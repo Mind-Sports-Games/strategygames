@@ -29,6 +29,7 @@ abstract class Variant private[variant] (
   def horde         = this == Horde
   def racingKings   = this == RacingKings
   def crazyhouse    = this == Crazyhouse
+  def linesOfAction = this == LinesOfAction
 
   def exotic = !standard
 
@@ -39,6 +40,7 @@ abstract class Variant private[variant] (
   def castles: Castles = Castles.all
 
   def initialFen: FEN = format.Forsyth.initial
+  def startColor: Color = White
 
   def isValidPromotion(promotion: Option[PromotableRole]) =
     promotion match {
@@ -216,7 +218,8 @@ object Variant {
     Antichess,
     Atomic,
     Horde,
-    RacingKings
+    RacingKings,
+    LinesOfAction
   )
   val byId = all map { v =>
     (v.id, v)

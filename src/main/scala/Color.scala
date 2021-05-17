@@ -21,6 +21,7 @@ sealed trait Color {
   final def rook   = this - Rook
   final def queen  = this - Queen
   final def king   = this - King
+  final def loachecker = this - LOAChecker
 
   final val white = this == Color.White
   final val black = this == Color.Black

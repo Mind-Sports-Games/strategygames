@@ -20,7 +20,7 @@ object Binary {
 
   private object Encoding {
     val pieceInts: Map[String, Int] =
-      Map("K" -> 1, "Q" -> 2, "R" -> 3, "N" -> 4, "B" -> 5, "O-O" -> 6, "O-O-O" -> 7)
+      Map("K" -> 1, "Q" -> 2, "R" -> 3, "N" -> 4, "B" -> 5, "O-O" -> 6, "O-O-O" -> 7, "L" -> 8)
     val pieceStrs: Map[Int, String]     = pieceInts map { case (k, v) => v -> k }
     val dropPieceInts: Map[String, Int] = Map("P" -> 1, "Q" -> 2, "R" -> 3, "N" -> 4, "B" -> 5)
     val dropPieceStrs: Map[Int, String] = dropPieceInts map { case (k, v) => v -> k }
@@ -202,7 +202,7 @@ object Binary {
         if (file.head < pos.head) 1 else 2
       }
 
-    val pieceR       = "([KQRNB])"
+    val pieceR       = "([KQRNBL])"
     val fileR        = "(?:([a-h])x)?"
     val posR         = "([a-h][1-9])"
     val captureR     = "(x?)"
