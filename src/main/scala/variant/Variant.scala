@@ -24,6 +24,7 @@ abstract class Variant private[variant] (
   def fromPosition  = this == FromPosition
   def kingOfTheHill = this == KingOfTheHill
   def threeCheck    = this == ThreeCheck
+  def twoCheck      = this == TwoCheck
   def antichess     = this == Antichess
   def atomic        = this == Atomic
   def horde         = this == Horde
@@ -213,6 +214,7 @@ object Variant {
     FromPosition,
     KingOfTheHill,
     ThreeCheck,
+    TwoCheck,
     Antichess,
     Atomic,
     Horde,
@@ -241,6 +243,7 @@ object Variant {
     chess.variant.Standard,
     chess.variant.Crazyhouse,
     chess.variant.ThreeCheck,
+    chess.variant.TwoCheck,
     chess.variant.KingOfTheHill
   )
 
@@ -248,6 +251,7 @@ object Variant {
     chess.variant.Standard,
     chess.variant.Chess960,
     chess.variant.ThreeCheck,
+    chess.variant.TwoCheck,
     chess.variant.KingOfTheHill,
     chess.variant.FromPosition
   )

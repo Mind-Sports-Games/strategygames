@@ -2,7 +2,7 @@ package chess
 
 import Pos._
 import format.Uci
-import variant.{ Antichess, Atomic, Crazyhouse, Standard, ThreeCheck }
+import variant.{ Antichess, Atomic, Crazyhouse, Standard, ThreeCheck, TwoCheck }
 import chess.format.FEN
 
 class HashTest extends ChessTest {
