@@ -7,7 +7,7 @@ case object LinesOfAction
     extends Variant(
       //went for a high number to avoid potential clashing in the future
       id = 100,
-      key = "linesofaction",
+      key = "linesOfAction",
       name = "Lines Of Action",
       shortName = "LOA",
       title = "Lines of Action - Connect all of your pieces",

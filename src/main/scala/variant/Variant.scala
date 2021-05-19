@@ -217,7 +217,8 @@ object Variant {
     Antichess,
     Atomic,
     Horde,
-    RacingKings
+    RacingKings,
+    LinesOfAction
   )
   val byId = all map { v =>
     (v.id, v)
