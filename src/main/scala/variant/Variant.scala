@@ -29,7 +29,7 @@ abstract class Variant private[variant] (
   def horde         = this == Horde
   def racingKings   = this == RacingKings
   def crazyhouse    = this == Crazyhouse
-  def linesofaction = this == LinesOfAction
+  def linesOfAction = this == LinesOfAction
 
   def exotic = !standard
 
