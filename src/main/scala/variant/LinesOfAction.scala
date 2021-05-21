@@ -56,16 +56,16 @@ case object LinesOfAction
   private def surroundingPositions(pos: Pos): Set[Pos] =
     Set(pos.up, pos.down, pos.left, pos.right, pos.upLeft, pos.upRight, pos.downLeft, pos.downRight).flatten
 
-  private def neighboringColorPieces(color: Color, pos: Pos, situation: Situation) =
-    situation.board.piecesOf(color).filterKeys(surroundingPositions(pos)).keySet.to(Queue)
+  private def neighboringColorPieces(color: Color, pos: Pos, board: Board) =
+    board.piecesOf(color).keySet.filter(surroundingPositions(pos)).to(Queue)
 
-  private def firstPiece(color: Color, situation: Situation): Option[Pos] =
-    Option(situation.board.piecesOf(color).keySet.head)
+  private def firstPiece(color: Color, board: Board): Option[Pos] =
+    Option(board.piecesOf(color).keySet.head)
 
-  private def numOfPieces(color: Color, situation: Situation): Int =
-    situation.board.piecesOf(color).size
+  private def numOfPieces(color: Color, board: Board): Int =
+    board.piecesOf(color).size
 
-  private def checkWinForColor(color: Color, situation: Situation): Boolean = {
+  private def winForColor(color: Color, board: Board): Boolean = {
 
     def piecesGroupSize(
       linkedPieces: Set[Pos],
@@ -83,32 +83,34 @@ case object LinesOfAction
         else
           piecesGroupSize(
             linkedPieces + (pos),
-            (nextPos.tail ++ neighboringColorPieces(color, pos, situation)).distinct
+            (nextPos.tail ++ neighboringColorPieces(color, pos, board)).distinct
           )
       }
     }
 
-    firstPiece(color, situation)
+    firstPiece(color, board)
       .map(firstPiece => piecesGroupSize(
         Set(firstPiece),
-        neighboringColorPieces(color, firstPiece, situation)
-      ) == numOfPieces(color, situation))
+        neighboringColorPieces(color, firstPiece, board)
+      ) == numOfPieces(color, board))
       .getOrElse(false)
   }
 
-  //havent tested specialEnd yet
   override def specialEnd(situation: Situation) =
-    !List(White, Black).filter(checkWinForColor(_, situation)).isEmpty
+    !List(White, Black).filter(winForColor(_, situation.board)).isEmpty
 
-  //this probably isnt done very nicely, and haven't considered draw yet
+  //this probably isnt done very nicely, is it correct to return None for a draw?
   override def winner(situation: Situation): Option[Color] = {
-    val blackWin = checkWinForColor(Black, situation)
-    val whiteWin = checkWinForColor(White, situation)
+    val blackWin = winForColor(Black, situation.board)
+    val whiteWin = winForColor(White, situation.board)
     if (blackWin && !whiteWin){
       Option(Black)
     } else if (!blackWin && whiteWin){
       Option(White)
     } else None
   }
+
+  override def specialDraw(situation: Situation) =
+    winForColor(Black, situation.board) && winForColor(White, situation.board)
 
 }
