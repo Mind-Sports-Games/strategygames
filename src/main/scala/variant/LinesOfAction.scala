@@ -5,7 +5,6 @@ import chess.format.FEN
 
 case object LinesOfAction
     extends Variant(
-      //went for a high number to avoid potential clashing in the future
       id = 11,
       key = "linesOfAction",
       name = "Lines Of Action",
@@ -47,7 +46,7 @@ case object LinesOfAction
   
   def pieces = Standard.pieces
 
-  override val initialFen = FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1")
+  override val initialFen = FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 
   override def allowsCastling = false
 
