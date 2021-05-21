@@ -158,6 +158,41 @@ case class Board(
 
   def materialImbalance: Int = variant.materialImbalance(this)
 
+  def fileOccupation(file: File): Map[Pos, Piece] = pieces.filter(_._1.file == file)
+
+  def rankOccupation(rank: Rank): Map[Pos, Piece] = pieces.filter(_._1.rank == rank)
+
+  def diagAscOccupation(pos: Pos): Map[Pos, Piece] = {
+    def upRights(pos: Pos, diagPieces: Map[Pos, Piece] = Map.empty[Pos, Piece]): Map[Pos, Piece] = {
+      pos.upRight match {
+        case Some(diagPos) => {
+          if (pieces.contains(diagPos))
+            upRights(diagPos, diagPieces ++ Map(diagPos -> pieces(diagPos)))
+          else
+            upRights(diagPos, diagPieces)
+        }
+        case None => return diagPieces
+      }
+    }
+
+    def downLefts(pos: Pos, diagPieces: Map[Pos, Piece] = Map.empty[Pos, Piece]): Map[Pos, Piece] = {
+      pos.downLeft match {
+        case Some(diagPos) => {
+          if (pieces.contains(diagPos))
+            downLefts(diagPos, diagPieces ++ Map(diagPos -> pieces(diagPos)))
+          else
+            downLefts(diagPos, diagPieces)
+        }
+        case None => return diagPieces
+      }
+    }
+
+    if (pieces.contains(pos))
+      Map[Pos, Piece](pos -> pieces(pos)) ++ upRights(pos) ++ downLefts(pos)
+    else
+      upRights(pos) ++ downLefts(pos)
+  }
+
   override def toString = s"$variant Position after ${history.lastMove}\n$visual"
 }
 

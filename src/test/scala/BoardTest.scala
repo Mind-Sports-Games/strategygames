@@ -138,5 +138,44 @@ R  BK  R"""
         E1 |< (p => board.pieces contains p) must_== List(D1)
       }
     }
+
+    "provide file occupations" in {
+      makeBoard(
+        A2 -> (White - Pawn),
+        A3 -> (White - Pawn),
+        D1 -> (White - King),
+        E7 -> (Black - King),
+        H1 -> (Black - Queen)
+      ).fileOccupation(File.A) must_== Map(
+        A2 -> (White - Pawn),
+        A3 -> (White - Pawn)
+      )
+    }
+
+    "provide rank occupations" in {
+      makeBoard(
+        A2 -> (White - Pawn),
+        A3 -> (White - Pawn),
+        D1 -> (White - King),
+        E7 -> (Black - King),
+        H1 -> (Black - Queen)
+      ).rankOccupation(Rank.First) must_== Map(
+        D1 -> (White - King),
+        H1 -> (Black - Queen)
+      )
+    }
+
+    "provide diagonal ascending occupations" in {
+      makeBoard(
+        A2 -> (White - Pawn),
+        A3 -> (White - Pawn),
+        D1 -> (White - King),
+        E7 -> (Black - King),
+        H1 -> (Black - Queen)
+      ).diagAscOccupation(D6) must_== Map(
+        A3 -> (White - Pawn),
+        E7 -> (Black - King)
+      )
+    }
   }
 }
