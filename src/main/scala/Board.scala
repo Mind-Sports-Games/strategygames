@@ -162,36 +162,37 @@ case class Board(
 
   def rankOccupation(rank: Rank): Map[Pos, Piece] = pieces.filter(_._1.rank == rank)
 
-  def diagAscOccupation(pos: Pos): Map[Pos, Piece] = {
-    def upRights(pos: Pos, diagPieces: Map[Pos, Piece] = Map.empty[Pos, Piece]): Map[Pos, Piece] = {
-      pos.upRight match {
-        case Some(diagPos) => {
-          if (pieces.contains(diagPos))
-            upRights(diagPos, diagPieces ++ Map(diagPos -> pieces(diagPos)))
-          else
-            upRights(diagPos, diagPieces)
-        }
-        case None => return diagPieces
-      }
+  private def diagOccupation(
+    pos: Pos,
+    direction: Pos => Option[Pos],
+    diagPieces: Map[Pos, Piece] = Map.empty[Pos, Piece]
+  ): Map[Pos, Piece] =
+    direction(pos) match {
+      case Some(diagPos) =>
+        if (pieces.contains(diagPos))
+          diagOccupation(diagPos, direction, diagPieces ++ Map(diagPos -> pieces(diagPos)))
+        else
+          diagOccupation(diagPos, direction, diagPieces)
+      case None => return diagPieces
     }
 
-    def downLefts(pos: Pos, diagPieces: Map[Pos, Piece] = Map.empty[Pos, Piece]): Map[Pos, Piece] = {
-      pos.downLeft match {
-        case Some(diagPos) => {
-          if (pieces.contains(diagPos))
-            downLefts(diagPos, diagPieces ++ Map(diagPos -> pieces(diagPos)))
-          else
-            downLefts(diagPos, diagPieces)
-        }
-        case None => return diagPieces
-      }
-    }
-
-    if (pieces.contains(pos))
-      Map[Pos, Piece](pos -> pieces(pos)) ++ upRights(pos) ++ downLefts(pos)
+  def diagAscOccupation(pos: Pos): Map[Pos, Piece] =
+   if (pieces.contains(pos))
+      Map[Pos, Piece](pos -> pieces(pos)) ++
+        diagOccupation(pos, {p: Pos => p.upRight}) ++
+        diagOccupation(pos, {p: Pos => p.downLeft})
     else
-      upRights(pos) ++ downLefts(pos)
-  }
+      diagOccupation(pos, {p: Pos => p.upRight}) ++
+        diagOccupation(pos, {p: Pos => p.downLeft})
+
+  def diagDescOccupation(pos: Pos): Map[Pos, Piece] =
+   if (pieces.contains(pos))
+      Map[Pos, Piece](pos -> pieces(pos)) ++
+        diagOccupation(pos, {p: Pos => p.upLeft}) ++
+        diagOccupation(pos, {p: Pos => p.downRight})
+    else
+      diagOccupation(pos, {p: Pos => p.upLeft}) ++
+        diagOccupation(pos, {p: Pos => p.downRight})
 
   override def toString = s"$variant Position after ${history.lastMove}\n$visual"
 }

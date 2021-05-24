@@ -177,5 +177,19 @@ R  BK  R"""
         E7 -> (Black - King)
       )
     }
+
+    "provide diagonal descending occupations" in {
+      makeBoard(
+        A3 -> (White - Pawn),
+        B2 -> (White - Pawn),
+        C1 -> (White - King),
+        E7 -> (Black - King),
+        H1 -> (Black - Queen)
+      ).diagDescOccupation(B2) must_== Map(
+        A3 -> (White - Pawn),
+        B2 -> (White - Pawn),
+        C1 -> (White - King),
+      )
+    }
   }
 }
