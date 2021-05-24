@@ -75,7 +75,7 @@ final case class Actor(
       case King if withCastle => shortRange(King.dirs) ::: castle
       case King               => shortRange(King.dirs)
 
-      case LOAChecker => longRange(LOAChecker.dirs)
+      case LOAChecker => loaRange
     }
 
     // We apply the current game variant's effects if there are any so that we can accurately decide if the king would
@@ -176,6 +176,43 @@ final case class Actor(
     }
 
     dirs foreach { addAll(pos, _) }
+    buf.toList
+  }
+
+  private def loaRange: List[Move] = {
+    val buf = new ArrayBuffer[Move]
+
+    def addDir(p: Pos, range: Int, dir: Direction): Unit = {
+      dir(p) match {
+        case None => ()
+        case s @ Some(to) => {
+          board.pieces.get(to) match {
+            case None =>
+              if (range == 1)
+                board.move(pos, to).foreach { buf += move(to, _) }
+              else
+                addDir(to, range-1, dir)
+            case Some(piece) =>
+              if (piece.color == color && range > 1)
+                addDir(to, range-1, dir)
+              else if (piece.color != color && range == 1)
+                board.taking(pos, to).foreach({ buf += move(to, _, s) })
+              else ()
+          }
+        }
+      }
+    }
+
+    def lookBothWays(pos: Pos, range: Int, dir1: Direction, dir2: Direction): Unit = {
+      addDir(pos, range, dir1)
+      addDir(pos, range, dir2)
+    }
+
+    lookBothWays(pos, board.rankOccupation(pos.rank).size, _.left, _.right)
+    lookBothWays(pos, board.fileOccupation(pos.file).size, _.up, _.down)
+    lookBothWays(pos, board.diagAscOccupation(pos).size, _.upRight, _.downLeft)
+    lookBothWays(pos, board.diagDescOccupation(pos).size, _.upLeft, _.downRight)
+
     buf.toList
   }
 

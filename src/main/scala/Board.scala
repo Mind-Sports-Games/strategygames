@@ -162,37 +162,27 @@ case class Board(
 
   def rankOccupation(rank: Rank): Map[Pos, Piece] = pieces.filter(_._1.rank == rank)
 
-  private def diagOccupation(
-    pos: Pos,
-    direction: Pos => Option[Pos],
-    diagPieces: Map[Pos, Piece] = Map.empty[Pos, Piece]
-  ): Map[Pos, Piece] =
-    direction(pos) match {
+  private def diagOccupation(p: Pos, dir: Direction, diagPieces: Map[Pos, Piece] = Map[Pos, Piece]()): Map[Pos, Piece] =
+    dir(p) match {
       case Some(diagPos) =>
         if (pieces.contains(diagPos))
-          diagOccupation(diagPos, direction, diagPieces ++ Map(diagPos -> pieces(diagPos)))
+          diagOccupation(diagPos, dir, diagPieces ++ Map(diagPos -> pieces(diagPos)))
         else
-          diagOccupation(diagPos, direction, diagPieces)
+          diagOccupation(diagPos, dir, diagPieces)
       case None => return diagPieces
     }
 
   def diagAscOccupation(pos: Pos): Map[Pos, Piece] =
    if (pieces.contains(pos))
-      Map[Pos, Piece](pos -> pieces(pos)) ++
-        diagOccupation(pos, {p: Pos => p.upRight}) ++
-        diagOccupation(pos, {p: Pos => p.downLeft})
+      Map[Pos, Piece](pos -> pieces(pos)) ++ diagOccupation(pos, _.upRight) ++ diagOccupation(pos, _.downLeft)
     else
-      diagOccupation(pos, {p: Pos => p.upRight}) ++
-        diagOccupation(pos, {p: Pos => p.downLeft})
+      diagOccupation(pos, _.upRight) ++ diagOccupation(pos, _.downLeft)
 
   def diagDescOccupation(pos: Pos): Map[Pos, Piece] =
    if (pieces.contains(pos))
-      Map[Pos, Piece](pos -> pieces(pos)) ++
-        diagOccupation(pos, {p: Pos => p.upLeft}) ++
-        diagOccupation(pos, {p: Pos => p.downRight})
+      Map[Pos, Piece](pos -> pieces(pos)) ++ diagOccupation(pos, _.upLeft) ++ diagOccupation(pos, _.downRight)
     else
-      diagOccupation(pos, {p: Pos => p.upLeft}) ++
-        diagOccupation(pos, {p: Pos => p.downRight})
+      diagOccupation(pos, _.upLeft) ++ diagOccupation(pos, _.downRight)
 
   override def toString = s"$variant Position after ${history.lastMove}\n$visual"
 }
