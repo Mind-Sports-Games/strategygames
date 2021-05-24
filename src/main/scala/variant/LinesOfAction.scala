@@ -16,34 +16,33 @@ case object LinesOfAction
     ) {
 
   override val pieces: Map[Pos, Piece] = Map(
-    Pos.B1 -> Black.queen,
-    Pos.C1 -> Black.queen,
-    Pos.D1 -> Black.queen,
-    Pos.E1 -> Black.queen,
-    Pos.F1 -> Black.queen,
-    Pos.G1 -> Black.queen,
-    Pos.B8 -> Black.queen,
-    Pos.C8 -> Black.queen,
-    Pos.D8 -> Black.queen,
-    Pos.E8 -> Black.queen,
-    Pos.F8 -> Black.queen,
-    Pos.G8 -> Black.queen,
-    Pos.A2 -> White.queen,
-    Pos.A3 -> White.queen,
-    Pos.A4 -> White.queen,
-    Pos.A5 -> White.queen,
-    Pos.A6 -> White.queen,
-    Pos.A7 -> White.queen,
-    Pos.H2 -> White.queen,
-    Pos.H3 -> White.queen,
-    Pos.H4 -> White.queen,
-    Pos.H5 -> White.queen,
-    Pos.H6 -> White.queen,
-    Pos.H7 -> White.queen,
+    Pos.B1 -> Black.loachecker,
+    Pos.C1 -> Black.loachecker,
+    Pos.D1 -> Black.loachecker,
+    Pos.E1 -> Black.loachecker,
+    Pos.F1 -> Black.loachecker,
+    Pos.G1 -> Black.loachecker,
+    Pos.B8 -> Black.loachecker,
+    Pos.C8 -> Black.loachecker,
+    Pos.D8 -> Black.loachecker,
+    Pos.E8 -> Black.loachecker,
+    Pos.F8 -> Black.loachecker,
+    Pos.G8 -> Black.loachecker,
+    Pos.A2 -> White.loachecker,
+    Pos.A3 -> White.loachecker,
+    Pos.A4 -> White.loachecker,
+    Pos.A5 -> White.loachecker,
+    Pos.A6 -> White.loachecker,
+    Pos.A7 -> White.loachecker,
+    Pos.H2 -> White.loachecker,
+    Pos.H3 -> White.loachecker,
+    Pos.H4 -> White.loachecker,
+    Pos.H5 -> White.loachecker,
+    Pos.H6 -> White.loachecker,
+    Pos.H7 -> White.loachecker,
   )
 
-  //picked queen to at least give us the option in early stages of being able to move pieces in all directions
-  override val initialFen = FEN("1qqqqqq1/Q6Q/Q6Q/Q6Q/Q6Q/Q6Q/Q6Q/1qqqqqq1 b - - 0 1")
+  override val initialFen = FEN("1llllll1/L6L/L6L/L6L/L6L/L6L/L6L/1llllll1 b - - 0 1")
 
   override def allowsCastling = false
 
@@ -56,7 +55,7 @@ case object LinesOfAction
   private def surroundingPositions(pos: Pos): Set[Pos] =
     Set(pos.up, pos.down, pos.left, pos.right, pos.upLeft, pos.upRight, pos.downLeft, pos.downRight).flatten
 
-  private def neighboringColorPieces(color: Color, pos: Pos, board: Board) =
+  private def neighboringColorPieces(color: Color, pos: Pos, board: Board): Queue[Pos] =
     board.piecesOf(color).keySet.filter(surroundingPositions(pos)).to(Queue)
 
   private def firstPiece(color: Color, board: Board): Option[Pos] =

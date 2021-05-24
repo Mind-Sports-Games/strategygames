@@ -46,6 +46,7 @@ object Hash {
       case Rook   => 3
       case Queen  => 4
       case King   => 5
+      case LOAChecker => 6
     }
 
   private def pieceIndex(piece: Piece) =

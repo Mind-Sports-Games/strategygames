@@ -74,6 +74,8 @@ final case class Actor(
 
       case King if withCastle => shortRange(King.dirs) ::: castle
       case King               => shortRange(King.dirs)
+
+      case LOAChecker => longRange(LOAChecker.dirs)
     }
 
     // We apply the current game variant's effects if there are any so that we can accurately decide if the king would
