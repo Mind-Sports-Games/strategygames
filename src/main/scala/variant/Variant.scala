@@ -40,6 +40,7 @@ abstract class Variant private[variant] (
   def castles: Castles = Castles.all
 
   def initialFen: FEN = format.Forsyth.initial
+  def startColor: Color = White
 
   def isValidPromotion(promotion: Option[PromotableRole]) =
     promotion match {

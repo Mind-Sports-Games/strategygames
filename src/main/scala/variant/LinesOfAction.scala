@@ -43,6 +43,7 @@ case object LinesOfAction
   )
 
   override val initialFen = FEN("1llllll1/L6L/L6L/L6L/L6L/L6L/L6L/1llllll1 b - - 0 1")
+  override def startColor: Color = Black
 
   override def allowsCastling = false
 
