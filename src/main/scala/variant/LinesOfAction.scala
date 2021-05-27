@@ -16,34 +16,34 @@ case object LinesOfAction
     ) {
 
   override val pieces: Map[Pos, Piece] = Map(
-    Pos.B1 -> Black.loachecker,
-    Pos.C1 -> Black.loachecker,
-    Pos.D1 -> Black.loachecker,
-    Pos.E1 -> Black.loachecker,
-    Pos.F1 -> Black.loachecker,
-    Pos.G1 -> Black.loachecker,
-    Pos.B8 -> Black.loachecker,
-    Pos.C8 -> Black.loachecker,
-    Pos.D8 -> Black.loachecker,
-    Pos.E8 -> Black.loachecker,
-    Pos.F8 -> Black.loachecker,
-    Pos.G8 -> Black.loachecker,
-    Pos.A2 -> White.loachecker,
-    Pos.A3 -> White.loachecker,
-    Pos.A4 -> White.loachecker,
-    Pos.A5 -> White.loachecker,
-    Pos.A6 -> White.loachecker,
-    Pos.A7 -> White.loachecker,
-    Pos.H2 -> White.loachecker,
-    Pos.H3 -> White.loachecker,
-    Pos.H4 -> White.loachecker,
-    Pos.H5 -> White.loachecker,
-    Pos.H6 -> White.loachecker,
-    Pos.H7 -> White.loachecker,
+    Pos.B1 -> White.loachecker,
+    Pos.C1 -> White.loachecker,
+    Pos.D1 -> White.loachecker,
+    Pos.E1 -> White.loachecker,
+    Pos.F1 -> White.loachecker,
+    Pos.G1 -> White.loachecker,
+    Pos.B8 -> White.loachecker,
+    Pos.C8 -> White.loachecker,
+    Pos.D8 -> White.loachecker,
+    Pos.E8 -> White.loachecker,
+    Pos.F8 -> White.loachecker,
+    Pos.G8 -> White.loachecker,
+    Pos.A2 -> Black.loachecker,
+    Pos.A3 -> Black.loachecker,
+    Pos.A4 -> Black.loachecker,
+    Pos.A5 -> Black.loachecker,
+    Pos.A6 -> Black.loachecker,
+    Pos.A7 -> Black.loachecker,
+    Pos.H2 -> Black.loachecker,
+    Pos.H3 -> Black.loachecker,
+    Pos.H4 -> Black.loachecker,
+    Pos.H5 -> Black.loachecker,
+    Pos.H6 -> Black.loachecker,
+    Pos.H7 -> Black.loachecker,
   )
 
-  override val initialFen = FEN("1llllll1/L6L/L6L/L6L/L6L/L6L/L6L/1llllll1 b - - 0 1")
-  override def startColor: Color = Black
+  override val initialFen = FEN("1llllll1/L6L/L6L/L6L/L6L/L6L/L6L/1llllll1 w - - 0 1")
+  override def startColor: Color = White
 
   override def allowsCastling = false
 
