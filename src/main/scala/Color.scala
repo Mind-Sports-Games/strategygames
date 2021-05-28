@@ -83,6 +83,10 @@ object Color {
   }
 
   def fromPly(ply: Int) = fromWhite((ply & 1) == 0)
+  def fromPly(ply: Int, startColor: Color) = startColor match {
+    case White => fromWhite((ply & 1) == 0)
+    case Black => fromWhite((ply & 1) == 1)
+  }
 
   def fromWhite(white: Boolean): Color = if (white) White else Black
 
