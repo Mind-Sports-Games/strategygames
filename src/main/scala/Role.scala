@@ -71,10 +71,16 @@ case object Pawn extends Role {
   def dir(from: Pos, to: Pos) = None
   val projection              = false
 }
+case object LOAChecker extends Role {
+  val forsyth                 = 'l'
+  val dirs: Directions        = Queen.dirs
+  def dir(from: Pos, to: Pos) = Queen.dir(from, to)
+  val projection              = false
+}
 
 object Role {
 
-  val all: List[Role]                     = List(King, Queen, Rook, Bishop, Knight, Pawn)
+  val all: List[Role]                     = List(King, Queen, Rook, Bishop, Knight, Pawn, LOAChecker)
   val allPromotable: List[PromotableRole] = List(Queen, Rook, Bishop, Knight, King)
   val allByForsyth: Map[Char, Role] = all map { r =>
     (r.forsyth, r)
@@ -117,5 +123,6 @@ object Role {
       case Rook   => Option(5)
       case Queen  => Option(9)
       case King   => None
+      case LOAChecker => None
     }
 }

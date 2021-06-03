@@ -25,6 +25,7 @@ case class Piece(color: Color, role: Role) {
         val yd = from yDist to
         (xd == 1 && yd == 2) || (xd == 2 && yd == 1)
       case Pawn => Piece.pawnEyes(color, from, to)
+      case LOAChecker  => (from onSameLine to) || (from onSameDiagonal to)
     }
 
   // movable positions assuming empty board
