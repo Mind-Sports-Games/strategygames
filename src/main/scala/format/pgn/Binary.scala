@@ -59,28 +59,28 @@ object Binary {
     // 2 movetype
     // 6 pos
     // ----
-    // 3 role
+    // 4 role
     // 2 check
     // 1 capture
     // 1 drop
-    // 1 nothing
     def simplePiece(b1: Int, b2: Int): String =
-      if (bitAt(b2, 2)) drop(b1, b2)
+      if (bitAt(b2, 1)) drop(b1, b2)
       else
-        pieceStrs(b2 >> 5) match {
+        pieceStrs(b2 >> 4) match {
           case castle @ ("O-O" | "O-O-O") =>
-            val check = checkStrs(cut(b2, 5, 3))
+            val check = checkStrs(cut(b2, 4, 2))
             s"$castle$check"
           case piece =>
             val pos     = posString(right(b1, 6))
-            val capture = if (bitAt(b2, 3)) "x" else ""
-            val check   = checkStrs(cut(b2, 5, 3))
+            val capture = if (bitAt(b2, 2)) "x" else ""
+            val check   = checkStrs(cut(b2, 4, 2))
             s"$piece$capture$pos$check"
         }
+
     def drop(b1: Int, b2: Int): String = {
-      val piece = dropPieceStrs(b2 >> 5)
+      val piece = dropPieceStrs(b2 >> 4)
       val pos   = posString(right(b1, 6))
-      val check = checkStrs(cut(b2, 5, 3))
+      val check = checkStrs(cut(b2, 4, 2))
       s"$piece@$pos$check"
     }
 
@@ -99,9 +99,9 @@ object Binary {
 
     def fullPiece(b1: Int, b2: Int, b3: Int): String = {
       val pos     = posString(right(b1, 6))
-      val piece   = pieceStrs(b2 >> 5)
-      val capture = if (bitAt(b2, 3)) "x" else ""
-      val check   = checkStrs(cut(b2, 5, 3))
+      val piece   = pieceStrs(b2 >> 4)
+      val capture = if (bitAt(b2, 2)) "x" else ""
+      val check   = checkStrs(cut(b2, 4, 2))
       val disamb = (b3 >> 6) match {
         case 0 => fileChar(right(b3, 3)).toString
         case 1 => rankChar(right(b3, 3)).toString
@@ -150,19 +150,19 @@ object Binary {
     def simplePiece(piece: String, pos: String, capture: String, check: String) =
       List(
         (MoveType.SimplePiece << 6) + posInt(pos),
-        (pieceInts(piece) << 5) + (checkInts(check) << 3) + (boolInt(capture) << 2)
+        (pieceInts(piece) << 4) + (checkInts(check) << 2) + (boolInt(capture) << 1)
       )
 
     def drop(piece: String, pos: String, check: String) =
       List(
         (MoveType.SimplePiece << 6) + posInt(pos),
-        (dropPieceInts(piece) << 5) + (checkInts(check) << 3) + (1 << 1)
+        (dropPieceInts(piece) << 4) + (checkInts(check) << 2) + 1
       )
 
     def castling(str: String, check: String) =
       List(
         MoveType.SimplePiece << 6,
-        (pieceInts(str) << 5) + (checkInts(check) << 3)
+        (pieceInts(str) << 4) + (checkInts(check) << 2)
       )
 
     def fullPawn(file: Option[String], pos: String, check: String, promotion: Option[String]) =
@@ -174,7 +174,7 @@ object Binary {
     def fullPiece(piece: String, orig: String, pos: String, capture: String, check: String) =
       List(
         (MoveType.FullPiece << 6) + posInt(pos),
-        (pieceInts(piece) << 5) + (checkInts(check) << 3) + (boolInt(capture) << 2),
+        (pieceInts(piece) << 4) + (checkInts(check) << 2) + (boolInt(capture) << 1),
         (disambTypeInt(orig) << 6) + disambiguationInt(orig)
       )
 
