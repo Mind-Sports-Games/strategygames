@@ -97,7 +97,7 @@ case object LinesOfAction
   }
 
   override def specialEnd(situation: Situation) =
-    !List(White, Black).filter(winForColor(_, situation.board)).isEmpty
+    winForColor(Black, situation.board) ^ winForColor(White, situation.board)
 
   //this probably isnt done very nicely, is it correct to return None for a draw?
   override def winner(situation: Situation): Option[Color] = {
@@ -112,5 +112,4 @@ case object LinesOfAction
 
   override def specialDraw(situation: Situation) =
     winForColor(Black, situation.board) && winForColor(White, situation.board)
-
 }
