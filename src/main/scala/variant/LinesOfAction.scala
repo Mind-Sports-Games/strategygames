@@ -11,7 +11,7 @@ case object LinesOfAction
       key = "linesOfAction",
       name = "Lines Of Action",
       shortName = "LOA",
-      title = "Lines of Action - Connect all of your pieces",
+      title = "Connect all of your checkers to win.",
       standardInitialPosition = false
     ) {
 
