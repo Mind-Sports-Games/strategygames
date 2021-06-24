@@ -42,7 +42,7 @@ case object LinesOfAction
     Pos.H7 -> Black.loachecker,
   )
 
-  override val initialFen = FEN("1llllll1/L6L/L6L/L6L/L6L/L6L/L6L/1llllll1 w - - 0 1")
+  override val initialFen = FEN("1LLLLLL1/l6l/l6l/l6l/l6l/l6l/l6l/1LLLLLL1 w - - 0 1")
   override def startColor: Color = White
 
   override def allowsCastling = false
