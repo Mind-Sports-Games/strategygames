@@ -1,6 +1,6 @@
-name := "scalachess"
+name := "strategygames"
 
-organization := "org.lichess"
+organization := "org.playstrategy"
 
 version := "10.2.1-pstrat4"
 
@@ -16,7 +16,7 @@ libraryDependencies ++= List(
 )
 
 resolvers ++= Seq(
-  "lila-maven" at "https://raw.githubusercontent.com/ornicar/lila-maven/master"
+  "lila-maven" at "https://raw.githubusercontent.com/Mind-Sports-Games/lila-maven/master"
 )
 
 scalacOptions ++= Seq(
