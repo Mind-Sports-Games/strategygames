@@ -55,7 +55,7 @@ object Color {
     val black = c.black
   }
 
-  final case class Draughts(c: Int) extends Color {
+  final case class Draughts(c: draughts.Color) extends Color {
     def unary_! = !c
 
     val letter = c.letter
