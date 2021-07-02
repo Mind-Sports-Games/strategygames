@@ -16,7 +16,7 @@ libraryDependencies ++= List(
 )
 
 resolvers ++= Seq(
-  "lila-maven" at "https://raw.githubusercontent.com/Mind-Sports-Games/lila-maven/master"
+  "lila-maven" at "https://raw.githubusercontent.com/ornicar/lila-maven/master"
 )
 
 scalacOptions ++= Seq(
