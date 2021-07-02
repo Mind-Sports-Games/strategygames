@@ -3,19 +3,14 @@ import chess._
 import draughts._
 
 package object strategy extends scalalib.Common with scalalib.OrnicarOption with scalalib.OrnicarBoolean {
+  def White(lib: GameLib) = lib match {
+    case GameLib.Draughts => Color.Draughts(draughts.White)
+    case GameLib.Chess => Color.Chess(chess.White)
+  }
 
+  def Black(lib: GameLib) = lib match {
+    case GameLib.Draughts => Color.Draughts(draughts.White)
+    case GameLib.Chess => Color.Chess(chess.White)
+  }
 
-
-  val White = Option[(chess.White, draughts.White)]
-  val Black = Option[(chess.Black, draughts.Black)]
-
-  type Direction  = Option[(chess.Direction, draughts.Direction)]
-  type Directions = Option[(chess.Directions, draughts.Directions)]
-
-  type PieceMap   = Option[(chess.PieceMap, draughts.PieceMap)]
-
-  type PositionHash = Option[(chess.PositionHash, draughts.PositionHash)]
-
-  //chess only
-  //type MoveOrDrop = Either[Move, Drop]
 }
