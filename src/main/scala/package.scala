@@ -4,6 +4,8 @@ import draughts._
 
 package object strategy extends scalalib.Common with scalalib.OrnicarOption with scalalib.OrnicarBoolean {
 
+
+
   val White = Option[(chess.White, draughts.White)]
   val Black = Option[(chess.Black, draughts.Black)]
 
