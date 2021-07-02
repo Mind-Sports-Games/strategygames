@@ -65,11 +65,14 @@ object Color {
     val black = c.black
   }
 
-  def fromPly(lib: GameLib, ply: Int) = fromWhite(lib, ply)
+  def fromPly(lib: GameLib, ply: Int) = lib match {
+    case GameLib.Draughts => Draughts(draughts.fromPly(ply))
+    case GameLib.Chess => Chess(chess.fromPly(ply))
+  }
 
   def fromWhite(lib: GameLib, white: Boolean): Color = lib match {
-    case GameLib.Draughts => Draughts(draughts.fromWhite(ply))
-    case GameLib.Chess => Chess(chess.fromWhite(ply))
+    case GameLib.Draughts => Draughts(draughts.fromWhite(white))
+    case GameLib.Chess => Chess(chess.fromWhite(white))
   }
 
   def fromName(lib: GameLib, n: String): Option[Color] = lib match {
