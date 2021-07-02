@@ -95,7 +95,7 @@ object Color {
     case GameLib.Chess => Chess(chess.black)
   }
 
-  val all(lib: GameLib) = lib match {
+  def all(lib: GameLib) = lib match {
     case GameLib.Draughts => Draughts(draughts.all(ply))
     case GameLib.Chess => Chess(chess.all(ply))
   }
