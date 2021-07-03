@@ -36,9 +36,10 @@ final case class Centis(centis: Int) extends AnyVal with Ordered[Centis] {
 
 object Centis {
   implicit final val zeroInstance = Zero.instance(Centis(0))
-  implicit object CentisMonoid extends Monoid[Centis] {
-    def append(c1: Centis, c2: => Centis) = c1 + c2
-    final val zero                        = Centis(0)
+
+  implicit val CentisMonoid = new Monoid[Centis] {
+    def combine(c1: Centis, c2: Centis) = c1 + c2
+    final val empty                     = Centis(0)
   }
 
   implicit final class CentisScalar(val scalar: Int) extends AnyVal {
