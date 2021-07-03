@@ -54,8 +54,8 @@ case class Situation(board: Board, color: Color) {
   def captureLengthFrom(pos: Pos): Option[Int] =
     actorAt(pos).map(_.captureLength)
 
-  lazy val allDestinations: Map[Pos, List[Pos]] = validMoves map { (_k, moves) moves map (_.dest) }.to(Map)
-  lazy val allCaptureDestinations: Map[Pos, List[Pos]] = allCaptures mapValues { _ map (_.dest) }.to(Map)
+  lazy val allDestinations: Map[Pos, List[Pos]]        = validMoves map (kv => (kv._1, kv._2.map(_.dest)))
+  lazy val allCaptureDestinations: Map[Pos, List[Pos]] = allCaptures map (kv => (kv._1, kv._2.map(_.dest)))
 
   def destinationsFrom(pos: Pos, finalSquare: Boolean = false): List[Pos] =
     movesFrom(pos, finalSquare) map (_.dest)
