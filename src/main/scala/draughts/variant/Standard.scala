@@ -1,6 +1,8 @@
 package draughts
 package variant
 
+import cats.implicits._
+
 case object Standard extends Variant(
   id = 1,
   gameType = 20,

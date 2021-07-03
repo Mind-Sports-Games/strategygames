@@ -21,36 +21,36 @@ abstract class Variant private[variant] (
   def initialFen: String
   def startingPosition: StartingPosition
   val openingTables: List[OpeningTable] = Nil
-  lazy val shortInitialFen = initialFen.split(":").take(3).mkString(":")
+  lazy val shortInitialFen              = initialFen.split(":").take(3).mkString(":")
 
   def captureDirs: Directions
   def moveDirsColor: Map[Color, Directions]
   def moveDirsAll: Directions
 
-  def standard = this == Standard
-  def frisian = this == Frisian
-  def frysk = this == Frysk
+  def standard     = this == Standard
+  def frisian      = this == Frisian
+  def frysk        = this == Frysk
   def antidraughts = this == Antidraughts
   def breakthrough = this == Breakthrough
-  def russian = this == Russian
-  def brazilian = this == Brazilian
+  def russian      = this == Russian
+  def brazilian    = this == Brazilian
   def fromPosition = this == FromPosition
 
   def frisianVariant = frisian || frysk
-  def exotic = !standard
+  def exotic         = !standard
 
   def isValidPromotion(promotion: Option[PromotableRole]) = promotion match {
-    case None => true
+    case None       => true
     case Some(King) => true
-    case _ => false
+    case _          => false
   }
 
   def getCaptureValue(board: Board, taken: List[Pos]) = taken.length
-  def getCaptureValue(board: Board, taken: Pos) = 1
+  def getCaptureValue(board: Board, taken: Pos)       = 1
 
   def validMoves(situation: Situation, finalSquare: Boolean = false): Map[Pos, List[Move]] = {
     var bestLineValue = 0
-    var captureMap = Map[Pos, List[Move]]()
+    var captureMap    = Map[Pos, List[Move]]()
     for (actor <- situation.actors) {
       val capts = if (finalSquare) actor.capturesFinal else actor.captures
       if (capts.nonEmpty) {
@@ -64,10 +64,13 @@ abstract class Variant private[variant] (
     }
 
     if (captureMap.nonEmpty) captureMap
-    else situation.actors.collect {
-      case actor if actor.noncaptures.nonEmpty =>
-        actor.pos -> actor.noncaptures
-    }.to(Map)
+    else
+      situation.actors
+        .collect {
+          case actor if actor.noncaptures.nonEmpty =>
+            actor.pos -> actor.noncaptures
+        }
+        .to(Map)
   }
 
   def validMovesFrom(situation: Situation, pos: Pos, finalSquare: Boolean = false): List[Move] =
@@ -86,7 +89,16 @@ abstract class Variant private[variant] (
       actor.noncaptures
   }
 
-  def move(situation: Situation, from: Pos, to: Pos, promotion: Option[PromotableRole], finalSquare: Boolean = false, forbiddenUci: Option[List[String]] = None, captures: Option[List[Pos]] = None, partialCaptures: Boolean = false): Validated[String, Move] = {
+  def move(
+      situation: Situation,
+      from: Pos,
+      to: Pos,
+      promotion: Option[PromotableRole],
+      finalSquare: Boolean = false,
+      forbiddenUci: Option[List[String]] = None,
+      captures: Option[List[Pos]] = None,
+      partialCaptures: Boolean = false
+  ): Validated[String, Move] = {
 
     // Find the move in the variant specific list of valid moves
     def findMove(from: Pos, to: Pos) = {
@@ -98,19 +110,20 @@ abstract class Variant private[variant] (
       if (exactMatch.isEmpty && partialCaptures && captures.isDefined) {
         moves.find { m =>
           if (forbiddenUci.fold(false)(_.contains(m.toUci.uci))) false
-          else m.capture.isDefined && captures.fold(false) { capts =>
-            m.capture.get.endsWith(capts)
-          }
+          else
+            m.capture.isDefined && captures.fold(false) { capts =>
+              m.capture.get.endsWith(capts)
+            }
         }
       } else exactMatch
     }
 
     for {
       actor <- situation.board.actors get from toValid "No piece on " + from
-      _ <- actor.validIf(actor is situation.color, "Not my piece on " + from)
-      m1 <- findMove(from, to) toValid "Piece on " + from + " cannot move to " + to
-      m2 <- m1 withPromotion promotion toValid "Piece on " + from + " cannot promote to " + promotion
-      m3 <- m2 validIf (isValidPromotion(promotion), "Cannot promote to " + promotion + " in this game mode")
+      _     <- actor.validIf(actor is situation.color, "Not my piece on " + from)
+      m1    <- findMove(from, to) toValid "Piece on " + from + " cannot move to " + to
+      m2    <- m1 withPromotion promotion toValid "Piece on " + from + " cannot promote to " + promotion
+      m3    <- m2 validIf (isValidPromotion(promotion), "Cannot promote to " + promotion + " in this game mode")
     } yield m3
 
   }
@@ -130,68 +143,94 @@ abstract class Variant private[variant] (
   private val maxCache = 2000
 
   def shortRangeCaptures(actor: Actor, finalSquare: Boolean): List[Move] = {
-    val buf = new scala.collection.mutable.ArrayBuffer[Move]
+    val buf              = new scala.collection.mutable.ArrayBuffer[Move]
     var bestCaptureValue = 0
 
     // "transposition table", dramatically reduces calculation time for extreme frisian positions like W:WK50:B3,7,10,12,13,14,17,20,21,23,25,30,32,36,38,39,41,43,K47
     var extraCaptsCache: Option[scala.collection.mutable.LongMap[Int]] = None
 
-    def walkCaptures(walkDir: Direction, curBoard: Board, curPos: PosMotion, destPos: Option[PosMotion], destBoard: Option[Board], allSquares: List[Pos], allTaken: List[Pos], captureValue: Int): Int =
+    def walkCaptures(
+        walkDir: Direction,
+        curBoard: Board,
+        curPos: PosMotion,
+        destPos: Option[PosMotion],
+        destBoard: Option[Board],
+        allSquares: List[Pos],
+        allTaken: List[Pos],
+        captureValue: Int
+    ): Int =
       if (extraCaptsCache.exists(_.size > maxCache)) 0
-      else walkDir._2(curPos) match {
-        case Some(nextPos) =>
-          curBoard(nextPos) match {
-            case Some(captPiece) if captPiece.isNot(actor.color) && !captPiece.isGhost =>
-              walkDir._2(nextPos) match {
-                case Some(landingPos) if curBoard(landingPos).isEmpty =>
-                  val boardAfter = curBoard.takingUnsafe(curPos, landingPos, actor.piece, nextPos, captPiece)
-                  val hash = if (extraCaptsCache.isDefined) boardAfter.pieces.hashCode() + walkDir._1 else 0
-                  val cachedExtraCapts = extraCaptsCache.flatMap(_ get hash)
-                  cachedExtraCapts match {
-                    case Some(extraCapts) if captureValue + extraCapts < bestCaptureValue =>
-                      // no need to calculate lines where we know they will end up too short
-                      captureValue + extraCapts
-                    case _ =>
-                      val newSquares = landingPos :: allSquares
-                      val newTaken = nextPos :: allTaken
-                      val newCaptureValue = captureValue + getCaptureValue(actor.board, nextPos)
-                      if (newCaptureValue > bestCaptureValue) {
-                        bestCaptureValue = newCaptureValue
-                        buf.clear()
-                        if (extraCaptsCache.isEmpty && boardAfter.variant.frisianVariant && newTaken.size > 10) {
-                          extraCaptsCache = scala.collection.mutable.LongMap.empty[Int].some
+      else
+        walkDir._2(curPos) match {
+          case Some(nextPos) =>
+            curBoard(nextPos) match {
+              case Some(captPiece) if captPiece.isNot(actor.color) && !captPiece.isGhost =>
+                walkDir._2(nextPos) match {
+                  case Some(landingPos) if curBoard(landingPos).isEmpty =>
+                    val boardAfter =
+                      curBoard.takingUnsafe(curPos, landingPos, actor.piece, nextPos, captPiece)
+                    val hash             = if (extraCaptsCache.isDefined) boardAfter.pieces.hashCode() + walkDir._1 else 0
+                    val cachedExtraCapts = extraCaptsCache.flatMap(_ get hash)
+                    cachedExtraCapts match {
+                      case Some(extraCapts) if captureValue + extraCapts < bestCaptureValue =>
+                        // no need to calculate lines where we know they will end up too short
+                        captureValue + extraCapts
+                      case _ =>
+                        val newSquares      = landingPos :: allSquares
+                        val newTaken        = nextPos :: allTaken
+                        val newCaptureValue = captureValue + getCaptureValue(actor.board, nextPos)
+                        if (newCaptureValue > bestCaptureValue) {
+                          bestCaptureValue = newCaptureValue
+                          buf.clear()
+                          if (
+                            extraCaptsCache.isEmpty && boardAfter.variant.frisianVariant && newTaken.size > 10
+                          ) {
+                            extraCaptsCache = scala.collection.mutable.LongMap.empty[Int].some
+                          }
                         }
-                      }
-                      if (newCaptureValue == bestCaptureValue) {
-                        if (finalSquare)
-                          buf += actor.move(landingPos, boardAfter.withoutGhosts, newSquares, newTaken)
-                        else
-                          buf += actor.move(destPos.getOrElse(landingPos), destBoard.getOrElse(boardAfter), newSquares, newTaken)
-                      }
-                      val opposite = Variant.oppositeDirs(walkDir._1)
-                      val newDest = if (destPos.isDefined) destPos else landingPos.some
-                      val newBoard = if (destBoard.isDefined) destBoard else boardAfter.some
-                      var maxExtraCapts = 0
-                      captureDirs.foreach {
-                        captDir =>
+                        if (newCaptureValue == bestCaptureValue) {
+                          if (finalSquare)
+                            buf += actor.move(landingPos, boardAfter.withoutGhosts, newSquares, newTaken)
+                          else
+                            buf += actor.move(
+                              destPos.getOrElse(landingPos),
+                              destBoard.getOrElse(boardAfter),
+                              newSquares,
+                              newTaken
+                            )
+                        }
+                        val opposite      = Variant.oppositeDirs(walkDir._1)
+                        val newDest       = if (destPos.isDefined) destPos else landingPos.some
+                        val newBoard      = if (destBoard.isDefined) destBoard else boardAfter.some
+                        var maxExtraCapts = 0
+                        captureDirs.foreach { captDir =>
                           if (captDir._1 != opposite) {
-                            val extraCapts = walkCaptures(captDir, boardAfter, landingPos, newDest, newBoard, newSquares, newTaken, newCaptureValue) - newCaptureValue
+                            val extraCapts = walkCaptures(
+                              captDir,
+                              boardAfter,
+                              landingPos,
+                              newDest,
+                              newBoard,
+                              newSquares,
+                              newTaken,
+                              newCaptureValue
+                            ) - newCaptureValue
                             if (extraCapts > maxExtraCapts)
                               maxExtraCapts = extraCapts
                           }
-                      }
-                      extraCaptsCache.foreach { cache =>
-                        if (cachedExtraCapts.isEmpty)
-                          cache += (hash, maxExtraCapts)
-                      }
-                      newCaptureValue + maxExtraCapts
-                  }
-                case _ => captureValue
-              }
-            case _ => captureValue
-          }
-        case _ => captureValue
-      }
+                        }
+                        extraCaptsCache.foreach { cache =>
+                          if (cachedExtraCapts.isEmpty)
+                            cache += (hash, maxExtraCapts)
+                        }
+                        newCaptureValue + maxExtraCapts
+                    }
+                  case _ => captureValue
+                }
+              case _ => captureValue
+            }
+          case _ => captureValue
+        }
 
     captureDirs.foreach {
       walkCaptures(_, actor.board, actor.pos, None, None, Nil, Nil, 0)
@@ -209,34 +248,72 @@ abstract class Variant private[variant] (
   }
 
   def longRangeCaptures(actor: Actor, finalSquare: Boolean): List[Move] = {
-    val buf = new scala.collection.mutable.ArrayBuffer[Move]
+    val buf              = new scala.collection.mutable.ArrayBuffer[Move]
     var bestCaptureValue = 0
 
     // "transposition table", dramatically reduces calculation time for extreme frisian positions like W:WK50:B3,7,10,12,13,14,17,20,21,23,25,30,32,36,38,39,41,43,K47
     var extraCaptsCache: Option[scala.collection.mutable.LongMap[Int]] = None
 
     @tailrec
-    def walkUntilCapture(walkDir: Direction, curBoard: Board, curPos: PosMotion, destPos: Option[PosMotion], destBoard: Option[Board], allSquares: List[Pos], allTaken: List[Pos], captureValue: Int): Int =
+    def walkUntilCapture(
+        walkDir: Direction,
+        curBoard: Board,
+        curPos: PosMotion,
+        destPos: Option[PosMotion],
+        destBoard: Option[Board],
+        allSquares: List[Pos],
+        allTaken: List[Pos],
+        captureValue: Int
+    ): Int =
       if (extraCaptsCache.exists(_.size > maxCache)) 0
-      else walkDir._2(curPos) match {
-        case Some(nextPos) =>
-          curBoard(nextPos) match {
-            case None =>
-              walkUntilCapture(walkDir, curBoard.moveUnsafe(curPos, nextPos, actor.piece), nextPos, destPos, destBoard, allSquares, allTaken, captureValue)
-            case Some(captPiece) if captPiece.isNot(actor.color) && !captPiece.isGhost =>
-              walkDir._2(nextPos) match {
-                case Some(landingPos) if curBoard(landingPos).isEmpty =>
-                  val boardAfter = curBoard.takingUnsafe(curPos, landingPos, actor.piece, nextPos, captPiece)
-                  walkAfterCapture(walkDir, boardAfter, landingPos, destPos, destBoard, allSquares, nextPos :: allTaken, captureValue + getCaptureValue(actor.board, nextPos))
-                case _ => captureValue
-              }
-            case _ => captureValue
-          }
-        case _ => captureValue
-      }
+      else
+        walkDir._2(curPos) match {
+          case Some(nextPos) =>
+            curBoard(nextPos) match {
+              case None =>
+                walkUntilCapture(
+                  walkDir,
+                  curBoard.moveUnsafe(curPos, nextPos, actor.piece),
+                  nextPos,
+                  destPos,
+                  destBoard,
+                  allSquares,
+                  allTaken,
+                  captureValue
+                )
+              case Some(captPiece) if captPiece.isNot(actor.color) && !captPiece.isGhost =>
+                walkDir._2(nextPos) match {
+                  case Some(landingPos) if curBoard(landingPos).isEmpty =>
+                    val boardAfter =
+                      curBoard.takingUnsafe(curPos, landingPos, actor.piece, nextPos, captPiece)
+                    walkAfterCapture(
+                      walkDir,
+                      boardAfter,
+                      landingPos,
+                      destPos,
+                      destBoard,
+                      allSquares,
+                      nextPos :: allTaken,
+                      captureValue + getCaptureValue(actor.board, nextPos)
+                    )
+                  case _ => captureValue
+                }
+              case _ => captureValue
+            }
+          case _ => captureValue
+        }
 
-    def walkAfterCapture(walkDir: Direction, curBoard: Board, curPos: PosMotion, destPos: Option[PosMotion], destBoard: Option[Board], allSquares: List[Pos], newTaken: List[Pos], newCaptureValue: Int): Int = {
-      val hash = if (extraCaptsCache.isDefined) curBoard.pieces.hashCode() + walkDir._1 else 0
+    def walkAfterCapture(
+        walkDir: Direction,
+        curBoard: Board,
+        curPos: PosMotion,
+        destPos: Option[PosMotion],
+        destBoard: Option[Board],
+        allSquares: List[Pos],
+        newTaken: List[Pos],
+        newCaptureValue: Int
+    ): Int = {
+      val hash             = if (extraCaptsCache.isDefined) curBoard.pieces.hashCode() + walkDir._1 else 0
       val cachedExtraCapts = extraCaptsCache.flatMap(_ get hash)
       cachedExtraCapts match {
         case Some(extraCapts) if newCaptureValue + extraCapts < bestCaptureValue =>
@@ -255,22 +332,45 @@ abstract class Variant private[variant] (
             if (finalSquare)
               buf += actor.move(curPos, curBoard.withoutGhosts, newSquares, newTaken)
             else
-              buf += actor.move(destPos.getOrElse(curPos), destBoard.getOrElse(curBoard), newSquares, newTaken)
+              buf += actor.move(
+                destPos.getOrElse(curPos),
+                destBoard.getOrElse(curBoard),
+                newSquares,
+                newTaken
+              )
           }
-          val opposite = Variant.oppositeDirs(walkDir._1)
-          val newDest = if (destPos.isDefined) destPos else curPos.some
-          val newBoard = if (destBoard.isDefined) destBoard else curBoard.some
+          val opposite      = Variant.oppositeDirs(walkDir._1)
+          val newDest       = if (destPos.isDefined) destPos else curPos.some
+          val newBoard      = if (destBoard.isDefined) destBoard else curBoard.some
           var maxExtraCapts = 0
           captureDirs.foreach { captDir =>
             if (captDir._1 != opposite) {
-              val extraCapture = walkUntilCapture(captDir, curBoard, curPos, newDest, newBoard, newSquares, newTaken, newCaptureValue) - newCaptureValue
+              val extraCapture = walkUntilCapture(
+                captDir,
+                curBoard,
+                curPos,
+                newDest,
+                newBoard,
+                newSquares,
+                newTaken,
+                newCaptureValue
+              ) - newCaptureValue
               if (extraCapture > maxExtraCapts)
                 maxExtraCapts = extraCapture
             }
           }
           walkDir._2(curPos) match {
             case Some(nextPos) if curBoard(nextPos).isEmpty =>
-              val extraCapts = walkAfterCapture(walkDir, curBoard.moveUnsafe(curPos, nextPos, actor.piece), nextPos, destPos, destBoard, allSquares, newTaken, newCaptureValue) - newCaptureValue
+              val extraCapts = walkAfterCapture(
+                walkDir,
+                curBoard.moveUnsafe(curPos, nextPos, actor.piece),
+                nextPos,
+                destPos,
+                destBoard,
+                allSquares,
+                newTaken,
+                newCaptureValue
+              ) - newCaptureValue
               if (extraCapts > maxExtraCapts)
                 maxExtraCapts = extraCapts
             case _ =>
@@ -302,32 +402,36 @@ abstract class Variant private[variant] (
   def winner(situation: Situation): Option[Color] =
     if (situation.checkMate || specialEnd(situation)) Some(!situation.color) else None
 
-  def specialEnd(situation: Situation) = false
+  def specialEnd(situation: Situation)  = false
   def specialDraw(situation: Situation) = false
 
   // Some variants have an extra effect on the board on a move. For example, in Atomic, some
   // pieces surrounding a capture explode
   def hasMoveEffects = false
 
-  /**
-   * Applies a variant specific effect to the move. This helps decide whether a king is endangered by a move, for
-   * example
-   */
+  /** Applies a variant specific effect to the move. This helps decide whether a king is endangered by a move, for
+    * example
+    */
   def addVariantEffect(move: Move): Move = move
 
-  /**
-   * Returns the amount of moves until a draw is reached given the material on the board.
-   */
+  /** Returns the amount of moves until a draw is reached given the material on the board.
+    */
   def maxDrawingMoves(board: Board): Option[Int]
 
   def updatePositionHashes(board: Board, move: Move, hash: draughts.PositionHash): PositionHash
 
-  /**
-   * Once a move has been decided upon from the available legal moves, the board is finalized
-   * This removes any reaining ghostpieces if the capture sequence has ended
-   */
-  def finalizeBoard(board: Board, uci: format.Uci.Move, captured: Option[List[Piece]], situationBefore: Situation, finalSquare: Boolean): Board = {
-    val remainingCaptures = finalSquare.fold(0, situationBefore.captureLengthFrom(uci.orig).getOrElse(0) - 1)
+  /** Once a move has been decided upon from the available legal moves, the board is finalized
+    * This removes any reaining ghostpieces if the capture sequence has ended
+    */
+  def finalizeBoard(
+      board: Board,
+      uci: format.Uci.Move,
+      captured: Option[List[Piece]],
+      situationBefore: Situation,
+      finalSquare: Boolean
+  ): Board = {
+    val remainingCaptures =
+      if (finalSquare) 0 else situationBefore.captureLengthFrom(uci.orig).getOrElse(0) - 1
     if (remainingCaptures > 0) board
     else board.withoutGhosts
   }
@@ -335,23 +439,22 @@ abstract class Variant private[variant] (
   protected def menOnPromotionRank(board: Board, color: Color) = {
     board.pieces.exists {
       case (pos, Piece(c, r)) if c == color && r == Man && promotablePos(board.posAt(pos), color) => true
-      case _ => false
+      case _                                                                                      => false
     }
   }
 
-  /**
-   * Checks board for valid game position
-   */
+  /** Checks board for valid game position
+    */
   protected def validSide(board: Board, strict: Boolean)(color: Color) = {
     val roles = board rolesOf color
     (roles.count(_ == Man) > 0 || roles.count(_ == King) > 0) &&
-      (!strict || roles.size <= 20) &&
-      (!menOnPromotionRank(board, color) || board.ghosts != 0)
+    (!strict || roles.size <= 20) &&
+    (!menOnPromotionRank(board, color) || board.ghosts != 0)
   }
 
-  def valid(board: Board, strict: Boolean) = Color.all forall validSide(board, strict)_
+  def valid(board: Board, strict: Boolean) = Color.all forall validSide(board, strict) _
 
-  val roles = List(Man, King)
+  val roles                            = List(Man, King)
   lazy val rolesByPdn: Map[Char, Role] = roles.map { r => (r.pdn, r) }.to(Map)
 
   override def toString = s"Variant($name)"
@@ -363,14 +466,14 @@ abstract class Variant private[variant] (
 
 object Variant {
 
-  val UpLeft = 1
-  val UpRight = 2
-  val DownLeft = 3
+  val UpLeft    = 1
+  val UpRight   = 2
+  val DownLeft  = 3
   val DownRight = 4
-  val Up = 5
-  val Down = 6
-  val Left = 7
-  val Right = 8
+  val Up        = 5
+  val Down      = 6
+  val Left      = 7
+  val Right     = 8
 
   val oppositeDirs: Array[Int] = Array(
     0,
@@ -384,18 +487,18 @@ object Variant {
     Left
   )
 
-  val all = List(Standard, Frisian, Frysk, Antidraughts, Breakthrough, Russian, Brazilian, FromPosition)
-  val byId = all map { v => (v.id, v) } toMap
+  val all   = List(Standard, Frisian, Frysk, Antidraughts, Breakthrough, Russian, Brazilian, FromPosition)
+  val byId  = all map { v => (v.id, v) } toMap
   val byKey = all map { v => (v.key, v) } toMap
 
   val allVariants = all.filter(FromPosition !=)
 
   val default = Standard
 
-  def apply(id: Int): Option[Variant] = byId get id
+  def apply(id: Int): Option[Variant]     = byId get id
   def apply(key: String): Option[Variant] = byKey get key
-  def orDefault(id: Int): Variant = apply(id) | default
-  def orDefault(key: String): Variant = apply(key) | default
+  def orDefault(id: Int): Variant         = apply(id) | default
+  def orDefault(key: String): Variant     = apply(key) | default
 
   def byName(name: String): Option[Variant] =
     all find (_.name.toLowerCase == name.toLowerCase)
@@ -423,45 +526,63 @@ object Variant {
     draughts.variant.FromPosition
   )
 
-  private[variant] def symmetricFourRank(rank: IndexedSeq[Role], boardSize: Board.BoardSize): Map[Pos, Piece] = {
+  private[variant] def symmetricFourRank(
+      rank: IndexedSeq[Role],
+      boardSize: Board.BoardSize
+  ): Map[Pos, Piece] = {
     (for (y <- Seq(1, 2, 3, 4, 7, 8, 9, 10); x <- 1 to 5) yield {
       boardSize.pos.posAt(x, y) map { pos =>
-        (pos, y match {
-          case 1 => Black - rank(x - 1)
-          case 2 => Black - rank(x - 1)
-          case 3 => Black - rank(x - 1)
-          case 4 => Black - rank(x - 1)
-          case 7 => White - rank(x - 1)
-          case 8 => White - rank(x - 1)
-          case 9 => White - rank(x - 1)
-          case 10 => White - rank(x - 1)
-        })
+        (
+          pos,
+          y match {
+            case 1  => Black - rank(x - 1)
+            case 2  => Black - rank(x - 1)
+            case 3  => Black - rank(x - 1)
+            case 4  => Black - rank(x - 1)
+            case 7  => White - rank(x - 1)
+            case 8  => White - rank(x - 1)
+            case 9  => White - rank(x - 1)
+            case 10 => White - rank(x - 1)
+          }
+        )
       }
     }).flatten.toMap
   }
 
-  private[variant] def symmetricThreeRank(rank: IndexedSeq[Role], boardSize: Board.BoardSize): Map[Pos, Piece] = {
+  private[variant] def symmetricThreeRank(
+      rank: IndexedSeq[Role],
+      boardSize: Board.BoardSize
+  ): Map[Pos, Piece] = {
     (for (y <- Seq(1, 2, 3, 6, 7, 8); x <- 1 to 4) yield {
       boardSize.pos.posAt(x, y) map { pos =>
-        (pos, y match {
-          case 1 => Black - rank(x - 1)
-          case 2 => Black - rank(x - 1)
-          case 3 => Black - rank(x - 1)
-          case 6 => White - rank(x - 1)
-          case 7 => White - rank(x - 1)
-          case 8 => White - rank(x - 1)
-        })
+        (
+          pos,
+          y match {
+            case 1 => Black - rank(x - 1)
+            case 2 => Black - rank(x - 1)
+            case 3 => Black - rank(x - 1)
+            case 6 => White - rank(x - 1)
+            case 7 => White - rank(x - 1)
+            case 8 => White - rank(x - 1)
+          }
+        )
       }
     }).flatten.toMap
   }
 
-  private[variant] def symmetricBackrank(rank: IndexedSeq[Role], boardSize: Board.BoardSize): Map[Pos, Piece] = {
+  private[variant] def symmetricBackrank(
+      rank: IndexedSeq[Role],
+      boardSize: Board.BoardSize
+  ): Map[Pos, Piece] = {
     (for (y <- Seq(1, 10); x <- 1 to 5) yield {
       boardSize.pos.posAt(x, y) map { pos =>
-        (pos, y match {
-          case 1 => Black - rank(x - 1)
-          case 10 => White - rank(x - 1)
-        })
+        (
+          pos,
+          y match {
+            case 1  => Black - rank(x - 1)
+            case 10 => White - rank(x - 1)
+          }
+        )
       }
     }).flatten.toMap
   }

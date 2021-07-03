@@ -1,6 +1,8 @@
 package draughts
 package variant
 
+import cats.implicits._
+
 case object Breakthrough extends Variant(
   id = 9,
   gameType = 96,

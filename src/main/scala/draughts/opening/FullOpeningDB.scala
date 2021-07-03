@@ -3,6 +3,8 @@ package opening
 
 import format.FEN
 
+import cats.implicits._
+
 object FullOpeningDB {
 
   private def all: Vector[FullOpening] = Vector()

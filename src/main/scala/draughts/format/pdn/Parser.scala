@@ -247,7 +247,7 @@ object Parser {
     """\[(FILENAME\s+")""".r.replaceAllIn(pdn, m => "\n[" + m.group(1))
 
   private def splitTagAndMoves(pdn: String): Validated[String, (String, String)] =
-    ensureTagsNewlineReverse(ensureTagsNewline(pdn)).lines.toList.map(_.trim).filter(_.nonEmpty) span { line =>
+    ensureTagsNewlineReverse(ensureTagsNewline(pdn)).linesIterator.toList.map(_.trim).filter(_.nonEmpty).to(List) span { line =>
       line lift 0 contains '['
     } match {
       case (tagLines, moveLines) => //Drop any tag in last line (accomodate [FILENAME)

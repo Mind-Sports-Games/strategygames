@@ -2,6 +2,7 @@ package draughts
 package format.pdn
 
 import cats.data.Validated
+import cats.implicits._
 
 object Reader {
 
@@ -14,7 +15,7 @@ object Reader {
       def valid = Validated.valid(replay)
     }
     case class Incomplete(replay: Replay, failure: String) extends Result {
-      def valid = Validated.invalid(failures)
+      def valid = Validated.invalid(failure)
     }
   }
 

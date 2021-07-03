@@ -1,7 +1,7 @@
 package draughts
 package variant
 
-import scala.collection.breakOut
+import cats.implicits._
 
 case object Frisian extends Variant(
   id = 10,
@@ -63,11 +63,11 @@ case object Frisian extends Variant(
       situation.actors.collect {
         case actor if actor.noncaptures.nonEmpty =>
           actor.pos -> actor.noncaptures
-      }(breakOut)
+      }.to(Map)
   }
 
   override def finalizeBoard(board: Board, uci: format.Uci.Move, captured: Option[List[Piece]], situationBefore: Situation, finalSquare: Boolean): Board = {
-    val remainingCaptures = finalSquare.fold(0, situationBefore.captureLengthFrom(uci.orig).getOrElse(0) - 1)
+    val remainingCaptures = if(finalSquare) 0 else situationBefore.captureLengthFrom(uci.orig).getOrElse(0) - 1
     if (remainingCaptures > 0) board
     else board.actorAt(uci.dest).fold(board) { act =>
       val tookLastMan = captured.fold(false)(_.exists(_.role == Man)) && board.count(Man, !act.color) == 0

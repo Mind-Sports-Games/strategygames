@@ -3,6 +3,7 @@ package format
 package pdn
 
 import scala._
+import cats.implicits._
 
 case class Pdn(
     tags: Tags,

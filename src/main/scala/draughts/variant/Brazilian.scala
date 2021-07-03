@@ -22,7 +22,7 @@ case object Brazilian extends Variant(
   def moveDirsAll = Standard.moveDirsAll
 
   override def finalizeBoard(board: Board, uci: format.Uci.Move, captured: Option[List[Piece]], situationBefore: Situation, finalSquare: Boolean): Board = {
-    val remainingCaptures = finalSquare.fold(0, situationBefore.captureLengthFrom(uci.orig).getOrElse(0) - 1)
+    val remainingCaptures = if(finalSquare) 0 else situationBefore.captureLengthFrom(uci.orig).getOrElse(0) - 1
     if (remainingCaptures > 0) board
     else {
       val whiteActors = board.actorsOf(Color.White)

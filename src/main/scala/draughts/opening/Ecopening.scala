@@ -1,6 +1,8 @@
 package draughts
 package opening
 
+import cats.implicits._
+
 final class Ecopening(
     val eco: Ecopening.ECO,
     val family: Ecopening.FamilyName,

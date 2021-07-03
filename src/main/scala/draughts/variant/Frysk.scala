@@ -1,6 +1,8 @@
 package draughts
 package variant
 
+import cats.implicits._
+
 case object Frysk extends Variant(
   id = 8,
   gameType = 97,
