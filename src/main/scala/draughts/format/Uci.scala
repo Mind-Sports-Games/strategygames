@@ -86,7 +86,7 @@ object Uci {
   case class WithSan(uci: Uci, san: String)
 
   def apply(move: draughts.Move, withCaptures: Boolean) =
-    Uci.Move(move.orig, move.dest, move.promotion, withCaptures ?? move.capture)
+    Uci.Move(move.orig, move.dest, move.promotion, if (withCaptures) move.capture else none)
 
   def combine(uci1: Uci, uci2: Uci) =
     apply(uci1.uci + uci2.uci.drop(2)).getOrElse(Uci.Move(uci1.origDest._1, uci2.origDest._2))
