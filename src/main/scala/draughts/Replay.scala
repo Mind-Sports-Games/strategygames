@@ -4,7 +4,7 @@ import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
-import format.pdn._
+import format.pdn.{ Reader, Parser, San, Std, Tag, Tags }
 import format.{ FEN, Forsyth, Uci }
 import variant.Variant
 
@@ -158,7 +158,8 @@ object Replay {
             uciMove.capture
           ).fold(
               err => {
-                logger.warn(s"exportScanMoves($iteratedCapts) $debugId: $uci -> ${uciMove.orig}${if (uciMove.capture.fold(false)(_.nonEmpty)) "x" else "-"}${uciMove.dest} - error ${err.head}")
+                // TODO: Warning?
+                //logger.warn(s"exportScanMoves($iteratedCapts) $debugId: $uci -> ${uciMove.orig}${if (uciMove.capture.fold(false)(_.nonEmpty)) "x" else "-"}${uciMove.dest} - error ${err.head}")
                 (Nil, err.head.some)
               },
               move => {

@@ -1,11 +1,9 @@
 package draughts
 
-import scala.collection.breakOut
-
 sealed abstract class Pos(val fieldNumber: Int) {
 
-  val piotr = Piotr.byField(fieldNumber)
-  val key = f"${fieldNumber}%02d"
+  val piotr    = Piotr.byField(fieldNumber)
+  val key      = f"${fieldNumber}%02d"
   val shortKey = fieldNumber.toString
   val piotrStr = piotr.toString
 
@@ -13,7 +11,7 @@ sealed abstract class Pos(val fieldNumber: Int) {
   override val hashCode = fieldNumber - 1
   override def equals(other: Any) = other match {
     case u: Pos => fieldNumber == u.fieldNumber
-    case _ => false
+    case _      => false
   }
 }
 
@@ -32,31 +30,31 @@ sealed abstract class PosMotion(field: Int) extends Pos(field) {
 
 sealed case class Pos100 private (x: Int, y: Int) extends PosMotion(5 * (y - 1) + x) {
 
-  import Pos100.{ posAt, movesDown, movesUp, movesHorizontal }
+  import Pos100.{ movesDown, movesHorizontal, movesUp, posAt }
 
-  lazy val moveDownLeft = movesDown.get(fieldNumber).map(_(0)).filter(_ > 0) flatMap posAt
+  lazy val moveDownLeft  = movesDown.get(fieldNumber).map(_(0)).filter(_ > 0) flatMap posAt
   lazy val moveDownRight = movesDown.get(fieldNumber).map(_(1)).filter(_ > 0) flatMap posAt
-  lazy val moveUpLeft = movesUp.get(fieldNumber).map(_(0)).filter(_ > 0) flatMap posAt
-  lazy val moveUpRight = movesUp.get(fieldNumber).map(_(1)).filter(_ > 0) flatMap posAt
+  lazy val moveUpLeft    = movesUp.get(fieldNumber).map(_(0)).filter(_ > 0) flatMap posAt
+  lazy val moveUpRight   = movesUp.get(fieldNumber).map(_(1)).filter(_ > 0) flatMap posAt
 
-  lazy val moveDown = movesDown.get(fieldNumber).map(_(2)).filter(_ > 0) flatMap posAt
-  lazy val moveUp = movesUp.get(fieldNumber).map(_(2)).filter(_ > 0) flatMap posAt
-  lazy val moveLeft = movesHorizontal.get(fieldNumber).map(_(0)).filter(_ > 0) flatMap posAt
+  lazy val moveDown  = movesDown.get(fieldNumber).map(_(2)).filter(_ > 0) flatMap posAt
+  lazy val moveUp    = movesUp.get(fieldNumber).map(_(2)).filter(_ > 0) flatMap posAt
+  lazy val moveLeft  = movesHorizontal.get(fieldNumber).map(_(0)).filter(_ > 0) flatMap posAt
   lazy val moveRight = movesHorizontal.get(fieldNumber).map(_(1)).filter(_ > 0) flatMap posAt
 }
 
 sealed case class Pos64 private (x: Int, y: Int) extends PosMotion(4 * (y - 1) + x) {
 
-  import Pos64.{ posAt, movesDown, movesUp, movesHorizontal }
+  import Pos64.{ movesDown, movesHorizontal, movesUp, posAt }
 
-  lazy val moveDownLeft = movesDown.get(fieldNumber).map(_(0)).filter(_ > 0) flatMap posAt
+  lazy val moveDownLeft  = movesDown.get(fieldNumber).map(_(0)).filter(_ > 0) flatMap posAt
   lazy val moveDownRight = movesDown.get(fieldNumber).map(_(1)).filter(_ > 0) flatMap posAt
-  lazy val moveUpLeft = movesUp.get(fieldNumber).map(_(0)).filter(_ > 0) flatMap posAt
-  lazy val moveUpRight = movesUp.get(fieldNumber).map(_(1)).filter(_ > 0) flatMap posAt
+  lazy val moveUpLeft    = movesUp.get(fieldNumber).map(_(0)).filter(_ > 0) flatMap posAt
+  lazy val moveUpRight   = movesUp.get(fieldNumber).map(_(1)).filter(_ > 0) flatMap posAt
 
-  lazy val moveDown = movesDown.get(fieldNumber).map(_(2)).filter(_ > 0) flatMap posAt
-  lazy val moveUp = movesUp.get(fieldNumber).map(_(2)).filter(_ > 0) flatMap posAt
-  lazy val moveLeft = movesHorizontal.get(fieldNumber).map(_(0)).filter(_ > 0) flatMap posAt
+  lazy val moveDown  = movesDown.get(fieldNumber).map(_(2)).filter(_ > 0) flatMap posAt
+  lazy val moveUp    = movesUp.get(fieldNumber).map(_(2)).filter(_ > 0) flatMap posAt
+  lazy val moveLeft  = movesHorizontal.get(fieldNumber).map(_(0)).filter(_ > 0) flatMap posAt
   lazy val moveRight = movesHorizontal.get(fieldNumber).map(_(1)).filter(_ > 0) flatMap posAt
 }
 
@@ -75,15 +73,15 @@ object Pos100 extends BoardPos {
 
   //Possible destinations: (left, right, straight)
   val movesDown = Map(
-    1 -> Array(6, 7, 11),
-    2 -> Array(7, 8, 12),
-    3 -> Array(8, 9, 13),
-    4 -> Array(9, 10, 14),
-    5 -> Array(10, -1, 15),
-    6 -> Array(-1, 11, 16),
-    7 -> Array(11, 12, 17),
-    8 -> Array(12, 13, 18),
-    9 -> Array(13, 14, 19),
+    1  -> Array(6, 7, 11),
+    2  -> Array(7, 8, 12),
+    3  -> Array(8, 9, 13),
+    4  -> Array(9, 10, 14),
+    5  -> Array(10, -1, 15),
+    6  -> Array(-1, 11, 16),
+    7  -> Array(11, 12, 17),
+    8  -> Array(12, 13, 18),
+    9  -> Array(13, 14, 19),
     10 -> Array(14, 15, 20),
     11 -> Array(16, 17, 21),
     12 -> Array(17, 18, 22),
@@ -124,10 +122,10 @@ object Pos100 extends BoardPos {
 
   //Possible destinations: (left, right, straight)
   val movesUp = Map(
-    6 -> Array(-1, 1, -1),
-    7 -> Array(1, 2, -1),
-    8 -> Array(2, 3, -1),
-    9 -> Array(3, 4, -1),
+    6  -> Array(-1, 1, -1),
+    7  -> Array(1, 2, -1),
+    8  -> Array(2, 3, -1),
+    9  -> Array(3, 4, -1),
     10 -> Array(4, 5, -1),
     11 -> Array(6, 7, 1),
     12 -> Array(7, 8, 2),
@@ -173,15 +171,15 @@ object Pos100 extends BoardPos {
 
   //Possible destinations: (straight-left, straight-right)
   val movesHorizontal = Map(
-    1 -> Array(-1, 2),
-    2 -> Array(1, 3),
-    3 -> Array(2, 4),
-    4 -> Array(3, 5),
-    5 -> Array(4, -1),
-    6 -> Array(-1, 7),
-    7 -> Array(6, 8),
-    8 -> Array(7, 9),
-    9 -> Array(8, 10),
+    1  -> Array(-1, 2),
+    2  -> Array(1, 3),
+    3  -> Array(2, 4),
+    4  -> Array(3, 5),
+    5  -> Array(4, -1),
+    6  -> Array(-1, 7),
+    7  -> Array(6, 8),
+    8  -> Array(7, 9),
+    9  -> Array(8, 10),
     10 -> Array(9, -1),
     11 -> Array(-1, 12),
     12 -> Array(11, 13),
@@ -239,7 +237,7 @@ object Pos100 extends BoardPos {
 
   def piotr(c: Char): Option[PosMotion] = allPiotrs get c
 
-  val hasAlgebraic = false
+  val hasAlgebraic          = false
   def algebraic(field: Int) = posAt(field) map { _.toString }
 
   private[this] def createPos(x: Int, y: Int): Pos100 = {
@@ -248,51 +246,51 @@ object Pos100 extends BoardPos {
     pos
   }
 
-  val A1 = createPos(1, 1)
-  val B1 = createPos(2, 1)
-  val C1 = createPos(3, 1)
-  val D1 = createPos(4, 1)
-  val E1 = createPos(5, 1)
-  val A2 = createPos(1, 2)
-  val B2 = createPos(2, 2)
-  val C2 = createPos(3, 2)
-  val D2 = createPos(4, 2)
-  val E2 = createPos(5, 2)
-  val A3 = createPos(1, 3)
-  val B3 = createPos(2, 3)
-  val C3 = createPos(3, 3)
-  val D3 = createPos(4, 3)
-  val E3 = createPos(5, 3)
-  val A4 = createPos(1, 4)
-  val B4 = createPos(2, 4)
-  val C4 = createPos(3, 4)
-  val D4 = createPos(4, 4)
-  val E4 = createPos(5, 4)
-  val A5 = createPos(1, 5)
-  val B5 = createPos(2, 5)
-  val C5 = createPos(3, 5)
-  val D5 = createPos(4, 5)
-  val E5 = createPos(5, 5)
-  val A6 = createPos(1, 6)
-  val B6 = createPos(2, 6)
-  val C6 = createPos(3, 6)
-  val D6 = createPos(4, 6)
-  val E6 = createPos(5, 6)
-  val A7 = createPos(1, 7)
-  val B7 = createPos(2, 7)
-  val C7 = createPos(3, 7)
-  val D7 = createPos(4, 7)
-  val E7 = createPos(5, 7)
-  val A8 = createPos(1, 8)
-  val B8 = createPos(2, 8)
-  val C8 = createPos(3, 8)
-  val D8 = createPos(4, 8)
-  val E8 = createPos(5, 8)
-  val A9 = createPos(1, 9)
-  val B9 = createPos(2, 9)
-  val C9 = createPos(3, 9)
-  val D9 = createPos(4, 9)
-  val E9 = createPos(5, 9)
+  val A1  = createPos(1, 1)
+  val B1  = createPos(2, 1)
+  val C1  = createPos(3, 1)
+  val D1  = createPos(4, 1)
+  val E1  = createPos(5, 1)
+  val A2  = createPos(1, 2)
+  val B2  = createPos(2, 2)
+  val C2  = createPos(3, 2)
+  val D2  = createPos(4, 2)
+  val E2  = createPos(5, 2)
+  val A3  = createPos(1, 3)
+  val B3  = createPos(2, 3)
+  val C3  = createPos(3, 3)
+  val D3  = createPos(4, 3)
+  val E3  = createPos(5, 3)
+  val A4  = createPos(1, 4)
+  val B4  = createPos(2, 4)
+  val C4  = createPos(3, 4)
+  val D4  = createPos(4, 4)
+  val E4  = createPos(5, 4)
+  val A5  = createPos(1, 5)
+  val B5  = createPos(2, 5)
+  val C5  = createPos(3, 5)
+  val D5  = createPos(4, 5)
+  val E5  = createPos(5, 5)
+  val A6  = createPos(1, 6)
+  val B6  = createPos(2, 6)
+  val C6  = createPos(3, 6)
+  val D6  = createPos(4, 6)
+  val E6  = createPos(5, 6)
+  val A7  = createPos(1, 7)
+  val B7  = createPos(2, 7)
+  val C7  = createPos(3, 7)
+  val D7  = createPos(4, 7)
+  val E7  = createPos(5, 7)
+  val A8  = createPos(1, 8)
+  val B8  = createPos(2, 8)
+  val C8  = createPos(3, 8)
+  val D8  = createPos(4, 8)
+  val E8  = createPos(5, 8)
+  val A9  = createPos(1, 9)
+  val B9  = createPos(2, 9)
+  val C9  = createPos(3, 9)
+  val D9  = createPos(4, 9)
+  val E9  = createPos(5, 9)
   val A10 = createPos(1, 10)
   val B10 = createPos(2, 10)
   val C10 = createPos(3, 10)
@@ -301,9 +299,9 @@ object Pos100 extends BoardPos {
 
   val all = posCache.toList.flatten
 
-  val allKeys: Map[String, PosMotion] = all.map { pos => pos.key -> pos }(breakOut)
+  val allKeys: Map[String, PosMotion] = all.map { pos => pos.key -> pos }.to(Map)
 
-  val allPiotrs: Map[Char, PosMotion] = all.map { pos => pos.piotr -> pos }(breakOut)
+  val allPiotrs: Map[Char, PosMotion] = all.map { pos => pos.piotr -> pos }.to(Map)
 
 }
 
@@ -311,15 +309,15 @@ object Pos64 extends BoardPos {
 
   //Possible destinations: (left, right, straight)
   val movesDown = Map(
-    1 -> Array(5, 6, 9),
-    2 -> Array(6, 7, 10),
-    3 -> Array(7, 8, 11),
-    4 -> Array(8, -1, 12),
-    5 -> Array(-1, 9, 13),
-    6 -> Array(9, 10, 14),
-    7 -> Array(10, 11, 15),
-    8 -> Array(11, 12, 16),
-    9 -> Array(13, 14, 17),
+    1  -> Array(5, 6, 9),
+    2  -> Array(6, 7, 10),
+    3  -> Array(7, 8, 11),
+    4  -> Array(8, -1, 12),
+    5  -> Array(-1, 9, 13),
+    6  -> Array(9, 10, 14),
+    7  -> Array(10, 11, 15),
+    8  -> Array(11, 12, 16),
+    9  -> Array(13, 14, 17),
     10 -> Array(14, 15, 18),
     11 -> Array(15, 16, 19),
     12 -> Array(16, -1, 20),
@@ -343,11 +341,11 @@ object Pos64 extends BoardPos {
 
   //Possible destinations: (left, right, straight)
   val movesUp = Map(
-    5 -> Array(-1, 1, -1),
-    6 -> Array(1, 2, -1),
-    7 -> Array(2, 3, -1),
-    8 -> Array(3, 4, -1),
-    9 -> Array(5, 6, 1),
+    5  -> Array(-1, 1, -1),
+    6  -> Array(1, 2, -1),
+    7  -> Array(2, 3, -1),
+    8  -> Array(3, 4, -1),
+    9  -> Array(5, 6, 1),
     10 -> Array(6, 7, 2),
     11 -> Array(7, 8, 3),
     12 -> Array(8, -1, 4),
@@ -375,15 +373,15 @@ object Pos64 extends BoardPos {
 
   //Possible destinations: (straight-left, straight-right)
   val movesHorizontal = Map(
-    1 -> Array(-1, 2),
-    2 -> Array(1, 3),
-    3 -> Array(2, 4),
-    4 -> Array(3, -1),
-    5 -> Array(-1, 6),
-    6 -> Array(5, 7),
-    7 -> Array(6, 8),
-    8 -> Array(7, -1),
-    9 -> Array(-1, 10),
+    1  -> Array(-1, 2),
+    2  -> Array(1, 3),
+    3  -> Array(2, 4),
+    4  -> Array(3, -1),
+    5  -> Array(-1, 6),
+    6  -> Array(5, 7),
+    7  -> Array(6, 8),
+    8  -> Array(7, -1),
+    9  -> Array(-1, 10),
     10 -> Array(9, 11),
     11 -> Array(10, 12),
     12 -> Array(11, -1),
@@ -412,18 +410,18 @@ object Pos64 extends BoardPos {
   val posCache = new Array[Some[PosMotion]](32)
 
   private lazy val alg2pos: Map[String, PosMotion] = posCache.map { p =>
-    val pos = p.get
+    val pos  = p.get
     val algY = 9 - pos.y
     val algX = pos.x * 2 - algY % 2
     s"${(96 + algX).toChar}$algY" -> pos
-  }(scala.collection.breakOut)
+  }.to(Map)
 
   private lazy val field2alg: Map[Int, String] = posCache.map { p =>
-    val pos = p.get
+    val pos  = p.get
     val algY = 9 - pos.y
     val algX = pos.x * 2 - algY % 2
     pos.fieldNumber -> s"${(96 + algX).toChar}$algY"
-  }(scala.collection.breakOut)
+  }.to(Map)
 
   def posAt(x: Int, y: Int): Option[PosMotion] =
     if (x < 1 || x > 4 || y < 1 || y > 8) None
@@ -438,7 +436,7 @@ object Pos64 extends BoardPos {
 
   def piotr(c: Char): Option[PosMotion] = allPiotrs get c
 
-  val hasAlgebraic = true
+  val hasAlgebraic          = true
   def algebraic(field: Int) = field2alg get field
 
   private[this] def createPos(x: Int, y: Int): Pos64 = {
@@ -482,8 +480,9 @@ object Pos64 extends BoardPos {
 
   val all = posCache.toList.flatten
 
-  val allKeys: Map[String, PosMotion] = all.map { pos => pos.key -> pos }(breakOut)
+  val allKeys: Map[String, PosMotion] = all.map { pos => pos.key -> pos }.to(Map)
 
-  val allPiotrs: Map[Char, PosMotion] = all.map { pos => pos.piotr -> pos }(breakOut)
+  val allPiotrs: Map[Char, PosMotion] = all.map { pos => pos.piotr -> pos }.to(Map)
 
 }
+

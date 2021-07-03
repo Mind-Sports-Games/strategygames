@@ -1,8 +1,6 @@
 package draughts
 package format
 
-import scala.collection.breakOut
-
 case class UciCharPair(a: Char, b: Char) {
   override def toString = s"$a$b"
 }
@@ -26,7 +24,7 @@ object UciCharPair {
 
     val pos2charMap: Map[Pos, Char] = Board.BoardSize.max.all.map { pos =>
       pos -> (pos.hashCode + charShift).toChar
-    }(breakOut)
+    }.to(Map)
 
     def toChar(pos: Pos) = pos2charMap.getOrElse(pos, voidChar)
 
@@ -35,7 +33,7 @@ object UciCharPair {
      */
     val ambiguity2charMap: Map[Int, Char] = (for {
       ambNr <- 1 to 50
-    } yield ambNr -> (charShift + pos2charMap.size + ambNr).toChar)(breakOut)
+    } yield ambNr -> (charShift + pos2charMap.size + ambNr).toChar).to(Map)
 
   }
 }

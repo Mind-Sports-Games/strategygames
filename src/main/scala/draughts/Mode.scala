@@ -1,5 +1,7 @@
 package draughts
 
+import cats.implicits._
+
 sealed abstract class Mode(val id: Int) {
 
   lazy val name = toString.toLowerCase
@@ -21,7 +23,7 @@ object Mode {
 
   def apply(id: Int): Option[Mode] = byId get id
 
-  def apply(rated: Boolean) = rated.fold(Rated, Casual)
+  def apply(rated: Boolean) = if (rated) Rated else Casual
 
   val default: Mode = Casual
 

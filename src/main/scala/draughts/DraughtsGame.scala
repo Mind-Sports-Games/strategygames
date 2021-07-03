@@ -1,6 +1,7 @@
 package draughts
 
 import cats.data.Validated
+import cats.syntax.option.none
 
 import format.{ pdn, Uci }
 
@@ -17,7 +18,7 @@ case class DraughtsGame(
     orig: Pos,
     dest: Pos,
     promotion: Option[PromotableRole] = None,
-    metrics: MoveMetrics = MoveMetrics(),
+    _metrics: MoveMetrics = MoveMetrics(),
     finalSquare: Boolean = false,
     captures: Option[List[Pos]] = None,
     partialCaptures: Boolean = false

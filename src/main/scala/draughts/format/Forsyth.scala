@@ -1,6 +1,8 @@
 package draughts
 package format
 
+import cats.implicits._
+
 import variant.{ Variant, Standard }
 
 /**
@@ -112,7 +114,7 @@ object Forsyth {
           _ =>
             line.drop(1).split(',').foldLeft(ghosts) {
               (lineGhosts, field) =>
-                (field.nonEmpty && "GP".indexOf(field.charAt(0)) != -1).fold(lineGhosts + 1, lineGhosts)
+                if (field.nonEmpty && "GP".indexOf(field.charAt(0)) != -1) lineGhosts + 1 else lineGhosts
             }
         }
     }
@@ -125,7 +127,7 @@ object Forsyth {
           _ =>
             line.drop(1).split(',').foldLeft(kings) {
               (lineKings, field) =>
-                (field.nonEmpty && field.charAt(0) == 'K').fold(lineKings + 1, lineKings)
+                if (field.nonEmpty && field.charAt(0) == 'K') lineKings + 1 else lineKings
             }
         }
     }
@@ -237,11 +239,8 @@ object Forsyth {
   }
 
   def shorten(fen: String): String = {
-    if (fen.endsWith(":+0+0")) fen.dropRight(5)
-    else fen
-  } |> { fen2 =>
-    if (fen2.endsWith(":H0:F1")) fen2.dropRight(6)
-    else fen2
+    val fen2 = if (fen.endsWith(":+0+0")) fen.dropRight(5) else fen
+    if (fen2.endsWith(":H0:F1")) fen2.dropRight(6) else fen2
   }
 
   def getFullMove(rawSource: String): Option[Int] = read(rawSource) { fen =>

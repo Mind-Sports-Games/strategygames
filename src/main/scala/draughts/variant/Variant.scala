@@ -4,7 +4,6 @@ package variant
 import cats.data.Validated
 import cats.syntax.option._
 import scala.annotation.tailrec
-import scala.collection.breakOut
 
 // Correctness depends on singletons for each variant ID
 abstract class Variant private[variant] (
@@ -68,7 +67,7 @@ abstract class Variant private[variant] (
     else situation.actors.collect {
       case actor if actor.noncaptures.nonEmpty =>
         actor.pos -> actor.noncaptures
-    }(breakOut)
+    }.to(Map)
   }
 
   def validMovesFrom(situation: Situation, pos: Pos, finalSquare: Boolean = false): List[Move] =
@@ -199,7 +198,8 @@ abstract class Variant private[variant] (
     }
 
     if (extraCaptsCache.exists(_.size > maxCache)) {
-      logger.warn(s"shortRangeCaptures($finalSquare) aborted with ${extraCaptsCache.get.size} entries for ${actor.piece} at ${actor.pos.shortKey} on ${draughts.format.Forsyth.exportBoard(actor.board)}")
+      // TODO: warning
+      //logger.warn(s"shortRangeCaptures($finalSquare) aborted with ${extraCaptsCache.get.size} entries for ${actor.piece} at ${actor.pos.shortKey} on ${draughts.format.Forsyth.exportBoard(actor.board)}")
     }
 
     buf.flatMap { m =>
@@ -288,7 +288,8 @@ abstract class Variant private[variant] (
     }
 
     if (extraCaptsCache.exists(_.size > maxCache)) {
-      logger.warn(s"longRangeCaptures($finalSquare) aborted with ${extraCaptsCache.get.size} entries for ${actor.piece} at ${actor.pos.shortKey} on ${draughts.format.Forsyth.exportBoard(actor.board)}")
+      // TODO: warning?
+      //logger.warn(s"longRangeCaptures($finalSquare) aborted with ${extraCaptsCache.get.size} entries for ${actor.piece} at ${actor.pos.shortKey} on ${draughts.format.Forsyth.exportBoard(actor.board)}")
     }
 
     buf.toList
@@ -351,7 +352,7 @@ abstract class Variant private[variant] (
   def valid(board: Board, strict: Boolean) = Color.all forall validSide(board, strict)_
 
   val roles = List(Man, King)
-  lazy val rolesByPdn: Map[Char, Role] = roles.map { r => (r.pdn, r) }(breakOut)
+  lazy val rolesByPdn: Map[Char, Role] = roles.map { r => (r.pdn, r) }.to(Map)
 
   override def toString = s"Variant($name)"
 

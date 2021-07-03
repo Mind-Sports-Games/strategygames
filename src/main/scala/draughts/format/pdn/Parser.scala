@@ -8,8 +8,6 @@ import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
-import scala.collection.breakOut
-
 // http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm
 // https://pdn.fmjd.org/index.html
 object Parser {
@@ -22,7 +20,7 @@ object Parser {
   )
 
   def full(pdn: String): Validated[String, ParsedPdn] = try {
-    val preprocessed = pdn.lines.map(_.trim).filter {
+    val preprocessed = pdn.linesIterator.map(_.trim).filter {
       _.headOption != Some('%')
     }.mkString("\n")
       .replace("[pgn]", "").replace("[pdn]", "")
@@ -52,7 +50,7 @@ object Parser {
     variant
   )
   def moves(strMoves: Traversable[String], variant: Variant): Validated[String, Sans] = objMoves(
-    strMoves.map { StrMove(_, Glyphs.empty, Nil, Nil) }(breakOut),
+    strMoves.map { StrMove(_, Glyphs.empty, Nil, Nil) }.to(List),
     variant
   )
   def objMoves(strMoves: List[StrMove], variant: Variant): Validated[String, Sans] =
@@ -61,12 +59,12 @@ object Parser {
         MoveParser(san, variant) map { m =>
           m withComments comments withVariations {
             variations.map { v =>
-              objMoves(v, variant) | Sans.empty
+              objMoves(v, variant).getOrElse(Sans.empty)
             }.filter(_.value.nonEmpty)
           } mergeGlyphs glyphs
         }
       ): Validated[String, San]
-    }.sequence map { Sans.apply }
+    }.sequence map { Sans apply _ }
 
   trait Logging { self: Parsers =>
     protected val loggingEnabled = false
@@ -210,7 +208,7 @@ object Parser {
 
   object TagParser extends RegexParsers with Logging {
 
-    def apply(pdn: String): Validated[Strings, Tags] = parseAll(all, pdn) match {
+    def apply(pdn: String): Validated[String, Tags] = parseAll(all, pdn) match {
       case f: Failure => invalid("Cannot parse tags: %s\n%s".format(f.toString, pdn))
       case Success(tags, _) => valid(Tags(tags))
       case err => invalid("Cannot parse tags: %s\n%s".format(err.toString, pdn))

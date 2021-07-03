@@ -1,7 +1,10 @@
 package draughts
 
+import cats.syntax.option.none
+
 import format.Uci
 import variant.{ Variant, Standard }
+
 
 // Consecutive king moves by the respective side.
 case class KingMoves(white: Int = 0, black: Int = 0, whiteKing: Option[Pos] = None, blackKing: Option[Pos] = None) {

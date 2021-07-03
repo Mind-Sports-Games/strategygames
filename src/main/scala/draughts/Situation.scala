@@ -5,9 +5,6 @@ import cats.implicits._
 
 import format.Uci
 
-import scala.collection.breakOut
-import scala.collection.mutable.ArrayBuffer
-
 case class Situation(board: Board, color: Color) {
 
   lazy val actors = board actorsOf color
@@ -20,7 +17,7 @@ case class Situation(board: Board, color: Color) {
   lazy val allCaptures: Map[Pos, List[Move]] = actors.collect {
     case actor if actor.captures.nonEmpty =>
       actor.pos -> actor.captures
-  }(breakOut)
+  }.to(Map)
 
   lazy val allMovesCaptureLength: Int =
     actors.foldLeft(0) {
@@ -40,11 +37,11 @@ case class Situation(board: Board, color: Color) {
   private def countAmbiguities(moves: List[Move]) =
     moves.foldLeft(0) {
       (total, m1) =>
-        moves.exists { m2 =>
+        if (moves.exists { m2 =>
           m1 != m2 &&
             m1.dest == m2.dest &&
             m1.situationAfter.board.pieces != m2.situationAfter.board.pieces
-        }.fold(total + 1, total)
+        }) total + 1 else total
     }
 
   def movesFrom(pos: Pos, finalSquare: Boolean = false): List[Move] = board.variant.validMovesFrom(this, pos, finalSquare)

@@ -21,6 +21,6 @@ package object draughts extends scalalib.Common with scalalib.OrnicarOption with
   def parseIntOption(str: String): Option[Int] =
     Try(Integer.parseInt(str)).toOption
 
-  private[draughts] def logger = draughtsLog("draughts")
+  private[draughts] val logger = draughtsLog("draughts")
 
 }

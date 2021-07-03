@@ -1,6 +1,7 @@
 package draughts
 
 import java.text.DecimalFormat
+import cats.syntax.option.none
 
 import Clock.Config
 

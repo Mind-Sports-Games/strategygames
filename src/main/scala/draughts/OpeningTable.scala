@@ -1,5 +1,7 @@
 package draughts
 
+import cats.syntax.option._
+
 case class OpeningTable(key: String, name: String, url: String, categories: List[StartingPosition.Category]) {
 
   val positions = categories.flatMap(_.positions)
@@ -13,7 +15,7 @@ case class OpeningTable(key: String, name: String, url: String, categories: List
 
   private val fen2position: Map[String, StartingPosition] = positions.map { p =>
     p.fen -> p
-  }(scala.collection.breakOut)
+  }.to(Map)
 
   def openingByFen = fen2position.get _
 
@@ -1087,7 +1089,7 @@ object OpeningTable {
   private val allTables = List(tableFMJD, tableFMJDBrazilian, tableIDFBasic)
   private val key2table: Map[String, OpeningTable] = allTables.map { p =>
     p.key -> p
-  }(scala.collection.breakOut)
+  }.to(Map)
 
   def byKey = key2table.get _
 

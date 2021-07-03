@@ -1,6 +1,5 @@
 package draughts
 
-import scala.collection.breakOut
 import variant.Variant
 
 case class Board(
@@ -43,7 +42,7 @@ case class Board(
 
   def rolesOf(c: Color): List[Role] = pieces.values.collect {
     case piece if piece.color == c => piece.role
-  }(breakOut)
+  }.to(List)
 
   def actorAt(at: Pos): Option[Actor] = actors get at
 
@@ -51,7 +50,7 @@ case class Board(
 
   lazy val kingPos: Map[Color, Pos] = pieces.collect {
     case (pos, Piece(color, King)) => color -> pos
-  }(breakOut)
+  }
 
   def kingPosOf(c: Color): Option[Pos] = kingPos get c
 
@@ -96,7 +95,7 @@ case class Board(
     copy(pieces = pieces.updated(taking, Piece(taken.color, taken.ghostRole)) - orig + (dest -> piece))
 
   lazy val occupation: Color.Map[Set[Pos]] = Color.Map { color =>
-    pieces.collect { case (pos, piece) if piece is color => pos }(breakOut)
+    pieces.collect { case (pos, piece) if piece is color => pos }.to(Set)
   }
 
   def hasPiece(p: Piece) = pieces.values exists (p ==)

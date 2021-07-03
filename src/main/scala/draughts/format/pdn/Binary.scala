@@ -2,7 +2,6 @@ package draughts
 package format.pdn
 
 import scala.util.Try
-import scala.collection.breakOut
 
 object Binary {
 
@@ -79,11 +78,12 @@ object Binary {
       case MoveUciR(src, dst) => moveUci(src, dst)
       case CaptureUciR(src, dst) => captureUci(src, dst)
       case _ =>
-        draughtsLog("ERROR: Binary").info(s"Cannot encode $str")
+        // TODO: log?
+        //draughtsLog("ERROR: Binary").info(s"Cannot encode $str")
         Nil
     }) map (_.toByte)
 
-    def moves(strs: Traversable[String]): Array[Byte] = strs.flatMap(move)(breakOut)
+    def moves(strs: Traversable[String]): Array[Byte] = strs.flatMap(move).to(Array)
 
     def moveUci(src: String, dst: String) = List(
       (MoveType.IsMove << 6) + src.toInt,

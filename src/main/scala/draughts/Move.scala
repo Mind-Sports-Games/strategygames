@@ -1,5 +1,7 @@
 package draughts
 
+import cats.implicits._
+
 import format.Uci
 
 case class Move(
