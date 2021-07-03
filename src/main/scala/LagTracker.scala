@@ -1,6 +1,4 @@
-package draughts
-
-import strategygames.Centis
+package strategygames
 
 final case class LagTracker(
     quotaGain: Centis,
@@ -26,9 +24,9 @@ final case class LagTracker(
         uncompStats = {
           // start recording after first uncomp.
           if (uncomped == Centis(0) && uncompStats.samples == 0) uncompStats
-          else uncompStats record uncomped.centis
+          else uncompStats record uncomped.centis.toFloat
         },
-        lagStats = lagStats record (lag atMost Centis(2000)).centis,
+        lagStats = lagStats record (lag atMost Centis(2000)).centis.toFloat,
         compEstSqErr = compEstSqErr + ceDiff.centis * ceDiff.centis,
         compEstOvers = compEstOvers + ceDiff.nonNeg
       ).recordLag(lag)
@@ -36,12 +34,10 @@ final case class LagTracker(
   }
 
   def recordLag(lag: Centis) = {
-    val e = lagEstimator.record((lag atMost quotaMax).centis)
+    val e = lagEstimator.record((lag atMost quotaMax).centis.toFloat)
     copy(
       lagEstimator = e,
-      compEstimate = Some {
-        Centis(e.mean - .8f * e.deviation).nonNeg atMost quota
-      }
+      compEstimate = Option(Centis(e.mean - .8f * e.deviation).nonNeg atMost quota)
     )
   }
 

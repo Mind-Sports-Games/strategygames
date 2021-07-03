@@ -1,5 +1,6 @@
 package draughts
 package format.pdn
+import strategygames.Clock
 
 import org.joda.time.DateTimeZone
 import org.joda.time.format.DateTimeFormat

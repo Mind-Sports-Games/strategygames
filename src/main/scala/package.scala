@@ -1,7 +1,6 @@
 import ornicar.scalalib
-import strategygames.{ Color, GameLib }
 
-package object strategy extends scalalib.Common with scalalib.OrnicarOption with scalalib.OrnicarBoolean {
+package object strategygames extends scalalib.Common with scalalib.OrnicarOption with scalalib.OrnicarBoolean {
   def White(lib: GameLib) = lib match {
     case GameLib.Draughts() => Color.Draughts(draughts.White)
     case GameLib.Chess()    => Color.Chess(chess.White)

@@ -1,4 +1,5 @@
 package chess
+import strategygames.{ Clock, MoveMetrics }
 
 import cats.data.Validated
 

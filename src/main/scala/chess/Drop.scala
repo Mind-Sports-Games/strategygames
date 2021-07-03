@@ -1,4 +1,5 @@
 package chess
+import strategygames.MoveMetrics
 
 import cats.syntax.option.none
 

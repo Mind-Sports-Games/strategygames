@@ -1,4 +1,5 @@
 package draughts
+import strategygames.{ Clock, MoveMetrics }
 
 import cats.data.Validated
 import cats.syntax.option.none

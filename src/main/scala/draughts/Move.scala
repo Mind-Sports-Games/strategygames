@@ -1,4 +1,5 @@
 package draughts
+import strategygames.MoveMetrics
 
 import cats.implicits._
 

@@ -1,6 +1,4 @@
-package chess
-
-import strategygames.Centis
+package strategygames
 
 case class MoveMetrics(
     clientLag: Option[Centis] = None,

@@ -1,4 +1,5 @@
 package chess
+import strategygames.Clock
 
 sealed abstract class Speed(
     val id: Int,

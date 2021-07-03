@@ -1,5 +1,6 @@
 package chess
 package format.pgn
+import strategygames.Clock
 
 import org.joda.time.DateTimeZone
 import org.joda.time.format.DateTimeFormat

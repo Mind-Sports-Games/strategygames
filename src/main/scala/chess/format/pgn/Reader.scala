@@ -1,5 +1,6 @@
 package chess
 package format.pgn
+import strategygames.{ Clock, GameLib }
 
 import cats.data.Validated
 
@@ -57,7 +58,7 @@ object Reader {
     )
     g.copy(
       startedAtTurn = g.turns,
-      clock = tags.clockConfig map Clock.apply
+      clock = tags.clockConfig map (config => Clock.apply(GameLib.Chess(), config))
     )
   }
 }

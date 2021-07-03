@@ -1,5 +1,6 @@
 package draughts
 package format.pdn
+import strategygames.{ Clock, GameLib }
 
 import cats.data.Validated
 import cats.implicits._
@@ -93,7 +94,7 @@ object Reader {
     )
     g.copy(
       startedAtTurn = g.turns,
-      clock = tags.clockConfig map Clock.apply
+      clock = tags.clockConfig map (config => Clock.apply(GameLib.Draughts(), config))
     )
   }
 }

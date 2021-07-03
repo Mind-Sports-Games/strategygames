@@ -1,4 +1,5 @@
 package draughts
+import strategygames.Clock
 
 sealed abstract class Speed(
     val id: Int,
