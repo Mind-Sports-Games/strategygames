@@ -1,5 +1,7 @@
 package draughts
 
+import strategygames.Centis
+
 final case class LagTracker(
     quotaGain: Centis,
     quota: Centis,

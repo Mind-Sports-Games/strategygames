@@ -1,4 +1,5 @@
 package draughts
+import strategygames.Centis
 
 import java.text.DecimalFormat
 import cats.syntax.option.none

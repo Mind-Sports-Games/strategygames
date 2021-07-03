@@ -1,4 +1,5 @@
 package draughts
+import strategygames.Centis
 
 case class MoveMetrics(
     clientLag: Option[Centis] = None,

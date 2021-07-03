@@ -4,6 +4,7 @@ import cats.syntax.option.none
 import java.text.DecimalFormat
 
 import chess.Clock.Config
+import strategygames.Centis
 
 // All unspecified durations are expressed in seconds
 case class Clock(

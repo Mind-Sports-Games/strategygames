@@ -1,4 +1,5 @@
 package chess
+import strategygames.Centis
 
 final case class LagTracker(
     quotaGain: Centis,

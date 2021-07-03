@@ -1,7 +1,8 @@
-package chess
+package strategygames
 
 import scala.concurrent.duration._
 
+import cats.implicits._
 import ornicar.scalalib.Zero
 import cats.Monoid
 
@@ -21,7 +22,7 @@ final case class Centis(centis: Int) extends AnyVal with Ordered[Centis] {
   def *(scalar: Int)     = Centis(scalar * centis)
   def *~(scalar: Float)  = Centis(scalar * centis)
   def *~(scalar: Double) = Centis(scalar * centis)
-  def /(div: Int)        = div != 0 option Centis(centis / div)
+  def /(div: Int)        = if(div != 0) Centis(centis / div).some else none
   def unary_-            = Centis(-centis)
 
   def avg(other: Centis) = Centis((centis + other.centis) >> 1)

@@ -1,4 +1,5 @@
 package chess
+import strategygames.Centis
 
 case class Timestamp(value: Long) extends AnyVal with Ordered[Timestamp] {
 
