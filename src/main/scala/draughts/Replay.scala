@@ -78,7 +78,7 @@ object Replay {
         ambs: List[(San, String)]
     ): (List[(DraughtsGame, Uci.WithSan)], Option[ErrorMessage]) = {
       var newAmb = none[(San, String)]
-      val res = moves match {
+      val res: (List[(DraughtsGame, Uci.WithSan)], Option[ErrorMessage]) = moves match {
         case (san, sanStr) :: rest =>
           san(
             g.situation,
@@ -86,7 +86,7 @@ object Replay {
             if (ambs.isEmpty) None
             else ambs.collect({ case (ambSan, ambUci) if ambSan == san => ambUci }).some
           ).fold(
-            err => (Nil, err.head.some),
+            err => (Nil, err.some),
             move => {
               val newGame = g(move)
               val uci     = move.toUci
@@ -110,7 +110,7 @@ object Replay {
     Parser
       .moves(moveStrs, variant)
       .fold(
-        err => List.empty[(DraughtsGame, Uci.WithSan)] -> err.head.some,
+        err => List.empty[(DraughtsGame, Uci.WithSan)] -> err.some,
         moves => mk(init, moves.value zip moveStrs, Nil)
       ) match {
       case (games, err) => (init, games, err)
@@ -129,7 +129,7 @@ object Replay {
         ambs: List[(San, String)]
     ): (List[String], Option[ErrorMessage]) = {
       var newAmb = none[(San, String)]
-      val res = moves match {
+      val res: (List[String], Option[ErrorMessage]) = moves match {
         case san :: rest =>
           san(
             sit,
@@ -137,7 +137,7 @@ object Replay {
             if (ambs.isEmpty) None
             else ambs.collect({ case (ambSan, ambUci) if ambSan == san => ambUci }).some
           ).fold(
-            err => (Nil, err.head.some),
+            err => (Nil, err.some),
             move => {
               val after = Situation.withColorAfter(move.afterWithLastMove(true), sit.color)
               val ambiguities =
@@ -183,7 +183,7 @@ object Replay {
         ambs: List[(String, String)]
     ): (List[String], Option[ErrorMessage]) = {
       var newAmb = none[(String, String)]
-      val res = moves match {
+      val res: (List[String], Option[ErrorMessage]) = moves match {
         case uci :: rest =>
           Uci.Move(uci) match {
             case Some(uciMove) =>
@@ -199,7 +199,7 @@ object Replay {
                   err => {
                     // TODO: Warning?
                     //logger.warn(s"exportScanMoves($iteratedCapts) $debugId: $uci -> ${uciMove.orig}${if (uciMove.capture.fold(false)(_.nonEmpty)) "x" else "-"}${uciMove.dest} - error ${err.head}")
-                    (Nil, err.head.some)
+                    (Nil, err.some)
                   },
                   move => {
                     val newGame  = g(move, true)
