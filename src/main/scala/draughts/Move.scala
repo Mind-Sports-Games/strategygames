@@ -29,12 +29,14 @@ case class Move(
       h1.copy(lastMove = Some(toUci))
     }
 
-    val finalized = board.variant.finalizeBoard(board, toUci, taken flatMap before.apply, situationBefore, finalSquare)
+    val finalized =
+      board.variant.finalizeBoard(board, toUci, taken flatMap before.apply, situationBefore, finalSquare)
     if (finalized.ghosts != 0) finalized
-    else finalized updateHistory { h =>
-      // Update position hashes last, only after updating the board, and when capture is complete
-      h.copy(positionHashes = board.variant.updatePositionHashes(board, this, h.positionHashes))
-    }
+    else
+      finalized updateHistory { h =>
+        // Update position hashes last, only after updating the board, and when capture is complete
+        h.copy(positionHashes = board.variant.updatePositionHashes(board, this, h.positionHashes))
+      }
   }
 
   def applyVariantEffect: Move = before.variant addVariantEffect this
@@ -68,7 +70,8 @@ case class Move(
   def withMetrics(m: MoveMetrics) = copy(metrics = m)
 
   def toUci = Uci.Move(orig, dest, promotion, capture)
-  def toShortUci = Uci.Move(orig, dest, promotion, if (capture.isDefined) capture.get.takeRight(1).some else None)
+  def toShortUci =
+    Uci.Move(orig, dest, promotion, if (capture.isDefined) capture.get.takeRight(1).some else None)
 
   def toSan = s"${orig.shortKey}${if (capture.nonEmpty) "x" else "-"}${dest.shortKey}"
   def toFullSan = {
@@ -77,7 +80,8 @@ case class Move(
   }
 
   def toScanMove =
-    if (taken.isDefined) (List(orig.shortKey, dest.shortKey) ::: taken.get.reverse.map(_.shortKey)) mkString "x"
+    if (taken.isDefined)
+      (List(orig.shortKey, dest.shortKey) ::: taken.get.reverse.map(_.shortKey)) mkString "x"
     else s"${orig.shortKey}-${dest.shortKey}"
 
   override def toString = s"$piece ${toUci.uci}"

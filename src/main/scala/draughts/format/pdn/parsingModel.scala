@@ -20,7 +20,11 @@ object Sans {
 // Standard Algebraic Notation
 sealed trait San {
 
-  def apply(situation: Situation, iteratedCapts: Boolean = false, forbiddenUci: Option[List[String]] = None): Validated[String, draughts.Move]
+  def apply(
+      situation: Situation,
+      iteratedCapts: Boolean = false,
+      forbiddenUci: Option[List[String]] = None
+  ): Validated[String, draughts.Move]
 
   def metas: Metas
 
@@ -46,9 +50,14 @@ case class Std(
   def apply(situation: Situation, iteratedCapts: Boolean = false, forbiddenUci: Option[List[String]] = None) =
     move(situation, iteratedCapts, forbiddenUci)
 
-  def move(situation: Situation, iteratedCapts: Boolean = false, forbiddenUci: Option[List[String]] = None, captures: Option[List[Pos]] = None): Validated[String, draughts.Move] = {
-    val src = fields.head
-    val dest = fields.last
+  def move(
+      situation: Situation,
+      iteratedCapts: Boolean = false,
+      forbiddenUci: Option[List[String]] = None,
+      captures: Option[List[Pos]] = None
+  ): Validated[String, draughts.Move] = {
+    val src         = fields.head
+    val dest        = fields.last
     val capturePath = if (capture) fields.tail.reverse else Nil
     situation.board.pieces.foldLeft(none[draughts.Move]) {
       case (None, (pos, piece)) if piece.color == situation.color && pos == src =>
@@ -61,15 +70,15 @@ case class Std(
           case None if capture && iteratedCapts =>
             a.capturesFinal.find { m =>
               m.dest == dest &&
-                captures.fold(true)(m.capture.contains) &&
-                !forbiddenUci.fold(false)(_.contains(m.toUci.uci)) &&
-                (capturePath.length <= 1 || m.capture.contains(capturePath))
+              captures.fold(true)(m.capture.contains) &&
+              !forbiddenUci.fold(false)(_.contains(m.toUci.uci)) &&
+              (capturePath.length <= 1 || m.capture.contains(capturePath))
             }
           case m @ _ => m
         }
       case (m, _) => m
     } match {
-      case None => invalid(s"No move found: $this\n$situation")
+      case None       => invalid(s"No move found: $this\n$situation")
       case Some(move) => valid(move)
     }
   }

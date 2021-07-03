@@ -28,18 +28,19 @@ object Uci {
       capture: Option[List[Pos]] = None
   ) extends Uci {
 
-    def keys = orig.key + dest.key
-    def uci = orig.key + capture.fold(dest.toString)(_.reverse.mkString)
+    def keys     = orig.key + dest.key
+    def uci      = orig.key + capture.fold(dest.toString)(_.reverse.mkString)
     def shortUci = orig.key + capture.fold(dest.toString)(_.last.toString)
 
     def keysPiotr = orig.piotrStr + dest.piotrStr
-    def piotr = keysPiotr + promotionString
+    def piotr     = keysPiotr + promotionString
 
     def promotionString = promotion.fold("")(_.forsyth.toString)
 
     def origDest = orig -> dest
 
-    def apply(situation: Situation, finalSquare: Boolean = false) = situation.move(orig, dest, promotion, finalSquare, none, capture)
+    def apply(situation: Situation, finalSquare: Boolean = false) =
+      situation.move(orig, dest, promotion, finalSquare, none, capture)
 
     def toSan = s"${orig.shortKey}${if (capture.nonEmpty) "x" else "-"}${dest.shortKey}"
     def toFullSan = {
@@ -84,10 +85,13 @@ object Uci {
 
   case class WithSan(uci: Uci, san: String)
 
-  def apply(move: draughts.Move, withCaptures: Boolean) = Uci.Move(move.orig, move.dest, move.promotion, withCaptures ?? move.capture)
+  def apply(move: draughts.Move, withCaptures: Boolean) =
+    Uci.Move(move.orig, move.dest, move.promotion, withCaptures ?? move.capture)
 
-  def combine(uci1: Uci, uci2: Uci) = apply(uci1.uci + uci2.uci.drop(2)).getOrElse(Uci.Move(uci1.origDest._1, uci2.origDest._2))
-  def combineSan(san1: String, san2: String) = san1.substring(0, san1.indexOf('x')) + san2.substring(san2.indexOf('x'))
+  def combine(uci1: Uci, uci2: Uci) =
+    apply(uci1.uci + uci2.uci.drop(2)).getOrElse(Uci.Move(uci1.origDest._1, uci2.origDest._2))
+  def combineSan(san1: String, san2: String) =
+    san1.substring(0, san1.indexOf('x')) + san2.substring(san2.indexOf('x'))
 
   def apply(move: String): Option[Uci] = Uci.Move(move)
 

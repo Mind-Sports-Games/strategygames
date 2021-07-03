@@ -2,7 +2,7 @@ package draughts
 
 sealed trait Role {
   val forsyth: Char
-  lazy val pdn: Char = forsyth
+  lazy val pdn: Char    = forsyth
   lazy val name: String = toString.toLowerCase
 }
 
@@ -26,14 +26,14 @@ case object GhostKing extends Role {
 
 object Role {
 
-  val all: List[Role] = List(King, Man)
+  val all: List[Role]                     = List(King, Man)
   val allPromotable: List[PromotableRole] = List(King)
 
-  val allByForsyth: Map[Char, Role] = all.map(r => (r.forsyth, r)).toMap
-  val allByPdn: Map[Char, Role] = all.map(r => (r.pdn, r)).toMap
-  val allByName: Map[String, Role] = all.map(r => (r.name, r))toMap
-  val allPromotableByName: Map[String, PromotableRole] = allPromotable.map(r => (r.toString, r))toMap
-  val allPromotableByForsyth: Map[Char, PromotableRole] = allPromotable.map(r => (r.forsyth, r))toMap
+  val allByForsyth: Map[Char, Role]                     = all.map(r => (r.forsyth, r)).toMap
+  val allByPdn: Map[Char, Role]                         = all.map(r => (r.pdn, r)).toMap
+  val allByName: Map[String, Role]                      = all.map(r => (r.name, r)) toMap
+  val allPromotableByName: Map[String, PromotableRole]  = allPromotable.map(r => (r.toString, r)) toMap
+  val allPromotableByForsyth: Map[Char, PromotableRole] = allPromotable.map(r => (r.forsyth, r)) toMap
 
   def forsyth(c: Char): Option[Role] = allByForsyth get c
 
@@ -47,9 +47,9 @@ object Role {
     name flatMap promotable
 
   def valueOf(r: Role): Option[Int] = r match {
-    case Man => Some(1)
+    case Man  => Some(1)
     case King => Some(2)
-    case _ => Some(0)
+    case _    => Some(0)
   }
 
 }

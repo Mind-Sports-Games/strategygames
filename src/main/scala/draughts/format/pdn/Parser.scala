@@ -20,23 +20,28 @@ object Parser {
   )
 
   def full(pdn: String): Validated[String, ParsedPdn] = try {
-    val preprocessed = pdn.linesIterator.map(_.trim).filter {
-      _.headOption != Some('%')
-    }.mkString("\n")
-      .replace("[pgn]", "").replace("[pdn]", "")
-      .replace("[/pgn]", "").replace("[/pdn]", "")
+    val preprocessed = pdn.linesIterator
+      .map(_.trim)
+      .filter {
+        _.headOption != Some('%')
+      }
+      .mkString("\n")
+      .replace("[pgn]", "")
+      .replace("[pdn]", "")
+      .replace("[/pgn]", "")
+      .replace("[/pdn]", "")
       .replace("‑", "-")
       .replace("–", "-")
     for {
       splitted <- splitTagAndMoves(preprocessed)
-      tagStr = splitted._1
+      tagStr  = splitted._1
       moveStr = splitted._2
-      preTags <- TagParser(tagStr)
+      preTags     <- TagParser(tagStr)
       parsedMoves <- MovesParser(moveStr)
-      init = parsedMoves._1
-      strMoves = parsedMoves._2
+      init         = parsedMoves._1
+      strMoves     = parsedMoves._2
       resultOption = parsedMoves._3
-      tags = resultOption.filterNot(_ => preTags.exists(_.Result)).fold(preTags)(t => preTags + t)
+      tags         = resultOption.filterNot(_ => preTags.exists(_.Result)).fold(preTags)(t => preTags + t)
       sans <- objMoves(strMoves, tags.variant | Variant.default)
     } yield ParsedPdn(init, tags, sans)
   } catch {
@@ -54,13 +59,15 @@ object Parser {
     variant
   )
   def objMoves(strMoves: List[StrMove], variant: Variant): Validated[String, Sans] =
-    strMoves.map {
-      case StrMove(san, glyphs, comments, variations) => (
+    strMoves.map { case StrMove(san, glyphs, comments, variations) =>
+      (
         MoveParser(san, variant) map { m =>
           m withComments comments withVariations {
-            variations.map { v =>
-              objMoves(v, variant).getOrElse(Sans.empty)
-            }.filter(_.value.nonEmpty)
+            variations
+              .map { v =>
+                objMoves(v, variant).getOrElse(Sans.empty)
+              }
+              .filter(_.value.nonEmpty)
           } mergeGlyphs glyphs
         }
       ): Validated[String, San]
@@ -87,12 +94,12 @@ object Parser {
       }
 
     def strMoves: Parser[(InitialPosition, List[StrMove], Option[String])] = as("moves") {
-      (commentary*) ~ (strMove*) ~ (result?) ~ (commentary*) ^^ {
+      (commentary *) ~ (strMove *) ~ (result ?) ~ (commentary *) ^^ {
         case coms ~ sans ~ res ~ _ => {
-          val init = InitialPosition(cleanComments(coms))
+          val init     = InitialPosition(cleanComments(coms))
           val drawMove = res.isEmpty && sans.lastOption.exists(_.san == "1-1")
-          val sans2 = if (drawMove) sans.dropRight(1) else sans
-          val res2 = if (drawMove) "1-1".some else res
+          val sans2    = if (drawMove) sans.dropRight(1) else sans
+          val res2     = if (drawMove) "1-1".some else res
           (init, sans2, res2)
         }
       }
@@ -102,18 +109,17 @@ object Parser {
     val moveRegex = s"""($fieldR)[\\-x:]($fieldR)([x:]($fieldR))*$suffR""".r
 
     def strMove: Parser[StrMove] = as("move") {
-      ((number | commentary)*) ~>
+      ((number | commentary) *) ~>
         (moveRegex ~ nagGlyphs ~ rep(commentary) ~ nagGlyphs ~ rep(variation)) <~
-        (moveExtras*) ^^ {
-          case san ~ glyphs ~ comments ~ glyphs2 ~ variations =>
-            StrMove(san.trim(), glyphs merge glyphs2, cleanComments(comments), variations)
+        (moveExtras *) ^^ { case san ~ glyphs ~ comments ~ glyphs2 ~ variations =>
+          StrMove(san.trim(), glyphs merge glyphs2, cleanComments(comments), variations)
         }
     }
 
     def number: Parser[String] = """[1-9]\d*\.+\s*""".r
 
     def moveExtras: Parser[Unit] = as("moveExtras") {
-      (commentary).^^^(())
+      commentary.^^^(())
     }
 
     def nagGlyphs: Parser[Glyphs] = as("nagGlyphs") {
@@ -151,9 +157,9 @@ object Parser {
 
   object MoveParser extends RegexParsers with Logging {
 
-    val fieldR = """50|[1-4][0-9]|0?[1-9]|[a-h][1-8]"""
-    val suffR = """[\?!□⨀]{0,2}"""
-    private val SimpleMoveR = s"""^($fieldR)(-|x|:)($fieldR)($suffR)$$""".r
+    val fieldR                 = """50|[1-4][0-9]|0?[1-9]|[a-h][1-8]"""
+    val suffR                  = """[\?!□⨀]{0,2}"""
+    private val SimpleMoveR    = s"""^($fieldR)(-|x|:)($fieldR)($suffR)$$""".r
     private val RepeatCaptureR = s"""^($fieldR)[x:]((?:$fieldR)(?:[x:](?:$fieldR))+)($suffR)$$""".r
 
     def apply(str: String, variant: Variant): Validated[String, San] = str match {
@@ -170,20 +176,23 @@ object Parser {
       else {
         val parsedGlyphs =
           if (suff.isEmpty) Glyphs.empty
-          else parseAll(glyphs, suff) match {
-            case Success(glphs, _) => glphs
-            case _ => Glyphs.empty
-          }
-        valid(Std(
-          fields = posList,
-          capture = capture,
-          metas = Metas(
-            checkmate = false,
-            comments = Nil,
-            glyphs = parsedGlyphs,
-            variations = Nil
+          else
+            parseAll(glyphs, suff) match {
+              case Success(glphs, _) => glphs
+              case _                 => Glyphs.empty
+            }
+        valid(
+          Std(
+            fields = posList,
+            capture = capture,
+            metas = Metas(
+              checkmate = false,
+              comments = Nil,
+              glyphs = parsedGlyphs,
+              variations = Nil
+            )
           )
-        ))
+        )
       }
     }
 
@@ -201,22 +210,22 @@ object Parser {
     def exists(c: String): Parser[Boolean] = c ^^^ true | success(false)
 
     def mapParser[A, B](pairs: Iterable[(A, B)], name: String): Parser[B] =
-      pairs.foldLeft(failure(name + " not found"): Parser[B]) {
-        case (acc, (a, b)) => a.toString ^^^ b | acc
+      pairs.foldLeft(failure(name + " not found"): Parser[B]) { case (acc, (a, b)) =>
+        a.toString ^^^ b | acc
       }
   }
 
   object TagParser extends RegexParsers with Logging {
 
     def apply(pdn: String): Validated[String, Tags] = parseAll(all, pdn) match {
-      case f: Failure => invalid("Cannot parse tags: %s\n%s".format(f.toString, pdn))
+      case f: Failure       => invalid("Cannot parse tags: %s\n%s".format(f.toString, pdn))
       case Success(tags, _) => valid(Tags(tags))
-      case err => invalid("Cannot parse tags: %s\n%s".format(err.toString, pdn))
+      case err              => invalid("Cannot parse tags: %s\n%s".format(err.toString, pdn))
     }
 
     def fromFullPdn(pdn: String): Validated[String, Tags] =
-      splitTagAndMoves(pdn) flatMap {
-        case (tags, _) => apply(tags)
+      splitTagAndMoves(pdn) flatMap { case (tags, _) =>
+        apply(tags)
       }
 
     def all: Parser[List[Tag]] = as("all") {
@@ -226,8 +235,8 @@ object Parser {
     def tags: Parser[List[Tag]] = rep(tag)
 
     def tag: Parser[Tag] = as("tag") {
-      tagName ~ tagValue ^^ {
-        case name ~ value => Tag(name, value)
+      tagName ~ tagValue ^^ { case name ~ value =>
+        Tag(name, value)
       }
     }
 
@@ -247,11 +256,15 @@ object Parser {
     """\[(FILENAME\s+")""".r.replaceAllIn(pdn, m => "\n[" + m.group(1))
 
   private def splitTagAndMoves(pdn: String): Validated[String, (String, String)] =
-    ensureTagsNewlineReverse(ensureTagsNewline(pdn)).linesIterator.toList.map(_.trim).filter(_.nonEmpty).to(List) span { line =>
+    ensureTagsNewlineReverse(ensureTagsNewline(pdn)).linesIterator.toList
+      .map(_.trim)
+      .filter(_.nonEmpty)
+      .to(List) span { line =>
       line lift 0 contains '['
     } match {
       case (tagLines, moveLines) => //Drop any tag in last line (accomodate [FILENAME)
-        if (moveLines.lastOption.fold(false)(line => line.nonEmpty && line.head == '[' && line.last == ']')) valid(tagLines.mkString("\n") -> moveLines.dropRight(1).mkString("\n"))
+        if (moveLines.lastOption.fold(false)(line => line.nonEmpty && line.head == '[' && line.last == ']'))
+          valid(tagLines.mkString("\n")    -> moveLines.dropRight(1).mkString("\n"))
         else valid(tagLines.mkString("\n") -> moveLines.mkString("\n"))
     }
 

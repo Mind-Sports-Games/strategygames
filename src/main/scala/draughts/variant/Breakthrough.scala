@@ -3,24 +3,25 @@ package variant
 
 import cats.implicits._
 
-case object Breakthrough extends Variant(
-  id = 9,
-  gameType = 96,
-  key = "breakthrough",
-  name = "Breakthrough",
-  shortName = "BT",
-  title = "The first player who makes a king wins.",
-  standardInitialPosition = true,
-  boardSize = Board.D100
-) {
+case object Breakthrough
+    extends Variant(
+      id = 9,
+      gameType = 96,
+      key = "breakthrough",
+      name = "Breakthrough",
+      shortName = "BT",
+      title = "The first player who makes a king wins.",
+      standardInitialPosition = true,
+      boardSize = Board.D100
+    ) {
 
-  def pieces = Standard.pieces
-  def initialFen = Standard.initialFen
+  def pieces           = Standard.pieces
+  def initialFen       = Standard.initialFen
   def startingPosition = Standard.startingPosition
 
-  def captureDirs = Standard.captureDirs
+  def captureDirs   = Standard.captureDirs
   def moveDirsColor = Standard.moveDirsColor
-  def moveDirsAll = Standard.moveDirsAll
+  def moveDirsAll   = Standard.moveDirsAll
 
   // Win on promotion
   override def specialEnd(situation: Situation) =
@@ -34,9 +35,8 @@ case object Breakthrough extends Variant(
 
   def maxDrawingMoves(board: Board): Option[Int] = None
 
-  /**
-   * No drawing rules
-   */
+  /** No drawing rules
+    */
   def updatePositionHashes(board: Board, move: Move, hash: draughts.PositionHash): PositionHash =
     Hash(Situation(board, !move.piece.color))
 

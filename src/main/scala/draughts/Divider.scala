@@ -93,17 +93,16 @@ object Divider {
 
   private def mixedness(board: Board): Int = {
     val boardValues = board.pieces.mapValues(_ is Color.white)
-    mixednessRegions.foldLeft(0) {
-      case (mix, region) =>
-        var white = 0
-        var black = 0
-        region foreach { p =>
-          boardValues get p foreach { v =>
-            if (v) white = white + 1
-            else black = black + 1
-          }
+    mixednessRegions.foldLeft(0) { case (mix, region) =>
+      var white = 0
+      var black = 0
+      region foreach { p =>
+        boardValues get p foreach { v =>
+          if (v) white = white + 1
+          else black = black + 1
         }
-        mix + score(white, black, board.posAt(region.head).y)
+      }
+      mix + score(white, black, board.posAt(region.head).y)
     }
   }
 }

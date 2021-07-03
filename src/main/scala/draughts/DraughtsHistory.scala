@@ -3,11 +3,15 @@ package draughts
 import cats.syntax.option.none
 
 import format.Uci
-import variant.{ Variant, Standard }
-
+import variant.{ Standard, Variant }
 
 // Consecutive king moves by the respective side.
-case class KingMoves(white: Int = 0, black: Int = 0, whiteKing: Option[Pos] = None, blackKing: Option[Pos] = None) {
+case class KingMoves(
+    white: Int = 0,
+    black: Int = 0,
+    whiteKing: Option[Pos] = None,
+    blackKing: Option[Pos] = None
+) {
 
   def add(color: Color, pos: Option[Pos]) = copy(
     white = white + color.fold(1, 0),
@@ -25,7 +29,7 @@ case class KingMoves(white: Int = 0, black: Int = 0, whiteKing: Option[Pos] = No
 
   def nonEmpty = white > 0 || black > 0
 
-  def apply(color: Color) = color.fold(white, black)
+  def apply(color: Color)   = color.fold(white, black)
   def kingPos(color: Color) = color.fold(whiteKing, blackKing)
 }
 
@@ -36,29 +40,28 @@ case class DraughtsHistory(
     variant: Variant = Standard
 ) {
 
-  /**
-   * Halfmove clock: This is the number of halfmoves
-   * since the last non-king move or capture.
-   * This is used to determine if a draw
-   * can be claimed under the twentyfive-move rule.
-   */
+  /** Halfmove clock: This is the number of halfmoves
+    * since the last non-king move or capture.
+    * This is used to determine if a draw
+    * can be claimed under the twentyfive-move rule.
+    */
   def halfMoveClock = math.max(0, (positionHashes.length / Hash.size) - 1)
 
   // generates random positionHashes to satisfy the half move clock
   def setHalfMoveClock(v: Int) =
     copy(positionHashes = DraughtsHistory.spoofHashes(v + 1))
 
-  /**
-   * Checks for threefold repetition, does not apply to frisian draughts
-   */
+  /** Checks for threefold repetition, does not apply to frisian draughts
+    */
   def threefoldRepetition: Boolean = !variant.frisianVariant && halfMoveClock >= 8 && {
     // compare only hashes for positions with the same side to move
     val positions = (positionHashes grouped Hash.size).sliding(1, 2).flatten.toList
     positions.headOption match {
-      case Some(Array(x, y, z)) => (positions count {
-        case Array(x2, y2, z2) => x == x2 && y == y2 && z == z2
-        case _ => false
-      }) >= 3
+      case Some(Array(x, y, z)) =>
+        (positions count {
+          case Array(x2, y2, z2) => x == x2 && y == y2 && z == z2
+          case _                 => false
+        }) >= 3
       case _ => false
     }
   }
@@ -86,8 +89,8 @@ case class DraughtsHistory(
 object DraughtsHistory {
 
   def make(
-    lastMove: Option[String], // 0510 etc
-    variant: Variant
+      lastMove: Option[String], // 0510 etc
+      variant: Variant
   ): DraughtsHistory = DraughtsHistory(
     lastMove = lastMove flatMap Uci.apply,
     positionHashes = Array(),
@@ -95,8 +98,8 @@ object DraughtsHistory {
   )
 
   private def spoofHashes(n: Int): PositionHash = {
-    (1 to n).toArray.flatMap {
-      i => Array((i >> 16).toByte, (i >> 8).toByte, i.toByte)
+    (1 to n).toArray.flatMap { i =>
+      Array((i >> 16).toByte, (i >> 8).toByte, i.toByte)
     }
   }
 }

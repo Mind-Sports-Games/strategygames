@@ -9,3 +9,4 @@ case class MoveMetrics(
   def reportedLag(elapsed: Centis) =
     clientMoveTime.fold(clientLag)(mt => Some(elapsed - mt))
 }
+

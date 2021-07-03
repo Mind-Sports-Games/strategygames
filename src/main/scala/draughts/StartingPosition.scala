@@ -1,6 +1,6 @@
 package draughts
 
-import variant.{ Variant, Standard }
+import variant.{ Standard, Variant }
 
 case class StartingPosition(
     code: String,
@@ -12,10 +12,10 @@ case class StartingPosition(
 ) {
 
   val shortName = code
-  val fullName = name.fold(code) { n => s"$code: $n" }
+  val fullName  = name.fold(code) { n => s"$code: $n" }
 
-  def url = wikiPath.map(u => s"https://en.wikipedia.org/wiki/$u")
-  def initialStandard = initialVariant(Standard)
+  def url                        = wikiPath.map(u => s"https://en.wikipedia.org/wiki/$u")
+  def initialStandard            = initialVariant(Standard)
   def initialVariant(v: Variant) = fen == v.initialFen || fen == v.shortInitialFen
 }
 

@@ -20,7 +20,10 @@ object FullOpeningDB {
   lazy val byFen: collection.Map[String, FullOpening] =
     all.map { o =>
       o.fen -> o
-    }(scala.collection.breakOut[Vector[_], (String, FullOpening), collection.mutable.AnyRefMap[String, FullOpening]])
+    }(
+      scala.collection
+        .breakOut[Vector[_], (String, FullOpening), collection.mutable.AnyRefMap[String, FullOpening]]
+    )
 
   def findByFen(fen: String) = byFen get fen.split(':').take(3).mkString(":")
 
@@ -39,9 +42,10 @@ object FullOpeningDB {
 
   def searchInFens(fens: List[FEN]): Option[FullOpening] =
     fens.foldRight(none[FullOpening]) {
-      case (fen, None) => byFen get {
-        fen.value.split(':').take(3) mkString ":"
-      }
+      case (fen, None) =>
+        byFen get {
+          fen.value.split(':').take(3) mkString ":"
+        }
       case (_, found) => found
     }
 }

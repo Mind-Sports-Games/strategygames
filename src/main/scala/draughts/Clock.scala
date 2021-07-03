@@ -33,7 +33,7 @@ case class Clock(
 
   def isRunning = timer.isDefined
 
-  def start = if (isRunning) this else copy(timer = Some(now))
+  def start   = if (isRunning) this else copy(timer = Some(now))
   def restart = copy(timer = timer.map(_ => now))
 
   def stop = timer.fold(this) { t =>
@@ -54,23 +54,24 @@ case class Clock(
   )
 
   def step(
-    metrics: MoveMetrics = MoveMetrics(),
-    gameActive: Boolean = true
+      metrics: MoveMetrics = MoveMetrics(),
+      gameActive: Boolean = true
   ) = (timer match {
-    case None => metrics.clientLag.fold(this) { l =>
-      updatePlayer(color) { _.recordLag(l) }
-    }
+    case None =>
+      metrics.clientLag.fold(this) { l =>
+        updatePlayer(color) { _.recordLag(l) }
+      }
     case Some(t) => {
       val elapsed = toNow(t)
-      val lag = ~metrics.reportedLag(elapsed) nonNeg
+      val lag     = ~metrics.reportedLag(elapsed) nonNeg
 
-      val player = players(color)
+      val player              = players(color)
       val (lagComp, lagTrack) = player.lag.onMove(lag)
 
       val moveTime = (elapsed - lagComp) nonNeg
 
       val clockActive = gameActive && moveTime < player.remaining
-      val inc = clockActive ?? player.increment
+      val inc         = clockActive ?? player.increment
 
       val newC = updatePlayer(color) {
         _.takeTime(moveTime - inc)
@@ -103,7 +104,7 @@ case class Clock(
   def goBerserk(c: Color) = updatePlayer(c) { _.copy(berserk = true) }
 
   def berserked(c: Color) = players(c).berserk
-  def lag(c: Color) = players(c).lag
+  def lag(c: Color)       = players(c).lag
 
   def lagCompAvg = players map { ~_.lag.compAvg } reduce (_ avg _)
 
@@ -111,12 +112,12 @@ case class Clock(
   def lagCompEstimate(c: Color) = players(c).lag.compEstimate
 
   def estimateTotalSeconds = config.estimateTotalSeconds
-  def estimateTotalTime = config.estimateTotalTime
-  def increment = config.increment
-  def incrementSeconds = config.incrementSeconds
-  def limit = config.limit
-  def limitInMinutes = config.limitInMinutes
-  def limitSeconds = config.limitSeconds
+  def estimateTotalTime    = config.estimateTotalTime
+  def increment            = config.increment
+  def incrementSeconds     = config.incrementSeconds
+  def limit                = config.limit
+  def limitInMinutes       = config.limitInMinutes
+  def limitSeconds         = config.limitSeconds
 }
 
 case class ClockPlayer(
@@ -182,7 +183,7 @@ object Clock {
       case 30 => "½"
       case 45 => "¾"
       case 90 => "1.5"
-      case _ => limitFormatter.format(limitSeconds / 60d)
+      case _  => limitFormatter.format(limitSeconds / 60d)
     }
 
     def show = toString
@@ -201,10 +202,11 @@ object Clock {
 
   // [TimeControl "600+2"] -> 10+2
   def readPdnConfig(str: String): Option[Config] = str.split('+') match {
-    case Array(initStr, incStr) => for {
-      init <- parseIntOption(initStr)
-      inc <- parseIntOption(incStr)
-    } yield Config(init, inc)
+    case Array(initStr, incStr) =>
+      for {
+        init <- parseIntOption(initStr)
+        inc  <- parseIntOption(incStr)
+      } yield Config(init, inc)
     case _ => none
   }
 

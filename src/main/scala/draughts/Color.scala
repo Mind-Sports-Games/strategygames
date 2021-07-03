@@ -11,7 +11,7 @@ sealed trait Color {
   val letter: Char
   val name: String
 
-  def man = this - Man
+  def man  = this - Man
   def king = this - King
 
   val white = this == Color.White
@@ -51,7 +51,7 @@ object Color {
     lazy val unary_! = Black
 
     val letter = 'W'
-    val name = "white"
+    val name   = "white"
 
     override val hashCode = 1
   }
@@ -61,7 +61,7 @@ object Color {
     val unary_! = White
 
     val letter = 'B'
-    val name = "black"
+    val name   = "black"
 
     override val hashCode = 2
   }
@@ -74,7 +74,6 @@ object Color {
     if (n == "white") Option(White)
     else if (n == "black") Option(Black)
     else None
-
 
   def apply(b: Boolean): Color = if (b) White else Black
 
@@ -100,7 +99,7 @@ object Color {
   def showResult(color: Option[Color], draughtsResult: Boolean) = color match {
     case Some(White) => if (draughtsResult) "2-0" else "1-0"
     case Some(Black) => if (draughtsResult) "0-2" else "0-1"
-    case None => if (draughtsResult) "1-1" else "1/2-1/2"
+    case None        => if (draughtsResult) "1-1" else "1/2-1/2"
   }
 
   def fromResult(result: String): Option[Color] = result match {
@@ -108,6 +107,6 @@ object Color {
     case "2-0" => Some(White)
     case "0-1" => Some(Black)
     case "0-2" => Some(Black)
-    case _ => None
+    case _     => None
   }
 }

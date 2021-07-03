@@ -8,16 +8,15 @@ case class Actor(
     board: Board
 ) {
 
-  lazy val noncaptures: List[Move] = noncaptureMoves()
-  lazy val captures: List[Move] = captureMoves(false)
+  lazy val noncaptures: List[Move]   = noncaptureMoves()
+  lazy val captures: List[Move]      = captureMoves(false)
   lazy val capturesFinal: List[Move] = captureMoves(true)
 
-  lazy val captureLength = captures.foldLeft(0) {
-    case (max, move) =>
-      move.capture.fold(max) { jumps =>
-        if (jumps.length > max) jumps.length
-        else max
-      }
+  lazy val captureLength = captures.foldLeft(0) { case (max, move) =>
+    move.capture.fold(max) { jumps =>
+      if (jumps.length > max) jumps.length
+      else max
+    }
   }
 
   def getCaptures(finalSquare: Boolean) = if (finalSquare) capturesFinal else captures
@@ -25,18 +24,21 @@ case class Actor(
   private def noncaptureMoves(): List[Move] = piece.role match {
     case Man => shortRangeMoves(board.variant.moveDirsColor(color))
     case King =>
-      if (board.variant.frisianVariant && board.history.kingMoves(color) >= 3 && board.history.kingMoves.kingPos(color).fold(true)(_ == pos)) Nil
+      if (
+        board.variant.frisianVariant && board.history
+          .kingMoves(color) >= 3 && board.history.kingMoves.kingPos(color).fold(true)(_ == pos)
+      ) Nil
       else longRangeMoves(board.variant.moveDirsAll)
     case _ => Nil
   }
 
   private def captureMoves(finalSquare: Boolean): List[Move] = piece.role match {
-    case Man => board.variant.shortRangeCaptures(this, finalSquare)
+    case Man  => board.variant.shortRangeCaptures(this, finalSquare)
     case King => board.variant.longRangeCaptures(this, finalSquare)
-    case _ => Nil
+    case _    => Nil
   }
 
-  def color: Color = piece.color
+  def color: Color          = piece.color
   def is(c: Color): Boolean = c == piece.color
   def is(p: Piece): Boolean = p == piece
 
@@ -46,7 +48,7 @@ case class Actor(
   private def shortRangeMoves(dirs: Directions): List[Move] =
     dirs flatMap { _._2(pos) } flatMap { to =>
       board.pieces.get(to) match {
-        case None => board.move(pos, to) map { move(to, _, None, None) } flatMap board.variant.maybePromote
+        case None    => board.move(pos, to) map { move(to, _, None, None) } flatMap board.variant.maybePromote
         case Some(_) => Nil
       }
     }
@@ -73,11 +75,11 @@ case class Actor(
   }
 
   def move(
-    dest: Pos,
-    after: Board,
-    /* Single capture or none */
-    capture: Option[Pos],
-    taken: Option[Pos]
+      dest: Pos,
+      after: Board,
+      /* Single capture or none */
+      capture: Option[Pos],
+      taken: Option[Pos]
   ) = Move(
     piece = piece,
     orig = pos,
@@ -89,15 +91,15 @@ case class Actor(
   )
 
   def move(
-    /** Destination square of the move */
-    dest: Pos,
-    /** Board after this move is made */
-    after: Board,
-    /** Chained captures (1x2x3) */
-    capture: List[Pos],
-    /** Pieces taken from the board */
-    taken: List[Pos],
-    promotion: Option[PromotableRole] = None
+      /** Destination square of the move */
+      dest: Pos,
+      /** Board after this move is made */
+      after: Board,
+      /** Chained captures (1x2x3) */
+      capture: List[Pos],
+      /** Pieces taken from the board */
+      taken: List[Pos],
+      promotion: Option[PromotableRole] = None
   ) = Move(
     piece = piece,
     orig = pos,

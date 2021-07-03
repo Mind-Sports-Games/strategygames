@@ -409,19 +409,23 @@ object Pos64 extends BoardPos {
 
   val posCache = new Array[Some[PosMotion]](32)
 
-  private lazy val alg2pos: Map[String, PosMotion] = posCache.map { p =>
-    val pos  = p.get
-    val algY = 9 - pos.y
-    val algX = pos.x * 2 - algY % 2
-    s"${(96 + algX).toChar}$algY" -> pos
-  }.to(Map)
+  private lazy val alg2pos: Map[String, PosMotion] = posCache
+    .map { p =>
+      val pos  = p.get
+      val algY = 9 - pos.y
+      val algX = pos.x * 2 - algY % 2
+      s"${(96 + algX).toChar}$algY" -> pos
+    }
+    .to(Map)
 
-  private lazy val field2alg: Map[Int, String] = posCache.map { p =>
-    val pos  = p.get
-    val algY = 9 - pos.y
-    val algX = pos.x * 2 - algY % 2
-    pos.fieldNumber -> s"${(96 + algX).toChar}$algY"
-  }.to(Map)
+  private lazy val field2alg: Map[Int, String] = posCache
+    .map { p =>
+      val pos  = p.get
+      val algY = 9 - pos.y
+      val algX = pos.x * 2 - algY % 2
+      pos.fieldNumber -> s"${(96 + algX).toChar}$algY"
+    }
+    .to(Map)
 
   def posAt(x: Int, y: Int): Option[PosMotion] =
     if (x < 1 || x > 4 || y < 1 || y > 8) None

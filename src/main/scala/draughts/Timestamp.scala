@@ -1,7 +1,6 @@
 package draughts
 
-case class Timestamp(value: Long)
-  extends AnyVal with Ordered[Timestamp] {
+case class Timestamp(value: Long) extends AnyVal with Ordered[Timestamp] {
 
   def -(o: Timestamp) = Centis.ofMillis(value - o.value)
 
@@ -19,3 +18,4 @@ trait Timestamper {
 private[draughts] object RealTimestamper extends Timestamper {
   def now = new Timestamp(System.currentTimeMillis)
 }
+

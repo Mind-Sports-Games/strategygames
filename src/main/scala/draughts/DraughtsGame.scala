@@ -9,51 +9,58 @@ case class DraughtsGame(
     situation: Situation,
     pdnMoves: Vector[String] = Vector.empty[String],
     clock: Option[Clock] = None,
-    /**turns means plies here*/
+    /** turns means plies here */
     turns: Int = 0,
     startedAtTurn: Int = 0
 ) {
 
   def apply(
-    orig: Pos,
-    dest: Pos,
-    promotion: Option[PromotableRole] = None,
-    _metrics: MoveMetrics = MoveMetrics(),
-    finalSquare: Boolean = false,
-    captures: Option[List[Pos]] = None,
-    partialCaptures: Boolean = false
+      orig: Pos,
+      dest: Pos,
+      promotion: Option[PromotableRole] = None,
+      _metrics: MoveMetrics = MoveMetrics(),
+      finalSquare: Boolean = false,
+      captures: Option[List[Pos]] = None,
+      partialCaptures: Boolean = false
   ): Validated[String, (DraughtsGame, Move)] =
     situation.move(orig, dest, promotion, finalSquare, none, captures, partialCaptures).map { fullMove =>
-      val gameWithMove = if (partialCaptures && finalSquare && fullMove.dest != dest && captures.exists(_.size > 1)) {
-        val steps = captures.get.reverse
-        val first = situation.move(
-          from = orig,
-          to = steps.head
-        ).map(m => apply(m) -> m).toOption.map {
-          case (g, m) => g -> m.copy(
-            capture = m.capture.flatMap(_.lastOption).map(List(_)),
-            taken = m.taken.flatMap(_.lastOption).map(List(_))
-          )
-        }
-        steps.tail.foldLeft(first) { (cur, step) =>
-          cur.flatMap {
-            case (curGame, curMove) =>
-              curGame.situation.move(
-                from = curMove.dest,
-                to = step
-              ).map(m => curGame.apply(m) -> m).toOption.map {
-                case (g, m) => g -> m.copy(
-                  capture = m.capture.flatMap(c => curMove.capture.map(c.last :: _)),
-                  taken = m.taken.flatMap(t => curMove.taken.map(t.last :: _))
+      val gameWithMove =
+        if (partialCaptures && finalSquare && fullMove.dest != dest && captures.exists(_.size > 1)) {
+          val steps = captures.get.reverse
+          val first = situation
+            .move(
+              from = orig,
+              to = steps.head
+            )
+            .map(m => apply(m) -> m)
+            .toOption
+            .map { case (g, m) =>
+              g -> m.copy(
+                capture = m.capture.flatMap(_.lastOption).map(List(_)),
+                taken = m.taken.flatMap(_.lastOption).map(List(_))
+              )
+            }
+          steps.tail.foldLeft(first) { (cur, step) =>
+            cur.flatMap { case (curGame, curMove) =>
+              curGame.situation
+                .move(
+                  from = curMove.dest,
+                  to = step
                 )
-              }
+                .map(m => curGame.apply(m) -> m)
+                .toOption
+                .map { case (g, m) =>
+                  g -> m.copy(
+                    capture = m.capture.flatMap(c => curMove.capture.map(c.last :: _)),
+                    taken = m.taken.flatMap(t => curMove.taken.map(t.last :: _))
+                  )
+                }
+            }
           }
-        }
-      } else none
-      gameWithMove map {
-        case (g, m) =>
-          val fullSan = s"${orig.shortKey}x${dest.shortKey}"
-          g.copy(pdnMoves = g.pdnMoves.dropRight(captures.get.size) :+ fullSan) -> m.copy(orig = orig)
+        } else none
+      gameWithMove map { case (g, m) =>
+        val fullSan = s"${orig.shortKey}x${dest.shortKey}"
+        g.copy(pdnMoves = g.pdnMoves.dropRight(captures.get.size) :+ fullSan) -> m.copy(orig = orig)
       } getOrElse apply(fullMove) -> fullMove
     }
 
@@ -97,34 +104,32 @@ case class DraughtsGame(
   def board = situation.board
 
   def isStandardInit = board.pieces == draughts.variant.Standard.pieces
-  def isInitial = board.pieces == board.variant.pieces
+  def isInitial      = board.pieces == board.variant.pieces
 
   def halfMoveClock: Int = board.history.halfMoveClock
 
-  /**
-   * Fullmove number: The number of the full move.
-   * It starts at 1, and is incremented after Black's move.
-   */
+  /** Fullmove number: The number of the full move.
+    * It starts at 1, and is incremented after Black's move.
+    */
   def fullMoveNumber: Int = 1 + turns / 2
 
   def moveString = s"${fullMoveNumber}${player.fold(".", "...")}"
 
   def pdnMovesConcat(fullCaptures: Boolean = false, dropGhosts: Boolean = false): Vector[String] = {
-    val movesConcat = pdnMoves.foldLeft(Vector.empty[String]) {
-      (moves, curMove) =>
-        if (moves.isEmpty) moves :+ curMove
+    val movesConcat = pdnMoves.foldLeft(Vector.empty[String]) { (moves, curMove) =>
+      if (moves.isEmpty) moves :+ curMove
+      else {
+        val curX = curMove.indexOf('x')
+        if (curX == -1) moves :+ curMove
         else {
-          val curX = curMove.indexOf('x')
-          if (curX == -1) moves :+ curMove
-          else {
-            val lastMove = moves.last
-            val lastX = lastMove.lastIndexOf('x')
-            if (lastX != -1 && lastMove.takeRight(lastMove.length - lastX - 1) == curMove.take(curX)) {
-              val prefix = if (fullCaptures) lastMove else lastMove.take(lastX)
-              moves.dropRight(1) :+ (prefix + curMove.takeRight(curMove.length - curX))
-            } else moves :+ curMove
-          }
+          val lastMove = moves.last
+          val lastX    = lastMove.lastIndexOf('x')
+          if (lastX != -1 && lastMove.takeRight(lastMove.length - lastX - 1) == curMove.take(curX)) {
+            val prefix = if (fullCaptures) lastMove else lastMove.take(lastX)
+            moves.dropRight(1) :+ (prefix + curMove.takeRight(curMove.length - curX))
+          } else moves :+ curMove
         }
+      }
     }
     if (dropGhosts && situation.ghosts != 0) movesConcat.dropRight(1)
     else movesConcat
@@ -150,17 +155,19 @@ object DraughtsGame {
 
   def apply(variantOption: Option[draughts.variant.Variant], fen: Option[String]): DraughtsGame = {
     val variant = variantOption | draughts.variant.Standard
-    val g = apply(variant)
-    fen.flatMap {
-      format.Forsyth.<<<@(variant, _)
-    }.fold(g) { parsed =>
-      g.copy(
-        situation = Situation(
-          board = parsed.situation.board withVariant g.board.variant,
-          color = parsed.situation.color
-        ),
-        turns = parsed.turns
-      )
-    }
+    val g       = apply(variant)
+    fen
+      .flatMap {
+        format.Forsyth.<<<@(variant, _)
+      }
+      .fold(g) { parsed =>
+        g.copy(
+          situation = Situation(
+            board = parsed.situation.board withVariant g.board.variant,
+            color = parsed.situation.color
+          ),
+          turns = parsed.turns
+        )
+      }
   }
 }

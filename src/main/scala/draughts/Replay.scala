@@ -4,7 +4,7 @@ import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
-import format.pdn.{ Reader, Parser, San, Std, Tag, Tags }
+import format.pdn.{ Parser, Reader, San, Std, Tag, Tags }
 import format.{ FEN, Forsyth, Uci }
 import variant.Variant
 
@@ -26,18 +26,20 @@ object Replay {
   def apply(game: DraughtsGame) = new Replay(game, Nil, game)
 
   def apply(
-    moveStrs: Traversable[String],
-    initialFen: Option[String],
-    variant: Variant,
-    finalSquare: Boolean
+      moveStrs: Traversable[String],
+      initialFen: Option[String],
+      variant: Variant,
+      finalSquare: Boolean
   ): Validated[String, Reader.Result] =
     moveStrs.some.filter(_.nonEmpty) toValid "[replay] pdn is empty" andThen { nonEmptyMoves =>
       Reader.moves(
         nonEmptyMoves,
-        Tags(List(
-          initialFen map { fen => Tag(_.FEN, fen) },
-          variant.some.filterNot(_.standard) map { v => Tag(_.GameType, v.gameType) }
-        ).flatten),
+        Tags(
+          List(
+            initialFen map { fen => Tag(_.FEN, fen) },
+            variant.some.filterNot(_.standard) map { v => Tag(_.GameType, v.gameType) }
+          ).flatten
+        ),
         finalSquare
       )
     }
@@ -45,16 +47,17 @@ object Replay {
   private def recursiveGames(game: DraughtsGame, sans: List[San]): Validated[String, List[DraughtsGame]] =
     sans match {
       case Nil => valid(Nil)
-      case san :: rest => san(game.situation) flatMap { move =>
-        val newGame = game.apply(move)
-        recursiveGames(newGame, rest) map { newGame :: _ }
-      }
+      case san :: rest =>
+        san(game.situation) flatMap { move =>
+          val newGame = game.apply(move)
+          recursiveGames(newGame, rest) map { newGame :: _ }
+        }
     }
 
   def games(
-    moveStrs: Traversable[String],
-    initialFen: Option[String],
-    variant: Variant
+      moveStrs: Traversable[String],
+      initialFen: Option[String],
+      variant: Variant
   ): Validated[String, List[DraughtsGame]] =
     Parser.moves(moveStrs, variant) andThen { moves =>
       val game = makeGame(variant, initialFen)
@@ -63,22 +66,34 @@ object Replay {
 
   type ErrorMessage = String
   def gameMoveWhileValid(
-    moveStrs: Seq[String],
-    initialFen: String,
-    variant: Variant,
-    iteratedCapts: Boolean = false
+      moveStrs: Seq[String],
+      initialFen: String,
+      variant: Variant,
+      iteratedCapts: Boolean = false
   ): (DraughtsGame, List[(DraughtsGame, Uci.WithSan)], Option[ErrorMessage]) = {
 
-    def mk(g: DraughtsGame, moves: List[(San, String)], ambs: List[(San, String)]): (List[(DraughtsGame, Uci.WithSan)], Option[ErrorMessage]) = {
+    def mk(
+        g: DraughtsGame,
+        moves: List[(San, String)],
+        ambs: List[(San, String)]
+    ): (List[(DraughtsGame, Uci.WithSan)], Option[ErrorMessage]) = {
       var newAmb = none[(San, String)]
       val res = moves match {
         case (san, sanStr) :: rest =>
-          san(g.situation, iteratedCapts, if (ambs.isEmpty) None else ambs.collect({ case (ambSan, ambUci) if ambSan == san => ambUci }).some).fold(
+          san(
+            g.situation,
+            iteratedCapts,
+            if (ambs.isEmpty) None
+            else ambs.collect({ case (ambSan, ambUci) if ambSan == san => ambUci }).some
+          ).fold(
             err => (Nil, err.head.some),
             move => {
               val newGame = g(move)
-              val uci = move.toUci
-              if (iteratedCapts && move.capture.fold(false)(_.length > 1) && move.situationBefore.ambiguitiesMove(move) > ambs.length + 1)
+              val uci     = move.toUci
+              if (
+                iteratedCapts && move.capture.fold(false)(_.length > 1) && move.situationBefore
+                  .ambiguitiesMove(move) > ambs.length + 1
+              )
                 newAmb = (san -> uci.uci).some
               mk(newGame, rest, newAmb.fold(ambs)(_ :: ambs)) match {
                 case (next, msg) => ((newGame, Uci.WithSan(uci, sanStr)) :: next, msg)
@@ -92,29 +107,41 @@ object Replay {
     }
 
     val init = makeGame(variant, initialFen.some)
-    Parser.moves(moveStrs, variant).fold(
-      err => List.empty[(DraughtsGame, Uci.WithSan)] -> err.head.some,
-      moves => mk(init, moves.value zip moveStrs, Nil)
-    ) match {
-        case (games, err) => (init, games, err)
-      }
+    Parser
+      .moves(moveStrs, variant)
+      .fold(
+        err => List.empty[(DraughtsGame, Uci.WithSan)] -> err.head.some,
+        moves => mk(init, moves.value zip moveStrs, Nil)
+      ) match {
+      case (games, err) => (init, games, err)
+    }
   }
 
   def unambiguousPdnMoves(
-    pdnMoves: Seq[String],
-    initialFen: Option[String],
-    variant: Variant
+      pdnMoves: Seq[String],
+      initialFen: Option[String],
+      variant: Variant
   ): Option[List[String]] = {
 
-    def mk(sit: Situation, moves: List[San], ambs: List[(San, String)]): (List[String], Option[ErrorMessage]) = {
+    def mk(
+        sit: Situation,
+        moves: List[San],
+        ambs: List[(San, String)]
+    ): (List[String], Option[ErrorMessage]) = {
       var newAmb = none[(San, String)]
       val res = moves match {
         case san :: rest =>
-          san(sit, true, if (ambs.isEmpty) None else ambs.collect({ case (ambSan, ambUci) if ambSan == san => ambUci }).some).fold(
+          san(
+            sit,
+            true,
+            if (ambs.isEmpty) None
+            else ambs.collect({ case (ambSan, ambUci) if ambSan == san => ambUci }).some
+          ).fold(
             err => (Nil, err.head.some),
             move => {
               val after = Situation.withColorAfter(move.afterWithLastMove(true), sit.color)
-              val ambiguities = if (move.capture.fold(false)(_.length > 1)) move.situationBefore.ambiguitiesMove(move) else 0
+              val ambiguities =
+                if (move.capture.fold(false)(_.length > 1)) move.situationBefore.ambiguitiesMove(move) else 0
               if (ambiguities > ambs.length + 1)
                 newAmb = (san -> move.toUci.uci).some
               mk(after, rest, newAmb.fold(ambs)(_ :: ambs)) match {
@@ -131,49 +158,64 @@ object Replay {
     }
 
     val init = initialFenToSituation(initialFen.map(FEN), variant)
-    Parser.moves(pdnMoves, variant).fold(
-      err => Nil -> err.head.some,
-      moves => mk(init, moves.value, Nil)
-    ) match {
-        case (_, Some(err)) => None
-        case (moves, _) => Option(moves)
-      }
+    Parser
+      .moves(pdnMoves, variant)
+      .fold(
+        err => Nil -> err.head.some,
+        moves => mk(init, moves.value, Nil)
+      ) match {
+      case (_, Some(err)) => None
+      case (moves, _)     => Option(moves)
+    }
   }
 
   def exportScanMoves(
-    uciMoves: Seq[String],
-    initialFen: String,
-    variant: Variant,
-    debugId: String,
-    iteratedCapts: Boolean = false
+      uciMoves: Seq[String],
+      initialFen: String,
+      variant: Variant,
+      debugId: String,
+      iteratedCapts: Boolean = false
   ): List[String] = {
 
-    def mk(g: DraughtsGame, moves: List[String], ambs: List[(String, String)]): (List[String], Option[ErrorMessage]) = {
+    def mk(
+        g: DraughtsGame,
+        moves: List[String],
+        ambs: List[(String, String)]
+    ): (List[String], Option[ErrorMessage]) = {
       var newAmb = none[(String, String)]
       val res = moves match {
-        case uci :: rest => Uci.Move(uci) match {
-          case Some(uciMove) => Std(List(uciMove.orig, uciMove.dest), uciMove.capture.fold(false)(_.nonEmpty)).move(
-            g.situation, true,
-            if (ambs.isEmpty) None else ambs.collect({ case (ambFrom, ambUci) if ambFrom == uci => ambUci }).some,
-            uciMove.capture
-          ).fold(
-              err => {
-                // TODO: Warning?
-                //logger.warn(s"exportScanMoves($iteratedCapts) $debugId: $uci -> ${uciMove.orig}${if (uciMove.capture.fold(false)(_.nonEmpty)) "x" else "-"}${uciMove.dest} - error ${err.head}")
-                (Nil, err.head.some)
-              },
-              move => {
-                val newGame = g(move, true)
-                val scanMove = move.toScanMove
-                if (iteratedCapts && move.capture.fold(false)(_.length > 1) && move.situationBefore.ambiguitiesMove(move) > ambs.length + 1)
-                  newAmb = (uci -> move.toUci.uci).some
-                mk(newGame, rest, newAmb.fold(ambs)(_ :: ambs)) match {
-                  case (next, msg) => (scanMove :: next, msg)
-                }
-              }
-            )
-          case _ => (Nil, None)
-        }
+        case uci :: rest =>
+          Uci.Move(uci) match {
+            case Some(uciMove) =>
+              Std(List(uciMove.orig, uciMove.dest), uciMove.capture.fold(false)(_.nonEmpty))
+                .move(
+                  g.situation,
+                  true,
+                  if (ambs.isEmpty) None
+                  else ambs.collect({ case (ambFrom, ambUci) if ambFrom == uci => ambUci }).some,
+                  uciMove.capture
+                )
+                .fold(
+                  err => {
+                    // TODO: Warning?
+                    //logger.warn(s"exportScanMoves($iteratedCapts) $debugId: $uci -> ${uciMove.orig}${if (uciMove.capture.fold(false)(_.nonEmpty)) "x" else "-"}${uciMove.dest} - error ${err.head}")
+                    (Nil, err.head.some)
+                  },
+                  move => {
+                    val newGame  = g(move, true)
+                    val scanMove = move.toScanMove
+                    if (
+                      iteratedCapts && move.capture.fold(false)(_.length > 1) && move.situationBefore
+                        .ambiguitiesMove(move) > ambs.length + 1
+                    )
+                      newAmb = (uci -> move.toUci.uci).some
+                    mk(newGame, rest, newAmb.fold(ambs)(_ :: ambs)) match {
+                      case (next, msg) => (scanMove :: next, msg)
+                    }
+                  }
+                )
+            case _ => (Nil, None)
+          }
         case _ => (Nil, None)
       }
       if (res._2.isDefined && newAmb.isDefined) mk(g, moves, newAmb.get :: ambs)
@@ -181,80 +223,102 @@ object Replay {
     }
 
     val init = makeGame(variant, initialFen.some)
-    val moveList = if (iteratedCapts) uciMoves.toList
-    else uciMoves.foldRight(List[String]()) {
-      (move, moves) =>
-        moves.headOption match {
-          case Some(lastMove) if lastMove.take(2) == move.slice(2, 4) =>
-            (move.take(2) + lastMove) :: moves.tail
-          case _ => move.take(4) :: moves
+    val moveList =
+      if (iteratedCapts) uciMoves.toList
+      else
+        uciMoves.foldRight(List[String]()) { (move, moves) =>
+          moves.headOption match {
+            case Some(lastMove) if lastMove.take(2) == move.slice(2, 4) =>
+              (move.take(2) + lastMove) :: moves.tail
+            case _ => move.take(4) :: moves
+          }
         }
-    }
     mk(init, moveList, Nil) match {
       case (moves, None) => moves
-      case _ => Nil
+      case _             => Nil
     }
   }
 
-  private def recursiveUcis(sit: Situation, sans: List[San], finalSquare: Boolean = false): Validated[String, List[Uci]] =
+  private def recursiveUcis(
+      sit: Situation,
+      sans: List[San],
+      finalSquare: Boolean = false
+  ): Validated[String, List[Uci]] =
     sans match {
       case Nil => valid(Nil)
-      case san :: rest => san(sit, finalSquare) flatMap { move =>
-        val after = Situation.withColorAfter(move.afterWithLastMove(finalSquare), sit.color)
-        recursiveUcis(after, rest, finalSquare) map { move.toUci :: _ }
-      }
+      case san :: rest =>
+        san(sit, finalSquare) flatMap { move =>
+          val after = Situation.withColorAfter(move.afterWithLastMove(finalSquare), sit.color)
+          recursiveUcis(after, rest, finalSquare) map { move.toUci :: _ }
+        }
     }
 
-  private def recursiveSituations(sit: Situation, sans: List[San], finalSquare: Boolean = false): Validated[String, List[Situation]] =
+  private def recursiveSituations(
+      sit: Situation,
+      sans: List[San],
+      finalSquare: Boolean = false
+  ): Validated[String, List[Situation]] =
     sans match {
       case Nil => valid(Nil)
-      case san :: rest => san(sit, finalSquare) flatMap { moveOrDrop =>
-        val after = Situation.withColorAfter(moveOrDrop.afterWithLastMove(finalSquare), sit.color)
-        recursiveSituations(after, rest, finalSquare) map { after :: _ }
-      }
+      case san :: rest =>
+        san(sit, finalSquare) flatMap { moveOrDrop =>
+          val after = Situation.withColorAfter(moveOrDrop.afterWithLastMove(finalSquare), sit.color)
+          recursiveSituations(after, rest, finalSquare) map { after :: _ }
+        }
     }
 
-  private def recursiveSituationsFromUci(sit: Situation, ucis: List[Uci], finalSquare: Boolean = false): Validated[String, List[Situation]] =
+  private def recursiveSituationsFromUci(
+      sit: Situation,
+      ucis: List[Uci],
+      finalSquare: Boolean = false
+  ): Validated[String, List[Situation]] =
     ucis match {
       case Nil => valid(Nil)
-      case uci :: rest => uci(sit, finalSquare) andThen { move =>
-        val after = Situation.withColorAfter(move.afterWithLastMove(finalSquare), sit.color)
-        recursiveSituationsFromUci(after, rest, finalSquare) map { after :: _ }
-      }
+      case uci :: rest =>
+        uci(sit, finalSquare) andThen { move =>
+          val after = Situation.withColorAfter(move.afterWithLastMove(finalSquare), sit.color)
+          recursiveSituationsFromUci(after, rest, finalSquare) map { after :: _ }
+        }
     }
 
-  private def recursiveReplayFromUci(replay: Replay, ucis: List[Uci], finalSquare: Boolean = false): Validated[String, Replay] =
+  private def recursiveReplayFromUci(
+      replay: Replay,
+      ucis: List[Uci],
+      finalSquare: Boolean = false
+  ): Validated[String, Replay] =
     ucis match {
       case Nil => valid(replay)
-      case uci :: rest => uci(replay.state.situation, finalSquare) andThen { move =>
-        recursiveReplayFromUci(replay.addMove(move, finalSquare), rest, finalSquare)
-      }
+      case uci :: rest =>
+        uci(replay.state.situation, finalSquare) andThen { move =>
+          recursiveReplayFromUci(replay.addMove(move, finalSquare), rest, finalSquare)
+        }
     }
 
   private def initialFenToSituation(initialFen: Option[FEN], variant: Variant): Situation =
     initialFen.flatMap { fen => Forsyth.<<@(variant, fen.value) } | Situation(variant)
 
   def boards(
-    moveStrs: Traversable[String],
-    initialFen: Option[FEN],
-    variant: Variant,
-    finalSquare: Boolean = false
-  ): Validated[String, List[Board]] = situations(moveStrs, initialFen, variant, finalSquare) map (_ map (_.board))
+      moveStrs: Traversable[String],
+      initialFen: Option[FEN],
+      variant: Variant,
+      finalSquare: Boolean = false
+  ): Validated[String, List[Board]] =
+    situations(moveStrs, initialFen, variant, finalSquare) map (_ map (_.board))
 
   def ucis(
-    moveStrs: Traversable[String],
-    initialSit: Situation,
-    finalSquare: Boolean = false
+      moveStrs: Traversable[String],
+      initialSit: Situation,
+      finalSquare: Boolean = false
   ): Validated[String, List[Uci]] =
     Parser.moves(moveStrs, initialSit.board.variant) andThen { moves =>
       recursiveUcis(initialSit, moves.value, finalSquare)
     }
 
   def situations(
-    moveStrs: Traversable[String],
-    initialFen: Option[FEN],
-    variant: Variant,
-    finalSquare: Boolean = false
+      moveStrs: Traversable[String],
+      initialFen: Option[FEN],
+      variant: Variant,
+      finalSquare: Boolean = false
   ): Validated[String, List[Situation]] = {
     val sit = initialFenToSituation(initialFen, variant)
     Parser.moves(moveStrs, sit.board.variant) andThen { moves =>
@@ -263,52 +327,53 @@ object Replay {
   }
 
   def boardsFromUci(
-    moves: List[Uci],
-    initialFen: Option[FEN],
-    variant: Variant
+      moves: List[Uci],
+      initialFen: Option[FEN],
+      variant: Variant
   ): Validated[String, List[Board]] = situationsFromUci(moves, initialFen, variant) map (_ map (_.board))
 
   def situationsFromUci(
-    moves: List[Uci],
-    initialFen: Option[FEN],
-    variant: Variant,
-    finalSquare: Boolean = false
+      moves: List[Uci],
+      initialFen: Option[FEN],
+      variant: Variant,
+      finalSquare: Boolean = false
   ): Validated[String, List[Situation]] = {
     val sit = initialFenToSituation(initialFen, variant)
     recursiveSituationsFromUci(sit, moves, finalSquare) map { sit :: _ }
   }
 
   def apply(
-    moves: List[Uci],
-    initialFen: Option[String],
-    variant: Variant,
-    finalSquare: Boolean = false
+      moves: List[Uci],
+      initialFen: Option[String],
+      variant: Variant,
+      finalSquare: Boolean = false
   ): Validated[String, Replay] =
     recursiveReplayFromUci(Replay(makeGame(variant, initialFen)), moves, finalSquare)
 
   def plyAtFen(
-    moveStrs: Traversable[String],
-    initialFen: Option[String],
-    variant: Variant,
-    atFen: String
+      moveStrs: Traversable[String],
+      initialFen: Option[String],
+      variant: Variant,
+      atFen: String
   ): Validated[String, Int] =
     if (Forsyth.<<@(variant, atFen).isEmpty) invalid(s"Invalid FEN $atFen")
     else {
 
       // we don't want to compare the full move number, to match transpositions
       def truncateFen(fen: String) = fen.split(' ').take(4) mkString " "
-      val atFenTruncated = truncateFen(atFen)
-      def compareFen(fen: String) = truncateFen(fen) == atFenTruncated
+      val atFenTruncated           = truncateFen(atFen)
+      def compareFen(fen: String)  = truncateFen(fen) == atFenTruncated
 
       def recursivePlyAtFen(sit: Situation, sans: List[San], ply: Int): Validated[String, Int] =
         sans match {
           case Nil => invalid(s"Can't find $atFenTruncated, reached ply $ply")
-          case san :: rest => san(sit) flatMap { move =>
-            val after = move.finalizeAfter()
-            val fen = Forsyth >> DraughtsGame(Situation(after, Color.fromPly(ply)), turns = ply)
-            if (compareFen(fen)) Validated.valid(ply)
-            else recursivePlyAtFen(Situation.withColorAfter(after, sit.color), rest, ply + 1)
-          }
+          case san :: rest =>
+            san(sit) flatMap { move =>
+              val after = move.finalizeAfter()
+              val fen   = Forsyth >> DraughtsGame(Situation(after, Color.fromPly(ply)), turns = ply)
+              if (compareFen(fen)) Validated.valid(ply)
+              else recursivePlyAtFen(Situation.withColorAfter(after, sit.color), rest, ply + 1)
+            }
         }
 
       val sit = initialFen.flatMap {

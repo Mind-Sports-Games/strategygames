@@ -5,14 +5,14 @@ import scala.util.Try
 
 object Binary {
 
-  def writeMove(m: String) = Try(Writer move m)
+  def writeMove(m: String)                = Try(Writer move m)
   def writeMoves(ms: Traversable[String]) = Try(Writer moves ms)
 
-  def readMoves(bs: List[Byte]) = Try(Reader moves bs)
+  def readMoves(bs: List[Byte])          = Try(Reader moves bs)
   def readMoves(bs: List[Byte], nb: Int) = Try(Reader.moves(bs, nb))
 
   private object MoveType {
-    val IsMove = 0
+    val IsMove    = 0
     val IsCapture = 1
   }
 
@@ -31,12 +31,12 @@ object Binary {
 
     private val maxPlies = 600
 
-    def moves(bs: List[Byte]): List[String] = moves(bs, maxPlies)
+    def moves(bs: List[Byte]): List[String]          = moves(bs, maxPlies)
     def moves(bs: List[Byte], nb: Int): List[String] = intMoves(bs map toInt, nb, "x00")
 
     private def intMoves(bs: List[Int], pliesToGo: Int, lastUci: String): List[String] = bs match {
       case _ if pliesToGo < 0 => Nil
-      case Nil => Nil
+      case Nil                => Nil
       case b1 :: b2 :: rest if moveType(b1) == MoveType.IsMove =>
         if (pliesToGo == 0)
           Nil
@@ -58,13 +58,14 @@ object Binary {
     // ----
     // 2 NOTHING
     // 6 dstPos
-    def moveUci(b1: Int, b2: Int): String = s"${right(b1, 6)}-${right(b2, 6)}"
+    def moveUci(b1: Int, b2: Int): String    = s"${right(b1, 6)}-${right(b2, 6)}"
     def captureUci(b1: Int, b2: Int): String = s"${right(b1, 6)}x${right(b2, 6)}"
 
     private def moveType(i: Int) = i >> 6
 
     private def right(i: Int, x: Int): Int = i & lengthMasks(x)
-    private val lengthMasks = Map(1 -> 0x01, 2 -> 0x03, 3 -> 0x07, 4 -> 0x0F, 5 -> 0x1F, 6 -> 0x3F, 7 -> 0x7F, 8 -> 0xFF)
+    private val lengthMasks =
+      Map(1 -> 0x01, 2 -> 0x03, 3 -> 0x07, 4 -> 0x0f, 5 -> 0x1f, 6 -> 0x3f, 7 -> 0x7f, 8 -> 0xff)
     private def !!(msg: String) = throw new Exception("Binary reader failed: " + msg)
 
     //private def cut(i: Int, from: Int, to: Int): Int = right(i, from) >> to
@@ -75,9 +76,9 @@ object Binary {
   private object Writer {
 
     def move(str: String): List[Byte] = (str match {
-      case MoveUciR(src, dst) => moveUci(src, dst)
+      case MoveUciR(src, dst)    => moveUci(src, dst)
       case CaptureUciR(src, dst) => captureUci(src, dst)
-      case _ =>
+      case _                     =>
         // TODO: log?
         //draughtsLog("ERROR: Binary").info(s"Cannot encode $str")
         Nil
@@ -95,13 +96,13 @@ object Binary {
       dst.toInt
     )
 
-    val fieldR = "(\\d+)"
-    val MoveUciR = s"$fieldR-$fieldR$$".r
+    val fieldR      = "(\\d+)"
+    val MoveUciR    = s"$fieldR-$fieldR$$".r
     val CaptureUciR = s"${fieldR}x$fieldR$$".r
 
   }
 
   @inline private def toInt(b: Byte): Int = b & 0xff
-  private def showByte(b: Int): String = "%08d" format (b.toBinaryString.toInt)
+  private def showByte(b: Int): String    = "%08d" format (b.toBinaryString.toInt)
 
 }

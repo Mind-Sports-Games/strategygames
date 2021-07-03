@@ -11,48 +11,54 @@ case class Situation(board: Board, color: Color) {
 
   lazy val ghosts = board.ghosts
 
-  lazy val validMoves: Map[Pos, List[Move]] = board.variant.validMoves(this)
+  lazy val validMoves: Map[Pos, List[Move]]      = board.variant.validMoves(this)
   lazy val validMovesFinal: Map[Pos, List[Move]] = board.variant.validMoves(this, true)
 
-  lazy val allCaptures: Map[Pos, List[Move]] = actors.collect {
-    case actor if actor.captures.nonEmpty =>
-      actor.pos -> actor.captures
-  }.to(Map)
+  lazy val allCaptures: Map[Pos, List[Move]] = actors
+    .collect {
+      case actor if actor.captures.nonEmpty =>
+        actor.pos -> actor.captures
+    }
+    .to(Map)
 
   lazy val allMovesCaptureLength: Int =
-    actors.foldLeft(0) {
-      case (max, actor) =>
-        Math.max(actor.captureLength, max)
+    actors.foldLeft(0) { case (max, actor) =>
+      Math.max(actor.captureLength, max)
     }
 
-  def hasCaptures = actors.foldLeft(false) {
-    case (capture, actor) =>
-      if (capture) true
-      else actor.captures.nonEmpty
+  def hasCaptures = actors.foldLeft(false) { case (capture, actor) =>
+    if (capture) true
+    else actor.captures.nonEmpty
   }
 
   def ambiguitiesMove(move: Move): Int = ambiguitiesMove(move.orig, move.dest)
-  def ambiguitiesMove(orig: Pos, dest: Pos): Int = countAmbiguities(movesFrom(orig, true).filter(_.dest == dest))
+  def ambiguitiesMove(orig: Pos, dest: Pos): Int = countAmbiguities(
+    movesFrom(orig, true).filter(_.dest == dest)
+  )
 
   private def countAmbiguities(moves: List[Move]) =
-    moves.foldLeft(0) {
-      (total, m1) =>
-        if (moves.exists { m2 =>
+    moves.foldLeft(0) { (total, m1) =>
+      if (
+        moves.exists { m2 =>
           m1 != m2 &&
-            m1.dest == m2.dest &&
-            m1.situationAfter.board.pieces != m2.situationAfter.board.pieces
-        }) total + 1 else total
+          m1.dest == m2.dest &&
+          m1.situationAfter.board.pieces != m2.situationAfter.board.pieces
+        }
+      ) total + 1
+      else total
     }
 
-  def movesFrom(pos: Pos, finalSquare: Boolean = false): List[Move] = board.variant.validMovesFrom(this, pos, finalSquare)
+  def movesFrom(pos: Pos, finalSquare: Boolean = false): List[Move] =
+    board.variant.validMovesFrom(this, pos, finalSquare)
 
   def captureLengthFrom(pos: Pos): Option[Int] =
     actorAt(pos).map(_.captureLength)
 
-  lazy val allDestinations: Map[Pos, List[Pos]] = validMoves mapValues { _ map (_.dest) }
+  lazy val allDestinations: Map[Pos, List[Pos]]        = validMoves mapValues { _ map (_.dest) }
   lazy val allCaptureDestinations: Map[Pos, List[Pos]] = allCaptures mapValues { _ map (_.dest) }
 
-  def destinationsFrom(pos: Pos, finalSquare: Boolean = false): List[Pos] = movesFrom(pos, finalSquare) map (_.dest)
+  def destinationsFrom(pos: Pos, finalSquare: Boolean = false): List[Pos] =
+    movesFrom(pos, finalSquare) map (_.dest)
 
   def validMoveCount = validMoves.foldLeft(0)((t, p) => t + p._2.length)
 
@@ -83,7 +89,15 @@ case class Situation(board: Board, color: Color) {
     else if (autoDraw) Status.Draw.some
     else none
 
-  def move(from: Pos, to: Pos, promotion: Option[PromotableRole] = None, finalSquare: Boolean = false, forbiddenUci: Option[List[String]] = None, captures: Option[List[Pos]] = None, partialCaptures: Boolean = false): Validated[String, Move] =
+  def move(
+      from: Pos,
+      to: Pos,
+      promotion: Option[PromotableRole] = None,
+      finalSquare: Boolean = false,
+      forbiddenUci: Option[List[String]] = None,
+      captures: Option[List[Pos]] = None,
+      partialCaptures: Boolean = false
+  ): Validated[String, Move] =
     board.variant.move(this, from, to, promotion, finalSquare, forbiddenUci, captures, partialCaptures)
 
   def move(uci: Uci.Move): Validated[String, Move] =

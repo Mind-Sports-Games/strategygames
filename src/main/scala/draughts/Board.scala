@@ -17,16 +17,16 @@ case class Board(
   }
 
   def apply(x: Int, y: Int): Option[Piece] = posAt(x, y) flatMap pieces.get
-  def apply(field: Int): Option[Piece] = posAt(field) flatMap pieces.get
+  def apply(field: Int): Option[Piece]     = posAt(field) flatMap pieces.get
 
   def boardSize = variant.boardSize
 
   def posAt(x: Int, y: Int): Option[PosMotion] = variant.boardSize.pos.posAt(x, y)
-  def posAt(field: Int): Option[PosMotion] = variant.boardSize.pos.posAt(field)
-  def posAt(pos: Pos): PosMotion = variant.boardSize.pos.posAt(pos.fieldNumber).get
+  def posAt(field: Int): Option[PosMotion]     = variant.boardSize.pos.posAt(field)
+  def posAt(pos: Pos): PosMotion               = variant.boardSize.pos.posAt(pos.fieldNumber).get
 
-  lazy val actors: Map[Pos, Actor] = pieces map {
-    case (pos, piece) => (pos, Actor(piece, posAt(pos), this))
+  lazy val actors: Map[Pos, Actor] = pieces map { case (pos, piece) =>
+    (pos, Actor(piece, posAt(pos), this))
   }
 
   lazy val actorsOf: Color.Map[Seq[Actor]] = {
@@ -40,16 +40,18 @@ case class Board(
 
   def roleCount(r: Role): Int = pieces.values.count(_.role == r)
 
-  def rolesOf(c: Color): List[Role] = pieces.values.collect {
-    case piece if piece.color == c => piece.role
-  }.to(List)
+  def rolesOf(c: Color): List[Role] = pieces.values
+    .collect {
+      case piece if piece.color == c => piece.role
+    }
+    .to(List)
 
   def actorAt(at: Pos): Option[Actor] = actors get at
 
   def piecesOf(c: Color): Map[Pos, Piece] = pieces filter (_._2 is c)
 
-  lazy val kingPos: Map[Color, Pos] = pieces.collect {
-    case (pos, Piece(color, King)) => color -> pos
+  lazy val kingPos: Map[Color, Pos] = pieces.collect { case (pos, Piece(color, King)) =>
+    color -> pos
   }
 
   def kingPosOf(c: Color): Option[Pos] = kingPos get c
@@ -77,32 +79,36 @@ case class Board(
 
   def move(orig: Pos, dest: Pos): Option[Board] =
     if (pieces contains dest) None
-    else pieces get orig map { piece =>
-      copy(pieces = pieces - orig + (dest -> piece))
-    }
+    else
+      pieces get orig map { piece =>
+        copy(pieces = pieces - orig + (dest -> piece))
+      }
 
   def moveUnsafe(orig: Pos, dest: Pos, piece: Piece): Board =
     copy(pieces = pieces - orig + (dest -> piece))
 
   def taking(orig: Pos, dest: Pos, taking: Pos): Option[Board] =
     if (pieces contains dest) None
-    else for {
-      piece <- pieces get orig
-      taken <- pieces get taking
-    } yield copy(pieces = pieces.updated(taking, Piece(taken.color, taken.ghostRole)) - orig + (dest -> piece))
+    else
+      for {
+        piece <- pieces get orig
+        taken <- pieces get taking
+      } yield copy(pieces =
+        pieces.updated(taking, Piece(taken.color, taken.ghostRole)) - orig + (dest -> piece)
+      )
 
   def takingUnsafe(orig: Pos, dest: Pos, piece: Piece, taking: Pos, taken: Piece): Board =
     copy(pieces = pieces.updated(taking, Piece(taken.color, taken.ghostRole)) - orig + (dest -> piece))
 
   lazy val occupation: Color.Map[Set[Pos]] = Color.Map { color =>
-    pieces.collect { case (pos, piece) if piece is color => pos }.to(Set)
+    pieces.collect { case (pos, piece) if piece is color => pos }(breakOut)
   }
 
   def hasPiece(p: Piece) = pieces.values exists (p ==)
 
   def promote(pos: Pos): Option[Board] = for {
     piece <- apply(pos)
-    if (piece is Man)
+    if piece is Man
     b2 <- take(pos)
     b3 <- b2.place(piece.color.king, pos)
   } yield b3
@@ -127,14 +133,15 @@ case class Board(
 
   def piecesOnLongDiagonal = actors.values.count(_.onLongDiagonal)
 
-  def autoDraw: Boolean = ghosts == 0 && variant.maxDrawingMoves(this).fold(false)(m => history.halfMoveClock >= m)
+  def autoDraw: Boolean =
+    ghosts == 0 && variant.maxDrawingMoves(this).fold(false)(m => history.halfMoveClock >= m)
 
   def situationOf(color: Color) = Situation(this, color)
 
   def valid(strict: Boolean) = variant.valid(this, strict)
 
-  def materialImbalance: Int = pieces.values.foldLeft(0) {
-    case (acc, Piece(color, role)) => Role.valueOf(role).fold(acc) { value =>
+  def materialImbalance: Int = pieces.values.foldLeft(0) { case (acc, Piece(color, role)) =>
+    Role.valueOf(role).fold(acc) { value =>
       acc + value * color.fold(1, -1)
     }
   }
@@ -144,7 +151,8 @@ case class Board(
 
 object Board {
 
-  def apply(pieces: Traversable[(Pos, Piece)], variant: Variant): Board = Board(pieces.toMap, DraughtsHistory(), variant)
+  def apply(pieces: Traversable[(Pos, Piece)], variant: Variant): Board =
+    Board(pieces.toMap, DraughtsHistory(), variant)
 
   def init(variant: Variant): Board = Board(variant.pieces, variant)
 
@@ -155,26 +163,28 @@ object Board {
       val width: Int,
       val height: Int
   ) {
-    val key = (width * height).toString
+    val key   = (width * height).toString
     val sizes = List(width, height)
 
-    val fields = (width * height) / 2
+    val fields           = (width * height) / 2
     val promotableYWhite = 1
     val promotableYBlack = height
   }
   object BoardSize {
     val all: List[BoardSize] = List(D100, D64)
-    val max = D100.pos
+    val max                  = D100.pos
   }
 
-  case object D100 extends BoardSize(
-    pos = Pos100,
-    width = 10,
-    height = 10
-  )
-  case object D64 extends BoardSize(
-    pos = Pos64,
-    width = 8,
-    height = 8
-  )
+  case object D100
+      extends BoardSize(
+        pos = Pos100,
+        width = 10,
+        height = 10
+      )
+  case object D64
+      extends BoardSize(
+        pos = Pos64,
+        width = 8,
+        height = 8
+      )
 }

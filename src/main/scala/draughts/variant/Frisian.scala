@@ -3,42 +3,52 @@ package variant
 
 import cats.implicits._
 
-case object Frisian extends Variant(
-  id = 10,
-  gameType = 40,
-  key = "frisian",
-  name = "Frisian",
-  shortName = "Frisian",
-  title = "Pieces can also capture horizontally and vertically.",
-  standardInitialPosition = true,
-  boardSize = Board.D100
-) {
+case object Frisian
+    extends Variant(
+      id = 10,
+      gameType = 40,
+      key = "frisian",
+      name = "Frisian",
+      shortName = "Frisian",
+      title = "Pieces can also capture horizontally and vertically.",
+      standardInitialPosition = true,
+      boardSize = Board.D100
+    ) {
   import Variant._
 
-  def pieces = Standard.pieces
-  def initialFen = Standard.initialFen
+  def pieces           = Standard.pieces
+  def initialFen       = Standard.initialFen
   def startingPosition = Standard.startingPosition
 
   def moveDirsColor = Standard.moveDirsColor
-  def moveDirsAll = Standard.moveDirsAll
+  def moveDirsAll   = Standard.moveDirsAll
 
-  val captureDirs: Directions = List((UpLeft, _.moveUpLeft), (UpRight, _.moveUpRight), (Up, _.moveUp), (DownLeft, _.moveDownLeft), (DownRight, _.moveDownRight), (Down, _.moveDown), (Left, _.moveLeft), (Right, _.moveRight))
+  val captureDirs: Directions = List(
+    (UpLeft, _.moveUpLeft),
+    (UpRight, _.moveUpRight),
+    (Up, _.moveUp),
+    (DownLeft, _.moveDownLeft),
+    (DownRight, _.moveDownRight),
+    (Down, _.moveDown),
+    (Left, _.moveLeft),
+    (Right, _.moveRight)
+  )
 
-  override def getCaptureValue(board: Board, taken: List[Pos]) = taken.foldLeft(0) {
-    (t, p) => t + getCaptureValue(board, p)
+  override def getCaptureValue(board: Board, taken: List[Pos]) = taken.foldLeft(0) { (t, p) =>
+    t + getCaptureValue(board, p)
   }
   override def getCaptureValue(board: Board, taken: Pos) =
     board(taken) match {
       case Some(piece) if piece.role == King => 199
-      case Some(piece) if piece.role == Man => 100
-      case _ => 0
+      case Some(piece) if piece.role == Man  => 100
+      case _                                 => 0
     }
 
   override def validMoves(situation: Situation, finalSquare: Boolean = false): Map[Pos, List[Move]] = {
 
     var bestLineValue = 0
-    var captureMap = Map[Pos, List[Move]]()
-    var captureKing = false
+    var captureMap    = Map[Pos, List[Move]]()
+    var captureKing   = false
     for (actor <- situation.actors) {
       val capts = if (finalSquare) actor.capturesFinal else actor.captures
       if (capts.nonEmpty) {
@@ -60,38 +70,52 @@ case object Frisian extends Variant(
     if (captureMap.nonEmpty)
       captureMap
     else
-      situation.actors.collect {
-        case actor if actor.noncaptures.nonEmpty =>
-          actor.pos -> actor.noncaptures
-      }.to(Map)
+      situation.actors
+        .collect {
+          case actor if actor.noncaptures.nonEmpty =>
+            actor.pos -> actor.noncaptures
+        }
+        .to(Map)
   }
 
-  override def finalizeBoard(board: Board, uci: format.Uci.Move, captured: Option[List[Piece]], situationBefore: Situation, finalSquare: Boolean): Board = {
-    val remainingCaptures = if(finalSquare) 0 else situationBefore.captureLengthFrom(uci.orig).getOrElse(0) - 1
+  override def finalizeBoard(
+      board: Board,
+      uci: format.Uci.Move,
+      captured: Option[List[Piece]],
+      situationBefore: Situation,
+      finalSquare: Boolean
+  ): Board = {
+    val remainingCaptures =
+      if (finalSquare) 0 else situationBefore.captureLengthFrom(uci.orig).getOrElse(0) - 1
     if (remainingCaptures > 0) board
-    else board.actorAt(uci.dest).fold(board) { act =>
-      val tookLastMan = captured.fold(false)(_.exists(_.role == Man)) && board.count(Man, !act.color) == 0
-      val remainingMen = board.count(Man, act.color)
-      if (remainingMen != 0)
-        board updateHistory { h =>
-          val kingmove = act.piece.role == King && uci.promotion.isEmpty && captured.fold(true)(_.isEmpty)
-          val differentKing = kingmove && act.color.fold(h.kingMoves.whiteKing, h.kingMoves.blackKing).fold(false)(_ != uci.orig)
-          val hist = if (differentKing) h.withKingMove(act.color, none, false) else h
-          hist.withKingMove(act.color, uci.dest.some, kingmove, tookLastMan)
-        }
-      else {
-        val promotedLastMan = uci.promotion.nonEmpty
-        if (tookLastMan)
-          board updateHistory { h =>
-            val hist = if (promotedLastMan) h.withKingMove(act.color, none, false) else h
-            h.withKingMove(!act.color, none, false)
+    else
+      board
+        .actorAt(uci.dest)
+        .fold(board) { act =>
+          val tookLastMan  = captured.fold(false)(_.exists(_.role == Man)) && board.count(Man, !act.color) == 0
+          val remainingMen = board.count(Man, act.color)
+          if (remainingMen != 0)
+            board updateHistory { h =>
+              val kingmove = act.piece.role == King && uci.promotion.isEmpty && captured.fold(true)(_.isEmpty)
+              val differentKing = kingmove && act.color
+                .fold(h.kingMoves.whiteKing, h.kingMoves.blackKing)
+                .fold(false)(_ != uci.orig)
+              val hist = if (differentKing) h.withKingMove(act.color, none, false) else h
+              hist.withKingMove(act.color, uci.dest.some, kingmove, tookLastMan)
+            }
+          else {
+            val promotedLastMan = uci.promotion.nonEmpty
+            if (tookLastMan)
+              board updateHistory { h =>
+                val hist = if (promotedLastMan) h.withKingMove(act.color, none, false) else h
+                h.withKingMove(!act.color, none, false)
+              }
+            else if (promotedLastMan)
+              board updateHistory { _.withKingMove(act.color, none, false) }
+            else
+              board
           }
-        else if (promotedLastMan)
-          board updateHistory { _.withKingMove(act.color, none, false) }
-        else
-          board
-      }
-    } withoutGhosts
+        } withoutGhosts
   }
 
   def maxDrawingMoves(board: Board): Option[Int] = {
@@ -102,11 +126,10 @@ case object Frisian extends Variant(
     } else None
   }
 
-  /**
-   * Update position hashes for frisian drawing rules:
-   * - When one player has two kings and the other one, the game is drawn after both players made 7 moves.
-   * - When bother players have one king left, the game is drawn after both players made 2 moves.  The official rules state that the game is drawn immediately when both players have only one king left, unless either player can capture the other king immediately or will necessarily be able to do this next move.  In absence of a good way to distinguish the positions that win by force from those that don't, this rule is implemented on lidraughts by always allowing 2 more moves to win the game.
-   */
+  /** Update position hashes for frisian drawing rules:
+    * - When one player has two kings and the other one, the game is drawn after both players made 7 moves.
+    * - When bother players have one king left, the game is drawn after both players made 2 moves.  The official rules state that the game is drawn immediately when both players have only one king left, unless either player can capture the other king immediately or will necessarily be able to do this next move.  In absence of a good way to distinguish the positions that win by force from those that don't, this rule is implemented on lidraughts by always allowing 2 more moves to win the game.
+    */
   def updatePositionHashes(board: Board, move: Move, hash: draughts.PositionHash): PositionHash = {
     val newHash = Hash(Situation(board, !move.piece.color))
     maxDrawingMoves(board) match {

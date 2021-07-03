@@ -19,7 +19,7 @@ case class Pdn(
   }
   def updatePly(ply: Int, f: Move => Move) = {
     val fullMove = (ply + 1) / 2
-    val color = Color(ply % 2 == 1)
+    val color    = Color(ply % 2 == 1)
     updateTurn(fullMove, _.update(color, f))
   }
   def updateLastPly(f: Move => Move) = updatePly(nbPlies, f)
@@ -39,7 +39,7 @@ case class Pdn(
       if (initial.comments.nonEmpty) initial.comments.mkString("{ ", " } { ", " }\n")
       else ""
     val turnStr = turns mkString " "
-    val endStr = tags(_.Result) | ""
+    val endStr  = tags(_.Result) | ""
     s"$tags\n\n$initStr$turnStr $endStr"
   }.trim + "\n"
 
@@ -77,10 +77,10 @@ case class Turn(
   override def toString = {
     val text = (white, black) match {
       case (Some(w), Some(b)) if w.isLong => s" $w $number... $b"
-      case (Some(w), Some(b)) => s" $w $b"
-      case (Some(w), None) => s" $w"
-      case (None, Some(b)) => s".. $b"
-      case _ => ""
+      case (Some(w), Some(b))             => s" $w $b"
+      case (Some(w), None)                => s" $w"
+      case (None, Some(b))                => s".. $b"
+      case _                              => ""
     }
     s"$number.$text"
   }
@@ -119,19 +119,25 @@ case class Move(
 
   private def clockString: Option[String] =
     if (canPrintTime)
-      s"[%clock ${turn.fold("w", "W")}${Move.formatPdnSeconds(secondsLeft._1.get)} ${turn.fold("B", "b")}${Move.formatPdnSeconds(secondsLeft._2.getOrElse(0))}]".some
+      s"[%clock ${turn.fold("w", "W")}${Move.formatPdnSeconds(secondsLeft._1.get)} ${turn.fold("B", "b")}${Move
+        .formatPdnSeconds(secondsLeft._2.getOrElse(0))}]".some
     else none
 
   override def toString = {
-    val glyphStr = glyphs.toList.map({
-      case glyph if glyph.id <= 6 => glyph.symbol
-      case glyph => s" $$${glyph.id}"
-    }).mkString
+    val glyphStr = glyphs.toList
+      .map({
+        case glyph if glyph.id <= 6 => glyph.symbol
+        case glyph                  => s" $$${glyph.id}"
+      })
+      .mkString
     val commentsOrTime =
       if (comments.nonEmpty || canPrintTime || opening.isDefined || result.isDefined)
-        List(clockString, opening, result).flatten.:::(comments map Move.noDoubleLineBreak).map { text =>
-          s" {$text}"
-        }.mkString
+        List(clockString, opening, result).flatten
+          .:::(comments map Move.noDoubleLineBreak)
+          .map { text =>
+            s" {$text}"
+          }
+          .mkString
       else ""
     val variationString =
       if (variations.isEmpty) ""
@@ -151,10 +157,13 @@ object Move {
     org.joda.time.Duration.standardSeconds(t).toPeriod
   )
 
-  private[this] val periodFormatter = new org.joda.time.format.PeriodFormatterBuilder()
-    .printZeroAlways
-    .minimumPrintedDigits(1).appendHours.appendSeparator(":")
-    .minimumPrintedDigits(2).appendMinutes.appendSeparator(":")
+  private[this] val periodFormatter = new org.joda.time.format.PeriodFormatterBuilder().printZeroAlways
+    .minimumPrintedDigits(1)
+    .appendHours
+    .appendSeparator(":")
+    .minimumPrintedDigits(2)
+    .appendMinutes
+    .appendSeparator(":")
     .appendSeconds
     .toFormatter
 
