@@ -18,4 +18,3 @@ trait Timestamper {
 private[draughts] object RealTimestamper extends Timestamper {
   def now = new Timestamp(System.currentTimeMillis)
 }
-

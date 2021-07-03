@@ -188,7 +188,7 @@ R  BK  R"""
       ).diagDescOccupation(B2) must_== Map(
         A3 -> (White - Pawn),
         B2 -> (White - Pawn),
-        C1 -> (White - King),
+        C1 -> (White - King)
       )
     }
   }

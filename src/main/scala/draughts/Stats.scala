@@ -77,4 +77,3 @@ object Stats {
   def apply(value: Float)                       = empty.record(value)
   def apply[T: Numeric](values: Traversable[T]) = empty.record(values)
 }
-

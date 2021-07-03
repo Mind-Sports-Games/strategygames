@@ -40,12 +40,12 @@ object Hash {
 
   private def roleIndex(role: Role) =
     role match {
-      case Pawn   => 0
-      case Knight => 1
-      case Bishop => 2
-      case Rook   => 3
-      case Queen  => 4
-      case King   => 5
+      case Pawn       => 0
+      case Knight     => 1
+      case Bishop     => 2
+      case Rook       => 3
+      case Queen      => 4
+      case King       => 5
       case LOAChecker => 6
     }
 

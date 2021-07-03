@@ -6,4 +6,3 @@ package object format {
     override def toString = value
   }
 }
-

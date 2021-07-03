@@ -70,4 +70,3 @@ case object Brazilian
     (!menOnPromotionRank(board, color) || board.ghosts != 0)
   }
 }
-

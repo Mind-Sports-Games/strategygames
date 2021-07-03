@@ -489,4 +489,3 @@ object Pos64 extends BoardPos {
   val allPiotrs: Map[Char, PosMotion] = all.map { pos => pos.piotr -> pos }.to(Map)
 
 }
-

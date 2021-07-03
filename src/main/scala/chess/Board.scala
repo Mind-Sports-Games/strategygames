@@ -162,7 +162,11 @@ case class Board(
 
   def rankOccupation(rank: Rank): Map[Pos, Piece] = pieces.filter(_._1.rank == rank)
 
-  private def diagOccupation(p: Pos, dir: Direction, diagPieces: Map[Pos, Piece] = Map[Pos, Piece]()): Map[Pos, Piece] =
+  private def diagOccupation(
+      p: Pos,
+      dir: Direction,
+      diagPieces: Map[Pos, Piece] = Map[Pos, Piece]()
+  ): Map[Pos, Piece] =
     dir(p) match {
       case Some(diagPos) =>
         if (pieces.contains(diagPos))
@@ -173,13 +177,13 @@ case class Board(
     }
 
   def diagAscOccupation(pos: Pos): Map[Pos, Piece] =
-   if (pieces.contains(pos))
+    if (pieces.contains(pos))
       Map[Pos, Piece](pos -> pieces(pos)) ++ diagOccupation(pos, _.upRight) ++ diagOccupation(pos, _.downLeft)
     else
       diagOccupation(pos, _.upRight) ++ diagOccupation(pos, _.downLeft)
 
   def diagDescOccupation(pos: Pos): Map[Pos, Piece] =
-   if (pieces.contains(pos))
+    if (pieces.contains(pos))
       Map[Pos, Piece](pos -> pieces(pos)) ++ diagOccupation(pos, _.upLeft) ++ diagOccupation(pos, _.downRight)
     else
       diagOccupation(pos, _.upLeft) ++ diagOccupation(pos, _.downRight)

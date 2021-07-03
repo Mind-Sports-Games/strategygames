@@ -404,4 +404,3 @@ case object Russian
     !menOnPromotionRank(board, color)
   }
 }
-

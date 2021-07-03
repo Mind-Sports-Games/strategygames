@@ -191,12 +191,12 @@ final case class Actor(
               if (range == 1)
                 board.move(pos, to).foreach { buf += move(to, _) }
               else
-                addDir(to, range-1, dir)
+                addDir(to, range - 1, dir)
             case Some(piece) =>
               if (piece.color == color && range > 1)
-                addDir(to, range-1, dir)
+                addDir(to, range - 1, dir)
               else if (piece.color != color && range == 1)
-                board.taking(pos, to).foreach({ buf += move(to, _, s) })
+                board.taking(pos, to).foreach { buf += move(to, _, s) }
               else ()
           }
         }

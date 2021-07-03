@@ -38,4 +38,3 @@ object Speed {
 
   def exists(id: Int): Boolean = byId contains id
 }
-

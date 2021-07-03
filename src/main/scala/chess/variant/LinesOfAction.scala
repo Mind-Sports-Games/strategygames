@@ -39,10 +39,10 @@ case object LinesOfAction
     Pos.H4 -> Black.loachecker,
     Pos.H5 -> Black.loachecker,
     Pos.H6 -> Black.loachecker,
-    Pos.H7 -> Black.loachecker,
+    Pos.H7 -> Black.loachecker
   )
 
-  override val initialFen = FEN("1LLLLLL1/l6l/l6l/l6l/l6l/l6l/l6l/1LLLLLL1 w - - 0 1")
+  override val initialFen        = FEN("1LLLLLL1/l6l/l6l/l6l/l6l/l6l/l6l/1LLLLLL1 w - - 0 1")
   override def startColor: Color = White
 
   override def allowsCastling = false
@@ -68,8 +68,8 @@ case object LinesOfAction
   private def winForColor(color: Color, board: Board): Boolean = {
 
     def piecesGroupSize(
-      linkedPieces: Set[Pos],
-      nextPos: Queue[Pos]
+        linkedPieces: Set[Pos],
+        nextPos: Queue[Pos]
     ): Int = {
       if (nextPos.size == 0)
         linkedPieces.size
@@ -82,17 +82,19 @@ case object LinesOfAction
           )
         else
           piecesGroupSize(
-            linkedPieces + (pos),
+            linkedPieces + pos,
             (nextPos.tail ++ neighboringColorPieces(color, pos, board)).distinct
           )
       }
     }
 
     firstPiece(color, board)
-      .map(firstPiece => piecesGroupSize(
-        Set(firstPiece),
-        neighboringColorPieces(color, firstPiece, board)
-      ) == numOfPieces(color, board))
+      .map(firstPiece =>
+        piecesGroupSize(
+          Set(firstPiece),
+          neighboringColorPieces(color, firstPiece, board)
+        ) == numOfPieces(color, board)
+      )
       .getOrElse(false)
   }
 
@@ -103,9 +105,9 @@ case object LinesOfAction
   override def winner(situation: Situation): Option[Color] = {
     val blackWin = winForColor(Black, situation.board)
     val whiteWin = winForColor(White, situation.board)
-    if (blackWin && !whiteWin){
+    if (blackWin && !whiteWin) {
       Option(Black)
-    } else if (!blackWin && whiteWin){
+    } else if (!blackWin && whiteWin) {
       Option(White)
     } else None
   }

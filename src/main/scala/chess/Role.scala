@@ -117,12 +117,12 @@ object Role {
 
   def valueOf(r: Role): Option[Int] =
     r match {
-      case Pawn   => Option(1)
-      case Knight => Option(3)
-      case Bishop => Option(3)
-      case Rook   => Option(5)
-      case Queen  => Option(9)
-      case King   => None
+      case Pawn       => Option(1)
+      case Knight     => Option(3)
+      case Bishop     => Option(3)
+      case Rook       => Option(5)
+      case Queen      => Option(9)
+      case King       => None
       case LOAChecker => None
     }
 }

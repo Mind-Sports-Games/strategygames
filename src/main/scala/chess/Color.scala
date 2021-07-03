@@ -15,12 +15,12 @@ sealed trait Color {
   val letter: Char
   val name: String
 
-  final def pawn   = this - Pawn
-  final def bishop = this - Bishop
-  final def knight = this - Knight
-  final def rook   = this - Rook
-  final def queen  = this - Queen
-  final def king   = this - King
+  final def pawn       = this - Pawn
+  final def bishop     = this - Bishop
+  final def knight     = this - Knight
+  final def rook       = this - Rook
+  final def queen      = this - Queen
+  final def king       = this - King
   final def loachecker = this - LOAChecker
 
   final val white = this == Color.White
