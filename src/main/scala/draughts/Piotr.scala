@@ -21,11 +21,11 @@ object Piotr {
 
   def keyToPiotr(key: String) = BoardSize.max.posAt(key) map (_.piotr)
   def doubleKeyToPiotr(key: String) = for {
-    a ← keyToPiotr(key take 2)
-    b ← keyToPiotr(key drop 2)
+    a <- keyToPiotr(key take 2)
+    b <- keyToPiotr(key drop 2)
   } yield s"$a$b"
   def doublePiotrToKey(piotrs: String) = for {
-    a ← BoardSize.max.piotr(piotrs.head)
-    b ← BoardSize.max.piotr(piotrs(1))
+    a <- BoardSize.max.piotr(piotrs.head)
+    b <- BoardSize.max.piotr(piotrs(1))
   } yield s"${a.key}${b.key}"
 }

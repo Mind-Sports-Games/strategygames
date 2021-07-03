@@ -3,8 +3,6 @@ package draughts
 import play.api.libs.openid.Errors.AUTH_CANCEL
 
 import scala.collection.breakOut
-import scalaz.Validation.FlatMap._
-import scalaz.Validation.{ failureNel, success }
 import variant.Variant
 
 case class Board(
@@ -12,8 +10,6 @@ case class Board(
     history: DraughtsHistory,
     variant: Variant
 ) {
-
-  import implicitFailures._
 
   def apply(at: Pos): Option[Piece] = pieces get at
 
@@ -61,13 +57,13 @@ case class Board(
 
   def kingPosOf(c: Color): Option[Pos] = kingPos get c
 
-  def seq(actions: (Board => Valid[Board])*): Valid[Board] =
-    actions.foldLeft(success(this): Valid[Board])(_ flatMap _)
+  def seq(actions: (Board => Option[Board])*): Option[Board] =
+    actions.foldLeft(Option(this): Option[Board])(_ flatMap _)
 
   def place(piece: Piece) = new {
-    def at(at: Pos): Valid[Board] =
-      if (pieces contains at) failureNel("Cannot place at occupied " + at)
-      else success(copy(pieces = pieces + ((at, piece))))
+    def at(at: Pos): Option[Board] =
+      if (pieces contains at) None
+      else Option(copy(pieces = pieces + ((at, piece))))
   }
 
   def place(piece: Piece, at: Pos): Option[Board] =
@@ -94,8 +90,8 @@ case class Board(
   def taking(orig: Pos, dest: Pos, taking: Pos): Option[Board] =
     if (pieces contains dest) None
     else for {
-      piece ← pieces get orig
-      taken ← pieces get taking
+      piece <- pieces get orig
+      taken <- pieces get taking
     } yield copy(pieces = pieces.updated(taking, Piece(taken.color, taken.ghostRole)) - orig + (dest -> piece))
 
   def takingUnsafe(orig: Pos, dest: Pos, piece: Piece, taking: Pos, taken: Piece): Board =
@@ -108,10 +104,10 @@ case class Board(
   def hasPiece(p: Piece) = pieces.values exists (p ==)
 
   def promote(pos: Pos): Option[Board] = for {
-    piece ← apply(pos)
+    piece <- apply(pos)
     if (piece is Man)
-    b2 ← take(pos)
-    b3 ← b2.place(piece.color.king, pos)
+    b2 <- take(pos)
+    b3 <- b2.place(piece.color.king, pos)
   } yield b3
 
   def withHistory(h: DraughtsHistory): Board = copy(history = h)

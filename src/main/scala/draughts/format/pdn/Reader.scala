@@ -1,30 +1,30 @@
 package draughts
 package format.pdn
 
-import scalaz.Validation.{ success, failure }
+import cats.data.Validated
 
 object Reader {
 
   sealed trait Result {
-    def valid: Valid[Replay]
+    def valid: Validated[String, Replay]
   }
 
   object Result {
     case class Complete(replay: Replay) extends Result {
-      def valid = success(replay)
+      def valid = Validated.valid(replay)
     }
-    case class Incomplete(replay: Replay, failures: Failures) extends Result {
-      def valid = failure(failures)
+    case class Incomplete(replay: Replay, failure: String) extends Result {
+      def valid = Validated.invalid(failures)
     }
   }
 
-  def full(pdn: String, tags: Tags = Tags.empty): Valid[Result] =
+  def full(pdn: String, tags: Tags = Tags.empty): Validated[String, Result] =
     fullWithSans(pdn, identity, tags, true)
 
-  def moves(moveStrs: Traversable[String], tags: Tags, iteratedCapts: Boolean = false): Valid[Result] =
+  def moves(moveStrs: Traversable[String], tags: Tags, iteratedCapts: Boolean = false): Validated[String, Result] =
     movesWithSans(moveStrs, identity, tags, iteratedCapts)
 
-  def fullWithSans(pdn: String, op: Sans => Sans, tags: Tags = Tags.empty, iteratedCapts: Boolean = false): Valid[Result] =
+  def fullWithSans(pdn: String, op: Sans => Sans, tags: Tags = Tags.empty, iteratedCapts: Boolean = false): Validated[String, Result] =
     Parser.full(cleanUserInput(pdn)) map { parsed =>
       makeReplay(makeGame(parsed.tags ++ tags), op(parsed.sans), iteratedCapts)
     }
@@ -32,13 +32,13 @@ object Reader {
   def fullWithSans(parsed: ParsedPdn, op: Sans => Sans): Result =
     makeReplay(makeGame(parsed.tags), op(parsed.sans))
 
-  def movesWithSans(moveStrs: Traversable[String], op: Sans => Sans, tags: Tags, iteratedCapts: Boolean = false): Valid[Result] =
+  def movesWithSans(moveStrs: Traversable[String], op: Sans => Sans, tags: Tags, iteratedCapts: Boolean = false): Validated[String, Result] =
     Parser.moves(moveStrs, tags.variant | variant.Variant.default) map { moves =>
       makeReplay(makeGame(tags), op(moves), iteratedCapts)
     }
 
   // remove invisible byte order mark
-  def cleanUserInput(str: String) = str.replace("""\ufeff""", "")
+  def cleanUserInput(str: String) = str.replace(s"\ufeff", "")
 
   private def makeReplay(game: DraughtsGame, sans: Sans, iteratedCapts: Boolean = false): Result = {
     def mk(replay: Replay, moves: List[San], ambs: List[(San, String)]): Result = {

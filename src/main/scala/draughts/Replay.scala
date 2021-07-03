@@ -1,10 +1,12 @@
 package draughts
 
+import cats.data.Validated
+import cats.data.Validated.{ invalid, valid }
+import cats.implicits._
+
 import format.pdn._
 import format.{ FEN, Forsyth, Uci }
 import variant.Variant
-import scalaz.Validation.FlatMap._
-import scalaz.Validation.{ failureNel, success }
 
 case class Replay(setup: DraughtsGame, moves: List[Move], state: DraughtsGame) {
 
@@ -28,8 +30,8 @@ object Replay {
     initialFen: Option[String],
     variant: Variant,
     finalSquare: Boolean
-  ): Valid[Reader.Result] =
-    moveStrs.some.filter(_.nonEmpty) toValid "[replay] pdn is empty" flatMap { nonEmptyMoves =>
+  ): Validated[String, Reader.Result] =
+    moveStrs.some.filter(_.nonEmpty) toValid "[replay] pdn is empty" andThen { nonEmptyMoves =>
       Reader.moves(
         nonEmptyMoves,
         Tags(List(
@@ -40,9 +42,9 @@ object Replay {
       )
     }
 
-  private def recursiveGames(game: DraughtsGame, sans: List[San]): Valid[List[DraughtsGame]] =
+  private def recursiveGames(game: DraughtsGame, sans: List[San]): Validated[String, List[DraughtsGame]] =
     sans match {
-      case Nil => success(Nil)
+      case Nil => valid(Nil)
       case san :: rest => san(game.situation) flatMap { move =>
         val newGame = game.apply(move)
         recursiveGames(newGame, rest) map { newGame :: _ }
@@ -53,8 +55,8 @@ object Replay {
     moveStrs: Traversable[String],
     initialFen: Option[String],
     variant: Variant
-  ): Valid[List[DraughtsGame]] =
-    Parser.moves(moveStrs, variant) flatMap { moves =>
+  ): Validated[String, List[DraughtsGame]] =
+    Parser.moves(moveStrs, variant) andThen { moves =>
       val game = makeGame(variant, initialFen)
       recursiveGames(game, moves.value) map { game :: _ }
     }
@@ -102,7 +104,7 @@ object Replay {
     pdnMoves: Seq[String],
     initialFen: Option[String],
     variant: Variant
-  ): Valid[List[String]] = {
+  ): Option[List[String]] = {
 
     def mk(sit: Situation, moves: List[San], ambs: List[(San, String)]): (List[String], Option[ErrorMessage]) = {
       var newAmb = none[(San, String)]
@@ -133,8 +135,8 @@ object Replay {
       err => Nil -> err.head.some,
       moves => mk(init, moves.value, Nil)
     ) match {
-        case (_, Some(err)) => failureNel(err)
-        case (moves, _) => success(moves)
+        case (_, Some(err)) => None
+        case (moves, _) => Option(moves)
       }
   }
 
@@ -193,37 +195,37 @@ object Replay {
     }
   }
 
-  private def recursiveUcis(sit: Situation, sans: List[San], finalSquare: Boolean = false): Valid[List[Uci]] =
+  private def recursiveUcis(sit: Situation, sans: List[San], finalSquare: Boolean = false): Validated[String, List[Uci]] =
     sans match {
-      case Nil => success(Nil)
+      case Nil => valid(Nil)
       case san :: rest => san(sit, finalSquare) flatMap { move =>
         val after = Situation.withColorAfter(move.afterWithLastMove(finalSquare), sit.color)
         recursiveUcis(after, rest, finalSquare) map { move.toUci :: _ }
       }
     }
 
-  private def recursiveSituations(sit: Situation, sans: List[San], finalSquare: Boolean = false): Valid[List[Situation]] =
+  private def recursiveSituations(sit: Situation, sans: List[San], finalSquare: Boolean = false): Validated[String, List[Situation]] =
     sans match {
-      case Nil => success(Nil)
+      case Nil => valid(Nil)
       case san :: rest => san(sit, finalSquare) flatMap { moveOrDrop =>
         val after = Situation.withColorAfter(moveOrDrop.afterWithLastMove(finalSquare), sit.color)
         recursiveSituations(after, rest, finalSquare) map { after :: _ }
       }
     }
 
-  private def recursiveSituationsFromUci(sit: Situation, ucis: List[Uci], finalSquare: Boolean = false): Valid[List[Situation]] =
+  private def recursiveSituationsFromUci(sit: Situation, ucis: List[Uci], finalSquare: Boolean = false): Validated[String, List[Situation]] =
     ucis match {
-      case Nil => success(Nil)
-      case uci :: rest => uci(sit, finalSquare) flatMap { move =>
+      case Nil => valid(Nil)
+      case uci :: rest => uci(sit, finalSquare) andThen { move =>
         val after = Situation.withColorAfter(move.afterWithLastMove(finalSquare), sit.color)
         recursiveSituationsFromUci(after, rest, finalSquare) map { after :: _ }
       }
     }
 
-  private def recursiveReplayFromUci(replay: Replay, ucis: List[Uci], finalSquare: Boolean = false): Valid[Replay] =
+  private def recursiveReplayFromUci(replay: Replay, ucis: List[Uci], finalSquare: Boolean = false): Validated[String, Replay] =
     ucis match {
-      case Nil => success(replay)
-      case uci :: rest => uci(replay.state.situation, finalSquare) flatMap { move =>
+      case Nil => valid(replay)
+      case uci :: rest => uci(replay.state.situation, finalSquare) andThen { move =>
         recursiveReplayFromUci(replay.addMove(move, finalSquare), rest, finalSquare)
       }
     }
@@ -236,14 +238,14 @@ object Replay {
     initialFen: Option[FEN],
     variant: Variant,
     finalSquare: Boolean = false
-  ): Valid[List[Board]] = situations(moveStrs, initialFen, variant, finalSquare) map (_ map (_.board))
+  ): Validated[String, List[Board]] = situations(moveStrs, initialFen, variant, finalSquare) map (_ map (_.board))
 
   def ucis(
     moveStrs: Traversable[String],
     initialSit: Situation,
     finalSquare: Boolean = false
-  ): Valid[List[Uci]] =
-    Parser.moves(moveStrs, initialSit.board.variant) flatMap { moves =>
+  ): Validated[String, List[Uci]] =
+    Parser.moves(moveStrs, initialSit.board.variant) andThen { moves =>
       recursiveUcis(initialSit, moves.value, finalSquare)
     }
 
@@ -252,9 +254,9 @@ object Replay {
     initialFen: Option[FEN],
     variant: Variant,
     finalSquare: Boolean = false
-  ): Valid[List[Situation]] = {
+  ): Validated[String, List[Situation]] = {
     val sit = initialFenToSituation(initialFen, variant)
-    Parser.moves(moveStrs, sit.board.variant) flatMap { moves =>
+    Parser.moves(moveStrs, sit.board.variant) andThen { moves =>
       recursiveSituations(sit, moves.value, finalSquare) map { sit :: _ }
     }
   }
@@ -263,14 +265,14 @@ object Replay {
     moves: List[Uci],
     initialFen: Option[FEN],
     variant: Variant
-  ): Valid[List[Board]] = situationsFromUci(moves, initialFen, variant) map (_ map (_.board))
+  ): Validated[String, List[Board]] = situationsFromUci(moves, initialFen, variant) map (_ map (_.board))
 
   def situationsFromUci(
     moves: List[Uci],
     initialFen: Option[FEN],
     variant: Variant,
     finalSquare: Boolean = false
-  ): Valid[List[Situation]] = {
+  ): Validated[String, List[Situation]] = {
     val sit = initialFenToSituation(initialFen, variant)
     recursiveSituationsFromUci(sit, moves, finalSquare) map { sit :: _ }
   }
@@ -280,7 +282,7 @@ object Replay {
     initialFen: Option[String],
     variant: Variant,
     finalSquare: Boolean = false
-  ): Valid[Replay] =
+  ): Validated[String, Replay] =
     recursiveReplayFromUci(Replay(makeGame(variant, initialFen)), moves, finalSquare)
 
   def plyAtFen(
@@ -288,8 +290,8 @@ object Replay {
     initialFen: Option[String],
     variant: Variant,
     atFen: String
-  ): Valid[Int] =
-    if (Forsyth.<<@(variant, atFen).isEmpty) failureNel(s"Invalid FEN $atFen")
+  ): Validated[String, Int] =
+    if (Forsyth.<<@(variant, atFen).isEmpty) invalid(s"Invalid FEN $atFen")
     else {
 
       // we don't want to compare the full move number, to match transpositions
@@ -297,13 +299,13 @@ object Replay {
       val atFenTruncated = truncateFen(atFen)
       def compareFen(fen: String) = truncateFen(fen) == atFenTruncated
 
-      def recursivePlyAtFen(sit: Situation, sans: List[San], ply: Int): Valid[Int] =
+      def recursivePlyAtFen(sit: Situation, sans: List[San], ply: Int): Validated[String, Int] =
         sans match {
-          case Nil => failureNel(s"Can't find $atFenTruncated, reached ply $ply")
+          case Nil => invalid(s"Can't find $atFenTruncated, reached ply $ply")
           case san :: rest => san(sit) flatMap { move =>
             val after = move.finalizeAfter()
             val fen = Forsyth >> DraughtsGame(Situation(after, Color.fromPly(ply)), turns = ply)
-            if (compareFen(fen)) scalaz.Success(ply)
+            if (compareFen(fen)) Validated.valid(ply)
             else recursivePlyAtFen(Situation.withColorAfter(after, sit.color), rest, ply + 1)
           }
         }
@@ -312,7 +314,7 @@ object Replay {
         Forsyth.<<@(variant, _)
       } | Situation(variant)
 
-      Parser.moves(moveStrs, sit.board.variant) flatMap { moves =>
+      Parser.moves(moveStrs, sit.board.variant) andThen { moves =>
         recursivePlyAtFen(sit, moves.value, 1)
       }
     }
