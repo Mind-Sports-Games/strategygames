@@ -2,7 +2,7 @@ package draughts
 package variant
 
 import cats.data.Validated
-import cats.syntax.option._
+import cats.implicits._
 import scala.annotation.tailrec
 
 // Correctness depends on singletons for each variant ID
@@ -120,10 +120,13 @@ abstract class Variant private[variant] (
 
     for {
       actor <- situation.board.actors get from toValid "No piece on " + from
-      _     <- actor.validIf(actor is situation.color, "Not my piece on " + from)
-      m1    <- findMove(from, to) toValid "Piece on " + from + " cannot move to " + to
-      m2    <- m1 withPromotion promotion toValid "Piece on " + from + " cannot promote to " + promotion
-      m3    <- m2 validIf (isValidPromotion(promotion), "Cannot promote to " + promotion + " in this game mode")
+      _ <-
+        if (actor is situation.color) Validated.valid(actor) else Validated.invalid("Not my piece on " + from)
+      m1 <- findMove(from, to) toValid "Piece on " + from + " cannot move to " + to
+      m2 <- m1 withPromotion promotion toValid "Piece on " + from + " cannot promote to " + promotion
+      m3 <-
+        if (isValidPromotion(promotion)) Validated.valid(m2)
+        else Validated.invalid("Cannot promote to " + promotion + " in this game mode")
     } yield m3
 
   }
