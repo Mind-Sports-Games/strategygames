@@ -66,7 +66,15 @@ object Color {
     override val hashCode = 2
   }
 
-  def fromPly(ply: Int) = apply((ply & 1) == 0)
+  def fromPly(ply: Int) = fromWhite((ply & 1) == 0)
+
+  def fromWhite(white: Boolean): Color = if (white) White else Black
+
+  def fromName(n: String): Option[Color] =
+    if (n == "white") Option(White)
+    else if (n == "black") Option(Black)
+    else None
+
 
   def apply(b: Boolean): Color = if (b) White else Black
 
@@ -90,9 +98,9 @@ object Color {
   def exists(name: String) = all exists (_.name == name)
 
   def showResult(color: Option[Color], draughtsResult: Boolean) = color match {
-    case Some(White) => draughtsResult.fold("2-0", "1-0")
-    case Some(Black) => draughtsResult.fold("0-2", "0-1")
-    case None => draughtsResult.fold("1-1", "1/2-1/2")
+    case Some(White) => if (draughtsResult) "2-0" else "1-0"
+    case Some(Black) => if (draughtsResult) "0-2" else "0-1"
+    case None => if (draughtsResult) "1-1" else "1/2-1/2"
   }
 
   def fromResult(result: String): Option[Color] = result match {

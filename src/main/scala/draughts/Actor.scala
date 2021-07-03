@@ -104,8 +104,8 @@ case class Actor(
     dest = dest,
     situationBefore = Situation(board, piece.color),
     after = after,
-    capture = capture.some,
-    taken = taken.some,
+    capture = Some(capture),
+    taken = Some(taken),
     promotion = promotion
   )
 }

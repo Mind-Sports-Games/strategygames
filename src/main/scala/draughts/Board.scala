@@ -1,7 +1,5 @@
 package draughts
 
-import play.api.libs.openid.Errors.AUTH_CANCEL
-
 import scala.collection.breakOut
 import variant.Variant
 
