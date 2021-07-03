@@ -1,7 +1,9 @@
 package draughts
 package format.pdn
 
-import scalaz.Validation.success
+import cats.data.Validated
+import cats.data.Validated.{ invalid, valid }
+import cats.syntax.option._
 
 case class ParsedPdn(
     initialPosition: InitialPosition,
@@ -18,7 +20,7 @@ object Sans {
 // Standard Algebraic Notation
 sealed trait San {
 
-  def apply(situation: Situation, iteratedCapts: Boolean = false, forbiddenUci: Option[List[String]] = None): Valid[draughts.Move]
+  def apply(situation: Situation, iteratedCapts: Boolean = false, forbiddenUci: Option[List[String]] = None): Validated[String, draughts.Move]
 
   def metas: Metas
 
@@ -44,7 +46,7 @@ case class Std(
   def apply(situation: Situation, iteratedCapts: Boolean = false, forbiddenUci: Option[List[String]] = None) =
     move(situation, iteratedCapts, forbiddenUci)
 
-  def move(situation: Situation, iteratedCapts: Boolean = false, forbiddenUci: Option[List[String]] = None, captures: Option[List[Pos]] = None): Valid[draughts.Move] = {
+  def move(situation: Situation, iteratedCapts: Boolean = false, forbiddenUci: Option[List[String]] = None, captures: Option[List[Pos]] = None): Validated[String, draughts.Move] = {
     val src = fields.head
     val dest = fields.last
     val capturePath = if (capture) fields.tail.reverse else Nil
@@ -67,8 +69,8 @@ case class Std(
         }
       case (m, _) => m
     } match {
-      case None => s"No move found: $this\n$situation".failureNel
-      case Some(move) => success(move)
+      case None => invalid(s"No move found: $this\n$situation")
+      case Some(move) => valid(move)
     }
   }
 

@@ -1,9 +1,10 @@
 package draughts
 package variant
 
+import cats.data.Validated
+import cats.syntax.option._
 import scala.annotation.tailrec
 import scala.collection.breakOut
-import scalaz.Validation.FlatMap._
 
 // Correctness depends on singletons for each variant ID
 abstract class Variant private[variant] (
@@ -86,7 +87,7 @@ abstract class Variant private[variant] (
       actor.noncaptures
   }
 
-  def move(situation: Situation, from: Pos, to: Pos, promotion: Option[PromotableRole], finalSquare: Boolean = false, forbiddenUci: Option[List[String]] = None, captures: Option[List[Pos]] = None, partialCaptures: Boolean = false): Valid[Move] = {
+  def move(situation: Situation, from: Pos, to: Pos, promotion: Option[PromotableRole], finalSquare: Boolean = false, forbiddenUci: Option[List[String]] = None, captures: Option[List[Pos]] = None, partialCaptures: Boolean = false): Validated[String, Move] = {
 
     // Find the move in the variant specific list of valid moves
     def findMove(from: Pos, to: Pos) = {
@@ -106,10 +107,10 @@ abstract class Variant private[variant] (
     }
 
     for {
-      actor ← situation.board.actors get from toValid "No piece on " + from
-      _ ← actor.validIf(actor is situation.color, "Not my piece on " + from)
-      m1 ← findMove(from, to) toValid "Piece on " + from + " cannot move to " + to
-      m2 ← m1 withPromotion promotion toValid "Piece on " + from + " cannot promote to " + promotion
+      actor <- situation.board.actors get from toValid "No piece on " + from
+      _ <- actor.validIf(actor is situation.color, "Not my piece on " + from)
+      m1 <- findMove(from, to) toValid "Piece on " + from + " cannot move to " + to
+      m2 <- m1 withPromotion promotion toValid "Piece on " + from + " cannot promote to " + promotion
       m3 <- m2 validIf (isValidPromotion(promotion), "Cannot promote to " + promotion + " in this game mode")
     } yield m3
 
@@ -422,7 +423,7 @@ object Variant {
   )
 
   private[variant] def symmetricFourRank(rank: IndexedSeq[Role], boardSize: Board.BoardSize): Map[Pos, Piece] = {
-    (for (y ← Seq(1, 2, 3, 4, 7, 8, 9, 10); x ← 1 to 5) yield {
+    (for (y <- Seq(1, 2, 3, 4, 7, 8, 9, 10); x <- 1 to 5) yield {
       boardSize.pos.posAt(x, y) map { pos =>
         (pos, y match {
           case 1 => Black - rank(x - 1)
@@ -439,7 +440,7 @@ object Variant {
   }
 
   private[variant] def symmetricThreeRank(rank: IndexedSeq[Role], boardSize: Board.BoardSize): Map[Pos, Piece] = {
-    (for (y ← Seq(1, 2, 3, 6, 7, 8); x ← 1 to 4) yield {
+    (for (y <- Seq(1, 2, 3, 6, 7, 8); x <- 1 to 4) yield {
       boardSize.pos.posAt(x, y) map { pos =>
         (pos, y match {
           case 1 => Black - rank(x - 1)
@@ -454,7 +455,7 @@ object Variant {
   }
 
   private[variant] def symmetricBackrank(rank: IndexedSeq[Role], boardSize: Board.BoardSize): Map[Pos, Piece] = {
-    (for (y ← Seq(1, 10); x ← 1 to 5) yield {
+    (for (y <- Seq(1, 10); x <- 1 to 5) yield {
       boardSize.pos.posAt(x, y) map { pos =>
         (pos, y match {
           case 1 => Black - rank(x - 1)

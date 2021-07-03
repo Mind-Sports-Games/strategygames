@@ -1,6 +1,9 @@
 package draughts
 package format
 
+import cats.data.Validated
+import cats.implicits._
+
 sealed trait Uci {
 
   def uci: String
@@ -12,13 +15,11 @@ sealed trait Uci {
 
   def origDest: (Pos, Pos)
 
-  def apply(situation: Situation, finalSquare: Boolean = false): Valid[Move]
+  def apply(situation: Situation, finalSquare: Boolean = false): Validated[String, Move]
 
 }
 
-object Uci
-  extends scalaz.std.OptionInstances
-  with scalaz.syntax.ToTraverseOps {
+object Uci {
 
   case class Move(
       orig: Pos,
@@ -60,22 +61,22 @@ object Uci
         } yield Move(orig, dest, None, Some(capts.reverse))
       } else {
         for {
-          orig ← posAt(move take 2)
-          dest ← posAt(move drop 2 take 2)
+          orig <- posAt(move take 2)
+          dest <- posAt(move drop 2 take 2)
           promotion = move lift 4 flatMap Role.promotable
         } yield Move(orig, dest, promotion)
       }
     }
 
     def piotr(move: String) = for {
-      orig ← move.headOption flatMap Board.BoardSize.max.piotr
-      dest ← move lift 1 flatMap Board.BoardSize.max.piotr
+      orig <- move.headOption flatMap Board.BoardSize.max.piotr
+      dest <- move lift 1 flatMap Board.BoardSize.max.piotr
       promotion = move lift 2 flatMap Role.promotable
     } yield Move(orig, dest, promotion)
 
     def fromStrings(origS: String, destS: String, promS: Option[String]) = for {
-      orig ← Board.BoardSize.max.posAt(origS)
-      dest ← Board.BoardSize.max.posAt(destS)
+      orig <- Board.BoardSize.max.posAt(origS)
+      dest <- Board.BoardSize.max.posAt(destS)
       promotion = Role promotable promS
     } yield Move(orig, dest, promotion)
 

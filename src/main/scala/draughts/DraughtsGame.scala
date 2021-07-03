@@ -1,5 +1,7 @@
 package draughts
 
+import cats.data.Validated
+
 import format.{ pdn, Uci }
 
 case class DraughtsGame(
@@ -19,7 +21,7 @@ case class DraughtsGame(
     finalSquare: Boolean = false,
     captures: Option[List[Pos]] = None,
     partialCaptures: Boolean = false
-  ): Valid[(DraughtsGame, Move)] =
+  ): Validated[String, (DraughtsGame, Move)] =
     situation.move(orig, dest, promotion, finalSquare, none, captures, partialCaptures).map { fullMove =>
       val gameWithMove = if (partialCaptures && finalSquare && fullMove.dest != dest && captures.exists(_.size > 1)) {
         val steps = captures.get.reverse
@@ -85,7 +87,7 @@ case class DraughtsGame(
     }
   }
 
-  def apply(uci: Uci.Move): Valid[(DraughtsGame, Move)] = apply(uci.orig, uci.dest, uci.promotion)
+  def apply(uci: Uci.Move): Validated[String, (DraughtsGame, Move)] = apply(uci.orig, uci.dest, uci.promotion)
 
   def displayTurns = if (situation.ghosts == 0) turns else turns + 1
 

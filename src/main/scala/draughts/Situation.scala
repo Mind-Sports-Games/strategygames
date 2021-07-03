@@ -1,5 +1,8 @@
 package draughts
 
+import cats.data.Validated
+import cats.implicits._
+
 import format.Uci
 
 import scala.collection.breakOut
@@ -83,10 +86,10 @@ case class Situation(board: Board, color: Color) {
     else if (autoDraw) Status.Draw.some
     else none
 
-  def move(from: Pos, to: Pos, promotion: Option[PromotableRole] = None, finalSquare: Boolean = false, forbiddenUci: Option[List[String]] = None, captures: Option[List[Pos]] = None, partialCaptures: Boolean = false): Valid[Move] =
+  def move(from: Pos, to: Pos, promotion: Option[PromotableRole] = None, finalSquare: Boolean = false, forbiddenUci: Option[List[String]] = None, captures: Option[List[Pos]] = None, partialCaptures: Boolean = false): Validated[String, Move] =
     board.variant.move(this, from, to, promotion, finalSquare, forbiddenUci, captures, partialCaptures)
 
-  def move(uci: Uci.Move): Valid[Move] =
+  def move(uci: Uci.Move): Validated[String, Move] =
     board.variant.move(this, uci.orig, uci.dest, uci.promotion)
 
   def withHistory(history: DraughtsHistory) = copy(
