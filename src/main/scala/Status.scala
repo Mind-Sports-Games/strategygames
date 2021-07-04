@@ -1,8 +1,8 @@
-package draughts
+package strategygames
 
 sealed abstract class Status(val id: Int) extends Ordered[Status] {
 
-  val name = toString.head.toLower + toString.tail
+  val name = s"${toString.head.toLower}${toString.tail}"
 
   def compare(other: Status) = id compare other.id
 
@@ -44,12 +44,14 @@ object Status {
   )
 
   val finishedNotCheated = all filter { s =>
-    s.id >= Mate.id && s.id != Cheat.id && s.id != Stalemate.id
+    s.id >= Mate.id && s.id != Cheat.id
   }
 
   val finishedWithWinner = List(Mate, Resign, Timeout, Outoftime, Cheat, NoStart, VariantEnd)
 
-  val byId = all map { v => (v.id, v) } toMap
+  val byId = all map { v =>
+    (v.id, v)
+  } toMap
 
   def apply(id: Int): Option[Status] = byId get id
 }

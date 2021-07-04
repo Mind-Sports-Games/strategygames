@@ -1,4 +1,5 @@
 package strategygames.chess
+import strategygames.Status
 
 import cats.data.Validated
 import cats.implicits._
