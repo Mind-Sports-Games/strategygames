@@ -1,6 +1,6 @@
-package chess
+package strategygames.chess
 
-import chess.format.FEN
+import strategygames.chess.format.FEN
 
 case class StartingPosition(
     eco: String,

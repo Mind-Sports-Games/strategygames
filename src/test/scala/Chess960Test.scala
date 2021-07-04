@@ -1,8 +1,8 @@
-package chess
+package strategygames.chess
 
 import variant.Chess960
 
-import chess.format.FEN
+import strategygames.chess.format.FEN
 
 class Chess960Test extends ChessTest {
 

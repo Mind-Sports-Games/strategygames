@@ -1,9 +1,9 @@
-package chess
+package strategygames.chess
 
 import cats.data.Validated
 import cats.implicits._
 
-import chess.format.Uci
+import strategygames.chess.format.Uci
 
 case class Situation(board: Board, color: Color) {
 
@@ -71,7 +71,7 @@ case class Situation(board: Board, color: Color) {
       board = board withHistory history
     )
 
-  def withVariant(variant: chess.variant.Variant) =
+  def withVariant(variant: strategygames.chess.variant.Variant) =
     copy(
       board = board withVariant variant
     )
@@ -102,5 +102,5 @@ case class Situation(board: Board, color: Color) {
 
 object Situation {
 
-  def apply(variant: chess.variant.Variant): Situation = Situation(Board init variant, variant.startColor)
+  def apply(variant: strategygames.chess.variant.Variant): Situation = Situation(Board init variant, variant.startColor)
 }

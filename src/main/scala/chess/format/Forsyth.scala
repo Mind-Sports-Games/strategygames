@@ -1,8 +1,8 @@
-package chess
-package format
+package strategygames.chess.format
 
 import cats.implicits._
-import variant.{ Standard, Variant }
+import strategygames.chess._
+import strategygames.chess.variant.{ Standard, Variant }
 
 /** Transform a game to standard Forsyth Edwards Notation
   * http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
@@ -130,7 +130,7 @@ object Forsyth {
       if (promoted.isEmpty) board else board.withCrazyData(_.copy(promoted = promoted))
     } map { board =>
       pockets.fold(board) { str =>
-        import chess.variant.Crazyhouse.{ Pocket, Pockets }
+        import strategygames.chess.variant.Crazyhouse.{ Pocket, Pockets }
         val (white, black) = str.toList.flatMap(Piece.fromChar).partition(_ is White)
         board.withCrazyData(
           _.copy(

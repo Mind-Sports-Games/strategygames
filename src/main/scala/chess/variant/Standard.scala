@@ -1,5 +1,5 @@
-package chess
-package variant
+package strategygames.chess.variant
+import strategygames.chess._
 
 case object Standard
     extends Variant(

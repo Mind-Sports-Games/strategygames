@@ -1,10 +1,10 @@
-package chess
+package strategygames.chess
 import strategygames.{ Clock, MoveMetrics }
 
 import cats.data.Validated
 
-import chess.format.FEN
-import chess.format.{ pgn, Uci }
+import strategygames.chess.format.FEN
+import strategygames.chess.format.{ pgn, Uci }
 
 case class Game(
     situation: Situation,
@@ -74,7 +74,7 @@ case class Game(
 
   def board = situation.board
 
-  def isStandardInit = board.pieces == chess.variant.Standard.pieces
+  def isStandardInit = board.pieces == strategygames.chess.variant.Standard.pieces
 
   def halfMoveClock: Int = board.history.halfMoveClock
 
@@ -95,15 +95,15 @@ case class Game(
 }
 
 object Game {
-  def apply(variant: chess.variant.Variant): Game =
+  def apply(variant: strategygames.chess.variant.Variant): Game =
     new Game(Situation(Board init variant, White))
 
   def apply(board: Board): Game = apply(board, White)
 
   def apply(board: Board, color: Color): Game = new Game(Situation(board, color))
 
-  def apply(variantOption: Option[chess.variant.Variant], fen: Option[FEN]): Game = {
-    val variant = variantOption | chess.variant.Standard
+  def apply(variantOption: Option[strategygames.chess.variant.Variant], fen: Option[FEN]): Game = {
+    val variant = variantOption | strategygames.chess.variant.Standard
     val g       = apply(variant)
     fen
       .flatMap {

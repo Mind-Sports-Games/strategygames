@@ -1,10 +1,10 @@
-package chess
+package strategygames.chess
 
 import cats.syntax.option._
 
-import chess.format.FEN
-import chess.Pos._
-import chess.variant.Standard
+import strategygames.chess.format.FEN
+import strategygames.chess.Pos._
+import strategygames.chess.variant.Standard
 
 class PromotionTest extends ChessTest {
 

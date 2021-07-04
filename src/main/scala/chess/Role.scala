@@ -1,4 +1,4 @@
-package chess
+package strategygames.chess
 
 sealed trait Role {
   val forsyth: Char

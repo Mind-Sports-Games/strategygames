@@ -1,4 +1,4 @@
-package chess
+package strategygames.chess
 
 case class Piece(color: Color, role: Role) {
 

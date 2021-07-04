@@ -1,7 +1,7 @@
-package chess
+package strategygames.chess
 
-import chess.format.FEN
-import chess.variant.Chess960
+import strategygames.chess.format.FEN
+import strategygames.chess.variant.Chess960
 
 class PerftTest extends ChessTest {
 

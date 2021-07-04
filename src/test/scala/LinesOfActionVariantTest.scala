@@ -1,7 +1,7 @@
-package chess
+package strategygames.chess
 
 import variant.LinesOfAction
-import chess.format.FEN
+import strategygames.chess.format.FEN
 
 class LinesOfActionVariantTest extends ChessTest {
 

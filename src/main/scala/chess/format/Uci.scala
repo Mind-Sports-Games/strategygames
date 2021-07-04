@@ -1,5 +1,5 @@
-package chess
-package format
+package strategygames.chess.format
+import strategygames.chess._
 
 import cats.data.Validated
 import cats.implicits._
@@ -81,9 +81,9 @@ object Uci {
 
   case class WithSan(uci: Uci, san: String)
 
-  def apply(move: chess.Move) = Uci.Move(move.orig, move.dest, move.promotion)
+  def apply(move: strategygames.chess.Move) = Uci.Move(move.orig, move.dest, move.promotion)
 
-  def apply(drop: chess.Drop) = Uci.Drop(drop.piece.role, drop.pos)
+  def apply(drop: strategygames.chess.Drop) = Uci.Drop(drop.piece.role, drop.pos)
 
   def apply(move: String): Option[Uci] =
     if (move lift 1 contains '@') for {

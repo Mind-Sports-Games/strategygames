@@ -1,7 +1,7 @@
-package chess
-package variant
+package strategygames.chess.variant
 
-import chess.format.FEN
+import strategygames.chess._
+import strategygames.chess.format.FEN
 
 case object Chess960
     extends Variant(

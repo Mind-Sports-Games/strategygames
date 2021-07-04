@@ -1,4 +1,4 @@
-package chess
+package strategygames.chess
 
 sealed abstract class Status(val id: Int) extends Ordered[Status] {
 

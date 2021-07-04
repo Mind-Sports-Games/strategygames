@@ -1,4 +1,4 @@
-package chess
+package strategygames.chess
 
 case class File private (val index: Int) extends AnyVal with Ordered[File] {
   @inline def -(that: File): Int           = index - that.index

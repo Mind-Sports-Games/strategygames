@@ -1,12 +1,12 @@
-package chess
+package strategygames.chess
 
-import cats.syntax.option._
+import cats.implicits._
+
 import org.specs2.matcher.ValidatedMatchers
 
-import chess.format.FEN
-import chess.format.Forsyth
-import chess.format.pgn.Reader
-import chess.variant.Antichess
+import strategygames.chess.format.{ FEN, Forsyth }
+import strategygames.chess.format.pgn.Reader
+import strategygames.chess.variant.Antichess
 
 class AntichessVariantTest extends ChessTest with ValidatedMatchers {
 

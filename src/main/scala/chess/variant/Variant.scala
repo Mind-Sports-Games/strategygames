@@ -1,11 +1,11 @@
-package chess
-package variant
+package strategygames.chess.variant
 
 import cats.data.Validated
 import cats.syntax.option._
 import scala.annotation.nowarn
 
-import chess.format.FEN
+import strategygames.chess._
+import strategygames.chess.format.FEN
 
 // Correctness depends on singletons for each variant ID
 abstract class Variant private[variant] (
@@ -241,18 +241,18 @@ object Variant {
   def exists(id: Int): Boolean = byId contains id
 
   val openingSensibleVariants: Set[Variant] = Set(
-    chess.variant.Standard,
-    chess.variant.Crazyhouse,
-    chess.variant.ThreeCheck,
-    chess.variant.KingOfTheHill
+    strategygames.chess.variant.Standard,
+    strategygames.chess.variant.Crazyhouse,
+    strategygames.chess.variant.ThreeCheck,
+    strategygames.chess.variant.KingOfTheHill
   )
 
   val divisionSensibleVariants: Set[Variant] = Set(
-    chess.variant.Standard,
-    chess.variant.Chess960,
-    chess.variant.ThreeCheck,
-    chess.variant.KingOfTheHill,
-    chess.variant.FromPosition
+    strategygames.chess.variant.Standard,
+    strategygames.chess.variant.Chess960,
+    strategygames.chess.variant.ThreeCheck,
+    strategygames.chess.variant.KingOfTheHill,
+    strategygames.chess.variant.FromPosition
   )
 
   private[variant] def symmetricRank(rank: IndexedSeq[Role]): Map[Pos, Piece] =

@@ -1,5 +1,4 @@
-package chess
-package opening
+package strategygames.chess.opening
 
 // format: off
 object EcopeningDB {

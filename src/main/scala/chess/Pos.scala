@@ -1,4 +1,4 @@
-package chess
+package strategygames.chess
 
 import scala.math.{ abs, max, min }
 

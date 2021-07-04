@@ -1,4 +1,4 @@
-package chess
+package strategygames.chess
 package format.pgn
 import strategygames.{ Clock, GameLib }
 
@@ -53,7 +53,7 @@ object Reader {
 
   private def makeGame(tags: Tags) = {
     val g = Game(
-      variantOption = tags(_.Variant) flatMap chess.variant.Variant.byName,
+      variantOption = tags(_.Variant) flatMap strategygames.chess.variant.Variant.byName,
       fen = tags.fen
     )
     g.copy(

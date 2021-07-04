@@ -1,7 +1,7 @@
-package chess
+package strategygames.chess
 
-import chess.Pos._
-import chess.variant.FromPosition
+import strategygames.chess.Pos._
+import strategygames.chess.variant.FromPosition
 
 class CastleTest extends ChessTest {
 

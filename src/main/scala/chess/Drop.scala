@@ -1,9 +1,9 @@
-package chess
+package strategygames.chess
 import strategygames.MoveMetrics
 
 import cats.syntax.option.none
 
-import chess.format.Uci
+import strategygames.chess.format.Uci
 
 case class Drop(
     piece: Piece,

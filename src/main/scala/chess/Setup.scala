@@ -1,6 +1,6 @@
-package chess
+package strategygames.chess
 
 object Setup {
 
-  def apply(variant: chess.variant.Variant) = Game(variant)
+  def apply(variant: strategygames.chess.variant.Variant) = Game(variant)
 }

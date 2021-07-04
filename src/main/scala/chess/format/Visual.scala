@@ -1,5 +1,5 @@
-package chess
-package format
+package strategygames.chess.format
+import strategygames.chess._
 
 /** r bqkb r
   * p ppp pp
@@ -29,7 +29,7 @@ object Visual {
           pos -> (Color.fromWhite(c isUpper) - role)
         }
       }) flatten,
-      variant = chess.variant.Variant.default
+      variant = strategygames.chess.variant.Variant.default
     )
   }
 

@@ -1,7 +1,7 @@
-package chess
+package strategygames.chess
 package format.pgn
 
-import chess.variant.Variant
+import strategygames.chess.variant.Variant
 
 import scala.util.parsing.combinator._
 import cats.data.Validated

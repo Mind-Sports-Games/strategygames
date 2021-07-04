@@ -1,4 +1,4 @@
-package chess
+package strategygames.chess
 
 final class Hash(size: Int) {
 

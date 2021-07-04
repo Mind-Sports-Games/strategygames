@@ -1,5 +1,5 @@
-package chess
-package format
+package strategygames.chess.format
+import strategygames.chess._
 
 case class UciCharPair(a: Char, b: Char) {
 

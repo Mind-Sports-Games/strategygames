@@ -1,9 +1,9 @@
-package chess
+package strategygames.chess
 
 import cats.syntax.option._
 
-import chess.format.FEN
-import chess.variant.Crazyhouse
+import strategygames.chess.format.FEN
+import strategygames.chess.variant.Crazyhouse
 
 class CrazyhouseVariantTest extends ChessTest {
 
@@ -286,8 +286,8 @@ class CrazyhouseVariantTest extends ChessTest {
     }
 
     "destinations prod bug on game VVXRgsQT" in {
-      import chess.Pos._
-      chess
+      import strategygames.chess.Pos._
+      strategygames.chess
         .Game(
           Crazyhouse.some,
           FEN("r2q1b1r/p2k1Ppp/2p2p2/4p3/P2nP2n/3P1PRP/1PPB1K1q~/RN1Q1B2/Npb w - - 40 21").some
@@ -301,7 +301,7 @@ class CrazyhouseVariantTest extends ChessTest {
     }
 
     "replay ZH" in {
-      chess.Replay.boards(
+      strategygames.chess.Replay.boards(
         moveStrs = Vector(
           "e4",
           "c5",

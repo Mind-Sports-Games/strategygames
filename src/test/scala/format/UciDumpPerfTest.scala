@@ -1,4 +1,4 @@
-package chess
+package strategygames.chess
 package format
 
 class UciDumpPerfTest extends ChessTest {

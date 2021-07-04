@@ -1,9 +1,9 @@
-package chess
+package strategygames.chess
 package format.pgn
 
 object Dumper {
 
-  def apply(situation: Situation, data: chess.Move, next: Situation): String = {
+  def apply(situation: Situation, data: strategygames.chess.Move, next: Situation): String = {
     import data._
 
     ((promotion, piece.role) match {
@@ -50,7 +50,7 @@ object Dumper {
     }
   }
 
-  def apply(data: chess.Drop, next: Situation): String = {
+  def apply(data: strategygames.chess.Drop, next: Situation): String = {
     data.toUci.uci + {
       if (next.check) {
         if (next.checkMate) "#" else "+"
@@ -59,14 +59,14 @@ object Dumper {
     }
   }
 
-  def apply(data: chess.Move): String =
+  def apply(data: strategygames.chess.Move): String =
     apply(
       data.situationBefore,
       data,
       data.finalizeAfter situationOf !data.color
     )
 
-  def apply(data: chess.Drop): String =
+  def apply(data: strategygames.chess.Drop): String =
     apply(
       data,
       data.finalizeAfter situationOf !data.color

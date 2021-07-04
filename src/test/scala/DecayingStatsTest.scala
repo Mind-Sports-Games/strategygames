@@ -1,10 +1,10 @@
-package chess
+package strategygames.chess
 
 import org.specs2.mutable.Specification
 
 class DecayingStatsTest extends Specification {
 
-  import chess.{ DecayingStats => DS }
+  import strategygames.{ DecayingStats => DS }
 
   val random = new java.util.Random(2286825201242408115L)
 

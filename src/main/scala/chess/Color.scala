@@ -1,4 +1,4 @@
-package chess
+package strategygames.chess
 
 sealed trait Color {
 
@@ -103,15 +103,15 @@ object Color {
 
   def showResult(color: Option[Color]) =
     color match {
-      case Some(chess.White) => "1-0"
-      case Some(chess.Black) => "0-1"
+      case Some(White) => "1-0"
+      case Some(Black) => "0-1"
       case None              => "1/2-1/2"
     }
 
   def fromResult(result: String): Option[Color] =
     result match {
-      case "1-0" => Option(chess.White)
-      case "0-1" => Option(chess.Black)
+      case "1-0" => Option(White)
+      case "0-1" => Option(Black)
       case _     => None
     }
 }

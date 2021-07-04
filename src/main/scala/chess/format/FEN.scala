@@ -1,6 +1,6 @@
-package chess.format
+package strategygames.chess.format
 
-import chess.Color
+import strategygames.chess.Color
 
 final case class FEN(value: String) extends AnyVal {
 

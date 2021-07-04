@@ -1,5 +1,4 @@
-package chess
-package variant
+package strategygames.chess.variant
 
 case object FromPosition
     extends Variant(

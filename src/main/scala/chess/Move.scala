@@ -1,7 +1,7 @@
-package chess
+package strategygames.chess
 import strategygames.MoveMetrics
 
-import chess.format.Uci
+import strategygames.chess.format.Uci
 import cats.syntax.option._
 
 case class Move(

@@ -1,3 +1,4 @@
+package strategygames
 import ornicar.scalalib
 
 package object chess extends scalalib.Common with scalalib.OrnicarOption with scalalib.OrnicarBoolean {

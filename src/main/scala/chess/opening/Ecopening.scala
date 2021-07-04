@@ -1,5 +1,5 @@
-package chess
-package opening
+package strategygames.chess.opening
+import strategygames.chess._
 
 import cats.syntax.option._
 

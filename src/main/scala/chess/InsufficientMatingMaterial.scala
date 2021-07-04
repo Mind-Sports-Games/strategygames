@@ -1,4 +1,4 @@
-package chess
+package strategygames.chess
 
 /** Utility methods for helping to determine whether a situation is a draw or a draw
   * on a player flagging.

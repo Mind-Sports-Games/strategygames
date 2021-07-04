@@ -1,9 +1,9 @@
-package chess
-package format
+package strategygames.chess.format
 
 import cats.data.Validated
 
-import chess.variant.Variant
+import strategygames.chess.variant.Variant
+import strategygames.chess.{ MoveOrDrop, Replay }
 
 object UciDump {
 

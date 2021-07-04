@@ -1,9 +1,8 @@
-package chess
-package opening
+package strategygames.chess.opening
 
 import cats.syntax.option._
 
-import chess.format.FEN
+import strategygames.chess.format.FEN
 
 object FullOpeningDB {
 
@@ -28,17 +27,17 @@ object FullOpeningDB {
 
   // assumes standard initial FEN and variant
   def search(moveStrs: Iterable[String]): Option[FullOpening.AtPly] =
-    chess.Replay
+    strategygames.chess.Replay
       .situations(
         moveStrs.take(SEARCH_MAX_PLIES).takeWhile(san => !san.contains('@')),
         None,
-        variant.Standard
+        strategygames.chess.variant.Standard
       )
       .toOption
       .flatMap {
         _.zipWithIndex.drop(1).foldRight(none[FullOpening.AtPly]) {
           case ((situation, ply), None) =>
-            val fen = format.Forsyth.exportStandardPositionTurnCastlingEp(situation)
+            val fen = strategygames.chess.format.Forsyth.exportStandardPositionTurnCastlingEp(situation)
             byFen get fen map (_ atPly ply)
           case (_, found) => found
         }

@@ -1,4 +1,4 @@
-package chess
+package strategygames.chess
 package format.pgn
 
 import cats.data.Validated
@@ -57,8 +57,8 @@ case class Std(
 
   def withMetas(m: Metas) = copy(metas = m)
 
-  def move(situation: Situation): Validated[String, chess.Move] =
-    situation.board.pieces.foldLeft(none[chess.Move]) {
+  def move(situation: Situation): Validated[String, strategygames.chess.Move] =
+    situation.board.pieces.foldLeft(none[strategygames.chess.Move]) {
       case (None, (pos, piece))
           if piece.color == situation.color && piece.role == role && compare(
             file,
@@ -90,7 +90,7 @@ case class Drop(
 
   def withMetas(m: Metas) = copy(metas = m)
 
-  def drop(situation: Situation): Validated[String, chess.Drop] =
+  def drop(situation: Situation): Validated[String, strategygames.chess.Drop] =
     situation.drop(role, pos)
 }
 
@@ -133,7 +133,7 @@ case class Castle(
 
   def withMetas(m: Metas) = copy(metas = m)
 
-  def move(situation: Situation): Validated[String, chess.Move] =
+  def move(situation: Situation): Validated[String, strategygames.chess.Move] =
     for {
       kingPos <- situation.board kingPosOf situation.color toValid "No king found"
       actor   <- situation.board actorAt kingPos toValid "No actor found"

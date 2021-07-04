@@ -1,4 +1,4 @@
-package chess
+package strategygames.chess
 package format.pgn
 import strategygames.Clock
 
@@ -32,10 +32,10 @@ case class Tags(value: List[Tag]) extends AnyVal {
       str
     } flatMap Clock.readPgnConfig
 
-  def variant: Option[chess.variant.Variant] =
+  def variant: Option[strategygames.chess.variant.Variant] =
     apply(_.Variant).map(_.toLowerCase).flatMap {
-      case "chess 960" | "fischerandom" | "fischerrandom" => chess.variant.Chess960.some
-      case name                                           => chess.variant.Variant byName name
+      case "chess 960" | "fischerandom" | "fischerrandom" => strategygames.chess.variant.Chess960.some
+      case name                                           => strategygames.chess.variant.Variant byName name
     }
 
   def anyDate: Option[String] = apply(_.UTCDate) orElse apply(_.Date)

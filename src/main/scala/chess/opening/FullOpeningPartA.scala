@@ -1,5 +1,4 @@
-package chess
-package opening
+package strategygames.chess.opening
 
 // Generated from https://github.com/niklasf/eco
 // format: off

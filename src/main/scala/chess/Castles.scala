@@ -1,4 +1,4 @@
-package chess
+package strategygames.chess
 
 final case class Castles(
     whiteKingSide: Boolean,

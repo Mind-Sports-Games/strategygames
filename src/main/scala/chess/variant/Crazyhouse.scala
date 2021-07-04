@@ -1,10 +1,10 @@
-package chess
-package variant
+package strategygames.chess.variant
 
-import chess.format.Uci
 import cats.syntax.option._
 import cats.data.Validated
-import chess.format.FEN
+import strategygames.chess._
+import strategygames.chess.format.Uci
+import strategygames.chess.format.FEN
 
 case object Crazyhouse
     extends Variant(
@@ -69,7 +69,7 @@ case object Crazyhouse
       val roles = data.pockets(situation.color).roles
       roles.nonEmpty && possibleDrops(situation).fold(true) { squares =>
         squares.nonEmpty && {
-          squares.exists(canDropPawnOn) || roles.exists(chess.Pawn !=)
+          squares.exists(canDropPawnOn) || roles.exists(strategygames.chess.Pawn !=)
         }
       }
     }

@@ -1,12 +1,12 @@
-package chess
+package strategygames.chess
 
 import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
-import chess.format.pgn.San
-import chess.format.pgn.{ Parser, Reader, Tag, Tags }
-import chess.format.{ FEN, Forsyth, Uci }
+import strategygames.chess.format.pgn.San
+import strategygames.chess.format.pgn.{ Parser, Reader, Tag, Tags }
+import strategygames.chess.format.{ FEN, Forsyth, Uci }
 
 case class Replay(setup: Game, moves: List[MoveOrDrop], state: Game) {
 
@@ -29,7 +29,7 @@ object Replay {
   def apply(
       moveStrs: Iterable[String],
       initialFen: Option[FEN],
-      variant: chess.variant.Variant
+      variant: strategygames.chess.variant.Variant
   ): Validated[String, Reader.Result] =
     moveStrs.some.filter(_.nonEmpty) toValid "[replay] pgn is empty" andThen { nonEmptyMoves =>
       Reader.moves(
@@ -60,7 +60,7 @@ object Replay {
   def games(
       moveStrs: Iterable[String],
       initialFen: Option[FEN],
-      variant: chess.variant.Variant
+      variant: strategygames.chess.variant.Variant
   ): Validated[String, List[Game]] =
     Parser.moves(moveStrs, variant) andThen { moves =>
       val game = makeGame(variant, initialFen)
@@ -70,7 +70,7 @@ object Replay {
   def gameMoveWhileValid(
       moveStrs: Seq[String],
       initialFen: FEN,
-      variant: chess.variant.Variant
+      variant: strategygames.chess.variant.Variant
   ): (Game, List[(Game, Uci.WithSan)], Option[String]) = {
 
     def mk(g: Game, moves: List[(San, String)]): (List[(Game, Uci.WithSan)], Option[String]) =
@@ -131,20 +131,23 @@ object Replay {
         }
     }
 
-  private def initialFenToSituation(initialFen: Option[FEN], variant: chess.variant.Variant): Situation = {
-    initialFen.flatMap(Forsyth.<<) | Situation(chess.variant.Standard)
+  private def initialFenToSituation(
+      initialFen: Option[FEN],
+      variant: strategygames.chess.variant.Variant
+  ): Situation = {
+    initialFen.flatMap(Forsyth.<<) | Situation(strategygames.chess.variant.Standard)
   } withVariant variant
 
   def boards(
       moveStrs: Iterable[String],
       initialFen: Option[FEN],
-      variant: chess.variant.Variant
+      variant: strategygames.chess.variant.Variant
   ): Validated[String, List[Board]] = situations(moveStrs, initialFen, variant) map (_ map (_.board))
 
   def situations(
       moveStrs: Iterable[String],
       initialFen: Option[FEN],
-      variant: chess.variant.Variant
+      variant: strategygames.chess.variant.Variant
   ): Validated[String, List[Situation]] = {
     val sit = initialFenToSituation(initialFen, variant)
     Parser.moves(moveStrs, sit.board.variant) andThen { moves =>
@@ -155,13 +158,13 @@ object Replay {
   def boardsFromUci(
       moves: List[Uci],
       initialFen: Option[FEN],
-      variant: chess.variant.Variant
+      variant: strategygames.chess.variant.Variant
   ): Validated[String, List[Board]] = situationsFromUci(moves, initialFen, variant) map (_ map (_.board))
 
   def situationsFromUci(
       moves: List[Uci],
       initialFen: Option[FEN],
-      variant: chess.variant.Variant
+      variant: strategygames.chess.variant.Variant
   ): Validated[String, List[Situation]] = {
     val sit = initialFenToSituation(initialFen, variant)
     recursiveSituationsFromUci(sit, moves) map { sit :: _ }
@@ -170,14 +173,14 @@ object Replay {
   def apply(
       moves: List[Uci],
       initialFen: Option[FEN],
-      variant: chess.variant.Variant
+      variant: strategygames.chess.variant.Variant
   ): Validated[String, Replay] =
     recursiveReplayFromUci(Replay(makeGame(variant, initialFen)), moves)
 
   def plyAtFen(
       moveStrs: Iterable[String],
       initialFen: Option[FEN],
-      variant: chess.variant.Variant,
+      variant: strategygames.chess.variant.Variant,
       atFen: FEN
   ): Validated[String, Int] =
     if (Forsyth.<<@(variant, atFen).isEmpty) invalid(s"Invalid FEN $atFen")
@@ -209,7 +212,7 @@ object Replay {
       }
     }
 
-  private def makeGame(variant: chess.variant.Variant, initialFen: Option[FEN]): Game = {
+  private def makeGame(variant: strategygames.chess.variant.Variant, initialFen: Option[FEN]): Game = {
     val g = Game(variant.some, initialFen)
     g.copy(startedAtTurn = g.turns)
   }
