@@ -4,6 +4,7 @@ import cats.implicits._
 
 import org.specs2.matcher.ValidatedMatchers
 
+import strategygames.Status
 import strategygames.chess.format.{ FEN, Forsyth }
 import strategygames.chess.format.pgn.Reader
 import strategygames.chess.variant.Antichess

@@ -2,6 +2,7 @@ package strategygames.chess
 
 import cats.syntax.option._
 
+import strategygames.Status
 import strategygames.chess.variant.Atomic
 import strategygames.chess.format.FEN
 

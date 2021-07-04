@@ -1,6 +1,4 @@
-package draughts
-
-import cats.implicits._
+package strategygames
 
 sealed abstract class Mode(val id: Int) {
 
@@ -19,7 +17,9 @@ object Mode {
 
   val all = List(Casual, Rated)
 
-  val byId = all map { v => (v.id, v) } toMap
+  val byId = all map { v =>
+    (v.id, v)
+  } toMap
 
   def apply(id: Int): Option[Mode] = byId get id
 
