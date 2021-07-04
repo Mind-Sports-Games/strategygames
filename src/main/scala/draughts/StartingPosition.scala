@@ -1,4 +1,4 @@
-package draughts
+package strategygames.draughts
 
 import variant.{ Standard, Variant }
 

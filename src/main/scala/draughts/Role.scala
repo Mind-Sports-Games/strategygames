@@ -1,4 +1,4 @@
-package draughts
+package strategygames.draughts
 
 sealed trait Role {
   val forsyth: Char

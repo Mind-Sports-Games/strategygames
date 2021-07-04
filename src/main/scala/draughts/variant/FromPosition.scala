@@ -1,4 +1,4 @@
-package draughts
+package strategygames.draughts
 package variant
 
 case object FromPosition
@@ -22,6 +22,6 @@ case object FromPosition
   def moveDirsAll   = Standard.moveDirsAll
 
   def maxDrawingMoves(board: Board): Option[Int] = Standard.maxDrawingMoves(board)
-  def updatePositionHashes(board: Board, move: Move, hash: draughts.PositionHash): PositionHash =
+  def updatePositionHashes(board: Board, move: Move, hash: strategygames.draughts.PositionHash): PositionHash =
     Standard.updatePositionHashes(board, move, hash)
 }

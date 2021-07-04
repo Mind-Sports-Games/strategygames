@@ -1,4 +1,4 @@
-package draughts
+package strategygames.draughts
 package opening
 
 import format.FEN
@@ -28,7 +28,7 @@ object FullOpeningDB {
 
   // assumes standard initial FEN and variant
   def search(moveStrs: Traversable[String]): Option[FullOpening.AtPly] =
-    draughts.Replay.boards(moveStrs take SEARCH_MAX_PLIES, None, variant.Standard).toOption.flatMap {
+    strategygames.draughts.Replay.boards(moveStrs take SEARCH_MAX_PLIES, None, variant.Standard).toOption.flatMap {
       _.zipWithIndex.drop(1).foldRight(none[FullOpening.AtPly]) {
         case ((board, ply), None) =>
           val fen = format.Forsyth.exportStandardPositionTurn(board, ply)

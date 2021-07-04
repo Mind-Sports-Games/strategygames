@@ -1,4 +1,4 @@
-package draughts
+package strategygames.draughts
 package variant
 
 import cats.data.Validated
@@ -421,7 +421,7 @@ abstract class Variant private[variant] (
     */
   def maxDrawingMoves(board: Board): Option[Int]
 
-  def updatePositionHashes(board: Board, move: Move, hash: draughts.PositionHash): PositionHash
+  def updatePositionHashes(board: Board, move: Move, hash: strategygames.draughts.PositionHash): PositionHash
 
   /** Once a move has been decided upon from the available legal moves, the board is finalized
     * This removes any reaining ghostpieces if the capture sequence has ended
@@ -512,21 +512,21 @@ object Variant {
   def exists(id: Int): Boolean = byId contains id
 
   val openingSensibleVariants: Set[Variant] = Set(
-    draughts.variant.Standard,
-    draughts.variant.Frisian,
-    draughts.variant.Breakthrough,
-    draughts.variant.Russian,
-    draughts.variant.Brazilian
+    strategygames.draughts.variant.Standard,
+    strategygames.draughts.variant.Frisian,
+    strategygames.draughts.variant.Breakthrough,
+    strategygames.draughts.variant.Russian,
+    strategygames.draughts.variant.Brazilian
   )
 
   val divisionSensibleVariants: Set[Variant] = Set(
-    draughts.variant.Standard,
-    draughts.variant.Frisian,
-    draughts.variant.Antidraughts,
-    draughts.variant.Breakthrough,
-    draughts.variant.Russian,
-    draughts.variant.Brazilian,
-    draughts.variant.FromPosition
+    strategygames.draughts.variant.Standard,
+    strategygames.draughts.variant.Frisian,
+    strategygames.draughts.variant.Antidraughts,
+    strategygames.draughts.variant.Breakthrough,
+    strategygames.draughts.variant.Russian,
+    strategygames.draughts.variant.Brazilian,
+    strategygames.draughts.variant.FromPosition
   )
 
   private[variant] def symmetricFourRank(

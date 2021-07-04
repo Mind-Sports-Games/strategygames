@@ -1,4 +1,4 @@
-package draughts
+package strategygames.draughts
 package format.pdn
 
 case class Glyph(id: Int, symbol: String, name: String) {

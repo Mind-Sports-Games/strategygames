@@ -1,4 +1,4 @@
-package draughts
+package strategygames.draughts
 package variant
 
 import cats.implicits._
@@ -37,7 +37,7 @@ case object Frysk
   ): Board = Frisian.finalizeBoard(board, uci, captured, situationBefore, finalSquare)
 
   def maxDrawingMoves(board: Board): Option[Int] = Frisian.maxDrawingMoves(board)
-  def updatePositionHashes(board: Board, move: Move, hash: draughts.PositionHash): PositionHash =
+  def updatePositionHashes(board: Board, move: Move, hash: strategygames.draughts.PositionHash): PositionHash =
     Frisian.updatePositionHashes(board, move, hash)
 
   override protected def validSide(board: Board, strict: Boolean)(color: Color) = {

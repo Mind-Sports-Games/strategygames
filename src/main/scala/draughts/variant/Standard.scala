@@ -1,4 +1,4 @@
-package draughts
+package strategygames.draughts
 package variant
 
 import cats.implicits._
@@ -62,7 +62,7 @@ case object Standard
     * - When one player has only a king left, and the other player three pieces including at least one king (three kings, two kings and a man, or one king and two men), the game is drawn after both players made 16 moves.
     * - When one player has only a king left, and the other player two pieces or less, including at least one king (one king, two kings, or one king and a man), the game is drawn after both players made 5 moves.
     */
-  def updatePositionHashes(board: Board, move: Move, hash: draughts.PositionHash): PositionHash = {
+  def updatePositionHashes(board: Board, move: Move, hash: strategygames.draughts.PositionHash): PositionHash = {
     val newHash = Hash(Situation(board, !move.piece.color))
     drawingMoves(board, move.some) match {
       case Some((drawingMoves, firstPromotion)) =>

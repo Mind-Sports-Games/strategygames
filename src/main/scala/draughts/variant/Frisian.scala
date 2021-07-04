@@ -1,4 +1,4 @@
-package draughts
+package strategygames.draughts
 package variant
 
 import cats.implicits._
@@ -130,7 +130,7 @@ case object Frisian
     * - When one player has two kings and the other one, the game is drawn after both players made 7 moves.
     * - When bother players have one king left, the game is drawn after both players made 2 moves.  The official rules state that the game is drawn immediately when both players have only one king left, unless either player can capture the other king immediately or will necessarily be able to do this next move.  In absence of a good way to distinguish the positions that win by force from those that don't, this rule is implemented on lidraughts by always allowing 2 more moves to win the game.
     */
-  def updatePositionHashes(board: Board, move: Move, hash: draughts.PositionHash): PositionHash = {
+  def updatePositionHashes(board: Board, move: Move, hash: strategygames.draughts.PositionHash): PositionHash = {
     val newHash = Hash(Situation(board, !move.piece.color))
     maxDrawingMoves(board) match {
       case Some(drawingMoves) =>

@@ -1,4 +1,4 @@
-package draughts
+package strategygames.draughts
 
 import cats.syntax.option._
 

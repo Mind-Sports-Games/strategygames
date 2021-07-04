@@ -1,4 +1,4 @@
-package draughts
+package strategygames.draughts
 package opening
 
 final class FullOpening(

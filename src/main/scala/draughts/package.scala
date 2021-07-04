@@ -1,3 +1,4 @@
+package strategygames
 import ornicar.scalalib
 
 import scala.util.Try

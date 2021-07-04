@@ -1,4 +1,4 @@
-package draughts
+package strategygames.draughts
 package variant
 
 case object Brazilian
@@ -60,7 +60,7 @@ case object Brazilian
   }
 
   def maxDrawingMoves(board: Board): Option[Int] = Russian.maxDrawingMoves(board)
-  def updatePositionHashes(board: Board, move: Move, hash: draughts.PositionHash): PositionHash =
+  def updatePositionHashes(board: Board, move: Move, hash: strategygames.draughts.PositionHash): PositionHash =
     Russian.updatePositionHashes(board, move, hash)
 
   override def validSide(board: Board, strict: Boolean)(color: Color) = {

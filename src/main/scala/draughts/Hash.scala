@@ -1,4 +1,4 @@
-package draughts
+package strategygames.draughts
 
 final class Hash(size: Int) {
 

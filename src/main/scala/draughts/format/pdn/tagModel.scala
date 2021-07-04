@@ -1,4 +1,4 @@
-package draughts
+package strategygames.draughts
 package format.pdn
 import strategygames.Clock
 
@@ -31,11 +31,11 @@ case class Tags(value: List[Tag]) extends AnyVal {
       str
     } flatMap Clock.readPdnConfig
 
-  def variant: Option[draughts.variant.Variant] =
-    apply(_.GameType).fold(apply(_.Variant) flatMap draughts.variant.Variant.byName) {
+  def variant: Option[strategygames.draughts.variant.Variant] =
+    apply(_.GameType).fold(apply(_.Variant) flatMap strategygames.draughts.variant.Variant.byName) {
       case Tags.GameTypeRegex(t, _*) =>
         parseIntOption(t) match {
-          case Some(gameType) => draughts.variant.Variant byGameType gameType
+          case Some(gameType) => strategygames.draughts.variant.Variant byGameType gameType
           case _              => None
         }
       case _ => None

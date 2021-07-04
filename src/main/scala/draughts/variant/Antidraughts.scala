@@ -1,4 +1,4 @@
-package draughts
+package strategygames.draughts
 package variant
 
 case object Antidraughts
@@ -29,7 +29,7 @@ case object Antidraughts
 
   /** Update position hashes for threefold repetition. Clear after non-kingmove, capture or promotion.
     */
-  def updatePositionHashes(board: Board, move: Move, hash: draughts.PositionHash): PositionHash = {
+  def updatePositionHashes(board: Board, move: Move, hash: strategygames.draughts.PositionHash): PositionHash = {
     val newHash = Hash(Situation(board, !move.piece.color))
     if (move.captures || move.piece.isNot(King) || move.promotes) newHash else newHash ++ hash
   }

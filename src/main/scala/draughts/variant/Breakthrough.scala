@@ -1,4 +1,4 @@
-package draughts
+package strategygames.draughts
 package variant
 
 import cats.implicits._
@@ -37,7 +37,7 @@ case object Breakthrough
 
   /** No drawing rules
     */
-  def updatePositionHashes(board: Board, move: Move, hash: draughts.PositionHash): PositionHash =
+  def updatePositionHashes(board: Board, move: Move, hash: strategygames.draughts.PositionHash): PositionHash =
     Hash(Situation(board, !move.piece.color))
 
 }

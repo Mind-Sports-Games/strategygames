@@ -1,4 +1,4 @@
-package draughts
+package strategygames.draughts
 
 case class Piece(color: Color, role: Role) {
 

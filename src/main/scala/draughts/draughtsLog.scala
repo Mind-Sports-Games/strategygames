@@ -1,3 +1,3 @@
-package draughts
+package strategygames.draughts
 
 object draughtsLog {}

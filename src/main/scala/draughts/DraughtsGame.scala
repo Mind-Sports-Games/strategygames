@@ -1,4 +1,4 @@
-package draughts
+package strategygames.draughts
 import strategygames.{ Clock, MoveMetrics }
 
 import cats.data.Validated
@@ -104,7 +104,7 @@ case class DraughtsGame(
 
   def board = situation.board
 
-  def isStandardInit = board.pieces == draughts.variant.Standard.pieces
+  def isStandardInit = board.pieces == strategygames.draughts.variant.Standard.pieces
   def isInitial      = board.pieces == board.variant.pieces
 
   def halfMoveClock: Int = board.history.halfMoveClock
@@ -146,7 +146,7 @@ case class DraughtsGame(
 }
 
 object DraughtsGame {
-  def apply(variant: draughts.variant.Variant): DraughtsGame = new DraughtsGame(
+  def apply(variant: strategygames.draughts.variant.Variant): DraughtsGame = new DraughtsGame(
     Situation(Board init variant, White)
   )
 
@@ -154,8 +154,8 @@ object DraughtsGame {
 
   def apply(board: Board, color: Color): DraughtsGame = new DraughtsGame(Situation(board, color))
 
-  def apply(variantOption: Option[draughts.variant.Variant], fen: Option[String]): DraughtsGame = {
-    val variant = variantOption | draughts.variant.Standard
+  def apply(variantOption: Option[strategygames.draughts.variant.Variant], fen: Option[String]): DraughtsGame = {
+    val variant = variantOption | strategygames.draughts.variant.Standard
     val g       = apply(variant)
     fen
       .flatMap {

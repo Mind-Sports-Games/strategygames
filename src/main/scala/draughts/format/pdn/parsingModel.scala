@@ -1,4 +1,4 @@
-package draughts
+package strategygames.draughts
 package format.pdn
 
 import cats.data.Validated
@@ -24,7 +24,7 @@ sealed trait San {
       situation: Situation,
       iteratedCapts: Boolean = false,
       forbiddenUci: Option[List[String]] = None
-  ): Validated[String, draughts.Move]
+  ): Validated[String, strategygames.draughts.Move]
 
   def metas: Metas
 
@@ -55,11 +55,11 @@ case class Std(
       iteratedCapts: Boolean = false,
       forbiddenUci: Option[List[String]] = None,
       captures: Option[List[Pos]] = None
-  ): Validated[String, draughts.Move] = {
+  ): Validated[String, strategygames.draughts.Move] = {
     val src         = fields.head
     val dest        = fields.last
     val capturePath = if (capture) fields.tail.reverse else Nil
-    situation.board.pieces.foldLeft(none[draughts.Move]) {
+    situation.board.pieces.foldLeft(none[strategygames.draughts.Move]) {
       case (None, (pos, piece)) if piece.color == situation.color && pos == src =>
         val a = Actor(piece, situation.board.posAt(pos), situation.board)
         // TODO: technically we should check situation.hasCaptures instead of actor

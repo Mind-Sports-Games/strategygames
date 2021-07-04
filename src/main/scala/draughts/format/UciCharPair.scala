@@ -1,4 +1,4 @@
-package draughts
+package strategygames.draughts
 package format
 
 case class UciCharPair(a: Char, b: Char) {

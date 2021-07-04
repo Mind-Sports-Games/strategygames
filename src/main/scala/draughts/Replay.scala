@@ -1,4 +1,4 @@
-package draughts
+package strategygames.draughts
 
 import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }

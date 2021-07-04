@@ -1,9 +1,9 @@
-package draughts
+package strategygames.draughts
 package format
 
 import cats.data.Validated
 
-import draughts.variant.Variant
+import strategygames.draughts.variant.Variant
 
 object UciDump {
 

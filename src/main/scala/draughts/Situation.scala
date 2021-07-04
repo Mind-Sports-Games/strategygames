@@ -1,4 +1,4 @@
-package draughts
+package strategygames.draughts
 import strategygames.Status
 
 import cats.data.Validated
@@ -108,7 +108,7 @@ case class Situation(board: Board, color: Color) {
     board = board withHistory history
   )
 
-  def withVariant(variant: draughts.variant.Variant) = copy(
+  def withVariant(variant: strategygames.draughts.variant.Variant) = copy(
     board = board withVariant variant
   )
 
@@ -121,7 +121,7 @@ case class Situation(board: Board, color: Color) {
 
 object Situation {
 
-  def apply(variant: draughts.variant.Variant): Situation = Situation(Board init variant, White)
+  def apply(variant: strategygames.draughts.variant.Variant): Situation = Situation(Board init variant, White)
 
   def withColorAfter(board: Board, colorBefore: Color): Situation =
     if (board.ghosts == 0) Situation(board, !colorBefore)

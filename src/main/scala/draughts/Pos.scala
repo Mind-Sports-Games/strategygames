@@ -1,4 +1,4 @@
-package draughts
+package strategygames.draughts
 
 sealed abstract class Pos(val fieldNumber: Int) {
 

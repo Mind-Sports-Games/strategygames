@@ -1,4 +1,4 @@
-package draughts
+package strategygames.draughts
 package variant
 
 import scala.annotation.tailrec
@@ -372,7 +372,7 @@ case object Russian
     * 7.2.8. If a player having in the party two kings, one king and man, one king against enemy king to their 5th move will not be able to achieve a winning position.
     * 7.2.9. ... excluding case when the game is obvious and the player can continue to demonstrate the victory :S ...
     */
-  def updatePositionHashes(board: Board, move: Move, hash: draughts.PositionHash): PositionHash = {
+  def updatePositionHashes(board: Board, move: Move, hash: strategygames.draughts.PositionHash): PositionHash = {
     val newHash = Hash(Situation(board, !move.piece.color))
     drawingMoves(board, move.some) match {
       case Some((drawingMoves, resetOnNonKingMove, allowPromotion, firstPromotion)) =>

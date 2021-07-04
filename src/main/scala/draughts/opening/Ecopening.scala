@@ -1,4 +1,4 @@
-package draughts
+package strategygames.draughts
 package opening
 
 import cats.implicits._

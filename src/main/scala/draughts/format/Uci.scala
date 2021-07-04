@@ -1,4 +1,4 @@
-package draughts
+package strategygames.draughts
 package format
 
 import cats.data.Validated
@@ -85,7 +85,7 @@ object Uci {
 
   case class WithSan(uci: Uci, san: String)
 
-  def apply(move: draughts.Move, withCaptures: Boolean) =
+  def apply(move: strategygames.draughts.Move, withCaptures: Boolean) =
     Uci.Move(move.orig, move.dest, move.promotion, if (withCaptures) move.capture else none)
 
   def combine(uci1: Uci, uci2: Uci) =
