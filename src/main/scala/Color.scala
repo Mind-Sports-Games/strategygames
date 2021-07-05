@@ -88,7 +88,7 @@ object Color {
     case GameLib.Chess()    => Chess(chess.Color.black)
   }
 
-  def all(lib: GameLib) = lib match {
+  def all(lib: GameLib): List[Color] = lib match {
     case GameLib.Draughts() => draughts.Color.all.map(Draughts)
     case GameLib.Chess()    => chess.Color.all.map(Chess)
   }

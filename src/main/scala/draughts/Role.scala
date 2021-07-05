@@ -34,6 +34,7 @@ object Role {
   val allByName: Map[String, Role]                      = all.map(r => (r.name, r)) toMap
   val allPromotableByName: Map[String, PromotableRole]  = allPromotable.map(r => (r.toString, r)) toMap
   val allPromotableByForsyth: Map[Char, PromotableRole] = allPromotable.map(r => (r.forsyth, r)) toMap
+  val allPromotableByPdn: Map[Char, PromotableRole]     = allPromotable.map(r => (r.pdn, r)) toMap
 
   def forsyth(c: Char): Option[Role] = allByForsyth get c
 
