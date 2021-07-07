@@ -106,4 +106,8 @@ object Role {
     case GameLib.Chess()    => chess.Role.promotable(name).map(ChessPromotableRole)
   }
 
+  def pgnMoveToRole(lib: GameLib, c: Char): Role = lib match {
+    case GameLib.Draughts() => DraughtsRole(draughts.Role.pdnMoveToRole(c))
+    case GameLib.Chess()    => ChessRole(chess.Role.pgnMoveToRole(c))
+  }
 }

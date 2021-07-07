@@ -128,6 +128,12 @@ object Role {
   def promotable(name: Option[String]): Option[PromotableRole] =
     name flatMap promotable
 
+  def pgnMoveToRole(c: Char): Role =
+    allByPgn.get(c) match {
+      case Some(r) => r
+      case None => if (c == 'O') King else Pawn
+    }
+
   def valueOf(r: Role): Option[Int] =
     r match {
       case Pawn       => Option(1)

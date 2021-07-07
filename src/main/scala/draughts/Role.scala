@@ -55,6 +55,13 @@ object Role {
   def promotable(name: Option[String]): Option[PromotableRole] =
     name flatMap promotable
 
+  def pdnMoveToRole(c: Char): Role =
+    //We dont want ghosts to be returned here
+    c match {
+      case 'K' | 'O' => King
+      case _ => Man
+    }
+
   def valueOf(r: Role): Option[Int] = r match {
     case Man  => Some(1)
     case King => Some(2)
