@@ -5,6 +5,7 @@ sealed trait Role {
   //draughts.Role.pdn will be referred to by pgn from this point
   val pgn: Char
   lazy val name = toString.toLowerCase
+  val binaryInt: Int
 }
 
 sealed trait PromotableRole extends Role
@@ -14,21 +15,25 @@ object Role {
   final case class ChessRole(r: chess.Role) extends Role {
     val forsyth = r.forsyth
     val pgn = r.pgn
+    val binaryInt = r.binaryInt
   }
 
   final case class DraughtsRole(r: draughts.Role) extends Role {
     val forsyth = r.forsyth
     val pgn = r.pdn
+    val binaryInt = r.binaryInt
   }
 
   final case class ChessPromotableRole(r: chess.PromotableRole) extends PromotableRole {
     val forsyth = r.forsyth
     val pgn = r.pgn
+    val binaryInt = r.binaryInt
   }
 
   final case class DraughtsPromotableRole(r: draughts.PromotableRole) extends PromotableRole {
     val forsyth = r.forsyth
     val pgn = r.pdn
+    val binaryInt = r.binaryInt
   }
 
   def all(lib: GameLib): List[Role] = lib match {
@@ -56,6 +61,11 @@ object Role {
     case GameLib.Chess() => chess.Role.allByName.map{case(n, r) => (n, ChessRole(r))}
   }
 
+  def allByBinaryInt(lib: GameLib): Map[Int, Role] = lib match {
+    case GameLib.Draughts() => draughts.Role.allByBinaryInt.map{case(n, r) => (n, DraughtsRole(r))}
+    case GameLib.Chess() => chess.Role.allByBinaryInt.map{case(n, r) => (n, ChessRole(r))}
+  }
+
   def allPromotableByName(lib: GameLib): Map[String, PromotableRole] = lib match {
     case GameLib.Draughts() => draughts.Role.allPromotableByName.map{case(n, r) => (n, DraughtsPromotableRole(r))}
     case GameLib.Chess() => chess.Role.allPromotableByName.map{case(n, r) => (n, ChessPromotableRole(r))}
@@ -76,6 +86,11 @@ object Role {
     case GameLib.Chess()    => chess.Role.forsyth(c).map(ChessRole)
   }
 
+  def binaryInt(lib: GameLib, i: Int): Option[Role] = lib match {
+    case GameLib.Draughts() => draughts.Role.binaryInt(i).map(DraughtsRole)
+    case GameLib.Chess()    => chess.Role.binaryInt(i).map(ChessRole)
+  }
+
   def promotable(lib: GameLib, c: Char): Option[PromotableRole] = lib match {
     case GameLib.Draughts() => draughts.Role.promotable(c).map(DraughtsPromotableRole)
     case GameLib.Chess()    => chess.Role.promotable(c).map(ChessPromotableRole)
@@ -91,10 +106,4 @@ object Role {
     case GameLib.Chess()    => chess.Role.promotable(name).map(ChessPromotableRole)
   }
 
-  /* I'm unsure how we map strategygames.Role back to strategygames.chess.Role?
-  def valueOf(lib: GameLib, r: Role): Option[Int] = lib match {
-    case GameLib.Draughts() => draughts.Role.valueOf(r) 
-    case GameLib.Chess()    => chess.Role.valueOf(r)
-  }
-  */
 }

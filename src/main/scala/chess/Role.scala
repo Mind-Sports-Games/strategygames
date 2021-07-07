@@ -6,6 +6,7 @@ sealed trait Role {
   lazy val pgn: Char          = forsythUpper
   lazy val name               = toString.toLowerCase
   val projection: Boolean
+  val binaryInt: Int
   val dirs: Directions
   def dir(from: Pos, to: Pos): Option[Direction]
 }
@@ -18,6 +19,7 @@ case object King extends PromotableRole {
   val dirs: Directions        = Queen.dirs
   def dir(from: Pos, to: Pos) = None
   val projection              = false
+  val binaryInt               = 1
 }
 
 case object Queen extends PromotableRole {
@@ -25,6 +27,7 @@ case object Queen extends PromotableRole {
   val dirs: Directions        = Rook.dirs ::: Bishop.dirs
   def dir(from: Pos, to: Pos) = Rook.dir(from, to) orElse Bishop.dir(from, to)
   val projection              = true
+  val binaryInt               = 2
 }
 case object Rook extends PromotableRole {
   val forsyth          = 'r'
@@ -36,6 +39,7 @@ case object Rook extends PromotableRole {
       Option(if (to ?< from) (_.left) else (_.right))
     else None
   val projection = true
+  val binaryInt  = 3
 }
 case object Bishop extends PromotableRole {
   val forsyth          = 'b'
@@ -49,6 +53,7 @@ case object Bishop extends PromotableRole {
       })
     else None
   val projection = true
+  val binaryInt  = 5
 }
 case object Knight extends PromotableRole {
   val forsyth = 'n'
@@ -64,18 +69,21 @@ case object Knight extends PromotableRole {
   )
   def dir(from: Pos, to: Pos) = None
   val projection              = false
+  val binaryInt               = 4
 }
 case object Pawn extends Role {
   val forsyth                 = 'p'
   val dirs: Directions        = Nil
   def dir(from: Pos, to: Pos) = None
   val projection              = false
+  val binaryInt               = 6
 }
 case object LOAChecker extends Role {
   val forsyth                 = 'l'
   val dirs: Directions        = Queen.dirs
   def dir(from: Pos, to: Pos) = Queen.dir(from, to)
   val projection              = false
+  val binaryInt               = 8
 }
 
 object Role {
@@ -91,6 +99,9 @@ object Role {
   val allByName: Map[String, Role] = all map { r =>
     (r.name, r)
   } toMap
+  val allByBinaryInt: Map[Int, Role] = all map { r =>
+    (r.binaryInt, r)
+  } toMap
   val allPromotableByName: Map[String, PromotableRole] =
     allPromotable map { r =>
       (r.toString, r)
@@ -105,6 +116,8 @@ object Role {
     } toMap
 
   def forsyth(c: Char): Option[Role] = allByForsyth get c
+
+  def binaryInt(i: Int): Option[Role] = allByBinaryInt get i
 
   def promotable(c: Char): Option[PromotableRole] =
     allPromotableByForsyth get c
