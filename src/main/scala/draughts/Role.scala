@@ -62,6 +62,12 @@ object Role {
       case _ => Man
     }
 
+  def javaSymbolToRole(s: String): Role =
+    s match {
+      case "" => Man
+      case _ => King
+    }
+
   def valueOf(r: Role): Option[Int] = r match {
     case Man  => Some(1)
     case King => Some(2)

@@ -110,4 +110,10 @@ object Role {
     case GameLib.Draughts() => DraughtsRole(draughts.Role.pdnMoveToRole(c))
     case GameLib.Chess()    => ChessRole(chess.Role.pgnMoveToRole(c))
   }
+
+  def javaSymbolToRole(lib: GameLib, s: String): Role = lib match {
+    case GameLib.Draughts() => DraughtsRole(draughts.Role.javaSymbolToRole(s))
+    case GameLib.Chess()    => ChessRole(chess.Role.javaSymbolToRole(s))
+  }
+
 }

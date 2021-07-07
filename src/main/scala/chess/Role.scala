@@ -134,6 +134,14 @@ object Role {
       case None => if (c == 'O') King else Pawn
     }
 
+  def javaSymbolToRole(s: String): Role =
+    allByPgn.get(
+      s.headOption match {    
+        case Some(c) => c    
+        case None => 'P'//JavaRole.PAWN.symbol is ""    
+      }
+    ).get
+
   def valueOf(r: Role): Option[Int] =
     r match {
       case Pawn       => Option(1)
