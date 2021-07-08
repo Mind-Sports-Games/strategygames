@@ -6,6 +6,8 @@ sealed abstract class Role {
   val pgn: Char
   lazy val name = toString.toLowerCase
   val binaryInt: Int
+  // TODO: Matt, write class methods like this:
+  // def square(i: Int): Int
 }
 
 sealed trait PromotableRole extends Role
@@ -16,12 +18,16 @@ object Role {
     val forsyth = r.forsyth
     val pgn = r.pgn
     val binaryInt = r.binaryInt
+    // TODO: Matt, write class methods like this:
+    // def square(i: Int): Int = r.square
   }
 
   final case class DraughtsRole(r: draughts.Role) extends Role {
     val forsyth = r.forsyth
     val pgn = r.pdn
     val binaryInt = r.binaryInt
+    // TODO: Matt, write class methods like this:
+    // def square(i: Int): Int = r.cubed // (because draughts is strange)
   }
 
   final case class ChessPromotableRole(r: chess.PromotableRole) extends PromotableRole {
