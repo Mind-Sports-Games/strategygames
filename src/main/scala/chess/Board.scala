@@ -30,7 +30,7 @@ case class Board(
 
   def actorAt(at: Pos): Option[Actor] = actors get at
 
-  def piecesOf(c: Color): Map[Pos, Piece] = pieces filter (_._2 is c)
+  def piecesOf(c: Color): PieceMap = pieces filter (_._2 is c)
 
   lazy val kingPos: Map[Color, Pos] = pieces.collect { case (pos, Piece(color, King)) =>
     color -> pos
@@ -158,15 +158,15 @@ case class Board(
 
   def materialImbalance: Int = variant.materialImbalance(this)
 
-  def fileOccupation(file: File): Map[Pos, Piece] = pieces.filter(_._1.file == file)
+  def fileOccupation(file: File): PieceMap = pieces.filter(_._1.file == file)
 
-  def rankOccupation(rank: Rank): Map[Pos, Piece] = pieces.filter(_._1.rank == rank)
+  def rankOccupation(rank: Rank): PieceMap = pieces.filter(_._1.rank == rank)
 
   private def diagOccupation(
       p: Pos,
       dir: Direction,
-      diagPieces: Map[Pos, Piece] = Map[Pos, Piece]()
-  ): Map[Pos, Piece] =
+      diagPieces: PieceMap = PieceMap()
+  ): PieceMap =
     dir(p) match {
       case Some(diagPos) =>
         if (pieces.contains(diagPos))
@@ -176,15 +176,15 @@ case class Board(
       case None => return diagPieces
     }
 
-  def diagAscOccupation(pos: Pos): Map[Pos, Piece] =
+  def diagAscOccupation(pos: Pos): PieceMap =
     if (pieces.contains(pos))
-      Map[Pos, Piece](pos -> pieces(pos)) ++ diagOccupation(pos, _.upRight) ++ diagOccupation(pos, _.downLeft)
+      PieceMap(pos -> pieces(pos)) ++ diagOccupation(pos, _.upRight) ++ diagOccupation(pos, _.downLeft)
     else
       diagOccupation(pos, _.upRight) ++ diagOccupation(pos, _.downLeft)
 
-  def diagDescOccupation(pos: Pos): Map[Pos, Piece] =
+  def diagDescOccupation(pos: Pos): PieceMap =
     if (pieces.contains(pos))
-      Map[Pos, Piece](pos -> pieces(pos)) ++ diagOccupation(pos, _.upLeft) ++ diagOccupation(pos, _.downRight)
+      PieceMap(pos -> pieces(pos)) ++ diagOccupation(pos, _.upLeft) ++ diagOccupation(pos, _.downRight)
     else
       diagOccupation(pos, _.upLeft) ++ diagOccupation(pos, _.downRight)
 
