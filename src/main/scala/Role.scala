@@ -1,6 +1,6 @@
 package strategygames
 
-sealed trait Role {
+sealed abstract class Role {
   val forsyth: Char
   //draughts.Role.pdn will be referred to by pgn from this point
   val pgn: Char
@@ -114,6 +114,12 @@ object Role {
   def javaSymbolToRole(lib: GameLib, s: String): Role = lib match {
     case GameLib.Draughts() => DraughtsRole(draughts.Role.javaSymbolToRole(s))
     case GameLib.Chess()    => ChessRole(chess.Role.javaSymbolToRole(s))
+  }
+
+  def valueOf(lib: GameLib, r: Role): Option[Int] = (lib, r) match {
+    case (GameLib.Draughts(), DraughtsRole(r)) => draughts.Role.valueOf(r)
+    case (GameLib.Chess(), ChessRole(r))    => chess.Role.valueOf(r)
+    case _ => None
   }
 
 }
