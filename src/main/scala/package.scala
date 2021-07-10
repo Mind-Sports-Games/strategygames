@@ -11,4 +11,6 @@ package object strategygames extends scalalib.Common with scalalib.OrnicarOption
     case GameLib.Chess()    => Color.Chess(chess.Black)
   }
 
+  type PieceMap = Map[Pos, Piece]
+
 }
