@@ -121,11 +121,14 @@ object Board {
       case _ => sys.error("Not passed Chess objects")
     }
 
-    def updateHistory(f: History => History): Board = f match {
-      //not sure this is right
-      case History.Chess(f) => Chess(b.updateHistory(f))
-      case _ => sys.error("Not passed Chess objects")
-    }
+    //This isn't correct, but it is unused by lila.
+    //If we wanted to make this work we should create a sealed class in this file
+    //e.g. UpdateHistory and then have case class for ChessUpdateHistory etc
+    //which have this function in them so then we can match on ChessUpdateHistory(f)
+    //def updateHistory(f: History => History): Board = f match {
+    //  case History.Chess(f) => Chess(b.updateHistory(f))
+    //  case _ => sys.error("Not passed Chess objects")
+    //}
 
     def autoDraw: Boolean = b.autoDraw
 
@@ -180,11 +183,14 @@ object Board {
       case _ => sys.error("Not passed Draughts objects")
     }
 
-    def updateHistory(f: History => History): Board = f match {
-      //not sure this is right
-      case History.Draughts(f) => Draughts(b.updateHistory(f))
-      case _ => sys.error("Not passed Draughts objects")
-    }
+    //This isn't correct, but it is unused by lila.
+    //If we wanted to make this work we should create a sealed class in this file
+    //e.g. UpdateHistory and then have case class for ChessUpdateHistory etc
+    //which have this function in them so then we can match on ChessUpdateHistory(f)
+    //def updateHistory(f: History => History): Board = f match {
+    //  case History.Draughts(f) => Draughts(b.updateHistory(f))
+    //  case _ => sys.error("Not passed Draughts objects")
+    //}
 
     def autoDraw: Boolean = b.autoDraw
 
