@@ -1,4 +1,4 @@
-package strategygames.draughts
+package strategygames
 
 
 //------------------------------------------------------------------------------
@@ -8,7 +8,7 @@ package strategygames.draughts
 // time as fixing up the usage of these within lila.
 //------------------------------------------------------------------------------
 
-sealed abstract class Pos(val fieldNumber: Int)
+sealed abstract class Pos
 
 case class ChessPos(p: chess.Pos) extends Pos
 case class DraughtsPos(p: draughts.Pos) extends Pos
