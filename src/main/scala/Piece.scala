@@ -26,7 +26,7 @@ object Piece {
 
   }
 
-  final case class Piece(p: draughts.Piece) extends Piece(
+  final case class Draughts(p: draughts.Piece) extends Piece(
     Color.Draughts(p.color),
     Role.Draughts(p.role)
   ){
