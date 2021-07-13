@@ -42,7 +42,6 @@ object Divider {
       }
     )
 
-  //TODO: need to work out how to handle a List of strategygames.Board
   def apply(lib: GameLib, boards: List[Board]): Division = lib match {
     case GameLib.Draughts() =>
       strategygames.draughts.Divider(draughtsBoards(boards))
