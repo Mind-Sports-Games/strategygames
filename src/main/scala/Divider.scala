@@ -26,10 +26,27 @@ object Division {
 
 object Divider {
 
-  //TODO: need to work out how to handle a List of strategygames.Board
-  //def apply(lib: GameLib, boards: List[Board]): Division = (lib, boards) match {
-  //  case (GameLib.Draughts(), List[Board.Draughts(b)]) => draughts.Divider.apply(b)
-  //  case (GameLib.Chess(), List[Board.Chess(b)])       => chess.Divider.apply(b)
-  //}
+  def draughtsBoards(boards: List[Board]): List[draughts.Board] =
+    boards.flatMap(b =>
+      b match {
+        case Board.Draughts(b) => Some(b)
+        case _                 => None
+      }
+    )
+
+  def chessBoards(boards: List[Board]): List[chess.Board] =
+    boards.flatMap(b =>
+      b match {
+        case Board.Chess(b) => Some(b)
+        case _              => None
+      }
+    )
+
+  def apply(lib: GameLib, boards: List[Board]): Division = lib match {
+    case GameLib.Draughts() =>
+      strategygames.draughts.Divider(draughtsBoards(boards))
+    case GameLib.Chess() =>
+      strategygames.chess.Divider(chessBoards(boards))
+  }
 
 }
