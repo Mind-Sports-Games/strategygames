@@ -93,14 +93,16 @@ object Color {
     case GameLib.Chess()    => chess.Color.all.map(Chess)
   }
 
-  // TODO: these are different between draughts and chess.
-  /*def showResult(lib: GameLib, color: Option[Color]) = lib match {
-    case GameLib.Draughts() => draughts.Color.showResult(color).map(Draughts)
-    case GameLib.Chess() => chess.Color.showResult(color).map(Chess)
-  }*/
+  //result default set to currently work for chess lila
+  //def showResult(lib: GameLib, color: Option[Color], result: Boolean = false): String = lib match {
+  //  case GameLib.Draughts() => draughts.Color.showResult(color, result)
+  //  case GameLib.Chess()    => chess.Color.allByResult.map{case(c, s) => (c.map(Chess), s)}.get(color)
+  //}
 
   def fromResult(lib: GameLib, result: String): Option[Color] = lib match {
     case GameLib.Draughts() => draughts.Color.fromResult(result).map(Draughts)
     case GameLib.Chess()    => chess.Color.fromResult(result).map(Chess)
   }
+
+
 }

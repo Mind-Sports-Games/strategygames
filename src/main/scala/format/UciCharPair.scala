@@ -14,7 +14,7 @@ object UciCharPair {
   // specific methods for draughts. :(
   def apply(lib: GameLib, uci: Uci, ambiguity: Int): UciCharPair = (lib, uci) match {
     case GameLib.Draughts() => draughts.UciCharPair(uci, ambiguity)
-    case _                                       => sys.error("This method is only implemented for draughts")
+    case _ => sys.error("This method is only implemented for draughts")
   }
   def apply(lib: GameLib.Draughts, orig: Char, ambiguity: Int): UciCharPair =
     draughts.UciCharPair(orig, ambiguity)

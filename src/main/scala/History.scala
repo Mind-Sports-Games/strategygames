@@ -4,14 +4,14 @@ import format.Uci
 import variant.Variant
 
 sealed class History(
-    lastMove: Option[Uci] = None,
-    positionHashes: PositionHash = Array.empty,
-    variant: Option[Variant] = None,
-    castles: chess.Castles = chess.Castles.all,
-    checkCount: chess.CheckCount = chess.CheckCount(0, 0),
-    unmovedRooks: chess.UnmovedRooks = chess.UnmovedRooks.default,
-    kingMoves: draughts.KingMoves = draughts.KingMoves(),
-    halfMoveClock: Int = 0
+  val lastMove: Option[Uci] = None,
+  val positionHashes: PositionHash = Array.empty,
+  val variant: Option[Variant] = None,
+  val castles: chess.Castles = chess.Castles.all,
+  val checkCount: chess.CheckCount = chess.CheckCount(0, 0),
+  val unmovedRooks: chess.UnmovedRooks = chess.UnmovedRooks.default,
+  val kingMoves: draughts.KingMoves = draughts.KingMoves(),
+  val halfMoveClock: Int = 0
 ) {
 
   def setHalfMoveClock(v: Int): History

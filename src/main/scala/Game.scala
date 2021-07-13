@@ -6,11 +6,11 @@ import strategygames.format.FEN
 import strategygames.format.{ pgn, Uci }
 
 sealed class Game(
-    situation: Situation,
-    pgnMoves: Vector[String] = Vector(),
-    clock: Option[Clock] = None,
-    turns: Int = 0, // plies
-    startedAtTurn: Int = 0
+  val situation: Situation,
+  val pgnMoves: Vector[String] = Vector(),
+  val clock: Option[Clock] = None,
+  val turns: Int = 0, // plies
+  val startedAtTurn: Int = 0
 ) {
 
   def apply(move: Move): Game

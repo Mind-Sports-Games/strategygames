@@ -1,6 +1,6 @@
 package strategygames
 
-case class Replay(setup: Game, moves: List[MoveOrDrop], state: Game) {
+sealed class Replay(val setup: Game, val moves: List[MoveOrDrop], val state: Game) {
 
   lazy val chronoMoves = moves.reverse
 

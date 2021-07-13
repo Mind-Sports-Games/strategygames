@@ -4,10 +4,10 @@ import chess.variant.Crazyhouse
 import variant.Variant
 
 sealed class Board(
-    pieces: PieceMap,
-    history: History,
-    variant: Variant,
-    crazyData: Option[Crazyhouse.Data] = None
+  val pieces: PieceMap,
+  val history: History,
+  val variant: Variant,
+  val crazyData: Option[Crazyhouse.Data] = None
 ) {
 
   def apply(at: Pos): Option[Piece] = pieces get at
