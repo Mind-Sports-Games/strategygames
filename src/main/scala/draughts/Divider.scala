@@ -1,26 +1,8 @@
 package strategygames.draughts
 
+import strategygames.Division
+
 import cats.syntax.option.none
-
-case class Division(middle: Option[Int], end: Option[Int], plies: Int) {
-
-  def openingSize: Int = middle | plies
-  def middleSize: Option[Int] = middle.map { m =>
-    (end | plies) - m
-  }
-  def endSize = end.map(plies -)
-
-  def openingBounds = middle.map(0 -> _)
-  def middleBounds = for {
-    m <- middle
-    e <- end
-  } yield m -> e
-  def endBounds = end.map(_ -> plies)
-}
-
-object Division {
-  val empty = Division(None, None, 0)
-}
 
 object Divider {
 
