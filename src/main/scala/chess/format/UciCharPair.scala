@@ -1,13 +1,9 @@
 package strategygames.chess.format
 import strategygames.chess._
 
-case class UciCharPair(a: Char, b: Char) {
-
-  override def toString = s"$a$b"
-}
-
 object UciCharPair {
 
+  import strategygames.format.UciCharPair
   import implementation._
 
   def apply(uci: Uci): UciCharPair =

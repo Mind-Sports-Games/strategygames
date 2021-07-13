@@ -1,13 +1,10 @@
 package strategygames.draughts
 package format
 
-case class UciCharPair(a: Char, b: Char) {
-  override def toString = s"$a$b"
-}
-
 object UciCharPair {
 
   import implementation._
+  import strategygames.format.UciCharPair
 
   def apply(uci: Uci): UciCharPair = UciCharPair(toChar(uci.origDest._1), toChar(uci.origDest._2))
   def apply(uci: Uci, ambiguity: Int): UciCharPair =
