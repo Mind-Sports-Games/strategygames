@@ -1,5 +1,7 @@
 package strategygames.draughts
+
 import strategygames.{ Clock, MoveMetrics }
+import strategygames.draughts.format.FEN
 
 import cats.data.Validated
 import cats.syntax.option.none
@@ -154,7 +156,7 @@ object DraughtsGame {
 
   def apply(board: Board, color: Color): DraughtsGame = new DraughtsGame(Situation(board, color))
 
-  def apply(variantOption: Option[strategygames.draughts.variant.Variant], fen: Option[String]): DraughtsGame = {
+  def apply(variantOption: Option[strategygames.draughts.variant.Variant], fen: Option[FEN]): DraughtsGame = {
     val variant = variantOption | strategygames.draughts.variant.Standard
     val g       = apply(variant)
     fen

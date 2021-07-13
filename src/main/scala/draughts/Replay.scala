@@ -27,7 +27,7 @@ object Replay {
 
   def apply(
       moveStrs: Traversable[String],
-      initialFen: Option[String],
+      initialFen: Option[FEN],
       variant: Variant,
       finalSquare: Boolean
   ): Validated[String, Reader.Result] =
@@ -36,7 +36,7 @@ object Replay {
         nonEmptyMoves,
         Tags(
           List(
-            initialFen map { fen => Tag(_.FEN, fen) },
+            initialFen map { fen => Tag(_.FEN, fen.value) },
             variant.some.filterNot(_.standard) map { v => Tag(_.GameType, v.gameType) }
           ).flatten
         ),
@@ -56,7 +56,7 @@ object Replay {
 
   def games(
       moveStrs: Traversable[String],
-      initialFen: Option[String],
+      initialFen: Option[FEN],
       variant: Variant
   ): Validated[String, List[DraughtsGame]] =
     Parser.moves(moveStrs, variant) andThen { moves =>
@@ -67,7 +67,7 @@ object Replay {
   type ErrorMessage = String
   def gameMoveWhileValid(
       moveStrs: Seq[String],
-      initialFen: String,
+      initialFen: FEN,
       variant: Variant,
       iteratedCapts: Boolean = false
   ): (DraughtsGame, List[(DraughtsGame, Uci.WithSan)], Option[ErrorMessage]) = {
@@ -119,7 +119,7 @@ object Replay {
 
   def unambiguousPdnMoves(
       pdnMoves: Seq[String],
-      initialFen: Option[String],
+      initialFen: Option[FEN],
       variant: Variant
   ): Option[List[String]] = {
 
@@ -157,7 +157,7 @@ object Replay {
       else res
     }
 
-    val init = initialFenToSituation(initialFen.map(FEN), variant)
+    val init = initialFenToSituation(initialFen, variant)
     Parser
       .moves(pdnMoves, variant)
       .fold(
@@ -171,7 +171,7 @@ object Replay {
 
   def exportScanMoves(
       uciMoves: Seq[String],
-      initialFen: String,
+      initialFen: FEN,
       variant: Variant,
       debugId: String,
       iteratedCapts: Boolean = false
@@ -344,7 +344,7 @@ object Replay {
 
   def apply(
       moves: List[Uci],
-      initialFen: Option[String],
+      initialFen: Option[FEN],
       variant: Variant,
       finalSquare: Boolean = false
   ): Validated[String, Replay] =
@@ -352,17 +352,17 @@ object Replay {
 
   def plyAtFen(
       moveStrs: Traversable[String],
-      initialFen: Option[String],
+      initialFen: Option[FEN],
       variant: Variant,
-      atFen: String
+      atFen: FEN
   ): Validated[String, Int] =
     if (Forsyth.<<@(variant, atFen).isEmpty) invalid(s"Invalid FEN $atFen")
     else {
 
       // we don't want to compare the full move number, to match transpositions
-      def truncateFen(fen: String) = fen.split(' ').take(4) mkString " "
-      val atFenTruncated           = truncateFen(atFen)
-      def compareFen(fen: String)  = truncateFen(fen) == atFenTruncated
+      def truncateFen(fen: FEN) = fen.value.split(' ').take(4) mkString " "
+      val atFenTruncated        = truncateFen(atFen)
+      def compareFen(fen: FEN)  = truncateFen(fen) == atFenTruncated
 
       def recursivePlyAtFen(sit: Situation, sans: List[San], ply: Int): Validated[String, Int] =
         sans match {
@@ -385,7 +385,7 @@ object Replay {
       }
     }
 
-  private def makeGame(variant: Variant, initialFen: Option[String]): DraughtsGame = {
+  private def makeGame(variant: Variant, initialFen: Option[FEN]): DraughtsGame = {
     val g = DraughtsGame(variant.some, initialFen)
     g.copy(startedAtTurn = g.turns)
   }

@@ -12,7 +12,7 @@ object UciDump {
 
   def apply(
       moves: Seq[String],
-      initialFen: Option[String],
+      initialFen: Option[FEN],
       variant: Variant,
       finalSquare: Boolean = false
   ): Validated[String, List[String]] =

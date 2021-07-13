@@ -15,13 +15,13 @@ import variant.{ Standard, Variant }
 object Forsyth {
 
   val initial =
-    "W:W31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:H0:F1"
+    FEN("W:W31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:H0:F1")
   val initialPieces =
-    "W31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20"
+    FEN("W31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20")
   val initialMoveAndPieces =
-    "W:W31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20"
+    FEN("W:W31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20")
 
-  def <<@(variant: Variant, rawSource: String): Option[Situation] = read(rawSource) { fen =>
+  def <<@(variant: Variant, fen: FEN): Option[Situation] =
     makeBoard(variant, fen) map { board =>
       val situation = Color.apply(fen.charAt(0)) match {
         case Some(color) => Situation(board, color)
@@ -34,15 +34,14 @@ object Forsyth {
           variant = variant
         )
         if (variant.frisianVariant) {
-          val kingMoves = fen.split(':').lastOption.flatMap(makeKingMoves(_, variant.boardSize.pos))
+          val kingMoves = fen.value.split(':').lastOption.flatMap(makeKingMoves(_, variant.boardSize.pos))
           kingMoves.fold(history)(history.withKingMoves)
         } else history
       }
 
     }
-  }
 
-  def <<(rawSource: String): Option[Situation] = <<@(Standard, rawSource)
+  def <<(fen: FEN): Option[Situation] = <<@(Standard, fen)
 
   case class SituationPlus(situation: Situation, fullMoveNumber: Int) {
 
@@ -50,8 +49,8 @@ object Forsyth {
 
   }
 
-  def <<<@(variant: Variant, rawSource: String): Option[SituationPlus] = read(rawSource) { source =>
-    <<@(variant, source) map { sit =>
+  def <<<@(variant: Variant, fen: FEN): Option[SituationPlus] =
+    <<@(variant, fen) map { sit =>
       val splitted = source.split(':')
       val fullMoveNumber = splitted find { s => s.length > 1 && s.charAt(0) == 'F' } flatMap { s =>
         parseIntOption(s drop 1)
@@ -64,9 +63,8 @@ object Forsyth {
         fullMoveNumber | 1
       )
     }
-  }
 
-  def <<<(rawSource: String): Option[SituationPlus] = <<<@(Standard, rawSource)
+  def <<<(fen: FEN): Option[SituationPlus] = <<<@(Standard, fen)
 
   def makeKingMoves(str: String, pos: BoardPos): Option[KingMoves] = {
     str.split('+').filter(_.nonEmpty).map(_.toList) match {
@@ -81,8 +79,8 @@ object Forsyth {
 
   /** Only cares about pieces positions on the board (second and third part of FEN string)
     */
-  def makeBoard(variant: Variant, rawSource: String): Option[Board] = read(rawSource) { fen =>
-    val fenPieces        = fen.split(':').drop(1)
+  def makeBoard(variant: Variant, fen: FEN): Option[Board] = {
+    val fenPieces        = fen.value.split(':').drop(1)
     def posAt(f: String) = variant.boardSize.pos.posAt(f)
     if (fenPieces.isEmpty) none
     else {
@@ -108,50 +106,50 @@ object Forsyth {
     }
   }
 
-  def toAlgebraic(variant: Variant, rawSource: String): Option[String] =
-    <<<@(variant, rawSource) map { case parsed @ SituationPlus(situation, _) =>
+  def toAlgebraic(variant: Variant, fen: FEN): Option[String] =
+    <<<@(variant, fen) map { case parsed @ SituationPlus(situation, _) =>
       doExport(DraughtsGame(situation, turns = parsed.turns), algebraic = true)
     }
 
-  def countGhosts(rawSource: String): Int = read(rawSource) { fen =>
-    fen.split(':').filter(_.nonEmpty).foldLeft(0) { (ghosts, line) =>
+  def countGhosts(fen: FEN): Int =
+    fen.value.split(':').filter(_.nonEmpty).foldLeft(0) { (ghosts, line) =>
       Color.apply(line.charAt(0)).fold(ghosts) { _ =>
         line.drop(1).split(',').foldLeft(ghosts) { (lineGhosts, field) =>
           if (field.nonEmpty && "GP".indexOf(field.charAt(0)) != -1) lineGhosts + 1 else lineGhosts
         }
       }
     }
-  }
 
-  def countKings(rawSource: String): Int = read(rawSource) { fen =>
-    fen.split(':').filter(_.nonEmpty).foldLeft(0) { (kings, line) =>
+  def countKings(fen: FEN): Int =
+    fen.value.split(':').filter(_.nonEmpty).foldLeft(0) { (kings, line) =>
       Color.apply(line.charAt(0)).fold(kings) { _ =>
         line.drop(1).split(',').foldLeft(kings) { (lineKings, field) =>
           if (field.nonEmpty && field.charAt(0) == 'K') lineKings + 1 else lineKings
         }
       }
     }
-  }
 
-  def >>(situation: Situation): String = >>(SituationPlus(situation, 1))
+  def >>(situation: Situation): FEN = >>(SituationPlus(situation, 1))
 
-  def >>(parsed: SituationPlus): String = parsed match {
+  def >>(parsed: SituationPlus): FEN = parsed match {
     case SituationPlus(situation, _) => >>(DraughtsGame(situation, turns = parsed.turns))
   }
 
-  def >>(game: DraughtsGame): String = doExport(game, algebraic = false)
+  def >>(game: DraughtsGame): FEN = doExport(game, algebraic = false)
 
-  private def doExport(game: DraughtsGame, algebraic: Boolean): String = {
-    List(
-      game.player.letter.toUpper,
-      exportBoard(game.board, algebraic),
-      "H" + game.halfMoveClock.toString,
-      "F" + game.fullMoveNumber.toString
-    ) ::: {
-      if (game.board.variant.frisianVariant) List(exportKingMoves(game.board))
-      else List()
-    }
-  } mkString ":"
+  private def doExport(game: DraughtsGame, algebraic: Boolean): FEN = FEN {
+    {
+      List(
+        game.player.letter.toUpper,
+        exportBoard(game.board, algebraic),
+        "H" + game.halfMoveClock.toString,
+        "F" + game.fullMoveNumber.toString
+      ) ::: {
+        if (game.board.variant.frisianVariant) List(exportKingMoves(game.board))
+        else List()
+      }
+    } mkString ":"
+  }
 
   def exportStandardPositionTurn(board: Board, ply: Int): String = List(
     Color(ply % 2 == 0).letter,
@@ -238,24 +236,19 @@ object Forsyth {
     pos.toString
   }
 
-  def shorten(fen: String): String = {
-    val fen2 = if (fen.endsWith(":+0+0")) fen.dropRight(5) else fen
-    if (fen2.endsWith(":H0:F1")) fen2.dropRight(6) else fen2
+  def shorten(fen: FEN): FEN = {
+    val fen2 = if (fen.value.endsWith(":+0+0")) fen.dropRight(5) else fen
+    if (fen2.endsWith(":H0:F1")) FEN(fen2.dropRight(6)) else FEN(fen2)
   }
 
-  def getFullMove(rawSource: String): Option[Int] = read(rawSource) { fen =>
-    fen.split(':') filter (s => s.length > 1 && s.charAt(0) == 'F') lift 0 flatMap parseIntOption
-  }
+  def getFullMove(fen: FEN): Option[Int] =
+    fen.value.split(':') filter (s => s.length > 1 && s.charAt(0) == 'F') lift 0 flatMap parseIntOption
 
-  def getColor(rawSource: String): Option[Color] = read(rawSource) { fen =>
-    fen lift 0 flatMap Color.apply
-  }
+  def getColor(fen: FEN): Option[Color] = fen.value lift 0 flatMap Color.apply
 
-  def getPly(rawSource: String): Option[Int] = read(rawSource) { fen =>
-    getFullMove(fen) map { fullMove =>
-      fullMove * 2 - (if (getColor(fen).exists(_.white)) 2 else 1)
+  def getPly(fen: FEN): Option[Int] =
+    getFullMove(fen.value) map { fullMove =>
+      fullMove * 2 - (if (getColor(fen.value).exists(_.white)) 2 else 1)
     }
-  }
 
-  private def read[A](source: String)(f: String => A): A = f(source.replace("_", " ").trim)
 }
