@@ -10,10 +10,10 @@ package strategygames
 
 sealed abstract class Pos
 
-case class ChessPos(p: chess.Pos) extends Pos
-case class DraughtsPos(p: draughts.Pos) extends Pos
-
 object Pos {
+  final case class Chess(p: chess.Pos) extends Pos
+  final case class Draughts(p: draughts.Pos) extends Pos
+
   def fromKey(lib: GameLib, key: String): Option[Pos] = lib match {
     case GameLib.Draughts() => chess.Pos.fromKey(key).map(DraughtsPos)
     case GameLib.Chess() => chess.Pos.posAt(key).map(ChessPos)
