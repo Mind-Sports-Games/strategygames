@@ -7,7 +7,7 @@ import cats.implicits._
 
 import strategygames.format.Uci
 
-sealed class Situation(board: Board, color: Color) {
+sealed class Situation(val board: Board, val color: Color) {
 
   lazy val actors = board actorsOf color
 

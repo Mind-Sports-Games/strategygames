@@ -2,7 +2,7 @@ package strategygames.format
 
 import strategygames.Color
 
-sealed class FEN(value: String) extends AnyVal {
+sealed class FEN(val value: String) extends AnyVal {
 
   override def toString = value
 

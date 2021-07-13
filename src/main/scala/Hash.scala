@@ -26,13 +26,13 @@ object Hash {
     val actorMasks: Array[Long]
   }
 
-  final class ChessZobristConstants(zc: chess.Hash.ZobristContants) extends ZobristContants {
+  final case class ChessZobristConstants(zc: chess.Hash.ZobristContants) extends ZobristContants {
     def hexToLong(s: String): Long = zc.hexToLong(s)
     val whiteTurnMask: Long        = zc.whiteTurnMask
     val actorMasks: Array[Long]    = zc.actorMasks 
   }
 
-  final class DraughtsZobristConstants(zc: draughts.Hash.ZobristContants) extends ZobristContants {
+  final case class DraughtsZobristConstants(zc: draughts.Hash.ZobristContants) extends ZobristContants {
     def hexToLong(s: String): Long = zc.hexToLong(s)
     val whiteTurnMask: Long        = zc.whiteTurnMask
     val actorMasks: Array[Long]    = zc.actorMasks 

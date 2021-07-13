@@ -1,6 +1,6 @@
 package strategygames
 
-sealed class Piece(color: Color, role: Role) {
+sealed class Piece(val color: Color, val role: Role) {
 
   def is(c: Color)    = c == color
   def is(r: Role)     = r == role

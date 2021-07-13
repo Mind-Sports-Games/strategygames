@@ -6,17 +6,17 @@ import strategygames.chess.format.Uci
 import cats.syntax.option._
 
 sealed class Move(
-    piece: Piece,
-    orig: Pos,
-    dest: Pos,
-    situationBefore: Situation,
-    after: Board,
-    capture: Option[Pos],
-    promotion: Option[PromotableRole] = None,
-    taken: Option[List[Pos]] = None,
-    castle: Option[((Pos, Pos), (Pos, Pos))] = None,
-    enpassant: Boolean = false,
-    metrics: MoveMetrics = MoveMetrics()
+  val piece: Piece,
+  val orig: Pos,
+  val dest: Pos,
+  val situationBefore: Situation,
+  val after: Board,
+  val capture: Option[Pos],
+  val promotion: Option[PromotableRole] = None,
+  val taken: Option[List[Pos]] = None,
+  val castle: Option[((Pos, Pos), (Pos, Pos))] = None,
+  val enpassant: Boolean = false,
+  val metrics: MoveMetrics = MoveMetrics()
 ) {
 
   def before = situationBefore.board

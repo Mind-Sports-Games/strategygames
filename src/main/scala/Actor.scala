@@ -5,9 +5,9 @@ import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
 
 sealed class Actor(
-    piece: Piece,
-    pos: Pos,
-    board: Board
+  val piece: Piece,
+  val pos: Pos,
+  val board: Board
 ) {
 
   def color: Color          = piece.color
