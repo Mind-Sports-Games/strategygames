@@ -20,7 +20,7 @@ object Hash {
 
   val size = 3
 
-  private class ZobristConstants(start: Int) {
+  class ZobristConstants(start: Int) {
     def hexToLong(s: String): Long =
       (java.lang.Long.parseLong(s.substring(start, start + 8), 16) << 32) |
         java.lang.Long.parseLong(s.substring(start + 8, start + 16), 16)
@@ -38,7 +38,7 @@ object Hash {
   private val polyglotTable    = new ZobristConstants(0)
   private lazy val randomTable = new ZobristConstants(16)
 
-  private def roleIndex(role: Role) =
+  def roleIndex(role: Role) =
     role match {
       case Pawn       => 0
       case Knight     => 1
@@ -55,7 +55,7 @@ object Hash {
   private def actorIndex(actor: Actor) =
     64 * pieceIndex(actor.piece) + actor.pos.hashCode
 
-  private def get(situation: Situation, table: ZobristConstants): Long = {
+  def get(situation: Situation, table: ZobristConstants): Long = {
 
     def crazyPocketMask(role: Role, colorshift: Int, count: Int) = {
       // There should be no kings and at most 16 pieces of any given type
