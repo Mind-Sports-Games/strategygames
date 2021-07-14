@@ -1,6 +1,8 @@
 package strategygames.draughts
 package format.pdn
 
+import strategygames.format.pgn.{ Tags }
+
 import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.syntax.option._

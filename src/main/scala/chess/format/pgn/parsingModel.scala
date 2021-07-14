@@ -4,6 +4,8 @@ package format.pgn
 import cats.data.Validated
 import cats.syntax.option._
 
+import strategygames.format.pgn.{ Tags }
+
 case class ParsedPgn(
     initialPosition: InitialPosition,
     tags: Tags,

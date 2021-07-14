@@ -5,7 +5,8 @@ import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
 import strategygames.chess.format.pgn.San
-import strategygames.chess.format.pgn.{ Parser, Reader, Tag, Tags }
+import strategygames.chess.format.pgn.{ Parser, Reader }
+import strategygames.format.pgn.{ Tag, Tags }
 import strategygames.chess.format.{ FEN, Forsyth, Uci }
 
 case class Replay(setup: Game, moves: List[MoveOrDrop], state: Game) {

@@ -4,7 +4,8 @@ import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
-import format.pdn.{ Parser, Reader, San, Std, Tag, Tags }
+import format.pdn.{ Parser, Reader, San, Std }
+import strategygames.format.pgn.{ Tag, Tags }
 import format.{ FEN, Forsyth, Uci }
 import variant.Variant
 

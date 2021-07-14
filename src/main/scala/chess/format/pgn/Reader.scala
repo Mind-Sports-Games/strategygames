@@ -2,6 +2,8 @@ package strategygames.chess
 package format.pgn
 import strategygames.{ Clock, GameLib }
 
+import strategygames.format.pgn.{ Tags }
+
 import cats.data.Validated
 
 object Reader {
@@ -34,7 +36,7 @@ object Reader {
     makeReplay(makeGame(parsed.tags), op(parsed.sans))
 
   def movesWithSans(moveStrs: Iterable[String], op: Sans => Sans, tags: Tags): Validated[String, Result] =
-    Parser.moves(moveStrs, tags.variant | variant.Variant.default) map { moves =>
+    Parser.moves(moveStrs, tags.chessVariant | variant.Variant.default) map { moves =>
       makeReplay(makeGame(tags), op(moves))
     }
 
@@ -54,7 +56,7 @@ object Reader {
   private def makeGame(tags: Tags) = {
     val g = Game(
       variantOption = tags(_.Variant) flatMap strategygames.chess.variant.Variant.byName,
-      fen = tags.fen
+      fen = tags.chessFen
     )
     g.copy(
       startedAtTurn = g.turns,

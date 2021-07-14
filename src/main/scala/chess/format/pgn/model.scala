@@ -4,6 +4,8 @@ package pgn
 
 import cats.implicits._
 
+import strategygames.format.pgn.{ Tag, Tags }
+
 case class Pgn(
     tags: Tags,
     turns: List[Turn],

@@ -3,6 +3,8 @@ package format.pgn
 
 import strategygames.chess.variant.Variant
 
+import strategygames.format.pgn.{ Tag, Tags }
+
 import scala.util.parsing.combinator._
 import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
@@ -42,7 +44,7 @@ object Parser {
         strMoves     = parsedMoves._2
         resultOption = parsedMoves._3
         tags         = resultOption.filterNot(_ => preTags.exists(_.Result)).foldLeft(preTags)(_ + _)
-        sans <- objMoves(strMoves, tags.variant | Variant.default)
+        sans <- objMoves(strMoves, tags.chessVariant | Variant.default)
       } yield ParsedPgn(init, tags, sans)
     } catch {
       case _: StackOverflowError =>

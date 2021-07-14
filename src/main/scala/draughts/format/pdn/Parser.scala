@@ -8,6 +8,8 @@ import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
+import strategygames.format.pgn.{ Tag, Tags }
+
 // http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm
 // https://pdn.fmjd.org/index.html
 object Parser {
@@ -42,7 +44,7 @@ object Parser {
       strMoves     = parsedMoves._2
       resultOption = parsedMoves._3
       tags         = resultOption.filterNot(_ => preTags.exists(_.Result)).fold(preTags)(t => preTags + t)
-      sans <- objMoves(strMoves, tags.variant | Variant.default)
+      sans <- objMoves(strMoves, tags.draughtsVariant | Variant.default)
     } yield ParsedPdn(init, tags, sans)
   } catch {
     case _: StackOverflowError =>

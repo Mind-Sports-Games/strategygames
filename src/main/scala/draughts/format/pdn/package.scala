@@ -2,6 +2,8 @@ package strategygames.draughts
 package format
 package pdn
 
+import strategygames.format.pgn.{ Tag, Tags }
+
 import scala._
 import cats.implicits._
 

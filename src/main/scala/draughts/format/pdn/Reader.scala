@@ -1,6 +1,7 @@
 package strategygames.draughts
 package format.pdn
 import strategygames.{ Clock, GameLib }
+import strategygames.format.pgn.{ Tags }
 
 import cats.data.Validated
 import cats.implicits._
@@ -49,7 +50,7 @@ object Reader {
       tags: Tags,
       iteratedCapts: Boolean = false
   ): Validated[String, Result] =
-    Parser.moves(moveStrs, tags.variant | variant.Variant.default) map { moves =>
+    Parser.moves(moveStrs, tags.draughtsVariant | variant.Variant.default) map { moves =>
       makeReplay(makeGame(tags), op(moves), iteratedCapts)
     }
 
@@ -89,8 +90,8 @@ object Reader {
 
   private def makeGame(tags: Tags) = {
     val g = DraughtsGame(
-      variantOption = tags.variant,
-      fen = tags.fen
+      variantOption = tags.draughtsVariant,
+      fen = tags.draughtsFen
     )
     g.copy(
       startedAtTurn = g.turns,
