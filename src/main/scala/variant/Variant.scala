@@ -146,7 +146,6 @@ object Variant {
   def default(lib: GameLib): Variant = lib match {
     case GameLib.Draughts() => Draughts(draughts.variant.Variant.default)
     case GameLib.Chess()    => Chess(chess.variant.Variant.default)
-    case _ => sys.error("Mismatched gamelib types")
   }
 
   def apply(lib: GameLib, id: Int): Option[Variant]     = byId(lib) get id
