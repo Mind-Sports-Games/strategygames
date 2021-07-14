@@ -23,7 +23,7 @@ object Forsyth {
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] =
     makeBoard(variant, fen) map { board =>
-      val situation = Color.apply(fen.charAt(0)) match {
+      val situation = Color.apply(fen.value.charAt(0)) match {
         case Some(color) => Situation(board, color)
         case _           => Situation(board, White)
       }
@@ -51,7 +51,7 @@ object Forsyth {
 
   def <<<@(variant: Variant, fen: FEN): Option[SituationPlus] =
     <<@(variant, fen) map { sit =>
-      val splitted = source.split(':')
+      val splitted = fen.value.split(':')
       val fullMoveNumber = splitted find { s => s.length > 1 && s.charAt(0) == 'F' } flatMap { s =>
         parseIntOption(s drop 1)
       } map (_ max 1 min 500)
@@ -106,7 +106,7 @@ object Forsyth {
     }
   }
 
-  def toAlgebraic(variant: Variant, fen: FEN): Option[String] =
+  def toAlgebraic(variant: Variant, fen: FEN): Option[FEN] =
     <<<@(variant, fen) map { case parsed @ SituationPlus(situation, _) =>
       doExport(DraughtsGame(situation, turns = parsed.turns), algebraic = true)
     }
@@ -237,7 +237,7 @@ object Forsyth {
   }
 
   def shorten(fen: FEN): FEN = {
-    val fen2 = if (fen.value.endsWith(":+0+0")) fen.dropRight(5) else fen
+    val fen2 = if (fen.value.endsWith(":+0+0")) fen.value.dropRight(5) else fen.value
     if (fen2.endsWith(":H0:F1")) FEN(fen2.dropRight(6)) else FEN(fen2)
   }
 
@@ -247,8 +247,8 @@ object Forsyth {
   def getColor(fen: FEN): Option[Color] = fen.value lift 0 flatMap Color.apply
 
   def getPly(fen: FEN): Option[Int] =
-    getFullMove(fen.value) map { fullMove =>
-      fullMove * 2 - (if (getColor(fen.value).exists(_.white)) 2 else 1)
+    getFullMove(fen) map { fullMove =>
+      fullMove * 2 - (if (getColor(fen).exists(_.white)) 2 else 1)
     }
 
 }

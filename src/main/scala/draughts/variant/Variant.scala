@@ -1,6 +1,8 @@
 package strategygames.draughts
 package variant
 
+import format.FEN
+
 import cats.data.Validated
 import cats.implicits._
 import scala.annotation.tailrec
@@ -18,10 +20,10 @@ abstract class Variant private[variant] (
 ) {
 
   def pieces: Map[Pos, Piece]
-  def initialFen: String
+  def initialFen: FEN
   def startingPosition: StartingPosition
   val openingTables: List[OpeningTable] = Nil
-  lazy val shortInitialFen              = initialFen.split(":").take(3).mkString(":")
+  lazy val shortInitialFen: FEN         = FEN(initialFen.value.split(":").take(3).mkString(":"))
 
   def captureDirs: Directions
   def moveDirsColor: Map[Color, Directions]

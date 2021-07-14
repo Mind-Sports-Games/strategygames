@@ -90,7 +90,7 @@ object Reader {
   private def makeGame(tags: Tags) = {
     val g = DraughtsGame(
       variantOption = tags.variant,
-      fen = tags(_.FEN)
+      fen = tags.fen
     )
     g.copy(
       startedAtTurn = g.turns,

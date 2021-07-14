@@ -1,10 +1,11 @@
 package strategygames.draughts
 
 import variant.{ Standard, Variant }
+import format.FEN
 
 case class StartingPosition(
     code: String,
-    fen: String,
+    fen: FEN,
     moves: String,
     name: Option[String] = None,
     wikiPath: Option[String] = None,
@@ -23,7 +24,7 @@ object StartingPosition {
 
   case class Category(name: String, positions: List[StartingPosition])
 
-  val random = StartingPosition("random", "random", "")
+  val random = StartingPosition("random", FEN("random"), "")
 
   /*lazy val featurable = new scala.util.Random(475591).shuffle(all.filter(_.featurable)).toIndexedSeq
 

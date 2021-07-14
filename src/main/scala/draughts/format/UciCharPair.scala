@@ -4,16 +4,16 @@ package format
 object UciCharPair {
 
   import implementation._
-  import strategygames.format.UciCharPair
+  import strategygames.format.{ UciCharPair => stratUciCharPair }
 
-  def apply(uci: Uci): UciCharPair = UciCharPair(toChar(uci.origDest._1), toChar(uci.origDest._2))
-  def apply(uci: Uci, ambiguity: Int): UciCharPair =
-    UciCharPair(toChar(uci.origDest._1), ambiguity2charMap.getOrElse(ambiguity, voidChar))
-  def apply(orig: Char, ambiguity: Int): UciCharPair =
-    UciCharPair(orig, ambiguity2charMap.getOrElse(ambiguity, voidChar))
+  def apply(uci: Uci): stratUciCharPair = stratUciCharPair(toChar(uci.origDest._1), toChar(uci.origDest._2))
+  def apply(uci: Uci, ambiguity: Int): stratUciCharPair =
+    stratUciCharPair(toChar(uci.origDest._1), ambiguity2charMap.getOrElse(ambiguity, voidChar))
+  def apply(orig: Char, ambiguity: Int): stratUciCharPair =
+    stratUciCharPair(orig, ambiguity2charMap.getOrElse(ambiguity, voidChar))
 
-  def combine(uci1: Uci, uci2: Uci): UciCharPair =
-    UciCharPair(toChar(uci1.origDest._1), toChar(uci2.origDest._2))
+  def combine(uci1: Uci, uci2: Uci): stratUciCharPair =
+    stratUciCharPair(toChar(uci1.origDest._1), toChar(uci2.origDest._2))
 
   private[format] object implementation {
 

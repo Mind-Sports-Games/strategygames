@@ -295,7 +295,7 @@ object Replay {
     }
 
   private def initialFenToSituation(initialFen: Option[FEN], variant: Variant): Situation =
-    initialFen.flatMap { fen => Forsyth.<<@(variant, fen.value) } | Situation(variant)
+    initialFen.flatMap { fen => Forsyth.<<@(variant, fen) } | Situation(variant)
 
   def boards(
       moveStrs: Traversable[String],
