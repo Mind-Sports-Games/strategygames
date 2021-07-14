@@ -1,9 +1,10 @@
-package strategygames.draughts
-package format.pdn
+package strategygames
+package format.pgn
 import strategygames.Clock
 
 import org.joda.time.DateTimeZone
 import org.joda.time.format.DateTimeFormat
+import cats.syntax.option._
 
 case class Tag(name: TagType, value: String) {
 
@@ -29,9 +30,9 @@ case class Tags(value: List[Tag]) extends AnyVal {
   def clockConfig: Option[Clock.Config] =
     value.collectFirst { case Tag(Tag.TimeControl, str) =>
       str
-    } flatMap Clock.readPdnConfig
+    } flatMap Clock.readPgnConfig
 
-  def variant: Option[strategygames.draughts.variant.Variant] =
+  def draughtsVariant: Option[strategygames.variant.Variant] =
     apply(_.GameType).fold(apply(_.Variant) flatMap strategygames.draughts.variant.Variant.byName) {
       case Tags.GameTypeRegex(t, _*) =>
         parseIntOption(t) match {
@@ -40,6 +41,16 @@ case class Tags(value: List[Tag]) extends AnyVal {
         }
       case _ => None
     }
+
+  def chessVariant: Option[strategygames.variant.Variant] =
+    apply(_.Variant).map(_.toLowerCase).flatMap {
+      case "chess 960" | "fischerandom" | "fischerrandom" => strategygames.chess.variant.Chess960.some
+      case name                                           => strategygames.chess.variant.Variant byName name
+    }
+
+  // TODO: this will need to be tested. We'll want to look at the _actual_ values that
+  //       come in via these tags and ensure that the order we look at them is appropriate
+  def variant: Option[strategygames.variant.Variant] = chessVariant.orElse(draughtsVariant)
 
   def anyDate: Option[String] = apply(_.UTCDate) orElse apply(_.Date)
 
@@ -72,6 +83,7 @@ case class Tags(value: List[Tag]) extends AnyVal {
 object Tags {
   val empty = Tags(Nil)
 
+  // according to http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm#c8.1.1
   val sevenTagRoster = List(
     Tag.Event,
     Tag.Site,
