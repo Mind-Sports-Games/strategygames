@@ -4,7 +4,7 @@ import format.Uci
 import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
 
-sealed class Actor(
+abstract sealed class Actor(
   val piece: Piece,
   val pos: Pos,
   val board: Board

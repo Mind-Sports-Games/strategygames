@@ -33,14 +33,24 @@ object Forsyth {
   }
 
   def <<<@(lib: GameLib, variant: Variant, fen: FEN): Option[SituationPlus] = (lib, variant, fen) match {
-    case (GameLib.Draughts(), Variant.Draughts(variant), FEN.Draughts(fen)) => draughts.format.Forsyth.<<<@(variant, fen).map(_ => SituationPlus(_.situation, _.fullMoveNumber))
-    case (GameLib.Chess(), Variant.Chess(variant), FEN.Chess(fen))          => chess.format.Forsyth.<<<@(variant, fen).map(_ => SituationPlus(_.situation, _.fullMoveNumber))
+    case (GameLib.Draughts(), Variant.Draughts(variant), FEN.Draughts(fen))
+      => draughts.format.Forsyth.<<<@(variant, fen).map(
+        sp => SituationPlus(Situation.Draughts(sp.situation), sp.fullMoveNumber)
+      )
+    case (GameLib.Chess(), Variant.Chess(variant), FEN.Chess(fen))
+      => chess.format.Forsyth.<<<@(variant, fen).map(
+        sp => SituationPlus(Situation.Chess(sp.situation), sp.fullMoveNumber)
+      )
     case _ => sys.error("Mismatched gamelib types")
   }
 
   def <<<(lib: GameLib, fen: FEN): Option[SituationPlus] = (lib, fen) match {
-    case (GameLib.Draughts(), FEN.Draughts(fen)) => draughts.format.Forsyth.<<<@(fen).map(_ => SituationPlus(_.situation, _.fullMoveNumber))
-    case (GameLib.Chess(), FEN.Chess(fen))       => chess.format.Forsyth.<<<@(fen).map(_ => SituationPlus(_.situation, _.fullMoveNumber))
+    case (GameLib.Draughts(), FEN.Draughts(fen)) => draughts.format.Forsyth.<<<(fen).map(
+      sp => SituationPlus(Situation.Draughts(sp.situation), sp.fullMoveNumber)
+    )
+    case (GameLib.Chess(), FEN.Chess(fen))       => chess.format.Forsyth.<<<(fen).map(
+      sp => SituationPlus(Situation.Chess(sp.situation), sp.fullMoveNumber)
+    )
     case _ => sys.error("Mismatched gamelib types")
   }
 
@@ -51,12 +61,19 @@ object Forsyth {
     case _ => sys.error("Mismatched gamelib types")
   }
 
-  def >>(situation: Situation): FEN = >>(SituationPlus(situation, 1))
+  def >>(lib: GameLib, situation: Situation): FEN = >>(lib, SituationPlus(situation, 1))
 
-  def >>(parsed: SituationPlus): FEN =
-    parsed match {
-      case SituationPlus(situation, _) => >>(Game(situation, turns = parsed.turns))
-    }
+  def >>(lib: GameLib, parsed: SituationPlus): FEN = (lib, parsed.situation) match{
+    case (GameLib.Draughts(), Situation.Draughts(situation))
+      => FEN.Draughts(draughts.format.Forsyth.>>(
+        draughts.format.Forsyth.SituationPlus(situation, parsed.fullMoveNumber)
+      ))
+    case (GameLib.Chess(), Situation.Chess(situation))
+      => FEN.Chess(chess.format.Forsyth.>>(
+        chess.format.Forsyth.SituationPlus(situation, parsed.fullMoveNumber)
+      ))
+    case _ => sys.error("Mismatched gamelib types")
+  }
 
   def >>(lib: GameLib, game: Game): FEN = (lib, game) match {
     case (GameLib.Draughts(), Game.Draughts(game)) => FEN.Draughts(draughts.format.Forsyth.>>(game))

@@ -8,7 +8,7 @@ import strategygames._
 import strategygames.format.FEN
 
 // Correctness depends on singletons for each variant ID
-abstract class Variant private[variant] (
+abstract class Variant (
     val id: Int,
     val key: String,
     val name: String,
@@ -26,6 +26,8 @@ abstract class Variant private[variant] (
   //def initialFen: FEN   = format.Forsyth.initial
 
   def isValidPromotion(promotion: Option[PromotableRole]): Boolean
+
+  def checkmate(situation: Situation): Boolean
 
   // In most variants, the winner is the last player to have played and there is a possibility of either a traditional
   // checkmate or a variant end condition
@@ -59,7 +61,7 @@ abstract class Variant private[variant] (
 
 object Variant {
 
-  class Chess(v: chess.variant.Variant) extends Variant(
+  case class Chess(v: chess.variant.Variant) extends Variant(
     id = v.id,
     key = v.key,
     name = v.name,
@@ -68,11 +70,19 @@ object Variant {
     standardInitialPosition = v.standardInitialPosition
   ) {
 
+    def pieces: Map[Pos, Piece] =
+      v.pieces.map{case (pos, piece) => (Pos.Chess(pos), Piece.Chess(piece))}
+
     def exotic: Boolean = v.exotic
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = promotion match {
-      case Some(ChessPromotableRole(pr)) => v.isValidPromotion(pr.some)
-      case None                     => v.isValidPromotion(None)
+      case Some(Role.ChessPromotableRole(pr)) => v.isValidPromotion(pr.some)
+      case None                               => v.isValidPromotion(None)
+      case _ => sys.error("Not passed Chess objects")
+    }
+
+    def checkmate(situation: Situation): Boolean = situation match {
+      case Situation.Chess(situation) => v.checkmate(situation)
       case _ => sys.error("Not passed Chess objects")
     }
 
@@ -81,25 +91,33 @@ object Variant {
       case _ => sys.error("Not passed Chess objects")
     }
 
-    val roles: List[Role] = v.roles.map(ChessRole(_))
+    val roles: List[Role] = v.roles.map(Role.ChessRole)
 
   }
 
-  class Draughts(v: draughts.variant.Variant) extends Variant(
+  case class Draughts(v: draughts.variant.Variant) extends Variant(
     id = v.id,
     key = v.key,
     name = v.name,
     shortName = v.shortName,
     title = v.title,
-    standardInitialPosition = v.standardInitialPosition
-    gameType = v.gameType
+    standardInitialPosition = v.standardInitialPosition,
+    gameType = Option(v.gameType)
   ) {
+
+    def pieces: Map[Pos, Piece] =
+      v.pieces.map{case (pos, piece) => (Pos.Draughts(pos), Piece.Draughts(piece))}
 
     def exotic: Boolean = v.exotic
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = promotion match {
-      case Some(DraughtsPromotableRole(pr)) => v.isValidPromotion(pr.some)
-      case None                             => v.isValidPromotion(None)
+      case Some(Role.DraughtsPromotableRole(pr)) => v.isValidPromotion(pr.some)
+      case None                                  => v.isValidPromotion(None)
+      case _ => sys.error("Not passed Draughts objects")
+    }
+
+    def checkmate(situation: Situation): Boolean = situation match {
+      case Situation.Draughts(situation) => v.checkmate(situation)
       case _ => sys.error("Not passed Draughts objects")
     }
 
@@ -108,46 +126,47 @@ object Variant {
       case _ => sys.error("Not passed Draughts objects")
     }
 
-    val roles: List[Role] = v.roles.map(DraughtsRole)
+    val roles: List[Role] = v.roles.map(Role.DraughtsRole)
 
   }
 
   def all(lib: GameLib): List[Variant] = lib match {
-    case GameLib.Draughts() => v.all.map(Draughts)
-    case GameLib.Chess()    => v.all.map(Chess)
+    case GameLib.Draughts() => draughts.variant.Variant.all.map(Draughts)
+    case GameLib.Chess()    => chess.variant.Variant.all.map(Chess)
   }
 
-  val byId = all map { v =>
+  def byId(lib: GameLib) = all(lib) map { v =>
     (v.id, v)
   } toMap
-  val byKey = all map { v =>
+
+  def byKey(lib: GameLib) = all(lib) map { v =>
     (v.key, v)
   } toMap
 
   def default(lib: GameLib): Variant = lib match {
-    case GameLib.Draughts() => Draughts(draughts.Variant.default)
-    case GameLib.Chess()    => Chess(chess.Variant.default)
+    case GameLib.Draughts() => Draughts(draughts.variant.Variant.default)
+    case GameLib.Chess()    => Chess(chess.variant.Variant.default)
     case _ => sys.error("Mismatched gamelib types")
   }
 
-  def apply(id: Int): Option[Variant]     = byId get id
-  def apply(key: String): Option[Variant] = byKey get key
-  def orDefault(id: Int): Variant         = apply(id) | default
-  def orDefault(key: String): Variant     = apply(key) | default
+  def apply(lib: GameLib, id: Int): Option[Variant]     = byId(lib) get id
+  def apply(lib: GameLib, key: String): Option[Variant] = byKey(lib) get key
+  def orDefault(lib: GameLib, id: Int): Variant         = apply(lib, id) | default(lib)
+  def orDefault(lib: GameLib, key: String): Variant     = apply(lib, key) | default(lib)
 
-  def byName(name: String): Option[Variant] =
-    all find (_.name.toLowerCase == name.toLowerCase)
+  def byName(lib: GameLib, name: String): Option[Variant] =
+    all(lib) find (_.name.toLowerCase == name.toLowerCase)
 
-  def exists(id: Int): Boolean = byId contains id
+  def exists(lib: GameLib, id: Int): Boolean = byId(lib) contains id
 
   def openingSensibleVariants(lib: GameLib): Set[Variant] = lib match {
-    case GameLib.Draughts() => v.openingSensibleVariants.map(Draughts)
-    case GameLib.Chess()    => v.openingSensibleVariants.map(Chess)
+    case GameLib.Draughts() => draughts.variant.Variant.openingSensibleVariants.map(Draughts)
+    case GameLib.Chess()    => chess.variant.Variant.openingSensibleVariants.map(Chess)
   }
 
   def divisionSensibleVariants(lib: GameLib): Set[Variant] = lib match {
-    case GameLib.Draughts() => v.divisionSensibleVariants.map(Draughts)
-    case GameLib.Chess()    => v.divisionSensibleVariants.map(Chess)
+    case GameLib.Draughts() => draughts.variant.Variant.divisionSensibleVariants.map(Draughts)
+    case GameLib.Chess()    => chess.variant.Variant.divisionSensibleVariants.map(Chess)
   }
 
 }

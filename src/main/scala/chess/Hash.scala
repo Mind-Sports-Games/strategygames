@@ -33,6 +33,8 @@ object Hash {
     val crazyPocketMasks    = ZobristTables.crazyPocketMasks.map(hexToLong)
   }
 
+  object ZobristConstants {}
+
   // The following masks are compatible with the Polyglot
   // opening book format.
   private val polyglotTable    = new ZobristConstants(0)

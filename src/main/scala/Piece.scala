@@ -1,6 +1,6 @@
 package strategygames
 
-sealed class Piece(val color: Color, val role: Role) {
+abstract sealed class Piece(val color: Color, val role: Role) {
 
   def is(c: Color)    = c == color
   def is(r: Role)     = r == role
@@ -19,7 +19,7 @@ object Piece {
 
   final case class Chess(p: chess.Piece) extends Piece(
     Color.Chess(p.color),
-    Role.Chess(p.role)
+    Role.ChessRole(p.role)
   ) {
 
     def forsyth: Char = p.forsyth
@@ -28,7 +28,7 @@ object Piece {
 
   final case class Draughts(p: draughts.Piece) extends Piece(
     Color.Draughts(p.color),
-    Role.Draughts(p.role)
+    Role.DraughtsRole(p.role)
   ){
 
     def forsyth: Char = p.forsyth

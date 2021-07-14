@@ -16,10 +16,19 @@ sealed trait Uci {
 
 object Uci {
 
-  final case class Chess(u: chess.format.Uci) extends Uci
-  final case class Draughts(u: draughts.format.Uci) extends Uci
+  final case class Chess(u: chess.format.Uci) extends Uci {
+    def uci = u.uci
+    def piotr = u.piotr
+    def origDest: (Pos, Pos) = (Pos.Chess(u.origDest._1), Pos.Chess(u.origDest._2))
+  }
 
-  sealed class Move(
+  final case class Draughts(u: draughts.format.Uci) extends Uci {
+    def uci = u.uci
+    def piotr = u.piotr
+    def origDest: (Pos, Pos) = (Pos.Draughts(u.origDest._1), Pos.Draughts(u.origDest._2))
+  }
+
+  abstract sealed class Move(
       orig: Pos,
       dest: Pos,
       promotion: Option[PromotableRole] = None,
@@ -41,7 +50,7 @@ object Uci {
   final case class ChessMove(m: chess.format.Uci.Move) extends Move(
     Pos.Chess(m.orig),
     Pos.Chess(m.dest),
-    m.promotion.map(ChessPromotableRole)
+    m.promotion.map(Role.ChessPromotableRole)
   ){
     def uci = m.uci
   }
@@ -49,11 +58,11 @@ object Uci {
   final case class DraughtsMove(m: draughts.format.Uci.Move) extends Move(
     Pos.Draughts(m.orig),
     Pos.Draughts(m.dest),
-    m.promotion.map(DraughtsPromotableRole),
-    m.capture.map(_.flatMap(p => p match {
-      case Pos.Draughts(p) => Some(p)
-      case _               => None
-    }))
+    m.promotion.map(Role.DraughtsPromotableRole),
+    m.capture match {
+      case Some(capture) => Some(capture.map(Pos.Draughts))
+      case None          => None
+    }
   ){
     def uci = m.uci
   }
@@ -88,15 +97,38 @@ object Uci {
       case GameLib.Chess()    => chess.format.Uci.piotr(move).map(Chess)
   }
 
-  def readList(moves: String): Option[List[Uci]] =
-    moves.split(' ').toList.map(apply).sequence
+  def readList(lib: GameLib, moves: String): Option[List[Uci]] =
+    moves.split(' ').toList.map(apply(lib, _)).sequence
 
   def writeList(moves: List[Uci]): String =
     moves.map(_.uci) mkString " "
 
-  def readListPiotr(moves: String): Option[List[Uci]] =
-    moves.split(' ').toList.map(piotr).sequence
+  def readListPiotr(lib: GameLib, moves: String): Option[List[Uci]] =
+    moves.split(' ').toList.map(piotr(lib, _)).sequence
 
-  def writeListPiotr(moves: List[Uci]): String =
-    moves.map(_.piotr) mkString " "
+  //something like this should be possible, but rewritten the function below
+  //def writeListPiotr(lib: GameLib, moves: List[Uci]): String =
+  //  moves.map(_.piotr(lib, _)) mkString " "
+
+  def draughtsUci(uci: List[Uci]): List[draughts.format.Uci] =
+    uci.flatMap(u =>
+      u match {
+        case Uci.Draughts(u) => Some(u)
+        case _               => None
+      }
+    )
+
+  def chessUci(uci: List[Uci]): List[chess.format.Uci] =
+    uci.flatMap(u =>
+      u match {
+        case Uci.Chess(u) => Some(u)
+        case _            => None
+      }
+    )
+
+  def writeListPiotr(lib: GameLib, moves: List[Uci]): String = lib match {
+    case GameLib.Draughts() => draughts.format.Uci.writeListPiotr(draughtsUci(moves))
+    case GameLib.Chess()    => chess.format.Uci.writeListPiotr(chessUci(moves))
+  }
+
 }

@@ -7,7 +7,7 @@ import cats.implicits._
 
 import strategygames.format.Uci
 
-sealed class Situation(val board: Board, val color: Color) {
+abstract sealed class Situation(val board: Board, val color: Color) {
 
   lazy val actors = board actorsOf color
 
@@ -28,9 +28,6 @@ sealed class Situation(val board: Board, val color: Color) {
   def playable(strict: Boolean): Boolean
 
   val status: Option[Status]
-
-  def move(uci: Uci.Move): Validated[String, Move] =
-    board.variant.move(this, uci.orig, uci.dest, uci.promotion)
 
   def withHistory(history: History): Situation
 
@@ -63,7 +60,7 @@ object Situation {
       case _ => sys.error("Not passed Chess objects")
     }
 
-    def unary_! : Situation = s.unary_!
+    def unary_! : Situation = Chess(s.unary_!)
 
   }
 
@@ -88,7 +85,7 @@ object Situation {
       case _ => sys.error("Not passed Draughts objects")
     }
 
-    def unary_! : Situation = s.unary_!
+    def unary_! : Situation = Draughts(s.unary_!)
 
   }
 

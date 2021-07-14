@@ -2,10 +2,10 @@ package strategygames
 
 import cats.data.Validated
 
-import strategygames.format.FEN
-import strategygames.format.{ pgn, Uci }
+import strategygames.variant.Variant
+import strategygames.format.{ FEN, Uci }
 
-sealed class Game(
+abstract class Game(
   val situation: Situation,
   val pgnMoves: Vector[String] = Vector(),
   val clock: Option[Clock] = None,
@@ -15,7 +15,7 @@ sealed class Game(
 
   def apply(move: Move): Game
 
-  def apply(uci: Uci.Move): Validated[String, (Game, Move)]
+  //def apply(uci: Uci.Move): Validated[String, (Game, Move)]
 
   def player = situation.color
 
@@ -57,11 +57,11 @@ object Game {
       case _ => sys.error("Not passed Chess objects")
     }
 
-    def apply(uci: Uci.Move): Validated[String, (Game, Move)] = uci match {
-      //need to convert?
-      case (Uci.Move.Chess(uci)) => g.apply(uci)
-      case _ => sys.error("Not passed Chess objects")
-    }
+    //TODO: need to convert?
+    //def apply(uci: Uci.Move): Validated[String, (Game, Move)] = uci match {
+    //  case (Uci.Move.Chess(uci)) => g.apply(uci)
+    //  case _ => sys.error("Not passed Chess objects")
+    //}
 
     def isStandardInit: Boolean = g.isStandardInit
 
@@ -81,7 +81,7 @@ object Game {
 
   final case class Draughts(g: draughts.DraughtsGame) extends Game(
     Situation.Draughts(g.situation),
-    g.pgnMoves,
+    g.pdnMoves,
     g.clock,
     g.turns,
     g.startedAtTurn
@@ -92,11 +92,11 @@ object Game {
       case _ => sys.error("Not passed Draughts objects")
     }
 
-    def apply(uci: Uci.Move): Validated[String, (Game, Move)] = uci match {
-      //need to convert?
-      case (Uci.Move.Draughts(uci)) => g.apply(uci)
-      case _ => sys.error("Not passed Draughts objects")
-    }
+    //TODO: need to convert?
+    //def apply(uci: Uci.Move): Validated[String, (Game, Move)] = uci match {
+    //  case (Uci.Move.Draughts(uci)) => g.apply(uci)
+    //  case _ => sys.error("Not passed Draughts objects")
+    //}
 
     def isStandardInit: Boolean = g.isStandardInit
 
@@ -115,20 +115,26 @@ object Game {
   }
 
   def apply(lib: GameLib, variant: strategygames.variant.Variant): Game = (lib, variant) match {
-    case (GameLib.Draughts(), Variant.Draughts(variant)) => Draughts(draughts.DraughtsGame.apply(variant))
-    case (GameLib.Chess(), Variant.Chess(variant))       => Chess(chess.Game.apply(variant))
+    case (GameLib.Draughts(), Variant.Draughts(variant))
+      => Draughts(draughts.DraughtsGame.apply(variant))
+    case (GameLib.Chess(), Variant.Chess(variant))
+      => Chess(chess.Game.apply(variant))
     case _ => sys.error("Mismatched gamelib types")
   }
 
   def apply(lib: GameLib, board: Board): Game = (lib, board) match {
-    case (GameLib.Draughts(), Board.Draughts(board)) => Draughts(draughts.DraughtsGame.apply(board))
-    case (GameLib.Chess(), Board.Chess(board))       => Chess(chess.Game.apply(board))
+    case (GameLib.Draughts(), Board.Draughts(board))
+      => Draughts(draughts.DraughtsGame.apply(board))
+    case (GameLib.Chess(), Board.Chess(board))
+      => Chess(chess.Game.apply(board))
     case _ => sys.error("Mismatched gamelib types")
   }
 
   def apply(lib: GameLib, board: Board, color: Color): Game = (lib, board, color) match {
-    case (GameLib.Draughts(), Board.Draughts(board), Color.Draughts(color)) => Draughts(draughts.DraughtsGame.apply(board, color))
-    case (GameLib.Chess(), Board.Chess(board), Color.Chess(color))          => Chess(chess.Game.apply(board, color))
+    case (GameLib.Draughts(), Board.Draughts(board), Color.Draughts(color))
+      => Draughts(draughts.DraughtsGame.apply(board, color))
+    case (GameLib.Chess(), Board.Chess(board), Color.Chess(color))
+      => Chess(chess.Game.apply(board, color))
     case _ => sys.error("Mismatched gamelib types")
   }
 

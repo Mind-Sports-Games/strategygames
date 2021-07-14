@@ -15,16 +15,16 @@ object Replay {
   final case class Chess(r: chess.Replay) extends Replay(
     Game.Chess(r.setup),
     r.moves.map(m => m match {
-      case(m: chess.Move) => Move.Chess(m)
-      case(m: chess.Drop) => m
+      case Left(m)  => Left(Move.Chess(m))
+      case Right(m) => Right(m)
     }),
     Game.Chess(r.state)
   ){}
 
   final case class Draughts(r: draughts.Replay) extends Replay(
     Game.Draughts(r.setup),
-    r.moves.map(Move.Draughts(_)),
-    Game.Chess(r.state)
+    r.moves.map((m: draughts.Move) => Left(Move.Draughts(m))),
+    Game.Draughts(r.state)
   ){}
 
   def apply(game: Game) = new Replay(game, Nil, game)

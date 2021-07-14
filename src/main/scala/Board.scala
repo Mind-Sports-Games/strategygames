@@ -3,7 +3,7 @@ package strategygames
 import chess.variant.Crazyhouse
 import variant.Variant
 
-sealed class Board(
+abstract sealed class Board(
   val pieces: PieceMap,
   val history: History,
   val variant: Variant,
@@ -43,10 +43,6 @@ sealed class Board(
 
   def move(orig: Pos, dest: Pos): Option[Board]
 
-  lazy val occupation: Color.Map[Set[Pos]] = Color.Map { color =>
-    pieces.collect { case (pos, piece) if piece is color => pos }.to(Set)
-  }
-
   def hasPiece(p: Piece) = pieces.values exists (p ==)
 
   def promote(pos: Pos): Option[Board]
@@ -57,14 +53,14 @@ sealed class Board(
 
   def withVariant(v: Variant): Board
 
-  def updateHistory(f: History => History): Board
+  //def updateHistory(f: History => History): Board
 
   def count(p: Piece): Int = pieces.values count (_ == p)
   def count(c: Color): Int = pieces.values count (_.color == c)
 
   def autoDraw: Boolean
 
-  def situationOf(color: Color) = Situation(this, color)
+  def situationOf(color: Color): Situation
 
   def valid(strict: Boolean) = variant.valid(this, strict)
 
@@ -75,8 +71,8 @@ sealed class Board(
 
 object Board {
 
-  final case class Chess(b: chess.Board) extends Board(
-    PieceMap.Chess(b.pieces),
+  case class Chess(b: chess.Board) extends Board(
+    b.pieces.map{case(pos, piece) => (Pos.Chess(pos), Piece.Chess(piece))},
     History.Chess(b.history),
     Variant.Chess(b.variant),
     b.crazyData
@@ -111,10 +107,10 @@ object Board {
       case _ => sys.error("Not passed Chess objects")
     }
 
-    def withPieces(newPieces: PieceMap): Board = newPieces match {
-      case PieceMap.Chess(newPieces) => Chess(b.withPieces(newPieces))
+    def withPieces(newPieces: PieceMap): Board = Chess(b.withPieces(newPieces.map{
+      case (Pos.Chess(pos), Piece.Chess(piece)) => (pos, piece)
       case _ => sys.error("Not passed Chess objects")
-    }
+    }))
 
     def withVariant(v: Variant): Board = v match {
       case Variant.Chess(v) => Chess(b.withVariant(v))
@@ -132,14 +128,18 @@ object Board {
 
     def autoDraw: Boolean = b.autoDraw
 
+    def situationOf(color: Color): Situation = color match {
+      case Color.Chess(color) => Situation.Chess(b.situationOf(color))
+      case _ => sys.error("Not passed Chess objects")
+    }
     def materialImbalance: Int = b.materialImbalance
 
-    override def toString: b.toString
+    override def toString: String = b.toString
 
   }
 
-  final case class Draughts(b: draughts.Board) extends Board(
-    PieceMap.Draughts(b.pieces),
+  case class Draughts(b: draughts.Board) extends Board(
+    b.pieces.map{case(pos, piece) => (Pos.Draughts(pos), Piece.Draughts(piece))},
     History.Draughts(b.history),
     Variant.Draughts(b.variant)
   ) {
@@ -173,10 +173,10 @@ object Board {
       case _ => sys.error("Not passed Draughts objects")
     }
 
-    def withPieces(newPieces: PieceMap): Board = newPieces match {
-      case PieceMap.Draughts(newPieces) => Draughts(b.withPieces(newPieces))
+    def withPieces(newPieces: PieceMap): Board = Draughts(b.withPieces(newPieces.map{
+      case (Pos.Draughts(pos), Piece.Draughts(piece)) => (pos, piece)
       case _ => sys.error("Not passed Draughts objects")
-    }
+    }))
 
     def withVariant(v: Variant): Board = v match {
       case Variant.Draughts(v) => Draughts(b.withVariant(v))
@@ -194,9 +194,13 @@ object Board {
 
     def autoDraw: Boolean = b.autoDraw
 
+    def situationOf(color: Color): Situation = color match {
+      case Color.Draughts(color) => Situation.Draughts(b.situationOf(color))
+      case _ => sys.error("Not passed Draughts objects")
+    }
     def materialImbalance: Int = b.materialImbalance
 
-    override def toString: b.toString
+    override def toString: String = b.toString
 
   }
 

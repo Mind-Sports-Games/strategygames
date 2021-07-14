@@ -3,15 +3,15 @@ import strategygames.chess._
 
 object UciCharPair {
 
-  import strategygames.format.UciCharPair
+  import strategygames.format.{ UciCharPair => stratUciCharPair }
   import implementation._
 
-  def apply(uci: Uci): UciCharPair =
+  def apply(uci: Uci): stratUciCharPair =
     uci match {
-      case Uci.Move(orig, dest, None)       => UciCharPair(toChar(orig), toChar(dest))
-      case Uci.Move(orig, dest, Some(role)) => UciCharPair(toChar(orig), toChar(dest.file, role))
+      case Uci.Move(orig, dest, None)       => stratUciCharPair(toChar(orig), toChar(dest))
+      case Uci.Move(orig, dest, Some(role)) => stratUciCharPair(toChar(orig), toChar(dest.file, role))
       case Uci.Drop(role, pos) =>
-        UciCharPair(
+        stratUciCharPair(
           toChar(pos),
           dropRole2charMap.getOrElse(role, voidChar)
         )

@@ -3,7 +3,7 @@ package strategygames
 import format.Uci
 import variant.Variant
 
-sealed class History(
+abstract sealed class History(
   val lastMove: Option[Uci] = None,
   val positionHashes: PositionHash = Array.empty,
   val variant: Option[Variant] = None,
@@ -30,7 +30,7 @@ sealed class History(
 object History {
 
   final case class Chess(h: chess.History) extends History(
-    lastMove = h.lastMove,
+    lastMove = h.lastMove.map(Uci.Chess),
     positionHashes = h.positionHashes,
     castles = h.castles,
     checkCount = h.checkCount,
@@ -42,14 +42,17 @@ object History {
 
     def threefoldRepetition: Boolean = h.threefoldRepetition
 
-    def withLastMove(m: Uci): History = Chess(h.withLastMove(m))
+    def withLastMove(m: Uci): History = m match {
+      case Uci.Chess(m)    => Chess(h.withLastMove(m))
+      case _ => sys.error("Not passed Chess objects")
+    }
 
   }
 
   final case class Draughts(h: draughts.DraughtsHistory) extends History(
-    lastMove = h.lastMove,
+    lastMove = h.lastMove.map(Uci.Draughts),
     positionHashes = h.positionHashes,
-    variant = h.Variant.some,
+    variant = Option(Variant.Draughts(h.variant)),
     kingMoves = h.kingMoves
   ) {
 
@@ -57,7 +60,10 @@ object History {
 
     def threefoldRepetition: Boolean = h.threefoldRepetition
 
-    def withLastMove(m: Uci): History = Draughts(h.withLastMove(m))
+    def withLastMove(m: Uci): History = m match {
+      case Uci.Draughts(m) => Draughts(h.withLastMove(m))
+      case _ => sys.error("Not passed Draughts objects")
+    }
 
   }
 

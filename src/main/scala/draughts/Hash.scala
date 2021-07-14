@@ -30,6 +30,8 @@ object Hash {
     val kingMovesMasks = ZobristTables.kingMovesMasks.map(hexToLong)
   }
 
+  object ZobristConstants {}
+
   // The following masks are compatible with the Polyglot
   // opening book format.
   private val polyglotTable    = new ZobristConstants(0)
