@@ -25,7 +25,7 @@ object Reader {
     fullWithSans(pdn, identity, tags, true)
 
   def moves(
-      moveStrs: Traversable[String],
+      moveStrs: Iterable[String],
       tags: Tags,
       iteratedCapts: Boolean = false
   ): Validated[String, Result] =
@@ -45,7 +45,7 @@ object Reader {
     makeReplay(makeGame(parsed.tags), op(parsed.sans))
 
   def movesWithSans(
-      moveStrs: Traversable[String],
+      moveStrs: Iterable[String],
       op: Sans => Sans,
       tags: Tags,
       iteratedCapts: Boolean = false

@@ -6,7 +6,7 @@ import scala.util.Try
 object Binary {
 
   def writeMove(m: String)                = Try(Writer move m)
-  def writeMoves(ms: Traversable[String]) = Try(Writer moves ms)
+  def writeMoves(ms: Iterable[String]) = Try(Writer moves ms)
 
   def readMoves(bs: List[Byte])          = Try(Reader moves bs)
   def readMoves(bs: List[Byte], nb: Int) = Try(Reader.moves(bs, nb))
@@ -84,7 +84,7 @@ object Binary {
         Nil
     }) map (_.toByte)
 
-    def moves(strs: Traversable[String]): Array[Byte] = strs.flatMap(move).to(Array)
+    def moves(strs: Iterable[String]): Array[Byte] = strs.flatMap(move).to(Array)
 
     def moveUci(src: String, dst: String) = List(
       (MoveType.IsMove << 6) + src.toInt,

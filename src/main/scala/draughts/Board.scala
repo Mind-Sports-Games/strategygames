@@ -151,7 +151,7 @@ case class Board(
 
 object Board {
 
-  def apply(pieces: Traversable[(Pos, Piece)], variant: Variant): Board =
+  def apply(pieces: Iterable[(Pos, Piece)], variant: Variant): Board =
     Board(pieces.toMap, DraughtsHistory(), variant)
 
   def init(variant: Variant): Board = Board(variant.pieces, variant)

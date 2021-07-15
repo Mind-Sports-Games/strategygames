@@ -27,7 +27,7 @@ object Replay {
   def apply(game: DraughtsGame) = new Replay(game, Nil, game)
 
   def apply(
-      moveStrs: Traversable[String],
+      moveStrs: Iterable[String],
       initialFen: Option[FEN],
       variant: Variant,
       finalSquare: Boolean
@@ -56,7 +56,7 @@ object Replay {
     }
 
   def games(
-      moveStrs: Traversable[String],
+      moveStrs: Iterable[String],
       initialFen: Option[FEN],
       variant: Variant
   ): Validated[String, List[DraughtsGame]] =
@@ -299,7 +299,7 @@ object Replay {
     initialFen.flatMap { fen => Forsyth.<<@(variant, fen) } | Situation(variant)
 
   def boards(
-      moveStrs: Traversable[String],
+      moveStrs: Iterable[String],
       initialFen: Option[FEN],
       variant: Variant,
       finalSquare: Boolean = false
@@ -307,7 +307,7 @@ object Replay {
     situations(moveStrs, initialFen, variant, finalSquare) map (_ map (_.board))
 
   def ucis(
-      moveStrs: Traversable[String],
+      moveStrs: Iterable[String],
       initialSit: Situation,
       finalSquare: Boolean = false
   ): Validated[String, List[Uci]] =
@@ -316,7 +316,7 @@ object Replay {
     }
 
   def situations(
-      moveStrs: Traversable[String],
+      moveStrs: Iterable[String],
       initialFen: Option[FEN],
       variant: Variant,
       finalSquare: Boolean = false
@@ -352,7 +352,7 @@ object Replay {
     recursiveReplayFromUci(Replay(makeGame(variant, initialFen)), moves, finalSquare)
 
   def plyAtFen(
-      moveStrs: Traversable[String],
+      moveStrs: Iterable[String],
       initialFen: Option[FEN],
       variant: Variant,
       atFen: FEN
