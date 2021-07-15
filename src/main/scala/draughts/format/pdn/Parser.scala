@@ -56,7 +56,7 @@ object Parser {
     str.split(' ').toList,
     variant
   )
-  def moves(strMoves: Traversable[String], variant: Variant): Validated[String, Sans] = objMoves(
+  def moves(strMoves: Iterable[String], variant: Variant): Validated[String, Sans] = objMoves(
     strMoves.map { StrMove(_, Glyphs.empty, Nil, Nil) }.to(List),
     variant
   )
