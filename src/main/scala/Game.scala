@@ -1,6 +1,7 @@
 package strategygames
 
 import cats.data.Validated
+import cats.implicits._
 
 import strategygames.variant.Variant
 import strategygames.format.{ FEN, Uci }
@@ -57,11 +58,12 @@ object Game {
       case _ => sys.error("Not passed Chess objects")
     }
 
-    //TODO: need to convert?
-    //def apply(uci: Uci.Move): Validated[String, (Game, Move)] = uci match {
-    //  case (Uci.Move.Chess(uci)) => g.apply(uci)
-    //  case _ => sys.error("Not passed Chess objects")
-    //}
+    def apply(uci: Uci.Move): Validated[String, (Game, Move)] = uci match {
+      case Uci.ChessMove(uci) => g.apply(uci).toEither.map(
+        (t) => (Chess(t._1), Move.Chess(t._2))
+      ).toValidated
+      case _ => sys.error("Not passed Chess objects")
+    }
 
     def isStandardInit: Boolean = g.isStandardInit
 
@@ -92,11 +94,12 @@ object Game {
       case _ => sys.error("Not passed Draughts objects")
     }
 
-    //TODO: need to convert?
-    //def apply(uci: Uci.Move): Validated[String, (Game, Move)] = uci match {
-    //  case (Uci.Move.Draughts(uci)) => g.apply(uci)
-    //  case _ => sys.error("Not passed Draughts objects")
-    //}
+    def apply(uci: Uci.Move): Validated[String, (Game, Move)] = uci match {
+      case Uci.DraughtsMove(uci) => g.apply(uci).toEither.map(
+        (t) => (Draughts(t._1), Move.Draughts(t._2))
+      ).toValidated
+      case _ => sys.error("Not passed Draughts objects")
+    }
 
     def isStandardInit: Boolean = g.isStandardInit
 
