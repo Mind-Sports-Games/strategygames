@@ -104,5 +104,7 @@ object Color {
     case GameLib.Chess()    => chess.Color.fromResult(result).map(Chess)
   }
 
+  implicit def chessColor(c: chess.Color) = Chess(c)
+  implicit def draughtsColor(c: draughts.Color) = Draughts(c)
 
 }

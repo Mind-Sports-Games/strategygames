@@ -204,6 +204,9 @@ object Board {
 
   }
 
+  implicit def chessBoard(b: chess.Board) = Board.Chess(b)
+  implicit def draughtsBoard(b: draughts.Board) = Board.Draughts(b)
+
   def init(lib: GameLib, variant: Variant): Board = (lib, variant) match {
     case (GameLib.Draughts(), Variant.Draughts(variant)) => Draughts(draughts.Board.init(variant))
     case (GameLib.Chess(), Variant.Chess(variant))       => Chess(chess.Board.init(variant))

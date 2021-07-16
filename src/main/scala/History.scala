@@ -67,4 +67,6 @@ object History {
 
   }
 
+  implicit def chessHistory(h: chess.History) = Chess(h)
+  implicit def draughtsHistory(h: draughts.DraughtsHistory) = Draughts(h)
 }
