@@ -68,6 +68,15 @@ object Replay {
             message
           )
       }
+    case (GameLib.Chess(), FEN.Chess(initialFen), Variant.Chess(variant)) =>
+      chess.Replay.gameMoveWhileValid(moveStrs, initialFen, variant) match {
+        case (game, gameswithsan, message) =>
+          (
+            Game.Chess(game),
+            gameswithsan.map { case (g, u) => (Game.Chess(g), Uci.ChessWithSan(u)) },
+            message
+          )
+      }
     case _ => sys.error("Mismatched gamelib types")
   }
 
