@@ -52,22 +52,24 @@ object Replay {
     case _ => sys.error("Mismatched gamelib types")
   }
 
-  //def gameMoveWhileValid(
-  //  lib: GameLib,
-  //  moveStrs: Seq[String],
-  //  initialFen: FEN,
-  //  variant: Variant,
-  //  iteratedCapts: Boolean = false
-  //): (Game, List[(Game, Uci.WithSan)], Option[String]) = (lib, initialFen, variant) match {
-  //  case (GameLib.Draughts(), FEN.Draughts(initialFen), Variant.Draughts(variant))
-  //    => draughts.Replay.gameMoveWhileValid(moveStrs, initialFen, variant, iteratedCapts)
-  //      .map{(game, gameswithsan, message) => (
-  //        Game.Draughts(game),
-  //        gameswithsan.map{(g, u) => (Game.Draughts(g), Uci.DraughtsWithSan(u))},
-  //        message
-  //      )}
-
-  //}
+  def gameMoveWhileValid(
+    lib: GameLib,
+    moveStrs: Seq[String],
+    initialFen: FEN,
+    variant: Variant,
+    iteratedCapts: Boolean = false
+  ): (Game, List[(Game, Uci.WithSan)], Option[String]) = (lib, initialFen, variant) match {
+    case (GameLib.Draughts(), FEN.Draughts(initialFen), Variant.Draughts(variant)) =>
+      draughts.Replay.gameMoveWhileValid(moveStrs, initialFen, variant, iteratedCapts) match {
+        case (game, gameswithsan, message) =>
+          (
+            Game.Draughts(game),
+            gameswithsan.map { case (g, u) => (Game.Draughts(g), Uci.DraughtsWithSan(u)) },
+            message
+          )
+      }
+    case _ => sys.error("Mismatched gamelib types")
+  }
 
   def boards(
     lib: GameLib,
