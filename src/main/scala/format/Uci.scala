@@ -85,7 +85,17 @@ object Uci {
     }
   }
 
-  case class WithSan(uci: Uci, san: String)
+  abstract sealed class WithSan(uci: Uci, san: String)
+
+  final case class ChessWithSan(w: chess.format.Uci.WithSan) extends WithSan(
+    Chess(w.uci),
+    w.san
+  )
+
+  final case class DraughtsWithSan(w: draughts.format.Uci.WithSan) extends WithSan(
+    Draughts(w.uci),
+    w.san
+  )
 
   def apply(lib: GameLib, move: String): Option[Uci] = lib match {
       case GameLib.Draughts() => draughts.format.Uci.apply(move).map(Draughts)
