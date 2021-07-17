@@ -35,4 +35,9 @@ object Piece {
 
   }
 
+  def fromChar(lib: GameLib, c: Char): Option[Piece] = lib match {
+    case (GameLib.Draughts()) => draughts.Piece.fromChar(c).map(Draughts)
+    case (GameLib.Chess())    => chess.Piece.fromChar(c).map(Chess)
+  }
+
 }

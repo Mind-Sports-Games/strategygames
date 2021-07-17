@@ -20,3 +20,12 @@ case class Piece(color: Color, role: Role) {
 
   override def toString = (color + "-" + role).toLowerCase
 }
+
+object Piece {
+
+  def fromChar(c: Char): Option[Piece] =
+    Role.allByPdn get c.toUpper map {
+      Piece(Color.fromWhite(c.isUpper), _)
+    }
+
+}
