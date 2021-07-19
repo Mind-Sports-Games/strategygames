@@ -16,6 +16,12 @@ abstract class Game(
 
   def apply(move: Move): Game
 
+  // Because I"m unsure how to properly write a single, generic copy
+  // type signature, we're getting individual ones for how we use it.
+  // TODO: figure out if we can properly make this generic
+  def copy(clock: Option[Clock]):  Game
+  def copy(turns: Int, startedAtTurn: Int):  Game
+
   //def apply(uci: Uci.Move): Validated[String, (Game, Move)]
 
   def player = situation.color
@@ -65,6 +71,11 @@ object Game {
       case _ => sys.error("Not passed Chess objects")
     }
 
+    def copy(clock: Option[Clock]):  Game = Chess(g.copy(clock=clock))
+    def copy(turns: Int, startedAtTurn: Int):  Game = Chess(
+      g.copy(turns=turns, startedAtTurn=startedAtTurn)
+    )
+
     def isStandardInit: Boolean = g.isStandardInit
 
     def withBoard(b: Board): Game = b match {
@@ -100,6 +111,11 @@ object Game {
       ).toValidated
       case _ => sys.error("Not passed Draughts objects")
     }
+
+    def copy(clock: Option[Clock]):  Game = Draughts(g.copy(clock=clock))
+    def copy(turns: Int, startedAtTurn: Int): Game = Draughts(
+      g.copy(turns = turns, startedAtTurn = startedAtTurn)
+    )
 
     def isStandardInit: Boolean = g.isStandardInit
 
