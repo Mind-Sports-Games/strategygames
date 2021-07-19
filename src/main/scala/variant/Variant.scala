@@ -37,7 +37,7 @@ abstract class Variant(
 
   def exotic: Boolean
 
-  //def initialFen: FEN   = format.Forsyth.initial
+  def initialFen: FEN
 
   def isValidPromotion(promotion: Option[PromotableRole]): Boolean
 
@@ -102,6 +102,8 @@ object Variant {
 
     def exotic: Boolean = v.exotic
 
+    def initialFen: FEN = format.Forsyth.initial(GameLib.Chess())
+
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = promotion match {
       case Some(Role.ChessPromotableRole(pr)) => v.isValidPromotion(pr.some)
       case None                               => v.isValidPromotion(None)
@@ -149,6 +151,8 @@ object Variant {
     def linesOfAction: Boolean = false
 
     def exotic: Boolean = v.exotic
+
+    def initialFen: FEN = format.Forsyth.initial(GameLib.Draughts())
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = promotion match {
       case Some(Role.DraughtsPromotableRole(pr)) => v.isValidPromotion(pr.some)
@@ -206,6 +210,16 @@ object Variant {
   def divisionSensibleVariants(lib: GameLib): Set[Variant] = lib match {
     case GameLib.Draughts() => draughts.variant.Variant.divisionSensibleVariants.map(Draughts)
     case GameLib.Chess()    => chess.variant.Variant.divisionSensibleVariants.map(Chess)
+  }
+
+  def libStandard(lib: GameLib): Variant = lib match {
+    case GameLib.Draughts() => Variant.Draughts(draughts.variant.Standard)
+    case GameLib.Chess()    => Variant.Chess(chess.variant.Standard)
+  }
+
+  def libFromPosition(lib: GameLib): Variant = lib match {
+    case GameLib.Draughts() => Variant.Draughts(draughts.variant.FromPosition)
+    case GameLib.Chess()    => Variant.Chess(chess.variant.FromPosition)
   }
 
 }
