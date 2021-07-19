@@ -1,5 +1,7 @@
 package strategygames.chess
 
+import strategygames.Color
+
 import variant.{ Crazyhouse, Variant }
 
 case class Board(
@@ -86,7 +88,7 @@ case class Board(
       pawn <- apply(pos)
       if pawn is Pawn
       b2 <- take(pos)
-      b3 <- b2.place(pawn.color.queen, pos)
+      b3 <- b2.place(Piece(pawn.color, Queen), pos)
     } yield b3
 
   def castles: Castles = history.castles
@@ -114,7 +116,7 @@ case class Board(
   def unmovedRooks =
     UnmovedRooks {
       history.unmovedRooks.pos.filter(pos =>
-        apply(pos).exists(piece => piece.is(Rook) && piece.color.backRank == pos.rank)
+        apply(pos).exists(piece => piece.is(Rook) && Rank.backRank(piece.color) == pos.rank)
       )
     }
 

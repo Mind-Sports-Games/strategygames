@@ -1,5 +1,7 @@
 package strategygames.chess
 
+import strategygames.Color
+
 import format.Uci
 
 // Checks received by the respective side.

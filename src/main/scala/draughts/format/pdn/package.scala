@@ -2,6 +2,7 @@ package strategygames.draughts
 package format
 package pdn
 
+import strategygames.Color
 import strategygames.format.pgn.{ Tag, Tags }
 
 import scala._

@@ -5,8 +5,8 @@ import scala.util.Try
 
 package object draughts extends scalalib.Common with scalalib.OrnicarOption with scalalib.OrnicarBoolean {
 
-  val White = Color.White
-  val Black = Color.Black
+  val White = strategygames.Color.White
+  val Black = strategygames.Color.Black
 
   type Direction  = (Int, PosMotion => Option[PosMotion])
   type Directions = List[Direction]

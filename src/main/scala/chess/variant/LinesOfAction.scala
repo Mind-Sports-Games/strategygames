@@ -2,6 +2,7 @@ package strategygames.chess.variant
 
 import strategygames.chess._
 import strategygames.chess.format.FEN
+import strategygames.Color
 
 import scala.collection.immutable.Queue
 
@@ -16,30 +17,30 @@ case object LinesOfAction
     ) {
 
   override val pieces: Map[Pos, Piece] = Map(
-    Pos.B1 -> White.loachecker,
-    Pos.C1 -> White.loachecker,
-    Pos.D1 -> White.loachecker,
-    Pos.E1 -> White.loachecker,
-    Pos.F1 -> White.loachecker,
-    Pos.G1 -> White.loachecker,
-    Pos.B8 -> White.loachecker,
-    Pos.C8 -> White.loachecker,
-    Pos.D8 -> White.loachecker,
-    Pos.E8 -> White.loachecker,
-    Pos.F8 -> White.loachecker,
-    Pos.G8 -> White.loachecker,
-    Pos.A2 -> Black.loachecker,
-    Pos.A3 -> Black.loachecker,
-    Pos.A4 -> Black.loachecker,
-    Pos.A5 -> Black.loachecker,
-    Pos.A6 -> Black.loachecker,
-    Pos.A7 -> Black.loachecker,
-    Pos.H2 -> Black.loachecker,
-    Pos.H3 -> Black.loachecker,
-    Pos.H4 -> Black.loachecker,
-    Pos.H5 -> Black.loachecker,
-    Pos.H6 -> Black.loachecker,
-    Pos.H7 -> Black.loachecker
+    Pos.B1 -> Piece(White, LOAChecker),
+    Pos.C1 -> Piece(White, LOAChecker),
+    Pos.D1 -> Piece(White, LOAChecker),
+    Pos.E1 -> Piece(White, LOAChecker),
+    Pos.F1 -> Piece(White, LOAChecker),
+    Pos.G1 -> Piece(White, LOAChecker),
+    Pos.B8 -> Piece(White, LOAChecker),
+    Pos.C8 -> Piece(White, LOAChecker),
+    Pos.D8 -> Piece(White, LOAChecker),
+    Pos.E8 -> Piece(White, LOAChecker),
+    Pos.F8 -> Piece(White, LOAChecker),
+    Pos.G8 -> Piece(White, LOAChecker),
+    Pos.A2 -> Piece(Black, LOAChecker),
+    Pos.A3 -> Piece(Black, LOAChecker),
+    Pos.A4 -> Piece(Black, LOAChecker),
+    Pos.A5 -> Piece(Black, LOAChecker),
+    Pos.A6 -> Piece(Black, LOAChecker),
+    Pos.A7 -> Piece(Black, LOAChecker),
+    Pos.H2 -> Piece(Black, LOAChecker),
+    Pos.H3 -> Piece(Black, LOAChecker),
+    Pos.H4 -> Piece(Black, LOAChecker),
+    Pos.H5 -> Piece(Black, LOAChecker),
+    Pos.H6 -> Piece(Black, LOAChecker),
+    Pos.H7 -> Piece(Black, LOAChecker)
   )
 
   override val initialFen        = FEN("1LLLLLL1/l6l/l6l/l6l/l6l/l6l/l6l/1LLLLLL1 w - - 0 1")

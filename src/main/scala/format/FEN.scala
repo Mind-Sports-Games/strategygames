@@ -16,7 +16,7 @@ object FEN {
 
   final case class Chess(f: strategygames.chess.format.FEN) extends FEN(f.value) {
 
-    def color: Option[Color] = f.color.map(Color.Chess)
+    def color: Option[Color] = f.color
 
     def initial: Boolean = f.initial
 
@@ -24,7 +24,7 @@ object FEN {
 
   final case class Draughts(f: strategygames.draughts.format.FEN) extends FEN(f.value) {
 
-    def color: Option[Color] = f.color.map(Color.Draughts)
+    def color: Option[Color] = f.color
 
     def initial: Boolean = f.initial
 

@@ -105,10 +105,10 @@ object Forsyth {
     boardAndColor(lib, situation.board, situation.color)
 
   def boardAndColor(lib: GameLib, board: Board, turnColor: Color): String =
-    (lib, board, turnColor) match {
-      case (GameLib.Draughts(), Board.Draughts(board), Color.Draughts(turnColor))
+    (lib, board) match {
+      case (GameLib.Draughts(), Board.Draughts(board))
         => draughts.format.Forsyth.boardAndColor(board, turnColor)
-      case (GameLib.Chess(), Board.Chess(board), Color.Chess(turnColor))
+      case (GameLib.Chess(), Board.Chess(board))
         => chess.format.Forsyth.boardAndColor(board, turnColor)
       case _ => sys.error("Mismatched gamelib types")
   }

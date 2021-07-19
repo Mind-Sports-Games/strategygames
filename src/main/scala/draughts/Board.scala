@@ -1,5 +1,6 @@
 package strategygames.draughts
 
+import strategygames.Color
 import variant.Variant
 
 case class Board(
@@ -110,7 +111,7 @@ case class Board(
     piece <- apply(pos)
     if piece is Man
     b2 <- take(pos)
-    b3 <- b2.place(piece.color.king, pos)
+    b3 <- b2.place(Piece(piece.color, King), pos)
   } yield b3
 
   def withHistory(h: DraughtsHistory): Board = copy(history = h)

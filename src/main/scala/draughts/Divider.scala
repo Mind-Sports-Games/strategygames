@@ -1,6 +1,6 @@
 package strategygames.draughts
 
-import strategygames.Division
+import strategygames.{ Color, Division }
 
 import cats.syntax.option.none
 

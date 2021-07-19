@@ -1,4 +1,5 @@
 package strategygames.chess.variant
+
 import strategygames.chess._
 
 case object KingOfTheHill

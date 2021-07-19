@@ -80,7 +80,7 @@ object Board {
 
     val actors: Map[Pos, Actor] = b.actors.map{case(p, a) => (Pos.Chess(p), Actor.Chess(a))}
 
-    val kingPos: Map[Color, Pos] = b.kingPos.map{case(c, p) => (Color.Chess(c), Pos.Chess(p))}
+    val kingPos: Map[Color, Pos] = b.kingPos.map{case(c, p) => (c, Pos.Chess(p))}
 
     def place(piece: Piece, at: Pos): Option[Board] = (piece, at) match {
       case (Piece.Chess(piece), Pos.Chess(at)) => b.place(piece, at).map(Chess)
@@ -128,10 +128,8 @@ object Board {
 
     def autoDraw: Boolean = b.autoDraw
 
-    def situationOf(color: Color): Situation = color match {
-      case Color.Chess(color) => Situation.Chess(b.situationOf(color))
-      case _ => sys.error("Not passed Chess objects")
-    }
+    def situationOf(color: Color): Situation = Situation.Chess(b.situationOf(color))
+
     def materialImbalance: Int = b.materialImbalance
 
     override def toString: String = b.toString
@@ -146,7 +144,7 @@ object Board {
 
     val actors: Map[Pos, Actor] = b.actors.map{case(p, a) => (Pos.Draughts(p), Actor.Draughts(a))}
 
-    val kingPos: Map[Color, Pos] = b.kingPos.map{case(c, p) => (Color.Draughts(c), Pos.Draughts(p))}
+    val kingPos: Map[Color, Pos] = b.kingPos.map{case(c, p) => (c, Pos.Draughts(p))}
 
     def place(piece: Piece, at: Pos): Option[Board] = (piece, at) match {
       case (Piece.Draughts(piece), Pos.Draughts(at)) => b.place(piece, at).map(Draughts)
@@ -194,10 +192,8 @@ object Board {
 
     def autoDraw: Boolean = b.autoDraw
 
-    def situationOf(color: Color): Situation = color match {
-      case Color.Draughts(color) => Situation.Draughts(b.situationOf(color))
-      case _ => sys.error("Not passed Draughts objects")
-    }
+    def situationOf(color: Color): Situation = Situation.Draughts(b.situationOf(color))
+
     def materialImbalance: Int = b.materialImbalance
 
     override def toString: String = b.toString

@@ -1,6 +1,8 @@
 package strategygames.draughts
 package variant
 
+import strategygames.Color
+
 case object Antidraughts
     extends Variant(
       id = 6,

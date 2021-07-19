@@ -2,6 +2,7 @@ package strategygames.chess.variant
 
 import strategygames.chess._
 import strategygames.chess.format.FEN
+import strategygames.Color
 
 case object Horde
     extends Variant(
@@ -17,17 +18,17 @@ case object Horde
     */
   lazy val pieces: Map[Pos, Piece] = {
 
-    val frontPawns = List(Pos.B5, Pos.C5, Pos.F5, Pos.G5).map { _ -> White.pawn }
+    val frontPawns = List(Pos.B5, Pos.C5, Pos.F5, Pos.G5).map { _ -> Piece(White, Pawn) }
 
     val whitePawnsHorde = frontPawns ++ (for {
       x <- File.all
       y <- Rank.all.take(4)
-    } yield (Pos(x, y) -> White.pawn)) toMap
+    } yield (Pos(x, y) -> Piece(White, Pawn))) toMap
 
     val blackPieces = (for (y <- List(Rank.Seventh, Rank.Eighth); x <- File.all) yield {
       Pos(x, y) -> (y match {
-        case Rank.Eighth  => Black - backRank(x.index)
-        case Rank.Seventh => Black.pawn
+        case Rank.Eighth  => Piece(Black, backRank(x.index))
+        case Rank.Seventh => Piece(Black, Pawn)
       })
     }).toMap
 

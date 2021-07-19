@@ -1,5 +1,7 @@
 package strategygames.chess.variant
+
 import strategygames.chess._
+import strategygames.Color
 
 case object Atomic
     extends Variant(

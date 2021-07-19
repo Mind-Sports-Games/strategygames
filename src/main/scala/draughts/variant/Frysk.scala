@@ -1,6 +1,8 @@
 package strategygames.draughts
 package variant
 
+import strategygames.Color
+
 import format.FEN
 
 import cats.implicits._

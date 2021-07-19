@@ -1,5 +1,7 @@
 package strategygames.chess
 
+import strategygames.Color
+
 final case class Castles(
     whiteKingSide: Boolean,
     whiteQueenSide: Boolean,

@@ -5,6 +5,7 @@ import cats.data.Validated
 import strategygames.chess._
 import strategygames.chess.format.Uci
 import strategygames.chess.format.FEN
+import strategygames.Color
 
 case object Crazyhouse
     extends Variant(
@@ -124,7 +125,7 @@ case object Crazyhouse
     def store(piece: Piece, from: Pos) =
       copy(
         pockets = pockets store {
-          if (promoted(from)) piece.color.pawn else piece
+          if (promoted(from)) Piece(piece.color, Pawn) else piece
         },
         promoted = promoted - from
       )

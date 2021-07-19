@@ -1,5 +1,7 @@
 package strategygames.draughts
 
+import strategygames.Color
+
 import cats.syntax.option.none
 
 import format.Uci

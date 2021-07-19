@@ -6,6 +6,7 @@ import scala.annotation.nowarn
 
 import strategygames.chess._
 import strategygames.chess.format.FEN
+import strategygames.Color
 
 // Correctness depends on singletons for each variant ID
 abstract class Variant private[variant] (
@@ -166,8 +167,9 @@ abstract class Variant private[variant] (
 
   protected def pawnsOnPromotionRank(board: Board, color: Color) = {
     board.pieces.exists {
-      case (pos, Piece(c, r)) if c == color && r == Pawn && pos.rank == color.promotablePawnRank => true
-      case _                                                                                     => false
+      case (pos, Piece(c, r))
+        if c == color && r == Pawn && pos.rank == Rank.promotablePawnRank(color) => true
+      case _ => false
     }
   }
 
@@ -258,10 +260,10 @@ object Variant {
   private[variant] def symmetricRank(rank: IndexedSeq[Role]): Map[Pos, Piece] =
     (for (y <- Seq(Rank.First, Rank.Second, Rank.Seventh, Rank.Eighth); x <- File.all) yield {
       Pos(x, y) -> (y match {
-        case Rank.First   => White - rank(x.index)
-        case Rank.Second  => White.pawn
-        case Rank.Seventh => Black.pawn
-        case Rank.Eighth  => Black - rank(x.index)
+        case Rank.First   => Piece(White, rank(x.index))
+        case Rank.Second  => Piece(White, Pawn)
+        case Rank.Seventh => Piece(Black, Pawn)
+        case Rank.Eighth  => Piece(Black, rank(x.index))
       })
     }).toMap
 }

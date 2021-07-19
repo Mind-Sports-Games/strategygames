@@ -9,8 +9,8 @@ sealed trait Color {
   val letter: Char
   val name: String
 
-  val white: Boolean
-  val black: Boolean
+  val white = this == Color.White
+  val black = this == Color.Black
 }
 
 object Color {
@@ -38,6 +38,79 @@ object Color {
     def exists(pred: A => Boolean) = pred(white) || pred(black)
   }
 
+  object Map {
+    def apply[A](f: Color => A): Map[A] = Map(white = f(White), black = f(Black))
+  }
+
+  case object White extends Color {
+
+    lazy val unary_! = Black
+
+    val letter = 'W'
+    val name   = "white"
+
+    override val hashCode = 1
+  }
+
+  case object Black extends Color {
+
+    val unary_! = White
+
+    val letter = 'B'
+    val name   = "black"
+
+    override val hashCode = 2
+  }
+
+  def fromPly(ply: Int) = fromWhite((ply & 1) == 0)
+
+  def fromWhite(white: Boolean): Color = if (white) White else Black
+
+  def fromName(n: String): Option[Color] =
+    if (n == "white") Option(White)
+    else if (n == "black") Option(Black)
+    else None
+
+  def apply(b: Boolean): Color = if (b) White else Black
+
+  def apply(n: String): Option[Color] =
+    if (n == "white") Some(White)
+    else if (n == "black") Some(Black)
+    else None
+
+  def apply(c: Char): Option[Color] =
+    if (c == 'W' || c == 'w') Some(White)
+    else if (c == 'B' || c == 'b') Some(Black)
+    else None
+
+  val white: Color = White
+  val black: Color = Black
+
+  val all = List(White, Black)
+
+  val names = all map (_.name)
+
+  def exists(name: String) = all exists (_.name == name)
+
+  //need to move this out of Color
+  def showResult(color: Option[Color], draughtsResult: Boolean = false) = color match {
+    case Some(White) => if (draughtsResult) "2-0" else "1-0"
+    case Some(Black) => if (draughtsResult) "0-2" else "0-1"
+    case None        => if (draughtsResult) "1-1" else "1/2-1/2"
+  }
+
+  //need to move this out of Color
+  def fromResult(result: String): Option[Color] =
+    result match {
+      case "1-0" => Option(White)
+      case "2-0" => Option(White)//draughts
+      case "0-1" => Option(Black)
+      case "0-2" => Option(Black)//draughts
+      case _     => None
+    }
+
+
+  /*
   final case class Chess(c: chess.Color) extends Color {
     def unary_! = Chess(!c)
 
@@ -106,5 +179,5 @@ object Color {
 
   implicit def chessColor(c: chess.Color) = Chess(c)
   implicit def draughtsColor(c: draughts.Color) = Draughts(c)
-
+  */
 }

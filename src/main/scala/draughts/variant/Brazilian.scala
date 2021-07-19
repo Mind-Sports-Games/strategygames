@@ -1,6 +1,8 @@
 package strategygames.draughts
 package variant
 
+import strategygames.Color
+
 case object Brazilian
     extends Variant(
       id = 12,

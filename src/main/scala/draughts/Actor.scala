@@ -1,5 +1,7 @@
 package strategygames.draughts
 
+import strategygames.Color
+
 import scala.annotation.tailrec
 
 case class Actor(

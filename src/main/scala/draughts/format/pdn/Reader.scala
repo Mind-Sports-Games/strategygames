@@ -95,7 +95,7 @@ object Reader {
     )
     g.copy(
       startedAtTurn = g.turns,
-      clock = tags.clockConfig map (config => Clock.apply(GameLib.Draughts(), config))
+      clock = tags.clockConfig map (config => Clock.apply(config))
     )
   }
 }

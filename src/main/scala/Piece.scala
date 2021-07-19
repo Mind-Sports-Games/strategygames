@@ -18,7 +18,7 @@ abstract sealed class Piece(val color: Color, val role: Role) {
 object Piece {
 
   final case class Chess(p: chess.Piece) extends Piece(
-    Color.Chess(p.color),
+    p.color,
     Role.ChessRole(p.role)
   ) {
 
@@ -27,7 +27,7 @@ object Piece {
   }
 
   final case class Draughts(p: draughts.Piece) extends Piece(
-    Color.Draughts(p.color),
+    p.color,
     Role.DraughtsRole(p.role)
   ){
 

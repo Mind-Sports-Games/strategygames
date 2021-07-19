@@ -1,5 +1,7 @@
 package strategygames.chess
 
+import strategygames.Color
+
 final class Hash(size: Int) {
 
   def apply(situation: Situation): PositionHash = {

@@ -1,6 +1,6 @@
 package strategygames.draughts
 
-import strategygames.{ Clock, MoveMetrics }
+import strategygames.{ Clock, Color, MoveMetrics }
 import strategygames.draughts.format.FEN
 
 import cats.data.Validated

@@ -51,7 +51,7 @@ object Situation {
 
   final case class Chess(s: chess.Situation) extends Situation(
     Board.Chess(s.board),
-    Color.Chess(s.color)
+    s.color
   ) {
 
     lazy val moves: Map[Pos, List[Move]] = s.moves.map{
@@ -90,7 +90,7 @@ object Situation {
 
   final case class Draughts(s: draughts.Situation) extends Situation(
     Board.Draughts(s.board),
-    Color.Draughts(s.color)
+    s.color
   ) {
 
     // TODO: DRAUGHTS I think that .validMoves is correct, but unsure. needs testing.

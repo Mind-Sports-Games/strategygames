@@ -59,9 +59,9 @@ case class Move(
 
   def withPromotion(op: Option[PromotableRole]): Option[Move] =
     op.fold(this.some) { p =>
-      if ((after count color.king) > (before count color.king)) for {
+      if ((after count Piece(color, King)) > (before count Piece(color, King))) for {
         b2 <- after take dest
-        b3 <- b2.place(color - p, dest)
+        b3 <- b2.place(Piece(color, p), dest)
       } yield copy(after = b3, promotion = Option(p))
       else this.some
     }

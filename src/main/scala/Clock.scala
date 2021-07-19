@@ -169,7 +169,7 @@ object Clock {
 
     def limitInMinutes = limitSeconds / 60d
 
-    def toClock(lib: GameLib) = Clock(lib, this)
+    def toClock = Clock(this)
 
     def limitString: String =
       limitSeconds match {
@@ -207,13 +207,13 @@ object Clock {
     }
   def readPdnConfig(str: String) = readPgnConfig(str)
 
-  def apply(lib: GameLib, limit: Int, increment: Int): Clock = apply(lib, Config(limit, increment))
+  def apply(limit: Int, increment: Int): Clock = apply(Config(limit, increment))
 
-  def apply(lib: GameLib, config: Config): Clock = {
+  def apply(config: Config): Clock = {
     val player = ClockPlayer.withConfig(config)
     Clock(
       config = config,
-      color = lib.white,
+      color = Color.White,
       players = Color.Map(player, player),
       timer = None
     )

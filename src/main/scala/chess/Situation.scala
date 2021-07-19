@@ -1,5 +1,6 @@
 package strategygames.chess
-import strategygames.Status
+
+import strategygames.{ Color, Status }
 
 import cats.data.Validated
 import cats.implicits._
@@ -90,7 +91,9 @@ case class Situation(board: Board, color: Color) {
           List(
             move.dest.file.offset(-1),
             move.dest.file.offset(1)
-          ).flatten.flatMap(board(_, color.passablePawnRank)).exists(_ == color.pawn)
+          ).flatten
+          .flatMap(board(_, Rank.passablePawnRank(color)))
+          .exists(_ == Piece(color, Pawn))
         )
           moves.values.flatten.find(_.enpassant).map(_.dest)
         else None

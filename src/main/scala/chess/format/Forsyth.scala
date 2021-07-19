@@ -1,6 +1,7 @@
 package strategygames.chess.format
 
 import cats.implicits._
+import strategygames.Color
 import strategygames.chess._
 import strategygames.chess.variant.{ Standard, Variant }
 
@@ -33,7 +34,7 @@ object Forsyth {
               val rooks = board
                 .piecesOf(color)
                 .collect {
-                  case (pos, piece) if piece.is(Rook) && pos.rank == color.backRank => pos
+                  case (pos, piece) if piece.is(Rook) && pos.rank == Rank.backRank(color) => pos
                 }
                 .toList
                 .sortBy(_.file)
@@ -217,14 +218,14 @@ object Forsyth {
   private[chess] def exportCastles(board: Board): String = {
 
     lazy val wr = board.pieces.collect {
-      case (pos, piece) if pos.rank == White.backRank && piece == White.rook => pos
+      case (pos, piece) if pos.rank == Rank.backRank(White) && piece == Piece(White, Rook) => pos
     }
     lazy val br = board.pieces.collect {
-      case (pos, piece) if pos.rank == Black.backRank && piece == Black.rook => pos
+      case (pos, piece) if pos.rank == Rank.backRank(Black) && piece == Piece(Black, Rook) => pos
     }
 
-    lazy val wur = board.unmovedRooks.pos.filter(_.rank == White.backRank)
-    lazy val bur = board.unmovedRooks.pos.filter(_.rank == Black.backRank)
+    lazy val wur = board.unmovedRooks.pos.filter(_.rank == Rank.backRank(White))
+    lazy val bur = board.unmovedRooks.pos.filter(_.rank == Rank.backRank(Black))
 
     {
       // castling rights with inner rooks are represented by their file name

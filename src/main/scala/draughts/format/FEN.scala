@@ -1,6 +1,6 @@
 package strategygames.draughts.format
 
-import strategygames.draughts.Color
+import strategygames.Color
 
 final case class FEN(value: String) extends AnyVal {
 

@@ -1,6 +1,8 @@
 package strategygames.draughts
 package variant
 
+import strategygames.Color
+
 import format.FEN
 
 import cats.data.Validated
@@ -540,14 +542,14 @@ object Variant {
         (
           pos,
           y match {
-            case 1  => Black - rank(x - 1)
-            case 2  => Black - rank(x - 1)
-            case 3  => Black - rank(x - 1)
-            case 4  => Black - rank(x - 1)
-            case 7  => White - rank(x - 1)
-            case 8  => White - rank(x - 1)
-            case 9  => White - rank(x - 1)
-            case 10 => White - rank(x - 1)
+            case 1  => Piece(Black, rank(x - 1))
+            case 2  => Piece(Black, rank(x - 1))
+            case 3  => Piece(Black, rank(x - 1))
+            case 4  => Piece(Black, rank(x - 1))
+            case 7  => Piece(White, rank(x - 1))
+            case 8  => Piece(White, rank(x - 1))
+            case 9  => Piece(White, rank(x - 1))
+            case 10 => Piece(White, rank(x - 1))
           }
         )
       }
@@ -563,12 +565,12 @@ object Variant {
         (
           pos,
           y match {
-            case 1 => Black - rank(x - 1)
-            case 2 => Black - rank(x - 1)
-            case 3 => Black - rank(x - 1)
-            case 6 => White - rank(x - 1)
-            case 7 => White - rank(x - 1)
-            case 8 => White - rank(x - 1)
+            case 1 => Piece(Black, rank(x - 1))
+            case 2 => Piece(Black, rank(x - 1))
+            case 3 => Piece(Black, rank(x - 1))
+            case 6 => Piece(White, rank(x - 1))
+            case 7 => Piece(White, rank(x - 1))
+            case 8 => Piece(White, rank(x - 1))
           }
         )
       }
@@ -584,8 +586,8 @@ object Variant {
         (
           pos,
           y match {
-            case 1  => Black - rank(x - 1)
-            case 10 => White - rank(x - 1)
+            case 1  => Piece(Black, rank(x - 1))
+            case 10 => Piece(White, rank(x - 1))
           }
         )
       }

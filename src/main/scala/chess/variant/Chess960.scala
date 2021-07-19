@@ -2,6 +2,7 @@ package strategygames.chess.variant
 
 import strategygames.chess._
 import strategygames.chess.format.FEN
+import strategygames.Color
 
 case object Chess960
     extends Variant(

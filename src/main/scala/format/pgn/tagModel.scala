@@ -74,15 +74,7 @@ case class Tags(value: List[Tag]) extends AnyVal {
     value.exists(_.name == which(Tag))
 
   def resultColor: Option[Option[Color]] =
-    apply(_.Result).filter("*" !=).map(v => {
-      strategygames.Color.fromResult(
-        variant match {
-          case Some(strategygames.variant.Variant.Draughts(_)) => strategygames.GameLib.Draughts()
-          case Some(strategygames.variant.Variant.Chess(_)) => strategygames.GameLib.Chess()
-          case _ => sys.error("This shouldn't happen, but if it does, it's a bug elsewhere")
-        },
-      v)
-    })
+    apply(_.Result).filter("*" !=).map(v => {strategygames.Color.fromResult(v)})
 
   def ++(tags: Tags) = tags.value.foldLeft(this)(_ + _)
 

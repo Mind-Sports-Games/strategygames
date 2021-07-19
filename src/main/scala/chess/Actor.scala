@@ -1,5 +1,7 @@
 package strategygames.chess
 
+import strategygames.Color
+
 import format.Uci
 import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
@@ -29,8 +31,8 @@ final case class Actor(
           } flatMap maybePromote
           def enpassant(horizontal: Direction): Option[Move] =
             for {
-              victimPos <- horizontal(pos).filter(_ => pos.rank == color.passablePawnRank)
-              _         <- board(victimPos).filter(v => v == !color - Pawn)
+              victimPos <- horizontal(pos).filter(_ => pos.rank == Rank.passablePawnRank(color))
+              _         <- board(victimPos).filter(v => v == Piece(!color, Pawn))
               targetPos <- horizontal(next)
               _ <- pawnDir(victimPos) flatMap pawnDir filter { vf =>
                 history.lastMove.exists {
@@ -43,7 +45,7 @@ final case class Actor(
           def forward(p: Pos): Option[Move] =
             board.move(pos, p) map { move(p, _) } flatMap maybePromote
           def maybePromote(m: Move): Option[Move] =
-            if (m.dest.rank == m.color.promotablePawnRank)
+            if (m.dest.rank == Rank.promotablePawnRank(m.color))
               (m.after promote m.dest) map { b2 =>
                 m.copy(after = b2, promotion = Option(Queen))
               }
@@ -113,7 +115,7 @@ final case class Actor(
       // Check castling rights.
       kingPos <- board kingPosOf color filter (_ => history canCastle color on side)
       rookPos <- side.tripToRook(kingPos, board).lastOption
-      if board(rookPos) contains color.rook
+      if board(rookPos) contains Piece(color, Rook)
       if history.unmovedRooks.pos.contains(rookPos)
       // Check impeded castling.
       newKingPos       = Pos(side.castledKingFile, kingPos.rank)
@@ -132,8 +134,8 @@ final case class Actor(
       if !mustNotBeAttacked.exists(p => board.variant.kingThreatened(b1, !color, p))
       // Test the final king position seperately, after the rook has been moved.
       b2 <- b1 take rookPos
-      b3 <- b2.place(color.king, newKingPos)
-      b4 <- b3.place(color.rook, newRookPos)
+      b3 <- b2.place(Piece(color, King), newKingPos)
+      b4 <- b3.place(Piece(color, Rook), newRookPos)
       if !board.variant.kingThreatened(b4, !color, newKingPos)
       b5     = b4 updateHistory (_ withoutCastles color)
       castle = Option((kingPos -> newKingPos, rookPos -> newRookPos))

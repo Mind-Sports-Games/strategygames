@@ -3,6 +3,8 @@ package format
 
 import cats.implicits._
 
+import strategygames.Color
+
 import variant.{ Standard, Variant }
 
 /** Transform a game to draughts Forsyth Edwards Notation

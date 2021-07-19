@@ -1,5 +1,6 @@
 package strategygames.draughts
-import strategygames.Status
+
+import strategygames.{ Color, Status }
 
 import cats.data.Validated
 import cats.implicits._

@@ -83,10 +83,7 @@ object Game {
       case _ => sys.error("Not passed Chess objects")
     }
 
-    def withPlayer(c: Color): Game = c match {
-      case (Color.Chess(c)) => Chess(g.withPlayer(c))
-      case _ => sys.error("Not passed Chess objects")
-    }
+    def withPlayer(c: Color): Game = Chess(g.withPlayer(c))
 
     def withTurns(t: Int): Game = Chess(g.withTurns(t))
 
@@ -124,10 +121,7 @@ object Game {
       case _ => sys.error("Not passed Draughts objects")
     }
 
-    def withPlayer(c: Color): Game = c match {
-      case (Color.Draughts(c)) => Draughts(g.withPlayer(c))
-      case _ => sys.error("Not passed Draughts objects")
-    }
+    def withPlayer(c: Color): Game = Draughts(g.withPlayer(c))
 
     def withTurns(t: Int): Game = Draughts(g.withTurns(t))
 
@@ -149,10 +143,10 @@ object Game {
     case _ => sys.error("Mismatched gamelib types")
   }
 
-  def apply(lib: GameLib, board: Board, color: Color): Game = (lib, board, color) match {
-    case (GameLib.Draughts(), Board.Draughts(board), Color.Draughts(color))
+  def apply(lib: GameLib, board: Board, color: Color): Game = (lib, board) match {
+    case (GameLib.Draughts(), Board.Draughts(board))
       => Draughts(draughts.DraughtsGame.apply(board, color))
-    case (GameLib.Chess(), Board.Chess(board), Color.Chess(color))
+    case (GameLib.Chess(), Board.Chess(board))
       => Chess(chess.Game.apply(board, color))
     case _ => sys.error("Mismatched gamelib types")
   }

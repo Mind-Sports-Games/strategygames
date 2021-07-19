@@ -2,6 +2,7 @@ package strategygames.chess.variant
 
 import strategygames.chess._
 import strategygames.chess.format.FEN
+import strategygames.Color
 
 case object RacingKings
     extends Variant(
@@ -19,22 +20,22 @@ case object RacingKings
   // krbnNBRK
   // qrbnNBRQ
   override val pieces: Map[Pos, Piece] = Map(
-    Pos.A1 -> Black.queen,
-    Pos.A2 -> Black.king,
-    Pos.B1 -> Black.rook,
-    Pos.B2 -> Black.rook,
-    Pos.C1 -> Black.bishop,
-    Pos.C2 -> Black.bishop,
-    Pos.D1 -> Black.knight,
-    Pos.D2 -> Black.knight,
-    Pos.E1 -> White.knight,
-    Pos.E2 -> White.knight,
-    Pos.F1 -> White.bishop,
-    Pos.F2 -> White.bishop,
-    Pos.G1 -> White.rook,
-    Pos.G2 -> White.rook,
-    Pos.H1 -> White.queen,
-    Pos.H2 -> White.king
+    Pos.A1 -> Piece(Black, Queen),
+    Pos.A2 -> Piece(Black, King),
+    Pos.B1 -> Piece(Black, Rook),
+    Pos.B2 -> Piece(Black, Rook),
+    Pos.C1 -> Piece(Black, Bishop),
+    Pos.C2 -> Piece(Black, Bishop),
+    Pos.D1 -> Piece(Black, Knight),
+    Pos.D2 -> Piece(Black, Knight),
+    Pos.E1 -> Piece(White, Knight),
+    Pos.E2 -> Piece(White, Knight),
+    Pos.F1 -> Piece(White, Bishop),
+    Pos.F2 -> Piece(White, Bishop),
+    Pos.G1 -> Piece(White, Rook),
+    Pos.G2 -> Piece(White, Rook),
+    Pos.H1 -> Piece(White, Queen),
+    Pos.H2 -> Piece(White, King)
   )
 
   override val castles = Castles.none

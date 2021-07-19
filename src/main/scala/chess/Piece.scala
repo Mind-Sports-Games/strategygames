@@ -1,5 +1,7 @@
 package strategygames.chess
 
+import strategygames.Color
+
 case class Piece(color: Color, role: Role) {
 
   def is(c: Color)    = c == color
