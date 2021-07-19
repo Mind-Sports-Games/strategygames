@@ -8,7 +8,7 @@ import strategygames._
 import strategygames.format.FEN
 
 // Correctness depends on singletons for each variant ID
-abstract class Variant (
+abstract class Variant(
     val id: Int,
     val key: String,
     val name: String,
@@ -20,6 +20,20 @@ abstract class Variant (
 ) {
 
   def pieces: Map[Pos, Piece]
+
+  // An abstraction leak, we probably won't need this long term
+  // but in the short term it helps us with the port.
+  def standard: Boolean
+  def chess960: Boolean
+  def fromPosition: Boolean
+  def kingOfTheHill: Boolean
+  def threeCheck: Boolean
+  def antichess: Boolean
+  def atomic: Boolean
+  def horde: Boolean
+  def racingKings: Boolean
+  def crazyhouse: Boolean
+  def linesOfAction: Boolean
 
   def exotic: Boolean
 
@@ -61,69 +75,95 @@ abstract class Variant (
 
 object Variant {
 
-  case class Chess(v: chess.variant.Variant) extends Variant(
-    id = v.id,
-    key = v.key,
-    name = v.name,
-    shortName = v.shortName,
-    title = v.title,
-    standardInitialPosition = v.standardInitialPosition
-  ) {
+  case class Chess(v: chess.variant.Variant)
+      extends Variant(
+        id = v.id,
+        key = v.key,
+        name = v.name,
+        shortName = v.shortName,
+        title = v.title,
+        standardInitialPosition = v.standardInitialPosition
+      ) {
 
     def pieces: Map[Pos, Piece] =
-      v.pieces.map{case (pos, piece) => (Pos.Chess(pos), Piece.Chess(piece))}
+      v.pieces.map { case (pos, piece) => (Pos.Chess(pos), Piece.Chess(piece)) }
+
+    def standard: Boolean      = v.standard
+    def chess960: Boolean      = v.chess960
+    def fromPosition: Boolean  = v.fromPosition
+    def kingOfTheHill: Boolean = v.kingOfTheHill
+    def threeCheck: Boolean    = v.threeCheck
+    def antichess: Boolean     = v.antichess
+    def atomic: Boolean        = v.atomic
+    def horde: Boolean         = v.horde
+    def racingKings: Boolean   = v.racingKings
+    def crazyhouse: Boolean    = v.crazyhouse
+    def linesOfAction: Boolean = v.linesOfAction
 
     def exotic: Boolean = v.exotic
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = promotion match {
       case Some(Role.ChessPromotableRole(pr)) => v.isValidPromotion(pr.some)
       case None                               => v.isValidPromotion(None)
-      case _ => sys.error("Not passed Chess objects")
+      case _                                  => sys.error("Not passed Chess objects")
     }
 
     def checkmate(situation: Situation): Boolean = situation match {
       case Situation.Chess(situation) => v.checkmate(situation)
-      case _ => sys.error("Not passed Chess objects")
+      case _                          => sys.error("Not passed Chess objects")
     }
 
     def valid(board: Board, strict: Boolean): Boolean = board match {
       case Board.Chess(board) => v.valid(board, strict)
-      case _ => sys.error("Not passed Chess objects")
+      case _                  => sys.error("Not passed Chess objects")
     }
 
     val roles: List[Role] = v.roles.map(Role.ChessRole)
 
   }
 
-  case class Draughts(v: draughts.variant.Variant) extends Variant(
-    id = v.id,
-    key = v.key,
-    name = v.name,
-    shortName = v.shortName,
-    title = v.title,
-    standardInitialPosition = v.standardInitialPosition,
-    gameType = Option(v.gameType)
-  ) {
+  case class Draughts(v: draughts.variant.Variant)
+      extends Variant(
+        id = v.id,
+        key = v.key,
+        name = v.name,
+        shortName = v.shortName,
+        title = v.title,
+        standardInitialPosition = v.standardInitialPosition,
+        gameType = Option(v.gameType)
+      ) {
 
     def pieces: Map[Pos, Piece] =
-      v.pieces.map{case (pos, piece) => (Pos.Draughts(pos), Piece.Draughts(piece))}
+      v.pieces.map { case (pos, piece) => (Pos.Draughts(pos), Piece.Draughts(piece)) }
+
+    def standard: Boolean      = false
+    def chess960: Boolean      = false
+    def fromPosition: Boolean  = false
+    def kingOfTheHill: Boolean = false
+    def threeCheck: Boolean    = false
+    def antichess: Boolean     = false
+    def atomic: Boolean        = false
+    def horde: Boolean         = false
+    def racingKings: Boolean   = false
+    def crazyhouse: Boolean    = false
+    def linesOfAction: Boolean = false
 
     def exotic: Boolean = v.exotic
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = promotion match {
       case Some(Role.DraughtsPromotableRole(pr)) => v.isValidPromotion(pr.some)
       case None                                  => v.isValidPromotion(None)
-      case _ => sys.error("Not passed Draughts objects")
+      case _                                     => sys.error("Not passed Draughts objects")
     }
 
     def checkmate(situation: Situation): Boolean = situation match {
       case Situation.Draughts(situation) => v.checkmate(situation)
-      case _ => sys.error("Not passed Draughts objects")
+      case _                             => sys.error("Not passed Draughts objects")
     }
 
     def valid(board: Board, strict: Boolean): Boolean = board match {
       case Board.Draughts(board) => v.valid(board, strict)
-      case _ => sys.error("Not passed Draughts objects")
+      case _                     => sys.error("Not passed Draughts objects")
     }
 
     val roles: List[Role] = v.roles.map(Role.DraughtsRole)

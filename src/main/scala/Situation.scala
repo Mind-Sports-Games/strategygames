@@ -11,6 +11,10 @@ abstract sealed class Situation(val board: Board, val color: Color) {
 
   lazy val actors = board actorsOf color
 
+  val destinations: Map[Pos, List[Pos]]
+
+  def drops: Option[List[Pos]]
+
   def history = board.history
 
   val check: Boolean
@@ -54,6 +58,12 @@ object Situation {
 
     def end: Boolean = s.end
 
+    val destinations: Map[Pos, List[Pos]] = s.destinations.map{
+      case (p: chess.Pos, l: List[chess.Pos]) => (Pos.Chess(p), l.map(Pos.Chess))
+    }
+
+    def drops: Option[List[Pos]] = s.drops.map(_.map(Pos.Chess))
+
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
@@ -80,6 +90,11 @@ object Situation {
     lazy val check: Boolean = false
 
     def checkSquare = None
+
+    // TODO: this probably needs to be properly implemented
+    val destinations: Map[Pos, List[Pos]] = Map()
+
+    def drops: Option[List[Pos]] = None
 
     def end: Boolean = s.end
 
