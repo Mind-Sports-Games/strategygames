@@ -13,6 +13,10 @@ abstract sealed class Situation(val board: Board, val color: Color) {
 
   def history = board.history
 
+  val check: Boolean
+
+  def checkSquare: Option[Pos]
+
   def checkMate: Boolean = board.variant checkmate this
 
   def autoDraw: Boolean = board.autoDraw || board.variant.specialDraw(this)
@@ -44,6 +48,10 @@ object Situation {
     Color.Chess(s.color)
   ) {
 
+    lazy val check: Boolean = s.check
+
+    def checkSquare = s.checkSquare.map(Pos.Chess)
+
     def end: Boolean = s.end
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
@@ -68,6 +76,10 @@ object Situation {
     Board.Draughts(s.board),
     Color.Draughts(s.color)
   ) {
+
+    lazy val check: Boolean = false
+
+    def checkSquare = None
 
     def end: Boolean = s.end
 
