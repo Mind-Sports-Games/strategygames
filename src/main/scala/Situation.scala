@@ -11,6 +11,8 @@ abstract sealed class Situation(val board: Board, val color: Color) {
 
   lazy val actors = board actorsOf color
 
+  val moves: Map[Pos, List[Move]]
+
   val destinations: Map[Pos, List[Pos]]
 
   def drops: Option[List[Pos]]
@@ -52,6 +54,10 @@ object Situation {
     Color.Chess(s.color)
   ) {
 
+    lazy val moves: Map[Pos, List[Move]] = s.moves.map{
+      case (p: chess.Pos, l: List[chess.Move]) => (Pos.Chess(p), l.map(Move.Chess))
+    }
+
     lazy val check: Boolean = s.check
 
     def checkSquare = s.checkSquare.map(Pos.Chess)
@@ -86,6 +92,11 @@ object Situation {
     Board.Draughts(s.board),
     Color.Draughts(s.color)
   ) {
+
+    // TODO: DRAUGHTS I think that .validMoves is correct, but unsure. needs testing.
+    lazy val moves: Map[Pos, List[Move]] = s.validMoves.map{
+      case (p: draughts.Pos, l: List[draughts.Move]) => (Pos.Draughts(p), l.map(Move.Draughts))
+    }
 
     lazy val check: Boolean = false
 
