@@ -85,7 +85,7 @@ object Uci {
     }
   }
 
-  abstract sealed class WithSan(uci: Uci, san: String)
+  abstract sealed class WithSan(val uci: Uci, val san: String)
 
   final case class ChessWithSan(w: chess.format.Uci.WithSan) extends WithSan(
     Chess(w.uci),
@@ -96,6 +96,28 @@ object Uci {
     Draughts(w.uci),
     w.san
   )
+
+  object WithSan {
+
+    def apply(lib: GameLib, uci: Uci, san: String): WithSan = (lib, uci) match {
+      case (GameLib.Draughts(), Uci.Draughts(uci))
+        => Uci.DraughtsWithSan(draughts.format.Uci.WithSan(uci, san))
+      case (GameLib.Chess(), Uci.Chess(uci))
+        => Uci.ChessWithSan(chess.format.Uci.WithSan(uci, san))
+      case _ => sys.error("Mismatched gamelib types")
+    }
+
+  }
+
+  //possibly wrong to handle Draughts.withCaptures likes this
+  def apply(lib: GameLib, move: strategygames.Move, withCaptures: Boolean = false): Uci.Move =
+    (lib, move) match {
+      case (GameLib.Draughts(), strategygames.Move.Draughts(move))
+        => DraughtsMove(draughts.format.Uci.apply(move, withCaptures))
+      case (GameLib.Chess(), strategygames.Move.Chess(move))
+        => ChessMove(chess.format.Uci.apply(move))
+      case _ => sys.error("Mismatched gamelib types")
+    }
 
   def apply(lib: GameLib, move: String): Option[Uci] = lib match {
       case GameLib.Draughts() => draughts.format.Uci.apply(move).map(Draughts)

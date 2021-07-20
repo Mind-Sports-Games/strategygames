@@ -53,10 +53,12 @@ object Pos {
 
   }
 
-  //def fromKey(lib: GameLib, key: String): Option[Pos] = lib match {
-  //  case GameLib.Draughts() => draughts.Pos.fromKey(key).map(Draughts)
-  //  case GameLib.Chess() => chess.Pos.fromKey(key).map(Chess)
-  //}
+  //need to equivalate this method for draughts probably
+  //think we need to figure out a way to map into Draughts with a board size at this point
+  def fromKey(lib: GameLib, key: String): Option[Pos] = lib match {
+    case GameLib.Draughts() => sys.error("Not implemented yet for draughts")
+    case GameLib.Chess() => chess.Pos.fromKey(key).map(Chess)
+  }
 
   //def at(lib: GameLib, x: Int, y: Int): Option[Pos] = lib match {
   //  case GameLib.Draughts() => draughts.Pos.at(x, y).map(Draughts)

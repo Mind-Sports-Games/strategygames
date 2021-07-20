@@ -16,6 +16,16 @@ abstract class Game(
 
   def apply(move: Move): Game
 
+  def apply(
+      orig: Pos,
+      dest: Pos,
+      promotion: Option[PromotableRole] = None,
+      metrics: MoveMetrics = MoveMetrics(),
+      finalSquare: Boolean = false,
+      captures: Option[List[Pos]] = None,
+      partialCaptures: Boolean = false
+  ): Validated[String, (Game, Move)]
+
   // Because I"m unsure how to properly write a single, generic copy
   // type signature, we're getting individual ones for how we use it.
   // TODO: figure out if we can properly make this generic
@@ -59,6 +69,22 @@ object Game {
     g.startedAtTurn
   ) {
 
+    def apply(
+      orig: Pos,
+      dest: Pos,
+      promotion: Option[PromotableRole] = None,
+      metrics: MoveMetrics = MoveMetrics(),
+      finalSquare: Boolean = false,
+      captures: Option[List[Pos]] = None,
+      partialCaptures: Boolean = false
+    ): Validated[String, (Game, Move)] = (orig, dest, promotion) match {
+      case (Pos.Chess(orig), Pos.Chess(dest), Some(Role.ChessPromotableRole(promotion)))
+        => g.apply(orig, dest, Some(promotion), metrics).toEither.map(
+          (t) => (Chess(t._1), Move.Chess(t._2))
+        ).toValidated
+      case _ => sys.error("Not passed Chess objects")
+    }
+
     def apply(move: Move): Game = move match {
       case (Move.Chess(move)) => Chess(g.apply(move))
       case _ => sys.error("Not passed Chess objects")
@@ -97,6 +123,44 @@ object Game {
     g.startedAtTurn
   ) {
 
+    private def draughtsCaptures(captures: Option[List[Pos]]): Option[List[draughts.Pos]] =
+      captures match {
+        case Some(captures) => Some(captures.flatMap(c =>
+          c match {
+            case Pos.Draughts(c) => Some(c)
+            case _               => None
+          }
+        ))
+        case None => None
+      }
+
+    def apply(
+      orig: Pos,
+      dest: Pos,
+      promotion: Option[PromotableRole] = None,
+      metrics: MoveMetrics = MoveMetrics(),
+      finalSquare: Boolean = false,
+      captures: Option[List[Pos]] = None,
+      partialCaptures: Boolean = false
+    ): Validated[String, (Game, Move)] = (orig, dest, promotion) match {
+      case (
+        Pos.Draughts(orig),
+        Pos.Draughts(dest),
+        Some(Role.DraughtsPromotableRole(promotion))
+      ) => g.apply(
+          orig,
+          dest,
+          Some(promotion),
+          metrics,
+          finalSquare,
+          draughtsCaptures(captures),
+          partialCaptures
+        ).toEither.map(
+          (t) => (Draughts(t._1), Move.Draughts(t._2))
+        ).toValidated
+      case _ => sys.error("Not passed Chess objects")
+    }
+
     def apply(move: Move): Game = move match {
       case (Move.Draughts(move)) => Draughts(g.apply(move))
       case _ => sys.error("Not passed Draughts objects")
@@ -127,7 +191,7 @@ object Game {
 
   }
 
-  def apply(lib: GameLib, variant: strategygames.variant.Variant): Game = (lib, variant) match {
+  def apply(lib: GameLib, variant: Variant): Game = (lib, variant) match {
     case (GameLib.Draughts(), Variant.Draughts(variant))
       => Draughts(draughts.DraughtsGame.apply(variant))
     case (GameLib.Chess(), Variant.Chess(variant))
@@ -150,5 +214,14 @@ object Game {
       => Chess(chess.Game.apply(board, color))
     case _ => sys.error("Mismatched gamelib types")
   }
+
+  def apply(lib: GameLib, variant: Option[Variant], fen: Option[FEN]): Game =
+    (lib, variant, fen) match {
+      case (GameLib.Draughts(), Some(Variant.Draughts(variant)), Some(FEN.Draughts(fen)))
+        => Draughts(draughts.DraughtsGame.apply(Some(variant), Some(fen)))
+      case (GameLib.Chess(), Some(Variant.Chess(variant)), Some(FEN.Chess(fen)))
+        => Chess(chess.Game.apply(Some(variant), Some(fen)))
+      case _ => sys.error("Mismatched gamelib types")
+    }
 
 }

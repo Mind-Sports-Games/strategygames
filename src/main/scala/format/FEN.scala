@@ -36,6 +36,11 @@ object FEN {
 
   }
 
+  def apply(lib: GameLib, value: String): FEN = lib match {
+    case GameLib.Draughts() => FEN.Draughts(strategygames.draughts.format.FEN(value))
+    case GameLib.Chess()    => FEN.Chess(strategygames.chess.format.FEN(value))
+  }
+
   def clean(lib: GameLib, source: String): FEN = lib match {
     case GameLib.Draughts()
       => Draughts(strategygames.draughts.format.FEN(source.replace("_", " ").trim))
