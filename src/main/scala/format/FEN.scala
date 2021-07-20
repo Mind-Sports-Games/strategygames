@@ -10,6 +10,8 @@ abstract sealed class FEN(val value: String) {
 
   def initial: Boolean
 
+  def chessFen: Option[strategygames.chess.format.FEN]
+
 }
 
 object FEN {
@@ -20,6 +22,8 @@ object FEN {
 
     def initial: Boolean = f.initial
 
+    def chessFen: Option[strategygames.chess.format.FEN] = Some(f)
+
   }
 
   final case class Draughts(f: strategygames.draughts.format.FEN) extends FEN(f.value) {
@@ -27,6 +31,8 @@ object FEN {
     def color: Option[Color] = f.color
 
     def initial: Boolean = f.initial
+
+    def chessFen: Option[strategygames.chess.format.FEN] = None
 
   }
 

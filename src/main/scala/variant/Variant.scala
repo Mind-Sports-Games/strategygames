@@ -71,6 +71,10 @@ abstract class Variant(
 
   override def hashCode: Int = id
 
+  // TODO: this function lies, it can't always turn itself into a chess variant,
+  //       so sometimes it doesn't, and it calls sys.error instead. Yes. I know.
+  def chessVariant: chess.variant.Variant
+
 }
 
 object Variant {
@@ -122,6 +126,8 @@ object Variant {
 
     val roles: List[Role] = v.roles.map(Role.ChessRole)
 
+    def chessVariant: chess.variant.Variant = v
+
   }
 
   case class Draughts(v: draughts.variant.Variant)
@@ -172,6 +178,7 @@ object Variant {
 
     val roles: List[Role] = v.roles.map(Role.DraughtsRole)
 
+    def chessVariant: chess.variant.Variant = sys.error("Unimplemented for Draughts")
   }
 
   def all(lib: GameLib): List[Variant] = lib match {
