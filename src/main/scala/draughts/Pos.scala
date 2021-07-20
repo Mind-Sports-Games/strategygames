@@ -13,6 +13,8 @@ sealed abstract class Pos(val fieldNumber: Int) {
     case u: Pos => fieldNumber == u.fieldNumber
     case _      => false
   }
+
+  val all: List[Pos]
 }
 
 sealed abstract class PosMotion(field: Int) extends Pos(field) {
@@ -41,6 +43,8 @@ sealed case class Pos100 private (x: Int, y: Int) extends PosMotion(5 * (y - 1) 
   lazy val moveUp    = movesUp.get(fieldNumber).map(_(2)).filter(_ > 0) flatMap posAt
   lazy val moveLeft  = movesHorizontal.get(fieldNumber).map(_(0)).filter(_ > 0) flatMap posAt
   lazy val moveRight = movesHorizontal.get(fieldNumber).map(_(1)).filter(_ > 0) flatMap posAt
+
+  val all: List[Pos] = Pos64.all
 }
 
 sealed case class Pos64 private (x: Int, y: Int) extends PosMotion(4 * (y - 1) + x) {
@@ -56,6 +60,8 @@ sealed case class Pos64 private (x: Int, y: Int) extends PosMotion(4 * (y - 1) +
   lazy val moveUp    = movesUp.get(fieldNumber).map(_(2)).filter(_ > 0) flatMap posAt
   lazy val moveLeft  = movesHorizontal.get(fieldNumber).map(_(0)).filter(_ > 0) flatMap posAt
   lazy val moveRight = movesHorizontal.get(fieldNumber).map(_(1)).filter(_ > 0) flatMap posAt
+
+  val all: List[Pos] = Pos100.all
 }
 
 sealed trait BoardPos {
