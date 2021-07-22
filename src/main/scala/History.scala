@@ -52,7 +52,7 @@ object History {
   final case class Draughts(h: draughts.DraughtsHistory) extends History(
     lastMove = h.lastMove.map(Uci.Draughts),
     positionHashes = h.positionHashes,
-    variant = Option(Variant.Draughts(h.variant)),
+    variant = Some(Variant.Draughts(h.variant)),
     kingMoves = h.kingMoves
   ) {
 
@@ -69,4 +69,35 @@ object History {
 
   implicit def chessHistory(h: chess.History) = Chess(h)
   implicit def draughtsHistory(h: draughts.DraughtsHistory) = Draughts(h)
+
+  def apply(
+    lib: GameLib,
+    lastMove: Option[Uci] = None,
+    positionHashes: PositionHash = Array.empty,
+    variant: Option[Variant] = None,
+    castles: chess.Castles = chess.Castles.all,
+    checkCount: chess.CheckCount = chess.CheckCount(0, 0),
+    unmovedRooks: chess.UnmovedRooks = chess.UnmovedRooks.default,
+    kingMoves: draughts.KingMoves = draughts.KingMoves(),
+    halfMoveClock: Int = 0
+  ): History = (lib, lastMove, variant) match {
+    case (GameLib.Draughts(), Some(Uci.Draughts(lastMove)), Some(Variant.Draughts(variant)))
+      => Draughts(draughts.DraughtsHistory(
+        lastMove = Some(lastMove),
+        positionHashes = positionHashes,
+        variant = variant,
+        kingMoves = kingMoves
+      ))
+    case (GameLib.Chess(), Some(Uci.Chess(lastMove)), Some(Variant.Chess(_)))
+      => Chess(chess.History(
+        lastMove = Some(lastMove),
+        positionHashes = positionHashes,
+        castles = castles,
+        checkCount = checkCount,
+        unmovedRooks = unmovedRooks,
+        halfMoveClock = halfMoveClock
+      ))
+    case _ => sys.error("Mismatched gamelib types")
+  }
+        
 }

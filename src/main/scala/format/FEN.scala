@@ -6,6 +6,8 @@ abstract sealed class FEN(val value: String) {
 
   override def toString = value
 
+  def fullMove: Option[Int]
+
   def color: Option[Color]
 
   def initial: Boolean
@@ -18,6 +20,8 @@ object FEN {
 
   final case class Chess(f: strategygames.chess.format.FEN) extends FEN(f.value) {
 
+    def fullMove: Option[Int] = f.fullMove
+
     def color: Option[Color] = f.color
 
     def initial: Boolean = f.initial
@@ -27,6 +31,9 @@ object FEN {
   }
 
   final case class Draughts(f: strategygames.draughts.format.FEN) extends FEN(f.value) {
+
+    //need to consider an implementation for draughts?
+    def fullMove: Option[Int] = None
 
     def color: Option[Color] = f.color
 

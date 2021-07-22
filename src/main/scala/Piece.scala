@@ -40,4 +40,12 @@ object Piece {
     case (GameLib.Chess())    => chess.Piece.fromChar(c).map(Chess)
   }
 
+  def chessPieceMap(pieceMap: PieceMap): chess.PieceMap = pieceMap.map{
+    case(Pos.Chess(pos), Chess(piece)) => (pos, piece)
+  }
+
+  def draughtsPieceMap(pieceMap: PieceMap): draughts.PieceMap = pieceMap.map{
+    case(Pos.Draughts(pos), Draughts(piece)) => (pos, piece)
+  }
+
 }

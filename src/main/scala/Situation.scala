@@ -27,6 +27,8 @@ abstract sealed class Situation(val board: Board, val color: Color) {
 
   def autoDraw: Boolean = board.autoDraw || board.variant.specialDraw(this)
 
+  def opponentHasInsufficientMaterial: Boolean
+
   lazy val threefoldRepetition: Boolean = board.history.threefoldRepetition
 
   def variantEnd = board.variant specialEnd this
@@ -38,6 +40,8 @@ abstract sealed class Situation(val board: Board, val color: Color) {
   def playable(strict: Boolean): Boolean
 
   val status: Option[Status]
+
+  def move(uci: Uci.Move): Validated[String, Move]
 
   def withHistory(history: History): Situation
 
@@ -62,6 +66,8 @@ object Situation {
 
     def checkSquare = s.checkSquare.map(Pos.Chess)
 
+    def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
+
     def end: Boolean = s.end
 
     val destinations: Map[Pos, List[Pos]] = s.destinations.map{
@@ -74,6 +80,11 @@ object Situation {
 
     val status: Option[Status] = s.status
     
+    def move(uci: Uci.Move): Validated[String, Move] = uci match {
+      case Uci.ChessMove(uci) => s.move(uci).toEither.map(m => Move.Chess(m)).toValidated
+      case _ => sys.error("Not passed Chess objects")
+    }
+
     def withHistory(history: History): Situation = history match {
       case History.Chess(history) => Chess(s.withHistory(history))
       case _ => sys.error("Not passed Chess objects")
@@ -107,12 +118,21 @@ object Situation {
 
     def drops: Option[List[Pos]] = None
 
+    //possibly need to do something for this
+    def opponentHasInsufficientMaterial: Boolean = false
+
     def end: Boolean = s.end
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
     
+    def move(uci: Uci.Move): Validated[String, Move] = uci match {
+      case Uci.DraughtsMove(uci)
+        => s.move(uci).toEither.map(m => Move.Draughts(m)).toValidated
+      case _ => sys.error("Not passed Draughts objects")
+    }
+
     def withHistory(history: History): Situation = history match {
       case History.Draughts(history) => Draughts(s.withHistory(history))
       case _ => sys.error("Not passed Draughts objects")
@@ -127,9 +147,19 @@ object Situation {
 
   }
 
+  def apply(lib: GameLib, board: Board, color: Color): Situation = (lib, board) match {
+    case (GameLib.Draughts(), Board.Draughts(board))
+      => Draughts(draughts.Situation(board, color))
+    case (GameLib.Chess(), Board.Chess(board))
+      => Chess(chess.Situation(board, color))
+    case _ => sys.error("Mismatched gamelib types")
+  }
+
   def apply(lib: GameLib, variant: Variant): Situation = (lib, variant) match {
-    case (GameLib.Draughts(), Variant.Draughts(variant)) => Draughts(draughts.Situation.apply(variant))
-    case (GameLib.Chess(), Variant.Chess(variant))       => Chess(chess.Situation.apply(variant))
+    case (GameLib.Draughts(), Variant.Draughts(variant))
+      => Draughts(draughts.Situation.apply(variant))
+    case (GameLib.Chess(), Variant.Chess(variant))
+      => Chess(chess.Situation.apply(variant))
     case _ => sys.error("Mismatched gamelib types")
   }
 

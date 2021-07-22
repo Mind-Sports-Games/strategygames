@@ -29,10 +29,10 @@ object Uci {
   }
 
   abstract sealed class Move(
-      orig: Pos,
-      dest: Pos,
-      promotion: Option[PromotableRole] = None,
-      capture: Option[List[Pos]] = None
+    val orig: Pos,
+    val dest: Pos,
+    val promotion: Option[PromotableRole] = None,
+    val capture: Option[List[Pos]] = None
   ) extends Uci {
 
     def keys = orig.key + dest.key
@@ -69,6 +69,24 @@ object Uci {
 
   object Move {
 
+    private def draughtsCaptures(captures: Option[List[Pos]]): Option[List[draughts.Pos]] =
+      captures match {
+        case Some(captures) => Some(captures.flatMap(c =>
+          c match {
+            case Pos.Draughts(c) => Some(c)
+            case _               => None
+          }
+        ))
+        case None => None
+      }
+
+    def apply(lib: GameLib, orig: Pos, dest: Pos, promotion: Option[PromotableRole], capture: Option[List[Pos]] = None): Move =
+      (lib, orig, dest, promotion) match {
+        case (GameLib.Draughts(), Pos.Draughts(orig), Pos.Draughts(dest), Some(Role.DraughtsPromotableRole(promotion))) => DraughtsMove(draughts.format.Uci.Move.apply(orig, dest, Some(promotion), draughtsCaptures(capture)))
+        case (GameLib.Chess(), Pos.Chess(orig), Pos.Chess(dest), Some(Role.ChessPromotableRole(promotion))) => ChessMove(chess.format.Uci.Move.apply(orig, dest, Some(promotion)))
+        case _ => sys.error("Mismatched gamelib types")
+      }
+
     def apply(lib: GameLib, move: String): Option[Move] = lib match {
       case GameLib.Draughts() => draughts.format.Uci.Move.apply(move).map(DraughtsMove)
       case GameLib.Chess()    => chess.format.Uci.Move.apply(move).map(ChessMove)
@@ -80,8 +98,10 @@ object Uci {
     }
 
     def fromStrings(lib: GameLib, origS: String, destS: String, promS: Option[String]): Option[Move] = lib match {
-      case GameLib.Draughts() => draughts.format.Uci.Move.fromStrings(origS, destS, promS).map(DraughtsMove)
-      case GameLib.Chess()    => chess.format.Uci.Move.fromStrings(origS, destS, promS).map(ChessMove)
+      case GameLib.Draughts()
+        => draughts.format.Uci.Move.fromStrings(origS, destS, promS).map(DraughtsMove)
+      case GameLib.Chess()
+        => chess.format.Uci.Move.fromStrings(origS, destS, promS).map(ChessMove)
     }
   }
 
