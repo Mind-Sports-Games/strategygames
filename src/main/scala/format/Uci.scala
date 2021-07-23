@@ -158,29 +158,7 @@ object Uci {
   def readListPiotr(lib: GameLib, moves: String): Option[List[Uci]] =
     moves.split(' ').toList.map(piotr(lib, _)).sequence
 
-  //something like this should be possible, but rewritten the function below
-  //def writeListPiotr(lib: GameLib, moves: List[Uci]): String =
-  //  moves.map(_.piotr(lib, _)) mkString " "
-
-  def draughtsUci(uci: List[Uci]): List[draughts.format.Uci] =
-    uci.flatMap(u =>
-      u match {
-        case Uci.Draughts(u) => Some(u)
-        case _               => None
-      }
-    )
-
-  def chessUci(uci: List[Uci]): List[chess.format.Uci] =
-    uci.flatMap(u =>
-      u match {
-        case Uci.Chess(u) => Some(u)
-        case _            => None
-      }
-    )
-
-  def writeListPiotr(lib: GameLib, moves: List[Uci]): String = lib match {
-    case GameLib.Draughts() => draughts.format.Uci.writeListPiotr(draughtsUci(moves))
-    case GameLib.Chess()    => chess.format.Uci.writeListPiotr(chessUci(moves))
-  }
+  def writeListPiotr(moves: List[Uci]): String =
+    moves.map(_.piotr) mkString " "
 
 }

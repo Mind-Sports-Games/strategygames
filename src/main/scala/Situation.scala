@@ -41,6 +41,16 @@ abstract sealed class Situation(val board: Board, val color: Color) {
 
   val status: Option[Status]
 
+  def move(
+    from: Pos,
+    to: Pos,
+    promotion: Option[PromotableRole] = None,
+    finalSquare: Boolean = false,
+    forbiddenUci: Option[List[String]] = None,
+    captures: Option[List[Pos]] = None,
+    partialCaptures: Boolean = false
+  ): Validated[String, Move]
+
   def move(uci: Uci.Move): Validated[String, Move]
 
   def withHistory(history: History): Situation
@@ -80,6 +90,20 @@ object Situation {
 
     val status: Option[Status] = s.status
     
+    def move(
+      from: Pos,
+      to: Pos,
+      promotion: Option[PromotableRole] = None,
+      finalSquare: Boolean = false,
+      forbiddenUci: Option[List[String]] = None,
+      captures: Option[List[Pos]] = None,
+      partialCaptures: Boolean = false
+    ): Validated[String, Move] = (from, to, promotion) match {
+      case (Pos.Chess(from), Pos.Chess(to), Some(Role.ChessPromotableRole(promotion)))
+        => s.move(from, to, Some(promotion)).toEither.map(m => Move.Chess(m)).toValidated
+      case _ => sys.error("Not passed Chess objects")
+    }
+
     def move(uci: Uci.Move): Validated[String, Move] = uci match {
       case Uci.ChessMove(uci) => s.move(uci).toEither.map(m => Move.Chess(m)).toValidated
       case _ => sys.error("Not passed Chess objects")
@@ -127,6 +151,31 @@ object Situation {
 
     val status: Option[Status] = s.status
     
+    private def draughtsCaptures(captures: Option[List[Pos]]): Option[List[draughts.Pos]] =
+      captures match {
+        case Some(captures) => Some(captures.flatMap(c =>
+          c match {
+            case Pos.Draughts(c) => Some(c)
+            case _               => None
+          }
+        ))
+        case None => None
+      }
+
+    def move(
+      from: Pos,
+      to: Pos,
+      promotion: Option[PromotableRole] = None,
+      finalSquare: Boolean = false,
+      forbiddenUci: Option[List[String]] = None,
+      captures: Option[List[Pos]] = None,
+      partialCaptures: Boolean = false
+    ): Validated[String, Move] = (from, to, promotion) match {
+      case (Pos.Draughts(from), Pos.Draughts(to), Some(Role.DraughtsPromotableRole(promotion)))
+        => s.move(from, to, Some(promotion), finalSquare, forbiddenUci, draughtsCaptures(captures), partialCaptures).toEither.map(m => Move.Draughts(m)).toValidated
+      case _ => sys.error("Not passed Draughts objects")
+    }
+
     def move(uci: Uci.Move): Validated[String, Move] = uci match {
       case Uci.DraughtsMove(uci)
         => s.move(uci).toEither.map(m => Move.Draughts(m)).toValidated

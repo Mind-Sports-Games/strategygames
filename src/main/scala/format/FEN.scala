@@ -10,6 +10,8 @@ abstract sealed class FEN(val value: String) {
 
   def color: Option[Color]
 
+  def ply: Option[Int]
+
   def initial: Boolean
 
   def chessFen: Option[strategygames.chess.format.FEN]
@@ -24,6 +26,8 @@ object FEN {
 
     def color: Option[Color] = f.color
 
+    def ply: Option[Int] = f.ply
+
     def initial: Boolean = f.initial
 
     def chessFen: Option[strategygames.chess.format.FEN] = Some(f)
@@ -36,6 +40,9 @@ object FEN {
     def fullMove: Option[Int] = None
 
     def color: Option[Color] = f.color
+
+    //need to consider an implementation for draughts?
+    def ply: Option[Int] = None
 
     def initial: Boolean = f.initial
 

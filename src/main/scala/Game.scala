@@ -191,6 +191,21 @@ object Game {
 
   }
 
+  def apply(
+    lib: GameLib,
+    situation: Situation,
+    pgnMoves: Vector[String] = Vector(),
+    clock: Option[Clock] = None,
+    turns: Int = 0, // plies
+    startedAtTurn: Int = 0
+  ): Game = (lib, situation) match {
+    case (GameLib.Draughts(), Situation.Draughts(situation))
+      => Draughts(draughts.DraughtsGame(situation, pgnMoves, clock, turns, startedAtTurn))
+    case (GameLib.Chess(), Situation.Chess(situation))
+      => Chess(chess.Game(situation, pgnMoves, clock, turns, startedAtTurn))
+    case _ => sys.error("Mismatched gamelib types")
+  }
+
   def apply(lib: GameLib, variant: Variant): Game = (lib, variant) match {
     case (GameLib.Draughts(), Variant.Draughts(variant))
       => Draughts(draughts.DraughtsGame.apply(variant))
