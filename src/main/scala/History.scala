@@ -30,7 +30,7 @@ abstract sealed class History(
 object History {
 
   final case class Chess(h: chess.History) extends History(
-    lastMove = h.lastMove.map(Uci.Chess),
+    lastMove = h.lastMove.map(Uci.wrap),
     positionHashes = h.positionHashes,
     castles = h.castles,
     checkCount = h.checkCount,
@@ -43,14 +43,14 @@ object History {
     def threefoldRepetition: Boolean = h.threefoldRepetition
 
     def withLastMove(m: Uci): History = m match {
-      case Uci.Chess(m)    => Chess(h.withLastMove(m))
+      case u: Uci.Chess    => Chess(h.withLastMove(u.unwrap))
       case _ => sys.error("Not passed Chess objects")
     }
 
   }
 
   final case class Draughts(h: draughts.DraughtsHistory) extends History(
-    lastMove = h.lastMove.map(Uci.Draughts),
+    lastMove = h.lastMove.map(Uci.wrap),
     positionHashes = h.positionHashes,
     variant = Some(Variant.Draughts(h.variant)),
     kingMoves = h.kingMoves
@@ -61,7 +61,7 @@ object History {
     def threefoldRepetition: Boolean = h.threefoldRepetition
 
     def withLastMove(m: Uci): History = m match {
-      case Uci.Draughts(m) => Draughts(h.withLastMove(m))
+      case u: Uci.Draughts => Draughts(h.withLastMove(u.unwrap))
       case _ => sys.error("Not passed Draughts objects")
     }
 
@@ -81,16 +81,16 @@ object History {
     kingMoves: draughts.KingMoves = draughts.KingMoves(),
     halfMoveClock: Int = 0
   ): History = (lib, lastMove, variant) match {
-    case (GameLib.Draughts(), Some(Uci.Draughts(lastMove)), Some(Variant.Draughts(variant)))
+    case (GameLib.Draughts(), Some(lastMove: Uci.Draughts), Some(Variant.Draughts(variant)))
       => Draughts(draughts.DraughtsHistory(
-        lastMove = Some(lastMove),
+        lastMove = Some(lastMove.unwrap),
         positionHashes = positionHashes,
         variant = variant,
         kingMoves = kingMoves
       ))
-    case (GameLib.Chess(), Some(Uci.Chess(lastMove)), Some(Variant.Chess(_)))
+    case (GameLib.Chess(), Some(lastMove: Uci.Chess), Some(Variant.Chess(_)))
       => Chess(chess.History(
-        lastMove = Some(lastMove),
+        lastMove = Some(lastMove.unwrap),
         positionHashes = positionHashes,
         castles = castles,
         checkCount = checkCount,
@@ -99,5 +99,5 @@ object History {
       ))
     case _ => sys.error("Mismatched gamelib types")
   }
-        
+
 }

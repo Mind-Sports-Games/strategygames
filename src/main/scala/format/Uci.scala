@@ -2,7 +2,6 @@ package strategygames.format
 
 import strategygames._
 
-import cats.data.Validated
 import cats.implicits._
 
 sealed trait Uci {
@@ -14,18 +13,14 @@ sealed trait Uci {
 
 }
 
+
 object Uci {
 
-  final case class Chess(u: chess.format.Uci) extends Uci {
-    def uci = u.uci
-    def piotr = u.piotr
-    def origDest: (Pos, Pos) = (Pos.Chess(u.origDest._1), Pos.Chess(u.origDest._2))
+  sealed trait Chess {
+    def unwrap: chess.format.Uci
   }
-
-  final case class Draughts(u: draughts.format.Uci) extends Uci {
-    def uci = u.uci
-    def piotr = u.piotr
-    def origDest: (Pos, Pos) = (Pos.Draughts(u.origDest._1), Pos.Draughts(u.origDest._2))
+  sealed trait Draughts {
+    def unwrap: draughts.format.Uci
   }
 
   abstract sealed class Move(
@@ -51,8 +46,9 @@ object Uci {
     Pos.Chess(m.orig),
     Pos.Chess(m.dest),
     m.promotion.map(Role.ChessPromotableRole)
-  ){
+  ) with Chess {
     def uci = m.uci
+    val unwrap = m
   }
 
   final case class DraughtsMove(m: draughts.format.Uci.Move) extends Move(
@@ -63,8 +59,31 @@ object Uci {
       case Some(capture) => Some(capture.map(Pos.Draughts))
       case None          => None
     }
-  ){
+  ) with Draughts {
     def uci = m.uci
+    val unwrap = m
+  }
+
+  abstract sealed class Drop(
+    val pos: Pos,
+  ) extends Uci {
+    def origDest = pos -> pos
+
+  }
+
+  final case class ChessDrop(d: chess.format.Uci.Drop) extends Drop(Pos.Chess(d.pos)) with Chess {
+    def uci                  = d.uci
+    def piotr                = d.piotr
+    val unwrap = d
+  }
+
+  def wrap(uci: chess.format.Uci): Uci = uci match {
+    case m: chess.format.Uci.Move => ChessMove(m)
+    case d: chess.format.Uci.Drop => ChessDrop(d)
+  }
+
+  def wrap(uci: draughts.format.Uci): Uci = uci match {
+    case m: draughts.format.Uci.Move => DraughtsMove(m)
   }
 
   object Move {
@@ -108,22 +127,22 @@ object Uci {
   abstract sealed class WithSan(val uci: Uci, val san: String)
 
   final case class ChessWithSan(w: chess.format.Uci.WithSan) extends WithSan(
-    Chess(w.uci),
+    wrap(w.uci),
     w.san
   )
 
   final case class DraughtsWithSan(w: draughts.format.Uci.WithSan) extends WithSan(
-    Draughts(w.uci),
+    wrap(w.uci),
     w.san
   )
 
   object WithSan {
 
     def apply(lib: GameLib, uci: Uci, san: String): WithSan = (lib, uci) match {
-      case (GameLib.Draughts(), Uci.Draughts(uci))
+      case (GameLib.Draughts(), Uci.DraughtsMove(uci))
         => Uci.DraughtsWithSan(draughts.format.Uci.WithSan(uci, san))
-      case (GameLib.Chess(), Uci.Chess(uci))
-        => Uci.ChessWithSan(chess.format.Uci.WithSan(uci, san))
+      case (GameLib.Chess(), u: Uci.Chess)
+        => Uci.ChessWithSan(chess.format.Uci.WithSan(u.unwrap, san))
       case _ => sys.error("Mismatched gamelib types")
     }
 
@@ -140,13 +159,13 @@ object Uci {
     }
 
   def apply(lib: GameLib, move: String): Option[Uci] = lib match {
-      case GameLib.Draughts() => draughts.format.Uci.apply(move).map(Draughts)
-      case GameLib.Chess()    => chess.format.Uci.apply(move).map(Chess)
+      case GameLib.Draughts() => draughts.format.Uci.apply(move).map(wrap)
+      case GameLib.Chess()    => chess.format.Uci.apply(move).map(wrap)
   }
 
   def piotr(lib: GameLib, move: String): Option[Uci] = lib match {
-      case GameLib.Draughts() => draughts.format.Uci.piotr(move).map(Draughts)
-      case GameLib.Chess()    => chess.format.Uci.piotr(move).map(Chess)
+      case GameLib.Draughts() => draughts.format.Uci.piotr(move).map(wrap)
+      case GameLib.Chess()    => chess.format.Uci.piotr(move).map(wrap)
   }
 
   def readList(lib: GameLib, moves: String): Option[List[Uci]] =

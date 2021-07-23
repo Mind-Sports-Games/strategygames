@@ -112,7 +112,7 @@ object Replay {
   def draughtsUcis(ucis: List[Uci]): List[draughts.format.Uci] =
     ucis.flatMap(u =>
       u match {
-        case Uci.Draughts(u) => Some(u)
+        case u: Uci.Draughts => Some(u.unwrap)
         case _               => None
       }
     )
@@ -120,7 +120,7 @@ object Replay {
   def chessUcis(ucis: List[Uci]): List[chess.format.Uci] =
     ucis.flatMap(u =>
       u match {
-        case Uci.Chess(u) => Some(u)
+        case u: Uci.Chess => Some(u.unwrap)
         case _            => None
       }
     )
