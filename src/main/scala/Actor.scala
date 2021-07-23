@@ -1,9 +1,5 @@
 package strategygames
 
-import format.Uci
-import scala.annotation.tailrec
-import scala.collection.mutable.ArrayBuffer
-
 abstract sealed class Actor(
   val piece: Piece,
   val pos: Pos,
