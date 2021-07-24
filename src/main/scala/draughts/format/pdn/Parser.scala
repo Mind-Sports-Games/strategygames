@@ -8,7 +8,7 @@ import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
-import strategygames.format.pgn.{ Tag, Tags }
+import strategygames.format.pgn.{ Glyph, Glyphs, Tag, Tags }
 
 // http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm
 // https://pdn.fmjd.org/index.html

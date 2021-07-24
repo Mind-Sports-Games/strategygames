@@ -4,7 +4,7 @@ package format.pgn
 import cats.data.Validated
 import cats.syntax.option._
 
-import strategygames.format.pgn.{ Tags }
+import strategygames.format.pgn.{ Glyphs, Tags }
 
 case class ParsedPgn(
     initialPosition: InitialPosition,

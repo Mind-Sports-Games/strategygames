@@ -1,7 +1,7 @@
 package strategygames.draughts
 package format.pdn
 
-import strategygames.format.pgn.{ Tags }
+import strategygames.format.pgn.{ Glyphs, Tags }
 
 import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }

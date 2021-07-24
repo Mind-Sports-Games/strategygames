@@ -5,7 +5,7 @@ package pgn
 import cats.implicits._
 
 import strategygames.Color
-import strategygames.format.pgn.{ Tag, Tags }
+import strategygames.format.pgn.{ Glyphs, Tag, Tags }
 
 case class Pgn(
     tags: Tags,

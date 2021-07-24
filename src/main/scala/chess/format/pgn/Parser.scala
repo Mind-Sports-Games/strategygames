@@ -3,7 +3,7 @@ package format.pgn
 
 import strategygames.chess.variant.Variant
 
-import strategygames.format.pgn.{ Tag, Tags }
+import strategygames.format.pgn.{ Glyph, Glyphs, Tag, Tags }
 
 import scala.util.parsing.combinator._
 import cats.data.Validated

@@ -3,7 +3,7 @@ package format
 package pdn
 
 import strategygames.Color
-import strategygames.format.pgn.{ Tag, Tags }
+import strategygames.format.pgn.{ Glyphs, Tag, Tags }
 
 import scala._
 import cats.implicits._
