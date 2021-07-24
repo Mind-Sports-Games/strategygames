@@ -68,6 +68,9 @@ abstract sealed class Board(
 
   override def toString: String
 
+  // TODO: there is probably a better way to generalize this.
+  def copy(history: History, variant: Variant): Board
+
   // TODO: Yup, still not type safe. :D
   def toChess: chess.Board
   def toDraughts: draughts.Board
@@ -138,6 +141,11 @@ object Board {
 
     override def toString: String = b.toString
 
+    def copy(history: History, variant: Variant): Board = (history, variant) match {
+      case (History.Chess(history), Variant.Chess(variant)) => Chess(b.copy(history=history, variant=variant))
+      case _ => sys.error("Unable to copy a chess board with non-chess arguments")
+    }
+
     def toChess = b
     def toDraughts = sys.error("Can't make a draughts board from a chess board")
 
@@ -204,6 +212,12 @@ object Board {
     def materialImbalance: Int = b.materialImbalance
 
     override def toString: String = b.toString
+
+    def copy(history: History, variant: Variant): Board = (history, variant) match {
+      case (History.Draughts(history), Variant.Draughts(variant)) => Draughts(b.copy(history=history, variant=variant))
+      case _ => sys.error("Unable to copy a draughts board with non-draughts arguments")
+    }
+
     def toDraughts = b
     def toChess = sys.error("Can't make a chess board from a draughts board")
 

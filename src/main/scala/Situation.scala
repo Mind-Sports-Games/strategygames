@@ -59,6 +59,9 @@ abstract sealed class Situation(val board: Board, val color: Color) {
 
   def unary_! : Situation
 
+  // TODO: There is probably a better way to a more generalized version of this function ...
+  def copy(board: Board): Situation
+
   // TODO: yup, still not typesafe
   def toChess: chess.Situation
   def toDraughts: draughts.Situation
@@ -124,6 +127,12 @@ object Situation {
     }
 
     def unary_! : Situation = Chess(s.unary_!)
+
+    def copy(board: Board): Situation = Chess(board match {
+      case Board.Chess(board) => s.copy(board)
+      case _ => sys.error("Can't copy a chess situation with a non-chess board")
+    })
+
     def toChess = s
     def toDraughts = sys.error("Can't make draughts situation from chess situation")
   }
@@ -198,6 +207,12 @@ object Situation {
     }
 
     def unary_! : Situation = Draughts(s.unary_!)
+
+    def copy(board: Board): Situation = Draughts(board match {
+      case Board.Draughts(board) => s.copy(board)
+      case _ => sys.error("Can't copy a draughts situation with a non-draughts board")
+    })
+
     def toDraughts = s
     def toChess = sys.error("Can't make chess situation from draughts situation")
 
