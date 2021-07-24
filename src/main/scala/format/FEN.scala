@@ -50,6 +50,9 @@ object FEN {
 
   }
 
+  def wrap(fen: strategygames.chess.format.FEN) = Chess(fen)
+  def wrap(fen: strategygames.draughts.format.FEN) = Draughts(fen)
+
   def apply(lib: GameLib, value: String): FEN = lib match {
     case GameLib.Draughts() => FEN.Draughts(strategygames.draughts.format.FEN(value))
     case GameLib.Chess()    => FEN.Chess(strategygames.chess.format.FEN(value))
