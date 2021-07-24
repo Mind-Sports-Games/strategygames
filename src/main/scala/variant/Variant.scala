@@ -75,6 +75,8 @@ abstract class Variant(
   //       so sometimes it doesn't, and it calls sys.error instead. Yes. I know.
   def chessVariant: chess.variant.Variant
 
+  def gameLib: GameLib
+
 }
 
 object Variant {
@@ -127,6 +129,7 @@ object Variant {
     val roles: List[Role] = v.roles.map(Role.ChessRole)
 
     def chessVariant: chess.variant.Variant = v
+    def gameLib: GameLib = GameLib.Chess()
 
   }
 
@@ -179,6 +182,7 @@ object Variant {
     val roles: List[Role] = v.roles.map(Role.DraughtsRole)
 
     def chessVariant: chess.variant.Variant = sys.error("Unimplemented for Draughts")
+    def gameLib: GameLib = GameLib.Draughts()
   }
 
   def all(lib: GameLib): List[Variant] = lib match {
@@ -228,5 +232,8 @@ object Variant {
     case GameLib.Draughts() => Variant.Draughts(draughts.variant.FromPosition)
     case GameLib.Chess()    => Variant.Chess(chess.variant.FromPosition)
   }
+
+  def wrap(v: chess.variant.Variant) = Chess(v)
+  def wrap(v: draughts.variant.Variant) = Draughts(v)
 
 }
