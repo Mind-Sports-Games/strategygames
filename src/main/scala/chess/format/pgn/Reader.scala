@@ -1,8 +1,8 @@
 package strategygames.chess
 package format.pgn
-import strategygames.{ Clock, GameLib }
+import strategygames.{ Clock, Move => StratMove, Situation => StratSituation }
 
-import strategygames.format.pgn.{ Tags }
+import strategygames.format.pgn.{ Sans, Tags }
 
 import cats.data.Validated
 
@@ -46,9 +46,9 @@ object Reader {
   private def makeReplay(game: Game, sans: Sans): Result =
     sans.value.foldLeft[Result](Result.Complete(Replay(game))) {
       case (Result.Complete(replay), san) =>
-        san(replay.state.situation).fold(
+        san(StratSituation.wrap(replay.state.situation)).fold(
           err => Result.Incomplete(replay, err),
-          move => Result.Complete(replay addMove move)
+          move => Result.Complete(replay addMove StratMove.toChess(move))
         )
       case (r: Result.Incomplete, _) => r
     }

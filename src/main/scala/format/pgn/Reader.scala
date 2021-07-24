@@ -55,12 +55,10 @@ object Reader {
       case GameLib.Draughts() => DraughtsReader.moves(moveStrs, tags, iteratedCapts).map(Result.wrap)
     }
 
-    // TODO: Lakin you are here.
-    /*
   def fullWithSans(
       lib: GameLib,
       pgn: String,
-      op: Sans => Sans, // TODO: Lakin you are here, this also needs to be ported.
+      op: Sans => Sans,
       tags: Tags = Tags.empty,
       iteratedCapts: Boolean = false
   ): Validated[String, Result] =
@@ -69,11 +67,13 @@ object Reader {
       case GameLib.Draughts() => DraughtsReader.fullWithSans(pgn, op, tags, iteratedCapts).map(Result.wrap)
     }
 
+  /* TODO: Maybe port this? I don't think it's used.
   def fullWithSans(lib: GameLib, parsed: ParsedPdn, op: Sans => Sans): Result =
     lib match {
       case GameLib.Chess()    => Result.wrap(ChessReader.fullWithSans(parsed, op))
       case GameLib.Draughts() => Result.wrap(DraughtsReader.fullWithSans(parsed, op))
     }
+  */
 
   def movesWithSans(
       lib: GameLib,
@@ -83,10 +83,10 @@ object Reader {
       iteratedCapts: Boolean = false
   ): Validated[String, Result] =
     lib match {
-      case GameLib.Chess()    => ChessReader.movesWithSans(moveStrs, op, tags).map(Result.wrap)
-      case GameLib.Draughts() => DraughtsReader.movesWithSans(moveStrs, op, tags, iteratedCapts).map(Result.wrap)
+      case GameLib.Chess() => ChessReader.movesWithSans(moveStrs, op, tags).map(Result.wrap)
+      case GameLib.Draughts() =>
+        DraughtsReader.movesWithSans(moveStrs, op, tags, iteratedCapts).map(Result.wrap)
     }
-  */
 
   // remove invisible byte order mark
   def cleanUserInput(str: String) = str.replace(s"\ufeff", "")

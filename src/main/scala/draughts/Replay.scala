@@ -4,9 +4,9 @@ import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
-import strategygames.Color
-import format.pdn.{ Parser, Reader, San, Std }
-import strategygames.format.pgn.{ Tag, Tags }
+import strategygames.{ Color, Game => StratGame, Move => StratMove, MoveOrDrop, Situation => StratSituation }
+import strategygames.format.pgn.{ San, Tag, Tags }
+import format.pdn.{ Parser, Reader, Std }
 import format.{ FEN, Forsyth, Uci }
 import variant.Variant
 
@@ -46,12 +46,19 @@ object Replay {
       )
     }
 
+  // TODO: because this is primarily used in a Validation context, we should be able to
+  //       return something that's runtime safe as well.
+  def draughtsMove(moveOrDrop: MoveOrDrop) = moveOrDrop match {
+    case Left(StratMove.Draughts(m)) => m
+    case _                           => sys.error("Invalid draughts move")
+  }
+
   private def recursiveGames(game: DraughtsGame, sans: List[San]): Validated[String, List[DraughtsGame]] =
     sans match {
       case Nil => valid(Nil)
       case san :: rest =>
-        san(game.situation) flatMap { move =>
-          val newGame = game.apply(move)
+        san(StratSituation.wrap(game.situation)) flatMap { move =>
+          val newGame = StratGame.wrap(game)(move).toDraughts
           recursiveGames(newGame, rest) map { newGame :: _ }
         }
     }
@@ -83,13 +90,17 @@ object Replay {
       val res: (List[(DraughtsGame, Uci.WithSan)], Option[ErrorMessage]) = moves match {
         case (san, sanStr) :: rest =>
           san(
-            g.situation,
+            StratSituation.wrap(g.situation),
             iteratedCapts,
             if (ambs.isEmpty) None
             else ambs.collect({ case (ambSan, ambUci) if ambSan == san => ambUci }).some
           ).fold(
             err => (Nil, err.some),
-            move => {
+            moveOrDrop => {
+              val move = moveOrDrop match {
+                case Left(StratMove.Draughts(m)) => m
+                case _                           => sys.error("Invalid draughts move")
+              }
               val newGame = g(move)
               val uci     = move.toUci
               if (
@@ -134,25 +145,27 @@ object Replay {
       val res: (List[String], Option[ErrorMessage]) = moves match {
         case san :: rest =>
           san(
-            sit,
+            StratSituation.wrap(sit),
             true,
             if (ambs.isEmpty) None
             else ambs.collect({ case (ambSan, ambUci) if ambSan == san => ambUci }).some
-          ).fold(
-            err => (Nil, err.some),
-            move => {
-              val after = Situation.withColorAfter(move.afterWithLastMove(true), sit.color)
-              val ambiguities =
-                if (move.capture.fold(false)(_.length > 1)) move.situationBefore.ambiguitiesMove(move) else 0
-              if (ambiguities > ambs.length + 1)
-                newAmb = (san -> move.toUci.uci).some
-              mk(after, rest, newAmb.fold(ambs)(_ :: ambs)) match {
-                case (next, msg) =>
-                  val san = if (ambiguities > 1) move.toFullSan else move.toSan
-                  (san :: next, msg)
+          ).map(draughtsMove)
+            .fold(
+              err => (Nil, err.some),
+              move => {
+                val after = Situation.withColorAfter(move.afterWithLastMove(true), sit.color)
+                val ambiguities =
+                  if (move.capture.fold(false)(_.length > 1)) move.situationBefore.ambiguitiesMove(move)
+                  else 0
+                if (ambiguities > ambs.length + 1)
+                  newAmb = (san -> move.toUci.uci).some
+                mk(after, rest, newAmb.fold(ambs)(_ :: ambs)) match {
+                  case (next, msg) =>
+                    val san = if (ambiguities > 1) move.toFullSan else move.toSan
+                    (san :: next, msg)
+                }
               }
-            }
-          )
+            )
         case _ => (Nil, None)
       }
       if (res._2.isDefined && newAmb.isDefined) mk(sit, moves, newAmb.get :: ambs)
@@ -166,7 +179,7 @@ object Replay {
         err => Nil -> err.head.some,
         moves => mk(init, moves.value, Nil)
       ) match {
-      case (_, Some(err)) => None
+      case (_, Some(_)) => None
       case (moves, _)     => Option(moves)
     }
   }
@@ -249,7 +262,7 @@ object Replay {
     sans match {
       case Nil => valid(Nil)
       case san :: rest =>
-        san(sit, finalSquare) flatMap { move =>
+        san(StratSituation.wrap(sit), finalSquare).map(draughtsMove) flatMap { move =>
           val after = Situation.withColorAfter(move.afterWithLastMove(finalSquare), sit.color)
           recursiveUcis(after, rest, finalSquare) map { move.toUci :: _ }
         }
@@ -263,8 +276,8 @@ object Replay {
     sans match {
       case Nil => valid(Nil)
       case san :: rest =>
-        san(sit, finalSquare) flatMap { moveOrDrop =>
-          val after = Situation.withColorAfter(moveOrDrop.afterWithLastMove(finalSquare), sit.color)
+        san(StratSituation.wrap(sit), finalSquare).map(draughtsMove) flatMap { move =>
+          val after = Situation.withColorAfter(move.afterWithLastMove(finalSquare), sit.color)
           recursiveSituations(after, rest, finalSquare) map { after :: _ }
         }
     }
@@ -370,7 +383,7 @@ object Replay {
         sans match {
           case Nil => invalid(s"Can't find $atFenTruncated, reached ply $ply")
           case san :: rest =>
-            san(sit) flatMap { move =>
+            san(StratSituation.wrap(sit)).map(draughtsMove) flatMap { move =>
               val after = move.finalizeAfter()
               val fen   = Forsyth >> DraughtsGame(Situation(after, Color.fromPly(ply)), turns = ply)
               if (compareFen(fen)) Validated.valid(ply)

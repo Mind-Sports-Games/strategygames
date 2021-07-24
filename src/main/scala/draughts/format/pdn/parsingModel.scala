@@ -1,7 +1,8 @@
 package strategygames.draughts
 package format.pdn
 
-import strategygames.format.pgn.{ Glyphs, Tags }
+import strategygames.{ Move => StratMove }
+import strategygames.format.pgn.{ Metas, San, Sans, Tags }
 
 import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
@@ -13,44 +14,18 @@ case class ParsedPdn(
     sans: Sans
 )
 
-case class Sans(value: List[San]) extends AnyVal
-
-object Sans {
-  val empty = Sans(Nil)
-}
-
-// Standard Algebraic Notation
-sealed trait San {
-
-  def apply(
-      situation: Situation,
-      iteratedCapts: Boolean = false,
-      forbiddenUci: Option[List[String]] = None
-  ): Validated[String, strategygames.draughts.Move]
-
-  def metas: Metas
-
-  def withMetas(m: Metas): San
-
-  def withSuffixes(s: Suffixes): San = withMetas(metas withSuffixes s)
-
-  def withComments(s: List[String]): San = withMetas(metas withComments s)
-
-  def withVariations(s: List[Sans]): San = withMetas(metas withVariations s)
-
-  def mergeGlyphs(glyphs: Glyphs): San = withMetas(
-    metas.withGlyphs(metas.glyphs merge glyphs)
-  )
-}
-
 case class Std(
     fields: List[Pos],
     capture: Boolean,
     metas: Metas = Metas.empty
 ) extends San {
 
-  def apply(situation: Situation, iteratedCapts: Boolean = false, forbiddenUci: Option[List[String]] = None) =
-    move(situation, iteratedCapts, forbiddenUci)
+  override def apply(
+      situation: strategygames.Situation,
+      iteratedCapts: Boolean,
+      forbiddenUci: Option[List[String]]
+  ): Validated[String, strategygames.MoveOrDrop] =
+    move(situation.toDraughts, iteratedCapts, forbiddenUci).map(m => Left(StratMove.wrap(m)))
 
   def move(
       situation: Situation,
@@ -90,32 +65,4 @@ case class Std(
 
 case class InitialPosition(
     comments: List[String]
-)
-
-case class Metas(
-    checkmate: Boolean,
-    comments: List[String],
-    glyphs: Glyphs,
-    variations: List[Sans]
-) {
-
-  def withSuffixes(s: Suffixes) = copy(
-    checkmate = s.checkmate,
-    glyphs = s.glyphs
-  )
-
-  def withGlyphs(g: Glyphs) = copy(glyphs = g)
-
-  def withComments(c: List[String]) = copy(comments = c)
-
-  def withVariations(v: List[Sans]) = copy(variations = v)
-}
-
-object Metas {
-  val empty = Metas(false, Nil, Glyphs.empty, Nil)
-}
-
-case class Suffixes(
-    checkmate: Boolean,
-    glyphs: Glyphs
 )

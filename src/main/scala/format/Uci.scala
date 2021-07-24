@@ -11,6 +11,10 @@ sealed trait Uci {
 
   def origDest: (Pos, Pos)
 
+  // TODO: Again, unsafe but we'll get back to it.
+  def toChess: chess.format.Uci
+  def toDraughts: draughts.format.Uci
+
 }
 
 
@@ -49,6 +53,8 @@ object Uci {
   ) with Chess {
     def uci = m.uci
     val unwrap = m
+    def toChess = m
+    def toDraughts = sys.error("Can't make a draughts UCI from a chess UCI")
   }
 
   final case class DraughtsMove(m: draughts.format.Uci.Move) extends Move(
@@ -62,6 +68,8 @@ object Uci {
   ) with Draughts {
     def uci = m.uci
     val unwrap = m
+    def toDraughts = m
+    def toChess = sys.error("Can't make a chess UCI from a draughts UCI")
   }
 
   abstract sealed class Drop(
@@ -75,6 +83,8 @@ object Uci {
     def uci                  = d.uci
     def piotr                = d.piotr
     val unwrap = d
+    def toChess = d
+    def toDraughts = sys.error("Can't make a draughts UCI from a chess UCI")
   }
 
   def wrap(uci: chess.format.Uci): Uci = uci match {

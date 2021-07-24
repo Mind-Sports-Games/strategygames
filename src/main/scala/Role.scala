@@ -8,7 +8,12 @@ sealed trait Role {
   val binaryInt: Int
 }
 
-sealed trait PromotableRole extends Role
+sealed trait PromotableRole extends Role {
+  // TODO: These functions lie, but we'll have to get over it until
+  //       we find the right pattern
+  def toChess: chess.PromotableRole
+  def toDraughts: draughts.PromotableRole
+}
 
 object Role {
 
@@ -28,12 +33,16 @@ object Role {
     val forsyth = r.forsyth
     val pgn = r.pgn
     val binaryInt = r.binaryInt
+    def toChess = r
+    def toDraughts: draughts.PromotableRole = sys.error("Not implemented for chess")
   }
 
   final case class DraughtsPromotableRole(r: draughts.PromotableRole) extends PromotableRole {
     val forsyth = r.forsyth
     val pgn = r.pdn
     val binaryInt = r.binaryInt
+    def toDraughts = r
+    def toChess: chess.PromotableRole = sys.error("Not implemented for draughts")
   }
 
   def all(lib: GameLib): List[Role] = lib match {
@@ -115,5 +124,8 @@ object Role {
     case GameLib.Draughts() => DraughtsRole(draughts.Role.javaSymbolToRole(s))
     case GameLib.Chess()    => ChessRole(chess.Role.javaSymbolToRole(s))
   }
+
+  def wrap(pr: chess.PromotableRole): PromotableRole = ChessPromotableRole(pr)
+  def wrap(pr: draughts.PromotableRole): PromotableRole = DraughtsPromotableRole(pr)
 
 }

@@ -3,7 +3,8 @@ package format.pgn
 
 import strategygames.chess.variant.Variant
 
-import strategygames.format.pgn.{ Glyph, Glyphs, Tag, Tags }
+import strategygames.format.pgn.{ Glyph, Glyphs, Metas, San, Sans, Suffixes, Tag, Tags }
+import strategygames.{ Role => ChessRole }
 
 import scala.util.parsing.combinator._
 import cats.data.Validated
@@ -307,7 +308,7 @@ object Parser {
 
     def suffixes: Parser[Suffixes] =
       opt(promotion) ~ checkmate ~ check ~ glyphs ^^ { case p ~ cm ~ c ~ g =>
-        Suffixes(c, cm, p, g)
+        Suffixes(c, cm, p.map(ChessRole.wrap), g)
       }
 
     def glyphs: Parser[Glyphs] =

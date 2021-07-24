@@ -5,10 +5,11 @@ import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
 import strategygames.Color
-import strategygames.chess.format.pgn.San
+import strategygames.format.pgn.San
 import strategygames.chess.format.pgn.{ Parser, Reader }
 import strategygames.format.pgn.{ Tag, Tags }
 import strategygames.chess.format.{ FEN, Forsyth, Uci }
+import strategygames.{ Game => StratGame, Situation => StratSituation }
 
 case class Replay(setup: Game, moves: List[MoveOrDrop], state: Game) {
 
@@ -53,8 +54,8 @@ object Replay {
     sans match {
       case Nil => valid(Nil)
       case san :: rest =>
-        san(game.situation) flatMap { moveOrDrop =>
-          val newGame = moveOrDrop.fold(game.apply, game.applyDrop)
+        san(StratSituation.wrap(game.situation)) flatMap { moveOrDrop =>
+          val newGame = StratGame.wrap(game)(moveOrDrop).toChess
           recursiveGames(newGame, rest) map { newGame :: _ }
         }
     }
@@ -78,11 +79,11 @@ object Replay {
     def mk(g: Game, moves: List[(San, String)]): (List[(Game, Uci.WithSan)], Option[String]) =
       moves match {
         case (san, sanStr) :: rest =>
-          san(g.situation).fold(
+          san(StratSituation.wrap(g.situation)).fold(
             err => (Nil, err.some),
             moveOrDrop => {
-              val newGame = moveOrDrop.fold(g.apply, g.applyDrop)
-              val uci     = moveOrDrop.fold(_.toUci, _.toUci)
+              val newGame = StratGame.wrap(g)(moveOrDrop).toChess
+              val uci     = moveOrDrop.fold(m => m.toUci.toChess, _.toUci)
               mk(newGame, rest) match {
                 case (next, msg) => ((newGame, Uci.WithSan(uci, sanStr)) :: next, msg)
               }
@@ -105,8 +106,8 @@ object Replay {
     sans match {
       case Nil => valid(Nil)
       case san :: rest =>
-        san(sit) flatMap { moveOrDrop =>
-          val after = Situation(moveOrDrop.fold(_.finalizeAfter, _.finalizeAfter), !sit.color)
+        san(StratSituation.wrap(sit)) flatMap { moveOrDrop =>
+          val after = Situation(moveOrDrop.fold(m => m.finalizeAfter().toChess, _.finalizeAfter), !sit.color)
           recursiveSituations(after, rest) map { after :: _ }
         }
     }
@@ -197,8 +198,8 @@ object Replay {
         sans match {
           case Nil => invalid(s"Can't find $atFenTruncated, reached ply $ply")
           case san :: rest =>
-            san(sit) flatMap { moveOrDrop =>
-              val after = moveOrDrop.fold(_.finalizeAfter, _.finalizeAfter)
+            san(StratSituation.wrap(sit)) flatMap { moveOrDrop =>
+              val after = moveOrDrop.fold(m => m.finalizeAfter().toChess, _.finalizeAfter)
               val fen   = Forsyth >> Game(Situation(after, Color.fromPly(ply)), turns = ply)
               if (compareFen(fen)) Validated.valid(ply)
               else recursivePlyAtFen(Situation(after, !sit.color), rest, ply + 1)

@@ -59,6 +59,10 @@ abstract sealed class Situation(val board: Board, val color: Color) {
 
   def unary_! : Situation
 
+  // TODO: yup, still not typesafe
+  def toChess: chess.Situation
+  def toDraughts: draughts.Situation
+
 }
 
 object Situation {
@@ -89,7 +93,7 @@ object Situation {
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
-    
+
     def move(
       from: Pos,
       to: Pos,
@@ -120,7 +124,8 @@ object Situation {
     }
 
     def unary_! : Situation = Chess(s.unary_!)
-
+    def toChess = s
+    def toDraughts = sys.error("Can't make draughts situation from chess situation")
   }
 
   final case class Draughts(s: draughts.Situation) extends Situation(
@@ -150,7 +155,7 @@ object Situation {
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
-    
+
     private def draughtsCaptures(captures: Option[List[Pos]]): Option[List[draughts.Pos]] =
       captures match {
         case Some(captures) => Some(captures.flatMap(c =>
@@ -193,6 +198,8 @@ object Situation {
     }
 
     def unary_! : Situation = Draughts(s.unary_!)
+    def toDraughts = s
+    def toChess = sys.error("Can't make chess situation from draughts situation")
 
   }
 
@@ -211,5 +218,8 @@ object Situation {
       => Chess(chess.Situation.apply(variant))
     case _ => sys.error("Mismatched gamelib types")
   }
+
+  def wrap(s: chess.Situation) = Chess(s)
+  def wrap(s: draughts.Situation) = Draughts(s)
 
 }

@@ -67,6 +67,10 @@ abstract sealed class Board(
   def materialImbalance: Int
 
   override def toString: String
+
+  // TODO: Yup, still not type safe. :D
+  def toChess: chess.Board
+  def toDraughts: draughts.Board
 }
 
 object Board {
@@ -134,6 +138,9 @@ object Board {
 
     override def toString: String = b.toString
 
+    def toChess = b
+    def toDraughts = sys.error("Can't make a draughts board from a chess board")
+
   }
 
   case class Draughts(b: draughts.Board) extends Board(
@@ -197,6 +204,8 @@ object Board {
     def materialImbalance: Int = b.materialImbalance
 
     override def toString: String = b.toString
+    def toDraughts = b
+    def toChess = sys.error("Can't make a chess board from a draughts board")
 
   }
 

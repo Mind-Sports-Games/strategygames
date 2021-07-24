@@ -1,7 +1,7 @@
 package strategygames.draughts
 package format.pdn
-import strategygames.{ Clock, GameLib }
-import strategygames.format.pgn.{ Tags }
+import strategygames.{ Clock, Move => StratMove, MoveOrDrop, Situation => StratSituation }
+import strategygames.format.pgn.{ San, Sans, Tags }
 
 import cats.data.Validated
 import cats.implicits._
@@ -57,17 +57,24 @@ object Reader {
   // remove invisible byte order mark
   def cleanUserInput(str: String) = str.replace(s"\ufeff", "")
 
+  // TODO: because this is primarily used in a Validation context, we should be able to
+  //       return something that's runtime safe as well.
+  def draughtsMove(moveOrDrop: MoveOrDrop) = moveOrDrop match {
+    case Left(StratMove.Draughts(m)) => m
+    case _                           => sys.error("Invalid draughts move")
+  }
+
   private def makeReplay(game: DraughtsGame, sans: Sans, iteratedCapts: Boolean = false): Result = {
     def mk(replay: Replay, moves: List[San], ambs: List[(San, String)]): Result = {
       var newAmb = none[(San, String)]
       val res = moves match {
         case san :: rest =>
           san(
-            replay.state.situation,
+            StratSituation.wrap(replay.state.situation),
             iteratedCapts,
             if (ambs.isEmpty) None
             else ambs.collect({ case (ambSan, ambUci) if ambSan == san => ambUci }).some
-          ).fold(
+          ).map(draughtsMove).fold(
             err => Result.Incomplete(replay, err),
             move => {
               if (

@@ -22,6 +22,7 @@ abstract sealed class Move(
   def before = situationBefore.board
 
   def situationAfter: Situation
+  def finalizeAfter(finalSquare: Boolean = false): Board
 
   def withHistory(h: History): Move
 
@@ -42,6 +43,10 @@ abstract sealed class Move(
   def toUci: Uci.Move
 
   override def toString = s"$piece ${toUci.uci}"
+
+  // TODO: Yup, still not type safe. :D
+  def toChess: chess.Move
+  def toDraughts: draughts.Move
 
 }
 
@@ -71,6 +76,7 @@ object Move {
   ){
 
     def situationAfter: Situation = Situation.Chess(m.situationAfter)
+    def finalizeAfter(_finalSquare: Boolean = false): Board = m.finalizeAfter
 
     def withHistory(h: History): Move = h match {
       case History.Chess(h) => Chess(m.withHistory(h))
@@ -93,6 +99,10 @@ object Move {
     def withMetrics(mm: MoveMetrics): Move = Move.Chess(m.withMetrics(mm))
 
     def toUci: Uci.Move = Uci.ChessMove(m.toUci)
+
+    val unwrap = m
+    def toChess = m
+    def toDraughts = sys.error("Can't make a draughts move from a chess move")
 
   }
 
@@ -120,6 +130,7 @@ object Move {
   ){
 
     def situationAfter: Situation = Situation.Draughts(m.situationAfter)
+    def finalizeAfter(finalSquare: Boolean = false): Board = m.finalizeAfter(finalSquare)
 
     def withHistory(h: History): Move = h match {
       case History.Draughts(h) => Draughts(m.withHistory(h))
@@ -143,6 +154,19 @@ object Move {
 
     def toUci: Uci.Move = Uci.DraughtsMove(m.toUci)
 
+    val unwrap = m
+    def toDraughts = m
+    def toChess = sys.error("Can't make a chess move from a draughts move")
+
   }
 
+  def wrap(m: chess.Move): Move = Move.Chess(m)
+  def wrap(m: draughts.Move): Move = Move.Draughts(m)
+  def wrap(d: chess.Drop): MoveOrDrop = Right(d)
+  def wrap(m: chess.MoveOrDrop): MoveOrDrop = m match {
+    case Left(move) => Left(Move.Chess(move))
+    case Right(drop) => Right(drop)
+  }
+
+  def toChess(moveOrDrop: MoveOrDrop): chess.MoveOrDrop = moveOrDrop.left.map(_.toChess)
 }
