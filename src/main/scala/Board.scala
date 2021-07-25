@@ -70,6 +70,7 @@ abstract sealed class Board(
 
   // TODO: there is probably a better way to generalize this.
   def copy(history: History, variant: Variant): Board
+  def copy(history: History): Board
 
   // TODO: Yup, still not type safe. :D
   def toChess: chess.Board
@@ -145,6 +146,10 @@ object Board {
       case (History.Chess(history), Variant.Chess(variant)) => Chess(b.copy(history=history, variant=variant))
       case _ => sys.error("Unable to copy a chess board with non-chess arguments")
     }
+    def copy(history: History): Board = history match {
+      case History.Chess(history) => Chess(b.copy(history=history))
+      case _ => sys.error("Unable to copy a chess board with non-chess arguments")
+    }
 
     def toChess = b
     def toDraughts = sys.error("Can't make a draughts board from a chess board")
@@ -215,6 +220,10 @@ object Board {
 
     def copy(history: History, variant: Variant): Board = (history, variant) match {
       case (History.Draughts(history), Variant.Draughts(variant)) => Draughts(b.copy(history=history, variant=variant))
+      case _ => sys.error("Unable to copy a draughts board with non-draughts arguments")
+    }
+    def copy(history: History): Board = history match {
+      case History.Draughts(history) => Draughts(b.copy(history=history))
       case _ => sys.error("Unable to copy a draughts board with non-draughts arguments")
     }
 
