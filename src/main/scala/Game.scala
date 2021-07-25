@@ -32,6 +32,7 @@ abstract class Game(
   // TODO: figure out if we can properly make this generic
   def copy(clock: Option[Clock]): Game
   def copy(turns: Int, startedAtTurn: Int): Game
+  def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int): Game
   def copy(situation: Situation, turns: Int): Game
 
   //def apply(uci: Uci.Move): Validated[String, (Game, Move)]
@@ -109,6 +110,9 @@ object Game {
     def copy(clock: Option[Clock]): Game = Chess(g.copy(clock = clock))
     def copy(turns: Int, startedAtTurn: Int): Game = Chess(
       g.copy(turns = turns, startedAtTurn = startedAtTurn)
+    )
+    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int): Game = Chess(
+      g.copy(clock = clock, turns = turns, startedAtTurn = startedAtTurn)
     )
 
     def copy(situation: Situation, turns: Int): Game = situation match {
@@ -200,6 +204,9 @@ object Game {
     def copy(clock: Option[Clock]): Game = Draughts(g.copy(clock = clock))
     def copy(turns: Int, startedAtTurn: Int): Game = Draughts(
       g.copy(turns = turns, startedAtTurn = startedAtTurn)
+    )
+    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int): Game = Draughts(
+      g.copy(clock = clock, turns = turns, startedAtTurn = startedAtTurn)
     )
     def copy(situation: Situation, turns: Int): Game = situation match {
       case Situation.Draughts(situation) => Draughts(g.copy(situation=situation, turns=turns))
