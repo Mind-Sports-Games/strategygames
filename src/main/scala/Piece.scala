@@ -35,6 +35,12 @@ object Piece {
 
   }
 
+  def apply(lib: GameLib, color: Color, role: Role): Piece = (lib, role) match {
+    case (GameLib.Draughts(), Role.DraughtsRole(role)) => Draughts(draughts.Piece(color, role))
+    case (GameLib.Chess(), Role.ChessRole(role))       => Chess(chess.Piece(color, role))
+    case _ => sys.error("Mismatched gamelib types")
+  }
+
   def fromChar(lib: GameLib, c: Char): Option[Piece] = lib match {
     case (GameLib.Draughts()) => draughts.Piece.fromChar(c).map(Draughts)
     case (GameLib.Chess())    => chess.Piece.fromChar(c).map(Chess)
