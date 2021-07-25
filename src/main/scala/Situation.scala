@@ -59,6 +59,8 @@ abstract sealed class Situation(val board: Board, val color: Color) {
 
   def unary_! : Situation
 
+  def gameLib: GameLib
+
   // TODO: There is probably a better way to a more generalized version of this function ...
   def copy(board: Board): Situation
 
@@ -132,6 +134,8 @@ object Situation {
       case Board.Chess(board) => s.copy(board)
       case _ => sys.error("Can't copy a chess situation with a non-chess board")
     })
+
+    def gameLib: GameLib = GameLib.Chess()
 
     def toChess = s
     def toDraughts = sys.error("Can't make draughts situation from chess situation")
@@ -212,6 +216,8 @@ object Situation {
       case Board.Draughts(board) => s.copy(board)
       case _ => sys.error("Can't copy a draughts situation with a non-draughts board")
     })
+
+    def gameLib: GameLib = GameLib.Draughts()
 
     def toDraughts = s
     def toChess = sys.error("Can't make chess situation from draughts situation")

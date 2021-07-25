@@ -32,6 +32,7 @@ abstract class Game(
   // TODO: figure out if we can properly make this generic
   def copy(clock: Option[Clock]): Game
   def copy(turns: Int, startedAtTurn: Int): Game
+  def copy(situation: Situation, turns: Int): Game
 
   //def apply(uci: Uci.Move): Validated[String, (Game, Move)]
 
@@ -109,6 +110,11 @@ object Game {
     def copy(turns: Int, startedAtTurn: Int): Game = Chess(
       g.copy(turns = turns, startedAtTurn = startedAtTurn)
     )
+
+    def copy(situation: Situation, turns: Int): Game = situation match {
+      case Situation.Chess(situation) => Chess(g.copy(situation=situation, turns=turns))
+      case _ => sys.error("Unable to copy chess game with non-chess arguments")
+    }
 
     def isStandardInit: Boolean = g.isStandardInit
 
@@ -195,6 +201,10 @@ object Game {
     def copy(turns: Int, startedAtTurn: Int): Game = Draughts(
       g.copy(turns = turns, startedAtTurn = startedAtTurn)
     )
+    def copy(situation: Situation, turns: Int): Game = situation match {
+      case Situation.Draughts(situation) => Draughts(g.copy(situation=situation, turns=turns))
+      case _ => sys.error("Unable to copy draughts game with non-draughts arguments")
+    }
 
     def isStandardInit: Boolean = g.isStandardInit
 
