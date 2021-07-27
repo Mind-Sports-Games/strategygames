@@ -8,12 +8,6 @@ import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.syntax.option._
 
-case class ParsedPdn(
-    initialPosition: InitialPosition,
-    tags: Tags,
-    sans: Sans
-)
-
 case class Std(
     fields: List[Pos],
     capture: Boolean,
@@ -62,7 +56,3 @@ case class Std(
 
   def withMetas(m: Metas) = copy(metas = m)
 }
-
-case class InitialPosition(
-    comments: List[String]
-)

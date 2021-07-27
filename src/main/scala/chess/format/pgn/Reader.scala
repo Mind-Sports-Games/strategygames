@@ -2,7 +2,7 @@ package strategygames.chess
 package format.pgn
 import strategygames.{ Clock, Move => StratMove, Situation => StratSituation }
 
-import strategygames.format.pgn.{ Sans, Tags }
+import strategygames.format.pgn.{ ParsedPgn, Sans, Tags }
 
 import cats.data.Validated
 

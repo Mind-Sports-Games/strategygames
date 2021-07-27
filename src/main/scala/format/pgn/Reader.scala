@@ -68,7 +68,7 @@ object Reader {
     }
 
   /* TODO: Maybe port this? I don't think it's used.
-  def fullWithSans(lib: GameLib, parsed: ParsedPdn, op: Sans => Sans): Result =
+  def fullWithSans(lib: GameLib, parsed: ParsedPgn, op: Sans => Sans): Result =
     lib match {
       case GameLib.Chess()    => Result.wrap(ChessReader.fullWithSans(parsed, op))
       case GameLib.Draughts() => Result.wrap(DraughtsReader.fullWithSans(parsed, op))

@@ -1,7 +1,7 @@
 package strategygames.draughts
 package format.pdn
 import strategygames.{ Clock, Move => StratMove, MoveOrDrop, Situation => StratSituation }
-import strategygames.format.pgn.{ San, Sans, Tags }
+import strategygames.format.pgn.{ ParsedPgn => ParsedPdn, San, Sans, Tags }
 
 import cats.data.Validated
 import cats.implicits._

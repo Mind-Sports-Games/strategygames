@@ -5,13 +5,7 @@ import cats.data.Validated
 import cats.syntax.option._
 
 import strategygames.{ Move => StratMove }
-import strategygames.format.pgn.{ Metas, San, Sans, Suffixes, Tags }
-
-case class ParsedPgn(
-    initialPosition: InitialPosition,
-    tags: Tags,
-    sans: Sans
-)
+import strategygames.format.pgn.{ Metas, ParsedPgn, San, Sans, Suffixes, Tags }
 
 case class Std(
     dest: Pos,
@@ -77,10 +71,6 @@ case class Drop(
   def drop(situation: Situation): Validated[String, strategygames.chess.Drop] =
     situation.drop(role, pos)
 }
-
-case class InitialPosition(
-    comments: List[String]
-)
 
 case class Castle(
     side: Side,

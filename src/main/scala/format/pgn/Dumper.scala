@@ -1,6 +1,8 @@
 package strategygames
 package format.pgn
 
+import strategygames.chess
+
 object Dumper {
 
   def apply(lib: GameLib, situation: Situation, data: Move, next: Situation): String =
@@ -24,6 +26,11 @@ object Dumper {
     case (GameLib.Draughts(), Move.Draughts(data)) => draughts.format.pdn.Dumper.apply(data)
     case (GameLib.Chess(), Move.Chess(data))       => chess.format.pgn.Dumper.apply(data)
     case _ => sys.error("Mismatched gamelib types")
+  }
+
+  def apply(lib: GameLib, data: chess.Drop): String = lib match {
+    case GameLib.Chess()      => chess.format.pgn.Dumper.apply(data)
+    case _ => sys.error("Drops can only be applied ")
   }
 
 }

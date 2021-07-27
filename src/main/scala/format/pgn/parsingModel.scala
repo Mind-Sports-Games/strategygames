@@ -66,3 +66,13 @@ case class Suffixes(
     promotion: Option[PromotableRole],
     glyphs: Glyphs
 )
+
+case class InitialPosition(
+    comments: List[String]
+)
+
+case class ParsedPgn(
+    initialPosition: InitialPosition,
+    tags: Tags,
+    sans: Sans
+)

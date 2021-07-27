@@ -3,7 +3,7 @@ package format.pgn
 
 import strategygames.chess.variant.Variant
 
-import strategygames.format.pgn.{ Glyph, Glyphs, Metas, San, Sans, Suffixes, Tag, Tags }
+import strategygames.format.pgn.{ Glyph, Glyphs, InitialPosition, Metas, ParsedPgn, San, Sans, Suffixes, Tag, Tags }
 import strategygames.{ Role => ChessRole }
 
 import scala.util.parsing.combinator._

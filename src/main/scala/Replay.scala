@@ -6,12 +6,15 @@ import cats.implicits._
 import variant.Variant
 import format.{ FEN, Uci }
 
-sealed class Replay(val setup: Game, val moves: List[MoveOrDrop], val state: Game) {
+sealed abstract class Replay(val setup: Game, val moves: List[MoveOrDrop], val state: Game) {
 
   lazy val chronoMoves = moves.reverse
 
   def moveAtPly(ply: Int): Option[MoveOrDrop] =
     chronoMoves lift (ply - 1 - setup.startedAtTurn)
+
+  // TODO: If we had a case class this would be automatic.
+  def copy(state: Game): Replay
 
 }
 
@@ -25,13 +28,23 @@ object Replay {
       case Right(m) => Right(m)
     }),
     Game.Chess(r.state)
-  ){}
+  ){
+    def copy(state: Game): Replay = state match {
+      case Game.Chess(state) => Replay.wrap(r.copy(state=state))
+      case _ => sys.error("Unable to copy a chess replay with a non-chess state")
+    }
+  }
 
   final case class Draughts(r: draughts.Replay) extends Replay(
     Game.Draughts(r.setup),
     r.moves.map((m: draughts.Move) => Left(Move.Draughts(m))),
     Game.Draughts(r.state)
-  ){}
+  ){
+    def copy(state: Game): Replay = state match {
+      case Game.Draughts(state) => Replay.wrap(r.copy(state=state))
+      case _ => sys.error("Unable to copy a draughts replay with a non-draughts state")
+    }
+  }
 
   def apply(lib: GameLib, setup: Game, moves: List[MoveOrDrop], state: Game): Replay =
     (lib, setup, state) match {
@@ -42,7 +55,8 @@ object Replay {
       case _ => sys.error("Mismatched gamelib types")
     }
 
-  def apply(game: Game) = new Replay(game, Nil, game)
+  // TODO: I don't think this is quite correct, let's see if it's used.
+  // def apply(game: Game) = new Replay(game, Nil, game)
 
   def games(
     lib: GameLib,
@@ -207,4 +221,8 @@ object Replay {
     case _ => sys.error("Mismatched gamelib types")
   }
 
+
+
+  def wrap(r: chess.Replay) = Chess(r)
+  def wrap(r: draughts.Replay) = Draughts(r)
 }
