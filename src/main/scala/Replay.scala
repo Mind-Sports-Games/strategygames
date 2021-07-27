@@ -33,6 +33,15 @@ object Replay {
     Game.Draughts(r.state)
   ){}
 
+  def apply(lib: GameLib, setup: Game, moves: List[MoveOrDrop], state: Game): Replay =
+    (lib, setup, state) match {
+      case (GameLib.Draughts(), Game.Draughts(setup), Game.Draughts(state))
+        => Draughts(draughts.Replay(setup, moves.map(Move.toDraughts), state))
+      case (GameLib.Chess(), Game.Chess(setup), Game.Chess(state))
+        => Chess(chess.Replay(setup, moves.map(Move.toChess), state))
+      case _ => sys.error("Mismatched gamelib types")
+    }
+
   def apply(game: Game) = new Replay(game, Nil, game)
 
   def games(
