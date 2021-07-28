@@ -23,6 +23,7 @@ abstract class Variant private[variant] (
 
   def pieces: Map[Pos, Piece]
   def initialFen: FEN
+  def startColor: Color = White
   def startingPosition: StartingPosition
   val openingTables: List[OpeningTable] = Nil
   lazy val shortInitialFen: FEN         = FEN(initialFen.value.split(":").take(3).mkString(":"))

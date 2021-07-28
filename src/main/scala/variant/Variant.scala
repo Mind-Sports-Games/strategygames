@@ -38,6 +38,7 @@ abstract class Variant(
   def exotic: Boolean
 
   def initialFen: FEN
+  def startColor: Color = White
 
   def isValidPromotion(promotion: Option[PromotableRole]): Boolean
 
