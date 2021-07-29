@@ -14,7 +14,7 @@ abstract sealed class Board(
 
   val actors: Map[Pos, Actor]
 
-  val actorsOf: Color.Map[Seq[Actor]] = {
+  def actorsOf: Color.Map[Seq[Actor]] = {
     val (w, b) = actors.values.toSeq.partition { _.color.white }
     Color.Map(w, b)
   }
