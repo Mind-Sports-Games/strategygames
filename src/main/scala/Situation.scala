@@ -5,11 +5,16 @@ import cats.implicits._
 
 import chess.format.Uci
 
-case class Situation(board: Board, color: Color) {
+sealed class Situation(board: Board, color: Color)
+
+case class ChessSituation(
+  board: ChessBoard,
+  color: Color
+) extends Situation(board, color){
 
   lazy val actors = board actorsOf color
 
-  lazy val moves: Map[Pos, List[Move]] = board.variant.validMoves(this)
+  lazy val moves: Map[Pos, List[ChessMove]] = board.variant.validMoves(this)
 
   lazy val playerCanCapture: Boolean = moves exists (_._2 exists (_.captures))
 
@@ -55,13 +60,13 @@ case class Situation(board: Board, color: Color) {
     else if (autoDraw) Status.Draw.some
     else none
 
-  def move(from: Pos, to: Pos, promotion: Option[PromotableRole]): Validated[String, Move] =
+  def move(from: Pos, to: Pos, promotion: Option[PromotableChessRole]): Validated[String, ChessMove] =
     board.variant.move(this, from, to, promotion)
 
-  def move(uci: Uci.Move): Validated[String, Move] =
+  def move(uci: Uci.ChessMove): Validated[String, ChessMove] =
     board.variant.move(this, uci.orig, uci.dest, uci.promotion)
 
-  def drop(role: Role, pos: Pos): Validated[String, Drop] =
+  def drop(role: ChessRole, pos: Pos): Validated[String, Drop] =
     board.variant.drop(this, role, pos)
 
   def fixCastles = copy(board = board fixCastles)
@@ -100,7 +105,7 @@ case class Situation(board: Board, color: Color) {
   def unary_! = copy(color = !color)
 }
 
-object Situation {
+object ChessSituation {
 
-  def apply(variant: chess.variant.Variant): Situation = Situation(Board init variant, variant.startColor)
+  def apply(variant: chess.variant.Variant): ChessSituation = ChessSituation(ChessBoard init variant, variant.startColor)
 }

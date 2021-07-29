@@ -1,25 +1,8 @@
 package chess
 
-import variant.{ Crazyhouse, Variant }
+import variant.{ Crazyhouse, Variant, ChessVariant }
 
-case class Board(
-    pieces: PieceMap,
-    history: History,
-    variant: Variant,
-    crazyData: Option[Crazyhouse.Data] = None
-) {
-
-  def apply(at: Pos): Option[Piece] = pieces get at
-  def apply(file: File, rank: Rank) = pieces get Pos(file, rank)
-
-  lazy val actors: Map[Pos, Actor] = pieces map { case (pos, piece) =>
-    (pos, Actor(piece, pos, this))
-  }
-
-  lazy val actorsOf: Color.Map[Seq[Actor]] = {
-    val (w, b) = actors.values.toSeq.partition { _.color.white }
-    Color.Map(w, b)
-  }
+sealed class Board(pieces: PieceMap, history: History, variant: Variant){
 
   def rolesOf(c: Color): List[Role] =
     pieces.values
@@ -28,11 +11,46 @@ case class Board(
       }
       .to(List)
 
-  def actorAt(at: Pos): Option[Actor] = actors get at
+  lazy val occupation: Color.Map[Set[Pos]] = Color.Map { color =>
+    pieces.collect { case (pos, piece) if piece is color => pos }.to(Set)
+  }
+
+  def hasPiece(p: Piece) = pieces.values exists (p ==)
+
+  def count(p: Piece): Int = pieces.values count (_ == p)
+  def count(c: Color): Int = pieces.values count (_.color == c)
+
+}
+
+case class ChessBoard(
+    pieces: ChessPieceMap,
+    history: History,
+    variant: ChessVariant,
+    crazyData: Option[Crazyhouse.Data] = None
+) extends Board(pieces, history, variant) {
+
+  def apply(at: Pos): Option[ChessPiece] = pieces get at
+
+  def apply(file: File, rank: Rank) = pieces get Pos(file, rank)
+
+  def boardSize = variant.boardSize
+
+  lazy val actors: Map[Pos, ChessActor] = pieces map { case (pos, piece) =>
+    (pos, ChessActor(piece, pos, this))
+  }
+
+  lazy val actorsOf: Color.Map[Seq[ChessActor]] = {
+    val (w, b) = actors.values.toSeq.partition { _.color.white }
+    Color.Map(w, b)
+  }
+
+  //def rolesOf(c: Color): List[ChessRole] = Board.rolesOf(c)
+
+  def actorAt(at: Pos): Option[ChessActor] = actors get at
 
   def piecesOf(c: Color): Map[Pos, Piece] = pieces filter (_._2 is c)
 
-  lazy val kingPos: Map[Color, Pos] = pieces.collect { case (pos, Piece(color, King)) =>
+  lazy val kingPos: Map[Color, Pos] = pieces.collect { case (pos, ChessPiece(color, King)) =>
     color -> pos
   }
 
@@ -50,38 +68,33 @@ case class Board(
 
   def destsFrom(from: Pos): Option[List[Pos]] = actorAt(from) map (_.destinations)
 
-  def seq(actions: Board => Option[Board]*): Option[Board] =
-    actions.foldLeft(Option(this): Option[Board])(_ flatMap _)
+  def seq(actions: ChessBoard => Option[ChessBoard]*): Option[ChessBoard] =
+    actions.foldLeft(Option(this): Option[ChessBoard])(_ flatMap _)
 
-  def place(piece: Piece, at: Pos): Option[Board] =
+  def place(piece: ChessPiece, at: Pos): Option[ChessBoard] =
     if (pieces contains at) None
     else Option(copy(pieces = pieces + ((at, piece))))
 
-  def take(at: Pos): Option[Board] =
+  def take(at: Pos): Option[ChessBoard] =
     if (pieces contains at) Option(copy(pieces = pieces - at))
     else None
 
-  def move(orig: Pos, dest: Pos): Option[Board] =
+  def move(orig: Pos, dest: Pos): Option[ChessBoard] =
     if (pieces contains dest) None
     else
       pieces get orig map { piece =>
         copy(pieces = pieces - orig + ((dest, piece)))
       }
 
-  def taking(orig: Pos, dest: Pos, taking: Option[Pos] = None): Option[Board] =
+
+  def taking(orig: Pos, dest: Pos, taking: Option[Pos] = None): Option[ChessBoard] =
     for {
       piece <- pieces get orig
       takenPos = taking getOrElse dest
       if pieces contains takenPos
     } yield copy(pieces = pieces - takenPos - orig + (dest -> piece))
 
-  lazy val occupation: Color.Map[Set[Pos]] = Color.Map { color =>
-    pieces.collect { case (pos, piece) if piece is color => pos }.to(Set)
-  }
-
-  def hasPiece(p: Piece) = pieces.values exists (p ==)
-
-  def promote(pos: Pos): Option[Board] =
+  def promote(pos: Pos): Option[ChessBoard] =
     for {
       pawn <- apply(pos)
       if pawn is Pawn
@@ -91,13 +104,13 @@ case class Board(
 
   def castles: Castles = history.castles
 
-  def withHistory(h: History): Board = copy(history = h)
+  def withHistory(h: History): ChessBoard = copy(history = h)
+
+  def withPieces(newPieces: ChessPieceMap) = copy(pieces = newPieces)
 
   def withCastles(c: Castles) = withHistory(history withCastles c)
 
-  def withPieces(newPieces: PieceMap) = copy(pieces = newPieces)
-
-  def withVariant(v: Variant): Board = {
+  def withVariant(v: ChessVariant): ChessBoard = {
     if (v == Crazyhouse)
       copy(variant = v).ensureCrazyData
     else
@@ -106,7 +119,7 @@ case class Board(
 
   def withCrazyData(data: Crazyhouse.Data)         = copy(crazyData = Option(data))
   def withCrazyData(data: Option[Crazyhouse.Data]) = copy(crazyData = data)
-  def withCrazyData(f: Crazyhouse.Data => Crazyhouse.Data): Board =
+  def withCrazyData(f: Crazyhouse.Data => Crazyhouse.Data): ChessBoard =
     withCrazyData(f(crazyData | Crazyhouse.Data.init))
 
   def ensureCrazyData = withCrazyData(crazyData | Crazyhouse.Data.init)
@@ -118,7 +131,7 @@ case class Board(
       )
     }
 
-  def fixCastles: Board =
+  def fixCastles: ChessBoard =
     withCastles {
       if (variant.allowsCastling) {
         val wkPos   = kingPosOf(White)
@@ -144,25 +157,22 @@ case class Board(
 
   def updateHistory(f: History => History) = copy(history = f(history))
 
-  def count(p: Piece): Int = pieces.values count (_ == p)
-  def count(c: Color): Int = pieces.values count (_.color == c)
-
   def autoDraw: Boolean =
     variant.fiftyMoves(history) || variant.isInsufficientMaterial(this) || history.fivefoldRepetition
 
-  def situationOf(color: Color) = Situation(this, color)
-
-  def visual = format.Visual >> this
+  def situationOf(color: Color) = ChessSituation(this, color)
 
   def valid(strict: Boolean) = variant.valid(this, strict)
 
+  def visual = format.Visual >> this
+
   def materialImbalance: Int = variant.materialImbalance(this)
 
-  def fileOccupation(file: File): Map[Pos, Piece] = pieces.filter(_._1.file == file)
+  def fileOccupation(file: File): Map[Pos, ChessPiece] = pieces.filter(_._1.file == file)
 
-  def rankOccupation(rank: Rank): Map[Pos, Piece] = pieces.filter(_._1.rank == rank)
+  def rankOccupation(rank: Rank): Map[Pos, ChessPiece] = pieces.filter(_._1.rank == rank)
 
-  private def diagOccupation(p: Pos, dir: Direction, diagPieces: Map[Pos, Piece] = Map[Pos, Piece]()): Map[Pos, Piece] =
+  private def diagOccupation(p: Pos, dir: Direction, diagPieces: Map[Pos, ChessPiece] = Map[Pos, ChessPiece]()): Map[Pos, ChessPiece] =
     dir(p) match {
       case Some(diagPos) =>
         if (pieces.contains(diagPos))
@@ -172,33 +182,71 @@ case class Board(
       case None => return diagPieces
     }
 
-  def diagAscOccupation(pos: Pos): Map[Pos, Piece] =
+  def diagAscOccupation(pos: Pos): Map[Pos, ChessPiece] =
    if (pieces.contains(pos))
-      Map[Pos, Piece](pos -> pieces(pos)) ++ diagOccupation(pos, _.upRight) ++ diagOccupation(pos, _.downLeft)
+      Map[Pos, ChessPiece](pos -> pieces(pos)) ++ diagOccupation(pos, _.upRight) ++ diagOccupation(pos, _.downLeft)
     else
       diagOccupation(pos, _.upRight) ++ diagOccupation(pos, _.downLeft)
 
-  def diagDescOccupation(pos: Pos): Map[Pos, Piece] =
+  def diagDescOccupation(pos: Pos): Map[Pos, ChessPiece] =
    if (pieces.contains(pos))
-      Map[Pos, Piece](pos -> pieces(pos)) ++ diagOccupation(pos, _.upLeft) ++ diagOccupation(pos, _.downRight)
+      Map[Pos, ChessPiece](pos -> pieces(pos)) ++ diagOccupation(pos, _.upLeft) ++ diagOccupation(pos, _.downRight)
     else
       diagOccupation(pos, _.upLeft) ++ diagOccupation(pos, _.downRight)
 
   override def toString = s"$variant Position after ${history.lastMove}\n$visual"
 }
 
-object Board {
+object ChessBoard {
 
-  def apply(pieces: Iterable[(Pos, Piece)], variant: Variant): Board =
-    Board(pieces.toMap, if (variant.allowsCastling) Castles.all else Castles.none, variant)
+  def apply(pieces: Iterable[(Pos, ChessPiece)], variant: ChessVariant): ChessBoard =
+    ChessBoard(pieces.toMap, if (variant.allowsCastling) Castles.all else Castles.none, variant)
 
-  def apply(pieces: Iterable[(Pos, Piece)], castles: Castles, variant: Variant): Board =
-    Board(pieces.toMap, History(castles = castles), variant, variantCrazyData(variant))
+  def apply(pieces: Iterable[(Pos, ChessPiece)], castles: Castles, variant: ChessVariant): ChessBoard =
+    ChessBoard(pieces.toMap, History(castles = castles), variant, variantCrazyData(variant))
 
-  def init(variant: Variant): Board = Board(variant.pieces, variant.castles, variant)
+  def init(variant: ChessVariant): ChessBoard = ChessBoard(variant.pieces, variant.castles, variant)
 
-  def empty(variant: Variant): Board = Board(Nil, variant)
+  def empty(variant: ChessVariant): ChessBoard = ChessBoard(Nil, variant)
 
-  private def variantCrazyData(variant: Variant) =
+  private def variantCrazyData(variant: ChessVariant) =
     (variant == Crazyhouse) option Crazyhouse.Data.init
+
+  sealed abstract class BoardSize(    
+      //val pos: BoardPos,    
+      val width: Int,    
+      val height: Int    
+  ) {    
+    val key = (width * height).toString    
+    val sizes = List(width, height)    
+    
+    val fields = (width * height) / 2    
+    val promotableYWhite = 1    
+    val promotableYBlack = height    
+  }    
+  object BoardSize {    
+    val all: List[BoardSize] = List(D100, D64)    
+    //val max = D100.pos    
+  }    
+    
+  case object D100    
+    extends BoardSize(    
+      //pos = Pos100,    
+      width = 10,    
+      height = 10    
+    )    
+  case object D64    
+    extends BoardSize(    
+      //pos = Pos64,    
+      width = 8,    
+      height = 8    
+    )
 }
+
+case class DraughtsBoard(
+    pieces: PieceMap,
+    history: History,
+    variant: Variant
+) extends Board(pieces, history, variant) {}
+
+object DraughtsBoard{}

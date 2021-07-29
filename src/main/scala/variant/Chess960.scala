@@ -4,17 +4,18 @@ package variant
 import chess.format.FEN
 
 case object Chess960
-    extends Variant(
+    extends ChessVariant(
       id = 2,
       key = "chess960",
       name = "Chess960",
       shortName = "960",
       title = "Starting position of the home rank pieces is randomized.",
-      standardInitialPosition = false
+      standardInitialPosition = false,
+      boardSize = Board.D64
     ) {
 
   def pieces =
-    Variant.symmetricRank {
+    ChessVariant.symmetricRank {
       positions(scala.util.Random.nextInt(960)) flatMap Role.allByForsyth.get
     }
 

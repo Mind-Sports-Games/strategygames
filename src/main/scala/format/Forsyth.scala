@@ -249,9 +249,9 @@ object Forsyth {
   def exportBoard(board: Board): String = {
     val fen   = new scala.collection.mutable.StringBuilder(70)
     var empty = 0
-    for (y <- Rank.allReversed) {
+    for (y <- Rank.allForBoardReversed(8)) {
       empty = 0
-      for (x <- File.all) {
+      for (x <- File.allForBoard(8)) {
         board(x, y) match {
           case None => empty = empty + 1
           case Some(piece) =>

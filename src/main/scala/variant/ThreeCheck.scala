@@ -4,25 +4,26 @@ package variant
 import chess.format.FEN
 
 case object ThreeCheck
-    extends Variant(
+    extends ChessVariant(
       id = 5,
       key = "threeCheck",
       name = "Three-check",
       shortName = "3check",
       title = "Check your opponent 3 times to win the game.",
-      standardInitialPosition = true
+      standardInitialPosition = true,
+      boardSize = Board.D64
     ) {
 
   def pieces = Standard.pieces
 
   override val initialFen = FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 +0+0")
 
-  override def finalizeBoard(board: Board, uci: format.Uci, capture: Option[Piece]): Board =
+  override def finalizeBoard(board: ChessBoard, uci: format.Uci, capture: Option[ChessPiece]): ChessBoard =
     board updateHistory {
       _.withCheck(Color.White, board.checkWhite).withCheck(Color.Black, board.checkBlack)
     }
 
-  override def specialEnd(situation: Situation) =
+  override def specialEnd(situation: ChessSituation) =
     situation.check && {
       val checks = situation.board.history.checkCount
       situation.color.fold(checks.white, checks.black) >= 3
@@ -30,10 +31,10 @@ case object ThreeCheck
 
   /** It's not possible to check or checkmate the opponent with only a king
     */
-  override def opponentHasInsufficientMaterial(situation: Situation) =
+  override def opponentHasInsufficientMaterial(situation: ChessSituation) =
     situation.board.rolesOf(!situation.color) == List(King)
 
   // When there is insufficient mating material, there is still potential to win by checking the opponent 3 times
   // by the variant ending. However, no players can check if there are only kings remaining
-  override def isInsufficientMaterial(board: Board) = board.pieces.values.forall(_ is King)
+  override def isInsufficientMaterial(board: ChessBoard) = board.pieces.values.forall(_ is King)
 }

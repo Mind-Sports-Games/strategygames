@@ -7,20 +7,21 @@ import cats.data.Validated
 import chess.format.FEN
 
 case object Crazyhouse
-    extends Variant(
+    extends ChessVariant(
       id = 10,
       key = "crazyhouse",
       name = "Crazyhouse",
       shortName = "Crazy",
       title = "Captured pieces can be dropped back on the board instead of moving a piece.",
-      standardInitialPosition = true
+      standardInitialPosition = true,
+      boardSize = Board.D64
     ) {
 
   def pieces = Standard.pieces
 
   override val initialFen = FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR/ w KQkq - 0 1")
 
-  override def valid(board: Board, strict: Boolean) = {
+  override def valid(board: ChessBoard, strict: Boolean) = {
     val pieces = board.pieces.values
     (Color.all forall validSide(board, false)) &&
     (!strict || (pieces.count(_ is Pawn) <= 16 && pieces.sizeIs <= 32))
@@ -28,13 +29,13 @@ case object Crazyhouse
 
   private def canDropPawnOn(pos: Pos) = pos.rank != Rank.First && pos.rank != Rank.Eighth
 
-  override def drop(situation: Situation, role: Role, pos: Pos): Validated[String, Drop] =
+  override def drop(situation: ChessSituation, role: ChessRole, pos: Pos): Validated[String, Drop] =
     for {
       d1 <- situation.board.crazyData toValid "Board has no crazyhouse data"
       _ <-
         if (role != Pawn || canDropPawnOn(pos)) Validated.valid(d1)
         else Validated.invalid(s"Can't drop $role on $pos")
-      piece = Piece(situation.color, role)
+      piece = ChessPiece(situation.color, role)
       d2     <- d1.drop(piece) toValid s"No $piece to drop on $pos"
       board1 <- situation.board.place(piece, pos) toValid s"Can't drop $role on $pos, it's occupied"
       _ <-
@@ -49,11 +50,11 @@ case object Crazyhouse
 
   override def fiftyMoves(history: History): Boolean = false
 
-  override def isIrreversible(move: Move): Boolean = move.castles
+  override def isIrreversible(move: ChessMove): Boolean = move.castles
 
-  override def finalizeBoard(board: Board, uci: Uci, capture: Option[Piece]): Board =
+  override def finalizeBoard(board: ChessBoard, uci: Uci, capture: Option[ChessPiece]): ChessBoard =
     uci match {
-      case Uci.Move(orig, dest, promOption) =>
+      case Uci.ChessMove(orig, dest, promOption) =>
         board.crazyData.fold(board) { data =>
           val d1 = capture.fold(data) { data.store(_, dest) }
           val d2 = promOption.fold(d1.move(orig, dest)) { _ =>
@@ -64,7 +65,7 @@ case object Crazyhouse
       case _ => board
     }
 
-  private def canDropStuff(situation: Situation) =
+  private def canDropStuff(situation: ChessSituation) =
     situation.board.crazyData.fold(false) { (data: Data) =>
       val roles = data.pockets(situation.color).roles
       roles.nonEmpty && possibleDrops(situation).fold(true) { squares =>
@@ -74,22 +75,26 @@ case object Crazyhouse
       }
     }
 
-  override def staleMate(situation: Situation) =
+  override def staleMate(situation: ChessSituation) =
     super.staleMate(situation) && !canDropStuff(situation)
 
-  override def checkmate(situation: Situation) =
+  override def checkmate(situation: ChessSituation) =
     super.checkmate(situation) && !canDropStuff(situation)
 
   // there is always sufficient mating material in Crazyhouse
-  override def opponentHasInsufficientMaterial(situation: Situation) = false
-  override def isInsufficientMaterial(board: Board)                  = false
+  override def opponentHasInsufficientMaterial(situation: ChessSituation) = false
+  override def isInsufficientMaterial(board: ChessBoard)                  = false
 
-  def possibleDrops(situation: Situation): Option[List[Pos]] =
+  def possibleDrops(situation: ChessSituation): Option[List[Pos]] =
     if (!situation.check) None
     else situation.kingPos.map { blockades(situation, _) }
 
-  private def blockades(situation: Situation, kingPos: Pos): List[Pos] = {
-    def attacker(piece: Piece) = piece.role.projection && piece.color != situation.color
+  private def blockades(situation: ChessSituation, kingPos: Pos): List[Pos] = {
+    def attacker(piece: ChessPiece) = 
+      piece match {
+        case p: ChessPiece => p.role.projection && p.color != situation.color
+        case _ => false
+      }
     @scala.annotation.tailrec
     def forward(p: Pos, dir: Direction, squares: List[Pos]): List[Pos] =
       dir(p) match {
@@ -116,12 +121,12 @@ case object Crazyhouse
       promoted: Set[Pos]
   ) {
 
-    def drop(piece: Piece): Option[Data] =
+    def drop(piece: ChessPiece): Option[Data] =
       pockets take piece map { nps =>
         copy(pockets = nps)
       }
 
-    def store(piece: Piece, from: Pos) =
+    def store(piece: ChessPiece, from: Pos) =
       copy(
         pockets = pockets store {
           if (promoted(from)) piece.color.pawn else piece
@@ -145,7 +150,7 @@ case object Crazyhouse
 
     def apply(color: Color) = color.fold(white, black)
 
-    def take(piece: Piece): Option[Pockets] =
+    def take(piece: ChessPiece): Option[Pockets] =
       piece.color.fold(
         white take piece.role map { np =>
           copy(white = np)
@@ -155,20 +160,20 @@ case object Crazyhouse
         }
       )
 
-    def store(piece: Piece) =
+    def store(piece: ChessPiece) =
       piece.color.fold(
         copy(black = black store piece.role),
         copy(white = white store piece.role)
       )
   }
 
-  case class Pocket(roles: List[Role]) {
+  case class Pocket(roles: List[ChessRole]) {
 
-    def take(role: Role) =
+    def take(role: ChessRole) =
       if (roles contains role) Option(copy(roles = roles diff List(role)))
       else None
 
-    def store(role: Role) =
+    def store(role: ChessRole) =
       if (storableRoles contains role) copy(roles = role :: roles)
       else this
   }

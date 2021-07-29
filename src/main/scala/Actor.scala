@@ -4,33 +4,40 @@ import format.Uci
 import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
 
-final case class Actor(
-    piece: Piece,
+sealed class Actor
+
+final case class ChessActor(
+    piece: ChessPiece,
     pos: Pos,
-    board: Board
-) {
+    board: ChessBoard
+) extends Actor {
 
-  import Actor._
+  import ChessActor._
 
-  lazy val moves: List[Move] = kingSafetyMoveFilter(trustedMoves(board.variant.allowsCastling))
+  lazy val moves: List[ChessMove] = kingSafetyMoveFilter(trustedMoves(board.variant.allowsCastling))
 
   /** The moves without taking defending the king into account */
-  def trustedMoves(withCastle: Boolean): List[Move] = {
+  def trustedMoves(withCastle: Boolean): List[ChessMove] = {
     val moves = piece.role match {
       case Pawn =>
         pawnDir(pos) map { next =>
           val fwd = Option(next) filterNot board.pieces.contains
-          def capture(horizontal: Direction): Option[Move] = {
+          def capture(horizontal: Direction): Option[ChessMove] = {
             for {
               p <- horizontal(next)
-              if board.pieces.get(p).exists { _.color != color }
+              if board.pieces.get(p).exists {
+                _ match {
+                  case p: ChessPiece => p.color != color
+                  case _ => false
+                }
+              }
               b <- board.taking(pos, p)
             } yield move(p, b, Option(p))
           } flatMap maybePromote
-          def enpassant(horizontal: Direction): Option[Move] =
+          def enpassant(horizontal: Direction): Option[ChessMove] =
             for {
               victimPos <- horizontal(pos).filter(_ => pos.rank == color.passablePawnRank)
-              _         <- board(victimPos).filter(v => v == !color - Pawn)
+              _         <- board(victimPos).filter(v => v == (!color chessPiece Pawn))
               targetPos <- horizontal(next)
               _ <- pawnDir(victimPos) flatMap pawnDir filter { vf =>
                 history.lastMove.exists {
@@ -40,9 +47,9 @@ final case class Actor(
               }
               b <- board.taking(pos, targetPos, Option(victimPos))
             } yield move(targetPos, b, Option(victimPos), enpassant = true)
-          def forward(p: Pos): Option[Move] =
+          def forward(p: Pos): Option[ChessMove] =
             board.move(pos, p) map { move(p, _) } flatMap maybePromote
-          def maybePromote(m: Move): Option[Move] =
+          def maybePromote(m: ChessMove): Option[ChessMove] =
             if (m.dest.rank == m.color.promotablePawnRank)
               (m.after promote m.dest) map { b2 =>
                 m.copy(after = b2, promotion = Option(Queen))
@@ -95,9 +102,13 @@ final case class Actor(
    *
    *  critical function. optimize for performance.
    */
-  def kingSafetyMoveFilter(ms: List[Move]): List[Move] = {
+  def kingSafetyMoveFilter(ms: List[ChessMove]): List[ChessMove] = {
     val filter: Piece => Boolean =
-      if ((piece is King) || check) _ => true else _.role.projection
+      if ((piece is King) || check) _ => true
+      else piece.role match {
+        case r: ChessRole => (_ => r.projection)
+        case _ => (_ => false)
+      }
     val stableKingPos = if (piece is King) None else board kingPosOf color
     ms filter { m =>
       board.variant.kingSafety(m, filter, stableKingPos orElse (m.after kingPosOf color))
@@ -106,9 +117,9 @@ final case class Actor(
 
   lazy val check: Boolean = board check color
 
-  private def castle: List[Move] = castleOn(KingSide) ::: castleOn(QueenSide)
+  private def castle: List[ChessMove] = castleOn(KingSide) ::: castleOn(QueenSide)
 
-  def castleOn(side: Side): List[Move] =
+  def castleOn(side: Side): List[ChessMove] =
     (for {
       // Check castling rights.
       kingPos <- board kingPosOf color filter (_ => history canCastle color on side)
@@ -145,7 +156,7 @@ final case class Actor(
       }
     } map { move(_, b5, castle = castle) }) getOrElse Nil
 
-  private def shortRange(dirs: Directions): List[Move] =
+  private def shortRange(dirs: Directions): List[ChessMove] =
     dirs flatMap { _(pos) } flatMap { to =>
       board.pieces.get(to) match {
         case None => board.move(pos, to) map { move(to, _) }
@@ -155,8 +166,8 @@ final case class Actor(
       }
     }
 
-  private def longRange(dirs: Directions): List[Move] = {
-    val buf = new ArrayBuffer[Move]
+  private def longRange(dirs: Directions): List[ChessMove] = {
+    val buf = new ArrayBuffer[ChessMove]
 
     @tailrec
     def addAll(p: Pos, dir: Direction): Unit = {
@@ -167,7 +178,7 @@ final case class Actor(
             case None =>
               board.move(pos, to).foreach { buf += move(to, _) }
               addAll(to, dir)
-            case Some(piece) =>
+            case Some(piece: ChessPiece) =>
               if (piece.color != color) board.taking(pos, to) foreach {
                 buf += move(to, _, s)
               }
@@ -179,8 +190,8 @@ final case class Actor(
     buf.toList
   }
 
-  private def loaRange: List[Move] = {
-    val buf = new ArrayBuffer[Move]
+  private def loaRange: List[ChessMove] = {
+    val buf = new ArrayBuffer[ChessMove]
 
     def addDir(p: Pos, range: Int, dir: Direction): Unit = {
       dir(p) match {
@@ -192,7 +203,7 @@ final case class Actor(
                 board.move(pos, to).foreach { buf += move(to, _) }
               else
                 addDir(to, range-1, dir)
-            case Some(piece) =>
+            case Some(piece: ChessPiece) =>
               if (piece.color == color && range > 1)
                 addDir(to, range-1, dir)
               else if (piece.color != color && range == 1)
@@ -220,17 +231,17 @@ final case class Actor(
 
   private def move(
       dest: Pos,
-      after: Board,
+      after: ChessBoard,
       capture: Option[Pos] = None,
       castle: Option[((Pos, Pos), (Pos, Pos))] = None,
-      promotion: Option[PromotableRole] = None,
+      promotion: Option[PromotableChessRole] = None,
       enpassant: Boolean = false
   ) =
-    Move(
+    ChessMove(
       piece = piece,
       orig = pos,
       dest = dest,
-      situationBefore = Situation(board, piece.color),
+      situationBefore = ChessSituation(board, piece.color),
       after = after,
       capture = capture,
       castle = castle,
@@ -241,9 +252,9 @@ final case class Actor(
   private def history = board.history
 }
 
-object Actor {
+object ChessActor {
 
-  def longRangeThreatens(board: Board, p: Pos, dir: Direction, to: Pos): Boolean =
+  def longRangeThreatens(board: ChessBoard, p: Pos, dir: Direction, to: Pos): Boolean =
     board.variant.longRangeThreatens(board, p, dir, to)
 
   def pawnDirOf(color: Color): Direction = color.fold(_.up, _.down)

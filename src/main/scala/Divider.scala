@@ -53,19 +53,38 @@ object Divider {
   }
 
   private def majorsAndMinors(board: Board): Int =
-    board.pieces.values.foldLeft(0) { (v, p) =>
-      if (p.role == Pawn || p.role == King) v else v + 1
+    board match {
+      case b: ChessBoard =>
+        b.pieces.values.foldLeft(0) { (v, p) =>
+          if (p.role == Pawn || p.role == King) v else v + 1
+        }
+      case b: DraughtsBoard =>
+        b.pieces.values.foldLeft(0) { (v, p) =>
+          if (p.role == CheckerMan || p.role == CheckerKing) v else v + 1
+        }
     }
+    //board.pieces.values.foldLeft(0) { (v, p) =>
+    //  p match {
+    //    case p: ChessPiece =>
+    //      if (p.role == Pawn || p.role == King) v else v + 1
+    //    case p: DraughtsPiece =>
+    //      if (p.role == CheckerMan || p.role == CheckerKing) v else v + 1
+    //  }
+    //}
 
   private val backranks =
     List(Pos.whiteBackrank -> Color.White, Pos.blackBackrank -> Color.Black)
 
   // Sparse back-rank indicates that pieces have been developed
   private def backrankSparse(board: Board): Boolean =
-    backranks.exists { case (backrank, color) =>
-      backrank.count { pos =>
-        board(pos).fold(false)(_ is color)
-      } < 4
+    board match {
+      case board: ChessBoard =>
+        backranks.exists { case (backrank, color) =>
+          backrank.count { pos =>
+            board(pos).fold(false)(_ is color)
+          } < 4
+        }
+      case _ => false
     }
 
   private def score(white: Int, black: Int, y: Int): Int =
@@ -110,17 +129,21 @@ object Divider {
   }.toList
 
   private def mixedness(board: Board): Int = {
-    val boardValues = board.pieces.view.mapValues(_ is Color.white)
-    mixednessRegions.foldLeft(0) { case (mix, region) =>
-      var white = 0
-      var black = 0
-      region foreach { p =>
-        boardValues get p foreach { v =>
-          if (v) white = white + 1
-          else black = black + 1
+    board match {
+      case board: ChessBoard =>
+        val boardValues = board.pieces.view.mapValues(_ is Color.white)
+        mixednessRegions.foldLeft(0) { case (mix, region) =>
+          var white = 0
+          var black = 0
+          region foreach { p =>
+            boardValues get p foreach { v =>
+              if (v) white = white + 1
+              else black = black + 1
+            }
+          }
+          mix + score(white, black, region.head.rank.index + 1)
         }
-      }
-      mix + score(white, black, region.head.rank.index + 1)
+      case _ => 0
     }
   }
 }

@@ -2,7 +2,9 @@ package chess
 
 sealed trait Color {
 
-  final def -(role: Role) = Piece(this, role)
+  //final def -(role: Role) = Piece(this, role)
+  final def chessPiece(role: ChessRole) = ChessPiece(this, role)
+  final def draughtsPiece(role: DraughtsRole) = DraughtsPiece(this, role)
 
   final def fold[A](w: => A, b: => A): A = if (white) w else b
 
@@ -15,13 +17,13 @@ sealed trait Color {
   val letter: Char
   val name: String
 
-  final def pawn   = this - Pawn
-  final def bishop = this - Bishop
-  final def knight = this - Knight
-  final def rook   = this - Rook
-  final def queen  = this - Queen
-  final def king   = this - King
-  final def loachecker = this - LOAChecker
+  final def pawn   = this chessPiece Pawn
+  final def bishop = this chessPiece Bishop
+  final def knight = this chessPiece Knight
+  final def rook   = this chessPiece Rook
+  final def queen  = this chessPiece Queen
+  final def king   = this chessPiece King
+  final def loachecker = this chessPiece LOAChecker
 
   final val white = this == Color.White
   final val black = this == Color.Black
@@ -44,8 +46,6 @@ object Color {
     def all: Seq[A] = Seq(white, black)
 
     def reduce[B](f: (A, A) => B) = f(white, black)
-
-    def forall(pred: A => Boolean) = pred(white) && pred(black)
 
     def exists(pred: A => Boolean) = pred(white) || pred(black)
   }

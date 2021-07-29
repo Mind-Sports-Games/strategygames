@@ -9,6 +9,8 @@ package object chess extends scalalib.Common with scalalib.OrnicarOption with sc
   type Directions = List[Direction]
 
   type PieceMap = Map[Pos, Piece]
+  type ChessPieceMap = Map[Pos, ChessPiece]
+  type DraughtsPieceMap = Map[Pos, DraughtsPiece]
 
   type PositionHash = Array[Byte]
 

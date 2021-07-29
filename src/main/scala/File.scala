@@ -5,7 +5,7 @@ case class File private (val index: Int) extends AnyVal with Ordered[File] {
   @inline override def compare(that: File) = this - that
 
   def offset(delta: Int): Option[File] =
-    if (-8 < delta && delta < 8) File(index + delta)
+    if (-10 < delta && delta < 10) File(index + delta)
     else None
 
   @inline def char: Char = (97 + index).toChar
@@ -17,7 +17,7 @@ case class File private (val index: Int) extends AnyVal with Ordered[File] {
 
 object File {
   def apply(index: Int): Option[File] =
-    if (0 <= index && index < 8) Some(new File(index))
+    if (0 <= index && index < 10) Some(new File(index))
     else None
 
   @inline def of(pos: Pos): File = new File(pos.index & 0x7)
@@ -32,6 +32,10 @@ object File {
   val F = new File(5)
   val G = new File(6)
   val H = new File(7)
+  val I = new File(8)
+  val J = new File(9)
 
-  val all = List(A, B, C, D, E, F, G, H)
+  val all = List(A, B, C, D, E, F, G, H, I, J)
+
+  def allForBoard(max: Int): List[File] = all.filter(_.index < max)
 }

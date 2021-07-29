@@ -3,25 +3,37 @@ package chess
 import chess.format.Uci
 import cats.syntax.option._
 
-case class Move(
-    piece: Piece,
-    orig: Pos,
-    dest: Pos,
+sealed class Move(
     situationBefore: Situation,
     after: Board,
-    capture: Option[Pos],
     promotion: Option[PromotableRole],
+    metrics: MoveMetrics = MoveMetrics()
+) {
+
+  def promotes = promotion.isDefined
+
+}
+
+case class ChessMove(
+    piece: ChessPiece,
+    orig: Pos,
+    dest: Pos,
+    situationBefore: ChessSituation,
+    after: ChessBoard,
+    capture: Option[Pos],
+    promotion: Option[PromotableChessRole],
     castle: Option[((Pos, Pos), (Pos, Pos))],
     enpassant: Boolean,
     metrics: MoveMetrics = MoveMetrics()
-) {
-  def before = situationBefore.board
+) extends Move(situationBefore, after, promotion, metrics){
 
-  def situationAfter = Situation(finalizeAfter, !piece.color)
+  def before: ChessBoard = situationBefore.board
+
+  def situationAfter = ChessSituation(finalizeAfter, !piece.color)
 
   def withHistory(h: History) = copy(after = after withHistory h)
 
-  def finalizeAfter: Board = {
+  def finalizeAfter: ChessBoard = {
     val board = after updateHistory { h1 =>
       val h2 = h1.copy(
         lastMove = Option(toUci),
@@ -52,16 +64,14 @@ case class Move(
       val resetsPositionHashes = board.variant.isIrreversible(this)
       val basePositionHashes =
         if (resetsPositionHashes) Array.empty: PositionHash else positionHashesOfSituationBefore
-      h.copy(positionHashes = Hash(Situation(board, !piece.color)) ++ basePositionHashes)
+      h.copy(positionHashes = Hash(ChessSituation(board, !piece.color)) ++ basePositionHashes)
     }
   }
 
-  def applyVariantEffect: Move = before.variant addVariantEffect this
+  def applyVariantEffect: ChessMove = before.variant addVariantEffect this
 
   // does this move capture an opponent piece?
   def captures = capture.isDefined
-
-  def promotes = promotion.isDefined
 
   def castles = castle.isDefined
 
@@ -72,18 +82,19 @@ case class Move(
 
   def color = piece.color
 
-  def withPromotion(op: Option[PromotableRole]): Option[Move] =
+  def withPromotion(op: Option[PromotableChessRole]): Option[ChessMove] =
     op.fold(this.some) { p =>
       if ((after count color.queen) > (before count color.queen)) for {
         b2 <- after take dest
-        b3 <- b2.place(color - p, dest)
+        b3 <- b2.place(color chessPiece p, dest)
       } yield copy(after = b3, promotion = Option(p))
       else this.some
     }
 
-  def withAfter(newBoard: Board) = copy(after = newBoard)
+  def withAfter(newBoard: ChessBoard) = copy(after = newBoard)
 
   def withMetrics(m: MoveMetrics) = copy(metrics = m)
+
 
   def toUci = Uci.Move(orig, dest, promotion)
 

@@ -4,13 +4,14 @@ package variant
 import chess.format.FEN
 
 case object Antichess
-    extends Variant(
+    extends ChessVariant(
       id = 6,
       key = "antichess",
       name = "Antichess",
       shortName = "Anti",
       title = "Lose all your pieces (or get stalemated) to win the game.",
-      standardInitialPosition = true
+      standardInitialPosition = true,
+      boardSize = Board.D64
     ) {
 
   def pieces = Standard.pieces
@@ -20,43 +21,43 @@ case object Antichess
   override val initialFen = FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 0 1")
 
   // In antichess, the king can't be put into check so we always return false
-  override def kingThreatened(board: Board, color: Color, to: Pos, filter: Piece => Boolean = _ => true) =
+  override def kingThreatened(board: ChessBoard, color: Color, to: Pos, filter: ChessPiece => Boolean = _ => true) =
     false
 
   // In this variant, a player must capture if a capturing move is available
-  override def validMoves(situation: Situation) = {
+  override def validMoves(situation: ChessSituation) = {
     val allMoves       = super.validMoves(situation)
     val capturingMoves = allMoves.view mapValues (_.filter(_.captures)) filterNot (_._2.isEmpty)
 
     (if (capturingMoves.nonEmpty) capturingMoves else allMoves).to(Map)
   }
 
-  override def valid(board: Board, strict: Boolean) =
+  override def valid(board: ChessBoard, strict: Boolean) =
     board.pieces.size >= 2 && board.pieces.size <= 32
 
   // In antichess, there is no checkmate condition, and the winner is the current player if they have no legal moves
-  override def winner(situation: Situation): Option[Color] =
+  override def winner(situation: ChessSituation): Option[Color] =
     if (specialEnd(situation)) Option(situation.color) else None
 
-  override def specialEnd(situation: Situation) = {
+  override def specialEnd(situation: ChessSituation) = {
     // The game ends with a win when one player manages to lose all their pieces or is in stalemate
     situation.board.piecesOf(situation.color).isEmpty || situation.moves.isEmpty
   }
 
   // In antichess, it is valuable for your opponent to have pieces.
-  override def materialImbalance(board: Board): Int =
-    board.pieces.values.foldLeft(0) { case (acc, Piece(color, _)) =>
+  override def materialImbalance(board: ChessBoard): Int =
+    board.pieces.values.foldLeft(0) { case (acc, ChessPiece(color, _)) =>
       acc + color.fold(-2, 2)
     }
 
   // In antichess, there is no checkmate condition therefore a player may only draw either by agreement,
   // blockade or stalemate. A player always has sufficient material to win otherwise.
-  override def opponentHasInsufficientMaterial(situation: Situation) = false
+  override def opponentHasInsufficientMaterial(situation: ChessSituation) = false
 
   // No player can win if the only remaining pieces are opposing bishops on different coloured
   // diagonals. There may be pawns that are incapable of moving and do not attack the right color
   // of square to allow the player to force their opponent to capture their bishop, also resulting in a draw
-  override def isInsufficientMaterial(board: Board) = {
+  override def isInsufficientMaterial(board: ChessBoard) = {
     // Exit early if we are not in a situation with only bishops and pawns
     val bishopsAndPawns = board.pieces.values.forall(p => p.is(Bishop) || p.is(Pawn)) &&
       board.pieces.values.exists(_.is(Bishop))
@@ -89,16 +90,16 @@ case object Antichess
     bishopsAndPawns && drawnBishops
   }
 
-  private def pawnNotAttackable(pawn: Actor, oppositeBishopLight: Boolean, board: Board) = {
+  private def pawnNotAttackable(pawn: ChessActor, oppositeBishopLight: Boolean, board: ChessBoard) = {
     // The pawn cannot attack a bishop or be attacked by a bishop
     val cannotAttackBishop =
-      !Actor.pawnAttacks(pawn.pos, pawn.piece.color).exists(_.isLight == oppositeBishopLight)
+      !ChessActor.pawnAttacks(pawn.pos, pawn.piece.color).exists(_.isLight == oppositeBishopLight)
 
     InsufficientMatingMaterial.pawnBlockedByPawn(pawn, board) && cannotAttackBishop
   }
 
   // In this game variant, a king is a valid promotion
-  override def isValidPromotion(promotion: Option[PromotableRole]) =
+  override def isValidPromotion(promotion: Option[PromotableChessRole]) =
     promotion match {
       case None                                        => true
       case Some(Queen | Rook | Knight | Bishop | King) => true
@@ -107,5 +108,5 @@ case object Antichess
 
   override val roles = List(Rook, Knight, King, Bishop, Queen, Pawn)
 
-  override val promotableRoles: List[PromotableRole] = List(Queen, Rook, Bishop, Knight, King)
+  override val promotableRoles: List[PromotableChessRole] = List(Queen, Rook, Bishop, Knight, King)
 }

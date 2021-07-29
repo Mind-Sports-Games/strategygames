@@ -61,9 +61,15 @@ object Uci {
 
   case class Drop(role: Role, pos: Pos) extends Uci {
 
-    def uci = s"${role.pgn}@${pos.key}"
+    def uci = role match {
+      case r: ChessRole => s"${r.pgn}@${pos.key}"
+      case r: DraughtsRole => s"${r.pdn}@${pos.key}"
+    }
 
-    def piotr = s"${role.pgn}@${pos.piotrStr}"
+    def piotr = role match {
+      case r: ChessRole => s"${r.pgn}@${pos.piotrStr}"
+      case r: DraughtsRole => s"${r.pdn}@${pos.piotrStr}"
+    }
 
     def origDest = pos -> pos
 

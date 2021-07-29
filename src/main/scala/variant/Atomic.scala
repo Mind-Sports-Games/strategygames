@@ -2,13 +2,14 @@ package chess
 package variant
 
 case object Atomic
-    extends Variant(
+    extends ChessVariant(
       id = 7,
       key = "atomic",
       name = "Atomic",
       shortName = "Atom",
       title = "Nuke your opponent's king to win.",
-      standardInitialPosition = true
+      standardInitialPosition = true,
+      boardSize = Board.D64
     ) {
 
   def pieces = Standard.pieces
@@ -16,17 +17,17 @@ case object Atomic
   override def hasMoveEffects = true
 
   /** Move threatens to explode the opponent's king */
-  private def explodesOpponentKing(situation: Situation)(move: Move): Boolean =
+  private def explodesOpponentKing(situation: ChessSituation)(move: ChessMove): Boolean =
     move.captures && {
       situation.board.kingPosOf(!situation.color) exists move.dest.touches
     }
 
   /** Move threatens to illegally explode our own king */
-  private def explodesOwnKing(situation: Situation)(move: Move): Boolean = {
+  private def explodesOwnKing(situation: ChessSituation)(move: ChessMove): Boolean = {
     move.captures && (situation.kingPos exists move.dest.touches)
   }
 
-  private def protectedByOtherKing(board: Board, to: Pos, color: Color): Boolean =
+  private def protectedByOtherKing(board: ChessBoard, to: Pos, color: Color): Boolean =
     board.kingPosOf(color) exists to.touches
 
   /** In atomic chess, a king cannot be threatened while it is in the perimeter of the other king as were the other player
@@ -34,33 +35,37 @@ case object Atomic
     * king.
     */
   override def kingThreatened(
-      board: Board,
+      board: ChessBoard,
       color: Color,
       to: Pos,
-      filter: Piece => Boolean = _ => true
+      filter: ChessPiece => Boolean = _ => true
   ): Boolean = {
     board.pieces exists {
-      case (pos, piece)
-          if piece.color == color && filter(piece) && piece.eyes(pos, to) && !protectedByOtherKing(
-            board,
-            to,
-            color
-          ) =>
-        (!piece.role.projection) || piece.role.dir(pos, to).exists {
-          longRangeThreatens(board, pos, _, to)
+      case (pos, piece) =>
+        piece match {
+          case p: ChessPiece =>
+            if (p.color == color && filter(p) && p.eyes(pos, to) && !protectedByOtherKing(
+              board,
+              to,
+              color
+            ))
+            (!p.role.projection) || p.role.dir(pos, to).exists {
+              longRangeThreatens(board, pos, _, to)
+            }
+          case _ => false
         }
       case _ => false
     }
   }
 
   // moves exploding opponent king are always playable
-  override def kingSafety(m: Move, filter: Piece => Boolean, kingPos: Option[Pos]): Boolean = {
+  override def kingSafety(m: ChessMove, filter: ChessPiece => Boolean, kingPos: Option[Pos]): Boolean = {
     !kingPos.exists(kingThreatened(m.after, !m.color, _, filter)) ||
     explodesOpponentKing(m.situationBefore)(m)
   } && !explodesOwnKing(m.situationBefore)(m)
 
   /** If the move captures, we explode the surrounding pieces. Otherwise, nothing explodes. */
-  private def explodeSurroundingPieces(move: Move): Move = {
+  private def explodeSurroundingPieces(move: ChessMove): ChessMove = {
     if (move.captures) {
       val affectedPos = surroundingPositions(move.dest)
       val afterBoard  = move.after
@@ -84,12 +89,12 @@ case object Atomic
   private[chess] def surroundingPositions(pos: Pos): Set[Pos] =
     Set(pos.up, pos.down, pos.left, pos.right, pos.upLeft, pos.upRight, pos.downLeft, pos.downRight).flatten
 
-  override def addVariantEffect(move: Move): Move = explodeSurroundingPieces(move)
+  override def addVariantEffect(move: ChessMove): ChessMove = explodeSurroundingPieces(move)
 
   /** Since kings cannot confine each other, if either player has only a king
     * then either a queen or multiple pieces are required for checkmate.
     */
-  private def insufficientAtomicWinningMaterial(board: Board) = {
+  private def insufficientAtomicWinningMaterial(board: ChessBoard) = {
     val kingsAndBishopsOnly = board.pieces forall { p =>
       (p._2 is King) || (p._2 is Bishop)
     }
@@ -116,13 +121,13 @@ case object Atomic
    * mate would be not be very likely. Additionally, a player can only mate another player with sufficient material.
    * We also look out for closed positions (pawns that cannot move and kings which cannot capture them.)
    */
-  override def isInsufficientMaterial(board: Board) = {
+  override def isInsufficientMaterial(board: ChessBoard) = {
     insufficientAtomicWinningMaterial(board) || atomicClosedPosition(board)
   }
 
   /** Since a king cannot capture, K + P vs K + P where none of the pawns can move is an automatic draw
     */
-  private def atomicClosedPosition(board: Board) = {
+  private def atomicClosedPosition(board: ChessBoard) = {
     val closedStructure = board.actors.values.forall(actor =>
       (actor.piece.is(Pawn) && actor.moves.isEmpty
         && InsufficientMatingMaterial.pawnBlockedByPawn(actor, board))
@@ -136,7 +141,7 @@ case object Atomic
     closedStructure && bishopsAbsentOrPawnitized
   }
 
-  private def bishopPawnitized(board: Board, sideWithBishop: Color, bishopLight: Boolean) = {
+  private def bishopPawnitized(board: ChessBoard, sideWithBishop: Color, bishopLight: Boolean) = {
     board.actors.values.forall(actor =>
       (actor.piece.is(Pawn) && actor.piece.is(sideWithBishop)) ||
         (actor.piece.is(Pawn) && actor.piece.is(!sideWithBishop) && actor.pos.isLight == !bishopLight) ||
@@ -149,9 +154,9 @@ case object Atomic
     * a piece in the opponent's king's proximity. On the other hand, a king alone or a king with
     * immobile pawns is not sufficient material to win with.
     */
-  override def opponentHasInsufficientMaterial(situation: Situation) =
+  override def opponentHasInsufficientMaterial(situation: ChessSituation) =
     situation.board.rolesOf(!situation.color) == List(King)
 
   /** Atomic chess has a special end where a king has been killed by exploding with an adjacent captured piece */
-  override def specialEnd(situation: Situation) = situation.board.kingPos.size != 2
+  override def specialEnd(situation: ChessSituation) = situation.board.kingPos.size != 2
 }

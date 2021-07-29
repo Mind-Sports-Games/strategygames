@@ -35,15 +35,15 @@ object UciCharPair {
     def toChar(pos: Pos) = pos2charMap.getOrElse(pos, voidChar)
 
     val promotion2charMap: Map[(File, PromotableRole), Char] = for {
-      (role, index) <- Role.allPromotable.zipWithIndex.to(Map)
-      file          <- File.all
+      (role, index) <- Role.allChessPromotable.zipWithIndex.to(Map)
+      file          <- File.allForBoard(8)
     } yield (file, role) -> (charShift + pos2charMap.size + index * 8 + file.index).toChar
 
     def toChar(file: File, prom: PromotableRole) =
       promotion2charMap.getOrElse(file -> prom, voidChar)
 
     val dropRole2charMap: Map[Role, Char] =
-      Role.all
+      Role.allChess
         .filterNot(King ==)
         .zipWithIndex
         .map { case (role, index) =>

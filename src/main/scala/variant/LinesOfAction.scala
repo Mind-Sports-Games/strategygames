@@ -6,16 +6,17 @@ import chess.format.FEN
 import scala.collection.immutable.Queue
 
 case object LinesOfAction
-    extends Variant(
+    extends ChessVariant(
       id = 11,
       key = "linesOfAction",
       name = "Lines Of Action",
       shortName = "LOA",
       title = "Connect all of your checkers to win.",
-      standardInitialPosition = false
+      standardInitialPosition = false,
+      boardSize = Board.D64
     ) {
 
-  override val pieces: Map[Pos, Piece] = Map(
+  override val pieces: Map[Pos, ChessPiece] = Map(
     Pos.B1 -> White.loachecker,
     Pos.C1 -> White.loachecker,
     Pos.D1 -> White.loachecker,
@@ -49,23 +50,23 @@ case object LinesOfAction
 
   override val castles = Castles.none
 
-  override def valid(board: Board, strict: Boolean) =
+  override def valid(board: ChessBoard, strict: Boolean) =
     board.kingPos.isEmpty
 
   //copied from Atomic
   private def surroundingPositions(pos: Pos): Set[Pos] =
     Set(pos.up, pos.down, pos.left, pos.right, pos.upLeft, pos.upRight, pos.downLeft, pos.downRight).flatten
 
-  private def neighboringColorPieces(color: Color, pos: Pos, board: Board): Queue[Pos] =
+  private def neighboringColorPieces(color: Color, pos: Pos, board: ChessBoard): Queue[Pos] =
     board.piecesOf(color).keySet.filter(surroundingPositions(pos)).to(Queue)
 
-  private def firstPiece(color: Color, board: Board): Option[Pos] =
+  private def firstPiece(color: Color, board: ChessBoard): Option[Pos] =
     Option(board.piecesOf(color).keySet.head)
 
-  private def numOfPieces(color: Color, board: Board): Int =
+  private def numOfPieces(color: Color, board: ChessBoard): Int =
     board.piecesOf(color).size
 
-  private def winForColor(color: Color, board: Board): Boolean = {
+  private def winForColor(color: Color, board: ChessBoard): Boolean = {
 
     def piecesGroupSize(
       linkedPieces: Set[Pos],
@@ -96,11 +97,11 @@ case object LinesOfAction
       .getOrElse(false)
   }
 
-  override def specialEnd(situation: Situation) =
+  override def specialEnd(situation: ChessSituation) =
     winForColor(Black, situation.board) ^ winForColor(White, situation.board)
 
   //this probably isnt done very nicely, is it correct to return None for a draw?
-  override def winner(situation: Situation): Option[Color] = {
+  override def winner(situation: ChessSituation): Option[Color] = {
     val blackWin = winForColor(Black, situation.board)
     val whiteWin = winForColor(White, situation.board)
     if (blackWin && !whiteWin){
@@ -110,6 +111,6 @@ case object LinesOfAction
     } else None
   }
 
-  override def specialDraw(situation: Situation) =
+  override def specialDraw(situation: ChessSituation) =
     winForColor(Black, situation.board) && winForColor(White, situation.board)
 }

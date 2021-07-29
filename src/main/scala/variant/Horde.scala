@@ -4,27 +4,28 @@ package variant
 import chess.format.FEN
 
 case object Horde
-    extends Variant(
+    extends ChessVariant(
       id = 8,
       key = "horde",
       name = "Horde",
       shortName = "Horde",
       title = "Destroy the horde to win!",
-      standardInitialPosition = false
+      standardInitialPosition = false,
+      boardSize = Board.D64
     ) {
 
   /** In Horde chess white advances against black with a horde of pawns.
     */
-  lazy val pieces: Map[Pos, Piece] = {
+  lazy val pieces: Map[Pos, ChessPiece] = {
 
     val frontPawns = List(Pos.B5, Pos.C5, Pos.F5, Pos.G5).map { _ -> White.pawn }
 
     val whitePawnsHorde = frontPawns ++ (for {
-      x <- File.all
+      x <- File.allForBoard(8)
       y <- Rank.all.take(4)
     } yield (Pos(x, y) -> White.pawn)) toMap
 
-    val blackPieces = (for (y <- List(Rank.Seventh, Rank.Eighth); x <- File.all) yield {
+    val blackPieces = (for (y <- List(Rank.Seventh, Rank.Eighth); x <- File.allForBoard(8)) yield {
       Pos(x, y) -> (y match {
         case Rank.Eighth  => Black - backRank(x.index)
         case Rank.Seventh => Black.pawn
@@ -38,18 +39,18 @@ case object Horde
 
   override val initialFen = FEN("rnbqkbnr/pppppppp/8/1PP2PP1/PPPPPPPP/PPPPPPPP/PPPPPPPP/PPPPPPPP w kq - 0 1")
 
-  override def valid(board: Board, strict: Boolean) =
+  override def valid(board: ChessBoard, strict: Boolean) =
     board.kingPosOf(White).isEmpty && validSide(board, strict)(Black) && !pawnsOnPromotionRank(board, White)
 
   /** The game has a special end condition when black manages to capture all of white's pawns */
-  override def specialEnd(situation: Situation) =
+  override def specialEnd(situation: ChessSituation) =
     situation.board.piecesOf(White).isEmpty
 
   /** Any vs K + any where horde is stalemated and only king can move is a fortress draw
     * This does not consider imminent fortresses such as 8/p7/P7/8/8/P7/8/k7 b - -
     * nor does it consider contrived fortresses such as b7/pk6/P7/P7/8/8/8/8 b - -
     */
-  private def hordeClosedPosition(board: Board) = {
+  private def hordeClosedPosition(board: ChessBoard) = {
     lazy val notKingBoard = board.kingPos.get(Color.black).flatMap(board.take).getOrElse(board)
     val hordePos          = board.occupation(Color.white) // may include promoted pieces
     val mateInOne =
@@ -60,14 +61,14 @@ case object Horde
   /** In horde chess, black can win unless a fortress stalemate is unavoidable.
     *  Auto-drawing the game should almost never happen, but it did in https://lichess.org/xQ2RsU8N#121
     */
-  override def isInsufficientMaterial(board: Board) = hordeClosedPosition(board)
+  override def isInsufficientMaterial(board: ChessBoard) = hordeClosedPosition(board)
 
   /** In horde chess, the horde cannot win on * V K or [BN]{2} v K or just one piece
     * since they lack a king for checkmate support.
     * Technically there are some positions where stalemate is unavoidable which
     * this method does not detect; however, such are trivial to premove.
     */
-  override def opponentHasInsufficientMaterial(situation: Situation): Boolean = {
+  override def opponentHasInsufficientMaterial(situation: ChessSituation): Boolean = {
     val board         = situation.board
     val opponentColor = !situation.color
     lazy val fortress = hordeClosedPosition(board) // costly function call

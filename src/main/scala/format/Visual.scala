@@ -41,8 +41,8 @@ object Visual {
         (pos, char)
       })
     }
-    for (y <- Rank.allReversed) yield {
-      for (x <- File.all) yield {
+    for (y <- Rank.allForBoardReversed(8)) yield {
+      for (x <- File.allForBoard(8)) yield {
         val pos = Pos(x, y)
         markedPoss.get(pos) getOrElse board(pos).fold(' ')(_ forsyth)
       }
