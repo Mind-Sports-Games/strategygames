@@ -12,7 +12,7 @@ abstract sealed class Board(
 
   def apply(at: Pos): Option[Piece] = pieces get at
 
-  val actors: Map[Pos, Actor]
+  def actors: Map[Pos, Actor]
 
   def actorsOf: Color.Map[Seq[Actor]] = {
     val (w, b) = actors.values.toSeq.partition { _.color.white }
@@ -30,7 +30,7 @@ abstract sealed class Board(
 
   def piecesOf(c: Color): Map[Pos, Piece] = pieces filter (_._2 is c)
 
-  val kingPos: Map[Color, Pos]
+  def kingPos: Map[Color, Pos]
 
   def kingPosOf(c: Color): Option[Pos] = kingPos get c
 
@@ -86,9 +86,9 @@ object Board {
     b.crazyData
   ) {
 
-    val actors: Map[Pos, Actor] = b.actors.map{case(p, a) => (Pos.Chess(p), Actor.Chess(a))}
+    def actors: Map[Pos, Actor] = b.actors.map{case(p, a) => (Pos.Chess(p), Actor.Chess(a))}
 
-    val kingPos: Map[Color, Pos] = b.kingPos.map{case(c, p) => (c, Pos.Chess(p))}
+    def kingPos: Map[Color, Pos] = b.kingPos.map{case(c, p) => (c, Pos.Chess(p))}
 
     def place(piece: Piece, at: Pos): Option[Board] = (piece, at) match {
       case (Piece.Chess(piece), Pos.Chess(at)) => b.place(piece, at).map(Chess)
@@ -162,9 +162,9 @@ object Board {
     Variant.Draughts(b.variant)
   ) {
 
-    val actors: Map[Pos, Actor] = b.actors.map{case(p, a) => (Pos.Draughts(p), Actor.Draughts(a))}
+    def actors: Map[Pos, Actor] = b.actors.map{case(p, a) => (Pos.Draughts(p), Actor.Draughts(a))}
 
-    val kingPos: Map[Color, Pos] = b.kingPos.map{case(c, p) => (c, Pos.Draughts(p))}
+    def kingPos: Map[Color, Pos] = b.kingPos.map{case(c, p) => (c, Pos.Draughts(p))}
 
     def place(piece: Piece, at: Pos): Option[Board] = (piece, at) match {
       case (Piece.Draughts(piece), Pos.Draughts(at)) => b.place(piece, at).map(Draughts)
