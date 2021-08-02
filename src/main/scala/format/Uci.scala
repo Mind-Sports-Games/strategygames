@@ -134,6 +134,15 @@ object Uci {
     }
   }
 
+  object Drop {
+
+    def fromStrings(lib: GameLib, roleS: String, posS: String): Option[Drop] = lib match {
+      case GameLib.Draughts() => None
+      case GameLib.Chess()    => chess.format.Uci.Drop.fromStrings(roleS, posS).map(ChessDrop)
+    }
+
+  }
+
   abstract sealed class WithSan(val uci: Uci, val san: String)
 
   final case class ChessWithSan(w: chess.format.Uci.WithSan) extends WithSan(
@@ -167,6 +176,11 @@ object Uci {
         => ChessMove(chess.format.Uci.apply(move))
       case _ => sys.error("Mismatched gamelib types")
     }
+
+  def apply(lib: GameLib, drop: strategygames.chess.Drop) = lib match {
+    case GameLib.Draughts() => sys.error("Drop not implemented for Draughts")
+    case GameLib.Chess()    => ChessDrop(chess.format.Uci.apply(drop))
+  }
 
   def apply(lib: GameLib, move: String): Option[Uci] = lib match {
       case GameLib.Draughts() => draughts.format.Uci.apply(move).map(wrap)
