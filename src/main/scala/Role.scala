@@ -4,7 +4,7 @@ sealed trait Role {
   val forsyth: Char
   //draughts.Role.pdn will be referred to by pgn from this point
   val pgn: Char
-  lazy val name = toString.toLowerCase
+  val name: String
   val binaryInt: Int
 }
 
@@ -21,18 +21,21 @@ object Role {
     val forsyth = r.forsyth
     val pgn = r.pgn
     val binaryInt = r.binaryInt
+    val name = r.name
   }
 
   final case class DraughtsRole(r: draughts.Role) extends Role {
     val forsyth = r.forsyth
     val pgn = r.pdn
     val binaryInt = r.binaryInt
+    val name = r.name
   }
 
   final case class ChessPromotableRole(r: chess.PromotableRole) extends PromotableRole {
     val forsyth = r.forsyth
     val pgn = r.pgn
     val binaryInt = r.binaryInt
+    val name = r.name
     def toChess = r
     def toDraughts: draughts.PromotableRole = sys.error("Not implemented for chess")
   }
@@ -41,6 +44,7 @@ object Role {
     val forsyth = r.forsyth
     val pgn = r.pdn
     val binaryInt = r.binaryInt
+    val name = r.name
     def toDraughts = r
     def toChess: chess.PromotableRole = sys.error("Not implemented for draughts")
   }
