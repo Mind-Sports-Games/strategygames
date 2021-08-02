@@ -69,6 +69,12 @@ abstract class Game(
 
 object Game {
 
+  private def toChessPromotion(p: Option[PromotableRole]): Option[chess.PromotableRole] =
+    p.map(_ match {
+      case Role.ChessPromotableRole(p) => p
+      case _ => sys.error("Non-chess promotable role paired with chess objects")
+    })
+
   final case class Chess(g: chess.Game)
       extends Game(
         Situation.Chess(g.situation),
@@ -86,9 +92,9 @@ object Game {
         finalSquare: Boolean = false,
         captures: Option[List[Pos]] = None,
         partialCaptures: Boolean = false
-    ): Validated[String, (Game, Move)] = (orig, dest, promotion) match {
-      case (Pos.Chess(orig), Pos.Chess(dest), Some(Role.ChessPromotableRole(promotion))) =>
-        g.apply(orig, dest, Some(promotion), metrics)
+    ): Validated[String, (Game, Move)] = (orig, dest) match {
+      case (Pos.Chess(orig), Pos.Chess(dest)) =>
+        g.apply(orig, dest, toChessPromotion(promotion), metrics)
           .toEither
           .map(t => (Chess(t._1), Move.Chess(t._2)))
           .toValidated
