@@ -46,7 +46,7 @@ object Color {
 
     lazy val unary_! = Black
 
-    val letter = 'W'
+    val letter = 'w'
     val name   = "white"
 
     override val hashCode = 1
@@ -56,7 +56,7 @@ object Color {
 
     val unary_! = White
 
-    val letter = 'B'
+    val letter = 'b'
     val name   = "black"
 
     override val hashCode = 2
