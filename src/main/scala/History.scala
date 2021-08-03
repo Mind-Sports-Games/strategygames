@@ -80,17 +80,17 @@ object History {
     unmovedRooks: chess.UnmovedRooks = chess.UnmovedRooks.default,
     kingMoves: draughts.KingMoves = draughts.KingMoves(),
     halfMoveClock: Int = 0
-  ): History = (lib, lastMove, variant) match {
-    case (GameLib.Draughts(), Some(lastMove: Uci.Draughts), Some(Variant.Draughts(variant)))
+  ): History = (lib, variant) match {
+    case (GameLib.Draughts(), Some(Variant.Draughts(variant)))
       => Draughts(draughts.DraughtsHistory(
-        lastMove = Some(lastMove.unwrap),
+        lastMove = lastMove.map(lm => lm.toDraughts),
         positionHashes = positionHashes,
         variant = variant,
         kingMoves = kingMoves
       ))
-    case (GameLib.Chess(), Some(lastMove: Uci.Chess), Some(Variant.Chess(_)))
+    case (GameLib.Chess(), None)
       => Chess(chess.History(
-        lastMove = Some(lastMove.unwrap),
+        lastMove = lastMove.map(lm => lm.toChess),
         positionHashes = positionHashes,
         castles = castles,
         checkCount = checkCount,
