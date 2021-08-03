@@ -97,7 +97,7 @@ object History {
         unmovedRooks = unmovedRooks,
         halfMoveClock = halfMoveClock
       ))
-    case _ => sys.error("Mismatched gamelib types")
+    case _ => sys.error("Mismatched gamelib types 1")
   }
 
 }

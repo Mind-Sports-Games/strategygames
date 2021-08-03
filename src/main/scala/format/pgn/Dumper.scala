@@ -19,13 +19,13 @@ object Dumper {
         Move.Chess(data),
         Situation.Chess(next)
       ) => chess.format.pgn.Dumper.apply(situation, data, next)
-      case _ => sys.error("Mismatched gamelib types")
+      case _ => sys.error("Mismatched gamelib types 30")
   }
 
   def apply(lib: GameLib, data: Move): String = (lib, data) match {
     case (GameLib.Draughts(), Move.Draughts(data)) => draughts.format.pdn.Dumper.apply(data)
     case (GameLib.Chess(), Move.Chess(data))       => chess.format.pgn.Dumper.apply(data)
-    case _ => sys.error("Mismatched gamelib types")
+    case _ => sys.error("Mismatched gamelib types 31")
   }
 
   def apply(lib: GameLib, data: chess.Drop): String = lib match {

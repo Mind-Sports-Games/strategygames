@@ -52,7 +52,7 @@ object Replay {
         => Draughts(draughts.Replay(setup, moves.map(Move.toDraughts), state))
       case (GameLib.Chess(), Game.Chess(setup), Game.Chess(state))
         => Chess(chess.Replay(setup, moves.map(Move.toChess), state))
-      case _ => sys.error("Mismatched gamelib types")
+      case _ => sys.error("Mismatched gamelib types 5")
     }
 
   // TODO: I don't think this is quite correct, let's see if it's used.
@@ -72,7 +72,7 @@ object Replay {
       => chess.Replay.games(moveStrs, Some(initialFen), variant).toEither.map(
         g => g.map(Game.Chess)
       ).toValidated
-    case _ => sys.error("Mismatched gamelib types")
+    case _ => sys.error("Mismatched gamelib types 6")
   }
 
   def gameMoveWhileValid(
@@ -100,7 +100,7 @@ object Replay {
             message
           )
       }
-    case _ => sys.error("Mismatched gamelib types")
+    case _ => sys.error("Mismatched gamelib types 7")
   }
 
   def boards(
@@ -129,7 +129,7 @@ object Replay {
         .toEither
         .map(s => s.map(Situation.Chess))
         .toValidated
-    case _ => sys.error("Mismatched gamelib types")
+    case _ => sys.error("Mismatched gamelib types 8")
   }
 
   def draughtsUcis(ucis: List[Uci]): List[draughts.format.Uci] =
@@ -164,7 +164,7 @@ object Replay {
         .toEither
         .map(b => b.map(Board.Chess))
         .toValidated
-    case _ => sys.error("Mismatched gamelib types")
+    case _ => sys.error("Mismatched gamelib types 8")
   }
 
   def situationsFromUci(
@@ -184,7 +184,7 @@ object Replay {
         .toEither
         .map(s => s.map(Situation.Chess))
         .toValidated
-    case _ => sys.error("Mismatched gamelib types")
+    case _ => sys.error("Mismatched gamelib types 9")
   }
 
   def apply(
@@ -204,7 +204,7 @@ object Replay {
         .toEither
         .map(r => Replay.Chess(r))
         .toValidated
-    case _ => sys.error("Mismatched gamelib types")
+    case _ => sys.error("Mismatched gamelib types 10")
   }
 
   def plyAtFen(
@@ -218,7 +218,7 @@ object Replay {
       => draughts.Replay.plyAtFen(moveStrs, Some(initialFen), variant, atFen)
     case (GameLib.Chess(), Some(FEN.Chess(initialFen)), Variant.Chess(variant), FEN.Chess(atFen))
       => chess.Replay.plyAtFen(moveStrs, Some(initialFen), variant, atFen)
-    case _ => sys.error("Mismatched gamelib types")
+    case _ => sys.error("Mismatched gamelib types 10")
   }
 
 

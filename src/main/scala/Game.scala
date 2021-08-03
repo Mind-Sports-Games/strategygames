@@ -256,25 +256,25 @@ object Game {
       Draughts(draughts.DraughtsGame(situation, pgnMoves, clock, turns, startedAtTurn))
     case (GameLib.Chess(), Situation.Chess(situation)) =>
       Chess(chess.Game(situation, pgnMoves, clock, turns, startedAtTurn))
-    case _ => sys.error("Mismatched gamelib types")
+    case _ => sys.error("Mismatched gamelib types 32")
   }
 
   def apply(lib: GameLib, variant: Variant): Game = (lib, variant) match {
     case (GameLib.Draughts(), Variant.Draughts(variant)) => Draughts(draughts.DraughtsGame.apply(variant))
     case (GameLib.Chess(), Variant.Chess(variant))       => Chess(chess.Game.apply(variant))
-    case _                                               => sys.error("Mismatched gamelib types")
+    case _                                               => sys.error("Mismatched gamelib types 33")
   }
 
   def apply(lib: GameLib, board: Board): Game = (lib, board) match {
     case (GameLib.Draughts(), Board.Draughts(board)) => Draughts(draughts.DraughtsGame.apply(board))
     case (GameLib.Chess(), Board.Chess(board))       => Chess(chess.Game.apply(board))
-    case _                                           => sys.error("Mismatched gamelib types")
+    case _                                           => sys.error("Mismatched gamelib types 34")
   }
 
   def apply(lib: GameLib, board: Board, color: Color): Game = (lib, board) match {
     case (GameLib.Draughts(), Board.Draughts(board)) => Draughts(draughts.DraughtsGame.apply(board, color))
     case (GameLib.Chess(), Board.Chess(board))       => Chess(chess.Game.apply(board, color))
-    case _                                           => sys.error("Mismatched gamelib types")
+    case _                                           => sys.error("Mismatched gamelib types 35")
   }
 
   def apply(lib: GameLib, variant: Option[Variant], fen: Option[FEN]): Game =
@@ -283,7 +283,7 @@ object Game {
         Draughts(draughts.DraughtsGame.apply(Some(variant), Some(fen)))
       case (GameLib.Chess(), Some(Variant.Chess(variant)), Some(FEN.Chess(fen))) =>
         Chess(chess.Game.apply(Some(variant), Some(fen)))
-      case _ => sys.error("Mismatched gamelib types")
+      case _ => sys.error("Mismatched gamelib types 36")
     }
 
     def wrap(g: chess.Game) = Chess(g)

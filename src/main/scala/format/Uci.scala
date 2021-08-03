@@ -113,7 +113,7 @@ object Uci {
       (lib, orig, dest, promotion) match {
         case (GameLib.Draughts(), Pos.Draughts(orig), Pos.Draughts(dest), Some(Role.DraughtsPromotableRole(promotion))) => DraughtsMove(draughts.format.Uci.Move.apply(orig, dest, Some(promotion), draughtsCaptures(capture)))
         case (GameLib.Chess(), Pos.Chess(orig), Pos.Chess(dest), Some(Role.ChessPromotableRole(promotion))) => ChessMove(chess.format.Uci.Move.apply(orig, dest, Some(promotion)))
-        case _ => sys.error("Mismatched gamelib types")
+        case _ => sys.error("Mismatched gamelib types 23")
       }
 
     def apply(lib: GameLib, move: String): Option[Move] = lib match {
@@ -162,7 +162,7 @@ object Uci {
         => Uci.DraughtsWithSan(draughts.format.Uci.WithSan(uci, san))
       case (GameLib.Chess(), u: Uci.Chess)
         => Uci.ChessWithSan(chess.format.Uci.WithSan(u.unwrap, san))
-      case _ => sys.error("Mismatched gamelib types")
+      case _ => sys.error("Mismatched gamelib types 24")
     }
 
   }
@@ -174,7 +174,7 @@ object Uci {
         => DraughtsMove(draughts.format.Uci.apply(move, withCaptures))
       case (GameLib.Chess(), strategygames.Move.Chess(move))
         => ChessMove(chess.format.Uci.apply(move))
-      case _ => sys.error("Mismatched gamelib types")
+      case _ => sys.error("Mismatched gamelib types 25")
     }
 
   def apply(lib: GameLib, drop: strategygames.chess.Drop) = lib match {

@@ -239,7 +239,7 @@ object Board {
   //      => Draughts(draughts.Board(Piece.draughtsPieceMap(pieces), history, variant))
   //    case (GameLib.Chess(), History.Chess(history), Variant.Chess(variant))
   //      => Chess(chess.Board(Piece.chessPieceMap(pieces), history, variant, crazyData))
-  //    case _ => sys.error("Mismatched gamelib types")
+  //    case _ => sys.error("Mismatched gamelib types 26")
   //  }
 
   def apply(lib: GameLib, pieces: Iterable[(Pos, Piece)], variant: Variant): Board =
@@ -254,7 +254,7 @@ object Board {
           pieces.map{case(Pos.Chess(pos), Piece.Chess(piece)) => (pos, piece)},
           variant
         ))
-      case _ => sys.error("Mismatched gamelib types")
+      case _ => sys.error("Mismatched gamelib types 27")
     }
 
 
@@ -264,13 +264,13 @@ object Board {
   def init(lib: GameLib, variant: Variant): Board = (lib, variant) match {
     case (GameLib.Draughts(), Variant.Draughts(variant)) => Draughts(draughts.Board.init(variant))
     case (GameLib.Chess(), Variant.Chess(variant))       => Chess(chess.Board.init(variant))
-    case _ => sys.error("Mismatched gamelib types")
+    case _ => sys.error("Mismatched gamelib types 28")
   }
 
   def empty(lib: GameLib, variant: Variant): Board = (lib, variant) match {
     case (GameLib.Draughts(), Variant.Draughts(variant)) => Draughts(draughts.Board.empty(variant))
     case (GameLib.Chess(), Variant.Chess(variant))       => Chess(chess.Board.empty(variant))
-    case _ => sys.error("Mismatched gamelib types")
+    case _ => sys.error("Mismatched gamelib types 29")
   }
 
 }

@@ -229,7 +229,7 @@ object Situation {
       => Draughts(draughts.Situation(board, color))
     case (GameLib.Chess(), Board.Chess(board))
       => Chess(chess.Situation(board, color))
-    case _ => sys.error("Mismatched gamelib types")
+    case _ => sys.error("Mismatched gamelib types 3")
   }
 
   def apply(lib: GameLib, variant: Variant): Situation = (lib, variant) match {

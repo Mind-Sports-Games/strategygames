@@ -13,7 +13,7 @@ object UciDump {
       => strategygames.draughts.format.UciDump.apply(replay)
     case (GameLib.Chess(), Replay.Chess(replay))
       => strategygames.chess.format.UciDump.apply(replay)
-    case _ => sys.error("Mismatched gamelib types")
+    case _ => sys.error("Mismatched gamelib types 11")
   }
 
   def apply(
@@ -27,7 +27,7 @@ object UciDump {
       => strategygames.draughts.format.UciDump.apply(moves, Some(initialFen), variant, finalSquare)
     case (GameLib.Chess(), Some(FEN.Chess(initialFen)), Variant.Chess(variant))
       => strategygames.chess.format.UciDump.apply(moves, Some(initialFen), variant)
-    case _ => sys.error("Mismatched gamelib types")
+    case _ => sys.error("Mismatched gamelib types 12")
   }
 
   def move(lib: GameLib, variant: Variant)(mod: MoveOrDrop): String = (lib, variant, mod) match {
@@ -37,6 +37,6 @@ object UciDump {
       => strategygames.chess.format.UciDump.move(variant)(Left(mod))
     case (GameLib.Chess(), Variant.Chess(variant), mod: strategygames.chess.Drop)
       => strategygames.chess.format.UciDump.move(variant)(Right(mod)) 
-    case _ => sys.error("Mismatched gamelib types")
+    case _ => sys.error("Mismatched gamelib types 13")
   }
 }
