@@ -6,6 +6,7 @@ sealed trait Role {
   val pgn: Char
   val name: String
   val binaryInt: Int
+  def toString(): String
 }
 
 sealed trait PromotableRole extends Role {
@@ -22,6 +23,7 @@ object Role {
     val pgn = r.pgn
     val binaryInt = r.binaryInt
     val name = r.name
+    override def toString() = r.name
   }
 
   final case class DraughtsRole(r: draughts.Role) extends Role {
@@ -29,6 +31,7 @@ object Role {
     val pgn = r.pdn
     val binaryInt = r.binaryInt
     val name = r.name
+    override def toString() = r.name
   }
 
   final case class ChessPromotableRole(r: chess.PromotableRole) extends PromotableRole {
@@ -36,6 +39,7 @@ object Role {
     val pgn = r.pgn
     val binaryInt = r.binaryInt
     val name = r.name
+    override def toString() = r.name
     def toChess = r
     def toDraughts: draughts.PromotableRole = sys.error("Not implemented for chess")
   }
@@ -45,6 +49,7 @@ object Role {
     val pgn = r.pdn
     val binaryInt = r.binaryInt
     val name = r.name
+    override def toString() = r.name
     def toDraughts = r
     def toChess: chess.PromotableRole = sys.error("Not implemented for draughts")
   }
