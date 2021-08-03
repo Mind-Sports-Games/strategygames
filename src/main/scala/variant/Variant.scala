@@ -129,6 +129,11 @@ object Variant {
 
     val roles: List[Role] = v.roles.map(Role.ChessRole)
 
+    override def equals(that: Any): Boolean = that match {
+      case Chess(v2) => v2.equals(v)
+      case _ => false
+    }
+
     def chessVariant: chess.variant.Variant = v
     def gameLib: GameLib = GameLib.Chess()
 
@@ -182,6 +187,11 @@ object Variant {
 
     val roles: List[Role] = v.roles.map(Role.DraughtsRole)
 
+    override def equals(that: Any): Boolean = that match {
+      case Draughts(v2) => v2.equals(v)
+      case _ => false
+    }
+
     def chessVariant: chess.variant.Variant = sys.error("Unimplemented for Draughts")
     def gameLib: GameLib = GameLib.Draughts()
   }
@@ -233,6 +243,7 @@ object Variant {
     case GameLib.Draughts() => Variant.Draughts(draughts.variant.FromPosition)
     case GameLib.Chess()    => Variant.Chess(chess.variant.FromPosition)
   }
+
 
   def wrap(v: chess.variant.Variant) = Chess(v)
   def wrap(v: draughts.variant.Variant) = Draughts(v)
