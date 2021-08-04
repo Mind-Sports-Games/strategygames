@@ -4,6 +4,9 @@ import strategygames.{ Color, GameLib }
 
 abstract sealed class FEN(val value: String) {
 
+  def toChess: strategygames.chess.format.FEN
+  def toDraughts: strategygames.draughts.format.FEN
+
   override def toString = value
 
   def fullMove: Option[Int]
@@ -22,6 +25,9 @@ object FEN {
 
   final case class Chess(f: strategygames.chess.format.FEN) extends FEN(f.value) {
 
+    def toChess = f
+    def toDraughts = sys.error("Can't convert chess to draughts")
+
     def fullMove: Option[Int] = f.fullMove
 
     def color: Option[Color] = f.color
@@ -35,6 +41,9 @@ object FEN {
   }
 
   final case class Draughts(f: strategygames.draughts.format.FEN) extends FEN(f.value) {
+
+    def toChess = sys.error("Can't convert draughts to chess")
+    def toDraughts = f
 
     //need to consider an implementation for draughts?
     def fullMove: Option[Int] = None

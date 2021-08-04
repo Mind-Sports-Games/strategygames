@@ -19,6 +19,9 @@ abstract class Variant(
     //not handling draughts.boardSize... (yet)
 ) {
 
+  def toChess: chess.variant.Variant
+  def toDraughts: draughts.variant.Variant
+
   def pieces: Map[Pos, Piece]
 
   // An abstraction leak, we probably won't need this long term
@@ -92,6 +95,9 @@ object Variant {
         standardInitialPosition = v.standardInitialPosition
       ) {
 
+    def toChess: chess.variant.Variant = v
+    def toDraughts = sys.error("Can't convert chess to draughts")
+
     def pieces: Map[Pos, Piece] =
       v.pieces.map { case (pos, piece) => (Pos.Chess(pos), Piece.Chess(piece)) }
 
@@ -149,6 +155,9 @@ object Variant {
         standardInitialPosition = v.standardInitialPosition,
         gameType = Option(v.gameType)
       ) {
+
+    def toChess = sys.error("Can't convert draughts to chess")
+    def toDraughts = v
 
     def pieces: Map[Pos, Piece] =
       v.pieces.map { case (pos, piece) => (Pos.Draughts(pos), Piece.Draughts(piece)) }
