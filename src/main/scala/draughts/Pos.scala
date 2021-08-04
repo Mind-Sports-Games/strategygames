@@ -14,7 +14,7 @@ sealed abstract class Pos(val fieldNumber: Int) {
     case _      => false
   }
 
-  val all: List[Pos]
+  def all: List[Pos]
 }
 
 sealed abstract class PosMotion(field: Int) extends Pos(field) {
@@ -44,7 +44,7 @@ sealed case class Pos100 private (x: Int, y: Int) extends PosMotion(5 * (y - 1) 
   lazy val moveLeft  = movesHorizontal.get(fieldNumber).map(_(0)).filter(_ > 0) flatMap posAt
   lazy val moveRight = movesHorizontal.get(fieldNumber).map(_(1)).filter(_ > 0) flatMap posAt
 
-  val all: List[Pos] = Pos64.all
+  def all: List[Pos] = Pos100.all
 }
 
 sealed case class Pos64 private (x: Int, y: Int) extends PosMotion(4 * (y - 1) + x) {
@@ -61,11 +61,11 @@ sealed case class Pos64 private (x: Int, y: Int) extends PosMotion(4 * (y - 1) +
   lazy val moveLeft  = movesHorizontal.get(fieldNumber).map(_(0)).filter(_ > 0) flatMap posAt
   lazy val moveRight = movesHorizontal.get(fieldNumber).map(_(1)).filter(_ > 0) flatMap posAt
 
-  val all: List[Pos] = Pos100.all
+  def all: List[Pos] = Pos64.all
 }
 
 sealed trait BoardPos {
-  val all: List[PosMotion]
+  def all: List[PosMotion]
   def posAt(x: Int, y: Int): Option[PosMotion]
   def posAt(field: Int): Option[PosMotion]
   def posAt(field: String): Option[PosMotion]
@@ -303,7 +303,7 @@ object Pos100 extends BoardPos {
   val D10 = createPos(4, 10)
   val E10 = createPos(5, 10)
 
-  val all = posCache.toList.flatten
+  def all = posCache.toList.flatten
 
   val allKeys: Map[String, PosMotion] = all.map { pos => pos.key -> pos }.to(Map)
 
@@ -488,7 +488,7 @@ object Pos64 extends BoardPos {
   val C8 = createPos(3, 8)
   val D8 = createPos(4, 8)
 
-  val all = posCache.toList.flatten
+  def all = posCache.toList.flatten
 
   val allKeys: Map[String, PosMotion] = all.map { pos => pos.key -> pos }.to(Map)
 
