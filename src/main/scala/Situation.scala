@@ -237,7 +237,7 @@ object Situation {
       => Draughts(draughts.Situation.apply(variant))
     case (GameLib.Chess(), Variant.Chess(variant))
       => Chess(chess.Situation.apply(variant))
-    case _ => sys.error("Mismatched gamelib types")
+    case _ => sys.error("Mismatched gamelib types 4")
   }
 
   def wrap(s: chess.Situation) = Chess(s)
