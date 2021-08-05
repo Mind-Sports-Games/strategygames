@@ -277,12 +277,11 @@ object Game {
     case _                                           => sys.error("Mismatched gamelib types 35")
   }
 
-  def apply(lib: GameLib, variant: Option[Variant], fen: Option[FEN]): Game =
-    (lib, variant, fen) match {
-      case (GameLib.Draughts(), Some(Variant.Draughts(variant)), Some(FEN.Draughts(fen))) =>
-        Draughts(draughts.DraughtsGame.apply(Some(variant), Some(fen)))
-      case (GameLib.Chess(), Some(Variant.Chess(variant)), Some(FEN.Chess(fen))) =>
-        Chess(chess.Game.apply(Some(variant), Some(fen)))
+  def apply(lib: GameLib, variant: Option[Variant], fen: Option[FEN]): Game = lib match {
+      case GameLib.Draughts() =>
+        Draughts(draughts.DraughtsGame.apply(variant.map(_.toDraughts), fen.map(_.toDraughts)))
+      case GameLib.Chess() =>
+        Chess(chess.Game.apply(variant.map(_.toChess), fen.map(_.toChess)))
       case _ => sys.error("Mismatched gamelib types 36")
     }
 

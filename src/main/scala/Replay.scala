@@ -63,13 +63,13 @@ object Replay {
     moveStrs: Iterable[String],
     initialFen: Option[FEN],
     variant: Variant
-  ): Validated[String, List[Game]] = (lib, initialFen, variant) match {
-    case (GameLib.Draughts(), Some(FEN.Draughts(initialFen)), Variant.Draughts(variant))
-      => draughts.Replay.games(moveStrs, Some(initialFen), variant).toEither.map(
+  ): Validated[String, List[Game]] = (lib, variant) match {
+    case (GameLib.Draughts(), Variant.Draughts(variant))
+      => draughts.Replay.games(moveStrs, initialFen.map(_.toDraughts), variant).toEither.map(
         g => g.map(Game.Draughts)
       ).toValidated
-    case (GameLib.Chess(), Some(FEN.Chess(initialFen)), Variant.Chess(variant))
-      => chess.Replay.games(moveStrs, Some(initialFen), variant).toEither.map(
+    case (GameLib.Chess(), Variant.Chess(variant))
+      => chess.Replay.games(moveStrs, initialFen.map(_.toChess), variant).toEither.map(
         g => g.map(Game.Chess)
       ).toValidated
     case _ => sys.error("Mismatched gamelib types 6")
@@ -118,14 +118,14 @@ object Replay {
     initialFen: Option[FEN],
     variant: Variant,
     finalSquare: Boolean = false
-  ): Validated[String, List[Situation]] = (lib, initialFen, variant) match {
-    case (GameLib.Draughts(), Some(FEN.Draughts(initialFen)), Variant.Draughts(variant))
-      => draughts.Replay.situations(moveStrs, Some(initialFen), variant, finalSquare)
+  ): Validated[String, List[Situation]] = (lib, variant) match {
+    case (GameLib.Draughts(), Variant.Draughts(variant)) =>
+      draughts.Replay.situations(moveStrs, initialFen.map(_.toDraughts), variant, finalSquare)
         .toEither
         .map(s => s.map(Situation.Draughts))
         .toValidated
-    case (GameLib.Chess(), Some(FEN.Chess(initialFen)), Variant.Chess(variant))
-      => chess.Replay.situations(moveStrs, Some(initialFen), variant)
+    case (GameLib.Chess(), Variant.Chess(variant)) =>
+      chess.Replay.situations(moveStrs, initialFen.map(_.toChess), variant)
         .toEither
         .map(s => s.map(Situation.Chess))
         .toValidated
@@ -153,18 +153,18 @@ object Replay {
     moves: List[Uci],
     initialFen: Option[FEN],
     variant: Variant
-  ): Validated[String, List[Board]] = (lib, initialFen, variant) match {
-    case (GameLib.Draughts(), Some(FEN.Draughts(initialFen)), Variant.Draughts(variant))
-      => draughts.Replay.boardsFromUci(draughtsUcis(moves), Some(initialFen), variant)
+  ): Validated[String, List[Board]] = (lib, variant) match {
+    case (GameLib.Draughts(), Variant.Draughts(variant)) =>
+      draughts.Replay.boardsFromUci(draughtsUcis(moves), initialFen.map(_.toDraughts), variant)
         .toEither
         .map(b => b.map(Board.Draughts))
         .toValidated
-    case (GameLib.Chess(), Some(FEN.Chess(initialFen)), Variant.Chess(variant))
-      => chess.Replay.boardsFromUci(chessUcis(moves), Some(initialFen), variant)
+    case (GameLib.Chess(), Variant.Chess(variant))
+      => chess.Replay.boardsFromUci(chessUcis(moves), initialFen.map(_.toChess), variant)
         .toEither
         .map(b => b.map(Board.Chess))
         .toValidated
-    case _ => sys.error("Mismatched gamelib types 8")
+    case _ => sys.error("Mismatched gamelib types 8a")
   }
 
   def situationsFromUci(
@@ -173,14 +173,14 @@ object Replay {
     initialFen: Option[FEN],
     variant: Variant,
     finalSquare: Boolean = false
-  ): Validated[String, List[Situation]] = (lib, initialFen, variant) match {
-    case (GameLib.Draughts(), Some(FEN.Draughts(initialFen)), Variant.Draughts(variant))
-      => draughts.Replay.situationsFromUci(draughtsUcis(moves), Some(initialFen), variant, finalSquare)
+  ): Validated[String, List[Situation]] = (lib, variant) match {
+    case (GameLib.Draughts(), Variant.Draughts(variant)) =>
+      draughts.Replay.situationsFromUci(draughtsUcis(moves), initialFen.map(_.toDraughts), variant, finalSquare)
         .toEither
         .map(s => s.map(Situation.Draughts))
         .toValidated
-    case (GameLib.Chess(), Some(FEN.Chess(initialFen)), Variant.Chess(variant))
-      => chess.Replay.situationsFromUci(chessUcis(moves), Some(initialFen), variant)
+    case (GameLib.Chess(), Variant.Chess(variant)) =>
+      chess.Replay.situationsFromUci(chessUcis(moves), initialFen.map(_.toChess), variant)
         .toEither
         .map(s => s.map(Situation.Chess))
         .toValidated
@@ -193,14 +193,14 @@ object Replay {
     initialFen: Option[FEN],
     variant: Variant,
     finalSquare: Boolean = false
-  ): Validated[String, Replay] = (lib, initialFen, variant) match {
-    case (GameLib.Draughts(), Some(FEN.Draughts(initialFen)), Variant.Draughts(variant))
-      => draughts.Replay.apply(draughtsUcis(moves), Some(initialFen), variant, finalSquare)
+  ): Validated[String, Replay] = (lib, variant) match {
+    case (GameLib.Draughts(), Variant.Draughts(variant)) =>
+      draughts.Replay.apply(draughtsUcis(moves), initialFen.map(_.toDraughts), variant, finalSquare)
         .toEither
         .map(r => Replay.Draughts(r))
         .toValidated
-    case (GameLib.Chess(), Some(FEN.Chess(initialFen)), Variant.Chess(variant))
-      => chess.Replay.apply(chessUcis(moves), Some(initialFen), variant)
+    case (GameLib.Chess(), Variant.Chess(variant)) =>
+      chess.Replay.apply(chessUcis(moves), initialFen.map(_.toChess), variant)
         .toEither
         .map(r => Replay.Chess(r))
         .toValidated
@@ -213,11 +213,11 @@ object Replay {
     initialFen: Option[FEN],
     variant: Variant,
     atFen: FEN
-  ): Validated[String, Int] = (lib, initialFen, variant, atFen) match {
-    case (GameLib.Draughts(), Some(FEN.Draughts(initialFen)), Variant.Draughts(variant), FEN.Draughts(atFen))
-      => draughts.Replay.plyAtFen(moveStrs, Some(initialFen), variant, atFen)
-    case (GameLib.Chess(), Some(FEN.Chess(initialFen)), Variant.Chess(variant), FEN.Chess(atFen))
-      => chess.Replay.plyAtFen(moveStrs, Some(initialFen), variant, atFen)
+  ): Validated[String, Int] = (lib, variant, atFen) match {
+    case (GameLib.Draughts(), Variant.Draughts(variant), FEN.Draughts(atFen))
+      => draughts.Replay.plyAtFen(moveStrs, initialFen.map(_.toDraughts), variant, atFen)
+    case (GameLib.Chess(), Variant.Chess(variant), FEN.Chess(atFen))
+      => chess.Replay.plyAtFen(moveStrs, initialFen.map(_.toChess), variant, atFen)
     case _ => sys.error("Mismatched gamelib types 10")
   }
 

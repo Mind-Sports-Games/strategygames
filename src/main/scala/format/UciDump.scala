@@ -22,11 +22,11 @@ object UciDump {
     initialFen: Option[FEN],
     variant: Variant,
     finalSquare: Boolean = false
-  ): Validated[String, List[String]] = (lib, initialFen, variant) match {
-    case (GameLib.Draughts(), Some(FEN.Draughts(initialFen)), Variant.Draughts(variant))
-      => strategygames.draughts.format.UciDump.apply(moves, Some(initialFen), variant, finalSquare)
-    case (GameLib.Chess(), Some(FEN.Chess(initialFen)), Variant.Chess(variant))
-      => strategygames.chess.format.UciDump.apply(moves, Some(initialFen), variant)
+  ): Validated[String, List[String]] = (lib, variant) match {
+    case (GameLib.Draughts(), Variant.Draughts(variant))
+      => strategygames.draughts.format.UciDump.apply(moves, initialFen.map(_.toDraughts), variant, finalSquare)
+    case (GameLib.Chess(), Variant.Chess(variant))
+      => strategygames.chess.format.UciDump.apply(moves, initialFen.map(_.toChess), variant)
     case _ => sys.error("Mismatched gamelib types 12")
   }
 

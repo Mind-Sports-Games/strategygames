@@ -107,9 +107,9 @@ object Situation {
       forbiddenUci: Option[List[String]] = None,
       captures: Option[List[Pos]] = None,
       partialCaptures: Boolean = false
-    ): Validated[String, Move] = (from, to, promotion) match {
-      case (Pos.Chess(from), Pos.Chess(to), Some(Role.ChessPromotableRole(promotion)))
-        => s.move(from, to, Some(promotion)).toEither.map(m => Move.Chess(m)).toValidated
+    ): Validated[String, Move] = (from, to) match {
+      case (Pos.Chess(from), Pos.Chess(to)) =>
+        s.move(from, to, promotion.map(_.toChess)).toEither.map(m => Move.Chess(m)).toValidated
       case _ => sys.error("Not passed Chess objects")
     }
 
@@ -188,9 +188,9 @@ object Situation {
       forbiddenUci: Option[List[String]] = None,
       captures: Option[List[Pos]] = None,
       partialCaptures: Boolean = false
-    ): Validated[String, Move] = (from, to, promotion) match {
-      case (Pos.Draughts(from), Pos.Draughts(to), Some(Role.DraughtsPromotableRole(promotion)))
-        => s.move(from, to, Some(promotion), finalSquare, forbiddenUci, draughtsCaptures(captures), partialCaptures).toEither.map(m => Move.Draughts(m)).toValidated
+    ): Validated[String, Move] = (from, to) match {
+      case (Pos.Draughts(from), Pos.Draughts(to)) =>
+        s.move(from, to, promotion.map(_.toDraughts), finalSquare, forbiddenUci, draughtsCaptures(captures), partialCaptures).toEither.map(m => Move.Draughts(m)).toValidated
       case _ => sys.error("Not passed Draughts objects")
     }
 
