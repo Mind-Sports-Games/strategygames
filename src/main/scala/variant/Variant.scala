@@ -38,6 +38,17 @@ abstract class Variant(
   def crazyhouse: Boolean
   def linesOfAction: Boolean
 
+  def draughtsStandard: Boolean
+  def frisian: Boolean
+  def frysk: Boolean
+  def antidraughts: Boolean
+  def breakthrough: Boolean
+  def russian: Boolean
+  def brazilian: Boolean
+  def draughtsFromPosition: Boolean
+
+  def frisianVariant: Boolean
+
   def exotic: Boolean
 
   def initialFen: FEN
@@ -113,6 +124,17 @@ object Variant {
     def crazyhouse: Boolean    = v.crazyhouse
     def linesOfAction: Boolean = v.linesOfAction
 
+    def draughtsStandard: Boolean     = false
+    def frisian: Boolean              = false
+    def frysk: Boolean                = false
+    def antidraughts: Boolean         = false
+    def breakthrough: Boolean         = false
+    def russian: Boolean              = false
+    def brazilian: Boolean            = false
+    def draughtsFromPosition: Boolean = false
+
+    def frisianVariant: Boolean       = false
+
     def exotic: Boolean = v.exotic
 
     def initialFen: FEN = format.Forsyth.initial(GameLib.Chess())
@@ -173,6 +195,17 @@ object Variant {
     def racingKings: Boolean   = false
     def crazyhouse: Boolean    = false
     def linesOfAction: Boolean = false
+
+    def draughtsStandard: Boolean     = v.standard
+    def frisian: Boolean              = v.frisian
+    def frysk: Boolean                = v.frysk
+    def antidraughts: Boolean         = v.antidraughts
+    def breakthrough: Boolean         = v.breakthrough
+    def russian: Boolean              = v.russian
+    def brazilian: Boolean            = v.brazilian
+    def draughtsFromPosition: Boolean = v.fromPosition
+
+    def frisianVariant: Boolean       = v.frisianVariant
 
     def exotic: Boolean = v.exotic
 
