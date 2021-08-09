@@ -41,6 +41,8 @@ abstract sealed class Move(
   def withMetrics(m: MoveMetrics): Move
 
   def toUci: Uci.Move
+  //only used by draughts but making available for all
+  def toShortUci: Uci.Move
 
   override def toString = s"$piece ${toUci.uci}"
 
@@ -100,6 +102,16 @@ object Move {
 
     def toUci: Uci.Move = Uci.ChessMove(m.toUci)
 
+    //only used by draughts
+    def toShortUci: Uci.Move =
+      Uci.Move(
+        GameLib.Chess(),
+        orig,
+        dest,
+        promotion,
+        if (capture.isDefined) capture.get.takeRight(1).some else None
+      )
+
     val unwrap = m
     def toChess = m
     def toDraughts = sys.error("Can't make a draughts move from a chess move")
@@ -153,6 +165,15 @@ object Move {
     def withMetrics(mm: MoveMetrics): Move = Move.Draughts(m.withMetrics(mm))
 
     def toUci: Uci.Move = Uci.DraughtsMove(m.toUci)
+
+    def toShortUci: Uci.Move =
+      Uci.Move(
+        GameLib.Draughts(),
+        orig,
+        dest,
+        promotion,
+        if (capture.isDefined) capture.get.takeRight(1).some else None
+      )
 
     val unwrap = m
     def toDraughts = m
