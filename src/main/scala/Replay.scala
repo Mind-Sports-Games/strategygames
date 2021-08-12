@@ -152,11 +152,16 @@ object Replay {
     lib: GameLib,
     moves: List[Uci],
     initialFen: Option[FEN],
-    variant: Variant
+    variant: Variant,
+    finalSquare: Boolean = false
   ): Validated[String, List[Board]] = (lib, variant) match {
     case (GameLib.Draughts(), Variant.Draughts(variant)) =>
-      draughts.Replay.boardsFromUci(draughtsUcis(moves), initialFen.map(_.toDraughts), variant)
-        .toEither
+      draughts.Replay.boardsFromUci(
+        draughtsUcis(moves),
+        initialFen.map(_.toDraughts),
+        variant,
+        finalSquare
+      ).toEither
         .map(b => b.map(Board.Draughts))
         .toValidated
     case (GameLib.Chess(), Variant.Chess(variant))

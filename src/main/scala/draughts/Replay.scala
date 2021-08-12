@@ -344,8 +344,10 @@ object Replay {
   def boardsFromUci(
       moves: List[Uci],
       initialFen: Option[FEN],
-      variant: Variant
-  ): Validated[String, List[Board]] = situationsFromUci(moves, initialFen, variant) map (_ map (_.board))
+      variant: Variant,
+      finalSquare: Boolean = false
+  ): Validated[String, List[Board]] =
+    situationsFromUci(moves, initialFen, variant, finalSquare) map (_ map (_.board))
 
   def situationsFromUci(
       moves: List[Uci],
