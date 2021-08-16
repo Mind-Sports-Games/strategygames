@@ -170,6 +170,12 @@ object Game {
         case None => None
       }
 
+    private def toDraughtsPromotion(p: Option[PromotableRole]): Option[draughts.PromotableRole] =
+      p.map(_ match {
+        case Role.DraughtsPromotableRole(p) => p
+        case _ => sys.error("Non-draughts promotable role paired with draughts objects")
+      })
+
     def apply(
         orig: Pos,
         dest: Pos,
@@ -178,16 +184,15 @@ object Game {
         finalSquare: Boolean = false,
         captures: Option[List[Pos]] = None,
         partialCaptures: Boolean = false
-    ): Validated[String, (Game, Move)] = (orig, dest, promotion) match {
+    ): Validated[String, (Game, Move)] = (orig, dest) match {
       case (
             Pos.Draughts(orig),
             Pos.Draughts(dest),
-            Some(Role.DraughtsPromotableRole(promotion))
           ) =>
         g.apply(
           orig,
           dest,
-          Some(promotion),
+          toDraughtsPromotion(promotion),
           metrics,
           finalSquare,
           draughtsCaptures(captures),
@@ -195,7 +200,7 @@ object Game {
         ).toEither
           .map(t => (Draughts(t._1), Move.Draughts(t._2)))
           .toValidated
-      case _ => sys.error("Not passed Chess objects")
+      case _ => sys.error("Not passed Draughts objects")
     }
 
     def apply(move: Move): Game = move match {
