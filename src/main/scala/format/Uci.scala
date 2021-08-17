@@ -205,10 +205,20 @@ object Uci {
   def writeList(moves: List[Uci]): String =
     moves.map(_.uci) mkString " "
 
-  def readListPiotr(lib: GameLib, moves: String): Option[List[Uci]] =
-    moves.split(' ').toList.map(piotr(lib, _)).sequence
+  def readListPiotr(moves: String): Option[List[Uci]] =
+    moves.split('_') match {
+      case Array(lib, moves) =>
+        moves.split(' ').toList.map(piotr(GameLib(lib.toInt), _)).sequence
+      case _ => sys.error("No lib encoded into uci piotr")
+    }
 
   def writeListPiotr(moves: List[Uci]): String =
-    moves.map(_.piotr) mkString " "
+    (if (moves.length > 0) {
+      moves.head match {
+        case Uci.ChessMove(_)    => "0_"
+        case Uci.ChessDrop(_)    => "0_"
+        case Uci.DraughtsMove(_) => "1_"
+      }
+    } else "") + moves.map(_.piotr) mkString " "
 
 }

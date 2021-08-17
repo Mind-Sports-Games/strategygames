@@ -47,6 +47,8 @@ abstract class Variant(
   def brazilian: Boolean
   def draughtsFromPosition: Boolean
 
+  def standardVariant: Boolean
+  def fromPositionVariant: Boolean
   def frisianVariant: Boolean
 
   def exotic: Boolean
@@ -133,6 +135,8 @@ object Variant {
     def brazilian: Boolean            = false
     def draughtsFromPosition: Boolean = false
 
+    def standardVariant: Boolean      = v.standard
+    def fromPositionVariant: Boolean  = v.fromPosition
     def frisianVariant: Boolean       = false
 
     def exotic: Boolean = v.exotic
@@ -205,6 +209,8 @@ object Variant {
     def brazilian: Boolean            = v.brazilian
     def draughtsFromPosition: Boolean = v.fromPosition
 
+    def standardVariant: Boolean      = v.standard
+    def fromPositionVariant: Boolean  = v.fromPosition
     def frisianVariant: Boolean       = v.frisianVariant
 
     def exotic: Boolean = v.exotic
