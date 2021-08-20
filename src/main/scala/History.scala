@@ -80,15 +80,19 @@ object History {
     unmovedRooks: chess.UnmovedRooks = chess.UnmovedRooks.default,
     kingMoves: draughts.KingMoves = draughts.KingMoves(),
     halfMoveClock: Int = 0
-  ): History = (lib, variant) match {
-    case (GameLib.Draughts(), Some(Variant.Draughts(variant)))
+  ): History = lib match {
+    case GameLib.Draughts()
       => Draughts(draughts.DraughtsHistory(
         lastMove = lastMove.map(lm => lm.toDraughts),
         positionHashes = positionHashes,
-        variant = variant,
+        variant = variant match {
+          case Some(Variant.Draughts(variant)) => variant
+          case None => strategygames.draughts.variant.Standard
+          case _ => sys.error("Mismatched variant types for draughts history")
+        },
         kingMoves = kingMoves
       ))
-    case (GameLib.Chess(), None)
+    case GameLib.Chess()
       => Chess(chess.History(
         lastMove = lastMove.map(lm => lm.toChess),
         positionHashes = positionHashes,
