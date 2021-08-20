@@ -10,7 +10,7 @@ case object Standard
       id = 1,
       gameType = 20,
       key = "standard",
-      name = "Standard",
+      name = "Standard Draughts",
       shortName = "Std",
       title = "Standard rules of international draughts (FMJD).",
       standardInitialPosition = true,
