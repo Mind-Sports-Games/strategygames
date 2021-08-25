@@ -54,7 +54,7 @@ abstract class Variant(
   def exotic: Boolean
 
   def initialFen: FEN
-  def startColor: Color = White
+  def startColor: Color
 
   def isValidPromotion(promotion: Option[PromotableRole]): Boolean
 
@@ -62,21 +62,20 @@ abstract class Variant(
 
   // In most variants, the winner is the last player to have played and there is a possibility of either a traditional
   // checkmate or a variant end condition
-  def winner(situation: Situation): Option[Color] =
-    if (situation.checkMate || specialEnd(situation)) Option(!situation.color) else None
+  def winner(situation: Situation): Option[Color]
 
-  @nowarn def specialEnd(situation: Situation) = false
+  @nowarn def specialEnd(situation: Situation): Boolean
 
-  @nowarn def specialDraw(situation: Situation) = false
+  @nowarn def specialDraw(situation: Situation): Boolean
 
   // Some variants have an extra effect on the board on a move. For example, in Atomic, some
   // pieces surrounding a capture explode
-  def hasMoveEffects = false
+  def hasMoveEffects: Boolean
 
   /** Applies a variant specific effect to the move. This helps decide whether a king is endangered by a move, for
     * example
     */
-  def addVariantEffect(move: Move): Move = move
+  def addVariantEffect(move: Move): Move
 
   def valid(board: Board, strict: Boolean): Boolean
 
@@ -142,6 +141,7 @@ object Variant {
     def exotic: Boolean = v.exotic
 
     def initialFen: FEN = format.Forsyth.initial(GameLib.Chess())
+    def startColor: Color = v.startColor
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = promotion match {
       case Some(Role.ChessPromotableRole(pr)) => v.isValidPromotion(pr.some)
@@ -152,6 +152,28 @@ object Variant {
     def checkmate(situation: Situation): Boolean = situation match {
       case Situation.Chess(situation) => v.checkmate(situation)
       case _                          => sys.error("Not passed Chess objects")
+    }
+
+    def winner(situation: Situation): Option[Color] = situation match {
+      case Situation.Chess(situation) => v.winner(situation)
+      case _                          => sys.error("Not passed Chess objects")
+    }
+
+    @nowarn def specialEnd(situation: Situation): Boolean = situation match {
+      case Situation.Chess(situation) => v.specialEnd(situation)
+      case _                          => sys.error("Not passed Chess objects")
+    }
+
+    @nowarn def specialDraw(situation: Situation): Boolean = situation match {
+      case Situation.Chess(situation) => v.specialDraw(situation)
+      case _                          => sys.error("Not passed Chess objects")
+    }
+
+    def hasMoveEffects: Boolean = v.hasMoveEffects
+
+    def addVariantEffect(move: Move): Move = move match {
+      case Move.Chess(move) => Move.Chess(v.addVariantEffect(move))
+      case _                => sys.error("Not passed Chess objects")
     }
 
     def valid(board: Board, strict: Boolean): Boolean = board match {
@@ -216,6 +238,7 @@ object Variant {
     def exotic: Boolean = v.exotic
 
     def initialFen: FEN = format.Forsyth.initial(GameLib.Draughts())
+    def startColor: Color = v.startColor
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = promotion match {
       case Some(Role.DraughtsPromotableRole(pr)) => v.isValidPromotion(pr.some)
@@ -228,6 +251,27 @@ object Variant {
       case _                             => sys.error("Not passed Draughts objects")
     }
 
+    def winner(situation: Situation): Option[Color] = situation match {
+      case Situation.Draughts(situation) => v.winner(situation)
+      case _                             => sys.error("Not passed Draughts objects")
+    }
+
+    @nowarn def specialEnd(situation: Situation): Boolean = situation match {
+      case Situation.Draughts(situation) => v.specialEnd(situation)
+      case _                             => sys.error("Not passed Draughts objects")
+    }
+
+    @nowarn def specialDraw(situation: Situation): Boolean = situation match {
+      case Situation.Draughts(situation) => v.specialDraw(situation)
+      case _                             => sys.error("Not passed Draughts objects")
+    }
+
+    def hasMoveEffects: Boolean = v.hasMoveEffects
+
+    def addVariantEffect(move: Move): Move = move match {
+      case Move.Draughts(move) => Move.Draughts(v.addVariantEffect(move))
+      case _                   => sys.error("Not passed Draughts objects")
+    }
     def valid(board: Board, strict: Boolean): Boolean = board match {
       case Board.Draughts(board) => v.valid(board, strict)
       case _                     => sys.error("Not passed Draughts objects")
