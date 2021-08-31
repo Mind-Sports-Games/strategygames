@@ -1,128 +1,140 @@
-package chess
+package strategygames
 
 sealed trait Role {
   val forsyth: Char
-  lazy val forsythUpper: Char = forsyth.toUpper
-  lazy val pgn: Char          = forsythUpper
-  lazy val name               = toString.toLowerCase
-  val projection: Boolean
-  val dirs: Directions
-  def dir(from: Pos, to: Pos): Option[Direction]
-}
-sealed trait PromotableRole extends Role
-
-/** Promotable in antichess.
-  */
-case object King extends PromotableRole {
-  val forsyth                 = 'k'
-  val dirs: Directions        = Queen.dirs
-  def dir(from: Pos, to: Pos) = None
-  val projection              = false
+  //draughts.Role.pdn will be referred to by pgn from this point
+  val pgn: Char
+  val name: String
+  val binaryInt: Int
+  def toString(): String
 }
 
-case object Queen extends PromotableRole {
-  val forsyth                 = 'q'
-  val dirs: Directions        = Rook.dirs ::: Bishop.dirs
-  def dir(from: Pos, to: Pos) = Rook.dir(from, to) orElse Bishop.dir(from, to)
-  val projection              = true
-}
-case object Rook extends PromotableRole {
-  val forsyth          = 'r'
-  val dirs: Directions = List(_.up, _.down, _.left, _.right)
-  def dir(from: Pos, to: Pos) =
-    if (to ?| from)
-      Option(if (to ?^ from) (_.up) else (_.down))
-    else if (to ?- from)
-      Option(if (to ?< from) (_.left) else (_.right))
-    else None
-  val projection = true
-}
-case object Bishop extends PromotableRole {
-  val forsyth          = 'b'
-  val dirs: Directions = List(_.upLeft, _.upRight, _.downLeft, _.downRight)
-  def dir(from: Pos, to: Pos) =
-    if (to onSameDiagonal from)
-      Option(if (to ?^ from) {
-        if (to ?< from) (_.upLeft) else (_.upRight)
-      } else {
-        if (to ?< from) (_.downLeft) else (_.downRight)
-      })
-    else None
-  val projection = true
-}
-case object Knight extends PromotableRole {
-  val forsyth = 'n'
-  val dirs: Directions = List(
-    p => Pos.at(p.file.index - 1, p.rank.index + 2),
-    p => Pos.at(p.file.index - 1, p.rank.index - 2),
-    p => Pos.at(p.file.index + 1, p.rank.index + 2),
-    p => Pos.at(p.file.index + 1, p.rank.index - 2),
-    p => Pos.at(p.file.index - 2, p.rank.index + 1),
-    p => Pos.at(p.file.index - 2, p.rank.index - 1),
-    p => Pos.at(p.file.index + 2, p.rank.index + 1),
-    p => Pos.at(p.file.index + 2, p.rank.index - 1)
-  )
-  def dir(from: Pos, to: Pos) = None
-  val projection              = false
-}
-case object Pawn extends Role {
-  val forsyth                 = 'p'
-  val dirs: Directions        = Nil
-  def dir(from: Pos, to: Pos) = None
-  val projection              = false
-}
-case object LOAChecker extends Role {
-  val forsyth                 = 'l'
-  val dirs: Directions        = Queen.dirs
-  def dir(from: Pos, to: Pos) = Queen.dir(from, to)
-  val projection              = false
+sealed trait PromotableRole extends Role {
+  // TODO: These functions lie, but we'll have to get over it until
+  //       we find the right pattern
+  def toChess: chess.PromotableRole
+  def toDraughts: draughts.PromotableRole
 }
 
 object Role {
 
-  val all: List[Role]                     = List(King, Queen, Rook, Bishop, Knight, Pawn, LOAChecker)
-  val allPromotable: List[PromotableRole] = List(Queen, Rook, Bishop, Knight, King)
-  val allByForsyth: Map[Char, Role] = all map { r =>
-    (r.forsyth, r)
-  } toMap
-  val allByPgn: Map[Char, Role] = all map { r =>
-    (r.pgn, r)
-  } toMap
-  val allByName: Map[String, Role] = all map { r =>
-    (r.name, r)
-  } toMap
-  val allPromotableByName: Map[String, PromotableRole] =
-    allPromotable map { r =>
-      (r.toString, r)
-    } toMap
-  val allPromotableByForsyth: Map[Char, PromotableRole] =
-    allPromotable map { r =>
-      (r.forsyth, r)
-    } toMap
-  val allPromotableByPgn: Map[Char, PromotableRole] =
-    allPromotable map { r =>
-      (r.pgn, r)
-    } toMap
+  final case class ChessRole(r: chess.Role) extends Role {
+    val forsyth = r.forsyth
+    val pgn = r.pgn
+    val binaryInt = r.binaryInt
+    val name = r.name
+    override def toString() = r.name
+  }
 
-  def forsyth(c: Char): Option[Role] = allByForsyth get c
+  final case class DraughtsRole(r: draughts.Role) extends Role {
+    val forsyth = r.forsyth
+    val pgn = r.pdn
+    val binaryInt = r.binaryInt
+    val name = r.name
+    override def toString() = r.name
+  }
 
-  def promotable(c: Char): Option[PromotableRole] =
-    allPromotableByForsyth get c
+  final case class ChessPromotableRole(r: chess.PromotableRole) extends PromotableRole {
+    val forsyth = r.forsyth
+    val pgn = r.pgn
+    val binaryInt = r.binaryInt
+    val name = r.name
+    override def toString() = r.name
+    def toChess = r
+    def toDraughts: draughts.PromotableRole = sys.error("Not implemented for chess")
+  }
 
-  def promotable(name: String): Option[PromotableRole] =
-    allPromotableByName get name.capitalize
+  final case class DraughtsPromotableRole(r: draughts.PromotableRole) extends PromotableRole {
+    val forsyth = r.forsyth
+    val pgn = r.pdn
+    val binaryInt = r.binaryInt
+    val name = r.name
+    override def toString() = r.name
+    def toDraughts = r
+    def toChess: chess.PromotableRole = sys.error("Not implemented for draughts")
+  }
 
-  def promotable(name: Option[String]): Option[PromotableRole] =
-    name flatMap promotable
+  def all(lib: GameLib): List[Role] = lib match {
+    case GameLib.Draughts() => draughts.Role.all.map(DraughtsRole)
+    case GameLib.Chess()    => chess.Role.all.map(ChessRole)
+  }
 
-  def valueOf(r: Role): Option[Int] =
-    r match {
-      case Pawn   => Option(1)
-      case Knight => Option(3)
-      case Bishop => Option(3)
-      case Rook   => Option(5)
-      case Queen  => Option(9)
-      case King   => None
-      case LOAChecker => None
-    }
+  def allPromotable(lib: GameLib): List[PromotableRole] = lib match {
+    case GameLib.Draughts() => draughts.Role.allPromotable.map(DraughtsPromotableRole)
+    case GameLib.Chess()    => chess.Role.allPromotable.map(ChessPromotableRole)
+  }
+
+  def allByForsyth(lib: GameLib): Map[Char, Role] = lib match {
+    case GameLib.Draughts() => draughts.Role.allByForsyth.map{case(f, r) => (f, DraughtsRole(r))}
+    case GameLib.Chess() => chess.Role.allByForsyth.map{case(f, r) => (f, ChessRole(r))}
+  }
+
+  def allByPgn(lib: GameLib): Map[Char, Role] = lib match {
+    case GameLib.Draughts() => draughts.Role.allByPdn.map{case(p, r) => (p, DraughtsRole(r))}
+    case GameLib.Chess() => chess.Role.allByPgn.map{case(p, r) => (p, ChessRole(r))}
+  }
+
+  def allByName(lib: GameLib): Map[String, Role] = lib match {
+    case GameLib.Draughts() => draughts.Role.allByName.map{case(n, r) => (n, DraughtsRole(r))}
+    case GameLib.Chess() => chess.Role.allByName.map{case(n, r) => (n, ChessRole(r))}
+  }
+
+  def allByBinaryInt(lib: GameLib): Map[Int, Role] = lib match {
+    case GameLib.Draughts() => draughts.Role.allByBinaryInt.map{case(n, r) => (n, DraughtsRole(r))}
+    case GameLib.Chess() => chess.Role.allByBinaryInt.map{case(n, r) => (n, ChessRole(r))}
+  }
+
+  def allPromotableByName(lib: GameLib): Map[String, PromotableRole] = lib match {
+    case GameLib.Draughts() => draughts.Role.allPromotableByName.map{case(n, r) => (n, DraughtsPromotableRole(r))}
+    case GameLib.Chess() => chess.Role.allPromotableByName.map{case(n, r) => (n, ChessPromotableRole(r))}
+  }
+
+  def allPromotableByForsyth(lib: GameLib): Map[Char, PromotableRole] = lib match {
+    case GameLib.Draughts() => draughts.Role.allPromotableByForsyth.map{case(f, r) => (f, DraughtsPromotableRole(r))}
+    case GameLib.Chess() => chess.Role.allPromotableByForsyth.map{case(f, r) => (f, ChessPromotableRole(r))}
+  }
+
+  def allPromotableByPgn(lib: GameLib): Map[Char, PromotableRole] = lib match {
+    case GameLib.Draughts() => draughts.Role.allPromotableByPdn.map{case(p, r) => (p, DraughtsPromotableRole(r))}
+    case GameLib.Chess() => chess.Role.allPromotableByPgn.map{case(p, r) => (p, ChessPromotableRole(r))}
+  }
+
+  def forsyth(lib: GameLib, c: Char): Option[Role] = lib match {
+    case GameLib.Draughts() => draughts.Role.forsyth(c).map(DraughtsRole)
+    case GameLib.Chess()    => chess.Role.forsyth(c).map(ChessRole)
+  }
+
+  def binaryInt(lib: GameLib, i: Int): Option[Role] = lib match {
+    case GameLib.Draughts() => draughts.Role.binaryInt(i).map(DraughtsRole)
+    case GameLib.Chess()    => chess.Role.binaryInt(i).map(ChessRole)
+  }
+
+  def promotable(lib: GameLib, c: Char): Option[PromotableRole] = lib match {
+    case GameLib.Draughts() => draughts.Role.promotable(c).map(DraughtsPromotableRole)
+    case GameLib.Chess()    => chess.Role.promotable(c).map(ChessPromotableRole)
+  }
+
+  def promotable(lib: GameLib, name: String): Option[PromotableRole] = lib match {
+    case GameLib.Draughts() => draughts.Role.promotable(name).map(DraughtsPromotableRole)
+    case GameLib.Chess()    => chess.Role.promotable(name).map(ChessPromotableRole)
+  }
+
+  def promotable(lib: GameLib, name: Option[String]): Option[PromotableRole] = lib match {
+    case GameLib.Draughts() => draughts.Role.promotable(name).map(DraughtsPromotableRole)
+    case GameLib.Chess()    => chess.Role.promotable(name).map(ChessPromotableRole)
+  }
+
+  def pgnMoveToRole(lib: GameLib, c: Char): Role = lib match {
+    case GameLib.Draughts() => DraughtsRole(draughts.Role.pdnMoveToRole(c))
+    case GameLib.Chess()    => ChessRole(chess.Role.pgnMoveToRole(c))
+  }
+
+  def javaSymbolToRole(lib: GameLib, s: String): Role = lib match {
+    case GameLib.Draughts() => DraughtsRole(draughts.Role.javaSymbolToRole(s))
+    case GameLib.Chess()    => ChessRole(chess.Role.javaSymbolToRole(s))
+  }
+
+  def wrap(pr: chess.PromotableRole): PromotableRole = ChessPromotableRole(pr)
+  def wrap(pr: draughts.PromotableRole): PromotableRole = DraughtsPromotableRole(pr)
+
 }

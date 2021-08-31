@@ -1,216 +1,233 @@
-package chess
+package strategygames
 
 import cats.data.Validated
-import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
-import chess.format.pgn.San
-import chess.format.pgn.{ Parser, Reader, Tag, Tags }
-import chess.format.{ FEN, Forsyth, Uci }
+import variant.Variant
+import format.{ FEN, Uci }
 
-case class Replay(setup: Game, moves: List[MoveOrDrop], state: Game) {
+sealed abstract class Replay(val setup: Game, val moves: List[MoveOrDrop], val state: Game) {
 
   lazy val chronoMoves = moves.reverse
 
-  def addMove(moveOrDrop: MoveOrDrop) =
-    copy(
-      moves = moveOrDrop.left.map(_.applyVariantEffect) :: moves,
-      state = moveOrDrop.fold(state.apply, state.applyDrop)
-    )
-
   def moveAtPly(ply: Int): Option[MoveOrDrop] =
     chronoMoves lift (ply - 1 - setup.startedAtTurn)
+
+  // TODO: If we had a case class this would be automatic.
+  def copy(state: Game): Replay
+
 }
 
+//lots of methods not wrapped, due to differences of Traversable/Iterable, and FEN/String
 object Replay {
 
-  def apply(game: Game) = new Replay(game, Nil, game)
+  final case class Chess(r: chess.Replay) extends Replay(
+    Game.Chess(r.setup),
+    r.moves.map(m => m match {
+      case Left(m)  => Left(Move.Chess(m))
+      case Right(m) => Right(m)
+    }),
+    Game.Chess(r.state)
+  ){
+    def copy(state: Game): Replay = state match {
+      case Game.Chess(state) => Replay.wrap(r.copy(state=state))
+      case _ => sys.error("Unable to copy a chess replay with a non-chess state")
+    }
+  }
 
-  def apply(
-      moveStrs: Iterable[String],
-      initialFen: Option[FEN],
-      variant: chess.variant.Variant
-  ): Validated[String, Reader.Result] =
-    moveStrs.some.filter(_.nonEmpty) toValid "[replay] pgn is empty" andThen { nonEmptyMoves =>
-      Reader.moves(
-        nonEmptyMoves,
-        Tags(
-          List(
-            initialFen map { fen =>
-              Tag(_.FEN, fen.value)
-            },
-            variant.some.filterNot(_.standard) map { v =>
-              Tag(_.Variant, v.name)
-            }
-          ).flatten
-        )
-      )
+  final case class Draughts(r: draughts.Replay) extends Replay(
+    Game.Draughts(r.setup),
+    r.moves.map((m: draughts.Move) => Left(Move.Draughts(m))),
+    Game.Draughts(r.state)
+  ){
+    def copy(state: Game): Replay = state match {
+      case Game.Draughts(state) => Replay.wrap(r.copy(state=state))
+      case _ => sys.error("Unable to copy a draughts replay with a non-draughts state")
+    }
+  }
+
+  def apply(lib: GameLib, setup: Game, moves: List[MoveOrDrop], state: Game): Replay =
+    (lib, setup, state) match {
+      case (GameLib.Draughts(), Game.Draughts(setup), Game.Draughts(state))
+        => Draughts(draughts.Replay(setup, moves.map(Move.toDraughts), state))
+      case (GameLib.Chess(), Game.Chess(setup), Game.Chess(state))
+        => Chess(chess.Replay(setup, moves.map(Move.toChess), state))
+      case _ => sys.error("Mismatched gamelib types 5")
     }
 
-  private def recursiveGames(game: Game, sans: List[San]): Validated[String, List[Game]] =
-    sans match {
-      case Nil => valid(Nil)
-      case san :: rest =>
-        san(game.situation) flatMap { moveOrDrop =>
-          val newGame = moveOrDrop.fold(game.apply, game.applyDrop)
-          recursiveGames(newGame, rest) map { newGame :: _ }
-        }
-    }
+  // TODO: I don't think this is quite correct, let's see if it's used.
+  // def apply(game: Game) = new Replay(game, Nil, game)
 
   def games(
-      moveStrs: Iterable[String],
-      initialFen: Option[FEN],
-      variant: chess.variant.Variant
-  ): Validated[String, List[Game]] =
-    Parser.moves(moveStrs, variant) andThen { moves =>
-      val game = makeGame(variant, initialFen)
-      recursiveGames(game, moves.value) map { game :: _ }
-    }
+    lib: GameLib,
+    moveStrs: Iterable[String],
+    initialFen: Option[FEN],
+    variant: Variant
+  ): Validated[String, List[Game]] = (lib, variant) match {
+    case (GameLib.Draughts(), Variant.Draughts(variant))
+      => draughts.Replay.games(moveStrs, initialFen.map(_.toDraughts), variant).toEither.map(
+        g => g.map(Game.Draughts)
+      ).toValidated
+    case (GameLib.Chess(), Variant.Chess(variant))
+      => chess.Replay.games(moveStrs, initialFen.map(_.toChess), variant).toEither.map(
+        g => g.map(Game.Chess)
+      ).toValidated
+    case _ => sys.error("Mismatched gamelib types 6")
+  }
 
   def gameMoveWhileValid(
-      moveStrs: Seq[String],
-      initialFen: FEN,
-      variant: chess.variant.Variant
-  ): (Game, List[(Game, Uci.WithSan)], Option[String]) = {
-
-    def mk(g: Game, moves: List[(San, String)]): (List[(Game, Uci.WithSan)], Option[String]) =
-      moves match {
-        case (san, sanStr) :: rest =>
-          san(g.situation).fold(
-            err => (Nil, err.some),
-            moveOrDrop => {
-              val newGame = moveOrDrop.fold(g.apply, g.applyDrop)
-              val uci     = moveOrDrop.fold(_.toUci, _.toUci)
-              mk(newGame, rest) match {
-                case (next, msg) => ((newGame, Uci.WithSan(uci, sanStr)) :: next, msg)
-              }
-            }
+    lib: GameLib,
+    moveStrs: Seq[String],
+    initialFen: FEN,
+    variant: Variant,
+    iteratedCapts: Boolean = false
+  ): (Game, List[(Game, Uci.WithSan)], Option[String]) = (lib, initialFen, variant) match {
+    case (GameLib.Draughts(), FEN.Draughts(initialFen), Variant.Draughts(variant)) =>
+      draughts.Replay.gameMoveWhileValid(moveStrs, initialFen, variant, iteratedCapts) match {
+        case (game, gameswithsan, message) =>
+          (
+            Game.Draughts(game),
+            gameswithsan.map { case (g, u) => (Game.Draughts(g), Uci.DraughtsWithSan(u)) },
+            message
           )
-        case _ => (Nil, None)
       }
-    val init = makeGame(variant, initialFen.some)
-    Parser
-      .moves(moveStrs, variant)
-      .fold(
-        err => List.empty[(Game, Uci.WithSan)] -> err.some,
-        moves => mk(init, moves.value zip moveStrs)
-      ) match {
-      case (games, err) => (init, games, err)
-    }
+    case (GameLib.Chess(), FEN.Chess(initialFen), Variant.Chess(variant)) =>
+      chess.Replay.gameMoveWhileValid(moveStrs, initialFen, variant) match {
+        case (game, gameswithsan, message) =>
+          (
+            Game.Chess(game),
+            gameswithsan.map { case (g, u) => (Game.Chess(g), Uci.ChessWithSan(u)) },
+            message
+          )
+      }
+    case _ => sys.error("Mismatched gamelib types 7")
   }
-
-  private def recursiveSituations(sit: Situation, sans: List[San]): Validated[String, List[Situation]] =
-    sans match {
-      case Nil => valid(Nil)
-      case san :: rest =>
-        san(sit) flatMap { moveOrDrop =>
-          val after = Situation(moveOrDrop.fold(_.finalizeAfter, _.finalizeAfter), !sit.color)
-          recursiveSituations(after, rest) map { after :: _ }
-        }
-    }
-
-  private def recursiveSituationsFromUci(
-      sit: Situation,
-      ucis: List[Uci]
-  ): Validated[String, List[Situation]] =
-    ucis match {
-      case Nil => valid(Nil)
-      case uci :: rest =>
-        uci(sit) andThen { moveOrDrop =>
-          val after = Situation(moveOrDrop.fold(_.finalizeAfter, _.finalizeAfter), !sit.color)
-          recursiveSituationsFromUci(after, rest) map { after :: _ }
-        }
-    }
-
-  private def recursiveReplayFromUci(replay: Replay, ucis: List[Uci]): Validated[String, Replay] =
-    ucis match {
-      case Nil => valid(replay)
-      case uci :: rest =>
-        uci(replay.state.situation) andThen { moveOrDrop =>
-          recursiveReplayFromUci(replay addMove moveOrDrop, rest)
-        }
-    }
-
-  private def initialFenToSituation(initialFen: Option[FEN], variant: chess.variant.Variant): Situation = {
-    initialFen.flatMap(Forsyth.<<) | Situation(chess.variant.Standard)
-  } withVariant variant
 
   def boards(
-      moveStrs: Iterable[String],
-      initialFen: Option[FEN],
-      variant: chess.variant.Variant
-  ): Validated[String, List[Board]] = situations(moveStrs, initialFen, variant) map (_ map (_.board))
+    lib: GameLib,
+    moveStrs: Iterable[String],
+    initialFen: Option[FEN],
+    variant: Variant,
+    finalSquare: Boolean = false
+  ): Validated[String, List[Board]] =
+    situations(lib, moveStrs, initialFen, variant, finalSquare) map (_ map (_.board))
 
   def situations(
-      moveStrs: Iterable[String],
-      initialFen: Option[FEN],
-      variant: chess.variant.Variant
-  ): Validated[String, List[Situation]] = {
-    val sit = initialFenToSituation(initialFen, variant)
-    Parser.moves(moveStrs, sit.board.variant) andThen { moves =>
-      recursiveSituations(sit, moves.value) map { sit :: _ }
-    }
+    lib: GameLib,
+    moveStrs: Iterable[String],
+    initialFen: Option[FEN],
+    variant: Variant,
+    finalSquare: Boolean = false
+  ): Validated[String, List[Situation]] = (lib, variant) match {
+    case (GameLib.Draughts(), Variant.Draughts(variant)) =>
+      draughts.Replay.situations(moveStrs, initialFen.map(_.toDraughts), variant, finalSquare)
+        .toEither
+        .map(s => s.map(Situation.Draughts))
+        .toValidated
+    case (GameLib.Chess(), Variant.Chess(variant)) =>
+      chess.Replay.situations(moveStrs, initialFen.map(_.toChess), variant)
+        .toEither
+        .map(s => s.map(Situation.Chess))
+        .toValidated
+    case _ => sys.error("Mismatched gamelib types 8")
   }
 
+  def draughtsUcis(ucis: List[Uci]): List[draughts.format.Uci] =
+    ucis.flatMap(u =>
+      u match {
+        case u: Uci.Draughts => Some(u.unwrap)
+        case _               => None
+      }
+    )
+
+  def chessUcis(ucis: List[Uci]): List[chess.format.Uci] =
+    ucis.flatMap(u =>
+      u match {
+        case u: Uci.Chess => Some(u.unwrap)
+        case _            => None
+      }
+    )
+
   def boardsFromUci(
-      moves: List[Uci],
-      initialFen: Option[FEN],
-      variant: chess.variant.Variant
-  ): Validated[String, List[Board]] = situationsFromUci(moves, initialFen, variant) map (_ map (_.board))
+    lib: GameLib,
+    moves: List[Uci],
+    initialFen: Option[FEN],
+    variant: Variant,
+    finalSquare: Boolean = false
+  ): Validated[String, List[Board]] = (lib, variant) match {
+    case (GameLib.Draughts(), Variant.Draughts(variant)) =>
+      draughts.Replay.boardsFromUci(
+        draughtsUcis(moves),
+        initialFen.map(_.toDraughts),
+        variant,
+        finalSquare
+      ).toEither
+        .map(b => b.map(Board.Draughts))
+        .toValidated
+    case (GameLib.Chess(), Variant.Chess(variant))
+      => chess.Replay.boardsFromUci(chessUcis(moves), initialFen.map(_.toChess), variant)
+        .toEither
+        .map(b => b.map(Board.Chess))
+        .toValidated
+    case _ => sys.error("Mismatched gamelib types 8a")
+  }
 
   def situationsFromUci(
-      moves: List[Uci],
-      initialFen: Option[FEN],
-      variant: chess.variant.Variant
-  ): Validated[String, List[Situation]] = {
-    val sit = initialFenToSituation(initialFen, variant)
-    recursiveSituationsFromUci(sit, moves) map { sit :: _ }
+    lib: GameLib,
+    moves: List[Uci],
+    initialFen: Option[FEN],
+    variant: Variant,
+    finalSquare: Boolean = false
+  ): Validated[String, List[Situation]] = (lib, variant) match {
+    case (GameLib.Draughts(), Variant.Draughts(variant)) =>
+      draughts.Replay.situationsFromUci(draughtsUcis(moves), initialFen.map(_.toDraughts), variant, finalSquare)
+        .toEither
+        .map(s => s.map(Situation.Draughts))
+        .toValidated
+    case (GameLib.Chess(), Variant.Chess(variant)) =>
+      chess.Replay.situationsFromUci(chessUcis(moves), initialFen.map(_.toChess), variant)
+        .toEither
+        .map(s => s.map(Situation.Chess))
+        .toValidated
+    case _ => sys.error("Mismatched gamelib types 9")
   }
 
   def apply(
-      moves: List[Uci],
-      initialFen: Option[FEN],
-      variant: chess.variant.Variant
-  ): Validated[String, Replay] =
-    recursiveReplayFromUci(Replay(makeGame(variant, initialFen)), moves)
+    lib: GameLib,
+    moves: List[Uci],
+    initialFen: Option[FEN],
+    variant: Variant,
+    finalSquare: Boolean = false
+  ): Validated[String, Replay] = (lib, variant) match {
+    case (GameLib.Draughts(), Variant.Draughts(variant)) =>
+      draughts.Replay.apply(draughtsUcis(moves), initialFen.map(_.toDraughts), variant, finalSquare)
+        .toEither
+        .map(r => Replay.Draughts(r))
+        .toValidated
+    case (GameLib.Chess(), Variant.Chess(variant)) =>
+      chess.Replay.apply(chessUcis(moves), initialFen.map(_.toChess), variant)
+        .toEither
+        .map(r => Replay.Chess(r))
+        .toValidated
+    case _ => sys.error("Mismatched gamelib types 10")
+  }
 
   def plyAtFen(
-      moveStrs: Iterable[String],
-      initialFen: Option[FEN],
-      variant: chess.variant.Variant,
-      atFen: FEN
-  ): Validated[String, Int] =
-    if (Forsyth.<<@(variant, atFen).isEmpty) invalid(s"Invalid FEN $atFen")
-    else {
-
-      // we don't want to compare the full move number, to match transpositions
-      def truncateFen(fen: FEN) = fen.value.split(' ').take(4) mkString " "
-      val atFenTruncated        = truncateFen(atFen)
-      def compareFen(fen: FEN)  = truncateFen(fen) == atFenTruncated
-
-      def recursivePlyAtFen(sit: Situation, sans: List[San], ply: Int): Validated[String, Int] =
-        sans match {
-          case Nil => invalid(s"Can't find $atFenTruncated, reached ply $ply")
-          case san :: rest =>
-            san(sit) flatMap { moveOrDrop =>
-              val after = moveOrDrop.fold(_.finalizeAfter, _.finalizeAfter)
-              val fen   = Forsyth >> Game(Situation(after, Color.fromPly(ply)), turns = ply)
-              if (compareFen(fen)) Validated.valid(ply)
-              else recursivePlyAtFen(Situation(after, !sit.color), rest, ply + 1)
-            }
-        }
-
-      val sit = initialFen.flatMap {
-        Forsyth.<<@(variant, _)
-      } | Situation(variant)
-
-      Parser.moves(moveStrs, sit.board.variant) andThen { moves =>
-        recursivePlyAtFen(sit, moves.value, 1)
-      }
-    }
-
-  private def makeGame(variant: chess.variant.Variant, initialFen: Option[FEN]): Game = {
-    val g = Game(variant.some, initialFen)
-    g.copy(startedAtTurn = g.turns)
+    lib: GameLib,
+    moveStrs: Iterable[String],
+    initialFen: Option[FEN],
+    variant: Variant,
+    atFen: FEN
+  ): Validated[String, Int] = (lib, variant, atFen) match {
+    case (GameLib.Draughts(), Variant.Draughts(variant), FEN.Draughts(atFen))
+      => draughts.Replay.plyAtFen(moveStrs, initialFen.map(_.toDraughts), variant, atFen)
+    case (GameLib.Chess(), Variant.Chess(variant), FEN.Chess(atFen))
+      => chess.Replay.plyAtFen(moveStrs, initialFen.map(_.toChess), variant, atFen)
+    case _ => sys.error("Mismatched gamelib types 10")
   }
+
+
+
+  def wrap(r: chess.Replay) = Chess(r)
+  def wrap(r: draughts.Replay) = Draughts(r)
 }

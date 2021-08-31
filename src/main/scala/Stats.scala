@@ -1,4 +1,4 @@
-package chess
+package strategygames
 
 // Welford's numerically stable online variance.
 //

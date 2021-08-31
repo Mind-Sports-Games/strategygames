@@ -1,4 +1,4 @@
-package chess
+package strategygames.chess
 
 import Pos._
 
@@ -17,7 +17,7 @@ class LOACheckerTest extends ChessTest {
         C3,
         E5,
         C5,
-        E3,
+        E3
       )
     }
 
@@ -25,7 +25,7 @@ class LOACheckerTest extends ChessTest {
       pieceMoves(loachecker, A1) must bePoss(
         A2,
         B1,
-        B2,
+        B2
       )
     }
 
@@ -44,7 +44,7 @@ L   L  L
         B4,
         E7,
         C2,
-        B7,
+        B7
       )
     }
 
@@ -64,7 +64,7 @@ l
         E7,
         C2,
         G6,
-        B7,
+        B7
       )
     }
 
@@ -80,7 +80,7 @@ l
     L  L
 """
       board destsFrom E4 must bePoss(
-        C2,
+        C2
       )
     }
 
@@ -100,7 +100,7 @@ l
         E1,
         C2,
         G6,
-        H1,
+        H1
       )
     }
   }

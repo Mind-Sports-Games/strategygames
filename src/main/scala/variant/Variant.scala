@@ -1,267 +1,343 @@
-package chess
-package variant
+package strategygames.variant
 
 import cats.data.Validated
 import cats.syntax.option._
 import scala.annotation.nowarn
 
-import chess.format.FEN
+import strategygames._
+import strategygames.format.FEN
 
 // Correctness depends on singletons for each variant ID
-abstract class Variant private[variant] (
+abstract class Variant(
     val id: Int,
     val key: String,
     val name: String,
     val shortName: String,
     val title: String,
-    val standardInitialPosition: Boolean
+    val standardInitialPosition: Boolean,
+    val gameType: Option[Int] = None
+    //not handling draughts.boardSize... (yet)
 ) {
+
+  def toChess: chess.variant.Variant
+  def toDraughts: draughts.variant.Variant
 
   def pieces: Map[Pos, Piece]
 
-  def standard      = this == Standard
-  def chess960      = this == Chess960
-  def fromPosition  = this == FromPosition
-  def kingOfTheHill = this == KingOfTheHill
-  def threeCheck    = this == ThreeCheck
-  def antichess     = this == Antichess
-  def atomic        = this == Atomic
-  def horde         = this == Horde
-  def racingKings   = this == RacingKings
-  def crazyhouse    = this == Crazyhouse
-  def linesOfAction = this == LinesOfAction
+  // An abstraction leak, we probably won't need this long term
+  // but in the short term it helps us with the port.
+  def standard: Boolean
+  def chess960: Boolean
+  def fromPosition: Boolean
+  def kingOfTheHill: Boolean
+  def threeCheck: Boolean
+  def antichess: Boolean
+  def atomic: Boolean
+  def horde: Boolean
+  def racingKings: Boolean
+  def crazyhouse: Boolean
+  def linesOfAction: Boolean
 
-  def exotic = !standard
+  def draughtsStandard: Boolean
+  def frisian: Boolean
+  def frysk: Boolean
+  def antidraughts: Boolean
+  def breakthrough: Boolean
+  def russian: Boolean
+  def brazilian: Boolean
+  def draughtsFromPosition: Boolean
 
-  def allowsCastling = !castles.isEmpty
+  def standardVariant: Boolean
+  def fromPositionVariant: Boolean
+  def frisianVariant: Boolean
 
-  protected val backRank = Vector(Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook)
+  def exotic: Boolean
 
-  def castles: Castles = Castles.all
+  def initialFen: FEN
+  def startColor: Color
 
-  def initialFen: FEN = format.Forsyth.initial
-  def startColor: Color = White
+  def isValidPromotion(promotion: Option[PromotableRole]): Boolean
 
-  def isValidPromotion(promotion: Option[PromotableRole]) =
-    promotion match {
-      case None                                 => true
-      case Some(Queen | Rook | Knight | Bishop) => true
-      case _                                    => false
-    }
-
-  def validMoves(situation: Situation): Map[Pos, List[Move]] =
-    situation.actors
-      .collect {
-        case actor if actor.moves.nonEmpty => actor.pos -> actor.moves
-      }
-      .to(Map)
-
-  // Optimised for performance
-  def pieceThreatened(board: Board, color: Color, to: Pos, filter: Piece => Boolean = _ => true): Boolean = {
-    board.pieces exists {
-      case (pos, piece) if piece.color == color && filter(piece) && piece.eyes(pos, to) =>
-        (!piece.role.projection) || piece.role.dir(pos, to).exists {
-          longRangeThreatens(board, pos, _, to)
-        }
-      case _ => false
-    }
-  }
-
-  def kingThreatened(board: Board, color: Color, to: Pos, filter: Piece => Boolean = _ => true) =
-    pieceThreatened(board, color, to, filter)
-
-  def kingSafety(m: Move, filter: Piece => Boolean, kingPos: Option[Pos]): Boolean =
-    ! {
-      kingPos exists { kingThreatened(m.after, !m.color, _, filter) }
-    }
-
-  def kingSafety(a: Actor, m: Move): Boolean =
-    kingSafety(
-      m,
-      if ((a.piece is King) || a.check) (_ => true) else (_.role.projection),
-      if (a.piece.role == King) None else a.board kingPosOf a.color
-    )
-
-  def longRangeThreatens(board: Board, p: Pos, dir: Direction, to: Pos): Boolean =
-    dir(p) exists { next =>
-      next == to || (!board.pieces.contains(next) && longRangeThreatens(board, next, dir, to))
-    }
-
-  def move(
-      situation: Situation,
-      from: Pos,
-      to: Pos,
-      promotion: Option[PromotableRole]
-  ): Validated[String, Move] = {
-
-    // Find the move in the variant specific list of valid moves
-    def findMove(from: Pos, to: Pos) = situation.moves get from flatMap (_.find(_.dest == to))
-
-    for {
-      actor <- situation.board.actors get from toValid "No piece on " + from
-      _ <-
-        if (actor is situation.color) Validated.valid(actor)
-        else Validated.invalid("Not my piece on " + from)
-      m1 <- findMove(from, to) toValid "Piece on " + from + " cannot move to " + to
-      m2 <- m1 withPromotion promotion toValid "Piece on " + from + " cannot promote to " + promotion
-      m3 <-
-        if (isValidPromotion(promotion)) Validated.valid(m2)
-        else Validated.invalid("Cannot promote to " + promotion + " in this game mode")
-    } yield m3
-  }
-
-  def drop(situation: Situation, role: Role, pos: Pos): Validated[String, Drop] =
-    Validated.invalid(s"$this variant cannot drop $situation $role $pos")
-
-  def staleMate(situation: Situation): Boolean = !situation.check && situation.moves.isEmpty
-
-  def checkmate(situation: Situation) = situation.check && situation.moves.isEmpty
+  def checkmate(situation: Situation): Boolean
 
   // In most variants, the winner is the last player to have played and there is a possibility of either a traditional
   // checkmate or a variant end condition
-  def winner(situation: Situation): Option[Color] =
-    if (situation.checkMate || specialEnd(situation)) Option(!situation.color) else None
+  def winner(situation: Situation): Option[Color]
 
-  @nowarn def specialEnd(situation: Situation) = false
+  @nowarn def specialEnd(situation: Situation): Boolean
 
-  @nowarn def specialDraw(situation: Situation) = false
-
-  /** Returns the material imbalance in pawns (overridden in Antichess)
-    */
-  def materialImbalance(board: Board): Int =
-    board.pieces.values.foldLeft(0) { case (acc, Piece(color, role)) =>
-      Role.valueOf(role).fold(acc) { value =>
-        acc + value * color.fold(1, -1)
-      }
-    }
-
-  /** Returns true if neither player can win. The game should end immediately.
-    */
-  def isInsufficientMaterial(board: Board) = InsufficientMatingMaterial(board)
-
-  /** Returns true if the other player cannot win. This is relevant when the
-    * side to move times out or disconnects. Instead of losing on time,
-    * the game should be drawn.
-    */
-  def opponentHasInsufficientMaterial(situation: Situation) =
-    InsufficientMatingMaterial(situation.board, !situation.color)
+  @nowarn def specialDraw(situation: Situation): Boolean
 
   // Some variants have an extra effect on the board on a move. For example, in Atomic, some
   // pieces surrounding a capture explode
-  def hasMoveEffects = false
+  def hasMoveEffects: Boolean
 
   /** Applies a variant specific effect to the move. This helps decide whether a king is endangered by a move, for
     * example
     */
-  def addVariantEffect(move: Move): Move = move
+  def addVariantEffect(move: Move): Move
 
-  def fiftyMoves(history: History): Boolean = history.halfMoveClock >= 100
+  def valid(board: Board, strict: Boolean): Boolean
 
-  def isIrreversible(move: Move): Boolean =
-    (move.piece is Pawn) || move.captures || move.promotes || move.castles
-
-  /** Once a move has been decided upon from the available legal moves, the board is finalized
-    */
-  @nowarn def finalizeBoard(board: Board, uci: format.Uci, captured: Option[Piece]): Board = board
-
-  protected def pawnsOnPromotionRank(board: Board, color: Color) = {
-    board.pieces.exists {
-      case (pos, Piece(c, r)) if c == color && r == Pawn && pos.rank == color.promotablePawnRank => true
-      case _                                                                                     => false
-    }
-  }
-
-  protected def validSide(board: Board, strict: Boolean)(color: Color) = {
-    val roles = board rolesOf color
-    roles.count(_ == King) == 1 &&
-    (!strict || { roles.count(_ == Pawn) <= 8 && roles.lengthCompare(16) <= 0 }) &&
-    !pawnsOnPromotionRank(board, color)
-  }
-
-  def valid(board: Board, strict: Boolean) = Color.all forall validSide(board, strict)
-
-  val roles = List(Rook, Knight, King, Bishop, King, Queen, Pawn)
-
-  val promotableRoles: List[PromotableRole] = List(Queen, Rook, Bishop, Knight)
-
-  lazy val rolesByPgn: Map[Char, Role] = roles
-    .map { r =>
-      (r.pgn, r)
-    }
-    .to(Map)
-
-  lazy val rolesPromotableByPgn: Map[Char, PromotableRole] =
-    promotableRoles
-      .map { r =>
-        (r.pgn, r)
-      }
-      .to(Map)
-
-  def isUnmovedPawn(color: Color, pos: Pos) = pos.rank == color.fold(Rank.Second, Rank.Seventh)
+  val roles: List[Role]
 
   override def toString = s"Variant($name)"
 
   override def equals(that: Any): Boolean = this eq that.asInstanceOf[AnyRef]
 
   override def hashCode: Int = id
+
+  // TODO: this function lies, it can't always turn itself into a chess variant,
+  //       so sometimes it doesn't, and it calls sys.error instead. Yes. I know.
+  def chessVariant: chess.variant.Variant
+
+  def gameLib: GameLib
+
 }
 
 object Variant {
 
-  val all = List(
-    Standard,
-    Crazyhouse,
-    Chess960,
-    FromPosition,
-    KingOfTheHill,
-    ThreeCheck,
-    Antichess,
-    Atomic,
-    Horde,
-    RacingKings,
-    LinesOfAction
-  )
-  val byId = all map { v =>
+  case class Chess(v: chess.variant.Variant)
+      extends Variant(
+        id = v.id,
+        key = v.key,
+        name = v.name,
+        shortName = v.shortName,
+        title = v.title,
+        standardInitialPosition = v.standardInitialPosition
+      ) {
+
+    def toChess: chess.variant.Variant = v
+    def toDraughts = sys.error("Can't convert chess to draughts")
+
+    def pieces: Map[Pos, Piece] =
+      v.pieces.map { case (pos, piece) => (Pos.Chess(pos), Piece.Chess(piece)) }
+
+    def standard: Boolean      = v.standard
+    def chess960: Boolean      = v.chess960
+    def fromPosition: Boolean  = v.fromPosition
+    def kingOfTheHill: Boolean = v.kingOfTheHill
+    def threeCheck: Boolean    = v.threeCheck
+    def antichess: Boolean     = v.antichess
+    def atomic: Boolean        = v.atomic
+    def horde: Boolean         = v.horde
+    def racingKings: Boolean   = v.racingKings
+    def crazyhouse: Boolean    = v.crazyhouse
+    def linesOfAction: Boolean = v.linesOfAction
+
+    def draughtsStandard: Boolean     = false
+    def frisian: Boolean              = false
+    def frysk: Boolean                = false
+    def antidraughts: Boolean         = false
+    def breakthrough: Boolean         = false
+    def russian: Boolean              = false
+    def brazilian: Boolean            = false
+    def draughtsFromPosition: Boolean = false
+
+    def standardVariant: Boolean      = v.standard
+    def fromPositionVariant: Boolean  = v.fromPosition
+    def frisianVariant: Boolean       = false
+
+    def exotic: Boolean = v.exotic
+
+    def initialFen: FEN = format.Forsyth.initial(GameLib.Chess())
+    def startColor: Color = v.startColor
+
+    def isValidPromotion(promotion: Option[PromotableRole]): Boolean = promotion match {
+      case Some(Role.ChessPromotableRole(pr)) => v.isValidPromotion(pr.some)
+      case None                               => v.isValidPromotion(None)
+      case _                                  => sys.error("Not passed Chess objects")
+    }
+
+    def checkmate(situation: Situation): Boolean = situation match {
+      case Situation.Chess(situation) => v.checkmate(situation)
+      case _                          => sys.error("Not passed Chess objects")
+    }
+
+    def winner(situation: Situation): Option[Color] = situation match {
+      case Situation.Chess(situation) => v.winner(situation)
+      case _                          => sys.error("Not passed Chess objects")
+    }
+
+    @nowarn def specialEnd(situation: Situation): Boolean = situation match {
+      case Situation.Chess(situation) => v.specialEnd(situation)
+      case _                          => sys.error("Not passed Chess objects")
+    }
+
+    @nowarn def specialDraw(situation: Situation): Boolean = situation match {
+      case Situation.Chess(situation) => v.specialDraw(situation)
+      case _                          => sys.error("Not passed Chess objects")
+    }
+
+    def hasMoveEffects: Boolean = v.hasMoveEffects
+
+    def addVariantEffect(move: Move): Move = move match {
+      case Move.Chess(move) => Move.Chess(v.addVariantEffect(move))
+      case _                => sys.error("Not passed Chess objects")
+    }
+
+    def valid(board: Board, strict: Boolean): Boolean = board match {
+      case Board.Chess(board) => v.valid(board, strict)
+      case _                  => sys.error("Not passed Chess objects")
+    }
+
+    val roles: List[Role] = v.roles.map(Role.ChessRole)
+
+    override def equals(that: Any): Boolean = that match {
+      case Chess(v2) => v2.equals(v)
+      case _ => false
+    }
+
+    def chessVariant: chess.variant.Variant = v
+    def gameLib: GameLib = GameLib.Chess()
+
+  }
+
+  case class Draughts(v: draughts.variant.Variant)
+      extends Variant(
+        id = v.id,
+        key = v.key,
+        name = v.name,
+        shortName = v.shortName,
+        title = v.title,
+        standardInitialPosition = v.standardInitialPosition,
+        gameType = Option(v.gameType)
+      ) {
+
+    def toChess = sys.error("Can't convert draughts to chess")
+    def toDraughts = v
+
+    def pieces: Map[Pos, Piece] =
+      v.pieces.map { case (pos, piece) => (Pos.Draughts(pos), Piece.Draughts(piece)) }
+
+    def standard: Boolean      = false
+    def chess960: Boolean      = false
+    def fromPosition: Boolean  = false
+    def kingOfTheHill: Boolean = false
+    def threeCheck: Boolean    = false
+    def antichess: Boolean     = false
+    def atomic: Boolean        = false
+    def horde: Boolean         = false
+    def racingKings: Boolean   = false
+    def crazyhouse: Boolean    = false
+    def linesOfAction: Boolean = false
+
+    def draughtsStandard: Boolean     = v.standard
+    def frisian: Boolean              = v.frisian
+    def frysk: Boolean                = v.frysk
+    def antidraughts: Boolean         = v.antidraughts
+    def breakthrough: Boolean         = v.breakthrough
+    def russian: Boolean              = v.russian
+    def brazilian: Boolean            = v.brazilian
+    def draughtsFromPosition: Boolean = v.fromPosition
+
+    def standardVariant: Boolean      = v.standard
+    def fromPositionVariant: Boolean  = v.fromPosition
+    def frisianVariant: Boolean       = v.frisianVariant
+
+    def exotic: Boolean = v.exotic
+
+    def initialFen: FEN = format.Forsyth.initial(GameLib.Draughts())
+    def startColor: Color = v.startColor
+
+    def isValidPromotion(promotion: Option[PromotableRole]): Boolean = promotion match {
+      case Some(Role.DraughtsPromotableRole(pr)) => v.isValidPromotion(pr.some)
+      case None                                  => v.isValidPromotion(None)
+      case _                                     => sys.error("Not passed Draughts objects")
+    }
+
+    def checkmate(situation: Situation): Boolean = situation match {
+      case Situation.Draughts(situation) => v.checkmate(situation)
+      case _                             => sys.error("Not passed Draughts objects")
+    }
+
+    def winner(situation: Situation): Option[Color] = situation match {
+      case Situation.Draughts(situation) => v.winner(situation)
+      case _                             => sys.error("Not passed Draughts objects")
+    }
+
+    @nowarn def specialEnd(situation: Situation): Boolean = situation match {
+      case Situation.Draughts(situation) => v.specialEnd(situation)
+      case _                             => sys.error("Not passed Draughts objects")
+    }
+
+    @nowarn def specialDraw(situation: Situation): Boolean = situation match {
+      case Situation.Draughts(situation) => v.specialDraw(situation)
+      case _                             => sys.error("Not passed Draughts objects")
+    }
+
+    def hasMoveEffects: Boolean = v.hasMoveEffects
+
+    def addVariantEffect(move: Move): Move = move match {
+      case Move.Draughts(move) => Move.Draughts(v.addVariantEffect(move))
+      case _                   => sys.error("Not passed Draughts objects")
+    }
+    def valid(board: Board, strict: Boolean): Boolean = board match {
+      case Board.Draughts(board) => v.valid(board, strict)
+      case _                     => sys.error("Not passed Draughts objects")
+    }
+
+    val roles: List[Role] = v.roles.map(Role.DraughtsRole)
+
+    override def equals(that: Any): Boolean = that match {
+      case Draughts(v2) => v2.equals(v)
+      case _ => false
+    }
+
+    def chessVariant: chess.variant.Variant = sys.error("Unimplemented for Draughts")
+    def gameLib: GameLib = GameLib.Draughts()
+  }
+
+  def all(lib: GameLib): List[Variant] = lib match {
+    case GameLib.Draughts() => draughts.variant.Variant.all.map(Draughts)
+    case GameLib.Chess()    => chess.variant.Variant.all.map(Chess)
+  }
+
+  def byId(lib: GameLib) = all(lib) map { v =>
     (v.id, v)
   } toMap
-  val byKey = all map { v =>
+
+  def byKey(lib: GameLib) = all(lib) map { v =>
     (v.key, v)
   } toMap
 
-  val default = Standard
+  def default(lib: GameLib): Variant = lib match {
+    case GameLib.Draughts() => Draughts(draughts.variant.Variant.default)
+    case GameLib.Chess()    => Chess(chess.variant.Variant.default)
+  }
 
-  def apply(id: Int): Option[Variant]     = byId get id
-  def apply(key: String): Option[Variant] = byKey get key
-  def orDefault(id: Int): Variant         = apply(id) | default
-  def orDefault(key: String): Variant     = apply(key) | default
+  def apply(lib: GameLib, id: Int): Option[Variant]     = byId(lib) get id
+  def apply(lib: GameLib, key: String): Option[Variant] = byKey(lib) get key
+  def orDefault(lib: GameLib, id: Int): Variant         = apply(lib, id) | default(lib)
+  def orDefault(lib: GameLib, key: String): Variant     = apply(lib, key) | default(lib)
 
-  def byName(name: String): Option[Variant] =
-    all find (_.name.toLowerCase == name.toLowerCase)
+  def byName(lib: GameLib, name: String): Option[Variant] =
+    all(lib) find (_.name.toLowerCase == name.toLowerCase)
 
-  def exists(id: Int): Boolean = byId contains id
+  def exists(lib: GameLib, id: Int): Boolean = byId(lib) contains id
 
-  val openingSensibleVariants: Set[Variant] = Set(
-    chess.variant.Standard,
-    chess.variant.Crazyhouse,
-    chess.variant.ThreeCheck,
-    chess.variant.KingOfTheHill
-  )
+  def openingSensibleVariants(lib: GameLib): Set[Variant] = lib match {
+    case GameLib.Draughts() => draughts.variant.Variant.openingSensibleVariants.map(Draughts)
+    case GameLib.Chess()    => chess.variant.Variant.openingSensibleVariants.map(Chess)
+  }
 
-  val divisionSensibleVariants: Set[Variant] = Set(
-    chess.variant.Standard,
-    chess.variant.Chess960,
-    chess.variant.ThreeCheck,
-    chess.variant.KingOfTheHill,
-    chess.variant.FromPosition
-  )
+  def divisionSensibleVariants(lib: GameLib): Set[Variant] = lib match {
+    case GameLib.Draughts() => draughts.variant.Variant.divisionSensibleVariants.map(Draughts)
+    case GameLib.Chess()    => chess.variant.Variant.divisionSensibleVariants.map(Chess)
+  }
 
-  private[variant] def symmetricRank(rank: IndexedSeq[Role]): Map[Pos, Piece] =
-    (for (y <- Seq(Rank.First, Rank.Second, Rank.Seventh, Rank.Eighth); x <- File.all) yield {
-      Pos(x, y) -> (y match {
-        case Rank.First   => White - rank(x.index)
-        case Rank.Second  => White.pawn
-        case Rank.Seventh => Black.pawn
-        case Rank.Eighth  => Black - rank(x.index)
-      })
-    }).toMap
+  def libStandard(lib: GameLib): Variant = lib match {
+    case GameLib.Draughts() => Variant.Draughts(draughts.variant.Standard)
+    case GameLib.Chess()    => Variant.Chess(chess.variant.Standard)
+  }
+
+  def libFromPosition(lib: GameLib): Variant = lib match {
+    case GameLib.Draughts() => Variant.Draughts(draughts.variant.FromPosition)
+    case GameLib.Chess()    => Variant.Chess(chess.variant.FromPosition)
+  }
+
+
+  def wrap(v: chess.variant.Variant) = Chess(v)
+  def wrap(v: draughts.variant.Variant) = Draughts(v)
+
 }

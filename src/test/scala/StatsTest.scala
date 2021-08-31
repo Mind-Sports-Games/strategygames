@@ -1,8 +1,10 @@
-package chess
+package strategygames.chess
 
 import org.specs2.mutable.Specification
 
 class StatsTest extends Specification {
+
+  import strategygames.{ Stats, StatHolder }
 
   def realMean(elts: Seq[Float]): Float = elts.sum / elts.size
 

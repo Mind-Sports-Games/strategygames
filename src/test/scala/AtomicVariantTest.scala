@@ -1,9 +1,10 @@
-package chess
+package strategygames.chess
 
 import cats.syntax.option._
 
-import chess.variant.Atomic
-import chess.format.FEN
+import strategygames.Status
+import strategygames.chess.variant.Atomic
+import strategygames.chess.format.FEN
 
 class AtomicVariantTest extends ChessTest {
 

@@ -1,7 +1,7 @@
-package chess
+package strategygames.chess
 
-import chess.format.Visual.addNewLines
-import chess.Pos._
+import strategygames.chess.format.Visual.addNewLines
+import strategygames.chess.Pos._
 
 class PlayTest extends ChessTest {
 

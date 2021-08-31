@@ -1,13 +1,10 @@
-package chess
+package strategygames
 
-import cats.syntax.option.none
 import java.text.DecimalFormat
-
-import chess.Clock.Config
-
+import cats.syntax.option.none
 // All unspecified durations are expressed in seconds
 case class Clock(
-    config: Config,
+    config: Clock.Config,
     color: Color,
     players: Color.Map[ClockPlayer],
     timer: Option[Timestamp] = None,
@@ -208,6 +205,7 @@ object Clock {
         } yield Config(init, inc)
       case _ => none
     }
+  def readPdnConfig(str: String) = readPgnConfig(str)
 
   def apply(limit: Int, increment: Int): Clock = apply(Config(limit, increment))
 
@@ -215,7 +213,7 @@ object Clock {
     val player = ClockPlayer.withConfig(config)
     Clock(
       config = config,
-      color = White,
+      color = Color.White,
       players = Color.Map(player, player),
       timer = None
     )

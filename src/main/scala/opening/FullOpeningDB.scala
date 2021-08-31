@@ -1,52 +1,58 @@
-package chess
-package opening
+package strategygames.opening
 
 import cats.syntax.option._
 
-import chess.format.FEN
+import strategygames.GameLib
+import strategygames.format.FEN
 
 object FullOpeningDB {
 
-  private lazy val byFen: collection.Map[String, FullOpening] = {
-    FullOpeningPartA.db ++ FullOpeningPartB.db ++ FullOpeningPartC.db ++ FullOpeningPartD.db ++ FullOpeningPartE.db
-  }.view.map { o =>
-    o.fen -> o
-  }.toMap
-
-  def findByFen(fen: FEN): Option[FullOpening] =
-    fen.value.split(' ').take(4) match {
-      case Array(boardPocket, turn, castle, ep) =>
-        val board =
-          if (boardPocket.contains('[')) boardPocket.takeWhile('[' !=)
-          else if (boardPocket.count('/' ==) == 8) boardPocket.split('/').take(8).mkString("/")
-          else boardPocket
-        byFen get List(board, turn, castle, ep).mkString(" ")
-      case _ => None
-    }
-
-  val SEARCH_MAX_PLIES = 40
+  def findByFen(lib: GameLib, fen: FEN): Option[FullOpening] = (lib, fen) match {
+    case (GameLib.Draughts(), _)
+      => strategygames.draughts.opening.FullOpeningDB.findByFen(fen.value).map(
+        FullOpening.Draughts
+      ) 
+    case (GameLib.Chess(), FEN.Chess(fen))
+      => strategygames.chess.opening.FullOpeningDB.findByFen(fen).map(
+        FullOpening.Chess
+      )
+    case _ => sys.error("Mismatched gamelib types full opening db")
+  }
 
   // assumes standard initial FEN and variant
-  def search(moveStrs: Iterable[String]): Option[FullOpening.AtPly] =
-    chess.Replay
-      .situations(
-        moveStrs.take(SEARCH_MAX_PLIES).takeWhile(san => !san.contains('@')),
-        None,
-        variant.Standard
-      )
-      .toOption
-      .flatMap {
-        _.zipWithIndex.drop(1).foldRight(none[FullOpening.AtPly]) {
-          case ((situation, ply), None) =>
-            val fen = format.Forsyth.exportStandardPositionTurnCastlingEp(situation)
-            byFen get fen map (_ atPly ply)
-          case (_, found) => found
-        }
-      }
-
-  def searchInFens(fens: Vector[FEN]): Option[FullOpening] =
-    fens.foldRight(none[FullOpening]) {
-      case (fen, None) => findByFen(fen)
-      case (_, found)  => found
+  def search(lib: GameLib, moveStrs: Iterable[String]): Option[FullOpening.AtPly] =
+    lib match {
+      case GameLib.Draughts() => strategygames.draughts.opening.FullOpeningDB.search(
+        moveStrs
+      ).map(fo => FullOpening.AtPly(FullOpening.Draughts(fo.opening), fo.ply))
+      case GameLib.Chess()    => strategygames.chess.opening.FullOpeningDB.search(
+        moveStrs
+      ).map(fo => FullOpening.AtPly(FullOpening.Chess(fo.opening), fo.ply))
     }
+
+  private def draughtsFENs(fens: Vector[FEN]): Vector[strategygames.draughts.format.FEN] =
+    fens.flatMap(f =>
+      f match {
+        case f: FEN.Draughts => Some(f.f)
+        case _               => None
+      }
+    )
+
+  private def chessFENs(fens: Vector[FEN]): Vector[strategygames.chess.format.FEN] =
+    fens.flatMap(f =>
+      f match {
+        case f: FEN.Chess => Some(f.f)
+        case _            => None
+      }
+    )
+
+  def searchInFens(lib: GameLib, fens: Vector[FEN]): Option[FullOpening] = lib match {
+    case GameLib.Draughts() => strategygames.draughts.opening.FullOpeningDB.searchInFens(
+      draughtsFENs(fens).toList
+    ).map(FullOpening.Draughts)
+    case GameLib.Chess()    => strategygames.chess.opening.FullOpeningDB.searchInFens(
+      chessFENs(fens)
+    ).map(FullOpening.Chess)
+  }
+
 }

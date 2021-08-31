@@ -1,5 +1,6 @@
-package chess
+package strategygames
 package format.pgn
+import strategygames.Clock
 
 import org.joda.time.DateTimeZone
 import org.joda.time.format.DateTimeFormat
@@ -31,38 +32,59 @@ case class Tags(value: List[Tag]) extends AnyVal {
       str
     } flatMap Clock.readPgnConfig
 
-  def variant: Option[chess.variant.Variant] =
-    apply(_.Variant).map(_.toLowerCase).flatMap {
-      case "chess 960" | "fischerandom" | "fischerrandom" => chess.variant.Chess960.some
-      case name                                           => chess.variant.Variant byName name
+  def draughtsVariant: Option[strategygames.draughts.variant.Variant] =
+    apply(_.GameType).fold(apply(_.Variant) flatMap strategygames.draughts.variant.Variant.byName) {
+      case Tags.GameTypeRegex(t, _*) =>
+        strategygames.draughts.parseIntOption(t) match {
+          case Some(gameType) => strategygames.draughts.variant.Variant byGameType gameType
+          case _              => None
+        }
+      case _ => None
     }
+
+  def chessVariant: Option[strategygames.chess.variant.Variant] =
+    apply(_.Variant).map(_.toLowerCase).flatMap {
+      case "chess 960" | "fischerandom" | "fischerrandom" => strategygames.chess.variant.Chess960.some
+      case name                                           => strategygames.chess.variant.Variant byName name
+    }
+
+  // TODO: this will need to be tested. We'll want to look at the _actual_ values that
+  //       come in via these tags and ensure that the order we look at them is appropriate
+  def variant: Option[strategygames.variant.Variant] = chessVariant
+    .map(strategygames.variant.Variant.Chess)
+    .orElse(draughtsVariant.map(strategygames.variant.Variant.Draughts))
 
   def anyDate: Option[String] = apply(_.UTCDate) orElse apply(_.Date)
 
-  def year: Option[Int] =
-    anyDate flatMap {
-      case Tags.DateRegex(y, _, _) => y.toIntOption
-      case _                       => None
-    }
+  def year: Option[Int] = anyDate flatMap {
+    case Tags.DateRegex(y, _, _) => strategygames.draughts.parseIntOption(y)
+    case _                       => None
+  }
 
-  def fen: Option[format.FEN] = apply(_.FEN) map format.FEN.apply
+  def chessFen: Option[chess.format.FEN] = apply(_.FEN).map(strategygames.chess.format.FEN.apply)
+  def draughtsFen: Option[draughts.format.FEN] = apply(_.FEN).map(strategygames.draughts.format.FEN.apply)
+
+  def fen: Option[format.FEN] = 
+      variant match {
+        case Some(strategygames.variant.Variant.Draughts(_)) => draughtsFen.map(format.FEN.Draughts)
+        case Some(strategygames.variant.Variant.Chess(_)) => chessFen.map(format.FEN.Chess)
+      }
 
   def exists(which: Tag.type => TagType): Boolean =
     value.exists(_.name == which(Tag))
 
   def resultColor: Option[Option[Color]] =
-    apply(_.Result).filter("*" !=) map Color.fromResult
+    apply(_.Result).filter("*" !=).map(v => {strategygames.Color.fromResult(v)})
 
   def ++(tags: Tags) = tags.value.foldLeft(this)(_ + _)
 
   def +(tag: Tag) = Tags(value.filterNot(_.name == tag.name) :+ tag)
 
-  def sorted =
-    copy(
-      value = value.sortBy { tag =>
-        Tags.tagIndex.getOrElse(tag.name, 999)
-      }
-    )
+  def sorted = copy(
+    value = value.sortBy { tag =>
+      Tags.tagIndex.getOrElse(tag.name, 999)
+    }
+  )
 
   override def toString = sorted.value mkString "\n"
 }
@@ -82,7 +104,8 @@ object Tags {
   )
   val tagIndex: Map[TagType, Int] = sevenTagRoster.zipWithIndex.toMap
 
-  private val DateRegex = """(\d{4}|\?{4})\.(\d\d|\?\?)\.(\d\d|\?\?)""".r
+  private val DateRegex     = """(\d{4}|\?{4})\.(\d\d|\?\?)\.(\d\d|\?\?)""".r
+  private val GameTypeRegex = """([0-9]+)(,[WB],[0-9]+,[0-9]+,[ANS][0123](,[01])?)?""".r
 }
 
 object Tag {
@@ -104,6 +127,8 @@ object Tag {
   case object BlackClock      extends TagType
   case object WhiteElo        extends TagType
   case object BlackElo        extends TagType
+  case object WhiteRating     extends TagType
+  case object BlackRating     extends TagType
   case object WhiteRatingDiff extends TagType
   case object BlackRatingDiff extends TagType
   case object WhiteTitle      extends TagType
@@ -113,6 +138,8 @@ object Tag {
   case object Result          extends TagType
   case object FEN             extends TagType
   case object Variant         extends TagType
+  case object GameType        extends TagType
+  case object MicroMatch      extends TagType
   case object ECO             extends TagType
   case object Opening         extends TagType
   case object Termination     extends TagType
@@ -136,6 +163,8 @@ object Tag {
     BlackClock,
     WhiteElo,
     BlackElo,
+    WhiteRating,
+    BlackRating,
     WhiteRatingDiff,
     BlackRatingDiff,
     WhiteTitle,
@@ -145,29 +174,25 @@ object Tag {
     Result,
     FEN,
     Variant,
+    GameType,
+    MicroMatch,
     ECO,
     Opening,
     Termination,
     Annotator
   )
   val tagTypesByLowercase: Map[String, TagType] =
-    tagTypes
-      .map { t =>
-        t.lowercase -> t
-      }
-      .to(Map)
+    tagTypes.map { t => t.lowercase -> t }.to(Map)
 
-  def apply(name: String, value: Any): Tag =
-    new Tag(
-      name = tagType(name),
-      value = value.toString
-    )
+  def apply(name: String, value: Any): Tag = new Tag(
+    name = tagType(name),
+    value = value.toString
+  )
 
-  def apply(name: Tag.type => TagType, value: Any): Tag =
-    new Tag(
-      name = name(this),
-      value = value.toString
-    )
+  def apply(name: Tag.type => TagType, value: Any): Tag = new Tag(
+    name = name(this),
+    value = value.toString
+  )
 
   def tagType(name: String) =
     (tagTypesByLowercase get name.toLowerCase) | Unknown(name)

@@ -1,4 +1,6 @@
-package chess
+package strategygames.chess
+
+import strategygames.Clock
 
 import cats.data.Validated
 import cats.syntax.option._
@@ -6,9 +8,9 @@ import org.specs2.matcher.Matcher
 import org.specs2.matcher.ValidatedMatchers
 import org.specs2.mutable.Specification
 
-import chess.format.{ Forsyth, Visual }
-import chess.variant.Variant
-import chess.format.FEN
+import strategygames.chess.format.{ Forsyth, Visual }
+import strategygames.chess.variant.Variant
+import strategygames.chess.format.FEN
 
 trait ChessTest extends Specification with ValidatedMatchers {
 
@@ -17,11 +19,11 @@ trait ChessTest extends Specification with ValidatedMatchers {
   implicit def stringToBoardBuilder(str: String) =
     new {
 
-      def chess960: Board = makeBoard(str, chess.variant.Chess960)
+      def chess960: Board = makeBoard(str, strategygames.chess.variant.Chess960)
 
-      def kingOfTheHill: Board = makeBoard(str, chess.variant.KingOfTheHill)
+      def kingOfTheHill: Board = makeBoard(str, strategygames.chess.variant.KingOfTheHill)
 
-      def threeCheck: Board = makeBoard(str, chess.variant.ThreeCheck)
+      def threeCheck: Board = makeBoard(str, strategygames.chess.variant.ThreeCheck)
     }
 
   implicit def stringToSituationBuilder(str: String) =
@@ -88,14 +90,14 @@ trait ChessTest extends Specification with ValidatedMatchers {
   }
 
   def makeBoard(pieces: (Pos, Piece)*): Board =
-    Board(pieces toMap, History(), chess.variant.Standard)
+    Board(pieces toMap, History(), strategygames.chess.variant.Standard)
 
   def makeBoard(str: String, variant: Variant) =
     Visual << str withVariant variant
 
-  def makeBoard: Board = Board init chess.variant.Standard
+  def makeBoard: Board = Board init strategygames.chess.variant.Standard
 
-  def makeEmptyBoard: Board = Board empty chess.variant.Standard
+  def makeEmptyBoard: Board = Board empty strategygames.chess.variant.Standard
 
   def bePoss(poss: Pos*): Matcher[Option[Iterable[Pos]]] =
     beSome.like { case p =>

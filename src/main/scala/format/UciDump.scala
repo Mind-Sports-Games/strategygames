@@ -1,31 +1,42 @@
-package chess
-package format
+package strategygames.format
 
 import cats.data.Validated
 
-import chess.variant.Variant
+import strategygames.variant.Variant
+import strategygames.{ GameLib, MoveOrDrop, Move, Replay }
 
 object UciDump {
 
   // a2a4, b8c6
-  def apply(replay: Replay): List[String] =
-    replay.chronoMoves map move(replay.setup.board.variant)
+  def apply(lib: GameLib, replay: Replay): List[String] = (lib, replay) match {
+    case (GameLib.Draughts(), Replay.Draughts(replay))
+      => strategygames.draughts.format.UciDump.apply(replay)
+    case (GameLib.Chess(), Replay.Chess(replay))
+      => strategygames.chess.format.UciDump.apply(replay)
+    case _ => sys.error("Mismatched gamelib types 11")
+  }
 
   def apply(
-      moves: Seq[String],
-      initialFen: Option[FEN],
-      variant: Variant
-  ): Validated[String, List[String]] =
-    if (moves.isEmpty) Validated.valid(Nil)
-    else Replay(moves, initialFen, variant) andThen (_.valid) map apply
+    lib: GameLib,
+    moves: Seq[String],
+    initialFen: Option[FEN],
+    variant: Variant,
+    finalSquare: Boolean = false
+  ): Validated[String, List[String]] = (lib, variant) match {
+    case (GameLib.Draughts(), Variant.Draughts(variant))
+      => strategygames.draughts.format.UciDump.apply(moves, initialFen.map(_.toDraughts), variant, finalSquare)
+    case (GameLib.Chess(), Variant.Chess(variant))
+      => strategygames.chess.format.UciDump.apply(moves, initialFen.map(_.toChess), variant)
+    case _ => sys.error("Mismatched gamelib types 12")
+  }
 
-  def move(variant: Variant)(mod: MoveOrDrop): String =
-    mod match {
-      case Left(m) =>
-        m.castle.fold(m.toUci.uci) {
-          case ((kf, kt), (rf, _)) if kf == kt || variant.chess960 || variant.fromPosition => kf.key + rf.key
-          case ((kf, kt), _)                                                               => kf.key + kt.key
-        }
-      case Right(d) => d.toUci.uci
-    }
+  def move(lib: GameLib, variant: Variant)(mod: MoveOrDrop): String = (lib, variant, mod) match {
+    case (GameLib.Draughts(), Variant.Draughts(variant), Left(Move.Draughts(mod)))
+      => strategygames.draughts.format.UciDump.move(variant)(mod)
+    case (GameLib.Chess(), Variant.Chess(variant), Left(Move.Chess(mod)))
+      => strategygames.chess.format.UciDump.move(variant)(Left(mod))
+    case (GameLib.Chess(), Variant.Chess(variant), mod: strategygames.chess.Drop)
+      => strategygames.chess.format.UciDump.move(variant)(Right(mod)) 
+    case _ => sys.error("Mismatched gamelib types 13")
+  }
 }

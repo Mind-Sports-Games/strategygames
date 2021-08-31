@@ -1,4 +1,4 @@
-package chess
+package strategygames
 
 sealed abstract class Mode(val id: Int) {
 

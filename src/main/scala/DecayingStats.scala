@@ -1,4 +1,4 @@
-package chess
+package strategygames
 
 trait DecayingRecorder {
   def record(value: Float): DecayingStats

@@ -1,4 +1,4 @@
-package chess
+package strategygames.chess
 package opening
 
 import format.FEN

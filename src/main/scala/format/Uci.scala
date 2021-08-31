@@ -1,7 +1,7 @@
-package chess
-package format
+package strategygames.format
 
-import cats.data.Validated
+import strategygames._
+
 import cats.implicits._
 
 sealed trait Uci {
@@ -11,19 +11,31 @@ sealed trait Uci {
 
   def origDest: (Pos, Pos)
 
-  def apply(situation: Situation): Validated[String, MoveOrDrop]
+  // TODO: Again, unsafe but we'll get back to it.
+  def toChess: chess.format.Uci
+  def toDraughts: draughts.format.Uci
+
 }
+
 
 object Uci {
 
-  case class Move(
-      orig: Pos,
-      dest: Pos,
-      promotion: Option[PromotableRole] = None
+  sealed trait Chess {
+    def unwrap: chess.format.Uci
+  }
+  sealed trait Draughts {
+    def unwrap: draughts.format.Uci
+  }
+
+  abstract sealed class Move(
+    val orig: Pos,
+    val dest: Pos,
+    val promotion: Option[PromotableRole] = None,
+    val capture: Option[List[Pos]] = None
   ) extends Uci {
 
     def keys = orig.key + dest.key
-    def uci  = keys + promotionString
+    def uci: String
 
     def keysPiotr = orig.piotrStr + dest.piotrStr
     def piotr     = keysPiotr + promotionString
@@ -32,82 +44,181 @@ object Uci {
 
     def origDest = orig -> dest
 
-    def apply(situation: Situation) = situation.move(orig, dest, promotion) map Left.apply
+  }
+
+  final case class ChessMove(m: chess.format.Uci.Move) extends Move(
+    Pos.Chess(m.orig),
+    Pos.Chess(m.dest),
+    m.promotion.map(Role.ChessPromotableRole)
+  ) with Chess {
+    def uci = m.uci
+    val unwrap = m
+    def toChess = m
+    def toDraughts = sys.error("Can't make a draughts UCI from a chess UCI")
+  }
+
+  final case class DraughtsMove(m: draughts.format.Uci.Move) extends Move(
+    Pos.Draughts(m.orig),
+    Pos.Draughts(m.dest),
+    m.promotion.map(Role.DraughtsPromotableRole),
+    m.capture match {
+      case Some(capture) => Some(capture.map(Pos.Draughts))
+      case None          => None
+    }
+  ) with Draughts {
+    def uci = m.uci
+    val unwrap = m
+    def toDraughts = m
+    def toChess = sys.error("Can't make a chess UCI from a draughts UCI")
+  }
+
+  abstract sealed class Drop(
+    val pos: Pos,
+  ) extends Uci {
+    def origDest = pos -> pos
+
+  }
+
+  final case class ChessDrop(d: chess.format.Uci.Drop) extends Drop(Pos.Chess(d.pos)) with Chess {
+    def uci                  = d.uci
+    def piotr                = d.piotr
+    val unwrap = d
+    def toChess = d
+    def toDraughts = sys.error("Can't make a draughts UCI from a chess UCI")
+  }
+
+  def wrap(uci: chess.format.Uci): Uci = uci match {
+    case m: chess.format.Uci.Move => ChessMove(m)
+    case d: chess.format.Uci.Drop => ChessDrop(d)
+  }
+
+  def wrap(uci: draughts.format.Uci): Uci = uci match {
+    case m: draughts.format.Uci.Move => DraughtsMove(m)
   }
 
   object Move {
 
-    def apply(move: String): Option[Move] =
-      for {
-        orig <- Pos.fromKey(move take 2)
-        dest <- Pos.fromKey(move.slice(2, 4))
-        promotion = move lift 4 flatMap Role.promotable
-      } yield Move(orig, dest, promotion)
+    private def draughtsCaptures(captures: Option[List[Pos]]): Option[List[draughts.Pos]] =
+      captures match {
+        case Some(captures) => Some(captures.flatMap(c =>
+          c match {
+            case Pos.Draughts(c) => Some(c)
+            case _               => None
+          }
+        ))
+        case None => None
+      }
 
-    def piotr(move: String) =
-      for {
-        orig <- move.headOption flatMap Pos.piotr
-        dest <- move lift 1 flatMap Pos.piotr
-        promotion = move lift 2 flatMap Role.promotable
-      } yield Move(orig, dest, promotion)
+    def apply(lib: GameLib, orig: Pos, dest: Pos, promotion: Option[PromotableRole], capture: Option[List[Pos]] = None): Move =
+      (lib, orig, dest) match {
+        case (GameLib.Draughts(), Pos.Draughts(orig), Pos.Draughts(dest)) =>
+          DraughtsMove(draughts.format.Uci.Move.apply(
+            orig, dest, promotion.map(_.toDraughts), draughtsCaptures(capture)
+          ))
+        case (GameLib.Chess(), Pos.Chess(orig), Pos.Chess(dest)) =>
+          ChessMove(
+            chess.format.Uci.Move.apply(
+              orig, dest, promotion.map(_.toChess)
+            ))
+        case _ => sys.error("Mismatched gamelib types 23")
+      }
 
-    def fromStrings(origS: String, destS: String, promS: Option[String]) =
-      for {
-        orig <- Pos.fromKey(origS)
-        dest <- Pos.fromKey(destS)
-        promotion = Role promotable promS
-      } yield Move(orig, dest, promotion)
-  }
+    def apply(lib: GameLib, move: String): Option[Move] = lib match {
+      case GameLib.Draughts() => draughts.format.Uci.Move.apply(move).map(DraughtsMove)
+      case GameLib.Chess()    => chess.format.Uci.Move.apply(move).map(ChessMove)
+    }
 
-  case class Drop(role: Role, pos: Pos) extends Uci {
+    def piotr(lib: GameLib, move: String): Option[Move] = lib match {
+      case GameLib.Draughts() => draughts.format.Uci.Move.piotr(move).map(DraughtsMove)
+      case GameLib.Chess()    => chess.format.Uci.Move.piotr(move).map(ChessMove)
+    }
 
-    def uci = s"${role.pgn}@${pos.key}"
-
-    def piotr = s"${role.pgn}@${pos.piotrStr}"
-
-    def origDest = pos -> pos
-
-    def apply(situation: Situation) = situation.drop(role, pos) map Right.apply
+    def fromStrings(lib: GameLib, origS: String, destS: String, promS: Option[String]): Option[Move] = lib match {
+      case GameLib.Draughts()
+        => draughts.format.Uci.Move.fromStrings(origS, destS, promS).map(DraughtsMove)
+      case GameLib.Chess()
+        => chess.format.Uci.Move.fromStrings(origS, destS, promS).map(ChessMove)
+    }
   }
 
   object Drop {
 
-    def fromStrings(roleS: String, posS: String) =
-      for {
-        role <- Role.allByName get roleS
-        pos  <- Pos.fromKey(posS)
-      } yield Drop(role, pos)
+    def fromStrings(lib: GameLib, roleS: String, posS: String): Option[Drop] = lib match {
+      case GameLib.Draughts() => None
+      case GameLib.Chess()    => chess.format.Uci.Drop.fromStrings(roleS, posS).map(ChessDrop)
+    }
+
   }
 
-  case class WithSan(uci: Uci, san: String)
+  abstract sealed class WithSan(val uci: Uci, val san: String)
 
-  def apply(move: chess.Move) = Uci.Move(move.orig, move.dest, move.promotion)
+  final case class ChessWithSan(w: chess.format.Uci.WithSan) extends WithSan(
+    wrap(w.uci),
+    w.san
+  )
 
-  def apply(drop: chess.Drop) = Uci.Drop(drop.piece.role, drop.pos)
+  final case class DraughtsWithSan(w: draughts.format.Uci.WithSan) extends WithSan(
+    wrap(w.uci),
+    w.san
+  )
 
-  def apply(move: String): Option[Uci] =
-    if (move lift 1 contains '@') for {
-      role <- move.headOption flatMap Role.allByPgn.get
-      pos  <- Pos.fromKey(move.slice(2, 4))
-    } yield Uci.Drop(role, pos)
-    else Uci.Move(move)
+  object WithSan {
 
-  def piotr(move: String): Option[Uci] =
-    if (move lift 1 contains '@') for {
-      role <- move.headOption flatMap Role.allByPgn.get
-      pos  <- move lift 2 flatMap Pos.piotr
-    } yield Uci.Drop(role, pos)
-    else Uci.Move.piotr(move)
+    def apply(lib: GameLib, uci: Uci, san: String): WithSan = (lib, uci) match {
+      case (GameLib.Draughts(), Uci.DraughtsMove(uci))
+        => Uci.DraughtsWithSan(draughts.format.Uci.WithSan(uci, san))
+      case (GameLib.Chess(), u: Uci.Chess)
+        => Uci.ChessWithSan(chess.format.Uci.WithSan(u.unwrap, san))
+      case _ => sys.error("Mismatched gamelib types 24")
+    }
 
-  def readList(moves: String): Option[List[Uci]] =
-    moves.split(' ').toList.map(apply).sequence
+  }
+
+  //possibly wrong to handle Draughts.withCaptures likes this
+  def apply(lib: GameLib, move: strategygames.Move, withCaptures: Boolean = false): Uci.Move =
+    (lib, move) match {
+      case (GameLib.Draughts(), strategygames.Move.Draughts(move))
+        => DraughtsMove(draughts.format.Uci.apply(move, withCaptures))
+      case (GameLib.Chess(), strategygames.Move.Chess(move))
+        => ChessMove(chess.format.Uci.apply(move))
+      case _ => sys.error("Mismatched gamelib types 25")
+    }
+
+  def apply(lib: GameLib, drop: strategygames.chess.Drop) = lib match {
+    case GameLib.Draughts() => sys.error("Drop not implemented for Draughts")
+    case GameLib.Chess()    => ChessDrop(chess.format.Uci.apply(drop))
+  }
+
+  def apply(lib: GameLib, move: String): Option[Uci] = lib match {
+      case GameLib.Draughts() => draughts.format.Uci.apply(move).map(wrap)
+      case GameLib.Chess()    => chess.format.Uci.apply(move).map(wrap)
+  }
+
+  def piotr(lib: GameLib, move: String): Option[Uci] = lib match {
+      case GameLib.Draughts() => draughts.format.Uci.piotr(move).map(wrap)
+      case GameLib.Chess()    => chess.format.Uci.piotr(move).map(wrap)
+  }
+
+  def readList(lib: GameLib, moves: String): Option[List[Uci]] =
+    moves.split(' ').toList.map(apply(lib, _)).sequence
 
   def writeList(moves: List[Uci]): String =
     moves.map(_.uci) mkString " "
 
   def readListPiotr(moves: String): Option[List[Uci]] =
-    moves.split(' ').toList.map(piotr).sequence
+    moves.split('_') match {
+      case Array(lib, moves) =>
+        moves.split(' ').toList.map(piotr(GameLib(lib.toInt), _)).sequence
+      case _ => sys.error("No lib encoded into uci piotr")
+    }
 
   def writeListPiotr(moves: List[Uci]): String =
-    moves.map(_.piotr) mkString " "
+    (if (moves.length > 0) {
+      moves.head match {
+        case Uci.ChessMove(_)    => "0_"
+        case Uci.ChessDrop(_)    => "0_"
+        case Uci.DraughtsMove(_) => "1_"
+      }
+    } else "") + moves.map(_.piotr) mkString " "
+
 }

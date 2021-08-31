@@ -1,5 +1,6 @@
-package chess
-package format
+package strategygames.format
+
+import strategygames.GameLib
 
 case class UciCharPair(a: Char, b: Char) {
 
@@ -8,47 +9,28 @@ case class UciCharPair(a: Char, b: Char) {
 
 object UciCharPair {
 
-  import implementation._
-
-  def apply(uci: Uci): UciCharPair =
-    uci match {
-      case Uci.Move(orig, dest, None)       => UciCharPair(toChar(orig), toChar(dest))
-      case Uci.Move(orig, dest, Some(role)) => UciCharPair(toChar(orig), toChar(dest.file, role))
-      case Uci.Drop(role, pos) =>
-        UciCharPair(
-          toChar(pos),
-          dropRole2charMap.getOrElse(role, voidChar)
-        )
-    }
-
-  private[format] object implementation {
-
-    val charShift = 35        // Start at Char(35) == '#'
-    val voidChar  = 33.toChar // '!'. We skipped Char(34) == '"'.
-
-    val pos2charMap: Map[Pos, Char] = Pos.all
-      .map { pos =>
-        pos -> (pos.hashCode + charShift).toChar
-      }
-      .to(Map)
-
-    def toChar(pos: Pos) = pos2charMap.getOrElse(pos, voidChar)
-
-    val promotion2charMap: Map[(File, PromotableRole), Char] = for {
-      (role, index) <- Role.allPromotable.zipWithIndex.to(Map)
-      file          <- File.all
-    } yield (file, role) -> (charShift + pos2charMap.size + index * 8 + file.index).toChar
-
-    def toChar(file: File, prom: PromotableRole) =
-      promotion2charMap.getOrElse(file -> prom, voidChar)
-
-    val dropRole2charMap: Map[Role, Char] =
-      Role.all
-        .filterNot(King ==)
-        .zipWithIndex
-        .map { case (role, index) =>
-          role -> (charShift + pos2charMap.size + promotion2charMap.size + index).toChar
-        }
-        .to(Map)
+  def apply(lib: GameLib, uci: Uci): UciCharPair = (lib, uci) match {
+    case (GameLib.Draughts(), uci: Uci.Draughts)
+      => strategygames.draughts.format.UciCharPair(uci.unwrap)
+    case (GameLib.Chess(), uci: Uci.Chess)
+      => strategygames.chess.format.UciCharPair(uci.unwrap)
+    case _ => sys.error("Mismatched gamelib and UciCharPair")
   }
+
+  // Unsure about these, probably will need them, but it's annoying to have such
+  // specific methods for draughts. :(
+  def apply(lib: GameLib, uci: Uci, ambiguity: Int): UciCharPair = (lib, uci) match {
+    case (GameLib.Draughts(), uci: Uci.Draughts)
+      => strategygames.draughts.format.UciCharPair(uci.unwrap, ambiguity)
+    case _ => sys.error("This method is only implemented for draughts")
+  }
+  def apply(lib: GameLib.Draughts, orig: Char, ambiguity: Int): UciCharPair =
+    strategygames.draughts.format.UciCharPair(orig, ambiguity)
+
+  def combine(lib: GameLib.Draughts, uci1: Uci, uci2: Uci): UciCharPair = (uci1, uci2) match {
+    case (uci1: Uci.Draughts, uci2: Uci.Draughts)
+      => strategygames.draughts.format.UciCharPair.combine(uci1.unwrap, uci2.unwrap)
+    case _ => sys.error("This is not implemented for anything but draughts")
+  }
+
 }

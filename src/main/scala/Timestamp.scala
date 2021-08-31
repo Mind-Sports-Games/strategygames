@@ -1,4 +1,4 @@
-package chess
+package strategygames
 
 case class Timestamp(value: Long) extends AnyVal with Ordered[Timestamp] {
 
@@ -15,6 +15,6 @@ trait Timestamper {
   def toNow(ts: Timestamp) = now - ts
 }
 
-private[chess] object RealTimestamper extends Timestamper {
+private[strategygames] object RealTimestamper extends Timestamper {
   def now = Timestamp(System.currentTimeMillis)
 }

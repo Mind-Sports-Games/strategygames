@@ -1,8 +1,8 @@
-package chess
+package strategygames.chess
 
 import format.{ Forsyth, Uci }
 
-import chess.format.FEN
+import strategygames.chess.format.FEN
 
 class ReplayTest extends ChessTest {
 

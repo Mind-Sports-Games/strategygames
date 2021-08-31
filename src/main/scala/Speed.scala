@@ -1,4 +1,4 @@
-package chess
+package strategygames
 
 sealed abstract class Speed(
     val id: Int,

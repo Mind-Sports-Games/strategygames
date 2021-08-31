@@ -1,74 +1,36 @@
-package chess
+package strategygames
 package format.pgn
+
+import strategygames.chess
 
 object Dumper {
 
-  def apply(situation: Situation, data: chess.Move, next: Situation): String = {
-    import data._
-
-    ((promotion, piece.role) match {
-      case _ if castles =>
-        if (orig ?> dest) "O-O-O" else "O-O"
-
-      case _ if enpassant =>
-        orig.file.toString + "x" + dest.key
-
-      case (promotion, Pawn) =>
-        (if (captures) s"${orig.file}x" else "") +
-          promotion.fold(dest.key)(p => s"${dest.key}=${p.pgn}")
-
-      case (_, role) =>
-        // Check whether there is a need to disambiguate:
-        //   - can a piece of same role move to/capture on the same square?
-        //   - if so, disambiguate, in order or preference, by:
-        //       - file
-        //       - rank
-        //       - both (only happens w/ at least 3 pieces of the same role)
-        val candidates = situation.board.pieces collect {
-          case (cpos, cpiece) if cpiece == piece && cpos != orig && cpiece.eyes(cpos, dest) => cpos
-        } filter { cpos =>
-          // We know Role ≠ Pawn, so it is fine to always pass None as promotion target
-          situation.move(cpos, dest, None).isValid
-        }
-
-        val disambiguation = if (candidates.isEmpty) {
-          ""
-        } else if (!candidates.exists(_ ?| orig)) {
-          orig.file.toString
-        } else if (!candidates.exists(_ ?- orig)) {
-          orig.rank.toString
-        } else {
-          orig.key
-        }
-
-        s"${role.pgn}$disambiguation${if (captures) "x" else ""}${dest.key}"
-    }) + {
-      if (next.check) {
-        if (next.checkMate) "#" else "+"
-      } else if (next.winner.isDefined) "#"
-      else ""
-    }
+  def apply(lib: GameLib, situation: Situation, data: Move, next: Situation): String =
+    (lib, situation, data, next) match {
+      case (
+        GameLib.Draughts(),
+        Situation.Draughts(situation),
+        Move.Draughts(data),
+        Situation.Draughts(next)
+      ) => draughts.format.pdn.Dumper.apply(situation, data, next)
+      case (
+        GameLib.Chess(),
+        Situation.Chess(situation),
+        Move.Chess(data),
+        Situation.Chess(next)
+      ) => chess.format.pgn.Dumper.apply(situation, data, next)
+      case _ => sys.error("Mismatched gamelib types 30")
   }
 
-  def apply(data: chess.Drop, next: Situation): String = {
-    data.toUci.uci + {
-      if (next.check) {
-        if (next.checkMate) "#" else "+"
-      } else if (next.winner.isDefined) "#"
-      else ""
-    }
+  def apply(lib: GameLib, data: Move): String = (lib, data) match {
+    case (GameLib.Draughts(), Move.Draughts(data)) => draughts.format.pdn.Dumper.apply(data)
+    case (GameLib.Chess(), Move.Chess(data))       => chess.format.pgn.Dumper.apply(data)
+    case _ => sys.error("Mismatched gamelib types 31")
   }
 
-  def apply(data: chess.Move): String =
-    apply(
-      data.situationBefore,
-      data,
-      data.finalizeAfter situationOf !data.color
-    )
+  def apply(lib: GameLib, data: chess.Drop): String = lib match {
+    case GameLib.Chess()      => chess.format.pgn.Dumper.apply(data)
+    case _ => sys.error("Drops can only be applied ")
+  }
 
-  def apply(data: chess.Drop): String =
-    apply(
-      data,
-      data.finalizeAfter situationOf !data.color
-    )
 }

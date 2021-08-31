@@ -1,9 +1,9 @@
-package chess
+package strategygames.chess
 package format.pgn
 
 import cats.syntax.option._
 
-import chess.variant.Standard
+import strategygames.chess.variant.Standard
 
 class ParserTest extends ChessTest {
 

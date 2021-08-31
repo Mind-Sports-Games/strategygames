@@ -1,10 +1,11 @@
-package chess
+package strategygames.chess
 
 import cats.syntax.option._
 
-import chess.format.FEN
-import chess.Pos._
-import chess.variant._
+import strategygames.Status
+import strategygames.chess.format.FEN
+import strategygames.chess.Pos._
+import strategygames.chess.variant._
 
 class VariantTest extends ChessTest {
 

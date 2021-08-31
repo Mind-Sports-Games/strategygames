@@ -1,8 +1,8 @@
-package chess
+package strategygames.chess
 
 import Pos._
 import variant.Standard
-import chess.format.FEN
+import strategygames.chess.format.FEN
 
 class AutodrawTest extends ChessTest {
 

@@ -1,4 +1,4 @@
-package chess
+package strategygames.chess
 package format
 
 import Forsyth.SituationPlus

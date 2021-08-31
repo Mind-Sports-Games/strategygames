@@ -1,4 +1,4 @@
-package chess
+package strategygames
 
 case class MoveMetrics(
     clientLag: Option[Centis] = None,
