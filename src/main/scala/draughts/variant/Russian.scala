@@ -265,14 +265,10 @@ case object Russian
     )
   }
 
-  override def finalizeBoard(
+  def finalizeBoardWithRemainingCaptures(
       board: Board,
-      uci: format.Uci.Move,
-      captured: Option[List[Piece]],
-      situationBefore: Situation,
-      finalSquare: Boolean
+      remainingCaptures: Int
   ): Board = {
-    val remainingCaptures = board.actorAt(uci.dest).map(_.captureLength).getOrElse(0)
     if (remainingCaptures > 0) board
     else {
       val whiteActors = board.actorsOf(Color.White)
@@ -300,6 +296,18 @@ case object Russian
       } else board.withoutGhosts
     }
   }
+
+  override def finalizeBoard(
+      board: Board,
+      uci: format.Uci.Move,
+      captured: Option[List[Piece]],
+      situationBefore: Situation,
+      finalSquare: Boolean
+  ): Board =
+    finalizeBoardWithRemainingCaptures(
+      board = board,
+      remainingCaptures = board.actorAt(uci.dest).map(_.captureLength).getOrElse(0)
+    )
 
   def maxDrawingMoves(board: Board): Option[Int] =
     drawingMoves(board, none).map(_._1)
