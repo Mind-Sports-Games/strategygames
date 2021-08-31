@@ -236,9 +236,33 @@ case object Pool
     )
   }
 
-  def maxDrawingMoves(board: Board): Option[Int] = Russian.maxDrawingMoves(board)
-  def updatePositionHashes(board: Board, move: Move, hash: strategygames.draughts.PositionHash): PositionHash =
-    Russian.updatePositionHashes(board, move, hash)
+  def maxDrawingMoves(board: Board): Option[Int] =
+    drawingMoves(board)
+
+  // (drawingMoves, resetOnNonKingMove, allowPromotion)
+  private def drawingMoves(board: Board): Option[Int] = {
+    val whiteActors = board.actorsOf(Color.White).filterNot(_.piece.isGhost)
+    val blackActors = board.actorsOf(Color.Black).filterNot(_.piece.isGhost)
+    val whiteKings  = whiteActors.count(_.piece is King)
+    val blackKings  = blackActors.count(_.piece is King)
+    val whitePieces = whiteActors.size
+    val blackPieces = blackActors.size
+
+    if ((whiteKings == 1 && whitePieces == 1 && blackKings == 3 && blackPieces == 3) ||
+        (blackKings == 1 && blackPieces == 1 && whiteKings == 3 && whitePieces == 3))
+      Some(26)
+    else
+      None
+
+  }
+
+  def updatePositionHashes(board: Board, move: Move, hash: PositionHash): PositionHash = {
+    val newHash = Hash(Situation(board, !move.piece.color))
+    drawingMoves(board) match {
+      case Some(_) => newHash ++ hash
+      case _ => newHash
+    }
+  }
 
   override def validSide(board: Board, strict: Boolean)(color: Color) = {
     val roles = board rolesOf color
