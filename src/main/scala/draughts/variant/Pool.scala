@@ -84,13 +84,17 @@ case object Pool
                   )
                 }
                 if (extraCaptures == 0) {
+                  val boardAfterPromote =
+                      if (promotablePos(landingPos, color))
+                        boardAfter.promote(landingPos).getOrElse(boardAfter)
+                      else boardAfter
                   val newMove =
                     if (finalSquare)
-                      actor.move(landingPos, boardAfter.withoutGhosts, newSquares, newTaken)
+                      actor.move(landingPos, boardAfterPromote.withoutGhosts, newSquares, newTaken)
                     else
                       actor.move(
                         firstSquare.getOrElse(landingPos),
-                        firstBoard.getOrElse(boardAfter),
+                        firstBoard.getOrElse(boardAfterPromote),
                         newSquares,
                         newTaken
                       )
