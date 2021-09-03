@@ -9,9 +9,9 @@ case object Standard
     extends Variant(
       id = 1,
       gameType = 20,
-      key = "standard",
-      name = "Standard Draughts",
-      shortName = "Std",
+      key = "international",
+      name = "International",
+      shortName = "Int",
       title = "Standard rules of international draughts (FMJD).",
       standardInitialPosition = true,
       boardSize = Board.D100
