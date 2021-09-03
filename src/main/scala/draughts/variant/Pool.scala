@@ -29,7 +29,7 @@ case object Pool
   def moveDirsColor = Standard.moveDirsColor
   def moveDirsAll   = Standard.moveDirsAll
 
-  override def validMoves(situation: Situation, finalSquare: Boolean = false): Map[Pos,List[Move]] = Russian.validMoves(situation, finalSquare)
+  override def validMoves(situation: Situation, finalSquare: Boolean = false): Map[Pos, List[Move]] = Russian.validMoves(situation, finalSquare)
 
   override def finalizeBoard(
       board: Board,
