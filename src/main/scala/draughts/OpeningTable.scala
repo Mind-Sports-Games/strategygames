@@ -3,6 +3,7 @@ package strategygames.draughts
 import format.FEN
 import opening.DrawTablesFMJD
 import opening.DrawTablesIDF
+import variant._
 
 import cats.syntax.option._
 
@@ -81,5 +82,11 @@ object OpeningTable {
     .to(Map)
 
   def byKey = key2table.get _
+
+  def tablesForVariant(v: Variant) = v match {
+    case Russian | Pool => tableIDF.categories.flatMap(_.positions).map(_.fen)
+    case Brazilian      => tableIDFBrazilian.categories.flatMap(_.positions).map(_.fen)
+    case _              => List()
+  }
 
 }
