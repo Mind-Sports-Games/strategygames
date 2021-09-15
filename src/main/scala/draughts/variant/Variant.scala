@@ -1,7 +1,7 @@
 package strategygames.draughts
 package variant
 
-import strategygames.Color
+import strategygames.{ Color, GameLib }
 
 import format.FEN
 
@@ -470,6 +470,8 @@ abstract class Variant private[variant] (
   override def equals(that: Any): Boolean = this eq that.asInstanceOf[AnyRef]
 
   override def hashCode: Int = id
+
+  def displayLib: GameLib = GameLib.Draughts()
 }
 
 object Variant {

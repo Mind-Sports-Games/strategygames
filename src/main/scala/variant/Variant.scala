@@ -92,6 +92,7 @@ abstract class Variant(
   def chessVariant: chess.variant.Variant
 
   def gameLib: GameLib
+  def displayLib: GameLib
 
 }
 
@@ -190,6 +191,7 @@ object Variant {
 
     def chessVariant: chess.variant.Variant = v
     def gameLib: GameLib = GameLib.Chess()
+    def displayLib: GameLib = v.displayLib
 
   }
 
@@ -286,6 +288,7 @@ object Variant {
 
     def chessVariant: chess.variant.Variant = sys.error("Unimplemented for Draughts")
     def gameLib: GameLib = GameLib.Draughts()
+    def displayLib: GameLib = v.displayLib
   }
 
   def all(lib: GameLib): List[Variant] = lib match {
