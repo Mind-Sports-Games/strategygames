@@ -39,10 +39,12 @@ abstract class Variant private[variant] (
   def breakthrough = this == Breakthrough
   def russian      = this == Russian
   def brazilian    = this == Brazilian
+  def pool         = this == Pool
   def fromPosition = this == FromPosition
 
-  def frisianVariant = frisian || frysk
-  def exotic         = !standard
+  def frisianVariant    = frisian || frysk
+  def draughts64Variant = russian || brazilian || pool
+  def exotic            = !standard
 
   def isValidPromotion(promotion: Option[PromotableRole]) = promotion match {
     case None       => true
@@ -497,7 +499,7 @@ object Variant {
     Left
   )
 
-  val all   = List(Standard, Frisian, Frysk, Antidraughts, Breakthrough, Russian, Brazilian, FromPosition)
+  val all   = List(Standard, Frisian, Frysk, Antidraughts, Breakthrough, Russian, Brazilian, Pool, FromPosition)
   val byId  = all map { v => (v.id, v) } toMap
   val byKey = all map { v => (v.key, v) } toMap
 
@@ -523,7 +525,8 @@ object Variant {
     strategygames.draughts.variant.Frisian,
     strategygames.draughts.variant.Breakthrough,
     strategygames.draughts.variant.Russian,
-    strategygames.draughts.variant.Brazilian
+    strategygames.draughts.variant.Brazilian,
+    strategygames.draughts.variant.Pool
   )
 
   val divisionSensibleVariants: Set[Variant] = Set(
@@ -533,6 +536,7 @@ object Variant {
     strategygames.draughts.variant.Breakthrough,
     strategygames.draughts.variant.Russian,
     strategygames.draughts.variant.Brazilian,
+    strategygames.draughts.variant.Pool,
     strategygames.draughts.variant.FromPosition
   )
 
