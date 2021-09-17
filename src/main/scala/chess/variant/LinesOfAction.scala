@@ -2,7 +2,7 @@ package strategygames.chess.variant
 
 import strategygames.chess._
 import strategygames.chess.format.FEN
-import strategygames.{ Color, GameLib }
+import strategygames.{ Color, DisplayLib }
 
 import scala.collection.immutable.Queue
 
@@ -16,7 +16,7 @@ case object LinesOfAction
       standardInitialPosition = false
     ) {
 
-  override def displayLib: GameLib = GameLib.LinesOfAction()
+  override def displayLib: DisplayLib = DisplayLib.LinesOfAction()
 
   override val pieces: Map[Pos, Piece] = Map(
     Pos.B1 -> Piece(White, LOAChecker),

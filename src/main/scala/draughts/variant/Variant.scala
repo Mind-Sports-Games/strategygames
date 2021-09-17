@@ -1,7 +1,7 @@
 package strategygames.draughts
 package variant
 
-import strategygames.{ Color, GameLib }
+import strategygames.{ Color, DisplayLib }
 
 import format.FEN
 
@@ -473,7 +473,7 @@ abstract class Variant private[variant] (
 
   override def hashCode: Int = id
 
-  def displayLib: GameLib = GameLib.Draughts()
+  def displayLib: DisplayLib = DisplayLib.Draughts()
 }
 
 object Variant {
