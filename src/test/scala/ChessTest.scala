@@ -24,6 +24,8 @@ trait ChessTest extends Specification with ValidatedMatchers {
       def kingOfTheHill: Board = makeBoard(str, strategygames.chess.variant.KingOfTheHill)
 
       def threeCheck: Board = makeBoard(str, strategygames.chess.variant.ThreeCheck)
+
+      def fiveCheck: Board = makeBoard(str, strategygames.chess.variant.FiveCheck)
     }
 
   implicit def stringToSituationBuilder(str: String) =

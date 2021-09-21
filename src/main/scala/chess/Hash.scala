@@ -31,6 +31,7 @@ object Hash {
     val castlingMasks       = ZobristTables.castlingMasks.map(hexToLong)
     val enPassantMasks      = ZobristTables.enPassantMasks.map(hexToLong)
     val threeCheckMasks     = ZobristTables.threeCheckMasks.map(hexToLong)
+    val fiveCheckMasks      = ZobristTables.fiveCheckMasks.map(hexToLong)
     val crazyPromotionMasks = ZobristTables.crazyPromotionMasks.map(hexToLong)
     val crazyPocketMasks    = ZobristTables.crazyPocketMasks.map(hexToLong)
   }
@@ -91,13 +92,18 @@ object Hash {
       hcastling ^ table.enPassantMasks(pos.file.index)
     }
 
-    // Hash in special three-check data.
+    // Hash in special three-check and five-check data.
     val hchecks = board.variant match {
       case variant.ThreeCheck =>
         val blackCount   = math.min(situation.history.checkCount.black, 3)
         val whiteCount   = math.min(situation.history.checkCount.white, 3)
         val hblackchecks = if (blackCount > 0) hep ^ table.threeCheckMasks(blackCount - 1) else hep
         if (whiteCount > 0) hblackchecks ^ table.threeCheckMasks(whiteCount + 2) else hblackchecks
+      case variant.FiveCheck =>
+        val blackCount   = math.min(situation.history.checkCount.black, 5)
+        val whiteCount   = math.min(situation.history.checkCount.white, 5)
+        val hblackchecks = if (blackCount > 0) hep ^ table.fiveCheckMasks(blackCount - 1) else hep
+        if (whiteCount > 0) hblackchecks ^ table.fiveCheckMasks(whiteCount + 2) else hblackchecks  
       case _ => hep
     }
 
@@ -1050,6 +1056,16 @@ private object ZobristTables {
   )
 
   val threeCheckMasks = Array(
+    "1d6dc0ee61ce803e6a2ad922a69a13e9",
+    "c6284b653d38e96a49b572c7942027d5",
+    "803f5fb0d2f97fae08c2e9271dc91e69",
+    "b183ccc9e73df9ed088dfad983bb7913",
+    "fdeef11602d6b44390a852cacfc0adeb",
+    "1b0ce4198b3801a6c8ce065f15fe38f5"
+  )
+
+  //TODO what does this hash need to be?
+  val fiveCheckMasks = Array(
     "1d6dc0ee61ce803e6a2ad922a69a13e9",
     "c6284b653d38e96a49b572c7942027d5",
     "803f5fb0d2f97fae08c2e9271dc91e69",

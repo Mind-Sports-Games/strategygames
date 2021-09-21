@@ -37,6 +37,7 @@ abstract class Variant(
   def racingKings: Boolean
   def crazyhouse: Boolean
   def linesOfAction: Boolean
+  def fiveCheck: Boolean
 
   def draughtsStandard: Boolean
   def frisian: Boolean
@@ -126,6 +127,7 @@ object Variant {
     def racingKings: Boolean   = v.racingKings
     def crazyhouse: Boolean    = v.crazyhouse
     def linesOfAction: Boolean = v.linesOfAction
+    def fiveCheck: Boolean     = v.fiveCheck
 
     def draughtsStandard: Boolean     = false
     def frisian: Boolean              = false
@@ -225,6 +227,7 @@ object Variant {
     def racingKings: Boolean   = false
     def crazyhouse: Boolean    = false
     def linesOfAction: Boolean = false
+    def fiveCheck: Boolean     = false
 
     def draughtsStandard: Boolean     = v.standard
     def frisian: Boolean              = v.frisian
