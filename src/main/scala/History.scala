@@ -71,7 +71,7 @@ object History {
   implicit def draughtsHistory(h: draughts.DraughtsHistory) = Draughts(h)
 
   def apply(
-    lib: GameLib,
+    lib: GameLogic,
     lastMove: Option[Uci] = None,
     positionHashes: PositionHash = Array.empty,
     variant: Option[Variant] = None,
@@ -81,7 +81,7 @@ object History {
     kingMoves: draughts.KingMoves = draughts.KingMoves(),
     halfMoveClock: Int = 0
   ): History = lib match {
-    case GameLib.Draughts()
+    case GameLogic.Draughts()
       => Draughts(draughts.DraughtsHistory(
         lastMove = lastMove.map(lm => lm.toDraughts),
         positionHashes = positionHashes,
@@ -92,7 +92,7 @@ object History {
         },
         kingMoves = kingMoves
       ))
-    case GameLib.Chess()
+    case GameLogic.Chess()
       => Chess(chess.History(
         lastMove = lastMove.map(lm => lm.toChess),
         positionHashes = positionHashes,
@@ -101,7 +101,7 @@ object History {
         unmovedRooks = unmovedRooks,
         halfMoveClock = halfMoveClock
       ))
-    case _ => sys.error("Mismatched gamelib types 1")
+    case _ => sys.error("Mismatched gamelogic types 1")
   }
 
 }

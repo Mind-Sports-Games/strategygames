@@ -2,30 +2,30 @@ package strategygames.opening
 
 import cats.syntax.option._
 
-import strategygames.GameLib
+import strategygames.GameLogic
 import strategygames.format.FEN
 
 object FullOpeningDB {
 
-  def findByFen(lib: GameLib, fen: FEN): Option[FullOpening] = (lib, fen) match {
-    case (GameLib.Draughts(), _)
+  def findByFen(lib: GameLogic, fen: FEN): Option[FullOpening] = (lib, fen) match {
+    case (GameLogic.Draughts(), _)
       => strategygames.draughts.opening.FullOpeningDB.findByFen(fen.value).map(
         FullOpening.Draughts
       ) 
-    case (GameLib.Chess(), FEN.Chess(fen))
+    case (GameLogic.Chess(), FEN.Chess(fen))
       => strategygames.chess.opening.FullOpeningDB.findByFen(fen).map(
         FullOpening.Chess
       )
-    case _ => sys.error("Mismatched gamelib types full opening db")
+    case _ => sys.error("Mismatched gamelogic types full opening db")
   }
 
   // assumes standard initial FEN and variant
-  def search(lib: GameLib, moveStrs: Iterable[String]): Option[FullOpening.AtPly] =
+  def search(lib: GameLogic, moveStrs: Iterable[String]): Option[FullOpening.AtPly] =
     lib match {
-      case GameLib.Draughts() => strategygames.draughts.opening.FullOpeningDB.search(
+      case GameLogic.Draughts() => strategygames.draughts.opening.FullOpeningDB.search(
         moveStrs
       ).map(fo => FullOpening.AtPly(FullOpening.Draughts(fo.opening), fo.ply))
-      case GameLib.Chess()    => strategygames.chess.opening.FullOpeningDB.search(
+      case GameLogic.Chess()    => strategygames.chess.opening.FullOpeningDB.search(
         moveStrs
       ).map(fo => FullOpening.AtPly(FullOpening.Chess(fo.opening), fo.ply))
     }
@@ -46,11 +46,11 @@ object FullOpeningDB {
       }
     )
 
-  def searchInFens(lib: GameLib, fens: Vector[FEN]): Option[FullOpening] = lib match {
-    case GameLib.Draughts() => strategygames.draughts.opening.FullOpeningDB.searchInFens(
+  def searchInFens(lib: GameLogic, fens: Vector[FEN]): Option[FullOpening] = lib match {
+    case GameLogic.Draughts() => strategygames.draughts.opening.FullOpeningDB.searchInFens(
       draughtsFENs(fens).toList
     ).map(FullOpening.Draughts)
-    case GameLib.Chess()    => strategygames.chess.opening.FullOpeningDB.searchInFens(
+    case GameLogic.Chess()    => strategygames.chess.opening.FullOpeningDB.searchInFens(
       chessFENs(fens)
     ).map(FullOpening.Chess)
   }

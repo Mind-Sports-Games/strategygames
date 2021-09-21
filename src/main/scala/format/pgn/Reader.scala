@@ -38,53 +38,53 @@ object Reader {
     }
   }
 
-  def full(lib: GameLib, pgn: String, tags: Tags = Tags.empty): Validated[String, Result] =
+  def full(lib: GameLogic, pgn: String, tags: Tags = Tags.empty): Validated[String, Result] =
     lib match {
-      case GameLib.Chess()    => ChessReader.full(pgn, tags).map(Result.wrap)
-      case GameLib.Draughts() => DraughtsReader.full(pgn, tags).map(Result.wrap)
+      case GameLogic.Chess()    => ChessReader.full(pgn, tags).map(Result.wrap)
+      case GameLogic.Draughts() => DraughtsReader.full(pgn, tags).map(Result.wrap)
     }
 
   def moves(
-      lib: GameLib,
+      lib: GameLogic,
       moveStrs: Iterable[String],
       tags: Tags,
       iteratedCapts: Boolean = false
   ): Validated[String, Result] =
     lib match {
-      case GameLib.Chess()    => ChessReader.moves(moveStrs, tags).map(Result.wrap)
-      case GameLib.Draughts() => DraughtsReader.moves(moveStrs, tags, iteratedCapts).map(Result.wrap)
+      case GameLogic.Chess()    => ChessReader.moves(moveStrs, tags).map(Result.wrap)
+      case GameLogic.Draughts() => DraughtsReader.moves(moveStrs, tags, iteratedCapts).map(Result.wrap)
     }
 
   def fullWithSans(
-      lib: GameLib,
+      lib: GameLogic,
       pgn: String,
       op: Sans => Sans,
       tags: Tags = Tags.empty,
       iteratedCapts: Boolean = false
   ): Validated[String, Result] =
     lib match {
-      case GameLib.Chess()    => ChessReader.fullWithSans(pgn, op, tags).map(Result.wrap)
-      case GameLib.Draughts() => DraughtsReader.fullWithSans(pgn, op, tags, iteratedCapts).map(Result.wrap)
+      case GameLogic.Chess()    => ChessReader.fullWithSans(pgn, op, tags).map(Result.wrap)
+      case GameLogic.Draughts() => DraughtsReader.fullWithSans(pgn, op, tags, iteratedCapts).map(Result.wrap)
     }
 
   /* TODO: Maybe port this? I don't think it's used.
-  def fullWithSans(lib: GameLib, parsed: ParsedPgn, op: Sans => Sans): Result =
+  def fullWithSans(lib: GameLogic, parsed: ParsedPgn, op: Sans => Sans): Result =
     lib match {
-      case GameLib.Chess()    => Result.wrap(ChessReader.fullWithSans(parsed, op))
-      case GameLib.Draughts() => Result.wrap(DraughtsReader.fullWithSans(parsed, op))
+      case GameLogic.Chess()    => Result.wrap(ChessReader.fullWithSans(parsed, op))
+      case GameLogic.Draughts() => Result.wrap(DraughtsReader.fullWithSans(parsed, op))
     }
   */
 
   def movesWithSans(
-      lib: GameLib,
+      lib: GameLogic,
       moveStrs: Iterable[String],
       op: Sans => Sans,
       tags: Tags,
       iteratedCapts: Boolean = false
   ): Validated[String, Result] =
     lib match {
-      case GameLib.Chess() => ChessReader.movesWithSans(moveStrs, op, tags).map(Result.wrap)
-      case GameLib.Draughts() =>
+      case GameLogic.Chess() => ChessReader.movesWithSans(moveStrs, op, tags).map(Result.wrap)
+      case GameLogic.Draughts() =>
         DraughtsReader.movesWithSans(moveStrs, op, tags, iteratedCapts).map(Result.wrap)
     }
 

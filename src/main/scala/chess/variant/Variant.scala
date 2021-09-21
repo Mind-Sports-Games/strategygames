@@ -6,7 +6,7 @@ import scala.annotation.nowarn
 
 import strategygames.chess._
 import strategygames.chess.format.FEN
-import strategygames.{ Color, DisplayLib }
+import strategygames.{ Color, GameFamily }
 
 // Correctness depends on singletons for each variant ID
 abstract class Variant private[variant] (
@@ -207,7 +207,7 @@ abstract class Variant private[variant] (
 
   override def hashCode: Int = id
 
-  def displayLib: DisplayLib = DisplayLib.Chess()
+  def gameFamily: GameFamily = GameFamily.Chess()
 }
 
 object Variant {

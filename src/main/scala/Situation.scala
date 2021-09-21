@@ -59,7 +59,7 @@ abstract sealed class Situation(val board: Board, val color: Color) {
 
   def unary_! : Situation
 
-  def gameLib: GameLib
+  def gameLogic: GameLogic
 
   // TODO: There is probably a better way to a more generalized version of this function ...
   def copy(board: Board): Situation
@@ -135,7 +135,7 @@ object Situation {
       case _ => sys.error("Can't copy a chess situation with a non-chess board")
     })
 
-    def gameLib: GameLib = GameLib.Chess()
+    def gameLogic: GameLogic = GameLogic.Chess()
 
     def toChess = s
     def toDraughts = sys.error("Can't make draughts situation from chess situation")
@@ -217,27 +217,27 @@ object Situation {
       case _ => sys.error("Can't copy a draughts situation with a non-draughts board")
     })
 
-    def gameLib: GameLib = GameLib.Draughts()
+    def gameLogic: GameLogic = GameLogic.Draughts()
 
     def toDraughts = s
     def toChess = sys.error("Can't make chess situation from draughts situation")
 
   }
 
-  def apply(lib: GameLib, board: Board, color: Color): Situation = (lib, board) match {
-    case (GameLib.Draughts(), Board.Draughts(board))
+  def apply(lib: GameLogic, board: Board, color: Color): Situation = (lib, board) match {
+    case (GameLogic.Draughts(), Board.Draughts(board))
       => Draughts(draughts.Situation(board, color))
-    case (GameLib.Chess(), Board.Chess(board))
+    case (GameLogic.Chess(), Board.Chess(board))
       => Chess(chess.Situation(board, color))
-    case _ => sys.error("Mismatched gamelib types 3")
+    case _ => sys.error("Mismatched gamelogic types 3")
   }
 
-  def apply(lib: GameLib, variant: Variant): Situation = (lib, variant) match {
-    case (GameLib.Draughts(), Variant.Draughts(variant))
+  def apply(lib: GameLogic, variant: Variant): Situation = (lib, variant) match {
+    case (GameLogic.Draughts(), Variant.Draughts(variant))
       => Draughts(draughts.Situation.apply(variant))
-    case (GameLib.Chess(), Variant.Chess(variant))
+    case (GameLogic.Chess(), Variant.Chess(variant))
       => Chess(chess.Situation.apply(variant))
-    case _ => sys.error("Mismatched gamelib types 4")
+    case _ => sys.error("Mismatched gamelogic types 4")
   }
 
   def wrap(s: chess.Situation) = Chess(s)

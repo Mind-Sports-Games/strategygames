@@ -105,7 +105,7 @@ object Move {
     //only used by draughts
     def toShortUci: Uci.Move =
       Uci.Move(
-        GameLib.Chess(),
+        GameLogic.Chess(),
         orig,
         dest,
         promotion,
@@ -168,7 +168,7 @@ object Move {
 
     def toShortUci: Uci.Move =
       Uci.Move(
-        GameLib.Draughts(),
+        GameLogic.Draughts(),
         orig,
         dest,
         promotion,
