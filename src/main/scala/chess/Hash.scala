@@ -1064,14 +1064,18 @@ private object ZobristTables {
     "1b0ce4198b3801a6c8ce065f15fe38f5"
   )
 
-  //TODO what does this hash need to be?
+  
   val fiveCheckMasks = Array(
-    "1d6dc0ee61ce803e6a2ad922a69a13e9",
-    "c6284b653d38e96a49b572c7942027d5",
-    "803f5fb0d2f97fae08c2e9271dc91e69",
-    "b183ccc9e73df9ed088dfad983bb7913",
-    "fdeef11602d6b44390a852cacfc0adeb",
-    "1b0ce4198b3801a6c8ce065f15fe38f5"
+    "366a2a47eb189287009f592bd8d06661",
+    "0622f736d98ed771f6a5d2bfc99deba7",
+    "25f9d3eaf92c9e91fe9714e012c0856d",
+    "ecd1a8444d42907ab8ccb16b4c0ac225",
+    "b936e514ed5d055b1ab045ed7e62394d",
+    "41731f54f27b958194d7d5ec0b0843d5",
+    "b468ce588498860cc9ebf774e6329d72",
+    "3222cdd8ab559c74f762ba780eed53f1",
+    "e9c1c9c8a0d731ba57c358cdcfaa4076",
+    "f225fcc6274bf6b43d518a67ad59310f"
   )
 
   val crazyPromotionMasks = Array(

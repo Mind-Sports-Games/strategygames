@@ -2,7 +2,7 @@ package strategygames.chess
 
 import Pos._
 import format.Uci
-import variant.{ Antichess, Atomic, Crazyhouse, Standard, ThreeCheck }
+import variant.{ Antichess, Atomic, Crazyhouse, Standard, ThreeCheck, FiveCheck }
 import strategygames.chess.format.FEN
 
 class HashTest extends ChessTest {
@@ -82,6 +82,32 @@ class HashTest extends ChessTest {
     "account for checks in three-check" in {
       // 2 ... Bb4+
       val gameA = Game(Board init ThreeCheck)
+        .playMoves(
+          E2 -> E4,
+          E7 -> E6,
+          D2 -> D4,
+          F8 -> B4
+        )
+        .toOption
+        .get
+
+      // repeat
+      val gameB = gameA
+        .playMoves(
+          C1 -> D2,
+          B4 -> F8,
+          D2 -> C1,
+          F8 -> B4
+        )
+        .toOption
+        .get
+
+      hash(gameA.situation) mustNotEqual hash(gameB.situation)
+    }
+
+    "account for checks in five-check" in {
+      // 2 ... Bb4+
+      val gameA = Game(Board init FiveCheck)
         .playMoves(
           E2 -> E4,
           E7 -> E6,
