@@ -2,7 +2,7 @@ package strategygames.chess.variant
 
 import strategygames.chess._
 import strategygames.chess.format.FEN
-import strategygames.Color
+import strategygames.{ Color, GameFamily }
 
 import scala.collection.immutable.Queue
 
@@ -15,6 +15,8 @@ case object LinesOfAction
       title = "Connect all of your checkers to win.",
       standardInitialPosition = false
     ) {
+
+  override def gameFamily: GameFamily = GameFamily.LinesOfAction()
 
   override val pieces: Map[Pos, Piece] = Map(
     Pos.B1 -> Piece(White, LOAChecker),
@@ -115,4 +117,5 @@ case object LinesOfAction
 
   override def specialDraw(situation: Situation) =
     winForColor(Black, situation.board) && winForColor(White, situation.board)
+
 }

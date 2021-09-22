@@ -109,43 +109,43 @@ object Uci {
         case None => None
       }
 
-    def apply(lib: GameLib, orig: Pos, dest: Pos, promotion: Option[PromotableRole], capture: Option[List[Pos]] = None): Move =
+    def apply(lib: GameLogic, orig: Pos, dest: Pos, promotion: Option[PromotableRole], capture: Option[List[Pos]] = None): Move =
       (lib, orig, dest) match {
-        case (GameLib.Draughts(), Pos.Draughts(orig), Pos.Draughts(dest)) =>
+        case (GameLogic.Draughts(), Pos.Draughts(orig), Pos.Draughts(dest)) =>
           DraughtsMove(draughts.format.Uci.Move.apply(
             orig, dest, promotion.map(_.toDraughts), draughtsCaptures(capture)
           ))
-        case (GameLib.Chess(), Pos.Chess(orig), Pos.Chess(dest)) =>
+        case (GameLogic.Chess(), Pos.Chess(orig), Pos.Chess(dest)) =>
           ChessMove(
             chess.format.Uci.Move.apply(
               orig, dest, promotion.map(_.toChess)
             ))
-        case _ => sys.error("Mismatched gamelib types 23")
+        case _ => sys.error("Mismatched gamelogic types 23")
       }
 
-    def apply(lib: GameLib, move: String): Option[Move] = lib match {
-      case GameLib.Draughts() => draughts.format.Uci.Move.apply(move).map(DraughtsMove)
-      case GameLib.Chess()    => chess.format.Uci.Move.apply(move).map(ChessMove)
+    def apply(lib: GameLogic, move: String): Option[Move] = lib match {
+      case GameLogic.Draughts() => draughts.format.Uci.Move.apply(move).map(DraughtsMove)
+      case GameLogic.Chess()    => chess.format.Uci.Move.apply(move).map(ChessMove)
     }
 
-    def piotr(lib: GameLib, move: String): Option[Move] = lib match {
-      case GameLib.Draughts() => draughts.format.Uci.Move.piotr(move).map(DraughtsMove)
-      case GameLib.Chess()    => chess.format.Uci.Move.piotr(move).map(ChessMove)
+    def piotr(lib: GameLogic, move: String): Option[Move] = lib match {
+      case GameLogic.Draughts() => draughts.format.Uci.Move.piotr(move).map(DraughtsMove)
+      case GameLogic.Chess()    => chess.format.Uci.Move.piotr(move).map(ChessMove)
     }
 
-    def fromStrings(lib: GameLib, origS: String, destS: String, promS: Option[String]): Option[Move] = lib match {
-      case GameLib.Draughts()
+    def fromStrings(lib: GameLogic, origS: String, destS: String, promS: Option[String]): Option[Move] = lib match {
+      case GameLogic.Draughts()
         => draughts.format.Uci.Move.fromStrings(origS, destS, promS).map(DraughtsMove)
-      case GameLib.Chess()
+      case GameLogic.Chess()
         => chess.format.Uci.Move.fromStrings(origS, destS, promS).map(ChessMove)
     }
   }
 
   object Drop {
 
-    def fromStrings(lib: GameLib, roleS: String, posS: String): Option[Drop] = lib match {
-      case GameLib.Draughts() => None
-      case GameLib.Chess()    => chess.format.Uci.Drop.fromStrings(roleS, posS).map(ChessDrop)
+    def fromStrings(lib: GameLogic, roleS: String, posS: String): Option[Drop] = lib match {
+      case GameLogic.Draughts() => None
+      case GameLogic.Chess()    => chess.format.Uci.Drop.fromStrings(roleS, posS).map(ChessDrop)
     }
 
   }
@@ -164,42 +164,42 @@ object Uci {
 
   object WithSan {
 
-    def apply(lib: GameLib, uci: Uci, san: String): WithSan = (lib, uci) match {
-      case (GameLib.Draughts(), Uci.DraughtsMove(uci))
+    def apply(lib: GameLogic, uci: Uci, san: String): WithSan = (lib, uci) match {
+      case (GameLogic.Draughts(), Uci.DraughtsMove(uci))
         => Uci.DraughtsWithSan(draughts.format.Uci.WithSan(uci, san))
-      case (GameLib.Chess(), u: Uci.Chess)
+      case (GameLogic.Chess(), u: Uci.Chess)
         => Uci.ChessWithSan(chess.format.Uci.WithSan(u.unwrap, san))
-      case _ => sys.error("Mismatched gamelib types 24")
+      case _ => sys.error("Mismatched gamelogic types 24")
     }
 
   }
 
   //possibly wrong to handle Draughts.withCaptures likes this
-  def apply(lib: GameLib, move: strategygames.Move, withCaptures: Boolean = false): Uci.Move =
+  def apply(lib: GameLogic, move: strategygames.Move, withCaptures: Boolean = false): Uci.Move =
     (lib, move) match {
-      case (GameLib.Draughts(), strategygames.Move.Draughts(move))
+      case (GameLogic.Draughts(), strategygames.Move.Draughts(move))
         => DraughtsMove(draughts.format.Uci.apply(move, withCaptures))
-      case (GameLib.Chess(), strategygames.Move.Chess(move))
+      case (GameLogic.Chess(), strategygames.Move.Chess(move))
         => ChessMove(chess.format.Uci.apply(move))
-      case _ => sys.error("Mismatched gamelib types 25")
+      case _ => sys.error("Mismatched gamelogic types 25")
     }
 
-  def apply(lib: GameLib, drop: strategygames.chess.Drop) = lib match {
-    case GameLib.Draughts() => sys.error("Drop not implemented for Draughts")
-    case GameLib.Chess()    => ChessDrop(chess.format.Uci.apply(drop))
+  def apply(lib: GameLogic, drop: strategygames.chess.Drop) = lib match {
+    case GameLogic.Draughts() => sys.error("Drop not implemented for Draughts")
+    case GameLogic.Chess()    => ChessDrop(chess.format.Uci.apply(drop))
   }
 
-  def apply(lib: GameLib, move: String): Option[Uci] = lib match {
-      case GameLib.Draughts() => draughts.format.Uci.apply(move).map(wrap)
-      case GameLib.Chess()    => chess.format.Uci.apply(move).map(wrap)
+  def apply(lib: GameLogic, move: String): Option[Uci] = lib match {
+      case GameLogic.Draughts() => draughts.format.Uci.apply(move).map(wrap)
+      case GameLogic.Chess()    => chess.format.Uci.apply(move).map(wrap)
   }
 
-  def piotr(lib: GameLib, move: String): Option[Uci] = lib match {
-      case GameLib.Draughts() => draughts.format.Uci.piotr(move).map(wrap)
-      case GameLib.Chess()    => chess.format.Uci.piotr(move).map(wrap)
+  def piotr(lib: GameLogic, move: String): Option[Uci] = lib match {
+      case GameLogic.Draughts() => draughts.format.Uci.piotr(move).map(wrap)
+      case GameLogic.Chess()    => chess.format.Uci.piotr(move).map(wrap)
   }
 
-  def readList(lib: GameLib, moves: String): Option[List[Uci]] =
+  def readList(lib: GameLogic, moves: String): Option[List[Uci]] =
     moves.split(' ').toList.map(apply(lib, _)).sequence
 
   def writeList(moves: List[Uci]): String =
@@ -208,7 +208,7 @@ object Uci {
   def readListPiotr(moves: String): Option[List[Uci]] =
     moves.split('_') match {
       case Array(lib, moves) =>
-        moves.split(' ').toList.map(piotr(GameLib(lib.toInt), _)).sequence
+        moves.split(' ').toList.map(piotr(GameLogic(lib.toInt), _)).sequence
       case _ => sys.error("No lib encoded into uci piotr")
     }
 

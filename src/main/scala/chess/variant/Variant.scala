@@ -6,7 +6,7 @@ import scala.annotation.nowarn
 
 import strategygames.chess._
 import strategygames.chess.format.FEN
-import strategygames.Color
+import strategygames.{ Color, GameFamily }
 
 // Correctness depends on singletons for each variant ID
 abstract class Variant private[variant] (
@@ -206,6 +206,8 @@ abstract class Variant private[variant] (
   override def equals(that: Any): Boolean = this eq that.asInstanceOf[AnyRef]
 
   override def hashCode: Int = id
+
+  def gameFamily: GameFamily = GameFamily.Chess()
 }
 
 object Variant {

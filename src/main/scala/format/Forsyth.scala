@@ -9,26 +9,26 @@ import strategygames.variant.Variant
   */
 object Forsyth {
 
-  def initial(lib: GameLib): FEN = lib match {
-    case GameLib.Draughts() => FEN.Draughts(draughts.format.Forsyth.initial)
-    case GameLib.Chess()    => FEN.Chess(chess.format.Forsyth.initial)
+  def initial(lib: GameLogic): FEN = lib match {
+    case GameLogic.Draughts() => FEN.Draughts(draughts.format.Forsyth.initial)
+    case GameLogic.Chess()    => FEN.Chess(chess.format.Forsyth.initial)
   }
 
-  def <<@(lib: GameLib, variant: Variant, fen: FEN): Option[Situation] =
+  def <<@(lib: GameLogic, variant: Variant, fen: FEN): Option[Situation] =
     (lib, variant, fen) match {
-      case (GameLib.Draughts(), Variant.Draughts(variant), FEN.Draughts(fen))
+      case (GameLogic.Draughts(), Variant.Draughts(variant), FEN.Draughts(fen))
         => draughts.format.Forsyth.<<@(variant, fen).map(Situation.Draughts)
-      case (GameLib.Chess(), Variant.Chess(variant), FEN.Chess(fen))
+      case (GameLogic.Chess(), Variant.Chess(variant), FEN.Chess(fen))
         => chess.format.Forsyth.<<@(variant, fen).map(Situation.Chess)
-      case _ => sys.error("Mismatched gamelib types 14")
+      case _ => sys.error("Mismatched gamelogic types 14")
   }
 
-  def <<(lib: GameLib, fen: FEN): Option[Situation] = (lib, fen) match {
-    case (GameLib.Draughts(), FEN.Draughts(fen))
+  def <<(lib: GameLogic, fen: FEN): Option[Situation] = (lib, fen) match {
+    case (GameLogic.Draughts(), FEN.Draughts(fen))
       => draughts.format.Forsyth.<<(fen).map(Situation.Draughts)
-    case (GameLib.Chess(), FEN.Chess(fen))
+    case (GameLogic.Chess(), FEN.Chess(fen))
       => chess.format.Forsyth.<<(fen).map(Situation.Chess)
-    case _ => sys.error("Mismatched gamelib types 15")
+    case _ => sys.error("Mismatched gamelogic types 15")
   }
 
   case class SituationPlus(situation: Situation, fullMoveNumber: Int) {
@@ -37,80 +37,80 @@ object Forsyth {
 
   }
 
-  def <<<@(lib: GameLib, variant: Variant, fen: FEN): Option[SituationPlus] =
+  def <<<@(lib: GameLogic, variant: Variant, fen: FEN): Option[SituationPlus] =
     (lib, variant, fen) match {
-      case (GameLib.Draughts(), Variant.Draughts(variant), FEN.Draughts(fen))
+      case (GameLogic.Draughts(), Variant.Draughts(variant), FEN.Draughts(fen))
         => draughts.format.Forsyth.<<<@(variant, fen).map(
           sp => SituationPlus(Situation.Draughts(sp.situation), sp.fullMoveNumber)
         )
-      case (GameLib.Chess(), Variant.Chess(variant), FEN.Chess(fen))
+      case (GameLogic.Chess(), Variant.Chess(variant), FEN.Chess(fen))
         => chess.format.Forsyth.<<<@(variant, fen).map(
           sp => SituationPlus(Situation.Chess(sp.situation), sp.fullMoveNumber)
         )
-      case _ => sys.error("Mismatched gamelib types 16")
+      case _ => sys.error("Mismatched gamelogic types 16")
   }
 
-  def <<<(lib: GameLib, fen: FEN): Option[SituationPlus] = (lib, fen) match {
-    case (GameLib.Draughts(), FEN.Draughts(fen)) => draughts.format.Forsyth.<<<(fen).map(
+  def <<<(lib: GameLogic, fen: FEN): Option[SituationPlus] = (lib, fen) match {
+    case (GameLogic.Draughts(), FEN.Draughts(fen)) => draughts.format.Forsyth.<<<(fen).map(
       sp => SituationPlus(Situation.Draughts(sp.situation), sp.fullMoveNumber)
     )
-    case (GameLib.Chess(), FEN.Chess(fen))       => chess.format.Forsyth.<<<(fen).map(
+    case (GameLogic.Chess(), FEN.Chess(fen))       => chess.format.Forsyth.<<<(fen).map(
       sp => SituationPlus(Situation.Chess(sp.situation), sp.fullMoveNumber)
     )
-    case _ => sys.error("Mismatched gamelib types 17")
+    case _ => sys.error("Mismatched gamelogic types 17")
   }
 
   // only cares about pieces positions on the board (first part of FEN string)
-  def makeBoard(lib: GameLib, variant: Variant, fen: FEN): Option[Board] =
+  def makeBoard(lib: GameLogic, variant: Variant, fen: FEN): Option[Board] =
     (lib, variant, fen) match {
-      case (GameLib.Draughts(), Variant.Draughts(variant), FEN.Draughts(fen))
+      case (GameLogic.Draughts(), Variant.Draughts(variant), FEN.Draughts(fen))
         => draughts.format.Forsyth.makeBoard(variant, fen).map(Board.Draughts)
-      case (GameLib.Chess(), Variant.Chess(variant), FEN.Chess(fen))
+      case (GameLogic.Chess(), Variant.Chess(variant), FEN.Chess(fen))
         => chess.format.Forsyth.makeBoard(variant, fen).map(Board.Chess)
-      case _ => sys.error("Mismatched gamelib types 18")
+      case _ => sys.error("Mismatched gamelogic types 18")
   }
 
-  def >>(lib: GameLib, situation: Situation): FEN = >>(lib, SituationPlus(situation, 1))
+  def >>(lib: GameLogic, situation: Situation): FEN = >>(lib, SituationPlus(situation, 1))
 
-  def >>(lib: GameLib, parsed: SituationPlus): FEN = (lib, parsed.situation) match{
-    case (GameLib.Draughts(), Situation.Draughts(situation))
+  def >>(lib: GameLogic, parsed: SituationPlus): FEN = (lib, parsed.situation) match{
+    case (GameLogic.Draughts(), Situation.Draughts(situation))
       => FEN.Draughts(draughts.format.Forsyth.>>(
         draughts.format.Forsyth.SituationPlus(situation, parsed.fullMoveNumber)
       ))
-    case (GameLib.Chess(), Situation.Chess(situation))
+    case (GameLogic.Chess(), Situation.Chess(situation))
       => FEN.Chess(chess.format.Forsyth.>>(
         chess.format.Forsyth.SituationPlus(situation, parsed.fullMoveNumber)
       ))
-    case _ => sys.error("Mismatched gamelib types 19")
+    case _ => sys.error("Mismatched gamelogic types 19")
   }
 
-  def >>(lib: GameLib, game: Game): FEN = (lib, game) match {
-    case (GameLib.Draughts(), Game.Draughts(game))
+  def >>(lib: GameLogic, game: Game): FEN = (lib, game) match {
+    case (GameLogic.Draughts(), Game.Draughts(game))
       => FEN.Draughts(draughts.format.Forsyth.>>(game))
-    case (GameLib.Chess(), Game.Chess(game))
+    case (GameLogic.Chess(), Game.Chess(game))
       => FEN.Chess(chess.format.Forsyth.>>(game))
-    case _ => sys.error("Mismatched gamelib types 20")
+    case _ => sys.error("Mismatched gamelogic types 20")
   }
 
-  def exportBoard(lib: GameLib, board: Board, algebraic: Boolean = false): String =
+  def exportBoard(lib: GameLogic, board: Board, algebraic: Boolean = false): String =
     (lib, board) match {
-      case (GameLib.Draughts(), Board.Draughts(board))
+      case (GameLogic.Draughts(), Board.Draughts(board))
         => draughts.format.Forsyth.exportBoard(board, algebraic)
-      case (GameLib.Chess(), Board.Chess(board))
+      case (GameLogic.Chess(), Board.Chess(board))
         => chess.format.Forsyth.exportBoard(board)
-      case _ => sys.error("Mismatched gamelib types 21")
+      case _ => sys.error("Mismatched gamelogic types 21")
   }
 
-  def boardAndColor(lib: GameLib, situation: Situation): String =
+  def boardAndColor(lib: GameLogic, situation: Situation): String =
     boardAndColor(lib, situation.board, situation.color)
 
-  def boardAndColor(lib: GameLib, board: Board, turnColor: Color): String =
+  def boardAndColor(lib: GameLogic, board: Board, turnColor: Color): String =
     (lib, board) match {
-      case (GameLib.Draughts(), Board.Draughts(board))
+      case (GameLogic.Draughts(), Board.Draughts(board))
         => draughts.format.Forsyth.boardAndColor(board, turnColor)
-      case (GameLib.Chess(), Board.Chess(board))
+      case (GameLogic.Chess(), Board.Chess(board))
         => chess.format.Forsyth.boardAndColor(board, turnColor)
-      case _ => sys.error("Mismatched gamelib types 22")
+      case _ => sys.error("Mismatched gamelogic types 22")
   }
 
 }

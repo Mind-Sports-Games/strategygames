@@ -250,44 +250,44 @@ object Game {
   }
 
   def apply(
-      lib: GameLib,
+      lib: GameLogic,
       situation: Situation,
       pgnMoves: Vector[String] = Vector(),
       clock: Option[Clock] = None,
       turns: Int = 0, // plies
       startedAtTurn: Int = 0
   ): Game = (lib, situation) match {
-    case (GameLib.Draughts(), Situation.Draughts(situation)) =>
+    case (GameLogic.Draughts(), Situation.Draughts(situation)) =>
       Draughts(draughts.DraughtsGame(situation, pgnMoves, clock, turns, startedAtTurn))
-    case (GameLib.Chess(), Situation.Chess(situation)) =>
+    case (GameLogic.Chess(), Situation.Chess(situation)) =>
       Chess(chess.Game(situation, pgnMoves, clock, turns, startedAtTurn))
-    case _ => sys.error("Mismatched gamelib types 32")
+    case _ => sys.error("Mismatched gamelogic types 32")
   }
 
-  def apply(lib: GameLib, variant: Variant): Game = (lib, variant) match {
-    case (GameLib.Draughts(), Variant.Draughts(variant)) => Draughts(draughts.DraughtsGame.apply(variant))
-    case (GameLib.Chess(), Variant.Chess(variant))       => Chess(chess.Game.apply(variant))
-    case _                                               => sys.error("Mismatched gamelib types 33")
+  def apply(lib: GameLogic, variant: Variant): Game = (lib, variant) match {
+    case (GameLogic.Draughts(), Variant.Draughts(variant)) => Draughts(draughts.DraughtsGame.apply(variant))
+    case (GameLogic.Chess(), Variant.Chess(variant))       => Chess(chess.Game.apply(variant))
+    case _                                               => sys.error("Mismatched gamelogic types 33")
   }
 
-  def apply(lib: GameLib, board: Board): Game = (lib, board) match {
-    case (GameLib.Draughts(), Board.Draughts(board)) => Draughts(draughts.DraughtsGame.apply(board))
-    case (GameLib.Chess(), Board.Chess(board))       => Chess(chess.Game.apply(board))
-    case _                                           => sys.error("Mismatched gamelib types 34")
+  def apply(lib: GameLogic, board: Board): Game = (lib, board) match {
+    case (GameLogic.Draughts(), Board.Draughts(board)) => Draughts(draughts.DraughtsGame.apply(board))
+    case (GameLogic.Chess(), Board.Chess(board))       => Chess(chess.Game.apply(board))
+    case _                                           => sys.error("Mismatched gamelogic types 34")
   }
 
-  def apply(lib: GameLib, board: Board, color: Color): Game = (lib, board) match {
-    case (GameLib.Draughts(), Board.Draughts(board)) => Draughts(draughts.DraughtsGame.apply(board, color))
-    case (GameLib.Chess(), Board.Chess(board))       => Chess(chess.Game.apply(board, color))
-    case _                                           => sys.error("Mismatched gamelib types 35")
+  def apply(lib: GameLogic, board: Board, color: Color): Game = (lib, board) match {
+    case (GameLogic.Draughts(), Board.Draughts(board)) => Draughts(draughts.DraughtsGame.apply(board, color))
+    case (GameLogic.Chess(), Board.Chess(board))       => Chess(chess.Game.apply(board, color))
+    case _                                           => sys.error("Mismatched gamelogic types 35")
   }
 
-  def apply(lib: GameLib, variant: Option[Variant], fen: Option[FEN]): Game = lib match {
-      case GameLib.Draughts() =>
+  def apply(lib: GameLogic, variant: Option[Variant], fen: Option[FEN]): Game = lib match {
+      case GameLogic.Draughts() =>
         Draughts(draughts.DraughtsGame.apply(variant.map(_.toDraughts), fen.map(_.toDraughts)))
-      case GameLib.Chess() =>
+      case GameLogic.Chess() =>
         Chess(chess.Game.apply(variant.map(_.toChess), fen.map(_.toChess)))
-      case _ => sys.error("Mismatched gamelib types 36")
+      case _ => sys.error("Mismatched gamelogic types 36")
     }
 
     def wrap(g: chess.Game) = Chess(g)

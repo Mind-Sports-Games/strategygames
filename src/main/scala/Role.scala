@@ -54,84 +54,84 @@ object Role {
     def toChess: chess.PromotableRole = sys.error("Not implemented for draughts")
   }
 
-  def all(lib: GameLib): List[Role] = lib match {
-    case GameLib.Draughts() => draughts.Role.all.map(DraughtsRole)
-    case GameLib.Chess()    => chess.Role.all.map(ChessRole)
+  def all(lib: GameLogic): List[Role] = lib match {
+    case GameLogic.Draughts() => draughts.Role.all.map(DraughtsRole)
+    case GameLogic.Chess()    => chess.Role.all.map(ChessRole)
   }
 
-  def allPromotable(lib: GameLib): List[PromotableRole] = lib match {
-    case GameLib.Draughts() => draughts.Role.allPromotable.map(DraughtsPromotableRole)
-    case GameLib.Chess()    => chess.Role.allPromotable.map(ChessPromotableRole)
+  def allPromotable(lib: GameLogic): List[PromotableRole] = lib match {
+    case GameLogic.Draughts() => draughts.Role.allPromotable.map(DraughtsPromotableRole)
+    case GameLogic.Chess()    => chess.Role.allPromotable.map(ChessPromotableRole)
   }
 
-  def allByForsyth(lib: GameLib): Map[Char, Role] = lib match {
-    case GameLib.Draughts() => draughts.Role.allByForsyth.map{case(f, r) => (f, DraughtsRole(r))}
-    case GameLib.Chess() => chess.Role.allByForsyth.map{case(f, r) => (f, ChessRole(r))}
+  def allByForsyth(lib: GameLogic): Map[Char, Role] = lib match {
+    case GameLogic.Draughts() => draughts.Role.allByForsyth.map{case(f, r) => (f, DraughtsRole(r))}
+    case GameLogic.Chess() => chess.Role.allByForsyth.map{case(f, r) => (f, ChessRole(r))}
   }
 
-  def allByPgn(lib: GameLib): Map[Char, Role] = lib match {
-    case GameLib.Draughts() => draughts.Role.allByPdn.map{case(p, r) => (p, DraughtsRole(r))}
-    case GameLib.Chess() => chess.Role.allByPgn.map{case(p, r) => (p, ChessRole(r))}
+  def allByPgn(lib: GameLogic): Map[Char, Role] = lib match {
+    case GameLogic.Draughts() => draughts.Role.allByPdn.map{case(p, r) => (p, DraughtsRole(r))}
+    case GameLogic.Chess() => chess.Role.allByPgn.map{case(p, r) => (p, ChessRole(r))}
   }
 
-  def allByName(lib: GameLib): Map[String, Role] = lib match {
-    case GameLib.Draughts() => draughts.Role.allByName.map{case(n, r) => (n, DraughtsRole(r))}
-    case GameLib.Chess() => chess.Role.allByName.map{case(n, r) => (n, ChessRole(r))}
+  def allByName(lib: GameLogic): Map[String, Role] = lib match {
+    case GameLogic.Draughts() => draughts.Role.allByName.map{case(n, r) => (n, DraughtsRole(r))}
+    case GameLogic.Chess() => chess.Role.allByName.map{case(n, r) => (n, ChessRole(r))}
   }
 
-  def allByBinaryInt(lib: GameLib): Map[Int, Role] = lib match {
-    case GameLib.Draughts() => draughts.Role.allByBinaryInt.map{case(n, r) => (n, DraughtsRole(r))}
-    case GameLib.Chess() => chess.Role.allByBinaryInt.map{case(n, r) => (n, ChessRole(r))}
+  def allByBinaryInt(lib: GameLogic): Map[Int, Role] = lib match {
+    case GameLogic.Draughts() => draughts.Role.allByBinaryInt.map{case(n, r) => (n, DraughtsRole(r))}
+    case GameLogic.Chess() => chess.Role.allByBinaryInt.map{case(n, r) => (n, ChessRole(r))}
   }
 
-  def allPromotableByName(lib: GameLib): Map[String, PromotableRole] = lib match {
-    case GameLib.Draughts() => draughts.Role.allPromotableByName.map{case(n, r) => (n, DraughtsPromotableRole(r))}
-    case GameLib.Chess() => chess.Role.allPromotableByName.map{case(n, r) => (n, ChessPromotableRole(r))}
+  def allPromotableByName(lib: GameLogic): Map[String, PromotableRole] = lib match {
+    case GameLogic.Draughts() => draughts.Role.allPromotableByName.map{case(n, r) => (n, DraughtsPromotableRole(r))}
+    case GameLogic.Chess() => chess.Role.allPromotableByName.map{case(n, r) => (n, ChessPromotableRole(r))}
   }
 
-  def allPromotableByForsyth(lib: GameLib): Map[Char, PromotableRole] = lib match {
-    case GameLib.Draughts() => draughts.Role.allPromotableByForsyth.map{case(f, r) => (f, DraughtsPromotableRole(r))}
-    case GameLib.Chess() => chess.Role.allPromotableByForsyth.map{case(f, r) => (f, ChessPromotableRole(r))}
+  def allPromotableByForsyth(lib: GameLogic): Map[Char, PromotableRole] = lib match {
+    case GameLogic.Draughts() => draughts.Role.allPromotableByForsyth.map{case(f, r) => (f, DraughtsPromotableRole(r))}
+    case GameLogic.Chess() => chess.Role.allPromotableByForsyth.map{case(f, r) => (f, ChessPromotableRole(r))}
   }
 
-  def allPromotableByPgn(lib: GameLib): Map[Char, PromotableRole] = lib match {
-    case GameLib.Draughts() => draughts.Role.allPromotableByPdn.map{case(p, r) => (p, DraughtsPromotableRole(r))}
-    case GameLib.Chess() => chess.Role.allPromotableByPgn.map{case(p, r) => (p, ChessPromotableRole(r))}
+  def allPromotableByPgn(lib: GameLogic): Map[Char, PromotableRole] = lib match {
+    case GameLogic.Draughts() => draughts.Role.allPromotableByPdn.map{case(p, r) => (p, DraughtsPromotableRole(r))}
+    case GameLogic.Chess() => chess.Role.allPromotableByPgn.map{case(p, r) => (p, ChessPromotableRole(r))}
   }
 
-  def forsyth(lib: GameLib, c: Char): Option[Role] = lib match {
-    case GameLib.Draughts() => draughts.Role.forsyth(c).map(DraughtsRole)
-    case GameLib.Chess()    => chess.Role.forsyth(c).map(ChessRole)
+  def forsyth(lib: GameLogic, c: Char): Option[Role] = lib match {
+    case GameLogic.Draughts() => draughts.Role.forsyth(c).map(DraughtsRole)
+    case GameLogic.Chess()    => chess.Role.forsyth(c).map(ChessRole)
   }
 
-  def binaryInt(lib: GameLib, i: Int): Option[Role] = lib match {
-    case GameLib.Draughts() => draughts.Role.binaryInt(i).map(DraughtsRole)
-    case GameLib.Chess()    => chess.Role.binaryInt(i).map(ChessRole)
+  def binaryInt(lib: GameLogic, i: Int): Option[Role] = lib match {
+    case GameLogic.Draughts() => draughts.Role.binaryInt(i).map(DraughtsRole)
+    case GameLogic.Chess()    => chess.Role.binaryInt(i).map(ChessRole)
   }
 
-  def promotable(lib: GameLib, c: Char): Option[PromotableRole] = lib match {
-    case GameLib.Draughts() => draughts.Role.promotable(c).map(DraughtsPromotableRole)
-    case GameLib.Chess()    => chess.Role.promotable(c).map(ChessPromotableRole)
+  def promotable(lib: GameLogic, c: Char): Option[PromotableRole] = lib match {
+    case GameLogic.Draughts() => draughts.Role.promotable(c).map(DraughtsPromotableRole)
+    case GameLogic.Chess()    => chess.Role.promotable(c).map(ChessPromotableRole)
   }
 
-  def promotable(lib: GameLib, name: String): Option[PromotableRole] = lib match {
-    case GameLib.Draughts() => draughts.Role.promotable(name).map(DraughtsPromotableRole)
-    case GameLib.Chess()    => chess.Role.promotable(name).map(ChessPromotableRole)
+  def promotable(lib: GameLogic, name: String): Option[PromotableRole] = lib match {
+    case GameLogic.Draughts() => draughts.Role.promotable(name).map(DraughtsPromotableRole)
+    case GameLogic.Chess()    => chess.Role.promotable(name).map(ChessPromotableRole)
   }
 
-  def promotable(lib: GameLib, name: Option[String]): Option[PromotableRole] = lib match {
-    case GameLib.Draughts() => draughts.Role.promotable(name).map(DraughtsPromotableRole)
-    case GameLib.Chess()    => chess.Role.promotable(name).map(ChessPromotableRole)
+  def promotable(lib: GameLogic, name: Option[String]): Option[PromotableRole] = lib match {
+    case GameLogic.Draughts() => draughts.Role.promotable(name).map(DraughtsPromotableRole)
+    case GameLogic.Chess()    => chess.Role.promotable(name).map(ChessPromotableRole)
   }
 
-  def pgnMoveToRole(lib: GameLib, c: Char): Role = lib match {
-    case GameLib.Draughts() => DraughtsRole(draughts.Role.pdnMoveToRole(c))
-    case GameLib.Chess()    => ChessRole(chess.Role.pgnMoveToRole(c))
+  def pgnMoveToRole(lib: GameLogic, c: Char): Role = lib match {
+    case GameLogic.Draughts() => DraughtsRole(draughts.Role.pdnMoveToRole(c))
+    case GameLogic.Chess()    => ChessRole(chess.Role.pgnMoveToRole(c))
   }
 
-  def javaSymbolToRole(lib: GameLib, s: String): Role = lib match {
-    case GameLib.Draughts() => DraughtsRole(draughts.Role.javaSymbolToRole(s))
-    case GameLib.Chess()    => ChessRole(chess.Role.javaSymbolToRole(s))
+  def javaSymbolToRole(lib: GameLogic, s: String): Role = lib match {
+    case GameLogic.Draughts() => DraughtsRole(draughts.Role.javaSymbolToRole(s))
+    case GameLogic.Chess()    => ChessRole(chess.Role.javaSymbolToRole(s))
   }
 
   def wrap(pr: chess.PromotableRole): PromotableRole = ChessPromotableRole(pr)

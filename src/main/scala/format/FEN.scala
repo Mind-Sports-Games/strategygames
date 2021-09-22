@@ -1,6 +1,6 @@
 package strategygames.format
 
-import strategygames.{ Color, GameLib }
+import strategygames.{ Color, GameLogic }
 
 abstract sealed class FEN(val value: String) {
 
@@ -62,15 +62,15 @@ object FEN {
   def wrap(fen: strategygames.chess.format.FEN) = Chess(fen)
   def wrap(fen: strategygames.draughts.format.FEN) = Draughts(fen)
 
-  def apply(lib: GameLib, value: String): FEN = lib match {
-    case GameLib.Draughts() => FEN.Draughts(strategygames.draughts.format.FEN(value))
-    case GameLib.Chess()    => FEN.Chess(strategygames.chess.format.FEN(value))
+  def apply(lib: GameLogic, value: String): FEN = lib match {
+    case GameLogic.Draughts() => FEN.Draughts(strategygames.draughts.format.FEN(value))
+    case GameLogic.Chess()    => FEN.Chess(strategygames.chess.format.FEN(value))
   }
 
-  def clean(lib: GameLib, source: String): FEN = lib match {
-    case GameLib.Draughts()
+  def clean(lib: GameLogic, source: String): FEN = lib match {
+    case GameLogic.Draughts()
       => Draughts(strategygames.draughts.format.FEN(source.replace("_", " ").trim))
-    case GameLib.Chess()
+    case GameLogic.Chess()
       => Chess(strategygames.chess.format.FEN(source.replace("_", " ").trim))
   }
 
