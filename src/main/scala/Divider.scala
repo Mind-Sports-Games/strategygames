@@ -42,10 +42,10 @@ object Divider {
       }
     )
 
-  def apply(lib: GameLib, boards: List[Board]): Division = lib match {
-    case GameLib.Draughts() =>
+  def apply(lib: GameLogic, boards: List[Board]): Division = lib match {
+    case GameLogic.Draughts() =>
       strategygames.draughts.Divider(draughtsBoards(boards))
-    case GameLib.Chess() =>
+    case GameLogic.Chess() =>
       strategygames.chess.Divider(chessBoards(boards))
   }
 

@@ -2,7 +2,7 @@ package strategygames
 
 final class Hash(size: Int) {
 
-  def apply(lib: GameLib, situation: Situation): PositionHash = {
+  def apply(lib: GameLogic, situation: Situation): PositionHash = {
     val l = Hash.get(lib, situation, Hash.polyglotTable(lib))
     if (size <= 8) {
       Array.tabulate(size)(i => (l >>> ((7 - i) * 8)).toByte)
@@ -40,25 +40,25 @@ object Hash {
 
   // The following masks are compatible with the Polyglot
   // opening book format.
-  private def polyglotTable(lib: GameLib): ZobristConstants = lib match {
-    case GameLib.Draughts() => DraughtsZobristConstants(new draughts.Hash.ZobristConstants(0))
-    case GameLib.Chess()    => ChessZobristConstants(new chess.Hash.ZobristConstants(0))
+  private def polyglotTable(lib: GameLogic): ZobristConstants = lib match {
+    case GameLogic.Draughts() => DraughtsZobristConstants(new draughts.Hash.ZobristConstants(0))
+    case GameLogic.Chess()    => ChessZobristConstants(new chess.Hash.ZobristConstants(0))
   }
 
-  private def randomTable(lib: GameLib): ZobristConstants = lib match {
-    case GameLib.Draughts() => DraughtsZobristConstants(new draughts.Hash.ZobristConstants(16))
-    case GameLib.Chess()    => ChessZobristConstants(new chess.Hash.ZobristConstants(16))
+  private def randomTable(lib: GameLogic): ZobristConstants = lib match {
+    case GameLogic.Draughts() => DraughtsZobristConstants(new draughts.Hash.ZobristConstants(16))
+    case GameLogic.Chess()    => ChessZobristConstants(new chess.Hash.ZobristConstants(16))
   }
 
-  private def get(lib: GameLib, situation: Situation, table: ZobristConstants): Long =
+  private def get(lib: GameLogic, situation: Situation, table: ZobristConstants): Long =
     (lib, situation, table) match {
-      case (GameLib.Draughts(), Situation.Draughts(situation), DraughtsZobristConstants(table)) => draughts.Hash.get(situation, table)
-      case (GameLib.Chess(), Situation.Chess(situation), ChessZobristConstants(table))          => chess.Hash.get(situation, table)
+      case (GameLogic.Draughts(), Situation.Draughts(situation), DraughtsZobristConstants(table)) => draughts.Hash.get(situation, table)
+      case (GameLogic.Chess(), Situation.Chess(situation), ChessZobristConstants(table))          => chess.Hash.get(situation, table)
     }
 
   private val h = new Hash(size)
 
-  def apply(lib: GameLib, situation: Situation): PositionHash = h.apply(lib, situation)
+  def apply(lib: GameLogic, situation: Situation): PositionHash = h.apply(lib, situation)
 
   def debug(hashes: PositionHash) = hashes.map(_.toInt).sum.toString
 

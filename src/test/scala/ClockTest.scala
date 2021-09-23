@@ -4,7 +4,7 @@ import strategygames._
 import Pos._
 
 class ClockTest extends ChessTest {
-  val chess = GameLib.Chess()
+  val chess = GameLogic.Chess()
   val fakeClock60 = Clock(chess, 60, 0)
     .copy(timestamper = new Timestamper {
       val now = Timestamp(0)

@@ -1,9 +1,9 @@
 package strategygames.chess
-import strategygames.{ Clock, GameLib }
+import strategygames.{ Clock, GameLogic }
 
 class BerserkTest extends ChessTest {
 
-  val chess = GameLib.Chess()
+  val chess = GameLogic.Chess()
 
   def whiteBerserk(minutes: Int, seconds: Int) =
     Clock(chess, minutes * 60, seconds).goBerserk(chess.white).remainingTime(chess.white).centis * .01

@@ -131,50 +131,50 @@ object Color {
     val black = c.black
   }
 
-  def fromPly(lib: GameLib, ply: Int) = lib match {
-    case GameLib.Draughts() => Draughts(draughts.Color.fromPly(ply))
-    case GameLib.Chess()    => Chess(chess.Color.fromPly(ply))
+  def fromPly(lib: GameLogic, ply: Int) = lib match {
+    case GameLogic.Draughts() => Draughts(draughts.Color.fromPly(ply))
+    case GameLogic.Chess()    => Chess(chess.Color.fromPly(ply))
   }
 
-  def fromWhite(lib: GameLib, white: Boolean): Color = lib match {
-    case GameLib.Draughts() => Draughts(draughts.Color.fromWhite(white))
-    case GameLib.Chess()    => Chess(chess.Color.fromWhite(white))
+  def fromWhite(lib: GameLogic, white: Boolean): Color = lib match {
+    case GameLogic.Draughts() => Draughts(draughts.Color.fromWhite(white))
+    case GameLogic.Chess()    => Chess(chess.Color.fromWhite(white))
   }
 
-  def fromName(lib: GameLib, n: String): Option[Color] = lib match {
-    case GameLib.Draughts() => draughts.Color.fromName(n).map(Draughts)
-    case GameLib.Chess()    => chess.Color.fromName(n).map(Chess)
+  def fromName(lib: GameLogic, n: String): Option[Color] = lib match {
+    case GameLogic.Draughts() => draughts.Color.fromName(n).map(Draughts)
+    case GameLogic.Chess()    => chess.Color.fromName(n).map(Chess)
   }
 
-  def apply(lib: GameLib, c: Char): Option[Color] = lib match {
-    case GameLib.Draughts() => draughts.Color(c).map(Draughts)
-    case GameLib.Chess()    => chess.Color(c).map(Chess)
+  def apply(lib: GameLogic, c: Char): Option[Color] = lib match {
+    case GameLogic.Draughts() => draughts.Color(c).map(Draughts)
+    case GameLogic.Chess()    => chess.Color(c).map(Chess)
   }
 
-  def white(lib: GameLib): Color = lib match {
-    case GameLib.Draughts() => Draughts(draughts.Color.white)
-    case GameLib.Chess()    => Chess(chess.Color.white)
+  def white(lib: GameLogic): Color = lib match {
+    case GameLogic.Draughts() => Draughts(draughts.Color.white)
+    case GameLogic.Chess()    => Chess(chess.Color.white)
   }
 
-  def black(lib: GameLib): Color = lib match {
-    case GameLib.Draughts() => Draughts(draughts.Color.black)
-    case GameLib.Chess()    => Chess(chess.Color.black)
+  def black(lib: GameLogic): Color = lib match {
+    case GameLogic.Draughts() => Draughts(draughts.Color.black)
+    case GameLogic.Chess()    => Chess(chess.Color.black)
   }
 
-  def all(lib: GameLib): List[Color] = lib match {
-    case GameLib.Draughts() => draughts.Color.all.map(Draughts)
-    case GameLib.Chess()    => chess.Color.all.map(Chess)
+  def all(lib: GameLogic): List[Color] = lib match {
+    case GameLogic.Draughts() => draughts.Color.all.map(Draughts)
+    case GameLogic.Chess()    => chess.Color.all.map(Chess)
   }
 
   //result default set to currently work for chess lila
-  //def showResult(lib: GameLib, color: Option[Color], result: Boolean = false): String = lib match {
-  //  case GameLib.Draughts() => draughts.Color.showResult(color, result)
-  //  case GameLib.Chess()    => chess.Color.allByResult.map{case(c, s) => (c.map(Chess), s)}.get(color)
+  //def showResult(lib: GameLogic, color: Option[Color], result: Boolean = false): String = lib match {
+  //  case GameLogic.Draughts() => draughts.Color.showResult(color, result)
+  //  case GameLogic.Chess()    => chess.Color.allByResult.map{case(c, s) => (c.map(Chess), s)}.get(color)
   //}
 
-  def fromResult(lib: GameLib, result: String): Option[Color] = lib match {
-    case GameLib.Draughts() => draughts.Color.fromResult(result).map(Draughts)
-    case GameLib.Chess()    => chess.Color.fromResult(result).map(Chess)
+  def fromResult(lib: GameLogic, result: String): Option[Color] = lib match {
+    case GameLogic.Draughts() => draughts.Color.fromResult(result).map(Draughts)
+    case GameLogic.Chess()    => chess.Color.fromResult(result).map(Chess)
   }
 
   implicit def chessColor(c: chess.Color) = Chess(c)

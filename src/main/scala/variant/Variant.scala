@@ -94,7 +94,8 @@ abstract class Variant(
   //       so sometimes it doesn't, and it calls sys.error instead. Yes. I know.
   def chessVariant: chess.variant.Variant
 
-  def gameLib: GameLib
+  def gameLogic: GameLogic
+  def gameFamily: GameFamily
 
 }
 
@@ -146,7 +147,7 @@ object Variant {
 
     def exotic: Boolean = v.exotic
 
-    def initialFen: FEN = format.Forsyth.initial(GameLib.Chess())
+    def initialFen: FEN = format.Forsyth.initial(GameLogic.Chess())
     def startColor: Color = v.startColor
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = promotion match {
@@ -195,7 +196,8 @@ object Variant {
     }
 
     def chessVariant: chess.variant.Variant = v
-    def gameLib: GameLib = GameLib.Chess()
+    def gameLogic: GameLogic = GameLogic.Chess()
+    def gameFamily: GameFamily = v.gameFamily
 
   }
 
@@ -246,7 +248,7 @@ object Variant {
 
     def exotic: Boolean = v.exotic
 
-    def initialFen: FEN = format.Forsyth.initial(GameLib.Draughts())
+    def initialFen: FEN = format.Forsyth.initial(GameLogic.Draughts())
     def startColor: Color = v.startColor
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = promotion match {
@@ -294,55 +296,56 @@ object Variant {
     }
 
     def chessVariant: chess.variant.Variant = sys.error("Unimplemented for Draughts")
-    def gameLib: GameLib = GameLib.Draughts()
+    def gameLogic: GameLogic = GameLogic.Draughts()
+    def gameFamily: GameFamily = v.gameFamily
   }
 
-  def all(lib: GameLib): List[Variant] = lib match {
-    case GameLib.Draughts() => draughts.variant.Variant.all.map(Draughts)
-    case GameLib.Chess()    => chess.variant.Variant.all.map(Chess)
+  def all(lib: GameLogic): List[Variant] = lib match {
+    case GameLogic.Draughts() => draughts.variant.Variant.all.map(Draughts)
+    case GameLogic.Chess()    => chess.variant.Variant.all.map(Chess)
   }
 
-  def byId(lib: GameLib) = all(lib) map { v =>
+  def byId(lib: GameLogic) = all(lib) map { v =>
     (v.id, v)
   } toMap
 
-  def byKey(lib: GameLib) = all(lib) map { v =>
+  def byKey(lib: GameLogic) = all(lib) map { v =>
     (v.key, v)
   } toMap
 
-  def default(lib: GameLib): Variant = lib match {
-    case GameLib.Draughts() => Draughts(draughts.variant.Variant.default)
-    case GameLib.Chess()    => Chess(chess.variant.Variant.default)
+  def default(lib: GameLogic): Variant = lib match {
+    case GameLogic.Draughts() => Draughts(draughts.variant.Variant.default)
+    case GameLogic.Chess()    => Chess(chess.variant.Variant.default)
   }
 
-  def apply(lib: GameLib, id: Int): Option[Variant]     = byId(lib) get id
-  def apply(lib: GameLib, key: String): Option[Variant] = byKey(lib) get key
-  def orDefault(lib: GameLib, id: Int): Variant         = apply(lib, id) | default(lib)
-  def orDefault(lib: GameLib, key: String): Variant     = apply(lib, key) | default(lib)
+  def apply(lib: GameLogic, id: Int): Option[Variant]     = byId(lib) get id
+  def apply(lib: GameLogic, key: String): Option[Variant] = byKey(lib) get key
+  def orDefault(lib: GameLogic, id: Int): Variant         = apply(lib, id) | default(lib)
+  def orDefault(lib: GameLogic, key: String): Variant     = apply(lib, key) | default(lib)
 
-  def byName(lib: GameLib, name: String): Option[Variant] =
+  def byName(lib: GameLogic, name: String): Option[Variant] =
     all(lib) find (_.name.toLowerCase == name.toLowerCase)
 
-  def exists(lib: GameLib, id: Int): Boolean = byId(lib) contains id
+  def exists(lib: GameLogic, id: Int): Boolean = byId(lib) contains id
 
-  def openingSensibleVariants(lib: GameLib): Set[Variant] = lib match {
-    case GameLib.Draughts() => draughts.variant.Variant.openingSensibleVariants.map(Draughts)
-    case GameLib.Chess()    => chess.variant.Variant.openingSensibleVariants.map(Chess)
+  def openingSensibleVariants(lib: GameLogic): Set[Variant] = lib match {
+    case GameLogic.Draughts() => draughts.variant.Variant.openingSensibleVariants.map(Draughts)
+    case GameLogic.Chess()    => chess.variant.Variant.openingSensibleVariants.map(Chess)
   }
 
-  def divisionSensibleVariants(lib: GameLib): Set[Variant] = lib match {
-    case GameLib.Draughts() => draughts.variant.Variant.divisionSensibleVariants.map(Draughts)
-    case GameLib.Chess()    => chess.variant.Variant.divisionSensibleVariants.map(Chess)
+  def divisionSensibleVariants(lib: GameLogic): Set[Variant] = lib match {
+    case GameLogic.Draughts() => draughts.variant.Variant.divisionSensibleVariants.map(Draughts)
+    case GameLogic.Chess()    => chess.variant.Variant.divisionSensibleVariants.map(Chess)
   }
 
-  def libStandard(lib: GameLib): Variant = lib match {
-    case GameLib.Draughts() => Variant.Draughts(draughts.variant.Standard)
-    case GameLib.Chess()    => Variant.Chess(chess.variant.Standard)
+  def libStandard(lib: GameLogic): Variant = lib match {
+    case GameLogic.Draughts() => Variant.Draughts(draughts.variant.Standard)
+    case GameLogic.Chess()    => Variant.Chess(chess.variant.Standard)
   }
 
-  def libFromPosition(lib: GameLib): Variant = lib match {
-    case GameLib.Draughts() => Variant.Draughts(draughts.variant.FromPosition)
-    case GameLib.Chess()    => Variant.Chess(chess.variant.FromPosition)
+  def libFromPosition(lib: GameLogic): Variant = lib match {
+    case GameLogic.Draughts() => Variant.Draughts(draughts.variant.FromPosition)
+    case GameLogic.Chess()    => Variant.Chess(chess.variant.FromPosition)
   }
 
 
