@@ -185,7 +185,7 @@ object Forsyth {
         game.halfMoveClock,
         game.fullMoveNumber
       ) ::: {
-        if (game.board.variant == variant.ThreeCheck) List(exportCheckCount(game.board))
+        if (game.board.variant == variant.ThreeCheck || game.board.variant == variant.FiveCheck) List(exportCheckCount(game.board))
         else List()
       }
     } mkString " "

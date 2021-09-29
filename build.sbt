@@ -2,7 +2,7 @@ name := "strategygames"
 
 organization := "org.playstrategy"
 
-version := "10.2.1-pstrat13_4"
+version := "10.2.1-pstrat13_5"
 
 scalaVersion := "2.13.5"
 
