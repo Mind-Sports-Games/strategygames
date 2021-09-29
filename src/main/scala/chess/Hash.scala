@@ -103,7 +103,7 @@ object Hash {
         val blackCount   = math.min(situation.history.checkCount.black, 5)
         val whiteCount   = math.min(situation.history.checkCount.white, 5)
         val hblackchecks = if (blackCount > 0) hep ^ table.fiveCheckMasks(blackCount - 1) else hep
-        if (whiteCount > 0) hblackchecks ^ table.fiveCheckMasks(whiteCount + 2) else hblackchecks  
+        if (whiteCount > 0) hblackchecks ^ table.fiveCheckMasks(whiteCount + 4) else hblackchecks  
       case _ => hep
     }
 

@@ -406,6 +406,50 @@ class ForsythTest extends ChessTest {
       }
     }
   }
+  "five-check" should {
+    import variant.FiveCheck
+    "write" in {
+      "no checks" in {
+        val moves = List(E2 -> E4, C7 -> C5, G1 -> F3, G8 -> H6, A2 -> A3)
+        Game(FiveCheck).playMoveList(moves take 5) must beValid.like { g =>
+          f >> g must_== FEN("rnbqkb1r/pp1ppppp/7n/2p5/4P3/P4N2/1PPP1PPP/RNBQKB1R b KQkq - 0 3 +0+0")
+        }
+      }
+      "checks" in {
+        val moves = List(E2 -> E4, E7 -> E5, F1 -> C4, G8 -> F6, B1 -> C3, F6 -> E4, C4 -> F7)
+        Game(FiveCheck).playMoveList(moves) must beValid.like { g =>
+          f >> g must_== FEN("rnbqkb1r/pppp1Bpp/8/4p3/4n3/2N5/PPPP1PPP/R1BQK1NR b KQkq - 0 4 +1+0")
+        }
+      }
+    }
+    "read" in {
+      "no checks" in {
+        f <<< FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3") must beSome.like { s =>
+          s.situation.board.history.checkCount.white must_== 0
+          s.situation.board.history.checkCount.black must_== 0
+        }
+      }
+      "explicitely no checks" in {
+        f <<< FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3 +0+0") must beSome.like { s =>
+          s.situation.board.history.checkCount.white must_== 0
+          s.situation.board.history.checkCount.black must_== 0
+        }
+      }
+      "checks" in {
+        f <<< FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3 +1+2") must beSome.like { s =>
+          s.situation.board.history.checkCount.white must_== 2
+          s.situation.board.history.checkCount.black must_== 1
+        }
+      }
+      "winboard checks" in {
+        f <<< FEN("r1bqkbnr/pppp1Qpp/2n5/4p3/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 4+5 0 3") must beSome.like {
+          s =>
+            s.situation.board.history.checkCount.white must_== 0
+            s.situation.board.history.checkCount.black must_== 1
+        }
+      }
+    }
+  }
   "x-fen" should {
     "wikipedia example" in {
       val canonical = FEN("rn2k1r1/ppp1pp1p/3p2p1/5bn1/P7/2N2B2/1PPPPP2/2BNK1RR w Gkq - 4 11")
