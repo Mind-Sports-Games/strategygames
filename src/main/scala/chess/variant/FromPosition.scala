@@ -11,4 +11,5 @@ case object FromPosition
     ) {
 
   def pieces = Standard.pieces
+
 }

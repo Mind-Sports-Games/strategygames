@@ -14,6 +14,10 @@ case object Horde
       standardInitialPosition = false
     ) {
 
+  override def whiteIsBetterVariant     = true
+  override def blindModeVariant         = false
+  override def materialImbalanceVariant = true
+
   /** In Horde chess white advances against black with a horde of pawns.
     */
   lazy val pieces: Map[Pos, Piece] = {

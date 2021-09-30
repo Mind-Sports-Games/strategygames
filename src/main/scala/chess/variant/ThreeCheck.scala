@@ -10,9 +10,11 @@ case object ThreeCheck
       key = "threeCheck",
       name = "Three-check",
       shortName = "3check",
-      title = "Check your opponent 3 times to win the game.",
+      title = "Check your opponent 3 times to win.",
       standardInitialPosition = true
     ) {
+
+  override def whiteIsBetterVariant = true
 
   def pieces = Standard.pieces
 

@@ -46,6 +46,15 @@ abstract class Variant private[variant] (
   def draughts64Variant = russian || brazilian || pool
   def exotic            = !standard
 
+  def baseVariant: Boolean = false
+  def fenVariant: Boolean  = false
+  def aiVariant: Boolean   = true
+
+  def whiteIsBetterVariant: Boolean = false
+  def blindModeVariant: Boolean     = false
+
+  def materialImbalanceVariant :Boolean = false
+
   def isValidPromotion(promotion: Option[PromotableRole]) = promotion match {
     case None       => true
     case Some(King) => true

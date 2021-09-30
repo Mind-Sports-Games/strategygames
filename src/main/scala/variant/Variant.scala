@@ -55,6 +55,16 @@ abstract class Variant(
 
   def exotic: Boolean
 
+  //used in lila setup/src/main/Config.scala
+  def baseVariant: Boolean
+  def fenVariant: Boolean
+  def aiVariant: Boolean
+  //used in lila modules/game/src/main/Game.scala
+  def whiteIsBetterVariant: Boolean
+  def blindModeVariant: Boolean
+  //used in lila modules/playban/src/main/RageSit.scala
+  def materialImbalanceVariant: Boolean
+
   def initialFen: FEN
   def startColor: Color
 
@@ -144,6 +154,15 @@ object Variant {
     def draughts64Variant: Boolean    = false
 
     def exotic: Boolean = v.exotic
+
+    def baseVariant: Boolean = v.baseVariant
+    def fenVariant: Boolean  = v.fenVariant
+    def aiVariant: Boolean   = v.aiVariant
+
+    def whiteIsBetterVariant: Boolean = v.whiteIsBetterVariant
+    def blindModeVariant: Boolean     = v.blindModeVariant
+
+    def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
 
     def initialFen: FEN = format.Forsyth.initial(GameLogic.Chess())
     def startColor: Color = v.startColor
@@ -245,6 +264,15 @@ object Variant {
 
     def exotic: Boolean = v.exotic
 
+    def baseVariant: Boolean = v.baseVariant
+    def fenVariant: Boolean  = v.fenVariant
+    def aiVariant: Boolean   = v.aiVariant
+
+    def whiteIsBetterVariant: Boolean = v.whiteIsBetterVariant
+    def blindModeVariant: Boolean     = v.blindModeVariant
+
+    def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
+
     def initialFen: FEN = format.Forsyth.initial(GameLogic.Draughts())
     def startColor: Color = v.startColor
 
@@ -297,6 +325,13 @@ object Variant {
     def gameFamily: GameFamily = v.gameFamily
   }
 
+  def all: List[Variant] =
+    chess.variant.Variant.all.map(Chess) ::: draughts.variant.Variant.all.map(Draughts)
+
+  def byId = all map { v => (v.id, v)} toMap
+
+  def byKey = all map { v => (v.key, v)} toMap
+
   def all(lib: GameLogic): List[Variant] = lib match {
     case GameLogic.Draughts() => draughts.variant.Variant.all.map(Draughts)
     case GameLogic.Chess()    => chess.variant.Variant.all.map(Chess)
@@ -317,8 +352,10 @@ object Variant {
 
   def apply(lib: GameLogic, id: Int): Option[Variant]     = byId(lib) get id
   def apply(lib: GameLogic, key: String): Option[Variant] = byKey(lib) get key
+  def apply(key: String): Option[Variant]                 = byKey get key
   def orDefault(lib: GameLogic, id: Int): Variant         = apply(lib, id) | default(lib)
   def orDefault(lib: GameLogic, key: String): Variant     = apply(lib, key) | default(lib)
+  def orDefault(key: String): Variant                     = apply(key) | default(GameLogic.Chess())
 
   def byName(lib: GameLogic, name: String): Option[Variant] =
     all(lib) find (_.name.toLowerCase == name.toLowerCase)

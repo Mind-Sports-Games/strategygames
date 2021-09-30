@@ -12,4 +12,6 @@ case object Standard
     ) {
 
   val pieces: Map[Pos, Piece] = Variant.symmetricRank(backRank)
+
+  override def baseVariant: Boolean = true
 }
