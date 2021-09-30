@@ -17,6 +17,8 @@ case object Breakthrough
       boardSize = Board.D100
     ) {
 
+  def perfId: Int = 117
+
   def pieces           = Standard.pieces
   def initialFen       = Standard.initialFen
   def startingPosition = Standard.startingPosition

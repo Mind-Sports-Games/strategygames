@@ -19,6 +19,8 @@ case object Pool
       boardSize = Board.D64
     ) {
 
+  def perfId: Int = 124
+
   override def fenVariant    = true
   override def aiVariant     = false
   def pieces                 = Russian.pieces

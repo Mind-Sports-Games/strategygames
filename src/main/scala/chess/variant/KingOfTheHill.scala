@@ -12,6 +12,9 @@ case object KingOfTheHill
       standardInitialPosition = true
     ) {
 
+  def perfId: Int    = 12
+  def perfIcon: Char = '('
+
   def pieces = Standard.pieces
 
   private val center = Set(Pos.D4, Pos.D5, Pos.E4, Pos.E5)

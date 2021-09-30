@@ -13,6 +13,9 @@ case object Chess960
       standardInitialPosition = false
     ) {
 
+  def perfId: Int    = 11
+  def perfIcon: Char = '\''
+
   override def baseVariant = true
   override def fenVariant = true
 
