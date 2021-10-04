@@ -45,6 +45,9 @@ abstract class Variant private[variant] (
 
   def materialImbalanceVariant :Boolean = false
 
+  def perfId: Int
+  def perfIcon: Char
+
   def isValidPromotion(promotion: Option[PromotableRole]) = promotion match {
     case None       => true
     case Some(King) => true

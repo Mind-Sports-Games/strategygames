@@ -389,6 +389,9 @@ object Variant {
 
     def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
 
+    def perfId: Int    = v.perfId
+    def perfIcon: Char = v.perfIcon
+
     def initialFen: FEN = format.Forsyth.initial(GameLogic.Draughts())
     def startColor: Color = v.startColor
 

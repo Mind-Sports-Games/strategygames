@@ -20,6 +20,9 @@ case object Xiangqi
 
   override def gameFamily: GameFamily = GameFamily.Xiangqi()
 
+  def perfIcon: Char = 'K'
+  def perfId: Int = 201
+
   override def baseVariant: Boolean = true
 
   val pieces           = symmetricFourRank(Vector(Man, Man, Man, Man, Man), boardSize)

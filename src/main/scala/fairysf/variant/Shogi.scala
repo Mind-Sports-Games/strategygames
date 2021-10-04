@@ -20,6 +20,9 @@ case object Shogi
 
   override def gameFamily: GameFamily = GameFamily.Shogi()
 
+  def perfIcon: Char = 'K'
+  def perfId: Int = 200
+
   override def baseVariant: Boolean = true
 
   val pieces           = symmetricFourRank(Vector(Man, Man, Man, Man, Man), boardSize)
