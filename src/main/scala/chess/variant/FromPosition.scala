@@ -10,6 +10,9 @@ case object FromPosition
       standardInitialPosition = false
     ) {
 
+  def perfId: Int    = Standard.perfId
+  def perfIcon: Char = Standard.perfIcon
+
   def pieces = Standard.pieces
 
 }

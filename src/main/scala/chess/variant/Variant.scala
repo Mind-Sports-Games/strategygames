@@ -43,6 +43,9 @@ abstract class Variant private[variant] (
 
   def materialImbalanceVariant: Boolean = false
 
+  def perfId: Int
+  def perfIcon: Char
+
   def allowsCastling = !castles.isEmpty
 
   protected val backRank = Vector(Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook)

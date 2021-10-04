@@ -65,6 +65,9 @@ abstract class Variant(
   //used in lila modules/playban/src/main/RageSit.scala
   def materialImbalanceVariant: Boolean
 
+  def perfId: Int
+  def perfIcon: Char
+
   def initialFen: FEN
   def startColor: Color
 
@@ -163,6 +166,9 @@ object Variant {
     def blindModeVariant: Boolean     = v.blindModeVariant
 
     def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
+
+    def perfId: Int    = v.perfId
+    def perfIcon: Char = v.perfIcon
 
     def initialFen: FEN = format.Forsyth.initial(GameLogic.Chess())
     def startColor: Color = v.startColor
@@ -272,6 +278,9 @@ object Variant {
     def blindModeVariant: Boolean     = v.blindModeVariant
 
     def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
+
+    def perfId: Int    = v.perfId
+    def perfIcon: Char = v.perfIcon
 
     def initialFen: FEN = format.Forsyth.initial(GameLogic.Draughts())
     def startColor: Color = v.startColor

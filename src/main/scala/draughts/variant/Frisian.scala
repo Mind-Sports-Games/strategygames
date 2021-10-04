@@ -16,6 +16,8 @@ case object Frisian
     ) {
   import Variant._
 
+  def perfId: Int = 111
+
   def pieces           = Standard.pieces
   def initialFen       = Standard.initialFen
   def startingPosition = Standard.startingPosition

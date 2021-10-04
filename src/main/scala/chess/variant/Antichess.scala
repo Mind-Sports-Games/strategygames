@@ -14,6 +14,9 @@ case object Antichess
       standardInitialPosition = true
     ) {
 
+  def perfId: Int    = 13
+  def perfIcon: Char = '@'
+
   override def whiteIsBetterVariant     = true
   override def blindModeVariant         = false
   override def materialImbalanceVariant = true
