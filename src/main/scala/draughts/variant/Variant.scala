@@ -53,7 +53,10 @@ abstract class Variant private[variant] (
   def whiteIsBetterVariant: Boolean = false
   def blindModeVariant: Boolean     = false
 
-  def materialImbalanceVariant :Boolean = false
+  def materialImbalanceVariant: Boolean = false
+
+  def perfId: Int
+  def perfIcon: Char = 'K'
 
   def isValidPromotion(promotion: Option[PromotableRole]) = promotion match {
     case None       => true

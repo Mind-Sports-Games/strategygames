@@ -21,6 +21,8 @@ case object Russian
       boardSize = Board.D64
     ) {
 
+  def perfId: Int = 122
+
   override def fenVariant    = true
   override def aiVariant     = false
   val pieces                 = Variant.symmetricThreeRank(Vector(Man, Man, Man, Man), boardSize)

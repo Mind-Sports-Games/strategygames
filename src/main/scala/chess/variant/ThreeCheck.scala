@@ -14,6 +14,9 @@ case object ThreeCheck
       standardInitialPosition = true
     ) {
 
+  def perfId: Int    = 15
+  def perfIcon: Char = '.'
+
   override def whiteIsBetterVariant = true
 
   def pieces = Standard.pieces

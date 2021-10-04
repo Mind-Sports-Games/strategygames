@@ -16,6 +16,9 @@ case object LinesOfAction
       standardInitialPosition = false
     ) {
 
+  def perfId: Int    = 21
+  def perfIcon: Char = ''
+
   override def gameFamily: GameFamily = GameFamily.LinesOfAction()
 
   override def baseVariant: Boolean = true
