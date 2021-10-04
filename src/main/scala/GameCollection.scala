@@ -21,11 +21,17 @@ object GameLogic {
     def name = "Draughts"
   }
 
+  final case class FairySF() extends GameLogic {
+    def id = 2
+    def name = "Fairy Stockfish"
+  }
+
   def all: List[GameLogic] = List(Chess(), Draughts())
 
   // TODO: I'm sure there is a better scala way of doing this
   def apply(id: Int): GameLogic = id match {
     case 1 => Draughts()
+    case 2 => FairySF()
     case _ => Chess()
   }
 }
@@ -74,12 +80,40 @@ object GameFamily {
     def variants = Variant.all(GameLogic.Chess()).filter(_.gameFamily == this)
   }
 
-  def all: List[GameFamily] = List(Chess(), Draughts(), LinesOfAction())
+  final case class Shogi() extends GameFamily {
+    def id = 3
+    def name = "Shogi"
+    def shortName = "Shogi"
+    def gameLogic = GameLogic.FairySF()
+    def aiEnabled = false
+    def defaultVariant = Variant.FairySF(strategygames.fairysf.variant.Shogi)
+    def variants = Variant.all(GameLogic.FairySF()).filter(_.gameFamily == this)
+  }
+
+  final case class Xiangqi() extends GameFamily {
+    def id = 4
+    def name = "Xiangqi"
+    def shortName = "Xiangqi"
+    def gameLogic = GameLogic.FairySF()
+    def aiEnabled = false
+    def defaultVariant = Variant.FairySF(strategygames.fairysf.variant.Xiangqi)
+    def variants = Variant.all(GameLogic.FairySF()).filter(_.gameFamily == this)
+  }
+
+  def all: List[GameFamily] = List(
+    Chess(),
+    Draughts(),
+    LinesOfAction(),
+    Shogi(),
+    Xiangqi()
+  )
 
   // TODO: I'm sure there is a better scala way of doing this
   def apply(id: Int): GameFamily = id match {
     case 1 => Draughts()
     case 2 => LinesOfAction()
+    case 3 => Shogi()
+    case 4 => Xiangqi()
     case _ => Chess()
   }
 

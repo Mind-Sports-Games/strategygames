@@ -1,7 +1,7 @@
 package strategygames.fairysf
 package variant
 
-import strategygames.Color
+import strategygames.{ Color, GameFamily }
 
 import cats.implicits._
 
@@ -17,6 +17,8 @@ case object Shogi
       boardSize = Board.D100
     ) {
   import Variant._
+
+  override def gameFamily: GameFamily = GameFamily.Shogi()
 
   override def baseVariant: Boolean = true
 
