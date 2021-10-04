@@ -14,6 +14,9 @@ case object RacingKings
       standardInitialPosition = false
     ) {
 
+  override def whiteIsBetterVariant = true
+  override def blindModeVariant = false
+
   override def allowsCastling = false
 
   // Both sides start on the first two ranks:

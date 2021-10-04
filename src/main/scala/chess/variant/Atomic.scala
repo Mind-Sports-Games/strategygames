@@ -13,6 +13,9 @@ case object Atomic
       standardInitialPosition = true
     ) {
 
+  override def whiteIsBetterVariant = true
+  override def blindModeVariant = false
+
   def pieces = Standard.pieces
 
   override def hasMoveEffects = true

@@ -19,6 +19,8 @@ case object Pool
       boardSize = Board.D64
     ) {
 
+  override def fenVariant    = true
+  override def aiVariant     = false
   def pieces                 = Russian.pieces
   def initialFen             = Russian.initialFen
   def startingPosition       = Russian.startingPosition
