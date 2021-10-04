@@ -17,6 +17,9 @@ case object Crazyhouse
       standardInitialPosition = true
     ) {
 
+  def perfId: Int    = 18
+  def perfIcon: Char = ''
+
   override def blindModeVariant         = false
   override def materialImbalanceVariant = true
 

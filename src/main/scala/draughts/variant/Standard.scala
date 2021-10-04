@@ -18,6 +18,8 @@ case object Standard
     ) {
   import Variant._
 
+  def perfId: Int = 105
+
   override def baseVariant: Boolean = true
 
   val pieces           = symmetricFourRank(Vector(Man, Man, Man, Man, Man), boardSize)

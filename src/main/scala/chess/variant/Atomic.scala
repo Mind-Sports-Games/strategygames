@@ -13,6 +13,9 @@ case object Atomic
       standardInitialPosition = true
     ) {
 
+  def perfId: Int    = 14
+  def perfIcon: Char = '>'
+
   override def whiteIsBetterVariant = true
   override def blindModeVariant = false
 
