@@ -27,6 +27,14 @@ abstract class Game(
       partialCaptures: Boolean = false
   ): Validated[String, (Game, Move)]
 
+  def drop(
+      role: Role,
+      pos: Pos,
+      metrics: MoveMetrics = MoveMetrics()
+  ): Validated[String, (Game, Drop)]
+
+  def applyDrop(drop: Drop): Game
+
   // Because I"m unsure how to properly write a single, generic copy
   // type signature, we're getting individual ones for how we use it.
   // TODO: figure out if we can properly make this generic
@@ -115,6 +123,24 @@ object Game {
 
     def apply(uci: Uci.Move): Validated[String, (Game, Move)] = uci match {
       case Uci.ChessMove(uci) => g.apply(uci).toEither.map(t => (Chess(t._1), Move.Chess(t._2))).toValidated
+      case _                  => sys.error("Not passed Chess objects")
+    }
+
+    def drop(
+        role: Role,
+        pos: Pos,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, Drop)] = (role, pos) match {
+      case (Role.ChessRole(role), Pos.Chess(pos)) =>
+        g.drop(role, pos, metrics)
+          .toEither
+          .map(t => (Chess(t._1), Drop.Chess(t._2)))
+          .toValidated
+      case _ => sys.error("Not passed Chess objects")
+    }
+
+    def applyDrop(drop: Drop): Game = drop match {
+      case (Drop.Chess(drop)) => Chess(g.applyDrop(drop))
       case _                  => sys.error("Not passed Chess objects")
     }
 
@@ -222,6 +248,14 @@ object Game {
       case _ => sys.error("Not passed Draughts objects")
     }
 
+    def drop(
+        role: Role,
+        pos: Pos,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, Drop)] = sys.error("Can't drop in draughts")
+
+    def applyDrop(drop: Drop): Game = sys.error("Can't drop in draughts")
+
     def copy(clock: Option[Clock]): Game = Draughts(g.copy(clock = clock))
     def copy(turns: Int, startedAtTurn: Int): Game = Draughts(
       g.copy(turns = turns, startedAtTurn = startedAtTurn)
@@ -301,6 +335,24 @@ object Game {
     def apply(uci: Uci.Move): Validated[String, (Game, Move)] = uci match {
       case Uci.FairySFMove(uci) => g.apply(uci).toEither.map(t => (FairySF(t._1), Move.FairySF(t._2))).toValidated
       case _                  => sys.error("Not passed FairySF objects")
+    }
+
+    def drop(
+        role: Role,
+        pos: Pos,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, Drop)] = (role, pos) match {
+      case (Role.FairySFRole(role), Pos.FairySF(pos)) =>
+        g.drop(role, pos, metrics)
+          .toEither
+          .map(t => (FairySF(t._1), Drop.FairySF(t._2)))
+          .toValidated
+      case _ => sys.error("Not passed FairySF objects")
+    }
+
+    def applyDrop(drop: Drop): Game = drop match {
+      case (Drop.FairySF(drop)) => FairySF(g.applyDrop(drop))
+      case _                    => sys.error("Not passed FairySF objects")
     }
 
     def copy(clock: Option[Clock]): Game = FairySF(g.copy(clock = clock))

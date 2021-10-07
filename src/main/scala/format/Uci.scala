@@ -91,13 +91,16 @@ object Uci {
   }
 
   abstract sealed class Drop(
-    val pos: Pos,
+    val role: Role,
+    val pos: Pos
   ) extends Uci {
     def origDest = pos -> pos
-
   }
 
-  final case class ChessDrop(d: chess.format.Uci.Drop) extends Drop(Pos.Chess(d.pos)) with Chess {
+  final case class ChessDrop(d: chess.format.Uci.Drop) extends Drop(
+    Role.ChessRole(d.role),
+    Pos.Chess(d.pos)
+  ) with Chess {
     def uci                  = d.uci
     def piotr                = d.piotr
     val unwrap = d
@@ -106,7 +109,10 @@ object Uci {
     def toFairySF = sys.error("Can't make a fairysf UCI from a chess UCI")
   }
 
-  final case class FairySFDrop(d: fairysf.format.Uci.Drop) extends Drop(Pos.FairySF(d.pos)) with FairySF {
+  final case class FairySFDrop(d: fairysf.format.Uci.Drop) extends Drop(
+    Role.FairySFRole(d.role),
+    Pos.FairySF(d.pos)
+  ) with FairySF {
     def uci                  = d.uci
     def piotr                = d.piotr
     val unwrap = d

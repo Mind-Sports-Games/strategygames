@@ -53,6 +53,8 @@ abstract sealed class Situation(val board: Board, val color: Color) {
 
   def move(uci: Uci.Move): Validated[String, Move]
 
+  def drop(role: Role, pos: Pos): Validated[String, Drop]
+
   def withHistory(history: History): Situation
 
   def withVariant(variant: Variant): Situation
@@ -116,6 +118,12 @@ object Situation {
 
     def move(uci: Uci.Move): Validated[String, Move] = uci match {
       case Uci.ChessMove(uci) => s.move(uci).toEither.map(m => Move.Chess(m)).toValidated
+      case _ => sys.error("Not passed Chess objects")
+    }
+
+    def drop(role: Role, pos: Pos): Validated[String, Drop] = (role, pos) match {
+      case (Role.ChessRole(role), Pos.Chess(pos)) =>
+        s.drop(role, pos).toEither.map(d => Drop.Chess(d)).toValidated
       case _ => sys.error("Not passed Chess objects")
     }
 
@@ -202,6 +210,9 @@ object Situation {
       case _ => sys.error("Not passed Draughts objects")
     }
 
+    def drop(role: Role, pos: Pos): Validated[String, Drop] =
+      sys.error("Can't do a Drop for draughts")
+
     def withHistory(history: History): Situation = history match {
       case History.Draughts(history) => Draughts(s.withHistory(history))
       case _ => sys.error("Not passed Draughts objects")
@@ -270,6 +281,12 @@ object Situation {
 
     def move(uci: Uci.Move): Validated[String, Move] = uci match {
       case Uci.FairySFMove(uci) => s.move(uci).toEither.map(m => Move.FairySF(m)).toValidated
+      case _ => sys.error("Not passed FairySF objects")
+    }
+
+    def drop(role: Role, pos: Pos): Validated[String, Drop] = (role, pos) match {
+      case (Role.FairySFRole(role), Pos.FairySF(pos)) =>
+        s.drop(role, pos).toEither.map(d => Drop.FairySF(d)).toValidated
       case _ => sys.error("Not passed FairySF objects")
     }
 

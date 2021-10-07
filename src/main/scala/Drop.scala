@@ -5,11 +5,11 @@ import cats.syntax.option.none
 import strategygames.format.Uci
 
 abstract sealed class Drop(
-    piece: Piece,
-    pos: Pos,
-    situationBefore: Situation,
-    after: Board,
-    metrics: MoveMetrics = MoveMetrics()
+  val piece: Piece,
+  val pos: Pos,
+  val situationBefore: Situation,
+  val after: Board,
+  val metrics: MoveMetrics = MoveMetrics()
 ) {
 
   def before = situationBefore.board
