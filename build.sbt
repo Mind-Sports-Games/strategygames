@@ -12,7 +12,8 @@ libraryDependencies ++= List(
   "org.specs2"             %% "specs2-cats"              % "4.10.0" % Test,
   "com.github.ornicar"     %% "scalalib"                 % "7.0.2",
   "joda-time"               % "joda-time"                % "2.10.10",
-  "org.typelevel"          %% "cats-core"                % "2.2.0"
+  "org.typelevel"          %% "cats-core"                % "2.2.0",
+  "org.playstrategy"        % "fairystockfish"           % "0.0.1"
 )
 
 resolvers ++= Seq(
