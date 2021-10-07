@@ -1,4 +1,4 @@
-package strategygames.chess
+package strategygames.fairysf
 package format.pgn
 
 import cats.data.Validated
@@ -21,18 +21,18 @@ case class Std(
     situation: strategygames.Situation,
     iteratedCapts: Boolean = false,
     forbiddenUci: Option[List[String]] = None
-  ) = move(situation.toChess).map(StratMove.wrap).map(Left.apply)
+  ) = move(situation.toFairySF).map(StratMove.wrap).map(Left.apply)
 
   override def withSuffixes(s: Suffixes) =
     copy(
       metas = metas withSuffixes s,
-      promotion = s.promotion.map(_.toChess)
+      promotion = s.promotion.map(_.toFairySF)
     )
 
   def withMetas(m: Metas) = copy(metas = m)
 
-  def move(situation: Situation): Validated[String, strategygames.chess.Move] =
-    situation.board.pieces.foldLeft(none[strategygames.chess.Move]) {
+  def move(situation: Situation): Validated[String, strategygames.fairysf.Move] =
+    situation.board.pieces.foldLeft(none[strategygames.fairysf.Move]) {
       case (None, (pos, piece))
           if piece.color == situation.color && piece.role == role && compare(
             file,
@@ -64,11 +64,11 @@ case class Drop(
     situation: strategygames.Situation,
     iteratedCapts: Boolean = false,
     forbiddenUci: Option[List[String]] = None
-  ) = drop(situation.toChess).map(StratDrop.wrap).map(Right.apply)
+  ) = drop(situation.toFairySF).map(StratDrop.wrap).map(Right.apply)
 
   def withMetas(m: Metas) = copy(metas = m)
 
-  def drop(situation: Situation): Validated[String, strategygames.chess.Drop] =
+  def drop(situation: Situation): Validated[String, strategygames.fairysf.Drop] =
     situation.drop(role, pos)
 }
 
@@ -81,11 +81,11 @@ case class Castle(
     situation: strategygames.Situation,
     iteratedCapts: Boolean = false,
     forbiddenUci: Option[List[String]] = None
-  ) = move(situation.toChess).map(StratMove.wrap).map(Left.apply)
+  ) = move(situation.toFairySF).map(StratMove.wrap).map(Left.apply)
 
   def withMetas(m: Metas) = copy(metas = m)
 
-  def move(situation: Situation): Validated[String, strategygames.chess.Move] =
+  def move(situation: Situation): Validated[String, strategygames.fairysf.Move] =
     for {
       kingPos <- situation.board kingPosOf situation.color toValid "No king found"
       actor   <- situation.board actorAt kingPos toValid "No actor found"

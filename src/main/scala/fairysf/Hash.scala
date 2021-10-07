@@ -1,5 +1,7 @@
 package strategygames.fairysf
 
+import strategygames.Color
+
 final class Hash(size: Int) {
 
   def apply(situation: Situation): PositionHash = {
@@ -20,14 +22,17 @@ object Hash {
 
   val size = 3
 
-  val zero: PositionHash = Array(0, 0, 0)
-
   class ZobristConstants(start: Int) {
-    def hexToLong(s: String): Long = (java.lang.Long.parseLong(s.substring(start, start + 8), 16) << 32) |
-      java.lang.Long.parseLong(s.substring(start + 8, start + 16), 16)
-    val whiteTurnMask  = hexToLong(ZobristTables.whiteTurnMask)
-    val actorMasks     = ZobristTables.actorMasks.map(hexToLong)
-    val kingMovesMasks = ZobristTables.kingMovesMasks.map(hexToLong)
+    def hexToLong(s: String): Long =
+      (java.lang.Long.parseLong(s.substring(start, start + 8), 16) << 32) |
+        java.lang.Long.parseLong(s.substring(start + 8, start + 16), 16)
+    val whiteTurnMask       = hexToLong(ZobristTables.whiteTurnMask)
+    val actorMasks          = ZobristTables.actorMasks.map(hexToLong)
+    val castlingMasks       = ZobristTables.castlingMasks.map(hexToLong)
+    val enPassantMasks      = ZobristTables.enPassantMasks.map(hexToLong)
+    val threeCheckMasks     = ZobristTables.threeCheckMasks.map(hexToLong)
+    val crazyPromotionMasks = ZobristTables.crazyPromotionMasks.map(hexToLong)
+    val crazyPocketMasks    = ZobristTables.crazyPocketMasks.map(hexToLong)
   }
 
   object ZobristConstants {}
@@ -37,12 +42,16 @@ object Hash {
   private val polyglotTable    = new ZobristConstants(0)
   private lazy val randomTable = new ZobristConstants(16)
 
-  def roleIndex(role: Role) = role match {
-    case Man       => 0
-    case King      => 1
-    case GhostKing => 2
-    case GhostMan  => 3
-  }
+  def roleIndex(role: Role) =
+    role match {
+      case Pawn       => 0
+      case Knight     => 1
+      case Bishop     => 2
+      case Rook       => 3
+      case Queen      => 4
+      case King       => 5
+      case LOAChecker => 6
+    }
 
   private def pieceIndex(piece: Piece) =
     roleIndex(piece.role) * 2 + piece.color.fold(1, 0)
@@ -51,6 +60,14 @@ object Hash {
     64 * pieceIndex(actor.piece) + actor.pos.hashCode
 
   def get(situation: Situation, table: ZobristConstants): Long = {
+
+    def crazyPocketMask(role: Role, colorshift: Int, count: Int) = {
+      // There should be no kings and at most 16 pieces of any given type
+      // in a pocket.
+      if (0 < count && count <= 16 && roleIndex(role) < 5)
+        Option(table.crazyPocketMasks(16 * roleIndex(role) + count + colorshift))
+      else None
+    }
 
     val board = situation.board
     val hturn = situation.color.fold(table.whiteTurnMask, 0L)
@@ -61,11 +78,42 @@ object Hash {
       }
       .fold(hturn)(_ ^ _)
 
-    // Hash in frisian kingmove-counter data
-    val hkingMoves = hactors
+    val hcastling =
+      if (board.variant.allowsCastling)
+        (situation.history.castles.toSeq.view zip table.castlingMasks)
+          .collect { case (true, castlingMask) =>
+            castlingMask
+          }
+          .fold(hactors)(_ ^ _)
+      else hactors
 
-    hkingMoves
+    val hep = situation.enPassantSquare.fold(hcastling) { pos =>
+      hcastling ^ table.enPassantMasks(pos.file.index)
+    }
 
+    // Hash in special three-check data.
+    val hchecks = board.variant match {
+      case _ => hep
+    }
+
+    // Hash in special crazyhouse data.
+    val hcrazy = board.crazyData.fold(hchecks) { data =>
+      val hcrazypromotions = data.promoted.view
+        .map { p =>
+          table.crazyPromotionMasks(p.hashCode)
+        }
+        .fold(hchecks)(_ ^ _)
+      Color.all
+        .flatMap { color =>
+          val colorshift = color.fold(79, -1)
+          data.pockets(color).roles.groupBy(identity).flatMap { case (role, list) =>
+            crazyPocketMask(role, colorshift, list.size)
+          }
+        }
+        .fold(hcrazypromotions)(_ ^ _)
+    }
+
+    hcrazy
   }
 
   private val h = new Hash(size)
@@ -845,12 +893,158 @@ private object ZobristTables {
     "5fa7867caf35e149a893a8fa258f383e",
     "56986e2ef3ed091be78c30cc1179b849",
     "917f1dd5f8886c612e4432e6ce4996d9",
-    "d20d8c88c8ffe65f576ec7a84e0b932d"
+    "d20d8c88c8ffe65f576ec7a84e0b932d",
+    "e451a35fdc1a15680be771561ec918cc",
+    "a7491dbcd15111d48c1d8d1f652a529e",
+    "8a4217fcd5606ec1e77cfdee91420b23",
+    "5d58f803bcc36ce9e817a8578960ff4e",
+    "a90baddaceded9031c729588f29a5aca",
+    "a9471d9e37b819e2b6e41b1c4a06a3f5",
+    "e156bff8c89bc39a0508ed09c3302ab5",
+    "0615d8d376bc7fcded07ce16d1ef259f",
+    "f456457534903782b909e6354382f1e8",
+    "32b536e093de22e9d41b48ed5273a71b",
+    "78b4539b20717c761639f5383a52a61b",
+    "a911e65a7773a2e0bd764b105ac02726",
+    "f627e5a63397a52416b3e6e67931c70f",
+    "4aafe20703afe6fd6c4590dcf159b130",
+    "39abad557a5979408f5f986770948b92",
+    "ac6032dffcf895202dccb0a1104abc38",
+    "92737a916770b1ef93f6cfaf16b73787",
+    "baeead670f8e4541de080d510ba6b8ad",
+    "c3e988bb11d2a6566038769bd67a9ff5",
+    "d8c983e407515dc00b33f8b0348d9f49",
+    "c8e67b5353d9c19fe856d64c017dce27",
+    "ea99450e132d73cbb5fa1987248dee24",
+    "12aa814460ac477c36eca5ebc4a2e4cd",
+    "619c162f3194d65186004e0fc630a7e1",
+    "f2f0f063aa2c16f521d47ec9fd7a02e1",
+    "6947f25cd65aa856dd30a05f9e19dcf6",
+    "25f20b4a567c64f5da2a9bf2f48d8533",
+    "9a2229ec2807889875f13543748549fa",
+    "2c48815c49a5f0fabd2c1a78eb76674b",
+    "af77c31d4c7265afc7e6a3f2f0a3aa37",
+    "acce0c833a3573efbafb036e101ebab3",
+    "30e93ba51f97b02246ef1cb7cdfac4fb",
+    "51f262e5a63efba0784655d00b1b28dd",
+    "cad75ea0533450f427608d1669c3199b",
+    "b2d06c848a5dd3e0dccf6e2d796b8daf",
+    "54a93f6f6155cd7c80e63fc44c3a5c00",
+    "3f5e483a930616001f173727808a8b85",
+    "f9229b26700da30a679fea485444b664",
+    "0ab39ecfc086ff245e818c8204e8dbe1",
+    "99f363d7d7529302d5df5ddc8f7114ad",
+    "91ce601f9b79806adc0ae2e42c2e3824",
+    "5faa8e971b369e61059556ea22a383c4",
+    "cf918b7638ff0f6adc9aa9c48ac35339",
+    "da681fb5553e51f3e43342224ea75fa2",
+    "35ea31a821d07a97241a05687374bbac",
+    "6174472a0ba38852a8aeb7ec6fd154c9",
+    "7d2353972cb50561b5ed67257e94af27",
+    "3086c452a8d1f217ca82922c96b4891e",
+    "b3493a4890144e823c49ed4447f5c1af",
+    "b77eb04ced6b4da680e5697a959cd265",
+    "0f9674061d9dde98f2f908462b7a7c82",
+    "0f5b409c8cd6d7558e8ad8c31c8d7c35",
+    "314b1563fffd7df412b190f269af3d15",
+    "49194a321ca48e15ae59e4212375c373",
+    "ac1f8d82620b99ecca85acc80d4792cc",
+    "f3d45ad6cc8143721738dbaf12f77c02",
+    "9f512e364fe3918b5fc34f06b9a581c5",
+    "db330613d3ede96adcc7365abfdb4ca5",
+    "599fb83195c12763d4b6179359571cc7",
+    "3630c153c8eb55f537e740d456eb6ac7",
+    "d142d302f484b36d5f549dfeee2a614b",
+    "bd3aba4c2361aefdea27d301fedf63e7",
+    "ae61e9ac401204d817ebad4fe2786896",
+    "e1761b467bd6200fbf12eb6d219e9039",
+    "41a7e1766724bd0d934f629fd32ae8e6",
+    "a3cd0a0fe0cb3221c1f94584f4a4718f",
+    "720c42f46a4a90bb4a7f154207c6f29a",
+    "bafd4f0ff903b1252efca997124c46aa",
+    "aab22508c3ddb9d1782e52d302382123",
+    "8a1fe9ebd768c2ec66d9b5295421ef82",
+    "d1ca0b47c5fae423a2171d841fd76862",
+    "edc4c252d59a45afb08e24258449c0f8",
+    "61e3c107bcd6086344b69ef29abcf104",
+    "0fc798dd2b02375eb856b9b6373e52b1",
+    "7a947bcae228e9706d5d2adf1bfc1524",
+    "c0677350c96d27adb5d88ef51ff0f808",
+    "1d0b08749687673391fffe853657b1db",
+    "3cef42fef7be3ee3836fe98efbc0a9ac",
+    "6b3371897f768168650e36cf10e68f5b",
+    "c2559854c0155ddfd69248be73e5f1fa",
+    "484ef707ad593f1114e20a4810507627",
+    "7001bb600a185cdfb89314fa2e10d6c3",
+    "dde856a34f8409113a989115b4cb1b74",
+    "c0383bd196c95464786fa46e50886c70",
+    "dd054cc476f9528884350262671ef260",
+    "fe72e1e8cc12d9b27f1cb78c5607eea1",
+    "82eebd2d55ef0bc7031620e7a9d440a4",
+    "dc0bae8b3c4d14e5da3208de90e91130",
+    "eebf7e1e21ae613a4911bf4adb2c5495",
+    "40338b058d9529b0ff74e78ac20b5606",
+    "f4f11d4cd9b76d1af11adadcce55f66d",
+    "6c13ad29ec64895bb5a5b848cbb2a3b2",
+    "0e2afbefd0bb63f426f20a1d6e531b16",
+    "ef1676dfa4c7f70476961b8fc2803de5",
+    "0aedb1a2cf66bcf03ab58a50aefbc505",
+    "53ff331b68b80b7409cc66874722c2c8",
+    "23ca594272c0e24dd23ea2458c58f9a2",
+    "7bb0e2eccb4a002988f1e8b49a77b37e",
+    "18fb00871630e7cc9c940772bf8bf640",
+    "b53d7e4052b0e6ed9803c0ac9989696d",
+    "5116a581878fbae0f93f42bae0d928de",
+    "7acdc7087d4423e0e791d17177dc66e5",
+    "0dbeeaeda792606213669a27d85fd282",
+    "7ffa5dae727405beedb817a210993d87",
+    "c71b75d78d28cdd211ca64062996e3d8",
+    "a64d6eaf17bd8eff86de6dfb079540bc",
+    "c4ae0d72878a4e17b2b1d1264ef70fdb",
+    "b5594460bd362f25a59c743beece4151",
+    "03c957eb70fd2d319a7edb235ba97eca",
+    "be7bf16e1398fd31dbe49ee3777fe59d",
+    "bfd7597a15804ccf48bc46404e9b0ac6",
+    "4e021708b31e165df350519970010467",
+    "36ba1af5eb9bd99d0dc581bb9f26b9d3",
+    "f5c9a9fd9222bbc4d708e13546b467e4",
+    "ea4c994af8783870ac39a8adcd1b2b15",
+    "1124c1533080e0853668d95537083a34",
+    "2feeec908fcea8efc15c2314889520cb",
+    "e274244547fb495828b2fbb3a00e69a4",
+    "d57059580c87b8aa44230d8dae0e8b75",
+    "bd76f6ad928d4194ec15b393ebddb27b",
+    "d3d11982cb9c6045e2a0c9d3ac375ad1",
+    "9f100b15d844d76924d7f01a6a0c12cc",
+    "91798a2918a4f379cc75ebc58b1affd3",
+    "218056f83ba6f96223b282eda43fdc12",
+    "94b3aab28111b3be02e7cd6d0b2dbcda",
+    "81c76d5d6d293239a4dd056a7b039528",
+    "b3b8051e4d3405c9cc44d2e7b563d30e",
+    "c4b5e4f9f06c3ae0d4ef932e79e182ff"
   )
 
   val whiteTurnMask = "f8d626aaaf2785093815e537b6222c85"
 
-  val kingMovesMasks = Array(
+  val castlingMasks = Array(
+    "31d71dce64b2c310ca3c7f8d050c44ba",
+    "f165b587df8981908f50a115834e5414",
+    "a57e6339dd2cf3a077568e6e61516b92",
+    "1ef6e6dbb1961ec9d153e6cf8d1984ea"
+  )
+
+  val enPassantMasks = Array(
+    "70cc73d90bc26e2413099942ab633504",
+    "e21a6b35df0c3ad7946c73529a2f3850",
+    "003a93d8b28069623d1adc27d706b921",
+    "1c99ded33cb890a1994b8bd260c3fad2",
+    "cf3145de0add4289f4cf0c83cace7fe4",
+    "d0e4427a5514fb7254807a18b6952e27",
+    "77c621cc9fb3a483e2a1aff40d08315c",
+    "67a34dac4356550b47ec43ffbc092584"
+  )
+
+  val threeCheckMasks = Array(
     "1d6dc0ee61ce803e6a2ad922a69a13e9",
     "c6284b653d38e96a49b572c7942027d5",
     "803f5fb0d2f97fae08c2e9271dc91e69",
@@ -859,4 +1053,223 @@ private object ZobristTables {
     "1b0ce4198b3801a6c8ce065f15fe38f5"
   )
 
+  val crazyPromotionMasks = Array(
+    "2f9900cc2b7a19ca2b9178eb57f3db25",
+    "f75235beb01886d317d16678351d3778",
+    "8ae7e29889ac996488b17afbdae836b1",
+    "ad30091ce7cb4204a8985bb047c388b1",
+    "aae118773ddd4e4d2577b875de120fd2",
+    "8ec514ce4736aa07bdf2fdea13ee21fd",
+    "26a412bd8cef4f153bcf1cf1605da5e7",
+    "1bdce26bd9af059f6ea6f4fb2ca4d856",
+    "ea5f4ade5acc0516b1198a9621b237f4",
+    "69ab7ebc076505656c87686b28782362",
+    "3e655f895a188a1c5158703d9536de86",
+    "f394f6882a114d65b3126fafbea75501",
+    "3173cfa2be5bd4d380d3335852547580",
+    "434d20d2ca00ae71c5afc4f44d5ab019",
+    "3ba297f73d338c937aff7035ddcde586",
+    "099ba1b0205a5ea5c338837c953120b2",
+    "c49f050b5e1c56537f8b4b715fc6eee8",
+    "e14eec50a9c690e876d1cd962b7c0005",
+    "2571cc79f4ce0169ad3db13d420b8915",
+    "de0f98d6002f4323e5a6076284061351",
+    "0682220b02e5c3e87f61ddc8b19de688",
+    "cb900d3a6b38c39d8648ca9be5696f33",
+    "24620fbf09d50d66469dc25e1b32d323",
+    "0f40a9b2781a119d4f529fa289578425",
+    "83c6980df0d0493282d550f6a40a3d66",
+    "ab6f9af720cb5df48e791844cfb87476",
+    "1c906974166ee8d4b229ab8bb6054dad",
+    "9c1ba3db0784ebda50a0b7e3c796ad7e",
+    "81a19098d16aa929186c0c4a7a5d68d1",
+    "fce56173c63ccefd748301e9e571a670",
+    "43cb7aa20c6209c22119955cd577ee40",
+    "7e96e2ae86924bab6c57c1380ffb21fb",
+    "01860725034b0fefadd607ff5aaaf995",
+    "f74d369066ec4e96d41ec439c73a3e0f",
+    "1ae9962c6e0d12323ee343c1d9837a9e",
+    "5d66fa465ccfc56097707414bf743321",
+    "e9c13ae1fc36afaae6a8ec453ed67917",
+    "caec4035fb840be403845f0849e183df",
+    "839d28adafad0f8fccd5f9e7ce7e601f",
+    "e4703b6e30422003e2c04ba3484232d8",
+    "1e2fd5b2827d5e435d9b925a3e6af022",
+    "96f1e8d8b94bd960a852b77063b9e148",
+    "90f2075c3f43960c279d2c0c53ecaac6",
+    "c48e0774c4f9134f39f0827a4f811c72",
+    "f17e5f6a2cb000c73b064b8614517b48",
+    "6248409bf55a4925db19bcf000dd394a",
+    "967bd94eb30505cca63dddb617c59634",
+    "e91e89853f9e844fece83ffa46fd173a",
+    "b841038e24193f0801c4d4d39c11557f",
+    "46f3b25cae82a6cca618dd21a5f6b67f",
+    "3e97e042449e3ed58356bdf440563fb0",
+    "868a166af46dcbd2f35ad55d727351a1",
+    "f71be788b3fd1a7aa3a0c83ec173d41c",
+    "cb6d65410533cc37a8b2fe93fc5ddd19",
+    "7e30d70559efaedc984fd612fa3936bd",
+    "32db0f5ca18159ce71c7e142bb029d2a",
+    "97a9116e874228c5759f8a9460c634a6",
+    "85ee68ee3a1752976fa2ca2ca3bdeb90",
+    "076a14170b409e2aea5f0228fc314b97",
+    "bad49d47dc95855bc40c265d97e763c0",
+    "636187d94ded991e201d68d0d89f0e31",
+    "962e50971f09cfab1b769456c77879cf",
+    "8f16c910d6776589a8baaf8b31da09a5",
+    "7e3de4bfbef5566f06a79ac414c9632e"
+  )
+
+  val crazyPocketMasks = Array(
+    "b262e9f9d61233206e21a47d5b561a1d",
+    "91533947cdaa8bec4263a757e414fe44",
+    "a13b56b45723a3d493c43f67cf55b53f",
+    "9a35cce29ca3ac75a89732f339d35eec",
+    "2716940e1d4f28d75df4ac25c29fbebf",
+    "7447209cfb79306662059230cedcd78f",
+    "5cf91d8ae6402e1a9b0f7261932d2c8e",
+    "4625588d38487ac5fc0f99f00e0cc0e7",
+    "e42ec6191353e3bdcba8a5a02c351aa5",
+    "478e6cc8f6b2dada77a6c01bd0174d69",
+    "1726fc948b994b87c200e5264100e463",
+    "fb9d2e5a66b467413f340a89f525effe",
+    "7f668e401ffe9e6ff748b2be597b2f7a",
+    "ee4d6fe11c46a236f7b2eddf7b8838c2",
+    "006cb70064259959bdec7e9f4317a678",
+    "33535a7c4def1b245e022239fdf20b36",
+    "479e792f8171fc29fdd92fa05b03b629",
+    "656a6e71de97097580cdab95a89927dc",
+    "cada3e48618a1c2b92cb516b8eba4a30",
+    "b37ad7262db9c99eac950f8bce3af2d9",
+    "85ae25402a311d5d9a43060d3aaae01a",
+    "3de4e82d52dbb44cf12b2f6012f9333c",
+    "b1c8499674464c218ae9143ece61584a",
+    "f1c1853cc6827b84676f70930e72993c",
+    "51f97ed3ba004fb025e0f5f014476a1f",
+    "00da9ede878e3e981e33827f042de978",
+    "3cd0fd658e1cdb12dd158e4a7838524d",
+    "ac2940b688a1d0f92b75316dfa1b15e2",
+    "e51acb5b336db0df0283b57f325ea495",
+    "cf7517fbdcb16174146e60f56ab91765",
+    "dfe901aba4a2ced3f50d2497f8b12819",
+    "24bfd4b72c8852eb7600c53f3c60308b",
+    "f085bcd9711883d4b75208a6056dc7e9",
+    "41b71908a3d86274e5f0eb83c20e921b",
+    "6d604cc0a2df1a697529d0a0c95f08ed",
+    "aedf8291e0048c3933c7b70ee04a511c",
+    "09d3c83f59547935727a256dad06cc11",
+    "257d5c7ebc7182421b26058e1ba73008",
+    "56ac1c998f5c2ede09c48fc7e167f3b0",
+    "a25c0b0679937316954f57cdf6076cd4",
+    "a9a2a7e200faa93632facc37b50d925e",
+    "b8e7ca4716cf9d49259698168b89f941",
+    "9b253f89247c4c1db4479bfb3575d3fc",
+    "1e701e2a73f9dc4be69d20380ad45ef5",
+    "cdf351b289aa5a840ea72e455dfb08e6",
+    "2e4e118fc45fdc0d7f834fab71613f89",
+    "80247d70885ad5ce0bef7b04290fa4d3",
+    "0a99dccfce316ca0425d9a9261abb5b9",
+    "b5553435dae76840231bfd9dfb70f61e",
+    "ee562004d5d14158f2ce79a69837967f",
+    "551b5fa3ec7166a2f9012eb6947f5b8c",
+    "2dbb493c6e9fec06e867f9c703503bf1",
+    "f06b4c65f4bb14a1ee98c9010d1d3cbc",
+    "5f0b44d98013acb995fc0aa1222389e8",
+    "ce7dbafa734bba8abf7533ebb6c99102",
+    "e009c0e355a77913bc4153720b7d8489",
+    "21918f473cb6decfe892965f4753afa0",
+    "dcf11e80dc14763feaec3e0774781d2e",
+    "7ac21357500fb0c600b698a9c3390404",
+    "28abe0a3761e326c84c94d9a3d13f9b5",
+    "30b8e3da17d34c6ee4a910d516e80a37",
+    "d999d38ffa5d771e30a99425bba73df4",
+    "8a7e0d1367d70b281fe92363cf099b7e",
+    "9157bfe7ac0717963fce173a5e427cb2",
+    "adda94b21edd779a3cf044d0bd7bfb26",
+    "6f555cf7856f0d6314dd9fdfd382638a",
+    "5b2a5b2788adc947a4ec5d64116068be",
+    "500c782c8c562a42970d0225c3155df4",
+    "20f8b3f7059d888496bb58faf0fd1692",
+    "79c890ed3e95f3f4183f9136b8160b83",
+    "e64dbd474ddcf8ca85c179d22cce92b9",
+    "a94966fbf7f270d5d355d7752b4405ff",
+    "2473b4e6ad9faa9ada7b7aa372230d64",
+    "98abdf9fa4b487e68218ddc4550f6260",
+    "75fa1ecb0717029a090f2692c727e1a1",
+    "f6053757646a08bace74c18e0f75f7f8",
+    "060e2788d99813aa075081d9944cf832",
+    "5fa61c63681ebbc890fb343362ef172d",
+    "90bbf42db708006aac07cd32cdd4a6c5",
+    "b525460ec1c159163684e6c1eaf9e5f5",
+    "2696070a4502024d0f515afc1356a5ca",
+    "158087442731df68282bbc7b2209e436",
+    "65010c3ea0acfdcfc0172402afbbcbc5",
+    "b28ecdf305a7a83134e345bfa3c47ceb",
+    "fd037a2e2a2e54e8a56824690a26a07d",
+    "5f09f3763f6a488282de3ff226f8520b",
+    "e0125e53c4e64b83d6e502a609ba9dde",
+    "1de44a244be3752a3b40c681d5b6e330",
+    "f78919dfb05f031c23c2312838f00cc0",
+    "bf81caebad91d8e16e63a230b2eab193",
+    "bc3780dce0bd58d59a08aa69fb121fc8",
+    "65b5fb1afa5c5714551be806bb80e780",
+    "b7ddb798d0c1ff235ab7fd28c7b96a6b",
+    "a823d99d1504f4d6b3277b903da3eab9",
+    "a3c526e07f1cf98daf84fcbb2d16fa25",
+    "a848f93e7a83ece41c53b33de31ba544",
+    "21e3941600abaaec4186f24fae7b9c26",
+    "534a070449a9238d4bccd3e248e2a69c",
+    "f86c2e4bb82d39238d6b46aee9ae0606",
+    "a594b44c256b41f87b281261c9e1028e",
+    "f1503a710531b6776c501072a1108abe",
+    "171a27a1b9911e11a8c4da9ba7c8a22a",
+    "d8d8a26ac022ebe688d5489e8bc29294",
+    "151ca9f641352f331381a967122b289a",
+    "553b499dc1eae685dc944a008e97acd7",
+    "0137684bed65e27e63838f936ef425de",
+    "254a12bd9efa353539bd05197acaddb5",
+    "f8361f0b0a35ef6df5871ddb63b0aecf",
+    "a7b7e76b7ff82166cd9a19a4addac30e",
+    "e266e0067bc7f39608c6dce88d2bfe12",
+    "bdd8a9037f5d0298ea8c0b4c4097cc43",
+    "2d5977c3f88a2a3174fb47cb2de1371f",
+    "4587cd651a3bb45f8c2406a60633f3a5",
+    "bcdc3c56ad971eb0c40387658bd2d9bf",
+    "248b2073706e18444616dae41e7f6769",
+    "ab03444dfb15bd0aff41e4fd3d1a34ee",
+    "bcaff3134756ab78d9c4e712cc561f6a",
+    "eea844cf3e1db285393520a31d54572c",
+    "b917fdb80f3551161cc02ca62684138e",
+    "21931f559ecefa34c1b9f65a9989c1d5",
+    "7170c6436114a4c286e3a7966174637c",
+    "73d2a7c1017a2aaf80d8247d1168300a",
+    "3b855d1755dce20e1996e2ac2b938629",
+    "37e35078817f0dbdb26f006263639c6a",
+    "e59b1e3389a1aad3fe1f7c18126abdd7",
+    "bad11ebe3c3df23983b9090f7e58e659",
+    "d54aad8a64c65c2728253df5164c46a3",
+    "eadb37a4f7fbeb4c3448dc022a87a231",
+    "5453586c4984a81c72ebd4eb6f76301d",
+    "b6777cd5e1b16bcc1f5cf5c027f9df47",
+    "24b690161baa0d65bcda2313c8ee1152",
+    "5bd3613d2ee222fdb2ebc33394603af6",
+    "c928bda035f8c39d84b3b1b6fa01cb1a",
+    "29e8eeca9b09c735e16b42d53a9ecf6e",
+    "dc35bba3f78ed4ee27b24383307c7a88",
+    "1753c5b3ef820c8101635963de0d35f7",
+    "ef3368ab56565ae7d5667fb942e52b2f",
+    "ebf48bd35c4ead40958faa7325a97d06",
+    "529b39d015e4975570433ecb73b7ad92",
+    "697ea70620e987514ab8a46b4c36eaaa",
+    "ebcabe3d4cbc02121869111d7c4fe1a8",
+    "2f424e669d2a7f1bfcd46428ff1e2a1e",
+    "6ae47a9c22302f58b65e4b536bfa3559",
+    "83f9a7b574523121180b7095853d37f3",
+    "77b6860daa7a39d5bb0226e8c1543063",
+    "1611e306f167e512708d753a0092df11",
+    "2d78f39e1adbaa9d9992315a0c7adfe5",
+    "1aada836dedb3ba7e12508294de8e35e",
+    "f37991753c7df55849960c597d119ace",
+    "e80840e623a19d0857b7ccbb21f74d1c"
+  )
 }

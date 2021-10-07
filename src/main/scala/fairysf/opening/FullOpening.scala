@@ -1,16 +1,14 @@
-package strategygames.fairysf
-package opening
+package strategygames.fairysf.opening
 
 final class FullOpening(
-    val code: String,
+    val eco: String,
     val name: String,
-    val fen: String,
-    val source: Option[String]
+    val fen: String
 ) {
 
-  def fullName = source.fold(s"$code: $name") { s => s"$s $code: $name" }
+  def ecoName = s"$eco $name"
 
-  override def toString = fullName
+  override def toString = ecoName
 
   def atPly(ply: Int) = FullOpening.AtPly(this, ply)
 }

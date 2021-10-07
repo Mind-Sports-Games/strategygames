@@ -1,14 +1,13 @@
 package strategygames.fairysf
 package format
-package pdn
+package pgn
+
+import cats.implicits._
 
 import strategygames.Color
 import strategygames.format.pgn.{ Glyphs, Tag, Tags }
 
-import scala._
-import cats.implicits._
-
-case class Pdn(
+case class Pgn(
     tags: Tags,
     turns: List[Turn],
     initial: Initial = Initial.empty
@@ -22,29 +21,34 @@ case class Pdn(
   }
   def updatePly(ply: Int, f: Move => Move) = {
     val fullMove = (ply + 1) / 2
-    val color    = Color(ply % 2 == 1)
+    val color    = Color.fromPly(ply - 1)
     updateTurn(fullMove, _.update(color, f))
   }
   def updateLastPly(f: Move => Move) = updatePly(nbPlies, f)
 
   def nbPlies = turns.foldLeft(0)(_ + _.count)
 
-  def moves = turns.flatMap { t =>
-    List(t.white, t.black).flatten
-  }
+  def moves =
+    turns.flatMap { t =>
+      List(t.white, t.black).flatten
+    }
 
-  def withEvent(title: String) = copy(
-    tags = tags + Tag(_.Event, title)
-  )
+  def withEvent(title: String) =
+    copy(
+      tags = tags + Tag(_.Event, title)
+    )
 
   def render: String = {
     val initStr =
       if (initial.comments.nonEmpty) initial.comments.mkString("{ ", " } { ", " }\n")
       else ""
-    val turnStr = turns mkString " "
-    val endStr  = tags(_.Result) | ""
-    s"$tags\n\n$initStr$turnStr $endStr"
-  }.trim + "\n"
+    val turnStr   = turns mkString " "
+    val resultStr = tags(_.Result) | ""
+    val endStr =
+      if (turnStr.nonEmpty) s" $resultStr"
+      else resultStr
+    s"$tags\n\n$initStr$turnStr$endStr"
+  }.trim
 
   override def toString = render
 }
@@ -61,10 +65,11 @@ case class Turn(
     black: Option[Move]
 ) {
 
-  def update(color: Color, f: Move => Move) = color.fold(
-    copy(white = white map f),
-    copy(black = black map f)
-  )
+  def update(color: Color, f: Move => Move) =
+    color.fold(
+      copy(white = white map f),
+      copy(black = black map f)
+    )
 
   def updateLast(f: Move => Move) = {
     black.map(m => copy(black = f(m).some)) orElse
@@ -105,26 +110,19 @@ object Turn {
 
 case class Move(
     san: String,
-    // the color who played the move
-    turn: Color,
     comments: List[String] = Nil,
     glyphs: Glyphs = Glyphs.empty,
     opening: Option[String] = None,
     result: Option[String] = None,
     variations: List[List[Turn]] = Nil,
-    // time left for the white, black player, after the move is made
-    secondsLeft: (Option[Int], Option[Int]) = (None, None)
+    // time left for the user who made the move, after he made it
+    secondsLeft: Option[Int] = None
 ) {
 
-  def isLong = comments.nonEmpty || variations.nonEmpty
-
-  private def canPrintTime = secondsLeft._1.isDefined && (secondsLeft._2.isDefined || turn.white)
+  def isLong = comments.nonEmpty || variations.nonEmpty || secondsLeft.isDefined
 
   private def clockString: Option[String] =
-    if (canPrintTime)
-      s"[%clock ${turn.fold("w", "W")}${Move.formatPdnSeconds(secondsLeft._1.get)} ${turn.fold("B", "b")}${Move
-        .formatPdnSeconds(secondsLeft._2.getOrElse(0))}]".some
-    else none
+    secondsLeft.map(seconds => "[%clk " + Move.formatPgnSeconds(seconds) + "]")
 
   override def toString = {
     val glyphStr = glyphs.toList
@@ -134,11 +132,11 @@ case class Move(
       })
       .mkString
     val commentsOrTime =
-      if (comments.nonEmpty || canPrintTime || opening.isDefined || result.isDefined)
+      if (comments.nonEmpty || secondsLeft.isDefined || opening.isDefined || result.isDefined)
         List(clockString, opening, result).flatten
           .:::(comments map Move.noDoubleLineBreak)
           .map { text =>
-            s" {$text}"
+            s" { $text }"
           }
           .mkString
       else ""
@@ -156,9 +154,10 @@ object Move {
   private def noDoubleLineBreak(txt: String) =
     noDoubleLineBreakRegex.replaceAllIn(txt, "\n")
 
-  private def formatPdnSeconds(t: Int) = periodFormatter.print(
-    org.joda.time.Duration.standardSeconds(t).toPeriod
-  )
+  private def formatPgnSeconds(t: Int) =
+    periodFormatter.print(
+      org.joda.time.Duration.standardSeconds(t).toPeriod
+    )
 
   private[this] val periodFormatter = new org.joda.time.format.PeriodFormatterBuilder().printZeroAlways
     .minimumPrintedDigits(1)

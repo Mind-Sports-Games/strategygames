@@ -35,15 +35,26 @@ object Piece {
 
   }
 
+  final case class FairySF(p: fairysf.Piece) extends Piece(
+    p.color,
+    Role.FairySFRole(p.role)
+  ){
+
+    def forsyth: Char = p.forsyth
+
+  }
+
   def apply(lib: GameLogic, color: Color, role: Role): Piece = (lib, role) match {
     case (GameLogic.Draughts(), Role.DraughtsRole(role)) => Draughts(draughts.Piece(color, role))
     case (GameLogic.Chess(), Role.ChessRole(role))       => Chess(chess.Piece(color, role))
+    case (GameLogic.FairySF(), Role.FairySFRole(role))   => FairySF(fairysf.Piece(color, role))
     case _ => sys.error("Mismatched gamelogic types 2")
   }
 
   def fromChar(lib: GameLogic, c: Char): Option[Piece] = lib match {
     case (GameLogic.Draughts()) => draughts.Piece.fromChar(c).map(Draughts)
     case (GameLogic.Chess())    => chess.Piece.fromChar(c).map(Chess)
+    case (GameLogic.FairySF())  => fairysf.Piece.fromChar(c).map(FairySF)
   }
 
   def chessPieceMap(pieceMap: PieceMap): chess.PieceMap = pieceMap.map{
@@ -54,4 +65,7 @@ object Piece {
     case(Pos.Draughts(pos), Draughts(piece)) => (pos, piece)
   }
 
+  def fairySFPieceMap(pieceMap: PieceMap): fairysf.PieceMap = pieceMap.map{
+    case(Pos.FairySF(pos), FairySF(piece)) => (pos, piece)
+  }
 }

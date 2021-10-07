@@ -9,6 +9,6 @@ package object strategygames extends scalalib.Common with scalalib.OrnicarOption
 
   type PositionHash = Array[Byte]
 
-  type MoveOrDrop = Either[Move, chess.Drop]
+  type MoveOrDrop = Either[Move, Drop]
 
 }

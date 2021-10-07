@@ -75,6 +75,7 @@ abstract sealed class Board(
   // TODO: Yup, still not type safe. :D
   def toChess: chess.Board
   def toDraughts: draughts.Board
+  def toFairySF: fairysf.Board
 }
 
 object Board {
@@ -153,6 +154,7 @@ object Board {
 
     def toChess = b
     def toDraughts = sys.error("Can't make a draughts board from a chess board")
+    def toFairySF = sys.error("Can't make a fairysf board from a chess board")
 
   }
 
@@ -229,6 +231,84 @@ object Board {
 
     def toDraughts = b
     def toChess = sys.error("Can't make a chess board from a draughts board")
+    def toFairySF = sys.error("Can't make a fairysf board from a draughts board")
+
+  }
+
+  case class FairySF(b: fairysf.Board) extends Board(
+    b.pieces.map{case(pos, piece) => (Pos.FairySF(pos), Piece.FairySF(piece))},
+    History.FairySF(b.history),
+    Variant.FairySF(b.variant)
+  ) {
+
+    def actors: Map[Pos, Actor] = b.actors.map{case(p, a) => (Pos.FairySF(p), Actor.FairySF(a))}
+
+    def kingPos: Map[Color, Pos] = b.kingPos.map{case(c, p) => (c, Pos.FairySF(p))}
+
+    def place(piece: Piece, at: Pos): Option[Board] = (piece, at) match {
+      case (Piece.FairySF(piece), Pos.FairySF(at)) => b.place(piece, at).map(FairySF)
+      case _ => sys.error("Not passed FairySF objects")
+    }
+
+    def take(at: Pos): Option[Board] = at match {
+      case Pos.FairySF(at) => b.take(at).map(FairySF)
+      case _ => sys.error("Not passed FairySF objects")
+    }
+
+    def move(orig: Pos, dest: Pos): Option[Board] = (orig, dest) match {
+      case (Pos.FairySF(orig), Pos.FairySF(dest)) => b.move(orig, dest).map(FairySF)
+      case _ => sys.error("Not passed FairySF objects")
+    }
+
+    def promote(pos: Pos): Option[Board] = pos match {
+      case Pos.FairySF(pos) => b.promote(pos).map(FairySF)
+      case _ => sys.error("Not passed FairySF objects")
+    }
+
+    def withHistory(h: History): Board = h match {
+      case History.FairySF(h) => FairySF(b.withHistory(h))
+      case _ => sys.error("Not passed FairySF objects")
+    }
+
+    def withPieces(newPieces: PieceMap): Board = FairySF(b.withPieces(newPieces.map{
+      case (Pos.FairySF(pos), Piece.FairySF(piece)) => (pos, piece)
+      case _ => sys.error("Not passed FairySF objects")
+    }))
+
+    def withVariant(v: Variant): Board = v match {
+      case Variant.FairySF(v) => FairySF(b.withVariant(v))
+      case _ => sys.error("Not passed FairySF objects")
+    }
+
+    //This isn't correct, but it is unused by lila.
+    //If we wanted to make this work we should create a sealed class in this file
+    //e.g. UpdateHistory and then have case class for ChessUpdateHistory etc
+    //which have this function in them so then we can match on ChessUpdateHistory(f)
+    //def updateHistory(f: History => History): Board = f match {
+    //  case History.FairySF(f) => FairySF(b.updateHistory(f))
+    //  case _ => sys.error("Not passed FairySF objects")
+    //}
+
+    def autoDraw: Boolean = b.autoDraw
+
+    def situationOf(color: Color): Situation = Situation.FairySF(b.situationOf(color))
+
+    def materialImbalance: Int = b.materialImbalance
+
+    override def toString: String = b.toString
+
+    def copy(history: History, variant: Variant): Board = (history, variant) match {
+      case (History.FairySF(history), Variant.FairySF(variant)) => FairySF(b.copy(history=history, variant=variant))
+      case _ => sys.error("Unable to copy a fairysf board with non-fairysf arguments")
+    }
+    def copy(history: History): Board = history match {
+      case History.FairySF(history) => FairySF(b.copy(history=history))
+      case _ => sys.error("Unable to copy a fairysf board with non-fairysf arguments")
+    }
+
+    def toFairySF = b
+    def toChess = sys.error("Can't make a chess board from a fairysf board")
+    def toDraughts = sys.error("Can't make a draughts board from a fairysf board")
 
   }
 
@@ -254,22 +334,30 @@ object Board {
           pieces.map{case(Pos.Chess(pos), Piece.Chess(piece)) => (pos, piece)},
           variant
         ))
+      case (GameLogic.FairySF(), Variant.FairySF(variant))
+        => FairySF(fairysf.Board.apply(
+          pieces.map{case(Pos.FairySF(pos), Piece.FairySF(piece)) => (pos, piece)},
+          variant
+        ))
       case _ => sys.error("Mismatched gamelogic types 27")
     }
 
 
   implicit def chessBoard(b: chess.Board) = Board.Chess(b)
   implicit def draughtsBoard(b: draughts.Board) = Board.Draughts(b)
+  implicit def fairysfBoard(b: fairysf.Board) = Board.FairySF(b)
 
   def init(lib: GameLogic, variant: Variant): Board = (lib, variant) match {
     case (GameLogic.Draughts(), Variant.Draughts(variant)) => Draughts(draughts.Board.init(variant))
     case (GameLogic.Chess(), Variant.Chess(variant))       => Chess(chess.Board.init(variant))
+    case (GameLogic.Chess(), Variant.FairySF(variant))     => FairySF(fairysf.Board.init(variant))
     case _ => sys.error("Mismatched gamelogic types 28")
   }
 
   def empty(lib: GameLogic, variant: Variant): Board = (lib, variant) match {
     case (GameLogic.Draughts(), Variant.Draughts(variant)) => Draughts(draughts.Board.empty(variant))
     case (GameLogic.Chess(), Variant.Chess(variant))       => Chess(chess.Board.empty(variant))
+    case (GameLogic.FairySF(), Variant.FairySF(variant))   => FairySF(fairysf.Board.empty(variant))
     case _ => sys.error("Mismatched gamelogic types 29")
   }
 

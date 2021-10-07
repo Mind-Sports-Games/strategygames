@@ -14,6 +14,8 @@ object UciCharPair {
       => strategygames.draughts.format.UciCharPair(uci.unwrap)
     case (GameLogic.Chess(), uci: Uci.Chess)
       => strategygames.chess.format.UciCharPair(uci.unwrap)
+    case (GameLogic.FairySF(), uci: Uci.FairySF)
+      => strategygames.fairysf.format.UciCharPair(uci.unwrap)
     case _ => sys.error("Mismatched gamelogic and UciCharPair")
   }
 

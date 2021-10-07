@@ -67,6 +67,7 @@ abstract sealed class Situation(val board: Board, val color: Color) {
   // TODO: yup, still not typesafe
   def toChess: chess.Situation
   def toDraughts: draughts.Situation
+  def toFairySF: fairysf.Situation
 
 }
 
@@ -139,6 +140,7 @@ object Situation {
 
     def toChess = s
     def toDraughts = sys.error("Can't make draughts situation from chess situation")
+    def toFairySF = sys.error("Can't make fairysf situation from chess situation")
   }
 
   final case class Draughts(s: draughts.Situation) extends Situation(
@@ -221,7 +223,78 @@ object Situation {
 
     def toDraughts = s
     def toChess = sys.error("Can't make chess situation from draughts situation")
+    def toFairySF = sys.error("Can't make fairysf situation from draughts situation")
 
+  }
+
+  final case class FairySF(s: fairysf.Situation) extends Situation(
+    Board.FairySF(s.board),
+    s.color
+  ) {
+
+    lazy val moves: Map[Pos, List[Move]] = s.moves.map{
+      case (p: fairysf.Pos, l: List[fairysf.Move]) => (Pos.FairySF(p), l.map(Move.FairySF))
+    }
+
+    lazy val check: Boolean = s.check
+
+    def checkSquare = s.checkSquare.map(Pos.FairySF)
+
+    def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
+
+    def end: Boolean = s.end
+
+    val destinations: Map[Pos, List[Pos]] = s.destinations.map{
+      case (p: fairysf.Pos, l: List[fairysf.Pos]) => (Pos.FairySF(p), l.map(Pos.FairySF))
+    }
+
+    def drops: Option[List[Pos]] = s.drops.map(_.map(Pos.FairySF))
+
+    def playable(strict: Boolean): Boolean = s.playable(strict)
+
+    val status: Option[Status] = s.status
+
+    def move(
+      from: Pos,
+      to: Pos,
+      promotion: Option[PromotableRole] = None,
+      finalSquare: Boolean = false,
+      forbiddenUci: Option[List[String]] = None,
+      captures: Option[List[Pos]] = None,
+      partialCaptures: Boolean = false
+    ): Validated[String, Move] = (from, to) match {
+      case (Pos.FairySF(from), Pos.FairySF(to)) =>
+        s.move(from, to, promotion.map(_.toFairySF)).toEither.map(m => Move.FairySF(m)).toValidated
+      case _ => sys.error("Not passed FairySF objects")
+    }
+
+    def move(uci: Uci.Move): Validated[String, Move] = uci match {
+      case Uci.FairySFMove(uci) => s.move(uci).toEither.map(m => Move.FairySF(m)).toValidated
+      case _ => sys.error("Not passed FairySF objects")
+    }
+
+    def withHistory(history: History): Situation = history match {
+      case History.FairySF(history) => FairySF(s.withHistory(history))
+      case _ => sys.error("Not passed FairySF objects")
+    }
+
+    def withVariant(variant: Variant): Situation = variant match {
+      case Variant.FairySF(variant) => FairySF(s.withVariant(variant))
+      case _ => sys.error("Not passed FairySF objects")
+    }
+
+    def unary_! : Situation = FairySF(s.unary_!)
+
+    def copy(board: Board): Situation = FairySF(board match {
+      case Board.FairySF(board) => s.copy(board)
+      case _ => sys.error("Can't copy a fairysf situation with a non-fairysf board")
+    })
+
+    def gameLogic: GameLogic = GameLogic.FairySF()
+
+    def toFairySF = s
+    def toChess = sys.error("Can't make chess situation from fairysf situation")
+    def toDraughts = sys.error("Can't make draughts situation from fairysf situation")
   }
 
   def apply(lib: GameLogic, board: Board, color: Color): Situation = (lib, board) match {
@@ -229,6 +302,8 @@ object Situation {
       => Draughts(draughts.Situation(board, color))
     case (GameLogic.Chess(), Board.Chess(board))
       => Chess(chess.Situation(board, color))
+    case (GameLogic.FairySF(), Board.FairySF(board))
+      => FairySF(fairysf.Situation(board, color))
     case _ => sys.error("Mismatched gamelogic types 3")
   }
 
@@ -237,10 +312,13 @@ object Situation {
       => Draughts(draughts.Situation.apply(variant))
     case (GameLogic.Chess(), Variant.Chess(variant))
       => Chess(chess.Situation.apply(variant))
+    case (GameLogic.FairySF(), Variant.FairySF(variant))
+      => FairySF(fairysf.Situation.apply(variant))
     case _ => sys.error("Mismatched gamelogic types 4")
   }
 
   def wrap(s: chess.Situation) = Chess(s)
   def wrap(s: draughts.Situation) = Draughts(s)
+  def wrap(s: fairysf.Situation) = FairySF(s)
 
 }

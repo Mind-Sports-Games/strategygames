@@ -1,20 +1,23 @@
 package strategygames.fairysf
 package variant
 
-import strategygames.{ Color, GameFamily }
-
 import cats.implicits._
+import cats.syntax.option._
+import cats.data.Validated
+
+import strategygames.fairysf._
+import strategygames.fairysf.format.Uci
+import strategygames.{ Color, GameFamily }
 
 case object Shogi
     extends Variant(
       id = 1,
-      gameType = 20,
-      key = "international",
-      name = "International",
-      shortName = "Int",
-      title = "Standard rules of international draughts (FMJD).",
-      standardInitialPosition = true,
-      boardSize = Board.D100
+      key = "shogi",
+      name = "Shogi",
+      shortName = "Shogi",
+      title = "Shogi (Japanese Chess)",
+      standardInitialPosition = true
+      //boardSize = Board.D100
     ) {
   import Variant._
 
@@ -25,71 +28,150 @@ case object Shogi
 
   override def baseVariant: Boolean = true
 
-  val pieces           = symmetricFourRank(Vector(Man, Man, Man, Man, Man), boardSize)
-  val initialFen       = format.Forsyth.initial
-  val startingPosition = StartingPosition("---", initialFen, "", "Initial position".some)
+  val pieces: Map[Pos, Piece] = Variant.symmetricRank(backRank)
+  //val initialFen       = format.Forsyth.initial
 
-  val captureDirs: Directions = List(
-    (UpLeft, _.moveUpLeft),
-    (UpRight, _.moveUpRight),
-    (DownLeft, _.moveDownLeft),
-    (DownRight, _.moveDownRight)
-  )
-  val moveDirsColor: Map[Color, Directions] = Map(
-    White -> List((UpLeft, _.moveUpLeft), (UpRight, _.moveUpRight)),
-    Black -> List((DownLeft, _.moveDownLeft), (DownRight, _.moveDownRight))
-  )
-  val moveDirsAll: Directions = moveDirsColor(White) ::: moveDirsColor(Black)
+  private def canDropPawnOn(pos: Pos) = pos.rank != Rank.First && pos.rank != Rank.Eighth
 
-  def maxDrawingMoves(board: Board): Option[Int] =
-    drawingMoves(board, none).map(_._1)
+//  override def drop(situation: Situation, role: Role, pos: Pos): Validated[String, Drop] =
+//    for {
+//      d1 <- situation.board.crazyData toValid "Board has no crazyhouse data"
+//      _ <-
+//        if (role != Pawn || canDropPawnOn(pos)) Validated.valid(d1)
+//        else Validated.invalid(s"Can't drop $role on $pos")
+//      piece = Piece(situation.color, role)
+//      d2     <- d1.drop(piece) toValid s"No $piece to drop on $pos"
+//      board1 <- situation.board.place(piece, pos) toValid s"Can't drop $role on $pos, it's occupied"
+//      _ <-
+//        if (!board1.check(situation.color)) Validated.valid(board1)
+//        else Validated.invalid(s"Dropping $role on $pos doesn't uncheck the king")
+//    } yield Drop(
+//      piece = piece,
+//      pos = pos,
+//      situationBefore = situation,
+//      after = board1 withCrazyData d2
+//    )
 
-  // (drawingMoves, first promotion: promotes this turn and has only one king)
-  private def drawingMoves(board: Board, move: Option[Move]): Option[(Int, Boolean)] =
-    if (board.pieces.size <= 4) {
-      val whitePieces    = board.pieces filter { p => !p._2.isGhost && p._2.is(Color.White) }
-      val blackPieces    = board.pieces filter { p => !p._2.isGhost && p._2.is(Color.Black) }
-      val whiteKings     = whitePieces.count(_._2.role == King)
-      val blackKings     = blackPieces.count(_._2.role == King)
-      def firstPromotion = move.exists(m => m.promotes && m.color.fold(whiteKings == 1, blackKings == 1))
-      val drawingMoves =
-        if (whitePieces.size == 1 && whiteKings == 1) {
-          if (blackKings == 0) 50
-          else if (blackPieces.size <= 2) 10
-          else 32
-        } else if (blackPieces.size == 1 && blackKings == 1) {
-          if (whiteKings == 0) 50
-          else if (whitePieces.size <= 2) 10
-          else 32
-        } else 50
-      Some(drawingMoves, drawingMoves != 50 && firstPromotion)
-    } else Some(50, false)
-
-  /** Update position hashes for standard drawing rules:
-    * - The game is drawn if three (or more) times the same position is repeated, with each time the same player having to move.
-    * - The game is drawn when both players make 25 consecutive king moves without capturing.
-    * - When one player has only a king left, and the other player three pieces including at least one king (three kings, two kings and a man, or one king and two men), the game is drawn after both players made 16 moves.
-    * - When one player has only a king left, and the other player two pieces or less, including at least one king (one king, two kings, or one king and a man), the game is drawn after both players made 5 moves.
-    */
-  def updatePositionHashes(board: Board, move: Move, hash: strategygames.draughts.PositionHash): PositionHash = {
-    val newHash = Hash(Situation(board, !move.piece.color))
-    drawingMoves(board, move.some) match {
-      case Some((drawingMoves, firstPromotion)) =>
-        if (drawingMoves == 50 && (move.captures || move.piece.isNot(King) || move.promotes))
-          newHash // 25-move rule resets on capture or non-king move. promotion check is included to prevent that a move promoting a man is counted as a king move
-        else {
-          def piecesBefore =
-            board.pieces.count(!_._2.isGhost) + Math.max(board.ghosts, move.taken.map(_.size).getOrElse(0))
-          if (
-            firstPromotion ||
-            (drawingMoves == 10 && move.captures && piecesBefore > 3) ||
-            (drawingMoves == 32 && move.captures && piecesBefore > 4)
-          )
-            newHash // 16 and 5 move reset on promotion or capture that create the material situation, so that this move is not counted as the first
-          else
-            newHash ++ hash // 5 move rule never resets once activated
+  override def finalizeBoard(board: Board, uci: Uci, capture: Option[Piece]): Board =
+    uci match {
+      case Uci.Move(orig, dest, promOption) =>
+        board.crazyData.fold(board) { data =>
+          val d1 = capture.fold(data) { data.store(_, dest) }
+          val d2 = promOption.fold(d1.move(orig, dest)) { _ =>
+            d1 promote dest
+          }
+          board withCrazyData d2
         }
-      case _ => newHash
+      case _ => board
+    }
+
+  private def canDropStuff(situation: Situation) =
+    situation.board.crazyData.fold(false) { (data: Data) =>
+      val roles = data.pockets(situation.color).roles
+      roles.nonEmpty && possibleDrops(situation).fold(true) { squares =>
+        squares.nonEmpty && {
+          squares.exists(canDropPawnOn) || roles.exists(strategygames.chess.Pawn !=)
+        }
+      }
+    }
+
+  override def staleMate(situation: Situation) =
+    super.staleMate(situation) && !canDropStuff(situation)
+
+  override def checkmate(situation: Situation) =
+    super.checkmate(situation) && !canDropStuff(situation)
+
+  // there is always sufficient mating material in Crazyhouse
+  override def opponentHasInsufficientMaterial(situation: Situation) = false
+  override def isInsufficientMaterial(board: Board)                  = false
+
+  def possibleDrops(situation: Situation): Option[List[Pos]] =
+    if (!situation.check) None
+    else situation.kingPos.map { blockades(situation, _) }
+
+  private def blockades(situation: Situation, kingPos: Pos): List[Pos] = {
+    def attacker(piece: Piece) = piece.role.projection && piece.color != situation.color
+    @scala.annotation.tailrec
+    def forward(p: Pos, dir: Direction, squares: List[Pos]): List[Pos] =
+      dir(p) match {
+        case None                                                 => Nil
+        case Some(next) if situation.board(next).exists(attacker) => next :: squares
+        case Some(next) if situation.board(next).isDefined        => Nil
+        case Some(next)                                           => forward(next, dir, next :: squares)
+      }
+    Queen.dirs flatMap { forward(kingPos, _, Nil) } filter { square =>
+      situation.board.place(Piece(situation.color, Knight), square) exists { defended =>
+        !defended.check(situation.color)
+      }
     }
   }
+
+  val storableRoles = List(Pawn, Knight, Bishop, Rook, Queen)
+
+  case class Data(
+      pockets: Pockets,
+      // in crazyhouse, a promoted piece becomes a pawn
+      // when captured and put in the pocket.
+      // there we need to remember which pieces are issued from promotions.
+      // we do that by tracking their positions on the board.
+      promoted: Set[Pos]
+  ) {
+
+    def drop(piece: Piece): Option[Data] =
+      pockets take piece map { nps =>
+        copy(pockets = nps)
+      }
+
+    def store(piece: Piece, from: Pos) =
+      copy(
+        pockets = pockets store {
+          if (promoted(from)) Piece(piece.color, Pawn) else piece
+        },
+        promoted = promoted - from
+      )
+
+    def promote(pos: Pos) = copy(promoted = promoted + pos)
+
+    def move(orig: Pos, dest: Pos) =
+      copy(
+        promoted = if (promoted(orig)) promoted - orig + dest else promoted
+      )
+  }
+
+  object Data {
+    val init = Data(Pockets(Pocket(Nil), Pocket(Nil)), Set.empty)
+  }
+
+  case class Pockets(white: Pocket, black: Pocket) {
+
+    def apply(color: Color) = color.fold(white, black)
+
+    def take(piece: Piece): Option[Pockets] =
+      piece.color.fold(
+        white take piece.role map { np =>
+          copy(white = np)
+        },
+        black take piece.role map { np =>
+          copy(black = np)
+        }
+      )
+
+    def store(piece: Piece) =
+      piece.color.fold(
+        copy(black = black store piece.role),
+        copy(white = white store piece.role)
+      )
+  }
+
+  case class Pocket(roles: List[Role]) {
+
+    def take(role: Role) =
+      if (roles contains role) Option(copy(roles = roles diff List(role)))
+      else None
+
+    def store(role: Role) =
+      if (storableRoles contains role) copy(roles = role :: roles)
+      else this
+  }
 }
+

@@ -67,8 +67,26 @@ object History {
 
   }
 
+  final case class FairySF(h: fairysf.History) extends History(
+    lastMove = h.lastMove.map(Uci.wrap),
+    positionHashes = h.positionHashes,
+    halfMoveClock = h.halfMoveClock
+  ) {
+
+    def setHalfMoveClock(v: Int): History = FairySF(h.setHalfMoveClock(v))
+
+    def threefoldRepetition: Boolean = h.threefoldRepetition
+
+    def withLastMove(m: Uci): History = m match {
+      case u: Uci.FairySF => FairySF(h.withLastMove(u.unwrap))
+      case _ => sys.error("Not passed FairySF objects")
+    }
+
+  }
+
   implicit def chessHistory(h: chess.History) = Chess(h)
   implicit def draughtsHistory(h: draughts.DraughtsHistory) = Draughts(h)
+  implicit def fairysfHistory(h: fairysf.History) = FairySF(h)
 
   def apply(
     lib: GameLogic,
@@ -99,6 +117,12 @@ object History {
         castles = castles,
         checkCount = checkCount,
         unmovedRooks = unmovedRooks,
+        halfMoveClock = halfMoveClock
+      ))
+    case GameLogic.FairySF()
+      => FairySF(fairysf.History(
+        lastMove = lastMove.map(lm => lm.toFairySF),
+        positionHashes = positionHashes,
         halfMoveClock = halfMoveClock
       ))
     case _ => sys.error("Mismatched gamelogic types 1")

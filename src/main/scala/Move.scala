@@ -49,6 +49,7 @@ abstract sealed class Move(
   // TODO: Yup, still not type safe. :D
   def toChess: chess.Move
   def toDraughts: draughts.Move
+  def toFairySF: fairysf.Move
 
 }
 
@@ -115,6 +116,7 @@ object Move {
     val unwrap = m
     def toChess = m
     def toDraughts = sys.error("Can't make a draughts move from a chess move")
+    def toFairySF = sys.error("Can't make a fairysf move from a chess move")
 
   }
 
@@ -178,18 +180,90 @@ object Move {
     val unwrap = m
     def toDraughts = m
     def toChess = sys.error("Can't make a chess move from a draughts move")
+    def toFairySF = sys.error("Can't make a fairysf move from a draughts move")
+
+  }
+
+  final case class FairySF(m: fairysf.Move) extends Move(
+    Piece.FairySF(m.piece),
+    Pos.FairySF(m.orig),
+    Pos.FairySF(m.dest),
+    Situation.FairySF(m.situationBefore),
+    Board.FairySF(m.after),
+    m.capture match {
+      case Some(capture) => Option(List(Pos.FairySF(capture)))
+      case None          => None
+    },
+    m.promotion match {
+      case Some(promotion) => Option(Role.FairySFPromotableRole(promotion))
+      case None            => None
+    },
+    None,
+    m.castle match {
+      case Some(((p1, p2), (p3, p4))) => ((Pos.FairySF(p1), Pos.FairySF(p2)), (Pos.FairySF(p3), Pos.FairySF(p4))).some
+      case None                       => None
+    },
+    m.enpassant,
+    m.metrics
+  ){
+
+    def situationAfter: Situation = Situation.FairySF(m.situationAfter)
+    def finalizeAfter(finalSquare: Boolean = false): Board = m.finalizeAfter
+
+    def withHistory(h: History): Move = h match {
+      case History.FairySF(h) => FairySF(m.withHistory(h))
+      case _ => sys.error("Not passed FairySF objects")
+    }
+
+    def captures: Boolean = m.captures
+
+    def withPromotion(op: Option[PromotableRole]): Option[Move] = op match {
+      case Some(Role.FairySFPromotableRole(op)) => m.withPromotion(Some(op)).map(FairySF)
+      case None                                  => m.withPromotion(None).map(FairySF)
+      case _ => sys.error("Not passed FairySF objects")
+    }
+
+    def withAfter(newBoard: Board): Move = newBoard match {
+      case Board.FairySF(newBoard) => FairySF(m.withAfter(newBoard))
+      case _ => sys.error("Not passed FairySF objects")
+    }
+
+    def withMetrics(mm: MoveMetrics): Move = Move.FairySF(m.withMetrics(mm))
+
+    def toUci: Uci.Move = Uci.FairySFMove(m.toUci)
+
+    def toShortUci: Uci.Move =
+      Uci.Move(
+        GameLogic.FairySF(),
+        orig,
+        dest,
+        promotion,
+        if (capture.isDefined) capture.get.takeRight(1).some else None
+      )
+
+    val unwrap = m
+    def toFairySF = m
+    def toChess = sys.error("Can't make a chess move from a fairysf move")
+    def toDraughts = sys.error("Can't make a draughts move from a fairysf move")
 
   }
 
   def wrap(m: chess.Move): Move = Move.Chess(m)
   def wrap(m: draughts.Move): Move = Move.Draughts(m)
-  def wrap(d: chess.Drop): MoveOrDrop = Right(d)
-  def wrap(m: chess.MoveOrDrop): MoveOrDrop = m match {
-    case Left(move) => Left(Move.Chess(move))
-    case Right(drop) => Right(drop)
-  }
+  def wrap(m: fairysf.Move): Move = Move.FairySF(m)
 
-  def toChess(moveOrDrop: MoveOrDrop): chess.MoveOrDrop = moveOrDrop.left.map(_.toChess)
+  //def wrap(m: chess.MoveOrDrop): MoveOrDrop = m match {
+  //  case Left(move) => Left(Move.Chess(move))
+  //  case Right(drop) => Right(Drop.Chess(drop))
+  //}
+
+  //def wrap(m: fairysf.MoveOrDrop): MoveOrDrop = m match {
+  //  case Left(move) => Left(Move.FairySF(move))
+  //  case Right(drop) => Right(Drop.FairySF(drop))
+  //}
+
+  def toChess(moveOrDrop: MoveOrDrop): chess.MoveOrDrop = moveOrDrop.left.map(_.toChess).right.map(_.toChess)
   //probably not type safe
   def toDraughts(moveOrDrop: MoveOrDrop): draughts.Move = moveOrDrop.left.map(_.toDraughts).left.get
+  def toFairySF(moveOrDrop: MoveOrDrop): fairysf.MoveOrDrop = moveOrDrop.left.map(_.toFairySF).right.map(_.toFairySF)
 }

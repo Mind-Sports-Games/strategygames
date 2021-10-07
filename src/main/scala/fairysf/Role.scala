@@ -2,45 +2,118 @@ package strategygames.fairysf
 
 sealed trait Role {
   val forsyth: Char
-  lazy val pdn: Char    = forsyth
-  lazy val name: String = toString.toLowerCase
+  lazy val forsythUpper: Char = forsyth.toUpper
+  lazy val pgn: Char          = forsythUpper
+  lazy val name               = toString.toLowerCase
+  val projection: Boolean
   val binaryInt: Int
+  val dirs: Directions
+  def dir(from: Pos, to: Pos): Option[Direction]
 }
-
 sealed trait PromotableRole extends Role
 
+/** Promotable in antichess.
+  */
 case object King extends PromotableRole {
-  val forsyth = 'K'
-  val binaryInt = 1
+  val forsyth                 = 'k'
+  val dirs: Directions        = Queen.dirs
+  def dir(from: Pos, to: Pos) = None
+  val projection              = false
+  val binaryInt               = 1
 }
 
-case object Man extends Role {
-  val forsyth = ' '
-  val binaryInt = 2
+case object Queen extends PromotableRole {
+  val forsyth                 = 'q'
+  val dirs: Directions        = Rook.dirs ::: Bishop.dirs
+  def dir(from: Pos, to: Pos) = Rook.dir(from, to) orElse Bishop.dir(from, to)
+  val projection              = true
+  val binaryInt               = 2
 }
-
-case object GhostMan extends Role {
-  val forsyth = 'G'
-  val binaryInt = 4
+case object Rook extends PromotableRole {
+  val forsyth          = 'r'
+  val dirs: Directions = List(_.up, _.down, _.left, _.right)
+  def dir(from: Pos, to: Pos) =
+    if (to ?| from)
+      Option(if (to ?^ from) (_.up) else (_.down))
+    else if (to ?- from)
+      Option(if (to ?< from) (_.left) else (_.right))
+    else None
+  val projection = true
+  val binaryInt  = 3
 }
-
-case object GhostKing extends Role {
-  val forsyth = 'P'
-  val binaryInt = 3
+case object Bishop extends PromotableRole {
+  val forsyth          = 'b'
+  val dirs: Directions = List(_.upLeft, _.upRight, _.downLeft, _.downRight)
+  def dir(from: Pos, to: Pos) =
+    if (to onSameDiagonal from)
+      Option(if (to ?^ from) {
+        if (to ?< from) (_.upLeft) else (_.upRight)
+      } else {
+        if (to ?< from) (_.downLeft) else (_.downRight)
+      })
+    else None
+  val projection = true
+  val binaryInt  = 5
+}
+case object Knight extends PromotableRole {
+  val forsyth = 'n'
+  val dirs: Directions = List(
+    p => Pos.at(p.file.index - 1, p.rank.index + 2),
+    p => Pos.at(p.file.index - 1, p.rank.index - 2),
+    p => Pos.at(p.file.index + 1, p.rank.index + 2),
+    p => Pos.at(p.file.index + 1, p.rank.index - 2),
+    p => Pos.at(p.file.index - 2, p.rank.index + 1),
+    p => Pos.at(p.file.index - 2, p.rank.index - 1),
+    p => Pos.at(p.file.index + 2, p.rank.index + 1),
+    p => Pos.at(p.file.index + 2, p.rank.index - 1)
+  )
+  def dir(from: Pos, to: Pos) = None
+  val projection              = false
+  val binaryInt               = 4
+}
+case object Pawn extends Role {
+  val forsyth                 = 'p'
+  val dirs: Directions        = Nil
+  def dir(from: Pos, to: Pos) = None
+  val projection              = false
+  val binaryInt               = 6
+}
+case object LOAChecker extends Role {
+  val forsyth                 = 'l'
+  val dirs: Directions        = Queen.dirs
+  def dir(from: Pos, to: Pos) = Queen.dir(from, to)
+  val projection              = false
+  val binaryInt               = 8
 }
 
 object Role {
 
-  val all: List[Role]                     = List(King, Man)
-  val allPromotable: List[PromotableRole] = List(King)
-
-  val allByForsyth: Map[Char, Role]                     = all.map(r => (r.forsyth, r)).toMap
-  val allByPdn: Map[Char, Role]                         = all.map(r => (r.pdn, r)).toMap
-  val allByName: Map[String, Role]                      = all.map(r => (r.name, r)) toMap
-  val allByBinaryInt: Map[Int, Role]                    = all.map(r => (r.binaryInt, r)) toMap
-  val allPromotableByName: Map[String, PromotableRole]  = allPromotable.map(r => (r.toString, r)) toMap
-  val allPromotableByForsyth: Map[Char, PromotableRole] = allPromotable.map(r => (r.forsyth, r)) toMap
-  val allPromotableByPdn: Map[Char, PromotableRole]     = allPromotable.map(r => (r.pdn, r)) toMap
+  val all: List[Role]                     = List(King, Queen, Rook, Bishop, Knight, Pawn, LOAChecker)
+  val allPromotable: List[PromotableRole] = List(Queen, Rook, Bishop, Knight, King)
+  val allByForsyth: Map[Char, Role] = all map { r =>
+    (r.forsyth, r)
+  } toMap
+  val allByPgn: Map[Char, Role] = all map { r =>
+    (r.pgn, r)
+  } toMap
+  val allByName: Map[String, Role] = all map { r =>
+    (r.name, r)
+  } toMap
+  val allByBinaryInt: Map[Int, Role] = all map { r =>
+    (r.binaryInt, r)
+  } toMap
+  val allPromotableByName: Map[String, PromotableRole] =
+    allPromotable map { r =>
+      (r.toString, r)
+    } toMap
+  val allPromotableByForsyth: Map[Char, PromotableRole] =
+    allPromotable map { r =>
+      (r.forsyth, r)
+    } toMap
+  val allPromotableByPgn: Map[Char, PromotableRole] =
+    allPromotable map { r =>
+      (r.pgn, r)
+    } toMap
 
   def forsyth(c: Char): Option[Role] = allByForsyth get c
 
@@ -55,23 +128,28 @@ object Role {
   def promotable(name: Option[String]): Option[PromotableRole] =
     name flatMap promotable
 
-  def pdnMoveToRole(c: Char): Role =
-    //We dont want ghosts to be returned here
-    c match {
-      case 'K' | 'O' => King
-      case _ => Man
+  def pgnMoveToRole(c: Char): Role =
+    allByPgn.get(c) match {
+      case Some(r) => r
+      case None => if (c == 'O') King else Pawn
     }
 
   def javaSymbolToRole(s: String): Role =
-    s match {
-      case "" => Man
-      case _ => King
+    allByPgn.get(
+      s.headOption match {    
+        case Some(c) => c    
+        case None => 'P'//JavaRole.PAWN.symbol is ""    
+      }
+    ).get
+
+  def valueOf(r: Role): Option[Int] =
+    r match {
+      case Pawn       => Option(1)
+      case Knight     => Option(3)
+      case Bishop     => Option(3)
+      case Rook       => Option(5)
+      case Queen      => Option(9)
+      case King       => None
+      case LOAChecker => None
     }
-
-  def valueOf(r: Role): Option[Int] = r match {
-    case Man  => Some(1)
-    case King => Some(2)
-    case _    => Some(0)
-  }
-
 }

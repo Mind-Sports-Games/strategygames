@@ -21,6 +21,7 @@ abstract class Variant(
 
   def toChess: chess.variant.Variant
   def toDraughts: draughts.variant.Variant
+  def toFairySF: fairysf.variant.Variant
 
   def pieces: Map[Pos, Piece]
 
@@ -125,6 +126,7 @@ object Variant {
 
     def toChess: chess.variant.Variant = v
     def toDraughts = sys.error("Can't convert chess to draughts")
+    def toFairySF = sys.error("Can't convert chess to fairysf")
 
     def pieces: Map[Pos, Piece] =
       v.pieces.map { case (pos, piece) => (Pos.Chess(pos), Piece.Chess(piece)) }
@@ -237,6 +239,7 @@ object Variant {
 
     def toChess = sys.error("Can't convert draughts to chess")
     def toDraughts = v
+    def toFairySF = sys.error("Can't convert draughts to fairysf")
 
     def pieces: Map[Pos, Piece] =
       v.pieces.map { case (pos, piece) => (Pos.Draughts(pos), Piece.Draughts(piece)) }
@@ -341,15 +344,15 @@ object Variant {
         name = v.name,
         shortName = v.shortName,
         title = v.title,
-        standardInitialPosition = v.standardInitialPosition,
-        gameType = Option(v.gameType)
+        standardInitialPosition = v.standardInitialPosition
       ) {
 
     def toChess = sys.error("Can't convert fairysf to chess")
     def toDraughts = sys.error("Can't convert fairysf to draughts")
+    def toFairySF = v
 
-    def pieces: Map[Pos, Piece] = ???
-      //v.pieces.map { case (pos, piece) => (Pos.Draughts(pos), Piece.Draughts(piece)) }
+    def pieces: Map[Pos, Piece] =
+      v.pieces.map { case (pos, piece) => (Pos.FairySF(pos), Piece.FairySF(piece)) }
 
     def standard: Boolean      = false
     def chess960: Boolean      = false
@@ -392,62 +395,54 @@ object Variant {
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
 
-    def initialFen: FEN = format.Forsyth.initial(GameLogic.Draughts())
+    def initialFen: FEN = format.Forsyth.initial(GameLogic.FairySF())
     def startColor: Color = v.startColor
 
-    def isValidPromotion(promotion: Option[PromotableRole]): Boolean = ???
-    //promotion match {
-    //  case Some(Role.DraughtsPromotableRole(pr)) => v.isValidPromotion(pr.some)
-    //  case None                                  => v.isValidPromotion(None)
-    //  case _                                     => sys.error("Not passed Draughts objects")
-    //}
+    def isValidPromotion(promotion: Option[PromotableRole]): Boolean = promotion match {
+      case Some(Role.FairySFPromotableRole(pr)) => v.isValidPromotion(pr.some)
+      case None                                 => v.isValidPromotion(None)
+      case _                                    => sys.error("Not passed FairySF objects")
+    }
 
-    def checkmate(situation: Situation): Boolean = ???
-    //situation match {
-    //  case Situation.Draughts(situation) => v.checkmate(situation)
-    //  case _                             => sys.error("Not passed Draughts objects")
-    //}
+    def checkmate(situation: Situation): Boolean = situation match {
+      case Situation.FairySF(situation) => v.checkmate(situation)
+      case _                             => sys.error("Not passed FairySF objects")
+    }
 
-    def winner(situation: Situation): Option[Color] = ???
-    //situation match {
-    //  case Situation.Draughts(situation) => v.winner(situation)
-    //  case _                             => sys.error("Not passed Draughts objects")
-    //}
+    def winner(situation: Situation): Option[Color] = situation match {
+      case Situation.FairySF(situation) => v.winner(situation)
+      case _                             => sys.error("Not passed FairySF objects")
+    }
 
-    @nowarn def specialEnd(situation: Situation): Boolean = ???
-    //situation match {
-    //  case Situation.Draughts(situation) => v.specialEnd(situation)
-    //  case _                             => sys.error("Not passed Draughts objects")
-    //}
+    @nowarn def specialEnd(situation: Situation): Boolean = situation match {
+      case Situation.FairySF(situation) => v.specialEnd(situation)
+      case _                             => sys.error("Not passed FairySF objects")
+    }
 
-    @nowarn def specialDraw(situation: Situation): Boolean = ???
-    //situation match {
-    //  case Situation.Draughts(situation) => v.specialDraw(situation)
-    //  case _                             => sys.error("Not passed Draughts objects")
-    //}
+    @nowarn def specialDraw(situation: Situation): Boolean = situation match {
+      case Situation.FairySF(situation) => v.specialDraw(situation)
+      case _                             => sys.error("Not passed FairySF objects")
+    }
 
     def hasMoveEffects: Boolean = v.hasMoveEffects
 
-    def addVariantEffect(move: Move): Move = ???
-    //move match {
-    //  case Move.Draughts(move) => Move.Draughts(v.addVariantEffect(move))
-    //  case _                   => sys.error("Not passed Draughts objects")
-    //}
-    def valid(board: Board, strict: Boolean): Boolean = ???
-    //board match {
-    //  case Board.Draughts(board) => v.valid(board, strict)
-    //  case _                     => sys.error("Not passed Draughts objects")
-    //}
+    def addVariantEffect(move: Move): Move = move match {
+      case Move.FairySF(move) => Move.FairySF(v.addVariantEffect(move))
+      case _                   => sys.error("Not passed FairySF objects")
+    }
+    def valid(board: Board, strict: Boolean): Boolean = board match {
+      case Board.FairySF(board) => v.valid(board, strict)
+      case _                     => sys.error("Not passed FairySF objects")
+    }
 
-    val roles: List[Role] = ???
-      //v.roles.map(Role.DraughtsRole)
+    val roles: List[Role] = v.roles.map(Role.FairySFRole)
 
     override def equals(that: Any): Boolean = that match {
-      case Draughts(v2) => v2.equals(v)
+      case FairySF(v2) => v2.equals(v)
       case _ => false
     }
 
-    def chessVariant: chess.variant.Variant = sys.error("Unimplemented for Draughts")
+    def chessVariant: chess.variant.Variant = sys.error("Unimplemented for FairySF")
     def gameLogic: GameLogic = GameLogic.FairySF()
     def gameFamily: GameFamily = v.gameFamily
   }
@@ -464,6 +459,7 @@ object Variant {
   def all(lib: GameLogic): List[Variant] = lib match {
     case GameLogic.Draughts() => draughts.variant.Variant.all.map(Draughts)
     case GameLogic.Chess()    => chess.variant.Variant.all.map(Chess)
+    case GameLogic.FairySF()  => fairysf.variant.Variant.all.map(FairySF)
   }
 
   def byId(lib: GameLogic) = all(lib) map { v =>
@@ -477,6 +473,7 @@ object Variant {
   def default(lib: GameLogic): Variant = lib match {
     case GameLogic.Draughts() => Draughts(draughts.variant.Variant.default)
     case GameLogic.Chess()    => Chess(chess.variant.Variant.default)
+    case GameLogic.FairySF()  => FairySF(fairysf.variant.Variant.default)
   }
 
   def apply(lib: GameLogic, id: Int): Option[Variant]     = byId(lib) get id
@@ -494,21 +491,26 @@ object Variant {
   def openingSensibleVariants(lib: GameLogic): Set[Variant] = lib match {
     case GameLogic.Draughts() => draughts.variant.Variant.openingSensibleVariants.map(Draughts)
     case GameLogic.Chess()    => chess.variant.Variant.openingSensibleVariants.map(Chess)
+    case GameLogic.FairySF()  => fairysf.variant.Variant.openingSensibleVariants.map(FairySF)
   }
 
   def divisionSensibleVariants(lib: GameLogic): Set[Variant] = lib match {
     case GameLogic.Draughts() => draughts.variant.Variant.divisionSensibleVariants.map(Draughts)
     case GameLogic.Chess()    => chess.variant.Variant.divisionSensibleVariants.map(Chess)
+    case GameLogic.FairySF()  => fairysf.variant.Variant.divisionSensibleVariants.map(FairySF)
   }
 
   def libStandard(lib: GameLogic): Variant = lib match {
     case GameLogic.Draughts() => Variant.Draughts(draughts.variant.Standard)
     case GameLogic.Chess()    => Variant.Chess(chess.variant.Standard)
+    case GameLogic.FairySF()  => Variant.FairySF(fairysf.variant.Shogi)
   }
 
   def libFromPosition(lib: GameLogic): Variant = lib match {
     case GameLogic.Draughts() => Variant.Draughts(draughts.variant.FromPosition)
     case GameLogic.Chess()    => Variant.Chess(chess.variant.FromPosition)
+    //TODO: Decide how we do from position for FairySF
+    case GameLogic.FairySF()  => Variant.FairySF(fairysf.variant.Shogi)
   }
 
 

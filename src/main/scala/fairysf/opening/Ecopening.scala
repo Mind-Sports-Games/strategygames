@@ -1,7 +1,7 @@
-package strategygames.fairysf
-package opening
+package strategygames.fairysf.opening
+import strategygames.fairysf._
 
-import cats.implicits._
+import cats.syntax.option._
 
 final class Ecopening(
     val eco: Ecopening.ECO,
@@ -49,13 +49,14 @@ object Ecopening {
       })
     }
 
-  def fromGame(pdnmoves: List[String]): Option[Ecopening] = Replay
-    .boards(
-      moveStrs = pdnmoves take EcopeningDB.MAX_MOVES,
-      initialFen = none,
-      variant = variant.Shogi
-    )
-    .toOption flatMap matchChronoBoards
+  def fromGame(pgnMoves: List[String]): Option[Ecopening] =
+    Replay
+      .boards(
+        moveStrs = pgnMoves take EcopeningDB.MAX_MOVES,
+        initialFen = None,
+        variant = variant.Variant.default
+      )
+      .toOption flatMap matchChronoBoards
 
   private def matchChronoBoards(boards: List[Board]): Option[Ecopening] =
     boards.reverse.foldLeft(none[Ecopening]) { case (acc, board) =>

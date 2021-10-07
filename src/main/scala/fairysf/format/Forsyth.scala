@@ -1,249 +1,276 @@
-package strategygames.fairysf
-package format
+package strategygames.fairysf.format
 
 import cats.implicits._
-
 import strategygames.Color
+import strategygames.fairysf._
+import strategygames.fairysf.variant.{ Variant }
 
-import variant.{ Shogi, Variant }
-
-/** Transform a game to draughts Forsyth Edwards Notation
-  * https://en.wikipedia.org/wiki/Portable_Draughts_Notation
-  * Additions:
-  * Piece role G/P = Ghost man or king of that color, has been captured but not removed because the forced capture sequence is not finished yet
-  * ":Hx" = Halfmove clock: This is the number of halfmoves since a forced draw material combination appears. This is used to determine if a draw can be claimed.
-  * ":Fx" = Fullmove number: The number of the full move. It starts at 1, and is incremented after Black's move.
+/** Transform a game to standard Forsyth Edwards Notation
+  * http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
+  *
+  * Crazyhouse & Threecheck extensions:
+  * https://github.com/ddugovic/Stockfish/wiki/FEN-extensions
+  * http://scidb.sourceforge.net/help/en/FEN.html#ThreeCheck
   */
 object Forsyth {
 
-  val initial =
-    FEN("W:W31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:H0:F1")
-  val initialPieces =
-    FEN("W31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20")
-  val initialMoveAndPieces =
-    FEN("W:W31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20")
+  val initial = FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] =
     makeBoard(variant, fen) map { board =>
-      val situation = Color.apply(fen.value.charAt(0)) match {
-        case Some(color) => Situation(board, color)
-        case _           => Situation(board, White)
+      val splitted    = fen.value split ' '
+      val colorOption = splitted lift 1 flatMap (_ lift 0) flatMap Color.apply
+      val situation = colorOption match {
+        case Some(color)             => Situation(board, color)
+        case _ if board.check(Black) => Situation(board, Black) // user in check will move first
+        case _                       => Situation(board, White)
       }
+      splitted
+        .lift(2)
+        .fold(situation) { strCastles =>
+          val (castles, unmovedRooks) = strCastles.foldLeft(Castles.none -> Set.empty[Pos]) {
+            case ((c, r), ch) =>
+              val color = Color.fromWhite(ch.isUpper)
+              val rooks = board
+                .piecesOf(color)
+                .collect {
+                  case (pos, piece) if piece.is(Rook) && pos.rank == Rank.backRank(color) => pos
+                }
+                .toList
+                .sortBy(_.file)
+              (for {
+                kingPos <- board.kingPosOf(color)
+                rookPos <- (ch.toLower match {
+                  case 'k'  => rooks.reverse.find(_ ?> kingPos)
+                  case 'q'  => rooks.find(_ ?< kingPos)
+                  case file => rooks.find(_.file.char == file)
+                })
+                side <- Side.kingRookSide(kingPos, rookPos)
+              } yield (c.add(color, side), r + rookPos)).getOrElse((c, r))
+          }
 
-      situation withHistory {
-        History(
-          positionHashes = Array.empty,
-          variant = variant
-        )
-      }
+          val fifthRank   = if (situation.color == White) Rank.Fifth else Rank.Fourth
+          val sixthRank   = if (situation.color == White) Rank.Sixth else Rank.Third
+          val seventhRank = if (situation.color == White) Rank.Seventh else Rank.Second
+          val lastMove = for {
+            pos <- splitted lift 3 flatMap Pos.fromKey
+            if pos.rank == sixthRank
+            orig = Pos(pos.file, seventhRank)
+            dest = Pos(pos.file, fifthRank)
+            if situation.board(dest).contains(Piece(!situation.color, Pawn)) &&
+              situation.board(pos.file, sixthRank).isEmpty &&
+              situation.board(orig).isEmpty
+          } yield Uci.Move(orig, dest)
 
+          situation withHistory {
+            val history = History(
+              lastMove = lastMove,
+              positionHashes = Array.empty,
+              castles = castles,
+              unmovedRooks = UnmovedRooks(unmovedRooks)
+            )
+            val checkCount =
+              splitted
+                .lift(4)
+                .flatMap(makeCheckCount)
+                .orElse(splitted.lift(6).flatMap(makeCheckCount))
+            checkCount.fold(history)(history.withCheckCount)
+          }
+        } fixCastles
     }
 
-  def <<(fen: FEN): Option[Situation] = <<@(Shogi, fen)
+  def <<(fen: FEN): Option[Situation] = <<@(Variant.default, fen)
 
   case class SituationPlus(situation: Situation, fullMoveNumber: Int) {
 
-    def turns = fullMoveNumber * 2 - (if (situation.color.white) 2 else 1)
-
+    def turns = fullMoveNumber * 2 - situation.color.fold(2, 1)
   }
 
   def <<<@(variant: Variant, fen: FEN): Option[SituationPlus] =
     <<@(variant, fen) map { sit =>
-      val splitted = fen.value.split(':')
-      val fullMoveNumber = splitted find { s => s.length > 1 && s.charAt(0) == 'F' } flatMap { s =>
-        parseIntOption(s drop 1)
-      } map (_ max 1 min 500)
-      val halfMoveClock = splitted find { s => s.length > 1 && s.charAt(0) == 'H' } flatMap { s =>
-        parseIntOption(s drop 1)
-      } map (_ max 0 min 100)
+      val splitted       = fen.value.split(' ').drop(4).dropWhile(_.contains('+'))
+      val fullMoveNumber = splitted lift 1 flatMap (_.toIntOption) map (_ max 1 min 500)
+      val halfMoveClock  = splitted lift 0 flatMap (_.toIntOption) map (_ max 0 min 100)
       SituationPlus(
         halfMoveClock.map(sit.history.setHalfMoveClock).fold(sit)(sit.withHistory),
         fullMoveNumber | 1
       )
     }
 
-  def <<<(fen: FEN): Option[SituationPlus] = <<<@(Shogi, fen)
+  def <<<(fen: FEN): Option[SituationPlus] = <<<@(Variant.default, fen)
 
-  def makeKingMoves(str: String, pos: BoardPos): Option[KingMoves] = {
-    str.split('+').filter(_.nonEmpty).map(_.toList) match {
-      case Array(w, b) if (w.length == 1 || w.length == 3) && (b.length == 1 || b.length == 3) =>
+  def makeCheckCount(str: String): Option[CheckCount] =
+    str.toList match {
+      case '+' :: w :: '+' :: b :: Nil =>
         for {
-          white <- parseIntOption(w.head.toString) if white <= 3
-          black <- parseIntOption(b.head.toString) if black <= 3
-        } yield KingMoves(black, white, pos.posAt(b.tail.mkString), pos.posAt(w.tail.mkString))
+          white <- w.toString.toIntOption if white <= 3
+          black <- b.toString.toIntOption if black <= 3
+        } yield CheckCount(black, white)
+      case w :: '+' :: b :: Nil =>
+        for {
+          white <- w.toString.toIntOption if white <= 3
+          black <- b.toString.toIntOption if black <= 3
+        } yield CheckCount(3 - black, 3 - white)
       case _ => None
     }
-  }
 
-  /** Only cares about pieces positions on the board (second and third part of FEN string)
-    */
+  // only cares about pieces positions on the board (first part of FEN string)
   def makeBoard(variant: Variant, fen: FEN): Option[Board] = {
-    val fenPieces        = fen.value.split(':').drop(1)
-    def posAt(f: String) = variant.boardSize.pos.posAt(f)
-    if (fenPieces.isEmpty) none
-    else {
-      val allFields = new scala.collection.mutable.ArrayBuffer[(Pos, Piece)]
-      for (line <- fenPieces) {
-        if (line.nonEmpty)
-          Color.apply(line.charAt(0)).foreach { color =>
-            val fields = if (line.endsWith(".")) line.substring(1, line.length - 1) else line.drop(1)
-            for (field <- fields.split(',')) {
-              if (field.nonEmpty)
-                field.charAt(0) match {
-                  case 'K' => posAt(field.drop(1)).foreach { pos => allFields.+=((pos, Piece(color, King))) }
-                  case 'G' =>
-                    posAt(field.drop(1)).foreach { pos => allFields.+=((pos, Piece(color, GhostMan))) }
-                  case 'P' =>
-                    posAt(field.drop(1)).foreach { pos => allFields.+=((pos, Piece(color, GhostKing))) }
-                  case _ => posAt(field).foreach { pos => allFields.+=((pos, Piece(color, Man))) }
-                }
-            }
-          }
+    val (position, pockets) = fen.value.takeWhile(' ' !=) match {
+      case word if word.count('/' ==) == 8 =>
+        val splitted = word.split('/')
+        splitted.take(8).mkString("/") -> splitted.lift(8)
+      case word if word.contains('[') && word.endsWith("]") =>
+        word.span('[' !=) match {
+          case (position, pockets) => position -> pockets.stripPrefix("[").stripSuffix("]").some
+        }
+      case word => word -> None
+    }
+    makePiecesWithCrazyPromoted(position.toList, 0, 7) map { case (pieces, promoted) =>
+      val board = Board(pieces, variant = variant)
+      if (promoted.isEmpty) board else board.withCrazyData(_.copy(promoted = promoted))
+    } map { board =>
+      pockets.fold(board) { str =>
+        import strategygames.fairysf.variant.Shogi.{ Pocket, Pockets }
+        val (white, black) = str.toList.flatMap(Piece.fromChar).partition(_ is White)
+        board.withCrazyData(
+          _.copy(
+            pockets = Pockets(
+              white = Pocket(white.map(_.role)),
+              black = Pocket(black.map(_.role))
+            )
+          )
+        )
       }
-      Board(allFields, variant).some
     }
   }
 
-  def toAlgebraic(variant: Variant, fen: FEN): Option[FEN] =
-    <<<@(variant, fen) map { case parsed @ SituationPlus(situation, _) =>
-      doExport(Game(situation, turns = parsed.turns), algebraic = true)
-    }
-
-  def countGhosts(fen: FEN): Int =
-    fen.value.split(':').filter(_.nonEmpty).foldLeft(0) { (ghosts, line) =>
-      Color.apply(line.charAt(0)).fold(ghosts) { _ =>
-        line.drop(1).split(',').foldLeft(ghosts) { (lineGhosts, field) =>
-          if (field.nonEmpty && "GP".indexOf(field.charAt(0)) != -1) lineGhosts + 1 else lineGhosts
-        }
-      }
-    }
-
-  def countKings(fen: FEN): Int =
-    fen.value.split(':').filter(_.nonEmpty).foldLeft(0) { (kings, line) =>
-      Color.apply(line.charAt(0)).fold(kings) { _ =>
-        line.drop(1).split(',').foldLeft(kings) { (lineKings, field) =>
-          if (field.nonEmpty && field.charAt(0) == 'K') lineKings + 1 else lineKings
-        }
-      }
+  private def makePiecesWithCrazyPromoted(
+      chars: List[Char],
+      x: Int,
+      y: Int
+  ): Option[(List[(Pos, Piece)], Set[Pos])] =
+    chars match {
+      case Nil                               => Option((Nil, Set.empty))
+      case '/' :: rest                       => makePiecesWithCrazyPromoted(rest, 0, y - 1)
+      case c :: rest if '1' <= c && c <= '8' => makePiecesWithCrazyPromoted(rest, x + (c - '0').toInt, y)
+      case c :: '~' :: rest =>
+        for {
+          pos                        <- Pos.at(x, y)
+          piece                      <- Piece.fromChar(c)
+          (nextPieces, nextPromoted) <- makePiecesWithCrazyPromoted(rest, x + 1, y)
+        } yield (pos -> piece :: nextPieces, nextPromoted + pos)
+      case c :: rest =>
+        for {
+          pos                        <- Pos.at(x, y)
+          piece                      <- Piece.fromChar(c)
+          (nextPieces, nextPromoted) <- makePiecesWithCrazyPromoted(rest, x + 1, y)
+        } yield (pos -> piece :: nextPieces, nextPromoted)
     }
 
   def >>(situation: Situation): FEN = >>(SituationPlus(situation, 1))
 
-  def >>(parsed: SituationPlus): FEN = parsed match {
-    case SituationPlus(situation, _) => >>(Game(situation, turns = parsed.turns))
-  }
+  def >>(parsed: SituationPlus): FEN =
+    parsed match {
+      case SituationPlus(situation, _) => >>(Game(situation, turns = parsed.turns))
+    }
 
-  def >>(game: Game): FEN = doExport(game, algebraic = false)
-
-  private def doExport(game: Game, algebraic: Boolean): FEN = FEN {
+  def >>(game: Game): FEN = FEN {
     {
       List(
-        game.player.letter.toUpper,
-        exportBoard(game.board, algebraic),
-        "H" + game.halfMoveClock.toString,
-        "F" + game.fullMoveNumber.toString
+        exportBoard(game.board) + exportCrazyPocket(game.board),
+        game.player.letter,
+        exportCastles(game.board),
+        game.situation.enPassantSquare.map(_.toString).getOrElse("-"),
+        game.halfMoveClock,
+        game.fullMoveNumber
       )
-    } mkString ":"
+    } mkString " "
   }
 
-  def exportStandardPositionTurn(board: Board, ply: Int): String = List(
-    Color(ply % 2 == 0).letter,
-    exportBoard(board)
-  ) mkString ":"
+  def exportStandardPositionTurnCastlingEp(situation: Situation): String =
+    List(
+      exportBoard(situation.board),
+      situation.color.letter,
+      exportCastles(situation.board),
+      situation.enPassantSquare.map(_.toString).getOrElse("-")
+    ) mkString " "
 
-  def exportKingMoves(board: Board) = board.history.kingMoves match {
-    case KingMoves(white, black, whiteKing, blackKing) =>
-      s"+$black${blackKing.fold("")(_.toString)}+$white${whiteKing.fold("")(_.toString)}"
+  private def exportCheckCount(board: Board) =
+    board.history.checkCount match {
+      case CheckCount(white, black) => s"+$black+$white"
+    }
+
+  private def exportCrazyPocket(board: Board) =
+    board.crazyData match {
+      case Some(variant.Shogi.Data(pockets, _)) =>
+        "/" +
+          pockets.white.roles.map(_.forsythUpper).mkString +
+          pockets.black.roles.map(_.forsyth).mkString
+      case _ => ""
+    }
+
+  implicit private val posOrdering = Ordering.by[Pos, File](_.file)
+
+  private[fairysf] def exportCastles(board: Board): String = {
+
+    lazy val wr = board.pieces.collect {
+      case (pos, piece) if pos.rank == Rank.backRank(White) && piece == Piece(White, Rook) => pos
+    }
+    lazy val br = board.pieces.collect {
+      case (pos, piece) if pos.rank == Rank.backRank(Black) && piece == Piece(Black, Rook) => pos
+    }
+
+    lazy val wur = board.unmovedRooks.pos.filter(_.rank == Rank.backRank(White))
+    lazy val bur = board.unmovedRooks.pos.filter(_.rank == Rank.backRank(Black))
+
+    {
+      // castling rights with inner rooks are represented by their file name
+      (if (board.castles.whiteKingSide && wr.nonEmpty && wur.nonEmpty)
+         (if (wur contains wr.max) "K" else wur.max.file.toUpperCaseString)
+       else "") +
+        (if (board.castles.whiteQueenSide && wr.nonEmpty && wur.nonEmpty)
+           (if (wur contains wr.min) "Q" else wur.min.file.toUpperCaseString)
+         else "") +
+        (if (board.castles.blackKingSide && br.nonEmpty && bur.nonEmpty)
+           (if (bur contains br.max) "k" else bur.max.file)
+         else "") +
+        (if (board.castles.blackQueenSide && br.nonEmpty && bur.nonEmpty)
+           (if (bur contains br.min) "q" else bur.min.file)
+         else "")
+    } match {
+      case "" => "-"
+      case n  => n
+    }
   }
 
-  def exportBoard(board: Board, algebraic: Boolean = false): String = {
-    val fenW = new scala.collection.mutable.StringBuilder(60)
-    val fenB = new scala.collection.mutable.StringBuilder(60)
-    fenW.append(White.letter)
-    fenB.append(Black.letter)
-    for (f <- 1 to board.boardSize.fields) {
-      board(f).foreach { piece =>
-        if (piece is White) {
-          if (fenW.length > 1) fenW append ','
-          if (piece isNot Man) fenW append piece.forsyth
-          if (algebraic) board.boardSize.pos.algebraic(f) foreach fenW.append
-          else fenW append f
-        } else {
-          if (fenB.length > 1) fenB append ','
-          if (piece isNot Man) fenB append piece.forsyth
-          if (algebraic) board.boardSize.pos.algebraic(f) foreach fenB.append
-          else fenB append f
+  def exportBoard(board: Board): String = {
+    val fen   = new scala.collection.mutable.StringBuilder(70)
+    var empty = 0
+    for (y <- Rank.allReversed) {
+      empty = 0
+      for (x <- File.all) {
+        board(x, y) match {
+          case None => empty = empty + 1
+          case Some(piece) =>
+            if (empty == 0) fen append piece.forsyth.toString
+            else {
+              fen append (empty.toString + piece.forsyth)
+              empty = 0
+            }
+            if (piece.role != Pawn && board.crazyData.fold(false)(_.promoted.contains(Pos(x, y))))
+              fen append '~'
         }
       }
+      if (empty > 0) fen append empty
+      if (y > Rank.First) fen append '/'
     }
-    fenW append ':'
-    fenW append fenB
-    fenW.toString
+    fen.toString
   }
 
   def boardAndColor(situation: Situation): String =
     boardAndColor(situation.board, situation.color)
 
   def boardAndColor(board: Board, turnColor: Color): String =
-    s"${turnColor.letter.toUpper}:${exportBoard(board)}"
-
-  def compressedBoard(board: Board): String = {
-    def posAt(f: Int) = board.boardSize.pos.posAt(f)
-    // roles as numbers to prevent conflict with position piotrs
-    def roleId(piece: Piece) = piece.role match {
-      case Man       => '1'
-      case King      => '2'
-      case GhostMan  => '3'
-      case GhostKing => '4'
-    }
-    val fenW = new scala.collection.mutable.StringBuilder(30)
-    val fenB = new scala.collection.mutable.StringBuilder(30)
-    fenB.append('0')
-    for (f <- 1 to board.boardSize.fields) {
-      board(f).foreach { piece =>
-        if (piece is White) {
-          if (piece isNot Man) fenW append roleId(piece)
-          fenW append posAt(f).get.piotr
-        } else {
-          if (piece isNot Man) fenB append roleId(piece)
-          fenB append posAt(f).get.piotr
-        }
-      }
-    }
-    fenW append fenB
-    fenW.toString
-  }
-
-  def exportScanPosition(sit: Option[Situation]): String = sit.fold("") { situation =>
-    val fields = situation.board.boardSize.fields
-    val pos    = new scala.collection.mutable.StringBuilder(fields + 1)
-    pos.append(situation.color.letter.toUpper)
-
-    for (f <- 1 to fields) {
-      situation.board(f) match {
-        case Some(Piece(White, Man))  => pos append 'w'
-        case Some(Piece(Black, Man))  => pos append 'b'
-        case Some(Piece(White, King)) => pos append 'W'
-        case Some(Piece(Black, King)) => pos append 'B'
-        case _                        => pos append 'e'
-      }
-    }
-    pos.toString
-  }
-
-  def shorten(fen: FEN): FEN = {
-    val fen2 = if (fen.value.endsWith(":+0+0")) fen.value.dropRight(5) else fen.value
-    if (fen2.endsWith(":H0:F1")) FEN(fen2.dropRight(6)) else FEN(fen2)
-  }
-
-  def getFullMove(fen: FEN): Option[Int] =
-    fen.value.split(':') filter (s => s.length > 1 && s.charAt(0) == 'F') lift 0 flatMap parseIntOption
-
-  def getColor(fen: FEN): Option[Color] = fen.value lift 0 flatMap Color.apply
-
-  def getPly(fen: FEN): Option[Int] =
-    getFullMove(fen) map { fullMove =>
-      fullMove * 2 - (if (getColor(fen).exists(_.white)) 2 else 1)
-    }
-
+    s"${exportBoard(board)} ${turnColor.letter}"
 }

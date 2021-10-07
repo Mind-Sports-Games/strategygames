@@ -2,85 +2,72 @@ package strategygames.fairysf
 
 import strategygames.Color
 
-import cats.syntax.option.none
-
 import format.Uci
-import variant.{ Shogi, Variant }
 
-// Consecutive king moves by the respective side.
-case class KingMoves(
-    white: Int = 0,
-    black: Int = 0,
-    whiteKing: Option[Pos] = None,
-    blackKing: Option[Pos] = None
-) {
+// Checks received by the respective side.
+case class CheckCount(white: Int = 0, black: Int = 0) {
 
-  def add(color: Color, pos: Option[Pos]) = copy(
-    white = white + color.fold(1, 0),
-    black = black + color.fold(0, 1),
-    whiteKing = color.fold(pos, whiteKing),
-    blackKing = color.fold(blackKing, pos)
-  )
-
-  def reset(color: Color) = copy(
-    white = color.fold(0, white),
-    black = color.fold(black, 0),
-    whiteKing = color.fold(none, whiteKing),
-    blackKing = color.fold(blackKing, none)
-  )
+  def add(color: Color) =
+    copy(
+      white = white + color.fold(1, 0),
+      black = black + color.fold(0, 1)
+    )
 
   def nonEmpty = white > 0 || black > 0
 
-  def apply(color: Color)   = color.fold(white, black)
-  def kingPos(color: Color) = color.fold(whiteKing, blackKing)
+  def apply(color: Color) = color.fold(white, black)
+}
+
+case class UnmovedRooks(pos: Set[Pos]) extends AnyVal
+
+object UnmovedRooks {
+  val default = UnmovedRooks((Pos.whiteBackrank ::: Pos.blackBackrank).toSet)
 }
 
 case class History(
     lastMove: Option[Uci] = None,
-    positionHashes: PositionHash = Hash.zero,
-    kingMoves: KingMoves = KingMoves(),
-    variant: Variant = Shogi
+    positionHashes: PositionHash = Array.empty,
+    castles: Castles = Castles.all,
+    checkCount: CheckCount = CheckCount(0, 0),
+    unmovedRooks: UnmovedRooks = UnmovedRooks.default,
+    halfMoveClock: Int = 0
 ) {
+  def setHalfMoveClock(v: Int) = copy(halfMoveClock = v)
 
-  /** Halfmove clock: This is the number of halfmoves
-    * since the last non-king move or capture.
-    * This is used to determine if a draw
-    * can be claimed under the twentyfive-move rule.
-    */
-  def halfMoveClock = math.max(0, (positionHashes.length / Hash.size) - 1)
-
-  // generates random positionHashes to satisfy the half move clock
-  def setHalfMoveClock(v: Int) =
-    copy(positionHashes = History.spoofHashes(v + 1))
-
-  /** Checks for threefold repetition, does not apply to frisian draughts
-    */
-  def threefoldRepetition: Boolean = halfMoveClock >= 8 && {
-    // compare only hashes for positions with the same side to move
-    val positions = (positionHashes grouped Hash.size).sliding(1, 2).flatten.toList
-    positions.headOption match {
-      case Some(Array(x, y, z)) =>
-        (positions count {
-          case Array(x2, y2, z2) => x == x2 && y == y2 && z == z2
-          case _                 => false
-        }) >= 3
-      case _ => false
+  private def isRepetition(times: Int) =
+    positionHashes.length > (times - 1) * 4 * Hash.size && {
+      // compare only hashes for positions with the same side to move
+      val positions = positionHashes.sliding(Hash.size, 2 * Hash.size).toList
+      positions.headOption match {
+        case Some(Array(x, y, z)) =>
+          (positions count {
+            case Array(x2, y2, z2) => x == x2 && y == y2 && z == z2
+            case _                 => false
+          }) >= times
+        case _ => times <= 1
+      }
     }
-  }
 
-  def withLastMove(m: Uci) = copy(lastMove = Some(m))
+  def threefoldRepetition = isRepetition(3)
 
-  def withKingMove(color: Color, pos: Option[Pos], v: Boolean, resetOther: Boolean = false) =
-    if (v && resetOther)
-      copy(kingMoves = kingMoves.add(color, pos).reset(!color))
-    else if (v)
-      copy(kingMoves = kingMoves.add(color, pos))
-    else if (resetOther)
-      copy(kingMoves = KingMoves())
-    else
-      copy(kingMoves = kingMoves reset color)
+  def fivefoldRepetition = isRepetition(5)
 
-  def withKingMoves(km: KingMoves) = copy(kingMoves = km)
+  def canCastle(color: Color) = castles can color
+
+  def withoutCastles(color: Color) = copy(castles = castles without color)
+
+  def withoutAnyCastles = copy(castles = Castles.none)
+
+  def withoutCastle(color: Color, side: Side) = copy(castles = castles.without(color, side))
+
+  def withCastles(c: Castles) = copy(castles = c)
+
+  def withLastMove(m: Uci) = copy(lastMove = Option(m))
+
+  def withCheck(color: Color, v: Boolean) =
+    if (v) copy(checkCount = checkCount add color) else this
+
+  def withCheckCount(cc: CheckCount) = copy(checkCount = cc)
 
   override def toString = {
     val positions = (positionHashes grouped Hash.size).toList
@@ -91,17 +78,30 @@ case class History(
 object History {
 
   def make(
-      lastMove: Option[String], // 0510 etc
-      variant: Variant
-  ): History = History(
-    lastMove = lastMove flatMap Uci.apply,
-    positionHashes = Array(),
-    variant = variant
-  )
+      lastMove: Option[String], // a2a4
+      castles: String
+  ): History =
+    History(
+      lastMove = lastMove flatMap Uci.apply,
+      castles = Castles(castles),
+      positionHashes = Array()
+    )
 
-  private def spoofHashes(n: Int): PositionHash = {
-    (1 to n).toArray.flatMap { i =>
-      Array((i >> 16).toByte, (i >> 8).toByte, i.toByte)
-    }
-  }
+  def castle(color: Color, kingSide: Boolean, queenSide: Boolean) =
+    History(
+      castles = color match {
+        case White =>
+          Castles.init.copy(
+            whiteKingSide = kingSide,
+            whiteQueenSide = queenSide
+          )
+        case Black =>
+          Castles.init.copy(
+            blackKingSide = kingSide,
+            blackQueenSide = queenSide
+          )
+      }
+    )
+
+  def noCastle = History(castles = Castles.none)
 }

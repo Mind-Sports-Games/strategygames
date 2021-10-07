@@ -1,9 +1,8 @@
 package strategygames.fairysf
 import strategygames.MoveMetrics
 
-import cats.implicits._
-
-import format.Uci
+import strategygames.fairysf.format.Uci
+import cats.syntax.option._
 
 case class Move(
     piece: Piece,
@@ -11,55 +10,72 @@ case class Move(
     dest: Pos,
     situationBefore: Situation,
     after: Board,
-    capture: Option[List[Pos]],
-    taken: Option[List[Pos]],
-    promotion: Option[PromotableRole] = None,
+    capture: Option[Pos],
+    promotion: Option[PromotableRole],
+    castle: Option[((Pos, Pos), (Pos, Pos))],
+    enpassant: Boolean,
     metrics: MoveMetrics = MoveMetrics()
 ) {
-
   def before = situationBefore.board
 
-  def situationAfter: Situation = situationAfter(false)
-  def situationAfter(finalSquare: Boolean): Situation =
-    Situation.withColorAfter(finalizeAfter(finalSquare), piece.color)
+  def situationAfter = Situation(finalizeAfter, !piece.color)
 
   def withHistory(h: History) = copy(after = after withHistory h)
 
-  def finalizeAfter(finalSquare: Boolean = false): Board = {
+  def finalizeAfter: Board = {
     val board = after updateHistory { h1 =>
-      h1.copy(lastMove = Some(toUci))
-    }
+      val h2 = h1.copy(
+        lastMove = Option(toUci),
+        unmovedRooks = before.unmovedRooks,
+        halfMoveClock =
+          if ((piece is Pawn) || captures || promotes) 0
+          else h1.halfMoveClock + 1
+      )
 
-    val finalized =
-      board.variant.finalizeBoard(board, toUci, taken flatMap before.apply, situationBefore, finalSquare)
-    if (finalized.ghosts != 0) finalized
-    else
-      finalized updateHistory { h =>
-        // Update position hashes last, only after updating the board, and when capture is complete
-        h.copy(positionHashes = board.variant.updatePositionHashes(board, this, h.positionHashes))
-      }
+      // my broken castles
+      if ((piece is King) && h2.canCastle(color).any)
+        h2 withoutCastles color
+      else if (piece is Rook) (for {
+        kingPos <- after kingPosOf color
+        side <- Side.kingRookSide(kingPos, orig).filter { s =>
+          (h2 canCastle color on s) &&
+          h1.unmovedRooks.pos(orig)
+        }
+      } yield h2.withoutCastle(color, side)) | h2
+      else h2
+    } fixCastles
+
+    // Update position hashes last, only after updating the board,
+    // castling rights and en-passant rights.
+    board.variant.finalizeBoard(board, toUci, capture flatMap before.apply) updateHistory { h =>
+      lazy val positionHashesOfSituationBefore =
+        if (h.positionHashes.isEmpty) Hash(situationBefore) else h.positionHashes
+      val resetsPositionHashes = board.variant.isIrreversible(this)
+      val basePositionHashes =
+        if (resetsPositionHashes) Array.empty: PositionHash else positionHashesOfSituationBefore
+      h.copy(positionHashes = Hash(Situation(board, !piece.color)) ++ basePositionHashes)
+    }
   }
 
   def applyVariantEffect: Move = before.variant addVariantEffect this
 
-  def afterWithLastMove(finalSquare: Boolean = false) = after.variant.finalizeBoard(
-    after.copy(history = after.history.withLastMove(toUci)),
-    toUci,
-    taken flatMap before.apply,
-    situationBefore,
-    finalSquare
-  )
-
   // does this move capture an opponent piece?
-  def captures = capture.fold(false)(_.nonEmpty)
+  def captures = capture.isDefined
 
   def promotes = promotion.isDefined
+
+  def castles = castle.isDefined
+
+  def normalizeCastle =
+    castle.fold(this) { case (_, (rookOrig, _)) =>
+      copy(dest = rookOrig)
+    }
 
   def color = piece.color
 
   def withPromotion(op: Option[PromotableRole]): Option[Move] =
     op.fold(this.some) { p =>
-      if ((after count Piece(color, King)) > (before count Piece(color, King))) for {
+      if ((after count Piece(color, Queen)) > (before count Piece(color, Queen))) for {
         b2 <- after take dest
         b3 <- b2.place(Piece(color, p), dest)
       } yield copy(after = b3, promotion = Option(p))
@@ -70,21 +86,7 @@ case class Move(
 
   def withMetrics(m: MoveMetrics) = copy(metrics = m)
 
-  def toUci = Uci.Move(orig, dest, promotion, capture)
-  def toShortUci =
-    Uci.Move(orig, dest, promotion, if (capture.isDefined) capture.get.takeRight(1).some else None)
-
-  def toSan = s"${orig.shortKey}${if (capture.nonEmpty) "x" else "-"}${dest.shortKey}"
-  def toFullSan = {
-    val sep = if (capture.nonEmpty) "x" else "-"
-    orig.shortKey + sep + capture.fold(dest.shortKey)(_.reverse.map(_.shortKey) mkString sep)
-  }
-
-  def toScanMove =
-    if (taken.isDefined)
-      (List(orig.shortKey, dest.shortKey) ::: taken.get.reverse.map(_.shortKey)) mkString "x"
-    else s"${orig.shortKey}-${dest.shortKey}"
+  def toUci = Uci.Move(orig, dest, promotion)
 
   override def toString = s"$piece ${toUci.uci}"
-
 }

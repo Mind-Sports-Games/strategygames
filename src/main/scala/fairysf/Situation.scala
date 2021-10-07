@@ -5,126 +5,106 @@ import strategygames.{ Color, Status }
 import cats.data.Validated
 import cats.implicits._
 
-import format.Uci
+import strategygames.fairysf.format.Uci
 
 case class Situation(board: Board, color: Color) {
 
   lazy val actors = board actorsOf color
 
-  lazy val ghosts = board.ghosts
+  lazy val moves: Map[Pos, List[Move]] = board.variant.validMoves(this)
 
-  lazy val validMoves: Map[Pos, List[Move]]      = board.variant.validMoves(this)
-  lazy val validMovesFinal: Map[Pos, List[Move]] = board.variant.validMoves(this, true)
+  lazy val playerCanCapture: Boolean = moves exists (_._2 exists (_.captures))
 
-  lazy val allCaptures: Map[Pos, List[Move]] = actors
-    .collect {
-      case actor if actor.captures.nonEmpty =>
-        actor.pos -> actor.captures
-    }
-    .to(Map)
+  lazy val destinations: Map[Pos, List[Pos]] = moves.view.mapValues { _ map (_.dest) }.to(Map)
 
-  lazy val allMovesCaptureLength: Int =
-    actors.foldLeft(0) { case (max, actor) =>
-      Math.max(actor.captureLength, max)
+  def drops: Option[List[Pos]] =
+    board.variant match {
+      case v: variant.Shogi.type => v possibleDrops this
+      case _                     => None
     }
 
-  def hasCaptures = actors.foldLeft(false) { case (capture, actor) =>
-    if (capture) true
-    else actor.captures.nonEmpty
-  }
+  lazy val kingPos: Option[Pos] = board kingPosOf color
 
-  def ambiguitiesMove(move: Move): Int = ambiguitiesMove(move.orig, move.dest)
-  def ambiguitiesMove(orig: Pos, dest: Pos): Int = countAmbiguities(
-    movesFrom(orig, true).filter(_.dest == dest)
-  )
+  lazy val check: Boolean = board check color
 
-  private def countAmbiguities(moves: List[Move]) =
-    moves.foldLeft(0) { (total, m1) =>
-      if (
-        moves.exists { m2 =>
-          m1 != m2 &&
-          m1.dest == m2.dest &&
-          m1.situationAfter.board.pieces != m2.situationAfter.board.pieces
-        }
-      ) total + 1
-      else total
-    }
-
-  def movesFrom(pos: Pos, finalSquare: Boolean = false): List[Move] =
-    board.variant.validMovesFrom(this, pos, finalSquare)
-
-  def captureLengthFrom(pos: Pos): Option[Int] =
-    actorAt(pos).map(_.captureLength)
-
-  lazy val allDestinations: Map[Pos, List[Pos]]        = validMoves map (kv => (kv._1, kv._2.map(_.dest)))
-  lazy val allCaptureDestinations: Map[Pos, List[Pos]] = allCaptures map (kv => (kv._1, kv._2.map(_.dest)))
-
-  def destinationsFrom(pos: Pos, finalSquare: Boolean = false): List[Pos] =
-    movesFrom(pos, finalSquare) map (_.dest)
-
-  def validMoveCount = validMoves.foldLeft(0)((t, p) => t + p._2.length)
-
-  def actorAt(pos: Pos): Option[Actor] = board.actorAt(pos)
-
-  def drops: Option[List[Pos]] = None
+  def checkSquare = if (check) kingPos else None
 
   def history = board.history
 
   def checkMate: Boolean = board.variant checkmate this
 
+  def staleMate: Boolean = board.variant staleMate this
+
   def autoDraw: Boolean = board.autoDraw || board.variant.specialDraw(this)
+
+  def opponentHasInsufficientMaterial: Boolean = board.variant.opponentHasInsufficientMaterial(this)
 
   lazy val threefoldRepetition: Boolean = board.history.threefoldRepetition
 
   def variantEnd = board.variant specialEnd this
 
-  def end: Boolean = checkMate || autoDraw || variantEnd
+  def end: Boolean = checkMate || staleMate || autoDraw || variantEnd
 
   def winner: Option[Color] = board.variant.winner(this)
 
   def playable(strict: Boolean): Boolean =
-    (board valid strict) && !end
+    (board valid strict) && !end && !copy(color = !color).check
 
   lazy val status: Option[Status] =
     if (checkMate) Status.Mate.some
     else if (variantEnd) Status.VariantEnd.some
+    else if (staleMate) Status.Stalemate.some
     else if (autoDraw) Status.Draw.some
     else none
 
-  def move(
-      from: Pos,
-      to: Pos,
-      promotion: Option[PromotableRole] = None,
-      finalSquare: Boolean = false,
-      forbiddenUci: Option[List[String]] = None,
-      captures: Option[List[Pos]] = None,
-      partialCaptures: Boolean = false
-  ): Validated[String, Move] =
-    board.variant.move(this, from, to, promotion, finalSquare, forbiddenUci, captures, partialCaptures)
+  def move(from: Pos, to: Pos, promotion: Option[PromotableRole]): Validated[String, Move] =
+    board.variant.move(this, from, to, promotion)
 
   def move(uci: Uci.Move): Validated[String, Move] =
     board.variant.move(this, uci.orig, uci.dest, uci.promotion)
 
-  def withHistory(history: History) = copy(
-    board = board withHistory history
-  )
+  def drop(role: Role, pos: Pos): Validated[String, Drop] =
+    board.variant.drop(this, role, pos)
 
-  def withVariant(variant: strategygames.fairysf.variant.Variant) = copy(
-    board = board withVariant variant
-  )
+  def fixCastles = copy(board = board fixCastles)
 
-  def withoutGhosts = copy(
-    board = board.withoutGhosts
-  )
+  def withHistory(history: History) =
+    copy(
+      board = board withHistory history
+    )
+
+  def withVariant(variant: strategygames.fairysf.variant.Variant) =
+    copy(
+      board = board withVariant variant
+    )
+
+  def canCastle = board.history.canCastle _
+
+  def enPassantSquare: Option[Pos] = {
+    // Before potentially expensive move generation, first ensure some basic
+    // conditions are met.
+    history.lastMove match {
+      case Some(move: Uci.Move) =>
+        if (
+          move.dest.yDist(move.orig) == 2 &&
+          board(move.dest).exists(_.is(Pawn)) &&
+          List(
+            move.dest.file.offset(-1),
+            move.dest.file.offset(1)
+          ).flatten
+          .flatMap(board(_, Rank.passablePawnRank(color)))
+          .exists(_ == Piece(color, Pawn))
+        )
+          moves.values.flatten.find(_.enpassant).map(_.dest)
+        else None
+      case _ => None
+    }
+  }
 
   def unary_! = copy(color = !color)
 }
 
 object Situation {
 
-  def apply(variant: strategygames.fairysf.variant.Variant): Situation = Situation(Board init variant, White)
-
-  def withColorAfter(board: Board, colorBefore: Color): Situation =
-    if (board.ghosts == 0) Situation(board, !colorBefore)
-    else Situation(board, colorBefore)
+  def apply(variant: strategygames.fairysf.variant.Variant): Situation = Situation(Board init variant, variant.startColor)
 }

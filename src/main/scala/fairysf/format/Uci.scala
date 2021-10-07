@@ -1,5 +1,5 @@
-package strategygames.fairysf
-package format
+package strategygames.fairysf.format
+import strategygames.fairysf._
 
 import cats.data.Validated
 import cats.implicits._
@@ -7,16 +7,11 @@ import cats.implicits._
 sealed trait Uci {
 
   def uci: String
-  def shortUci: String
   def piotr: String
-
-  def toSan: String
-  def toFullSan: String
 
   def origDest: (Pos, Pos)
 
-  def apply(situation: Situation, finalSquare: Boolean = false): Validated[String, Move]
-
+  def apply(situation: Situation): Validated[String, MoveOrDrop]
 }
 
 object Uci {
@@ -24,13 +19,11 @@ object Uci {
   case class Move(
       orig: Pos,
       dest: Pos,
-      promotion: Option[PromotableRole] = None,
-      capture: Option[List[Pos]] = None
+      promotion: Option[PromotableRole] = None
   ) extends Uci {
 
-    def keys     = orig.key + dest.key
-    def uci      = orig.key + capture.fold(dest.toString)(_.reverse.mkString)
-    def shortUci = orig.key + capture.fold(dest.toString)(_.last.toString)
+    def keys = orig.key + dest.key
+    def uci  = keys + promotionString
 
     def keysPiotr = orig.piotrStr + dest.piotrStr
     def piotr     = keysPiotr + promotionString
@@ -39,63 +32,72 @@ object Uci {
 
     def origDest = orig -> dest
 
-    def apply(situation: Situation, finalSquare: Boolean = false) =
-      situation.move(orig, dest, promotion, finalSquare, none, capture)
-
-    def toSan = s"${orig.shortKey}${if (capture.nonEmpty) "x" else "-"}${dest.shortKey}"
-    def toFullSan = {
-      val sep = if (capture.nonEmpty) "x" else "-"
-      orig.shortKey + sep + capture.fold(dest.shortKey)(_.reverse.map(_.shortKey) mkString sep)
-    }
-
+    def apply(situation: Situation) = situation.move(orig, dest, promotion) map Left.apply
   }
 
   object Move {
 
-    def apply(move: String): Option[Move] = {
-      def posAt(f: String) = Board.BoardSize.max.posAt(f)
-      if (move.length >= 6) {
-        val capts = (for { c <- 2 until move.length by 2 } yield posAt(move.slice(c, c + 2))).toList.flatten
-        for {
-          orig <- posAt(move take 2)
-          dest <- posAt(move.slice(move.length - 2, move.length))
-        } yield Move(orig, dest, None, Some(capts.reverse))
-      } else {
-        for {
-          orig <- posAt(move take 2)
-          dest <- posAt(move drop 2 take 2)
-          promotion = move lift 4 flatMap Role.promotable
-        } yield Move(orig, dest, promotion)
-      }
-    }
+    def apply(move: String): Option[Move] =
+      for {
+        orig <- Pos.fromKey(move take 2)
+        dest <- Pos.fromKey(move.slice(2, 4))
+        promotion = move lift 4 flatMap Role.promotable
+      } yield Move(orig, dest, promotion)
 
-    def piotr(move: String) = for {
-      orig <- move.headOption flatMap Board.BoardSize.max.piotr
-      dest <- move lift 1 flatMap Board.BoardSize.max.piotr
-      promotion = move lift 2 flatMap Role.promotable
-    } yield Move(orig, dest, promotion)
+    def piotr(move: String) =
+      for {
+        orig <- move.headOption flatMap Pos.piotr
+        dest <- move lift 1 flatMap Pos.piotr
+        promotion = move lift 2 flatMap Role.promotable
+      } yield Move(orig, dest, promotion)
 
-    def fromStrings(origS: String, destS: String, promS: Option[String]) = for {
-      orig <- Board.BoardSize.max.posAt(origS)
-      dest <- Board.BoardSize.max.posAt(destS)
-      promotion = Role promotable promS
-    } yield Move(orig, dest, promotion)
+    def fromStrings(origS: String, destS: String, promS: Option[String]) =
+      for {
+        orig <- Pos.fromKey(origS)
+        dest <- Pos.fromKey(destS)
+        promotion = Role promotable promS
+      } yield Move(orig, dest, promotion)
+  }
 
+  case class Drop(role: Role, pos: Pos) extends Uci {
+
+    def uci = s"${role.pgn}@${pos.key}"
+
+    def piotr = s"${role.pgn}@${pos.piotrStr}"
+
+    def origDest = pos -> pos
+
+    def apply(situation: Situation) = situation.drop(role, pos) map Right.apply
+  }
+
+  object Drop {
+
+    def fromStrings(roleS: String, posS: String) =
+      for {
+        role <- Role.allByName get roleS
+        pos  <- Pos.fromKey(posS)
+      } yield Drop(role, pos)
   }
 
   case class WithSan(uci: Uci, san: String)
 
-  def apply(move: strategygames.fairysf.Move, withCaptures: Boolean) =
-    Uci.Move(move.orig, move.dest, move.promotion, if (withCaptures) move.capture else none)
+  def apply(move: strategygames.fairysf.Move) = Uci.Move(move.orig, move.dest, move.promotion)
 
-  def combine(uci1: Uci, uci2: Uci) =
-    apply(uci1.uci + uci2.uci.drop(2)).getOrElse(Uci.Move(uci1.origDest._1, uci2.origDest._2))
-  def combineSan(san1: String, san2: String) =
-    san1.substring(0, san1.indexOf('x')) + san2.substring(san2.indexOf('x'))
+  def apply(drop: strategygames.fairysf.Drop) = Uci.Drop(drop.piece.role, drop.pos)
 
-  def apply(move: String): Option[Uci] = Uci.Move(move)
+  def apply(move: String): Option[Uci] =
+    if (move lift 1 contains '@') for {
+      role <- move.headOption flatMap Role.allByPgn.get
+      pos  <- Pos.fromKey(move.slice(2, 4))
+    } yield Uci.Drop(role, pos)
+    else Uci.Move(move)
 
-  def piotr(move: String): Option[Uci] = Uci.Move.piotr(move)
+  def piotr(move: String): Option[Uci] =
+    if (move lift 1 contains '@') for {
+      role <- move.headOption flatMap Role.allByPgn.get
+      pos  <- move lift 2 flatMap Pos.piotr
+    } yield Uci.Drop(role, pos)
+    else Uci.Move.piotr(move)
 
   def readList(moves: String): Option[List[Uci]] =
     moves.split(' ').toList.map(apply).sequence
@@ -108,5 +110,4 @@ object Uci {
 
   def writeListPiotr(moves: List[Uci]): String =
     moves.map(_.piotr) mkString " "
-
 }
