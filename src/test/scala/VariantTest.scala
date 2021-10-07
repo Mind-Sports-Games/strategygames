@@ -15,38 +15,38 @@ class VariantTest extends ChessTest {
 
     "position pieces correctly" in {
       Standard.pieces must havePairs(
-        A1 -> (White - Rook),
-        B1 -> (White - Knight),
-        C1 -> (White - Bishop),
-        D1 -> (White - Queen),
-        E1 -> (White - King),
-        F1 -> (White - Bishop),
-        G1 -> (White - Knight),
-        H1 -> (White - Rook),
-        A2 -> (White - Pawn),
-        B2 -> (White - Pawn),
-        C2 -> (White - Pawn),
-        D2 -> (White - Pawn),
-        E2 -> (White - Pawn),
-        F2 -> (White - Pawn),
-        G2 -> (White - Pawn),
-        H2 -> (White - Pawn),
-        A7 -> (Black - Pawn),
-        B7 -> (Black - Pawn),
-        C7 -> (Black - Pawn),
-        D7 -> (Black - Pawn),
-        E7 -> (Black - Pawn),
-        F7 -> (Black - Pawn),
-        G7 -> (Black - Pawn),
-        H7 -> (Black - Pawn),
-        A8 -> (Black - Rook),
-        B8 -> (Black - Knight),
-        C8 -> (Black - Bishop),
-        D8 -> (Black - Queen),
-        E8 -> (Black - King),
-        F8 -> (Black - Bishop),
-        G8 -> (Black - Knight),
-        H8 -> (Black - Rook)
+        A1 -> (Rook - White),
+        B1 -> (Knight - White),
+        C1 -> (Bishop - White),
+        D1 -> (Queen - White),
+        E1 -> (King - White),
+        F1 -> (Bishop - White),
+        G1 -> (Knight - White),
+        H1 -> (Rook - White),
+        A2 -> (Pawn - White),
+        B2 -> (Pawn - White),
+        C2 -> (Pawn - White),
+        D2 -> (Pawn - White),
+        E2 -> (Pawn - White),
+        F2 -> (Pawn - White),
+        G2 -> (Pawn - White),
+        H2 -> (Pawn - White),
+        A7 -> (Pawn - Black),
+        B7 -> (Pawn - Black),
+        C7 -> (Pawn - Black),
+        D7 -> (Pawn - Black),
+        E7 -> (Pawn - Black),
+        F7 -> (Pawn - Black),
+        G7 -> (Pawn - Black),
+        H7 -> (Pawn - Black),
+        A8 -> (Rook - Black),
+        B8 -> (Knight - Black),
+        C8 -> (Bishop - Black),
+        D8 -> (Queen - Black),
+        E8 -> (King - Black),
+        F8 -> (Bishop - Black),
+        G8 -> (Knight - Black),
+        H8 -> (Rook - Black)
       )
     }
 
@@ -84,7 +84,7 @@ class VariantTest extends ChessTest {
   "chess960" should {
 
     "position pieces correctly" in {
-      Chess960.pieces must havePair(A2 -> (White - Pawn))
+      Chess960.pieces must havePair(A2 -> (Pawn - White))
     }
 
     "initialize the board with castling rights" in {

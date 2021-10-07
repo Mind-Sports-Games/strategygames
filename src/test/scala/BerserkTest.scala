@@ -1,12 +1,12 @@
 package strategygames.chess
-import strategygames.{ Clock, GameLogic }
+import strategygames.{ Black, Clock, GameLogic, White  }
 
 class BerserkTest extends ChessTest {
 
   val chess = GameLogic.Chess()
 
   def whiteBerserk(minutes: Int, seconds: Int) =
-    Clock(chess, minutes * 60, seconds).goBerserk(chess.white).remainingTime(chess.white).centis * .01
+    Clock(Clock.Config(minutes * 60, seconds)).goBerserk(White).remainingTime(White).centis * .01
 
   "berserkable" should {
     "yep" in {
@@ -22,12 +22,12 @@ class BerserkTest extends ChessTest {
   }
   "berserk flags" should {
     "white" in {
-      Clock(chess, 60, 0).berserked(chess.white) must_== false
-      Clock(chess, 60, 0).goBerserk(chess.white).berserked(chess.white) must_== true
+      Clock(Clock.Config(60, 0)).berserked(White) must_== false
+      Clock(Clock.Config(60, 0)).goBerserk(White).berserked(White) must_== true
     }
     "black" in {
-      Clock(chess, 60, 0).berserked(chess.black) must_== false
-      Clock(chess, 60, 0).goBerserk(chess.black).berserked(chess.black) must_== true
+      Clock(Clock.Config(60, 0)).berserked(Black) must_== false
+      Clock(Clock.Config(60, 0)).goBerserk(Black).berserked(Black) must_== true
     }
   }
   "initial time penalty, no increment" should {

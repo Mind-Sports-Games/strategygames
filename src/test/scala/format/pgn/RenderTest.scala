@@ -1,6 +1,8 @@
 package strategygames.chess
 package format.pgn
 
+import strategygames.format.pgn._
+
 import cats.syntax.option._
 
 class RenderTest extends ChessTest {

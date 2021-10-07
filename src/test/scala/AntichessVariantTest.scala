@@ -4,7 +4,7 @@ import cats.implicits._
 
 import org.specs2.matcher.ValidatedMatchers
 
-import strategygames.Status
+import strategygames.{ Black, Color, Status, White }
 import strategygames.chess.format.{ FEN, Forsyth }
 import strategygames.chess.format.pgn.Reader
 import strategygames.chess.variant.Antichess
@@ -154,7 +154,7 @@ g4 {[%emt 0.200]} 34. Rxg4 {[%emt 0.172]} 0-1"""
       val newGame = originalGame flatMap (_.apply(Pos.F7, Pos.F8, Option(King))) map (_._1)
 
       newGame must beValid.like { case gameWithPromotion =>
-        gameWithPromotion.board(Pos.F8).mustEqual(Option(White - King))
+        gameWithPromotion.board(Pos.F8).mustEqual(Option(King - White))
       }
 
     }

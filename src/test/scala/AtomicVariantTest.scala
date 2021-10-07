@@ -2,7 +2,7 @@ package strategygames.chess
 
 import cats.syntax.option._
 
-import strategygames.Status
+import strategygames.{ Black, Color, Status, White }
 import strategygames.chess.variant.Atomic
 import strategygames.chess.format.FEN
 
@@ -563,8 +563,8 @@ class AtomicVariantTest extends ChessTest {
       val newGame  = game flatMap (_.playMove(Pos.E1, Pos.C1))
 
       newGame must beValid.like { case game =>
-        game.board(Pos.C1) must beEqualTo(White.king.some)
-        game.board(Pos.D1) must beEqualTo(White.rook.some)
+        game.board(Pos.C1) must beEqualTo(King.white.some)
+        game.board(Pos.D1) must beEqualTo(Rook.white.some)
       }
     }
 

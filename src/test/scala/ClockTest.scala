@@ -1,17 +1,17 @@
 package strategygames.chess
 import strategygames._
 
-import Pos._
+import strategygames.chess.Pos._
 
 class ClockTest extends ChessTest {
   val chess = GameLogic.Chess()
-  val fakeClock60 = Clock(chess, 60, 0)
+  val fakeClock60 = Clock(Clock.Config(60, 0))
     .copy(timestamper = new Timestamper {
       val now = Timestamp(0)
     })
     .start
 
-  val fakeClock600 = Clock(chess, 600, 0)
+  val fakeClock600 = Clock(Clock.Config(600, 0))
     .copy(timestamper = new Timestamper {
       val now = Timestamp(0)
     })
@@ -23,29 +23,29 @@ class ClockTest extends ChessTest {
     })
 
   "play with a clock" should {
-    val clock = Clock(chess, 5 * 60 * 1000, 0)
+    val clock = Clock(Clock.Config(5 * 60 * 1000, 0))
     val game  = makeGame withClock clock.start
     "new game" in {
-      game.clock map { _.color } must_== Option(chess.white)
+      game.clock map { _.color } must_== Option(White)
     }
     "one move played" in {
       game.playMoves(E2 -> E4) must beValid.like { case g: Game =>
-        g.clock map { _.color } must_== Option(chess.black)
+        g.clock map { _.color } must_== Option(Black)
       }
     }
   }
   "create a clock" should {
     "with time" in {
-      Clock(chess, 60, 10).limitSeconds must_== 60
+      Clock(Clock.Config(60, 10)).limitSeconds must_== 60
     }
     "with increment" in {
-      Clock(chess, 60, 10).incrementSeconds must_== 10
+      Clock(Clock.Config(60, 10)).incrementSeconds must_== 10
     }
     "with few time" in {
-      Clock(chess, 0, 10).limitSeconds must_== 0
+      Clock(Clock.Config(0, 10)).limitSeconds must_== 0
     }
     "with 30 seconds" in {
-      Clock(chess, 30, 0).limitInMinutes must_== 0.5
+      Clock(Clock.Config(30, 0)).limitInMinutes must_== 0.5
     }
   }
   "lag compensation" should {
@@ -54,7 +54,7 @@ class ClockTest extends ChessTest {
     def clockStep(clock: Clock, wait: Int, lags: Int*) = {
       (lags.foldLeft(clock) { (clk, lag) =>
         advance(clk.step(), wait + lag) step durOf(lag)
-      } remainingTime chess.black).centis
+      } remainingTime Black).centis
     }
 
     def clockStep60(w: Int, l: Int*)  = clockStep(fakeClock60, w, l: _*)
@@ -62,7 +62,7 @@ class ClockTest extends ChessTest {
 
     def clockStart(lag: Int) = {
       val clock = fakeClock60.step()
-      ((clock step durOf(lag)) remainingTime chess.white).centis
+      ((clock step durOf(lag)) remainingTime White).centis
     }
 
     "start" in {
@@ -138,18 +138,18 @@ class ClockTest extends ChessTest {
     "60s stall" in {
       val clock60 = advance(fakeClock60, 60 * 100)
 
-      clock60.remainingTime(chess.white).centis must_== 0
-      clock60.outOfTime(chess.black, withGrace = true) must beFalse
-      clock60.outOfTime(chess.white, withGrace = true) must beFalse
-      clock60.outOfTime(chess.white, withGrace = false) must beTrue
+      clock60.remainingTime(White).centis must_== 0
+      clock60.outOfTime(Black, withGrace = true) must beFalse
+      clock60.outOfTime(White, withGrace = true) must beFalse
+      clock60.outOfTime(White, withGrace = false) must beTrue
     }
     "61s stall" in {
       val clock61 = advance(fakeClock60, 61 * 100)
-      clock61.remainingTime(chess.white).centis must_== 0
-      clock61.outOfTime(chess.white, withGrace = true) must beFalse
+      clock61.remainingTime(White).centis must_== 0
+      clock61.outOfTime(White, withGrace = true) must beFalse
     }
-    "over quota stall" >> advance(fakeClock60, 6190).outOfTime(chess.white, withGrace = true)
-    "stall within quota" >> !advance(fakeClock600, 60190).outOfTime(chess.white, withGrace = true)
-    "max grace stall" >> advance(fakeClock600, 602 * 100).outOfTime(chess.white, withGrace = true)
+    "over quota stall" >> advance(fakeClock60, 6190).outOfTime(White, withGrace = true)
+    "stall within quota" >> !advance(fakeClock600, 60190).outOfTime(White, withGrace = true)
+    "max grace stall" >> advance(fakeClock600, 602 * 100).outOfTime(White, withGrace = true)
   }
 }

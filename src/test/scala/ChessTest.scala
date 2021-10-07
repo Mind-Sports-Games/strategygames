@@ -1,6 +1,6 @@
 package strategygames.chess
 
-import strategygames.Clock
+import strategygames.{ Clock, Color }
 
 import cats.data.Validated
 import cats.syntax.option._

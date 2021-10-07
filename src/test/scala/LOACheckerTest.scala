@@ -6,7 +6,7 @@ class LOACheckerTest extends ChessTest {
 
   "a loa checker" should {
 
-    val loachecker = White - LOAChecker
+    val loachecker = LOAChecker - White
 
     "move one space in any direction on empty board" in {
       pieceMoves(loachecker, D4) must bePoss(

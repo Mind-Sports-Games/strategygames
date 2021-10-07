@@ -1,5 +1,7 @@
 package strategygames.chess
 
+import strategygames.{ Black, Color, White }
+
 sealed trait Role {
   val forsyth: Char
   lazy val forsythUpper: Char = forsyth.toUpper
@@ -9,6 +11,9 @@ sealed trait Role {
   val binaryInt: Int
   val dirs: Directions
   def dir(from: Pos, to: Pos): Option[Direction]
+  final def -(color: Color) = Piece(color, this)
+  final def white           = this - White
+  final def black           = this - Black
 }
 sealed trait PromotableRole extends Role
 
@@ -131,16 +136,18 @@ object Role {
   def pgnMoveToRole(c: Char): Role =
     allByPgn.get(c) match {
       case Some(r) => r
-      case None => if (c == 'O') King else Pawn
+      case None    => if (c == 'O') King else Pawn
     }
 
   def javaSymbolToRole(s: String): Role =
-    allByPgn.get(
-      s.headOption match {    
-        case Some(c) => c    
-        case None => 'P'//JavaRole.PAWN.symbol is ""    
-      }
-    ).get
+    allByPgn
+      .get(
+        s.headOption match {
+          case Some(c) => c
+          case None    => 'P' //JavaRole.PAWN.symbol is ""
+        }
+      )
+      .get
 
   def valueOf(r: Role): Option[Int] =
     r match {

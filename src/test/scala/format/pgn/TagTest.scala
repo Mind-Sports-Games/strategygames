@@ -1,6 +1,8 @@
 package strategygames.chess
 package format.pgn
 
+import strategygames.format.pgn._
+
 class TagTest extends ChessTest {
 
   "Tags" should {
