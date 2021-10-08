@@ -1,7 +1,7 @@
 package strategygames.fairysf.format
 
 import cats.implicits._
-import strategygames.Color
+import strategygames.{ Color, Pocket, Pockets }
 import strategygames.fairysf._
 import strategygames.fairysf.variant.{ Variant }
 
@@ -135,8 +135,8 @@ object Forsyth {
         board.withCrazyData(
           _.copy(
             pockets = Pockets(
-              white = Pocket(white.map(_.role)),
-              black = Pocket(black.map(_.role))
+              white = Pocket(white.map(_.role).map(strategygames.Role.FairySFRole)),
+              black = Pocket(black.map(_.role).map(strategygames.Role.FairySFRole))
             )
           )
         )
@@ -204,7 +204,7 @@ object Forsyth {
     board.crazyData match {
       case Some(PocketData(pockets, _)) =>
         "/" +
-          pockets.white.roles.map(_.forsythUpper).mkString +
+          pockets.white.roles.map(_.forsyth).map(_.toUpper).mkString +
           pockets.black.roles.map(_.forsyth).mkString
       case _ => ""
     }

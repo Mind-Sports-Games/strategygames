@@ -37,15 +37,8 @@ object Hash {
   private val polyglotTable    = new ZobristConstants(0)
   private lazy val randomTable = new ZobristConstants(16)
 
-  def roleIndex(role: Role) = role match {
-    case Man       => 0
-    case King      => 1
-    case GhostKing => 2
-    case GhostMan  => 3
-  }
-
   private def pieceIndex(piece: Piece) =
-    roleIndex(piece.role) * 2 + piece.color.fold(1, 0)
+    piece.role.hashInt * 2 + piece.color.fold(1, 0)
 
   private def actorIndex(actor: Actor) =
     64 * pieceIndex(actor.piece) + actor.pos.hashCode

@@ -1,38 +1,6 @@
 package strategygames.fairysf
 
-import strategygames.Color
-
-case class Pockets(white: Pocket, black: Pocket) {
-
-  def apply(color: Color) = color.fold(white, black)
-
-  def take(piece: Piece): Option[Pockets] =
-    piece.color.fold(
-      white take piece.role map { np =>
-        copy(white = np)
-      },
-      black take piece.role map { np =>
-        copy(black = np)
-      }
-    )
-
-  def store(piece: Piece) =
-    piece.color.fold(
-      copy(black = black store piece.role),
-      copy(white = white store piece.role)
-    )
-}
-
-case class Pocket(roles: List[Role]) {
-
-  def take(role: Role) =
-    if (roles contains role) Option(copy(roles = roles diff List(role)))
-    else None
-
-  def store(role: Role) =
-    if (Role.storableRoles contains role) copy(roles = role :: roles)
-    else this
-}
+import strategygames.{ Color, GameLogic, Piece => StratPiece, Pockets, Pocket }
 
 case class PocketData(
     pockets: Pockets,
@@ -44,15 +12,16 @@ case class PocketData(
 ) {
 
   def drop(piece: Piece): Option[PocketData] =
-    pockets take piece map { nps =>
+    pockets take StratPiece.FairySF(piece) map { nps =>
       copy(pockets = nps)
     }
 
   def store(piece: Piece, from: Pos) =
     copy(
-      pockets = pockets store {
-        if (promoted(from)) Piece(piece.color, Pawn) else piece
-      },
+      pockets = pockets.store(
+        GameLogic.FairySF(),
+        StratPiece.FairySF(if (promoted(from)) Piece(piece.color, Pawn) else piece)
+      ),
       promoted = promoted - from
     )
 

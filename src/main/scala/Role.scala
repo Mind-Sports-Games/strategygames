@@ -6,6 +6,8 @@ sealed trait Role {
   val pgn: Char
   val name: String
   val binaryInt: Int
+  val hashInt: Int
+  val storable: Boolean
   def toString(): String
 }
 
@@ -23,7 +25,9 @@ object Role {
     val forsyth = r.forsyth
     val pgn = r.pgn
     val binaryInt = r.binaryInt
+    val hashInt = r.hashInt
     val name = r.name
+    val storable = r.storable
     override def toString() = r.name
   }
 
@@ -31,7 +35,9 @@ object Role {
     val forsyth = r.forsyth
     val pgn = r.pdn
     val binaryInt = r.binaryInt
+    val hashInt = r.hashInt
     val name = r.name
+    val storable = false
     override def toString() = r.name
   }
 
@@ -39,7 +45,9 @@ object Role {
     val forsyth = r.forsyth
     val pgn = r.pgn
     val binaryInt = r.binaryInt
+    val hashInt = r.hashInt
     val name = r.name
+    val storable = r.storable
     override def toString() = r.name
   }
 
@@ -47,7 +55,9 @@ object Role {
     val forsyth = r.forsyth
     val pgn = r.pgn
     val binaryInt = r.binaryInt
+    val hashInt = r.hashInt
     val name = r.name
+    val storable = r.storable
     override def toString() = r.name
     def toChess = r
     def toDraughts: draughts.PromotableRole = sys.error("Not implemented for chess")
@@ -58,7 +68,9 @@ object Role {
     val forsyth = r.forsyth
     val pgn = r.pdn
     val binaryInt = r.binaryInt
+    val hashInt = r.hashInt
     val name = r.name
+    val storable = false
     override def toString() = r.name
     def toDraughts = r
     def toChess: chess.PromotableRole = sys.error("Not implemented for draughts")
@@ -69,7 +81,9 @@ object Role {
     val forsyth = r.forsyth
     val pgn = r.pgn
     val binaryInt = r.binaryInt
+    val hashInt = r.hashInt
     val name = r.name
+    val storable = r.storable
     override def toString() = r.name
     def toDraughts: draughts.PromotableRole = sys.error("Not implemented for fairysf")
     def toChess: chess.PromotableRole = sys.error("Not implemented for fairysf")
@@ -112,6 +126,12 @@ object Role {
     case GameLogic.FairySF() => fairysf.Role.allByBinaryInt.map{case(n, r) => (n, FairySFRole(r))}
   }
 
+  def allByHashInt(lib: GameLogic): Map[Int, Role] = lib match {
+    case GameLogic.Draughts() => draughts.Role.allByHashInt.map{case(n, r) => (n, DraughtsRole(r))}
+    case GameLogic.Chess() => chess.Role.allByHashInt.map{case(n, r) => (n, ChessRole(r))}
+    case GameLogic.FairySF() => fairysf.Role.allByHashInt.map{case(n, r) => (n, FairySFRole(r))}
+  }
+
   def allPromotableByName(lib: GameLogic): Map[String, PromotableRole] = lib match {
     case GameLogic.Draughts() => draughts.Role.allPromotableByName.map{case(n, r) => (n, DraughtsPromotableRole(r))}
     case GameLogic.Chess() => chess.Role.allPromotableByName.map{case(n, r) => (n, ChessPromotableRole(r))}
@@ -142,6 +162,12 @@ object Role {
     case GameLogic.FairySF()  => fairysf.Role.binaryInt(i).map(FairySFRole)
   }
 
+  def hashInt(lib: GameLogic, i: Int): Option[Role] = lib match {
+    case GameLogic.Draughts() => draughts.Role.hashInt(i).map(DraughtsRole)
+    case GameLogic.Chess()    => chess.Role.hashInt(i).map(ChessRole)
+    case GameLogic.FairySF()  => fairysf.Role.hashInt(i).map(FairySFRole)
+  }
+
   def promotable(lib: GameLogic, c: Char): Option[PromotableRole] = lib match {
     case GameLogic.Draughts() => draughts.Role.promotable(c).map(DraughtsPromotableRole)
     case GameLogic.Chess()    => chess.Role.promotable(c).map(ChessPromotableRole)
@@ -158,6 +184,12 @@ object Role {
     case GameLogic.Draughts() => draughts.Role.promotable(name).map(DraughtsPromotableRole)
     case GameLogic.Chess()    => chess.Role.promotable(name).map(ChessPromotableRole)
     case GameLogic.FairySF()  => fairysf.Role.promotable(name).map(FairySFPromotableRole)
+  }
+
+  def storable(lib: GameLogic): List[Role] = lib match {
+    case GameLogic.Draughts() => List()
+    case GameLogic.Chess()    => chess.Role.storable.map(ChessRole)
+    case GameLogic.FairySF()  => fairysf.Role.storable.map(FairySFRole)
   }
 
   def pgnMoveToRole(lib: GameLogic, c: Char): Role = lib match {

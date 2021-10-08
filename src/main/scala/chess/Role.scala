@@ -9,6 +9,7 @@ sealed trait Role {
   lazy val name               = toString.toLowerCase
   val projection: Boolean
   val binaryInt: Int
+  val hashInt: Int
   val storable: Boolean
   val dirs: Directions
   def dir(from: Pos, to: Pos): Option[Direction]
@@ -26,6 +27,7 @@ case object King extends PromotableRole {
   def dir(from: Pos, to: Pos) = None
   val projection              = false
   val binaryInt               = 1
+  val hashInt                 = 5
   val storable                = false
 }
 
@@ -35,6 +37,7 @@ case object Queen extends PromotableRole {
   def dir(from: Pos, to: Pos) = Rook.dir(from, to) orElse Bishop.dir(from, to)
   val projection              = true
   val binaryInt               = 2
+  val hashInt                 = 4
   val storable                = true
 }
 case object Rook extends PromotableRole {
@@ -48,6 +51,7 @@ case object Rook extends PromotableRole {
     else None
   val projection = true
   val binaryInt  = 3
+  val hashInt    = 3
   val storable   = true
 }
 case object Bishop extends PromotableRole {
@@ -63,6 +67,7 @@ case object Bishop extends PromotableRole {
     else None
   val projection = true
   val binaryInt  = 5
+  val hashInt    = 2
   val storable   = true
 }
 case object Knight extends PromotableRole {
@@ -80,6 +85,7 @@ case object Knight extends PromotableRole {
   def dir(from: Pos, to: Pos) = None
   val projection              = false
   val binaryInt               = 4
+  val hashInt                 = 1
   val storable                = true
 }
 case object Pawn extends Role {
@@ -88,6 +94,7 @@ case object Pawn extends Role {
   def dir(from: Pos, to: Pos) = None
   val projection              = false
   val binaryInt               = 6
+  val hashInt                 = 0
   val storable                = true
 }
 case object LOAChecker extends Role {
@@ -96,6 +103,7 @@ case object LOAChecker extends Role {
   def dir(from: Pos, to: Pos) = Queen.dir(from, to)
   val projection              = false
   val binaryInt               = 8
+  val hashInt                 = 6
   val storable                = false
 }
 
@@ -115,6 +123,9 @@ object Role {
   val allByBinaryInt: Map[Int, Role] = all map { r =>
     (r.binaryInt, r)
   } toMap
+  val allByHashInt: Map[Int, Role] = all map { r =>
+    (r.hashInt, r)
+  } toMap
   val allPromotableByName: Map[String, PromotableRole] =
     allPromotable map { r =>
       (r.toString, r)
@@ -132,6 +143,8 @@ object Role {
 
   def binaryInt(i: Int): Option[Role] = allByBinaryInt get i
 
+  def hashInt(i: Int): Option[Role] = allByHashInt get i
+
   def promotable(c: Char): Option[PromotableRole] =
     allPromotableByForsyth get c
 
@@ -141,7 +154,7 @@ object Role {
   def promotable(name: Option[String]): Option[PromotableRole] =
     name flatMap promotable
 
-  def storableRoles: List[Role] = all.filter(_.storable)
+  def storable: List[Role] = all.filter(_.storable)
 
   def pgnMoveToRole(c: Char): Role =
     allByPgn.get(c) match {

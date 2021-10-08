@@ -66,6 +66,8 @@ abstract class Variant(
   //used in lila modules/playban/src/main/RageSit.scala
   def materialImbalanceVariant: Boolean
 
+  def dropsVariant: Boolean
+
   def perfId: Int
   def perfIcon: Char
 
@@ -168,6 +170,8 @@ object Variant {
     def blindModeVariant: Boolean     = v.blindModeVariant
 
     def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
+
+    def dropsVariant: Boolean = v.dropsVariant
 
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
@@ -282,6 +286,8 @@ object Variant {
 
     def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
 
+    def dropsVariant: Boolean = false
+
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
 
@@ -391,6 +397,8 @@ object Variant {
     def blindModeVariant: Boolean     = v.blindModeVariant
 
     def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
+
+    def dropsVariant: Boolean = v.dropsVariant
 
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon

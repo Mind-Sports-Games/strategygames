@@ -42,30 +42,19 @@ object Hash {
   private val polyglotTable    = new ZobristConstants(0)
   private lazy val randomTable = new ZobristConstants(16)
 
-  def roleIndex(role: Role) =
-    role match {
-      case Pawn       => 0
-      case Knight     => 1
-      case Bishop     => 2
-      case Rook       => 3
-      case Queen      => 4
-      case King       => 5
-      case LOAChecker => 6
-    }
-
   private def pieceIndex(piece: Piece) =
-    roleIndex(piece.role) * 2 + piece.color.fold(1, 0)
+    piece.role.hashInt * 2 + piece.color.fold(1, 0)
 
   private def actorIndex(actor: Actor) =
     64 * pieceIndex(actor.piece) + actor.pos.hashCode
 
   def get(situation: Situation, table: ZobristConstants): Long = {
 
-    def crazyPocketMask(role: Role, colorshift: Int, count: Int) = {
+    def crazyPocketMask(roleHash: Int, colorshift: Int, count: Int) = {
       // There should be no kings and at most 16 pieces of any given type
       // in a pocket.
-      if (0 < count && count <= 16 && roleIndex(role) < 5)
-        Option(table.crazyPocketMasks(16 * roleIndex(role) + count + colorshift))
+      if (0 < count && count <= 16 && roleHash < 5)
+        Option(table.crazyPocketMasks(16 * roleHash + count + colorshift))
       else None
     }
 
@@ -112,7 +101,7 @@ object Hash {
         .flatMap { color =>
           val colorshift = color.fold(79, -1)
           data.pockets(color).roles.groupBy(identity).flatMap { case (role, list) =>
-            crazyPocketMask(role, colorshift, list.size)
+            crazyPocketMask(role.hashInt, colorshift, list.size)
           }
         }
         .fold(hcrazypromotions)(_ ^ _)
