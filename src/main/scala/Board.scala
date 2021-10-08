@@ -1,13 +1,12 @@
 package strategygames
 
-import chess.variant.Crazyhouse
 import variant.Variant
 
 abstract sealed class Board(
   val pieces: PieceMap,
   val history: History,
   val variant: Variant,
-  val crazyData: Option[Crazyhouse.Data] = None
+  val crazyData: Option[chess.PocketData] = None
 ) {
 
   def apply(at: Pos): Option[Piece] = pieces get at
@@ -313,7 +312,7 @@ object Board {
   }
 
   //added this and then didnt use it
-  //def apply(lib: GameLogic, pieces: PieceMap, history: History, variant: Variant, crazyData: Option[Crazyhouse.Data] = None): Board =
+  //def apply(lib: GameLogic, pieces: PieceMap, history: History, variant: Variant, crazyData: Option[chess.PocketData] = None): Board =
   //  (lib, history, variant) match {
   //    case (GameLogic.Draughts(), History.Draughts(history), Variant.Draughts(variant))
   //      => Draughts(draughts.Board(Piece.draughtsPieceMap(pieces), history, variant))

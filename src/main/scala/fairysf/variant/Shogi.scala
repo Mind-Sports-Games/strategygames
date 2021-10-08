@@ -23,6 +23,8 @@ case object Shogi
 
   override def gameFamily: GameFamily = GameFamily.Shogi()
 
+  override def dropsVariant = true
+
   def perfIcon: Char = 'K'
   def perfId: Int = 200
 
@@ -66,7 +68,7 @@ case object Shogi
     }
 
   private def canDropStuff(situation: Situation) =
-    situation.board.crazyData.fold(false) { (data: Data) =>
+    situation.board.crazyData.fold(false) { (data: PocketData) =>
       val roles = data.pockets(situation.color).roles
       roles.nonEmpty && possibleDrops(situation).fold(true) { squares =>
         squares.nonEmpty && {
@@ -106,72 +108,4 @@ case object Shogi
     }
   }
 
-  val storableRoles = List(Pawn, Knight, Bishop, Rook, Queen)
-
-  case class Data(
-      pockets: Pockets,
-      // in crazyhouse, a promoted piece becomes a pawn
-      // when captured and put in the pocket.
-      // there we need to remember which pieces are issued from promotions.
-      // we do that by tracking their positions on the board.
-      promoted: Set[Pos]
-  ) {
-
-    def drop(piece: Piece): Option[Data] =
-      pockets take piece map { nps =>
-        copy(pockets = nps)
-      }
-
-    def store(piece: Piece, from: Pos) =
-      copy(
-        pockets = pockets store {
-          if (promoted(from)) Piece(piece.color, Pawn) else piece
-        },
-        promoted = promoted - from
-      )
-
-    def promote(pos: Pos) = copy(promoted = promoted + pos)
-
-    def move(orig: Pos, dest: Pos) =
-      copy(
-        promoted = if (promoted(orig)) promoted - orig + dest else promoted
-      )
-  }
-
-  object Data {
-    val init = Data(Pockets(Pocket(Nil), Pocket(Nil)), Set.empty)
-  }
-
-  case class Pockets(white: Pocket, black: Pocket) {
-
-    def apply(color: Color) = color.fold(white, black)
-
-    def take(piece: Piece): Option[Pockets] =
-      piece.color.fold(
-        white take piece.role map { np =>
-          copy(white = np)
-        },
-        black take piece.role map { np =>
-          copy(black = np)
-        }
-      )
-
-    def store(piece: Piece) =
-      piece.color.fold(
-        copy(black = black store piece.role),
-        copy(white = white store piece.role)
-      )
-  }
-
-  case class Pocket(roles: List[Role]) {
-
-    def take(role: Role) =
-      if (roles contains role) Option(copy(roles = roles diff List(role)))
-      else None
-
-    def store(role: Role) =
-      if (storableRoles contains role) copy(roles = role :: roles)
-      else this
-  }
 }
-

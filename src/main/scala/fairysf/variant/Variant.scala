@@ -34,6 +34,8 @@ abstract class Variant private[variant] (
 
   def materialImbalanceVariant: Boolean = false
 
+  def dropsVariant: Boolean = false
+
   def perfId: Int
   def perfIcon: Char
 

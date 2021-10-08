@@ -9,6 +9,7 @@ sealed trait Role {
   lazy val name               = toString.toLowerCase
   val projection: Boolean
   val binaryInt: Int
+  val storable: Boolean
   val dirs: Directions
   def dir(from: Pos, to: Pos): Option[Direction]
   final def -(color: Color) = Piece(color, this)
@@ -25,6 +26,7 @@ case object King extends PromotableRole {
   def dir(from: Pos, to: Pos) = None
   val projection              = false
   val binaryInt               = 1
+  val storable                = false
 }
 
 case object Queen extends PromotableRole {
@@ -33,6 +35,7 @@ case object Queen extends PromotableRole {
   def dir(from: Pos, to: Pos) = Rook.dir(from, to) orElse Bishop.dir(from, to)
   val projection              = true
   val binaryInt               = 2
+  val storable                = true
 }
 case object Rook extends PromotableRole {
   val forsyth          = 'r'
@@ -45,6 +48,7 @@ case object Rook extends PromotableRole {
     else None
   val projection = true
   val binaryInt  = 3
+  val storable   = true
 }
 case object Bishop extends PromotableRole {
   val forsyth          = 'b'
@@ -59,6 +63,7 @@ case object Bishop extends PromotableRole {
     else None
   val projection = true
   val binaryInt  = 5
+  val storable   = true
 }
 case object Knight extends PromotableRole {
   val forsyth = 'n'
@@ -75,6 +80,7 @@ case object Knight extends PromotableRole {
   def dir(from: Pos, to: Pos) = None
   val projection              = false
   val binaryInt               = 4
+  val storable                = true
 }
 case object Pawn extends Role {
   val forsyth                 = 'p'
@@ -82,6 +88,7 @@ case object Pawn extends Role {
   def dir(from: Pos, to: Pos) = None
   val projection              = false
   val binaryInt               = 6
+  val storable                = true
 }
 case object LOAChecker extends Role {
   val forsyth                 = 'l'
@@ -89,6 +96,7 @@ case object LOAChecker extends Role {
   def dir(from: Pos, to: Pos) = Queen.dir(from, to)
   val projection              = false
   val binaryInt               = 8
+  val storable                = false
 }
 
 object Role {
@@ -132,6 +140,8 @@ object Role {
 
   def promotable(name: Option[String]): Option[PromotableRole] =
     name flatMap promotable
+
+  def storableRoles: List[Role] = all.filter(_.storable)
 
   def pgnMoveToRole(c: Char): Role =
     allByPgn.get(c) match {

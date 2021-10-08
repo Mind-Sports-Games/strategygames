@@ -2,13 +2,13 @@ package strategygames.fairysf
 
 import strategygames.Color
 
-import variant.{ Shogi, Variant }
+import variant.Variant
 
 case class Board(
     pieces: PieceMap,
     history: History,
     variant: Variant,
-    crazyData: Option[Shogi.Data] = None
+    crazyData: Option[PocketData] = None
 ) {
 
   def apply(at: Pos): Option[Piece] = pieces get at
@@ -99,19 +99,16 @@ case class Board(
 
   def withPieces(newPieces: PieceMap) = copy(pieces = newPieces)
 
-  def withVariant(v: Variant): Board = {
-    if (v == Shogi)
-      copy(variant = v).ensureCrazyData
-    else
-      copy(variant = v)
-  }
+  def withVariant(v: Variant): Board =
+    if (v.dropsVariant) copy(variant = v).ensureCrazyData
+    else copy(variant = v)
 
-  def withCrazyData(data: Shogi.Data)         = copy(crazyData = Option(data))
-  def withCrazyData(data: Option[Shogi.Data]) = copy(crazyData = data)
-  def withCrazyData(f: Shogi.Data => Shogi.Data): Board =
-    withCrazyData(f(crazyData | Shogi.Data.init))
+  def withCrazyData(data: PocketData)         = copy(crazyData = Option(data))
+  def withCrazyData(data: Option[PocketData]) = copy(crazyData = data)
+  def withCrazyData(f: PocketData => PocketData): Board =
+    withCrazyData(f(crazyData | PocketData.init))
 
-  def ensureCrazyData = withCrazyData(crazyData | Shogi.Data.init)
+  def ensureCrazyData = withCrazyData(crazyData | PocketData.init)
 
   def unmovedRooks =
     UnmovedRooks {
@@ -206,5 +203,6 @@ object Board {
   def empty(variant: Variant): Board = Board(Nil, variant)
 
   private def variantCrazyData(variant: Variant) =
-    (variant == Shogi) option Shogi.Data.init
+    (variant.dropsVariant) option PocketData.init
+
 }

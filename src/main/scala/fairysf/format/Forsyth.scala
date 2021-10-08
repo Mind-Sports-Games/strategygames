@@ -131,7 +131,6 @@ object Forsyth {
       if (promoted.isEmpty) board else board.withCrazyData(_.copy(promoted = promoted))
     } map { board =>
       pockets.fold(board) { str =>
-        import strategygames.fairysf.variant.Shogi.{ Pocket, Pockets }
         val (white, black) = str.toList.flatMap(Piece.fromChar).partition(_ is White)
         board.withCrazyData(
           _.copy(
@@ -203,7 +202,7 @@ object Forsyth {
 
   private def exportCrazyPocket(board: Board) =
     board.crazyData match {
-      case Some(variant.Shogi.Data(pockets, _)) =>
+      case Some(PocketData(pockets, _)) =>
         "/" +
           pockets.white.roles.map(_.forsythUpper).mkString +
           pockets.black.roles.map(_.forsyth).mkString

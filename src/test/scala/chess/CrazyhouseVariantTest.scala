@@ -15,10 +15,10 @@ class CrazyhouseVariantTest extends ChessTest {
         fenToGame(fenPosition, Crazyhouse).toOption.get
       }.updateBoard { b =>
         b.withCrazyData(
-          Crazyhouse.Data(
-            pockets = Crazyhouse.Pockets(
-              Crazyhouse.Pocket(Nil),
-              Crazyhouse.Pocket(Nil)
+          PocketData(
+            pockets = Pockets(
+              Pocket(Nil),
+              Pocket(Nil)
             ),
             promoted = Set.empty
           )
@@ -34,10 +34,10 @@ class CrazyhouseVariantTest extends ChessTest {
         fenToGame(fenPosition, Crazyhouse).toOption.get
       }.updateBoard { b =>
         b.withCrazyData(
-          Crazyhouse.Data(
-            pockets = Crazyhouse.Pockets(
-              Crazyhouse.Pocket(Queen :: Nil),
-              Crazyhouse.Pocket(Rook :: Pawn :: Pawn :: Nil)
+          PocketData(
+            pockets = Pockets(
+              Pocket(Queen :: Nil),
+              Pocket(Rook :: Pawn :: Pawn :: Nil)
             ),
             promoted = Set.empty
           )
