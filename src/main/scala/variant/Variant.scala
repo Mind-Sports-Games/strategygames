@@ -49,6 +49,9 @@ abstract class Variant(
   def pool: Boolean
   def draughtsFromPosition: Boolean
 
+  def shogi: Boolean
+  def xiangqi: Boolean
+
   def standardVariant: Boolean
   def fromPositionVariant: Boolean
   def frisianVariant: Boolean
@@ -154,6 +157,9 @@ object Variant {
     def brazilian: Boolean            = false
     def pool: Boolean                 = false
     def draughtsFromPosition: Boolean = false
+
+    def shogi: Boolean                = false
+    def xiangqi: Boolean              = false
 
     def standardVariant: Boolean      = v.standard
     def fromPositionVariant: Boolean  = v.fromPosition
@@ -270,6 +276,9 @@ object Variant {
     def pool: Boolean                 = v.pool
     def draughtsFromPosition: Boolean = v.fromPosition
 
+    def shogi: Boolean                = false
+    def xiangqi: Boolean              = false
+
     def standardVariant: Boolean      = v.standard
     def fromPositionVariant: Boolean  = v.fromPosition
     def frisianVariant: Boolean       = v.frisianVariant
@@ -381,6 +390,9 @@ object Variant {
     def brazilian: Boolean            = false
     def pool: Boolean                 = false
     def draughtsFromPosition: Boolean = false
+
+    def shogi: Boolean                = v.shogi
+    def xiangqi: Boolean              = v.xiangqi
 
     def standardVariant: Boolean      = standard || draughtsStandard
     def fromPositionVariant: Boolean  = fromPosition || draughtsFromPosition

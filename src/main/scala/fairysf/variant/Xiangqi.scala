@@ -19,7 +19,7 @@ case object Xiangqi
 
   override def gameFamily: GameFamily = GameFamily.Xiangqi()
 
-  def perfIcon: Char = 'K'
+  def perfIcon: Char = 't'
   def perfId: Int = 201
 
   override def baseVariant: Boolean = true
