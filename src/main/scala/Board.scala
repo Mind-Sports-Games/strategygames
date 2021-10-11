@@ -6,7 +6,7 @@ abstract sealed class Board(
   val pieces: PieceMap,
   val history: History,
   val variant: Variant,
-  val crazyData: Option[chess.PocketData] = None
+  val crazyData: Option[PocketData] = None
 ) {
 
   def apply(at: Pos): Option[Piece] = pieces get at
@@ -83,7 +83,7 @@ object Board {
     b.pieces.map{case(pos, piece) => (Pos.Chess(pos), Piece.Chess(piece))},
     History.Chess(b.history),
     Variant.Chess(b.variant),
-    b.crazyData
+    b.crazyData.map(PocketData.Chess)
   ) {
 
     def actors: Map[Pos, Actor] = b.actors.map{case(p, a) => (Pos.Chess(p), Actor.Chess(a))}
