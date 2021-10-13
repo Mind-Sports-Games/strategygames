@@ -33,7 +33,9 @@ case object Shogi
   val pieces: Map[Pos, Piece] = Variant.symmetricRank(backRank)
   //val initialFen       = format.Forsyth.initial
 
-  private def canDropPawnOn(pos: Pos) = pos.rank != Rank.First && pos.rank != Rank.Eighth
+  //DROP Crazyhouse code:
+
+//  private def canDropPawnOn(pos: Pos) = pos.rank != Rank.First && pos.rank != Rank.Eighth
 
 //  override def drop(situation: Situation, role: Role, pos: Pos): Validated[String, Drop] =
 //    for {
@@ -54,58 +56,58 @@ case object Shogi
 //      after = board1 withCrazyData d2
 //    )
 
-  override def finalizeBoard(board: Board, uci: Uci, capture: Option[Piece]): Board =
-    uci match {
-      case Uci.Move(orig, dest, promOption) =>
-        board.crazyData.fold(board) { data =>
-          val d1 = capture.fold(data) { data.store(_, dest) }
-          val d2 = promOption.fold(d1.move(orig, dest)) { _ =>
-            d1 promote dest
-          }
-          board withCrazyData d2
-        }
-      case _ => board
-    }
-
-  private def canDropStuff(situation: Situation) =
-    situation.board.crazyData.fold(false) { (data: PocketData) =>
-      val roles = data.pockets(situation.color).roles
-      roles.nonEmpty && possibleDrops(situation).fold(true) { squares =>
-        squares.nonEmpty && {
-          squares.exists(canDropPawnOn) || roles.exists(strategygames.chess.Pawn !=)
-        }
-      }
-    }
-
-  override def staleMate(situation: Situation) =
-    super.staleMate(situation) && !canDropStuff(situation)
-
-  override def checkmate(situation: Situation) =
-    super.checkmate(situation) && !canDropStuff(situation)
-
-  // there is always sufficient mating material in Crazyhouse
-  override def opponentHasInsufficientMaterial(situation: Situation) = false
-  override def isInsufficientMaterial(board: Board)                  = false
-
-  def possibleDrops(situation: Situation): Option[List[Pos]] =
-    if (!situation.check) None
-    else situation.kingPos.map { blockades(situation, _) }
-
-  private def blockades(situation: Situation, kingPos: Pos): List[Pos] = {
-    def attacker(piece: Piece) = piece.role.projection && piece.color != situation.color
-    @scala.annotation.tailrec
-    def forward(p: Pos, dir: Direction, squares: List[Pos]): List[Pos] =
-      dir(p) match {
-        case None                                                 => Nil
-        case Some(next) if situation.board(next).exists(attacker) => next :: squares
-        case Some(next) if situation.board(next).isDefined        => Nil
-        case Some(next)                                           => forward(next, dir, next :: squares)
-      }
-    Queen.dirs flatMap { forward(kingPos, _, Nil) } filter { square =>
-      situation.board.place(Piece(situation.color, Knight), square) exists { defended =>
-        !defended.check(situation.color)
-      }
-    }
-  }
+//  override def finalizeBoard(board: Board, uci: Uci, capture: Option[Piece]): Board =
+//    uci match {
+//      case Uci.Move(orig, dest, promOption) =>
+//        board.crazyData.fold(board) { data =>
+//          val d1 = capture.fold(data) { data.store(_, dest) }
+//          val d2 = promOption.fold(d1.move(orig, dest)) { _ =>
+//            d1 promote dest
+//          }
+//          board withCrazyData d2
+//        }
+//      case _ => board
+//    }
+//
+//  private def canDropStuff(situation: Situation) =
+//    situation.board.crazyData.fold(false) { (data: PocketData) =>
+//      val roles = data.pockets(situation.color).roles
+//      roles.nonEmpty && possibleDrops(situation).fold(true) { squares =>
+//        squares.nonEmpty && {
+//          squares.exists(canDropPawnOn) || roles.exists(strategygames.chess.Pawn !=)
+//        }
+//      }
+//    }
+//
+//  override def staleMate(situation: Situation) =
+//    super.staleMate(situation) && !canDropStuff(situation)
+//
+//  override def checkmate(situation: Situation) =
+//    super.checkmate(situation) && !canDropStuff(situation)
+//
+//  // there is always sufficient mating material in Crazyhouse
+//  override def opponentHasInsufficientMaterial(situation: Situation) = false
+//  override def isInsufficientMaterial(board: Board)                  = false
+//
+//  def possibleDrops(situation: Situation): Option[List[Pos]] =
+//    if (!situation.check) None
+//    else situation.kingPos.map { blockades(situation, _) }
+//
+//  private def blockades(situation: Situation, kingPos: Pos): List[Pos] = {
+//    def attacker(piece: Piece) = piece.role.projection && piece.color != situation.color
+//    @scala.annotation.tailrec
+//    def forward(p: Pos, dir: Direction, squares: List[Pos]): List[Pos] =
+//      dir(p) match {
+//        case None                                                 => Nil
+//        case Some(next) if situation.board(next).exists(attacker) => next :: squares
+//        case Some(next) if situation.board(next).isDefined        => Nil
+//        case Some(next)                                           => forward(next, dir, next :: squares)
+//      }
+//    Queen.dirs flatMap { forward(kingPos, _, Nil) } filter { square =>
+//      situation.board.place(Piece(situation.color, Knight), square) exists { defended =>
+//        !defended.check(situation.color)
+//      }
+//    }
+//  }
 
 }

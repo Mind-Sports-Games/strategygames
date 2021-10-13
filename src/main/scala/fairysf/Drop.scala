@@ -13,11 +13,11 @@ case class Drop(
     metrics: MoveMetrics = MoveMetrics()
 ) {
 
-  def before = situationBefore.board
+  private def before = situationBefore.board
 
   def situationAfter = Situation(finalizeAfter, !piece.color)
 
-  def withHistory(h: History) = copy(after = after withHistory h)
+  //def withHistory(h: History) = copy(after = after withHistory h)
 
   def finalizeAfter: Board = {
     val board = after.variant.finalizeBoard(
@@ -39,16 +39,16 @@ case class Drop(
     }
   }
 
-  def afterWithLastMove =
-    after.variant.finalizeBoard(
-      after.copy(history = after.history.withLastMove(toUci)),
-      toUci,
-      none
-    )
+  //def afterWithLastMove =
+  //  after.variant.finalizeBoard(
+  //    after.copy(history = after.history.withLastMove(toUci)),
+  //    toUci,
+  //    none
+  //  )
 
   def color = piece.color
 
-  def withAfter(newBoard: Board) = copy(after = newBoard)
+  //def withAfter(newBoard: Board) = copy(after = newBoard)
 
   def withMetrics(m: MoveMetrics) = copy(metrics = m)
 

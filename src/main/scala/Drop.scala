@@ -12,21 +12,11 @@ abstract sealed class Drop(
   val metrics: MoveMetrics = MoveMetrics()
 ) {
 
-  def before = situationBefore.board
-
   def situationAfter: Situation
 
   def finalizeAfter: Board
 
-  def withHistory(h: History): Drop
-
-  def afterWithLastMove: Board
-
   def color = piece.color
-
-  def withAfter(newBoard: Board): Drop
-
-  def withMetrics(m: MoveMetrics): Drop
 
   def toUci: Uci.Drop
 
@@ -50,20 +40,6 @@ object Drop {
     def situationAfter: Situation = Situation.Chess(d.situationAfter)
     def finalizeAfter: Board = d.finalizeAfter
 
-    def withHistory(h: History): Drop = h match {
-      case History.Chess(h) => Chess(d.withHistory(h))
-      case _ => sys.error("Not passed Chess objects")
-    }
-
-    def afterWithLastMove: Board = Board.Chess(d.afterWithLastMove)
-
-    def withAfter(newBoard: Board): Drop = newBoard match {
-      case Board.Chess(newBoard) => Chess(d.withAfter(newBoard))
-      case _ => sys.error("Not passed Chess objects")
-    }
-
-    def withMetrics(mm: MoveMetrics): Drop = Drop.Chess(d.withMetrics(mm))
-
     def toUci: Uci.Drop = Uci.ChessDrop(d.toUci)
 
     val unwrap = d
@@ -83,20 +59,6 @@ object Drop {
     def situationAfter: Situation = Situation.FairySF(d.situationAfter)
     def finalizeAfter: Board = d.finalizeAfter
 
-    def withHistory(h: History): Drop = h match {
-      case History.FairySF(h) => FairySF(d.withHistory(h))
-      case _ => sys.error("Not passed FairySF objects")
-    }
-
-    def afterWithLastMove: Board = Board.FairySF(d.afterWithLastMove)
-
-    def withAfter(newBoard: Board): Drop = newBoard match {
-      case Board.FairySF(newBoard) => FairySF(d.withAfter(newBoard))
-      case _ => sys.error("Not passed FairySF objects")
-    }
-
-    def withMetrics(mm: MoveMetrics): Drop = Drop.FairySF(d.withMetrics(mm))
-
     def toUci: Uci.Drop = Uci.FairySFDrop(d.toUci)
 
     val unwrap = d
@@ -108,18 +70,9 @@ object Drop {
   def wrap(d: chess.Drop): Drop = Drop.Chess(d)
   def wrap(d: fairysf.Drop): Drop = Drop.FairySF(d)
 
-  //def wrap(d: chess.MoveOrDrop): MoveOrDrop = d match {
-  //  case Left(move) => Left(Move.Chess(move))
-  //  case Right(drop) => Right(Drop.Chess(drop))
-  //}
-
-  //def wrap(d: fairysf.MoveOrDrop): MoveOrDrop = d match {
-  //  case Left(move) => Left(Move.FairySF(move))
-  //  case Right(drop) => Right(Drop.FairySF(drop))
-  //}
-
   def toChess(moveOrDrop: MoveOrDrop): chess.MoveOrDrop = moveOrDrop.left.map(_.toChess).right.map(_.toChess)
   //probably not type safe
   def toDraughts(moveOrDrop: MoveOrDrop): draughts.Move = moveOrDrop.left.map(_.toDraughts).left.get
   def toFairySF(moveOrDrop: MoveOrDrop): fairysf.MoveOrDrop = moveOrDrop.left.map(_.toFairySF).right.map(_.toFairySF)
+
 }

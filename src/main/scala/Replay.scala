@@ -71,30 +71,6 @@ object Replay {
       case _ => sys.error("Mismatched gamelogic types 5")
     }
 
-  // TODO: I don't think this is quite correct, let's see if it's used.
-  // def apply(game: Game) = new Replay(game, Nil, game)
-
-  def games(
-    lib: GameLogic,
-    moveStrs: Iterable[String],
-    initialFen: Option[FEN],
-    variant: Variant
-  ): Validated[String, List[Game]] = (lib, variant) match {
-    case (GameLogic.Draughts(), Variant.Draughts(variant))
-      => draughts.Replay.games(moveStrs, initialFen.map(_.toDraughts), variant).toEither.map(
-        g => g.map(Game.Draughts)
-      ).toValidated
-    case (GameLogic.Chess(), Variant.Chess(variant))
-      => chess.Replay.games(moveStrs, initialFen.map(_.toChess), variant).toEither.map(
-        g => g.map(Game.Chess)
-      ).toValidated
-    case (GameLogic.FairySF(), Variant.FairySF(variant))
-      => fairysf.Replay.games(moveStrs, initialFen.map(_.toFairySF), variant).toEither.map(
-        g => g.map(Game.FairySF)
-      ).toValidated
-    case _ => sys.error("Mismatched gamelogic types 6")
-  }
-
   def gameMoveWhileValid(
     lib: GameLogic,
     moveStrs: Seq[String],
@@ -166,7 +142,7 @@ object Replay {
     case _ => sys.error("Mismatched gamelogic types 8")
   }
 
-  def draughtsUcis(ucis: List[Uci]): List[draughts.format.Uci] =
+  private def draughtsUcis(ucis: List[Uci]): List[draughts.format.Uci] =
     ucis.flatMap(u =>
       u match {
         case u: Uci.Draughts => Some(u.unwrap)
@@ -174,7 +150,7 @@ object Replay {
       }
     )
 
-  def chessUcis(ucis: List[Uci]): List[chess.format.Uci] =
+  private def chessUcis(ucis: List[Uci]): List[chess.format.Uci] =
     ucis.flatMap(u =>
       u match {
         case u: Uci.Chess => Some(u.unwrap)
@@ -182,7 +158,7 @@ object Replay {
       }
     )
 
-  def fairysfUcis(ucis: List[Uci]): List[fairysf.format.Uci] =
+  private def fairysfUcis(ucis: List[Uci]): List[fairysf.format.Uci] =
     ucis.flatMap(u =>
       u match {
         case u: Uci.FairySF => Some(u.unwrap)

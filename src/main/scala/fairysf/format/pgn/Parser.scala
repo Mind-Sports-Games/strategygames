@@ -186,8 +186,8 @@ object Parser {
       }
       else
         str match {
-          case "O-O" | "o-o" | "0-0"       => valid(Castle(KingSide))
-          case "O-O-O" | "o-o-o" | "0-0-0" => valid(Castle(QueenSide))
+          //case "O-O" | "o-o" | "0-0"       => valid(Castle(KingSide))
+          //case "O-O-O" | "o-o-o" | "0-0-0" => valid(Castle(QueenSide))
           case MoveR(role, file, rank, capture, pos, prom, check, mate) =>
             role.headOption.fold[Option[Role]](Option(Pawn))(variant.rolesByPgn.get) flatMap { role =>
               Pos fromKey pos map { dest =>
@@ -238,12 +238,13 @@ object Parser {
         case err             => invalid("Cannot parse move: %s\n%s".format(err.toString, str))
       }
 
-    def move: Parser[San] = castle | standard
+    //stub
+    def move: Parser[San] = standard//castle | standard
 
-    def castle =
-      (qCastle | kCastle) ~ suffixes ^^ { case side ~ suf =>
-        Castle(side) withSuffixes suf
-      }
+    //def castle =
+    //  (qCastle | kCastle) ~ suffixes ^^ { case side ~ suf =>
+    //    Castle(side) withSuffixes suf
+    //  }
 
     val qCastle: Parser[Side] = ("O-O-O" | "o-o-o" | "0-0-0") ^^^ QueenSide
 

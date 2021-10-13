@@ -50,25 +50,6 @@ object Reader {
     }
   }
 
-  def full(lib: GameLogic, pgn: String, tags: Tags = Tags.empty): Validated[String, Result] =
-    lib match {
-      case GameLogic.Chess()    => ChessReader.full(pgn, tags).map(Result.wrap)
-      case GameLogic.Draughts() => DraughtsReader.full(pgn, tags).map(Result.wrap)
-      case GameLogic.FairySF()  => FairySFReader.full(pgn, tags).map(Result.wrap)
-    }
-
-  def moves(
-      lib: GameLogic,
-      moveStrs: Iterable[String],
-      tags: Tags,
-      iteratedCapts: Boolean = false
-  ): Validated[String, Result] =
-    lib match {
-      case GameLogic.Chess()    => ChessReader.moves(moveStrs, tags).map(Result.wrap)
-      case GameLogic.Draughts() => DraughtsReader.moves(moveStrs, tags, iteratedCapts).map(Result.wrap)
-      case GameLogic.FairySF()  => FairySFReader.moves(moveStrs, tags).map(Result.wrap)
-    }
-
   def fullWithSans(
       lib: GameLogic,
       pgn: String,
@@ -81,14 +62,6 @@ object Reader {
       case GameLogic.Draughts() => DraughtsReader.fullWithSans(pgn, op, tags, iteratedCapts).map(Result.wrap)
       case GameLogic.FairySF()  => FairySFReader.fullWithSans(pgn, op, tags).map(Result.wrap)
     }
-
-  /* TODO: Maybe port this? I don't think it's used.
-  def fullWithSans(lib: GameLogic, parsed: ParsedPgn, op: Sans => Sans): Result =
-    lib match {
-      case GameLogic.Chess()    => Result.wrap(ChessReader.fullWithSans(parsed, op))
-      case GameLogic.Draughts() => Result.wrap(DraughtsReader.fullWithSans(parsed, op))
-    }
-  */
 
   def movesWithSans(
       lib: GameLogic,
@@ -105,8 +78,5 @@ object Reader {
       case GameLogic.FairySF() =>
         FairySFReader.movesWithSans(moveStrs, op, tags).map(Result.wrap)
     }
-
-  // remove invisible byte order mark
-  def cleanUserInput(str: String) = str.replace(s"\ufeff", "")
 
 }

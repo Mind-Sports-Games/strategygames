@@ -13,35 +13,37 @@ case class Situation(board: Board, color: Color) {
 
   lazy val moves: Map[Pos, List[Move]] = board.variant.validMoves(this)
 
-  lazy val playerCanCapture: Boolean = moves exists (_._2 exists (_.captures))
+  //lazy val playerCanCapture: Boolean = moves exists (_._2 exists (_.captures))
 
   lazy val destinations: Map[Pos, List[Pos]] = moves.view.mapValues { _ map (_.dest) }.to(Map)
 
   def drops: Option[List[Pos]] =
     board.variant match {
-      case v: variant.Shogi.type => v possibleDrops this
+      //case v: variant.Shogi.type => v possibleDrops this
       case _                     => None
     }
 
-  lazy val kingPos: Option[Pos] = board kingPosOf color
+  //lazy val kingPos: Option[Pos] = board kingPosOf color
 
-  lazy val check: Boolean = board check color
+  //stub
+  lazy val check: Boolean = false
 
-  def checkSquare = if (check) kingPos else None
+  //stub
+  def checkSquare = None
 
   def history = board.history
 
   def checkMate: Boolean = board.variant checkmate this
 
-  def staleMate: Boolean = board.variant staleMate this
+  private def staleMate: Boolean = board.variant staleMate this
 
-  def autoDraw: Boolean = board.autoDraw || board.variant.specialDraw(this)
+  private def autoDraw: Boolean = board.autoDraw || board.variant.specialDraw(this)
 
   def opponentHasInsufficientMaterial: Boolean = board.variant.opponentHasInsufficientMaterial(this)
 
   lazy val threefoldRepetition: Boolean = board.history.threefoldRepetition
 
-  def variantEnd = board.variant specialEnd this
+  private def variantEnd = board.variant specialEnd this
 
   def end: Boolean = checkMate || staleMate || autoDraw || variantEnd
 
@@ -66,40 +68,41 @@ case class Situation(board: Board, color: Color) {
   def drop(role: Role, pos: Pos): Validated[String, Drop] =
     board.variant.drop(this, role, pos)
 
-  def fixCastles = copy(board = board fixCastles)
+  //def fixCastles = copy(board = board fixCastles)
 
-  def withHistory(history: History) =
-    copy(
-      board = board withHistory history
-    )
+  //def withHistory(history: History) =
+  //  copy(
+  //    board = board withHistory history
+  //  )
 
   def withVariant(variant: strategygames.fairysf.variant.Variant) =
     copy(
       board = board withVariant variant
     )
 
-  def canCastle = board.history.canCastle _
+  //def canCastle = board.history.canCastle _
 
-  def enPassantSquare: Option[Pos] = {
-    // Before potentially expensive move generation, first ensure some basic
-    // conditions are met.
-    history.lastMove match {
-      case Some(move: Uci.Move) =>
-        if (
-          move.dest.yDist(move.orig) == 2 &&
-          board(move.dest).exists(_.is(Pawn)) &&
-          List(
-            move.dest.file.offset(-1),
-            move.dest.file.offset(1)
-          ).flatten
-          .flatMap(board(_, Rank.passablePawnRank(color)))
-          .exists(_ == Piece(color, Pawn))
-        )
-          moves.values.flatten.find(_.enpassant).map(_.dest)
-        else None
-      case _ => None
-    }
-  }
+  //stub
+  def enPassantSquare: Option[Pos] = None//{
+  //  // Before potentially expensive move generation, first ensure some basic
+  //  // conditions are met.
+  //  history.lastMove match {
+  //    case Some(move: Uci.Move) =>
+  //      if (
+  //        move.dest.yDist(move.orig) == 2 &&
+  //        board(move.dest).exists(_.is(Pawn)) &&
+  //        List(
+  //          move.dest.file.offset(-1),
+  //          move.dest.file.offset(1)
+  //        ).flatten
+  //        .flatMap(board(_, Rank.passablePawnRank(color)))
+  //        .exists(_ == Piece(color, Pawn))
+  //      )
+  //        moves.values.flatten.find(_.enpassant).map(_.dest)
+  //      else None
+  //    case _ => None
+  //  }
+  //}
 
   def unary_! = copy(color = !color)
 }

@@ -90,6 +90,7 @@ object Role {
     def toFairySF = r
   }
 
+  //lila
   def all(lib: GameLogic): List[Role] = lib match {
     case GameLogic.Draughts() => draughts.Role.all.map(DraughtsRole)
     case GameLogic.Chess()    => chess.Role.all.map(ChessRole)
@@ -120,18 +121,6 @@ object Role {
     case GameLogic.FairySF() => fairysf.Role.allByName.map{case(n, r) => (n, FairySFRole(r))}
   }
 
-  def allByBinaryInt(lib: GameLogic): Map[Int, Role] = lib match {
-    case GameLogic.Draughts() => draughts.Role.allByBinaryInt.map{case(n, r) => (n, DraughtsRole(r))}
-    case GameLogic.Chess() => chess.Role.allByBinaryInt.map{case(n, r) => (n, ChessRole(r))}
-    case GameLogic.FairySF() => fairysf.Role.allByBinaryInt.map{case(n, r) => (n, FairySFRole(r))}
-  }
-
-  def allByHashInt(lib: GameLogic): Map[Int, Role] = lib match {
-    case GameLogic.Draughts() => draughts.Role.allByHashInt.map{case(n, r) => (n, DraughtsRole(r))}
-    case GameLogic.Chess() => chess.Role.allByHashInt.map{case(n, r) => (n, ChessRole(r))}
-    case GameLogic.FairySF() => fairysf.Role.allByHashInt.map{case(n, r) => (n, FairySFRole(r))}
-  }
-
   def allPromotableByName(lib: GameLogic): Map[String, PromotableRole] = lib match {
     case GameLogic.Draughts() => draughts.Role.allPromotableByName.map{case(n, r) => (n, DraughtsPromotableRole(r))}
     case GameLogic.Chess() => chess.Role.allPromotableByName.map{case(n, r) => (n, ChessPromotableRole(r))}
@@ -156,18 +145,6 @@ object Role {
     case GameLogic.FairySF()  => fairysf.Role.forsyth(c).map(FairySFRole)
   }
 
-  def binaryInt(lib: GameLogic, i: Int): Option[Role] = lib match {
-    case GameLogic.Draughts() => draughts.Role.binaryInt(i).map(DraughtsRole)
-    case GameLogic.Chess()    => chess.Role.binaryInt(i).map(ChessRole)
-    case GameLogic.FairySF()  => fairysf.Role.binaryInt(i).map(FairySFRole)
-  }
-
-  def hashInt(lib: GameLogic, i: Int): Option[Role] = lib match {
-    case GameLogic.Draughts() => draughts.Role.hashInt(i).map(DraughtsRole)
-    case GameLogic.Chess()    => chess.Role.hashInt(i).map(ChessRole)
-    case GameLogic.FairySF()  => fairysf.Role.hashInt(i).map(FairySFRole)
-  }
-
   def promotable(lib: GameLogic, c: Char): Option[PromotableRole] = lib match {
     case GameLogic.Draughts() => draughts.Role.promotable(c).map(DraughtsPromotableRole)
     case GameLogic.Chess()    => chess.Role.promotable(c).map(ChessPromotableRole)
@@ -175,12 +152,6 @@ object Role {
   }
 
   def promotable(lib: GameLogic, name: String): Option[PromotableRole] = lib match {
-    case GameLogic.Draughts() => draughts.Role.promotable(name).map(DraughtsPromotableRole)
-    case GameLogic.Chess()    => chess.Role.promotable(name).map(ChessPromotableRole)
-    case GameLogic.FairySF()  => fairysf.Role.promotable(name).map(FairySFPromotableRole)
-  }
-
-  def promotable(lib: GameLogic, name: Option[String]): Option[PromotableRole] = lib match {
     case GameLogic.Draughts() => draughts.Role.promotable(name).map(DraughtsPromotableRole)
     case GameLogic.Chess()    => chess.Role.promotable(name).map(ChessPromotableRole)
     case GameLogic.FairySF()  => fairysf.Role.promotable(name).map(FairySFPromotableRole)

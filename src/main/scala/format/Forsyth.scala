@@ -72,18 +72,6 @@ object Forsyth {
     case _ => sys.error("Mismatched gamelogic types 17")
   }
 
-  // only cares about pieces positions on the board (first part of FEN string)
-  def makeBoard(lib: GameLogic, variant: Variant, fen: FEN): Option[Board] =
-    (lib, variant, fen) match {
-      case (GameLogic.Draughts(), Variant.Draughts(variant), FEN.Draughts(fen))
-        => draughts.format.Forsyth.makeBoard(variant, fen).map(Board.Draughts)
-      case (GameLogic.Chess(), Variant.Chess(variant), FEN.Chess(fen))
-        => chess.format.Forsyth.makeBoard(variant, fen).map(Board.Chess)
-      case (GameLogic.FairySF(), Variant.FairySF(variant), FEN.FairySF(fen))
-        => fairysf.format.Forsyth.makeBoard(variant, fen).map(Board.FairySF)
-      case _ => sys.error("Mismatched gamelogic types 18")
-  }
-
   def >>(lib: GameLogic, situation: Situation): FEN = >>(lib, SituationPlus(situation, 1))
 
   def >>(lib: GameLogic, parsed: SituationPlus): FEN = (lib, parsed.situation) match{
@@ -126,7 +114,7 @@ object Forsyth {
   def boardAndColor(lib: GameLogic, situation: Situation): String =
     boardAndColor(lib, situation.board, situation.color)
 
-  def boardAndColor(lib: GameLogic, board: Board, turnColor: Color): String =
+  private def boardAndColor(lib: GameLogic, board: Board, turnColor: Color): String =
     (lib, board) match {
       case (GameLogic.Draughts(), Board.Draughts(board))
         => draughts.format.Forsyth.boardAndColor(board, turnColor)

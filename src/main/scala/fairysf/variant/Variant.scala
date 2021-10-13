@@ -81,12 +81,13 @@ abstract class Variant private[variant] (
       kingPos exists { kingThreatened(m.after, !m.color, _, filter) }
     }
 
-  def kingSafety(a: Actor, m: Move): Boolean =
-    kingSafety(
-      m,
-      if ((a.piece is King) || a.check) (_ => true) else (_.role.projection),
-      if (a.piece.role == King) None else a.board kingPosOf a.color
-    )
+  //stub
+  def kingSafety(a: Actor, m: Move): Boolean = true
+  //  kingSafety(
+  //    m,
+  //    if ((a.piece is King) || a.check) (_ => true) else (_.role.projection),
+  //    if (a.piece.role == King) None else a.board kingPosOf a.color
+  //  )
 
   def longRangeThreatens(board: Board, p: Pos, dir: Direction, to: Pos): Boolean =
     dir(p) exists { next =>

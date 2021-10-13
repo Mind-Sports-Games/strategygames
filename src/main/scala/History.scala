@@ -14,11 +14,7 @@ abstract sealed class History(
   val halfMoveClock: Int = 0
 ) {
 
-  def setHalfMoveClock(v: Int): History
-
   def threefoldRepetition: Boolean
-
-  def withLastMove(m: Uci): History
 
   override def toString = {
     val positions = (positionHashes grouped Hash.size).toList
@@ -38,14 +34,7 @@ object History {
     halfMoveClock = h.halfMoveClock
   ) {
 
-    def setHalfMoveClock(v: Int): History = Chess(h.setHalfMoveClock(v))
-
     def threefoldRepetition: Boolean = h.threefoldRepetition
-
-    def withLastMove(m: Uci): History = m match {
-      case u: Uci.Chess    => Chess(h.withLastMove(u.unwrap))
-      case _ => sys.error("Not passed Chess objects")
-    }
 
   }
 
@@ -56,14 +45,7 @@ object History {
     kingMoves = h.kingMoves
   ) {
 
-    def setHalfMoveClock(v: Int): History = Draughts(h.setHalfMoveClock(v))
-
     def threefoldRepetition: Boolean = h.threefoldRepetition
-
-    def withLastMove(m: Uci): History = m match {
-      case u: Uci.Draughts => Draughts(h.withLastMove(u.unwrap))
-      case _ => sys.error("Not passed Draughts objects")
-    }
 
   }
 
@@ -73,14 +55,7 @@ object History {
     halfMoveClock = h.halfMoveClock
   ) {
 
-    def setHalfMoveClock(v: Int): History = FairySF(h.setHalfMoveClock(v))
-
     def threefoldRepetition: Boolean = h.threefoldRepetition
-
-    def withLastMove(m: Uci): History = m match {
-      case u: Uci.FairySF => FairySF(h.withLastMove(u.unwrap))
-      case _ => sys.error("Not passed FairySF objects")
-    }
 
   }
 
@@ -88,6 +63,7 @@ object History {
   implicit def draughtsHistory(h: draughts.DraughtsHistory) = Draughts(h)
   implicit def fairysfHistory(h: fairysf.History) = FairySF(h)
 
+  //lila
   def apply(
     lib: GameLogic,
     lastMove: Option[Uci] = None,

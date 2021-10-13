@@ -3,20 +3,9 @@ package strategygames.format
 import cats.data.Validated
 
 import strategygames.variant.Variant
-import strategygames.{ GameLogic, MoveOrDrop, Drop, Move, Replay }
+import strategygames.{ GameLogic, MoveOrDrop, Drop, Move }
 
 object UciDump {
-
-  // a2a4, b8c6
-  def apply(lib: GameLogic, replay: Replay): List[String] = (lib, replay) match {
-    case (GameLogic.Draughts(), Replay.Draughts(replay))
-      => strategygames.draughts.format.UciDump.apply(replay)
-    case (GameLogic.Chess(), Replay.Chess(replay))
-      => strategygames.chess.format.UciDump.apply(replay)
-    case (GameLogic.FairySF(), Replay.FairySF(replay))
-      => strategygames.fairysf.format.UciDump.apply(replay)
-    case _ => sys.error("Mismatched gamelogic types 11")
-  }
 
   def apply(
     lib: GameLogic,

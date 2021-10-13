@@ -9,8 +9,6 @@ import strategygames.format.Uci
 
 abstract sealed class Situation(val board: Board, val color: Color) {
 
-  lazy val actors = board actorsOf color
-
   val moves: Map[Pos, List[Move]]
 
   val destinations: Map[Pos, List[Pos]]
@@ -25,13 +23,9 @@ abstract sealed class Situation(val board: Board, val color: Color) {
 
   def checkMate: Boolean = board.variant checkmate this
 
-  def autoDraw: Boolean = board.autoDraw || board.variant.specialDraw(this)
-
   def opponentHasInsufficientMaterial: Boolean
 
   lazy val threefoldRepetition: Boolean = board.history.threefoldRepetition
-
-  def variantEnd = board.variant specialEnd this
 
   def end: Boolean
 
@@ -55,11 +49,7 @@ abstract sealed class Situation(val board: Board, val color: Color) {
 
   def drop(role: Role, pos: Pos): Validated[String, Drop]
 
-  def withHistory(history: History): Situation
-
   def withVariant(variant: Variant): Situation
-
-  def unary_! : Situation
 
   def gameLogic: GameLogic
 
@@ -124,11 +114,6 @@ object Situation {
     def drop(role: Role, pos: Pos): Validated[String, Drop] = (role, pos) match {
       case (Role.ChessRole(role), Pos.Chess(pos)) =>
         s.drop(role, pos).toEither.map(d => Drop.Chess(d)).toValidated
-      case _ => sys.error("Not passed Chess objects")
-    }
-
-    def withHistory(history: History): Situation = history match {
-      case History.Chess(history) => Chess(s.withHistory(history))
       case _ => sys.error("Not passed Chess objects")
     }
 
@@ -213,11 +198,6 @@ object Situation {
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
       sys.error("Can't do a Drop for draughts")
 
-    def withHistory(history: History): Situation = history match {
-      case History.Draughts(history) => Draughts(s.withHistory(history))
-      case _ => sys.error("Not passed Draughts objects")
-    }
-
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.Draughts(variant) => Draughts(s.withVariant(variant))
       case _ => sys.error("Not passed Draughts objects")
@@ -287,11 +267,6 @@ object Situation {
     def drop(role: Role, pos: Pos): Validated[String, Drop] = (role, pos) match {
       case (Role.FairySFRole(role), Pos.FairySF(pos)) =>
         s.drop(role, pos).toEither.map(d => Drop.FairySF(d)).toValidated
-      case _ => sys.error("Not passed FairySF objects")
-    }
-
-    def withHistory(history: History): Situation = history match {
-      case History.FairySF(history) => FairySF(s.withHistory(history))
       case _ => sys.error("Not passed FairySF objects")
     }
 

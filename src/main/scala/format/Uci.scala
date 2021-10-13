@@ -230,7 +230,6 @@ object Uci {
 
   }
 
-  //possibly wrong to handle Draughts.withCaptures likes this
   def apply(lib: GameLogic, move: strategygames.Move, withCaptures: Boolean = false): Uci.Move =
     (lib, move) match {
       case (GameLogic.Draughts(), strategygames.Move.Draughts(move))
@@ -256,7 +255,7 @@ object Uci {
       case GameLogic.FairySF()  => fairysf.format.Uci.apply(move).map(wrap)
   }
 
-  def piotr(lib: GameLogic, move: String): Option[Uci] = lib match {
+  private def piotr(lib: GameLogic, move: String): Option[Uci] = lib match {
       case GameLogic.Draughts() => draughts.format.Uci.piotr(move).map(wrap)
       case GameLogic.Chess()    => chess.format.Uci.piotr(move).map(wrap)
       case GameLogic.FairySF()  => fairysf.format.Uci.piotr(move).map(wrap)
