@@ -14,7 +14,10 @@ import strategygames.fairysf.variant.{ Variant }
   */
 object Forsyth {
 
-  val initial = FEN("lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1")
+  //lishogi
+  //val initial = FEN("lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1")
+  //pychess shogi
+  val initial = FEN("lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL[-] w 0 1")
 
   //stub
   def <<@(variant: Variant, fen: FEN): Option[Situation] = None
