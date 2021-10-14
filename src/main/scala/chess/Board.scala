@@ -8,7 +8,7 @@ case class Board(
     pieces: PieceMap,
     history: History,
     variant: Variant,
-    crazyData: Option[PocketData] = None
+    pocketData: Option[PocketData] = None
 ) {
 
   def apply(at: Pos): Option[Piece] = pieces get at
@@ -103,12 +103,12 @@ case class Board(
     if (v.dropsVariant) copy(variant = v).ensureCrazyData
     else copy(variant = v)
 
-  def withCrazyData(data: PocketData)         = copy(crazyData = Option(data))
-  def withCrazyData(data: Option[PocketData]) = copy(crazyData = data)
+  def withCrazyData(data: PocketData)         = copy(pocketData = Option(data))
+  def withCrazyData(data: Option[PocketData]) = copy(pocketData = data)
   def withCrazyData(f: PocketData => PocketData): Board =
-    withCrazyData(f(crazyData | PocketData.init))
+    withCrazyData(f(pocketData | PocketData.init))
 
-  def ensureCrazyData = withCrazyData(crazyData | PocketData.init)
+  def ensureCrazyData = withCrazyData(pocketData | PocketData.init)
 
   def unmovedRooks =
     UnmovedRooks {

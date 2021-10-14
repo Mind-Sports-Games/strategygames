@@ -113,7 +113,7 @@ object Game {
         g.copy(
           situation = Situation(
             board = parsed.situation.board withVariant g.board.variant withCrazyData {
-              parsed.situation.board.crazyData orElse g.board.crazyData
+              parsed.situation.board.pocketData orElse g.board.pocketData
             },
             color = parsed.situation.color
           ),

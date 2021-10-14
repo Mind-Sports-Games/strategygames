@@ -39,7 +39,7 @@ case object Crazyhouse
 
   override def drop(situation: Situation, role: Role, pos: Pos): Validated[String, Drop] =
     for {
-      d1 <- situation.board.crazyData toValid "Board has no crazyhouse data"
+      d1 <- situation.board.pocketData toValid "Board has no crazyhouse data"
       _ <-
         if (role != Pawn || canDropPawnOn(pos)) Validated.valid(d1)
         else Validated.invalid(s"Can't drop $role on $pos")
@@ -63,7 +63,7 @@ case object Crazyhouse
   override def finalizeBoard(board: Board, uci: Uci, capture: Option[Piece]): Board =
     uci match {
       case Uci.Move(orig, dest, promOption) =>
-        board.crazyData.fold(board) { data =>
+        board.pocketData.fold(board) { data =>
           val d1 = capture.fold(data) { data.store(_, dest) }
           val d2 = promOption.fold(d1.move(orig, dest)) { _ =>
             d1 promote dest
@@ -74,7 +74,7 @@ case object Crazyhouse
     }
 
   private def canDropStuff(situation: Situation) =
-    situation.board.crazyData.fold(false) { (data: PocketData) =>
+    situation.board.pocketData.fold(false) { (data: PocketData) =>
       val roles = data.pockets(situation.color).roles
       roles.nonEmpty && possibleDrops(situation).fold(true) { squares =>
         squares.nonEmpty && {

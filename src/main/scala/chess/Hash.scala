@@ -32,7 +32,7 @@ object Hash {
     val enPassantMasks      = ZobristTables.enPassantMasks.map(hexToLong)
     val threeCheckMasks     = ZobristTables.threeCheckMasks.map(hexToLong)
     val crazyPromotionMasks = ZobristTables.crazyPromotionMasks.map(hexToLong)
-    val crazyPocketMasks    = ZobristTables.crazyPocketMasks.map(hexToLong)
+    val pocketMasks    = ZobristTables.pocketMasks.map(hexToLong)
   }
 
   object ZobristConstants {}
@@ -50,11 +50,11 @@ object Hash {
 
   def get(situation: Situation, table: ZobristConstants): Long = {
 
-    def crazyPocketMask(roleHash: Int, colorshift: Int, count: Int) = {
+    def pocketMask(roleHash: Int, colorshift: Int, count: Int) = {
       // There should be no kings and at most 16 pieces of any given type
       // in a pocket.
       if (0 < count && count <= 16 && roleHash < 5)
-        Option(table.crazyPocketMasks(16 * roleHash + count + colorshift))
+        Option(table.pocketMasks(16 * roleHash + count + colorshift))
       else None
     }
 
@@ -91,7 +91,7 @@ object Hash {
     }
 
     // Hash in special crazyhouse data.
-    val hcrazy = board.crazyData.fold(hchecks) { data =>
+    val hcrazy = board.pocketData.fold(hchecks) { data =>
       val hcrazypromotions = data.promoted.view
         .map { p =>
           table.crazyPromotionMasks(p.hashCode)
@@ -101,7 +101,7 @@ object Hash {
         .flatMap { color =>
           val colorshift = color.fold(79, -1)
           data.pockets(color).roles.groupBy(identity).flatMap { case (role, list) =>
-            crazyPocketMask(role.hashInt, colorshift, list.size)
+            pocketMask(role.hashInt, colorshift, list.size)
           }
         }
         .fold(hcrazypromotions)(_ ^ _)
@@ -1114,7 +1114,7 @@ private object ZobristTables {
     "7e3de4bfbef5566f06a79ac414c9632e"
   )
 
-  val crazyPocketMasks = Array(
+  val pocketMasks = Array(
     "b262e9f9d61233206e21a47d5b561a1d",
     "91533947cdaa8bec4263a757e414fe44",
     "a13b56b45723a3d493c43f67cf55b53f",

@@ -204,7 +204,7 @@ object Forsyth {
     }
 
   private def exportCrazyPocket(board: Board) =
-    board.crazyData match {
+    board.pocketData match {
       case Some(PocketData(pockets, _)) =>
         "/" +
           pockets.white.roles.map(_.forsyth).map(_.toUpper).mkString +
@@ -260,7 +260,7 @@ object Forsyth {
               fen append (empty.toString + piece.forsyth)
               empty = 0
             }
-            if (piece.role != Pawn && board.crazyData.fold(false)(_.promoted.contains(Pos(x, y))))
+            if (piece.role != Pawn && board.pocketData.fold(false)(_.promoted.contains(Pos(x, y))))
               fen append '~'
         }
       }
