@@ -220,7 +220,7 @@ object Role {
   def pgnMoveToRole(c: Char): Role =
     allByPgn.get(c) match {
       case Some(r) => r
-      case None    => sys.error("TODO: implement me")// ShogiPawn // TODO: this is probably wrong,
+      case None    => ???// ShogiPawn // TODO: this is probably wrong,
     }
 
   def javaSymbolToRole(s: String): Role =
