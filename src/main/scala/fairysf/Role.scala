@@ -3,114 +3,175 @@ package strategygames.fairysf
 import strategygames.{ Black, Color, White }
 
 sealed trait Role {
+  val fairySfID: Int
   val forsyth: Char
   lazy val forsythUpper: Char = forsyth.toUpper
   lazy val pgn: Char          = forsythUpper
   lazy val name               = toString.toLowerCase
-  val projection: Boolean
   val binaryInt: Int
   val hashInt: Int
   val storable: Boolean
-  val dirs: Directions
-  def dir(from: Pos, to: Pos): Option[Direction]
   final def -(color: Color) = Piece(color, this)
   final def white           = this - White
   final def black           = this - Black
 }
 sealed trait PromotableRole extends Role
 
+/* These are all of the pieces that fairysf supports
+ * My plan is to use the integer value (left column)
+ * to represent the pieces when passing back and forth
++----+----------------+----------+
+| ID | Name           | Betza    |
++----+----------------+----------+
+| 62 |                |          |
++----+----------------+----------+
+| 10 | aiwok          | RNF      |
++----+----------------+----------+
+| 7  | alfil          | A        |
++----+----------------+----------+
+| 14 | amazon         | QN       |
++----+----------------+----------+
+| 12 | archbishop     | BN       |
++----+----------------+----------+
+| 33 | banner         | RcpRnN   |
++----+----------------+----------+
+| 11 | bers           | RF       |
++----+----------------+----------+
+| 3  | bishop         | B        |
++----+----------------+----------+
+| 16 | biskni         | mBcN     |
++----+----------------+----------+
+| 25 | breakthrough   | fWfFcF   |
++----+----------------+----------+
+| 27 | cannon         | mRcpR    |
++----+----------------+----------+
+| 36 | centaur        | KN       |
++----+----------------+----------+
+| 13 | chancellor     | RN       |
++----+----------------+----------+
+| 24 | clobber        | cW       |
++----+----------------+----------+
+| 35 | commoner       | K        |
++----+----------------+----------+
+| 23 | dragonHorse    | BW       |
++----+----------------+----------+
+| 31 | elephant       | nA       |
++----+----------------+----------+
+| 6  | fers           | F        |
++----+----------------+----------+
+| 8  | fersAlfil      | FA       |
++----+----------------+----------+
+| 22 | gold           | WfF      |
++----+----------------+----------+
+| 30 | horse          | nN       |
++----+----------------+----------+
+| 26 | immobile       |          |
++----+----------------+----------+
+| 28 | janggiCannon   | pR       |
++----+----------------+----------+
+| 32 | janggiElephant | mafsmafW |
++----+----------------+----------+
+| 63 | king           | K        |
++----+----------------+----------+
+| 15 | knibis         | mNcB     |
++----+----------------+----------+
+| 2  | knight         | N        |
++----+----------------+----------+
+| 17 | kniroo         | mNcR     |
++----+----------------+----------+
+| 20 | lance          | fR       |
++----+----------------+----------+
+| 1  | pawn           | fmWfceF  |
++----+----------------+----------+
+| 5  | queen          | Q        |
++----+----------------+----------+
+| 4  | rook           | R        |
++----+----------------+----------+
+| 18 | rookni         | mRcN     |
++----+----------------+----------+
+| 21 | shogiKnight    | fN       |
++----+----------------+----------+
+| 19 | shogiPawn      | fW       |
++----+----------------+----------+
+| 9  | silver         | FfW      |
++----+----------------+----------+
+| 29 | soldier        | fsW      |
++----+----------------+----------+
+| 34 | wazir          | W        |
++----+----------------+----------+
+ */
+
 /** Promotable in antichess.
   */
-case object King extends PromotableRole {
-  val forsyth                 = 'k'
-  val dirs: Directions        = Queen.dirs
-  def dir(from: Pos, to: Pos) = None
-  val projection              = false
-  val binaryInt               = 1
-  val hashInt                 = 5
-  val storable                = false
+case object ShogiPawn extends PromotableRole {
+  val fairySfID = 19
+  val forsyth   = 'P'
+  val binaryInt = 1
+  val hashInt   = 8
+  val storable  = false
 }
 
-case object Queen extends PromotableRole {
-  val forsyth                 = 'q'
-  val dirs: Directions        = Rook.dirs ::: Bishop.dirs
-  def dir(from: Pos, to: Pos) = Rook.dir(from, to) orElse Bishop.dir(from, to)
-  val projection              = true
-  val binaryInt               = 2
-  val hashInt                 = 4
-  val storable                = true
+case object ShogiLance extends PromotableRole {
+  val fairySfID = 20
+  val forsyth   = 'L'
+  val binaryInt = 2
+  val hashInt   = 7
+  val storable  = true
 }
-case object Rook extends PromotableRole {
-  val forsyth          = 'r'
-  val dirs: Directions = List(_.up, _.down, _.left, _.right)
-  def dir(from: Pos, to: Pos) =
-    if (to ?| from)
-      Option(if (to ?^ from) (_.up) else (_.down))
-    else if (to ?- from)
-      Option(if (to ?< from) (_.left) else (_.right))
-    else None
-  val projection = true
-  val binaryInt  = 3
-  val hashInt    = 3
-  val storable   = true
+case object ShogiKnight extends PromotableRole {
+  val fairySfID = 21
+  val forsyth   = 'N'
+  val binaryInt = 3
+  val hashInt   = 6
+  val storable  = true
 }
-case object Bishop extends PromotableRole {
-  val forsyth          = 'b'
-  val dirs: Directions = List(_.upLeft, _.upRight, _.downLeft, _.downRight)
-  def dir(from: Pos, to: Pos) =
-    if (to onSameDiagonal from)
-      Option(if (to ?^ from) {
-        if (to ?< from) (_.upLeft) else (_.upRight)
-      } else {
-        if (to ?< from) (_.downLeft) else (_.downRight)
-      })
-    else None
-  val projection = true
-  val binaryInt  = 5
-  val hashInt    = 2
-  val storable   = true
+
+case object ShogiSilver extends PromotableRole {
+  val fairySfID = 9
+  val forsyth   = 'S'
+  val binaryInt = 4
+  val hashInt   = 5
+  val storable  = true
 }
-case object Knight extends PromotableRole {
-  val forsyth = 'n'
-  val dirs: Directions = List(
-    p => Pos.at(p.file.index - 1, p.rank.index + 2),
-    p => Pos.at(p.file.index - 1, p.rank.index - 2),
-    p => Pos.at(p.file.index + 1, p.rank.index + 2),
-    p => Pos.at(p.file.index + 1, p.rank.index - 2),
-    p => Pos.at(p.file.index - 2, p.rank.index + 1),
-    p => Pos.at(p.file.index - 2, p.rank.index - 1),
-    p => Pos.at(p.file.index + 2, p.rank.index + 1),
-    p => Pos.at(p.file.index + 2, p.rank.index - 1)
-  )
-  def dir(from: Pos, to: Pos) = None
-  val projection              = false
-  val binaryInt               = 4
-  val hashInt                 = 1
-  val storable                = true
+
+case object ShogiGold extends PromotableRole {
+  val fairySfID = 22
+  val forsyth   = 'G'
+  val binaryInt = 5
+  val hashInt   = 4
+  val storable  = true
 }
-case object Pawn extends Role {
-  val forsyth                 = 'p'
-  val dirs: Directions        = Nil
-  def dir(from: Pos, to: Pos) = None
-  val projection              = false
-  val binaryInt               = 6
-  val hashInt                 = 0
-  val storable                = true
+
+case object ShogiBishop extends PromotableRole {
+  val fairySfID = 3
+  val forsyth   = 'B'
+  val binaryInt = 6
+  val hashInt   = 3
+  val storable  = true
 }
-case object LOAChecker extends Role {
-  val forsyth                 = 'l'
-  val dirs: Directions        = Queen.dirs
-  def dir(from: Pos, to: Pos) = Queen.dir(from, to)
-  val projection              = false
-  val binaryInt               = 8
-  val hashInt                 = 6
-  val storable                = false
+
+case object ShogiRook extends PromotableRole {
+  val fairySfID = 4
+  val forsyth   = 'R'
+  val binaryInt = 7
+  val hashInt   = 2
+  val storable  = true
+}
+
+case object ShogiKing extends PromotableRole {
+  val fairySfID = 63
+  val forsyth   = 'K'
+  val binaryInt = 8
+  val hashInt   = 1
+  val storable  = true
 }
 
 object Role {
 
-  val all: List[Role]                     = List(King, Queen, Rook, Bishop, Knight, Pawn, LOAChecker)
-  val allPromotable: List[PromotableRole] = List(Queen, Rook, Bishop, Knight, King)
+  val all: List[Role] =
+    List(ShogiPawn, ShogiLance, ShogiKnight, ShogiSilver, ShogiGold, ShogiBishop, ShogiRook, ShogiKing)
+  val allPromotable: List[PromotableRole] =
+    List(ShogiPawn, ShogiLance, ShogiKnight, ShogiSilver, ShogiBishop, ShogiRook)
   val allByForsyth: Map[Char, Role] = all map { r =>
     (r.forsyth, r)
   } toMap
@@ -159,7 +220,7 @@ object Role {
   def pgnMoveToRole(c: Char): Role =
     allByPgn.get(c) match {
       case Some(r) => r
-      case None    => if (c == 'O') King else Pawn
+      case None    => sys.error("TODO: implement me")// ShogiPawn // TODO: this is probably wrong,
     }
 
   def javaSymbolToRole(s: String): Role =
@@ -173,13 +234,13 @@ object Role {
       .get
 
   def valueOf(r: Role): Option[Int] =
+    // Taken from: https://en.wikipedia.org/wiki/Shogi_strategy
     r match {
-      case Pawn       => Option(1)
-      case Knight     => Option(3)
-      case Bishop     => Option(3)
-      case Rook       => Option(5)
-      case Queen      => Option(9)
-      case King       => None
-      case LOAChecker => None
+      case ShogiPawn                => Option(1)
+      case ShogiLance | ShogiKnight => Option(3)
+      case ShogiSilver | ShogiGold  => Option(5)
+      case ShogiBishop              => Option(8)
+      case ShogiRook                => Option(9)
+      case _                        => None
     }
 }

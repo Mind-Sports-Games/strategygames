@@ -25,7 +25,7 @@ case object Xiangqi
 
   override def baseVariant: Boolean = true
 
-  val pieces: Map[Pos, Piece] = Variant.symmetricRank(backRank)
+  val pieces: Map[Pos, Piece] = ???
   override val initialFen =
     FEN("rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C2C4/9/RNBAKABNR b - - 1 1")
 

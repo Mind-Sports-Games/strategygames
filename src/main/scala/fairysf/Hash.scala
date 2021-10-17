@@ -61,24 +61,11 @@ object Hash {
     val board = situation.board
     val hturn = situation.color.fold(table.whiteTurnMask, 0L)
 
-    val hactors = board.actors.values.view
-      .map {
-        table.actorMasks compose actorIndex _
-      }
-      .fold(hturn)(_ ^ _)
+    val hactors = ???
 
-    val hcastling =
-      if (board.variant.allowsCastling)
-        (situation.history.castles.toSeq.view zip table.castlingMasks)
-          .collect { case (true, castlingMask) =>
-            castlingMask
-          }
-          .fold(hactors)(_ ^ _)
-      else hactors
+    val hcastling = ???
 
-    val hep = situation.enPassantSquare.fold(hcastling) { pos =>
-      hcastling ^ table.enPassantMasks(pos.file.index)
-    }
+    val hep = ???
 
     // Hash in special three-check data.
     val hchecks = board.variant match {

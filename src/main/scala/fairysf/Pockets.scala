@@ -20,7 +20,7 @@ case class PocketData(
     copy(
       pockets = pockets.store(
         GameLogic.FairySF(),
-        StratPiece.FairySF(if (promoted(from)) Piece(piece.color, Pawn) else piece)
+        StratPiece.FairySF(piece) // TODO: maybe have to properly add in conversion for storage here.
       ),
       promoted = promoted - from
     )

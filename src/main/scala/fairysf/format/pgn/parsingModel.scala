@@ -31,25 +31,7 @@ case class Std(
 
   def withMetas(m: Metas) = copy(metas = m)
 
-  def move(situation: Situation): Validated[String, strategygames.fairysf.Move] =
-    situation.board.pieces.foldLeft(none[strategygames.fairysf.Move]) {
-      case (None, (pos, piece))
-          if piece.color == situation.color && piece.role == role && compare(
-            file,
-            pos.file.index + 1
-          ) && compare(
-            rank,
-            pos.rank.index + 1
-          ) && piece.eyesMovable(pos, dest) =>
-        val a = Actor(piece, pos, situation.board)
-        a trustedMoves false find { m =>
-          m.dest == dest && a.board.variant.kingSafety(a, m)
-        }
-      case (m, _) => m
-    } match {
-      case None       => Validated invalid s"No move found: $this\n$situation"
-      case Some(move) => move withPromotion promotion toValid "Wrong promotion"
-    }
+  def move(situation: Situation): Validated[String, strategygames.fairysf.Move] = ???
 
   private def compare[A](a: Option[A], b: A) = a.fold(true)(b ==)
 }

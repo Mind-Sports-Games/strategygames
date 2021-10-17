@@ -41,81 +41,21 @@ abstract class Variant private[variant] (
 
   def allowsCastling = !castles.isEmpty
 
-  protected val backRank = Vector(Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook)
-
   def castles: Castles = Castles.all
 
   def initialFen: FEN   = format.Forsyth.initial
   def startColor: Color = White
 
-  def isValidPromotion(promotion: Option[PromotableRole]) =
-    promotion match {
-      case None                                 => true
-      case Some(Queen | Rook | Knight | Bishop) => true
-      case _                                    => false
-    }
+  def isValidPromotion(promotion: Option[PromotableRole]) = ???
 
-  def validMoves(situation: Situation): Map[Pos, List[Move]] =
-    situation.actors
-      .collect {
-        case actor if actor.moves.nonEmpty => actor.pos -> actor.moves
-      }
-      .to(Map)
-
-  // Optimised for performance
-  def pieceThreatened(board: Board, color: Color, to: Pos, filter: Piece => Boolean = _ => true): Boolean = {
-    board.pieces exists {
-      case (pos, piece) if piece.color == color && filter(piece) && piece.eyes(pos, to) =>
-        (!piece.role.projection) || piece.role.dir(pos, to).exists {
-          longRangeThreatens(board, pos, _, to)
-        }
-      case _ => false
-    }
-  }
-
-  def kingThreatened(board: Board, color: Color, to: Pos, filter: Piece => Boolean = _ => true) =
-    pieceThreatened(board, color, to, filter)
-
-  def kingSafety(m: Move, filter: Piece => Boolean, kingPos: Option[Pos]): Boolean =
-    ! {
-      kingPos exists { kingThreatened(m.after, !m.color, _, filter) }
-    }
-
-  //stub
-  def kingSafety(a: Actor, m: Move): Boolean = true
-  //  kingSafety(
-  //    m,
-  //    if ((a.piece is King) || a.check) (_ => true) else (_.role.projection),
-  //    if (a.piece.role == King) None else a.board kingPosOf a.color
-  //  )
-
-  def longRangeThreatens(board: Board, p: Pos, dir: Direction, to: Pos): Boolean =
-    dir(p) exists { next =>
-      next == to || (!board.pieces.contains(next) && longRangeThreatens(board, next, dir, to))
-    }
+  def validMoves(situation: Situation): Map[Pos, List[Move]] = ???
 
   def move(
       situation: Situation,
       from: Pos,
       to: Pos,
       promotion: Option[PromotableRole]
-  ): Validated[String, Move] = {
-
-    // Find the move in the variant specific list of valid moves
-    def findMove(from: Pos, to: Pos) = situation.moves get from flatMap (_.find(_.dest == to))
-
-    for {
-      actor <- situation.board.actors get from toValid "No piece on " + from
-      _ <-
-        if (actor is situation.color) Validated.valid(actor)
-        else Validated.invalid("Not my piece on " + from)
-      m1 <- findMove(from, to) toValid "Piece on " + from + " cannot move to " + to
-      m2 <- m1 withPromotion promotion toValid "Piece on " + from + " cannot promote to " + promotion
-      m3 <-
-        if (isValidPromotion(promotion)) Validated.valid(m2)
-        else Validated.invalid("Cannot promote to " + promotion + " in this game mode")
-    } yield m3
-  }
+  ): Validated[String, Move] = ???
 
   def drop(situation: Situation, role: Role, pos: Pos): Validated[String, Drop] =
     Validated.invalid(s"$this variant cannot drop $situation $role $pos")
@@ -142,17 +82,6 @@ abstract class Variant private[variant] (
       }
     }
 
-  /** Returns true if neither player can win. The game should end immediately.
-    */
-  def isInsufficientMaterial(board: Board) = InsufficientMatingMaterial(board)
-
-  /** Returns true if the other player cannot win. This is relevant when the
-    * side to move times out or disconnects. Instead of losing on time,
-    * the game should be drawn.
-    */
-  def opponentHasInsufficientMaterial(situation: Situation) =
-    InsufficientMatingMaterial(situation.board, !situation.color)
-
   // Some variants have an extra effect on the board on a move. For example, in Atomic, some
   // pieces surrounding a capture explode
   def hasMoveEffects = false
@@ -164,33 +93,21 @@ abstract class Variant private[variant] (
 
   def fiftyMoves(history: History): Boolean = history.halfMoveClock >= 100
 
-  def isIrreversible(move: Move): Boolean =
-    (move.piece is Pawn) || move.captures || move.promotes || move.castles
+  def isIrreversible(move: Move): Boolean = ???
 
   /** Once a move has been decided upon from the available legal moves, the board is finalized
     */
   @nowarn def finalizeBoard(board: Board, uci: format.Uci, captured: Option[Piece]): Board = board
 
-  protected def pawnsOnPromotionRank(board: Board, color: Color) = {
-    board.pieces.exists {
-      case (pos, Piece(c, r))
-        if c == color && r == Pawn && pos.rank == Rank.promotablePawnRank(color) => true
-      case _ => false
-    }
-  }
-
-  protected def validSide(board: Board, strict: Boolean)(color: Color) = {
-    val roles = board rolesOf color
-    roles.count(_ == King) == 1 &&
-    (!strict || { roles.count(_ == Pawn) <= 8 && roles.lengthCompare(16) <= 0 }) &&
-    !pawnsOnPromotionRank(board, color)
-  }
+  protected def validSide(board: Board, strict: Boolean)(color: Color) = ???
 
   def valid(board: Board, strict: Boolean) = Color.all forall validSide(board, strict)
 
-  val roles = List(Rook, Knight, King, Bishop, King, Queen, Pawn)
+  val roles: List[Role] =
+    List(ShogiPawn, ShogiLance, ShogiKnight, ShogiSilver, ShogiGold, ShogiBishop, ShogiRook, ShogiKing)
 
-  val promotableRoles: List[PromotableRole] = List(Queen, Rook, Bishop, Knight)
+  val promotableRoles: List[PromotableRole] =
+    List(ShogiPawn, ShogiLance, ShogiKnight, ShogiSilver, ShogiBishop, ShogiRook)
 
   lazy val rolesByPgn: Map[Char, Role] = roles
     .map { r =>
@@ -245,13 +162,4 @@ object Variant {
 
   val divisionSensibleVariants: Set[Variant] = Set()
 
-  private[variant] def symmetricRank(rank: IndexedSeq[Role]): Map[Pos, Piece] =
-    (for (y <- Seq(Rank.First, Rank.Second, Rank.Seventh, Rank.Eighth); x <- File.all) yield {
-      Pos(x, y) -> (y match {
-        case Rank.First   => Piece(White, rank(x.index))
-        case Rank.Second  => Piece(White, Pawn)
-        case Rank.Seventh => Piece(Black, Pawn)
-        case Rank.Eighth  => Piece(Black, rank(x.index))
-      })
-    }).toMap
 }
