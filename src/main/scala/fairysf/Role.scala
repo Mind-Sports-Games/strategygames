@@ -197,6 +197,8 @@ object Role {
 
   def valueOf(r: Role): Option[Int] =
     // Taken from: https://en.wikipedia.org/wiki/Shogi_strategy
+    // TODO: It's incomplete because none of the promoted pieces
+    //       are currently represented.
     r match {
       case ShogiPawn                => Option(1)
       case ShogiLance | ShogiKnight => Option(3)
