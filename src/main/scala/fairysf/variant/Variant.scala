@@ -39,10 +39,6 @@ abstract class Variant private[variant] (
   def perfId: Int
   def perfIcon: Char
 
-  def allowsCastling = !castles.isEmpty
-
-  def castles: Castles = Castles.all
-
   def initialFen: FEN   = format.Forsyth.initial
   def startColor: Color = White
 

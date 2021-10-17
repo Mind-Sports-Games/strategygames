@@ -2,8 +2,10 @@ package strategygames.fairysf
 
 import strategygames.{ Black, Color, White }
 
+case class FairySFRoleID(val id: Int)
+
 sealed trait Role {
-  val fairySfID: Int
+  val fairySFID: FairySFRoleID
   val forsyth: Char
   lazy val forsythUpper: Char = forsyth.toUpper
   lazy val pgn: Char          = forsythUpper
@@ -17,94 +19,10 @@ sealed trait Role {
 }
 sealed trait PromotableRole extends Role
 
-/* These are all of the pieces that fairysf supports
- * My plan is to use the integer value (left column)
- * to represent the pieces when passing back and forth
-+----+----------------+----------+
-| ID | Name           | Betza    |
-+----+----------------+----------+
-| 62 |                |          |
-+----+----------------+----------+
-| 10 | aiwok          | RNF      |
-+----+----------------+----------+
-| 7  | alfil          | A        |
-+----+----------------+----------+
-| 14 | amazon         | QN       |
-+----+----------------+----------+
-| 12 | archbishop     | BN       |
-+----+----------------+----------+
-| 33 | banner         | RcpRnN   |
-+----+----------------+----------+
-| 11 | bers           | RF       |
-+----+----------------+----------+
-| 3  | bishop         | B        |
-+----+----------------+----------+
-| 16 | biskni         | mBcN     |
-+----+----------------+----------+
-| 25 | breakthrough   | fWfFcF   |
-+----+----------------+----------+
-| 27 | cannon         | mRcpR    |
-+----+----------------+----------+
-| 36 | centaur        | KN       |
-+----+----------------+----------+
-| 13 | chancellor     | RN       |
-+----+----------------+----------+
-| 24 | clobber        | cW       |
-+----+----------------+----------+
-| 35 | commoner       | K        |
-+----+----------------+----------+
-| 23 | dragonHorse    | BW       |
-+----+----------------+----------+
-| 31 | elephant       | nA       |
-+----+----------------+----------+
-| 6  | fers           | F        |
-+----+----------------+----------+
-| 8  | fersAlfil      | FA       |
-+----+----------------+----------+
-| 22 | gold           | WfF      |
-+----+----------------+----------+
-| 30 | horse          | nN       |
-+----+----------------+----------+
-| 26 | immobile       |          |
-+----+----------------+----------+
-| 28 | janggiCannon   | pR       |
-+----+----------------+----------+
-| 32 | janggiElephant | mafsmafW |
-+----+----------------+----------+
-| 63 | king           | K        |
-+----+----------------+----------+
-| 15 | knibis         | mNcB     |
-+----+----------------+----------+
-| 2  | knight         | N        |
-+----+----------------+----------+
-| 17 | kniroo         | mNcR     |
-+----+----------------+----------+
-| 20 | lance          | fR       |
-+----+----------------+----------+
-| 1  | pawn           | fmWfceF  |
-+----+----------------+----------+
-| 5  | queen          | Q        |
-+----+----------------+----------+
-| 4  | rook           | R        |
-+----+----------------+----------+
-| 18 | rookni         | mRcN     |
-+----+----------------+----------+
-| 21 | shogiKnight    | fN       |
-+----+----------------+----------+
-| 19 | shogiPawn      | fW       |
-+----+----------------+----------+
-| 9  | silver         | FfW      |
-+----+----------------+----------+
-| 29 | soldier        | fsW      |
-+----+----------------+----------+
-| 34 | wazir          | W        |
-+----+----------------+----------+
- */
-
 /** Promotable in antichess.
   */
 case object ShogiPawn extends PromotableRole {
-  val fairySfID = 19
+  val fairySFID = Role.shogiPawn
   val forsyth   = 'P'
   val binaryInt = 1
   val hashInt   = 8
@@ -112,14 +30,14 @@ case object ShogiPawn extends PromotableRole {
 }
 
 case object ShogiLance extends PromotableRole {
-  val fairySfID = 20
+  val fairySFID = Role.lance
   val forsyth   = 'L'
   val binaryInt = 2
   val hashInt   = 7
   val storable  = true
 }
 case object ShogiKnight extends PromotableRole {
-  val fairySfID = 21
+  val fairySFID = Role.shogiKnight
   val forsyth   = 'N'
   val binaryInt = 3
   val hashInt   = 6
@@ -127,7 +45,7 @@ case object ShogiKnight extends PromotableRole {
 }
 
 case object ShogiSilver extends PromotableRole {
-  val fairySfID = 9
+  val fairySFID = Role.silver
   val forsyth   = 'S'
   val binaryInt = 4
   val hashInt   = 5
@@ -135,7 +53,7 @@ case object ShogiSilver extends PromotableRole {
 }
 
 case object ShogiGold extends PromotableRole {
-  val fairySfID = 22
+  val fairySFID = Role.gold
   val forsyth   = 'G'
   val binaryInt = 5
   val hashInt   = 4
@@ -143,7 +61,7 @@ case object ShogiGold extends PromotableRole {
 }
 
 case object ShogiBishop extends PromotableRole {
-  val fairySfID = 3
+  val fairySFID = Role.bishop
   val forsyth   = 'B'
   val binaryInt = 6
   val hashInt   = 3
@@ -151,7 +69,7 @@ case object ShogiBishop extends PromotableRole {
 }
 
 case object ShogiRook extends PromotableRole {
-  val fairySfID = 4
+  val fairySFID = Role.rook
   val forsyth   = 'R'
   val binaryInt = 7
   val hashInt   = 2
@@ -159,7 +77,7 @@ case object ShogiRook extends PromotableRole {
 }
 
 case object ShogiKing extends PromotableRole {
-  val fairySfID = 63
+  val fairySFID = Role.king
   val forsyth   = 'K'
   val binaryInt = 8
   val hashInt   = 1
@@ -167,6 +85,50 @@ case object ShogiKing extends PromotableRole {
 }
 
 object Role {
+  //---------------------------------------------------
+  // These are all of the pieces that fairysf supports
+  // Internally, Fairsf uses an enum to represent these
+  // but we are just going to use ints for this.
+  //
+  // The init method prints them out for us to use.
+  //---------------------------------------------------
+  val aiwok          = FairySFRoleID(10)
+  val alfil          = FairySFRoleID(7)
+  val amazon         = FairySFRoleID(14)
+  val archbishop     = FairySFRoleID(12)
+  val banner         = FairySFRoleID(33)
+  val bers           = FairySFRoleID(11)
+  val bishop         = FairySFRoleID(3)
+  val biskni         = FairySFRoleID(16)
+  val breakthrough   = FairySFRoleID(25)
+  val cannon         = FairySFRoleID(27)
+  val centaur        = FairySFRoleID(36)
+  val chancellor     = FairySFRoleID(13)
+  val clobber        = FairySFRoleID(24)
+  val commoner       = FairySFRoleID(35)
+  val dragonHorse    = FairySFRoleID(23)
+  val elephant       = FairySFRoleID(31)
+  val fers           = FairySFRoleID(6)
+  val fersAlfil      = FairySFRoleID(8)
+  val gold           = FairySFRoleID(22)
+  val horse          = FairySFRoleID(30)
+  val immobile       = FairySFRoleID(26)
+  val janggiCannon   = FairySFRoleID(28)
+  val janggiElephant = FairySFRoleID(32)
+  val king           = FairySFRoleID(63)
+  val knibis         = FairySFRoleID(15)
+  val knight         = FairySFRoleID(2)
+  val kniroo         = FairySFRoleID(17)
+  val lance          = FairySFRoleID(20)
+  val pawn           = FairySFRoleID(1)
+  val queen          = FairySFRoleID(5)
+  val rook           = FairySFRoleID(4)
+  val rookni         = FairySFRoleID(18)
+  val shogiKnight    = FairySFRoleID(21)
+  val shogiPawn      = FairySFRoleID(19)
+  val silver         = FairySFRoleID(9)
+  val soldier        = FairySFRoleID(29)
+  val wazir          = FairySFRoleID(34)
 
   val all: List[Role] =
     List(ShogiPawn, ShogiLance, ShogiKnight, ShogiSilver, ShogiGold, ShogiBishop, ShogiRook, ShogiKing)
@@ -220,7 +182,7 @@ object Role {
   def pgnMoveToRole(c: Char): Role =
     allByPgn.get(c) match {
       case Some(r) => r
-      case None    => ???// ShogiPawn // TODO: this is probably wrong,
+      case None    => ??? // ShogiPawn // TODO: this is probably wrong,
     }
 
   def javaSymbolToRole(s: String): Role =
