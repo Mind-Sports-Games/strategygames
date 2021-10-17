@@ -16,7 +16,8 @@ case object Shogi
       name = "Shogi",
       shortName = "Shogi",
       title = "Shogi (Japanese Chess)",
-      standardInitialPosition = true
+      standardInitialPosition = true,
+      fairysfName=FairySFName("shogi")
       //boardSize = Board.D100
     ) {
   import Variant._

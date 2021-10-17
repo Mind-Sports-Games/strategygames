@@ -8,6 +8,8 @@ import strategygames.fairysf._
 import strategygames.fairysf.format.FEN
 import strategygames.{ Color, GameFamily }
 
+case class FairySFName(val name: String)
+
 // Correctness depends on singletons for each variant ID
 abstract class Variant private[variant] (
     val id: Int,
@@ -15,7 +17,8 @@ abstract class Variant private[variant] (
     val name: String,
     val shortName: String,
     val title: String,
-    val standardInitialPosition: Boolean
+    val standardInitialPosition: Boolean,
+    val fairysfName: FairySFName
 ) {
 
   def pieces: Map[Pos, Piece]

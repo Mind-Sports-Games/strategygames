@@ -4,6 +4,9 @@ package format
 import Forsyth.SituationPlus
 import Pos._
 import variant._
+import strategygames.{Pocket, Pockets}
+import strategygames.chess.PocketData
+import strategygames.{ Role => StratRole }
 
 class ForsythTest extends ChessTest {
 
@@ -315,7 +318,10 @@ class ForsythTest extends ChessTest {
       "pockets" in {
         f <<< FEN("2b2rk1/3p2pp/2pNp3/4PpN1/qp1P3P/4P1K1/6P1/1Q6/pPP w - f6 0 36") must beSome.like { s =>
           s.situation.board.pocketData must beSome.like {
-            case Data(Pockets(Pocket(Pawn :: Pawn :: Nil), Pocket(Pawn :: Nil)), promoted) =>
+            case PocketData(Pockets(
+              Pocket(StratRole.ChessRole(Pawn) :: StratRole.ChessRole(Pawn) :: Nil),
+              Pocket(StratRole.ChessRole(Pawn) :: Nil)
+            ), promoted) =>
               promoted must beEmpty
           }
         }
@@ -324,14 +330,17 @@ class ForsythTest extends ChessTest {
         f <<< FEN("r1bk3r/ppp2ppp/4p3/1B1pP3/1b1N4/2N2qPp/PPP2NbP/4R1KR[PNq] b - - 39 20") must beSome.like {
           s =>
             s.situation.board.pocketData must beSome.like {
-              case Data(Pockets(Pocket(Pawn :: Knight :: Nil), Pocket(Queen :: Nil)), promoted) =>
+              case PocketData(Pockets(
+                Pocket(StratRole.ChessRole(Pawn) :: StratRole.ChessRole(Knight) :: Nil),
+                Pocket(StratRole.ChessRole(Queen) :: Nil)
+              ), promoted) =>
                 promoted must beEmpty
             }
         }
       }
       "promoted none" in {
         f <<< FEN("2b2rk1/3p2pp/2pNp3/4PpN1/qp1P3P/4P1K1/6P1/1Q6/pPP w - f6 0 36") must beSome.like { s =>
-          s.situation.board.pocketData must beSome.like { case Data(_, promoted) =>
+          s.situation.board.pocketData must beSome.like { case PocketData(_, promoted) =>
             promoted must beEmpty
           }
         }
@@ -339,7 +348,7 @@ class ForsythTest extends ChessTest {
       "promoted some" in {
         f <<< FEN("Q~R~b~2rk1/3p2pp/2pNp3/4PpN1/qp1P3P/4P1K1/6P1/1Q4q~R~/pPP w - f6 0 36") must beSome.like {
           s =>
-            s.situation.board.pocketData must beSome.like { case Data(_, promoted) =>
+            s.situation.board.pocketData must beSome.like { case PocketData(_, promoted) =>
               promoted must_== Set(A8, B8, C8, G1, H1)
             }
         }
@@ -347,7 +356,7 @@ class ForsythTest extends ChessTest {
       "promoted on H8" in {
         f << FEN("rnb1k2Q~/pp5p/2pp1p2/8/8/P1N2P2/P1PP1K1P/R1BQ1BNR/RPNBQPp b q - 21 11") must beSome.like {
           s =>
-            s.board.pocketData must beSome.like { case Data(_, promoted) =>
+            s.board.pocketData must beSome.like { case PocketData(_, promoted) =>
               promoted must_== Set(H8)
             }
         }
@@ -355,7 +364,7 @@ class ForsythTest extends ChessTest {
       "promoted on H2" in {
         f << FEN("r2q1b1r/p2k1Ppp/2p2p2/4p3/P2nP2n/3P1PRP/1PPB1K1q~/RN1Q1B2/Npb w - - 40 21") must beSome
           .like { s =>
-            s.board.pocketData must beSome.like { case Data(_, promoted) =>
+            s.board.pocketData must beSome.like { case PocketData(_, promoted) =>
               promoted must_== Set(H2)
             }
           }

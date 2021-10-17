@@ -2,8 +2,10 @@ package strategygames.chess
 
 import cats.syntax.option._
 
+import strategygames.{ Pocket, Pockets, Role }
 import strategygames.chess.format.FEN
 import strategygames.chess.variant.Crazyhouse
+
 
 class CrazyhouseVariantTest extends ChessTest {
 
@@ -36,8 +38,8 @@ class CrazyhouseVariantTest extends ChessTest {
         b.withCrazyData(
           PocketData(
             pockets = Pockets(
-              Pocket(Queen :: Nil),
-              Pocket(Rook :: Pawn :: Pawn :: Nil)
+              Pocket(Role.ChessRole(Queen) :: Nil),
+              Pocket((Rook :: Pawn :: Pawn :: Nil).map(Role.ChessRole))
             ),
             promoted = Set.empty
           )
