@@ -136,7 +136,7 @@ case object XiangqiElephant extends Role {
   val storable  = false
 }
 
-case object XiangqiRook extends PromotableRole {
+case object XiangqiRook extends Role {
   val fairySFID = Role.rook
   val forsyth   = 'R'
   val binaryInt = 5
