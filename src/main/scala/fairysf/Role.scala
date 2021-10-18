@@ -21,22 +21,22 @@ sealed trait PromotableRole extends Role
 
 /** Promotable in antichess.
   */
-case object ShogiPawn extends PromotableRole {
+case object ShogiPawn extends Role {
   val fairySFID = Role.shogiPawn
   val forsyth   = 'P'
   val binaryInt = 1
   val hashInt   = 8
-  val storable  = false
+  val storable  = true
 }
 
-case object ShogiLance extends PromotableRole {
+case object ShogiLance extends Role {
   val fairySFID = Role.lance
   val forsyth   = 'L'
   val binaryInt = 2
   val hashInt   = 7
   val storable  = true
 }
-case object ShogiKnight extends PromotableRole {
+case object ShogiKnight extends Role {
   val fairySFID = Role.shogiKnight
   val forsyth   = 'N'
   val binaryInt = 3
@@ -44,7 +44,7 @@ case object ShogiKnight extends PromotableRole {
   val storable  = true
 }
 
-case object ShogiSilver extends PromotableRole {
+case object ShogiSilver extends Role {
   val fairySFID = Role.silver
   val forsyth   = 'S'
   val binaryInt = 4
@@ -60,7 +60,7 @@ case object ShogiGold extends PromotableRole {
   val storable  = true
 }
 
-case object ShogiBishop extends PromotableRole {
+case object ShogiBishop extends Role {
   val fairySFID = Role.bishop
   val forsyth   = 'B'
   val binaryInt = 6
@@ -68,7 +68,7 @@ case object ShogiBishop extends PromotableRole {
   val storable  = true
 }
 
-case object ShogiRook extends PromotableRole {
+case object ShogiRook extends Role {
   val fairySFID = Role.rook
   val forsyth   = 'R'
   val binaryInt = 7
@@ -76,12 +76,92 @@ case object ShogiRook extends PromotableRole {
   val storable  = true
 }
 
-case object ShogiKing extends PromotableRole {
+case object ShogiKing extends Role {
   val fairySFID = Role.king
   val forsyth   = 'K'
   val binaryInt = 8
   val hashInt   = 1
+  val storable  = false
+}
+
+case object ShogiHorse extends PromotableRole {
+  val fairySFID = Role.horse
+  val forsyth   = 'H'
+  val binaryInt = 9
+  val hashInt   = 9
+  //depends if storable means
+  //can a piece of this role be stored when captured
+  //or if this role can be stored
   val storable  = true
+}
+
+case object ShogiDragon extends PromotableRole {
+  val fairySFID = Role.dragonHorse
+  val forsyth   = 'D'
+  val binaryInt = 10
+  val hashInt   = 10
+  val storable  = true
+}
+
+
+case object XiangqiSoldier extends Role {
+  val fairySFID = Role.soldier
+  val forsyth   = 'P'
+  val binaryInt = 1
+  val hashInt   = 7
+  val storable  = false
+}
+
+case object XiangqiCannon extends Role {
+  val fairySFID = Role.lance
+  val forsyth   = 'C'
+  val binaryInt = 2
+  val hashInt   = 6
+  val storable  = false
+}
+
+case object XiangqiHorse extends Role {
+  val fairySFID = Role.knight
+  val forsyth   = 'N'
+  val binaryInt = 3
+  val hashInt   = 5
+  val storable  = false
+}
+
+case object XiangqiElephant extends Role {
+  val fairySFID = Role.elephant
+  val forsyth   = 'B'
+  val binaryInt = 4
+  val hashInt   = 4
+  val storable  = false
+}
+
+case object XiangqiRook extends PromotableRole {
+  val fairySFID = Role.rook
+  val forsyth   = 'R'
+  val binaryInt = 5
+  val hashInt   = 3
+  val storable  = false
+}
+
+case object XiangqiAdvisor extends Role {
+  //probably wrong. Wikipedia says the advisor can be named:
+  //guards or ministers, and less commonly as assistants, mandarins, or warriors
+  //or "scholar", "gentleman", "officer", "guardian", or "official"
+  //none of which are in the fairysf list!
+  val fairySFID = Role.archbishop
+  val forsyth   = 'A'
+  val binaryInt = 6
+  val hashInt   = 2
+  val storable  = false
+}
+
+case object XiangqiKing extends Role {
+  val fairySFID = Role.king
+  val forsyth   = 'K'
+  val binaryInt = 7
+  val hashInt   = 1
+  val storable  = false
 }
 
 object Role {
@@ -131,9 +211,25 @@ object Role {
   val wazir          = FairySFRoleID(34)
 
   val all: List[Role] =
-    List(ShogiPawn, ShogiLance, ShogiKnight, ShogiSilver, ShogiGold, ShogiBishop, ShogiRook, ShogiKing)
+    List(
+      ShogiPawn,
+      ShogiLance,
+      ShogiKnight,
+      ShogiSilver,
+      ShogiGold,
+      ShogiBishop,
+      ShogiRook,
+      ShogiKing,
+      XiangqiSoldier,
+      XiangqiAdvisor,
+      XiangqiElephant,
+      XiangqiHorse,
+      XiangqiCannon,
+      XiangqiRook,
+      XiangqiKing
+    )
   val allPromotable: List[PromotableRole] =
-    List(ShogiPawn, ShogiLance, ShogiKnight, ShogiSilver, ShogiBishop, ShogiRook)
+    List(ShogiGold, ShogiHorse, ShogiDragon)
   val allByForsyth: Map[Char, Role] = all map { r =>
     (r.forsyth, r)
   } toMap
@@ -197,14 +293,14 @@ object Role {
 
   def valueOf(r: Role): Option[Int] =
     // Taken from: https://en.wikipedia.org/wiki/Shogi_strategy
-    // TODO: It's incomplete because none of the promoted pieces
-    //       are currently represented.
+    // Merged with: https://github.com/WandererXII/lishogi/blob/master/modules/shogi/src/main/scala/Role.scala
     r match {
       case ShogiPawn                => Option(1)
       case ShogiLance | ShogiKnight => Option(3)
       case ShogiSilver | ShogiGold  => Option(5)
       case ShogiBishop              => Option(8)
-      case ShogiRook                => Option(9)
-      case _                        => None
+      case ShogiRook | ShogiHorse   => Option(10)
+      case ShogiDragon              => Option(12)
+      case ShogiKing                => None
     }
 }

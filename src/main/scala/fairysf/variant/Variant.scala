@@ -102,11 +102,9 @@ abstract class Variant private[variant] (
 
   def valid(board: Board, strict: Boolean) = Color.all forall validSide(board, strict)
 
-  val roles: List[Role] =
-    List(ShogiPawn, ShogiLance, ShogiKnight, ShogiSilver, ShogiGold, ShogiBishop, ShogiRook, ShogiKing)
+  val roles: List[Role] = Role.all
 
-  val promotableRoles: List[PromotableRole] =
-    List(ShogiPawn, ShogiLance, ShogiKnight, ShogiSilver, ShogiBishop, ShogiRook)
+  val promotableRoles: List[PromotableRole] = Role.allPromotable
 
   lazy val rolesByPgn: Map[Char, Role] = roles
     .map { r =>
