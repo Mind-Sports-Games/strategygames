@@ -44,8 +44,9 @@ abstract class Variant private[variant] (
   def perfId: Int
   def perfIcon: Char
 
-  FairyStockfish.init()
-  def initialFen: FEN   = FEN(
+  //FairyStockfish.init()
+  def initialFen: FEN   = //FEN("lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL[-] w 0 1")
+  FEN(
     FairyStockfish.initialFen(fairysfName.name)
   )
   def startColor: Color = White

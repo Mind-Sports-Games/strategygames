@@ -9,7 +9,7 @@ import strategygames.fairysf._
 import strategygames.fairysf.format.Uci
 import strategygames.{ Color, GameFamily }
 
-import org.playstrategy.FairyStockfish
+//import org.playstrategy.FairyStockfish
 
 case object Shogi
     extends Variant(
@@ -24,7 +24,7 @@ case object Shogi
     ) {
   import Variant._
 
-  FairyStockfish.init()
+  //FairyStockfish.init()
   
   override def gameFamily: GameFamily = GameFamily.Shogi()
 
@@ -35,6 +35,6 @@ case object Shogi
 
   override def baseVariant: Boolean = true
 
-  val pieces: Map[Pos, Piece] = Map.empty()//TODO: ???
+  val pieces: Map[Pos, Piece] = Map.empty//TODO: ???
 
 }

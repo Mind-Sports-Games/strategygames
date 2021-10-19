@@ -3,7 +3,7 @@ package variant
 
 import strategygames.GameFamily
 import strategygames.fairysf.format.FEN
-import org.playstrategy.FairyStockfish
+//import org.playstrategy.FairyStockfish
 
 import cats.implicits._
 
@@ -20,7 +20,7 @@ case object Xiangqi
     ) {
   import Variant._
 
-  FairyStockfish.init()
+  //FairyStockfish.init()
 
   override def gameFamily: GameFamily = GameFamily.Xiangqi()
 
@@ -29,7 +29,7 @@ case object Xiangqi
 
   override def baseVariant: Boolean = true
 
-  val pieces: Map[Pos, Piece] = Map.empty() //TODO: ???
+  val pieces: Map[Pos, Piece] = Map.empty //TODO: ???
   //override val initialFen = FEN(
   //  FairyStockfish.initialFen(fairysfName.name)
   //)
