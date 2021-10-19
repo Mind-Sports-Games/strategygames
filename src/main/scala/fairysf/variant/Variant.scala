@@ -8,6 +8,8 @@ import strategygames.fairysf._
 import strategygames.fairysf.format.FEN
 import strategygames.{ Color, GameFamily }
 
+import org.playstrategy.FairyStockfish
+
 case class FairySFName(val name: String)
 
 // Correctness depends on singletons for each variant ID
@@ -42,19 +44,22 @@ abstract class Variant private[variant] (
   def perfId: Int
   def perfIcon: Char
 
-  def initialFen: FEN   = format.Forsyth.initial
+  FairyStockfish.init()
+  def initialFen: FEN   = FEN(
+    FairyStockfish.initialFen(fairysfName.name)
+  )
   def startColor: Color = White
 
-  def isValidPromotion(promotion: Option[PromotableRole]) = ???
+  def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false //TODO: ???
 
-  def validMoves(situation: Situation): Map[Pos, List[Move]] = ???
+  def validMoves(situation: Situation): Map[Pos, List[Move]] = Map.empty() //TODO: ???
 
   def move(
       situation: Situation,
       from: Pos,
       to: Pos,
       promotion: Option[PromotableRole]
-  ): Validated[String, Move] = ???
+  ): Validated[String, Move] = Validated.invalid("Not implemented") //TODO: ???
 
   def drop(situation: Situation, role: Role, pos: Pos): Validated[String, Drop] =
     Validated.invalid(s"$this variant cannot drop $situation $role $pos")
@@ -92,15 +97,13 @@ abstract class Variant private[variant] (
 
   def fiftyMoves(history: History): Boolean = history.halfMoveClock >= 100
 
-  def isIrreversible(move: Move): Boolean = ???
+  def isIrreversible(move: Move): Boolean = false //TODO: ???
 
   /** Once a move has been decided upon from the available legal moves, the board is finalized
     */
   @nowarn def finalizeBoard(board: Board, uci: format.Uci, captured: Option[Piece]): Board = board
 
-  protected def validSide(board: Board, strict: Boolean)(color: Color) = ???
-
-  def valid(board: Board, strict: Boolean) = Color.all forall validSide(board, strict)
+  def valid(board: Board, strict: Boolean): Boolean = true //TODO: ???
 
   val roles: List[Role] = Role.all
 
@@ -132,7 +135,7 @@ abstract class Variant private[variant] (
 
 object Variant {
 
-  val all = List(
+  val all: List[Variant] = List(
     Shogi,
     Xiangqi
   )

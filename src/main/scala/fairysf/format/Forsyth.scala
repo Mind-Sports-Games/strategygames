@@ -20,7 +20,7 @@ object Forsyth {
   val initial = FEN("lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL[-] w 0 1")
 
   //stub
-  def <<@(variant: Variant, fen: FEN): Option[Situation] = ???
+  def <<@(variant: Variant, fen: FEN): Option[Situation] = None //TODO: ???
 
   def <<(fen: FEN): Option[Situation] = <<@(Variant.default, fen)
 
@@ -29,7 +29,7 @@ object Forsyth {
     def turns = fullMoveNumber * 2 - situation.color.fold(2, 1)
   }
 
-  def <<<@(variant: Variant, fen: FEN): Option[SituationPlus] = ???
+  def <<<@(variant: Variant, fen: FEN): Option[SituationPlus] = None //TODO: ???
 
   def <<<(fen: FEN): Option[SituationPlus] = <<<@(Variant.default, fen)
 
@@ -40,9 +40,9 @@ object Forsyth {
       case SituationPlus(situation, _) => >>(Game(situation, turns = parsed.turns))
     }
 
-  def >>(game: Game): FEN = ???
+  def >>(game: Game): FEN = FEN("") //TODO: ???
 
-  def exportBoard(board: Board): String =  ???
+  def exportBoard(board: Board): String = "" //TODO: ???
 
   def boardAndColor(situation: Situation): String =
     boardAndColor(situation.board, situation.color)

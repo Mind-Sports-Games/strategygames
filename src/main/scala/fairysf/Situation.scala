@@ -35,16 +35,16 @@ case class Situation(board: Board, color: Color) {
 
   private def variantEnd = board.variant specialEnd this
 
-  def end: Boolean = ???
+  def end: Boolean = false //TODO: ???
 
   def winner: Option[Color] = board.variant.winner(this)
 
   def playable(strict: Boolean): Boolean =
     (board valid strict) && !end && !copy(color = !color).check
 
-  lazy val status: Option[Status] = ???
+  lazy val status: Option[Status] = None //TODO: ???
 
-  def opponentHasInsufficientMaterial: Boolean = ???
+  def opponentHasInsufficientMaterial: Boolean = false //TODO: ???
 
   def move(from: Pos, to: Pos, promotion: Option[PromotableRole]): Validated[String, Move] =
     board.variant.move(this, from, to, promotion)

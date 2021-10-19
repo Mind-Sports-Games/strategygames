@@ -20,6 +20,8 @@ case object Xiangqi
     ) {
   import Variant._
 
+  FairyStockfish.init()
+
   override def gameFamily: GameFamily = GameFamily.Xiangqi()
 
   def perfIcon: Char = 't'
@@ -27,10 +29,10 @@ case object Xiangqi
 
   override def baseVariant: Boolean = true
 
-  val pieces: Map[Pos, Piece] = ???
-  override val initialFen = FEN(
-    FairyStockfish.initialFen(fairysfName.name)
-  )
+  val pieces: Map[Pos, Piece] = Map.empty() //TODO: ???
+  //override val initialFen = FEN(
+  //  FairyStockfish.initialFen(fairysfName.name)
+  //)
   // FEN("rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C2C4/9/RNBAKABNR b - - 1 1")
 
 }

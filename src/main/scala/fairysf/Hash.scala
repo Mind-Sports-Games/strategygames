@@ -61,11 +61,11 @@ object Hash {
     val board = situation.board
     val hturn = situation.color.fold(table.whiteTurnMask, 0L)
 
-    val hactors = ???
+    val hactors: Long = 0L //TODO: ???
 
-    val hcastling = ???
+    val hcastling: Long = 0L //TODO: ???
 
-    val hep = ???
+    val hep: Long = 0L //TODO: ???
 
     // Hash in special three-check data.
     val hchecks = board.variant match {
