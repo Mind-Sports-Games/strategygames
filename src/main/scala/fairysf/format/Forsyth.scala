@@ -42,7 +42,32 @@ object Forsyth {
 
   def >>(game: Game): FEN = FEN("") //TODO: ???
 
-  def exportBoard(board: Board): String = "" //TODO: ???
+  //TODO: might need to update this
+  def exportBoard(board: Board): String = {
+    val fen   = new scala.collection.mutable.StringBuilder(70)
+    var empty = 0
+    for (y <- Rank.allReversed) {
+      empty = 0
+      for (x <- File.all) {
+        board(x, y) match {
+          case None => empty = empty + 1
+          case Some(piece) =>
+            if (empty == 0) fen append piece.forsyth.toString
+            else {
+              fen append (empty.toString + piece.forsyth)
+              empty = 0
+            }
+            if (board.pocketData.fold(false)(_.promoted.contains(Pos(x, y))))
+              fen append '~'
+        }
+      }
+      if (empty > 0) fen append empty
+      if (y > Rank.First) fen append '/'
+    }
+    fen.toString
+  }
+
+  def exportBoardFen(board: Board): FEN = FEN(exportBoard(board))
 
   def boardAndColor(situation: Situation): String =
     boardAndColor(situation.board, situation.color)

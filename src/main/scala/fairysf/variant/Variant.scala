@@ -5,7 +5,7 @@ import cats.syntax.option._
 import scala.annotation.nowarn
 
 import strategygames.fairysf._
-import strategygames.fairysf.format.FEN
+import strategygames.fairysf.format.{ FEN, Forsyth }
 import strategygames.{ Color, GameFamily }
 
 import org.playstrategy.FairyStockfish
@@ -53,7 +53,54 @@ abstract class Variant private[variant] (
 
   def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false //TODO: ???
 
-  def validMoves(situation: Situation): Map[Pos, List[Move]] = Map.empty() //TODO: ???
+  def validMoves(situation: Situation): Map[Pos, List[Move]] = {
+    val currentFen = Forsyth.exportBoard(situation.board)
+    val fsMoves = FairyStockfish.getLegalMoves(
+      fairysfName.name,
+      currentFen,
+      new FairyStockfish.VectorOfStrings()
+    )
+    val uciMoves = List.range(0, fsMoves.size()).map(i => fsMoves.get(i).getString().toUpperCase)
+    uciMoves.map(
+      uciMove => (uciMove.slice(0,2), uciMove.slice(2,4))
+    ).map{
+      case (orig, dest) => (Pos.fromKey(orig), Pos.fromKey(dest))
+    }.map{
+      case (Some(orig), Some(dest)) => (orig, Move(
+        piece = situation.board.pieces(orig),
+        orig = orig,
+        dest = dest,
+        situationBefore = situation,
+        after = situation.board.copy(
+          pieces = convertPieceMap(FairyStockfish.piecesOnBoard(
+            fairysfName.name,
+            FairyStockfish.getFEN(
+              fairysfName.name,
+              currentFen,
+              new FairyStockfish.VectorOfStrings(s"${orig.key}${dest.key}".toLowerCase)
+            )
+          ))
+        ),
+        capture = None,
+        promotion = None,
+        castle = None,
+        enpassant = false
+      ))
+    }.groupBy(_._1).map { case (k,v) => (k,v.map(_._2))}
+  }
+
+  private def convertPieceMap(fsPieceMap: FairyStockfish.PieceMap): PieceMap = {
+    var first = fsPieceMap.begin()
+    var pieceMap = scala.collection.mutable.Map[Pos, Piece]()
+    while(!first.equals(fsPieceMap.end())) {
+      pieceMap(Pos.fromKey(first.first().getString().toUpperCase).get) = Piece(
+        Color.all(first.second().color()),
+        Role.allByFairySFID(first.second().pieceInfo().id)
+      )
+      first = first.increment()
+    }
+    pieceMap.toMap
+  }
 
   def move(
       situation: Situation,

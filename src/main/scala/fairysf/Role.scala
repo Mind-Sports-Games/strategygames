@@ -257,6 +257,9 @@ object Role {
     allPromotable map { r =>
       (r.pgn, r)
     } toMap
+  val allByFairySFID: Map[Int, Role] = all map { r =>
+    (r.fairySFID.id, r)
+  } toMap
 
   def forsyth(c: Char): Option[Role] = allByForsyth get c
 
