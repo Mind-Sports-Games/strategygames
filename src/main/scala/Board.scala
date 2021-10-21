@@ -103,7 +103,8 @@ object Board {
   case class FairySF(b: fairysf.Board) extends Board(
     b.pieces.map{case(pos, piece) => (Pos.FairySF(pos), Piece.FairySF(piece))},
     History.FairySF(b.history),
-    Variant.FairySF(b.variant)
+    Variant.FairySF(b.variant),
+    b.pocketData.map(PocketData.FairySF)
   ) {
 
     def withHistory(h: History): Board = h match {

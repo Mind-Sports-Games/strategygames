@@ -40,13 +40,13 @@ case class Board(
 object Board {
 
   def apply(pieces: Iterable[(Pos, Piece)], variant: Variant): Board =
-    Board(pieces.toMap, History(), variant, variantCrazyData(variant))
+    Board(pieces.toMap, History(), variant, variantPocketData(variant))
 
   def init(variant: Variant): Board = Board(variant.pieces, variant)
 
   //def empty(variant: Variant): Board = Board(Nil, variant)
 
-  private def variantCrazyData(variant: Variant) =
+  private def variantPocketData(variant: Variant) =
     (variant.dropsVariant) option PocketData.init
 
 }
