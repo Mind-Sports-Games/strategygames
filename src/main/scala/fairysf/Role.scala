@@ -278,10 +278,11 @@ object Role {
 
   def storable: List[Role] = all.filter(_.storable)
 
+  //only used in lila by insight module
   def pgnMoveToRole(c: Char): Role =
     allByPgn.get(c) match {
       case Some(r) => r
-      case None    => ShogiPawn //TODO: ??? //this is probably wrong,
+      case None    => sys.error("Could not find Role from pgnMove")
     }
 
   def javaSymbolToRole(s: String): Role =

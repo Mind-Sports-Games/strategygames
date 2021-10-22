@@ -40,7 +40,7 @@ object Forsyth {
       case SituationPlus(situation, _) => >>(Game(situation, turns = parsed.turns))
     }
 
-  def >>(game: Game): FEN = FEN("") //TODO: ???
+  def >>(game: Game): FEN = exportBoardFen(game.situation.board) //TODO: ???
 
   //TODO: might need to update this
   def exportBoard(board: Board): String = {

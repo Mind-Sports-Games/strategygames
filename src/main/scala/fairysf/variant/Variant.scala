@@ -51,7 +51,9 @@ abstract class Variant private[variant] (
   )
   def startColor: Color = White
 
-  def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false //TODO: ???
+  //looks like this is only to allow King to be a valid promotion piece
+  //in just atomic, so can leave as true for now
+  def isValidPromotion(promotion: Option[PromotableRole]): Boolean = true
 
   def validMoves(situation: Situation): Map[Pos, List[Move]] = {
     val currentFen = Forsyth.exportBoard(situation.board)
@@ -102,12 +104,25 @@ abstract class Variant private[variant] (
     pieceMap.toMap
   }
 
+  //TODO: test, but think this is right as its based off chess without actor check
+  //Consider drops might get passed in through here
   def move(
       situation: Situation,
       from: Pos,
       to: Pos,
       promotion: Option[PromotableRole]
-  ): Validated[String, Move] = Validated.invalid("Not implemented") //TODO: ???
+  ): Validated[String, Move] = {
+    // Find the move in the variant specific list of valid moves
+    def findMove(from: Pos, to: Pos) = situation.moves get from flatMap (_.find(_.dest == to))
+
+    for {
+      m1 <- findMove(from, to) toValid "Piece on " + from + " cannot move to " + to
+      m2 <- m1 withPromotion promotion toValid "Piece on " + from + " cannot promote to " + promotion
+      m3 <-
+        if (isValidPromotion(promotion)) Validated.valid(m2)
+        else Validated.invalid("Cannot promote to " + promotion + " in this game mode")
+    } yield m3
+  }
 
   def drop(situation: Situation, role: Role, pos: Pos): Validated[String, Drop] =
     Validated.invalid(s"$this variant cannot drop $situation $role $pos")

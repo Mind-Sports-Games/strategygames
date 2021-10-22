@@ -5,7 +5,9 @@ import strategygames.{ Color, Status }
 import cats.data.Validated
 import cats.implicits._
 
-import strategygames.fairysf.format.Uci
+import strategygames.fairysf.format.{ Forsyth, Uci }
+
+import org.playstrategy.FairyStockfish
 
 case class Situation(board: Board, color: Color) {
 
@@ -44,7 +46,18 @@ case class Situation(board: Board, color: Color) {
 
   lazy val status: Option[Status] = None //TODO: ???
 
-  def opponentHasInsufficientMaterial: Boolean = false //TODO: ???
+  //TODO: test White/Black map is correct
+  def opponentHasInsufficientMaterial: Boolean = {
+    val insufficientMaterial = FairyStockfish.hasInsufficientMaterial(
+      board.variant.fairysfName.name,
+      Forsyth.exportBoard(board),
+      new FairyStockfish.VectorOfStrings()
+    ) //TODO: ???
+    color match {
+      case White => insufficientMaterial.get0()
+      case Black => insufficientMaterial.get1()
+    }
+  }
 
   def move(from: Pos, to: Pos, promotion: Option[PromotableRole]): Validated[String, Move] =
     board.variant.move(this, from, to, promotion)
