@@ -7,11 +7,11 @@ import org.specs2.mutable.Specification
 
 class FairyStockfishTest extends Specification with ValidatedMatchers {
 
+  FairyStockfish.init()
   val emptyMoves = new FairyStockfish.VectorOfStrings()
 
   "Shogi initial fen" should {
     "be expected string" in {
-      FairyStockfish.init()
       format.FEN(
         "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL[-] w 0 1"
       ) must_== variant.Shogi.initialFen
@@ -21,7 +21,6 @@ class FairyStockfishTest extends Specification with ValidatedMatchers {
 
   "Shogi initial fen" should {
     "be valid" in {
-      FairyStockfish.init()
       FairyStockfish.validateFEN(
         variant.Shogi.fairysfName.name,
         variant.Shogi.initialFen.value
@@ -31,7 +30,6 @@ class FairyStockfishTest extends Specification with ValidatedMatchers {
 
   "Shogi initial fen minus middle rank" should {
     "be invalid" in {
-      FairyStockfish.init()
       FairyStockfish.validateFEN(
         variant.Shogi.fairysfName.name,
         "lnsgkgsnl/1r5b1/ppppppppp/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL[-] w 0 1"
@@ -41,7 +39,6 @@ class FairyStockfishTest extends Specification with ValidatedMatchers {
 
   "Random string" should {
     "be invalid fen" in {
-      FairyStockfish.init()
       FairyStockfish.validateFEN(
         variant.Shogi.fairysfName.name,
         "I'm a Shogi FEN! (not)"
@@ -51,7 +48,6 @@ class FairyStockfishTest extends Specification with ValidatedMatchers {
 
   "Shogi initial FEN" should {
     "not be game end" in {
-      FairyStockfish.init()
       FairyStockfish.isImmediateGameEnd(
         variant.Shogi.fairysfName.name,
         variant.Shogi.initialFen.value,
