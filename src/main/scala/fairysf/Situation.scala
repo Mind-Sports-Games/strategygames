@@ -37,22 +37,27 @@ case class Situation(board: Board, color: Color) {
 
   private def variantEnd = board.variant specialEnd this
 
-  def end: Boolean = false //TODO: ???
+  //TODO: ???
+  def end: Boolean = FairyStockfish.isImmediateGameEnd(
+    board.variant.fairysfName.name,
+    Forsyth.exportBoard(board),
+    new FairyStockfish.VectorOfStrings()
+  ).get0()
 
   def winner: Option[Color] = board.variant.winner(this)
 
   def playable(strict: Boolean): Boolean =
     (board valid strict) && !end && !copy(color = !color).check
 
-  lazy val status: Option[Status] = None //TODO: ???
+  val status: Option[Status] = None //TODO: ???
 
-  //TODO: test White/Black map is correct
+  //TODO: ??? test White/Black map is correct
   def opponentHasInsufficientMaterial: Boolean = {
     val insufficientMaterial = FairyStockfish.hasInsufficientMaterial(
       board.variant.fairysfName.name,
       Forsyth.exportBoard(board),
       new FairyStockfish.VectorOfStrings()
-    ) //TODO: ???
+    )
     color match {
       case White => insufficientMaterial.get0()
       case Black => insufficientMaterial.get1()

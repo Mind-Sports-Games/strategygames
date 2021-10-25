@@ -166,7 +166,11 @@ abstract class Variant private[variant] (
     */
   @nowarn def finalizeBoard(board: Board, uci: format.Uci, captured: Option[Piece]): Board = board
 
-  def valid(board: Board, strict: Boolean): Boolean = true //TODO: ???
+  //TODO: ???
+  def valid(board: Board, strict: Boolean): Boolean = FairyStockfish.validateFEN(
+    fairysfName.name,
+    Forsyth.exportBoard(board)
+  )
 
   val roles: List[Role] = Role.all
 
