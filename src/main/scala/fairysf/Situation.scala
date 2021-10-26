@@ -7,8 +7,6 @@ import cats.implicits._
 
 import strategygames.fairysf.format.{ Forsyth, Uci }
 
-import org.playstrategy.FairyStockfish
-
 case class Situation(board: Board, color: Color) {
 
   lazy val moves: Map[Pos, List[Move]] = board.variant.validMoves(this)
@@ -38,11 +36,7 @@ case class Situation(board: Board, color: Color) {
   private def variantEnd = board.variant specialEnd this
 
   //TODO: ???
-  def end: Boolean = FairyStockfish.isImmediateGameEnd(
-    board.variant.fairysfName.name,
-    Forsyth.exportBoard(board),
-    new FairyStockfish.VectorOfStrings()
-  ).get0()
+  def end: Boolean = Api.gameEnd(board.variant.fairysfName.name, Forsyth.exportBoard(board))
 
   def winner: Option[Color] = board.variant.winner(this)
 
@@ -53,14 +47,13 @@ case class Situation(board: Board, color: Color) {
 
   //TODO: ??? test White/Black map is correct
   def opponentHasInsufficientMaterial: Boolean = {
-    val insufficientMaterial = FairyStockfish.hasInsufficientMaterial(
+    val insufficientMaterial = Api.insufficientMaterial(
       board.variant.fairysfName.name,
-      Forsyth.exportBoard(board),
-      new FairyStockfish.VectorOfStrings()
+      Forsyth.exportBoard(board)
     )
     color match {
-      case White => insufficientMaterial.get0()
-      case Black => insufficientMaterial.get1()
+      case White => insufficientMaterial._1
+      case Black => insufficientMaterial._2
     }
   }
 

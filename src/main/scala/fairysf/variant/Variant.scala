@@ -8,8 +8,6 @@ import strategygames.fairysf._
 import strategygames.fairysf.format.{ FEN, Forsyth }
 import strategygames.{ Color, GameFamily }
 
-import org.playstrategy.FairyStockfish
-
 case class FairySFName(val name: String)
 
 // Correctness depends on singletons for each variant ID
@@ -44,11 +42,8 @@ abstract class Variant private[variant] (
   def perfId: Int
   def perfIcon: Char
 
-  //FairyStockfish.init()
-  def initialFen: FEN   = //FEN("lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL[-] w 0 1")
-  FEN(
-    FairyStockfish.initialFen(fairysfName.name)
-  )
+  def initialFen: FEN = Api.initialFen(fairysfName.name)
+
   def startColor: Color = White
 
   //looks like this is only to allow King to be a valid promotion piece
@@ -57,16 +52,14 @@ abstract class Variant private[variant] (
 
   def validMoves(situation: Situation): Map[Pos, List[Move]] = {
     val currentFen = Forsyth.exportBoard(situation.board)
-    val fsMoves = FairyStockfish.getLegalMoves(
+    val uciMoves = Api.legalMoves(
       fairysfName.name,
       currentFen,
-      new FairyStockfish.VectorOfStrings()
     )
-    val uciMoves = List.range(0, fsMoves.size()).map(i => fsMoves.get(i).getString().toUpperCase)
     uciMoves.map(
       uciMove => (uciMove.slice(0,2), uciMove.slice(2,4))
     ).map{
-      case (orig, dest) => (Pos.fromKey(orig), Pos.fromKey(dest))
+      case (orig, dest) => (Pos.fromKey(orig.toUpperCase), Pos.fromKey(dest.toUpperCase))
     }.map{
       case (Some(orig), Some(dest)) => (orig, Move(
         piece = situation.board.pieces(orig),
@@ -74,34 +67,22 @@ abstract class Variant private[variant] (
         dest = dest,
         situationBefore = situation,
         after = situation.board.copy(
-          pieces = convertPieceMap(FairyStockfish.piecesOnBoard(
+          pieces = Api.pieceMapFromFen(
             fairysfName.name,
-            FairyStockfish.getFEN(
+            Api.fenFromMoves(
               fairysfName.name,
               currentFen,
-              new FairyStockfish.VectorOfStrings(s"${orig.key}${dest.key}".toLowerCase)
-            )
-          ))
+              List(s"${orig.key}${dest.key}".toLowerCase).some
+            ).value
+          )
         ),
         capture = None,
         promotion = None,
         castle = None,
         enpassant = false
       ))
-    }.groupBy(_._1).map { case (k,v) => (k,v.map(_._2))}
-  }
-
-  private def convertPieceMap(fsPieceMap: FairyStockfish.PieceMap): PieceMap = {
-    var first = fsPieceMap.begin()
-    var pieceMap = scala.collection.mutable.Map[Pos, Piece]()
-    while(!first.equals(fsPieceMap.end())) {
-      pieceMap(Pos.fromKey(first.first().getString().toUpperCase).get) = Piece(
-        Color.all(first.second().color()),
-        Role.allByFairySFID(first.second().pieceInfo().id)
-      )
-      first = first.increment()
-    }
-    pieceMap.toMap
+      case _ => sys.error("Invalid position from uci")
+    }.groupBy(_._1).map { case (k,v) => (k,v.toList.map(_._2))}
   }
 
   //TODO: test, but think this is right as its based off chess without actor check
@@ -167,10 +148,8 @@ abstract class Variant private[variant] (
   @nowarn def finalizeBoard(board: Board, uci: format.Uci, captured: Option[Piece]): Board = board
 
   //TODO: ???
-  def valid(board: Board, strict: Boolean): Boolean = FairyStockfish.validateFEN(
-    fairysfName.name,
-    Forsyth.exportBoard(board)
-  )
+  def valid(board: Board, strict: Boolean): Boolean =
+    Api.validateFEN(fairysfName.name, Forsyth.exportBoard(board))
 
   val roles: List[Role] = Role.all
 
