@@ -1,6 +1,5 @@
 package strategygames
 import ornicar.scalalib
-import org.playstrategy.FairyStockfish;
 
 package object fairysf extends scalalib.Common with scalalib.OrnicarOption with scalalib.OrnicarBoolean {
 
@@ -15,8 +14,5 @@ package object fairysf extends scalalib.Common with scalalib.OrnicarOption with 
   type PositionHash = Array[Byte]
 
   type MoveOrDrop = Either[Move, Drop]
-
-  // This needs to be called at least once, before everything else.
-  FairyStockfish.init();
 
 }
