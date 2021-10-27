@@ -10,6 +10,7 @@ sealed trait Role {
   lazy val forsythUpper: Char = forsyth.toUpper
   lazy val pgn: Char          = forsythUpper
   lazy val name               = toString.toLowerCase
+  lazy val groundName         = s"${forsyth}-piece"
   val binaryInt: Int
   val hashInt: Int
   val storable: Boolean
@@ -238,6 +239,9 @@ object Role {
   } toMap
   val allByName: Map[String, Role] = all map { r =>
     (r.name, r)
+  } toMap
+  val allByGroundName: Map[String, Role] = all map { r =>
+    (r.groundName, r)
   } toMap
   val allByBinaryInt: Map[Int, Role] = all map { r =>
     (r.binaryInt, r)

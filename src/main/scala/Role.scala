@@ -5,6 +5,7 @@ sealed trait Role {
   //draughts.Role.pdn will be referred to by pgn from this point
   val pgn: Char
   val name: String
+  val groundName: String
   val binaryInt: Int
   val hashInt: Int
   val storable: Boolean
@@ -27,6 +28,7 @@ object Role {
     val binaryInt = r.binaryInt
     val hashInt = r.hashInt
     val name = r.name
+    val groundName = r.groundName
     val storable = r.storable
     override def toString() = r.name
   }
@@ -37,6 +39,7 @@ object Role {
     val binaryInt = r.binaryInt
     val hashInt = r.hashInt
     val name = r.name
+    val groundName = r.name
     val storable = false
     override def toString() = r.name
   }
@@ -47,6 +50,7 @@ object Role {
     val binaryInt = r.binaryInt
     val hashInt = r.hashInt
     val name = r.name
+    val groundName = r.name
     val storable = r.storable
     override def toString() = r.name
   }
@@ -57,6 +61,7 @@ object Role {
     val binaryInt = r.binaryInt
     val hashInt = r.hashInt
     val name = r.name
+    val groundName = r.groundName
     val storable = r.storable
     override def toString() = r.name
     def toChess = r
@@ -70,6 +75,7 @@ object Role {
     val binaryInt = r.binaryInt
     val hashInt = r.hashInt
     val name = r.name
+    val groundName = r.name
     val storable = false
     override def toString() = r.name
     def toDraughts = r
@@ -83,6 +89,7 @@ object Role {
     val binaryInt = r.binaryInt
     val hashInt = r.hashInt
     val name = r.name
+    val groundName = r.name
     val storable = r.storable
     override def toString() = r.name
     def toDraughts: draughts.PromotableRole = sys.error("Not implemented for fairysf")
@@ -121,6 +128,12 @@ object Role {
     case GameLogic.FairySF() => fairysf.Role.allByName.map{case(n, r) => (n, FairySFRole(r))}
   }
 
+  def allByGroundName(lib: GameLogic): Map[String, Role] = lib match {
+    case GameLogic.Draughts() => draughts.Role.allByName.map{case(n, r) => (n, DraughtsRole(r))}
+    case GameLogic.Chess() => chess.Role.allByGroundName.map{case(n, r) => (n, ChessRole(r))}
+    case GameLogic.FairySF() => fairysf.Role.allByGroundName.map{case(n, r) => (n, FairySFRole(r))}
+  }
+
   def allPromotableByName(lib: GameLogic): Map[String, PromotableRole] = lib match {
     case GameLogic.Draughts() => draughts.Role.allPromotableByName.map{case(n, r) => (n, DraughtsPromotableRole(r))}
     case GameLogic.Chess() => chess.Role.allPromotableByName.map{case(n, r) => (n, ChessPromotableRole(r))}
@@ -152,6 +165,12 @@ object Role {
   }
 
   def promotable(lib: GameLogic, name: String): Option[PromotableRole] = lib match {
+    case GameLogic.Draughts() => draughts.Role.promotable(name).map(DraughtsPromotableRole)
+    case GameLogic.Chess()    => chess.Role.promotable(name).map(ChessPromotableRole)
+    case GameLogic.FairySF()  => fairysf.Role.promotable(name).map(FairySFPromotableRole)
+  }
+
+  def promotable(lib: GameLogic, name: Option[String]): Option[PromotableRole] = lib match {
     case GameLogic.Draughts() => draughts.Role.promotable(name).map(DraughtsPromotableRole)
     case GameLogic.Chess()    => chess.Role.promotable(name).map(ChessPromotableRole)
     case GameLogic.FairySF()  => fairysf.Role.promotable(name).map(FairySFPromotableRole)
