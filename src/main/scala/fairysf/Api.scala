@@ -77,7 +77,10 @@ object Api {
     )
 
   def gameEnd(variantName: String, fen: String, movesList: Option[List[String]] = None): Boolean =
-    FairyStockfish.isImmediateGameEnd(variantName, fen, movesList).get0()
+    legalMoves(variantName, fen, movesList).size == 0
+
+  def optionalGameEnd(variantName: String, fen: String, movesList: Option[List[String]] = None): Boolean =
+    FairyStockfish.isOptionalGameEnd(variantName, fen, movesList).get0()
 
   def insufficientMaterial(variantName: String, fen: String, movesList: Option[List[String]] = None): (Boolean, Boolean) = {
     val im = FairyStockfish.hasInsufficientMaterial(variantName, fen, movesList)

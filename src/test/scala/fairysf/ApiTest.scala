@@ -18,8 +18,20 @@ class FairyStockfishApiTest extends Specification with ValidatedMatchers {
         variant.Shogi.initialFen.value
       ) must_== ((false, false))
     }
+    "have legal moves" in {
+      Api.legalMoves(
+        variant.Shogi.fairysfName.name,
+        variant.Shogi.initialFen.value
+      ).size must_!= 0L
+    }
     "not be game end" in {
       Api.gameEnd(
+        variant.Shogi.fairysfName.name,
+        variant.Shogi.initialFen.value
+      ) must_== false
+    }
+    "not be optional game end" in {
+      Api.optionalGameEnd(
         variant.Shogi.fairysfName.name,
         variant.Shogi.initialFen.value
       ) must_== false
@@ -58,6 +70,40 @@ class FairyStockfishApiTest extends Specification with ValidatedMatchers {
         "chess",
         "r1bqkbnr/1ppppQ1p/p1n3p1/8/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 4",
       ) must_== GameResult.Checkmate()
+    }
+  }
+
+  "Chess three fold repetition" should {
+    "be optional game end" in {
+      Api.optionalGameEnd(
+        "chess",
+        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+        Some(List("b1c3", "g8f6", "c3b1", "f6g8", "b1c3", "g8f6", "c3b1", "f6g8"))
+      ) must_== true
+    }
+    "not be game end" in {
+      Api.gameEnd(
+        "chess",
+        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+        Some(List("b1c3", "g8f6", "c3b1", "f6g8", "b1c3", "g8f6", "c3b1", "f6g8"))
+      ) must_== false
+    }
+  }
+
+  "Shogi four fold repetition" should {
+    "be optional game end" in {
+      Api.optionalGameEnd(
+        variant.Shogi.fairysfName.name,
+        variant.Shogi.initialFen.value,
+        Some(List("h2i2", "b8a8", "i2h2", "a8b8", "h2i2", "b8a8", "i2h2", "a8b8", "h2i2", "b8a8", "i2h2", "a8b8"))
+      ) must_== true
+    }
+    "not be game end" in {
+      Api.gameEnd(
+        variant.Shogi.fairysfName.name,
+        variant.Shogi.initialFen.value,
+        Some(List("h2i2", "b8a8", "i2h2", "a8b8", "h2i2", "b8a8", "i2h2", "a8b8", "h2i2", "b8a8", "i2h2", "a8b8"))
+      ) must_== false
     }
   }
 
