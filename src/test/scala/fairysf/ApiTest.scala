@@ -18,6 +18,12 @@ class FairyStockfishApiTest extends Specification with ValidatedMatchers {
         variant.Shogi.initialFen.value
       ) must_== (false, false)
     }
+    "not be game end" in {
+      Api.gameEnd(
+        variant.Shogi.fairysfName.name,
+        variant.Shogi.initialFen.value
+      ) must_== false
+    }
   }
 
   "Shogi initial fen minus middle rank" should {
@@ -40,6 +46,10 @@ class FairyStockfishApiTest extends Specification with ValidatedMatchers {
 
   "Chess black Checkmate FEN" should {
     "be game end" in {
+      Api.gameEnd(
+        "chess",
+        "rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3"
+      ) must_== true
       Api.gameResult(
         "chess",
         "rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3",
@@ -55,6 +65,12 @@ class FairyStockfishApiTest extends Specification with ValidatedMatchers {
     //https://www.pychess.org/cdRztJdY?ply=74
     val checkmateFen = "l2g1g1nl/5sk2/3p1p1p1/p3p1p1p/1n2n4/P4PP1P/1P1sPK1P1/5sR1+r/L4+p1N1[GPSBBglpp] w - - 4 38"
     "be game end" in {
+      Api.gameEnd(
+        variant.Shogi.fairysfName.name,
+        checkmateFen
+      ) must_== true
+    }
+    "be checkmate" in {
       Api.gameResult(
         variant.Shogi.fairysfName.name,
         checkmateFen
@@ -77,6 +93,12 @@ class FairyStockfishApiTest extends Specification with ValidatedMatchers {
         Some(List("h3h4", "e9f8", "h4h5", "f8g8", "h5h6", "b8f8", "h6h7+"))
       ).value must_== foolsFEN
     }
+    "be game end" in {
+      Api.gameEnd(
+        variant.Shogi.fairysfName.name,
+        foolsFEN
+      ) must_== true
+    }
     "be checkmate" in {
       Api.gameResult(
         variant.Shogi.fairysfName.name,
@@ -88,6 +110,35 @@ class FairyStockfishApiTest extends Specification with ValidatedMatchers {
         variant.Shogi.fairysfName.name,
         foolsFEN,
       ).size must_== 0L
+    }
+  }
+
+  "Chess stalemate is draw" should {
+    val stalemateFEN = "5bnr/4p1pq/4Qpkr/7p/7P/4P3/PPPP1PP1/RNB1KBNR b KQ - 2 10"
+    "moves produce stalemate fen" in {
+      Api.fenFromMoves(
+        "chess",
+        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+        Some(List("e2e3", "a7a5", "d1h5", "a8a6", "h5a5", "h7h5", "a5c7", "a6h6", "h2h4", "f7f6", "c7d7", "e8f7", "d7b7", "d8d3", "b7b8", "d3h7", "b8c8", "f7g6", "c8e6"))
+      ).value must_== stalemateFEN
+    }
+    "have no legal moves" in {
+      Api.legalMoves(
+        "chess",
+        stalemateFEN,
+      ).size must_== 0L
+    }
+    "be game end" in {
+      Api.gameEnd(
+        "chess",
+        stalemateFEN
+      ) must_== true
+    }
+    "be stalemate" in {
+      Api.gameResult(
+        "chess",
+        stalemateFEN,
+      ) must_== GameResult.Draw()
     }
   }
 
@@ -105,7 +156,13 @@ class FairyStockfishApiTest extends Specification with ValidatedMatchers {
         stalemateFEN,
       ).size must_== 0L
     }
-    "be stalemate" in {
+    "be game end" in {
+      Api.gameEnd(
+        variant.Shogi.fairysfName.name,
+        stalemateFEN
+      ) must_== true
+    }
+    "be checkmate" in {
       Api.gameResult(
         variant.Shogi.fairysfName.name,
         stalemateFEN,
@@ -125,11 +182,11 @@ class FairyStockfishApiTest extends Specification with ValidatedMatchers {
 
   "Shogi king only" should {
     val insufficientMaterialFEN = "8k/9/9/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL[LNSGGSNLBRPPPPPPPPP] b - - 0 2"
-    "have insufficient material" in {
+    "never have insufficient material" in {
       Api.insufficientMaterial(
         variant.Shogi.fairysfName.name,
         insufficientMaterialFEN
-      ) must_== (false, true)
+      ) must_== (false, false)
     }
   }
 

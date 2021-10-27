@@ -31,12 +31,17 @@ case class Situation(board: Board, color: Color) {
 
   def history = board.history
 
-  def checkMate: Boolean = board.variant checkmate this
+  private def gameResult =
+    Api.gameResult(board.variant.fairysfName.name, Forsyth.exportBoard(board))
 
-  private def variantEnd = board.variant specialEnd this
+  def checkMate: Boolean = gameResult == GameResult.Checkmate()
+
+  def staleMate: Boolean = gameResult == GameResult.Draw()
+
+  private def variantEnd = gameResult == GameResult.VariantEnd()
 
   //TODO: ???
-  def end: Boolean = Api.gameEnd(board.variant.fairysfName.name, Forsyth.exportBoard(board))
+  def end: Boolean = checkMate || variantEnd
 
   def winner: Option[Color] = board.variant.winner(this)
 

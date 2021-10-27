@@ -8,12 +8,14 @@ import strategygames.fairysf.format.FEN
 sealed abstract class GameResult extends Product with Serializable
 
 object GameResult {
-  final case class Checkmate() extends GameResult
-  final case class Draw()      extends GameResult
+  final case class Checkmate()  extends GameResult
+  final case class Draw()       extends GameResult
+  final case class VariantEnd() extends GameResult
 
   def fromInt(value: Int): GameResult =
     if (value.abs == 32000) GameResult.Checkmate()
     else if (value.abs == 0) GameResult.Draw()
+    else if (value.abs == -32000) GameResult.VariantEnd()
     else sys.error("Unknown game result")
 }
 
