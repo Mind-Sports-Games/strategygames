@@ -16,7 +16,7 @@ class FairyStockfishApiTest extends Specification with ValidatedMatchers {
       Api.insufficientMaterial(
         variant.Shogi.fairysfName.name,
         variant.Shogi.initialFen.value
-      ) must_== (false, false)
+      ) must_== ((false, false))
     }
   }
 
@@ -119,7 +119,7 @@ class FairyStockfishApiTest extends Specification with ValidatedMatchers {
       Api.insufficientMaterial(
         "chess",
         insufficientMaterialFEN
-      ) must_== (false, true)
+      ) must_== ((false, true))
     }
   }
 
@@ -129,7 +129,7 @@ class FairyStockfishApiTest extends Specification with ValidatedMatchers {
       Api.insufficientMaterial(
         variant.Shogi.fairysfName.name,
         insufficientMaterialFEN
-      ) must_== (false, true)
+      ) must_== ((false, false))
     }
   }
 
