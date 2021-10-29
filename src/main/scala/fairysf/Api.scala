@@ -14,8 +14,8 @@ object GameResult {
 
   def fromInt(value: Int): GameResult =
     if (value.abs == 32000) GameResult.Checkmate()
-    else if (value.abs == 0) GameResult.Draw()
     else if (value.abs == -32000) GameResult.VariantEnd()
+    else if (value.abs == 0) GameResult.Draw()
     else sys.error("Unknown game result")
 }
 
@@ -42,14 +42,23 @@ object Api {
   }
   implicit def intoArray(vos: FairyStockfish.VectorOfStrings): Array[String] = vos.get().map(_.getString())
 
+  private def pieceFromFSPiece(piece: FairyStockfish.Piece): Piece =
+    Piece(
+      Color.all(piece.color()),
+      Role.allByFairySFID(piece.pieceInfo().id)
+    )
+
+  implicit def vectorOfPiecesToPieceArray(pieces: FairyStockfish.VectorOfPieces): Array[Piece] =
+    pieces.get().map(pieceFromFSPiece)
+
+
   implicit def convertPieceMap(fsPieceMap: FairyStockfish.PieceMap): PieceMap = {
     var first = fsPieceMap.begin()
-    var pieceMap = scala.collection.mutable.Map[Pos, Piece]()
+    val pieceMap = scala.collection.mutable.Map[Pos, Piece]()
     while(!first.equals(fsPieceMap.end())) {
-      pieceMap(Pos.fromKey(first.first().getString().toUpperCase).get) = Piece(
-        Color.all(first.second().color()),
-        Role.allByFairySFID(first.second().pieceInfo().id)
-      )
+      pieceMap(
+        Pos.fromKey(first.first().getString().toUpperCase).get
+      ) = pieceFromFSPiece(first.second())
       first = first.increment()
     }
     pieceMap.toMap
@@ -77,7 +86,10 @@ object Api {
     )
 
   def gameEnd(variantName: String, fen: String, movesList: Option[List[String]] = None): Boolean =
-    legalMoves(variantName, fen, movesList).size == 0
+    legalMoves(variantName, fen, movesList).size == 0 || insufficientMaterial(variantName, fen, movesList) == ((true, true))
+
+  //def immediateGameEnd(variantName: String, fen: String, movesList: Option[List[String]] = None): Boolean =
+  //  FairyStockfish.isImmediateGameEnd(variantName, fen, movesList).get0()
 
   def optionalGameEnd(variantName: String, fen: String, movesList: Option[List[String]] = None): Boolean =
     FairyStockfish.isOptionalGameEnd(variantName, fen, movesList).get0()
@@ -89,6 +101,9 @@ object Api {
 
   def legalMoves(variantName: String, fen: String, movesList: Option[List[String]] = None): Array[String] =
     FairyStockfish.getLegalMoves(variantName, fen, movesList)
+
+  def piecesInHand(variantName: String, fen: String): Array[Piece] =
+    FairyStockfish.piecesInHand(variantName, fen)
 
   def pieceMapFromFen(variantName: String, fen: String):PieceMap =
     FairyStockfish.piecesOnBoard(variantName, fen)

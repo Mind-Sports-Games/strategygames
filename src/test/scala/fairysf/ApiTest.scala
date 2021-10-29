@@ -128,6 +128,12 @@ class FairyStockfishApiTest extends Specification with ValidatedMatchers {
         checkmateFen
       ).size must_== 0L
     }
+    "have pieces in hand" in {
+      Api.piecesInHand(
+        variant.Shogi.fairysfName.name,
+        checkmateFen
+      ).size must_== 9L
+    }
   }
 
   "Shogi fools mate moves" should {
@@ -233,6 +239,98 @@ class FairyStockfishApiTest extends Specification with ValidatedMatchers {
         variant.Shogi.fairysfName.name,
         insufficientMaterialFEN
       ) must_== ((false, false))
+    }
+  }
+
+  "Chess white king vs black king only" should {
+    val insufficientMaterialFEN = "4k3/8/8/8/8/8/8/3K4 w KQ - 0 1"
+    "have insufficient material" in {
+      Api.insufficientMaterial(
+        "chess",
+        insufficientMaterialFEN
+      ) must_== ((true, true))
+    }
+    "be game end" in {
+      Api.gameEnd(
+        "chess",
+        insufficientMaterialFEN
+      ) must_== true
+    }
+    "be stalemate" in {
+      Api.gameResult(
+        "chess",
+        insufficientMaterialFEN
+      ) must_== GameResult.Draw()
+    }
+  }
+
+  "Chess autodraw" should {
+    //https://lichess.org/BdvgPSMd#82
+    //from src/test/scala/chess/AutodrawTest.scala
+    val moves = Some(List("e2e4", "c7c5", "g1f3", "d7d6", "d2d4", "c5d4", "f3d4", "g8f6", "b1c3", "g7g6", "c1g5", "f8g7", "f2f4", "b8c6", "f1b5", "c8d7", "d4c6", "d7c6", "b5c6", "b7c6", "e1g1", "d8b6", "g1h1", "b6b2", "d1d3", "e8g8", "a1b1", "b2a3", "b1b3", "a3c5", "c3a4", "c5a5", "a4c3", "a8b8", "f4f5", "b8b3", "a2b3", "f6g4", "c3e2", "a5c5", "h2h3", "g4f2", "f1f2", "c5f2", "f5g6", "h7g6", "g5e7", "f8e8", "e7d6", "f2f1", "h1h2", "g7e5", "d6e5", "e8e5", "d3d8", "g8g7", "d8d4", "f7f6", "e2g3", "f1f4", "d4d7", "g7h6", "d7f7", "e5g5", "f7f8", "h6h7", "f8f7", "h7h8", "f7f8", "h8h7", "f8f7", "h7h6", "f7f8", "h6h7", "f8f7", "h7h8", "f7f8", "h8h7", "f8f7", "h7h6", "f7f8", "h6h7"))
+    //"be immediate game end" in {
+    //  Api.immediateGameEnd(
+    //    "chess",
+    //    Api.initialFen("chess").value,
+    //    moves
+    //  ) must_== true
+    //}
+    "be optional game end" in {
+      Api.optionalGameEnd(
+        "chess",
+        Api.initialFen("chess").value,
+        moves
+      ) must_== true
+    }
+    "be game end" in {
+      Api.gameEnd(
+        "chess",
+        Api.initialFen("chess").value,
+        moves
+      ) must_== true
+    }
+    "be draw" in {
+      Api.gameResult(
+        "chess",
+        Api.initialFen("chess").value,
+        moves
+      ) must_== GameResult.Draw()
+    }
+  }
+
+  "King of the hill variant win" should {
+    val moves = Some(List("e2e4", "a7a6", "e1e2", "a6a5", "e2e3", "a5a4", "e3d4"))
+    "be game end" in {
+      Api.gameEnd(
+        "kingofthehill",
+        Api.initialFen("kingofthehill").value,
+        moves
+      ) must_== true
+    }
+    "be variant end" in {
+      Api.gameResult(
+        "kingofthehill",
+        Api.initialFen("kingofthehill").value,
+        moves
+      ) must_== GameResult.VariantEnd()
+    }
+  }
+
+  "Racing Kings draw" should {
+    val moves = Some(List("h2h3", "a2a3", "h3h4", "a3a4", "h4h5", "a4a5", "h5h6", "a5a6", "h6g7", "a6b7", "g7g8", "b7b8"))
+    "be game end" in {
+      Api.gameEnd(
+        "racingkings",
+        Api.initialFen("racingkings").value,
+        moves
+      ) must_== true
+    }
+    "be draw" in {
+      Api.gameResult(
+        "racingkings",
+        Api.initialFen("racingkings").value,
+        moves
+      ) must_== GameResult.Draw()
     }
   }
 
