@@ -55,9 +55,15 @@ object Api {
   implicit def convertPieceMap(fsPieceMap: FairyStockfish.PieceMap): PieceMap = {
     var first = fsPieceMap.begin()
     val pieceMap = scala.collection.mutable.Map[Pos, Piece]()
+    //while(!first.equals(fsPieceMap.end())) {
+    //  var temp = first.first().getString()
+    //  temp = first.second().pieceInfo().name().getString()
+    //  first = first.increment()
+    //}
+    //first = fsPieceMap.begin()
     while(!first.equals(fsPieceMap.end())) {
       pieceMap(
-        Pos.fromKey(first.first().getString().toUpperCase).get
+        Pos.fromKey(first.first().getString()).getOrElse(sys.error(s"Invalid Pos: ${first.first().getString()}"))
       ) = pieceFromFSPiece(first.second())
       first = first.increment()
     }
@@ -107,6 +113,5 @@ object Api {
 
   def pieceMapFromFen(variantName: String, fen: String):PieceMap =
     FairyStockfish.piecesOnBoard(variantName, fen)
-
 
 }

@@ -14,6 +14,7 @@ sealed trait Role {
   val binaryInt: Int
   val hashInt: Int
   val storable: Boolean
+  val valueOf: Option[Int]
   final def -(color: Color) = Piece(color, this)
   final def white           = this - White
   final def black           = this - Black
@@ -28,6 +29,7 @@ case object ShogiPawn extends Role {
   val binaryInt = 1
   val hashInt   = 8
   val storable  = true
+  val valueOf   = Option(1)
 }
 
 case object ShogiLance extends Role {
@@ -36,13 +38,16 @@ case object ShogiLance extends Role {
   val binaryInt = 2
   val hashInt   = 7
   val storable  = true
+  val valueOf   = Option(3)
 }
+
 case object ShogiKnight extends Role {
   val fairySFID = Role.shogiKnight
   val forsyth   = 'N'
   val binaryInt = 3
   val hashInt   = 6
   val storable  = true
+  val valueOf   = Option(3)
 }
 
 case object ShogiSilver extends Role {
@@ -51,6 +56,7 @@ case object ShogiSilver extends Role {
   val binaryInt = 4
   val hashInt   = 5
   val storable  = true
+  val valueOf   = Option(5)
 }
 
 case object ShogiGold extends PromotableRole {
@@ -59,6 +65,7 @@ case object ShogiGold extends PromotableRole {
   val binaryInt = 5
   val hashInt   = 4
   val storable  = true
+  val valueOf   = Option(5)
 }
 
 case object ShogiBishop extends Role {
@@ -67,6 +74,7 @@ case object ShogiBishop extends Role {
   val binaryInt = 6
   val hashInt   = 3
   val storable  = true
+  val valueOf   = Option(8)
 }
 
 case object ShogiRook extends Role {
@@ -75,6 +83,7 @@ case object ShogiRook extends Role {
   val binaryInt = 7
   val hashInt   = 2
   val storable  = true
+  val valueOf   = Option(10)
 }
 
 case object ShogiKing extends Role {
@@ -83,6 +92,7 @@ case object ShogiKing extends Role {
   val binaryInt = 8
   val hashInt   = 1
   val storable  = false
+  val valueOf   = None
 }
 
 case object ShogiHorse extends PromotableRole {
@@ -94,6 +104,7 @@ case object ShogiHorse extends PromotableRole {
   //can a piece of this role be stored when captured
   //or if this role can be stored
   val storable  = true
+  val valueOf   = Option(10)
 }
 
 case object ShogiDragon extends PromotableRole {
@@ -102,6 +113,7 @@ case object ShogiDragon extends PromotableRole {
   val binaryInt = 10
   val hashInt   = 10
   val storable  = true
+  val valueOf   = Option(12)
 }
 
 
@@ -111,22 +123,25 @@ case object XiangqiSoldier extends Role {
   val binaryInt = 1
   val hashInt   = 7
   val storable  = false
+  val valueOf   = Option(1)
 }
 
 case object XiangqiCannon extends Role {
-  val fairySFID = Role.lance
+  val fairySFID = Role.cannon
   val forsyth   = 'C'
   val binaryInt = 2
   val hashInt   = 6
   val storable  = false
+  val valueOf   = Option(5)
 }
 
 case object XiangqiHorse extends Role {
-  val fairySFID = Role.knight
+  val fairySFID = Role.horse
   val forsyth   = 'N'
   val binaryInt = 3
   val hashInt   = 5
   val storable  = false
+  val valueOf   = Option(4)
 }
 
 case object XiangqiElephant extends Role {
@@ -135,6 +150,7 @@ case object XiangqiElephant extends Role {
   val binaryInt = 4
   val hashInt   = 4
   val storable  = false
+  val valueOf   = Option(2)
 }
 
 case object XiangqiRook extends Role {
@@ -143,18 +159,16 @@ case object XiangqiRook extends Role {
   val binaryInt = 5
   val hashInt   = 3
   val storable  = false
+  val valueOf   = Option(9)
 }
 
 case object XiangqiAdvisor extends Role {
-  //probably wrong. Wikipedia says the advisor can be named:
-  //guards or ministers, and less commonly as assistants, mandarins, or warriors
-  //or "scholar", "gentleman", "officer", "guardian", or "official"
-  //none of which are in the fairysf list!
-  val fairySFID = Role.archbishop
+  val fairySFID = Role.fers
   val forsyth   = 'A'
   val binaryInt = 6
   val hashInt   = 2
   val storable  = false
+  val valueOf   = Option(2)
 }
 
 case object XiangqiKing extends Role {
@@ -163,6 +177,7 @@ case object XiangqiKing extends Role {
   val binaryInt = 7
   val hashInt   = 1
   val storable  = false
+  val valueOf   = None
 }
 
 object Role {
@@ -302,13 +317,7 @@ object Role {
   def valueOf(r: Role): Option[Int] =
     // Taken from: https://en.wikipedia.org/wiki/Shogi_strategy
     // Merged with: https://github.com/WandererXII/lishogi/blob/master/modules/shogi/src/main/scala/Role.scala
-    r match {
-      case ShogiPawn                => Option(1)
-      case ShogiLance | ShogiKnight => Option(3)
-      case ShogiSilver | ShogiGold  => Option(5)
-      case ShogiBishop              => Option(8)
-      case ShogiRook | ShogiHorse   => Option(10)
-      case ShogiDragon              => Option(12)
-      case ShogiKing                => None
-    }
+    // https://en.wikipedia.org/wiki/Xiangqi#Approximate_relative_values_of_the_pieces
+    r.valueOf
+
 }

@@ -51,40 +51,44 @@ abstract class Variant private[variant] (
   //in just atomic, so can leave as true for now
   def isValidPromotion(promotion: Option[PromotableRole]): Boolean = true
 
-  def validMoves(situation: Situation): Map[Pos, List[Move]] = {
-    val currentFen = Forsyth.exportBoard(situation.board)
-    val uciMoves = Api.legalMoves(
+  def validMoves(situation: Situation): Map[Pos, List[Move]] =
+    Api.legalMoves(
       fairysfName.name,
-      currentFen,
-    )
-    uciMoves.map(
-      uciMove => (uciMove.slice(0,2), uciMove.slice(2,4))
+      situation.board.variant.initialFen.value,
+      situation.board.uciMoves.some
+    //Do we need to always filter out the drops?
+    ).filterNot(_.contains("@"))
+    .map(
+      uciMove => (uciMove.slice(0,2), uciMove.slice(2,4), uciMove.drop(4))
     ).map{
-      case (orig, dest) => (Pos.fromKey(orig), Pos.fromKey(dest))
+      case (orig, dest, promotion) => (Pos.fromKey(orig), Pos.fromKey(dest), promotion)
     }.map{
-      case (Some(orig), Some(dest)) => (orig, Move(
-        piece = situation.board.pieces(orig),
-        orig = orig,
-        dest = dest,
-        situationBefore = situation,
-        after = situation.board.copy(
-          pieces = Api.pieceMapFromFen(
-            fairysfName.name,
-            Api.fenFromMoves(
+      case (Some(orig), Some(dest), promotion) => {
+        val uciMoves = (situation.board.uciMoves :+ s"${orig.key}${dest.key}${promotion}")
+        (orig, Move(
+          piece = situation.board.pieces(orig),
+          orig = orig,
+          dest = dest,
+          situationBefore = situation,
+          after = situation.board.copy(
+            pieces = Api.pieceMapFromFen(
               fairysfName.name,
-              currentFen,
-              List(s"${orig.key}${dest.key}".toLowerCase).some
-            ).value
-          )
-        ),
-        capture = None,
-        promotion = None,
-        castle = None,
-        enpassant = false
-      ))
+              Api.fenFromMoves(
+                fairysfName.name,
+                situation.board.variant.initialFen.value,
+                uciMoves.some
+              ).value
+            ),
+            uciMoves = uciMoves
+          ),
+          capture = None,
+          promotion = None,
+          castle = None,
+          enpassant = false
+        ))
+      }
       case _ => sys.error("Invalid position from uci")
     }.groupBy(_._1).map { case (k,v) => (k,v.toList.map(_._2))}
-  }
 
   //TODO: test, but think this is right as its based off chess without actor check
   //Consider drops might get passed in through here

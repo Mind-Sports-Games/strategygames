@@ -7,21 +7,21 @@ case class Rank private (val index: Int) extends AnyVal with Ordered[Rank] {
   @inline override def compare(that: Rank) = this - that
 
   def offset(delta: Int): Option[Rank] =
-    if (-8 < delta && delta < 8) Rank(index + delta)
+    if (-Rank.all.size < delta && delta < Rank.all.size) Rank(index + delta)
     else None
 
-  @inline def char: Char = (49 + index).toChar
-  override def toString  = char.toString
+  @inline def char: Char = if (index < 9) (49 + index).toChar else 48.toChar//0
+  override def toString  = (index+1).toString
 }
 
 object Rank {
   def apply(index: Int): Option[Rank] =
-    if (0 <= index && index < 8) Some(new Rank(index))
+    if (0 <= index && index < all.size) Some(new Rank(index))
     else None
 
-  @inline def of(pos: Pos): Rank = new Rank(pos.index >> 3)
+  @inline def of(pos: Pos): Rank = new Rank(pos.index/File.all.size)
 
-  def fromChar(ch: Char): Option[Rank] = apply(ch.toInt - 49)
+  def fromChar(ch: Char): Option[Rank] = apply(if (ch.toInt == 48) 9 else ch.toInt - 49)
 
   val First   = new Rank(0)
   val Second  = new Rank(1)
@@ -31,23 +31,10 @@ object Rank {
   val Sixth   = new Rank(5)
   val Seventh = new Rank(6)
   val Eighth  = new Rank(7)
+  val Ninth   = new Rank(8)
+  val Tenth   = new Rank(9)
 
-  val all                     = List(First, Second, Third, Fourth, Fifth, Sixth, Seventh, Eighth)
+  val all = List(First, Second, Third, Fourth, Fifth, Sixth, Seventh, Eighth, Ninth, Tenth)
   val allReversed: List[Rank] = all.reverse
-
-  def passablePawnRank(color: Color): Rank = color match {
-    case White => Fifth
-    case Black => Fourth
-  }
-
-  def promotablePawnRank(color: Color): Rank = color match {
-    case White => Eighth
-    case Black => First
-  }
-
-  def backRank(color: Color): Rank = color match {
-    case White => First
-    case Black => Eighth
-  }
 
 }

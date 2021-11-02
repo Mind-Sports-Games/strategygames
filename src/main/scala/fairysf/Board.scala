@@ -8,7 +8,8 @@ case class Board(
     pieces: PieceMap,
     history: History,
     variant: Variant,
-    pocketData: Option[PocketData] = None
+    pocketData: Option[PocketData] = None,
+    uciMoves: List[String] = List()
 ) {
 
   def apply(at: Pos): Option[Piece] = pieces get at

@@ -58,13 +58,14 @@ case class Pos private (index: Int) extends AnyVal {
 
 object Pos {
   def apply(index: Int): Option[Pos] =
-    if (0 <= index && index < 81) Some(new Pos(index))
+    if (0 <= index && index < File.all.size*Rank.all.size) Some(new Pos(index))
     else None
 
-  def apply(file: File, rank: Rank): Pos = new Pos(file.index + 9 * rank.index)
+  def apply(file: File, rank: Rank): Pos = new Pos(file.index + File.all.size * rank.index)
 
   def at(x: Int, y: Int): Option[Pos] =
-    if (0 <= x && x < 9 && 0 <= y && y < 9) Some(new Pos(x + 9 * y))
+    if (0 <= x && x < File.all.size && 0 <= y && y < Rank.all.size)
+      Some(new Pos(x + File.all.size * y))
     else None
 
   def fromKey(key: String): Option[Pos] = allKeys get key
@@ -164,11 +165,17 @@ object Pos {
   val G9 = new Pos(78)
   val H9 = new Pos(79)
   val I9 = new Pos(80)
+  val A10 = new Pos(81)
+  val B10 = new Pos(82)
+  val C10 = new Pos(83)
+  val D10 = new Pos(84)
+  val E10 = new Pos(85)
+  val F10 = new Pos(86)
+  val G10 = new Pos(87)
+  val H10 = new Pos(88)
+  val I10 = new Pos(89)
 
-  val all: List[Pos] = (0 to 80).map(new Pos(_)).toList
-
-  val whiteBackrank = (A1 <-> I1).toList
-  val blackBackrank = (A9 <-> H9).toList
+  val all: List[Pos] = (0 to (File.all.size*Rank.all.size)-1).map(new Pos(_)).toList
 
   val allKeys: Map[String, Pos] = all
     .map { pos =>
