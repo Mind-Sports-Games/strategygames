@@ -18,10 +18,9 @@ abstract class Variant private[variant] (
     val shortName: String,
     val title: String,
     val standardInitialPosition: Boolean,
-    val fairysfName: FairySFName
+    val fairysfName: FairySFName,
+    val boardSize: Board.BoardSize
 ) {
-
-  def pieces: Map[Pos, Piece]
 
   def shogi   = this == Shogi
   def xiangqi = this == Xiangqi
@@ -44,6 +43,8 @@ abstract class Variant private[variant] (
 
   def initialFen: FEN = Api.initialFen(fairysfName.name)
 
+  def pieces: Map[Pos, Piece] = Api.pieceMapFromFen(fairysfName.name, initialFen.value)
+
   def startColor: Color = White
 
   //looks like this is only to allow King to be a valid promotion piece
@@ -59,7 +60,7 @@ abstract class Variant private[variant] (
     uciMoves.map(
       uciMove => (uciMove.slice(0,2), uciMove.slice(2,4))
     ).map{
-      case (orig, dest) => (Pos.fromKey(orig.toUpperCase), Pos.fromKey(dest.toUpperCase))
+      case (orig, dest) => (Pos.fromKey(orig), Pos.fromKey(dest))
     }.map{
       case (Some(orig), Some(dest)) => (orig, Move(
         piece = situation.board.pieces(orig),
@@ -141,13 +142,15 @@ abstract class Variant private[variant] (
 
   def fiftyMoves(history: History): Boolean = history.halfMoveClock >= 100
 
-  def isIrreversible(move: Move): Boolean = false //TODO: ???
+  //can the move legally be 'undone' in a future move?
+  //can the board return to the state before this move
+  //only used in Move, and probably not going to be used
+  //def isIrreversible(move: Move): Boolean = false
 
   /** Once a move has been decided upon from the available legal moves, the board is finalized
     */
   @nowarn def finalizeBoard(board: Board, uci: format.Uci, captured: Option[Piece]): Board = board
 
-  //TODO: ???
   def valid(board: Board, strict: Boolean): Boolean =
     Api.validateFEN(fairysfName.name, Forsyth.exportBoard(board))
 

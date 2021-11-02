@@ -49,4 +49,36 @@ object Board {
   private def variantPocketData(variant: Variant) =
     (variant.dropsVariant) option PocketData.init
 
+  sealed abstract class BoardSize(
+    val width: Int,
+    val height: Int
+  ) {
+
+    val validPos: List[Pos] =
+      Pos.all.filter(p => p.file.index < width && p.rank.index < height)
+
+    override def toString = s"${width}x${height}"
+
+  }
+
+  object BoardSize {
+    val all: List[BoardSize] = List(Dim8x8, Dim9x9, Dim9x10)
+  }
+
+  case object Dim8x8
+      extends BoardSize(
+        width = 8,
+        height = 8
+      )
+  case object Dim9x9
+      extends BoardSize(
+        width = 9,
+        height = 9
+      )
+  case object Dim9x10
+      extends BoardSize(
+        width = 9,
+        height = 10
+      )
+
 }
