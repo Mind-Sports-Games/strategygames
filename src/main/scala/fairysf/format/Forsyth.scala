@@ -40,31 +40,14 @@ object Forsyth {
       case SituationPlus(situation, _) => >>(Game(situation, turns = parsed.turns))
     }
 
-  def >>(game: Game): FEN = exportBoardFen(game.situation.board) //TODO: ???
+  def >>(game: Game): FEN = exportBoardFen(game.situation.board)
 
-  //TODO: might need to update this
   def exportBoard(board: Board): String = {
-    val fen   = new scala.collection.mutable.StringBuilder(70)
-    var empty = 0
-    for (y <- Rank.allReversed) {
-      empty = 0
-      for (x <- File.all) {
-        board(x, y) match {
-          case None => empty = empty + 1
-          case Some(piece) =>
-            if (empty == 0) fen append piece.forsyth.toString
-            else {
-              fen append (empty.toString + piece.forsyth)
-              empty = 0
-            }
-            if (board.pocketData.fold(false)(_.promoted.contains(Pos(x, y))))
-              fen append '~'
-        }
-      }
-      if (empty > 0) fen append empty
-      if (y > Rank.First) fen append '/'
-    }
-    fen.toString
+    Api.fenFromMoves(
+                board.variant.fairysfName.name,
+                board.variant.initialFen.value,
+                board.uciMoves.some
+              ).value
   }
 
   def exportBoardFen(board: Board): FEN = FEN(exportBoard(board))
