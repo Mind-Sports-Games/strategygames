@@ -55,13 +55,13 @@ object Board {
     val height: Int
   ) {
 
-    val key   = (width * height).toString
+    val key   = s"${width}x${height}"
     val sizes = List(width, height)
 
     val validPos: List[Pos] =
       Pos.all.filter(p => p.file.index < width && p.rank.index < height)
 
-    override def toString = s"${width}x${height}"
+    override def toString = key
 
   }
 
