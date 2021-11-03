@@ -20,7 +20,34 @@ object Forsyth {
   val initial = FEN("lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL[-] w 0 1")
 
   //stub
-  def <<@(variant: Variant, fen: FEN): Option[Situation] = None //TODO: ???
+  def <<@(variant: Variant, fen: FEN): Option[Situation] = Some(Situation(
+    Board(
+      Api.pieceMapFromFen(variant.fairysfName.name, fen.value),
+      History(),
+      variant,
+      if (variant.dropsVariant){
+        val piecesInHand = Api.piecesInHand(variant.fairysfName.name, fen.value)
+        PocketData(
+          Pockets(
+            Pocket(piecesInHand.filter(_.color == White).toList.map(
+              p => strategygames.Role.FairySFRole(p.role)
+            )),
+            Pocket(piecesInHand.filter(_.color == Black).toList.map(
+              p => strategygames.Role.FairySFRole(p.role)
+            ))
+          ),
+          //Can make an empty Set of Pos because we dont have to track promoted pieces
+          //(FairySF presumably does this)
+          Set[Pos]()
+        ).some
+      } else None
+    ),
+    fen.value.split(' ')(1) match {
+      case "w" => White
+      case "b" => Black
+      case _ => sys.error("Invalid color in fen")
+    }
+  ))
 
   def <<(fen: FEN): Option[Situation] = <<@(Variant.default, fen)
 
@@ -29,7 +56,14 @@ object Forsyth {
     def turns = fullMoveNumber * 2 - situation.color.fold(2, 1)
   }
 
-  def <<<@(variant: Variant, fen: FEN): Option[SituationPlus] = None //TODO: ???
+  def <<<@(variant: Variant, fen: FEN): Option[SituationPlus] =
+    <<@(variant, fen) map { sit =>
+      SituationPlus(
+        //not doing half move clock history like we do in chess
+        sit,
+        fen.value.split(' ').last.toIntOption.map(_ max 1 min 500) | 1
+      )
+    }
 
   def <<<(fen: FEN): Option[SituationPlus] = <<<@(Variant.default, fen)
 
@@ -52,6 +86,7 @@ object Forsyth {
         board(x, y) match {
           case None => empty = empty + 1
           case Some(piece) =>
+            //TODO: handle shogi promoted pieces correctly
             if (empty == 0) fen append piece.forsyth.toString
             else {
               fen append (empty.toString + piece.forsyth)
