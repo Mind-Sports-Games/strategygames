@@ -55,6 +55,9 @@ object Board {
     val height: Int
   ) {
 
+    val key   = (width * height).toString
+    val sizes = List(width, height)
+
     val validPos: List[Pos] =
       Pos.all.filter(p => p.file.index < width && p.rank.index < height)
 
