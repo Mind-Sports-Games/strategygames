@@ -56,15 +56,15 @@ object Api {
     var first = fsPieceMap.begin()
     val pieceMap = scala.collection.mutable.Map[Pos, Piece]()
     //while(!first.equals(fsPieceMap.end())) {
-    //  var temp = first.first().getString()
-    //  temp = first.second().pieceInfo().name().getString()
+    //  var temp = first.first().getString().pp("Pos: ")
+    //  temp = first.second().pieceInfo().name().getString().pp("Piece")
     //  first = first.increment()
     //}
     //first = fsPieceMap.begin()
     while(!first.equals(fsPieceMap.end())) {
       pieceMap(
-        Pos.fromKey(first.first().getString()).getOrElse(sys.error(s"Invalid Pos: ${first.first().getString()}"))
-      ) = pieceFromFSPiece(first.second())
+        Pos.fromKey(first.first().getString().pp("Pos:  ")).getOrElse(sys.error(s"Invalid Pos: ${first.first().getString()} Piece: ${first.second().pieceInfo().name().getString()}"))
+      ) = pieceFromFSPiece(first.second()).pp("Piece:")
       first = first.increment()
     }
     pieceMap.toMap
