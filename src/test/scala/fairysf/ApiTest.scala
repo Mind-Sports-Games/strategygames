@@ -24,6 +24,12 @@ class FairyStockfishApiTest extends Specification with ValidatedMatchers {
         variant.Shogi.initialFen.value
       ).size must_!= 0L
     }
+    "have 40 pieces" in {
+      Api.pieceMapFromFen(
+        variant.Shogi.fairysfName.name,
+        variant.Shogi.initialFen.value
+      ).size must_== 40
+    }
     "not be game end" in {
       Api.gameEnd(
         variant.Shogi.fairysfName.name,
@@ -34,6 +40,51 @@ class FairyStockfishApiTest extends Specification with ValidatedMatchers {
       Api.optionalGameEnd(
         variant.Shogi.fairysfName.name,
         variant.Shogi.initialFen.value
+      ) must_== false
+    }
+  }
+
+  "Xiangqi initial fen" should {
+    "be valid" in {
+      Api.validateFEN(
+        variant.Xiangqi.fairysfName.name,
+        variant.Xiangqi.initialFen.value
+      ) must_== true
+    }
+    "return confirm sufficient material for both sides" in {
+      Api.insufficientMaterial(
+        variant.Xiangqi.fairysfName.name,
+        variant.Xiangqi.initialFen.value
+      ) must_== ((false, false))
+    }
+    "have legal moves" in {
+      Api.legalMoves(
+        variant.Xiangqi.fairysfName.name,
+        variant.Xiangqi.initialFen.value
+      ).size must_!= 0L
+    }
+    "have 32 pieces" in {
+      Api.pieceMapFromFen(
+        variant.Xiangqi.fairysfName.name,
+        variant.Xiangqi.initialFen.value
+      ).size must_== 32
+    }
+    "have 32 pieces again" in {
+      Api.pieceMapFromFen(
+        variant.Xiangqi.fairysfName.name,
+        variant.Xiangqi.initialFen.value
+      ).size must_== 32
+    }
+    "not be game end" in {
+      Api.gameEnd(
+        variant.Xiangqi.fairysfName.name,
+        variant.Xiangqi.initialFen.value
+      ) must_== false
+    }
+    "not be optional game end" in {
+      Api.optionalGameEnd(
+        variant.Xiangqi.fairysfName.name,
+        variant.Xiangqi.initialFen.value
       ) must_== false
     }
   }
