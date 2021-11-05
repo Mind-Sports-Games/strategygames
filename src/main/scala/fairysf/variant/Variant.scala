@@ -87,11 +87,12 @@ abstract class Variant private[variant] (
           enpassant = false
         ))
       }
-      case _ => sys.error("Invalid position from uci")
+      case (orig, dest, promotion) => sys.error(s"Invalid position from uci: ${orig}${dest}${promotion}")
     }.groupBy(_._1).map { case (k,v) => (k,v.toList.map(_._2))}
 
   //TODO: test, but think this is right as its based off chess without actor check
   //Consider drops might get passed in through here
+  //Update: not checking promotion here yet!
   def move(
       situation: Situation,
       from: Pos,
@@ -99,15 +100,17 @@ abstract class Variant private[variant] (
       promotion: Option[PromotableRole]
   ): Validated[String, Move] = {
     // Find the move in the variant specific list of valid moves
-    def findMove(from: Pos, to: Pos) = situation.moves get from flatMap (_.find(_.dest == to))
-
-    for {
-      m1 <- findMove(from, to) toValid "Piece on " + from + " cannot move to " + to
-      m2 <- m1 withPromotion promotion toValid "Piece on " + from + " cannot promote to " + promotion
-      m3 <-
-        if (isValidPromotion(promotion)) Validated.valid(m2)
-        else Validated.invalid("Cannot promote to " + promotion + " in this game mode")
-    } yield m3
+    situation.moves get from flatMap (_.find(_.dest == to)) match {
+      case Some(move) => Validated.valid(move)
+      case None => Validated.invalid(s"Not a valid move: ${from}${to}")
+    }
+    //for {
+    //  m1 <- findMove(from, to) toValid "Piece on " + from + " cannot move to " + to
+    //  m2 <- m1 withPromotion promotion toValid "Piece on " + from + " cannot promote to " + promotion
+    //  m3 <-
+    //    if (isValidPromotion(promotion)) Validated.valid(m2)
+    //    else Validated.invalid("Cannot promote to " + promotion + " in this game mode")
+    //} yield m3
   }
 
   def drop(situation: Situation, role: Role, pos: Pos): Validated[String, Drop] =

@@ -36,29 +36,36 @@ case class Situation(board: Board, color: Color) {
 
   def checkMate: Boolean = gameResult == GameResult.Checkmate()
 
-  def staleMate: Boolean = gameResult == GameResult.Draw()
+  def staleMate: Boolean = gameResult == GameResult.Draw() && Api.gameEnd(board.variant.fairysfName.name, Forsyth.exportBoard(board))
 
   private def variantEnd = gameResult == GameResult.VariantEnd()
 
-  //TODO: ???
-  def end: Boolean = checkMate || variantEnd
+  //TODO: is leaving out autodraw ok?
+  def end: Boolean = checkMate || staleMate || variantEnd
 
   def winner: Option[Color] = board.variant.winner(this)
 
   def playable(strict: Boolean): Boolean =
     (board valid strict) && !end && !copy(color = !color).check
 
-  val status: Option[Status] = None //TODO: ???
+  lazy val status: Option[Status] =
+    if (checkMate) Status.Mate.some
+    //alot of variantEnds appear as checkMate in fairysf
+    else if (variantEnd) Status.VariantEnd.some
+    else if (staleMate) Status.Draw.some
+    //no way to tell stalemate from draw
+    //else if (autoDraw) Status.Draw.some
+    else none
 
-  //TODO: ??? test White/Black map is correct
+  //TODO: test White/Black map is correct
   def opponentHasInsufficientMaterial: Boolean = {
     val insufficientMaterial = Api.insufficientMaterial(
       board.variant.fairysfName.name,
       Forsyth.exportBoard(board)
     )
     color match {
-      case White => insufficientMaterial._1
-      case Black => insufficientMaterial._2
+      case White => insufficientMaterial._2
+      case Black => insufficientMaterial._1
     }
   }
 

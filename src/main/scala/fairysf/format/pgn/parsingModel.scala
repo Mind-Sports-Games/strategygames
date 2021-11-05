@@ -31,7 +31,7 @@ case class Std(
 
   def withMetas(m: Metas) = copy(metas = m)
 
-  def move(situation: Situation): Validated[String, strategygames.fairysf.Move] = Validated.invalid("Not implemented") //TODO: ???
+  def move(situation: Situation): Validated[String, strategygames.fairysf.Move] = Validated.invalid("Not implemented move") //TODO: ???
 
   private def compare[A](a: Option[A], b: A) = a.fold(true)(b ==)
 }
