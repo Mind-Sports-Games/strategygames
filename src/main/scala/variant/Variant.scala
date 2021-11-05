@@ -415,7 +415,7 @@ object Variant {
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
 
-    def initialFen: FEN = format.Forsyth.initial(GameLogic.FairySF())
+    def initialFen: FEN = FEN.FairySF(v.initialFen)
     def startColor: Color = v.startColor
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = promotion match {

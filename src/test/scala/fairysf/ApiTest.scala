@@ -45,6 +45,9 @@ class FairyStockfishApiTest extends Specification with ValidatedMatchers {
   }
 
   "Xiangqi initial fen" should {
+    "equal expected initialfen" in {
+      variant.Xiangqi.initialFen.value must_== "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1"
+    }
     "be valid" in {
       Api.validateFEN(
         variant.Xiangqi.fairysfName.name,
@@ -86,6 +89,16 @@ class FairyStockfishApiTest extends Specification with ValidatedMatchers {
         variant.Xiangqi.fairysfName.name,
         variant.Xiangqi.initialFen.value
       ) must_== false
+    }
+    "e1e2 opening provide valid piece map" in {
+      Api.pieceMapFromFen(
+        variant.Xiangqi.fairysfName.name,
+        Api.fenFromMoves(
+          variant.Xiangqi.fairysfName.name,
+          variant.Xiangqi.initialFen.value,
+          Option(List("e1e2"))
+        ).value
+      ).size must_== 32
     }
   }
 

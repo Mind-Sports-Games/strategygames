@@ -63,8 +63,8 @@ object Api {
     //first = fsPieceMap.begin()
     while(!first.equals(fsPieceMap.end())) {
       pieceMap(
-        Pos.fromKey(first.first().getString().pp("Pos:  ")).getOrElse(sys.error(s"Invalid Pos: ${first.first().getString()} Piece: ${first.second().pieceInfo().name().getString()}"))
-      ) = pieceFromFSPiece(first.second()).pp("Piece:")
+        Pos.fromKey(first.first().getString()).get
+      ) = pieceFromFSPiece(first.second())
       first = first.increment()
     }
     pieceMap.toMap
