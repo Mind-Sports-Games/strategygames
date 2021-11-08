@@ -32,7 +32,9 @@ case class Situation(board: Board, color: Color) {
   def history = board.history
 
   private def gameResult =
-    Api.gameResult(board.variant.fairysfName.name, Forsyth.exportBoard(board))
+    if (Api.gameEnd(board.variant.fairysfName.name, Forsyth.exportBoard(board)))
+      Api.gameResult(board.variant.fairysfName.name, Forsyth.exportBoard(board))
+    else false
 
   def checkMate: Boolean = gameResult == GameResult.Checkmate()
 
