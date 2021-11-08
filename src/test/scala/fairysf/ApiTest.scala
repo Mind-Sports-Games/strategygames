@@ -307,7 +307,7 @@ class FairyStockfishApiTest extends Specification with ValidatedMatchers {
   }
 
   "Chess white king vs black king only" should {
-    val insufficientMaterialFEN = "4k3/8/8/8/8/8/8/3K4 w KQ - 0 1"
+    val insufficientMaterialFEN = "4k3/8/8/8/8/8/8/3K4 w - - 0 1"
     "have insufficient material" in {
       Api.insufficientMaterial(
         "chess",
