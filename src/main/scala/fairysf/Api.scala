@@ -11,6 +11,7 @@ object GameResult {
   final case class Checkmate()  extends GameResult
   final case class Draw()       extends GameResult
   final case class VariantEnd() extends GameResult
+  final case class Ongoing()    extends GameResult
 
   def fromInt(value: Int): GameResult =
     if (value.abs == 32000) GameResult.Checkmate()
@@ -87,9 +88,11 @@ object Api {
     FEN(FairyStockfish.getFEN(variantName, fen, movesList))
 
   def gameResult(variantName: String, fen: String, movesList: Option[List[String]] = None): GameResult =
-    GameResult.fromInt(
-      FairyStockfish.gameResult(variantName, fen, movesList)
-    )
+    if (legalMoves(variantName, fen, movesList).size == 0)
+      GameResult.fromInt(
+        FairyStockfish.gameResult(variantName, fen, movesList)
+      )
+    else GameResult.Ongoing()
 
   def gameEnd(variantName: String, fen: String, movesList: Option[List[String]] = None): Boolean =
     legalMoves(variantName, fen, movesList).size == 0 || insufficientMaterial(variantName, fen, movesList) == ((true, true))
