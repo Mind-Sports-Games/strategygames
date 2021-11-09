@@ -188,4 +188,9 @@ object Pos {
       pos.piotr -> pos
     }
     .to(Map)
+
+  val posR  = "([a-i][1-9]|[a-i]10)"
+  val extra = "(\\+?)"
+  val MoveR = s"^$posR$posR$extra$$".r
+
 }

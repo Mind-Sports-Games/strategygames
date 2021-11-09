@@ -58,13 +58,11 @@ abstract class Variant private[variant] (
       situation.board.uciMoves.some
     //Do we need to always filter out the drops?
     ).filterNot(_.contains("@"))
-    .map(
-      uciMove => (uciMove.slice(0,2), uciMove.slice(2,4), uciMove.drop(4))
-    ).map{
-      case (orig, dest, promotion) => (Pos.fromKey(orig), Pos.fromKey(dest), promotion)
+    .map{
+      case Pos.MoveR(orig, dest, check) => (Pos.fromKey(orig), Pos.fromKey(dest), check)
     }.map{
-      case (Some(orig), Some(dest), promotion) => {
-        val uciMoves = (situation.board.uciMoves :+ s"${orig.key}${dest.key}${promotion}")
+      case (Some(orig), Some(dest), check) => {
+        val uciMoves = (situation.board.uciMoves :+ s"${orig.key}${dest.key}${check}")
         (orig, Move(
           piece = situation.board.pieces(orig),
           orig = orig,
@@ -87,7 +85,7 @@ abstract class Variant private[variant] (
           enpassant = false
         ))
       }
-      case (orig, dest, promotion) => sys.error(s"Invalid position from uci: ${orig}${dest}${promotion}")
+      case (orig, dest, check) => sys.error(s"Invalid position from uci: ${orig}${dest}${check}")
     }.groupBy(_._1).map { case (k,v) => (k,v.toList.map(_._2))}
 
   //TODO: test, but think this is right as its based off chess without actor check
@@ -123,7 +121,7 @@ abstract class Variant private[variant] (
   // In most variants, the winner is the last player to have played and there is a possibility of either a traditional
   // checkmate or a variant end condition
   def winner(situation: Situation): Option[Color] =
-    if (situation.checkMate || specialEnd(situation)) Option(!situation.color) else None
+    if (situation.checkMate.pp("checkMateWinner") || specialEnd(situation)) Option(!situation.color) else None
 
   @nowarn def specialEnd(situation: Situation) = false
 

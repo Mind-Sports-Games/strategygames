@@ -71,7 +71,7 @@ object Binary {
 
     def move(str: String): List[Byte] =
       (str match {
-        case MoveR(src, dst) => moveUci(src, dst)
+        case Pos.MoveR(src, dst, _) => moveUci(src, dst)
         case _ => sys.error(s"Invalid move to write: ${str}")
       }) map (_.toByte)
 
@@ -83,8 +83,8 @@ object Binary {
     )
 
     //val pieceR       = "([KQRNBL])"
-    val posR         = "([a-i][1-9]|10)"
-    val MoveR        = s"^$posR$posR$$".r
+    //val posR         = "([a-i][1-9]|[a-i]10)"
+    //val MoveR        = s"^$posR$posR$$".r
     //val DropR        = s"^([QRNBP])@$posR$checkR$$".r
   }
 
