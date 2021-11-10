@@ -5,7 +5,7 @@ import cats.syntax.option._
 import scala.annotation.nowarn
 
 import strategygames.fairysf._
-import strategygames.fairysf.format.{ FEN, Forsyth }
+import strategygames.fairysf.format.{ FEN, Forsyth, Uci }
 import strategygames.{ Color, GameFamily }
 
 case class FairySFName(val name: String)
@@ -51,7 +51,6 @@ abstract class Variant private[variant] (
   //in just atomic, so can leave as true for now
   def isValidPromotion(promotion: Option[PromotableRole]): Boolean = true
 
-  val moveR = s"^${Pos.posR}${Pos.posR}${Pos.extra}$$".r
   def validMoves(situation: Situation): Map[Pos, List[Move]] =
     Api.legalMoves(
       fairysfName.name,
@@ -60,7 +59,7 @@ abstract class Variant private[variant] (
     //Do we need to always filter out the drops?
     ).filterNot(_.contains("@"))
     .map{
-      case moveR(orig, dest, check) => (Pos.fromKey(orig), Pos.fromKey(dest), check)
+      case Uci.Move.moveR(orig, dest, check) => (Pos.fromKey(orig), Pos.fromKey(dest), check)
     }.map{
       case (Some(orig), Some(dest), check) => {
         val uciMoves = (situation.board.uciMoves :+ s"${orig.key}${dest.key}${check}")

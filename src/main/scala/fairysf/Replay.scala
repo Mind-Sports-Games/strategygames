@@ -70,8 +70,6 @@ object Replay {
   //    recursiveGames(game, moves.value) map { game :: _ }
   //  }
 
-  val moveR = s"^${Pos.posR}${Pos.posR}${Pos.extra}$$".r
-
   def gameMoveWhileValid(
       moveStrs: Seq[String],
       initialFen: FEN,
@@ -84,7 +82,7 @@ object Replay {
     var errors = ""
     val moves: List[(Game, Uci.WithSan)] = moveStrs.toList
       .map{
-        case moveR(orig, dest, check) => (Pos.fromKey(orig), Pos.fromKey(dest), check)
+        case Uci.Move.moveR(orig, dest, check) => (Pos.fromKey(orig), Pos.fromKey(dest), check)
       }.map{
         case (Some(orig), Some(dest), check) => {
           val uciMove = s"${orig.key}${dest.key}${check}"

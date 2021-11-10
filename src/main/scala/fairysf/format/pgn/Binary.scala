@@ -1,6 +1,8 @@
 package strategygames.fairysf
 package format.pgn
 
+import strategygames.fairysf.format.Uci
+
 import scala.util.Try
 
 object Binary {
@@ -71,8 +73,8 @@ object Binary {
 
     def move(str: String): List[Byte] =
       (str match {
-        case MoveR(src, dst, _) => moveUci(src, dst)
-        case DropR(piece, dst, _) => sys.error("Not done drop")
+        case Uci.Move.moveR(src, dst, _) => moveUci(src, dst)
+        case Uci.Drop.dropR(piece, dst, _) => sys.error("Not done drop")
         case _ => sys.error(s"Invalid move to write: ${str}")
       }) map (_.toByte)
 
@@ -83,8 +85,6 @@ object Binary {
       (0 << 7) + Pos.fromKey(dst).get.index//0 << 7 is gameFamily 0 can be Shogi for now
     )
 
-    val MoveR = s"^${Pos.posR}${Pos.posR}${Pos.extra}$$".r
-    val DropR = s"^${Role.roleR}@${Pos.posR}${Pos.extra}$$".r
     //val pieceR       = "([KQRNBL])"
     //val posR         = "([a-i][1-9]|[a-i]10)"
     //val MoveR        = s"^$posR$posR$$".r

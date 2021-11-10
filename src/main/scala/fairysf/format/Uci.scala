@@ -57,6 +57,9 @@ object Uci {
         dest <- Pos.fromKey(destS)
         promotion = Role promotable promS
       } yield Move(orig, dest, promotion)
+
+    val moveR = s"^${Pos.posR}${Pos.posR}(\\+?)$$".r
+
   }
 
   case class Drop(role: Role, pos: Pos) extends Uci {
@@ -77,6 +80,9 @@ object Uci {
         role <- Role.allByName get roleS
         pos  <- Pos.fromKey(posS)
       } yield Drop(role, pos)
+
+    val dropR = s"^${Role.roleR}@${Pos.posR}(\\+?)$$".r
+
   }
 
   case class WithSan(uci: Uci, san: String)

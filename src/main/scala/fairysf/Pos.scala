@@ -190,6 +190,5 @@ object Pos {
     .to(Map)
 
   val posR  = "([a-i][1-9]|[a-i]10)"
-  val extra = "(\\+?)"
 
 }
