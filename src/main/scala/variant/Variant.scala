@@ -182,7 +182,7 @@ object Variant {
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
 
-    def initialFen: FEN = format.Forsyth.initial(GameLogic.Chess())
+    def initialFen: FEN = FEN.Chess(v.initialFen)
     def startColor: Color = v.startColor
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = promotion match {
@@ -300,7 +300,7 @@ object Variant {
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
 
-    def initialFen: FEN = format.Forsyth.initial(GameLogic.Draughts())
+    def initialFen: FEN = FEN.Draughts(v.initialFen)
     def startColor: Color = v.startColor
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = promotion match {
