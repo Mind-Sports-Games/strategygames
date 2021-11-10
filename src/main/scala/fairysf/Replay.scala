@@ -79,6 +79,8 @@ object Replay {
   ): (Game, List[(Game, Uci.WithSan)], Option[String]) = {
 
     val init = makeGame(variant, initialFen.some)
+    var state = init
+    var uciMoves = init.situation.board.uciMoves
     var errors = ""
     val moves: List[(Game, Uci.WithSan)] = moveStrs.toList
       .map{
@@ -86,14 +88,14 @@ object Replay {
       }.map{
         case (Some(orig), Some(dest), check) => {
           val uciMove = s"${orig.key}${dest.key}${check}"
-          val uciMoves = (init.situation.board.uciMoves :+ uciMove)
-          (init.apply(
+          uciMoves = uciMoves :+ uciMove
+          state = state.apply(
             Move(
-              piece = init.situation.board.pieces(orig),
+              piece = state.situation.board.pieces(orig),
               orig = orig,
               dest = dest,
-              situationBefore = init.situation,
-              after = init.situation.board.copy(
+              situationBefore = state.situation,
+              after = state.situation.board.copy(
                 pieces = Api.pieceMapFromFen(
                   init.board.variant.fairysfName.name,
                   Api.fenFromMoves(
@@ -109,7 +111,8 @@ object Replay {
               castle = None,
               enpassant = false
             )
-          ), Uci.WithSan(Uci.apply(uciMove).get, "NOSAN"))
+          )
+          (state, Uci.WithSan(Uci.apply(uciMove).get, "NOSAN"))
         }
         case (orig, dest, check) => {
           val uciMove = s"${orig}${dest}${check}"
