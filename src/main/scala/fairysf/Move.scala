@@ -91,5 +91,7 @@ case class Move(
 
   def toUci = Uci.Move(orig, dest, promotion)
 
+  val moveR = s"^${Pos.posR}${Pos.posR}${Pos.extra}$$".r
+
   override def toString = s"$piece ${toUci.uci}"
 }

@@ -320,4 +320,6 @@ object Role {
     // https://en.wikipedia.org/wiki/Xiangqi#Approximate_relative_values_of_the_pieces
     r.valueOf
 
+  val roleR = s"([${allByForsyth.keys.mkString("")}])"
+
 }

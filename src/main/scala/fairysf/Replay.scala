@@ -70,36 +70,54 @@ object Replay {
   //    recursiveGames(game, moves.value) map { game :: _ }
   //  }
 
+  val moveR = s"^${Pos.posR}${Pos.posR}${Pos.extra}$$".r
+
   def gameMoveWhileValid(
       moveStrs: Seq[String],
       initialFen: FEN,
       variant: strategygames.fairysf.variant.Variant
   ): (Game, List[(Game, Uci.WithSan)], Option[String]) = {
 
-    def mk(g: Game, moves: List[(San, String)]): (List[(Game, Uci.WithSan)], Option[String]) =
-      moves match {
-        case (san, sanStr) :: rest =>
-          san(StratSituation.wrap(g.situation)).fold(
-            err => (Nil, err.some),
-            moveOrDrop => {
-              val newGame = StratGame.wrap(g)(moveOrDrop).toFairySF
-              val uci     = moveOrDrop.fold(m => m.toUci.toFairySF, d => d.toUci.toFairySF)
-              mk(newGame, rest) match {
-                case (next, msg) => ((newGame, Uci.WithSan(uci, sanStr)) :: next, msg)
-              }
-            }
-          )
-        case _ => (Nil, None)
-      }
     val init = makeGame(variant, initialFen.some)
-    Parser
-      .moves(moveStrs, variant)
-      .fold(
-        err => List.empty[(Game, Uci.WithSan)] -> err.some,
-        moves => mk(init, moves.value zip moveStrs)
-      ) match {
-      case (games, err) => (init, games, err)
-    }
+    var errors = ""
+    val moves: List[(Game, Uci.WithSan)] = moveStrs.toList
+      .map{
+        case moveR(orig, dest, check) => (Pos.fromKey(orig), Pos.fromKey(dest), check)
+      }.map{
+        case (Some(orig), Some(dest), check) => {
+          val uciMove = s"${orig.key}${dest.key}${check}"
+          val uciMoves = (init.situation.board.uciMoves :+ uciMove)
+          (init.apply(
+            Move(
+              piece = init.situation.board.pieces(orig),
+              orig = orig,
+              dest = dest,
+              situationBefore = init.situation,
+              after = init.situation.board.copy(
+                pieces = Api.pieceMapFromFen(
+                  init.board.variant.fairysfName.name,
+                  Api.fenFromMoves(
+                    init.board.variant.fairysfName.name,
+                    init.situation.board.variant.initialFen.value,
+                    uciMoves.some
+                  ).value
+                ),
+                uciMoves = uciMoves
+              ),
+              capture = None,
+              promotion = None,
+              castle = None,
+              enpassant = false
+            )
+          ), Uci.WithSan(Uci.apply(uciMove).get, "NOSAN"))
+        }
+        case (orig, dest, check) => {
+          val uciMove = s"${orig}${dest}${check}"
+          errors += uciMove + ","
+          sys.error(s"Invalid move: ${uciMove}")
+        }
+      }
+    (init, moves, errors match {case "" => None; case _ => errors.some})
   }
 
   private def recursiveSituations(sit: Situation, sans: List[San]): Validated[String, List[Situation]] =

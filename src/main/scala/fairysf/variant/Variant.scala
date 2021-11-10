@@ -51,6 +51,7 @@ abstract class Variant private[variant] (
   //in just atomic, so can leave as true for now
   def isValidPromotion(promotion: Option[PromotableRole]): Boolean = true
 
+  val moveR = s"^${Pos.posR}${Pos.posR}${Pos.extra}$$".r
   def validMoves(situation: Situation): Map[Pos, List[Move]] =
     Api.legalMoves(
       fairysfName.name,
@@ -59,7 +60,7 @@ abstract class Variant private[variant] (
     //Do we need to always filter out the drops?
     ).filterNot(_.contains("@"))
     .map{
-      case Pos.MoveR(orig, dest, check) => (Pos.fromKey(orig), Pos.fromKey(dest), check)
+      case moveR(orig, dest, check) => (Pos.fromKey(orig), Pos.fromKey(dest), check)
     }.map{
       case (Some(orig), Some(dest), check) => {
         val uciMoves = (situation.board.uciMoves :+ s"${orig.key}${dest.key}${check}")
@@ -121,7 +122,7 @@ abstract class Variant private[variant] (
   // In most variants, the winner is the last player to have played and there is a possibility of either a traditional
   // checkmate or a variant end condition
   def winner(situation: Situation): Option[Color] =
-    if (situation.checkMate.pp("checkMateWinner") || specialEnd(situation)) Option(!situation.color) else None
+    if (situation.checkMate || specialEnd(situation)) Option(!situation.color) else None
 
   @nowarn def specialEnd(situation: Situation) = false
 

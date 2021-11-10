@@ -22,11 +22,11 @@ object Parser {
       variations: List[List[StrMove]]
   )
 
-  def full(pgn: String): Validated[String, ParsedPgn] = Validated.invalid("Not implemented full") //TODO: ???
+  def full(pgn: String): Validated[String, ParsedPgn] = Validated.invalid(s"Not implemented full: ${pgn}") //TODO: ???
 
-  def moves(str: String, variant: Variant): Validated[String, Sans] = Validated.invalid("Not implemented moves") //TODO: ???
-  def moves(strMoves: Iterable[String], variant: Variant): Validated[String, Sans] = Validated.invalid("Not implemented moves2") //TODO: ???
-  def objMoves(strMoves: List[StrMove], variant: Variant): Validated[String, Sans] = Validated.invalid("Not implemented objMoves") //TODO: ???
+  def moves(str: String, variant: Variant): Validated[String, Sans] = Validated.invalid(s"Not implemented moves: ${str}") //TODO: ???
+  def moves(strMoves: Iterable[String], variant: Variant): Validated[String, Sans] = Validated.invalid(s"Not implemented iterable moves: ${strMoves}") //TODO: ???
+  private def objMoves(strMoves: List[StrMove], variant: Variant): Validated[String, Sans] = Validated.invalid("Not implemented objMoves") //TODO: ???
 
   trait Logging { self: Parsers =>
     protected val loggingEnabled = false

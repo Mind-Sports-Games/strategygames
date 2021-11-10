@@ -29,7 +29,7 @@ case class Game(
     copy(
       situation = newSituation,
       turns = turns + 1,
-      pgnMoves = pgnMoves :+ pgn.Dumper(situation, move, newSituation),
+      pgnMoves = pgnMoves :+ move.toUci.uci,
       clock = applyClock(move.metrics, newSituation.status.isEmpty)
     )
   }
