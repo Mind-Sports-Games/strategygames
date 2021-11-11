@@ -1,7 +1,8 @@
 package strategygames.fairysf.format
 
 import cats.implicits._
-import strategygames.{ Color, Pocket, Pockets }
+
+import strategygames.Color
 import strategygames.fairysf._
 import strategygames.fairysf.variant.{ Variant }
 
@@ -25,22 +26,7 @@ object Forsyth {
       Api.pieceMapFromFen(variant.fairysfName.name, fen.value),
       History(),
       variant,
-      if (variant.dropsVariant){
-        val piecesInHand = Api.piecesInHand(variant.fairysfName.name, fen.value)
-        PocketData(
-          Pockets(
-            Pocket(piecesInHand.filter(_.color == White).toList.map(
-              p => strategygames.Role.FairySFRole(p.role)
-            )),
-            Pocket(piecesInHand.filter(_.color == Black).toList.map(
-              p => strategygames.Role.FairySFRole(p.role)
-            ))
-          ),
-          //Can make an empty Set of Pos because we dont have to track promoted pieces
-          //(FairySF presumably does this)
-          Set[Pos]()
-        ).some
-      } else None
+      Api.pocketData(variant, fen.value)
     ),
     fen.value.split(' ')(1) match {
       case "w" => White

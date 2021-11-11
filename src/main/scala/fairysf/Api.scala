@@ -2,8 +2,11 @@ package strategygames.fairysf
 
 import org.playstrategy.FairyStockfish
 
-import strategygames.Color
+import cats.implicits._
+
+import strategygames.{ Color, Pocket, Pockets }
 import strategygames.fairysf.format.FEN
+import strategygames.fairysf.variant.Variant
 
 sealed abstract class GameResult extends Product with Serializable
 
@@ -113,6 +116,24 @@ object Api {
 
   def piecesInHand(variantName: String, fen: String): Array[Piece] =
     FairyStockfish.piecesInHand(variantName, fen)
+
+  def pocketData(variant: Variant, fen: String): Option[PocketData] =
+    if (variant.dropsVariant){
+      val pieces = piecesInHand(variant.fairysfName.name, fen)
+      PocketData(
+        Pockets(
+          Pocket(pieces.filter(_.color == White).toList.map(
+            p => strategygames.Role.FairySFRole(p.role)
+          )),
+          Pocket(pieces.filter(_.color == Black).toList.map(
+            p => strategygames.Role.FairySFRole(p.role)
+          ))
+        ),
+        //Can make an empty Set of Pos because we dont have to track promoted pieces
+        //(FairySF presumably does this)
+        Set[Pos]()
+      ).some
+    } else None
 
   def pieceMapFromFen(variantName: String, fen: String):PieceMap =
     FairyStockfish.piecesOnBoard(variantName, fen)

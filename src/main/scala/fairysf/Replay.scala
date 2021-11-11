@@ -87,6 +87,11 @@ object Replay {
         case (Some(orig), Some(dest), check) => {
           val uciMove = s"${orig.key}${dest.key}${check}"
           uciMoves = uciMoves :+ uciMove
+          val fen = Api.fenFromMoves(
+            init.board.variant.fairysfName.name,
+            init.situation.board.variant.initialFen.value,
+            uciMoves.some
+          ).value
           state = state.apply(
             Move(
               piece = state.situation.board.pieces(orig),
@@ -96,13 +101,10 @@ object Replay {
               after = state.situation.board.copy(
                 pieces = Api.pieceMapFromFen(
                   init.board.variant.fairysfName.name,
-                  Api.fenFromMoves(
-                    init.board.variant.fairysfName.name,
-                    init.situation.board.variant.initialFen.value,
-                    uciMoves.some
-                  ).value
+                  fen
                 ),
-                uciMoves = uciMoves
+                uciMoves = uciMoves,
+                pocketData = Api.pocketData(init.board.variant, fen)
               ),
               capture = None,
               promotion = None,

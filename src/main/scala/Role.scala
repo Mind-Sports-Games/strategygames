@@ -50,7 +50,7 @@ object Role {
     val binaryInt = r.binaryInt
     val hashInt = r.hashInt
     val name = r.name
-    val groundName = r.name
+    val groundName = r.groundName
     val storable = r.storable
     override def toString() = r.name
   }

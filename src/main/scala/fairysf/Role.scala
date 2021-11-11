@@ -1,6 +1,6 @@
 package strategygames.fairysf
 
-import strategygames.{ Black, Color, White }
+import strategygames.{ Black, Color, White, GameFamily }
 
 case class FairySFRoleID(val id: Int)
 
@@ -10,11 +10,12 @@ sealed trait Role {
   lazy val forsythUpper: Char = forsyth.toUpper
   lazy val pgn: Char          = forsythUpper
   lazy val name               = toString.toLowerCase
-  lazy val groundName         = s"${forsyth}-piece"
+  lazy val groundName         = s"${forsyth.toLower}-piece"
   val binaryInt: Int
   val hashInt: Int
   val storable: Boolean
   val valueOf: Option[Int]
+  val gameFamily: GameFamily
   final def -(color: Color) = Piece(color, this)
   final def white           = this - White
   final def black           = this - Black
@@ -24,12 +25,13 @@ sealed trait PromotableRole extends Role
 /** Promotable in antichess.
   */
 case object ShogiPawn extends Role {
-  val fairySFID = Role.shogiPawn
-  val forsyth   = 'P'
-  val binaryInt = 1
-  val hashInt   = 8
-  val storable  = true
-  val valueOf   = Option(1)
+  val fairySFID  = Role.shogiPawn
+  val forsyth    = 'P'
+  val binaryInt  = 1
+  val hashInt    = 8
+  val storable   = true
+  val valueOf    = Option(1)
+  val gameFamily = GameFamily.Shogi()
 }
 
 case object ShogiLance extends Role {
@@ -39,6 +41,7 @@ case object ShogiLance extends Role {
   val hashInt   = 7
   val storable  = true
   val valueOf   = Option(3)
+  val gameFamily = GameFamily.Shogi()
 }
 
 case object ShogiKnight extends Role {
@@ -48,6 +51,7 @@ case object ShogiKnight extends Role {
   val hashInt   = 6
   val storable  = true
   val valueOf   = Option(3)
+  val gameFamily = GameFamily.Shogi()
 }
 
 case object ShogiSilver extends Role {
@@ -57,6 +61,7 @@ case object ShogiSilver extends Role {
   val hashInt   = 5
   val storable  = true
   val valueOf   = Option(5)
+  val gameFamily = GameFamily.Shogi()
 }
 
 case object ShogiGold extends PromotableRole {
@@ -66,6 +71,7 @@ case object ShogiGold extends PromotableRole {
   val hashInt   = 4
   val storable  = true
   val valueOf   = Option(5)
+  val gameFamily = GameFamily.Shogi()
 }
 
 case object ShogiBishop extends Role {
@@ -75,6 +81,7 @@ case object ShogiBishop extends Role {
   val hashInt   = 3
   val storable  = true
   val valueOf   = Option(8)
+  val gameFamily = GameFamily.Shogi()
 }
 
 case object ShogiRook extends Role {
@@ -84,6 +91,7 @@ case object ShogiRook extends Role {
   val hashInt   = 2
   val storable  = true
   val valueOf   = Option(10)
+  val gameFamily = GameFamily.Shogi()
 }
 
 case object ShogiKing extends Role {
@@ -93,6 +101,7 @@ case object ShogiKing extends Role {
   val hashInt   = 1
   val storable  = false
   val valueOf   = None
+  val gameFamily = GameFamily.Shogi()
 }
 
 case object ShogiHorse extends PromotableRole {
@@ -105,6 +114,7 @@ case object ShogiHorse extends PromotableRole {
   //or if this role can be stored
   val storable  = true
   val valueOf   = Option(10)
+  val gameFamily = GameFamily.Shogi()
 }
 
 case object ShogiDragon extends PromotableRole {
@@ -114,6 +124,7 @@ case object ShogiDragon extends PromotableRole {
   val hashInt   = 10
   val storable  = true
   val valueOf   = Option(12)
+  val gameFamily = GameFamily.Shogi()
 }
 
 
@@ -124,6 +135,7 @@ case object XiangqiSoldier extends Role {
   val hashInt   = 7
   val storable  = false
   val valueOf   = Option(1)
+  val gameFamily = GameFamily.Xiangqi()
 }
 
 case object XiangqiCannon extends Role {
@@ -133,6 +145,7 @@ case object XiangqiCannon extends Role {
   val hashInt   = 6
   val storable  = false
   val valueOf   = Option(5)
+  val gameFamily = GameFamily.Xiangqi()
 }
 
 case object XiangqiHorse extends Role {
@@ -142,6 +155,7 @@ case object XiangqiHorse extends Role {
   val hashInt   = 5
   val storable  = false
   val valueOf   = Option(4)
+  val gameFamily = GameFamily.Xiangqi()
 }
 
 case object XiangqiElephant extends Role {
@@ -151,6 +165,7 @@ case object XiangqiElephant extends Role {
   val hashInt   = 4
   val storable  = false
   val valueOf   = Option(2)
+  val gameFamily = GameFamily.Xiangqi()
 }
 
 case object XiangqiRook extends Role {
@@ -160,6 +175,7 @@ case object XiangqiRook extends Role {
   val hashInt   = 3
   val storable  = false
   val valueOf   = Option(9)
+  val gameFamily = GameFamily.Xiangqi()
 }
 
 case object XiangqiAdvisor extends Role {
@@ -169,6 +185,7 @@ case object XiangqiAdvisor extends Role {
   val hashInt   = 2
   val storable  = false
   val valueOf   = Option(2)
+  val gameFamily = GameFamily.Xiangqi()
 }
 
 case object XiangqiKing extends Role {
@@ -178,6 +195,7 @@ case object XiangqiKing extends Role {
   val hashInt   = 1
   val storable  = false
   val valueOf   = None
+  val gameFamily = GameFamily.Xiangqi()
 }
 
 object Role {
@@ -259,6 +277,9 @@ object Role {
     (r.groundName, r)
   } toMap
   val allByBinaryInt: Map[Int, Role] = all map { r =>
+    (r.binaryInt, r)
+  } toMap
+  def allByBinaryInt(gf: GameFamily): Map[Int, Role] = all.filter(_.gameFamily == gf) map { r =>
     (r.binaryInt, r)
   } toMap
   val allByHashInt: Map[Int, Role] = all map { r =>

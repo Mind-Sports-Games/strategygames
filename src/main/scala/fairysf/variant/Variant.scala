@@ -63,6 +63,11 @@ abstract class Variant private[variant] (
     }.map{
       case (Some(orig), Some(dest), check) => {
         val uciMoves = (situation.board.uciMoves :+ s"${orig.key}${dest.key}${check}")
+        val fen = Api.fenFromMoves(
+          fairysfName.name,
+          situation.board.variant.initialFen.value,
+          uciMoves.some
+        ).value
         (orig, Move(
           piece = situation.board.pieces(orig),
           orig = orig,
@@ -71,13 +76,10 @@ abstract class Variant private[variant] (
           after = situation.board.copy(
             pieces = Api.pieceMapFromFen(
               fairysfName.name,
-              Api.fenFromMoves(
-                fairysfName.name,
-                situation.board.variant.initialFen.value,
-                uciMoves.some
-              ).value
+              fen
             ),
-            uciMoves = uciMoves
+            uciMoves = uciMoves,
+            pocketData = Api.pocketData(situation.board.variant, fen)
           ),
           capture = None,
           promotion = None,
