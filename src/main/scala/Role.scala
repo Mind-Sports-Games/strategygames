@@ -116,10 +116,22 @@ object Role {
     case GameLogic.FairySF() => fairysf.Role.allByForsyth.map{case(f, r) => (f, FairySFRole(r))}
   }
 
+  def allByForsyth(lib: GameLogic, gf: GameFamily): Map[Char, Role] = lib match {
+    case GameLogic.Draughts() => draughts.Role.allByForsyth.map{case(f, r) => (f, DraughtsRole(r))}
+    case GameLogic.Chess() => chess.Role.allByForsyth.map{case(f, r) => (f, ChessRole(r))}
+    case GameLogic.FairySF() => fairysf.Role.allByForsyth(gf).map{case(f, r) => (f, FairySFRole(r))}
+  }
+
   def allByPgn(lib: GameLogic): Map[Char, Role] = lib match {
     case GameLogic.Draughts() => draughts.Role.allByPdn.map{case(p, r) => (p, DraughtsRole(r))}
     case GameLogic.Chess() => chess.Role.allByPgn.map{case(p, r) => (p, ChessRole(r))}
     case GameLogic.FairySF() => fairysf.Role.allByPgn.map{case(p, r) => (p, FairySFRole(r))}
+  }
+
+  def allByPgn(lib: GameLogic, gf: GameFamily): Map[Char, Role] = lib match {
+    case GameLogic.Draughts() => draughts.Role.allByPdn.map{case(p, r) => (p, DraughtsRole(r))}
+    case GameLogic.Chess() => chess.Role.allByPgn.map{case(p, r) => (p, ChessRole(r))}
+    case GameLogic.FairySF() => fairysf.Role.allByPgn(gf).map{case(p, r) => (p, FairySFRole(r))}
   }
 
   def allByName(lib: GameLogic): Map[String, Role] = lib match {
@@ -128,10 +140,22 @@ object Role {
     case GameLogic.FairySF() => fairysf.Role.allByName.map{case(n, r) => (n, FairySFRole(r))}
   }
 
+  def allByName(lib: GameLogic, gf: GameFamily): Map[String, Role] = lib match {
+    case GameLogic.Draughts() => draughts.Role.allByName.map{case(n, r) => (n, DraughtsRole(r))}
+    case GameLogic.Chess() => chess.Role.allByName.map{case(n, r) => (n, ChessRole(r))}
+    case GameLogic.FairySF() => fairysf.Role.allByName(gf).map{case(n, r) => (n, FairySFRole(r))}
+  }
+
   def allByGroundName(lib: GameLogic): Map[String, Role] = lib match {
     case GameLogic.Draughts() => draughts.Role.allByName.map{case(n, r) => (n, DraughtsRole(r))}
     case GameLogic.Chess() => chess.Role.allByGroundName.map{case(n, r) => (n, ChessRole(r))}
     case GameLogic.FairySF() => fairysf.Role.allByGroundName.map{case(n, r) => (n, FairySFRole(r))}
+  }
+
+  def allByGroundName(lib: GameLogic, gf: GameFamily): Map[String, Role] = lib match {
+    case GameLogic.Draughts() => draughts.Role.allByName.map{case(n, r) => (n, DraughtsRole(r))}
+    case GameLogic.Chess() => chess.Role.allByGroundName.map{case(n, r) => (n, ChessRole(r))}
+    case GameLogic.FairySF() => fairysf.Role.allByGroundName(gf).map{case(n, r) => (n, FairySFRole(r))}
   }
 
   def allPromotableByName(lib: GameLogic): Map[String, PromotableRole] = lib match {
@@ -182,10 +206,10 @@ object Role {
     case GameLogic.FairySF()  => fairysf.Role.storable.map(FairySFRole)
   }
 
-  def pgnMoveToRole(lib: GameLogic, c: Char): Role = lib match {
+  def pgnMoveToRole(lib: GameLogic, gf: GameFamily, c: Char): Role = lib match {
     case GameLogic.Draughts() => DraughtsRole(draughts.Role.pdnMoveToRole(c))
     case GameLogic.Chess()    => ChessRole(chess.Role.pgnMoveToRole(c))
-    case GameLogic.FairySF()  => FairySFRole(fairysf.Role.pgnMoveToRole(c))
+    case GameLogic.FairySF()  => FairySFRole(fairysf.Role.pgnMoveToRole(gf, c))
   }
 
   def javaSymbolToRole(lib: GameLogic, s: String): Role = lib match {

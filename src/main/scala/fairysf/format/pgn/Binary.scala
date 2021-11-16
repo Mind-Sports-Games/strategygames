@@ -97,7 +97,7 @@ object Binary {
     )
 
     def dropUci(gf: GameFamily, piece: String, dst: String) = List(
-      (MoveType.Drop << 7) + Role.allByForsyth.get(piece(0)).get.binaryInt,
+      (MoveType.Drop << 7) + Role.allByForsyth(gf).get(piece(0)).get.binaryInt,
       (gf.id - 3 << 7) + Pos.fromKey(dst).get.index//-3 to set to 0 or 1 (Shogi or Xiangqi)
     )
 

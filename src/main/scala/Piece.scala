@@ -51,10 +51,10 @@ object Piece {
     case _ => sys.error("Mismatched gamelogic types 2")
   }
 
-  def fromChar(lib: GameLogic, c: Char): Option[Piece] = lib match {
+  def fromChar(lib: GameLogic, gf: GameFamily, c: Char): Option[Piece] = lib match {
     case (GameLogic.Draughts()) => draughts.Piece.fromChar(c).map(Draughts)
     case (GameLogic.Chess())    => chess.Piece.fromChar(c).map(Chess)
-    case (GameLogic.FairySF())  => fairysf.Piece.fromChar(c).map(FairySF)
+    case (GameLogic.FairySF())  => fairysf.Piece.fromChar(gf, c).map(FairySF)
   }
 
   def chessPieceMap(pieceMap: PieceMap): chess.PieceMap = pieceMap.map{

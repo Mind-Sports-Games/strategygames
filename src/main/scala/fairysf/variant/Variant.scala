@@ -56,7 +56,6 @@ abstract class Variant private[variant] (
       fairysfName.name,
       situation.board.variant.initialFen.value,
       situation.board.uciMoves.some
-    //Do we need to always filter out the drops?
     ).filterNot(_.contains("@"))
     .map{
       case Uci.Move.moveR(orig, dest, check) => (Pos.fromKey(orig), Pos.fromKey(dest), check)
@@ -90,8 +89,44 @@ abstract class Variant private[variant] (
       case (orig, dest, check) => sys.error(s"Invalid position from uci: ${orig}${dest}${check}")
     }.groupBy(_._1).map { case (k,v) => (k,v.toList.map(_._2))}
 
+  def validDrops(situation: Situation): List[Drop] =
+    Api.legalMoves(
+      fairysfName.name,
+      situation.board.variant.initialFen.value,
+      situation.board.uciMoves.some
+    ).filter(_.contains("@"))
+    .map{
+      case Uci.Drop.dropR(role, dest, check) => (
+        Role.allByForsyth(situation.board.variant.gameFamily).get(role(0)),
+        Pos.fromKey(dest),
+        check
+      )
+    }.map{
+      case (Some(role), Some(dest), check) => {
+        val uciMoves = (situation.board.uciMoves :+ s"${role.forsyth}@${dest.key}${check}")
+        val fen = Api.fenFromMoves(
+          fairysfName.name,
+          situation.board.variant.initialFen.value,
+          uciMoves.some
+        ).value
+        Drop(
+          piece = Piece(situation.color, role),
+          pos = dest,
+          situationBefore = situation,
+          after = situation.board.copy(
+            pieces = Api.pieceMapFromFen(
+              fairysfName.name,
+              fen
+            ),
+            uciMoves = uciMoves,
+            pocketData = Api.pocketData(situation.board.variant, fen)
+          )
+        )
+      }
+      case (role, dest, check) => sys.error(s"Invalid position from uci: ${role}${dest}${check}")
+    }.toList
+
   //TODO: test, but think this is right as its based off chess without actor check
-  //Consider drops might get passed in through here
   //Update: not checking promotion here yet!
   def move(
       situation: Situation,
@@ -114,7 +149,19 @@ abstract class Variant private[variant] (
   }
 
   def drop(situation: Situation, role: Role, pos: Pos): Validated[String, Drop] =
-    Validated.invalid(s"$this variant cannot drop $situation $role $pos")
+    if (dropsVariant)
+      validDrops(situation).filter(
+        d => d.piece.role == role && d.pos == pos
+      ).headOption match {
+        case Some(drop) => Validated.valid(drop)
+        case None => Validated.invalid(s"$situation cannot perform the drop: $role on $pos")
+      }
+    else Validated.invalid(s"$this variant cannot drop $situation $role $pos")
+
+  def possibleDrops(situation: Situation): Option[List[Pos]] =
+    if (dropsVariant)
+      validDrops(situation).map(_.pos).some
+    else None
 
   def staleMate(situation: Situation): Boolean = !situation.check && situation.moves.isEmpty
 

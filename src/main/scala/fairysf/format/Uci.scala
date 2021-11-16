@@ -1,6 +1,8 @@
 package strategygames.fairysf.format
 import strategygames.fairysf._
 
+import strategygames.GameFamily
+
 import cats.data.Validated
 import cats.implicits._
 
@@ -75,9 +77,9 @@ object Uci {
 
   object Drop {
 
-    def fromStrings(roleS: String, posS: String) =
+    def fromStrings(gf: GameFamily, roleS: String, posS: String) =
       for {
-        role <- Role.allByName get roleS
+        role <- Role.allByName(gf) get roleS
         pos  <- Pos.fromKey(posS)
       } yield Drop(role, pos)
 
@@ -91,16 +93,20 @@ object Uci {
 
   def apply(drop: strategygames.fairysf.Drop) = Uci.Drop(drop.piece.role, drop.pos)
 
+  //will need to work out something different for GameFamily
+  //if multiple GameFamilys have drops
   def apply(move: String): Option[Uci] =
     if (move lift 1 contains '@') for {
-      role <- move.headOption flatMap Role.allByPgn.get
+      role <- move.headOption flatMap Role.allByPgn(GameFamily.Shogi()).get
       pos  <- Pos.fromKey(move.slice(2, 4))
     } yield Uci.Drop(role, pos)
     else Uci.Move(move)
 
+  //will need to work out something different for GameFamily
+  //if multiple GameFamilys have drops
   def piotr(move: String): Option[Uci] =
     if (move lift 1 contains '@') for {
-      role <- move.headOption flatMap Role.allByPgn.get
+      role <- move.headOption flatMap Role.allByPgn(GameFamily.Shogi()).get
       pos  <- move lift 2 flatMap Pos.piotr
     } yield Uci.Drop(role, pos)
     else Uci.Move.piotr(move)

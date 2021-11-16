@@ -191,11 +191,14 @@ object Uci {
 
   object Drop {
 
-    def fromStrings(lib: GameLogic, roleS: String, posS: String): Option[Drop] = lib match {
-      case GameLogic.Draughts() => None
-      case GameLogic.Chess()    => chess.format.Uci.Drop.fromStrings(roleS, posS).map(ChessDrop)
-      case GameLogic.FairySF()  => fairysf.format.Uci.Drop.fromStrings(roleS, posS).map(FairySFDrop)
-    }
+    def fromStrings(lib: GameLogic, gf: GameFamily, roleS: String, posS: String): Option[Drop] =
+      lib match {
+        case GameLogic.Draughts() => None
+        case GameLogic.Chess()    =>
+          chess.format.Uci.Drop.fromStrings(roleS, posS).map(ChessDrop)
+        case GameLogic.FairySF()  =>
+          fairysf.format.Uci.Drop.fromStrings(gf, roleS, posS).map(FairySFDrop)
+      }
 
   }
 

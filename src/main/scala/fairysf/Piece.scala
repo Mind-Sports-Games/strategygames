@@ -1,6 +1,6 @@
 package strategygames.fairysf
 
-import strategygames.Color
+import strategygames.{ Color, GameFamily }
 
 case class Piece(color: Color, role: Role) {
 
@@ -17,13 +17,9 @@ case class Piece(color: Color, role: Role) {
 
 object Piece {
 
-  def fromChar(c: Char): Option[Piece] =
-    Role.allByPgn get c.toUpper map {
+  def fromChar(gf: GameFamily, c: Char): Option[Piece] =
+    Role.allByPgn(gf) get c.toUpper map {
       Piece(Color.fromWhite(c.isUpper), _)
     }
 
-  private def pawnEyes(color: Color, from: Pos, to: Pos) =
-    (from xDist to) == 1 && (to.rank - from.rank) == {
-      if (color.white) 1 else -1
-    }
 }
