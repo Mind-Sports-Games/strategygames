@@ -105,7 +105,7 @@ case object ShogiKing extends Role {
 }
 
 case object ShogiHorse extends PromotableRole {
-  val fairySFID = Role.horse
+  val fairySFID = Role.dragonHorse
   val forsyth   = 'H'
   val binaryInt = 9
   val hashInt   = 9
@@ -118,7 +118,7 @@ case object ShogiHorse extends PromotableRole {
 }
 
 case object ShogiDragon extends PromotableRole {
-  val fairySFID = Role.dragonHorse
+  val fairySFID = Role.bers
   val forsyth   = 'D'
   val binaryInt = 10
   val hashInt   = 10
@@ -254,6 +254,8 @@ object Role {
       ShogiBishop,
       ShogiRook,
       ShogiKing,
+      ShogiHorse,
+      ShogiDragon,
       XiangqiSoldier,
       XiangqiAdvisor,
       XiangqiElephant,
