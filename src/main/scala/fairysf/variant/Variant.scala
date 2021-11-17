@@ -58,10 +58,14 @@ abstract class Variant private[variant] (
       situation.board.uciMoves.some
     ).filterNot(_.contains("@"))
     .map{
-      case Uci.Move.moveR(orig, dest, check) => (Pos.fromKey(orig), Pos.fromKey(dest), check)
+      case Uci.Move.moveR(orig, dest, promotion) => (
+        Pos.fromKey(orig),
+        Pos.fromKey(dest),
+        promotion
+      )
     }.map{
-      case (Some(orig), Some(dest), check) => {
-        val uciMoves = (situation.board.uciMoves :+ s"${orig.key}${dest.key}${check}")
+      case (Some(orig), Some(dest), promotion) => {
+        val uciMoves = (situation.board.uciMoves :+ s"${orig.key}${dest.key}${promotion}")
         val fen = Api.fenFromMoves(
           fairysfName.name,
           situation.board.variant.initialFen.value,
@@ -81,12 +85,20 @@ abstract class Variant private[variant] (
             pocketData = Api.pocketData(situation.board.variant, fen)
           ),
           capture = None,
-          promotion = None,
+          promotion = promotion match {
+            case "+" => situation.board.pieces(orig).role match {
+              case ShogiPawn | ShogiLance | ShogiKnight | ShogiSilver => ShogiGold.some
+              case ShogiBishop => ShogiHorse.some
+              case ShogiRook => ShogiDragon.some
+              case _ => None
+            }
+            case _ => None
+          },
           castle = None,
           enpassant = false
         ))
       }
-      case (orig, dest, check) => sys.error(s"Invalid position from uci: ${orig}${dest}${check}")
+      case (orig, dest, prom) => sys.error(s"Invalid position from uci: ${orig}${dest}${prom}")
     }.groupBy(_._1).map { case (k,v) => (k,v.toList.map(_._2))}
 
   def validDrops(situation: Situation): List[Drop] =
@@ -96,14 +108,13 @@ abstract class Variant private[variant] (
       situation.board.uciMoves.some
     ).filter(_.contains("@"))
     .map{
-      case Uci.Drop.dropR(role, dest, check) => (
+      case Uci.Drop.dropR(role, dest) => (
         Role.allByForsyth(situation.board.variant.gameFamily).get(role(0)),
-        Pos.fromKey(dest),
-        check
+        Pos.fromKey(dest)
       )
     }.map{
-      case (Some(role), Some(dest), check) => {
-        val uciMoves = (situation.board.uciMoves :+ s"${role.forsyth}@${dest.key}${check}")
+      case (Some(role), Some(dest)) => {
+        val uciMoves = (situation.board.uciMoves :+ s"${role.forsyth}@${dest.key}")
         val fen = Api.fenFromMoves(
           fairysfName.name,
           situation.board.variant.initialFen.value,
@@ -123,7 +134,7 @@ abstract class Variant private[variant] (
           )
         )
       }
-      case (role, dest, check) => sys.error(s"Invalid position from uci: ${role}${dest}${check}")
+      case (role, dest) => sys.error(s"Invalid position from uci: ${role}${dest}")
     }.toList
 
   //TODO: test, but think this is right as its based off chess without actor check
@@ -135,9 +146,12 @@ abstract class Variant private[variant] (
       promotion: Option[PromotableRole]
   ): Validated[String, Move] = {
     // Find the move in the variant specific list of valid moves
-    situation.moves get from flatMap (_.find(_.dest == to)) match {
+    val prom = promotion.pp("promotion")
+    situation.moves get from flatMap (_.find(
+      m => m.dest == to && m.promotion == promotion)
+    ) match {
       case Some(move) => Validated.valid(move)
-      case None => Validated.invalid(s"Not a valid move: ${from}${to}")
+      case None => Validated.invalid(s"Not a valid move: ${from}${to} with prom: ${promotion}. Allowed moves: ${situation.moves}")
     }
     //for {
     //  m1 <- findMove(from, to) toValid "Piece on " + from + " cannot move to " + to

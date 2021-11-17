@@ -83,7 +83,7 @@ object Uci {
         pos  <- Pos.fromKey(posS)
       } yield Drop(role, pos)
 
-    val dropR = s"^${Role.roleR}@${Pos.posR}(\\+?)$$".r
+    val dropR = s"^${Role.roleR}@${Pos.posR}$$".r
 
   }
 

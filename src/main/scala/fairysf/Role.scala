@@ -2,6 +2,8 @@ package strategygames.fairysf
 
 import strategygames.{ Black, Color, White, GameFamily }
 
+import cats.implicits._
+
 case class FairySFRoleID(val id: Int)
 
 sealed trait Role {
@@ -264,8 +266,18 @@ object Role {
       XiangqiRook,
       XiangqiKing
     )
+
   val allPromotable: List[PromotableRole] =
     List(ShogiGold, ShogiHorse, ShogiDragon)
+
+  val promotionMap: Map[Role, PromotableRole] = Map(
+    ShogiPawn   -> ShogiGold,
+    ShogiLance  -> ShogiGold,
+    ShogiKnight -> ShogiGold,
+    ShogiSilver -> ShogiGold,
+    ShogiBishop -> ShogiHorse,
+    ShogiRook   -> ShogiDragon
+  )
   def allByGameFamily(gf: GameFamily): List[Role] = all.filter(_.gameFamily == gf)
   val allByForsyth: Map[Char, Role] = all map { r =>
     (r.forsyth, r)
@@ -323,7 +335,11 @@ object Role {
   def hashInt(i: Int): Option[Role] = allByHashInt get i
 
   def promotable(c: Char): Option[PromotableRole] =
-    allPromotableByForsyth get c
+    (c match {
+      case 'b' => ShogiHorse
+      case 'r' => ShogiDragon
+      case _ => ShogiGold
+    }).some//allPromotableByForsyth.getOrElse(c.toUpper, ShogiGold.some)
 
   def promotable(name: String): Option[PromotableRole] =
     allPromotableByName get name.capitalize
