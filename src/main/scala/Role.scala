@@ -164,10 +164,22 @@ object Role {
     case GameLogic.FairySF() => fairysf.Role.allPromotableByName.map{case(n, r) => (n, FairySFPromotableRole(r))}
   }
 
+  def allPromotableByName(lib: GameLogic, gf: GameFamily): Map[String, PromotableRole] = lib match {
+    case GameLogic.Draughts() => draughts.Role.allPromotableByName.map{case(n, r) => (n, DraughtsPromotableRole(r))}
+    case GameLogic.Chess() => chess.Role.allPromotableByName.map{case(n, r) => (n, ChessPromotableRole(r))}
+    case GameLogic.FairySF() => fairysf.Role.allPromotableByName(gf).map{case(n, r) => (n, FairySFPromotableRole(r))}
+  }
+
   def allPromotableByForsyth(lib: GameLogic): Map[Char, PromotableRole] = lib match {
     case GameLogic.Draughts() => draughts.Role.allPromotableByForsyth.map{case(f, r) => (f, DraughtsPromotableRole(r))}
     case GameLogic.Chess() => chess.Role.allPromotableByForsyth.map{case(f, r) => (f, ChessPromotableRole(r))}
     case GameLogic.FairySF() => fairysf.Role.allPromotableByForsyth.map{case(f, r) => (f, FairySFPromotableRole(r))}
+  }
+
+  def allPromotableByForsyth(lib: GameLogic, gf: GameFamily): Map[Char, PromotableRole] = lib match {
+    case GameLogic.Draughts() => draughts.Role.allPromotableByForsyth.map{case(f, r) => (f, DraughtsPromotableRole(r))}
+    case GameLogic.Chess() => chess.Role.allPromotableByForsyth.map{case(f, r) => (f, ChessPromotableRole(r))}
+    case GameLogic.FairySF() => fairysf.Role.allPromotableByForsyth(gf).map{case(f, r) => (f, FairySFPromotableRole(r))}
   }
 
   def allPromotableByPgn(lib: GameLogic): Map[Char, PromotableRole] = lib match {
@@ -176,28 +188,34 @@ object Role {
     case GameLogic.FairySF() => fairysf.Role.allPromotableByPgn.map{case(p, r) => (p, FairySFPromotableRole(r))}
   }
 
+  def allPromotableByPgn(lib: GameLogic, gf: GameFamily): Map[Char, PromotableRole] = lib match {
+    case GameLogic.Draughts() => draughts.Role.allPromotableByPdn.map{case(p, r) => (p, DraughtsPromotableRole(r))}
+    case GameLogic.Chess() => chess.Role.allPromotableByPgn.map{case(p, r) => (p, ChessPromotableRole(r))}
+    case GameLogic.FairySF() => fairysf.Role.allPromotableByPgn(gf).map{case(p, r) => (p, FairySFPromotableRole(r))}
+  }
+
   def forsyth(lib: GameLogic, c: Char): Option[Role] = lib match {
     case GameLogic.Draughts() => draughts.Role.forsyth(c).map(DraughtsRole)
     case GameLogic.Chess()    => chess.Role.forsyth(c).map(ChessRole)
     case GameLogic.FairySF()  => fairysf.Role.forsyth(c).map(FairySFRole)
   }
 
-  def promotable(lib: GameLogic, c: Char): Option[PromotableRole] = lib match {
+  def promotable(lib: GameLogic, gf: GameFamily, c: Char): Option[PromotableRole] = lib match {
     case GameLogic.Draughts() => draughts.Role.promotable(c).map(DraughtsPromotableRole)
     case GameLogic.Chess()    => chess.Role.promotable(c).map(ChessPromotableRole)
-    case GameLogic.FairySF()  => fairysf.Role.promotable(c).map(FairySFPromotableRole)
+    case GameLogic.FairySF()  => fairysf.Role.promotable(gf, c).map(FairySFPromotableRole)
   }
 
-  def promotable(lib: GameLogic, name: String): Option[PromotableRole] = lib match {
+  def promotable(lib: GameLogic, gf: GameFamily, name: String): Option[PromotableRole] = lib match {
     case GameLogic.Draughts() => draughts.Role.promotable(name).map(DraughtsPromotableRole)
     case GameLogic.Chess()    => chess.Role.promotable(name).map(ChessPromotableRole)
-    case GameLogic.FairySF()  => fairysf.Role.promotable(name).map(FairySFPromotableRole)
+    case GameLogic.FairySF()  => fairysf.Role.promotable(gf, name).map(FairySFPromotableRole)
   }
 
-  def promotable(lib: GameLogic, name: Option[String]): Option[PromotableRole] = lib match {
+  def promotable(lib: GameLogic, gf: GameFamily, name: Option[String]): Option[PromotableRole] = lib match {
     case GameLogic.Draughts() => draughts.Role.promotable(name).map(DraughtsPromotableRole)
     case GameLogic.Chess()    => chess.Role.promotable(name).map(ChessPromotableRole)
-    case GameLogic.FairySF()  => fairysf.Role.promotable(name).map(FairySFPromotableRole)
+    case GameLogic.FairySF()  => fairysf.Role.promotable(gf, name).map(FairySFPromotableRole)
   }
 
   def storable(lib: GameLogic): List[Role] = lib match {

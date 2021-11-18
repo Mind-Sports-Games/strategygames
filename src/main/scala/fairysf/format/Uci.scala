@@ -39,25 +39,25 @@ object Uci {
 
   object Move {
 
-    def apply(move: String): Option[Move] =
+    def apply(gf: GameFamily, move: String): Option[Move] =
       for {
         orig <- Pos.fromKey(move take 2)
         dest <- Pos.fromKey(move.slice(2, 4))
-        promotion = move lift 4 flatMap Role.promotable
+        promotion = move.lift(4).flatMap(Role.promotable(gf, _))
       } yield Move(orig, dest, promotion)
 
-    def piotr(move: String) =
+    def piotr(gf: GameFamily, move: String) =
       for {
         orig <- move.headOption flatMap Pos.piotr
         dest <- move lift 1 flatMap Pos.piotr
-        promotion = move lift 2 flatMap Role.promotable
+        promotion = move.lift(2).flatMap(Role.promotable(gf, _))
       } yield Move(orig, dest, promotion)
 
-    def fromStrings(origS: String, destS: String, promS: Option[String]) =
+    def fromStrings(gf: GameFamily, origS: String, destS: String, promS: Option[String]) =
       for {
         orig <- Pos.fromKey(origS)
         dest <- Pos.fromKey(destS)
-        promotion = Role promotable promS
+        promotion = Role.promotable(gf, promS)
       } yield Move(orig, dest, promotion)
 
     val moveR = s"^${Pos.posR}${Pos.posR}(\\+?)$$".r
@@ -93,32 +93,28 @@ object Uci {
 
   def apply(drop: strategygames.fairysf.Drop) = Uci.Drop(drop.piece.role, drop.pos)
 
-  //will need to work out something different for GameFamily
-  //if multiple GameFamilys have drops
-  def apply(move: String): Option[Uci] =
+  def apply(gf: GameFamily, move: String): Option[Uci] =
     if (move lift 1 contains '@') for {
-      role <- move.headOption flatMap Role.allByPgn(GameFamily.Shogi()).get
+      role <- move.headOption flatMap Role.allByPgn(gf).get
       pos  <- Pos.fromKey(move.slice(2, 4))
     } yield Uci.Drop(role, pos)
-    else Uci.Move(move)
+    else Uci.Move(gf, move)
 
-  //will need to work out something different for GameFamily
-  //if multiple GameFamilys have drops
-  def piotr(move: String): Option[Uci] =
+  def piotr(gf: GameFamily, move: String): Option[Uci] =
     if (move lift 1 contains '@') for {
-      role <- move.headOption flatMap Role.allByPgn(GameFamily.Shogi()).get
+      role <- move.headOption flatMap Role.allByPgn(gf).get
       pos  <- move lift 2 flatMap Pos.piotr
     } yield Uci.Drop(role, pos)
-    else Uci.Move.piotr(move)
+    else Uci.Move.piotr(gf, move)
 
-  def readList(moves: String): Option[List[Uci]] =
-    moves.split(' ').toList.map(apply).sequence
+  def readList(gf: GameFamily, moves: String): Option[List[Uci]] =
+    moves.split(' ').toList.map(apply(gf, _)).sequence
 
   def writeList(moves: List[Uci]): String =
     moves.map(_.uci) mkString " "
 
-  def readListPiotr(moves: String): Option[List[Uci]] =
-    moves.split(' ').toList.map(piotr).sequence
+  def readListPiotr(gf: GameFamily, moves: String): Option[List[Uci]] =
+    moves.split(' ').toList.map(piotr(gf, _)).sequence
 
   def writeListPiotr(moves: List[Uci]): String =
     moves.map(_.piotr) mkString " "

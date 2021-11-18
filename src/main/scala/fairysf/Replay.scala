@@ -112,7 +112,7 @@ object Replay {
               enpassant = false
             )
           )
-          (state, Uci.WithSan(Uci.apply(uciMove).get, "NOSAN"))
+          (state, Uci.WithSan(Uci.apply(state.board.variant.gameFamily, uciMove).get, "NOSAN"))
         }
         case (orig, dest, check) => {
           val uciMove = s"${orig}${dest}${check}"

@@ -24,8 +24,6 @@ sealed trait Role {
 }
 sealed trait PromotableRole extends Role
 
-/** Promotable in antichess.
-  */
 case object ShogiPawn extends Role {
   val fairySFID  = Role.shogiPawn
   val forsyth    = 'P'
@@ -66,7 +64,7 @@ case object ShogiSilver extends Role {
   val gameFamily = GameFamily.Shogi()
 }
 
-case object ShogiGold extends PromotableRole {
+case object ShogiGold extends Role {
   val fairySFID = Role.gold
   val forsyth   = 'G'
   val binaryInt = 5
@@ -103,6 +101,50 @@ case object ShogiKing extends Role {
   val hashInt   = 1
   val storable  = false
   val valueOf   = None
+  val gameFamily = GameFamily.Shogi()
+}
+
+case object ShogiPromotedPawn extends PromotableRole {
+  val fairySFID  = Role.shogiPawn
+  val forsyth    = 'P'
+  override lazy val groundName = s"p${forsyth.toLower}-piece"
+  val binaryInt  = 1
+  val hashInt    = 8
+  val storable   = true
+  val valueOf    = Option(5)
+  val gameFamily = GameFamily.Shogi()
+}
+
+case object ShogiPromotedLance extends PromotableRole {
+  val fairySFID = Role.lance
+  val forsyth   = 'L'
+  override lazy val groundName = s"p${forsyth.toLower}-piece"
+  val binaryInt = 2
+  val hashInt   = 7
+  val storable  = true
+  val valueOf   = Option(5)
+  val gameFamily = GameFamily.Shogi()
+}
+
+case object ShogiPromotedKnight extends PromotableRole {
+  val fairySFID = Role.shogiKnight
+  val forsyth   = 'N'
+  override lazy val groundName = s"p${forsyth.toLower}-piece"
+  val binaryInt = 3
+  val hashInt   = 6
+  val storable  = true
+  val valueOf   = Option(5)
+  val gameFamily = GameFamily.Shogi()
+}
+
+case object ShogiPromotedSilver extends PromotableRole {
+  val fairySFID = Role.silver
+  val forsyth   = 'S'
+  override lazy val groundName = s"p${forsyth.toLower}-piece"
+  val binaryInt = 4
+  val hashInt   = 5
+  val storable  = true
+  val valueOf   = Option(5)
   val gameFamily = GameFamily.Shogi()
 }
 
@@ -268,17 +310,38 @@ object Role {
     )
 
   val allPromotable: List[PromotableRole] =
-    List(ShogiGold, ShogiHorse, ShogiDragon)
+    List(
+      ShogiPromotedPawn,
+      ShogiPromotedLance,
+      ShogiPromotedKnight,
+      ShogiPromotedSilver,
+      ShogiHorse,
+      ShogiDragon
+    )
+
+  val promotedRolesForDisplayOnly: List[PromotableRole] =
+    List(
+      ShogiPromotedPawn,
+      ShogiPromotedLance,
+      ShogiPromotedKnight,
+      ShogiPromotedSilver,
+    )
 
   val promotionMap: Map[Role, PromotableRole] = Map(
-    ShogiPawn   -> ShogiGold,
-    ShogiLance  -> ShogiGold,
-    ShogiKnight -> ShogiGold,
-    ShogiSilver -> ShogiGold,
+    ShogiPawn   -> ShogiPromotedPawn,
+    ShogiLance  -> ShogiPromotedLance,
+    ShogiKnight -> ShogiPromotedKnight,
+    ShogiSilver -> ShogiPromotedSilver,
     ShogiBishop -> ShogiHorse,
     ShogiRook   -> ShogiDragon
   )
-  def allByGameFamily(gf: GameFamily): List[Role] = all.filter(_.gameFamily == gf)
+
+  def allByGameFamily(gf: GameFamily): List[Role] =
+    all.filter(r => r.gameFamily == gf && !promotedRolesForDisplayOnly.contains(r))
+
+  def allPromotableByGameFamily(gf: GameFamily): List[PromotableRole] =
+    allPromotable.filter(r => r.gameFamily == gf)
+
   val allByForsyth: Map[Char, Role] = all map { r =>
     (r.forsyth, r)
   } toMap
@@ -316,12 +379,24 @@ object Role {
     allPromotable map { r =>
       (r.toString, r)
     } toMap
+  def allPromotableByName(gf: GameFamily): Map[String, PromotableRole] =
+    allPromotableByGameFamily(gf) map { r =>
+      (r.toString, r)
+    } toMap
   val allPromotableByForsyth: Map[Char, PromotableRole] =
     allPromotable map { r =>
       (r.forsyth, r)
     } toMap
+  def allPromotableByForsyth(gf: GameFamily): Map[Char, PromotableRole] =
+    allPromotableByGameFamily(gf) map { r =>
+      (r.forsyth, r)
+    } toMap
   val allPromotableByPgn: Map[Char, PromotableRole] =
     allPromotable map { r =>
+      (r.pgn, r)
+    } toMap
+  def allPromotableByPgn(gf: GameFamily): Map[Char, PromotableRole] =
+    allPromotableByGameFamily(gf) map { r =>
       (r.pgn, r)
     } toMap
   val allByFairySFID: Map[Int, Role] = all map { r =>
@@ -334,18 +409,14 @@ object Role {
 
   def hashInt(i: Int): Option[Role] = allByHashInt get i
 
-  def promotable(c: Char): Option[PromotableRole] =
-    (c match {
-      case 'b' => ShogiHorse
-      case 'r' => ShogiDragon
-      case _ => ShogiGold
-    }).some//allPromotableByForsyth.getOrElse(c.toUpper, ShogiGold.some)
+  def promotable(gf: GameFamily, c: Char): Option[PromotableRole] =
+    allByForsyth(gf).get(c.toUpper).flatMap(promotionMap.get(_))
 
-  def promotable(name: String): Option[PromotableRole] =
-    allPromotableByName get name.capitalize
+  def promotable(gf: GameFamily, name: String): Option[PromotableRole] =
+    allPromotableByName(gf).get(name.capitalize).flatMap(promotionMap.get(_))
 
-  def promotable(name: Option[String]): Option[PromotableRole] =
-    name flatMap promotable
+  def promotable(gf: GameFamily, name: Option[String]): Option[PromotableRole] =
+    name.flatMap(promotable(gf, _))
 
   def storable: List[Role] = all.filter(_.storable)
 

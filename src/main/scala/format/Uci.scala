@@ -167,25 +167,25 @@ object Uci {
         case _ => sys.error("Mismatched gamelogic types 23")
       }
 
-    def apply(lib: GameLogic, move: String): Option[Move] = lib match {
+    def apply(lib: GameLogic, gf: GameFamily, move: String): Option[Move] = lib match {
       case GameLogic.Draughts() => draughts.format.Uci.Move.apply(move).map(DraughtsMove)
       case GameLogic.Chess()    => chess.format.Uci.Move.apply(move).map(ChessMove)
-      case GameLogic.FairySF()  => fairysf.format.Uci.Move.apply(move).map(FairySFMove)
+      case GameLogic.FairySF()  => fairysf.format.Uci.Move.apply(gf, move).map(FairySFMove)
     }
 
-    def piotr(lib: GameLogic, move: String): Option[Move] = lib match {
+    def piotr(lib: GameLogic, gf: GameFamily, move: String): Option[Move] = lib match {
       case GameLogic.Draughts() => draughts.format.Uci.Move.piotr(move).map(DraughtsMove)
       case GameLogic.Chess()    => chess.format.Uci.Move.piotr(move).map(ChessMove)
-      case GameLogic.FairySF()  => fairysf.format.Uci.Move.piotr(move).map(FairySFMove)
+      case GameLogic.FairySF()  => fairysf.format.Uci.Move.piotr(gf, move).map(FairySFMove)
     }
 
-    def fromStrings(lib: GameLogic, origS: String, destS: String, promS: Option[String]): Option[Move] = lib match {
+    def fromStrings(lib: GameLogic, gf: GameFamily, origS: String, destS: String, promS: Option[String]): Option[Move] = lib match {
       case GameLogic.Draughts()
         => draughts.format.Uci.Move.fromStrings(origS, destS, promS).map(DraughtsMove)
       case GameLogic.Chess()
         => chess.format.Uci.Move.fromStrings(origS, destS, promS).map(ChessMove)
       case GameLogic.FairySF()
-        => fairysf.format.Uci.Move.fromStrings(origS, destS, promS).map(FairySFMove)
+        => fairysf.format.Uci.Move.fromStrings(gf, origS, destS, promS).map(FairySFMove)
     }
   }
 
@@ -252,39 +252,41 @@ object Uci {
       => FairySFDrop(fairysf.format.Uci.apply(drop))
   }
 
-  def apply(lib: GameLogic, move: String): Option[Uci] = lib match {
+  def apply(lib: GameLogic, gf: GameFamily, move: String): Option[Uci] = lib match {
       case GameLogic.Draughts() => draughts.format.Uci.apply(move).map(wrap)
       case GameLogic.Chess()    => chess.format.Uci.apply(move).map(wrap)
-      case GameLogic.FairySF()  => fairysf.format.Uci.apply(move).map(wrap)
+      case GameLogic.FairySF()  => fairysf.format.Uci.apply(gf, move).map(wrap)
   }
 
-  private def piotr(lib: GameLogic, move: String): Option[Uci] = lib match {
+  private def piotr(lib: GameLogic, gf: GameFamily, move: String): Option[Uci] = lib match {
       case GameLogic.Draughts() => draughts.format.Uci.piotr(move).map(wrap)
       case GameLogic.Chess()    => chess.format.Uci.piotr(move).map(wrap)
-      case GameLogic.FairySF()  => fairysf.format.Uci.piotr(move).map(wrap)
+      case GameLogic.FairySF()  => fairysf.format.Uci.piotr(gf, move).map(wrap)
   }
 
-  def readList(lib: GameLogic, moves: String): Option[List[Uci]] =
-    moves.split(' ').toList.map(apply(lib, _)).sequence
+  def readList(lib: GameLogic, gf: GameFamily, moves: String): Option[List[Uci]] =
+    moves.split(' ').toList.map(apply(lib, gf, _)).sequence
 
   def writeList(moves: List[Uci]): String =
     moves.map(_.uci) mkString " "
 
   def readListPiotr(moves: String): Option[List[Uci]] =
     moves.split('_') match {
-      case Array(lib, moves) =>
-        moves.split(' ').toList.map(piotr(GameLogic(lib.toInt), _)).sequence
+      case Array(lib, gf, moves) =>
+        moves.split(' ').toList.map(
+          piotr(GameLogic(lib.toInt), GameFamily(gf.toInt), _)
+        ).sequence
       case _ => sys.error("No lib encoded into uci piotr")
     }
 
-  def writeListPiotr(moves: List[Uci]): String =
+  def writeListPiotr(gf: GameFamily, moves: List[Uci]): String =
     (if (moves.length > 0) {
       moves.head match {
-        case Uci.ChessMove(_)    => "0_"
-        case Uci.ChessDrop(_)    => "0_"
-        case Uci.DraughtsMove(_) => "1_"
-        case Uci.FairySFMove(_)  => "2_"
-        case Uci.FairySFDrop(_)  => "2_"
+        case Uci.ChessMove(_)    => s"0_${gf.id}_"
+        case Uci.ChessDrop(_)    => s"0_${gf.id}_"
+        case Uci.DraughtsMove(_) => s"1_${gf.id}_"
+        case Uci.FairySFMove(_)  => s"2_${gf.id}_"
+        case Uci.FairySFDrop(_)  => s"2_${gf.id}_"
       }
     } else "") + moves.map(_.piotr) mkString " "
 

@@ -86,12 +86,10 @@ abstract class Variant private[variant] (
           ),
           capture = None,
           promotion = promotion match {
-            case "+" => situation.board.pieces(orig).role match {
-              case ShogiPawn | ShogiLance | ShogiKnight | ShogiSilver => ShogiGold.some
-              case ShogiBishop => ShogiHorse.some
-              case ShogiRook => ShogiDragon.some
-              case _ => None
-            }
+            case "+" => Role.promotable(
+              situation.board.variant.gameFamily,
+              situation.board.pieces(orig).role.forsyth
+            )
             case _ => None
           },
           castle = None,
