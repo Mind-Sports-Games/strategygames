@@ -49,7 +49,8 @@ object Api {
   private def pieceFromFSPiece(piece: FairyStockfish.Piece): Piece =
     Piece(
       Color.all(piece.color()),
-      Role.allByFairySFID(piece.pieceInfo().id)
+      if (piece.promoted) Role.promotionMap(Role.allByFairySFID(piece.pieceInfo().id))
+      else Role.allByFairySFID(piece.pieceInfo().id)
     )
 
   implicit def vectorOfPiecesToPieceArray(pieces: FairyStockfish.VectorOfPieces): Array[Piece] =
