@@ -104,45 +104,47 @@ case object ShogiKing extends Role {
   val gameFamily = GameFamily.Shogi()
 }
 
+//On promoted pieces, `storable` depends if storable means
+//can a piece of this role be stored when captured or if this role can be stored
 case object ShogiPromotedPawn extends PromotableRole {
-  val fairySFID  = Role.shogiPawn
+  val fairySFID  = Role.undefined
   val forsyth    = 'P'
   override lazy val groundName = s"p${forsyth.toLower}-piece"
-  val binaryInt  = 1
-  val hashInt    = 8
+  val binaryInt  = 11
+  val hashInt    = 14
   val storable   = true
   val valueOf    = Option(5)
   val gameFamily = GameFamily.Shogi()
 }
 
 case object ShogiPromotedLance extends PromotableRole {
-  val fairySFID = Role.lance
+  val fairySFID = Role.undefined
   val forsyth   = 'L'
   override lazy val groundName = s"p${forsyth.toLower}-piece"
-  val binaryInt = 2
-  val hashInt   = 7
+  val binaryInt = 12
+  val hashInt   = 13
   val storable  = true
   val valueOf   = Option(5)
   val gameFamily = GameFamily.Shogi()
 }
 
 case object ShogiPromotedKnight extends PromotableRole {
-  val fairySFID = Role.shogiKnight
+  val fairySFID = Role.undefined
   val forsyth   = 'N'
   override lazy val groundName = s"p${forsyth.toLower}-piece"
-  val binaryInt = 3
-  val hashInt   = 6
+  val binaryInt = 13
+  val hashInt   = 12
   val storable  = true
   val valueOf   = Option(5)
   val gameFamily = GameFamily.Shogi()
 }
 
 case object ShogiPromotedSilver extends PromotableRole {
-  val fairySFID = Role.silver
+  val fairySFID = Role.undefined
   val forsyth   = 'S'
   override lazy val groundName = s"p${forsyth.toLower}-piece"
-  val binaryInt = 4
-  val hashInt   = 5
+  val binaryInt = 14
+  val hashInt   = 11
   val storable  = true
   val valueOf   = Option(5)
   val gameFamily = GameFamily.Shogi()
@@ -154,9 +156,6 @@ case object ShogiHorse extends PromotableRole {
   override lazy val groundName = s"p${forsyth.toLower}-piece"
   val binaryInt = 9
   val hashInt   = 9
-  //depends if storable means
-  //can a piece of this role be stored when captured
-  //or if this role can be stored
   val storable  = true
   val valueOf   = Option(10)
   val gameFamily = GameFamily.Shogi()
@@ -289,6 +288,7 @@ object Role {
   val silver         = FairySFRoleID(9)
   val soldier        = FairySFRoleID(29)
   val wazir          = FairySFRoleID(34)
+  val undefined      = FairySFRoleID(0)
 
   val all: List[Role] =
     List(
@@ -300,6 +300,10 @@ object Role {
       ShogiBishop,
       ShogiRook,
       ShogiKing,
+      ShogiPromotedPawn,
+      ShogiPromotedLance,
+      ShogiPromotedKnight,
+      ShogiPromotedSilver,
       ShogiHorse,
       ShogiDragon,
       XiangqiSoldier,
@@ -331,6 +335,9 @@ object Role {
   )
 
   def allByGameFamily(gf: GameFamily): List[Role] =
+    all.filter(r => r.gameFamily == gf)
+
+  def allNonPromotableByGameFamily(gf: GameFamily): List[Role] =
     all.filter(r => r.gameFamily == gf && !allPromotable.contains(r))
 
   def allPromotableByGameFamily(gf: GameFamily): List[PromotableRole] =
@@ -339,13 +346,13 @@ object Role {
   val allByForsyth: Map[Char, Role] = all map { r =>
     (r.forsyth, r)
   } toMap
-  def allByForsyth(gf: GameFamily): Map[Char, Role] = allByGameFamily(gf) map { r =>
+  def allByForsyth(gf: GameFamily): Map[Char, Role] = allNonPromotableByGameFamily(gf) map { r =>
     (r.forsyth, r)
   } toMap
   val allByPgn: Map[Char, Role] = all map { r =>
     (r.pgn, r)
   } toMap
-  def allByPgn(gf: GameFamily): Map[Char, Role] = allByGameFamily(gf) map { r =>
+  def allByPgn(gf: GameFamily): Map[Char, Role] = allNonPromotableByGameFamily(gf) map { r =>
     (r.pgn, r)
   } toMap
   val allByName: Map[String, Role] = all map { r =>

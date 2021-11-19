@@ -42,8 +42,8 @@ object Binary {
       bs match {
         case _ if pliesToGo <= 0 => Nil
         case Nil                 => Nil
-        case b1 :: b2 :: rest if moveType(b1) == MoveType.Move =>
-          moveUci(b1, b2) :: intMoves(rest, pliesToGo - 1)
+        case b1 :: b2 :: b3 :: rest if moveType(b1) == MoveType.Move =>
+          moveUci(b1, b2, b3) :: intMoves(rest, pliesToGo - 1)
         case b1 :: b2 :: rest if moveType(b1) == MoveType.Drop =>
           dropUci(b1, b2) :: intMoves(rest, pliesToGo - 1)
         case x => !!(x map showByte mkString ",")
@@ -52,11 +52,18 @@ object Binary {
     // 1 movetype
     // 7 pos (from)
     // ----
+    // 1 gamefamily (might need more than 1 bit once there are more than shogi/xiangqi)
+    // 7 pos (dest)
+    // ----
+    // 8 piece (only needs 4 bits?)
+    def moveUci(b1: Int, b2: Int, b3: Int): String =
+      s"${posFromInt(b1)}${posFromInt(b2)}${optionalPieceFromInt(gameFamily(b2), b3)}"
+
+    // 1 movetype
+    // 7 piece (only needs 4 bits?)
+    // ----
     // 1 gamefamily
     // 7 pos (dest)
-    def moveUci(b1: Int, b2: Int): String =
-      s"${posFromInt(b1)}${posFromInt(b2)}"
-
     def dropUci(b1: Int, b2: Int): String =
       s"${pieceFromInt(gameFamily(b2), b1)}@${posFromInt(b2)}"
 
@@ -65,7 +72,12 @@ object Binary {
     def pieceFromInt(gf: Int, b: Int): String =
       Role.allByBinaryInt(GameFamily(gf)).get(b).get.forsyth.toString
 
-    private def moveType(i: Int)  = i >> 7
+    def optionalPieceFromInt(gf: Int, b: Int): String = b match {
+      case 0 => ""
+      case _ => pieceFromInt(gf, b)
+    }
+
+    private def moveType(i: Int)   = i >> 7
     private def gameFamily(i: Int) = (i >> 7) + 3
     //private def posString(i: Int) = fileChar(i >> 3).toString + rankChar(right(i, 3))
     //private def fileChar(i: Int)  = (i + 97).toChar
@@ -83,7 +95,7 @@ object Binary {
 
     def move(gf: GameFamily, str: String): List[Byte] =
       (str match {
-        case Uci.Move.moveR(src, dst, _) => moveUci(src, dst)
+        case Uci.Move.moveR(src, dst, promotion) => moveUci(gf, src, dst, promotion)
         case Uci.Drop.dropR(piece, dst, _) => dropUci(gf, piece, dst)
         case _ => sys.error(s"Invalid move to write: ${str}")
       }) map (_.toByte)
@@ -91,15 +103,22 @@ object Binary {
     def moves(gf: GameFamily, strs: Iterable[String]): Array[Byte] =
       strs.flatMap(move(gf, _)).to(Array)
 
-    def moveUci(src: String, dst: String) = List(
-      (MoveType.Move << 7) + Pos.fromKey(src).get.index,
-      (0 << 7) + Pos.fromKey(dst).get.index//0 << 7 is gameFamily 0 can be Shogi for now
+    def moveUci(gf: GameFamily, src: String, dst: String, promotion: String) = List(
+      (moveType(MoveType.Move)) + Pos.fromKey(src).get.index,
+      (gameFamily(gf)) + Pos.fromKey(dst).get.index,
+      promotion.headOption match {
+        case Some(p) => Role.promotable(gf, p).map(_.binaryInt).getOrElse(0)
+        case None => 0
+      }
     )
 
     def dropUci(gf: GameFamily, piece: String, dst: String) = List(
-      (MoveType.Drop << 7) + Role.allByForsyth(gf).get(piece(0)).get.binaryInt,
-      (gf.id - 3 << 7) + Pos.fromKey(dst).get.index//-3 to set to 0 or 1 (Shogi or Xiangqi)
+      (moveType(MoveType.Drop)) + Role.allByForsyth(gf).get(piece(0)).get.binaryInt,
+      (gameFamily(gf)) + Pos.fromKey(dst).get.index
     )
+
+    private def moveType(mt: Int)          = mt << 7
+    private def gameFamily(gf: GameFamily) = (gf.id - 3) << 7
 
     //val pieceR       = "([KQRNBL])"
     //val posR         = "([a-i][1-9]|[a-i]10)"
