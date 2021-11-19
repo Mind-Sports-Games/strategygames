@@ -24,4 +24,6 @@ case object Xiangqi
 
   override def baseVariant: Boolean = true
 
+  val kingPiece: Role = XiangqiKing
+
 }

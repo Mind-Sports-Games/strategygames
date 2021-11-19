@@ -31,4 +31,5 @@ case object Shogi
 
   override def baseVariant: Boolean = true
 
+  val kingPiece: Role = ShogiKing
 }

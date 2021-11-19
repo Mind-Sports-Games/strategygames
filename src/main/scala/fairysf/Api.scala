@@ -112,6 +112,9 @@ object Api {
     (im.get0(), im.get1())
   }
 
+  def givesCheck(variantName: String, fen: String, movesList: Option[List[String]] = None): Boolean =
+    FairyStockfish.givesCheck(variantName, fen, movesList)
+
   def legalMoves(variantName: String, fen: String, movesList: Option[List[String]] = None): Array[String] =
     FairyStockfish.getLegalMoves(variantName, fen, movesList)
 

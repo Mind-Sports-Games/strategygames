@@ -19,11 +19,11 @@ case class Situation(board: Board, color: Color) {
 
   //lazy val kingPos: Option[Pos] = board kingPosOf color
 
-  //stub
-  lazy val check: Boolean = false
+  lazy val check: Boolean = Api.givesCheck(board.variant.fairysfName.name, Forsyth.exportBoard(board))
 
-  //stub
-  def checkSquare = None
+  def checkSquare =
+    if (check) board.posMap.get(Piece(color, board.variant.kingPiece)).flatMap(_.headOption)
+    else None
 
   def history = board.history
 

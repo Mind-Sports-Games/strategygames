@@ -47,6 +47,8 @@ abstract class Variant private[variant] (
 
   def startColor: Color = White
 
+  val kingPiece: Role
+
   //looks like this is only to allow King to be a valid promotion piece
   //in just atomic, so can leave as true for now
   def isValidPromotion(promotion: Option[PromotableRole]): Boolean = true
