@@ -150,7 +150,8 @@ case object ShogiPromotedSilver extends PromotableRole {
 
 case object ShogiHorse extends PromotableRole {
   val fairySFID = Role.dragonHorse
-  val forsyth   = 'H'
+  val forsyth   = 'B'
+  override lazy val groundName = s"p${forsyth.toLower}-piece"
   val binaryInt = 9
   val hashInt   = 9
   //depends if storable means
@@ -163,7 +164,8 @@ case object ShogiHorse extends PromotableRole {
 
 case object ShogiDragon extends PromotableRole {
   val fairySFID = Role.bers
-  val forsyth   = 'D'
+  val forsyth   = 'R'
+  override lazy val groundName = s"p${forsyth.toLower}-piece"
   val binaryInt = 10
   val hashInt   = 10
   val storable  = true
@@ -319,14 +321,6 @@ object Role {
       ShogiDragon
     )
 
-  val promotedRolesForDisplayOnly: List[PromotableRole] =
-    List(
-      ShogiPromotedPawn,
-      ShogiPromotedLance,
-      ShogiPromotedKnight,
-      ShogiPromotedSilver,
-    )
-
   val promotionMap: Map[Role, PromotableRole] = Map(
     ShogiPawn   -> ShogiPromotedPawn,
     ShogiLance  -> ShogiPromotedLance,
@@ -337,7 +331,7 @@ object Role {
   )
 
   def allByGameFamily(gf: GameFamily): List[Role] =
-    all.filter(r => r.gameFamily == gf && !promotedRolesForDisplayOnly.contains(r))
+    all.filter(r => r.gameFamily == gf && !allPromotable.contains(r))
 
   def allPromotableByGameFamily(gf: GameFamily): List[PromotableRole] =
     allPromotable.filter(r => r.gameFamily == gf)
