@@ -4,7 +4,7 @@ import org.playstrategy.FairyStockfish
 
 import cats.implicits._
 
-import strategygames.{ Color, Pocket, Pockets }
+import strategygames.{ Color, GameFamily, Pocket, Pockets }
 import strategygames.fairysf.format.FEN
 import strategygames.fairysf.variant.Variant
 
@@ -46,18 +46,18 @@ object Api {
   }
   implicit def intoArray(vos: FairyStockfish.VectorOfStrings): Array[String] = vos.get().map(_.getString())
 
-  private def pieceFromFSPiece(piece: FairyStockfish.Piece): Piece =
+  private def pieceFromFSPiece(piece: FairyStockfish.Piece, gf: GameFamily): Piece =
     Piece(
       Color.all(piece.color()),
-      if (piece.promoted) Role.promotionMap(Role.allByFairySFID(piece.pieceInfo().id))
-      else Role.allByFairySFID(piece.pieceInfo().id)
+      if (piece.promoted) Role.promotionMap(Role.allByFairySFID(gf)(piece.pieceInfo().id))
+      else Role.allByFairySFID(gf)(piece.pieceInfo().id)
     )
 
-  implicit def vectorOfPiecesToPieceArray(pieces: FairyStockfish.VectorOfPieces): Array[Piece] =
-    pieces.get().map(pieceFromFSPiece)
+  def vectorOfPiecesToPieceArray(pieces: FairyStockfish.VectorOfPieces, gf: GameFamily): Array[Piece] =
+    pieces.get().map(pieceFromFSPiece(_, gf))
 
 
-  implicit def convertPieceMap(fsPieceMap: FairyStockfish.PieceMap): PieceMap = {
+  def convertPieceMap(fsPieceMap: FairyStockfish.PieceMap, gf: GameFamily): PieceMap = {
     var first = fsPieceMap.begin()
     val pieceMap = scala.collection.mutable.Map[Pos, Piece]()
     //while(!first.equals(fsPieceMap.end())) {
@@ -69,7 +69,7 @@ object Api {
     while(!first.equals(fsPieceMap.end())) {
       pieceMap(
         Pos.fromKey(first.first().getString()).get
-      ) = pieceFromFSPiece(first.second())
+      ) = pieceFromFSPiece(first.second(), gf)
       first = first.increment()
     }
     pieceMap.toMap
@@ -118,12 +118,12 @@ object Api {
   def legalMoves(variantName: String, fen: String, movesList: Option[List[String]] = None): Array[String] =
     FairyStockfish.getLegalMoves(variantName, fen, movesList)
 
-  def piecesInHand(variantName: String, fen: String): Array[Piece] =
-    FairyStockfish.piecesInHand(variantName, fen)
+  def piecesInHand(variantName: String, gf: GameFamily, fen: String): Array[Piece] =
+    vectorOfPiecesToPieceArray(FairyStockfish.piecesInHand(variantName, fen), gf)
 
   def pocketData(variant: Variant, fen: String): Option[PocketData] =
     if (variant.dropsVariant){
-      val pieces = piecesInHand(variant.fairysfName.name, fen)
+      val pieces = piecesInHand(variant.fairysfName.name, variant.gameFamily, fen)
       PocketData(
         Pockets(
           Pocket(pieces.filter(_.color == White).toList.map(
@@ -139,7 +139,7 @@ object Api {
       ).some
     } else None
 
-  def pieceMapFromFen(variantName: String, fen: String):PieceMap =
-    FairyStockfish.piecesOnBoard(variantName, fen)
+  def pieceMapFromFen(variantName: String, gf: GameFamily, fen: String):PieceMap =
+    convertPieceMap(FairyStockfish.piecesOnBoard(variantName, fen), gf)
 
 }

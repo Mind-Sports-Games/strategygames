@@ -23,7 +23,7 @@ object Forsyth {
   //stub
   def <<@(variant: Variant, fen: FEN): Option[Situation] = Some(Situation(
     Board(
-      Api.pieceMapFromFen(variant.fairysfName.name, fen.value),
+      Api.pieceMapFromFen(variant.fairysfName.name, variant.gameFamily, fen.value),
       History(),
       variant,
       Api.pocketData(variant, fen.value)

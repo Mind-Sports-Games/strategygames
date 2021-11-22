@@ -43,7 +43,8 @@ abstract class Variant private[variant] (
 
   def initialFen: FEN = Api.initialFen(fairysfName.name)
 
-  def pieces: Map[Pos, Piece] = Api.pieceMapFromFen(fairysfName.name, initialFen.value)
+  def pieces: Map[Pos, Piece] =
+    Api.pieceMapFromFen(fairysfName.name, gameFamily, initialFen.value)
 
   def startColor: Color = White
 
@@ -81,6 +82,7 @@ abstract class Variant private[variant] (
           after = situation.board.copy(
             pieces = Api.pieceMapFromFen(
               fairysfName.name,
+              gameFamily,
               fen
             ),
             uciMoves = uciMoves,
@@ -127,6 +129,7 @@ abstract class Variant private[variant] (
           after = situation.board.copy(
             pieces = Api.pieceMapFromFen(
               fairysfName.name,
+              gameFamily,
               fen
             ),
             uciMoves = uciMoves,

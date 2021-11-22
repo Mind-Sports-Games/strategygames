@@ -101,6 +101,7 @@ object Replay {
               after = state.situation.board.copy(
                 pieces = Api.pieceMapFromFen(
                   init.board.variant.fairysfName.name,
+                  init.board.variant.gameFamily,
                   fen
                 ),
                 uciMoves = uciMoves,

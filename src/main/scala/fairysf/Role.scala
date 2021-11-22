@@ -400,7 +400,7 @@ object Role {
     allPromotableByGameFamily(gf) map { r =>
       (r.pgn, r)
     } toMap
-  val allByFairySFID: Map[Int, Role] = all map { r =>
+  def allByFairySFID(gf: GameFamily): Map[Int, Role] = allByGameFamily(gf) map { r =>
     (r.fairySFID.id, r)
   } toMap
 
