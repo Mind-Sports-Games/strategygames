@@ -70,6 +70,7 @@ object Replay {
   //    recursiveGames(game, moves.value) map { game :: _ }
   //  }
 
+
   def gameMoveWhileValid(
       moveStrs: Seq[String],
       initialFen: FEN,
@@ -80,12 +81,11 @@ object Replay {
     var state = init
     var uciMoves = init.situation.board.uciMoves
     var errors = ""
-    val moves: List[(Game, Uci.WithSan)] = moveStrs.toList
-      .map{
-        case Uci.Move.moveR(orig, dest, check) => (Pos.fromKey(orig), Pos.fromKey(dest), check)
-      }.map{
-        case (Some(orig), Some(dest), check) => {
-          val uciMove = s"${orig.key}${dest.key}${check}"
+
+    def replayMove(orig: Option[Pos], dest: Option[Pos], promotion: String): (Game, Uci.WithSan) =
+      (orig, dest, promotion) match {
+        case (Some(orig), Some(dest), promotion) => {
+          val uciMove = s"${orig.key}${dest.key}${promotion}"
           uciMoves = uciMoves :+ uciMove
           val fen = Api.fenFromMoves(
             init.board.variant.fairysfName.name,
@@ -108,19 +108,75 @@ object Replay {
                 pocketData = Api.pocketData(init.board.variant, fen)
               ),
               capture = None,
-              promotion = None,
+              promotion = promotion match {
+                case "+" => Role.promotable(
+                  state.situation.board.variant.gameFamily,
+                  state.situation.board.pieces(orig).role.forsyth
+                )
+                case _ => None
+              },
               castle = None,
               enpassant = false
             )
           )
           (state, Uci.WithSan(Uci.apply(state.board.variant.gameFamily, uciMove).get, "NOSAN"))
         }
-        case (orig, dest, check) => {
-          val uciMove = s"${orig}${dest}${check}"
+        case (orig, dest, promotion) => {
+          val uciMove = s"${orig}${dest}${promotion}"
           errors += uciMove + ","
-          sys.error(s"Invalid move: ${uciMove}")
+          sys.error(s"Invalid move for replay: ${uciMove}")
         }
       }
+
+    def replayDrop(role: Option[Role], dest: Option[Pos]): (Game, Uci.WithSan) =
+      (role, dest) match {
+        case (Some(role), Some(dest)) => {
+          val uciDrop = s"${role.forsyth}@${dest.key}"
+          uciMoves = uciMoves :+ uciDrop
+          val fen = Api.fenFromMoves(
+            init.board.variant.fairysfName.name,
+            init.situation.board.variant.initialFen.value,
+            uciMoves.some
+          ).value
+          state = state.applyDrop(
+            Drop(
+              piece = Piece(state.situation.color, role),
+              pos = dest,
+              situationBefore = state.situation,
+              after = state.situation.board.copy(
+                pieces = Api.pieceMapFromFen(
+                  init.board.variant.fairysfName.name,
+                  init.board.variant.gameFamily,
+                  fen
+                ),
+                uciMoves = uciMoves,
+                pocketData = Api.pocketData(init.board.variant, fen)
+              ),
+            )
+          )
+          (state, Uci.WithSan(Uci.apply(state.board.variant.gameFamily, uciDrop).get, "NOSAN"))
+        }
+        case (role, dest) => {
+          val uciDrop = s"${role}@${dest}"
+          errors += uciDrop + ","
+          sys.error(s"Invalid drop for replay: ${uciDrop}")
+        }
+      }
+
+    val moves: List[(Game, Uci.WithSan)] = moveStrs.toList
+      .map{
+        case Uci.Move.moveR(orig, dest, promotion) => replayMove(
+          Pos.fromKey(orig),
+          Pos.fromKey(dest),
+          promotion
+        )
+        case Uci.Drop.dropR(role, dest) => replayDrop(
+          Role.allByForsyth(init.situation.board.variant.gameFamily).get(role(0)),
+          Pos.fromKey(dest)
+        )
+        case moveStr: String => sys.error(s"Invalid moveordrop for replay: $moveStr")
+      }
+
     (init, moves, errors match {case "" => None; case _ => errors.some})
   }
 

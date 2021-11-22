@@ -137,7 +137,7 @@ abstract class Variant private[variant] (
           )
         )
       }
-      case (role, dest) => sys.error(s"Invalid position from uci: ${role}${dest}")
+      case (role, dest) => sys.error(s"Invalid position from uci: ${role}@${dest}")
     }.toList
 
   //TODO: test, but think this is right as its based off chess without actor check

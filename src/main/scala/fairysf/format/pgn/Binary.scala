@@ -96,7 +96,7 @@ object Binary {
     def move(gf: GameFamily, str: String): List[Byte] =
       (str match {
         case Uci.Move.moveR(src, dst, promotion) => moveUci(gf, src, dst, promotion)
-        case Uci.Drop.dropR(piece, dst, _) => dropUci(gf, piece, dst)
+        case Uci.Drop.dropR(piece, dst) => dropUci(gf, piece, dst)
         case _ => sys.error(s"Invalid move to write: ${str}")
       }) map (_.toByte)
 
