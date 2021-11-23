@@ -446,5 +446,6 @@ object Role {
     r.valueOf
 
   val roleR = s"([${allByForsyth.keys.mkString("")}])"
+  val roleRr = s"([${allByForsyth.keys.map(k => s"${k.toLower}${k.toUpper}").mkString("")}]?)"
 
 }
