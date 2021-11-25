@@ -15,6 +15,8 @@ abstract sealed class Situation(val board: Board, val color: Color) {
 
   def drops: Option[List[Pos]]
 
+  def dropsByRole: Option[Map[Role, List[Pos]]]
+
   def history = board.history
 
   val check: Boolean
@@ -88,6 +90,8 @@ object Situation {
 
     def drops: Option[List[Pos]] = s.drops.map(_.map(Pos.Chess))
 
+    def dropsByRole: Option[Map[Role, List[Pos]]] = sys.error("dropsByRole not implemented for chess")
+
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
@@ -154,6 +158,8 @@ object Situation {
     val destinations: Map[Pos, List[Pos]] = Map()
 
     def drops: Option[List[Pos]] = None
+
+    def dropsByRole: Option[Map[Role, List[Pos]]] = None
 
     //possibly need to do something for this
     def opponentHasInsufficientMaterial: Boolean = false
@@ -240,6 +246,10 @@ object Situation {
     }
 
     def drops: Option[List[Pos]] = s.drops.map(_.map(Pos.FairySF))
+
+    def dropsByRole: Option[Map[Role, List[Pos]]] = s.dropsByRole.map(_.map{
+      case(r: fairysf.Role, p: List[fairysf.Pos]) => (Role.FairySFRole(r), p.map(Pos.FairySF))
+    })
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 

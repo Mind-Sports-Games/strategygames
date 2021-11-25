@@ -17,6 +17,8 @@ case class Situation(board: Board, color: Color) {
 
   def drops: Option[List[Pos]] = board.variant.possibleDrops(this)
 
+  def dropsByRole: Option[Map[Role, List[Pos]]] = board.variant.possibleDropsByRole(this)
+
   //lazy val kingPos: Option[Pos] = board kingPosOf color
 
   lazy val check: Boolean = Api.givesCheck(board.variant.fairysfName.name, Forsyth.exportBoard(board))

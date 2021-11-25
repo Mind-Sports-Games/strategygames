@@ -180,6 +180,13 @@ abstract class Variant private[variant] (
       validDrops(situation).map(_.pos).some
     else None
 
+  def possibleDropsByRole(situation: Situation): Option[Map[Role, List[Pos]]] =
+    if (dropsVariant)
+      validDrops(situation).map(
+        drop => (drop.piece.role, drop.pos)
+      ).groupBy(_._1).map { case (k,v) => (k,v.toList.map(_._2))}.some
+    else None
+
   def staleMate(situation: Situation): Boolean = !situation.check && situation.moves.isEmpty
 
   def checkmate(situation: Situation) = situation.check && situation.moves.isEmpty
