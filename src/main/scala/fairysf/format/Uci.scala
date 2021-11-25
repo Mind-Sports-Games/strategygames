@@ -40,11 +40,25 @@ object Uci {
   object Move {
 
     def apply(gf: GameFamily, move: String): Option[Move] =
-      for {
-        orig <- Pos.fromKey(move take 2)
-        dest <- Pos.fromKey(move.slice(2, 4))
-        promotion = move.lift(4).flatMap(Role.promotable(gf, _))
-      } yield Move(orig, dest, promotion)
+      move match { 
+        case moveP(orig, dest, promotion) => (
+            Pos.fromKey(orig),
+            Pos.fromKey(dest),
+            promotion
+            ) match { 
+                case (Some(orig), Some(dest), promotion) => {
+                  Move(orig = orig, 
+                        dest = dest, 
+                        promotion = promotion match {
+                          case "" => None
+                          case c  => (Role.promotable(gf, c.charAt(0)))
+                        }
+                  ).some
+                }
+                case _ => None
+                }
+        case _ => None
+      }
 
     def piotr(gf: GameFamily, move: String) =
       for {
@@ -61,7 +75,7 @@ object Uci {
       } yield Move(orig, dest, promotion)
 
     val moveR = s"^${Pos.posR}${Pos.posR}(\\+?)$$".r
-
+    val moveP = s"^${Pos.posR}${Pos.posR}${Role.roleRr}$$".r
   }
 
   case class Drop(role: Role, pos: Pos) extends Uci {
