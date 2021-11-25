@@ -19,7 +19,7 @@ case class Drop(
 
   //def withHistory(h: History) = copy(after = after withHistory h)
 
-  def finalizeAfter: Board = {
+  def finalizeAfter: Board = after/*{
     val board = after.variant.finalizeBoard(
       after updateHistory { h =>
         h.copy(
@@ -35,7 +35,7 @@ case class Drop(
         if (h.positionHashes.isEmpty) Hash(situationBefore) else board.history.positionHashes
       h.copy(positionHashes = Hash(Situation(board, !piece.color)) ++ basePositionHashes)
     }
-  }
+  }*/
 
   //def afterWithLastMove =
   //  after.variant.finalizeBoard(
