@@ -1,10 +1,13 @@
 package strategygames.fairysf
 package format.pgn
-import strategygames.{ Clock, Move => StratMove, Situation => StratSituation }
+import strategygames.{ Clock, Drop => StratDrop, Move => StratMove, Situation => StratSituation }
 
 import strategygames.format.pgn.{ ParsedPgn, Sans, Tags }
 
+import strategygames.fairysf.format.Uci
+
 import cats.data.Validated
+import cats.implicits._
 
 object Reader {
 
@@ -40,6 +43,9 @@ object Reader {
       makeReplay(makeGame(tags), op(moves))
     }
 
+  def movesWithUcis(moveStrs: Iterable[String], op: Iterable[String] => Iterable[String], tags: Tags): Validated[String, Result] =
+    Validated.valid(makeReplayWithUci(makeGame(tags), op(moveStrs)))
+
   // remove invisible byte order mark
   def cleanUserInput(str: String) = str.replace(s"\ufeff", "")
 
@@ -50,6 +56,57 @@ object Reader {
           err => Result.Incomplete(replay, err),
           move => Result.Complete(replay addMove StratMove.toFairySF(move))
         )
+      case (r: Result.Incomplete, _) => r
+    }
+
+  private def makeReplayWithUci(game: Game, moves: Iterable[String]): Result =
+    moves.foldLeft[Result](Result.Complete(Replay(game))) {
+      case (Result.Complete(replay), m) =>
+        m match {
+          case Uci.Move.moveR(orig, dest, promotion) =>
+            (Pos.fromKey(orig), Pos.fromKey(dest)) match {
+              case (Some(orig), Some(dest)) => Result.Complete(
+                replay.addMove(StratMove.toFairySF(
+                  Left.apply(StratMove.wrap(Replay.replayMove(
+                    replay.state,
+                    orig,
+                    dest,
+                    promotion,
+                    Api.fenFromMoves(
+                      replay.state.board.variant.fairysfName.name,
+                      replay.state.board.variant.initialFen.value,
+                      (replay.state.board.uciMoves :+ m).some
+                    ),
+                    replay.state.board.uciMoves :+ m
+                  )))
+                ))
+              )
+              //case _ => Result.Incomplete(replay, s"Error making replay with move: ${m}")
+              case _ => sys.error(s"Error making replay with move: ${m}")
+          }
+          case Uci.Drop.dropR(role, dest) =>
+            (Role.allByForsyth(replay.state.board.variant.gameFamily).get(role(0)), Pos.fromKey(dest)) match {
+              case (Some(role), Some(dest)) => Result.Complete(
+                replay.addMove(StratMove.toFairySF(
+                  Right.apply(StratDrop.wrap(Replay.replayDrop(
+                    replay.state,
+                    role,
+                    dest,
+                    Api.fenFromMoves(
+                      replay.state.board.variant.fairysfName.name,
+                      replay.state.board.variant.initialFen.value,
+                      (replay.state.board.uciMoves :+ m).some
+                    ),
+                    replay.state.board.uciMoves :+ m
+                  )))
+                ))
+              )
+              //case _ => Result.Incomplete(replay, s"Error making replay with drop: ${m}")
+              case _ => sys.error(s"Error making replay with drop: ${m}")
+            }
+          //case _ => Result.Incomplete(replay, s"Error making replay with uci move: ${m}")
+          case _ => sys.error(s"Error making replay with uci move: ${m}")
+        }
       case (r: Result.Incomplete, _) => r
     }
 

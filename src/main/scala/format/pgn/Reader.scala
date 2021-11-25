@@ -76,7 +76,21 @@ object Reader {
       case GameLogic.Draughts() =>
         DraughtsReader.movesWithSans(moveStrs, op, tags, iteratedCapts).map(Result.wrap)
       case GameLogic.FairySF() =>
-        FairySFReader.movesWithSans(moveStrs, op, tags).map(Result.wrap)
+        //FairySFReader.movesWithSans(moveStrs, op, tags).map(Result.wrap)
+        sys.error("Sans not implemented for fairysf")
+    }
+
+  def movesWithUcis(
+      lib: GameLogic,
+      moveStrs: Iterable[String],
+      op: Iterable[String] => Iterable[String],
+      tags: Tags
+  ): Validated[String, Result] =
+    lib match {
+      case GameLogic.Chess()    => sys.error("movesWithUcis not implemented for chess")
+      case GameLogic.Draughts() => sys.error("movesWithUcis not implemented for draughts")
+      case GameLogic.FairySF() =>
+        FairySFReader.movesWithUcis(moveStrs, op, tags).map(Result.wrap)
     }
 
 }
