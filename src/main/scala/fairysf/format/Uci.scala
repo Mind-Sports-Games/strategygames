@@ -42,21 +42,22 @@ object Uci {
     def apply(gf: GameFamily, move: String): Option[Move] =
       move match { 
         case moveP(orig, dest, promotion) => (
-            Pos.fromKey(orig),
-            Pos.fromKey(dest),
-            promotion
-            ) match { 
-                case (Some(orig), Some(dest), promotion) => {
-                  Move(orig = orig, 
-                        dest = dest, 
-                        promotion = promotion match {
-                          case "" => None
-                          case c  => (Role.promotable(gf, c.charAt(0)))
-                        }
-                  ).some
-                }
-                case _ => None
-                }
+          Pos.fromKey(orig),
+          Pos.fromKey(dest),
+          promotion
+        ) match {
+          case (Some(orig), Some(dest), promotion) => {
+            Move(
+              orig = orig,
+              dest = dest,
+              promotion = promotion match {
+                case "" => None
+                case c  => (Role.promotable(gf, c.charAt(0)))
+              }
+            ).some
+          }
+          case _ => None
+        }
         case _ => None
       }
 
@@ -76,6 +77,7 @@ object Uci {
 
     val moveR = s"^${Pos.posR}${Pos.posR}(\\+?)$$".r
     val moveP = s"^${Pos.posR}${Pos.posR}${Role.roleRr}$$".r
+    val movePR = s"^${Pos.posR}${Pos.posR}${Role.rolePR}$$".r
   }
 
   case class Drop(role: Role, pos: Pos) extends Uci {
@@ -108,11 +110,15 @@ object Uci {
   def apply(drop: strategygames.fairysf.Drop) = Uci.Drop(drop.piece.role, drop.pos)
 
   def apply(gf: GameFamily, move: String): Option[Uci] =
-    if (move lift 1 contains '@') for {
-      role <- move.headOption flatMap Role.allByPgn(gf).get
-      pos  <- Pos.fromKey(move.slice(2, 4))
-    } yield Uci.Drop(role, pos)
-    else Uci.Move(gf, move)
+    move match {
+      case Move.movePR(_, _, _) => Uci.Move(gf, move)
+      case Drop.dropR(role, dest) =>
+        (Role.allByPgn(gf).get(role.charAt(0)), Pos.fromKey(dest)) match {
+          case (Some(role), Some(dest)) => Uci.Drop(role, dest).some
+          case _ => sys.error(s"Cannot apply uci drop: ${move}")
+        }
+      case _ => sys.error(s"Cannot apply uci: ${move}")
+    }
 
   def piotr(gf: GameFamily, move: String): Option[Uci] =
     if (move lift 1 contains '@') for {

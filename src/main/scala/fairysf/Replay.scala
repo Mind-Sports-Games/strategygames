@@ -87,11 +87,11 @@ object Replay {
       ),
       capture = None,
       promotion = promotion match {
-        case "+" => Role.promotable(
+        case "" => None
+        case _ => Role.promotable(
           before.board.variant.gameFamily,
           before.board.pieces(orig).role.forsyth
         )
-        case _ => None
       },
       castle = None,
       enpassant = false
@@ -168,7 +168,7 @@ object Replay {
 
     val moves: List[(Game, Uci.WithSan)] = moveStrs.toList
       .map{
-        case Uci.Move.moveR(orig, dest, promotion) => replayMoveFromUci(
+        case Uci.Move.moveP(orig, dest, promotion) => replayMoveFromUci(
           Pos.fromKey(orig),
           Pos.fromKey(dest),
           promotion

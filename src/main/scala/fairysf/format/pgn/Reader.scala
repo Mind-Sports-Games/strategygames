@@ -43,8 +43,8 @@ object Reader {
       makeReplay(makeGame(tags), op(moves))
     }
 
-  def movesWithUcis(moveStrs: Iterable[String], op: Iterable[String] => Iterable[String], tags: Tags): Validated[String, Result] =
-    Validated.valid(makeReplayWithUci(makeGame(tags), op(moveStrs)))
+  def movesWithPgns(moveStrs: Iterable[String], op: Iterable[String] => Iterable[String], tags: Tags): Validated[String, Result] =
+    Validated.valid(makeReplayWithPgn(makeGame(tags), op(moveStrs)))
 
   // remove invisible byte order mark
   def cleanUserInput(str: String) = str.replace(s"\ufeff", "")
@@ -59,11 +59,16 @@ object Reader {
       case (r: Result.Incomplete, _) => r
     }
 
-  private def makeReplayWithUci(game: Game, moves: Iterable[String]): Result =
+  private def makeReplayWithPgn(game: Game, moves: Iterable[String]): Result =
     moves.foldLeft[Result](Result.Complete(Replay(game))) {
       case (Result.Complete(replay), m) =>
         m match {
-          case Uci.Move.moveR(orig, dest, promotion) =>
+          case Uci.Move.moveP(orig, dest, promotion) => {
+            val prom = promotion match {
+              case "" => ""
+              case _ => "+"
+            }
+            val uciMove = s"${orig}${dest}${prom}"
             (Pos.fromKey(orig), Pos.fromKey(dest)) match {
               case (Some(orig), Some(dest)) => Result.Complete(
                 replay.addMove(StratMove.toFairySF(
@@ -71,18 +76,19 @@ object Reader {
                     replay.state,
                     orig,
                     dest,
-                    promotion,
+                    prom,
                     Api.fenFromMoves(
                       replay.state.board.variant.fairysfName.name,
                       replay.state.board.variant.initialFen.value,
-                      (replay.state.board.uciMoves :+ m).some
+                      (replay.state.board.uciMoves :+ uciMove).some
                     ),
-                    replay.state.board.uciMoves :+ m
+                    replay.state.board.uciMoves :+ uciMove
                   )))
                 ))
               )
               //case _ => Result.Incomplete(replay, s"Error making replay with move: ${m}")
               case _ => sys.error(s"Error making replay with move: ${m}")
+            }
           }
           case Uci.Drop.dropR(role, dest) =>
             (Role.allByForsyth(replay.state.board.variant.gameFamily).get(role(0)), Pos.fromKey(dest)) match {
