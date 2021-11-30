@@ -149,7 +149,6 @@ abstract class Variant private[variant] (
       promotion: Option[PromotableRole]
   ): Validated[String, Move] = {
     // Find the move in the variant specific list of valid moves
-    val prom = promotion.pp("promotion")
     situation.moves get from flatMap (_.find(
       m => m.dest == to && m.promotion == promotion)
     ) match {
