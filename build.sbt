@@ -16,8 +16,13 @@ libraryDependencies ++= List(
   "org.playstrategy"        % "fairystockfish"           % "0.0.1"
 )
 
+// Explicitly add in the linux-class path
+lazy val fairystockfish = Artifact("fairystockfish", "linux-x86_64")
+libraryDependencies += "org.playstrategy"        % "fairystockfish"           % "0.0.1" artifacts(fairystockfish)
+classpathTypes ++= Set("linux-x86_64")
+
 resolvers ++= Seq(
-  "lila-maven" at "https://raw.githubusercontent.com/ornicar/lila-maven/master"
+  "lila-maven" at "https://raw.githubusercontent.com/Mind-Sports-Games/lila-maven/master"
 )
 
 scalacOptions ++= Seq(
