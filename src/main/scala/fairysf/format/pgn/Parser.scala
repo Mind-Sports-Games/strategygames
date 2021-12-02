@@ -2,6 +2,7 @@ package strategygames.fairysf
 package format.pgn
 
 import strategygames.fairysf.variant.Variant
+import strategygames.fairysf.format.Uci
 
 import strategygames.format.pgn.{ Glyph, Glyphs, InitialPosition, Metas, ParsedPgn, San, Sans, Suffixes, Tag, Tags }
 import strategygames.{ Role => ChessRole }
@@ -14,6 +15,17 @@ import scala.util.matching.Regex
 
 // http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm
 object Parser {
+
+  def pgnMovesToUciMoves(pgnMoves: Iterable[String]): List[String] =
+    pgnMoves.toList.map(
+      _ match {
+        case Uci.Move.moveP(orig, dest, promotion) => promotion match {
+          case "" => s"${orig}${dest}"                                                    
+          case _  => s"${orig}${dest}+"                                                   
+        }                                                                                 
+        case s: String => s                                                                 
+      }
+    )
 
   case class StrMove(
       san: String,
