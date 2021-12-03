@@ -32,4 +32,14 @@ case object Shogi
   override def baseVariant: Boolean = true
 
   val kingPiece: Role = ShogiKing
+
+  override def validDrops(situation: Situation): List[Drop] =
+    super.validDrops(situation).filterNot(
+      d => d.piece.role == ShogiPawn && Api.gameResult(
+        fairysfName.name,
+        super.initialFen.value,
+        Some(situation.board.uciMoves :+ d.toUci.uci)
+      ) == GameResult.Checkmate()
+    )
+
 }

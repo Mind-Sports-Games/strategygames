@@ -311,6 +311,31 @@ class FairyStockfishApiTest extends Specification with ValidatedMatchers {
     }
   }
 
+  //valid moves doesnt filter this out
+  //"Shogi pawn drop into checkmate" should {
+  //  "setup should not produce valid move" in {
+  //    Api.legalMoves(
+  //      variant.Shogi.fairysfName.name,
+  //      variant.Shogi.initialFen.value,
+  //      Some(List("c3c4", "e7e6", "b2g7+", "e9e8", "e3e4", "e6e5", "e4e5", "d9e9", "h2e2", "e8d9", "e5e6", "b8e8", "e6e7", "e8e7", "e2e7+", "a7a6", "e7e5", "d9d8", "e5d5", "d8e7", "g7f7", "e7d8", "f7g7", "d8e7", "a3a4", "c9d8", "a4a5", "e9e8"))
+  //    ).contains("P@e6") must_== false
+  //  }
+  //  "drop should not produce game end" in {
+  //    Api.gameEnd(
+  //      variant.Shogi.fairysfName.name,
+  //      variant.Shogi.initialFen.value,
+  //      Some(List("c3c4", "e7e6", "b2g7+", "e9e8", "e3e4", "e6e5", "e4e5", "d9e9", "h2e2", "e8d9", "e5e6", "b8e8", "e6e7", "e8e7", "e2e7+", "a7a6", "e7e5", "d9d8", "e5d5", "d8e7", "g7f7", "e7d8", "f7g7", "d8e7", "a3a4", "c9d8", "a4a5", "e9e8", "P@e6"))
+  //    ) must_== false
+  //  }
+  //  "drop should not produce checkmate" in {
+  //    Api.gameResult(
+  //      variant.Shogi.fairysfName.name,
+  //      variant.Shogi.initialFen.value,
+  //      Some(List("c3c4", "e7e6", "b2g7+", "e9e8", "e3e4", "e6e5", "e4e5", "d9e9", "h2e2", "e8d9", "e5e6", "b8e8", "e6e7", "e8e7", "e2e7+", "a7a6", "e7e5", "d9d8", "e5d5", "d8e7", "g7f7", "e7d8", "f7g7", "d8e7", "a3a4", "c9d8", "a4a5", "e9e8", "P@e6"))
+  //    ) must_!= GameResult.Checkmate()
+  //  }
+  //}
+
   "Chess white king vs black king only" should {
     val insufficientMaterialFEN = "4k3/8/8/8/8/8/8/3K4 w - - 0 1"
     "have insufficient material" in {
