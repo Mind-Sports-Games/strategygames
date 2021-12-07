@@ -27,11 +27,11 @@ abstract sealed class Situation(val board: Board, val color: Color) {
 
   def opponentHasInsufficientMaterial: Boolean
 
-  lazy val threefoldRepetition: Boolean = board.history.threefoldRepetition
+  def threefoldRepetition: Boolean
 
   def end: Boolean
 
-  def winner: Option[Color] = board.variant.winner(this)
+  def winner: Option[Color]
 
   def playable(strict: Boolean): Boolean
 
@@ -82,7 +82,11 @@ object Situation {
 
     def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
 
+    def threefoldRepetition: Boolean = s.threefoldRepetition
+
     def end: Boolean = s.end
+
+    def winner: Option[Color] = s.winner
 
     val destinations: Map[Pos, List[Pos]] = s.destinations.map{
       case (p: chess.Pos, l: List[chess.Pos]) => (Pos.Chess(p), l.map(Pos.Chess))
@@ -164,7 +168,11 @@ object Situation {
     //possibly need to do something for this
     def opponentHasInsufficientMaterial: Boolean = false
 
+    def threefoldRepetition: Boolean = s.threefoldRepetition
+
     def end: Boolean = s.end
+
+    def winner: Option[Color] = s.winner
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -239,7 +247,11 @@ object Situation {
 
     def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
 
+    def threefoldRepetition: Boolean = s.threefoldRepetition
+
     def end: Boolean = s.end
+
+    def winner: Option[Color] = s.winner
 
     val destinations: Map[Pos, List[Pos]] = s.destinations.map{
       case (p: fairysf.Pos, l: List[fairysf.Pos]) => (Pos.FairySF(p), l.map(Pos.FairySF))

@@ -21,7 +21,11 @@ case class Situation(board: Board, color: Color) {
 
   //lazy val kingPos: Option[Pos] = board kingPosOf color
 
-  lazy val check: Boolean = Api.givesCheck(board.variant.fairysfName.name, Forsyth.exportBoard(board))
+  lazy val check: Boolean = Api.givesCheck(
+    board.variant.fairysfName.name,
+    board.variant.initialFen.value,
+    board.uciMoves.some
+  )
 
   def checkSquare =
     if (check) board.posMap.get(Piece(color, board.variant.kingPiece)).flatMap(_.headOption)
@@ -30,18 +34,31 @@ case class Situation(board: Board, color: Color) {
   def history = board.history
 
   private def gameResult =
-    if (Api.gameEnd(board.variant.fairysfName.name, Forsyth.exportBoard(board)))
-      Api.gameResult(board.variant.fairysfName.name, Forsyth.exportBoard(board))
+    if (Api.gameEnd(
+      board.variant.fairysfName.name,
+      board.variant.initialFen.value,
+      board.uciMoves.some
+    ))
+      Api.gameResult(
+        board.variant.fairysfName.name,
+        board.variant.initialFen.value,
+        board.uciMoves.some
+      )
     else false
 
   def checkMate: Boolean = gameResult == GameResult.Checkmate()
 
-  def staleMate: Boolean = gameResult == GameResult.Draw() && Api.gameEnd(board.variant.fairysfName.name, Forsyth.exportBoard(board))
+  def perpetual: Boolean = gameResult == GameResult.Perpetual()
+
+  def staleMate: Boolean = gameResult == GameResult.Draw() && Api.gameEnd(
+    board.variant.fairysfName.name,
+    board.variant.initialFen.value,
+    board.uciMoves.some
+  )
 
   private def variantEnd = gameResult == GameResult.VariantEnd()
 
-  //TODO: is leaving out autodraw ok?
-  def end: Boolean = checkMate || staleMate || variantEnd
+  def end: Boolean = checkMate || perpetual || staleMate || variantEnd
 
   def winner: Option[Color] = board.variant.winner(this)
 
@@ -50,24 +67,32 @@ case class Situation(board: Board, color: Color) {
 
   lazy val status: Option[Status] =
     if (checkMate) Status.Mate.some
+    else if (perpetual) Status.PerpetualCheck.some
     //alot of variantEnds appear as checkMate in fairysf
     else if (variantEnd) Status.VariantEnd.some
-    else if (staleMate) Status.Draw.some
-    //no way to tell stalemate from draw
-    //else if (autoDraw) Status.Draw.some
+    else if (staleMate) Status.Stalemate.some
     else none
 
   //TODO: test White/Black map is correct
   def opponentHasInsufficientMaterial: Boolean = {
     val insufficientMaterial = Api.insufficientMaterial(
       board.variant.fairysfName.name,
-      Forsyth.exportBoard(board)
+      board.variant.initialFen.value,
+      board.uciMoves.some
     )
     color match {
       case White => insufficientMaterial._2
       case Black => insufficientMaterial._1
     }
   }
+
+  //called threefold actually will return for xfold
+  def threefoldRepetition: Boolean =
+    Api.optionalGameEnd(
+      board.variant.fairysfName.name,
+      board.variant.initialFen.value,
+      board.uciMoves.some
+    )
 
   def move(from: Pos, to: Pos, promotion: Option[PromotableRole]): Validated[String, Move] =
     board.variant.move(this, from, to, promotion)

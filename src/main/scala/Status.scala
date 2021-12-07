@@ -25,6 +25,7 @@ object Status {
   case object Cheat         extends Status(36)
   case object NoStart       extends Status(37) // the player did not make the first move in time
   case object UnknownFinish extends Status(38) // we don't know why the game ended
+  case object PerpetualCheck extends Status(39) // For Shogi/Xiangqi
   case object VariantEnd    extends Status(60) // the variant has a special ending
 
   val all = List(
@@ -40,6 +41,7 @@ object Status {
     Cheat,
     NoStart,
     UnknownFinish,
+    PerpetualCheck,
     VariantEnd
   )
 

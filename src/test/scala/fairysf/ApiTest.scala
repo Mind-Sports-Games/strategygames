@@ -336,6 +336,17 @@ class FairyStockfishApiTest extends Specification with ValidatedMatchers {
   //  }
   //}
 
+  //https://www.pychess.org/ozI3pCRx
+  "Shogi perpetual check" should {
+    "should produce non optional game end" in {
+      Api.gameEnd(
+        variant.Shogi.fairysfName.name,
+        variant.Shogi.initialFen.value,
+        List("c3c4", "a7a6", "b2g7+", "e9d8", "g7f6", "d8e9", "f6g7", "e9d8", "g7f6", "d8e9", "f6g7", "e9d8", "g7f6", "d8e9", "f6g7")
+      ) must_== true
+    }
+  }
+
   "Chess white king vs black king only" should {
     val insufficientMaterialFEN = "4k3/8/8/8/8/8/8/3K4 w - - 0 1"
     "have insufficient material" in {

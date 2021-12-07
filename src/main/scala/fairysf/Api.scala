@@ -12,15 +12,22 @@ sealed abstract class GameResult extends Product with Serializable
 
 object GameResult {
   final case class Checkmate()  extends GameResult
+  final case class Perpetual()  extends GameResult
   final case class Draw()       extends GameResult
   final case class VariantEnd() extends GameResult
   final case class Ongoing()    extends GameResult
 
-  def fromInt(value: Int): GameResult =
+  def resultFromInt(value: Int): GameResult =
     if (value.abs == 32000) GameResult.Checkmate()
-    else if (value.abs == -32000) GameResult.VariantEnd()
-    else if (value.abs == 0) GameResult.Draw()
-    else sys.error("Unknown game result")
+    //else if (value == -32000) GameResult.VariantEnd()
+    else if (value == 0) GameResult.Draw()
+    else sys.error(s"Unknown game result: ${value}")
+
+  def optionalResultFromInt(value: Int): GameResult =
+    if (value == 32000) GameResult.Perpetual()
+    //else if (value == 0) GameResult.Draw()
+    else GameResult.Ongoing()
+
 }
 
 object Api {
@@ -101,20 +108,29 @@ object Api {
 
   def gameResult(variantName: String, fen: String, movesList: Option[List[String]] = None): GameResult =
     if (legalMoves(variantName, fen, movesList).size == 0)
-      GameResult.fromInt(
+      GameResult.resultFromInt(
         FairyStockfish.gameResult(variantName, fen, convertUciMoves(movesList))
       )
-    else GameResult.Ongoing()
+    else optionalGameEndResult(variantName, fen, movesList)
 
   def gameEnd(variantName: String, fen: String, movesList: Option[List[String]] = None): Boolean =
-    legalMoves(variantName, fen, convertUciMoves(movesList)).size == 0 ||
+    gameResult(variantName, fen, movesList) != GameResult.Ongoing() ||
       insufficientMaterial(variantName, fen, convertUciMoves(movesList)) == ((true, true))
 
   //def immediateGameEnd(variantName: String, fen: String, movesList: Option[List[String]] = None): Boolean =
   //  FairyStockfish.isImmediateGameEnd(variantName, fen, movesList).get0()
 
+  private def isOptionalGameEnd(variantName: String, fen: String, movesList: Option[List[String]] = None) =
+    FairyStockfish.isOptionalGameEnd(variantName, fen, convertUciMoves(movesList))
+
   def optionalGameEnd(variantName: String, fen: String, movesList: Option[List[String]] = None): Boolean =
-    FairyStockfish.isOptionalGameEnd(variantName, fen, convertUciMoves(movesList)).get0()
+    isOptionalGameEnd(variantName, fen, movesList).get0()
+
+  def optionalGameEndResult(variantName: String, fen: String, movesList: Option[List[String]] = None): GameResult = {
+    val optionalGameEndData = isOptionalGameEnd(variantName, fen, movesList)
+    if (optionalGameEndData.get0()) GameResult.optionalResultFromInt(optionalGameEndData.get1())
+    else GameResult.Ongoing()
+  }
 
   def insufficientMaterial(variantName: String, fen: String, movesList: Option[List[String]] = None): (Boolean, Boolean) = {
     val im = FairyStockfish.hasInsufficientMaterial(variantName, fen, convertUciMoves(movesList))
