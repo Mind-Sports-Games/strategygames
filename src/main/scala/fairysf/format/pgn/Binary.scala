@@ -70,7 +70,7 @@ object Binary {
     def posFromInt(b: Int): String = Pos(right(b, 7)).get.toString()
 
     def pieceFromInt(gf: Int, b: Int): String =
-      Role.allByBinaryInt(GameFamily(gf)).get(b).get.forsyth.toString
+      Role.allByBinaryInt(GameFamily(gf)).get(right(b, 7)).get.forsyth.toString
 
     def optionalPieceFromInt(gf: Int, b: Int): String = b match {
       case 0 => ""
