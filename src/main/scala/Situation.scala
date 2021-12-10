@@ -88,7 +88,7 @@ object Situation {
 
     def winner: Option[Color] = s.winner
 
-    val destinations: Map[Pos, List[Pos]] = s.destinations.map{
+    lazy val destinations: Map[Pos, List[Pos]] = s.destinations.map{
       case (p: chess.Pos, l: List[chess.Pos]) => (Pos.Chess(p), l.map(Pos.Chess))
     }
 
@@ -159,7 +159,7 @@ object Situation {
     def checkSquare = None
 
     // TODO: this probably needs to be properly implemented
-    val destinations: Map[Pos, List[Pos]] = Map()
+    lazy val destinations: Map[Pos, List[Pos]] = Map()
 
     def drops: Option[List[Pos]] = None
 
@@ -253,7 +253,7 @@ object Situation {
 
     def winner: Option[Color] = s.winner
 
-    val destinations: Map[Pos, List[Pos]] = s.destinations.map{
+    lazy val destinations: Map[Pos, List[Pos]] = s.destinations.map{
       case (p: fairysf.Pos, l: List[fairysf.Pos]) => (Pos.FairySF(p), l.map(Pos.FairySF))
     }
 
