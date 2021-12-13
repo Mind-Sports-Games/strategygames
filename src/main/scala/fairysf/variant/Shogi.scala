@@ -39,11 +39,26 @@ case object Shogi
 
   override def validDrops(situation: Situation): List[Drop] =
     super.validDrops(situation).filterNot(
-      d => d.piece.role == ShogiPawn && Api.gameResult(
-        fairysfName.name,
-        super.initialFen.value,
-        Some(situation.board.uciMoves :+ d.toUci.uci)
-      ) == GameResult.Checkmate()
+      d => d.piece.role == ShogiPawn && {
+        val kingPos = situation.board.posMap.get(
+          Piece(!situation.color, kingPiece)
+        ).flatMap(_.headOption)
+        Some(d.pos) == (situation.color match {
+          case White => kingPos.flatMap(_.down)
+          case Black => kingPos.flatMap(_.up)
+        })
+      } && (situation.board.fen match {
+        case Some(fen) => Api.gameResult(
+          fairysfName.name,
+          fen.value,
+          Some(List(d.toUci.uci))
+        )
+        case None      => Api.gameResult(
+          fairysfName.name,
+          initialFen.value,
+          Some(situation.board.uciMoves :+ d.toUci.uci)
+        )
+      }) == GameResult.Checkmate()
     )
 
 }

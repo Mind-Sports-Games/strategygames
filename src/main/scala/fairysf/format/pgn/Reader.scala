@@ -60,15 +60,11 @@ object Reader {
     }
 
   private def makeReplayWithPgn(game: Game, moves: Iterable[String]): Result =
-    moves.foldLeft[Result](Result.Complete(Replay(game))) {
+    Parser.pgnMovesToUciMoves(moves).foldLeft[Result](Result.Complete(Replay(game))) {
       case (Result.Complete(replay), m) =>
         m match {
-          case Uci.Move.moveP(orig, dest, promotion) => {
-            val prom = promotion match {
-              case "" => ""
-              case _ => "+"
-            }
-            val uciMove = s"${orig}${dest}${prom}"
+          case Uci.Move.moveR(orig, dest, promotion) => {
+            val uciMove = s"${orig}${dest}${promotion}"
             (Pos.fromKey(orig), Pos.fromKey(dest)) match {
               case (Some(orig), Some(dest)) => Result.Complete(
                 replay.addMove(StratMove.toFairySF(
@@ -76,12 +72,19 @@ object Reader {
                     replay.state,
                     orig,
                     dest,
-                    prom,
-                    Api.fenFromMoves(
-                      replay.state.board.variant.fairysfName.name,
-                      replay.state.board.variant.initialFen.value,
-                      (replay.state.board.uciMoves :+ uciMove).some
-                    ),
+                    promotion,
+                    replay.state.board.fen match {
+                      case Some(fen) => Api.fenFromMoves(
+                        replay.state.board.variant.fairysfName.name,
+                        fen.value,
+                        List(uciMove).some
+                      )
+                      case None      => Api.fenFromMoves(
+                        replay.state.board.variant.fairysfName.name,
+                        replay.state.board.variant.initialFen.value,
+                        (replay.state.board.uciMoves :+ uciMove).some
+                      )
+                    },
                     replay.state.board.uciMoves :+ uciMove
                   )))
                 ))
@@ -98,11 +101,18 @@ object Reader {
                     replay.state,
                     role,
                     dest,
-                    Api.fenFromMoves(
-                      replay.state.board.variant.fairysfName.name,
-                      replay.state.board.variant.initialFen.value,
-                      (replay.state.board.uciMoves :+ m).some
-                    ),
+                    replay.state.board.fen match {
+                      case Some(fen) => Api.fenFromMoves(
+                        replay.state.board.variant.fairysfName.name,
+                        fen.value,
+                        List(m).some
+                      )
+                      case None      => Api.fenFromMoves(
+                        replay.state.board.variant.fairysfName.name,
+                        replay.state.board.variant.initialFen.value,
+                        (replay.state.board.uciMoves :+ m).some
+                      )
+                    },
                     replay.state.board.uciMoves :+ m
                   )))
                 ))

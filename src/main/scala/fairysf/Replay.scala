@@ -83,7 +83,8 @@ object Replay {
           fen.value
         ),
         uciMoves = uciMoves,
-        pocketData = Api.pocketData(before.board.variant, fen.value)
+        pocketData = Api.pocketData(before.board.variant, fen.value),
+        fen = fen.some
       ),
       capture = None,
       promotion = promotion match {
@@ -109,7 +110,8 @@ object Replay {
           fen.value
         ),
         uciMoves = uciMoves,
-        pocketData = Api.pocketData(before.board.variant, fen.value)
+        pocketData = Api.pocketData(before.board.variant, fen.value),
+        fen = fen.some
       ),
     )
 
@@ -126,21 +128,28 @@ object Replay {
     var errors = ""
 
     def getReplayFEN =
-      Api.fenFromMoves(
-        init.board.variant.fairysfName.name,
-        init.situation.board.variant.initialFen.value,
-        uciMoves.some
-      )
+      init.situation.board.fen match {
+        case Some(fen) => fen
+        case None      => Api.fenFromMoves(
+          init.board.variant.fairysfName.name,
+          init.situation.board.variant.initialFen.value,
+          uciMoves.some
+        )
+      }
 
     def replayMoveFromUci(orig: Option[Pos], dest: Option[Pos], promotion: String): (Game, Uci.WithSan) =
       (orig, dest) match {
         case (Some(orig), Some(dest)) => {
           val uciMove = s"${orig.key}${dest.key}${promotion}"
+          val pgnMove = s"${orig.key}${dest.key}${promotion match {
+            case "" => ""
+            case _ => state.board.pieces(orig).role.forsyth
+          }}"
           uciMoves = uciMoves :+ uciMove
           state = state.apply(
             replayMove(state, orig, dest, promotion, getReplayFEN, uciMoves)
           )
-          (state, Uci.WithSan(Uci.apply(state.board.variant.gameFamily, uciMove).get, "NOSAN"))
+          (state, Uci.WithSan(Uci.apply(state.board.variant.gameFamily, pgnMove).get, "NOSAN"))
         }
         case (orig, dest) => {
           val uciMove = s"${orig}${dest}${promotion}"
@@ -166,9 +175,9 @@ object Replay {
         }
       }
 
-    val moves: List[(Game, Uci.WithSan)] = moveStrs.toList
+    val moves: List[(Game, Uci.WithSan)] = Parser.pgnMovesToUciMoves(moveStrs)
       .map{
-        case Uci.Move.moveP(orig, dest, promotion) => replayMoveFromUci(
+        case Uci.Move.moveR(orig, dest, promotion) => replayMoveFromUci(
           Pos.fromKey(orig),
           Pos.fromKey(dest),
           promotion

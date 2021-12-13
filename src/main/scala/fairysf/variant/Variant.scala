@@ -54,13 +54,35 @@ abstract class Variant private[variant] (
   //in just atomic, so can leave as true for now
   def isValidPromotion(promotion: Option[PromotableRole]): Boolean = true
 
+  private def legalMovesAndDropsFromFEN(board: Board) =
+    board.fen match {
+      case Some(fen) => Api.legalMoves(
+        fairysfName.name,
+        fen.value.pp("fen")
+      )
+      case None => Api.legalMoves(
+        fairysfName.name,
+        board.variant.initialFen.value,
+        board.uciMoves.some.pp("uciMoves")
+      )
+    }
+
+  private def fenAfterMoveOrDrop(board: Board, uciMove: String): String =
+    board.fen match {
+      case Some(fen) => Api.fenFromMoves(
+        fairysfName.name,
+        fen.value,
+        List(uciMove).some
+      ).value
+      case None      => Api.fenFromMoves(
+        fairysfName.name,
+        board.variant.initialFen.value,
+        (board.uciMoves :+ uciMove).some
+      ).value
+    }
+
   def validMoves(situation: Situation): Map[Pos, List[Move]] =
-    Api.legalMoves(
-      fairysfName.name,
-      situation.board.variant.initialFen.value,
-      situation.board.uciMoves.some
-    ).filterNot(_.contains("@"))
-    .map{
+    legalMovesAndDropsFromFEN(situation.board).filterNot(_.contains("@")).map{
       case Uci.Move.moveR(orig, dest, promotion) => (
         Pos.fromKey(orig),
         Pos.fromKey(dest),
@@ -68,12 +90,8 @@ abstract class Variant private[variant] (
       )
     }.map{
       case (Some(orig), Some(dest), promotion) => {
-        val uciMoves = (situation.board.uciMoves :+ s"${orig.key}${dest.key}${promotion}")
-        val fen = Api.fenFromMoves(
-          fairysfName.name,
-          situation.board.variant.initialFen.value,
-          uciMoves.some
-        ).value
+        val uciMove = s"${orig.key}${dest.key}${promotion}"
+        val fen = fenAfterMoveOrDrop(situation.board, uciMove)
         (orig, Move(
           piece = situation.board.pieces(orig),
           orig = orig,
@@ -85,8 +103,9 @@ abstract class Variant private[variant] (
               gameFamily,
               fen
             ),
-            uciMoves = uciMoves,
-            pocketData = Api.pocketData(situation.board.variant, fen)
+            uciMoves = (situation.board.uciMoves :+ uciMove),
+            pocketData = Api.pocketData(situation.board.variant, fen),
+            fen = FEN(fen).some
           ),
           capture = None,
           promotion = promotion match {
@@ -104,24 +123,15 @@ abstract class Variant private[variant] (
     }.groupBy(_._1).map { case (k,v) => (k,v.toList.map(_._2))}
 
   def validDrops(situation: Situation): List[Drop] =
-    Api.legalMoves(
-      fairysfName.name,
-      situation.board.variant.initialFen.value,
-      situation.board.uciMoves.some
-    ).filter(_.contains("@"))
-    .map{
+    legalMovesAndDropsFromFEN(situation.board).filter(_.contains("@")).map{
       case Uci.Drop.dropR(role, dest) => (
         Role.allByForsyth(situation.board.variant.gameFamily).get(role(0)),
         Pos.fromKey(dest)
       )
     }.map{
       case (Some(role), Some(dest)) => {
-        val uciMoves = (situation.board.uciMoves :+ s"${role.forsyth}@${dest.key}")
-        val fen = Api.fenFromMoves(
-          fairysfName.name,
-          situation.board.variant.initialFen.value,
-          uciMoves.some
-        ).value
+        val uciMove = s"${role.forsyth}@${dest.key}"
+        val fen = fenAfterMoveOrDrop(situation.board, uciMove)
         Drop(
           piece = Piece(situation.color, role),
           pos = dest,
@@ -132,8 +142,9 @@ abstract class Variant private[variant] (
               gameFamily,
               fen
             ),
-            uciMoves = uciMoves,
-            pocketData = Api.pocketData(situation.board.variant, fen)
+            uciMoves = (situation.board.uciMoves :+ uciMove),
+            pocketData = Api.pocketData(situation.board.variant, fen),
+            fen = FEN(fen).some
           )
         )
       }

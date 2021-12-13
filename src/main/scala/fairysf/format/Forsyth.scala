@@ -63,11 +63,14 @@ object Forsyth {
   def >>(game: Game): FEN = exportBoardFen(game.situation.board)
 
   def exportBoard(board: Board): String =
-    Api.fenFromMoves(
-      board.variant.fairysfName.name,
-      board.variant.initialFen.value,
-      board.uciMoves.some
-    ).value
+    board.fen match {
+      case Some(fen) => fen.value
+      case None      => Api.fenFromMoves(
+        board.variant.fairysfName.name,
+        board.variant.initialFen.value,
+        board.uciMoves.some
+      ).value
+    }
 
   def exportBoardFen(board: Board): FEN = FEN(exportBoard(board))
 

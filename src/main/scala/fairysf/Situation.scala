@@ -21,11 +21,17 @@ case class Situation(board: Board, color: Color) {
 
   //lazy val kingPos: Option[Pos] = board kingPosOf color
 
-  lazy val check: Boolean = Api.givesCheck(
-    board.variant.fairysfName.name,
-    board.variant.initialFen.value,
-    board.uciMoves.some
-  )
+  lazy val check: Boolean = board.fen match {
+    case Some(fen) => Api.givesCheck(
+      board.variant.fairysfName.name,
+      fen.value
+    )
+    case None      => Api.givesCheck(
+      board.variant.fairysfName.name,
+      board.variant.initialFen.value,
+      board.uciMoves.some
+    )
+  }
 
   def checkSquare =
     if (check) board.posMap.get(Piece(color, board.variant.kingPiece)).flatMap(_.headOption)
@@ -33,30 +39,30 @@ case class Situation(board: Board, color: Color) {
 
   def history = board.history
 
-  private lazy val gameResult =
-    if (Api.gameEnd(
-      board.variant.fairysfName.name,
-      board.variant.initialFen.value,
-      board.uciMoves.some
-    ))
-      Api.gameResult(
-        board.variant.fairysfName.name,
-        board.variant.initialFen.value,
-        board.uciMoves.some
-      )
-    else false
-
-  def checkMate: Boolean = gameResult == GameResult.Checkmate()
-
-  def perpetual: Boolean = gameResult == GameResult.Perpetual()
-
-  def staleMate: Boolean = gameResult == GameResult.Draw() && Api.gameEnd(
+  private lazy val gameEnd = Api.gameEnd(
+    gameResult,
     board.variant.fairysfName.name,
     board.variant.initialFen.value,
     board.uciMoves.some
   )
 
-  private def variantEnd = gameResult == GameResult.VariantEnd()
+  private lazy val gameResult = Api.gameResult(
+    board.variant.fairysfName.name,
+    board.variant.initialFen.value,
+    board.uciMoves.some
+  )
+
+  private lazy val result =
+    if (gameEnd) gameResult
+    else GameResult.Ongoing()
+
+  def checkMate: Boolean = result == GameResult.Checkmate()
+
+  def perpetual: Boolean = result == GameResult.Perpetual()
+
+  def staleMate: Boolean = result == GameResult.Draw() && gameEnd
+
+  private def variantEnd = result == GameResult.VariantEnd()
 
   def end: Boolean = checkMate || perpetual || staleMate || variantEnd
 
