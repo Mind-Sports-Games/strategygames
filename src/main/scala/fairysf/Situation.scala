@@ -33,7 +33,7 @@ case class Situation(board: Board, color: Color) {
 
   def history = board.history
 
-  private def gameResult =
+  private lazy val gameResult =
     if (Api.gameEnd(
       board.variant.fairysfName.name,
       board.variant.initialFen.value,
