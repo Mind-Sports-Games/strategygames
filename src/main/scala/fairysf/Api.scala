@@ -41,6 +41,9 @@ class FairyPosition(position: FairyStockfish.Position) {
     def legalMoves(): Array[String] = position.getLegalMoves()
     lazy val fen: FEN = FEN(position.getFEN())
     lazy val givesCheck: Boolean = position.givesCheck()
+
+
+    // TODO: finish porting the rest of these similar to above
 }
 
 object Api {
