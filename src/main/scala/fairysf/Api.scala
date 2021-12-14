@@ -30,6 +30,19 @@ object GameResult {
 
 }
 
+class FairyPosition(position: FairyStockfish.Position) {
+    import Api._
+    def this(variant: Variant) =
+      this(new FairyStockfish.Position(variant.name))
+
+    def makeMoves(movesList: List[String]): FairyPosition = 
+          new FairyPosition(position.makeMoves(movesList))
+
+    def legalMoves(): Array[String] = position.getLegalMoves()
+    lazy val fen: FEN = FEN(position.getFEN())
+    lazy val givesCheck: Boolean = position.givesCheck()
+}
+
 object Api {
   // This will always be called when we import this module. So as long as we directly use
   // this package for calling everything, it should ensure that it's always initialized

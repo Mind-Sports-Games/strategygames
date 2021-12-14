@@ -13,12 +13,12 @@ libraryDependencies ++= List(
   "com.github.ornicar"     %% "scalalib"                 % "7.0.2",
   "joda-time"               % "joda-time"                % "2.10.10",
   "org.typelevel"          %% "cats-core"                % "2.2.0",
-  "org.playstrategy"        % "fairystockfish"           % "0.0.1"
+  "org.playstrategy"        % "fairystockfish"           % "0.0.3"
 )
 
 // Explicitly add in the linux-class path
 lazy val fairystockfish = Artifact("fairystockfish", "linux-x86_64")
-libraryDependencies += "org.playstrategy"        % "fairystockfish"           % "0.0.1" artifacts(fairystockfish)
+libraryDependencies += "org.playstrategy"        % "fairystockfish"           % "0.0.3" artifacts(fairystockfish)
 classpathTypes ++= Set("linux-x86_64")
 
 resolvers ++= Seq(
