@@ -195,7 +195,7 @@ abstract class Variant private[variant] (
     else if (situation.perpetual) Option(situation.color)
     else None
 
-  @nowarn def specialEnd(situation: Situation) = situation.perpetual
+  @nowarn def specialEnd(situation: Situation) = false
 
   @nowarn def specialDraw(situation: Situation) = false
 
