@@ -67,8 +67,8 @@ object Reader {
             val uciMove = s"${orig}${dest}${promotion}"
             (Pos.fromKey(orig), Pos.fromKey(dest)) match {
               case (Some(orig), Some(dest)) => Result.Complete(
-                replay.addMove(StratMove.toFairySF(
-                  Left.apply(StratMove.wrap(Replay.replayMove(
+                replay.addMove(
+                  Left(Replay.replayMove(
                     replay.state,
                     orig,
                     dest,
@@ -86,8 +86,8 @@ object Reader {
                       )
                     },
                     replay.state.board.uciMoves :+ uciMove
-                  )))
-                ))
+                  ))
+                )
               )
               //case _ => Result.Incomplete(replay, s"Error making replay with move: ${m}")
               case _ => sys.error(s"Error making replay with move: ${m}")
@@ -96,8 +96,8 @@ object Reader {
           case Uci.Drop.dropR(role, dest) =>
             (Role.allByForsyth(replay.state.board.variant.gameFamily).get(role(0)), Pos.fromKey(dest)) match {
               case (Some(role), Some(dest)) => Result.Complete(
-                replay.addMove(StratMove.toFairySF(
-                  Right.apply(StratDrop.wrap(Replay.replayDrop(
+                replay.addMove(
+                  Right(Replay.replayDrop(
                     replay.state,
                     role,
                     dest,
@@ -114,8 +114,8 @@ object Reader {
                       )
                     },
                     replay.state.board.uciMoves :+ m
-                  )))
-                ))
+                  ))
+                )
               )
               //case _ => Result.Incomplete(replay, s"Error making replay with drop: ${m}")
               case _ => sys.error(s"Error making replay with drop: ${m}")
