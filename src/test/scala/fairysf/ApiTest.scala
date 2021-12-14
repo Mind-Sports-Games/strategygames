@@ -342,7 +342,7 @@ class FairyStockfishApiTest extends Specification with ValidatedMatchers {
       Api.gameEnd(
         variant.Shogi.fairysfName.name,
         variant.Shogi.initialFen.value,
-        List("c3c4", "a7a6", "b2g7+", "e9d8", "g7f6", "d8e9", "f6g7", "e9d8", "g7f6", "d8e9", "f6g7", "e9d8", "g7f6", "d8e9", "f6g7")
+        Some(List("c3c4", "e7e6", "b2g7+", "e9d8", "g7f6", "d8e9", "f6g7", "e9d8", "g7f6", "d8e9", "f6g7", "e9d8", "g7f6", "d8e9", "f6g7"))
       ) must_== true
     }
   }
