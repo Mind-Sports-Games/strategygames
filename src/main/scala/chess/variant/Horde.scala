@@ -14,6 +14,13 @@ case object Horde
       standardInitialPosition = false
     ) {
 
+  def perfId: Int    = 16
+  def perfIcon: Char = '_'
+
+  override def whiteIsBetterVariant     = true
+  override def blindModeVariant         = false
+  override def materialImbalanceVariant = true
+
   /** In Horde chess white advances against black with a horde of pawns.
     */
   lazy val pieces: Map[Pos, Piece] = {

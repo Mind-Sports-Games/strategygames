@@ -10,10 +10,12 @@ case object Antidraughts
       key = "antidraughts",
       name = "Antidraughts",
       shortName = "Anti",
-      title = "Lose all your pieces (or run out of moves) to win the game.",
+      title = "Lose all your pieces (or run out of moves) to win.",
       standardInitialPosition = true,
       boardSize = Board.D100
     ) {
+
+  def perfId: Int = 113
 
   def pieces           = Standard.pieces
   def initialFen       = Standard.initialFen

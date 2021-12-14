@@ -5,6 +5,7 @@ sealed trait Role {
   //draughts.Role.pdn will be referred to by pgn from this point
   val pgn: Char
   val name: String
+  val groundName: String
   val binaryInt: Int
   def toString(): String
 }
@@ -23,6 +24,7 @@ object Role {
     val pgn = r.pgn
     val binaryInt = r.binaryInt
     val name = r.name
+    val groundName = r.groundName
     override def toString() = r.name
   }
 
@@ -31,6 +33,7 @@ object Role {
     val pgn = r.pdn
     val binaryInt = r.binaryInt
     val name = r.name
+    val groundName = r.name
     override def toString() = r.name
   }
 
@@ -39,6 +42,7 @@ object Role {
     val pgn = r.pgn
     val binaryInt = r.binaryInt
     val name = r.name
+    val groundName = r.groundName
     override def toString() = r.name
     def toChess = r
     def toDraughts: draughts.PromotableRole = sys.error("Not implemented for chess")
@@ -49,6 +53,7 @@ object Role {
     val pgn = r.pdn
     val binaryInt = r.binaryInt
     val name = r.name
+    val groundName = r.name
     override def toString() = r.name
     def toDraughts = r
     def toChess: chess.PromotableRole = sys.error("Not implemented for draughts")
@@ -77,6 +82,11 @@ object Role {
   def allByName(lib: GameLogic): Map[String, Role] = lib match {
     case GameLogic.Draughts() => draughts.Role.allByName.map{case(n, r) => (n, DraughtsRole(r))}
     case GameLogic.Chess() => chess.Role.allByName.map{case(n, r) => (n, ChessRole(r))}
+  }
+
+  def allByGroundName(lib: GameLogic): Map[String, Role] = lib match {
+    case GameLogic.Draughts() => draughts.Role.allByName.map{case(n, r) => (n, DraughtsRole(r))}
+    case GameLogic.Chess() => chess.Role.allByGroundName.map{case(n, r) => (n, ChessRole(r))}
   }
 
   def allByBinaryInt(lib: GameLogic): Map[Int, Role] = lib match {

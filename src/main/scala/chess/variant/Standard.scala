@@ -11,5 +11,10 @@ case object Standard
       standardInitialPosition = true
     ) {
 
+  def perfId: Int    = 5
+  def perfIcon: Char = '8'
+
   val pieces: Map[Pos, Piece] = Variant.symmetricRank(backRank)
+
+  override def baseVariant: Boolean = true
 }

@@ -17,6 +17,12 @@ case object Crazyhouse
       standardInitialPosition = true
     ) {
 
+  def perfId: Int    = 18
+  def perfIcon: Char = ''
+
+  override def blindModeVariant         = false
+  override def materialImbalanceVariant = true
+
   def pieces = Standard.pieces
 
   override val initialFen = FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR/ w KQkq - 0 1")

@@ -14,6 +14,12 @@ case object RacingKings
       standardInitialPosition = false
     ) {
 
+  def perfId: Int    = 17
+  def perfIcon: Char = ''
+
+  override def whiteIsBetterVariant = true
+  override def blindModeVariant = false
+
   override def allowsCastling = false
 
   // Both sides start on the first two ranks:

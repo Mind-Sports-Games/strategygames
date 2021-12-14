@@ -14,6 +14,13 @@ case object Antichess
       standardInitialPosition = true
     ) {
 
+  def perfId: Int    = 13
+  def perfIcon: Char = '@'
+
+  override def whiteIsBetterVariant     = true
+  override def blindModeVariant         = false
+  override def materialImbalanceVariant = true
+
   def pieces = Standard.pieces
 
   // In antichess, it is not permitted to castle

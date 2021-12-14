@@ -2,7 +2,6 @@ package strategygames.chess.variant
 
 import strategygames.chess._
 import strategygames.chess.format.FEN
-import strategygames.Color
 
 case object Chess960
     extends Variant(
@@ -13,6 +12,12 @@ case object Chess960
       title = "Starting position of the home rank pieces is randomized.",
       standardInitialPosition = false
     ) {
+
+  def perfId: Int    = 11
+  def perfIcon: Char = '\''
+
+  override def baseVariant = true
+  override def fenVariant = true
 
   def pieces =
     Variant.symmetricRank {

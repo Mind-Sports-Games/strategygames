@@ -19,6 +19,8 @@ case object Frysk
       boardSize = Board.D100
     ) {
 
+  def perfId: Int = 116
+
   val pieces           = Variant.symmetricBackrank(Vector(Man, Man, Man, Man, Man), boardSize)
   val initialFen       = FEN("W:W46,47,48,49,50:B1,2,3,4,5:H0:F1")
   val startingPosition = StartingPosition("---", initialFen, "", "Initial position".some)

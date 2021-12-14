@@ -16,6 +16,9 @@ case object FiveCheck
 
   def pieces = Standard.pieces
 
+  def perfId: Int    = 15
+  def perfIcon: Char = '.'
+
   override val initialFen = FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 +0+0")
 
   override def finalizeBoard(board: Board, uci: format.Uci, capture: Option[Piece]): Board =

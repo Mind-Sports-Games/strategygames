@@ -13,6 +13,8 @@ case object FromPosition
       boardSize = Board.D100
     ) {
 
+  def perfId: Int = Standard.perfId
+
   def pieces           = Standard.pieces
   def initialFen       = Standard.initialFen
   def startingPosition = Standard.startingPosition

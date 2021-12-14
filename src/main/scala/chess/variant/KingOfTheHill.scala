@@ -8,9 +8,12 @@ case object KingOfTheHill
       key = "kingOfTheHill",
       name = "King of the Hill",
       shortName = "KotH",
-      title = "Bring your King to the center to win the game.",
+      title = "Bring your King to the center to win.",
       standardInitialPosition = true
     ) {
+
+  def perfId: Int    = 12
+  def perfIcon: Char = '('
 
   def pieces = Standard.pieces
 

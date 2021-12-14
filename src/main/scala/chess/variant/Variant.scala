@@ -35,6 +35,18 @@ abstract class Variant private[variant] (
 
   def exotic = !standard
 
+  def baseVariant: Boolean = false
+  def fenVariant: Boolean  = false
+  def aiVariant: Boolean   = true
+
+  def whiteIsBetterVariant: Boolean = false
+  def blindModeVariant: Boolean     = true
+
+  def materialImbalanceVariant: Boolean = false
+
+  def perfId: Int
+  def perfIcon: Char
+
   def allowsCastling = !castles.isEmpty
 
   protected val backRank = Vector(Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook)
