@@ -150,8 +150,16 @@ object Api {
       )
     else optionalGameEndResult(variantName, fen, movesList)
 
-  def gameEnd(gameResult: GameResult, variantName: String, fen: String, movesList: Option[List[String]] = None): Boolean =
-    gameResult != GameResult.Ongoing() ||
+  def gameEnd(
+    variantName: String,
+    fen: String,
+    movesList: Option[List[String]] = None,
+    result: Option[GameResult] = None
+  ): Boolean =
+    (result match {
+      case Some(r) => r
+      case None    => gameResult(variantName, fen, movesList)
+    }) != GameResult.Ongoing() ||
       insufficientMaterial(variantName, fen, convertUciMoves(movesList)) == ((true, true))
 
   //def immediateGameEnd(variantName: String, fen: String, movesList: Option[List[String]] = None): Boolean =

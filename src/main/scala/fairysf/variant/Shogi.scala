@@ -22,7 +22,7 @@ case object Shogi
       boardSize = Board.Dim9x9
     ) {
   
-  override def gameFamily: GameFamily = GameFamily.Shogi()
+  def gameFamily: GameFamily = GameFamily.Shogi()
 
   override def dropsVariant = true
 
