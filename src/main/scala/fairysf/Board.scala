@@ -3,6 +3,8 @@ package strategygames.fairysf
 import strategygames.Color
 import format.FEN
 
+import cats.implicits._
+
 import variant.Variant
 
 case class Board(
@@ -43,6 +45,19 @@ case class Board(
   def valid(strict: Boolean) = variant.valid(this, strict)
 
   def materialImbalance: Int = variant.materialImbalance(this)
+
+  lazy val legalMovesAndDropsFromFEN =
+    fen match {
+      case Some(fen) => Api.legalMoves(
+        variant.fairysfName.name,
+        fen.value
+      )
+      case None => Api.legalMoves(
+        variant.fairysfName.name,
+        variant.initialFen.value,
+        uciMoves.some
+      )
+    }
 
   override def toString = s"$variant Position after ${history.lastMove}"
 }

@@ -78,7 +78,7 @@ case object Crazyhouse
       val roles = data.pockets(situation.color).roles
       roles.nonEmpty && possibleDrops(situation).fold(true) { squares =>
         squares.nonEmpty && {
-          squares.exists(canDropPawnOn) || roles.exists(strategygames.chess.Pawn !=)
+          squares.exists(canDropPawnOn) || roles.exists(r => strategygames.chess.Pawn.forsyth != r.forsyth)
         }
       }
     }

@@ -54,19 +54,6 @@ abstract class Variant private[variant] (
   //in just atomic, so can leave as true for now
   def isValidPromotion(promotion: Option[PromotableRole]): Boolean = true
 
-  private def legalMovesAndDropsFromFEN(board: Board) =
-    board.fen match {
-      case Some(fen) => Api.legalMoves(
-        fairysfName.name,
-        fen.value.pp("fen")
-      )
-      case None => Api.legalMoves(
-        fairysfName.name,
-        board.variant.initialFen.value,
-        board.uciMoves.some.pp("uciMoves")
-      )
-    }
-
   private def fenAfterMoveOrDrop(board: Board, uciMove: String): String =
     board.fen match {
       case Some(fen) => Api.fenFromMoves(
@@ -82,7 +69,7 @@ abstract class Variant private[variant] (
     }
 
   def validMoves(situation: Situation): Map[Pos, List[Move]] =
-    legalMovesAndDropsFromFEN(situation.board).filterNot(_.contains("@")).map{
+    situation.board.legalMovesAndDropsFromFEN.filterNot(_.contains("@")).map{
       case Uci.Move.moveR(orig, dest, promotion) => (
         Pos.fromKey(orig),
         Pos.fromKey(dest),
@@ -123,7 +110,7 @@ abstract class Variant private[variant] (
     }.groupBy(_._1).map { case (k,v) => (k,v.toList.map(_._2))}
 
   def validDrops(situation: Situation): List[Drop] =
-    legalMovesAndDropsFromFEN(situation.board).filter(_.contains("@")).map{
+    situation.board.legalMovesAndDropsFromFEN.filter(_.contains("@")).map{
       case Uci.Drop.dropR(role, dest) => (
         Role.allByForsyth(situation.board.variant.gameFamily).get(role(0)),
         Pos.fromKey(dest)
@@ -208,7 +195,7 @@ abstract class Variant private[variant] (
     else if (situation.perpetual) Option(situation.color)
     else None
 
-  @nowarn def specialEnd(situation: Situation) = situation.perpetual
+  @nowarn def specialEnd(situation: Situation) = false
 
   @nowarn def specialDraw(situation: Situation) = false
 

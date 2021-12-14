@@ -39,18 +39,36 @@ case class Situation(board: Board, color: Color) {
 
   def history = board.history
 
-  private lazy val gameEnd = Api.gameEnd(
-    gameResult,
-    board.variant.fairysfName.name,
-    board.variant.initialFen.value,
-    board.uciMoves.some
-  )
+  private lazy val gameEnd = board.fen match {
+    case Some(fen) => Api.gameEnd(
+      gameResult,
+      board.variant.fairysfName.name,
+      fen.value
+    )
+    case None      => Api.gameEnd(
+      gameResult,
+      board.variant.fairysfName.name,
+      board.variant.initialFen.value,
+      board.uciMoves.some
+    )
+  }
 
   private lazy val gameResult = Api.gameResult(
     board.variant.fairysfName.name,
     board.variant.initialFen.value,
     board.uciMoves.some
   )
+  //private lazy val gameResult = board.fen match {
+  //  case Some(fen) => Api.gameResult(
+  //    board.variant.fairysfName.name,
+  //    fen.value
+  //  )
+  //  case None      => Api.gameResult(
+  //    board.variant.fairysfName.name,
+  //    board.variant.initialFen.value,
+  //    board.uciMoves.some
+  //  )
+  //}
 
   private lazy val result =
     if (gameEnd) gameResult
