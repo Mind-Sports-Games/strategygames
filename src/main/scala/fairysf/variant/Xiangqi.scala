@@ -17,7 +17,7 @@ case object Xiangqi
       boardSize = Board.Dim9x10
     ) {
 
-  override def gameFamily: GameFamily = GameFamily.Xiangqi()
+  def gameFamily: GameFamily = GameFamily.Xiangqi()
 
   def perfIcon: Char = 't'
   def perfId: Int = 201

@@ -256,7 +256,7 @@ abstract class Variant private[variant] (
 
   override def hashCode: Int = id
 
-  def gameFamily: GameFamily = GameFamily.Chess()
+  def gameFamily: GameFamily
 }
 
 object Variant {
