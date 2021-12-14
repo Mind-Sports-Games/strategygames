@@ -35,15 +35,36 @@ class FairyPosition(position: FairyStockfish.Position) {
     def this(variant: Variant) =
       this(new FairyStockfish.Position(variant.name))
 
+    // TODO: yes, this is an abuse of scala. We could get an
+    //       exception here, but I'm not sure how to work around that
+    //       at the moment
+    val variant = Variant.byName(position.variant()).get
+
     def makeMoves(movesList: List[String]): FairyPosition = 
           new FairyPosition(position.makeMoves(movesList))
 
     def legalMoves(): Array[String] = position.getLegalMoves()
     lazy val fen: FEN = FEN(position.getFEN())
     lazy val givesCheck: Boolean = position.givesCheck()
+    lazy val gameResult: GameResult = GameResult.resultFromInt(position.gameResult())
+    lazy val isImmediateGameEnd: (Boolean, GameResult) = {
+      val im = position.isImmediateGameEnd()
+      (im.get0(), GameResult.resultFromInt(im.get1()))
+    }
+    lazy val immediateGameEnd: Boolean = isImmediateGameEnd._1
+    private lazy val isOptionalGameEnd = position.isOptionalGameEnd()
+    lazy val optionalGameEnd: Boolean = isOptionalGameEnd.get0()
+    lazy val insufficientMaterial: (Boolean, Boolean) = {
+      val im = position.hasInsufficientMaterial()
+      (im.get0(), im.get1())
+    }
 
+    def isDraw(ply: Int): Boolean = position.isDraw(ply)
+    def hasGameCycle(ply: Int): Boolean = position.hasGameCycle(ply)
+    lazy val hasRepeated: Boolean = position.hasRepeated()
 
-    // TODO: finish porting the rest of these similar to above
+    lazy val piecesOnBoard: PieceMap = convertPieceMap(position.piecesOnBoard(), variant.gameFamily)
+    lazy val piecesInHand: Array[Piece] = vectorOfPiecesToPieceArray(position.piecesInHand(), variant.gameFamily)
 }
 
 object Api {
