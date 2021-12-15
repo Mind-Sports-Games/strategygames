@@ -1,20 +1,12 @@
 package strategygames.fairysf
-import org.playstrategy.FairyStockfish
 
 import org.specs2.matcher.ValidatedMatchers
 import org.specs2.mutable.Specification
 
 class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
 
-  "Shogi board " should {
-    FairyStockfish.init()
-    "something something" in {
-      val position = new Api.FairyPosition(variant.Shogi)
-      position.legalMoves.length must_== 30
-    }
-  }
   "Shogi initial fen" should {
-    val position = new Api.FairyPosition(variant.Shogi)
+    val position = Api.positionFromVariant(variant.Shogi)
     "be valid" in {
       Api.validateFEN(
         variant.Shogi.fairysfName.name,
@@ -39,7 +31,7 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
   }
 
   "Xiangqi initial fen" should {
-    val position = new Api.FairyPosition(variant.Xiangqi)
+    val position = Api.positionFromVariant(variant.Xiangqi)
     "equal expected initialfen" in {
       variant.Xiangqi.initialFen.value must_== "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1"
     }
@@ -76,7 +68,7 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
 
 
   "Shogi four fold repetition" should {
-    val position = new Api.FairyPosition(variant.Shogi)
+    val position = Api.positionFromVariant(variant.Shogi)
     "be optional game end" in {
       val newPosition = position.makeMoves(
         List("h2i2", "b8a8", "i2h2", "a8b8", "h2i2", "b8a8", "i2h2", "a8b8", "h2i2", "b8a8", "i2h2", "a8b8")
@@ -94,7 +86,7 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
   "Shogi Checkmate FEN" should {
     //https://www.pychess.org/cdRztJdY?ply=74
     val checkmateFen = "l2g1g1nl/5sk2/3p1p1p1/p3p1p1p/1n2n4/P4PP1P/1P1sPK1P1/5sR1+r/L4+p1N1[GPSBBglpp] w - - 4 38"
-    val position = new Api.FairyPosition(variant.Shogi.key, checkmateFen)
+    val position = Api.positionFromVariantKeyAndFEN(variant.Shogi.key, checkmateFen)
     "be game end" in {
       position.gameEnd() must_== true
     }
@@ -111,8 +103,8 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
 
   "Shogi fools mate moves" should {
     val foolsFEN = "lnsg1gsnl/5rkb1/ppppppp+Pp/9/9/9/PPPPPPP1P/1B5R1/LNSGKGSNL[P] b - - 0 4"
-    val positionStart = new Api.FairyPosition(variant.Shogi)
-    val position = new Api.FairyPosition(variant.Shogi.key, foolsFEN)
+    val positionStart = Api.positionFromVariant(variant.Shogi)
+    val position = Api.positionFromVariantKeyAndFEN(variant.Shogi.key, foolsFEN)
     "produce fools mate fen" in {
       val newPosition = positionStart.makeMoves(
         List("h3h4", "e9f8", "h4h5", "f8g8", "h5h6", "b8f8", "h6h7+")
@@ -132,7 +124,7 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
 
   "Shogi stalemate is win" should {
     val stalemateFEN = "8l/8k/9/8P/9/2P6/PP1PPPP2/1B5R1/LNSGKGSNL[] b - - 0 2"
-    val position = new Api.FairyPosition(variant.Shogi.key, stalemateFEN)
+    val position = Api.positionFromVariantKeyAndFEN(variant.Shogi.key, stalemateFEN)
     "have no legal moves" in {
       position.legalMoves.size must_== 0L
     }
@@ -146,7 +138,7 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
 
   "Shogi king only" should {
     val insufficientMaterialFEN = "8k/9/9/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL[LNSGGSNLBRPPPPPPPPP] b - - 0 2"
-    val position = new Api.FairyPosition(variant.Shogi.key, insufficientMaterialFEN)
+    val position = Api.positionFromVariantKeyAndFEN(variant.Shogi.key, insufficientMaterialFEN)
     "never have insufficient material" in {
       position.insufficientMaterial must_== ((false, false))
     }
@@ -154,7 +146,7 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
 
   //https://www.pychess.org/ozI3pCRx
   "Shogi perpetual check" should {
-    val position = new Api.FairyPosition(variant.Shogi)
+    val position = Api.positionFromVariant(variant.Shogi)
     val position2 = position.makeMoves(
         List("c3c4", "e7e6", "b2g7+", "e9d8", "g7f6", "d8e9", "f6g7", "e9d8", "g7f6", "d8e9", "f6g7", "e9d8", "g7f6", "d8e9", "f6g7")
     )

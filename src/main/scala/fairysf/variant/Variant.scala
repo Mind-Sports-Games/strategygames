@@ -43,7 +43,7 @@ abstract class Variant private[variant] (
 
   def initialFen: FEN = Api.initialFen(fairysfName.name)
 
-  val position: Api.FairyPosition
+  val position: Api.Position
 
   def pieces: Map[Pos, Piece] =
     Api.pieceMapFromFen(fairysfName.name, gameFamily, initialFen.value)

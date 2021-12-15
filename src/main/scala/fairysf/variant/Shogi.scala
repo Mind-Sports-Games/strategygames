@@ -1,10 +1,6 @@
 package strategygames.fairysf
 package variant
 
-import cats.implicits._
-import cats.syntax.option._
-import cats.data.Validated
-
 import strategygames.fairysf._
 import strategygames.GameFamily
 
@@ -61,5 +57,5 @@ case object Shogi
       }) == GameResult.Checkmate()
     )
 
-  val position: Api.FairyPosition = new Api.FairyPosition(this.key)
+  lazy val position: Api.Position = Api.positionFromVariantKey(this.key)
 }

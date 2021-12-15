@@ -3,8 +3,6 @@ package variant
 
 import strategygames.GameFamily
 
-import cats.implicits._
-
 case object Xiangqi
     extends Variant(
       id = 2,
@@ -30,5 +28,5 @@ case object Xiangqi
   override def initialFen =
     format.FEN("rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1")
 
-  val position: Api.FairyPosition = new Api.FairyPosition(this.key)
+  lazy val position: Api.Position = Api.positionFromVariantKey(this.key)
 }

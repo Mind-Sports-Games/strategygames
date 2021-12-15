@@ -33,18 +33,33 @@ object GameResult {
 object Api {
   // This will always be called when we import this module. So as long as we directly use
   // this package for calling everything, it should ensure that it's always initialized
-  FairyStockfish.init();
+  val init = FairyStockfish.init().pp("Initialized")
 
-  class FairyPosition(position: FairyStockfish.Position) {
-    def this(variant: Variant) =
-      this(new FairyStockfish.Position(variant.key))
+  abstract class Position {
+    val variant: Variant
 
-    def this(variantKey: String) =
-      this(new FairyStockfish.Position(variantKey))
+    def makeMoves(movesList: List[String]): Position
+    val fen: FEN
+    val givesCheck: Boolean
+    val isImmediateGameEnd: (Boolean, GameResult)
+    val immediateGameEnd: Boolean
+    val optionalGameEnd: Boolean
+    val insufficientMaterial: (Boolean, Boolean)
 
-    def this(variantKey: String, fen: String) =
-      this(new FairyStockfish.Position(variantKey, fen))
+    def isDraw(ply: Int): Boolean
+    def hasGameCycle(ply: Int): Boolean
+    val hasRepeated: Boolean
 
+    val pieceMap: PieceMap
+    val piecesInHand: Array[Piece]
+
+    val optionalGameEndResult: GameResult
+    val gameResult: GameResult
+    def gameEnd(result: Option[GameResult] = None): Boolean
+    val legalMoves: Array[String]
+  }
+
+  private class FairyPosition(position: FairyStockfish.Position) extends Position {
     // TODO: yes, this is an abuse of scala. We could get an
     //       exception here, but I'm not sure how to work around that
     //       at the moment
@@ -52,7 +67,7 @@ object Api {
     //       only the variants we support
     val variant = Variant.byName(position.variant()).get
 
-    def makeMoves(movesList: List[String]): FairyPosition =
+    def makeMoves(movesList: List[String]): Position =
       new FairyPosition(position.makeMoves(movesList))
 
     lazy val fen: FEN            = FEN(position.getFEN())
@@ -94,6 +109,21 @@ object Api {
         insufficientMaterial == ((true, true))
 
     lazy val legalMoves: Array[String] = position.getLegalMoves()
+  }
+
+  def positionFromVariant(variant: Variant): Position = {
+      init
+      new FairyPosition(new FairyStockfish.Position(variant.key))
+  }
+
+  def positionFromVariantKey(variantKey: String): Position = {
+    init
+    new FairyPosition(new FairyStockfish.Position(variantKey))
+  }
+
+  def positionFromVariantKeyAndFEN(variantKey: String, fen: String): Position = {
+    init
+    new FairyPosition(new FairyStockfish.Position(variantKey, fen))
   }
 
   val emptyMoves = new FairyStockfish.VectorOfStrings()
