@@ -30,47 +30,68 @@ object GameResult {
 
 }
 
-class FairyPosition(position: FairyStockfish.Position) {
-    import Api._
+object Api {
+  // This will always be called when we import this module. So as long as we directly use
+  // this package for calling everything, it should ensure that it's always initialized
+  FairyStockfish.init();
+
+  class FairyPosition(position: FairyStockfish.Position) {
     def this(variant: Variant) =
-      this(new FairyStockfish.Position(variant.name))
+      this(new FairyStockfish.Position(variant.key))
+
+    def this(variantKey: String, fen: String) =
+      this(new FairyStockfish.Position(variantKey, fen))
 
     // TODO: yes, this is an abuse of scala. We could get an
     //       exception here, but I'm not sure how to work around that
     //       at the moment
+    // NOTE: this means we can't use this API to test chess related things
+    //       only the variants we support
     val variant = Variant.byName(position.variant()).get
 
-    def makeMoves(movesList: List[String]): FairyPosition = 
-          new FairyPosition(position.makeMoves(movesList))
+    def makeMoves(movesList: List[String]): FairyPosition =
+      new FairyPosition(position.makeMoves(movesList))
 
-    def legalMoves(): Array[String] = position.getLegalMoves()
-    lazy val fen: FEN = FEN(position.getFEN())
+    lazy val fen: FEN            = FEN(position.getFEN())
     lazy val givesCheck: Boolean = position.givesCheck()
-    lazy val gameResult: GameResult = GameResult.resultFromInt(position.gameResult())
     lazy val isImmediateGameEnd: (Boolean, GameResult) = {
       val im = position.isImmediateGameEnd()
       (im.get0(), GameResult.resultFromInt(im.get1()))
     }
     lazy val immediateGameEnd: Boolean = isImmediateGameEnd._1
     private lazy val isOptionalGameEnd = position.isOptionalGameEnd()
-    lazy val optionalGameEnd: Boolean = isOptionalGameEnd.get0()
+    lazy val optionalGameEnd: Boolean  = isOptionalGameEnd.get0()
     lazy val insufficientMaterial: (Boolean, Boolean) = {
       val im = position.hasInsufficientMaterial()
       (im.get0(), im.get1())
     }
 
-    def isDraw(ply: Int): Boolean = position.isDraw(ply)
+    def isDraw(ply: Int): Boolean       = position.isDraw(ply)
     def hasGameCycle(ply: Int): Boolean = position.hasGameCycle(ply)
-    lazy val hasRepeated: Boolean = position.hasRepeated()
+    lazy val hasRepeated: Boolean       = position.hasRepeated()
 
-    lazy val piecesOnBoard: PieceMap = convertPieceMap(position.piecesOnBoard(), variant.gameFamily)
-    lazy val piecesInHand: Array[Piece] = vectorOfPiecesToPieceArray(position.piecesInHand(), variant.gameFamily)
-}
+    lazy val pieceMap: PieceMap = convertPieceMap(position.piecesOnBoard(), variant.gameFamily)
+    lazy val piecesInHand: Array[Piece] =
+      vectorOfPiecesToPieceArray(position.piecesInHand(), variant.gameFamily)
 
-object Api {
-  // This will always be called when we import this module. So as long as we directly use
-  // this package for calling everything, it should ensure that it's always initialized
-  FairyStockfish.init();
+    lazy val optionalGameEndResult: GameResult =
+      if (isOptionalGameEnd.get0()) GameResult.optionalResultFromInt(isOptionalGameEnd.get1())
+      else GameResult.Ongoing()
+
+    lazy val gameResult: GameResult =
+      if (legalMoves.size == 0)
+        GameResult.resultFromInt(position.gameResult)
+      else optionalGameEndResult
+
+    def gameEnd(result: Option[GameResult] = None): Boolean =
+      (result match {
+        case Some(r) => r
+        case None    => gameResult
+      }) != GameResult.Ongoing() ||
+        insufficientMaterial == ((true, true))
+
+    lazy val legalMoves: Array[String] = position.getLegalMoves()
+  }
 
   val emptyMoves = new FairyStockfish.VectorOfStrings()
 
@@ -100,9 +121,8 @@ object Api {
   def vectorOfPiecesToPieceArray(pieces: FairyStockfish.VectorOfPieces, gf: GameFamily): Array[Piece] =
     pieces.get().map(pieceFromFSPiece(_, gf))
 
-
   def convertPieceMap(fsPieceMap: FairyStockfish.PieceMap, gf: GameFamily): PieceMap = {
-    var first = fsPieceMap.begin()
+    var first    = fsPieceMap.begin()
     val pieceMap = scala.collection.mutable.Map[Pos, Piece]()
     //while(!first.equals(fsPieceMap.end())) {
     //  var temp = first.first().getString().pp("Pos: ")
@@ -110,7 +130,7 @@ object Api {
     //  first = first.increment()
     //}
     //first = fsPieceMap.begin()
-    while(!first.equals(fsPieceMap.end())) {
+    while (!first.equals(fsPieceMap.end())) {
       pieceMap(
         Pos.fromKey(first.first().getString()).get
       ) = pieceFromFSPiece(first.second(), gf)
@@ -120,13 +140,18 @@ object Api {
   }
 
   def convertUciMoves(movesList: Option[List[String]]): Option[List[String]] =
-    movesList.map(_.map(m => m match {
-      case Uci.Move.moveP(orig, dest, promotion) => promotion match {
-        case "" => m
-        case _ => s"${orig}${dest}+"
-      }
-      case s: String => s
-    }))
+    movesList.map(
+      _.map(m =>
+        m match {
+          case Uci.Move.moveP(orig, dest, promotion) =>
+            promotion match {
+              case "" => m
+              case _  => s"${orig}${dest}+"
+            }
+          case s: String => s
+        }
+      )
+    )
 
   // Actual API wrapper
   def version: String = FairyStockfish.version()
@@ -151,10 +176,10 @@ object Api {
     else optionalGameEndResult(variantName, fen, movesList)
 
   def gameEnd(
-    variantName: String,
-    fen: String,
-    movesList: Option[List[String]] = None,
-    result: Option[GameResult] = None
+      variantName: String,
+      fen: String,
+      movesList: Option[List[String]] = None,
+      result: Option[GameResult] = None
   ): Boolean =
     (result match {
       case Some(r) => r
@@ -171,13 +196,21 @@ object Api {
   def optionalGameEnd(variantName: String, fen: String, movesList: Option[List[String]] = None): Boolean =
     isOptionalGameEnd(variantName, fen, movesList).get0()
 
-  def optionalGameEndResult(variantName: String, fen: String, movesList: Option[List[String]] = None): GameResult = {
+  def optionalGameEndResult(
+      variantName: String,
+      fen: String,
+      movesList: Option[List[String]] = None
+  ): GameResult = {
     val optionalGameEndData = isOptionalGameEnd(variantName, fen, movesList)
     if (optionalGameEndData.get0()) GameResult.optionalResultFromInt(optionalGameEndData.get1())
     else GameResult.Ongoing()
   }
 
-  def insufficientMaterial(variantName: String, fen: String, movesList: Option[List[String]] = None): (Boolean, Boolean) = {
+  def insufficientMaterial(
+      variantName: String,
+      fen: String,
+      movesList: Option[List[String]] = None
+  ): (Boolean, Boolean) = {
     val im = FairyStockfish.hasInsufficientMaterial(variantName, fen, convertUciMoves(movesList))
     (im.get0(), im.get1())
   }
@@ -192,16 +225,12 @@ object Api {
     vectorOfPiecesToPieceArray(FairyStockfish.piecesInHand(variantName, fen), gf)
 
   def pocketData(variant: Variant, fen: String): Option[PocketData] =
-    if (variant.dropsVariant){
+    if (variant.dropsVariant) {
       val pieces = piecesInHand(variant.fairysfName.name, variant.gameFamily, fen)
       PocketData(
         Pockets(
-          Pocket(pieces.filter(_.color == White).toList.map(
-            p => strategygames.Role.FairySFRole(p.role)
-          )),
-          Pocket(pieces.filter(_.color == Black).toList.map(
-            p => strategygames.Role.FairySFRole(p.role)
-          ))
+          Pocket(pieces.filter(_.color == White).toList.map(p => strategygames.Role.FairySFRole(p.role))),
+          Pocket(pieces.filter(_.color == Black).toList.map(p => strategygames.Role.FairySFRole(p.role)))
         ),
         //Can make an empty Set of Pos because we dont have to track promoted pieces
         //(FairySF presumably does this)
@@ -209,7 +238,7 @@ object Api {
       ).some
     } else None
 
-  def pieceMapFromFen(variantName: String, gf: GameFamily, fen: String):PieceMap =
+  def pieceMapFromFen(variantName: String, gf: GameFamily, fen: String): PieceMap =
     convertPieceMap(FairyStockfish.piecesOnBoard(variantName, fen), gf)
 
 }
