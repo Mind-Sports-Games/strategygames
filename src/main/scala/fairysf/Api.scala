@@ -33,7 +33,7 @@ object GameResult {
 object Api {
   // This will always be called when we import this module. So as long as we directly use
   // this package for calling everything, it should ensure that it's always initialized
-  val init = FairyStockfish.init().pp("Initialized")
+  FairyStockfish.init()
 
   abstract class Position {
     val variant: Variant
@@ -111,20 +111,14 @@ object Api {
     lazy val legalMoves: Array[String] = position.getLegalMoves()
   }
 
-  def positionFromVariant(variant: Variant): Position = {
-      init
+  def positionFromVariant(variant: Variant): Position =
       new FairyPosition(new FairyStockfish.Position(variant.key))
-  }
 
-  def positionFromVariantKey(variantKey: String): Position = {
-    init
+  def positionFromVariantKey(variantKey: String): Position =
     new FairyPosition(new FairyStockfish.Position(variantKey))
-  }
 
-  def positionFromVariantKeyAndFEN(variantKey: String, fen: String): Position = {
-    init
+  def positionFromVariantKeyAndFEN(variantKey: String, fen: String): Position =
     new FairyPosition(new FairyStockfish.Position(variantKey, fen))
-  }
 
   val emptyMoves = new FairyStockfish.VectorOfStrings()
 
