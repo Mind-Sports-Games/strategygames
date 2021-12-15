@@ -75,24 +75,21 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
 
 
 
-/*
   "Shogi four fold repetition" should {
     val position = new Api.FairyPosition(variant.Shogi)
-    "not be game end" in {
-      val newPosition = position.makeMoves(
-        List("h2i2", "b8a8", "i2h2", "a8b8", "h2i2", "b8a8", "i2h2", "a8b8", "h2i2", "b8a8", "i2h2", "a8b8")
-      )
-      //newPosition.gameEnd() must_== false
-      true must_== true
-    }
     "be optional game end" in {
       val newPosition = position.makeMoves(
         List("h2i2", "b8a8", "i2h2", "a8b8", "h2i2", "b8a8", "i2h2", "a8b8", "h2i2", "b8a8", "i2h2", "a8b8")
       )
-      //newPosition.optionalGameEnd must_== true
-      true must_== true
+      newPosition.optionalGameEnd must_== true
     }
-  }*/
+    "not be game end" in {
+      val newPosition = position.makeMoves(
+        List("h2i2", "b8a8", "i2h2", "a8b8", "h2i2", "b8a8", "i2h2", "a8b8", "h2i2", "b8a8", "i2h2", "a8b8")
+      )
+      newPosition.gameEnd() must_== false
+    }
+  }
     /*
 
   "Shogi Checkmate FEN" should {
