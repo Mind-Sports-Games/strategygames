@@ -61,4 +61,5 @@ case object Shogi
       }) == GameResult.Checkmate()
     )
 
+  val position: Api.FairyPosition = new Api.FairyPosition(this.key)
 }

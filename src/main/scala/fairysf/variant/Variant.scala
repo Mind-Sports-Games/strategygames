@@ -43,6 +43,8 @@ abstract class Variant private[variant] (
 
   def initialFen: FEN = Api.initialFen(fairysfName.name)
 
+  val position: Api.FairyPosition
+
   def pieces: Map[Pos, Piece] =
     Api.pieceMapFromFen(fairysfName.name, gameFamily, initialFen.value)
 
@@ -261,7 +263,7 @@ abstract class Variant private[variant] (
 
 object Variant {
 
-  val all: List[Variant] = List(
+  lazy val all: List[Variant] = List(
     Shogi,
     Xiangqi
   )

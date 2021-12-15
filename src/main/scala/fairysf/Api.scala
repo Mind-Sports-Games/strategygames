@@ -39,6 +39,9 @@ object Api {
     def this(variant: Variant) =
       this(new FairyStockfish.Position(variant.key))
 
+    def this(variantKey: String) =
+      this(new FairyStockfish.Position(variantKey))
+
     def this(variantKey: String, fen: String) =
       this(new FairyStockfish.Position(variantKey, fen))
 
