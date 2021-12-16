@@ -43,7 +43,7 @@ abstract class Variant private[variant] (
 
   def initialFen: FEN = Api.initialFen(fairysfName.name)
 
-  val position: Api.Position
+  lazy val position: Api.Position = Api.positionFromVariantName(this.fairysfName.name)
 
   def pieces: Map[Pos, Piece] =
     Api.pieceMapFromFen(fairysfName.name, gameFamily, initialFen.value)
@@ -56,22 +56,8 @@ abstract class Variant private[variant] (
   //in just atomic, so can leave as true for now
   def isValidPromotion(promotion: Option[PromotableRole]): Boolean = true
 
-  private def fenAfterMoveOrDrop(board: Board, uciMove: String): String =
-    board.fen match {
-      case Some(fen) => Api.fenFromMoves(
-        fairysfName.name,
-        fen.value,
-        List(uciMove).some
-      ).value
-      case None      => Api.fenFromMoves(
-        fairysfName.name,
-        board.variant.initialFen.value,
-        (board.uciMoves :+ uciMove).some
-      ).value
-    }
-
   def validMoves(situation: Situation): Map[Pos, List[Move]] =
-    situation.board.legalMovesAndDropsFromFEN.filterNot(_.contains("@")).map{
+    situation.board.apiPosition.legalMoves.filterNot(_.contains("@")).map{
       case Uci.Move.moveR(orig, dest, promotion) => (
         Pos.fromKey(orig),
         Pos.fromKey(dest),
@@ -80,21 +66,17 @@ abstract class Variant private[variant] (
     }.map{
       case (Some(orig), Some(dest), promotion) => {
         val uciMove = s"${orig.key}${dest.key}${promotion}"
-        val fen = fenAfterMoveOrDrop(situation.board, uciMove)
+        val newPosition = situation.board.apiPosition.makeMoves(List(uciMove))
         (orig, Move(
           piece = situation.board.pieces(orig),
           orig = orig,
           dest = dest,
           situationBefore = situation,
           after = situation.board.copy(
-            pieces = Api.pieceMapFromFen(
-              fairysfName.name,
-              gameFamily,
-              fen
-            ),
+            pieces = newPosition.pieceMap,
             uciMoves = (situation.board.uciMoves :+ uciMove),
-            pocketData = Api.pocketData(situation.board.variant, fen),
-            fen = FEN(fen).some
+            pocketData = Api.pocketData(situation.board.variant, newPosition),
+            position = newPosition.some
           ),
           capture = None,
           promotion = promotion match {
@@ -112,7 +94,7 @@ abstract class Variant private[variant] (
     }.groupBy(_._1).map { case (k,v) => (k,v.toList.map(_._2))}
 
   def validDrops(situation: Situation): List[Drop] =
-    situation.board.legalMovesAndDropsFromFEN.filter(_.contains("@")).map{
+    situation.board.apiPosition.legalMoves.filter(_.contains("@")).map{
       case Uci.Drop.dropR(role, dest) => (
         Role.allByForsyth(situation.board.variant.gameFamily).get(role(0)),
         Pos.fromKey(dest)
@@ -120,20 +102,16 @@ abstract class Variant private[variant] (
     }.map{
       case (Some(role), Some(dest)) => {
         val uciMove = s"${role.forsyth}@${dest.key}"
-        val fen = fenAfterMoveOrDrop(situation.board, uciMove)
+        val newPosition = situation.board.apiPosition.makeMoves(List(uciMove))
         Drop(
           piece = Piece(situation.color, role),
           pos = dest,
           situationBefore = situation,
           after = situation.board.copy(
-            pieces = Api.pieceMapFromFen(
-              fairysfName.name,
-              gameFamily,
-              fen
-            ),
+            pieces = newPosition.pieceMap,
             uciMoves = (situation.board.uciMoves :+ uciMove),
-            pocketData = Api.pocketData(situation.board.variant, fen),
-            fen = FEN(fen).some
+            pocketData = Api.pocketData(situation.board.variant, newPosition),
+            position = newPosition.some
           )
         )
       }
@@ -272,6 +250,9 @@ object Variant {
   } toMap
   val byKey = all map { v =>
     (v.key, v)
+  } toMap
+  val byFairySFName = all map { v =>
+    (v.fairysfName.name, v)
   } toMap
 
   val default = Shogi

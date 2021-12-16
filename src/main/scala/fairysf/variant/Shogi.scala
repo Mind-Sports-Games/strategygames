@@ -43,19 +43,7 @@ case object Shogi
           case White => kingPos.flatMap(_.down)
           case Black => kingPos.flatMap(_.up)
         })
-      } && (situation.board.fen match {
-        case Some(fen) => Api.gameResult(
-          fairysfName.name,
-          fen.value,
-          Some(List(d.toUci.uci))
-        )
-        case None      => Api.gameResult(
-          fairysfName.name,
-          initialFen.value,
-          Some(situation.board.uciMoves :+ d.toUci.uci)
-        )
-      }) == GameResult.Checkmate()
+      } && situation.board.apiPosition.makeMoves(List(d.toUci.uci)).gameResult == GameResult.Checkmate()
     )
 
-  lazy val position: Api.Position = Api.positionFromVariantKey(this.key)
 }

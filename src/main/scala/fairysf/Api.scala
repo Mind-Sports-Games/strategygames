@@ -55,7 +55,7 @@ object Api {
 
     val optionalGameEndResult: GameResult
     val gameResult: GameResult
-    def gameEnd(result: Option[GameResult] = None): Boolean
+    val gameEnd: Boolean
     val legalMoves: Array[String]
   }
 
@@ -65,7 +65,7 @@ object Api {
     //       at the moment
     // NOTE: this means we can't use this API to test chess related things
     //       only the variants we support
-    val variant = Variant.byName(position.variant()).get
+    val variant = Variant.byFairySFName(position.variant())
 
     def makeMoves(movesList: List[String]): Position =
       new FairyPosition(position.makeMoves(movesList))
@@ -101,24 +101,24 @@ object Api {
         GameResult.resultFromInt(position.gameResult)
       else optionalGameEndResult
 
-    def gameEnd(result: Option[GameResult] = None): Boolean =
-      (result match {
-        case Some(r) => r
-        case None    => gameResult
-      }) != GameResult.Ongoing() ||
+    lazy val gameEnd: Boolean =
+      gameResult != GameResult.Ongoing() ||
         insufficientMaterial == ((true, true))
 
     lazy val legalMoves: Array[String] = position.getLegalMoves()
   }
 
   def positionFromVariant(variant: Variant): Position =
-      new FairyPosition(new FairyStockfish.Position(variant.key))
+      new FairyPosition(new FairyStockfish.Position(variant.fairysfName.name))
 
-  def positionFromVariantKey(variantKey: String): Position =
-    new FairyPosition(new FairyStockfish.Position(variantKey))
+  def positionFromVariantName(variantName: String): Position =
+    new FairyPosition(new FairyStockfish.Position(variantName))
 
-  def positionFromVariantKeyAndFEN(variantKey: String, fen: String): Position =
-    new FairyPosition(new FairyStockfish.Position(variantKey, fen))
+  def positionFromVariantNameAndFEN(variantName: String, fen: String): Position =
+    new FairyPosition(new FairyStockfish.Position(variantName, fen))
+
+  def positionFromVariantAndMoves(variant: Variant, uciMoves: List[String]): Position =
+    positionFromVariant(variant).makeMoves(uciMoves)
 
   val emptyMoves = new FairyStockfish.VectorOfStrings()
 
@@ -254,6 +254,20 @@ object Api {
   def pocketData(variant: Variant, fen: String): Option[PocketData] =
     if (variant.dropsVariant) {
       val pieces = piecesInHand(variant.fairysfName.name, variant.gameFamily, fen)
+      PocketData(
+        Pockets(
+          Pocket(pieces.filter(_.color == White).toList.map(p => strategygames.Role.FairySFRole(p.role))),
+          Pocket(pieces.filter(_.color == Black).toList.map(p => strategygames.Role.FairySFRole(p.role)))
+        ),
+        //Can make an empty Set of Pos because we dont have to track promoted pieces
+        //(FairySF presumably does this)
+        Set[Pos]()
+      ).some
+    } else None
+
+  def pocketData(variant: Variant, position: Api.Position): Option[PocketData] =
+    if (variant.dropsVariant) {
+      val pieces = position.piecesInHand
       PocketData(
         Pockets(
           Pocket(pieces.filter(_.color == White).toList.map(p => strategygames.Role.FairySFRole(p.role))),

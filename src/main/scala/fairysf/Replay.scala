@@ -70,21 +70,24 @@ object Replay {
   //    recursiveGames(game, moves.value) map { game :: _ }
   //  }
 
-  def replayMove(before: Game, orig: Pos, dest: Pos, promotion: String, fen: FEN, uciMoves: List[String]): Move =
+  def replayMove(
+    before: Game,
+    orig: Pos,
+    dest: Pos,
+    promotion: String,
+    apiPosition: Api.Position,
+    uciMoves: List[String]
+  ): Move =
     Move(
       piece = before.situation.board.pieces(orig),
       orig = orig,
       dest = dest,
       situationBefore = before.situation,
       after = before.situation.board.copy(
-        pieces = Api.pieceMapFromFen(
-          before.board.variant.fairysfName.name,
-          before.board.variant.gameFamily,
-          fen.value
-        ),
+        pieces = apiPosition.pieceMap,
         uciMoves = uciMoves,
-        pocketData = Api.pocketData(before.board.variant, fen.value),
-        fen = fen.some
+        pocketData = Api.pocketData(before.board.variant, apiPosition),
+        position = apiPosition.some
       ),
       capture = None,
       promotion = promotion match {
@@ -98,20 +101,22 @@ object Replay {
       enpassant = false
     )
 
-  def replayDrop(before: Game, role: Role, dest: Pos, fen: FEN, uciMoves: List[String]): Drop =
+  def replayDrop(
+    before: Game,
+    role: Role,
+    dest: Pos,
+    apiPosition: Api.Position,
+    uciMoves: List[String]
+  ): Drop =
     Drop(
       piece = Piece(before.situation.color, role),
       pos = dest,
       situationBefore = before.situation,
       after = before.situation.board.copy(
-        pieces = Api.pieceMapFromFen(
-          before.board.variant.fairysfName.name,
-          before.board.variant.gameFamily,
-          fen.value
-        ),
+        pieces = apiPosition.pieceMap,
         uciMoves = uciMoves,
-        pocketData = Api.pocketData(before.board.variant, fen.value),
-        fen = fen.some
+        pocketData = Api.pocketData(before.board.variant, apiPosition),
+        position = apiPosition.some
       ),
     )
 
@@ -127,15 +132,7 @@ object Replay {
     var uciMoves = init.situation.board.uciMoves
     var errors = ""
 
-    def getReplayFEN =
-      init.situation.board.fen match {
-        case Some(fen) => fen
-        case None      => Api.fenFromMoves(
-          init.board.variant.fairysfName.name,
-          init.situation.board.variant.initialFen.value,
-          uciMoves.some
-        )
-      }
+    def getApiPosition(uciMove: String) = state.board.apiPosition.makeMoves(List(uciMove))
 
     def replayMoveFromUci(orig: Option[Pos], dest: Option[Pos], promotion: String): (Game, Uci.WithSan) =
       (orig, dest) match {
@@ -147,7 +144,7 @@ object Replay {
           }}"
           uciMoves = uciMoves :+ uciMove
           state = state.apply(
-            replayMove(state, orig, dest, promotion, getReplayFEN, uciMoves)
+            replayMove(state, orig, dest, promotion, getApiPosition(uciMove), uciMoves)
           )
           (state, Uci.WithSan(Uci.apply(state.board.variant.gameFamily, pgnMove).get, "NOSAN"))
         }
@@ -164,7 +161,7 @@ object Replay {
           val uciDrop = s"${role.forsyth}@${dest.key}"
           uciMoves = uciMoves :+ uciDrop
           state = state.applyDrop(
-            replayDrop(state, role, dest, getReplayFEN, uciMoves)
+            replayDrop(state, role, dest, getApiPosition(uciDrop), uciMoves)
           )
           (state, Uci.WithSan(Uci.apply(state.board.variant.gameFamily, uciDrop).get, "NOSAN"))
         }

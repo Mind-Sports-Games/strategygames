@@ -13,7 +13,7 @@ case class Board(
     variant: Variant,
     pocketData: Option[PocketData] = None,
     uciMoves: List[String] = List(),
-    fen: Option[FEN] = None
+    position: Option[Api.Position] = None
 ) {
 
   def apply(at: Pos): Option[Piece] = pieces get at
@@ -46,18 +46,10 @@ case class Board(
 
   def materialImbalance: Int = variant.materialImbalance(this)
 
-  lazy val legalMovesAndDropsFromFEN =
-    fen match {
-      case Some(fen) => Api.legalMoves(
-        variant.fairysfName.name,
-        fen.value
-      )
-      case None => Api.legalMoves(
-        variant.fairysfName.name,
-        variant.initialFen.value,
-        uciMoves.some
-      )
-    }
+  lazy val apiPosition = position match {
+    case Some(position) => position
+    case None           => Api.positionFromVariantAndMoves(variant, uciMoves)
+  }
 
   override def toString = s"$variant Position after ${history.lastMove}"
 }

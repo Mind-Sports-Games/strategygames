@@ -64,7 +64,6 @@ object Reader {
       case (Result.Complete(replay), m) =>
         m match {
           case Uci.Move.moveR(orig, dest, promotion) => {
-            val uciMove = s"${orig}${dest}${promotion}"
             (Pos.fromKey(orig), Pos.fromKey(dest)) match {
               case (Some(orig), Some(dest)) => Result.Complete(
                 replay.addMove(
@@ -73,19 +72,8 @@ object Reader {
                     orig,
                     dest,
                     promotion,
-                    replay.state.board.fen match {
-                      case Some(fen) => Api.fenFromMoves(
-                        replay.state.board.variant.fairysfName.name,
-                        fen.value,
-                        List(uciMove).some
-                      )
-                      case None      => Api.fenFromMoves(
-                        replay.state.board.variant.fairysfName.name,
-                        replay.state.board.variant.initialFen.value,
-                        (replay.state.board.uciMoves :+ uciMove).some
-                      )
-                    },
-                    replay.state.board.uciMoves :+ uciMove
+                    replay.state.board.apiPosition.makeMoves(List(m)),
+                    replay.state.board.uciMoves :+ m
                   ))
                 )
               )
@@ -101,18 +89,7 @@ object Reader {
                     replay.state,
                     role,
                     dest,
-                    replay.state.board.fen match {
-                      case Some(fen) => Api.fenFromMoves(
-                        replay.state.board.variant.fairysfName.name,
-                        fen.value,
-                        List(m).some
-                      )
-                      case None      => Api.fenFromMoves(
-                        replay.state.board.variant.fairysfName.name,
-                        replay.state.board.variant.initialFen.value,
-                        (replay.state.board.uciMoves :+ m).some
-                      )
-                    },
+                    replay.state.board.apiPosition.makeMoves(List(m)),
                     replay.state.board.uciMoves :+ m
                   ))
                 )

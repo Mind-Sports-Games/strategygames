@@ -21,17 +21,7 @@ case class Situation(board: Board, color: Color) {
 
   //lazy val kingPos: Option[Pos] = board kingPosOf color
 
-  lazy val check: Boolean = board.fen match {
-    case Some(fen) => Api.givesCheck(
-      board.variant.fairysfName.name,
-      fen.value
-    )
-    case None      => Api.givesCheck(
-      board.variant.fairysfName.name,
-      board.variant.initialFen.value,
-      board.uciMoves.some
-    )
-  }
+  lazy val check: Boolean = board.apiPosition.givesCheck
 
   def checkSquare =
     if (check) board.posMap.get(Piece(color, board.variant.kingPiece)).flatMap(_.headOption)
@@ -39,36 +29,9 @@ case class Situation(board: Board, color: Color) {
 
   def history = board.history
 
-  private lazy val gameEnd: Boolean = board.fen match {
-    case Some(fen) => Api.gameEnd(
-      variantName = board.variant.fairysfName.name,
-      fen = fen.value,
-      result = gameResult.some,
-    )
-    case None      => Api.gameEnd(
-      variantName = board.variant.fairysfName.name,
-      fen = board.variant.initialFen.value,
-      movesList = board.uciMoves.some,
-      result = gameResult.some
-    )
-  }
+  private lazy val gameEnd: Boolean = board.apiPosition.gameEnd
 
-  private lazy val gameResult: GameResult = Api.gameResult(
-    board.variant.fairysfName.name,
-    board.variant.initialFen.value,
-    board.uciMoves.some
-  )
-  //private lazy val gameResult = board.fen match {
-  //  case Some(fen) => Api.gameResult(
-  //    board.variant.fairysfName.name,
-  //    fen.value
-  //  )
-  //  case None      => Api.gameResult(
-  //    board.variant.fairysfName.name,
-  //    board.variant.initialFen.value,
-  //    board.uciMoves.some
-  //  )
-  //}
+  private lazy val gameResult: GameResult = board.apiPosition.gameResult
 
   private lazy val result =
     if (gameEnd) gameResult
@@ -99,11 +62,7 @@ case class Situation(board: Board, color: Color) {
 
   //TODO: test White/Black map is correct
   def opponentHasInsufficientMaterial: Boolean = {
-    val insufficientMaterial = Api.insufficientMaterial(
-      board.variant.fairysfName.name,
-      board.variant.initialFen.value,
-      board.uciMoves.some
-    )
+    val insufficientMaterial = board.apiPosition.insufficientMaterial
     color match {
       case White => insufficientMaterial._2
       case Black => insufficientMaterial._1
@@ -112,11 +71,7 @@ case class Situation(board: Board, color: Color) {
 
   //called threefold actually will return for xfold
   def threefoldRepetition: Boolean =
-    Api.optionalGameEnd(
-      board.variant.fairysfName.name,
-      board.variant.initialFen.value,
-      board.uciMoves.some
-    )
+    board.apiPosition.optionalGameEnd
 
   def move(from: Pos, to: Pos, promotion: Option[PromotableRole]): Validated[String, Move] =
     board.variant.move(this, from, to, promotion)

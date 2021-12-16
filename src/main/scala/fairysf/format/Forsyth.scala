@@ -21,19 +21,23 @@ object Forsyth {
   val initial = FEN("lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL[-] w 0 1")
 
   //stub
-  def <<@(variant: Variant, fen: FEN): Option[Situation] = Some(Situation(
-    Board(
-      Api.pieceMapFromFen(variant.fairysfName.name, variant.gameFamily, fen.value),
-      History(),
-      variant,
-      Api.pocketData(variant, fen.value)
-    ),
-    fen.value.split(' ')(1) match {
-      case "w" => White
-      case "b" => Black
-      case _ => sys.error("Invalid color in fen")
-    }
-  ))
+  def <<@(variant: Variant, fen: FEN): Option[Situation] = {
+    val apiPosition = Api.positionFromVariantNameAndFEN(variant.fairysfName.name, fen.value)
+    Some(Situation(
+      Board(
+        pieces = apiPosition.pieceMap,
+        history = History(),
+        variant = variant,
+        pocketData = Api.pocketData(variant, apiPosition),
+        position = apiPosition.some
+      ),
+      fen.value.split(' ')(1) match {
+        case "w" => White
+        case "b" => Black
+        case _ => sys.error("Invalid color in fen")
+      }
+    ))
+  }
 
   def <<(fen: FEN): Option[Situation] = <<@(Variant.default, fen)
 
@@ -62,17 +66,9 @@ object Forsyth {
 
   def >>(game: Game): FEN = exportBoardFen(game.situation.board)
 
-  def exportBoard(board: Board): String =
-    board.fen match {
-      case Some(fen) => fen.value
-      case None      => Api.fenFromMoves(
-        board.variant.fairysfName.name,
-        board.variant.initialFen.value,
-        board.uciMoves.some
-      ).value
-    }
+  def exportBoard(board: Board): String = exportBoardFen(board).value
 
-  def exportBoardFen(board: Board): FEN = FEN(exportBoard(board))
+  def exportBoardFen(board: Board): FEN = board.apiPosition.fen
 
   def boardAndColor(situation: Situation): String =
     boardAndColor(situation.board, situation.color)
