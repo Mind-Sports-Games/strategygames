@@ -23,7 +23,7 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
       position.pieceMap.size must_== 40
     }
     "not be game end" in {
-      position.gameEnd() must_== false
+      position.gameEnd must_== false
     }
     "not be optional game end" in {
       position.optionalGameEnd must_== false
@@ -54,7 +54,7 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
       position.pieceMap.size must_== 32
     }
     "not be game end" in {
-      position.gameEnd() must_== false
+      position.gameEnd must_== false
     }
     "not be optional game end" in {
       position.optionalGameEnd must_== false
@@ -79,16 +79,16 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
       val newPosition = position.makeMoves(
         List("h2i2", "b8a8", "i2h2", "a8b8", "h2i2", "b8a8", "i2h2", "a8b8", "h2i2", "b8a8", "i2h2", "a8b8")
       )
-      newPosition.gameEnd() must_== false
+      newPosition.gameEnd must_== false
     }
   }
 
   "Shogi Checkmate FEN" should {
     //https://www.pychess.org/cdRztJdY?ply=74
     val checkmateFen = "l2g1g1nl/5sk2/3p1p1p1/p3p1p1p/1n2n4/P4PP1P/1P1sPK1P1/5sR1+r/L4+p1N1[GPSBBglpp] w - - 4 38"
-    val position = Api.positionFromVariantKeyAndFEN(variant.Shogi.key, checkmateFen)
+    val position = Api.positionFromVariantNameAndFEN(variant.Shogi.key, checkmateFen)
     "be game end" in {
-      position.gameEnd() must_== true
+      position.gameEnd must_== true
     }
     "be checkmate" in {
       position.gameResult must_== GameResult.Checkmate()
@@ -104,7 +104,7 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
   "Shogi fools mate moves" should {
     val foolsFEN = "lnsg1gsnl/5rkb1/ppppppp+Pp/9/9/9/PPPPPPP1P/1B5R1/LNSGKGSNL[P] b - - 0 4"
     val positionStart = Api.positionFromVariant(variant.Shogi)
-    val position = Api.positionFromVariantKeyAndFEN(variant.Shogi.key, foolsFEN)
+    val position = Api.positionFromVariantNameAndFEN(variant.Shogi.key, foolsFEN)
     "produce fools mate fen" in {
       val newPosition = positionStart.makeMoves(
         List("h3h4", "e9f8", "h4h5", "f8g8", "h5h6", "b8f8", "h6h7+")
@@ -112,7 +112,7 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
       newPosition.fen.value must_== foolsFEN
     }
     "be game end" in {
-      position.gameEnd() must_== true
+      position.gameEnd must_== true
     }
     "be checkmate" in {
       position.gameResult must_== GameResult.Checkmate()
@@ -124,12 +124,12 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
 
   "Shogi stalemate is win" should {
     val stalemateFEN = "8l/8k/9/8P/9/2P6/PP1PPPP2/1B5R1/LNSGKGSNL[] b - - 0 2"
-    val position = Api.positionFromVariantKeyAndFEN(variant.Shogi.key, stalemateFEN)
+    val position = Api.positionFromVariantNameAndFEN(variant.Shogi.key, stalemateFEN)
     "have no legal moves" in {
       position.legalMoves.size must_== 0L
     }
     "be game end" in {
-      position.gameEnd() must_== true
+      position.gameEnd must_== true
     }
     "be checkmate" in {
       position.gameResult must_== GameResult.Checkmate()
@@ -138,7 +138,7 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
 
   "Shogi king only" should {
     val insufficientMaterialFEN = "8k/9/9/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL[LNSGGSNLBRPPPPPPPPP] b - - 0 2"
-    val position = Api.positionFromVariantKeyAndFEN(variant.Shogi.key, insufficientMaterialFEN)
+    val position = Api.positionFromVariantNameAndFEN(variant.Shogi.key, insufficientMaterialFEN)
     "never have insufficient material" in {
       position.insufficientMaterial must_== ((false, false))
     }
@@ -151,7 +151,7 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
         List("c3c4", "e7e6", "b2g7+", "e9d8", "g7f6", "d8e9", "f6g7", "e9d8", "g7f6", "d8e9", "f6g7", "e9d8", "g7f6", "d8e9", "f6g7")
     )
     "should produce non optional game end" in {
-      position2.gameEnd() must_== true
+      position2.gameEnd must_== true
     }
   }
 }
