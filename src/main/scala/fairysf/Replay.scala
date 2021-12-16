@@ -86,7 +86,7 @@ object Replay {
       after = before.situation.board.copy(
         pieces = apiPosition.pieceMap,
         uciMoves = uciMoves,
-        pocketData = Api.pocketData(before.board.variant, apiPosition),
+        pocketData = apiPosition.pocketData,
         position = apiPosition.some
       ),
       capture = None,
@@ -115,7 +115,7 @@ object Replay {
       after = before.situation.board.copy(
         pieces = apiPosition.pieceMap,
         uciMoves = uciMoves,
-        pocketData = Api.pocketData(before.board.variant, apiPosition),
+        pocketData = apiPosition.pocketData,
         position = apiPosition.some
       ),
     )

@@ -52,6 +52,7 @@ object Api {
 
     val pieceMap: PieceMap
     val piecesInHand: Array[Piece]
+    val pocketData: Option[PocketData]
 
     val optionalGameEndResult: GameResult
     val gameResult: GameResult
@@ -88,9 +89,28 @@ object Api {
     def hasGameCycle(ply: Int): Boolean = position.hasGameCycle(ply)
     lazy val hasRepeated: Boolean       = position.hasRepeated()
 
-    lazy val pieceMap: PieceMap = convertPieceMap(position.piecesOnBoard(), variant.gameFamily)
+    lazy val pieceMap: PieceMap =
+      convertPieceMap(position.piecesOnBoard(), variant.gameFamily)
+
     lazy val piecesInHand: Array[Piece] =
       vectorOfPiecesToPieceArray(position.piecesInHand(), variant.gameFamily)
+
+    lazy val pocketData =
+      if (variant.dropsVariant)
+        PocketData(
+          Pockets(
+            Pocket(piecesInHand.filter(_.color == White).toList.map(
+              p => strategygames.Role.FairySFRole(p.role)
+            )),
+            Pocket(piecesInHand.filter(_.color == Black).toList.map(
+              p => strategygames.Role.FairySFRole(p.role)
+            ))
+          ),
+          //Can make an empty Set of Pos because we dont have to track promoted pieces
+          //(FairySF presumably does this)
+          Set[Pos]()
+        ).some
+      else None
 
     lazy val optionalGameEndResult: GameResult =
       if (isOptionalGameEnd.get0()) GameResult.optionalResultFromInt(isOptionalGameEnd.get1())
@@ -123,7 +143,9 @@ object Api {
   val emptyMoves = new FairyStockfish.VectorOfStrings()
 
   // Some implicits to make the below methods a bit more ergonomic
-  implicit def bytePointerToString(bp: org.bytedeco.javacpp.BytePointer): String = bp.getString()
+  implicit def bytePointerToString(bp: org.bytedeco.javacpp.BytePointer): String =
+    bp.getString()
+
   implicit def vectorOfStringFromOptionalMovesList(
       movesList: Option[List[String]] = None
   ): FairyStockfish.VectorOfStrings =
@@ -136,7 +158,9 @@ object Api {
     })
     vec
   }
-  implicit def intoArray(vos: FairyStockfish.VectorOfStrings): Array[String] = vos.get().map(_.getString())
+
+  implicit def intoArray(vos: FairyStockfish.VectorOfStrings): Array[String] =
+    vos.get().map(_.getString())
 
   private def pieceFromFSPiece(piece: FairyStockfish.Piece, gf: GameFamily): Piece =
     Piece(
@@ -192,92 +216,92 @@ object Api {
   def validateFEN(variantName: String, fen: String): Boolean =
     FairyStockfish.validateFEN(variantName, fen)
 
-  def fenFromMoves(variantName: String, fen: String, movesList: Option[List[String]] = None): FEN =
-    FEN(FairyStockfish.getFEN(variantName, fen, convertUciMoves(movesList)))
+  //def fenFromMoves(variantName: String, fen: String, movesList: Option[List[String]] = None): FEN =
+  //  FEN(FairyStockfish.getFEN(variantName, fen, convertUciMoves(movesList)))
 
-  def gameResult(variantName: String, fen: String, movesList: Option[List[String]] = None): GameResult =
-    if (legalMoves(variantName, fen, movesList).size == 0)
-      GameResult.resultFromInt(
-        FairyStockfish.gameResult(variantName, fen, convertUciMoves(movesList))
-      )
-    else optionalGameEndResult(variantName, fen, movesList)
+  //def gameResult(variantName: String, fen: String, movesList: Option[List[String]] = None): GameResult =
+  //  if (legalMoves(variantName, fen, movesList).size == 0)
+  //    GameResult.resultFromInt(
+  //      FairyStockfish.gameResult(variantName, fen, convertUciMoves(movesList))
+  //    )
+  //  else optionalGameEndResult(variantName, fen, movesList)
 
-  def gameEnd(
-      variantName: String,
-      fen: String,
-      movesList: Option[List[String]] = None,
-      result: Option[GameResult] = None
-  ): Boolean =
-    (result match {
-      case Some(r) => r
-      case None    => gameResult(variantName, fen, movesList)
-    }) != GameResult.Ongoing() ||
-      insufficientMaterial(variantName, fen, convertUciMoves(movesList)) == ((true, true))
+  //def gameEnd(
+  //    variantName: String,
+  //    fen: String,
+  //    movesList: Option[List[String]] = None,
+  //    result: Option[GameResult] = None
+  //): Boolean =
+  //  (result match {
+  //    case Some(r) => r
+  //    case None    => gameResult(variantName, fen, movesList)
+  //  }) != GameResult.Ongoing() ||
+  //    insufficientMaterial(variantName, fen, convertUciMoves(movesList)) == ((true, true))
 
   //def immediateGameEnd(variantName: String, fen: String, movesList: Option[List[String]] = None): Boolean =
   //  FairyStockfish.isImmediateGameEnd(variantName, fen, movesList).get0()
 
-  private def isOptionalGameEnd(variantName: String, fen: String, movesList: Option[List[String]] = None) =
-    FairyStockfish.isOptionalGameEnd(variantName, fen, convertUciMoves(movesList))
+  //private def isOptionalGameEnd(variantName: String, fen: String, movesList: Option[List[String]] = None) =
+  //  FairyStockfish.isOptionalGameEnd(variantName, fen, convertUciMoves(movesList))
 
-  def optionalGameEnd(variantName: String, fen: String, movesList: Option[List[String]] = None): Boolean =
-    isOptionalGameEnd(variantName, fen, movesList).get0()
+  //def optionalGameEnd(variantName: String, fen: String, movesList: Option[List[String]] = None): Boolean =
+  //  isOptionalGameEnd(variantName, fen, movesList).get0()
 
-  def optionalGameEndResult(
-      variantName: String,
-      fen: String,
-      movesList: Option[List[String]] = None
-  ): GameResult = {
-    val optionalGameEndData = isOptionalGameEnd(variantName, fen, movesList)
-    if (optionalGameEndData.get0()) GameResult.optionalResultFromInt(optionalGameEndData.get1())
-    else GameResult.Ongoing()
-  }
+  //def optionalGameEndResult(
+  //    variantName: String,
+  //    fen: String,
+  //    movesList: Option[List[String]] = None
+  //): GameResult = {
+  //  val optionalGameEndData = isOptionalGameEnd(variantName, fen, movesList)
+  //  if (optionalGameEndData.get0()) GameResult.optionalResultFromInt(optionalGameEndData.get1())
+  //  else GameResult.Ongoing()
+  //}
 
-  def insufficientMaterial(
-      variantName: String,
-      fen: String,
-      movesList: Option[List[String]] = None
-  ): (Boolean, Boolean) = {
-    val im = FairyStockfish.hasInsufficientMaterial(variantName, fen, convertUciMoves(movesList))
-    (im.get0(), im.get1())
-  }
+  //def insufficientMaterial(
+  //    variantName: String,
+  //    fen: String,
+  //    movesList: Option[List[String]] = None
+  //): (Boolean, Boolean) = {
+  //  val im = FairyStockfish.hasInsufficientMaterial(variantName, fen, convertUciMoves(movesList))
+  //  (im.get0(), im.get1())
+  //}
 
-  def givesCheck(variantName: String, fen: String, movesList: Option[List[String]] = None): Boolean =
-    FairyStockfish.givesCheck(variantName, fen, convertUciMoves(movesList))
+  //def givesCheck(variantName: String, fen: String, movesList: Option[List[String]] = None): Boolean =
+  //  FairyStockfish.givesCheck(variantName, fen, convertUciMoves(movesList))
 
-  def legalMoves(variantName: String, fen: String, movesList: Option[List[String]] = None): Array[String] =
-    FairyStockfish.getLegalMoves(variantName, fen, convertUciMoves(movesList))
+  //def legalMoves(variantName: String, fen: String, movesList: Option[List[String]] = None): Array[String] =
+  //  FairyStockfish.getLegalMoves(variantName, fen, convertUciMoves(movesList))
 
-  def piecesInHand(variantName: String, gf: GameFamily, fen: String): Array[Piece] =
-    vectorOfPiecesToPieceArray(FairyStockfish.piecesInHand(variantName, fen), gf)
+  //def piecesInHand(variantName: String, gf: GameFamily, fen: String): Array[Piece] =
+  //  vectorOfPiecesToPieceArray(FairyStockfish.piecesInHand(variantName, fen), gf)
 
-  def pocketData(variant: Variant, fen: String): Option[PocketData] =
-    if (variant.dropsVariant) {
-      val pieces = piecesInHand(variant.fairysfName.name, variant.gameFamily, fen)
-      PocketData(
-        Pockets(
-          Pocket(pieces.filter(_.color == White).toList.map(p => strategygames.Role.FairySFRole(p.role))),
-          Pocket(pieces.filter(_.color == Black).toList.map(p => strategygames.Role.FairySFRole(p.role)))
-        ),
-        //Can make an empty Set of Pos because we dont have to track promoted pieces
-        //(FairySF presumably does this)
-        Set[Pos]()
-      ).some
-    } else None
+  //def pocketData(variant: Variant, fen: String): Option[PocketData] =
+  //  if (variant.dropsVariant) {
+  //    val pieces = piecesInHand(variant.fairysfName.name, variant.gameFamily, fen)
+  //    PocketData(
+  //      Pockets(
+  //        Pocket(pieces.filter(_.color == White).toList.map(p => strategygames.Role.FairySFRole(p.role))),
+  //        Pocket(pieces.filter(_.color == Black).toList.map(p => strategygames.Role.FairySFRole(p.role)))
+  //      ),
+  //      //Can make an empty Set of Pos because we dont have to track promoted pieces
+  //      //(FairySF presumably does this)
+  //      Set[Pos]()
+  //    ).some
+  //  } else None
 
-  def pocketData(variant: Variant, position: Api.Position): Option[PocketData] =
-    if (variant.dropsVariant) {
-      val pieces = position.piecesInHand
-      PocketData(
-        Pockets(
-          Pocket(pieces.filter(_.color == White).toList.map(p => strategygames.Role.FairySFRole(p.role))),
-          Pocket(pieces.filter(_.color == Black).toList.map(p => strategygames.Role.FairySFRole(p.role)))
-        ),
-        //Can make an empty Set of Pos because we dont have to track promoted pieces
-        //(FairySF presumably does this)
-        Set[Pos]()
-      ).some
-    } else None
+  //def pocketData(variant: Variant, position: Api.Position): Option[PocketData] =
+  //  if (variant.dropsVariant) {
+  //    val pieces = position.piecesInHand
+  //    PocketData(
+  //      Pockets(
+  //        Pocket(pieces.filter(_.color == White).toList.map(p => strategygames.Role.FairySFRole(p.role))),
+  //        Pocket(pieces.filter(_.color == Black).toList.map(p => strategygames.Role.FairySFRole(p.role)))
+  //      ),
+  //      //Can make an empty Set of Pos because we dont have to track promoted pieces
+  //      //(FairySF presumably does this)
+  //      Set[Pos]()
+  //    ).some
+  //  } else None
 
   def pieceMapFromFen(variantName: String, gf: GameFamily, fen: String): PieceMap =
     convertPieceMap(FairyStockfish.piecesOnBoard(variantName, fen), gf)
