@@ -44,6 +44,9 @@ sealed abstract class GameFamily {
   def aiEnabled: Boolean
   def defaultVariant: Variant
   def variants: List[Variant]
+  def displayPiece: String
+  def pieceSetThemes: List[String]
+  def pieceSetDefault: String
 
   override def toString = s"GameFamily($name)"
 }
@@ -58,6 +61,13 @@ object GameFamily {
     def aiEnabled = true
     def defaultVariant = Variant.Chess(strategygames.chess.variant.Standard)
     def variants = Variant.all(GameLogic.Chess()).filter(_.gameFamily == this)
+    def displayPiece = "wN"
+    def pieceSetThemes = List("cburnett", "merida", "alpha", "california", "cardinal", "chess7",
+                              "chessnut", "companion", "dubrovny", "fantasy", "fresca", "gioco",
+                              "governor", "horsey", "icpieces", "kosal", "leipzig", "letter", "maestro",
+                              "pirouetti", "pixel", "reillycraig", "riohacha", "shapes", "spatial",
+                              "staunty", "tatiana")
+    def pieceSetDefault= "cburnett"
   }
 
   final case class Draughts() extends GameFamily {
@@ -68,6 +78,9 @@ object GameFamily {
     def aiEnabled = false
     def defaultVariant = Variant.Draughts(strategygames.draughts.variant.Standard)
     def variants = Variant.all(GameLogic.Draughts())
+    def displayPiece = "wK"
+    def pieceSetThemes = List("wide_crown", "fabirovsky", "check_yb")
+    def pieceSetDefault= "wide_crown"
   }
 
   final case class LinesOfAction() extends GameFamily {
@@ -78,6 +91,9 @@ object GameFamily {
     def aiEnabled = false
     def defaultVariant = Variant.Chess(strategygames.chess.variant.LinesOfAction)
     def variants = Variant.all(GameLogic.Chess()).filter(_.gameFamily == this)
+    def displayPiece = "wL"
+    def pieceSetThemes = List("fabirovsky_loa", "check_yb_loa", "wide")
+    def pieceSetDefault= "fabirovsky_loa"
   }
 
   final case class Shogi() extends GameFamily {
@@ -88,6 +104,9 @@ object GameFamily {
     def aiEnabled = false
     def defaultVariant = Variant.FairySF(strategygames.fairysf.variant.Shogi)
     def variants = Variant.all(GameLogic.FairySF()).filter(_.gameFamily == this)
+    def displayPiece = "0KE"
+    def pieceSetThemes = List("2kanji", "ctw")
+    def pieceSetDefault= "2kanji"
   }
 
   final case class Xiangqi() extends GameFamily {
@@ -98,6 +117,9 @@ object GameFamily {
     def aiEnabled = false
     def defaultVariant = Variant.FairySF(strategygames.fairysf.variant.Xiangqi)
     def variants = Variant.all(GameLogic.FairySF()).filter(_.gameFamily == this)
+    def displayPiece = "RH"
+    def pieceSetThemes = List("2dhanzi", "ka")
+    def pieceSetDefault= "2dhanzi"
   }
 
   def all: List[GameFamily] = List(
