@@ -45,44 +45,4 @@ class FairyStockfishTest extends Specification with ValidatedMatchers {
       ) must_== false
     }
   }
-
-  "Shogi initial FEN" should {
-    "not be game end" in {
-      FairyStockfish.isImmediateGameEnd(
-        variant.Shogi.fairysfName.name,
-        variant.Shogi.initialFen.value,
-        emptyMoves
-      ).get0() must_== false
-    }
-  }
-
-  "Chess black Checkmate FEN" should {
-    "be game end" in {
-      FairyStockfish.init()
-      FairyStockfish.gameResult(
-        "chess",
-        //https://www.pychess.org/cdRztJdY?ply=74
-        "rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3",
-        emptyMoves
-      ) must_== -32000L
-      FairyStockfish.gameResult(
-        "chess",
-        //https://www.pychess.org/cdRztJdY?ply=74
-        "r1bqkbnr/1ppppQ1p/p1n3p1/8/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 4",
-        emptyMoves
-      ) must_== -32000L
-    }
-  }
-  "Shogi Checkmate FEN" should {
-    "have no legal moves" in {
-      FairyStockfish.init()
-      FairyStockfish.getLegalMoves(
-        variant.Shogi.fairysfName.name,
-        //https://www.pychess.org/cdRztJdY?ply=74
-        "l2g1g1nl/5sk2/3p1p1p1/p3p1p1p/1n2n4/P4PP1P/1P1sPK1P1/5sR1+r/L4+p1N1[GPSBBglpp] w - - 4 38",
-        emptyMoves
-      ).size() must_== 0L
-    }
-  }
-
 }

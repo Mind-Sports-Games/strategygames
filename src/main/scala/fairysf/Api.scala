@@ -109,7 +109,7 @@ object Api {
   }
 
   def positionFromVariant(variant: Variant): Position =
-      new FairyPosition(new FairyStockfish.Position(variant.fairysfName.name))
+    new FairyPosition(new FairyStockfish.Position(variant.fairysfName.name))
 
   def positionFromVariantName(variantName: String): Position =
     new FairyPosition(new FairyStockfish.Position(variantName))
@@ -192,14 +192,16 @@ object Api {
   def validateFEN(variantName: String, fen: String): Boolean =
     FairyStockfish.validateFEN(variantName, fen)
 
+  def positionFromMoves(variantName: String, fen: String, movesList: Option[List[String]] = None): Position =
+    positionFromVariantNameAndFEN(variantName, fen)
+      .makeMoves(convertUciMoves(movesList).getOrElse(List.empty))
+
   def fenFromMoves(variantName: String, fen: String, movesList: Option[List[String]] = None): FEN =
-    FEN(FairyStockfish.getFEN(variantName, fen, convertUciMoves(movesList)))
+    positionFromMoves(variantName, fen, movesList).fen
 
   def gameResult(variantName: String, fen: String, movesList: Option[List[String]] = None): GameResult =
     if (legalMoves(variantName, fen, movesList).size == 0)
-      GameResult.resultFromInt(
-        FairyStockfish.gameResult(variantName, fen, convertUciMoves(movesList))
-      )
+      positionFromMoves(variantName, fen, movesList).gameResult
     else optionalGameEndResult(variantName, fen, movesList)
 
   def gameEnd(
@@ -217,39 +219,31 @@ object Api {
   //def immediateGameEnd(variantName: String, fen: String, movesList: Option[List[String]] = None): Boolean =
   //  FairyStockfish.isImmediateGameEnd(variantName, fen, movesList).get0()
 
-  private def isOptionalGameEnd(variantName: String, fen: String, movesList: Option[List[String]] = None) =
-    FairyStockfish.isOptionalGameEnd(variantName, fen, convertUciMoves(movesList))
-
   def optionalGameEnd(variantName: String, fen: String, movesList: Option[List[String]] = None): Boolean =
-    isOptionalGameEnd(variantName, fen, movesList).get0()
+    positionFromMoves(variantName, fen, movesList).optionalGameEnd
 
   def optionalGameEndResult(
       variantName: String,
       fen: String,
       movesList: Option[List[String]] = None
-  ): GameResult = {
-    val optionalGameEndData = isOptionalGameEnd(variantName, fen, movesList)
-    if (optionalGameEndData.get0()) GameResult.optionalResultFromInt(optionalGameEndData.get1())
-    else GameResult.Ongoing()
-  }
+  ): GameResult =
+    positionFromMoves(variantName, fen, movesList).optionalGameEndResult
 
   def insufficientMaterial(
       variantName: String,
       fen: String,
       movesList: Option[List[String]] = None
-  ): (Boolean, Boolean) = {
-    val im = FairyStockfish.hasInsufficientMaterial(variantName, fen, convertUciMoves(movesList))
-    (im.get0(), im.get1())
-  }
+  ): (Boolean, Boolean) =
+    positionFromMoves(variantName, fen, movesList).insufficientMaterial
 
   def givesCheck(variantName: String, fen: String, movesList: Option[List[String]] = None): Boolean =
-    FairyStockfish.givesCheck(variantName, fen, convertUciMoves(movesList))
+    positionFromMoves(variantName, fen, movesList).givesCheck
 
   def legalMoves(variantName: String, fen: String, movesList: Option[List[String]] = None): Array[String] =
-    FairyStockfish.getLegalMoves(variantName, fen, convertUciMoves(movesList))
+    positionFromMoves(variantName, fen, movesList).legalMoves
 
   def piecesInHand(variantName: String, gf: GameFamily, fen: String): Array[Piece] =
-    vectorOfPiecesToPieceArray(FairyStockfish.piecesInHand(variantName, fen), gf)
+    positionFromMoves(variantName, fen).piecesInHand
 
   def pocketData(variant: Variant, fen: String): Option[PocketData] =
     if (variant.dropsVariant) {
@@ -280,6 +274,6 @@ object Api {
     } else None
 
   def pieceMapFromFen(variantName: String, gf: GameFamily, fen: String): PieceMap =
-    convertPieceMap(FairyStockfish.piecesOnBoard(variantName, fen), gf)
+    positionFromMoves(variantName, fen).pieceMap
 
 }
