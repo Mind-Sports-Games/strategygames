@@ -69,7 +69,8 @@ object Api {
     val variant = Variant.byFairySFName(position.variant())
 
     def makeMoves(movesList: List[String]): Position =
-      new FairyPosition(position.makeMoves(movesList))
+      if (movesList.isEmpty) this
+      else new FairyPosition(position.makeMoves(movesList))
 
     lazy val fen: FEN            = FEN(position.getFEN())
     lazy val givesCheck: Boolean = position.givesCheck()
@@ -107,7 +108,7 @@ object Api {
             ))
           ),
           //Can make an empty Set of Pos because we dont have to track promoted pieces
-          //(FairySF presumably does this)
+          //FairySF takes care of this for us
           Set[Pos]()
         ).some
       else None
@@ -305,7 +306,7 @@ object Api {
   //    ).some
   //  } else None
 
-  def pieceMapFromFen(variantName: String, gf: GameFamily, fen: String): PieceMap =
+  def pieceMapFromFen(variantName: String, fen: String): PieceMap =
     positionFromMoves(variantName, fen).pieceMap
 
 }

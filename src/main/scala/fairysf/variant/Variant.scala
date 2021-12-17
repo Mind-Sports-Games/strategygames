@@ -45,8 +45,7 @@ abstract class Variant private[variant] (
 
   lazy val position: Api.Position = Api.positionFromVariantName(this.fairysfName.name)
 
-  def pieces: Map[Pos, Piece] =
-    Api.pieceMapFromFen(fairysfName.name, gameFamily, initialFen.value)
+  def pieces: Map[Pos, Piece] = Api.pieceMapFromFen(fairysfName.name, initialFen.value)
 
   def startColor: Color = White
 
