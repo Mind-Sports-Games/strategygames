@@ -117,8 +117,6 @@ abstract class Variant private[variant] (
       case (role, dest) => sys.error(s"Invalid position from uci: ${role}@${dest}")
     }.toList
 
-  //TODO: test, but think this is right as its based off chess without actor check
-  //Update: not checking promotion here yet!
   def move(
       situation: Situation,
       from: Pos,
@@ -132,13 +130,6 @@ abstract class Variant private[variant] (
       case Some(move) => Validated.valid(move)
       case None => Validated.invalid(s"Not a valid move: ${from}${to} with prom: ${promotion}. Allowed moves: ${situation.moves}")
     }
-    //for {
-    //  m1 <- findMove(from, to) toValid "Piece on " + from + " cannot move to " + to
-    //  m2 <- m1 withPromotion promotion toValid "Piece on " + from + " cannot promote to " + promotion
-    //  m3 <-
-    //    if (isValidPromotion(promotion)) Validated.valid(m2)
-    //    else Validated.invalid("Cannot promote to " + promotion + " in this game mode")
-    //} yield m3
   }
 
   def drop(situation: Situation, role: Role, pos: Pos): Validated[String, Drop] =
@@ -167,8 +158,8 @@ abstract class Variant private[variant] (
 
   def checkmate(situation: Situation) = situation.check && situation.moves.isEmpty
 
-  // In most variants, the winner is the last player to have played and there is a possibility of either a traditional
-  // checkmate or a variant end condition
+  // In most variants, the winner is the last player to have played
+  // perpetual is the opposite. would need to recheck this for new variants
   def winner(situation: Situation): Option[Color] =
     if (situation.checkMate || specialEnd(situation)) Option(!situation.color)
     else if (situation.perpetual) Option(situation.color)
@@ -191,9 +182,6 @@ abstract class Variant private[variant] (
   // pieces surrounding a capture explode
   def hasMoveEffects = false
 
-  /** Applies a variant specific effect to the move. This helps decide whether a king is endangered by a move, for
-    * example
-    */
   def addVariantEffect(move: Move): Move = move
 
   def fiftyMoves(history: History): Boolean = history.halfMoveClock >= 100
@@ -205,7 +193,8 @@ abstract class Variant private[variant] (
 
   /** Once a move has been decided upon from the available legal moves, the board is finalized
     */
-  @nowarn def finalizeBoard(board: Board, uci: format.Uci, captured: Option[Piece]): Board = board
+  @nowarn def finalizeBoard(board: Board, uci: format.Uci, captured: Option[Piece]): Board =
+    board
 
   def valid(board: Board, strict: Boolean): Boolean =
     Api.validateFEN(fairysfName.name, Forsyth.exportBoard(board))

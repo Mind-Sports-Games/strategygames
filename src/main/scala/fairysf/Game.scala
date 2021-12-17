@@ -62,19 +62,9 @@ case class Game(
       }
     }
 
-  //def apply(uci: Uci.Move): Validated[String, (Game, Move)] = apply(uci.orig, uci.dest, uci.promotion)
-  //def apply(uci: Uci.Drop): Validated[String, (Game, Drop)] = drop(uci.role, uci.pos)
-  //def apply(uci: Uci): Validated[String, (Game, MoveOrDrop)] =
-  //  uci match {
-  //    case u: Uci.Move => apply(u) map { case (g, m) => g -> Left(m) }
-  //    case u: Uci.Drop => apply(u) map { case (g, d) => g -> Right(d) }
-  //  }
-
   def player = situation.color
 
   def board = situation.board
-
-  //def isStandardInit = board.pieces == strategygames.fairysf.variant.Variant.default.pieces
 
   def halfMoveClock: Int = board.history.halfMoveClock
 
@@ -83,24 +73,12 @@ case class Game(
     */
   def fullMoveNumber: Int = 1 + turns / 2
 
-  //def moveString = s"$fullMoveNumber${player.fold(".", "...")}"
-
-  //def withBoard(b: Board) = copy(situation = situation.copy(board = b))
-
-  //def updateBoard(f: Board => Board) = withBoard(f(board))
-
-  //def withPlayer(c: Color) = copy(situation = situation.copy(color = c))
-
   def withTurns(t: Int) = copy(turns = t)
 }
 
 object Game {
   def apply(variant: strategygames.fairysf.variant.Variant): Game =
     new Game(Situation(Board init variant, White))
-
-  //def apply(board: Board): Game = apply(board, White)
-
-  //def apply(board: Board, color: Color): Game = new Game(Situation(board, color))
 
   def apply(variantOption: Option[strategygames.fairysf.variant.Variant], fen: Option[FEN]): Game = {
     val variant = variantOption | strategygames.fairysf.variant.Variant.default

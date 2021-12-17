@@ -77,8 +77,7 @@ object Reader {
                   ))
                 )
               )
-              //case _ => Result.Incomplete(replay, s"Error making replay with move: ${m}")
-              case _ => sys.error(s"Error making replay with move: ${m}")
+              case _ => Result.Incomplete(replay, s"Error making replay with move: ${m}")
             }
           }
           case Uci.Drop.dropR(role, dest) =>
@@ -94,11 +93,9 @@ object Reader {
                   ))
                 )
               )
-              //case _ => Result.Incomplete(replay, s"Error making replay with drop: ${m}")
-              case _ => sys.error(s"Error making replay with drop: ${m}")
+              case _ => Result.Incomplete(replay, s"Error making replay with drop: ${m}")
             }
-          //case _ => Result.Incomplete(replay, s"Error making replay with uci move: ${m}")
-          case _ => sys.error(s"Error making replay with uci move: ${m}")
+          case _ => Result.Incomplete(replay, s"Error making replay with uci move: ${m}")
         }
       case (r: Result.Incomplete, _) => r
     }

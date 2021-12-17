@@ -4,8 +4,6 @@ package variant
 import strategygames.fairysf._
 import strategygames.GameFamily
 
-//import org.playstrategy.FairyStockfish
-
 case object Shogi
     extends Variant(
       id = 1,
@@ -33,6 +31,8 @@ case object Shogi
   override def initialFen =
     format.FEN("lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL[-] w 0 1")
 
+  //manually calculated where might put king in mate
+  //this was done for optimisation but could go back to just checking the api lots?
   override def validDrops(situation: Situation): List[Drop] =
     super.validDrops(situation).filterNot(
       d => d.piece.role == ShogiPawn && {

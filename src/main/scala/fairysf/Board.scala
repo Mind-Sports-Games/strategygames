@@ -19,11 +19,6 @@ case class Board(
   def apply(at: Pos): Option[Piece] = pieces get at
   def apply(file: File, rank: Rank) = pieces get Pos(file, rank)
 
-  //used in Hash
-  lazy val actors: Map[Pos, Actor] = pieces map { case (pos, piece) =>
-    (pos, Actor(piece, pos, this))
-  }
-
   lazy val posMap: Map[Piece, Iterable[Pos]] = pieces.groupMap(_._2)(_._1)
 
   def withHistory(h: History): Board = copy(history = h)

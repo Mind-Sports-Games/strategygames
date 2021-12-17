@@ -66,13 +66,8 @@ object Binary {
       Role.allByBinaryInt(gf).get(right(b, 7)).get.forsyth.toString
 
     private def headerBit(i: Int) = i >> 7
-    //private def posString(i: Int) = fileChar(i >> 3).toString + rankChar(right(i, 3))
-    //private def fileChar(i: Int)  = (i + 97).toChar
-    //private def rankChar(i: Int)  = (i + 49).toChar
 
     private def right(i: Int, x: Int): Int           = i & lengthMasks(x)
-    //private def cut(i: Int, from: Int, to: Int): Int = right(i, from) >> to
-    //private def bitAt(i: Int, p: Int): Boolean       = cut(i, p, p - 1) != 0
     private val lengthMasks =
       Map(1 -> 0x01, 2 -> 0x03, 3 -> 0x07, 4 -> 0x0f, 5 -> 0x1f, 6 -> 0x3f, 7 -> 0x7f, 8 -> 0xff)
     private def !!(msg: String) = throw new Exception("Binary reader failed: " + msg)

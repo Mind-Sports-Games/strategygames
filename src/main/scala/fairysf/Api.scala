@@ -173,15 +173,9 @@ object Api {
   def vectorOfPiecesToPieceArray(pieces: FairyStockfish.VectorOfPieces, gf: GameFamily): Array[Piece] =
     pieces.get().map(pieceFromFSPiece(_, gf))
 
-  def convertPieceMap(fsPieceMap: FairyStockfish.PieceMap, gf: GameFamily): PieceMap = {
+  private def convertPieceMap(fsPieceMap: FairyStockfish.PieceMap, gf: GameFamily): PieceMap = {
     var first    = fsPieceMap.begin()
     val pieceMap = scala.collection.mutable.Map[Pos, Piece]()
-    //while(!first.equals(fsPieceMap.end())) {
-    //  var temp = first.first().getString().pp("Pos: ")
-    //  temp = first.second().pieceInfo().name().getString().pp("Piece")
-    //  first = first.increment()
-    //}
-    //first = fsPieceMap.begin()
     while (!first.equals(fsPieceMap.end())) {
       pieceMap(
         Pos.fromKey(first.first().getString()).get
@@ -191,7 +185,7 @@ object Api {
     pieceMap.toMap
   }
 
-  def convertUciMoves(movesList: Option[List[String]]): Option[List[String]] =
+  private def convertUciMoves(movesList: Option[List[String]]): Option[List[String]] =
     movesList.map(
       _.map(m =>
         m match {
@@ -220,91 +214,6 @@ object Api {
   def positionFromMoves(variantName: String, fen: String, movesList: Option[List[String]] = None): Position =
     positionFromVariantNameAndFEN(variantName, fen)
       .makeMoves(convertUciMoves(movesList).getOrElse(List.empty))
-
-  //def fenFromMoves(variantName: String, fen: String, movesList: Option[List[String]] = None): FEN =
-  //  positionFromMoves(variantName, fen, movesList).fen
-
-  //def gameResult(variantName: String, fen: String, movesList: Option[List[String]] = None): GameResult =
-  //  if (legalMoves(variantName, fen, movesList).size == 0)
-  //    positionFromMoves(variantName, fen, movesList).gameResult
-  //  else optionalGameEndResult(variantName, fen, movesList)
-
-  //def gameEnd(
-  //    variantName: String,
-  //    fen: String,
-  //    movesList: Option[List[String]] = None,
-  //    result: Option[GameResult] = None
-  //): Boolean =
-  //  (result match {
-  //    case Some(r) => r
-  //    case None    => gameResult(variantName, fen, movesList)
-  //  }) != GameResult.Ongoing() ||
-  //    insufficientMaterial(variantName, fen, convertUciMoves(movesList)) == ((true, true))
-
-  //def immediateGameEnd(variantName: String, fen: String, movesList: Option[List[String]] = None): Boolean =
-  //  FairyStockfish.isImmediateGameEnd(variantName, fen, movesList).get0()
-
-  //private def isOptionalGameEnd(variantName: String, fen: String, movesList: Option[List[String]] = None) =
-  //  FairyStockfish.isOptionalGameEnd(variantName, fen, convertUciMoves(movesList))
-
-  //def optionalGameEnd(variantName: String, fen: String, movesList: Option[List[String]] = None): Boolean =
-  //  isOptionalGameEnd(variantName, fen, movesList).get0()
-
-  //def optionalGameEndResult(
-  //    variantName: String,
-  //    fen: String,
-  //    movesList: Option[List[String]] = None
-  //): GameResult = {
-  //  val optionalGameEndData = isOptionalGameEnd(variantName, fen, movesList)
-  //  if (optionalGameEndData.get0()) GameResult.optionalResultFromInt(optionalGameEndData.get1())
-  //  else GameResult.Ongoing()
-  //}
-
-  //def insufficientMaterial(
-  //    variantName: String,
-  //    fen: String,
-  //    movesList: Option[List[String]] = None
-  //): (Boolean, Boolean) = {
-  //  val im = FairyStockfish.hasInsufficientMaterial(variantName, fen, convertUciMoves(movesList))
-  //  (im.get0(), im.get1())
-  //}
-
-  //def givesCheck(variantName: String, fen: String, movesList: Option[List[String]] = None): Boolean =
-  //  FairyStockfish.givesCheck(variantName, fen, convertUciMoves(movesList))
-
-  //def legalMoves(variantName: String, fen: String, movesList: Option[List[String]] = None): Array[String] =
-  //  FairyStockfish.getLegalMoves(variantName, fen, convertUciMoves(movesList))
-
-  //def piecesInHand(variantName: String, gf: GameFamily, fen: String): Array[Piece] =
-  //  vectorOfPiecesToPieceArray(FairyStockfish.piecesInHand(variantName, fen), gf)
-
-  //def pocketData(variant: Variant, fen: String): Option[PocketData] =
-  //  if (variant.dropsVariant) {
-  //    val pieces = piecesInHand(variant.fairysfName.name, variant.gameFamily, fen)
-  //    PocketData(
-  //      Pockets(
-  //        Pocket(pieces.filter(_.color == White).toList.map(p => strategygames.Role.FairySFRole(p.role))),
-  //        Pocket(pieces.filter(_.color == Black).toList.map(p => strategygames.Role.FairySFRole(p.role)))
-  //      ),
-  //      //Can make an empty Set of Pos because we dont have to track promoted pieces
-  //      //(FairySF presumably does this)
-  //      Set[Pos]()
-  //    ).some
-  //  } else None
-
-  //def pocketData(variant: Variant, position: Api.Position): Option[PocketData] =
-  //  if (variant.dropsVariant) {
-  //    val pieces = position.piecesInHand
-  //    PocketData(
-  //      Pockets(
-  //        Pocket(pieces.filter(_.color == White).toList.map(p => strategygames.Role.FairySFRole(p.role))),
-  //        Pocket(pieces.filter(_.color == Black).toList.map(p => strategygames.Role.FairySFRole(p.role)))
-  //      ),
-  //      //Can make an empty Set of Pos because we dont have to track promoted pieces
-  //      //(FairySF presumably does this)
-  //      Set[Pos]()
-  //    ).some
-  //  } else None
 
   def pieceMapFromFen(variantName: String, fen: String): PieceMap =
     positionFromMoves(variantName, fen).pieceMap

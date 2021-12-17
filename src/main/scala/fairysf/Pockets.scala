@@ -8,6 +8,7 @@ case class PocketData(
     // when captured and put in the pocket.
     // there we need to remember which pieces are issued from promotions.
     // we do that by tracking their positions on the board.
+    // we dont need to track this fairysf, so it should always be empty
     promoted: Set[Pos]
 ) {
 
@@ -20,7 +21,7 @@ case class PocketData(
     copy(
       pockets = pockets.store(
         GameLogic.FairySF(),
-        StratPiece.FairySF(piece) // TODO: maybe have to properly add in conversion for storage here.
+        StratPiece.FairySF(piece)
       ),
       promoted = promoted - from
     )
