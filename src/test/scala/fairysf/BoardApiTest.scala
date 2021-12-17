@@ -83,6 +83,25 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
     }
   }
 
+  "Shogi four fold repetition step by step" should {
+    val position = Api.positionFromVariant(variant.Shogi)
+    "be optional game end" in {
+      val newPosition = position.makeMoves(List("h2i2"))
+      val newPosition2 = newPosition.makeMoves(List("b8a8"))
+      val newPosition3 = newPosition2.makeMoves(List("i2h2"))
+      val newPosition4 = newPosition3.makeMoves(List("a8b8"))
+      val newPosition5 = newPosition4.makeMoves(List("h2i2"))
+      val newPosition6 = newPosition5.makeMoves(List("b8a8"))
+      val newPosition7 = newPosition6.makeMoves(List("i2h2"))
+      val newPosition8 = newPosition7.makeMoves(List("a8b8"))
+      val newPosition9 = newPosition8.makeMoves(List("h2i2"))
+      val newPosition10 = newPosition9.makeMoves(List("b8a8"))
+      val newPosition11 = newPosition10.makeMoves(List("i2h2"))
+      val newPosition12 = newPosition11.makeMoves(List("a8b8"))
+      newPosition12.optionalGameEnd must_== true
+    }
+  }
+
   "Shogi Checkmate FEN" should {
     //https://www.pychess.org/cdRztJdY?ply=74
     val checkmateFen = "l2g1g1nl/5sk2/3p1p1p1/p3p1p1p/1n2n4/P4PP1P/1P1sPK1P1/5sR1+r/L4+p1N1[GPSBBglpp] w - - 4 38"
