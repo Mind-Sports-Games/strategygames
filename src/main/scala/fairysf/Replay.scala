@@ -4,7 +4,7 @@ import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
-import strategygames.Color
+import strategygames.Player
 import strategygames.format.pgn.San
 import strategygames.fairysf.format.pgn.{ Parser, Reader }
 import strategygames.format.pgn.{ Tag, Tags }
@@ -89,7 +89,7 @@ object Replay {
     uciMoves: List[String]
   ): Drop =
     Drop(
-      piece = Piece(before.situation.color, role),
+      piece = Piece(before.situation.player, role),
       pos = dest,
       situationBefore = before.situation,
       after = before.situation.board.copy(
@@ -174,7 +174,7 @@ object Replay {
       case Nil => valid(Nil)
       case san :: rest =>
         san(StratSituation.wrap(sit)) flatMap { moveOrDrop =>
-          val after = Situation(moveOrDrop.fold(m => m.finalizeAfter().toFairySF, d => d.finalizeAfter.toFairySF), !sit.color)
+          val after = Situation(moveOrDrop.fold(m => m.finalizeAfter().toFairySF, d => d.finalizeAfter.toFairySF), !sit.player)
           recursiveSituations(after, rest) map { after :: _ }
         }
     }
@@ -187,7 +187,7 @@ object Replay {
       case Nil => valid(Nil)
       case uci :: rest =>
         uci(sit) andThen { moveOrDrop =>
-          val after = Situation(moveOrDrop.fold(_.finalizeAfter, _.finalizeAfter), !sit.color)
+          val after = Situation(moveOrDrop.fold(_.finalizeAfter, _.finalizeAfter), !sit.player)
           recursiveSituationsFromUci(after, rest) map { after :: _ }
         }
     }
@@ -267,9 +267,9 @@ object Replay {
           case san :: rest =>
             san(StratSituation.wrap(sit)) flatMap { moveOrDrop =>
               val after = moveOrDrop.fold(m => m.finalizeAfter().toFairySF, d => d.finalizeAfter.toFairySF)
-              val fen   = Forsyth >> Game(Situation(after, Color.fromPly(ply)), turns = ply)
+              val fen   = Forsyth >> Game(Situation(after, Player.fromPly(ply)), turns = ply)
               if (compareFen(fen)) Validated.valid(ply)
-              else recursivePlyAtFen(Situation(after, !sit.color), rest, ply + 1)
+              else recursivePlyAtFen(Situation(after, !sit.player), rest, ply + 1)
             }
         }
 

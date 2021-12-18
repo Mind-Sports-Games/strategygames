@@ -64,7 +64,7 @@ abstract class Variant(
   def fenVariant: Boolean
   def aiVariant: Boolean
   //used in lila modules/game/src/main/Game.scala
-  def whiteIsBetterVariant: Boolean
+  def p1IsBetterVariant: Boolean
   def blindModeVariant: Boolean
   //used in lila modules/playban/src/main/RageSit.scala
   def materialImbalanceVariant: Boolean
@@ -75,7 +75,7 @@ abstract class Variant(
   def perfIcon: Char
 
   def initialFen: FEN
-  def startColor: Color
+  def startPlayer: Player
 
   def isValidPromotion(promotion: Option[PromotableRole]): Boolean
 
@@ -83,7 +83,7 @@ abstract class Variant(
 
   // In most variants, the winner is the last player to have played and there is a possibility of either a traditional
   // checkmate or a variant end condition
-  def winner(situation: Situation): Option[Color]
+  def winner(situation: Situation): Option[Player]
 
   @nowarn def specialEnd(situation: Situation): Boolean
 
@@ -172,7 +172,7 @@ object Variant {
     def fenVariant: Boolean  = v.fenVariant
     def aiVariant: Boolean   = v.aiVariant
 
-    def whiteIsBetterVariant: Boolean = v.whiteIsBetterVariant
+    def p1IsBetterVariant: Boolean = v.p1IsBetterVariant
     def blindModeVariant: Boolean     = v.blindModeVariant
 
     def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
@@ -183,7 +183,7 @@ object Variant {
     def perfIcon: Char = v.perfIcon
 
     def initialFen: FEN = FEN.Chess(v.initialFen)
-    def startColor: Color = v.startColor
+    def startPlayer: Player = v.startPlayer
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = promotion match {
       case Some(Role.ChessPromotableRole(pr)) => v.isValidPromotion(pr.some)
@@ -196,7 +196,7 @@ object Variant {
       case _                          => sys.error("Not passed Chess objects")
     }
 
-    def winner(situation: Situation): Option[Color] = situation match {
+    def winner(situation: Situation): Option[Player] = situation match {
       case Situation.Chess(situation) => v.winner(situation)
       case _                          => sys.error("Not passed Chess objects")
     }
@@ -290,7 +290,7 @@ object Variant {
     def fenVariant: Boolean  = v.fenVariant
     def aiVariant: Boolean   = v.aiVariant
 
-    def whiteIsBetterVariant: Boolean = v.whiteIsBetterVariant
+    def p1IsBetterVariant: Boolean = v.p1IsBetterVariant
     def blindModeVariant: Boolean     = v.blindModeVariant
 
     def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
@@ -301,7 +301,7 @@ object Variant {
     def perfIcon: Char = v.perfIcon
 
     def initialFen: FEN = FEN.Draughts(v.initialFen)
-    def startColor: Color = v.startColor
+    def startPlayer: Player = v.startPlayer
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = promotion match {
       case Some(Role.DraughtsPromotableRole(pr)) => v.isValidPromotion(pr.some)
@@ -314,7 +314,7 @@ object Variant {
       case _                             => sys.error("Not passed Draughts objects")
     }
 
-    def winner(situation: Situation): Option[Color] = situation match {
+    def winner(situation: Situation): Option[Player] = situation match {
       case Situation.Draughts(situation) => v.winner(situation)
       case _                             => sys.error("Not passed Draughts objects")
     }
@@ -405,7 +405,7 @@ object Variant {
     def fenVariant: Boolean  = v.fenVariant
     def aiVariant: Boolean   = v.aiVariant
 
-    def whiteIsBetterVariant: Boolean = v.whiteIsBetterVariant
+    def p1IsBetterVariant: Boolean = v.p1IsBetterVariant
     def blindModeVariant: Boolean     = v.blindModeVariant
 
     def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
@@ -416,7 +416,7 @@ object Variant {
     def perfIcon: Char = v.perfIcon
 
     def initialFen: FEN = FEN.FairySF(v.initialFen)
-    def startColor: Color = v.startColor
+    def startPlayer: Player = v.startPlayer
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = promotion match {
       case Some(Role.FairySFPromotableRole(pr)) => v.isValidPromotion(pr.some)
@@ -429,7 +429,7 @@ object Variant {
       case _                             => sys.error("Not passed FairySF objects")
     }
 
-    def winner(situation: Situation): Option[Color] = situation match {
+    def winner(situation: Situation): Option[Player] = situation match {
       case Situation.FairySF(situation) => v.winner(situation)
       case _                             => sys.error("Not passed FairySF objects")
     }

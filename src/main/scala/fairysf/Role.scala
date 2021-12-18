@@ -1,6 +1,6 @@
 package strategygames.fairysf
 
-import strategygames.{ Black, Color, White, GameFamily }
+import strategygames.{ P2, Player, P1, GameFamily }
 
 import cats.implicits._
 
@@ -18,9 +18,9 @@ sealed trait Role {
   val storable: Boolean
   val valueOf: Option[Int]
   val gameFamily: GameFamily
-  final def -(color: Color) = Piece(color, this)
-  final def white           = this - White
-  final def black           = this - Black
+  final def -(player: Player) = Piece(player, this)
+  final def p1           = this - P1
+  final def p2           = this - P2
 }
 sealed trait PromotableRole extends Role
 

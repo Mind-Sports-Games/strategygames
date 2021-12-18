@@ -2,7 +2,7 @@ package strategygames.fairysf.format
 
 import cats.implicits._
 
-import strategygames.Color
+import strategygames.Player
 import strategygames.fairysf._
 import strategygames.fairysf.variant.{ Variant }
 
@@ -27,9 +27,9 @@ object Forsyth {
         position = apiPosition.some
       ),
       fen.value.split(' ')(1) match {
-        case "w" => White
-        case "b" => Black
-        case _ => sys.error("Invalid color in fen")
+        case "w" => P1
+        case "b" => P2
+        case _ => sys.error("Invalid player in fen")
       }
     ))
   }
@@ -38,7 +38,7 @@ object Forsyth {
 
   case class SituationPlus(situation: Situation, fullMoveNumber: Int) {
 
-    def turns = fullMoveNumber * 2 - situation.color.fold(2, 1)
+    def turns = fullMoveNumber * 2 - situation.player.fold(2, 1)
   }
 
   def <<<@(variant: Variant, fen: FEN): Option[SituationPlus] =
@@ -65,9 +65,9 @@ object Forsyth {
 
   def exportBoardFen(board: Board): FEN = board.apiPosition.fen
 
-  def boardAndColor(situation: Situation): String =
-    boardAndColor(situation.board, situation.color)
+  def boardAndPlayer(situation: Situation): String =
+    boardAndPlayer(situation.board, situation.player)
 
-  def boardAndColor(board: Board, turnColor: Color): String =
-    s"${exportBoard(board)} ${turnColor.letter}"
+  def boardAndPlayer(board: Board, turnPlayer: Player): String =
+    s"${exportBoard(board)} ${turnPlayer.letter}"
 }

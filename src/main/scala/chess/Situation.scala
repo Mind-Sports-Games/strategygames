@@ -1,15 +1,15 @@
 package strategygames.chess
 
-import strategygames.{ Color, Status }
+import strategygames.{ Player, Status }
 
 import cats.data.Validated
 import cats.implicits._
 
 import strategygames.chess.format.Uci
 
-case class Situation(board: Board, color: Color) {
+case class Situation(board: Board, player: Player) {
 
-  lazy val actors = board actorsOf color
+  lazy val actors = board actorsOf player
 
   lazy val moves: Map[Pos, List[Move]] = board.variant.validMoves(this)
 
@@ -23,9 +23,9 @@ case class Situation(board: Board, color: Color) {
       case _                          => None
     }
 
-  lazy val kingPos: Option[Pos] = board kingPosOf color
+  lazy val kingPos: Option[Pos] = board kingPosOf player
 
-  lazy val check: Boolean = board check color
+  lazy val check: Boolean = board check player
 
   def checkSquare = if (check) kingPos else None
 
@@ -45,10 +45,10 @@ case class Situation(board: Board, color: Color) {
 
   def end: Boolean = checkMate || staleMate || autoDraw || variantEnd
 
-  def winner: Option[Color] = board.variant.winner(this)
+  def winner: Option[Player] = board.variant.winner(this)
 
   def playable(strict: Boolean): Boolean =
-    (board valid strict) && !end && !copy(color = !color).check
+    (board valid strict) && !end && !copy(player = !player).check
 
   lazy val status: Option[Status] =
     if (checkMate) Status.Mate.some
@@ -92,8 +92,8 @@ case class Situation(board: Board, color: Color) {
             move.dest.file.offset(-1),
             move.dest.file.offset(1)
           ).flatten
-          .flatMap(board(_, Rank.passablePawnRank(color)))
-          .exists(_ == Piece(color, Pawn))
+          .flatMap(board(_, Rank.passablePawnRank(player)))
+          .exists(_ == Piece(player, Pawn))
         )
           moves.values.flatten.find(_.enpassant).map(_.dest)
         else None
@@ -101,10 +101,10 @@ case class Situation(board: Board, color: Color) {
     }
   }
 
-  def unary_! = copy(color = !color)
+  def unary_! = copy(player = !player)
 }
 
 object Situation {
 
-  def apply(variant: strategygames.chess.variant.Variant): Situation = Situation(Board init variant, variant.startColor)
+  def apply(variant: strategygames.chess.variant.Variant): Situation = Situation(Board init variant, variant.startPlayer)
 }

@@ -15,38 +15,38 @@ class VariantTest extends ChessTest {
 
     "position pieces correctly" in {
       Standard.pieces must havePairs(
-        A1 -> (Rook - White),
-        B1 -> (Knight - White),
-        C1 -> (Bishop - White),
-        D1 -> (Queen - White),
-        E1 -> (King - White),
-        F1 -> (Bishop - White),
-        G1 -> (Knight - White),
-        H1 -> (Rook - White),
-        A2 -> (Pawn - White),
-        B2 -> (Pawn - White),
-        C2 -> (Pawn - White),
-        D2 -> (Pawn - White),
-        E2 -> (Pawn - White),
-        F2 -> (Pawn - White),
-        G2 -> (Pawn - White),
-        H2 -> (Pawn - White),
-        A7 -> (Pawn - Black),
-        B7 -> (Pawn - Black),
-        C7 -> (Pawn - Black),
-        D7 -> (Pawn - Black),
-        E7 -> (Pawn - Black),
-        F7 -> (Pawn - Black),
-        G7 -> (Pawn - Black),
-        H7 -> (Pawn - Black),
-        A8 -> (Rook - Black),
-        B8 -> (Knight - Black),
-        C8 -> (Bishop - Black),
-        D8 -> (Queen - Black),
-        E8 -> (King - Black),
-        F8 -> (Bishop - Black),
-        G8 -> (Knight - Black),
-        H8 -> (Rook - Black)
+        A1 -> (Rook - P1),
+        B1 -> (Knight - P1),
+        C1 -> (Bishop - P1),
+        D1 -> (Queen - P1),
+        E1 -> (King - P1),
+        F1 -> (Bishop - P1),
+        G1 -> (Knight - P1),
+        H1 -> (Rook - P1),
+        A2 -> (Pawn - P1),
+        B2 -> (Pawn - P1),
+        C2 -> (Pawn - P1),
+        D2 -> (Pawn - P1),
+        E2 -> (Pawn - P1),
+        F2 -> (Pawn - P1),
+        G2 -> (Pawn - P1),
+        H2 -> (Pawn - P1),
+        A7 -> (Pawn - P2),
+        B7 -> (Pawn - P2),
+        C7 -> (Pawn - P2),
+        D7 -> (Pawn - P2),
+        E7 -> (Pawn - P2),
+        F7 -> (Pawn - P2),
+        G7 -> (Pawn - P2),
+        H7 -> (Pawn - P2),
+        A8 -> (Rook - P2),
+        B8 -> (Knight - P2),
+        C8 -> (Bishop - P2),
+        D8 -> (Queen - P2),
+        E8 -> (King - P2),
+        F8 -> (Bishop - P2),
+        G8 -> (Knight - P2),
+        H8 -> (Rook - P2)
       )
     }
 
@@ -84,7 +84,7 @@ class VariantTest extends ChessTest {
   "chess960" should {
 
     "position pieces correctly" in {
-      Chess960.pieces must havePair(A2 -> (Pawn - White))
+      Chess960.pieces must havePair(A2 -> (Pawn - P1))
     }
 
     "initialize the board with castling rights" in {
@@ -100,7 +100,7 @@ class VariantTest extends ChessTest {
 PPk
 K
 """.kingOfTheHill,
-          White
+          P1
         ).situation.end must beFalse
       }
       "regular checkMate" in {
@@ -109,15 +109,15 @@ K
 PP
 K  r
 """.kingOfTheHill,
-          White
+          P1
         )
 
         game.situation.end must beTrue
-        game.situation.winner must beSome.like { case color =>
-          color == Black
+        game.situation.winner must beSome.like { case player =>
+          player == P2
         }
       }
-      "centered black king" in {
+      "centered p2 king" in {
         val sit = Game(
           """
    k
@@ -125,11 +125,11 @@ K  r
 PP
    K
 """.kingOfTheHill,
-          White
+          P1
         ).situation
         sit.end must beTrue
-        sit.winner must beSome.like { case color =>
-          color == Black
+        sit.winner must beSome.like { case player =>
+          player == P2
         }
 
       }
@@ -148,7 +148,7 @@ PP
 PPk
 K
 """.threeCheck,
-          White
+          P1
         ).situation.end must beFalse
       }
       "regular checkMate" in {
@@ -157,11 +157,11 @@ K
 PP
 K  r
 """.threeCheck,
-          White
+          P1
         )
         game.situation.end must beTrue
-        game.situation.winner must beSome.like { case color =>
-          color == Black
+        game.situation.winner must beSome.like { case player =>
+          player == P2
         }
       }
       "1 check" in {
@@ -208,8 +208,8 @@ K  r
           .get
         game.situation.end must beTrue
 
-        game.situation.winner must beSome.like { case color =>
-          color == Black
+        game.situation.winner must beSome.like { case player =>
+          player == P2
         }
       }
     }
@@ -262,33 +262,33 @@ K  r
     }
 
     "should recognize a king in the goal" in {
-      "white" in {
+      "p1" in {
         val position = FEN("2K5/8/6k1/8/8/8/8/Q6q w - - 0 1")
         val game     = fenToGame(position, RacingKings)
 
         game must beValid.like { case game =>
           game.situation.end must beTrue
-          game.situation.winner must beSome.like { case color =>
-            color == White
+          game.situation.winner must beSome.like { case player =>
+            player == P1
           }
         }
       }
 
-      "black" in {
+      "p2" in {
         val position = FEN("6k1/8/8/8/8/2r5/1KB5/2B5 w - - 0 1")
         val game     = fenToGame(position, RacingKings)
 
         game must beValid.like { case game =>
           game.situation.end must beTrue
-          game.situation.winner must beSome.like { case color =>
-            color == Black
+          game.situation.winner must beSome.like { case player =>
+            player == P2
           }
         }
       }
     }
 
-    "should give black one more move" in {
-      "when white is in the goal" in {
+    "should give p2 one more move" in {
+      "when p1 is in the goal" in {
         val position = FEN("2K5/5k2/8/8/8/8/8/8 b - - 0 1")
         val game     = fenToGame(position, RacingKings)
 
@@ -303,8 +303,8 @@ K  r
 
         game must beValid.like { case game =>
           game.situation.end must beTrue
-          game.situation.winner must beSome.like { case color =>
-            color == White
+          game.situation.winner must beSome.like { case player =>
+            player == P1
           }
         }
       }
@@ -341,7 +341,7 @@ K  r
   }
 
   "horde" should {
-    "initialize the board with black castling rights" in {
+    "initialize the board with p2 castling rights" in {
       Board.init(Horde).history.castles must_== Castles("kq")
     }
   }

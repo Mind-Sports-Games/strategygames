@@ -1,6 +1,6 @@
 package strategygames.draughts
 
-import strategygames.Color
+import strategygames.Player
 
 import cats.syntax.option.none
 
@@ -9,30 +9,30 @@ import variant.{ Standard, Variant }
 
 // Consecutive king moves by the respective side.
 case class KingMoves(
-    white: Int = 0,
-    black: Int = 0,
-    whiteKing: Option[Pos] = None,
-    blackKing: Option[Pos] = None
+    p1: Int = 0,
+    p2: Int = 0,
+    p1King: Option[Pos] = None,
+    p2King: Option[Pos] = None
 ) {
 
-  def add(color: Color, pos: Option[Pos]) = copy(
-    white = white + color.fold(1, 0),
-    black = black + color.fold(0, 1),
-    whiteKing = color.fold(pos, whiteKing),
-    blackKing = color.fold(blackKing, pos)
+  def add(player: Player, pos: Option[Pos]) = copy(
+    p1 = p1 + player.fold(1, 0),
+    p2 = p2 + player.fold(0, 1),
+    p1King = player.fold(pos, p1King),
+    p2King = player.fold(p2King, pos)
   )
 
-  def reset(color: Color) = copy(
-    white = color.fold(0, white),
-    black = color.fold(black, 0),
-    whiteKing = color.fold(none, whiteKing),
-    blackKing = color.fold(blackKing, none)
+  def reset(player: Player) = copy(
+    p1 = player.fold(0, p1),
+    p2 = player.fold(p2, 0),
+    p1King = player.fold(none, p1King),
+    p2King = player.fold(p2King, none)
   )
 
-  def nonEmpty = white > 0 || black > 0
+  def nonEmpty = p1 > 0 || p2 > 0
 
-  def apply(color: Color)   = color.fold(white, black)
-  def kingPos(color: Color) = color.fold(whiteKing, blackKing)
+  def apply(player: Player)   = player.fold(p1, p2)
+  def kingPos(player: Player) = player.fold(p1King, p2King)
 }
 
 case class DraughtsHistory(
@@ -70,15 +70,15 @@ case class DraughtsHistory(
 
   def withLastMove(m: Uci) = copy(lastMove = Some(m))
 
-  def withKingMove(color: Color, pos: Option[Pos], v: Boolean, resetOther: Boolean = false) =
+  def withKingMove(player: Player, pos: Option[Pos], v: Boolean, resetOther: Boolean = false) =
     if (v && resetOther)
-      copy(kingMoves = kingMoves.add(color, pos).reset(!color))
+      copy(kingMoves = kingMoves.add(player, pos).reset(!player))
     else if (v)
-      copy(kingMoves = kingMoves.add(color, pos))
+      copy(kingMoves = kingMoves.add(player, pos))
     else if (resetOther)
       copy(kingMoves = KingMoves())
     else
-      copy(kingMoves = kingMoves reset color)
+      copy(kingMoves = kingMoves reset player)
 
   def withKingMoves(km: KingMoves) = copy(kingMoves = km)
 

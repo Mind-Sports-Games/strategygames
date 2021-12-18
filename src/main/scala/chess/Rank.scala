@@ -1,6 +1,6 @@
 package strategygames.chess
 
-import strategygames.Color
+import strategygames.Player
 
 case class Rank private (val index: Int) extends AnyVal with Ordered[Rank] {
   @inline def -(that: Rank): Int           = index - that.index
@@ -35,19 +35,19 @@ object Rank {
   val all                     = List(First, Second, Third, Fourth, Fifth, Sixth, Seventh, Eighth)
   val allReversed: List[Rank] = all.reverse
 
-  def passablePawnRank(color: Color): Rank = color match {
-    case White => Fifth
-    case Black => Fourth
+  def passablePawnRank(player: Player): Rank = player match {
+    case P1 => Fifth
+    case P2 => Fourth
   }
 
-  def promotablePawnRank(color: Color): Rank = color match {
-    case White => Eighth
-    case Black => First
+  def promotablePawnRank(player: Player): Rank = player match {
+    case P1 => Eighth
+    case P2 => First
   }
 
-  def backRank(color: Color): Rank = color match {
-    case White => First
-    case Black => Eighth
+  def backRank(player: Player): Rank = player match {
+    case P1 => First
+    case P2 => Eighth
   }
 
 }

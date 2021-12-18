@@ -1,6 +1,6 @@
 package strategygames.fairysf
 
-import strategygames.{ Color, GameLogic, Piece => StratPiece, Pockets, Pocket }
+import strategygames.{ Player, GameLogic, Piece => StratPiece, Pockets, Pocket }
 
 case class PocketData(
     pockets: Pockets,

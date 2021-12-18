@@ -620,9 +620,9 @@ object StartingPosition {
         ),
         StartingPosition(
           "D00",
-          "Blackmar Gambit",
+          "P2mar Gambit",
           FEN("rnbqkbnr/ppp1pppp/8/3p4/3PP3/8/PPP2PPP/RNBQKBNR b KQkq - 0 2"),
-          "Blackmar–Diemer_Gambit",
+          "P2mar–Diemer_Gambit",
           "1. d4 d5 2. e4"
         ),
         StartingPosition(

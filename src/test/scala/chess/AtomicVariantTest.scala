@@ -2,7 +2,7 @@ package strategygames.chess
 
 import cats.syntax.option._
 
-import strategygames.{ Black, Color, Status, White }
+import strategygames.{ P2, Player, Status, P1 }
 import strategygames.chess.variant.Atomic
 import strategygames.chess.format.FEN
 
@@ -67,7 +67,7 @@ class AtomicVariantTest extends ChessTest {
         winningGame.situation.end must beTrue
         winningGame.situation.variantEnd must beTrue
         winningGame.situation.winner must beSome.like { case winner =>
-          winner == Black
+          winner == P2
         }
       }
     }
@@ -81,7 +81,7 @@ class AtomicVariantTest extends ChessTest {
       gameWin must beValid.like { case winningGame =>
         winningGame.situation.end must beTrue
         winningGame.situation.variantEnd must beFalse
-        winningGame.situation.winner must beSome.like { case color => color == Black }
+        winningGame.situation.winner must beSome.like { case player => player == P2 }
       }
     }
 
@@ -282,8 +282,8 @@ class AtomicVariantTest extends ChessTest {
 
       successGame must beValid.like { case game =>
         game.situation.end must beTrue
-        game.situation.winner must beSome.like { case color =>
-          color == Black
+        game.situation.winner must beSome.like { case player =>
+          player == P2
         }
       }
     }
@@ -417,7 +417,7 @@ class AtomicVariantTest extends ChessTest {
       }
     }
 
-    "Not draw inappropriately on two bishops (of both square colors)" in {
+    "Not draw inappropriately on two bishops (of both square players)" in {
       val position = FEN("8/5k2/8/8/8/8/4pK2/5b2 b - - 1 44")
       val game     = fenToGame(position, Atomic)
       val newGame = game flatMap (_.playMove(
@@ -445,7 +445,7 @@ class AtomicVariantTest extends ChessTest {
       }
     }
 
-    "Not draw inappropriately on three bishops (of both square colors)" in {
+    "Not draw inappropriately on three bishops (of both square players)" in {
       val position = FEN("8/5k2/8/8/8/8/4pKB1/5B2 b - - 1 44")
       val game     = fenToGame(position, Atomic)
       val newGame = game flatMap (_.playMove(
@@ -459,7 +459,7 @@ class AtomicVariantTest extends ChessTest {
       }
     }
 
-    "Not draw inappropriately on three bishops (of both square colors)" in {
+    "Not draw inappropriately on three bishops (of both square players)" in {
       val position = FEN("8/5k2/8/8/8/8/4pKB1/6B1 b - - 1 44")
       val game     = fenToGame(position, Atomic)
       val newGame = game flatMap (_.playMove(
@@ -515,7 +515,7 @@ class AtomicVariantTest extends ChessTest {
       }
     }
 
-    "Not draw inappropriately on three knights (of two colors)" in {
+    "Not draw inappropriately on three knights (of two players)" in {
       val position = FEN("8/5k2/8/8/8/8/4pKN1/6N1 b - - 1 44")
       val game     = fenToGame(position, Atomic)
       val newGame = game flatMap (_.playMove(
@@ -529,7 +529,7 @@ class AtomicVariantTest extends ChessTest {
       }
     }
 
-    "Not draw inappropriately on three knights (of two colors)" in {
+    "Not draw inappropriately on three knights (of two players)" in {
       val position = FEN("8/5k2/8/8/8/8/4pKN1/6n1 b - - 1 44")
       val game     = fenToGame(position, Atomic)
       val newGame = game flatMap (_.playMove(
@@ -543,7 +543,7 @@ class AtomicVariantTest extends ChessTest {
       }
     }
 
-    "Not draw inappropriately on three knights (of the same color)" in {
+    "Not draw inappropriately on three knights (of the same player)" in {
       val position = FEN("8/5k2/8/8/8/8/4pKn1/6n1 b - - 1 44")
       val game     = fenToGame(position, Atomic)
       val newGame = game flatMap (_.playMove(
@@ -563,8 +563,8 @@ class AtomicVariantTest extends ChessTest {
       val newGame  = game flatMap (_.playMove(Pos.E1, Pos.C1))
 
       newGame must beValid.like { case game =>
-        game.board(Pos.C1) must beEqualTo(King.white.some)
-        game.board(Pos.D1) must beEqualTo(Rook.white.some)
+        game.board(Pos.C1) must beEqualTo(King.p1.some)
+        game.board(Pos.D1) must beEqualTo(Rook.p1.some)
       }
     }
 

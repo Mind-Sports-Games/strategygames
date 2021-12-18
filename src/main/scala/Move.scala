@@ -26,7 +26,7 @@ abstract sealed class Move(
 
   def promotes = promotion.isDefined
 
-  def color = piece.color
+  def player = piece.player
 
   def toUci: Uci.Move
   //only used by draughts but making available for all

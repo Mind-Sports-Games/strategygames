@@ -1,6 +1,6 @@
 package strategygames.chess.format
 
-import strategygames.Color
+import strategygames.Player
 
 final case class FEN(value: String) extends AnyVal {
 
@@ -8,12 +8,12 @@ final case class FEN(value: String) extends AnyVal {
 
   def fullMove: Option[Int] = value.split(' ').lift(5).flatMap(_.toIntOption)
 
-  def color: Option[Color] =
-    value.split(' ').lift(1) flatMap (_.headOption) flatMap Color.apply
+  def player: Option[Player] =
+    value.split(' ').lift(1) flatMap (_.headOption) flatMap Player.apply
 
   def ply: Option[Int] =
     fullMove map { fm =>
-      fm * 2 - (if (color.exists(_.white)) 2 else 1)
+      fm * 2 - (if (player.exists(_.p1)) 2 else 1)
     }
 
   def initial = value == Forsyth.initial.value

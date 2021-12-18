@@ -3,16 +3,16 @@ package format
 
 import cats.implicits._
 
-import strategygames.Color
+import strategygames.Player
 
 import variant.{ Standard, Variant }
 
 /** Transform a game to draughts Forsyth Edwards Notation
   * https://en.wikipedia.org/wiki/Portable_Draughts_Notation
   * Additions:
-  * Piece role G/P = Ghost man or king of that color, has been captured but not removed because the forced capture sequence is not finished yet
+  * Piece role G/P = Ghost man or king of that player, has been captured but not removed because the forced capture sequence is not finished yet
   * ":Hx" = Halfmove clock: This is the number of halfmoves since a forced draw material combination appears. This is used to determine if a draw can be claimed.
-  * ":Fx" = Fullmove number: The number of the full move. It starts at 1, and is incremented after Black's move.
+  * ":Fx" = Fullmove number: The number of the full move. It starts at 1, and is incremented after P2's move.
   */
 object Forsyth {
 
@@ -25,9 +25,9 @@ object Forsyth {
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] =
     makeBoard(variant, fen) map { board =>
-      val situation = Color.apply(fen.value.charAt(0)) match {
-        case Some(color) => Situation(board, color)
-        case _           => Situation(board, White)
+      val situation = Player.apply(fen.value.charAt(0)) match {
+        case Some(player) => Situation(board, player)
+        case _           => Situation(board, P1)
       }
 
       situation withHistory {
@@ -47,7 +47,7 @@ object Forsyth {
 
   case class SituationPlus(situation: Situation, fullMoveNumber: Int) {
 
-    def turns = fullMoveNumber * 2 - (if (situation.color.white) 2 else 1)
+    def turns = fullMoveNumber * 2 - (if (situation.player.p1) 2 else 1)
 
   }
 
@@ -72,9 +72,9 @@ object Forsyth {
     str.split('+').filter(_.nonEmpty).map(_.toList) match {
       case Array(w, b) if (w.length == 1 || w.length == 3) && (b.length == 1 || b.length == 3) =>
         for {
-          white <- parseIntOption(w.head.toString) if white <= 3
-          black <- parseIntOption(b.head.toString) if black <= 3
-        } yield KingMoves(black, white, pos.posAt(b.tail.mkString), pos.posAt(w.tail.mkString))
+          p1 <- parseIntOption(w.head.toString) if p1 <= 3
+          p2 <- parseIntOption(b.head.toString) if p2 <= 3
+        } yield KingMoves(p2, p1, pos.posAt(b.tail.mkString), pos.posAt(w.tail.mkString))
       case _ => None
     }
   }
@@ -89,17 +89,17 @@ object Forsyth {
       val allFields = new scala.collection.mutable.ArrayBuffer[(Pos, Piece)]
       for (line <- fenPieces) {
         if (line.nonEmpty)
-          Color.apply(line.charAt(0)).foreach { color =>
+          Player.apply(line.charAt(0)).foreach { player =>
             val fields = if (line.endsWith(".")) line.substring(1, line.length - 1) else line.drop(1)
             for (field <- fields.split(',')) {
               if (field.nonEmpty)
                 field.charAt(0) match {
-                  case 'K' => posAt(field.drop(1)).foreach { pos => allFields.+=((pos, Piece(color, King))) }
+                  case 'K' => posAt(field.drop(1)).foreach { pos => allFields.+=((pos, Piece(player, King))) }
                   case 'G' =>
-                    posAt(field.drop(1)).foreach { pos => allFields.+=((pos, Piece(color, GhostMan))) }
+                    posAt(field.drop(1)).foreach { pos => allFields.+=((pos, Piece(player, GhostMan))) }
                   case 'P' =>
-                    posAt(field.drop(1)).foreach { pos => allFields.+=((pos, Piece(color, GhostKing))) }
-                  case _ => posAt(field).foreach { pos => allFields.+=((pos, Piece(color, Man))) }
+                    posAt(field.drop(1)).foreach { pos => allFields.+=((pos, Piece(player, GhostKing))) }
+                  case _ => posAt(field).foreach { pos => allFields.+=((pos, Piece(player, Man))) }
                 }
             }
           }
@@ -115,7 +115,7 @@ object Forsyth {
 
   def countGhosts(fen: FEN): Int =
     fen.value.split(':').filter(_.nonEmpty).foldLeft(0) { (ghosts, line) =>
-      Color.apply(line.charAt(0)).fold(ghosts) { _ =>
+      Player.apply(line.charAt(0)).fold(ghosts) { _ =>
         line.drop(1).split(',').foldLeft(ghosts) { (lineGhosts, field) =>
           if (field.nonEmpty && "GP".indexOf(field.charAt(0)) != -1) lineGhosts + 1 else lineGhosts
         }
@@ -124,7 +124,7 @@ object Forsyth {
 
   def countKings(fen: FEN): Int =
     fen.value.split(':').filter(_.nonEmpty).foldLeft(0) { (kings, line) =>
-      Color.apply(line.charAt(0)).fold(kings) { _ =>
+      Player.apply(line.charAt(0)).fold(kings) { _ =>
         line.drop(1).split(',').foldLeft(kings) { (lineKings, field) =>
           if (field.nonEmpty && field.charAt(0) == 'K') lineKings + 1 else lineKings
         }
@@ -154,23 +154,23 @@ object Forsyth {
   }
 
   def exportStandardPositionTurn(board: Board, ply: Int): String = List(
-    Color(ply % 2 == 0).letter,
+    Player(ply % 2 == 0).letter,
     exportBoard(board)
   ) mkString ":"
 
   def exportKingMoves(board: Board) = board.history.kingMoves match {
-    case KingMoves(white, black, whiteKing, blackKing) =>
-      s"+$black${blackKing.fold("")(_.toString)}+$white${whiteKing.fold("")(_.toString)}"
+    case KingMoves(p1, p2, p1King, p2King) =>
+      s"+$p2${p2King.fold("")(_.toString)}+$p1${p1King.fold("")(_.toString)}"
   }
 
   def exportBoard(board: Board, algebraic: Boolean = false): String = {
     val fenW = new scala.collection.mutable.StringBuilder(60)
     val fenB = new scala.collection.mutable.StringBuilder(60)
-    fenW.append(White.letter)
-    fenB.append(Black.letter)
+    fenW.append(P1.letter)
+    fenB.append(P2.letter)
     for (f <- 1 to board.boardSize.fields) {
       board(f).foreach { piece =>
-        if (piece is White) {
+        if (piece is P1) {
           if (fenW.length > 1) fenW append ','
           if (piece isNot Man) fenW append piece.forsyth
           if (algebraic) board.boardSize.pos.algebraic(f) foreach fenW.append
@@ -188,11 +188,11 @@ object Forsyth {
     fenW.toString
   }
 
-  def boardAndColor(situation: Situation): String =
-    boardAndColor(situation.board, situation.color)
+  def boardAndPlayer(situation: Situation): String =
+    boardAndPlayer(situation.board, situation.player)
 
-  def boardAndColor(board: Board, turnColor: Color): String =
-    s"${turnColor.letter.toUpper}:${exportBoard(board)}"
+  def boardAndPlayer(board: Board, turnPlayer: Player): String =
+    s"${turnPlayer.letter.toUpper}:${exportBoard(board)}"
 
   def compressedBoard(board: Board): String = {
     def posAt(f: Int) = board.boardSize.pos.posAt(f)
@@ -208,7 +208,7 @@ object Forsyth {
     fenB.append('0')
     for (f <- 1 to board.boardSize.fields) {
       board(f).foreach { piece =>
-        if (piece is White) {
+        if (piece is P1) {
           if (piece isNot Man) fenW append roleId(piece)
           fenW append posAt(f).get.piotr
         } else {
@@ -224,14 +224,14 @@ object Forsyth {
   def exportScanPosition(sit: Option[Situation]): String = sit.fold("") { situation =>
     val fields = situation.board.boardSize.fields
     val pos    = new scala.collection.mutable.StringBuilder(fields + 1)
-    pos.append(situation.color.letter.toUpper)
+    pos.append(situation.player.letter.toUpper)
 
     for (f <- 1 to fields) {
       situation.board(f) match {
-        case Some(Piece(White, Man))  => pos append 'w'
-        case Some(Piece(Black, Man))  => pos append 'b'
-        case Some(Piece(White, King)) => pos append 'W'
-        case Some(Piece(Black, King)) => pos append 'B'
+        case Some(Piece(P1, Man))  => pos append 'w'
+        case Some(Piece(P2, Man))  => pos append 'b'
+        case Some(Piece(P1, King)) => pos append 'W'
+        case Some(Piece(P2, King)) => pos append 'B'
         case _                        => pos append 'e'
       }
     }
@@ -246,11 +246,11 @@ object Forsyth {
   def getFullMove(fen: FEN): Option[Int] =
     fen.value.split(':') filter (s => s.length > 1 && s.charAt(0) == 'F') lift 0 flatMap parseIntOption
 
-  def getColor(fen: FEN): Option[Color] = fen.value lift 0 flatMap Color.apply
+  def getPlayer(fen: FEN): Option[Player] = fen.value lift 0 flatMap Player.apply
 
   def getPly(fen: FEN): Option[Int] =
     getFullMove(fen) map { fullMove =>
-      fullMove * 2 - (if (getColor(fen).exists(_.white)) 2 else 1)
+      fullMove * 2 - (if (getPlayer(fen).exists(_.p1)) 2 else 1)
     }
 
 }

@@ -1,6 +1,6 @@
 package strategygames.draughts
 
-import strategygames.Color
+import strategygames.Player
 
 import scala.annotation.tailrec
 
@@ -24,11 +24,11 @@ case class Actor(
   def getCaptures(finalSquare: Boolean) = if (finalSquare) capturesFinal else captures
 
   private def noncaptureMoves(): List[Move] = piece.role match {
-    case Man => shortRangeMoves(board.variant.moveDirsColor(color))
+    case Man => shortRangeMoves(board.variant.moveDirsPlayer(player))
     case King =>
       if (
         board.variant.frisianVariant && board.history
-          .kingMoves(color) >= 3 && board.history.kingMoves.kingPos(color).fold(true)(_ == pos)
+          .kingMoves(player) >= 3 && board.history.kingMoves.kingPos(player).fold(true)(_ == pos)
       ) Nil
       else longRangeMoves(board.variant.moveDirsAll)
     case _ => Nil
@@ -40,8 +40,8 @@ case class Actor(
     case _    => Nil
   }
 
-  def color: Color          = piece.color
-  def is(c: Color): Boolean = c == piece.color
+  def player: Player          = piece.player
+  def is(c: Player): Boolean = c == piece.player
   def is(p: Piece): Boolean = p == piece
 
   def onLongDiagonal: Boolean =
@@ -86,7 +86,7 @@ case class Actor(
     piece = piece,
     orig = pos,
     dest = dest,
-    situationBefore = Situation(board, piece.color),
+    situationBefore = Situation(board, piece.player),
     after = after,
     capture = capture.map(List(_)),
     taken = taken.map(List(_))
@@ -106,7 +106,7 @@ case class Actor(
     piece = piece,
     orig = pos,
     dest = dest,
-    situationBefore = Situation(board, piece.color),
+    situationBefore = Situation(board, piece.player),
     after = after,
     capture = Some(capture),
     taken = Some(taken),

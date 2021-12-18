@@ -22,19 +22,19 @@ object Hash {
 
   abstract sealed class ZobristConstants {
     def hexToLong(s: String): Long
-    val whiteTurnMask: Long
+    val p1TurnMask: Long
     val actorMasks: Array[Long]
   }
 
   final case class ChessZobristConstants(zc: chess.Hash.ZobristConstants) extends ZobristConstants {
     def hexToLong(s: String): Long = zc.hexToLong(s)
-    val whiteTurnMask: Long        = zc.whiteTurnMask
+    val p1TurnMask: Long        = zc.p1TurnMask
     val actorMasks: Array[Long]    = zc.actorMasks 
   }
 
   final case class DraughtsZobristConstants(zc: draughts.Hash.ZobristConstants) extends ZobristConstants {
     def hexToLong(s: String): Long = zc.hexToLong(s)
-    val whiteTurnMask: Long        = zc.whiteTurnMask
+    val p1TurnMask: Long        = zc.p1TurnMask
     val actorMasks: Array[Long]    = zc.actorMasks 
   }
 

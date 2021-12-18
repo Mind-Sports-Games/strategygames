@@ -81,8 +81,8 @@ case class Tags(value: List[Tag]) extends AnyVal {
   def exists(which: Tag.type => TagType): Boolean =
     value.exists(_.name == which(Tag))
 
-  def resultColor: Option[Option[Color]] =
-    apply(_.Result).filter("*" !=).map(v => {strategygames.Color.fromResult(v)})
+  def resultPlayer: Option[Option[Player]] =
+    apply(_.Result).filter("*" !=).map(v => {strategygames.Player.fromResult(v)})
 
   def ++(tags: Tags) = tags.value.foldLeft(this)(_ + _)
 
@@ -106,8 +106,8 @@ object Tags {
     Tag.Site,
     Tag.Date,
     Tag.Round,
-    Tag.White,
-    Tag.Black,
+    Tag.P1,
+    Tag.P2,
     Tag.Result
   )
   val tagIndex: Map[TagType, Int] = sevenTagRoster.zipWithIndex.toMap
@@ -128,21 +128,21 @@ object Tag {
     val format = DateTimeFormat forPattern "HH:mm:ss" withZone DateTimeZone.UTC
   }
   case object Round           extends TagType
-  case object White           extends TagType
-  case object Black           extends TagType
+  case object P1           extends TagType
+  case object P2           extends TagType
   case object TimeControl     extends TagType
-  case object WhiteClock      extends TagType
-  case object BlackClock      extends TagType
-  case object WhiteElo        extends TagType
-  case object BlackElo        extends TagType
-  case object WhiteRating     extends TagType
-  case object BlackRating     extends TagType
-  case object WhiteRatingDiff extends TagType
-  case object BlackRatingDiff extends TagType
-  case object WhiteTitle      extends TagType
-  case object BlackTitle      extends TagType
-  case object WhiteTeam       extends TagType
-  case object BlackTeam       extends TagType
+  case object P1Clock      extends TagType
+  case object P2Clock      extends TagType
+  case object P1Elo        extends TagType
+  case object P2Elo        extends TagType
+  case object P1Rating     extends TagType
+  case object P2Rating     extends TagType
+  case object P1RatingDiff extends TagType
+  case object P2RatingDiff extends TagType
+  case object P1Title      extends TagType
+  case object P2Title      extends TagType
+  case object P1Team       extends TagType
+  case object P2Team       extends TagType
   case object Result          extends TagType
   case object FEN             extends TagType
   case object Variant         extends TagType
@@ -164,21 +164,21 @@ object Tag {
     UTCDate,
     UTCTime,
     Round,
-    White,
-    Black,
+    P1,
+    P2,
     TimeControl,
-    WhiteClock,
-    BlackClock,
-    WhiteElo,
-    BlackElo,
-    WhiteRating,
-    BlackRating,
-    WhiteRatingDiff,
-    BlackRatingDiff,
-    WhiteTitle,
-    BlackTitle,
-    WhiteTeam,
-    BlackTeam,
+    P1Clock,
+    P2Clock,
+    P1Elo,
+    P2Elo,
+    P1Rating,
+    P2Rating,
+    P1RatingDiff,
+    P2RatingDiff,
+    P1Title,
+    P2Title,
+    P1Team,
+    P2Team,
     Result,
     FEN,
     Variant,

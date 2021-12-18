@@ -1,13 +1,13 @@
 package strategygames.draughts.format
 
-import strategygames.Color
+import strategygames.Player
 
 final case class FEN(value: String) extends AnyVal {
 
   override def toString = value
 
-  def color: Option[Color] =
-    value.split(':').lift(0) flatMap (_.headOption) flatMap Color.apply
+  def player: Option[Player] =
+    value.split(':').lift(0) flatMap (_.headOption) flatMap Player.apply
 
   def initial = value == Forsyth.initial.value
 

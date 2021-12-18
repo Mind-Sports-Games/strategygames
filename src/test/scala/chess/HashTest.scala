@@ -125,7 +125,7 @@ class HashTest extends ChessTest {
         .toOption
         .get
 
-      // we reach the same position, but now the pawn is in blacks pocket
+      // we reach the same position, but now the pawn is in p2s pocket
       val gameB = intermediate(Uci.Drop(Pawn, D6)).toOption.get._1
         .playMoves(
           D7 -> D6,
@@ -140,7 +140,7 @@ class HashTest extends ChessTest {
     }
 
     "be consistent in crazyhouse" in {
-      // from https://lichess.org/j4r7XHTB/black
+      // from https://lichess.org/j4r7XHTB/p2
       val fen           = FEN("r2qkb1r/ppp1pppp/2n2n2/3p2B1/3P2b1/4PN2/PPP1BPPP/RN1QK2R/ b KQkq - 9 5")
       val situation     = ((format.Forsyth << fen) get) withVariant Crazyhouse
       val move          = situation.move(Pos.G4, Pos.F3, None).toOption.get

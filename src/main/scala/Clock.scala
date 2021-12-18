@@ -5,27 +5,27 @@ import cats.syntax.option.none
 // All unspecified durations are expressed in seconds
 case class Clock(
     config: Clock.Config,
-    color: Color,
-    players: Color.Map[ClockPlayer],
+    player: Player,
+    players: Player.Map[ClockPlayer],
     timer: Option[Timestamp] = None,
     timestamper: Timestamper = RealTimestamper
 ) {
   import timestamper.{ now, toNow }
 
-  @inline def timerFor(c: Color) = if (c == color) timer else None
+  @inline def timerFor(c: Player) = if (c == player) timer else None
 
-  @inline def pending(c: Color) = timerFor(c).fold(Centis(0))(toNow)
+  @inline def pending(c: Player) = timerFor(c).fold(Centis(0))(toNow)
 
-  def remainingTime(c: Color) = (players(c).remaining - pending(c)) nonNeg
+  def remainingTime(c: Player) = (players(c).remaining - pending(c)) nonNeg
 
-  def outOfTime(c: Color, withGrace: Boolean) =
+  def outOfTime(c: Player, withGrace: Boolean) =
     players(c).remaining <=
       timerFor(c).fold(Centis(0)) { t =>
         if (withGrace) (toNow(t) - (players(c).lag.quota atMost Centis(200))) nonNeg
         else toNow(t)
       }
 
-  def moretimeable(c: Color) = players(c).remaining.centis < 100 * 60 * 60 * 2
+  def moretimeable(c: Player) = players(c).remaining.centis < 100 * 60 * 60 * 2
 
   def isRunning = timer.isDefined
 
@@ -34,19 +34,19 @@ case class Clock(
   def stop =
     timer.fold(this) { t =>
       copy(
-        players = players.update(color, _.takeTime(toNow(t))),
+        players = players.update(player, _.takeTime(toNow(t))),
         timer = None
       )
     }
 
   def hardStop = copy(timer = None)
 
-  def updatePlayer(c: Color)(f: ClockPlayer => ClockPlayer) =
+  def updatePlayer(c: Player)(f: ClockPlayer => ClockPlayer) =
     copy(players = players.update(c, f))
 
   def switch =
     copy(
-      color = !color,
+      player = !player,
       timer = timer.map(_ => now)
     )
 
@@ -57,21 +57,21 @@ case class Clock(
     (timer match {
       case None =>
         metrics.clientLag.fold(this) { l =>
-          updatePlayer(color) { _.recordLag(l) }
+          updatePlayer(player) { _.recordLag(l) }
         }
       case Some(t) =>
         val elapsed = toNow(t)
         val lag     = ~metrics.reportedLag(elapsed) nonNeg
 
-        val player              = players(color)
-        val (lagComp, lagTrack) = player.lag.onMove(lag)
+        val competitor         = players(player)
+        val (lagComp, lagTrack) = competitor.lag.onMove(lag)
 
         val moveTime = (elapsed - lagComp) nonNeg
 
-        val clockActive = gameActive && moveTime < player.remaining
-        val inc         = clockActive ?? player.increment
+        val clockActive = gameActive && moveTime < competitor.remaining
+        val inc         = clockActive ?? competitor.increment
 
-        val newC = updatePlayer(color) {
+        val newC = updatePlayer(player) {
           _.takeTime(moveTime - inc)
             .copy(lag = lagTrack)
         }
@@ -80,31 +80,31 @@ case class Clock(
     }).switch
 
   // To do: safely add this to takeback to remove inc from player.
-  // def deinc = updatePlayer(color, _.giveTime(-incrementOf(color)))
+  // def deinc = updatePlayer(player, _.giveTime(-incrementOf(player)))
 
   def takeback = switch
 
-  def giveTime(c: Color, t: Centis) =
+  def giveTime(c: Player, t: Centis) =
     updatePlayer(c) {
       _.giveTime(t)
     }
 
-  def setRemainingTime(c: Color, centis: Centis) =
+  def setRemainingTime(c: Player, centis: Centis) =
     updatePlayer(c) {
       _.setRemaining(centis)
     }
 
-  def incrementOf(c: Color) = players(c).increment
+  def incrementOf(c: Player) = players(c).increment
 
-  def goBerserk(c: Color) = updatePlayer(c) { _.copy(berserk = true) }
+  def goBerserk(c: Player) = updatePlayer(c) { _.copy(berserk = true) }
 
-  def berserked(c: Color) = players(c).berserk
-  def lag(c: Color)       = players(c).lag
+  def berserked(c: Player) = players(c).berserk
+  def lag(c: Player)       = players(c).lag
 
   def lagCompAvg = players map { ~_.lag.compAvg } reduce (_ avg _)
 
   // Lowball estimate of next move's lag comp for UI butter.
-  def lagCompEstimate(c: Color) = players(c).lag.compEstimate
+  def lagCompEstimate(c: Player) = players(c).lag.compEstimate
 
   def estimateTotalSeconds = config.estimateTotalSeconds
   def estimateTotalTime    = config.estimateTotalTime
@@ -213,8 +213,8 @@ object Clock {
     val player = ClockPlayer.withConfig(config)
     Clock(
       config = config,
-      color = Color.White,
-      players = Color.Map(player, player),
+      player = Player.P1,
+      players = Player.Map(player, player),
       timer = None
     )
   }

@@ -16,7 +16,7 @@ abstract sealed class Drop(
 
   def finalizeAfter: Board
 
-  def color = piece.color
+  def player = piece.player
 
   def toUci: Uci.Drop
 

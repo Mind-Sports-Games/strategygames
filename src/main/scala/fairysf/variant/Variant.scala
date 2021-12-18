@@ -6,7 +6,7 @@ import scala.annotation.nowarn
 
 import strategygames.fairysf._
 import strategygames.fairysf.format.{ FEN, Forsyth, Uci }
-import strategygames.{ Color, GameFamily }
+import strategygames.{ Player, GameFamily }
 
 case class FairySFName(val name: String)
 
@@ -31,7 +31,7 @@ abstract class Variant private[variant] (
   def fenVariant: Boolean  = false
   def aiVariant: Boolean   = true
 
-  def whiteIsBetterVariant: Boolean = false
+  def p1IsBetterVariant: Boolean = false
   def blindModeVariant: Boolean     = true
 
   def materialImbalanceVariant: Boolean = false
@@ -47,7 +47,7 @@ abstract class Variant private[variant] (
 
   def pieces: Map[Pos, Piece] = Api.pieceMapFromFen(fairysfName.name, initialFen.value)
 
-  def startColor: Color = White
+  def startPlayer: Player = P1
 
   val kingPiece: Role
 
@@ -103,7 +103,7 @@ abstract class Variant private[variant] (
         val uciMove = s"${role.forsyth}@${dest.key}"
         val newPosition = situation.board.apiPosition.makeMoves(List(uciMove))
         Drop(
-          piece = Piece(situation.color, role),
+          piece = Piece(situation.player, role),
           pos = dest,
           situationBefore = situation,
           after = situation.board.copy(
@@ -160,9 +160,9 @@ abstract class Variant private[variant] (
 
   // In most variants, the winner is the last player to have played
   // perpetual is the opposite. would need to recheck this for new variants
-  def winner(situation: Situation): Option[Color] =
-    if (situation.checkMate || specialEnd(situation)) Option(!situation.color)
-    else if (situation.perpetual) Option(situation.color)
+  def winner(situation: Situation): Option[Player] =
+    if (situation.checkMate || specialEnd(situation)) Option(!situation.player)
+    else if (situation.perpetual) Option(situation.player)
     else None
 
   @nowarn def specialEnd(situation: Situation) = false
@@ -172,9 +172,9 @@ abstract class Variant private[variant] (
   /** Returns the material imbalance in pawns (overridden in Antichess)
     */
   def materialImbalance(board: Board): Int =
-    board.pieces.values.foldLeft(0) { case (acc, Piece(color, role)) =>
+    board.pieces.values.foldLeft(0) { case (acc, Piece(player, role)) =>
       Role.valueOf(role).fold(acc) { value =>
-        acc + value * color.fold(1, -1)
+        acc + value * player.fold(1, -1)
       }
     }
 
@@ -216,7 +216,7 @@ abstract class Variant private[variant] (
       }
       .to(Map)
 
-  def isUnmovedPawn(color: Color, pos: Pos) = pos.rank == color.fold(Rank.Second, Rank.Seventh)
+  def isUnmovedPawn(player: Player, pos: Pos) = pos.rank == player.fold(Rank.Second, Rank.Seventh)
 
   override def toString = s"Variant($name)"
 

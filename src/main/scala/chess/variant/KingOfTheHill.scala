@@ -20,7 +20,7 @@ case object KingOfTheHill
   private val center = Set(Pos.D4, Pos.D5, Pos.E4, Pos.E5)
 
   override def specialEnd(situation: Situation) =
-    situation.board.kingPosOf(!situation.color) exists center.contains
+    situation.board.kingPosOf(!situation.player) exists center.contains
 
   /** You only need a king to be able to win in this variant
     */

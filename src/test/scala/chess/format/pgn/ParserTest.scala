@@ -38,17 +38,17 @@ class ParserTest extends ChessTest {
       }
     }
     "in tags" in {
-      parser(whiteResignsInTags) must beValid.like { case parsed =>
+      parser(p1ResignsInTags) must beValid.like { case parsed =>
         parsed.tags("Result") must_== Option("0-1")
       }
     }
     "in moves" in {
-      parser(whiteResignsInMoves) must beValid.like { case parsed =>
+      parser(p1ResignsInMoves) must beValid.like { case parsed =>
         parsed.tags("Result") must_== Option("0-1")
       }
     }
     "in tags and moves" in {
-      parser(whiteResignsInTagsAndMoves) must beValid.like { case parsed =>
+      parser(p1ResignsInTagsAndMoves) must beValid.like { case parsed =>
         parsed.tags("Result") must_== Option("0-1")
       }
     }
@@ -159,23 +159,23 @@ class ParserTest extends ChessTest {
   "inline tags" in {
     parser(inlineTags) must beValid.like { case a =>
       a.tags.value must contain { (tag: Tag) =>
-        tag.name == Tag.White && tag.value == "Blazquez, Denis"
+        tag.name == Tag.P1 && tag.value == "Blazquez, Denis"
       }
     }
   }
 
   "tag with nested quotes" in {
-    parser("""[Black "Schwarzenegger, Arnold \"The Terminator\""]""") must beValid.like { case a =>
+    parser("""[P2 "Schwarzenegger, Arnold \"The Terminator\""]""") must beValid.like { case a =>
       a.tags.value must contain { (tag: Tag) =>
-        tag.name == Tag.Black && tag.value == """Schwarzenegger, Arnold "The Terminator""""
+        tag.name == Tag.P2 && tag.value == """Schwarzenegger, Arnold "The Terminator""""
       }
     }
   }
 
   "tag with inner brackets" in {
-    parser("""[Black "[=0040.34h5a4]"]""") must beValid.like { case a =>
+    parser("""[P2 "[=0040.34h5a4]"]""") must beValid.like { case a =>
       a.tags.value must contain { (tag: Tag) =>
-        tag.name == Tag.Black && tag.value == "[=0040.34h5a4]"
+        tag.name == Tag.P2 && tag.value == "[=0040.34h5a4]"
       }
     }
   }

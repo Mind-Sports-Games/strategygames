@@ -12,7 +12,7 @@ class PromotionTest extends ChessTest {
     val board = """
   p
 K      """
-    val game  = Game(board, Black)
+    val game  = Game(board, P2)
     "promote to a queen" in {
       game.playMove(C2, C1, Queen.some) must beGame("""
 
@@ -33,7 +33,7 @@ K n    """)
         """
   p
 K  R""",
-        Black
+        P2
       ).playMove(C2, D1) must beGame("""
 
 K  q""")
@@ -43,12 +43,12 @@ K  q""")
         """
   p
 K  R""",
-        Black
+        P2
       ).playMove(C2, D1, Knight.some) must beGame("""
 
 K  n""")
     }
-    "promote to a whiteknight" in {
+    "promote to a p1knight" in {
       Game("""
 
 P

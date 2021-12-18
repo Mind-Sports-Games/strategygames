@@ -4,7 +4,7 @@ import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
-import strategygames.{ Color, Game => StratGame, Move => StratMove, MoveOrDrop, Situation => StratSituation }
+import strategygames.{ Player, Game => StratGame, Move => StratMove, MoveOrDrop, Situation => StratSituation }
 import strategygames.format.pgn.{ San, Tag, Tags }
 import format.pdn.{ Parser, Reader, Std }
 import format.{ FEN, Forsyth, Uci }
@@ -153,7 +153,7 @@ object Replay {
             .fold(
               err => (Nil, err.some),
               move => {
-                val after = Situation.withColorAfter(move.afterWithLastMove(true), sit.color)
+                val after = Situation.withPlayerAfter(move.afterWithLastMove(true), sit.player)
                 val ambiguities =
                   if (move.capture.fold(false)(_.length > 1)) move.situationBefore.ambiguitiesMove(move)
                   else 0
@@ -263,7 +263,7 @@ object Replay {
       case Nil => valid(Nil)
       case san :: rest =>
         san(StratSituation.wrap(sit), finalSquare).map(draughtsMove) flatMap { move =>
-          val after = Situation.withColorAfter(move.afterWithLastMove(finalSquare), sit.color)
+          val after = Situation.withPlayerAfter(move.afterWithLastMove(finalSquare), sit.player)
           recursiveUcis(after, rest, finalSquare) map { move.toUci :: _ }
         }
     }
@@ -277,7 +277,7 @@ object Replay {
       case Nil => valid(Nil)
       case san :: rest =>
         san(StratSituation.wrap(sit), finalSquare).map(draughtsMove) flatMap { move =>
-          val after = Situation.withColorAfter(move.afterWithLastMove(finalSquare), sit.color)
+          val after = Situation.withPlayerAfter(move.afterWithLastMove(finalSquare), sit.player)
           recursiveSituations(after, rest, finalSquare) map { after :: _ }
         }
     }
@@ -291,7 +291,7 @@ object Replay {
       case Nil => valid(Nil)
       case uci :: rest =>
         uci(sit, finalSquare) andThen { move =>
-          val after = Situation.withColorAfter(move.afterWithLastMove(finalSquare), sit.color)
+          val after = Situation.withPlayerAfter(move.afterWithLastMove(finalSquare), sit.player)
           recursiveSituationsFromUci(after, rest, finalSquare) map { after :: _ }
         }
     }
@@ -387,9 +387,9 @@ object Replay {
           case san :: rest =>
             san(StratSituation.wrap(sit)).map(draughtsMove) flatMap { move =>
               val after = move.finalizeAfter()
-              val fen   = Forsyth >> DraughtsGame(Situation(after, Color.fromPly(ply)), turns = ply)
+              val fen   = Forsyth >> DraughtsGame(Situation(after, Player.fromPly(ply)), turns = ply)
               if (compareFen(fen)) Validated.valid(ply)
-              else recursivePlyAtFen(Situation.withColorAfter(after, sit.color), rest, ply + 1)
+              else recursivePlyAtFen(Situation.withPlayerAfter(after, sit.player), rest, ply + 1)
             }
         }
 

@@ -15,7 +15,7 @@ case class Drop(
 
   def before = situationBefore.board
 
-  def situationAfter = Situation(finalizeAfter, !piece.color)
+  def situationAfter = Situation(finalizeAfter, !piece.player)
 
   def withHistory(h: History) = copy(after = after withHistory h)
 
@@ -35,7 +35,7 @@ case class Drop(
     board updateHistory { h =>
       val basePositionHashes =
         if (h.positionHashes.isEmpty) Hash(situationBefore) else board.history.positionHashes
-      h.copy(positionHashes = Hash(Situation(board, !piece.color)) ++ basePositionHashes)
+      h.copy(positionHashes = Hash(Situation(board, !piece.player)) ++ basePositionHashes)
     }
   }
 
@@ -46,7 +46,7 @@ case class Drop(
       none
     )
 
-  def color = piece.color
+  def player = piece.player
 
   def withAfter(newBoard: Board) = copy(after = newBoard)
 

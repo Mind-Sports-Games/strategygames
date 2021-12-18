@@ -1,6 +1,6 @@
 package strategygames.chess
 
-import strategygames.{ Color, GameLogic, Piece => StratPiece, Pocket, Pockets }
+import strategygames.{ Player, GameLogic, Piece => StratPiece, Pocket, Pockets }
 
 case class PocketData(
     pockets: Pockets,
@@ -20,7 +20,7 @@ case class PocketData(
     copy(
       pockets = pockets.store(
         GameLogic.Chess(),
-        StratPiece.Chess(if (promoted(from)) Piece(piece.color, Pawn) else piece)
+        StratPiece.Chess(if (promoted(from)) Piece(piece.player, Pawn) else piece)
       ),
       promoted = promoted - from
     )

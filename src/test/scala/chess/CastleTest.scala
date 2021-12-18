@@ -9,14 +9,14 @@ class CastleTest extends ChessTest {
     val goodHist = """
 PPPPPPPP
 R  QK  R"""
-    val badHist  = goodHist updateHistory (_ withoutCastles White)
+    val badHist  = goodHist updateHistory (_ withoutCastles P1)
     "impossible" in {
       "standard chess" in {
         "near bishop in the way" in {
-          goodHist place (Bishop.white, F1) flatMap (_ destsFrom E1) must bePoss()
+          goodHist place (Bishop.p1, F1) flatMap (_ destsFrom E1) must bePoss()
         }
         "distant knight in the way" in {
-          goodHist place (Knight.white, G1) flatMap (_ destsFrom E1) must bePoss(F1)
+          goodHist place (Knight.p1, G1) flatMap (_ destsFrom E1) must bePoss(F1)
         }
         "not allowed by history" in {
           badHist destsFrom E1 must bePoss(F1)
@@ -25,18 +25,18 @@ R  QK  R"""
       "chess960" in {
         val board960 = """
 PPPPPPPP
-RQK   R """.chess960 withHistory History.castle(White, kingSide = true, queenSide = true)
+RQK   R """.chess960 withHistory History.castle(P1, kingSide = true, queenSide = true)
         "near bishop in the way" in {
-          board960 place (Bishop.white, D1) flatMap (_ destsFrom C1) must bePoss()
+          board960 place (Bishop.p1, D1) flatMap (_ destsFrom C1) must bePoss()
         }
         "distant knight in the way" in {
-          board960 place (Knight.white, F1) flatMap (_ destsFrom C1) must bePoss(D1)
+          board960 place (Knight.p1, F1) flatMap (_ destsFrom C1) must bePoss(D1)
         }
       }
     }
     "possible" in {
       "standard" in {
-        val game = Game(goodHist, White)
+        val game = Game(goodHist, P1)
         "viable moves" in {
           game.board destsFrom E1 must bePoss(F1, G1, H1)
         }
@@ -50,7 +50,7 @@ R  Q RK """)
         val board: Board = """
    PPPPP
 B     KR""".chess960
-        val game         = Game(board, White)
+        val game         = Game(board, P1)
         "viable moves" in {
           board destsFrom G1 must bePoss(F1, H1)
         }
@@ -72,7 +72,7 @@ RKRBB   """.chess960
         val board: Board = """
 PPPPPPPP
 RK     B""".chess960
-        val game         = Game(board, White)
+        val game         = Game(board, P1)
         "viable moves" in {
           board destsFrom B1 must bePoss(A1, C1)
         }
@@ -82,7 +82,7 @@ PPPPPPPP
   KR   B""")
         }
       }
-      "chess960 close queenside as black" in {
+      "chess960 close queenside as p2" in {
         val game = Game(
           """
  b rkr q
@@ -93,7 +93,7 @@ p pppppp
 
 
  K""".chess960,
-          Black
+          P2
         )
         "viable moves" in {
           game.board destsFrom E8 must bePoss(D8, F8)
@@ -123,7 +123,7 @@ R     NP
  KNQRB""",
             FromPosition
           ),
-          Black
+          P2
         )
         "dests" in {
           game.board destsFrom B8 must bePoss(A8, C8, E8)
@@ -136,23 +136,23 @@ R     NP
     val goodHist = """
 PPPPPPPP
 R   KB R"""
-    val badHist  = goodHist updateHistory (_ withoutCastles White)
+    val badHist  = goodHist updateHistory (_ withoutCastles P1)
     "impossible" in {
       "near queen in the way" in {
-        goodHist place (Queen.white, D1) flatMap (_ destsFrom E1) must bePoss()
+        goodHist place (Queen.p1, D1) flatMap (_ destsFrom E1) must bePoss()
       }
       "bishop in the way" in {
-        goodHist place (Bishop.white, C1) flatMap (_ destsFrom E1) must bePoss(D1)
+        goodHist place (Bishop.p1, C1) flatMap (_ destsFrom E1) must bePoss(D1)
       }
       "distant knight in the way" in {
-        goodHist place (Knight.white, C1) flatMap (_ destsFrom E1) must bePoss(D1)
+        goodHist place (Knight.p1, C1) flatMap (_ destsFrom E1) must bePoss(D1)
       }
       "not allowed by history" in {
         badHist destsFrom E1 must bePoss(D1)
       }
     }
     "possible" in {
-      val game = Game(goodHist, White)
+      val game = Game(goodHist, P1)
       "viable moves" in {
         game.board destsFrom E1 must bePoss(A1, C1, D1)
       }
@@ -167,8 +167,8 @@ PPPPPPPP
   "impact history" in {
     val board = """
 PPPPPPPP
-R   K  R""" withHistory History.castle(White, kingSide = true, queenSide = true)
-    val game  = Game(board, White)
+R   K  R""" withHistory History.castle(P1, kingSide = true, queenSide = true)
+    val game  = Game(board, P1)
     "if king castles kingside" in {
       val g2 = game.playMove(E1, G1)
       "correct new board" in {
@@ -205,28 +205,28 @@ PPPPPPPP
     }
     "if king moves" in {
       "to the right" in {
-        val g2 = game.playMove(E1, F1) map (_ as White)
+        val g2 = game.playMove(E1, F1) map (_ as P1)
         "cannot castle anymore" in {
           g2.toOption flatMap (_.board destsFrom F1) must bePoss(E1, G1)
         }
         "neither if the king comes back" in {
-          val g3 = g2 flatMap (_.playMove(F1, E1)) map (_ as White)
+          val g3 = g2 flatMap (_.playMove(F1, E1)) map (_ as P1)
           g3.toOption flatMap (_.board destsFrom E1) must bePoss(D1, F1)
         }
       }
       "to the left" in {
-        val g2 = game.playMove(E1, D1) map (_ as White)
+        val g2 = game.playMove(E1, D1) map (_ as P1)
         "cannot castle anymore" in {
           g2.toOption flatMap (_.board destsFrom D1) must bePoss(C1, E1)
         }
         "neither if the king comes back" in {
-          val g3 = g2 flatMap (_.playMove(D1, E1)) map (_ as White)
+          val g3 = g2 flatMap (_.playMove(D1, E1)) map (_ as P1)
           g3.toOption flatMap (_.board destsFrom E1) must bePoss(D1, F1)
         }
       }
     }
     "if kingside rook moves" in {
-      val g2 = game.playMove(H1, G1) map (_ as White)
+      val g2 = game.playMove(H1, G1) map (_ as P1)
       "can only castle queenside" in {
         g2.toOption flatMap (_.board destsFrom E1) must bePoss(C1, D1, F1, A1)
       }
@@ -238,7 +238,7 @@ PPPPPPPP
       }
     }
     "if queenside rook moves" in {
-      val g2 = game.playMove(A1, B1) map (_ as White)
+      val g2 = game.playMove(A1, B1) map (_ as P1)
       "can only castle kingside" in {
         g2.toOption flatMap (_.board destsFrom E1) must bePoss(D1, F1, G1, H1)
       }
@@ -253,39 +253,39 @@ PPPPPPPP
   "threat on king prevents castling" in {
     val board: Board = """R   K  R"""
     "by a rook" in {
-      board place (Rook.black, E3) flatMap (_ destsFrom E1) must bePoss(D1, D2, F2, F1)
+      board place (Rook.p2, E3) flatMap (_ destsFrom E1) must bePoss(D1, D2, F2, F1)
     }
     "by a knight" in {
-      board place (Knight.black, D3) flatMap (_ destsFrom E1) must bePoss(D1, D2, E2, F1)
+      board place (Knight.p2, D3) flatMap (_ destsFrom E1) must bePoss(D1, D2, E2, F1)
     }
   }
   "threat on castle trip prevents castling" in {
     "king side" in {
       val board: Board = """R  QK  R"""
       "close" in {
-        board place (Rook.black, F3) flatMap (_ destsFrom E1) must bePoss(D2, E2)
+        board place (Rook.p2, F3) flatMap (_ destsFrom E1) must bePoss(D2, E2)
       }
       "far" in {
-        board place (Rook.black, G3) flatMap (_ destsFrom E1) must bePoss(D2, E2, F2, F1)
+        board place (Rook.p2, G3) flatMap (_ destsFrom E1) must bePoss(D2, E2, F2, F1)
       }
     }
     "queen side" in {
       val board: Board = """R   KB R"""
       "close" in {
-        board place (Rook.black, D3) flatMap (_ destsFrom E1) must bePoss(E2, F2)
+        board place (Rook.p2, D3) flatMap (_ destsFrom E1) must bePoss(E2, F2)
       }
       "far" in {
-        board place (Rook.black, C3) flatMap (_ destsFrom E1) must bePoss(D1, D2, E2, F2)
+        board place (Rook.p2, C3) flatMap (_ destsFrom E1) must bePoss(D1, D2, E2, F2)
       }
     }
     "chess 960" in {
       "far kingside" in {
         val board: Board = """BK     R"""
         "rook threat" in {
-          board place (Rook.black, F3) flatMap (_ destsFrom B1) must bePoss(A2, B2, C2, C1)
+          board place (Rook.p2, F3) flatMap (_ destsFrom B1) must bePoss(A2, B2, C2, C1)
         }
         "enemy king threat" in {
-          board place (King.black, E2) flatMap (_ destsFrom B1) must bePoss(A2, B2, C2, C1)
+          board place (King.p2, E2) flatMap (_ destsFrom B1) must bePoss(A2, B2, C2, C1)
         }
       }
     }
@@ -293,7 +293,7 @@ PPPPPPPP
   "threat on rook does not prevent castling" in {
     "king side" in {
       val board: Board = """R  QK  R"""
-      board place (Rook.black, H3) flatMap (_ destsFrom E1) must bePoss(
+      board place (Rook.p2, H3) flatMap (_ destsFrom E1) must bePoss(
         D2,
         E2,
         F1,
@@ -304,7 +304,7 @@ PPPPPPPP
     }
     "queen side" in {
       val board: Board = """R   KB R"""
-      board place (Rook.black, A3) flatMap (_ destsFrom E1) must bePoss(
+      board place (Rook.p2, A3) flatMap (_ destsFrom E1) must bePoss(
         A1,
         C1,
         D1,

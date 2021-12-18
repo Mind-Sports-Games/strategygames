@@ -1,7 +1,7 @@
 package strategygames.draughts
 package variant
 
-import strategygames.Color
+import strategygames.Player
 
 import format.FEN
 
@@ -31,7 +31,7 @@ case object Russian
   override val openingTables = List(OpeningTable.tableFMJD, OpeningTable.tableIDFBasic)
 
   def captureDirs   = Standard.captureDirs
-  def moveDirsColor = Standard.moveDirsColor
+  def moveDirsPlayer = Standard.moveDirsPlayer
   def moveDirsAll   = Standard.moveDirsAll
 
   override def validMoves(situation: Situation, finalSquare: Boolean = false): Map[Pos, List[Move]] = {
@@ -54,7 +54,7 @@ case object Russian
 
   override def shortRangeCaptures(actor: Actor, finalSquare: Boolean): List[Move] = {
     val buf   = new ArrayBuffer[Move]
-    val color = actor.color
+    val player = actor.player
 
     def walkCaptures(
         walkDir: Direction,
@@ -67,11 +67,11 @@ case object Russian
     ): Int =
       walkDir._2(curPos).fold(0) { nextPos =>
         curBoard(nextPos) match {
-          case Some(captPiece) if captPiece.isNot(color) && !captPiece.isGhost =>
+          case Some(captPiece) if captPiece.isNot(player) && !captPiece.isGhost =>
             walkDir._2(nextPos) match {
               case Some(landingPos) if curBoard(landingPos).isEmpty =>
                 val takingBoard = curBoard.takingUnsafe(curPos, landingPos, actor.piece, nextPos, captPiece)
-                val promotion   = promotablePos(landingPos, color)
+                val promotion   = promotablePos(landingPos, player)
                 val boardAfter =
                   if (promotion) takingBoard.promote(landingPos).getOrElse(takingBoard) else takingBoard
                 val promoted   = if (promotion) Some(King) else None
@@ -185,7 +185,7 @@ case object Russian
                 allSquares,
                 allTaken
               )
-            case Some(captPiece) if captPiece.isNot(actor.color) && !captPiece.isGhost =>
+            case Some(captPiece) if captPiece.isNot(actor.player) && !captPiece.isGhost =>
               walkDir._2(nextPos) match {
                 case Some(landingPos) if curBoard(landingPos).isEmpty =>
                   val boardAfter = curBoard.takingUnsafe(curPos, landingPos, newPiece, nextPos, captPiece)
@@ -275,27 +275,27 @@ case object Russian
   ): Board = {
     if (remainingCaptures > 0) board
     else {
-      val whiteActors = board.actorsOf(Color.White)
-      val blackActors = board.actorsOf(Color.Black)
-      val whiteKings  = whiteActors.count(_.piece is King)
-      val blackKings  = blackActors.count(_.piece is King)
-      val whitePieces = whiteActors.size
-      val blackPieces = blackActors.size
+      val p1Actors = board.actorsOf(Player.P1)
+      val p2Actors = board.actorsOf(Player.P2)
+      val p1Kings  = p1Actors.count(_.piece is King)
+      val p2Kings  = p2Actors.count(_.piece is King)
+      val p1Pieces = p1Actors.size
+      val p2Pieces = p2Actors.size
       def loneKing(strongPieces: Int, strongKings: Int, weakKing: Actor) =
         strongPieces == 3 && strongKings >= 1 && weakKing.onLongDiagonal && board.piecesOnLongDiagonal == 1
-      val whiteLoneKing =
-        if (whiteKings == 1 && whitePieces == 1 && blackKings >= 1) {
-          loneKing(blackPieces, blackKings, whiteActors.head)
+      val p1LoneKing =
+        if (p1Kings == 1 && p1Pieces == 1 && p2Kings >= 1) {
+          loneKing(p2Pieces, p2Kings, p1Actors.head)
         } else false
-      val blackLoneKing =
-        if (blackKings == 1 && blackPieces == 1 && whiteKings >= 1) {
-          loneKing(whitePieces, whiteKings, blackActors.head)
+      val p2LoneKing =
+        if (p2Kings == 1 && p2Pieces == 1 && p1Kings >= 1) {
+          loneKing(p1Pieces, p1Kings, p2Actors.head)
         } else false
-      if (whiteLoneKing || blackLoneKing) {
+      if (p1LoneKing || p2LoneKing) {
         board updateHistory { h =>
           // "abuse" kingmove counter to count the amount of moves made on the long
           // diagonal by the side with a lone king against 3 (see 7.2.7)
-          h.withKingMove(Color(whiteLoneKing), None, true)
+          h.withKingMove(Player(p1LoneKing), None, true)
         } withoutGhosts
       } else board.withoutGhosts
     }
@@ -318,15 +318,15 @@ case object Russian
 
   // (drawingMoves, resetOnNonKingMove, allowPromotion, first promotion: promotes this turn and has only one king)
   private def drawingMoves(board: Board, move: Option[Move]): Option[(Int, Boolean, Boolean, Boolean)] = {
-    val whiteActors    = board.actorsOf(Color.White).filterNot(_.piece.isGhost)
-    val blackActors    = board.actorsOf(Color.Black).filterNot(_.piece.isGhost)
-    val whiteKings     = whiteActors.count(_.piece is King)
-    val blackKings     = blackActors.count(_.piece is King)
-    val whitePieces    = whiteActors.size
-    val blackPieces    = blackActors.size
-    def firstPromotion = move.exists(m => m.promotes && m.color.fold(whiteKings == 1, blackKings == 1))
+    val p1Actors    = board.actorsOf(Player.P1).filterNot(_.piece.isGhost)
+    val p2Actors    = board.actorsOf(Player.P2).filterNot(_.piece.isGhost)
+    val p1Kings     = p1Actors.count(_.piece is King)
+    val p2Kings     = p2Actors.count(_.piece is King)
+    val p1Pieces    = p1Actors.size
+    val p2Pieces    = p2Actors.size
+    def firstPromotion = move.exists(m => m.promotes && m.player.fold(p1Kings == 1, p2Kings == 1))
 
-    def singleKing(strongPieces: Int, strongKings: Int, weakKing: Actor, weakColor: Color) = {
+    def singleKing(strongPieces: Int, strongKings: Int, weakKing: Actor, weakPlayer: Player) = {
       // weak side:   pieces == 1, kings == 1
       // strong side: pieces <= 2, kings >= 1
       //    7.2.8 => 5
@@ -341,7 +341,7 @@ case object Russian
       else if (
         strongPieces == 3 && strongKings >= 1 && weakKing.onLongDiagonal && board.piecesOnLongDiagonal == 1
       ) {
-        if (board.history.kingMoves(weakColor) >= 10)
+        if (board.history.kingMoves(weakPlayer) >= 10)
           Some(
             10,
             false,
@@ -359,15 +359,15 @@ case object Russian
       else None
     }
     val singleKingDraw =
-      if (whiteKings == 1 && whitePieces == 1 && blackKings >= 1) {
-        singleKing(blackPieces, blackKings, whiteActors.head, Color.white)
-      } else if (blackKings == 1 && blackPieces == 1 && whiteKings >= 1) {
-        singleKing(whitePieces, whiteKings, blackActors.head, Color.black)
+      if (p1Kings == 1 && p1Pieces == 1 && p2Kings >= 1) {
+        singleKing(p2Pieces, p2Kings, p1Actors.head, Player.p1)
+      } else if (p2Kings == 1 && p2Pieces == 1 && p1Kings >= 1) {
+        singleKing(p1Pieces, p1Kings, p2Actors.head, Player.p2)
       } else None
 
     if (singleKingDraw.isDefined) singleKingDraw
-    else if (blackKings >= 1 && whiteKings >= 1) {
-      val totalPieces = blackPieces + whitePieces
+    else if (p2Kings >= 1 && p1Kings >= 1) {
+      val totalPieces = p2Pieces + p1Pieces
       if (totalPieces == 6 || totalPieces == 7)
         Some(120, false, false, false) // 7.2.6: "6-and 7-pieces endings"
       else if (totalPieces == 4 || totalPieces == 5)
@@ -389,7 +389,7 @@ case object Russian
     * 7.2.9. ... excluding case when the game is obvious and the player can continue to demonstrate the victory :S ...
     */
   def updatePositionHashes(board: Board, move: Move, hash: strategygames.draughts.PositionHash): PositionHash = {
-    val newHash = Hash(Situation(board, !move.piece.color))
+    val newHash = Hash(Situation(board, !move.piece.player))
     drawingMoves(board, move.some) match {
       case Some((drawingMoves, resetOnNonKingMove, allowPromotion, firstPromotion)) =>
         if (
@@ -413,10 +413,10 @@ case object Russian
     }
   }
 
-  override def validSide(board: Board, strict: Boolean)(color: Color) = {
-    val roles = board rolesOf color
+  override def validSide(board: Board, strict: Boolean)(player: Player) = {
+    val roles = board rolesOf player
     (roles.count(_ == Man) > 0 || roles.count(_ == King) > 0) &&
     (!strict || roles.size <= 12) &&
-    !menOnPromotionRank(board, color)
+    !menOnPromotionRank(board, player)
   }
 }

@@ -4,7 +4,7 @@ import org.playstrategy.FairyStockfish
 
 import cats.implicits._
 
-import strategygames.{ Color, GameFamily, Pocket, Pockets }
+import strategygames.{ Player, GameFamily, Pocket, Pockets }
 import strategygames.fairysf.format.{ FEN, Uci }
 import strategygames.fairysf.variant.Variant
 
@@ -100,10 +100,10 @@ object Api {
       if (variant.dropsVariant)
         PocketData(
           Pockets(
-            Pocket(piecesInHand.filter(_.color == White).toList.map(
+            Pocket(piecesInHand.filter(_.player == P1).toList.map(
               p => strategygames.Role.FairySFRole(p.role)
             )),
-            Pocket(piecesInHand.filter(_.color == Black).toList.map(
+            Pocket(piecesInHand.filter(_.player == P2).toList.map(
               p => strategygames.Role.FairySFRole(p.role)
             ))
           ),
@@ -165,7 +165,7 @@ object Api {
 
   private def pieceFromFSPiece(piece: FairyStockfish.Piece, gf: GameFamily): Piece =
     Piece(
-      Color.all(piece.color()),
+      Player.all(piece.color()),
       if (piece.promoted) Role.promotionMap(Role.allByFairySFID(gf)(piece.pieceInfo().id))
       else Role.allByFairySFID(gf)(piece.pieceInfo().id)
     )

@@ -84,22 +84,22 @@ object Glyph {
   object PositionAssessment {
     val equal               = new Glyph(10, "=", "Equal position") with PositionAssessment
     val unclear             = new Glyph(13, "∞", "Unclear position") with PositionAssessment
-    val whiteSlightlyBetter = new Glyph(14, "⩲", "White is slightly better") with PositionAssessment
-    val blackSlightlyBetter = new Glyph(15, "⩱", "Black is slightly better") with PositionAssessment
-    val whiteQuiteBetter    = new Glyph(16, "±", "White is better") with PositionAssessment
-    val blackQuiteBetter    = new Glyph(17, "∓", "Black is better") with PositionAssessment
-    val whiteMuchBetter     = new Glyph(18, "+−", "White is winning") with PositionAssessment
-    val blackMuchBetter     = new Glyph(19, "-+", "Black is winning") with PositionAssessment
+    val p1SlightlyBetter = new Glyph(14, "⩲", "P1 is slightly better") with PositionAssessment
+    val p2SlightlyBetter = new Glyph(15, "⩱", "P2 is slightly better") with PositionAssessment
+    val p1QuiteBetter    = new Glyph(16, "±", "P1 is better") with PositionAssessment
+    val p2QuiteBetter    = new Glyph(17, "∓", "P2 is better") with PositionAssessment
+    val p1MuchBetter     = new Glyph(18, "+−", "P1 is winning") with PositionAssessment
+    val p2MuchBetter     = new Glyph(19, "-+", "P2 is winning") with PositionAssessment
 
     val all = List(
       equal,
       unclear,
-      whiteSlightlyBetter,
-      blackSlightlyBetter,
-      whiteQuiteBetter,
-      blackQuiteBetter,
-      whiteMuchBetter,
-      blackMuchBetter
+      p1SlightlyBetter,
+      p2SlightlyBetter,
+      p1QuiteBetter,
+      p2QuiteBetter,
+      p1MuchBetter,
+      p2MuchBetter
     )
     val byId: Map[Int, Glyph] = all
       .map { g =>

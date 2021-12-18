@@ -1,24 +1,24 @@
 package strategygames
 
-abstract sealed class Piece(val color: Color, val role: Role) {
+abstract sealed class Piece(val player: Player, val role: Role) {
 
-  def is(c: Color)    = c == color
+  def is(c: Player)    = c == player
   def is(r: Role)     = r == role
-  def isNot(c: Color) = c != color
+  def isNot(c: Player) = c != player
   def isNot(r: Role)  = r != role
 
   def oneOf(rs: Set[Role]) = rs(role)
 
   def forsyth: Char
 
-  override def toString = s"$color-$role".toLowerCase
+  override def toString = s"$player-$role".toLowerCase
 
 }
 
 object Piece {
 
   final case class Chess(p: chess.Piece) extends Piece(
-    p.color,
+    p.player,
     Role.ChessRole(p.role)
   ) {
 
@@ -27,7 +27,7 @@ object Piece {
   }
 
   final case class Draughts(p: draughts.Piece) extends Piece(
-    p.color,
+    p.player,
     Role.DraughtsRole(p.role)
   ){
 
@@ -36,7 +36,7 @@ object Piece {
   }
 
   final case class FairySF(p: fairysf.Piece) extends Piece(
-    p.color,
+    p.player,
     Role.FairySFRole(p.role)
   ){
 
@@ -44,10 +44,10 @@ object Piece {
 
   }
 
-  def apply(lib: GameLogic, color: Color, role: Role): Piece = (lib, role) match {
-    case (GameLogic.Draughts(), Role.DraughtsRole(role)) => Draughts(draughts.Piece(color, role))
-    case (GameLogic.Chess(), Role.ChessRole(role))       => Chess(chess.Piece(color, role))
-    case (GameLogic.FairySF(), Role.FairySFRole(role))   => FairySF(fairysf.Piece(color, role))
+  def apply(lib: GameLogic, player: Player, role: Role): Piece = (lib, role) match {
+    case (GameLogic.Draughts(), Role.DraughtsRole(role)) => Draughts(draughts.Piece(player, role))
+    case (GameLogic.Chess(), Role.ChessRole(role))       => Chess(chess.Piece(player, role))
+    case (GameLogic.FairySF(), Role.FairySFRole(role))   => FairySF(fairysf.Piece(player, role))
     case _ => sys.error("Mismatched gamelogic types 2")
   }
 
