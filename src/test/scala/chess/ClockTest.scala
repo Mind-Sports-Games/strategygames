@@ -25,30 +25,30 @@ class ClockTest extends ChessTest {
   "play with a clock" should {
     val clock = Clock(Clock.Config(5 * 60 * 1000, 0))
     val game  = makeGame withClock clock.start
-    "new game" in {
-      game.clock map { _.player } must_== Option(P1)
-    }
-    "one move played" in {
-      game.playMoves(E2 -> E4) must beValid.like { case g: Game =>
-        g.clock map { _.player } must_== Option(P2)
+      "new game" in {
+        game.clock map { _.player } must_== Option(P1)
+      }
+      "one move played" in {
+        game.playMoves(E2 -> E4) must beValid.like { case g: strategygames.chess.Game =>
+          g.clock map { _.player } must_== Option(P2)
+        }
       }
     }
-  }
-  "create a clock" should {
-    "with time" in {
-      Clock(Clock.Config(60, 10)).limitSeconds must_== 60
+    "create a clock" should {
+      "with time" in {
+        Clock(Clock.Config(60, 10)).limitSeconds must_== 60
+      }
+      "with increment" in {
+        Clock(Clock.Config(60, 10)).incrementSeconds must_== 10
+      }
+      "with few time" in {
+        Clock(Clock.Config(0, 10)).limitSeconds must_== 0
+      }
+      "with 30 seconds" in {
+        Clock(Clock.Config(30, 0)).limitInMinutes must_== 0.5
+      }
     }
-    "with increment" in {
-      Clock(Clock.Config(60, 10)).incrementSeconds must_== 10
-    }
-    "with few time" in {
-      Clock(Clock.Config(0, 10)).limitSeconds must_== 0
-    }
-    "with 30 seconds" in {
-      Clock(Clock.Config(30, 0)).limitInMinutes must_== 0.5
-    }
-  }
-  "lag compensation" should {
+    "lag compensation" should {
     def durOf(lag: Int) = MoveMetrics(clientLag = Option(Centis(lag)))
 
     def clockStep(clock: Clock, wait: Int, lags: Int*) = {

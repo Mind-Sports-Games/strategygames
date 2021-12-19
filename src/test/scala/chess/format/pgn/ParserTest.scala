@@ -330,7 +330,7 @@ class ParserTest extends ChessTest {
 
   "weird variant names" in {
     parser(stLouisFischerandom) must beValid.like { case parsed =>
-      parsed.tags.variant must_== Option(variant.Chess960)
+      parsed.tags.variant must_== Option(strategygames.variant.Variant.wrap(strategygames.chess.variant.Chess960))
     }
   }
 
