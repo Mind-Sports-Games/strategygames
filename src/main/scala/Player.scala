@@ -81,8 +81,8 @@ object Player {
     else None
 
   def apply(c: Char): Option[Player] =
-    if (c == '1' || c == '1') Some(P1)
-    else if (c == '2' || c == '2') Some(P2)
+    if (c == '1' || c == 'w' || c == 'W') Some(P1)
+    else if (c == '2' || c == 'b' || c == 'B') Some(P2)
     else None
 
   val p1: Player = P1
