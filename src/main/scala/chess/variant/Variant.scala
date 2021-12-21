@@ -132,6 +132,8 @@ abstract class Variant private[variant] (
 
   def checkmate(situation: Situation) = situation.check && situation.moves.isEmpty
 
+  def stalemateIsDraw = true
+
   // In most variants, the winner is the last player to have played and there is a possibility of either a traditional
   // checkmate or a variant end condition
   def winner(situation: Situation): Option[Color] =

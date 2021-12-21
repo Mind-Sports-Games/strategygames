@@ -39,7 +39,7 @@ case class Situation(board: Board, color: Color) {
 
   def perpetual: Boolean = result == GameResult.Perpetual()
 
-  def staleMate: Boolean = result == GameResult.Draw() && gameEnd
+  def staleMate: Boolean = result == GameResult.Stalemate()
 
   private def variantEnd = result == GameResult.VariantEnd()
 
