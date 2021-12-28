@@ -39,7 +39,7 @@ object Parser {
         splitted <- splitTagAndMoves(preprocessed)
         tagStr  = splitted._1
         moveStr = splitted._2
-        preTags     <- TagParser(tagStr)
+        preTags     <- TagParser(tagStr.pp("tagStr"))
         parsedMoves <- MovesParser(moveStr)
         init         = parsedMoves._1
         strMoves     = parsedMoves._2
@@ -380,7 +380,7 @@ object Parser {
         }
       }
 
-    val tagName: Parser[String] = "[" ~> """[a-zA-Z]+""".r
+    val tagName: Parser[String] = "[" ~> """[a-zA-Z12]+""".r
 
     val tagValue: Parser[String] = """"(?:[^"\\]|\\.)*"""".r <~ "]" ^^ {
       _.stripPrefix("\"").stripSuffix("\"").replace("\\\"", "\"")
