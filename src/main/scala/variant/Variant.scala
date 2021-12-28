@@ -318,14 +318,10 @@ object Variant {
       case _                             => sys.error("Not passed Draughts objects")
     }
 
-<<<<<<< HEAD
-    def winner(situation: Situation): Option[Player] = situation match {
-=======
     //stalemate not referenced in draughts
     def stalemateIsDraw: Boolean = true
 
-    def winner(situation: Situation): Option[Color] = situation match {
->>>>>>> origin/fairysf-implementation
+    def winner(situation: Situation): Option[Player] = situation match {
       case Situation.Draughts(situation) => v.winner(situation)
       case _                             => sys.error("Not passed Draughts objects")
     }
