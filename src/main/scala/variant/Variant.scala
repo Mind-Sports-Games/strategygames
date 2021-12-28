@@ -81,6 +81,8 @@ abstract class Variant(
 
   def checkmate(situation: Situation): Boolean
 
+  def stalemateIsDraw: Boolean
+
   // In most variants, the winner is the last player to have played and there is a possibility of either a traditional
   // checkmate or a variant end condition
   def winner(situation: Situation): Option[Player]
@@ -195,6 +197,8 @@ object Variant {
       case Situation.Chess(situation) => v.checkmate(situation)
       case _                          => sys.error("Not passed Chess objects")
     }
+
+    def stalemateIsDraw: Boolean = v.stalemateIsDraw
 
     def winner(situation: Situation): Option[Player] = situation match {
       case Situation.Chess(situation) => v.winner(situation)
@@ -314,7 +318,14 @@ object Variant {
       case _                             => sys.error("Not passed Draughts objects")
     }
 
+<<<<<<< HEAD
     def winner(situation: Situation): Option[Player] = situation match {
+=======
+    //stalemate not referenced in draughts
+    def stalemateIsDraw: Boolean = true
+
+    def winner(situation: Situation): Option[Color] = situation match {
+>>>>>>> origin/fairysf-implementation
       case Situation.Draughts(situation) => v.winner(situation)
       case _                             => sys.error("Not passed Draughts objects")
     }
@@ -428,6 +439,8 @@ object Variant {
       case Situation.FairySF(situation) => v.checkmate(situation)
       case _                             => sys.error("Not passed FairySF objects")
     }
+
+    def stalemateIsDraw: Boolean = v.stalemateIsDraw
 
     def winner(situation: Situation): Option[Player] = situation match {
       case Situation.FairySF(situation) => v.winner(situation)

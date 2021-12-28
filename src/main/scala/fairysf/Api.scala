@@ -12,20 +12,21 @@ sealed abstract class GameResult extends Product with Serializable
 
 object GameResult {
   final case class Checkmate()  extends GameResult
+  final case class Stalemate()  extends GameResult
   final case class Perpetual()  extends GameResult
   final case class Draw()       extends GameResult
   final case class VariantEnd() extends GameResult
   final case class Ongoing()    extends GameResult
 
-  def resultFromInt(value: Int): GameResult =
-    if (value.abs == 32000) GameResult.Checkmate()
-    //else if (value == -32000) GameResult.VariantEnd()
+  def resultFromInt(value: Int, check: Boolean): GameResult =
+    if (value.abs == 32000)
+      if (check) GameResult.Checkmate()
+      else GameResult.Stalemate()
     else if (value == 0) GameResult.Draw()
     else sys.error(s"Unknown game result: ${value}")
 
   def optionalResultFromInt(value: Int): GameResult =
     if (value == 32000) GameResult.Perpetual()
-    //else if (value == 0) GameResult.Draw()
     else GameResult.Ongoing()
 
 }
@@ -76,7 +77,7 @@ object Api {
     lazy val givesCheck: Boolean = position.givesCheck()
     lazy val isImmediateGameEnd: (Boolean, GameResult) = {
       val im = position.isImmediateGameEnd()
-      (im.get0(), GameResult.resultFromInt(im.get1()))
+      (im.get0(), GameResult.resultFromInt(im.get1(), givesCheck))
     }
     lazy val immediateGameEnd: Boolean = isImmediateGameEnd._1
     private lazy val isOptionalGameEnd = position.isOptionalGameEnd()
@@ -119,7 +120,7 @@ object Api {
 
     lazy val gameResult: GameResult =
       if (legalMoves.size == 0)
-        GameResult.resultFromInt(position.gameResult)
+        GameResult.resultFromInt(position.gameResult, givesCheck)
       else optionalGameEndResult
 
     lazy val gameEnd: Boolean =

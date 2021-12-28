@@ -158,10 +158,12 @@ abstract class Variant private[variant] (
 
   def checkmate(situation: Situation) = situation.check && situation.moves.isEmpty
 
+  def stalemateIsDraw = false
+
   // In most variants, the winner is the last player to have played
   // perpetual is the opposite. would need to recheck this for new variants
   def winner(situation: Situation): Option[Player] =
-    if (situation.checkMate || specialEnd(situation)) Option(!situation.player)
+    if (situation.checkMate || situation.staleMate) Option(!situation.player)
     else if (situation.perpetual) Option(situation.player)
     else None
 
