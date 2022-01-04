@@ -27,4 +27,10 @@ object Actor {
     Board.Draughts(a.board)
   ){}
 
+  final case class FairySF(a: fairysf.Actor) extends Actor(
+    Piece.FairySF(a.piece),
+    Pos.FairySF(a.pos),
+    Board.FairySF(a.board)
+  ){}
+
 }

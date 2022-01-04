@@ -3,18 +3,9 @@ package strategygames.format
 import cats.data.Validated
 
 import strategygames.variant.Variant
-import strategygames.{ GameLogic, MoveOrDrop, Move, Replay }
+import strategygames.{ GameLogic, MoveOrDrop, Drop, Move }
 
 object UciDump {
-
-  // a2a4, b8c6
-  def apply(lib: GameLogic, replay: Replay): List[String] = (lib, replay) match {
-    case (GameLogic.Draughts(), Replay.Draughts(replay))
-      => strategygames.draughts.format.UciDump.apply(replay)
-    case (GameLogic.Chess(), Replay.Chess(replay))
-      => strategygames.chess.format.UciDump.apply(replay)
-    case _ => sys.error("Mismatched gamelogic types 11")
-  }
 
   def apply(
     lib: GameLogic,
@@ -27,6 +18,8 @@ object UciDump {
       => strategygames.draughts.format.UciDump.apply(moves, initialFen.map(_.toDraughts), variant, finalSquare)
     case (GameLogic.Chess(), Variant.Chess(variant))
       => strategygames.chess.format.UciDump.apply(moves, initialFen.map(_.toChess), variant)
+    case (GameLogic.FairySF(), Variant.FairySF(variant))
+      => strategygames.fairysf.format.UciDump.apply(moves, initialFen.map(_.toFairySF), variant)
     case _ => sys.error("Mismatched gamelogic types 12")
   }
 
@@ -35,8 +28,12 @@ object UciDump {
       => strategygames.draughts.format.UciDump.move(variant)(mod)
     case (GameLogic.Chess(), Variant.Chess(variant), Left(Move.Chess(mod)))
       => strategygames.chess.format.UciDump.move(variant)(Left(mod))
-    case (GameLogic.Chess(), Variant.Chess(variant), mod: strategygames.chess.Drop)
+    case (GameLogic.Chess(), Variant.Chess(variant), Right(Drop.Chess(mod)))
       => strategygames.chess.format.UciDump.move(variant)(Right(mod)) 
+    case (GameLogic.FairySF(), Variant.FairySF(variant), Left(Move.FairySF(mod)))
+      => strategygames.fairysf.format.UciDump.move(variant)(Left(mod))
+    case (GameLogic.FairySF(), Variant.FairySF(variant), Right(Drop.FairySF(mod)))
+      => strategygames.fairysf.format.UciDump.move(variant)(Right(mod))
     case _ => sys.error("Mismatched gamelogic types 13")
   }
 }

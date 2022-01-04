@@ -36,6 +36,16 @@ object FullOpening {
 
   }
 
+  final case class FairySF(f: strategygames.fairysf.opening.FullOpening) extends FullOpening(
+    f.eco,
+    f.name,
+    f.fen
+  ) {
+
+    override def toString = f.toString()
+
+  }
+
   case class AtPly(opening: FullOpening, ply: Int)
 
 }

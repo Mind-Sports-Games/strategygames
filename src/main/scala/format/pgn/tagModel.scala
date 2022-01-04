@@ -48,11 +48,16 @@ case class Tags(value: List[Tag]) extends AnyVal {
       case name                                           => strategygames.chess.variant.Variant byName name
     }
 
+  def fairysfVariant: Option[strategygames.fairysf.variant.Variant] =
+    apply(_.Variant).map(_.toLowerCase).flatMap {
+      strategygames.fairysf.variant.Variant byName _
+    }
+
   // TODO: this will need to be tested. We'll want to look at the _actual_ values that
   //       come in via these tags and ensure that the order we look at them is appropriate
   def variant: Option[strategygames.variant.Variant] = chessVariant
     .map(strategygames.variant.Variant.Chess)
-    .orElse(draughtsVariant.map(strategygames.variant.Variant.Draughts))
+    .orElse(draughtsVariant.map(strategygames.variant.Variant.Draughts).orElse(fairysfVariant.map(strategygames.variant.Variant.FairySF)))
 
   def anyDate: Option[String] = apply(_.UTCDate) orElse apply(_.Date)
 
@@ -64,11 +69,14 @@ case class Tags(value: List[Tag]) extends AnyVal {
   def chessFen: Option[chess.format.FEN] = apply(_.FEN).map(strategygames.chess.format.FEN.apply)
   def draughtsFen: Option[draughts.format.FEN] = apply(_.FEN).map(strategygames.draughts.format.FEN.apply)
 
+  def fairysfFen: Option[fairysf.format.FEN] = apply(_.FEN).map(strategygames.fairysf.format.FEN.apply)
+
   def fen: Option[format.FEN] = 
-      variant match {
-        case Some(strategygames.variant.Variant.Draughts(_)) => draughtsFen.map(format.FEN.Draughts)
-        case Some(strategygames.variant.Variant.Chess(_)) => chessFen.map(format.FEN.Chess)
-      }
+     variant match {
+       case Some(strategygames.variant.Variant.Draughts(_)) => draughtsFen.map(format.FEN.Draughts)
+       case Some(strategygames.variant.Variant.Chess(_)) => chessFen.map(format.FEN.Chess)
+       case Some(strategygames.variant.Variant.FairySF(_)) => fairysfFen.map(format.FEN.FairySF)
+     }
 
   def exists(which: Tag.type => TagType): Boolean =
     value.exists(_.name == which(Tag))
