@@ -1,7 +1,7 @@
 package strategygames.chess.format
 
 import cats.implicits._
-import strategygames.Color
+import strategygames.{ Color, Pocket, Pockets }
 import strategygames.chess._
 import strategygames.chess.variant.{ Standard, Variant }
 
@@ -138,13 +138,12 @@ object Forsyth {
       if (promoted.isEmpty) board else board.withCrazyData(_.copy(promoted = promoted))
     } map { board =>
       pockets.fold(board) { str =>
-        import strategygames.chess.variant.Crazyhouse.{ Pocket, Pockets }
         val (white, black) = str.toList.flatMap(Piece.fromChar).partition(_ is White)
         board.withCrazyData(
           _.copy(
             pockets = Pockets(
-              white = Pocket(white.map(_.role)),
-              black = Pocket(black.map(_.role))
+              white = Pocket(white.map(_.role).map(strategygames.Role.ChessRole)),
+              black = Pocket(black.map(_.role).map(strategygames.Role.ChessRole))
             )
           )
         )
@@ -212,10 +211,10 @@ object Forsyth {
     }
 
   private def exportCrazyPocket(board: Board) =
-    board.crazyData match {
-      case Some(variant.Crazyhouse.Data(pockets, _)) =>
+    board.pocketData match {
+      case Some(PocketData(pockets, _)) =>
         "/" +
-          pockets.white.roles.map(_.forsythUpper).mkString +
+          pockets.white.roles.map(_.forsyth).map(_.toUpper).mkString +
           pockets.black.roles.map(_.forsyth).mkString
       case _ => ""
     }
@@ -268,7 +267,7 @@ object Forsyth {
               fen append (empty.toString + piece.forsyth)
               empty = 0
             }
-            if (piece.role != Pawn && board.crazyData.fold(false)(_.promoted.contains(Pos(x, y))))
+            if (piece.role != Pawn && board.pocketData.fold(false)(_.promoted.contains(Pos(x, y))))
               fen append '~'
         }
       }

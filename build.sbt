@@ -2,7 +2,11 @@ name := "strategygames"
 
 organization := "org.playstrategy"
 
+<<<<<<< HEAD
 version := "10.2.1-pstrat21_1"
+=======
+version := "10.2.1-pstrat23"
+>>>>>>> master
 
 scalaVersion := "2.13.5"
 
@@ -12,11 +16,17 @@ libraryDependencies ++= List(
   "org.specs2"             %% "specs2-cats"              % "4.10.0" % Test,
   "com.github.ornicar"     %% "scalalib"                 % "7.0.2",
   "joda-time"               % "joda-time"                % "2.10.10",
-  "org.typelevel"          %% "cats-core"                % "2.2.0"
+  "org.typelevel"          %% "cats-core"                % "2.2.0",
+  "org.playstrategy"        % "fairystockfish"           % "0.0.4"
 )
 
+// Explicitly add in the linux-class path
+lazy val fairystockfish = Artifact("fairystockfish", "linux-x86_64")
+libraryDependencies += "org.playstrategy"        % "fairystockfish"           % "0.0.4" artifacts(fairystockfish)
+classpathTypes ++= Set("linux-x86_64")
+
 resolvers ++= Seq(
-  "lila-maven" at "https://raw.githubusercontent.com/ornicar/lila-maven/master"
+  "lila-maven" at "https://raw.githubusercontent.com/Mind-Sports-Games/lila-maven/master"
 )
 
 scalacOptions ++= Seq(

@@ -12,6 +12,7 @@ object Forsyth {
   def initial(lib: GameLogic): FEN = lib match {
     case GameLogic.Draughts() => FEN.Draughts(draughts.format.Forsyth.initial)
     case GameLogic.Chess()    => FEN.Chess(chess.format.Forsyth.initial)
+    case GameLogic.FairySF()  => FEN.FairySF(fairysf.format.Forsyth.initial)
   }
 
   def <<@(lib: GameLogic, variant: Variant, fen: FEN): Option[Situation] =
@@ -20,6 +21,8 @@ object Forsyth {
         => draughts.format.Forsyth.<<@(variant, fen).map(Situation.Draughts)
       case (GameLogic.Chess(), Variant.Chess(variant), FEN.Chess(fen))
         => chess.format.Forsyth.<<@(variant, fen).map(Situation.Chess)
+      case (GameLogic.FairySF(), Variant.FairySF(variant), FEN.FairySF(fen))
+        => fairysf.format.Forsyth.<<@(variant, fen).map(Situation.FairySF)
       case _ => sys.error("Mismatched gamelogic types 14")
   }
 
@@ -28,6 +31,8 @@ object Forsyth {
       => draughts.format.Forsyth.<<(fen).map(Situation.Draughts)
     case (GameLogic.Chess(), FEN.Chess(fen))
       => chess.format.Forsyth.<<(fen).map(Situation.Chess)
+    case (GameLogic.FairySF(), FEN.FairySF(fen))
+      => fairysf.format.Forsyth.<<(fen).map(Situation.FairySF)
     case _ => sys.error("Mismatched gamelogic types 15")
   }
 
@@ -47,6 +52,10 @@ object Forsyth {
         => chess.format.Forsyth.<<<@(variant, fen).map(
           sp => SituationPlus(Situation.Chess(sp.situation), sp.fullMoveNumber)
         )
+      case (GameLogic.FairySF(), Variant.FairySF(variant), FEN.FairySF(fen))
+        => fairysf.format.Forsyth.<<<@(variant, fen).map(
+          sp => SituationPlus(Situation.FairySF(sp.situation), sp.fullMoveNumber)
+        )
       case _ => sys.error("Mismatched gamelogic types 16")
   }
 
@@ -57,17 +66,10 @@ object Forsyth {
     case (GameLogic.Chess(), FEN.Chess(fen))       => chess.format.Forsyth.<<<(fen).map(
       sp => SituationPlus(Situation.Chess(sp.situation), sp.fullMoveNumber)
     )
+    case (GameLogic.FairySF(), FEN.FairySF(fen))   => fairysf.format.Forsyth.<<<(fen).map(
+      sp => SituationPlus(Situation.FairySF(sp.situation), sp.fullMoveNumber)
+    )
     case _ => sys.error("Mismatched gamelogic types 17")
-  }
-
-  // only cares about pieces positions on the board (first part of FEN string)
-  def makeBoard(lib: GameLogic, variant: Variant, fen: FEN): Option[Board] =
-    (lib, variant, fen) match {
-      case (GameLogic.Draughts(), Variant.Draughts(variant), FEN.Draughts(fen))
-        => draughts.format.Forsyth.makeBoard(variant, fen).map(Board.Draughts)
-      case (GameLogic.Chess(), Variant.Chess(variant), FEN.Chess(fen))
-        => chess.format.Forsyth.makeBoard(variant, fen).map(Board.Chess)
-      case _ => sys.error("Mismatched gamelogic types 18")
   }
 
   def >>(lib: GameLogic, situation: Situation): FEN = >>(lib, SituationPlus(situation, 1))
@@ -81,6 +83,10 @@ object Forsyth {
       => FEN.Chess(chess.format.Forsyth.>>(
         chess.format.Forsyth.SituationPlus(situation, parsed.fullMoveNumber)
       ))
+    case (GameLogic.FairySF(), Situation.FairySF(situation))
+      => FEN.FairySF(fairysf.format.Forsyth.>>(
+        fairysf.format.Forsyth.SituationPlus(situation, parsed.fullMoveNumber)
+      ))
     case _ => sys.error("Mismatched gamelogic types 19")
   }
 
@@ -89,6 +95,8 @@ object Forsyth {
       => FEN.Draughts(draughts.format.Forsyth.>>(game))
     case (GameLogic.Chess(), Game.Chess(game))
       => FEN.Chess(chess.format.Forsyth.>>(game))
+    case (GameLogic.FairySF(), Game.FairySF(game))
+      => FEN.FairySF(fairysf.format.Forsyth.>>(game))
     case _ => sys.error("Mismatched gamelogic types 20")
   }
 
@@ -98,18 +106,22 @@ object Forsyth {
         => draughts.format.Forsyth.exportBoard(board, algebraic)
       case (GameLogic.Chess(), Board.Chess(board))
         => chess.format.Forsyth.exportBoard(board)
+      case (GameLogic.FairySF(), Board.FairySF(board))
+        => fairysf.format.Forsyth.exportBoard(board)
       case _ => sys.error("Mismatched gamelogic types 21")
   }
 
   def boardAndColor(lib: GameLogic, situation: Situation): String =
     boardAndColor(lib, situation.board, situation.color)
 
-  def boardAndColor(lib: GameLogic, board: Board, turnColor: Color): String =
+  private def boardAndColor(lib: GameLogic, board: Board, turnColor: Color): String =
     (lib, board) match {
       case (GameLogic.Draughts(), Board.Draughts(board))
         => draughts.format.Forsyth.boardAndColor(board, turnColor)
       case (GameLogic.Chess(), Board.Chess(board))
         => chess.format.Forsyth.boardAndColor(board, turnColor)
+      case (GameLogic.FairySF(), Board.FairySF(board))
+        => fairysf.format.Forsyth.boardAndColor(board, turnColor)
       case _ => sys.error("Mismatched gamelogic types 22")
   }
 

@@ -44,6 +44,8 @@ abstract class Variant private[variant] (
 
   def materialImbalanceVariant: Boolean = false
 
+  def dropsVariant: Boolean = false
+
   def perfId: Int
   def perfIcon: Char
 
@@ -130,6 +132,8 @@ abstract class Variant private[variant] (
   def staleMate(situation: Situation): Boolean = !situation.check && situation.moves.isEmpty
 
   def checkmate(situation: Situation) = situation.check && situation.moves.isEmpty
+
+  def stalemateIsDraw = true
 
   // In most variants, the winner is the last player to have played and there is a possibility of either a traditional
   // checkmate or a variant end condition

@@ -16,6 +16,10 @@ object FullOpeningDB {
       => strategygames.chess.opening.FullOpeningDB.findByFen(fen).map(
         FullOpening.Chess
       )
+    case (GameLogic.FairySF(), FEN.FairySF(fen))
+      => strategygames.fairysf.opening.FullOpeningDB.findByFen(fen).map(
+        FullOpening.FairySF
+      )
     case _ => sys.error("Mismatched gamelogic types full opening db")
   }
 
@@ -28,6 +32,9 @@ object FullOpeningDB {
       case GameLogic.Chess()    => strategygames.chess.opening.FullOpeningDB.search(
         moveStrs
       ).map(fo => FullOpening.AtPly(FullOpening.Chess(fo.opening), fo.ply))
+      case GameLogic.FairySF()  => strategygames.fairysf.opening.FullOpeningDB.search(
+        moveStrs
+      ).map(fo => FullOpening.AtPly(FullOpening.FairySF(fo.opening), fo.ply))
     }
 
   private def draughtsFENs(fens: Vector[FEN]): Vector[strategygames.draughts.format.FEN] =
@@ -46,6 +53,14 @@ object FullOpeningDB {
       }
     )
 
+  private def fairysfFENs(fens: Vector[FEN]): Vector[strategygames.fairysf.format.FEN] =
+    fens.flatMap(f =>
+      f match {
+        case f: FEN.FairySF => Some(f.f)
+        case _              => None
+      }
+    )
+
   def searchInFens(lib: GameLogic, fens: Vector[FEN]): Option[FullOpening] = lib match {
     case GameLogic.Draughts() => strategygames.draughts.opening.FullOpeningDB.searchInFens(
       draughtsFENs(fens).toList
@@ -53,6 +68,9 @@ object FullOpeningDB {
     case GameLogic.Chess()    => strategygames.chess.opening.FullOpeningDB.searchInFens(
       chessFENs(fens)
     ).map(FullOpening.Chess)
+    case GameLogic.FairySF()  => strategygames.fairysf.opening.FullOpeningDB.searchInFens(
+      fairysfFENs(fens)
+    ).map(FullOpening.FairySF)
   }
 
 }

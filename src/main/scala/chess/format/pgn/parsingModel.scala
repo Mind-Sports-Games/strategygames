@@ -4,7 +4,7 @@ package format.pgn
 import cats.data.Validated
 import cats.syntax.option._
 
-import strategygames.{ Move => StratMove }
+import strategygames.{ Move => StratMove, Drop => StratDrop }
 import strategygames.format.pgn.{ Metas, ParsedPgn, San, Sans, Suffixes, Tags }
 
 case class Std(
@@ -64,7 +64,7 @@ case class Drop(
     situation: strategygames.Situation,
     iteratedCapts: Boolean = false,
     forbiddenUci: Option[List[String]] = None
-  ) = drop(situation.toChess).map(StratMove.wrap)
+  ) = drop(situation.toChess).map(StratDrop.wrap).map(Right.apply)
 
   def withMetas(m: Metas) = copy(metas = m)
 

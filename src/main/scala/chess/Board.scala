@@ -2,13 +2,13 @@ package strategygames.chess
 
 import strategygames.Color
 
-import variant.{ Crazyhouse, Variant }
+import variant.Variant
 
 case class Board(
     pieces: PieceMap,
     history: History,
     variant: Variant,
-    crazyData: Option[Crazyhouse.Data] = None
+    pocketData: Option[PocketData] = None
 ) {
 
   def apply(at: Pos): Option[Piece] = pieces get at
@@ -99,19 +99,16 @@ case class Board(
 
   def withPieces(newPieces: PieceMap) = copy(pieces = newPieces)
 
-  def withVariant(v: Variant): Board = {
-    if (v == Crazyhouse)
-      copy(variant = v).ensureCrazyData
-    else
-      copy(variant = v)
-  }
+  def withVariant(v: Variant): Board =
+    if (v.dropsVariant) copy(variant = v).ensureCrazyData
+    else copy(variant = v)
 
-  def withCrazyData(data: Crazyhouse.Data)         = copy(crazyData = Option(data))
-  def withCrazyData(data: Option[Crazyhouse.Data]) = copy(crazyData = data)
-  def withCrazyData(f: Crazyhouse.Data => Crazyhouse.Data): Board =
-    withCrazyData(f(crazyData | Crazyhouse.Data.init))
+  def withCrazyData(data: PocketData)         = copy(pocketData = Option(data))
+  def withCrazyData(data: Option[PocketData]) = copy(pocketData = data)
+  def withCrazyData(f: PocketData => PocketData): Board =
+    withCrazyData(f(pocketData | PocketData.init))
 
-  def ensureCrazyData = withCrazyData(crazyData | Crazyhouse.Data.init)
+  def ensureCrazyData = withCrazyData(pocketData | PocketData.init)
 
   def unmovedRooks =
     UnmovedRooks {
@@ -206,5 +203,6 @@ object Board {
   def empty(variant: Variant): Board = Board(Nil, variant)
 
   private def variantCrazyData(variant: Variant) =
-    (variant == Crazyhouse) option Crazyhouse.Data.init
+    (variant.dropsVariant) option PocketData.init
+
 }

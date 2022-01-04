@@ -9,13 +9,13 @@ import strategygames.format.Uci
 
 abstract sealed class Situation(val board: Board, val color: Color) {
 
-  lazy val actors = board actorsOf color
-
   val moves: Map[Pos, List[Move]]
 
   val destinations: Map[Pos, List[Pos]]
 
   def drops: Option[List[Pos]]
+
+  def dropsByRole: Option[Map[Role, List[Pos]]]
 
   def history = board.history
 
@@ -25,17 +25,13 @@ abstract sealed class Situation(val board: Board, val color: Color) {
 
   def checkMate: Boolean = board.variant checkmate this
 
-  def autoDraw: Boolean = board.autoDraw || board.variant.specialDraw(this)
-
   def opponentHasInsufficientMaterial: Boolean
 
-  lazy val threefoldRepetition: Boolean = board.history.threefoldRepetition
-
-  def variantEnd = board.variant specialEnd this
+  def threefoldRepetition: Boolean
 
   def end: Boolean
 
-  def winner: Option[Color] = board.variant.winner(this)
+  def winner: Option[Color]
 
   def playable(strict: Boolean): Boolean
 
@@ -53,11 +49,9 @@ abstract sealed class Situation(val board: Board, val color: Color) {
 
   def move(uci: Uci.Move): Validated[String, Move]
 
-  def withHistory(history: History): Situation
+  def drop(role: Role, pos: Pos): Validated[String, Drop]
 
   def withVariant(variant: Variant): Situation
-
-  def unary_! : Situation
 
   def gameLogic: GameLogic
 
@@ -67,6 +61,7 @@ abstract sealed class Situation(val board: Board, val color: Color) {
   // TODO: yup, still not typesafe
   def toChess: chess.Situation
   def toDraughts: draughts.Situation
+  def toFairySF: fairysf.Situation
 
 }
 
@@ -87,13 +82,19 @@ object Situation {
 
     def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
 
+    def threefoldRepetition: Boolean = s.threefoldRepetition
+
     def end: Boolean = s.end
 
-    val destinations: Map[Pos, List[Pos]] = s.destinations.map{
+    def winner: Option[Color] = s.winner
+
+    lazy val destinations: Map[Pos, List[Pos]] = s.destinations.map{
       case (p: chess.Pos, l: List[chess.Pos]) => (Pos.Chess(p), l.map(Pos.Chess))
     }
 
     def drops: Option[List[Pos]] = s.drops.map(_.map(Pos.Chess))
+
+    def dropsByRole: Option[Map[Role, List[Pos]]] = sys.error("dropsByRole not implemented for chess")
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -118,8 +119,9 @@ object Situation {
       case _ => sys.error("Not passed Chess objects")
     }
 
-    def withHistory(history: History): Situation = history match {
-      case History.Chess(history) => Chess(s.withHistory(history))
+    def drop(role: Role, pos: Pos): Validated[String, Drop] = (role, pos) match {
+      case (Role.ChessRole(role), Pos.Chess(pos)) =>
+        s.drop(role, pos).toEither.map(d => Drop.Chess(d)).toValidated
       case _ => sys.error("Not passed Chess objects")
     }
 
@@ -139,6 +141,7 @@ object Situation {
 
     def toChess = s
     def toDraughts = sys.error("Can't make draughts situation from chess situation")
+    def toFairySF = sys.error("Can't make fairysf situation from chess situation")
   }
 
   final case class Draughts(s: draughts.Situation) extends Situation(
@@ -156,14 +159,20 @@ object Situation {
     def checkSquare = None
 
     // TODO: this probably needs to be properly implemented
-    val destinations: Map[Pos, List[Pos]] = Map()
+    lazy val destinations: Map[Pos, List[Pos]] = Map()
 
     def drops: Option[List[Pos]] = None
+
+    def dropsByRole: Option[Map[Role, List[Pos]]] = None
 
     //possibly need to do something for this
     def opponentHasInsufficientMaterial: Boolean = false
 
+    def threefoldRepetition: Boolean = s.threefoldRepetition
+
     def end: Boolean = s.end
+
+    def winner: Option[Color] = s.winner
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -200,10 +209,8 @@ object Situation {
       case _ => sys.error("Not passed Draughts objects")
     }
 
-    def withHistory(history: History): Situation = history match {
-      case History.Draughts(history) => Draughts(s.withHistory(history))
-      case _ => sys.error("Not passed Draughts objects")
-    }
+    def drop(role: Role, pos: Pos): Validated[String, Drop] =
+      sys.error("Can't do a Drop for draughts")
 
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.Draughts(variant) => Draughts(s.withVariant(variant))
@@ -221,7 +228,87 @@ object Situation {
 
     def toDraughts = s
     def toChess = sys.error("Can't make chess situation from draughts situation")
+    def toFairySF = sys.error("Can't make fairysf situation from draughts situation")
 
+  }
+
+  final case class FairySF(s: fairysf.Situation) extends Situation(
+    Board.FairySF(s.board),
+    s.color
+  ) {
+
+    lazy val moves: Map[Pos, List[Move]] = s.moves.map{
+      case (p: fairysf.Pos, l: List[fairysf.Move]) => (Pos.FairySF(p), l.map(Move.FairySF))
+    }
+
+    lazy val check: Boolean = s.check
+
+    def checkSquare = s.checkSquare.map(Pos.FairySF)
+
+    def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
+
+    def threefoldRepetition: Boolean = s.threefoldRepetition
+
+    def end: Boolean = s.end
+
+    def winner: Option[Color] = s.winner
+
+    lazy val destinations: Map[Pos, List[Pos]] = s.destinations.map{
+      case (p: fairysf.Pos, l: List[fairysf.Pos]) => (Pos.FairySF(p), l.map(Pos.FairySF))
+    }
+
+    def drops: Option[List[Pos]] = s.drops.map(_.map(Pos.FairySF))
+
+    def dropsByRole: Option[Map[Role, List[Pos]]] = s.dropsByRole.map(_.map{
+      case(r: fairysf.Role, p: List[fairysf.Pos]) => (Role.FairySFRole(r), p.map(Pos.FairySF))
+    })
+
+    def playable(strict: Boolean): Boolean = s.playable(strict)
+
+    val status: Option[Status] = s.status
+
+    def move(
+      from: Pos,
+      to: Pos,
+      promotion: Option[PromotableRole] = None,
+      finalSquare: Boolean = false,
+      forbiddenUci: Option[List[String]] = None,
+      captures: Option[List[Pos]] = None,
+      partialCaptures: Boolean = false
+    ): Validated[String, Move] = (from, to) match {
+      case (Pos.FairySF(from), Pos.FairySF(to)) =>
+        s.move(from, to, promotion.map(_.toFairySF)).toEither.map(m => Move.FairySF(m)).toValidated
+      case _ => sys.error("Not passed FairySF objects")
+    }
+
+    def move(uci: Uci.Move): Validated[String, Move] = uci match {
+      case Uci.FairySFMove(uci) => s.move(uci).toEither.map(m => Move.FairySF(m)).toValidated
+      case _ => sys.error("Not passed FairySF objects")
+    }
+
+    def drop(role: Role, pos: Pos): Validated[String, Drop] = (role, pos) match {
+      case (Role.FairySFRole(role), Pos.FairySF(pos)) =>
+        s.drop(role, pos).toEither.map(d => Drop.FairySF(d)).toValidated
+      case _ => sys.error("Not passed FairySF objects")
+    }
+
+    def withVariant(variant: Variant): Situation = variant match {
+      case Variant.FairySF(variant) => FairySF(s.withVariant(variant))
+      case _ => sys.error("Not passed FairySF objects")
+    }
+
+    def unary_! : Situation = FairySF(s.unary_!)
+
+    def copy(board: Board): Situation = FairySF(board match {
+      case Board.FairySF(board) => s.copy(board)
+      case _ => sys.error("Can't copy a fairysf situation with a non-fairysf board")
+    })
+
+    def gameLogic: GameLogic = GameLogic.FairySF()
+
+    def toFairySF = s
+    def toChess = sys.error("Can't make chess situation from fairysf situation")
+    def toDraughts = sys.error("Can't make draughts situation from fairysf situation")
   }
 
   def apply(lib: GameLogic, board: Board, color: Color): Situation = (lib, board) match {
@@ -229,6 +316,8 @@ object Situation {
       => Draughts(draughts.Situation(board, color))
     case (GameLogic.Chess(), Board.Chess(board))
       => Chess(chess.Situation(board, color))
+    case (GameLogic.FairySF(), Board.FairySF(board))
+      => FairySF(fairysf.Situation(board, color))
     case _ => sys.error("Mismatched gamelogic types 3")
   }
 
@@ -237,10 +326,13 @@ object Situation {
       => Draughts(draughts.Situation.apply(variant))
     case (GameLogic.Chess(), Variant.Chess(variant))
       => Chess(chess.Situation.apply(variant))
+    case (GameLogic.FairySF(), Variant.FairySF(variant))
+      => FairySF(fairysf.Situation.apply(variant))
     case _ => sys.error("Mismatched gamelogic types 4")
   }
 
   def wrap(s: chess.Situation) = Chess(s)
   def wrap(s: draughts.Situation) = Draughts(s)
+  def wrap(s: fairysf.Situation) = FairySF(s)
 
 }

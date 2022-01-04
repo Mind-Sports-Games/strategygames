@@ -1,5 +1,7 @@
 package strategygames.chess
 
+import strategygames.{ Black, Color, White }
+
 sealed trait Role {
   val forsyth: Char
   lazy val forsythUpper: Char = forsyth.toUpper
@@ -8,8 +10,13 @@ sealed trait Role {
   lazy val groundName         = s"${forsyth}-piece"
   val projection: Boolean
   val binaryInt: Int
+  val hashInt: Int
+  val storable: Boolean
   val dirs: Directions
   def dir(from: Pos, to: Pos): Option[Direction]
+  final def -(color: Color) = Piece(color, this)
+  final def white           = this - White
+  final def black           = this - Black
 }
 sealed trait PromotableRole extends Role
 
@@ -21,6 +28,8 @@ case object King extends PromotableRole {
   def dir(from: Pos, to: Pos) = None
   val projection              = false
   val binaryInt               = 1
+  val hashInt                 = 5
+  val storable                = false
 }
 
 case object Queen extends PromotableRole {
@@ -29,6 +38,8 @@ case object Queen extends PromotableRole {
   def dir(from: Pos, to: Pos) = Rook.dir(from, to) orElse Bishop.dir(from, to)
   val projection              = true
   val binaryInt               = 2
+  val hashInt                 = 4
+  val storable                = true
 }
 case object Rook extends PromotableRole {
   val forsyth          = 'r'
@@ -41,6 +52,8 @@ case object Rook extends PromotableRole {
     else None
   val projection = true
   val binaryInt  = 3
+  val hashInt    = 3
+  val storable   = true
 }
 case object Bishop extends PromotableRole {
   val forsyth          = 'b'
@@ -55,6 +68,8 @@ case object Bishop extends PromotableRole {
     else None
   val projection = true
   val binaryInt  = 5
+  val hashInt    = 2
+  val storable   = true
 }
 case object Knight extends PromotableRole {
   val forsyth = 'n'
@@ -71,6 +86,8 @@ case object Knight extends PromotableRole {
   def dir(from: Pos, to: Pos) = None
   val projection              = false
   val binaryInt               = 4
+  val hashInt                 = 1
+  val storable                = true
 }
 case object Pawn extends Role {
   val forsyth                 = 'p'
@@ -78,6 +95,8 @@ case object Pawn extends Role {
   def dir(from: Pos, to: Pos) = None
   val projection              = false
   val binaryInt               = 6
+  val hashInt                 = 0
+  val storable                = true
 }
 case object LOAChecker extends Role {
   val forsyth                 = 'l'
@@ -85,6 +104,8 @@ case object LOAChecker extends Role {
   def dir(from: Pos, to: Pos) = Queen.dir(from, to)
   val projection              = false
   val binaryInt               = 8
+  val hashInt                 = 6
+  val storable                = false
 }
 
 object Role {
@@ -106,6 +127,9 @@ object Role {
   val allByBinaryInt: Map[Int, Role] = all map { r =>
     (r.binaryInt, r)
   } toMap
+  val allByHashInt: Map[Int, Role] = all map { r =>
+    (r.hashInt, r)
+  } toMap
   val allPromotableByName: Map[String, PromotableRole] =
     allPromotable map { r =>
       (r.toString, r)
@@ -123,6 +147,8 @@ object Role {
 
   def binaryInt(i: Int): Option[Role] = allByBinaryInt get i
 
+  def hashInt(i: Int): Option[Role] = allByHashInt get i
+
   def promotable(c: Char): Option[PromotableRole] =
     allPromotableByForsyth get c
 
@@ -132,19 +158,23 @@ object Role {
   def promotable(name: Option[String]): Option[PromotableRole] =
     name flatMap promotable
 
+  def storable: List[Role] = all.filter(_.storable)
+
   def pgnMoveToRole(c: Char): Role =
     allByPgn.get(c) match {
       case Some(r) => r
-      case None => if (c == 'O') King else Pawn
+      case None    => if (c == 'O') King else Pawn
     }
 
   def javaSymbolToRole(s: String): Role =
-    allByPgn.get(
-      s.headOption match {    
-        case Some(c) => c    
-        case None => 'P'//JavaRole.PAWN.symbol is ""    
-      }
-    ).get
+    allByPgn
+      .get(
+        s.headOption match {
+          case Some(c) => c
+          case None    => 'P' //JavaRole.PAWN.symbol is ""
+        }
+      )
+      .get
 
   def valueOf(r: Role): Option[Int] =
     r match {

@@ -14,7 +14,6 @@ abstract class Game(
     val startedAtTurn: Int = 0
 ) {
 
-  def apply(move: Move): Game
   def apply(moveOrdrop: MoveOrDrop): Game
 
   def apply(
@@ -27,6 +26,12 @@ abstract class Game(
       partialCaptures: Boolean = false
   ): Validated[String, (Game, Move)]
 
+  def drop(
+      role: Role,
+      pos: Pos,
+      metrics: MoveMetrics = MoveMetrics()
+  ): Validated[String, (Game, Drop)]
+
   // Because I"m unsure how to properly write a single, generic copy
   // type signature, we're getting individual ones for how we use it.
   // TODO: figure out if we can properly make this generic
@@ -36,44 +41,25 @@ abstract class Game(
   def copy(situation: Situation, turns: Int): Game
   def copy(situation: Situation): Game
 
-  //def apply(uci: Uci.Move): Validated[String, (Game, Move)]
-
   def player = situation.color
 
   def board = situation.board
-
-  def isStandardInit: Boolean
-
-  def halfMoveClock: Int = board.history.halfMoveClock
 
   /** Fullmove number: The number of the full move.
     * It starts at 1, and is incremented after Black's move.
     */
   def fullMoveNumber: Int = 1 + turns / 2
 
-  def moveString = s"$fullMoveNumber${player.fold(".", "...")}"
-
-  def withBoard(b: Board): Game
-
-  def updateBoard(f: Board => Board) = withBoard(f(board))
-
-  def withPlayer(c: Color): Game
-
   def withTurns(t: Int): Game
 
   // TODO: Again, unsafe until we figure out the better design.
   def toChess: chess.Game
   def toDraughts: draughts.DraughtsGame
+  def toFairySF: fairysf.Game
 
 }
 
 object Game {
-
-  private def toChessPromotion(p: Option[PromotableRole]): Option[chess.PromotableRole] =
-    p.map(_ match {
-      case Role.ChessPromotableRole(p) => p
-      case _ => sys.error("Non-chess promotable role paired with chess objects")
-    })
 
   final case class Chess(g: chess.Game)
       extends Game(
@@ -83,6 +69,12 @@ object Game {
         g.turns,
         g.startedAtTurn
       ) {
+
+    private def toChessPromotion(p: Option[PromotableRole]): Option[chess.PromotableRole] =
+      p.map(_ match {
+        case Role.ChessPromotableRole(p) => p
+        case _ => sys.error("Non-chess promotable role paired with chess objects")
+      })
 
     def apply(
         orig: Pos,
@@ -107,11 +99,22 @@ object Game {
     }
 
     def apply(moveOrDrop: MoveOrDrop): Game =
-      moveOrDrop.fold(apply, drop => Chess(g.applyDrop(drop)))
+      moveOrDrop.fold(apply, drop => drop match {
+        case (Drop.Chess(drop)) => Chess(g.applyDrop(drop))
+        case _                  => sys.error("Not passed Chess objects")
+      })
 
-    def apply(uci: Uci.Move): Validated[String, (Game, Move)] = uci match {
-      case Uci.ChessMove(uci) => g.apply(uci).toEither.map(t => (Chess(t._1), Move.Chess(t._2))).toValidated
-      case _                  => sys.error("Not passed Chess objects")
+    def drop(
+        role: Role,
+        pos: Pos,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, Drop)] = (role, pos) match {
+      case (Role.ChessRole(role), Pos.Chess(pos)) =>
+        g.drop(role, pos, metrics)
+          .toEither
+          .map(t => (Chess(t._1), Drop.Chess(t._2)))
+          .toValidated
+      case _ => sys.error("Not passed Chess objects")
     }
 
     def copy(clock: Option[Clock]): Game = Chess(g.copy(clock = clock))
@@ -131,19 +134,11 @@ object Game {
       case _ => sys.error("Unable to copy chess game with non-chess arguments")
     }
 
-    def isStandardInit: Boolean = g.isStandardInit
-
-    def withBoard(b: Board): Game = b match {
-      case (Board.Chess(b)) => Chess(g.withBoard(b))
-      case _                => sys.error("Not passed Chess objects")
-    }
-
-    def withPlayer(c: Color): Game = Chess(g.withPlayer(c))
-
     def withTurns(t: Int): Game = Chess(g.withTurns(t))
 
     def toChess: chess.Game = g
     def toDraughts: draughts.DraughtsGame = sys.error("Can't turn a chess game into a draughts game")
+    def toFairySF: fairysf.Game = sys.error("Can't turn a chess game into a fairysf game")
 
   }
 
@@ -211,11 +206,11 @@ object Game {
     def apply(moveOrDrop: MoveOrDrop): Game =
       moveOrDrop.fold(apply, _ => sys.error("Draughts doesn't support drops"))
 
-    def apply(uci: Uci.Move): Validated[String, (Game, Move)] = uci match {
-      case Uci.DraughtsMove(uci) =>
-        g.apply(uci).toEither.map(t => (Draughts(t._1), Move.Draughts(t._2))).toValidated
-      case _ => sys.error("Not passed Draughts objects")
-    }
+    def drop(
+        role: Role,
+        pos: Pos,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, Drop)] = sys.error("Can't drop in draughts")
 
     def copy(clock: Option[Clock]): Game = Draughts(g.copy(clock = clock))
     def copy(turns: Int, startedAtTurn: Int): Game = Draughts(
@@ -233,19 +228,92 @@ object Game {
       case _ => sys.error("Unable to copy draughts game with non-draughts arguments")
     }
 
-    def isStandardInit: Boolean = g.isStandardInit
-
-    def withBoard(b: Board): Game = b match {
-      case (Board.Draughts(b)) => Draughts(g.withBoard(b))
-      case _                   => sys.error("Not passed Draughts objects")
-    }
-
-    def withPlayer(c: Color): Game = Draughts(g.withPlayer(c))
-
     def withTurns(t: Int): Game = Draughts(g.withTurns(t))
 
     def toChess: chess.Game = sys.error("Can't turn a draughts game into a chess game")
     def toDraughts: draughts.DraughtsGame = g
+    def toFairySF: fairysf.Game = sys.error("Can't turn a draughts game into a fairysf game")
+
+  }
+
+  final case class FairySF(g: fairysf.Game)
+      extends Game(
+        Situation.FairySF(g.situation),
+        g.pgnMoves,
+        g.clock,
+        g.turns,
+        g.startedAtTurn
+      ) {
+
+    private def toFairySFPromotion(p: Option[PromotableRole]): Option[fairysf.PromotableRole] =
+      p.map(_ match {
+        case Role.FairySFPromotableRole(p) => p
+        case _ => sys.error("Non-fairysf promotable role paired with fairysf objects")
+      })
+
+    def apply(
+        orig: Pos,
+        dest: Pos,
+        promotion: Option[PromotableRole] = None,
+        metrics: MoveMetrics = MoveMetrics(),
+        finalSquare: Boolean = false,
+        captures: Option[List[Pos]] = None,
+        partialCaptures: Boolean = false
+    ): Validated[String, (Game, Move)] = (orig, dest) match {
+      case (Pos.FairySF(orig), Pos.FairySF(dest)) =>
+        g.apply(orig, dest, toFairySFPromotion(promotion), metrics)
+          .toEither
+          .map(t => (FairySF(t._1), Move.FairySF(t._2)))
+          .toValidated
+      case _ => sys.error("Not passed FairySF objects")
+    }
+
+    private def apply(move: Move): Game = move match {
+      case (Move.FairySF(move)) => FairySF(g.apply(move))
+      case _                  => sys.error("Not passed FairySF objects")
+    }
+
+    def apply(moveOrDrop: MoveOrDrop): Game =
+      moveOrDrop.fold(apply, drop => drop match {
+        case (Drop.FairySF(drop)) => FairySF(g.applyDrop(drop))
+        case _                    => sys.error("Not passed FairySF objects")
+      })
+
+    def drop(
+        role: Role,
+        pos: Pos,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, Drop)] = (role, pos) match {
+      case (Role.FairySFRole(role), Pos.FairySF(pos)) =>
+        g.drop(role, pos, metrics)
+          .toEither
+          .map(t => (FairySF(t._1), Drop.FairySF(t._2)))
+          .toValidated
+      case _ => sys.error("Not passed FairySF objects")
+    }
+
+    def copy(clock: Option[Clock]): Game = FairySF(g.copy(clock = clock))
+    def copy(turns: Int, startedAtTurn: Int): Game = FairySF(
+      g.copy(turns = turns, startedAtTurn = startedAtTurn)
+    )
+    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int): Game = FairySF(
+      g.copy(clock = clock, turns = turns, startedAtTurn = startedAtTurn)
+    )
+
+    def copy(situation: Situation, turns: Int): Game = situation match {
+      case Situation.FairySF(situation) => FairySF(g.copy(situation=situation, turns=turns))
+      case _ => sys.error("Unable to copy fairysf game with non-fairysf arguments")
+    }
+    def copy(situation: Situation): Game = situation match {
+      case Situation.FairySF(situation) => FairySF(g.copy(situation=situation))
+      case _ => sys.error("Unable to copy fairysf game with non-fairysf arguments")
+    }
+
+    def withTurns(t: Int): Game = FairySF(g.withTurns(t))
+
+    def toFairySF: fairysf.Game = g
+    def toChess: chess.Game = sys.error("Can't turn a fairysf game into a chess game")
+    def toDraughts: draughts.DraughtsGame = sys.error("Can't turn a fairysf game into a draughts game")
 
   }
 
@@ -261,25 +329,16 @@ object Game {
       Draughts(draughts.DraughtsGame(situation, pgnMoves, clock, turns, startedAtTurn))
     case (GameLogic.Chess(), Situation.Chess(situation)) =>
       Chess(chess.Game(situation, pgnMoves, clock, turns, startedAtTurn))
+    case (GameLogic.FairySF(), Situation.FairySF(situation)) =>
+      FairySF(fairysf.Game(situation, pgnMoves, clock, turns, startedAtTurn))
     case _ => sys.error("Mismatched gamelogic types 32")
   }
 
   def apply(lib: GameLogic, variant: Variant): Game = (lib, variant) match {
     case (GameLogic.Draughts(), Variant.Draughts(variant)) => Draughts(draughts.DraughtsGame.apply(variant))
     case (GameLogic.Chess(), Variant.Chess(variant))       => Chess(chess.Game.apply(variant))
-    case _                                               => sys.error("Mismatched gamelogic types 33")
-  }
-
-  def apply(lib: GameLogic, board: Board): Game = (lib, board) match {
-    case (GameLogic.Draughts(), Board.Draughts(board)) => Draughts(draughts.DraughtsGame.apply(board))
-    case (GameLogic.Chess(), Board.Chess(board))       => Chess(chess.Game.apply(board))
-    case _                                           => sys.error("Mismatched gamelogic types 34")
-  }
-
-  def apply(lib: GameLogic, board: Board, color: Color): Game = (lib, board) match {
-    case (GameLogic.Draughts(), Board.Draughts(board)) => Draughts(draughts.DraughtsGame.apply(board, color))
-    case (GameLogic.Chess(), Board.Chess(board))       => Chess(chess.Game.apply(board, color))
-    case _                                           => sys.error("Mismatched gamelogic types 35")
+    case (GameLogic.FairySF(), Variant.FairySF(variant))   => FairySF(fairysf.Game.apply(variant))
+    case _ => sys.error("Mismatched gamelogic types 33")
   }
 
   def apply(lib: GameLogic, variant: Option[Variant], fen: Option[FEN]): Game = lib match {
@@ -287,10 +346,13 @@ object Game {
         Draughts(draughts.DraughtsGame.apply(variant.map(_.toDraughts), fen.map(_.toDraughts)))
       case GameLogic.Chess() =>
         Chess(chess.Game.apply(variant.map(_.toChess), fen.map(_.toChess)))
+      case GameLogic.FairySF() =>
+        FairySF(fairysf.Game.apply(variant.map(_.toFairySF), fen.map(_.toFairySF)))
       case _ => sys.error("Mismatched gamelogic types 36")
     }
 
     def wrap(g: chess.Game) = Chess(g)
     def wrap(g: draughts.DraughtsGame) = Draughts(g)
+    def wrap(g: fairysf.Game) = FairySF(g)
 
 }

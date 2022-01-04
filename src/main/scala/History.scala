@@ -14,12 +14,6 @@ abstract sealed class History(
   val halfMoveClock: Int = 0
 ) {
 
-  def setHalfMoveClock(v: Int): History
-
-  def threefoldRepetition: Boolean
-
-  def withLastMove(m: Uci): History
-
   override def toString = {
     val positions = (positionHashes grouped Hash.size).toList
     s"${lastMove.fold("-")(_.uci)} ${positions.map(Hash.debug).mkString(" ")}"
@@ -36,40 +30,26 @@ object History {
     checkCount = h.checkCount,
     unmovedRooks = h.unmovedRooks,
     halfMoveClock = h.halfMoveClock
-  ) {
-
-    def setHalfMoveClock(v: Int): History = Chess(h.setHalfMoveClock(v))
-
-    def threefoldRepetition: Boolean = h.threefoldRepetition
-
-    def withLastMove(m: Uci): History = m match {
-      case u: Uci.Chess    => Chess(h.withLastMove(u.unwrap))
-      case _ => sys.error("Not passed Chess objects")
-    }
-
-  }
+  )
 
   final case class Draughts(h: draughts.DraughtsHistory) extends History(
     lastMove = h.lastMove.map(Uci.wrap),
     positionHashes = h.positionHashes,
     variant = Some(Variant.Draughts(h.variant)),
     kingMoves = h.kingMoves
-  ) {
+  )
 
-    def setHalfMoveClock(v: Int): History = Draughts(h.setHalfMoveClock(v))
-
-    def threefoldRepetition: Boolean = h.threefoldRepetition
-
-    def withLastMove(m: Uci): History = m match {
-      case u: Uci.Draughts => Draughts(h.withLastMove(u.unwrap))
-      case _ => sys.error("Not passed Draughts objects")
-    }
-
-  }
+  final case class FairySF(h: fairysf.History) extends History(
+    lastMove = h.lastMove.map(Uci.wrap),
+    positionHashes = h.positionHashes,
+    halfMoveClock = h.halfMoveClock
+  )
 
   implicit def chessHistory(h: chess.History) = Chess(h)
   implicit def draughtsHistory(h: draughts.DraughtsHistory) = Draughts(h)
+  implicit def fairysfHistory(h: fairysf.History) = FairySF(h)
 
+  //lila
   def apply(
     lib: GameLogic,
     lastMove: Option[Uci] = None,
@@ -99,6 +79,12 @@ object History {
         castles = castles,
         checkCount = checkCount,
         unmovedRooks = unmovedRooks,
+        halfMoveClock = halfMoveClock
+      ))
+    case GameLogic.FairySF()
+      => FairySF(fairysf.History(
+        lastMove = lastMove.map(lm => lm.toFairySF),
+        positionHashes = positionHashes,
         halfMoveClock = halfMoveClock
       ))
     case _ => sys.error("Mismatched gamelogic types 1")
