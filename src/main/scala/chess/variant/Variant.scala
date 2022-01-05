@@ -236,12 +236,12 @@ object Variant {
     FromPosition,
     KingOfTheHill,
     ThreeCheck,
+    FiveCheck,
     Antichess,
     Atomic,
     Horde,
     RacingKings,
     LinesOfAction,
-    FiveCheck
   )
   val byId = all map { v =>
     (v.id, v)

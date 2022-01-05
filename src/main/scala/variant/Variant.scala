@@ -384,6 +384,7 @@ object Variant {
     def fromPosition: Boolean  = false
     def kingOfTheHill: Boolean = false
     def threeCheck: Boolean    = false
+    def fiveCheck: Boolean     = false
     def antichess: Boolean     = false
     def atomic: Boolean        = false
     def horde: Boolean         = false
