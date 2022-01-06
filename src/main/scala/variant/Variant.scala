@@ -39,6 +39,8 @@ abstract class Variant(
   def crazyhouse: Boolean
   def linesOfAction: Boolean
   def fiveCheck: Boolean
+  def noCastling: Boolean
+  def scrambledEggs: Boolean
 
   def draughtsStandard: Boolean
   def frisian: Boolean
@@ -151,6 +153,8 @@ object Variant {
     def crazyhouse: Boolean    = v.crazyhouse
     def linesOfAction: Boolean = v.linesOfAction
     def fiveCheck: Boolean     = v.fiveCheck
+    def noCastling: Boolean    = v.noCastling
+    def scrambledEggs: Boolean = v.scrambledEggs
 
     def draughtsStandard: Boolean     = false
     def frisian: Boolean              = false
@@ -272,6 +276,8 @@ object Variant {
     def crazyhouse: Boolean    = false
     def linesOfAction: Boolean = false
     def fiveCheck: Boolean     = false
+    def noCastling: Boolean    = false
+    def scrambledEggs: Boolean = false
 
     def draughtsStandard: Boolean     = v.standard
     def frisian: Boolean              = v.frisian
@@ -391,6 +397,8 @@ object Variant {
     def racingKings: Boolean   = false
     def crazyhouse: Boolean    = false
     def linesOfAction: Boolean = false
+    def noCastling: Boolean    = false
+    def scrambledEggs: Boolean = false
 
     def draughtsStandard: Boolean     = false
     def frisian: Boolean              = false
