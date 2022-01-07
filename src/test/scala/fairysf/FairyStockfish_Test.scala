@@ -18,7 +18,6 @@ class FairyStockfishTest extends Specification with ValidatedMatchers {
     }
   }
 
-
   "Shogi initial fen" should {
     "be valid" in {
       FairyStockfish.validateFEN(
@@ -43,6 +42,33 @@ class FairyStockfishTest extends Specification with ValidatedMatchers {
         variant.Shogi.fairysfName.name,
         "I'm a Shogi FEN! (not)"
       ) must_== false
+    }
+  }
+
+  "Load flipersi" should {
+    "result in this being a valid game" in {
+      FairyStockfish.loadVariantConfig("""
+[flipersi]
+immobile = p
+startFen = 8/8/8/8/8/8/8/8[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppp] w 0 1
+pieceDrops = true
+promotionPieceTypes = -
+doubleStep = false
+castling = false
+stalemateValue = loss
+stalematePieceCount = true
+materialCounting = unweighted
+enclosingDrop = reversi
+enclosingDropStart = d4 e4 d5 e5
+immobilityIllegal = false
+flipEnclosedPieces = reversi
+passOnStalemate = false
+
+[flipello:flipersi]
+startFen = 8/8/8/3pP3/3Pp3/8/8/8[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppp] w 0 1
+passOnStalemate = true
+        """)
+      FairyStockfish.initialFen("flipello") must_== "8/8/8/3pP3/3Pp3/8/8/8[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppp] w 0 1"
     }
   }
 }
