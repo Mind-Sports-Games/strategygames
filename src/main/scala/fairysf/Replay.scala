@@ -9,7 +9,7 @@ import strategygames.format.pgn.San
 import strategygames.fairysf.format.pgn.{ Parser, Reader }
 import strategygames.format.pgn.{ Tag, Tags }
 import strategygames.fairysf.format.{ FEN, Forsyth, Uci }
-import strategygames.{ Game => StratGame, Situation => StratSituation }
+import strategygames.{ Situation => StratSituation }
 
 case class Replay(setup: Game, moves: List[MoveOrDrop], state: Game) {
 
