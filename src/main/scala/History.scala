@@ -14,8 +14,6 @@ abstract sealed class History(
   val halfMoveClock: Int = 0
 ) {
 
-  def threefoldRepetition: Boolean
-
   override def toString = {
     val positions = (positionHashes grouped Hash.size).toList
     s"${lastMove.fold("-")(_.uci)} ${positions.map(Hash.debug).mkString(" ")}"
@@ -32,32 +30,20 @@ object History {
     checkCount = h.checkCount,
     unmovedRooks = h.unmovedRooks,
     halfMoveClock = h.halfMoveClock
-  ) {
-
-    def threefoldRepetition: Boolean = h.threefoldRepetition
-
-  }
+  )
 
   final case class Draughts(h: draughts.DraughtsHistory) extends History(
     lastMove = h.lastMove.map(Uci.wrap),
     positionHashes = h.positionHashes,
     variant = Some(Variant.Draughts(h.variant)),
     kingMoves = h.kingMoves
-  ) {
-
-    def threefoldRepetition: Boolean = h.threefoldRepetition
-
-  }
+  )
 
   final case class FairySF(h: fairysf.History) extends History(
     lastMove = h.lastMove.map(Uci.wrap),
     positionHashes = h.positionHashes,
     halfMoveClock = h.halfMoveClock
-  ) {
-
-    def threefoldRepetition: Boolean = h.threefoldRepetition
-
-  }
+  )
 
   implicit def chessHistory(h: chess.History) = Chess(h)
   implicit def draughtsHistory(h: draughts.DraughtsHistory) = Draughts(h)

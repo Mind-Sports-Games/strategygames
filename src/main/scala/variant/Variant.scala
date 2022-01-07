@@ -38,6 +38,7 @@ abstract class Variant(
   def racingKings: Boolean
   def crazyhouse: Boolean
   def linesOfAction: Boolean
+  def fiveCheck: Boolean
 
   def draughtsStandard: Boolean
   def frisian: Boolean
@@ -80,6 +81,8 @@ abstract class Variant(
   def isValidPromotion(promotion: Option[PromotableRole]): Boolean
 
   def checkmate(situation: Situation): Boolean
+
+  def stalemateIsDraw: Boolean
 
   // In most variants, the winner is the last player to have played and there is a possibility of either a traditional
   // checkmate or a variant end condition
@@ -147,6 +150,7 @@ object Variant {
     def racingKings: Boolean   = v.racingKings
     def crazyhouse: Boolean    = v.crazyhouse
     def linesOfAction: Boolean = v.linesOfAction
+    def fiveCheck: Boolean     = v.fiveCheck
 
     def draughtsStandard: Boolean     = false
     def frisian: Boolean              = false
@@ -195,6 +199,8 @@ object Variant {
       case Situation.Chess(situation) => v.checkmate(situation)
       case _                          => sys.error("Not passed Chess objects")
     }
+
+    def stalemateIsDraw: Boolean = v.stalemateIsDraw
 
     def winner(situation: Situation): Option[Color] = situation match {
       case Situation.Chess(situation) => v.winner(situation)
@@ -265,6 +271,7 @@ object Variant {
     def racingKings: Boolean   = false
     def crazyhouse: Boolean    = false
     def linesOfAction: Boolean = false
+    def fiveCheck: Boolean     = false
 
     def draughtsStandard: Boolean     = v.standard
     def frisian: Boolean              = v.frisian
@@ -313,6 +320,9 @@ object Variant {
       case Situation.Draughts(situation) => v.checkmate(situation)
       case _                             => sys.error("Not passed Draughts objects")
     }
+
+    //stalemate not referenced in draughts
+    def stalemateIsDraw: Boolean = true
 
     def winner(situation: Situation): Option[Color] = situation match {
       case Situation.Draughts(situation) => v.winner(situation)
@@ -374,6 +384,7 @@ object Variant {
     def fromPosition: Boolean  = false
     def kingOfTheHill: Boolean = false
     def threeCheck: Boolean    = false
+    def fiveCheck: Boolean     = false
     def antichess: Boolean     = false
     def atomic: Boolean        = false
     def horde: Boolean         = false
@@ -428,6 +439,8 @@ object Variant {
       case Situation.FairySF(situation) => v.checkmate(situation)
       case _                             => sys.error("Not passed FairySF objects")
     }
+
+    def stalemateIsDraw: Boolean = v.stalemateIsDraw
 
     def winner(situation: Situation): Option[Color] = situation match {
       case Situation.FairySF(situation) => v.winner(situation)

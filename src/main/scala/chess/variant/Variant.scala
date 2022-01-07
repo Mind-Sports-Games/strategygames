@@ -25,6 +25,7 @@ abstract class Variant private[variant] (
   def fromPosition  = this == FromPosition
   def kingOfTheHill = this == KingOfTheHill
   def threeCheck    = this == ThreeCheck
+  def fiveCheck     = this == FiveCheck
   def antichess     = this == Antichess
   def atomic        = this == Atomic
   def horde         = this == Horde
@@ -132,6 +133,8 @@ abstract class Variant private[variant] (
 
   def checkmate(situation: Situation) = situation.check && situation.moves.isEmpty
 
+  def stalemateIsDraw = true
+
   // In most variants, the winner is the last player to have played and there is a possibility of either a traditional
   // checkmate or a variant end condition
   def winner(situation: Situation): Option[Color] =
@@ -233,11 +236,12 @@ object Variant {
     FromPosition,
     KingOfTheHill,
     ThreeCheck,
+    FiveCheck,
     Antichess,
     Atomic,
     Horde,
     RacingKings,
-    LinesOfAction
+    LinesOfAction,
   )
   val byId = all map { v =>
     (v.id, v)
@@ -262,6 +266,7 @@ object Variant {
     strategygames.chess.variant.Standard,
     strategygames.chess.variant.Crazyhouse,
     strategygames.chess.variant.ThreeCheck,
+    strategygames.chess.variant.FiveCheck,
     strategygames.chess.variant.KingOfTheHill
   )
 
@@ -269,6 +274,7 @@ object Variant {
     strategygames.chess.variant.Standard,
     strategygames.chess.variant.Chess960,
     strategygames.chess.variant.ThreeCheck,
+    strategygames.chess.variant.FiveCheck,
     strategygames.chess.variant.KingOfTheHill,
     strategygames.chess.variant.FromPosition
   )

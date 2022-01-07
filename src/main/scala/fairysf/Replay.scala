@@ -50,26 +50,6 @@ object Replay {
       )
     }
 
-  //private def recursiveGames(game: Game, sans: List[San]): Validated[String, List[Game]] =
-  //  sans match {
-  //    case Nil => valid(Nil)
-  //    case san :: rest =>
-  //      san(StratSituation.wrap(game.situation)) flatMap { moveOrDrop =>
-  //        val newGame = StratGame.wrap(game)(moveOrDrop).toFairySF
-  //        recursiveGames(newGame, rest) map { newGame :: _ }
-  //      }
-  //  }
-
-  //def games(
-  //    moveStrs: Iterable[String],
-  //    initialFen: Option[FEN],
-  //    variant: strategygames.fairysf.variant.Variant
-  //): Validated[String, List[Game]] =
-  //  Parser.moves(moveStrs, variant) andThen { moves =>
-  //    val game = makeGame(variant, initialFen)
-  //    recursiveGames(game, moves.value) map { game :: _ }
-  //  }
-
   def replayMove(
     before: Game,
     orig: Pos,

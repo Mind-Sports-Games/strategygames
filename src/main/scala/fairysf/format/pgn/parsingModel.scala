@@ -53,24 +53,3 @@ case class Drop(
   def drop(situation: Situation): Validated[String, strategygames.fairysf.Drop] =
     situation.drop(role, pos)
 }
-
-//case class Castle(
-//    side: Side,
-//    metas: Metas = Metas.empty
-//) extends San {
-//
-//  def apply(
-//    situation: strategygames.Situation,
-//    iteratedCapts: Boolean = false,
-//    forbiddenUci: Option[List[String]] = None
-//  ) = move(situation.toFairySF).map(StratMove.wrap).map(Left.apply)
-//
-//  def withMetas(m: Metas) = copy(metas = m)
-//
-//  def move(situation: Situation): Validated[String, strategygames.fairysf.Move] =
-//    for {
-//      kingPos <- situation.board kingPosOf situation.color toValid "No king found"
-//      actor   <- situation.board actorAt kingPos toValid "No actor found"
-//      move    <- actor.castleOn(side).headOption toValid "Cannot castle / variant is " + situation.board.variant
-//    } yield move
-//}

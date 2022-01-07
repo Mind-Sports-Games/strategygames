@@ -47,6 +47,8 @@ sealed abstract class GameFamily {
   def displayPiece: String
   def pieceSetThemes: List[String]
   def pieceSetDefault: String
+  def boardThemes: List[String]
+  def boardThemeDefault: String
 
   override def toString = s"GameFamily($name)"
 }
@@ -67,7 +69,12 @@ object GameFamily {
                               "governor", "horsey", "icpieces", "kosal", "leipzig", "letter", "maestro",
                               "pirouetti", "pixel", "reillycraig", "riohacha", "shapes", "spatial",
                               "staunty", "tatiana")
-    def pieceSetDefault= "cburnett"
+    def pieceSetDefault= "staunty"
+    def boardThemes = List ("blue", "blue2", "blue3", "blue-marble", "canvas", "wood", "wood2",
+                            "wood3", "wood4", "maple", "maple2", "brown", "leather", "green",
+                            "marble", "green-plastic", "grey", "metal", "olive", "newspaper",
+                            "purple", "purple-diag", "pink", "ic", "horsey")
+    def boardThemeDefault = "maple"
   }
 
   final case class Draughts() extends GameFamily {
@@ -81,6 +88,10 @@ object GameFamily {
     def displayPiece = "wK"
     def pieceSetThemes = List("wide_crown", "fabirovsky", "check_yb")
     def pieceSetDefault= "wide_crown"
+    def boardThemes = List ("blue", "blue2", "blue3", "canvas", "wood", "wood2", "wood3",
+                            "maple", "brown", "leather", "green", "marble", "grey", "metal",
+                            "olive", "purple")
+    def boardThemeDefault = "blue3"
   }
 
   final case class LinesOfAction() extends GameFamily {
@@ -93,7 +104,12 @@ object GameFamily {
     def variants = Variant.all(GameLogic.Chess()).filter(_.gameFamily == this)
     def displayPiece = "wL"
     def pieceSetThemes = List("fabirovsky_loa", "check_yb_loa", "wide")
-    def pieceSetDefault= "fabirovsky_loa"
+    def pieceSetDefault= "check_yb_loa"
+    def boardThemes = List ("blue", "blue2", "blue3", "blue-marble", "canvas", "wood", "wood2",
+                            "wood3", "wood4", "maple", "maple2", "brown", "leather", "green",
+                            "marble", "green-plastic", "grey", "metal", "olive", "newspaper",
+                            "purple", "purple-diag", "pink", "ic", "horsey")
+    def boardThemeDefault = "marble"
   }
 
   final case class Shogi() extends GameFamily {
@@ -107,6 +123,8 @@ object GameFamily {
     def displayPiece = "0KE"
     def pieceSetThemes = List("2kanji", "ctw")
     def pieceSetDefault= "2kanji"
+    def boardThemes = List ("wood", "clear")
+    def boardThemeDefault = "wood"
   }
 
   final case class Xiangqi() extends GameFamily {
@@ -120,6 +138,8 @@ object GameFamily {
     def displayPiece = "RH"
     def pieceSetThemes = List("2dhanzi", "ka")
     def pieceSetDefault= "2dhanzi"
+    def boardThemes = List ("grey", "green")
+    def boardThemeDefault = "green"
   }
 
   def all: List[GameFamily] = List(

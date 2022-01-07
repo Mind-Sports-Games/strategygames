@@ -240,6 +240,138 @@ K  r
     }
   }
 
+"fiveCheck" should {
+    "detect win" in {
+      "not" in {
+        Game(
+          """
+PPk
+K
+""".fiveCheck,
+          White
+        ).situation.end must beFalse
+      }
+      "regular checkMate" in {
+        val game = Game(
+          """
+PP
+K  r
+""".fiveCheck,
+          White
+        )
+        game.situation.end must beTrue
+        game.situation.winner must beSome.like { case color =>
+          color == Black
+        }
+      }
+      "1 check" in {
+        val game = Game(Board init FiveCheck)
+          .playMoves(
+            E2 -> E4,
+            E7 -> E6,
+            D2 -> D4,
+            F8 -> B4
+          )
+          .toOption
+          .get
+        game.situation.end must beFalse
+      }
+      "2 checks" in {
+        val game = Game(Board init FiveCheck)
+          .playMoves(
+            E2 -> E4,
+            E7 -> E6,
+            D2 -> D4,
+            F8 -> B4,
+            C2 -> C3,
+            B4 -> C3
+          )
+          .toOption
+          .get
+        game.situation.end must beFalse
+      }
+      "3 checks" in {
+        val game = Game(Board init FiveCheck)
+          .playMoves(
+            E2 -> E4,
+            E7 -> E6,
+            D2 -> D4,
+            F8 -> B4,
+            C2 -> C3,
+            B4 -> C3,
+            D1 -> D2,
+            C3 -> D2
+          )
+          .toOption
+          .get
+        game.situation.end must beFalse
+      }
+      "4 checks" in {
+        val game = Game(Board init FiveCheck)
+          .playMoves(
+            E2 -> E4,
+            E7 -> E6,
+            D2 -> D4,
+            F8 -> B4,
+            C2 -> C3,
+            B4 -> C3,
+            D1 -> D2,
+            C3 -> D2,
+            E1 -> D2,
+            D8 -> G5
+          )
+          .toOption
+          .get
+        game.situation.end must beFalse
+      }
+      "5 checks" in {
+        val game = Game(Board init FiveCheck)
+          .playMoves(
+            E2 -> E4,
+            E7 -> E6,
+            D2 -> D4,
+            F8 -> B4,
+            C2 -> C3,
+            B4 -> C3,
+            D1 -> D2,
+            C3 -> D2,
+            E1 -> D2,
+            D8 -> G5,
+            F5 -> F4,
+            G5 -> F4
+          )
+          .toOption
+          .get
+        game.situation.end must beTrue
+
+        game.situation.winner must beSome.like { case color =>
+          color == Black
+        }
+      }
+    }
+
+    "Not force a draw when there is insufficient mating material" in {
+      val position = FEN("8/6K1/8/8/8/8/k6p/8 b - - 1 39")
+      val game     = fenToGame(position, FiveCheck)
+
+      val successGame = game flatMap (_.playMove(Pos.H2, Pos.H1, Knight.some))
+
+      successGame must beValid.like { case game =>
+        game.situation.end must beFalse
+      }
+    }
+
+    "Force a draw when there are only kings remaining" in {
+      val position = FEN("8/6K1/8/8/8/8/k7/8 b - -")
+      val game     = fenToGame(position, FiveCheck)
+
+      game must beValid.like { case game =>
+        game.situation.end must beTrue
+        game.situation.status must beEqualTo(Status.Draw.some)
+      }
+    }
+  }
+
   "racingKings" should {
     "call it stalemate when there is no legal move" in {
       val position = FEN("8/8/8/8/3K4/8/1k6/b7 b - - 5 3")

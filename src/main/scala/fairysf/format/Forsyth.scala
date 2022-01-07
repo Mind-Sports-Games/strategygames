@@ -8,10 +8,6 @@ import strategygames.fairysf.variant.{ Variant }
 
 /** Transform a game to standard Forsyth Edwards Notation
   * http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
-  *
-  * Crazyhouse & Threecheck extensions:
-  * https://github.com/ddugovic/Stockfish/wiki/FEN-extensions
-  * http://scidb.sourceforge.net/help/en/FEN.html#ThreeCheck
   */
 object Forsyth {
 
@@ -20,7 +16,6 @@ object Forsyth {
   //pychess shogi
   val initial = FEN("lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL[-] w 0 1")
 
-  //stub
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
     val apiPosition = Api.positionFromVariantNameAndFEN(variant.fairysfName.name, fen.value)
     Some(Situation(
