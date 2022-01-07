@@ -1,6 +1,7 @@
 project/project
 project/target
 target
+metals.sbt
 
 # auto-generated eclipse files.
 /.classpath
