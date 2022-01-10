@@ -32,6 +32,8 @@ abstract class Variant private[variant] (
   def racingKings   = this == RacingKings
   def crazyhouse    = this == Crazyhouse
   def linesOfAction = this == LinesOfAction
+  def noCastling    = this == NoCastling
+  def scrambledEggs = this == ScrambledEggs
 
   def exotic = !standard
 
@@ -241,7 +243,9 @@ object Variant {
     Atomic,
     Horde,
     RacingKings,
+    NoCastling,
     LinesOfAction,
+    ScrambledEggs,
   )
   val byId = all map { v =>
     (v.id, v)

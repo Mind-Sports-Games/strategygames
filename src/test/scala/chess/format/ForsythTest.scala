@@ -389,25 +389,25 @@ class ForsythTest extends ChessTest {
     }
     "read" in {
       "no checks" in {
-        f <<< FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3") must beSome.like { s =>
+        f.<<<@(ThreeCheck, FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3")) must beSome.like { s =>
           s.situation.board.history.checkCount.white must_== 0
           s.situation.board.history.checkCount.black must_== 0
         }
       }
       "explicitely no checks" in {
-        f <<< FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3 +0+0") must beSome.like { s =>
+        f.<<<@(ThreeCheck, FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3 +0+0")) must beSome.like { s =>
           s.situation.board.history.checkCount.white must_== 0
           s.situation.board.history.checkCount.black must_== 0
         }
       }
       "checks" in {
-        f <<< FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3 +1+2") must beSome.like { s =>
+        f.<<<@(ThreeCheck, FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3 +1+2")) must beSome.like { s =>
           s.situation.board.history.checkCount.white must_== 2
           s.situation.board.history.checkCount.black must_== 1
         }
       }
       "winboard checks" in {
-        f <<< FEN("r1bqkbnr/pppp1Qpp/2n5/4p3/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 2+3 0 3") must beSome.like {
+        f.<<<@(ThreeCheck, FEN("r1bqkbnr/pppp1Qpp/2n5/4p3/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 2+3 0 3")) must beSome.like {
           s =>
             s.situation.board.history.checkCount.white must_== 0
             s.situation.board.history.checkCount.black must_== 1
@@ -433,25 +433,25 @@ class ForsythTest extends ChessTest {
     }
     "read" in {
       "no checks" in {
-        f <<< FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3") must beSome.like { s =>
+        f.<<<@(FiveCheck,FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3")) must beSome.like { s =>
           s.situation.board.history.checkCount.white must_== 0
           s.situation.board.history.checkCount.black must_== 0
         }
       }
       "explicitely no checks" in {
-        f <<< FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3 +0+0") must beSome.like { s =>
+        f.<<<@(FiveCheck,FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3 +0+0")) must beSome.like { s =>
           s.situation.board.history.checkCount.white must_== 0
           s.situation.board.history.checkCount.black must_== 0
         }
       }
       "checks" in {
-        f <<< FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3 +1+2") must beSome.like { s =>
+        f.<<<@(FiveCheck,FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3 +1+2")) must beSome.like { s =>
           s.situation.board.history.checkCount.white must_== 2
           s.situation.board.history.checkCount.black must_== 1
         }
       }
       "winboard checks" in {
-        f <<< FEN("r1bqkbnr/pppp1Qpp/2n5/4p3/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 4+5 0 3") must beSome.like {
+        f.<<<@(FiveCheck,FEN("r1bqkbnr/pppp1Qpp/2n5/4p3/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 4+5 0 3")) must beSome.like {
           s =>
             s.situation.board.history.checkCount.white must_== 0
             s.situation.board.history.checkCount.black must_== 1

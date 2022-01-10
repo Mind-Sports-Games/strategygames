@@ -337,7 +337,7 @@ K  r
             C3 -> D2,
             E1 -> D2,
             D8 -> G5,
-            F5 -> F4,
+            F2 -> F4,
             G5 -> F4
           )
           .toOption
