@@ -54,6 +54,8 @@ abstract class Variant(
 
   def shogi: Boolean
   def xiangqi: Boolean
+  def minishogi: Boolean
+  def minixiangqi: Boolean
 
   def standardVariant: Boolean
   def fromPositionVariant: Boolean
@@ -168,6 +170,8 @@ object Variant {
 
     def shogi: Boolean                = false
     def xiangqi: Boolean              = false
+    def minishogi: Boolean            = false
+    def minixiangqi: Boolean          = false
 
     def standardVariant: Boolean      = v.standard
     def fromPositionVariant: Boolean  = v.fromPosition
@@ -291,6 +295,8 @@ object Variant {
 
     def shogi: Boolean                = false
     def xiangqi: Boolean              = false
+    def minishogi: Boolean            = false
+    def minixiangqi: Boolean          = false
 
     def standardVariant: Boolean      = v.standard
     def fromPositionVariant: Boolean  = v.fromPosition
@@ -412,6 +418,8 @@ object Variant {
 
     def shogi: Boolean                = v.shogi
     def xiangqi: Boolean              = v.xiangqi
+    def minishogi: Boolean            = v.minishogi
+    def minixiangqi: Boolean          = v.minixiangqi
 
     def standardVariant: Boolean      = standard || draughtsStandard
     def fromPositionVariant: Boolean  = fromPosition || draughtsFromPosition
