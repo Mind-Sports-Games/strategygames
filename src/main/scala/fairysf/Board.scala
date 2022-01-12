@@ -80,6 +80,16 @@ object Board {
     val all: List[BoardSize] = List(Dim8x8, Dim9x9, Dim9x10)
   }
 
+  case object Dim5x5
+      extends BoardSize(
+        width = 5,
+        height = 5
+      )
+  case object Dim7x7
+      extends BoardSize(
+        width = 7,
+        height = 7
+      )
   case object Dim8x8
       extends BoardSize(
         width = 8,
