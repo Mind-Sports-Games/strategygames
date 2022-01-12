@@ -7,7 +7,7 @@ case object MiniXiangqi
     extends Variant(
       id = 4,
       key = "minixiangqi",
-      name = "minixiangqi",
+      name = "Mini Xiangqi",
       shortName = "minixiangqi",
       title = "Mini Xiangqi (Chinese Chess)",
       standardInitialPosition = true,

@@ -8,7 +8,7 @@ case object MiniShogi
     extends Variant(
       id = 3,
       key = "minishogi",
-      name = "minishogi",
+      name = "Mini Shogi",
       shortName = "minishogi",
       title = "Mini Shogi (Japanese Chess)",
       standardInitialPosition = true,
