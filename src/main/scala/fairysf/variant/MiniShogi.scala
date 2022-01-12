@@ -6,7 +6,7 @@ import strategygames.GameFamily
 
 case object MiniShogi
     extends Variant(
-      id = 3,
+      id = 5,
       key = "minishogi",
       name = "Mini Shogi",
       shortName = "minishogi",
