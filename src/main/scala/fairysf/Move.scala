@@ -1,6 +1,8 @@
 package strategygames.fairysf
 import strategygames.MoveMetrics
 
+import cats.syntax.option.none
+
 import strategygames.fairysf.format.Uci
 import cats.syntax.option._
 
@@ -20,7 +22,17 @@ case class Move(
 
   def situationAfter = Situation(finalizeAfter, !piece.color)
 
-  def finalizeAfter: Board = after
+  def withHistory(h: History) = copy(after = after withHistory h)
+
+  def finalizeAfter: Board = after.variant.finalizeBoard( 
+    after updateHistory { h =>
+        h.copy(
+          lastMove = Option(toUci)
+        )
+    },
+    toUci,
+    none
+  )
 
   def applyVariantEffect: Move = before.variant addVariantEffect this
 

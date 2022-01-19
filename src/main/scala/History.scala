@@ -42,7 +42,8 @@ object History {
   final case class FairySF(h: fairysf.History) extends History(
     lastMove = h.lastMove.map(Uci.wrap),
     positionHashes = h.positionHashes,
-    halfMoveClock = h.halfMoveClock
+    halfMoveClock = h.halfMoveClock,
+    variant = Some(Variant.FairySF(h.variant))
   )
 
   implicit def chessHistory(h: chess.History) = Chess(h)
@@ -85,7 +86,12 @@ object History {
       => FairySF(fairysf.History(
         lastMove = lastMove.map(lm => lm.toFairySF),
         positionHashes = positionHashes,
-        halfMoveClock = halfMoveClock
+        halfMoveClock = halfMoveClock,
+        variant = variant match {
+          case Some(Variant.FairySF(variant)) => variant
+          case None => strategygames.fairysf.variant.Shogi
+          case _ => sys.error("Mismatched variant types for FairySF history")
+        },
       ))
     case _ => sys.error("Mismatched gamelogic types 1")
   }
