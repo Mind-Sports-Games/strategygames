@@ -122,6 +122,9 @@ abstract class Variant(
   def gameLogic: GameLogic
   def gameFamily: GameFamily
 
+  def playerNames: Map[Player, String]
+  def playerColors: Map[Player, String]
+
 }
 
 object Variant {
@@ -248,6 +251,8 @@ object Variant {
     def gameLogic: GameLogic = GameLogic.Chess()
     def gameFamily: GameFamily = v.gameFamily
 
+    def playerNames: Map[Player, String] = gameFamily.playerNames
+    def playerColors: Map[Player, String] = gameFamily.playerColors
   }
 
   case class Draughts(v: draughts.variant.Variant)
@@ -372,6 +377,9 @@ object Variant {
     def chessVariant: chess.variant.Variant = sys.error("Unimplemented for Draughts")
     def gameLogic: GameLogic = GameLogic.Draughts()
     def gameFamily: GameFamily = v.gameFamily
+
+    def playerNames: Map[Player, String] = gameFamily.playerNames
+    def playerColors: Map[Player, String] = gameFamily.playerColors
   }
 
   case class FairySF(v: fairysf.variant.Variant)
@@ -494,6 +502,9 @@ object Variant {
     def chessVariant: chess.variant.Variant = sys.error("Unimplemented for FairySF")
     def gameLogic: GameLogic = GameLogic.FairySF()
     def gameFamily: GameFamily = v.gameFamily
+
+    def playerNames: Map[Player, String] = gameFamily.playerNames
+    def playerColors: Map[Player, String] = gameFamily.playerColors
   }
 
   def all: List[Variant] =

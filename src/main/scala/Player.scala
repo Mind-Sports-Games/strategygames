@@ -8,6 +8,7 @@ sealed trait Player {
 
   val letter: Char
   val name: String
+  val classicName: String
 
   val p1 = this == Player.P1
   val p2 = this == Player.P2
@@ -49,6 +50,7 @@ object Player {
     //retain old color lettering
     val letter = 'w'
     val name   = "p1"
+    val classicName = "white"
 
     override val hashCode = 1
   }
@@ -60,6 +62,7 @@ object Player {
     //retain old color lettering
     val letter = 'b'
     val name   = "p2"
+    val classicName = "black"
 
     override val hashCode = 2
   }
