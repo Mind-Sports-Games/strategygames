@@ -72,14 +72,36 @@ object Forsyth {
             val checkCount =
               splitted
                 .lift(4)
-                .flatMap(makeCheckCount)
-                .orElse(splitted.lift(6).flatMap(makeCheckCount))
+                .flatMap(makeCheckCount(_, variant))
+                .orElse(splitted.lift(6).flatMap(makeCheckCount(_,variant)))
             checkCount.fold(history)(history.withCheckCount)
           }
         } fixCastles
     }
 
   def <<(fen: FEN): Option[Situation] = <<@(Standard, fen)
+
+
+  def makeCheckCount(str: String, gameVariant: Variant): Option[CheckCount] = {
+      val numchecks = gameVariant match {
+        case variant.FiveCheck => 5 
+        case variant.ThreeCheck => 3
+        case _ => 0
+      }
+      str.toList match {
+        case '+' :: w :: '+' :: b :: Nil =>
+          for {
+            p1 <- w.toString.toIntOption if p1 <= numchecks
+            p2 <- b.toString.toIntOption if p2 <= numchecks
+          } yield CheckCount(p2, p1)
+        case w :: '+' :: b :: Nil =>
+          for {
+            p1 <- w.toString.toIntOption if p1 <= numchecks
+            p2 <- b.toString.toIntOption if p2 <= numchecks
+          } yield CheckCount(numchecks - p2, numchecks - p1)
+        case _ => None
+      }
+  }
 
   case class SituationPlus(situation: Situation, fullMoveNumber: Int) {
 
@@ -98,21 +120,6 @@ object Forsyth {
     }
 
   def <<<(fen: FEN): Option[SituationPlus] = <<<@(Standard, fen)
-
-  def makeCheckCount(str: String): Option[CheckCount] =
-    str.toList match {
-      case '+' :: w :: '+' :: b :: Nil =>
-        for {
-          p1 <- w.toString.toIntOption if p1 <= 3
-          p2 <- b.toString.toIntOption if p2 <= 3
-        } yield CheckCount(p2, p1)
-      case w :: '+' :: b :: Nil =>
-        for {
-          p1 <- w.toString.toIntOption if p1 <= 3
-          p2 <- b.toString.toIntOption if p2 <= 3
-        } yield CheckCount(3 - p2, 3 - p1)
-      case _ => None
-    }
 
   // only cares about pieces positions on the board (first part of FEN string)
   def makeBoard(variant: Variant, fen: FEN): Option[Board] = {
@@ -184,7 +191,7 @@ object Forsyth {
         game.halfMoveClock,
         game.fullMoveNumber
       ) ::: {
-        if (game.board.variant == variant.ThreeCheck) List(exportCheckCount(game.board))
+        if (game.board.variant == variant.ThreeCheck || game.board.variant == variant.FiveCheck) List(exportCheckCount(game.board))
         else List()
       }
     } mkString " "

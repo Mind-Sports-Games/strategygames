@@ -24,6 +24,8 @@ abstract class Variant private[variant] (
 
   def shogi   = this == Shogi
   def xiangqi = this == Xiangqi
+  def minishogi = this == MiniShogi
+  def minixiangqi = this == MiniXiangqi
 
   def exotic = true
 
@@ -233,7 +235,9 @@ object Variant {
 
   lazy val all: List[Variant] = List(
     Shogi,
-    Xiangqi
+    MiniShogi,
+    Xiangqi,
+    MiniXiangqi
   )
   val byId = all map { v =>
     (v.id, v)

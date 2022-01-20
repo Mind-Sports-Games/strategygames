@@ -38,6 +38,9 @@ abstract class Variant(
   def racingKings: Boolean
   def crazyhouse: Boolean
   def linesOfAction: Boolean
+  def fiveCheck: Boolean
+  def noCastling: Boolean
+  def scrambledEggs: Boolean
 
   def draughtsStandard: Boolean
   def frisian: Boolean
@@ -51,6 +54,8 @@ abstract class Variant(
 
   def shogi: Boolean
   def xiangqi: Boolean
+  def minishogi: Boolean
+  def minixiangqi: Boolean
 
   def standardVariant: Boolean
   def fromPositionVariant: Boolean
@@ -149,6 +154,9 @@ object Variant {
     def racingKings: Boolean   = v.racingKings
     def crazyhouse: Boolean    = v.crazyhouse
     def linesOfAction: Boolean = v.linesOfAction
+    def fiveCheck: Boolean     = v.fiveCheck
+    def noCastling: Boolean    = v.noCastling
+    def scrambledEggs: Boolean = v.scrambledEggs
 
     def draughtsStandard: Boolean     = false
     def frisian: Boolean              = false
@@ -162,6 +170,8 @@ object Variant {
 
     def shogi: Boolean                = false
     def xiangqi: Boolean              = false
+    def minishogi: Boolean            = false
+    def minixiangqi: Boolean          = false
 
     def standardVariant: Boolean      = v.standard
     def fromPositionVariant: Boolean  = v.fromPosition
@@ -269,6 +279,9 @@ object Variant {
     def racingKings: Boolean   = false
     def crazyhouse: Boolean    = false
     def linesOfAction: Boolean = false
+    def fiveCheck: Boolean     = false
+    def noCastling: Boolean    = false
+    def scrambledEggs: Boolean = false
 
     def draughtsStandard: Boolean     = v.standard
     def frisian: Boolean              = v.frisian
@@ -282,6 +295,8 @@ object Variant {
 
     def shogi: Boolean                = false
     def xiangqi: Boolean              = false
+    def minishogi: Boolean            = false
+    def minixiangqi: Boolean          = false
 
     def standardVariant: Boolean      = v.standard
     def fromPositionVariant: Boolean  = v.fromPosition
@@ -381,12 +396,15 @@ object Variant {
     def fromPosition: Boolean  = false
     def kingOfTheHill: Boolean = false
     def threeCheck: Boolean    = false
+    def fiveCheck: Boolean     = false
     def antichess: Boolean     = false
     def atomic: Boolean        = false
     def horde: Boolean         = false
     def racingKings: Boolean   = false
     def crazyhouse: Boolean    = false
     def linesOfAction: Boolean = false
+    def noCastling: Boolean    = false
+    def scrambledEggs: Boolean = false
 
     def draughtsStandard: Boolean     = false
     def frisian: Boolean              = false
@@ -400,6 +418,8 @@ object Variant {
 
     def shogi: Boolean                = v.shogi
     def xiangqi: Boolean              = v.xiangqi
+    def minishogi: Boolean            = v.minishogi
+    def minixiangqi: Boolean          = v.minixiangqi
 
     def standardVariant: Boolean      = standard || draughtsStandard
     def fromPositionVariant: Boolean  = fromPosition || draughtsFromPosition

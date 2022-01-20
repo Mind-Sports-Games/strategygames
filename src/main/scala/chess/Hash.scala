@@ -31,6 +31,7 @@ object Hash {
     val castlingMasks       = ZobristTables.castlingMasks.map(hexToLong)
     val enPassantMasks      = ZobristTables.enPassantMasks.map(hexToLong)
     val threeCheckMasks     = ZobristTables.threeCheckMasks.map(hexToLong)
+    val fiveCheckMasks      = ZobristTables.fiveCheckMasks.map(hexToLong)
     val crazyPromotionMasks = ZobristTables.crazyPromotionMasks.map(hexToLong)
     val pocketMasks    = ZobristTables.pocketMasks.map(hexToLong)
   }
@@ -80,13 +81,18 @@ object Hash {
       hcastling ^ table.enPassantMasks(pos.file.index)
     }
 
-    // Hash in special three-check data.
+    // Hash in special three-check and five-check data.
     val hchecks = board.variant match {
       case variant.ThreeCheck =>
         val p2Count   = math.min(situation.history.checkCount.p2, 3)
         val p1Count   = math.min(situation.history.checkCount.p1, 3)
         val hp2checks = if (p2Count > 0) hep ^ table.threeCheckMasks(p2Count - 1) else hep
         if (p1Count > 0) hp2checks ^ table.threeCheckMasks(p1Count + 2) else hp2checks
+      case variant.FiveCheck =>
+        val p2Count   = math.min(situation.history.checkCount.p2, 5)
+        val p1Count   = math.min(situation.history.checkCount.p1, 5)
+        val hp2checks = if (p2Count > 0) hep ^ table.fiveCheckMasks(p2Count - 1) else hep
+        if (p1Count > 0) hp2checks ^ table.fiveCheckMasks(p1Count + 4) else hp2checks  
       case _ => hep
     }
 
@@ -1045,6 +1051,20 @@ private object ZobristTables {
     "b183ccc9e73df9ed088dfad983bb7913",
     "fdeef11602d6b44390a852cacfc0adeb",
     "1b0ce4198b3801a6c8ce065f15fe38f5"
+  )
+
+  
+  val fiveCheckMasks = Array(
+    "366a2a47eb189287009f592bd8d06661",
+    "0622f736d98ed771f6a5d2bfc99deba7",
+    "25f9d3eaf92c9e91fe9714e012c0856d",
+    "ecd1a8444d42907ab8ccb16b4c0ac225",
+    "b936e514ed5d055b1ab045ed7e62394d",
+    "41731f54f27b958194d7d5ec0b0843d5",
+    "b468ce588498860cc9ebf774e6329d72",
+    "3222cdd8ab559c74f762ba780eed53f1",
+    "e9c1c9c8a0d731ba57c358cdcfaa4076",
+    "f225fcc6274bf6b43d518a67ad59310f"
   )
 
   val crazyPromotionMasks = Array(
