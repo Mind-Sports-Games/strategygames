@@ -150,8 +150,8 @@ object GameFamily {
     def pieceSetDefault= "2dhanzi"
     def boardThemes = List ("grey", "green")
     def boardThemeDefault = "green"
-    def playerNames = Map(P1 -> "Red", P2 -> "Black")
-    def playerColors = Map(P1 -> "red", P2 -> "black")
+    def playerNames = Map(P1 -> "White", P2 -> "Black")
+    def playerColors = Map(P1 -> "white", P2 -> "black")
   }
 
   def all: List[GameFamily] = List(
