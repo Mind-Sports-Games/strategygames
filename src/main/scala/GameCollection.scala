@@ -108,7 +108,7 @@ object GameFamily {
     def aiEnabled = false
     def defaultVariant = Variant.Chess(strategygames.chess.variant.LinesOfAction)
     def variants = Variant.all(GameLogic.Chess()).filter(_.gameFamily == this)
-    def displayPiece = "wL"
+    def displayPiece = "bL"
     def pieceSetThemes = List("fabirovsky_loa", "check_yb_loa", "wide")
     def pieceSetDefault= "check_yb_loa"
     def boardThemes = List ("blue", "blue2", "blue3", "blue-marble", "canvas", "wood", "wood2",
