@@ -6,7 +6,7 @@ import scala.annotation.nowarn
 
 import strategygames.chess._
 import strategygames.chess.format.FEN
-import strategygames.{ Color, GameFamily }
+import strategygames.{ Player, GameFamily }
 
 // Correctness depends on singletons for each variant ID
 abstract class Variant private[variant] (
@@ -41,7 +41,7 @@ abstract class Variant private[variant] (
   def fenVariant: Boolean  = false
   def aiVariant: Boolean   = true
 
-  def whiteIsBetterVariant: Boolean = false
+  def p1IsBetterVariant: Boolean = false
   def blindModeVariant: Boolean     = true
 
   def materialImbalanceVariant: Boolean = false
@@ -58,7 +58,7 @@ abstract class Variant private[variant] (
   def castles: Castles = Castles.all
 
   def initialFen: FEN   = format.Forsyth.initial
-  def startColor: Color = White
+  def startPlayer: Player = P1
 
   def isValidPromotion(promotion: Option[PromotableRole]) =
     promotion match {
@@ -75,9 +75,9 @@ abstract class Variant private[variant] (
       .to(Map)
 
   // Optimised for performance
-  def pieceThreatened(board: Board, color: Color, to: Pos, filter: Piece => Boolean = _ => true): Boolean = {
+  def pieceThreatened(board: Board, player: Player, to: Pos, filter: Piece => Boolean = _ => true): Boolean = {
     board.pieces exists {
-      case (pos, piece) if piece.color == color && filter(piece) && piece.eyes(pos, to) =>
+      case (pos, piece) if piece.player == player && filter(piece) && piece.eyes(pos, to) =>
         (!piece.role.projection) || piece.role.dir(pos, to).exists {
           longRangeThreatens(board, pos, _, to)
         }
@@ -85,19 +85,19 @@ abstract class Variant private[variant] (
     }
   }
 
-  def kingThreatened(board: Board, color: Color, to: Pos, filter: Piece => Boolean = _ => true) =
-    pieceThreatened(board, color, to, filter)
+  def kingThreatened(board: Board, player: Player, to: Pos, filter: Piece => Boolean = _ => true) =
+    pieceThreatened(board, player, to, filter)
 
   def kingSafety(m: Move, filter: Piece => Boolean, kingPos: Option[Pos]): Boolean =
     ! {
-      kingPos exists { kingThreatened(m.after, !m.color, _, filter) }
+      kingPos exists { kingThreatened(m.after, !m.player, _, filter) }
     }
 
   def kingSafety(a: Actor, m: Move): Boolean =
     kingSafety(
       m,
       if ((a.piece is King) || a.check) (_ => true) else (_.role.projection),
-      if (a.piece.role == King) None else a.board kingPosOf a.color
+      if (a.piece.role == King) None else a.board kingPosOf a.player
     )
 
   def longRangeThreatens(board: Board, p: Pos, dir: Direction, to: Pos): Boolean =
@@ -118,7 +118,7 @@ abstract class Variant private[variant] (
     for {
       actor <- situation.board.actors get from toValid "No piece on " + from
       _ <-
-        if (actor is situation.color) Validated.valid(actor)
+        if (actor is situation.player) Validated.valid(actor)
         else Validated.invalid("Not my piece on " + from)
       m1 <- findMove(from, to) toValid "Piece on " + from + " cannot move to " + to
       m2 <- m1 withPromotion promotion toValid "Piece on " + from + " cannot promote to " + promotion
@@ -139,8 +139,8 @@ abstract class Variant private[variant] (
 
   // In most variants, the winner is the last player to have played and there is a possibility of either a traditional
   // checkmate or a variant end condition
-  def winner(situation: Situation): Option[Color] =
-    if (situation.checkMate || specialEnd(situation)) Option(!situation.color) else None
+  def winner(situation: Situation): Option[Player] =
+    if (situation.checkMate || specialEnd(situation)) Option(!situation.player) else None
 
   @nowarn def specialEnd(situation: Situation) = false
 
@@ -149,9 +149,9 @@ abstract class Variant private[variant] (
   /** Returns the material imbalance in pawns (overridden in Antichess)
     */
   def materialImbalance(board: Board): Int =
-    board.pieces.values.foldLeft(0) { case (acc, Piece(color, role)) =>
+    board.pieces.values.foldLeft(0) { case (acc, Piece(player, role)) =>
       Role.valueOf(role).fold(acc) { value =>
-        acc + value * color.fold(1, -1)
+        acc + value * player.fold(1, -1)
       }
     }
 
@@ -164,7 +164,7 @@ abstract class Variant private[variant] (
     * the game should be drawn.
     */
   def opponentHasInsufficientMaterial(situation: Situation) =
-    InsufficientMatingMaterial(situation.board, !situation.color)
+    InsufficientMatingMaterial(situation.board, !situation.player)
 
   // Some variants have an extra effect on the board on a move. For example, in Atomic, some
   // pieces surrounding a capture explode
@@ -184,22 +184,22 @@ abstract class Variant private[variant] (
     */
   @nowarn def finalizeBoard(board: Board, uci: format.Uci, captured: Option[Piece]): Board = board
 
-  protected def pawnsOnPromotionRank(board: Board, color: Color) = {
+  protected def pawnsOnPromotionRank(board: Board, player: Player) = {
     board.pieces.exists {
       case (pos, Piece(c, r))
-        if c == color && r == Pawn && pos.rank == Rank.promotablePawnRank(color) => true
+        if c == player && r == Pawn && pos.rank == Rank.promotablePawnRank(player) => true
       case _ => false
     }
   }
 
-  protected def validSide(board: Board, strict: Boolean)(color: Color) = {
-    val roles = board rolesOf color
+  protected def validSide(board: Board, strict: Boolean)(player: Player) = {
+    val roles = board rolesOf player
     roles.count(_ == King) == 1 &&
     (!strict || { roles.count(_ == Pawn) <= 8 && roles.lengthCompare(16) <= 0 }) &&
-    !pawnsOnPromotionRank(board, color)
+    !pawnsOnPromotionRank(board, player)
   }
 
-  def valid(board: Board, strict: Boolean) = Color.all forall validSide(board, strict)
+  def valid(board: Board, strict: Boolean) = Player.all forall validSide(board, strict)
 
   val roles = List(Rook, Knight, King, Bishop, King, Queen, Pawn)
 
@@ -218,7 +218,7 @@ abstract class Variant private[variant] (
       }
       .to(Map)
 
-  def isUnmovedPawn(color: Color, pos: Pos) = pos.rank == color.fold(Rank.Second, Rank.Seventh)
+  def isUnmovedPawn(player: Player, pos: Pos) = pos.rank == player.fold(Rank.Second, Rank.Seventh)
 
   override def toString = s"Variant($name)"
 
@@ -286,10 +286,10 @@ object Variant {
   private[variant] def symmetricRank(rank: IndexedSeq[Role]): Map[Pos, Piece] =
     (for (y <- Seq(Rank.First, Rank.Second, Rank.Seventh, Rank.Eighth); x <- File.all) yield {
       Pos(x, y) -> (y match {
-        case Rank.First   => Piece(White, rank(x.index))
-        case Rank.Second  => Piece(White, Pawn)
-        case Rank.Seventh => Piece(Black, Pawn)
-        case Rank.Eighth  => Piece(Black, rank(x.index))
+        case Rank.First   => Piece(P1, rank(x.index))
+        case Rank.Second  => Piece(P1, Pawn)
+        case Rank.Seventh => Piece(P2, Pawn)
+        case Rank.Eighth  => Piece(P2, rank(x.index))
       })
     }).toMap
 }

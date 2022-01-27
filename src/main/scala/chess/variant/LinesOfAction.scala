@@ -2,7 +2,7 @@ package strategygames.chess.variant
 
 import strategygames.chess._
 import strategygames.chess.format.FEN
-import strategygames.{ Color, GameFamily }
+import strategygames.{ Player, GameFamily }
 
 import scala.collection.immutable.Queue
 
@@ -25,34 +25,34 @@ case object LinesOfAction
   override def aiVariant: Boolean   = false
 
   override val pieces: Map[Pos, Piece] = Map(
-    Pos.B1 -> Piece(White, LOAChecker),
-    Pos.C1 -> Piece(White, LOAChecker),
-    Pos.D1 -> Piece(White, LOAChecker),
-    Pos.E1 -> Piece(White, LOAChecker),
-    Pos.F1 -> Piece(White, LOAChecker),
-    Pos.G1 -> Piece(White, LOAChecker),
-    Pos.B8 -> Piece(White, LOAChecker),
-    Pos.C8 -> Piece(White, LOAChecker),
-    Pos.D8 -> Piece(White, LOAChecker),
-    Pos.E8 -> Piece(White, LOAChecker),
-    Pos.F8 -> Piece(White, LOAChecker),
-    Pos.G8 -> Piece(White, LOAChecker),
-    Pos.A2 -> Piece(Black, LOAChecker),
-    Pos.A3 -> Piece(Black, LOAChecker),
-    Pos.A4 -> Piece(Black, LOAChecker),
-    Pos.A5 -> Piece(Black, LOAChecker),
-    Pos.A6 -> Piece(Black, LOAChecker),
-    Pos.A7 -> Piece(Black, LOAChecker),
-    Pos.H2 -> Piece(Black, LOAChecker),
-    Pos.H3 -> Piece(Black, LOAChecker),
-    Pos.H4 -> Piece(Black, LOAChecker),
-    Pos.H5 -> Piece(Black, LOAChecker),
-    Pos.H6 -> Piece(Black, LOAChecker),
-    Pos.H7 -> Piece(Black, LOAChecker)
+    Pos.B1 -> Piece(P1, LOAChecker),
+    Pos.C1 -> Piece(P1, LOAChecker),
+    Pos.D1 -> Piece(P1, LOAChecker),
+    Pos.E1 -> Piece(P1, LOAChecker),
+    Pos.F1 -> Piece(P1, LOAChecker),
+    Pos.G1 -> Piece(P1, LOAChecker),
+    Pos.B8 -> Piece(P1, LOAChecker),
+    Pos.C8 -> Piece(P1, LOAChecker),
+    Pos.D8 -> Piece(P1, LOAChecker),
+    Pos.E8 -> Piece(P1, LOAChecker),
+    Pos.F8 -> Piece(P1, LOAChecker),
+    Pos.G8 -> Piece(P1, LOAChecker),
+    Pos.A2 -> Piece(P2, LOAChecker),
+    Pos.A3 -> Piece(P2, LOAChecker),
+    Pos.A4 -> Piece(P2, LOAChecker),
+    Pos.A5 -> Piece(P2, LOAChecker),
+    Pos.A6 -> Piece(P2, LOAChecker),
+    Pos.A7 -> Piece(P2, LOAChecker),
+    Pos.H2 -> Piece(P2, LOAChecker),
+    Pos.H3 -> Piece(P2, LOAChecker),
+    Pos.H4 -> Piece(P2, LOAChecker),
+    Pos.H5 -> Piece(P2, LOAChecker),
+    Pos.H6 -> Piece(P2, LOAChecker),
+    Pos.H7 -> Piece(P2, LOAChecker)
   )
 
   override val initialFen        = FEN("1LLLLLL1/l6l/l6l/l6l/l6l/l6l/l6l/1LLLLLL1 w - - 0 1")
-  override def startColor: Color = White
+  override def startPlayer: Player = P1
 
   override def allowsCastling = false
 
@@ -65,16 +65,16 @@ case object LinesOfAction
   private def surroundingPositions(pos: Pos): Set[Pos] =
     Set(pos.up, pos.down, pos.left, pos.right, pos.upLeft, pos.upRight, pos.downLeft, pos.downRight).flatten
 
-  private def neighboringColorPieces(color: Color, pos: Pos, board: Board): Queue[Pos] =
-    board.piecesOf(color).keySet.filter(surroundingPositions(pos)).to(Queue)
+  private def neighboringPlayerPieces(player: Player, pos: Pos, board: Board): Queue[Pos] =
+    board.piecesOf(player).keySet.filter(surroundingPositions(pos)).to(Queue)
 
-  private def firstPiece(color: Color, board: Board): Option[Pos] =
-    Option(board.piecesOf(color).keySet.head)
+  private def firstPiece(player: Player, board: Board): Option[Pos] =
+    Option(board.piecesOf(player).keySet.head)
 
-  private def numOfPieces(color: Color, board: Board): Int =
-    board.piecesOf(color).size
+  private def numOfPieces(player: Player, board: Board): Int =
+    board.piecesOf(player).size
 
-  private def winForColor(color: Color, board: Board): Boolean = {
+  private def winForPlayer(player: Player, board: Board): Boolean = {
 
     def piecesGroupSize(
         linkedPieces: Set[Pos],
@@ -92,36 +92,36 @@ case object LinesOfAction
         else
           piecesGroupSize(
             linkedPieces + pos,
-            (nextPos.tail ++ neighboringColorPieces(color, pos, board)).distinct
+            (nextPos.tail ++ neighboringPlayerPieces(player, pos, board)).distinct
           )
       }
     }
 
-    firstPiece(color, board)
+    firstPiece(player, board)
       .map(firstPiece =>
         piecesGroupSize(
           Set(firstPiece),
-          neighboringColorPieces(color, firstPiece, board)
-        ) == numOfPieces(color, board)
+          neighboringPlayerPieces(player, firstPiece, board)
+        ) == numOfPieces(player, board)
       )
       .getOrElse(false)
   }
 
   override def specialEnd(situation: Situation) =
-    winForColor(Black, situation.board) ^ winForColor(White, situation.board)
+    winForPlayer(P2, situation.board) ^ winForPlayer(P1, situation.board)
 
   //this probably isnt done very nicely, is it correct to return None for a draw?
-  override def winner(situation: Situation): Option[Color] = {
-    val blackWin = winForColor(Black, situation.board)
-    val whiteWin = winForColor(White, situation.board)
-    if (blackWin && !whiteWin) {
-      Option(Black)
-    } else if (!blackWin && whiteWin) {
-      Option(White)
+  override def winner(situation: Situation): Option[Player] = {
+    val p2Win = winForPlayer(P2, situation.board)
+    val p1Win = winForPlayer(P1, situation.board)
+    if (p2Win && !p1Win) {
+      Option(P2)
+    } else if (!p2Win && p1Win) {
+      Option(P1)
     } else None
   }
 
   override def specialDraw(situation: Situation) =
-    winForColor(Black, situation.board) && winForColor(White, situation.board)
+    winForPlayer(P2, situation.board) && winForPlayer(P1, situation.board)
 
 }

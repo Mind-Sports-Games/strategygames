@@ -20,7 +20,7 @@ case object FromPosition
   def startingPosition = Standard.startingPosition
 
   def captureDirs   = Standard.captureDirs
-  def moveDirsColor = Standard.moveDirsColor
+  def moveDirsPlayer = Standard.moveDirsPlayer
   def moveDirsAll   = Standard.moveDirsAll
 
   def maxDrawingMoves(board: Board): Option[Int] = Standard.maxDrawingMoves(board)

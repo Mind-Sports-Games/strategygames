@@ -15,7 +15,7 @@ abstract sealed class Board(
 
   def withHistory(h: History): Board
 
-  def situationOf(color: Color): Situation
+  def situationOf(player: Player): Situation
 
   def valid(strict: Boolean) = variant.valid(this, strict)
 
@@ -47,7 +47,7 @@ object Board {
       case _ => sys.error("Not passed Chess objects")
     }
 
-    def situationOf(color: Color): Situation = Situation.Chess(b.situationOf(color))
+    def situationOf(player: Player): Situation = Situation.Chess(b.situationOf(player))
 
     def materialImbalance: Int = b.materialImbalance
 
@@ -79,7 +79,7 @@ object Board {
       case _ => sys.error("Not passed Draughts objects")
     }
 
-    def situationOf(color: Color): Situation = Situation.Draughts(b.situationOf(color))
+    def situationOf(player: Player): Situation = Situation.Draughts(b.situationOf(player))
 
     def materialImbalance: Int = b.materialImbalance
 
@@ -112,7 +112,7 @@ object Board {
       case _ => sys.error("Not passed FairySF objects")
     }
 
-    def situationOf(color: Color): Situation = Situation.FairySF(b.situationOf(color))
+    def situationOf(player: Player): Situation = Situation.FairySF(b.situationOf(player))
 
     def materialImbalance: Int = b.materialImbalance
 

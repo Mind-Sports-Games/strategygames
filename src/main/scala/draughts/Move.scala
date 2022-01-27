@@ -21,7 +21,7 @@ case class Move(
 
   def situationAfter: Situation = situationAfter(false)
   def situationAfter(finalSquare: Boolean): Situation =
-    Situation.withColorAfter(finalizeAfter(finalSquare), piece.color)
+    Situation.withPlayerAfter(finalizeAfter(finalSquare), piece.player)
 
   def withHistory(h: DraughtsHistory) = copy(after = after withHistory h)
 
@@ -55,13 +55,13 @@ case class Move(
 
   def promotes = promotion.isDefined
 
-  def color = piece.color
+  def player = piece.player
 
   def withPromotion(op: Option[PromotableRole]): Option[Move] =
     op.fold(this.some) { p =>
-      if ((after count Piece(color, King)) > (before count Piece(color, King))) for {
+      if ((after count Piece(player, King)) > (before count Piece(player, King))) for {
         b2 <- after take dest
-        b3 <- b2.place(Piece(color, p), dest)
+        b3 <- b2.place(Piece(player, p), dest)
       } yield copy(after = b3, promotion = Option(p))
       else this.some
     }

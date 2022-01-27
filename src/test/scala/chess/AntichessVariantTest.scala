@@ -4,7 +4,7 @@ import cats.implicits._
 
 import org.specs2.matcher.ValidatedMatchers
 
-import strategygames.{ Black, Color, Status, White }
+import strategygames.{ P2, Player, Status, P1 }
 import strategygames.chess.format.{ FEN, Forsyth }
 import strategygames.chess.format.pgn.Reader
 import strategygames.chess.variant.Antichess
@@ -17,22 +17,22 @@ class AntichessVariantTest extends ChessTest with ValidatedMatchers {
 [Site "freechess.org"]
 [Date "2014.12.12"]
 [Round "?"]
-[White "Gnarus"]
-[Black "CatNail"]
+[P1 "Gnarus"]
+[P2 "CatNail"]
 [Result "0-1"]
 [ResultDescription "CatNail wins by losing all material"]
-[WhiteElo "1778"]
-[BlackElo "2025"]
+[P1Elo "1778"]
+[P2Elo "2025"]
 [PlyCount "67"]
 [Variant "antichess"]
 [TimeControl "180+0"]
-[WhiteClock "00:03:00.0"]
-[BlackClock "00:03:00.0"]
-[WhiteLagMillis "1470"]
-[BlackLagMillis "0"]
-[WhiteRemainingMillis "139297"]
-[BlackRemainingMillis "173163"]
-[WhiteOnTop "0"]
+[P1Clock "00:03:00.0"]
+[P2Clock "00:03:00.0"]
+[P1LagMillis "1470"]
+[P2LagMillis "0"]
+[P1RemainingMillis "139297"]
+[P2RemainingMillis "173163"]
+[P1OnTop "0"]
 
 1. g3 {[%emt 0.000]} h6 {[%emt 0.000]} 2. Nh3 {[%emt 1.156]} a6 {[%emt 0.221]} 3. Ng5 {[%emt 0.454]}
 hxg5 {[%emt 0.220]} 4. Bh3 {[%emt 0.671]} Rxh3 {[%emt 0.221]} 5. Rg1 {[%emt 0.516]}
@@ -54,7 +54,7 @@ g4 {[%emt 0.200]} 34. Rxg4 {[%emt 0.172]} 0-1"""
 
   "Antichess " should {
 
-    "Allow an opening move for white taking into account a player may move without taking if possible" in {
+    "Allow an opening move for p1 taking into account a player may move without taking if possible" in {
       val startingPosition = Game(Antichess)
       val afterFirstMove   = startingPosition.playMove(Pos.E2, Pos.E4, None)
 
@@ -130,7 +130,7 @@ g4 {[%emt 0.200]} 34. Rxg4 {[%emt 0.172]} 0-1"""
       )
 
       game must beValid.like { case newGame =>
-        newGame.board.kingPosOf(Color.black) must beNone
+        newGame.board.kingPosOf(Player.p2) must beNone
       }
     }
 
@@ -154,7 +154,7 @@ g4 {[%emt 0.200]} 34. Rxg4 {[%emt 0.172]} 0-1"""
       val newGame = originalGame flatMap (_.apply(Pos.F7, Pos.F8, Option(King))) map (_._1)
 
       newGame must beValid.like { case gameWithPromotion =>
-        gameWithPromotion.board(Pos.F8).mustEqual(Option(King - White))
+        gameWithPromotion.board(Pos.F8).mustEqual(Option(King - P1))
       }
 
     }
@@ -175,7 +175,7 @@ g4 {[%emt 0.200]} 34. Rxg4 {[%emt 0.172]} 0-1"""
       }
     }
 
-    "Be drawn on multiple bishops on the opposite color" in {
+    "Be drawn on multiple bishops on the opposite player" in {
       val position     = FEN("8/6P1/8/8/1b6/8/8/5B2 w - -")
       val originalGame = fenToGame(position, Antichess)
 
@@ -192,7 +192,7 @@ g4 {[%emt 0.200]} 34. Rxg4 {[%emt 0.172]} 0-1"""
 
     }
 
-    "Not be drawn when the black and white bishops are on the same coloured squares " in {
+    "Not be drawn when the p2 and p1 bishops are on the same coloured squares " in {
       val position     = FEN("7b/8/1p6/8/8/8/5B2/8 w - -")
       val originalGame = fenToGame(position, Antichess)
 
@@ -220,7 +220,7 @@ g4 {[%emt 0.200]} 34. Rxg4 {[%emt 0.172]} 0-1"""
       }
     }
 
-    "Not be drawn on opposite color bishops but with pawns that could be forced to attack a bishop" in {
+    "Not be drawn on opposite player bishops but with pawns that could be forced to attack a bishop" in {
       val position     = FEN("8/6p1/1B4P1/4p3/4P3/8/3p4/8 b - -")
       val originalGame = fenToGame(position, Antichess)
 
@@ -233,7 +233,7 @@ g4 {[%emt 0.200]} 34. Rxg4 {[%emt 0.172]} 0-1"""
       }
     }
 
-    "Not be drawn where a white bishop can attack a black pawn in an almost closed position" in {
+    "Not be drawn where a p1 bishop can attack a p2 pawn in an almost closed position" in {
       val position     = FEN("5b2/1P4p1/4B1P1/4p3/4P3/8/8/8 w - -")
       val originalGame = fenToGame(position, Antichess)
 
@@ -292,8 +292,8 @@ g4 {[%emt 0.200]} 34. Rxg4 {[%emt 0.172]} 0-1"""
         game.situation.end must beTrue
 
         // In antichess, the player who has just lost all their pieces is the winner
-        game.situation.winner must beSome.like { case color =>
-          color == Black;
+        game.situation.winner must beSome.like { case player =>
+          player == P2;
         }
       }
     }
@@ -306,8 +306,8 @@ g4 {[%emt 0.200]} 34. Rxg4 {[%emt 0.172]} 0-1"""
 
       drawnGame must beValid.like { case game =>
         game.situation.end must beTrue
-        game.situation.winner must beSome.like { case color =>
-          color == Black;
+        game.situation.winner must beSome.like { case player =>
+          player == P2;
         }
       }
     }
@@ -324,8 +324,8 @@ g4 {[%emt 0.200]} 34. Rxg4 {[%emt 0.172]} 0-1"""
           state == Status.VariantEnd
 
         }
-        game.situation.winner must beSome.like { case color =>
-          color == Black;
+        game.situation.winner must beSome.like { case player =>
+          player == P2;
         }
       }
     }

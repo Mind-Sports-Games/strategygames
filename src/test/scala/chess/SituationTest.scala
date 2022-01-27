@@ -7,13 +7,13 @@ class SituationTest extends ChessTest {
       "by rook" in {
         ("""
 K  r
-""" as White).check must beTrue
+""" as P1).check must beTrue
       }
       "by knight" in {
         ("""
   n
 K
-""" as White).check must beTrue
+""" as P1).check must beTrue
       }
       "by bishop" in {
         ("""
@@ -21,19 +21,19 @@ K
 
    
      K
-""" as White).check must beTrue
+""" as P1).check must beTrue
       }
       "by pawn" in {
         ("""
     p
      K
-""" as White).check must beTrue
+""" as P1).check must beTrue
       }
       "not" in {
         ("""
    n
 K
-""" as White).check must beFalse
+""" as P1).check must beFalse
       }
     }
     "detect check mate" in {
@@ -41,19 +41,19 @@ K
         ("""
 PP
 K  r
-""" as White).checkMate must beTrue
+""" as P1).checkMate must beTrue
       }
       "by knight" in {
         ("""
 PPn
 KR
-""" as White).checkMate must beTrue
+""" as P1).checkMate must beTrue
       }
       "not" in {
         ("""
   n
 K
-""" as White).checkMate must beFalse
+""" as P1).checkMate must beFalse
       }
     }
     "stale mate" in {
@@ -61,13 +61,13 @@ K
         ("""
 prr
 K
-""" as White).staleMate must beTrue
+""" as P1).staleMate must beTrue
       }
       "not" in {
         ("""
   b
 K
-""" as White).staleMate must beFalse
+""" as P1).staleMate must beFalse
       }
     }
 
@@ -76,11 +76,11 @@ K
         """
 PP
 K  r
-""" as White
+""" as P1
 
       game.checkMate must beTrue
-      game.winner must beSome.like { case color =>
-        color == Black
+      game.winner must beSome.like { case player =>
+        player == P2
       }
     }
 
@@ -88,7 +88,7 @@ K  r
       val game = """
     p
      K
-    """ as White
+    """ as P1
 
       game.winner must beNone
 
@@ -96,13 +96,13 @@ K  r
 
     "not be playable" in {
       "with touching kings" in {
-        val game = "kK BN" as Black
+        val game = "kK BN" as P2
         game.playable(true) must beFalse
         game.playable(false) must beFalse
       }
 
       "with other side in check" in {
-        val game = "k Q K" as White
+        val game = "k Q K" as P1
         game.playable(true) must beFalse
         game.playable(false) must beFalse
       }

@@ -162,12 +162,12 @@ class ForsythTest extends ChessTest {
           s.turns must_== 0
         }
       }
-      "white to play" in {
+      "p1 to play" in {
         f <<< FEN("r2q1rk1/ppp2pp1/1bnpbn1p/4p3/4P3/1BNPBN1P/PPPQ1PP1/R3K2R w KQ - 7 10") must beSome.like {
           s => s.turns must_== 18
         }
       }
-      "black to play" in {
+      "p2 to play" in {
         f <<< FEN("r1q2rk1/ppp2ppp/3p1n2/8/2PNp3/P1PnP3/2QP1PPP/R1B2K1R b - - 3 12") must beSome.like { s =>
           s.turns must_== 23
         }
@@ -182,7 +182,7 @@ class ForsythTest extends ChessTest {
           s.situation.board.history.lastMove must_== Option(Uci.Move(Pos.D7, Pos.D5))
         }
       }
-      "last move (for en passant with black to move)" in {
+      "last move (for en passant with p2 to move)" in {
         f <<< FEN("4k3/8/8/8/4pP2/8/2K5/8 b - f3 0 1") must beSome.like { s =>
           s.situation.board.history.lastMove must_== Option(Uci.Move(Pos.F2, Pos.F4))
         }
@@ -198,7 +198,7 @@ class ForsythTest extends ChessTest {
             ok
         }
       }
-      "white to play" in {
+      "p1 to play" in {
         f <<< FEN("r2q1rk1/ppp2pp1/1bnpbn1p/4p3/4P3/1BNPBN1P/PPPQ1PP1/R3K2R w KQ - 7 10") must beSome.like {
           case SituationPlus(
                 Situation(Board(_, History(_, _, Castles(true, true, false, false), _, _, _), _, _), _),
@@ -207,7 +207,7 @@ class ForsythTest extends ChessTest {
             ok
         }
       }
-      "black to play" in {
+      "p2 to play" in {
         f <<< FEN("r1q2rk1/ppp2ppp/3p1n2/8/2PNp3/P1PnP3/2QP1PPP/R1B2K1R b - - 3 12") must beSome.like {
           case SituationPlus(
                 Situation(Board(_, History(_, _, Castles(false, false, false, false), _, _, _), _, _), _),
@@ -228,37 +228,37 @@ class ForsythTest extends ChessTest {
       val fen = FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
       fixCastles(fen) must beSome(fen)
     }
-    "white king out" in {
+    "p1 king out" in {
       val fen = FEN("rnbqkbnr/pppppppp/8/8/4K3/8/PPPPPPPP/RNBQ1BNR w KQkq - 0 1")
       val fix = FEN("rnbqkbnr/pppppppp/8/8/4K3/8/PPPPPPPP/RNBQ1BNR w kq - 0 1")
       fixCastles(fen) must beSome(fix)
     }
-    "black king out" in {
+    "p2 king out" in {
       val fen = FEN("rnbq1bnr/pppppppp/3k4/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
       val fix = FEN("rnbq1bnr/pppppppp/3k4/8/8/8/PPPPPPPP/RNBQKBNR w KQ - 0 1")
       fixCastles(fen) must beSome(fix)
     }
-    "white king rook out" in {
+    "p1 king rook out" in {
       val fen = FEN("rnbqkbnr/pppppppp/8/8/8/7R/PPPPPPPP/RNBQKBN1 w KQkq - 0 1")
       val fix = FEN("rnbqkbnr/pppppppp/8/8/8/7R/PPPPPPPP/RNBQKBN1 w Qkq - 0 1")
       fixCastles(fen) must beSome(fix)
     }
-    "white queen rook out" in {
+    "p1 queen rook out" in {
       val fen = FEN("rnbqkbnr/pppppppp/8/8/8/R7/PPPPPPPP/1NBQKBNR w KQkq - 0 1")
       val fix = FEN("rnbqkbnr/pppppppp/8/8/8/R7/PPPPPPPP/1NBQKBNR w Kkq - 0 1")
       fixCastles(fen) must beSome(fix)
     }
-    "white king rook out" in {
+    "p1 king rook out" in {
       val fen = FEN("rnbqkbnr/pppppppp/8/8/8/7R/PPPPPPPP/RNBQKBN1 w KQkq - 0 1")
       val fix = FEN("rnbqkbnr/pppppppp/8/8/8/7R/PPPPPPPP/RNBQKBN1 w Qkq - 0 1")
       fixCastles(fen) must beSome(fix)
     }
-    "white both rooks out" in {
+    "p1 both rooks out" in {
       val fen = FEN("rnbqkbnr/pppppppp/8/8/8/R6R/PPPPPPPP/1NBQKBN1 w KQkq - 0 1")
       val fix = FEN("rnbqkbnr/pppppppp/8/8/8/R6R/PPPPPPPP/1NBQKBN1 w kq - 0 1")
       fixCastles(fen) must beSome(fix)
     }
-    "white and black both rooks out" in {
+    "p1 and p2 both rooks out" in {
       val fen = FEN("1nbqkbn1/pppppppp/8/8/8/R6R/PPPPPPPP/1NBQKBN1 w KQkq - 0 1")
       val fix = FEN("1nbqkbn1/pppppppp/8/8/8/R6R/PPPPPPPP/1NBQKBN1 w - - 0 1")
       fixCastles(fen) must beSome(fix)
@@ -390,27 +390,27 @@ class ForsythTest extends ChessTest {
     "read" in {
       "no checks" in {
         f.<<<@(ThreeCheck, FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3")) must beSome.like { s =>
-          s.situation.board.history.checkCount.white must_== 0
-          s.situation.board.history.checkCount.black must_== 0
+          s.situation.board.history.checkCount.p1 must_== 0
+          s.situation.board.history.checkCount.p2 must_== 0
         }
       }
       "explicitely no checks" in {
         f.<<<@(ThreeCheck, FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3 +0+0")) must beSome.like { s =>
-          s.situation.board.history.checkCount.white must_== 0
-          s.situation.board.history.checkCount.black must_== 0
+          s.situation.board.history.checkCount.p1 must_== 0
+          s.situation.board.history.checkCount.p2 must_== 0
         }
       }
       "checks" in {
         f.<<<@(ThreeCheck, FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3 +1+2")) must beSome.like { s =>
-          s.situation.board.history.checkCount.white must_== 2
-          s.situation.board.history.checkCount.black must_== 1
+          s.situation.board.history.checkCount.p1 must_== 2
+          s.situation.board.history.checkCount.p2 must_== 1
         }
       }
       "winboard checks" in {
         f.<<<@(ThreeCheck, FEN("r1bqkbnr/pppp1Qpp/2n5/4p3/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 2+3 0 3")) must beSome.like {
           s =>
-            s.situation.board.history.checkCount.white must_== 0
-            s.situation.board.history.checkCount.black must_== 1
+            s.situation.board.history.checkCount.p1 must_== 0
+            s.situation.board.history.checkCount.p2 must_== 1
         }
       }
     }
@@ -434,27 +434,27 @@ class ForsythTest extends ChessTest {
     "read" in {
       "no checks" in {
         f.<<<@(FiveCheck,FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3")) must beSome.like { s =>
-          s.situation.board.history.checkCount.white must_== 0
-          s.situation.board.history.checkCount.black must_== 0
+          s.situation.board.history.checkCount.p1 must_== 0
+          s.situation.board.history.checkCount.p2 must_== 0
         }
       }
       "explicitely no checks" in {
         f.<<<@(FiveCheck,FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3 +0+0")) must beSome.like { s =>
-          s.situation.board.history.checkCount.white must_== 0
-          s.situation.board.history.checkCount.black must_== 0
+          s.situation.board.history.checkCount.p1 must_== 0
+          s.situation.board.history.checkCount.p2 must_== 0
         }
       }
       "checks" in {
         f.<<<@(FiveCheck,FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3 +1+2")) must beSome.like { s =>
-          s.situation.board.history.checkCount.white must_== 2
-          s.situation.board.history.checkCount.black must_== 1
+          s.situation.board.history.checkCount.p1 must_== 2
+          s.situation.board.history.checkCount.p2 must_== 1
         }
       }
       "winboard checks" in {
         f.<<<@(FiveCheck,FEN("r1bqkbnr/pppp1Qpp/2n5/4p3/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 4+5 0 3")) must beSome.like {
           s =>
-            s.situation.board.history.checkCount.white must_== 0
-            s.situation.board.history.checkCount.black must_== 1
+            s.situation.board.history.checkCount.p1 must_== 0
+            s.situation.board.history.checkCount.p2 must_== 1
         }
       }
     }

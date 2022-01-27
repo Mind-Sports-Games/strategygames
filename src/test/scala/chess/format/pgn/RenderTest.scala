@@ -17,11 +17,11 @@ class RenderTest extends ChessTest {
 [Site "Bonn GER"]
 [Date "2008.10.14"]
 [Round "1"]
-[White "Kramnik,V"]
-[Black "Anand,V"]
+[P1 "Kramnik,V"]
+[P2 "Anand,V"]
 [Result "1/2-1/2"]
-[WhiteElo "2772"]
-[BlackElo "2783"]
+[P1Elo "2772"]
+[P2Elo "2783"]
 [ECO "D14"]
 [Annotator "IM Malcolm Pein"]
 [EventDate "2008.10.14"]
@@ -32,9 +32,9 @@ confidently }
 
 1. d4 d5 2. c4 c6 3. Nc3 Nf6 4. cxd5 { The Exchange Slav, the sure way to
 play with zero losing chances so an ideal choice for game one } 4... cxd5
-5. Bf4 Nc6 6. e3 Bf5 7. Nf3 e6 { Black cannot continue symmetrically for
+5. Bf4 Nc6 6. e3 Bf5 7. Nf3 e6 { P2 cannot continue symmetrically for
 too long of course but this is the most solid choice } 8. Qb3 Bb4 9. Bb5
-O-O { Black breaks the symmetry but this is still the main line of chess
+O-O { P2 breaks the symmetry but this is still the main line of chess
 opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
    */
 
@@ -43,45 +43,45 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
       val pgn = Pgn(
         tags = Tags(
           List(
-            Tag(_.White, "Kramnik,V"),
-            Tag(_.Black, "Anand,V"),
+            Tag(_.P1, "Kramnik,V"),
+            Tag(_.P2, "Anand,V"),
             Tag(_.ECO, "D14")
           )
         ),
         turns = List(
           Turn(
             number = 1,
-            white = Move("d4").some,
-            black = Move("d5").some
+            p1 = Move("d4").some,
+            p2 = Move("d5").some
           ),
           Turn(
             number = 2,
-            white = Move("c4", glyphs = glyphs(1)).some,
-            black = Move("c6", glyphs = glyphs(2)).some
+            p1 = Move("c4", glyphs = glyphs(1)).some,
+            p2 = Move("c6", glyphs = glyphs(2)).some
           ),
           Turn(
             number = 3,
-            white = Move("Nc3", glyphs = glyphs(3)).some,
-            black = Move("Nf6").some
+            p1 = Move("Nc3", glyphs = glyphs(3)).some,
+            p2 = Move("Nf6").some
           ),
           Turn(
             number = 4,
-            white = Move(
+            p1 = Move(
               "cxd5",
               comments =
                 "The Exchange Slav, the sure way to play with zero losing chances so an ideal choice for game one" :: Nil
             ).some,
-            black = Move("cxd5").some
+            p2 = Move("cxd5").some
           ),
           Turn(
             number = 5,
-            white = Move("Bf4").some,
-            black = Move("Nc6").some
+            p1 = Move("Bf4").some,
+            p2 = Move("Nc6").some
           )
         )
       )
-      pgn.toString must_== """[White "Kramnik,V"]
-[Black "Anand,V"]
+      pgn.toString must_== """[P1 "Kramnik,V"]
+[P2 "Anand,V"]
 [ECO "D14"]
 
 1. d4 d5 2. c4! c6? 3. Nc3!! Nf6 4. cxd5 { The Exchange Slav, the sure way to play with zero losing chances so an ideal choice for game one } 4... cxd5 5. Bf4 Nc6"""
@@ -90,8 +90,8 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
       val pgn = Pgn(
         tags = Tags(
           List(
-            Tag(_.White, "tsinnema"),
-            Tag(_.Black, "stockfish"),
+            Tag(_.P1, "tsinnema"),
+            Tag(_.P2, "stockfish"),
             Tag(_.TimeControl, "300"),
             Tag(_.ECO, "A00e")
           )
@@ -99,38 +99,38 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
         turns = List(
           Turn(
             number = 1,
-            white = Move("a4", secondsLeft = 298.some).some,
-            black = Move("Nf6", secondsLeft = 299.some).some
+            p1 = Move("a4", secondsLeft = 298.some).some,
+            p2 = Move("Nf6", secondsLeft = 299.some).some
           ),
           Turn(
             number = 2,
-            white = Move("d4", secondsLeft = 295.some).some,
-            black = Move("d5", secondsLeft = 298.some).some
+            p1 = Move("d4", secondsLeft = 295.some).some,
+            p2 = Move("d5", secondsLeft = 298.some).some
           ),
           Turn(
             number = 3,
-            white = Move("h4", secondsLeft = 292.some).some,
-            black = Move("e6", secondsLeft = 297.some).some
+            p1 = Move("h4", secondsLeft = 292.some).some,
+            p2 = Move("e6", secondsLeft = 297.some).some
           ),
           Turn(
             number = 4,
-            white = Move(
+            p1 = Move(
               "Qd3",
               glyphs = glyphs(1),
               secondsLeft = 288.some,
               comments = "An invention of true genius." :: Nil
             ).some,
-            black = Move("c5", secondsLeft = 296.some).some
+            p2 = Move("c5", secondsLeft = 296.some).some
           ),
           Turn(
             number = 5,
-            white = Move("dxc5", secondsLeft = 258.some).some,
-            black = Move("Bxc5", glyphs = glyphs(1), secondsLeft = 295.some).some
+            p1 = Move("dxc5", secondsLeft = 258.some).some,
+            p2 = Move("Bxc5", glyphs = glyphs(1), secondsLeft = 295.some).some
           )
         )
       )
-      pgn.toString must_== """[White "tsinnema"]
-[Black "stockfish"]
+      pgn.toString must_== """[P1 "tsinnema"]
+[P2 "stockfish"]
 [TimeControl "300"]
 [ECO "A00e"]
 
@@ -143,25 +143,25 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
         turns = List(
           Turn(
             number = 1,
-            white = Move("d3", glyphs = glyphs(6)).some,
-            black = Move("Nc6", glyphs = glyphs(10)).some
+            p1 = Move("d3", glyphs = glyphs(6)).some,
+            p2 = Move("Nc6", glyphs = glyphs(10)).some
           ),
           Turn(
             number = 2,
-            white = Move("Qd2").some,
-            black = Move(
+            p1 = Move("Qd2").some,
+            p2 = Move(
               "Nb4",
               glyphs = Glyphs(
                 Glyph.MoveAssessment.blunder.some,
-                Glyph.PositionAssessment.whiteMuchBetter.some,
+                Glyph.PositionAssessment.p1MuchBetter.some,
                 List(Glyph.Observation.timeTrouble)
               )
             ).some
           ),
           Turn(
             number = 3,
-            white = Move("Qxb4", glyphs = glyphs(7)).some,
-            black = None
+            p1 = Move("Qxb4", glyphs = glyphs(7)).some,
+            p2 = None
           )
         )
       )
@@ -174,26 +174,26 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
         turns = List(
           Turn(
             number = 1,
-            white = Move(
+            p1 = Move(
               "d4",
               variations = List(
                 List(
                   Turn(
                     number = 1,
-                    white = Move("e4").some,
-                    black = None
+                    p1 = Move("e4").some,
+                    p2 = None
                   )
                 )
               )
             ).some,
-            black = Move(
+            p2 = Move(
               "Nf6",
               variations = List(
                 List(
                   Turn(
                     number = 1,
-                    white = None,
-                    black = Move("d5").some
+                    p1 = None,
+                    p2 = Move("d5").some
                   )
                 )
               )
@@ -207,8 +207,8 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
       val pgn = Pgn(
         tags = Tags(
           List(
-            Tag(_.White, "tsinnema"),
-            Tag(_.Black, "[=0040.34h5a4]"),
+            Tag(_.P1, "tsinnema"),
+            Tag(_.P2, "[=0040.34h5a4]"),
             Tag(_.TimeControl, "300"),
             Tag(_.ECO, "A00e")
           )
@@ -216,38 +216,38 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
         turns = List(
           Turn(
             number = 1,
-            white = Move("a4", secondsLeft = 298.some).some,
-            black = Move("Nf6", secondsLeft = 299.some).some
+            p1 = Move("a4", secondsLeft = 298.some).some,
+            p2 = Move("Nf6", secondsLeft = 299.some).some
           ),
           Turn(
             number = 2,
-            white = Move("d4", secondsLeft = 295.some).some,
-            black = Move("d5", secondsLeft = 298.some).some
+            p1 = Move("d4", secondsLeft = 295.some).some,
+            p2 = Move("d5", secondsLeft = 298.some).some
           ),
           Turn(
             number = 3,
-            white = Move("h4", secondsLeft = 292.some).some,
-            black = Move("e6", secondsLeft = 297.some).some
+            p1 = Move("h4", secondsLeft = 292.some).some,
+            p2 = Move("e6", secondsLeft = 297.some).some
           ),
           Turn(
             number = 4,
-            white = Move(
+            p1 = Move(
               "Qd3",
               glyphs = glyphs(1),
               secondsLeft = 288.some,
               comments = "An invention of true genius." :: Nil
             ).some,
-            black = Move("c5", secondsLeft = 296.some).some
+            p2 = Move("c5", secondsLeft = 296.some).some
           ),
           Turn(
             number = 5,
-            white = Move("dxc5", secondsLeft = 258.some).some,
-            black = Move("Bxc5", glyphs = glyphs(1), secondsLeft = 295.some).some
+            p1 = Move("dxc5", secondsLeft = 258.some).some,
+            p2 = Move("Bxc5", glyphs = glyphs(1), secondsLeft = 295.some).some
           )
         )
       )
-      pgn.toString must_== """[White "tsinnema"]
-[Black "[=0040.34h5a4]"]
+      pgn.toString must_== """[P1 "tsinnema"]
+[P2 "[=0040.34h5a4]"]
 [TimeControl "300"]
 [ECO "A00e"]
 
@@ -303,26 +303,26 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
         turns = List(
           Turn(
             number = 1,
-            white = Move(
+            p1 = Move(
               "d4",
               variations = List(
                 List(
                   Turn(
                     number = 1,
-                    white = Move("e4").some,
-                    black = None
+                    p1 = Move("e4").some,
+                    p2 = None
                   )
                 )
               )
             ).some,
-            black = Move(
+            p2 = Move(
               "Nf6",
               variations = List(
                 List(
                   Turn(
                     number = 1,
-                    white = None,
-                    black = Move("d5").some
+                    p1 = None,
+                    p2 = Move("d5").some
                   )
                 )
               )

@@ -7,12 +7,12 @@ class LinesOfActionVariantTest extends ChessTest {
 
   "Lines Of Action" should {
 
-    "Black win from position" in {
+    "P2 win from position" in {
       val position = FEN("1llllll1/L6L/L6L/L6L/L6L/L6L/L6L/8 b - - 0 1")
       val game     = fenToGame(position, LinesOfAction)
       game must beValid.like {
         case game => {
-          game.situation.winner == Option(Black) must beTrue
+          game.situation.winner == Option(P2) must beTrue
         }
       }
     }

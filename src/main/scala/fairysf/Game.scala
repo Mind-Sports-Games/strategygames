@@ -1,5 +1,5 @@
 package strategygames.fairysf
-import strategygames.{ Clock, Color, MoveMetrics }
+import strategygames.{ Clock, Player, MoveMetrics }
 
 import cats.data.Validated
 
@@ -62,14 +62,14 @@ case class Game(
       }
     }
 
-  def player = situation.color
+  def player = situation.player
 
   def board = situation.board
 
   def halfMoveClock: Int = board.history.halfMoveClock
 
   /** Fullmove number: The number of the full move.
-    * It starts at 1, and is incremented after Black's move.
+    * It starts at 1, and is incremented after P2's move.
     */
   def fullMoveNumber: Int = 1 + turns / 2
 
@@ -78,7 +78,7 @@ case class Game(
 
 object Game {
   def apply(variant: strategygames.fairysf.variant.Variant): Game =
-    new Game(Situation(Board init variant, White))
+    new Game(Situation(Board init variant, P1))
 
   def apply(variantOption: Option[strategygames.fairysf.variant.Variant], fen: Option[FEN]): Game = {
     val variant = variantOption | strategygames.fairysf.variant.Variant.default
@@ -93,7 +93,7 @@ object Game {
             board = parsed.situation.board withVariant g.board.variant withPocketData {
               parsed.situation.board.pocketData orElse g.board.pocketData
             },
-            color = parsed.situation.color
+            player = parsed.situation.player
           ),
           turns = parsed.turns
         )

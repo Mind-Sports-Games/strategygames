@@ -31,7 +31,7 @@ case class Std(
     val dest        = fields.last
     val capturePath = if (capture) fields.tail.reverse else Nil
     situation.board.pieces.foldLeft(none[strategygames.draughts.Move]) {
-      case (None, (pos, piece)) if piece.color == situation.color && pos == src =>
+      case (None, (pos, piece)) if piece.player == situation.player && pos == src =>
         val a = Actor(piece, situation.board.posAt(pos), situation.board)
         // TODO: technically we should check situation.hasCaptures instead of actor
         val validMoves = if (a.captures.nonEmpty) a.captures else a.noncaptures

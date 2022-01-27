@@ -1,12 +1,12 @@
 package strategygames.chess
 
-import strategygames.Color
+import strategygames.Player
 
-case class Piece(color: Color, role: Role) {
+case class Piece(player: Player, role: Role) {
 
-  def is(c: Color)    = c == color
+  def is(c: Player)    = c == player
   def is(r: Role)     = r == role
-  def isNot(c: Color) = c != color
+  def isNot(c: Player) = c != player
   def isNot(r: Role)  = r != role
 
   def oneOf(rs: Set[Role]) = rs(role)
@@ -14,7 +14,7 @@ case class Piece(color: Color, role: Role) {
   def isMinor = oneOf(Set(Knight, Bishop))
   def isMajor = oneOf(Set(Queen, Rook))
 
-  def forsyth: Char = if (color == White) role.forsythUpper else role.forsyth
+  def forsyth: Char = if (player == P1) role.forsythUpper else role.forsyth
 
   // attackable positions assuming empty board
   def eyes(from: Pos, to: Pos): Boolean =
@@ -27,33 +27,33 @@ case class Piece(color: Color, role: Role) {
         val xd = from xDist to
         val yd = from yDist to
         (xd == 1 && yd == 2) || (xd == 2 && yd == 1)
-      case Pawn       => Piece.pawnEyes(color, from, to)
+      case Pawn       => Piece.pawnEyes(player, from, to)
       case LOAChecker => (from onSameLine to) || (from onSameDiagonal to)
     }
 
   // movable positions assuming empty board
   def eyesMovable(from: Pos, to: Pos): Boolean =
-    if (role == Pawn) Piece.pawnEyes(color, from, to) || {
+    if (role == Pawn) Piece.pawnEyes(player, from, to) || {
       (from ?| to) && {
         val dy = to.rank - from.rank
-        if (color.white) (dy == 1 || (from.rank <= Rank.Second && dy == 2))
+        if (player.p1) (dy == 1 || (from.rank <= Rank.Second && dy == 2))
         else (dy == -1 || (from.rank >= Rank.Seventh && dy == -2))
       }
     }
     else eyes(from, to)
 
-  override def toString = s"$color-$role".toLowerCase
+  override def toString = s"$player-$role".toLowerCase
 }
 
 object Piece {
 
   def fromChar(c: Char): Option[Piece] =
     Role.allByPgn get c.toUpper map {
-      Piece(Color.fromWhite(c.isUpper), _)
+      Piece(Player.fromP1(c.isUpper), _)
     }
 
-  private def pawnEyes(color: Color, from: Pos, to: Pos) =
+  private def pawnEyes(player: Player, from: Pos, to: Pos) =
     (from xDist to) == 1 && (to.rank - from.rank) == {
-      if (color.white) 1 else -1
+      if (player.p1) 1 else -1
     }
 }

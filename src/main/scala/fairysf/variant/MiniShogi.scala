@@ -34,11 +34,11 @@ case object MiniShogi
     super.validDrops(situation).filterNot(
       d => d.piece.role == ShogiPawn && {
         val kingPos = situation.board.posMap.get(
-          Piece(!situation.color, kingPiece)
+          Piece(!situation.player, kingPiece)
         ).flatMap(_.headOption)
-        Some(d.pos) == (situation.color match {
-          case White => kingPos.flatMap(_.down)
-          case Black => kingPos.flatMap(_.up)
+        Some(d.pos) == (situation.player match {
+          case P1 => kingPos.flatMap(_.down)
+          case P2 => kingPos.flatMap(_.up)
         })
       } && situation.board.apiPosition.makeMoves(List(d.toUci.uci)).gameResult == GameResult.Checkmate()
     )

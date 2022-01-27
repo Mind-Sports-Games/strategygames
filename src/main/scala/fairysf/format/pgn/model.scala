@@ -4,7 +4,7 @@ package pgn
 
 import cats.implicits._
 
-import strategygames.Color
+import strategygames.Player
 import strategygames.format.pgn.{ Glyphs, Tag, Tags }
 
 case class Pgn(
@@ -21,8 +21,8 @@ case class Pgn(
   }
   def updatePly(ply: Int, f: Move => Move) = {
     val fullMove = (ply + 1) / 2
-    val color    = Color.fromPly(ply - 1)
-    updateTurn(fullMove, _.update(color, f))
+    val player    = Player.fromPly(ply - 1)
+    updateTurn(fullMove, _.update(player, f))
   }
   def updateLastPly(f: Move => Move) = updatePly(nbPlies, f)
 
@@ -30,7 +30,7 @@ case class Pgn(
 
   def moves =
     turns.flatMap { t =>
-      List(t.white, t.black).flatten
+      List(t.p1, t.p2).flatten
     }
 
   def withEvent(title: String) =
@@ -61,29 +61,29 @@ object Initial {
 
 case class Turn(
     number: Int,
-    white: Option[Move],
-    black: Option[Move]
+    p1: Option[Move],
+    p2: Option[Move]
 ) {
 
-  def update(color: Color, f: Move => Move) =
-    color.fold(
-      copy(white = white map f),
-      copy(black = black map f)
+  def update(player: Player, f: Move => Move) =
+    player.fold(
+      copy(p1 = p1 map f),
+      copy(p2 = p2 map f)
     )
 
   def updateLast(f: Move => Move) = {
-    black.map(m => copy(black = f(m).some)) orElse
-      white.map(m => copy(white = f(m).some))
+    p2.map(m => copy(p2 = f(m).some)) orElse
+      p1.map(m => copy(p1 = f(m).some))
   } | this
 
-  def isEmpty = white.isEmpty && black.isEmpty
+  def isEmpty = p1.isEmpty && p2.isEmpty
 
-  def plyOf(color: Color) = number * 2 - color.fold(1, 0)
+  def plyOf(player: Player) = number * 2 - player.fold(1, 0)
 
-  def count = List(white, black) count (_.isDefined)
+  def count = List(p1, p2) count (_.isDefined)
 
   override def toString = {
-    val text = (white, black) match {
+    val text = (p1, p2) match {
       case (Some(w), Some(b)) if w.isLong => s" $w $number... $b"
       case (Some(w), Some(b))             => s" $w $b"
       case (Some(w), None)                => s" $w"
@@ -103,7 +103,7 @@ object Turn {
       case ((Nil, p), move) =>
         (Turn((p + 1) / 2, none, move.some) :: Nil) -> (p + 1)
       case ((t :: tt, p), move) =>
-        (t.copy(black = move.some) :: tt) -> (p + 1)
+        (t.copy(p2 = move.some) :: tt) -> (p + 1)
     }
   }._1.reverse
 }

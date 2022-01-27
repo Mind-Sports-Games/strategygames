@@ -2,7 +2,7 @@ package strategygames.chess.variant
 
 import strategygames.chess._
 import strategygames.chess.format.FEN
-import strategygames.Color
+import strategygames.Player
 
 case object RacingKings
     extends Variant(
@@ -17,7 +17,7 @@ case object RacingKings
   def perfId: Int    = 17
   def perfIcon: Char = ''
 
-  override def whiteIsBetterVariant = true
+  override def p1IsBetterVariant = true
   override def blindModeVariant = false
 
   override def allowsCastling = false
@@ -26,22 +26,22 @@ case object RacingKings
   // krbnNBRK
   // qrbnNBRQ
   override val pieces: Map[Pos, Piece] = Map(
-    Pos.A1 -> Piece(Black, Queen),
-    Pos.A2 -> Piece(Black, King),
-    Pos.B1 -> Piece(Black, Rook),
-    Pos.B2 -> Piece(Black, Rook),
-    Pos.C1 -> Piece(Black, Bishop),
-    Pos.C2 -> Piece(Black, Bishop),
-    Pos.D1 -> Piece(Black, Knight),
-    Pos.D2 -> Piece(Black, Knight),
-    Pos.E1 -> Piece(White, Knight),
-    Pos.E2 -> Piece(White, Knight),
-    Pos.F1 -> Piece(White, Bishop),
-    Pos.F2 -> Piece(White, Bishop),
-    Pos.G1 -> Piece(White, Rook),
-    Pos.G2 -> Piece(White, Rook),
-    Pos.H1 -> Piece(White, Queen),
-    Pos.H2 -> Piece(White, King)
+    Pos.A1 -> Piece(P2, Queen),
+    Pos.A2 -> Piece(P2, King),
+    Pos.B1 -> Piece(P2, Rook),
+    Pos.B2 -> Piece(P2, Rook),
+    Pos.C1 -> Piece(P2, Bishop),
+    Pos.C2 -> Piece(P2, Bishop),
+    Pos.D1 -> Piece(P2, Knight),
+    Pos.D2 -> Piece(P2, Knight),
+    Pos.E1 -> Piece(P1, Knight),
+    Pos.E2 -> Piece(P1, Knight),
+    Pos.F1 -> Piece(P1, Bishop),
+    Pos.F2 -> Piece(P1, Bishop),
+    Pos.G1 -> Piece(P1, Rook),
+    Pos.G2 -> Piece(P1, Rook),
+    Pos.H1 -> Piece(P1, Queen),
+    Pos.H2 -> Piece(P1, King)
   )
 
   override val castles = Castles.none
@@ -51,39 +51,39 @@ case object RacingKings
   override def isInsufficientMaterial(board: Board)                  = false
   override def opponentHasInsufficientMaterial(situation: Situation) = false
 
-  private def reachedGoal(board: Board, color: Color) =
-    board.kingPosOf(color) exists (_.rank == Rank.Eighth)
+  private def reachedGoal(board: Board, player: Player) =
+    board.kingPosOf(player) exists (_.rank == Rank.Eighth)
 
   private def reachesGoal(move: Move) =
-    reachedGoal(move.situationAfter.board, move.piece.color)
+    reachedGoal(move.situationAfter.board, move.piece.player)
 
-  // It is a win, when exactly one king made it to the goal. When white reaches
-  // the goal and black can make it on the next ply, he is given a chance to
+  // It is a win, when exactly one king made it to the goal. When p1 reaches
+  // the goal and p2 can make it on the next ply, he is given a chance to
   // draw, to compensate for the first-move advantage. The draw is not called
-  // automatically, because black should also be given equal chances to flag.
+  // automatically, because p2 should also be given equal chances to flag.
   override def specialEnd(situation: Situation) =
-    situation.color match {
-      case White =>
-        reachedGoal(situation.board, White) ^ reachedGoal(situation.board, Black)
-      case Black =>
-        reachedGoal(situation.board, White) && (validMoves(situation).view mapValues (_.filter(reachesGoal)))
+    situation.player match {
+      case P1 =>
+        reachedGoal(situation.board, P1) ^ reachedGoal(situation.board, P2)
+      case P2 =>
+        reachedGoal(situation.board, P1) && (validMoves(situation).view mapValues (_.filter(reachesGoal)))
           .forall(_._2.isEmpty)
     }
 
-  // If white reaches the goal and black also reaches the goal directly after,
+  // If p1 reaches the goal and p2 also reaches the goal directly after,
   // then it is a draw.
   override def specialDraw(situation: Situation) =
-    situation.color.white && reachedGoal(situation.board, White) && reachedGoal(situation.board, Black)
+    situation.player.p1 && reachedGoal(situation.board, P1) && reachedGoal(situation.board, P2)
 
-  override def winner(situation: Situation): Option[Color] =
-    specialEnd(situation) option Color.fromWhite(reachedGoal(situation.board, White))
+  override def winner(situation: Situation): Option[Player] =
+    specialEnd(situation) option Player.fromP1(reachedGoal(situation.board, P1))
 
   // Not only check that our king is safe,
   // but also check the opponent's
   override def kingSafety(m: Move, filter: Piece => Boolean, kingPos: Option[Pos]): Boolean =
     super.kingSafety(m, filter, kingPos) && ! {
-      m.after.kingPos get !m.color exists { theirKingPos =>
-        kingThreatened(m.after, m.color, theirKingPos, (_ => true))
+      m.after.kingPos get !m.player exists { theirKingPos =>
+        kingThreatened(m.after, m.player, theirKingPos, (_ => true))
       }
     }
 

@@ -1,6 +1,6 @@
 package strategygames.chess
 
-import strategygames.Color
+import strategygames.Player
 
 /** Utility methods for helping to determine whether a situation is a draw or a draw
   * on a player flagging.
@@ -11,7 +11,7 @@ object InsufficientMatingMaterial {
 
   def nonKingPieces(board: Board) = board.pieces filter (_._2.role != King)
 
-  def bishopsOnOppositeColors(board: Board) =
+  def bishopsOnOppositePlayers(board: Board) =
     (board.pieces collect { case (pos, Piece(_, Bishop)) => pos.isLight } toList).distinct
     .lengthCompare(2) == 0
 
@@ -20,7 +20,7 @@ object InsufficientMatingMaterial {
    */
   def pawnBlockedByPawn(pawn: Actor, board: Board) =
     pawn.moves.isEmpty && {
-      val blockingPosition = Actor.posAheadOfPawn(pawn.pos, pawn.piece.color)
+      val blockingPosition = Actor.posAheadOfPawn(pawn.pos, pawn.piece.player)
       blockingPosition.flatMap(board.apply).exists(_.is(Pawn))
     }
 
@@ -36,32 +36,32 @@ object InsufficientMatingMaterial {
       (p._2 is King) || (p._2 is Bishop) || (p._2 is Knight)
     }
 
-    kingsAndMinorsOnly && (board.pieces.size <= 3 || (kingsAndBishopsOnly && !bishopsOnOppositeColors(board)))
+    kingsAndMinorsOnly && (board.pieces.size <= 3 || (kingsAndBishopsOnly && !bishopsOnOppositePlayers(board)))
   }
 
   /*
-   * Determines whether a color does not have mating material. In general:
+   * Determines whether a player does not have mating material. In general:
    * King by itself is not mating material
    * King + knight mates against king + any(rook, bishop, knight, pawn)
    * King + bishop mates against king + any(bishop, knight, pawn)
-   * King + bishop(s) versus king + bishop(s) depends upon bishop square colors
+   * King + bishop(s) versus king + bishop(s) depends upon bishop square players
    */
-  def apply(board: Board, color: Color) = {
+  def apply(board: Board, player: Player) = {
 
-    val kingsAndMinorsOnlyOfColor = board.piecesOf(color) forall { p =>
+    val kingsAndMinorsOnlyOfPlayer = board.piecesOf(player) forall { p =>
       (p._2 is King) || (p._2 is Bishop) || (p._2 is Knight)
     }
-    lazy val nonKingRolesOfColor  = board rolesOf color filter (King !=)
-    lazy val rolesOfOpponentColor = board rolesOf !color
+    lazy val nonKingRolesOfPlayer  = board rolesOf player filter (King !=)
+    lazy val rolesOfOpponentPlayer = board rolesOf !player
 
-    kingsAndMinorsOnlyOfColor && (nonKingRolesOfColor.distinct match {
+    kingsAndMinorsOnlyOfPlayer && (nonKingRolesOfPlayer.distinct match {
       case Nil => true
       case List(Knight) =>
-        nonKingRolesOfColor.lengthCompare(
+        nonKingRolesOfPlayer.lengthCompare(
           1
-        ) == 0 && !(rolesOfOpponentColor filter (King !=) exists (Queen !=))
+        ) == 0 && !(rolesOfOpponentPlayer filter (King !=) exists (Queen !=))
       case List(Bishop) =>
-        !(rolesOfOpponentColor.exists(r => r == Knight || r == Pawn) || bishopsOnOppositeColors(board))
+        !(rolesOfOpponentPlayer.exists(r => r == Knight || r == Pawn) || bishopsOnOppositePlayers(board))
       case _ => false
     })
   }

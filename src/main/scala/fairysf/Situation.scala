@@ -1,13 +1,13 @@
 package strategygames.fairysf
 
-import strategygames.{ Color, Status }
+import strategygames.{ Player, Status }
 
 import cats.data.Validated
 import cats.implicits._
 
 import strategygames.fairysf.format.{ Forsyth, Uci }
 
-case class Situation(board: Board, color: Color) {
+case class Situation(board: Board, player: Player) {
 
   lazy val moves: Map[Pos, List[Move]] = board.variant.validMoves(this)
 
@@ -17,12 +17,12 @@ case class Situation(board: Board, color: Color) {
 
   def dropsByRole: Option[Map[Role, List[Pos]]] = board.variant.possibleDropsByRole(this)
 
-  //lazy val kingPos: Option[Pos] = board kingPosOf color
+  //lazy val kingPos: Option[Pos] = board kingPosOf player
 
   lazy val check: Boolean = board.apiPosition.givesCheck
 
   def checkSquare =
-    if (check) board.posMap.get(Piece(color, board.variant.kingPiece)).flatMap(_.headOption)
+    if (check) board.posMap.get(Piece(player, board.variant.kingPiece)).flatMap(_.headOption)
     else None
 
   def history = board.history
@@ -45,10 +45,10 @@ case class Situation(board: Board, color: Color) {
 
   def end: Boolean = checkMate || perpetual || staleMate || variantEnd
 
-  def winner: Option[Color] = board.variant.winner(this)
+  def winner: Option[Player] = board.variant.winner(this)
 
   def playable(strict: Boolean): Boolean =
-    (board valid strict) && !end && !copy(color = !color).check
+    (board valid strict) && !end && !copy(player = !player).check
 
   lazy val status: Option[Status] =
     if (checkMate) Status.Mate.some
@@ -58,12 +58,12 @@ case class Situation(board: Board, color: Color) {
     else if (staleMate) Status.Stalemate.some
     else none
 
-  //TODO: test White/Black map is correct
+  //TODO: test P1/P2 map is correct
   def opponentHasInsufficientMaterial: Boolean = {
     val insufficientMaterial = board.apiPosition.insufficientMaterial
-    color match {
-      case White => insufficientMaterial._2
-      case Black => insufficientMaterial._1
+    player match {
+      case P1 => insufficientMaterial._2
+      case P2 => insufficientMaterial._1
     }
   }
 
@@ -85,10 +85,10 @@ case class Situation(board: Board, color: Color) {
       board = board withVariant variant
     )
 
-  def unary_! = copy(color = !color)
+  def unary_! = copy(player = !player)
 }
 
 object Situation {
 
-  def apply(variant: strategygames.fairysf.variant.Variant): Situation = Situation(Board init variant, variant.startColor)
+  def apply(variant: strategygames.fairysf.variant.Variant): Situation = Situation(Board init variant, variant.startPlayer)
 }

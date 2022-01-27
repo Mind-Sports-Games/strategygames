@@ -1,12 +1,12 @@
 package strategygames.draughts
 
-import strategygames.Color
+import strategygames.Player
 
-case class Piece(color: Color, role: Role) {
+case class Piece(player: Player, role: Role) {
 
-  def is(c: Color)    = c == color
+  def is(c: Player)    = c == player
   def is(r: Role)     = r == role
-  def isNot(c: Color) = c != color
+  def isNot(c: Player) = c != player
   def isNot(r: Role)  = r != role
 
   def oneOf(rs: Set[Role]) = rs(role)
@@ -20,14 +20,14 @@ case class Piece(color: Color, role: Role) {
     else if (role == King) GhostKing
     else role
 
-  override def toString = (color + "-" + role).toLowerCase
+  override def toString = (player + "-" + role).toLowerCase
 }
 
 object Piece {
 
   def fromChar(c: Char): Option[Piece] =
     Role.allByPdn get c.toUpper map {
-      Piece(Color.fromWhite(c.isUpper), _)
+      Piece(Player.fromP1(c.isUpper), _)
     }
 
 }

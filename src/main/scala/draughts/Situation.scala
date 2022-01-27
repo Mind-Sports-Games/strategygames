@@ -1,15 +1,15 @@
 package strategygames.draughts
 
-import strategygames.{ Color, Status }
+import strategygames.{ Player, Status }
 
 import cats.data.Validated
 import cats.implicits._
 
 import format.Uci
 
-case class Situation(board: Board, color: Color) {
+case class Situation(board: Board, player: Player) {
 
-  lazy val actors = board actorsOf color
+  lazy val actors = board actorsOf player
 
   lazy val ghosts = board.ghosts
 
@@ -80,7 +80,7 @@ case class Situation(board: Board, color: Color) {
 
   def end: Boolean = checkMate || autoDraw || variantEnd
 
-  def winner: Option[Color] = board.variant.winner(this)
+  def winner: Option[Player] = board.variant.winner(this)
 
   def playable(strict: Boolean): Boolean =
     (board valid strict) && !end
@@ -117,14 +117,14 @@ case class Situation(board: Board, color: Color) {
     board = board.withoutGhosts
   )
 
-  def unary_! = copy(color = !color)
+  def unary_! = copy(player = !player)
 }
 
 object Situation {
 
-  def apply(variant: strategygames.draughts.variant.Variant): Situation = Situation(Board init variant, White)
+  def apply(variant: strategygames.draughts.variant.Variant): Situation = Situation(Board init variant, P1)
 
-  def withColorAfter(board: Board, colorBefore: Color): Situation =
-    if (board.ghosts == 0) Situation(board, !colorBefore)
-    else Situation(board, colorBefore)
+  def withPlayerAfter(board: Board, playerBefore: Player): Situation =
+    if (board.ghosts == 0) Situation(board, !playerBefore)
+    else Situation(board, playerBefore)
 }

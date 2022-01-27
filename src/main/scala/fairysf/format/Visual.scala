@@ -1,6 +1,6 @@
 package strategygames.fairysf.format
 import strategygames.fairysf._
-import strategygames.Color
+import strategygames.Player
 
 /** r bqkb r
   * p ppp pp
@@ -29,7 +29,7 @@ object Visual {
         role   <- Role forsyth c.toLower
       } yield {
         Pos.at(x, 7 - y) map { pos =>
-          pos -> (Piece(Color.fromWhite(c isUpper), role))
+          pos -> (Piece(Player.fromP1(c isUpper), role))
         }
       }) flatten,
       variant = strategygames.fairysf.variant.Variant.default

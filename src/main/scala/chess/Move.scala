@@ -18,7 +18,7 @@ case class Move(
 ) {
   def before = situationBefore.board
 
-  def situationAfter = Situation(finalizeAfter, !piece.color)
+  def situationAfter = Situation(finalizeAfter, !piece.player)
 
   def withHistory(h: History) = copy(after = after withHistory h)
 
@@ -33,15 +33,15 @@ case class Move(
       )
 
       // my broken castles
-      if ((piece is King) && h2.canCastle(color).any)
-        h2 withoutCastles color
+      if ((piece is King) && h2.canCastle(player).any)
+        h2 withoutCastles player
       else if (piece is Rook) (for {
-        kingPos <- after kingPosOf color
+        kingPos <- after kingPosOf player
         side <- Side.kingRookSide(kingPos, orig).filter { s =>
-          (h2 canCastle color on s) &&
+          (h2 canCastle player on s) &&
           h1.unmovedRooks.pos(orig)
         }
-      } yield h2.withoutCastle(color, side)) | h2
+      } yield h2.withoutCastle(player, side)) | h2
       else h2
     } fixCastles
 
@@ -53,7 +53,7 @@ case class Move(
       val resetsPositionHashes = board.variant.isIrreversible(this)
       val basePositionHashes =
         if (resetsPositionHashes) Array.empty: PositionHash else positionHashesOfSituationBefore
-      h.copy(positionHashes = Hash(Situation(board, !piece.color)) ++ basePositionHashes)
+      h.copy(positionHashes = Hash(Situation(board, !piece.player)) ++ basePositionHashes)
     }
   }
 
@@ -71,13 +71,13 @@ case class Move(
       copy(dest = rookOrig)
     }
 
-  def color = piece.color
+  def player = piece.player
 
   def withPromotion(op: Option[PromotableRole]): Option[Move] =
     op.fold(this.some) { p =>
-      if ((after count Piece(color, Queen)) > (before count Piece(color, Queen))) for {
+      if ((after count Piece(player, Queen)) > (before count Piece(player, Queen))) for {
         b2 <- after take dest
-        b3 <- b2.place(Piece(color, p), dest)
+        b3 <- b2.place(Piece(player, p), dest)
       } yield copy(after = b3, promotion = Option(p))
       else this.some
     }

@@ -25,7 +25,7 @@ object Hash {
   class ZobristConstants(start: Int) {
     def hexToLong(s: String): Long = (java.lang.Long.parseLong(s.substring(start, start + 8), 16) << 32) |
       java.lang.Long.parseLong(s.substring(start + 8, start + 16), 16)
-    val whiteTurnMask  = hexToLong(ZobristTables.whiteTurnMask)
+    val p1TurnMask  = hexToLong(ZobristTables.p1TurnMask)
     val actorMasks     = ZobristTables.actorMasks.map(hexToLong)
     val kingMovesMasks = ZobristTables.kingMovesMasks.map(hexToLong)
   }
@@ -38,7 +38,7 @@ object Hash {
   private lazy val randomTable = new ZobristConstants(16)
 
   private def pieceIndex(piece: Piece) =
-    piece.role.hashInt * 2 + piece.color.fold(1, 0)
+    piece.role.hashInt * 2 + piece.player.fold(1, 0)
 
   private def actorIndex(actor: Actor) =
     64 * pieceIndex(actor.piece) + actor.pos.hashCode
@@ -46,7 +46,7 @@ object Hash {
   def get(situation: Situation, table: ZobristConstants): Long = {
 
     val board = situation.board
-    val hturn = situation.color.fold(table.whiteTurnMask, 0L)
+    val hturn = situation.player.fold(table.p1TurnMask, 0L)
 
     val hactors = board.actors.values.view
       .map {
@@ -57,10 +57,10 @@ object Hash {
     // Hash in frisian kingmove-counter data
     val hkingMoves = board.variant match {
       case variant.Frisian | variant.Frysk =>
-        val blackCount  = math.min(situation.history.kingMoves.black, 3)
-        val whiteCount  = math.min(situation.history.kingMoves.white, 3)
-        val hblackCount = if (blackCount > 0) hactors ^ table.kingMovesMasks(blackCount - 1) else hactors
-        if (whiteCount > 0) hblackCount ^ table.kingMovesMasks(whiteCount + 2) else hblackCount
+        val p2Count  = math.min(situation.history.kingMoves.p2, 3)
+        val p1Count  = math.min(situation.history.kingMoves.p1, 3)
+        val hp2Count = if (p2Count > 0) hactors ^ table.kingMovesMasks(p2Count - 1) else hactors
+        if (p1Count > 0) hp2Count ^ table.kingMovesMasks(p1Count + 2) else hp2Count
       case _ => hactors
     }
 
@@ -848,7 +848,7 @@ private object ZobristTables {
     "d20d8c88c8ffe65f576ec7a84e0b932d"
   )
 
-  val whiteTurnMask = "f8d626aaaf2785093815e537b6222c85"
+  val p1TurnMask = "f8d626aaaf2785093815e537b6222c85"
 
   val kingMovesMasks = Array(
     "1d6dc0ee61ce803e6a2ad922a69a13e9",

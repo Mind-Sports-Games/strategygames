@@ -1,6 +1,6 @@
 package strategygames.fairysf
 
-import strategygames.Color
+import strategygames.Player
 import format.FEN
 
 import cats.implicits._
@@ -35,7 +35,7 @@ case class Board(
 
   def ensurePocketData = withPocketData(pocketData | PocketData.init)
 
-  def situationOf(color: Color) = Situation(this, color)
+  def situationOf(player: Player) = Situation(this, player)
 
   def valid(strict: Boolean) = variant.valid(this, strict)
 

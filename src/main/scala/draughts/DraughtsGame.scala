@@ -1,6 +1,6 @@
 package strategygames.draughts
 
-import strategygames.{ Clock, Color, MoveMetrics }
+import strategygames.{ Clock, Player, MoveMetrics }
 import strategygames.draughts.format.FEN
 
 import cats.data.Validated
@@ -102,7 +102,7 @@ case class DraughtsGame(
 
   def displayTurns = if (situation.ghosts == 0) turns else turns + 1
 
-  def player = situation.color
+  def player = situation.player
 
   def board = situation.board
 
@@ -112,7 +112,7 @@ case class DraughtsGame(
   def halfMoveClock: Int = board.history.halfMoveClock
 
   /** Fullmove number: The number of the full move.
-    * It starts at 1, and is incremented after Black's move.
+    * It starts at 1, and is incremented after P2's move.
     */
   def fullMoveNumber: Int = 1 + turns / 2
 
@@ -142,19 +142,19 @@ case class DraughtsGame(
 
   def updateBoard(f: Board => Board) = withBoard(f(board))
 
-  def withPlayer(c: Color) = copy(situation = situation.copy(color = c))
+  def withPlayer(c: Player) = copy(situation = situation.copy(player = c))
 
   def withTurns(t: Int) = copy(turns = t)
 }
 
 object DraughtsGame {
   def apply(variant: strategygames.draughts.variant.Variant): DraughtsGame = new DraughtsGame(
-    Situation(Board init variant, White)
+    Situation(Board init variant, P1)
   )
 
-  def apply(board: Board): DraughtsGame = apply(board, White)
+  def apply(board: Board): DraughtsGame = apply(board, P1)
 
-  def apply(board: Board, color: Color): DraughtsGame = new DraughtsGame(Situation(board, color))
+  def apply(board: Board, player: Player): DraughtsGame = new DraughtsGame(Situation(board, player))
 
   def apply(variantOption: Option[strategygames.draughts.variant.Variant], fen: Option[FEN]): DraughtsGame = {
     val variant = variantOption | strategygames.draughts.variant.Standard
@@ -167,7 +167,7 @@ object DraughtsGame {
         g.copy(
           situation = Situation(
             board = parsed.situation.board withVariant g.board.variant,
-            color = parsed.situation.color
+            player = parsed.situation.player
           ),
           turns = parsed.turns
         )

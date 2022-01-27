@@ -1,6 +1,6 @@
 package strategygames.chess
 
-import strategygames.{ Black, Color, White }
+import strategygames.{ P2, Player, P1 }
 
 sealed trait Role {
   val forsyth: Char
@@ -14,9 +14,9 @@ sealed trait Role {
   val storable: Boolean
   val dirs: Directions
   def dir(from: Pos, to: Pos): Option[Direction]
-  final def -(color: Color) = Piece(color, this)
-  final def white           = this - White
-  final def black           = this - Black
+  final def -(player: Player) = Piece(player, this)
+  final def p1           = this - P1
+  final def p2           = this - P2
 }
 sealed trait PromotableRole extends Role
 

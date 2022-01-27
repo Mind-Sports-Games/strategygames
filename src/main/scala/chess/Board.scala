@@ -1,6 +1,6 @@
 package strategygames.chess
 
-import strategygames.Color
+import strategygames.Player
 
 import variant.Variant
 
@@ -18,34 +18,34 @@ case class Board(
     (pos, Actor(piece, pos, this))
   }
 
-  lazy val actorsOf: Color.Map[Seq[Actor]] = {
-    val (w, b) = actors.values.toSeq.partition { _.color.white }
-    Color.Map(w, b)
+  lazy val actorsOf: Player.Map[Seq[Actor]] = {
+    val (w, b) = actors.values.toSeq.partition { _.player.p1 }
+    Player.Map(w, b)
   }
 
-  def rolesOf(c: Color): List[Role] =
+  def rolesOf(c: Player): List[Role] =
     pieces.values
       .collect {
-        case piece if piece.color == c => piece.role
+        case piece if piece.player == c => piece.role
       }
       .to(List)
 
   def actorAt(at: Pos): Option[Actor] = actors get at
 
-  def piecesOf(c: Color): Map[Pos, Piece] = pieces filter (_._2 is c)
+  def piecesOf(c: Player): Map[Pos, Piece] = pieces filter (_._2 is c)
 
-  lazy val kingPos: Map[Color, Pos] = pieces.collect { case (pos, Piece(color, King)) =>
-    color -> pos
+  lazy val kingPos: Map[Player, Pos] = pieces.collect { case (pos, Piece(player, King)) =>
+    player -> pos
   }
 
-  def kingPosOf(c: Color): Option[Pos] = kingPos get c
+  def kingPosOf(c: Player): Option[Pos] = kingPos get c
 
-  def check(c: Color): Boolean = c.fold(checkWhite, checkBlack)
+  def check(c: Player): Boolean = c.fold(checkP1, checkP2)
 
-  lazy val checkWhite = checkOf(White)
-  lazy val checkBlack = checkOf(Black)
+  lazy val checkP1 = checkOf(P1)
+  lazy val checkP2 = checkOf(P2)
 
-  private def checkOf(c: Color): Boolean =
+  private def checkOf(c: Player): Boolean =
     kingPosOf(c) exists { kingPos =>
       variant.kingThreatened(this, !c, kingPos)
     }
@@ -77,8 +77,8 @@ case class Board(
       if pieces contains takenPos
     } yield copy(pieces = pieces - takenPos - orig + (dest -> piece))
 
-  lazy val occupation: Color.Map[Set[Pos]] = Color.Map { color =>
-    pieces.collect { case (pos, piece) if piece is color => pos }.to(Set)
+  lazy val occupation: Player.Map[Set[Pos]] = Player.Map { player =>
+    pieces.collect { case (pos, piece) if piece is player => pos }.to(Set)
   }
 
   def hasPiece(p: Piece) = pieces.values exists (p ==)
@@ -88,7 +88,7 @@ case class Board(
       pawn <- apply(pos)
       if pawn is Pawn
       b2 <- take(pos)
-      b3 <- b2.place(Piece(pawn.color, Queen), pos)
+      b3 <- b2.place(Piece(pawn.player, Queen), pos)
     } yield b3
 
   def castles: Castles = history.castles
@@ -113,30 +113,30 @@ case class Board(
   def unmovedRooks =
     UnmovedRooks {
       history.unmovedRooks.pos.filter(pos =>
-        apply(pos).exists(piece => piece.is(Rook) && Rank.backRank(piece.color) == pos.rank)
+        apply(pos).exists(piece => piece.is(Rook) && Rank.backRank(piece.player) == pos.rank)
       )
     }
 
   def fixCastles: Board =
     withCastles {
       if (variant.allowsCastling) {
-        val wkPos   = kingPosOf(White)
-        val bkPos   = kingPosOf(Black)
+        val wkPos   = kingPosOf(P1)
+        val bkPos   = kingPosOf(P2)
         val wkReady = wkPos.fold(false)(_.rank == Rank.First)
         val bkReady = bkPos.fold(false)(_.rank == Rank.Eighth)
-        def rookReady(color: Color, kPos: Option[Pos], left: Boolean) =
+        def rookReady(player: Player, kPos: Option[Pos], left: Boolean) =
           kPos.fold(false) { kp =>
-            actorsOf(color) exists { a =>
+            actorsOf(player) exists { a =>
               a.piece.is(Rook) && a.pos ?- kp && (left ^ (a.pos ?> kp)) && history.unmovedRooks.pos(
                 a.pos
               )
             }
           }
         Castles(
-          whiteKingSide = castles.whiteKingSide && wkReady && rookReady(White, wkPos, left = false),
-          whiteQueenSide = castles.whiteQueenSide && wkReady && rookReady(White, wkPos, left = true),
-          blackKingSide = castles.blackKingSide && bkReady && rookReady(Black, bkPos, left = false),
-          blackQueenSide = castles.blackQueenSide && bkReady && rookReady(Black, bkPos, left = true)
+          p1KingSide = castles.p1KingSide && wkReady && rookReady(P1, wkPos, left = false),
+          p1QueenSide = castles.p1QueenSide && wkReady && rookReady(P1, wkPos, left = true),
+          p2KingSide = castles.p2KingSide && bkReady && rookReady(P2, bkPos, left = false),
+          p2QueenSide = castles.p2QueenSide && bkReady && rookReady(P2, bkPos, left = true)
         )
       } else Castles.none
     }
@@ -144,12 +144,12 @@ case class Board(
   def updateHistory(f: History => History) = copy(history = f(history))
 
   def count(p: Piece): Int = pieces.values count (_ == p)
-  def count(c: Color): Int = pieces.values count (_.color == c)
+  def count(c: Player): Int = pieces.values count (_.player == c)
 
   def autoDraw: Boolean =
     variant.fiftyMoves(history) || variant.isInsufficientMaterial(this) || history.fivefoldRepetition
 
-  def situationOf(color: Color) = Situation(this, color)
+  def situationOf(player: Player) = Situation(this, player)
 
   def visual = format.Visual >> this
 

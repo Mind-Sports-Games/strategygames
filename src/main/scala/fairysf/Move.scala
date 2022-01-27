@@ -18,7 +18,7 @@ case class Move(
 ) {
   def before = situationBefore.board
 
-  def situationAfter = Situation(finalizeAfter, !piece.color)
+  def situationAfter = Situation(finalizeAfter, !piece.player)
 
   def finalizeAfter: Board = after
 
@@ -37,7 +37,7 @@ case class Move(
       copy(dest = rookOrig)
     }
 
-  def color = piece.color
+  def player = piece.player
 
   def withPromotion(op: Option[PromotableRole]): Option[Move] = None
 

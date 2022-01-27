@@ -1,5 +1,5 @@
 package strategygames.chess
-import strategygames.{ Clock, Color, MoveMetrics }
+import strategygames.{ Clock, Player, MoveMetrics }
 
 import cats.data.Validated
 
@@ -70,7 +70,7 @@ case class Game(
       case u: Uci.Drop => apply(u) map { case (g, d) => g -> Right(d) }
     }
 
-  def player = situation.color
+  def player = situation.player
 
   def board = situation.board
 
@@ -79,7 +79,7 @@ case class Game(
   def halfMoveClock: Int = board.history.halfMoveClock
 
   /** Fullmove number: The number of the full move.
-    * It starts at 1, and is incremented after Black's move.
+    * It starts at 1, and is incremented after P2's move.
     */
   def fullMoveNumber: Int = 1 + turns / 2
 
@@ -89,18 +89,18 @@ case class Game(
 
   def updateBoard(f: Board => Board) = withBoard(f(board))
 
-  def withPlayer(c: Color) = copy(situation = situation.copy(color = c))
+  def withPlayer(c: Player) = copy(situation = situation.copy(player = c))
 
   def withTurns(t: Int) = copy(turns = t)
 }
 
 object Game {
   def apply(variant: strategygames.chess.variant.Variant): Game =
-    new Game(Situation(Board init variant, White))
+    new Game(Situation(Board init variant, P1))
 
-  def apply(board: Board): Game = apply(board, White)
+  def apply(board: Board): Game = apply(board, P1)
 
-  def apply(board: Board, color: Color): Game = new Game(Situation(board, color))
+  def apply(board: Board, player: Player): Game = new Game(Situation(board, player))
 
   def apply(variantOption: Option[strategygames.chess.variant.Variant], fen: Option[FEN]): Game = {
     val variant = variantOption | strategygames.chess.variant.Standard
@@ -115,7 +115,7 @@ object Game {
             board = parsed.situation.board withVariant g.board.variant withCrazyData {
               parsed.situation.board.pocketData orElse g.board.pocketData
             },
-            color = parsed.situation.color
+            player = parsed.situation.player
           ),
           turns = parsed.turns
         )

@@ -1,7 +1,7 @@
 package strategygames.draughts
 package variant
 
-import strategygames.{ Color, GameFamily }
+import strategygames.{ Player, GameFamily }
 
 import format.FEN
 
@@ -23,13 +23,13 @@ abstract class Variant private[variant] (
 
   def pieces: Map[Pos, Piece]
   def initialFen: FEN
-  def startColor: Color = White
+  def startPlayer: Player = P1
   def startingPosition: StartingPosition
   val openingTables: List[OpeningTable] = Nil
   lazy val shortInitialFen: FEN         = FEN(initialFen.value.split(":").take(3).mkString(":"))
 
   def captureDirs: Directions
-  def moveDirsColor: Map[Color, Directions]
+  def moveDirsPlayer: Map[Player, Directions]
   def moveDirsAll: Directions
 
   def standard     = this == Standard
@@ -50,7 +50,7 @@ abstract class Variant private[variant] (
   def fenVariant: Boolean  = false
   def aiVariant: Boolean   = true
 
-  def whiteIsBetterVariant: Boolean = false
+  def p1IsBetterVariant: Boolean = false
   def blindModeVariant: Boolean     = false
 
   def materialImbalanceVariant: Boolean = false
@@ -140,7 +140,7 @@ abstract class Variant private[variant] (
     for {
       actor <- situation.board.actors get from toValid "No piece on " + from
       _ <-
-        if (actor is situation.color) Validated.valid(actor) else Validated.invalid("Not my piece on " + from)
+        if (actor is situation.player) Validated.valid(actor) else Validated.invalid("Not my piece on " + from)
       m1 <- findMove(from, to) toValid "Piece on " + from + " cannot move to " + to
       m2 <- m1 withPromotion promotion toValid "Piece on " + from + " cannot promote to " + promotion
       m3 <-
@@ -150,11 +150,11 @@ abstract class Variant private[variant] (
 
   }
 
-  def promotablePos(pos: PosMotion, color: Color) =
-    pos.y == color.fold(boardSize.promotableYWhite, boardSize.promotableYBlack)
+  def promotablePos(pos: PosMotion, player: Player) =
+    pos.y == player.fold(boardSize.promotableYP1, boardSize.promotableYP2)
 
   def maybePromote(m: Move): Option[Move] =
-    if (promotablePos(m.after.posAt(m.dest), m.color))
+    if (promotablePos(m.after.posAt(m.dest), m.player))
       (m.after promote m.dest) map { b2 =>
         m.copy(after = b2, promotion = Some(King))
       }
@@ -186,7 +186,7 @@ abstract class Variant private[variant] (
         walkDir._2(curPos) match {
           case Some(nextPos) =>
             curBoard(nextPos) match {
-              case Some(captPiece) if captPiece.isNot(actor.color) && !captPiece.isGhost =>
+              case Some(captPiece) if captPiece.isNot(actor.player) && !captPiece.isGhost =>
                 walkDir._2(nextPos) match {
                   case Some(landingPos) if curBoard(landingPos).isEmpty =>
                     val boardAfter =
@@ -303,7 +303,7 @@ abstract class Variant private[variant] (
                   allTaken,
                   captureValue
                 )
-              case Some(captPiece) if captPiece.isNot(actor.color) && !captPiece.isGhost =>
+              case Some(captPiece) if captPiece.isNot(actor.player) && !captPiece.isGhost =>
                 walkDir._2(nextPos) match {
                   case Some(landingPos) if curBoard(landingPos).isEmpty =>
                     val boardAfter =
@@ -421,8 +421,8 @@ abstract class Variant private[variant] (
 
   // In most variants, the winner is the last player to have played and there is a possibility of either a traditional
   // checkmate or a variant end condition
-  def winner(situation: Situation): Option[Color] =
-    if (situation.checkMate || specialEnd(situation)) Some(!situation.color) else None
+  def winner(situation: Situation): Option[Player] =
+    if (situation.checkMate || specialEnd(situation)) Some(!situation.player) else None
 
   def specialEnd(situation: Situation)  = false
   def specialDraw(situation: Situation) = false
@@ -458,23 +458,23 @@ abstract class Variant private[variant] (
     else board.withoutGhosts
   }
 
-  protected def menOnPromotionRank(board: Board, color: Color) = {
+  protected def menOnPromotionRank(board: Board, player: Player) = {
     board.pieces.exists {
-      case (pos, Piece(c, r)) if c == color && r == Man && promotablePos(board.posAt(pos), color) => true
+      case (pos, Piece(c, r)) if c == player && r == Man && promotablePos(board.posAt(pos), player) => true
       case _                                                                                      => false
     }
   }
 
   /** Checks board for valid game position
     */
-  protected def validSide(board: Board, strict: Boolean)(color: Color) = {
-    val roles = board rolesOf color
+  protected def validSide(board: Board, strict: Boolean)(player: Player) = {
+    val roles = board rolesOf player
     (roles.count(_ == Man) > 0 || roles.count(_ == King) > 0) &&
     (!strict || roles.size <= 20) &&
-    (!menOnPromotionRank(board, color) || board.ghosts != 0)
+    (!menOnPromotionRank(board, player) || board.ghosts != 0)
   }
 
-  def valid(board: Board, strict: Boolean) = Color.all forall validSide(board, strict) _
+  def valid(board: Board, strict: Boolean) = Player.all forall validSide(board, strict) _
 
   val roles                            = List(Man, King)
   lazy val rolesByPdn: Map[Char, Role] = roles.map { r => (r.pdn, r) }.to(Map)
@@ -561,14 +561,14 @@ object Variant {
         (
           pos,
           y match {
-            case 1  => Piece(Black, rank(x - 1))
-            case 2  => Piece(Black, rank(x - 1))
-            case 3  => Piece(Black, rank(x - 1))
-            case 4  => Piece(Black, rank(x - 1))
-            case 7  => Piece(White, rank(x - 1))
-            case 8  => Piece(White, rank(x - 1))
-            case 9  => Piece(White, rank(x - 1))
-            case 10 => Piece(White, rank(x - 1))
+            case 1  => Piece(P2, rank(x - 1))
+            case 2  => Piece(P2, rank(x - 1))
+            case 3  => Piece(P2, rank(x - 1))
+            case 4  => Piece(P2, rank(x - 1))
+            case 7  => Piece(P1, rank(x - 1))
+            case 8  => Piece(P1, rank(x - 1))
+            case 9  => Piece(P1, rank(x - 1))
+            case 10 => Piece(P1, rank(x - 1))
           }
         )
       }
@@ -584,12 +584,12 @@ object Variant {
         (
           pos,
           y match {
-            case 1 => Piece(Black, rank(x - 1))
-            case 2 => Piece(Black, rank(x - 1))
-            case 3 => Piece(Black, rank(x - 1))
-            case 6 => Piece(White, rank(x - 1))
-            case 7 => Piece(White, rank(x - 1))
-            case 8 => Piece(White, rank(x - 1))
+            case 1 => Piece(P2, rank(x - 1))
+            case 2 => Piece(P2, rank(x - 1))
+            case 3 => Piece(P2, rank(x - 1))
+            case 6 => Piece(P1, rank(x - 1))
+            case 7 => Piece(P1, rank(x - 1))
+            case 8 => Piece(P1, rank(x - 1))
           }
         )
       }
@@ -605,8 +605,8 @@ object Variant {
         (
           pos,
           y match {
-            case 1  => Piece(Black, rank(x - 1))
-            case 10 => Piece(White, rank(x - 1))
+            case 1  => Piece(P2, rank(x - 1))
+            case 10 => Piece(P1, rank(x - 1))
           }
         )
       }

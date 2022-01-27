@@ -1,6 +1,6 @@
 package strategygames.chess
 
-import strategygames.{ Clock, Color }
+import strategygames.{ Clock, Player }
 
 import cats.data.Validated
 import cats.syntax.option._
@@ -31,7 +31,7 @@ trait ChessTest extends Specification with ValidatedMatchers {
   implicit def stringToSituationBuilder(str: String) =
     new {
 
-      def as(color: Color): Situation = Situation(Visual << str, color)
+      def as(player: Player): Situation = Situation(Visual << str, player)
     }
 
   case class RichActor(actor: Actor) {
@@ -47,7 +47,7 @@ trait ChessTest extends Specification with ValidatedMatchers {
   implicit def richActor(actor: Actor) = RichActor(actor)
 
   case class RichGame(game: Game) {
-    def as(color: Color): Game = game.withPlayer(color)
+    def as(player: Player): Game = game.withPlayer(player)
 
     def playMoves(moves: (Pos, Pos)*): Validated[String, Game] = playMoveList(moves)
 
@@ -83,10 +83,10 @@ trait ChessTest extends Specification with ValidatedMatchers {
   def fenToGame(positionString: FEN, variant: Variant) = {
     val situation = Forsyth << positionString
     situation map { sit =>
-      sit.color -> sit.withVariant(variant).board
-    } toValid "Could not construct situation from FEN" map { case (color, board) =>
+      sit.player -> sit.withVariant(variant).board
+    } toValid "Could not construct situation from FEN" map { case (player, board) =>
       Game(variant).copy(
-        situation = Situation(board, color)
+        situation = Situation(board, player)
       )
     }
   }
@@ -106,7 +106,7 @@ trait ChessTest extends Specification with ValidatedMatchers {
       sortPoss(p.toList) must_== sortPoss(poss.toList)
     }
 
-  def makeGame: Game = Game(makeBoard, White)
+  def makeGame: Game = Game(makeBoard, P1)
 
   def bePoss(board: Board, visual: String): Matcher[Option[Iterable[Pos]]] =
     beSome.like { case p =>

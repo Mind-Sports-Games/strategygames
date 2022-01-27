@@ -1,7 +1,7 @@
 package strategygames.draughts
 package variant
 
-import strategygames.Color
+import strategygames.Player
 
 import cats.implicits._
 
@@ -32,11 +32,11 @@ case object Standard
     (DownLeft, _.moveDownLeft),
     (DownRight, _.moveDownRight)
   )
-  val moveDirsColor: Map[Color, Directions] = Map(
-    White -> List((UpLeft, _.moveUpLeft), (UpRight, _.moveUpRight)),
-    Black -> List((DownLeft, _.moveDownLeft), (DownRight, _.moveDownRight))
+  val moveDirsPlayer: Map[Player, Directions] = Map(
+    P1 -> List((UpLeft, _.moveUpLeft), (UpRight, _.moveUpRight)),
+    P2 -> List((DownLeft, _.moveDownLeft), (DownRight, _.moveDownRight))
   )
-  val moveDirsAll: Directions = moveDirsColor(White) ::: moveDirsColor(Black)
+  val moveDirsAll: Directions = moveDirsPlayer(P1) ::: moveDirsPlayer(P2)
 
   def maxDrawingMoves(board: Board): Option[Int] =
     drawingMoves(board, none).map(_._1)
@@ -44,19 +44,19 @@ case object Standard
   // (drawingMoves, first promotion: promotes this turn and has only one king)
   private def drawingMoves(board: Board, move: Option[Move]): Option[(Int, Boolean)] =
     if (board.pieces.size <= 4) {
-      val whitePieces    = board.pieces filter { p => !p._2.isGhost && p._2.is(Color.White) }
-      val blackPieces    = board.pieces filter { p => !p._2.isGhost && p._2.is(Color.Black) }
-      val whiteKings     = whitePieces.count(_._2.role == King)
-      val blackKings     = blackPieces.count(_._2.role == King)
-      def firstPromotion = move.exists(m => m.promotes && m.color.fold(whiteKings == 1, blackKings == 1))
+      val p1Pieces    = board.pieces filter { p => !p._2.isGhost && p._2.is(Player.P1) }
+      val p2Pieces    = board.pieces filter { p => !p._2.isGhost && p._2.is(Player.P2) }
+      val p1Kings     = p1Pieces.count(_._2.role == King)
+      val p2Kings     = p2Pieces.count(_._2.role == King)
+      def firstPromotion = move.exists(m => m.promotes && m.player.fold(p1Kings == 1, p2Kings == 1))
       val drawingMoves =
-        if (whitePieces.size == 1 && whiteKings == 1) {
-          if (blackKings == 0) 50
-          else if (blackPieces.size <= 2) 10
+        if (p1Pieces.size == 1 && p1Kings == 1) {
+          if (p2Kings == 0) 50
+          else if (p2Pieces.size <= 2) 10
           else 32
-        } else if (blackPieces.size == 1 && blackKings == 1) {
-          if (whiteKings == 0) 50
-          else if (whitePieces.size <= 2) 10
+        } else if (p2Pieces.size == 1 && p2Kings == 1) {
+          if (p1Kings == 0) 50
+          else if (p1Pieces.size <= 2) 10
           else 32
         } else 50
       Some(drawingMoves, drawingMoves != 50 && firstPromotion)
@@ -69,7 +69,7 @@ case object Standard
     * - When one player has only a king left, and the other player two pieces or less, including at least one king (one king, two kings, or one king and a man), the game is drawn after both players made 5 moves.
     */
   def updatePositionHashes(board: Board, move: Move, hash: strategygames.draughts.PositionHash): PositionHash = {
-    val newHash = Hash(Situation(board, !move.piece.color))
+    val newHash = Hash(Situation(board, !move.piece.player))
     drawingMoves(board, move.some) match {
       case Some((drawingMoves, firstPromotion)) =>
         if (drawingMoves == 50 && (move.captures || move.piece.isNot(King) || move.promotes))

@@ -1,7 +1,7 @@
 package strategygames.draughts
 package variant
 
-import strategygames.Color
+import strategygames.Player
 
 import cats.implicits._
 
@@ -24,17 +24,17 @@ case object Breakthrough
   def startingPosition = Standard.startingPosition
 
   def captureDirs   = Standard.captureDirs
-  def moveDirsColor = Standard.moveDirsColor
+  def moveDirsPlayer = Standard.moveDirsPlayer
   def moveDirsAll   = Standard.moveDirsAll
 
   // Win on promotion
   override def specialEnd(situation: Situation) =
-    situation.board.kingPosOf(White).isDefined || situation.board.kingPosOf(Black).isDefined
+    situation.board.kingPosOf(P1).isDefined || situation.board.kingPosOf(P2).isDefined
 
-  override def winner(situation: Situation): Option[Color] =
-    if (situation.checkMate) Some(!situation.color)
-    else if (situation.board.kingPosOf(White).isDefined) White.some
-    else if (situation.board.kingPosOf(Black).isDefined) Black.some
+  override def winner(situation: Situation): Option[Player] =
+    if (situation.checkMate) Some(!situation.player)
+    else if (situation.board.kingPosOf(P1).isDefined) P1.some
+    else if (situation.board.kingPosOf(P2).isDefined) P2.some
     else None
 
   def maxDrawingMoves(board: Board): Option[Int] = None
@@ -42,6 +42,6 @@ case object Breakthrough
   /** No drawing rules
     */
   def updatePositionHashes(board: Board, move: Move, hash: strategygames.draughts.PositionHash): PositionHash =
-    Hash(Situation(board, !move.piece.color))
+    Hash(Situation(board, !move.piece.player))
 
 }

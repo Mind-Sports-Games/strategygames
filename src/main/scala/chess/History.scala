@@ -1,27 +1,27 @@
 package strategygames.chess
 
-import strategygames.Color
+import strategygames.Player
 
 import format.Uci
 
 // Checks received by the respective side.
-case class CheckCount(white: Int = 0, black: Int = 0) {
+case class CheckCount(p1: Int = 0, p2: Int = 0) {
 
-  def add(color: Color) =
+  def add(player: Player) =
     copy(
-      white = white + color.fold(1, 0),
-      black = black + color.fold(0, 1)
+      p1 = p1 + player.fold(1, 0),
+      p2 = p2 + player.fold(0, 1)
     )
 
-  def nonEmpty = white > 0 || black > 0
+  def nonEmpty = p1 > 0 || p2 > 0
 
-  def apply(color: Color) = color.fold(white, black)
+  def apply(player: Player) = player.fold(p1, p2)
 }
 
 case class UnmovedRooks(pos: Set[Pos]) extends AnyVal
 
 object UnmovedRooks {
-  val default = UnmovedRooks((Pos.whiteBackrank ::: Pos.blackBackrank).toSet)
+  val default = UnmovedRooks((Pos.p1Backrank ::: Pos.p2Backrank).toSet)
 }
 
 case class History(
@@ -52,20 +52,20 @@ case class History(
 
   def fivefoldRepetition = isRepetition(5)
 
-  def canCastle(color: Color) = castles can color
+  def canCastle(player: Player) = castles can player
 
-  def withoutCastles(color: Color) = copy(castles = castles without color)
+  def withoutCastles(player: Player) = copy(castles = castles without player)
 
   def withoutAnyCastles = copy(castles = Castles.none)
 
-  def withoutCastle(color: Color, side: Side) = copy(castles = castles.without(color, side))
+  def withoutCastle(player: Player, side: Side) = copy(castles = castles.without(player, side))
 
   def withCastles(c: Castles) = copy(castles = c)
 
   def withLastMove(m: Uci) = copy(lastMove = Option(m))
 
-  def withCheck(color: Color, v: Boolean) =
-    if (v) copy(checkCount = checkCount add color) else this
+  def withCheck(player: Player, v: Boolean) =
+    if (v) copy(checkCount = checkCount add player) else this
 
   def withCheckCount(cc: CheckCount) = copy(checkCount = cc)
 
@@ -87,18 +87,18 @@ object History {
       positionHashes = Array()
     )
 
-  def castle(color: Color, kingSide: Boolean, queenSide: Boolean) =
+  def castle(player: Player, kingSide: Boolean, queenSide: Boolean) =
     History(
-      castles = color match {
-        case White =>
+      castles = player match {
+        case P1 =>
           Castles.init.copy(
-            whiteKingSide = kingSide,
-            whiteQueenSide = queenSide
+            p1KingSide = kingSide,
+            p1QueenSide = queenSide
           )
-        case Black =>
+        case P2 =>
           Castles.init.copy(
-            blackKingSide = kingSide,
-            blackQueenSide = queenSide
+            p2KingSide = kingSide,
+            p2QueenSide = queenSide
           )
       }
     )
