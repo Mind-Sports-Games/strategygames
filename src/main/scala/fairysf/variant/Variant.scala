@@ -51,7 +51,7 @@ abstract class Variant private[variant] (
 
   def startPlayer: Player = P1
 
-  val kingPiece: Role
+  val kingPiece: Option[Role] = None
 
   //looks like this is only to allow King to be a valid promotion piece
   //in just atomic, so can leave as true for now

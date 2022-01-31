@@ -21,9 +21,11 @@ case class Situation(board: Board, player: Player) {
 
   lazy val check: Boolean = board.apiPosition.givesCheck
 
-  def checkSquare =
-    if (check) board.posMap.get(Piece(player, board.variant.kingPiece)).flatMap(_.headOption)
-    else None
+  def checkSquare: Option[Pos] =
+    board.variant.kingPiece.flatMap(kingPiece =>
+      if (check) board.posMap.get(Piece(player, kingPiece)).flatMap(_.headOption)
+      else None
+    )
 
   def history = board.history
 

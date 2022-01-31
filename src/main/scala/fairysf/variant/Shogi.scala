@@ -25,7 +25,7 @@ case object Shogi
 
   override def baseVariant: Boolean = true
 
-  val kingPiece: Role = ShogiKing
+  override val kingPiece: Option[Role] = Some(ShogiKing)
 
   //cache this rather than checking with the API everytime
   override def initialFen =
@@ -37,7 +37,7 @@ case object Shogi
     super.validDrops(situation).filterNot(
       d => d.piece.role == ShogiPawn && {
         val kingPos = situation.board.posMap.get(
-          Piece(!situation.player, kingPiece)
+          Piece(!situation.player, ShogiKing)
         ).flatMap(_.headOption)
         Some(d.pos) == (situation.player match {
           case P1 => kingPos.flatMap(_.down)

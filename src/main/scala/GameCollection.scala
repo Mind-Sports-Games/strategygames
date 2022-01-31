@@ -154,12 +154,33 @@ object GameFamily {
     def playerColors = Map(P1 -> "white", P2 -> "black")
   }
 
+  final case class Flipello() extends GameFamily {
+    def id = 5
+    def name = "Flipello"
+    def shortName = "Flipello"
+    def gameLogic = GameLogic.FairySF()
+    def aiEnabled = false
+    def defaultVariant = Variant.FairySF(strategygames.fairysf.variant.Flipello)
+    def variants = Variant.all(GameLogic.FairySF()).filter(_.gameFamily == this)
+    def displayPiece = "wL"
+    def pieceSetThemes = List("fabirovsky_loa", "check_yb_loa", "wide")
+    def pieceSetDefault= "check_yb_loa"
+    def boardThemes = List ("blue", "blue2", "blue3", "blue-marble", "canvas", "wood", "wood2",
+                            "wood3", "wood4", "maple", "maple2", "brown", "leather", "green",
+                            "marble", "green-plastic", "grey", "metal", "olive", "newspaper",
+                            "purple", "purple-diag", "pink", "ic", "horsey")
+    def boardThemeDefault = "marble"
+    def playerNames = Map(P1 -> "Black", P2 -> "White")
+    def playerColors = Map(P1 -> "black", P2 -> "white")
+  }
+
   def all: List[GameFamily] = List(
     Chess(),
     Draughts(),
     LinesOfAction(),
     Shogi(),
-    Xiangqi()
+    Xiangqi(),
+    Flipello()
   )
 
   // TODO: I'm sure there is a better scala way of doing this
@@ -168,6 +189,7 @@ object GameFamily {
     case 2 => LinesOfAction()
     case 3 => Shogi()
     case 4 => Xiangqi()
+    case 5 => Flipello()
     case _ => Chess()
   }
 

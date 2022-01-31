@@ -20,7 +20,7 @@ case object MiniXiangqi
   def perfIcon: Char = 't'
   def perfId: Int = 203
 
-  val kingPiece: Role = XiangqiKing
+  override val kingPiece: Option[Role] = Some(XiangqiKing)
 
   //cache this rather than checking with the API everytime
   override def initialFen =

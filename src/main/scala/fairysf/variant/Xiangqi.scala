@@ -22,7 +22,7 @@ case object Xiangqi
 
   override def baseVariant: Boolean = true
 
-  val kingPiece: Role = XiangqiKing
+  override val kingPiece: Option[Role] = Some(XiangqiKing)
 
   //cache this rather than checking with the API everytime
   override def initialFen =
