@@ -1,13 +1,15 @@
-Chess API written in scala for [lichess.org](https://lichess.org) [![Build Status](https://travis-ci.org/ornicar/scalachess.svg?branch=master)](https://travis-ci.org/ornicar/scalachess)
+Strategy Games API written in scala for [playstrategy.org](https://playstrategy.org) [![Build Status](https://travis-ci.org/Mind-Sports-Games/strategygames.svg?branch=master)](https://travis-ci.org/Mind-Sports-Games/strategygames)
 
 It is entirely functional, immutable, and free of side effects.
+
+strategygames is a fork from [scalachess](https://github.com/lichess-org/scalachess) which is the equivalent Chess API for [lichess.org](https://lichess.org).
 
 INSTALL
 -------
 
 Clone scalachess
 
-    git clone git://github.com/ornicar/scalachess
+    git clone git://github.com/Mind-Sports-Games/strategygames
 
 Get latest sbt on http://www.scala-sbt.org/download.html
 
