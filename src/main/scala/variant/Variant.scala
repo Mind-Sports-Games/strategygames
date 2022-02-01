@@ -576,5 +576,6 @@ object Variant {
 
   def wrap(v: chess.variant.Variant) = Chess(v)
   def wrap(v: draughts.variant.Variant) = Draughts(v)
+  def wrap(v: fairysf.variant.Variant) = FairySF(v)
 
 }
