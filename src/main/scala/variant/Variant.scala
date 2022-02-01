@@ -56,6 +56,7 @@ abstract class Variant(
   def xiangqi: Boolean
   def minishogi: Boolean
   def minixiangqi: Boolean
+  def flipello: Boolean
 
   def standardVariant: Boolean
   def fromPositionVariant: Boolean
@@ -75,6 +76,7 @@ abstract class Variant(
   def materialImbalanceVariant: Boolean
 
   def dropsVariant: Boolean
+  def onlyDropsVariant: Boolean
 
   def perfId: Int
   def perfIcon: Char
@@ -175,6 +177,7 @@ object Variant {
     def xiangqi: Boolean              = false
     def minishogi: Boolean            = false
     def minixiangqi: Boolean          = false
+    def flipello: Boolean             = false
 
     def standardVariant: Boolean      = v.standard
     def fromPositionVariant: Boolean  = v.fromPosition
@@ -193,6 +196,7 @@ object Variant {
     def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
 
     def dropsVariant: Boolean = v.dropsVariant
+    def onlyDropsVariant: Boolean = false
 
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
@@ -302,6 +306,7 @@ object Variant {
     def xiangqi: Boolean              = false
     def minishogi: Boolean            = false
     def minixiangqi: Boolean          = false
+    def flipello: Boolean             = false
 
     def standardVariant: Boolean      = v.standard
     def fromPositionVariant: Boolean  = v.fromPosition
@@ -320,6 +325,7 @@ object Variant {
     def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
 
     def dropsVariant: Boolean = false
+    def onlyDropsVariant: Boolean = false
 
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
@@ -428,6 +434,7 @@ object Variant {
     def xiangqi: Boolean              = v.xiangqi
     def minishogi: Boolean            = v.minishogi
     def minixiangqi: Boolean          = v.minixiangqi
+    def flipello: Boolean             = v.flipello
 
     def standardVariant: Boolean      = standard || draughtsStandard
     def fromPositionVariant: Boolean  = fromPosition || draughtsFromPosition
@@ -446,6 +453,7 @@ object Variant {
     def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
 
     def dropsVariant: Boolean = v.dropsVariant
+    def onlyDropsVariant: Boolean = v.onlyDropsVariant
 
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon

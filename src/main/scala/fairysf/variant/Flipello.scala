@@ -17,10 +17,13 @@ case object Flipello
 
   def gameFamily: GameFamily = GameFamily.Flipello()
 
-  def perfIcon: Char = 't'
-  def perfId: Int = 202
+  def perfIcon: Char = 'l'
+  def perfId: Int = 204
 
   override def baseVariant: Boolean = true
+
+  override def dropsVariant = true
+  override def onlyDropsVariant = true
 
   //cache this rather than checking with the API everytime
   override def initialFen =

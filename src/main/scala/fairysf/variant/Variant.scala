@@ -26,6 +26,7 @@ abstract class Variant private[variant] (
   def xiangqi = this == Xiangqi
   def minishogi = this == MiniShogi
   def minixiangqi = this == MiniXiangqi
+  def flipello = this == Flipello
 
   def exotic = true
 
@@ -39,6 +40,7 @@ abstract class Variant private[variant] (
   def materialImbalanceVariant: Boolean = false
 
   def dropsVariant: Boolean = false
+  def onlyDropsVariant: Boolean = false
 
   def perfId: Int
   def perfIcon: Char
@@ -237,7 +239,8 @@ object Variant {
     Shogi,
     MiniShogi,
     Xiangqi,
-    MiniXiangqi
+    MiniXiangqi,
+    Flipello
   )
   val byId = all map { v =>
     (v.id, v)
