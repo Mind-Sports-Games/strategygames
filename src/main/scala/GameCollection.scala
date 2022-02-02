@@ -163,7 +163,7 @@ object GameFamily {
     def defaultVariant = Variant.FairySF(strategygames.fairysf.variant.Flipello)
     def variants = Variant.all(GameLogic.FairySF()).filter(_.gameFamily == this)
     def displayPiece = "wP"
-    def pieceSetThemes = List("classic_flipello","fabirovsky_flipello", "check_yb_flipello", "marble_flipello")
+    def pieceSetThemes = List("classic_flipello","fabirovsky_flipello", "check_yb_flipello", "marble_bw_flipello")
     def pieceSetDefault= "classic_flipello"
     def boardThemes = List ("green", "green-marble", "wood")
     def boardThemeDefault = "green"
