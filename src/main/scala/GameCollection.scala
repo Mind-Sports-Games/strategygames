@@ -162,14 +162,11 @@ object GameFamily {
     def aiEnabled = false
     def defaultVariant = Variant.FairySF(strategygames.fairysf.variant.Flipello)
     def variants = Variant.all(GameLogic.FairySF()).filter(_.gameFamily == this)
-    def displayPiece = "wL"
-    def pieceSetThemes = List("fabirovsky_loa", "check_yb_loa", "wide")
-    def pieceSetDefault= "check_yb_loa"
-    def boardThemes = List ("blue", "blue2", "blue3", "blue-marble", "canvas", "wood", "wood2",
-                            "wood3", "wood4", "maple", "maple2", "brown", "leather", "green",
-                            "marble", "green-plastic", "grey", "metal", "olive", "newspaper",
-                            "purple", "purple-diag", "pink", "ic", "horsey")
-    def boardThemeDefault = "marble"
+    def displayPiece = "wP"
+    def pieceSetThemes = List("classic_flipello","fabirovsky_flipello", "check_yb_flipello", "marble_flipello")
+    def pieceSetDefault= "classic_flipello"
+    def boardThemes = List ("green", "green-marble", "wood")
+    def boardThemeDefault = "green"
     def playerNames = Map(P1 -> "Black", P2 -> "White")
     def playerColors = Map(P1 -> "black", P2 -> "white")
   }
