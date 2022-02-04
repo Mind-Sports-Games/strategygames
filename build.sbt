@@ -13,7 +13,7 @@ libraryDependencies ++= List(
   "com.github.ornicar"     %% "scalalib"                 % "7.0.2",
   "joda-time"               % "joda-time"                % "2.10.10",
   "org.typelevel"          %% "cats-core"                % "2.2.0",
-  "org.playstrategy"        % "fairystockfish"           % "0.0.4"
+  "org.playstrategy"        % "fairystockfish"           % "0.0.5"
 )
 
 // Explicitly add in the linux-class path
