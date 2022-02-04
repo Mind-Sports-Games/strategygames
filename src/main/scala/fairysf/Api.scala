@@ -242,7 +242,7 @@ immobilityIllegal = false
 flipEnclosedPieces = reversi
 passOnStalemate = false
 [flipello:flipersi]
-startFen = 8/8/8/3pP3/3Pp3/8/8/8[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppp] w 0 1
+startFen = 8/8/8/3pP3/3Pp3/8/8/8[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppp] w 0 1
 passOnStalemate = true
   """
 
