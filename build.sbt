@@ -6,6 +6,8 @@ version := "10.2.1-pstrat28_1"
 
 scalaVersion := "2.13.5"
 
+val fairystockfishVersion = "0.0.5"
+
 libraryDependencies ++= List(
   "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
   "org.specs2"             %% "specs2-core"              % "4.10.0" % Test,
@@ -13,12 +15,12 @@ libraryDependencies ++= List(
   "com.github.ornicar"     %% "scalalib"                 % "7.0.2",
   "joda-time"               % "joda-time"                % "2.10.10",
   "org.typelevel"          %% "cats-core"                % "2.2.0",
-  "org.playstrategy"        % "fairystockfish"           % "0.0.5"
+  "org.playstrategy"        % "fairystockfish"           % fairystockfishVersion
 )
 
 // Explicitly add in the linux-class path
 lazy val fairystockfish = Artifact("fairystockfish", "linux-x86_64")
-libraryDependencies += "org.playstrategy"        % "fairystockfish"           % "0.0.4" artifacts(fairystockfish)
+libraryDependencies += "org.playstrategy" % "fairystockfish" % fairystockfishVersion artifacts(fairystockfish)
 classpathTypes ++= Set("linux-x86_64")
 
 resolvers ++= Seq(
