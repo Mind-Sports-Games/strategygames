@@ -14,7 +14,7 @@ case object ThreeCheck
       standardInitialPosition = true
     ) {
 
-  def perfId: Int    = 19
+  def perfId: Int    = 15
   def perfIcon: Char = '.'
 
   override def p1IsBetterVariant = true
