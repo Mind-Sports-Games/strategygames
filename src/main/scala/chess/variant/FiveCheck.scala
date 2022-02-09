@@ -16,7 +16,7 @@ case object FiveCheck
 
   def pieces = Standard.pieces
 
-  def perfId: Int    = 15
+  def perfId: Int    = 19
   def perfIcon: Char = '.'
 
   override def aiVariant: Boolean   = false
