@@ -43,7 +43,7 @@ case class Situation(board: Board, player: Player) {
 
   def staleMate: Boolean = result == GameResult.Stalemate()
 
-  private def variantEnd = result == GameResult.VariantEnd()
+  private def variantEnd = result == GameResult.VariantEnd() || board.variant.specialEnd(this)
 
   def end: Boolean = checkMate || perpetual || staleMate || variantEnd
 

@@ -1,11 +1,11 @@
 package strategygames.fairysf
 package variant
 
-import strategygames.GameFamily
+import strategygames.{ GameFamily, Player, P1, P2 }
 
 case object Flipello
     extends Variant(
-      id = 3,
+      id = 6,
       key = "flipello",
       name = "Flipello",
       shortName = "Flipello",
@@ -28,5 +28,15 @@ case object Flipello
   //cache this rather than checking with the API everytime
   override def initialFen =
     format.FEN("8/8/8/3pP3/3Pp3/8/8/8[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppp] w 0 1")
+
+  override def specialEnd(situation: Situation) =
+    situation.board.piecesOnBoardCount == boardSize.width * boardSize.height
+
+  override def specialDraw(situation: Situation) =
+    situation.board.playerPiecesOnBoardCount(P1) == situation.board.playerPiecesOnBoardCount(P2)
+
+  override def winner(situation: Situation): Option[Player] =
+    (specialEnd(situation) && !specialDraw(situation)) option
+      situation.board.playerPiecesOnBoardCount.maxBy(_._2)._1
 
 }
