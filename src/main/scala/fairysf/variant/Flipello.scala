@@ -30,7 +30,8 @@ case object Flipello
     format.FEN("8/8/8/3pP3/3Pp3/8/8/8[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppp] w 0 1")
 
   override def specialEnd(situation: Situation) =
-    situation.board.piecesOnBoardCount == boardSize.width * boardSize.height
+    (situation.board.piecesOnBoardCount == boardSize.width * boardSize.height) ||
+    (situation.board.apiPosition.legalMoves.size == 0)
 
   override def specialDraw(situation: Situation) =
     situation.board.playerPiecesOnBoardCount(P1) == situation.board.playerPiecesOnBoardCount(P2)
