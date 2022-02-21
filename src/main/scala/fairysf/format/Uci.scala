@@ -26,11 +26,13 @@ object Uci {
 
     def keys = orig.key + dest.key
     def uci  = keys + promotionString
+    def lilaUci = keys + lilaPromotionString
 
     def keysPiotr = orig.piotrStr + dest.piotrStr
     def piotr     = keysPiotr + promotionString
 
     def promotionString = promotion.fold("")(_.forsyth.toString)
+    def lilaPromotionString = promotion.fold("")(_ => "+")
 
     def origDest = orig -> dest
 
@@ -40,7 +42,7 @@ object Uci {
   object Move {
 
     def apply(gf: GameFamily, move: String): Option[Move] =
-      move match { 
+      move match {
         case moveP(orig, dest, promotion) => (
           Pos.fromKey(orig),
           Pos.fromKey(dest),
