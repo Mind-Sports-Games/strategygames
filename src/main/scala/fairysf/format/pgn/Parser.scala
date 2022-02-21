@@ -38,7 +38,6 @@ object Parser {
 
   def moves(str: String, variant: Variant): Validated[String, Sans] = Validated.invalid(s"Not implemented moves: ${str}") //TODO: ???
   def moves(strMoves: Iterable[String], variant: Variant): Validated[String, Sans] = Validated.invalid(s"Not implemented iterable moves: ${strMoves}") //TODO: ???
-  private def objMoves(strMoves: List[StrMove], variant: Variant): Validated[String, Sans] = Validated.invalid("Not implemented objMoves") //TODO: ???
 
   trait Logging { self: Parsers =>
     protected val loggingEnabled = false
