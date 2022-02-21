@@ -24,15 +24,17 @@ object Uci {
       promotion: Option[PromotableRole] = None
   ) extends Uci {
 
-    def keys = orig.key + dest.key
-    def uci  = keys + promotionString
-    def lilaUci = keys + lilaPromotionString
+    def keys    = orig.key + dest.key
+    def lilaUci     = keys + lilaPromotionString
+    def fairySfUci     = keys + fairySfPromotionString
+    def uci = lilaUci
 
     def keysPiotr = orig.piotrStr + dest.piotrStr
     def piotr     = keysPiotr + promotionString
 
-    def promotionString = promotion.fold("")(_.forsyth.toString)
-    def lilaPromotionString = promotion.fold("")(_ => "+")
+    def lilaPromotionString     = promotion.fold("")(_.forsyth.toString)
+    def fairySfPromotionString = promotion.fold("")(_ => "+")
+    def promotionString = lilaPromotionString
 
     def origDest = orig -> dest
 
@@ -43,23 +45,24 @@ object Uci {
 
     def apply(gf: GameFamily, move: String): Option[Move] =
       move match {
-        case moveP(orig, dest, promotion) => (
-          Pos.fromKey(orig),
-          Pos.fromKey(dest),
-          promotion
-        ) match {
-          case (Some(orig), Some(dest), promotion) => {
-            Move(
-              orig = orig,
-              dest = dest,
-              promotion = promotion match {
-                case "" => None
-                case c  => (Role.promotable(gf, c.charAt(0)))
-              }
-            ).some
+        case moveP(orig, dest, promotion) =>
+          (
+            Pos.fromKey(orig),
+            Pos.fromKey(dest),
+            promotion
+          ) match {
+            case (Some(orig), Some(dest), promotion) => {
+              Move(
+                orig = orig,
+                dest = dest,
+                promotion = promotion match {
+                  case "" => None
+                  case c  => (Role.promotable(gf, c.charAt(0)))
+                }
+              ).some
+            }
+            case _ => None
           }
-          case _ => None
-        }
         case _ => None
       }
 
@@ -77,14 +80,16 @@ object Uci {
         promotion = Role.promotable(gf, promS)
       } yield Move(orig, dest, promotion)
 
-    val moveR = s"^${Pos.posR}${Pos.posR}(\\+?)$$".r
-    val moveP = s"^${Pos.posR}${Pos.posR}${Role.roleRr}$$".r
+    val moveR  = s"^${Pos.posR}${Pos.posR}(\\+?)$$".r
+    val moveP  = s"^${Pos.posR}${Pos.posR}${Role.roleRr}$$".r
     val movePR = s"^${Pos.posR}${Pos.posR}${Role.rolePR}$$".r
   }
 
   case class Drop(role: Role, pos: Pos) extends Uci {
 
-    def uci = s"${role.pgn}@${pos.key}"
+    def lilaUci = s"${role.pgn}@${pos.key}"
+    def fairySfUci = s"${role.pgn}@${pos.key}"
+    def uci = lilaUci
 
     def piotr = s"${role.pgn}@${pos.piotrStr}"
 
@@ -117,7 +122,7 @@ object Uci {
       case Drop.dropR(role, dest) =>
         (Role.allByPgn(gf).get(role.charAt(0)), Pos.fromKey(dest)) match {
           case (Some(role), Some(dest)) => Uci.Drop(role, dest).some
-          case _ => sys.error(s"Cannot apply uci drop: ${move}")
+          case _                        => sys.error(s"Cannot apply uci drop: ${move}")
         }
       case _ => sys.error(s"Cannot apply uci: ${move}")
     }
