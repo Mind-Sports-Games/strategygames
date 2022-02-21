@@ -23,7 +23,6 @@ case object Flipello
   override def baseVariant: Boolean = true
 
   override def dropsVariant = true
-
   override def onlyDropsVariant = true
 
   //cache this rather than checking with the API everytime
