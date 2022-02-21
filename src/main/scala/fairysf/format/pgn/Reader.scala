@@ -1,13 +1,12 @@
 package strategygames.fairysf
 package format.pgn
-import strategygames.{ Clock, Drop => StratDrop, Move => StratMove, Situation => StratSituation }
+import strategygames.{ Clock, GameFamily, Move => StratMove, Situation => StratSituation }
 
 import strategygames.format.pgn.{ ParsedPgn, Sans, Tags }
 
 import strategygames.fairysf.format.Uci
 
 import cats.data.Validated
-import cats.implicits._
 
 object Reader {
 
