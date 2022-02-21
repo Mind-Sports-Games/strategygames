@@ -11,14 +11,14 @@ case object MiniXiangqi
       shortName = "minixiangqi",
       title = "Mini Xiangqi (Chinese Chess)",
       standardInitialPosition = true,
-      fairysfName=FairySFName("minixiangqi"),
+      fairysfName = FairySFName("minixiangqi"),
       boardSize = Board.Dim7x7
     ) {
 
   def gameFamily: GameFamily = GameFamily.Xiangqi()
 
   def perfIcon: Char = 't'
-  def perfId: Int = 203
+  def perfId: Int    = 203
 
   val kingPiece: Role = XiangqiKing
 
@@ -27,3 +27,4 @@ case object MiniXiangqi
     format.FEN("rcnkncr/p1ppp1p/7/7/7/P1PPP1P/RCNKNCR w - - 0 1")
 
 }
+

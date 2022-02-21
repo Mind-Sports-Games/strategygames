@@ -15,11 +15,12 @@ object Parser {
   def pgnMovesToUciMoves(pgnMoves: Iterable[String]): List[String] =
     pgnMoves.toList.map(
       _ match {
-        case Uci.Move.moveP(orig, dest, promotion) => promotion match {
-          case "" => s"${orig}${dest}"                                                    
-          case _  => s"${orig}${dest}+"                                                   
-        }                                                                                 
-        case s: String => s                                                                 
+        case Uci.Move.moveP(orig, dest, promotion) =>
+          promotion match {
+            case "" => s"${orig}${dest}"
+            case _  => s"${orig}${dest}+"
+          }
+        case s: String => s
       }
     )
 
@@ -30,10 +31,13 @@ object Parser {
       variations: List[List[StrMove]]
   )
 
-  def full(pgn: String): Validated[String, ParsedPgn] = Validated.invalid(s"Not implemented full: ${pgn}") //TODO: ???
+  def full(pgn: String): Validated[String, ParsedPgn] =
+    Validated.invalid(s"Not implemented full: ${pgn}") //TODO: ???
 
-  def moves(str: String, variant: Variant): Validated[String, Sans] = Validated.invalid(s"Not implemented moves: ${str}") //TODO: ???
-  def moves(strMoves: Iterable[String], variant: Variant): Validated[String, Sans] = Validated.invalid(s"Not implemented iterable moves: ${strMoves}") //TODO: ???
+  def moves(str: String, variant: Variant): Validated[String, Sans] =
+    Validated.invalid(s"Not implemented moves: ${str}") //TODO: ???
+  def moves(strMoves: Iterable[String], variant: Variant): Validated[String, Sans] =
+    Validated.invalid(s"Not implemented iterable moves: ${strMoves}") //TODO: ???
 
   trait Logging { self: Parsers =>
     protected val loggingEnabled = false
@@ -45,8 +49,8 @@ object Parser {
 
     override val whiteSpace = """(\s|\t|\r?\n)+""".r
 
-
-    def apply(pgn: String): Validated[String, (InitialPosition, List[StrMove], Option[Tag])] = Validated.invalid("Not implemented MovesParser") //TODO: ???
+    def apply(pgn: String): Validated[String, (InitialPosition, List[StrMove], Option[Tag])] =
+      Validated.invalid("Not implemented MovesParser") //TODO: ???
 
     //def strMoves: Parser[(InitialPosition, List[StrMove], Option[String])] = //TODO: ???
 

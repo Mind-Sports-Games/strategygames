@@ -37,4 +37,3 @@ case class PocketData(
 object PocketData {
   val init = PocketData(Pockets(Pocket(Nil), Pocket(Nil)), Set.empty)
 }
-

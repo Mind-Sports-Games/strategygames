@@ -67,7 +67,7 @@ object Binary {
 
     private def headerBit(i: Int) = i >> 7
 
-    private def right(i: Int, x: Int): Int           = i & lengthMasks(x)
+    private def right(i: Int, x: Int): Int = i & lengthMasks(x)
     private val lengthMasks =
       Map(1 -> 0x01, 2 -> 0x03, 3 -> 0x07, 4 -> 0x0f, 5 -> 0x1f, 6 -> 0x3f, 7 -> 0x7f, 8 -> 0xff)
     private def !!(msg: String) = throw new Exception("Binary reader failed: " + msg)
@@ -78,8 +78,8 @@ object Binary {
     def move(gf: GameFamily, str: String): List[Byte] =
       (str match {
         case Uci.Move.moveR(src, dst, promotion) => moveUci(src, dst, promotion)
-        case Uci.Drop.dropR(piece, dst) => dropUci(gf, piece, dst)
-        case _ => sys.error(s"Invalid move to write: ${str}")
+        case Uci.Drop.dropR(piece, dst)          => dropUci(gf, piece, dst)
+        case _                                   => sys.error(s"Invalid move to write: ${str}")
       }) map (_.toByte)
 
     def moves(gf: GameFamily, strs: Iterable[String]): Array[Byte] =
@@ -89,7 +89,7 @@ object Binary {
       (headerBit(MoveType.Move)) + Pos.fromKey(src).get.index,
       (headerBit(promotion.headOption match {
         case Some(_) => 1
-        case None => 0
+        case None    => 0
       })) + Pos.fromKey(dst).get.index
     )
 

@@ -58,7 +58,11 @@ object Reader {
       makeReplay(makeGame(tags), op(moves))
     }
 
-  def movesWithPgns(moveStrs: Iterable[String], op: Iterable[String] => Iterable[String], tags: Tags): Validated[String, Result] =
+  def movesWithPgns(
+      moveStrs: Iterable[String],
+      op: Iterable[String] => Iterable[String],
+      tags: Tags
+  ): Validated[String, Result] =
     Validated.valid(makeReplayWithPgn(makeGame(tags), op(moveStrs)))
 
   // remove invisible byte order mark
@@ -90,34 +94,40 @@ object Reader {
         m match {
           case Uci.Move.moveR(orig, dest, promotion) => {
             (Pos.fromKey(orig), Pos.fromKey(dest)) match {
-              case (Some(orig), Some(dest)) => Result.Complete(
-                replay.addMove(
-                  Left(Replay.replayMove(
-                    replay.state,
-                    orig,
-                    dest,
-                    promotion,
-                    replay.state.board.apiPosition.makeMoves(List(m)),
-                    replay.state.board.uciMoves :+ m
-                  ))
+              case (Some(orig), Some(dest)) =>
+                Result.Complete(
+                  replay.addMove(
+                    Left(
+                      Replay.replayMove(
+                        replay.state,
+                        orig,
+                        dest,
+                        promotion,
+                        replay.state.board.apiPosition.makeMoves(List(m)),
+                        replay.state.board.uciMoves :+ m
+                      )
+                    )
+                  )
                 )
-              )
               case _ => Result.Incomplete(replay, s"Error making replay with move: ${m}")
             }
           }
           case Uci.Drop.dropR(role, dest) =>
             (Role.allByForsyth(replay.state.board.variant.gameFamily).get(role(0)), Pos.fromKey(dest)) match {
-              case (Some(role), Some(dest)) => Result.Complete(
-                replay.addMove(
-                  Right(Replay.replayDrop(
-                    replay.state,
-                    role,
-                    dest,
-                    replay.state.board.apiPosition.makeMoves(List(m)),
-                    replay.state.board.uciMoves :+ m
-                  ))
+              case (Some(role), Some(dest)) =>
+                Result.Complete(
+                  replay.addMove(
+                    Right(
+                      Replay.replayDrop(
+                        replay.state,
+                        role,
+                        dest,
+                        replay.state.board.apiPosition.makeMoves(List(m)),
+                        replay.state.board.uciMoves :+ m
+                      )
+                    )
+                  )
                 )
-              )
               case _ => Result.Incomplete(replay, s"Error making replay with drop: ${m}")
             }
           case _ => Result.Incomplete(replay, s"Error making replay with uci move: ${m}")

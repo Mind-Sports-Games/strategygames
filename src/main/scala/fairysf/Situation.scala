@@ -5,7 +5,7 @@ import strategygames.{ Player, Status }
 import cats.data.Validated
 import cats.implicits._
 
-import strategygames.fairysf.format.{ Forsyth, Uci }
+import strategygames.fairysf.format.Uci
 
 case class Situation(board: Board, player: Player) {
 
@@ -90,5 +90,6 @@ case class Situation(board: Board, player: Player) {
 
 object Situation {
 
-  def apply(variant: strategygames.fairysf.variant.Variant): Situation = Situation(Board init variant, variant.startPlayer)
+  def apply(variant: strategygames.fairysf.variant.Variant): Situation =
+    Situation(Board init variant, variant.startPlayer)
 }

@@ -10,8 +10,8 @@ case class Rank private (val index: Int) extends AnyVal with Ordered[Rank] {
     if (-Rank.all.size < delta && delta < Rank.all.size) Rank(index + delta)
     else None
 
-  @inline def char: Char = if (index < 9) (49 + index).toChar else 48.toChar//0
-  override def toString  = (index+1).toString
+  @inline def char: Char = if (index < 9) (49 + index).toChar else 48.toChar //0
+  override def toString  = (index + 1).toString
 }
 
 object Rank {
@@ -19,7 +19,7 @@ object Rank {
     if (0 <= index && index < all.size) Some(new Rank(index))
     else None
 
-  @inline def of(pos: Pos): Rank = new Rank(pos.index/File.all.size)
+  @inline def of(pos: Pos): Rank = new Rank(pos.index / File.all.size)
 
   def fromChar(ch: Char): Option[Rank] = apply(if (ch.toInt == 48) 9 else ch.toInt - 49)
 
@@ -34,7 +34,7 @@ object Rank {
   val Ninth   = new Rank(8)
   val Tenth   = new Rank(9)
 
-  val all = List(First, Second, Third, Fourth, Fifth, Sixth, Seventh, Eighth, Ninth, Tenth)
+  val all                     = List(First, Second, Third, Fourth, Fifth, Sixth, Seventh, Eighth, Ninth, Tenth)
   val allReversed: List[Rank] = all.reverse
 
 }

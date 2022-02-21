@@ -41,8 +41,7 @@ object UciCharPair {
 
     //copied from chess (minus !King filter), im sure this just gives '?' for all roles
     val dropRole2charMap: Map[Role, Char] =
-      Role.all
-        .zipWithIndex
+      Role.all.zipWithIndex
         .map { case (role, index) =>
           role -> (charShift + pos2charMap.size + promotion2charMap.size + index).toChar
         }
