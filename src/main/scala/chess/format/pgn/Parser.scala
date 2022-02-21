@@ -39,7 +39,7 @@ object Parser {
         splitted <- splitTagAndMoves(preprocessed)
         tagStr  = splitted._1
         moveStr = splitted._2
-        preTags     <- TagParser(tagStr.pp("tagStr"))
+        preTags     <- TagParser(tagStr)
         parsedMoves <- MovesParser(moveStr)
         init         = parsedMoves._1
         strMoves     = parsedMoves._2

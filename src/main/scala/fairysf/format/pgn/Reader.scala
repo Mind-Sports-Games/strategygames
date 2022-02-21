@@ -32,8 +32,8 @@ object Reader {
   // Because fairysf deals exclusively with UCI moves, we need this version
   // for parsing replaces from uci move
   def uciMoves(gf: GameFamily, moveStrs: Iterable[String], tags: Tags): Validated[String, Result] = {
-    val moves = moveStrs.pp("Moves").flatMap(Uci(gf, _)).pp("flatMoves")
-    if (moves.size.pp("newSize") < moveStrs.size.pp("oldSize")) {
+    val moves = moveStrs.flatMap(Uci(gf, _))
+    if (moves.size < moveStrs.size) {
       Validated.invalid("Invalid UCI moves")
     } else {
       Validated.valid(

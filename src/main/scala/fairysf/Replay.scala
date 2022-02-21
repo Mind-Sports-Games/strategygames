@@ -34,12 +34,11 @@ object Replay {
       variant: strategygames.fairysf.variant.Variant
   ): Validated[String, Reader.Result] = {
     val fen = initialFen.getOrElse(variant.initialFen)
-    moveStrs.pp("moveStrs")
     val (init, moves, error) = gameMoveWhileValid__impl(moveStrs.toSeq, fen, variant)
     val game = moves.last._1
     error match {
       case None => Validated.valid(Reader.Result.Complete(new Replay(init, moves.map(_._2), game)))
-      case Some(msg) => Validated.invalid(msg).pp("invalid")
+      case Some(msg) => Validated.invalid(msg)
     }
   }
 
