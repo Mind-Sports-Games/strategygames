@@ -1,7 +1,7 @@
 package strategygames.fairysf
 package variant
 
-import strategygames.{ GameFamily, Player, P1, P2 }
+import strategygames.{ GameFamily, P1, P2, Player }
 
 case object Flipello
     extends Variant(
@@ -11,18 +11,19 @@ case object Flipello
       shortName = "Flipello",
       title = "Flipello",
       standardInitialPosition = true,
-      fairysfName=FairySFName("flipello"),
+      fairysfName = FairySFName("flipello"),
       boardSize = Board.Dim8x8
     ) {
 
   def gameFamily: GameFamily = GameFamily.Flipello()
 
   def perfIcon: Char = 'l'
-  def perfId: Int = 204
+  def perfId: Int    = 204
 
   override def baseVariant: Boolean = true
 
   override def dropsVariant = true
+
   override def onlyDropsVariant = true
 
   //cache this rather than checking with the API everytime
@@ -31,7 +32,7 @@ case object Flipello
 
   override def specialEnd(situation: Situation) =
     (situation.board.piecesOnBoardCount == boardSize.width * boardSize.height) ||
-    (situation.board.apiPosition.legalMoves.size == 0)
+      (situation.board.apiPosition.legalMoves.size == 0)
 
   override def specialDraw(situation: Situation) =
     situation.board.playerPiecesOnBoardCount(P1) == situation.board.playerPiecesOnBoardCount(P2)
