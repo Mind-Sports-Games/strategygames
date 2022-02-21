@@ -4,14 +4,10 @@ package format.pgn
 import strategygames.fairysf.variant.Variant
 import strategygames.fairysf.format.Uci
 
-import strategygames.format.pgn.{ Glyph, Glyphs, InitialPosition, Metas, ParsedPgn, San, Sans, Suffixes, Tag, Tags }
-import strategygames.{ Role => ChessRole }
+import strategygames.format.pgn.{ Glyphs, InitialPosition, ParsedPgn, Sans, Tag }
 
 import scala.util.parsing.combinator._
 import cats.data.Validated
-import cats.data.Validated.{ invalid, valid }
-import cats.implicits._
-import scala.util.matching.Regex
 
 // http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm
 object Parser {
