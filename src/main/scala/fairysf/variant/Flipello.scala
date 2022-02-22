@@ -22,8 +22,10 @@ case object Flipello
 
   override def baseVariant: Boolean = true
 
-  override def dropsVariant = true
+  override def dropsVariant     = true
   override def onlyDropsVariant = true
+
+  override def passUci = Some("d1d1")
 
   //cache this rather than checking with the API everytime
   override def initialFen =

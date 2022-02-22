@@ -3,6 +3,8 @@ import strategygames.MoveMetrics
 
 import strategygames.fairysf.format.Uci
 
+import cats.syntax.option._
+
 case class Drop(
     piece: Piece,
     pos: Pos,
@@ -13,9 +15,25 @@ case class Drop(
 
   private def before = situationBefore.board
 
-  def situationAfter = Situation(finalizeAfter, !piece.player)
+  private def nextMoveIsPass: Boolean = before.variant.passUci match {
+    case Some(passUci) => after.apiPosition.legalMoves.sameElements(Array(passUci))
+    case None          => false
+  }
 
-  def finalizeAfter: Board = after
+  def situationAfter =
+    Situation(finalizeAfter, if (nextMoveIsPass) piece.player else !piece.player)
+
+  def finalizeAfter: Board = before.variant.passUci match {
+    case Some(passUci) if nextMoveIsPass =>
+      val newPosition = after.apiPosition.makeMoves(List(passUci))
+      after.copy(
+        pieces = newPosition.pieceMap, //will also == after.pieces
+        uciMoves = after.uciMoves :+ passUci,
+        pocketData = newPosition.pocketData,
+        position = newPosition.some
+      )
+    case _ => after
+  }
 
   def player = piece.player
 
