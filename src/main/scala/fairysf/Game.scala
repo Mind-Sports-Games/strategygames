@@ -1,5 +1,5 @@
 package strategygames.fairysf
-import strategygames.{ Clock, Player, MoveMetrics }
+import strategygames.{ Clock, MoveMetrics, Player }
 
 import cats.data.Validated
 
@@ -45,11 +45,21 @@ case class Game(
 
   def applyDrop(drop: Drop): Game = {
     val newSituation = drop situationAfter
+    var newTurns     = turns + 1
+    var newPgnMoves  = pgnMoves :+ drop.toUci.uci
+
+    newSituation.board.variant.passUci match {
+      case Some(passUci) if newSituation.board.uciMoves.lastOption == Some(passUci) => {
+        newTurns = newTurns + 1
+        newPgnMoves = newPgnMoves :+ passUci
+      }
+      case _ => {}
+    }
 
     copy(
       situation = newSituation,
-      turns = turns + 1,
-      pgnMoves = pgnMoves :+ drop.toUci.uci,
+      turns = newTurns,
+      pgnMoves = newPgnMoves,
       clock = applyClock(drop.metrics, newSituation.status.isEmpty)
     )
   }
