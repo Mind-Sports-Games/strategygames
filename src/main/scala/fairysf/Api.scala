@@ -4,7 +4,7 @@ import org.playstrategy.FairyStockfish
 
 import cats.implicits._
 
-import strategygames.{ Player, GameFamily, Pocket, Pockets }
+import strategygames.{ GameFamily, Player, Pocket, Pockets }
 import strategygames.fairysf.format.{ FEN, Uci }
 import strategygames.fairysf.variant.Variant
 
@@ -102,12 +102,12 @@ object Api {
       if (variant.dropsVariant)
         PocketData(
           Pockets(
-            Pocket(piecesInHand.filter(_.player == P1).toList.map(
-              p => strategygames.Role.FairySFRole(p.role)
-            )),
-            Pocket(piecesInHand.filter(_.player == P2).toList.map(
-              p => strategygames.Role.FairySFRole(p.role)
-            ))
+            Pocket(
+              piecesInHand.filter(_.player == P1).toList.map(p => strategygames.Role.FairySFRole(p.role))
+            ),
+            Pocket(
+              piecesInHand.filter(_.player == P2).toList.map(p => strategygames.Role.FairySFRole(p.role))
+            )
           ),
           //Can make an empty Set of Pos because we dont have to track promoted pieces
           //FairySF takes care of this for us
@@ -222,13 +222,12 @@ object Api {
 
 }
 
-
 object ApiVariantConfig {
 
   val config = """
 [flipersi]
 immobile = p
-startFen = 8/8/8/8/8/8/8/8[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppp] w 0 1
+startFen = 8/8/8/8/8/8/8/8[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp] w 0 1
 pieceDrops = true
 promotionPieceTypes = -
 doubleStep = false
@@ -242,7 +241,7 @@ immobilityIllegal = false
 flipEnclosedPieces = reversi
 passOnStalemate = false
 [flipello:flipersi]
-startFen = 8/8/8/3pP3/3Pp3/8/8/8[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppp] w 0 1
+startFen = 8/8/8/3pP3/3Pp3/8/8/8[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp] w 0 1
 passOnStalemate = true
   """
 
