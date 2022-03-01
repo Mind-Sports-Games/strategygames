@@ -2,11 +2,11 @@ name := "strategygames"
 
 organization := "org.playstrategy"
 
-version := "10.2.1-pstrat30"
+version := "10.2.1-pstrat31"
 
 scalaVersion := "2.13.5"
 
-val fairystockfishVersion = "0.0.5"
+val fairystockfishVersion = "0.0.7"
 
 libraryDependencies ++= List(
   "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
@@ -20,7 +20,7 @@ libraryDependencies ++= List(
 
 // Explicitly add in the linux-class path
 lazy val fairystockfish = Artifact("fairystockfish", "linux-x86_64")
-libraryDependencies += "org.playstrategy" % "fairystockfish" % fairystockfishVersion artifacts(fairystockfish)
+libraryDependencies += "org.playstrategy" % "fairystockfish" % fairystockfishVersion artifacts fairystockfish
 classpathTypes ++= Set("linux-x86_64")
 
 resolvers ++= Seq(
