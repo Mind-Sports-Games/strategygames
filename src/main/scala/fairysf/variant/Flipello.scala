@@ -8,8 +8,6 @@ case object Flipello
       id = 6,
       key = "flipello",
       name = "Flipello",
-      shortName = "Flipello",
-      title = "Flipello",
       standardInitialPosition = true,
       fairysfName = FairySFName("flipello"),
       boardSize = Board.Dim8x8

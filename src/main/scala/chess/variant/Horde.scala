@@ -9,15 +9,13 @@ case object Horde
       id = 8,
       key = "horde",
       name = "Horde",
-      shortName = "Horde",
-      title = "Destroy the horde to win!",
       standardInitialPosition = false
     ) {
 
   def perfId: Int    = 16
   def perfIcon: Char = '_'
 
-  override def p1IsBetterVariant     = true
+  override def p1IsBetterVariant        = true
   override def blindModeVariant         = false
   override def materialImbalanceVariant = true
 
@@ -76,21 +74,21 @@ case object Horde
     * this method does not detect; however, such are trivial to premove.
     */
   override def opponentHasInsufficientMaterial(situation: Situation): Boolean = {
-    val board         = situation.board
+    val board          = situation.board
     val opponentPlayer = !situation.player
-    lazy val fortress = hordeClosedPosition(board) // costly function call
+    lazy val fortress  = hordeClosedPosition(board) // costly function call
     if (opponentPlayer == Player.p1) {
-      lazy val notKingPieces           = InsufficientMatingMaterial.nonKingPieces(board) toList
-      val horde                        = board.piecesOf(Player.p1)
+      lazy val notKingPieces            = InsufficientMatingMaterial.nonKingPieces(board) toList
+      val horde                         = board.piecesOf(Player.p1)
       lazy val hordeBishopSquarePlayers = horde.filter(_._2.is(Bishop)).toList.map(_._1.isLight).distinct
-      lazy val hordeRoles              = horde.map(_._2.role)
-      lazy val army                    = board.piecesOf(Player.p2)
-      lazy val armyPawnsOrRooks        = army.count(p => p._2.is(Pawn) || p._2.is(Rook))
-      lazy val armyPawnsOrBishops      = army.filter(p => p._2.is(Pawn) || p._2.is(Bishop))
-      lazy val armyPawnsOrKnights      = army.count(p => p._2.is(Pawn) || p._2.is(Knight))
-      lazy val armyNonQueens           = army.count(_._2.isNot(Queen))
-      lazy val armyNonQueensOrRooks    = army.count(p => p._2.isNot(Queen) && p._2.isNot(Rook))
-      lazy val armyNonQueensOrBishops  = army.count(p => p._2.isNot(Queen) && p._2.isNot(Bishop))
+      lazy val hordeRoles               = horde.map(_._2.role)
+      lazy val army                     = board.piecesOf(Player.p2)
+      lazy val armyPawnsOrRooks         = army.count(p => p._2.is(Pawn) || p._2.is(Rook))
+      lazy val armyPawnsOrBishops       = army.filter(p => p._2.is(Pawn) || p._2.is(Bishop))
+      lazy val armyPawnsOrKnights       = army.count(p => p._2.is(Pawn) || p._2.is(Knight))
+      lazy val armyNonQueens            = army.count(_._2.isNot(Queen))
+      lazy val armyNonQueensOrRooks     = army.count(p => p._2.isNot(Queen) && p._2.isNot(Rook))
+      lazy val armyNonQueensOrBishops   = army.count(p => p._2.isNot(Queen) && p._2.isNot(Bishop))
       lazy val armyBishopSquarePlayers  = army.filter(_._2.is(Bishop)).toList.map(_._1.isLight).distinct
       if (horde.sizeIs == 1) {
         hordeRoles match {

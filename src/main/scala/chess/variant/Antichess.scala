@@ -9,15 +9,13 @@ case object Antichess
       id = 6,
       key = "antichess",
       name = "Antichess",
-      shortName = "Anti",
-      title = "Lose all your pieces (or get stalemated) to win the game.",
       standardInitialPosition = true
     ) {
 
   def perfId: Int    = 13
   def perfIcon: Char = '@'
 
-  override def p1IsBetterVariant     = true
+  override def p1IsBetterVariant        = true
   override def blindModeVariant         = false
   override def materialImbalanceVariant = true
 

@@ -5,8 +5,6 @@ case object FromPosition
       id = 3,
       key = "fromPosition",
       name = "From Position",
-      shortName = "FEN",
-      title = "Custom starting position",
       standardInitialPosition = false
     ) {
 

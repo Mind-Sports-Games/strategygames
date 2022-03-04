@@ -9,19 +9,17 @@ case object MiniShogi
       id = 5,
       key = "minishogi",
       name = "Mini Shogi",
-      shortName = "minishogi",
-      title = "Mini Shogi (Japanese Chess)",
       standardInitialPosition = true,
-      fairysfName=FairySFName("minishogi"),
+      fairysfName = FairySFName("minishogi"),
       boardSize = Board.Dim5x5
     ) {
-  
+
   def gameFamily: GameFamily = GameFamily.Shogi()
 
   override def dropsVariant = true
 
   def perfIcon: Char = 's'
-  def perfId: Int = 202
+  def perfId: Int    = 202
 
   override val kingPiece: Option[Role] = Some(ShogiKing)
 
@@ -31,16 +29,20 @@ case object MiniShogi
   //manually calculated where might put king in mate
   //this was done for optimisation but could go back to just checking the api lots?
   override def validDrops(situation: Situation): List[Drop] =
-    super.validDrops(situation).filterNot(
-      d => d.piece.role == ShogiPawn && {
-        val kingPos = situation.board.posMap.get(
-          Piece(!situation.player, ShogiKing)
-        ).flatMap(_.headOption)
-        Some(d.pos) == (situation.player match {
-          case P1 => kingPos.flatMap(_.down)
-          case P2 => kingPos.flatMap(_.up)
-        })
-      } && situation.board.apiPosition.makeMoves(List(d.toUci.uci)).gameResult == GameResult.Checkmate()
-    )
+    super
+      .validDrops(situation)
+      .filterNot(d =>
+        d.piece.role == ShogiPawn && {
+          val kingPos = situation.board.posMap
+            .get(
+              Piece(!situation.player, ShogiKing)
+            )
+            .flatMap(_.headOption)
+          Some(d.pos) == (situation.player match {
+            case P1 => kingPos.flatMap(_.down)
+            case P2 => kingPos.flatMap(_.up)
+          })
+        } && situation.board.apiPosition.makeMoves(List(d.toUci.uci)).gameResult == GameResult.Checkmate()
+      )
 
 }

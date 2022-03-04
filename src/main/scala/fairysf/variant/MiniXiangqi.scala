@@ -8,17 +8,15 @@ case object MiniXiangqi
       id = 4,
       key = "minixiangqi",
       name = "Mini Xiangqi",
-      shortName = "minixiangqi",
-      title = "Mini Xiangqi (Chinese Chess)",
       standardInitialPosition = true,
-      fairysfName=FairySFName("minixiangqi"),
+      fairysfName = FairySFName("minixiangqi"),
       boardSize = Board.Dim7x7
     ) {
 
   def gameFamily: GameFamily = GameFamily.Xiangqi()
 
   def perfIcon: Char = 't'
-  def perfId: Int = 203
+  def perfId: Int    = 203
 
   override val kingPiece: Option[Role] = Some(XiangqiKing)
 

@@ -6,15 +6,13 @@ import scala.annotation.nowarn
 
 import strategygames.chess._
 import strategygames.chess.format.FEN
-import strategygames.{ Player, GameFamily }
+import strategygames.{ GameFamily, Player }
 
 // Correctness depends on singletons for each variant ID
 abstract class Variant private[variant] (
     val id: Int,
     val key: String,
     val name: String,
-    val shortName: String,
-    val title: String,
     val standardInitialPosition: Boolean
 ) {
 
@@ -42,7 +40,7 @@ abstract class Variant private[variant] (
   def aiVariant: Boolean   = true
 
   def p1IsBetterVariant: Boolean = false
-  def blindModeVariant: Boolean     = true
+  def blindModeVariant: Boolean  = true
 
   def materialImbalanceVariant: Boolean = false
 
@@ -57,7 +55,7 @@ abstract class Variant private[variant] (
 
   def castles: Castles = Castles.all
 
-  def initialFen: FEN   = format.Forsyth.initial
+  def initialFen: FEN     = format.Forsyth.initial
   def startPlayer: Player = P1
 
   def isValidPromotion(promotion: Option[PromotableRole]) =
@@ -75,7 +73,12 @@ abstract class Variant private[variant] (
       .to(Map)
 
   // Optimised for performance
-  def pieceThreatened(board: Board, player: Player, to: Pos, filter: Piece => Boolean = _ => true): Boolean = {
+  def pieceThreatened(
+      board: Board,
+      player: Player,
+      to: Pos,
+      filter: Piece => Boolean = _ => true
+  ): Boolean = {
     board.pieces exists {
       case (pos, piece) if piece.player == player && filter(piece) && piece.eyes(pos, to) =>
         (!piece.role.projection) || piece.role.dir(pos, to).exists {
@@ -186,8 +189,8 @@ abstract class Variant private[variant] (
 
   protected def pawnsOnPromotionRank(board: Board, player: Player) = {
     board.pieces.exists {
-      case (pos, Piece(c, r))
-        if c == player && r == Pawn && pos.rank == Rank.promotablePawnRank(player) => true
+      case (pos, Piece(c, r)) if c == player && r == Pawn && pos.rank == Rank.promotablePawnRank(player) =>
+        true
       case _ => false
     }
   }
@@ -245,7 +248,7 @@ object Variant {
     RacingKings,
     NoCastling,
     LinesOfAction,
-    ScrambledEggs,
+    ScrambledEggs
   )
   val byId = all map { v =>
     (v.id, v)

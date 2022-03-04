@@ -13,27 +13,26 @@ case object Pool
       gameType = 27,
       key = "pool",
       name = "Pool",
-      shortName = "Pool",
-      title = "The same rules as Russian Draughts, but with no promotion during a capture chain.",
       standardInitialPosition = false,
       boardSize = Board.D64
     ) {
 
   def perfId: Int = 124
 
-  override def fenVariant    = true
-  override def aiVariant     = false
-  def pieces                 = Russian.pieces
-  def initialFen             = Russian.initialFen
-  def startingPosition       = Russian.startingPosition
+  override def fenVariant = true
+  override def aiVariant  = false
+  def pieces              = Russian.pieces
+  def initialFen          = Russian.initialFen
+  def startingPosition    = Russian.startingPosition
   //TODO: Set this
   override val openingTables = List(OpeningTable.tableFMJDBrazilian, OpeningTable.tableIDFBasic)
 
-  def captureDirs   = Standard.captureDirs
+  def captureDirs    = Standard.captureDirs
   def moveDirsPlayer = Standard.moveDirsPlayer
-  def moveDirsAll   = Standard.moveDirsAll
+  def moveDirsAll    = Standard.moveDirsAll
 
-  override def validMoves(situation: Situation, finalSquare: Boolean = false): Map[Pos, List[Move]] = Russian.validMoves(situation, finalSquare)
+  override def validMoves(situation: Situation, finalSquare: Boolean = false): Map[Pos, List[Move]] =
+    Russian.validMoves(situation, finalSquare)
 
   override def finalizeBoard(
       board: Board,
@@ -41,8 +40,8 @@ case object Pool
       captured: Option[List[Piece]],
       situationBefore: Situation,
       finalSquare: Boolean
-  ): Board = 
-    // TODO: Both the Brazilian and Russian implentations are equivalent except 
+  ): Board =
+    // TODO: Both the Brazilian and Russian implentations are equivalent except
     //       for the remainingCaptures calculation. Rather than duplicate it a third time
     //       we're using this, but the other two are candidates for refactoring.
     Russian.finalizeBoardWithRemainingCaptures(
@@ -50,12 +49,11 @@ case object Pool
       //RUSSIAN:
       //remainingCaptures = board.actorAt(uci.dest).map(_.captureLength).getOrElse(0)
       //BRAZILIAN:
-      remainingCaptures =
-        if (finalSquare) 0 else situationBefore.captureLengthFrom(uci.orig).getOrElse(0) - 1
+      remainingCaptures = if (finalSquare) 0 else situationBefore.captureLengthFrom(uci.orig).getOrElse(0) - 1
     )
 
   override def shortRangeCaptures(actor: Actor, finalSquare: Boolean): List[Move] = {
-    val buf   = new ArrayBuffer[Move]
+    val buf    = new ArrayBuffer[Move]
     val player = actor.player
 
     def walkCaptures(
@@ -80,21 +78,22 @@ case object Pool
                 val newBoard   = if (firstBoard.isDefined) firstBoard else boardAfter.some
                 val extraCaptures = captureDirs.foldLeft(0) { case (total, captDir) =>
                   if (captDir._1 == opposite) total
-                  else total + walkCaptures(
-                    captDir,
-                    boardAfter,
-                    landingPos,
-                    newDest,
-                    newBoard,
-                    newSquares,
-                    newTaken
-                  )
+                  else
+                    total + walkCaptures(
+                      captDir,
+                      boardAfter,
+                      landingPos,
+                      newDest,
+                      newBoard,
+                      newSquares,
+                      newTaken
+                    )
                 }
                 if (extraCaptures == 0) {
                   val boardAfterPromote =
-                      if (promotablePos(landingPos, player))
-                        boardAfter.promote(landingPos).getOrElse(boardAfter)
-                      else boardAfter
+                    if (promotablePos(landingPos, player))
+                      boardAfter.promote(landingPos).getOrElse(boardAfter)
+                    else boardAfter
                   val newMove =
                     if (finalSquare)
                       actor.move(landingPos, boardAfterPromote.withoutGhosts, newSquares, newTaken)

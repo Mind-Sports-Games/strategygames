@@ -9,8 +9,6 @@ case object RacingKings
       id = 9,
       key = "racingKings",
       name = "Racing Kings",
-      shortName = "Racing",
-      title = "Race your King to the eighth rank to win.",
       standardInitialPosition = false
     ) {
 
@@ -18,7 +16,7 @@ case object RacingKings
   def perfIcon: Char = ''
 
   override def p1IsBetterVariant = true
-  override def blindModeVariant = false
+  override def blindModeVariant  = false
 
   override def allowsCastling = false
 

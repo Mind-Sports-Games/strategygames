@@ -7,8 +7,6 @@ case object FromPosition
       gameType = 99,
       key = "fromPosition",
       name = "From Position",
-      shortName = "FEN",
-      title = "Custom starting position",
       standardInitialPosition = false,
       boardSize = Board.D100
     ) {
@@ -19,11 +17,15 @@ case object FromPosition
   def initialFen       = Standard.initialFen
   def startingPosition = Standard.startingPosition
 
-  def captureDirs   = Standard.captureDirs
+  def captureDirs    = Standard.captureDirs
   def moveDirsPlayer = Standard.moveDirsPlayer
-  def moveDirsAll   = Standard.moveDirsAll
+  def moveDirsAll    = Standard.moveDirsAll
 
   def maxDrawingMoves(board: Board): Option[Int] = Standard.maxDrawingMoves(board)
-  def updatePositionHashes(board: Board, move: Move, hash: strategygames.draughts.PositionHash): PositionHash =
+  def updatePositionHashes(
+      board: Board,
+      move: Move,
+      hash: strategygames.draughts.PositionHash
+  ): PositionHash =
     Standard.updatePositionHashes(board, move, hash)
 }

@@ -1,7 +1,7 @@
 package strategygames.draughts
 package variant
 
-import strategygames.{ Player, GameFamily }
+import strategygames.{ GameFamily, Player }
 
 import format.FEN
 
@@ -15,8 +15,6 @@ abstract class Variant private[variant] (
     val gameType: Int,
     val key: String,
     val name: String,
-    val shortName: String,
-    val title: String,
     val standardInitialPosition: Boolean,
     val boardSize: Board.BoardSize
 ) {
@@ -51,7 +49,7 @@ abstract class Variant private[variant] (
   def aiVariant: Boolean   = true
 
   def p1IsBetterVariant: Boolean = false
-  def blindModeVariant: Boolean     = false
+  def blindModeVariant: Boolean  = false
 
   def materialImbalanceVariant: Boolean = false
 
@@ -140,7 +138,8 @@ abstract class Variant private[variant] (
     for {
       actor <- situation.board.actors get from toValid "No piece on " + from
       _ <-
-        if (actor is situation.player) Validated.valid(actor) else Validated.invalid("Not my piece on " + from)
+        if (actor is situation.player) Validated.valid(actor)
+        else Validated.invalid("Not my piece on " + from)
       m1 <- findMove(from, to) toValid "Piece on " + from + " cannot move to " + to
       m2 <- m1 withPromotion promotion toValid "Piece on " + from + " cannot promote to " + promotion
       m3 <-
@@ -461,7 +460,7 @@ abstract class Variant private[variant] (
   protected def menOnPromotionRank(board: Board, player: Player) = {
     board.pieces.exists {
       case (pos, Piece(c, r)) if c == player && r == Man && promotablePos(board.posAt(pos), player) => true
-      case _                                                                                      => false
+      case _                                                                                        => false
     }
   }
 

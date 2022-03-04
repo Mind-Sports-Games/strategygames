@@ -2,7 +2,7 @@ package strategygames.chess.variant
 
 import strategygames.chess._
 import strategygames.chess.format.FEN
-import strategygames.{ Player, GameFamily }
+import strategygames.{ GameFamily, Player }
 
 import scala.collection.immutable.Queue
 
@@ -11,8 +11,6 @@ case object ScrambledEggs
       id = 14,
       key = "scrambledEggs",
       name = "Scrambled Eggs",
-      shortName = "seggs",
-      title = "Connect all of your scrambled checkers to win.",
       standardInitialPosition = false
     ) {
 
@@ -21,7 +19,7 @@ case object ScrambledEggs
 
   override def gameFamily: GameFamily = GameFamily.LinesOfAction()
 
-  override def aiVariant: Boolean   = false
+  override def aiVariant: Boolean = false
 
   override val pieces: Map[Pos, Piece] = Map(
     Pos.B1 -> Piece(P1, LOAChecker),
@@ -50,7 +48,7 @@ case object ScrambledEggs
     Pos.H7 -> Piece(P2, LOAChecker)
   )
 
-  override val initialFen        = FEN("1lLlLlL1/L6l/l6L/L6l/l6L/L6l/l6L/1LlLlLl1 w - - 0 1")
+  override val initialFen          = FEN("1lLlLlL1/L6l/l6L/L6l/l6L/L6l/l6L/1LlLlLl1 w - - 0 1")
   override def startPlayer: Player = P1
 
   override def allowsCastling = false

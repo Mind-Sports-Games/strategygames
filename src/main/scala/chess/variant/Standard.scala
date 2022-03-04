@@ -6,8 +6,6 @@ case object Standard
       id = 1,
       key = "standard",
       name = "Standard Chess",
-      shortName = "Std",
-      title = "Standard rules of chess (FIDE)",
       standardInitialPosition = true
     ) {
 

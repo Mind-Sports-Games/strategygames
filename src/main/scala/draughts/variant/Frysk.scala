@@ -13,8 +13,6 @@ case object Frysk
       gameType = 97,
       key = "frysk",
       name = "Frysk!",
-      shortName = "Frysk",
-      title = "Frisian draughts starting with 5 pieces each.",
       standardInitialPosition = false,
       boardSize = Board.D100
     ) {
@@ -25,9 +23,9 @@ case object Frysk
   val initialFen       = FEN("W:W46,47,48,49,50:B1,2,3,4,5:H0:F1")
   val startingPosition = StartingPosition("---", initialFen, "", "Initial position".some)
 
-  def captureDirs   = Frisian.captureDirs
+  def captureDirs    = Frisian.captureDirs
   def moveDirsPlayer = Frisian.moveDirsPlayer
-  def moveDirsAll   = Frisian.moveDirsAll
+  def moveDirsAll    = Frisian.moveDirsAll
 
   override def getCaptureValue(board: Board, taken: List[Pos]) = Frisian.getCaptureValue(board, taken)
   override def getCaptureValue(board: Board, taken: Pos)       = Frisian.getCaptureValue(board, taken)
@@ -43,7 +41,11 @@ case object Frysk
   ): Board = Frisian.finalizeBoard(board, uci, captured, situationBefore, finalSquare)
 
   def maxDrawingMoves(board: Board): Option[Int] = Frisian.maxDrawingMoves(board)
-  def updatePositionHashes(board: Board, move: Move, hash: strategygames.draughts.PositionHash): PositionHash =
+  def updatePositionHashes(
+      board: Board,
+      move: Move,
+      hash: strategygames.draughts.PositionHash
+  ): PositionHash =
     Frisian.updatePositionHashes(board, move, hash)
 
   override protected def validSide(board: Board, strict: Boolean)(player: Player) = {

@@ -8,8 +8,6 @@ case object Atomic
       id = 7,
       key = "atomic",
       name = "Atomic",
-      shortName = "Atom",
-      title = "Nuke your opponent's king to win.",
       standardInitialPosition = true
     ) {
 
@@ -17,7 +15,7 @@ case object Atomic
   def perfIcon: Char = '>'
 
   override def p1IsBetterVariant = true
-  override def blindModeVariant = false
+  override def blindModeVariant  = false
 
   def pieces = Standard.pieces
 
