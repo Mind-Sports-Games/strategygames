@@ -217,7 +217,7 @@ object Replay {
       initialFen: Option[FEN],
       variant: strategygames.fairysf.variant.Variant
   ): Situation = {
-    initialFen.flatMap(Forsyth.<<) | Situation(strategygames.fairysf.variant.Variant.default)
+    initialFen.flatMap(Forsyth.<<) | Situation(variant)
   } withVariant variant
 
   def boards(
