@@ -7,7 +7,7 @@ import cats.implicits._
 
 import strategygames.format.Uci
 
-abstract sealed class Situation(val board: Board, val color: Color) {
+abstract sealed class Situation(val board: Board, val player: Player) {
 
   val moves: Map[Pos, List[Move]]
 
@@ -31,7 +31,7 @@ abstract sealed class Situation(val board: Board, val color: Color) {
 
   def end: Boolean
 
-  def winner: Option[Color]
+  def winner: Option[Player]
 
   def playable(strict: Boolean): Boolean
 
@@ -69,7 +69,7 @@ object Situation {
 
   final case class Chess(s: chess.Situation) extends Situation(
     Board.Chess(s.board),
-    s.color
+    s.player
   ) {
 
     lazy val moves: Map[Pos, List[Move]] = s.moves.map{
@@ -86,7 +86,7 @@ object Situation {
 
     def end: Boolean = s.end
 
-    def winner: Option[Color] = s.winner
+    def winner: Option[Player] = s.winner
 
     lazy val destinations: Map[Pos, List[Pos]] = s.destinations.map{
       case (p: chess.Pos, l: List[chess.Pos]) => (Pos.Chess(p), l.map(Pos.Chess))
@@ -146,7 +146,7 @@ object Situation {
 
   final case class Draughts(s: draughts.Situation) extends Situation(
     Board.Draughts(s.board),
-    s.color
+    s.player
   ) {
 
     // TODO: DRAUGHTS I think that .validMoves is correct, but unsure. needs testing.
@@ -172,7 +172,7 @@ object Situation {
 
     def end: Boolean = s.end
 
-    def winner: Option[Color] = s.winner
+    def winner: Option[Player] = s.winner
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -234,7 +234,7 @@ object Situation {
 
   final case class FairySF(s: fairysf.Situation) extends Situation(
     Board.FairySF(s.board),
-    s.color
+    s.player
   ) {
 
     lazy val moves: Map[Pos, List[Move]] = s.moves.map{
@@ -251,7 +251,7 @@ object Situation {
 
     def end: Boolean = s.end
 
-    def winner: Option[Color] = s.winner
+    def winner: Option[Player] = s.winner
 
     lazy val destinations: Map[Pos, List[Pos]] = s.destinations.map{
       case (p: fairysf.Pos, l: List[fairysf.Pos]) => (Pos.FairySF(p), l.map(Pos.FairySF))
@@ -311,13 +311,13 @@ object Situation {
     def toDraughts = sys.error("Can't make draughts situation from fairysf situation")
   }
 
-  def apply(lib: GameLogic, board: Board, color: Color): Situation = (lib, board) match {
+  def apply(lib: GameLogic, board: Board, player: Player): Situation = (lib, board) match {
     case (GameLogic.Draughts(), Board.Draughts(board))
-      => Draughts(draughts.Situation(board, color))
+      => Draughts(draughts.Situation(board, player))
     case (GameLogic.Chess(), Board.Chess(board))
-      => Chess(chess.Situation(board, color))
+      => Chess(chess.Situation(board, player))
     case (GameLogic.FairySF(), Board.FairySF(board))
-      => FairySF(fairysf.Situation(board, color))
+      => FairySF(fairysf.Situation(board, player))
     case _ => sys.error("Mismatched gamelogic types 3")
   }
 

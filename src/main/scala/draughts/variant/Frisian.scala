@@ -22,7 +22,7 @@ case object Frisian
   def initialFen       = Standard.initialFen
   def startingPosition = Standard.startingPosition
 
-  def moveDirsColor = Standard.moveDirsColor
+  def moveDirsPlayer = Standard.moveDirsPlayer
   def moveDirsAll   = Standard.moveDirsAll
 
   val captureDirs: Directions = List(
@@ -94,26 +94,26 @@ case object Frisian
       board
         .actorAt(uci.dest)
         .fold(board) { act =>
-          val tookLastMan  = captured.fold(false)(_.exists(_.role == Man)) && board.count(Man, !act.color) == 0
-          val remainingMen = board.count(Man, act.color)
+          val tookLastMan  = captured.fold(false)(_.exists(_.role == Man)) && board.count(Man, !act.player) == 0
+          val remainingMen = board.count(Man, act.player)
           if (remainingMen != 0)
             board updateHistory { h =>
               val kingmove = act.piece.role == King && uci.promotion.isEmpty && captured.fold(true)(_.isEmpty)
-              val differentKing = kingmove && act.color
-                .fold(h.kingMoves.whiteKing, h.kingMoves.blackKing)
+              val differentKing = kingmove && act.player
+                .fold(h.kingMoves.p1King, h.kingMoves.p2King)
                 .fold(false)(_ != uci.orig)
-              val hist = if (differentKing) h.withKingMove(act.color, none, false) else h
-              hist.withKingMove(act.color, uci.dest.some, kingmove, tookLastMan)
+              val hist = if (differentKing) h.withKingMove(act.player, none, false) else h
+              hist.withKingMove(act.player, uci.dest.some, kingmove, tookLastMan)
             }
           else {
             val promotedLastMan = uci.promotion.nonEmpty
             if (tookLastMan)
               board updateHistory { h =>
-                val hist = if (promotedLastMan) h.withKingMove(act.color, none, false) else h
-                h.withKingMove(!act.color, none, false)
+                val hist = if (promotedLastMan) h.withKingMove(act.player, none, false) else h
+                h.withKingMove(!act.player, none, false)
               }
             else if (promotedLastMan)
-              board updateHistory { _.withKingMove(act.color, none, false) }
+              board updateHistory { _.withKingMove(act.player, none, false) }
             else
               board
           }
@@ -133,7 +133,7 @@ case object Frisian
     * - When bother players have one king left, the game is drawn after both players made 2 moves.  The official rules state that the game is drawn immediately when both players have only one king left, unless either player can capture the other king immediately or will necessarily be able to do this next move.  In absence of a good way to distinguish the positions that win by force from those that don't, this rule is implemented on lidraughts by always allowing 2 more moves to win the game.
     */
   def updatePositionHashes(board: Board, move: Move, hash: strategygames.draughts.PositionHash): PositionHash = {
-    val newHash = Hash(Situation(board, !move.piece.color))
+    val newHash = Hash(Situation(board, !move.piece.player))
     maxDrawingMoves(board) match {
       case Some(drawingMoves) =>
         if (move.captures || move.promotes)

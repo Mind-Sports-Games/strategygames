@@ -1,6 +1,6 @@
 package strategygames.fairysf
 
-import strategygames.Color
+import strategygames.Player
 import format.FEN
 
 import cats.implicits._
@@ -21,7 +21,7 @@ case class Board(
 
   lazy val posMap: Map[Piece, Iterable[Pos]] = pieces.groupMap(_._2)(_._1)
 
-  def withHistory(h: History): Board = copy(history = h)
+  def withHistory(h: History): Board       = copy(history = h)
   def updateHistory(f: History => History) = copy(history = f(history))
 
   def withVariant(v: Variant): Board =
@@ -35,7 +35,7 @@ case class Board(
 
   def ensurePocketData = withPocketData(pocketData | PocketData.init)
 
-  def situationOf(color: Color) = Situation(this, color)
+  def situationOf(player: Player) = Situation(this, player)
 
   def valid(strict: Boolean) = variant.valid(this, strict)
 
@@ -62,8 +62,8 @@ object Board {
     (variant.dropsVariant) option PocketData.init
 
   sealed abstract class BoardSize(
-    val width: Int,
-    val height: Int
+      val width: Int,
+      val height: Int
   ) {
 
     val key   = s"${width}x${height}"
@@ -80,6 +80,16 @@ object Board {
     val all: List[BoardSize] = List(Dim8x8, Dim9x9, Dim9x10)
   }
 
+  case object Dim5x5
+      extends BoardSize(
+        width = 5,
+        height = 5
+      )
+  case object Dim7x7
+      extends BoardSize(
+        width = 7,
+        height = 7
+      )
   case object Dim8x8
       extends BoardSize(
         width = 8,

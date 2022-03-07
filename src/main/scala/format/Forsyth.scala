@@ -38,7 +38,7 @@ object Forsyth {
 
   case class SituationPlus(situation: Situation, fullMoveNumber: Int) {
 
-    def turns = fullMoveNumber * 2 - situation.color.fold(2, 1)
+    def turns = fullMoveNumber * 2 - situation.player.fold(2, 1)
 
   }
 
@@ -111,17 +111,17 @@ object Forsyth {
       case _ => sys.error("Mismatched gamelogic types 21")
   }
 
-  def boardAndColor(lib: GameLogic, situation: Situation): String =
-    boardAndColor(lib, situation.board, situation.color)
+  def boardAndPlayer(lib: GameLogic, situation: Situation): String =
+    boardAndPlayer(lib, situation.board, situation.player)
 
-  private def boardAndColor(lib: GameLogic, board: Board, turnColor: Color): String =
+  private def boardAndPlayer(lib: GameLogic, board: Board, turnPlayer: Player): String =
     (lib, board) match {
       case (GameLogic.Draughts(), Board.Draughts(board))
-        => draughts.format.Forsyth.boardAndColor(board, turnColor)
+        => draughts.format.Forsyth.boardAndPlayer(board, turnPlayer)
       case (GameLogic.Chess(), Board.Chess(board))
-        => chess.format.Forsyth.boardAndColor(board, turnColor)
+        => chess.format.Forsyth.boardAndPlayer(board, turnPlayer)
       case (GameLogic.FairySF(), Board.FairySF(board))
-        => fairysf.format.Forsyth.boardAndColor(board, turnColor)
+        => fairysf.format.Forsyth.boardAndPlayer(board, turnPlayer)
       case _ => sys.error("Mismatched gamelogic types 22")
   }
 

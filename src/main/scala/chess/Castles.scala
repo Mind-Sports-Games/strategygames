@@ -1,59 +1,59 @@
 package strategygames.chess
 
-import strategygames.Color
+import strategygames.Player
 
 final case class Castles(
-    whiteKingSide: Boolean,
-    whiteQueenSide: Boolean,
-    blackKingSide: Boolean,
-    blackQueenSide: Boolean
+    p1KingSide: Boolean,
+    p1QueenSide: Boolean,
+    p2KingSide: Boolean,
+    p2QueenSide: Boolean
 ) {
 
-  def can(color: Color) = new Castles.Can(this, color)
+  def can(player: Player) = new Castles.Can(this, player)
 
-  def without(color: Color) =
-    color match {
-      case White =>
+  def without(player: Player) =
+    player match {
+      case P1 =>
         copy(
-          whiteKingSide = false,
-          whiteQueenSide = false
+          p1KingSide = false,
+          p1QueenSide = false
         )
-      case Black =>
+      case P2 =>
         copy(
-          blackKingSide = false,
-          blackQueenSide = false
+          p2KingSide = false,
+          p2QueenSide = false
         )
     }
 
-  def without(color: Color, side: Side) =
-    (color, side) match {
-      case (White, KingSide)  => copy(whiteKingSide = false)
-      case (White, QueenSide) => copy(whiteQueenSide = false)
-      case (Black, KingSide)  => copy(blackKingSide = false)
-      case (Black, QueenSide) => copy(blackQueenSide = false)
+  def without(player: Player, side: Side) =
+    (player, side) match {
+      case (P1, KingSide)  => copy(p1KingSide = false)
+      case (P1, QueenSide) => copy(p1QueenSide = false)
+      case (P2, KingSide)  => copy(p2KingSide = false)
+      case (P2, QueenSide) => copy(p2QueenSide = false)
     }
 
-  def add(color: Color, side: Side) =
-    (color, side) match {
-      case (White, KingSide)  => copy(whiteKingSide = true)
-      case (White, QueenSide) => copy(whiteQueenSide = true)
-      case (Black, KingSide)  => copy(blackKingSide = true)
-      case (Black, QueenSide) => copy(blackQueenSide = true)
+  def add(player: Player, side: Side) =
+    (player, side) match {
+      case (P1, KingSide)  => copy(p1KingSide = true)
+      case (P1, QueenSide) => copy(p1QueenSide = true)
+      case (P2, KingSide)  => copy(p2KingSide = true)
+      case (P2, QueenSide) => copy(p2QueenSide = true)
     }
 
   override lazy val toString: String = {
-    (if (whiteKingSide) "K" else "") +
-      (if (whiteQueenSide) "Q" else "") +
-      (if (blackKingSide) "k" else "") +
-      (if (blackQueenSide) "q" else "")
+    (if (p1KingSide) "K" else "") +
+      (if (p1QueenSide) "Q" else "") +
+      (if (p2KingSide) "k" else "") +
+      (if (p2QueenSide) "q" else "")
   } match {
     case "" => "-"
     case n  => n
   }
 
-  def toSeq = Array(whiteKingSide, whiteQueenSide, blackKingSide, blackQueenSide)
+  def toSeq = Array(p1KingSide, p1QueenSide, p2KingSide, p2QueenSide)
 
-  def isEmpty = !(whiteKingSide || whiteQueenSide || blackKingSide || blackQueenSide)
+  def isEmpty = !(p1KingSide || p1QueenSide || p2KingSide || p2QueenSide)
 }
 
 object Castles {
@@ -62,10 +62,10 @@ object Castles {
       castles: (Boolean, Boolean, Boolean, Boolean)
   ): Castles =
     new Castles(
-      whiteKingSide = castles._1,
-      whiteQueenSide = castles._2,
-      blackKingSide = castles._3,
-      blackQueenSide = castles._4
+      p1KingSide = castles._1,
+      p1QueenSide = castles._2,
+      p2KingSide = castles._3,
+      p2QueenSide = castles._4
     )
 
   def apply(str: String): Castles =
@@ -80,13 +80,13 @@ object Castles {
   val none = new Castles(false, false, false, false)
   def init = all
 
-  final class Can(castles: Castles, color: Color) {
+  final class Can(castles: Castles, player: Player) {
     def on(side: Side): Boolean =
-      (color, side) match {
-        case (White, KingSide)  => castles.whiteKingSide
-        case (White, QueenSide) => castles.whiteQueenSide
-        case (Black, KingSide)  => castles.blackKingSide
-        case (Black, QueenSide) => castles.blackQueenSide
+      (player, side) match {
+        case (P1, KingSide)  => castles.p1KingSide
+        case (P1, QueenSide) => castles.p1QueenSide
+        case (P2, KingSide)  => castles.p2KingSide
+        case (P2, QueenSide) => castles.p2QueenSide
       }
     def any = on(KingSide) || on(QueenSide)
   }

@@ -380,7 +380,7 @@ object Parser {
         }
       }
 
-    val tagName: Parser[String] = "[" ~> """[a-zA-Z]+""".r
+    val tagName: Parser[String] = "[" ~> """[a-zA-Z12]+""".r
 
     val tagValue: Parser[String] = """"(?:[^"\\]|\\.)*"""".r <~ "]" ^^ {
       _.stripPrefix("\"").stripSuffix("\"").replace("\\\"", "\"")

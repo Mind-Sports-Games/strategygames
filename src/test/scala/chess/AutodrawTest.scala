@@ -39,27 +39,27 @@ K     B""".autoDraw must_== true
       k
 K     N""".autoDraw must_== true
       }
-      "one bishop and one knight of different colors" in {
+      "one bishop and one knight of different players" in {
         """
       k
 K n   B""".autoDraw must_== false
       }
-      "one bishop and one knight of same color" in {
+      "one bishop and one knight of same player" in {
         """
   B   k
 K N    """.autoDraw must_== false
       }
-      "one bishop and one rook of different colors" in {
+      "one bishop and one rook of different players" in {
         """
       k
 K r   B""".autoDraw must_== false
       }
-      "two bishops and one bishop of same colors" in {
+      "two bishops and one bishop of same players" in {
         """
       k
 K B b B""".autoDraw must_== true
       }
-      "one bishop and one bishop of different colors" in {
+      "one bishop and one bishop of different players" in {
         """
       k
 K   bB""".autoDraw must_== false
@@ -497,7 +497,7 @@ K   bB""".autoDraw must_== false
         game.situation.opponentHasInsufficientMaterial must beFalse
       }
     }
-    "on same-color bishops on both sides" in {
+    "on same-player bishops on both sides" in {
       val position = FEN("5K2/8/8/1B6/8/k7/6b1/8 w - - 0 39")
       val game     = fenToGame(position, Standard)
       game must beValid.like { case game =>

@@ -1,6 +1,6 @@
 package strategygames.format
 
-import strategygames.{ Color, GameLogic }
+import strategygames.{ Player, GameLogic }
 
 abstract sealed class FEN(val value: String) {
 
@@ -12,7 +12,7 @@ abstract sealed class FEN(val value: String) {
 
   def fullMove: Option[Int]
 
-  def color: Option[Color]
+  def player: Option[Player]
 
   def ply: Option[Int]
 
@@ -32,7 +32,7 @@ object FEN {
 
     def fullMove: Option[Int] = f.fullMove
 
-    def color: Option[Color] = f.color
+    def player: Option[Player] = f.player
 
     def ply: Option[Int] = f.ply
 
@@ -51,7 +51,7 @@ object FEN {
     //need to consider an implementation for draughts?
     def fullMove: Option[Int] = None
 
-    def color: Option[Color] = f.color
+    def player: Option[Player] = f.player
 
     //need to consider an implementation for draughts?
     def ply: Option[Int] = None
@@ -70,7 +70,7 @@ object FEN {
 
     def fullMove: Option[Int] = f.fullMove
 
-    def color: Option[Color] = f.color
+    def player: Option[Player] = f.player
 
     def ply: Option[Int] = f.ply
 

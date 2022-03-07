@@ -1,6 +1,6 @@
 package strategygames.chess
 
-import strategygames.{ Color, Division }
+import strategygames.{ Player, Division }
 
 import cats.syntax.option.none
 
@@ -38,18 +38,18 @@ object Divider {
     }
 
   private val backranks =
-    List(Pos.whiteBackrank -> Color.White, Pos.blackBackrank -> Color.Black)
+    List(Pos.p1Backrank -> Player.P1, Pos.p2Backrank -> Player.P2)
 
   // Sparse back-rank indicates that pieces have been developed
   private def backrankSparse(board: Board): Boolean =
-    backranks.exists { case (backrank, color) =>
+    backranks.exists { case (backrank, player) =>
       backrank.count { pos =>
-        board(pos).fold(false)(_ is color)
+        board(pos).fold(false)(_ is player)
       } < 4
     }
 
-  private def score(white: Int, black: Int, y: Int): Int =
-    (white, black) match {
+  private def score(p1: Int, p2: Int, y: Int): Int =
+    (p1, p2) match {
       case (0, 0) => 0
 
       case (1, 0) => 1 + (8 - y)
@@ -90,17 +90,17 @@ object Divider {
   }.toList
 
   private def mixedness(board: Board): Int = {
-    val boardValues = board.pieces.view.mapValues(_ is Color.white)
+    val boardValues = board.pieces.view.mapValues(_ is Player.p1)
     mixednessRegions.foldLeft(0) { case (mix, region) =>
-      var white = 0
-      var black = 0
+      var p1 = 0
+      var p2 = 0
       region foreach { p =>
         boardValues get p foreach { v =>
-          if (v) white = white + 1
-          else black = black + 1
+          if (v) p1 = p1 + 1
+          else p2 = p2 + 1
         }
       }
-      mix + score(white, black, region.head.rank.index + 1)
+      mix + score(p1, p2, region.head.rank.index + 1)
     }
   }
 }

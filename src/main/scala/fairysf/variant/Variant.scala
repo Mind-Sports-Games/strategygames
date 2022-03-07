@@ -6,7 +6,7 @@ import scala.annotation.nowarn
 
 import strategygames.fairysf._
 import strategygames.fairysf.format.{ FEN, Forsyth, Uci }
-import strategygames.{ Color, GameFamily }
+import strategygames.{ GameFamily, Player }
 
 case class FairySFName(val name: String)
 
@@ -22,8 +22,10 @@ abstract class Variant private[variant] (
     val boardSize: Board.BoardSize
 ) {
 
-  def shogi   = this == Shogi
-  def xiangqi = this == Xiangqi
+  def shogi       = this == Shogi
+  def xiangqi     = this == Xiangqi
+  def minishogi   = this == MiniShogi
+  def minixiangqi = this == MiniXiangqi
 
   def exotic = true
 
@@ -31,8 +33,8 @@ abstract class Variant private[variant] (
   def fenVariant: Boolean  = false
   def aiVariant: Boolean   = true
 
-  def whiteIsBetterVariant: Boolean = false
-  def blindModeVariant: Boolean     = true
+  def p1IsBetterVariant: Boolean = false
+  def blindModeVariant: Boolean  = true
 
   def materialImbalanceVariant: Boolean = false
 
@@ -47,7 +49,7 @@ abstract class Variant private[variant] (
 
   def pieces: Map[Pos, Piece] = Api.pieceMapFromFen(fairysfName.name, initialFen.value)
 
-  def startColor: Color = White
+  def startPlayer: Player = P1
 
   val kingPiece: Role
 
@@ -56,66 +58,79 @@ abstract class Variant private[variant] (
   def isValidPromotion(promotion: Option[PromotableRole]): Boolean = true
 
   def validMoves(situation: Situation): Map[Pos, List[Move]] =
-    situation.board.apiPosition.legalMoves.filterNot(_.contains("@")).map{
-      case Uci.Move.moveR(orig, dest, promotion) => (
-        Pos.fromKey(orig),
-        Pos.fromKey(dest),
-        promotion
-      )
-    }.map{
-      case (Some(orig), Some(dest), promotion) => {
-        val uciMove = s"${orig.key}${dest.key}${promotion}"
-        val newPosition = situation.board.apiPosition.makeMoves(List(uciMove))
-        (orig, Move(
-          piece = situation.board.pieces(orig),
-          orig = orig,
-          dest = dest,
-          situationBefore = situation,
-          after = situation.board.copy(
-            pieces = newPosition.pieceMap,
-            uciMoves = (situation.board.uciMoves :+ uciMove),
-            pocketData = newPosition.pocketData,
-            position = newPosition.some
-          ),
-          capture = None,
-          promotion = promotion match {
-            case "+" => Role.promotable(
-              situation.board.variant.gameFamily,
-              situation.board.pieces(orig).role.forsyth
-            )
-            case _ => None
-          },
-          castle = None,
-          enpassant = false
-        ))
-      }
-      case (orig, dest, prom) => sys.error(s"Invalid position from uci: ${orig}${dest}${prom}")
-    }.groupBy(_._1).map { case (k,v) => (k,v.toList.map(_._2))}
-
-  def validDrops(situation: Situation): List[Drop] =
-    situation.board.apiPosition.legalMoves.filter(_.contains("@")).map{
-      case Uci.Drop.dropR(role, dest) => (
-        Role.allByForsyth(situation.board.variant.gameFamily).get(role(0)),
-        Pos.fromKey(dest)
-      )
-    }.map{
-      case (Some(role), Some(dest)) => {
-        val uciMove = s"${role.forsyth}@${dest.key}"
-        val newPosition = situation.board.apiPosition.makeMoves(List(uciMove))
-        Drop(
-          piece = Piece(situation.color, role),
-          pos = dest,
-          situationBefore = situation,
-          after = situation.board.copy(
-            pieces = newPosition.pieceMap,
-            uciMoves = (situation.board.uciMoves :+ uciMove),
-            pocketData = newPosition.pocketData,
-            position = newPosition.some
-          )
+    situation.board.apiPosition.legalMoves
+      .filterNot(_.contains("@"))
+      .map { case Uci.Move.moveR(orig, dest, promotion) =>
+        (
+          Pos.fromKey(orig),
+          Pos.fromKey(dest),
+          promotion
         )
       }
-      case (role, dest) => sys.error(s"Invalid position from uci: ${role}@${dest}")
-    }.toList
+      .map {
+        case (Some(orig), Some(dest), promotion) => {
+          val uciMove     = s"${orig.key}${dest.key}${promotion}"
+          val newPosition = situation.board.apiPosition.makeMoves(List(uciMove))
+          (
+            orig,
+            Move(
+              piece = situation.board.pieces(orig),
+              orig = orig,
+              dest = dest,
+              situationBefore = situation,
+              after = situation.board.copy(
+                pieces = newPosition.pieceMap,
+                uciMoves = (situation.board.uciMoves :+ uciMove),
+                pocketData = newPosition.pocketData,
+                position = newPosition.some
+              ),
+              capture = None,
+              promotion = promotion match {
+                case "+" =>
+                  Role.promotable(
+                    situation.board.variant.gameFamily,
+                    situation.board.pieces(orig).role.forsyth
+                  )
+                case _ => None
+              },
+              castle = None,
+              enpassant = false
+            )
+          )
+        }
+        case (orig, dest, prom) => sys.error(s"Invalid position from uci: ${orig}${dest}${prom}")
+      }
+      .groupBy(_._1)
+      .map { case (k, v) => (k, v.toList.map(_._2)) }
+
+  def validDrops(situation: Situation): List[Drop] =
+    situation.board.apiPosition.legalMoves
+      .filter(_.contains("@"))
+      .map { case Uci.Drop.dropR(role, dest) =>
+        (
+          Role.allByForsyth(situation.board.variant.gameFamily).get(role(0)),
+          Pos.fromKey(dest)
+        )
+      }
+      .map {
+        case (Some(role), Some(dest)) => {
+          val uciMove     = s"${role.forsyth}@${dest.key}"
+          val newPosition = situation.board.apiPosition.makeMoves(List(uciMove))
+          Drop(
+            piece = Piece(situation.player, role),
+            pos = dest,
+            situationBefore = situation,
+            after = situation.board.copy(
+              pieces = newPosition.pieceMap,
+              uciMoves = (situation.board.uciMoves :+ uciMove),
+              pocketData = newPosition.pocketData,
+              position = newPosition.some
+            )
+          )
+        }
+        case (role, dest) => sys.error(s"Invalid position from uci: ${role}@${dest}")
+      }
+      .toList
 
   def move(
       situation: Situation,
@@ -124,21 +139,20 @@ abstract class Variant private[variant] (
       promotion: Option[PromotableRole]
   ): Validated[String, Move] = {
     // Find the move in the variant specific list of valid moves
-    situation.moves get from flatMap (_.find(
-      m => m.dest == to && m.promotion == promotion)
-    ) match {
+    situation.moves get from flatMap (_.find(m => m.dest == to && m.promotion == promotion)) match {
       case Some(move) => Validated.valid(move)
-      case None => Validated.invalid(s"Not a valid move: ${from}${to} with prom: ${promotion}. Allowed moves: ${situation.moves}")
+      case None =>
+        Validated.invalid(
+          s"Not a valid move: ${from}${to} with prom: ${promotion}. Allowed moves: ${situation.moves}"
+        )
     }
   }
 
   def drop(situation: Situation, role: Role, pos: Pos): Validated[String, Drop] =
     if (dropsVariant)
-      validDrops(situation).filter(
-        d => d.piece.role == role && d.pos == pos
-      ).headOption match {
+      validDrops(situation).filter(d => d.piece.role == role && d.pos == pos).headOption match {
         case Some(drop) => Validated.valid(drop)
-        case None => Validated.invalid(s"$situation cannot perform the drop: $role on $pos")
+        case None       => Validated.invalid(s"$situation cannot perform the drop: $role on $pos")
       }
     else Validated.invalid(s"$this variant cannot drop $situation $role $pos")
 
@@ -149,9 +163,11 @@ abstract class Variant private[variant] (
 
   def possibleDropsByRole(situation: Situation): Option[Map[Role, List[Pos]]] =
     if (dropsVariant)
-      validDrops(situation).map(
-        drop => (drop.piece.role, drop.pos)
-      ).groupBy(_._1).map { case (k,v) => (k,v.toList.map(_._2))}.some
+      validDrops(situation)
+        .map(drop => (drop.piece.role, drop.pos))
+        .groupBy(_._1)
+        .map { case (k, v) => (k, v.toList.map(_._2)) }
+        .some
     else None
 
   def staleMate(situation: Situation): Boolean = !situation.check && situation.moves.isEmpty
@@ -162,9 +178,9 @@ abstract class Variant private[variant] (
 
   // In most variants, the winner is the last player to have played
   // perpetual is the opposite. would need to recheck this for new variants
-  def winner(situation: Situation): Option[Color] =
-    if (situation.checkMate || situation.staleMate) Option(!situation.color)
-    else if (situation.perpetual) Option(situation.color)
+  def winner(situation: Situation): Option[Player] =
+    if (situation.checkMate || situation.staleMate) Option(!situation.player)
+    else if (situation.perpetual) Option(situation.player)
     else None
 
   @nowarn def specialEnd(situation: Situation) = false
@@ -174,9 +190,9 @@ abstract class Variant private[variant] (
   /** Returns the material imbalance in pawns (overridden in Antichess)
     */
   def materialImbalance(board: Board): Int =
-    board.pieces.values.foldLeft(0) { case (acc, Piece(color, role)) =>
+    board.pieces.values.foldLeft(0) { case (acc, Piece(player, role)) =>
       Role.valueOf(role).fold(acc) { value =>
-        acc + value * color.fold(1, -1)
+        acc + value * player.fold(1, -1)
       }
     }
 
@@ -218,7 +234,7 @@ abstract class Variant private[variant] (
       }
       .to(Map)
 
-  def isUnmovedPawn(color: Color, pos: Pos) = pos.rank == color.fold(Rank.Second, Rank.Seventh)
+  def isUnmovedPawn(player: Player, pos: Pos) = pos.rank == player.fold(Rank.Second, Rank.Seventh)
 
   override def toString = s"Variant($name)"
 
@@ -233,7 +249,9 @@ object Variant {
 
   lazy val all: List[Variant] = List(
     Shogi,
-    Xiangqi
+    MiniShogi,
+    Xiangqi,
+    MiniXiangqi
   )
   val byId = all map { v =>
     (v.id, v)

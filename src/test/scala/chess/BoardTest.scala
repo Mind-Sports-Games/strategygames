@@ -1,6 +1,6 @@
 package strategygames.chess
 
-import strategygames.Color
+import strategygames.Player
 
 import Pos._
 
@@ -12,38 +12,38 @@ class BoardTest extends ChessTest {
 
     "position pieces correctly" in {
       board.pieces must havePairs(
-        A1 -> (Rook - White),
-        B1 -> (Knight - White),
-        C1 -> (Bishop - White),
-        D1 -> (Queen - White),
-        E1 -> (King - White),
-        F1 -> (Bishop - White),
-        G1 -> (Knight - White),
-        H1 -> (Rook - White),
-        A2 -> (Pawn - White),
-        B2 -> (Pawn - White),
-        C2 -> (Pawn - White),
-        D2 -> (Pawn - White),
-        E2 -> (Pawn - White),
-        F2 -> (Pawn - White),
-        G2 -> (Pawn - White),
-        H2 -> (Pawn - White),
-        A7 -> (Pawn - Black),
-        B7 -> (Pawn - Black),
-        C7 -> (Pawn - Black),
-        D7 -> (Pawn - Black),
-        E7 -> (Pawn - Black),
-        F7 -> (Pawn - Black),
-        G7 -> (Pawn - Black),
-        H7 -> (Pawn - Black),
-        A8 -> (Rook - Black),
-        B8 -> (Knight - Black),
-        C8 -> (Bishop - Black),
-        D8 -> (Queen - Black),
-        E8 -> (King - Black),
-        F8 -> (Bishop - Black),
-        G8 -> (Knight - Black),
-        H8 -> (Rook - Black)
+        A1 -> (Rook - P1),
+        B1 -> (Knight - P1),
+        C1 -> (Bishop - P1),
+        D1 -> (Queen - P1),
+        E1 -> (King - P1),
+        F1 -> (Bishop - P1),
+        G1 -> (Knight - P1),
+        H1 -> (Rook - P1),
+        A2 -> (Pawn - P1),
+        B2 -> (Pawn - P1),
+        C2 -> (Pawn - P1),
+        D2 -> (Pawn - P1),
+        E2 -> (Pawn - P1),
+        F2 -> (Pawn - P1),
+        G2 -> (Pawn - P1),
+        H2 -> (Pawn - P1),
+        A7 -> (Pawn - P2),
+        B7 -> (Pawn - P2),
+        C7 -> (Pawn - P2),
+        D7 -> (Pawn - P2),
+        E7 -> (Pawn - P2),
+        F7 -> (Pawn - P2),
+        G7 -> (Pawn - P2),
+        H7 -> (Pawn - P2),
+        A8 -> (Rook - P2),
+        B8 -> (Knight - P2),
+        C8 -> (Bishop - P2),
+        D8 -> (Queen - P2),
+        E8 -> (King - P2),
+        F8 -> (Bishop - P2),
+        G8 -> (Knight - P2),
+        H8 -> (Rook - P2)
       )
     }
 
@@ -56,8 +56,8 @@ class BoardTest extends ChessTest {
     }
 
     "allow a piece to be placed" in {
-      board.place(Rook - White, E3) must beSome.like { case b =>
-        b(E3) mustEqual Option(Rook - White)
+      board.place(Rook - P1, E3) must beSome.like { case b =>
+        b(E3) mustEqual Option(Rook - P1)
       }
     }
 
@@ -69,7 +69,7 @@ class BoardTest extends ChessTest {
 
     "allow a piece to move" in {
       board.move(E2, E4) must beSome.like { case b =>
-        b(E4) mustEqual Option(Pawn - White)
+        b(E4) mustEqual Option(Pawn - P1)
       }
     }
 
@@ -82,39 +82,39 @@ class BoardTest extends ChessTest {
     }
 
     "allow a pawn to be promoted to a queen" in {
-      makeEmptyBoard.place(Pawn.black, A8) flatMap (_ promote A8) must beSome.like { case b =>
-        b(A8) must beSome(Queen.black)
+      makeEmptyBoard.place(Pawn.p2, A8) flatMap (_ promote A8) must beSome.like { case b =>
+        b(A8) must beSome(Queen.p2)
       }
     }
 
     "allow chaining actions" in {
       makeEmptyBoard.seq(
-        _.place(Pawn - White, A2),
-        _.place(Pawn - White, A3),
+        _.place(Pawn - P1, A2),
+        _.place(Pawn - P1, A3),
         _.move(A2, A4)
       ) must beSome.like { case b =>
-        b(A4) mustEqual Option(Pawn - White)
+        b(A4) mustEqual Option(Pawn - P1)
       }
     }
 
     "fail on bad actions chain" in {
       makeEmptyBoard.seq(
-        _.place(Pawn - White, A2),
-        _.place(Pawn - White, A3),
+        _.place(Pawn - P1, A2),
+        _.place(Pawn - P1, A3),
         _.move(B2, B4)
       ) must beNone
     }
 
     "provide occupation map" in {
       makeBoard(
-        A2 -> (Pawn - White),
-        A3 -> (Pawn - White),
-        D1 -> (King - White),
-        E8 -> (King - Black),
-        H4 -> (Queen - Black)
-      ).occupation must_== Color.Map(
-        white = Set(A2, A3, D1),
-        black = Set(E8, H4)
+        A2 -> (Pawn - P1),
+        A3 -> (Pawn - P1),
+        D1 -> (King - P1),
+        E8 -> (King - P2),
+        H4 -> (Queen - P2)
+      ).occupation must_== Player.Map(
+        p1 = Set(A2, A3, D1),
+        p2 = Set(E8, H4)
       )
     }
 
@@ -143,54 +143,54 @@ R  BK  R"""
 
     "provide file occupations" in {
       makeBoard(
-        A2 -> (Pawn - White),
-        A3 -> (Pawn - White),
-        D1 -> (King - White),
-        E7 -> (King - Black),
-        H1 -> (Queen - Black)
+        A2 -> (Pawn - P1),
+        A3 -> (Pawn - P1),
+        D1 -> (King - P1),
+        E7 -> (King - P2),
+        H1 -> (Queen - P2)
       ).fileOccupation(File.A) must_== Map(
-        A2 -> (Pawn - White),
-        A3 -> (Pawn - White)
+        A2 -> (Pawn - P1),
+        A3 -> (Pawn - P1)
       )
     }
 
     "provide rank occupations" in {
       makeBoard(
-        A2 -> (Pawn - White),
-        A3 -> (Pawn - White),
-        D1 -> (King - White),
-        E7 -> (King - Black),
-        H1 -> (Queen - Black)
+        A2 -> (Pawn - P1),
+        A3 -> (Pawn - P1),
+        D1 -> (King - P1),
+        E7 -> (King - P2),
+        H1 -> (Queen - P2)
       ).rankOccupation(Rank.First) must_== Map(
-        D1 -> (King - White),
-        H1 -> (Queen - Black)
+        D1 -> (King - P1),
+        H1 -> (Queen - P2)
       )
     }
 
     "provide diagonal ascending occupations" in {
       makeBoard(
-        A2 -> (Pawn - White),
-        A3 -> (Pawn - White),
-        D1 -> (King - White),
-        E7 -> (King - Black),
-        H1 -> (Queen - Black)
+        A2 -> (Pawn - P1),
+        A3 -> (Pawn - P1),
+        D1 -> (King - P1),
+        E7 -> (King - P2),
+        H1 -> (Queen - P2)
       ).diagAscOccupation(D6) must_== Map(
-        A3 -> (Pawn - White),
-        E7 -> (King - Black)
+        A3 -> (Pawn - P1),
+        E7 -> (King - P2)
       )
     }
 
     "provide diagonal descending occupations" in {
       makeBoard(
-        A3 -> (Pawn - White),
-        B2 -> (Pawn - White),
-        C1 -> (King - White),
-        E7 -> (King - Black),
-        H1 -> (Queen - Black)
+        A3 -> (Pawn - P1),
+        B2 -> (Pawn - P1),
+        C1 -> (King - P1),
+        E7 -> (King - P2),
+        H1 -> (Queen - P2)
       ).diagDescOccupation(B2) must_== Map(
-        A3 -> (Pawn - White),
-        B2 -> (Pawn - White),
-        C1 -> (King - White)
+        A3 -> (Pawn - P1),
+        B2 -> (Pawn - P1),
+        C1 -> (King - P1)
       )
     }
   }

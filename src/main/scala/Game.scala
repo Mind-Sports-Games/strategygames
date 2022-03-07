@@ -41,12 +41,12 @@ abstract class Game(
   def copy(situation: Situation, turns: Int): Game
   def copy(situation: Situation): Game
 
-  def player = situation.color
+  def player = situation.player
 
   def board = situation.board
 
   /** Fullmove number: The number of the full move.
-    * It starts at 1, and is incremented after Black's move.
+    * It starts at 1, and is incremented after P2's move.
     */
   def fullMoveNumber: Int = 1 + turns / 2
 

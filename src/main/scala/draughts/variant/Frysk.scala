@@ -1,7 +1,7 @@
 package strategygames.draughts
 package variant
 
-import strategygames.Color
+import strategygames.Player
 
 import format.FEN
 
@@ -26,7 +26,7 @@ case object Frysk
   val startingPosition = StartingPosition("---", initialFen, "", "Initial position".some)
 
   def captureDirs   = Frisian.captureDirs
-  def moveDirsColor = Frisian.moveDirsColor
+  def moveDirsPlayer = Frisian.moveDirsPlayer
   def moveDirsAll   = Frisian.moveDirsAll
 
   override def getCaptureValue(board: Board, taken: List[Pos]) = Frisian.getCaptureValue(board, taken)
@@ -46,11 +46,11 @@ case object Frysk
   def updatePositionHashes(board: Board, move: Move, hash: strategygames.draughts.PositionHash): PositionHash =
     Frisian.updatePositionHashes(board, move, hash)
 
-  override protected def validSide(board: Board, strict: Boolean)(color: Color) = {
-    val roles = board rolesOf color
+  override protected def validSide(board: Board, strict: Boolean)(player: Player) = {
+    val roles = board rolesOf player
     (roles.count(_ == Man) > 0 || roles.count(_ == King) > 0) &&
     (!strict || roles.size <= 5) &&
-    (!menOnPromotionRank(board, color) || board.ghosts != 0)
+    (!menOnPromotionRank(board, player) || board.ghosts != 0)
   }
 
 }

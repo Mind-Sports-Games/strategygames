@@ -1,7 +1,7 @@
 package strategygames.draughts
 package variant
 
-import strategygames.Color
+import strategygames.Player
 
 import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
@@ -30,7 +30,7 @@ case object Pool
   override val openingTables = List(OpeningTable.tableFMJDBrazilian, OpeningTable.tableIDFBasic)
 
   def captureDirs   = Standard.captureDirs
-  def moveDirsColor = Standard.moveDirsColor
+  def moveDirsPlayer = Standard.moveDirsPlayer
   def moveDirsAll   = Standard.moveDirsAll
 
   override def validMoves(situation: Situation, finalSquare: Boolean = false): Map[Pos, List[Move]] = Russian.validMoves(situation, finalSquare)
@@ -56,7 +56,7 @@ case object Pool
 
   override def shortRangeCaptures(actor: Actor, finalSquare: Boolean): List[Move] = {
     val buf   = new ArrayBuffer[Move]
-    val color = actor.color
+    val player = actor.player
 
     def walkCaptures(
         walkDir: Direction,
@@ -69,7 +69,7 @@ case object Pool
     ): Int =
       walkDir._2(curPos).fold(0) { nextPos =>
         curBoard(nextPos) match {
-          case Some(captPiece) if captPiece.isNot(color) && !captPiece.isGhost =>
+          case Some(captPiece) if captPiece.isNot(player) && !captPiece.isGhost =>
             walkDir._2(nextPos) match {
               case Some(landingPos) if curBoard(landingPos).isEmpty =>
                 val boardAfter = curBoard.takingUnsafe(curPos, landingPos, actor.piece, nextPos, captPiece)
@@ -92,7 +92,7 @@ case object Pool
                 }
                 if (extraCaptures == 0) {
                   val boardAfterPromote =
-                      if (promotablePos(landingPos, color))
+                      if (promotablePos(landingPos, player))
                         boardAfter.promote(landingPos).getOrElse(boardAfter)
                       else boardAfter
                   val newMove =
@@ -164,7 +164,7 @@ case object Pool
                 allSquares,
                 allTaken
               )
-            case Some(captPiece) if captPiece.isNot(actor.color) && !captPiece.isGhost =>
+            case Some(captPiece) if captPiece.isNot(actor.player) && !captPiece.isGhost =>
               walkDir._2(nextPos) match {
                 case Some(landingPos) if curBoard(landingPos).isEmpty =>
                   val boardAfter = curBoard.takingUnsafe(curPos, landingPos, actor.piece, nextPos, captPiece)
@@ -253,10 +253,10 @@ case object Pool
   def updatePositionHashes(board: Board, move: Move, hash: PositionHash): PositionHash =
     Russian.updatePositionHashes(board, move, hash)
 
-  override def validSide(board: Board, strict: Boolean)(color: Color) = {
-    val roles = board rolesOf color
+  override def validSide(board: Board, strict: Boolean)(player: Player) = {
+    val roles = board rolesOf player
     (roles.count(_ == Man) > 0 || roles.count(_ == King) > 0) &&
     (!strict || roles.size <= 12) &&
-    (!menOnPromotionRank(board, color) || board.ghosts != 0)
+    (!menOnPromotionRank(board, player) || board.ghosts != 0)
   }
 }

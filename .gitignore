@@ -1,9 +1,13 @@
 project/project
 project/target
+project/.bloop
+project/metals.sbt
 target
 metals.sbt
 
-# auto-generated eclipse files.
+# auto-generated files.
 /.classpath
 /.project
 /.settings/
+/.bloop/
+/.metals/

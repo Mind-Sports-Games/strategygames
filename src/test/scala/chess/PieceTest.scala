@@ -5,11 +5,11 @@ class PieceTest extends ChessTest {
   "Piece" should {
     "compare" in {
       "objects and - method" in {
-        Pawn - !White must_== Pawn - Black
+        Pawn - !P1 must_== Pawn - P2
       }
       "value and - method" in {
-        val color = White
-        Pawn - !color must_== Pawn - Black
+        val player = P1
+        Pawn - !player must_== Pawn - P2
       }
     }
   }

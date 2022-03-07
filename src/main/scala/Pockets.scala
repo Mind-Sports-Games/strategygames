@@ -1,25 +1,25 @@
 package strategygames
 
-import strategygames.Color
+import strategygames.Player
 
-case class Pockets(white: Pocket, black: Pocket) {
+case class Pockets(p1: Pocket, p2: Pocket) {
 
-  def apply(color: Color) = color.fold(white, black)
+  def apply(player: Player) = player.fold(p1, p2)
 
   def take(piece: Piece): Option[Pockets] =
-    piece.color.fold(
-      white take piece.role map { np =>
-        copy(white = np)
+    piece.player.fold(
+      p1 take piece.role map { np =>
+        copy(p1 = np)
       },
-      black take piece.role map { np =>
-        copy(black = np)
+      p2 take piece.role map { np =>
+        copy(p2 = np)
       }
     )
 
   def store(lib: GameLogic, piece: Piece) =
-    piece.color.fold(
-      copy(black = black store(lib, piece.role)),
-      copy(white = white store(lib, piece.role))
+    piece.player.fold(
+      copy(p2 = p2 store(lib, piece.role)),
+      copy(p1 = p1 store(lib, piece.role))
     )
 }
 

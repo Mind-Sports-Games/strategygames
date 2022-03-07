@@ -2,7 +2,6 @@ package strategygames.fairysf
 import strategygames.MoveMetrics
 
 import strategygames.fairysf.format.Uci
-import cats.syntax.option._
 
 case class Move(
     piece: Piece,
@@ -18,7 +17,7 @@ case class Move(
 ) {
   def before = situationBefore.board
 
-  def situationAfter = Situation(finalizeAfter, !piece.color)
+  def situationAfter = Situation(finalizeAfter, !piece.player)
 
   def finalizeAfter: Board = after
 
@@ -37,7 +36,7 @@ case class Move(
       copy(dest = rookOrig)
     }
 
-  def color = piece.color
+  def player = piece.player
 
   def withPromotion(op: Option[PromotableRole]): Option[Move] = None
 

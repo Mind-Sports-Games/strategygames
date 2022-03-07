@@ -15,11 +15,11 @@ object UciDump {
     finalSquare: Boolean = false
   ): Validated[String, List[String]] = (lib, variant) match {
     case (GameLogic.Draughts(), Variant.Draughts(variant))
-      => strategygames.draughts.format.UciDump.apply(moves, initialFen.map(_.toDraughts), variant, finalSquare)
+      => strategygames.draughts.format.UciDump(moves, initialFen.map(_.toDraughts), variant, finalSquare)
     case (GameLogic.Chess(), Variant.Chess(variant))
-      => strategygames.chess.format.UciDump.apply(moves, initialFen.map(_.toChess), variant)
+      => strategygames.chess.format.UciDump(moves, initialFen.map(_.toChess), variant)
     case (GameLogic.FairySF(), Variant.FairySF(variant))
-      => strategygames.fairysf.format.UciDump.apply(moves, initialFen.map(_.toFairySF), variant)
+      => strategygames.fairysf.format.UciDump(moves, initialFen.map(_.toFairySF), variant)
     case _ => sys.error("Mismatched gamelogic types 12")
   }
 

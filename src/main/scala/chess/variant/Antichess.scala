@@ -2,7 +2,7 @@ package strategygames.chess.variant
 
 import strategygames.chess._
 import strategygames.chess.format.FEN
-import strategygames.Color
+import strategygames.Player
 
 case object Antichess
     extends Variant(
@@ -17,7 +17,7 @@ case object Antichess
   def perfId: Int    = 13
   def perfIcon: Char = '@'
 
-  override def whiteIsBetterVariant     = true
+  override def p1IsBetterVariant     = true
   override def blindModeVariant         = false
   override def materialImbalanceVariant = true
 
@@ -28,7 +28,7 @@ case object Antichess
   override val initialFen = FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 0 1")
 
   // In antichess, the king can't be put into check so we always return false
-  override def kingThreatened(board: Board, color: Color, to: Pos, filter: Piece => Boolean = _ => true) =
+  override def kingThreatened(board: Board, player: Player, to: Pos, filter: Piece => Boolean = _ => true) =
     false
 
   // In this variant, a player must capture if a capturing move is available
@@ -43,18 +43,18 @@ case object Antichess
     board.pieces.size >= 2 && board.pieces.size <= 32
 
   // In antichess, there is no checkmate condition, and the winner is the current player if they have no legal moves
-  override def winner(situation: Situation): Option[Color] =
-    if (specialEnd(situation)) Option(situation.color) else None
+  override def winner(situation: Situation): Option[Player] =
+    if (specialEnd(situation)) Option(situation.player) else None
 
   override def specialEnd(situation: Situation) = {
     // The game ends with a win when one player manages to lose all their pieces or is in stalemate
-    situation.board.piecesOf(situation.color).isEmpty || situation.moves.isEmpty
+    situation.board.piecesOf(situation.player).isEmpty || situation.moves.isEmpty
   }
 
   // In antichess, it is valuable for your opponent to have pieces.
   override def materialImbalance(board: Board): Int =
-    board.pieces.values.foldLeft(0) { case (acc, Piece(color, _)) =>
-      acc + color.fold(-2, 2)
+    board.pieces.values.foldLeft(0) { case (acc, Piece(player, _)) =>
+      acc + player.fold(-2, 2)
     }
 
   // In antichess, there is no checkmate condition therefore a player may only draw either by agreement,
@@ -62,34 +62,34 @@ case object Antichess
   override def opponentHasInsufficientMaterial(situation: Situation) = false
 
   // No player can win if the only remaining pieces are opposing bishops on different coloured
-  // diagonals. There may be pawns that are incapable of moving and do not attack the right color
+  // diagonals. There may be pawns that are incapable of moving and do not attack the right player
   // of square to allow the player to force their opponent to capture their bishop, also resulting in a draw
   override def isInsufficientMaterial(board: Board) = {
     // Exit early if we are not in a situation with only bishops and pawns
     val bishopsAndPawns = board.pieces.values.forall(p => p.is(Bishop) || p.is(Pawn)) &&
       board.pieces.values.exists(_.is(Bishop))
 
-    lazy val drawnBishops = board.actors.values.partition(_.is(White)) match {
-      case (whitePieces, blackPieces) =>
-        val whiteBishops    = whitePieces.filter(_.is(Bishop))
-        val blackBishops    = blackPieces.filter(_.is(Bishop))
-        lazy val whitePawns = whitePieces.filter(_.is(Pawn))
-        lazy val blackPawns = blackPieces.filter(_.is(Pawn))
+    lazy val drawnBishops = board.actors.values.partition(_.is(P1)) match {
+      case (p1Pieces, p2Pieces) =>
+        val p1Bishops    = p1Pieces.filter(_.is(Bishop))
+        val p2Bishops    = p2Pieces.filter(_.is(Bishop))
+        lazy val p1Pawns = p1Pieces.filter(_.is(Pawn))
+        lazy val p2Pawns = p2Pieces.filter(_.is(Pawn))
 
         // We consider the case where a player has two bishops on the same diagonal after promoting.
         if (
-          whiteBishops.map(_.pos.isLight).to(Set).size != 1 ||
-          blackBishops.map(_.pos.isLight).to(Set).size != 1
+          p1Bishops.map(_.pos.isLight).to(Set).size != 1 ||
+          p2Bishops.map(_.pos.isLight).to(Set).size != 1
         ) false
         else {
           for {
-            whiteBishopLight <- whiteBishops.headOption map (_.pos.isLight)
-            blackBishopLight <- blackBishops.headOption map (_.pos.isLight)
+            p1BishopLight <- p1Bishops.headOption map (_.pos.isLight)
+            p2BishopLight <- p2Bishops.headOption map (_.pos.isLight)
           } yield {
-            whiteBishopLight != blackBishopLight && whitePawns.forall(
-              pawnNotAttackable(_, blackBishopLight, board)
+            p1BishopLight != p2BishopLight && p1Pawns.forall(
+              pawnNotAttackable(_, p2BishopLight, board)
             ) &&
-            blackPawns.forall(pawnNotAttackable(_, whiteBishopLight, board))
+            p2Pawns.forall(pawnNotAttackable(_, p1BishopLight, board))
           }
         } getOrElse false
     }
@@ -100,7 +100,7 @@ case object Antichess
   private def pawnNotAttackable(pawn: Actor, oppositeBishopLight: Boolean, board: Board) = {
     // The pawn cannot attack a bishop or be attacked by a bishop
     val cannotAttackBishop =
-      !Actor.pawnAttacks(pawn.pos, pawn.piece.color).exists(_.isLight == oppositeBishopLight)
+      !Actor.pawnAttacks(pawn.pos, pawn.piece.player).exists(_.isLight == oppositeBishopLight)
 
     InsufficientMatingMaterial.pawnBlockedByPawn(pawn, board) && cannotAttackBishop
   }

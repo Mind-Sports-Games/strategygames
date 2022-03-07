@@ -226,7 +226,7 @@ k
   }
 
   "chess960" should {
-    "castle queenside as white" in {
+    "castle queenside as p1" in {
       Game(
         makeBoard(
           """
@@ -239,7 +239,7 @@ NRK RQBB
         ms must_== List("O-O-O")
       }
     }
-    "castle kingside as white" in {
+    "castle kingside as p1" in {
       Game(
         makeBoard(
           """
@@ -252,7 +252,7 @@ NRK R  B
         ms must_== List("O-O")
       }
     }
-    "castle queenside as black" in {
+    "castle queenside as p2" in {
       Game(
         makeBoard(
           """
@@ -267,11 +267,11 @@ NRK RQBB
 """,
           variant.Chess960
         )
-      ).withPlayer(Black).playMoves(C8 -> B8) map (_.pgnMoves) must beValid.like { case ms =>
+      ).withPlayer(P2).playMoves(C8 -> B8) map (_.pgnMoves) must beValid.like { case ms =>
         ms must_== List("O-O-O")
       }
     }
-    "castle kingside as black" in {
+    "castle kingside as p2" in {
       Game(
         makeBoard(
           """
@@ -286,7 +286,7 @@ NRK RQBB
 """,
           variant.Chess960
         )
-      ).withPlayer(Black).playMoves(C8 -> E8) map (_.pgnMoves) must beValid.like { case ms =>
+      ).withPlayer(P2).playMoves(C8 -> E8) map (_.pgnMoves) must beValid.like { case ms =>
         ms must_== List("O-O")
       }
     }
@@ -320,7 +320,7 @@ NRKNRQBB
     "tricky rook disambiguation" in {
       val fen           = FEN("r5k1/1b5p/N3p1p1/Q4p2/4r3/2P1q3/1PK2RP1/5R2 w - - 1 38")
       val sit           = strategygames.chess.format.Forsyth.<<(fen).get
-      val game1         = Game(sit.board, sit.color)
+      val game1         = Game(sit.board, sit.player)
       val (game2, move) = game1(Pos.F2, Pos.F3).toOption.get
       Dumper(game1.situation, move, game2.situation) must_== "Rf3"
     }

@@ -1,11 +1,11 @@
 package strategygames.chess
 
-class ColorTest extends ChessTest {
+class PlayerTest extends ChessTest {
 
-  "Color" should {
+  "Player" should {
     "unary !" in {
-      "white" in { !White must_== Black }
-      "black" in { !Black must_== White }
+      "p1" in { !P1 must_== P2 }
+      "p2" in { !P2 must_== P1 }
     }
   }
 }

@@ -13,11 +13,11 @@ case class Drop(
 
   private def before = situationBefore.board
 
-  def situationAfter = Situation(finalizeAfter, !piece.color)
+  def situationAfter = Situation(finalizeAfter, !piece.player)
 
   def finalizeAfter: Board = after
 
-  def color = piece.color
+  def player = piece.player
 
   def withMetrics(m: MoveMetrics) = copy(metrics = m)
 

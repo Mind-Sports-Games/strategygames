@@ -6,8 +6,8 @@ abstract sealed class Actor(
   val board: Board
 ) {
 
-  def color: Color          = piece.color
-  def is(c: Color): Boolean = c == piece.color
+  def player: Player          = piece.player
+  def is(c: Player): Boolean = c == piece.player
   def is(r: Role): Boolean  = r == piece.role
   def is(p: Piece): Boolean = p == piece
 

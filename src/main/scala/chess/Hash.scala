@@ -1,6 +1,6 @@
 package strategygames.chess
 
-import strategygames.Color
+import strategygames.Player
 
 final class Hash(size: Int) {
 
@@ -26,7 +26,7 @@ object Hash {
     def hexToLong(s: String): Long =
       (java.lang.Long.parseLong(s.substring(start, start + 8), 16) << 32) |
         java.lang.Long.parseLong(s.substring(start + 8, start + 16), 16)
-    val whiteTurnMask       = hexToLong(ZobristTables.whiteTurnMask)
+    val p1TurnMask       = hexToLong(ZobristTables.p1TurnMask)
     val actorMasks          = ZobristTables.actorMasks.map(hexToLong)
     val castlingMasks       = ZobristTables.castlingMasks.map(hexToLong)
     val enPassantMasks      = ZobristTables.enPassantMasks.map(hexToLong)
@@ -44,23 +44,23 @@ object Hash {
   private lazy val randomTable = new ZobristConstants(16)
 
   private def pieceIndex(piece: Piece) =
-    piece.role.hashInt * 2 + piece.color.fold(1, 0)
+    piece.role.hashInt * 2 + piece.player.fold(1, 0)
 
   private def actorIndex(actor: Actor) =
     64 * pieceIndex(actor.piece) + actor.pos.hashCode
 
   def get(situation: Situation, table: ZobristConstants): Long = {
 
-    def pocketMask(roleHash: Int, colorshift: Int, count: Int) = {
+    def pocketMask(roleHash: Int, playershift: Int, count: Int) = {
       // There should be no kings and at most 16 pieces of any given type
       // in a pocket.
       if (0 < count && count <= 16 && roleHash < 5)
-        Option(table.pocketMasks(16 * roleHash + count + colorshift))
+        Option(table.pocketMasks(16 * roleHash + count + playershift))
       else None
     }
 
     val board = situation.board
-    val hturn = situation.color.fold(table.whiteTurnMask, 0L)
+    val hturn = situation.player.fold(table.p1TurnMask, 0L)
 
     val hactors = board.actors.values.view
       .map {
@@ -84,15 +84,15 @@ object Hash {
     // Hash in special three-check and five-check data.
     val hchecks = board.variant match {
       case variant.ThreeCheck =>
-        val blackCount   = math.min(situation.history.checkCount.black, 3)
-        val whiteCount   = math.min(situation.history.checkCount.white, 3)
-        val hblackchecks = if (blackCount > 0) hep ^ table.threeCheckMasks(blackCount - 1) else hep
-        if (whiteCount > 0) hblackchecks ^ table.threeCheckMasks(whiteCount + 2) else hblackchecks
+        val p2Count   = math.min(situation.history.checkCount.p2, 3)
+        val p1Count   = math.min(situation.history.checkCount.p1, 3)
+        val hp2checks = if (p2Count > 0) hep ^ table.threeCheckMasks(p2Count - 1) else hep
+        if (p1Count > 0) hp2checks ^ table.threeCheckMasks(p1Count + 2) else hp2checks
       case variant.FiveCheck =>
-        val blackCount   = math.min(situation.history.checkCount.black, 5)
-        val whiteCount   = math.min(situation.history.checkCount.white, 5)
-        val hblackchecks = if (blackCount > 0) hep ^ table.fiveCheckMasks(blackCount - 1) else hep
-        if (whiteCount > 0) hblackchecks ^ table.fiveCheckMasks(whiteCount + 4) else hblackchecks  
+        val p2Count   = math.min(situation.history.checkCount.p2, 5)
+        val p1Count   = math.min(situation.history.checkCount.p1, 5)
+        val hp2checks = if (p2Count > 0) hep ^ table.fiveCheckMasks(p2Count - 1) else hep
+        if (p1Count > 0) hp2checks ^ table.fiveCheckMasks(p1Count + 4) else hp2checks  
       case _ => hep
     }
 
@@ -103,11 +103,11 @@ object Hash {
           table.crazyPromotionMasks(p.hashCode)
         }
         .fold(hchecks)(_ ^ _)
-      Color.all
-        .flatMap { color =>
-          val colorshift = color.fold(79, -1)
-          data.pockets(color).roles.groupBy(identity).flatMap { case (role, list) =>
-            pocketMask(role.hashInt, colorshift, list.size)
+      Player.all
+        .flatMap { player =>
+          val playershift = player.fold(79, -1)
+          data.pockets(player).roles.groupBy(identity).flatMap { case (role, list) =>
+            pocketMask(role.hashInt, playershift, list.size)
           }
         }
         .fold(hcrazypromotions)(_ ^ _)
@@ -1024,7 +1024,7 @@ private object ZobristTables {
     "c4b5e4f9f06c3ae0d4ef932e79e182ff"
   )
 
-  val whiteTurnMask = "f8d626aaaf2785093815e537b6222c85"
+  val p1TurnMask = "f8d626aaaf2785093815e537b6222c85"
 
   val castlingMasks = Array(
     "31d71dce64b2c310ca3c7f8d050c44ba",

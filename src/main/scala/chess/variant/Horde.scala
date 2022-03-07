@@ -2,7 +2,7 @@ package strategygames.chess.variant
 
 import strategygames.chess._
 import strategygames.chess.format.FEN
-import strategygames.Color
+import strategygames.Player
 
 case object Horde
     extends Variant(
@@ -17,29 +17,29 @@ case object Horde
   def perfId: Int    = 16
   def perfIcon: Char = '_'
 
-  override def whiteIsBetterVariant     = true
+  override def p1IsBetterVariant     = true
   override def blindModeVariant         = false
   override def materialImbalanceVariant = true
 
-  /** In Horde chess white advances against black with a horde of pawns.
+  /** In Horde chess p1 advances against p2 with a horde of pawns.
     */
   lazy val pieces: Map[Pos, Piece] = {
 
-    val frontPawns = List(Pos.B5, Pos.C5, Pos.F5, Pos.G5).map { _ -> Piece(White, Pawn) }
+    val frontPawns = List(Pos.B5, Pos.C5, Pos.F5, Pos.G5).map { _ -> Piece(P1, Pawn) }
 
-    val whitePawnsHorde = frontPawns ++ (for {
+    val p1PawnsHorde = frontPawns ++ (for {
       x <- File.all
       y <- Rank.all.take(4)
-    } yield (Pos(x, y) -> Piece(White, Pawn))) toMap
+    } yield (Pos(x, y) -> Piece(P1, Pawn))) toMap
 
-    val blackPieces = (for (y <- List(Rank.Seventh, Rank.Eighth); x <- File.all) yield {
+    val p2Pieces = (for (y <- List(Rank.Seventh, Rank.Eighth); x <- File.all) yield {
       Pos(x, y) -> (y match {
-        case Rank.Eighth  => Piece(Black, backRank(x.index))
-        case Rank.Seventh => Piece(Black, Pawn)
+        case Rank.Eighth  => Piece(P2, backRank(x.index))
+        case Rank.Seventh => Piece(P2, Pawn)
       })
     }).toMap
 
-    blackPieces ++ whitePawnsHorde
+    p2Pieces ++ p1PawnsHorde
   }
 
   override val castles = Castles("kq")
@@ -47,25 +47,25 @@ case object Horde
   override val initialFen = FEN("rnbqkbnr/pppppppp/8/1PP2PP1/PPPPPPPP/PPPPPPPP/PPPPPPPP/PPPPPPPP w kq - 0 1")
 
   override def valid(board: Board, strict: Boolean) =
-    board.kingPosOf(White).isEmpty && validSide(board, strict)(Black) && !pawnsOnPromotionRank(board, White)
+    board.kingPosOf(P1).isEmpty && validSide(board, strict)(P2) && !pawnsOnPromotionRank(board, P1)
 
-  /** The game has a special end condition when black manages to capture all of white's pawns */
+  /** The game has a special end condition when p2 manages to capture all of p1's pawns */
   override def specialEnd(situation: Situation) =
-    situation.board.piecesOf(White).isEmpty
+    situation.board.piecesOf(P1).isEmpty
 
   /** Any vs K + any where horde is stalemated and only king can move is a fortress draw
     * This does not consider imminent fortresses such as 8/p7/P7/8/8/P7/8/k7 b - -
     * nor does it consider contrived fortresses such as b7/pk6/P7/P7/8/8/8/8 b - -
     */
   private def hordeClosedPosition(board: Board) = {
-    lazy val notKingBoard = board.kingPos.get(Color.black).flatMap(board.take).getOrElse(board)
-    val hordePos          = board.occupation(Color.white) // may include promoted pieces
+    lazy val notKingBoard = board.kingPos.get(Player.p2).flatMap(board.take).getOrElse(board)
+    val hordePos          = board.occupation(Player.p1) // may include promoted pieces
     val mateInOne =
-      hordePos.sizeIs == 1 && hordePos.forall(pos => pieceThreatened(board, Color.black, pos, (_ => true)))
+      hordePos.sizeIs == 1 && hordePos.forall(pos => pieceThreatened(board, Player.p2, pos, (_ => true)))
     !mateInOne && notKingBoard.actors.values.forall(actor => actor.moves.isEmpty)
   }
 
-  /** In horde chess, black can win unless a fortress stalemate is unavoidable.
+  /** In horde chess, p2 can win unless a fortress stalemate is unavoidable.
     *  Auto-drawing the game should almost never happen, but it did in https://lichess.org/xQ2RsU8N#121
     */
   override def isInsufficientMaterial(board: Board) = hordeClosedPosition(board)
@@ -77,25 +77,25 @@ case object Horde
     */
   override def opponentHasInsufficientMaterial(situation: Situation): Boolean = {
     val board         = situation.board
-    val opponentColor = !situation.color
+    val opponentPlayer = !situation.player
     lazy val fortress = hordeClosedPosition(board) // costly function call
-    if (opponentColor == Color.white) {
+    if (opponentPlayer == Player.p1) {
       lazy val notKingPieces           = InsufficientMatingMaterial.nonKingPieces(board) toList
-      val horde                        = board.piecesOf(Color.white)
-      lazy val hordeBishopSquareColors = horde.filter(_._2.is(Bishop)).toList.map(_._1.isLight).distinct
+      val horde                        = board.piecesOf(Player.p1)
+      lazy val hordeBishopSquarePlayers = horde.filter(_._2.is(Bishop)).toList.map(_._1.isLight).distinct
       lazy val hordeRoles              = horde.map(_._2.role)
-      lazy val army                    = board.piecesOf(Color.black)
+      lazy val army                    = board.piecesOf(Player.p2)
       lazy val armyPawnsOrRooks        = army.count(p => p._2.is(Pawn) || p._2.is(Rook))
       lazy val armyPawnsOrBishops      = army.filter(p => p._2.is(Pawn) || p._2.is(Bishop))
       lazy val armyPawnsOrKnights      = army.count(p => p._2.is(Pawn) || p._2.is(Knight))
       lazy val armyNonQueens           = army.count(_._2.isNot(Queen))
       lazy val armyNonQueensOrRooks    = army.count(p => p._2.isNot(Queen) && p._2.isNot(Rook))
       lazy val armyNonQueensOrBishops  = army.count(p => p._2.isNot(Queen) && p._2.isNot(Bishop))
-      lazy val armyBishopSquareColors  = army.filter(_._2.is(Bishop)).toList.map(_._1.isLight).distinct
+      lazy val armyBishopSquarePlayers  = army.filter(_._2.is(Bishop)).toList.map(_._1.isLight).distinct
       if (horde.sizeIs == 1) {
         hordeRoles match {
           case List(Knight) =>
-            army.sizeIs < 4 || armyNonQueensOrRooks == 0 || armyNonQueensOrBishops == 0 || (armyNonQueensOrBishops + armyBishopSquareColors.size) < 4
+            army.sizeIs < 4 || armyNonQueensOrRooks == 0 || armyNonQueensOrBishops == 0 || (armyNonQueensOrBishops + armyBishopSquarePlayers.size) < 4
           case List(Bishop) =>
             notKingPieces.count(p =>
               p._2.is(Pawn) || (p._2.is(Bishop) && p._1.isLight != horde.head._1.isLight)
@@ -106,7 +106,7 @@ case object Horde
       } else if (
         (hordeRoles.forall(
           _ == Bishop
-        ) && hordeBishopSquareColors.lengthCompare(1) == 0) && {
+        ) && hordeBishopSquarePlayers.lengthCompare(1) == 0) && {
           armyPawnsOrKnights + armyPawnsOrBishops
             .count(p => p._1.isLight != horde.head._1.isLight) < 2
         }
@@ -120,7 +120,7 @@ case object Horde
     } else fortress
   }
 
-  override def isUnmovedPawn(color: Color, pos: Pos) =
-    if (color.white) pos.rank <= Rank.Second
+  override def isUnmovedPawn(player: Player, pos: Pos) =
+    if (player.p1) pos.rank <= Rank.Second
     else pos.rank == Rank.Seventh
 }

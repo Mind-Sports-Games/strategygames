@@ -11,14 +11,14 @@ case object Xiangqi
       shortName = "Xiangqi",
       title = "Xiangqi (Chinese Chess)",
       standardInitialPosition = true,
-      fairysfName=FairySFName("xiangqi"),
+      fairysfName = FairySFName("xiangqi"),
       boardSize = Board.Dim9x10
     ) {
 
   def gameFamily: GameFamily = GameFamily.Xiangqi()
 
   def perfIcon: Char = 't'
-  def perfId: Int = 201
+  def perfId: Int    = 201
 
   override def baseVariant: Boolean = true
 

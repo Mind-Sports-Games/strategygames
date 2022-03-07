@@ -1,6 +1,6 @@
 package strategygames.draughts
 
-import strategygames.Color
+import strategygames.Player
 import variant.Variant
 
 case class Board(
@@ -30,32 +30,32 @@ case class Board(
     (pos, Actor(piece, posAt(pos), this))
   }
 
-  lazy val actorsOf: Color.Map[Seq[Actor]] = {
+  lazy val actorsOf: Player.Map[Seq[Actor]] = {
     val (w, b) = actors.values.toSeq.partition {
-      _.color.white
+      _.player.p1
     }
-    Color.Map(w, b)
+    Player.Map(w, b)
   }
 
   lazy val ghosts = pieces.values.count(_.isGhost)
 
   def roleCount(r: Role): Int = pieces.values.count(_.role == r)
 
-  def rolesOf(c: Color): List[Role] = pieces.values
+  def rolesOf(c: Player): List[Role] = pieces.values
     .collect {
-      case piece if piece.color == c => piece.role
+      case piece if piece.player == c => piece.role
     }
     .to(List)
 
   def actorAt(at: Pos): Option[Actor] = actors get at
 
-  def piecesOf(c: Color): Map[Pos, Piece] = pieces filter (_._2 is c)
+  def piecesOf(c: Player): Map[Pos, Piece] = pieces filter (_._2 is c)
 
-  lazy val kingPos: Map[Color, Pos] = pieces.collect { case (pos, Piece(color, King)) =>
-    color -> pos
+  lazy val kingPos: Map[Player, Pos] = pieces.collect { case (pos, Piece(player, King)) =>
+    player -> pos
   }
 
-  def kingPosOf(c: Color): Option[Pos] = kingPos get c
+  def kingPosOf(c: Player): Option[Pos] = kingPos get c
 
   def seq(actions: (Board => Option[Board])*): Option[Board] =
     actions.foldLeft(Option(this): Option[Board])(_ flatMap _)
@@ -95,14 +95,14 @@ case class Board(
         piece <- pieces get orig
         taken <- pieces get taking
       } yield copy(pieces =
-        pieces.updated(taking, Piece(taken.color, taken.ghostRole)) - orig + (dest -> piece)
+        pieces.updated(taking, Piece(taken.player, taken.ghostRole)) - orig + (dest -> piece)
       )
 
   def takingUnsafe(orig: Pos, dest: Pos, piece: Piece, taking: Pos, taken: Piece): Board =
-    copy(pieces = pieces.updated(taking, Piece(taken.color, taken.ghostRole)) - orig + (dest -> piece))
+    copy(pieces = pieces.updated(taking, Piece(taken.player, taken.ghostRole)) - orig + (dest -> piece))
 
-  lazy val occupation: Color.Map[Set[Pos]] = Color.Map { color =>
-    pieces.collect { case (pos, piece) if piece is color => pos }.to(Set)
+  lazy val occupation: Player.Map[Set[Pos]] = Player.Map { player =>
+    pieces.collect { case (pos, piece) if piece is player => pos }.to(Set)
   }
 
   def hasPiece(p: Piece) = pieces.values exists (p ==)
@@ -111,7 +111,7 @@ case class Board(
     piece <- apply(pos)
     if piece is Man
     b2 <- take(pos)
-    b3 <- b2.place(Piece(piece.color, King), pos)
+    b3 <- b2.place(Piece(piece.player, King), pos)
   } yield b3
 
   def withHistory(h: DraughtsHistory): Board = copy(history = h)
@@ -124,11 +124,11 @@ case class Board(
 
   def updateHistory(f: DraughtsHistory => DraughtsHistory) = copy(history = f(history))
 
-  def count(r: Role, c: Color): Int = pieces.values count (p => p.role == r && p.color == c)
+  def count(r: Role, c: Player): Int = pieces.values count (p => p.role == r && p.player == c)
 
   def count(p: Piece): Int = pieces.values count (_ == p)
 
-  def count(c: Color): Int = pieces.values count (_.color == c)
+  def count(c: Player): Int = pieces.values count (_.player == c)
 
   def pieceCount: Int = pieces.values.size
 
@@ -137,13 +137,13 @@ case class Board(
   def autoDraw: Boolean =
     ghosts == 0 && variant.maxDrawingMoves(this).fold(false)(m => history.halfMoveClock >= m)
 
-  def situationOf(color: Color) = Situation(this, color)
+  def situationOf(player: Player) = Situation(this, player)
 
   def valid(strict: Boolean) = variant.valid(this, strict)
 
-  def materialImbalance: Int = pieces.values.foldLeft(0) { case (acc, Piece(color, role)) =>
+  def materialImbalance: Int = pieces.values.foldLeft(0) { case (acc, Piece(player, role)) =>
     Role.valueOf(role).fold(acc) { value =>
-      acc + value * color.fold(1, -1)
+      acc + value * player.fold(1, -1)
     }
   }
 
@@ -168,8 +168,8 @@ object Board {
     val sizes = List(width, height)
 
     val fields           = (width * height) / 2
-    val promotableYWhite = 1
-    val promotableYBlack = height
+    val promotableYP1 = 1
+    val promotableYP2 = height
   }
   object BoardSize {
     val all: List[BoardSize] = List(D100, D64)

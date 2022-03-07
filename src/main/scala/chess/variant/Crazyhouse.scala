@@ -5,7 +5,7 @@ import cats.data.Validated
 import strategygames.chess._
 import strategygames.chess.format.Uci
 import strategygames.chess.format.FEN
-import strategygames.Color
+import strategygames.Player
 
 case object Crazyhouse
     extends Variant(
@@ -31,7 +31,7 @@ case object Crazyhouse
 
   override def valid(board: Board, strict: Boolean) = {
     val pieces = board.pieces.values
-    (Color.all forall validSide(board, false)) &&
+    (Player.all forall validSide(board, false)) &&
     (!strict || (pieces.count(_ is Pawn) <= 16 && pieces.sizeIs <= 32))
   }
 
@@ -43,11 +43,11 @@ case object Crazyhouse
       _ <-
         if (role != Pawn || canDropPawnOn(pos)) Validated.valid(d1)
         else Validated.invalid(s"Can't drop $role on $pos")
-      piece = Piece(situation.color, role)
+      piece = Piece(situation.player, role)
       d2     <- d1.drop(piece) toValid s"No $piece to drop on $pos"
       board1 <- situation.board.place(piece, pos) toValid s"Can't drop $role on $pos, it's occupied"
       _ <-
-        if (!board1.check(situation.color)) Validated.valid(board1)
+        if (!board1.check(situation.player)) Validated.valid(board1)
         else Validated.invalid(s"Dropping $role on $pos doesn't uncheck the king")
     } yield Drop(
       piece = piece,
@@ -75,7 +75,7 @@ case object Crazyhouse
 
   private def canDropStuff(situation: Situation) =
     situation.board.pocketData.fold(false) { (data: PocketData) =>
-      val roles = data.pockets(situation.color).roles
+      val roles = data.pockets(situation.player).roles
       roles.nonEmpty && possibleDrops(situation).fold(true) { squares =>
         squares.nonEmpty && {
           squares.exists(canDropPawnOn) || roles.exists(r => strategygames.chess.Pawn.forsyth != r.forsyth)
@@ -98,7 +98,7 @@ case object Crazyhouse
     else situation.kingPos.map { blockades(situation, _) }
 
   private def blockades(situation: Situation, kingPos: Pos): List[Pos] = {
-    def attacker(piece: Piece) = piece.role.projection && piece.color != situation.color
+    def attacker(piece: Piece) = piece.role.projection && piece.player != situation.player
     @scala.annotation.tailrec
     def forward(p: Pos, dir: Direction, squares: List[Pos]): List[Pos] =
       dir(p) match {
@@ -108,8 +108,8 @@ case object Crazyhouse
         case Some(next)                                           => forward(next, dir, next :: squares)
       }
     Queen.dirs flatMap { forward(kingPos, _, Nil) } filter { square =>
-      situation.board.place(Piece(situation.color, Knight), square) exists { defended =>
-        !defended.check(situation.color)
+      situation.board.place(Piece(situation.player, Knight), square) exists { defended =>
+        !defended.check(situation.player)
       }
     }
   }

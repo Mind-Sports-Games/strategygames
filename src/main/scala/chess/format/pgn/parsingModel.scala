@@ -34,7 +34,7 @@ case class Std(
   def move(situation: Situation): Validated[String, strategygames.chess.Move] =
     situation.board.pieces.foldLeft(none[strategygames.chess.Move]) {
       case (None, (pos, piece))
-          if piece.color == situation.color && piece.role == role && compare(
+          if piece.player == situation.player && piece.role == role && compare(
             file,
             pos.file.index + 1
           ) && compare(
@@ -87,7 +87,7 @@ case class Castle(
 
   def move(situation: Situation): Validated[String, strategygames.chess.Move] =
     for {
-      kingPos <- situation.board kingPosOf situation.color toValid "No king found"
+      kingPos <- situation.board kingPosOf situation.player toValid "No king found"
       actor   <- situation.board actorAt kingPos toValid "No actor found"
       move    <- actor.castleOn(side).headOption toValid "Cannot castle / variant is " + situation.board.variant
     } yield move
