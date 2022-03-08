@@ -1,6 +1,7 @@
 package strategygames.format
 
 import strategygames._
+import strategygames.variant.Variant
 
 import cats.implicits._
 
@@ -297,6 +298,9 @@ object Uci {
     case GameLogic.Chess()    => chess.format.Uci(move).map(wrap)
     case GameLogic.FairySF()  => fairysf.format.Uci(gf, move).map(wrap)
   }
+
+  def apply(v: Variant, move: String): Option[Uci] =
+    apply(v.gameLogic, v.gameFamily, move)
 
   private def piotr(lib: GameLogic, gf: GameFamily, move: String): Option[Uci] = lib match {
     case GameLogic.Draughts() => draughts.format.Uci.piotr(move).map(wrap)
