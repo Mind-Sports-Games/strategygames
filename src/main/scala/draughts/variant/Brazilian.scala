@@ -9,8 +9,6 @@ case object Brazilian
       gameType = 26,
       key = "brazilian",
       name = "Brazilian",
-      shortName = "Brazilian",
-      title = "Same rules as international draughts, played on an 8x8 board.",
       standardInitialPosition = false,
       boardSize = Board.D64
     ) {
@@ -24,9 +22,9 @@ case object Brazilian
   def startingPosition       = Russian.startingPosition
   override val openingTables = List(OpeningTable.tableFMJDBrazilian, OpeningTable.tableIDFBasic)
 
-  def captureDirs   = Standard.captureDirs
+  def captureDirs    = Standard.captureDirs
   def moveDirsPlayer = Standard.moveDirsPlayer
-  def moveDirsAll   = Standard.moveDirsAll
+  def moveDirsAll    = Standard.moveDirsAll
 
   override def finalizeBoard(
       board: Board,
@@ -66,7 +64,11 @@ case object Brazilian
   }
 
   def maxDrawingMoves(board: Board): Option[Int] = Russian.maxDrawingMoves(board)
-  def updatePositionHashes(board: Board, move: Move, hash: strategygames.draughts.PositionHash): PositionHash =
+  def updatePositionHashes(
+      board: Board,
+      move: Move,
+      hash: strategygames.draughts.PositionHash
+  ): PositionHash =
     Russian.updatePositionHashes(board, move, hash)
 
   override def validSide(board: Board, strict: Boolean)(player: Player) = {

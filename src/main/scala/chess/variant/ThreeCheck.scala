@@ -9,8 +9,6 @@ case object ThreeCheck
       id = 5,
       key = "threeCheck",
       name = "Three-check",
-      shortName = "3check",
-      title = "Check your opponent 3 times to win.",
       standardInitialPosition = true
     ) {
 

@@ -9,8 +9,6 @@ case object FiveCheck
       id = 12,
       key = "fiveCheck",
       name = "Five-check",
-      shortName = "5check",
-      title = "Check your opponent 5 times to win the game.",
       standardInitialPosition = true
     ) {
 
@@ -19,8 +17,8 @@ case object FiveCheck
   def perfId: Int    = 19
   def perfIcon: Char = '.'
 
-  override def aiVariant: Boolean   = false
-  override val initialFen = FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 +0+0")
+  override def aiVariant: Boolean = false
+  override val initialFen         = FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 +0+0")
 
   override def finalizeBoard(board: Board, uci: format.Uci, capture: Option[Piece]): Board =
     board updateHistory {

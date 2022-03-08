@@ -6,3 +6,11 @@ target
 /.classpath
 /.project
 /.settings/
+
+.bloop/
+.bsp/
+.metals/
+project/.bloop
+project/metals.sbt
+src/main/scala/.metals
+src/test/.bsp

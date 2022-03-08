@@ -150,8 +150,8 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
     "be game end" in {
       position.gameEnd must_== true
     }
-    "be checkmate" in {
-      position.gameResult must_== GameResult.Checkmate()
+    "be stalemate" in {
+      position.gameResult must_== GameResult.Stalemate()
     }
   }
 
@@ -171,6 +171,34 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
     )
     "should produce non optional game end" in {
       position2.gameEnd must_== true
+    }
+  }
+
+  //https://www.youtube.com/watch?v=6ehiWOSp_wk
+  "Flipello quickest win" should {
+    val position = Api.positionFromVariant(variant.Flipello)
+    val position2 = position.makeMoves(
+        List("P@f4", "P@d3", "P@c4", "P@f5", "P@e6", "P@f3", "P@g4", "P@e3", "P@e2")
+    )
+    "should produce no legal moves" in {
+      position2.legalMoves.size must_== 0L
+    }
+  }
+
+  //https://www.vint.ee/en-gb/replay/12076188/
+  //move 40 sets up 'passes' which Fairy-Stockfish calls 'd1d1'
+  //Need to flip numbers from vint grid references to get equivalent Fairy-Stockfish uci
+  "Flipello situation with passes" should {
+    val position = Api.positionFromVariant(variant.Flipello)
+    val position2 = position.makeMoves(
+        List("P@d6", "P@c4", "P@f3", "P@f4", "P@e3", "P@e6", "P@c6", "P@f6", "P@c5", "P@c3", "P@d3", "P@f2", "P@f5", "P@d2", "P@b4", "P@a5", "P@b3", "P@d7", "P@a4", "P@a3", "P@c2", "P@b5", "P@e2", "P@d1", "P@g4", "P@h5", "P@h4", "P@h3", "P@e1", "P@f1", "P@g3", "P@h2", "P@b1", "P@b2", "P@a6", "P@a7", "P@b6", "P@b7", "P@c7", "P@g2", "P@a8", "P@c8", "P@a2")
+    )
+    "should produce no drops in legal moves" in {
+      position2.legalMoves.filterNot(_.startsWith("P@")).size must_!= 0L
+    }
+    val position3 = position2.makeMoves(List("d1d1"))
+    "should produce legal moves after pass" in {
+      position3.legalMoves.size must_!= 0L
     }
   }
 }

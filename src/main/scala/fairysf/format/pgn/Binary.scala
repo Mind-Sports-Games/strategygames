@@ -35,8 +35,10 @@ object Binary {
         case (b1 :: rest, None)       => intMoves(rest, pliesToGo, Some(GameFamily(b1)))
         case (b1 :: b2 :: rest, Some(gf)) if headerBit(b1) == MoveType.Move =>
           moveUci(b1, b2) :: intMoves(rest, pliesToGo - 1, Some(gf))
+        case (b1 :: rest, Some(gf)) if headerBit(b1) == MoveType.Drop && gf == GameFamily.Flipello() =>
+          dropUciFlipello(b1) :: intMoves(rest, pliesToGo - 1, Some(gf))
         case (b1 :: b2 :: rest, Some(gf)) if headerBit(b1) == MoveType.Drop =>
-          dropUci(gf, b1, b2) :: intMoves(rest, pliesToGo - 1, Some(gf))
+          dropUciDefault(gf, b1, b2) :: intMoves(rest, pliesToGo - 1, Some(gf))
         case (x, _) => !!(x map showByte mkString ",")
       }
 
@@ -50,9 +52,14 @@ object Binary {
 
     // 1 movetype
     // 7 pos (dest)
+    def dropUciFlipello(b1: Int): String =
+      s"P@${posFromInt(b1)}"
+
+    // 1 movetype
+    // 7 pos (dest)
     // ----
     // 8 piece (only needs 4 bits?)
-    def dropUci(gf: GameFamily, b1: Int, b2: Int): String =
+    def dropUciDefault(gf: GameFamily, b1: Int, b2: Int): String =
       s"${pieceFromInt(gf, b2)}@${posFromInt(b1)}"
 
     def posFromInt(b: Int): String = Pos(right(b, 7)).get.toString()
@@ -67,7 +74,7 @@ object Binary {
 
     private def headerBit(i: Int) = i >> 7
 
-    private def right(i: Int, x: Int): Int           = i & lengthMasks(x)
+    private def right(i: Int, x: Int): Int = i & lengthMasks(x)
     private val lengthMasks =
       Map(1 -> 0x01, 2 -> 0x03, 3 -> 0x07, 4 -> 0x0f, 5 -> 0x1f, 6 -> 0x3f, 7 -> 0x7f, 8 -> 0xff)
     private def !!(msg: String) = throw new Exception("Binary reader failed: " + msg)
@@ -78,8 +85,8 @@ object Binary {
     def move(gf: GameFamily, str: String): List[Byte] =
       (str match {
         case Uci.Move.moveR(src, dst, promotion) => moveUci(src, dst, promotion)
-        case Uci.Drop.dropR(piece, dst) => dropUci(gf, piece, dst)
-        case _ => sys.error(s"Invalid move to write: ${str}")
+        case Uci.Drop.dropR(piece, dst)          => dropUci(gf, piece, dst)
+        case _                                   => sys.error(s"Invalid move to write: ${str}")
       }) map (_.toByte)
 
     def moves(gf: GameFamily, strs: Iterable[String]): Array[Byte] =
@@ -89,11 +96,20 @@ object Binary {
       (headerBit(MoveType.Move)) + Pos.fromKey(src).get.index,
       (headerBit(promotion.headOption match {
         case Some(_) => 1
-        case None => 0
+        case None    => 0
       })) + Pos.fromKey(dst).get.index
     )
 
-    def dropUci(gf: GameFamily, piece: String, dst: String) = List(
+    def dropUci(gf: GameFamily, piece: String, dst: String) = gf match {
+      case GameFamily.Flipello() => dropUciFlipello(dst: String)
+      case _                     => dropUciDefault(gf, piece, dst)
+    }
+
+    def dropUciFlipello(dst: String) = List(
+      (headerBit(MoveType.Drop)) + Pos.fromKey(dst).get.index
+    )
+
+    def dropUciDefault(gf: GameFamily, piece: String, dst: String) = List(
       (headerBit(MoveType.Drop)) + Pos.fromKey(dst).get.index,
       Role.allByForsyth(gf).get(piece(0)).get.binaryInt
     )

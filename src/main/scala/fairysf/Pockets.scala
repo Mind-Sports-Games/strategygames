@@ -1,6 +1,6 @@
 package strategygames.fairysf
 
-import strategygames.{ Player, GameLogic, Piece => StratPiece, Pockets, Pocket }
+import strategygames.{ GameLogic, GameFamily, Piece => StratPiece, Pockets, Pocket }
 
 case class PocketData(
     pockets: Pockets,
@@ -32,9 +32,19 @@ case class PocketData(
     copy(
       promoted = if (promoted(orig)) promoted - orig + dest else promoted
     )
+
+  def gameFamily: Option[GameFamily] = pockets.p1.roles.headOption match {
+    case Some(strategygames.Role.FairySFRole(role)) => Some(role.gameFamily)
+    case None =>
+      pockets.p2.roles.headOption match {
+        case Some(strategygames.Role.FairySFRole(role)) => Some(role.gameFamily)
+        case None                                       => None
+        case _                                          => sys.error("Not got fairysf roles in p2 pocket")
+      }
+    case _ => sys.error("Not got fairysf roles in p1 pocket")
+  }
 }
 
 object PocketData {
   val init = PocketData(Pockets(Pocket(Nil), Pocket(Nil)), Set.empty)
 }
-

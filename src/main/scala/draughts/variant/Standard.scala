@@ -11,8 +11,6 @@ case object Standard
       gameType = 20,
       key = "international",
       name = "International",
-      shortName = "Int",
-      title = "Standard rules of international draughts (FMJD).",
       standardInitialPosition = true,
       boardSize = Board.D100
     ) {
@@ -44,10 +42,10 @@ case object Standard
   // (drawingMoves, first promotion: promotes this turn and has only one king)
   private def drawingMoves(board: Board, move: Option[Move]): Option[(Int, Boolean)] =
     if (board.pieces.size <= 4) {
-      val p1Pieces    = board.pieces filter { p => !p._2.isGhost && p._2.is(Player.P1) }
-      val p2Pieces    = board.pieces filter { p => !p._2.isGhost && p._2.is(Player.P2) }
-      val p1Kings     = p1Pieces.count(_._2.role == King)
-      val p2Kings     = p2Pieces.count(_._2.role == King)
+      val p1Pieces       = board.pieces filter { p => !p._2.isGhost && p._2.is(Player.P1) }
+      val p2Pieces       = board.pieces filter { p => !p._2.isGhost && p._2.is(Player.P2) }
+      val p1Kings        = p1Pieces.count(_._2.role == King)
+      val p2Kings        = p2Pieces.count(_._2.role == King)
       def firstPromotion = move.exists(m => m.promotes && m.player.fold(p1Kings == 1, p2Kings == 1))
       val drawingMoves =
         if (p1Pieces.size == 1 && p1Kings == 1) {
@@ -68,7 +66,11 @@ case object Standard
     * - When one player has only a king left, and the other player three pieces including at least one king (three kings, two kings and a man, or one king and two men), the game is drawn after both players made 16 moves.
     * - When one player has only a king left, and the other player two pieces or less, including at least one king (one king, two kings, or one king and a man), the game is drawn after both players made 5 moves.
     */
-  def updatePositionHashes(board: Board, move: Move, hash: strategygames.draughts.PositionHash): PositionHash = {
+  def updatePositionHashes(
+      board: Board,
+      move: Move,
+      hash: strategygames.draughts.PositionHash
+  ): PositionHash = {
     val newHash = Hash(Situation(board, !move.piece.player))
     drawingMoves(board, move.some) match {
       case Some((drawingMoves, firstPromotion)) =>

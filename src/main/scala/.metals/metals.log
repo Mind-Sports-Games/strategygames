@@ -1,4 +1,0 @@
-[0m2021.11.02 11:53:48 INFO  Started: Metals version 0.10.3 in workspace '/home/matt/mso/strategygames/src/main/scala' for client coc.nvim 0.0.80.[0m
-[0m2021.11.02 11:53:49 INFO  time: initialize in 1.63s[0m
-[0m2021.11.02 11:53:49 WARN  Build server is not auto-connectable.[0m
-[0m2021.11.02 11:53:49 WARN  no build tool detected in workspace '/home/matt/mso/strategygames/src/main/scala'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. [0m

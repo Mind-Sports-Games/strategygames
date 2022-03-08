@@ -9,8 +9,6 @@ case object Frisian
       gameType = 40,
       key = "frisian",
       name = "Frisian",
-      shortName = "Frisian",
-      title = "Pieces can also capture horizontally and vertically.",
       standardInitialPosition = true,
       boardSize = Board.D100
     ) {
@@ -23,7 +21,7 @@ case object Frisian
   def startingPosition = Standard.startingPosition
 
   def moveDirsPlayer = Standard.moveDirsPlayer
-  def moveDirsAll   = Standard.moveDirsAll
+  def moveDirsAll    = Standard.moveDirsAll
 
   val captureDirs: Directions = List(
     (UpLeft, _.moveUpLeft),
@@ -94,7 +92,8 @@ case object Frisian
       board
         .actorAt(uci.dest)
         .fold(board) { act =>
-          val tookLastMan  = captured.fold(false)(_.exists(_.role == Man)) && board.count(Man, !act.player) == 0
+          val tookLastMan =
+            captured.fold(false)(_.exists(_.role == Man)) && board.count(Man, !act.player) == 0
           val remainingMen = board.count(Man, act.player)
           if (remainingMen != 0)
             board updateHistory { h =>
@@ -132,7 +131,11 @@ case object Frisian
     * - When one player has two kings and the other one, the game is drawn after both players made 7 moves.
     * - When bother players have one king left, the game is drawn after both players made 2 moves.  The official rules state that the game is drawn immediately when both players have only one king left, unless either player can capture the other king immediately or will necessarily be able to do this next move.  In absence of a good way to distinguish the positions that win by force from those that don't, this rule is implemented on lidraughts by always allowing 2 more moves to win the game.
     */
-  def updatePositionHashes(board: Board, move: Move, hash: strategygames.draughts.PositionHash): PositionHash = {
+  def updatePositionHashes(
+      board: Board,
+      move: Move,
+      hash: strategygames.draughts.PositionHash
+  ): PositionHash = {
     val newHash = Hash(Situation(board, !move.piece.player))
     maxDrawingMoves(board) match {
       case Some(drawingMoves) =>
