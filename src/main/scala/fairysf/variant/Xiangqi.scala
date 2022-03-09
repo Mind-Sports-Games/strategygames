@@ -20,6 +20,8 @@ case object Xiangqi
 
   override def baseVariant: Boolean = true
 
+  override def repetitionEnabled: Boolean = false
+
   override val kingPiece: Option[Role] = Some(XiangqiKing)
 
   //cache this rather than checking with the API everytime

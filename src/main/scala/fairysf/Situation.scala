@@ -71,7 +71,11 @@ case class Situation(board: Board, player: Player) {
 
   //called threefold actually will return for xfold
   def threefoldRepetition: Boolean =
-    board.apiPosition.optionalGameEnd
+    board.variant.repetitionEnabled && board.apiPosition.optionalGameEnd
+
+  lazy val perpetualPossible: Boolean =
+    board.variant.validMoves(this).values.flatMap(_.map(_.situationAfter.perpetual)).toList.contains(true) ||
+      board.variant.validDrops(this).map(_.situationAfter.perpetual).contains(true)
 
   def move(from: Pos, to: Pos, promotion: Option[PromotableRole]): Validated[String, Move] =
     board.variant.move(this, from, to, promotion)
@@ -92,5 +96,6 @@ case class Situation(board: Board, player: Player) {
 
 object Situation {
 
-  def apply(variant: strategygames.fairysf.variant.Variant): Situation = Situation(Board init variant, variant.startPlayer)
+  def apply(variant: strategygames.fairysf.variant.Variant): Situation =
+    Situation(Board init variant, variant.startPlayer)
 }
