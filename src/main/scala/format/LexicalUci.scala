@@ -3,12 +3,11 @@ package strategygames.format
 import org.playstrategy.FairyStockfish.{ availablePieceChars, availablePromotablePieceChars, init };
 
 // The name comes from here
+// https://en.wikipedia.org/wiki/Lexical_analysis
 
-// We need a more generalized, simple notion of UCI here.
-// Without a variant we can't fully parse UCI and ensure it's validate it
-// So instead we do a simpler validation here, which is based on simple
-// structure of uci.
-//
+// This version of Uci has been lexically parse according to fairy-stockfishes
+// supported games and has the right general format, but hasn't been validated
+// against a particular game logic or variant.
 trait LexicalUci {
   val uci: String
 }
