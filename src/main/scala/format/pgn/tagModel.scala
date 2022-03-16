@@ -57,7 +57,11 @@ case class Tags(value: List[Tag]) extends AnyVal {
   //       come in via these tags and ensure that the order we look at them is appropriate
   def variant: Option[strategygames.variant.Variant] = chessVariant
     .map(strategygames.variant.Variant.Chess)
-    .orElse(draughtsVariant.map(strategygames.variant.Variant.Draughts).orElse(fairysfVariant.map(strategygames.variant.Variant.FairySF)))
+    .orElse(
+      draughtsVariant
+        .map(strategygames.variant.Variant.Draughts)
+        .orElse(fairysfVariant.map(strategygames.variant.Variant.FairySF))
+    )
 
   def anyDate: Option[String] = apply(_.UTCDate) orElse apply(_.Date)
 
@@ -66,23 +70,23 @@ case class Tags(value: List[Tag]) extends AnyVal {
     case _                       => None
   }
 
-  def chessFen: Option[chess.format.FEN] = apply(_.FEN).map(strategygames.chess.format.FEN.apply)
+  def chessFen: Option[chess.format.FEN]       = apply(_.FEN).map(strategygames.chess.format.FEN.apply)
   def draughtsFen: Option[draughts.format.FEN] = apply(_.FEN).map(strategygames.draughts.format.FEN.apply)
 
   def fairysfFen: Option[fairysf.format.FEN] = apply(_.FEN).map(strategygames.fairysf.format.FEN.apply)
 
-  def fen: Option[format.FEN] = 
-     variant match {
-       case Some(strategygames.variant.Variant.Draughts(_)) => draughtsFen.map(format.FEN.Draughts)
-       case Some(strategygames.variant.Variant.Chess(_)) => chessFen.map(format.FEN.Chess)
-       case Some(strategygames.variant.Variant.FairySF(_)) => fairysfFen.map(format.FEN.FairySF)
-     }
+  def fen: Option[format.FEN] =
+    variant match {
+      case Some(strategygames.variant.Variant.Draughts(_))     => draughtsFen.map(format.FEN.Draughts)
+      case Some(strategygames.variant.Variant.FairySF(_))      => fairysfFen.map(format.FEN.FairySF)
+      case Some(strategygames.variant.Variant.Chess(_)) | None => chessFen.map(format.FEN.Chess)
+    }
 
   def exists(which: Tag.type => TagType): Boolean =
     value.exists(_.name == which(Tag))
 
   def resultPlayer: Option[Option[Player]] =
-    apply(_.Result).filter("*" !=).map(v => {strategygames.Player.fromResult(v)})
+    apply(_.Result).filter("*" !=).map(v => { strategygames.Player.fromResult(v) })
 
   def ++(tags: Tags) = tags.value.foldLeft(this)(_ + _)
 
@@ -127,10 +131,10 @@ object Tag {
   case object UTCTime extends TagType {
     val format = DateTimeFormat forPattern "HH:mm:ss" withZone DateTimeZone.UTC
   }
-  case object Round           extends TagType
+  case object Round        extends TagType
   case object P1           extends TagType
   case object P2           extends TagType
-  case object TimeControl     extends TagType
+  case object TimeControl  extends TagType
   case object P1Clock      extends TagType
   case object P2Clock      extends TagType
   case object P1Elo        extends TagType
@@ -143,15 +147,15 @@ object Tag {
   case object P2Title      extends TagType
   case object P1Team       extends TagType
   case object P2Team       extends TagType
-  case object Result          extends TagType
-  case object FEN             extends TagType
-  case object Variant         extends TagType
-  case object GameType        extends TagType
-  case object MicroMatch      extends TagType
-  case object ECO             extends TagType
-  case object Opening         extends TagType
-  case object Termination     extends TagType
-  case object Annotator       extends TagType
+  case object Result       extends TagType
+  case object FEN          extends TagType
+  case object Variant      extends TagType
+  case object GameType     extends TagType
+  case object MicroMatch   extends TagType
+  case object ECO          extends TagType
+  case object Opening      extends TagType
+  case object Termination  extends TagType
+  case object Annotator    extends TagType
   case class Unknown(n: String) extends TagType {
     override def toString  = n
     override val isUnknown = true
