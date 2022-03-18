@@ -8,8 +8,6 @@ case object MiniXiangqi
       id = 4,
       key = "minixiangqi",
       name = "Mini Xiangqi",
-      shortName = "minixiangqi",
-      title = "Mini Xiangqi (Chinese Chess)",
       standardInitialPosition = true,
       fairysfName = FairySFName("minixiangqi"),
       boardSize = Board.Dim7x7
@@ -20,11 +18,12 @@ case object MiniXiangqi
   def perfIcon: Char = 't'
   def perfId: Int    = 203
 
-  val kingPiece: Role = XiangqiKing
+  override val kingPiece: Option[Role] = Some(XiangqiKing)
+
+  override def repetitionEnabled: Boolean = false
 
   //cache this rather than checking with the API everytime
   override def initialFen =
     format.FEN("rcnkncr/p1ppp1p/7/7/7/P1PPP1P/RCNKNCR w - - 0 1")
 
 }
-

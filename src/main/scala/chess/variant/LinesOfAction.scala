@@ -2,7 +2,7 @@ package strategygames.chess.variant
 
 import strategygames.chess._
 import strategygames.chess.format.FEN
-import strategygames.{ Player, GameFamily }
+import strategygames.{ GameFamily, Player }
 
 import scala.collection.immutable.Queue
 
@@ -11,8 +11,6 @@ case object LinesOfAction
       id = 11,
       key = "linesOfAction",
       name = "Lines Of Action",
-      shortName = "LOA",
-      title = "Connect all of your checkers to win.",
       standardInitialPosition = false
     ) {
 
@@ -51,7 +49,7 @@ case object LinesOfAction
     Pos.H7 -> Piece(P2, LOAChecker)
   )
 
-  override val initialFen        = FEN("1LLLLLL1/l6l/l6l/l6l/l6l/l6l/l6l/1LLLLLL1 w - - 0 1")
+  override val initialFen          = FEN("1LLLLLL1/l6l/l6l/l6l/l6l/l6l/l6l/1LLLLLL1 w - - 0 1")
   override def startPlayer: Player = P1
 
   override def allowsCastling = false

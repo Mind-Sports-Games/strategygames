@@ -11,3 +11,12 @@ metals.sbt
 /.settings/
 /.bloop/
 /.metals/
+
+.bloop/
+.bsp/
+.metals/
+project/.bloop
+project/metals.sbt
+src/main/scala/.metals
+src/test/.bsp
+>>>>>>> 10dae631f519a9b96c6d3bccc7cdd0c6093b28ad

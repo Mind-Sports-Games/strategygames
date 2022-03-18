@@ -35,8 +35,10 @@ object Binary {
         case (b1 :: rest, None)       => intMoves(rest, pliesToGo, Some(GameFamily(b1)))
         case (b1 :: b2 :: rest, Some(gf)) if headerBit(b1) == MoveType.Move =>
           moveUci(b1, b2) :: intMoves(rest, pliesToGo - 1, Some(gf))
+        case (b1 :: rest, Some(gf)) if headerBit(b1) == MoveType.Drop && gf == GameFamily.Flipello() =>
+          dropUciFlipello(b1) :: intMoves(rest, pliesToGo - 1, Some(gf))
         case (b1 :: b2 :: rest, Some(gf)) if headerBit(b1) == MoveType.Drop =>
-          dropUci(gf, b1, b2) :: intMoves(rest, pliesToGo - 1, Some(gf))
+          dropUciDefault(gf, b1, b2) :: intMoves(rest, pliesToGo - 1, Some(gf))
         case (x, _) => !!(x map showByte mkString ",")
       }
 
@@ -50,9 +52,14 @@ object Binary {
 
     // 1 movetype
     // 7 pos (dest)
+    def dropUciFlipello(b1: Int): String =
+      s"P@${posFromInt(b1)}"
+
+    // 1 movetype
+    // 7 pos (dest)
     // ----
     // 8 piece (only needs 4 bits?)
-    def dropUci(gf: GameFamily, b1: Int, b2: Int): String =
+    def dropUciDefault(gf: GameFamily, b1: Int, b2: Int): String =
       s"${pieceFromInt(gf, b2)}@${posFromInt(b1)}"
 
     def posFromInt(b: Int): String = Pos(right(b, 7)).get.toString()
@@ -93,7 +100,16 @@ object Binary {
       })) + Pos.fromKey(dst).get.index
     )
 
-    def dropUci(gf: GameFamily, piece: String, dst: String) = List(
+    def dropUci(gf: GameFamily, piece: String, dst: String) = gf match {
+      case GameFamily.Flipello() => dropUciFlipello(dst: String)
+      case _                     => dropUciDefault(gf, piece, dst)
+    }
+
+    def dropUciFlipello(dst: String) = List(
+      (headerBit(MoveType.Drop)) + Pos.fromKey(dst).get.index
+    )
+
+    def dropUciDefault(gf: GameFamily, piece: String, dst: String) = List(
       (headerBit(MoveType.Drop)) + Pos.fromKey(dst).get.index,
       Role.allByForsyth(gf).get(piece(0)).get.binaryInt
     )

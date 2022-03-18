@@ -9,8 +9,6 @@ case object Shogi
       id = 1,
       key = "shogi",
       name = "Shogi",
-      shortName = "Shogi",
-      title = "Shogi (Japanese Chess)",
       standardInitialPosition = true,
       fairysfName = FairySFName("shogi"),
       boardSize = Board.Dim9x9
@@ -25,7 +23,7 @@ case object Shogi
 
   override def baseVariant: Boolean = true
 
-  val kingPiece: Role = ShogiKing
+  override val kingPiece: Option[Role] = Some(ShogiKing)
 
   //cache this rather than checking with the API everytime
   override def initialFen =
@@ -40,7 +38,7 @@ case object Shogi
         d.piece.role == ShogiPawn && {
           val kingPos = situation.board.posMap
             .get(
-              Piece(!situation.player, kingPiece)
+              Piece(!situation.player, ShogiKing)
             )
             .flatMap(_.headOption)
           Some(d.pos) == (situation.player match {

@@ -15,8 +15,6 @@ case object Russian
       gameType = 25,
       key = "russian",
       name = "Russian",
-      shortName = "Russian",
-      title = "Choice of capture, promotion during a multi-capture.",
       standardInitialPosition = false,
       boardSize = Board.D64
     ) {
@@ -30,9 +28,9 @@ case object Russian
   val startingPosition       = StartingPosition("---", initialFen, "", "Initial position".some)
   override val openingTables = List(OpeningTable.tableFMJD, OpeningTable.tableIDFBasic)
 
-  def captureDirs   = Standard.captureDirs
+  def captureDirs    = Standard.captureDirs
   def moveDirsPlayer = Standard.moveDirsPlayer
-  def moveDirsAll   = Standard.moveDirsAll
+  def moveDirsAll    = Standard.moveDirsAll
 
   override def validMoves(situation: Situation, finalSquare: Boolean = false): Map[Pos, List[Move]] = {
     val captures: Map[Pos, List[Move]] = situation.actors
@@ -53,7 +51,7 @@ case object Russian
   }
 
   override def shortRangeCaptures(actor: Actor, finalSquare: Boolean): List[Move] = {
-    val buf   = new ArrayBuffer[Move]
+    val buf    = new ArrayBuffer[Move]
     val player = actor.player
 
     def walkCaptures(
@@ -318,12 +316,12 @@ case object Russian
 
   // (drawingMoves, resetOnNonKingMove, allowPromotion, first promotion: promotes this turn and has only one king)
   private def drawingMoves(board: Board, move: Option[Move]): Option[(Int, Boolean, Boolean, Boolean)] = {
-    val p1Actors    = board.actorsOf(Player.P1).filterNot(_.piece.isGhost)
-    val p2Actors    = board.actorsOf(Player.P2).filterNot(_.piece.isGhost)
-    val p1Kings     = p1Actors.count(_.piece is King)
-    val p2Kings     = p2Actors.count(_.piece is King)
-    val p1Pieces    = p1Actors.size
-    val p2Pieces    = p2Actors.size
+    val p1Actors       = board.actorsOf(Player.P1).filterNot(_.piece.isGhost)
+    val p2Actors       = board.actorsOf(Player.P2).filterNot(_.piece.isGhost)
+    val p1Kings        = p1Actors.count(_.piece is King)
+    val p2Kings        = p2Actors.count(_.piece is King)
+    val p1Pieces       = p1Actors.size
+    val p2Pieces       = p2Actors.size
     def firstPromotion = move.exists(m => m.promotes && m.player.fold(p1Kings == 1, p2Kings == 1))
 
     def singleKing(strongPieces: Int, strongKings: Int, weakKing: Actor, weakPlayer: Player) = {
@@ -388,7 +386,11 @@ case object Russian
     * 7.2.8. If a player having in the party two kings, one king and man, one king against enemy king to their 5th move will not be able to achieve a winning position.
     * 7.2.9. ... excluding case when the game is obvious and the player can continue to demonstrate the victory :S ...
     */
-  def updatePositionHashes(board: Board, move: Move, hash: strategygames.draughts.PositionHash): PositionHash = {
+  def updatePositionHashes(
+      board: Board,
+      move: Move,
+      hash: strategygames.draughts.PositionHash
+  ): PositionHash = {
     val newHash = Hash(Situation(board, !move.piece.player))
     drawingMoves(board, move.some) match {
       case Some((drawingMoves, resetOnNonKingMove, allowPromotion, firstPromotion)) =>

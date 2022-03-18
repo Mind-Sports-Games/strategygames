@@ -11,8 +11,6 @@ case object Breakthrough
       gameType = 96,
       key = "breakthrough",
       name = "Breakthrough",
-      shortName = "BT",
-      title = "The first player who makes a king wins.",
       standardInitialPosition = true,
       boardSize = Board.D100
     ) {
@@ -23,9 +21,9 @@ case object Breakthrough
   def initialFen       = Standard.initialFen
   def startingPosition = Standard.startingPosition
 
-  def captureDirs   = Standard.captureDirs
+  def captureDirs    = Standard.captureDirs
   def moveDirsPlayer = Standard.moveDirsPlayer
-  def moveDirsAll   = Standard.moveDirsAll
+  def moveDirsAll    = Standard.moveDirsAll
 
   // Win on promotion
   override def specialEnd(situation: Situation) =
@@ -41,7 +39,11 @@ case object Breakthrough
 
   /** No drawing rules
     */
-  def updatePositionHashes(board: Board, move: Move, hash: strategygames.draughts.PositionHash): PositionHash =
+  def updatePositionHashes(
+      board: Board,
+      move: Move,
+      hash: strategygames.draughts.PositionHash
+  ): PositionHash =
     Hash(Situation(board, !move.piece.player))
 
 }

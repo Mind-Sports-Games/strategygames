@@ -9,8 +9,6 @@ case object MiniShogi
       id = 5,
       key = "minishogi",
       name = "Mini Shogi",
-      shortName = "minishogi",
-      title = "Mini Shogi (Japanese Chess)",
       standardInitialPosition = true,
       fairysfName = FairySFName("minishogi"),
       boardSize = Board.Dim5x5
@@ -23,7 +21,7 @@ case object MiniShogi
   def perfIcon: Char = 's'
   def perfId: Int    = 202
 
-  val kingPiece: Role = ShogiKing
+  override val kingPiece: Option[Role] = Some(ShogiKing)
 
   //cache this rather than checking with the API everytime
   override def initialFen = format.FEN("rbsgk/4p/5/P4/KGSBR[-] w 0 1")
@@ -37,7 +35,7 @@ case object MiniShogi
         d.piece.role == ShogiPawn && {
           val kingPos = situation.board.posMap
             .get(
-              Piece(!situation.player, kingPiece)
+              Piece(!situation.player, ShogiKing)
             )
             .flatMap(_.headOption)
           Some(d.pos) == (situation.player match {

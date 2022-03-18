@@ -8,8 +8,6 @@ case object Chess960
       id = 2,
       key = "chess960",
       name = "Chess960",
-      shortName = "960",
-      title = "Starting position of the home rank pieces is randomized.",
       standardInitialPosition = false
     ) {
 
@@ -17,7 +15,7 @@ case object Chess960
   def perfIcon: Char = '\''
 
   override def baseVariant = true
-  override def fenVariant = true
+  override def fenVariant  = true
 
   def pieces =
     Variant.symmetricRank {

@@ -15,8 +15,6 @@ abstract class Variant private[variant] (
     val id: Int,
     val key: String,
     val name: String,
-    val shortName: String,
-    val title: String,
     val standardInitialPosition: Boolean,
     val fairysfName: FairySFName,
     val boardSize: Board.BoardSize
@@ -26,6 +24,7 @@ abstract class Variant private[variant] (
   def xiangqi     = this == Xiangqi
   def minishogi   = this == MiniShogi
   def minixiangqi = this == MiniXiangqi
+  def flipello    = this == Flipello
 
   def exotic = true
 
@@ -38,7 +37,10 @@ abstract class Variant private[variant] (
 
   def materialImbalanceVariant: Boolean = false
 
-  def dropsVariant: Boolean = false
+  def dropsVariant: Boolean     = false
+  def onlyDropsVariant: Boolean = false
+
+  def repetitionEnabled: Boolean = true
 
   def perfId: Int
   def perfIcon: Char
@@ -51,7 +53,7 @@ abstract class Variant private[variant] (
 
   def startPlayer: Player = P1
 
-  val kingPiece: Role
+  val kingPiece: Option[Role] = None
 
   //looks like this is only to allow King to be a valid promotion piece
   //in just atomic, so can leave as true for now
@@ -251,7 +253,8 @@ object Variant {
     Shogi,
     MiniShogi,
     Xiangqi,
-    MiniXiangqi
+    MiniXiangqi,
+    Flipello
   )
   val byId = all map { v =>
     (v.id, v)

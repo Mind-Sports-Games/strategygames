@@ -7,8 +7,6 @@ case object KingOfTheHill
       id = 4,
       key = "kingOfTheHill",
       name = "King of the Hill",
-      shortName = "KotH",
-      title = "Bring your King to the center to win.",
       standardInitialPosition = true
     ) {
 

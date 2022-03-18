@@ -8,8 +8,6 @@ case object Xiangqi
       id = 2,
       key = "xiangqi",
       name = "Xiangqi",
-      shortName = "Xiangqi",
-      title = "Xiangqi (Chinese Chess)",
       standardInitialPosition = true,
       fairysfName = FairySFName("xiangqi"),
       boardSize = Board.Dim9x10
@@ -22,7 +20,9 @@ case object Xiangqi
 
   override def baseVariant: Boolean = true
 
-  val kingPiece: Role = XiangqiKing
+  override def repetitionEnabled: Boolean = false
+
+  override val kingPiece: Option[Role] = Some(XiangqiKing)
 
   //cache this rather than checking with the API everytime
   override def initialFen =

@@ -35,6 +35,7 @@ object Api {
   // This will always be called when we import this module. So as long as we directly use
   // this package for calling everything, it should ensure that it's always initialized
   FairyStockfish.init()
+  FairyStockfish.loadVariantConfig(ApiVariantConfig.config)
 
   abstract class Position {
     val variant: Variant
@@ -218,5 +219,30 @@ object Api {
 
   def pieceMapFromFen(variantName: String, fen: String): PieceMap =
     positionFromMoves(variantName, fen).pieceMap
+
+}
+
+object ApiVariantConfig {
+
+  val config = """
+[flipersi]
+immobile = p
+startFen = 8/8/8/8/8/8/8/8[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp] w 0 1
+pieceDrops = true
+promotionPieceTypes = -
+doubleStep = false
+castling = false
+stalemateValue = loss
+stalematePieceCount = true
+materialCounting = unweighted
+enclosingDrop = reversi
+enclosingDropStart = d4 e4 d5 e5
+immobilityIllegal = false
+flipEnclosedPieces = reversi
+passOnStalemate = false
+[flipello:flipersi]
+startFen = 8/8/8/3pP3/3Pp3/8/8/8[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp] w 0 1
+passOnStalemate = true
+  """
 
 }

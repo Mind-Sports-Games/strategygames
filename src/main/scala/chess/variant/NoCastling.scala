@@ -7,8 +7,6 @@ case object NoCastling
       id = 13,
       key = "noCastling",
       name = "No Castling",
-      shortName = "nocastling",
-      title = "Standard chess but no castling",
       standardInitialPosition = true
     ) {
 
@@ -22,4 +20,3 @@ case object NoCastling
 
   override def baseVariant: Boolean = true
 }
-
