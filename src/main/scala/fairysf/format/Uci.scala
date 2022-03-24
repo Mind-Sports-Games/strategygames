@@ -25,18 +25,18 @@ object Uci {
       promotion: Option[PromotableRole] = None
   ) extends Uci {
 
-    def keys    = orig.key + dest.key
-    def lilaUci     = keys + lilaPromotionString
-    def fairySfUci     = keys + fairySfPromotionString
-    def fishnetUci     = fairySfUci // Use the fairySfUci
-    def uci = lilaUci
+    def keys       = orig.key + dest.key
+    def lilaUci    = keys + lilaPromotionString
+    def fairySfUci = keys + fairySfPromotionString
+    def fishnetUci = fairySfUci // Use the fairySfUci
+    def uci        = lilaUci
 
     def keysPiotr = orig.piotrStr + dest.piotrStr
     def piotr     = keysPiotr + promotionString
 
-    def lilaPromotionString     = promotion.fold("")(_.forsyth.toString)
+    def lilaPromotionString    = promotion.fold("")(_.forsyth.toString)
     def fairySfPromotionString = promotion.fold("")(_ => "+")
-    def promotionString = lilaPromotionString
+    def promotionString        = lilaPromotionString
 
     def origDest = orig -> dest
 
@@ -89,10 +89,10 @@ object Uci {
 
   case class Drop(role: Role, pos: Pos) extends Uci {
 
-    def lilaUci = s"${role.pgn}@${pos.key}"
-    def fairySfUci = s"${role.pgn}@${pos.key}"
-    def fishnetUci     = fairySfUci // Use the fairySfUci
-    def uci = lilaUci
+    def lilaUci    = s"${role.pgn}@${pos.key}"
+    def fairySfUci = lilaUci
+    def fishnetUci = fairySfUci // Use the fairySfUci
+    def uci        = lilaUci
 
     def piotr = s"${role.pgn}@${pos.piotrStr}"
 
