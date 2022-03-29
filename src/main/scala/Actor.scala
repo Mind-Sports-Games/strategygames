@@ -33,4 +33,10 @@ object Actor {
     Board.FairySF(a.board)
   ){}
 
+  final case class Oware(a: oware.Actor) extends Actor(
+    Piece.Oware(a.piece),
+    Pos.Oware(a.pos),
+    Board.Oware(a.board)
+  ){}
+
 }

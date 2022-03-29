@@ -65,12 +65,25 @@ object Pos {
 
   }
 
+  final case class Oware(p: oware.Pos) extends Pos {
+
+    val key: String = p.key
+
+    def piotr: Char = p.piotr
+
+    lazy val toInt: Int = (p.file.index << 3) + p.rank.index
+
+    lazy val all: List[Pos] = chess.Pos.all.map(Chess)
+
+  }
+
   //need to equivalate this method for draughts probably
   //think we need to figure out a way to map into Draughts with a board size at this point
   def fromKey(lib: GameLogic, key: String): Option[Pos] = lib match {
     case GameLogic.Draughts() => sys.error("Not implemented yet for draughts")
     case GameLogic.Chess() => chess.Pos.fromKey(key).map(Chess)
     case GameLogic.FairySF() => sys.error("Not implemented yet for fairysf")
+    case GameLogic.Oware() => sys.error("Not implemented yet for oware")
   }
 
   //def at(lib: GameLogic, x: Int, y: Int): Option[Pos] = lib match {

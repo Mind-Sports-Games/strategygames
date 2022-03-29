@@ -26,12 +26,18 @@ object GameLogic {
     def name = "Fairy Stockfish"
   }
 
-  def all: List[GameLogic] = List(Chess(), Draughts())
+  final case class Oware() extends GameLogic {
+    def id   = 3
+    def name = "Oware"
+  }
+
+  def all: List[GameLogic] = List(Chess(), Draughts(), FairySF(), Oware())
 
   // TODO: I'm sure there is a better scala way of doing this
   def apply(id: Int): GameLogic = id match {
     case 1 => Draughts()
     case 2 => FairySF()
+    case 3 => Oware()
     case _ => Chess()
   }
 }
@@ -257,13 +263,32 @@ object GameFamily {
     def playerColors      = Map(P1 -> "black", P2 -> "white")
   }
 
+  final case class Oware() extends GameFamily {
+    def id             = 6
+    def name           = "Oware"
+    def key            = "oware"
+    def gameLogic      = GameLogic.Oware()
+    def aiEnabled      = false
+    def defaultVariant = Variant.Oware(strategygames.oware.variant.Oware)
+    def variants       = Variant.all(GameLogic.Oware()).filter(_.gameFamily == this)
+    def displayPiece   = "wE"
+    def pieceSetThemes =
+      List("blue_oware", "green_oware", "stone_oware", "purple_oware", "water_oware")
+    def pieceSetDefault   = "stone_oware"
+    def boardThemes       = List("light-wood", "dark-wood")
+    def boardThemeDefault = "light-wood"
+    def playerNames       = Map(P1 -> "White", P2 -> "Black")
+    def playerColors      = Map(P1 -> "white", P2 -> "black")
+  }
+
   def all: List[GameFamily] = List(
     Chess(),
     Draughts(),
     LinesOfAction(),
     Shogi(),
     Xiangqi(),
-    Flipello()
+    Flipello(),
+    Oware()
   )
 
   // TODO: I'm sure there is a better scala way of doing this
@@ -273,6 +298,7 @@ object GameFamily {
     case 3 => Shogi()
     case 4 => Xiangqi()
     case 5 => Flipello()
+    case 6 => Oware()
     case _ => Chess()
   }
 

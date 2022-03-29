@@ -44,10 +44,20 @@ object Piece {
 
   }
 
+  final case class Oware(p: oware.Piece) extends Piece(
+    p.player,
+    Role.OwareRole(p.role)
+  ){
+
+    def forsyth: Char = p.forsyth
+
+  }
+
   def apply(lib: GameLogic, player: Player, role: Role): Piece = (lib, role) match {
     case (GameLogic.Draughts(), Role.DraughtsRole(role)) => Draughts(draughts.Piece(player, role))
     case (GameLogic.Chess(), Role.ChessRole(role))       => Chess(chess.Piece(player, role))
     case (GameLogic.FairySF(), Role.FairySFRole(role))   => FairySF(fairysf.Piece(player, role))
+    case (GameLogic.Oware(), Role.OwareRole(role))   => Oware(oware.Piece(player, role))
     case _ => sys.error("Mismatched gamelogic types 2")
   }
 
@@ -55,6 +65,7 @@ object Piece {
     case (GameLogic.Draughts()) => draughts.Piece.fromChar(c).map(Draughts)
     case (GameLogic.Chess())    => chess.Piece.fromChar(c).map(Chess)
     case (GameLogic.FairySF())  => fairysf.Piece.fromChar(gf, c).map(FairySF)
+    case (GameLogic.Oware())  => oware.Piece.fromChar(gf, c).map(Oware)
   }
 
   def chessPieceMap(pieceMap: PieceMap): chess.PieceMap = pieceMap.map{
@@ -67,5 +78,9 @@ object Piece {
 
   def fairySFPieceMap(pieceMap: PieceMap): fairysf.PieceMap = pieceMap.map{
     case(Pos.FairySF(pos), FairySF(piece)) => (pos, piece)
+  }
+
+  def owarePieceMap(pieceMap: PieceMap): oware.PieceMap = pieceMap.map{
+    case(Pos.Oware(pos), Oware(piece)) => (pos, piece)
   }
 }

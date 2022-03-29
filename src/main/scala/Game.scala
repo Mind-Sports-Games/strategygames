@@ -56,6 +56,7 @@ abstract class Game(
   def toChess: chess.Game
   def toDraughts: draughts.DraughtsGame
   def toFairySF: fairysf.Game
+  def toOware: oware.Game
 
 }
 
@@ -139,6 +140,7 @@ object Game {
     def toChess: chess.Game = g
     def toDraughts: draughts.DraughtsGame = sys.error("Can't turn a chess game into a draughts game")
     def toFairySF: fairysf.Game = sys.error("Can't turn a chess game into a fairysf game")
+    def toOware: oware.Game = sys.error("Can't turn a chess game into a oware game")
 
   }
 
@@ -233,6 +235,7 @@ object Game {
     def toChess: chess.Game = sys.error("Can't turn a draughts game into a chess game")
     def toDraughts: draughts.DraughtsGame = g
     def toFairySF: fairysf.Game = sys.error("Can't turn a draughts game into a fairysf game")
+    def toOware: oware.Game = sys.error("Can't turn a draughts game into a oware game")
 
   }
 
@@ -314,6 +317,80 @@ object Game {
     def toFairySF: fairysf.Game = g
     def toChess: chess.Game = sys.error("Can't turn a fairysf game into a chess game")
     def toDraughts: draughts.DraughtsGame = sys.error("Can't turn a fairysf game into a draughts game")
+    def toOware: oware.Game = sys.error("Can't turn a fairysf game into a oware game")
+
+  }
+
+  final case class Oware(g: oware.Game)
+      extends Game(
+        Situation.Oware(g.situation),
+        g.pgnMoves,
+        g.clock,
+        g.turns,
+        g.startedAtTurn
+      ) {
+
+    private def toOwarePromotion(p: Option[PromotableRole]): Option[oware.PromotableRole] =
+      p.map(_ match {
+        case Role.OwarePromotableRole(p) => p
+        case _ => sys.error("Non-oware promotable role paired with oware objects")
+      })
+
+    def apply(
+        orig: Pos,
+        dest: Pos,
+        promotion: Option[PromotableRole] = None,
+        metrics: MoveMetrics = MoveMetrics(),
+        finalSquare: Boolean = false,
+        captures: Option[List[Pos]] = None,
+        partialCaptures: Boolean = false
+    ): Validated[String, (Game, Move)] = (orig, dest) match {
+      case (Pos.Oware(orig), Pos.Oware(dest)) =>
+        g.apply(orig, dest, toOwarePromotion(promotion), metrics)
+          .toEither
+          .map(t => (Oware(t._1), Move.Oware(t._2)))
+          .toValidated
+      case _ => sys.error("Not passed Oware objects")
+    }
+
+    private def apply(move: Move): Game = move match {
+      case (Move.Oware(move)) => Oware(g.apply(move))
+      case _                  => sys.error("Not passed Oware objects")
+    }
+
+    def apply(moveOrDrop: MoveOrDrop): Game =
+      moveOrDrop.fold(apply, _ => sys.error("Oware does not support drops"))
+      
+
+    def drop(
+        role: Role,
+        pos: Pos,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, Drop)] = sys.error("Can't drop in oware")
+
+    def copy(clock: Option[Clock]): Game = Oware(g.copy(clock = clock))
+    def copy(turns: Int, startedAtTurn: Int): Game = Oware(
+      g.copy(turns = turns, startedAtTurn = startedAtTurn)
+    )
+    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int): Game = Oware(
+      g.copy(clock = clock, turns = turns, startedAtTurn = startedAtTurn)
+    )
+
+    def copy(situation: Situation, turns: Int): Game = situation match {
+      case Situation.Oware(situation) => Oware(g.copy(situation=situation, turns=turns))
+      case _ => sys.error("Unable to copy oware game with non-oware arguments")
+    }
+    def copy(situation: Situation): Game = situation match {
+      case Situation.Oware(situation) => Oware(g.copy(situation=situation))
+      case _ => sys.error("Unable to copy oware game with non-oware arguments")
+    }
+
+    def withTurns(t: Int): Game = Oware(g.withTurns(t))
+
+    def toFairySF: fairysf.Game = sys.error("Can't turn a oware game into a fairysf game")
+    def toChess: chess.Game = sys.error("Can't turn a oware game into a chess game")
+    def toDraughts: draughts.DraughtsGame = sys.error("Can't turn a oware game into a draughts game")
+    def toOware: oware.Game = g
 
   }
 
@@ -331,6 +408,8 @@ object Game {
       Chess(chess.Game(situation, pgnMoves, clock, turns, startedAtTurn))
     case (GameLogic.FairySF(), Situation.FairySF(situation)) =>
       FairySF(fairysf.Game(situation, pgnMoves, clock, turns, startedAtTurn))
+    case (GameLogic.Oware(), Situation.Oware(situation)) =>
+      Oware(oware.Game(situation, pgnMoves, clock, turns, startedAtTurn))
     case _ => sys.error("Mismatched gamelogic types 32")
   }
 
@@ -338,6 +417,7 @@ object Game {
     case (GameLogic.Draughts(), Variant.Draughts(variant)) => Draughts(draughts.DraughtsGame.apply(variant))
     case (GameLogic.Chess(), Variant.Chess(variant))       => Chess(chess.Game.apply(variant))
     case (GameLogic.FairySF(), Variant.FairySF(variant))   => FairySF(fairysf.Game.apply(variant))
+    case (GameLogic.Oware(), Variant.Oware(variant))   => Oware(oware.Game.apply(variant))
     case _ => sys.error("Mismatched gamelogic types 33")
   }
 
@@ -348,11 +428,14 @@ object Game {
         Chess(chess.Game.apply(variant.map(_.toChess), fen.map(_.toChess)))
       case GameLogic.FairySF() =>
         FairySF(fairysf.Game.apply(variant.map(_.toFairySF), fen.map(_.toFairySF)))
+      case GameLogic.Oware() =>
+        Oware(oware.Game.apply(variant.map(_.toOware), fen.map(_.toOware)))
       case _ => sys.error("Mismatched gamelogic types 36")
     }
 
     def wrap(g: chess.Game) = Chess(g)
     def wrap(g: draughts.DraughtsGame) = Draughts(g)
     def wrap(g: fairysf.Game) = FairySF(g)
+    def wrap(g: oware.Game) = Oware(g)
 
 }

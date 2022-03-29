@@ -60,6 +60,18 @@ object Replay {
     }
   }
 
+  final case class Oware(r: oware.Replay) extends Replay(
+    Game.Oware(r.setup),
+    r.moves.map((m: oware.Move) => Left(Move.Oware(m))),
+    Game.Oware(r.state)
+  ){
+    def copy(state: Game): Replay = state match {
+      case Game.Oware(state) => Replay.wrap(r.copy(state=state))
+      case _ => sys.error("Unable to copy a oware replay with a non-oware state")
+    }
+  }
+
+
   def apply(lib: GameLogic, setup: Game, moves: List[MoveOrDrop], state: Game): Replay =
     (lib, setup, state) match {
       case (GameLogic.Draughts(), Game.Draughts(setup), Game.Draughts(state))
@@ -68,6 +80,8 @@ object Replay {
         => Chess(chess.Replay(setup, moves.map(Move.toChess), state))
       case (GameLogic.FairySF(), Game.FairySF(setup), Game.FairySF(state))
         => FairySF(fairysf.Replay(setup, moves.map(Move.toFairySF), state))
+      case (GameLogic.Oware(), Game.Oware(setup), Game.Oware(state))
+        => Oware(oware.Replay(setup, moves.map(Move.toOware), state))
       case _ => sys.error("Mismatched gamelogic types 5")
     }
 
@@ -105,6 +119,15 @@ object Replay {
             message
           )
       }
+    case (GameLogic.Oware(), FEN.Oware(initialFen), Variant.Oware(variant)) =>
+      oware.Replay.gameMoveWhileValid(moveStrs, initialFen, variant) match {
+        case (game, gameswithsan, message) =>
+          (
+            Game.Oware(game),
+            gameswithsan.map { case (g, u) => (Game.Oware(g), Uci.OwareWithSan(u)) },
+            message
+          )
+      }
     case _ => sys.error("Mismatched gamelogic types 7")
   }
 
@@ -139,6 +162,11 @@ object Replay {
         .toEither
         .map(s => s.map(Situation.FairySF))
         .toValidated
+    case (GameLogic.Oware(), Variant.Oware(variant)) =>
+      oware.Replay.situations(moveStrs, initialFen.map(_.toOware), variant)
+        .toEither
+        .map(s => s.map(Situation.Oware))
+        .toValidated
     case _ => sys.error("Mismatched gamelogic types 8")
   }
 
@@ -162,6 +190,14 @@ object Replay {
     ucis.flatMap(u =>
       u match {
         case u: Uci.FairySF => Some(u.unwrap)
+        case _              => None
+      }
+    )
+  
+  private def owareUcis(ucis: List[Uci]): List[oware.format.Uci] =
+    ucis.flatMap(u =>
+      u match {
+        case u: Uci.Oware => Some(u.unwrap)
         case _              => None
       }
     )
@@ -192,6 +228,11 @@ object Replay {
         .toEither
         .map(b => b.map(Board.FairySF))
         .toValidated
+    case (GameLogic.Oware(), Variant.Oware(variant))
+      => oware.Replay.boardsFromUci(owareUcis(moves), initialFen.map(_.toOware), variant)
+        .toEither
+        .map(b => b.map(Board.Oware))
+        .toValidated
     case _ => sys.error("Mismatched gamelogic types 8a")
   }
 
@@ -216,6 +257,11 @@ object Replay {
       fairysf.Replay.situationsFromUci(fairysfUcis(moves), initialFen.map(_.toFairySF), variant)
         .toEither
         .map(s => s.map(Situation.FairySF))
+        .toValidated
+    case (GameLogic.Oware(), Variant.Oware(variant)) =>
+      oware.Replay.situationsFromUci(owareUcis(moves), initialFen.map(_.toOware), variant)
+        .toEither
+        .map(s => s.map(Situation.Oware))
         .toValidated
     case _ => sys.error("Mismatched gamelogic types 9")
   }
@@ -242,6 +288,11 @@ object Replay {
         .toEither
         .map(r => Replay.FairySF(r))
         .toValidated
+    case (GameLogic.Oware(), Variant.Oware(variant)) =>
+      oware.Replay.apply(owareUcis(moves), initialFen.map(_.toOware), variant)
+        .toEither
+        .map(r => Replay.Oware(r))
+        .toValidated
     case _ => sys.error("Mismatched gamelogic types 10")
   }
 
@@ -258,11 +309,14 @@ object Replay {
       => chess.Replay.plyAtFen(moveStrs, initialFen.map(_.toChess), variant, atFen)
     case (GameLogic.FairySF(), Variant.FairySF(variant), FEN.FairySF(atFen))
       => fairysf.Replay.plyAtFen(moveStrs, initialFen.map(_.toFairySF), variant, atFen)
+    case (GameLogic.Oware(), Variant.Oware(variant), FEN.Oware(atFen))
+      => oware.Replay.plyAtFen(moveStrs, initialFen.map(_.toOware), variant, atFen)
     case _ => sys.error("Mismatched gamelogic types 10")
   }
 
   def wrap(r: chess.Replay) = Chess(r)
   def wrap(r: draughts.Replay) = Draughts(r)
   def wrap(r: fairysf.Replay) = FairySF(r)
+  def wrap(r: oware.Replay) = Oware(r)
 
 }

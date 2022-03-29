@@ -38,6 +38,7 @@ abstract sealed class Move(
   def toChess: chess.Move
   def toDraughts: draughts.Move
   def toFairySF: fairysf.Move
+  def toOware: oware.Move
 
 }
 
@@ -85,6 +86,7 @@ object Move {
     def toChess = m
     def toDraughts = sys.error("Can't make a draughts move from a chess move")
     def toFairySF = sys.error("Can't make a fairysf move from a chess move")
+    def toOware = sys.error("Can't make a oware move from a chess move")
 
   }
 
@@ -129,6 +131,8 @@ object Move {
     def toDraughts = m
     def toChess = sys.error("Can't make a chess move from a draughts move")
     def toFairySF = sys.error("Can't make a fairysf move from a draughts move")
+    def toOware = sys.error("Can't make a oware move from a chess move")
+
 
   }
 
@@ -173,16 +177,64 @@ object Move {
     def toFairySF = m
     def toChess = sys.error("Can't make a chess move from a fairysf move")
     def toDraughts = sys.error("Can't make a draughts move from a fairysf move")
+    def toOware = sys.error("Can't make a oware move from a chess move")
+
+
+  }
+
+  final case class Oware(m: oware.Move) extends Move(
+    Piece.Oware(m.piece),
+    Pos.Oware(m.orig),
+    Pos.Oware(m.dest),
+    Situation.Oware(m.situationBefore),
+    Board.Oware(m.after),
+    m.capture match {
+      case Some(capture) => Option(List(Pos.Oware(capture)))
+      case None          => None
+    },
+    m.promotion match {
+      case Some(promotion) => Option(Role.OwarePromotableRole(promotion))
+      case None            => None
+    },
+    None,
+    None,
+    false,
+    m.metrics
+  ){
+
+    def situationAfter: Situation = Situation.Oware(m.situationAfter)
+    def finalizeAfter(finalSquare: Boolean = false): Board = m.finalizeAfter
+
+    def toUci: Uci.Move = Uci.OwareMove(m.toUci)
+
+    def toShortUci: Uci.Move =
+      Uci.Move(
+        GameLogic.Oware(),
+        orig,
+        dest,
+        promotion,
+        if (capture.isDefined) capture.get.takeRight(1).some else None
+      )
+
+    val unwrap = m
+    def toFairySF = sys.error("Can't make a fairysf move from a oware move")
+    def toChess = sys.error("Can't make a chess move from a oware move")
+    def toDraughts = sys.error("Can't make a draughts move from a oware move")
+    def toOware = m
+
 
   }
 
   def wrap(m: chess.Move): Move = Move.Chess(m)
   def wrap(m: draughts.Move): Move = Move.Draughts(m)
   def wrap(m: fairysf.Move): Move = Move.FairySF(m)
+  def wrap(m: oware.Move): Move = Move.Oware(m)
+
 
   def toChess(moveOrDrop: MoveOrDrop): chess.MoveOrDrop = moveOrDrop.left.map(_.toChess).right.map(_.toChess)
   //probably not type safe
   def toDraughts(moveOrDrop: MoveOrDrop): draughts.Move = moveOrDrop.left.map(_.toDraughts).left.get
   def toFairySF(moveOrDrop: MoveOrDrop): fairysf.MoveOrDrop = moveOrDrop.left.map(_.toFairySF).right.map(_.toFairySF)
+  def toOware(moveOrDrop: MoveOrDrop): oware.Move = moveOrDrop.left.map(_.toOware).left.get
 
 }

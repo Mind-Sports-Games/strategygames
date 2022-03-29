@@ -45,9 +45,16 @@ object History {
     halfMoveClock = h.halfMoveClock
   )
 
+  final case class Oware(h: oware.History) extends History(
+    lastMove = h.lastMove.map(Uci.wrap),
+    positionHashes = h.positionHashes,
+    halfMoveClock = h.halfMoveClock
+  )
+
   implicit def chessHistory(h: chess.History) = Chess(h)
   implicit def draughtsHistory(h: draughts.DraughtsHistory) = Draughts(h)
   implicit def fairysfHistory(h: fairysf.History) = FairySF(h)
+  implicit def owareHistory(h: oware.History) = Oware(h)
 
   //lila
   def apply(
@@ -84,6 +91,12 @@ object History {
     case GameLogic.FairySF()
       => FairySF(fairysf.History(
         lastMove = lastMove.map(lm => lm.toFairySF),
+        positionHashes = positionHashes,
+        halfMoveClock = halfMoveClock
+      ))
+    case GameLogic.Oware()
+      => Oware(oware.History(
+        lastMove = lastMove.map(lm => lm.toOware),
         positionHashes = positionHashes,
         halfMoveClock = halfMoveClock
       ))

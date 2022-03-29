@@ -31,6 +31,7 @@ abstract sealed class Board(
   def toChess: chess.Board
   def toDraughts: draughts.Board
   def toFairySF: fairysf.Board
+  def toOware: oware.Board
 }
 
 object Board {
@@ -65,6 +66,7 @@ object Board {
     def toChess = b
     def toDraughts = sys.error("Can't make a draughts board from a chess board")
     def toFairySF = sys.error("Can't make a fairysf board from a chess board")
+    def toOware = sys.error("Can't make a oware board from a chess board")
 
   }
 
@@ -97,6 +99,7 @@ object Board {
     def toDraughts = b
     def toChess = sys.error("Can't make a chess board from a draughts board")
     def toFairySF = sys.error("Can't make a fairysf board from a draughts board")
+    def toOware = sys.error("Can't make a oware board from a draughts board")
 
   }
 
@@ -130,6 +133,40 @@ object Board {
     def toFairySF = b
     def toChess = sys.error("Can't make a chess board from a fairysf board")
     def toDraughts = sys.error("Can't make a draughts board from a fairysf board")
+    def toOware = sys.error("Can't make a oware board from a fairysf board")
+
+  }
+
+  case class Oware(b: oware.Board) extends Board(
+    b.pieces.map{case(pos, piece) => (Pos.Oware(pos), Piece.Oware(piece))},
+    History.Oware(b.history),
+    Variant.Oware(b.variant)
+  ) {
+
+    def withHistory(h: History): Board = h match {
+      case History.Oware(h) => Oware(b.withHistory(h))
+      case _ => sys.error("Not passed Oware objects")
+    }
+
+    def situationOf(player: Player): Situation = Situation.Oware(b.situationOf(player))
+
+    def materialImbalance: Int = b.materialImbalance
+
+    override def toString: String = b.toString
+
+    def copy(history: History, variant: Variant): Board = (history, variant) match {
+      case (History.Oware(history), Variant.Oware(variant)) => Oware(b.copy(history=history, variant=variant))
+      case _ => sys.error("Unable to copy a oware board with non-oware arguments")
+    }
+    def copy(history: History): Board = history match {
+      case History.Oware(history) => Oware(b.copy(history=history))
+      case _ => sys.error("Unable to copy a oware board with non-oware arguments")
+    }
+
+    def toFairySF = sys.error("Can't make a fairysf board from a oware board")
+    def toChess = sys.error("Can't make a chess board from a oware board")
+    def toDraughts = sys.error("Can't make a draughts board from a oware board")
+    def toOware = b
 
   }
 
@@ -150,6 +187,11 @@ object Board {
           pieces.map{case(Pos.FairySF(pos), Piece.FairySF(piece)) => (pos, piece)},
           variant
         ))
+      case (GameLogic.Oware(), Variant.Oware(variant))
+        => Oware(oware.Board.apply(
+          pieces.map{case(Pos.Oware(pos), Piece.Oware(piece)) => (pos, piece)},
+          variant
+        ))
       case _ => sys.error("Mismatched gamelogic types 27")
     }
 
@@ -157,11 +199,13 @@ object Board {
   implicit def chessBoard(b: chess.Board) = Board.Chess(b)
   implicit def draughtsBoard(b: draughts.Board) = Board.Draughts(b)
   implicit def fairysfBoard(b: fairysf.Board) = Board.FairySF(b)
+  implicit def owareBoard(b: oware.Board) = Board.Oware(b)
 
   def init(lib: GameLogic, variant: Variant): Board = (lib, variant) match {
     case (GameLogic.Draughts(), Variant.Draughts(variant)) => Draughts(draughts.Board.init(variant))
     case (GameLogic.Chess(), Variant.Chess(variant))       => Chess(chess.Board.init(variant))
     case (GameLogic.Chess(), Variant.FairySF(variant))     => FairySF(fairysf.Board.init(variant))
+    case (GameLogic.Oware(), Variant.Oware(variant))     => Oware(oware.Board.init(variant))
     case _ => sys.error("Mismatched gamelogic types 28")
   }
 

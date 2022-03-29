@@ -13,6 +13,7 @@ object Forsyth {
     case GameLogic.Draughts() => FEN.Draughts(draughts.format.Forsyth.initial)
     case GameLogic.Chess()    => FEN.Chess(chess.format.Forsyth.initial)
     case GameLogic.FairySF()  => FEN.FairySF(fairysf.format.Forsyth.initial)
+    case GameLogic.Oware()    => FEN.Oware(oware.format.Forsyth.initial)
   }
 
   def <<@(lib: GameLogic, variant: Variant, fen: FEN): Option[Situation] =
@@ -23,6 +24,8 @@ object Forsyth {
         => chess.format.Forsyth.<<@(variant, fen).map(Situation.Chess)
       case (GameLogic.FairySF(), Variant.FairySF(variant), FEN.FairySF(fen))
         => fairysf.format.Forsyth.<<@(variant, fen).map(Situation.FairySF)
+      case (GameLogic.Oware(), Variant.Oware(variant), FEN.Oware(fen))
+        => oware.format.Forsyth.<<@(variant, fen).map(Situation.Oware)
       case _ => sys.error("Mismatched gamelogic types 14")
   }
 
@@ -33,6 +36,8 @@ object Forsyth {
       => chess.format.Forsyth.<<(fen).map(Situation.Chess)
     case (GameLogic.FairySF(), FEN.FairySF(fen))
       => fairysf.format.Forsyth.<<(fen).map(Situation.FairySF)
+    case (GameLogic.Oware(), FEN.Oware(fen))
+      => oware.format.Forsyth.<<(fen).map(Situation.Oware)
     case _ => sys.error("Mismatched gamelogic types 15")
   }
 
@@ -56,6 +61,10 @@ object Forsyth {
         => fairysf.format.Forsyth.<<<@(variant, fen).map(
           sp => SituationPlus(Situation.FairySF(sp.situation), sp.fullMoveNumber)
         )
+      case (GameLogic.Oware(), Variant.Oware(variant), FEN.Oware(fen))
+        => oware.format.Forsyth.<<<@(variant, fen).map(
+          sp => SituationPlus(Situation.Oware(sp.situation), sp.fullMoveNumber)
+        )
       case _ => sys.error("Mismatched gamelogic types 16")
   }
 
@@ -68,6 +77,9 @@ object Forsyth {
     )
     case (GameLogic.FairySF(), FEN.FairySF(fen))   => fairysf.format.Forsyth.<<<(fen).map(
       sp => SituationPlus(Situation.FairySF(sp.situation), sp.fullMoveNumber)
+    )
+    case (GameLogic.Oware(), FEN.Oware(fen))   => oware.format.Forsyth.<<<(fen).map(
+      sp => SituationPlus(Situation.Oware(sp.situation), sp.fullMoveNumber)
     )
     case _ => sys.error("Mismatched gamelogic types 17")
   }
@@ -87,6 +99,10 @@ object Forsyth {
       => FEN.FairySF(fairysf.format.Forsyth.>>(
         fairysf.format.Forsyth.SituationPlus(situation, parsed.fullMoveNumber)
       ))
+    case (GameLogic.Oware(), Situation.Oware(situation))
+      => FEN.Oware(oware.format.Forsyth.>>(
+        oware.format.Forsyth.SituationPlus(situation, parsed.fullMoveNumber)
+      ))
     case _ => sys.error("Mismatched gamelogic types 19")
   }
 
@@ -97,6 +113,8 @@ object Forsyth {
       => FEN.Chess(chess.format.Forsyth.>>(game))
     case (GameLogic.FairySF(), Game.FairySF(game))
       => FEN.FairySF(fairysf.format.Forsyth.>>(game))
+    case (GameLogic.Oware(), Game.Oware(game))
+      => FEN.Oware(oware.format.Forsyth.>>(game))
     case _ => sys.error("Mismatched gamelogic types 20")
   }
 
@@ -108,6 +126,8 @@ object Forsyth {
         => chess.format.Forsyth.exportBoard(board)
       case (GameLogic.FairySF(), Board.FairySF(board))
         => fairysf.format.Forsyth.exportBoard(board)
+      case (GameLogic.Oware(), Board.Oware(board))
+        => oware.format.Forsyth.exportBoard(board)
       case _ => sys.error("Mismatched gamelogic types 21")
   }
 
@@ -122,6 +142,8 @@ object Forsyth {
         => chess.format.Forsyth.boardAndPlayer(board, turnPlayer)
       case (GameLogic.FairySF(), Board.FairySF(board))
         => fairysf.format.Forsyth.boardAndPlayer(board, turnPlayer)
+      case (GameLogic.Oware(), Board.Oware(board))
+        => oware.format.Forsyth.boardAndPlayer(board, turnPlayer)
       case _ => sys.error("Mismatched gamelogic types 22")
   }
 

@@ -5,6 +5,7 @@ import strategygames.format.pgn.Tags
 import strategygames.chess.format.pgn.{ Reader => ChessReader }
 import strategygames.draughts.format.pdn.{ Reader => DraughtsReader }
 import strategygames.fairysf.format.pgn.{ Reader => FairySFReader }
+import strategygames.oware.format.pgn.{ Reader => OwareReader }
 
 import cats.data.Validated
 
@@ -33,6 +34,13 @@ object Reader {
     case class FairySFIncomplete(replay: fairysf.Replay, failure: String) extends Result {
       def valid = Validated.invalid(failure)
     }
+    case class OwareComplete(replay: oware.Replay) extends Result {
+      def valid = Validated.valid(Replay.Oware(replay))
+    }
+    case class OwareIncomplete(replay: oware.Replay, failure: String) extends Result {
+      def valid = Validated.invalid(failure)
+    }
+
 
     def wrap(result: ChessReader.Result) = result match {
       case ChessReader.Result.Complete(replay)            => Result.ChessComplete(replay)
@@ -48,6 +56,11 @@ object Reader {
       case FairySFReader.Result.Complete(replay)            => Result.FairySFComplete(replay)
       case FairySFReader.Result.Incomplete(replay, failure) => Result.FairySFIncomplete(replay, failure)
     }
+
+    def wrap(result: OwareReader.Result) = result match {
+      case OwareReader.Result.Complete(replay)            => Result.OwareComplete(replay)
+      case OwareReader.Result.Incomplete(replay, failure) => Result.OwareIncomplete(replay, failure)
+    }
   }
 
   def fullWithSans(
@@ -61,6 +74,7 @@ object Reader {
       case GameLogic.Chess()    => ChessReader.fullWithSans(pgn, op, tags).map(Result.wrap)
       case GameLogic.Draughts() => DraughtsReader.fullWithSans(pgn, op, tags, iteratedCapts).map(Result.wrap)
       case GameLogic.FairySF()  => FairySFReader.fullWithSans(pgn, op, tags).map(Result.wrap)
+      case GameLogic.Oware()    => OwareReader.fullWithSans(pgn, op, tags).map(Result.wrap)
     }
 
   def movesWithSans(
@@ -78,6 +92,9 @@ object Reader {
       case GameLogic.FairySF() =>
         //FairySFReader.movesWithSans(moveStrs, op, tags).map(Result.wrap)
         sys.error("Sans not implemented for fairysf")
+      case GameLogic.Oware() =>
+        //FairySFReader.movesWithSans(moveStrs, op, tags).map(Result.wrap)
+        sys.error("Sans not implemented for oware")
     }
 
   def movesWithPgns(
@@ -91,6 +108,8 @@ object Reader {
       case GameLogic.Draughts() => sys.error("movesWithPgns not implemented for draughts")
       case GameLogic.FairySF() =>
         FairySFReader.movesWithPgns(moveStrs, op, tags).map(Result.wrap)
+      case GameLogic.Oware() =>
+        OwareReader.movesWithPgns(moveStrs, op, tags).map(Result.wrap)
     }
 
 }

@@ -65,6 +65,7 @@ sealed abstract class Situation(val board: Board, val player: Player) {
   def toChess: chess.Situation
   def toDraughts: draughts.Situation
   def toFairySF: fairysf.Situation
+  def toOware: oware.Situation
 
 }
 
@@ -146,6 +147,7 @@ object Situation {
     def toChess    = s
     def toDraughts = sys.error("Can't make draughts situation from chess situation")
     def toFairySF  = sys.error("Can't make fairysf situation from chess situation")
+    def toOware  = sys.error("Can't make oware situation from chess situation")
   }
 
   final case class Draughts(s: draughts.Situation)
@@ -246,6 +248,7 @@ object Situation {
     def toDraughts = s
     def toChess    = sys.error("Can't make chess situation from draughts situation")
     def toFairySF  = sys.error("Can't make fairysf situation from draughts situation")
+    def toOware  = sys.error("Can't make oware situation from draughts situation")
 
   }
 
@@ -329,12 +332,86 @@ object Situation {
     def toFairySF  = s
     def toChess    = sys.error("Can't make chess situation from fairysf situation")
     def toDraughts = sys.error("Can't make draughts situation from fairysf situation")
+    def toOware  = sys.error("Can't make oware situation from fairy situation")
+  }
+
+
+  final case class Oware(s: oware.Situation)
+      extends Situation(
+        Board.Oware(s.board),
+        s.player
+      ) {
+
+    lazy val moves: Map[Pos, List[Move]] = s.moves.map { case (p: oware.Pos, l: List[oware.Move]) =>
+      (Pos.Oware(p), l.map(Move.Oware))
+    }
+
+    lazy val check: Boolean = s.check
+
+    def checkSquare = s.checkSquare.map(Pos.Oware)
+
+    def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
+
+    def threefoldRepetition: Boolean = s.threefoldRepetition
+
+    override lazy val perpetualPossible: Boolean = s.perpetualPossible
+
+    def end: Boolean = s.end
+
+    def winner: Option[Player] = s.winner
+
+    lazy val destinations: Map[Pos, List[Pos]] = s.destinations.map {
+      case (p: oware.Pos, l: List[oware.Pos]) => (Pos.Oware(p), l.map(Pos.Oware))
+    }
+
+    def playable(strict: Boolean): Boolean = s.playable(strict)
+
+    val status: Option[Status] = s.status
+
+    def move(
+        from: Pos,
+        to: Pos,
+        promotion: Option[PromotableRole] = None,
+        finalSquare: Boolean = false,
+        forbiddenUci: Option[List[String]] = None,
+        captures: Option[List[Pos]] = None,
+        partialCaptures: Boolean = false
+    ): Validated[String, Move] = (from, to) match {
+      case (Pos.Oware(from), Pos.Oware(to)) =>
+        s.move(from, to, promotion.map(_.toOware)).toEither.map(m => Move.Oware(m)).toValidated
+      case _ => sys.error("Not passed Oware objects")
+    }
+
+    def move(uci: Uci.Move): Validated[String, Move] = uci match {
+      case Uci.OwareMove(uci) => s.move(uci).toEither.map(m => Move.Oware(m)).toValidated
+      case _                    => sys.error("Not passed Oware objects")
+    }
+
+    def withVariant(variant: Variant): Situation = variant match {
+      case Variant.Oware(variant) => Oware(s.withVariant(variant))
+      case _                        => sys.error("Not passed Oware objects")
+    }
+
+    def unary_! : Situation = Oware(s.unary_!)
+
+    def copy(board: Board): Situation = Oware(board match {
+      case Board.Oware(board)   => s.copy(board)
+      case _                    => sys.error("Can't copy a oware situation with a non-oware board")
+    })
+
+    def gameLogic: GameLogic = GameLogic.Oware()
+
+    def toFairySF  = sys.error("Can't make fairysf situation from oware situation")
+    def toChess    = sys.error("Can't make chess situation from oware situation")
+    def toDraughts = sys.error("Can't make draughts situation from oware situation")
+    def toOware    = s
   }
 
   def apply(lib: GameLogic, board: Board, player: Player): Situation = (lib, board) match {
     case (GameLogic.Draughts(), Board.Draughts(board)) => Draughts(draughts.Situation(board, player))
     case (GameLogic.Chess(), Board.Chess(board))       => Chess(chess.Situation(board, player))
     case (GameLogic.FairySF(), Board.FairySF(board))   => FairySF(fairysf.Situation(board, player))
+    case (GameLogic.Oware(), Board.Oware(board))       => Oware(oware.Situation(board, player))
     case _                                             => sys.error("Mismatched gamelogic types 3")
   }
 
@@ -342,11 +419,13 @@ object Situation {
     case (GameLogic.Draughts(), Variant.Draughts(variant)) => Draughts(draughts.Situation.apply(variant))
     case (GameLogic.Chess(), Variant.Chess(variant))       => Chess(chess.Situation.apply(variant))
     case (GameLogic.FairySF(), Variant.FairySF(variant))   => FairySF(fairysf.Situation.apply(variant))
+    case (GameLogic.Oware(), Variant.Oware(variant))       => Oware(oware.Situation.apply(variant))
     case _                                                 => sys.error("Mismatched gamelogic types 4")
   }
 
   def wrap(s: chess.Situation)    = Chess(s)
   def wrap(s: draughts.Situation) = Draughts(s)
   def wrap(s: fairysf.Situation)  = FairySF(s)
+  def wrap(s: oware.Situation)    = Oware(s)
 
 }

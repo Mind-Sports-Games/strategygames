@@ -20,6 +20,7 @@ abstract class Variant(
   def toChess: chess.variant.Variant
   def toDraughts: draughts.variant.Variant
   def toFairySF: fairysf.variant.Variant
+  def toOware: oware.variant.Variant
 
   def pieces: Map[Pos, Piece]
 
@@ -55,6 +56,8 @@ abstract class Variant(
   def minishogi: Boolean
   def minixiangqi: Boolean
   def flipello: Boolean
+
+  def oware: Boolean
 
   def standardVariant: Boolean
   def fromPositionVariant: Boolean
@@ -140,6 +143,7 @@ object Variant {
     def toChess: chess.variant.Variant = v
     def toDraughts                     = sys.error("Can't convert chess to draughts")
     def toFairySF                      = sys.error("Can't convert chess to fairysf")
+    def toOware                      = sys.error("Can't convert chess to oware")
 
     def pieces: Map[Pos, Piece] =
       v.pieces.map { case (pos, piece) => (Pos.Chess(pos), Piece.Chess(piece)) }
@@ -174,6 +178,8 @@ object Variant {
     def minishogi: Boolean   = false
     def minixiangqi: Boolean = false
     def flipello: Boolean    = false
+    
+    def oware: Boolean       = false
 
     def standardVariant: Boolean     = v.standard
     def fromPositionVariant: Boolean = v.fromPosition
@@ -267,6 +273,7 @@ object Variant {
     def toChess    = sys.error("Can't convert draughts to chess")
     def toDraughts = v
     def toFairySF  = sys.error("Can't convert draughts to fairysf")
+    def toOware    = sys.error("Can't convert draughts to oware")
 
     def pieces: Map[Pos, Piece] =
       v.pieces.map { case (pos, piece) => (Pos.Draughts(pos), Piece.Draughts(piece)) }
@@ -301,6 +308,8 @@ object Variant {
     def minishogi: Boolean   = false
     def minixiangqi: Boolean = false
     def flipello: Boolean    = false
+
+    def oware: Boolean       = false
 
     def standardVariant: Boolean     = v.standard
     def fromPositionVariant: Boolean = v.fromPosition
@@ -393,7 +402,7 @@ object Variant {
     def toChess    = sys.error("Can't convert fairysf to chess")
     def toDraughts = sys.error("Can't convert fairysf to draughts")
     def toFairySF  = v
-
+    def toOware    = sys.error("Can't convert fairysf to oware")
     def pieces: Map[Pos, Piece] =
       v.pieces.map { case (pos, piece) => (Pos.FairySF(pos), Piece.FairySF(piece)) }
 
@@ -427,6 +436,8 @@ object Variant {
     def minishogi: Boolean   = v.minishogi
     def minixiangqi: Boolean = v.minixiangqi
     def flipello: Boolean    = v.flipello
+
+    def oware: Boolean       = false
 
     def standardVariant: Boolean     = standard || draughtsStandard
     def fromPositionVariant: Boolean = fromPosition || draughtsFromPosition
@@ -507,10 +518,140 @@ object Variant {
     def playerColors: Map[Player, String] = gameFamily.playerColors
   }
 
+
+  case class Oware(v: oware.variant.Variant)
+      extends Variant(
+        id = v.id,
+        key = v.key,
+        name = v.name,
+        standardInitialPosition = v.standardInitialPosition
+      ) {
+
+    def toChess    = sys.error("Can't convert oware to chess")
+    def toDraughts = sys.error("Can't convert oware to draughts")
+    def toFairySF  = sys.error("Can't convert oware to fairysf")
+    def toOware    = v
+    def pieces: Map[Pos, Piece] =
+      v.pieces.map { case (pos, piece) => (Pos.Oware(pos), Piece.Oware(piece)) }
+
+    def standard: Boolean      = false
+    def chess960: Boolean      = false
+    def fromPosition: Boolean  = false
+    def kingOfTheHill: Boolean = false
+    def threeCheck: Boolean    = false
+    def fiveCheck: Boolean     = false
+    def antichess: Boolean     = false
+    def atomic: Boolean        = false
+    def horde: Boolean         = false
+    def racingKings: Boolean   = false
+    def crazyhouse: Boolean    = false
+    def linesOfAction: Boolean = false
+    def noCastling: Boolean    = false
+    def scrambledEggs: Boolean = false
+
+    def draughtsStandard: Boolean     = false
+    def frisian: Boolean              = false
+    def frysk: Boolean                = false
+    def antidraughts: Boolean         = false
+    def breakthrough: Boolean         = false
+    def russian: Boolean              = false
+    def brazilian: Boolean            = false
+    def pool: Boolean                 = false
+    def draughtsFromPosition: Boolean = false
+
+    def shogi: Boolean       = false
+    def xiangqi: Boolean     = false
+    def minishogi: Boolean   = false
+    def minixiangqi: Boolean = false
+    def flipello: Boolean    = false
+
+    def oware: Boolean       = v.oware
+
+    def standardVariant: Boolean     = standard || draughtsStandard
+    def fromPositionVariant: Boolean = fromPosition || draughtsFromPosition
+    def frisianVariant: Boolean      = false
+    def draughts64Variant: Boolean   = false
+
+    def exotic: Boolean = v.exotic
+
+    def baseVariant: Boolean = v.baseVariant
+    def fenVariant: Boolean  = v.fenVariant
+    def aiVariant: Boolean   = v.aiVariant
+
+    def p1IsBetterVariant: Boolean = v.p1IsBetterVariant
+    def blindModeVariant: Boolean  = v.blindModeVariant
+
+    def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
+
+    def dropsVariant: Boolean     = false
+    def onlyDropsVariant: Boolean = false
+
+    def perfId: Int    = v.perfId
+    def perfIcon: Char = v.perfIcon
+
+    def initialFen: FEN     = FEN.Oware(v.initialFen)
+    def startPlayer: Player = v.startPlayer
+
+    def isValidPromotion(promotion: Option[PromotableRole]): Boolean = promotion match {
+      case Some(Role.OwarePromotableRole(pr)) => v.isValidPromotion(pr.some)
+      case None                                 => v.isValidPromotion(None)
+      case _                                    => sys.error("Not passed Oware objects")
+    }
+
+    def checkmate(situation: Situation): Boolean = situation match {
+      case Situation.Oware(situation)   => v.checkmate(situation)
+      case _                            => sys.error("Not passed Oware objects")
+    }
+
+    def stalemateIsDraw: Boolean = v.stalemateIsDraw
+
+    def winner(situation: Situation): Option[Player] = situation match {
+      case Situation.Oware(situation) => v.winner(situation)
+      case _                            => sys.error("Not passed Oware objects")
+    }
+
+    @nowarn def specialEnd(situation: Situation): Boolean = situation match {
+      case Situation.Oware(situation) => v.specialEnd(situation)
+      case _                            => sys.error("Not passed Oware objects")
+    }
+
+    @nowarn def specialDraw(situation: Situation): Boolean = situation match {
+      case Situation.Oware(situation) => v.specialDraw(situation)
+      case _                            => sys.error("Not passed Oware objects")
+    }
+
+    def hasMoveEffects: Boolean = v.hasMoveEffects
+
+    def addVariantEffect(move: Move): Move = move match {
+      case Move.Oware(move) => Move.Oware(v.addVariantEffect(move))
+      case _                  => sys.error("Not passed Oware objects")
+    }
+    def valid(board: Board, strict: Boolean): Boolean = board match {
+      case Board.Oware(board) => v.valid(board, strict)
+      case _                    => sys.error("Not passed Oware objects")
+    }
+
+    val roles: List[Role] = v.roles.map(Role.OwareRole)
+
+    override def equals(that: Any): Boolean = that match {
+      case Oware(v2) => v2.equals(v)
+      case _           => false
+    }
+
+    def chessVariant: chess.variant.Variant = sys.error("Unimplemented for Oware")
+    def gameLogic: GameLogic                = GameLogic.Oware()
+    def gameFamily: GameFamily              = v.gameFamily
+
+    def playerNames: Map[Player, String]  = gameFamily.playerNames
+    def playerColors: Map[Player, String] = gameFamily.playerColors
+  }
+
+
   def all: List[Variant] =
     chess.variant.Variant.all.map(Chess) :::
       draughts.variant.Variant.all.map(Draughts) :::
-      fairysf.variant.Variant.all.map(FairySF)
+      fairysf.variant.Variant.all.map(FairySF) :::
+      oware.variant.Variant.all.map(Oware)  
 
   def byId = all map { v => (v.id, v) } toMap
 
@@ -520,6 +661,7 @@ object Variant {
     case GameLogic.Draughts() => draughts.variant.Variant.all.map(Draughts)
     case GameLogic.Chess()    => chess.variant.Variant.all.map(Chess)
     case GameLogic.FairySF()  => fairysf.variant.Variant.all.map(FairySF)
+    case GameLogic.Oware()    => oware.variant.Variant.all.map(Oware)
   }
 
   def byId(lib: GameLogic) = all(lib) map { v =>
@@ -534,6 +676,7 @@ object Variant {
     case GameLogic.Draughts() => Draughts(draughts.variant.Variant.default)
     case GameLogic.Chess()    => Chess(chess.variant.Variant.default)
     case GameLogic.FairySF()  => FairySF(fairysf.variant.Variant.default)
+    case GameLogic.Oware()    => Oware(oware.variant.Variant.default)
   }
 
   def apply(lib: GameLogic, id: Int): Option[Variant]     = byId(lib) get id
@@ -552,29 +695,34 @@ object Variant {
     case GameLogic.Draughts() => draughts.variant.Variant.openingSensibleVariants.map(Draughts)
     case GameLogic.Chess()    => chess.variant.Variant.openingSensibleVariants.map(Chess)
     case GameLogic.FairySF()  => fairysf.variant.Variant.openingSensibleVariants.map(FairySF)
+    case GameLogic.Oware()    => oware.variant.Variant.openingSensibleVariants.map(Oware)
   }
 
   def divisionSensibleVariants(lib: GameLogic): Set[Variant] = lib match {
     case GameLogic.Draughts() => draughts.variant.Variant.divisionSensibleVariants.map(Draughts)
     case GameLogic.Chess()    => chess.variant.Variant.divisionSensibleVariants.map(Chess)
     case GameLogic.FairySF()  => fairysf.variant.Variant.divisionSensibleVariants.map(FairySF)
+    case GameLogic.Oware()    => oware.variant.Variant.divisionSensibleVariants.map(Oware)
   }
 
   def libStandard(lib: GameLogic): Variant = lib match {
     case GameLogic.Draughts() => Variant.Draughts(draughts.variant.Standard)
     case GameLogic.Chess()    => Variant.Chess(chess.variant.Standard)
     case GameLogic.FairySF()  => Variant.FairySF(fairysf.variant.Shogi)
+    case GameLogic.Oware()    => Variant.Oware(oware.variant.Standard)
   }
 
   def libFromPosition(lib: GameLogic): Variant = lib match {
     case GameLogic.Draughts() => Variant.Draughts(draughts.variant.FromPosition)
     case GameLogic.Chess()    => Variant.Chess(chess.variant.FromPosition)
-    //TODO: Decide how we do from position for FairySF
+    //TODO: Decide how we do from position for FairySF and Oware
     case GameLogic.FairySF() => Variant.FairySF(fairysf.variant.Shogi)
+    case GameLogic.Oware()   => Variant.Oware(oware.variant.FromPosition)
   }
 
   def wrap(v: chess.variant.Variant)    = Chess(v)
   def wrap(v: draughts.variant.Variant) = Draughts(v)
   def wrap(v: fairysf.variant.Variant)  = FairySF(v)
+  def wrap(v: oware.variant.Variant)    = Oware(v)
 
 }

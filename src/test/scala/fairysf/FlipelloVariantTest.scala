@@ -18,3 +18,4 @@ class FlipelloVariantTest extends FairySFTest {
     }
 
 }
+}
