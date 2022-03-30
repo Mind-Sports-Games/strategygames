@@ -26,18 +26,18 @@ object GameLogic {
     def name = "Fairy Stockfish"
   }
 
-  final case class Oware() extends GameLogic {
+  final case class Mancala() extends GameLogic {
     def id   = 3
-    def name = "Oware"
+    def name = "Mancala"
   }
 
-  def all: List[GameLogic] = List(Chess(), Draughts(), FairySF(), Oware())
+  def all: List[GameLogic] = List(Chess(), Draughts(), FairySF(), Mancala())
 
   // TODO: I'm sure there is a better scala way of doing this
   def apply(id: Int): GameLogic = id match {
     case 1 => Draughts()
     case 2 => FairySF()
-    case 3 => Oware()
+    case 3 => Mancala()
     case _ => Chess()
   }
 }
@@ -263,18 +263,18 @@ object GameFamily {
     def playerColors      = Map(P1 -> "black", P2 -> "white")
   }
 
-  final case class Oware() extends GameFamily {
+  final case class Mancala() extends GameFamily {
     def id             = 6
-    def name           = "Oware"
-    def key            = "oware"
-    def gameLogic      = GameLogic.Oware()
+    def name           = "Mancala"
+    def key            = "mancala"
+    def gameLogic      = GameLogic.Mancala()
     def aiEnabled      = false
-    def defaultVariant = Variant.Oware(strategygames.oware.variant.Oware)
-    def variants       = Variant.all(GameLogic.Oware()).filter(_.gameFamily == this)
+    def defaultVariant = Variant.Mancala(strategygames.mancala.variant.Oware)
+    def variants       = Variant.all(GameLogic.Mancala()).filter(_.gameFamily == this)
     def displayPiece   = "wE"
     def pieceSetThemes =
-      List("blue_oware", "green_oware", "stone_oware", "purple_oware", "water_oware")
-    def pieceSetDefault   = "stone_oware"
+      List("blue_mancala", "green_mancala", "stone_mancala", "purple_mancala", "water_mancala")
+    def pieceSetDefault   = "stone_mancala"
     def boardThemes       = List("light-wood", "dark-wood")
     def boardThemeDefault = "light-wood"
     def playerNames       = Map(P1 -> "White", P2 -> "Black")
@@ -288,7 +288,7 @@ object GameFamily {
     Shogi(),
     Xiangqi(),
     Flipello(),
-    Oware()
+    Mancala()
   )
 
   // TODO: I'm sure there is a better scala way of doing this
@@ -298,7 +298,7 @@ object GameFamily {
     case 3 => Shogi()
     case 4 => Xiangqi()
     case 5 => Flipello()
-    case 6 => Oware()
+    case 6 => Mancala()
     case _ => Chess()
   }
 

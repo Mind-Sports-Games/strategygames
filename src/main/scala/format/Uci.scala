@@ -15,6 +15,7 @@ sealed trait Uci {
   def toChess: chess.format.Uci
   def toDraughts: draughts.format.Uci
   def toFairySF: fairysf.format.Uci
+  def toMancala: mancala.format.Uci
 
 }
 
@@ -30,8 +31,8 @@ object Uci {
   sealed trait FairySF {
     def unwrap: fairysf.format.Uci
   }
-  sealed trait Oware {
-    def unwrap: oware.format.Uci
+  sealed trait Mancala {
+    def unwrap: mancala.format.Uci
   }
 
   abstract sealed class Move(
@@ -63,7 +64,7 @@ object Uci {
     def toChess = m
     def toDraughts = sys.error("Can't make a draughts UCI from a chess UCI")
     def toFairySF = sys.error("Can't make a fairysf UCI from a chess UCI")
-    def toOware = sys.error("Can't make a oware UCI from a chess UCI")
+    def toMancala = sys.error("Can't make a mancala UCI from a chess UCI")
   }
 
   final case class DraughtsMove(m: draughts.format.Uci.Move) extends Move(
@@ -80,7 +81,7 @@ object Uci {
     def toDraughts = m
     def toChess = sys.error("Can't make a chess UCI from a draughts UCI")
     def toFairySF = sys.error("Can't make a fairysf UCI from a draughts UCI")
-    def toOware = sys.error("Can't make a oware UCI from a draughts UCI")
+    def toMancala = sys.error("Can't make a mancala UCI from a draughts UCI")
   }
 
   final case class FairySFMove(m: fairysf.format.Uci.Move) extends Move(
@@ -93,20 +94,20 @@ object Uci {
     def toChess = sys.error("Can't make a chess UCI from a fairysf UCI")
     def toDraughts = sys.error("Can't make a draughts UCI from a fairysf UCI")
     def toFairySF = m
-    def toOware = sys.error("Can't make a oware UCI from a fairy UCI")
+    def toMancala = sys.error("Can't make a mancala UCI from a fairy UCI")
   }
 
-  final case class OwareMove(m: oware.format.Uci.Move) extends Move(
-    Pos.Oware(m.orig),
-    Pos.Oware(m.dest),
-    m.promotion.map(Role.OwarePromotableRole)
-  ) with Oware {
+  final case class MancalaMove(m: mancala.format.Uci.Move) extends Move(
+    Pos.Mancala(m.orig),
+    Pos.Mancala(m.dest),
+    None
+  ) with Mancala {
     def uci = m.uci
     val unwrap = m
-    def toChess = sys.error("Can't make a chess UCI from a oware UCI")
-    def toDraughts = sys.error("Can't make a draughts UCI from a oware UCI")
-    def toFairySF = sys.error("Can't make a fairysf UCI from a oware UCI")
-    def toOware = m
+    def toChess = sys.error("Can't make a chess UCI from a mancala UCI")
+    def toDraughts = sys.error("Can't make a draughts UCI from a mancala UCI")
+    def toFairySF = sys.error("Can't make a fairysf UCI from a mancala UCI")
+    def toMancala = m
   }
 
   abstract sealed class Drop(
@@ -126,7 +127,7 @@ object Uci {
     def toChess = d
     def toDraughts = sys.error("Can't make a draughts UCI from a chess UCI")
     def toFairySF = sys.error("Can't make a fairysf UCI from a chess UCI")
-    def toOware = sys.error("Can't make a oware UCI from a chess UCI")
+    def toMancala = sys.error("Can't make a mancala UCI from a chess UCI")
   }
 
   final case class FairySFDrop(d: fairysf.format.Uci.Drop) extends Drop(
@@ -139,7 +140,7 @@ object Uci {
     def toChess = sys.error("Can't make a chess UCI from a fairysf UCI")
     def toDraughts = sys.error("Can't make a draughts UCI from a fairysf UCI")
     def toFairySF = d
-    def toOware = sys.error("Can't make a oware UCI from a fairysf UCI")
+    def toMancala = sys.error("Can't make a mancala UCI from a fairysf UCI")
   }
 
   def wrap(uci: chess.format.Uci): Uci = uci match {
@@ -156,8 +157,8 @@ object Uci {
     case d: fairysf.format.Uci.Drop => FairySFDrop(d)
   }
 
-  def wrap(uci: oware.format.Uci): Uci = uci match {
-    case m: oware.format.Uci.Move => OwareMove(m)
+  def wrap(uci: mancala.format.Uci): Uci = uci match {
+    case m: mancala.format.Uci.Move => MancalaMove(m)
   }
 
   object Move {
@@ -189,10 +190,10 @@ object Uci {
             fairysf.format.Uci.Move.apply(
               orig, dest, promotion.map(_.toFairySF)
             ))
-        case (GameLogic.Oware(), Pos.Oware(orig), Pos.Oware(dest)) =>
-          OwareMove(
-            oware.format.Uci.Move.apply(
-              orig, dest, promotion.map(_.toOware)
+        case (GameLogic.Mancala(), Pos.Mancala(orig), Pos.Mancala(dest)) =>
+          MancalaMove(
+            mancala.format.Uci.Move.apply(
+              orig, dest, promotion.map(_.toMancala)
             ))
         case _ => sys.error("Mismatched gamelogic types 23")
       }
@@ -201,14 +202,14 @@ object Uci {
       case GameLogic.Draughts() => draughts.format.Uci.Move.apply(move).map(DraughtsMove)
       case GameLogic.Chess()    => chess.format.Uci.Move.apply(move).map(ChessMove)
       case GameLogic.FairySF()  => fairysf.format.Uci.Move.apply(gf, move).map(FairySFMove)
-      case GameLogic.Oware()    => oware.format.Uci.Move.apply(move).map(OwareMove)
+      case GameLogic.Mancala()  => mancala.format.Uci.Move.apply(move).map(MancalaMove)
     }
 
     def piotr(lib: GameLogic, gf: GameFamily, move: String): Option[Move] = lib match {
       case GameLogic.Draughts() => draughts.format.Uci.Move.piotr(move).map(DraughtsMove)
       case GameLogic.Chess()    => chess.format.Uci.Move.piotr(move).map(ChessMove)
       case GameLogic.FairySF()  => fairysf.format.Uci.Move.piotr(gf, move).map(FairySFMove)
-      case GameLogic.Oware()    => oware.format.Uci.Move.piotr(move).map(OwareMove)
+      case GameLogic.Mancala()  => mancala.format.Uci.Move.piotr(move).map(MancalaMove)
     }
 
     def fromStrings(lib: GameLogic, gf: GameFamily, origS: String, destS: String, promS: Option[String]): Option[Move] = lib match {
@@ -218,8 +219,8 @@ object Uci {
         => chess.format.Uci.Move.fromStrings(origS, destS, promS).map(ChessMove)
       case GameLogic.FairySF()
         => fairysf.format.Uci.Move.fromStrings(gf, origS, destS, promS).map(FairySFMove)
-      case GameLogic.Oware()
-        => oware.format.Uci.Move.fromStrings(gf, origS, destS, promS).map(OwareMove)
+      case GameLogic.Mancala()
+        => mancala.format.Uci.Move.fromStrings(gf, origS, destS, promS).map(MancalaMove)
     }
   }
 
@@ -228,7 +229,7 @@ object Uci {
     def fromStrings(lib: GameLogic, gf: GameFamily, roleS: String, posS: String): Option[Drop] =
       lib match {
         case GameLogic.Draughts() => None
-        case GameLogic.Oware() => None
+        case GameLogic.Mancala() => None
         case GameLogic.Chess()    =>
           chess.format.Uci.Drop.fromStrings(roleS, posS).map(ChessDrop)
         case GameLogic.FairySF()  =>
@@ -254,7 +255,7 @@ object Uci {
     w.san
   )
 
-  final case class OwareWithSan(w: oware.format.Uci.WithSan) extends WithSan(
+  final case class MancalaWithSan(w: mancala.format.Uci.WithSan) extends WithSan(
     wrap(w.uci),
     w.san
   )
@@ -268,8 +269,8 @@ object Uci {
         => Uci.ChessWithSan(chess.format.Uci.WithSan(u.unwrap, san))
       case (GameLogic.FairySF(), u: Uci.FairySF)
         => Uci.FairySFWithSan(fairysf.format.Uci.WithSan(u.unwrap, san))
-      case (GameLogic.Oware(), u: Uci.Oware)
-        => Uci.OwareWithSan(oware.format.Uci.WithSan(u.unwrap, san))
+      case (GameLogic.Mancala(), u: Uci.Mancala)
+        => Uci.MancalaWithSan(mancala.format.Uci.WithSan(u.unwrap, san))
       case _ => sys.error("Mismatched gamelogic types 24")
     }
 
@@ -283,8 +284,8 @@ object Uci {
         => ChessMove(chess.format.Uci.apply(move))
       case (GameLogic.FairySF(), strategygames.Move.FairySF(move))
         => FairySFMove(fairysf.format.Uci.apply(move))
-      case (GameLogic.Oware(), strategygames.Move.Oware(move))
-        => OwareMove(oware.format.Uci(move))
+      case (GameLogic.Mancala(), strategygames.Move.Mancala(move))
+        => MancalaMove(mancala.format.Uci(move))
       case _ => sys.error("Mismatched gamelogic types 25")
     }
 
@@ -294,21 +295,21 @@ object Uci {
       => ChessDrop(chess.format.Uci.apply(drop))
     case (GameLogic.FairySF(), strategygames.Drop.FairySF(drop))
       => FairySFDrop(fairysf.format.Uci.apply(drop))
-    case (GameLogic.Oware(), _) => sys.error("Drop not implemented for Oware")
+    case (GameLogic.Mancala(), _) => sys.error("Drop not implemented for mancala")
   }
 
   def apply(lib: GameLogic, gf: GameFamily, move: String): Option[Uci] = lib match {
       case GameLogic.Draughts() => draughts.format.Uci.apply(move).map(wrap)
       case GameLogic.Chess()    => chess.format.Uci.apply(move).map(wrap)
       case GameLogic.FairySF()  => fairysf.format.Uci.apply(gf, move).map(wrap)
-      case GameLogic.Oware()    => oware.format.Uci.apply(move).map(wrap)
+      case GameLogic.Mancala()  => mancala.format.Uci.apply(move).map(wrap)
   }
 
   private def piotr(lib: GameLogic, gf: GameFamily, move: String): Option[Uci] = lib match {
       case GameLogic.Draughts() => draughts.format.Uci.piotr(move).map(wrap)
       case GameLogic.Chess()    => chess.format.Uci.piotr(move).map(wrap)
       case GameLogic.FairySF()  => fairysf.format.Uci.piotr(gf, move).map(wrap)
-      case GameLogic.Oware()    => oware.format.Uci.piotr(move).map(wrap)
+      case GameLogic.Mancala()  => mancala.format.Uci.piotr(move).map(wrap)
   }
 
   def readList(lib: GameLogic, gf: GameFamily, moves: String): Option[List[Uci]] =
@@ -334,7 +335,7 @@ object Uci {
         case Uci.DraughtsMove(_) => s"1_${gf.id}_"
         case Uci.FairySFMove(_)  => s"2_${gf.id}_"
         case Uci.FairySFDrop(_)  => s"2_${gf.id}_"
-        case Uci.OwareMove(_)    => s"3_${gf.id}_"
+        case Uci.MancalaMove(_)  => s"3_${gf.id}_"
       }
     } else "") + moves.map(_.piotr) mkString " "
 

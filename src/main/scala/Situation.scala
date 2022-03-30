@@ -65,7 +65,7 @@ sealed abstract class Situation(val board: Board, val player: Player) {
   def toChess: chess.Situation
   def toDraughts: draughts.Situation
   def toFairySF: fairysf.Situation
-  def toOware: oware.Situation
+  def toMancala: mancala.Situation
 
 }
 
@@ -147,7 +147,7 @@ object Situation {
     def toChess    = s
     def toDraughts = sys.error("Can't make draughts situation from chess situation")
     def toFairySF  = sys.error("Can't make fairysf situation from chess situation")
-    def toOware  = sys.error("Can't make oware situation from chess situation")
+    def toMancala  = sys.error("Can't make mancala situation from chess situation")
   }
 
   final case class Draughts(s: draughts.Situation)
@@ -248,7 +248,7 @@ object Situation {
     def toDraughts = s
     def toChess    = sys.error("Can't make chess situation from draughts situation")
     def toFairySF  = sys.error("Can't make fairysf situation from draughts situation")
-    def toOware  = sys.error("Can't make oware situation from draughts situation")
+    def toMancala  = sys.error("Can't make mancala situation from draughts situation")
 
   }
 
@@ -332,37 +332,44 @@ object Situation {
     def toFairySF  = s
     def toChess    = sys.error("Can't make chess situation from fairysf situation")
     def toDraughts = sys.error("Can't make draughts situation from fairysf situation")
-    def toOware  = sys.error("Can't make oware situation from fairy situation")
+    def toMancala  = sys.error("Can't make mancala situation from fairy situation")
   }
 
 
-  final case class Oware(s: oware.Situation)
+  final case class Mancala(s: mancala.Situation)
       extends Situation(
-        Board.Oware(s.board),
+        Board.Mancala(s.board),
         s.player
       ) {
 
-    lazy val moves: Map[Pos, List[Move]] = s.moves.map { case (p: oware.Pos, l: List[oware.Move]) =>
-      (Pos.Oware(p), l.map(Move.Oware))
+    lazy val moves: Map[Pos, List[Move]] = s.moves.map { case (p: mancala.Pos, l: List[mancala.Move]) =>
+      (Pos.Mancala(p), l.map(Move.Mancala))
     }
 
-    lazy val check: Boolean = s.check
+    lazy val check: Boolean = false
 
-    def checkSquare = s.checkSquare.map(Pos.Oware)
+    def checkSquare = None
 
     def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
 
-    def threefoldRepetition: Boolean = s.threefoldRepetition
+    def threefoldRepetition: Boolean = false
 
-    override lazy val perpetualPossible: Boolean = s.perpetualPossible
+    override lazy val perpetualPossible: Boolean = false
 
     def end: Boolean = s.end
 
     def winner: Option[Player] = s.winner
 
     lazy val destinations: Map[Pos, List[Pos]] = s.destinations.map {
-      case (p: oware.Pos, l: List[oware.Pos]) => (Pos.Oware(p), l.map(Pos.Oware))
+      case (p: mancala.Pos, l: List[mancala.Pos]) => (Pos.Mancala(p), l.map(Pos.Mancala))
     }
+
+    def drops: Option[List[Pos]] = None
+
+    def dropsByRole: Option[Map[Role, List[Pos]]] = None
+
+    def drop(role: Role, pos: Pos): Validated[String, Drop] =
+      sys.error("Can't do a Drop for mancala")
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -377,41 +384,41 @@ object Situation {
         captures: Option[List[Pos]] = None,
         partialCaptures: Boolean = false
     ): Validated[String, Move] = (from, to) match {
-      case (Pos.Oware(from), Pos.Oware(to)) =>
-        s.move(from, to, promotion.map(_.toOware)).toEither.map(m => Move.Oware(m)).toValidated
-      case _ => sys.error("Not passed Oware objects")
+      case (Pos.Mancala(from), Pos.Mancala(to)) =>
+        s.move(from, to, promotion.map(_.toMancala)).toEither.map(m => Move.Mancala(m)).toValidated
+      case _ => sys.error("Not passed Mancala objects")
     }
 
     def move(uci: Uci.Move): Validated[String, Move] = uci match {
-      case Uci.OwareMove(uci) => s.move(uci).toEither.map(m => Move.Oware(m)).toValidated
-      case _                    => sys.error("Not passed Oware objects")
+      case Uci.MancalaMove(uci) => s.move(uci).toEither.map(m => Move.Mancala(m)).toValidated
+      case _                    => sys.error("Not passed Mancala objects")
     }
 
     def withVariant(variant: Variant): Situation = variant match {
-      case Variant.Oware(variant) => Oware(s.withVariant(variant))
-      case _                        => sys.error("Not passed Oware objects")
+      case Variant.Mancala(variant) => Mancala(s.withVariant(variant))
+      case _                        => sys.error("Not passed Mancala objects")
     }
 
-    def unary_! : Situation = Oware(s.unary_!)
+    def unary_! : Situation = Mancala(s.unary_!)
 
-    def copy(board: Board): Situation = Oware(board match {
-      case Board.Oware(board)   => s.copy(board)
-      case _                    => sys.error("Can't copy a oware situation with a non-oware board")
+    def copy(board: Board): Situation = Mancala(board match {
+      case Board.Mancala(board)   => s.copy(board)
+      case _                    => sys.error("Can't copy a mancala situation with a non-mancala board")
     })
 
-    def gameLogic: GameLogic = GameLogic.Oware()
+    def gameLogic: GameLogic = GameLogic.Mancala()
 
-    def toFairySF  = sys.error("Can't make fairysf situation from oware situation")
-    def toChess    = sys.error("Can't make chess situation from oware situation")
-    def toDraughts = sys.error("Can't make draughts situation from oware situation")
-    def toOware    = s
+    def toFairySF  = sys.error("Can't make fairysf situation from mancala situation")
+    def toChess    = sys.error("Can't make chess situation from mancala situation")
+    def toDraughts = sys.error("Can't make draughts situation from mancala situation")
+    def toMancala    = s
   }
 
   def apply(lib: GameLogic, board: Board, player: Player): Situation = (lib, board) match {
     case (GameLogic.Draughts(), Board.Draughts(board)) => Draughts(draughts.Situation(board, player))
     case (GameLogic.Chess(), Board.Chess(board))       => Chess(chess.Situation(board, player))
     case (GameLogic.FairySF(), Board.FairySF(board))   => FairySF(fairysf.Situation(board, player))
-    case (GameLogic.Oware(), Board.Oware(board))       => Oware(oware.Situation(board, player))
+    case (GameLogic.Mancala(), Board.Mancala(board))   => Mancala(mancala.Situation(board, player))
     case _                                             => sys.error("Mismatched gamelogic types 3")
   }
 
@@ -419,13 +426,13 @@ object Situation {
     case (GameLogic.Draughts(), Variant.Draughts(variant)) => Draughts(draughts.Situation.apply(variant))
     case (GameLogic.Chess(), Variant.Chess(variant))       => Chess(chess.Situation.apply(variant))
     case (GameLogic.FairySF(), Variant.FairySF(variant))   => FairySF(fairysf.Situation.apply(variant))
-    case (GameLogic.Oware(), Variant.Oware(variant))       => Oware(oware.Situation.apply(variant))
+    case (GameLogic.Mancala(), Variant.Mancala(variant))   => Mancala(mancala.Situation.apply(variant))
     case _                                                 => sys.error("Mismatched gamelogic types 4")
   }
 
   def wrap(s: chess.Situation)    = Chess(s)
   def wrap(s: draughts.Situation) = Draughts(s)
   def wrap(s: fairysf.Situation)  = FairySF(s)
-  def wrap(s: oware.Situation)    = Oware(s)
+  def wrap(s: mancala.Situation)  = Mancala(s)
 
 }

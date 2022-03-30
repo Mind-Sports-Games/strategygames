@@ -45,7 +45,7 @@ object History {
     halfMoveClock = h.halfMoveClock
   )
 
-  final case class Oware(h: oware.History) extends History(
+  final case class Mancala(h: mancala.History) extends History(
     lastMove = h.lastMove.map(Uci.wrap),
     positionHashes = h.positionHashes,
     halfMoveClock = h.halfMoveClock
@@ -54,7 +54,7 @@ object History {
   implicit def chessHistory(h: chess.History) = Chess(h)
   implicit def draughtsHistory(h: draughts.DraughtsHistory) = Draughts(h)
   implicit def fairysfHistory(h: fairysf.History) = FairySF(h)
-  implicit def owareHistory(h: oware.History) = Oware(h)
+  implicit def mancalaHistory(h: mancala.History) = Mancala(h)
 
   //lila
   def apply(
@@ -94,9 +94,9 @@ object History {
         positionHashes = positionHashes,
         halfMoveClock = halfMoveClock
       ))
-    case GameLogic.Oware()
-      => Oware(oware.History(
-        lastMove = lastMove.map(lm => lm.toOware),
+    case GameLogic.Mancala()
+      => Mancala(mancala.History(
+        lastMove = lastMove.map(lm => lm.toMancala),
         positionHashes = positionHashes,
         halfMoveClock = halfMoveClock
       ))

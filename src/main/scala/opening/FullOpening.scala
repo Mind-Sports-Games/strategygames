@@ -46,7 +46,7 @@ object FullOpening {
 
   }
 
-  final case class Oware(f: strategygames.oware.opening.FullOpening) extends FullOpening(
+  final case class Mancala(f: strategygames.mancala.opening.FullOpening) extends FullOpening(
     f.eco,
     f.name,
     f.fen

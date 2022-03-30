@@ -60,14 +60,14 @@ object Replay {
     }
   }
 
-  final case class Oware(r: oware.Replay) extends Replay(
-    Game.Oware(r.setup),
-    r.moves.map((m: oware.Move) => Left(Move.Oware(m))),
-    Game.Oware(r.state)
+  final case class Mancala(r: mancala.Replay) extends Replay(
+    Game.Mancala(r.setup),
+    r.moves.map((m: mancala.Move) => Left(Move.Mancala(m))),
+    Game.Mancala(r.state)
   ){
     def copy(state: Game): Replay = state match {
-      case Game.Oware(state) => Replay.wrap(r.copy(state=state))
-      case _ => sys.error("Unable to copy a oware replay with a non-oware state")
+      case Game.Mancala(state) => Replay.wrap(r.copy(state=state))
+      case _ => sys.error("Unable to copy a mancala replay with a non-mancala state")
     }
   }
 
@@ -80,8 +80,8 @@ object Replay {
         => Chess(chess.Replay(setup, moves.map(Move.toChess), state))
       case (GameLogic.FairySF(), Game.FairySF(setup), Game.FairySF(state))
         => FairySF(fairysf.Replay(setup, moves.map(Move.toFairySF), state))
-      case (GameLogic.Oware(), Game.Oware(setup), Game.Oware(state))
-        => Oware(oware.Replay(setup, moves.map(Move.toOware), state))
+      case (GameLogic.Mancala(), Game.Mancala(setup), Game.Mancala(state))
+        => Mancala(mancala.Replay(setup, moves.map(Move.toMancala), state))
       case _ => sys.error("Mismatched gamelogic types 5")
     }
 
@@ -119,12 +119,12 @@ object Replay {
             message
           )
       }
-    case (GameLogic.Oware(), FEN.Oware(initialFen), Variant.Oware(variant)) =>
-      oware.Replay.gameMoveWhileValid(moveStrs, initialFen, variant) match {
+    case (GameLogic.Mancala(), FEN.Mancala(initialFen), Variant.Mancala(variant)) =>
+      mancala.Replay.gameMoveWhileValid(moveStrs, initialFen, variant) match {
         case (game, gameswithsan, message) =>
           (
-            Game.Oware(game),
-            gameswithsan.map { case (g, u) => (Game.Oware(g), Uci.OwareWithSan(u)) },
+            Game.Mancala(game),
+            gameswithsan.map { case (g, u) => (Game.Mancala(g), Uci.MancalaWithSan(u)) },
             message
           )
       }
@@ -162,10 +162,10 @@ object Replay {
         .toEither
         .map(s => s.map(Situation.FairySF))
         .toValidated
-    case (GameLogic.Oware(), Variant.Oware(variant)) =>
-      oware.Replay.situations(moveStrs, initialFen.map(_.toOware), variant)
+    case (GameLogic.Mancala(), Variant.Mancala(variant)) =>
+      mancala.Replay.situations(moveStrs, initialFen.map(_.toMancala), variant)
         .toEither
-        .map(s => s.map(Situation.Oware))
+        .map(s => s.map(Situation.Mancala))
         .toValidated
     case _ => sys.error("Mismatched gamelogic types 8")
   }
@@ -194,10 +194,10 @@ object Replay {
       }
     )
   
-  private def owareUcis(ucis: List[Uci]): List[oware.format.Uci] =
+  private def mancalaUcis(ucis: List[Uci]): List[mancala.format.Uci] =
     ucis.flatMap(u =>
       u match {
-        case u: Uci.Oware => Some(u.unwrap)
+        case u: Uci.Mancala => Some(u.unwrap)
         case _              => None
       }
     )
@@ -228,10 +228,10 @@ object Replay {
         .toEither
         .map(b => b.map(Board.FairySF))
         .toValidated
-    case (GameLogic.Oware(), Variant.Oware(variant))
-      => oware.Replay.boardsFromUci(owareUcis(moves), initialFen.map(_.toOware), variant)
+    case (GameLogic.Mancala(), Variant.Mancala(variant))
+      => mancala.Replay.boardsFromUci(mancalaUcis(moves), initialFen.map(_.toMancala), variant)
         .toEither
-        .map(b => b.map(Board.Oware))
+        .map(b => b.map(Board.Mancala))
         .toValidated
     case _ => sys.error("Mismatched gamelogic types 8a")
   }
@@ -258,10 +258,10 @@ object Replay {
         .toEither
         .map(s => s.map(Situation.FairySF))
         .toValidated
-    case (GameLogic.Oware(), Variant.Oware(variant)) =>
-      oware.Replay.situationsFromUci(owareUcis(moves), initialFen.map(_.toOware), variant)
+    case (GameLogic.Mancala(), Variant.Mancala(variant)) =>
+      mancala.Replay.situationsFromUci(mancalaUcis(moves), initialFen.map(_.toMancala), variant)
         .toEither
-        .map(s => s.map(Situation.Oware))
+        .map(s => s.map(Situation.Mancala))
         .toValidated
     case _ => sys.error("Mismatched gamelogic types 9")
   }
@@ -288,10 +288,10 @@ object Replay {
         .toEither
         .map(r => Replay.FairySF(r))
         .toValidated
-    case (GameLogic.Oware(), Variant.Oware(variant)) =>
-      oware.Replay.apply(owareUcis(moves), initialFen.map(_.toOware), variant)
+    case (GameLogic.Mancala(), Variant.Mancala(variant)) =>
+      mancala.Replay.apply(mancalaUcis(moves), initialFen.map(_.toMancala), variant)
         .toEither
-        .map(r => Replay.Oware(r))
+        .map(r => Replay.Mancala(r))
         .toValidated
     case _ => sys.error("Mismatched gamelogic types 10")
   }
@@ -309,14 +309,14 @@ object Replay {
       => chess.Replay.plyAtFen(moveStrs, initialFen.map(_.toChess), variant, atFen)
     case (GameLogic.FairySF(), Variant.FairySF(variant), FEN.FairySF(atFen))
       => fairysf.Replay.plyAtFen(moveStrs, initialFen.map(_.toFairySF), variant, atFen)
-    case (GameLogic.Oware(), Variant.Oware(variant), FEN.Oware(atFen))
-      => oware.Replay.plyAtFen(moveStrs, initialFen.map(_.toOware), variant, atFen)
+    case (GameLogic.Mancala(), Variant.Mancala(variant), FEN.Mancala(atFen))
+      => mancala.Replay.plyAtFen(moveStrs, initialFen.map(_.toMancala), variant, atFen)
     case _ => sys.error("Mismatched gamelogic types 10")
   }
 
   def wrap(r: chess.Replay) = Chess(r)
   def wrap(r: draughts.Replay) = Draughts(r)
   def wrap(r: fairysf.Replay) = FairySF(r)
-  def wrap(r: oware.Replay) = Oware(r)
+  def wrap(r: mancala.Replay) = Mancala(r)
 
 }

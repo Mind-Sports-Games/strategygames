@@ -53,9 +53,9 @@ case class Tags(value: List[Tag]) extends AnyVal {
       strategygames.fairysf.variant.Variant byName _
     }
   
-  def owareVariant: Option[strategygames.oware.variant.Variant] =
+  def mancalaVariant: Option[strategygames.mancala.variant.Variant] =
     apply(_.Variant).map(_.toLowerCase).flatMap {
-      strategygames.oware.variant.Variant byName _
+      strategygames.mancala.variant.Variant byName _
     }
 
   // TODO: this will need to be tested. We'll want to look at the _actual_ values that
@@ -78,13 +78,13 @@ case class Tags(value: List[Tag]) extends AnyVal {
   def chessFen: Option[chess.format.FEN]       = apply(_.FEN).map(strategygames.chess.format.FEN.apply)
   def draughtsFen: Option[draughts.format.FEN] = apply(_.FEN).map(strategygames.draughts.format.FEN.apply)
   def fairysfFen: Option[fairysf.format.FEN] = apply(_.FEN).map(strategygames.fairysf.format.FEN.apply)
-  def owareFen: Option[oware.format.FEN] = apply(_.FEN).map(strategygames.oware.format.FEN.apply)
+  def mancalaFen: Option[mancala.format.FEN] = apply(_.FEN).map(strategygames.mancala.format.FEN.apply)
 
   def fen: Option[format.FEN] =
     variant match {
       case Some(strategygames.variant.Variant.Draughts(_))     => draughtsFen.map(format.FEN.Draughts)
       case Some(strategygames.variant.Variant.FairySF(_))      => fairysfFen.map(format.FEN.FairySF)
-      case Some(strategygames.variant.Variant.Oware(_))      => owareFen.map(format.FEN.Oware)
+      case Some(strategygames.variant.Variant.Mancala(_))      => mancalaFen.map(format.FEN.Mancala)
       case Some(strategygames.variant.Variant.Chess(_)) | None => chessFen.map(format.FEN.Chess)
     }
 

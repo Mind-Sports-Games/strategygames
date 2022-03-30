@@ -20,9 +20,9 @@ object FullOpeningDB {
       => strategygames.fairysf.opening.FullOpeningDB.findByFen(fen).map(
         FullOpening.FairySF
       )
-    case (GameLogic.Oware(), FEN.Oware(fen))
-      => strategygames.oware.opening.FullOpeningDB.findByFen(fen).map(
-        FullOpening.Oware
+    case (GameLogic.Mancala(), FEN.Mancala(fen))
+      => strategygames.mancala.opening.FullOpeningDB.findByFen(fen).map(
+        FullOpening.Mancala
       )
     case _ => sys.error("Mismatched gamelogic types full opening db")
   }
@@ -39,9 +39,9 @@ object FullOpeningDB {
       case GameLogic.FairySF()  => strategygames.fairysf.opening.FullOpeningDB.search(
         moveStrs
       ).map(fo => FullOpening.AtPly(FullOpening.FairySF(fo.opening), fo.ply))
-      case GameLogic.Oware()  => strategygames.oware.opening.FullOpeningDB.search(
+      case GameLogic.Mancala()  => strategygames.mancala.opening.FullOpeningDB.search(
         moveStrs
-      ).map(fo => FullOpening.AtPly(FullOpening.Oware(fo.opening), fo.ply))
+      ).map(fo => FullOpening.AtPly(FullOpening.Mancala(fo.opening), fo.ply))
     }
 
   private def draughtsFENs(fens: Vector[FEN]): Vector[strategygames.draughts.format.FEN] =
@@ -68,10 +68,10 @@ object FullOpeningDB {
       }
     )
   
-  private def owareFENs(fens: Vector[FEN]): Vector[strategygames.oware.format.FEN] =
+  private def mancalaFENs(fens: Vector[FEN]): Vector[strategygames.mancala.format.FEN] =
     fens.flatMap(f =>
       f match {
-        case f: FEN.Oware => Some(f.f)
+        case f: FEN.Mancala => Some(f.f)
         case _              => None
       }
     )
@@ -86,9 +86,9 @@ object FullOpeningDB {
     case GameLogic.FairySF()  => strategygames.fairysf.opening.FullOpeningDB.searchInFens(
       fairysfFENs(fens)
     ).map(FullOpening.FairySF)
-    case GameLogic.Oware()  => strategygames.oware.opening.FullOpeningDB.searchInFens(
-      owareFENs(fens)
-    ).map(FullOpening.Oware)
+    case GameLogic.Mancala()  => strategygames.mancala.opening.FullOpeningDB.searchInFens(
+      mancalaFENs(fens)
+    ).map(FullOpening.Mancala)
   }
 
 }

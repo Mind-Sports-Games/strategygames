@@ -65,7 +65,7 @@ object Pos {
 
   }
 
-  final case class Oware(p: oware.Pos) extends Pos {
+  final case class Mancala(p: mancala.Pos) extends Pos {
 
     val key: String = p.key
 
@@ -83,7 +83,7 @@ object Pos {
     case GameLogic.Draughts() => sys.error("Not implemented yet for draughts")
     case GameLogic.Chess() => chess.Pos.fromKey(key).map(Chess)
     case GameLogic.FairySF() => sys.error("Not implemented yet for fairysf")
-    case GameLogic.Oware() => sys.error("Not implemented yet for oware")
+    case GameLogic.Mancala() => sys.error("Not implemented yet for mancala")
   }
 
   //def at(lib: GameLogic, x: Int, y: Int): Option[Pos] = lib match {
