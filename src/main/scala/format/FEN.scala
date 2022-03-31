@@ -1,6 +1,7 @@
 package strategygames.format
 
 import strategygames.{ Player, GameLogic }
+import strategygames.variant.Variant
 
 abstract sealed class FEN(val value: String) {
 
@@ -89,6 +90,8 @@ object FEN {
     case GameLogic.Chess()    => FEN.Chess(strategygames.chess.format.FEN(value))
     case GameLogic.FairySF()  => FEN.FairySF(strategygames.fairysf.format.FEN(value))
   }
+
+  def apply(v: Variant, value: String): FEN = apply(v.gameLogic, value)
 
   def clean(lib: GameLogic, source: String): FEN = lib match {
     case GameLogic.Draughts()

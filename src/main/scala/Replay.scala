@@ -228,17 +228,17 @@ object Replay {
     finalSquare: Boolean = false
   ): Validated[String, Replay] = (lib, variant) match {
     case (GameLogic.Draughts(), Variant.Draughts(variant)) =>
-      draughts.Replay.apply(draughtsUcis(moves), initialFen.map(_.toDraughts), variant, finalSquare)
+      draughts.Replay(draughtsUcis(moves), initialFen.map(_.toDraughts), variant, finalSquare)
         .toEither
         .map(r => Replay.Draughts(r))
         .toValidated
     case (GameLogic.Chess(), Variant.Chess(variant)) =>
-      chess.Replay.apply(chessUcis(moves), initialFen.map(_.toChess), variant)
+      chess.Replay(chessUcis(moves), initialFen.map(_.toChess), variant)
         .toEither
         .map(r => Replay.Chess(r))
         .toValidated
     case (GameLogic.FairySF(), Variant.FairySF(variant)) =>
-      fairysf.Replay.apply(fairysfUcis(moves), initialFen.map(_.toFairySF), variant)
+      fairysf.Replay(fairysfUcis(moves), initialFen.map(_.toFairySF), variant)
         .toEither
         .map(r => Replay.FairySF(r))
         .toValidated

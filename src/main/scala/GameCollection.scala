@@ -210,7 +210,7 @@ object GameFamily {
     def name              = "Shogi"
     def key               = "shogi"
     def gameLogic         = GameLogic.FairySF()
-    def aiEnabled         = false
+    def aiEnabled         = true
     def defaultVariant    = Variant.FairySF(strategygames.fairysf.variant.Shogi)
     def variants          = Variant.all(GameLogic.FairySF()).filter(_.gameFamily == this)
     def displayPiece      = "0KE"
@@ -227,7 +227,7 @@ object GameFamily {
     def name              = "Xiangqi"
     def key               = "xiangqi"
     def gameLogic         = GameLogic.FairySF()
-    def aiEnabled         = false
+    def aiEnabled         = true
     def defaultVariant    = Variant.FairySF(strategygames.fairysf.variant.Xiangqi)
     def variants          = Variant.all(GameLogic.FairySF()).filter(_.gameFamily == this)
     def displayPiece      = "RH"
@@ -244,7 +244,7 @@ object GameFamily {
     def name           = "Flipello"
     def key            = "flipello"
     def gameLogic      = GameLogic.FairySF()
-    def aiEnabled      = false
+    def aiEnabled      = true
     def defaultVariant = Variant.FairySF(strategygames.fairysf.variant.Flipello)
     def variants       = Variant.all(GameLogic.FairySF()).filter(_.gameFamily == this)
     def displayPiece   = "bP"

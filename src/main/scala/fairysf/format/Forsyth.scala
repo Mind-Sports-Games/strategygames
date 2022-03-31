@@ -18,20 +18,22 @@ object Forsyth {
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
     val apiPosition = Api.positionFromVariantNameAndFEN(variant.fairysfName.name, fen.value)
-    Some(Situation(
-      Board(
-        pieces = apiPosition.pieceMap,
-        history = History(),
-        variant = variant,
-        pocketData = apiPosition.pocketData,
-        position = apiPosition.some
-      ),
-      fen.value.split(' ')(1) match {
-        case "w" => P1
-        case "b" => P2
-        case _ => sys.error("Invalid player in fen")
-      }
-    ))
+    Some(
+      Situation(
+        Board(
+          pieces = apiPosition.pieceMap,
+          history = History(),
+          variant = variant,
+          pocketData = apiPosition.pocketData,
+          position = apiPosition.some
+        ),
+        fen.value.split(' ')(1) match {
+          case "w" => P1
+          case "b" => P2
+          case _   => sys.error("Invalid player in fen")
+        }
+      )
+    )
   }
 
   def <<(fen: FEN): Option[Situation] = <<@(Variant.default, fen)

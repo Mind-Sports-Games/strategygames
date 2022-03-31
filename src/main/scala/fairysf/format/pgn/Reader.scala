@@ -1,13 +1,12 @@
 package strategygames.fairysf
 package format.pgn
-import strategygames.{ Clock, Drop => StratDrop, Move => StratMove, Situation => StratSituation }
+import strategygames.{ Clock, GameFamily, Move => StratMove, Situation => StratSituation }
 
 import strategygames.format.pgn.{ ParsedPgn, Sans, Tags }
 
 import strategygames.fairysf.format.Uci
 
 import cats.data.Validated
-import cats.implicits._
 
 object Reader {
 
@@ -30,6 +29,22 @@ object Reader {
   def moves(moveStrs: Iterable[String], tags: Tags): Validated[String, Result] =
     movesWithSans(moveStrs, identity, tags)
 
+  // Because fairysf deals exclusively with UCI moves, we need this version
+  // for parsing replaces from uci move
+  def uciMoves(gf: GameFamily, moveStrs: Iterable[String], tags: Tags): Validated[String, Result] = {
+    val moves = moveStrs.flatMap(Uci(gf, _))
+    if (moves.size < moveStrs.size) {
+      Validated.invalid("Invalid UCI moves")
+    } else {
+      Validated.valid(
+        makeReplayFromUCI(
+          makeGame(tags),
+          moves.toList
+        )
+      )
+    }
+  }
+
   def fullWithSans(pgn: String, op: Sans => Sans, tags: Tags = Tags.empty): Validated[String, Result] =
     Parser.full(cleanUserInput(pgn)) map { parsed =>
       makeReplay(makeGame(parsed.tags ++ tags), op(parsed.sans))
@@ -43,7 +58,11 @@ object Reader {
       makeReplay(makeGame(tags), op(moves))
     }
 
-  def movesWithPgns(moveStrs: Iterable[String], op: Iterable[String] => Iterable[String], tags: Tags): Validated[String, Result] =
+  def movesWithPgns(
+      moveStrs: Iterable[String],
+      op: Iterable[String] => Iterable[String],
+      tags: Tags
+  ): Validated[String, Result] =
     Validated.valid(makeReplayWithPgn(makeGame(tags), op(moveStrs)))
 
   // remove invisible byte order mark
@@ -59,40 +78,56 @@ object Reader {
       case (r: Result.Incomplete, _) => r
     }
 
+  private def makeReplayFromUCI(game: Game, ucis: List[Uci]): Result =
+    ucis.foldLeft[Result](Result.Complete(Replay(game))) {
+      case (Result.Complete(replay), uci) =>
+        uci(replay.state.situation).fold(
+          err => Result.Incomplete(replay, err),
+          move => Result.Complete(replay addMove move)
+        )
+      case (r: Result.Incomplete, _) => r
+    }
+
   private def makeReplayWithPgn(game: Game, moves: Iterable[String]): Result =
     Parser.pgnMovesToUciMoves(moves).foldLeft[Result](Result.Complete(Replay(game))) {
       case (Result.Complete(replay), m) =>
         m match {
           case Uci.Move.moveR(orig, dest, promotion) => {
             (Pos.fromKey(orig), Pos.fromKey(dest)) match {
-              case (Some(orig), Some(dest)) => Result.Complete(
-                replay.addMove(
-                  Left(Replay.replayMove(
-                    replay.state,
-                    orig,
-                    dest,
-                    promotion,
-                    replay.state.board.apiPosition.makeMoves(List(m)),
-                    replay.state.board.uciMoves :+ m
-                  ))
+              case (Some(orig), Some(dest)) =>
+                Result.Complete(
+                  replay.addMove(
+                    Left(
+                      Replay.replayMove(
+                        replay.state,
+                        orig,
+                        dest,
+                        promotion,
+                        replay.state.board.apiPosition.makeMoves(List(m)),
+                        replay.state.board.uciMoves :+ m
+                      )
+                    )
+                  )
                 )
-              )
               case _ => Result.Incomplete(replay, s"Error making replay with move: ${m}")
             }
           }
           case Uci.Drop.dropR(role, dest) =>
             (Role.allByForsyth(replay.state.board.variant.gameFamily).get(role(0)), Pos.fromKey(dest)) match {
-              case (Some(role), Some(dest)) => Result.Complete(
-                replay.addMove(
-                  Right(Replay.replayDrop(
-                    replay.state,
-                    role,
-                    dest,
-                    replay.state.board.apiPosition.makeMoves(List(m)),
-                    replay.state.board.uciMoves :+ m
-                  ))
+              case (Some(role), Some(dest)) =>
+                Result.Complete(
+                  replay.addMove(
+                    Right(
+                      Replay.replayDrop(
+                        replay.state,
+                        role,
+                        dest,
+                        replay.state.board.apiPosition.makeMoves(List(m)),
+                        replay.state.board.uciMoves :+ m
+                      )
+                    )
+                  )
                 )
-              )
               case _ => Result.Incomplete(replay, s"Error making replay with drop: ${m}")
             }
           case _ => Result.Incomplete(replay, s"Error making replay with uci move: ${m}")

@@ -1,11 +1,16 @@
 project/project
 project/target
+project/.bloop
+project/metals.sbt
 target
+metals.sbt
 
-# auto-generated eclipse files.
+# auto-generated files.
 /.classpath
 /.project
 /.settings/
+/.bloop/
+/.metals/
 
 .bloop/
 .bsp/
@@ -14,3 +19,4 @@ project/.bloop
 project/metals.sbt
 src/main/scala/.metals
 src/test/.bsp
+>>>>>>> 10dae631f519a9b96c6d3bccc7cdd0c6093b28ad

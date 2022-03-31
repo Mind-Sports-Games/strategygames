@@ -5,7 +5,7 @@ import strategygames.{ Player, Status }
 import cats.data.Validated
 import cats.implicits._
 
-import strategygames.fairysf.format.{ Forsyth, Uci }
+import strategygames.fairysf.format.Uci
 
 case class Situation(board: Board, player: Player) {
 
@@ -49,8 +49,7 @@ case class Situation(board: Board, player: Player) {
 
   def winner: Option[Player] = board.variant.winner(this)
 
-  def playable(strict: Boolean): Boolean =
-    (board valid strict) && !end && !copy(player = !player).check
+  def playable(strict: Boolean): Boolean = board valid strict && !end
 
   lazy val status: Option[Status] =
     if (checkMate) Status.Mate.some
