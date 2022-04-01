@@ -11,7 +11,7 @@ import strategygames.mancala.variant.{ Variant }
   */
 object Forsyth {
 
-  val initial = FEN("eeeeee/eeeeee[-] w 0 1")
+  val initial = FEN("dddddd/dddddd[-] w 0 1")
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
     val apiPosition = Api.positionFromVariantNameAndFEN(variant.name, fen.value)

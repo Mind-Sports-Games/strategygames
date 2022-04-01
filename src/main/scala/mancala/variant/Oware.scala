@@ -22,7 +22,7 @@ case object Oware
 
   //cache this rather than checking with the API everytime
   override def initialFen =
-    format.FEN("eeeeee/eeeeee[-] w 0 1")
+    format.FEN("dddddd/dddddd[-] w 0 1")
 
 
 }
