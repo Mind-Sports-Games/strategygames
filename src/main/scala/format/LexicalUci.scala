@@ -61,7 +61,7 @@ object LexicalUci {
         case (false, true, 5 | 6) =>
           validSquarePair(uciLower.slice(0, uciLower.length() - 1)) // d8d9+ | d8d9R | d8e9+
         // moves
-        case (false, false, 4 | 5) => validSquarePair(uciLower) // d8d9 | d9d10
+        case (false, false, 4 | 5 | 6) => validSquarePair(uciLower) // d8d9 | d9d10 | a10b10
 
         // Bleh
         case _ => false
