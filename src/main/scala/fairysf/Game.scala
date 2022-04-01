@@ -1,10 +1,9 @@
 package strategygames.fairysf
-import strategygames.{ Clock, Player, MoveMetrics }
+import strategygames.{ Clock, MoveMetrics }
 
 import cats.data.Validated
 
 import strategygames.fairysf.format.FEN
-import strategygames.fairysf.format.{ pgn, Uci }
 
 case class Game(
     situation: Situation,

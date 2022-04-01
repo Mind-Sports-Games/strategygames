@@ -26,7 +26,7 @@ case class Board(
     p => (p, pieces.collect{ case (pos, piece) if piece.player == p  => (pos, piece)}.size)
   }.toMap
 
-  def withHistory(h: History): Board = copy(history = h)
+  def withHistory(h: History): Board       = copy(history = h)
   def updateHistory(f: History => History) = copy(history = f(history))
 
   def withVariant(v: Variant): Board =
@@ -67,8 +67,8 @@ object Board {
     (variant.dropsVariant) option PocketData.init
 
   sealed abstract class BoardSize(
-    val width: Int,
-    val height: Int
+      val width: Int,
+      val height: Int
   ) {
 
     val key   = s"${width}x${height}"

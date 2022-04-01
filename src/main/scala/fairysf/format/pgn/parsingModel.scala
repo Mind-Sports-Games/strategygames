@@ -18,9 +18,9 @@ case class Std(
 ) extends San {
 
   def apply(
-    situation: strategygames.Situation,
-    iteratedCapts: Boolean = false,
-    forbiddenUci: Option[List[String]] = None
+      situation: strategygames.Situation,
+      iteratedCapts: Boolean = false,
+      forbiddenUci: Option[List[String]] = None
   ) = move(situation.toFairySF).map(StratMove.wrap).map(Left.apply)
 
   override def withSuffixes(s: Suffixes) =
@@ -31,7 +31,8 @@ case class Std(
 
   def withMetas(m: Metas) = copy(metas = m)
 
-  def move(situation: Situation): Validated[String, strategygames.fairysf.Move] = Validated.invalid("Not implemented move") //TODO: ???
+  def move(situation: Situation): Validated[String, strategygames.fairysf.Move] =
+    Validated.invalid("Not implemented move") //TODO: ???
 
   private def compare[A](a: Option[A], b: A) = a.fold(true)(b ==)
 }
@@ -43,9 +44,9 @@ case class Drop(
 ) extends San {
 
   def apply(
-    situation: strategygames.Situation,
-    iteratedCapts: Boolean = false,
-    forbiddenUci: Option[List[String]] = None
+      situation: strategygames.Situation,
+      iteratedCapts: Boolean = false,
+      forbiddenUci: Option[List[String]] = None
   ) = drop(situation.toFairySF).map(StratDrop.wrap).map(Right.apply)
 
   def withMetas(m: Metas) = copy(metas = m)
