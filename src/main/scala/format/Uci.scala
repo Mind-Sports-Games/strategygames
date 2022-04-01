@@ -114,6 +114,7 @@ object Uci {
     None
   ) with Mancala {
     def uci = m.uci
+    def fishnetUci = m.uci
     val unwrap = m
     def toChess = sys.error("Can't make a chess UCI from a mancala UCI")
     def toDraughts = sys.error("Can't make a draughts UCI from a mancala UCI")
