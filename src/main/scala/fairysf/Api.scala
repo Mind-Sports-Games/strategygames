@@ -207,13 +207,13 @@ object Api {
     movesList.map(moveList => {
       var position = positionFromVariant(variant)
       moveList.map(m => {
-        position = position.makeMoves(List(m));
         val pieceMap = position.pieceMap
+        position = position.makeMoves(List(m));
         m match {
           case fairyPromotion(baseUci) => {
             Uci(variant.gameFamily, baseUci) match {
               case Some(baseMove: Uci.Move) => {
-                f"${baseUci}${pieceMap(baseMove.dest).forsyth}"
+                f"${baseUci}${pieceMap(baseMove.orig).forsyth}"
               }
               case _ => m
             }
