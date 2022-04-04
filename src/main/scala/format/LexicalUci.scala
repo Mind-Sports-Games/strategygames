@@ -1,6 +1,6 @@
 package strategygames.format
 
-import org.playstrategy.FairyStockfish.{ availablePieceChars, availablePromotablePieceChars, init };
+import org.playstrategy.FairyStockfish.{ availablePieceChars, init };
 
 // The name comes from here
 // https://en.wikipedia.org/wiki/Lexical_analysis
@@ -22,7 +22,7 @@ object LexicalUci {
   }
 
   val availablePieces           = availablePieceChars().getString()
-  val availablePromotablePieces = availablePromotablePieceChars().getString()
+  val availablePromotablePieces = availablePieceChars().getString()
 
   def validRole(c: Char): Boolean = availablePieces.exists(c.==)
   def validPromotableRole(c: Char): Boolean =
