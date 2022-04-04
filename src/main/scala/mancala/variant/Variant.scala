@@ -40,11 +40,9 @@ abstract class Variant private[variant] (
   def perfId: Int
   def perfIcon: Char
 
-  def initialFen: FEN = Api.initialFen(name)
+  def initialFen: FEN = format.FEN("dddddd/dddddd[-] w 0 1")
 
-  lazy val position: Api.Position = Api.positionFromVariantName(name)
-
-  def pieces: Map[Pos, Piece] = Api.pieceMapFromFen(name, initialFen.value)
+  def pieces: Map[Pos, Piece] = Map.empty[Pos,Piece]
 
   def startPlayer: Player = P1
 
@@ -55,40 +53,7 @@ abstract class Variant private[variant] (
   def isValidPromotion(promotion: Option[PromotableRole]): Boolean = true
 
   def validMoves(situation: Situation): Map[Pos, List[Move]] =
-    situation.board.apiPosition.legalMoves
-      .filterNot(_.contains("@"))
-      .map { case Uci.Move.moveR(orig, dest, promotion) =>
-        (
-          Pos.fromKey(orig),
-          Pos.fromKey(dest),
-          promotion
-        )
-      }
-      .map {
-        case (Some(orig), Some(dest), promotion) => {
-          val uciMove     = s"${orig.key}${dest.key}${promotion}"
-          val newPosition = situation.board.apiPosition.makeMoves(List(uciMove))
-          (
-            orig,
-            Move(
-              piece = situation.board.pieces(orig),
-              orig = orig,
-              dest = dest,
-              situationBefore = situation,
-              after = situation.board.copy(
-                pieces = newPosition.pieceMap,
-                uciMoves = (situation.board.uciMoves :+ uciMove),
-                position = newPosition.some
-              ),
-              capture = None,
-              promotion = None
-            )
-          )
-        }
-        case (orig, dest, prom) => sys.error(s"Invalid position from uci: ${orig}${dest}${prom}")
-      }
-      .groupBy(_._1)
-      .map { case (k, v) => (k, v.toList.map(_._2)) }
+    Map.empty[Pos, List[Move]]
 
 
   def move(
@@ -145,7 +110,7 @@ abstract class Variant private[variant] (
     board
 
   def valid(board: Board, strict: Boolean): Boolean =
-    Api.validateFEN(name, Forsyth.exportBoard(board))
+    true // Api.validateFEN(name, Forsyth.exportBoard(board))
 
   val roles: List[Role] = Role.all
 

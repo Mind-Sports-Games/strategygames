@@ -71,7 +71,7 @@ object Reader {
                     replay.state,
                     orig,
                     dest,
-                    replay.state.board.apiPosition.makeMoves(List(m)),
+                    //replay.state.board.apiPosition.makeMoves(List(m)),
                     replay.state.board.uciMoves :+ m
                   )
                 )

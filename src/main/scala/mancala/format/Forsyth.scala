@@ -14,13 +14,12 @@ object Forsyth {
   val initial = FEN("dddddd/dddddd[-] w 0 1")
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
-    val apiPosition = Api.positionFromVariantNameAndFEN(variant.name, fen.value)
+    // val apiPosition = Api.positionFromVariantNameAndFEN(variant.name, fen.value)
     Some(Situation(
       Board(
-        pieces = apiPosition.pieceMap,
+        pieces = Map.empty[Pos,Piece],
         history = History(),
         variant = variant,
-        position = apiPosition.some
       ),
       fen.value.split(' ')(1) match {
         case "w" => P1
@@ -59,7 +58,7 @@ object Forsyth {
 
   def exportBoard(board: Board): String = exportBoardFen(board).value
 
-  def exportBoardFen(board: Board): FEN = board.apiPosition.fen
+  def exportBoardFen(board: Board): FEN = format.FEN("dddddd/dddddd[-] w 0 1")
 
   def boardAndPlayer(situation: Situation): String =
     boardAndPlayer(situation.board, situation.player)

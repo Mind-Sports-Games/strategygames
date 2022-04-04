@@ -15,9 +15,9 @@ case class Situation(board: Board, player: Player) {
 
   def history = board.history
 
-  private lazy val gameEnd: Boolean = board.apiPosition.gameEnd
+  private lazy val gameEnd: Boolean = false
 
-  private lazy val gameResult: GameResult = board.apiPosition.gameResult
+  private lazy val gameResult: GameResult = GameResult.Ongoing()
 
   private lazy val result =
     if (gameEnd) gameResult
@@ -43,13 +43,7 @@ case class Situation(board: Board, player: Player) {
     else none
 
   //TODO: test P1/P2 map is correct
-  def opponentHasInsufficientMaterial: Boolean = {
-    val insufficientMaterial = board.apiPosition.insufficientMaterial
-    player match {
-      case P1 => insufficientMaterial._2
-      case P2 => insufficientMaterial._1
-    }
-  }
+  def opponentHasInsufficientMaterial: Boolean = false
 
   def move(from: Pos, to: Pos, promotion: Option[PromotableRole]): Validated[String, Move] =
     board.variant.move(this, from, to, promotion)

@@ -66,7 +66,7 @@ object Api {
     //       at the moment
     // NOTE: this means we can't use this API to test chess related things
     //       only the variants we support
-    val variant = Variant.byKey("oware")
+    val variant = Variant.byKey("shogi") //patch to get working not functional
 
     def makeMoves(movesList: List[String]): Position =
       if (movesList.isEmpty) this
