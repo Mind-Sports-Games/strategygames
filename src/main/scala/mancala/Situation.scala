@@ -23,9 +23,9 @@ case class Situation(board: Board, player: Player) {
     if (gameEnd) gameResult
     else GameResult.Ongoing()
 
-  def checkMate: Boolean = result == GameResult.Checkmate()
-
-  def staleMate: Boolean = result == GameResult.Stalemate()
+  //these dont exist in Oware. Normal ending tracked in VariantEnd
+  def checkMate: Boolean = false
+  def staleMate: Boolean = false
 
   private def variantEnd = result == GameResult.VariantEnd() || board.variant.specialEnd(this)
 
@@ -42,7 +42,6 @@ case class Situation(board: Board, player: Player) {
     else if (staleMate) Status.Stalemate.some
     else none
 
-  //TODO: test P1/P2 map is correct
   def opponentHasInsufficientMaterial: Boolean = false
 
   def move(from: Pos, to: Pos, promotion: Option[PromotableRole]): Validated[String, Move] =

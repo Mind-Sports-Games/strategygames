@@ -9,13 +9,14 @@ scalaVersion := "2.13.5"
 val fairystockfishVersion = "0.0.7"
 
 libraryDependencies ++= List(
-  "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
-  "org.specs2"             %% "specs2-core"              % "4.10.0" % Test,
-  "org.specs2"             %% "specs2-cats"              % "4.10.0" % Test,
-  "com.github.ornicar"     %% "scalalib"                 % "7.0.2",
-  "joda-time"               % "joda-time"                % "2.10.10",
-  "org.typelevel"          %% "cats-core"                % "2.2.0",
-  "org.playstrategy"        % "fairystockfish"           % fairystockfishVersion
+  "org.scala-lang.modules"   %% "scala-parser-combinators" % "1.1.2",
+  "org.specs2"               %% "specs2-core"              % "4.10.0" % Test,
+  "org.specs2"               %% "specs2-cats"              % "4.10.0" % Test,
+  "com.github.ornicar"       %% "scalalib"                 % "7.0.2",
+  "joda-time"                 % "joda-time"                % "2.10.10",
+  "org.typelevel"            %% "cats-core"                % "2.2.0",
+  "org.playstrategy"          % "fairystockfish"           % fairystockfishVersion,
+  "com.github.joansalasoler" %% "aalina"                   % "1.2.1" from "file:///home/matt/mso/strategygames/com.github.joansalasoler/aalina/1.2.1/jars/aalina_1.2.1.jar"
 )
 
 // Explicitly add in the linux-class path
