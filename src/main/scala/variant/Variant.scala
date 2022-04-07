@@ -78,6 +78,7 @@ abstract class Variant(
 
   def dropsVariant: Boolean
   def onlyDropsVariant: Boolean
+  def hasGameScore: Boolean
 
   def perfId: Int
   def perfIcon: Char
@@ -199,6 +200,7 @@ object Variant {
 
     def dropsVariant: Boolean     = v.dropsVariant
     def onlyDropsVariant: Boolean = false
+    def hasGameScore: Boolean = false
 
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
@@ -329,6 +331,7 @@ object Variant {
 
     def dropsVariant: Boolean     = false
     def onlyDropsVariant: Boolean = false
+    def hasGameScore: Boolean = false
 
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
@@ -457,6 +460,7 @@ object Variant {
 
     def dropsVariant: Boolean     = v.dropsVariant
     def onlyDropsVariant: Boolean = v.onlyDropsVariant
+    def hasGameScore: Boolean = v.hasGameScore
 
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
@@ -585,6 +589,7 @@ object Variant {
 
     def dropsVariant: Boolean     = false
     def onlyDropsVariant: Boolean = false
+    def hasGameScore: Boolean = true
 
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
