@@ -27,6 +27,7 @@ object Api {
     val variant: Variant
 
     def makeMoves(movesList: List[Int]): Position
+    def makeMove(move: Int): Position
     def toBoard: String
     //val fen: FEN
     //val isImmediateGameEnd: (Boolean, GameResult)
@@ -45,19 +46,26 @@ object Api {
     val gameResult: GameResult
     val gameEnd: Boolean
     val legalMoves: Array[Int]
+    val playerTurn: Int //1 for South -1 for North
   }
 
   private class OwarePosition(position: OwareGame) extends Position {
     // TODO: yes, this is an abuse of scala. We could get an
     //       exception here, but I'm not sure how to work around that
     //       at the moment
-    val variant = Variant.byKey("oware") //patch to get working not functional
+    val variant = Variant.byKey("oware")
 
     def makeMoves(movesList: List[Int]): Position = {
       movesList.map { move =>
         if (position.legalMoves.contains(move)) position.makeMove(move)
         else sys.error(s"Illegal move: ${move} from list: ${movesList}")
       }
+      new OwarePosition(position)
+    }
+
+    def makeMove(move: Int): Position = {
+      if (position.legalMoves.contains(move)) position.makeMove(move)
+      else sys.error(s"Illegal move: ${move} required one from: ${position.legalMoves}")
       new OwarePosition(position)
     }
 
@@ -111,6 +119,7 @@ object Api {
       }
       moves.toArray
     }
+    val playerTurn: Int = position.turn()
   }
 
   def position: Position =
