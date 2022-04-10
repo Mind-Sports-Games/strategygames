@@ -35,103 +35,103 @@ class TournamentEY1k6otN extends Tournament {
     player.id match {
       case "derarzt" =>
         List(
-          win(derarzt, matt, 0),
-          win(derarzt, ayala, 1),
-          win(derarzt, rapha, 2),
-          win(derarzt, berserk, 3),
-          win(derarzt, irina, 4),
-          win(derarzt, mega, 5),
-          win(derarzt, fun, 6)
+          Round(0).win(derarzt, matt),
+          Round(1).win(derarzt, ayala),
+          Round(2).win(derarzt, rapha),
+          Round(3).win(derarzt, berserk),
+          Round(4).win(derarzt, irina),
+          Round(5).win(derarzt, mega),
+          Round(6).win(derarzt, fun)
         )
       case "Ayala7" =>
         List(
-          win(ayala, manka, 0),
-          lose(ayala, derarzt, 1),
-          win(ayala, mega, 2),
-          win(ayala, rapha, 3),
-          win(ayala, berserk, 4),
-          win(ayala, irina, 5),
-          bye(ayala, 6)
+          Round(0).win(ayala, manka),
+          Round(1).lose(ayala, derarzt),
+          Round(2).win(ayala, mega),
+          Round(3).win(ayala, rapha),
+          Round(4).win(ayala, berserk),
+          Round(5).win(ayala, irina),
+          Round(6).bye(ayala),
         )
       case "raphael20odrich" =>
         List(
-          win(rapha, mega, 0),
-          win(rapha, irina, 1),
-          lose(rapha, derarzt, 2),
-          lose(rapha, ayala, 3),
-          win(rapha, manka, 4),
-          win(rapha, matt, 5),
-          win(rapha, berserk, 6)
+          Round(0).win(rapha, mega),
+          Round(1).win(rapha, irina),
+          Round(2).lose(rapha, derarzt),
+          Round(3).lose(rapha, ayala),
+          Round(4).win(rapha, manka),
+          Round(5).win(rapha, matt),
+          Round(6).win(rapha, berserk),
         )
       case "Irina" =>
         List(
-          win(irina, berserk, 0),
-          lose(irina, rapha, 1),
-          win(irina, fun, 2),
-          win(irina, matt, 3),
-          lose(irina, derarzt, 4),
-          lose(irina, ayala, 5),
-          win(irina, mega, 6)
+          Round(0).win(irina, berserk),
+          Round(1).lose(irina, rapha),
+          Round(2).win(irina, fun),
+          Round(3).win(irina, matt),
+          Round(4).lose(irina, derarzt),
+          Round(5).lose(irina, ayala),
+          Round(6).win(irina, mega),
         )
       case "berserker" =>
         List(
-          lose(berserk, irina, 0),
-          bye(berserk, 1),
-          win(berserk, matt, 2),
-          lose(berserk, derarzt, 3),
-          lose(berserk, ayala, 4),
-          win(berserk, manka, 5),
-          lose(berserk, rapha, 6)
+          Round(0).lose(berserk, irina),
+          Round(1).bye(berserk),
+          Round(2).win(berserk, matt),
+          Round(3).lose(berserk, derarzt),
+          Round(4).lose(berserk, ayala),
+          Round(5).win(berserk, manka),
+          Round(6).lose(berserk, rapha),
         )
       case "megamau" =>
         List(
-          lose(mega, rapha, 0),
-          win(mega, manka, 1),
-          lose(mega, ayala, 2),
-          bye(mega, 3),
-          win(mega, fun, 4),
-          lose(mega, derarzt, 5),
-          lose(mega, irina, 6)
+          Round(0).lose(mega, rapha),
+          Round(1).win(mega, manka),
+          Round(2).lose(mega, ayala),
+          Round(3).bye(mega),
+          Round(4).win(mega, fun),
+          Round(5).lose(mega, derarzt),
+          Round(6).lose(mega, irina),
         )
       case "statmatt" =>
         List(
-          lose(matt, derarzt, 0),
-          win(matt, fun, 1),
-          lose(matt, berserk, 2),
-          lose(matt, irina, 3),
-          bye(matt, 4),
-          lose(matt, rapha, 5),
-          win(matt, manka, 6)
+          Round(0).lose(matt, derarzt),
+          Round(1).win(matt, fun),
+          Round(2).lose(matt, berserk),
+          Round(3).lose(matt, irina),
+          Round(4).bye(matt),
+          Round(5).lose(matt, rapha),
+          Round(6).win(matt, manka),
         )
       case "mankalacz" =>
         List(
-          lose(manka, ayala, 0),
-          lose(manka, mega, 1),
-          bye(manka, 2),
-          win(manka, fun, 3),
-          lose(manka, rapha, 4),
-          lose(manka, berserk, 5),
-          lose(manka, matt, 6)
+          Round(0).lose(manka, ayala),
+          Round(1).lose(manka, mega),
+          Round(2).bye(manka),
+          Round(3).win(manka, fun),
+          Round(4).lose(manka, rapha),
+          Round(5).lose(manka, berserk),
+          Round(6).lose(manka, matt),
         )
       case "FunWithFlags" =>
         List(
-          presentWin(fun, egor, 0),
-          lose(fun, matt, 1),
-          lose(fun, irina, 2),
-          lose(fun, manka, 3),
-          lose(fun, mega, 4),
-          bye(fun, 5),
-          lose(fun, derarzt, 6)
+          Round(0).noOpponentWin(fun, egor),
+          Round(1).lose(fun, matt),
+          Round(2).lose(fun, irina),
+          Round(3).lose(fun, manka),
+          Round(4).lose(fun, mega),
+          Round(5).bye(fun),
+          Round(6).lose(fun, derarzt),
         )
       case "egormmaksymov341" =>
         List(
-          absentLoss(egor, fun, 0),
-          withdrawn(egor, 1),
-          withdrawn(egor, 2),
-          withdrawn(egor, 3),
-          withdrawn(egor, 4),
-          withdrawn(egor, 5),
-          withdrawn(egor, 6)
+          Round(0).noShowLoss(egor, fun),
+          Round(1).withdrawn(egor),
+          Round(2).withdrawn(egor),
+          Round(3).withdrawn(egor),
+          Round(4).withdrawn(egor),
+          Round(5).withdrawn(egor),
+          Round(6).withdrawn(egor),
         )
     }
   List()
