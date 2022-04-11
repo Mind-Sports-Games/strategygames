@@ -142,52 +142,52 @@ class TiebreakTests extends Specification with ValidatedMatchers {
   val tourney  = new Tiebreak(draughts);
   "derarzt results" should {
     tourney.score(draughts.derarzt) must_== 14
-    tourney.sonnenbornBerger(draughts.derarzt) must_== 52
-    tourney.buccholz(draughts.derarzt) must_== 52
+    tourney.lilaSonnenbornBerger(draughts.derarzt) must_== 52
+    tourney.msoBuccholz(draughts.derarzt) must_== 47
   }
   "ayala results" should {
     tourney.score(draughts.ayala) must_== 12
-    tourney.sonnenbornBerger(draughts.ayala) must_== 34
-    tourney.buccholz(draughts.ayala) must_== 58
+    tourney.lilaSonnenbornBerger(draughts.ayala) must_== 34
+    tourney.msoBuccholz(draughts.ayala) must_== 55
   }
   "rapha results" should {
     tourney.score(draughts.rapha) must_== 10
-    tourney.sonnenbornBerger(draughts.rapha) must_== 30
-    tourney.buccholz(draughts.rapha) must_== 56
+    tourney.lilaSonnenbornBerger(draughts.rapha) must_== 30
+    tourney.msoBuccholz(draughts.rapha) must_== 51
   }
   "irina results" should {
     tourney.score(draughts.irina) must_== 8
-    tourney.sonnenbornBerger(draughts.irina) must_== 22
-    tourney.buccholz(draughts.irina) must_== 58
+    tourney.lilaSonnenbornBerger(draughts.irina) must_== 22
+    tourney.msoBuccholz(draughts.irina) must_== 53
   }
   "berserker results" should {
     tourney.score(draughts.berserk) must_== 6
-    tourney.sonnenbornBerger(draughts.berserk) must_== 10
-    tourney.buccholz(draughts.berserk) must_== 59
+    tourney.lilaSonnenbornBerger(draughts.berserk) must_== 10
+    tourney.msoBuccholz(draughts.berserk) must_== 56
   }
   "megamau results" should {
     tourney.score(draughts.mega) must_== 6
-    tourney.sonnenbornBerger(draughts.mega) must_== 8
-    tourney.buccholz(draughts.mega) must_== 57
+    tourney.lilaSonnenbornBerger(draughts.mega) must_== 8
+    tourney.msoBuccholz(draughts.mega) must_== 54
   }
   "statmatt results" should {
     tourney.score(draughts.matt) must_== 6
-    tourney.sonnenbornBerger(draughts.matt) must_== 8
-    tourney.buccholz(draughts.matt) must_== 50
+    tourney.lilaSonnenbornBerger(draughts.matt) must_== 8
+    tourney.msoBuccholz(draughts.matt) must_== 47
   }
   "mankalacz results" should {
     tourney.score(draughts.manka) must_== 4
-    tourney.sonnenbornBerger(draughts.manka) must_== 4
-    tourney.buccholz(draughts.manka) must_== 48
+    tourney.lilaSonnenbornBerger(draughts.manka) must_== 4
+    tourney.msoBuccholz(draughts.manka) must_== 43
   }
   "funwithflags results" should {
     tourney.score(draughts.fun) must_== 4
-    tourney.sonnenbornBerger(draughts.fun) must_== 0
-    tourney.buccholz(draughts.fun) must_== 41
+    tourney.lilaSonnenbornBerger(draughts.fun) must_== 0
+    tourney.msoBuccholz(draughts.fun) must_== 44
   }
   "egormmaksymov341 results" should {
     tourney.score(draughts.egor) must_== 0
-    tourney.sonnenbornBerger(draughts.egor) must_== 0
-    tourney.buccholz(draughts.egor) must_== 0
+    tourney.lilaSonnenbornBerger(draughts.egor) must_== 0
+    tourney.msoBuccholz(draughts.egor) must_== 0
   }
 }

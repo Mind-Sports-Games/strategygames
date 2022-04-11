@@ -36,17 +36,20 @@ class Tiebreak(val tournament: Tournament) {
   // In the following we distinguish between score and tiebreak.
   // Score is what you get for the Result directly.
   // Tiebreak is what you get from your opponent for a tiebreak
+  def virtualOpponentScoreAtRound(p: Player, round: Int): Double =
+    scoreAtRound(p, round) + remainingRoundDraws(round)
+
+  def remainingRoundDraws(round: Int): Double =
+    ((tournament.nbRounds) - round - 1) * Draw
+
   def scoreAtRound(p: Player, round: Int): Double =
     tournament.resultsForPlayer(p).take(round).map(score).sum
 
   def score(p: Player): Double =
     scoreAtRound(p, tournament.nbRounds)
 
-  def virtualOpponentScoreAtRound(p: Player, round: Int): Double =
-    scoreAtRound(p, round) + remainingRoundDraws(round)
-
-  def remainingRoundDraws(round: Int): Double =
-    ((tournament.nbRounds) - round - 1) * Draw
+  def scoreForOpponentTiebreak(p: Player): Double =
+    tournament.resultsForPlayer(p).map(scoreForOpponentTiebreak).sum
 
   def score(g: Result): Double =
     g match {
@@ -58,18 +61,43 @@ class Tiebreak(val tournament: Tournament) {
       case _ => Loss
     }
 
+  def scoreForOpponentTiebreak(g: Result): Double =
+    g match {
+      // Regular game played with regular result
+      case Result(_, Hero(Player(_), Present), WonAgainst, Foe(Player(_))) => Win
+      case Result(_, Hero(Player(_), Present), DrewWith, Foe(Player(_)))   => Draw
+      case Result(_, Hero(Player(_), Present), LostTo, Foe(Player(_)))     => Loss
+
+      case Result(_, Hero(Player(_), Present), WonAgainst, Foe(Virtual)) => Draw
+      case Result(_, Hero(Player(_), Absent), _, Foe(Virtual)) => Draw
+
+      // Not sure any of the rest of these make any sense.
+      case _ => Loss
+    }
+
   // When used for tie-breaking among players with the same raw score, no
   // multiplying is necessary and the sum of the raw scores of the opponents
   // played is used to break ties (Golombek 1977). When used as a tie-break
   // system, it is equivalent to the Solkoff system.
   // - https://en.wikipedia.org/wiki/Buchholz_system
-  def buccholz(p: Player): Double =
-    tournament.resultsForPlayer(p).map(buccholzForGame).sum
 
-  def buccholzForGame(g: Result): Double =
+
+
+  // MSO Rules as per MSO arbiter, Mike Dixon:
+  // ---------------------------------------------------------------------------
+  // If someone you played later withdraws you get 1/2 a point per round they
+  // skipped added to your TB (ontop of what they scored in the tournament). You
+  // get the same for a bye (0.5 per round ontop of your score going into that
+  // match). And if you play somebody who got a bye their bye only counts as
+  // 0.5 for your TB (not the 1.0 that they get for the bye)
+  // 
+  def msoBuccholz(p: Player): Double =
+    tournament.resultsForPlayer(p).map(msoBuccholzForGame).sum
+
+  def msoBuccholzForGame(g: Result): Double =
     g match {
       // Regular game played with regular result
-      case Result(_, Hero(Player(_), Present), _, Foe(p: Player)) => score(p)
+      case Result(_, Hero(Player(_), Present), _, Foe(p: Player)) => scoreForOpponentTiebreak(p)
 
       case Result(round, Hero(p: Player, Present), WonAgainst, Foe(Virtual)) =>
         virtualOpponentScoreAtRound(p, round)
@@ -78,10 +106,13 @@ class Tiebreak(val tournament: Tournament) {
       case _                                                                 => 0
     }
 
-  def sonnenbornBerger(p: Player): Double =
-    tournament.resultsForPlayer(p).map(sonnenbornBergerForGame).sum
+  // The name lila refers to the fact that this has some quirks specific to the
+  // lila implementation. It doesn't deal with virtual opponents tiebreak values
+  // for byes.
+  def lilaSonnenbornBerger(p: Player): Double =
+    tournament.resultsForPlayer(p).map(lilaSonnenbornBergerForGame).sum
 
-  def sonnenbornBergerForGame(g: Result): Double =
+  def lilaSonnenbornBergerForGame(g: Result): Double =
     g match {
       // Regular game played with regular result
       case Result(_, Hero(Player(_), Present), WonAgainst, Foe(p: Player)) => score(p)
