@@ -4,6 +4,7 @@ import com.joansala.game.oware.OwareGame
 
 import cats.implicits._
 
+import strategygames.mancala.format.{ FEN }
 import strategygames.mancala.variant.Variant
 
 sealed abstract class GameResult extends Product with Serializable
@@ -21,6 +22,8 @@ object GameResult {
 
 }
 
+trait OwareBoard;
+
 object Api {
 
   abstract class Position {
@@ -29,7 +32,13 @@ object Api {
     def makeMoves(movesList: List[Int]): Position
     def makeMove(move: Int): Position
     def toBoard: String
-    //val fen: FEN
+
+    def toCoordinates(move: Int): String
+    def toNotation (moves: List[Int]): String
+    def toMoves(notation: String): List[Int]
+    def toDiagram: String
+
+    val fen: FEN
     //val isImmediateGameEnd: (Boolean, GameResult)
     //val immediateGameEnd: Boolean
     //val optionalGameEnd: Boolean
@@ -47,6 +56,7 @@ object Api {
     val gameEnd: Boolean
     val legalMoves: Array[Int]
     val playerTurn: Int //1 for South -1 for North
+    val getFEN: String
   }
 
   private class OwarePosition(position: OwareGame) extends Position {
@@ -72,7 +82,35 @@ object Api {
     //helper
     def toBoard: String = position.toBoard.toString
 
-    //lazy val fen: FEN            = FEN(position.getFEN())
+    def toCoordinates(move: Int): String = position.toBoard().toCoordinates(move)
+    def toNotation (moves: List[Int]): String = position.toBoard().toNotation(moves.toArray)
+
+    def toMoves(notation: String): List[Int] = position.toBoard().toMoves(notation).toList
+
+    def toDiagram: String = position.toBoard().toDiagram()
+
+    private val numHouses = variant.boardSize.width * variant.boardSize.height
+    val getFEN: String = position.toBoard().toDiagram().split('-').map{ part => 
+      part match {
+        case "0" => "1" //empty
+        case "S" => "w" //player 1
+        case "N" => "b" //player 2
+        case _ => 
+          part.toIntOption match {
+            case Some(x: Int) => 
+              x match {
+                case x if x < 27  => (x + 64).toChar
+                case x if x >= 27 => (x + 70).toChar
+                case x if x > 52 => sys.error("expected number of stones less than 53, got " + x.toString())
+              }
+            case _ => "" // should never get here....
+          }
+      }
+    }.mkString("").patch(numHouses + 2, " ", 0).patch(numHouses + 1, " ", 0).patch(numHouses, " ", 0).patch(variant.boardSize.width, "/", 0)
+    
+    def toPosition = position.toBoard().position()
+
+    lazy val fen: FEN            = FEN(getFEN)
 
     //this is covered by gameEnd
     //lazy val isImmediateGameEnd: (Boolean, GameResult) = {

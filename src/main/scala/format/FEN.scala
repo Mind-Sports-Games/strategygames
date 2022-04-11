@@ -92,11 +92,11 @@ object FEN {
     def toFairySF = sys.error("Can't convert mancala to fairysf")
     def toMancala = f
 
-    def fullMove: Option[Int] = f.fullMove
+    def fullMove: Option[Int] = ??? //f.fullmove
 
     def player: Option[Player] = f.player
 
-    def ply: Option[Int] = f.ply
+    def ply: Option[Int] = ??? //f.ply
 
     def initial: Boolean = f.initial
 
