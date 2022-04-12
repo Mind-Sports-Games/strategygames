@@ -91,10 +91,10 @@ class Tiebreak(val tournament: Tournament) {
   // match). And if you play somebody who got a bye their bye only counts as
   // 0.5 for your TB (not the 1.0 that they get for the bye)
   // 
-  def msoBuccholz(p: Player): Double =
-    tournament.resultsForPlayer(p).map(msoBuccholzForGame).sum
+  def msoBuchholz(p: Player): Double =
+    tournament.resultsForPlayer(p).map(msoBuchholzForGame).sum
 
-  def msoBuccholzForGame(g: Result): Double =
+  def msoBuchholzForGame(g: Result): Double =
     g match {
       // Regular game played with regular result
       case Result(_, Hero(Player(_), Present), _, Foe(p: Player)) => scoreForOpponentTiebreak(p)
