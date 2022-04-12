@@ -187,7 +187,7 @@ object Api {
     pieceMap.toMap
   }
 
-  private def convertUciMoves(movesList: Option[List[String]]): Option[List[String]] =
+  def lilaUciToFairyUci(movesList: Option[List[String]]): Option[List[String]] =
     movesList.map(
       _.map(m =>
         m match {
@@ -200,6 +200,29 @@ object Api {
         }
       )
     )
+
+  private val fairyPromotion = "^(.*)\\+$".r
+
+  def fairyUciToLilaUci(variant: Variant, movesList: Option[List[String]]): Option[List[String]] =  {
+    movesList.map(moveList => {
+      var position = positionFromVariant(variant)
+      moveList.map(m => {
+        val pieceMap = position.pieceMap
+        position = position.makeMoves(List(m));
+        m match {
+          case fairyPromotion(baseUci) => {
+            Uci(variant.gameFamily, baseUci) match {
+              case Some(baseMove: Uci.Move) => {
+                f"${baseUci}${pieceMap(baseMove.orig).forsyth}"
+              }
+              case _ => m
+            }
+          }
+          case _ => m
+        }
+      })
+    })
+  }
 
   // Actual API wrapper
   def version: String = FairyStockfish.version()
@@ -215,7 +238,7 @@ object Api {
 
   def positionFromMoves(variantName: String, fen: String, movesList: Option[List[String]] = None): Position =
     positionFromVariantNameAndFEN(variantName, fen)
-      .makeMoves(convertUciMoves(movesList).getOrElse(List.empty))
+      .makeMoves(lilaUciToFairyUci(movesList).getOrElse(List.empty))
 
   def pieceMapFromFen(variantName: String, fen: String): PieceMap =
     positionFromMoves(variantName, fen).pieceMap
