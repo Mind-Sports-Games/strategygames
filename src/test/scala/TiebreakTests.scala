@@ -143,51 +143,51 @@ class TiebreakTests extends Specification with ValidatedMatchers {
   "derarzt results" should {
     tourney.score(draughts.derarzt) must_== 14
     tourney.lilaSonnenbornBerger(draughts.derarzt) must_== 52
-    tourney.msoBuchholz(draughts.derarzt) must_== 47
+    tourney.fideBuchholz(draughts.derarzt) must_== 47
   }
   "ayala results" should {
     tourney.score(draughts.ayala) must_== 12
     tourney.lilaSonnenbornBerger(draughts.ayala) must_== 34
-    tourney.msoBuchholz(draughts.ayala) must_== 55
+    tourney.fideBuchholz(draughts.ayala) must_== 55
   }
   "rapha results" should {
     tourney.score(draughts.rapha) must_== 10
     tourney.lilaSonnenbornBerger(draughts.rapha) must_== 30
-    tourney.msoBuchholz(draughts.rapha) must_== 51
+    tourney.fideBuchholz(draughts.rapha) must_== 51
   }
   "irina results" should {
     tourney.score(draughts.irina) must_== 8
     tourney.lilaSonnenbornBerger(draughts.irina) must_== 22
-    tourney.msoBuchholz(draughts.irina) must_== 53
+    tourney.fideBuchholz(draughts.irina) must_== 53
   }
   "berserker results" should {
     tourney.score(draughts.berserk) must_== 6
     tourney.lilaSonnenbornBerger(draughts.berserk) must_== 10
-    tourney.msoBuchholz(draughts.berserk) must_== 56
+    tourney.fideBuchholz(draughts.berserk) must_== 56
   }
   "megamau results" should {
     tourney.score(draughts.mega) must_== 6
     tourney.lilaSonnenbornBerger(draughts.mega) must_== 8
-    tourney.msoBuchholz(draughts.mega) must_== 54
+    tourney.fideBuchholz(draughts.mega) must_== 54
   }
   "statmatt results" should {
     tourney.score(draughts.matt) must_== 6
     tourney.lilaSonnenbornBerger(draughts.matt) must_== 8
-    tourney.msoBuchholz(draughts.matt) must_== 47
+    tourney.fideBuchholz(draughts.matt) must_== 47
   }
   "mankalacz results" should {
     tourney.score(draughts.manka) must_== 4
     tourney.lilaSonnenbornBerger(draughts.manka) must_== 4
-    tourney.msoBuchholz(draughts.manka) must_== 43
+    tourney.fideBuchholz(draughts.manka) must_== 43
   }
   "funwithflags results" should {
     tourney.score(draughts.fun) must_== 4
     tourney.lilaSonnenbornBerger(draughts.fun) must_== 0
-    tourney.msoBuchholz(draughts.fun) must_== 44
+    tourney.fideBuchholz(draughts.fun) must_== 44
   }
   "egormmaksymov341 results" should {
     tourney.score(draughts.egor) must_== 0
     tourney.lilaSonnenbornBerger(draughts.egor) must_== 0
-    tourney.msoBuchholz(draughts.egor) must_== 0
+    tourney.fideBuchholz(draughts.egor) must_== 0
   }
 }
