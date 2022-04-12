@@ -48,8 +48,10 @@ class Tiebreak(val tournament: Tournament) {
   def score(p: Player): Double =
     scoreAtRound(p, tournament.nbRounds)
 
-  def scoreForOpponentTiebreak(p: Player): Double =
-    tournament.resultsForPlayer(p).map(scoreForOpponentTiebreak).sum
+  def scoreForOpponentTiebreak(scoreForOpponentTiebreakResult: Result => Double)(p: Player): Double =
+    tournament.resultsForPlayer(p).map(scoreForOpponentTiebreakResult).sum
+
+  val fideScoreForOpponentTiebreak = scoreForOpponentTiebreak(fideScoreForOpponentTiebreakResult) _
 
   def score(g: Result): Double =
     g match {
@@ -61,15 +63,21 @@ class Tiebreak(val tournament: Tournament) {
       case _ => Loss
     }
 
-  def scoreForOpponentTiebreak(g: Result): Double =
+  private def fideScoreForOpponentTiebreakResult(g: Result): Double =
     g match {
       // Regular game played with regular result
       case Result(_, Hero(Player(_), Present), WonAgainst, Foe(Player(_))) => Win
       case Result(_, Hero(Player(_), Present), DrewWith, Foe(Player(_)))   => Draw
       case Result(_, Hero(Player(_), Present), LostTo, Foe(Player(_)))     => Loss
 
-      case Result(_, Hero(Player(_), Present), WonAgainst, Foe(Virtual)) => Draw
-      case Result(_, Hero(Player(_), Absent), _, Foe(Virtual)) => Draw
+      // According to FIDE:
+      // 13.15.3: For tie-break purposes all unplayed games in which players are
+      // indirectely (sic) involved (results by forfeit of opponents) are consid-
+      // ered to have been drawn"
+      //
+      // Both the extra quote AND the mispelling are part of the doc:
+      // https://handbook.fide.com/files/handbook/C02Standards.pdf
+      case Result(_, Hero(Player(_), _), _, Foe(Virtual)) => Draw
 
       // Not sure any of the rest of these make any sense.
       case _ => Loss
@@ -97,7 +105,7 @@ class Tiebreak(val tournament: Tournament) {
   def fideBuchholzForGame(g: Result): Double =
     g match {
       // Regular game played with regular result
-      case Result(_, Hero(Player(_), Present), _, Foe(p: Player)) => scoreForOpponentTiebreak(p)
+      case Result(_, Hero(Player(_), Present), _, Foe(p: Player)) => fideScoreForOpponentTiebreak(p)
 
       case Result(round, Hero(p: Player, Present), WonAgainst, Foe(Virtual)) =>
         virtualOpponentScoreAtRound(p, round)
