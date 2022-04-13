@@ -18,8 +18,8 @@ class TournamentEY1k6otN extends Tournament {
   val fun     = Player("FunWithFlags")
   val egor    = Player("egormmaksymov341")
 
-  val nbRounds                                       = 7
-  val players                                        = List(
+  val nbRounds = 7
+  val players  = List(
     derarzt,
     ayala,
     rapha,
@@ -31,6 +31,7 @@ class TournamentEY1k6otN extends Tournament {
     fun,
     egor
   )
+
   def resultsForPlayer(player: Player): List[Result] =
     player.id match {
       case "derarzt"          =>
@@ -146,8 +147,8 @@ class TournamentUW8K3BjW extends Tournament {
   val statmatt   = Player("statmatt")
   val lakin2     = Player("lakin2")
 
-  val nbRounds                                       = 5
-  val players                                        = List(
+  val nbRounds = 5
+  val players  = List(
     james_test,
     statmatt2,
     jheps,
@@ -155,6 +156,7 @@ class TournamentUW8K3BjW extends Tournament {
     statmatt,
     lakin2
   )
+
   def resultsForPlayer(player: Player): List[Result] =
     player.id match {
       case "james_test" =>
@@ -265,7 +267,7 @@ class TiebreakTests extends Specification with ValidatedMatchers {
   val flipello1        = new TournamentUW8K3BjW();
   val flipello1Tourney = new Tiebreak(flipello1);
 
-  //--------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
   // This is the value that each player represents on a tie break with the
   // explanation. Remember all points are doubled.
   // lakin2     - 3 points => 3 points from the games where they were withdrawn
@@ -280,7 +282,7 @@ class TiebreakTests extends Specification with ValidatedMatchers {
   //                       => 1 from their withdrawn final round game
   // james_test - 9 points => 8 from wins
   //                       => 1 from draw
-  //--------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
   "james_test results" should {
     flipello1Tourney.score(flipello1.james_test) must_== 9.0
     // played:    lakin2 + statmatt2 + jheps + lakin + statmatt
