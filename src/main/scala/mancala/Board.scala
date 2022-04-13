@@ -11,7 +11,8 @@ case class Board(
     pieces: PieceMap,
     history: History,
     variant: Variant,
-    uciMoves: List[String] = List()
+    uciMoves: List[String] = List(),
+    position: Option[Api.Position] = None
 ) {
 
   def apply(at: Pos): Option[Piece] = pieces get at
@@ -36,6 +37,11 @@ case class Board(
   def valid(strict: Boolean) = variant.valid(this, strict)
 
   def materialImbalance: Int = variant.materialImbalance(this)
+
+  lazy val apiPosition = position match {
+    case Some(position) => position
+    case None           => Api.positionFromVariantAndMoves(variant, uciMoves)
+  }
 
   override def toString = s"$variant Position after ${history.lastMove}"
 }

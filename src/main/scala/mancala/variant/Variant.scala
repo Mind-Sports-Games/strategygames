@@ -41,9 +41,9 @@ abstract class Variant private[variant] (
   def perfId: Int
   def perfIcon: Char
 
-  def initialFen: FEN = format.FEN("dddddd/dddddd[-] w 0 1")
+  def initialFen: FEN = format.FEN("DDDDDD/DDDDDD 0 0 S")
 
-  def pieces: Map[Pos, Piece] = Map.empty[Pos,Piece]
+  def pieces: Map[Pos, Piece] = Api.pieceMapFromFen(key, initialFen.value) 
 
   def startPlayer: Player = P1
 
@@ -53,9 +53,42 @@ abstract class Variant private[variant] (
   //in just atomic, so can leave as true for now
   def isValidPromotion(promotion: Option[PromotableRole]): Boolean = true
 
-  def validMoves(situation: Situation): Map[Pos, List[Move]] =
-    Map.empty[Pos, List[Move]]
-
+  def validMoves(situation: Situation): Map[Pos, List[Move]] = {
+    situation.board.apiPosition.legalMoves
+      .map{ move => 
+        val numSeeds = situation.board.apiPosition.fen.owareStoneArray(move)
+        (
+        move,
+        Pos(move),
+        Pos((numSeeds + move + (numSeeds - 1)/11) % 12) //dest -- seeds + move position + skipping own house
+        )
+      }
+      .map{ 
+        case (move, Some(orig), Some(dest)) => {
+          val uciMove     = s"${orig.key}${dest.key}"
+          val newPosition = situation.board.apiPosition.makeMove(move)
+            (
+              orig,
+              Move(
+                piece = situation.board.pieces(orig),
+                orig = orig,
+                dest = dest,
+                situationBefore = situation,
+                after = situation.board.copy(
+                  pieces = newPosition.pieceMap,
+                  uciMoves = (situation.board.uciMoves :+ uciMove),
+                  position = newPosition.some
+                ),
+                capture = None,
+                promotion = None
+              )
+            )
+        }
+        case (_, orig, dest) => sys.error(s"Invalid position from uci: ${orig}${dest}")
+      }
+      .groupBy(_._1)
+      .map { case (k, v) => (k, v.toList.map(_._2)) }
+  }
 
   def move(
       situation: Situation,
@@ -111,7 +144,7 @@ abstract class Variant private[variant] (
     board
 
   def valid(board: Board, strict: Boolean): Boolean =
-    true // Api.validateFEN(name, Forsyth.exportBoard(board))
+    Api.validateFEN(Forsyth.exportBoard(board)) 
 
   val roles: List[Role] = Role.all
 

@@ -286,6 +286,16 @@ case object TwentySixStone extends Role {
   val valueOf = Option(1)
 }
 
+case object TwentySevenStone extends Role {
+  val mancalaID  = Role.twentySevenStone
+  val forsyth    = 'a'
+  val binaryInt  = 27
+  val hashInt    = 27
+  val storable = true
+  val gameFamily = GameFamily.Mancala()
+  val valueOf = Option(1)
+}
+
 object Role {
   //---------------------------------------------------
   // These are all of the pieces that mancala supports
@@ -320,6 +330,7 @@ object Role {
   val twentyFourStone   = MancalaRoleID(24)
   val twentyFiveStone   = MancalaRoleID(25)
   val twentySixStone    = MancalaRoleID(26)
+  val twentySevenStone  = MancalaRoleID(27)
   val undefined         = MancalaRoleID(0)
 
   val all: List[Role] =
@@ -349,7 +360,8 @@ object Role {
       TwentyThreeStone,
       TwentyFourStone,
       TwentyFiveStone,
-      TwentySixStone
+      TwentySixStone,
+      TwentySevenStone
     )
 
   def allByGameFamily(gf: GameFamily): List[Role] =

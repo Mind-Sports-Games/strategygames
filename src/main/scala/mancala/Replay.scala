@@ -61,6 +61,7 @@ object Replay {
     before: Game,
     orig: Pos,
     dest: Pos,
+    apiPosition: Api.Position,
     uciMoves: List[String]
   ): Move =
     Move(
@@ -69,8 +70,9 @@ object Replay {
       dest = dest,
       situationBefore = before.situation,
       after = before.situation.board.copy(
-        // pieces = apiPosition.pieceMap,
-        uciMoves = uciMoves
+        pieces = apiPosition.pieceMap,
+        uciMoves = uciMoves,
+        position = apiPosition.some
       ),
       capture = None,
       promotion = None
@@ -88,6 +90,8 @@ object Replay {
     var uciMoves = init.situation.board.uciMoves
     var errors = ""
 
+    def getApiPosition(uciMove: String) = state.board.apiPosition.makeMoves(List(uciMove).map(m => Api.uciToMove(m)))
+
     def replayMoveFromUci(orig: Option[Pos], dest: Option[Pos], promotion: String): (Game, Uci.WithSan) =
       (orig, dest) match {
         case (Some(orig), Some(dest)) => {
@@ -98,7 +102,7 @@ object Replay {
           }}"
           uciMoves = uciMoves :+ uciMove
           state = state.apply(
-            replayMove(state, orig, dest, uciMoves)
+            replayMove(state, orig, dest, getApiPosition(uciMove), uciMoves)
           )
           (state, Uci.WithSan(Uci(pgnMove).get, "NOSAN"))
         }

@@ -34,6 +34,20 @@ final case class FEN(value: String) extends AnyVal {
           }
       case None => 0
       }
+  
+  def owareStoneArray: Array[Int] = 
+    value.split(' ').take(1).flatMap(x => x).map(c =>
+      c.toString() match{
+        case "/" => 999 //row divider
+        case "1" => 0 //empty
+        case _ => 
+          c.toInt match{
+            case y if y <= 90 => y - 64
+            case y if y > 96  => y - 70
+          } 
+      }
+    ).filter(x => x != 999)
+
 
   // def ply: Option[Int] =
   //   fullMove map { fm =>

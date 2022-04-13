@@ -15,9 +15,9 @@ case class Situation(board: Board, player: Player) {
 
   def history = board.history
 
-  private lazy val gameEnd: Boolean = false
+  private lazy val gameEnd: Boolean = board.apiPosition.gameEnd
 
-  private lazy val gameResult: GameResult = GameResult.Ongoing()
+  private lazy val gameResult: GameResult = board.apiPosition.gameResult
 
   private lazy val result =
     if (gameEnd) gameResult

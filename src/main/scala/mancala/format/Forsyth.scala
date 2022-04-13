@@ -11,19 +11,20 @@ import strategygames.mancala.variant.{ Variant }
   */
 object Forsyth {
 
-  val initial = FEN("dddddd/dddddd[-] w 0 1")
+  val initial = FEN("DDDDDD/DDDDDD 0 0 S")
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
-    // val apiPosition = Api.positionFromVariantNameAndFEN(variant.name, fen.value)
+    val apiPosition = Api.positionFromVariantNameAndFEN(variant.name, fen.value)
     Some(Situation(
       Board(
         pieces = Map.empty[Pos,Piece],
         history = History(),
         variant = variant,
+        position = apiPosition.some
       ),
-      fen.value.split(' ')(1) match {
-        case "w" => P1
-        case "b" => P2
+      fen.value.split(' ')(3) match {
+        case "S" => P1
+        case "N" => P2
         case _ => sys.error("Invalid player in fen")
       }
     ))
@@ -58,7 +59,7 @@ object Forsyth {
 
   def exportBoard(board: Board): String = exportBoardFen(board).value
 
-  def exportBoardFen(board: Board): FEN = format.FEN("dddddd/dddddd[-] w 0 1")
+  def exportBoardFen(board: Board): FEN = board.apiPosition.fen
 
   def boardAndPlayer(situation: Situation): String =
     boardAndPlayer(situation.board, situation.player)

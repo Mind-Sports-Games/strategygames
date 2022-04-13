@@ -1,9 +1,11 @@
 package strategygames.mancala
 
 import com.joansala.game.oware.OwareGame
+import com.joansala.game.oware.OwareBoard
 
 import cats.implicits._
 
+import strategygames.{ GameFamily, Player }
 import strategygames.mancala.format.{ FEN }
 import strategygames.mancala.variant.Variant
 
@@ -22,8 +24,6 @@ object GameResult {
 
 }
 
-trait OwareBoard;
-
 object Api {
 
   abstract class Position {
@@ -36,7 +36,7 @@ object Api {
     def toCoordinates(move: Int): String
     def toNotation (moves: List[Int]): String
     def toMoves(notation: String): List[Int]
-    def toDiagram: String
+    val owareDiagram: String
 
     val fen: FEN
     //val isImmediateGameEnd: (Boolean, GameResult)
@@ -48,7 +48,7 @@ object Api {
     //def hasGameCycle(ply: Int): Boolean
     //val hasRepeated: Boolean
 
-    //val pieceMap: PieceMap
+    val pieceMap: PieceMap
     //val piecesInHand: Array[Piece]
 
     //val optionalGameEndResult: GameResult
@@ -82,31 +82,42 @@ object Api {
     //helper
     def toBoard: String = position.toBoard.toString
 
+    def setBoard(owareBoard: OwareBoard): Unit = position.setBoard(owareBoard)
     def toCoordinates(move: Int): String = position.toBoard().toCoordinates(move)
     def toNotation (moves: List[Int]): String = position.toBoard().toNotation(moves.toArray)
 
     def toMoves(notation: String): List[Int] = position.toBoard().toMoves(notation).toList
 
-    def toDiagram: String = position.toBoard().toDiagram()
+    val owareDiagram: String = position.toBoard().toDiagram()
 
     private val numHouses = variant.boardSize.width * variant.boardSize.height
-    val getFEN: String = position.toBoard().toDiagram().split('-').map{ part => 
-      part match {
-        case "0" => "1" //empty
-        case "S" => "w" //player 1
-        case "N" => "b" //player 2
-        case _ => 
-          part.toIntOption match {
-            case Some(x: Int) => 
-              x match {
-                case x if x < 27  => (x + 64).toChar
-                case x if x >= 27 => (x + 70).toChar
-                case x if x > 52 => sys.error("expected number of stones less than 53, got " + x.toString())
-              }
-            case _ => "" // should never get here....
-          }
+    val getFEN: String = 
+      owareDiagram
+      .split('-')
+      .take(numHouses)
+      .map{ part => 
+        part match {
+          case "0" => "1" //empty house
+          case _ => 
+            part.toIntOption match {
+              case Some(x: Int) => 
+                x match {
+                  case x if x < 27  => (x + 64).toChar
+                  case x if x >= 27 => (x + 70).toChar
+                  case x if x > 52 => sys.error("expected number of stones less than 53, got " + x.toString())
+                }
+              case _ => sys.error("expected integer number of string in owareDiagram: " + owareDiagram)
+            }
+        }
       }
-    }.mkString("").patch(numHouses + 2, " ", 0).patch(numHouses + 1, " ", 0).patch(numHouses, " ", 0).patch(variant.boardSize.width, "/", 0)
+      .mkString("")
+      .patch(variant.boardSize.width, "/", 0)
+      .concat(" ")
+      .concat(owareDiagram.split('-')(numHouses))
+      .concat(" ")
+      .concat(owareDiagram.split('-')(numHouses + 1))
+      .concat(" ")
+      .concat(owareDiagram.split('-')(numHouses + 2))
     
     def toPosition = position.toBoard().position()
 
@@ -132,8 +143,32 @@ object Api {
     //def hasGameCycle(ply: Int): Boolean = position.hasGameCycle(ply)
     //lazy val hasRepeated: Boolean       = position.hasRepeated()
 
-    //lazy val pieceMap: PieceMap =
-    //  convertPieceMap(position.piecesOnBoard(), variant.gameFamily)
+    private def pieceFromStonesAndIndex(stones: Int, index: Int): Piece = {
+      Piece(if (index < 6) Player.P1 else Player.P2,
+            Role.allByMancalaID(GameFamily.Mancala()).get(stones).getOrElse(Role.all(0)) 
+      )
+    }
+
+    private def convertPieceMapFromFen(fen: String): PieceMap = {
+      val pm = scala.collection.mutable.Map[Pos, Piece]()
+      val l = FEN(fen).owareStoneArray.zipWithIndex.map{case (seeds, index) => 
+        seeds match {
+          case 0 => (None, None)
+          case n => 
+            (
+              Pos(index),
+              pieceFromStonesAndIndex(n, index)
+            )
+        }
+      }
+      .map{ case (Some(pos), Some(piece)) => (pos, piece)}
+
+      l.foreach{case (pos, piece) => pm(pos) -> piece}
+
+      return pm.toMap
+    } 
+  
+    lazy val pieceMap: PieceMap = convertPieceMapFromFen(getFEN)
 
     //lazy val piecesInHand: Array[Piece] =
     //  vectorOfPiecesToPieceArray(position.piecesInHand(), variant.gameFamily)
@@ -160,31 +195,68 @@ object Api {
     val playerTurn: Int = position.turn()
   }
 
+
   def position: Position =
     new OwarePosition(new OwareGame())
 
-//  def positionFromVariant(variant: Variant): Position =
-//    new FairyPosition(new FairyStockfish.Position(variant.name))
+ def positionFromVariant(variant: Variant): Position =
+   variant.key match {
+     case "oware" => new OwarePosition(new OwareGame())
+     case _       => new OwarePosition(new OwareGame())
+   }
+
 //
 //  def positionFromVariantName(variantName: String): Position =
 //    new FairyPosition(new FairyStockfish.Position(variantName))
 //
-//  def positionFromVariantNameAndFEN(variantName: String, fen: String): Position =
-//    new FairyPosition(new FairyStockfish.Position(variantName, fen))
-//
-//  def positionFromVariantAndMoves(variant: Variant, uciMoves: List[String]): Position =
-//    positionFromVariant(variant).makeMoves(uciMoves)
 
-//  def initialFen(variantName: String): FEN = FEN(FairyStockfish.initialFen(variantName))
-//
-//  def validateFEN(variantName: String, fen: String): Boolean =
-//    FairyStockfish.validateFEN(variantName, fen)
+  def positionFromVariantNameAndFEN(variantName: String, fen: String): Position = {
+      val game = new OwareGame()
+      game.setBoard(owareBoardFromFen(fen))
+      variantName match {
+        case "oware" => new OwarePosition(game)
+        case _ => new OwarePosition(new OwareGame())
+      }
+    }
 
-//  def positionFromMoves(variantName: String, fen: String, movesList: Option[List[String]] = None): Position =
-//    positionFromVariantNameAndFEN(variantName, fen)
-//      .makeMoves(convertUciMoves(movesList).getOrElse(List.empty))
-//
-//  def pieceMapFromFen(variantName: String, fen: String): PieceMap =
-//    positionFromMoves(variantName, fen).pieceMap
+  def owareBoardFromFen(fen: String): OwareBoard = {
+    val myFen = FEN(fen)
+    val position: Array[Int] = myFen.owareStoneArray :+ myFen.player1Score :+ myFen.player2Score
+    val turn: Int = if(fen.split(" ").last == "S") 1 else -1
+    new OwareBoard(position, turn)
+  }
+
+  def positionFromVariantAndMoves(variant: Variant, uciMoves: List[String]): Position =
+    positionFromVariant(variant).makeMoves(uciMoves.map(m => uciToMove(m)))
+
+  //assumption for uci that 'a1' is bottom left for South player.
+  def uciToMove(uciMove: String): Int = {
+    uciMove(1).toString() match {
+      case "1" => uciMove(0).toInt - 97
+      case _   => 11 - ( uciMove(0).toInt - 97 )
+    }
+  }
+
+  def moveToUci(move: Int): String ={
+    move match {
+      case x if x < 6 => s"${(x + 97).toChar}1"
+      case _          => s"${((11 - move) + 97).toChar}2"
+    }
+  }
+
+  //  def initialFen(variantName: String): FEN = FEN(FairyStockfish.initialFen(variantName))
+  //
+
+   def validateFEN(fen: String): Boolean =
+      fen.matches("[A-Za-z0-6]{1,6}/[A-Za-z0-6]{1,6} [\\d]+ [\\d]+ [N|S]")
+
+  //  def positionFromMoves(variantName: String, fen: String, movesList: Option[List[String]] = None): Position =
+  //    positionFromVariantNameAndFEN(variantName, fen)
+  //      .makeMoves(convertUciMoves(movesList).getOrElse(List.empty))
+  //
+
+  def pieceMapFromFen(variantName: String, fen: String): PieceMap = {
+    positionFromVariantNameAndFEN(variantName, fen).pieceMap
+  }
 
 }
