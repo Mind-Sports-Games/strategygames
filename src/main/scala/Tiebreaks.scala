@@ -12,7 +12,7 @@ sealed trait POV
 case class Hero(participant: Player, presence: Presence) extends POV
 case class Foe(participant: Participant)                 extends POV
 
-// Results are always from a particualar point-of-view. So we only need
+// Results are always from a particular point-of-view. So we only need
 // the three cases.
 sealed trait Outcome
 case object WonAgainst extends Outcome
