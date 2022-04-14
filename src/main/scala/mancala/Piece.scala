@@ -22,4 +22,9 @@ object Piece {
       Piece(Player.fromP1(c.isUpper), _)
     }
 
+  def fromStoneNumber(player: Player, n: Int): Option[Piece] =
+    Role.allByBinaryInt get n map {
+      Piece(player, _)
+    }
+
 }

@@ -37,9 +37,40 @@ class OwareApiTest extends Specification with ValidatedMatchers {
     "Piece map of Oware setup" should {
         val game = Api.position
         val pieceMap: PieceMap = game.pieceMap
+        val roleAtA1: Role = pieceMap.get(Pos.A1) match {
+            case Some(piece) => piece.role
+            case None => OneStone
+        }
         "12 starting pieces " in {
             pieceMap.size must_== 12
         }
+        "fourstone in pos 0" in {
+            roleAtA1 must_== FourStone
+        }
+    }
+
+    "Piece map of Oware game" should {
+        val game = Api.position
+        val newGame = game.makeMoves(List(0,6,3,7,4))
+        val position = Api.positionFromFen(newGame.fen.value)
+         val fen = newGame.fen // looking for 577812 (top) 165--6 (bot)
+        println(newGame.legalMoves.size)
+        println(newGame.fen)
+        println(position.fen)
+        // val pieceMap: PieceMap = position.pieceMap
+        // val roleAtC1: Role = pieceMap.get(Pos.C1) match {
+        //     case Some(piece) => piece.role
+        //     case None => OneStone
+        // }
+        "fen after a few moves" in {
+            fen must_== "AFE11F/EGGHAB 0 0 N"
+        }
+        // "10 current pieces " in {
+        //     pieceMap.size must_== 10
+        // }
+        // "fiveStone in pos 2/c1" in {
+        //     roleAtC1 must_== FiveStone
+        // }
     }
 
 }

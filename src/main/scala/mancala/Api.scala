@@ -90,6 +90,8 @@ object Api {
     val owareDiagram: String = position.toBoard().toDiagram()
 
     private val numHouses = variant.boardSize.width * variant.boardSize.height
+
+    //TODO fix fen creation as not processing in correct order for 2nd row
     val getFEN: String = 
       owareDiagram
       .split('-')
@@ -142,30 +144,20 @@ object Api {
     //def hasGameCycle(ply: Int): Boolean = position.hasGameCycle(ply)
     //lazy val hasRepeated: Boolean       = position.hasRepeated()
 
-    private def pieceFromStonesAndIndex(stones: Int, index: Int): Piece = {
-      Piece(if (index < 6) Player.P1 else Player.P2,
-            Role.allByMancalaID(GameFamily.Mancala()).get(stones).getOrElse(Role.all(0)) 
-      )
-    }
-
-    //TODO fix this function! 
-    def convertPieceMapFromFen(fen: String): PieceMap = {
-      val pm = scala.collection.mutable.Map[Pos, Piece]()
-      val l = FEN(fen).owareStoneArray.zipWithIndex.map{case (seeds, index) => 
+    
+    def convertPieceMapFromFen(fenString: String): PieceMap = {
+      FEN(fenString).owareStoneArray.zipWithIndex.map{case (seeds, index) => 
         seeds match {
           case 0 => (None, None)
           case n => 
             (
               Pos(index),
-              pieceFromStonesAndIndex(n, index)
+              Piece.fromStoneNumber(if (index < 6) Player.fromP1(true) else Player.fromP1(false), n)
             )
         }
       }
-      .map{ case (Some(pos), piece) => (pos, piece)}
-
-      l.foreach{case (pos, piece) => pm(pos) -> piece}
-
-      return pm.toMap
+      .map{ case (Some(pos), Some(piece)) => pos -> piece}
+      .toMap      
     } 
   
     lazy val pieceMap: PieceMap = convertPieceMapFromFen(getFEN)
@@ -210,20 +202,26 @@ object Api {
 //    new FairyPosition(new FairyStockfish.Position(variantName))
 //
 
-  def positionFromVariantNameAndFEN(variantName: String, fen: String): Position = {
+  def positionFromFen(fenString: String): Position = {
+    val game = new OwareGame()
+    game.setBoard(owareBoardFromFen(fenString))
+    new OwarePosition(game)
+  }
+
+  def positionFromVariantNameAndFEN(variantName: String, fenString: String): Position = {
       val game = new OwareGame()
-      game.setBoard(owareBoardFromFen(fen))
+      game.setBoard(owareBoardFromFen(fenString))
       variantName match {
         case "oware" => new OwarePosition(game)
         case _ => new OwarePosition(new OwareGame())
       }
     }
 
-  def owareBoardFromFen(fen: String): OwareBoard = {
-    val myFen = FEN(fen)
-    val position: Array[Int] = myFen.owareStoneArray :+ myFen.player1Score :+ myFen.player2Score
-    val turn: Int = if(fen.split(" ").last == "S") 1 else -1
-    new OwareBoard(position, turn)
+  def owareBoardFromFen(fenString: String): OwareBoard = {
+    val myFen = FEN(fenString)
+    val posFromFen: Array[Int] = myFen.owareStoneArray :+ myFen.player1Score :+ myFen.player2Score
+    val turn: Int = if(fenString.split(" ").last == "S") 1 else -1
+    new OwareBoard(posFromFen, turn)
   }
 
   def positionFromVariantAndMoves(variant: Variant, uciMoves: List[String]): Position =
@@ -244,19 +242,19 @@ object Api {
     }
   }
 
-  //  def initialFen(variantName: String): FEN = FEN(FairyStockfish.initialFen(variantName))
-  //
+  val initialFen: FEN = variant.Oware.initialFen
+  
 
-   def validateFEN(fen: String): Boolean =
-      fen.matches("[A-Za-z0-6]{1,6}/[A-Za-z0-6]{1,6} [\\d]+ [\\d]+ [N|S]")
+  def validateFEN(fenString: String): Boolean =
+    fenString.matches("[A-Za-z0-6]{1,6}/[A-Za-z0-6]{1,6} [\\d]+ [\\d]+ [N|S]")
 
   //  def positionFromMoves(variantName: String, fen: String, movesList: Option[List[String]] = None): Position =
   //    positionFromVariantNameAndFEN(variantName, fen)
   //      .makeMoves(convertUciMoves(movesList).getOrElse(List.empty))
   //
 
-  def pieceMapFromFen(variantName: String, fen: String): PieceMap = {
-    positionFromVariantNameAndFEN(variantName, fen).pieceMap
+  def pieceMapFromFen(variantName: String, fenString: String): PieceMap = {
+    positionFromVariantNameAndFEN(variantName, fenString).pieceMap
   }
 
 }
