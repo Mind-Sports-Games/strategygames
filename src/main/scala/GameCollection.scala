@@ -214,7 +214,7 @@ object GameFamily {
     def defaultVariant    = Variant.FairySF(strategygames.fairysf.variant.Shogi)
     def variants          = Variant.all(GameLogic.FairySF()).filter(_.gameFamily == this)
     def displayPiece      = "0KE"
-    def pieceSetThemes    = List("2kanji", "ctw")
+    def pieceSetThemes    = List("2kanji", "1kanji", "ctw")
     def pieceSetDefault   = "2kanji"
     def boardThemes       = List("wood", "clear")
     def boardThemeDefault = "wood"
