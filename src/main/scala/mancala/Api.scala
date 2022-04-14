@@ -49,7 +49,6 @@ object Api {
     //val hasRepeated: Boolean
 
     val pieceMap: PieceMap
-    //val piecesInHand: Array[Piece]
 
     //val optionalGameEndResult: GameResult
     val gameResult: GameResult
@@ -149,7 +148,8 @@ object Api {
       )
     }
 
-    private def convertPieceMapFromFen(fen: String): PieceMap = {
+    //TODO fix this function! 
+    def convertPieceMapFromFen(fen: String): PieceMap = {
       val pm = scala.collection.mutable.Map[Pos, Piece]()
       val l = FEN(fen).owareStoneArray.zipWithIndex.map{case (seeds, index) => 
         seeds match {
@@ -161,7 +161,7 @@ object Api {
             )
         }
       }
-      .map{ case (Some(pos), Some(piece)) => (pos, piece)}
+      .map{ case (Some(pos), piece) => (pos, piece)}
 
       l.foreach{case (pos, piece) => pm(pos) -> piece}
 
@@ -199,11 +199,11 @@ object Api {
   def position: Position =
     new OwarePosition(new OwareGame())
 
- def positionFromVariant(variant: Variant): Position =
-   variant.key match {
-     case "oware" => new OwarePosition(new OwareGame())
-     case _       => new OwarePosition(new OwareGame())
-   }
+  def positionFromVariant(variant: Variant): Position =
+    variant.key match {
+      case "oware" => new OwarePosition(new OwareGame())
+      case _       => new OwarePosition(new OwareGame())
+    }
 
 //
 //  def positionFromVariantName(variantName: String): Position =
