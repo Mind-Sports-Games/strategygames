@@ -8,7 +8,18 @@ class OwareApiTest extends Specification with ValidatedMatchers {
     "Oware initial fen" should {
         val fen = variant.Oware.initialFen.value
         "be valid" in {
-        Api.validateFEN( fen ) must_== true
+            Api.validateFEN( fen ) must_== true
+        }
+    }
+
+    "Oware invalid fen" should {
+        val fen = "RRRRRR/RRRRRR E J S"
+        "false due to too many pieces" in {
+            Api.validateFEN(fen) must_== false
+        }
+        val fen2 = "3EEE/4RR 0 F N"
+         "false due to only allowing 1's for empty spaces" in {
+            Api.validateFEN(fen2) must_== false
         }
     }
 
@@ -163,6 +174,7 @@ class OwareApiTest extends Specification with ValidatedMatchers {
             position.gameResult must_== GameResult.Draw()
         }
     }
+
 
 
 }

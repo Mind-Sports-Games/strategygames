@@ -8,6 +8,7 @@ import cats.implicits._
 import strategygames.{ Player }
 import strategygames.mancala.format.{ FEN }
 import strategygames.mancala.variant.Variant
+import scala.util.{Try, Success, Failure}
 
 sealed abstract class GameResult extends Product with Serializable
 
@@ -247,8 +248,14 @@ object Api {
   val initialFen: FEN = variant.Oware.initialFen
   
 
-  def validateFEN(fenString: String): Boolean =
-    fenString.matches("[A-Za-z0-6]{1,6}/[A-Za-z0-6]{1,6} [\\d]+ [\\d]+ [N|S]")
+  def validateFEN(fenString: String): Boolean = {
+    val owareBoard = Try(owareBoardFromFen(fenString))
+    val owareBoardCreation = owareBoard match {
+      case Success(_) => true
+      case Failure(_) => false
+    }
+    fenString.matches("[A-Za-z0-6]{1,6}/[A-Za-z0-6]{1,6} [A-Za-z0]+ [A-Za-z0]+ [N|S]") && owareBoardCreation
+  }
 
   //  def positionFromMoves(variantName: String, fen: String, movesList: Option[List[String]] = None): Position =
   //    positionFromVariantNameAndFEN(variantName, fen)
