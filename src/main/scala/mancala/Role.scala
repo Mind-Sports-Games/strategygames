@@ -296,6 +296,256 @@ case object TwentySevenStone extends Role {
   val valueOf = Option(1)
 }
 
+case object TwentyEightStone extends Role {
+  val mancalaID  = Role.twentyEightStone
+  val forsyth    = 'b'
+  val binaryInt  = 28
+  val hashInt    = 28
+  val storable = true
+  val gameFamily = GameFamily.Mancala()
+  val valueOf = Option(1)
+}
+
+case object TwentyNineStone extends Role {
+  val mancalaID  = Role.twentyNineStone
+  val forsyth    = 'c'
+  val binaryInt  = 29
+  val hashInt    = 29
+  val storable = true
+  val gameFamily = GameFamily.Mancala()
+  val valueOf = Option(1)
+}
+
+case object ThirtyStone extends Role {
+  val mancalaID  = Role.thirtyStone
+  val forsyth    = 'd'
+  val binaryInt  = 30
+  val hashInt    = 30
+  val storable = true
+  val gameFamily = GameFamily.Mancala()
+  val valueOf = Option(1)
+}
+
+case object ThirtyOneStone extends Role {
+  val mancalaID  = Role.thirtyOneStone
+  val forsyth    = 'e'
+  val binaryInt  = 31
+  val hashInt    = 31
+  val storable = true
+  val gameFamily = GameFamily.Mancala()
+  val valueOf = Option(1)
+}
+
+case object ThirtyTwoStone extends Role {
+  val mancalaID  = Role.thirtyTwoStone
+  val forsyth    = 'f'
+  val binaryInt  = 32
+  val hashInt    = 32
+  val storable = true
+  val gameFamily = GameFamily.Mancala()
+  val valueOf = Option(1)
+}
+
+case object ThirtyThreeStone extends Role {
+  val mancalaID  = Role.thirtyThreeStone
+  val forsyth    = 'g'
+  val binaryInt  = 33
+  val hashInt    = 33
+  val storable = true
+  val gameFamily = GameFamily.Mancala()
+  val valueOf = Option(1)
+}
+
+case object ThirtyFourStone extends Role {
+  val mancalaID  = Role.thirtyFourStone
+  val forsyth    = 'h'
+  val binaryInt  = 34
+  val hashInt    = 34
+  val storable = true
+  val gameFamily = GameFamily.Mancala()
+  val valueOf = Option(1)
+}
+
+case object ThirtyFiveStone extends Role {
+  val mancalaID  = Role.thirtyFiveStone
+  val forsyth    = 'i'
+  val binaryInt  = 35
+  val hashInt    = 35
+  val storable = true
+  val gameFamily = GameFamily.Mancala()
+  val valueOf = Option(1)
+}
+
+case object ThirtySixStone extends Role {
+  val mancalaID  = Role.thirtySixStone
+  val forsyth    = 'j'
+  val binaryInt  = 36
+  val hashInt    = 36
+  val storable = true
+  val gameFamily = GameFamily.Mancala()
+  val valueOf = Option(1)
+}
+
+case object ThirtySevenStone extends Role {
+  val mancalaID  = Role.thirtySevenStone
+  val forsyth    = 'k'
+  val binaryInt  = 37
+  val hashInt    = 37
+  val storable = true
+  val gameFamily = GameFamily.Mancala()
+  val valueOf = Option(1)
+}
+
+case object ThirtyEightStone extends Role {
+  val mancalaID  = Role.thirtyEightStone
+  val forsyth    = 'l'
+  val binaryInt  = 38
+  val hashInt    = 38
+  val storable = true
+  val gameFamily = GameFamily.Mancala()
+  val valueOf = Option(1)
+}
+
+case object ThirtyNineStone extends Role {
+  val mancalaID  = Role.thirtyNineStone
+  val forsyth    = 'm'
+  val binaryInt  = 39
+  val hashInt    = 39
+  val storable = true
+  val gameFamily = GameFamily.Mancala()
+  val valueOf = Option(1)
+}
+
+case object FortyStone extends Role {
+  val mancalaID  = Role.fortyStone
+  val forsyth    = 'n'
+  val binaryInt  = 40
+  val hashInt    = 40
+  val storable = true
+  val gameFamily = GameFamily.Mancala()
+  val valueOf = Option(1)
+}
+
+case object FortyOneStone extends Role {
+  val mancalaID  = Role.fortyOneStone
+  val forsyth    = 'o'
+  val binaryInt  = 41
+  val hashInt    = 41
+  val storable = true
+  val gameFamily = GameFamily.Mancala()
+  val valueOf = Option(1)
+}
+
+case object FortyTwoStone extends Role {
+  val mancalaID  = Role.fortyTwoStone
+  val forsyth    = 'p'
+  val binaryInt  = 42
+  val hashInt    = 42
+  val storable = true
+  val gameFamily = GameFamily.Mancala()
+  val valueOf = Option(1)
+}
+
+case object FortyThreeStone extends Role {
+  val mancalaID  = Role.fortyThreeStone
+  val forsyth    = 'q'
+  val binaryInt  = 43
+  val hashInt    = 43
+  val storable = true
+  val gameFamily = GameFamily.Mancala()
+  val valueOf = Option(1)
+}
+
+case object FortyFourStone extends Role {
+  val mancalaID  = Role.fortyFourStone
+  val forsyth    = 'r'
+  val binaryInt  = 44
+  val hashInt    = 44
+  val storable = true
+  val gameFamily = GameFamily.Mancala()
+  val valueOf = Option(1)
+}
+
+case object FortyFiveStone extends Role {
+  val mancalaID  = Role.fortyFiveStone
+  val forsyth    = 's'
+  val binaryInt  = 45
+  val hashInt    = 45
+  val storable = true
+  val gameFamily = GameFamily.Mancala()
+  val valueOf = Option(1)
+}
+
+case object FortySixStone extends Role {
+  val mancalaID  = Role.fortySixStone
+  val forsyth    = 't'
+  val binaryInt  = 46
+  val hashInt    = 46
+  val storable = true
+  val gameFamily = GameFamily.Mancala()
+  val valueOf = Option(1)
+}
+
+case object FortySevenStone extends Role {
+  val mancalaID  = Role.fortySevenStone
+  val forsyth    = 'u'
+  val binaryInt  = 47
+  val hashInt    = 47
+  val storable = true
+  val gameFamily = GameFamily.Mancala()
+  val valueOf = Option(1)
+}
+
+case object FortyEightStone extends Role {
+  val mancalaID  = Role.fortyEightStone
+  val forsyth    = 'v'
+  val binaryInt  = 48
+  val hashInt    = 48
+  val storable = true
+  val gameFamily = GameFamily.Mancala()
+  val valueOf = Option(1)
+}
+
+case object FortyNineStone extends Role {
+  val mancalaID  = Role.fortyNineStone
+  val forsyth    = 'w'
+  val binaryInt  = 49
+  val hashInt    = 49
+  val storable = true
+  val gameFamily = GameFamily.Mancala()
+  val valueOf = Option(1)
+}
+
+case object FiftyStone extends Role {
+  val mancalaID  = Role.fiftyStone
+  val forsyth    = 'x'
+  val binaryInt  = 50
+  val hashInt    = 50
+  val storable = true
+  val gameFamily = GameFamily.Mancala()
+  val valueOf = Option(1)
+}
+
+case object FiftyOneStone extends Role {
+  val mancalaID  = Role.fiftyOneStone
+  val forsyth    = 'y'
+  val binaryInt  = 51
+  val hashInt    = 51
+  val storable = true
+  val gameFamily = GameFamily.Mancala()
+  val valueOf = Option(1)
+}
+
+case object FiftyTwoStone extends Role {
+  val mancalaID  = Role.fiftyTwoStone
+  val forsyth    = 'z'
+  val binaryInt  = 52
+  val hashInt    = 52
+  val storable = true
+  val gameFamily = GameFamily.Mancala()
+  val valueOf = Option(1)
+}
+
 object Role {
   //---------------------------------------------------
   // These are all of the pieces that mancala supports
@@ -331,6 +581,31 @@ object Role {
   val twentyFiveStone   = MancalaRoleID(25)
   val twentySixStone    = MancalaRoleID(26)
   val twentySevenStone  = MancalaRoleID(27)
+  val twentyEightStone  = MancalaRoleID(28)
+  val twentyNineStone   = MancalaRoleID(29)
+  val thirtyStone       = MancalaRoleID(30)
+  val thirtyOneStone    = MancalaRoleID(31)
+  val thirtyTwoStone    = MancalaRoleID(32)
+  val thirtyThreeStone  = MancalaRoleID(33)
+  val thirtyFourStone   = MancalaRoleID(34)
+  val thirtyFiveStone   = MancalaRoleID(35)
+  val thirtySixStone    = MancalaRoleID(36)
+  val thirtySevenStone  = MancalaRoleID(37)
+  val thirtyEightStone  = MancalaRoleID(38)
+  val thirtyNineStone   = MancalaRoleID(39)
+  val fortyStone        = MancalaRoleID(40)
+  val fortyOneStone     = MancalaRoleID(41)
+  val fortyTwoStone     = MancalaRoleID(42)
+  val fortyThreeStone   = MancalaRoleID(43)
+  val fortyFourStone    = MancalaRoleID(44)
+  val fortyFiveStone    = MancalaRoleID(45)
+  val fortySixStone     = MancalaRoleID(46)
+  val fortySevenStone   = MancalaRoleID(47)
+  val fortyEightStone   = MancalaRoleID(48)
+  val fortyNineStone    = MancalaRoleID(49)
+  val fiftyStone        = MancalaRoleID(50)
+  val fiftyOneStone     = MancalaRoleID(51)
+  val fiftyTwoStone     = MancalaRoleID(52)
   val undefined         = MancalaRoleID(0)
 
   val all: List[Role] =
@@ -361,7 +636,32 @@ object Role {
       TwentyFourStone,
       TwentyFiveStone,
       TwentySixStone,
-      TwentySevenStone
+      TwentySevenStone,
+      TwentyEightStone,
+      TwentyNineStone,
+      ThirtyStone,
+      ThirtyOneStone,
+      ThirtyTwoStone,
+      ThirtyThreeStone,
+      ThirtyFourStone,
+      ThirtyFiveStone,
+      ThirtySixStone,
+      ThirtySevenStone,
+      ThirtyEightStone,
+      ThirtyNineStone,
+      FortyStone,
+      FortyOneStone,
+      FortyTwoStone,
+      FortyThreeStone,
+      FortyFourStone,
+      FortyFiveStone,
+      FortySixStone,
+      FortySevenStone,
+      FortyEightStone,
+      FortyNineStone,
+      FiftyStone,
+      FiftyOneStone,
+      FiftyTwoStone,
     )
 
   def allByGameFamily(gf: GameFamily): List[Role] =

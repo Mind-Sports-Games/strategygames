@@ -56,7 +56,7 @@ abstract class Variant private[variant] (
   def validMoves(situation: Situation): Map[Pos, List[Move]] = {
     situation.board.apiPosition.legalMoves
       .map{ move => 
-        val numSeeds = situation.board.apiPosition.fen.owareStoneArray(move)
+        val numSeeds = situation.board.apiPosition.fen.owareStoneArray(move) 
         (
         move,
         Pos(move),

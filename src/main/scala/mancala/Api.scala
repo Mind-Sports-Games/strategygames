@@ -5,7 +5,7 @@ import com.joansala.game.oware.OwareBoard
 
 import cats.implicits._
 
-import strategygames.{ GameFamily, Player }
+import strategygames.{ Player }
 import strategygames.mancala.format.{ FEN }
 import strategygames.mancala.variant.Variant
 
@@ -36,7 +36,7 @@ object Api {
     def toCoordinates(move: Int): String
     def toNotation (moves: List[Int]): String
     def toMoves(notation: String): List[Int]
-    val owareDiagram: String
+    def owareDiagram: String
 
     val fen: FEN
     //val isImmediateGameEnd: (Boolean, GameResult)
@@ -55,7 +55,7 @@ object Api {
     val gameEnd: Boolean
     val legalMoves: Array[Int]
     val playerTurn: Int //1 for South -1 for North
-    val getFEN: String
+    def getFEN: String
   }
 
   private class OwarePosition(position: OwareGame) extends Position {
@@ -87,26 +87,36 @@ object Api {
 
     def toMoves(notation: String): List[Int] = position.toBoard().toMoves(notation).toList
 
-    val owareDiagram: String = position.toBoard().toDiagram()
+    def owareDiagram: String = position.toBoard.toDiagram
 
     private val numHouses = variant.boardSize.width * variant.boardSize.height
 
-    //TODO fix fen creation as not processing in correct order for 2nd row
-    val getFEN: String = 
-      owareDiagram
-      .split('-')
-      .take(numHouses)
+    def seedCountToLetter(num: Int): Char = {
+      num match {
+        case x if x < 27  => (x + 64).toChar
+        case x if x >= 27 => (x + 70).toChar
+        case x if x > 52 => sys.error("expected number of stones less than 53, got " + x.toString()) 
+      }
+    }
+
+    def scoreNumberToLetter(num: String): String = {
+      num.toInt match {
+        case 0 => "0"
+        case x => seedCountToLetter(x).toString()
+      }
+    }
+    def getFEN: String = 
+      (
+        owareDiagram.split('-').take(variant.boardSize.width * 2).drop(variant.boardSize.width).reverse
+        ++
+        owareDiagram.split('-').take(variant.boardSize.width)
+      )
       .map{ part => 
         part match {
           case "0" => "1" //empty house
           case _ => 
             part.toIntOption match {
-              case Some(x: Int) => 
-                x match {
-                  case x if x < 27  => (x + 64).toChar
-                  case x if x >= 27 => (x + 70).toChar
-                  case x if x > 52 => sys.error("expected number of stones less than 53, got " + x.toString())
-                }
+              case Some(x: Int) => seedCountToLetter(x)
               case _ => sys.error("expected integer number of string in owareDiagram: " + owareDiagram)
             }
         }
@@ -114,16 +124,16 @@ object Api {
       .mkString("")
       .patch(variant.boardSize.width, "/", 0)
       .concat(" ")
-      .concat(owareDiagram.split('-')(numHouses))
+      .concat(scoreNumberToLetter(owareDiagram.split('-')(numHouses))) //TODO convert to letter!
       .concat(" ")
-      .concat(owareDiagram.split('-')(numHouses + 1))
+      .concat(scoreNumberToLetter(owareDiagram.split('-')(numHouses + 1)))
       .concat(" ")
       .concat(owareDiagram.split('-')(numHouses + 2))
     
     def toPosition = position.toBoard().position()
 
     lazy val fen: FEN            = FEN(getFEN)
-
+    
     //this is covered by gameEnd
     //lazy val isImmediateGameEnd: (Boolean, GameResult) = {
     //  val im = position.isImmediateGameEnd()
@@ -145,8 +155,8 @@ object Api {
     //lazy val hasRepeated: Boolean       = position.hasRepeated()
 
     
-    def convertPieceMapFromFen(fenString: String): PieceMap = {
-      FEN(fenString).owareStoneArray.zipWithIndex.map{case (seeds, index) => 
+    private def convertPieceMapFromFen(fenString: String): PieceMap = {
+      FEN(fenString).owareStoneArray.zipWithIndex.map{case (seeds, index) =>
         seeds match {
           case 0 => (None, None)
           case n => 
@@ -156,14 +166,12 @@ object Api {
             )
         }
       }
-      .map{ case (Some(pos), Some(piece)) => pos -> piece}
+      .filter(x => x!=(None,None))
+      .map{ case (Some(pos), Some(piece)) => pos -> piece }
       .toMap      
     } 
   
     lazy val pieceMap: PieceMap = convertPieceMapFromFen(getFEN)
-
-    //lazy val piecesInHand: Array[Piece] =
-    //  vectorOfPiecesToPieceArray(position.piecesInHand(), variant.gameFamily)
 
     //lazy val optionalGameEndResult: GameResult =
     //  if (isOptionalGameEnd.get0()) GameResult.optionalResultFromInt(isOptionalGameEnd.get1())
@@ -187,7 +195,6 @@ object Api {
     val playerTurn: Int = position.turn()
   }
 
-
   def position: Position =
     new OwarePosition(new OwareGame())
 
@@ -196,11 +203,6 @@ object Api {
       case "oware" => new OwarePosition(new OwareGame())
       case _       => new OwarePosition(new OwareGame())
     }
-
-//
-//  def positionFromVariantName(variantName: String): Position =
-//    new FairyPosition(new FairyStockfish.Position(variantName))
-//
 
   def positionFromFen(fenString: String): Position = {
     val game = new OwareGame()
