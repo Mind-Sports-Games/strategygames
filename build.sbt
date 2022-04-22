@@ -2,7 +2,7 @@ name := "strategygames"
 
 organization := "org.playstrategy"
 
-version := "10.2.1-pstrat37"
+version := "10.2.1-pstrat37_13"
 
 scalaVersion := "2.13.5"
 
@@ -16,7 +16,7 @@ libraryDependencies ++= List(
   "joda-time"                 % "joda-time"                % "2.10.10",
   "org.typelevel"            %% "cats-core"                % "2.2.0",
   "org.playstrategy"          % "fairystockfish"           % fairystockfishVersion,
-  "com.github.joansalasoler" %% "aalina"                   % "1.2.1" from "file:///home/matt/mso/strategygames/com.github.joansalasoler/aalina/1.2.1/jars/aalina_1.2.1.jar"
+  "com.joansala.aalina"       % "aalina"                   % "2.1.0-SNAPSHOT"
 )
 
 // Explicitly add in the linux-class path
@@ -25,8 +25,10 @@ libraryDependencies += "org.playstrategy" % "fairystockfish" % fairystockfishVer
 classpathTypes ++= Set("linux-x86_64")
 
 resolvers ++= Seq(
-  "lila-maven" at "https://raw.githubusercontent.com/Mind-Sports-Games/lila-maven/master"
-)
+  "lila-maven" at "https://raw.githubusercontent.com/Mind-Sports-Games/lila-maven/master",
+  "wsl-local-maven" at "file:////home/jheps/.m2/repository/", //TODO remove these once tested environment variable
+  "docker-local-maven" at "file:////home/playstrategy/.m2/repository/"
+) ++ sys.env.get("LILA_MAVEN_RESOLVERS").map(_.split(",").zipWithIndex.map((i,x) => s"local-maven-$i" at x)).fold(Seq())(_.toSeq)
 
 scalacOptions ++= Seq(
   "-encoding",
