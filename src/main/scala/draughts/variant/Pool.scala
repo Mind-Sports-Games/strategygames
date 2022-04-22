@@ -46,10 +46,7 @@ case object Pool
     //       we're using this, but the other two are candidates for refactoring.
     Russian.finalizeBoardWithRemainingCaptures(
       board = board,
-      //RUSSIAN:
-      //remainingCaptures = board.actorAt(uci.dest).map(_.captureLength).getOrElse(0)
-      //BRAZILIAN:
-      remainingCaptures = if (finalSquare) 0 else situationBefore.captureLengthFrom(uci.orig).getOrElse(0) - 1
+      remainingCaptures = board.actorAt(uci.dest).map(_.captureLength).getOrElse(0)
     )
 
   override def shortRangeCaptures(actor: Actor, finalSquare: Boolean): List[Move] = {
