@@ -44,9 +44,14 @@ case object Pool
     // TODO: Both the Brazilian and Russian implentations are equivalent except
     //       for the remainingCaptures calculation. Rather than duplicate it a third time
     //       we're using this, but the other two are candidates for refactoring.
+    val promoted =
+      situationBefore.board.actorAt(uci.orig) zip 
+      board.actorAt(uci.dest) map {
+        case (before, after) => before.piece != after.piece
+      } getOrElse(false)
     Russian.finalizeBoardWithRemainingCaptures(
       board = board,
-      remainingCaptures = board.actorAt(uci.dest).map(_.captureLength).getOrElse(0)
+      remainingCaptures = if (promoted) 0 else board.actorAt(uci.dest).map(_.captureLength).getOrElse(0)
     )
 
   override def shortRangeCaptures(actor: Actor, finalSquare: Boolean): List[Move] = {

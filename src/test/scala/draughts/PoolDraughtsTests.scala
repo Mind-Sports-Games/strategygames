@@ -34,6 +34,15 @@ class PoolDraughtsTest extends Specification with ValidatedMatchers {
       "3113", "2511", "1302", "1125"
     )
 
+  val buggyMovesKingPromotion = List(
+    "2217", "1014", "1710", "0615", "2419",
+    "1524", "2819", "1115", "1910", "0714",
+    "2622", "0206", "2724", "0307", "3127",
+    "0610", "3228", "1015", "2419", "1524",
+    "2431",
+    //"3117"
+  )
+
   def toMove(uci: String): format.Uci.Move = {
     format.Uci.Move(uci) match {
       case Some(m) => m
@@ -69,6 +78,11 @@ class PoolDraughtsTest extends Specification with ValidatedMatchers {
         .take(40)
         .foldLeft(Situation(variant.Russian))((sit, uci) => move(sit, uci))
       println(s3.validMoves)*/
+
+      val s5 = buggyMovesKingPromotion
+        .foldLeft(Situation(variant.Pool))((sit, uci) => move(sit, uci))
+      println(s5.validMoves)
+      s5.player must_== Player.P1
 
     }
   }
