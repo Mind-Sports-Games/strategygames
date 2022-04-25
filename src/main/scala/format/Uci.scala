@@ -110,8 +110,7 @@ object Uci {
 
   final case class MancalaMove(m: mancala.format.Uci.Move) extends Move(
     Pos.Mancala(m.orig),
-    Pos.Mancala(m.dest),
-    None
+    Pos.Mancala(m.dest)
   ) with Mancala {
     def uci = m.uci
     def fishnetUci = m.uci

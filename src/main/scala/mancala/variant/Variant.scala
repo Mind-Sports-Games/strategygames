@@ -66,7 +66,7 @@ abstract class Variant private[variant] (
       .map{ 
         case (move, Some(orig), Some(dest)) => {
           val uciMove     = s"${orig.key}${dest.key}"
-          val newPosition = situation.board.apiPosition.makeMove(move)
+          val newPosition = situation.board.apiPosition.makeTestMoves(List(move))
             (
               orig,
               Move(

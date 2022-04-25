@@ -31,7 +31,8 @@ object Api {
     val variant: Variant
 
     def makeMoves(movesList: List[Int]): Position
-    def makeMove(move: Int): Position
+    def makeTestMoves(movesList: List[Int]): Position
+    // def makeMove(move: Int): Position
     def toBoard: String
 
     def toCoordinates(move: Int): String
@@ -65,19 +66,32 @@ object Api {
     //       at the moment
     val variant = Variant.byKey("oware")
 
+    def makeTestMoves(movesList: List[Int]): Position = {
+      val game = new OwareGame()
+      game.setBoard(owareBoardFromFen(getFEN))
+
+      movesList.map { move =>
+        if (game.legalMoves.contains(move)) game.makeMove(move)
+        else sys.error(s"Illegal move: ${move} from list: ${movesList}")
+      }
+      return new OwarePosition(game)
+    }
+
     def makeMoves(movesList: List[Int]): Position = {
       movesList.map { move =>
         if (position.legalMoves.contains(move)) position.makeMove(move)
         else sys.error(s"Illegal move: ${move} from list: ${movesList}")
       }
-      new OwarePosition(position)
+      return new OwarePosition(position)
     }
 
-    def makeMove(move: Int): Position = {
-      if (position.legalMoves.contains(move)) position.makeMove(move)
-      else sys.error(s"Illegal move: ${move} required one from: ${position.legalMoves}")
-      new OwarePosition(position)
-    }
+    // def makeMove(move: Int): Position = {
+    //   println(position.toBoard.toDiagram)
+    //   if (position.legalMoves.contains(move)) position.makeMove(move)
+    //   else sys.error(s"Illegal move: ${move} required one from: ${position.legalMoves}")
+    //   new OwarePosition(position)
+    // }
+    
 
     //helper
     def toBoard: String = position.toBoard.toString

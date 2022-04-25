@@ -73,7 +73,7 @@ object Pos {
 
     lazy val toInt: Int = (p.file.index << 3) + p.rank.index
 
-    lazy val all: List[Pos] = chess.Pos.all.map(Chess)
+    lazy val all: List[Pos] = mancala.Pos.all.map(Mancala)
 
   }
 

@@ -2,7 +2,7 @@ name := "strategygames"
 
 organization := "org.playstrategy"
 
-version := "10.2.1-pstrat37_13"
+version := "10.2.1-pstrat37_17"
 
 scalaVersion := "2.13.5"
 
@@ -26,9 +26,8 @@ classpathTypes ++= Set("linux-x86_64")
 
 resolvers ++= Seq(
   "lila-maven" at "https://raw.githubusercontent.com/Mind-Sports-Games/lila-maven/master",
-  "wsl-local-maven" at "file:////home/jheps/.m2/repository/", //TODO remove these once tested environment variable
-  "docker-local-maven" at "file:////home/playstrategy/.m2/repository/"
-) ++ sys.env.get("LILA_MAVEN_RESOLVERS").map(_.split(",").zipWithIndex.map((i,x) => s"local-maven-$i" at x)).fold(Seq())(_.toSeq)
+ ) ++ sys.env.get("LILA_MAVEN_RESOLVERS").map(_.split(",").zipWithIndex.map{case (x,i) => s"local-maven-$i" at x}).map(_.toSeq).getOrElse(Seq())
+
 
 scalacOptions ++= Seq(
   "-encoding",
