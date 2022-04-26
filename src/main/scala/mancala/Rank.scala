@@ -25,14 +25,6 @@ object Rank {
 
   val First   = new Rank(0)
   val Second  = new Rank(1)
-  // val Third   = new Rank(2)
-  // val Fourth  = new Rank(3)
-  // val Fifth   = new Rank(4)
-  // val Sixth   = new Rank(5)
-  // val Seventh = new Rank(6)
-  // val Eighth  = new Rank(7)
-  // val Ninth   = new Rank(8)
-  // val Tenth   = new Rank(9)
 
   //val all = List(First, Second, Third, Fourth, Fifth, Sixth, Seventh, Eighth, Ninth, Tenth)
   val all = List(First, Second)

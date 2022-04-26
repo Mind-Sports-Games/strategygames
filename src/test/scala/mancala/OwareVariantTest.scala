@@ -28,7 +28,6 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
             case Some(move) => move.head.toUci.uci
             case None => ""
         }
-        //val m = situation.moves
         "c1 goes to f2" in {
             uci must_== "c1f2"
         }
@@ -36,8 +35,7 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
 
     "pos in second rank " should {
         val pos = Pos(6)
-        val expected = Some("f2")
-        //val m = situation.moves
+        val expected = Pos.at(5,1)
         "be backwards, Pos(6) is f2" in {
             pos must_== expected
         }

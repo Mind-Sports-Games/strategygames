@@ -19,7 +19,10 @@ object File {
     if (0 <= index && index < all.size) Some(new File(index))
     else None
 
-  @inline def of(pos: Pos): File = new File(pos.index % all.size)
+  @inline def of(pos: Pos): File = {
+    val rank:Int = if (pos.index > 5) 1 else 0
+    new File(pos.index + ((pos.index - all.size)*(-2) - 1) * rank)
+  } 
 
   def fromChar(ch: Char): Option[File] = apply(ch.toInt - 97)
 
@@ -29,10 +32,6 @@ object File {
   val D = new File(3)
   val E = new File(4)
   val F = new File(5)
-  // val G = new File(6)
-  // val H = new File(7)
-  // val I = new File(8)
 
-  //val all = List(A, B, C, D, E, F, G, H, I)
   val all = List(A, B, C, D, E, F)
 }
