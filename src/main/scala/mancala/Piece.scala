@@ -11,16 +11,17 @@ case class Piece(player: Player, role: Role) {
 
   def oneOf(rs: Set[Role]) = rs(role)
 
-  def forsyth: Char = if (player == P1) role.forsythUpper else role.forsyth
-  override def toString = s"$player-$role".toLowerCase
+  def forsyth: Char = role.forsyth
+  override def toString = s"${player.toString.toLowerCase}-$role"
 }
 
 object Piece {
 
-  def fromChar(gf: GameFamily, c: Char): Option[Piece] =
-    Role.allByPgn(gf) get c.toUpper map {
-      Piece(Player.fromP1(c.isUpper), _)
-    }
+  //TODO this is wrong
+  // def fromChar(gf: GameFamily, c: Char): Option[Piece] =
+  //   Role.allByPgn(gf) get c.toUpper map {
+  //     Piece(Player.fromP1(c.isUpper), _)
+  //   }
 
   def fromStoneNumber(player: Player, n: Int): Option[Piece] =
     Role.allByBinaryInt get n map {

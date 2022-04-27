@@ -10,10 +10,10 @@ case class MancalaRoleID(val id: Int)
 sealed trait Role {
   val mancalaID: MancalaRoleID
   val forsyth: Char
-  lazy val forsythUpper: Char = forsyth.toUpper
-  lazy val pgn: Char          = forsythUpper
-  lazy val name               = toString.toLowerCase
-  lazy val groundName         = s"${forsyth.toLower}-piece"
+  //lazy val forsythUpper: Char = forsyth.toUpper //this contradicts what the piece is now!
+  lazy val pgn: Char          = forsyth
+  lazy val name               = toString
+  lazy val groundName         = s"${forsyth}-piece"
   val binaryInt: Int
   val hashInt: Int
   val storable: Boolean

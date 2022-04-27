@@ -65,7 +65,8 @@ object Piece {
     case (GameLogic.Draughts()) => draughts.Piece.fromChar(c).map(Draughts)
     case (GameLogic.Chess())    => chess.Piece.fromChar(c).map(Chess)
     case (GameLogic.FairySF())  => fairysf.Piece.fromChar(gf, c).map(FairySF)
-    case (GameLogic.Mancala())  => mancala.Piece.fromChar(gf, c).map(Mancala)
+    //case (GameLogic.Mancala())  => mancala.Piece.fromChar(gf, c).map(Mancala)
+    case (GameLogic.Mancala())  => sys.error("cannot get piece from Char anymore")
   }
 
   def chessPieceMap(pieceMap: PieceMap): chess.PieceMap = pieceMap.map{
