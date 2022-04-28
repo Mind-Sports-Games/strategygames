@@ -42,8 +42,8 @@ class OwareFenTest extends Specification with ValidatedMatchers {
         }
     }
 
-    "fen 11111M/D1A11C a B S" should {
-        val fen = strategygames.mancala.format.FEN("11111M/D1A11C a B S")
+    "fen 5M/D1A2C a B S" should {
+        val fen = strategygames.mancala.format.FEN("5M/D1A2C a B S")
         "player 1 score be 4" in {
         fen.player1Score must_== 27
         }

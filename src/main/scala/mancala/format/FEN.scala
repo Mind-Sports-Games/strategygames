@@ -37,20 +37,25 @@ final case class FEN(value: String) extends AnyVal {
   
   def owareStoneArray: Array[Int] = 
     (
-      value.split(' ').take(1).flatMap(x => x).drop(7)
-      ++
-      value.split(' ').take(1).flatMap(x => x).take(6).reverse
+      value.split(' ')(0).split('/')(1)
+      +
+      value.split(' ')(0).split('/')(0).reverse
     )  
     .map(c =>
       c.toString() match{
-        case "1" => 0 //empty
-        case _ => 
+        case "1" => Array.fill(1)(0) //empty
+        case "2" => Array.fill(2)(0)
+        case "3" => Array.fill(3)(0)
+        case "4" => Array.fill(4)(0)
+        case "5" => Array.fill(5)(0)
+        case "6" => Array.fill(6)(0)
+        case _ =>
           c.toInt match{
-            case y if y <= 90 => y - 64
-            case y if y > 96  => y - 70
+            case y if y <= 90 => Array(y - 64)
+            case y if y > 96  => Array(y - 70)
           } 
       }
-    )
+    ).flatten.toArray
 
   
   // def ply: Option[Int] =

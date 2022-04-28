@@ -11,6 +11,7 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
         val board = Board.init(variant.Oware)
         val p1 = Player(true)
         val situation = Situation(board, p1)
+        
         val moves = variant.Oware.validMoves(situation)
         //val m = situation.moves
         "be valid" in {

@@ -120,8 +120,8 @@ object Api {
         case x => seedCountToLetter(x).toString()
       }
     }
-    def getFEN: String = 
-      (
+    def getFEN: String = {
+      val board = (
         owareDiagram.split('-').take(variant.boardSize.width * 2).drop(variant.boardSize.width).reverse
         ++
         owareDiagram.split('-').take(variant.boardSize.width)
@@ -138,12 +138,15 @@ object Api {
       }
       .mkString("")
       .patch(variant.boardSize.width, "/", 0)
+      val updatedBoard = "^(1+)$".r.replaceAllIn(board, "$1".length.toString()) //combine 1's into size of group
+      return updatedBoard
       .concat(" ")
-      .concat(scoreNumberToLetter(owareDiagram.split('-')(numHouses))) //TODO convert to letter!
+      .concat(scoreNumberToLetter(owareDiagram.split('-')(numHouses))) 
       .concat(" ")
       .concat(scoreNumberToLetter(owareDiagram.split('-')(numHouses + 1)))
       .concat(" ")
       .concat(owareDiagram.split('-')(numHouses + 2))
+    }
     
     def toPosition = position.toBoard().position()
 

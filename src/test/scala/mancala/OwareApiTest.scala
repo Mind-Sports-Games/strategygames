@@ -17,9 +17,13 @@ class OwareApiTest extends Specification with ValidatedMatchers {
         "false due to too many pieces" in {
             Api.validateFEN(fen) must_== false
         }
-        val fen2 = "3EEE/4RR 0 F N"
-         "false due to only allowing 1's for empty spaces" in {
-            Api.validateFEN(fen2) must_== false
+        val fen2 = "B4A/AA3A U U N"
+         "true due to allowing >1 for multiple empty spaces" in {
+            Api.validateFEN(fen2) must_== true
+        }
+        val fen3 = "3EEE/4RR2 0 F N"
+         "false due to more space than width" in {
+            Api.validateFEN(fen3) must_== false
         }
     }
 
