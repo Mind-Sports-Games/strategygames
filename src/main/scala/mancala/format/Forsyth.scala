@@ -17,7 +17,7 @@ object Forsyth {
     val apiPosition = Api.positionFromVariantNameAndFEN(variant.name, fen.value)
     Some(Situation(
       Board(
-        pieces = Map.empty[Pos,Piece],
+        pieces = apiPosition.pieceMap,
         history = History(),
         variant = variant,
         position = apiPosition.some
