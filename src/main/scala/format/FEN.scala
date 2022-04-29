@@ -22,6 +22,9 @@ abstract sealed class FEN(val value: String) {
 
   def chessFen: Option[strategygames.chess.format.FEN]
 
+  def player1Score: Int
+  def player2Score: Int
+
 }
 
 object FEN {
@@ -42,6 +45,9 @@ object FEN {
     def initial: Boolean = f.initial
 
     def chessFen: Option[strategygames.chess.format.FEN] = Some(f)
+
+    def player1Score = ???
+    def player2Score = ???
 
   }
 
@@ -64,6 +70,9 @@ object FEN {
 
     def chessFen: Option[strategygames.chess.format.FEN] = None
 
+    def player1Score = ???
+    def player2Score = ???
+
   }
 
   final case class FairySF(f: strategygames.fairysf.format.FEN) extends FEN(f.value) {
@@ -83,6 +92,9 @@ object FEN {
 
     def chessFen: Option[strategygames.chess.format.FEN] = None
 
+    def player1Score = ???
+    def player2Score = ???
+
   }
 
   final case class Mancala(f: strategygames.mancala.format.FEN) extends FEN(f.value) {
@@ -101,6 +113,9 @@ object FEN {
     def initial: Boolean = f.initial
 
     def chessFen: Option[strategygames.chess.format.FEN] = None
+
+    def player1Score = f.player1Score
+    def player2Score = f.player2Score
 
   }
 
