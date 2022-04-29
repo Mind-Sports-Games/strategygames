@@ -2,7 +2,7 @@ package strategygames.mancala
 package variant
 
 import strategygames.mancala._
-import strategygames.GameFamily
+import strategygames.{ GameFamily, Player }
 
 case object Oware
     extends Variant(
@@ -24,5 +24,17 @@ case object Oware
   override def initialFen =
     format.FEN("DDDDDD/DDDDDD 0 0 S")
 
+  override def specialEnd(situation: Situation) =
+    (situation.board.apiPosition.fen.player1Score > 24) ||
+    (situation.board.apiPosition.fen.player2Score > 24) ||
+    (situation.board.apiPosition.legalMoves.size == 0)
+
+  override def specialDraw(situation: Situation) =
+    situation.board.apiPosition.fen.gameEndPlayer1Score == situation.board.apiPosition.fen.gameEndPlayer2Score
+
+  override def winner(situation: Situation): Option[Player] =
+    if (specialEnd(situation) && !specialDraw(situation))
+      {if(situation.board.apiPosition.fen.gameEndPlayer1Score > situation.board.apiPosition.fen.gameEndPlayer2Score) Player.fromName("p1") else Player.fromName("p2")}
+    else None
 
 }
