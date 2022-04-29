@@ -40,7 +40,6 @@ trait FairySFTest extends Specification with ValidatedMatchers {
   //implicit def richActor(actor: Actor) = RichActor(actor)
 
   case class RichGame(game: Game) {
-    def as(player: Player): Game = game.withPlayer(player)
 
     def playMoves(moves: (Pos, Pos)*): Validated[String, Game] = playMoveList(moves)
 
@@ -85,46 +84,24 @@ trait FairySFTest extends Specification with ValidatedMatchers {
   }
 
   def makeBoard(pieces: (Pos, Piece)*): Board =
-    Board(pieces toMap, History(), strategygames.chess.variant.Standard)
+    Board(pieces toMap, History(), strategygames.fairysf.variant.Shogi)
 
   def makeBoard(str: String, variant: Variant) =
     Visual << str withVariant variant
 
-  def makeBoard: Board = Board init strategygames.chess.variant.Standard
-
-  def makeEmptyBoard: Board = Board empty strategygames.chess.variant.Standard
+  def makeBoard: Board = Board init strategygames.fairysf.variant.Shogi
 
   def bePoss(poss: Pos*): Matcher[Option[Iterable[Pos]]] =
     beSome.like { case p =>
       sortPoss(p.toList) must_== sortPoss(poss.toList)
     }
 
-  def makeGame: Game = Game(makeBoard, P1)
-
   def bePoss(board: Board, visual: String): Matcher[Option[Iterable[Pos]]] =
     beSome.like { case p =>
       Visual.addNewLines(Visual.>>|(board, Map(p -> 'x'))) must_== visual
     }
 
-  def beBoard(visual: String): Matcher[Validated[String, Board]] =
-    beValid.like { case b =>
-      b.visual must_== (Visual << visual).visual
-    }
-
-  def beSituation(visual: String): Matcher[Validated[String, Situation]] =
-    beValid.like { case s =>
-      s.board.visual must_== (Visual << visual).visual
-    }
-
-  def beGame(visual: String): Matcher[Validated[String, Game]] =
-    beValid.like { case g =>
-      g.board.visual must_== (Visual << visual).visual
-    }
 
   def sortPoss(poss: Seq[Pos]): Seq[Pos] = poss sortBy (_.toString)
 
-  def pieceMoves(piece: Piece, pos: Pos): Option[List[Pos]] =
-    (makeEmptyBoard place (piece, pos)) flatMap { b =>
-      b actorAt pos map (_.destinations)
-    }
 }

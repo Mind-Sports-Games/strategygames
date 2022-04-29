@@ -40,17 +40,17 @@ case object Pool
       captured: Option[List[Piece]],
       situationBefore: Situation,
       finalSquare: Boolean
-  ): Board =
-    // TODO: Both the Brazilian and Russian implentations are equivalent except
-    //       for the remainingCaptures calculation. Rather than duplicate it a third time
-    //       we're using this, but the other two are candidates for refactoring.
+  ): Board = {
+    val promoted =
+      situationBefore.board.actorAt(uci.orig) zip 
+      board.actorAt(uci.dest) map {
+        case (before, after) => before.piece != after.piece
+      } getOrElse(false)
     Russian.finalizeBoardWithRemainingCaptures(
       board = board,
-      //RUSSIAN:
-      //remainingCaptures = board.actorAt(uci.dest).map(_.captureLength).getOrElse(0)
-      //BRAZILIAN:
-      remainingCaptures = if (finalSquare) 0 else situationBefore.captureLengthFrom(uci.orig).getOrElse(0) - 1
+      remainingCaptures = if (promoted) 0 else board.actorAt(uci.dest).map(_.captureLength).getOrElse(0)
     )
+  }
 
   override def shortRangeCaptures(actor: Actor, finalSquare: Boolean): List[Move] = {
     val buf    = new ArrayBuffer[Move]
