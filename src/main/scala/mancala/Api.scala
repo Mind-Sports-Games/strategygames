@@ -55,6 +55,7 @@ object Api {
     //val optionalGameEndResult: GameResult
     val gameResult: GameResult
     val gameEnd: Boolean
+    val gameOutcome: Int
     val legalMoves: Array[Int]
     val playerTurn: Int //1 for South -1 for North
     def getFEN: String
@@ -191,14 +192,12 @@ object Api {
   
     lazy val pieceMap: PieceMap = convertPieceMapFromFen(getFEN)
 
-    //lazy val optionalGameEndResult: GameResult =
-    //  if (isOptionalGameEnd.get0()) GameResult.optionalResultFromInt(isOptionalGameEnd.get1())
-    //  else GameResult.Ongoing()
-
     lazy val gameResult: GameResult =
       GameResult.resultFromInt(position.outcome(), position.hasEnded())
 
     lazy val gameEnd: Boolean = position.hasEnded()
+
+    lazy val gameOutcome: Int = position.outcome()
 
     val legalMoves: Array[Int] = {
       position.resetCursor()
