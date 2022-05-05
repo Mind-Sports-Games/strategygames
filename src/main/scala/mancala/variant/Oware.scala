@@ -27,11 +27,17 @@ case object Oware
   override def specialEnd(situation: Situation) =
     (situation.board.apiPosition.fen.player1Score > 24) ||
     (situation.board.apiPosition.fen.player2Score > 24) ||
-    (situation.board.apiPosition.legalMoves.size == 0)
+    (situation.board.apiPosition.legalMoves.size == 0) ||
+    (situation.board.apiPosition.gameEnd)
 
   override def specialDraw(situation: Situation) =
     situation.board.apiPosition.fen.gameEndPlayer1Score == situation.board.apiPosition.fen.gameEndPlayer2Score
 
+  // def engineWinner(situation: Situation): Option[Player] = {
+  //   if (situation.board.apiPosition.gameOutcome.abs == 1000){
+  //     if (situation.board.apiPosition.gameOutcome == 1000) Player.fromName("p1") else Player.fromName("p2")
+  //   } else None
+  // }
   override def winner(situation: Situation): Option[Player] =
     if (specialEnd(situation) && !specialDraw(situation))
       {if(situation.board.apiPosition.fen.gameEndPlayer1Score > situation.board.apiPosition.fen.gameEndPlayer2Score) Player.fromName("p1") else Player.fromName("p2")}

@@ -31,20 +31,15 @@ object Api {
     val variant: Variant
 
     def makeMoves(movesList: List[Int]): Position
-    def makeTestMoves(movesList: List[Int]): Position
-    // def makeMove(move: Int): Position
+    def makeMovesWithPrevious(movesList: List[Int], previousMoves: List[String]): Position
+    
     def toBoard: String
-
     def toCoordinates(move: Int): String
     def toNotation (moves: List[Int]): String
     def toMoves(notation: String): List[Int]
     def owareDiagram: String
 
     val fen: FEN
-    //val isImmediateGameEnd: (Boolean, GameResult)
-    //val immediateGameEnd: Boolean
-    //val optionalGameEnd: Boolean
-    //val insufficientMaterial: (Boolean, Boolean)
 
     //def isDraw(ply: Int): Boolean
     //def hasGameCycle(ply: Int): Boolean
@@ -67,9 +62,9 @@ object Api {
     //       at the moment
     val variant = Variant.byKey("oware")
 
-    def makeTestMoves(movesList: List[Int]): Position = {
+    def makeMovesWithPrevious(movesList: List[Int], previousMoves: List[String]): Position = {
       val game = new OwareGame()
-      game.setBoard(owareBoardFromFen(getFEN))
+      previousMoves.map(uci => game.makeMove(uciToMove(uci)))
 
       movesList.map { move =>
         if (game.legalMoves.contains(move)) game.makeMove(move)
@@ -85,13 +80,6 @@ object Api {
       }
       return new OwarePosition(position)
     }
-
-    // def makeMove(move: Int): Position = {
-    //   println(position.toBoard.toDiagram)
-    //   if (position.legalMoves.contains(move)) position.makeMove(move)
-    //   else sys.error(s"Illegal move: ${move} required one from: ${position.legalMoves}")
-    //   new OwarePosition(position)
-    // }
     
 
     //helper
@@ -153,27 +141,10 @@ object Api {
 
     lazy val fen: FEN            = FEN(getFEN)
     
-    //this is covered by gameEnd
-    //lazy val isImmediateGameEnd: (Boolean, GameResult) = {
-    //  val im = position.isImmediateGameEnd()
-    //  (im.get0(), GameResult.resultFromInt(im.get1(), givesCheck))
-    //}
-
-    //lazy val immediateGameEnd: Boolean = position.hasEnded()
-
-    //dont think there is any optional game end stuff here
-    //private lazy val isOptionalGameEnd = position.isOptionalGameEnd()
-    //lazy val optionalGameEnd: Boolean  = isOptionalGameEnd.get0()
-    //lazy val insufficientMaterial: (Boolean, Boolean) = {
-    //  val im = position.hasInsufficientMaterial()
-    //  (im.get0(), im.get1())
-    //}
-
     //def isDraw(ply: Int): Boolean       = position.isDraw(ply)
     //def hasGameCycle(ply: Int): Boolean = position.hasGameCycle(ply)
     //lazy val hasRepeated: Boolean       = position.hasRepeated()
 
-    
     private def convertPieceMapFromFen(fenString: String): PieceMap = {
       FEN(fenString).owareStoneArray.zipWithIndex.map{case (seeds, index) =>
         seeds match {

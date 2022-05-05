@@ -179,6 +179,47 @@ class OwareApiTest extends Specification with ValidatedMatchers {
         }
     }
 
+    "game result" should {
+        val fen = "1AAAAB/111111 V T S"
+        val position = Api.positionFromFen(fen)
+        "end game when no legal moves" in {
+            position.gameResult must_== GameResult.VariantEnd()
+        }
+        "player with more total stones wins" in {
+            position.gameOutcome must_== -1000
+        }
+    }
+
+    "game result" should {
+        val fen = "1AAAAB/111111 T V S"
+        val position = Api.positionFromFen(fen)
+        "end game when no legal moves" in {
+            position.gameResult must_== GameResult.VariantEnd()
+        }
+        "player with more total stones wins" in {
+            position.gameOutcome must_== -1000
+        }
+    }
+
+    "game result" should {
+        val fen = "DDDDDD/DDDDDD 0 0 S" //starting pos
+        val position = Api.positionFromFen(fen)
+        val moves = List(3,9,5,7,4,10,1,8,2,7,0,6,5,6,0,10,0,11,0,9,0,7,5,8,1,9,2,11,3,6,0,7,1,10,4,7,3,6,1,11,2,8,4,7,5,7,3,8,4,9,5)
+        position.makeMoves(moves)
+        "end in draw after given moves" in {
+            position.gameResult must_== GameResult.Draw()
+        }
+    }
+
+    "game result" should {
+        val fen = "DDDDDD/DDDDDD 0 0 S" //starting pos
+        val position = Api.positionFromFen(fen)
+        val moves = List(3,9,5,7,4,10,1,8,2,7,0,6,5,6,0,10,0,11,0,9,0,7,5,8,1,9,2,11,3,6,0,7,1,10,4,7,3,6,1,11,2,8,4,7,5,7,3,8,4,9,5)
+        position.makeMoves(moves)
+        "end in draw after given moves" in {
+            position.gameResult must_== GameResult.Draw()
+        }
+    }
 
 
 }
