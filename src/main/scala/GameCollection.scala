@@ -272,9 +272,8 @@ object GameFamily {
     def defaultVariant = Variant.Mancala(strategygames.mancala.variant.Oware)
     def variants       = Variant.all(GameLogic.Mancala()).filter(_.gameFamily == this)
     def displayPiece   = "display"
-    def pieceSetThemes =
-      List("blue_mancala", "green_mancala", "stone_mancala", "purple_mancala", "black_mancala")
-    def pieceSetDefault   = "blue_mancala"
+    def pieceSetThemes = List("green_mancala", "purple_mancala", "black_mancala")
+    def pieceSetDefault   = "black_mancala"
     def boardThemes       = List("light-wood", "dark-wood")
     def boardThemeDefault = "light-wood"
     def playerNames       = Map(P1 -> "White", P2 -> "Black")
