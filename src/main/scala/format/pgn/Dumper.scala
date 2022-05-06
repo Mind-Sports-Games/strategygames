@@ -9,6 +9,7 @@ object Dumper {
     case (GameLogic.Draughts(), Move.Draughts(data)) => draughts.format.pdn.Dumper(data)
     case (GameLogic.Chess(), Move.Chess(data))       => chess.format.pgn.Dumper(data)
     case (GameLogic.FairySF(), Move.FairySF(data))   => fairysf.format.pgn.Dumper(data)
+    case (GameLogic.Mancala(), Move.Mancala(data))   => mancala.format.pgn.Dumper(data)
     case _ => sys.error("Mismatched gamelogic types 31")
   }
 

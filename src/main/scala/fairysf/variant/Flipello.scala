@@ -22,6 +22,7 @@ case object Flipello
 
   override def dropsVariant     = true
   override def onlyDropsVariant = true
+  override def hasGameScore = true
 
   //cache this rather than checking with the API everytime
   override def initialFen =

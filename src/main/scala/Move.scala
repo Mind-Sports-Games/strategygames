@@ -38,6 +38,7 @@ abstract sealed class Move(
   def toChess: chess.Move
   def toDraughts: draughts.Move
   def toFairySF: fairysf.Move
+  def toMancala: mancala.Move
 
 }
 
@@ -85,6 +86,7 @@ object Move {
     def toChess = m
     def toDraughts = sys.error("Can't make a draughts move from a chess move")
     def toFairySF = sys.error("Can't make a fairysf move from a chess move")
+    def toMancala = sys.error("Can't make a mancala move from a chess move")
 
   }
 
@@ -129,6 +131,8 @@ object Move {
     def toDraughts = m
     def toChess = sys.error("Can't make a chess move from a draughts move")
     def toFairySF = sys.error("Can't make a fairysf move from a draughts move")
+    def toMancala = sys.error("Can't make a mancala move from a chess move")
+
 
   }
 
@@ -173,16 +177,61 @@ object Move {
     def toFairySF = m
     def toChess = sys.error("Can't make a chess move from a fairysf move")
     def toDraughts = sys.error("Can't make a draughts move from a fairysf move")
+    def toMancala = sys.error("Can't make a mancala move from a chess move")
+
+
+  }
+
+  final case class Mancala(m: mancala.Move) extends Move(
+    Piece.Mancala(m.piece),
+    Pos.Mancala(m.orig),
+    Pos.Mancala(m.dest),
+    Situation.Mancala(m.situationBefore),
+    Board.Mancala(m.after),
+    m.capture match {
+      case Some(capture) => Option(List(Pos.Mancala(capture)))
+      case None          => None
+    },
+    None,
+    None,
+    None,
+    false,
+    m.metrics
+  ){
+
+    def situationAfter: Situation = Situation.Mancala(m.situationAfter)
+    def finalizeAfter(finalSquare: Boolean = false): Board = m.finalizeAfter
+
+    def toUci: Uci.Move = Uci.MancalaMove(m.toUci)
+
+    def toShortUci: Uci.Move =
+      Uci.Move(
+        GameLogic.Mancala(),
+        orig,
+        dest,
+        promotion,
+        if (capture.isDefined) capture.get.takeRight(1).some else None
+      )
+
+    val unwrap = m
+    def toFairySF = sys.error("Can't make a fairysf move from a mancala move")
+    def toChess = sys.error("Can't make a chess move from a mancala move")
+    def toDraughts = sys.error("Can't make a draughts move from a mancala move")
+    def toMancala = m
+
 
   }
 
   def wrap(m: chess.Move): Move = Move.Chess(m)
   def wrap(m: draughts.Move): Move = Move.Draughts(m)
   def wrap(m: fairysf.Move): Move = Move.FairySF(m)
+  def wrap(m: mancala.Move): Move = Move.Mancala(m)
+
 
   def toChess(moveOrDrop: MoveOrDrop): chess.MoveOrDrop = moveOrDrop.left.map(_.toChess).right.map(_.toChess)
   //probably not type safe
   def toDraughts(moveOrDrop: MoveOrDrop): draughts.Move = moveOrDrop.left.map(_.toDraughts).left.get
   def toFairySF(moveOrDrop: MoveOrDrop): fairysf.MoveOrDrop = moveOrDrop.left.map(_.toFairySF).right.map(_.toFairySF)
+  def toMancala(moveOrDrop: MoveOrDrop): mancala.Move = moveOrDrop.left.map(_.toMancala).left.get
 
 }

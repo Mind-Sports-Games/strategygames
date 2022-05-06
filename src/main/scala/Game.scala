@@ -4,7 +4,7 @@ import cats.data.Validated
 import cats.implicits._
 
 import strategygames.variant.Variant
-import strategygames.format.{ FEN, Uci }
+import strategygames.format.{ FEN }
 
 abstract class Game(
     val situation: Situation,
@@ -56,6 +56,7 @@ abstract class Game(
   def toChess: chess.Game
   def toDraughts: draughts.DraughtsGame
   def toFairySF: fairysf.Game
+  def toMancala: mancala.Game
 
 }
 
@@ -139,6 +140,7 @@ object Game {
     def toChess: chess.Game = g
     def toDraughts: draughts.DraughtsGame = sys.error("Can't turn a chess game into a draughts game")
     def toFairySF: fairysf.Game = sys.error("Can't turn a chess game into a fairysf game")
+    def toMancala: mancala.Game = sys.error("Can't turn a chess game into a mancala game")
 
   }
 
@@ -233,6 +235,7 @@ object Game {
     def toChess: chess.Game = sys.error("Can't turn a draughts game into a chess game")
     def toDraughts: draughts.DraughtsGame = g
     def toFairySF: fairysf.Game = sys.error("Can't turn a draughts game into a fairysf game")
+    def toMancala: mancala.Game = sys.error("Can't turn a draughts game into a mancala game")
 
   }
 
@@ -314,6 +317,74 @@ object Game {
     def toFairySF: fairysf.Game = g
     def toChess: chess.Game = sys.error("Can't turn a fairysf game into a chess game")
     def toDraughts: draughts.DraughtsGame = sys.error("Can't turn a fairysf game into a draughts game")
+    def toMancala: mancala.Game = sys.error("Can't turn a fairysf game into a mancala game")
+
+  }
+
+  final case class Mancala(g: mancala.Game)
+      extends Game(
+        Situation.Mancala(g.situation),
+        g.pgnMoves,
+        g.clock,
+        g.turns,
+        g.startedAtTurn
+      ) {
+
+    def apply(
+        orig: Pos,
+        dest: Pos,
+        promotion: Option[PromotableRole] = None,
+        metrics: MoveMetrics = MoveMetrics(),
+        finalSquare: Boolean = false,
+        captures: Option[List[Pos]] = None,
+        partialCaptures: Boolean = false
+    ): Validated[String, (Game, Move)] = (orig, dest) match {
+      case (Pos.Mancala(orig), Pos.Mancala(dest)) =>
+        g.apply(orig, dest, None, metrics)
+          .toEither
+          .map(t => (Mancala(t._1), Move.Mancala(t._2)))
+          .toValidated
+      case _ => sys.error("Not passed Mancala objects")
+    }
+
+    private def apply(move: Move): Game = move match {
+      case (Move.Mancala(move)) => Mancala(g.apply(move))
+      case _                  => sys.error("Not passed Mancala objects")
+    }
+
+    def apply(moveOrDrop: MoveOrDrop): Game =
+      moveOrDrop.fold(apply, _ => sys.error("Mancala does not support drops"))
+      
+
+    def drop(
+        role: Role,
+        pos: Pos,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, Drop)] = sys.error("Can't drop in Mancala")
+
+    def copy(clock: Option[Clock]): Game = Mancala(g.copy(clock = clock))
+    def copy(turns: Int, startedAtTurn: Int): Game = Mancala(
+      g.copy(turns = turns, startedAtTurn = startedAtTurn)
+    )
+    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int): Game = Mancala(
+      g.copy(clock = clock, turns = turns, startedAtTurn = startedAtTurn)
+    )
+
+    def copy(situation: Situation, turns: Int): Game = situation match {
+      case Situation.Mancala(situation) => Mancala(g.copy(situation=situation, turns=turns))
+      case _ => sys.error("Unable to copy mancala game with non-mancala arguments")
+    }
+    def copy(situation: Situation): Game = situation match {
+      case Situation.Mancala(situation) => Mancala(g.copy(situation=situation))
+      case _ => sys.error("Unable to copy mancala game with non-mancala arguments")
+    }
+
+    def withTurns(t: Int): Game = Mancala(g.withTurns(t))
+
+    def toFairySF: fairysf.Game = sys.error("Can't turn a mancala game into a fairysf game")
+    def toChess: chess.Game = sys.error("Can't turn a mancala game into a chess game")
+    def toDraughts: draughts.DraughtsGame = sys.error("Can't turn a mancala game into a draughts game")
+    def toMancala: mancala.Game = g
 
   }
 
@@ -331,6 +402,8 @@ object Game {
       Chess(chess.Game(situation, pgnMoves, clock, turns, startedAtTurn))
     case (GameLogic.FairySF(), Situation.FairySF(situation)) =>
       FairySF(fairysf.Game(situation, pgnMoves, clock, turns, startedAtTurn))
+    case (GameLogic.Mancala(), Situation.Mancala(situation)) =>
+      Mancala(mancala.Game(situation, pgnMoves, clock, turns, startedAtTurn))
     case _ => sys.error("Mismatched gamelogic types 32")
   }
 
@@ -338,6 +411,7 @@ object Game {
     case (GameLogic.Draughts(), Variant.Draughts(variant)) => Draughts(draughts.DraughtsGame.apply(variant))
     case (GameLogic.Chess(), Variant.Chess(variant))       => Chess(chess.Game.apply(variant))
     case (GameLogic.FairySF(), Variant.FairySF(variant))   => FairySF(fairysf.Game.apply(variant))
+    case (GameLogic.Mancala(), Variant.Mancala(variant))   => Mancala(mancala.Game.apply(variant))
     case _ => sys.error("Mismatched gamelogic types 33")
   }
 
@@ -348,11 +422,14 @@ object Game {
         Chess(chess.Game.apply(variant.map(_.toChess), fen.map(_.toChess)))
       case GameLogic.FairySF() =>
         FairySF(fairysf.Game.apply(variant.map(_.toFairySF), fen.map(_.toFairySF)))
+      case GameLogic.Mancala() =>
+        Mancala(mancala.Game.apply(variant.map(_.toMancala), fen.map(_.toMancala)))
       case _ => sys.error("Mismatched gamelogic types 36")
     }
 
     def wrap(g: chess.Game) = Chess(g)
     def wrap(g: draughts.DraughtsGame) = Draughts(g)
     def wrap(g: fairysf.Game) = FairySF(g)
+    def wrap(g: mancala.Game) = Mancala(g)
 
 }

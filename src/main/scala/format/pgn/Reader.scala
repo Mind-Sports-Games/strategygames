@@ -5,6 +5,7 @@ import strategygames.format.pgn.Tags
 import strategygames.chess.format.pgn.{ Reader => ChessReader }
 import strategygames.draughts.format.pdn.{ Reader => DraughtsReader }
 import strategygames.fairysf.format.pgn.{ Reader => FairySFReader }
+import strategygames.mancala.format.pgn.{ Reader => MancalaReader }
 
 import cats.data.Validated
 
@@ -33,6 +34,13 @@ object Reader {
     case class FairySFIncomplete(replay: fairysf.Replay, failure: String) extends Result {
       def valid = Validated.invalid(failure)
     }
+    case class MancalaComplete(replay: mancala.Replay) extends Result {
+      def valid = Validated.valid(Replay.Mancala(replay))
+    }
+    case class MancalaIncomplete(replay: mancala.Replay, failure: String) extends Result {
+      def valid = Validated.invalid(failure)
+    }
+
 
     def wrap(result: ChessReader.Result) = result match {
       case ChessReader.Result.Complete(replay)            => Result.ChessComplete(replay)
@@ -48,6 +56,11 @@ object Reader {
       case FairySFReader.Result.Complete(replay)            => Result.FairySFComplete(replay)
       case FairySFReader.Result.Incomplete(replay, failure) => Result.FairySFIncomplete(replay, failure)
     }
+
+    def wrap(result: MancalaReader.Result) = result match {
+      case MancalaReader.Result.Complete(replay)            => Result.MancalaComplete(replay)
+      case MancalaReader.Result.Incomplete(replay, failure) => Result.MancalaIncomplete(replay, failure)
+    }
   }
 
   def fullWithSans(
@@ -61,6 +74,7 @@ object Reader {
       case GameLogic.Chess()    => ChessReader.fullWithSans(pgn, op, tags).map(Result.wrap)
       case GameLogic.Draughts() => DraughtsReader.fullWithSans(pgn, op, tags, iteratedCapts).map(Result.wrap)
       case GameLogic.FairySF()  => FairySFReader.fullWithSans(pgn, op, tags).map(Result.wrap)
+      case GameLogic.Mancala()    => MancalaReader.fullWithSans(pgn, op, tags).map(Result.wrap)
     }
 
   def movesWithSans(
@@ -78,6 +92,8 @@ object Reader {
       case GameLogic.FairySF() =>
         //FairySFReader.movesWithSans(moveStrs, op, tags).map(Result.wrap)
         sys.error("Sans not implemented for fairysf")
+      case GameLogic.Mancala() =>
+        sys.error("Sans not implemented for mancala")
     }
 
   def movesWithPgns(
@@ -91,6 +107,8 @@ object Reader {
       case GameLogic.Draughts() => sys.error("movesWithPgns not implemented for draughts")
       case GameLogic.FairySF() =>
         FairySFReader.movesWithPgns(moveStrs, op, tags).map(Result.wrap)
+      case GameLogic.Mancala() =>
+        MancalaReader.movesWithPgns(moveStrs, op, tags).map(Result.wrap)
     }
 
 }

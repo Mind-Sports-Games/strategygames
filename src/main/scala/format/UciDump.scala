@@ -20,6 +20,8 @@ object UciDump {
       => strategygames.chess.format.UciDump(moves, initialFen.map(_.toChess), variant)
     case (GameLogic.FairySF(), Variant.FairySF(variant))
       => strategygames.fairysf.format.UciDump(moves, initialFen.map(_.toFairySF), variant)
+    case (GameLogic.Mancala(), Variant.Mancala(variant))
+      => strategygames.mancala.format.UciDump(moves, initialFen.map(_.toMancala), variant)
     case _ => sys.error("Mismatched gamelogic types 12")
   }
 
@@ -34,6 +36,8 @@ object UciDump {
       => strategygames.fairysf.format.UciDump.move(variant)(Left(mod))
     case (GameLogic.FairySF(), Variant.FairySF(variant), Right(Drop.FairySF(mod)))
       => strategygames.fairysf.format.UciDump.move(variant)(Right(mod))
+    case (GameLogic.Mancala(), Variant.Mancala(variant), Left(Move.Mancala(mod)))
+      => strategygames.mancala.format.UciDump.move(variant)(mod)
     case _ => sys.error("Mismatched gamelogic types 13")
   }
 }

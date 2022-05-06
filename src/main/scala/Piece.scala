@@ -44,10 +44,20 @@ object Piece {
 
   }
 
+  final case class Mancala(p: mancala.Piece) extends Piece(
+    p.player,
+    Role.MancalaRole(p.role)
+  ){
+
+    def forsyth: Char = p.forsyth
+
+  }
+
   def apply(lib: GameLogic, player: Player, role: Role): Piece = (lib, role) match {
     case (GameLogic.Draughts(), Role.DraughtsRole(role)) => Draughts(draughts.Piece(player, role))
     case (GameLogic.Chess(), Role.ChessRole(role))       => Chess(chess.Piece(player, role))
     case (GameLogic.FairySF(), Role.FairySFRole(role))   => FairySF(fairysf.Piece(player, role))
+    case (GameLogic.Mancala(), Role.MancalaRole(role))   => Mancala(mancala.Piece(player, role))
     case _ => sys.error("Mismatched gamelogic types 2")
   }
 
@@ -55,6 +65,8 @@ object Piece {
     case (GameLogic.Draughts()) => draughts.Piece.fromChar(c).map(Draughts)
     case (GameLogic.Chess())    => chess.Piece.fromChar(c).map(Chess)
     case (GameLogic.FairySF())  => fairysf.Piece.fromChar(gf, c).map(FairySF)
+    //case (GameLogic.Mancala())  => mancala.Piece.fromChar(gf, c).map(Mancala)
+    case (GameLogic.Mancala())  => sys.error("cannot get piece from Char anymore")
   }
 
   def chessPieceMap(pieceMap: PieceMap): chess.PieceMap = pieceMap.map{
@@ -67,5 +79,9 @@ object Piece {
 
   def fairySFPieceMap(pieceMap: PieceMap): fairysf.PieceMap = pieceMap.map{
     case(Pos.FairySF(pos), FairySF(piece)) => (pos, piece)
+  }
+
+  def mancalaPieceMap(pieceMap: PieceMap): mancala.PieceMap = pieceMap.map{
+    case(Pos.Mancala(pos), Mancala(piece)) => (pos, piece)
   }
 }
