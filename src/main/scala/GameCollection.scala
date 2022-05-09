@@ -276,7 +276,7 @@ object GameFamily {
     def pieceSetDefault   = "black_mancala"
     def boardThemes       = List("light-wood", "dark-wood")
     def boardThemeDefault = "light-wood"
-    def playerNames       = Map(P1 -> "White", P2 -> "Black")
+    def playerNames       = Map(P1 -> "South", P2 -> "North")
     def playerColors      = Map(P1 -> "white", P2 -> "black")
   }
 

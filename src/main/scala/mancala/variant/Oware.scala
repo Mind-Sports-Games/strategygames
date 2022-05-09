@@ -15,20 +15,20 @@ case object Oware
 
   def gameFamily: GameFamily = GameFamily.Mancala()
 
-  def perfIcon: Char = 's'
+  def perfIcon: Char = ''
   def perfId: Int    = 300
 
   override def baseVariant: Boolean = true
 
-  //cache this rather than checking with the API everytime
+  // cache this rather than checking with the API everytime
   override def initialFen =
     format.FEN("DDDDDD/DDDDDD 0 0 S")
 
   override def specialEnd(situation: Situation) =
     (situation.board.apiPosition.fen.player1Score > 24) ||
-    (situation.board.apiPosition.fen.player2Score > 24) ||
-    (situation.board.apiPosition.legalMoves.size == 0) ||
-    (situation.board.apiPosition.gameEnd)
+      (situation.board.apiPosition.fen.player2Score > 24) ||
+      (situation.board.apiPosition.legalMoves.size == 0) ||
+      (situation.board.apiPosition.gameEnd)
 
   override def specialDraw(situation: Situation) =
     situation.board.apiPosition.fen.gameEndPlayer1Score == situation.board.apiPosition.fen.gameEndPlayer2Score
@@ -39,8 +39,11 @@ case object Oware
   //   } else None
   // }
   override def winner(situation: Situation): Option[Player] =
-    if (specialEnd(situation) && !specialDraw(situation))
-      {if(situation.board.apiPosition.fen.gameEndPlayer1Score > situation.board.apiPosition.fen.gameEndPlayer2Score) Player.fromName("p1") else Player.fromName("p2")}
-    else None
+    if (specialEnd(situation) && !specialDraw(situation)) {
+      if (
+        situation.board.apiPosition.fen.gameEndPlayer1Score > situation.board.apiPosition.fen.gameEndPlayer2Score
+      ) Player.fromName("p1")
+      else Player.fromName("p2")
+    } else None
 
 }
