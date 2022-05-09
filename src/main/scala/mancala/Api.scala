@@ -103,8 +103,8 @@ object Api {
       }
     }
 
-    def scoreNumberToLetter(num: String): String = {
-      num.toInt match {
+    def scoreNumberToLetter(num: Int): String = {
+      num match {
         case 0 => "0"
         case x => seedCountToLetter(x).toString()
       }
@@ -128,14 +128,30 @@ object Api {
       .mkString("")
       .patch(variant.boardSize.width, "/", 0)
       val updatedBoard = "^(1+)$".r.replaceAllIn(board, "$1".length.toString()) //combine 1's into size of group
+      val p1CurrentScore = owareDiagram.split('-')(numHouses).toInt
+      val p2CurrentScore = owareDiagram.split('-')(numHouses + 1).toInt
       return updatedBoard
       .concat(" ")
-      .concat(scoreNumberToLetter(owareDiagram.split('-')(numHouses))) 
+      .concat(scoreNumberToLetter(finalStoneScore(p1CurrentScore, p2CurrentScore, "p1"))) 
       .concat(" ")
-      .concat(scoreNumberToLetter(owareDiagram.split('-')(numHouses + 1)))
+      .concat(scoreNumberToLetter(finalStoneScore(p1CurrentScore, p2CurrentScore, "p2")))
       .concat(" ")
       .concat(owareDiagram.split('-')(numHouses + 2))
     }
+
+    def finalStoneScore(currentP1Score: Int, currentP2Score: Int, playerIndex: String): Int = {
+      if (position.hasEnded() && currentP1Score < 25 && currentP2Score < 25){
+        playerIndex match{
+          case "p1" => currentP1Score + owareDiagram.split('-').take(6).map(_.toInt).sum
+          case "p2" => currentP2Score + owareDiagram.split('-').drop(6).take(6).map(_.toInt).sum
+        }
+      } else {
+        playerIndex match{
+          case "p1" => currentP1Score
+          case "p2" => currentP2Score
+        }
+      }
+    } 
     
     def toPosition = position.toBoard().position()
 
