@@ -5,10 +5,10 @@ import com.joansala.game.oware.OwareBoard
 
 import cats.implicits._
 
-import strategygames.{ Player }
-import strategygames.mancala.format.{ FEN }
+import strategygames.Player
+import strategygames.mancala.format.FEN
 import strategygames.mancala.variant.Variant
-import scala.util.{Try, Success, Failure}
+import scala.util.{ Failure, Success, Try }
 
 sealed abstract class GameResult extends Product with Serializable
 
@@ -32,28 +32,19 @@ object Api {
 
     def makeMoves(movesList: List[Int]): Position
     def makeMovesWithPrevious(movesList: List[Int], previousMoves: List[String]): Position
-    
+
     def toBoard: String
-    def toCoordinates(move: Int): String
-    def toNotation (moves: List[Int]): String
-    def toMoves(notation: String): List[Int]
     def owareDiagram: String
 
     val fen: FEN
-
-    //def isDraw(ply: Int): Boolean
-    //def hasGameCycle(ply: Int): Boolean
-    //val hasRepeated: Boolean
-
     val pieceMap: PieceMap
 
-    //val optionalGameEndResult: GameResult
     val gameResult: GameResult
     val gameEnd: Boolean
     val gameOutcome: Int
     val legalMoves: Array[Int]
-    val playerTurn: Int //1 for South -1 for North
-    def getFEN: String
+    val playerTurn: Int // 1 for South -1 for North
+    def fenString: String
   }
 
   private class OwarePosition(position: OwareGame) extends Position {
@@ -64,7 +55,7 @@ object Api {
 
     def makeMovesWithPrevious(movesList: List[Int], previousMoves: List[String]): Position = {
       val game = new OwareGame()
-      previousMoves.map(uci => game.makeMove(uciToMove(uci)))
+      previousMoves.foreach(uci => game.makeMove(uciToMove(uci)))
 
       movesList.map { move =>
         if (game.legalMoves.contains(move)) game.makeMove(move)
@@ -80,104 +71,93 @@ object Api {
       }
       return new OwarePosition(position)
     }
-    
 
-    //helper
+    // helper
     def toBoard: String = position.toBoard.toString
 
     def setBoard(owareBoard: OwareBoard): Unit = position.setBoard(owareBoard)
-    def toCoordinates(move: Int): String = position.toBoard().toCoordinates(move)
-    def toNotation (moves: List[Int]): String = position.toBoard().toNotation(moves.toArray)
-
-    def toMoves(notation: String): List[Int] = position.toBoard().toMoves(notation).toList
 
     def owareDiagram: String = position.toBoard.toDiagram
 
     private val numHouses = variant.boardSize.width * variant.boardSize.height
 
-    def seedCountToLetter(num: Int): Char = {
+    def seedCountToLetter(num: Int): Char =
       num match {
         case x if x < 27  => (x + 64).toChar
         case x if x >= 27 => (x + 70).toChar
-        case x if x > 52 => sys.error("expected number of stones less than 53, got " + x.toString()) 
+        case x if x > 52  => sys.error("expected number of stones less than 53, got " + x.toString())
       }
-    }
 
-    def scoreNumberToLetter(num: Int): String = {
+    def scoreNumberToLetter(num: Int): String =
       num match {
         case 0 => "0"
         case x => seedCountToLetter(x).toString()
       }
-    }
-    def getFEN: String = {
-      val board = (
+
+    def fenString: String = {
+      val board        = (
         owareDiagram.split('-').take(variant.boardSize.width * 2).drop(variant.boardSize.width).reverse
-        ++
-        owareDiagram.split('-').take(variant.boardSize.width)
+          ++
+            owareDiagram.split('-').take(variant.boardSize.width)
       )
-      .map{ part => 
-        part match {
-          case "0" => "1" //empty house
-          case _ => 
-            part.toIntOption match {
-              case Some(x: Int) => seedCountToLetter(x)
-              case _ => sys.error("expected integer number of string in owareDiagram: " + owareDiagram)
-            }
+        .map { part =>
+          part match {
+            case "0" => "1" // empty house
+            case _   =>
+              part.toIntOption match {
+                case Some(x: Int) => seedCountToLetter(x)
+                case _            => sys.error("expected integer number of string in owareDiagram: " + owareDiagram)
+              }
+          }
         }
-      }
-      .mkString("")
-      .patch(variant.boardSize.width, "/", 0)
-      val updatedBoard = "^(1+)$".r.replaceAllIn(board, "$1".length.toString()) //combine 1's into size of group
+        .mkString("")
+        .patch(variant.boardSize.width, "/", 0)
+      val updatedBoard =
+        "^(1+)$".r.replaceAllIn(board, "$1".length.toString()) // combine 1's into size of group
       val p1CurrentScore = owareDiagram.split('-')(numHouses).toInt
       val p2CurrentScore = owareDiagram.split('-')(numHouses + 1).toInt
-      return updatedBoard
-      .concat(" ")
-      .concat(scoreNumberToLetter(finalStoneScore(p1CurrentScore, p2CurrentScore, "p1"))) 
-      .concat(" ")
-      .concat(scoreNumberToLetter(finalStoneScore(p1CurrentScore, p2CurrentScore, "p2")))
-      .concat(" ")
-      .concat(owareDiagram.split('-')(numHouses + 2))
+      val p1FinalScore   = finalStoneScore(p1CurrentScore, p2CurrentScore, "p1")
+      val p2FinalScore   = finalStoneScore(p1CurrentScore, p2CurrentScore, "p2")
+      return s"${updatedBoard} ${scoreNumberToLetter(p1FinalScore)} ${scoreNumberToLetter(p2FinalScore)} ${owareDiagram
+          .split('-')(numHouses + 2)}"
     }
 
     def finalStoneScore(currentP1Score: Int, currentP2Score: Int, playerIndex: String): Int = {
-      if (position.hasEnded() && currentP1Score < 25 && currentP2Score < 25){
-        playerIndex match{
+      if (position.hasEnded() && currentP1Score < 25 && currentP2Score < 25) {
+        playerIndex match {
           case "p1" => currentP1Score + owareDiagram.split('-').take(6).map(_.toInt).sum
           case "p2" => currentP2Score + owareDiagram.split('-').drop(6).take(6).map(_.toInt).sum
         }
       } else {
-        playerIndex match{
+        playerIndex match {
           case "p1" => currentP1Score
           case "p2" => currentP2Score
         }
       }
-    } 
-    
+    }
+
     def toPosition = position.toBoard().position()
 
-    lazy val fen: FEN            = FEN(getFEN)
-    
-    //def isDraw(ply: Int): Boolean       = position.isDraw(ply)
-    //def hasGameCycle(ply: Int): Boolean = position.hasGameCycle(ply)
-    //lazy val hasRepeated: Boolean       = position.hasRepeated()
+    lazy val fen: FEN = FEN(fenString)
 
     private def convertPieceMapFromFen(fenString: String): PieceMap = {
-      FEN(fenString).owareStoneArray.zipWithIndex.map{case (seeds, index) =>
-        seeds match {
-          case 0 => (None, None)
-          case n => 
-            (
-              Pos(index),
-              Piece.fromStoneNumber(if (index < 6) Player.fromP1(true) else Player.fromP1(false), n)
-            )
+      FEN(fenString).owareStoneArray.zipWithIndex
+        .map { case (seeds, index) =>
+          seeds match {
+            case 0 => (None, None)
+            case n =>
+              (
+                Pos(index),
+                Piece.fromStoneNumber(if (index < 6) Player.fromP1(true) else Player.fromP1(false), n)
+              )
+          }
         }
-      }
-      .filter(x => x!=(None,None))
-      .map{ case (Some(pos), Some(piece)) => pos -> piece }
-      .toMap      
-    } 
-  
-    lazy val pieceMap: PieceMap = convertPieceMapFromFen(getFEN)
+        .filter(x => x != (None, None))
+        .map { case (Some(pos), Some(piece)) => pos -> piece }
+        .toMap
+    }
+
+    lazy val pieceMap: PieceMap = convertPieceMapFromFen(fenString)
 
     lazy val gameResult: GameResult =
       GameResult.resultFromInt(position.outcome(), position.hasEnded())
@@ -196,7 +176,7 @@ object Api {
       }
       moves.toArray
     }
-    val playerTurn: Int = position.turn()
+    val playerTurn: Int        = position.turn()
   }
 
   def position: Position =
@@ -215,33 +195,33 @@ object Api {
   }
 
   def positionFromVariantNameAndFEN(variantName: String, fenString: String): Position = {
-      val game = new OwareGame()
-      game.setBoard(owareBoardFromFen(fenString))
-      variantName match {
-        case "oware" => new OwarePosition(game)
-        case _ => new OwarePosition(new OwareGame())
-      }
+    val game = new OwareGame()
+    game.setBoard(owareBoardFromFen(fenString))
+    variantName match {
+      case "oware" => new OwarePosition(game)
+      case _       => new OwarePosition(new OwareGame())
     }
+  }
 
   def owareBoardFromFen(fenString: String): OwareBoard = {
-    val myFen = FEN(fenString)
+    val myFen                  = FEN(fenString)
     val posFromFen: Array[Int] = myFen.owareStoneArray :+ myFen.player1Score :+ myFen.player2Score
-    val turn: Int = if(fenString.split(" ").last == "S") 1 else -1
+    val turn: Int              = if (fenString.split(" ").last == "S") 1 else -1
     new OwareBoard(posFromFen, turn)
   }
 
   def positionFromVariantAndMoves(variant: Variant, uciMoves: List[String]): Position =
     positionFromVariant(variant).makeMoves(uciMoves.map(m => uciToMove(m)))
 
-  //assumption for uci that 'a1' is bottom left for South player.
+  // assumption for uci that 'a1' is bottom left for South player.
   def uciToMove(uciMove: String): Int = {
     uciMove(1).toString() match {
       case "1" => uciMove(0).toInt - 97
-      case _   => 11 - ( uciMove(0).toInt - 97 )
+      case _   => 11 - (uciMove(0).toInt - 97)
     }
   }
 
-  def moveToUci(move: Int): String ={
+  def moveToUci(move: Int): String = {
     move match {
       case x if x < 6 => s"${(x + 97).toChar}1"
       case _          => s"${((11 - move) + 97).toChar}2"
@@ -249,16 +229,10 @@ object Api {
   }
 
   val initialFen: FEN = variant.Oware.initialFen
-  
 
-  def validateFEN(fenString: String): Boolean = {
-    val owareBoard = Try(owareBoardFromFen(fenString))
-    val owareBoardCreation = owareBoard match {
-      case Success(_) => true
-      case Failure(_) => false
-    }
-    fenString.matches("[A-Za-z0-6]{1,6}/[A-Za-z0-6]{1,6} [A-Za-z0]+ [A-Za-z0]+ [N|S]") && owareBoardCreation
-  }
+  private val fenRegex                        = "[A-Za-z0-6]{1,6}/[A-Za-z0-6]{1,6} [A-Za-z0]+ [A-Za-z0]+ [N|S]"
+  def validateFEN(fenString: String): Boolean =
+    Try(owareBoardFromFen(fenString)).isSuccess && fenString.matches(fenRegex)
 
   //  def positionFromMoves(variantName: String, fen: String, movesList: Option[List[String]] = None): Position =
   //    positionFromVariantNameAndFEN(variantName, fen)
