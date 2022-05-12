@@ -19,7 +19,7 @@ abstract class Variant private[variant] (
     val boardSize: Board.BoardSize
 ) {
 
-  def oware       = this == Oware
+  def oware = this == Oware
 
   def exotic = true
 
@@ -34,7 +34,7 @@ abstract class Variant private[variant] (
 
   def dropsVariant: Boolean     = false
   def onlyDropsVariant: Boolean = false
-  def hasGameScore: Boolean = true
+  def hasGameScore: Boolean     = true
 
   def repetitionEnabled: Boolean = false
 
@@ -43,53 +43,54 @@ abstract class Variant private[variant] (
 
   def initialFen: FEN = format.FEN("DDDDDD/DDDDDD 0 0 S")
 
-  def pieces: Map[Pos, Piece] = Api.pieceMapFromFen(key, initialFen.value) 
+  def pieces: Map[Pos, Piece] = Api.pieceMapFromFen(key, initialFen.value)
 
   def startPlayer: Player = P1
 
   val kingPiece: Option[Role] = None
 
-  //looks like this is only to allow King to be a valid promotion piece
-  //in just atomic, so can leave as true for now
+  // looks like this is only to allow King to be a valid promotion piece
+  // in just atomic, so can leave as true for now
   def isValidPromotion(promotion: Option[PromotableRole]): Boolean = true
 
-  def validMoves(situation: Situation): Map[Pos, List[Move]] = {
+  def validMoves(situation: Situation): Map[Pos, List[Move]] =
     situation.board.apiPosition.legalMoves
-      .map{ move => 
+      .map { move =>
         val numSeeds = situation.board.apiPosition.fen.owareStoneArray(move)
         (
-        move,
-        Pos(move),
-        Pos((numSeeds + move + (numSeeds - 1)/11) % 12) //dest -- seeds + move position + skipping own house
+          move,
+          Pos(move),
+          Pos(
+            (numSeeds + move + (numSeeds - 1) / 11) % 12
+          ) // dest = seeds + move position + skipping own house
         )
       }
-      .map{ 
+      .map {
         case (move, Some(orig), Some(dest)) => {
-          val uciMove     = s"${orig.key}${dest.key}"
+          val uciMove       = s"${orig.key}${dest.key}"
           val previousMoves = situation.board.uciMoves
-          val newPosition = situation.board.apiPosition.makeMovesWithPrevious(List(move), previousMoves)
-            (
-              orig,
-              Move(
-                piece = situation.board.pieces(orig),
-                orig = orig,
-                dest = dest,
-                situationBefore = situation,
-                after = situation.board.copy(
-                  pieces = newPosition.pieceMap,
-                  uciMoves = (situation.board.uciMoves :+ uciMove),
-                  position = newPosition.some
-                ),
-                capture = None,
-                promotion = None
-              )
+          val newPosition   = situation.board.apiPosition.makeMovesWithPrevious(List(move), previousMoves)
+          (
+            orig,
+            Move(
+              piece = situation.board.pieces(orig),
+              orig = orig,
+              dest = dest,
+              situationBefore = situation,
+              after = situation.board.copy(
+                pieces = newPosition.pieceMap,
+                uciMoves = situation.board.uciMoves :+ uciMove,
+                position = newPosition.some
+              ),
+              capture = None,
+              promotion = None
             )
+          )
         }
-        case (_, orig, dest) => sys.error(s"Invalid position from uci: ${orig}${dest}")
+        case (_, orig, dest)                => sys.error(s"Invalid position from uci: ${orig}${dest}")
       }
       .groupBy(_._1)
       .map { case (k, v) => (k, v.toList.map(_._2)) }
-  }
 
   def move(
       situation: Situation,
@@ -98,26 +99,13 @@ abstract class Variant private[variant] (
       promotion: Option[PromotableRole]
   ): Validated[String, Move] = {
     // Find the move in the variant specific list of valid moves
-    situation.moves get from flatMap (_.find(m => m.dest == to && m.promotion == promotion)) match {
-      case Some(move) => Validated.valid(move)
-      case None =>
-        Validated.invalid(
-          s"Not a valid move: ${from}${to} with prom: ${promotion}. Allowed moves: ${situation.moves}"
-        )
-    }
+    situation.moves get from flatMap (_.find(m => m.dest == to && m.promotion == promotion)) toValid
+      s"Not a valid move: ${from}${to} with prom: ${promotion}. Allowed moves: ${situation.moves}"
   }
-
-  def staleMate(situation: Situation): Boolean = situation.moves.isEmpty
-
-  def checkmate(situation: Situation) = situation.moves.isEmpty
 
   def stalemateIsDraw = false
 
-  // In most variants, the winner is the last player to have played
-  // perpetual is the opposite. would need to recheck this for new variants
-  def winner(situation: Situation): Option[Player] =
-    if (situation.checkMate || situation.staleMate) Option(!situation.player)
-    else None
+  def winner(situation: Situation): Option[Player]
 
   @nowarn def specialEnd(situation: Situation) = false
 
@@ -138,14 +126,13 @@ abstract class Variant private[variant] (
 
   def addVariantEffect(move: Move): Move = move
 
-  
   /** Once a move has been decided upon from the available legal moves, the board is finalized
     */
   @nowarn def finalizeBoard(board: Board, uci: format.Uci, captured: Option[Piece]): Board =
     board
 
   def valid(board: Board, strict: Boolean): Boolean =
-    Api.validateFEN(Forsyth.exportBoard(board)) 
+    Api.validateFEN(Forsyth.exportBoard(board))
 
   val roles: List[Role] = Role.all
 
@@ -169,13 +156,13 @@ object Variant {
   lazy val all: List[Variant] = List(
     Oware
   )
-  val byId = all map { v =>
+  val byId                    = all map { v =>
     (v.id, v)
   } toMap
-  val byKey = all map { v =>
+  val byKey                   = all map { v =>
     (v.key, v)
   } toMap
-  
+
   val default = Oware
 
   def apply(id: Int): Option[Variant]     = byId get id

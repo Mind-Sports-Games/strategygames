@@ -2,21 +2,21 @@ name := "strategygames"
 
 organization := "org.playstrategy"
 
-version := "10.2.1-pstrat43"
+version := "10.2.1-pstrat45"
 
 scalaVersion := "2.13.5"
 
 val fairystockfishVersion = "0.0.7"
 
 libraryDependencies ++= List(
-  "org.scala-lang.modules"   %% "scala-parser-combinators" % "1.1.2",
-  "org.specs2"               %% "specs2-core"              % "4.10.0" % Test,
-  "org.specs2"               %% "specs2-cats"              % "4.10.0" % Test,
-  "com.github.ornicar"       %% "scalalib"                 % "7.0.2",
-  "joda-time"                 % "joda-time"                % "2.10.10",
-  "org.typelevel"            %% "cats-core"                % "2.2.0",
-  "org.playstrategy"          % "fairystockfish"           % fairystockfishVersion,
-  "com.joansala.aalina"       % "aalina"                   % "2.1.0-pstrat1"
+  "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
+  "org.specs2"             %% "specs2-core"              % "4.10.0" % Test,
+  "org.specs2"             %% "specs2-cats"              % "4.10.0" % Test,
+  "com.github.ornicar"     %% "scalalib"                 % "7.0.2",
+  "joda-time"               % "joda-time"                % "2.10.10",
+  "org.typelevel"          %% "cats-core"                % "2.2.0",
+  "org.playstrategy"        % "fairystockfish"           % fairystockfishVersion,
+  "com.joansala.aalina"     % "aalina"                   % "2.1.0-pstrat1"
 )
 
 // Explicitly add in the linux-class path
@@ -25,9 +25,12 @@ libraryDependencies += "org.playstrategy" % "fairystockfish" % fairystockfishVer
 classpathTypes ++= Set("linux-x86_64")
 
 resolvers ++= Seq(
-  "lila-maven" at "https://raw.githubusercontent.com/Mind-Sports-Games/lila-maven/master",
- ) ++ sys.env.get("LILA_MAVEN_RESOLVERS").map(_.split(",").zipWithIndex.map{case (x,i) => s"local-maven-$i" at x}).map(_.toSeq).getOrElse(Seq())
-
+  "lila-maven" at "https://raw.githubusercontent.com/Mind-Sports-Games/lila-maven/master"
+) ++ sys.env
+  .get("LILA_MAVEN_RESOLVERS")
+  .map(_.split(",").zipWithIndex.map { case (x, i) => s"local-maven-$i" at x })
+  .map(_.toSeq)
+  .getOrElse(Seq())
 
 scalacOptions ++= Seq(
   "-encoding",

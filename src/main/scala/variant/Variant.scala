@@ -14,7 +14,7 @@ abstract class Variant(
     val name: String,
     val standardInitialPosition: Boolean,
     val gameType: Option[Int] = None
-    //not handling draughts.boardSize... (yet)
+    // not handling draughts.boardSize... (yet)
 ) {
 
   def toChess: chess.variant.Variant
@@ -66,14 +66,14 @@ abstract class Variant(
 
   def exotic: Boolean
 
-  //used in lila setup/src/main/Config.scala
+  // used in lila setup/src/main/Config.scala
   def baseVariant: Boolean
   def fenVariant: Boolean
   def aiVariant: Boolean
-  //used in lila modules/game/src/main/Game.scala
+  // used in lila modules/game/src/main/Game.scala
   def p1IsBetterVariant: Boolean
   def blindModeVariant: Boolean
-  //used in lila modules/playban/src/main/RageSit.scala
+  // used in lila modules/playban/src/main/RageSit.scala
   def materialImbalanceVariant: Boolean
 
   def dropsVariant: Boolean
@@ -104,8 +104,8 @@ abstract class Variant(
   // pieces surrounding a capture explode
   def hasMoveEffects: Boolean
 
-  /** Applies a variant specific effect to the move. This helps decide whether a king is endangered by a move, for
-    * example
+  /** Applies a variant specific effect to the move. This helps decide whether a king is endangered by a move,
+    * for example
     */
   def addVariantEffect(move: Move): Move
 
@@ -179,8 +179,8 @@ object Variant {
     def minishogi: Boolean   = false
     def minixiangqi: Boolean = false
     def flipello: Boolean    = false
-    
-    def oware: Boolean       = false
+
+    def oware: Boolean = false
 
     def standardVariant: Boolean     = v.standard
     def fromPositionVariant: Boolean = v.fromPosition
@@ -200,7 +200,7 @@ object Variant {
 
     def dropsVariant: Boolean     = v.dropsVariant
     def onlyDropsVariant: Boolean = false
-    def hasGameScore: Boolean = false
+    def hasGameScore: Boolean     = false
 
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
@@ -275,7 +275,7 @@ object Variant {
     def toChess    = sys.error("Can't convert draughts to chess")
     def toDraughts = v
     def toFairySF  = sys.error("Can't convert draughts to fairysf")
-    def toMancala    = sys.error("Can't convert draughts to mancala")
+    def toMancala  = sys.error("Can't convert draughts to mancala")
 
     def pieces: Map[Pos, Piece] =
       v.pieces.map { case (pos, piece) => (Pos.Draughts(pos), Piece.Draughts(piece)) }
@@ -311,7 +311,7 @@ object Variant {
     def minixiangqi: Boolean = false
     def flipello: Boolean    = false
 
-    def oware: Boolean       = false
+    def oware: Boolean = false
 
     def standardVariant: Boolean     = v.standard
     def fromPositionVariant: Boolean = v.fromPosition
@@ -331,7 +331,7 @@ object Variant {
 
     def dropsVariant: Boolean     = false
     def onlyDropsVariant: Boolean = false
-    def hasGameScore: Boolean = false
+    def hasGameScore: Boolean     = false
 
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
@@ -350,7 +350,7 @@ object Variant {
       case _                             => sys.error("Not passed Draughts objects")
     }
 
-    //stalemate not referenced in draughts
+    // stalemate not referenced in draughts
     def stalemateIsDraw: Boolean = true
 
     def winner(situation: Situation): Option[Player] = situation match {
@@ -370,7 +370,7 @@ object Variant {
 
     def hasMoveEffects: Boolean = v.hasMoveEffects
 
-    def addVariantEffect(move: Move): Move = move match {
+    def addVariantEffect(move: Move): Move            = move match {
       case Move.Draughts(move) => Move.Draughts(v.addVariantEffect(move))
       case _                   => sys.error("Not passed Draughts objects")
     }
@@ -402,10 +402,10 @@ object Variant {
         standardInitialPosition = v.standardInitialPosition
       ) {
 
-    def toChess    = sys.error("Can't convert fairysf to chess")
-    def toDraughts = sys.error("Can't convert fairysf to draughts")
-    def toFairySF  = v
-    def toMancala    = sys.error("Can't convert fairysf to mancala")
+    def toChess                 = sys.error("Can't convert fairysf to chess")
+    def toDraughts              = sys.error("Can't convert fairysf to draughts")
+    def toFairySF               = v
+    def toMancala               = sys.error("Can't convert fairysf to mancala")
     def pieces: Map[Pos, Piece] =
       v.pieces.map { case (pos, piece) => (Pos.FairySF(pos), Piece.FairySF(piece)) }
 
@@ -440,7 +440,7 @@ object Variant {
     def minixiangqi: Boolean = v.minixiangqi
     def flipello: Boolean    = v.flipello
 
-    def oware: Boolean       = false
+    def oware: Boolean = false
 
     def standardVariant: Boolean     = standard || draughtsStandard
     def fromPositionVariant: Boolean = fromPosition || draughtsFromPosition
@@ -460,7 +460,7 @@ object Variant {
 
     def dropsVariant: Boolean     = v.dropsVariant
     def onlyDropsVariant: Boolean = v.onlyDropsVariant
-    def hasGameScore: Boolean = v.hasGameScore
+    def hasGameScore: Boolean     = v.hasGameScore
 
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
@@ -498,7 +498,7 @@ object Variant {
 
     def hasMoveEffects: Boolean = v.hasMoveEffects
 
-    def addVariantEffect(move: Move): Move = move match {
+    def addVariantEffect(move: Move): Move            = move match {
       case Move.FairySF(move) => Move.FairySF(v.addVariantEffect(move))
       case _                  => sys.error("Not passed FairySF objects")
     }
@@ -522,7 +522,6 @@ object Variant {
     def playerColors: Map[Player, String] = gameFamily.playerColors
   }
 
-
   case class Mancala(v: mancala.variant.Variant)
       extends Variant(
         id = v.id,
@@ -531,10 +530,10 @@ object Variant {
         standardInitialPosition = v.standardInitialPosition
       ) {
 
-    def toChess    = sys.error("Can't convert mancala to chess")
-    def toDraughts = sys.error("Can't convert mancala to draughts")
-    def toFairySF  = sys.error("Can't convert mancala to fairysf")
-    def toMancala    = v
+    def toChess                 = sys.error("Can't convert mancala to chess")
+    def toDraughts              = sys.error("Can't convert mancala to draughts")
+    def toFairySF               = sys.error("Can't convert mancala to fairysf")
+    def toMancala               = v
     def pieces: Map[Pos, Piece] =
       v.pieces.map { case (pos, piece) => (Pos.Mancala(pos), Piece.Mancala(piece)) }
 
@@ -569,7 +568,7 @@ object Variant {
     def minixiangqi: Boolean = false
     def flipello: Boolean    = false
 
-    def oware: Boolean       = v.oware
+    def oware: Boolean = v.oware
 
     def standardVariant: Boolean     = standard || draughtsStandard
     def fromPositionVariant: Boolean = fromPosition || draughtsFromPosition
@@ -589,7 +588,7 @@ object Variant {
 
     def dropsVariant: Boolean     = false
     def onlyDropsVariant: Boolean = false
-    def hasGameScore: Boolean = true
+    def hasGameScore: Boolean     = true
 
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
@@ -600,7 +599,7 @@ object Variant {
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false
 
     def checkmate(situation: Situation): Boolean = situation match {
-      case Situation.Mancala(situation)   => v.checkmate(situation)
+      case Situation.Mancala(situation) => false
       case _                            => sys.error("Not passed Mancala objects")
     }
 
@@ -623,7 +622,7 @@ object Variant {
 
     def hasMoveEffects: Boolean = v.hasMoveEffects
 
-    def addVariantEffect(move: Move): Move = move match {
+    def addVariantEffect(move: Move): Move            = move match {
       case Move.Mancala(move) => Move.Mancala(v.addVariantEffect(move))
       case _                  => sys.error("Not passed Mancala objects")
     }
@@ -647,12 +646,11 @@ object Variant {
     def playerColors: Map[Player, String] = gameFamily.playerColors
   }
 
-
   def all: List[Variant] =
     chess.variant.Variant.all.map(Chess) :::
       draughts.variant.Variant.all.map(Draughts) :::
       fairysf.variant.Variant.all.map(FairySF) :::
-      mancala.variant.Variant.all.map(Mancala)  
+      mancala.variant.Variant.all.map(Mancala)
 
   def byId = all map { v => (v.id, v) } toMap
 
@@ -662,7 +660,7 @@ object Variant {
     case GameLogic.Draughts() => draughts.variant.Variant.all.map(Draughts)
     case GameLogic.Chess()    => chess.variant.Variant.all.map(Chess)
     case GameLogic.FairySF()  => fairysf.variant.Variant.all.map(FairySF)
-    case GameLogic.Mancala()    => mancala.variant.Variant.all.map(Mancala)
+    case GameLogic.Mancala()  => mancala.variant.Variant.all.map(Mancala)
   }
 
   def byId(lib: GameLogic) = all(lib) map { v =>
@@ -677,7 +675,7 @@ object Variant {
     case GameLogic.Draughts() => Draughts(draughts.variant.Variant.default)
     case GameLogic.Chess()    => Chess(chess.variant.Variant.default)
     case GameLogic.FairySF()  => FairySF(fairysf.variant.Variant.default)
-    case GameLogic.Mancala()    => Mancala(mancala.variant.Variant.default)
+    case GameLogic.Mancala()  => Mancala(mancala.variant.Variant.default)
   }
 
   def apply(lib: GameLogic, id: Int): Option[Variant]     = byId(lib) get id
@@ -716,7 +714,7 @@ object Variant {
   def libFromPosition(lib: GameLogic): Variant = lib match {
     case GameLogic.Draughts() => Variant.Draughts(draughts.variant.FromPosition)
     case GameLogic.Chess()    => Variant.Chess(chess.variant.FromPosition)
-    //TODO: Decide how we do from position for FairySF and Mancala
+    // TODO: Decide how we do from position for FairySF and Mancala
     case GameLogic.FairySF()  => Variant.FairySF(fairysf.variant.Shogi)
     case GameLogic.Mancala()  => Variant.Mancala(mancala.variant.Oware)
   }

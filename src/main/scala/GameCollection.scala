@@ -64,15 +64,15 @@ sealed abstract class GameFamily {
 object GameFamily {
 
   final case class Chess() extends GameFamily {
-    def id             = GameLogic.Chess().id
-    def name           = GameLogic.Chess().name
-    def key            = GameLogic.Chess().name.toLowerCase()
-    def gameLogic      = GameLogic.Chess()
-    def aiEnabled      = true
-    def defaultVariant = Variant.Chess(strategygames.chess.variant.Standard)
-    def variants       = Variant.all(GameLogic.Chess()).filter(_.gameFamily == this)
-    def displayPiece   = "wN"
-    def pieceSetThemes = List(
+    def id                = GameLogic.Chess().id
+    def name              = GameLogic.Chess().name
+    def key               = GameLogic.Chess().name.toLowerCase()
+    def gameLogic         = GameLogic.Chess()
+    def aiEnabled         = true
+    def defaultVariant    = Variant.Chess(strategygames.chess.variant.Standard)
+    def variants          = Variant.all(GameLogic.Chess()).filter(_.gameFamily == this)
+    def displayPiece      = "wN"
+    def pieceSetThemes    = List(
       "cburnett",
       "merida",
       "alpha",
@@ -101,8 +101,8 @@ object GameFamily {
       "staunty",
       "tatiana"
     )
-    def pieceSetDefault = "staunty"
-    def boardThemes = List(
+    def pieceSetDefault   = "staunty"
+    def boardThemes       = List(
       "blue",
       "blue2",
       "blue3",
@@ -135,17 +135,17 @@ object GameFamily {
   }
 
   final case class Draughts() extends GameFamily {
-    def id              = GameLogic.Draughts().id
-    def name            = GameLogic.Draughts().name
-    def key             = GameLogic.Draughts().name.toLowerCase()
-    def gameLogic       = GameLogic.Draughts()
-    def aiEnabled       = false
-    def defaultVariant  = Variant.Draughts(strategygames.draughts.variant.Standard)
-    def variants        = Variant.all(GameLogic.Draughts())
-    def displayPiece    = "wK"
-    def pieceSetThemes  = List("wide_crown", "fabirovsky", "check_yb")
-    def pieceSetDefault = "wide_crown"
-    def boardThemes = List(
+    def id                = GameLogic.Draughts().id
+    def name              = GameLogic.Draughts().name
+    def key               = GameLogic.Draughts().name.toLowerCase()
+    def gameLogic         = GameLogic.Draughts()
+    def aiEnabled         = false
+    def defaultVariant    = Variant.Draughts(strategygames.draughts.variant.Standard)
+    def variants          = Variant.all(GameLogic.Draughts())
+    def displayPiece      = "wK"
+    def pieceSetThemes    = List("wide_crown", "fabirovsky", "check_yb")
+    def pieceSetDefault   = "wide_crown"
+    def boardThemes       = List(
       "blue",
       "blue2",
       "blue3",
@@ -169,17 +169,17 @@ object GameFamily {
   }
 
   final case class LinesOfAction() extends GameFamily {
-    def id              = 2
-    def name            = "Lines Of Action"
-    def key             = "loa"
-    def gameLogic       = GameLogic.Chess()
-    def aiEnabled       = false
-    def defaultVariant  = Variant.Chess(strategygames.chess.variant.LinesOfAction)
-    def variants        = Variant.all(GameLogic.Chess()).filter(_.gameFamily == this)
-    def displayPiece    = "bL"
-    def pieceSetThemes  = List("fabirovsky_loa", "check_yb_loa", "wide")
-    def pieceSetDefault = "check_yb_loa"
-    def boardThemes = List(
+    def id                = 2
+    def name              = "Lines Of Action"
+    def key               = "loa"
+    def gameLogic         = GameLogic.Chess()
+    def aiEnabled         = false
+    def defaultVariant    = Variant.Chess(strategygames.chess.variant.LinesOfAction)
+    def variants          = Variant.all(GameLogic.Chess()).filter(_.gameFamily == this)
+    def displayPiece      = "bL"
+    def pieceSetThemes    = List("fabirovsky_loa", "check_yb_loa", "wide")
+    def pieceSetDefault   = "check_yb_loa"
+    def boardThemes       = List(
       "blue",
       "blue2",
       "blue3",
@@ -246,15 +246,15 @@ object GameFamily {
   }
 
   final case class Flipello() extends GameFamily {
-    def id             = 5
-    def name           = "Flipello"
-    def key            = "flipello"
-    def gameLogic      = GameLogic.FairySF()
-    def aiEnabled      = true
-    def defaultVariant = Variant.FairySF(strategygames.fairysf.variant.Flipello)
-    def variants       = Variant.all(GameLogic.FairySF()).filter(_.gameFamily == this)
-    def displayPiece   = "bP"
-    def pieceSetThemes =
+    def id                = 5
+    def name              = "Flipello"
+    def key               = "flipello"
+    def gameLogic         = GameLogic.FairySF()
+    def aiEnabled         = true
+    def defaultVariant    = Variant.FairySF(strategygames.fairysf.variant.Flipello)
+    def variants          = Variant.all(GameLogic.FairySF()).filter(_.gameFamily == this)
+    def displayPiece      = "bP"
+    def pieceSetThemes    =
       List("fabirovsky_flipello", "check_yb_flipello", "classic_flipello", "marble_bw_flipello")
     def pieceSetDefault   = "fabirovsky_flipello"
     def boardThemes       = List("green", "green-marble", "wood")
@@ -264,19 +264,19 @@ object GameFamily {
   }
 
   final case class Mancala() extends GameFamily {
-    def id             = 6
-    def name           = "Mancala"
-    def key            = "mancala"
-    def gameLogic      = GameLogic.Mancala()
-    def aiEnabled      = false
-    def defaultVariant = Variant.Mancala(strategygames.mancala.variant.Oware)
-    def variants       = Variant.all(GameLogic.Mancala()).filter(_.gameFamily == this)
-    def displayPiece   = "display"
-    def pieceSetThemes = List("green_mancala", "purple_mancala", "black_mancala", "red_mancala")
-    def pieceSetDefault   = "black_mancala"
-    def boardThemes       = List("light-wood", "dark-wood")
+    def id                = 6
+    def name              = "Mancala"
+    def key               = "mancala"
+    def gameLogic         = GameLogic.Mancala()
+    def aiEnabled         = false
+    def defaultVariant    = Variant.Mancala(strategygames.mancala.variant.Oware)
+    def variants          = Variant.all(GameLogic.Mancala()).filter(_.gameFamily == this)
+    def displayPiece      = "display"
+    def pieceSetThemes    = List("red_mancala")
+    def pieceSetDefault   = "red_mancala"
+    def boardThemes       = List("light-wood")
     def boardThemeDefault = "light-wood"
-    def playerNames       = Map(P1 -> "White", P2 -> "Black")
+    def playerNames       = Map(P1 -> "South", P2 -> "North")
     def playerColors      = Map(P1 -> "white", P2 -> "black")
   }
 
