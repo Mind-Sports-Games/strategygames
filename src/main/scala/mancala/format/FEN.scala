@@ -48,14 +48,6 @@ final case class FEN(value: String) extends AnyVal {
       .flatten
       .toArray
 
-  def gameEndPlayer1Score: Int = {
-    player1Score + owareStoneArray.take(6).sum
-  }
-
-  def gameEndPlayer2Score: Int = {
-    player2Score + owareStoneArray.drop(6).take(6).sum
-  }
-
   // def ply: Option[Int] =
   //   fullMove map { fm =>
   //     fm * 2 - (if (player.exists(_.p1)) 2 else 1)

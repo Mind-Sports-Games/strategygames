@@ -31,13 +31,12 @@ case object Oware
       (situation.board.apiPosition.gameEnd)
 
   override def specialDraw(situation: Situation) =
-    situation.board.apiPosition.fen.gameEndPlayer1Score == situation.board.apiPosition.fen.gameEndPlayer2Score
+    situation.board.apiPosition.fen.player1Score == situation.board.apiPosition.fen.player2Score
 
   override def winner(situation: Situation): Option[Player] =
     if (specialEnd(situation) && !specialDraw(situation)) {
-      if (
-        situation.board.apiPosition.fen.gameEndPlayer1Score > situation.board.apiPosition.fen.gameEndPlayer2Score
-      ) Player.fromName("p1")
+      if (situation.board.apiPosition.fen.player1Score > situation.board.apiPosition.fen.player2Score)
+        Player.fromName("p1")
       else Player.fromName("p2")
     } else None
 

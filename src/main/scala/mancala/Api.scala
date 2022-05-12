@@ -81,14 +81,14 @@ object Api {
 
     private val numHouses = variant.boardSize.width * variant.boardSize.height
 
-    def seedCountToLetter(num: Int): Char =
+    private def seedCountToLetter(num: Int): Char =
       num match {
         case x if x < 27  => (x + 64).toChar
         case x if x >= 27 => (x + 70).toChar
         case x if x > 52  => sys.error("expected number of stones less than 53, got " + x.toString())
       }
 
-    def scoreNumberToLetter(num: Int): String =
+    private def scoreNumberToLetter(num: Int): String =
       num match {
         case 0 => "0"
         case x => seedCountToLetter(x).toString()
@@ -122,7 +122,7 @@ object Api {
           .split('-')(numHouses + 2)}"
     }
 
-    def finalStoneScore(currentP1Score: Int, currentP2Score: Int, playerIndex: String): Int = {
+    private def finalStoneScore(currentP1Score: Int, currentP2Score: Int, playerIndex: String): Int = {
       if (position.hasEnded() && currentP1Score < 25 && currentP2Score < 25) {
         playerIndex match {
           case "p1" => currentP1Score + owareDiagram.split('-').take(6).map(_.toInt).sum
