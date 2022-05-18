@@ -42,6 +42,7 @@ object Api {
     val gameResult: GameResult
     val gameEnd: Boolean
     val gameOutcome: Int
+    val isRepetition: Boolean
     val legalMoves: Array[Int]
     val playerTurn: Int // 1 for South -1 for North
     def fenString: String
@@ -124,9 +125,34 @@ object Api {
 
     private def finalStoneScore(currentP1Score: Int, currentP2Score: Int, playerIndex: String): Int = {
       if (position.hasEnded() && currentP1Score < 25 && currentP2Score < 25) {
-        playerIndex match {
-          case "p1" => currentP1Score + owareDiagram.split('-').take(6).map(_.toInt).sum
-          case "p2" => currentP2Score + owareDiagram.split('-').drop(6).take(6).map(_.toInt).sum
+        if (position.isRepetition()) {
+          val p1SideStonesLeft = owareDiagram.split('-').take(6).map(_.toInt).sum
+          val p2SideStonesLeft = owareDiagram.split('-').drop(6).take(6).map(_.toInt).sum
+          val total            = p1SideStonesLeft + p2SideStonesLeft
+          total match {
+            case even if total % 2 == 0 =>
+              playerIndex match {
+                case "p1" => currentP1Score + total / 2
+                case "p2" => currentP2Score + total / 2
+              }
+            case odd =>
+              if (p1SideStonesLeft > p2SideStonesLeft) {
+                playerIndex match {
+                  case "p1" => currentP1Score + (total + 1) / 2
+                  case "p2" => currentP2Score + (total - 1) / 2
+                }
+              } else {
+                playerIndex match {
+                  case "p1" => currentP1Score + (total - 1) / 2
+                  case "p2" => currentP2Score + (total + 1) / 2
+                }
+              }
+          }
+        } else {
+          playerIndex match {
+            case "p1" => currentP1Score + owareDiagram.split('-').take(6).map(_.toInt).sum
+            case "p2" => currentP2Score + owareDiagram.split('-').drop(6).take(6).map(_.toInt).sum
+          }
         }
       } else {
         playerIndex match {
@@ -164,7 +190,8 @@ object Api {
 
     lazy val gameEnd: Boolean = position.hasEnded()
 
-    lazy val gameOutcome: Int = position.outcome()
+    lazy val gameOutcome: Int      = position.outcome()
+    lazy val isRepetition: Boolean = position.isRepetition()
 
     val legalMoves: Array[Int] = {
       position.resetCursor()
