@@ -9,52 +9,213 @@ class PoolDraughtsTest extends Specification with ValidatedMatchers {
 
   // https://playstrategy.org/UkIpe5ec
   val buggyMovesUkIpe5ec = List(
-      "2419", "1115", "2824", "0811", "2318", "0913",
-      "2623", "0609", "2217", "1522", "1726", "1115",
-      "2522", "0914", "2420", "1524", "2318", "1423",
-      "2619", "1928", "0509", "2824", "0914", "2419",
-      "1417", "2114", "1017", "1726", "3122", "0408",
-      "2723", "0811", "2925", "0106", "2521", "0610",
-      "3227", "1115", "2218",
-      "1522", // <- valid move
-      "2225", // <- invalid move
-      "2117",
-      "1322", "3021", "1014", "2016", "1418", "2314",
-      "2226", "1409", "2630", "0905", "0711", "1607",
-      "3016", "0501", "0211", "2117", "1620", "0128",
-      "2031", "3113", "2801", "1115", "0119", "1322",
-      "1924", "0307", "2420", "0710", "2024", "1014",
-      "2427", "1417", "2723", "1721", "2319", "2125",
-      "1924", "2529", "2427", "1216", "2724", "1620",
-      "2419", "2231", "1912", "2024", "1216", "2427",
-      "1612", "2732", "1216", "3124", "1630", "3214",
-      "3026", "2410", "2630", "2911", "3026", "1125",
-      "2616", "2522", "1612", "2225", "1216", "2522",
-      "1612", "2225", "1226", "2511", "2631", "1125",
-      "3113", "2511", "1302", "1125"
-    )
+    "2419",
+    "1115",
+    "2824",
+    "0811",
+    "2318",
+    "0913",
+    "2623",
+    "0609",
+    "2217",
+    "1522",
+    "1726",
+    "1115",
+    "2522",
+    "0914",
+    "2420",
+    "1524",
+    "2318",
+    "1423",
+    "2619",
+    "1928",
+    "0509",
+    "2824",
+    "0914",
+    "2419",
+    "1417",
+    "2114",
+    "1017",
+    "1726",
+    "3122",
+    "0408",
+    "2723",
+    "0811",
+    "2925",
+    "0106",
+    "2521",
+    "0610",
+    "3227",
+    "1115",
+    "2218",
+    "1522", // <- valid move
+    "2225", // <- invalid move
+    "2117",
+    "1322",
+    "3021",
+    "1014",
+    "2016",
+    "1418",
+    "2314",
+    "2226",
+    "1409",
+    "2630",
+    "0905",
+    "0711",
+    "1607",
+    "3016",
+    "0501",
+    "0211",
+    "2117",
+    "1620",
+    "0128",
+    "2031",
+    "3113",
+    "2801",
+    "1115",
+    "0119",
+    "1322",
+    "1924",
+    "0307",
+    "2420",
+    "0710",
+    "2024",
+    "1014",
+    "2427",
+    "1417",
+    "2723",
+    "1721",
+    "2319",
+    "2125",
+    "1924",
+    "2529",
+    "2427",
+    "1216",
+    "2724",
+    "1620",
+    "2419",
+    "2231",
+    "1912",
+    "2024",
+    "1216",
+    "2427",
+    "1612",
+    "2732",
+    "1216",
+    "3124",
+    "1630",
+    "3214",
+    "3026",
+    "2410",
+    "2630",
+    "2911",
+    "3026",
+    "1125",
+    "2616",
+    "2522",
+    "1612",
+    "2225",
+    "1216",
+    "2522",
+    "1612",
+    "2225",
+    "1226",
+    "2511",
+    "2631",
+    "1125",
+    "3113",
+    "2511",
+    "1302",
+    "1125"
+  )
 
   val buggyMovesKingPromotion = List(
-    "2217", "1014", "1710", "0615", "2419",
-    "1524", "2819", "1115", "1910", "0714",
-    "2622", "0206", "2724", "0307", "3127",
-    "0610", "3228", "1015", "2419", "1524",
-    "2431",
-    //"3117"
+    "2217",
+    "1014",
+    "1710",
+    "0615",
+    "2419",
+    "1524",
+    "2819",
+    "1115",
+    "1910",
+    "0714",
+    "2622",
+    "0206",
+    "2724",
+    "0307",
+    "3127",
+    "0610",
+    "3228",
+    "1015",
+    "2419",
+    "1524",
+    "2431"
+    // "3117"
   )
+
+  // https://playstrategy.dev/IbNF47GY
+  val buggyGamePromotionCaputreOption = List(
+    "2420",
+    "1015",
+    "2319",
+    "1524",
+    "2819",
+    "1116",
+    "2011",
+    "0716",
+    "1623", // double capture move
+    "2718",
+    "0307",
+    "2623",
+    "0710",
+    "3126",
+    "0811",
+    "3227",
+    "1216",
+    "2117",
+    "0913",
+    "2521",
+    "0408",
+    "2925",
+    "1015",
+    "1814",
+    "1519",
+    "2318",
+    "0812",
+    "2623",
+    "1926",
+    "3023",
+    "1620",
+    "1410",
+    "0615",
+    "1714",
+    "1216",
+    "2117",
+    "1519",
+    "1410",
+    "1926",
+    "2231",
+    "1322", // Start of capture choice (41st move)
+    "2229", // this move should be allowed insted of the 3 capture and results in a king
+    "1007",
+    "2915",
+    "0703"  // king for white
+  )
+  // "B:w10,17,18,25,27,31:b1,2,5,11,13,16,20:H0:F20" fen before the 'bad' move
 
   def toMove(uci: String): format.Uci.Move = {
     format.Uci.Move(uci) match {
       case Some(m) => m
-      case None => sys.error("Unable to parse move")
+      case None    => sys.error("Unable to parse move")
 
     }
   }
 
-  def move(s: Situation, uci: String): Situation = 
+  def move(s: Situation, uci: String): Situation =
     s.move(toMove(uci)) match {
       case Valid(move) => move.situationAfter
-      case Invalid(e) => sys.error(s"Move is invalid for position: ${e}")
+      case Invalid(e)  => sys.error(s"Move is invalid for position: ${e}")
     }
 
   "Pool Draughts" should {
@@ -70,9 +231,9 @@ class PoolDraughtsTest extends Specification with ValidatedMatchers {
         .take(40)
         .foldLeft(Situation(variant.Pool))((sit, uci) => move(sit, uci))
       s2.player must_== Player.P1
-      //println(s2.validMoves)
+      // println(s2.validMoves)
 
-      //println("---------------------------------------------------------")
+      // println("---------------------------------------------------------")
 
       /*val s3 = buggyMovesUkIpe5ec
         .take(40)
@@ -81,9 +242,49 @@ class PoolDraughtsTest extends Specification with ValidatedMatchers {
 
       val s5 = buggyMovesKingPromotion
         .foldLeft(Situation(variant.Pool))((sit, uci) => move(sit, uci))
-      println(s5.validMoves)
+      // println(s5.validMoves)
       s5.player must_== Player.P1
 
+    }
+  }
+
+  "Pool Draughts" should {
+    "have a valid 2 capture move" in {
+      val s1    = buggyGamePromotionCaputreOption
+        .take(41)
+        .foldLeft(Situation(variant.Pool))((sit, uci) => move(sit, uci))
+      println(s1.validMoves)
+      val s1Fen = format.Forsyth.>>(s1)
+      // println(s1Fen)
+      s1Fen.value must_== "B:w10,G17,18,25,27,31:b1,2,5,11,16,20,22:H0:F1"
+
+      val s2 = buggyGamePromotionCaputreOption
+        .take(42)
+        .foldLeft(Situation(variant.Pool))((sit, uci) => move(sit, uci))
+      // println(s2.validMoves)
+
+      val s2Fen = format.Forsyth.>>(s2)
+      // println(s2Fen)
+      s2Fen.value must_== "W:w10,18,27,31:b1,2,5,11,16,20,K29:H0:F1"
+
+      s1.player must_== Player.P2
+      s2.player must_== Player.P1
+
+      val s3    = buggyGamePromotionCaputreOption
+        .take(43)
+        .foldLeft(Situation(variant.Pool))((sit, uci) => move(sit, uci))
+      // println(s3.validMoves)
+      val s3Fen = format.Forsyth.>>(s3)
+      // println(s3Fen)
+      s3Fen.value must_== "B:w7,18,27,31:b1,2,5,11,16,20,K29:H0:F1"
+
+      val s5    = buggyGamePromotionCaputreOption
+        .foldLeft(Situation(variant.Pool))((sit, uci) => move(sit, uci))
+      val s5Fen = format.Forsyth.>>(s5)
+      // println(s5Fen)
+      s5Fen.value must_== "B:wK3,27,31:b1,2,5,11,K15,16,20:H0:F1"
+
+      s5.player must_== Player.P2
     }
   }
 }
