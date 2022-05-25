@@ -18,7 +18,7 @@ case class Replay(setup: Game, moves: List[Move], state: Game) {
   def addMove(move: Move) =
     copy(
       moves = move.applyVariantEffect :: moves,
-      state = state.apply(move) 
+      state = state.apply(move)
     )
 
   def moveAtPly(ply: Int): Option[Move] =
@@ -54,15 +54,15 @@ object Replay {
   //       return something that's runtime safe as well.
   def mancalaMove(moveOrDrop: MoveOrDrop) = moveOrDrop match {
     case Left(StratMove.Mancala(m)) => m
-    case _                           => sys.error("Invalid mancala move")
+    case _                          => sys.error("Invalid mancala move")
   }
 
   def replayMove(
-    before: Game,
-    orig: Pos,
-    dest: Pos,
-    apiPosition: Api.Position,
-    uciMoves: List[String]
+      before: Game,
+      orig: Pos,
+      dest: Pos,
+      apiPosition: Api.Position,
+      uciMoves: List[String]
   ): Move =
     Move(
       piece = before.situation.board.pieces(orig),
@@ -78,58 +78,59 @@ object Replay {
       promotion = None
     )
 
-
   def gameMoveWhileValid(
       moveStrs: Seq[String],
       initialFen: FEN,
       variant: strategygames.mancala.variant.Variant
   ): (Game, List[(Game, Uci.WithSan)], Option[String]) = {
 
-    val init = makeGame(variant, initialFen.some)
-    var state = init
+    val init     = makeGame(variant, initialFen.some)
+    var state    = init
     var uciMoves = init.situation.board.uciMoves
-    var errors = ""
+    var errors   = ""
 
-    def getApiPosition(uciMove: String) = state.board.apiPosition.makeMoves(List(uciMove).map(m => Api.uciToMove(m)))
+    def getApiPosition(uciMoves: List[String]) =
+      Api.positionFromVariantAndMoves(variant, uciMoves)
 
     def replayMoveFromUci(orig: Option[Pos], dest: Option[Pos], promotion: String): (Game, Uci.WithSan) =
       (orig, dest) match {
         case (Some(orig), Some(dest)) => {
           val uciMove = s"${orig.key}${dest.key}${promotion}"
           val pgnMove = s"${orig.key}${dest.key}${promotion match {
-            case "" => ""
-            case _ => state.board.pieces(orig).role.forsyth
-          }}"
+              case "" => ""
+              case _  => state.board.pieces(orig).role.forsyth
+            }}"
           uciMoves = uciMoves :+ uciMove
           state = state.apply(
-            replayMove(state, orig, dest, getApiPosition(uciMove), uciMoves)
+            replayMove(state, orig, dest, getApiPosition(uciMoves), uciMoves)
           )
           (state, Uci.WithSan(Uci(pgnMove).get, "NOSAN"))
         }
-        case (orig, dest) => {
+        case (orig, dest)             => {
           val uciMove = s"${orig}${dest}${promotion}"
           errors += uciMove + ","
           sys.error(s"Invalid move for replay: ${uciMove}")
         }
       }
 
-    
-    val moves: List[(Game, Uci.WithSan)] = Parser.pgnMovesToUciMoves(moveStrs)
-      .map{
-        case Uci.Move.moveR(orig, dest, promotion) => replayMoveFromUci(
-          Pos.fromKey(orig),
-          Pos.fromKey(dest),
-          promotion
-        )
-        case moveStr: String => sys.error(s"Invalid move for replay: $moveStr")
+    val moves: List[(Game, Uci.WithSan)] = Parser
+      .pgnMovesToUciMoves(moveStrs)
+      .map {
+        case Uci.Move.moveR(orig, dest, promotion) =>
+          replayMoveFromUci(
+            Pos.fromKey(orig),
+            Pos.fromKey(dest),
+            promotion
+          )
+        case moveStr: String                       => sys.error(s"Invalid move for replay: $moveStr")
       }
 
-    (init, moves, errors match {case "" => None; case _ => errors.some})
+    (init, moves, errors match { case "" => None; case _ => errors.some })
   }
 
   private def recursiveSituations(sit: Situation, sans: List[San]): Validated[String, List[Situation]] =
     sans match {
-      case Nil => valid(Nil)
+      case Nil         => valid(Nil)
       case san :: rest =>
         san(StratSituation.wrap(sit)).map(mancalaMove) flatMap { move =>
           val after = Situation(move.finalizeAfter, !sit.player)
@@ -142,7 +143,7 @@ object Replay {
       ucis: List[Uci]
   ): Validated[String, List[Situation]] =
     ucis match {
-      case Nil => valid(Nil)
+      case Nil         => valid(Nil)
       case uci :: rest =>
         uci(sit) andThen { move =>
           val after = Situation(move.finalizeAfter, !sit.player)
@@ -152,7 +153,7 @@ object Replay {
 
   private def recursiveReplayFromUci(replay: Replay, ucis: List[Uci]): Validated[String, Replay] =
     ucis match {
-      case Nil => valid(replay)
+      case Nil         => valid(replay)
       case uci :: rest =>
         uci(replay.state.situation) andThen { move =>
           recursiveReplayFromUci(replay.addMove(move), rest)
@@ -221,7 +222,7 @@ object Replay {
 
       def recursivePlyAtFen(sit: Situation, sans: List[San], ply: Int): Validated[String, Int] =
         sans match {
-          case Nil => invalid(s"Can't find $atFenTruncated, reached ply $ply")
+          case Nil         => invalid(s"Can't find $atFenTruncated, reached ply $ply")
           case san :: rest =>
             san(StratSituation.wrap(sit)).map(mancalaMove) flatMap { move =>
               val after = move.finalizeAfter
