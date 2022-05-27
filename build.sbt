@@ -2,7 +2,7 @@ name := "strategygames"
 
 organization := "org.playstrategy"
 
-version := "10.2.1-pstrat50"
+version := "10.2.1-pstrat51"
 
 scalaVersion := "2.13.5"
 
@@ -16,7 +16,7 @@ libraryDependencies ++= List(
   "joda-time"               % "joda-time"                % "2.10.10",
   "org.typelevel"          %% "cats-core"                % "2.2.0",
   "org.playstrategy"        % "fairystockfish"           % fairystockfishVersion,
-  "com.joansala.aalina"     % "aalina"                   % "2.1.0-pstrat1"
+  "com.joansala.aalina"     % "aalina"                   % "2.1.0-pstrat2"
 )
 
 // Explicitly add in the linux-class path
