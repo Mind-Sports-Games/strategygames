@@ -54,8 +54,11 @@ object Api {
     //       at the moment
     val variant = Variant.byKey("oware")
 
+    private val maxPlies = 600 // this is duplicate from format/pgn/Binary and hard coded in lila
+
     def makeMovesWithPrevious(movesList: List[Int], previousMoves: List[String]): Position = {
       val game = new OwareGame()
+      game.ensureCapacity(maxPlies)
       previousMoves.foreach(uci => game.makeMove(uciToMove(uci)))
 
       movesList.map { move =>
