@@ -13,6 +13,8 @@ case object KingOfTheHill
   def perfId: Int    = 12
   def perfIcon: Char = '('
 
+  override def exoticChessVariant = true
+
   def pieces = Standard.pieces
 
   private val center = Set(Pos.D4, Pos.D5, Pos.E4, Pos.E5)

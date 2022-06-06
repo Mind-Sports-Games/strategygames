@@ -15,7 +15,8 @@ case object ThreeCheck
   def perfId: Int    = 15
   def perfIcon: Char = '.'
 
-  override def p1IsBetterVariant = true
+  override def exoticChessVariant = true
+  override def p1IsBetterVariant  = true
 
   def pieces = Standard.pieces
 

@@ -35,6 +35,9 @@ abstract class Variant private[variant] (
 
   def exotic = !standard
 
+  // used to define chess variants medley
+  def exoticChessVariant: Boolean = false
+
   def baseVariant: Boolean = false
   def fenVariant: Boolean  = false
   def aiVariant: Boolean   = true
@@ -84,7 +87,7 @@ abstract class Variant private[variant] (
         (!piece.role.projection) || piece.role.dir(pos, to).exists {
           longRangeThreatens(board, pos, _, to)
         }
-      case _ => false
+      case _                                                                              => false
     }
   }
 
@@ -120,12 +123,12 @@ abstract class Variant private[variant] (
 
     for {
       actor <- situation.board.actors get from toValid "No piece on " + from
-      _ <-
+      _     <-
         if (actor is situation.player) Validated.valid(actor)
         else Validated.invalid("Not my piece on " + from)
-      m1 <- findMove(from, to) toValid "Piece on " + from + " cannot move to " + to
-      m2 <- m1 withPromotion promotion toValid "Piece on " + from + " cannot promote to " + promotion
-      m3 <-
+      m1    <- findMove(from, to) toValid "Piece on " + from + " cannot move to " + to
+      m2    <- m1 withPromotion promotion toValid "Piece on " + from + " cannot promote to " + promotion
+      m3    <-
         if (isValidPromotion(promotion)) Validated.valid(m2)
         else Validated.invalid("Cannot promote to " + promotion + " in this game mode")
     } yield m3
@@ -162,9 +165,8 @@ abstract class Variant private[variant] (
     */
   def isInsufficientMaterial(board: Board) = InsufficientMatingMaterial(board)
 
-  /** Returns true if the other player cannot win. This is relevant when the
-    * side to move times out or disconnects. Instead of losing on time,
-    * the game should be drawn.
+  /** Returns true if the other player cannot win. This is relevant when the side to move times out or
+    * disconnects. Instead of losing on time, the game should be drawn.
     */
   def opponentHasInsufficientMaterial(situation: Situation) =
     InsufficientMatingMaterial(situation.board, !situation.player)
@@ -173,8 +175,8 @@ abstract class Variant private[variant] (
   // pieces surrounding a capture explode
   def hasMoveEffects = false
 
-  /** Applies a variant specific effect to the move. This helps decide whether a king is endangered by a move, for
-    * example
+  /** Applies a variant specific effect to the move. This helps decide whether a king is endangered by a move,
+    * for example
     */
   def addVariantEffect(move: Move): Move = move
 
@@ -191,7 +193,7 @@ abstract class Variant private[variant] (
     board.pieces.exists {
       case (pos, Piece(c, r)) if c == player && r == Pawn && pos.rank == Rank.promotablePawnRank(player) =>
         true
-      case _ => false
+      case _                                                                                             => false
     }
   }
 
@@ -234,7 +236,7 @@ abstract class Variant private[variant] (
 
 object Variant {
 
-  val all = List(
+  val all   = List(
     Standard,
     Crazyhouse,
     Chess960,
@@ -250,7 +252,7 @@ object Variant {
     LinesOfAction,
     ScrambledEggs
   )
-  val byId = all map { v =>
+  val byId  = all map { v =>
     (v.id, v)
   } toMap
   val byKey = all map { v =>
