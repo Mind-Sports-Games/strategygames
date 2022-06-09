@@ -18,6 +18,7 @@ case object Crazyhouse
   def perfId: Int    = 18
   def perfIcon: Char = ''
 
+  override def exoticChessVariant       = true
   override def blindModeVariant         = false
   override def materialImbalanceVariant = true
 
@@ -37,14 +38,14 @@ case object Crazyhouse
 
   override def drop(situation: Situation, role: Role, pos: Pos): Validated[String, Drop] =
     for {
-      d1 <- situation.board.pocketData toValid "Board has no crazyhouse data"
-      _ <-
+      d1     <- situation.board.pocketData toValid "Board has no crazyhouse data"
+      _      <-
         if (role != Pawn || canDropPawnOn(pos)) Validated.valid(d1)
         else Validated.invalid(s"Can't drop $role on $pos")
-      piece = Piece(situation.player, role)
+      piece   = Piece(situation.player, role)
       d2     <- d1.drop(piece) toValid s"No $piece to drop on $pos"
       board1 <- situation.board.place(piece, pos) toValid s"Can't drop $role on $pos, it's occupied"
-      _ <-
+      _      <-
         if (!board1.check(situation.player)) Validated.valid(board1)
         else Validated.invalid(s"Dropping $role on $pos doesn't uncheck the king")
     } yield Drop(
@@ -68,7 +69,7 @@ case object Crazyhouse
           }
           board withCrazyData d2
         }
-      case _ => board
+      case _                                => board
     }
 
   private def canDropStuff(situation: Situation) =
@@ -96,7 +97,7 @@ case object Crazyhouse
     else situation.kingPos.map { blockades(situation, _) }
 
   private def blockades(situation: Situation, kingPos: Pos): List[Pos] = {
-    def attacker(piece: Piece) = piece.role.projection && piece.player != situation.player
+    def attacker(piece: Piece)                                         = piece.role.projection && piece.player != situation.player
     @scala.annotation.tailrec
     def forward(p: Pos, dir: Direction, squares: List[Pos]): List[Pos] =
       dir(p) match {

@@ -61,6 +61,7 @@ abstract class Variant(
 
   def standardVariant: Boolean
   def fromPositionVariant: Boolean
+  def exoticChessVariant: Boolean
   def frisianVariant: Boolean
   def draughts64Variant: Boolean
 
@@ -184,6 +185,7 @@ object Variant {
 
     def standardVariant: Boolean     = v.standard
     def fromPositionVariant: Boolean = v.fromPosition
+    def exoticChessVariant: Boolean  = v.exoticChessVariant
     def frisianVariant: Boolean      = false
     def draughts64Variant: Boolean   = false
 
@@ -315,6 +317,7 @@ object Variant {
 
     def standardVariant: Boolean     = v.standard
     def fromPositionVariant: Boolean = v.fromPosition
+    def exoticChessVariant: Boolean  = false
     def frisianVariant: Boolean      = v.frisianVariant
     def draughts64Variant: Boolean   = v.draughts64Variant
 
@@ -444,6 +447,7 @@ object Variant {
 
     def standardVariant: Boolean     = standard || draughtsStandard
     def fromPositionVariant: Boolean = fromPosition || draughtsFromPosition
+    def exoticChessVariant: Boolean  = false
     def frisianVariant: Boolean      = false
     def draughts64Variant: Boolean   = false
 
@@ -572,6 +576,7 @@ object Variant {
 
     def standardVariant: Boolean     = standard || draughtsStandard
     def fromPositionVariant: Boolean = fromPosition || draughtsFromPosition
+    def exoticChessVariant: Boolean  = false
     def frisianVariant: Boolean      = false
     def draughts64Variant: Boolean   = false
 

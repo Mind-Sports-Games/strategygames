@@ -15,6 +15,7 @@ case object Antichess
   def perfId: Int    = 13
   def perfIcon: Char = '@'
 
+  override def exoticChessVariant       = true
   override def p1IsBetterVariant        = true
   override def blindModeVariant         = false
   override def materialImbalanceVariant = true

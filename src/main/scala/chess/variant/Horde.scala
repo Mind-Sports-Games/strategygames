@@ -15,6 +15,7 @@ case object Horde
   def perfId: Int    = 16
   def perfIcon: Char = '_'
 
+  override def exoticChessVariant       = true
   override def p1IsBetterVariant        = true
   override def blindModeVariant         = false
   override def materialImbalanceVariant = true
@@ -51,27 +52,26 @@ case object Horde
   override def specialEnd(situation: Situation) =
     situation.board.piecesOf(P1).isEmpty
 
-  /** Any vs K + any where horde is stalemated and only king can move is a fortress draw
-    * This does not consider imminent fortresses such as 8/p7/P7/8/8/P7/8/k7 b - -
-    * nor does it consider contrived fortresses such as b7/pk6/P7/P7/8/8/8/8 b - -
+  /** Any vs K + any where horde is stalemated and only king can move is a fortress draw This does not
+    * consider imminent fortresses such as 8/p7/P7/8/8/P7/8/k7 b - - nor does it consider contrived fortresses
+    * such as b7/pk6/P7/P7/8/8/8/8 b - -
     */
   private def hordeClosedPosition(board: Board) = {
     lazy val notKingBoard = board.kingPos.get(Player.p2).flatMap(board.take).getOrElse(board)
     val hordePos          = board.occupation(Player.p1) // may include promoted pieces
-    val mateInOne =
+    val mateInOne         =
       hordePos.sizeIs == 1 && hordePos.forall(pos => pieceThreatened(board, Player.p2, pos, (_ => true)))
     !mateInOne && notKingBoard.actors.values.forall(actor => actor.moves.isEmpty)
   }
 
-  /** In horde chess, p2 can win unless a fortress stalemate is unavoidable.
-    *  Auto-drawing the game should almost never happen, but it did in https://lichess.org/xQ2RsU8N#121
+  /** In horde chess, p2 can win unless a fortress stalemate is unavoidable. Auto-drawing the game should
+    * almost never happen, but it did in https://lichess.org/xQ2RsU8N#121
     */
   override def isInsufficientMaterial(board: Board) = hordeClosedPosition(board)
 
-  /** In horde chess, the horde cannot win on * V K or [BN]{2} v K or just one piece
-    * since they lack a king for checkmate support.
-    * Technically there are some positions where stalemate is unavoidable which
-    * this method does not detect; however, such are trivial to premove.
+  /** In horde chess, the horde cannot win on * V K or [BN]{2} v K or just one piece since they lack a king
+    * for checkmate support. Technically there are some positions where stalemate is unavoidable which this
+    * method does not detect; however, such are trivial to premove.
     */
   override def opponentHasInsufficientMaterial(situation: Situation): Boolean = {
     val board          = situation.board
@@ -98,8 +98,8 @@ case object Horde
             notKingPieces.count(p =>
               p._2.is(Pawn) || (p._2.is(Bishop) && p._1.isLight != horde.head._1.isLight)
             ) < 2
-          case List(Rook) => army.sizeIs < 3 || armyPawnsOrRooks == 0 || armyPawnsOrKnights == 0
-          case _          => armyPawnsOrRooks == 0
+          case List(Rook)   => army.sizeIs < 3 || armyPawnsOrRooks == 0 || armyPawnsOrKnights == 0
+          case _            => armyPawnsOrRooks == 0
         }
       } else if (
         (hordeRoles.forall(

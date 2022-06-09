@@ -14,8 +14,9 @@ case object Atomic
   def perfId: Int    = 14
   def perfIcon: Char = '>'
 
-  override def p1IsBetterVariant = true
-  override def blindModeVariant  = false
+  override def exoticChessVariant = true
+  override def p1IsBetterVariant  = true
+  override def blindModeVariant   = false
 
   def pieces = Standard.pieces
 
@@ -35,9 +36,9 @@ case object Atomic
   private def protectedByOtherKing(board: Board, to: Pos, player: Player): Boolean =
     board.kingPosOf(player) exists to.touches
 
-  /** In atomic chess, a king cannot be threatened while it is in the perimeter of the other king as were the other player
-    * to capture it, their own king would explode. This effectively makes a king invincible while connected with another
-    * king.
+  /** In atomic chess, a king cannot be threatened while it is in the perimeter of the other king as were the
+    * other player to capture it, their own king would explode. This effectively makes a king invincible while
+    * connected with another king.
     */
   override def kingThreatened(
       board: Board,
@@ -84,26 +85,26 @@ case object Atomic
     } else move
   }
 
-  /** The positions surrounding a given position on the board. Any square at the edge of the board has
-    * less surrounding positions than the usual eight.
+  /** The positions surrounding a given position on the board. Any square at the edge of the board has less
+    * surrounding positions than the usual eight.
     */
   private[chess] def surroundingPositions(pos: Pos): Set[Pos] =
     Set(pos.up, pos.down, pos.left, pos.right, pos.upLeft, pos.upRight, pos.downLeft, pos.downRight).flatten
 
   override def addVariantEffect(move: Move): Move = explodeSurroundingPieces(move)
 
-  /** Since kings cannot confine each other, if either player has only a king
-    * then either a queen or multiple pieces are required for checkmate.
+  /** Since kings cannot confine each other, if either player has only a king then either a queen or multiple
+    * pieces are required for checkmate.
     */
   private def insufficientAtomicWinningMaterial(board: Board) = {
-    val kingsAndBishopsOnly = board.pieces forall { p =>
+    val kingsAndBishopsOnly           = board.pieces forall { p =>
       (p._2 is King) || (p._2 is Bishop)
     }
     lazy val bishopsOnOppositePlayers = InsufficientMatingMaterial.bishopsOnOppositePlayers(board)
-    lazy val kingsAndKnightsOnly = board.pieces forall { p =>
+    lazy val kingsAndKnightsOnly      = board.pieces forall { p =>
       (p._2 is King) || (p._2 is Knight)
     }
-    lazy val kingsRooksAndMinorsOnly = board.pieces forall { p =>
+    lazy val kingsRooksAndMinorsOnly  = board.pieces forall { p =>
       (p._2 is King) || (p._2 is Rook) || (p._2 is Bishop) || (p._2 is Knight)
     }
 
@@ -129,12 +130,12 @@ case object Atomic
   /** Since a king cannot capture, K + P vs K + P where none of the pawns can move is an automatic draw
     */
   private def atomicClosedPosition(board: Board) = {
-    val closedStructure = board.actors.values.forall(actor =>
+    val closedStructure           = board.actors.values.forall(actor =>
       (actor.piece.is(Pawn) && actor.moves.isEmpty
         && InsufficientMatingMaterial.pawnBlockedByPawn(actor, board))
         || actor.piece.is(King) || actor.piece.is(Bishop)
     )
-    val randomBishop = board.pieces.find { case (_, piece) => piece.is(Bishop) }
+    val randomBishop              = board.pieces.find { case (_, piece) => piece.is(Bishop) }
     val bishopsAbsentOrPawnitized = randomBishop match {
       case Some((pos, piece)) => bishopPawnitized(board, piece.player, pos.isLight)
       case None               => true
@@ -151,13 +152,14 @@ case object Atomic
     )
   }
 
-  /** In atomic chess, it is possible to win with a single knight, bishop, etc, by exploding
-    * a piece in the opponent's king's proximity. On the other hand, a king alone or a king with
-    * immobile pawns is not sufficient material to win with.
+  /** In atomic chess, it is possible to win with a single knight, bishop, etc, by exploding a piece in the
+    * opponent's king's proximity. On the other hand, a king alone or a king with immobile pawns is not
+    * sufficient material to win with.
     */
   override def opponentHasInsufficientMaterial(situation: Situation) =
     situation.board.rolesOf(!situation.player) == List(King)
 
-  /** Atomic chess has a special end where a king has been killed by exploding with an adjacent captured piece */
+  /** Atomic chess has a special end where a king has been killed by exploding with an adjacent captured piece
+    */
   override def specialEnd(situation: Situation) = situation.board.kingPos.size != 2
 }

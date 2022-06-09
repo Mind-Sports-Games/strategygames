@@ -15,8 +15,9 @@ case object RacingKings
   def perfId: Int    = 17
   def perfIcon: Char = ''
 
-  override def p1IsBetterVariant = true
-  override def blindModeVariant  = false
+  override def exoticChessVariant = true
+  override def p1IsBetterVariant  = true
+  override def blindModeVariant   = false
 
   override def allowsCastling = false
 
