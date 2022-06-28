@@ -74,16 +74,16 @@ object Api {
       if (movesList.isEmpty) this
       else new FairyPosition(position.makeMoves(movesList))
 
-    lazy val fen: FEN            = FEN(position.getFEN())
-    lazy val givesCheck: Boolean = position.givesCheck()
+    lazy val fen: FEN                                  = FEN(position.getFEN())
+    lazy val givesCheck: Boolean                       = position.givesCheck()
     lazy val isImmediateGameEnd: (Boolean, GameResult) = {
       val im = position.isImmediateGameEnd()
       (im.get0(), GameResult.resultFromInt(im.get1(), givesCheck))
     }
-    lazy val immediateGameEnd: Boolean = isImmediateGameEnd._1
-    private lazy val isOptionalGameEnd = position.isOptionalGameEnd()
-    lazy val optionalGameEnd: Boolean  = isOptionalGameEnd.get0()
-    lazy val insufficientMaterial: (Boolean, Boolean) = {
+    lazy val immediateGameEnd: Boolean                 = isImmediateGameEnd._1
+    private lazy val isOptionalGameEnd                 = position.isOptionalGameEnd()
+    lazy val optionalGameEnd: Boolean                  = isOptionalGameEnd.get0()
+    lazy val insufficientMaterial: (Boolean, Boolean)  = {
       val im = position.hasInsufficientMaterial()
       (im.get0(), im.get1())
     }
@@ -109,8 +109,8 @@ object Api {
               piecesInHand.filter(_.player == P2).toList.map(p => strategygames.Role.FairySFRole(p.role))
             )
           ),
-          //Can make an empty Set of Pos because we dont have to track promoted pieces
-          //FairySF takes care of this for us
+          // Can make an empty Set of Pos because we dont have to track promoted pieces
+          // FairySF takes care of this for us
           Set[Pos]()
         ).some
       else None
@@ -196,14 +196,14 @@ object Api {
               case "" => m
               case _  => s"${orig}${dest}+"
             }
-          case s: String => s
+          case s: String                             => s
         }
       )
     )
 
   private val fairyPromotion = "^(.*)\\+$".r
 
-  def fairyUciToLilaUci(variant: Variant, movesList: Option[List[String]]): Option[List[String]] =  {
+  def fairyUciToLilaUci(variant: Variant, movesList: Option[List[String]]): Option[List[String]] = {
     movesList.map(moveList => {
       var position = positionFromVariant(variant)
       moveList.map(m => {
@@ -215,10 +215,10 @@ object Api {
               case Some(baseMove: Uci.Move) => {
                 f"${baseUci}${pieceMap(baseMove.orig).forsyth}"
               }
-              case _ => m
+              case _                        => m
             }
           }
-          case _ => m
+          case _                       => m
         }
       })
     })
@@ -266,6 +266,11 @@ passOnStalemate = false
 [flipello:flipersi]
 startFen = 8/8/8/3pP3/3Pp3/8/8/8[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp] w 0 1
 passOnStalemate = true
+[flipello10:flipello]
+maxRank = 10
+maxFile = 10
+startFen = 10/10/10/10/4pP4/4Pp4/10/10/10/10[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp] w 0 1
+enclosingDropStart = e5 f5 e6 f6
   """
 
 }

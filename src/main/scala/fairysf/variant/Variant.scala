@@ -25,6 +25,7 @@ abstract class Variant private[variant] (
   def minishogi   = this == MiniShogi
   def minixiangqi = this == MiniXiangqi
   def flipello    = this == Flipello
+  def flipello10  = this == Flipello10
 
   def exotic = true
 
@@ -39,7 +40,7 @@ abstract class Variant private[variant] (
 
   def dropsVariant: Boolean     = false
   def onlyDropsVariant: Boolean = false
-  def hasGameScore: Boolean = false
+  def hasGameScore: Boolean     = false
 
   def repetitionEnabled: Boolean = true
 
@@ -56,8 +57,8 @@ abstract class Variant private[variant] (
 
   val kingPiece: Option[Role] = None
 
-  //looks like this is only to allow King to be a valid promotion piece
-  //in just atomic, so can leave as true for now
+  // looks like this is only to allow King to be a valid promotion piece
+  // in just atomic, so can leave as true for now
   def isValidPromotion(promotion: Option[PromotableRole]): Boolean = true
 
   def validMoves(situation: Situation): Map[Pos, List[Move]] =
@@ -83,7 +84,7 @@ abstract class Variant private[variant] (
               situationBefore = situation,
               after = situation.board.copy(
                 pieces = newPosition.pieceMap,
-                uciMoves = (situation.board.uciMoves :+ uciMove),
+                uciMoves = situation.board.uciMoves :+ uciMove,
                 pocketData = newPosition.pocketData,
                 position = newPosition.some
               ),
@@ -94,14 +95,14 @@ abstract class Variant private[variant] (
                     situation.board.variant.gameFamily,
                     situation.board.pieces(orig).role.forsyth
                   )
-                case _ => None
+                case _   => None
               },
               castle = None,
               enpassant = false
             )
           )
         }
-        case (orig, dest, prom) => sys.error(s"Invalid position from uci: ${orig}${dest}${prom}")
+        case (orig, dest, prom)                  => sys.error(s"Invalid position from uci: ${orig}${dest}${prom}")
       }
       .groupBy(_._1)
       .map { case (k, v) => (k, v.toList.map(_._2)) }
@@ -125,13 +126,13 @@ abstract class Variant private[variant] (
             situationBefore = situation,
             after = situation.board.copy(
               pieces = newPosition.pieceMap,
-              uciMoves = (situation.board.uciMoves :+ uciMove),
+              uciMoves = situation.board.uciMoves :+ uciMove,
               pocketData = newPosition.pocketData,
               position = newPosition.some
             )
           )
         }
-        case (role, dest) => sys.error(s"Invalid position from uci: ${role}@${dest}")
+        case (role, dest)             => sys.error(s"Invalid position from uci: ${role}@${dest}")
       }
       .toList
 
@@ -144,7 +145,7 @@ abstract class Variant private[variant] (
     // Find the move in the variant specific list of valid moves
     situation.moves get from flatMap (_.find(m => m.dest == to && m.promotion == promotion)) match {
       case Some(move) => Validated.valid(move)
-      case None =>
+      case None       =>
         Validated.invalid(
           s"Not a valid move: ${from}${to} with prom: ${promotion}. Allowed moves: ${situation.moves}"
         )
@@ -207,10 +208,10 @@ abstract class Variant private[variant] (
 
   def fiftyMoves(history: History): Boolean = history.halfMoveClock >= 100
 
-  //can the move legally be 'undone' in a future move?
-  //can the board return to the state before this move
-  //only used in Move, and probably not going to be used
-  //def isIrreversible(move: Move): Boolean = false
+  // can the move legally be 'undone' in a future move?
+  // can the board return to the state before this move
+  // only used in Move, and probably not going to be used
+  // def isIrreversible(move: Move): Boolean = false
 
   /** Once a move has been decided upon from the available legal moves, the board is finalized
     */
@@ -255,15 +256,16 @@ object Variant {
     MiniShogi,
     Xiangqi,
     MiniXiangqi,
-    Flipello
+    Flipello,
+    Flipello10
   )
-  val byId = all map { v =>
+  val byId                    = all map { v =>
     (v.id, v)
   } toMap
-  val byKey = all map { v =>
+  val byKey                   = all map { v =>
     (v.key, v)
   } toMap
-  val byFairySFName = all map { v =>
+  val byFairySFName           = all map { v =>
     (v.fairysfName.name, v)
   } toMap
 

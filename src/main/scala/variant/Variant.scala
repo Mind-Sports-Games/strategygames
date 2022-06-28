@@ -56,6 +56,7 @@ abstract class Variant(
   def minishogi: Boolean
   def minixiangqi: Boolean
   def flipello: Boolean
+  def flipello10: Boolean
 
   def oware: Boolean
 
@@ -180,6 +181,7 @@ object Variant {
     def minishogi: Boolean   = false
     def minixiangqi: Boolean = false
     def flipello: Boolean    = false
+    def flipello10: Boolean  = false
 
     def oware: Boolean = false
 
@@ -312,6 +314,7 @@ object Variant {
     def minishogi: Boolean   = false
     def minixiangqi: Boolean = false
     def flipello: Boolean    = false
+    def flipello10: Boolean  = false
 
     def oware: Boolean = false
 
@@ -442,6 +445,7 @@ object Variant {
     def minishogi: Boolean   = v.minishogi
     def minixiangqi: Boolean = v.minixiangqi
     def flipello: Boolean    = v.flipello
+    def flipello10: Boolean  = v.flipello10
 
     def oware: Boolean = false
 
@@ -571,6 +575,7 @@ object Variant {
     def minishogi: Boolean   = false
     def minixiangqi: Boolean = false
     def flipello: Boolean    = false
+    def flipello10: Boolean  = false
 
     def oware: Boolean = v.oware
 
