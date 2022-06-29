@@ -3,22 +3,20 @@ package variant
 
 import strategygames.{ GameFamily, P1, P2, Player }
 
-case object Flipello
+case object Flipello10
     extends Variant(
-      id = 6,
-      key = "flipello",
-      name = "Flipello",
+      id = 7,
+      key = "flipello10",
+      name = "Flipello10",
       standardInitialPosition = true,
-      fairysfName = FairySFName("flipello"),
-      boardSize = Board.Dim8x8
+      fairysfName = FairySFName("flipello10"),
+      boardSize = Board.Dim10x10
     ) {
 
   def gameFamily: GameFamily = GameFamily.Flipello()
 
   def perfIcon: Char = 'l'
-  def perfId: Int    = 204
-
-  override def baseVariant: Boolean = true
+  def perfId: Int    = 205
 
   override def dropsVariant      = true
   override def onlyDropsVariant  = true
@@ -28,7 +26,7 @@ case object Flipello
   // cache this rather than checking with the API everytime
   override def initialFen =
     format.FEN(
-      "8/8/8/3pP3/3Pp3/8/8/8[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp] w 0 1"
+      "10/10/10/10/4pP4/4Pp4/10/10/10/10[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp] w 0 1"
     )
 
   override def specialEnd(situation: Situation) =

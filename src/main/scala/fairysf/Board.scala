@@ -21,9 +21,9 @@ case class Board(
 
   lazy val posMap: Map[Piece, Iterable[Pos]] = pieces.groupMap(_._2)(_._1)
 
-  lazy val piecesOnBoardCount: Int = pieces.keys.size
-  lazy val playerPiecesOnBoardCount: Map[Player, Int] = Player.all.map{
-    p => (p, pieces.collect{ case (pos, piece) if piece.player == p  => (pos, piece)}.size)
+  lazy val piecesOnBoardCount: Int                    = pieces.keys.size
+  lazy val playerPiecesOnBoardCount: Map[Player, Int] = Player.all.map { p =>
+    (p, pieces.collect { case (pos, piece) if piece.player == p => (pos, piece) }.size)
   }.toMap
 
   def withHistory(h: History): Board       = copy(history = h)
@@ -33,8 +33,8 @@ case class Board(
     if (v.dropsVariant) copy(variant = v).ensurePocketData
     else copy(variant = v)
 
-  def withPocketData(data: PocketData)         = copy(pocketData = Option(data))
-  def withPocketData(data: Option[PocketData]) = copy(pocketData = data)
+  def withPocketData(data: PocketData)                   = copy(pocketData = Option(data))
+  def withPocketData(data: Option[PocketData])           = copy(pocketData = data)
   def withPocketData(f: PocketData => PocketData): Board =
     withPocketData(f(pocketData | PocketData.init))
 
@@ -61,7 +61,7 @@ object Board {
 
   def init(variant: Variant): Board = Board(variant.pieces, variant)
 
-  //def empty(variant: Variant): Board = Board(Nil, variant)
+  // def empty(variant: Variant): Board = Board(Nil, variant)
 
   private def variantPocketData(variant: Variant) =
     (variant.dropsVariant) option PocketData.init
@@ -82,7 +82,7 @@ object Board {
   }
 
   object BoardSize {
-    val all: List[BoardSize] = List(Dim8x8, Dim9x9, Dim9x10)
+    val all: List[BoardSize] = List(Dim5x5, Dim7x7, Dim8x8, Dim9x9, Dim9x10, Dim10x10)
   }
 
   case object Dim5x5
@@ -108,6 +108,11 @@ object Board {
   case object Dim9x10
       extends BoardSize(
         width = 9,
+        height = 10
+      )
+  case object Dim10x10
+      extends BoardSize(
+        width = 10,
         height = 10
       )
 

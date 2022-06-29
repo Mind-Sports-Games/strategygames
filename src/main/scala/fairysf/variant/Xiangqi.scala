@@ -21,10 +21,11 @@ case object Xiangqi
   override def baseVariant: Boolean = true
 
   override def repetitionEnabled: Boolean = false
+  override def useFairyOptionalGameEnd    = true
 
   override val kingPiece: Option[Role] = Some(XiangqiKing)
 
-  //cache this rather than checking with the API everytime
+  // cache this rather than checking with the API everytime
   override def initialFen =
     format.FEN("rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1")
 
