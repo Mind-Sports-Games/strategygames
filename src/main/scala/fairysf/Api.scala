@@ -116,7 +116,8 @@ object Api {
       else None
 
     lazy val optionalGameEndResult: GameResult =
-      if (isOptionalGameEnd.get0()) GameResult.optionalResultFromInt(isOptionalGameEnd.get1())
+      if (variant.useFairyOptionalGameEnd && isOptionalGameEnd.get0())
+        GameResult.optionalResultFromInt(isOptionalGameEnd.get1())
       else GameResult.Ongoing()
 
     lazy val gameResult: GameResult =

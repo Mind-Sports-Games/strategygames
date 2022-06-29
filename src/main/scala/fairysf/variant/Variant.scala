@@ -42,7 +42,8 @@ abstract class Variant private[variant] (
   def onlyDropsVariant: Boolean = false
   def hasGameScore: Boolean     = false
 
-  def repetitionEnabled: Boolean = true
+  def repetitionEnabled: Boolean       = true
+  def useFairyOptionalGameEnd: Boolean = false
 
   def perfId: Int
   def perfIcon: Char

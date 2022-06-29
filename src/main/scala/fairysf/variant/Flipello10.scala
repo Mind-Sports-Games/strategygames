@@ -18,9 +18,10 @@ case object Flipello10
   def perfIcon: Char = 'l'
   def perfId: Int    = 205
 
-  override def dropsVariant     = true
-  override def onlyDropsVariant = true
-  override def hasGameScore     = true
+  override def dropsVariant      = true
+  override def onlyDropsVariant  = true
+  override def hasGameScore      = true
+  override def repetitionEnabled = false
 
   // cache this rather than checking with the API everytime
   override def initialFen =
