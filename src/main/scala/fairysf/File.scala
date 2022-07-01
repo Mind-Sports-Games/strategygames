@@ -20,7 +20,13 @@ object File {
     if (0 <= index && index < all.size) Some(new File(index))
     else None
 
-  @inline def of(pos: Pos): File = new File(pos.index % all.size)
+  @inline def of(pos: Pos): File = {
+    if (pos.index < File.formerAll.size * Rank.all.size) {
+      new File(pos.index % formerAll.size)
+    } else {
+      File.J
+    }
+  }
 
   def fromChar(ch: Char): Option[File] = apply(ch.toInt - 97)
 
