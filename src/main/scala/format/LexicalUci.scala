@@ -27,7 +27,7 @@ object LexicalUci {
   def validRole(c: Char): Boolean = availablePieces.exists(c.==)
   def validPromotableRole(c: Char): Boolean =
     c == '+' || availablePromotablePieces.exists(c.==)
-  def validFile(c: Char): Boolean = ('a' to 'i').exists(c.==)
+  def validFile(c: Char): Boolean = ('a' to 'j').exists(c.==)
   def validRank(s: String): Boolean =
     (s.length() == 1 && ('0' to '9').exists(s(0).==)) || (s == "10")
   def validSquare(s: String): Boolean =
@@ -57,6 +57,8 @@ object LexicalUci {
         // Drops
         case (true, false, 4) =>
           validRole(uciLower(0)) && validSquare(uciLower.slice(2, uciLower.length())) // P@b4
+        case (true, false, 5) =>
+          validRole(uciLower(0)) && validSquare(uciLower.slice(2, uciLower.length())) // P@b10
         // Promotions
         case (false, true, 5 | 6) =>
           validSquarePair(uciLower.slice(0, uciLower.length() - 1)) // d8d9+ | d8d9R | d8e9+
