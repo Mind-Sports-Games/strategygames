@@ -15,13 +15,13 @@ package object draughts extends scalalib.Common with scalalib.OrnicarOption with
 
   type PositionHash = Array[Byte]
 
-  //object implicitFailures {
+  // object implicitFailures {
   //  implicit def stringToFailures(str: String): Failures = scalaz.NonEmptyList(str)
-  //}
+  // }
 
   def parseIntOption(str: String): Option[Int] =
     Try(Integer.parseInt(str)).toOption
 
-  //private[draughts] val logger = draughtsLog("draughts")
+  // private[draughts] val logger = draughtsLog("draughts")
 
 }

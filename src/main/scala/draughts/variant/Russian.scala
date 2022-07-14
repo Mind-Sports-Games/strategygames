@@ -68,16 +68,16 @@ case object Russian
           case Some(captPiece) if captPiece.isNot(player) && !captPiece.isGhost =>
             walkDir._2(nextPos) match {
               case Some(landingPos) if curBoard(landingPos).isEmpty =>
-                val takingBoard = curBoard.takingUnsafe(curPos, landingPos, actor.piece, nextPos, captPiece)
-                val promotion   = promotablePos(landingPos, player)
-                val boardAfter =
+                val takingBoard   = curBoard.takingUnsafe(curPos, landingPos, actor.piece, nextPos, captPiece)
+                val promotion     = promotablePos(landingPos, player)
+                val boardAfter    =
                   if (promotion) takingBoard.promote(landingPos).getOrElse(takingBoard) else takingBoard
-                val promoted   = if (promotion) Some(King) else None
-                val newSquares = landingPos :: allSquares
-                val newTaken   = nextPos :: allTaken
-                val opposite   = Variant.oppositeDirs(walkDir._1)
-                val newDest    = if (firstSquare.isDefined) firstSquare else landingPos.some
-                val newBoard   = if (firstBoard.isDefined) firstBoard else boardAfter.some
+                val promoted      = if (promotion) Some(King) else None
+                val newSquares    = landingPos :: allSquares
+                val newTaken      = nextPos :: allTaken
+                val opposite      = Variant.oppositeDirs(walkDir._1)
+                val newDest       = if (firstSquare.isDefined) firstSquare else landingPos.some
+                val newBoard      = if (firstBoard.isDefined) firstBoard else boardAfter.some
                 val extraCaptures = captureDirs.foldLeft(0) { case (total, captDir) =>
                   if (captDir._1 == opposite) total
                   else {
@@ -122,9 +122,9 @@ case object Russian
                   buf += newMove
                 }
                 extraCaptures + 1
-              case _ => 0
+              case _                                                => 0
             }
-          case _ => 0
+          case _                                                                => 0
         }
       }
 
@@ -173,7 +173,7 @@ case object Russian
       walkDir._2(curPos) match {
         case Some(nextPos) =>
           curBoard(nextPos) match {
-            case None =>
+            case None                                                                   =>
               walkUntilCapture(
                 walkDir,
                 curBoard.moveUnsafe(curPos, nextPos, newPiece),
@@ -198,11 +198,11 @@ case object Russian
                     true,
                     0
                   )
-                case _ => 0
+                case _                                                => 0
               }
-            case _ => 0
+            case _                                                                      => 0
           }
-        case _ => 0
+        case _             => 0
       }
 
     def walkAfterCapture(
@@ -216,11 +216,11 @@ case object Russian
         justTaken: Boolean,
         currentCaptures: Int
     ): Int = {
-      val newSquares = curPos :: allSquares
-      val opposite   = Variant.oppositeDirs(walkDir._1)
-      val newDest    = if (firstSquare.isDefined) firstSquare else curPos.some
-      val newBoard   = if (firstBoard.isDefined) firstBoard else curBoard.some
-      val extraCaptures = captureDirs.foldLeft(0) { case (total, captDir) =>
+      val newSquares        = curPos :: allSquares
+      val opposite          = Variant.oppositeDirs(walkDir._1)
+      val newDest           = if (firstSquare.isDefined) firstSquare else curPos.some
+      val newBoard          = if (firstBoard.isDefined) firstBoard else curBoard.some
+      val extraCaptures     = captureDirs.foldLeft(0) { case (total, captDir) =>
         if (captDir._1 == opposite) total
         else total + walkUntilCapture(captDir, curBoard, curPos, newDest, newBoard, newSquares, newTaken)
       }
@@ -237,9 +237,9 @@ case object Russian
             false,
             currentCaptures + extraCaptures
           )
-        case _ => 0
+        case _                                          => 0
       }
-      val totalCaptures = currentCaptures + extraCaptures + moreExtraCaptures
+      val totalCaptures     = currentCaptures + extraCaptures + moreExtraCaptures
       if (totalCaptures == 0) {
         if (finalSquare)
           buf += actor.move(curPos, curBoard.withoutGhosts, newSquares, newTaken, promoted)
@@ -273,19 +273,19 @@ case object Russian
   ): Board = {
     if (remainingCaptures > 0) board
     else {
-      val p1Actors = board.actorsOf(Player.P1)
-      val p2Actors = board.actorsOf(Player.P2)
-      val p1Kings  = p1Actors.count(_.piece is King)
-      val p2Kings  = p2Actors.count(_.piece is King)
-      val p1Pieces = p1Actors.size
-      val p2Pieces = p2Actors.size
+      val p1Actors                                                       = board.actorsOf(Player.P1)
+      val p2Actors                                                       = board.actorsOf(Player.P2)
+      val p1Kings                                                        = p1Actors.count(_.piece is King)
+      val p2Kings                                                        = p2Actors.count(_.piece is King)
+      val p1Pieces                                                       = p1Actors.size
+      val p2Pieces                                                       = p2Actors.size
       def loneKing(strongPieces: Int, strongKings: Int, weakKing: Actor) =
         strongPieces == 3 && strongKings >= 1 && weakKing.onLongDiagonal && board.piecesOnLongDiagonal == 1
-      val p1LoneKing =
+      val p1LoneKing                                                     =
         if (p1Kings == 1 && p1Pieces == 1 && p2Kings >= 1) {
           loneKing(p2Pieces, p2Kings, p1Actors.head)
         } else false
-      val p2LoneKing =
+      val p2LoneKing                                                     =
         if (p2Kings == 1 && p2Pieces == 1 && p1Kings >= 1) {
           loneKing(p1Pieces, p1Kings, p2Actors.head)
         } else false
@@ -352,11 +352,11 @@ case object Russian
             false,
             true,
             firstPromotion
-          )                                                                                      // 7.2.7: right combination, awaiting 5th move, do not reset on promotion!
+          ) // 7.2.7: right combination, awaiting 5th move, do not reset on promotion!
       } else if (strongPieces >= 3 && strongKings == strongPieces) Some(30, false, false, false) // 7.2.4
       else None
     }
-    val singleKingDraw =
+    val singleKingDraw                                                                       =
       if (p1Kings == 1 && p1Pieces == 1 && p2Kings >= 1) {
         singleKing(p2Pieces, p2Kings, p1Actors.head, Player.p1)
       } else if (p2Kings == 1 && p2Pieces == 1 && p1Kings >= 1) {
@@ -367,24 +367,26 @@ case object Russian
     else if (p2Kings >= 1 && p1Kings >= 1) {
       val totalPieces = p2Pieces + p1Pieces
       if (totalPieces == 6 || totalPieces == 7)
-        Some(120, false, false, false) // 7.2.6: "6-and 7-pieces endings"
+        Some(120, false, false, false)  // 7.2.6: "6-and 7-pieces endings"
       else if (totalPieces == 4 || totalPieces == 5)
         Some(60, false, false, false)   // 7.2.6: "4, and 5-pieces endings"
       else Some(30, true, false, false) // 7.2.5: "the players made 15 moves only kings without moving of men"
     } else None
   }
 
-  /** Update position hashes for Russian drawing rules (https://fmjd64.org/rules-of-the-game/):
-    * 7.2.3. If three (or more) times the same position is repeated, and each time the same player having to move.
-    * 7.2.4. If a player has three kings (or more) against a single enemy king, the game is drawn if his 15th move does not capture the enemy king
-    *        (counting from the time of establishing the correlation of forces).
-    * 7.2.5. If within 15 moves the players made moves only kings without moving of men and not making the capture.
-    * 7.2.6. If the position in which the both opponents having kings have not changed the balance of pieces (ie, there was no capture and man did not become a king) for:
-    *          – To 4-and 5-pieces endings – 30 moves;
-    *          – In 6, and 7-pieces endings – 60 moves.
-    * 7.2.7. If a player having in the party three kings, two kings and one man, one king and two men against one enemy king, located on the long diagonal, his 5th move will not be able to achieve a winning position.
-    * 7.2.8. If a player having in the party two kings, one king and man, one king against enemy king to their 5th move will not be able to achieve a winning position.
-    * 7.2.9. ... excluding case when the game is obvious and the player can continue to demonstrate the victory :S ...
+  /** Update position hashes for Russian drawing rules (https://fmjd64.org/rules-of-the-game/): 7.2.3. If
+    * three (or more) times the same position is repeated, and each time the same player having to move.
+    * 7.2.4. If a player has three kings (or more) against a single enemy king, the game is drawn if his 15th
+    * move does not capture the enemy king (counting from the time of establishing the correlation of forces).
+    * 7.2.5. If within 15 moves the players made moves only kings without moving of men and not making the
+    * capture. 7.2.6. If the position in which the both opponents having kings have not changed the balance of
+    * pieces (ie, there was no capture and man did not become a king) for: – To 4-and 5-pieces endings – 30
+    * moves; – In 6, and 7-pieces endings – 60 moves. 7.2.7. If a player having in the party three kings, two
+    * kings and one man, one king and two men against one enemy king, located on the long diagonal, his 5th
+    * move will not be able to achieve a winning position. 7.2.8. If a player having in the party two kings,
+    * one king and man, one king against enemy king to their 5th move will not be able to achieve a winning
+    * position. 7.2.9. ... excluding case when the game is obvious and the player can continue to demonstrate
+    * the victory :S ...
     */
   def updatePositionHashes(
       board: Board,
@@ -411,7 +413,7 @@ case object Russian
           else              // 7.2.7 is unclear - we count total moves on long diagonal from start of piece configuration, so reentering long diagonal enough times before ply 30 still draws (leaving the diagonal is dumb anyway)
             newHash ++ hash // 7.2.8 never resets once activated
         }
-      case _ => newHash
+      case _                                                                        => newHash
     }
   }
 

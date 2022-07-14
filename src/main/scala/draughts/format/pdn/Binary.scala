@@ -5,7 +5,7 @@ import scala.util.Try
 
 object Binary {
 
-  def writeMove(m: String)                = Try(Writer move m)
+  def writeMove(m: String)             = Try(Writer move m)
   def writeMoves(ms: Iterable[String]) = Try(Writer moves ms)
 
   def readMoves(bs: List[Byte])          = Try(Reader moves bs)
@@ -35,9 +35,9 @@ object Binary {
     def moves(bs: List[Byte], nb: Int): List[String] = intMoves(bs map toInt, nb, "x00")
 
     private def intMoves(bs: List[Int], pliesToGo: Int, lastUci: String): List[String] = bs match {
-      case _ if pliesToGo < 0 => Nil
-      case Nil                => Nil
-      case b1 :: b2 :: rest if moveType(b1) == MoveType.IsMove =>
+      case _ if pliesToGo < 0                                     => Nil
+      case Nil                                                    => Nil
+      case b1 :: b2 :: rest if moveType(b1) == MoveType.IsMove    =>
         if (pliesToGo == 0)
           Nil
         else
@@ -50,7 +50,7 @@ object Binary {
           Nil
         else
           newUci :: intMoves(rest, pliesToGo - 1, newUci)
-      case x => !!(x map showByte mkString ",")
+      case x                                                      => !!(x map showByte mkString ",")
     }
 
     // 2 movetype
@@ -64,12 +64,12 @@ object Binary {
     private def moveType(i: Int) = i >> 6
 
     private def right(i: Int, x: Int): Int = i & lengthMasks(x)
-    private val lengthMasks =
+    private val lengthMasks                =
       Map(1 -> 0x01, 2 -> 0x03, 3 -> 0x07, 4 -> 0x0f, 5 -> 0x1f, 6 -> 0x3f, 7 -> 0x7f, 8 -> 0xff)
-    private def !!(msg: String) = throw new Exception("Binary reader failed: " + msg)
+    private def !!(msg: String)            = throw new Exception("Binary reader failed: " + msg)
 
-    //private def cut(i: Int, from: Int, to: Int): Int = right(i, from) >> to
-    //private def bitAt(i: Int, p: Int): Boolean = cut(i, p, p - 1) != 0
+    // private def cut(i: Int, from: Int, to: Int): Int = right(i, from) >> to
+    // private def bitAt(i: Int, p: Int): Boolean = cut(i, p, p - 1) != 0
 
   }
 
@@ -80,7 +80,7 @@ object Binary {
       case CaptureUciR(src, dst) => captureUci(src, dst)
       case _                     =>
         // TODO: log?
-        //draughtsLog("ERROR: Binary").info(s"Cannot encode $str")
+        // draughtsLog("ERROR: Binary").info(s"Cannot encode $str")
         Nil
     }) map (_.toByte)
 

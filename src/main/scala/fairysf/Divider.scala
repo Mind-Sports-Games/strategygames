@@ -1,10 +1,10 @@
 package strategygames.fairysf
 
-import strategygames.{ Division }
+import strategygames.Division
 
 object Divider {
 
-  //TODO set this
+  // TODO set this
   def apply(boards: List[Board]): Division = Division.empty
 
 }

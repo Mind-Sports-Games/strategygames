@@ -19,7 +19,7 @@ case class Move(
 
   def before = situationBefore.board
 
-  def situationAfter: Situation = situationAfter(false)
+  def situationAfter: Situation                       = situationAfter(false)
   def situationAfter(finalSquare: Boolean): Situation =
     Situation.withPlayerAfter(finalizeAfter(finalSquare), piece.player)
 
@@ -70,11 +70,11 @@ case class Move(
 
   def withMetrics(m: MoveMetrics) = copy(metrics = m)
 
-  def toUci = Uci.Move(orig, dest, promotion, capture)
+  def toUci      = Uci.Move(orig, dest, promotion, capture)
   def toShortUci =
     Uci.Move(orig, dest, promotion, if (capture.isDefined) capture.get.takeRight(1).some else None)
 
-  def toSan = s"${orig.shortKey}${if (capture.nonEmpty) "x" else "-"}${dest.shortKey}"
+  def toSan     = s"${orig.shortKey}${if (capture.nonEmpty) "x" else "-"}${dest.shortKey}"
   def toFullSan = {
     val sep = if (capture.nonEmpty) "x" else "-"
     orig.shortKey + sep + capture.fold(dest.shortKey)(_.reverse.map(_.shortKey) mkString sep)

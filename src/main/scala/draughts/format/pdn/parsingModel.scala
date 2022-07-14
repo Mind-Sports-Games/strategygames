@@ -32,7 +32,7 @@ case class Std(
     val capturePath = if (capture) fields.tail.reverse else Nil
     situation.board.pieces.foldLeft(none[strategygames.draughts.Move]) {
       case (None, (pos, piece)) if piece.player == situation.player && pos == src =>
-        val a = Actor(piece, situation.board.posAt(pos), situation.board)
+        val a          = Actor(piece, situation.board.posAt(pos), situation.board)
         // TODO: technically we should check situation.hasCaptures instead of actor
         val validMoves = if (a.captures.nonEmpty) a.captures else a.noncaptures
         validMoves.find { m =>
@@ -45,9 +45,9 @@ case class Std(
               !forbiddenUci.fold(false)(_.contains(m.toUci.uci)) &&
               (capturePath.length <= 1 || m.capture.contains(capturePath))
             }
-          case m @ _ => m
+          case m @ _                            => m
         }
-      case (m, _) => m
+      case (m, _)                                                                 => m
     } match {
       case None       => invalid(s"No move found: $this\n$situation")
       case Some(move) => valid(move)

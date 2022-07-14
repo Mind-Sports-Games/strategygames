@@ -7,8 +7,8 @@ sealed abstract class Pos(val fieldNumber: Int) {
   val shortKey = fieldNumber.toString
   val piotrStr = piotr.toString
 
-  override val toString = key
-  override val hashCode = fieldNumber - 1
+  override val toString           = key
+  override val hashCode           = fieldNumber - 1
   override def equals(other: Any) = other match {
     case u: Pos => fieldNumber == u.fieldNumber
     case _      => false
@@ -77,7 +77,7 @@ sealed trait BoardPos {
 
 object Pos100 extends BoardPos {
 
-  //Possible destinations: (left, right, straight)
+  // Possible destinations: (left, right, straight)
   val movesDown = Map(
     1  -> Array(6, 7, 11),
     2  -> Array(7, 8, 12),
@@ -126,7 +126,7 @@ object Pos100 extends BoardPos {
     45 -> Array(50, -1, -1)
   )
 
-  //Possible destinations: (left, right, straight)
+  // Possible destinations: (left, right, straight)
   val movesUp = Map(
     6  -> Array(-1, 1, -1),
     7  -> Array(1, 2, -1),
@@ -175,7 +175,7 @@ object Pos100 extends BoardPos {
     50 -> Array(44, 45, 40)
   )
 
-  //Possible destinations: (straight-left, straight-right)
+  // Possible destinations: (straight-left, straight-right)
   val movesHorizontal = Map(
     1  -> Array(-1, 2),
     2  -> Array(1, 3),
@@ -313,7 +313,7 @@ object Pos100 extends BoardPos {
 
 object Pos64 extends BoardPos {
 
-  //Possible destinations: (left, right, straight)
+  // Possible destinations: (left, right, straight)
   val movesDown = Map(
     1  -> Array(5, 6, 9),
     2  -> Array(6, 7, 10),
@@ -345,7 +345,7 @@ object Pos64 extends BoardPos {
     28 -> Array(32, -1, -1)
   )
 
-  //Possible destinations: (left, right, straight)
+  // Possible destinations: (left, right, straight)
   val movesUp = Map(
     5  -> Array(-1, 1, -1),
     6  -> Array(1, 2, -1),
@@ -377,7 +377,7 @@ object Pos64 extends BoardPos {
     32 -> Array(27, 28, 24)
   )
 
-  //Possible destinations: (straight-left, straight-right)
+  // Possible destinations: (straight-left, straight-right)
   val movesHorizontal = Map(
     1  -> Array(-1, 2),
     2  -> Array(1, 3),

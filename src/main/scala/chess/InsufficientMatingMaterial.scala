@@ -2,8 +2,7 @@ package strategygames.chess
 
 import strategygames.Player
 
-/** Utility methods for helping to determine whether a situation is a draw or a draw
-  * on a player flagging.
+/** Utility methods for helping to determine whether a situation is a draw or a draw on a player flagging.
   *
   * See http://www.e4ec.org/immr.html
   */
@@ -32,11 +31,13 @@ object InsufficientMatingMaterial {
     lazy val kingsAndBishopsOnly = board.pieces forall { p =>
       (p._2 is King) || (p._2 is Bishop)
     }
-    val kingsAndMinorsOnly = board.pieces forall { p =>
+    val kingsAndMinorsOnly       = board.pieces forall { p =>
       (p._2 is King) || (p._2 is Bishop) || (p._2 is Knight)
     }
 
-    kingsAndMinorsOnly && (board.pieces.size <= 3 || (kingsAndBishopsOnly && !bishopsOnOppositePlayers(board)))
+    kingsAndMinorsOnly && (board.pieces.size <= 3 || (kingsAndBishopsOnly && !bishopsOnOppositePlayers(
+      board
+    )))
   }
 
   /*
@@ -55,14 +56,14 @@ object InsufficientMatingMaterial {
     lazy val rolesOfOpponentPlayer = board rolesOf !player
 
     kingsAndMinorsOnlyOfPlayer && (nonKingRolesOfPlayer.distinct match {
-      case Nil => true
+      case Nil          => true
       case List(Knight) =>
         nonKingRolesOfPlayer.lengthCompare(
           1
         ) == 0 && !(rolesOfOpponentPlayer filter (King !=) exists (Queen !=))
       case List(Bishop) =>
         !(rolesOfOpponentPlayer.exists(r => r == Knight || r == Pawn) || bishopsOnOppositePlayers(board))
-      case _ => false
+      case _            => false
     })
   }
 }

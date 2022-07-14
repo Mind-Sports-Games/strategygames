@@ -20,12 +20,12 @@ case class Glyphs(
     glyph match {
       case g: Glyph.MoveAssessment     => copy(move = !move.contains(g) option g)
       case g: Glyph.PositionAssessment => copy(position = !position.contains(g) option g)
-      case g: Glyph.Observation =>
+      case g: Glyph.Observation        =>
         copy(observations =
           if (observations contains g) observations.filter(g !=)
           else g :: observations
         )
-      case _ => this
+      case _                           => this
     }
 
   def merge(g: Glyphs) =
@@ -50,7 +50,7 @@ object Glyphs {
       position = glyphs.collectFirst { case g: Glyph.PositionAssessment => g },
       observations = glyphs.collect { case g: Glyph.Observation => g }
     )
-  val all = Glyph.MoveAssessment.all ++ Glyph.Observation.all ++ Glyph.PositionAssessment.all
+  val all                           = Glyph.MoveAssessment.all ++ Glyph.Observation.all ++ Glyph.PositionAssessment.all
 
   val bySymbol: Map[String, Glyph] = all.map { g => g.symbol -> g }.toMap
 }
@@ -69,7 +69,7 @@ object Glyph {
     val only        = new Glyph(7, "□", "Only move") with MoveAssessment
     val zugzwang    = new Glyph(22, "⨀", "Zugzwang") with MoveAssessment
 
-    val all = List(good, mistake, brillant, blunder, interesting, dubious, only, zugzwang)
+    val all                   = List(good, mistake, brillant, blunder, interesting, dubious, only, zugzwang)
     val byId: Map[Int, Glyph] = all
       .map { g =>
         g.id -> g
@@ -82,8 +82,8 @@ object Glyph {
   sealed trait PositionAssessment extends Glyph
 
   object PositionAssessment {
-    val equal               = new Glyph(10, "=", "Equal position") with PositionAssessment
-    val unclear             = new Glyph(13, "∞", "Unclear position") with PositionAssessment
+    val equal            = new Glyph(10, "=", "Equal position") with PositionAssessment
+    val unclear          = new Glyph(13, "∞", "Unclear position") with PositionAssessment
     val p1SlightlyBetter = new Glyph(14, "⩲", "P1 is slightly better") with PositionAssessment
     val p2SlightlyBetter = new Glyph(15, "⩱", "P2 is slightly better") with PositionAssessment
     val p1QuiteBetter    = new Glyph(16, "±", "P1 is better") with PositionAssessment
@@ -91,7 +91,7 @@ object Glyph {
     val p1MuchBetter     = new Glyph(18, "+−", "P1 is winning") with PositionAssessment
     val p2MuchBetter     = new Glyph(19, "-+", "P2 is winning") with PositionAssessment
 
-    val all = List(
+    val all                   = List(
       equal,
       unclear,
       p1SlightlyBetter,
@@ -122,7 +122,7 @@ object Glyph {
     val compensation = new Glyph(44, "=∞", "With compensation") with Observation
     val withIdea     = new Glyph(140, "∆", "With the idea") with Observation
 
-    val all = List(novelty, development, initiative, attack, counterplay, timeTrouble, compensation, withIdea)
+    val all                   = List(novelty, development, initiative, attack, counterplay, timeTrouble, compensation, withIdea)
     val byId: Map[Int, Glyph] = all
       .map { g =>
         g.id -> g

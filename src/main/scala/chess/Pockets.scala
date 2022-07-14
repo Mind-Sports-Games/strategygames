@@ -1,6 +1,6 @@
 package strategygames.chess
 
-import strategygames.{ Player, GameLogic, Piece => StratPiece, Pocket, Pockets }
+import strategygames.{ GameLogic, Piece => StratPiece, Player, Pocket, Pockets }
 
 case class PocketData(
     pockets: Pockets,
@@ -36,4 +36,3 @@ case class PocketData(
 object PocketData {
   val init = PocketData(Pockets(Pocket(Nil), Pocket(Nil)), Set.empty)
 }
-

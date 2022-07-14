@@ -1,5 +1,5 @@
 package strategygames.mancala
-import strategygames.{ Clock, Player, MoveMetrics }
+import strategygames.{ Clock, MoveMetrics, Player }
 
 import cats.data.Validated
 
@@ -34,7 +34,6 @@ case class Game(
     )
   }
 
-  
   private def applyClock(metrics: MoveMetrics, gameActive: Boolean) =
     clock.map { c =>
       {
@@ -49,8 +48,7 @@ case class Game(
 
   def halfMoveClock: Int = board.history.halfMoveClock
 
-  /** Fullmove number: The number of the full move.
-    * It starts at 1, and is incremented after P2's move.
+  /** Fullmove number: The number of the full move. It starts at 1, and is incremented after P2's move.
     */
   def fullMoveNumber: Int = 1 + turns / 2
 

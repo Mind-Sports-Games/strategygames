@@ -20,7 +20,7 @@ object FullOpeningDB {
           else if (boardPocket.count('/' ==) == 8) boardPocket.split('/').take(8).mkString("/")
           else boardPocket
         byFen get List(board, turn, castle, ep).mkString(" ")
-      case _ => None
+      case _                                    => None
     }
 
   val SEARCH_MAX_PLIES = 40
@@ -39,7 +39,7 @@ object FullOpeningDB {
           case ((situation, ply), None) =>
             val fen = strategygames.chess.format.Forsyth.exportStandardPositionTurnCastlingEp(situation)
             byFen get fen map (_ atPly ply)
-          case (_, found) => found
+          case (_, found)               => found
         }
       }
 

@@ -72,7 +72,7 @@ case class Board(
 
   def taking(orig: Pos, dest: Pos, taking: Option[Pos] = None): Option[Board] =
     for {
-      piece <- pieces get orig
+      piece   <- pieces get orig
       takenPos = taking getOrElse dest
       if pieces contains takenPos
     } yield copy(pieces = pieces - takenPos - orig + (dest -> piece))
@@ -87,8 +87,8 @@ case class Board(
     for {
       pawn <- apply(pos)
       if pawn is Pawn
-      b2 <- take(pos)
-      b3 <- b2.place(Piece(pawn.player, Queen), pos)
+      b2   <- take(pos)
+      b3   <- b2.place(Piece(pawn.player, Queen), pos)
     } yield b3
 
   def castles: Castles = history.castles
@@ -103,8 +103,8 @@ case class Board(
     if (v.dropsVariant) copy(variant = v).ensureCrazyData
     else copy(variant = v)
 
-  def withCrazyData(data: PocketData)         = copy(pocketData = Option(data))
-  def withCrazyData(data: Option[PocketData]) = copy(pocketData = data)
+  def withCrazyData(data: PocketData)                   = copy(pocketData = Option(data))
+  def withCrazyData(data: Option[PocketData])           = copy(pocketData = data)
   def withCrazyData(f: PocketData => PocketData): Board =
     withCrazyData(f(pocketData | PocketData.init))
 
@@ -120,10 +120,10 @@ case class Board(
   def fixCastles: Board =
     withCastles {
       if (variant.allowsCastling) {
-        val wkPos   = kingPosOf(P1)
-        val bkPos   = kingPosOf(P2)
-        val wkReady = wkPos.fold(false)(_.rank == Rank.First)
-        val bkReady = bkPos.fold(false)(_.rank == Rank.Eighth)
+        val wkPos                                                       = kingPosOf(P1)
+        val bkPos                                                       = kingPosOf(P2)
+        val wkReady                                                     = wkPos.fold(false)(_.rank == Rank.First)
+        val bkReady                                                     = bkPos.fold(false)(_.rank == Rank.Eighth)
         def rookReady(player: Player, kPos: Option[Pos], left: Boolean) =
           kPos.fold(false) { kp =>
             actorsOf(player) exists { a =>
@@ -143,7 +143,7 @@ case class Board(
 
   def updateHistory(f: History => History) = copy(history = f(history))
 
-  def count(p: Piece): Int = pieces.values count (_ == p)
+  def count(p: Piece): Int  = pieces.values count (_ == p)
   def count(c: Player): Int = pieces.values count (_.player == c)
 
   def autoDraw: Boolean =
@@ -172,7 +172,7 @@ case class Board(
           diagOccupation(diagPos, dir, diagPieces ++ Map(diagPos -> pieces(diagPos)))
         else
           diagOccupation(diagPos, dir, diagPieces)
-      case None => return diagPieces
+      case None          => return diagPieces
     }
 
   def diagAscOccupation(pos: Pos): Map[Pos, Piece] =

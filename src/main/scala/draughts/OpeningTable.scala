@@ -72,7 +72,7 @@ object OpeningTable {
     tableIDFBrazilian,
     tableIDFBasic,
     tableFMJD,
-    tableFMJDBrazilian,
+    tableFMJDBrazilian
   )
 
   private val key2table: Map[String, OpeningTable] = allTables

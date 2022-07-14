@@ -30,7 +30,7 @@ case class Move(
 
   def castles = castle.isDefined
 
-  //could get rid of this?
+  // could get rid of this?
   def normalizeCastle =
     castle.fold(this) { case (_, (rookOrig, _)) =>
       copy(dest = rookOrig)

@@ -17,7 +17,7 @@ case class Situation(board: Board, player: Player) {
 
   def dropsByRole: Option[Map[Role, List[Pos]]] = board.variant.possibleDropsByRole(this)
 
-  //lazy val kingPos: Option[Pos] = board kingPosOf player
+  // lazy val kingPos: Option[Pos] = board kingPosOf player
 
   lazy val check: Boolean = board.apiPosition.givesCheck
 
@@ -54,12 +54,12 @@ case class Situation(board: Board, player: Player) {
   lazy val status: Option[Status] =
     if (checkMate) Status.Mate.some
     else if (perpetual) Status.PerpetualCheck.some
-    //alot of variantEnds appear as checkMate in fairysf
+    // alot of variantEnds appear as checkMate in fairysf
     else if (variantEnd) Status.VariantEnd.some
     else if (staleMate) Status.Stalemate.some
     else none
 
-  //TODO: test P1/P2 map is correct
+  // TODO: test P1/P2 map is correct
   def opponentHasInsufficientMaterial: Boolean = {
     val insufficientMaterial = board.apiPosition.insufficientMaterial
     player match {
@@ -68,7 +68,7 @@ case class Situation(board: Board, player: Player) {
     }
   }
 
-  //called threefold actually will return for xfold
+  // called threefold actually will return for xfold
   def threefoldRepetition: Boolean =
     board.variant.repetitionEnabled && board.apiPosition.optionalGameEnd
 

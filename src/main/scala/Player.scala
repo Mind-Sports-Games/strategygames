@@ -47,9 +47,9 @@ object Player {
 
     lazy val unary_! = P2
 
-    //retain old color lettering
-    val letter = 'w'
-    val name   = "p1"
+    // retain old color lettering
+    val letter      = 'w'
+    val name        = "p1"
     val classicName = "white"
 
     override val hashCode = 1
@@ -59,9 +59,9 @@ object Player {
 
     val unary_! = P1
 
-    //retain old color lettering
-    val letter = 'b'
-    val name   = "p2"
+    // retain old color lettering
+    val letter      = 'b'
+    val name        = "p2"
     val classicName = "black"
 
     override val hashCode = 2
@@ -97,20 +97,20 @@ object Player {
 
   def exists(name: String) = all exists (_.name == name)
 
-  //need to move this out of Player
+  // need to move this out of Player
   def showResult(player: Option[Player], draughtsResult: Boolean = false) = player match {
     case Some(P1) => if (draughtsResult) "2-0" else "1-0"
     case Some(P2) => if (draughtsResult) "0-2" else "0-1"
-    case None        => if (draughtsResult) "1-1" else "1/2-1/2"
+    case None     => if (draughtsResult) "1-1" else "1/2-1/2"
   }
 
-  //need to move this out of Player
+  // need to move this out of Player
   def fromResult(result: String): Option[Player] =
     result match {
       case "1-0" => Option(P1)
-      case "2-0" => Option(P1)//draughts
+      case "2-0" => Option(P1) // draughts
       case "0-1" => Option(P2)
-      case "0-2" => Option(P2)//draughts
+      case "0-2" => Option(P2) // draughts
       case _     => None
     }
 

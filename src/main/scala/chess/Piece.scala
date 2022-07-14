@@ -5,9 +5,9 @@ import strategygames.Player
 case class Piece(player: Player, role: Role) {
 
   def is(c: Player)    = c == player
-  def is(r: Role)     = r == role
+  def is(r: Role)      = r == role
   def isNot(c: Player) = c != player
-  def isNot(r: Role)  = r != role
+  def isNot(r: Role)   = r != role
 
   def oneOf(rs: Set[Role]) = rs(role)
 
@@ -19,11 +19,11 @@ case class Piece(player: Player, role: Role) {
   // attackable positions assuming empty board
   def eyes(from: Pos, to: Pos): Boolean =
     role match {
-      case King   => from touches to
-      case Queen  => (from onSameLine to) || (from onSameDiagonal to)
-      case Rook   => from onSameLine to
-      case Bishop => from onSameDiagonal to
-      case Knight =>
+      case King       => from touches to
+      case Queen      => (from onSameLine to) || (from onSameDiagonal to)
+      case Rook       => from onSameLine to
+      case Bishop     => from onSameDiagonal to
+      case Knight     =>
         val xd = from xDist to
         val yd = from yDist to
         (xd == 1 && yd == 2) || (xd == 2 && yd == 1)

@@ -8,8 +8,7 @@ import strategygames.chess.variant.{ Standard, Variant }
 /** Transform a game to standard Forsyth Edwards Notation
   * http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
   *
-  * Crazyhouse & Threecheck extensions:
-  * https://github.com/ddugovic/Stockfish/wiki/FEN-extensions
+  * Crazyhouse & Threecheck extensions: https://github.com/ddugovic/Stockfish/wiki/FEN-extensions
   * http://scidb.sourceforge.net/help/en/FEN.html#ThreeCheck
   */
 object Forsyth {
@@ -18,12 +17,12 @@ object Forsyth {
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] =
     makeBoard(variant, fen) map { board =>
-      val splitted    = fen.value split ' '
+      val splitted     = fen.value split ' '
       val playerOption = splitted lift 1 flatMap (_ lift 0) flatMap Player.apply
-      val situation = playerOption match {
-        case Some(player)             => Situation(board, player)
+      val situation    = playerOption match {
+        case Some(player)         => Situation(board, player)
         case _ if board.check(P2) => Situation(board, P2) // user in check will move first
-        case _                       => Situation(board, P1)
+        case _                    => Situation(board, P1)
       }
       splitted
         .lift(2)
@@ -31,7 +30,7 @@ object Forsyth {
           val (castles, unmovedRooks) = strCastles.foldLeft(Castles.none -> Set.empty[Pos]) {
             case ((c, r), ch) =>
               val player = Player.fromP1(ch.isUpper)
-              val rooks = board
+              val rooks  = board
                 .piecesOf(player)
                 .collect {
                   case (pos, piece) if piece.is(Rook) && pos.rank == Rank.backRank(player) => pos
@@ -41,18 +40,18 @@ object Forsyth {
               (for {
                 kingPos <- board.kingPosOf(player)
                 rookPos <- (ch.toLower match {
-                  case 'k'  => rooks.reverse.find(_ ?> kingPos)
-                  case 'q'  => rooks.find(_ ?< kingPos)
-                  case file => rooks.find(_.file.char == file)
-                })
-                side <- Side.kingRookSide(kingPos, rookPos)
+                             case 'k'  => rooks.reverse.find(_ ?> kingPos)
+                             case 'q'  => rooks.find(_ ?< kingPos)
+                             case file => rooks.find(_.file.char == file)
+                           })
+                side    <- Side.kingRookSide(kingPos, rookPos)
               } yield (c.add(player, side), r + rookPos)).getOrElse((c, r))
           }
 
           val fifthRank   = if (situation.player == P1) Rank.Fifth else Rank.Fourth
           val sixthRank   = if (situation.player == P1) Rank.Sixth else Rank.Third
           val seventhRank = if (situation.player == P1) Rank.Seventh else Rank.Second
-          val lastMove = for {
+          val lastMove    = for {
             pos <- splitted lift 3 flatMap Pos.fromKey
             if pos.rank == sixthRank
             orig = Pos(pos.file, seventhRank)
@@ -63,7 +62,7 @@ object Forsyth {
           } yield Uci.Move(orig, dest)
 
           situation withHistory {
-            val history = History(
+            val history    = History(
               lastMove = lastMove,
               positionHashes = Array.empty,
               castles = castles,
@@ -73,7 +72,7 @@ object Forsyth {
               splitted
                 .lift(4)
                 .flatMap(makeCheckCount(_, variant))
-                .orElse(splitted.lift(6).flatMap(makeCheckCount(_,variant)))
+                .orElse(splitted.lift(6).flatMap(makeCheckCount(_, variant)))
             checkCount.fold(history)(history.withCheckCount)
           }
         } fixCastles
@@ -81,26 +80,25 @@ object Forsyth {
 
   def <<(fen: FEN): Option[Situation] = <<@(Standard, fen)
 
-
   def makeCheckCount(str: String, gameVariant: Variant): Option[CheckCount] = {
-      val numchecks = gameVariant match {
-        case variant.FiveCheck => 5 
-        case variant.ThreeCheck => 3
-        case _ => 0
-      }
-      str.toList match {
-        case '+' :: w :: '+' :: b :: Nil =>
-          for {
-            p1 <- w.toString.toIntOption if p1 <= numchecks
-            p2 <- b.toString.toIntOption if p2 <= numchecks
-          } yield CheckCount(p2, p1)
-        case w :: '+' :: b :: Nil =>
-          for {
-            p1 <- w.toString.toIntOption if p1 <= numchecks
-            p2 <- b.toString.toIntOption if p2 <= numchecks
-          } yield CheckCount(numchecks - p2, numchecks - p1)
-        case _ => None
-      }
+    val numchecks = gameVariant match {
+      case variant.FiveCheck  => 5
+      case variant.ThreeCheck => 3
+      case _                  => 0
+    }
+    str.toList match {
+      case '+' :: w :: '+' :: b :: Nil =>
+        for {
+          p1 <- w.toString.toIntOption if p1 <= numchecks
+          p2 <- b.toString.toIntOption if p2 <= numchecks
+        } yield CheckCount(p2, p1)
+      case w :: '+' :: b :: Nil        =>
+        for {
+          p1 <- w.toString.toIntOption if p1 <= numchecks
+          p2 <- b.toString.toIntOption if p2 <= numchecks
+        } yield CheckCount(numchecks - p2, numchecks - p1)
+      case _                           => None
+    }
   }
 
   case class SituationPlus(situation: Situation, fullMoveNumber: Int) {
@@ -124,14 +122,14 @@ object Forsyth {
   // only cares about pieces positions on the board (first part of FEN string)
   def makeBoard(variant: Variant, fen: FEN): Option[Board] = {
     val (position, pockets) = fen.value.takeWhile(' ' !=) match {
-      case word if word.count('/' ==) == 8 =>
+      case word if word.count('/' ==) == 8                  =>
         val splitted = word.split('/')
         splitted.take(8).mkString("/") -> splitted.lift(8)
       case word if word.contains('[') && word.endsWith("]") =>
         word.span('[' !=) match {
           case (position, pockets) => position -> pockets.stripPrefix("[").stripSuffix("]").some
         }
-      case word => word -> None
+      case word                                             => word -> None
     }
     makePiecesWithCrazyPromoted(position.toList, 0, 7) map { case (pieces, promoted) =>
       val board = Board(pieces, variant = variant)
@@ -160,13 +158,13 @@ object Forsyth {
       case Nil                               => Option((Nil, Set.empty))
       case '/' :: rest                       => makePiecesWithCrazyPromoted(rest, 0, y - 1)
       case c :: rest if '1' <= c && c <= '8' => makePiecesWithCrazyPromoted(rest, x + (c - '0').toInt, y)
-      case c :: '~' :: rest =>
+      case c :: '~' :: rest                  =>
         for {
           pos                        <- Pos.at(x, y)
           piece                      <- Piece.fromChar(c)
           (nextPieces, nextPromoted) <- makePiecesWithCrazyPromoted(rest, x + 1, y)
         } yield (pos -> piece :: nextPieces, nextPromoted + pos)
-      case c :: rest =>
+      case c :: rest                         =>
         for {
           pos                        <- Pos.at(x, y)
           piece                      <- Piece.fromChar(c)
@@ -191,7 +189,8 @@ object Forsyth {
         game.halfMoveClock,
         game.fullMoveNumber
       ) ::: {
-        if (game.board.variant == variant.ThreeCheck || game.board.variant == variant.FiveCheck) List(exportCheckCount(game.board))
+        if (game.board.variant == variant.ThreeCheck || game.board.variant == variant.FiveCheck)
+          List(exportCheckCount(game.board))
         else List()
       }
     } mkString " "
@@ -216,7 +215,7 @@ object Forsyth {
         "/" +
           pockets.p1.roles.map(_.forsyth).map(_.toUpper).mkString +
           pockets.p2.roles.map(_.forsyth).mkString
-      case _ => ""
+      case _                            => ""
     }
 
   implicit private val posOrdering = Ordering.by[Pos, File](_.file)
@@ -260,7 +259,7 @@ object Forsyth {
       empty = 0
       for (x <- File.all) {
         board(x, y) match {
-          case None => empty = empty + 1
+          case None        => empty = empty + 1
           case Some(piece) =>
             if (empty == 0) fen append piece.forsyth.toString
             else {

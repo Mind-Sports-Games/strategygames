@@ -2,19 +2,12 @@ package strategygames.chess.format
 import strategygames.chess._
 import strategygames.Player
 
-/** r bqkb r
-  * p ppp pp
-  * pr
-  *    P p
-  *    QnB
-  *  PP  N
-  * P    PPP
-  * RN  K  R
+/** r bqkb r p ppp pp pr P p QnB PP N P PPP RN K R
   */
 object Visual {
 
   def <<(source: String): Board = {
-    val lines = augmentString(source).linesIterator.to(List)
+    val lines    = augmentString(source).linesIterator.to(List)
     val filtered = lines.size match {
       case 8          => lines
       case n if n > 8 => lines.slice(1, 9)

@@ -19,12 +19,12 @@ case object Pool
 
   def perfId: Int = 124
 
-  override def fenVariant = true
-  override def aiVariant  = false
-  def pieces              = Russian.pieces
-  def initialFen          = Russian.initialFen
-  def startingPosition    = Russian.startingPosition
-  //TODO: Set this
+  override def fenVariant    = true
+  override def aiVariant     = false
+  def pieces                 = Russian.pieces
+  def initialFen             = Russian.initialFen
+  def startingPosition       = Russian.startingPosition
+  // TODO: Set this
   override val openingTables = List(OpeningTable.tableFMJDBrazilian, OpeningTable.tableIDFBasic)
 
   def captureDirs    = Standard.captureDirs
@@ -42,10 +42,10 @@ case object Pool
       finalSquare: Boolean
   ): Board = {
     val promoted =
-      situationBefore.board.actorAt(uci.orig) zip 
-      board.actorAt(uci.dest) map {
-        case (before, after) => before.piece != after.piece
-      } getOrElse(false)
+      situationBefore.board.actorAt(uci.orig) zip
+        board.actorAt(uci.dest) map { case (before, after) =>
+          before.piece != after.piece
+        } getOrElse false
     Russian.finalizeBoardWithRemainingCaptures(
       board = board,
       remainingCaptures = if (promoted) 0 else board.actorAt(uci.dest).map(_.captureLength).getOrElse(0)
@@ -70,12 +70,12 @@ case object Pool
           case Some(captPiece) if captPiece.isNot(player) && !captPiece.isGhost =>
             walkDir._2(nextPos) match {
               case Some(landingPos) if curBoard(landingPos).isEmpty =>
-                val boardAfter = curBoard.takingUnsafe(curPos, landingPos, actor.piece, nextPos, captPiece)
-                val newSquares = landingPos :: allSquares
-                val newTaken   = nextPos :: allTaken
-                val opposite   = Variant.oppositeDirs(walkDir._1)
-                val newDest    = if (firstSquare.isDefined) firstSquare else landingPos.some
-                val newBoard   = if (firstBoard.isDefined) firstBoard else boardAfter.some
+                val boardAfter    = curBoard.takingUnsafe(curPos, landingPos, actor.piece, nextPos, captPiece)
+                val newSquares    = landingPos :: allSquares
+                val newTaken      = nextPos :: allTaken
+                val opposite      = Variant.oppositeDirs(walkDir._1)
+                val newDest       = if (firstSquare.isDefined) firstSquare else landingPos.some
+                val newBoard      = if (firstBoard.isDefined) firstBoard else boardAfter.some
                 val extraCaptures = captureDirs.foldLeft(0) { case (total, captDir) =>
                   if (captDir._1 == opposite) total
                   else
@@ -94,7 +94,7 @@ case object Pool
                     if (promotablePos(landingPos, player))
                       boardAfter.promote(landingPos).getOrElse(boardAfter)
                     else boardAfter
-                  val newMove =
+                  val newMove           =
                     if (finalSquare)
                       actor.move(landingPos, boardAfterPromote.withoutGhosts, newSquares, newTaken)
                     else
@@ -107,9 +107,9 @@ case object Pool
                   buf += newMove
                 }
                 extraCaptures + 1
-              case _ => 0
+              case _                                                => 0
             }
-          case _ => 0
+          case _                                                                => 0
         }
       }
 
@@ -153,7 +153,7 @@ case object Pool
       walkDir._2(curPos) match {
         case Some(nextPos) =>
           curBoard(nextPos) match {
-            case None =>
+            case None                                                                   =>
               walkUntilCapture(
                 walkDir,
                 curBoard.moveUnsafe(curPos, nextPos, actor.piece),
@@ -178,11 +178,11 @@ case object Pool
                     true,
                     0
                   )
-                case _ => 0
+                case _                                                => 0
               }
-            case _ => 0
+            case _                                                                      => 0
           }
-        case _ => 0
+        case _             => 0
       }
 
     def walkAfterCapture(
@@ -196,11 +196,11 @@ case object Pool
         justTaken: Boolean,
         currentCaptures: Int
     ): Int = {
-      val newSquares = curPos :: allSquares
-      val opposite   = Variant.oppositeDirs(walkDir._1)
-      val newDest    = if (firstSquare.isDefined) firstSquare else curPos.some
-      val newBoard   = if (firstBoard.isDefined) firstBoard else curBoard.some
-      val extraCaptures = captureDirs.foldLeft(0) { case (total, captDir) =>
+      val newSquares        = curPos :: allSquares
+      val opposite          = Variant.oppositeDirs(walkDir._1)
+      val newDest           = if (firstSquare.isDefined) firstSquare else curPos.some
+      val newBoard          = if (firstBoard.isDefined) firstBoard else curBoard.some
+      val extraCaptures     = captureDirs.foldLeft(0) { case (total, captDir) =>
         if (captDir._1 == opposite) total
         else total + walkUntilCapture(captDir, curBoard, curPos, newDest, newBoard, newSquares, newTaken)
       }
@@ -217,9 +217,9 @@ case object Pool
             false,
             currentCaptures + extraCaptures
           )
-        case _ => 0
+        case _                                          => 0
       }
-      val totalCaptures = currentCaptures + extraCaptures + moreExtraCaptures
+      val totalCaptures     = currentCaptures + extraCaptures + moreExtraCaptures
       if (totalCaptures == 0) {
         if (finalSquare)
           buf += actor.move(curPos, curBoard.withoutGhosts, newSquares, newTaken)

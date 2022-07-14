@@ -55,7 +55,7 @@ case class Clock(
       gameActive: Boolean = true
   ) =
     (timer match {
-      case None =>
+      case None    =>
         metrics.clientLag.fold(this) { l =>
           updatePlayer(player) { _.recordLag(l) }
         }
@@ -63,7 +63,7 @@ case class Clock(
         val elapsed = toNow(t)
         val lag     = ~metrics.reportedLag(elapsed) nonNeg
 
-        val competitor         = players(player)
+        val competitor          = players(player)
         val (lagComp, lagTrack) = competitor.lag.onMove(lag)
 
         val moveTime = (elapsed - lagComp) nonNeg
@@ -203,9 +203,9 @@ object Clock {
           init <- initStr.toIntOption
           inc  <- incStr.toIntOption
         } yield Config(init, inc)
-      case _ => none
+      case _                      => none
     }
-  def readPdnConfig(str: String) = readPgnConfig(str)
+  def readPdnConfig(str: String)                 = readPgnConfig(str)
 
   def apply(limit: Int, increment: Int): Clock = apply(Config(limit, increment))
 

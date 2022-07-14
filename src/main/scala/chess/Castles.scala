@@ -88,6 +88,6 @@ object Castles {
         case (P2, KingSide)  => castles.p2KingSide
         case (P2, QueenSide) => castles.p2QueenSide
       }
-    def any = on(KingSide) || on(QueenSide)
+    def any                     = on(KingSide) || on(QueenSide)
   }
 }

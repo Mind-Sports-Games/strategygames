@@ -39,7 +39,7 @@ case class Tags(value: List[Tag]) extends AnyVal {
           case Some(gameType) => strategygames.draughts.variant.Variant byGameType gameType
           case _              => None
         }
-      case _ => None
+      case _                         => None
     }
 
   def chessVariant: Option[strategygames.chess.variant.Variant] =
@@ -52,7 +52,7 @@ case class Tags(value: List[Tag]) extends AnyVal {
     apply(_.Variant).map(_.toLowerCase).flatMap {
       strategygames.fairysf.variant.Variant byName _
     }
-  
+
   def mancalaVariant: Option[strategygames.mancala.variant.Variant] =
     apply(_.Variant).map(_.toLowerCase).flatMap {
       strategygames.mancala.variant.Variant byName _
@@ -77,8 +77,8 @@ case class Tags(value: List[Tag]) extends AnyVal {
 
   def chessFen: Option[chess.format.FEN]       = apply(_.FEN).map(strategygames.chess.format.FEN.apply)
   def draughtsFen: Option[draughts.format.FEN] = apply(_.FEN).map(strategygames.draughts.format.FEN.apply)
-  def fairysfFen: Option[fairysf.format.FEN] = apply(_.FEN).map(strategygames.fairysf.format.FEN.apply)
-  def mancalaFen: Option[mancala.format.FEN] = apply(_.FEN).map(strategygames.mancala.format.FEN.apply)
+  def fairysfFen: Option[fairysf.format.FEN]   = apply(_.FEN).map(strategygames.fairysf.format.FEN.apply)
+  def mancalaFen: Option[mancala.format.FEN]   = apply(_.FEN).map(strategygames.mancala.format.FEN.apply)
 
   def fen: Option[format.FEN] =
     variant match {
@@ -111,7 +111,7 @@ object Tags {
   val empty = Tags(Nil)
 
   // according to http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm#c8.1.1
-  val sevenTagRoster = List(
+  val sevenTagRoster              = List(
     Tag.Event,
     Tag.Site,
     Tag.Date,
@@ -128,46 +128,46 @@ object Tags {
 
 object Tag {
 
-  case object Event extends TagType
-  case object Site  extends TagType
-  case object Date  extends TagType
-  case object UTCDate extends TagType {
+  case object Event             extends TagType
+  case object Site              extends TagType
+  case object Date              extends TagType
+  case object UTCDate           extends TagType {
     val format = DateTimeFormat forPattern "yyyy.MM.dd" withZone DateTimeZone.UTC
   }
-  case object UTCTime extends TagType {
+  case object UTCTime           extends TagType {
     val format = DateTimeFormat forPattern "HH:mm:ss" withZone DateTimeZone.UTC
   }
-  case object Round        extends TagType
-  case object P1           extends TagType
-  case object P2           extends TagType
-  case object TimeControl  extends TagType
-  case object P1Clock      extends TagType
-  case object P2Clock      extends TagType
-  case object P1Elo        extends TagType
-  case object P2Elo        extends TagType
-  case object P1Rating     extends TagType
-  case object P2Rating     extends TagType
-  case object P1RatingDiff extends TagType
-  case object P2RatingDiff extends TagType
-  case object P1Title      extends TagType
-  case object P2Title      extends TagType
-  case object P1Team       extends TagType
-  case object P2Team       extends TagType
-  case object Result       extends TagType
-  case object FEN          extends TagType
-  case object Variant      extends TagType
-  case object GameType     extends TagType
-  case object MicroMatch   extends TagType
-  case object ECO          extends TagType
-  case object Opening      extends TagType
-  case object Termination  extends TagType
-  case object Annotator    extends TagType
+  case object Round             extends TagType
+  case object P1                extends TagType
+  case object P2                extends TagType
+  case object TimeControl       extends TagType
+  case object P1Clock           extends TagType
+  case object P2Clock           extends TagType
+  case object P1Elo             extends TagType
+  case object P2Elo             extends TagType
+  case object P1Rating          extends TagType
+  case object P2Rating          extends TagType
+  case object P1RatingDiff      extends TagType
+  case object P2RatingDiff      extends TagType
+  case object P1Title           extends TagType
+  case object P2Title           extends TagType
+  case object P1Team            extends TagType
+  case object P2Team            extends TagType
+  case object Result            extends TagType
+  case object FEN               extends TagType
+  case object Variant           extends TagType
+  case object GameType          extends TagType
+  case object MicroMatch        extends TagType
+  case object ECO               extends TagType
+  case object Opening           extends TagType
+  case object Termination       extends TagType
+  case object Annotator         extends TagType
   case class Unknown(n: String) extends TagType {
     override def toString  = n
     override val isUnknown = true
   }
 
-  val tagTypes = List(
+  val tagTypes                                  = List(
     Event,
     Site,
     Date,

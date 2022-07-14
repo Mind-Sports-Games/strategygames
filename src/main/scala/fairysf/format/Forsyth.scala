@@ -4,16 +4,16 @@ import cats.implicits._
 
 import strategygames.Player
 import strategygames.fairysf._
-import strategygames.fairysf.variant.{ Variant }
+import strategygames.fairysf.variant.Variant
 
 /** Transform a game to standard Forsyth Edwards Notation
   * http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
   */
 object Forsyth {
 
-  //lishogi
-  //val initial = FEN("lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1")
-  //pychess shogi
+  // lishogi
+  // val initial = FEN("lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1")
+  // pychess shogi
   val initial = FEN("lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL[-] w 0 1")
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
@@ -46,7 +46,7 @@ object Forsyth {
   def <<<@(variant: Variant, fen: FEN): Option[SituationPlus] =
     <<@(variant, fen) map { sit =>
       SituationPlus(
-        //not doing half move clock history like we do in chess
+        // not doing half move clock history like we do in chess
         sit,
         fen.value.split(' ').last.toIntOption.map(_ max 1 min 500) | 1
       )

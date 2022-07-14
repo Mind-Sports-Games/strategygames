@@ -24,13 +24,13 @@ object LexicalUci {
   val availablePieces           = availablePieceChars().getString()
   val availablePromotablePieces = availablePieceChars().getString()
 
-  def validRole(c: Char): Boolean = availablePieces.exists(c.==)
+  def validRole(c: Char): Boolean           = availablePieces.exists(c.==)
   def validPromotableRole(c: Char): Boolean =
     c == '+' || availablePromotablePieces.exists(c.==)
-  def validFile(c: Char): Boolean = ('a' to 'j').exists(c.==)
-  def validRank(s: String): Boolean =
+  def validFile(c: Char): Boolean           = ('a' to 'j').exists(c.==)
+  def validRank(s: String): Boolean         =
     (s.length() == 1 && ('0' to '9').exists(s(0).==)) || (s == "10")
-  def validSquare(s: String): Boolean =
+  def validSquare(s: String): Boolean       =
     (s.nonEmpty && validFile(s(0))) &&
       ((s.length() == 2 && validRank(s.slice(1, 2))) ||
         (s.length() == 3 && validRank(s.slice(1, 3))))
@@ -55,12 +55,12 @@ object LexicalUci {
       val isPromotion = validPromotableRole(uciLower.last)
       (isDrop, isPromotion, uciLower.length()) match {
         // Drops
-        case (true, false, 4) =>
+        case (true, false, 4)          =>
           validRole(uciLower(0)) && validSquare(uciLower.slice(2, uciLower.length())) // P@b4
-        case (true, false, 5) =>
+        case (true, false, 5)          =>
           validRole(uciLower(0)) && validSquare(uciLower.slice(2, uciLower.length())) // P@b10
         // Promotions
-        case (false, true, 5 | 6) =>
+        case (false, true, 5 | 6)      =>
           validSquarePair(uciLower.slice(0, uciLower.length() - 1)) // d8d9+ | d8d9R | d8e9+
         // moves
         case (false, false, 4 | 5 | 6) => validSquarePair(uciLower) // d8d9 | d9d10 | a10b10

@@ -16,7 +16,7 @@ object Reader {
   }
 
   object Result {
-    case class Complete(replay: Replay) extends Result {
+    case class Complete(replay: Replay)                    extends Result {
       def valid = Validated.valid(replay)
     }
     case class Incomplete(replay: Replay, failure: String) extends Result {
@@ -43,7 +43,11 @@ object Reader {
       makeReplay(makeGame(tags), op(moves))
     }
 
-  def movesWithPgns(moveStrs: Iterable[String], op: Iterable[String] => Iterable[String], tags: Tags): Validated[String, Result] =
+  def movesWithPgns(
+      moveStrs: Iterable[String],
+      op: Iterable[String] => Iterable[String],
+      tags: Tags
+  ): Validated[String, Result] =
     Validated.valid(makeReplayWithPgn(makeGame(tags), op(moveStrs)))
 
   // remove invisible byte order mark
@@ -56,7 +60,7 @@ object Reader {
           err => Result.Incomplete(replay, err),
           move => Result.Complete(replay addMove StratMove.toMancala(move))
         )
-      case (r: Result.Incomplete, _) => r
+      case (r: Result.Incomplete, _)      => r
     }
 
   private def makeReplayWithPgn(game: Game, moves: Iterable[String]): Result =
@@ -65,23 +69,25 @@ object Reader {
         m match {
           case Uci.Move.moveR(orig, dest, _) => {
             (Pos.fromKey(orig), Pos.fromKey(dest)) match {
-              case (Some(orig), Some(dest)) => Result.Complete(
-                replay.addMove(
-                  Replay.replayMove(
-                    replay.state,
-                    orig,
-                    dest,
-                    replay.state.board.apiPosition.makeMoves(List(m).map(uciMove => Api.uciToMove(uciMove) )),
-                    replay.state.board.uciMoves :+ m
+              case (Some(orig), Some(dest)) =>
+                Result.Complete(
+                  replay.addMove(
+                    Replay.replayMove(
+                      replay.state,
+                      orig,
+                      dest,
+                      replay.state.board.apiPosition
+                        .makeMoves(List(m).map(uciMove => Api.uciToMove(uciMove))),
+                      replay.state.board.uciMoves :+ m
+                    )
                   )
                 )
-              )
-              case _ => Result.Incomplete(replay, s"Error making replay with move: ${m}")
+              case _                        => Result.Incomplete(replay, s"Error making replay with move: ${m}")
             }
           }
-          case _ => Result.Incomplete(replay, s"Error making replay with uci move: ${m}")
+          case _                             => Result.Incomplete(replay, s"Error making replay with uci move: ${m}")
         }
-      case (r: Result.Incomplete, _) => r
+      case (r: Result.Incomplete, _)    => r
     }
 
   private def makeGame(tags: Tags) = {

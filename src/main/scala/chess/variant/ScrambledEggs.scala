@@ -58,7 +58,7 @@ case object ScrambledEggs
   override def valid(board: Board, strict: Boolean) =
     board.kingPos.isEmpty
 
-  //copied from Atomic
+  // copied from Atomic
   private def surroundingPositions(pos: Pos): Set[Pos] =
     Set(pos.up, pos.down, pos.left, pos.right, pos.upLeft, pos.upRight, pos.downLeft, pos.downRight).flatten
 
@@ -107,7 +107,7 @@ case object ScrambledEggs
   override def specialEnd(situation: Situation) =
     winForPlayer(P2, situation.board) ^ winForPlayer(P1, situation.board)
 
-  //this probably isnt done very nicely, is it correct to return None for a draw?
+  // this probably isnt done very nicely, is it correct to return None for a draw?
   override def winner(situation: Situation): Option[Player] = {
     val p2Win = winForPlayer(P2, situation.board)
     val p1Win = winForPlayer(P1, situation.board)

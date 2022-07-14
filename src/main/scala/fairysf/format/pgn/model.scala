@@ -19,12 +19,12 @@ case class Pgn(
       copy(turns = turns.updated(index, f(turn)))
     }
   }
-  def updatePly(ply: Int, f: Move => Move) = {
+  def updatePly(ply: Int, f: Move => Move)       = {
     val fullMove = (ply + 1) / 2
     val player   = Player.fromPly(ply - 1)
     updateTurn(fullMove, _.update(player, f))
   }
-  def updateLastPly(f: Move => Move) = updatePly(nbPlies, f)
+  def updateLastPly(f: Move => Move)             = updatePly(nbPlies, f)
 
   def nbPlies = turns.foldLeft(0)(_ + _.count)
 
@@ -39,12 +39,12 @@ case class Pgn(
     )
 
   def render: String = {
-    val initStr =
+    val initStr   =
       if (initial.comments.nonEmpty) initial.comments.mkString("{ ", " } { ", " }\n")
       else ""
     val turnStr   = turns mkString " "
     val resultStr = tags(_.Result) | ""
-    val endStr =
+    val endStr    =
       if (turnStr.nonEmpty) s" $resultStr"
       else resultStr
     s"$tags\n\n$initStr$turnStr$endStr"
@@ -125,13 +125,11 @@ case class Move(
     secondsLeft.map(seconds => "[%clk " + Move.formatPgnSeconds(seconds) + "]")
 
   override def toString = {
-    val glyphStr = glyphs.toList
-      .map({
-        case glyph if glyph.id <= 6 => glyph.symbol
-        case glyph                  => s" $$${glyph.id}"
-      })
-      .mkString
-    val commentsOrTime =
+    val glyphStr        = glyphs.toList.map {
+      case glyph if glyph.id <= 6 => glyph.symbol
+      case glyph                  => s" $$${glyph.id}"
+    }.mkString
+    val commentsOrTime  =
       if (comments.nonEmpty || secondsLeft.isDefined || opening.isDefined || result.isDefined)
         List(clockString, opening, result).flatten
           .:::(comments map Move.noDoubleLineBreak)

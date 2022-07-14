@@ -23,7 +23,7 @@ case class Situation(board: Board, player: Player) {
     if (gameEnd) gameResult
     else GameResult.Ongoing()
 
-  //these dont exist in Oware. Normal ending tracked in VariantEnd
+  // these dont exist in Oware. Normal ending tracked in VariantEnd
   def checkMate: Boolean = false
   def staleMate: Boolean = false
 

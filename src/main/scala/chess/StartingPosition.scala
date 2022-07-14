@@ -1083,7 +1083,7 @@ object StartingPosition {
   def randomFeaturable = featurable(scala.util.Random.nextInt(featurable.size))
 
   object presets {
-    val halloween = StartingPosition(
+    val halloween    = StartingPosition(
       "C47",
       "Halloween Gambit",
       FEN("r1bqkb1r/pppp1ppp/2n2n2/4N3/4P3/2N5/PPPP1PPP/R1BQKB1R b KQkq - 0 4"),

@@ -16,31 +16,30 @@ object Reader {
   }
 
   object Result {
-    case class ChessComplete(replay: chess.Replay) extends Result {
+    case class ChessComplete(replay: chess.Replay)                          extends Result {
       def valid = Validated.valid(Replay.Chess(replay))
     }
-    case class ChessIncomplete(replay: chess.Replay, failure: String) extends Result {
+    case class ChessIncomplete(replay: chess.Replay, failure: String)       extends Result {
       def valid = Validated.invalid(failure)
     }
-    case class DraughtsComplete(replay: draughts.Replay) extends Result {
+    case class DraughtsComplete(replay: draughts.Replay)                    extends Result {
       def valid = Validated.valid(Replay.Draughts(replay))
     }
     case class DraughtsIncomplete(replay: draughts.Replay, failure: String) extends Result {
       def valid = Validated.invalid(failure)
     }
-    case class FairySFComplete(replay: fairysf.Replay) extends Result {
+    case class FairySFComplete(replay: fairysf.Replay)                      extends Result {
       def valid = Validated.valid(Replay.FairySF(replay))
     }
-    case class FairySFIncomplete(replay: fairysf.Replay, failure: String) extends Result {
+    case class FairySFIncomplete(replay: fairysf.Replay, failure: String)   extends Result {
       def valid = Validated.invalid(failure)
     }
-    case class MancalaComplete(replay: mancala.Replay) extends Result {
+    case class MancalaComplete(replay: mancala.Replay)                      extends Result {
       def valid = Validated.valid(Replay.Mancala(replay))
     }
-    case class MancalaIncomplete(replay: mancala.Replay, failure: String) extends Result {
+    case class MancalaIncomplete(replay: mancala.Replay, failure: String)   extends Result {
       def valid = Validated.invalid(failure)
     }
-
 
     def wrap(result: ChessReader.Result) = result match {
       case ChessReader.Result.Complete(replay)            => Result.ChessComplete(replay)
@@ -74,7 +73,7 @@ object Reader {
       case GameLogic.Chess()    => ChessReader.fullWithSans(pgn, op, tags).map(Result.wrap)
       case GameLogic.Draughts() => DraughtsReader.fullWithSans(pgn, op, tags, iteratedCapts).map(Result.wrap)
       case GameLogic.FairySF()  => FairySFReader.fullWithSans(pgn, op, tags).map(Result.wrap)
-      case GameLogic.Mancala()    => MancalaReader.fullWithSans(pgn, op, tags).map(Result.wrap)
+      case GameLogic.Mancala()  => MancalaReader.fullWithSans(pgn, op, tags).map(Result.wrap)
     }
 
   def movesWithSans(
@@ -85,14 +84,14 @@ object Reader {
       iteratedCapts: Boolean = false
   ): Validated[String, Result] =
     lib match {
-      case GameLogic.Chess() =>
+      case GameLogic.Chess()    =>
         ChessReader.movesWithSans(moveStrs, op, tags).map(Result.wrap)
       case GameLogic.Draughts() =>
         DraughtsReader.movesWithSans(moveStrs, op, tags, iteratedCapts).map(Result.wrap)
-      case GameLogic.FairySF() =>
-        //FairySFReader.movesWithSans(moveStrs, op, tags).map(Result.wrap)
+      case GameLogic.FairySF()  =>
+        // FairySFReader.movesWithSans(moveStrs, op, tags).map(Result.wrap)
         sys.error("Sans not implemented for fairysf")
-      case GameLogic.Mancala() =>
+      case GameLogic.Mancala()  =>
         sys.error("Sans not implemented for mancala")
     }
 
@@ -105,9 +104,9 @@ object Reader {
     lib match {
       case GameLogic.Chess()    => sys.error("movesWithPgns not implemented for chess")
       case GameLogic.Draughts() => sys.error("movesWithPgns not implemented for draughts")
-      case GameLogic.FairySF() =>
+      case GameLogic.FairySF()  =>
         FairySFReader.movesWithPgns(moveStrs, op, tags).map(Result.wrap)
-      case GameLogic.Mancala() =>
+      case GameLogic.Mancala()  =>
         MancalaReader.movesWithPgns(moveStrs, op, tags).map(Result.wrap)
     }
 

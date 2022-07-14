@@ -110,8 +110,8 @@ case class Board(
   def promote(pos: Pos): Option[Board] = for {
     piece <- apply(pos)
     if piece is Man
-    b2 <- take(pos)
-    b3 <- b2.place(Piece(piece.player, King), pos)
+    b2    <- take(pos)
+    b3    <- b2.place(Piece(piece.player, King), pos)
   } yield b3
 
   def withHistory(h: DraughtsHistory): Board = copy(history = h)
@@ -167,7 +167,7 @@ object Board {
     val key   = (width * height).toString
     val sizes = List(width, height)
 
-    val fields           = (width * height) / 2
+    val fields        = (width * height) / 2
     val promotableYP1 = 1
     val promotableYP2 = height
   }

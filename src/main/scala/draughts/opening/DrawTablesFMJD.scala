@@ -4659,11 +4659,11 @@ object DrawTablesFMJD {
   )
 
   val categoriesFMJDBrazilian = categoriesFMJD.map {
-    case cat if cat.name == "1" =>
+    case cat if cat.name == "1"  =>
       cat.copy(positions = cat.positions.filterNot(_.code == "1-IX"))
-    case cat if cat.name == "4" =>
+    case cat if cat.name == "4"  =>
       cat.copy(positions = cat.positions.filterNot(_.code == "4-XV"))
-    case cat if cat.name == "5" =>
+    case cat if cat.name == "5"  =>
       cat.copy(positions = cat.positions.filterNot(p => p.code == "5-IX" || p.code == "5-XI"))
     case cat if cat.name == "19" =>
       cat.copy(positions = cat.positions.filterNot(_.code == "19-V"))
@@ -4679,7 +4679,7 @@ object DrawTablesFMJD {
       cat.copy(positions = cat.positions.filterNot(_.code == "42-XIV"))
     case cat if cat.name == "43" =>
       cat.copy(positions = cat.positions.filterNot(_.code == "43-II"))
-    case cat => cat
+    case cat                     => cat
   }
 
 }

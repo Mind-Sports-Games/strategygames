@@ -8,26 +8,32 @@ import strategygames.Player
 import variant.{ Standard, Variant }
 
 /** Transform a game to draughts Forsyth Edwards Notation
-  * https://en.wikipedia.org/wiki/Portable_Draughts_Notation
-  * Additions:
-  * Piece role G/P = Ghost man or king of that player, has been captured but not removed because the forced capture sequence is not finished yet
-  * ":Hx" = Halfmove clock: This is the number of halfmoves since a forced draw material combination appears. This is used to determine if a draw can be claimed.
-  * ":Fx" = Fullmove number: The number of the full move. It starts at 1, and is incremented after P2's move.
+  * https://en.wikipedia.org/wiki/Portable_Draughts_Notation Additions: Piece role G/P = Ghost man or king of
+  * that player, has been captured but not removed because the forced capture sequence is not finished yet
+  * ":Hx" = Halfmove clock: This is the number of halfmoves since a forced draw material combination appears.
+  * This is used to determine if a draw can be claimed. ":Fx" = Fullmove number: The number of the full move.
+  * It starts at 1, and is incremented after P2's move.
   */
 object Forsyth {
 
-  val initial =
-    FEN("W:W31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:H0:F1")
-  val initialPieces =
-    FEN("W31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20")
+  val initial              =
+    FEN(
+      "W:W31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:H0:F1"
+    )
+  val initialPieces        =
+    FEN(
+      "W31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20"
+    )
   val initialMoveAndPieces =
-    FEN("W:W31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20")
+    FEN(
+      "W:W31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20"
+    )
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] =
     makeBoard(variant, fen) map { board =>
       val situation = Player.apply(fen.value.charAt(0)) match {
         case Some(player) => Situation(board, player)
-        case _           => Situation(board, P1)
+        case _            => Situation(board, P1)
       }
 
       situation withHistory {
@@ -53,11 +59,11 @@ object Forsyth {
 
   def <<<@(variant: Variant, fen: FEN): Option[SituationPlus] =
     <<@(variant, fen) map { sit =>
-      val splitted = fen.value.split(':')
+      val splitted       = fen.value.split(':')
       val fullMoveNumber = splitted find { s => s.length > 1 && s.charAt(0) == 'F' } flatMap { s =>
         parseIntOption(s drop 1)
       } map (_ max 1 min 500)
-      val halfMoveClock = splitted find { s => s.length > 1 && s.charAt(0) == 'H' } flatMap { s =>
+      val halfMoveClock  = splitted find { s => s.length > 1 && s.charAt(0) == 'H' } flatMap { s =>
         parseIntOption(s drop 1)
       } map (_ max 0 min 100)
       SituationPlus(
@@ -75,7 +81,7 @@ object Forsyth {
           p1 <- parseIntOption(w.head.toString) if p1 <= 3
           p2 <- parseIntOption(b.head.toString) if p2 <= 3
         } yield KingMoves(p2, p1, pos.posAt(b.tail.mkString), pos.posAt(w.tail.mkString))
-      case _ => None
+      case _                                                                                   => None
     }
   }
 
@@ -99,7 +105,7 @@ object Forsyth {
                     posAt(field.drop(1)).foreach { pos => allFields.+=((pos, Piece(player, GhostMan))) }
                   case 'P' =>
                     posAt(field.drop(1)).foreach { pos => allFields.+=((pos, Piece(player, GhostKing))) }
-                  case _ => posAt(field).foreach { pos => allFields.+=((pos, Piece(player, Man))) }
+                  case _   => posAt(field).foreach { pos => allFields.+=((pos, Piece(player, Man))) }
                 }
             }
           }
@@ -195,7 +201,7 @@ object Forsyth {
     s"${turnPlayer.letter.toUpper}:${exportBoard(board)}"
 
   def compressedBoard(board: Board): String = {
-    def posAt(f: Int) = board.boardSize.pos.posAt(f)
+    def posAt(f: Int)        = board.boardSize.pos.posAt(f)
     // roles as numbers to prevent conflict with position piotrs
     def roleId(piece: Piece) = piece.role match {
       case Man       => '1'
@@ -203,8 +209,8 @@ object Forsyth {
       case GhostMan  => '3'
       case GhostKing => '4'
     }
-    val fenW = new scala.collection.mutable.StringBuilder(30)
-    val fenB = new scala.collection.mutable.StringBuilder(30)
+    val fenW                 = new scala.collection.mutable.StringBuilder(30)
+    val fenB                 = new scala.collection.mutable.StringBuilder(30)
     fenB.append('0')
     for (f <- 1 to board.boardSize.fields) {
       board(f).foreach { piece =>
@@ -232,7 +238,7 @@ object Forsyth {
         case Some(Piece(P2, Man))  => pos append 'b'
         case Some(Piece(P1, King)) => pos append 'W'
         case Some(Piece(P2, King)) => pos append 'B'
-        case _                        => pos append 'e'
+        case _                     => pos append 'e'
       }
     }
     pos.toString

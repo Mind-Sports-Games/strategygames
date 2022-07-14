@@ -1,6 +1,6 @@
 package strategygames.chess
 
-import strategygames.{ Player, Division }
+import strategygames.{ Division, Player }
 
 import cats.syntax.option.none
 
@@ -15,7 +15,7 @@ object Divider {
         (majorsAndMinors(board) <= 10 ||
           backrankSparse(board) ||
           mixedness(board) > 150) option index
-      case (found, _) => found
+      case (found, _)             => found
     }
 
     val endGame =

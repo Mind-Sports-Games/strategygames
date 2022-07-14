@@ -4,7 +4,7 @@ import cats.implicits._
 
 import strategygames.Player
 import strategygames.mancala._
-import strategygames.mancala.variant.{ Variant }
+import strategygames.mancala.variant.Variant
 
 /** Transform a game to standard Forsyth Edwards Notation
   * http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
@@ -15,19 +15,21 @@ object Forsyth {
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
     val apiPosition = Api.positionFromVariantNameAndFEN(variant.name, fen.value)
-    Some(Situation(
-      Board(
-        pieces = apiPosition.pieceMap,
-        history = History(),
-        variant = variant,
-        position = apiPosition.some
-      ),
-      fen.value.split(' ')(3) match {
-        case "S" => P1
-        case "N" => P2
-        case _ => sys.error("Invalid player in fen")
-      }
-    ))
+    Some(
+      Situation(
+        Board(
+          pieces = apiPosition.pieceMap,
+          history = History(),
+          variant = variant,
+          position = apiPosition.some
+        ),
+        fen.value.split(' ')(3) match {
+          case "S" => P1
+          case "N" => P2
+          case _   => sys.error("Invalid player in fen")
+        }
+      )
+    )
   }
 
   def <<(fen: FEN): Option[Situation] = <<@(Variant.default, fen)
@@ -40,7 +42,7 @@ object Forsyth {
   def <<<@(variant: Variant, fen: FEN): Option[SituationPlus] =
     <<@(variant, fen) map { sit =>
       SituationPlus(
-        //not doing half move clock history like we do in chess
+        // not doing half move clock history like we do in chess
         sit,
         fen.value.split(' ').last.toIntOption.map(_ max 1 min 500) | 1
       )

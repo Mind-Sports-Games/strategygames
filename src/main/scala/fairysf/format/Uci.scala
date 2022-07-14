@@ -63,22 +63,22 @@ object Uci {
                 }
               ).some
             }
-            case _ => None
+            case _                                   => None
           }
-        case _ => None
+        case _                            => None
       }
 
     def piotr(gf: GameFamily, move: String) =
       for {
-        orig <- move.headOption flatMap Pos.piotr
-        dest <- move lift 1 flatMap Pos.piotr
+        orig     <- move.headOption flatMap Pos.piotr
+        dest     <- move lift 1 flatMap Pos.piotr
         promotion = move.lift(2).flatMap(Role.promotable(gf, _))
       } yield Move(orig, dest, promotion)
 
     def fromStrings(gf: GameFamily, origS: String, destS: String, promS: Option[String]) =
       for {
-        orig <- Pos.fromKey(origS)
-        dest <- Pos.fromKey(destS)
+        orig     <- Pos.fromKey(origS)
+        dest     <- Pos.fromKey(destS)
         promotion = Role.promotable(gf, promS)
       } yield Move(orig, dest, promotion)
 
@@ -121,13 +121,13 @@ object Uci {
 
   def apply(gf: GameFamily, move: String): Option[Uci] =
     move match {
-      case Move.movePR(_, _, _) => Uci.Move(gf, move)
+      case Move.movePR(_, _, _)   => Uci.Move(gf, move)
       case Drop.dropR(role, dest) =>
         (Role.allByPgn(gf).get(role.charAt(0)), Pos.fromKey(dest)) match {
           case (Some(role), Some(dest)) => Uci.Drop(role, dest).some
           case _                        => sys.error(s"Cannot apply uci drop: ${move}")
         }
-      case _ => sys.error(s"Cannot apply uci: ${move}")
+      case _                      => sys.error(s"Cannot apply uci: ${move}")
     }
 
   def piotr(gf: GameFamily, move: String): Option[Uci] =

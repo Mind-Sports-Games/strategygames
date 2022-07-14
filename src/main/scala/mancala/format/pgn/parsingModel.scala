@@ -4,7 +4,7 @@ package format.pgn
 import cats.data.Validated
 import cats.syntax.option._
 
-import strategygames.{ Move => StratMove, Drop => StratDrop }
+import strategygames.{ Drop => StratDrop, Move => StratMove }
 import strategygames.format.pgn.{ Metas, ParsedPgn, San, Sans, Suffixes, Tags }
 
 case class Std(
@@ -18,9 +18,9 @@ case class Std(
 ) extends San {
 
   def apply(
-    situation: strategygames.Situation,
-    iteratedCapts: Boolean = false,
-    forbiddenUci: Option[List[String]] = None
+      situation: strategygames.Situation,
+      iteratedCapts: Boolean = false,
+      forbiddenUci: Option[List[String]] = None
   ) = move(situation.toMancala).map(StratMove.wrap).map(Left.apply)
 
   override def withSuffixes(s: Suffixes) =
@@ -31,7 +31,8 @@ case class Std(
 
   def withMetas(m: Metas) = copy(metas = m)
 
-  def move(situation: Situation): Validated[String, strategygames.mancala.Move] = Validated.invalid("Not implemented move") //TODO: ???
+  def move(situation: Situation): Validated[String, strategygames.mancala.Move] =
+    Validated.invalid("Not implemented move") // TODO: ???
 
   private def compare[A](a: Option[A], b: A) = a.fold(true)(b ==)
 }
