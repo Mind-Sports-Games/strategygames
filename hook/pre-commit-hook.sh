@@ -30,7 +30,7 @@ then
     echo "* Yes!"
 		
     echo "* Properly formatted?"
-    cd $DIR/; scalafmt
+    cd $DIR/; sbt scalafmt
     git diff --quiet
     formatted=$?
 
