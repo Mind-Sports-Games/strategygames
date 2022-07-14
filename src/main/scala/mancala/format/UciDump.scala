@@ -20,5 +20,5 @@ object UciDump {
     else Replay(moves, initialFen, variant) andThen (_.valid) map apply
 
   def move(variant: Variant)(mod: Move): String = mod.toUci.uci
-    
+
 }

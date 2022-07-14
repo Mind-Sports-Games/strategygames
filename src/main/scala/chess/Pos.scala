@@ -13,8 +13,8 @@ case class Pos private (index: Int) extends AnyVal {
   def upLeft: Option[Pos]    = Pos.at(file.index - 1, rank.index + 1)
   def upRight: Option[Pos]   = Pos.at(file.index + 1, rank.index + 1)
 
-  def >|(stop: Pos => Boolean): List[Pos] = |<>|(stop, _.right)
-  def |<(stop: Pos => Boolean): List[Pos] = |<>|(stop, _.left)
+  def >|(stop: Pos => Boolean): List[Pos]                   = |<>|(stop, _.right)
+  def |<(stop: Pos => Boolean): List[Pos]                   = |<>|(stop, _.left)
   def |<>|(stop: Pos => Boolean, dir: Direction): List[Pos] =
     dir(this) map { p =>
       p :: (if (stop(p)) Nil else p.|<>|(stop, dir))
@@ -34,7 +34,7 @@ case class Pos private (index: Int) extends AnyVal {
 
   def onSameDiagonal(other: Pos): Boolean =
     file.index - rank.index == other.file.index - other.rank.index || file.index + rank.index == other.file.index + other.rank.index
-  def onSameLine(other: Pos): Boolean = ?-(other) || ?|(other)
+  def onSameLine(other: Pos): Boolean     = ?-(other) || ?|(other)
 
   def xDist(other: Pos) = abs(file - other.file)
   def yDist(other: Pos) = abs(rank - other.rank)
@@ -45,9 +45,9 @@ case class Pos private (index: Int) extends AnyVal {
   @inline def rank = Rank of this
 
   def piotr: Char =
-    if (index <= 25) (97 + index).toChar      // a ...
+    if (index <= 25) (97 + index).toChar // a ...
     else if (index <= 51) (39 + index).toChar // A ...
-    else if (index <= 61) (index - 4).toChar  // 0 ...
+    else if (index <= 61) (index - 4).toChar // 0 ...
     else if (index == 62) '!'
     else '?'
   def piotrStr = piotr.toString
@@ -71,8 +71,8 @@ object Pos {
 
   def piotr(c: Char): Option[Pos] = allPiotrs get c
 
-  def keyToPiotr(key: String) = fromKey(key) map (_.piotr)
-  def doubleKeyToPiotr(key: String) =
+  def keyToPiotr(key: String)          = fromKey(key) map (_.piotr)
+  def doubleKeyToPiotr(key: String)    =
     for {
       a <- keyToPiotr(key take 2)
       b <- keyToPiotr(key drop 2)

@@ -13,7 +13,7 @@ object Reader {
   }
 
   object Result {
-    case class Complete(replay: Replay) extends Result {
+    case class Complete(replay: Replay)                    extends Result {
       def valid = Validated.valid(replay)
     }
     case class Incomplete(replay: Replay, failure: String) extends Result {
@@ -67,25 +67,26 @@ object Reader {
   private def makeReplay(game: DraughtsGame, sans: Sans, iteratedCapts: Boolean = false): Result = {
     def mk(replay: Replay, moves: List[San], ambs: List[(San, String)]): Result = {
       var newAmb = none[(San, String)]
-      val res = moves match {
+      val res    = moves match {
         case san :: rest =>
           san(
             StratSituation.wrap(replay.state.situation),
             iteratedCapts,
             if (ambs.isEmpty) None
-            else ambs.collect({ case (ambSan, ambUci) if ambSan == san => ambUci }).some
-          ).map(draughtsMove).fold(
-            err => Result.Incomplete(replay, err),
-            move => {
-              if (
-                iteratedCapts && move.capture.fold(false)(_.length > 1) && move.situationBefore
-                  .ambiguitiesMove(move) > ambs.length + 1
-              )
-                newAmb = (san -> move.toUci.uci).some
-              mk(replay.addMove(move, iteratedCapts), rest, newAmb.fold(ambs)(_ :: ambs))
-            }
-          )
-        case _ => Result.Complete(replay)
+            else ambs.collect { case (ambSan, ambUci) if ambSan == san => ambUci }.some
+          ).map(draughtsMove)
+            .fold(
+              err => Result.Incomplete(replay, err),
+              move => {
+                if (
+                  iteratedCapts && move.capture.fold(false)(_.length > 1) && move.situationBefore
+                    .ambiguitiesMove(move) > ambs.length + 1
+                )
+                  newAmb = (san -> move.toUci.uci).some
+                mk(replay.addMove(move, iteratedCapts), rest, newAmb.fold(ambs)(_ :: ambs))
+              }
+            )
+        case _           => Result.Complete(replay)
       }
       res match {
         case Result.Incomplete(_, _) if newAmb.isDefined => mk(replay, moves, newAmb.get :: ambs)

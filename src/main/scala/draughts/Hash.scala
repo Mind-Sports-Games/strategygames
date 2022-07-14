@@ -25,9 +25,9 @@ object Hash {
   class ZobristConstants(start: Int) {
     def hexToLong(s: String): Long = (java.lang.Long.parseLong(s.substring(start, start + 8), 16) << 32) |
       java.lang.Long.parseLong(s.substring(start + 8, start + 16), 16)
-    val p1TurnMask  = hexToLong(ZobristTables.p1TurnMask)
-    val actorMasks     = ZobristTables.actorMasks.map(hexToLong)
-    val kingMovesMasks = ZobristTables.kingMovesMasks.map(hexToLong)
+    val p1TurnMask                 = hexToLong(ZobristTables.p1TurnMask)
+    val actorMasks                 = ZobristTables.actorMasks.map(hexToLong)
+    val kingMovesMasks             = ZobristTables.kingMovesMasks.map(hexToLong)
   }
 
   object ZobristConstants {}
@@ -61,7 +61,7 @@ object Hash {
         val p1Count  = math.min(situation.history.kingMoves.p1, 3)
         val hp2Count = if (p2Count > 0) hactors ^ table.kingMovesMasks(p2Count - 1) else hactors
         if (p1Count > 0) hp2Count ^ table.kingMovesMasks(p1Count + 2) else hp2Count
-      case _ => hactors
+      case _                               => hactors
     }
 
     hkingMoves

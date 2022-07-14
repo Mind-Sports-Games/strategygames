@@ -1,6 +1,5 @@
 package strategygames
 
-
 //------------------------------------------------------------------------------
 // At the moment these are the main fields that I see exposed to lila.
 //
@@ -77,18 +76,18 @@ object Pos {
 
   }
 
-  //need to equivalate this method for draughts probably
-  //think we need to figure out a way to map into Draughts with a board size at this point
+  // need to equivalate this method for draughts probably
+  // think we need to figure out a way to map into Draughts with a board size at this point
   def fromKey(lib: GameLogic, key: String): Option[Pos] = lib match {
     case GameLogic.Draughts() => sys.error("Not implemented yet for draughts")
-    case GameLogic.Chess() => chess.Pos.fromKey(key).map(Chess)
-    case GameLogic.FairySF() => sys.error("Not implemented yet for fairysf")
-    case GameLogic.Mancala() => sys.error("Not implemented yet for mancala")
+    case GameLogic.Chess()    => chess.Pos.fromKey(key).map(Chess)
+    case GameLogic.FairySF()  => sys.error("Not implemented yet for fairysf")
+    case GameLogic.Mancala()  => sys.error("Not implemented yet for mancala")
   }
 
-  //def at(lib: GameLogic, x: Int, y: Int): Option[Pos] = lib match {
+  // def at(lib: GameLogic, x: Int, y: Int): Option[Pos] = lib match {
   //  case GameLogic.Draughts() => draughts.Pos.at(x, y).map(Draughts)
   //  case GameLogic.Chess() => chess.Pos.at(x, y).map(Chess)
-  //}
+  // }
 
 }

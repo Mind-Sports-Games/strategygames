@@ -12,8 +12,8 @@ object Piotr {
 
   def byField(field: Int) = all(field - 1)
 
-  def keyToPiotr(key: String) = BoardSize.max.posAt(key) map (_.piotr)
-  def doubleKeyToPiotr(key: String) = for {
+  def keyToPiotr(key: String)          = BoardSize.max.posAt(key) map (_.piotr)
+  def doubleKeyToPiotr(key: String)    = for {
     a <- keyToPiotr(key take 2)
     b <- keyToPiotr(key drop 2)
   } yield s"$a$b"

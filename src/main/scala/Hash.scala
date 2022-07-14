@@ -20,7 +20,7 @@ object Hash {
 
   val size = 3
 
-  abstract sealed class ZobristConstants {
+  sealed abstract class ZobristConstants {
     def hexToLong(s: String): Long
     val p1TurnMask: Long
     val actorMasks: Array[Long]
@@ -28,14 +28,14 @@ object Hash {
 
   final case class ChessZobristConstants(zc: chess.Hash.ZobristConstants) extends ZobristConstants {
     def hexToLong(s: String): Long = zc.hexToLong(s)
-    val p1TurnMask: Long        = zc.p1TurnMask
-    val actorMasks: Array[Long]    = zc.actorMasks 
+    val p1TurnMask: Long           = zc.p1TurnMask
+    val actorMasks: Array[Long]    = zc.actorMasks
   }
 
   final case class DraughtsZobristConstants(zc: draughts.Hash.ZobristConstants) extends ZobristConstants {
     def hexToLong(s: String): Long = zc.hexToLong(s)
-    val p1TurnMask: Long        = zc.p1TurnMask
-    val actorMasks: Array[Long]    = zc.actorMasks 
+    val p1TurnMask: Long           = zc.p1TurnMask
+    val actorMasks: Array[Long]    = zc.actorMasks
   }
 
   // The following masks are compatible with the Polyglot
@@ -52,8 +52,10 @@ object Hash {
 
   private def get(lib: GameLogic, situation: Situation, table: ZobristConstants): Long =
     (lib, situation, table) match {
-      case (GameLogic.Draughts(), Situation.Draughts(situation), DraughtsZobristConstants(table)) => draughts.Hash.get(situation, table)
-      case (GameLogic.Chess(), Situation.Chess(situation), ChessZobristConstants(table))          => chess.Hash.get(situation, table)
+      case (GameLogic.Draughts(), Situation.Draughts(situation), DraughtsZobristConstants(table)) =>
+        draughts.Hash.get(situation, table)
+      case (GameLogic.Chess(), Situation.Chess(situation), ChessZobristConstants(table))          =>
+        chess.Hash.get(situation, table)
     }
 
   private val h = new Hash(size)
@@ -63,4 +65,3 @@ object Hash {
   def debug(hashes: PositionHash) = hashes.map(_.toInt).sum.toString
 
 }
-

@@ -9,8 +9,8 @@ object UciCharPair {
 
   def apply(uci: Uci): stratUciCharPair =
     uci match {
-      case Uci.Move(orig, dest, None)       => stratUciCharPair(toChar(orig), toChar(dest))
-      case Uci.Move(_, _, Some(role))       => sys.error(s"Mancala does not have promotable roles, ${role}")
+      case Uci.Move(orig, dest, None) => stratUciCharPair(toChar(orig), toChar(dest))
+      case Uci.Move(_, _, Some(role)) => sys.error(s"Mancala does not have promotable roles, ${role}")
     }
 
   private[format] object implementation {
@@ -28,10 +28,9 @@ object UciCharPair {
 
     def toChar(file: File, prom: PromotableRole) = (file -> prom, voidChar)
 
-    //copied from chess (minus !King filter), im sure this just gives '?' for all roles
+    // copied from chess (minus !King filter), im sure this just gives '?' for all roles
     val dropRole2charMap: Map[Role, Char] =
-      Role.all
-        .zipWithIndex
+      Role.all.zipWithIndex
         .map { case (role, index) =>
           role -> (charShift + pos2charMap.size + index).toChar
         }

@@ -64,7 +64,7 @@ object Replay {
       capture = None,
       promotion = promotion match {
         case "" => None
-        case _ =>
+        case _  =>
           Role.promotable(
             before.board.variant.gameFamily,
             before.board.pieces(orig).role.forsyth
@@ -111,11 +111,11 @@ object Replay {
         case (Some(orig), Some(dest)) => {
           val uciMove = s"${orig.key}${dest.key}${promotion}"
           uciMoves = uciMoves :+ uciMove
-          val move = replayMove(state, orig, dest, promotion, getApiPosition(uciMove), uciMoves)
+          val move    = replayMove(state, orig, dest, promotion, getApiPosition(uciMove), uciMoves)
           state = state.apply(move)
           (state, move.asLeft)
         }
-        case (orig, dest) => {
+        case (orig, dest)             => {
           val uciMove = s"${orig}${dest}${promotion}"
           errors += uciMove + ","
           sys.error(s"Invalid move for replay: ${uciMove}")
@@ -127,11 +127,11 @@ object Replay {
         case (Some(role), Some(dest)) => {
           val uciDrop = s"${role.forsyth}@${dest.key}"
           uciMoves = uciMoves :+ uciDrop
-          val drop = replayDrop(state, role, dest, getApiPosition(uciDrop), uciMoves)
+          val drop    = replayDrop(state, role, dest, getApiPosition(uciDrop), uciMoves)
           state = state.applyDrop(drop)
           (state, drop.asRight)
         }
-        case (role, dest) => {
+        case (role, dest)             => {
           val uciDrop = s"${role}@${dest}"
           errors += uciDrop + ","
           sys.error(s"Invalid drop for replay: ${uciDrop}")
@@ -147,12 +147,12 @@ object Replay {
             Pos.fromKey(dest),
             promotion
           )
-        case Uci.Drop.dropR(role, dest) =>
+        case Uci.Drop.dropR(role, dest)            =>
           replayDropFromUci(
             Role.allByForsyth(init.situation.board.variant.gameFamily).get(role(0)),
             Pos.fromKey(dest)
           )
-        case moveStr: String => sys.error(s"Invalid moveordrop for replay: $moveStr")
+        case moveStr: String                       => sys.error(s"Invalid moveordrop for replay: $moveStr")
       }
 
     (init, moves, errors match { case "" => None; case _ => errors.some })
@@ -180,7 +180,7 @@ object Replay {
 
   private def recursiveSituations(sit: Situation, sans: List[San]): Validated[String, List[Situation]] =
     sans match {
-      case Nil => valid(Nil)
+      case Nil         => valid(Nil)
       case san :: rest =>
         san(StratSituation.wrap(sit)) flatMap { moveOrDrop =>
           val after = Situation(
@@ -196,7 +196,7 @@ object Replay {
       ucis: List[Uci]
   ): Validated[String, List[Situation]] =
     ucis match {
-      case Nil => valid(Nil)
+      case Nil         => valid(Nil)
       case uci :: rest =>
         uci(sit) andThen { moveOrDrop =>
           val after = Situation(moveOrDrop.fold(_.finalizeAfter, _.finalizeAfter), !sit.player)
@@ -206,7 +206,7 @@ object Replay {
 
   private def recursiveReplayFromUci(replay: Replay, ucis: List[Uci]): Validated[String, Replay] =
     ucis match {
-      case Nil => valid(replay)
+      case Nil         => valid(replay)
       case uci :: rest =>
         uci(replay.state.situation) andThen { moveOrDrop =>
           recursiveReplayFromUci(replay addMove moveOrDrop, rest)
@@ -275,7 +275,7 @@ object Replay {
 
       def recursivePlyAtFen(sit: Situation, sans: List[San], ply: Int): Validated[String, Int] =
         sans match {
-          case Nil => invalid(s"Can't find $atFenTruncated, reached ply $ply")
+          case Nil         => invalid(s"Can't find $atFenTruncated, reached ply $ply")
           case san :: rest =>
             san(StratSituation.wrap(sit)) flatMap { moveOrDrop =>
               val after = moveOrDrop.fold(m => m.finalizeAfter().toFairySF, d => d.finalizeAfter.toFairySF)

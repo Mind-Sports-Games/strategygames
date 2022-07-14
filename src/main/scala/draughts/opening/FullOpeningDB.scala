@@ -28,14 +28,17 @@ object FullOpeningDB {
 
   // assumes standard initial FEN and variant
   def search(moveStrs: Iterable[String]): Option[FullOpening.AtPly] =
-    strategygames.draughts.Replay.boards(moveStrs take SEARCH_MAX_PLIES, None, variant.Standard).toOption.flatMap {
-      _.zipWithIndex.drop(1).foldRight(none[FullOpening.AtPly]) {
-        case ((board, ply), None) =>
-          val fen = format.Forsyth.exportStandardPositionTurn(board, ply)
-          byFen get fen map (_ atPly ply)
-        case (_, found) => found
+    strategygames.draughts.Replay
+      .boards(moveStrs take SEARCH_MAX_PLIES, None, variant.Standard)
+      .toOption
+      .flatMap {
+        _.zipWithIndex.drop(1).foldRight(none[FullOpening.AtPly]) {
+          case ((board, ply), None) =>
+            val fen = format.Forsyth.exportStandardPositionTurn(board, ply)
+            byFen get fen map (_ atPly ply)
+          case (_, found)           => found
+        }
       }
-    }
 
   def searchInFens(fens: List[FEN]): Option[FullOpening] =
     fens.foldRight(none[FullOpening]) {
@@ -43,6 +46,6 @@ object FullOpeningDB {
         byFen get {
           fen.value.split(':').take(3) mkString ":"
         }
-      case (_, found) => found
+      case (_, found)  => found
     }
 }

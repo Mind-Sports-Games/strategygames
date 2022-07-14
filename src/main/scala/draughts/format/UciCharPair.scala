@@ -6,8 +6,8 @@ object UciCharPair {
   import implementation._
   import strategygames.format.{ UciCharPair => stratUciCharPair }
 
-  def apply(uci: Uci): stratUciCharPair = stratUciCharPair(toChar(uci.origDest._1), toChar(uci.origDest._2))
-  def apply(uci: Uci, ambiguity: Int): stratUciCharPair =
+  def apply(uci: Uci): stratUciCharPair                   = stratUciCharPair(toChar(uci.origDest._1), toChar(uci.origDest._2))
+  def apply(uci: Uci, ambiguity: Int): stratUciCharPair   =
     stratUciCharPair(toChar(uci.origDest._1), ambiguity2charMap.getOrElse(ambiguity, voidChar))
   def apply(orig: Char, ambiguity: Int): stratUciCharPair =
     stratUciCharPair(orig, ambiguity2charMap.getOrElse(ambiguity, voidChar))

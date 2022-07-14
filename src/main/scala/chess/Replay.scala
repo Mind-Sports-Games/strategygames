@@ -52,7 +52,7 @@ object Replay {
 
   private def recursiveGames(game: Game, sans: List[San]): Validated[String, List[Game]] =
     sans match {
-      case Nil => valid(Nil)
+      case Nil         => valid(Nil)
       case san :: rest =>
         san(StratSituation.wrap(game.situation)) flatMap { moveOrDrop =>
           val newGame = StratGame.wrap(game)(moveOrDrop).toChess
@@ -89,9 +89,9 @@ object Replay {
               }
             }
           )
-        case _ => (Nil, None)
+        case _                     => (Nil, None)
       }
-    val init = makeGame(variant, initialFen.some)
+    val init                                                                                 = makeGame(variant, initialFen.some)
     Parser
       .moves(moveStrs, variant)
       .fold(
@@ -104,10 +104,13 @@ object Replay {
 
   private def recursiveSituations(sit: Situation, sans: List[San]): Validated[String, List[Situation]] =
     sans match {
-      case Nil => valid(Nil)
+      case Nil         => valid(Nil)
       case san :: rest =>
         san(StratSituation.wrap(sit)) flatMap { moveOrDrop =>
-          val after = Situation(moveOrDrop.fold(m => m.finalizeAfter().toChess, d => d.finalizeAfter.toChess), !sit.player)
+          val after = Situation(
+            moveOrDrop.fold(m => m.finalizeAfter().toChess, d => d.finalizeAfter.toChess),
+            !sit.player
+          )
           recursiveSituations(after, rest) map { after :: _ }
         }
     }
@@ -117,7 +120,7 @@ object Replay {
       ucis: List[Uci]
   ): Validated[String, List[Situation]] =
     ucis match {
-      case Nil => valid(Nil)
+      case Nil         => valid(Nil)
       case uci :: rest =>
         uci(sit) andThen { moveOrDrop =>
           val after = Situation(moveOrDrop.fold(_.finalizeAfter, _.finalizeAfter), !sit.player)
@@ -127,7 +130,7 @@ object Replay {
 
   private def recursiveReplayFromUci(replay: Replay, ucis: List[Uci]): Validated[String, Replay] =
     ucis match {
-      case Nil => valid(replay)
+      case Nil         => valid(replay)
       case uci :: rest =>
         uci(replay.state.situation) andThen { moveOrDrop =>
           recursiveReplayFromUci(replay addMove moveOrDrop, rest)
@@ -196,7 +199,7 @@ object Replay {
 
       def recursivePlyAtFen(sit: Situation, sans: List[San], ply: Int): Validated[String, Int] =
         sans match {
-          case Nil => invalid(s"Can't find $atFenTruncated, reached ply $ply")
+          case Nil         => invalid(s"Can't find $atFenTruncated, reached ply $ply")
           case san :: rest =>
             san(StratSituation.wrap(sit)) flatMap { moveOrDrop =>
               val after = moveOrDrop.fold(m => m.finalizeAfter().toChess, d => d.finalizeAfter.toChess)

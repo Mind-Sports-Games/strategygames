@@ -9,7 +9,7 @@ import cats.Monoid
 // maximum centis = Int.MaxValue / 100 / 60 / 60 / 24 = 248 days
 final case class Centis(centis: Int) extends AnyVal with Ordered[Centis] {
 
-  def roundTenths: Int =
+  def roundTenths: Int  =
     if (centis > 0) (centis + 5) / 10 else (centis - 4) / 10
   def roundSeconds: Int = Math.round(centis * 0.01f)
 
@@ -22,7 +22,7 @@ final case class Centis(centis: Int) extends AnyVal with Ordered[Centis] {
   def *(scalar: Int)     = Centis(scalar * centis)
   def *~(scalar: Float)  = Centis(scalar * centis)
   def *~(scalar: Double) = Centis(scalar * centis)
-  def /(div: Int)        = if(div != 0) Centis(centis / div).some else none
+  def /(div: Int)        = if (div != 0) Centis(centis / div).some else none
   def unary_-            = Centis(-centis)
 
   def avg(other: Centis) = Centis((centis + other.centis) >> 1)

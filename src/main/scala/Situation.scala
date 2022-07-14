@@ -29,7 +29,7 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def threefoldRepetition: Boolean
 
-  //only implemented for fairysf for Xiangqi
+  // only implemented for fairysf for Xiangqi
   lazy val perpetualPossible: Boolean = false
 
   def end: Boolean
@@ -116,7 +116,7 @@ object Situation {
     ): Validated[String, Move] = (from, to) match {
       case (Pos.Chess(from), Pos.Chess(to)) =>
         s.move(from, to, promotion.map(_.toChess)).toEither.map(m => Move.Chess(m)).toValidated
-      case _ => sys.error("Not passed Chess objects")
+      case _                                => sys.error("Not passed Chess objects")
     }
 
     def move(uci: Uci.Move): Validated[String, Move] = uci match {
@@ -127,7 +127,7 @@ object Situation {
     def drop(role: Role, pos: Pos): Validated[String, Drop] = (role, pos) match {
       case (Role.ChessRole(role), Pos.Chess(pos)) =>
         s.drop(role, pos).toEither.map(d => Drop.Chess(d)).toValidated
-      case _ => sys.error("Not passed Chess objects")
+      case _                                      => sys.error("Not passed Chess objects")
     }
 
     def withVariant(variant: Variant): Situation = variant match {
@@ -172,7 +172,7 @@ object Situation {
 
     def dropsByRole: Option[Map[Role, List[Pos]]] = None
 
-    //possibly need to do something for this
+    // possibly need to do something for this
     def opponentHasInsufficientMaterial: Boolean = false
 
     def threefoldRepetition: Boolean = s.threefoldRepetition
@@ -196,7 +196,7 @@ object Situation {
               }
             )
           )
-        case None => None
+        case None           => None
       }
 
     def move(
@@ -220,7 +220,7 @@ object Situation {
         ).toEither
           .map(m => Move.Draughts(m))
           .toValidated
-      case _ => sys.error("Not passed Draughts objects")
+      case _                                      => sys.error("Not passed Draughts objects")
     }
 
     def move(uci: Uci.Move): Validated[String, Move] = uci match {
@@ -301,7 +301,7 @@ object Situation {
     ): Validated[String, Move] = (from, to) match {
       case (Pos.FairySF(from), Pos.FairySF(to)) =>
         s.move(from, to, promotion.map(_.toFairySF)).toEither.map(m => Move.FairySF(m)).toValidated
-      case _ => sys.error("Not passed FairySF objects")
+      case _                                    => sys.error("Not passed FairySF objects")
     }
 
     def move(uci: Uci.Move): Validated[String, Move] = uci match {
@@ -312,7 +312,7 @@ object Situation {
     def drop(role: Role, pos: Pos): Validated[String, Drop] = (role, pos) match {
       case (Role.FairySFRole(role), Pos.FairySF(pos)) =>
         s.drop(role, pos).toEither.map(d => Drop.FairySF(d)).toValidated
-      case _ => sys.error("Not passed FairySF objects")
+      case _                                          => sys.error("Not passed FairySF objects")
     }
 
     def withVariant(variant: Variant): Situation = variant match {
@@ -334,7 +334,6 @@ object Situation {
     def toDraughts = sys.error("Can't make draughts situation from fairysf situation")
     def toMancala  = sys.error("Can't make mancala situation from fairy situation")
   }
-
 
   final case class Mancala(s: mancala.Situation)
       extends Situation(
@@ -386,7 +385,7 @@ object Situation {
     ): Validated[String, Move] = (from, to) match {
       case (Pos.Mancala(from), Pos.Mancala(to)) =>
         s.move(from, to, promotion.map(_.toMancala)).toEither.map(m => Move.Mancala(m)).toValidated
-      case _ => sys.error("Not passed Mancala objects")
+      case _                                    => sys.error("Not passed Mancala objects")
     }
 
     def move(uci: Uci.Move): Validated[String, Move] = uci match {
@@ -402,7 +401,7 @@ object Situation {
     def unary_! : Situation = Mancala(s.unary_!)
 
     def copy(board: Board): Situation = Mancala(board match {
-      case Board.Mancala(board)   => s.copy(board)
+      case Board.Mancala(board) => s.copy(board)
       case _                    => sys.error("Can't copy a mancala situation with a non-mancala board")
     })
 
@@ -411,7 +410,7 @@ object Situation {
     def toFairySF  = sys.error("Can't make fairysf situation from mancala situation")
     def toChess    = sys.error("Can't make chess situation from mancala situation")
     def toDraughts = sys.error("Can't make draughts situation from mancala situation")
-    def toMancala    = s
+    def toMancala  = s
   }
 
   def apply(lib: GameLogic, board: Board, player: Player): Situation = (lib, board) match {

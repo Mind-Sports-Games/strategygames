@@ -2,19 +2,12 @@ package strategygames.fairysf.format
 import strategygames.fairysf._
 import strategygames.Player
 
-/** r bqkb r
-  * p ppp pp
-  * pr
-  *    P p
-  *    QnB
-  *  PP  N
-  * P    PPP
-  * RN  K  R
+/** r bqkb r p ppp pp pr P p QnB PP N P PPP RN K R
   */
 object Visual {
 
   def <<(source: String): Board = {
-    val lines = augmentString(source).linesIterator.to(List)
+    val lines    = augmentString(source).linesIterator.to(List)
     val filtered = lines.size match {
       case 8          => lines
       case n if n > 8 => lines.slice(1, 9)
@@ -24,8 +17,8 @@ object Visual {
       pieces = (for {
         (l, y) <- (filtered zipWithIndex)
         (c, x) <- (l zipWithIndex)
-        //might need to get changed for different gameFamilys
-        //but then the whole file will need changing! only used for tests
+        // might need to get changed for different gameFamilys
+        // but then the whole file will need changing! only used for tests
         role   <- Role forsyth c.toLower
       } yield {
         Pos.at(x, 7 - y) map { pos =>

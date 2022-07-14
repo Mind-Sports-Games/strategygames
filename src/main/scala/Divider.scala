@@ -4,20 +4,20 @@ import cats.syntax.option.none
 
 case class Division(middle: Option[Int], end: Option[Int], plies: Int) {
 
-  def openingSize: Int = middle | plies
+  def openingSize: Int        = middle | plies
   def middleSize: Option[Int] =
     middle.map { m =>
       (end | plies) - m
     }
-  def endSize = end.map(plies -)
+  def endSize                 = end.map(plies -)
 
   def openingBounds = middle.map(0 -> _)
-  def middleBounds =
+  def middleBounds  =
     for {
       m <- middle
       e <- end
     } yield m -> e
-  def endBounds = end.map(_ -> plies)
+  def endBounds     = end.map(_ -> plies)
 }
 
 object Division {
@@ -45,7 +45,7 @@ object Divider {
   def apply(lib: GameLogic, boards: List[Board]): Division = lib match {
     case GameLogic.Draughts() =>
       strategygames.draughts.Divider(draughtsBoards(boards))
-    case GameLogic.Chess() =>
+    case GameLogic.Chess()    =>
       strategygames.chess.Divider(chessBoards(boards))
   }
 

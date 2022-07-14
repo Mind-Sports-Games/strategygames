@@ -32,9 +32,9 @@ case object Chess960
                 r1 != r8 && r1.toLower == r8
               }
             }
-          case _ => None
+          case _                                                               => None
         }
-      case _ => None
+      case _                                        => None
     }
 
   private val positions = Array(

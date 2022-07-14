@@ -10,7 +10,7 @@ object UciCharPair {
     uci match {
       case Uci.Move(orig, dest, None)       => stratUciCharPair(toChar(orig), toChar(dest))
       case Uci.Move(orig, dest, Some(role)) => stratUciCharPair(toChar(orig), toChar(dest.file, role))
-      case Uci.Drop(role, pos) =>
+      case Uci.Drop(role, pos)              =>
         stratUciCharPair(
           toChar(pos),
           dropRole2charMap.getOrElse(role, voidChar)

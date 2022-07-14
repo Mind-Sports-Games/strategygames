@@ -37,19 +37,19 @@ case object Brazilian
       if (finalSquare) 0 else situationBefore.captureLengthFrom(uci.orig).getOrElse(0) - 1
     if (remainingCaptures > 0) board
     else {
-      val p1Actors = board.actorsOf(Player.P1)
-      val p2Actors = board.actorsOf(Player.P2)
-      val p1Kings  = p1Actors.count(_.piece is King)
-      val p2Kings  = p2Actors.count(_.piece is King)
-      val p1Pieces = p1Actors.size
-      val p2Pieces = p2Actors.size
+      val p1Actors                                                       = board.actorsOf(Player.P1)
+      val p2Actors                                                       = board.actorsOf(Player.P2)
+      val p1Kings                                                        = p1Actors.count(_.piece is King)
+      val p2Kings                                                        = p2Actors.count(_.piece is King)
+      val p1Pieces                                                       = p1Actors.size
+      val p2Pieces                                                       = p2Actors.size
       def loneKing(strongPieces: Int, strongKings: Int, weakKing: Actor) =
         strongPieces == 3 && strongKings >= 1 && weakKing.onLongDiagonal && board.piecesOnLongDiagonal == 1
-      val p1LoneKing =
+      val p1LoneKing                                                     =
         if (p1Kings == 1 && p1Pieces == 1 && p2Kings >= 1) {
           loneKing(p2Pieces, p2Kings, p1Actors.head)
         } else false
-      val p2LoneKing =
+      val p2LoneKing                                                     =
         if (p2Kings == 1 && p2Pieces == 1 && p1Kings >= 1) {
           loneKing(p1Pieces, p1Kings, p2Actors.head)
         } else false

@@ -3,7 +3,8 @@ package format.pgn
 
 object Dumper {
 
-  def apply(situation: Situation, data: strategygames.fairysf.Move, next: Situation): String = data.toUci.lilaUci
+  def apply(situation: Situation, data: strategygames.fairysf.Move, next: Situation): String =
+    data.toUci.lilaUci
 
   def apply(data: strategygames.fairysf.Drop, next: Situation): String = data.toUci.lilaUci
 

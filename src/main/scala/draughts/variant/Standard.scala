@@ -24,7 +24,7 @@ case object Standard
   val initialFen       = format.Forsyth.initial
   val startingPosition = StartingPosition("---", initialFen, "", "Initial position".some)
 
-  val captureDirs: Directions = List(
+  val captureDirs: Directions                 = List(
     (UpLeft, _.moveUpLeft),
     (UpRight, _.moveUpRight),
     (DownLeft, _.moveDownLeft),
@@ -34,7 +34,7 @@ case object Standard
     P1 -> List((UpLeft, _.moveUpLeft), (UpRight, _.moveUpRight)),
     P2 -> List((DownLeft, _.moveDownLeft), (DownRight, _.moveDownRight))
   )
-  val moveDirsAll: Directions = moveDirsPlayer(P1) ::: moveDirsPlayer(P2)
+  val moveDirsAll: Directions                 = moveDirsPlayer(P1) ::: moveDirsPlayer(P2)
 
   def maxDrawingMoves(board: Board): Option[Int] =
     drawingMoves(board, none).map(_._1)
@@ -47,7 +47,7 @@ case object Standard
       val p1Kings        = p1Pieces.count(_._2.role == King)
       val p2Kings        = p2Pieces.count(_._2.role == King)
       def firstPromotion = move.exists(m => m.promotes && m.player.fold(p1Kings == 1, p2Kings == 1))
-      val drawingMoves =
+      val drawingMoves   =
         if (p1Pieces.size == 1 && p1Kings == 1) {
           if (p2Kings == 0) 50
           else if (p2Pieces.size <= 2) 10
@@ -61,10 +61,15 @@ case object Standard
     } else Some(50, false)
 
   /** Update position hashes for standard drawing rules:
-    * - The game is drawn if three (or more) times the same position is repeated, with each time the same player having to move.
-    * - The game is drawn when both players make 25 consecutive king moves without capturing.
-    * - When one player has only a king left, and the other player three pieces including at least one king (three kings, two kings and a man, or one king and two men), the game is drawn after both players made 16 moves.
-    * - When one player has only a king left, and the other player two pieces or less, including at least one king (one king, two kings, or one king and a man), the game is drawn after both players made 5 moves.
+    *   - The game is drawn if three (or more) times the same position is repeated, with each time the same
+    *     player having to move.
+    *   - The game is drawn when both players make 25 consecutive king moves without capturing.
+    *   - When one player has only a king left, and the other player three pieces including at least one king
+    *     (three kings, two kings and a man, or one king and two men), the game is drawn after both players
+    *     made 16 moves.
+    *   - When one player has only a king left, and the other player two pieces or less, including at least
+    *     one king (one king, two kings, or one king and a man), the game is drawn after both players made 5
+    *     moves.
     */
   def updatePositionHashes(
       board: Board,
@@ -84,11 +89,11 @@ case object Standard
             (drawingMoves == 10 && move.captures && piecesBefore > 3) ||
             (drawingMoves == 32 && move.captures && piecesBefore > 4)
           )
-            newHash // 16 and 5 move reset on promotion or capture that create the material situation, so that this move is not counted as the first
+            newHash         // 16 and 5 move reset on promotion or capture that create the material situation, so that this move is not counted as the first
           else
             newHash ++ hash // 5 move rule never resets once activated
         }
-      case _ => newHash
+      case _                                    => newHash
     }
   }
 }

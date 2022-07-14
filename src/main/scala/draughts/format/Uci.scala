@@ -42,7 +42,7 @@ object Uci {
     def apply(situation: Situation, finalSquare: Boolean = false) =
       situation.move(orig, dest, promotion, finalSquare, none, capture)
 
-    def toSan = s"${orig.shortKey}${if (capture.nonEmpty) "x" else "-"}${dest.shortKey}"
+    def toSan     = s"${orig.shortKey}${if (capture.nonEmpty) "x" else "-"}${dest.shortKey}"
     def toFullSan = {
       val sep = if (capture.nonEmpty) "x" else "-"
       orig.shortKey + sep + capture.fold(dest.shortKey)(_.reverse.map(_.shortKey) mkString sep)
@@ -62,22 +62,22 @@ object Uci {
         } yield Move(orig, dest, None, Some(capts.reverse))
       } else {
         for {
-          orig <- posAt(move take 2)
-          dest <- posAt(move drop 2 take 2)
+          orig     <- posAt(move take 2)
+          dest     <- posAt(move drop 2 take 2)
           promotion = move lift 4 flatMap Role.promotable
         } yield Move(orig, dest, promotion)
       }
     }
 
     def piotr(move: String) = for {
-      orig <- move.headOption flatMap Board.BoardSize.max.piotr
-      dest <- move lift 1 flatMap Board.BoardSize.max.piotr
+      orig     <- move.headOption flatMap Board.BoardSize.max.piotr
+      dest     <- move lift 1 flatMap Board.BoardSize.max.piotr
       promotion = move lift 2 flatMap Role.promotable
     } yield Move(orig, dest, promotion)
 
     def fromStrings(origS: String, destS: String, promS: Option[String]) = for {
-      orig <- Board.BoardSize.max.posAt(origS)
-      dest <- Board.BoardSize.max.posAt(destS)
+      orig     <- Board.BoardSize.max.posAt(origS)
+      dest     <- Board.BoardSize.max.posAt(destS)
       promotion = Role promotable promS
     } yield Move(orig, dest, promotion)
 
@@ -88,7 +88,7 @@ object Uci {
   def apply(move: strategygames.draughts.Move, withCaptures: Boolean) =
     Uci.Move(move.orig, move.dest, move.promotion, if (withCaptures) move.capture else none)
 
-  def combine(uci1: Uci, uci2: Uci) =
+  def combine(uci1: Uci, uci2: Uci)          =
     apply(uci1.uci + uci2.uci.drop(2)).getOrElse(Uci.Move(uci1.origDest._1, uci2.origDest._2))
   def combineSan(san1: String, san2: String) =
     san1.substring(0, san1.indexOf('x')) + san2.substring(san2.indexOf('x'))

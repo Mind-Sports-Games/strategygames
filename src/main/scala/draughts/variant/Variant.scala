@@ -21,7 +21,7 @@ abstract class Variant private[variant] (
 
   def pieces: Map[Pos, Piece]
   def initialFen: FEN
-  def startPlayer: Player = P1
+  def startPlayer: Player               = P1
   def startingPosition: StartingPosition
   val openingTables: List[OpeningTable] = Nil
   lazy val shortInitialFen: FEN         = FEN(initialFen.value.split(":").take(3).mkString(":"))
@@ -95,7 +95,7 @@ abstract class Variant private[variant] (
       case Some(actor) =>
         if (situation.hasCaptures) actor.getCaptures(finalSquare)
         else actor.noncaptures
-      case _ => Nil
+      case _           => Nil
     }
 
   def validMoves(actor: Actor): List[Move] = {
@@ -119,7 +119,7 @@ abstract class Variant private[variant] (
 
     // Find the move in the variant specific list of valid moves
     def findMove(from: Pos, to: Pos) = {
-      val moves = validMovesFrom(situation, from, finalSquare)
+      val moves      = validMovesFrom(situation, from, finalSquare)
       val exactMatch = moves.find { m =>
         if (forbiddenUci.fold(false)(_.contains(m.toUci.uci))) false
         else m.dest == to && captures.fold(true)(m.capture.contains)
@@ -137,12 +137,12 @@ abstract class Variant private[variant] (
 
     for {
       actor <- situation.board.actors get from toValid "No piece on " + from
-      _ <-
+      _     <-
         if (actor is situation.player) Validated.valid(actor)
         else Validated.invalid("Not my piece on " + from)
-      m1 <- findMove(from, to) toValid "Piece on " + from + " cannot move to " + to
-      m2 <- m1 withPromotion promotion toValid "Piece on " + from + " cannot promote to " + promotion
-      m3 <-
+      m1    <- findMove(from, to) toValid "Piece on " + from + " cannot move to " + to
+      m2    <- m1 withPromotion promotion toValid "Piece on " + from + " cannot promote to " + promotion
+      m3    <-
         if (isValidPromotion(promotion)) Validated.valid(m2)
         else Validated.invalid("Cannot promote to " + promotion + " in this game mode")
     } yield m3
@@ -188,7 +188,7 @@ abstract class Variant private[variant] (
               case Some(captPiece) if captPiece.isNot(actor.player) && !captPiece.isGhost =>
                 walkDir._2(nextPos) match {
                   case Some(landingPos) if curBoard(landingPos).isEmpty =>
-                    val boardAfter =
+                    val boardAfter       =
                       curBoard.takingUnsafe(curPos, landingPos, actor.piece, nextPos, captPiece)
                     val hash             = if (extraCaptsCache.isDefined) boardAfter.pieces.hashCode() + walkDir._1 else 0
                     val cachedExtraCapts = extraCaptsCache.flatMap(_ get hash)
@@ -196,7 +196,7 @@ abstract class Variant private[variant] (
                       case Some(extraCapts) if captureValue + extraCapts < bestCaptureValue =>
                         // no need to calculate lines where we know they will end up too short
                         captureValue + extraCapts
-                      case _ =>
+                      case _                                                                =>
                         val newSquares      = landingPos :: allSquares
                         val newTaken        = nextPos :: allTaken
                         val newCaptureValue = captureValue + getCaptureValue(actor.board, nextPos)
@@ -220,10 +220,10 @@ abstract class Variant private[variant] (
                               newTaken
                             )
                         }
-                        val opposite      = Variant.oppositeDirs(walkDir._1)
-                        val newDest       = if (destPos.isDefined) destPos else landingPos.some
-                        val newBoard      = if (destBoard.isDefined) destBoard else boardAfter.some
-                        var maxExtraCapts = 0
+                        val opposite        = Variant.oppositeDirs(walkDir._1)
+                        val newDest         = if (destPos.isDefined) destPos else landingPos.some
+                        val newBoard        = if (destBoard.isDefined) destBoard else boardAfter.some
+                        var maxExtraCapts   = 0
                         captureDirs.foreach { captDir =>
                           if (captDir._1 != opposite) {
                             val extraCapts = walkCaptures(
@@ -246,11 +246,11 @@ abstract class Variant private[variant] (
                         }
                         newCaptureValue + maxExtraCapts
                     }
-                  case _ => captureValue
+                  case _                                                => captureValue
                 }
-              case _ => captureValue
+              case _                                                                      => captureValue
             }
-          case _ => captureValue
+          case _             => captureValue
         }
 
     captureDirs.foreach {
@@ -259,7 +259,7 @@ abstract class Variant private[variant] (
 
     if (extraCaptsCache.exists(_.size > maxCache)) {
       // TODO: warning
-      //logger.warn(s"shortRangeCaptures($finalSquare) aborted with ${extraCaptsCache.get.size} entries for ${actor.piece} at ${actor.pos.shortKey} on ${draughts.format.Forsyth.exportBoard(actor.board)}")
+      // logger.warn(s"shortRangeCaptures($finalSquare) aborted with ${extraCaptsCache.get.size} entries for ${actor.piece} at ${actor.pos.shortKey} on ${draughts.format.Forsyth.exportBoard(actor.board)}")
     }
 
     buf.flatMap { m =>
@@ -291,7 +291,7 @@ abstract class Variant private[variant] (
         walkDir._2(curPos) match {
           case Some(nextPos) =>
             curBoard(nextPos) match {
-              case None =>
+              case None                                                                   =>
                 walkUntilCapture(
                   walkDir,
                   curBoard.moveUnsafe(curPos, nextPos, actor.piece),
@@ -317,11 +317,11 @@ abstract class Variant private[variant] (
                       nextPos :: allTaken,
                       captureValue + getCaptureValue(actor.board, nextPos)
                     )
-                  case _ => captureValue
+                  case _                                                => captureValue
                 }
-              case _ => captureValue
+              case _                                                                      => captureValue
             }
-          case _ => captureValue
+          case _             => captureValue
         }
 
     def walkAfterCapture(
@@ -340,8 +340,8 @@ abstract class Variant private[variant] (
         case Some(extraCapts) if newCaptureValue + extraCapts < bestCaptureValue =>
           // no need to calculate lines where we know they will end up too short
           newCaptureValue + extraCapts
-        case _ =>
-          val newSquares = curPos :: allSquares
+        case _                                                                   =>
+          val newSquares    = curPos :: allSquares
           if (newCaptureValue > bestCaptureValue) {
             bestCaptureValue = newCaptureValue
             buf.clear()
@@ -394,7 +394,7 @@ abstract class Variant private[variant] (
               ) - newCaptureValue
               if (extraCapts > maxExtraCapts)
                 maxExtraCapts = extraCapts
-            case _ =>
+            case _                                          =>
           }
           extraCaptsCache.foreach { cache =>
             if (cachedExtraCapts.isEmpty)
@@ -410,7 +410,7 @@ abstract class Variant private[variant] (
 
     if (extraCaptsCache.exists(_.size > maxCache)) {
       // TODO: warning?
-      //logger.warn(s"longRangeCaptures($finalSquare) aborted with ${extraCaptsCache.get.size} entries for ${actor.piece} at ${actor.pos.shortKey} on ${draughts.format.Forsyth.exportBoard(actor.board)}")
+      // logger.warn(s"longRangeCaptures($finalSquare) aborted with ${extraCaptsCache.get.size} entries for ${actor.piece} at ${actor.pos.shortKey} on ${draughts.format.Forsyth.exportBoard(actor.board)}")
     }
 
     buf.toList
@@ -430,8 +430,8 @@ abstract class Variant private[variant] (
   // pieces surrounding a capture explode
   def hasMoveEffects = false
 
-  /** Applies a variant specific effect to the move. This helps decide whether a king is endangered by a move, for
-    * example
+  /** Applies a variant specific effect to the move. This helps decide whether a king is endangered by a move,
+    * for example
     */
   def addVariantEffect(move: Move): Move = move
 
@@ -441,8 +441,8 @@ abstract class Variant private[variant] (
 
   def updatePositionHashes(board: Board, move: Move, hash: strategygames.draughts.PositionHash): PositionHash
 
-  /** Once a move has been decided upon from the available legal moves, the board is finalized
-    * This removes any reaining ghostpieces if the capture sequence has ended
+  /** Once a move has been decided upon from the available legal moves, the board is finalized This removes
+    * any reaining ghostpieces if the capture sequence has ended
     */
   def finalizeBoard(
       board: Board,

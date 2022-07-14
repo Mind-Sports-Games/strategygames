@@ -13,7 +13,7 @@ object Reader {
   }
 
   object Result {
-    case class Complete(replay: Replay) extends Result {
+    case class Complete(replay: Replay)                    extends Result {
       def valid = Validated.valid(replay)
     }
     case class Incomplete(replay: Replay, failure: String) extends Result {
@@ -50,7 +50,7 @@ object Reader {
           err => Result.Incomplete(replay, err),
           move => Result.Complete(replay addMove StratMove.toChess(move))
         )
-      case (r: Result.Incomplete, _) => r
+      case (r: Result.Incomplete, _)      => r
     }
 
   private def makeGame(tags: Tags) = {

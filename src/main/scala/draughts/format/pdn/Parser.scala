@@ -8,7 +8,17 @@ import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
-import strategygames.format.pgn.{ Glyph, Glyphs, InitialPosition, Metas, ParsedPgn => ParsedPdn, San, Sans, Tag, Tags }
+import strategygames.format.pgn.{
+  Glyph,
+  Glyphs,
+  InitialPosition,
+  Metas,
+  ParsedPgn => ParsedPdn,
+  San,
+  Sans,
+  Tag,
+  Tags
+}
 
 // http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm
 // https://pdn.fmjd.org/index.html
@@ -35,16 +45,16 @@ object Parser {
       .replace("‑", "-")
       .replace("–", "-")
     for {
-      splitted <- splitTagAndMoves(preprocessed)
-      tagStr  = splitted._1
-      moveStr = splitted._2
+      splitted    <- splitTagAndMoves(preprocessed)
+      tagStr       = splitted._1
+      moveStr      = splitted._2
       preTags     <- TagParser(tagStr)
       parsedMoves <- MovesParser(moveStr)
       init         = parsedMoves._1
       strMoves     = parsedMoves._2
       resultOption = parsedMoves._3
       tags         = resultOption.filterNot(_ => preTags.exists(_.Result)).fold(preTags)(t => preTags + t)
-      sans <- objMoves(strMoves, tags.draughtsVariant.getOrElse(Variant.default))
+      sans        <- objMoves(strMoves, tags.draughtsVariant.getOrElse(Variant.default))
     } yield ParsedPdn(init, tags, sans)
   } catch {
     case _: StackOverflowError =>
@@ -52,7 +62,7 @@ object Parser {
       sys error "### StackOverflowError ### in PDN parser"
   }
 
-  def moves(str: String, variant: Variant): Validated[String, Sans] = moves(
+  def moves(str: String, variant: Variant): Validated[String, Sans]                = moves(
     str.split(' ').toList,
     variant
   )
@@ -76,7 +86,7 @@ object Parser {
     }.sequence map { Sans apply _ }
 
   trait Logging { self: Parsers =>
-    protected val loggingEnabled = false
+    protected val loggingEnabled                                 = false
     protected def as[T](msg: String)(p: => Parser[T]): Parser[T] =
       if (loggingEnabled) log(p)(msg) else p
   }
@@ -91,7 +101,7 @@ object Parser {
       parseAll(strMoves, pdn) match {
         case Success((init, moves, result), _) =>
           valid(init, moves, result map { r => Tag(_.Result, r) })
-        case err =>
+        case err                               =>
           invalid("Cannot parse moves: %s\n%s".format(err.toString, pdn))
       }
 
@@ -167,9 +177,9 @@ object Parser {
     def apply(str: String, variant: Variant): Validated[String, San] = str match {
       case SimpleMoveR(src, sep, dst, suff) =>
         stdIfValid(variant, List(src, dst), sep != "-", suff)
-      case RepeatCaptureR(src, rest, suff) =>
+      case RepeatCaptureR(src, rest, suff)  =>
         stdIfValid(variant, src :: rest.split("x|:").toList, true, suff);
-      case _ => invalid(s"Cannot parse move: $str")
+      case _                                => invalid(s"Cannot parse move: $str")
     }
 
     private def stdIfValid(variant: Variant, fields: List[String], capture: Boolean, suff: String) = {
@@ -254,7 +264,7 @@ object Parser {
   private def ensureTagsNewline(pdn: String): String =
     """"\]\s*(\{|\d+\.)""".r.replaceAllIn(pdn, m => "\"]\n" + m.group(1))
 
-  //To accomodate some common PDN source that always adds a [FILENAME ""] tag on the bottom of every file
+  // To accomodate some common PDN source that always adds a [FILENAME ""] tag on the bottom of every file
   private def ensureTagsNewlineReverse(pdn: String): String =
     """\[(FILENAME\s+")""".r.replaceAllIn(pdn, m => "\n[" + m.group(1))
 
@@ -265,7 +275,7 @@ object Parser {
       .to(List) span { line =>
       line lift 0 contains '['
     } match {
-      case (tagLines, moveLines) => //Drop any tag in last line (accomodate [FILENAME)
+      case (tagLines, moveLines) => // Drop any tag in last line (accomodate [FILENAME)
         if (moveLines.lastOption.fold(false)(line => line.nonEmpty && line.head == '[' && line.last == ']'))
           valid(tagLines.mkString("\n")    -> moveLines.dropRight(1).mkString("\n"))
         else valid(tagLines.mkString("\n") -> moveLines.mkString("\n"))

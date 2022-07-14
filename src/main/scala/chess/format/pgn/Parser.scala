@@ -3,7 +3,18 @@ package format.pgn
 
 import strategygames.chess.variant.Variant
 
-import strategygames.format.pgn.{ Glyph, Glyphs, InitialPosition, Metas, ParsedPgn, San, Sans, Suffixes, Tag, Tags }
+import strategygames.format.pgn.{
+  Glyph,
+  Glyphs,
+  InitialPosition,
+  Metas,
+  ParsedPgn,
+  San,
+  Sans,
+  Suffixes,
+  Tag,
+  Tags
+}
 import strategygames.{ Role => ChessRole }
 
 import scala.util.parsing.combinator._
@@ -36,23 +47,23 @@ object Parser {
         .replace("–", "-")
         .replace("e.p.", "") // silly en-passant notation
       for {
-        splitted <- splitTagAndMoves(preprocessed)
-        tagStr  = splitted._1
-        moveStr = splitted._2
+        splitted    <- splitTagAndMoves(preprocessed)
+        tagStr       = splitted._1
+        moveStr      = splitted._2
         preTags     <- TagParser(tagStr)
         parsedMoves <- MovesParser(moveStr)
         init         = parsedMoves._1
         strMoves     = parsedMoves._2
         resultOption = parsedMoves._3
         tags         = resultOption.filterNot(_ => preTags.exists(_.Result)).foldLeft(preTags)(_ + _)
-        sans <- objMoves(strMoves, tags.chessVariant | Variant.default)
+        sans        <- objMoves(strMoves, tags.chessVariant | Variant.default)
       } yield ParsedPgn(init, tags, sans)
     } catch {
       case _: StackOverflowError =>
         sys error "### StackOverflowError ### in PGN parser"
     }
 
-  def moves(str: String, variant: Variant): Validated[String, Sans] =
+  def moves(str: String, variant: Variant): Validated[String, Sans]                =
     moves(
       str.split(' ').toList,
       variant
@@ -78,7 +89,7 @@ object Parser {
     }.sequence map { Sans.apply }
 
   trait Logging { self: Parsers =>
-    protected val loggingEnabled = false
+    protected val loggingEnabled                                 = false
     protected def as[T](msg: String)(p: => Parser[T]): Parser[T] =
       if (loggingEnabled) log(p)(msg) else p
   }
@@ -101,7 +112,7 @@ object Parser {
               }
             )
           )
-        case err => invalid("Cannot parse moves: %s\n%s".format(err.toString, pgn))
+        case err                               => invalid("Cannot parse moves: %s\n%s".format(err.toString, pgn))
       }
 
     def strMoves: Parser[(InitialPosition, List[StrMove], Option[String])] =
@@ -186,8 +197,8 @@ object Parser {
       }
       else
         str match {
-          case "O-O" | "o-o" | "0-0"       => valid(Castle(KingSide))
-          case "O-O-O" | "o-o-o" | "0-0-0" => valid(Castle(QueenSide))
+          case "O-O" | "o-o" | "0-0"                                    => valid(Castle(KingSide))
+          case "O-O-O" | "o-o-o" | "0-0-0"                              => valid(Castle(QueenSide))
           case MoveR(role, file, rank, capture, pos, prom, check, mate) =>
             role.headOption.fold[Option[Role]](Option(Pawn))(variant.rolesByPgn.get) flatMap { role =>
               Pos fromKey pos map { dest =>
@@ -210,7 +221,7 @@ object Parser {
                 )
               }
             } getOrElse slow(str)
-          case DropR(roleS, posS, check, mate) =>
+          case DropR(roleS, posS, check, mate)                          =>
             roleS.headOption flatMap variant.rolesByPgn.get flatMap { role =>
               Pos fromKey posS map { pos =>
                 valid(
@@ -228,7 +239,7 @@ object Parser {
                 )
               }
             } getOrElse invalid(s"Cannot parse drop: $str")
-          case _ => slow(str)
+          case _                                                        => slow(str)
         }
     }
 

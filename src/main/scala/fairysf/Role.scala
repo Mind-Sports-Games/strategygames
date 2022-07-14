@@ -241,23 +241,23 @@ case object XiangqiKing extends Role {
 }
 
 case object FlipCounter extends Role {
-  val fairySFID = Role.immobile
-  val forsyth   = 'P'
-  val binaryInt = 1
-  val hashInt   = 1
-  val storable  = true
-  val valueOf   = None
+  val fairySFID  = Role.immobile
+  val forsyth    = 'P'
+  val binaryInt  = 1
+  val hashInt    = 1
+  val storable   = true
+  val valueOf    = None
   val gameFamily = GameFamily.Flipello()
 }
 
 object Role {
-  //---------------------------------------------------
+  // ---------------------------------------------------
   // These are all of the pieces that fairysf supports
   // Internally, Fairsf uses an enum to represent these
   // but we are just going to use ints for this.
   //
   // The init method prints them out for us to use.
-  //---------------------------------------------------
+  // ---------------------------------------------------
   val aiwok          = FairySFRoleID(10)
   val alfil          = FairySFRoleID(7)
   val amazon         = FairySFRoleID(14)
@@ -351,48 +351,48 @@ object Role {
   def allPromotableByGameFamily(gf: GameFamily): List[PromotableRole] =
     allPromotable.filter(r => r.gameFamily == gf)
 
-  val allByForsyth: Map[Char, Role] = all map { r =>
+  val allByForsyth: Map[Char, Role]                                     = all map { r =>
     (r.forsyth, r)
   } toMap
-  def allByForsyth(gf: GameFamily): Map[Char, Role] = allNonPromotableByGameFamily(gf) map { r =>
+  def allByForsyth(gf: GameFamily): Map[Char, Role]                     = allNonPromotableByGameFamily(gf) map { r =>
     (r.forsyth, r)
   } toMap
-  val allByPgn: Map[Char, Role] = all map { r =>
+  val allByPgn: Map[Char, Role]                                         = all map { r =>
     (r.pgn, r)
   } toMap
-  def allByPgn(gf: GameFamily): Map[Char, Role] = allNonPromotableByGameFamily(gf) map { r =>
+  def allByPgn(gf: GameFamily): Map[Char, Role]                         = allNonPromotableByGameFamily(gf) map { r =>
     (r.pgn, r)
   } toMap
-  val allByName: Map[String, Role] = all map { r =>
+  val allByName: Map[String, Role]                                      = all map { r =>
     (r.name, r)
   } toMap
-  def allByName(gf: GameFamily): Map[String, Role] = allByGameFamily(gf) map { r =>
+  def allByName(gf: GameFamily): Map[String, Role]                      = allByGameFamily(gf) map { r =>
     (r.name, r)
   } toMap
-  val allByGroundName: Map[String, Role] = all map { r =>
+  val allByGroundName: Map[String, Role]                                = all map { r =>
     (r.groundName, r)
   } toMap
-  def allByGroundName(gf: GameFamily): Map[String, Role] = allByGameFamily(gf) map { r =>
+  def allByGroundName(gf: GameFamily): Map[String, Role]                = allByGameFamily(gf) map { r =>
     (r.groundName, r)
   } toMap
-  val allByBinaryInt: Map[Int, Role] = all map { r =>
+  val allByBinaryInt: Map[Int, Role]                                    = all map { r =>
     (r.binaryInt, r)
   } toMap
-  def allByBinaryInt(gf: GameFamily): Map[Int, Role] = allByGameFamily(gf) map { r =>
+  def allByBinaryInt(gf: GameFamily): Map[Int, Role]                    = allByGameFamily(gf) map { r =>
     (r.binaryInt, r)
   } toMap
-  val allByHashInt: Map[Int, Role] = all map { r =>
+  val allByHashInt: Map[Int, Role]                                      = all map { r =>
     (r.hashInt, r)
   } toMap
-  val allPromotableByName: Map[String, PromotableRole] =
+  val allPromotableByName: Map[String, PromotableRole]                  =
     allPromotable map { r =>
       (r.toString, r)
     } toMap
-  def allPromotableByName(gf: GameFamily): Map[String, PromotableRole] =
+  def allPromotableByName(gf: GameFamily): Map[String, PromotableRole]  =
     allPromotableByGameFamily(gf) map { r =>
       (r.toString, r)
     } toMap
-  val allPromotableByForsyth: Map[Char, PromotableRole] =
+  val allPromotableByForsyth: Map[Char, PromotableRole]                 =
     allPromotable map { r =>
       (r.forsyth, r)
     } toMap
@@ -400,15 +400,15 @@ object Role {
     allPromotableByGameFamily(gf) map { r =>
       (r.forsyth, r)
     } toMap
-  val allPromotableByPgn: Map[Char, PromotableRole] =
+  val allPromotableByPgn: Map[Char, PromotableRole]                     =
     allPromotable map { r =>
       (r.pgn, r)
     } toMap
-  def allPromotableByPgn(gf: GameFamily): Map[Char, PromotableRole] =
+  def allPromotableByPgn(gf: GameFamily): Map[Char, PromotableRole]     =
     allPromotableByGameFamily(gf) map { r =>
       (r.pgn, r)
     } toMap
-  def allByFairySFID(gf: GameFamily): Map[Int, Role] = allByGameFamily(gf) map { r =>
+  def allByFairySFID(gf: GameFamily): Map[Int, Role]                    = allByGameFamily(gf) map { r =>
     (r.fairySFID.id, r)
   } toMap
 
@@ -429,20 +429,20 @@ object Role {
 
   def storable: List[Role] = all.filter(_.storable)
 
-  //only used in lila by insight module
+  // only used in lila by insight module
   def pgnMoveToRole(gf: GameFamily, c: Char): Role =
     allByPgn(gf).get(c) match {
       case Some(r) => r
       case None    => sys.error("Could not find Role from pgnMove")
     }
 
-  //unused by lila
+  // unused by lila
   def javaSymbolToRole(s: String): Role =
     allByPgn
       .get(
         s.headOption match {
           case Some(c) => c
-          case None    => 'P' //JavaRole.PAWN.symbol is ""
+          case None    => 'P' // JavaRole.PAWN.symbol is ""
         }
       )
       .get

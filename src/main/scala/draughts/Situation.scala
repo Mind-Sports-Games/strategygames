@@ -33,7 +33,7 @@ case class Situation(board: Board, player: Player) {
     else actor.captures.nonEmpty
   }
 
-  def ambiguitiesMove(move: Move): Int = ambiguitiesMove(move.orig, move.dest)
+  def ambiguitiesMove(move: Move): Int           = ambiguitiesMove(move.orig, move.dest)
   def ambiguitiesMove(orig: Pos, dest: Pos): Int = countAmbiguities(
     movesFrom(orig, true).filter(_.dest == dest)
   )

@@ -15,42 +15,46 @@ abstract class FullOpening(
 
 object FullOpening {
 
-  final case class Chess(f: strategygames.chess.opening.FullOpening) extends FullOpening(
-    f.eco,
-    f.name,
-    f.fen
-  ) {
+  final case class Chess(f: strategygames.chess.opening.FullOpening)
+      extends FullOpening(
+        f.eco,
+        f.name,
+        f.fen
+      ) {
 
     override def toString = f.toString()
 
   }
 
-  final case class Draughts(f: strategygames.draughts.opening.FullOpening) extends FullOpening(
-    f.code,
-    f.name,
-    f.fen,
-    f.source
-  ) {
+  final case class Draughts(f: strategygames.draughts.opening.FullOpening)
+      extends FullOpening(
+        f.code,
+        f.name,
+        f.fen,
+        f.source
+      ) {
 
     override def toString = f.toString()
 
   }
 
-  final case class FairySF(f: strategygames.fairysf.opening.FullOpening) extends FullOpening(
-    f.eco,
-    f.name,
-    f.fen
-  ) {
+  final case class FairySF(f: strategygames.fairysf.opening.FullOpening)
+      extends FullOpening(
+        f.eco,
+        f.name,
+        f.fen
+      ) {
 
     override def toString = f.toString()
 
   }
 
-  final case class Mancala(f: strategygames.mancala.opening.FullOpening) extends FullOpening(
-    f.eco,
-    f.name,
-    f.fen
-  ) {
+  final case class Mancala(f: strategygames.mancala.opening.FullOpening)
+      extends FullOpening(
+        f.eco,
+        f.name,
+        f.fen
+      ) {
 
     override def toString = f.toString()
 

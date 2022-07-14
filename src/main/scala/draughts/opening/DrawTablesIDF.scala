@@ -4598,9 +4598,9 @@ object DrawTablesIDF {
   )
 
   val categoriesIDFBrazilian = categoriesIDF.map {
-    case cat if cat.name == "3" =>
+    case cat if cat.name == "3"  =>
       cat.copy(positions = cat.positions.filterNot(_.code == "3-XIII"))
-    case cat if cat.name == "5" =>
+    case cat if cat.name == "5"  =>
       cat.copy(positions = cat.positions.filterNot(_.code == "5-XXVI"))
     case cat if cat.name == "12" =>
       cat.copy(positions = cat.positions.filterNot(_.code == "12-XV"))
@@ -4614,7 +4614,7 @@ object DrawTablesIDF {
       cat.copy(positions = cat.positions.filterNot(_.code == "20-XXIII"))
     case cat if cat.name == "22" =>
       cat.copy(positions = cat.positions.filterNot(_.code == "22-XIV"))
-    case cat => cat
+    case cat                     => cat
   }
 
   val categoriesIDFBasic = List(

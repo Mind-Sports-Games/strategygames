@@ -11,7 +11,7 @@ object UciCharPair {
     uci match {
       case Uci.Move(orig, dest, None)       => stratUciCharPair(toChar(orig), toChar(dest))
       case Uci.Move(orig, dest, Some(role)) => stratUciCharPair(toChar(orig), toChar(dest.file, role))
-      case Uci.Drop(role, pos) =>
+      case Uci.Drop(role, pos)              =>
         stratUciCharPair(
           toChar(pos),
           dropRole2charMap.getOrElse(role, voidChar)
@@ -39,7 +39,7 @@ object UciCharPair {
     def toChar(file: File, prom: PromotableRole) =
       promotion2charMap.getOrElse(file -> prom, voidChar)
 
-    //copied from chess (minus !King filter), im sure this just gives '?' for all roles
+    // copied from chess (minus !King filter), im sure this just gives '?' for all roles
     val dropRole2charMap: Map[Role, Char] =
       Role.all.zipWithIndex
         .map { case (role, index) =>

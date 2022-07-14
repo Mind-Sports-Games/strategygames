@@ -11,27 +11,27 @@ sealed trait Role {
 sealed trait PromotableRole extends Role
 
 case object King extends PromotableRole {
-  val forsyth = 'K'
+  val forsyth   = 'K'
   val binaryInt = 1
-  val hashInt = 2
+  val hashInt   = 2
 }
 
 case object Man extends Role {
-  val forsyth = ' '
+  val forsyth   = ' '
   val binaryInt = 2
-  val hashInt = 1
+  val hashInt   = 1
 }
 
 case object GhostMan extends Role {
-  val forsyth = 'G'
+  val forsyth   = 'G'
   val binaryInt = 4
-  val hashInt = 3
+  val hashInt   = 3
 }
 
 case object GhostKing extends Role {
-  val forsyth = 'P'
+  val forsyth   = 'P'
   val binaryInt = 3
-  val hashInt = 2
+  val hashInt   = 2
 }
 
 object Role {
@@ -64,16 +64,16 @@ object Role {
     name flatMap promotable
 
   def pdnMoveToRole(c: Char): Role =
-    //We dont want ghosts to be returned here
+    // We dont want ghosts to be returned here
     c match {
       case 'K' | 'O' => King
-      case _ => Man
+      case _         => Man
     }
 
   def javaSymbolToRole(s: String): Role =
     s match {
       case "" => Man
-      case _ => King
+      case _  => King
     }
 
   def valueOf(r: Role): Option[Int] = r match {

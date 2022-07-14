@@ -10,7 +10,7 @@ object Sans {
 }
 
 // Standard Algebraic Notation
-trait San {
+trait San   {
 
   def apply(
       situation: Situation,
@@ -58,7 +58,6 @@ case class Metas(
 object Metas {
   val empty = Metas(check = false, checkmate = false, Nil, Glyphs.empty, Nil)
 }
-
 
 case class Suffixes(
     check: Boolean,

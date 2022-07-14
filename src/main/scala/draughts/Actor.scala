@@ -24,14 +24,14 @@ case class Actor(
   def getCaptures(finalSquare: Boolean) = if (finalSquare) capturesFinal else captures
 
   private def noncaptureMoves(): List[Move] = piece.role match {
-    case Man => shortRangeMoves(board.variant.moveDirsPlayer(player))
+    case Man  => shortRangeMoves(board.variant.moveDirsPlayer(player))
     case King =>
       if (
         board.variant.frisianVariant && board.history
           .kingMoves(player) >= 3 && board.history.kingMoves.kingPos(player).fold(true)(_ == pos)
       ) Nil
       else longRangeMoves(board.variant.moveDirsAll)
-    case _ => Nil
+    case _    => Nil
   }
 
   private def captureMoves(finalSquare: Boolean): List[Move] = piece.role match {
@@ -40,9 +40,9 @@ case class Actor(
     case _    => Nil
   }
 
-  def player: Player          = piece.player
+  def player: Player         = piece.player
   def is(c: Player): Boolean = c == piece.player
-  def is(p: Piece): Boolean = p == piece
+  def is(p: Piece): Boolean  = p == piece
 
   def onLongDiagonal: Boolean =
     (pos.x + ((pos.y + 1) / 2 - 1)) % (board.boardSize.width / 2) == 0
@@ -66,9 +66,9 @@ case class Actor(
             case None =>
               board.move(pos, to).foreach { buf += move(to, _, None, None) }
               addAll(to, dir)
-            case _ => // occupied
+            case _    => // occupied
           }
-        case _ => // past end of board
+        case _        => // past end of board
       }
     }
 

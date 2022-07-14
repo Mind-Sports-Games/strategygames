@@ -1,5 +1,5 @@
 package strategygames.chess
-import strategygames.{ Clock, Player, MoveMetrics }
+import strategygames.{ Clock, MoveMetrics, Player }
 
 import cats.data.Validated
 
@@ -62,8 +62,8 @@ case class Game(
       }
     }
 
-  def apply(uci: Uci.Move): Validated[String, (Game, Move)] = apply(uci.orig, uci.dest, uci.promotion)
-  def apply(uci: Uci.Drop): Validated[String, (Game, Drop)] = drop(uci.role, uci.pos)
+  def apply(uci: Uci.Move): Validated[String, (Game, Move)]  = apply(uci.orig, uci.dest, uci.promotion)
+  def apply(uci: Uci.Drop): Validated[String, (Game, Drop)]  = drop(uci.role, uci.pos)
   def apply(uci: Uci): Validated[String, (Game, MoveOrDrop)] =
     uci match {
       case u: Uci.Move => apply(u) map { case (g, m) => g -> Left(m) }
@@ -78,8 +78,7 @@ case class Game(
 
   def halfMoveClock: Int = board.history.halfMoveClock
 
-  /** Fullmove number: The number of the full move.
-    * It starts at 1, and is incremented after P2's move.
+  /** Fullmove number: The number of the full move. It starts at 1, and is incremented after P2's move.
     */
   def fullMoveNumber: Int = 1 + turns / 2
 

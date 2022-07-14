@@ -21,76 +21,83 @@ sealed abstract class Replay(val setup: Game, val moves: List[MoveOrDrop], val s
 //lots of methods not wrapped, due to differences of Traversable/Iterable, and FEN/String
 object Replay {
 
-  final case class Chess(r: chess.Replay) extends Replay(
-    Game.Chess(r.setup),
-    r.moves.map(m => m match {
-      case Left(m)  => Left(Move.Chess(m))
-      case Right(d) => Right(Drop.Chess(d))
-    }),
-    Game.Chess(r.state)
-  ){
+  final case class Chess(r: chess.Replay)
+      extends Replay(
+        Game.Chess(r.setup),
+        r.moves.map(m =>
+          m match {
+            case Left(m)  => Left(Move.Chess(m))
+            case Right(d) => Right(Drop.Chess(d))
+          }
+        ),
+        Game.Chess(r.state)
+      ) {
     def copy(state: Game): Replay = state match {
-      case Game.Chess(state) => Replay.wrap(r.copy(state=state))
-      case _ => sys.error("Unable to copy a chess replay with a non-chess state")
+      case Game.Chess(state) => Replay.wrap(r.copy(state = state))
+      case _                 => sys.error("Unable to copy a chess replay with a non-chess state")
     }
   }
 
-  final case class Draughts(r: draughts.Replay) extends Replay(
-    Game.Draughts(r.setup),
-    r.moves.map((m: draughts.Move) => Left(Move.Draughts(m))),
-    Game.Draughts(r.state)
-  ){
+  final case class Draughts(r: draughts.Replay)
+      extends Replay(
+        Game.Draughts(r.setup),
+        r.moves.map((m: draughts.Move) => Left(Move.Draughts(m))),
+        Game.Draughts(r.state)
+      ) {
     def copy(state: Game): Replay = state match {
-      case Game.Draughts(state) => Replay.wrap(r.copy(state=state))
-      case _ => sys.error("Unable to copy a draughts replay with a non-draughts state")
+      case Game.Draughts(state) => Replay.wrap(r.copy(state = state))
+      case _                    => sys.error("Unable to copy a draughts replay with a non-draughts state")
     }
   }
 
-  final case class FairySF(r: fairysf.Replay) extends Replay(
-    Game.FairySF(r.setup),
-    r.moves.map(m => m match {
-      case Left(m)  => Left(Move.FairySF(m))
-      case Right(d) => Right(Drop.FairySF(d))
-    }),
-    Game.FairySF(r.state)
-  ){
+  final case class FairySF(r: fairysf.Replay)
+      extends Replay(
+        Game.FairySF(r.setup),
+        r.moves.map(m =>
+          m match {
+            case Left(m)  => Left(Move.FairySF(m))
+            case Right(d) => Right(Drop.FairySF(d))
+          }
+        ),
+        Game.FairySF(r.state)
+      ) {
     def copy(state: Game): Replay = state match {
-      case Game.FairySF(state) => Replay.wrap(r.copy(state=state))
-      case _ => sys.error("Unable to copy a fairysf replay with a non-fairysf state")
+      case Game.FairySF(state) => Replay.wrap(r.copy(state = state))
+      case _                   => sys.error("Unable to copy a fairysf replay with a non-fairysf state")
     }
   }
 
-  final case class Mancala(r: mancala.Replay) extends Replay(
-    Game.Mancala(r.setup),
-    r.moves.map((m: mancala.Move) => Left(Move.Mancala(m))),
-    Game.Mancala(r.state)
-  ){
+  final case class Mancala(r: mancala.Replay)
+      extends Replay(
+        Game.Mancala(r.setup),
+        r.moves.map((m: mancala.Move) => Left(Move.Mancala(m))),
+        Game.Mancala(r.state)
+      ) {
     def copy(state: Game): Replay = state match {
-      case Game.Mancala(state) => Replay.wrap(r.copy(state=state))
-      case _ => sys.error("Unable to copy a mancala replay with a non-mancala state")
+      case Game.Mancala(state) => Replay.wrap(r.copy(state = state))
+      case _                   => sys.error("Unable to copy a mancala replay with a non-mancala state")
     }
   }
-
 
   def apply(lib: GameLogic, setup: Game, moves: List[MoveOrDrop], state: Game): Replay =
     (lib, setup, state) match {
-      case (GameLogic.Draughts(), Game.Draughts(setup), Game.Draughts(state))
-        => Draughts(draughts.Replay(setup, moves.map(Move.toDraughts), state))
-      case (GameLogic.Chess(), Game.Chess(setup), Game.Chess(state))
-        => Chess(chess.Replay(setup, moves.map(Move.toChess), state))
-      case (GameLogic.FairySF(), Game.FairySF(setup), Game.FairySF(state))
-        => FairySF(fairysf.Replay(setup, moves.map(Move.toFairySF), state))
-      case (GameLogic.Mancala(), Game.Mancala(setup), Game.Mancala(state))
-        => Mancala(mancala.Replay(setup, moves.map(Move.toMancala), state))
-      case _ => sys.error("Mismatched gamelogic types 5")
+      case (GameLogic.Draughts(), Game.Draughts(setup), Game.Draughts(state)) =>
+        Draughts(draughts.Replay(setup, moves.map(Move.toDraughts), state))
+      case (GameLogic.Chess(), Game.Chess(setup), Game.Chess(state))          =>
+        Chess(chess.Replay(setup, moves.map(Move.toChess), state))
+      case (GameLogic.FairySF(), Game.FairySF(setup), Game.FairySF(state))    =>
+        FairySF(fairysf.Replay(setup, moves.map(Move.toFairySF), state))
+      case (GameLogic.Mancala(), Game.Mancala(setup), Game.Mancala(state))    =>
+        Mancala(mancala.Replay(setup, moves.map(Move.toMancala), state))
+      case _                                                                  => sys.error("Mismatched gamelogic types 5")
     }
 
   def gameMoveWhileValid(
-    lib: GameLogic,
-    moveStrs: Seq[String],
-    initialFen: FEN,
-    variant: Variant,
-    iteratedCapts: Boolean = false
+      lib: GameLogic,
+      moveStrs: Seq[String],
+      initialFen: FEN,
+      variant: Variant,
+      iteratedCapts: Boolean = false
   ): (Game, List[(Game, Uci.WithSan)], Option[String]) = (lib, initialFen, variant) match {
     case (GameLogic.Draughts(), FEN.Draughts(initialFen), Variant.Draughts(variant)) =>
       draughts.Replay.gameMoveWhileValid(moveStrs, initialFen, variant, iteratedCapts) match {
@@ -101,7 +108,7 @@ object Replay {
             message
           )
       }
-    case (GameLogic.Chess(), FEN.Chess(initialFen), Variant.Chess(variant)) =>
+    case (GameLogic.Chess(), FEN.Chess(initialFen), Variant.Chess(variant))          =>
       chess.Replay.gameMoveWhileValid(moveStrs, initialFen, variant) match {
         case (game, gameswithsan, message) =>
           (
@@ -110,7 +117,7 @@ object Replay {
             message
           )
       }
-    case (GameLogic.FairySF(), FEN.FairySF(initialFen), Variant.FairySF(variant)) =>
+    case (GameLogic.FairySF(), FEN.FairySF(initialFen), Variant.FairySF(variant))    =>
       fairysf.Replay.gameMoveWhileValid(moveStrs, initialFen, variant) match {
         case (game, gameswithsan, message) =>
           (
@@ -119,7 +126,7 @@ object Replay {
             message
           )
       }
-    case (GameLogic.Mancala(), FEN.Mancala(initialFen), Variant.Mancala(variant)) =>
+    case (GameLogic.Mancala(), FEN.Mancala(initialFen), Variant.Mancala(variant))    =>
       mancala.Replay.gameMoveWhileValid(moveStrs, initialFen, variant) match {
         case (game, gameswithsan, message) =>
           (
@@ -128,46 +135,50 @@ object Replay {
             message
           )
       }
-    case _ => sys.error("Mismatched gamelogic types 7")
+    case _                                                                           => sys.error("Mismatched gamelogic types 7")
   }
 
   def boards(
-    lib: GameLogic,
-    moveStrs: Iterable[String],
-    initialFen: Option[FEN],
-    variant: Variant,
-    finalSquare: Boolean = false
+      lib: GameLogic,
+      moveStrs: Iterable[String],
+      initialFen: Option[FEN],
+      variant: Variant,
+      finalSquare: Boolean = false
   ): Validated[String, List[Board]] =
     situations(lib, moveStrs, initialFen, variant, finalSquare) map (_ map (_.board))
 
   def situations(
-    lib: GameLogic,
-    moveStrs: Iterable[String],
-    initialFen: Option[FEN],
-    variant: Variant,
-    finalSquare: Boolean = false
+      lib: GameLogic,
+      moveStrs: Iterable[String],
+      initialFen: Option[FEN],
+      variant: Variant,
+      finalSquare: Boolean = false
   ): Validated[String, List[Situation]] = (lib, variant) match {
     case (GameLogic.Draughts(), Variant.Draughts(variant)) =>
-      draughts.Replay.situations(moveStrs, initialFen.map(_.toDraughts), variant, finalSquare)
+      draughts.Replay
+        .situations(moveStrs, initialFen.map(_.toDraughts), variant, finalSquare)
         .toEither
         .map(s => s.map(Situation.Draughts))
         .toValidated
-    case (GameLogic.Chess(), Variant.Chess(variant)) =>
-      chess.Replay.situations(moveStrs, initialFen.map(_.toChess), variant)
+    case (GameLogic.Chess(), Variant.Chess(variant))       =>
+      chess.Replay
+        .situations(moveStrs, initialFen.map(_.toChess), variant)
         .toEither
         .map(s => s.map(Situation.Chess))
         .toValidated
-    case (GameLogic.FairySF(), Variant.FairySF(variant)) =>
-      fairysf.Replay.situations(moveStrs, initialFen.map(_.toFairySF), variant)
+    case (GameLogic.FairySF(), Variant.FairySF(variant))   =>
+      fairysf.Replay
+        .situations(moveStrs, initialFen.map(_.toFairySF), variant)
         .toEither
         .map(s => s.map(Situation.FairySF))
         .toValidated
-    case (GameLogic.Mancala(), Variant.Mancala(variant)) =>
-      mancala.Replay.situations(moveStrs, initialFen.map(_.toMancala), variant)
+    case (GameLogic.Mancala(), Variant.Mancala(variant))   =>
+      mancala.Replay
+        .situations(moveStrs, initialFen.map(_.toMancala), variant)
         .toEither
         .map(s => s.map(Situation.Mancala))
         .toValidated
-    case _ => sys.error("Mismatched gamelogic types 8")
+    case _                                                 => sys.error("Mismatched gamelogic types 8")
   }
 
   private def draughtsUcis(ucis: List[Uci]): List[draughts.format.Uci] =
@@ -193,7 +204,7 @@ object Replay {
         case _              => None
       }
     )
-  
+
   private def mancalaUcis(ucis: List[Uci]): List[mancala.format.Uci] =
     ucis.flatMap(u =>
       u match {
@@ -203,120 +214,133 @@ object Replay {
     )
 
   def boardsFromUci(
-    lib: GameLogic,
-    moves: List[Uci],
-    initialFen: Option[FEN],
-    variant: Variant,
-    finalSquare: Boolean = false
+      lib: GameLogic,
+      moves: List[Uci],
+      initialFen: Option[FEN],
+      variant: Variant,
+      finalSquare: Boolean = false
   ): Validated[String, List[Board]] = (lib, variant) match {
     case (GameLogic.Draughts(), Variant.Draughts(variant)) =>
-      draughts.Replay.boardsFromUci(
-        draughtsUcis(moves),
-        initialFen.map(_.toDraughts),
-        variant,
-        finalSquare
-      ).toEither
+      draughts.Replay
+        .boardsFromUci(
+          draughtsUcis(moves),
+          initialFen.map(_.toDraughts),
+          variant,
+          finalSquare
+        )
+        .toEither
         .map(b => b.map(Board.Draughts))
         .toValidated
-    case (GameLogic.Chess(), Variant.Chess(variant))
-      => chess.Replay.boardsFromUci(chessUcis(moves), initialFen.map(_.toChess), variant)
+    case (GameLogic.Chess(), Variant.Chess(variant))       =>
+      chess.Replay
+        .boardsFromUci(chessUcis(moves), initialFen.map(_.toChess), variant)
         .toEither
         .map(b => b.map(Board.Chess))
         .toValidated
-    case (GameLogic.FairySF(), Variant.FairySF(variant))
-      => fairysf.Replay.boardsFromUci(fairysfUcis(moves), initialFen.map(_.toFairySF), variant)
+    case (GameLogic.FairySF(), Variant.FairySF(variant))   =>
+      fairysf.Replay
+        .boardsFromUci(fairysfUcis(moves), initialFen.map(_.toFairySF), variant)
         .toEither
         .map(b => b.map(Board.FairySF))
         .toValidated
-    case (GameLogic.Mancala(), Variant.Mancala(variant))
-      => mancala.Replay.boardsFromUci(mancalaUcis(moves), initialFen.map(_.toMancala), variant)
+    case (GameLogic.Mancala(), Variant.Mancala(variant))   =>
+      mancala.Replay
+        .boardsFromUci(mancalaUcis(moves), initialFen.map(_.toMancala), variant)
         .toEither
         .map(b => b.map(Board.Mancala))
         .toValidated
-    case _ => sys.error("Mismatched gamelogic types 8a")
+    case _                                                 => sys.error("Mismatched gamelogic types 8a")
   }
 
   def situationsFromUci(
-    lib: GameLogic,
-    moves: List[Uci],
-    initialFen: Option[FEN],
-    variant: Variant,
-    finalSquare: Boolean = false
+      lib: GameLogic,
+      moves: List[Uci],
+      initialFen: Option[FEN],
+      variant: Variant,
+      finalSquare: Boolean = false
   ): Validated[String, List[Situation]] = (lib, variant) match {
     case (GameLogic.Draughts(), Variant.Draughts(variant)) =>
-      draughts.Replay.situationsFromUci(draughtsUcis(moves), initialFen.map(_.toDraughts), variant, finalSquare)
+      draughts.Replay
+        .situationsFromUci(draughtsUcis(moves), initialFen.map(_.toDraughts), variant, finalSquare)
         .toEither
         .map(s => s.map(Situation.Draughts))
         .toValidated
-    case (GameLogic.Chess(), Variant.Chess(variant)) =>
-      chess.Replay.situationsFromUci(chessUcis(moves), initialFen.map(_.toChess), variant)
+    case (GameLogic.Chess(), Variant.Chess(variant))       =>
+      chess.Replay
+        .situationsFromUci(chessUcis(moves), initialFen.map(_.toChess), variant)
         .toEither
         .map(s => s.map(Situation.Chess))
         .toValidated
-    case (GameLogic.FairySF(), Variant.FairySF(variant)) =>
-      fairysf.Replay.situationsFromUci(fairysfUcis(moves), initialFen.map(_.toFairySF), variant)
+    case (GameLogic.FairySF(), Variant.FairySF(variant))   =>
+      fairysf.Replay
+        .situationsFromUci(fairysfUcis(moves), initialFen.map(_.toFairySF), variant)
         .toEither
         .map(s => s.map(Situation.FairySF))
         .toValidated
-    case (GameLogic.Mancala(), Variant.Mancala(variant)) =>
-      mancala.Replay.situationsFromUci(mancalaUcis(moves), initialFen.map(_.toMancala), variant)
+    case (GameLogic.Mancala(), Variant.Mancala(variant))   =>
+      mancala.Replay
+        .situationsFromUci(mancalaUcis(moves), initialFen.map(_.toMancala), variant)
         .toEither
         .map(s => s.map(Situation.Mancala))
         .toValidated
-    case _ => sys.error("Mismatched gamelogic types 9")
+    case _                                                 => sys.error("Mismatched gamelogic types 9")
   }
 
   def apply(
-    lib: GameLogic,
-    moves: List[Uci],
-    initialFen: Option[FEN],
-    variant: Variant,
-    finalSquare: Boolean = false
+      lib: GameLogic,
+      moves: List[Uci],
+      initialFen: Option[FEN],
+      variant: Variant,
+      finalSquare: Boolean = false
   ): Validated[String, Replay] = (lib, variant) match {
     case (GameLogic.Draughts(), Variant.Draughts(variant)) =>
-      draughts.Replay(draughtsUcis(moves), initialFen.map(_.toDraughts), variant, finalSquare)
+      draughts
+        .Replay(draughtsUcis(moves), initialFen.map(_.toDraughts), variant, finalSquare)
         .toEither
         .map(r => Replay.Draughts(r))
         .toValidated
-    case (GameLogic.Chess(), Variant.Chess(variant)) =>
-      chess.Replay(chessUcis(moves), initialFen.map(_.toChess), variant)
+    case (GameLogic.Chess(), Variant.Chess(variant))       =>
+      chess
+        .Replay(chessUcis(moves), initialFen.map(_.toChess), variant)
         .toEither
         .map(r => Replay.Chess(r))
         .toValidated
-    case (GameLogic.FairySF(), Variant.FairySF(variant)) =>
-      fairysf.Replay(fairysfUcis(moves), initialFen.map(_.toFairySF), variant)
+    case (GameLogic.FairySF(), Variant.FairySF(variant))   =>
+      fairysf
+        .Replay(fairysfUcis(moves), initialFen.map(_.toFairySF), variant)
         .toEither
         .map(r => Replay.FairySF(r))
         .toValidated
-    case (GameLogic.Mancala(), Variant.Mancala(variant)) =>
-      mancala.Replay.apply(mancalaUcis(moves), initialFen.map(_.toMancala), variant)
+    case (GameLogic.Mancala(), Variant.Mancala(variant))   =>
+      mancala.Replay
+        .apply(mancalaUcis(moves), initialFen.map(_.toMancala), variant)
         .toEither
         .map(r => Replay.Mancala(r))
         .toValidated
-    case _ => sys.error("Mismatched gamelogic types 10")
+    case _                                                 => sys.error("Mismatched gamelogic types 10")
   }
 
   def plyAtFen(
-    lib: GameLogic,
-    moveStrs: Iterable[String],
-    initialFen: Option[FEN],
-    variant: Variant,
-    atFen: FEN
+      lib: GameLogic,
+      moveStrs: Iterable[String],
+      initialFen: Option[FEN],
+      variant: Variant,
+      atFen: FEN
   ): Validated[String, Int] = (lib, variant, atFen) match {
-    case (GameLogic.Draughts(), Variant.Draughts(variant), FEN.Draughts(atFen))
-      => draughts.Replay.plyAtFen(moveStrs, initialFen.map(_.toDraughts), variant, atFen)
-    case (GameLogic.Chess(), Variant.Chess(variant), FEN.Chess(atFen))
-      => chess.Replay.plyAtFen(moveStrs, initialFen.map(_.toChess), variant, atFen)
-    case (GameLogic.FairySF(), Variant.FairySF(variant), FEN.FairySF(atFen))
-      => fairysf.Replay.plyAtFen(moveStrs, initialFen.map(_.toFairySF), variant, atFen)
-    case (GameLogic.Mancala(), Variant.Mancala(variant), FEN.Mancala(atFen))
-      => mancala.Replay.plyAtFen(moveStrs, initialFen.map(_.toMancala), variant, atFen)
-    case _ => sys.error("Mismatched gamelogic types 10")
+    case (GameLogic.Draughts(), Variant.Draughts(variant), FEN.Draughts(atFen)) =>
+      draughts.Replay.plyAtFen(moveStrs, initialFen.map(_.toDraughts), variant, atFen)
+    case (GameLogic.Chess(), Variant.Chess(variant), FEN.Chess(atFen))          =>
+      chess.Replay.plyAtFen(moveStrs, initialFen.map(_.toChess), variant, atFen)
+    case (GameLogic.FairySF(), Variant.FairySF(variant), FEN.FairySF(atFen))    =>
+      fairysf.Replay.plyAtFen(moveStrs, initialFen.map(_.toFairySF), variant, atFen)
+    case (GameLogic.Mancala(), Variant.Mancala(variant), FEN.Mancala(atFen))    =>
+      mancala.Replay.plyAtFen(moveStrs, initialFen.map(_.toMancala), variant, atFen)
+    case _                                                                      => sys.error("Mismatched gamelogic types 10")
   }
 
-  def wrap(r: chess.Replay) = Chess(r)
+  def wrap(r: chess.Replay)    = Chess(r)
   def wrap(r: draughts.Replay) = Draughts(r)
-  def wrap(r: fairysf.Replay) = FairySF(r)
-  def wrap(r: mancala.Replay) = Mancala(r)
+  def wrap(r: fairysf.Replay)  = FairySF(r)
+  def wrap(r: mancala.Replay)  = Mancala(r)
 
 }

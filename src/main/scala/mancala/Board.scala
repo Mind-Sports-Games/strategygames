@@ -20,12 +20,12 @@ case class Board(
 
   lazy val posMap: Map[Piece, Iterable[Pos]] = pieces.groupMap(_._2)(_._1)
 
-  lazy val piecesOnBoardCount: Int = pieces.keys.size
-  lazy val playerPiecesOnBoardCount: Map[Player, Int] = Player.all.map{
-    p => (p, pieces.collect{ case (pos, piece) if piece.player == p  => (pos, piece)}.size)
+  lazy val piecesOnBoardCount: Int                    = pieces.keys.size
+  lazy val playerPiecesOnBoardCount: Map[Player, Int] = Player.all.map { p =>
+    (p, pieces.collect { case (pos, piece) if piece.player == p => (pos, piece) }.size)
   }.toMap
 
-  def withHistory(h: History): Board = copy(history = h)
+  def withHistory(h: History): Board       = copy(history = h)
   def updateHistory(f: History => History) = copy(history = f(history))
 
   def withVariant(v: Variant): Board =
@@ -53,11 +53,11 @@ object Board {
 
   def init(variant: Variant): Board = Board(variant.pieces, variant)
 
-  //def empty(variant: Variant): Board = Board(Nil, variant)
+  // def empty(variant: Variant): Board = Board(Nil, variant)
 
   sealed abstract class BoardSize(
-    val width: Int,
-    val height: Int
+      val width: Int,
+      val height: Int
   ) {
 
     val key   = s"${width}x${height}"

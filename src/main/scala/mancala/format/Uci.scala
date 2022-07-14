@@ -40,39 +40,40 @@ object Uci {
   object Move {
 
     def apply(move: String): Option[Move] =
-      move match { 
-        case moveP(orig, dest, promotion) => (
-          Pos.fromKey(orig),
-          Pos.fromKey(dest),
-          promotion
-        ) match {
-          case (Some(orig), Some(dest), _) => {
-            Move(
-              orig = orig,
-              dest = dest,
-              promotion = None
-            ).some
+      move match {
+        case moveP(orig, dest, promotion) =>
+          (
+            Pos.fromKey(orig),
+            Pos.fromKey(dest),
+            promotion
+          ) match {
+            case (Some(orig), Some(dest), _) => {
+              Move(
+                orig = orig,
+                dest = dest,
+                promotion = None
+              ).some
+            }
+            case _                           => None
           }
-          case _ => None
-        }
-        case _ => None
+        case _                            => None
       }
 
     def piotr(move: String) =
       for {
         orig <- move.headOption flatMap Pos.piotr
         dest <- move lift 1 flatMap Pos.piotr
-      } yield Move(orig, dest, promotion=None)
+      } yield Move(orig, dest, promotion = None)
 
     def fromStrings(gf: GameFamily, origS: String, destS: String, promS: Option[String]) =
       for {
-        orig <- Pos.fromKey(origS)
-        dest <- Pos.fromKey(destS)
+        orig     <- Pos.fromKey(origS)
+        dest     <- Pos.fromKey(destS)
         promotion = None
       } yield Move(orig, dest, promotion)
 
-    val moveR = s"^${Pos.posR}${Pos.posR}(\\+?)$$".r
-    val moveP = s"^${Pos.posR}${Pos.posR}${Role.roleRr}$$".r
+    val moveR  = s"^${Pos.posR}${Pos.posR}(\\+?)$$".r
+    val moveP  = s"^${Pos.posR}${Pos.posR}${Role.roleRr}$$".r
     val movePR = s"^${Pos.posR}${Pos.posR}${Role.rolePR}$$".r
   }
 

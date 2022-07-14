@@ -4,7 +4,7 @@ package format.pgn
 import cats.data.Validated
 import cats.syntax.option._
 
-import strategygames.{ Move => StratMove, Drop => StratDrop }
+import strategygames.{ Drop => StratDrop, Move => StratMove }
 import strategygames.format.pgn.{ Metas, ParsedPgn, San, Sans, Suffixes, Tags }
 
 case class Std(
@@ -18,9 +18,9 @@ case class Std(
 ) extends San {
 
   def apply(
-    situation: strategygames.Situation,
-    iteratedCapts: Boolean = false,
-    forbiddenUci: Option[List[String]] = None
+      situation: strategygames.Situation,
+      iteratedCapts: Boolean = false,
+      forbiddenUci: Option[List[String]] = None
   ) = move(situation.toChess).map(StratMove.wrap).map(Left.apply)
 
   override def withSuffixes(s: Suffixes) =
@@ -61,9 +61,9 @@ case class Drop(
 ) extends San {
 
   def apply(
-    situation: strategygames.Situation,
-    iteratedCapts: Boolean = false,
-    forbiddenUci: Option[List[String]] = None
+      situation: strategygames.Situation,
+      iteratedCapts: Boolean = false,
+      forbiddenUci: Option[List[String]] = None
   ) = drop(situation.toChess).map(StratDrop.wrap).map(Right.apply)
 
   def withMetas(m: Metas) = copy(metas = m)
@@ -78,9 +78,9 @@ case class Castle(
 ) extends San {
 
   def apply(
-    situation: strategygames.Situation,
-    iteratedCapts: Boolean = false,
-    forbiddenUci: Option[List[String]] = None
+      situation: strategygames.Situation,
+      iteratedCapts: Boolean = false,
+      forbiddenUci: Option[List[String]] = None
   ) = move(situation.toChess).map(StratMove.wrap).map(Left.apply)
 
   def withMetas(m: Metas) = copy(metas = m)

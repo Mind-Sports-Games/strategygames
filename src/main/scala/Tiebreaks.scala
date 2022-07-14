@@ -89,8 +89,6 @@ class Tiebreak(val tournament: Tournament) {
   // system, it is equivalent to the Solkoff system.
   // - https://en.wikipedia.org/wiki/Buchholz_system
 
-
-
   // MSO Rules (based on FIDE) as per MSO arbiter, Mike Dixon:
   // ---------------------------------------------------------------------------
   // If someone you played later withdraws you get 1/2 a point per round they
@@ -98,7 +96,7 @@ class Tiebreak(val tournament: Tournament) {
   // get the same for a bye (0.5 per round ontop of your score going into that
   // match). And if you play somebody who got a bye their bye only counts as
   // 0.5 for your TB (not the 1.0 that they get for the bye)
-  // 
+  //
   def fideBuchholz(p: Player): Double =
     tournament.resultsForPlayer(p).map(fideBuchholzForGame).sum
 

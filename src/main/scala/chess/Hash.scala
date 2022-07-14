@@ -26,14 +26,14 @@ object Hash {
     def hexToLong(s: String): Long =
       (java.lang.Long.parseLong(s.substring(start, start + 8), 16) << 32) |
         java.lang.Long.parseLong(s.substring(start + 8, start + 16), 16)
-    val p1TurnMask       = hexToLong(ZobristTables.p1TurnMask)
-    val actorMasks          = ZobristTables.actorMasks.map(hexToLong)
-    val castlingMasks       = ZobristTables.castlingMasks.map(hexToLong)
-    val enPassantMasks      = ZobristTables.enPassantMasks.map(hexToLong)
-    val threeCheckMasks     = ZobristTables.threeCheckMasks.map(hexToLong)
-    val fiveCheckMasks      = ZobristTables.fiveCheckMasks.map(hexToLong)
-    val crazyPromotionMasks = ZobristTables.crazyPromotionMasks.map(hexToLong)
-    val pocketMasks    = ZobristTables.pocketMasks.map(hexToLong)
+    val p1TurnMask                 = hexToLong(ZobristTables.p1TurnMask)
+    val actorMasks                 = ZobristTables.actorMasks.map(hexToLong)
+    val castlingMasks              = ZobristTables.castlingMasks.map(hexToLong)
+    val enPassantMasks             = ZobristTables.enPassantMasks.map(hexToLong)
+    val threeCheckMasks            = ZobristTables.threeCheckMasks.map(hexToLong)
+    val fiveCheckMasks             = ZobristTables.fiveCheckMasks.map(hexToLong)
+    val crazyPromotionMasks        = ZobristTables.crazyPromotionMasks.map(hexToLong)
+    val pocketMasks                = ZobristTables.pocketMasks.map(hexToLong)
   }
 
   object ZobristConstants {}
@@ -88,12 +88,12 @@ object Hash {
         val p1Count   = math.min(situation.history.checkCount.p1, 3)
         val hp2checks = if (p2Count > 0) hep ^ table.threeCheckMasks(p2Count - 1) else hep
         if (p1Count > 0) hp2checks ^ table.threeCheckMasks(p1Count + 2) else hp2checks
-      case variant.FiveCheck =>
+      case variant.FiveCheck  =>
         val p2Count   = math.min(situation.history.checkCount.p2, 5)
         val p1Count   = math.min(situation.history.checkCount.p1, 5)
         val hp2checks = if (p2Count > 0) hep ^ table.fiveCheckMasks(p2Count - 1) else hep
-        if (p1Count > 0) hp2checks ^ table.fiveCheckMasks(p1Count + 4) else hp2checks  
-      case _ => hep
+        if (p1Count > 0) hp2checks ^ table.fiveCheckMasks(p1Count + 4) else hp2checks
+      case _                  => hep
     }
 
     // Hash in special crazyhouse data.
@@ -1053,7 +1053,6 @@ private object ZobristTables {
     "1b0ce4198b3801a6c8ce065f15fe38f5"
   )
 
-  
   val fiveCheckMasks = Array(
     "366a2a47eb189287009f592bd8d06661",
     "0622f736d98ed771f6a5d2bfc99deba7",

@@ -37,10 +37,10 @@ case class Move(
         h2 withoutCastles player
       else if (piece is Rook) (for {
         kingPos <- after kingPosOf player
-        side <- Side.kingRookSide(kingPos, orig).filter { s =>
-          (h2 canCastle player on s) &&
-          h1.unmovedRooks.pos(orig)
-        }
+        side    <- Side.kingRookSide(kingPos, orig).filter { s =>
+                     (h2 canCastle player on s) &&
+                     h1.unmovedRooks.pos(orig)
+                   }
       } yield h2.withoutCastle(player, side)) | h2
       else h2
     } fixCastles
@@ -50,8 +50,8 @@ case class Move(
     board.variant.finalizeBoard(board, toUci, capture flatMap before.apply) updateHistory { h =>
       lazy val positionHashesOfSituationBefore =
         if (h.positionHashes.isEmpty) Hash(situationBefore) else h.positionHashes
-      val resetsPositionHashes = board.variant.isIrreversible(this)
-      val basePositionHashes =
+      val resetsPositionHashes                 = board.variant.isIrreversible(this)
+      val basePositionHashes                   =
         if (resetsPositionHashes) Array.empty: PositionHash else positionHashesOfSituationBefore
       h.copy(positionHashes = Hash(Situation(board, !piece.player)) ++ basePositionHashes)
     }

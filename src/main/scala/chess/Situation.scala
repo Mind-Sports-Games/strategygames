@@ -92,12 +92,12 @@ case class Situation(board: Board, player: Player) {
             move.dest.file.offset(-1),
             move.dest.file.offset(1)
           ).flatten
-          .flatMap(board(_, Rank.passablePawnRank(player)))
-          .exists(_ == Piece(player, Pawn))
+            .flatMap(board(_, Rank.passablePawnRank(player)))
+            .exists(_ == Piece(player, Pawn))
         )
           moves.values.flatten.find(_.enpassant).map(_.dest)
         else None
-      case _ => None
+      case _                    => None
     }
   }
 
@@ -106,5 +106,6 @@ case class Situation(board: Board, player: Player) {
 
 object Situation {
 
-  def apply(variant: strategygames.chess.variant.Variant): Situation = Situation(Board init variant, variant.startPlayer)
+  def apply(variant: strategygames.chess.variant.Variant): Situation =
+    Situation(Board init variant, variant.startPlayer)
 }

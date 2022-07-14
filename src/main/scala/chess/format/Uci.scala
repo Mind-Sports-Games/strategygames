@@ -39,22 +39,22 @@ object Uci {
 
     def apply(move: String): Option[Move] =
       for {
-        orig <- Pos.fromKey(move take 2)
-        dest <- Pos.fromKey(move.slice(2, 4))
+        orig     <- Pos.fromKey(move take 2)
+        dest     <- Pos.fromKey(move.slice(2, 4))
         promotion = move lift 4 flatMap Role.promotable
       } yield Move(orig, dest, promotion)
 
     def piotr(move: String) =
       for {
-        orig <- move.headOption flatMap Pos.piotr
-        dest <- move lift 1 flatMap Pos.piotr
+        orig     <- move.headOption flatMap Pos.piotr
+        dest     <- move lift 1 flatMap Pos.piotr
         promotion = move lift 2 flatMap Role.promotable
       } yield Move(orig, dest, promotion)
 
     def fromStrings(origS: String, destS: String, promS: Option[String]) =
       for {
-        orig <- Pos.fromKey(origS)
-        dest <- Pos.fromKey(destS)
+        orig     <- Pos.fromKey(origS)
+        dest     <- Pos.fromKey(destS)
         promotion = Role promotable promS
       } yield Move(orig, dest, promotion)
   }

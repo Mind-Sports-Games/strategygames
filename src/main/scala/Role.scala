@@ -2,7 +2,7 @@ package strategygames
 
 sealed trait Role {
   val forsyth: Char
-  //draughts.Role.pdn will be referred to by pgn from this point
+  // draughts.Role.pdn will be referred to by pgn from this point
   val pgn: Char
   val name: String
   val groundName: String
@@ -24,96 +24,95 @@ sealed trait PromotableRole extends Role {
 object Role {
 
   final case class ChessRole(r: chess.Role) extends Role {
-    val forsyth = r.forsyth
-    val pgn = r.pgn
-    val binaryInt = r.binaryInt
-    val hashInt = r.hashInt
-    val name = r.name
-    val groundName = r.groundName
-    val storable = r.storable
+    val forsyth             = r.forsyth
+    val pgn                 = r.pgn
+    val binaryInt           = r.binaryInt
+    val hashInt             = r.hashInt
+    val name                = r.name
+    val groundName          = r.groundName
+    val storable            = r.storable
     override def toString() = r.name
   }
 
   final case class DraughtsRole(r: draughts.Role) extends Role {
-    val forsyth = r.forsyth
-    val pgn = r.pdn
-    val binaryInt = r.binaryInt
-    val hashInt = r.hashInt
-    val name = r.name
-    val groundName = r.name
-    val storable = false
+    val forsyth             = r.forsyth
+    val pgn                 = r.pdn
+    val binaryInt           = r.binaryInt
+    val hashInt             = r.hashInt
+    val name                = r.name
+    val groundName          = r.name
+    val storable            = false
     override def toString() = r.name
   }
 
   final case class FairySFRole(r: fairysf.Role) extends Role {
-    val forsyth = r.forsyth
-    val pgn = r.pgn
-    val binaryInt = r.binaryInt
-    val hashInt = r.hashInt
-    val name = r.name
-    val groundName = r.groundName
-    val storable = r.storable
+    val forsyth             = r.forsyth
+    val pgn                 = r.pgn
+    val binaryInt           = r.binaryInt
+    val hashInt             = r.hashInt
+    val name                = r.name
+    val groundName          = r.groundName
+    val storable            = r.storable
     override def toString() = r.name
   }
 
   final case class MancalaRole(r: mancala.Role) extends Role {
-    val forsyth = r.forsyth
-    val pgn = r.pgn
-    val binaryInt = r.binaryInt
-    val hashInt = r.hashInt
-    val name = r.name
-    val groundName = r.groundName
-    val storable = r.storable
+    val forsyth             = r.forsyth
+    val pgn                 = r.pgn
+    val binaryInt           = r.binaryInt
+    val hashInt             = r.hashInt
+    val name                = r.name
+    val groundName          = r.groundName
+    val storable            = r.storable
     override def toString() = r.name
   }
 
   final case class ChessPromotableRole(r: chess.PromotableRole) extends PromotableRole {
-    val forsyth = r.forsyth
-    val pgn = r.pgn
-    val binaryInt = r.binaryInt
-    val hashInt = r.hashInt
-    val name = r.name
-    val groundName = r.groundName
-    val storable = r.storable
-    override def toString() = r.name
-    def toChess = r
+    val forsyth                             = r.forsyth
+    val pgn                                 = r.pgn
+    val binaryInt                           = r.binaryInt
+    val hashInt                             = r.hashInt
+    val name                                = r.name
+    val groundName                          = r.groundName
+    val storable                            = r.storable
+    override def toString()                 = r.name
+    def toChess                             = r
     def toDraughts: draughts.PromotableRole = sys.error("Not implemented for chess")
-    def toFairySF: fairysf.PromotableRole = sys.error("Not implemented for chess")
-    def toMancala: mancala.PromotableRole = sys.error("Not implemented for chess")
+    def toFairySF: fairysf.PromotableRole   = sys.error("Not implemented for chess")
+    def toMancala: mancala.PromotableRole   = sys.error("Not implemented for chess")
   }
 
   final case class DraughtsPromotableRole(r: draughts.PromotableRole) extends PromotableRole {
-    val forsyth = r.forsyth
-    val pgn = r.pdn
-    val binaryInt = r.binaryInt
-    val hashInt = r.hashInt
-    val name = r.name
-    val groundName = r.name
-    val storable = false
-    override def toString() = r.name
-    def toDraughts = r
-    def toChess: chess.PromotableRole = sys.error("Not implemented for draughts")
+    val forsyth                           = r.forsyth
+    val pgn                               = r.pdn
+    val binaryInt                         = r.binaryInt
+    val hashInt                           = r.hashInt
+    val name                              = r.name
+    val groundName                        = r.name
+    val storable                          = false
+    override def toString()               = r.name
+    def toDraughts                        = r
+    def toChess: chess.PromotableRole     = sys.error("Not implemented for draughts")
     def toFairySF: fairysf.PromotableRole = sys.error("Not implemented for draughts")
     def toMancala: mancala.PromotableRole = sys.error("Not implemented for draughts")
   }
 
   final case class FairySFPromotableRole(r: fairysf.PromotableRole) extends PromotableRole {
-    val forsyth = r.forsyth
-    val pgn = r.pgn
-    val binaryInt = r.binaryInt
-    val hashInt = r.hashInt
-    val name = r.name
-    val groundName = r.groundName
-    val storable = r.storable
-    override def toString() = r.name
+    val forsyth                             = r.forsyth
+    val pgn                                 = r.pgn
+    val binaryInt                           = r.binaryInt
+    val hashInt                             = r.hashInt
+    val name                                = r.name
+    val groundName                          = r.groundName
+    val storable                            = r.storable
+    override def toString()                 = r.name
     def toDraughts: draughts.PromotableRole = sys.error("Not implemented for fairysf")
-    def toChess: chess.PromotableRole = sys.error("Not implemented for fairysf")
-    def toFairySF = r
-    def toMancala: mancala.PromotableRole = sys.error("Not implemented for mancala")
+    def toChess: chess.PromotableRole       = sys.error("Not implemented for fairysf")
+    def toFairySF                           = r
+    def toMancala: mancala.PromotableRole   = sys.error("Not implemented for mancala")
   }
 
-
-  //lila
+  // lila
   def all(lib: GameLogic): List[Role] = lib match {
     case GameLogic.Draughts() => draughts.Role.all.map(DraughtsRole)
     case GameLogic.Chess()    => chess.Role.all.map(ChessRole)
@@ -129,101 +128,117 @@ object Role {
   }
 
   def allByForsyth(lib: GameLogic): Map[Char, Role] = lib match {
-    case GameLogic.Draughts() => draughts.Role.allByForsyth.map{case(f, r) => (f, DraughtsRole(r))}
-    case GameLogic.Chess()    => chess.Role.allByForsyth.map{case(f, r) => (f, ChessRole(r))}
-    case GameLogic.FairySF()  => fairysf.Role.allByForsyth.map{case(f, r) => (f, FairySFRole(r))}
-    case GameLogic.Mancala()  => mancala.Role.allByForsyth.map{case(f, r) => (f, MancalaRole(r))}
+    case GameLogic.Draughts() => draughts.Role.allByForsyth.map { case (f, r) => (f, DraughtsRole(r)) }
+    case GameLogic.Chess()    => chess.Role.allByForsyth.map { case (f, r) => (f, ChessRole(r)) }
+    case GameLogic.FairySF()  => fairysf.Role.allByForsyth.map { case (f, r) => (f, FairySFRole(r)) }
+    case GameLogic.Mancala()  => mancala.Role.allByForsyth.map { case (f, r) => (f, MancalaRole(r)) }
   }
 
   def allByForsyth(lib: GameLogic, gf: GameFamily): Map[Char, Role] = lib match {
-    case GameLogic.Draughts() => draughts.Role.allByForsyth.map{case(f, r) => (f, DraughtsRole(r))}
-    case GameLogic.Chess() => chess.Role.allByForsyth.map{case(f, r) => (f, ChessRole(r))}
-    case GameLogic.FairySF() => fairysf.Role.allByForsyth(gf).map{case(f, r) => (f, FairySFRole(r))}
-    case GameLogic.Mancala() => mancala.Role.allByForsyth(gf).map{case(f, r) => (f, MancalaRole(r))}
+    case GameLogic.Draughts() => draughts.Role.allByForsyth.map { case (f, r) => (f, DraughtsRole(r)) }
+    case GameLogic.Chess()    => chess.Role.allByForsyth.map { case (f, r) => (f, ChessRole(r)) }
+    case GameLogic.FairySF()  => fairysf.Role.allByForsyth(gf).map { case (f, r) => (f, FairySFRole(r)) }
+    case GameLogic.Mancala()  => mancala.Role.allByForsyth(gf).map { case (f, r) => (f, MancalaRole(r)) }
   }
 
   def allByPgn(lib: GameLogic): Map[Char, Role] = lib match {
-    case GameLogic.Draughts() => draughts.Role.allByPdn.map{case(p, r) => (p, DraughtsRole(r))}
-    case GameLogic.Chess() => chess.Role.allByPgn.map{case(p, r) => (p, ChessRole(r))}
-    case GameLogic.FairySF() => fairysf.Role.allByPgn.map{case(p, r) => (p, FairySFRole(r))}
-    case GameLogic.Mancala() => mancala.Role.allByPgn.map{case(p, r) => (p, MancalaRole(r))}
+    case GameLogic.Draughts() => draughts.Role.allByPdn.map { case (p, r) => (p, DraughtsRole(r)) }
+    case GameLogic.Chess()    => chess.Role.allByPgn.map { case (p, r) => (p, ChessRole(r)) }
+    case GameLogic.FairySF()  => fairysf.Role.allByPgn.map { case (p, r) => (p, FairySFRole(r)) }
+    case GameLogic.Mancala()  => mancala.Role.allByPgn.map { case (p, r) => (p, MancalaRole(r)) }
   }
 
   def allByPgn(lib: GameLogic, gf: GameFamily): Map[Char, Role] = lib match {
-    case GameLogic.Draughts() => draughts.Role.allByPdn.map{case(p, r) => (p, DraughtsRole(r))}
-    case GameLogic.Chess() => chess.Role.allByPgn.map{case(p, r) => (p, ChessRole(r))}
-    case GameLogic.FairySF() => fairysf.Role.allByPgn(gf).map{case(p, r) => (p, FairySFRole(r))}
-    case GameLogic.Mancala() => mancala.Role.allByPgn(gf).map{case(p, r) => (p, MancalaRole(r))}
+    case GameLogic.Draughts() => draughts.Role.allByPdn.map { case (p, r) => (p, DraughtsRole(r)) }
+    case GameLogic.Chess()    => chess.Role.allByPgn.map { case (p, r) => (p, ChessRole(r)) }
+    case GameLogic.FairySF()  => fairysf.Role.allByPgn(gf).map { case (p, r) => (p, FairySFRole(r)) }
+    case GameLogic.Mancala()  => mancala.Role.allByPgn(gf).map { case (p, r) => (p, MancalaRole(r)) }
   }
 
   def allByName(lib: GameLogic): Map[String, Role] = lib match {
-    case GameLogic.Draughts() => draughts.Role.allByName.map{case(n, r) => (n, DraughtsRole(r))}
-    case GameLogic.Chess() => chess.Role.allByName.map{case(n, r) => (n, ChessRole(r))}
-    case GameLogic.FairySF() => fairysf.Role.allByName.map{case(n, r) => (n, FairySFRole(r))}
-    case GameLogic.Mancala() => mancala.Role.allByName.map{case(n, r) => (n, MancalaRole(r))}
+    case GameLogic.Draughts() => draughts.Role.allByName.map { case (n, r) => (n, DraughtsRole(r)) }
+    case GameLogic.Chess()    => chess.Role.allByName.map { case (n, r) => (n, ChessRole(r)) }
+    case GameLogic.FairySF()  => fairysf.Role.allByName.map { case (n, r) => (n, FairySFRole(r)) }
+    case GameLogic.Mancala()  => mancala.Role.allByName.map { case (n, r) => (n, MancalaRole(r)) }
   }
 
   def allByName(lib: GameLogic, gf: GameFamily): Map[String, Role] = lib match {
-    case GameLogic.Draughts() => draughts.Role.allByName.map{case(n, r) => (n, DraughtsRole(r))}
-    case GameLogic.Chess() => chess.Role.allByName.map{case(n, r) => (n, ChessRole(r))}
-    case GameLogic.FairySF() => fairysf.Role.allByName(gf).map{case(n, r) => (n, FairySFRole(r))}
-    case GameLogic.Mancala() => mancala.Role.allByName(gf).map{case(n, r) => (n, MancalaRole(r))}
+    case GameLogic.Draughts() => draughts.Role.allByName.map { case (n, r) => (n, DraughtsRole(r)) }
+    case GameLogic.Chess()    => chess.Role.allByName.map { case (n, r) => (n, ChessRole(r)) }
+    case GameLogic.FairySF()  => fairysf.Role.allByName(gf).map { case (n, r) => (n, FairySFRole(r)) }
+    case GameLogic.Mancala()  => mancala.Role.allByName(gf).map { case (n, r) => (n, MancalaRole(r)) }
   }
 
   def allByGroundName(lib: GameLogic): Map[String, Role] = lib match {
-    case GameLogic.Draughts() => draughts.Role.allByName.map{case(n, r) => (n, DraughtsRole(r))}
-    case GameLogic.Chess() => chess.Role.allByGroundName.map{case(n, r) => (n, ChessRole(r))}
-    case GameLogic.FairySF() => fairysf.Role.allByGroundName.map{case(n, r) => (n, FairySFRole(r))}
-    case GameLogic.Mancala() => mancala.Role.allByGroundName.map{case(n, r) => (n, MancalaRole(r))}
+    case GameLogic.Draughts() => draughts.Role.allByName.map { case (n, r) => (n, DraughtsRole(r)) }
+    case GameLogic.Chess()    => chess.Role.allByGroundName.map { case (n, r) => (n, ChessRole(r)) }
+    case GameLogic.FairySF()  => fairysf.Role.allByGroundName.map { case (n, r) => (n, FairySFRole(r)) }
+    case GameLogic.Mancala()  => mancala.Role.allByGroundName.map { case (n, r) => (n, MancalaRole(r)) }
   }
 
   def allByGroundName(lib: GameLogic, gf: GameFamily): Map[String, Role] = lib match {
-    case GameLogic.Draughts() => draughts.Role.allByName.map{case(n, r) => (n, DraughtsRole(r))}
-    case GameLogic.Chess() => chess.Role.allByGroundName.map{case(n, r) => (n, ChessRole(r))}
-    case GameLogic.FairySF() => fairysf.Role.allByGroundName(gf).map{case(n, r) => (n, FairySFRole(r))}
-    case GameLogic.Mancala() => mancala.Role.allByGroundName(gf).map{case(n, r) => (n, MancalaRole(r))}
+    case GameLogic.Draughts() => draughts.Role.allByName.map { case (n, r) => (n, DraughtsRole(r)) }
+    case GameLogic.Chess()    => chess.Role.allByGroundName.map { case (n, r) => (n, ChessRole(r)) }
+    case GameLogic.FairySF()  => fairysf.Role.allByGroundName(gf).map { case (n, r) => (n, FairySFRole(r)) }
+    case GameLogic.Mancala()  => mancala.Role.allByGroundName(gf).map { case (n, r) => (n, MancalaRole(r)) }
   }
 
   def allPromotableByName(lib: GameLogic): Map[String, PromotableRole] = lib match {
-    case GameLogic.Draughts() => draughts.Role.allPromotableByName.map{case(n, r) => (n, DraughtsPromotableRole(r))}
-    case GameLogic.Chess() => chess.Role.allPromotableByName.map{case(n, r) => (n, ChessPromotableRole(r))}
-    case GameLogic.FairySF() => fairysf.Role.allPromotableByName.map{case(n, r) => (n, FairySFPromotableRole(r))}
-    case GameLogic.Mancala() => sys.error("allPromotableByName not implemented for mancala")
+    case GameLogic.Draughts() =>
+      draughts.Role.allPromotableByName.map { case (n, r) => (n, DraughtsPromotableRole(r)) }
+    case GameLogic.Chess()    =>
+      chess.Role.allPromotableByName.map { case (n, r) => (n, ChessPromotableRole(r)) }
+    case GameLogic.FairySF()  =>
+      fairysf.Role.allPromotableByName.map { case (n, r) => (n, FairySFPromotableRole(r)) }
+    case GameLogic.Mancala()  => sys.error("allPromotableByName not implemented for mancala")
   }
 
   def allPromotableByName(lib: GameLogic, gf: GameFamily): Map[String, PromotableRole] = lib match {
-    case GameLogic.Draughts() => draughts.Role.allPromotableByName.map{case(n, r) => (n, DraughtsPromotableRole(r))}
-    case GameLogic.Chess() => chess.Role.allPromotableByName.map{case(n, r) => (n, ChessPromotableRole(r))}
-    case GameLogic.FairySF() => fairysf.Role.allPromotableByName(gf).map{case(n, r) => (n, FairySFPromotableRole(r))}
-    case GameLogic.Mancala() => sys.error("allPromotableByName not implemented for mancala")
+    case GameLogic.Draughts() =>
+      draughts.Role.allPromotableByName.map { case (n, r) => (n, DraughtsPromotableRole(r)) }
+    case GameLogic.Chess()    =>
+      chess.Role.allPromotableByName.map { case (n, r) => (n, ChessPromotableRole(r)) }
+    case GameLogic.FairySF()  =>
+      fairysf.Role.allPromotableByName(gf).map { case (n, r) => (n, FairySFPromotableRole(r)) }
+    case GameLogic.Mancala()  => sys.error("allPromotableByName not implemented for mancala")
   }
 
   def allPromotableByForsyth(lib: GameLogic): Map[Char, PromotableRole] = lib match {
-    case GameLogic.Draughts() => draughts.Role.allPromotableByForsyth.map{case(f, r) => (f, DraughtsPromotableRole(r))}
-    case GameLogic.Chess() => chess.Role.allPromotableByForsyth.map{case(f, r) => (f, ChessPromotableRole(r))}
-    case GameLogic.FairySF() => fairysf.Role.allPromotableByForsyth.map{case(f, r) => (f, FairySFPromotableRole(r))}
-    case GameLogic.Mancala() => sys.error("allPromotableByForsyth not implemented for mancala")
+    case GameLogic.Draughts() =>
+      draughts.Role.allPromotableByForsyth.map { case (f, r) => (f, DraughtsPromotableRole(r)) }
+    case GameLogic.Chess()    =>
+      chess.Role.allPromotableByForsyth.map { case (f, r) => (f, ChessPromotableRole(r)) }
+    case GameLogic.FairySF()  =>
+      fairysf.Role.allPromotableByForsyth.map { case (f, r) => (f, FairySFPromotableRole(r)) }
+    case GameLogic.Mancala()  => sys.error("allPromotableByForsyth not implemented for mancala")
   }
 
   def allPromotableByForsyth(lib: GameLogic, gf: GameFamily): Map[Char, PromotableRole] = lib match {
-    case GameLogic.Draughts() => draughts.Role.allPromotableByForsyth.map{case(f, r) => (f, DraughtsPromotableRole(r))}
-    case GameLogic.Chess() => chess.Role.allPromotableByForsyth.map{case(f, r) => (f, ChessPromotableRole(r))}
-    case GameLogic.FairySF() => fairysf.Role.allPromotableByForsyth(gf).map{case(f, r) => (f, FairySFPromotableRole(r))}
-    case GameLogic.Mancala() => sys.error("allPromotableByForsyth not implemented for mancala")
+    case GameLogic.Draughts() =>
+      draughts.Role.allPromotableByForsyth.map { case (f, r) => (f, DraughtsPromotableRole(r)) }
+    case GameLogic.Chess()    =>
+      chess.Role.allPromotableByForsyth.map { case (f, r) => (f, ChessPromotableRole(r)) }
+    case GameLogic.FairySF()  =>
+      fairysf.Role.allPromotableByForsyth(gf).map { case (f, r) => (f, FairySFPromotableRole(r)) }
+    case GameLogic.Mancala()  => sys.error("allPromotableByForsyth not implemented for mancala")
   }
 
   def allPromotableByPgn(lib: GameLogic): Map[Char, PromotableRole] = lib match {
-    case GameLogic.Draughts() => draughts.Role.allPromotableByPdn.map{case(p, r) => (p, DraughtsPromotableRole(r))}
-    case GameLogic.Chess() => chess.Role.allPromotableByPgn.map{case(p, r) => (p, ChessPromotableRole(r))}
-    case GameLogic.FairySF() => fairysf.Role.allPromotableByPgn.map{case(p, r) => (p, FairySFPromotableRole(r))}
-    case GameLogic.Mancala() => sys.error("allPromotableByPgn not implemented for mancala")
+    case GameLogic.Draughts() =>
+      draughts.Role.allPromotableByPdn.map { case (p, r) => (p, DraughtsPromotableRole(r)) }
+    case GameLogic.Chess()    => chess.Role.allPromotableByPgn.map { case (p, r) => (p, ChessPromotableRole(r)) }
+    case GameLogic.FairySF()  =>
+      fairysf.Role.allPromotableByPgn.map { case (p, r) => (p, FairySFPromotableRole(r)) }
+    case GameLogic.Mancala()  => sys.error("allPromotableByPgn not implemented for mancala")
   }
 
   def allPromotableByPgn(lib: GameLogic, gf: GameFamily): Map[Char, PromotableRole] = lib match {
-    case GameLogic.Draughts() => draughts.Role.allPromotableByPdn.map{case(p, r) => (p, DraughtsPromotableRole(r))}
-    case GameLogic.Chess()    => chess.Role.allPromotableByPgn.map{case(p, r) => (p, ChessPromotableRole(r))}
-    case GameLogic.FairySF()  => fairysf.Role.allPromotableByPgn(gf).map{case(p, r) => (p, FairySFPromotableRole(r))}
-    case GameLogic.Mancala() => sys.error("allPromotableByPgn not implemented for mancala")
+    case GameLogic.Draughts() =>
+      draughts.Role.allPromotableByPdn.map { case (p, r) => (p, DraughtsPromotableRole(r)) }
+    case GameLogic.Chess()    => chess.Role.allPromotableByPgn.map { case (p, r) => (p, ChessPromotableRole(r)) }
+    case GameLogic.FairySF()  =>
+      fairysf.Role.allPromotableByPgn(gf).map { case (p, r) => (p, FairySFPromotableRole(r)) }
+    case GameLogic.Mancala()  => sys.error("allPromotableByPgn not implemented for mancala")
   }
 
   def forsyth(lib: GameLogic, c: Char): Option[Role] = lib match {
@@ -237,21 +252,21 @@ object Role {
     case GameLogic.Draughts() => draughts.Role.promotable(c).map(DraughtsPromotableRole)
     case GameLogic.Chess()    => chess.Role.promotable(c).map(ChessPromotableRole)
     case GameLogic.FairySF()  => fairysf.Role.promotable(gf, c).map(FairySFPromotableRole)
-    case GameLogic.Mancala()    => sys.error("promotable not implemented for mancala")
+    case GameLogic.Mancala()  => sys.error("promotable not implemented for mancala")
   }
 
   def promotable(lib: GameLogic, gf: GameFamily, name: String): Option[PromotableRole] = lib match {
     case GameLogic.Draughts() => draughts.Role.promotable(name).map(DraughtsPromotableRole)
     case GameLogic.Chess()    => chess.Role.promotable(name).map(ChessPromotableRole)
     case GameLogic.FairySF()  => fairysf.Role.promotable(gf, name).map(FairySFPromotableRole)
-    case GameLogic.Mancala()    => sys.error("promotable not implemented for mancala")
+    case GameLogic.Mancala()  => sys.error("promotable not implemented for mancala")
   }
 
   def promotable(lib: GameLogic, gf: GameFamily, name: Option[String]): Option[PromotableRole] = lib match {
     case GameLogic.Draughts() => draughts.Role.promotable(name).map(DraughtsPromotableRole)
     case GameLogic.Chess()    => chess.Role.promotable(name).map(ChessPromotableRole)
     case GameLogic.FairySF()  => fairysf.Role.promotable(gf, name).map(FairySFPromotableRole)
-    case GameLogic.Mancala()    => sys.error("promotable not implemented for mancala")
+    case GameLogic.Mancala()  => sys.error("promotable not implemented for mancala")
   }
 
   def storable(lib: GameLogic): List[Role] = lib match {
@@ -275,8 +290,8 @@ object Role {
     case GameLogic.Mancala()  => MancalaRole(mancala.Role.javaSymbolToRole(s))
   }
 
-  def wrap(pr: chess.PromotableRole): PromotableRole = ChessPromotableRole(pr)
+  def wrap(pr: chess.PromotableRole): PromotableRole    = ChessPromotableRole(pr)
   def wrap(pr: draughts.PromotableRole): PromotableRole = DraughtsPromotableRole(pr)
-  def wrap(pr: fairysf.PromotableRole): PromotableRole = FairySFPromotableRole(pr)
+  def wrap(pr: fairysf.PromotableRole): PromotableRole  = FairySFPromotableRole(pr)
 
 }

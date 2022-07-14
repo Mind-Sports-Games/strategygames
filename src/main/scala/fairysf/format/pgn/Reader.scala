@@ -15,7 +15,7 @@ object Reader {
   }
 
   object Result {
-    case class Complete(replay: Replay) extends Result {
+    case class Complete(replay: Replay)                    extends Result {
       def valid = Validated.valid(replay)
     }
     case class Incomplete(replay: Replay, failure: String) extends Result {
@@ -75,7 +75,7 @@ object Reader {
           err => Result.Incomplete(replay, err),
           move => Result.Complete(replay addMove StratMove.toFairySF(move))
         )
-      case (r: Result.Incomplete, _) => r
+      case (r: Result.Incomplete, _)      => r
     }
 
   private def makeReplayFromUCI(game: Game, ucis: List[Uci]): Result =
@@ -85,7 +85,7 @@ object Reader {
           err => Result.Incomplete(replay, err),
           move => Result.Complete(replay addMove move)
         )
-      case (r: Result.Incomplete, _) => r
+      case (r: Result.Incomplete, _)      => r
     }
 
   private def makeReplayWithPgn(game: Game, moves: Iterable[String]): Result =
@@ -109,10 +109,10 @@ object Reader {
                     )
                   )
                 )
-              case _ => Result.Incomplete(replay, s"Error making replay with move: ${m}")
+              case _                        => Result.Incomplete(replay, s"Error making replay with move: ${m}")
             }
           }
-          case Uci.Drop.dropR(role, dest) =>
+          case Uci.Drop.dropR(role, dest)            =>
             (Role.allByForsyth(replay.state.board.variant.gameFamily).get(role(0)), Pos.fromKey(dest)) match {
               case (Some(role), Some(dest)) =>
                 Result.Complete(
@@ -128,11 +128,11 @@ object Reader {
                     )
                   )
                 )
-              case _ => Result.Incomplete(replay, s"Error making replay with drop: ${m}")
+              case _                        => Result.Incomplete(replay, s"Error making replay with drop: ${m}")
             }
-          case _ => Result.Incomplete(replay, s"Error making replay with uci move: ${m}")
+          case _                                     => Result.Incomplete(replay, s"Error making replay with uci move: ${m}")
         }
-      case (r: Result.Incomplete, _) => r
+      case (r: Result.Incomplete, _)    => r
     }
 
   private def makeGame(tags: Tags) = {

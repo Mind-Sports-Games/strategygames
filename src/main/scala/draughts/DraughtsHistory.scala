@@ -42,10 +42,8 @@ case class DraughtsHistory(
     variant: Variant = Standard
 ) {
 
-  /** Halfmove clock: This is the number of halfmoves
-    * since the last non-king move or capture.
-    * This is used to determine if a draw
-    * can be claimed under the twentyfive-move rule.
+  /** Halfmove clock: This is the number of halfmoves since the last non-king move or capture. This is used to
+    * determine if a draw can be claimed under the twentyfive-move rule.
     */
   def halfMoveClock = math.max(0, (positionHashes.length / Hash.size) - 1)
 
@@ -64,7 +62,7 @@ case class DraughtsHistory(
           case Array(x2, y2, z2) => x == x2 && y == y2 && z == z2
           case _                 => false
         }) >= 3
-      case _ => false
+      case _                    => false
     }
   }
 
