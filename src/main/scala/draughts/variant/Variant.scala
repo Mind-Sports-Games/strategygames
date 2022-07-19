@@ -38,10 +38,11 @@ abstract class Variant private[variant] (
   def russian      = this == Russian
   def brazilian    = this == Brazilian
   def pool         = this == Pool
+  def portuguese   = this == Portuguese
   def fromPosition = this == FromPosition
 
   def frisianVariant    = frisian || frysk
-  def draughts64Variant = russian || brazilian || pool
+  def draughts64Variant = russian || brazilian || pool || portuguese
   def exotic            = !standard
 
   def baseVariant: Boolean = false
@@ -510,7 +511,18 @@ object Variant {
     Left
   )
 
-  val all   = List(Standard, Frisian, Frysk, Antidraughts, Breakthrough, Russian, Brazilian, Pool, FromPosition)
+  val all   = List(
+    Standard,
+    Frisian,
+    Frysk,
+    Antidraughts,
+    Breakthrough,
+    Russian,
+    Brazilian,
+    Pool,
+    Portuguese,
+    FromPosition
+  )
   val byId  = all map { v => (v.id, v) } toMap
   val byKey = all map { v => (v.key, v) } toMap
 
@@ -537,7 +549,8 @@ object Variant {
     strategygames.draughts.variant.Breakthrough,
     strategygames.draughts.variant.Russian,
     strategygames.draughts.variant.Brazilian,
-    strategygames.draughts.variant.Pool
+    strategygames.draughts.variant.Pool,
+    strategygames.draughts.variant.Portuguese
   )
 
   val divisionSensibleVariants: Set[Variant] = Set(
@@ -548,6 +561,7 @@ object Variant {
     strategygames.draughts.variant.Russian,
     strategygames.draughts.variant.Brazilian,
     strategygames.draughts.variant.Pool,
+    strategygames.draughts.variant.Portuguese,
     strategygames.draughts.variant.FromPosition
   )
 

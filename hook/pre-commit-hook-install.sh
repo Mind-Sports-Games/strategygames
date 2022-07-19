@@ -10,3 +10,6 @@ ln -s pre-commit-hook.sh ../.git/hooks/pre-commit
 
 #copy paste the code in the hook folder
 cp pre-commit-hook.sh ../.git/hooks/pre-commit-hook.sh
+
+#give the files the correct access
+chmod +x ../.git/hooks/pre-commit
