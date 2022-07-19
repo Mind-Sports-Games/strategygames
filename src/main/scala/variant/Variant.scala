@@ -49,6 +49,7 @@ abstract class Variant(
   def russian: Boolean
   def brazilian: Boolean
   def pool: Boolean
+  def portuguese: Boolean
   def draughtsFromPosition: Boolean
 
   def shogi: Boolean
@@ -174,6 +175,7 @@ object Variant {
     def russian: Boolean              = false
     def brazilian: Boolean            = false
     def pool: Boolean                 = false
+    def portuguese: Boolean           = false
     def draughtsFromPosition: Boolean = false
 
     def shogi: Boolean       = false
@@ -307,6 +309,7 @@ object Variant {
     def russian: Boolean              = v.russian
     def brazilian: Boolean            = v.brazilian
     def pool: Boolean                 = v.pool
+    def portuguese: Boolean           = v.portuguese
     def draughtsFromPosition: Boolean = v.fromPosition
 
     def shogi: Boolean       = false
@@ -438,6 +441,7 @@ object Variant {
     def russian: Boolean              = false
     def brazilian: Boolean            = false
     def pool: Boolean                 = false
+    def portuguese: Boolean           = false
     def draughtsFromPosition: Boolean = false
 
     def shogi: Boolean       = v.shogi
@@ -568,6 +572,7 @@ object Variant {
     def russian: Boolean              = false
     def brazilian: Boolean            = false
     def pool: Boolean                 = false
+    def portuguese: Boolean           = false
     def draughtsFromPosition: Boolean = false
 
     def shogi: Boolean       = false

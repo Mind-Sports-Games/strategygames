@@ -2,20 +2,15 @@
 
 1) This repository uses [scalafmt](https://scalameta.org/scalafmt/). Please ensure it is installed.
 
-2) You need to give execution permission to the pre-commit-hook-install script:
-> `chmod +x pre-commit-hook-install.sh`
+2) path to the hook folder
+> `cd hook`
 
-3) run the install script this will create two files in `.git/hooks`
+3) run the install script this will create two files in `.git/hooks` with execute permissions
 > `./pre-commit-hook-install.sh`
 
-4) give permissions to execute these two new files:
-> `chmod +x pre-commit`
-> `chmod +x pre-commit-hook.sh`
-
-5) You are all set up and good to go. Ff the commit fails due to formatting make sure you run `sbt scalafmt`!
+4) You are all set up and good to go. If the commit fails due to formatting make sure you run `sbt scalafmt`!
 
 If there are changes to the pre-commit script you will need to run the install again
-
 
 Links that this was followed from:
 - https://medium.com/zyseme-technology/code-formatting-scalafmt-and-the-git-pre-commit-hook-3de71d099514
