@@ -98,6 +98,9 @@ class FlipelloVariantTest extends FairySFTest {
       println("Possible moves in this position")
       position2.legalMoves.map(println(_))
 
+      println("current fen")
+      println(position2.fen) // checking number of drops remaining....
+
       position2.legalMoves.size must_== 5
       position2.gameEnd must_== false
     }
