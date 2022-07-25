@@ -53,6 +53,9 @@ case class Move(
   // does this move capture an opponent piece?
   def captures = capture.fold(false)(_.nonEmpty)
 
+  // Returns the first move without any of the captgures.
+  def first: Move = copy(dest = capture.flatMap(_.lastOption).getOrElse(dest), capture = None)
+
   def promotes = promotion.isDefined
 
   def player = piece.player
