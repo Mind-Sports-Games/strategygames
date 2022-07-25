@@ -28,6 +28,11 @@ sealed abstract class Move(
 
   def player = piece.player
 
+  // Used to peel off the first part of a multi-move.
+  // Must be implemented by the specializations if they
+  // support multi moves
+  def first: Move
+
   def toUci: Uci.Move
   // only used by draughts but making available for all
   def toShortUci: Uci.Move
@@ -84,6 +89,8 @@ object Move {
         if (capture.isDefined) capture.get.takeRight(1).some else None
       )
 
+    def first: Move = this
+
     val unwrap     = m
     def toChess    = m
     def toDraughts = sys.error("Can't make a draughts move from a chess move")
@@ -129,6 +136,8 @@ object Move {
         promotion,
         if (capture.isDefined) capture.get.takeRight(1).some else None
       )
+
+    def first: Move = copy(m = m.first)
 
     val unwrap     = m
     def toDraughts = m
@@ -177,6 +186,8 @@ object Move {
         if (capture.isDefined) capture.get.takeRight(1).some else None
       )
 
+    def first: Move = this
+
     val unwrap     = m
     def toFairySF  = m
     def toChess    = sys.error("Can't make a chess move from a fairysf move")
@@ -216,6 +227,8 @@ object Move {
         promotion,
         if (capture.isDefined) capture.get.takeRight(1).some else None
       )
+
+    def first: Move = this
 
     val unwrap     = m
     def toFairySF  = sys.error("Can't make a fairysf move from a mancala move")
