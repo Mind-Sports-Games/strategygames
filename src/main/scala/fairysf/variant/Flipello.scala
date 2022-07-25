@@ -9,7 +9,7 @@ case object Flipello
       key = "flipello",
       name = "Flipello",
       standardInitialPosition = true,
-      fairysfName = FairySFName("flipello"),
+      fairysfName = FairySFName("ps-flipello"),
       boardSize = Board.Dim8x8
     ) {
 
