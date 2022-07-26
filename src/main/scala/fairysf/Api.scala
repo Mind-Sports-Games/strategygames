@@ -249,7 +249,7 @@ object Api {
 object ApiVariantConfig {
 
   val config = """
-[flipersi]
+[ps-flipersi]
 immobile = p
 startFen = 8/8/8/8/8/8/8/8[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp] w 0 1
 pieceDrops = true
@@ -264,10 +264,10 @@ enclosingDropStart = d4 e4 d5 e5
 immobilityIllegal = false
 flipEnclosedPieces = reversi
 passOnStalemate = false
-[flipello:flipersi]
+[ps-flipello:ps-flipersi]
 startFen = 8/8/8/3pP3/3Pp3/8/8/8[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp] w 0 1
 passOnStalemate = true
-[flipello10:flipello]
+[ps-flipello10:ps-flipello]
 maxRank = 10
 maxFile = 10
 startFen = 10/10/10/10/4pP4/4Pp4/10/10/10/10[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp] w 0 1

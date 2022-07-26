@@ -4,7 +4,7 @@ import cats.data.Validated
 import cats.implicits._
 
 import strategygames.variant.Variant
-import strategygames.format.FEN
+import strategygames.format.{ FEN, Uci }
 
 abstract class Game(
     val situation: Situation,
@@ -25,6 +25,67 @@ abstract class Game(
       captures: Option[List[Pos]] = None,
       partialCaptures: Boolean = false
   ): Validated[String, (Game, Move)]
+
+  def apply(
+      uci: Uci,
+      metrics: MoveMetrics,
+      finalSquare: Boolean
+  ): Validated[String, (Game, MoveOrDrop)] =
+    uci match {
+      case Uci.ChessMove(uci)    =>
+        apply(
+          Pos.Chess(uci.orig),
+          Pos.Chess(uci.dest),
+          uci.promotion.map(Role.ChessPromotableRole),
+          metrics
+        ) map { case (ncg, move) =>
+          ncg -> (Left(move): MoveOrDrop)
+        }
+      case Uci.DraughtsMove(uci) =>
+        apply(
+          Pos.Draughts(uci.orig),
+          Pos.Draughts(uci.dest),
+          uci.promotion.map(Role.DraughtsPromotableRole),
+          metrics,
+          finalSquare
+        ) map { case (ncg, move) =>
+          ncg -> (Left(move): MoveOrDrop)
+        }
+      case Uci.FairySFMove(uci)  =>
+        apply(
+          Pos.FairySF(uci.orig),
+          Pos.FairySF(uci.dest),
+          uci.promotion.map(Role.FairySFPromotableRole),
+          metrics
+        ) map { case (ncg, move) =>
+          ncg -> (Left(move): MoveOrDrop)
+        }
+      case Uci.MancalaMove(uci)  =>
+        apply(
+          Pos.Mancala(uci.orig),
+          Pos.Mancala(uci.dest),
+          promotion = None,
+          metrics
+        ) map { case (ncg, move) =>
+          ncg -> (Left(move): MoveOrDrop)
+        }
+      case Uci.ChessDrop(uci)    =>
+        drop(
+          Role.ChessRole(uci.role),
+          Pos.Chess(uci.pos),
+          metrics
+        ) map { case (ncg, drop) =>
+          ncg -> (Right(drop): MoveOrDrop)
+        }
+      case Uci.FairySFDrop(uci)  =>
+        drop(
+          Role.FairySFRole(uci.role),
+          Pos.FairySF(uci.pos),
+          metrics
+        ) map { case (ncg, drop) =>
+          ncg -> (Right(drop): MoveOrDrop)
+        }
+    }
 
   def drop(
       role: Role,
