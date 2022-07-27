@@ -26,10 +26,12 @@ abstract class Game(
       partialCaptures: Boolean = false
   ): Validated[String, (Game, Move)]
 
-  def apply(
+  def applyUci(
       uci: Uci,
       metrics: MoveMetrics,
-      finalSquare: Boolean
+      finalSquare: Boolean = false,
+      captures: Option[List[Pos]] = None,
+      partialCaptures: Boolean = false
   ): Validated[String, (Game, MoveOrDrop)] =
     uci match {
       case Uci.ChessMove(uci)    =>
@@ -39,7 +41,7 @@ abstract class Game(
           uci.promotion.map(Role.ChessPromotableRole),
           metrics
         ) map { case (ncg, move) =>
-          ncg -> (Left(move): MoveOrDrop)
+          ncg -> Left(move)
         }
       case Uci.DraughtsMove(uci) =>
         apply(
@@ -47,9 +49,11 @@ abstract class Game(
           Pos.Draughts(uci.dest),
           uci.promotion.map(Role.DraughtsPromotableRole),
           metrics,
-          finalSquare
+          finalSquare,
+          captures,
+          partialCaptures
         ) map { case (ncg, move) =>
-          ncg -> (Left(move): MoveOrDrop)
+          ncg -> Left(move)
         }
       case Uci.FairySFMove(uci)  =>
         apply(
@@ -58,7 +62,7 @@ abstract class Game(
           uci.promotion.map(Role.FairySFPromotableRole),
           metrics
         ) map { case (ncg, move) =>
-          ncg -> (Left(move): MoveOrDrop)
+          ncg -> Left(move)
         }
       case Uci.MancalaMove(uci)  =>
         apply(
@@ -67,7 +71,7 @@ abstract class Game(
           promotion = None,
           metrics
         ) map { case (ncg, move) =>
-          ncg -> (Left(move): MoveOrDrop)
+          ncg -> Left(move)
         }
       case Uci.ChessDrop(uci)    =>
         drop(
@@ -75,7 +79,7 @@ abstract class Game(
           Pos.Chess(uci.pos),
           metrics
         ) map { case (ncg, drop) =>
-          ncg -> (Right(drop): MoveOrDrop)
+          ncg -> Right(drop)
         }
       case Uci.FairySFDrop(uci)  =>
         drop(
@@ -83,7 +87,7 @@ abstract class Game(
           Pos.FairySF(uci.pos),
           metrics
         ) map { case (ncg, drop) =>
-          ncg -> (Right(drop): MoveOrDrop)
+          ncg -> Right(drop)
         }
     }
 

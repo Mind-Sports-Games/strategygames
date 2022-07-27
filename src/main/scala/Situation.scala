@@ -17,6 +17,21 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def dropsByRole: Option[Map[Role, List[Pos]]]
 
+  def dropsAsDrops: List[Drop] =
+    dropsByRole
+      .getOrElse(Map())
+      .flatMap { case (role, listPos) =>
+        // This technically should valid the drops
+        // but I'm going to assume they're correct at this point
+        // because they came from our move generation.
+        // So if they don't validate, we just filter them out here.
+        listPos.flatMap(drop(role, _).toOption)
+      }
+      .toList
+
+  def actions: List[MoveOrDrop] =
+    moves.values.flatten.map(Left(_)).toList ::: dropsAsDrops.map(Right(_)).toList
+
   def history = board.history
 
   val check: Boolean
@@ -99,7 +114,7 @@ object Situation {
 
     def drops: Option[List[Pos]] = s.drops.map(_.map(Pos.Chess))
 
-    def dropsByRole: Option[Map[Role, List[Pos]]] = sys.error("dropsByRole not implemented for chess")
+    def dropsByRole: Option[Map[Role, List[Pos]]] = None
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
