@@ -18,12 +18,11 @@ case object Portuguese
   import Variant._
   def perfId: Int = 125
 
-  override def fenVariant    = true
-  override def aiVariant     = false
-  def pieces                 = Russian.pieces
-  def initialFen             = Russian.initialFen
-  def startingPosition       = Russian.startingPosition
-  override val openingTables = List(OpeningTable.tableFMJD, OpeningTable.tableIDFBasic)
+  override def fenVariant = true
+  override def aiVariant  = false
+  def pieces              = Russian.pieces
+  def initialFen          = Russian.initialFen
+  def startingPosition    = Russian.startingPosition
 
   // captureDirs is now used for kings within portuguese draughts
   def captureDirs = Standard.captureDirs
