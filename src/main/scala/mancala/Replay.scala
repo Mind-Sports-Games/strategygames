@@ -33,22 +33,15 @@ object Replay {
       moveStrs: Iterable[String],
       initialFen: Option[FEN],
       variant: strategygames.mancala.variant.Variant
-  ): Validated[String, Reader.Result] =
-    moveStrs.some.filter(_.nonEmpty) toValid "[replay] pgn is empty" andThen { nonEmptyMoves =>
-      Reader.moves(
-        nonEmptyMoves,
-        Tags(
-          List(
-            initialFen map { fen =>
-              Tag(_.FEN, fen.value)
-            },
-            variant.some.filterNot(_.oware) map { v =>
-              Tag(_.Variant, v.name)
-            }
-          ).flatten
-        )
-      )
+  ): Validated[String, Reader.Result] = {
+    val fen                  = initialFen.getOrElse(variant.initialFen)
+    val (init, moves, error) = gameMoveWhileValid__impl(moveStrs.toSeq, fen, variant)
+    val game                 = moves.reverse.last._1
+    error match {
+      case None      => Validated.valid(Reader.Result.Complete(new Replay(init, moves.reverse.map(_._2), game)))
+      case Some(msg) => Validated.invalid(msg)
     }
+  }
 
   // TODO: because this is primarily used in a Validation context, we should be able to
   //       return something that's runtime safe as well.
@@ -78,12 +71,11 @@ object Replay {
       promotion = None
     )
 
-  def gameMoveWhileValid(
+  def gameMoveWhileValid__impl(
       moveStrs: Seq[String],
       initialFen: FEN,
       variant: strategygames.mancala.variant.Variant
-  ): (Game, List[(Game, Uci.WithSan)], Option[String]) = {
-
+  ): (Game, List[(Game, Move)], Option[String]) = {
     val init     = makeGame(variant, initialFen.some)
     var state    = init
     var uciMoves = init.situation.board.uciMoves
@@ -92,19 +84,14 @@ object Replay {
     def getApiPosition(uciMoves: List[String]) =
       Api.positionFromVariantAndMoves(variant, uciMoves)
 
-    def replayMoveFromUci(orig: Option[Pos], dest: Option[Pos], promotion: String): (Game, Uci.WithSan) =
+    def replayMoveFromUci(orig: Option[Pos], dest: Option[Pos], promotion: String): (Game, Move) =
       (orig, dest) match {
         case (Some(orig), Some(dest)) => {
           val uciMove = s"${orig.key}${dest.key}${promotion}"
-          val pgnMove = s"${orig.key}${dest.key}${promotion match {
-              case "" => ""
-              case _  => state.board.pieces(orig).role.forsyth
-            }}"
           uciMoves = uciMoves :+ uciMove
-          state = state.apply(
-            replayMove(state, orig, dest, getApiPosition(uciMoves), uciMoves)
-          )
-          (state, Uci.WithSan(Uci(pgnMove).get, "NOSAN"))
+          val move    = replayMove(state, orig, dest, getApiPosition(uciMoves), uciMoves)
+          state = state(move)
+          (state, move)
         }
         case (orig, dest)             => {
           val uciMove = s"${orig}${dest}${promotion}"
@@ -113,7 +100,7 @@ object Replay {
         }
       }
 
-    val moves: List[(Game, Uci.WithSan)] = Parser
+    val moves: List[(Game, Move)] = Parser
       .pgnMovesToUciMoves(moveStrs)
       .map {
         case Uci.Move.moveR(orig, dest, promotion) =>
@@ -126,6 +113,24 @@ object Replay {
       }
 
     (init, moves, errors match { case "" => None; case _ => errors.some })
+  }
+
+  def gameMoveWhileValid(
+      moveStrs: Seq[String],
+      initialFen: FEN,
+      variant: strategygames.mancala.variant.Variant
+  ): (Game, List[(Game, Uci.WithSan)], Option[String]) = {
+    val (game, moves, error) = gameMoveWhileValid__impl(moveStrs, initialFen, variant)
+    (
+      game,
+      moves.map { v =>
+        {
+          val (state, move) = v
+          (state, Uci.WithSan(move.toUci, "NOSAN"))
+        }
+      },
+      error
+    )
   }
 
   private def recursiveSituations(sit: Situation, sans: List[San]): Validated[String, List[Situation]] =

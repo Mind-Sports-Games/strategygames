@@ -8,6 +8,7 @@ import cats.implicits._
 sealed trait Uci {
 
   def uci: String
+  def shortUci: String
   def fishnetUci: String
   def piotr: String
 
@@ -64,6 +65,7 @@ object Uci {
       )
       with Chess {
     def uci        = m.uci
+    def shortUci   = m.uci
     def fishnetUci = m.uci
     val unwrap     = m
     def toChess    = m
@@ -84,6 +86,7 @@ object Uci {
       )
       with Draughts {
     def uci        = m.uci
+    def shortUci   = m.shortUci
     def fishnetUci = m.uci
     val unwrap     = m
     def toDraughts = m
@@ -100,6 +103,7 @@ object Uci {
       )
       with FairySF {
     def uci        = m.uci
+    def shortUci   = m.uci
     def fishnetUci = m.fishnetUci
     val unwrap     = m
     def toChess    = sys.error("Can't make a chess UCI from a fairysf UCI")
@@ -115,6 +119,7 @@ object Uci {
       )
       with Mancala {
     def uci        = m.uci
+    def shortUci   = m.uci
     def fishnetUci = m.uci
     val unwrap     = m
     def toChess    = sys.error("Can't make a chess UCI from a mancala UCI")
@@ -137,6 +142,7 @@ object Uci {
       )
       with Chess {
     def uci        = d.uci
+    def shortUci   = d.uci
     def fishnetUci = d.uci
     def piotr      = d.piotr
     val unwrap     = d
@@ -153,6 +159,7 @@ object Uci {
       )
       with FairySF {
     def uci        = d.uci
+    def shortUci   = d.uci
     def fishnetUci = d.fishnetUci
     def piotr      = d.piotr
     val unwrap     = d
