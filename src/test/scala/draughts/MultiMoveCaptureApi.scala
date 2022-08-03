@@ -4,7 +4,7 @@ import cats.data.Validated._
 import org.specs2.matcher.ValidatedMatchers
 import org.specs2.mutable.Specification
 
-class MultiMoveCaptureDraughtsTest extends Specification with ValidatedMatchers {
+class MultiMoveCaptureApi extends Specification with ValidatedMatchers {
 
   // https://playstrategy.dev/q3tX9jp6
   val moves = List(
@@ -118,7 +118,7 @@ class MultiMoveCaptureDraughtsTest extends Specification with ValidatedMatchers 
     "1015",
     "2420",
     "1524",
-    "2413",
+    "2413"
   )
 
   def toMove(uci: String): format.Uci.Move = {
