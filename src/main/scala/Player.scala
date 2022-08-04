@@ -18,7 +18,6 @@ sealed trait Player {
 object Player {
 
   // TODO: this is duplicated three times now.
-  // TODO
   case class Map[A](p1: A, p2: A) {
     def apply(player: Player) = if (player.p1) p1 else p2
 
