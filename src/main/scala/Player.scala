@@ -1,5 +1,6 @@
 package strategygames
 
+//this was Color in scalachess
 sealed trait Player {
 
   final def fold[A](a: => A, b: => A): A = if (p1) a else b
