@@ -17,6 +17,8 @@ if ! [ $hadNoNonStagedChanges -eq 0 ]
 then
     echo "* Stashing non-staged changes"
     git stash --keep-index -u > /dev/null
+else
+    echo "* You had no non-staged changes"
 fi
 
 echo "* Compiling/formatting staged changes"
@@ -39,22 +41,20 @@ then
     echo "* Yes!"
     else
         echo "* No!"
-	echo "The following files need formatting (in stage or commited):"
-	git diff --name-only
-        echo ""
+        echo "The following files need formatting (in stage or commited):"
+        git diff --name-only
+        echo "* Undoing formatting"
+        git stash --keep-index > /dev/null
+        git stash drop > /dev/null
     fi
 else
     echo "* No!"
 fi
 
-echo "* Undoing formatting"
-git stash --keep-index > /dev/null
-git stash drop > /dev/null
-
 if ! [ $hadNoNonStagedChanges -eq 0 ]
 then
     echo "* Scheduling stash pop of previously stashed non-staged changes for 1 second after commit"
-    sleep 1 && git stash pop --index > /dev/null & # sleep and & otherwise commit fails when this leads to a merge conflict
+    sleep 1 && git stash pop --index > /dev/null & # sleep and &, otherwise commit fails when this leads to a merge conflict
 fi
 
 if [ $compiles -eq 0 ] && [ $formatted -eq 0 ]
