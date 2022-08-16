@@ -520,7 +520,7 @@ object Variant {
     Russian,
     Brazilian,
     Pool,
-    Portuguese,
+    // Portuguese, //Remove for now until fixed
     FromPosition
   )
   val byId  = all map { v => (v.id, v) } toMap
