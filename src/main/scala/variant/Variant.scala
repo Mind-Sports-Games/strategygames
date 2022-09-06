@@ -1,6 +1,5 @@
 package strategygames.variant
 
-import cats.data.Validated
 import cats.syntax.option._
 import scala.annotation.nowarn
 
@@ -11,6 +10,7 @@ import strategygames.format.FEN
 abstract class Variant(
     val id: Int,
     val key: String,
+    val fishnetKey: String,
     val name: String,
     val standardInitialPosition: Boolean,
     val gameType: Option[Int] = None
@@ -140,6 +140,7 @@ object Variant {
       extends Variant(
         id = v.id,
         key = v.key,
+        fishnetKey = v.fishnetKey,
         name = v.name,
         standardInitialPosition = v.standardInitialPosition
       ) {
@@ -273,6 +274,7 @@ object Variant {
       extends Variant(
         id = v.id,
         key = v.key,
+        fishnetKey = v.key,
         name = v.name,
         standardInitialPosition = v.standardInitialPosition,
         gameType = Option(v.gameType)
@@ -407,6 +409,7 @@ object Variant {
       extends Variant(
         id = v.id,
         key = v.key,
+        fishnetKey = v.fairysfName.name,
         name = v.name,
         standardInitialPosition = v.standardInitialPosition
       ) {
@@ -538,6 +541,7 @@ object Variant {
       extends Variant(
         id = v.id,
         key = v.key,
+        fishnetKey = v.key,
         name = v.name,
         standardInitialPosition = v.standardInitialPosition
       ) {
