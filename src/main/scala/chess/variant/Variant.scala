@@ -16,6 +16,12 @@ abstract class Variant private[variant] (
     val standardInitialPosition: Boolean
 ) {
 
+  val fishnetKey = key match {
+    case "fiveCheck" => "5check"
+    case "noCastling" => "nocastle"
+    case _ => key
+  }
+
   def pieces: Map[Pos, Piece]
 
   def standard      = this == Standard
