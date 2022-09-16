@@ -17,9 +17,9 @@ abstract class Variant private[variant] (
 ) {
 
   val fishnetKey = key match {
-    case "fiveCheck" => "5check"
+    case "fiveCheck"  => "5check"
     case "noCastling" => "nocastle"
-    case _ => key
+    case _            => key
   }
 
   def pieces: Map[Pos, Piece]
