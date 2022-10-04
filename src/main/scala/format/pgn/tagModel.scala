@@ -158,6 +158,7 @@ object Tag {
   case object Variant           extends TagType
   case object GameType          extends TagType
   case object MicroMatch        extends TagType
+  case object MultiMatch        extends TagType
   case object ECO               extends TagType
   case object Opening           extends TagType
   case object Termination       extends TagType
@@ -194,6 +195,7 @@ object Tag {
     Variant,
     GameType,
     MicroMatch,
+    MultiMatch,
     ECO,
     Opening,
     Termination,

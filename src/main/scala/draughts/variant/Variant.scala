@@ -519,9 +519,9 @@ object Variant {
     Breakthrough,
     Russian,
     Brazilian,
-    Pool,
+    Pool // ,
     // Portuguese, //Remove for now until fixed
-    FromPosition
+    // FromPosition //Remove for now until fixed
   )
   val byId  = all map { v => (v.id, v) } toMap
   val byKey = all map { v => (v.key, v) } toMap

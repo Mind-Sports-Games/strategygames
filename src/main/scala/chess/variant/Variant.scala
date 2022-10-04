@@ -16,6 +16,12 @@ abstract class Variant private[variant] (
     val standardInitialPosition: Boolean
 ) {
 
+  val fishnetKey = key match {
+    case "fiveCheck"  => "5check"
+    case "noCastling" => "nocastle"
+    case _            => key
+  }
+
   def pieces: Map[Pos, Piece]
 
   def standard      = this == Standard
@@ -200,7 +206,7 @@ abstract class Variant private[variant] (
   protected def validSide(board: Board, strict: Boolean)(player: Player) = {
     val roles = board rolesOf player
     roles.count(_ == King) == 1 &&
-    (!strict || { roles.count(_ == Pawn) <= 8 && roles.lengthCompare(16) <= 0 }) &&
+    (!strict || roles.count(_ == Pawn) <= 8) &&
     !pawnsOnPromotionRank(board, player)
   }
 

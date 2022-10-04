@@ -78,24 +78,18 @@ object GameFamily {
       "alpha",
       "california",
       "cardinal",
-      "chess7",
-      "chessnut",
       "companion",
       "dubrovny",
       "fantasy",
       "fresca",
       "gioco",
       "governor",
-      "horsey",
-      "icpieces",
       "kosal",
       "leipzig",
       "letter",
       "maestro",
       "pirouetti",
-      "pixel",
       "reillycraig",
-      "riohacha",
       "shapes",
       "spatial",
       "staunty",
@@ -273,7 +267,14 @@ object GameFamily {
     def variants          = Variant.all(GameLogic.Mancala()).filter(_.gameFamily == this)
     def displayPiece      = "display"
     def pieceSetThemes    =
-      List("green_mancala", "blue_mancala", "red_mancala", "grey_mancala", "green_numbers_mancala")
+      List(
+        "green_mancala",
+        "blue_mancala",
+        "red_mancala",
+        "grey_mancala",
+        "green_seed_mancala",
+        "green_numbers_mancala"
+      )
     def pieceSetDefault   = "green_mancala"
     def boardThemes       = List("light-wood", "dark-wood")
     def boardThemeDefault = "light-wood"

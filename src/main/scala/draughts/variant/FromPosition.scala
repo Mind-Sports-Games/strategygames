@@ -5,7 +5,7 @@ case object FromPosition
     extends Variant(
       id = 3,
       gameType = 99,
-      key = "fromPosition",
+      key = "draughtsFromPosition",
       name = "From Position",
       standardInitialPosition = false,
       boardSize = Board.D100
