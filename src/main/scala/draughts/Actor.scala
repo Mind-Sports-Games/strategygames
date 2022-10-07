@@ -30,6 +30,7 @@ case class Actor(
         board.variant.frisianVariant && board.history
           .kingMoves(player) >= 3 && board.history.kingMoves.kingPos(player).fold(true)(_ == pos)
       ) Nil
+      else if (!board.variant.flyingKings) shortRangeMoves(board.variant.moveDirsAll)
       else longRangeMoves(board.variant.moveDirsAll)
     case _    => Nil
   }
