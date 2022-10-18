@@ -74,6 +74,25 @@ class BrazilianDraughtsTest extends Specification with ValidatedMatchers {
     "1405"
   )
 
+  //midmulticapture
+  val midMultiCaptureMoves = List(
+    "2218",    
+    "1115",    
+    "1811",                                         
+    "0815",                                      
+    "2117",    
+    "0711",    
+    "2521",    
+    "1116",    
+    "2925",    
+    "0207",                                     
+    "2622",     
+    "0308",                                      
+    "2420",     
+    "1014",
+    "1710"
+  )
+
   def toMove(uci: String): format.Uci.Move = {
     format.Uci.Move(uci) match {
       case Some(m) => m
@@ -94,6 +113,15 @@ class BrazilianDraughtsTest extends Specification with ValidatedMatchers {
         .foldLeft(Situation(variant.Brazilian))((sit, uci) => move(sit, uci))
 
       s.winner must_== Some(Player.P1)
+    }
+  }
+
+  "Partial Brazilian Draughts game " should {
+    "have valid moves mid multicapture" in {
+      val s = midMultiCaptureMoves
+        .foldLeft(Situation(variant.Brazilian))((sit, uci) => move(sit, uci))
+
+      s.validMoves.pp("validMoves").size must_!= 0
     }
   }
 
