@@ -180,7 +180,8 @@ object Situation {
 
     def checkSquare = None
 
-    // TODO: this probably needs to be properly implemented
+    // TODO: we should be able to implement this in the same way chess etc as
+    // validMoves now combines validMoves and validMovesFrom as it does in lila
     lazy val destinations: Map[Pos, List[Pos]] = Map()
 
     def drops: Option[List[Pos]] = None

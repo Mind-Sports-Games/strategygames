@@ -13,39 +13,28 @@ case class Situation(board: Board, player: Player) {
 
   lazy val ghosts = board.ghosts
 
-  def filterIfLastMoveWasMyCapture(moves: Map[Pos, List[Move]]): Map[Pos, List[Move]] =
-    if (ghosts <= 0) {
-      moves
-    } else {
+  def validMovesVerified(finalSquare: Boolean = false): Map[Pos, List[Move]] =
+    if (ghosts <= 0) board.variant.validMoves(this, finalSquare)
+    else
       // Assumptions: ghosts > 0 means it's our move and we made a capture.
       //              Maybe we should check it later?
-      board.history.lastMove.fold(moves)(lastMoveUci => {
+      board.history.lastMove.fold(
+        board.variant.validMoves(this, finalSquare)
+      )(lastMoveUci => {
         val lastMoveDest = lastMoveUci.origDest._2
-        board(lastMoveDest).fold(moves)(lastPieceMoved => {
-          if (lastPieceMoved.is(player)) {
-            moves.filter { case (pos: Pos, _: List[Move]) =>
-              pos == lastMoveDest
-            }
-          } else {
-            moves
-          }
-        })
+        Map(lastMoveDest -> board.variant.validMovesFrom(this, lastMoveDest, finalSquare))
       })
-    }
 
-  lazy val validMoves: Map[Pos, List[Move]]      = filterIfLastMoveWasMyCapture(board.variant.validMoves(this))
-  lazy val validMovesFinal: Map[Pos, List[Move]] = filterIfLastMoveWasMyCapture(
-    board.variant.validMoves(this, true)
-  )
+  lazy val validMoves: Map[Pos, List[Move]]      = validMovesVerified()
+  lazy val validMovesFinal: Map[Pos, List[Move]] = validMovesVerified(true)
 
-  lazy val allCaptures: Map[Pos, List[Move]] = filterIfLastMoveWasMyCapture(
+  lazy val allCaptures: Map[Pos, List[Move]] =
     actors
       .collect {
         case actor if actor.captures.nonEmpty =>
           actor.pos -> actor.captures
       }
       .to(Map)
-  )
 
   lazy val allMovesCaptureLength: Int =
     actors.foldLeft(0) { case (max, actor) =>
