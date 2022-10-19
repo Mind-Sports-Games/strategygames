@@ -13,7 +13,8 @@ case object Brazilian
       boardSize = Board.D64
     ) {
 
-  def perfId: Int = 123
+  def perfId: Int    = 123
+  def perfIcon: Char = ''
 
   override def fenVariant    = true
   override def aiVariant     = false

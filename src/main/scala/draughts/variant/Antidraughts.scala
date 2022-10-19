@@ -13,7 +13,8 @@ case object Antidraughts
       boardSize = Board.D100
     ) {
 
-  def perfId: Int = 113
+  def perfId: Int    = 113
+  def perfIcon: Char = ''
 
   def pieces           = Standard.pieces
   def initialFen       = Standard.initialFen

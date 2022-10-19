@@ -14,7 +14,8 @@ case object Frisian
     ) {
   import Variant._
 
-  def perfId: Int = 111
+  def perfId: Int    = 111
+  def perfIcon: Char = ''
 
   def pieces           = Standard.pieces
   def initialFen       = Standard.initialFen
