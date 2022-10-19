@@ -19,7 +19,8 @@ case object Russian
       boardSize = Board.D64
     ) {
 
-  def perfId: Int = 122
+  def perfId: Int    = 122
+  def perfIcon: Char = ''
 
   override def fenVariant    = true
   override def aiVariant     = false

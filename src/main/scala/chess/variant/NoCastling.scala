@@ -11,7 +11,7 @@ case object NoCastling
     ) {
 
   def perfId: Int    = 20
-  def perfIcon: Char = '8'
+  def perfIcon: Char = ''
 
   override val castles    = Castles.none
   override val initialFen = FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 0 1")

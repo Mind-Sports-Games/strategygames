@@ -15,7 +15,7 @@ case object FiveCheck
   def pieces = Standard.pieces
 
   def perfId: Int    = 19
-  def perfIcon: Char = '.'
+  def perfIcon: Char = ''
 
   override val initialFen = FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 5+5 0 1")
 

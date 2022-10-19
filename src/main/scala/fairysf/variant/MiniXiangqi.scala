@@ -15,7 +15,7 @@ case object MiniXiangqi
 
   def gameFamily: GameFamily = GameFamily.Xiangqi()
 
-  def perfIcon: Char = 't'
+  def perfIcon: Char = ''
   def perfId: Int    = 203
 
   override val kingPiece: Option[Role] = Some(XiangqiKing)
