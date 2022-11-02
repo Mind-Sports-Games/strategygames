@@ -3,11 +3,17 @@ package strategygames.draughts
 import format.FEN
 import opening.DrawTablesFMJD
 import opening.DrawTablesIDF
+import opening.DrawTablesACF
 import variant._
 
 import cats.syntax.option._
 
-case class OpeningTable(key: String, name: String, url: String, categories: List[StartingPosition.Category]) {
+case class OpeningTable(
+    key: String,
+    name: String,
+    url: String,
+    categories: List[StartingPosition.Category]
+) {
 
   val positions = categories.flatMap(_.positions)
 
@@ -28,6 +34,10 @@ case class OpeningTable(key: String, name: String, url: String, categories: List
 
   def withFen(p: StartingPosition) = s"$key|${p.fen}"
   def withRandomFen                = withFen(StartingPosition.random)
+
+  def displayStr(p: StartingPosition) =
+    s"${name}. ${p.code}${p.name.map(n => s": $n").getOrElse("")}"
+
 }
 
 object OpeningTable {
@@ -67,10 +77,26 @@ object OpeningTable {
     categories = DrawTablesIDF.categoriesIDFBasic
   )
 
+  val tableACF11ManBallot = OpeningTable(
+    key = "acf-11_man_ballot",
+    name = "ACF 11 man ballot",
+    url = "",
+    categories = DrawTablesACF.categoriesACF11ManBallot
+  )
+
+  val tableACFThreeMoveRestriction = OpeningTable(
+    key = "acf-three_move_restriction",
+    name = "ACF Three Move Restriction",
+    url = "",
+    categories = DrawTablesACF.categoriesACF11ManBallot
+  )
+
   private val allTables = List(
     tableIDF,
     tableIDFBrazilian,
     tableIDFBasic,
+    tableACF11ManBallot,
+    tableACFThreeMoveRestriction,
     tableFMJD,
     tableFMJDBrazilian
   )
@@ -83,10 +109,14 @@ object OpeningTable {
 
   def byKey = key2table.get _
 
-  def tablesForVariant(v: Variant) = v match {
-    case Russian | Pool => tableIDF.categories.flatMap(_.positions).map(_.fen)
-    case Brazilian      => tableIDFBrazilian.categories.flatMap(_.positions).map(_.fen)
-    case _              => List()
+  def tableForVariant(v: Variant): Option[OpeningTable] = v match {
+    case Russian | Pool => Some(tableIDF)
+    case Brazilian      => Some(tableIDFBrazilian)
+    case English        => Some(tableACF11ManBallot)
+    case _              => None
   }
+
+  def fensForVariant(v: Variant) =
+    tableForVariant(v).map(_.categories).getOrElse(List()).flatMap(_.positions).map(_.fen)
 
 }
