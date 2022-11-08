@@ -24,12 +24,14 @@ case class Actor(
   def getCaptures(finalSquare: Boolean) = if (finalSquare) capturesFinal else captures
 
   private def noncaptureMoves(): List[Move] = piece.role match {
-    case Man  => shortRangeMoves(board.variant.moveDirsPlayer(player))
+    case Man  => shortRangeMoves(board.variant.moveDirsPlayer(player), true)
     case King =>
       if (
         board.variant.frisianVariant && board.history
           .kingMoves(player) >= 3 && board.history.kingMoves.kingPos(player).fold(true)(_ == pos)
       ) Nil
+      else if (!board.variant.flyingKings)
+        shortRangeMoves(board.variant.moveDirsAll, false)
       else longRangeMoves(board.variant.moveDirsAll)
     case _    => Nil
   }
@@ -47,11 +49,14 @@ case class Actor(
   def onLongDiagonal: Boolean =
     (pos.x + ((pos.y + 1) / 2 - 1)) % (board.boardSize.width / 2) == 0
 
-  private def shortRangeMoves(dirs: Directions): List[Move] =
+  private def shortRangeMoves(dirs: Directions, checkPromotion: Boolean): List[Move] =
     dirs flatMap { _._2(pos) } flatMap { to =>
       board.pieces.get(to) match {
-        case None    => board.move(pos, to) map { move(to, _, None, None) } flatMap board.variant.maybePromote
-        case Some(_) => Nil
+        case None if checkPromotion  =>
+          board.move(pos, to) map { move(to, _, None, None) } flatMap board.variant.maybePromote
+        case None if !checkPromotion =>
+          board.move(pos, to) map { move(to, _, None, None) }
+        case Some(_)                 => Nil
       }
     }
 

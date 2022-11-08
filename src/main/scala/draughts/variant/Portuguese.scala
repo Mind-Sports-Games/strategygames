@@ -187,49 +187,63 @@ case object Portuguese
       captured: Option[List[Piece]],
       situationBefore: Situation,
       finalSquare: Boolean
-  ): Board = {
-    val remainingCaptures =
-      if (finalSquare) 0 else situationBefore.captureLengthFrom(uci.orig).getOrElse(0) - 1
-    if (remainingCaptures > 0) board
-    else {
-      val p1Actors                                                       = board.actorsOf(Player.P1)
-      val p2Actors                                                       = board.actorsOf(Player.P2)
-      val p1Kings                                                        = p1Actors.count(_.piece is King)
-      val p2Kings                                                        = p2Actors.count(_.piece is King)
-      val p1Pieces                                                       = p1Actors.size
-      val p2Pieces                                                       = p2Actors.size
-      def loneKing(strongPieces: Int, strongKings: Int, weakKing: Actor) =
-        strongPieces == 3 && strongKings >= 1 && weakKing.onLongDiagonal && board.piecesOnLongDiagonal == 1
-      val p1LoneKing                                                     =
-        if (p1Kings == 1 && p1Pieces == 1 && p2Kings >= 1) {
-          loneKing(p2Pieces, p2Kings, p1Actors.head)
-        } else false
-      val p2LoneKing                                                     =
-        if (p2Kings == 1 && p2Pieces == 1 && p1Kings >= 1) {
-          loneKing(p1Pieces, p1Kings, p2Actors.head)
-        } else false
-      if (p1LoneKing || p2LoneKing) {
-        board updateHistory { h =>
-          // "abuse" kingmove counter to count the amount of moves made on the long
-          // diagonal by the side with a lone king against 3 (see 7.2.7)
-          h.withKingMove(Player(p1LoneKing), None, true)
-        } withoutGhosts
-      } else board.withoutGhosts
-    }
+  ): Board = Brazilian.finalizeBoard(board, uci, captured, situationBefore, finalSquare)
+
+  def maxDrawingMoves(board: Board): Option[Int] =
+    drawingMoves(board, none).map(_._1)
+
+  // (drawingMoves, movedOnToLongDiag)
+  private def drawingMoves(board: Board, move: Option[Move]): Option[(Int, Boolean)] = {
+    val p1Actors       = board.nonGhostActorsForPlayer(Player.P1)
+    val p2Actors       = board.nonGhostActorsForPlayer(Player.P2)
+    val p1Kings        = p1Actors.count(_.piece is King)
+    val p2Kings        = p2Actors.count(_.piece is King)
+    val totalPieces    = p1Actors.size + p2Actors.size
+    val p1ActorsBefore = move.map(_.before.nonGhostActorsForPlayer(Player.P1)).getOrElse(Seq.empty)
+    val p2ActorsBefore = move.map(_.before.nonGhostActorsForPlayer(Player.P2)).getOrElse(Seq.empty)
+
+    def actorsOnLongDiag(actors: Seq[Actor]): Int = actors.map(_.onLongDiagonal).filter(true.==).size
+
+    def longDiagCheck(actors: Seq[Actor], beforeActors: Seq[Actor]): Boolean =
+      actorsOnLongDiag(actors) > actorsOnLongDiag(beforeActors) && actorsOnLongDiag(beforeActors) == 0
+
+    def playerOnLongDiagonalWithThreePieces(playerActors: Seq[Actor]): Boolean =
+      playerActors.size == 3 && actorsOnLongDiag(playerActors) > 0
+
+    def playerOnLongDiagonal: Option[Player] =
+      if (playerOnLongDiagonalWithThreePieces(p1Actors)) Some(Player.P1)
+      else if (playerOnLongDiagonalWithThreePieces(p2Actors)) Some(Player.P2)
+      else None
+
+    if (p1Kings == 1 && p2Kings == 3 && totalPieces == 4 && playerOnLongDiagonal == Some(Player.P2))
+      Some(24, longDiagCheck(p2Actors, p2ActorsBefore)) // 3.2.b
+    else if (p1Kings == 3 && p2Kings == 1 && totalPieces == 4 && playerOnLongDiagonal == Some(Player.P1))
+      Some(24, longDiagCheck(p1Actors, p1ActorsBefore)) // 3.2.b
+    else Some(40, false)                                // 3.2.a
   }
 
-  def maxDrawingMoves(board: Board): Option[Int] = Russian.maxDrawingMoves(board)
+  /** Update position hashes for Portuguese drawing rules
+    * (http://www.fpdamas.pt/wp-content/uploads/2021/01/1Regras_Damas_Cla%CC%81ssicas_.pdf): 3.2.a: 20
+    * consecutive moves per player without change in state (captures or promotion) 3.2.b: 12 moves per player
+    * from the point that the board has 3 Kings + 0 Men vs 1 King + 0 Men and the player with 3 kings has 1 of
+    * them on the long diagonal. 3.2.c: 3 fold repetition.
+    */
   def updatePositionHashes(
       board: Board,
       move: Move,
       hash: strategygames.draughts.PositionHash
-  ): PositionHash =
-    Russian.updatePositionHashes(board, move, hash)
-
-  override def validSide(board: Board, strict: Boolean)(player: Player) = {
-    val roles = board rolesOf player
-    (roles.count(_ == Man) > 0 || roles.count(_ == King) > 0) &&
-    (!strict || roles.size <= 12) &&
-    (!menOnPromotionRank(board, player) || board.ghosts != 0)
+  ): PositionHash = {
+    val newHash = Hash(Situation(board, !move.piece.player))
+    drawingMoves(board, Some(move)) match {
+      case Some((_, movedOnToLongDiag)) =>
+        if (move.captures || move.promotes || movedOnToLongDiag)
+          newHash // 3.2.a, 3.2.b reset hash on capture or promotion or when king moves onto long diag. Doesnt handle the case when player leaves long diag but in other draughts comments this is described as 'dumb' so isnt handled there either
+        else newHash ++ hash
+      case _                            => newHash
+    }
   }
+
+  override def validSide(board: Board, strict: Boolean)(player: Player) =
+    Brazilian.validSide(board, strict)(player)
+
 }

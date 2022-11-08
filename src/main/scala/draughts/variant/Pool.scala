@@ -25,8 +25,12 @@ case object Pool
   def pieces                 = Russian.pieces
   def initialFen             = Russian.initialFen
   def startingPosition       = Russian.startingPosition
-  // TODO: Set this
   override val openingTables = List(OpeningTable.tableFMJDBrazilian, OpeningTable.tableIDFBasic)
+
+  //override def playerNames: Map[Player, String]  = Map(P1 -> "Black", P2 -> "White")
+  //override def playerColors: Map[Player, String] = Map(P1 -> "black", P2 -> "white")
+
+  //override def invertNumericCoords: Boolean = true
 
   def captureDirs    = Standard.captureDirs
   def moveDirsPlayer = Standard.moveDirsPlayer
