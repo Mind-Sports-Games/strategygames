@@ -18,7 +18,7 @@ case object Shogi
 
   override def dropsVariant = true
 
-  def perfIcon: Char = 's'
+  def perfIcon: Char = ''
   def perfId: Int    = 200
 
   override def baseVariant: Boolean    = true

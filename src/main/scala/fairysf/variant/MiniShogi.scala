@@ -19,7 +19,7 @@ case object MiniShogi
   override def dropsVariant            = true
   override def useFairyOptionalGameEnd = true
 
-  def perfIcon: Char = 's'
+  def perfIcon: Char = ''
   def perfId: Int    = 202
 
   override val kingPiece: Option[Role] = Some(ShogiKing)

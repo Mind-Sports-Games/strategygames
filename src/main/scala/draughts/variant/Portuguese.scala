@@ -17,6 +17,7 @@ case object Portuguese
     ) {
   import Variant._
   def perfId: Int = 125
+  def perfIcon: Char = 'K'
 
   override def fenVariant = true
   override def aiVariant  = false

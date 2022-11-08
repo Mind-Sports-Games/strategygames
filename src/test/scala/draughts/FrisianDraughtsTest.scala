@@ -109,4 +109,23 @@ class FrisianDraughtsTest extends Specification with ValidatedMatchers {
     }
   }
 
+  "Frisian Draughts game " should {
+    "has valid moves" in {
+      val s = List(
+          "3328",
+          "1721",
+          "3126",
+          "1117",
+          "3933",
+          "2025",
+          "3731",
+          "1520",
+          "3111"//, trying to do 311122. in the test this looks like it should include the next line
+          //"1122"
+        ).foldLeft(Situation(variant.Frisian))((sit, uci) => move(sit, uci))
+
+      s.validMoves.size must_!= 0
+    }
+  }
+
 }

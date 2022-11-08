@@ -16,7 +16,8 @@ case object Standard
     ) {
   import Variant._
 
-  def perfId: Int = 105
+  def perfId: Int    = 105
+  def perfIcon: Char = ''
 
   override def baseVariant: Boolean = true
 

@@ -56,7 +56,7 @@ abstract class Variant private[variant] (
   def materialImbalanceVariant: Boolean = false
 
   def perfId: Int
-  def perfIcon: Char = 'K'
+  def perfIcon: Char
 
   def flyingKings: Boolean = true
 
