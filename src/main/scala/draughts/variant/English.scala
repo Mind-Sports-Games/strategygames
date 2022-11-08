@@ -15,7 +15,8 @@ case object English
       boardSize = Board.D64
     ) {
 
-  def perfId: Int = 126
+  def perfId: Int    = 126
+  def perfIcon: Char = 'K'
 
   override def fenVariant = true
   override def aiVariant  = false
