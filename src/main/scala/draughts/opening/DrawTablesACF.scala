@@ -3229,7 +3229,7 @@ object Cat1_11ManBallot {
 
 object Cat2_11ManBallot {
 
-  val startingPositions = 
+  val startingPositions =
     List(
       StartingPosition(
         code = "#501",

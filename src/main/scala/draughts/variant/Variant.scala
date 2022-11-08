@@ -488,10 +488,25 @@ abstract class Variant private[variant] (
 
   override def hashCode: Int = id
 
+  def drawTableInfo(fen: FEN): Option[String] = {
+    val parsedFen    = fen.value.split(":").take(3).mkString(":").toUpperCase()
+    val openingTable = OpeningTable.tableForVariant(this)
+    openingTable.map { ot =>
+      ot.positions
+        .filter(
+          _.fen.value == parsedFen
+        )
+        .headOption
+        .map(ot.displayStr)
+    }.flatten
+  }
+
   def gameFamily: GameFamily = GameFamily.Draughts()
 
   def playerNames: Map[Player, String]  = gameFamily.playerNames
   def playerColors: Map[Player, String] = gameFamily.playerColors
+
+  def invertNumericCoords: Boolean = false
 }
 
 object Variant {
