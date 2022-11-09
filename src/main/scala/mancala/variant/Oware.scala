@@ -15,7 +15,7 @@ case object Oware
 
   def gameFamily: GameFamily = GameFamily.Mancala()
 
-  def perfIcon: Char = ''
+  def perfIcon: Char = ''
   def perfId: Int    = 300
 
   override def baseVariant: Boolean = true

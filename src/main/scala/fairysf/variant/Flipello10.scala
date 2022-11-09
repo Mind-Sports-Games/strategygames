@@ -15,7 +15,7 @@ case object Flipello10
 
   def gameFamily: GameFamily = GameFamily.Flipello()
 
-  def perfIcon: Char = 'l'
+  def perfIcon: Char = ''
   def perfId: Int    = 205
 
   override def dropsVariant      = true
