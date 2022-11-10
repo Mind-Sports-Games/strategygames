@@ -55,7 +55,7 @@ object Reader {
 
   private def makeGame(tags: Tags) = {
     val g = Game(
-      variantOption = tags(_.Variant) flatMap strategygames.chess.variant.Variant.byName,
+      variantOption = tags.chessVariant,
       fen = tags.chessFen
     )
     g.copy(
