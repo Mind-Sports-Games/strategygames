@@ -114,7 +114,10 @@ object Situation {
 
     def drops: Option[List[Pos]] = s.drops.map(_.map(Pos.Chess))
 
-    def dropsByRole: Option[Map[Role, List[Pos]]] = None
+    def dropsByRole: Option[Map[Role, List[Pos]]] =
+      s.dropsByRole.map(_.map { case (r: chess.Role, p: List[chess.Pos]) =>
+        (Role.ChessRole(r), p.map(Pos.Chess))
+      })
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
