@@ -33,6 +33,9 @@ final class Ecopening(
 
   def compare(other: Ecopening) = eco compare other.eco
 
+  def possibleContinuation(other: Ecopening) =
+    (lastMoveUci == "" && other.size == 1) || ((size + 1 == other.size) && (moveList == other.moveList.reverse.tail.reverse))
+
   override def toString = s"$ecoName ($moves)"
 }
 

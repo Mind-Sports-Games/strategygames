@@ -60,6 +60,8 @@ object Hash {
 
   private val h = new Hash(size)
 
+  def long(lib: GameLogic, situation: Situation) = Hash.get(lib, situation, Hash.polyglotTable(lib))
+
   def apply(lib: GameLogic, situation: Situation): PositionHash = h.apply(lib, situation)
 
   def debug(hashes: PositionHash) = hashes.map(_.toInt).sum.toString
