@@ -27,10 +27,10 @@ case object Pool
   def startingPosition       = Russian.startingPosition
   override val openingTables = List(OpeningTable.tableFMJDBrazilian, OpeningTable.tableIDFBasic)
 
-  //override def playerNames: Map[Player, String]  = Map(P1 -> "Black", P2 -> "White")
-  //override def playerColors: Map[Player, String] = Map(P1 -> "black", P2 -> "white")
+  // override def playerNames: Map[Player, String]  = Map(P1 -> "Black", P2 -> "White")
+  // override def playerColors: Map[Player, String] = Map(P1 -> "black", P2 -> "white")
 
-  //override def invertNumericCoords: Boolean = true
+  // override def invertNumericCoords: Boolean = true
 
   def captureDirs    = Standard.captureDirs
   def moveDirsPlayer = Standard.moveDirsPlayer

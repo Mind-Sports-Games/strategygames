@@ -175,7 +175,7 @@ object Variant {
 
   def exists(id: Int): Boolean = byId contains id
 
-  val openingSensibleVariants: Set[Variant] = Set()
+  val openingSensibleVariants: Set[Variant] = Set(strategygames.mancala.variant.Oware)
 
   val divisionSensibleVariants: Set[Variant] = Set()
 
