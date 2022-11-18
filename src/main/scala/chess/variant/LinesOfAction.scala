@@ -15,7 +15,7 @@ case object LinesOfAction
     ) {
 
   def perfId: Int    = 21
-  def perfIcon: Char = ''
+  def perfIcon: Char = ''
 
   override def gameFamily: GameFamily = GameFamily.LinesOfAction()
 

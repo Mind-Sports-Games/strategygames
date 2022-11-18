@@ -15,7 +15,7 @@ case object ScrambledEggs
     ) {
 
   def perfId: Int    = 22
-  def perfIcon: Char = ''
+  def perfIcon: Char = ''
 
   override def gameFamily: GameFamily = GameFamily.LinesOfAction()
 
