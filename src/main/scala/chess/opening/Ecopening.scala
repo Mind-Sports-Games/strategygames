@@ -5,14 +5,15 @@ import cats.syntax.option._
 
 final class Ecopening(
     val eco: Ecopening.ECO,
+    val variantGrouping: String,
     val family: Ecopening.FamilyName,
     val name: String,
-    private val moves: String,
+    val moves: String,
     val fen: Ecopening.FEN,
     val lastMoveUci: String
 ) extends Ordered[Ecopening] {
 
-  private lazy val moveList = moves.split(' ').toList
+  lazy val moveList = moves.split(' ').toList
 
   def firstMove = moveList.headOption
 
@@ -32,9 +33,6 @@ final class Ecopening(
   def ecoName = s"$eco $name"
 
   def compare(other: Ecopening) = eco compare other.eco
-
-  def possibleContinuation(other: Ecopening) =
-    (lastMoveUci == "" && other.size == 1) || ((size + 1 == other.size) && (moveList == other.moveList.reverse.tail.reverse))
 
   override def toString = s"$ecoName ($moves)"
 }

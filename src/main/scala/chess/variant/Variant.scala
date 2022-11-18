@@ -284,7 +284,10 @@ object Variant {
     strategygames.chess.variant.Crazyhouse,
     strategygames.chess.variant.ThreeCheck,
     strategygames.chess.variant.FiveCheck,
-    strategygames.chess.variant.KingOfTheHill
+    strategygames.chess.variant.KingOfTheHill,
+    strategygames.chess.variant.NoCastling,
+    strategygames.chess.variant.LinesOfAction,
+    strategygames.chess.variant.ScrambledEggs
   )
 
   val divisionSensibleVariants: Set[Variant] = Set(

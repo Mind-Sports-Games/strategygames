@@ -38,16 +38,32 @@ object Hash {
     val actorMasks: Array[Long]    = zc.actorMasks
   }
 
+  final case class FairySFZobristConstants(zc: fairysf.Hash.ZobristConstants) extends ZobristConstants {
+    def hexToLong(s: String): Long = zc.hexToLong(s)
+    val p1TurnMask: Long           = zc.p1TurnMask
+    val actorMasks: Array[Long]    = zc.actorMasks
+  }
+
+  final case class MancalaZobristConstants(zc: mancala.Hash.ZobristConstants) extends ZobristConstants {
+    def hexToLong(s: String): Long = zc.hexToLong(s)
+    val p1TurnMask: Long           = zc.p1TurnMask
+    val actorMasks: Array[Long]    = zc.actorMasks
+  }
+
   // The following masks are compatible with the Polyglot
   // opening book format.
   private def polyglotTable(lib: GameLogic): ZobristConstants = lib match {
     case GameLogic.Draughts() => DraughtsZobristConstants(new draughts.Hash.ZobristConstants(0))
     case GameLogic.Chess()    => ChessZobristConstants(new chess.Hash.ZobristConstants(0))
+    case GameLogic.FairySF()  => FairySFZobristConstants(new fairysf.Hash.ZobristConstants(0))
+    case GameLogic.Mancala()  => MancalaZobristConstants(new mancala.Hash.ZobristConstants(0))
   }
 
   private def randomTable(lib: GameLogic): ZobristConstants = lib match {
     case GameLogic.Draughts() => DraughtsZobristConstants(new draughts.Hash.ZobristConstants(16))
     case GameLogic.Chess()    => ChessZobristConstants(new chess.Hash.ZobristConstants(16))
+    case GameLogic.FairySF()  => FairySFZobristConstants(new fairysf.Hash.ZobristConstants(16))
+    case GameLogic.Mancala()  => MancalaZobristConstants(new mancala.Hash.ZobristConstants(16))
   }
 
   private def get(lib: GameLogic, situation: Situation, table: ZobristConstants): Long =
@@ -56,6 +72,10 @@ object Hash {
         draughts.Hash.get(situation, table)
       case (GameLogic.Chess(), Situation.Chess(situation), ChessZobristConstants(table))          =>
         chess.Hash.get(situation, table)
+      case (GameLogic.FairySF(), Situation.FairySF(situation), FairySFZobristConstants(table))    =>
+        fairysf.Hash.get(situation, table)
+      case (GameLogic.Mancala(), Situation.Mancala(situation), MancalaZobristConstants(table))    =>
+        mancala.Hash.get(situation, table)
     }
 
   private val h = new Hash(size)
