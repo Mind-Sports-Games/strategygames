@@ -63,7 +63,7 @@ object Role {
     val hashInt             = r.hashInt
     val name                = r.name
     val groundName          = r.groundName
-    val storable            = r.storable
+    val storable            = false
     override def toString() = r.name
   }
 
@@ -273,7 +273,7 @@ object Role {
     case GameLogic.Draughts() => List()
     case GameLogic.Chess()    => chess.Role.storable.map(ChessRole)
     case GameLogic.FairySF()  => fairysf.Role.storable.map(FairySFRole)
-    case GameLogic.Mancala()  => mancala.Role.storable.map(MancalaRole)
+    case GameLogic.Mancala()  => List()
   }
 
   def pgnMoveToRole(lib: GameLogic, gf: GameFamily, c: Char): Role = lib match {
