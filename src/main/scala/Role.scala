@@ -35,46 +35,46 @@ object Role {
   }
 
   final case class DraughtsRole(r: draughts.Role) extends Role {
-    val forsyth             = r.forsyth
-    val pgn                 = r.pdn
-    val binaryInt           = r.binaryInt
-    val hashInt             = r.hashInt
-    val name                = r.name
-    val groundName          = r.name
-    val storable            = false
+    lazy val forsyth             = r.forsyth
+    lazy val pgn                 = r.pdn
+    lazy val binaryInt           = r.binaryInt
+    lazy val hashInt             = r.hashInt
+    lazy val name                = r.name
+    lazy val groundName          = r.name
+    lazy val storable            = false
     override def toString() = r.name
   }
 
   final case class FairySFRole(r: fairysf.Role) extends Role {
-    val forsyth             = r.forsyth
-    val pgn                 = r.pgn
-    val binaryInt           = r.binaryInt
-    val hashInt             = r.hashInt
-    val name                = r.name
-    val groundName          = r.groundName
-    val storable            = r.storable
+    lazy val forsyth             = r.forsyth
+    lazy val pgn                 = r.pgn
+    lazy val binaryInt           = r.binaryInt
+    lazy val hashInt             = r.hashInt
+    lazy val name                = r.name
+    lazy val groundName          = r.groundName
+    lazy val storable            = r.storable
     override def toString() = r.name
   }
 
   final case class MancalaRole(r: mancala.Role) extends Role {
-    val forsyth             = r.forsyth
-    val pgn                 = r.pgn
-    val binaryInt           = r.binaryInt
-    val hashInt             = r.hashInt
-    val name                = r.name
-    val groundName          = r.groundName
-    val storable            = r.storable
+    lazy val forsyth             = r.forsyth
+    lazy val pgn                 = r.pgn
+    lazy val binaryInt           = r.binaryInt
+    lazy val hashInt             = r.hashInt
+    lazy val name                = r.name
+    lazy val groundName          = r.groundName
+    lazy val storable            = r.storable
     override def toString() = r.name
   }
 
   final case class ChessPromotableRole(r: chess.PromotableRole) extends PromotableRole {
-    val forsyth                             = r.forsyth
-    val pgn                                 = r.pgn
-    val binaryInt                           = r.binaryInt
-    val hashInt                             = r.hashInt
-    val name                                = r.name
-    val groundName                          = r.groundName
-    val storable                            = r.storable
+    lazy val forsyth                             = r.forsyth
+    lazy val pgn                                 = r.pgn
+    lazy val binaryInt                           = r.binaryInt
+    lazy val hashInt                             = r.hashInt
+    lazy val name                                = r.name
+    lazy val groundName                          = r.groundName
+    lazy val storable                            = r.storable
     override def toString()                 = r.name
     def toChess                             = r
     def toDraughts: draughts.PromotableRole = sys.error("Not implemented for chess")
@@ -83,13 +83,13 @@ object Role {
   }
 
   final case class DraughtsPromotableRole(r: draughts.PromotableRole) extends PromotableRole {
-    val forsyth                           = r.forsyth
-    val pgn                               = r.pdn
-    val binaryInt                         = r.binaryInt
-    val hashInt                           = r.hashInt
-    val name                              = r.name
-    val groundName                        = r.name
-    val storable                          = false
+    lazy val forsyth                           = r.forsyth
+    lazy val pgn                               = r.pdn
+    lazy val binaryInt                         = r.binaryInt
+    lazy val hashInt                           = r.hashInt
+    lazy val name                              = r.name
+    lazy val groundName                        = r.name
+    lazy val storable                          = false
     override def toString()               = r.name
     def toDraughts                        = r
     def toChess: chess.PromotableRole     = sys.error("Not implemented for draughts")
@@ -98,13 +98,13 @@ object Role {
   }
 
   final case class FairySFPromotableRole(r: fairysf.PromotableRole) extends PromotableRole {
-    val forsyth                             = r.forsyth
-    val pgn                                 = r.pgn
-    val binaryInt                           = r.binaryInt
-    val hashInt                             = r.hashInt
-    val name                                = r.name
-    val groundName                          = r.groundName
-    val storable                            = r.storable
+    lazy val forsyth                             = r.forsyth
+    lazy val pgn                                 = r.pgn
+    lazy val binaryInt                           = r.binaryInt
+    lazy val hashInt                             = r.hashInt
+    lazy val name                                = r.name
+    lazy val groundName                          = r.groundName
+    lazy val storable                            = r.storable
     override def toString()                 = r.name
     def toDraughts: draughts.PromotableRole = sys.error("Not implemented for fairysf")
     def toChess: chess.PromotableRole       = sys.error("Not implemented for fairysf")
