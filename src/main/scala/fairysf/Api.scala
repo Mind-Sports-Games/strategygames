@@ -93,7 +93,7 @@ object Api {
     lazy val hasRepeated: Boolean       = position.hasRepeated()
 
     lazy val pieceMap: PieceMap =
-      convertPieceMap(position.piecesOnIntBoard(), variant.gameFamily)
+      convertPieceMap(position.piecesOnBoard(), variant.gameFamily)
 
     lazy val piecesInHand: Array[Piece] =
       vectorOfPiecesToPieceArray(position.piecesInHand(), variant.gameFamily)
@@ -176,7 +176,7 @@ object Api {
   def vectorOfPiecesToPieceArray(pieces: FairyStockfish.VectorOfPieces, gf: GameFamily): Array[Piece] =
     pieces.get().map(pieceFromFSPiece(_, gf))
 
-  private def convertPieceMap(fsPieceMap: FairyStockfish.IntPieceMap, gf: GameFamily): PieceMap = {
+  private def convertPieceMap(fsPieceMap: FairyStockfish.PieceMap, gf: GameFamily): PieceMap = {
     var first    = fsPieceMap.begin()
     val end      = fsPieceMap.end()
     val pieceMap = scala.collection.mutable.Map[Pos, Piece]()
