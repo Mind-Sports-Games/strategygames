@@ -82,6 +82,37 @@ case object Crazyhouse
       }
     }
 
+  private def accountForPawnDrops(roles: List[Role], spaces: List[Pos]): Map[Role, List[Pos]] =
+    roles
+      .map(r => {
+        if (r.forsyth == strategygames.chess.Pawn.forsyth) {
+          r -> spaces.filter(canDropPawnOn(_))
+        } else r -> spaces
+      })
+      .toMap
+
+  override def possibleDropsByRole(situation: Situation): Option[Map[Role, List[Pos]]] = {
+    situation.board.pocketData
+      .fold[Option[Map[Role, List[Pos]]]](None) { (data: PocketData) =>
+        val roles = data
+          .pockets(situation.player)
+          .roles
+          .map(r => Role.allByForsyth(r.forsyth))
+          .toList
+        if (roles.nonEmpty) {
+          possibleDrops(situation).fold {
+            // calc drops not in check
+            val emptySpaces: List[Pos] =
+              Pos.all.filterNot(p => situation.board.pieces.map(_._1).toList.contains(p))
+            accountForPawnDrops(roles, emptySpaces).some
+          } { squares =>
+            if (squares.nonEmpty) accountForPawnDrops(roles, squares).some
+            else None
+          }
+        } else None
+      }
+  }
+
   override def staleMate(situation: Situation) =
     super.staleMate(situation) && !canDropStuff(situation)
 
@@ -92,6 +123,7 @@ case object Crazyhouse
   override def opponentHasInsufficientMaterial(situation: Situation) = false
   override def isInsufficientMaterial(board: Board)                  = false
 
+  // this only considers drops to block check not all possible drops in general!
   def possibleDrops(situation: Situation): Option[List[Pos]] =
     if (!situation.check) None
     else situation.kingPos.map { blockades(situation, _) }

@@ -50,6 +50,7 @@ abstract class Variant(
   def brazilian: Boolean
   def pool: Boolean
   def portuguese: Boolean
+  def english: Boolean
   def draughtsFromPosition: Boolean
 
   def shogi: Boolean
@@ -177,6 +178,7 @@ object Variant {
     def brazilian: Boolean            = false
     def pool: Boolean                 = false
     def portuguese: Boolean           = false
+    def english: Boolean              = false
     def draughtsFromPosition: Boolean = false
 
     def shogi: Boolean       = false
@@ -312,6 +314,7 @@ object Variant {
     def brazilian: Boolean            = v.brazilian
     def pool: Boolean                 = v.pool
     def portuguese: Boolean           = v.portuguese
+    def english: Boolean              = v.english
     def draughtsFromPosition: Boolean = v.fromPosition
 
     def shogi: Boolean       = false
@@ -401,8 +404,8 @@ object Variant {
     def gameLogic: GameLogic                = GameLogic.Draughts()
     def gameFamily: GameFamily              = v.gameFamily
 
-    def playerNames: Map[Player, String]  = gameFamily.playerNames
-    def playerColors: Map[Player, String] = gameFamily.playerColors
+    def playerNames: Map[Player, String]  = v.playerNames
+    def playerColors: Map[Player, String] = v.playerColors
   }
 
   case class FairySF(v: fairysf.variant.Variant)
@@ -445,6 +448,7 @@ object Variant {
     def brazilian: Boolean            = false
     def pool: Boolean                 = false
     def portuguese: Boolean           = false
+    def english: Boolean              = false
     def draughtsFromPosition: Boolean = false
 
     def shogi: Boolean       = v.shogi
@@ -577,6 +581,7 @@ object Variant {
     def brazilian: Boolean            = false
     def pool: Boolean                 = false
     def portuguese: Boolean           = false
+    def english: Boolean              = false
     def draughtsFromPosition: Boolean = false
 
     def shogi: Boolean       = false

@@ -282,7 +282,14 @@ object Variant {
 
   def exists(id: Int): Boolean = byId contains id
 
-  val openingSensibleVariants: Set[Variant] = Set()
+  val openingSensibleVariants: Set[Variant] = Set(
+    strategygames.fairysf.variant.Shogi,
+    strategygames.fairysf.variant.MiniShogi,
+    strategygames.fairysf.variant.Xiangqi,
+    strategygames.fairysf.variant.MiniXiangqi,
+    strategygames.fairysf.variant.Flipello,
+    strategygames.fairysf.variant.Flipello10
+  )
 
   val divisionSensibleVariants: Set[Variant] = Set()
 

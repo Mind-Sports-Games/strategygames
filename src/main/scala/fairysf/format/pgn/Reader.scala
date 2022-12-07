@@ -137,7 +137,7 @@ object Reader {
 
   private def makeGame(tags: Tags) = {
     val g = Game(
-      variantOption = tags(_.Variant) flatMap strategygames.fairysf.variant.Variant.byName,
+      variantOption = tags.fairysfVariant,
       fen = tags.fairysfFen
     )
     g.copy(

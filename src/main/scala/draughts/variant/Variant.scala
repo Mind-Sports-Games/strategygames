@@ -39,10 +39,11 @@ abstract class Variant private[variant] (
   def brazilian    = this == Brazilian
   def pool         = this == Pool
   def portuguese   = this == Portuguese
+  def english      = this == English
   def fromPosition = this == FromPosition
 
   def frisianVariant    = frisian || frysk
-  def draughts64Variant = russian || brazilian || pool || portuguese
+  def draughts64Variant = russian || brazilian || pool || portuguese || english
   def exotic            = !standard
 
   def baseVariant: Boolean = false
@@ -56,6 +57,8 @@ abstract class Variant private[variant] (
 
   def perfId: Int
   def perfIcon: Char
+
+  def flyingKings: Boolean = true
 
   def isValidPromotion(promotion: Option[PromotableRole]) = promotion match {
     case None       => true
@@ -485,7 +488,25 @@ abstract class Variant private[variant] (
 
   override def hashCode: Int = id
 
+  def drawTableInfo(fen: FEN): Option[String] = {
+    val parsedFen    = fen.value.split(":").take(3).mkString(":").toUpperCase()
+    val openingTable = OpeningTable.tableForVariant(this)
+    openingTable.map { ot =>
+      ot.positions
+        .filter(
+          _.fen.value == parsedFen
+        )
+        .headOption
+        .map(ot.displayStr)
+    }.flatten
+  }
+
   def gameFamily: GameFamily = GameFamily.Draughts()
+
+  def playerNames: Map[Player, String]  = gameFamily.playerNames
+  def playerColors: Map[Player, String] = gameFamily.playerColors
+
+  def invertNumericCoords: Boolean = false
 }
 
 object Variant {
@@ -519,9 +540,10 @@ object Variant {
     Breakthrough,
     Russian,
     Brazilian,
-    Pool // ,
-    // Portuguese, //Remove for now until fixed
-    // FromPosition //Remove for now until fixed
+    Pool,
+    Portuguese,
+    English
+    // , FromPosition //Remove for now until fixed
   )
   val byId  = all map { v => (v.id, v) } toMap
   val byKey = all map { v => (v.key, v) } toMap
@@ -550,7 +572,8 @@ object Variant {
     strategygames.draughts.variant.Russian,
     strategygames.draughts.variant.Brazilian,
     strategygames.draughts.variant.Pool,
-    strategygames.draughts.variant.Portuguese
+    strategygames.draughts.variant.Portuguese,
+    strategygames.draughts.variant.English
   )
 
   val divisionSensibleVariants: Set[Variant] = Set(
@@ -562,6 +585,7 @@ object Variant {
     strategygames.draughts.variant.Brazilian,
     strategygames.draughts.variant.Pool,
     strategygames.draughts.variant.Portuguese,
+    strategygames.draughts.variant.English,
     strategygames.draughts.variant.FromPosition
   )
 

@@ -33,7 +33,13 @@ case class Tags(value: List[Tag]) extends AnyVal {
     } flatMap Clock.readPgnConfig
 
   def draughtsVariant: Option[strategygames.draughts.variant.Variant] =
-    apply(_.GameType).fold(apply(_.Variant) flatMap strategygames.draughts.variant.Variant.byName) {
+    apply(_.GameType).fold{
+      apply(_.Variant).map(_.toLowerCase).flatMap {
+        case "spanish"                                          => strategygames.draughts.variant.Portuguese.some
+        case "american" | "american/english" | "anglo american" => strategygames.draughts.variant.English.some
+        case name                                               => strategygames.draughts.variant.Variant byName name
+      }
+    }{
       case Tags.GameTypeRegex(t, _*) =>
         strategygames.draughts.parseIntOption(t) match {
           case Some(gameType) => strategygames.draughts.variant.Variant byGameType gameType
@@ -50,7 +56,9 @@ case class Tags(value: List[Tag]) extends AnyVal {
 
   def fairysfVariant: Option[strategygames.fairysf.variant.Variant] =
     apply(_.Variant).map(_.toLowerCase).flatMap {
-      strategygames.fairysf.variant.Variant byName _
+      case "othello" | "reversi"                                               => strategygames.fairysf.variant.Flipello.some
+      case "grandothello" | "grand othello" | "grandreversi" | "grand reversi" => strategygames.fairysf.variant.Flipello10.some
+      case name                                                                => strategygames.fairysf.variant.Variant byName name
     }
 
   def mancalaVariant: Option[strategygames.mancala.variant.Variant] =

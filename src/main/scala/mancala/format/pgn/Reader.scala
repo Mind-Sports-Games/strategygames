@@ -92,7 +92,7 @@ object Reader {
 
   private def makeGame(tags: Tags) = {
     val g = Game(
-      variantOption = tags(_.Variant) flatMap strategygames.mancala.variant.Variant.byName,
+      variantOption = tags.mancalaVariant,
       fen = tags.mancalaFen
     )
     g.copy(

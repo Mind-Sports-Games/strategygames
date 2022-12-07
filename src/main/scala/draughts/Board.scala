@@ -37,6 +37,8 @@ case class Board(
     Player.Map(w, b)
   }
 
+  def nonGhostActorsForPlayer(p: Player) = actorsOf(p).filterNot(_.piece.isGhost)
+
   lazy val ghosts = pieces.values.count(_.isGhost)
 
   def roleCount(r: Role): Int = pieces.values.count(_.role == r)

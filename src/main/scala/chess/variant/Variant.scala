@@ -143,6 +143,8 @@ abstract class Variant private[variant] (
   def drop(situation: Situation, role: Role, pos: Pos): Validated[String, Drop] =
     Validated.invalid(s"$this variant cannot drop $situation $role $pos")
 
+  def possibleDropsByRole(situation: Situation): Option[Map[Role, List[Pos]]] = None // override in crazyhouse
+
   def staleMate(situation: Situation): Boolean = !situation.check && situation.moves.isEmpty
 
   def checkmate(situation: Situation) = situation.check && situation.moves.isEmpty
@@ -282,7 +284,10 @@ object Variant {
     strategygames.chess.variant.Crazyhouse,
     strategygames.chess.variant.ThreeCheck,
     strategygames.chess.variant.FiveCheck,
-    strategygames.chess.variant.KingOfTheHill
+    strategygames.chess.variant.KingOfTheHill,
+    strategygames.chess.variant.NoCastling,
+    strategygames.chess.variant.LinesOfAction,
+    strategygames.chess.variant.ScrambledEggs
   )
 
   val divisionSensibleVariants: Set[Variant] = Set(

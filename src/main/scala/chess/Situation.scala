@@ -23,6 +23,12 @@ case class Situation(board: Board, player: Player) {
       case _                          => None
     }
 
+  def dropsByRole: Option[Map[Role, List[Pos]]] =
+    board.variant match {
+      case v: variant.Crazyhouse.type => v possibleDropsByRole this
+      case _                          => None
+    }
+
   lazy val kingPos: Option[Pos] = board kingPosOf player
 
   lazy val check: Boolean = board check player

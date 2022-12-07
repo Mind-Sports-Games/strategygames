@@ -401,6 +401,6 @@ object Uci {
          case Uci.FairySFDrop(_)  => s"2_${gf.id}_"
          case Uci.MancalaMove(_)  => s"3_${gf.id}_"
        }
-     } else "") + moves.map(_.piotr) mkString " "
+     } else "") + (moves.map(_.piotr) mkString " ")
 
 }
