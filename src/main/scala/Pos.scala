@@ -81,7 +81,8 @@ object Pos {
   def fromKey(lib: GameLogic, key: String): Option[Pos] = lib match {
     case GameLogic.Draughts() => sys.error("Not implemented yet for draughts")
     case GameLogic.Chess()    => chess.Pos.fromKey(key).map(Chess)
-    case GameLogic.FairySF()  => sys.error("Not implemented yet for fairysf")
+    case GameLogic.FairySF()  => fairysf.Pos.fromKey(key).map(FairySF)
+    // TODO: Lakin you must get mancala going too!
     case GameLogic.Mancala()  => sys.error("Not implemented yet for mancala")
   }
 
