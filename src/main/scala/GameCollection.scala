@@ -47,7 +47,8 @@ sealed abstract class GameFamily {
   def name: String
   def key: String
   def gameLogic: GameLogic
-  def aiEnabled: Boolean
+  def hasFishnet: Boolean
+  def hasAnalysisBoard: Boolean
   def defaultVariant: Variant
   def variants: List[Variant]
   def displayPiece: String
@@ -68,7 +69,8 @@ object GameFamily {
     def name              = GameLogic.Chess().name
     def key               = GameLogic.Chess().name.toLowerCase()
     def gameLogic         = GameLogic.Chess()
-    def aiEnabled         = true
+    def hasFishnet        = true
+    def hasAnalysisBoard  = true
     def defaultVariant    = Variant.Chess(strategygames.chess.variant.Standard)
     def variants          = Variant.all(GameLogic.Chess()).filter(_.gameFamily == this)
     def displayPiece      = "wN"
@@ -133,7 +135,8 @@ object GameFamily {
     def name              = GameLogic.Draughts().name
     def key               = GameLogic.Draughts().name.toLowerCase()
     def gameLogic         = GameLogic.Draughts()
-    def aiEnabled         = false
+    def hasFishnet        = false
+    def hasAnalysisBoard  = false
     def defaultVariant    = Variant.Draughts(strategygames.draughts.variant.Standard)
     def variants          = Variant.all(GameLogic.Draughts())
     def displayPiece      = "wK"
@@ -167,7 +170,8 @@ object GameFamily {
     def name              = "Lines Of Action"
     def key               = "loa"
     def gameLogic         = GameLogic.Chess()
-    def aiEnabled         = false
+    def hasFishnet        = false
+    def hasAnalysisBoard  = true
     def defaultVariant    = Variant.Chess(strategygames.chess.variant.LinesOfAction)
     def variants          = Variant.all(GameLogic.Chess()).filter(_.gameFamily == this)
     def displayPiece      = "bL"
@@ -210,7 +214,8 @@ object GameFamily {
     def name              = "Shogi"
     def key               = "shogi"
     def gameLogic         = GameLogic.FairySF()
-    def aiEnabled         = true
+    def hasFishnet        = true
+    def hasAnalysisBoard  = true
     def defaultVariant    = Variant.FairySF(strategygames.fairysf.variant.Shogi)
     def variants          = Variant.all(GameLogic.FairySF()).filter(_.gameFamily == this)
     def displayPiece      = "0KE"
@@ -227,7 +232,8 @@ object GameFamily {
     def name              = "Xiangqi"
     def key               = "xiangqi"
     def gameLogic         = GameLogic.FairySF()
-    def aiEnabled         = true
+    def hasFishnet        = true
+    def hasAnalysisBoard  = true
     def defaultVariant    = Variant.FairySF(strategygames.fairysf.variant.Xiangqi)
     def variants          = Variant.all(GameLogic.FairySF()).filter(_.gameFamily == this)
     def displayPiece      = "RH"
@@ -244,7 +250,8 @@ object GameFamily {
     def name              = "Flipello"
     def key               = "flipello"
     def gameLogic         = GameLogic.FairySF()
-    def aiEnabled         = true
+    def hasFishnet        = true
+    def hasAnalysisBoard  = true
     def defaultVariant    = Variant.FairySF(strategygames.fairysf.variant.Flipello)
     def variants          = Variant.all(GameLogic.FairySF()).filter(_.gameFamily == this)
     def displayPiece      = "bP"
@@ -262,7 +269,8 @@ object GameFamily {
     def name              = "Mancala"
     def key               = "mancala"
     def gameLogic         = GameLogic.Mancala()
-    def aiEnabled         = false
+    def hasFishnet        = false
+    def hasAnalysisBoard  = true
     def defaultVariant    = Variant.Mancala(strategygames.mancala.variant.Oware)
     def variants          = Variant.all(GameLogic.Mancala()).filter(_.gameFamily == this)
     def displayPiece      = "display"

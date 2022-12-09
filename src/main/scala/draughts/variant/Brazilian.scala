@@ -16,12 +16,12 @@ case object Brazilian
   def perfId: Int    = 123
   def perfIcon: Char = ''
 
-  override def fenVariant    = true
-  override def aiVariant     = false
-  def pieces                 = Russian.pieces
-  def initialFen             = Russian.initialFen
-  def startingPosition       = Russian.startingPosition
-  override val openingTables = List(OpeningTable.tableFMJDBrazilian, OpeningTable.tableIDFBasic)
+  override def fenVariant       = true
+  override def hasAnalysisBoard = false
+  def pieces                    = Russian.pieces
+  def initialFen                = Russian.initialFen
+  def startingPosition          = Russian.startingPosition
+  override val openingTables    = List(OpeningTable.tableFMJDBrazilian, OpeningTable.tableIDFBasic)
 
   def captureDirs    = Standard.captureDirs
   def moveDirsPlayer = Standard.moveDirsPlayer
