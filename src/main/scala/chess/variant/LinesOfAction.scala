@@ -19,9 +19,9 @@ case object LinesOfAction
 
   override def gameFamily: GameFamily = GameFamily.LinesOfAction()
 
-  override def baseVariant: Boolean = true
-  override def hasAnalysisBoard: Boolean   = true
-  override def hasFishnet: Boolean   = false
+  override def baseVariant: Boolean      = true
+  override def hasAnalysisBoard: Boolean = true
+  override def hasFishnet: Boolean       = false
 
   override val pieces: Map[Pos, Piece] = Map(
     Pos.B1 -> Piece(P1, LOAChecker),

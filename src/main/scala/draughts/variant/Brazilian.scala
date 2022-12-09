@@ -17,7 +17,6 @@ case object Brazilian
   def perfIcon: Char = ''
 
   override def fenVariant       = true
-  override def hasAnalysisBoard = false
   def pieces                    = Russian.pieces
   def initialFen                = Russian.initialFen
   def startingPosition          = Russian.startingPosition
