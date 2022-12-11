@@ -1,10 +1,9 @@
 package strategygames.mancala
-import strategygames.{ Clock, MoveMetrics, Player }
+import strategygames.{ Clock, MoveMetrics }
 
 import cats.data.Validated
 
-import strategygames.mancala.format.FEN
-import strategygames.mancala.format.{ pgn, Uci }
+import strategygames.mancala.format.{ FEN, pgn }
 
 case class Game(
     situation: Situation,
