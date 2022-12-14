@@ -1,9 +1,6 @@
 package strategygames.mancala
 
 import strategygames.Player
-import format.FEN
-
-import cats.implicits._
 
 import variant.Variant
 
