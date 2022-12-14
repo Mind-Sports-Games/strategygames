@@ -224,7 +224,7 @@ object Api {
   def positionFromVariantNameAndFEN(variantName: String, fenString: String): Position = {
     val game = new OwareGame()
     game.setBoard(owareBoardFromFen(fenString))
-    variantName match {
+    variantName.toLowerCase() match {
       case "oware" => new OwarePosition(game)
       case _       => new OwarePosition(new OwareGame())
     }
