@@ -16,7 +16,7 @@ case object Portuguese
       boardSize = Board.D64
     ) {
   import Variant._
-  def perfId: Int = 125
+  def perfId: Int    = 125
   def perfIcon: Char = ''
 
   override def fenVariant = true

@@ -109,7 +109,7 @@ object Situation {
         (Role.ChessRole(r), p.map(Pos.Chess))
       })
 
-    //this is really inefficient but harder to otherwise generate for chess
+    // this is really inefficient but harder to otherwise generate for chess
     def dropsAsDrops: List[Drop] =
       dropsByRole
         .getOrElse(Map())
