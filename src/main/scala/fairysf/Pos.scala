@@ -2,6 +2,114 @@ package strategygames.fairysf
 
 import scala.math.{ abs, max, min }
 
+  // Matches with: https://github.com/Mind-Sports-Games/lila/blob/incoming-prs/ui/chess/src/piotr.ts
+object Piotr {
+  val lookup: Map[Int, Char] = Map(
+    Pos.A1.index -> 'a',
+    Pos.B1.index -> 'b',
+    Pos.C1.index -> 'c',
+    Pos.D1.index -> 'd',
+    Pos.E1.index -> 'e',
+    Pos.F1.index -> 'f',
+    Pos.G1.index -> 'g',
+    Pos.H1.index -> 'h',
+    Pos.A2.index -> 'i',
+    Pos.B2.index -> 'j',
+    Pos.C2.index -> 'k',
+    Pos.D2.index -> 'l',
+    Pos.E2.index -> 'm',
+    Pos.F2.index -> 'n',
+    Pos.G2.index -> 'o',
+    Pos.H2.index -> 'p',
+    Pos.A3.index -> 'q',
+    Pos.B3.index -> 'r',
+    Pos.C3.index -> 's',
+    Pos.D3.index -> 't',
+    Pos.E3.index -> 'u',
+    Pos.F3.index -> 'v',
+    Pos.G3.index -> 'w',
+    Pos.H3.index -> 'x',
+    Pos.A4.index -> 'y',
+    Pos.B4.index -> 'z',
+    Pos.C4.index -> 'A',
+    Pos.D4.index -> 'B',
+    Pos.E4.index -> 'C',
+    Pos.F4.index -> 'D',
+    Pos.G4.index -> 'E',
+    Pos.H4.index -> 'F',
+    Pos.A5.index -> 'G',
+    Pos.B5.index -> 'H',
+    Pos.C5.index -> 'I',
+    Pos.D5.index -> 'J',
+    Pos.E5.index -> 'K',
+    Pos.F5.index -> 'L',
+    Pos.G5.index -> 'M',
+    Pos.H5.index -> 'N',
+    Pos.A6.index -> 'O',
+    Pos.B6.index -> 'P',
+    Pos.C6.index -> 'Q',
+    Pos.D6.index -> 'R',
+    Pos.E6.index -> 'S',
+    Pos.F6.index -> 'T',
+    Pos.G6.index -> 'U',
+    Pos.H6.index -> 'V',
+    Pos.A7.index -> 'W',
+    Pos.B7.index -> 'X',
+    Pos.C7.index -> 'Y',
+    Pos.D7.index -> 'Z',
+    Pos.E7.index -> '0',
+    Pos.F7.index -> '1',
+    Pos.G7.index -> '2',
+    Pos.H7.index -> '3',
+    Pos.A8.index -> '4',
+    Pos.B8.index -> '5',
+    Pos.C8.index -> '6',
+    Pos.D8.index -> '7',
+    Pos.E8.index -> '8',
+    Pos.F8.index -> '9',
+    Pos.G8.index -> '!',
+    Pos.H8.index -> '?',
+    Pos.A9.index -> '\"',
+    Pos.B9.index -> '#',
+    Pos.C9.index -> '$',
+    Pos.D9.index -> '%',
+    Pos.E9.index -> '&',
+    Pos.F9.index -> '\'',
+    Pos.G9.index -> '(',
+    Pos.H9.index -> ')',
+    Pos.I9.index -> '*',
+    Pos.J9.index -> '+',
+    Pos.A10.index -> ',',
+    Pos.B10.index -> '-',
+    Pos.C10.index -> '.',
+    Pos.D10.index -> '/',
+    Pos.E10.index -> ':',
+    Pos.F10.index -> ';',
+    Pos.G10.index -> '<',
+    Pos.H10.index -> '=',
+    Pos.I10.index -> '>',
+    Pos.J10.index -> '@',
+    Pos.I1.index -> '[',
+    Pos.J1.index -> '\\',
+    Pos.I2.index -> ']',
+    Pos.J2.index -> '^',
+    Pos.I3.index -> '_',
+    Pos.J3.index -> '`',
+    Pos.I4.index -> '{',
+    Pos.J4.index -> '|',
+    Pos.I5.index -> '}',
+    Pos.J5.index -> '~',
+    // https://en.wikipedia.org/wiki/List_of_Unicode_characters#Latin_script
+    // from the latin-1 script
+    Pos.I6.index -> '¡',
+    Pos.J6.index -> '¢',
+    Pos.I7.index -> '£',
+    Pos.J7.index -> '¤',
+    Pos.I8.index -> '¥',
+    Pos.J8.index -> '¦',
+  )
+}
+
 case class Pos private (index: Int) extends AnyVal {
 
   def down: Option[Pos]      = Pos.at(file.index, rank.index - 1)
@@ -44,12 +152,7 @@ case class Pos private (index: Int) extends AnyVal {
   @inline def file = File of this
   @inline def rank = Rank of this
 
-  def piotr: Char =
-    if (index <= 25) (97 + index).toChar // a ...
-    else if (index <= 51) (39 + index).toChar // A ...
-    else if (index <= 61) (index - 4).toChar // 0 ...
-    else if (index == 62) '!'
-    else '?'
+  def piotr: Char = Piotr.lookup.get(index).getOrElse('?')
   def piotrStr = piotr.toString
 
   def key               = file.toString + rank.toString

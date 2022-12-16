@@ -381,7 +381,7 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
       "f1e2",
       "f2d2"
     )
-    val moves           = uciMoves.dropRight(2).map(x => (Api.uciToMove(x)))
+    val moves           = uciMoves.dropRight(2).map(Api.uciToMove)
     val newGame         = initialPosition.makeMovesWithPrevious(moves, List[String]())
     val cycleGame       = newGame.makeMovesWithPrevious(List(5, 6), uciMoves.dropRight(2))
     "currently be ongoing game" in {
@@ -498,7 +498,7 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
       "e1f1",
       "a2a1"
     )
-    val moves           = uciMoves.dropRight(1).map(x => (Api.uciToMove(x)))
+    val moves           = uciMoves.dropRight(1).map(Api.uciToMove)
     val newGame         = initialPosition.makeMovesWithPrevious(moves, List[String]())
     val cycleGame       = newGame.makeMovesWithPrevious(List(11), uciMoves.dropRight(1))
     "currently be ongoing game" in {

@@ -46,9 +46,10 @@ abstract class Variant private[variant] (
   def draughts64Variant = russian || brazilian || pool || portuguese || english
   def exotic            = !standard
 
-  def baseVariant: Boolean = false
-  def fenVariant: Boolean  = false
-  def aiVariant: Boolean   = true
+  def baseVariant: Boolean      = false
+  def fenVariant: Boolean       = false
+  def hasAnalysisBoard: Boolean = false
+  def hasFishnet: Boolean       = false
 
   def p1IsBetterVariant: Boolean = false
   def blindModeVariant: Boolean  = false

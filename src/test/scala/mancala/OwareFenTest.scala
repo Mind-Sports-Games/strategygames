@@ -44,17 +44,32 @@ class OwareFenTest extends Specification with ValidatedMatchers {
 
     "fen 5M/D1A2C a B S" should {
         val fen = strategygames.mancala.format.FEN("5M/D1A2C a B S")
-        "player 1 score be 4" in {
+        "player 1 score be 27" in {
         fen.player1Score must_== 27
         }
-        "player 2 score be 8" in {
+        "player 2 score be 2" in {
         fen.player2Score must_== 2
         }
-        "Player turn is North" in {
+        "Player turn is South" in {
         fen.player must_== Some(Player.P1)
         }
         "OwarestoneArray" in {
         fen.owareStoneArray must_== Array(4,0,1,0,0,3,13,0,0,0,0,0)
+        }
+    }
+    "fen DDDEEE/DDDD1E 0 0 N " should {
+        val fen = strategygames.mancala.format.FEN("DDDEEE/DDDD1E 0 0 N")
+        "player 1 score be 0" in {
+        fen.player1Score must_== 0
+        }
+        "player 2 score be 0" in {
+        fen.player2Score must_== 0
+        }
+        "Player turn is South" in {
+        fen.player must_== Some(Player.P2)
+        }
+        "OwarestoneArray" in {
+        fen.owareStoneArray must_== Array(4,4,4,4,0,5,5,5,5,4,4,4)
         }
     }
     
