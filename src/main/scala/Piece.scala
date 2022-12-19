@@ -74,18 +74,23 @@ object Piece {
   }
 
   def chessPieceMap(pieceMap: PieceMap): chess.PieceMap = pieceMap.map {
-    case (Pos.Chess(pos), Chess(piece)) => (pos, piece)
+    case (Pos.Chess(pos), (Chess(piece), _)) => (pos, piece)
   }
 
   def draughtsPieceMap(pieceMap: PieceMap): draughts.PieceMap = pieceMap.map {
-    case (Pos.Draughts(pos), Draughts(piece)) => (pos, piece)
+    case (Pos.Draughts(pos), (Draughts(piece), _)) => (pos, piece)
   }
 
   def fairySFPieceMap(pieceMap: PieceMap): fairysf.PieceMap = pieceMap.map {
-    case (Pos.FairySF(pos), FairySF(piece)) => (pos, piece)
+    case (Pos.FairySF(pos), (FairySF(piece), _)) => (pos, piece)
   }
 
   def mancalaPieceMap(pieceMap: PieceMap): mancala.PieceMap = pieceMap.map {
-    case (Pos.Mancala(pos), Mancala(piece)) => (pos, piece)
+    case (Pos.Mancala(pos), (Mancala(piece), _)) => (pos, piece)
   }
+
+  def pieceMapForChess(pieces: strategygames.chess.PieceMap): PieceMap = pieces.map {
+    case (pos, piece) => (Pos.Chess(pos), (Piece.Chess(piece), 1))
+  }
+
 }
