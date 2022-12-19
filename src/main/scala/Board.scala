@@ -145,7 +145,7 @@ object Board {
 
   case class Mancala(b: mancala.Board)
       extends Board(
-        b.pieces.map { case (pos, piece) => (Pos.Mancala(pos), (Piece.Mancala(piece), piece.role.binaryInt)) },
+        b.pieces.map { case (pos, (piece, count)) => (Pos.Mancala(pos), (Piece.Mancala(piece), count)) },
         History.Mancala(b.history),
         Variant.Mancala(b.variant)
       ) {
@@ -204,7 +204,7 @@ object Board {
       case (GameLogic.Mancala(), Variant.Mancala(variant))   =>
         Mancala(
           mancala.Board.apply(
-            pieces.map { case (Pos.Mancala(pos), (Piece.Mancala(piece), _)) => (pos, piece) },
+            pieces.map { case (Pos.Mancala(pos), (Piece.Mancala(piece), count)) => (pos, (piece, count)) },
             variant
           )
         )

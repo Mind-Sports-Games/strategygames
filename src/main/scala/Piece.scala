@@ -86,7 +86,7 @@ object Piece {
   }
 
   def mancalaPieceMap(pieceMap: PieceMap): mancala.PieceMap = pieceMap.map {
-    case (Pos.Mancala(pos), (Mancala(piece), _)) => (pos, piece)
+    case (Pos.Mancala(pos), (Mancala(piece), count)) => (pos, (piece, count))
   }
 
   def pieceMapForChess(pieces: strategygames.chess.PieceMap): PieceMap = pieces.map {

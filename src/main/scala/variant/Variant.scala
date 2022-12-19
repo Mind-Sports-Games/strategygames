@@ -554,8 +554,9 @@ object Variant {
     def toDraughts              = sys.error("Can't convert mancala to draughts")
     def toFairySF               = sys.error("Can't convert mancala to fairysf")
     def toMancala               = v
-    def pieces: PieceMap =
-      v.pieces.map { case (pos, piece) => (Pos.Mancala(pos), (Piece.Mancala(piece), piece.role.binaryInt)) }
+    def pieces: PieceMap        = v.pieces.map {
+      case (pos, (piece, count)) => (Pos.Mancala(pos), (Piece.Mancala(piece), count))
+    }
 
     def standard: Boolean      = false
     def chess960: Boolean      = false

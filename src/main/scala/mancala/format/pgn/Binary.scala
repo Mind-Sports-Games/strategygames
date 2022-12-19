@@ -53,8 +53,9 @@ object Binary {
       case _ => ""
     }
 
-    def pieceFromInt(gf: GameFamily, b: Int): String =
-      Role.allByBinaryInt(gf).get(right(b, 7)).get.forsyth.toString
+    //not needed for mancala as no drops
+    //def pieceFromInt(gf: GameFamily, b: Int): String =
+    //  Role.allByBinaryInt(gf).get(right(b, 7)).get.forsyth.toString
 
     private def headerBit(i: Int) = i >> 7
 

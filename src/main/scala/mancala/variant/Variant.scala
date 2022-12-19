@@ -41,9 +41,9 @@ abstract class Variant private[variant] (
   def perfId: Int
   def perfIcon: Char
 
-  def initialFen: FEN = format.FEN("DDDDDD/DDDDDD 0 0 S")
+  def initialFen: FEN = format.FEN("4S,4S,4S,4S,4S,4S/4S,4S,4S,4S,4S,4S 0 0 S")
 
-  def pieces: Map[Pos, Piece] = Api.pieceMapFromFen(key, initialFen.value)
+  def pieces: PieceMap = Api.pieceMapFromFen(key, initialFen.value)
 
   def startPlayer: Player = P1
 
@@ -73,7 +73,7 @@ abstract class Variant private[variant] (
           (
             orig,
             Move(
-              piece = situation.board.pieces(orig),
+              piece = situation.board.pieces(orig)._1,
               orig = orig,
               dest = dest,
               situationBefore = situation,
@@ -111,13 +111,9 @@ abstract class Variant private[variant] (
 
   @nowarn def specialDraw(situation: Situation) = false
 
-  /** Returns the material imbalance in pawns (overridden in Antichess)
-    */
   def materialImbalance(board: Board): Int =
-    board.pieces.values.foldLeft(0) { case (acc, Piece(player, role)) =>
-      Role.valueOf(role).fold(acc) { value =>
-        acc + value * player.fold(1, -1)
-      }
+    board.pieces.values.foldLeft(0) { case (acc, (Piece(player, _), count)) =>
+        acc + count * player.fold(1, -1)
     }
 
   // Some variants have an extra effect on the board on a move. For example, in Atomic, some
