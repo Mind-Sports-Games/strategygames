@@ -19,7 +19,8 @@ case object ScrambledEggs
 
   override def gameFamily: GameFamily = GameFamily.LinesOfAction()
 
-  override def aiVariant: Boolean = false
+  override def hasAnalysisBoard: Boolean = true
+  override def hasFishnet: Boolean       = false
 
   override val pieces: Map[Pos, Piece] = Map(
     Pos.B1 -> Piece(P1, LOAChecker),

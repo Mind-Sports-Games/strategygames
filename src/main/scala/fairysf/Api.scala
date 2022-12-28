@@ -169,8 +169,8 @@ object Api {
   private def pieceFromFSPiece(piece: FairyStockfish.Piece, gf: GameFamily): Piece =
     Piece(
       Player.all(piece.color()),
-      if (piece.promoted) Role.promotionMap(Role.allByFairySFID(gf)(piece.pieceInfo().id))
-      else Role.allByFairySFID(gf)(piece.pieceInfo().id)
+      if (piece.promoted) Role.promotionMap(Role.sfPieceToRole((piece.id(), gf.id)))
+      else Role.sfPieceToRole((piece.id(), gf.id))
     )
 
   def vectorOfPiecesToPieceArray(pieces: FairyStockfish.VectorOfPieces, gf: GameFamily): Array[Piece] =
@@ -178,10 +178,11 @@ object Api {
 
   private def convertPieceMap(fsPieceMap: FairyStockfish.PieceMap, gf: GameFamily): PieceMap = {
     var first    = fsPieceMap.begin()
+    val end      = fsPieceMap.end()
     val pieceMap = scala.collection.mutable.Map[Pos, Piece]()
-    while (!first.equals(fsPieceMap.end())) {
+    while (!first.equals(end)) {
       pieceMap(
-        Pos.fromKey(first.first().getString()).get
+        Pos.fromFairy(first.first()).get
       ) = pieceFromFSPiece(first.second(), gf)
       first = first.increment()
     }

@@ -17,17 +17,7 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def dropsByRole: Option[Map[Role, List[Pos]]]
 
-  def dropsAsDrops: List[Drop] =
-    dropsByRole
-      .getOrElse(Map())
-      .flatMap { case (role, listPos) =>
-        // This technically should valid the drops
-        // but I'm going to assume they're correct at this point
-        // because they came from our move generation.
-        // So if they don't validate, we just filter them out here.
-        listPos.flatMap(drop(role, _).toOption)
-      }
-      .toList
+  def dropsAsDrops: List[Drop]
 
   def actions: List[MoveOrDrop] =
     moves.values.flatten.map(Left(_)).toList ::: dropsAsDrops.map(Right(_)).toList
@@ -119,6 +109,19 @@ object Situation {
         (Role.ChessRole(r), p.map(Pos.Chess))
       })
 
+    // this is really inefficient but harder to otherwise generate for chess
+    def dropsAsDrops: List[Drop] =
+      dropsByRole
+        .getOrElse(Map())
+        .flatMap { case (role, listPos) =>
+          // This technically should valid the drops
+          // but I'm going to assume they're correct at this point
+          // because they came from our move generation.
+          // So if they don't validate, we just filter them out here.
+          listPos.flatMap(drop(role, _).toOption)
+        }
+        .toList
+
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
@@ -190,6 +193,8 @@ object Situation {
     def drops: Option[List[Pos]] = None
 
     def dropsByRole: Option[Map[Role, List[Pos]]] = None
+
+    def dropsAsDrops: List[Drop] = List.empty
 
     // possibly need to do something for this
     def opponentHasInsufficientMaterial: Boolean = false
@@ -305,6 +310,8 @@ object Situation {
       case (r: fairysf.Role, p: List[fairysf.Pos]) => (Role.FairySFRole(r), p.map(Pos.FairySF))
     })
 
+    def dropsAsDrops: List[Drop] = s.dropsAsDrops.map(Drop.FairySF)
+
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
@@ -385,6 +392,8 @@ object Situation {
     def drops: Option[List[Pos]] = None
 
     def dropsByRole: Option[Map[Role, List[Pos]]] = None
+
+    def dropsAsDrops: List[Drop] = List.empty
 
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
       sys.error("Can't do a Drop for mancala")

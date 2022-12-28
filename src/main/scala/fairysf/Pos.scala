@@ -2,6 +2,114 @@ package strategygames.fairysf
 
 import scala.math.{ abs, max, min }
 
+  // Matches with: https://github.com/Mind-Sports-Games/lila/blob/incoming-prs/ui/chess/src/piotr.ts
+object Piotr {
+  val lookup: Map[Int, Char] = Map(
+    Pos.A1.index -> 'a',
+    Pos.B1.index -> 'b',
+    Pos.C1.index -> 'c',
+    Pos.D1.index -> 'd',
+    Pos.E1.index -> 'e',
+    Pos.F1.index -> 'f',
+    Pos.G1.index -> 'g',
+    Pos.H1.index -> 'h',
+    Pos.A2.index -> 'i',
+    Pos.B2.index -> 'j',
+    Pos.C2.index -> 'k',
+    Pos.D2.index -> 'l',
+    Pos.E2.index -> 'm',
+    Pos.F2.index -> 'n',
+    Pos.G2.index -> 'o',
+    Pos.H2.index -> 'p',
+    Pos.A3.index -> 'q',
+    Pos.B3.index -> 'r',
+    Pos.C3.index -> 's',
+    Pos.D3.index -> 't',
+    Pos.E3.index -> 'u',
+    Pos.F3.index -> 'v',
+    Pos.G3.index -> 'w',
+    Pos.H3.index -> 'x',
+    Pos.A4.index -> 'y',
+    Pos.B4.index -> 'z',
+    Pos.C4.index -> 'A',
+    Pos.D4.index -> 'B',
+    Pos.E4.index -> 'C',
+    Pos.F4.index -> 'D',
+    Pos.G4.index -> 'E',
+    Pos.H4.index -> 'F',
+    Pos.A5.index -> 'G',
+    Pos.B5.index -> 'H',
+    Pos.C5.index -> 'I',
+    Pos.D5.index -> 'J',
+    Pos.E5.index -> 'K',
+    Pos.F5.index -> 'L',
+    Pos.G5.index -> 'M',
+    Pos.H5.index -> 'N',
+    Pos.A6.index -> 'O',
+    Pos.B6.index -> 'P',
+    Pos.C6.index -> 'Q',
+    Pos.D6.index -> 'R',
+    Pos.E6.index -> 'S',
+    Pos.F6.index -> 'T',
+    Pos.G6.index -> 'U',
+    Pos.H6.index -> 'V',
+    Pos.A7.index -> 'W',
+    Pos.B7.index -> 'X',
+    Pos.C7.index -> 'Y',
+    Pos.D7.index -> 'Z',
+    Pos.E7.index -> '0',
+    Pos.F7.index -> '1',
+    Pos.G7.index -> '2',
+    Pos.H7.index -> '3',
+    Pos.A8.index -> '4',
+    Pos.B8.index -> '5',
+    Pos.C8.index -> '6',
+    Pos.D8.index -> '7',
+    Pos.E8.index -> '8',
+    Pos.F8.index -> '9',
+    Pos.G8.index -> '!',
+    Pos.H8.index -> '?',
+    Pos.A9.index -> '\"',
+    Pos.B9.index -> '#',
+    Pos.C9.index -> '$',
+    Pos.D9.index -> '%',
+    Pos.E9.index -> '&',
+    Pos.F9.index -> '\'',
+    Pos.G9.index -> '(',
+    Pos.H9.index -> ')',
+    Pos.I9.index -> '*',
+    Pos.J9.index -> '+',
+    Pos.A10.index -> ',',
+    Pos.B10.index -> '-',
+    Pos.C10.index -> '.',
+    Pos.D10.index -> '/',
+    Pos.E10.index -> ':',
+    Pos.F10.index -> ';',
+    Pos.G10.index -> '<',
+    Pos.H10.index -> '=',
+    Pos.I10.index -> '>',
+    Pos.J10.index -> '@',
+    Pos.I1.index -> '[',
+    Pos.J1.index -> '\\',
+    Pos.I2.index -> ']',
+    Pos.J2.index -> '^',
+    Pos.I3.index -> '_',
+    Pos.J3.index -> '`',
+    Pos.I4.index -> '{',
+    Pos.J4.index -> '|',
+    Pos.I5.index -> '}',
+    Pos.J5.index -> '~',
+    // https://en.wikipedia.org/wiki/List_of_Unicode_characters#Latin_script
+    // from the latin-1 script
+    Pos.I6.index -> '¡',
+    Pos.J6.index -> '¢',
+    Pos.I7.index -> '£',
+    Pos.J7.index -> '¤',
+    Pos.I8.index -> '¥',
+    Pos.J8.index -> '¦',
+  )
+}
+
 case class Pos private (index: Int) extends AnyVal {
 
   def down: Option[Pos]      = Pos.at(file.index, rank.index - 1)
@@ -44,12 +152,7 @@ case class Pos private (index: Int) extends AnyVal {
   @inline def file = File of this
   @inline def rank = Rank of this
 
-  def piotr: Char =
-    if (index <= 25) (97 + index).toChar // a ...
-    else if (index <= 51) (39 + index).toChar // A ...
-    else if (index <= 61) (index - 4).toChar // 0 ...
-    else if (index == 62) '!'
-    else '?'
+  def piotr: Char = Piotr.lookup.get(index).getOrElse('?')
   def piotrStr = piotr.toString
 
   def key               = file.toString + rank.toString
@@ -211,5 +314,129 @@ object Pos {
     .to(Map)
 
   val posR = "([a-j][1-9]|[a-j]10)"
+
+  private val fairySquareToPos: Map[Int, Pos] = Map(
+    0   -> A1,  // SQ_A1 = 0
+    1   -> B1,  // SQ_B1 = 0
+    2   -> C1,  // SQ_C1 = 0
+    3   -> D1,  // SQ_D1 = 0
+    4   -> E1,  // SQ_E1 = 0
+    5   -> F1,  // SQ_F1 = 0
+    6   -> G1,  // SQ_G1 = 0
+    7   -> H1,  // SQ_H1 = 0
+    8   -> I1,  // SQ_I1 = 0
+    9   -> J1,  // SQ_J1 = 0
+    // 10 -> K1, //SQ_K1 = 0
+    // 11 -> L1, //SQ_L1,
+    12  -> A2,  // SQ_A2 = 0
+    13  -> B2,  // SQ_B2 = 0
+    14  -> C2,  // SQ_C2 = 0
+    15  -> D2,  // SQ_D2 = 0
+    16  -> E2,  // SQ_E2 = 0
+    17  -> F2,  // SQ_F2 = 0
+    18  -> G2,  // SQ_G2 = 0
+    19  -> H2,  // SQ_H2 = 0
+    20  -> I2,  // SQ_I2 = 0
+    21  -> J2,  // SQ_J2 = 0
+    // 22 -> K2, //SQ_K2 = 0
+    // 23 -> L2, //SQ_L2,
+    24  -> A3,  // SQ_A3 = 0
+    25  -> B3,  // SQ_B3 = 0
+    26  -> C3,  // SQ_C3 = 0
+    27  -> D3,  // SQ_D3 = 0
+    28  -> E3,  // SQ_E3 = 0
+    29  -> F3,  // SQ_F3 = 0
+    30  -> G3,  // SQ_G3 = 0
+    31  -> H3,  // SQ_H3 = 0
+    32  -> I3,  // SQ_I3 = 0
+    33  -> J3,  // SQ_J3 = 0
+    // 34 -> K3, //SQ_K3 = 0
+    // 35 -> L3, //SQ_L3,
+    36  -> A4,  // SQ_A4 = 0
+    37  -> B4,  // SQ_B4 = 0
+    38  -> C4,  // SQ_C4 = 0
+    39  -> D4,  // SQ_D4 = 0
+    40  -> E4,  // SQ_E4 = 0
+    41  -> F4,  // SQ_F4 = 0
+    42  -> G4,  // SQ_G4 = 0
+    43  -> H4,  // SQ_H4 = 0
+    44  -> I4,  // SQ_I4 = 0
+    45  -> J4,  // SQ_J4 = 0
+    // 46 -> K4, //SQ_K4 = 0
+    // 47 -> L4, //SQ_L4,
+    48  -> A5,  // SQ_A5 = 0
+    49  -> B5,  // SQ_B5 = 0
+    50  -> C5,  // SQ_C5 = 0
+    51  -> D5,  // SQ_D5 = 0
+    52  -> E5,  // SQ_E5 = 0
+    53  -> F5,  // SQ_F5 = 0
+    54  -> G5,  // SQ_G5 = 0
+    55  -> H5,  // SQ_H5 = 0
+    56  -> I5,  // SQ_I5 = 0
+    57  -> J5,  // SQ_J5 = 0
+    // 58 -> K5, //SQ_K5 = 0
+    // 59 -> L5, //SQ_L5,
+    60  -> A6,  // SQ_A6 = 0
+    61  -> B6,  // SQ_B6 = 0
+    62  -> C6,  // SQ_C6 = 0
+    63  -> D6,  // SQ_D6 = 0
+    64  -> E6,  // SQ_E6 = 0
+    65  -> F6,  // SQ_F6 = 0
+    66  -> G6,  // SQ_G6 = 0
+    67  -> H6,  // SQ_H6 = 0
+    68  -> I6,  // SQ_I6 = 0
+    69  -> J6,  // SQ_J6 = 0
+    // 70 -> K6, //SQ_K6 = 0
+    // 71 -> L6, //SQ_L6,
+    72  -> A7,  // SQ_A7 = 0
+    73  -> B7,  // SQ_B7 = 0
+    74  -> C7,  // SQ_C7 = 0
+    75  -> D7,  // SQ_D7 = 0
+    76  -> E7,  // SQ_E7 = 0
+    77  -> F7,  // SQ_F7 = 0
+    78  -> G7,  // SQ_G7 = 0
+    79  -> H7,  // SQ_H7 = 0
+    80  -> I7,  // SQ_I7 = 0
+    81  -> J7,  // SQ_J7 = 0
+    // 82 -> K7, //SQ_K7 = 0
+    // 83 -> L7, //SQ_L7,
+    84  -> A8,  // SQ_A8 = 0
+    85  -> B8,  // SQ_B8 = 0
+    86  -> C8,  // SQ_C8 = 0
+    87  -> D8,  // SQ_D8 = 0
+    88  -> E8,  // SQ_E8 = 0
+    89  -> F8,  // SQ_F8 = 0
+    90  -> G8,  // SQ_G8 = 0
+    91  -> H8,  // SQ_H8 = 0
+    92  -> I8,  // SQ_I8 = 0
+    93  -> J8,  // SQ_J8 = 0
+    // 94 -> K8, //SQ_K8 = 0
+    // 95 -> L8, //SQ_L8,
+    96  -> A9,  // SQ_A9 = 0
+    97  -> B9,  // SQ_B9 = 0
+    98  -> C9,  // SQ_C9 = 0
+    99  -> D9,  // SQ_D9 = 0
+    100 -> E9,  // SQ_E9 = 0
+    101 -> F9,  // SQ_F9 = 0
+    102 -> G9,  // SQ_G9 = 0
+    103 -> H9,  // SQ_H9 = 0
+    104 -> I9,  // SQ_I9 = 0
+    105 -> J9,  // SQ_J9 = 0
+    // 106 -> K9, //SQ_K9 = 0
+    // 107 -> L9, //SQ_L9,
+    108 -> A10, // SQ_A10 = 0
+    109 -> B10, // SQ_B10 = 0
+    110 -> C10, // SQ_C10 = 0
+    111 -> D10, // SQ_D10 = 0
+    112 -> E10, // SQ_E10 = 0
+    113 -> F10, // SQ_F10 = 0
+    114 -> G10, // SQ_G10 = 0
+    115 -> H10, // SQ_H10 = 0
+    116 -> I10, // SQ_I10 = 0
+    117 -> J10  // SQ_J10 = 0
+    // 118 -> K10, //SQ_K10 = 0
+    // 119 -> L10, //SQ_L10,
+  )
+  def fromFairy(i: Int): Option[Pos]          = fairySquareToPos.get(i)
 
 }

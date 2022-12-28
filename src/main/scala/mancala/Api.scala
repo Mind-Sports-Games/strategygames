@@ -48,29 +48,40 @@ object Api {
     def fenString: String
   }
 
-  private class OwarePosition(position: OwareGame) extends Position {
+  private class OwarePosition(position: OwareGame, fromFen: Option[FEN] = None) extends Position {
     // TODO: yes, this is an abuse of scala. We could get an
     //       exception here, but I'm not sure how to work around that
     //       at the moment
     val variant = Variant.byKey("oware")
 
     def makeMovesWithPrevious(movesList: List[Int], previousMoves: List[String]): Position = {
-      val game = new OwareGame()
-      previousMoves.foreach(uci => game.makeMove(uciToMove(uci)))
+
+      var pos =
+        if (previousMoves.length == 0 && Api.initialFen.value != fen.value) positionFromFen(fen.value)
+        else if (Api.initialFen.value != initialFen.value) positionFromFen(initialFen.value)
+        else new OwarePosition(new OwareGame(), fromFen)
+
+      pos = pos.makeMoves(previousMoves.map(uciToMove))
 
       movesList.map { move =>
-        if (game.legalMoves.contains(move)) game.makeMove(move)
-        else sys.error(s"Illegal move: ${move} from list: ${movesList}")
+        if (pos.legalMoves.contains(move)) pos = pos.makeMoves(List(move))
+        else
+          sys.error(
+            s"Illegal move1: ${move} from list: ${movesList} legalMoves: ${pos.legalMoves.map(_.toString()).mkString(", ")}"
+          )
       }
-      return new OwarePosition(game)
+      return pos
     }
 
     def makeMoves(movesList: List[Int]): Position = {
       movesList.map { move =>
         if (position.legalMoves.contains(move)) position.makeMove(move)
-        else sys.error(s"Illegal move: ${move} from list: ${movesList}")
+        else
+          sys.error(
+            s"Illegal move2: ${move} from list: ${movesList} legalMoves: ${position.legalMoves.map(_.toString()).mkString(", ")}"
+          )
       }
-      return new OwarePosition(position)
+      return new OwarePosition(position, fromFen)
     }
 
     // helper
@@ -189,6 +200,9 @@ object Api {
       moves.toArray
     }
     val playerTurn: Int        = position.turn()
+
+    val initialFen: FEN = fromFen.fold(Api.initialFen)(f => f)
+
   }
 
   def position: Position =
@@ -203,15 +217,15 @@ object Api {
   def positionFromFen(fenString: String): Position = {
     val game = new OwareGame()
     game.setBoard(owareBoardFromFen(fenString))
-    new OwarePosition(game)
+    new OwarePosition(game, Some(FEN(fenString)))
   }
 
   def positionFromVariantNameAndFEN(variantName: String, fenString: String): Position = {
     val game = new OwareGame()
     game.setBoard(owareBoardFromFen(fenString))
-    variantName match {
-      case "oware" => new OwarePosition(game)
-      case _       => new OwarePosition(new OwareGame())
+    variantName.toLowerCase() match {
+      case "oware" => new OwarePosition(game, Some(FEN(fenString)))
+      case _       => new OwarePosition(new OwareGame(), Some(FEN(fenString)))
     }
   }
 

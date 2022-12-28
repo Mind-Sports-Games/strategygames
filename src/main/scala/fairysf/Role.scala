@@ -342,6 +342,8 @@ object Role {
     ShogiRook   -> ShogiDragon
   )
 
+  lazy val sfPieceToRole: Map[(Int, Int), Role] = all.map(r => ((r.fairySFID.id, r.gameFamily.id), r)).toMap
+
   def allByGameFamily(gf: GameFamily): List[Role] =
     all.filter(r => r.gameFamily == gf)
 

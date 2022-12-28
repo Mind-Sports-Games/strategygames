@@ -23,9 +23,10 @@ abstract class Variant private[variant] (
 
   def exotic = true
 
-  def baseVariant: Boolean = false
-  def fenVariant: Boolean  = false
-  def aiVariant: Boolean   = false
+  def baseVariant: Boolean      = false
+  def fenVariant: Boolean       = false
+  def hasAnalysisBoard: Boolean = true
+  def hasFishnet: Boolean       = false
 
   def p1IsBetterVariant: Boolean = false
   def blindModeVariant: Boolean  = true

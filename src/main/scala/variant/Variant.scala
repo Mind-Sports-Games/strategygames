@@ -73,7 +73,8 @@ abstract class Variant(
   // used in lila setup/src/main/Config.scala
   def baseVariant: Boolean
   def fenVariant: Boolean
-  def aiVariant: Boolean
+  def hasAnalysisBoard: Boolean
+  def hasFishnet: Boolean
   // used in lila modules/game/src/main/Game.scala
   def p1IsBetterVariant: Boolean
   def blindModeVariant: Boolean
@@ -198,9 +199,10 @@ object Variant {
 
     def exotic: Boolean = v.exotic
 
-    def baseVariant: Boolean = v.baseVariant
-    def fenVariant: Boolean  = v.fenVariant
-    def aiVariant: Boolean   = v.aiVariant
+    def baseVariant: Boolean      = v.baseVariant
+    def fenVariant: Boolean       = v.fenVariant
+    def hasAnalysisBoard: Boolean = v.hasAnalysisBoard
+    def hasFishnet: Boolean       = v.hasFishnet
 
     def p1IsBetterVariant: Boolean = v.p1IsBetterVariant
     def blindModeVariant: Boolean  = v.blindModeVariant
@@ -334,9 +336,10 @@ object Variant {
 
     def exotic: Boolean = v.exotic
 
-    def baseVariant: Boolean = v.baseVariant
-    def fenVariant: Boolean  = v.fenVariant
-    def aiVariant: Boolean   = v.aiVariant
+    def baseVariant: Boolean      = v.baseVariant
+    def fenVariant: Boolean       = v.fenVariant
+    def hasAnalysisBoard: Boolean = v.hasAnalysisBoard
+    def hasFishnet: Boolean       = v.hasFishnet
 
     def p1IsBetterVariant: Boolean = v.p1IsBetterVariant
     def blindModeVariant: Boolean  = v.blindModeVariant
@@ -468,9 +471,10 @@ object Variant {
 
     def exotic: Boolean = v.exotic
 
-    def baseVariant: Boolean = v.baseVariant
-    def fenVariant: Boolean  = v.fenVariant
-    def aiVariant: Boolean   = v.aiVariant
+    def baseVariant: Boolean      = v.baseVariant
+    def fenVariant: Boolean       = v.fenVariant
+    def hasAnalysisBoard: Boolean = v.hasAnalysisBoard
+    def hasFishnet: Boolean       = v.hasFishnet
 
     def p1IsBetterVariant: Boolean = v.p1IsBetterVariant
     def blindModeVariant: Boolean  = v.blindModeVariant
@@ -602,9 +606,10 @@ object Variant {
 
     def exotic: Boolean = v.exotic
 
-    def baseVariant: Boolean = v.baseVariant
-    def fenVariant: Boolean  = v.fenVariant
-    def aiVariant: Boolean   = v.aiVariant
+    def baseVariant: Boolean      = v.baseVariant
+    def fenVariant: Boolean       = v.fenVariant
+    def hasAnalysisBoard: Boolean = v.hasAnalysisBoard
+    def hasFishnet: Boolean       = v.hasFishnet
 
     def p1IsBetterVariant: Boolean = v.p1IsBetterVariant
     def blindModeVariant: Boolean  = v.blindModeVariant
