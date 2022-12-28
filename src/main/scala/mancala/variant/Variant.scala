@@ -144,6 +144,8 @@ abstract class Variant private[variant] (
 
   override def hashCode: Int = id
 
+  def defaultRole: Role = Role.defaultRole
+
   def gameFamily: GameFamily
 }
 

@@ -34,6 +34,8 @@ object Role {
       Stone
     )
 
+  def defaultRole: Role = Stone
+
   def allByGameFamily(gf: GameFamily): List[Role] =
     all.filter(r => r.gameFamily == gf)
 
@@ -81,7 +83,7 @@ object Role {
   def pgnMoveToRole(gf: GameFamily, c: Char): Role =
     allByPgn(gf).get(c) match {
       case Some(r) => r
-      case None    => sys.error("Could not find Role from pgnMove")
+      case None    => sys.error(s"Could not find Role from pgnMove: $c (gf: $gf)")
     }
 
   // unused by lila
@@ -90,10 +92,18 @@ object Role {
       .get(
         s.headOption match {
           case Some(c) => c
-          case None    => 'P' // JavaRole.PAWN.symbol is ""
+          case None    => sys.error(s"Could not find Role from java symbol: $s")
         }
       )
       .get
+
+  // unused by lila
+  def javaSymbolToInt(s: String): Int =
+    s.headOption match {
+      case Some(c) if (c.toInt >= 65 && c.toInt <= 90)  => c.toInt - 64
+      case Some(c) if (c.toInt >= 97 && c.toInt <= 122) => c.toInt - 70
+      case _    => sys.error(s"Could not get Int from java symbol: $s")
+    }
 
   def valueOf(r: Role): Option[Int] = r.valueOf
 

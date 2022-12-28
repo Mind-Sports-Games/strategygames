@@ -159,12 +159,10 @@ object Api {
 
     lazy val fen: FEN = FEN(fenString)
 
-    private val defaultOwareRole: Role = Stone
-
     private def convertPieceMapFromFen(fenString: String): PieceMap = {
       FEN(fenString).owareStoneArray.zipWithIndex.filterNot{case (s, _) => s == 0}
         .map { case (seeds, index) =>
-          (Pos(index), (Piece(Player.fromP1(index < 6), defaultOwareRole), seeds))
+          (Pos(index), (Piece(Player.fromP1(index < 6), variant.defaultRole), seeds))
         }
         .map { case (Some(pos), pieceCount) => pos -> pieceCount }
         .toMap
