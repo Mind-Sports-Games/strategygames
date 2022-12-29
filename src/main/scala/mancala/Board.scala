@@ -12,18 +12,18 @@ case class Board(
     position: Option[Api.Position] = None
 ) {
 
-  def apply(at: Pos): Option[Piece] = pieces get at
+  def apply(at: Pos): Option[Piece] = (pieces get at).map(_._1)
   def apply(file: File, rank: Rank) = pieces get Pos(file, rank)
 
-  lazy val actors: Map[Pos, Actor] = pieces map { case (pos, piece) =>
+  lazy val actors: Map[Pos, Actor] = pieces map { case (pos, (piece, count)) =>
     (pos, Actor(piece, pos, this))
   }
 
-  lazy val posMap: Map[Piece, Iterable[Pos]] = pieces.groupMap(_._2)(_._1)
+  lazy val posMap: Map[(Piece, Int), Iterable[Pos]] = pieces.groupMap(_._2)(_._1)
 
   lazy val piecesOnBoardCount: Int                    = pieces.keys.size
   lazy val playerPiecesOnBoardCount: Map[Player, Int] = Player.all.map { p =>
-    (p, pieces.collect { case (pos, piece) if piece.player == p => (pos, piece) }.size)
+    (p, pieces.collect { case (pos, (piece, count)) if piece.player == p => (pos, (piece, count)) }.size)
   }.toMap
 
   def withHistory(h: History): Board       = copy(history = h)
@@ -49,7 +49,7 @@ case class Board(
 
 object Board {
 
-  def apply(pieces: Iterable[(Pos, Piece)], variant: Variant): Board =
+  def apply(pieces: Iterable[(Pos, (Piece, Int))], variant: Variant): Board =
     Board(pieces.toMap, History(), variant)
 
   def init(variant: Variant): Board = Board(variant.pieces, variant)

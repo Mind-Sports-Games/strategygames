@@ -91,47 +91,40 @@ object Api {
 
     def owareDiagram: String = position.toBoard.toDiagram
 
-    private val numHouses = variant.boardSize.width * variant.boardSize.height
 
-    private def seedCountToLetter(num: Int): Char =
-      num match {
-        case x if x < 27  => (x + 64).toChar
-        case x if x >= 27 => (x + 70).toChar
-        case x if x > 52  => sys.error("expected number of stones less than 53, got " + x.toString())
+    private def playerPitsToFen(pits: Array[String]): String =
+      pits.map { part =>
+        part match {
+          case "0" => "1" // empty pit
+          case _   =>
+            part.toIntOption match {
+              case Some(x: Int) => s"${x}S"
+              case _            => sys.error(s"expected integer in oware string of pits: $pits")
+            }
+        }
       }
+      .mkString(",") + ","
 
-    private def scoreNumberToLetter(num: Int): String =
-      num match {
-        case 0 => "0"
-        case x => seedCountToLetter(x).toString()
-      }
+    private def joinEmptyPits(pits: String, replacePits: List[(String, String)]): String =
+      replacePits.foldLeft(pits)((fen, repPair) => fen.replace(repPair._1, repPair._2))
 
     def fenString: String = {
-      val board        = (
-        owareDiagram.split('-').take(variant.boardSize.width * 2).drop(variant.boardSize.width).reverse
-          ++
-            owareDiagram.split('-').take(variant.boardSize.width)
-      )
-        .map { part =>
-          part match {
-            case "0" => "1" // empty house
-            case _   =>
-              part.toIntOption match {
-                case Some(x: Int) => seedCountToLetter(x)
-                case _            => sys.error("expected integer number of string in owareDiagram: " + owareDiagram)
-              }
-          }
-        }
-        .mkString("")
-        .patch(variant.boardSize.width, "/", 0)
-      val updatedBoard =
-        "^(1+)$".r.replaceAllIn(board, "$1".length.toString()) // combine 1's into size of group
-      val p1CurrentScore = owareDiagram.split('-')(numHouses).toInt
-      val p2CurrentScore = owareDiagram.split('-')(numHouses + 1).toInt
+      val splitDiagram = owareDiagram.split('-')
+      val width        = variant.boardSize.width
+      val numPits      = variant.boardSize.width * variant.boardSize.height
+      val replacePits  = (2 to width).toList.reverse.map(i => ("1,"*i, s"$i,"))
+      val board        = List(
+        splitDiagram.take(width * 2).drop(width).reverse,
+        splitDiagram.take(width)
+      ).map(playerPitsToFen)
+        .map(pits => joinEmptyPits(pits, replacePits))
+        .map(_.dropRight(1))
+        .mkString("/")
+      val p1CurrentScore = splitDiagram(numPits).toInt
+      val p2CurrentScore = splitDiagram(numPits + 1).toInt
       val p1FinalScore   = finalStoneScore(p1CurrentScore, p2CurrentScore, "p1")
       val p2FinalScore   = finalStoneScore(p1CurrentScore, p2CurrentScore, "p2")
-      return s"${updatedBoard} ${scoreNumberToLetter(p1FinalScore)} ${scoreNumberToLetter(p2FinalScore)} ${owareDiagram
-          .split('-')(numHouses + 2)}"
+      return s"${board} ${p1FinalScore} ${p2FinalScore} ${splitDiagram(numPits + 2)}"
     }
 
     private def finalStoneScore(currentP1Score: Int, currentP2Score: Int, playerIndex: String): Int = {
@@ -178,19 +171,11 @@ object Api {
     lazy val fen: FEN = FEN(fenString)
 
     private def convertPieceMapFromFen(fenString: String): PieceMap = {
-      FEN(fenString).owareStoneArray.zipWithIndex
+      FEN(fenString).owareStoneArray.zipWithIndex.filterNot{case (s, _) => s == 0}
         .map { case (seeds, index) =>
-          seeds match {
-            case 0 => (None, None)
-            case n =>
-              (
-                Pos(index),
-                Piece.fromStoneNumber(if (index < 6) Player.fromP1(true) else Player.fromP1(false), n)
-              )
-          }
+          (Pos(index), (Piece(Player.fromP1(index < 6), variant.defaultRole), seeds))
         }
-        .filter(x => x != (None, None))
-        .map { case (Some(pos), Some(piece)) => pos -> piece }
+        .map { case (Some(pos), pieceCount) => pos -> pieceCount }
         .toMap
     }
 
@@ -271,7 +256,7 @@ object Api {
 
   val initialFen: FEN = variant.Oware.initialFen
 
-  private val fenRegex                        = "[A-Za-z0-6]{1,6}/[A-Za-z0-6]{1,6} [A-Za-z0]+ [A-Za-z0]+ [N|S]"
+  private val fenRegex                        = "([0-9]+[A-Z]?,?){1,6}/([0-9]+[A-Z]?,?){1,6} [0-9]+ [0-9]+ [N|S]"
   def validateFEN(fenString: String): Boolean =
     Try(owareBoardFromFen(fenString)).isSuccess && fenString.matches(fenRegex)
 

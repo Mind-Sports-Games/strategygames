@@ -9,9 +9,9 @@ sealed abstract class Board(
     val pocketData: Option[PocketData] = None
 ) {
 
-  def apply(at: Pos): Option[Piece] = pieces get at
+  def apply(at: Pos): Option[Piece] = (pieces get at).map(_._1)
 
-  def hasPiece(p: Piece) = pieces.values exists (p ==)
+  def hasPiece(p: Piece) = pieces.values.map(_._1) exists (p ==)
 
   def withHistory(h: History): Board
 
@@ -38,7 +38,7 @@ object Board {
 
   case class Chess(b: chess.Board)
       extends Board(
-        b.pieces.map { case (pos, piece) => (Pos.Chess(pos), Piece.Chess(piece)) },
+        b.pieces.map { case (pos, piece) => (Pos.Chess(pos), (Piece.Chess(piece), 1)) },
         History.Chess(b.history),
         Variant.Chess(b.variant),
         b.pocketData.map(PocketData.Chess)
@@ -74,7 +74,7 @@ object Board {
 
   case class Draughts(b: draughts.Board)
       extends Board(
-        b.pieces.map { case (pos, piece) => (Pos.Draughts(pos), Piece.Draughts(piece)) },
+        b.pieces.map { case (pos, piece) => (Pos.Draughts(pos), (Piece.Draughts(piece), 1)) },
         History.Draughts(b.history),
         Variant.Draughts(b.variant)
       ) {
@@ -109,7 +109,7 @@ object Board {
 
   case class FairySF(b: fairysf.Board)
       extends Board(
-        b.pieces.map { case (pos, piece) => (Pos.FairySF(pos), Piece.FairySF(piece)) },
+        b.pieces.map { case (pos, piece) => (Pos.FairySF(pos), (Piece.FairySF(piece), 1)) },
         History.FairySF(b.history),
         Variant.FairySF(b.variant),
         b.pocketData.map(PocketData.FairySF)
@@ -145,7 +145,7 @@ object Board {
 
   case class Mancala(b: mancala.Board)
       extends Board(
-        b.pieces.map { case (pos, piece) => (Pos.Mancala(pos), Piece.Mancala(piece)) },
+        b.pieces.map { case (pos, (piece, count)) => (Pos.Mancala(pos), (Piece.Mancala(piece), count)) },
         History.Mancala(b.history),
         Variant.Mancala(b.variant)
       ) {
@@ -178,33 +178,33 @@ object Board {
 
   }
 
-  def apply(lib: GameLogic, pieces: Iterable[(Pos, Piece)], variant: Variant): Board =
+  def apply(lib: GameLogic, pieces: Iterable[(Pos, (Piece, Int))], variant: Variant): Board =
     (lib, variant) match {
       case (GameLogic.Draughts(), Variant.Draughts(variant)) =>
         Draughts(
           draughts.Board.apply(
-            pieces.map { case (Pos.Draughts(pos), Piece.Draughts(piece)) => (pos, piece) },
+            pieces.map { case (Pos.Draughts(pos), (Piece.Draughts(piece), _)) => (pos, piece) },
             variant
           )
         )
       case (GameLogic.Chess(), Variant.Chess(variant))       =>
         Chess(
           chess.Board.apply(
-            pieces.map { case (Pos.Chess(pos), Piece.Chess(piece)) => (pos, piece) },
+            pieces.map { case (Pos.Chess(pos), (Piece.Chess(piece), _)) => (pos, piece) },
             variant
           )
         )
       case (GameLogic.FairySF(), Variant.FairySF(variant))   =>
         FairySF(
           fairysf.Board.apply(
-            pieces.map { case (Pos.FairySF(pos), Piece.FairySF(piece)) => (pos, piece) },
+            pieces.map { case (Pos.FairySF(pos), (Piece.FairySF(piece), _)) => (pos, piece) },
             variant
           )
         )
       case (GameLogic.Mancala(), Variant.Mancala(variant))   =>
         Mancala(
           mancala.Board.apply(
-            pieces.map { case (Pos.Mancala(pos), Piece.Mancala(piece)) => (pos, piece) },
+            pieces.map { case (Pos.Mancala(pos), (Piece.Mancala(piece), count)) => (pos, (piece, count)) },
             variant
           )
         )

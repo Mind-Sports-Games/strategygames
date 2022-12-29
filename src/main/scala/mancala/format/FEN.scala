@@ -11,38 +11,27 @@ final case class FEN(value: String) extends AnyVal {
   def player: Option[Player] =
     value.split(' ').lift(3) flatMap (_.headOption) flatMap Player.apply
 
-  def player1Score: Int = playerScore("p1")
+  def player1Score: Int = playerScore(1)
 
-  def player2Score: Int = playerScore("p2")
+  def player2Score: Int = playerScore(2)
 
-  private def playerScore(playerIndex: String): Int =
+  private def playerScore(playerIndex: Int): Int =
     value
       .split(' ')
-      .lift(if (playerIndex == "p1") 1 else 2)
-      .flatMap(_.headOption)
-      .fold(0)(v =>
-        v.toString() match {
-          case "1"                     => 0
-          case c if c.matches("[A-Z]") => v.toInt - 64
-          case c if c.matches("[a-z]") => v.toInt - 70
-          case _                       => 0
-        }
-      )
+      .lift(playerIndex)
+      .map(_.toInt)
+      .getOrElse(0)
 
   def owareStoneArray: Array[Int] =
     (
-      value.split(' ')(0).split('/')(1)
-        +
-          value.split(' ')(0).split('/')(0).reverse
+      value.split(' ')(0).split('/')(1).split(',')
+        ++
+          value.split(' ')(0).split('/')(0).split(',').reverse
     )
       .map(c =>
         c.toString() match {
           case x if 1 to 6 map (_.toString) contains x => Array.fill(x.toInt)(0)
-          case _                                       =>
-            c.toInt match {
-              case y if y <= 90 => Array(y - 64)
-              case y if y > 96  => Array(y - 70)
-            }
+          case _                                       => Array(c.dropRight(1).toInt)
         }
       )
       .flatten

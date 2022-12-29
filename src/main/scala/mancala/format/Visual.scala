@@ -19,10 +19,10 @@ object Visual {
         (c, x) <- (l zipWithIndex)
         // might need to get changed for different gameFamilys
         // but then the whole file will need changing! only used for tests
-        role   <- Role forsyth c.toLower
+        //role   <- Role forsyth c.toLower
       } yield {
         Pos.at(x, 7 - y) map { pos =>
-          pos -> (Piece(Player.fromP1(c isUpper), role))
+          pos -> ((Piece(Player.fromP1(c isUpper), Stone)), c.toInt)
         }
       }) flatten,
       variant = strategygames.mancala.variant.Variant.default

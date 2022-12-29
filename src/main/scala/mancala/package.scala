@@ -9,7 +9,9 @@ package object mancala extends scalalib.Common with scalalib.OrnicarOption with 
   type Direction  = Pos => Option[Pos]
   type Directions = List[Direction]
 
-  type PieceMap = Map[Pos, Piece]
+  type PosInfo = (Piece, Int)
+
+  type PieceMap = Map[Pos, PosInfo]
 
   type PositionHash = Array[Byte]
 

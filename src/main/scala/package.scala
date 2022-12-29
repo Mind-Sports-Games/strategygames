@@ -8,7 +8,9 @@ package object strategygames
   val P1 = Player.P1
   val P2 = Player.P2
 
-  type PieceMap = Map[Pos, Piece]
+  type PosInfo = (Piece, Int)
+  
+  type PieceMap = Map[Pos, PosInfo]
 
   type PositionHash = Array[Byte]
 

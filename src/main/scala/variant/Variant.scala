@@ -22,7 +22,7 @@ abstract class Variant(
   def toFairySF: fairysf.variant.Variant
   def toMancala: mancala.variant.Variant
 
-  def pieces: Map[Pos, Piece]
+  def pieces: PieceMap
 
   // An abstraction leak, we probably won't need this long term
   // but in the short term it helps us with the port.
@@ -152,8 +152,8 @@ object Variant {
     def toFairySF                      = sys.error("Can't convert chess to fairysf")
     def toMancala                      = sys.error("Can't convert chess to mancala")
 
-    def pieces: Map[Pos, Piece] =
-      v.pieces.map { case (pos, piece) => (Pos.Chess(pos), Piece.Chess(piece)) }
+    def pieces: PieceMap =
+      v.pieces.map { case (pos, piece) => (Pos.Chess(pos), (Piece.Chess(piece), 1)) }
 
     def standard: Boolean      = v.standard
     def chess960: Boolean      = v.chess960
@@ -289,8 +289,8 @@ object Variant {
     def toFairySF  = sys.error("Can't convert draughts to fairysf")
     def toMancala  = sys.error("Can't convert draughts to mancala")
 
-    def pieces: Map[Pos, Piece] =
-      v.pieces.map { case (pos, piece) => (Pos.Draughts(pos), Piece.Draughts(piece)) }
+    def pieces: PieceMap =
+      v.pieces.map { case (pos, piece) => (Pos.Draughts(pos), (Piece.Draughts(piece), 1)) }
 
     def standard: Boolean      = false
     def chess960: Boolean      = false
@@ -424,8 +424,8 @@ object Variant {
     def toDraughts              = sys.error("Can't convert fairysf to draughts")
     def toFairySF               = v
     def toMancala               = sys.error("Can't convert fairysf to mancala")
-    def pieces: Map[Pos, Piece] =
-      v.pieces.map { case (pos, piece) => (Pos.FairySF(pos), Piece.FairySF(piece)) }
+    def pieces: PieceMap =
+      v.pieces.map { case (pos, piece) => (Pos.FairySF(pos), (Piece.FairySF(piece), 1)) }
 
     def standard: Boolean      = false
     def chess960: Boolean      = false
@@ -558,8 +558,9 @@ object Variant {
     def toDraughts              = sys.error("Can't convert mancala to draughts")
     def toFairySF               = sys.error("Can't convert mancala to fairysf")
     def toMancala               = v
-    def pieces: Map[Pos, Piece] =
-      v.pieces.map { case (pos, piece) => (Pos.Mancala(pos), Piece.Mancala(piece)) }
+    def pieces: PieceMap        = v.pieces.map {
+      case (pos, (piece, count)) => (Pos.Mancala(pos), (Piece.Mancala(piece), count))
+    }
 
     def standard: Boolean      = false
     def chess960: Boolean      = false

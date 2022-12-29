@@ -58,7 +58,7 @@ object Replay {
       uciMoves: List[String]
   ): Move =
     Move(
-      piece = before.situation.board.pieces(orig),
+      piece = before.situation.board.pieces(orig)._1,
       orig = orig,
       dest = dest,
       situationBefore = before.situation,
