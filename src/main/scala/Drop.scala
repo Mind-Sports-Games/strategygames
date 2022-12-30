@@ -75,8 +75,10 @@ object Drop {
   def toChess(moveOrDrop: MoveOrDrop): chess.MoveOrDrop     = moveOrDrop.left.map(_.toChess).right.map(_.toChess)
   // probably not type safe
   def toDraughts(moveOrDrop: MoveOrDrop): draughts.Move     = moveOrDrop.left.map(_.toDraughts).left.get
-  def toMancala(moveOrDrop: MoveOrDrop): mancala.Move       = moveOrDrop.left.map(_.toMancala).left.get
   def toFairySF(moveOrDrop: MoveOrDrop): fairysf.MoveOrDrop =
     moveOrDrop.left.map(_.toFairySF).right.map(_.toFairySF)
+  def toSamurai(moveOrDrop: MoveOrDrop): samurai.Move       = moveOrDrop.left.map(_.toSamurai).left.get
+  def toTogyzkumalak(moveOrDrop: MoveOrDrop): togyzkumalak.Move =
+    moveOrDrop.left.map(_.toTogyzkumalak).left.get
 
 }

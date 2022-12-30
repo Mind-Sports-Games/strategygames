@@ -13,7 +13,8 @@ object Forsyth {
     case GameLogic.Draughts() => FEN.Draughts(draughts.format.Forsyth.initial)
     case GameLogic.Chess()    => FEN.Chess(chess.format.Forsyth.initial)
     case GameLogic.FairySF()  => FEN.FairySF(fairysf.format.Forsyth.initial)
-    case GameLogic.Mancala()  => FEN.Mancala(mancala.format.Forsyth.initial)
+    case GameLogic.Samurai()  => FEN.Samurai(samurai.format.Forsyth.initial)
+    case GameLogic.Togyzkumalak()  => FEN.Togyzkumalak(togyzkumalak.format.Forsyth.initial)
   }
 
   def <<@(lib: GameLogic, variant: Variant, fen: FEN): Option[Situation] =
@@ -24,8 +25,10 @@ object Forsyth {
         chess.format.Forsyth.<<@(variant, fen).map(Situation.Chess)
       case (GameLogic.FairySF(), Variant.FairySF(variant), FEN.FairySF(fen))    =>
         fairysf.format.Forsyth.<<@(variant, fen).map(Situation.FairySF)
-      case (GameLogic.Mancala(), Variant.Mancala(variant), FEN.Mancala(fen))    =>
-        mancala.format.Forsyth.<<@(variant, fen).map(Situation.Mancala)
+      case (GameLogic.Samurai(), Variant.Samurai(variant), FEN.Samurai(fen))    =>
+        samurai.format.Forsyth.<<@(variant, fen).map(Situation.Samurai)
+      case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant), FEN.Togyzkumalak(fen))    =>
+        togyzkumalak.format.Forsyth.<<@(variant, fen).map(Situation.Togyzkumalak)
       case _                                                                    => sys.error("Mismatched gamelogic types 14")
     }
 
@@ -33,7 +36,8 @@ object Forsyth {
     case (GameLogic.Draughts(), FEN.Draughts(fen)) => draughts.format.Forsyth.<<(fen).map(Situation.Draughts)
     case (GameLogic.Chess(), FEN.Chess(fen))       => chess.format.Forsyth.<<(fen).map(Situation.Chess)
     case (GameLogic.FairySF(), FEN.FairySF(fen))   => fairysf.format.Forsyth.<<(fen).map(Situation.FairySF)
-    case (GameLogic.Mancala(), FEN.Mancala(fen))   => mancala.format.Forsyth.<<(fen).map(Situation.Mancala)
+    case (GameLogic.Samurai(), FEN.Samurai(fen))   => samurai.format.Forsyth.<<(fen).map(Situation.Samurai)
+    case (GameLogic.Togyzkumalak(), FEN.Togyzkumalak(fen))   => togyzkumalak.format.Forsyth.<<(fen).map(Situation.Togyzkumalak)
     case _                                         => sys.error("Mismatched gamelogic types 15")
   }
 
@@ -57,10 +61,14 @@ object Forsyth {
         fairysf.format.Forsyth
           .<<<@(variant, fen)
           .map(sp => SituationPlus(Situation.FairySF(sp.situation), sp.fullMoveNumber))
-      case (GameLogic.Mancala(), Variant.Mancala(variant), FEN.Mancala(fen))    =>
-        mancala.format.Forsyth
+      case (GameLogic.Samurai(), Variant.Samurai(variant), FEN.Samurai(fen))    =>
+        samurai.format.Forsyth
           .<<<@(variant, fen)
-          .map(sp => SituationPlus(Situation.Mancala(sp.situation), sp.fullMoveNumber))
+          .map(sp => SituationPlus(Situation.Samurai(sp.situation), sp.fullMoveNumber))
+      case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant), FEN.Togyzkumalak(fen))    =>
+        togyzkumalak.format.Forsyth
+          .<<<@(variant, fen)
+          .map(sp => SituationPlus(Situation.Togyzkumalak(sp.situation), sp.fullMoveNumber))
       case _                                                                    => sys.error("Mismatched gamelogic types 16")
     }
 
@@ -75,10 +83,14 @@ object Forsyth {
       fairysf.format.Forsyth
         .<<<(fen)
         .map(sp => SituationPlus(Situation.FairySF(sp.situation), sp.fullMoveNumber))
-    case (GameLogic.Mancala(), FEN.Mancala(fen))   =>
-      mancala.format.Forsyth
+    case (GameLogic.Samurai(), FEN.Samurai(fen))   =>
+      samurai.format.Forsyth
         .<<<(fen)
-        .map(sp => SituationPlus(Situation.Mancala(sp.situation), sp.fullMoveNumber))
+        .map(sp => SituationPlus(Situation.Samurai(sp.situation), sp.fullMoveNumber))
+    case (GameLogic.Togyzkumalak(), FEN.Togyzkumalak(fen))   =>
+      togyzkumalak.format.Forsyth
+        .<<<(fen)
+        .map(sp => SituationPlus(Situation.Togyzkumalak(sp.situation), sp.fullMoveNumber))
     case _                                         => sys.error("Mismatched gamelogic types 17")
   }
 
@@ -103,10 +115,16 @@ object Forsyth {
           fairysf.format.Forsyth.SituationPlus(situation, parsed.fullMoveNumber)
         )
       )
-    case (GameLogic.Mancala(), Situation.Mancala(situation))   =>
-      FEN.Mancala(
-        mancala.format.Forsyth.>>(
-          mancala.format.Forsyth.SituationPlus(situation, parsed.fullMoveNumber)
+    case (GameLogic.Samurai(), Situation.Samurai(situation))   =>
+      FEN.Samurai(
+        samurai.format.Forsyth.>>(
+          samurai.format.Forsyth.SituationPlus(situation, parsed.fullMoveNumber)
+        )
+      )
+    case (GameLogic.Togyzkumalak(), Situation.Togyzkumalak(situation))   =>
+      FEN.Togyzkumalak(
+        togyzkumalak.format.Forsyth.>>(
+          togyzkumalak.format.Forsyth.SituationPlus(situation, parsed.fullMoveNumber)
         )
       )
     case _                                                     => sys.error("Mismatched gamelogic types 19")
@@ -116,7 +134,8 @@ object Forsyth {
     case (GameLogic.Draughts(), Game.Draughts(game)) => FEN.Draughts(draughts.format.Forsyth.>>(game))
     case (GameLogic.Chess(), Game.Chess(game))       => FEN.Chess(chess.format.Forsyth.>>(game))
     case (GameLogic.FairySF(), Game.FairySF(game))   => FEN.FairySF(fairysf.format.Forsyth.>>(game))
-    case (GameLogic.Mancala(), Game.Mancala(game))   => FEN.Mancala(mancala.format.Forsyth.>>(game))
+    case (GameLogic.Samurai(), Game.Samurai(game))   => FEN.Samurai(samurai.format.Forsyth.>>(game))
+    case (GameLogic.Togyzkumalak(), Game.Togyzkumalak(game))   => FEN.Togyzkumalak(togyzkumalak.format.Forsyth.>>(game))
     case _                                           => sys.error("Mismatched gamelogic types 20")
   }
 
@@ -126,7 +145,8 @@ object Forsyth {
         draughts.format.Forsyth.exportBoard(board, algebraic)
       case (GameLogic.Chess(), Board.Chess(board))       => chess.format.Forsyth.exportBoard(board)
       case (GameLogic.FairySF(), Board.FairySF(board))   => fairysf.format.Forsyth.exportBoard(board)
-      case (GameLogic.Mancala(), Board.Mancala(board))   => mancala.format.Forsyth.exportBoard(board)
+      case (GameLogic.Samurai(), Board.Samurai(board))   => samurai.format.Forsyth.exportBoard(board)
+      case (GameLogic.Togyzkumalak(), Board.Togyzkumalak(board))   => togyzkumalak.format.Forsyth.exportBoard(board)
       case _                                             => sys.error("Mismatched gamelogic types 21")
     }
 
@@ -140,8 +160,10 @@ object Forsyth {
       case (GameLogic.Chess(), Board.Chess(board))       => chess.format.Forsyth.boardAndPlayer(board, turnPlayer)
       case (GameLogic.FairySF(), Board.FairySF(board))   =>
         fairysf.format.Forsyth.boardAndPlayer(board, turnPlayer)
-      case (GameLogic.Mancala(), Board.Mancala(board))   =>
-        mancala.format.Forsyth.boardAndPlayer(board, turnPlayer)
+      case (GameLogic.Samurai(), Board.Samurai(board))   =>
+        samurai.format.Forsyth.boardAndPlayer(board, turnPlayer)
+      case (GameLogic.Togyzkumalak(), Board.Togyzkumalak(board))   =>
+        togyzkumalak.format.Forsyth.boardAndPlayer(board, turnPlayer)
       case _                                             => sys.error("Mismatched gamelogic types 22")
     }
 

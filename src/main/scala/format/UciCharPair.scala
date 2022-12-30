@@ -13,7 +13,8 @@ object UciCharPair {
     case (GameLogic.Draughts(), uci: Uci.Draughts) => strategygames.draughts.format.UciCharPair(uci.unwrap)
     case (GameLogic.Chess(), uci: Uci.Chess)       => strategygames.chess.format.UciCharPair(uci.unwrap)
     case (GameLogic.FairySF(), uci: Uci.FairySF)   => strategygames.fairysf.format.UciCharPair(uci.unwrap)
-    case (GameLogic.Mancala(), uci: Uci.Mancala)   => strategygames.mancala.format.UciCharPair(uci.unwrap)
+    case (GameLogic.Samurai(), uci: Uci.Samurai)   => strategygames.samurai.format.UciCharPair(uci.unwrap)
+    case (GameLogic.Togyzkumalak(), uci: Uci.Togyzkumalak)   => strategygames.togyzkumalak.format.UciCharPair(uci.unwrap)
     case _                                         => sys.error("Mismatched gamelogic and UciCharPair")
   }
 

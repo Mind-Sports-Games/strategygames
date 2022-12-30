@@ -8,7 +8,8 @@ sealed abstract class FEN(val value: String) {
   def toChess: strategygames.chess.format.FEN
   def toDraughts: strategygames.draughts.format.FEN
   def toFairySF: strategygames.fairysf.format.FEN
-  def toMancala: strategygames.mancala.format.FEN
+  def toSamurai: strategygames.samurai.format.FEN
+  def toTogyzkumalak: strategygames.togyzkumalak.format.FEN
 
   override def toString = value
 
@@ -34,7 +35,8 @@ object FEN {
     def toChess    = f
     def toDraughts = sys.error("Can't convert chess to draughts")
     def toFairySF  = sys.error("Can't convert chess to fairysf")
-    def toMancala  = sys.error("Can't convert chess to mancala")
+    def toSamurai  = sys.error("Can't convert chess to samurai")
+    def toTogyzkumalak  = sys.error("Can't convert chess to togyzkumalak")
 
     def fullMove: Option[Int] = f.fullMove
 
@@ -56,7 +58,8 @@ object FEN {
     def toChess    = sys.error("Can't convert draughts to chess")
     def toDraughts = f
     def toFairySF  = sys.error("Can't convert draughts to fairysf")
-    def toMancala  = sys.error("Can't convert draughts to mancala")
+    def toSamurai  = sys.error("Can't convert draughts to samurai")
+    def toTogyzkumalak  = sys.error("Can't convert draughts to togyzkumalak")
 
     // need to consider an implementation for draughts?
     def fullMove: Option[Int] = None
@@ -80,7 +83,8 @@ object FEN {
     def toChess    = sys.error("Can't convert fairysf to chess")
     def toDraughts = sys.error("Can't convert fairysf to draughts")
     def toFairySF  = f
-    def toMancala  = sys.error("Can't convert fairysf to mancala")
+    def toSamurai  = sys.error("Can't convert fairysf to samurai")
+    def toTogyzkumalak  = sys.error("Can't convert fairysf to togyzkumalak")
 
     def fullMove: Option[Int] = f.fullMove
 
@@ -97,14 +101,38 @@ object FEN {
 
   }
 
-  final case class Mancala(f: strategygames.mancala.format.FEN) extends FEN(f.value) {
+  final case class Samurai(f: strategygames.samurai.format.FEN) extends FEN(f.value) {
 
-    def toChess    = sys.error("Can't convert mancala to chess")
-    def toDraughts = sys.error("Can't convert mancala to draughts")
-    def toFairySF  = sys.error("Can't convert mancala to fairysf")
-    def toMancala  = f
+    def toChess    = sys.error("Can't convert samurai to chess")
+    def toDraughts = sys.error("Can't convert samurai to draughts")
+    def toFairySF  = sys.error("Can't convert samurai to fairysf")
+    def toSamurai  = f
+    def toTogyzkumalak  = sys.error("Can't convert samurai to togyzkumalak")
 
-    def fullMove: Option[Int] = sys.error("There is no fullMove in mancala")
+    def fullMove: Option[Int] = sys.error("There is no fullMove in samurai")
+
+    def player: Option[Player] = f.player
+
+    def ply: Option[Int] = sys.error("There is no ply in chess")
+
+    def initial: Boolean = f.initial
+
+    def chessFen: Option[strategygames.chess.format.FEN] = None
+
+    def player1Score = f.player1Score
+    def player2Score = f.player2Score
+
+  }
+
+  final case class Togyzkumalak(f: strategygames.togyzkumalak.format.FEN) extends FEN(f.value) {
+
+    def toChess    = sys.error("Can't convert togyzkumalak to chess")
+    def toDraughts = sys.error("Can't convert togyzkumalak to draughts")
+    def toFairySF  = sys.error("Can't convert togyzkumalak to fairysf")
+    def toSamurai  = sys.error("Can't convert togyzkumalak to samurai")
+    def toTogyzkumalak  = f
+
+    def fullMove: Option[Int] = sys.error("There is no fullMove in togyzkumalak")
 
     def player: Option[Player] = f.player
 
@@ -122,13 +150,15 @@ object FEN {
   def wrap(fen: strategygames.chess.format.FEN)    = Chess(fen)
   def wrap(fen: strategygames.draughts.format.FEN) = Draughts(fen)
   def wrap(fen: strategygames.fairysf.format.FEN)  = FairySF(fen)
-  def wrap(fen: strategygames.mancala.format.FEN)  = Mancala(fen)
+  def wrap(fen: strategygames.samurai.format.FEN)  = Samurai(fen)
+  def wrap(fen: strategygames.togyzkumalak.format.FEN)  = Togyzkumalak(fen)
 
   def apply(lib: GameLogic, value: String): FEN = lib match {
     case GameLogic.Draughts() => FEN.Draughts(strategygames.draughts.format.FEN(value))
     case GameLogic.Chess()    => FEN.Chess(strategygames.chess.format.FEN(value))
     case GameLogic.FairySF()  => FEN.FairySF(strategygames.fairysf.format.FEN(value))
-    case GameLogic.Mancala()  => FEN.Mancala(strategygames.mancala.format.FEN(value))
+    case GameLogic.Samurai()  => FEN.Samurai(strategygames.samurai.format.FEN(value))
+    case GameLogic.Togyzkumalak()  => FEN.Togyzkumalak(strategygames.togyzkumalak.format.FEN(value))
   }
 
   def apply(v: Variant, value: String): FEN = apply(v.gameLogic, value)
@@ -137,7 +167,8 @@ object FEN {
     case GameLogic.Draughts() => Draughts(strategygames.draughts.format.FEN(source.replace("_", " ").trim))
     case GameLogic.Chess()    => Chess(strategygames.chess.format.FEN(source.replace("_", " ").trim))
     case GameLogic.FairySF()  => FairySF(strategygames.fairysf.format.FEN(source.replace("_", " ").trim))
-    case GameLogic.Mancala()  => Mancala(strategygames.mancala.format.FEN(source.replace("_", " ").trim))
+    case GameLogic.Samurai()  => Samurai(strategygames.samurai.format.FEN(source.replace("_", " ").trim))
+    case GameLogic.Togyzkumalak()  => Togyzkumalak(strategygames.togyzkumalak.format.FEN(source.replace("_", " ").trim))
   }
 
 }

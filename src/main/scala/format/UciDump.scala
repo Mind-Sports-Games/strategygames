@@ -20,8 +20,10 @@ object UciDump {
       strategygames.chess.format.UciDump(moves, initialFen.map(_.toChess), variant)
     case (GameLogic.FairySF(), Variant.FairySF(variant))   =>
       strategygames.fairysf.format.UciDump(moves, initialFen.map(_.toFairySF), variant)
-    case (GameLogic.Mancala(), Variant.Mancala(variant))   =>
-      strategygames.mancala.format.UciDump(moves, initialFen.map(_.toMancala), variant)
+    case (GameLogic.Samurai(), Variant.Samurai(variant))   =>
+      strategygames.samurai.format.UciDump(moves, initialFen.map(_.toSamurai), variant)
+    case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant))   =>
+      strategygames.togyzkumalak.format.UciDump(moves, initialFen.map(_.toTogyzkumalak), variant)
     case _                                                 => sys.error("Mismatched gamelogic types 12")
   }
 
@@ -36,8 +38,10 @@ object UciDump {
       strategygames.fairysf.format.UciDump.move(variant)(Left(mod))
     case (GameLogic.FairySF(), Variant.FairySF(variant), Right(Drop.FairySF(mod)))   =>
       strategygames.fairysf.format.UciDump.move(variant)(Right(mod))
-    case (GameLogic.Mancala(), Variant.Mancala(variant), Left(Move.Mancala(mod)))    =>
-      strategygames.mancala.format.UciDump.move(variant)(mod)
+    case (GameLogic.Samurai(), Variant.Samurai(variant), Left(Move.Samurai(mod)))    =>
+      strategygames.samurai.format.UciDump.move(variant)(mod)
+    case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant), Left(Move.Togyzkumalak(mod)))    =>
+      strategygames.togyzkumalak.format.UciDump.move(variant)(mod)
     case _                                                                           => sys.error("Mismatched gamelogic types 13")
   }
 }

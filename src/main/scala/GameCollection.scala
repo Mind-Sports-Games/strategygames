@@ -26,18 +26,24 @@ object GameLogic {
     def name = "Fairy Stockfish"
   }
 
-  final case class Mancala() extends GameLogic {
+  final case class Samurai() extends GameLogic {
     def id   = 3
-    def name = "Mancala"
+    def name = "Samurai"
   }
 
-  def all: List[GameLogic] = List(Chess(), Draughts(), FairySF(), Mancala())
+  final case class Togyzkumalak() extends GameLogic {
+    def id   = 4
+    def name = "Togyzkumalak"
+  }
+
+  def all: List[GameLogic] = List(Chess(), Draughts(), FairySF(), Samurai(), Togyzkumalak())
 
   // TODO: I'm sure there is a better scala way of doing this
   def apply(id: Int): GameLogic = id match {
     case 1 => Draughts()
     case 2 => FairySF()
-    case 3 => Mancala()
+    case 3 => Samurai()
+    case 4 => Togyzkumalak()
     case _ => Chess()
   }
 }
@@ -264,29 +270,50 @@ object GameFamily {
     def playerColors      = Map(P1 -> "black", P2 -> "white")
   }
 
-  final case class Mancala() extends GameFamily {
+  final case class Oware() extends GameFamily {
     def id                = 6
-    def name              = "Mancala"
-    def key               = "mancala"
-    def gameLogic         = GameLogic.Mancala()
+    def name              = "Oware"
+    def key               = "oware"
+    def gameLogic         = GameLogic.Samurai()
     def hasFishnet        = false
     def hasAnalysisBoard  = true
-    def defaultVariant    = Variant.Mancala(strategygames.mancala.variant.Oware)
-    def variants          = Variant.all(GameLogic.Mancala()).filter(_.gameFamily == this)
+    def defaultVariant    = Variant.Samurai(strategygames.samurai.variant.Oware)
+    def variants          = Variant.all(GameLogic.Samurai()).filter(_.gameFamily == this)
     def displayPiece      = "display"
     def pieceSetThemes    =
       List(
-        "green_mancala",
-        "blue_mancala",
-        "red_mancala",
-        "grey_mancala",
-        "green_seed_mancala",
-        "green_numbers_mancala"
+        "green_oware",
+        "blue_oware",
+        "red_oware",
+        "grey_oware",
+        "green_seed_oware",
+        "green_numbers_oware"
       )
-    def pieceSetDefault   = "green_mancala"
+    def pieceSetDefault   = "green_oware"
     def boardThemes       = List("light-wood", "dark-wood")
     def boardThemeDefault = "light-wood"
     def playerNames       = Map(P1 -> "South", P2 -> "North")
+    def playerColors      = Map(P1 -> "white", P2 -> "black")
+  }
+
+  final case class Togyzkumalak() extends GameFamily {
+    def id                = 7
+    def name              = "Togyzkumalak"
+    def key               = "togyzkumalak"
+    def gameLogic         = GameLogic.Togyzkumalak()
+    def hasFishnet        = false
+    def hasAnalysisBoard  = true
+    def defaultVariant    = Variant.Togyzkumalak(strategygames.togyzkumalak.variant.Togyzkumalak)
+    def variants          = Variant.all(GameLogic.Togyzkumalak()).filter(_.gameFamily == this)
+    def displayPiece      = "display"
+    def pieceSetThemes    =
+      List(
+        "black_gloss"
+      )
+    def pieceSetDefault   = "black_gloss"
+    def boardThemes       = List("blue")
+    def boardThemeDefault = "blue"
+    def playerNames       = Map(P1 -> "Bastaushi", P2 -> "Kostaushi")
     def playerColors      = Map(P1 -> "white", P2 -> "black")
   }
 
@@ -297,7 +324,8 @@ object GameFamily {
     Shogi(),
     Xiangqi(),
     Flipello(),
-    Mancala()
+    Oware(),
+    Togyzkumalak()
   )
 
   // TODO: I'm sure there is a better scala way of doing this
@@ -307,7 +335,8 @@ object GameFamily {
     case 3 => Shogi()
     case 4 => Xiangqi()
     case 5 => Flipello()
-    case 6 => Mancala()
+    case 6 => Oware()
+    case 7 => Togyzkumalak()
     case _ => Chess()
   }
 

@@ -67,15 +67,27 @@ object Replay {
     }
   }
 
-  final case class Mancala(r: mancala.Replay)
+  final case class Samurai(r: samurai.Replay)
       extends Replay(
-        Game.Mancala(r.setup),
-        r.moves.map((m: mancala.Move) => Left(Move.Mancala(m))),
-        Game.Mancala(r.state)
+        Game.Samurai(r.setup),
+        r.moves.map((m: samurai.Move) => Left(Move.Samurai(m))),
+        Game.Samurai(r.state)
       ) {
     def copy(state: Game): Replay = state match {
-      case Game.Mancala(state) => Replay.wrap(r.copy(state = state))
-      case _                   => sys.error("Unable to copy a mancala replay with a non-mancala state")
+      case Game.Samurai(state) => Replay.wrap(r.copy(state = state))
+      case _                   => sys.error("Unable to copy a samurai replay with a non-samurai state")
+    }
+  }
+
+  final case class Togyzkumalak(r: togyzkumalak.Replay)
+      extends Replay(
+        Game.Togyzkumalak(r.setup),
+        r.moves.map((m: togyzkumalak.Move) => Left(Move.Togyzkumalak(m))),
+        Game.Togyzkumalak(r.state)
+      ) {
+    def copy(state: Game): Replay = state match {
+      case Game.Togyzkumalak(state) => Replay.wrap(r.copy(state = state))
+      case _                   => sys.error("Unable to copy a togyzkumalak replay with a non-togyzkumalak state")
     }
   }
 
@@ -87,8 +99,10 @@ object Replay {
         Chess(chess.Replay(setup, moves.map(Move.toChess), state))
       case (GameLogic.FairySF(), Game.FairySF(setup), Game.FairySF(state))    =>
         FairySF(fairysf.Replay(setup, moves.map(Move.toFairySF), state))
-      case (GameLogic.Mancala(), Game.Mancala(setup), Game.Mancala(state))    =>
-        Mancala(mancala.Replay(setup, moves.map(Move.toMancala), state))
+      case (GameLogic.Samurai(), Game.Samurai(setup), Game.Samurai(state))    =>
+        Samurai(samurai.Replay(setup, moves.map(Move.toSamurai), state))
+      case (GameLogic.Togyzkumalak(), Game.Togyzkumalak(setup), Game.Togyzkumalak(state))    =>
+        Togyzkumalak(togyzkumalak.Replay(setup, moves.map(Move.toTogyzkumalak), state))
       case _                                                                  => sys.error("Mismatched gamelogic types 5")
     }
 
@@ -126,12 +140,21 @@ object Replay {
             message
           )
       }
-    case (GameLogic.Mancala(), FEN.Mancala(initialFen), Variant.Mancala(variant))    =>
-      mancala.Replay.gameMoveWhileValid(moveStrs, initialFen, variant) match {
+    case (GameLogic.Samurai(), FEN.Samurai(initialFen), Variant.Samurai(variant))    =>
+      samurai.Replay.gameMoveWhileValid(moveStrs, initialFen, variant) match {
         case (game, gameswithsan, message) =>
           (
-            Game.Mancala(game),
-            gameswithsan.map { case (g, u) => (Game.Mancala(g), Uci.MancalaWithSan(u)) },
+            Game.Samurai(game),
+            gameswithsan.map { case (g, u) => (Game.Samurai(g), Uci.SamuraiWithSan(u)) },
+            message
+          )
+      }
+    case (GameLogic.Togyzkumalak(), FEN.Togyzkumalak(initialFen), Variant.Togyzkumalak(variant))    =>
+      togyzkumalak.Replay.gameMoveWhileValid(moveStrs, initialFen, variant) match {
+        case (game, gameswithsan, message) =>
+          (
+            Game.Togyzkumalak(game),
+            gameswithsan.map { case (g, u) => (Game.Togyzkumalak(g), Uci.TogyzkumalakWithSan(u)) },
             message
           )
       }
@@ -172,11 +195,17 @@ object Replay {
         .toEither
         .map(s => s.map(Situation.FairySF))
         .toValidated
-    case (GameLogic.Mancala(), Variant.Mancala(variant))   =>
-      mancala.Replay
-        .situations(moveStrs, initialFen.map(_.toMancala), variant)
+    case (GameLogic.Samurai(), Variant.Samurai(variant))   =>
+      samurai.Replay
+        .situations(moveStrs, initialFen.map(_.toSamurai), variant)
         .toEither
-        .map(s => s.map(Situation.Mancala))
+        .map(s => s.map(Situation.Samurai))
+        .toValidated
+    case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant))   =>
+      togyzkumalak.Replay
+        .situations(moveStrs, initialFen.map(_.toTogyzkumalak), variant)
+        .toEither
+        .map(s => s.map(Situation.Togyzkumalak))
         .toValidated
     case _                                                 => sys.error("Mismatched gamelogic types 8")
   }
@@ -205,10 +234,18 @@ object Replay {
       }
     )
 
-  private def mancalaUcis(ucis: List[Uci]): List[mancala.format.Uci] =
+  private def samuraiUcis(ucis: List[Uci]): List[samurai.format.Uci] =
     ucis.flatMap(u =>
       u match {
-        case u: Uci.Mancala => Some(u.unwrap)
+        case u: Uci.Samurai => Some(u.unwrap)
+        case _              => None
+      }
+    )
+
+  private def togyzkumalakUcis(ucis: List[Uci]): List[togyzkumalak.format.Uci] =
+    ucis.flatMap(u =>
+      u match {
+        case u: Uci.Togyzkumalak => Some(u.unwrap)
         case _              => None
       }
     )
@@ -243,11 +280,17 @@ object Replay {
         .toEither
         .map(b => b.map(Board.FairySF))
         .toValidated
-    case (GameLogic.Mancala(), Variant.Mancala(variant))   =>
-      mancala.Replay
-        .boardsFromUci(mancalaUcis(moves), initialFen.map(_.toMancala), variant)
+    case (GameLogic.Samurai(), Variant.Samurai(variant))   =>
+      samurai.Replay
+        .boardsFromUci(samuraiUcis(moves), initialFen.map(_.toSamurai), variant)
         .toEither
-        .map(b => b.map(Board.Mancala))
+        .map(b => b.map(Board.Samurai))
+        .toValidated
+    case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant))   =>
+      togyzkumalak.Replay
+        .boardsFromUci(togyzkumalakUcis(moves), initialFen.map(_.toTogyzkumalak), variant)
+        .toEither
+        .map(b => b.map(Board.Togyzkumalak))
         .toValidated
     case _                                                 => sys.error("Mismatched gamelogic types 8a")
   }
@@ -277,11 +320,17 @@ object Replay {
         .toEither
         .map(s => s.map(Situation.FairySF))
         .toValidated
-    case (GameLogic.Mancala(), Variant.Mancala(variant))   =>
-      mancala.Replay
-        .situationsFromUci(mancalaUcis(moves), initialFen.map(_.toMancala), variant)
+    case (GameLogic.Samurai(), Variant.Samurai(variant))   =>
+      samurai.Replay
+        .situationsFromUci(samuraiUcis(moves), initialFen.map(_.toSamurai), variant)
         .toEither
-        .map(s => s.map(Situation.Mancala))
+        .map(s => s.map(Situation.Samurai))
+        .toValidated
+    case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant))   =>
+      togyzkumalak.Replay
+        .situationsFromUci(togyzkumalakUcis(moves), initialFen.map(_.toTogyzkumalak), variant)
+        .toEither
+        .map(s => s.map(Situation.Togyzkumalak))
         .toValidated
     case _                                                 => sys.error("Mismatched gamelogic types 9")
   }
@@ -311,11 +360,17 @@ object Replay {
         .toEither
         .map(r => Replay.FairySF(r))
         .toValidated
-    case (GameLogic.Mancala(), Variant.Mancala(variant))   =>
-      mancala.Replay
-        .apply(mancalaUcis(moves), initialFen.map(_.toMancala), variant)
+    case (GameLogic.Samurai(), Variant.Samurai(variant))   =>
+      samurai.Replay
+        .apply(samuraiUcis(moves), initialFen.map(_.toSamurai), variant)
         .toEither
-        .map(r => Replay.Mancala(r))
+        .map(r => Replay.Samurai(r))
+        .toValidated
+    case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant))   =>
+      togyzkumalak.Replay
+        .apply(togyzkumalakUcis(moves), initialFen.map(_.toTogyzkumalak), variant)
+        .toEither
+        .map(r => Replay.Togyzkumalak(r))
         .toValidated
     case _                                                 => sys.error("Mismatched gamelogic types 10")
   }
@@ -333,14 +388,17 @@ object Replay {
       chess.Replay.plyAtFen(moveStrs, initialFen.map(_.toChess), variant, atFen)
     case (GameLogic.FairySF(), Variant.FairySF(variant), FEN.FairySF(atFen))    =>
       fairysf.Replay.plyAtFen(moveStrs, initialFen.map(_.toFairySF), variant, atFen)
-    case (GameLogic.Mancala(), Variant.Mancala(variant), FEN.Mancala(atFen))    =>
-      mancala.Replay.plyAtFen(moveStrs, initialFen.map(_.toMancala), variant, atFen)
+    case (GameLogic.Samurai(), Variant.Samurai(variant), FEN.Samurai(atFen))    =>
+      samurai.Replay.plyAtFen(moveStrs, initialFen.map(_.toSamurai), variant, atFen)
+    case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant), FEN.Togyzkumalak(atFen))    =>
+      togyzkumalak.Replay.plyAtFen(moveStrs, initialFen.map(_.toTogyzkumalak), variant, atFen)
     case _                                                                      => sys.error("Mismatched gamelogic types 10")
   }
 
   def wrap(r: chess.Replay)    = Chess(r)
   def wrap(r: draughts.Replay) = Draughts(r)
   def wrap(r: fairysf.Replay)  = FairySF(r)
-  def wrap(r: mancala.Replay)  = Mancala(r)
+  def wrap(r: samurai.Replay)  = Samurai(r)
+  def wrap(r: togyzkumalak.Replay)  = Togyzkumalak(r)
 
 }

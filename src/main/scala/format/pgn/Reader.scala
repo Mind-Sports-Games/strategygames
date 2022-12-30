@@ -5,7 +5,8 @@ import strategygames.format.pgn.Tags
 import strategygames.chess.format.pgn.{ Reader => ChessReader }
 import strategygames.draughts.format.pdn.{ Reader => DraughtsReader }
 import strategygames.fairysf.format.pgn.{ Reader => FairySFReader }
-import strategygames.mancala.format.pgn.{ Reader => MancalaReader }
+import strategygames.samurai.format.pgn.{ Reader => SamuraiReader }
+import strategygames.togyzkumalak.format.pgn.{ Reader => TogyzkumalakReader }
 
 import cats.data.Validated
 
@@ -34,10 +35,16 @@ object Reader {
     case class FairySFIncomplete(replay: fairysf.Replay, failure: String)   extends Result {
       def valid = Validated.invalid(failure)
     }
-    case class MancalaComplete(replay: mancala.Replay)                      extends Result {
-      def valid = Validated.valid(Replay.Mancala(replay))
+    case class SamuraiComplete(replay: samurai.Replay)                      extends Result {
+      def valid = Validated.valid(Replay.Samurai(replay))
     }
-    case class MancalaIncomplete(replay: mancala.Replay, failure: String)   extends Result {
+    case class SamuraiIncomplete(replay: samurai.Replay, failure: String)   extends Result {
+      def valid = Validated.invalid(failure)
+    }
+    case class TogyzkumalakComplete(replay: togyzkumalak.Replay)                      extends Result {
+      def valid = Validated.valid(Replay.Togyzkumalak(replay))
+    }
+    case class TogyzkumalakIncomplete(replay: togyzkumalak.Replay, failure: String)   extends Result {
       def valid = Validated.invalid(failure)
     }
 
@@ -56,9 +63,14 @@ object Reader {
       case FairySFReader.Result.Incomplete(replay, failure) => Result.FairySFIncomplete(replay, failure)
     }
 
-    def wrap(result: MancalaReader.Result) = result match {
-      case MancalaReader.Result.Complete(replay)            => Result.MancalaComplete(replay)
-      case MancalaReader.Result.Incomplete(replay, failure) => Result.MancalaIncomplete(replay, failure)
+    def wrap(result: SamuraiReader.Result) = result match {
+      case SamuraiReader.Result.Complete(replay)            => Result.SamuraiComplete(replay)
+      case SamuraiReader.Result.Incomplete(replay, failure) => Result.SamuraiIncomplete(replay, failure)
+    }
+
+    def wrap(result: TogyzkumalakReader.Result) = result match {
+      case TogyzkumalakReader.Result.Complete(replay)            => Result.TogyzkumalakComplete(replay)
+      case TogyzkumalakReader.Result.Incomplete(replay, failure) => Result.TogyzkumalakIncomplete(replay, failure)
     }
   }
 
@@ -73,7 +85,8 @@ object Reader {
       case GameLogic.Chess()    => ChessReader.fullWithSans(pgn, op, tags).map(Result.wrap)
       case GameLogic.Draughts() => DraughtsReader.fullWithSans(pgn, op, tags, iteratedCapts).map(Result.wrap)
       case GameLogic.FairySF()  => FairySFReader.fullWithSans(pgn, op, tags).map(Result.wrap)
-      case GameLogic.Mancala()  => MancalaReader.fullWithSans(pgn, op, tags).map(Result.wrap)
+      case GameLogic.Samurai()  => SamuraiReader.fullWithSans(pgn, op, tags).map(Result.wrap)
+      case GameLogic.Togyzkumalak()  => TogyzkumalakReader.fullWithSans(pgn, op, tags).map(Result.wrap)
     }
 
   def movesWithSans(
@@ -91,8 +104,10 @@ object Reader {
       case GameLogic.FairySF()  =>
         // FairySFReader.movesWithSans(moveStrs, op, tags).map(Result.wrap)
         sys.error("Sans not implemented for fairysf")
-      case GameLogic.Mancala()  =>
-        sys.error("Sans not implemented for mancala")
+      case GameLogic.Samurai()  =>
+        sys.error("Sans not implemented for samurai")
+      case GameLogic.Togyzkumalak()  =>
+        sys.error("Sans not implemented for togyzkumalak")
     }
 
   def movesWithPgns(
@@ -106,8 +121,10 @@ object Reader {
       case GameLogic.Draughts() => sys.error("movesWithPgns not implemented for draughts")
       case GameLogic.FairySF()  =>
         FairySFReader.movesWithPgns(moveStrs, op, tags).map(Result.wrap)
-      case GameLogic.Mancala()  =>
-        MancalaReader.movesWithPgns(moveStrs, op, tags).map(Result.wrap)
+      case GameLogic.Samurai()  =>
+        SamuraiReader.movesWithPgns(moveStrs, op, tags).map(Result.wrap)
+      case GameLogic.Togyzkumalak()  =>
+        TogyzkumalakReader.movesWithPgns(moveStrs, op, tags).map(Result.wrap)
     }
 
 }

@@ -48,7 +48,14 @@ object History {
         halfMoveClock = h.halfMoveClock
       )
 
-  final case class Mancala(h: mancala.History)
+  final case class Samurai(h: samurai.History)
+      extends History(
+        lastMove = h.lastMove.map(Uci.wrap),
+        positionHashes = h.positionHashes,
+        halfMoveClock = h.halfMoveClock
+      )
+
+  final case class Togyzkumalak(h: togyzkumalak.History)
       extends History(
         lastMove = h.lastMove.map(Uci.wrap),
         positionHashes = h.positionHashes,
@@ -58,7 +65,8 @@ object History {
   implicit def chessHistory(h: chess.History)               = Chess(h)
   implicit def draughtsHistory(h: draughts.DraughtsHistory) = Draughts(h)
   implicit def fairysfHistory(h: fairysf.History)           = FairySF(h)
-  implicit def mancalaHistory(h: mancala.History)           = Mancala(h)
+  implicit def samuraiHistory(h: samurai.History)           = Samurai(h)
+  implicit def togyzkumalakHistory(h: togyzkumalak.History)           = Togyzkumalak(h)
 
   // lila
   def apply(
@@ -104,10 +112,18 @@ object History {
           halfMoveClock = halfMoveClock
         )
       )
-    case GameLogic.Mancala()  =>
-      Mancala(
-        mancala.History(
-          lastMove = lastMove.map(lm => lm.toMancala),
+    case GameLogic.Samurai()  =>
+      Samurai(
+        samurai.History(
+          lastMove = lastMove.map(lm => lm.toSamurai),
+          positionHashes = positionHashes,
+          halfMoveClock = halfMoveClock
+        )
+      )
+    case GameLogic.Togyzkumalak()  =>
+      Togyzkumalak(
+        togyzkumalak.History(
+          lastMove = lastMove.map(lm => lm.toTogyzkumalak),
           positionHashes = positionHashes,
           halfMoveClock = halfMoveClock
         )
