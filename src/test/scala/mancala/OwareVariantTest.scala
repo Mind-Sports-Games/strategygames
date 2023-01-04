@@ -42,7 +42,7 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
   }
 
   "grandslam in oware" should {
-    val fen      = "3,2S,1S,2S/1S,3,2S,3S 20 17 S"
+    val fen      = "3,2S,1S,2S/1S,3,2S,3S 20 17 S 50"
     val position = Api.positionFromFen(fen)
     val newGame  = position.makeMoves(List(5))
     "have an initial valid fen" in {
@@ -60,13 +60,13 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
     "hence new new fen is valid" in {
       Api.validateFEN(newGame.fen.value) must_== true
     }
-    "and equal to 3,3S,2S,3S/1S,3,2S,1 20 17 N" in {
-      newGame.fen.value must_== "3,3S,2S,3S/1S,3,2S,1 20 17 N"
+    "and equal to 3,3S,2S,3S/1S,3,2S,1 20 17 N 51" in {
+      newGame.fen.value must_== "3,3S,2S,3S/1S,3,2S,1 20 17 N 51"
     }
   }
 
   "grandslam in oware" should {
-    val fen      = "1S,1,8S,2,3S/2S,1S,1S,2S,2S,2S 13 13 N"
+    val fen      = "1S,1,8S,2,3S/2S,1S,1S,2S,2S,2S 13 13 N 51"
     val position = Api.positionFromFen(fen)
     val newGame  = position.makeMoves(List(9))
     "have an initial valid fen" in {
@@ -84,13 +84,13 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
     "hence new new fen is valid" in {
       Api.validateFEN(newGame.fen.value) must_== true
     }
-    "and equal to 2S,1S,3,3S/3S,2S,2S,3S,3S,3S 13 13 S" in {
-      newGame.fen.value must_== "2S,1S,3,3S/3S,2S,2S,3S,3S,3S 13 13 S"
+    "and equal to 2S,1S,3,3S/3S,2S,2S,3S,3S,3S 13 13 S 52" in {
+      newGame.fen.value must_== "2S,1S,3,3S/3S,2S,2S,3S,3S,3S 13 13 S 52"
     }
   }
 
   "grandslam in oware" should {
-    val fen      = "5,1S/1S,4,1S 22 23 S"
+    val fen      = "5,1S/1S,4,1S 22 23 S 50"
     val position = Api.positionFromFen(fen)
     val newGame  = position.makeMoves(List(5))
     "have an initial valid fen" in {
@@ -108,13 +108,13 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
     "hence new new fen is valid" in {
       Api.validateFEN(newGame.fen.value) must_== true
     }
-    "and equal to 5,2S/1S,5 22 23 N" in {
-      newGame.fen.value must_== "5,2S/1S,5 22 23 N"
+    "and equal to 5,2S/1S,5 22 23 N 51" in {
+      newGame.fen.value must_== "5,2S/1S,5 22 23 N 51"
     }
   }
 
   "cycle position in oware" should {
-    val fen      = "1S,5/5,1S 23 23 S"
+    val fen      = "1S,5/5,1S 23 23 S 50"
     val position = Api.positionFromFen(fen)
     val newGame  = position.makeMoves(List(5, 11, 0, 6, 1, 7, 2, 8, 3, 9, 4, 10))
     "have an initial valid fen" in {
@@ -127,7 +127,7 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
       newGame.fen.value.split(" ")(0) must_== fen.split(" ")(0)
     }
     "Ending cycle changes final fen scores" in {
-      newGame.fen.value must_== fen.split(" ")(0) + " 24 24 S"
+      newGame.fen.value must_== fen.split(" ")(0) + " 24 24 S 62"
     }
     "and result in a draw" in {
       newGame.gameResult must_== GameResult.Draw()
@@ -135,7 +135,7 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
   }
 
   "not yet cycle position in oware" should {
-    val fen      = "1S,5/5,1S 23 23 S"
+    val fen      = "1S,5/5,1S 23 23 S 50"
     val position = Api.positionFromFen(fen)
     val newGame  = position.makeMoves(List(5, 11, 0, 6, 1, 7, 2, 8, 3, 9, 4))
     "have an initial valid fen" in {
@@ -156,7 +156,7 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
   }
 
   "cycle position in oware" should {
-    val fen      = "2S,5/5,2S 21 23 S"
+    val fen      = "2S,5/5,2S 21 23 S 50"
     val position = Api.positionFromFen(fen)
     val newGame  = position.makeMoves(List(5, 11, 0, 6, 1, 7, 2, 8, 3, 9, 4, 10))
     "have an initial valid fen" in {
@@ -175,7 +175,7 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
       newGame.fen.value.split(" ")(0) must_== fen.split(" ")(0)
     }
     "Ending cycle changes final fen scores" in {
-      newGame.fen.value must_== fen.split(" ")(0) + " 23 25 S"
+      newGame.fen.value must_== fen.split(" ")(0) + " 23 25 S 62"
     }
     "and result in also game end" in {
       newGame.gameResult must_== GameResult.VariantEnd()
@@ -186,7 +186,7 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
   }
 
   "Another cycle position in oware - part 1" should {
-    val fen             = "4S,4S,4S,4S,4S,4S/4S,4S,4S,4S,4S,4S 0 0 S"
+    val fen             = "4S,4S,4S,4S,4S,4S/4S,4S,4S,4S,4S,4S 0 0 S 0"
     val initialPosition = Api.positionFromFen(fen)
     val uciMoves        = List(
       "d1e2",
@@ -289,7 +289,7 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
   }
 
   "Another cycle position in oware - part 2" should {
-    val fen             = "4S,4S,4S,4S,4S,4S/4S,4S,4S,4S,4S,4S 0 0 S"
+    val fen             = "4S,4S,4S,4S,4S,4S/4S,4S,4S,4S,4S,4S 0 0 S 0"
     val initialPosition = Api.positionFromFen(fen)
     val uciMoves        = List(
       "d1e2",
@@ -406,7 +406,7 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
 
   "Cycle position in oware - what is result?" should {
     // should this test be a draw - have to ask experts, as position repeats while 2 remaining stones left on South Side.
-    val fen             = "4S,4S,4S,4S,4S,4S/4S,4S,4S,4S,4S,4S 0 0 S"
+    val fen             = "4S,4S,4S,4S,4S,4S/4S,4S,4S,4S,4S,4S 0 0 S 0"
     val initialPosition = Api.positionFromFen(fen)
     val uciMoves        = List(
       "e1d2",
