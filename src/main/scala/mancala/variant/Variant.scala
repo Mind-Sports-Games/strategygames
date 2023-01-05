@@ -42,7 +42,7 @@ abstract class Variant private[variant] (
   def perfId: Int
   def perfIcon: Char
 
-  def initialFen: FEN = format.FEN("4S,4S,4S,4S,4S,4S/4S,4S,4S,4S,4S,4S 0 0 S")
+  def initialFen: FEN = format.FEN("4S,4S,4S,4S,4S,4S/4S,4S,4S,4S,4S,4S 0 0 S 0")
 
   def pieces: PieceMap = Api.pieceMapFromFen(key, initialFen.value)
 
@@ -114,7 +114,7 @@ abstract class Variant private[variant] (
 
   def materialImbalance(board: Board): Int =
     board.pieces.values.foldLeft(0) { case (acc, (Piece(player, _), count)) =>
-        acc + count * player.fold(1, -1)
+      acc + count * player.fold(1, -1)
     }
 
   // Some variants have an extra effect on the board on a move. For example, in Atomic, some
