@@ -63,7 +63,7 @@ object Api {
       var pos =
         if (previousMoves.length == 0 && Api.initialFen.value != fen.value) positionFromFen(fen.value)
         else if (Api.initialFen.value != initialFen.value) positionFromFen(initialFen.value)
-        else new OwarePosition(new OwareGame(), ply, fromFen)
+        else new OwarePosition(new OwareGame(), 0, fromFen)
 
       pos = pos.makeMoves(previousMoves.map(uciToMove))
 
