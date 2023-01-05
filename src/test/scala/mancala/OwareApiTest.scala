@@ -17,11 +17,11 @@ class OwareApiTest extends Specification with ValidatedMatchers {
     "false due to too many pieces" in {
       Api.validateFEN(fen) must_== false
     }
-    val fen2 = "2S,4,1S/1S,1S,3,1S 21 21 N 51"
+    val fen2 = "2S,4,1S/1S,1S,3,1S 21 21 N 50"
     "true due to allowing >1 for multiple empty spaces" in {
       Api.validateFEN(fen2) must_== true
     }
-    val fen3 = "3,5S,5S,5S/4,18S,18S,2 0 6 N 51"
+    val fen3 = "3,5S,5S,5S/4,18S,18S,2 0 6 N 50"
     "false due to more space than width" in {
       Api.validateFEN(fen3) must_== false
     }
@@ -78,7 +78,7 @@ class OwareApiTest extends Specification with ValidatedMatchers {
     val game    = Api.position
     val newGame = game.makeMoves(List(0, 6, 3, 7, 4))
 
-    // val fen = "5S,7S,7S,8S,1S,2s/1S,6S,5S,2,6s 0 0 N"
+    // val fen = "5S,7S,7S,8S,1S,2s/1S,6S,5S,2,6s 0 0 N 50"
     val pieceMap       = newGame.pieceMap
     val countAtB1: Int = pieceMap.get(Pos.B1).map(_._2).getOrElse(0)
     val countAtD1: Int = pieceMap.get(Pos.D1).map(_._2).getOrElse(0)
@@ -105,7 +105,7 @@ class OwareApiTest extends Specification with ValidatedMatchers {
     val pieceMap: PieceMap = position.pieceMap
     val countAtC1: Int     = pieceMap.get(Pos.C1).map(_._2).getOrElse(0)
     "fen after a few moves" in {
-      fen.value must_== "5S,7S,7S,8S,1S,2S/1S,6S,5S,2,6S 0 0 N 5"
+      fen.value must_== "5S,7S,7S,8S,1S,2S/1S,6S,5S,2,6S 0 0 N 3"
     }
     "10 current pieces " in {
       pieceMap.size must_== 10
@@ -121,7 +121,7 @@ class OwareApiTest extends Specification with ValidatedMatchers {
     val fen        = newGame.fen
     val owareBoard = Api.owareBoardFromFen(fen.value)
     "fen is 5S,5S,6S,6S,1S,5S/1,5S,5S,5S,1,5S 0 0 N 3" in {
-      fen.value must_== "5S,5S,6S,6S,1S,5S/1,5S,5S,5S,1,5S 0 0 N 3"
+      fen.value must_== "5S,5S,6S,6S,1S,5S/1,5S,5S,5S,1,5S 0 0 N 2"
     }
     "oware board is " in {
       owareBoard.position must_== Array(0, 5, 5, 5, 0, 5, 5, 1, 6, 6, 5, 5, 0, 0)
@@ -133,7 +133,7 @@ class OwareApiTest extends Specification with ValidatedMatchers {
     val pos      = Api.positionFromVariantAndMoves(variant.Oware, uciMoves)
     val fen      = pos.fen
     "fen is 5S,5S,6S,6S,1S,5S/1,5S,5S,5S,1,5S 0 0 N 3" in {
-      fen.value must_== "5S,5S,6S,6S,1S,5S/1,5S,5S,5S,1,5S 0 0 N 3"
+      fen.value must_== "5S,5S,6S,6S,1S,5S/1,5S,5S,5S,1,5S 0 0 N 2"
     }
     "legal moves are 6,7,8,9,10,11" in {
       pos.legalMoves must_== Array(7, 11, 10, 9, 8,
@@ -146,7 +146,7 @@ class OwareApiTest extends Specification with ValidatedMatchers {
   }
 
   "positionFromVariantNameAndFEN" should {
-    val fen = "2S,4,1S/1S,1S,3,1S 21 21 N"
+    val fen = "2S,4,1S/1S,1S,3,1S 21 21 N 50"
     val pos = Api.positionFromVariantNameAndFEN("oware", fen)
     "fen from new pos" in {
       pos.fen.value must_== fen
@@ -154,7 +154,7 @@ class OwareApiTest extends Specification with ValidatedMatchers {
   }
 
   "pieceMapFromFen" should {
-    val fen      = "2S,4,1S/1S,1S,3,1S 21 21 N"
+    val fen      = "2S,4,1S/1S,1S,3,1S 21 21 N 50"
     val pieceMap = Api.pieceMapFromFen("oware", fen)
     "6 pieces" in {
       pieceMap.size must_== 5
@@ -169,7 +169,7 @@ class OwareApiTest extends Specification with ValidatedMatchers {
   }
 
   "game result " should {
-    val fen      = "2S,4,1S/1S,1S,3,1S 21 21 N 51"
+    val fen      = "2S,4,1S/1S,1S,3,1S 21 21 N 50"
     val position = Api.positionFromFen(fen)
     "is still ongoing during game" in {
       position.gameResult must_== GameResult.Ongoing()
@@ -177,7 +177,7 @@ class OwareApiTest extends Specification with ValidatedMatchers {
   }
 
   "game result" should {
-    val fen      = "2S,4,1S/1S,1S,3,1S 25 17 N 51"
+    val fen      = "2S,4,1S/1S,1S,3,1S 25 17 N 50"
     val position = Api.positionFromFen(fen)
     "is variantEnd if player has score above 24" in {
       position.gameResult must_== GameResult.VariantEnd()
@@ -185,7 +185,7 @@ class OwareApiTest extends Specification with ValidatedMatchers {
   }
 
   "game result" should {
-    val fen      = "6/6 24 24 S"
+    val fen      = "6/6 24 24 S 50"
     val position = Api.positionFromFen(fen)
     "be a draw with same score and no pieces" in {
       position.gameResult must_== GameResult.Draw()
@@ -215,7 +215,7 @@ class OwareApiTest extends Specification with ValidatedMatchers {
   }
 
   "game result" should {
-    val fen      = "4S,4S,4S,4S,4S,4S/4S,4S,4S,4S,4S,4S 0 0 S 0" // starting pos
+    val fen      = "4S,4S,4S,4S,4S,4S/4S,4S,4S,4S,4S,4S 0 0 S 1" // starting pos
     val position = Api.positionFromFen(fen)
     val moves    = List(3, 9, 5, 7, 4, 10, 1, 8, 2, 7, 0, 6, 5, 6, 0, 10, 0, 11, 0, 9, 0, 7, 5, 8, 1, 9, 2, 11,
       3, 6, 0, 7, 1, 10, 4, 7, 3, 6, 1, 11, 2, 8, 4, 7, 5, 7, 3, 8, 4, 9, 5)
@@ -226,7 +226,7 @@ class OwareApiTest extends Specification with ValidatedMatchers {
   }
 
   "game result" should {
-    val fen      = "4S,4S,4S,4S,4S,4S/4S,4S,4S,4S,4S,4S 0 0 S 0" // starting pos
+    val fen      = "4S,4S,4S,4S,4S,4S/4S,4S,4S,4S,4S,4S 0 0 S 1" // starting pos
     val position = Api.positionFromFen(fen)
     val moves    = List(3, 9, 5, 7, 4, 10, 1, 8, 2, 7, 0, 6, 5, 6, 0, 10, 0, 11, 0, 9, 0, 7, 5, 8, 1, 9, 2, 11,
       3, 6, 0, 7, 1, 10, 4, 7, 3, 6, 1, 11, 2, 8, 4, 7, 5, 7, 3, 8, 4, 9, 5)

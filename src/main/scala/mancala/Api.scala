@@ -50,7 +50,7 @@ object Api {
 
   private class OwarePosition(
       position: OwareGame,
-      ply: Option[Int] = None,
+      ply: Int = 0,
       fromFen: Option[FEN] = None
   ) extends Position {
     // TODO: yes, this is an abuse of scala. We could get an
@@ -85,7 +85,7 @@ object Api {
             s"Illegal move2: ${move} from list: ${movesList} legalMoves: ${position.legalMoves.map(_.toString()).mkString(", ")}"
           )
       }
-      return new OwarePosition(position, Some(ply.getOrElse(0) + movesList.length), fromFen)
+      return new OwarePosition(position, ply + movesList.length, fromFen)
     }
 
     // helper
@@ -128,8 +128,8 @@ object Api {
       val p2CurrentScore = splitDiagram(numPits + 1).toInt
       val p1FinalScore   = finalStoneScore(p1CurrentScore, p2CurrentScore, "p1")
       val p2FinalScore   = finalStoneScore(p1CurrentScore, p2CurrentScore, "p2")
-      val plyStr         = ply.fold("")(p => s" ${p}")
-      return s"${board} ${p1FinalScore} ${p2FinalScore} ${splitDiagram(numPits + 2)}${plyStr}"
+      val fullMoveStr    = (ply / 2 + 1).toString()
+      return s"${board} ${p1FinalScore} ${p2FinalScore} ${splitDiagram(numPits + 2)} ${fullMoveStr}"
     }
 
     private def finalStoneScore(currentP1Score: Int, currentP2Score: Int, playerIndex: String): Int = {
@@ -139,12 +139,12 @@ object Api {
           val p2SideStonesLeft = owareDiagram.split('-').drop(6).take(6).map(_.toInt).sum
           val total            = p1SideStonesLeft + p2SideStonesLeft
           total match {
-            case even if total % 2 == 0 =>
+            case _ if total % 2 == 0 =>
               playerIndex match {
                 case "p1" => currentP1Score + total / 2
                 case "p2" => currentP2Score + total / 2
               }
-            case odd =>
+            case _ =>
               if (p1SideStonesLeft > p2SideStonesLeft) {
                 playerIndex match {
                   case "p1" => currentP1Score + (total + 1) / 2
@@ -225,7 +225,7 @@ object Api {
     val game = new OwareGame()
     val fen  = FEN(fenString)
     game.setBoard(owareBoardFromFen(fenString))
-    new OwarePosition(game, fen.ply, Some(fen))
+    new OwarePosition(game, fen.ply.getOrElse(0), Some(fen))
   }
 
   def positionFromVariantNameAndFEN(variantName: String, fenString: String): Position = {
@@ -233,8 +233,8 @@ object Api {
     val fen  = FEN(fenString)
     game.setBoard(owareBoardFromFen(fenString))
     variantName.toLowerCase() match {
-      case "oware" => new OwarePosition(game, fen.ply, Some(fen))
-      case _       => new OwarePosition(new OwareGame(), fen.ply, Some(fen))
+      case "oware" => new OwarePosition(game, fen.ply.getOrElse(0), Some(fen))
+      case _       => new OwarePosition(new OwareGame(), fen.ply.getOrElse(0), Some(fen))
     }
   }
 
