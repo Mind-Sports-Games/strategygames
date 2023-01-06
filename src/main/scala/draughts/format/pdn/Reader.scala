@@ -1,6 +1,6 @@
 package strategygames.draughts
 package format.pdn
-import strategygames.{ Clock, Move => StratMove, MoveOrDrop, Situation => StratSituation }
+import strategygames.{ FischerClock, Move => StratMove, MoveOrDrop, Situation => StratSituation }
 import strategygames.format.pgn.{ ParsedPgn => ParsedPdn, San, Sans, Tags }
 
 import cats.data.Validated
@@ -103,7 +103,11 @@ object Reader {
     )
     g.copy(
       startedAtTurn = g.turns,
-      clock = tags.clockConfig map (config => Clock.apply(config))
+      // TODO: byoyomi, we should also read byoyomi here.
+      clock = tags.clockConfig.flatMap({
+        case c: FischerClock.Config => Some(FischerClock.apply(c))
+        case _ => None
+      })
     )
   }
 }

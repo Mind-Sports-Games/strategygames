@@ -1,6 +1,6 @@
 package strategygames.fairysf
 package format.pgn
-import strategygames.{ Clock, GameFamily, Move => StratMove, Situation => StratSituation }
+import strategygames.{ FischerClock, GameFamily, Move => StratMove, Situation => StratSituation }
 
 import strategygames.format.pgn.{ ParsedPgn, Sans, Tags }
 
@@ -142,7 +142,11 @@ object Reader {
     )
     g.copy(
       startedAtTurn = g.turns,
-      clock = tags.clockConfig map (config => Clock.apply(config))
+      // TODO: byoyomi, we should also read byoyomi here.
+      clock = tags.clockConfig.flatMap({
+        case c: FischerClock.Config => Some(FischerClock.apply(c))
+        case _ => None
+      })
     )
   }
 }

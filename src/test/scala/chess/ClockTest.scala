@@ -5,25 +5,25 @@ import strategygames.chess.Pos._
 
 class ClockTest extends ChessTest {
   val chess = GameLogic.Chess()
-  val fakeClock60 = Clock(Clock.Config(60, 0))
+  val fakeClock60 = FischerClock(FischerClock.Config(60, 0))
     .copy(timestamper = new Timestamper {
       val now = Timestamp(0)
     })
     .start
 
-  val fakeClock600 = Clock(Clock.Config(600, 0))
+  val fakeClock600 = FischerClock(FischerClock.Config(600, 0))
     .copy(timestamper = new Timestamper {
       val now = Timestamp(0)
     })
     .start
 
   def advance(c: Clock, t: Int) =
-    c.copy(timestamper = new Timestamper {
+    c.withTimestamper(new Timestamper {
       val now = c.timestamper.now + Centis(t)
     })
 
   "play with a clock" should {
-    val clock = Clock(Clock.Config(5 * 60 * 1000, 0))
+    val clock = FischerClock(FischerClock.Config(5 * 60 * 1000, 0))
     val game  = makeGame withClock clock.start
       "new game" in {
         game.clock map { _.player } must_== Option(P1)
@@ -36,16 +36,16 @@ class ClockTest extends ChessTest {
     }
     "create a clock" should {
       "with time" in {
-        Clock(Clock.Config(60, 10)).limitSeconds must_== 60
+        FischerClock(FischerClock.Config(60, 10)).limitSeconds must_== 60
       }
       "with increment" in {
-        Clock(Clock.Config(60, 10)).incrementSeconds must_== 10
+        FischerClock(FischerClock.Config(60, 10)).incrementSeconds must_== 10
       }
       "with few time" in {
-        Clock(Clock.Config(0, 10)).limitSeconds must_== 0
+        FischerClock(FischerClock.Config(0, 10)).limitSeconds must_== 0
       }
       "with 30 seconds" in {
-        Clock(Clock.Config(30, 0)).limitInMinutes must_== 0.5
+        FischerClock(FischerClock.Config(30, 0)).limitInMinutes must_== 0.5
       }
     }
     "lag compensation" should {

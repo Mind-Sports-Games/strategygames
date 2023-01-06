@@ -97,9 +97,10 @@ object Speed {
 
   def apply(id: Int): Option[Speed] = byId get id
 
-  def apply(clock: Clock.Config) = byTime(clock.estimateTotalSeconds)
+  // TODO: byoyomi - add initialization from lishogi here
+  def apply(clock: ClockConfig) = byTime(clock.estimateTotalSeconds)
 
-  def apply(clock: Option[Clock.Config]) = byTime(clock.fold(Int.MaxValue)(_.estimateTotalSeconds))
+  def apply(clock: Option[ClockConfig]) = byTime(clock.fold(Int.MaxValue)(_.estimateTotalSeconds))
 
   def byTime(seconds: Int): Speed = all.find(_.range contains seconds) | Correspondence
 

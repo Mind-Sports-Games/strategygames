@@ -65,7 +65,7 @@ object Board {
 
   def init(variant: Variant): Board = Board(variant.pieces, variant)
 
-  // def empty(variant: Variant): Board = Board(Nil, variant)
+  def empty(variant: Variant): Board = Board(Nil, variant)
 
   private def variantPocketData(variant: Variant) =
     (variant.dropsVariant) option PocketData.init

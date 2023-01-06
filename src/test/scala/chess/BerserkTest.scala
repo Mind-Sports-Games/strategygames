@@ -1,33 +1,33 @@
 package strategygames.chess
-import strategygames.{ P2, Clock, GameLogic, P1  }
+import strategygames.{ P2, FischerClock, GameLogic, P1  }
 
 class BerserkTest extends ChessTest {
 
   val chess = GameLogic.Chess()
 
   def p1Berserk(minutes: Int, seconds: Int) =
-    Clock(Clock.Config(minutes * 60, seconds)).goBerserk(P1).remainingTime(P1).centis * .01
+    FischerClock(FischerClock.Config(minutes * 60, seconds)).goBerserk(P1).remainingTime(P1).centis * .01
 
   "berserkable" should {
     "yep" in {
-      Clock.Config(60 * 60, 0).berserkable must_== true
-      Clock.Config(1 * 60, 0).berserkable must_== true
-      Clock.Config(60 * 60, 60).berserkable must_== true
-      Clock.Config(1 * 60, 0).berserkable must_== true
+      FischerClock.Config(60 * 60, 0).berserkable must_== true
+      FischerClock.Config(1 * 60, 0).berserkable must_== true
+      FischerClock.Config(60 * 60, 60).berserkable must_== true
+      FischerClock.Config(1 * 60, 0).berserkable must_== true
     }
     "nope" in {
-      Clock.Config(0 * 60, 1).berserkable must_== false
-      Clock.Config(0 * 60, 10).berserkable must_== false
+      FischerClock.Config(0 * 60, 1).berserkable must_== false
+      FischerClock.Config(0 * 60, 10).berserkable must_== false
     }
   }
   "berserk flags" should {
     "p1" in {
-      Clock(Clock.Config(60, 0)).berserked(P1) must_== false
-      Clock(Clock.Config(60, 0)).goBerserk(P1).berserked(P1) must_== true
+      FischerClock(FischerClock.Config(60, 0)).berserked(P1) must_== false
+      FischerClock(FischerClock.Config(60, 0)).goBerserk(P1).berserked(P1) must_== true
     }
     "p2" in {
-      Clock(Clock.Config(60, 0)).berserked(P2) must_== false
-      Clock(Clock.Config(60, 0)).goBerserk(P2).berserked(P2) must_== true
+      FischerClock(FischerClock.Config(60, 0)).berserked(P2) must_== false
+      FischerClock(FischerClock.Config(60, 0)).goBerserk(P2).berserked(P2) must_== true
     }
   }
   "initial time penalty, no increment" should {
