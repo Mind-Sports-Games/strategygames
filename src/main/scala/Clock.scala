@@ -14,6 +14,10 @@ sealed trait ClockConfig {
   def limitSeconds: Int
   def initTime: Centis
   def berserkPenalty: Centis
+  def berserkable: Boolean
+  def emergSeconds: Int
+  def show: String
+  def toClock: Clock
 }
 
 sealed trait ClockInfo {
@@ -68,7 +72,10 @@ sealed trait Clock {
   def giveTime(c: Player, t: Centis): Clock
   def goBerserk(c: Player): Clock
   def clockPlayer(c: Player): ClockPlayer
+  def clockPlayerExists(f: ClockPlayer => Boolean): Boolean
+  def allClockPlayers: Seq[ClockPlayer]
   def lagCompAvg: Centis
+  def setRemainingTime(p: Player, t: Centis): Clock
 
   def currentClockFor(c: Player): ClockInfo
 
@@ -114,6 +121,8 @@ case class FischerClock(
   import timestamper.{ now, toNow }
 
   def clockPlayer(c: Player) = players(c)
+  def clockPlayerExists(f: ClockPlayer => Boolean) = players.exists(f)
+  def allClockPlayers: Seq[FischerClockPlayer] = players.all
   def lagCompAvg = players map { ~_.lag.compAvg } reduce (_ avg _)
 
   def currentClockFor(c: Player) = {
@@ -310,6 +319,8 @@ case class ByoyomiClock(
   import timestamper.{ now, toNow }
 
   def clockPlayer(c: Player) = players(c)
+  def clockPlayerExists(f: ClockPlayer => Boolean) = players.exists(f)
+  def allClockPlayers: Seq[ByoyomiClockPlayer] = players.all
   def lagCompAvg = players map { ~_.lag.compAvg } reduce (_ avg _)
 
   private def periodsInUse(c: Player, t: Centis): Int = {
