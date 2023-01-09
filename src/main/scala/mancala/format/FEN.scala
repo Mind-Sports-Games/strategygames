@@ -11,16 +11,19 @@ final case class FEN(value: String) extends AnyVal {
   def player: Option[Player] =
     value.split(' ').lift(3) flatMap (_.headOption) flatMap Player.apply
 
-  def player1Score: Int = playerScore(1)
+  def player1Score: Int = intFromFen(1).getOrElse(0)
 
-  def player2Score: Int = playerScore(2)
+  def player2Score: Int = intFromFen(2).getOrElse(0)
 
-  private def playerScore(playerIndex: Int): Int =
-    value
-      .split(' ')
-      .lift(playerIndex)
-      .map(_.toInt)
-      .getOrElse(0)
+  def fullMove: Option[Int] = intFromFen(4)
+
+  def ply: Option[Int] =
+    fullMove map { fm =>
+      fm * 2 - (if (player.exists(_.p1)) 2 else 1)
+    }
+
+  private def intFromFen(index: Int): Option[Int] =
+    value.split(' ').lift(index).flatMap(_.toIntOption)
 
   def owareStoneArray: Array[Int] =
     (
@@ -36,11 +39,6 @@ final case class FEN(value: String) extends AnyVal {
       )
       .flatten
       .toArray
-
-  // def ply: Option[Int] =
-  //   fullMove map { fm =>
-  //     fm * 2 - (if (player.exists(_.p1)) 2 else 1)
-  //   }
 
   def initial = value == Forsyth.initial.value
 }

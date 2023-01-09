@@ -14,6 +14,6 @@ object EcopeningDB {
   }
 
   lazy val allByEco: Map[ECO, Ecopening] = Map(
-"A00" -> new Ecopening("A00", "oware", "Oware Start Pos", "Oware Start Pos", "", "4S,4S,4S,4S,4S,4S/4S,4S,4S,4S,4S,4S 0 0 S", "")
+"A00" -> new Ecopening("A00", "oware", "Oware Start Pos", "Oware Start Pos", "", "4S,4S,4S,4S,4S,4S/4S,4S,4S,4S,4S,4S 0 0 S 1", "")
   )
 }
