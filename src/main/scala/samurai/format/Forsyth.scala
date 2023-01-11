@@ -11,7 +11,7 @@ import strategygames.samurai.variant.Variant
   */
 object Forsyth {
 
-  val initial = FEN("4S,4S,4S,4S,4S,4S/4S,4S,4S,4S,4S,4S 0 0 S")
+  val initial = FEN("4S,4S,4S,4S,4S,4S/4S,4S,4S,4S,4S,4S 0 0 S 1")
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
     val apiPosition = Api.positionFromVariantNameAndFEN(variant.name, fen.value)
