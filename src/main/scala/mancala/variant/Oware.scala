@@ -22,7 +22,7 @@ case object Oware
 
   // cache this rather than checking with the API everytime
   override def initialFen =
-    format.FEN("4S,4S,4S,4S,4S,4S/4S,4S,4S,4S,4S,4S 0 0 S 0")
+    format.FEN("4S,4S,4S,4S,4S,4S/4S,4S,4S,4S,4S,4S 0 0 S 1")
 
   override def specialEnd(situation: Situation) =
     (situation.board.apiPosition.fen.player1Score > 24) ||

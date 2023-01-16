@@ -15,10 +15,15 @@ final case class FEN(value: String) extends AnyVal {
 
   def player2Score: Int = intFromFen(2).getOrElse(0)
 
-  def ply: Option[Int] = intFromFen(4)
+  def fullMove: Option[Int] = intFromFen(4)
+
+  def ply: Option[Int] =
+    fullMove map { fm =>
+      fm * 2 - (if (player.exists(_.p1)) 2 else 1)
+    }
 
   private def intFromFen(index: Int): Option[Int] =
-    value.split(' ').lift(index).map(_.toInt)
+    value.split(' ').lift(index).flatMap(_.toIntOption)
 
   def owareStoneArray: Array[Int] =
     (
