@@ -29,9 +29,21 @@ case object Flipello10
       "10/10/10/10/4pP4/4Pp4/10/10/10/10[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp] w 0 1"
     )
 
-  override def specialEnd(situation: Situation) =
+  override def specialEnd(situation: Situation) = {
     (situation.board.piecesOnBoardCount == boardSize.width * boardSize.height) ||
-      (situation.board.apiPosition.legalMoves.size == 0)
+    (situation.board.apiPosition.legalMoves.size == 0) ||
+    pendingDoublePass(situation)
+  }
+
+  def pendingPass(situation: Situation) =
+    situation.moves.size == 1 && situation.drops.fold(0) { _.size } == 0
+
+  def applyPass(situation: Situation) =
+    situation.moves.values.flatMap(moves => moves.headOption.map(_.situationAfter)).headOption
+
+  def pendingDoublePass(situation: Situation) =
+    pendingPass(situation) && applyPass(situation).fold(false)(pendingPass(_))
+
 
   override def specialDraw(situation: Situation) =
     situation.board.playerPiecesOnBoardCount(P1) == situation.board.playerPiecesOnBoardCount(P2)
