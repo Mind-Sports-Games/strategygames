@@ -52,7 +52,7 @@ object Api {
     // TODO: yes, this is an abuse of scala. We could get an
     //       exception here, but I'm not sure how to work around that
     //       at the moment
-    val variant = Variant.byKey("oware")
+    val variant = Variant.byKey("togyzkumalak")
 
     def makeMovesWithPrevious(movesList: List[Int], previousMoves: List[String]): Position = {
 

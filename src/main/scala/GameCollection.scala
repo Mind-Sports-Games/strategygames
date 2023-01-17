@@ -282,14 +282,14 @@ object GameFamily {
     def displayPiece      = "display"
     def pieceSetThemes    =
       List(
-        "green_oware",
-        "blue_oware",
-        "red_oware",
-        "grey_oware",
-        "green_seed_oware",
-        "green_numbers_oware"
+        "green",
+        "blue",
+        "red",
+        "grey",
+        "green_seed",
+        "green_numbers"
       )
-    def pieceSetDefault   = "green_oware"
+    def pieceSetDefault   = "green"
     def boardThemes       = List("light-wood", "dark-wood")
     def boardThemeDefault = "light-wood"
     def playerNames       = Map(P1 -> "South", P2 -> "North")
@@ -311,7 +311,7 @@ object GameFamily {
         "black_gloss"
       )
     def pieceSetDefault   = "black_gloss"
-    def boardThemes       = List("blue")
+    def boardThemes       = List("blue", "wood")
     def boardThemeDefault = "blue"
     def playerNames       = Map(P1 -> "Bastaushi", P2 -> "Kostaushi")
     def playerColors      = Map(P1 -> "white", P2 -> "black")
