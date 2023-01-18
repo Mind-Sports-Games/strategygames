@@ -11,17 +11,16 @@ import strategygames.togyzkumalak.variant.Variant
   */
 object Forsyth {
 
-  val initial = FEN("4S,4S,4S,4S,4S,4S/4S,4S,4S,4S,4S,4S 0 0 S")
+  val initial = FEN("9S,9S,9S,9S,9S,9S,9S,9S,9S/9S,9S,9S,9S,9S,9S,9S,9S,9S 0 0 S 1")
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
-    val apiPosition = Api.positionFromVariantNameAndFEN(variant.name, fen.value)
     Some(
       Situation(
         Board(
-          pieces = apiPosition.pieceMap,
+          // TODO set pieces
+          pieces = Map(),
           history = History(),
-          variant = variant,
-          position = apiPosition.some
+          variant = variant
         ),
         fen.value.split(' ')(3) match {
           case "S" => P1
@@ -57,11 +56,11 @@ object Forsyth {
       case SituationPlus(situation, _) => >>(Game(situation, turns = parsed.turns))
     }
 
-  def >>(game: Game): FEN = exportBoardFen(game.situation.board)
+  // TODO: set
+  def >>(game: Game): FEN = initial
 
-  def exportBoard(board: Board): String = exportBoardFen(board).value
-
-  def exportBoardFen(board: Board): FEN = board.apiPosition.fen
+  // TODO: set
+  def exportBoard(board: Board): String = ""
 
   def boardAndPlayer(situation: Situation): String =
     boardAndPlayer(situation.board, situation.player)

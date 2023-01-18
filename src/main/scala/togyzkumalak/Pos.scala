@@ -47,23 +47,23 @@ case class Pos private (index: Int) extends AnyVal {
   // We're going to use the chess piotr's which are not based on the
   // indices that we use.
   def chessIndex: Int = index match {
-    case 6 => 13
-    case 7 => 12
-    case 8 => 11
-    case 9 => 10
+    case 6  => 13
+    case 7  => 12
+    case 8  => 11
+    case 9  => 10
     case 10 => 9
     case 11 => 8
-    case i => i
+    case i  => i
   }
-  
+
   def piotr: Char = {
-    if (chessIndex <= 25) (97 + chessIndex).toChar // a ...
+    if (chessIndex <= 25) (97 + chessIndex).toChar      // a ...
     else if (chessIndex <= 51) (39 + chessIndex).toChar // A ...
     else if (chessIndex <= 61) (chessIndex - 4).toChar // 0 ...
     else if (chessIndex == 62) '!'
     else '?'
   }
-  def piotrStr = piotr.toString
+  def piotrStr    = piotr.toString
 
   def key               = file.toString + rank.toString
   override def toString = key
@@ -103,14 +103,20 @@ object Pos {
   val D1 = new Pos(3)
   val E1 = new Pos(4)
   val F1 = new Pos(5)
+  val G1 = new Pos(6)
+  val H1 = new Pos(7)
+  val I1 = new Pos(8)
 
   // backwards for 2nd rank
-  val F2 = new Pos(6)
-  val E2 = new Pos(7)
-  val D2 = new Pos(8)
-  val C2 = new Pos(9)
-  val B2 = new Pos(10)
-  val A2 = new Pos(11)
+  val I2 = new Pos(9)
+  val H2 = new Pos(10)
+  val G2 = new Pos(11)
+  val F2 = new Pos(12)
+  val E2 = new Pos(13)
+  val D2 = new Pos(14)
+  val C2 = new Pos(15)
+  val B2 = new Pos(16)
+  val A2 = new Pos(17)
 
   val all: List[Pos] = (0 to (File.all.size * Rank.all.size) - 1).map(new Pos(_)).toList
 

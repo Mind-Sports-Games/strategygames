@@ -10,7 +10,7 @@ case object Togyzkumalak
       key = "togyzkumalak",
       name = "Togyzkumalak",
       standardInitialPosition = true,
-      boardSize = Board.Dim6x2
+      boardSize = Board.Dim9x2
     ) {
 
   def gameFamily: GameFamily = GameFamily.Togyzkumalak()
@@ -22,22 +22,15 @@ case object Togyzkumalak
 
   // cache this rather than checking with the API everytime
   override def initialFen =
-    format.FEN("4S,4S,4S,4S,4S,4S/4S,4S,4S,4S,4S,4S 0 0 S")
+    format.FEN("9S,9S,9S,9S,9S,9S,9S,9S,9S/9S,9S,9S,9S,9S,9S,9S,9S,9S 0 0 S 1")
 
-  override def specialEnd(situation: Situation) =
-    (situation.board.apiPosition.fen.player1Score > 24) ||
-      (situation.board.apiPosition.fen.player2Score > 24) ||
-      (situation.board.apiPosition.legalMoves.size == 0) ||
-      (situation.board.apiPosition.gameEnd)
+  // TODO: implement
+  override def specialEnd(situation: Situation) = false
 
-  override def specialDraw(situation: Situation) =
-    situation.board.apiPosition.fen.player1Score == situation.board.apiPosition.fen.player2Score
+  // TODO: implement
+  override def specialDraw(situation: Situation) = false
 
-  override def winner(situation: Situation): Option[Player] =
-    if (specialEnd(situation) && !specialDraw(situation)) {
-      if (situation.board.apiPosition.fen.player1Score > situation.board.apiPosition.fen.player2Score)
-        Player.fromName("p1")
-      else Player.fromName("p2")
-    } else None
+  // TODO: implement
+  override def winner(situation: Situation): Option[Player] = None
 
 }

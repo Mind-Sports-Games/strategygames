@@ -42,9 +42,10 @@ abstract class Variant private[variant] (
   def perfId: Int
   def perfIcon: Char
 
-  def initialFen: FEN = format.FEN("4S,4S,4S,4S,4S,4S/4S,4S,4S,4S,4S,4S 0 0 S")
+  def initialFen: FEN = format.FEN("9S,9S,9S,9S,9S,9S,9S,9S,9S/9S,9S,9S,9S,9S,9S,9S,9S,9S 0 0 S 1")
 
-  def pieces: PieceMap = Api.pieceMapFromFen(key, initialFen.value)
+  // TODO implement
+  def pieces: PieceMap = Map()
 
   def startPlayer: Player = P1
 
@@ -54,44 +55,8 @@ abstract class Variant private[variant] (
   // in just atomic, so can leave as true for now
   def isValidPromotion(promotion: Option[PromotableRole]): Boolean = true
 
-  def validMoves(situation: Situation): Map[Pos, List[Move]] =
-    situation.board.apiPosition.legalMoves
-      .map { move =>
-        val numSeeds = situation.board.apiPosition.fen.owareStoneArray(move)
-        (
-          move,
-          Pos(move),
-          Pos(
-            (numSeeds + move + (numSeeds - 1) / 11) % 12
-          ) // dest = seeds + move position + skipping own house
-        )
-      }
-      .map {
-        case (move, Some(orig), Some(dest)) => {
-          val uciMove       = s"${orig.key}${dest.key}"
-          val previousMoves = situation.board.uciMoves
-          val newPosition   = situation.board.apiPosition.makeMovesWithPrevious(List(move), previousMoves)
-          (
-            orig,
-            Move(
-              piece = situation.board.pieces(orig)._1,
-              orig = orig,
-              dest = dest,
-              situationBefore = situation,
-              after = situation.board.copy(
-                pieces = newPosition.pieceMap,
-                uciMoves = situation.board.uciMoves :+ uciMove,
-                position = newPosition.some
-              ),
-              capture = None,
-              promotion = None
-            )
-          )
-        }
-        case (_, orig, dest)                => sys.error(s"Invalid position from uci: ${orig}${dest}")
-      }
-      .groupBy(_._1)
-      .map { case (k, v) => (k, v.toList.map(_._2)) }
+  // TODO: implement
+  def validMoves(situation: Situation): Map[Pos, List[Move]] = Map()
 
   def move(
       situation: Situation,
@@ -114,7 +79,7 @@ abstract class Variant private[variant] (
 
   def materialImbalance(board: Board): Int =
     board.pieces.values.foldLeft(0) { case (acc, (Piece(player, _), count)) =>
-        acc + count * player.fold(1, -1)
+      acc + count * player.fold(1, -1)
     }
 
   // Some variants have an extra effect on the board on a move. For example, in Atomic, some
@@ -128,8 +93,8 @@ abstract class Variant private[variant] (
   @nowarn def finalizeBoard(board: Board, uci: format.Uci, captured: Option[Piece]): Board =
     board
 
-  def valid(board: Board, strict: Boolean): Boolean =
-    Api.validateFEN(Forsyth.exportBoard(board))
+  // TODO: implement
+  def valid(board: Board, strict: Boolean): Boolean = true
 
   val roles: List[Role] = Role.all
 

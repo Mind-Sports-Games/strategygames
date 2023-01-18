@@ -15,19 +15,20 @@ case class Situation(board: Board, player: Player) {
 
   def history = board.history
 
-  private lazy val gameEnd: Boolean = board.apiPosition.gameEnd
+  // TODO: Implement
+  private lazy val gameEnd: Boolean = false
 
-  private lazy val gameResult: GameResult = board.apiPosition.gameResult
+  // private lazy val gameResult: GameResult = board.apiPosition.gameResult
 
-  private lazy val result =
-    if (gameEnd) gameResult
-    else GameResult.Ongoing()
+  // private lazy val result =
+  //  if (gameEnd) gameResult
+  //  else GameResult.Ongoing()
 
   // these dont exist in Oware. Normal ending tracked in VariantEnd
   def checkMate: Boolean = false
   def staleMate: Boolean = false
 
-  private def variantEnd = result == GameResult.VariantEnd() || board.variant.specialEnd(this)
+  private def variantEnd = false || board.variant.specialEnd(this)
 
   def end: Boolean = checkMate || staleMate || variantEnd
 

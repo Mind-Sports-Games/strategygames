@@ -47,15 +47,13 @@ object Replay {
   //       return something that's runtime safe as well.
   def togyzkumalakMove(moveOrDrop: MoveOrDrop) = moveOrDrop match {
     case Left(StratMove.Togyzkumalak(m)) => m
-    case _                          => sys.error("Invalid togyzkumalak move")
+    case _                               => sys.error("Invalid togyzkumalak move")
   }
 
   def replayMove(
       before: Game,
       orig: Pos,
-      dest: Pos,
-      apiPosition: Api.Position,
-      uciMoves: List[String]
+      dest: Pos
   ): Move =
     Move(
       piece = before.situation.board.pieces(orig)._1,
@@ -63,9 +61,8 @@ object Replay {
       dest = dest,
       situationBefore = before.situation,
       after = before.situation.board.copy(
-        pieces = apiPosition.pieceMap,
-        uciMoves = uciMoves,
-        position = apiPosition.some
+        // TODO this line is just copying the whole board!
+        pieces = before.situation.board.pieces
       ),
       capture = None,
       promotion = None
@@ -76,20 +73,14 @@ object Replay {
       initialFen: FEN,
       variant: strategygames.togyzkumalak.variant.Variant
   ): (Game, List[(Game, Move)], Option[String]) = {
-    val init     = makeGame(variant, initialFen.some)
-    var state    = init
-    var uciMoves = init.situation.board.uciMoves
-    var errors   = ""
-
-    def getApiPosition(uciMoves: List[String]) =
-      Api.positionFromVariantAndMoves(variant, uciMoves)
+    val init   = makeGame(variant, initialFen.some)
+    var state  = init
+    var errors = ""
 
     def replayMoveFromUci(orig: Option[Pos], dest: Option[Pos], promotion: String): (Game, Move) =
       (orig, dest) match {
         case (Some(orig), Some(dest)) => {
-          val uciMove = s"${orig.key}${dest.key}${promotion}"
-          uciMoves = uciMoves :+ uciMove
-          val move    = replayMove(state, orig, dest, getApiPosition(uciMoves), uciMoves)
+          val move = replayMove(state, orig, dest)
           state = state(move)
           (state, move)
         }

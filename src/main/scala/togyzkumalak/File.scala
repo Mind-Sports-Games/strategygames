@@ -32,6 +32,9 @@ object File {
   val D = new File(3)
   val E = new File(4)
   val F = new File(5)
+  val G = new File(6)
+  val H = new File(7)
+  val I = new File(8)
 
-  val all = List(A, B, C, D, E, F)
+  val all = List(A, B, C, D, E, F, G, H, I)
 }

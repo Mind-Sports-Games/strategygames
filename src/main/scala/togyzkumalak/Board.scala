@@ -7,9 +7,7 @@ import variant.Variant
 case class Board(
     pieces: PieceMap,
     history: History,
-    variant: Variant,
-    uciMoves: List[String] = List(),
-    position: Option[Api.Position] = None
+    variant: Variant
 ) {
 
   def apply(at: Pos): Option[Piece] = (pieces get at).map(_._1)
@@ -39,11 +37,6 @@ case class Board(
 
   def materialImbalance: Int = variant.materialImbalance(this)
 
-  lazy val apiPosition = position match {
-    case Some(position) => position
-    case None           => Api.positionFromVariantAndMoves(variant, uciMoves)
-  }
-
   override def toString = s"$variant Position after ${history.lastMove}"
 }
 
@@ -72,12 +65,12 @@ object Board {
   }
 
   object BoardSize {
-    val all: List[BoardSize] = List(Dim6x2)
+    val all: List[BoardSize] = List(Dim9x2)
   }
 
-  case object Dim6x2
+  case object Dim9x2
       extends BoardSize(
-        width = 6,
+        width = 9,
         height = 2
       )
 
