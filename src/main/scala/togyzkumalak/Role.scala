@@ -23,15 +23,21 @@ sealed trait Role {
 sealed trait PromotableRole extends Role
 
 case object Stone extends Role {
-  val forsyth = 's'
-  val binaryInt = 1
+  val forsyth   = 's'
+  val binaryInt = 0
+}
+
+case object Tuzdik extends Role {
+  val forsyth   = 't'
+  val binaryInt = 163
 }
 
 object Role {
 
   val all: List[Role] =
     List(
-      Stone
+      Stone,
+      Tuzdik
     )
 
   def defaultRole: Role = Stone
@@ -100,9 +106,9 @@ object Role {
   // unused by lila
   def javaSymbolToInt(s: String): Int =
     s.headOption match {
-      case Some(c) if (c.toInt >= 65 && c.toInt <= 90)  => c.toInt - 64
-      case Some(c) if (c.toInt >= 97 && c.toInt <= 122) => c.toInt - 70
-      case _    => sys.error(s"Could not get Int from java symbol: $s")
+      case Some(c) if c.toInt >= 65 && c.toInt <= 90  => c.toInt - 64
+      case Some(c) if c.toInt >= 97 && c.toInt <= 122 => c.toInt - 70
+      case _                                          => sys.error(s"Could not get Int from java symbol: $s")
     }
 
   def valueOf(r: Role): Option[Int] = r.valueOf

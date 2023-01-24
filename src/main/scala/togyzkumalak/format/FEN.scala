@@ -22,7 +22,9 @@ final case class FEN(value: String) extends AnyVal {
       .map(_.toInt)
       .getOrElse(0)
 
-  def owareStoneArray: Array[Int] =
+  private def width: Int = 9
+
+  def mancalaStoneArray: Array[Int] =
     (
       value.split(' ')(0).split('/')(1).split(',')
         ++
@@ -30,12 +32,34 @@ final case class FEN(value: String) extends AnyVal {
     )
       .map(c =>
         c.toString() match {
-          case x if 1 to 6 map (_.toString) contains x => Array.fill(x.toInt)(0)
-          case _                                       => Array(c.dropRight(1).toInt)
+          case x if 1 to width map (_.toString) contains x => Array.fill(x.toInt)(0)
+          case x if x.length > 1                           => Array(c.dropRight(1).toInt)
+          case _                                           => Array(0)
         }
       )
       .flatten
       .toArray
+
+  private def tuzdikPit(playerFen: Array[String]): Option[Int] = {
+    val pit = playerFen
+      .map(c =>
+        c.toString() match {
+          case x if 1 to width map (_.toString) contains x => Array.fill(x.toInt)(0)
+          case x if x.length > 1                           => Array(0)
+          case _                                           => Array(1)
+        }
+      )
+      .flatten
+      .toArray
+      .indexOf(1)
+    if (pit < 0) None else Some(pit)
+  }
+
+  def tuzdikPits: Map[Player, Option[Int]] =
+    Map(
+      Player.P1 -> tuzdikPit(value.split(' ')(0).split('/')(1).split(',')),
+      Player.P2 -> tuzdikPit(value.split(' ')(0).split('/')(0).split(',').reverse)
+    )
 
   // def ply: Option[Int] =
   //   fullMove map { fm =>

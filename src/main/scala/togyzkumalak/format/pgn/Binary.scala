@@ -16,6 +16,8 @@ object Binary {
   def readMoves(bs: List[Byte])          = Try(Reader moves bs)
   def readMoves(bs: List[Byte], nb: Int) = Try(Reader.moves(bs, nb))
 
+  // this could be removed as there are no Drops in Mancala
+  // similarly gamefamily doesnt need to be stored either but we do
   private object MoveType {
     val Move = 0
     val Drop = 1
@@ -53,8 +55,8 @@ object Binary {
       case _ => ""
     }
 
-    //not needed for togyzkumalak as no drops
-    //def pieceFromInt(gf: GameFamily, b: Int): String =
+    // not needed for togyzkumalak as no drops
+    // def pieceFromInt(gf: GameFamily, b: Int): String =
     //  Role.allByBinaryInt(gf).get(right(b, 7)).get.forsyth.toString
 
     private def headerBit(i: Int) = i >> 7

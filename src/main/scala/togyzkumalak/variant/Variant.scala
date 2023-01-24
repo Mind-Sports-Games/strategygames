@@ -42,10 +42,16 @@ abstract class Variant private[variant] (
   def perfId: Int
   def perfIcon: Char
 
-  def initialFen: FEN = format.FEN("9S,9S,9S,9S,9S,9S,9S,9S,9S/9S,9S,9S,9S,9S,9S,9S,9S,9S 0 0 S 1")
+  def initialFen: FEN = format.FEN("9S,9S,9S,9S,9S,9S,9S,9S,9s/9S,9S,9S,9S,9S,9S,9S,9S,9s 0 0 S 1")
 
-  // TODO implement
-  def pieces: PieceMap = Map()
+  def pieces: PieceMap = initialFen.mancalaStoneArray.zipWithIndex
+    .filterNot { case (s, _) => s == 0 }
+    .map { case (stones, index) =>
+      Pos(index) -> (if (stones == -1) (Tuzdik, 1)
+                     else (Stone, stones))
+    }
+    .map { case (Some(pos), (role, count)) => (pos -> (Piece(pos.player, role), count)) }
+    .toMap
 
   def startPlayer: Player = P1
 

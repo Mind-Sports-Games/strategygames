@@ -1,5 +1,7 @@
 package strategygames.togyzkumalak
 
+import strategygames.Player
+
 import scala.math.{ abs, max, min }
 
 case class Pos private (index: Int) extends AnyVal {
@@ -64,6 +66,8 @@ case class Pos private (index: Int) extends AnyVal {
     else '?'
   }
   def piotrStr    = piotr.toString
+
+  def player: Player = if (index < 9) Player.P1 else Player.P2
 
   def key               = file.toString + rank.toString
   override def toString = key
