@@ -11,7 +11,7 @@ import strategygames.togyzkumalak.variant.Variant
   */
 object Forsyth {
 
-  val initial = FEN("9S,9S,9S,9S,9S,9S,9S,9S,9s/9S,9S,9S,9S,9S,9S,9S,9S,9s 0 0 S 1")
+  val initial = FEN("9S,9S,9S,9S,9S,9S,9S,9S,9S/9S,9S,9S,9S,9S,9S,9S,9S,9S 0 0 S 1")
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
     Some(
