@@ -34,7 +34,7 @@ final case class FEN(value: String) extends AnyVal {
         c.toString() match {
           case x if 1 to width map (_.toString) contains x => Array.fill(x.toInt)(0)
           case x if x.length > 1                           => Array(c.dropRight(1).toInt)
-          case _                                           => Array(0)
+          case _                                           => Array(-1)
         }
       )
       .flatten
