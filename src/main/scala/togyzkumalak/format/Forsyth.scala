@@ -17,8 +17,7 @@ object Forsyth {
     Some(
       Situation(
         Board(
-          // TODO set pieces
-          pieces = Map(),
+          pieces = fen.pieces,
           history = History(),
           variant = variant
         ),
@@ -56,11 +55,33 @@ object Forsyth {
       case SituationPlus(situation, _) => >>(Game(situation, turns = parsed.turns))
     }
 
-  // TODO: set
-  def >>(game: Game): FEN = initial
+  def >>(game: Game): FEN =
+    FEN(s"${exportBoard(game.situation.board)} 0 0 ${game.situation.player.fold('S', 'N')} 1")
 
-  // TODO: set
-  def exportBoard(board: Board): String = initial.value
+  def exportBoard(board: Board): String = {
+    val fen   = new scala.collection.mutable.StringBuilder(70)
+    var empty = 0
+    for (y <- Rank.allReversed) {
+      empty = 0
+      val files = if (y.index == 0) File.all else File.allReversed
+      for (x <- files) {
+        board(x, y) match {
+          case None                 => empty = empty + 1
+          case Some((piece, count)) =>
+            if (empty > 0) {
+              fen.append(s"${empty},")
+              empty = 0
+            }
+            if (piece.role == Role.defaultRole)
+              fen.append(s"${count}${piece.forsyth.toString.toUpperCase()},")
+            else fen.append(s"${piece.forsyth},")
+        }
+      }
+      if (empty > 0) fen.append(s"${empty},")
+      fen.append('/')
+    }
+    fen.toString.replace(",/", "/").dropRight(1)
+  }
 
   def boardAndPlayer(situation: Situation): String =
     boardAndPlayer(situation.board, situation.player)

@@ -22,7 +22,7 @@ case object Togyzkumalak
 
   // cache this rather than checking with the API everytime
   override def initialFen =
-    format.FEN("9S,9S,9S,9S,9S,9S,9S,9S,t/9S,9S,9S,9S,9S,9S,9S,9S,t 0 0 S 1")
+    format.FEN("9S,9S,9S,9S,9S,9S,9S,9S,9S/9S,9S,9S,9S,9S,9S,9S,9S,9S 0 0 S 1")
 
   // TODO: implement
   override def specialEnd(situation: Situation) = false

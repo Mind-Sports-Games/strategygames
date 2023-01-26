@@ -42,16 +42,9 @@ abstract class Variant private[variant] (
   def perfId: Int
   def perfIcon: Char
 
-  def initialFen: FEN = format.FEN("9S,9S,9S,9S,9S,9S,9S,9S,9s/9S,9S,9S,9S,9S,9S,9S,9S,9s 0 0 S 1")
+  def initialFen: FEN = format.FEN("9S,9S,9S,9S,9S,9S,9S,9S,9S/9S,9S,9S,9S,9S,9S,9S,9S,9S 0 0 S 1")
 
-  def pieces: PieceMap = initialFen.mancalaStoneArray.zipWithIndex
-    .filterNot { case (s, _) => s == 0 }
-    .map { case (stones, index) =>
-      Pos(index) -> (if (stones == -1) (Tuzdik, 1)
-                     else (Stone, stones))
-    }
-    .map { case (Some(pos), (role, count)) => (pos -> (Piece(pos.player, role), count)) }
-    .toMap
+  def pieces: PieceMap = initialFen.pieces
 
   def startPlayer: Player = P1
 
@@ -61,8 +54,86 @@ abstract class Variant private[variant] (
   // in just atomic, so can leave as true for now
   def isValidPromotion(promotion: Option[PromotableRole]): Boolean = true
 
-  // TODO: implement
-  def validMoves(situation: Situation): Map[Pos, List[Move]] = Map()
+  private def destFromOrig(pos: Pos, count: Int): Pos =
+    (if (count == 1) Pos((pos.index + 1) % 18)
+     else Pos((pos.index + count - 1)    % 18)) match {
+      case Some(dest) => dest
+      case None       => sys.error(s"Invalid dest from orig(${pos.index}) in togyz move(${count})")
+    }
+
+  private lazy val emptyPieceMap: PieceMap =
+    Pos.all.map(pos => (pos, (Piece(pos.player, Stone), 0))).toMap
+
+  private def pieceMapWithEmpties(pieces: PieceMap): PieceMap = emptyPieceMap.map {
+    case (pos, posInfo) if pieces.get(pos).nonEmpty => (pos -> pieces(pos))
+    case piece                                      => piece
+  }
+
+  private def stonesAfterMove(origStones: Int, thisStones: Int, origIndex: Int, thisIndex: Int): Int = {
+    val thisDiff = if (thisIndex < origIndex) thisIndex + 18 else thisIndex;
+    if (origStones == 1) {
+      if (origIndex == thisIndex) 0
+      else if (thisDiff - origIndex == 1) thisStones + 1
+      else thisStones
+    } else {
+      val remainder = if ((thisDiff - origIndex) < origStones % 18) 1 else 0;
+      thisStones + (thisIndex / 18) + remainder
+    }
+  }
+
+  private def piecesAfterMove(pieces: PieceMap, orig: Pos, dest: Pos): PieceMap =
+    pieceMapWithEmpties(pieces)
+      .map {
+        // potentially refactor the first two cases into stonesAfterMove
+        // case (pos, posInfo) if pieces(orig)._2 == 1 && pos == orig => (pos, (posInfo._1, 0))
+        // case (pos, posInfo)
+        //    if pieces(orig)._2 == 1 && Some(pos) == Pos(
+        //      (orig.index + 1) % 18
+        //    ) && posInfo._1.role != Tuzdik =>
+        //  (pos, (posInfo._1, posInfo._2 + 1))
+        // case (pos, posInfo) if pos == orig               => (pos, (posInfo._1, (((posInfo._2 - 1) / 18) % 18) + 1))
+        case (pos, posInfo) if posInfo._1.role != Tuzdik =>
+          (pos, (posInfo._1, stonesAfterMove(pieces(orig)._2, posInfo._2, orig.index, pos.index)))
+        case (pos, posInfo)                              => (pos, posInfo)
+      }
+      // now remove stones
+      .map {
+        case (pos, posInfo) if pos == dest && orig.player != dest.player && posInfo._2 % 2 == 0 =>
+          (pos, (posInfo._1, 0))
+        case (pos, posInfo) if pos == dest && orig.player != dest.player && posInfo._2 == 3 && pieces.filter {
+              case (pos2, posInfo2) => posInfo2._1.role == Tuzdik && pos2.player == dest.player
+            }.isEmpty =>
+          (pos, (Piece(pos.player, Tuzdik), 1))
+        case (pos, posInfo) => (pos, posInfo)
+      }
+      .filterNot { case (pos, posInfo) => posInfo._2 == 0 }
+      .toMap
+
+  def validMoves(situation: Situation): Map[Pos, List[Move]] =
+    situation.board.pieces
+      .filter { case (pos, posInfo) =>
+        posInfo._1.player == situation.player && posInfo._1.role == Stone
+      }
+      .map {
+        case (pos, posInfo) => {
+          val dest = destFromOrig(pos, posInfo._2);
+          (
+            pos,
+            List(
+              Move(
+                piece = posInfo._1,
+                orig = pos,
+                dest = dest,
+                situationBefore = situation,
+                after = situation.board.copy(
+                  pieces = piecesAfterMove(situation.board.pieces, pos, dest).pp("piecesAfterMove")
+                )
+              )
+            )
+          )
+        }
+      }
+      .toMap
 
   def move(
       situation: Situation,

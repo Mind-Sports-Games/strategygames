@@ -1,6 +1,7 @@
 package strategygames.togyzkumalak.format
 
 import strategygames.Player
+import strategygames.togyzkumalak.{ Piece, PieceMap, Pos, Stone, Tuzdik }
 
 final case class FEN(value: String) extends AnyVal {
 
@@ -39,6 +40,16 @@ final case class FEN(value: String) extends AnyVal {
       )
       .flatten
       .toArray
+
+  def pieces: PieceMap =
+    mancalaStoneArray.zipWithIndex
+      .filterNot { case (s, _) => s == 0 }
+      .map { case (stones, index) =>
+        Pos(index) -> (if (stones == -1) (Tuzdik, 1)
+                       else (Stone, stones))
+      }
+      .map { case (Some(pos), (role, count)) => (pos -> (Piece(pos.player, role), count)) }
+      .toMap
 
   private def tuzdikPit(playerFen: Array[String]): Option[Int] = {
     val pit = playerFen
