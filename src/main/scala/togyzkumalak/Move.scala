@@ -10,8 +10,8 @@ case class Move(
     dest: Pos,
     situationBefore: Situation,
     after: Board,
-    capture: Option[Pos],
-    promotion: Option[PromotableRole],
+    capture: Option[Pos] = None,
+    promotion: Option[PromotableRole] = None,
     metrics: MoveMetrics = MoveMetrics()
 ) {
   def before = situationBefore.board

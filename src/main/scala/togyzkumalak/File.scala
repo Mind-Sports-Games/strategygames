@@ -20,7 +20,7 @@ object File {
     else None
 
   @inline def of(pos: Pos): File = {
-    val rank: Int = if (pos.index > 5) 1 else 0
+    val rank: Int = if (pos.index > 8) 1 else 0
     new File(pos.index + ((pos.index - all.size) * -2 - 1) * rank)
   }
 
