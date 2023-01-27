@@ -341,3 +341,90 @@ object GameFamily {
   }
 
 }
+
+sealed abstract class GameGroup {
+  def id: Int
+  def name: String
+  def key: String
+  def variants: List[Variant]
+
+  override def toString = s"GameGroup($name)"
+}
+
+object GameGroup {
+
+  final case class Chess() extends GameGroup {
+    def id       = 0
+    def name     = "Chess"
+    def key      = "chess"
+    def variants = Variant.all(GameLogic.Chess()).filter(_.gameFamily.name == this.name)
+  }
+
+  final case class Draughts() extends GameGroup {
+    def id       = 1
+    def name     = "Draughts"
+    def key      = "draughts"
+    def variants = Variant.all(GameLogic.Draughts())
+
+  }
+
+  final case class LinesOfAction() extends GameGroup {
+    def id       = 2
+    def name     = "Lines of Action"
+    def key      = "loa"
+    def variants = Variant.all(GameLogic.Chess()).filter(_.gameFamily == GameFamily.LinesOfAction())
+  }
+
+  final case class FairySF() extends GameGroup {
+    def id       = 3
+    def name     = "Fairy Stockfish"
+    def key      = "fairysf"
+    def variants = Variant.all(GameLogic.FairySF())
+  }
+
+  final case class Shogi() extends GameGroup {
+    def id       = 4
+    def name     = "Shogi"
+    def key      = "shogi"
+    def variants = Variant.all(GameLogic.FairySF()).filter(_.gameFamily.name == this.name)
+  }
+
+  final case class Xiangqi() extends GameGroup {
+    def id       = 5
+    def name     = "Xiangqi"
+    def key      = "xiangqi"
+    def variants = Variant.all(GameLogic.FairySF()).filter(_.gameFamily.name == this.name)
+  }
+
+  final case class Flipello() extends GameGroup {
+    def id       = 6
+    def name     = "Flipello"
+    def key      = "flipello"
+    def variants = Variant.all(GameLogic.FairySF()).filter(_.gameFamily.name == this.name)
+  }
+
+  final case class Mancala() extends GameGroup {
+    def id       = 7
+    def name     = "Mancala"
+    def key      = "mancala"
+    def variants = Variant.all(GameLogic.Togyzkumalak()) ::: Variant.all(GameLogic.Samurai())
+  }
+
+  def all: List[GameGroup] =
+    List(Chess(), Draughts(), LinesOfAction(), FairySF(), Shogi(), Xiangqi(), Flipello(), Mancala())
+
+  def medley: List[GameGroup] =
+    List(Chess(), Draughts(), LinesOfAction(), Shogi(), Xiangqi(), Flipello(), Mancala())
+
+  // TODO: I'm sure there is a better scala way of doing this
+  def apply(id: Int): GameGroup = id match {
+    case 1 => Draughts()
+    case 2 => LinesOfAction()
+    case 3 => FairySF()
+    case 4 => Shogi()
+    case 5 => Xiangqi()
+    case 6 => Flipello()
+    case 7 => Mancala()
+    case _ => Chess()
+  }
+}

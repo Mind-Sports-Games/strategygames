@@ -17,34 +17,34 @@ object Reader {
   }
 
   object Result {
-    case class ChessComplete(replay: chess.Replay)                          extends Result {
+    case class ChessComplete(replay: chess.Replay)                                  extends Result {
       def valid = Validated.valid(Replay.Chess(replay))
     }
-    case class ChessIncomplete(replay: chess.Replay, failure: String)       extends Result {
+    case class ChessIncomplete(replay: chess.Replay, failure: String)               extends Result {
       def valid = Validated.invalid(failure)
     }
-    case class DraughtsComplete(replay: draughts.Replay)                    extends Result {
+    case class DraughtsComplete(replay: draughts.Replay)                            extends Result {
       def valid = Validated.valid(Replay.Draughts(replay))
     }
-    case class DraughtsIncomplete(replay: draughts.Replay, failure: String) extends Result {
+    case class DraughtsIncomplete(replay: draughts.Replay, failure: String)         extends Result {
       def valid = Validated.invalid(failure)
     }
-    case class FairySFComplete(replay: fairysf.Replay)                      extends Result {
+    case class FairySFComplete(replay: fairysf.Replay)                              extends Result {
       def valid = Validated.valid(Replay.FairySF(replay))
     }
-    case class FairySFIncomplete(replay: fairysf.Replay, failure: String)   extends Result {
+    case class FairySFIncomplete(replay: fairysf.Replay, failure: String)           extends Result {
       def valid = Validated.invalid(failure)
     }
-    case class SamuraiComplete(replay: samurai.Replay)                      extends Result {
+    case class SamuraiComplete(replay: samurai.Replay)                              extends Result {
       def valid = Validated.valid(Replay.Samurai(replay))
     }
-    case class SamuraiIncomplete(replay: samurai.Replay, failure: String)   extends Result {
+    case class SamuraiIncomplete(replay: samurai.Replay, failure: String)           extends Result {
       def valid = Validated.invalid(failure)
     }
-    case class TogyzkumalakComplete(replay: togyzkumalak.Replay)                      extends Result {
+    case class TogyzkumalakComplete(replay: togyzkumalak.Replay)                    extends Result {
       def valid = Validated.valid(Replay.Togyzkumalak(replay))
     }
-    case class TogyzkumalakIncomplete(replay: togyzkumalak.Replay, failure: String)   extends Result {
+    case class TogyzkumalakIncomplete(replay: togyzkumalak.Replay, failure: String) extends Result {
       def valid = Validated.invalid(failure)
     }
 
@@ -70,7 +70,8 @@ object Reader {
 
     def wrap(result: TogyzkumalakReader.Result) = result match {
       case TogyzkumalakReader.Result.Complete(replay)            => Result.TogyzkumalakComplete(replay)
-      case TogyzkumalakReader.Result.Incomplete(replay, failure) => Result.TogyzkumalakIncomplete(replay, failure)
+      case TogyzkumalakReader.Result.Incomplete(replay, failure) =>
+        Result.TogyzkumalakIncomplete(replay, failure)
     }
   }
 
@@ -82,11 +83,11 @@ object Reader {
       iteratedCapts: Boolean = false
   ): Validated[String, Result] =
     lib match {
-      case GameLogic.Chess()    => ChessReader.fullWithSans(pgn, op, tags).map(Result.wrap)
-      case GameLogic.Draughts() => DraughtsReader.fullWithSans(pgn, op, tags, iteratedCapts).map(Result.wrap)
-      case GameLogic.FairySF()  => FairySFReader.fullWithSans(pgn, op, tags).map(Result.wrap)
-      case GameLogic.Samurai()  => SamuraiReader.fullWithSans(pgn, op, tags).map(Result.wrap)
-      case GameLogic.Togyzkumalak()  => TogyzkumalakReader.fullWithSans(pgn, op, tags).map(Result.wrap)
+      case GameLogic.Chess()        => ChessReader.fullWithSans(pgn, op, tags).map(Result.wrap)
+      case GameLogic.Draughts()     => DraughtsReader.fullWithSans(pgn, op, tags, iteratedCapts).map(Result.wrap)
+      case GameLogic.FairySF()      => FairySFReader.fullWithSans(pgn, op, tags).map(Result.wrap)
+      case GameLogic.Samurai()      => SamuraiReader.fullWithSans(pgn, op, tags).map(Result.wrap)
+      case GameLogic.Togyzkumalak() => TogyzkumalakReader.fullWithSans(pgn, op, tags).map(Result.wrap)
     }
 
   def movesWithSans(
@@ -97,16 +98,16 @@ object Reader {
       iteratedCapts: Boolean = false
   ): Validated[String, Result] =
     lib match {
-      case GameLogic.Chess()    =>
+      case GameLogic.Chess()        =>
         ChessReader.movesWithSans(moveStrs, op, tags).map(Result.wrap)
-      case GameLogic.Draughts() =>
+      case GameLogic.Draughts()     =>
         DraughtsReader.movesWithSans(moveStrs, op, tags, iteratedCapts).map(Result.wrap)
-      case GameLogic.FairySF()  =>
+      case GameLogic.FairySF()      =>
         // FairySFReader.movesWithSans(moveStrs, op, tags).map(Result.wrap)
         sys.error("Sans not implemented for fairysf")
-      case GameLogic.Samurai()  =>
+      case GameLogic.Samurai()      =>
         sys.error("Sans not implemented for samurai")
-      case GameLogic.Togyzkumalak()  =>
+      case GameLogic.Togyzkumalak() =>
         sys.error("Sans not implemented for togyzkumalak")
     }
 
@@ -117,13 +118,13 @@ object Reader {
       tags: Tags
   ): Validated[String, Result] =
     lib match {
-      case GameLogic.Chess()    => sys.error("movesWithPgns not implemented for chess")
-      case GameLogic.Draughts() => sys.error("movesWithPgns not implemented for draughts")
-      case GameLogic.FairySF()  =>
+      case GameLogic.Chess()        => sys.error("movesWithPgns not implemented for chess")
+      case GameLogic.Draughts()     => sys.error("movesWithPgns not implemented for draughts")
+      case GameLogic.FairySF()      =>
         FairySFReader.movesWithPgns(moveStrs, op, tags).map(Result.wrap)
-      case GameLogic.Samurai()  =>
+      case GameLogic.Samurai()      =>
         SamuraiReader.movesWithPgns(moveStrs, op, tags).map(Result.wrap)
-      case GameLogic.Togyzkumalak()  =>
+      case GameLogic.Togyzkumalak() =>
         TogyzkumalakReader.movesWithPgns(moveStrs, op, tags).map(Result.wrap)
     }
 

@@ -19,10 +19,10 @@ case object Portuguese
   def perfId: Int    = 125
   def perfIcon: Char = ''
 
-  override def fenVariant       = true
-  def pieces                    = Russian.pieces
-  def initialFen                = Russian.initialFen
-  def startingPosition          = Russian.startingPosition
+  override def fenVariant = true
+  def pieces              = Russian.pieces
+  def initialFen          = Russian.initialFen
+  def startingPosition    = Russian.startingPosition
 
   // captureDirs is now used for kings within portuguese draughts
   def captureDirs = Standard.captureDirs

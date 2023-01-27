@@ -66,7 +66,7 @@ object History {
   implicit def draughtsHistory(h: draughts.DraughtsHistory) = Draughts(h)
   implicit def fairysfHistory(h: fairysf.History)           = FairySF(h)
   implicit def samuraiHistory(h: samurai.History)           = Samurai(h)
-  implicit def togyzkumalakHistory(h: togyzkumalak.History)           = Togyzkumalak(h)
+  implicit def togyzkumalakHistory(h: togyzkumalak.History) = Togyzkumalak(h)
 
   // lila
   def apply(
@@ -80,7 +80,7 @@ object History {
       kingMoves: draughts.KingMoves = draughts.KingMoves(),
       halfMoveClock: Int = 0
   ): History = lib match {
-    case GameLogic.Draughts() =>
+    case GameLogic.Draughts()     =>
       Draughts(
         draughts.DraughtsHistory(
           lastMove = lastMove.map(lm => lm.toDraughts),
@@ -93,7 +93,7 @@ object History {
           kingMoves = kingMoves
         )
       )
-    case GameLogic.Chess()    =>
+    case GameLogic.Chess()        =>
       Chess(
         chess.History(
           lastMove = lastMove.map(lm => lm.toChess),
@@ -104,7 +104,7 @@ object History {
           halfMoveClock = halfMoveClock
         )
       )
-    case GameLogic.FairySF()  =>
+    case GameLogic.FairySF()      =>
       FairySF(
         fairysf.History(
           lastMove = lastMove.map(lm => lm.toFairySF),
@@ -112,7 +112,7 @@ object History {
           halfMoveClock = halfMoveClock
         )
       )
-    case GameLogic.Samurai()  =>
+    case GameLogic.Samurai()      =>
       Samurai(
         samurai.History(
           lastMove = lastMove.map(lm => lm.toSamurai),
@@ -120,7 +120,7 @@ object History {
           halfMoveClock = halfMoveClock
         )
       )
-    case GameLogic.Togyzkumalak()  =>
+    case GameLogic.Togyzkumalak() =>
       Togyzkumalak(
         togyzkumalak.History(
           lastMove = lastMove.map(lm => lm.toTogyzkumalak),
@@ -128,7 +128,7 @@ object History {
           halfMoveClock = halfMoveClock
         )
       )
-    case _                    => sys.error("Mismatched gamelogic types 1")
+    case _                        => sys.error("Mismatched gamelogic types 1")
   }
 
 }

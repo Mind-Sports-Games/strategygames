@@ -18,10 +18,10 @@ case object English
   def perfId: Int    = 126
   def perfIcon: Char = ''
 
-  override def fenVariant       = true
-  def pieces                    = Russian.pieces
-  def initialFen                = Russian.initialFen
-  def startingPosition          = Russian.startingPosition
+  override def fenVariant = true
+  def pieces              = Russian.pieces
+  def initialFen          = Russian.initialFen
+  def startingPosition    = Russian.startingPosition
 
   override val openingTables = List(OpeningTable.tableACF11ManBallot)
 

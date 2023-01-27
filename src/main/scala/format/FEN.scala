@@ -32,11 +32,11 @@ object FEN {
 
   final case class Chess(f: strategygames.chess.format.FEN) extends FEN(f.value) {
 
-    def toChess    = f
-    def toDraughts = sys.error("Can't convert chess to draughts")
-    def toFairySF  = sys.error("Can't convert chess to fairysf")
-    def toSamurai  = sys.error("Can't convert chess to samurai")
-    def toTogyzkumalak  = sys.error("Can't convert chess to togyzkumalak")
+    def toChess        = f
+    def toDraughts     = sys.error("Can't convert chess to draughts")
+    def toFairySF      = sys.error("Can't convert chess to fairysf")
+    def toSamurai      = sys.error("Can't convert chess to samurai")
+    def toTogyzkumalak = sys.error("Can't convert chess to togyzkumalak")
 
     def fullMove: Option[Int] = f.fullMove
 
@@ -55,11 +55,11 @@ object FEN {
 
   final case class Draughts(f: strategygames.draughts.format.FEN) extends FEN(f.value) {
 
-    def toChess    = sys.error("Can't convert draughts to chess")
-    def toDraughts = f
-    def toFairySF  = sys.error("Can't convert draughts to fairysf")
-    def toSamurai  = sys.error("Can't convert draughts to samurai")
-    def toTogyzkumalak  = sys.error("Can't convert draughts to togyzkumalak")
+    def toChess        = sys.error("Can't convert draughts to chess")
+    def toDraughts     = f
+    def toFairySF      = sys.error("Can't convert draughts to fairysf")
+    def toSamurai      = sys.error("Can't convert draughts to samurai")
+    def toTogyzkumalak = sys.error("Can't convert draughts to togyzkumalak")
 
     // need to consider an implementation for draughts?
     def fullMove: Option[Int] = None
@@ -80,11 +80,11 @@ object FEN {
 
   final case class FairySF(f: strategygames.fairysf.format.FEN) extends FEN(f.value) {
 
-    def toChess    = sys.error("Can't convert fairysf to chess")
-    def toDraughts = sys.error("Can't convert fairysf to draughts")
-    def toFairySF  = f
-    def toSamurai  = sys.error("Can't convert fairysf to samurai")
-    def toTogyzkumalak  = sys.error("Can't convert fairysf to togyzkumalak")
+    def toChess        = sys.error("Can't convert fairysf to chess")
+    def toDraughts     = sys.error("Can't convert fairysf to draughts")
+    def toFairySF      = f
+    def toSamurai      = sys.error("Can't convert fairysf to samurai")
+    def toTogyzkumalak = sys.error("Can't convert fairysf to togyzkumalak")
 
     def fullMove: Option[Int] = f.fullMove
 
@@ -103,11 +103,11 @@ object FEN {
 
   final case class Samurai(f: strategygames.samurai.format.FEN) extends FEN(f.value) {
 
-    def toChess    = sys.error("Can't convert samurai to chess")
-    def toDraughts = sys.error("Can't convert samurai to draughts")
-    def toFairySF  = sys.error("Can't convert samurai to fairysf")
-    def toSamurai  = f
-    def toTogyzkumalak  = sys.error("Can't convert samurai to togyzkumalak")
+    def toChess        = sys.error("Can't convert samurai to chess")
+    def toDraughts     = sys.error("Can't convert samurai to draughts")
+    def toFairySF      = sys.error("Can't convert samurai to fairysf")
+    def toSamurai      = f
+    def toTogyzkumalak = sys.error("Can't convert samurai to togyzkumalak")
 
     def fullMove: Option[Int] = sys.error("There is no fullMove in samurai")
 
@@ -126,11 +126,11 @@ object FEN {
 
   final case class Togyzkumalak(f: strategygames.togyzkumalak.format.FEN) extends FEN(f.value) {
 
-    def toChess    = sys.error("Can't convert togyzkumalak to chess")
-    def toDraughts = sys.error("Can't convert togyzkumalak to draughts")
-    def toFairySF  = sys.error("Can't convert togyzkumalak to fairysf")
-    def toSamurai  = sys.error("Can't convert togyzkumalak to samurai")
-    def toTogyzkumalak  = f
+    def toChess        = sys.error("Can't convert togyzkumalak to chess")
+    def toDraughts     = sys.error("Can't convert togyzkumalak to draughts")
+    def toFairySF      = sys.error("Can't convert togyzkumalak to fairysf")
+    def toSamurai      = sys.error("Can't convert togyzkumalak to samurai")
+    def toTogyzkumalak = f
 
     def fullMove: Option[Int] = sys.error("There is no fullMove in togyzkumalak")
 
@@ -147,28 +147,29 @@ object FEN {
 
   }
 
-  def wrap(fen: strategygames.chess.format.FEN)    = Chess(fen)
-  def wrap(fen: strategygames.draughts.format.FEN) = Draughts(fen)
-  def wrap(fen: strategygames.fairysf.format.FEN)  = FairySF(fen)
-  def wrap(fen: strategygames.samurai.format.FEN)  = Samurai(fen)
-  def wrap(fen: strategygames.togyzkumalak.format.FEN)  = Togyzkumalak(fen)
+  def wrap(fen: strategygames.chess.format.FEN)        = Chess(fen)
+  def wrap(fen: strategygames.draughts.format.FEN)     = Draughts(fen)
+  def wrap(fen: strategygames.fairysf.format.FEN)      = FairySF(fen)
+  def wrap(fen: strategygames.samurai.format.FEN)      = Samurai(fen)
+  def wrap(fen: strategygames.togyzkumalak.format.FEN) = Togyzkumalak(fen)
 
   def apply(lib: GameLogic, value: String): FEN = lib match {
-    case GameLogic.Draughts() => FEN.Draughts(strategygames.draughts.format.FEN(value))
-    case GameLogic.Chess()    => FEN.Chess(strategygames.chess.format.FEN(value))
-    case GameLogic.FairySF()  => FEN.FairySF(strategygames.fairysf.format.FEN(value))
-    case GameLogic.Samurai()  => FEN.Samurai(strategygames.samurai.format.FEN(value))
-    case GameLogic.Togyzkumalak()  => FEN.Togyzkumalak(strategygames.togyzkumalak.format.FEN(value))
+    case GameLogic.Draughts()     => FEN.Draughts(strategygames.draughts.format.FEN(value))
+    case GameLogic.Chess()        => FEN.Chess(strategygames.chess.format.FEN(value))
+    case GameLogic.FairySF()      => FEN.FairySF(strategygames.fairysf.format.FEN(value))
+    case GameLogic.Samurai()      => FEN.Samurai(strategygames.samurai.format.FEN(value))
+    case GameLogic.Togyzkumalak() => FEN.Togyzkumalak(strategygames.togyzkumalak.format.FEN(value))
   }
 
   def apply(v: Variant, value: String): FEN = apply(v.gameLogic, value)
 
   def clean(lib: GameLogic, source: String): FEN = lib match {
-    case GameLogic.Draughts() => Draughts(strategygames.draughts.format.FEN(source.replace("_", " ").trim))
-    case GameLogic.Chess()    => Chess(strategygames.chess.format.FEN(source.replace("_", " ").trim))
-    case GameLogic.FairySF()  => FairySF(strategygames.fairysf.format.FEN(source.replace("_", " ").trim))
-    case GameLogic.Samurai()  => Samurai(strategygames.samurai.format.FEN(source.replace("_", " ").trim))
-    case GameLogic.Togyzkumalak()  => Togyzkumalak(strategygames.togyzkumalak.format.FEN(source.replace("_", " ").trim))
+    case GameLogic.Draughts()     => Draughts(strategygames.draughts.format.FEN(source.replace("_", " ").trim))
+    case GameLogic.Chess()        => Chess(strategygames.chess.format.FEN(source.replace("_", " ").trim))
+    case GameLogic.FairySF()      => FairySF(strategygames.fairysf.format.FEN(source.replace("_", " ").trim))
+    case GameLogic.Samurai()      => Samurai(strategygames.samurai.format.FEN(source.replace("_", " ").trim))
+    case GameLogic.Togyzkumalak() =>
+      Togyzkumalak(strategygames.togyzkumalak.format.FEN(source.replace("_", " ").trim))
   }
 
 }

@@ -89,18 +89,19 @@ case class Tags(value: List[Tag]) extends AnyVal {
     case _                       => None
   }
 
-  def chessFen: Option[chess.format.FEN]       = apply(_.FEN).map(strategygames.chess.format.FEN.apply)
-  def draughtsFen: Option[draughts.format.FEN] = apply(_.FEN).map(strategygames.draughts.format.FEN.apply)
-  def fairysfFen: Option[fairysf.format.FEN]   = apply(_.FEN).map(strategygames.fairysf.format.FEN.apply)
-  def samuraiFen: Option[samurai.format.FEN]   = apply(_.FEN).map(strategygames.samurai.format.FEN.apply)
-  def togyzkumalakFen: Option[togyzkumalak.format.FEN]   = apply(_.FEN).map(strategygames.togyzkumalak.format.FEN.apply)
+  def chessFen: Option[chess.format.FEN]               = apply(_.FEN).map(strategygames.chess.format.FEN.apply)
+  def draughtsFen: Option[draughts.format.FEN]         = apply(_.FEN).map(strategygames.draughts.format.FEN.apply)
+  def fairysfFen: Option[fairysf.format.FEN]           = apply(_.FEN).map(strategygames.fairysf.format.FEN.apply)
+  def samuraiFen: Option[samurai.format.FEN]           = apply(_.FEN).map(strategygames.samurai.format.FEN.apply)
+  def togyzkumalakFen: Option[togyzkumalak.format.FEN] =
+    apply(_.FEN).map(strategygames.togyzkumalak.format.FEN.apply)
 
   def fen: Option[format.FEN] =
     variant match {
       case Some(strategygames.variant.Variant.Draughts(_))     => draughtsFen.map(format.FEN.Draughts)
       case Some(strategygames.variant.Variant.FairySF(_))      => fairysfFen.map(format.FEN.FairySF)
       case Some(strategygames.variant.Variant.Samurai(_))      => samuraiFen.map(format.FEN.Samurai)
-      case Some(strategygames.variant.Variant.Togyzkumalak(_))      => togyzkumalakFen.map(format.FEN.Togyzkumalak)
+      case Some(strategygames.variant.Variant.Togyzkumalak(_)) => togyzkumalakFen.map(format.FEN.Togyzkumalak)
       case Some(strategygames.variant.Variant.Chess(_)) | None => chessFen.map(format.FEN.Chess)
     }
 

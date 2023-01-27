@@ -50,7 +50,8 @@ object Hash {
     val actorMasks: Array[Long]    = zc.actorMasks
   }
 
-  final case class TogyzkumalakZobristConstants(zc: togyzkumalak.Hash.ZobristConstants) extends ZobristConstants {
+  final case class TogyzkumalakZobristConstants(zc: togyzkumalak.Hash.ZobristConstants)
+      extends ZobristConstants {
     def hexToLong(s: String): Long = zc.hexToLong(s)
     val p1TurnMask: Long           = zc.p1TurnMask
     val actorMasks: Array[Long]    = zc.actorMasks
@@ -59,19 +60,19 @@ object Hash {
   // The following masks are compatible with the Polyglot
   // opening book format.
   private def polyglotTable(lib: GameLogic): ZobristConstants = lib match {
-    case GameLogic.Draughts() => DraughtsZobristConstants(new draughts.Hash.ZobristConstants(0))
-    case GameLogic.Chess()    => ChessZobristConstants(new chess.Hash.ZobristConstants(0))
-    case GameLogic.FairySF()  => FairySFZobristConstants(new fairysf.Hash.ZobristConstants(0))
-    case GameLogic.Samurai()  => SamuraiZobristConstants(new samurai.Hash.ZobristConstants(0))
-    case GameLogic.Togyzkumalak()  => TogyzkumalakZobristConstants(new togyzkumalak.Hash.ZobristConstants(0))
+    case GameLogic.Draughts()     => DraughtsZobristConstants(new draughts.Hash.ZobristConstants(0))
+    case GameLogic.Chess()        => ChessZobristConstants(new chess.Hash.ZobristConstants(0))
+    case GameLogic.FairySF()      => FairySFZobristConstants(new fairysf.Hash.ZobristConstants(0))
+    case GameLogic.Samurai()      => SamuraiZobristConstants(new samurai.Hash.ZobristConstants(0))
+    case GameLogic.Togyzkumalak() => TogyzkumalakZobristConstants(new togyzkumalak.Hash.ZobristConstants(0))
   }
 
   private def randomTable(lib: GameLogic): ZobristConstants = lib match {
-    case GameLogic.Draughts() => DraughtsZobristConstants(new draughts.Hash.ZobristConstants(16))
-    case GameLogic.Chess()    => ChessZobristConstants(new chess.Hash.ZobristConstants(16))
-    case GameLogic.FairySF()  => FairySFZobristConstants(new fairysf.Hash.ZobristConstants(16))
-    case GameLogic.Samurai()  => SamuraiZobristConstants(new samurai.Hash.ZobristConstants(16))
-    case GameLogic.Togyzkumalak()  => TogyzkumalakZobristConstants(new togyzkumalak.Hash.ZobristConstants(16))
+    case GameLogic.Draughts()     => DraughtsZobristConstants(new draughts.Hash.ZobristConstants(16))
+    case GameLogic.Chess()        => ChessZobristConstants(new chess.Hash.ZobristConstants(16))
+    case GameLogic.FairySF()      => FairySFZobristConstants(new fairysf.Hash.ZobristConstants(16))
+    case GameLogic.Samurai()      => SamuraiZobristConstants(new samurai.Hash.ZobristConstants(16))
+    case GameLogic.Togyzkumalak() => TogyzkumalakZobristConstants(new togyzkumalak.Hash.ZobristConstants(16))
   }
 
   private def get(lib: GameLogic, situation: Situation, table: ZobristConstants): Long =
@@ -84,7 +85,11 @@ object Hash {
         fairysf.Hash.get(situation, table)
       case (GameLogic.Samurai(), Situation.Samurai(situation), SamuraiZobristConstants(table))    =>
         samurai.Hash.get(situation, table)
-      case (GameLogic.Togyzkumalak(), Situation.Togyzkumalak(situation), TogyzkumalakZobristConstants(table))    =>
+      case (
+            GameLogic.Togyzkumalak(),
+            Situation.Togyzkumalak(situation),
+            TogyzkumalakZobristConstants(table)
+          ) =>
         togyzkumalak.Hash.get(situation, table)
     }
 

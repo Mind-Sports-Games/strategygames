@@ -127,7 +127,9 @@ abstract class Variant private[variant] (
                 situationBefore = situation,
                 after = situation.board.copy(
                   pieces = piecesAfterMove(situation.board.pieces, pos, dest).pp("piecesAfterMove")
-                )
+                ),
+                capture = None,
+                promotion = None
               )
             )
           )

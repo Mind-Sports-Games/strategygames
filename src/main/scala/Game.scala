@@ -34,7 +34,7 @@ abstract class Game(
       partialCaptures: Boolean = false
   ): Validated[String, (Game, MoveOrDrop)] =
     uci match {
-      case Uci.ChessMove(uci)    =>
+      case Uci.ChessMove(uci)        =>
         apply(
           Pos.Chess(uci.orig),
           Pos.Chess(uci.dest),
@@ -43,7 +43,7 @@ abstract class Game(
         ) map { case (ncg, move) =>
           ncg -> Left(move)
         }
-      case Uci.DraughtsMove(uci) =>
+      case Uci.DraughtsMove(uci)     =>
         apply(
           Pos.Draughts(uci.orig),
           Pos.Draughts(uci.dest),
@@ -55,7 +55,7 @@ abstract class Game(
         ) map { case (ncg, move) =>
           ncg -> Left(move)
         }
-      case Uci.FairySFMove(uci)  =>
+      case Uci.FairySFMove(uci)      =>
         apply(
           Pos.FairySF(uci.orig),
           Pos.FairySF(uci.dest),
@@ -64,7 +64,7 @@ abstract class Game(
         ) map { case (ncg, move) =>
           ncg -> Left(move)
         }
-      case Uci.SamuraiMove(uci)  =>
+      case Uci.SamuraiMove(uci)      =>
         apply(
           Pos.Samurai(uci.orig),
           Pos.Samurai(uci.dest),
@@ -73,7 +73,7 @@ abstract class Game(
         ) map { case (ncg, move) =>
           ncg -> Left(move)
         }
-      case Uci.TogyzkumalakMove(uci)  =>
+      case Uci.TogyzkumalakMove(uci) =>
         apply(
           Pos.Togyzkumalak(uci.orig),
           Pos.Togyzkumalak(uci.dest),
@@ -82,7 +82,7 @@ abstract class Game(
         ) map { case (ncg, move) =>
           ncg -> Left(move)
         }
-      case Uci.ChessDrop(uci)    =>
+      case Uci.ChessDrop(uci)        =>
         drop(
           Role.ChessRole(uci.role),
           Pos.Chess(uci.pos),
@@ -90,7 +90,7 @@ abstract class Game(
         ) map { case (ncg, drop) =>
           ncg -> Right(drop)
         }
-      case Uci.FairySFDrop(uci)  =>
+      case Uci.FairySFDrop(uci)      =>
         drop(
           Role.FairySFRole(uci.role),
           Pos.FairySF(uci.pos),
@@ -219,7 +219,7 @@ object Game {
     def toDraughts: draughts.DraughtsGame = sys.error("Can't turn a chess game into a draughts game")
     def toFairySF: fairysf.Game           = sys.error("Can't turn a chess game into a fairysf game")
     def toSamurai: samurai.Game           = sys.error("Can't turn a chess game into a samurai game")
-    def toTogyzkumalak: togyzkumalak.Game           = sys.error("Can't turn a chess game into a togyzkumalak game")
+    def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a chess game into a togyzkumalak game")
 
   }
 
@@ -315,7 +315,7 @@ object Game {
     def toDraughts: draughts.DraughtsGame = g
     def toFairySF: fairysf.Game           = sys.error("Can't turn a draughts game into a fairysf game")
     def toSamurai: samurai.Game           = sys.error("Can't turn a draughts game into a samurai game")
-    def toTogyzkumalak: togyzkumalak.Game           = sys.error("Can't turn a draughts game into a togyzkumalak game")
+    def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a draughts game into a togyzkumalak game")
 
   }
 
@@ -402,7 +402,7 @@ object Game {
     def toChess: chess.Game               = sys.error("Can't turn a fairysf game into a chess game")
     def toDraughts: draughts.DraughtsGame = sys.error("Can't turn a fairysf game into a draughts game")
     def toSamurai: samurai.Game           = sys.error("Can't turn a fairysf game into a samurai game")
-    def toTogyzkumalak: togyzkumalak.Game           = sys.error("Can't turn a fairysf game into a togyzkumalak game")
+    def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a fairysf game into a togyzkumalak game")
 
   }
 
@@ -496,12 +496,12 @@ object Game {
           .toEither
           .map(t => (Togyzkumalak(t._1), Move.Togyzkumalak(t._2)))
           .toValidated
-      case _                                      => sys.error("Not passed Togyzkumalak objects")
+      case _                                                => sys.error("Not passed Togyzkumalak objects")
     }
 
     private def apply(move: Move): Game = move match {
       case (Move.Togyzkumalak(move)) => Togyzkumalak(g.apply(move))
-      case _                    => sys.error("Not passed Togyzkumalak objects")
+      case _                         => sys.error("Not passed Togyzkumalak objects")
     }
 
     def apply(moveOrDrop: MoveOrDrop): Game =
@@ -523,11 +523,11 @@ object Game {
 
     def copy(situation: Situation, turns: Int): Game = situation match {
       case Situation.Togyzkumalak(situation) => Togyzkumalak(g.copy(situation = situation, turns = turns))
-      case _                            => sys.error("Unable to copy togyzkumalak game with non-togyzkumalak arguments")
+      case _                                 => sys.error("Unable to copy togyzkumalak game with non-togyzkumalak arguments")
     }
     def copy(situation: Situation): Game             = situation match {
       case Situation.Togyzkumalak(situation) => Togyzkumalak(g.copy(situation = situation))
-      case _                            => sys.error("Unable to copy togyzkumalak game with non-togyzkumalak arguments")
+      case _                                 => sys.error("Unable to copy togyzkumalak game with non-togyzkumalak arguments")
     }
 
     def withTurns(t: Int): Game = Togyzkumalak(g.withTurns(t))
@@ -536,7 +536,7 @@ object Game {
     def toChess: chess.Game               = sys.error("Can't turn a togyzkumalak game into a chess game")
     def toDraughts: draughts.DraughtsGame = sys.error("Can't turn a togyzkumalak game into a draughts game")
     def toSamurai: samurai.Game           = sys.error("Can't turn a togyzkumalak game into a samurai game")
-    def toTogyzkumalak: togyzkumalak.Game           = g
+    def toTogyzkumalak: togyzkumalak.Game = g
 
   }
 
@@ -548,46 +548,47 @@ object Game {
       turns: Int = 0, // plies
       startedAtTurn: Int = 0
   ): Game = (lib, situation) match {
-    case (GameLogic.Draughts(), Situation.Draughts(situation)) =>
+    case (GameLogic.Draughts(), Situation.Draughts(situation))         =>
       Draughts(draughts.DraughtsGame(situation, pgnMoves, clock, turns, startedAtTurn))
-    case (GameLogic.Chess(), Situation.Chess(situation))       =>
+    case (GameLogic.Chess(), Situation.Chess(situation))               =>
       Chess(chess.Game(situation, pgnMoves, clock, turns, startedAtTurn))
-    case (GameLogic.FairySF(), Situation.FairySF(situation))   =>
+    case (GameLogic.FairySF(), Situation.FairySF(situation))           =>
       FairySF(fairysf.Game(situation, pgnMoves, clock, turns, startedAtTurn))
-    case (GameLogic.Samurai(), Situation.Samurai(situation))   =>
+    case (GameLogic.Samurai(), Situation.Samurai(situation))           =>
       Samurai(samurai.Game(situation, pgnMoves, clock, turns, startedAtTurn))
-    case (GameLogic.Togyzkumalak(), Situation.Togyzkumalak(situation))   =>
+    case (GameLogic.Togyzkumalak(), Situation.Togyzkumalak(situation)) =>
       Togyzkumalak(togyzkumalak.Game(situation, pgnMoves, clock, turns, startedAtTurn))
-    case _                                                     => sys.error("Mismatched gamelogic types 32")
+    case _                                                             => sys.error("Mismatched gamelogic types 32")
   }
 
   def apply(lib: GameLogic, variant: Variant): Game = (lib, variant) match {
-    case (GameLogic.Draughts(), Variant.Draughts(variant)) => Draughts(draughts.DraughtsGame.apply(variant))
-    case (GameLogic.Chess(), Variant.Chess(variant))       => Chess(chess.Game.apply(variant))
-    case (GameLogic.FairySF(), Variant.FairySF(variant))   => FairySF(fairysf.Game.apply(variant))
-    case (GameLogic.Samurai(), Variant.Samurai(variant))   => Samurai(samurai.Game.apply(variant))
-    case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant))   => Togyzkumalak(togyzkumalak.Game.apply(variant))
-    case _                                                 => sys.error("Mismatched gamelogic types 33")
+    case (GameLogic.Draughts(), Variant.Draughts(variant))         => Draughts(draughts.DraughtsGame.apply(variant))
+    case (GameLogic.Chess(), Variant.Chess(variant))               => Chess(chess.Game.apply(variant))
+    case (GameLogic.FairySF(), Variant.FairySF(variant))           => FairySF(fairysf.Game.apply(variant))
+    case (GameLogic.Samurai(), Variant.Samurai(variant))           => Samurai(samurai.Game.apply(variant))
+    case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant)) =>
+      Togyzkumalak(togyzkumalak.Game.apply(variant))
+    case _                                                         => sys.error("Mismatched gamelogic types 33")
   }
 
   def apply(lib: GameLogic, variant: Option[Variant], fen: Option[FEN]): Game = lib match {
-    case GameLogic.Draughts() =>
+    case GameLogic.Draughts()     =>
       Draughts(draughts.DraughtsGame.apply(variant.map(_.toDraughts), fen.map(_.toDraughts)))
-    case GameLogic.Chess()    =>
+    case GameLogic.Chess()        =>
       Chess(chess.Game.apply(variant.map(_.toChess), fen.map(_.toChess)))
-    case GameLogic.FairySF()  =>
+    case GameLogic.FairySF()      =>
       FairySF(fairysf.Game.apply(variant.map(_.toFairySF), fen.map(_.toFairySF)))
-    case GameLogic.Samurai()  =>
+    case GameLogic.Samurai()      =>
       Samurai(samurai.Game.apply(variant.map(_.toSamurai), fen.map(_.toSamurai)))
-    case GameLogic.Togyzkumalak()  =>
+    case GameLogic.Togyzkumalak() =>
       Togyzkumalak(togyzkumalak.Game.apply(variant.map(_.toTogyzkumalak), fen.map(_.toTogyzkumalak)))
-    case _                    => sys.error("Mismatched gamelogic types 36")
+    case _                        => sys.error("Mismatched gamelogic types 36")
   }
 
   def wrap(g: chess.Game)            = Chess(g)
   def wrap(g: draughts.DraughtsGame) = Draughts(g)
   def wrap(g: fairysf.Game)          = FairySF(g)
   def wrap(g: samurai.Game)          = Samurai(g)
-  def wrap(g: togyzkumalak.Game)          = Togyzkumalak(g)
+  def wrap(g: togyzkumalak.Game)     = Togyzkumalak(g)
 
 }

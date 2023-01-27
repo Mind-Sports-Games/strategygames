@@ -154,7 +154,7 @@ object Variant {
     def toDraughts                     = sys.error("Can't convert chess to draughts")
     def toFairySF                      = sys.error("Can't convert chess to fairysf")
     def toSamurai                      = sys.error("Can't convert chess to samurai")
-    def toTogyzkumalak                      = sys.error("Can't convert chess to togyzkumalak")
+    def toTogyzkumalak                 = sys.error("Can't convert chess to togyzkumalak")
 
     def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.Chess(pos), (Piece.Chess(piece), 1)) }
@@ -290,11 +290,11 @@ object Variant {
         gameType = Option(v.gameType)
       ) {
 
-    def toChess    = sys.error("Can't convert draughts to chess")
-    def toDraughts = v
-    def toFairySF  = sys.error("Can't convert draughts to fairysf")
-    def toSamurai  = sys.error("Can't convert draughts to samurai")
-    def toTogyzkumalak  = sys.error("Can't convert draughts to togyzkumalak")
+    def toChess        = sys.error("Can't convert draughts to chess")
+    def toDraughts     = v
+    def toFairySF      = sys.error("Can't convert draughts to fairysf")
+    def toSamurai      = sys.error("Can't convert draughts to samurai")
+    def toTogyzkumalak = sys.error("Can't convert draughts to togyzkumalak")
 
     def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.Draughts(pos), (Piece.Draughts(piece), 1)) }
@@ -429,11 +429,11 @@ object Variant {
         standardInitialPosition = v.standardInitialPosition
       ) {
 
-    def toChess                 = sys.error("Can't convert fairysf to chess")
-    def toDraughts              = sys.error("Can't convert fairysf to draughts")
-    def toFairySF               = v
-    def toSamurai               = sys.error("Can't convert fairysf to samurai")
-    def toTogyzkumalak               = sys.error("Can't convert fairysf to togyzkumalak")
+    def toChess          = sys.error("Can't convert fairysf to chess")
+    def toDraughts       = sys.error("Can't convert fairysf to draughts")
+    def toFairySF        = v
+    def toSamurai        = sys.error("Can't convert fairysf to samurai")
+    def toTogyzkumalak   = sys.error("Can't convert fairysf to togyzkumalak")
     def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.FairySF(pos), (Piece.FairySF(piece), 1)) }
 
@@ -566,13 +566,13 @@ object Variant {
         standardInitialPosition = v.standardInitialPosition
       ) {
 
-    def toChess                 = sys.error("Can't convert samurai to chess")
-    def toDraughts              = sys.error("Can't convert samurai to draughts")
-    def toFairySF               = sys.error("Can't convert samurai to fairysf")
-    def toSamurai               = v
-    def toTogyzkumalak          = sys.error("Can't convert samurai to togyzkumalak")
-    def pieces: PieceMap        = v.pieces.map {
-      case (pos, (piece, count)) => (Pos.Samurai(pos), (Piece.Samurai(piece), count))
+    def toChess          = sys.error("Can't convert samurai to chess")
+    def toDraughts       = sys.error("Can't convert samurai to draughts")
+    def toFairySF        = sys.error("Can't convert samurai to fairysf")
+    def toSamurai        = v
+    def toTogyzkumalak   = sys.error("Can't convert samurai to togyzkumalak")
+    def pieces: PieceMap = v.pieces.map { case (pos, (piece, count)) =>
+      (Pos.Samurai(pos), (Piece.Samurai(piece), count))
     }
 
     def standard: Boolean      = false
@@ -700,13 +700,13 @@ object Variant {
         standardInitialPosition = v.standardInitialPosition
       ) {
 
-    def toChess                 = sys.error("Can't convert togyzkumalak to chess")
-    def toDraughts              = sys.error("Can't convert togyzkumalak to draughts")
-    def toFairySF               = sys.error("Can't convert togyzkumalak to fairysf")
-    def toSamurai               = sys.error("Can't convert togyzkumalak to samurai")
-    def toTogyzkumalak               = v
-    def pieces: PieceMap        = v.pieces.map {
-      case (pos, (piece, count)) => (Pos.Togyzkumalak(pos), (Piece.Togyzkumalak(piece), count))
+    def toChess          = sys.error("Can't convert togyzkumalak to chess")
+    def toDraughts       = sys.error("Can't convert togyzkumalak to draughts")
+    def toFairySF        = sys.error("Can't convert togyzkumalak to fairysf")
+    def toSamurai        = sys.error("Can't convert togyzkumalak to samurai")
+    def toTogyzkumalak   = v
+    def pieces: PieceMap = v.pieces.map { case (pos, (piece, count)) =>
+      (Pos.Togyzkumalak(pos), (Piece.Togyzkumalak(piece), count))
     }
 
     def standard: Boolean      = false
@@ -779,42 +779,42 @@ object Variant {
 
     def checkmate(situation: Situation): Boolean = situation match {
       case Situation.Togyzkumalak(situation) => false
-      case _                            => sys.error("Not passed Togyzkumalak objects")
+      case _                                 => sys.error("Not passed Togyzkumalak objects")
     }
 
     def stalemateIsDraw: Boolean = v.stalemateIsDraw
 
     def winner(situation: Situation): Option[Player] = situation match {
       case Situation.Togyzkumalak(situation) => v.winner(situation)
-      case _                            => sys.error("Not passed Togyzkumalak objects")
+      case _                                 => sys.error("Not passed Togyzkumalak objects")
     }
 
     @nowarn def specialEnd(situation: Situation): Boolean = situation match {
       case Situation.Togyzkumalak(situation) => v.specialEnd(situation)
-      case _                            => sys.error("Not passed Togyzkumalak objects")
+      case _                                 => sys.error("Not passed Togyzkumalak objects")
     }
 
     @nowarn def specialDraw(situation: Situation): Boolean = situation match {
       case Situation.Togyzkumalak(situation) => v.specialDraw(situation)
-      case _                            => sys.error("Not passed Togyzkumalak objects")
+      case _                                 => sys.error("Not passed Togyzkumalak objects")
     }
 
     def hasMoveEffects: Boolean = v.hasMoveEffects
 
     def addVariantEffect(move: Move): Move            = move match {
       case Move.Togyzkumalak(move) => Move.Togyzkumalak(v.addVariantEffect(move))
-      case _                  => sys.error("Not passed Togyzkumalak objects")
+      case _                       => sys.error("Not passed Togyzkumalak objects")
     }
     def valid(board: Board, strict: Boolean): Boolean = board match {
       case Board.Togyzkumalak(board) => v.valid(board, strict)
-      case _                    => sys.error("Not passed Togyzkumalak objects")
+      case _                         => sys.error("Not passed Togyzkumalak objects")
     }
 
     val roles: List[Role] = v.roles.map(Role.TogyzkumalakRole)
 
     override def equals(that: Any): Boolean = that match {
       case Togyzkumalak(v2) => v2.equals(v)
-      case _           => false
+      case _                => false
     }
 
     def chessVariant: chess.variant.Variant = sys.error("Unimplemented for Togyzkumalak")
@@ -837,11 +837,11 @@ object Variant {
   def byKey = all map { v => (v.key, v) } toMap
 
   def all(lib: GameLogic): List[Variant] = lib match {
-    case GameLogic.Draughts() => draughts.variant.Variant.all.map(Draughts)
-    case GameLogic.Chess()    => chess.variant.Variant.all.map(Chess)
-    case GameLogic.FairySF()  => fairysf.variant.Variant.all.map(FairySF)
-    case GameLogic.Samurai()  => samurai.variant.Variant.all.map(Samurai)
-    case GameLogic.Togyzkumalak()  => togyzkumalak.variant.Variant.all.map(Togyzkumalak)
+    case GameLogic.Draughts()     => draughts.variant.Variant.all.map(Draughts)
+    case GameLogic.Chess()        => chess.variant.Variant.all.map(Chess)
+    case GameLogic.FairySF()      => fairysf.variant.Variant.all.map(FairySF)
+    case GameLogic.Samurai()      => samurai.variant.Variant.all.map(Samurai)
+    case GameLogic.Togyzkumalak() => togyzkumalak.variant.Variant.all.map(Togyzkumalak)
   }
 
   def byId(lib: GameLogic) = all(lib) map { v =>
@@ -853,11 +853,11 @@ object Variant {
   } toMap
 
   def default(lib: GameLogic): Variant = lib match {
-    case GameLogic.Draughts() => Draughts(draughts.variant.Variant.default)
-    case GameLogic.Chess()    => Chess(chess.variant.Variant.default)
-    case GameLogic.FairySF()  => FairySF(fairysf.variant.Variant.default)
-    case GameLogic.Samurai()  => Samurai(samurai.variant.Variant.default)
-    case GameLogic.Togyzkumalak()  => Togyzkumalak(togyzkumalak.variant.Variant.default)
+    case GameLogic.Draughts()     => Draughts(draughts.variant.Variant.default)
+    case GameLogic.Chess()        => Chess(chess.variant.Variant.default)
+    case GameLogic.FairySF()      => FairySF(fairysf.variant.Variant.default)
+    case GameLogic.Samurai()      => Samurai(samurai.variant.Variant.default)
+    case GameLogic.Togyzkumalak() => Togyzkumalak(togyzkumalak.variant.Variant.default)
   }
 
   def apply(lib: GameLogic, id: Int): Option[Variant]     = byId(lib) get id
@@ -873,42 +873,42 @@ object Variant {
   def exists(lib: GameLogic, id: Int): Boolean = byId(lib) contains id
 
   def openingSensibleVariants(lib: GameLogic): Set[Variant] = lib match {
-    case GameLogic.Draughts() => draughts.variant.Variant.openingSensibleVariants.map(Draughts)
-    case GameLogic.Chess()    => chess.variant.Variant.openingSensibleVariants.map(Chess)
-    case GameLogic.FairySF()  => fairysf.variant.Variant.openingSensibleVariants.map(FairySF)
-    case GameLogic.Samurai()  => samurai.variant.Variant.openingSensibleVariants.map(Samurai)
-    case GameLogic.Togyzkumalak()  => togyzkumalak.variant.Variant.openingSensibleVariants.map(Togyzkumalak)
+    case GameLogic.Draughts()     => draughts.variant.Variant.openingSensibleVariants.map(Draughts)
+    case GameLogic.Chess()        => chess.variant.Variant.openingSensibleVariants.map(Chess)
+    case GameLogic.FairySF()      => fairysf.variant.Variant.openingSensibleVariants.map(FairySF)
+    case GameLogic.Samurai()      => samurai.variant.Variant.openingSensibleVariants.map(Samurai)
+    case GameLogic.Togyzkumalak() => togyzkumalak.variant.Variant.openingSensibleVariants.map(Togyzkumalak)
   }
 
   def divisionSensibleVariants(lib: GameLogic): Set[Variant] = lib match {
-    case GameLogic.Draughts() => draughts.variant.Variant.divisionSensibleVariants.map(Draughts)
-    case GameLogic.Chess()    => chess.variant.Variant.divisionSensibleVariants.map(Chess)
-    case GameLogic.FairySF()  => fairysf.variant.Variant.divisionSensibleVariants.map(FairySF)
-    case GameLogic.Samurai()  => samurai.variant.Variant.divisionSensibleVariants.map(Samurai)
-    case GameLogic.Togyzkumalak()  => togyzkumalak.variant.Variant.divisionSensibleVariants.map(Togyzkumalak)
+    case GameLogic.Draughts()     => draughts.variant.Variant.divisionSensibleVariants.map(Draughts)
+    case GameLogic.Chess()        => chess.variant.Variant.divisionSensibleVariants.map(Chess)
+    case GameLogic.FairySF()      => fairysf.variant.Variant.divisionSensibleVariants.map(FairySF)
+    case GameLogic.Samurai()      => samurai.variant.Variant.divisionSensibleVariants.map(Samurai)
+    case GameLogic.Togyzkumalak() => togyzkumalak.variant.Variant.divisionSensibleVariants.map(Togyzkumalak)
   }
 
   def libStandard(lib: GameLogic): Variant = lib match {
-    case GameLogic.Draughts() => Variant.Draughts(draughts.variant.Standard)
-    case GameLogic.Chess()    => Variant.Chess(chess.variant.Standard)
-    case GameLogic.FairySF()  => Variant.FairySF(fairysf.variant.Shogi)
-    case GameLogic.Samurai()  => Variant.Samurai(samurai.variant.Oware)
-    case GameLogic.Togyzkumalak()  => Variant.Togyzkumalak(togyzkumalak.variant.Togyzkumalak)
+    case GameLogic.Draughts()     => Variant.Draughts(draughts.variant.Standard)
+    case GameLogic.Chess()        => Variant.Chess(chess.variant.Standard)
+    case GameLogic.FairySF()      => Variant.FairySF(fairysf.variant.Shogi)
+    case GameLogic.Samurai()      => Variant.Samurai(samurai.variant.Oware)
+    case GameLogic.Togyzkumalak() => Variant.Togyzkumalak(togyzkumalak.variant.Togyzkumalak)
   }
 
   def libFromPosition(lib: GameLogic): Variant = lib match {
-    case GameLogic.Draughts() => Variant.Draughts(draughts.variant.FromPosition)
-    case GameLogic.Chess()    => Variant.Chess(chess.variant.FromPosition)
+    case GameLogic.Draughts()     => Variant.Draughts(draughts.variant.FromPosition)
+    case GameLogic.Chess()        => Variant.Chess(chess.variant.FromPosition)
     // TODO: Decide how we do from position for other game logics
-    case GameLogic.FairySF()  => Variant.FairySF(fairysf.variant.Shogi)
-    case GameLogic.Samurai()  => Variant.Samurai(samurai.variant.Oware)
-    case GameLogic.Togyzkumalak()  => Variant.Togyzkumalak(togyzkumalak.variant.Togyzkumalak)
+    case GameLogic.FairySF()      => Variant.FairySF(fairysf.variant.Shogi)
+    case GameLogic.Samurai()      => Variant.Samurai(samurai.variant.Oware)
+    case GameLogic.Togyzkumalak() => Variant.Togyzkumalak(togyzkumalak.variant.Togyzkumalak)
   }
 
-  def wrap(v: chess.variant.Variant)    = Chess(v)
-  def wrap(v: draughts.variant.Variant) = Draughts(v)
-  def wrap(v: fairysf.variant.Variant)  = FairySF(v)
-  def wrap(v: samurai.variant.Variant)  = Samurai(v)
-  def wrap(v: togyzkumalak.variant.Variant)  = Togyzkumalak(v)
+  def wrap(v: chess.variant.Variant)        = Chess(v)
+  def wrap(v: draughts.variant.Variant)     = Draughts(v)
+  def wrap(v: fairysf.variant.Variant)      = FairySF(v)
+  def wrap(v: samurai.variant.Variant)      = Samurai(v)
+  def wrap(v: togyzkumalak.variant.Variant) = Togyzkumalak(v)
 
 }

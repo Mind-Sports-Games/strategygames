@@ -92,12 +92,12 @@ object Move {
 
     def first: Move = this
 
-    val unwrap     = m
-    def toChess    = m
-    def toDraughts = sys.error("Can't make a draughts move from a chess move")
-    def toFairySF  = sys.error("Can't make a fairysf move from a chess move")
-    def toSamurai  = sys.error("Can't make a samurai move from a chess move")
-    def toTogyzkumalak  = sys.error("Can't make a togyzkumalak move from a chess move")
+    val unwrap         = m
+    def toChess        = m
+    def toDraughts     = sys.error("Can't make a draughts move from a chess move")
+    def toFairySF      = sys.error("Can't make a fairysf move from a chess move")
+    def toSamurai      = sys.error("Can't make a samurai move from a chess move")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak move from a chess move")
 
   }
 
@@ -141,12 +141,12 @@ object Move {
 
     def first: Move = copy(m = m.first)
 
-    val unwrap     = m
-    def toDraughts = m
-    def toChess    = sys.error("Can't make a chess move from a draughts move")
-    def toFairySF  = sys.error("Can't make a fairysf move from a draughts move")
-    def toSamurai  = sys.error("Can't make a samurai move from a draughts move")
-    def toTogyzkumalak  = sys.error("Can't make a togyzkumalak move from a draughts move")
+    val unwrap         = m
+    def toDraughts     = m
+    def toChess        = sys.error("Can't make a chess move from a draughts move")
+    def toFairySF      = sys.error("Can't make a fairysf move from a draughts move")
+    def toSamurai      = sys.error("Can't make a samurai move from a draughts move")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak move from a draughts move")
 
   }
 
@@ -191,12 +191,12 @@ object Move {
 
     def first: Move = this
 
-    val unwrap     = m
-    def toFairySF  = m
-    def toChess    = sys.error("Can't make a chess move from a fairysf move")
-    def toDraughts = sys.error("Can't make a draughts move from a fairysf move")
-    def toSamurai  = sys.error("Can't make a samurai move from a fairysf move")
-    def toTogyzkumalak  = sys.error("Can't make a togyzkumalak move from a fairysf move")
+    val unwrap         = m
+    def toFairySF      = m
+    def toChess        = sys.error("Can't make a chess move from a fairysf move")
+    def toDraughts     = sys.error("Can't make a draughts move from a fairysf move")
+    def toSamurai      = sys.error("Can't make a samurai move from a fairysf move")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak move from a fairysf move")
 
   }
 
@@ -234,12 +234,12 @@ object Move {
 
     def first: Move = this
 
-    val unwrap     = m
-    def toFairySF  = sys.error("Can't make a fairysf move from a samurai move")
-    def toChess    = sys.error("Can't make a chess move from a samurai move")
-    def toDraughts = sys.error("Can't make a draughts move from a samurai move")
-    def toSamurai  = m
-    def toTogyzkumalak  = sys.error("Can't make a togyzkumalak move from a samurai move")
+    val unwrap         = m
+    def toFairySF      = sys.error("Can't make a fairysf move from a samurai move")
+    def toChess        = sys.error("Can't make a chess move from a samurai move")
+    def toDraughts     = sys.error("Can't make a draughts move from a samurai move")
+    def toSamurai      = m
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak move from a samurai move")
 
   }
 
@@ -277,27 +277,28 @@ object Move {
 
     def first: Move = this
 
-    val unwrap     = m
-    def toFairySF  = sys.error("Can't make a fairysf move from a togyzkumalak move")
-    def toChess    = sys.error("Can't make a chess move from a togyzkumalak move")
-    def toDraughts = sys.error("Can't make a draughts move from a togyzkumalak move")
-    def toSamurai  = sys.error("Can't make a samurai move from a togyzkumalak move")
-    def toTogyzkumalak  = m
+    val unwrap         = m
+    def toFairySF      = sys.error("Can't make a fairysf move from a togyzkumalak move")
+    def toChess        = sys.error("Can't make a chess move from a togyzkumalak move")
+    def toDraughts     = sys.error("Can't make a draughts move from a togyzkumalak move")
+    def toSamurai      = sys.error("Can't make a samurai move from a togyzkumalak move")
+    def toTogyzkumalak = m
 
   }
 
-  def wrap(m: chess.Move): Move    = Move.Chess(m)
-  def wrap(m: draughts.Move): Move = Move.Draughts(m)
-  def wrap(m: fairysf.Move): Move  = Move.FairySF(m)
-  def wrap(m: samurai.Move): Move  = Move.Samurai(m)
-  def wrap(m: togyzkumalak.Move): Move  = Move.Togyzkumalak(m)
+  def wrap(m: chess.Move): Move        = Move.Chess(m)
+  def wrap(m: draughts.Move): Move     = Move.Draughts(m)
+  def wrap(m: fairysf.Move): Move      = Move.FairySF(m)
+  def wrap(m: samurai.Move): Move      = Move.Samurai(m)
+  def wrap(m: togyzkumalak.Move): Move = Move.Togyzkumalak(m)
 
-  def toChess(moveOrDrop: MoveOrDrop): chess.MoveOrDrop     = moveOrDrop.left.map(_.toChess).right.map(_.toChess)
+  def toChess(moveOrDrop: MoveOrDrop): chess.MoveOrDrop         = moveOrDrop.left.map(_.toChess).right.map(_.toChess)
   // probably not type safe
-  def toDraughts(moveOrDrop: MoveOrDrop): draughts.Move     = moveOrDrop.left.map(_.toDraughts).left.get
-  def toFairySF(moveOrDrop: MoveOrDrop): fairysf.MoveOrDrop =
+  def toDraughts(moveOrDrop: MoveOrDrop): draughts.Move         = moveOrDrop.left.map(_.toDraughts).left.get
+  def toFairySF(moveOrDrop: MoveOrDrop): fairysf.MoveOrDrop     =
     moveOrDrop.left.map(_.toFairySF).right.map(_.toFairySF)
-  def toSamurai(moveOrDrop: MoveOrDrop): samurai.Move       = moveOrDrop.left.map(_.toSamurai).left.get
-  def toTogyzkumalak(moveOrDrop: MoveOrDrop): togyzkumalak.Move       = moveOrDrop.left.map(_.toTogyzkumalak).left.get
+  def toSamurai(moveOrDrop: MoveOrDrop): samurai.Move           = moveOrDrop.left.map(_.toSamurai).left.get
+  def toTogyzkumalak(moveOrDrop: MoveOrDrop): togyzkumalak.Move =
+    moveOrDrop.left.map(_.toTogyzkumalak).left.get
 
 }
