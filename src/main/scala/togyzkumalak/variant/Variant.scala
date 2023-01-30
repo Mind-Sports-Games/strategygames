@@ -77,11 +77,12 @@ abstract class Variant private[variant] (
       else thisStones
     } else {
       val remainder = if ((thisDiff - origIndex) < origStones % 18) 1 else 0;
-      thisStones + (thisIndex / 18) + remainder
+      val remaining = if (origIndex == thisIndex) 0 else thisStones
+      remaining + (thisIndex / 18) + remainder
     }
   }
 
-  private def piecesAfterMove(pieces: PieceMap, orig: Pos, dest: Pos): PieceMap =
+  def piecesAfterMove(pieces: PieceMap, orig: Pos, dest: Pos): PieceMap =
     pieceMapWithEmpties(pieces)
       .map {
         // potentially refactor the first two cases into stonesAfterMove
