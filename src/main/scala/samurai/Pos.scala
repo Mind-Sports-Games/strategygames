@@ -74,7 +74,6 @@ object Pos {
     if (0 <= index && index < File.all.size * Rank.all.size) Some(new Pos(index))
     else None
 
-  //TODO: Check this, could be wrong
   def apply(file: File, rank: Rank): Pos = new Pos(file.index + (File.all.size - file.index) * rank.index)
 
   def at(x: Int, y: Int): Option[Pos] =

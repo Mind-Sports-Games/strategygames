@@ -4,6 +4,30 @@ import strategygames.Player
 
 import scala.math.{ abs, max, min }
 
+//match src/main/scala/fairysf/Pos.scala for use in analysis and stratops
+object Piotr {
+  val lookup: Map[Int, Char] = Map(
+    Pos.A1.index -> 'a',
+    Pos.B1.index -> 'b',
+    Pos.C1.index -> 'c',
+    Pos.D1.index -> 'd',
+    Pos.E1.index -> 'e',
+    Pos.F1.index -> 'f',
+    Pos.G1.index -> 'g',
+    Pos.H1.index -> 'h',
+    Pos.A2.index -> 'i',
+    Pos.B2.index -> 'j',
+    Pos.C2.index -> 'k',
+    Pos.D2.index -> 'l',
+    Pos.E2.index -> 'm',
+    Pos.F2.index -> 'n',
+    Pos.G2.index -> 'o',
+    Pos.H2.index -> 'p',
+    Pos.I1.index -> '[',
+    Pos.I2.index -> ']'
+  )
+}
+
 case class Pos private (index: Int) extends AnyVal {
 
   def down: Option[Pos]      = Pos.at(file.index, rank.index - 1)
@@ -48,23 +72,7 @@ case class Pos private (index: Int) extends AnyVal {
 
   // We're going to use the chess piotr's which are not based on the
   // indices that we use.
-  def chessIndex: Int = index match {
-    case 6  => 13
-    case 7  => 12
-    case 8  => 11
-    case 9  => 10
-    case 10 => 9
-    case 11 => 8
-    case i  => i
-  }
-
-  def piotr: Char = {
-    if (chessIndex <= 25) (97 + chessIndex).toChar      // a ...
-    else if (chessIndex <= 51) (39 + chessIndex).toChar // A ...
-    else if (chessIndex <= 61) (chessIndex - 4).toChar // 0 ...
-    else if (chessIndex == 62) '!'
-    else '?'
-  }
+  def piotr: Char = Piotr.lookup.get(index).getOrElse('?')
   def piotrStr    = piotr.toString
 
   def player: Player = if (index < 9) Player.P1 else Player.P2
@@ -137,6 +145,6 @@ object Pos {
     .to(Map)
 
   // val posR  = "([a-i][1-9]|[a-i]10)"
-  val posR = "([a-f][1-2])"
+  val posR = "([a-i][1-2])"
 
 }
