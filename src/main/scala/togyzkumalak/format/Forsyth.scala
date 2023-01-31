@@ -26,6 +26,12 @@ object Forsyth {
           case "N" => P2
           case _   => sys.error("Invalid player in fen")
         }
+      ).withHistory(
+        History(
+          score = Score(fen.player1Score, fen.player2Score),
+          // seems like we might be using History.halfMoveClock incorrectly
+          halfMoveClock = fen.fullMove.getOrElse(0)
+        )
       )
     )
   }
@@ -55,8 +61,13 @@ object Forsyth {
       case SituationPlus(situation, _) => >>(Game(situation, turns = parsed.turns))
     }
 
-  def >>(game: Game): FEN =
-    FEN(s"${exportBoard(game.situation.board)} 0 0 ${game.situation.player.fold('S', 'N')} 1")
+  def >>(game: Game): FEN = {
+    val boardFen = exportBoard(game.situation.board)
+    val scoreStr = game.situation.board.history.score.fenStr
+    val player   = game.situation.player.fold('S', 'N')
+    val moves    = game.situation.board.history.halfMoveClock
+    FEN(s"${boardFen} ${scoreStr} ${player} ${moves}")
+  }
 
   def exportBoard(board: Board): String = {
     val fen   = new scala.collection.mutable.StringBuilder(70)

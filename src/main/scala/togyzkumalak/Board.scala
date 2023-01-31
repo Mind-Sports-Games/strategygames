@@ -17,6 +17,12 @@ case class Board(
     (pos, Actor(piece, pos, this))
   }
 
+  lazy val totalStones: Int =
+    pieces
+      .filter { case (_, (piece, _)) => piece.role == Stone }
+      .map { case (_, (_, count)) => count }
+      .sum
+
   lazy val posMap: Map[(Piece, Int), Iterable[Pos]] = pieces.groupMap(_._2)(_._1)
 
   lazy val piecesOnBoardCount: Int                    = pieces.keys.size

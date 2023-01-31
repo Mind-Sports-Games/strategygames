@@ -24,13 +24,20 @@ case object Togyzkumalak
   override def initialFen =
     format.FEN("9S,9S,9S,9S,9S,9S,9S,9S,9S/9S,9S,9S,9S,9S,9S,9S,9S,9S 0 0 S 1")
 
-  // TODO: implement
-  override def specialEnd(situation: Situation) = false
+  // TODO check legalMoves.size == 0 condition
+  override def specialEnd(situation: Situation) =
+    (situation.board.history.score.p1 > 81) ||
+      (situation.board.history.score.p2 > 81) ||
+      (situation.moves.size == 0)
 
-  // TODO: implement
-  override def specialDraw(situation: Situation) = false
+  override def specialDraw(situation: Situation) =
+    situation.board.history.score.p1 == situation.board.history.score.p2
 
-  // TODO: implement
-  override def winner(situation: Situation): Option[Player] = None
+  override def winner(situation: Situation): Option[Player] =
+    if (specialEnd(situation) && !specialDraw(situation)) {
+      if (situation.board.history.score.p1 > situation.board.history.score.p2)
+        Player.fromName("p1")
+      else Player.fromName("p2")
+    } else None
 
 }

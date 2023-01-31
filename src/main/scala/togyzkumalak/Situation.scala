@@ -51,6 +51,11 @@ case class Situation(board: Board, player: Player) {
   def move(uci: Uci.Move): Validated[String, Move] =
     board.variant.move(this, uci.orig, uci.dest, uci.promotion)
 
+  def withHistory(history: History) =
+    copy(
+      board = board withHistory history
+    )
+
   def withVariant(variant: strategygames.togyzkumalak.variant.Variant) =
     copy(
       board = board withVariant variant
