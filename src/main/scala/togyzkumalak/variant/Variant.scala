@@ -94,7 +94,7 @@ abstract class Variant private[variant] (
         case (pos, posInfo) if pos == dest && orig.player != dest.player && posInfo._2 % 2 == 0 =>
           (pos, (posInfo._1, 0))
         case (pos, posInfo) if pos == dest && orig.player != dest.player && posInfo._2 == 3 && pieces.filter {
-              case (pos2, posInfo2) => posInfo2._1.role == Tuzdik && pos2.player == !dest.player
+              case (pos2, posInfo2) => posInfo2._1.role == Tuzdik && pos2.player == dest.player
             }.isEmpty =>
           (pos, (Piece(!pos.player, Tuzdik), 1))
         case (pos, posInfo) => (pos, posInfo)
