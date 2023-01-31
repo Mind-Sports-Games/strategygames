@@ -147,7 +147,7 @@ abstract class Variant private[variant] (
                         situation.board.history.score.p1 + p1Scored,
                         situation.board.history.score.p2 + p2Scored
                       ),
-                      halfMoveClock = situation.board.history.halfMoveClock + 1
+                      halfMoveClock = situation.board.history.halfMoveClock + situation.player.fold(0,1)
                     )
                   )
                 },
