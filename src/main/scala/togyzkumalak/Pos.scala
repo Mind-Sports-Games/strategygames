@@ -77,6 +77,8 @@ case class Pos private (index: Int) extends AnyVal {
 
   def player: Player = if (index < 9) Player.P1 else Player.P2
 
+  def last: Boolean = (index + 1) % 9 == 0
+
   def key               = file.toString + rank.toString
   override def toString = key
 }
@@ -92,6 +94,8 @@ object Pos {
     if (0 <= x && x < File.all.size && 0 <= y && y < Rank.all.size)
       Some(new Pos(x + (File.all.size - x) * y))
     else None
+
+  def opposite(index: Int): Option[Pos] = apply(if (index < 9) index + 9 else index - 9)
 
   def fromKey(key: String): Option[Pos] = allKeys get key
 

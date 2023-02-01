@@ -64,7 +64,8 @@ object Replay {
         pieces = before.situation.board.variant.piecesAfterMove(
           before.situation.board.pieces,
           orig,
-          dest
+          dest,
+          before.situation.oppTuzdik
         )
       ),
       capture = None,

@@ -82,7 +82,7 @@ abstract class Variant private[variant] (
     }
   }
 
-  def piecesAfterMove(pieces: PieceMap, orig: Pos, dest: Pos): PieceMap =
+  def piecesAfterMove(pieces: PieceMap, orig: Pos, dest: Pos, oppTuzdik: Option[Pos]): PieceMap =
     pieceMapWithEmpties(pieces)
       .map {
         case (pos, posInfo) if posInfo._1.role != Tuzdik =>
@@ -95,7 +95,7 @@ abstract class Variant private[variant] (
           (pos, (posInfo._1, 0))
         case (pos, posInfo) if pos == dest && orig.player != dest.player && posInfo._2 == 3 && pieces.filter {
               case (pos2, posInfo2) => posInfo2._1.role == Tuzdik && pos2.player == dest.player
-            }.isEmpty =>
+            }.isEmpty && oppTuzdik != Pos.opposite(dest.index) && !dest.last =>
           (pos, (Piece(!pos.player, Tuzdik), 1))
         case (pos, posInfo) => (pos, posInfo)
       }
@@ -120,16 +120,10 @@ abstract class Variant private[variant] (
                 situationBefore = situation,
                 after = {
                   val boardAfter      = situation.board.copy(
-                    pieces = piecesAfterMove(situation.board.pieces, pos, dest)
+                    pieces = piecesAfterMove(situation.board.pieces, pos, dest, situation.oppTuzdik)
                   )
                   val stoneDiff       = situation.board.totalStones - boardAfter.totalStones
-                  val oppTuzdikStones = situation.board.pieces
-                    .filter {
-                      case (_, (p, _)) if p.role == Tuzdik && p.player != situation.player => true
-                      case _                                                               => false
-                    }
-                    .map { case (pos, _) => pos }
-                    .headOption
+                  val oppTuzdikStones = situation.oppTuzdik
                     .map(p => stonesAfterMove(situation.board.pieces(pos)._2, 0, pos.index, p.index))
                     .getOrElse(0)
                   val p1Scored        = situation.player.fold(
