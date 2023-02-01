@@ -11,6 +11,7 @@ sealed abstract class History(
     val checkCount: chess.CheckCount = chess.CheckCount(0, 0),
     val unmovedRooks: chess.UnmovedRooks = chess.UnmovedRooks.default,
     val kingMoves: draughts.KingMoves = draughts.KingMoves(),
+    val score: togyzkumalak.Score = togyzkumalak.Score(0, 0),
     val halfMoveClock: Int = 0
 ) {
 
@@ -59,7 +60,8 @@ object History {
       extends History(
         lastMove = h.lastMove.map(Uci.wrap),
         positionHashes = h.positionHashes,
-        halfMoveClock = h.halfMoveClock
+        halfMoveClock = h.halfMoveClock,
+        score = h.score
       )
 
   implicit def chessHistory(h: chess.History)               = Chess(h)
@@ -78,6 +80,7 @@ object History {
       checkCount: chess.CheckCount = chess.CheckCount(0, 0),
       unmovedRooks: chess.UnmovedRooks = chess.UnmovedRooks.default,
       kingMoves: draughts.KingMoves = draughts.KingMoves(),
+      score: togyzkumalak.Score = togyzkumalak.Score(0, 0),
       halfMoveClock: Int = 0
   ): History = lib match {
     case GameLogic.Draughts()     =>
@@ -125,7 +128,8 @@ object History {
         togyzkumalak.History(
           lastMove = lastMove.map(lm => lm.toTogyzkumalak),
           positionHashes = positionHashes,
-          halfMoveClock = halfMoveClock
+          halfMoveClock = halfMoveClock,
+          score = score
         )
       )
     case _                        => sys.error("Mismatched gamelogic types 1")

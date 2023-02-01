@@ -99,4 +99,11 @@ object Forsyth {
 
   def boardAndPlayer(board: Board, turnPlayer: Player): String =
     s"${exportBoard(board)} ${turnPlayer.letter}"
+
+  def boardAndScore(situation: Situation): String =
+    boardAndScore(situation.board, situation.history.score)
+
+  def boardAndScore(board: Board, score: Score): String =
+    s"${exportBoard(board)} ${score.p1} ${score.p2}"
+
 }
