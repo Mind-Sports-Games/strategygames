@@ -78,7 +78,7 @@ abstract class Variant private[variant] (
     } else {
       val remainder = if ((thisDiff - origIndex) < origStones % 18) 1 else 0;
       val remaining = if (origIndex == thisIndex) 0 else thisStones
-      remaining + (thisIndex / 18) + remainder
+      remaining + (origStones / 18) + remainder
     }
   }
 
@@ -103,27 +103,19 @@ abstract class Variant private[variant] (
       .toMap
 
   def boardAfter(situation: Situation, orig: Pos, dest: Pos): Board = {
-    val boardAfter      = situation.board.copy(
+    val boardAfter     = situation.board.copy(
       pieces = piecesAfterMove(situation.board.pieces, orig, dest, situation.oppTuzdik)
     )
-    val stoneDiff       = situation.board.totalStones - boardAfter.totalStones
-    val oppTuzdikStones = situation.oppTuzdik
+    val oppCaptured    = situation.oppTuzdik
       .map(p => stonesAfterMove(situation.board.pieces(orig)._2, 0, orig.index, p.index))
       .getOrElse(0)
-    val p1Scored        = situation.player.fold(
-      stoneDiff - oppTuzdikStones,
-      oppTuzdikStones
-    )
-    val p2Scored        = situation.player.fold(
-      oppTuzdikStones,
-      stoneDiff - oppTuzdikStones
-    )
+    val activeCaptured = (situation.board.totalStones - boardAfter.totalStones) - oppCaptured
     boardAfter.withHistory(
       situation.board.history.copy(
         lastMove = Some(Uci.Move(orig, dest)),
         score = Score(
-          situation.board.history.score.p1 + p1Scored,
-          situation.board.history.score.p2 + p2Scored
+          situation.board.history.score.p1 + situation.player.fold(activeCaptured, oppCaptured),
+          situation.board.history.score.p2 + situation.player.fold(oppCaptured, activeCaptured)
         ),
         halfMoveClock = situation.board.history.halfMoveClock + situation.player.fold(0, 1)
       )
