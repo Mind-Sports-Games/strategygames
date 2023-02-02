@@ -109,13 +109,15 @@ abstract class Variant private[variant] (
     val oppCaptured    = situation.oppTuzdik
       .map(p => stonesAfterMove(situation.board.pieces(orig)._2, 0, orig.index, p.index))
       .getOrElse(0)
-    val activeCaptured = (situation.board.totalStones - boardAfter.totalStones) - oppCaptured
+    val activeCaptured =
+      if (boardAfter.playerStoneCount(!situation.player) == 0) situation.board.stoneCount - oppCaptured
+      else (situation.board.stoneCount - boardAfter.stoneCount) - oppCaptured
     boardAfter.withHistory(
-      situation.board.history.copy(
+      situation.history.copy(
         lastMove = Some(Uci.Move(orig, dest)),
         score = Score(
-          situation.board.history.score.p1 + situation.player.fold(activeCaptured, oppCaptured),
-          situation.board.history.score.p2 + situation.player.fold(oppCaptured, activeCaptured)
+          situation.history.score.p1 + situation.player.fold(activeCaptured, oppCaptured),
+          situation.history.score.p2 + situation.player.fold(oppCaptured, activeCaptured)
         ),
         halfMoveClock = situation.board.history.halfMoveClock + situation.player.fold(0, 1)
       )
