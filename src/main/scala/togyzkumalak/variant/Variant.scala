@@ -102,6 +102,34 @@ abstract class Variant private[variant] (
       .filterNot { case (pos, posInfo) => posInfo._2 == 0 }
       .toMap
 
+  def boardAfter(situation: Situation, orig: Pos, dest: Pos): Board = {
+    val boardAfter      = situation.board.copy(
+      pieces = piecesAfterMove(situation.board.pieces, orig, dest, situation.oppTuzdik)
+    )
+    val stoneDiff       = situation.board.totalStones - boardAfter.totalStones
+    val oppTuzdikStones = situation.oppTuzdik
+      .map(p => stonesAfterMove(situation.board.pieces(orig)._2, 0, orig.index, p.index))
+      .getOrElse(0)
+    val p1Scored        = situation.player.fold(
+      stoneDiff - oppTuzdikStones,
+      oppTuzdikStones
+    )
+    val p2Scored        = situation.player.fold(
+      oppTuzdikStones,
+      stoneDiff - oppTuzdikStones
+    )
+    boardAfter.withHistory(
+      situation.board.history.copy(
+        lastMove = Some(Uci.Move(orig, dest)),
+        score = Score(
+          situation.board.history.score.p1 + p1Scored,
+          situation.board.history.score.p2 + p2Scored
+        ),
+        halfMoveClock = situation.board.history.halfMoveClock + situation.player.fold(0, 1)
+      )
+    )
+  }
+
   def validMoves(situation: Situation): Map[Pos, List[Move]] =
     situation.board.pieces
       .filter { case (pos, posInfo) =>
@@ -118,33 +146,7 @@ abstract class Variant private[variant] (
                 orig = pos,
                 dest = dest,
                 situationBefore = situation,
-                after = {
-                  val boardAfter      = situation.board.copy(
-                    pieces = piecesAfterMove(situation.board.pieces, pos, dest, situation.oppTuzdik)
-                  )
-                  val stoneDiff       = situation.board.totalStones - boardAfter.totalStones
-                  val oppTuzdikStones = situation.oppTuzdik
-                    .map(p => stonesAfterMove(situation.board.pieces(pos)._2, 0, pos.index, p.index))
-                    .getOrElse(0)
-                  val p1Scored        = situation.player.fold(
-                    stoneDiff - oppTuzdikStones,
-                    oppTuzdikStones
-                  )
-                  val p2Scored        = situation.player.fold(
-                    oppTuzdikStones,
-                    stoneDiff - oppTuzdikStones
-                  )
-                  boardAfter.withHistory(
-                    situation.board.history.copy(
-                      lastMove = Some(Uci.Move(pos, dest)),
-                      score = Score(
-                        situation.board.history.score.p1 + p1Scored,
-                        situation.board.history.score.p2 + p2Scored
-                      ),
-                      halfMoveClock = situation.board.history.halfMoveClock + situation.player.fold(0, 1)
-                    )
-                  )
-                },
+                after = boardAfter(situation, pos, dest),
                 capture = None,
                 promotion = None
               )

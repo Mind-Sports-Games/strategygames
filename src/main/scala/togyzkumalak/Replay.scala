@@ -60,14 +60,7 @@ object Replay {
       orig = orig,
       dest = dest,
       situationBefore = before.situation,
-      after = before.situation.board.copy(
-        pieces = before.situation.board.variant.piecesAfterMove(
-          before.situation.board.pieces,
-          orig,
-          dest,
-          before.situation.oppTuzdik
-        )
-      ),
+      after = before.situation.board.variant.boardAfter(before.situation, orig, dest),
       capture = None,
       promotion = None
     )
