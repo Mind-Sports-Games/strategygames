@@ -62,7 +62,7 @@ object Forsyth {
     }
 
   def >>(game: Game): FEN = {
-    val boardFen = exportBoard(game.situation.board)
+    val boardFen = boardPart(game.situation.board)
     val scoreStr = game.situation.board.history.score.fenStr
     val player   = game.situation.player.fold('S', 'N')
     val moves    = game.situation.board.history.halfMoveClock
@@ -70,6 +70,12 @@ object Forsyth {
   }
 
   def exportBoard(board: Board): String = {
+    val boardFen = boardPart(board)
+    val scoreStr = board.history.score.fenStr
+    s"${boardFen} ${scoreStr}"
+  }
+
+  def boardPart(board: Board): String = {
     val fen   = new scala.collection.mutable.StringBuilder(70)
     var empty = 0
     for (y <- Rank.allReversed) {
@@ -99,11 +105,5 @@ object Forsyth {
 
   def boardAndPlayer(board: Board, turnPlayer: Player): String =
     s"${exportBoard(board)} ${turnPlayer.letter}"
-
-  def boardAndScore(situation: Situation): String =
-    boardAndScore(situation.board, situation.history.score)
-
-  def boardAndScore(board: Board, score: Score): String =
-    s"${exportBoard(board)} ${score.p1} ${score.p2}"
 
 }
