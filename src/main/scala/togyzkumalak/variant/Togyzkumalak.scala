@@ -15,7 +15,7 @@ case object Togyzkumalak
 
   def gameFamily: GameFamily = GameFamily.Togyzkumalak()
 
-  def perfIcon: Char = ''
+  def perfIcon: Char = '›'
   def perfId: Int    = 400
 
   override def baseVariant: Boolean = true
