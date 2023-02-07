@@ -20,11 +20,11 @@ case object Pool
   def perfId: Int    = 124
   def perfIcon: Char = ''
 
-  override def fenVariant       = true
-  def pieces                    = Russian.pieces
-  def initialFen                = Russian.initialFen
-  def startingPosition          = Russian.startingPosition
-  override val openingTables    = List(OpeningTable.tableFMJDBrazilian, OpeningTable.tableIDFBasic)
+  override def fenVariant    = true
+  def pieces                 = Russian.pieces
+  def initialFen             = Russian.initialFen
+  def startingPosition       = Russian.startingPosition
+  override val openingTables = List(OpeningTable.tableFMJDBrazilian, OpeningTable.tableIDFBasic)
 
   // override def playerNames: Map[Player, String]  = Map(P1 -> "Black", P2 -> "White")
   // override def playerColors: Map[Player, String] = Map(P1 -> "black", P2 -> "white")

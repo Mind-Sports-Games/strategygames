@@ -49,7 +49,18 @@ object FullOpening {
 
   }
 
-  final case class Mancala(f: strategygames.mancala.opening.FullOpening)
+  final case class Samurai(f: strategygames.samurai.opening.FullOpening)
+      extends FullOpening(
+        f.eco,
+        f.name,
+        f.fen
+      ) {
+
+    override def toString = f.toString()
+
+  }
+
+  final case class Togyzkumalak(f: strategygames.togyzkumalak.opening.FullOpening)
       extends FullOpening(
         f.eco,
         f.name,

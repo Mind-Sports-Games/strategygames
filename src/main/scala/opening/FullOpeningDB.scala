@@ -8,60 +8,72 @@ import strategygames.format.FEN
 object FullOpeningDB {
 
   def findByFen(lib: GameLogic, fen: FEN): Option[FullOpening] = (lib, fen) match {
-    case (GameLogic.Draughts(), _)               =>
+    case (GameLogic.Draughts(), _)                         =>
       strategygames.draughts.opening.FullOpeningDB
         .findByFen(fen.value)
         .map(
           FullOpening.Draughts
         )
-    case (GameLogic.Chess(), FEN.Chess(fen))     =>
+    case (GameLogic.Chess(), FEN.Chess(fen))               =>
       strategygames.chess.opening.FullOpeningDB
         .findByFen(fen)
         .map(
           FullOpening.Chess
         )
-    case (GameLogic.FairySF(), FEN.FairySF(fen)) =>
+    case (GameLogic.FairySF(), FEN.FairySF(fen))           =>
       strategygames.fairysf.opening.FullOpeningDB
         .findByFen(fen)
         .map(
           FullOpening.FairySF
         )
-    case (GameLogic.Mancala(), FEN.Mancala(fen)) =>
-      strategygames.mancala.opening.FullOpeningDB
+    case (GameLogic.Samurai(), FEN.Samurai(fen))           =>
+      strategygames.samurai.opening.FullOpeningDB
         .findByFen(fen)
         .map(
-          FullOpening.Mancala
+          FullOpening.Samurai
         )
-    case _                                       => sys.error("Mismatched gamelogic types full opening db")
+    case (GameLogic.Togyzkumalak(), FEN.Togyzkumalak(fen)) =>
+      strategygames.togyzkumalak.opening.FullOpeningDB
+        .findByFen(fen)
+        .map(
+          FullOpening.Togyzkumalak
+        )
+    case _                                                 => sys.error("Mismatched gamelogic types full opening db")
   }
 
   // assumes standard initial FEN and variant
   def search(lib: GameLogic, moveStrs: Iterable[String]): Option[FullOpening.AtPly] =
     lib match {
-      case GameLogic.Draughts() =>
+      case GameLogic.Draughts()     =>
         strategygames.draughts.opening.FullOpeningDB
           .search(
             moveStrs
           )
           .map(fo => FullOpening.AtPly(FullOpening.Draughts(fo.opening), fo.ply))
-      case GameLogic.Chess()    =>
+      case GameLogic.Chess()        =>
         strategygames.chess.opening.FullOpeningDB
           .search(
             moveStrs
           )
           .map(fo => FullOpening.AtPly(FullOpening.Chess(fo.opening), fo.ply))
-      case GameLogic.FairySF()  =>
+      case GameLogic.FairySF()      =>
         strategygames.fairysf.opening.FullOpeningDB
           .search(
             moveStrs
           )
           .map(fo => FullOpening.AtPly(FullOpening.FairySF(fo.opening), fo.ply))
-      case GameLogic.Mancala()  =>
-        strategygames.mancala.opening.FullOpeningDB
+      case GameLogic.Samurai()      =>
+        strategygames.samurai.opening.FullOpeningDB
           .search(
             moveStrs
           )
-          .map(fo => FullOpening.AtPly(FullOpening.Mancala(fo.opening), fo.ply))
+          .map(fo => FullOpening.AtPly(FullOpening.Samurai(fo.opening), fo.ply))
+      case GameLogic.Togyzkumalak() =>
+        strategygames.togyzkumalak.opening.FullOpeningDB
+          .search(
+            moveStrs
+          )
+          .map(fo => FullOpening.AtPly(FullOpening.Togyzkumalak(fo.opening), fo.ply))
     }
 
   private def draughtsFENs(fens: Vector[FEN]): Vector[strategygames.draughts.format.FEN] =
@@ -88,39 +100,53 @@ object FullOpeningDB {
       }
     )
 
-  private def mancalaFENs(fens: Vector[FEN]): Vector[strategygames.mancala.format.FEN] =
+  private def samuraiFENs(fens: Vector[FEN]): Vector[strategygames.samurai.format.FEN] =
     fens.flatMap(f =>
       f match {
-        case f: FEN.Mancala => Some(f.f)
+        case f: FEN.Samurai => Some(f.f)
         case _              => None
       }
     )
 
+  private def togyzkumalakFENs(fens: Vector[FEN]): Vector[strategygames.togyzkumalak.format.FEN] =
+    fens.flatMap(f =>
+      f match {
+        case f: FEN.Togyzkumalak => Some(f.f)
+        case _                   => None
+      }
+    )
+
   def searchInFens(lib: GameLogic, fens: Vector[FEN]): Option[FullOpening] = lib match {
-    case GameLogic.Draughts() =>
+    case GameLogic.Draughts()     =>
       strategygames.draughts.opening.FullOpeningDB
         .searchInFens(
           draughtsFENs(fens).toList
         )
         .map(FullOpening.Draughts)
-    case GameLogic.Chess()    =>
+    case GameLogic.Chess()        =>
       strategygames.chess.opening.FullOpeningDB
         .searchInFens(
           chessFENs(fens)
         )
         .map(FullOpening.Chess)
-    case GameLogic.FairySF()  =>
+    case GameLogic.FairySF()      =>
       strategygames.fairysf.opening.FullOpeningDB
         .searchInFens(
           fairysfFENs(fens)
         )
         .map(FullOpening.FairySF)
-    case GameLogic.Mancala()  =>
-      strategygames.mancala.opening.FullOpeningDB
+    case GameLogic.Samurai()      =>
+      strategygames.samurai.opening.FullOpeningDB
         .searchInFens(
-          mancalaFENs(fens)
+          samuraiFENs(fens)
         )
-        .map(FullOpening.Mancala)
+        .map(FullOpening.Samurai)
+    case GameLogic.Togyzkumalak() =>
+      strategygames.togyzkumalak.opening.FullOpeningDB
+        .searchInFens(
+          togyzkumalakFENs(fens)
+        )
+        .map(FullOpening.Togyzkumalak)
   }
 
 }

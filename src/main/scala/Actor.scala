@@ -36,11 +36,18 @@ object Actor {
         Board.FairySF(a.board)
       ) {}
 
-  final case class Mancala(a: mancala.Actor)
+  final case class Samurai(a: samurai.Actor)
       extends Actor(
-        Piece.Mancala(a.piece),
-        Pos.Mancala(a.pos),
-        Board.Mancala(a.board)
+        Piece.Samurai(a.piece),
+        Pos.Samurai(a.pos),
+        Board.Samurai(a.board)
+      ) {}
+
+  final case class Togyzkumalak(a: togyzkumalak.Actor)
+      extends Actor(
+        Piece.Togyzkumalak(a.piece),
+        Pos.Togyzkumalak(a.pos),
+        Board.Togyzkumalak(a.board)
       ) {}
 
 }
