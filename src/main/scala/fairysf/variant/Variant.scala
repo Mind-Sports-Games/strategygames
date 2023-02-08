@@ -26,6 +26,7 @@ abstract class Variant private[variant] (
   def minixiangqi = this == MiniXiangqi
   def flipello    = this == Flipello
   def flipello10  = this == Flipello10
+  def amazons     = this == Amazons
 
   def exotic = true
 
@@ -259,7 +260,8 @@ object Variant {
     Xiangqi,
     MiniXiangqi,
     Flipello,
-    Flipello10
+    Flipello10,
+    Amazons
   )
   val byId                    = all map { v =>
     (v.id, v)
@@ -289,7 +291,8 @@ object Variant {
     strategygames.fairysf.variant.Xiangqi,
     strategygames.fairysf.variant.MiniXiangqi,
     strategygames.fairysf.variant.Flipello,
-    strategygames.fairysf.variant.Flipello10
+    strategygames.fairysf.variant.Flipello10,
+    strategygames.fairysf.variant.Amazons
   )
 
   val divisionSensibleVariants: Set[Variant] = Set()

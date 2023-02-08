@@ -270,6 +270,24 @@ object GameFamily {
     def playerColors      = Map(P1 -> "black", P2 -> "white")
   }
 
+  final case class Amazons() extends GameFamily {
+    def id                = 8
+    def name              = "Amazons"
+    def key               = "amazons"
+    def gameLogic         = GameLogic.FairySF()
+    def hasFishnet        = true
+    def hasAnalysisBoard  = true
+    def defaultVariant    = Variant.FairySF(strategygames.fairysf.variant.Amazons)
+    def variants          = Variant.all(GameLogic.FairySF()).filter(_.gameFamily == this)
+    def displayPiece      = "wQ"
+    def pieceSetThemes    = List("queen")
+    def pieceSetDefault   = "queen"
+    def boardThemes       = List("blue", "brown", "grey")
+    def boardThemeDefault = "grey"
+    def playerNames       = Map(P1 -> "White", P2 -> "Black")
+    def playerColors      = Map(P1 -> "white", P2 -> "black")
+  }
+
   final case class Oware() extends GameFamily {
     def id                = 6
     def name              = "Oware"
@@ -324,6 +342,7 @@ object GameFamily {
     Shogi(),
     Xiangqi(),
     Flipello(),
+    Amazons(),
     Oware(),
     Togyzkumalak()
   )
@@ -337,6 +356,7 @@ object GameFamily {
     case 5 => Flipello()
     case 6 => Oware()
     case 7 => Togyzkumalak()
+    case 8 => Amazons()
     case _ => Chess()
   }
 
@@ -410,8 +430,25 @@ object GameGroup {
     def variants = Variant.all(GameLogic.Togyzkumalak()) ::: Variant.all(GameLogic.Samurai())
   }
 
+  final case class Amazons() extends GameGroup {
+    def id       = 8
+    def name     = "Amazons"
+    def key      = "amazons"
+    def variants = Variant.all(GameLogic.FairySF()).filter(_.gameFamily.name == this.name)
+  }
+
   def all: List[GameGroup] =
-    List(Chess(), Draughts(), LinesOfAction(), FairySF(), Shogi(), Xiangqi(), Flipello(), Mancala())
+    List(
+      Chess(),
+      Draughts(),
+      LinesOfAction(),
+      FairySF(),
+      Shogi(),
+      Xiangqi(),
+      Flipello(),
+      Mancala(),
+      Amazons()
+    )
 
   def medley: List[GameGroup] =
     List(Chess(), Draughts(), LinesOfAction(), Shogi(), Xiangqi(), Flipello(), Mancala())
@@ -425,6 +462,7 @@ object GameGroup {
     case 5 => Xiangqi()
     case 6 => Flipello()
     case 7 => Mancala()
+    case 8 => Amazons()
     case _ => Chess()
   }
 }

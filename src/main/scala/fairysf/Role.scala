@@ -250,6 +250,16 @@ case object FlipCounter extends Role {
   val gameFamily = GameFamily.Flipello()
 }
 
+case object AmazonQueen extends Role {
+  val fairySFID  = Role.queen
+  val forsyth    = 'Q'
+  val binaryInt  = 1
+  val hashInt    = 1
+  val storable   = true
+  val valueOf    = None
+  val gameFamily = GameFamily.Amazons()
+}
+
 object Role {
   // ---------------------------------------------------
   // These are all of the pieces that fairysf supports
@@ -320,7 +330,8 @@ object Role {
       XiangqiCannon,
       XiangqiRook,
       XiangqiKing,
-      FlipCounter
+      FlipCounter,
+      AmazonQueen
     )
 
   val allPromotable: List[PromotableRole] =

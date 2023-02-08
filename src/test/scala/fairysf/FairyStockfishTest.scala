@@ -18,7 +18,6 @@ class FairyStockfishTest extends Specification with ValidatedMatchers {
     }
   }
 
-
   "Shogi initial fen" should {
     "be valid" in {
       FairyStockfish.validateFEN(
@@ -43,6 +42,23 @@ class FairyStockfishTest extends Specification with ValidatedMatchers {
         variant.Shogi.fairysfName.name,
         "I'm a Shogi FEN! (not)"
       ) must_== false
+    }
+  }
+
+  "Amazons initial fen" should {
+    "be expected string" in {
+      format.FEN(
+        "3q2q3/10/10/q8q/10/10/Q8Q/10/10/3Q2Q3 w - - 0 1"
+      ) must_== variant.Amazons.initialFen
+    }
+  }
+
+  "Amazons initial fen" should {
+    "be valid" in {
+      FairyStockfish.validateFEN(
+        variant.Amazons.fairysfName.name,
+        variant.Amazons.initialFen.value
+      ) must_== true
     }
   }
 }
