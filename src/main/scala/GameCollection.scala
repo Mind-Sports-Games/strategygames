@@ -282,7 +282,24 @@ object GameFamily {
     def displayPiece      = "wQ"
     def pieceSetThemes    = List("queen")
     def pieceSetDefault   = "queen"
-    def boardThemes       = List("blue", "brown", "grey")
+    def boardThemes       = List(
+      "blue",
+      "blue2",
+      "blue3",
+      "canvas",
+      "wood",
+      "wood2",
+      "wood3",
+      "maple",
+      "brown",
+      "leather",
+      "green",
+      "marble",
+      "grey",
+      "metal",
+      "olive",
+      "purple"
+    )
     def boardThemeDefault = "grey"
     def playerNames       = Map(P1 -> "White", P2 -> "Black")
     def playerColors      = Map(P1 -> "white", P2 -> "black")
