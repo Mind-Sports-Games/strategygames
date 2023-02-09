@@ -48,7 +48,7 @@ class FairyStockfishTest extends Specification with ValidatedMatchers {
   "Amazons initial fen" should {
     "be expected string" in {
       format.FEN(
-        "3q2q3/10/10/q8q/10/10/Q8Q/10/10/3Q2Q3 w - - 0 1"
+        "3q2q3/10/10/q8q/10/10/Q8Q/10/10/3Q2Q3[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppp] w - - 0 1"
       ) must_== variant.Amazons.initialFen
     }
   }
