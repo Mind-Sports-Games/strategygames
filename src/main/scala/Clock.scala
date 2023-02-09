@@ -18,6 +18,7 @@ sealed trait ClockConfig {
   def emergSeconds: Int
   def show: String
   def toClock: Clock
+  def startsAtZero: Boolean
 }
 
 sealed trait ClockInfo {
@@ -31,6 +32,7 @@ sealed trait ClockPlayer {
   val lag: LagTracker
   val elapsed: Centis
   val berserk: Boolean
+  val lastMoveTime: Centis
 
   def recordLag(l: Centis): ClockPlayer
   def takeTime(t: Centis): ClockPlayer
@@ -44,8 +46,8 @@ sealed trait ClockPlayer {
     else config.initTime
   }
 
-  def remaining: Centis                    = limit - elapsed
-  def increment: Centis                    = if (berserk) Centis(0) else config.increment
+  def remaining: Centis = limit - elapsed
+  def increment: Centis = if (berserk) Centis(0) else config.increment
 }
 
 sealed trait Clock {
@@ -53,7 +55,7 @@ sealed trait Clock {
 
   // Abstract values
   val player: Player
-  //val players: Player.Map[ClockPlayer]
+  // val players: Player.Map[ClockPlayer]
   val timestamper: Timestamper
   val timer: Option[Timestamp]
   val config: ClockConfig
@@ -80,16 +82,16 @@ sealed trait Clock {
   def currentClockFor(c: Player): ClockInfo
 
   // Implemented attributes
-  def remainingTime(c: Player) = (clockPlayer(c).remaining - pending(c)) nonNeg
-  def moretimeable(c: Player)  = clockPlayer(c).remaining.centis < 100 * 60 * 60 * 2
-  def incrementOf(c: Player)   = clockPlayer(c).increment
+  def remainingTime(c: Player)  = (clockPlayer(c).remaining - pending(c)) nonNeg
+  def moretimeable(c: Player)   = clockPlayer(c).remaining.centis < 100 * 60 * 60 * 2
+  def incrementOf(c: Player)    = clockPlayer(c).increment
+  def lastMoveTimeOf(c: Player) = clockPlayer(c).lastMoveTime
 
   def takeback = switch
 
   def isRunning            = timer.isDefined
   def berserked(c: Player) = clockPlayer(c).berserk
   def lag(c: Player)       = clockPlayer(c).lag
-
 
   // Lowball estimate of next move's lag comp for UI butter.
   def lagCompEstimate(c: Player) = clockPlayer(c).lag.compEstimate
@@ -120,10 +122,10 @@ case class FischerClock(
 ) extends Clock {
   import timestamper.{ now, toNow }
 
-  def clockPlayer(c: Player) = players(c)
+  def clockPlayer(c: Player)                       = players(c)
   def clockPlayerExists(f: ClockPlayer => Boolean) = players.exists(f)
-  def allClockPlayers: Seq[FischerClockPlayer] = players.all
-  def lagCompAvg = players map { ~_.lag.compAvg } reduce (_ avg _)
+  def allClockPlayers: Seq[FischerClockPlayer]     = players.all
+  def lagCompAvg                                   = players map { ~_.lag.compAvg } reduce (_ avg _)
 
   def currentClockFor(c: Player) = {
     val elapsed               = pending(c)
@@ -140,13 +142,18 @@ case class FischerClock(
 
   def start = if (isRunning) this else copy(timer = Option(now))
 
-  def stop =
+  def stop = {
     timer.fold(this) { t =>
+      val curT = toNow(t)
       copy(
-        players = players.update(player, _.takeTime(toNow(t))),
+        players = players.update(
+          player,
+          _.takeTime(curT).copy(lastMoveTime = curT)
+        ),
         timer = None
       )
     }
+  }
 
   def hardStop = copy(timer = None)
 
@@ -196,7 +203,7 @@ case class FischerClock(
 
         val newC = updatePlayer(player) {
           _.takeTime(moveTime - inc)
-            .copy(lag = lagTrack)
+            .copy(lag = lagTrack, lastMoveTime = moveTime)
         }
 
         if (clockActive) newC else newC.hardStop
@@ -211,7 +218,8 @@ case class FischerClockPlayer(
     config: FischerClock.Config,
     lag: LagTracker,
     elapsed: Centis = Centis(0),
-    berserk: Boolean = false
+    berserk: Boolean = false,
+    lastMoveTime: Centis = Centis(0)
 ) extends ClockPlayer {
 
   def recordLag(l: Centis) = copy(lag = lag.recordLag(l))
@@ -222,7 +230,7 @@ case class FischerClockPlayer(
 
   def goBerserk = copy(berserk = true)
 
-  def giveTime(t: Centis): FischerClockPlayer     = takeTime(-t)
+  def giveTime(t: Centis): FischerClockPlayer = takeTime(-t)
 }
 
 object FischerClockPlayer {
@@ -266,6 +274,9 @@ object FischerClock {
         case 90 => "1.5"
         case _  => limitFormatter.format(limitSeconds / 60d)
       }
+
+    // TODO: I don't know if this is correct for fischer clocks, but this certainly unifies the interface
+    def startsAtZero = limitSeconds == 0
 
     def show = toString
 
@@ -318,10 +329,10 @@ case class ByoyomiClock(
 ) extends Clock {
   import timestamper.{ now, toNow }
 
-  def clockPlayer(c: Player) = players(c)
+  def clockPlayer(c: Player)                       = players(c)
   def clockPlayerExists(f: ClockPlayer => Boolean) = players.exists(f)
-  def allClockPlayers: Seq[ByoyomiClockPlayer] = players.all
-  def lagCompAvg = players map { ~_.lag.compAvg } reduce (_ avg _)
+  def allClockPlayers: Seq[ByoyomiClockPlayer]     = players.all
+  def lagCompAvg                                   = players map { ~_.lag.compAvg } reduce (_ avg _)
 
   private def periodsInUse(c: Player, t: Centis): Int = {
     val player          = players(c)
@@ -342,18 +353,21 @@ case class ByoyomiClock(
   }
 
   def outOfTime(c: Player, withGrace: Boolean) = {
-    val player = players(c)
-    player.remaining + player.periodsLeft * player.byoyomi <= timerFor(c).fold(Centis(0)) { t =>
+    val player        = players(c)
+    val timeUsed      = timerFor(c).fold(Centis(0))(t =>
       if (withGrace) (toNow(t) - (players(c).lag.quota atMost Centis(200))) nonNeg
       else toNow(t)
-    }
+    )
+    val timeRemaining = player.remaining + player.periodsLeft * player.byoyomi
+
+    timeRemaining <= timeUsed
   }
 
   def start = if (isRunning) this else copy(timer = Option(now))
 
-  def stop = 
+  def stop =
     timer.fold(this) { t =>
-      val curT = toNow(t)
+      val curT    = toNow(t)
       val periods = periodsInUse(player, curT)
       copy(
         players = players.update(
@@ -397,7 +411,7 @@ case class ByoyomiClock(
       gameActive: Boolean = true
   ) =
     (timer match {
-      case None =>
+      case None    =>
         metrics.clientLag.fold(this) { l =>
           updatePlayer(player) { _.recordLag(l) }
         }
@@ -405,15 +419,15 @@ case class ByoyomiClock(
         val elapsed = toNow(t)
         val lag     = ~metrics.reportedLag(elapsed) nonNeg
 
-        val competitor              = players(player)
+        val competitor          = players(player)
         val remaining           = competitor.remaining
         val (lagComp, lagTrack) = competitor.lag.onMove(lag)
         val moveTime            = (elapsed - lagComp) nonNeg
 
         // As long as game is still in progress, and we have enough time left (including byoyomi and periods)
-        val clockActive = gameActive && moveTime < remaining + competitor.periodsLeft * competitor.byoyomi
+        val clockActive  = gameActive && moveTime < remaining + competitor.periodsLeft * competitor.byoyomi
         // The number of periods the move stretched over
-        val periodSpan = periodsInUse(player, moveTime)
+        val periodSpan   = periodsInUse(player, moveTime)
         val usingByoyomi =
           clockActive && competitor.byoyomi.isPositive && (competitor.spentPeriods > 0 || periodSpan > 0)
 
@@ -440,14 +454,13 @@ case class ByoyomiClock(
       _.refundPeriods(p)
     }
 
+  def byoyomiOf(c: Player)               = players(c).byoyomi
+  def spentPeriodsOf(c: Player)          = players(c).spentPeriods
+  override def lastMoveTimeOf(c: Player) = players(c).lastMoveTime
 
-  def byoyomiOf(c: Player)      = players(c).byoyomi
-  def spentPeriodsOf(c: Player) = players(c).spentPeriods
-  def lastMoveTimeOf(c: Player) = players(c).lastMoveTime
-
-  def byoyomi              = config.byoyomi
-  def byoyomiSeconds       = config.byoyomiSeconds
-  def periodsTotal         = config.periodsTotal
+  def byoyomi        = config.byoyomi
+  def byoyomiSeconds = config.byoyomiSeconds
+  def periodsTotal   = config.periodsTotal
 }
 
 case class ByoyomiClockPlayer(
@@ -465,7 +478,7 @@ case class ByoyomiClockPlayer(
 
   def takeTime(t: Centis) = copy(elapsed = elapsed + t)
 
-  def giveTime(t: Centis): ByoyomiClockPlayer     = takeTime(-t)
+  def giveTime(t: Centis): ByoyomiClockPlayer = takeTime(-t)
 
   def setRemaining(t: Centis) = copy(elapsed = limit - t)
 
@@ -494,7 +507,8 @@ object ByoyomiClock {
   private val limitFormatter = new DecimalFormat("#.##")
 
   // All unspecified durations are expressed in seconds
-  case class Config(limitSeconds: Int, incrementSeconds: Int, byoyomiSeconds: Int, periods: Int) extends ClockConfig {
+  case class Config(limitSeconds: Int, incrementSeconds: Int, byoyomiSeconds: Int, periods: Int)
+      extends ClockConfig {
 
     def berserkable = (incrementSeconds == 0 && byoyomiSeconds == 0) || limitSeconds > 0
 
@@ -585,12 +599,12 @@ object ByoyomiClock {
           per  <- Option(perStr).fold(1.some)(_ toIntOption)
           inc  <- Option(incStr).fold(0.some)(parseJPTime _)
         } yield Config(init, inc, byo, per)
-      case _ => none
+      case _                                            => none
     }
 
   def readCsaConfig(str: String): Option[Config] =
     str.split("""\+|\|""") match {
-      case Array(initStr, byoStr) =>
+      case Array(initStr, byoStr)         =>
         for {
           init <- initStr.toIntOption
           byo  <- byoStr.toIntOption
@@ -601,7 +615,7 @@ object ByoyomiClock {
           byo  <- byoStr.toIntOption
           inc  <- incStr.toIntOption
         } yield Config(init, inc, byo, 1)
-      case _ => none
+      case _                              => none
     }
 
   def apply(limit: Int, increment: Int, byoyomi: Int, periods: Int): ByoyomiClock = {
