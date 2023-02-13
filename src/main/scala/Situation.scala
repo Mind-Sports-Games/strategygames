@@ -70,7 +70,8 @@ sealed abstract class Situation(val board: Board, val player: Player) {
   def toChess: chess.Situation
   def toDraughts: draughts.Situation
   def toFairySF: fairysf.Situation
-  def toMancala: mancala.Situation
+  def toSamurai: samurai.Situation
+  def toTogyzkumalak: togyzkumalak.Situation
 
 }
 
@@ -165,10 +166,11 @@ object Situation {
 
     def gameLogic: GameLogic = GameLogic.Chess()
 
-    def toChess    = s
-    def toDraughts = sys.error("Can't make draughts situation from chess situation")
-    def toFairySF  = sys.error("Can't make fairysf situation from chess situation")
-    def toMancala  = sys.error("Can't make mancala situation from chess situation")
+    def toChess        = s
+    def toDraughts     = sys.error("Can't make draughts situation from chess situation")
+    def toFairySF      = sys.error("Can't make fairysf situation from chess situation")
+    def toSamurai      = sys.error("Can't make samurai situation from chess situation")
+    def toTogyzkumalak = sys.error("Can't make togyzkumalak situation from chess situation")
   }
 
   final case class Draughts(s: draughts.Situation)
@@ -269,10 +271,11 @@ object Situation {
 
     def gameLogic: GameLogic = GameLogic.Draughts()
 
-    def toDraughts = s
-    def toChess    = sys.error("Can't make chess situation from draughts situation")
-    def toFairySF  = sys.error("Can't make fairysf situation from draughts situation")
-    def toMancala  = sys.error("Can't make mancala situation from draughts situation")
+    def toDraughts     = s
+    def toChess        = sys.error("Can't make chess situation from draughts situation")
+    def toFairySF      = sys.error("Can't make fairysf situation from draughts situation")
+    def toSamurai      = sys.error("Can't make samurai situation from draughts situation")
+    def toTogyzkumalak = sys.error("Can't make togyzkumalak situation from draughts situation")
 
   }
 
@@ -355,20 +358,21 @@ object Situation {
 
     def gameLogic: GameLogic = GameLogic.FairySF()
 
-    def toFairySF  = s
-    def toChess    = sys.error("Can't make chess situation from fairysf situation")
-    def toDraughts = sys.error("Can't make draughts situation from fairysf situation")
-    def toMancala  = sys.error("Can't make mancala situation from fairy situation")
+    def toFairySF      = s
+    def toChess        = sys.error("Can't make chess situation from fairysf situation")
+    def toDraughts     = sys.error("Can't make draughts situation from fairysf situation")
+    def toSamurai      = sys.error("Can't make samurai situation from fairy situation")
+    def toTogyzkumalak = sys.error("Can't make togyzkumalak situation from fairy situation")
   }
 
-  final case class Mancala(s: mancala.Situation)
+  final case class Samurai(s: samurai.Situation)
       extends Situation(
-        Board.Mancala(s.board),
+        Board.Samurai(s.board),
         s.player
       ) {
 
-    lazy val moves: Map[Pos, List[Move]] = s.moves.map { case (p: mancala.Pos, l: List[mancala.Move]) =>
-      (Pos.Mancala(p), l.map(Move.Mancala))
+    lazy val moves: Map[Pos, List[Move]] = s.moves.map { case (p: samurai.Pos, l: List[samurai.Move]) =>
+      (Pos.Samurai(p), l.map(Move.Samurai))
     }
 
     lazy val check: Boolean = false
@@ -386,7 +390,7 @@ object Situation {
     def winner: Option[Player] = s.winner
 
     lazy val destinations: Map[Pos, List[Pos]] = s.destinations.map {
-      case (p: mancala.Pos, l: List[mancala.Pos]) => (Pos.Mancala(p), l.map(Pos.Mancala))
+      case (p: samurai.Pos, l: List[samurai.Pos]) => (Pos.Samurai(p), l.map(Pos.Samurai))
     }
 
     def drops: Option[List[Pos]] = None
@@ -396,7 +400,7 @@ object Situation {
     def dropsAsDrops: List[Drop] = List.empty
 
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
-      sys.error("Can't do a Drop for mancala")
+      sys.error("Can't do a Drop for samurai")
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -411,55 +415,143 @@ object Situation {
         captures: Option[List[Pos]] = None,
         partialCaptures: Boolean = false
     ): Validated[String, Move] = (from, to) match {
-      case (Pos.Mancala(from), Pos.Mancala(to)) =>
-        s.move(from, to, promotion.map(_.toMancala)).toEither.map(m => Move.Mancala(m)).toValidated
-      case _                                    => sys.error("Not passed Mancala objects")
+      case (Pos.Samurai(from), Pos.Samurai(to)) =>
+        s.move(from, to, promotion.map(_.toSamurai)).toEither.map(m => Move.Samurai(m)).toValidated
+      case _                                    => sys.error("Not passed Samurai objects")
     }
 
     def move(uci: Uci.Move): Validated[String, Move] = uci match {
-      case Uci.MancalaMove(uci) => s.move(uci).toEither.map(m => Move.Mancala(m)).toValidated
-      case _                    => sys.error("Not passed Mancala objects")
+      case Uci.SamuraiMove(uci) => s.move(uci).toEither.map(m => Move.Samurai(m)).toValidated
+      case _                    => sys.error("Not passed Samurai objects")
     }
 
     def withVariant(variant: Variant): Situation = variant match {
-      case Variant.Mancala(variant) => Mancala(s.withVariant(variant))
-      case _                        => sys.error("Not passed Mancala objects")
+      case Variant.Samurai(variant) => Samurai(s.withVariant(variant))
+      case _                        => sys.error("Not passed Samurai objects")
     }
 
-    def unary_! : Situation = Mancala(s.unary_!)
+    def unary_! : Situation = Samurai(s.unary_!)
 
-    def copy(board: Board): Situation = Mancala(board match {
-      case Board.Mancala(board) => s.copy(board)
-      case _                    => sys.error("Can't copy a mancala situation with a non-mancala board")
+    def copy(board: Board): Situation = Samurai(board match {
+      case Board.Samurai(board) => s.copy(board)
+      case _                    => sys.error("Can't copy a samurai situation with a non-samurai board")
     })
 
-    def gameLogic: GameLogic = GameLogic.Mancala()
+    def gameLogic: GameLogic = GameLogic.Samurai()
 
-    def toFairySF  = sys.error("Can't make fairysf situation from mancala situation")
-    def toChess    = sys.error("Can't make chess situation from mancala situation")
-    def toDraughts = sys.error("Can't make draughts situation from mancala situation")
-    def toMancala  = s
+    def toFairySF      = sys.error("Can't make fairysf situation from samurai situation")
+    def toChess        = sys.error("Can't make chess situation from samurai situation")
+    def toDraughts     = sys.error("Can't make draughts situation from samurai situation")
+    def toSamurai      = s
+    def toTogyzkumalak = sys.error("Can't make draughts situation from samurai situation")
+  }
+
+  final case class Togyzkumalak(s: togyzkumalak.Situation)
+      extends Situation(
+        Board.Togyzkumalak(s.board),
+        s.player
+      ) {
+
+    lazy val moves: Map[Pos, List[Move]] = s.moves.map {
+      case (p: togyzkumalak.Pos, l: List[togyzkumalak.Move]) =>
+        (Pos.Togyzkumalak(p), l.map(Move.Togyzkumalak))
+    }
+
+    lazy val check: Boolean = false
+
+    def checkSquare = None
+
+    def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
+
+    def threefoldRepetition: Boolean = false
+
+    override lazy val perpetualPossible: Boolean = false
+
+    def end: Boolean = s.end
+
+    def winner: Option[Player] = s.winner
+
+    lazy val destinations: Map[Pos, List[Pos]] = s.destinations.map {
+      case (p: togyzkumalak.Pos, l: List[togyzkumalak.Pos]) => (Pos.Togyzkumalak(p), l.map(Pos.Togyzkumalak))
+    }
+
+    def drops: Option[List[Pos]] = None
+
+    def dropsByRole: Option[Map[Role, List[Pos]]] = None
+
+    def dropsAsDrops: List[Drop] = List.empty
+
+    def drop(role: Role, pos: Pos): Validated[String, Drop] =
+      sys.error("Can't do a Drop for togyzkumalak")
+
+    def playable(strict: Boolean): Boolean = s.playable(strict)
+
+    val status: Option[Status] = s.status
+
+    def move(
+        from: Pos,
+        to: Pos,
+        promotion: Option[PromotableRole] = None,
+        finalSquare: Boolean = false,
+        forbiddenUci: Option[List[String]] = None,
+        captures: Option[List[Pos]] = None,
+        partialCaptures: Boolean = false
+    ): Validated[String, Move] = (from, to) match {
+      case (Pos.Togyzkumalak(from), Pos.Togyzkumalak(to)) =>
+        s.move(from, to, promotion.map(_.toTogyzkumalak)).toEither.map(m => Move.Togyzkumalak(m)).toValidated
+      case _                                              => sys.error("Not passed Togyzkumalak objects")
+    }
+
+    def move(uci: Uci.Move): Validated[String, Move] = uci match {
+      case Uci.TogyzkumalakMove(uci) => s.move(uci).toEither.map(m => Move.Togyzkumalak(m)).toValidated
+      case _                         => sys.error("Not passed Togyzkumalak objects")
+    }
+
+    def withVariant(variant: Variant): Situation = variant match {
+      case Variant.Togyzkumalak(variant) => Togyzkumalak(s.withVariant(variant))
+      case _                             => sys.error("Not passed Togyzkumalak objects")
+    }
+
+    def unary_! : Situation = Togyzkumalak(s.unary_!)
+
+    def copy(board: Board): Situation = Togyzkumalak(board match {
+      case Board.Togyzkumalak(board) => s.copy(board)
+      case _                         => sys.error("Can't copy a togyzkumalak situation with a non-togyzkumalak board")
+    })
+
+    def gameLogic: GameLogic = GameLogic.Togyzkumalak()
+
+    def toFairySF      = sys.error("Can't make fairysf situation from togyzkumalak situation")
+    def toChess        = sys.error("Can't make chess situation from togyzkumalak situation")
+    def toDraughts     = sys.error("Can't make draughts situation from togyzkumalak situation")
+    def toSamurai      = sys.error("Can't make draughts situation from samurai situation")
+    def toTogyzkumalak = s
   }
 
   def apply(lib: GameLogic, board: Board, player: Player): Situation = (lib, board) match {
-    case (GameLogic.Draughts(), Board.Draughts(board)) => Draughts(draughts.Situation(board, player))
-    case (GameLogic.Chess(), Board.Chess(board))       => Chess(chess.Situation(board, player))
-    case (GameLogic.FairySF(), Board.FairySF(board))   => FairySF(fairysf.Situation(board, player))
-    case (GameLogic.Mancala(), Board.Mancala(board))   => Mancala(mancala.Situation(board, player))
-    case _                                             => sys.error("Mismatched gamelogic types 3")
+    case (GameLogic.Draughts(), Board.Draughts(board))         => Draughts(draughts.Situation(board, player))
+    case (GameLogic.Chess(), Board.Chess(board))               => Chess(chess.Situation(board, player))
+    case (GameLogic.FairySF(), Board.FairySF(board))           => FairySF(fairysf.Situation(board, player))
+    case (GameLogic.Samurai(), Board.Samurai(board))           => Samurai(samurai.Situation(board, player))
+    case (GameLogic.Togyzkumalak(), Board.Togyzkumalak(board)) =>
+      Togyzkumalak(togyzkumalak.Situation(board, player))
+    case _                                                     => sys.error("Mismatched gamelogic types 3")
   }
 
   def apply(lib: GameLogic, variant: Variant): Situation = (lib, variant) match {
-    case (GameLogic.Draughts(), Variant.Draughts(variant)) => Draughts(draughts.Situation.apply(variant))
-    case (GameLogic.Chess(), Variant.Chess(variant))       => Chess(chess.Situation.apply(variant))
-    case (GameLogic.FairySF(), Variant.FairySF(variant))   => FairySF(fairysf.Situation.apply(variant))
-    case (GameLogic.Mancala(), Variant.Mancala(variant))   => Mancala(mancala.Situation.apply(variant))
-    case _                                                 => sys.error("Mismatched gamelogic types 4")
+    case (GameLogic.Draughts(), Variant.Draughts(variant))         => Draughts(draughts.Situation.apply(variant))
+    case (GameLogic.Chess(), Variant.Chess(variant))               => Chess(chess.Situation.apply(variant))
+    case (GameLogic.FairySF(), Variant.FairySF(variant))           => FairySF(fairysf.Situation.apply(variant))
+    case (GameLogic.Samurai(), Variant.Samurai(variant))           => Samurai(samurai.Situation.apply(variant))
+    case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant)) =>
+      Togyzkumalak(togyzkumalak.Situation.apply(variant))
+    case _                                                         => sys.error("Mismatched gamelogic types 4")
   }
 
-  def wrap(s: chess.Situation)    = Chess(s)
-  def wrap(s: draughts.Situation) = Draughts(s)
-  def wrap(s: fairysf.Situation)  = FairySF(s)
-  def wrap(s: mancala.Situation)  = Mancala(s)
+  def wrap(s: chess.Situation)        = Chess(s)
+  def wrap(s: draughts.Situation)     = Draughts(s)
+  def wrap(s: fairysf.Situation)      = FairySF(s)
+  def wrap(s: samurai.Situation)      = Samurai(s)
+  def wrap(s: togyzkumalak.Situation) = Togyzkumalak(s)
 
 }
