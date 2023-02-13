@@ -15,7 +15,7 @@ case object Amazons
 
   def gameFamily: GameFamily = GameFamily.Amazons()
 
-  def perfIcon: Char = ''
+  def perfIcon: Char = '€'
   def perfId: Int    = 206
 
   override def baseVariant       = true

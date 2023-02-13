@@ -280,8 +280,8 @@ object GameFamily {
     def defaultVariant    = Variant.FairySF(strategygames.fairysf.variant.Amazons)
     def variants          = Variant.all(GameLogic.FairySF()).filter(_.gameFamily == this)
     def displayPiece      = "wQ"
-    def pieceSetThemes    = List("queen")
-    def pieceSetDefault   = "queen"
+    def pieceSetThemes    = List("arrow", "queen")
+    def pieceSetDefault   = "arrow"
     def boardThemes       = List(
       "blue",
       "blue2",
