@@ -300,7 +300,7 @@ object GameFamily {
       "olive",
       "purple"
     )
-    def boardThemeDefault = "grey"
+    def boardThemeDefault = "leather"
     def playerNames       = Map(P1 -> "White", P2 -> "Black")
     def playerColors      = Map(P1 -> "white", P2 -> "black")
   }
