@@ -5,7 +5,6 @@ import strategygames.fairysf.format.FEN
 
 class AmazonsVariantTest extends FairySFTest {
 
-  // https://playstrategy.dev/4eCFkjwt
   val amazonsGame = List(
     "d1d6,d6g9",
     "d10f10,f10e10",
@@ -16,6 +15,19 @@ class AmazonsVariantTest extends FairySFTest {
     "j4j9,j9h9",
     "j10i10,i10i9",
     "j9j10,j10j9" // then p2 has no moves
+  )
+
+  val amazonsGame2 = List(
+    "a4a2,a2b2",
+    "a7a5,a5b5",
+    "j4a4,a4b4",
+    "d10d7,d7a10",
+    "d1a1,a1b1",
+    "g10g9,g9g10",
+    "g1e3,e3j3",
+    "j7i7,i7i10",
+    "e3a3,a3b3" // most p2 moves will end game and
+    // then p1 has no moves
   )
 
   "Amazons" should {
@@ -68,6 +80,17 @@ class AmazonsVariantTest extends FairySFTest {
       val position2 = position.makeMoves(amazonsGame)
       position2.legalMoves.size must_== 0
       position2.gameEnd must_== true
+    }
+
+    "P2 win in example game" in {
+      val position  = Api.positionFromVariant(variant.Amazons)
+      val position2 = position.makeMoves(amazonsGame2)
+      position2.legalMoves.size > 0
+      position2.gameEnd must_== false
+      val position3 = position2.makeMoves(List("a5a9,a9a5"))
+      position3.gameEnd must_== true
+      val position4 = position2.makeMoves(List("a5a9,a9a8"))
+      position4.gameEnd must_== false
     }
 
     "Should detect game end from fen" in {
