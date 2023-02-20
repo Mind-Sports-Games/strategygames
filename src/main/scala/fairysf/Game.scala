@@ -1,5 +1,5 @@
 package strategygames.fairysf
-import strategygames.{ Clock, MoveMetrics }
+import strategygames.{ Clock, MoveMetrics, Player }
 
 import cats.data.Validated
 
@@ -21,6 +21,8 @@ case class Game(
     situation.move(orig, dest, promotion).map(_.normalizeCastle withMetrics metrics) map { move =>
       apply(move) -> move
     }
+
+  def withPlayer(c: Player) = copy(situation = situation.copy(player = c))
 
   def apply(move: Move): Game = {
     val newSituation = move.situationAfter

@@ -44,7 +44,6 @@ case object Flipello10
   def pendingDoublePass(situation: Situation) =
     pendingPass(situation) && applyPass(situation).fold(false)(pendingPass(_))
 
-
   override def specialDraw(situation: Situation) =
     situation.board.playerPiecesOnBoardCount(P1) == situation.board.playerPiecesOnBoardCount(P2)
 
