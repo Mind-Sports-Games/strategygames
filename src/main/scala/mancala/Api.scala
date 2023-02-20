@@ -91,29 +91,29 @@ object Api {
 
     def owareDiagram: String = position.toBoard.toDiagram
 
-
     private def playerPitsToFen(pits: Array[String]): String =
-      pits.map { part =>
-        part match {
-          case "0" => "1" // empty pit
-          case _   =>
-            part.toIntOption match {
-              case Some(x: Int) => s"${x}S"
-              case _            => sys.error(s"expected integer in oware string of pits: $pits")
-            }
+      pits
+        .map { part =>
+          part match {
+            case "0" => "1" // empty pit
+            case _   =>
+              part.toIntOption match {
+                case Some(x: Int) => s"${x}S"
+                case _            => sys.error(s"expected integer in oware string of pits: $pits")
+              }
+          }
         }
-      }
-      .mkString(",") + ","
+        .mkString(",") + ","
 
     private def joinEmptyPits(pits: String, replacePits: List[(String, String)]): String =
       replacePits.foldLeft(pits)((fen, repPair) => fen.replace(repPair._1, repPair._2))
 
     def fenString: String = {
-      val splitDiagram = owareDiagram.split('-')
-      val width        = variant.boardSize.width
-      val numPits      = variant.boardSize.width * variant.boardSize.height
-      val replacePits  = (2 to width).toList.reverse.map(i => ("1,"*i, s"$i,"))
-      val board        = List(
+      val splitDiagram   = owareDiagram.split('-')
+      val width          = variant.boardSize.width
+      val numPits        = variant.boardSize.width * variant.boardSize.height
+      val replacePits    = (2 to width).toList.reverse.map(i => ("1," * i, s"$i,"))
+      val board          = List(
         splitDiagram.take(width * 2).drop(width).reverse,
         splitDiagram.take(width)
       ).map(playerPitsToFen)
@@ -171,7 +171,8 @@ object Api {
     lazy val fen: FEN = FEN(fenString)
 
     private def convertPieceMapFromFen(fenString: String): PieceMap = {
-      FEN(fenString).owareStoneArray.zipWithIndex.filterNot{case (s, _) => s == 0}
+      FEN(fenString).owareStoneArray.zipWithIndex
+        .filterNot { case (s, _) => s == 0 }
         .map { case (seeds, index) =>
           (Pos(index), (Piece(Player.fromP1(index < 6), variant.defaultRole), seeds))
         }

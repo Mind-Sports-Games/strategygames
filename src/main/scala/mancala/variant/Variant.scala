@@ -114,7 +114,7 @@ abstract class Variant private[variant] (
 
   def materialImbalance(board: Board): Int =
     board.pieces.values.foldLeft(0) { case (acc, (Piece(player, _), count)) =>
-        acc + count * player.fold(1, -1)
+      acc + count * player.fold(1, -1)
     }
 
   // Some variants have an extra effect on the board on a move. For example, in Atomic, some

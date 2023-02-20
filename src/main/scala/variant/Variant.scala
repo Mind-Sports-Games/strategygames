@@ -420,10 +420,10 @@ object Variant {
         standardInitialPosition = v.standardInitialPosition
       ) {
 
-    def toChess                 = sys.error("Can't convert fairysf to chess")
-    def toDraughts              = sys.error("Can't convert fairysf to draughts")
-    def toFairySF               = v
-    def toMancala               = sys.error("Can't convert fairysf to mancala")
+    def toChess          = sys.error("Can't convert fairysf to chess")
+    def toDraughts       = sys.error("Can't convert fairysf to draughts")
+    def toFairySF        = v
+    def toMancala        = sys.error("Can't convert fairysf to mancala")
     def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.FairySF(pos), (Piece.FairySF(piece), 1)) }
 
@@ -554,12 +554,12 @@ object Variant {
         standardInitialPosition = v.standardInitialPosition
       ) {
 
-    def toChess                 = sys.error("Can't convert mancala to chess")
-    def toDraughts              = sys.error("Can't convert mancala to draughts")
-    def toFairySF               = sys.error("Can't convert mancala to fairysf")
-    def toMancala               = v
-    def pieces: PieceMap        = v.pieces.map {
-      case (pos, (piece, count)) => (Pos.Mancala(pos), (Piece.Mancala(piece), count))
+    def toChess          = sys.error("Can't convert mancala to chess")
+    def toDraughts       = sys.error("Can't convert mancala to draughts")
+    def toFairySF        = sys.error("Can't convert mancala to fairysf")
+    def toMancala        = v
+    def pieces: PieceMap = v.pieces.map { case (pos, (piece, count)) =>
+      (Pos.Mancala(pos), (Piece.Mancala(piece), count))
     }
 
     def standard: Boolean      = false

@@ -89,8 +89,8 @@ object Piece {
     case (Pos.Mancala(pos), (Mancala(piece), count)) => (pos, (piece, count))
   }
 
-  def pieceMapForChess(pieces: strategygames.chess.PieceMap): PieceMap = pieces.map {
-    case (pos, piece) => (Pos.Chess(pos), (Piece.Chess(piece), 1))
+  def pieceMapForChess(pieces: strategygames.chess.PieceMap): PieceMap = pieces.map { case (pos, piece) =>
+    (Pos.Chess(pos), (Piece.Chess(piece), 1))
   }
 
 }

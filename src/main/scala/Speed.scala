@@ -97,7 +97,6 @@ object Speed {
 
   def apply(id: Int): Option[Speed] = byId get id
 
-  // TODO: byoyomi - add initialization from lishogi here
   def apply(clock: ClockConfig) = byTime(clock.estimateTotalSeconds)
 
   def apply(clock: Option[ClockConfig]) = byTime(clock.fold(Int.MaxValue)(_.estimateTotalSeconds))

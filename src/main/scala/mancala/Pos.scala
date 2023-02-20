@@ -47,23 +47,23 @@ case class Pos private (index: Int) extends AnyVal {
   // We're going to use the chess piotr's which are not based on the
   // indices that we use.
   def chessIndex: Int = index match {
-    case 6 => 13
-    case 7 => 12
-    case 8 => 11
-    case 9 => 10
+    case 6  => 13
+    case 7  => 12
+    case 8  => 11
+    case 9  => 10
     case 10 => 9
     case 11 => 8
-    case i => i
+    case i  => i
   }
-  
+
   def piotr: Char = {
-    if (chessIndex <= 25) (97 + chessIndex).toChar // a ...
+    if (chessIndex <= 25) (97 + chessIndex).toChar      // a ...
     else if (chessIndex <= 51) (39 + chessIndex).toChar // A ...
     else if (chessIndex <= 61) (chessIndex - 4).toChar // 0 ...
     else if (chessIndex == 62) '!'
     else '?'
   }
-  def piotrStr = piotr.toString
+  def piotrStr    = piotr.toString
 
   def key               = file.toString + rank.toString
   override def toString = key

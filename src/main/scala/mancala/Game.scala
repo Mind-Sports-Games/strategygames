@@ -3,7 +3,7 @@ import strategygames.{ Clock, MoveMetrics }
 
 import cats.data.Validated
 
-import strategygames.mancala.format.{ FEN, pgn }
+import strategygames.mancala.format.{ pgn, FEN }
 
 case class Game(
     situation: Situation,
