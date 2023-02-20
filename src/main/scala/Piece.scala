@@ -47,10 +47,20 @@ object Piece {
 
   }
 
-  final case class Mancala(p: mancala.Piece)
+  final case class Samurai(p: samurai.Piece)
       extends Piece(
         p.player,
-        Role.MancalaRole(p.role)
+        Role.SamuraiRole(p.role)
+      ) {
+
+    def forsyth: Char = p.forsyth
+
+  }
+
+  final case class Togyzkumalak(p: togyzkumalak.Piece)
+      extends Piece(
+        p.player,
+        Role.TogyzkumalakRole(p.role)
       ) {
 
     def forsyth: Char = p.forsyth
@@ -58,19 +68,21 @@ object Piece {
   }
 
   def apply(lib: GameLogic, player: Player, role: Role): Piece = (lib, role) match {
-    case (GameLogic.Draughts(), Role.DraughtsRole(role)) => Draughts(draughts.Piece(player, role))
-    case (GameLogic.Chess(), Role.ChessRole(role))       => Chess(chess.Piece(player, role))
-    case (GameLogic.FairySF(), Role.FairySFRole(role))   => FairySF(fairysf.Piece(player, role))
-    case (GameLogic.Mancala(), Role.MancalaRole(role))   => Mancala(mancala.Piece(player, role))
-    case _                                               => sys.error("Mismatched gamelogic types 2")
+    case (GameLogic.Draughts(), Role.DraughtsRole(role))         => Draughts(draughts.Piece(player, role))
+    case (GameLogic.Chess(), Role.ChessRole(role))               => Chess(chess.Piece(player, role))
+    case (GameLogic.FairySF(), Role.FairySFRole(role))           => FairySF(fairysf.Piece(player, role))
+    case (GameLogic.Samurai(), Role.SamuraiRole(role))           => Samurai(samurai.Piece(player, role))
+    case (GameLogic.Togyzkumalak(), Role.TogyzkumalakRole(role)) =>
+      Togyzkumalak(togyzkumalak.Piece(player, role))
+    case _                                                       => sys.error("Mismatched gamelogic types 2")
   }
 
   def fromChar(lib: GameLogic, gf: GameFamily, c: Char): Option[Piece] = lib match {
-    case (GameLogic.Draughts()) => draughts.Piece.fromChar(c).map(Draughts)
-    case (GameLogic.Chess())    => chess.Piece.fromChar(c).map(Chess)
-    case (GameLogic.FairySF())  => fairysf.Piece.fromChar(gf, c).map(FairySF)
-    // case (GameLogic.Mancala())  => mancala.Piece.fromChar(gf, c).map(Mancala)
-    case (GameLogic.Mancala())  => sys.error("cannot get piece from Char anymore")
+    case (GameLogic.Draughts())     => draughts.Piece.fromChar(c).map(Draughts)
+    case (GameLogic.Chess())        => chess.Piece.fromChar(c).map(Chess)
+    case (GameLogic.FairySF())      => fairysf.Piece.fromChar(gf, c).map(FairySF)
+    case (GameLogic.Samurai())      => sys.error("cannot get piece from Char for samurai anymore")
+    case (GameLogic.Togyzkumalak()) => sys.error("cannot get piece from Char for togyzkumalak anymore")
   }
 
   def chessPieceMap(pieceMap: PieceMap): chess.PieceMap = pieceMap.map {
@@ -85,8 +97,12 @@ object Piece {
     case (Pos.FairySF(pos), (FairySF(piece), _)) => (pos, piece)
   }
 
-  def mancalaPieceMap(pieceMap: PieceMap): mancala.PieceMap = pieceMap.map {
-    case (Pos.Mancala(pos), (Mancala(piece), count)) => (pos, (piece, count))
+  def samuraiPieceMap(pieceMap: PieceMap): samurai.PieceMap = pieceMap.map {
+    case (Pos.Samurai(pos), (Samurai(piece), count)) => (pos, (piece, count))
+  }
+
+  def togyzkumalakPieceMap(pieceMap: PieceMap): togyzkumalak.PieceMap = pieceMap.map {
+    case (Pos.Togyzkumalak(pos), (Togyzkumalak(piece), count)) => (pos, (piece, count))
   }
 
   def pieceMapForChess(pieces: strategygames.chess.PieceMap): PieceMap = pieces.map { case (pos, piece) =>

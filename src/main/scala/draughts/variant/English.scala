@@ -16,7 +16,7 @@ case object English
     ) {
 
   def perfId: Int    = 126
-  def perfIcon: Char = ''
+  def perfIcon: Char = '‹'
 
   override def fenVariant = true
   def pieces              = Russian.pieces
