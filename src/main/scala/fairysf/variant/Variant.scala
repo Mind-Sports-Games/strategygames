@@ -58,6 +58,8 @@ abstract class Variant private[variant] (
 
   def startPlayer: Player = P1
 
+  val switchPlayerAfterMove: Boolean = true
+
   val kingPiece: Option[Role] = None
 
   // looks like this is only to allow King to be a valid promotion piece

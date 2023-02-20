@@ -3,11 +3,7 @@ package strategygames.fairysf
 import variant.Amazons
 import strategygames.fairysf.format.FEN
 
-class AmazonsVariantTest extends FairySFTest {
-
-  val initialFen = FEN(
-    "3q2q3/10/10/q8q/10/10/Q8Q/10/10/3Q2Q3[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppp] w - - 0 1"
-  )
+class AmazonsApiTest extends FairySFTest {
 
   val amazonsGame = List(
     "d1d6,d6g9",
@@ -37,7 +33,11 @@ class AmazonsVariantTest extends FairySFTest {
   "Amazons" should {
 
     "not have winner from start position" in {
-      val game = fenToGame(initialFen, Amazons)
+      val position =
+        FEN(
+          "3q2q3/10/10/q8q/10/10/Q8Q/10/10/3Q2Q3[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppp] w - - 0 1"
+        )
+      val game     = fenToGame(position, Amazons)
       game must beValid.like {
         case game => {
           game.situation.winner == None must beTrue
@@ -45,15 +45,34 @@ class AmazonsVariantTest extends FairySFTest {
       }
     }
 
-    "80 move from start pos" in {
-      val game = fenToGame(initialFen, Amazons)
-      game must beValid.like {
-        case game => {
-          game.situation.moves.pp("moves").size must_== 4
-          game.situation.moves.toList(0)._2.size must_== 20
-          // strategygames.fairysf.Game.apply(strategygames.fairysf.variant.Amazons).situation.moves.toList(0)._2.size
-        }
-      }
+    "2176 move from start pos" in {
+      val position = Api.positionFromVariant(variant.Amazons)
+      position.legalMoves.size must_== 2176
+    }
+
+    "have 32 pawn drops from starting d1d6 move" in {
+      val position = Api.positionFromVariant(variant.Amazons)
+      position.legalMoves.filter(x => x.contains("d1d6")).size must_== 32
+    }
+
+    "have opening move d1d6,d6g9" in {
+      val position = Api.positionFromVariant(variant.Amazons)
+      position.legalMoves.contains("d1d6,d6g9")
+    }
+
+    "doesn't allow knight movement of piece" in {
+      val position = Api.positionFromVariant(variant.Amazons)
+      !position.legalMoves.contains("d1c3")
+    }
+
+    "doesn't allow knight movement of arrows" in {
+      val position = Api.positionFromVariant(variant.Amazons)
+      !position.legalMoves.contains("d4e6")
+    }
+
+    "doesn't allow arrows through pieces" in {
+      val position = Api.positionFromVariant(variant.Amazons)
+      !position.legalMoves.contains("a4a5,a5a9")
     }
 
     "P1 win in example game" in {

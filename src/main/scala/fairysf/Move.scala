@@ -17,9 +17,17 @@ case class Move(
 ) {
   def before = situationBefore.board
 
-  def situationAfter = Situation(finalizeAfter, !piece.player)
+  def situationAfter =
+    Situation(
+      finalizeAfter,
+      if (before.variant.switchPlayerAfterMove) !piece.player else piece.player
+    )
 
-  def finalizeAfter: Board = after
+  def finalizeAfter: Board = after updateHistory { h =>
+    h.copy(
+      lastMove = Option(toUci)
+    )
+  }
 
   def applyVariantEffect: Move = before.variant addVariantEffect this
 

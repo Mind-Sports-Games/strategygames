@@ -74,7 +74,7 @@ object Api {
       if (movesList.isEmpty) this
       else new FairyPosition(position.makeMoves(movesList))
 
-    lazy val fen: FEN                                  = FEN(position.getFEN())
+    lazy val fen: FEN                                  = FEN(position.getFEN().replace("*", "p"))
     lazy val givesCheck: Boolean                       = position.givesCheck()
     lazy val isImmediateGameEnd: (Boolean, GameResult) = {
       val im = position.isImmediateGameEnd()
@@ -138,8 +138,12 @@ object Api {
   def positionFromVariantName(variantName: String): Position =
     new FairyPosition(new FairyStockfish.Position(variantName))
 
+  private def convertFen(variantName: String, fen: String): String =
+    if (variantName == "amazons") fen.replace("p", "*").replace("P", "*")
+    else fen
+
   def positionFromVariantNameAndFEN(variantName: String, fen: String): Position =
-    new FairyPosition(new FairyStockfish.Position(variantName, fen))
+    new FairyPosition(new FairyStockfish.Position(variantName, convertFen(variantName, fen)))
 
   def positionFromVariantAndMoves(variant: Variant, uciMoves: List[String]): Position =
     positionFromVariant(variant).makeMoves(uciMoves)
@@ -233,10 +237,10 @@ object Api {
 
   def availableVariants(): Array[String] = FairyStockfish.availableVariants()
 
-  def initialFen(variantName: String): FEN = FEN(FairyStockfish.initialFen(variantName))
+  def initialFen(variantName: String): FEN = FEN(FairyStockfish.initialFen(variantName).replace("*", "p"))
 
   def validateFEN(variantName: String, fen: String): Boolean =
-    FairyStockfish.validateFEN(variantName, fen)
+    FairyStockfish.validateFEN(variantName, convertFen(variantName, fen))
 
   def positionFromMoves(variantName: String, fen: String, movesList: Option[List[String]] = None): Position =
     positionFromVariantNameAndFEN(variantName, fen)
