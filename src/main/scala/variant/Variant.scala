@@ -94,6 +94,7 @@ abstract class Variant(
 
   def initialFen: FEN
   def startPlayer: Player
+  def plysPerTurn: Int
 
   def isValidPromotion(promotion: Option[PromotableRole]): Boolean
 
@@ -226,6 +227,7 @@ object Variant {
 
     def initialFen: FEN     = FEN.Chess(v.initialFen)
     def startPlayer: Player = v.startPlayer
+    def plysPerTurn: Int    = v.plysPerTurn
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = promotion match {
       case Some(Role.ChessPromotableRole(pr)) => v.isValidPromotion(pr.some)
@@ -367,6 +369,7 @@ object Variant {
 
     def initialFen: FEN     = FEN.Draughts(v.initialFen)
     def startPlayer: Player = v.startPlayer
+    def plysPerTurn: Int    = v.plysPerTurn
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = promotion match {
       case Some(Role.DraughtsPromotableRole(pr)) => v.isValidPromotion(pr.some)
@@ -506,6 +509,7 @@ object Variant {
 
     def initialFen: FEN     = FEN.FairySF(v.initialFen)
     def startPlayer: Player = v.startPlayer
+    def plysPerTurn: Int    = v.plysPerTurn
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = promotion match {
       case Some(Role.FairySFPromotableRole(pr)) => v.isValidPromotion(pr.some)
@@ -645,6 +649,7 @@ object Variant {
 
     def initialFen: FEN     = FEN.Samurai(v.initialFen)
     def startPlayer: Player = v.startPlayer
+    def plysPerTurn: Int    = v.plysPerTurn
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false
 
@@ -780,6 +785,7 @@ object Variant {
 
     def initialFen: FEN     = FEN.Togyzkumalak(v.initialFen)
     def startPlayer: Player = v.startPlayer
+    def plysPerTurn: Int    = v.plysPerTurn
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false
 

@@ -338,7 +338,7 @@ object Replay {
           case san :: rest =>
             san(StratSituation.wrap(sit)) flatMap { moveOrDrop =>
               val after = moveOrDrop.fold(m => m.finalizeAfter().toFairySF, d => d.finalizeAfter.toFairySF)
-              val fen   = Forsyth >> Game(Situation(after, Player.fromPly(ply)), turns = ply)
+              val fen   = Forsyth >> Game(Situation(after, Player.fromPly(ply, variant.plysPerTurn)), turns = ply)
               if (compareFen(fen)) Validated.valid(ply)
               else recursivePlyAtFen(Situation(after, !sit.player), rest, ply + 1)
             }

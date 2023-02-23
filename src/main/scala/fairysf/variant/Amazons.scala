@@ -25,6 +25,7 @@ case object Amazons
   override def repetitionEnabled     = false
   override def dropsVariant          = true
   override val switchPlayerAfterMove = false
+  override val plysPerTurn           = 2
 
   // cache this rather than checking with the API everytime
   override def initialFen =
