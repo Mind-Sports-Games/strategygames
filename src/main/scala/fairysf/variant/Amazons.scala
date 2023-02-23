@@ -34,7 +34,7 @@ case object Amazons
 
   override def validMoves(situation: Situation): Map[Pos, List[Move]] =
     situation.board.history.lastMove match {
-      case Some(_: Uci.Move) => Map.empty()
+      case Some(_: Uci.Move) => Map.empty
       case _                 =>
         situation.board.apiPosition.legalMoves
           .map(_.split(",").headOption)
