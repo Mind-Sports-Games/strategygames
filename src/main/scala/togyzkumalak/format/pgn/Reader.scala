@@ -1,6 +1,12 @@
 package strategygames.togyzkumalak
 package format.pgn
-import strategygames.{ Clock, Drop => StratDrop, Move => StratMove, Situation => StratSituation }
+import strategygames.{
+  ByoyomiClock,
+  Drop => StratDrop,
+  FischerClock,
+  Move => StratMove,
+  Situation => StratSituation
+}
 
 import strategygames.format.pgn.{ ParsedPgn, Sans, Tags }
 
@@ -94,7 +100,11 @@ object Reader {
     )
     g.copy(
       startedAtTurn = g.turns,
-      clock = tags.clockConfig map (config => Clock.apply(config))
+      clock = tags.clockConfig.flatMap {
+        case fc: FischerClock.Config => Some(FischerClock.apply(fc))
+        case bc: ByoyomiClock.Config => Some(ByoyomiClock.apply(bc))
+        case _                       => None
+      }
     )
   }
 }

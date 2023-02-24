@@ -10,7 +10,7 @@ case object Standard
     ) {
 
   def perfId: Int    = 5
-  def perfIcon: Char = ''
+  def perfIcon: Char = '⁄'
 
   val pieces: Map[Pos, Piece] = Variant.symmetricRank(backRank)
 
