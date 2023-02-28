@@ -65,7 +65,7 @@ object Forsyth {
 
   def exportBoard(board: Board): String = exportBoardFen(board).value
 
-  def exportBoardFen(board: Board): FEN = board.apiPosition.fen
+  def exportBoardFen(board: Board): FEN = board.variant.exportBoardFen(board)
 
   def boardAndPlayer(situation: Situation): String =
     boardAndPlayer(situation.board, situation.player)
