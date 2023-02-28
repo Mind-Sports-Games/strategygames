@@ -121,14 +121,14 @@ case object Amazons
               // val uciDrop     = s"${defaultDropRole.forsyth}@${dest.key}"
               val uciMove     = s"${lastMove.uci},${lastMove.dest.key}${dest.key}"
               val newPosition = situation.board.apiPosition.makeMoves(List(uciMove))
+              val piece       = Piece(situation.player, defaultDropRole)
               Drop(
-                piece = Piece(situation.player, defaultDropRole),
+                piece = piece,
                 pos = dest,
                 situationBefore = situation,
                 after = situation.board.copy(
-                  pieces = newPosition.pieceMap,
+                  pieces = situation.board.pieces + ((dest, piece)),
                   uciMoves = situation.board.uciMoves :+ uciMove,
-                  pocketData = newPosition.pocketData,
                   position = newPosition.some
                 )
               )
