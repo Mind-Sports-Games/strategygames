@@ -56,6 +56,8 @@ abstract class Variant private[variant] (
 
   def pieces: Map[Pos, Piece] = Api.pieceMapFromFen(fairysfName.name, initialFen.value)
 
+  def exportBoardFen(board: Board): FEN = board.apiPosition.fen
+
   def startPlayer: Player = P1
 
   val switchPlayerAfterMove: Boolean = true

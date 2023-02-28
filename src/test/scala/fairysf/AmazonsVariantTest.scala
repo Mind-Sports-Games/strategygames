@@ -46,14 +46,11 @@ class AmazonsVariantTest extends FairySFTest {
     }
 
     "80 move from start pos" in {
-      val game = fenToGame(initialFen, Amazons)
-      game must beValid.like {
-        case game => {
-          game.situation.moves.pp("moves").size must_== 4
-          game.situation.moves.toList(0)._2.size must_== 20
-          // strategygames.fairysf.Game.apply(strategygames.fairysf.variant.Amazons).situation.moves.toList(0)._2.size
-        }
-      }
+      // val game = fenToGame(initialFen, Amazons)
+      val game = Game(Amazons)
+      game.situation.pp("sit").moves.pp("moves").size must_== 4
+      game.situation.moves.toList(0)._2.size must_== 20
+      // strategygames.fairysf.Game.apply(strategygames.fairysf.variant.Amazons).situation.moves.toList(0)._2.size
     }
 
     "P1 win in example game" in {

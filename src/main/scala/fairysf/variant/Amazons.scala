@@ -4,7 +4,7 @@ package variant
 import cats.syntax.option._
 
 import strategygames.fairysf.format.{ FEN, Forsyth, Uci }
-import strategygames.GameFamily
+import strategygames.{ GameFamily, Player }
 
 case object Amazons
     extends Variant(
@@ -33,18 +33,52 @@ case object Amazons
       "3q2q3/10/10/q8q/10/10/Q8Q/10/10/3Q2Q3[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppp] w - - 0 1"
     )
 
+  private def boardPart(board: Board): String = {
+    val fen   = new scala.collection.mutable.StringBuilder(70)
+    var empty = 0
+    for (y <- Rank.allReversed) {
+      empty = 0
+      val files = if (y.index == 0) File.all else File.allReversed
+      for (x <- files) {
+        board(x, y) match {
+          case None        => empty = empty + 1
+          case Some(piece) =>
+            if (empty > 0) {
+              fen.append(empty)
+              empty = 0
+            }
+            if (piece.player == Player.P1)
+              fen.append(piece.forsyth.toString.toUpperCase())
+            else fen.append(piece.forsyth)
+        }
+      }
+      if (empty > 0) fen.append(s"${empty},")
+      fen.append('/')
+    }
+    fen.toString.replace(",/", "/").dropRight(1)
+  }
+
+  private def fullPockets: String = s"[${"P" * 46}${"p" * 46}]"
+
+  override def exportBoardFen(board: Board): FEN =
+    FEN(
+      s"${boardPart(board)}${fullPockets} ${board.apiPosition.fen.value.split(" ").drop(1).mkString(" ")}"
+    )
+
   override def validMoves(situation: Situation): Map[Pos, List[Move]] =
     situation.board.history.lastMove match {
       case Some(_: Uci.Move) => Map.empty
       case _                 =>
         situation.board.apiPosition.legalMoves
           .map(_.split(",").headOption)
-          .map { case Some(Uci.Move.moveR(orig, dest, promotion)) =>
-            (
-              Pos.fromKey(orig),
-              Pos.fromKey(dest),
-              promotion
-            )
+          .map {
+            case Some(Uci.Move.moveR(orig, dest, promotion)) =>
+              (
+                Pos.fromKey(orig),
+                Pos.fromKey(dest),
+                promotion
+              )
+            case Some(x)                                     => sys.error(s"Invalid legalMove for Amazons: ${x}")
           }
           .distinct
           .map {
