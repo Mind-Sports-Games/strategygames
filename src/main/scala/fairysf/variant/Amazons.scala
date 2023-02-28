@@ -49,7 +49,7 @@ case object Amazons
             }
             if (piece.player == Player.P1)
               fen.append(piece.forsyth.toString.toUpperCase())
-            else fen.append(piece.forsyth)
+            else fen.append(piece.forsyth.toString.toLowerCase())
         }
       }
       if (empty > 0) fen.append(s"${empty},")
