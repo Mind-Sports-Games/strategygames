@@ -62,7 +62,7 @@ case object Amazons
 
   override def exportBoardFen(board: Board): FEN =
     FEN(
-      s"${boardPart(board)}${fullPockets} ${board.apiPosition.fen.value.split("] ")(1)}"
+      s"${boardPart(board)}${fullPockets} ${board.apiPosition.fen.value.split(" ").drop(1).mkString(" ")}"
     )
 
   override def validMoves(situation: Situation): Map[Pos, List[Move]] =
