@@ -112,7 +112,7 @@ case object Amazons
     situation.board.history.lastMove match {
       case Some(lastMove: Uci.Move) =>
         situation.board.apiPosition.legalMoves
-          .filter(_.startsWith(lastMove.uci))
+          .filter(_.startsWith(s"${lastMove.uci},"))
           .map(_.split(",").reverse.headOption)
           .map { case Some(Uci.Move.moveR(_, dest, _)) => Pos.fromKey(dest) }
           .map {
