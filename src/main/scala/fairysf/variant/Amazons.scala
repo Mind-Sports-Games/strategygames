@@ -3,7 +3,7 @@ package variant
 
 import cats.syntax.option._
 
-import strategygames.fairysf.format.{ FEN, Forsyth, Uci }
+import strategygames.fairysf.format.{ FEN, Uci }
 import strategygames.{ GameFamily, Player }
 
 case object Amazons
@@ -137,5 +137,11 @@ case object Amazons
           .toList
       case _                        => List()
     }
+
+  override def staleMate(situation: Situation): Boolean     = false
+  override def specialEnd(situation: Situation): Boolean    = situation.board.apiPosition.legalMoves.isEmpty
+  override def winner(situation: Situation): Option[Player] =
+    if (specialEnd(situation)) Option(!situation.player)
+    else None
 
 }
