@@ -108,18 +108,19 @@ object Replay {
       dest: Pos,
       apiPosition: Api.Position,
       uciMoves: List[String]
-  ): Drop =
+  ): Drop = {
+    val piece = Piece(before.situation.player, role)
     Drop(
-      piece = Piece(before.situation.player, role),
+      piece = piece,
       pos = dest,
       situationBefore = before.situation,
       after = before.situation.board.copy(
-        pieces = apiPosition.pieceMap,
+        pieces = before.situation.board.pieces + ((dest, piece)),
         uciMoves = uciMoves,
-        pocketData = apiPosition.pocketData,
         position = apiPosition.some
       )
     )
+  }
 
   private def gameMoveWhileValid__impl(
       moveStrs: Seq[String],
