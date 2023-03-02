@@ -26,6 +26,7 @@ abstract class Variant private[variant] (
   def minixiangqi = this == MiniXiangqi
   def flipello    = this == Flipello
   def flipello10  = this == Flipello10
+  def amazons     = this == Amazons
 
   def exotic = true
 
@@ -55,7 +56,13 @@ abstract class Variant private[variant] (
 
   def pieces: Map[Pos, Piece] = Api.pieceMapFromFen(fairysfName.name, initialFen.value)
 
+  def exportBoardFen(board: Board): FEN = board.apiPosition.fen
+
   def startPlayer: Player = P1
+
+  val switchPlayerAfterMove: Boolean = true
+
+  val plysPerTurn: Int = 1
 
   val kingPiece: Option[Role] = None
 
@@ -259,7 +266,8 @@ object Variant {
     Xiangqi,
     MiniXiangqi,
     Flipello,
-    Flipello10
+    Flipello10,
+    Amazons
   )
   val byId                    = all map { v =>
     (v.id, v)
@@ -289,7 +297,8 @@ object Variant {
     strategygames.fairysf.variant.Xiangqi,
     strategygames.fairysf.variant.MiniXiangqi,
     strategygames.fairysf.variant.Flipello,
-    strategygames.fairysf.variant.Flipello10
+    strategygames.fairysf.variant.Flipello10,
+    strategygames.fairysf.variant.Amazons
   )
 
   val divisionSensibleVariants: Set[Variant] = Set()

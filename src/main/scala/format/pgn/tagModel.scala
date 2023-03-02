@@ -74,12 +74,23 @@ case class Tags(value: List[Tag]) extends AnyVal {
 
   // TODO: this will need to be tested. We'll want to look at the _actual_ values that
   //       come in via these tags and ensure that the order we look at them is appropriate
+  //       what a mess this function is.
   def variant: Option[strategygames.variant.Variant] = chessVariant
     .map(strategygames.variant.Variant.Chess)
     .orElse(
       draughtsVariant
         .map(strategygames.variant.Variant.Draughts)
-        .orElse(fairysfVariant.map(strategygames.variant.Variant.FairySF))
+        .orElse(
+          fairysfVariant
+            .map(strategygames.variant.Variant.FairySF)
+            .orElse(
+              samuraiVariant
+                .map(strategygames.variant.Variant.Samurai)
+                .orElse(
+                  togyzkumalakVariant.map(strategygames.variant.Variant.Togyzkumalak)
+                )
+            )
+        )
     )
 
   def anyDate: Option[String] = apply(_.UTCDate) orElse apply(_.Date)

@@ -74,24 +74,53 @@ object Replay {
       enpassant = false
     )
 
+  def replayMoveWithoutAPI(
+      before: Game,
+      piece: Piece,
+      orig: Pos,
+      dest: Pos,
+      promotion: String
+  ): Move =
+    Move(
+      piece = piece,
+      orig = orig,
+      dest = dest,
+      situationBefore = before.situation,
+      after = before.situation.board.copy(
+        pieces = before.situation.board.pieces - orig + ((dest, piece))
+      ),
+      capture = None,
+      promotion = promotion match {
+        case "" => None
+        case _  =>
+          Role.promotable(
+            before.board.variant.gameFamily,
+            before.board.pieces(orig).role.forsyth
+          )
+      },
+      castle = None,
+      enpassant = false
+    )
+
   def replayDrop(
       before: Game,
       role: Role,
       dest: Pos,
       apiPosition: Api.Position,
       uciMoves: List[String]
-  ): Drop =
+  ): Drop = {
+    val piece = Piece(before.situation.player, role)
     Drop(
-      piece = Piece(before.situation.player, role),
+      piece = piece,
       pos = dest,
       situationBefore = before.situation,
       after = before.situation.board.copy(
-        pieces = apiPosition.pieceMap,
+        pieces = before.situation.board.pieces + ((dest, piece)),
         uciMoves = uciMoves,
-        pocketData = apiPosition.pocketData,
         position = apiPosition.some
       )
     )
+  }
 
   private def gameMoveWhileValid__impl(
       moveStrs: Seq[String],
@@ -109,11 +138,18 @@ object Replay {
     def replayMoveFromUci(orig: Option[Pos], dest: Option[Pos], promotion: String): (Game, MoveOrDrop) =
       (orig, dest) match {
         case (Some(orig), Some(dest)) => {
-          val uciMove = s"${orig.key}${dest.key}${promotion}"
-          uciMoves = uciMoves :+ uciMove
-          val move    = replayMove(state, orig, dest, promotion, getApiPosition(uciMove), uciMoves)
-          state = state.apply(move)
-          (state, move.asLeft)
+          if (variant.switchPlayerAfterMove) {
+            val uciMove = s"${orig.key}${dest.key}${promotion}"
+            uciMoves = uciMoves :+ uciMove
+            val move    = replayMove(state, orig, dest, promotion, getApiPosition(uciMove), uciMoves)
+            state = state.apply(move)
+            (state, move.asLeft)
+          } else {
+            // Amazons
+            val move = replayMoveWithoutAPI(state, state.situation.board.pieces(orig), orig, dest, promotion)
+            state = state.apply(move)
+            (state, move.asLeft)
+          }
         }
         case (orig, dest)             => {
           val uciMove = s"${orig}${dest}${promotion}"
@@ -122,25 +158,36 @@ object Replay {
         }
       }
 
-    def replayDropFromUci(role: Option[Role], dest: Option[Pos]): (Game, MoveOrDrop) =
-      (role, dest) match {
-        case (Some(role), Some(dest)) => {
+    def replayDropFromUci(
+        role: Option[Role],
+        dest: Option[Pos],
+        prevStr: Option[String]
+    ): (Game, MoveOrDrop) =
+      (role, dest, prevStr) match {
+        case (Some(role), Some(dest), None)                                        => {
           val uciDrop = s"${role.forsyth}@${dest.key}"
           uciMoves = uciMoves :+ uciDrop
           val drop    = replayDrop(state, role, dest, getApiPosition(uciDrop), uciMoves)
           state = state.applyDrop(drop)
           (state, drop.asRight)
         }
-        case (role, dest)             => {
+        // Amazons
+        case (Some(role), Some(dest), Some(Uci.Move.moveR(prevOrig, prevDest, _))) => {
+          val uciMove = s"${prevOrig}${prevDest},${prevDest}${dest.key}"
+          uciMoves = uciMoves :+ uciMove
+          val drop    = replayDrop(state, role, dest, getApiPosition(uciMove), uciMoves)
+          state = state.applyDrop(drop)
+          (state, drop.asRight)
+        }
+        case (role, dest, _)                                                       => {
           val uciDrop = s"${role}@${dest}"
           errors += uciDrop + ","
           sys.error(s"Invalid drop for replay: ${uciDrop}")
         }
       }
 
-    val moves: List[(Game, MoveOrDrop)] = Parser
-      .pgnMovesToUciMoves(moveStrs)
-      .map {
+    def parseMoveOrDropWithPrevious(moveStr: String, prevStr: Option[String]): (Game, MoveOrDrop) =
+      moveStr match {
         case Uci.Move.moveR(orig, dest, promotion) =>
           replayMoveFromUci(
             Pos.fromKey(orig),
@@ -150,9 +197,26 @@ object Replay {
         case Uci.Drop.dropR(role, dest)            =>
           replayDropFromUci(
             Role.allByForsyth(init.situation.board.variant.gameFamily).get(role(0)),
-            Pos.fromKey(dest)
+            Pos.fromKey(dest),
+            prevStr
           )
         case moveStr: String                       => sys.error(s"Invalid moveordrop for replay: $moveStr")
+      }
+
+    def parseMoveOrDrop(moveStr: String): (Game, MoveOrDrop) =
+      parseMoveOrDropWithPrevious(moveStr, None)
+
+    def moves: List[(Game, MoveOrDrop)] =
+      if (!variant.switchPlayerAfterMove) {
+        // Amazons. Don't want doubleMoveFormat from Parser, so dont ask for it
+        val moves       = Parser.pgnMovesToUciMoves(moveStrs)
+        val firstMove   = moves.headOption.toList
+        val pairedMoves = if (moves == firstMove) List() else moves.sliding(2)
+        (firstMove.map(parseMoveOrDrop)) ::: pairedMoves.map { case List(prev, move) =>
+          parseMoveOrDropWithPrevious(move, Some(prev))
+        }.toList
+      } else {
+        Parser.pgnMovesToUciMoves(moveStrs).map(parseMoveOrDrop)
       }
 
     (init, moves, errors match { case "" => None; case _ => errors.some })
@@ -175,7 +239,6 @@ object Replay {
       },
       error
     )
-
   }
 
   private def recursiveSituations(sit: Situation, sans: List[San]): Validated[String, List[Situation]] =
@@ -279,7 +342,8 @@ object Replay {
           case san :: rest =>
             san(StratSituation.wrap(sit)) flatMap { moveOrDrop =>
               val after = moveOrDrop.fold(m => m.finalizeAfter().toFairySF, d => d.finalizeAfter.toFairySF)
-              val fen   = Forsyth >> Game(Situation(after, Player.fromPly(ply)), turns = ply)
+              val fen   =
+                Forsyth >> Game(Situation(after, Player.fromPly(ply, variant.plysPerTurn)), turns = ply)
               if (compareFen(fen)) Validated.valid(ply)
               else recursivePlyAtFen(Situation(after, !sit.player), rest, ply + 1)
             }

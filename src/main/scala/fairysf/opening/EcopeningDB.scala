@@ -50,5 +50,6 @@ object EcopeningDB {
 "D12" -> new Ecopening("D12", "minishogi", "MiniShogi Opening 3", "MiniShogi Opening 3", "b1b2 d5d4", "rbs1k/3gp/5/PG3/K1SBR[]", "d5d4"),
 "E00" -> new Ecopening("E00", "flipello", "Flipello Start Pos", "Flipello Start Pos", "", "8/8/8/3pP3/3Pp3/8/8/8[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp]", ""),
 "F00" -> new Ecopening("F00", "flipello10", "Flipello10 Start Pos", "Flipello10 Start Pos", "", "10/10/10/10/4pP4/4Pp4/10/10/10/10[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp]", ""),
+"G00" -> new Ecopening("G00", "amazons", "Amazons Start Pos", "Amazons Start Pos", "", "3q2q3/10/10/q8q/10/10/Q8Q/10/10/3Q2Q3", ""),
   )
 }

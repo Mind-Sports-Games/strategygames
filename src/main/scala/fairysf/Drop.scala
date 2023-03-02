@@ -15,7 +15,11 @@ case class Drop(
 
   def situationAfter = Situation(finalizeAfter, !piece.player)
 
-  def finalizeAfter: Board = after
+  def finalizeAfter: Board = after updateHistory { h =>
+    h.copy(
+      lastMove = Option(toUci)
+    )
+  }
 
   def player = piece.player
 
