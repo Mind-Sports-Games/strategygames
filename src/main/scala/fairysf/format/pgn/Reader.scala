@@ -94,25 +94,38 @@ object Reader {
       case (r: Result.Incomplete, _)      => r
     }
 
-  private def makeReplayWithPgn(game: Game, moves: Iterable[String]): Result =
+  private def makeReplayWithPgn(game: Game, moves: Iterable[String]): Result = {
+    var lastMove: Option[String] = None
+    var lastDest: Option[String] = None
     Parser.pgnMovesToUciMoves(moves).foldLeft[Result](Result.Complete(Replay(game))) {
       case (Result.Complete(replay), m) =>
         m match {
           case Uci.Move.moveR(orig, dest, promotion) => {
+            lastMove = Some(m)
+            lastDest = Some(dest)
             (Pos.fromKey(orig), Pos.fromKey(dest)) match {
               case (Some(orig), Some(dest)) =>
                 Result.Complete(
                   replay.addMove(
-                    Left(
-                      Replay.replayMove(
-                        replay.state,
-                        orig,
-                        dest,
-                        promotion,
-                        replay.state.board.apiPosition.makeMoves(List(m)),
-                        replay.state.board.uciMoves :+ m
-                      )
-                    )
+                    Left {
+                      if (game.situation.board.variant.switchPlayerAfterMove)
+                        Replay.replayMove(
+                          replay.state,
+                          orig,
+                          dest,
+                          promotion,
+                          replay.state.board.apiPosition.makeMoves(List(m)),
+                          replay.state.board.uciMoves :+ m
+                        )
+                      else
+                        Replay.replayMoveWithoutAPI(
+                          replay.state,
+                          replay.state.board.pieces(orig),
+                          orig,
+                          dest,
+                          promotion
+                        )
+                    }
                   )
                 )
               case _                        => Result.Incomplete(replay, s"Error making replay with move: ${m}")
@@ -123,15 +136,18 @@ object Reader {
               case (Some(role), Some(dest)) =>
                 Result.Complete(
                   replay.addMove(
-                    Right(
+                    Right {
+                      val uci =
+                        if (game.situation.board.variant.switchPlayerAfterMove) m
+                        else s"${lastMove.getOrElse("")},${lastDest.getOrElse("")}${dest.key}"
                       Replay.replayDrop(
                         replay.state,
                         role,
                         dest,
-                        replay.state.board.apiPosition.makeMoves(List(m)),
-                        replay.state.board.uciMoves :+ m
+                        replay.state.board.apiPosition.makeMoves(List(uci)),
+                        replay.state.board.uciMoves :+ uci
                       )
-                    )
+                    }
                   )
                 )
               case _                        => Result.Incomplete(replay, s"Error making replay with drop: ${m}")
@@ -140,6 +156,7 @@ object Reader {
         }
       case (r: Result.Incomplete, _)    => r
     }
+  }
 
   private def makeGame(tags: Tags) = {
     val g = Game(

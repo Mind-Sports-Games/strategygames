@@ -21,7 +21,7 @@ case class Pgn(
   }
   def updatePly(ply: Int, f: Move => Move)       = {
     val fullMove = (ply + 1) / 2
-    val player   = Player.fromPly(ply - 1)
+    val player   = Player.fromPly(ply - 1, tags.fairysfVariant.map(_.plysPerTurn).getOrElse(1))
     updateTurn(fullMove, _.update(player, f))
   }
   def updateLastPly(f: Move => Move)             = updatePly(nbPlies, f)
@@ -78,6 +78,7 @@ case class Turn(
 
   def isEmpty = p1.isEmpty && p2.isEmpty
 
+  //TODO This might be wrong for Amazons
   def plyOf(player: Player) = number * 2 - player.fold(1, 0)
 
   def count = List(p1, p2) count (_.isDefined)
@@ -96,6 +97,7 @@ case class Turn(
 
 object Turn {
 
+  //TODO This might be wrong for Amazons
   def fromMoves(moves: List[Move], ply: Int): List[Turn] = {
     moves.foldLeft((List[Turn](), ply)) {
       case ((turns, p), move) if p % 2 == 1 =>

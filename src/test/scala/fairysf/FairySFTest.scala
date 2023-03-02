@@ -16,7 +16,7 @@ trait FairySFTest extends Specification with ValidatedMatchers {
 
   implicit def stringToBoard(str: String): Board = Visual << str
 
-  //implicit def stringToBoardBuilder(str: String) =
+  // implicit def stringToBoardBuilder(str: String) =
   //  new {
 
   //  }
@@ -27,7 +27,7 @@ trait FairySFTest extends Specification with ValidatedMatchers {
       def as(player: Player): Situation = Situation(Visual << str, player)
     }
 
-  //case class RichActor(actor: Actor) {
+  // case class RichActor(actor: Actor) {
   //  def threatens(to: Pos): Boolean =
   //    actor.piece.eyes(actor.pos, to) && {
   //      (!actor.piece.role.projection) ||
@@ -35,9 +35,9 @@ trait FairySFTest extends Specification with ValidatedMatchers {
   //        Actor.longRangeThreatens(actor.board, actor.pos, _, to)
   //      }
   //    }
-  //}
+  // }
 
-  //implicit def richActor(actor: Actor) = RichActor(actor)
+  // implicit def richActor(actor: Actor) = RichActor(actor)
 
   case class RichGame(game: Game) {
 
@@ -72,6 +72,8 @@ trait FairySFTest extends Specification with ValidatedMatchers {
 
   implicit def richGame(game: Game) = RichGame(game)
 
+  // this isnt how we initialise games for fairy and so isn't a good test
+  // It doesn't work all the time either
   def fenToGame(positionString: FEN, variant: Variant) = {
     val situation = Forsyth << positionString
     situation map { sit =>
@@ -100,7 +102,6 @@ trait FairySFTest extends Specification with ValidatedMatchers {
     beSome.like { case p =>
       Visual.addNewLines(Visual.>>|(board, Map(p -> 'x'))) must_== visual
     }
-
 
   def sortPoss(poss: Seq[Pos]): Seq[Pos] = poss sortBy (_.toString)
 

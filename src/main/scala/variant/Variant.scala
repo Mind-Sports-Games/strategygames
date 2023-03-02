@@ -60,6 +60,7 @@ abstract class Variant(
   def minixiangqi: Boolean
   def flipello: Boolean
   def flipello10: Boolean
+  def amazons: Boolean
 
   def oware: Boolean
 
@@ -93,6 +94,7 @@ abstract class Variant(
 
   def initialFen: FEN
   def startPlayer: Player
+  def plysPerTurn: Int
 
   def isValidPromotion(promotion: Option[PromotableRole]): Boolean
 
@@ -192,6 +194,7 @@ object Variant {
     def minixiangqi: Boolean = false
     def flipello: Boolean    = false
     def flipello10: Boolean  = false
+    def amazons: Boolean     = false
 
     def oware: Boolean = false
 
@@ -224,6 +227,7 @@ object Variant {
 
     def initialFen: FEN     = FEN.Chess(v.initialFen)
     def startPlayer: Player = v.startPlayer
+    def plysPerTurn: Int    = v.plysPerTurn
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = promotion match {
       case Some(Role.ChessPromotableRole(pr)) => v.isValidPromotion(pr.some)
@@ -332,6 +336,7 @@ object Variant {
     def minixiangqi: Boolean = false
     def flipello: Boolean    = false
     def flipello10: Boolean  = false
+    def amazons: Boolean     = false
 
     def oware: Boolean = false
 
@@ -364,6 +369,7 @@ object Variant {
 
     def initialFen: FEN     = FEN.Draughts(v.initialFen)
     def startPlayer: Player = v.startPlayer
+    def plysPerTurn: Int    = v.plysPerTurn
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = promotion match {
       case Some(Role.DraughtsPromotableRole(pr)) => v.isValidPromotion(pr.some)
@@ -470,6 +476,7 @@ object Variant {
     def minixiangqi: Boolean = v.minixiangqi
     def flipello: Boolean    = v.flipello
     def flipello10: Boolean  = v.flipello10
+    def amazons: Boolean     = v.amazons
 
     def oware: Boolean = false
 
@@ -502,6 +509,7 @@ object Variant {
 
     def initialFen: FEN     = FEN.FairySF(v.initialFen)
     def startPlayer: Player = v.startPlayer
+    def plysPerTurn: Int    = v.plysPerTurn
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = promotion match {
       case Some(Role.FairySFPromotableRole(pr)) => v.isValidPromotion(pr.some)
@@ -608,6 +616,7 @@ object Variant {
     def minixiangqi: Boolean = false
     def flipello: Boolean    = false
     def flipello10: Boolean  = false
+    def amazons: Boolean     = false
 
     def oware: Boolean = v.oware
 
@@ -640,6 +649,7 @@ object Variant {
 
     def initialFen: FEN     = FEN.Samurai(v.initialFen)
     def startPlayer: Player = v.startPlayer
+    def plysPerTurn: Int    = v.plysPerTurn
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false
 
@@ -742,6 +752,7 @@ object Variant {
     def minixiangqi: Boolean = false
     def flipello: Boolean    = false
     def flipello10: Boolean  = false
+    def amazons: Boolean     = false
 
     def oware: Boolean = false
 
@@ -774,6 +785,7 @@ object Variant {
 
     def initialFen: FEN     = FEN.Togyzkumalak(v.initialFen)
     def startPlayer: Player = v.startPlayer
+    def plysPerTurn: Int    = v.plysPerTurn
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false
 

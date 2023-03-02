@@ -12,17 +12,30 @@ import cats.data.Validated
 // http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm
 object Parser {
 
-  def pgnMovesToUciMoves(pgnMoves: Iterable[String]): List[String] =
-    pgnMoves.toList.map(
-      _ match {
-        case Uci.Move.moveP(orig, dest, promotion) =>
-          promotion match {
-            case "" => s"${orig}${dest}"
-            case _  => s"${orig}${dest}+"
+  def pgnMovesToUciMoves(pgnMoves: Iterable[String], doubleMoveFormat: Boolean = false): List[String] =
+    if (doubleMoveFormat)
+      pgnMoves.toList
+        .sliding(2, 2)
+        .toList
+        .map(
+          _ match {
+            case List(Uci.Move.moveP(orig, dest, _), Uci.Drop.dropR(_, dest2)) =>
+              Some(s"${orig}${dest},${dest}${dest2}")
+            case _                                                             => None
           }
-        case s: String                             => s
-      }
-    )
+        )
+        .flatten
+    else
+      pgnMoves.toList.map(
+        _ match {
+          case Uci.Move.moveP(orig, dest, promotion) =>
+            promotion match {
+              case "" => s"${orig}${dest}"
+              case _  => s"${orig}${dest}+"
+            }
+          case s: String                             => s
+        }
+      )
 
   case class StrMove(
       san: String,
