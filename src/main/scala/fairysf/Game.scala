@@ -29,7 +29,9 @@ case class Game(
       situation = newSituation,
       turns = turns + 1,
       pgnMoves = pgnMoves :+ move.toUci.uci,
-      clock = applyClock(move.metrics, newSituation.status.isEmpty)
+      clock =
+        if (newSituation.player == situation.player) clock
+        else applyClock(move.metrics, newSituation.status.isEmpty)
     )
   }
 
