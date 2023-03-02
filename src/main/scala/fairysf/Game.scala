@@ -59,7 +59,7 @@ case class Game(
     clock.map { c =>
       {
         val newC = c.step(metrics, gameActive)
-        if (turns - startedAtTurn == 1) newC.start else newC
+        if (turns - startedAtTurn == situation.board.variant.plysPerTurn) newC.start else newC
       }
     }
 
