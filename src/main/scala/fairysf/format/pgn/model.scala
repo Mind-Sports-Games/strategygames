@@ -78,7 +78,7 @@ case class Turn(
 
   def isEmpty = p1.isEmpty && p2.isEmpty
 
-  //TODO This might be wrong for Amazons
+  // TODO This might be wrong for Amazons
   def plyOf(player: Player) = number * 2 - player.fold(1, 0)
 
   def count = List(p1, p2) count (_.isDefined)
@@ -97,7 +97,7 @@ case class Turn(
 
 object Turn {
 
-  //TODO This might be wrong for Amazons
+  // TODO This might be wrong for Amazons
   def fromMoves(moves: List[Move], ply: Int): List[Turn] = {
     moves.foldLeft((List[Turn](), ply)) {
       case ((turns, p), move) if p % 2 == 1 =>
