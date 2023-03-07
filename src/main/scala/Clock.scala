@@ -431,8 +431,9 @@ case class ByoyomiClock(
         val clockActive  = gameActive && moveTime < remaining + competitor.periodsLeft * competitor.byoyomi
         // The number of periods the move stretched over
         val periodSpan   = periodsInUse(player, moveTime)
+        // TODO: If we could assume you were _always_ using byoyomi, that would simplify this (and other code)
         val usingByoyomi =
-          clockActive && competitor.byoyomi.isPositive && (competitor.spentPeriods > 0 || periodSpan > 0)
+          competitor.byoyomi.isPositive && (competitor.spentPeriods > 0 || periodSpan > 0)
 
         val timeRemainingAfterMove = (remaining - moveTime) + periodSpan * competitor.byoyomi
         val newC                   =
