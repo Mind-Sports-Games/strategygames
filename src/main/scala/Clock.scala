@@ -64,10 +64,11 @@ sealed trait Clock {
   def start: Clock
   def stop: Clock
   def hardStop: Clock
-  def switch: Clock
+  def switch(switchPlayer: Boolean = true): Clock
   def step(
       metrics: MoveMetrics = MoveMetrics(),
-      gameActive: Boolean = true
+      gameActive: Boolean = true,
+      switchClock: Boolean = true
   ): Clock
   def withTimestamper(timestamper: Timestamper): Clock
   def outOfTime(c: Player, withGrace: Boolean): Boolean
@@ -87,7 +88,7 @@ sealed trait Clock {
   def incrementOf(c: Player)    = clockPlayer(c).increment
   def lastMoveTimeOf(c: Player) = clockPlayer(c).lastMoveTime
 
-  def takeback = switch
+  def takeback(switchPlayer: Boolean = true) = switch(switchPlayer)
 
   def isRunning            = timer.isDefined
   def berserked(c: Player) = clockPlayer(c).berserk
@@ -174,15 +175,16 @@ case class FischerClock(
 
   def withTimestamper(timestamper: Timestamper) = copy(timestamper = timestamper)
 
-  def switch =
+  def switch(switchPlayer: Boolean = true) =
     copy(
-      player = !player,
+      player = if (switchPlayer) !player else player,
       timer = timer.map(_ => now)
     )
 
   def step(
       metrics: MoveMetrics = MoveMetrics(),
-      gameActive: Boolean = true
+      gameActive: Boolean = true,
+      switchClock: Boolean = true
   ) =
     (timer match {
       case None    =>
@@ -199,7 +201,7 @@ case class FischerClock(
         val moveTime = (elapsed - lagComp) nonNeg
 
         val clockActive = gameActive && moveTime < competitor.remaining
-        val inc         = clockActive ?? competitor.increment
+        val inc         = (clockActive && switchClock) ?? competitor.increment
 
         val newC = updatePlayer(player) {
           _.takeTime(moveTime - inc)
@@ -207,7 +209,7 @@ case class FischerClock(
         }
 
         if (clockActive) newC else newC.hardStop
-    }).switch
+    }).switch(switchClock)
 
   // To do: safely add this to takeback to remove inc from player.
   // def deinc = updatePlayer(player, _.giveTime(-incrementOf(player)))
@@ -400,15 +402,16 @@ case class ByoyomiClock(
       _.giveTime(t)
     }
 
-  def switch =
+  def switch(switchPlayer: Boolean = true) =
     copy(
-      player = !player,
+      player = if (switchPlayer) !player else player,
       timer = timer.map(_ => now)
     )
 
   def step(
       metrics: MoveMetrics = MoveMetrics(),
-      gameActive: Boolean = true
+      gameActive: Boolean = true,
+      switchClock: Boolean = true
   ) =
     (timer match {
       case None    =>
@@ -428,26 +431,31 @@ case class ByoyomiClock(
         val clockActive  = gameActive && moveTime < remaining + competitor.periodsLeft * competitor.byoyomi
         // The number of periods the move stretched over
         val periodSpan   = periodsInUse(player, moveTime)
+        // TODO: If we could assume you were _always_ using byoyomi, that would simplify this (and other code)
         val usingByoyomi =
-          clockActive && competitor.byoyomi.isPositive && (competitor.spentPeriods > 0 || periodSpan > 0)
+          competitor.byoyomi.isPositive && (competitor.spentPeriods > 0 || periodSpan > 0)
 
-        val newC =
+        val timeRemainingAfterMove = (remaining - moveTime) + periodSpan * competitor.byoyomi
+        val newC                   =
           if (usingByoyomi)
             updatePlayer(player) {
-              _.setRemaining((remaining - moveTime) atLeast competitor.byoyomi)
+              _.setRemaining(
+                (remaining - moveTime) atLeast (if (switchClock) competitor.byoyomi
+                                                else timeRemainingAfterMove)
+              )
                 .spendPeriods(periodSpan)
                 .copy(lag = lagTrack, lastMoveTime = moveTime)
             }
           else
             updatePlayer(player) {
-              _.takeTime(moveTime - (clockActive ?? competitor.increment))
+              _.takeTime(moveTime - ((clockActive && switchClock) ?? competitor.increment))
                 .spendPeriods(periodSpan)
                 .copy(lag = lagTrack, lastMoveTime = moveTime)
             }
 
         if (clockActive) newC else newC.hardStop
       }
-    }).switch
+    }).switch(switchClock)
 
   def refundPeriods(c: Player, p: Int) =
     updatePlayer(c) {
