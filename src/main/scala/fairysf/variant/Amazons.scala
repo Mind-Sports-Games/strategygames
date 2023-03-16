@@ -80,7 +80,8 @@ case object Amazons
                 Pos.fromKey(dest),
                 promotion
               )
-            case Some(x)                                     => sys.error(s"Invalid legalMove for Amazons: ${x}")
+            case Some(x)                                     => sys.error(s"Ilegal move for Amazons: ${x}")
+            case _                                           => sys.error(s"Illegal unknown move for Amazons.")
           }
           .distinct
           .map {
