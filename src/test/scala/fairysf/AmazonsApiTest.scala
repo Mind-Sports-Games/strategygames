@@ -2,6 +2,7 @@ package strategygames.fairysf
 
 import variant.Amazons
 import strategygames.fairysf.format.FEN
+import org.playstrategy.FairyStockfish
 
 class AmazonsApiTest extends FairySFTest {
 
@@ -165,5 +166,30 @@ class AmazonsApiTest extends FairySFTest {
       position2.fen.toString() must_== "10/10/10/q3qq3q/pppppppppp/pppppppppp/Q3QQ3Q/10/10/10 w - - 20 11"
     }
 
+  }
+
+  "Should convert between FEN formats" in {
+    val initialFen =
+      "3q2q3/10/10/q8q/10/10/Q8Q/10/10/3Q2Q3[pppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp] w - - 0 1"
+    val fairyFen   = Api.toFairySFFen("amazons", initialFen)
+    fairyFen must_== "3q2q3/10/10/q8q/10/10/Q8Q/10/10/3Q2Q3[********************************************************************************************] w - - 0 1"
+    val isometric  = Api.fromFairySFFen(
+      "amazons",
+      "3q2q3/10/10/q8q/10/10/Q8Q/10/10/3Q2Q3[********************************************************************************************] w - - 0 1"
+    )
+    isometric must_== initialFen
+
+  }
+  "Amazons initial fen" should {
+    "be valid" in {
+      // NOTE: this test only makes sense at the API level, because we can convert it
+      val name = variant.Amazons.fairysfName.name
+      println(s"initialFen.value: ${variant.Amazons.initialFen.value}")
+      val initialFen = Api.toFairySFFen(name, variant.Amazons.initialFen.value)
+      println(s"converted: ${initialFen}")
+      println(s"API.initialFen: ${Api.initialFen(name)}")
+      println(s"variantName: ${name}")
+      FairyStockfish.validateFEN(name, initialFen) must_== true
+    }
   }
 }

@@ -53,12 +53,4 @@ class FairyStockfishTest extends Specification with ValidatedMatchers {
     }
   }
 
-  "Amazons initial fen" should {
-    "be valid" in {
-      FairyStockfish.validateFEN(
-        variant.Amazons.fairysfName.name,
-        variant.Amazons.initialFen.value
-      ) must_== true
-    }
-  }
 }

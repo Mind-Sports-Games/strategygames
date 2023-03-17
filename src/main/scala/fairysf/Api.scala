@@ -138,12 +138,16 @@ object Api {
   def positionFromVariantName(variantName: String): Position =
     new FairyPosition(new FairyStockfish.Position(variantName))
 
-  private def convertFen(variantName: String, fen: String): String =
+  def toFairySFFen(variantName: String, fen: String): String =
     if (variantName == "amazons") fen.replace("p", "*").replace("P", "*")
     else fen
 
+  def fromFairySFFen(variantName: String, fen: String): String =
+    if (variantName == "amazons") fen.replace("*", "p")
+    else fen
+
   def positionFromVariantNameAndFEN(variantName: String, fen: String): Position =
-    new FairyPosition(new FairyStockfish.Position(variantName, convertFen(variantName, fen)))
+    new FairyPosition(new FairyStockfish.Position(variantName, toFairySFFen(variantName, fen)))
 
   def positionFromVariantAndMoves(variant: Variant, uciMoves: List[String]): Position =
     positionFromVariant(variant).makeMoves(uciMoves)
@@ -237,10 +241,10 @@ object Api {
 
   def availableVariants(): Array[String] = FairyStockfish.availableVariants()
 
-  def initialFen(variantName: String): FEN = FEN(FairyStockfish.initialFen(variantName).replace("*", "p"))
+  def initialFen(variantName: String): FEN = FEN(fromFairySFFen(variantName, FairyStockfish.initialFen(variantName)))
 
   def validateFEN(variantName: String, fen: String): Boolean =
-    FairyStockfish.validateFEN(variantName, convertFen(variantName, fen))
+    FairyStockfish.validateFEN(variantName, toFairySFFen(variantName, fen))
 
   def positionFromMoves(variantName: String, fen: String, movesList: Option[List[String]] = None): Position =
     positionFromVariantNameAndFEN(variantName, fen)
