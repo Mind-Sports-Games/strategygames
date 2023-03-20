@@ -5,9 +5,6 @@ import strategygames.draughts.Pos64
 import cats.data.Validated._
 import org.specs2.matcher.ValidatedMatchers
 import org.specs2.mutable.Specification
-import scala.concurrent.{ Await, Future }
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration.DurationInt
 
 import format.Uci
 
@@ -155,23 +152,15 @@ class RussianDraughtsTest extends Specification with ValidatedMatchers {
       s.validMoves.contains(Pos64.posAt(moves(29).take(2).toInt).getOrElse(Pos64(1, 1))) must_== false
     }
     "be invalid when playing a non possible move " in {
-      val future = Future {
-        moves
-          .take(29)
-          .:+("2420")
-          .foldLeft(Situation(variant.Russian))((sit, uci) => move(sit, uci))
-      }
-
-      Await.result(future, 1 seconds) must throwA[RuntimeException]
+      moves
+        .take(29)
+        .:+("2420")
+        .foldLeft(Situation(variant.Russian))((sit, uci) => move(sit, uci)) must throwA[RuntimeException]
     }
     "be invalid when playing a non possible move for variant " in {
-      val future = Future {
-        moves
-          .take(30)
-          .foldLeft(Situation(variant.Brazilian))((sit, uci) => move(sit, uci))
-      }
-
-      Await.result(future, 1 seconds) must throwA[RuntimeException]
+      moves
+        .take(30)
+        .foldLeft(Situation(variant.Brazilian))((sit, uci) => move(sit, uci)) must throwA[RuntimeException]
     }
   }
 
@@ -190,9 +179,7 @@ class RussianDraughtsTest extends Specification with ValidatedMatchers {
     "but not replayable for brazilian variant" in {
       val variantGame = variant.Brazilian
       val initialFen  = variant.Brazilian.initialFen
-      val future      = Future { Replay.gameMoveWhileValid(pdnMoves, initialFen, variantGame) }
-
-      Await.result(future, 1 seconds) must throwA[RuntimeException]
+      Replay.gameMoveWhileValid(pdnMoves, initialFen, variantGame) must throwA[RuntimeException]
     }
   }
 
