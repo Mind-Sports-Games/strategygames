@@ -23,13 +23,9 @@ case object Russian
   def perfIcon: Char = ''
 
   override def fenVariant    = true
-  def pieces                 = {
-    println("Russian.pieces")
-    val pieces = Variant.symmetricThreeRank(Vector(Man, Man, Man, Man), boardSize)
-    pieces
-  }
-  val initialFen             = FEN("W:W21,22,23,24,25,26,27,28,29,30,31,32:B1,2,3,4,5,6,7,8,9,10,11,12:H0:F1")
-  val startingPosition       = StartingPosition("---", initialFen, "", "Initial position".some)
+  def pieces                 = Variant.symmetricThreeRank(Vector(Man, Man, Man, Man), boardSize)
+  def initialFen             = FEN("W:W21,22,23,24,25,26,27,28,29,30,31,32:B1,2,3,4,5,6,7,8,9,10,11,12:H0:F1")
+  def startingPosition       = StartingPosition("---", initialFen, "", "Initial position".some)
   override val openingTables = List(OpeningTable.tableFMJD, OpeningTable.tableIDFBasic)
 
   def captureDirs    = Standard.captureDirs

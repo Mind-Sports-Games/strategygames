@@ -20,9 +20,9 @@ case object Frysk
   def perfId: Int    = 116
   def perfIcon: Char = ''
 
-  val pieces           = Variant.symmetricBackrank(Vector(Man, Man, Man, Man, Man), boardSize)
-  val initialFen       = FEN("W:W46,47,48,49,50:B1,2,3,4,5:H0:F1")
-  val startingPosition = StartingPosition("---", initialFen, "", "Initial position".some)
+  def pieces           = Variant.symmetricBackrank(Vector(Man, Man, Man, Man, Man), boardSize)
+  def initialFen       = FEN("W:W46,47,48,49,50:B1,2,3,4,5:H0:F1")
+  def startingPosition = StartingPosition("---", initialFen, "", "Initial position".some)
 
   def captureDirs    = Frisian.captureDirs
   def moveDirsPlayer = Frisian.moveDirsPlayer
