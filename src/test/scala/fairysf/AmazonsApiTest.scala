@@ -1,7 +1,8 @@
 package strategygames.fairysf
 
 import variant.Amazons
-import strategygames.fairysf.format.FEN
+import strategygames.fairysf.format.{ FEN, Uci, UciDump }
+import strategygames.GameFamily
 import org.playstrategy.FairyStockfish
 
 class AmazonsApiTest extends FairySFTest {
@@ -168,28 +169,50 @@ class AmazonsApiTest extends FairySFTest {
 
   }
 
-  "Should convert between FEN formats" in {
-    val initialFen =
-      "3q2q3/10/10/q8q/10/10/Q8Q/10/10/3Q2Q3[pppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp] w - - 0 1"
-    val fairyFen   = Api.toFairySFFen("amazons", initialFen)
-    fairyFen must_== "3q2q3/10/10/q8q/10/10/Q8Q/10/10/3Q2Q3[********************************************************************************************] w - - 0 1"
-    val isometric  = Api.fromFairySFFen(
-      "amazons",
-      "3q2q3/10/10/q8q/10/10/Q8Q/10/10/3Q2Q3[********************************************************************************************] w - - 0 1"
-    )
-    isometric must_== initialFen
-
-  }
   "Amazons initial fen" should {
+    "Should convert between formats" in {
+      val initialFen =
+        "3q2q3/10/10/q8q/10/10/Q8Q/10/10/3Q2Q3[pppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp] w - - 0 1"
+      val fairyFen   = Api.toFairySFFen("amazons", initialFen)
+      fairyFen must_== "3q2q3/10/10/q8q/10/10/Q8Q/10/10/3Q2Q3 w - - 0 1"
+      Api.toFairySFFen("amazons", Api.fromFairySFFen("amazons", fairyFen)) must_== fairyFen
+
+    }
     "be valid" in {
       // NOTE: this test only makes sense at the API level, because we can convert it
-      val name = variant.Amazons.fairysfName.name
+      val name       = variant.Amazons.fairysfName.name
       println(s"initialFen.value: ${variant.Amazons.initialFen.value}")
       val initialFen = Api.toFairySFFen(name, variant.Amazons.initialFen.value)
       println(s"converted: ${initialFen}")
       println(s"API.initialFen: ${Api.initialFen(name)}")
       println(s"variantName: ${name}")
       FairyStockfish.validateFEN(name, initialFen) must_== true
+    }
+  }
+  "Amazons UCI" should {
+    "convert between formats" in {
+      val fairySfMoves = List(
+        "d1d4,d4d5",
+        "d10d7,d7d6",
+        "g1g4,g4g5",
+        "g10g7,g7g6",
+        "d4e4,e4e5"
+      ).mkString(" ")
+      val stratGamesMoves = List(
+        "d1d4", "P@d5",
+        "d10d7", "P@d6",
+        "g1g4", "P@g5",
+        "g10g7", "P@g6",
+        "d4e4", "P@e5"
+      ).mkString(" ")
+      Uci
+        .readList(GameFamily.Amazons(), stratGamesMoves)
+        .fold(
+          false must_== true
+        )(uciMoveList => {
+          (uciMoveList.size > 0) must_== true
+          UciDump.fairySFUciMoves(variant.Amazons)(uciMoveList) must_== fairySfMoves
+        })
     }
   }
 }
