@@ -211,7 +211,7 @@ class AmazonsApiTest extends FairySFTest {
           false must_== true
         )(uciMoveList => {
           (uciMoveList.size > 0) must_== true
-          UciDump.fairySFUciMoves(variant.Amazons)(uciMoveList) must_== fairySfMoves
+          UciDump.fishnetUci(variant.Amazons)(uciMoveList) must_== fairySfMoves
         })
     }
   }

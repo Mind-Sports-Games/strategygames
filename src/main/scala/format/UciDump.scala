@@ -45,9 +45,9 @@ object UciDump {
     case _                                                                                       => sys.error("Mismatched gamelogic types 13")
   }
 
-  def fairySFUciMoves(variant: Variant)(moves: List[Uci]): String = variant match {
+  def fishnetUci(variant: Variant)(moves: List[Uci]): String = variant match {
     case Variant.FairySF(variant) =>
-      strategygames.fairysf.format.UciDump.fairySFUciMoves(variant)(moves.map(_.toFairySF))
+      strategygames.fairysf.format.UciDump.fishnetUci(variant)(moves.map(_.toFairySF))
     case _                    =>
       moves.map(_.fishnetUci).mkString(" ")
   }

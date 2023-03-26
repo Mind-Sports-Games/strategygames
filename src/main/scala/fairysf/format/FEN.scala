@@ -1,6 +1,8 @@
 package strategygames.fairysf.format
 
-import strategygames.Player
+import strategygames.{ GameFamily, Player }
+import strategygames.fairysf.variant.Variant
+import strategygames.fairysf.Api
 
 final case class FEN(value: String) extends AnyVal {
 
@@ -22,4 +24,11 @@ final case class FEN(value: String) extends AnyVal {
 object FEN {
 
   def clean(source: String): FEN = FEN(source.replace("_", " ").trim)
+
+  def fishnetFen(variant: Variant)(fen: FEN) = variant.gameFamily match {
+    case GameFamily.Amazons() =>
+      FEN(Api.toFairySFFen("amazons", fen.value))
+    case _                    =>
+      fen
+  }
 }

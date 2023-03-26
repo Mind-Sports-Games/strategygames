@@ -30,7 +30,7 @@ object UciDump {
       case Right(d) => d.toUci.lilaUci
     }
 
-  def fairySFUciMoves(variant: Variant)(moves: List[Uci]): String = variant.gameFamily match {
+  def fishnetUci(variant: Variant)(moves: List[Uci]): String = variant.gameFamily match {
     case GameFamily.Amazons() =>
       moves.toList
         .sliding(2, 2)
