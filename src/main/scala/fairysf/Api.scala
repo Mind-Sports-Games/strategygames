@@ -155,12 +155,18 @@ object Api {
     }
   }
 
+  private def toFairySFAmazonArrowsFen(fen: String): String =
+    fen.replace("p", "*").replace("P", "*")
+
+  private def fromFairySFAmazonArrowsFen(fen: String): String =
+    fen.replace("*", "P")
+
   def toFairySFFen(variantName: String, fen: String): String =
-    if (variantName == "amazons") removePockets(fen)
+    if (variantName == "amazons") toFairySFAmazonArrowsFen(removePockets(fen))
     else fen
 
   def fromFairySFFen(variantName: String, fen: String): String =
-    if (variantName == "amazons") addAmazonPockets(fen)
+    if (variantName == "amazons") fromFairySFAmazonArrowsFen(addAmazonPockets(fen))
     else fen
 
   def positionFromVariantNameAndFEN(variantName: String, fen: String): Position =
