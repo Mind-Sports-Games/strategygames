@@ -46,8 +46,14 @@ object LexicalUci {
       case _ => false
     }
 
-  def validUci(uci: String): Boolean =
-    if (uci.length() < 4 || uci.length() > 7) false
+  def validUci(uci: String): Boolean = {
+    val comma = uci.indexOf(',')
+    if (comma >= 0) {
+      val first = uci.substring(0, comma)
+      val second = uci.substring(comma+1)
+      val dontRecurse = second.indexOf(',') == -1
+      dontRecurse && validUci(first) && validUci(second)
+    } else if (uci.length() < 4 || uci.length() > 7) false
     else if (uci == "0000") true
     else {
       val uciLower    = uci.toLowerCase()
@@ -69,6 +75,7 @@ object LexicalUci {
         case _ => false
       }
     }
+  }
 
   private case class LexicalUciImpl(uci: String) extends LexicalUci
 }
