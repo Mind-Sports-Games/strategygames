@@ -3,7 +3,7 @@ package strategygames.format
 import cats.data.Validated
 
 import strategygames.variant.Variant
-import strategygames.{ Drop, GameLogic, Move, MoveOrDrop }
+import strategygames.{ Drop, GameFamily, GameLogic, Move, MoveOrDrop }
 
 object UciDump {
 
@@ -43,5 +43,12 @@ object UciDump {
     case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant), Left(Move.Togyzkumalak(mod))) =>
       strategygames.togyzkumalak.format.UciDump.move(variant)(mod)
     case _                                                                                       => sys.error("Mismatched gamelogic types 13")
+  }
+
+  def fishnetUci(variant: Variant)(moves: List[Uci]): String = variant match {
+    case Variant.FairySF(variant) =>
+      strategygames.fairysf.format.UciDump.fishnetUci(variant)(moves.map(_.toFairySF))
+    case _                    =>
+      moves.map(_.fishnetUci).mkString(" ")
   }
 }

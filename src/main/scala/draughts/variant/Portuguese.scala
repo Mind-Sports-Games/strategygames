@@ -28,7 +28,7 @@ case object Portuguese
   def captureDirs = Standard.captureDirs
 
   // define capture of men as they cannot capture backwards in portuguese draughts (to be used in shortrange capture)
-  val manCaptureDirsPlayer: Map[Player, Directions] = Map(
+  def manCaptureDirsPlayer: Map[Player, Directions] = Map(
     P1 -> List((UpLeft, _.moveUpLeft), (UpRight, _.moveUpRight)),
     P2 -> List((DownLeft, _.moveDownLeft), (DownRight, _.moveDownRight))
   )

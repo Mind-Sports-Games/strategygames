@@ -4,6 +4,7 @@ import cats.data.Validated
 
 import strategygames.fairysf.variant.Variant
 import strategygames.fairysf.{ MoveOrDrop, Replay }
+import strategygames.GameFamily
 
 object UciDump {
 
@@ -28,4 +29,21 @@ object UciDump {
         }
       case Right(d) => d.toUci.lilaUci
     }
+
+  def fishnetUci(variant: Variant)(moves: List[Uci]): String = variant.gameFamily match {
+    case GameFamily.Amazons() =>
+      moves.toList
+        .sliding(2, 2)
+        .toList
+        .flatMap(
+          _ match {
+            case List(Uci.Move(orig, dest, _), Uci.Drop(_, dest2))        =>
+              Some(s"${orig}${dest},${dest}${dest2}")
+            case _                                                        => None
+          }
+        )
+        .mkString(" ")
+    case _                    =>
+      moves.map(_.fishnetUci).mkString(" ")
+  }
 }

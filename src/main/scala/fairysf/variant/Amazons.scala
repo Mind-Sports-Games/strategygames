@@ -27,8 +27,8 @@ case object Amazons
   override val switchPlayerAfterMove = false
   override val plysPerTurn           = 2
 
-  override def hasAnalysisBoard: Boolean = false
-  override def hasFishnet: Boolean       = false
+  override def hasAnalysisBoard: Boolean = true
+  override def hasFishnet: Boolean       = true
 
   // cache this rather than checking with the API everytime
   override def initialFen =
@@ -80,7 +80,8 @@ case object Amazons
                 Pos.fromKey(dest),
                 promotion
               )
-            case Some(x)                                     => sys.error(s"Invalid legalMove for Amazons: ${x}")
+            case Some(x)                                     => sys.error(s"Ilegal move for Amazons: ${x}")
+            case _                                           => sys.error(s"Illegal unknown move for Amazons.")
           }
           .distinct
           .map {
