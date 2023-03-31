@@ -75,7 +75,7 @@ class FryskDraughtsTest extends Specification with ValidatedMatchers {
       case Invalid(e)  => sys.error(s"Move is invalid for position: ${e}")
     }
 
-  "Frisian Draughts game " should {
+  "Frysk Draughts game " should {
     "end in win for P2" in {
       val s = moves
         .foldLeft(Situation(variant.Frysk))((sit, uci) => move(sit, uci))

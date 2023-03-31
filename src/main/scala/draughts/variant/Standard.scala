@@ -21,9 +21,9 @@ case object Standard
 
   override def baseVariant: Boolean = true
 
-  val pieces           = symmetricFourRank(Vector(Man, Man, Man, Man, Man), boardSize)
-  val initialFen       = format.Forsyth.initial
-  val startingPosition = StartingPosition("---", initialFen, "", "Initial position".some)
+  def pieces           = symmetricFourRank(Vector(Man, Man, Man, Man, Man), boardSize)
+  def initialFen       = format.Forsyth.initial
+  def startingPosition = StartingPosition("---", initialFen, "", "Initial position".some)
 
   val captureDirs: Directions                 = List(
     (UpLeft, _.moveUpLeft),

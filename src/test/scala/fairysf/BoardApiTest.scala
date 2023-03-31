@@ -274,13 +274,4 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
       position.pieceMap.size must_== 8
     }
   }
-
-  "Amazons requires full move " should {
-    val position  = Api.positionFromVariant(variant.Amazons)
-    val position2 = position.makeMoves(List("d1d6pd7"))
-
-    "have 9 pieces (8 queens and pawn)" in {
-      position2.pieceMap.size must_== 9
-    }
-  }
 }

@@ -35,7 +35,7 @@ case object English
   // captureDirs is now used for kings within english draughts
   def captureDirs = Standard.captureDirs
 
-  val manCaptureDirsPlayer: Map[Player, Directions] = Portuguese.manCaptureDirsPlayer
+  def manCaptureDirsPlayer: Map[Player, Directions] = Portuguese.manCaptureDirsPlayer
   def moveDirsPlayer                                = Standard.moveDirsPlayer
   def moveDirsAll                                   = Standard.moveDirsAll
 

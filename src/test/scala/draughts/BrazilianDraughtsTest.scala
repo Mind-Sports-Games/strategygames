@@ -74,21 +74,21 @@ class BrazilianDraughtsTest extends Specification with ValidatedMatchers {
     "1405"
   )
 
-  //midmulticapture
+  // midmulticapture
   val midMultiCaptureMoves = List(
-    "2218",    
-    "1115",    
-    "1811",                                         
-    "0815",                                      
-    "2117",    
-    "0711",    
-    "2521",    
-    "1116",    
-    "2925",    
-    "0207",                                     
-    "2622",     
-    "0308",                                      
-    "2420",     
+    "2218",
+    "1115",
+    "1811",
+    "0815",
+    "2117",
+    "0711",
+    "2521",
+    "1116",
+    "2925",
+    "0207",
+    "2622",
+    "0308",
+    "2420",
     "1014",
     "1710"
   )
