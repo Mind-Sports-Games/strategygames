@@ -48,7 +48,7 @@ object UciDump {
   def fishnetUci(variant: Variant)(moves: List[Uci]): String = variant match {
     case Variant.FairySF(variant) =>
       strategygames.fairysf.format.UciDump.fishnetUci(variant)(moves.map(_.toFairySF))
-    case _                    =>
+    case _                        =>
       moves.map(_.fishnetUci).mkString(" ")
   }
 }

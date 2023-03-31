@@ -172,10 +172,10 @@ object FEN {
       Togyzkumalak(strategygames.togyzkumalak.format.FEN(source.replace("_", " ").trim))
   }
 
-  def fishnetFen(variant: Variant)(fen: FEN): FEN =  variant match {
+  def fishnetFen(variant: Variant)(fen: FEN): FEN = variant match {
     case Variant.FairySF(variant) =>
       wrap(strategygames.fairysf.format.FEN.fishnetFen(variant)(fen.toFairySF))
-    case _                    =>
+    case _                        =>
       fen
   }
 

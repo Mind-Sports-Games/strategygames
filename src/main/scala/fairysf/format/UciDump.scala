@@ -37,9 +37,9 @@ object UciDump {
         .toList
         .flatMap(
           _ match {
-            case List(Uci.Move(orig, dest, _), Uci.Drop(_, dest2))        =>
+            case List(Uci.Move(orig, dest, _), Uci.Drop(_, dest2)) =>
               Some(s"${orig}${dest},${dest}${dest2}")
-            case _                                                        => None
+            case _                                                 => None
           }
         )
         .mkString(" ")
