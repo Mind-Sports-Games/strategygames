@@ -47,8 +47,18 @@ object UciDump {
 
   def fishnetUci(variant: Variant)(moves: List[Uci]): String = variant match {
     case Variant.FairySF(variant) =>
-      strategygames.fairysf.format.UciDump.fishnetUci(variant)(moves.map(_.toFairySF))
+      strategygames.fairysf.format.UciDump.toFishnetUci(variant)(moves.map(_.toFairySF))
     case _                        =>
       moves.map(_.fishnetUci).mkString(" ")
   }
+
+  def fromFishnetUci(lib: GameLogic, gameFamily: GameFamily)(moves: List[LexicalUci]): List[Uci] =
+    gameFamily match {
+      case GameFamily.Amazons() =>
+        moves
+          .flatMap(_.uci.split(","))
+          .flatMap(uci => Uci.apply(lib, gameFamily, uci))
+      case _                    =>
+        moves.flatMap(lexicalUci => Uci.apply(lib, gameFamily, lexicalUci.uci))
+    }
 }
