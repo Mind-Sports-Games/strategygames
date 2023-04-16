@@ -16,6 +16,11 @@ class LexicalUciTest extends Specification with ValidatedMatchers {
       LexicalUci.validUci("d8d7,d7d9") must_== true
     }
   }
+  "f9e10,e10f10" should {
+    "be a valid Uci" in {
+      LexicalUci.validUci("f9e10,e10f10") must_== true
+    }
+  }
 
   "d8d7,d7d9,d7d5" should {
     "not be a valid Uci" in {
