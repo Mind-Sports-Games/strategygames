@@ -45,20 +45,35 @@ object UciDump {
     case _                                                                                       => sys.error("Mismatched gamelogic types 13")
   }
 
-  def fishnetUci(variant: Variant)(moves: List[Uci]): String = variant match {
+  private def moveStringToUci(variant: Variant, moves: String): List[Uci] =
+    moves.trim().split(" ") match {
+      case Array("") => Nil
+      case l         => l.toList.flatMap(m => Uci.apply(variant.gameLogic, variant.gameFamily, m))
+    }
+
+  private def moveStringToLexicalUci(moves: String): List[LexicalUci] =
+    moves.trim().split(" ") match {
+      case Array("") => Nil
+      case l         => l.toList.flatMap(m => LexicalUci.apply(m))
+    }
+
+  def fishnetUci(variant: Variant, moves: String): String =
+    fishnetUci(variant, moveStringToUci(variant, moves))
+
+  def fishnetUci(variant: Variant, moves: List[Uci]): String = variant match {
     case Variant.FairySF(variant) =>
-      strategygames.fairysf.format.UciDump.toFishnetUci(variant)(moves.map(_.toFairySF))
+      strategygames.fairysf.format.UciDump.toFishnetUci(variant.gameFamily, moves.map(_.toFairySF))
     case _                        =>
       moves.map(_.fishnetUci).mkString(" ")
   }
 
-  def fromFishnetUci(lib: GameLogic, gameFamily: GameFamily)(moves: List[LexicalUci]): List[Uci] =
-    gameFamily match {
-      case GameFamily.Amazons() =>
-        moves
-          .flatMap(_.uci.split(","))
-          .flatMap(uci => Uci.apply(lib, gameFamily, uci))
-      case _                    =>
-        moves.flatMap(lexicalUci => Uci.apply(lib, gameFamily, lexicalUci.uci))
-    }
+  def fromFishnetUci(variant: Variant, moves: List[LexicalUci]): List[LexicalUci] = variant match {
+    case Variant.FairySF(variant) =>
+      strategygames.fairysf.format.UciDump.fromFishnetUci(variant, moves)
+    case _                        =>
+      moves
+  }
+
+  def fromFishnetUci(variant: Variant, moves: String): List[LexicalUci] =
+    fromFishnetUci(variant, moveStringToLexicalUci(moves))
 }
