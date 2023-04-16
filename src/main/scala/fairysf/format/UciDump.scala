@@ -7,6 +7,7 @@ import strategygames.fairysf.{ MoveOrDrop, Replay }
 import strategygames.format.{ Uci => StratGamesUci }
 import strategygames.format.LexicalUci
 import strategygames.{ GameFamily, GameLogic }
+import strategygames.fairysf.Api
 
 object UciDump {
 
@@ -32,8 +33,12 @@ object UciDump {
       case Right(d) => d.toUci.lilaUci
     }
 
-  // TODO: It should probably be the opposite of the one in the main UciDump
-  def toFishnetUci(variant: Variant)(moves: List[Uci]): String = variant.gameFamily match {
+  // TODO: I'm not a big fan of the API that's resulted in the toFishnetUci and fromFishnetUci.
+  //       It feels overly specific but I'm also not sure if it warrants the time to spend on
+  //       cleaning it up right now. So I'll leave it for the review and see if we want to do it
+  //       then.
+
+  def toFishnetUci(gameFamily: GameFamily, moves: List[Uci]): String = gameFamily match {
     case GameFamily.Amazons() =>
       moves.toList
         .sliding(2, 2)
@@ -50,4 +55,24 @@ object UciDump {
       moves.map(_.fishnetUci).mkString(" ")
   }
 
+  def fromFishnetUci(variant: Variant, moves: List[LexicalUci]): List[LexicalUci] =
+    variant.gameFamily match {
+      case GameFamily.Amazons() =>
+        moves
+          .flatMap(
+            _.uci
+              .split(",")
+              .sliding(2, 2)
+              .flatMap(both => {
+                Uci(variant.gameFamily, both(1)) match {
+                  case Some(uci) =>
+                    List(both(0), s"P@${uci.origDest._2}")
+                  case None      => sys.error(s"Unable to parse uci: ${both(1)}")
+                }
+              })
+          )
+          .flatMap(LexicalUci.apply)
+      case _                    =>
+        moves
+    }
 }
