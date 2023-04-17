@@ -27,7 +27,7 @@ case object Amazons
   override val switchPlayerAfterMove = false
   override val plysPerTurn           = 2
 
-  override def hasAnalysisBoard: Boolean = true
+  override def hasAnalysisBoard: Boolean = false
   override def hasFishnet: Boolean       = true
 
   // cache this rather than checking with the API everytime
