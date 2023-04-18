@@ -14,7 +14,8 @@ case class DraughtsGame(
     clock: Option[Clock] = None,
     /** turns means plies here */
     turns: Int = 0,
-    startedAtTurn: Int = 0
+    startedAtTurn: Int = 0,
+    startPlayer: Player = Player.P1
 ) {
 
   def apply(

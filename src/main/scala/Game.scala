@@ -11,7 +11,8 @@ abstract class Game(
     val pgnMoves: Vector[String] = Vector(),
     val clock: Option[Clock] = None,
     val turns: Int = 0, // plies
-    val startedAtTurn: Int = 0
+    val startedAtTurn: Int = 0,
+    val startPlayer: Player = Player.P1
 ) {
 
   def apply(moveOrdrop: MoveOrDrop): Game
@@ -110,8 +111,8 @@ abstract class Game(
   // type signature, we're getting individual ones for how we use it.
   // TODO: figure out if we can properly make this generic
   def copy(clock: Option[Clock]): Game
-  def copy(turns: Int, startedAtTurn: Int): Game
-  def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int): Game
+  def copy(turns: Int, startedAtTurn: Int, startPlayer: Player): Game
+  def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int, startPlayer: Player): Game
   def copy(situation: Situation, turns: Int): Game
   def copy(situation: Situation): Game
 
@@ -142,7 +143,8 @@ object Game {
         g.pgnMoves,
         g.clock,
         g.turns,
-        g.startedAtTurn
+        g.startedAtTurn,
+        g.startPlayer
       ) {
 
     private def toChessPromotion(p: Option[PromotableRole]): Option[chess.PromotableRole] =
@@ -196,13 +198,21 @@ object Game {
       case _                                      => sys.error("Not passed Chess objects")
     }
 
-    def copy(clock: Option[Clock]): Game                                 = Chess(g.copy(clock = clock))
-    def copy(turns: Int, startedAtTurn: Int): Game                       = Chess(
-      g.copy(turns = turns, startedAtTurn = startedAtTurn)
-    )
-    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int): Game = Chess(
-      g.copy(clock = clock, turns = turns, startedAtTurn = startedAtTurn)
-    )
+    def copy(clock: Option[Clock]): Game =
+      Chess(g.copy(clock = clock))
+
+    def copy(turns: Int, startedAtTurn: Int, startPlayer: Player): Game =
+      Chess(g.copy(turns = turns, startedAtTurn = startedAtTurn, startPlayer = startPlayer))
+
+    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int, startPlayer: Player): Game =
+      Chess(
+        g.copy(
+          clock = clock,
+          turns = turns,
+          startedAtTurn = startedAtTurn,
+          startPlayer = startPlayer
+        )
+      )
 
     def copy(situation: Situation, turns: Int): Game = situation match {
       case Situation.Chess(situation) => Chess(g.copy(situation = situation, turns = turns))
@@ -229,7 +239,8 @@ object Game {
         g.pdnMoves,
         g.clock,
         g.turns,
-        g.startedAtTurn
+        g.startedAtTurn,
+        g.startPlayer
       ) {
 
     private def draughtsCaptures(captures: Option[List[Pos]]): Option[List[draughts.Pos]] =
@@ -293,18 +304,27 @@ object Game {
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, Drop)] = sys.error("Can't drop in draughts")
 
-    def copy(clock: Option[Clock]): Game                                 = Draughts(g.copy(clock = clock))
-    def copy(turns: Int, startedAtTurn: Int): Game                       = Draughts(
-      g.copy(turns = turns, startedAtTurn = startedAtTurn)
-    )
-    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int): Game = Draughts(
-      g.copy(clock = clock, turns = turns, startedAtTurn = startedAtTurn)
-    )
-    def copy(situation: Situation, turns: Int): Game                     = situation match {
+    def copy(clock: Option[Clock]): Game =
+      Draughts(g.copy(clock = clock))
+
+    def copy(turns: Int, startedAtTurn: Int, startPlayer: Player): Game =
+      Draughts(g.copy(turns = turns, startedAtTurn = startedAtTurn, startPlayer = startPlayer))
+
+    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int, startPlayer: Player): Game =
+      Draughts(
+        g.copy(
+          clock = clock,
+          turns = turns,
+          startedAtTurn = startedAtTurn,
+          startPlayer = startPlayer
+        )
+      )
+
+    def copy(situation: Situation, turns: Int): Game = situation match {
       case Situation.Draughts(situation) => Draughts(g.copy(situation = situation, turns = turns))
       case _                             => sys.error("Unable to copy draughts game with non-draughts arguments")
     }
-    def copy(situation: Situation): Game                                 = situation match {
+    def copy(situation: Situation): Game             = situation match {
       case Situation.Draughts(situation) => Draughts(g.copy(situation = situation))
       case _                             => sys.error("Unable to copy draughts game with non-draughts arguments")
     }
@@ -325,7 +345,8 @@ object Game {
         g.pgnMoves,
         g.clock,
         g.turns,
-        g.startedAtTurn
+        g.startedAtTurn,
+        g.startPlayer
       ) {
 
     private def toFairySFPromotion(p: Option[PromotableRole]): Option[fairysf.PromotableRole] =
@@ -379,13 +400,21 @@ object Game {
       case _                                          => sys.error("Not passed FairySF objects")
     }
 
-    def copy(clock: Option[Clock]): Game                                 = FairySF(g.copy(clock = clock))
-    def copy(turns: Int, startedAtTurn: Int): Game                       = FairySF(
-      g.copy(turns = turns, startedAtTurn = startedAtTurn)
-    )
-    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int): Game = FairySF(
-      g.copy(clock = clock, turns = turns, startedAtTurn = startedAtTurn)
-    )
+    def copy(clock: Option[Clock]): Game =
+      FairySF(g.copy(clock = clock))
+
+    def copy(turns: Int, startedAtTurn: Int, startPlayer: Player): Game =
+      FairySF(g.copy(turns = turns, startedAtTurn = startedAtTurn, startPlayer = startPlayer))
+
+    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int, startPlayer: Player): Game =
+      FairySF(
+        g.copy(
+          clock = clock,
+          turns = turns,
+          startedAtTurn = startedAtTurn,
+          startPlayer = startPlayer
+        )
+      )
 
     def copy(situation: Situation, turns: Int): Game = situation match {
       case Situation.FairySF(situation) => FairySF(g.copy(situation = situation, turns = turns))
@@ -412,7 +441,8 @@ object Game {
         g.pgnMoves,
         g.clock,
         g.turns,
-        g.startedAtTurn
+        g.startedAtTurn,
+        g.startPlayer
       ) {
 
     def apply(
@@ -446,13 +476,21 @@ object Game {
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, Drop)] = sys.error("Can't drop in Samurai")
 
-    def copy(clock: Option[Clock]): Game                                 = Samurai(g.copy(clock = clock))
-    def copy(turns: Int, startedAtTurn: Int): Game                       = Samurai(
-      g.copy(turns = turns, startedAtTurn = startedAtTurn)
-    )
-    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int): Game = Samurai(
-      g.copy(clock = clock, turns = turns, startedAtTurn = startedAtTurn)
-    )
+    def copy(clock: Option[Clock]): Game =
+      Samurai(g.copy(clock = clock))
+
+    def copy(turns: Int, startedAtTurn: Int, startPlayer: Player): Game =
+      Samurai(g.copy(turns = turns, startedAtTurn = startedAtTurn))
+
+    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int, startPlayer: Player): Game =
+      Samurai(
+        g.copy(
+          clock = clock,
+          turns = turns,
+          startedAtTurn = startedAtTurn,
+          startPlayer = startPlayer
+        )
+      )
 
     def copy(situation: Situation, turns: Int): Game = situation match {
       case Situation.Samurai(situation) => Samurai(g.copy(situation = situation, turns = turns))
@@ -479,7 +517,8 @@ object Game {
         g.pgnMoves,
         g.clock,
         g.turns,
-        g.startedAtTurn
+        g.startedAtTurn,
+        g.startPlayer
       ) {
 
     def apply(
@@ -513,13 +552,21 @@ object Game {
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, Drop)] = sys.error("Can't drop in Togyzkumalak")
 
-    def copy(clock: Option[Clock]): Game                                 = Togyzkumalak(g.copy(clock = clock))
-    def copy(turns: Int, startedAtTurn: Int): Game                       = Togyzkumalak(
-      g.copy(turns = turns, startedAtTurn = startedAtTurn)
-    )
-    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int): Game = Togyzkumalak(
-      g.copy(clock = clock, turns = turns, startedAtTurn = startedAtTurn)
-    )
+    def copy(clock: Option[Clock]): Game =
+      Togyzkumalak(g.copy(clock = clock))
+
+    def copy(turns: Int, startedAtTurn: Int, startPlayer: Player): Game =
+      Togyzkumalak(g.copy(turns = turns, startedAtTurn = startedAtTurn, startPlayer = startPlayer))
+
+    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int, startPlayer: Player): Game =
+      Togyzkumalak(
+        g.copy(
+          clock = clock,
+          turns = turns,
+          startedAtTurn = startedAtTurn,
+          startPlayer = startPlayer
+        )
+      )
 
     def copy(situation: Situation, turns: Int): Game = situation match {
       case Situation.Togyzkumalak(situation) => Togyzkumalak(g.copy(situation = situation, turns = turns))
@@ -546,18 +593,19 @@ object Game {
       pgnMoves: Vector[String] = Vector(),
       clock: Option[Clock] = None,
       turns: Int = 0, // plies
-      startedAtTurn: Int = 0
+      startedAtTurn: Int = 0,
+      startPlayer: Player = Player.P1
   ): Game = (lib, situation) match {
     case (GameLogic.Draughts(), Situation.Draughts(situation))         =>
-      Draughts(draughts.DraughtsGame(situation, pgnMoves, clock, turns, startedAtTurn))
+      Draughts(draughts.DraughtsGame(situation, pgnMoves, clock, turns, startedAtTurn, startPlayer))
     case (GameLogic.Chess(), Situation.Chess(situation))               =>
-      Chess(chess.Game(situation, pgnMoves, clock, turns, startedAtTurn))
+      Chess(chess.Game(situation, pgnMoves, clock, turns, startedAtTurn, startPlayer))
     case (GameLogic.FairySF(), Situation.FairySF(situation))           =>
-      FairySF(fairysf.Game(situation, pgnMoves, clock, turns, startedAtTurn))
+      FairySF(fairysf.Game(situation, pgnMoves, clock, turns, startedAtTurn, startPlayer))
     case (GameLogic.Samurai(), Situation.Samurai(situation))           =>
-      Samurai(samurai.Game(situation, pgnMoves, clock, turns, startedAtTurn))
+      Samurai(samurai.Game(situation, pgnMoves, clock, turns, startedAtTurn, startPlayer))
     case (GameLogic.Togyzkumalak(), Situation.Togyzkumalak(situation)) =>
-      Togyzkumalak(togyzkumalak.Game(situation, pgnMoves, clock, turns, startedAtTurn))
+      Togyzkumalak(togyzkumalak.Game(situation, pgnMoves, clock, turns, startedAtTurn, startPlayer))
     case _                                                             => sys.error("Mismatched gamelogic types 32")
   }
 

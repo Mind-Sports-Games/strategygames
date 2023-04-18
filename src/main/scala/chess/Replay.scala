@@ -220,6 +220,6 @@ object Replay {
 
   private def makeGame(variant: strategygames.chess.variant.Variant, initialFen: Option[FEN]): Game = {
     val g = Game(variant.some, initialFen)
-    g.copy(startedAtTurn = g.turns)
+    g.copy(startedAtTurn = g.turns, startPlayer = g.situation.player)
   }
 }

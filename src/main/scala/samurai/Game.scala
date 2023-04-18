@@ -1,5 +1,5 @@
 package strategygames.samurai
-import strategygames.{ Clock, MoveMetrics }
+import strategygames.{ Clock, MoveMetrics, Player }
 
 import cats.data.Validated
 
@@ -10,7 +10,8 @@ case class Game(
     pgnMoves: Vector[String] = Vector(),
     clock: Option[Clock] = None,
     turns: Int = 0, // plies
-    startedAtTurn: Int = 0
+    startedAtTurn: Int = 0,
+    startPlayer: Player = Player.P1
 ) {
   def apply(
       orig: Pos,

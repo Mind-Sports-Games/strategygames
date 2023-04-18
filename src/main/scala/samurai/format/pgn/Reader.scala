@@ -103,6 +103,7 @@ object Reader {
     )
     g.copy(
       startedAtTurn = g.turns,
+      startPlayer = g.situation.player,
       clock = tags.clockConfig.flatMap {
         case fc: FischerClock.Config => Some(FischerClock.apply(fc))
         case bc: ByoyomiClock.Config => Some(ByoyomiClock.apply(bc))
