@@ -8,7 +8,7 @@ import strategygames.chess.format.{ pgn, Uci }
 
 case class Game(
     situation: Situation,
-    pgnMoves: Vector[String] = Vector(),
+    actions: Vector[Vector[String]] = Vector(),
     clock: Option[Clock] = None,
     turns: Int = 0, // plies
     startedAtTurn: Int = 0,
@@ -30,7 +30,7 @@ case class Game(
     copy(
       situation = newSituation,
       turns = turns + 1,
-      pgnMoves = pgnMoves :+ pgn.Dumper(situation, move, newSituation),
+      actions = applyAction(pgn.Dumper(situation, move, newSituation)),
       clock = applyClock(move.metrics, newSituation.status.isEmpty)
     )
   }
@@ -50,7 +50,7 @@ case class Game(
     copy(
       situation = newSituation,
       turns = turns + 1,
-      pgnMoves = pgnMoves :+ pgn.Dumper(drop, newSituation),
+      actions = applyAction(pgn.Dumper(drop, newSituation)),
       clock = applyClock(drop.metrics, newSituation.status.isEmpty)
     )
   }
@@ -70,6 +70,12 @@ case class Game(
       case u: Uci.Move => apply(u) map { case (g, m) => g -> Left(m) }
       case u: Uci.Drop => apply(u) map { case (g, d) => g -> Right(d) }
     }
+
+  private def applyAction(action: String): Vector[Vector[String]] =
+    if (Player.fromPly(actions.size) == situation.player)
+      actions :+ Vector(action)
+    else
+      actions.updated(actions.size - 1, actions(actions.size - 1) :+ action)
 
   def player = situation.player
 

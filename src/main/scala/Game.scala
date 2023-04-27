@@ -8,7 +8,7 @@ import strategygames.format.{ FEN, Uci }
 
 abstract class Game(
     val situation: Situation,
-    val pgnMoves: Vector[String] = Vector(),
+    val actions: Vector[Vector[String]] = Vector(),
     val clock: Option[Clock] = None,
     val turns: Int = 0, // plies
     val startedAtTurn: Int = 0,
@@ -140,7 +140,7 @@ object Game {
   final case class Chess(g: chess.Game)
       extends Game(
         Situation.Chess(g.situation),
-        g.pgnMoves,
+        g.actions,
         g.clock,
         g.turns,
         g.startedAtTurn,
@@ -236,7 +236,7 @@ object Game {
   final case class Draughts(g: draughts.DraughtsGame)
       extends Game(
         Situation.Draughts(g.situation),
-        g.pdnMoves,
+        g.actions,
         g.clock,
         g.turns,
         g.startedAtTurn,
@@ -342,7 +342,7 @@ object Game {
   final case class FairySF(g: fairysf.Game)
       extends Game(
         Situation.FairySF(g.situation),
-        g.pgnMoves,
+        g.actions,
         g.clock,
         g.turns,
         g.startedAtTurn,
@@ -438,7 +438,7 @@ object Game {
   final case class Samurai(g: samurai.Game)
       extends Game(
         Situation.Samurai(g.situation),
-        g.pgnMoves,
+        g.actions,
         g.clock,
         g.turns,
         g.startedAtTurn,
@@ -514,7 +514,7 @@ object Game {
   final case class Togyzkumalak(g: togyzkumalak.Game)
       extends Game(
         Situation.Togyzkumalak(g.situation),
-        g.pgnMoves,
+        g.actions,
         g.clock,
         g.turns,
         g.startedAtTurn,
@@ -590,22 +590,22 @@ object Game {
   def apply(
       lib: GameLogic,
       situation: Situation,
-      pgnMoves: Vector[String] = Vector(),
+      actions: Vector[Vector[String]] = Vector(),
       clock: Option[Clock] = None,
       turns: Int = 0, // plies
       startedAtTurn: Int = 0,
       startPlayer: Player = Player.P1
   ): Game = (lib, situation) match {
     case (GameLogic.Draughts(), Situation.Draughts(situation))         =>
-      Draughts(draughts.DraughtsGame(situation, pgnMoves, clock, turns, startedAtTurn, startPlayer))
+      Draughts(draughts.DraughtsGame(situation, actions, clock, turns, startedAtTurn, startPlayer))
     case (GameLogic.Chess(), Situation.Chess(situation))               =>
-      Chess(chess.Game(situation, pgnMoves, clock, turns, startedAtTurn, startPlayer))
+      Chess(chess.Game(situation, actions, clock, turns, startedAtTurn, startPlayer))
     case (GameLogic.FairySF(), Situation.FairySF(situation))           =>
-      FairySF(fairysf.Game(situation, pgnMoves, clock, turns, startedAtTurn, startPlayer))
+      FairySF(fairysf.Game(situation, actions, clock, turns, startedAtTurn, startPlayer))
     case (GameLogic.Samurai(), Situation.Samurai(situation))           =>
-      Samurai(samurai.Game(situation, pgnMoves, clock, turns, startedAtTurn, startPlayer))
+      Samurai(samurai.Game(situation, actions, clock, turns, startedAtTurn, startPlayer))
     case (GameLogic.Togyzkumalak(), Situation.Togyzkumalak(situation)) =>
-      Togyzkumalak(togyzkumalak.Game(situation, pgnMoves, clock, turns, startedAtTurn, startPlayer))
+      Togyzkumalak(togyzkumalak.Game(situation, actions, clock, turns, startedAtTurn, startPlayer))
     case _                                                             => sys.error("Mismatched gamelogic types 32")
   }
 

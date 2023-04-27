@@ -10,7 +10,7 @@ import format.{ pdn, Uci }
 
 case class DraughtsGame(
     situation: Situation,
-    pdnMoves: Vector[String] = Vector.empty[String],
+    actions: Vector[Vector[String]] = Vector(),
     clock: Option[Clock] = None,
     /** turns means plies here */
     turns: Int = 0,
@@ -64,7 +64,12 @@ case class DraughtsGame(
         } else none
       gameWithMove map { case (g, m) =>
         val fullSan = s"${orig.shortKey}x${dest.shortKey}"
-        g.copy(pdnMoves = g.pdnMoves.dropRight(captures.get.size) :+ fullSan) -> m.copy(orig = orig)
+        g.copy(
+          actions = g.actions.updated(
+            g.actions.size - 1,
+            g.actions(g.actions.size - 1).dropRight(captures.get.size) :+ fullSan
+          )
+        ) -> m.copy(orig = orig)
       } getOrElse apply(fullMove) -> fullMove
     }
 
@@ -78,14 +83,14 @@ case class DraughtsGame(
       copy(
         situation = newSituation,
         turns = turns,
-        pdnMoves = pdnMoves :+ pdn.Dumper(situation, move, newSituation),
+        actions = applyAction(pdn.Dumper(situation, move, newSituation)),
         clock = clock
       )
     } else {
       copy(
         situation = newSituation,
         turns = turns + 1,
-        pdnMoves = pdnMoves :+ pdn.Dumper(situation, move, newSituation),
+        actions = applyAction(pdn.Dumper(situation, move, newSituation)),
         clock = applyClock(move.metrics, newSituation.status.isEmpty)
       )
     }
@@ -100,6 +105,12 @@ case class DraughtsGame(
   }
 
   def apply(uci: Uci.Move): Validated[String, (DraughtsGame, Move)] = apply(uci.orig, uci.dest, uci.promotion)
+
+  private def applyAction(action: String): Vector[Vector[String]] =
+    if (Player.fromPly(actions.size) == situation.player)
+      actions :+ Vector(action)
+    else
+      actions.updated(actions.size, actions(actions.size) :+ action)
 
   def displayTurns = if (situation.ghosts == 0) turns else turns + 1
 
@@ -118,8 +129,12 @@ case class DraughtsGame(
 
   def moveString = s"${fullMoveNumber}${player.fold(".", "...")}"
 
-  def pdnMovesConcat(fullCaptures: Boolean = false, dropGhosts: Boolean = false): Vector[String] = {
-    val movesConcat = pdnMoves.foldLeft(Vector.empty[String]) { (moves, curMove) =>
+  private def turnConcat(
+      turn: Vector[String],
+      fullCaptures: Boolean,
+      dropGhosts: Boolean
+  ): Vector[String] = {
+    val movesConcat = turn.foldLeft(Vector.empty[String]) { (moves, curMove) =>
       if (moves.isEmpty) moves :+ curMove
       else {
         val curX = curMove.indexOf('x')
@@ -137,6 +152,9 @@ case class DraughtsGame(
     if (dropGhosts && situation.ghosts != 0) movesConcat.dropRight(1)
     else movesConcat
   }
+
+  def actionsConcat(fullCaptures: Boolean = false, dropGhosts: Boolean = false): Vector[Vector[String]] =
+    actions.map(t => turnConcat(t, fullCaptures, dropGhosts))
 
   def withBoard(b: Board) = copy(situation = situation.copy(board = b))
 

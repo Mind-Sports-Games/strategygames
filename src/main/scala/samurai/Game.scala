@@ -7,7 +7,7 @@ import strategygames.samurai.format.{ pgn, FEN }
 
 case class Game(
     situation: Situation,
-    pgnMoves: Vector[String] = Vector(),
+    actions: Vector[Vector[String]] = Vector(),
     clock: Option[Clock] = None,
     turns: Int = 0, // plies
     startedAtTurn: Int = 0,
@@ -29,7 +29,7 @@ case class Game(
     copy(
       situation = newSituation,
       turns = turns + 1,
-      pgnMoves = pgnMoves :+ move.toUci.uci,
+      actions = applyAction(move.toUci.uci),
       clock = applyClock(move.metrics, newSituation.status.isEmpty)
     )
   }
@@ -41,6 +41,12 @@ case class Game(
         if (turns - startedAtTurn == 1) newC.start else newC
       }
     }
+
+  private def applyAction(action: String): Vector[Vector[String]] =
+    if (Player.fromPly(actions.size) == situation.player)
+      actions :+ Vector(action)
+    else
+      actions.updated(actions.size - 1, actions(actions.size - 1) :+ action)
 
   def player = situation.player
 
