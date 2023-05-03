@@ -3,7 +3,7 @@ package strategygames.fairysf
 import strategygames.format.{ FEN => StratFen, Forsyth => StratForsyth, Uci => StratUci }
 import strategygames.variant.{ Variant => StratVariant }
 import variant.Amazons
-import strategygames.fairysf.format.FEN
+import strategygames.fairysf.format.{ FEN, Forsyth }
 
 import strategygames.{ Player, Status }
 
@@ -72,7 +72,49 @@ class AmazonsVariantTest extends FairySFTest {
       gameEnd.situation.winner must_== Some(Player.P1)
     }
 
+    "Creating game from fen after move one should allow for drops" in {
+      val replay       = Replay.gameMoveWhileValid(Vector("g1j1"), initialFen, variant.Amazons)
+      val initialGame  = replay._2.last._1
+      val afterPly1Fen = Forsyth >> initialGame.situation
+      println(afterPly1Fen)
+      initialGame.situation.drops must beSome.like {
+        case drops => {
+          drops == List() must beFalse
+          val game = Game(Some(Amazons), Some(afterPly1Fen))
+          println(game.situation.drops)
+          game.situation.drops must beSome.like {
+            case dropsFromFEN => {
+              dropsFromFEN must_== drops
+            }
+          }
+        }
+      }
+    }
+
+    "Ensuring fens keep pawns when using them to create games further in" in {
+      val replay       = Replay.gameMoveWhileValid(Vector("g1j1", "P@i2"), initialFen, variant.Amazons)
+      val initialGame  = replay._2.last._1
+      val afterPly2Fen = Forsyth >> initialGame.situation
+      afterPly2Fen.value must contain("8P1")
+      println(s"afterPly2Fen: ${afterPly2Fen}")
+      val gameFromFen  = Game(Some(Amazons), Some(afterPly2Fen))
+      gameFromFen.situation.destinations must_== initialGame.situation.destinations
+
+      println(">>>>>>>>>>>>>>>>>>>>>>>>>>>-----------------")
+      val afterPly2FenAgain = Forsyth >> gameFromFen.situation
+      println("<<<<<<<<<<<<<<<<<<<<<<<<<<------------------")
+      println(s"afterPly2FenAgain: ${afterPly2FenAgain}")
+      afterPly2FenAgain.value must contain("8P1")
+      afterPly2Fen must_== afterPly2FenAgain
+
+      val replay2              = Replay.gameMoveWhileValid(Vector("j7i6"), afterPly2Fen, variant.Amazons)
+      val gameFromFenAfterMove = replay2._2.last._1
+      val afterPly3Fen         = Forsyth >> gameFromFenAfterMove.situation
+      println(s"afterPly3Fen: ${afterPly3Fen}")
+      afterPly3Fen.value must contain("8P1")
+    }
   }
+
 }
 
 class AmazonsVariantTestIsometry extends strategygames.chess.ChessTest {
