@@ -91,6 +91,18 @@ object Replay {
     }
   }
 
+  final case class Go(r: go.Replay)
+      extends Replay(
+        Game.Go(r.setup),
+        r.moves.map((d: go.Drop) => Right(Drop.Go(d))),
+        Game.Go(r.state)
+      ) {
+    def copy(state: Game): Replay = state match {
+      case Game.Go(state) => Replay.wrap(r.copy(state = state))
+      case _              => sys.error("Unable to copy a go replay with a non-go state")
+    }
+  }
+
   def apply(lib: GameLogic, setup: Game, moves: List[MoveOrDrop], state: Game): Replay =
     (lib, setup, state) match {
       case (GameLogic.Draughts(), Game.Draughts(setup), Game.Draughts(state))             =>
@@ -103,6 +115,8 @@ object Replay {
         Samurai(samurai.Replay(setup, moves.map(Move.toSamurai), state))
       case (GameLogic.Togyzkumalak(), Game.Togyzkumalak(setup), Game.Togyzkumalak(state)) =>
         Togyzkumalak(togyzkumalak.Replay(setup, moves.map(Move.toTogyzkumalak), state))
+      case (GameLogic.Go(), Game.Go(setup), Game.Go(state))                               =>
+        Go(go.Replay(setup, moves.map(Move.toGo), state))
       case _                                                                              => sys.error("Mismatched gamelogic types 5")
     }
 
@@ -158,6 +172,15 @@ object Replay {
             message
           )
       }
+    case (GameLogic.Go(), FEN.Go(initialFen), Variant.Go(variant))                               =>
+      go.Replay.gameMoveWhileValid(moveStrs, initialFen, variant) match {
+        case (game, gameswithsan, message) =>
+          (
+            Game.Go(game),
+            gameswithsan.map { case (g, u) => (Game.Go(g), Uci.GoWithSan(u)) },
+            message
+          )
+      }
     case _                                                                                       => sys.error("Mismatched gamelogic types 7")
   }
 
@@ -207,6 +230,12 @@ object Replay {
         .toEither
         .map(s => s.map(Situation.Togyzkumalak))
         .toValidated
+    case (GameLogic.Go(), Variant.Go(variant))                     =>
+      go.Replay
+        .situations(moveStrs, initialFen.map(_.toGo), variant)
+        .toEither
+        .map(s => s.map(Situation.Go))
+        .toValidated
     case _                                                         => sys.error("Mismatched gamelogic types 8")
   }
 
@@ -247,6 +276,14 @@ object Replay {
       u match {
         case u: Uci.Togyzkumalak => Some(u.unwrap)
         case _                   => None
+      }
+    )
+
+  private def goUcis(ucis: List[Uci]): List[go.format.Uci] =
+    ucis.flatMap(u =>
+      u match {
+        case u: Uci.Go => Some(u.unwrap)
+        case _         => None
       }
     )
 
@@ -292,6 +329,12 @@ object Replay {
         .toEither
         .map(b => b.map(Board.Togyzkumalak))
         .toValidated
+    case (GameLogic.Go(), Variant.Go(variant))                     =>
+      go.Replay
+        .boardsFromUci(goUcis(moves), initialFen.map(_.toGo), variant)
+        .toEither
+        .map(b => b.map(Board.Go))
+        .toValidated
     case _                                                         => sys.error("Mismatched gamelogic types 8a")
   }
 
@@ -331,6 +374,12 @@ object Replay {
         .situationsFromUci(togyzkumalakUcis(moves), initialFen.map(_.toTogyzkumalak), variant)
         .toEither
         .map(s => s.map(Situation.Togyzkumalak))
+        .toValidated
+    case (GameLogic.Go(), Variant.Go(variant))                     =>
+      go.Replay
+        .situationsFromUci(goUcis(moves), initialFen.map(_.toGo), variant)
+        .toEither
+        .map(s => s.map(Situation.Go))
         .toValidated
     case _                                                         => sys.error("Mismatched gamelogic types 9")
   }
@@ -372,6 +421,12 @@ object Replay {
         .toEither
         .map(r => Replay.Togyzkumalak(r))
         .toValidated
+    case (GameLogic.Go(), Variant.Go(variant))                     =>
+      go.Replay
+        .apply(goUcis(moves), initialFen.map(_.toGo), variant)
+        .toEither
+        .map(r => Replay.Go(r))
+        .toValidated
     case _                                                         => sys.error("Mismatched gamelogic types 10")
   }
 
@@ -392,6 +447,8 @@ object Replay {
       samurai.Replay.plyAtFen(moveStrs, initialFen.map(_.toSamurai), variant, atFen)
     case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant), FEN.Togyzkumalak(atFen)) =>
       togyzkumalak.Replay.plyAtFen(moveStrs, initialFen.map(_.toTogyzkumalak), variant, atFen)
+    case (GameLogic.Go(), Variant.Go(variant), FEN.Go(atFen))                               =>
+      go.Replay.plyAtFen(moveStrs, initialFen.map(_.toGo), variant, atFen)
     case _                                                                                  => sys.error("Mismatched gamelogic types 10")
   }
 
@@ -400,5 +457,6 @@ object Replay {
   def wrap(r: fairysf.Replay)      = FairySF(r)
   def wrap(r: samurai.Replay)      = Samurai(r)
   def wrap(r: togyzkumalak.Replay) = Togyzkumalak(r)
+  def wrap(r: go.Replay)           = Go(r)
 
 }

@@ -50,4 +50,11 @@ object Actor {
         Board.Togyzkumalak(a.board)
       ) {}
 
+  final case class Go(a: go.Actor)
+      extends Actor(
+        Piece.Go(a.piece),
+        Pos.Go(a.pos),
+        Board.Go(a.board)
+      ) {}
+
 }

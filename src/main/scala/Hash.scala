@@ -57,6 +57,12 @@ object Hash {
     val actorMasks: Array[Long]    = zc.actorMasks
   }
 
+  final case class GoZobristConstants(zc: go.Hash.ZobristConstants) extends ZobristConstants {
+    def hexToLong(s: String): Long = zc.hexToLong(s)
+    val p1TurnMask: Long           = zc.p1TurnMask
+    val actorMasks: Array[Long]    = zc.actorMasks
+  }
+
   // The following masks are compatible with the Polyglot
   // opening book format.
   private def polyglotTable(lib: GameLogic): ZobristConstants = lib match {
@@ -65,6 +71,7 @@ object Hash {
     case GameLogic.FairySF()      => FairySFZobristConstants(new fairysf.Hash.ZobristConstants(0))
     case GameLogic.Samurai()      => SamuraiZobristConstants(new samurai.Hash.ZobristConstants(0))
     case GameLogic.Togyzkumalak() => TogyzkumalakZobristConstants(new togyzkumalak.Hash.ZobristConstants(0))
+    case GameLogic.Go()           => GoZobristConstants(new go.Hash.ZobristConstants(0))
   }
 
   private def randomTable(lib: GameLogic): ZobristConstants = lib match {
@@ -73,6 +80,7 @@ object Hash {
     case GameLogic.FairySF()      => FairySFZobristConstants(new fairysf.Hash.ZobristConstants(16))
     case GameLogic.Samurai()      => SamuraiZobristConstants(new samurai.Hash.ZobristConstants(16))
     case GameLogic.Togyzkumalak() => TogyzkumalakZobristConstants(new togyzkumalak.Hash.ZobristConstants(16))
+    case GameLogic.Go()           => GoZobristConstants(new go.Hash.ZobristConstants(16))
   }
 
   private def get(lib: GameLogic, situation: Situation, table: ZobristConstants): Long =
@@ -91,6 +99,8 @@ object Hash {
             TogyzkumalakZobristConstants(table)
           ) =>
         togyzkumalak.Hash.get(situation, table)
+      case (GameLogic.Go(), Situation.Go(situation), GoZobristConstants(table))                   =>
+        go.Hash.get(situation, table)
     }
 
   private val h = new Hash(size)

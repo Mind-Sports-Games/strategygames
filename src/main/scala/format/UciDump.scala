@@ -24,6 +24,8 @@ object UciDump {
       strategygames.samurai.format.UciDump(moves, initialFen.map(_.toSamurai), variant)
     case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant)) =>
       strategygames.togyzkumalak.format.UciDump(moves, initialFen.map(_.toTogyzkumalak), variant)
+    case (GameLogic.Go(), Variant.Go(variant))                     =>
+      strategygames.go.format.UciDump(moves, initialFen.map(_.toGo), variant)
     case _                                                         => sys.error("Mismatched gamelogic types 12")
   }
 
@@ -42,6 +44,8 @@ object UciDump {
       strategygames.samurai.format.UciDump.move(variant)(mod)
     case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant), Left(Move.Togyzkumalak(mod))) =>
       strategygames.togyzkumalak.format.UciDump.move(variant)(mod)
+    case (GameLogic.Go(), Variant.Go(variant), Right(Drop.Go(mod)))                              =>
+      strategygames.go.format.UciDump.move(variant)(mod)
     case _                                                                                       => sys.error("Mismatched gamelogic types 13")
   }
 

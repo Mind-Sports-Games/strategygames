@@ -38,6 +38,12 @@ object FullOpeningDB {
         .map(
           FullOpening.Togyzkumalak
         )
+    case (GameLogic.Go(), FEN.Go(fen))                     =>
+      strategygames.go.opening.FullOpeningDB
+        .findByFen(fen)
+        .map(
+          FullOpening.Go
+        )
     case _                                                 => sys.error("Mismatched gamelogic types full opening db")
   }
 
@@ -74,6 +80,12 @@ object FullOpeningDB {
             moveStrs
           )
           .map(fo => FullOpening.AtPly(FullOpening.Togyzkumalak(fo.opening), fo.ply))
+      case GameLogic.Go()           =>
+        strategygames.go.opening.FullOpeningDB
+          .search(
+            moveStrs
+          )
+          .map(fo => FullOpening.AtPly(FullOpening.Go(fo.opening), fo.ply))
     }
 
   private def draughtsFENs(fens: Vector[FEN]): Vector[strategygames.draughts.format.FEN] =
@@ -116,6 +128,14 @@ object FullOpeningDB {
       }
     )
 
+  private def goFENs(fens: Vector[FEN]): Vector[strategygames.go.format.FEN] =
+    fens.flatMap(f =>
+      f match {
+        case f: FEN.Go => Some(f.f)
+        case _         => None
+      }
+    )
+
   def searchInFens(lib: GameLogic, fens: Vector[FEN]): Option[FullOpening] = lib match {
     case GameLogic.Draughts()     =>
       strategygames.draughts.opening.FullOpeningDB
@@ -147,6 +167,12 @@ object FullOpeningDB {
           togyzkumalakFENs(fens)
         )
         .map(FullOpening.Togyzkumalak)
+    case GameLogic.Go()           =>
+      strategygames.go.opening.FullOpeningDB
+        .searchInFens(
+          goFENs(fens)
+        )
+        .map(FullOpening.Go)
   }
 
 }

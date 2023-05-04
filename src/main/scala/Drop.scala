@@ -25,6 +25,7 @@ sealed abstract class Drop(
   // TODO: Yup, still not type safe. :D
   def toChess: chess.Drop
   def toFairySF: fairysf.Drop
+  def toGo: go.Drop
 }
 
 object Drop {
@@ -46,6 +47,7 @@ object Drop {
     val unwrap    = d
     def toChess   = d
     def toFairySF = sys.error("Can't make a fairysf drop from a chess drop")
+    def toGo      = sys.error("Can't make a go drop from a chess drop")
 
   }
 
@@ -66,11 +68,34 @@ object Drop {
     val unwrap    = d
     def toChess   = sys.error("Can't make a chess drop from a fairysf drop")
     def toFairySF = d
+    def toGo      = sys.error("Can't make a go drop from a fairysf drop")
+
+  }
+
+  final case class Go(d: go.Drop)
+      extends Drop(
+        Piece.Go(d.piece),
+        Pos.Go(d.pos),
+        Situation.Go(d.situationBefore),
+        Board.Go(d.after),
+        d.metrics
+      ) {
+
+    def situationAfter: Situation = Situation.Go(d.situationAfter)
+    def finalizeAfter: Board      = d.finalizeAfter
+
+    def toUci: Uci.Drop = Uci.GoDrop(d.toUci)
+
+    val unwrap    = d
+    def toChess   = sys.error("Can't make a chess drop from a go drop")
+    def toFairySF = sys.error("Can't make a fairysf drop from a go drop")
+    def toGo      = d
 
   }
 
   def wrap(d: chess.Drop): Drop   = Drop.Chess(d)
   def wrap(d: fairysf.Drop): Drop = Drop.FairySF(d)
+  def wrap(d: go.Drop): Drop      = Drop.Go(d)
 
   def toChess(moveOrDrop: MoveOrDrop): chess.MoveOrDrop         = moveOrDrop.left.map(_.toChess).right.map(_.toChess)
   // probably not type safe
@@ -80,5 +105,6 @@ object Drop {
   def toSamurai(moveOrDrop: MoveOrDrop): samurai.Move           = moveOrDrop.left.map(_.toSamurai).left.get
   def toTogyzkumalak(moveOrDrop: MoveOrDrop): togyzkumalak.Move =
     moveOrDrop.left.map(_.toTogyzkumalak).left.get
+  def toGo(moveOrDrop: MoveOrDrop): go.Drop                     = moveOrDrop.right.map(_.toGo).right.get
 
 }

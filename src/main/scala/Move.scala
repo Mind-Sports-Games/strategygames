@@ -300,5 +300,6 @@ object Move {
   def toSamurai(moveOrDrop: MoveOrDrop): samurai.Move           = moveOrDrop.left.map(_.toSamurai).left.get
   def toTogyzkumalak(moveOrDrop: MoveOrDrop): togyzkumalak.Move =
     moveOrDrop.left.map(_.toTogyzkumalak).left.get
+  def toGo(moveOrDrop: MoveOrDrop): go.Drop                     = moveOrDrop.right.map(_.toGo).right.get
 
 }

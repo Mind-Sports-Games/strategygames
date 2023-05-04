@@ -22,6 +22,7 @@ abstract class Variant(
   def toFairySF: fairysf.variant.Variant
   def toSamurai: samurai.variant.Variant
   def toTogyzkumalak: strategygames.togyzkumalak.variant.Variant
+  def toGo: go.variant.Variant
 
   def pieces: PieceMap
 
@@ -65,6 +66,10 @@ abstract class Variant(
   def oware: Boolean
 
   def togyzkumalak: Boolean
+
+  def go9x9: Boolean
+  def go13x13: Boolean
+  def go19x19: Boolean
 
   def standardVariant: Boolean
   def fromPositionVariant: Boolean
@@ -157,6 +162,7 @@ object Variant {
     def toFairySF                      = sys.error("Can't convert chess to fairysf")
     def toSamurai                      = sys.error("Can't convert chess to samurai")
     def toTogyzkumalak                 = sys.error("Can't convert chess to togyzkumalak")
+    def toGo                           = sys.error("Can't convert chess to go")
 
     def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.Chess(pos), (Piece.Chess(piece), 1)) }
@@ -198,8 +204,10 @@ object Variant {
 
     def oware: Boolean = false
 
-    def togyzkumalak: Boolean = false
-
+    def togyzkumalak: Boolean        = false
+    def go9x9: Boolean               = false
+    def go13x13: Boolean             = false
+    def go19x19: Boolean             = false
     def standardVariant: Boolean     = v.standard
     def fromPositionVariant: Boolean = v.fromPosition
     def exoticChessVariant: Boolean  = v.exoticChessVariant
@@ -299,6 +307,7 @@ object Variant {
     def toFairySF      = sys.error("Can't convert draughts to fairysf")
     def toSamurai      = sys.error("Can't convert draughts to samurai")
     def toTogyzkumalak = sys.error("Can't convert draughts to togyzkumalak")
+    def toGo           = sys.error("Can't convert draughts to go")
 
     def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.Draughts(pos), (Piece.Draughts(piece), 1)) }
@@ -341,6 +350,9 @@ object Variant {
     def oware: Boolean = false
 
     def togyzkumalak: Boolean = false
+    def go9x9: Boolean        = false
+    def go13x13: Boolean      = false
+    def go19x19: Boolean      = false
 
     def standardVariant: Boolean     = v.standard
     def fromPositionVariant: Boolean = v.fromPosition
@@ -440,6 +452,7 @@ object Variant {
     def toFairySF        = v
     def toSamurai        = sys.error("Can't convert fairysf to samurai")
     def toTogyzkumalak   = sys.error("Can't convert fairysf to togyzkumalak")
+    def toGo             = sys.error("Can't convert fairysf to go")
     def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.FairySF(pos), (Piece.FairySF(piece), 1)) }
 
@@ -481,6 +494,9 @@ object Variant {
     def oware: Boolean = false
 
     def togyzkumalak: Boolean = false
+    def go9x9: Boolean        = false
+    def go13x13: Boolean      = false
+    def go19x19: Boolean      = false
 
     def standardVariant: Boolean     = standard || draughtsStandard
     def fromPositionVariant: Boolean = fromPosition || draughtsFromPosition
@@ -579,6 +595,7 @@ object Variant {
     def toFairySF        = sys.error("Can't convert samurai to fairysf")
     def toSamurai        = v
     def toTogyzkumalak   = sys.error("Can't convert samurai to togyzkumalak")
+    def toGo             = sys.error("Can't convert samurai to go")
     def pieces: PieceMap = v.pieces.map { case (pos, (piece, count)) =>
       (Pos.Samurai(pos), (Piece.Samurai(piece), count))
     }
@@ -621,6 +638,9 @@ object Variant {
     def oware: Boolean = v.oware
 
     def togyzkumalak: Boolean = false
+    def go9x9: Boolean        = false
+    def go13x13: Boolean      = false
+    def go19x19: Boolean      = false
 
     def standardVariant: Boolean     = standard || draughtsStandard
     def fromPositionVariant: Boolean = fromPosition || draughtsFromPosition
@@ -715,6 +735,7 @@ object Variant {
     def toFairySF        = sys.error("Can't convert togyzkumalak to fairysf")
     def toSamurai        = sys.error("Can't convert togyzkumalak to samurai")
     def toTogyzkumalak   = v
+    def toGo             = sys.error("Can't convert togyzkumalak to go")
     def pieces: PieceMap = v.pieces.map { case (pos, (piece, count)) =>
       (Pos.Togyzkumalak(pos), (Piece.Togyzkumalak(piece), count))
     }
@@ -757,6 +778,9 @@ object Variant {
     def oware: Boolean = false
 
     def togyzkumalak: Boolean = v.togyzkumalak
+    def go9x9: Boolean        = false
+    def go13x13: Boolean      = false
+    def go19x19: Boolean      = false
 
     def standardVariant: Boolean     = standard || draughtsStandard
     def fromPositionVariant: Boolean = fromPosition || draughtsFromPosition
@@ -837,12 +861,155 @@ object Variant {
     def playerColors: Map[Player, String] = gameFamily.playerColors
   }
 
+  case class Go(v: go.variant.Variant)
+      extends Variant(
+        id = v.id,
+        key = v.key,
+        fishnetKey = v.key,
+        name = v.name,
+        standardInitialPosition = v.standardInitialPosition
+      ) {
+
+    def toChess          = sys.error("Can't convert go to chess")
+    def toDraughts       = sys.error("Can't convert go to draughts")
+    def toFairySF        = sys.error("Can't convert go to fairysf")
+    def toSamurai        = sys.error("Can't convert go to samurai")
+    def toTogyzkumalak   = sys.error("Can't convert go to togyzkumalak")
+    def toGo             = v
+    def pieces: PieceMap = v.pieces.map { case (pos, (piece, count)) =>
+      (Pos.Go(pos), (Piece.Go(piece), count))
+    }
+
+    def standard: Boolean      = false
+    def chess960: Boolean      = false
+    def fromPosition: Boolean  = false
+    def kingOfTheHill: Boolean = false
+    def threeCheck: Boolean    = false
+    def fiveCheck: Boolean     = false
+    def antichess: Boolean     = false
+    def atomic: Boolean        = false
+    def horde: Boolean         = false
+    def racingKings: Boolean   = false
+    def crazyhouse: Boolean    = false
+    def linesOfAction: Boolean = false
+    def noCastling: Boolean    = false
+    def scrambledEggs: Boolean = false
+
+    def draughtsStandard: Boolean     = false
+    def frisian: Boolean              = false
+    def frysk: Boolean                = false
+    def antidraughts: Boolean         = false
+    def breakthrough: Boolean         = false
+    def russian: Boolean              = false
+    def brazilian: Boolean            = false
+    def pool: Boolean                 = false
+    def portuguese: Boolean           = false
+    def english: Boolean              = false
+    def draughtsFromPosition: Boolean = false
+
+    def shogi: Boolean       = false
+    def xiangqi: Boolean     = false
+    def minishogi: Boolean   = false
+    def minixiangqi: Boolean = false
+    def flipello: Boolean    = false
+    def flipello10: Boolean  = false
+    def amazons: Boolean     = false
+
+    def oware: Boolean = false
+
+    def togyzkumalak: Boolean = false
+    def go9x9: Boolean        = v.go9x9
+    def go13x13: Boolean      = v.go13x13
+    def go19x19: Boolean      = v.go19x19
+
+    def standardVariant: Boolean     = standard || draughtsStandard
+    def fromPositionVariant: Boolean = fromPosition || draughtsFromPosition
+    def exoticChessVariant: Boolean  = false
+    def frisianVariant: Boolean      = false
+    def draughts64Variant: Boolean   = false
+
+    def exotic: Boolean = v.exotic
+
+    def baseVariant: Boolean      = v.baseVariant
+    def fenVariant: Boolean       = v.fenVariant
+    def hasAnalysisBoard: Boolean = v.hasAnalysisBoard
+    def hasFishnet: Boolean       = v.hasFishnet
+
+    def p1IsBetterVariant: Boolean = v.p1IsBetterVariant
+    def blindModeVariant: Boolean  = v.blindModeVariant
+
+    def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
+
+    def dropsVariant: Boolean     = true
+    def onlyDropsVariant: Boolean = true
+    def hasGameScore: Boolean     = true
+
+    def perfId: Int    = v.perfId
+    def perfIcon: Char = v.perfIcon
+
+    def initialFen: FEN     = FEN.Go(v.initialFen)
+    def startPlayer: Player = v.startPlayer
+    def plysPerTurn: Int    = v.plysPerTurn
+
+    def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false
+
+    def checkmate(situation: Situation): Boolean = situation match {
+      case Situation.Go(situation) => false
+      case _                       => sys.error("Not passed Go objects")
+    }
+
+    def stalemateIsDraw: Boolean = v.stalemateIsDraw
+
+    def winner(situation: Situation): Option[Player] = situation match {
+      case Situation.Go(situation) => v.winner(situation)
+      case _                       => sys.error("Not passed Go objects")
+    }
+
+    @nowarn def specialEnd(situation: Situation): Boolean = situation match {
+      case Situation.Go(situation) => v.specialEnd(situation)
+      case _                       => sys.error("Not passed Go objects")
+    }
+
+    @nowarn def specialDraw(situation: Situation): Boolean = situation match {
+      case Situation.Go(situation) => v.specialDraw(situation)
+      case _                       => sys.error("Not passed Go objects")
+    }
+
+    def hasMoveEffects: Boolean = v.hasMoveEffects
+
+    def addVariantEffect(move: Move): Move = sys.error("No moves in Go")
+
+    def addVariantEffect(drop: Drop): Drop            = drop match {
+      case Drop.Go(drop) => Drop.Go(v.addVariantEffect(drop))
+      case _             => sys.error("Not passed Go objects")
+    }
+    def valid(board: Board, strict: Boolean): Boolean = board match {
+      case Board.Go(board) => v.valid(board, strict)
+      case _               => sys.error("Not passed Go objects")
+    }
+
+    val roles: List[Role] = v.roles.map(Role.GoRole)
+
+    override def equals(that: Any): Boolean = that match {
+      case Go(v2) => v2.equals(v)
+      case _      => false
+    }
+
+    def chessVariant: chess.variant.Variant = sys.error("Unimplemented for Go")
+    def gameLogic: GameLogic                = GameLogic.Go()
+    def gameFamily: GameFamily              = v.gameFamily
+
+    def playerNames: Map[Player, String]  = gameFamily.playerNames
+    def playerColors: Map[Player, String] = gameFamily.playerColors
+  }
+
   def all: List[Variant] =
     chess.variant.Variant.all.map(Chess) :::
       draughts.variant.Variant.all.map(Draughts) :::
       fairysf.variant.Variant.all.map(FairySF) :::
       samurai.variant.Variant.all.map(Samurai) :::
-      togyzkumalak.variant.Variant.all.map(Togyzkumalak)
+      togyzkumalak.variant.Variant.all.map(Togyzkumalak) :::
+      go.variant.Variant.all.map(Go)
 
   def byId = all map { v => (v.id, v) } toMap
 
@@ -854,6 +1021,7 @@ object Variant {
     case GameLogic.FairySF()      => fairysf.variant.Variant.all.map(FairySF)
     case GameLogic.Samurai()      => samurai.variant.Variant.all.map(Samurai)
     case GameLogic.Togyzkumalak() => togyzkumalak.variant.Variant.all.map(Togyzkumalak)
+    case GameLogic.Go()           => go.variant.Variant.all.map(Go)
   }
 
   def byId(lib: GameLogic) = all(lib) map { v =>
@@ -870,6 +1038,7 @@ object Variant {
     case GameLogic.FairySF()      => FairySF(fairysf.variant.Variant.default)
     case GameLogic.Samurai()      => Samurai(samurai.variant.Variant.default)
     case GameLogic.Togyzkumalak() => Togyzkumalak(togyzkumalak.variant.Variant.default)
+    case GameLogic.Go()           => Go(go.variant.Variant.default)
   }
 
   def apply(lib: GameLogic, id: Int): Option[Variant]     = byId(lib) get id
@@ -890,6 +1059,7 @@ object Variant {
     case GameLogic.FairySF()      => fairysf.variant.Variant.openingSensibleVariants.map(FairySF)
     case GameLogic.Samurai()      => samurai.variant.Variant.openingSensibleVariants.map(Samurai)
     case GameLogic.Togyzkumalak() => togyzkumalak.variant.Variant.openingSensibleVariants.map(Togyzkumalak)
+    case GameLogic.Go()           => go.variant.Variant.openingSensibleVariants.map(Go)
   }
 
   def divisionSensibleVariants(lib: GameLogic): Set[Variant] = lib match {
@@ -898,6 +1068,7 @@ object Variant {
     case GameLogic.FairySF()      => fairysf.variant.Variant.divisionSensibleVariants.map(FairySF)
     case GameLogic.Samurai()      => samurai.variant.Variant.divisionSensibleVariants.map(Samurai)
     case GameLogic.Togyzkumalak() => togyzkumalak.variant.Variant.divisionSensibleVariants.map(Togyzkumalak)
+    case GameLogic.Go()           => go.variant.Variant.divisionSensibleVariants.map(Go)
   }
 
   def libStandard(lib: GameLogic): Variant = lib match {
@@ -906,6 +1077,7 @@ object Variant {
     case GameLogic.FairySF()      => Variant.FairySF(fairysf.variant.Shogi)
     case GameLogic.Samurai()      => Variant.Samurai(samurai.variant.Oware)
     case GameLogic.Togyzkumalak() => Variant.Togyzkumalak(togyzkumalak.variant.Togyzkumalak)
+    case GameLogic.Go()           => Variant.Go(go.variant.Go9x9)
   }
 
   def libFromPosition(lib: GameLogic): Variant = lib match {
@@ -915,6 +1087,7 @@ object Variant {
     case GameLogic.FairySF()      => Variant.FairySF(fairysf.variant.Shogi)
     case GameLogic.Samurai()      => Variant.Samurai(samurai.variant.Oware)
     case GameLogic.Togyzkumalak() => Variant.Togyzkumalak(togyzkumalak.variant.Togyzkumalak)
+    case GameLogic.Go()           => Variant.Go(go.variant.Go9x9)
   }
 
   def wrap(v: chess.variant.Variant)        = Chess(v)
@@ -922,5 +1095,6 @@ object Variant {
   def wrap(v: fairysf.variant.Variant)      = FairySF(v)
   def wrap(v: samurai.variant.Variant)      = Samurai(v)
   def wrap(v: togyzkumalak.variant.Variant) = Togyzkumalak(v)
+  def wrap(v: go.variant.Variant)           = Go(v)
 
 }
