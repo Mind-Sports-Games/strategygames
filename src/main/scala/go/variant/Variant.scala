@@ -44,7 +44,7 @@ abstract class Variant private[variant] (
   def perfId: Int
   def perfIcon: Char
 
-  def initialFen: FEN = format.FEN("9/9/9/9/9/9/9/9/9 0 0 W 1")
+  def initialFen: FEN = format.FEN("19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19 B - 0 0 1")
 
   def pieces: PieceMap = Api.pieceMapFromFen(key, initialFen.value)
 

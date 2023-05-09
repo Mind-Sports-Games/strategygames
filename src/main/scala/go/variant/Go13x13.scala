@@ -20,7 +20,7 @@ case object Go13x13
 
   // cache this rather than checking with the API everytime
   override def initialFen =
-    format.FEN("13/13/13/13/13/13/13/13/13/13/13/13/13 0 0 W 1")
+    format.FEN("13/13/13/13/13/13/13/13/13/13/13/13/13 B - 0 0 1")
 
   override def specialEnd(situation: Situation) =
     (situation.board.apiPosition.legalMoves.size == 0) ||

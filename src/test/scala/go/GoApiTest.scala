@@ -5,55 +5,61 @@ import org.specs2.mutable.Specification
 
 class GoApiTest extends Specification with ValidatedMatchers {
 
-  "Oware initial fen" should {
-    val fen = variant.Go.initialFen.value
+  "Go initial fen" should {
+    val fen = variant.Go19x19.initialFen.value
     "be valid" in {
       Api.validateFEN(fen) must_== true
     }
+    // println(fen.matches(Api.fenRegex))
+
+    val fen2 = "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1XXOO14 B - 0 0 1"
+    "true due to allowing >1 for multiple empty spaces" in {
+      Api.validateFEN(fen2) must_== true
+    }
+    // println(fen2.matches(Api.fenRegex))
+
+    val fen4 = "19/19/19/19/19/19/19/19/19/19/19/19/XOXOXOXOXOXOXOXOXOXO/19/19/19/19/19/19 W - 0 0 1"
+    // println(fen4.matches(Api.fenRegex))
+    "false due to more stone in row than width" in {
+      Api.validateFEN(fen4) must_== false
+    }
   }
 
-//   "Oware invalid fen" should {
-//     val fen  = "18S,18S,18S,18S,18S,18S/18S,18S,18S,18S,18S,18S 5 10 S 50"
-//     "false due to too many pieces" in {
-//       Api.validateFEN(fen) must_== false
-//     }
-//     val fen2 = "2S,4,1S/1S,1S,3,1S 21 21 N 50"
-//     "true due to allowing >1 for multiple empty spaces" in {
-//       Api.validateFEN(fen2) must_== true
-//     }
-//     val fen3 = "3,5S,5S,5S/4,18S,18S,2 0 6 N 50"
-//     "false due to more space than width" in {
-//       Api.validateFEN(fen3) must_== false
-//     }
-//   }
+  "Go situation legal moves" should {
+    val game = Api.position
+    // game.legalMoves.map(m => { println(m); m })
+    "19*19 legal moves" in {
+      game.legalMoves.size must_== 19 * 19 // 0 to 361 from api ?
+    }
+  }
 
-//   "Oware situation legal moves" should {
-//     val game    = Api.position
-//     val newGame = game.makeMoves(List(0, 8, 2))
-//     "5 legal moves" in {
-//       newGame.legalMoves.size must_== 5
-//     }
-//   }
+  "Go situation legal moves" should {
+    val game    = Api.position
+    val newGame = game.makeMoves(List(1, 2, 3, 40, 21))
+    "lots legal moves" in {
+      newGame.legalMoves.size must_== 19 * 19 - 5
+    }
+  }
 
-//   "Oware Move to Uci " should {
-//     val moves = List[Int](0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)
-//     "possible moves convert to uci (0->a1 etc)" in {
-//       moves.map(m => Api.moveToUci(m)) must_== List(
-//         "a1",
-//         "b1",
-//         "c1",
-//         "d1",
-//         "e1",
-//         "f1",
-//         "f2",
-//         "e2",
-//         "d2",
-//         "c2",
-//         "b2",
-//         "a2"
-//       )
-//     }
-//   }
+  "Go Move to Uci " should {
+    val moves = List[Int](0, 1, 2, 3, 4, 5, 60, 70, 80, 90, 100, 110)
+    "possible moves convert to uci (0->a1 etc)" in {
+      moves.map(m => Api.moveToUci(m)) must_== List(
+        "a1",
+        "b1",
+        "c1",
+        "d1",
+        "e1",
+        "f1",
+        "d4",
+        "n4",
+        "e5",
+        "o5",
+        "f6",
+        "p6"
+      )
+    }
+  }
 
 //   "Oware Uci to Move " should {
 //     val uci = List[String]("a1", "b1", "c1", "d1", "e1", "f1", "a2", "b2", "c2", "d2", "e2", "f2")

@@ -95,69 +95,33 @@ object Api {
 
     def goDiagram: String = position.toBoard.toDiagram
 
-    private def playerPitsToFen(pits: Array[String]): String =
-      pits
-        .map { part =>
-          part match {
-            case "0" => "1" // empty pit
-            case _   =>
-              part.toIntOption match {
-                case Some(x: Int) => s"${x}S"
-                case _            => sys.error(s"expected integer in go string of pits: $pits")
-              }
-          }
-        }
-        .mkString(",") + ","
-
-    private def joinEmptyPits(pits: String, replacePits: List[(String, String)]): String =
-      replacePits.foldLeft(pits)((fen, repPair) => fen.replace(repPair._1, repPair._2))
-
     def fenString: String = {
-      val splitDiagram   = goDiagram.split('-')
-      val width          = variant.boardSize.width
-      val numPits        = variant.boardSize.width * variant.boardSize.height
-      val replacePits    = (2 to width).toList.reverse.map(i => ("1," * i, s"$i,"))
-      val board          = List(
-        splitDiagram.take(width * 2).drop(width).reverse,
-        splitDiagram.take(width)
-      ).map(playerPitsToFen)
-        .map(pits => joinEmptyPits(pits, replacePits))
-        .map(_.dropRight(1))
-        .mkString("/")
-      val p1CurrentScore = splitDiagram(numPits).toInt
-      val p2CurrentScore = splitDiagram(numPits + 1).toInt
-      val p1FinalScore   = finalStoneScore(p1CurrentScore, p2CurrentScore, "p1")
-      val p2FinalScore   = finalStoneScore(p1CurrentScore, p2CurrentScore, "p2")
-      val fullMoveStr    = (ply / 2 + 1).toString()
-      return s"${board} ${p1FinalScore} ${p2FinalScore} ${splitDiagram(numPits + 2)} ${fullMoveStr}"
-    }
-
-    private def finalStoneScore(currentP1Score: Int, currentP2Score: Int, playerIndex: String): Int = {
-      if (position.hasEnded() && currentP1Score < 25 && currentP2Score < 25) {
-        playerIndex match {
-          case "p1" => currentP1Score + goDiagram.split('-').take(6).map(_.toInt).sum
-          case "p2" => currentP2Score + goDiagram.split('-').drop(6).take(6).map(_.toInt).sum
-        }
-      } else {
-        playerIndex match {
-          case "p1" => currentP1Score
-          case "p2" => currentP2Score
-        }
-      }
+      val splitDiagram = goDiagram.split(' ')
+      val board        = splitDiagram.lift(0).getOrElse(" board fen error ")
+      val turn         = splitDiagram.lift(1).getOrElse("w").toString().toUpperCase()
+      val ko           = splitDiagram.lift(2).getOrElse("-").toString()
+      val p1Komi       = 0
+      val p2Komi       = 6 // do we handle this here?
+      val p1FinalScore = p1Komi
+      val p2FinalScore = p2Komi
+      val fullMoveStr  = (ply / 2 + 1).toString()
+      return s"${board} ${turn} ${ko} ${p1FinalScore} ${p2FinalScore} ${fullMoveStr}"
     }
 
     def toPosition = position.toBoard().position()
 
     lazy val fen: FEN = FEN(fenString)
 
+    // todo fix
     private def convertPieceMapFromFen(fenString: String): PieceMap = {
-      FEN(fenString).goStoneArray.zipWithIndex
-        .filterNot { case (s, _) => s == 0 }
-        .map { case (seeds, index) =>
-          (Pos(index), (Piece(Player.fromP1(index < 6), variant.defaultRole), seeds))
-        }
-        .map { case (Some(pos), pieceCount) => pos -> pieceCount }
-        .toMap
+      // FEN(fenString).goStoneArray.zipWithIndex
+      //   .filterNot { case (s, _) => s == 0 }
+      //   .map { case (seeds, index) =>
+      //     (Pos(index), (Piece(Player.fromP1(index < 6), variant.defaultRole), seeds))
+      //   }
+      //   .map { case (Some(pos), pieceCount) => pos -> pieceCount }
+      //   .toMap
+      Map.empty[Pos, (Piece, Int)]
     }
 
     lazy val pieceMap: PieceMap = convertPieceMapFromFen(fenString)
@@ -189,6 +153,7 @@ object Api {
   def position: Position =
     new GoPosition(new GoGame())
 
+  // todo handle constants in go engine for different size boards
   def positionFromVariant(variant: Variant): Position =
     variant.key match {
       case "go9x9"   => new GoPosition(new GoGame())
@@ -215,11 +180,9 @@ object Api {
   }
 
   def goBoardFromFen(fenString: String): GoBoard = {
-    // todo
-    // val fen                    = FEN(fenString)
-    // val posFromFen: Array[Int] = fen.goStoneArray :+ fen.player1Score :+ fen.player2Score
-    // val turn: Int              = if (fen.player.map(_.p1).getOrElse(false)) 1 else -1
-    new GoBoard()
+    val fen = FEN(fenString)
+    val b   = new GoBoard()
+    b.toBoard(fen.engineFen)
   }
 
   def positionFromVariantAndMoves(variant: Variant, uciMoves: List[String]): Position =
@@ -232,7 +195,7 @@ object Api {
 
   val initialFen: FEN = variant.Go19x19.initialFen
 
-  private val fenRegex                        = "([0-9]+[A-Z]?,?){1,19}(/([0-9]+[A-Z]?,?){1,19}){8,18} [0-9]+ [0-9]+ [N|S] [0-9]+"
+  val fenRegex                                = "([0-9XO]?){1,19}(/([0-9XO]?){1,19}){8,18} [W|B] - [0-9]+ [0-9]+ [0-9]+"
   def validateFEN(fenString: String): Boolean =
     Try(goBoardFromFen(fenString)).isSuccess && fenString.matches(fenRegex)
 
