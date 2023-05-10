@@ -5,7 +5,7 @@ import strategygames.{ Player, Status }
 import cats.data.Validated
 import cats.implicits._
 
-import strategygames.samurai.format.{ Forsyth, Uci }
+import strategygames.samurai.format.Uci
 
 case class Situation(board: Board, player: Player) {
 
@@ -41,6 +41,8 @@ case class Situation(board: Board, player: Player) {
     else if (variantEnd) Status.VariantEnd.some
     else if (staleMate) Status.Stalemate.some
     else none
+
+  def isRepetition: Boolean = board.apiPosition.isRepetition
 
   def opponentHasInsufficientMaterial: Boolean = false
 
