@@ -6,6 +6,7 @@ import scala.annotation.nowarn
 
 import strategygames.fairysf._
 import strategygames.fairysf.format.{ FEN, Forsyth, Uci }
+import strategygames.fairysf.format.pgn.Binary
 import strategygames.{ GameFamily, Player }
 
 case class FairySFName(val name: String)
@@ -71,6 +72,10 @@ abstract class Variant private[variant] (
   def isValidPromotion(promotion: Option[PromotableRole]): Boolean = true
 
   def validMoves(situation: Situation): Map[Pos, List[Move]] =
+    if (situation.board.uciMoves.size < Binary.maxPlies) legalMoves(situation)
+    else Map()
+
+  private def legalMoves(situation: Situation): Map[Pos, List[Move]] =
     situation.board.apiPosition.legalMoves
       .filterNot(_.contains("@"))
       .map { case Uci.Move.moveR(orig, dest, promotion) =>
@@ -117,6 +122,10 @@ abstract class Variant private[variant] (
       .map { case (k, v) => (k, v.toList.map(_._2)) }
 
   def validDrops(situation: Situation): List[Drop] =
+    if (situation.board.uciMoves.size < Binary.maxPlies) legalDrops(situation)
+    else List()
+
+  private def legalDrops(situation: Situation): List[Drop] =
     situation.board.apiPosition.legalMoves
       .filter(_.contains("@"))
       .map { case Uci.Drop.dropR(role, dest) =>
