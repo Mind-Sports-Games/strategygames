@@ -9,9 +9,7 @@ package object go extends scalalib.Common with scalalib.OrnicarOption with scala
   type Direction  = Pos => Option[Pos]
   type Directions = List[Direction]
 
-  type PosInfo = (Piece, Int)
-
-  type PieceMap = Map[Pos, PosInfo]
+  type PieceMap = Map[Pos, Piece]
 
   type PositionHash = Array[Byte]
 

@@ -9,7 +9,7 @@ import strategygames.Player
 import strategygames.go.format.FEN
 import strategygames.go.Pos
 import strategygames.go.variant.Variant
-import scala.util.{ Failure, Success, Try }
+import scala.util.Try
 
 sealed abstract class GameResult extends Product with Serializable
 
@@ -44,7 +44,7 @@ object Api {
     val gameEnd: Boolean
     val gameOutcome: Int
     val legalMoves: Array[Int]
-    val playerTurn: Int // 1 for South -1 for North
+    val playerTurn: Int // 1 for South (P1/black) -1 for North (P2/white)
     def fenString: String
   }
 
@@ -98,7 +98,7 @@ object Api {
     def fenString: String = {
       val splitDiagram = goDiagram.split(' ')
       val board        = splitDiagram.lift(0).getOrElse(" board fen error ")
-      val turn         = splitDiagram.lift(1).getOrElse("w").toString().toUpperCase()
+      val turn         = splitDiagram.lift(1).getOrElse("w").toString()
       val ko           = splitDiagram.lift(2).getOrElse("-").toString()
       val p1Komi       = 0
       val p2Komi       = 6 // do we handle this here?
@@ -112,16 +112,45 @@ object Api {
 
     lazy val fen: FEN = FEN(fenString)
 
-    // todo fix
     private def convertPieceMapFromFen(fenString: String): PieceMap = {
-      // FEN(fenString).goStoneArray.zipWithIndex
-      //   .filterNot { case (s, _) => s == 0 }
-      //   .map { case (seeds, index) =>
-      //     (Pos(index), (Piece(Player.fromP1(index < 6), variant.defaultRole), seeds))
-      //   }
-      //   .map { case (Some(pos), pieceCount) => pos -> pieceCount }
-      //   .toMap
-      Map.empty[Pos, (Piece, Int)]
+      val boardWidth = variant.boardSize.width
+      val boardFen   = fenString.split(' ').take(1).mkString("")
+      var pieces     = Map.empty[Pos, Piece]
+      boardFen
+        .split('/')
+        .zipWithIndex
+        .map {
+          case (row, rowIndex) => {
+            var colIndex    = 0
+            var isLastChar1 = false
+            row.map(c => {
+              c match {
+                case 'X' =>
+                  Pos((boardWidth - rowIndex - 1) * boardWidth + colIndex).map { pos =>
+                    {
+                      pieces += (pos -> Piece(P1, Stone))
+                      colIndex += 1
+                    }
+                  }
+                case 'O' =>
+                  Pos((boardWidth - rowIndex - 1) * boardWidth + colIndex).map { pos =>
+                    {
+                      pieces += (pos -> Piece(P2, Stone))
+                      colIndex += 1
+                    }
+                  }
+                case n   => {
+                  colIndex += n.asDigit
+                  if (isLastChar1) colIndex += 9
+                }
+                case _   => sys.error(s"unrecognaised character in Go fen, ${c}")
+              }
+              isLastChar1 = c == '1'
+            })
+          }
+        }
+
+      pieces
     }
 
     lazy val pieceMap: PieceMap = convertPieceMapFromFen(fenString)
@@ -156,8 +185,8 @@ object Api {
   // todo handle constants in go engine for different size boards
   def positionFromVariant(variant: Variant): Position =
     variant.key match {
-      case "go9x9"   => new GoPosition(new GoGame())
-      case "go13x13" => new GoPosition(new GoGame())
+      case "go9x9"   => new GoPosition(new GoGame()) // todo setup 9x9
+      case "go13x13" => new GoPosition(new GoGame()) // todo setup 13x13
       case "go19x19" => new GoPosition(new GoGame())
       case _         => new GoPosition(new GoGame())
     }
@@ -182,7 +211,8 @@ object Api {
   def goBoardFromFen(fenString: String): GoBoard = {
     val fen = FEN(fenString)
     val b   = new GoBoard()
-    b.toBoard(fen.engineFen)
+    val b2  = b.toBoard(fen.engineFen)
+    b2
   }
 
   def positionFromVariantAndMoves(variant: Variant, uciMoves: List[String]): Position =
@@ -195,7 +225,7 @@ object Api {
 
   val initialFen: FEN = variant.Go19x19.initialFen
 
-  val fenRegex                                = "([0-9XO]?){1,19}(/([0-9XO]?){1,19}){8,18} [W|B] - [0-9]+ [0-9]+ [0-9]+"
+  val fenRegex                                = "([0-9XO]?){1,19}(/([0-9XO]?){1,19}){8,18} [w|b] - [0-9]+ [0-9]+ [0-9]+"
   def validateFEN(fenString: String): Boolean =
     Try(goBoardFromFen(fenString)).isSuccess && fenString.matches(fenRegex)
 

@@ -876,9 +876,8 @@ object Variant {
     def toSamurai        = sys.error("Can't convert go to samurai")
     def toTogyzkumalak   = sys.error("Can't convert go to togyzkumalak")
     def toGo             = v
-    def pieces: PieceMap = v.pieces.map { case (pos, (piece, count)) =>
-      (Pos.Go(pos), (Piece.Go(piece), count))
-    }
+    def pieces: PieceMap =
+      v.pieces.map { case (pos, piece) => (Pos.Go(pos), (Piece.Go(piece), 1)) }
 
     def standard: Boolean      = false
     def chess960: Boolean      = false

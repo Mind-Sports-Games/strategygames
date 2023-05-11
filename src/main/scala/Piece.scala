@@ -117,8 +117,8 @@ object Piece {
     case (Pos.Togyzkumalak(pos), (Togyzkumalak(piece), count)) => (pos, (piece, count))
   }
 
-  def goPieceMap(pieceMap: PieceMap): go.PieceMap = pieceMap.map { case (Pos.Go(pos), (Go(piece), count)) =>
-    (pos, (piece, count))
+  def goPieceMap(pieceMap: PieceMap): go.PieceMap = pieceMap.map { case (Pos.Go(pos), (Go(piece), _)) =>
+    (pos, piece)
   }
 
   def pieceMapForChess(pieces: strategygames.chess.PieceMap): PieceMap = pieces.map { case (pos, piece) =>

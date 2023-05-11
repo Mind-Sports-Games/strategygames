@@ -38,11 +38,11 @@ object Hash {
   private lazy val randomTable = new ZobristConstants(16)
 
   // for oware hashInt is just 1 for stone
-  private def pieceIndex(piece: Piece, count: Int) =
-    (piece.role.hashInt * count) * 2 + piece.player.fold(1, 0)
+  private def pieceIndex(piece: Piece) =
+    piece.role.hashInt * 2 + piece.player.fold(1, 0)
 
-  private def actorIndex(actorCount: (Actor, Int)) =
-    12 * pieceIndex(actorCount._1.piece, actorCount._2) + actorCount._1.pos.hashCode
+  private def actorIndex(actor: Actor) =
+    12 * pieceIndex(actor.piece) + actor.pos.hashCode
 
   def get(situation: Situation, table: ZobristConstants): Long = {
 

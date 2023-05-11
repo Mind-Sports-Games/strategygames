@@ -11,7 +11,7 @@ import strategygames.go.variant.Variant
   */
 object Forsyth {
 
-  val initial = FEN("19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19 B - 0 0 1")
+  val initial = FEN("19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19 b - 0 0 1")
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
     val apiPosition = Api.positionFromVariantNameAndFEN(variant.name, fen.value)
@@ -24,8 +24,8 @@ object Forsyth {
           position = apiPosition.some
         ),
         fen.value.split(' ')(1) match {
-          case "B" => P1
-          case "W" => P2
+          case "b" => P1
+          case "w" => P2
           case _   => sys.error("Invalid player in fen")
         }
       )

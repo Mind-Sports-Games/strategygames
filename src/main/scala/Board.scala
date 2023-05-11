@@ -228,9 +228,7 @@ object Board {
 
   case class Go(b: go.Board)
       extends Board(
-        b.pieces.map { case (pos, (piece, count)) =>
-          (Pos.Go(pos), (Piece.Go(piece), count))
-        },
+        b.pieces.map { case (pos, piece) => (Pos.Go(pos), (Piece.Go(piece), 1)) },
         History.Go(b.history),
         Variant.Go(b.variant)
       ) {
@@ -307,7 +305,7 @@ object Board {
       case (GameLogic.Go(), Variant.Go(variant))                     =>
         Go(
           go.Board.apply(
-            pieces.map { case (Pos.Go(pos), (Piece.Go(piece), count)) => (pos, (piece, count)) },
+            pieces.map { case (Pos.Go(pos), (Piece.Go(piece), _)) => (pos, piece) },
             variant
           )
         )
