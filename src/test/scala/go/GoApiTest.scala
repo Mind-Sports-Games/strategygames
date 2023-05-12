@@ -32,9 +32,8 @@ class GoApiTest extends Specification with ValidatedMatchers {
 
   "Go situation legal moves" should {
     val game = Api.position
-    // game.legalMoves.map(m => { println(m); m })
     "19*19 legal moves and a pass" in {
-      game.legalMoves.size must_== 19 * 19 + 1 // 0 to 360 (361 is pass)
+      game.legalMoves.size must_== 19 * 19 // 0 to 360
     }
   }
 
@@ -42,7 +41,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
     val game    = Api.position
     val newGame = game.makeMoves(List(1, 2, 3, 40, 21))
     "lots legal moves" in {
-      newGame.legalMoves.size must_== 19 * 19 - 5 + 1 // 1 extra for pass
+      newGame.legalMoves.size must_== 19 * 19 - 5
     }
   }
 
@@ -182,16 +181,16 @@ class GoApiTest extends Specification with ValidatedMatchers {
   }
 
   // todo need different example?
-  "go game with a ko point" should {
-    val game    = Api.position
-    val newGame = game.makeMoves(List(2, 59, 20, 39, 22, 41, 40, 21))
-    val fen     = newGame.fenString
-    // println(newGame.toBoard)
-    // println(fen)
-    "show up in fen" in {
-      fen.split(" ").lift(2) must_== Some(40)
-    }
-  }
+  // "go game with a ko point" should {
+  //   val game    = Api.position
+  //   val newGame = game.makeMoves(List(2, 59, 20, 39, 22, 41, 40, 21))
+  //   val fen     = newGame.fenString
+  //   // println(newGame.toBoard)
+  //   // println(fen)
+  //   "show up in fen" in {
+  //     fen.split(" ").lift(2) must_== Some(40)
+  //   }
+  // }
 
   "go game with a ko point" should {
     val game    = Api.position
@@ -222,7 +221,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
       fen.value must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/X3O14 b - 0 6 2"
     }
     "360 legal moves" in {
-      pos.legalMoves.size must_== 360
+      pos.legalMoves.size must_== 359
     }
   }
 
@@ -295,7 +294,8 @@ class GoApiTest extends Specification with ValidatedMatchers {
       position.gameEnd must_== false
       position.gameOutcome must_== 1000
       position.gameResult must_== GameResult.VariantEnd()
-      position.legalMoves.size must_== 3
+      position.legalMoves.size must_== 2
+      position.gameScore must_== 361
     }
 
   }

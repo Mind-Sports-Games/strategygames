@@ -43,6 +43,7 @@ object Api {
     val gameResult: GameResult
     val gameEnd: Boolean
     val gameOutcome: Int
+    val gameScore: Int
     val legalMoves: Array[Int]
     val playerTurn: Int // 1 for South (P1/black) -1 for North (P2/white)
     def fenString: String
@@ -51,7 +52,8 @@ object Api {
   private class GoPosition(
       position: GoGame,
       ply: Int = 0,
-      fromFen: Option[FEN] = None
+      fromFen: Option[FEN] = None,
+      komi: Int = 6
   ) extends Position {
     // TODO: yes, this is an abuse of scala. We could get an
     //       exception here, but I'm not sure how to work around that
@@ -63,7 +65,7 @@ object Api {
       var pos =
         if (previousMoves.length == 0 && Api.initialFen.value != fen.value) positionFromFen(fen.value)
         else if (Api.initialFen.value != initialFen.value) positionFromFen(initialFen.value)
-        else new GoPosition(new GoGame(), 0, fromFen)
+        else new GoPosition(new GoGame(), 0, fromFen, komi)
 
       pos = pos.makeMoves(previousMoves.map(uciToMove))
 
@@ -85,7 +87,7 @@ object Api {
             s"Illegal move2: ${move} from list: ${movesList} legalMoves: ${position.legalMoves.map(_.toString()).mkString(", ")}"
           )
       }
-      return new GoPosition(position, ply + movesList.length, fromFen)
+      return new GoPosition(position, ply + movesList.length, fromFen, komi)
     }
 
     // helper
@@ -93,17 +95,19 @@ object Api {
 
     def setBoard(goBoard: GoBoard): Unit = position.setBoard(goBoard)
 
+    def setKomi(k: Int): Unit = position.setKomiScore(k)
+
     def goDiagram: String = position.toBoard.toDiagram
 
     def fenString: String = {
       val splitDiagram = goDiagram.split(' ')
       val board        = splitDiagram.lift(0).getOrElse(" board fen error ")
-      val turn         = splitDiagram.lift(1).getOrElse("w").toString()
+      val turn         =
+        if (position.turn() == 1) "b"
+        else "w" // cant trust engine fen - not sure why but it always returns 'b'
       val ko           = splitDiagram.lift(2).getOrElse("-").toString()
-      val p1Komi       = 0
-      val p2Komi       = 6 // do we handle this here?
-      val p1FinalScore = p1Komi
-      val p2FinalScore = p2Komi
+      val p1FinalScore = 0
+      val p2FinalScore = komi
       val fullMoveStr  = (ply / 2 + 1).toString()
       return s"${board} ${turn} ${ko} ${p1FinalScore} ${p2FinalScore} ${fullMoveStr}"
     }
@@ -162,6 +166,10 @@ object Api {
 
     lazy val gameOutcome: Int = position.outcome()
 
+    lazy val gameScore: Int = position.score() // black - (white + komi)
+
+    val passMove: Int = 361
+
     val legalMoves: Array[Int] = {
       position.resetCursor()
       var moves: List[Int] = List()
@@ -170,7 +178,7 @@ object Api {
         moves = moves ::: List(nextMove)
         nextMove = position.nextMove()
       }
-      moves.toArray
+      moves.toArray.filter(m => m != passMove)
     }
 
     val playerTurn: Int = position.turn()
