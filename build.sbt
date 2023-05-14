@@ -4,7 +4,7 @@ organization := "org.playstrategy"
 
 version := "10.2.1-pstrat130"
 
-scalaVersion := "2.13.5"
+scalaVersion := "2.13.10"
 
 val fairystockfishVersion = "0.0.18"
 
