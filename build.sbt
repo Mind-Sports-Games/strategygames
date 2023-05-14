@@ -6,7 +6,7 @@ version := "10.2.1-pstrat130"
 
 scalaVersion := "2.13.10"
 
-val fairystockfishVersion = "0.0.18"
+val fairystockfishVersion = "0.0.19"
 
 libraryDependencies ++= List(
   "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
