@@ -30,6 +30,9 @@ class AmazonsVariantTest extends FairySFTest {
     "P@i9" // then after j9j10,P@j9 p2 has no moves
   ).map(Vector(_))
 
+  def fromMoves(moves: Vector[String]): Game =
+    Replay.gameMoveWhileValid(moves, initialFen, variant.Amazons)._2.last._1
+
   "Amazons" should {
 
     "not have winner from start position" in {
@@ -69,17 +72,36 @@ class AmazonsVariantTest extends FairySFTest {
       gameEnd.situation.status must_== Some(Status.VariantEnd)
       gameEnd.situation.winner must_== Some(Player.P1)
     }
+  }
+
+  "Amazon Fens" should {
+    "Ensure fen contains half move" in {
+      val onePlyGame        = fromMoves(Vector("g1j1"))
+      val onePlyFen         = Forsyth >> onePlyGame
+      onePlyFen.value must contain(" ½")
+      onePlyFen.value must contain(" ½g1j1")
+      val onePlyGameFromFen = Game(Some(Amazons), Some(onePlyFen))
+      onePlyGameFromFen.situation.lastMove must beSome.like { case move =>
+        move.toUci.uci must_== "g1j1"
+      }
+
+      val twoPlyGame         = fromMoves(Vector("g1j1", "P@i2"))
+      val twoPlyFen          = Forsyth >> twoPlyGame
+      twoPlyFen.value must not contain " ½"
+      val twoPlayGameFromFen = Game(Some(Amazons), Some(twoPlyFen))
+      twoPlayGameFromFen.situation.lastMove must beNone
+
+    }
 
     "Creating game from fen after move one should allow for drops" in {
-      val replay       = Replay.gameMoveWhileValid(Vector("g1j1"), initialFen, variant.Amazons)
-      val initialGame  = replay._2.last._1
-      val afterPly1Fen = Forsyth >> initialGame.situation
-      println(afterPly1Fen)
+      val initialGame  = fromMoves(Vector("g1j1"))
+      val afterPly1Fen = Forsyth >> initialGame
+      afterPly1Fen.value must contain(" ½")
+      afterPly1Fen.value must contain(" ½g1j1")
       initialGame.situation.drops must beSome.like {
         case drops => {
           drops == List() must beFalse
           val game = Game(Some(Amazons), Some(afterPly1Fen))
-          println(game.situation.drops)
           game.situation.drops must beSome.like {
             case dropsFromFEN => {
               dropsFromFEN must_== drops
@@ -90,26 +112,20 @@ class AmazonsVariantTest extends FairySFTest {
     }
 
     "Ensuring fens keep pawns when using them to create games further in" in {
-      val replay       = Replay.gameMoveWhileValid(Vector("g1j1", "P@i2"), initialFen, variant.Amazons)
-      val initialGame  = replay._2.last._1
+      val initialGame  = fromMoves(Vector("g1j1", "P@i2"))
       val afterPly2Fen = Forsyth >> initialGame.situation
-      afterPly2Fen.value must contain("8P1")
-      println(s"afterPly2Fen: ${afterPly2Fen}")
+      afterPly2Fen.value.toLowerCase() must contain("8p1")
       val gameFromFen  = Game(Some(Amazons), Some(afterPly2Fen))
       gameFromFen.situation.destinations must_== initialGame.situation.destinations
 
-      println(">>>>>>>>>>>>>>>>>>>>>>>>>>>-----------------")
       val afterPly2FenAgain = Forsyth >> gameFromFen.situation
-      println("<<<<<<<<<<<<<<<<<<<<<<<<<<------------------")
-      println(s"afterPly2FenAgain: ${afterPly2FenAgain}")
-      afterPly2FenAgain.value must contain("8P1")
+      afterPly2FenAgain.value.toLowerCase() must contain("8p1")
       afterPly2Fen must_== afterPly2FenAgain
 
       val replay2              = Replay.gameMoveWhileValid(Vector("j7i6"), afterPly2Fen, variant.Amazons)
       val gameFromFenAfterMove = replay2._2.last._1
       val afterPly3Fen         = Forsyth >> gameFromFenAfterMove.situation
-      println(s"afterPly3Fen: ${afterPly3Fen}")
-      afterPly3Fen.value must contain("8P1")
+      afterPly3Fen.value.toLowerCase() must contain("8p1")
     }
   }
 
