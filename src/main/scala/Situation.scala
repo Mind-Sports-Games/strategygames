@@ -34,6 +34,8 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def threefoldRepetition: Boolean
 
+  def isRepetition: Boolean
+
   // only implemented for fairysf for Xiangqi
   lazy val perpetualPossible: Boolean = false
 
@@ -95,6 +97,8 @@ object Situation {
     def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
 
     def threefoldRepetition: Boolean = s.threefoldRepetition
+
+    def isRepetition: Boolean = s.threefoldRepetition
 
     def end: Boolean = s.end
 
@@ -205,6 +209,8 @@ object Situation {
 
     def threefoldRepetition: Boolean = s.threefoldRepetition
 
+    def isRepetition: Boolean = s.threefoldRepetition
+
     def end: Boolean = s.end
 
     def winner: Option[Player] = s.winner
@@ -300,6 +306,8 @@ object Situation {
 
     def threefoldRepetition: Boolean = s.threefoldRepetition
 
+    def isRepetition: Boolean = s.threefoldRepetition
+
     override lazy val perpetualPossible: Boolean = s.perpetualPossible
 
     def end: Boolean = s.end
@@ -387,6 +395,8 @@ object Situation {
 
     def threefoldRepetition: Boolean = false
 
+    def isRepetition: Boolean = s.isRepetition
+
     override lazy val perpetualPossible: Boolean = false
 
     def end: Boolean = s.end
@@ -469,6 +479,7 @@ object Situation {
     def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
 
     def threefoldRepetition: Boolean = false
+    def isRepetition: Boolean        = false
 
     override lazy val perpetualPossible: Boolean = false
 
@@ -550,6 +561,7 @@ object Situation {
 
     def threefoldRepetition: Boolean = false
 
+    def isRepetition: Boolean                    = false
     override lazy val perpetualPossible: Boolean = false // not allowed to repeat ko
 
     def end: Boolean = s.end
