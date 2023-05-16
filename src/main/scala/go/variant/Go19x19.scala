@@ -6,7 +6,7 @@ import strategygames.{ GameFamily, Player }
 
 case object Go19x19
     extends Variant(
-      id = 3,
+      id = 4,
       key = "go19x19",
       name = "Go 19x19",
       standardInitialPosition = true,
@@ -20,7 +20,7 @@ case object Go19x19
 
   // cache this rather than checking with the API everytime
   override def initialFen =
-    format.FEN("19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19 b - 0 0 1")
+    format.FEN("19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 0 1")
 
   override def specialEnd(situation: Situation) =
     (situation.board.apiPosition.legalMoves.size == 0) ||

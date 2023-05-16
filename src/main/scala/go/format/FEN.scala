@@ -20,7 +20,9 @@ final case class FEN(value: String) extends AnyVal {
       fm * 2 - (if (player.exists(_.p1)) 2 else 1)
     }
 
-  def engineFen: String = value.split(' ').take(3).mkString(" ")
+  def parts                 = value.split(' ')
+  def board: Option[String] = parts.lift(0).flatMap(_.split('[').lift(0))
+  def engineFen: String     = board.getOrElse("") ++ " " ++ (parts.lift(1) ++ parts.lift(2)).mkString(" ")
 
   private def intFromFen(index: Int): Option[Int] =
     value.split(' ').lift(index).flatMap(_.toIntOption)

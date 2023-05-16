@@ -109,7 +109,8 @@ object Api {
       val p1FinalScore = 0
       val p2FinalScore = komi
       val fullMoveStr  = (ply / 2 + 1).toString()
-      return s"${board} ${turn} ${ko} ${p1FinalScore} ${p2FinalScore} ${fullMoveStr}"
+      val pocket       = "[SSSSSSSSSSssssssssss]"
+      return s"${board}${pocket} ${turn} ${ko} ${p1FinalScore} ${p2FinalScore} ${fullMoveStr}"
     }
 
     def toPosition = position.toBoard().position()
@@ -117,10 +118,11 @@ object Api {
     lazy val fen: FEN = FEN(fenString)
 
     private def convertPieceMapFromFen(fenString: String): PieceMap = {
-      val boardWidth = variant.boardSize.width
-      val boardFen   = fenString.split(' ').take(1).mkString("")
-      var pieces     = Map.empty[Pos, Piece]
-      boardFen
+      val boardWidth            = variant.boardSize.width
+      val boardFen              = fenString.split(' ').take(1).mkString("")
+      val boardFenWithoutPocket = boardFen.split('[').take(1).mkString("")
+      var pieces                = Map.empty[Pos, Piece]
+      boardFenWithoutPocket
         .split('/')
         .zipWithIndex
         .map {
@@ -233,7 +235,7 @@ object Api {
 
   val initialFen: FEN = variant.Go19x19.initialFen
 
-  val fenRegex                                = "([0-9XO]?){1,19}(/([0-9XO]?){1,19}){8,18} [w|b] - [0-9]+ [0-9]+ [0-9]+"
+  val fenRegex                                = "([0-9XO]?){1,19}(/([0-9XO]?){1,19}){8,18}\\[[Ss]+\\] [w|b] - [0-9]+ [0-9]+ [0-9]+"
   def validateFEN(fenString: String): Boolean =
     Try(goBoardFromFen(fenString)).isSuccess && fenString.matches(fenRegex)
 
