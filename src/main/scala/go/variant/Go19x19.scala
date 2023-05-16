@@ -6,7 +6,7 @@ import strategygames.{ GameFamily, Player }
 
 case object Go19x19
     extends Variant(
-      id = 1,
+      id = 3,
       key = "go19x19",
       name = "Go 19x19",
       standardInitialPosition = true,
