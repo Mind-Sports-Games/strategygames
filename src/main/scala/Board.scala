@@ -230,7 +230,8 @@ object Board {
       extends Board(
         b.pieces.map { case (pos, piece) => (Pos.Go(pos), (Piece.Go(piece), 1)) },
         History.Go(b.history),
-        Variant.Go(b.variant)
+        Variant.Go(b.variant),
+        b.pocketData.map(PocketData.Go)
       ) {
 
     def withHistory(h: History): Board = h match {

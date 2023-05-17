@@ -33,18 +33,15 @@ case class PocketData(
       promoted = if (promoted(orig)) promoted - orig + dest else promoted
     )
 
-  def gameFamily: Option[GameFamily] = pockets.p1.roles.headOption match {
-    case Some(strategygames.Role.GoRole(role)) => Some(role.gameFamily)
-    case None                                  =>
-      pockets.p2.roles.headOption match {
-        case Some(strategygames.Role.GoRole(role)) => Some(role.gameFamily)
-        case None                                  => None
-        case _                                     => sys.error("Not got go roles in p2 pocket")
-      }
-    case _                                     => sys.error("Not got go roles in p1 pocket")
-  }
 }
 
 object PocketData {
-  val init = PocketData(Pockets(Pocket(Nil), Pocket(Nil)), Set.empty)
+  // val init = PocketData(Pockets(Pocket(Nil), Pocket(Nil)), Set.empty)
+  val init = PocketData(
+    Pockets(
+      Pocket(List(strategygames.Role.GoRole(Stone), strategygames.Role.GoRole(Stone))),
+      Pocket(List(strategygames.Role.GoRole(Stone), strategygames.Role.GoRole(Stone)))
+    ),
+    Set.empty
+  )
 }

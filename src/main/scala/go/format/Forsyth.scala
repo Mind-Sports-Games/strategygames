@@ -23,6 +23,7 @@ object Forsyth {
           pieces = apiPosition.pieceMap,
           history = History(),
           variant = variant,
+          pocketData = apiPosition.pocketData,
           position = apiPosition.some
         ),
         fen.value.split(' ')(1) match {

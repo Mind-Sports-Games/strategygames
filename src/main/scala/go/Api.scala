@@ -5,7 +5,7 @@ import com.joansala.game.go.GoBoard
 
 import cats.implicits._
 
-import strategygames.Player
+import strategygames.{ Player, Pocket, Pockets }
 import strategygames.go.format.FEN
 import strategygames.go.Pos
 import strategygames.go.variant.Variant
@@ -39,6 +39,7 @@ object Api {
 
     val fen: FEN
     val pieceMap: PieceMap
+    val pocketData: Option[PocketData]
 
     val gameResult: GameResult
     val gameEnd: Boolean
@@ -160,6 +161,18 @@ object Api {
     }
 
     lazy val pieceMap: PieceMap = convertPieceMapFromFen(fenString)
+
+    lazy val pocketData =
+      Some(
+        PocketData(
+          Pockets(
+            Pocket(List(strategygames.Role.GoRole(Stone), strategygames.Role.GoRole(Stone))),
+            Pocket(List(strategygames.Role.GoRole(Stone), strategygames.Role.GoRole(Stone)))
+          ),
+          // Can make an empty Set of Pos because we dont have to track promoted pieces
+          Set[Pos]()
+        )
+      )
 
     lazy val gameResult: GameResult =
       GameResult.resultFromInt(position.outcome(), position.hasEnded())

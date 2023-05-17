@@ -18,6 +18,8 @@ case object Go19x19
   def perfIcon: Char = '' // todo change
   def perfId: Int    = 502
 
+  override def baseVariant: Boolean = true
+
   // cache this rather than checking with the API everytime
   override def initialFen =
     format.FEN("19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 0 1")

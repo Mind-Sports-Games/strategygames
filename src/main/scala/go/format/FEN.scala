@@ -20,9 +20,15 @@ final case class FEN(value: String) extends AnyVal {
       fm * 2 - (if (player.exists(_.p1)) 2 else 1)
     }
 
-  def parts                 = value.split(' ')
-  def board: Option[String] = parts.lift(0).flatMap(_.split('[').lift(0))
-  def engineFen: String     = board.getOrElse("") ++ " " ++ (parts.lift(1) ++ parts.lift(2)).mkString(" ")
+  def engineFen: String = removePockets(value.split(' ').take(3).mkString(" "))
+
+  private def removePockets(fen: String): String = {
+    val start = fen.indexOf("[", 0)
+    val end   = fen.indexOf("]", start)
+    if (start > 0 && end > 0)
+      fen.substring(0, start) + fen.substring(end + 1, fen.length)
+    else fen
+  }
 
   private def intFromFen(index: Int): Option[Int] =
     value.split(' ').lift(index).flatMap(_.toIntOption)

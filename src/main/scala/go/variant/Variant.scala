@@ -77,6 +77,7 @@ abstract class Variant private[variant] (
             after = situation.board.copy(
               pieces = newPosition.pieceMap,
               uciMoves = situation.board.uciMoves :+ uciMove,
+              pocketData = newPosition.pocketData,
               position = newPosition.some
             )
           )
