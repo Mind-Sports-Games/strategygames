@@ -48,12 +48,15 @@ object Uci {
 
   def apply(drop: strategygames.go.Drop) = Uci.Drop(drop.piece.role, drop.pos)
 
-  def apply(move: String) = {
-    for {
-      role <- move.headOption flatMap Role.allByPgn.get
-      pos  <- Pos.fromKey(move.slice(2, 4))
-    } yield Uci.Drop(role, pos)
-  }
+  def apply(move: String): Option[Uci] =
+    move match {
+      case Drop.dropR(role, dest) =>
+        (Role.allByPgn.get(role.charAt(0)), Pos.fromKey(dest)) match {
+          case (Some(role), Some(dest)) => Uci.Drop(role, dest).some
+          case _                        => sys.error(s"Cannot apply uci drop: ${move}")
+        }
+      case _                      => sys.error(s"Cannot apply uci: ${move}")
+    }
 
   def piotr(move: String): Option[Uci] = {
     for {

@@ -102,7 +102,7 @@ object Api {
 
     def fenString: String = {
       val splitDiagram = goDiagram.split(' ')
-      val board        = splitDiagram.lift(0).getOrElse(" board fen error ")
+      val board        = splitDiagram.lift(0).getOrElse(" board fen error ").replace("X", "S").replace("O", "s")
       val turn         =
         if (position.turn() == 1) "b"
         else "w" // cant trust engine fen - not sure why but it always returns 'b'
@@ -132,25 +132,25 @@ object Api {
             var isLastChar1 = false
             row.map(c => {
               c match {
-                case 'X' =>
+                case 'X' | 'S' =>
                   Pos((boardWidth - rowIndex - 1) * boardWidth + colIndex).map { pos =>
                     {
                       pieces += (pos -> Piece(P1, Stone))
                       colIndex += 1
                     }
                   }
-                case 'O' =>
+                case 'O' | 's' =>
                   Pos((boardWidth - rowIndex - 1) * boardWidth + colIndex).map { pos =>
                     {
                       pieces += (pos -> Piece(P2, Stone))
                       colIndex += 1
                     }
                   }
-                case n   => {
+                case n         => {
                   colIndex += n.asDigit
                   if (isLastChar1) colIndex += 9
                 }
-                case _   => sys.error(s"unrecognaised character in Go fen, ${c}")
+                case _         => sys.error(s"unrecognaised character in Go fen, ${c}")
               }
               isLastChar1 = c == '1'
             })
@@ -241,14 +241,13 @@ object Api {
   def positionFromVariantAndMoves(variant: Variant, uciMoves: List[String]): Position =
     positionFromVariant(variant).makeMoves(uciMoves.map(m => uciToMove(m)))
 
-  // TODO check 0 based coordinates
-  def uciToMove(uciMove: String): Int = Pos.fromKey(uciMove takeRight 2).map(_.index).getOrElse(0)
+  def uciToMove(uciMove: String): Int = Pos.fromKey(uciMove.drop(2)).map(_.index).getOrElse(0)
 
-  def moveToUci(move: Int): String = Pos(move).map(_.key).getOrElse("a1")
+  def moveToUci(move: Int): String = s"${Stone.forsyth.toUpper}@${Pos(move).map(_.key).getOrElse("a1")}"
 
   val initialFen: FEN = variant.Go19x19.initialFen
 
-  val fenRegex                                = "([0-9XO]?){1,19}(/([0-9XO]?){1,19}){8,18}\\[[Ss]+\\] [w|b] - [0-9]+ [0-9]+ [0-9]+"
+  val fenRegex                                = "([0-9Ss]?){1,19}(/([0-9Ss]?){1,19}){8,18}\\[[Ss]+\\] [w|b] - [0-9]+ [0-9]+ [0-9]+"
   def validateFEN(fenString: String): Boolean =
     Try(goBoardFromFen(fenString)).isSuccess && fenString.matches(fenRegex)
 

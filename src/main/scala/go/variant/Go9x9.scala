@@ -15,10 +15,8 @@ case object Go9x9
 
   def gameFamily: GameFamily = GameFamily.Go()
 
-  def perfIcon: Char = '' // todo change
+  def perfIcon: Char = '' // todo change
   def perfId: Int    = 500
-
-  override def baseVariant: Boolean = true
 
   // cache this rather than checking with the API everytime
   override def initialFen =

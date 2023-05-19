@@ -20,7 +20,8 @@ final case class FEN(value: String) extends AnyVal {
       fm * 2 - (if (player.exists(_.p1)) 2 else 1)
     }
 
-  def engineFen: String = removePockets(value.split(' ').take(3).mkString(" "))
+  def engineFen: String =
+    removePockets(value.split(' ').take(3).mkString(" ")).replace("S", "X").replace("s", "O")
 
   private def removePockets(fen: String): String = {
     val start = fen.indexOf("[", 0)

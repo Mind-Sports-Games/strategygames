@@ -15,7 +15,7 @@ case object Go19x19
 
   def gameFamily: GameFamily = GameFamily.Go()
 
-  def perfIcon: Char = '' // todo change
+  def perfIcon: Char = '' // todo change
   def perfId: Int    = 502
 
   override def baseVariant: Boolean = true
