@@ -13,12 +13,14 @@ final case class FEN(value: String) extends AnyVal {
 
   def player2Score: Int = intFromFen(4).getOrElse(0)
 
-  def fullMove: Option[Int] = intFromFen(5)
+  def fullMove: Option[Int] = intFromFen(6)
 
   def ply: Option[Int] =
     fullMove map { fm =>
       fm * 2 - (if (player.exists(_.p1)) 2 else 1)
     }
+
+  def komi: Int = intFromFen(5).getOrElse(0)
 
   def engineFen: String =
     removePockets(value.split(' ').take(3).mkString(" ")).replace("S", "X").replace("s", "O")

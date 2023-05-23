@@ -17,7 +17,7 @@ libraryDependencies ++= List(
   "org.typelevel"          %% "cats-core"                % "2.2.0",
   "org.playstrategy"        % "fairystockfish"           % fairystockfishVersion,
   "com.joansala.aalina"     % "aalina"                   % "2.1.0-pstrat2",
-  "com.joansala"            % "go-engine"                % "1.0.0-pstrat1"
+  "com.joansala"            % "go-engine"                % "1.0.0-pstrat1.1"
 )
 
 // Explicitly add in the linux-class path

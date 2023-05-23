@@ -12,14 +12,15 @@ class GoApiTest extends Specification with ValidatedMatchers {
     }
     // println(fen.matches(Api.fenRegex))
 
-    val fen2 = "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1SSss14[SSSSSSSSSSssssssssss] b - 0 0 1"
+    val fen2 =
+      "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1SSss14[SSSSSSSSSSssssssssss] b - 0 0 6 1"
     "true due to allowing >1 for multiple empty spaces" in {
       Api.validateFEN(fen2) must_== true
     }
     // println(fen2.matches(Api.fenRegex))
 
     val fen4 =
-      "19/19/19/19/19/19/19/19/19/19/19/19/SsSsSsSsSsSsSsSsSsSs/19/19/19/19/19/19[SSSSSSSSSSssssssssss] w - 0 0 1"
+      "19/19/19/19/19/19/19/19/19/19/19/19/SsSsSsSsSsSsSsSsSsSs/19/19/19/19/19/19[SSSSSSSSSSssssssssss] w - 0 0 6 1"
     // println(fen4.matches(Api.fenRegex))
     "false due to more stone in row than width" in {
       Api.validateFEN(fen4) must_== false
@@ -149,7 +150,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
     val pieceMap: PieceMap       = position.pieceMap
     val pieceAtD1: Option[Piece] = pieceMap.get(Pos.D1)
     "fen after a few moves" in {
-      fen.value must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S2SS1ss11[SSSSSSSSSSssssssssss] w - 0 6 3"
+      fen.value must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S2SS1ss11[SSSSSSSSSSssssssssss] w - 3 8 6 3"
     }
     "P1 Stone at pos D1" in {
       pieceAtD1 must_== Some(Piece(P1, Stone))
@@ -164,7 +165,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
     val newGame1 = game.makeMoves(List(0))
     val fen1     = newGame1.fen
     "should be white to play after 1 ply" in {
-      fen1.value must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S18[SSSSSSSSSSssssssssss] w - 0 6 1"
+      fen1.value must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S18[SSSSSSSSSSssssssssss] w - 361 6 6 1"
     }
   }
 
@@ -173,7 +174,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
     val newGame2 = game.makeMovesWithPrevious(List(10), List(0).map(Api.moveToUci))
     val fen2     = newGame2.fen
     "should be black to play after 2 ply" in {
-      fen2.value must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S9s8[SSSSSSSSSSssssssssss] b - 0 6 2"
+      fen2.value must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S9s8[SSSSSSSSSSssssssssss] b - 1 7 6 2"
     }
   }
 
@@ -182,7 +183,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
     val newGame3 = game.makeMovesWithPrevious(List(19), List(0, 10).map(Api.moveToUci))
     val fen3     = newGame3.fen
     "should be white to play after 3 ply" in {
-      fen3.value must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S18/S9s8[SSSSSSSSSSssssssssss] w - 0 6 2"
+      fen3.value must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S18/S9s8[SSSSSSSSSSssssssssss] w - 2 7 6 2"
     }
   }
 
@@ -191,7 +192,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
     val newGame4 = game.makeMovesWithPrevious(List(38), List(0, 10, 19).map(Api.moveToUci))
     val fen4     = newGame4.fen
     "should be black to play after 4 ply" in {
-      fen4.value must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/s18/S18/S9s8[SSSSSSSSSSssssssssss] b - 0 6 3"
+      fen4.value must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/s18/S18/S9s8[SSSSSSSSSSssssssssss] b - 2 8 6 3"
     }
   }
 
@@ -220,8 +221,8 @@ class GoApiTest extends Specification with ValidatedMatchers {
     val newGame = game.makeMoves(List(0, 7, 4, 1))
     val fen     = newGame.fen
     val goBoard = Api.goBoardFromFen(fen.value)
-    "fen is 19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/Ss2S2s11[SSSSSSSSSSssssssssss] b - 0 6 3" in {
-      fen.value must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/Ss2S2s11[SSSSSSSSSSssssssssss] b - 0 6 3"
+    "fen is 19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/Ss2S2s11[SSSSSSSSSSssssssssss] b - 2 8 6 3" in {
+      fen.value must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/Ss2S2s11[SSSSSSSSSSssssssssss] b - 2 8 6 3"
     }
     "go board diagram matches the fen " in {
       goBoard.toDiagram must_== fen.engineFen
@@ -232,8 +233,8 @@ class GoApiTest extends Specification with ValidatedMatchers {
     val uciMoves = List("S@a1", "S@e1") // 0,4
     val pos      = Api.positionFromVariantAndMoves(variant.Go19x19, uciMoves)
     val fen      = pos.fen
-    "fen is 19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S3s14[SSSSSSSSSSssssssssss] b - 0 6 2" in {
-      fen.value must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S3s14[SSSSSSSSSSssssssssss] b - 0 6 2"
+    "fen is 19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S3s14[SSSSSSSSSSssssssssss] b - 1 7 6 2" in {
+      fen.value must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S3s14[SSSSSSSSSSssssssssss] b - 1 7 6 2"
     }
     "360 legal moves" in {
       pos.legalMoves.size must_== 359
@@ -244,8 +245,8 @@ class GoApiTest extends Specification with ValidatedMatchers {
     val uciMoves = List("S@a15", "S@e11")
     val pos      = Api.positionFromVariantAndMoves(variant.Go19x19, uciMoves)
     val fen      = pos.fen
-    "fen is 19/19/19/19/S18/19/19/19/4s14/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 6 2" in {
-      fen.value must_== "19/19/19/19/S18/19/19/19/4s14/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 6 2"
+    "fen is 19/19/19/19/S18/19/19/19/4s14/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 1 7 6 2" in {
+      fen.value must_== "19/19/19/19/S18/19/19/19/4s14/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 1 7 6 2"
     }
     "360 legal moves" in {
       pos.legalMoves.size must_== 359
@@ -253,7 +254,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
   }
 
   "positionFromVariantNameAndFEN" should {
-    val fen = "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S3s14[SSSSSSSSSSssssssssss] b - 0 6 2"
+    val fen = "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S3s14[SSSSSSSSSSssssssssss] b - 1 7 6 2"
     val pos = Api.positionFromVariantNameAndFEN("go19x19", fen)
     "fen from new pos" in {
       pos.fen.value must_== fen
@@ -261,7 +262,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
   }
 
   "pieceMapFromFen" should {
-    val fen      = "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S3s14[SSSSSSSSSSssssssssss] b - 0 6 2"
+    val fen      = "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S3s14[SSSSSSSSSSssssssssss] b - 1 7 6 2"
     val pieceMap = Api.pieceMapFromFen("go19x19", fen)
     "2 pieces" in {
       pieceMap.size must_== 2
@@ -273,25 +274,39 @@ class GoApiTest extends Specification with ValidatedMatchers {
   }
 
   "game result " should {
-    val fen      = "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S3s14[SSSSSSSSSSssssssssss] b - 0 6 2"
+    val fen      = "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S3s14[SSSSSSSSSSssssssssss] b - 1 7 6 2"
     val position = Api.positionFromFen(fen)
     "is still ongoing during game" in {
+      position.gameEnd must_== false
+      position.gameOutcome must_== -1000
+      position.p1Score must_== 1
+      position.p2Score must_== 7
       position.gameResult must_== GameResult.Ongoing()
     }
   }
 
   "game result" should {
-    val fen      = "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S3s14[SSSSSSSSSSssssssssss] b - 0 6 2"
+    val fen      = "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S3s14[SSSSSSSSSSssssssssss] b - 1 7 6 2"
     val position = Api.positionFromFen(fen)
     position.makeMoves(List(361, 361))
-    "is draw if both players pass early" in {
+    "is not a draw if both players pass early due to komi" in {
+      position.gameResult must_!= GameResult.Draw()
+    }
+  }
+
+  "game result" should {
+    val fen      =
+      "SSSSSS13/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S3s14[SSSSSSSSSSssssssssss] b - 7 7 6 2"
+    val position = Api.positionFromFen(fen)
+    position.makeMoves(List(361, 361))
+    "is a draw if both players pass in given position" in {
       position.gameResult must_== GameResult.Draw()
     }
   }
 
   "game result" should {
     val fen      =
-      "sssssssssssssssssss/sssssssssssssssssss/19/19/19/19/19/19/19/19/19/19/19/19/19/SSSSSSSSSSSSSSSSSSS/19/SSSSSSSSSSSSSSSSSSS/19[SSSSSSSSSSssssssssss] b - 0 6 39"
+      "sssssssssssssssssss/sssssssssssssssssss/19/19/19/19/19/19/19/19/19/19/19/19/19/SSSSSSSSSSSSSSSSSSS/19/SSSSSSSSSSSSSSSSSSS/19[SSSSSSSSSSssssssssss] b - 0 6 6 39"
     val position = Api.positionFromFen(fen)
     val newGame  = position.makeMoves(List(361, 361))
     "be a win for player 1 as more territory " in {
@@ -303,7 +318,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
 
   "game result" should {
     val fen      =
-      "19/sssssssssssssssssss/19/sssssssssssssssssss/19/19/19/19/19/19/19/19/19/19/19/19/19/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS[SSSSSSSSSSssssssssss] b - 0 6 39"
+      "19/sssssssssssssssssss/19/sssssssssssssssssss/19/19/19/19/19/19/19/19/19/19/19/19/19/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS[SSSSSSSSSSssssssssss] b - 0 6 6 39"
     val position = Api.positionFromFen(fen)
     val newGame  = position.makeMoves(List(361, 361))
     "be a win for player 2 as more territory " in {
@@ -315,14 +330,44 @@ class GoApiTest extends Specification with ValidatedMatchers {
 
   "game result" should {
     val fen      =
-      "2SSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/S1S1S1S1S1S1S1S1S1S/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/S1S1S1S1S1S1S1S1S1S[SSSSSSSSSSssssssssss] w - 0 6 239"
+      "2SSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/S1S1S1S1S1S1S1S1S1S/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/S1S1S1S1S1S1S1S1S1S[SSSSSSSSSSssssssssss] w - 0 6 6 239"
     val position = Api.positionFromFen(fen)
-    "be a win as its clearly over but moves can be played " in {
+    "be a winning for p1 but ongoing as moves can be played " in {
       position.gameEnd must_== false
       position.gameOutcome must_== 1000
-      position.gameResult must_== GameResult.VariantEnd()
+      position.gameResult must_== GameResult.Ongoing()
       position.legalMoves.size must_== 2
-      position.gameScore must_== 361
+      position.gameScore must_== 355
+    }
+
+  }
+
+  "game result" should {
+    val fen      =
+      "s1s1s1s1s1s1s1s1s1s/sssssssssssssssssss/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/S1S1S1S1S1S1S1S1S1S/SSSSSSSSSSSSSSSSSSS/S1S1S1S1S1S1S1S1S1S/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/19[SSSSSSSSSSssssssssss] w - 0 6 6 239"
+    val position = Api.positionFromFen(fen)
+    "be a win as for p1 but ongoing as moves can be played " in {
+      position.gameEnd must_== false
+      position.gameOutcome must_== 1000
+      position.gameResult must_== GameResult.Ongoing()
+      position.legalMoves.size must_== 28
+      position.gameScore must_== 279
+    }
+
+  }
+
+  "game result" should {
+    val fen      =
+      "s1s1s1s1s1s1s1s1s1s/sssssssssssssssssss/1SSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/S1S1S1S1S1S1S1S1S1S/SSSSSSSSSSSSSSSSSSS/S1S1S1S1S1S1S1S1S1S/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/19[SSSSSSSSSSssssssssss] b - 0 6 6 239"
+    val position = Api.positionFromFen(fen)
+    "not count neutral spaces in scoring " in {
+      position.gameEnd must_== false
+      position.gameOutcome must_== 1000
+      position.gameResult must_== GameResult.Ongoing()
+      position.legalMoves.size must_== 38
+      position.gameScore must_== 278
+      position.p1Score must_== 322
+      position.p2Score must_== 44
     }
 
   }

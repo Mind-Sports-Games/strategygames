@@ -19,9 +19,9 @@ object GameResult {
   final case class Ongoing()    extends GameResult
 
   def resultFromInt(value: Int, ended: Boolean): GameResult =
-    if (value.abs == 1000) GameResult.VariantEnd()
+    if (value.abs == 1000 && ended) GameResult.VariantEnd()
     else if (value == 0 && ended) GameResult.Draw()
-    else if (value == 0 && !ended) GameResult.Ongoing()
+    else if (!ended) GameResult.Ongoing()
     else sys.error(s"Unknown game result: ${value}")
 
 }
@@ -36,6 +36,7 @@ object Api {
 
     def toBoard: String
     def goDiagram: String
+    def setKomi(komi: Int): Unit
 
     val fen: FEN
     val pieceMap: PieceMap
@@ -45,6 +46,8 @@ object Api {
     val gameEnd: Boolean
     val gameOutcome: Int
     val gameScore: Int
+    val p1Score: Int
+    val p2Score: Int
     val legalMoves: Array[Int]
     val playerTurn: Int // 1 for South (P1/black) -1 for North (P2/white)
     def fenString: String
@@ -77,6 +80,7 @@ object Api {
             s"Illegal move1: ${move} from list: ${movesList} legalMoves: ${pos.legalMoves.map(_.toString()).mkString(", ")}"
           )
       }
+      pos.setKomi(komi)
       return pos
     }
 
@@ -107,11 +111,11 @@ object Api {
         if (position.turn() == 1) "b"
         else "w" // cant trust engine fen - not sure why but it always returns 'b'
       val ko           = splitDiagram.lift(2).getOrElse("-").toString()
-      val p1FinalScore = 0
-      val p2FinalScore = komi
+      val p1FinalScore = p1Score
+      val p2FinalScore = p2Score
       val fullMoveStr  = (ply / 2 + 1).toString()
       val pocket       = "[SSSSSSSSSSssssssssss]"
-      return s"${board}${pocket} ${turn} ${ko} ${p1FinalScore} ${p2FinalScore} ${fullMoveStr}"
+      return s"${board}${pocket} ${turn} ${ko} ${p1FinalScore} ${p2FinalScore} ${komi} ${fullMoveStr}"
     }
 
     def toPosition = position.toBoard().position()
@@ -183,6 +187,9 @@ object Api {
 
     lazy val gameScore: Int = position.score() // black - (white + komi)
 
+    lazy val p1Score: Int = position.blackScore() // black
+    lazy val p2Score: Int = position.whiteScore() // white + komi
+
     val passMove: Int = 361
 
     val legalMoves: Array[Int] = {
@@ -202,15 +209,19 @@ object Api {
 
   }
 
-  def position: Position =
-    new GoPosition(new GoGame())
+  def position: Position = {
+    val g    = new GoGame()
+    val komi = 6 // todo add as input from setup?
+    g.setKomiScore(komi)
+    new GoPosition(g)
+  }
 
-  // todo handle constants in go engine for different size boards
+  // todo handle constants in go engine for different size boards and komi
   def positionFromVariant(variant: Variant): Position =
     variant.key match {
       case "go9x9"   => new GoPosition(new GoGame()) // todo setup 9x9
       case "go13x13" => new GoPosition(new GoGame()) // todo setup 13x13
-      case "go19x19" => new GoPosition(new GoGame())
+      case "go19x19" => position
       case _         => new GoPosition(new GoGame())
     }
 
@@ -218,16 +229,18 @@ object Api {
     val game = new GoGame()
     val fen  = FEN(fenString)
     game.setBoard(goBoardFromFen(fenString))
-    new GoPosition(game, fen.ply.getOrElse(0), Some(fen))
+    game.setKomiScore(fen.komi)
+    new GoPosition(game, fen.ply.getOrElse(0), Some(fen), fen.komi)
   }
 
   def positionFromVariantNameAndFEN(variantName: String, fenString: String): Position = {
     val game = new GoGame()
     val fen  = FEN(fenString)
     game.setBoard(goBoardFromFen(fenString))
+    game.setKomiScore(fen.komi)
     variantName.toLowerCase() match {
-      case "go19x19" => new GoPosition(game, fen.ply.getOrElse(0), Some(fen))
-      case _         => new GoPosition(new GoGame(), fen.ply.getOrElse(0), Some(fen))
+      case "go19x19" => new GoPosition(game, fen.ply.getOrElse(0), Some(fen), fen.komi)
+      case _         => new GoPosition(new GoGame(), fen.ply.getOrElse(0), Some(fen), fen.komi)
     }
   }
 
@@ -247,7 +260,7 @@ object Api {
 
   val initialFen: FEN = variant.Go19x19.initialFen
 
-  val fenRegex                                = "([0-9Ss]?){1,19}(/([0-9Ss]?){1,19}){8,18}\\[[Ss]+\\] [w|b] - [0-9]+ [0-9]+ [0-9]+"
+  val fenRegex                                = "([0-9Ss]?){1,19}(/([0-9Ss]?){1,19}){8,18}\\[[Ss]+\\] [w|b] - [0-9]+ [0-9]+ [0-9]+ [0-9]+"
   def validateFEN(fenString: String): Boolean =
     Try(goBoardFromFen(fenString)).isSuccess && fenString.matches(fenRegex)
 
