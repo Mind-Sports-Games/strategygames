@@ -39,13 +39,12 @@ object Forsyth {
       }
     )
 
-    Some(
-      moveStr
-        .flatMap(moveStr => Uci.Move(variant.gameFamily, moveStr))
-        .flatMap(uciMove => baseSituation.move(uciMove).toOption)
-        .map(_.situationAfter)
-        .getOrElse(baseSituation)
-    )
+    val finalSituation = moveStr
+      .flatMap(moveStr => Uci.Move(variant.gameFamily, moveStr))
+      .flatMap(uciMove => baseSituation.move(uciMove).toOption)
+      .map(_.situationAfter)
+      .getOrElse(baseSituation)
+    Some(finalSituation)
 
   }
 

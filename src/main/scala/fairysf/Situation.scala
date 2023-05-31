@@ -89,6 +89,9 @@ case class Situation(board: Board, player: Player, lastMove: Option[Move] = None
   def drop(role: Role, pos: Pos): Validated[String, Drop] =
     board.variant.drop(this, role, pos)
 
+  def drop(uci: Uci.Drop): Validated[String, Drop] =
+    board.variant.drop(this, uci.role, uci.pos)
+
   def withVariant(variant: strategygames.fairysf.variant.Variant) =
     copy(
       board = board withVariant variant
