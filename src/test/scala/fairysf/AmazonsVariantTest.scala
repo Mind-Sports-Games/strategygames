@@ -128,6 +128,13 @@ class AmazonsVariantTest extends FairySFTest {
       val gameFromFenAfterMove = replay2._2.last._1
       val afterPly3Fen         = Forsyth >> gameFromFenAfterMove.situation
       afterPly3Fen.value.toLowerCase() must contain("8p1")
+      afterPly3Fen.value.toLowerCase() must contain(" ½j7i6")
+
+      val replay3               = Replay.gameMoveWhileValid(Vector("P@i5"), afterPly3Fen, variant.Amazons)
+      val gameFromFenAfterMove3 = replay3._2.last._1
+      val afterPly4Fen          = Forsyth >> gameFromFenAfterMove3.situation
+      afterPly4Fen.value.toLowerCase() must not contain "½j7i6"
+      afterPly4Fen.value.toLowerCase() must contain("8p1")
     }
   }
 

@@ -69,7 +69,7 @@ case object Amazons
 
   override def exportBoardFenWithLastMove(board: Board, lastMove: Move): FEN =
     FEN(
-      s"${board.apiPosition.fen.value} ½${lastMove.toUci.uci}"
+      s"${exportBoardFen(board)} ½${lastMove.toUci.uci}"
     )
 
   override def paramsForFen(game: Game): Tuple2[Board, Option[Move]] = {

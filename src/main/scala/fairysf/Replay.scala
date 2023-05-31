@@ -172,8 +172,9 @@ object Replay {
 
     val init     = makeGame(variant, initialFen.some)
     var state    = init
-    var uciMoves = init.situation.board.uciMoves
     var errors   = ""
+    val lastMove = init.situation.lastMove
+    var uciMoves = init.situation.board.uciMoves
 
     def getApiPosition(uciMove: String) = state.board.apiPosition.makeMoves(List(uciMove))
 
@@ -228,7 +229,7 @@ object Replay {
         }
       }
 
-    def parseFairyUciWithPrevious(fairyUci: String, prevStr: Option[String]): (Game, Action) =
+    def parseFairyUciWithPrevious(fairyUci: String, prevStr: Option[String]): (Game, Action) = {
       fairyUci match {
         case Uci.Move.moveR(orig, dest, promotion) =>
           replayMoveFromUci(
@@ -244,6 +245,7 @@ object Replay {
           )
         case fairyUci: String                      => sys.error(s"Invalid fairyUci for replay: $fairyUci")
       }
+    }
 
     def parseFairyUci(fairyUci: String): (Game, Action) =
       parseFairyUciWithPrevious(fairyUci, None)
