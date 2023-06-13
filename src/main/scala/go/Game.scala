@@ -13,7 +13,7 @@ case class Game(
     startedAtTurn: Int = 0
 ) {
   def apply(drop: Drop): Game = {
-    val newSituation = drop situationAfter
+    val newSituation = drop.situationAfter
 
     copy(
       situation = newSituation,
@@ -33,7 +33,7 @@ case class Game(
     }
 
   def applyDrop(drop: Drop): Game = {
-    val newSituation = drop situationAfter
+    val newSituation = drop.situationAfter
 
     copy(
       situation = newSituation,

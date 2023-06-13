@@ -33,6 +33,7 @@ sealed abstract class Board(
   def toFairySF: fairysf.Board
   def toSamurai: samurai.Board
   def toTogyzkumalak: togyzkumalak.Board
+  def toGo: go.Board
 }
 
 object Board {

@@ -577,6 +577,11 @@ object Game {
     //   case _               => sys.error("Not passed Go objects")
     // }
 
+    def apply(drop: Drop): Game = drop match {
+      case (Drop.Go(drop)) => Go(g.apply(drop))
+      case _               => sys.error("Not passed Go objects")
+    }
+
     def apply(moveOrDrop: MoveOrDrop): Game =
       moveOrDrop.fold(
         move => sys.error("Not passed Go objects no moves allows only drops"),
