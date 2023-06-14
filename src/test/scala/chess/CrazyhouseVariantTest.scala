@@ -275,7 +275,7 @@ class CrazyhouseVariantTest extends ChessTest {
         _.split(' ').toList
       }
       def runOne(moves: List[String]) =
-        Replay.gameMoveWhileValid(moves, format.Forsyth.initial, Crazyhouse)
+        Replay.gamePlyWhileValid(moves.map(List(_)), format.Forsyth.initial, Crazyhouse)
       def hex(buf: Array[Byte]): String = buf.map("%02x" format _).mkString
       val g                             = gameMoves.map(runOne)
       g.exists(_._3.nonEmpty) must beFalse
@@ -304,7 +304,7 @@ class CrazyhouseVariantTest extends ChessTest {
 
     "replay ZH" in {
       strategygames.chess.Replay.boards(
-        moveStrs = Vector(
+        actions = Vector(
           "e4",
           "c5",
           "Na3",
@@ -326,7 +326,7 @@ class CrazyhouseVariantTest extends ChessTest {
           "Be6+",
           "Ke8",
           "B@f7#"
-        ),
+        ).map(Vector(_)),
         initialFen = None,
         variant = Crazyhouse
       ) must beValid

@@ -12,7 +12,7 @@ class TogyzkumalakReplayTest extends Specification with ValidatedMatchers {
   //  val initialFen = variant.Togyzkumalak.initialFen
 
   //  val x: (Game, List[(Game, Uci.WithSan)], Option[String]) =
-  //    Replay.gameMoveWhileValid(pgnMoves, initialFen, varaint)
+  //    Replay.gamePlyWhileValid(pgnMoves, initialFen, varaint)
 
   //  val initGame = x._1
   //  val getFen   = initGame.situation.board.apiPosition.fen
