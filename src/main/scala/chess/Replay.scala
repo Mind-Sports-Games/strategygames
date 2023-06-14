@@ -4,16 +4,32 @@ import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
-import strategygames.Player
 import strategygames.format.pgn.San
 import strategygames.chess.format.pgn.{ Parser, Reader }
 import strategygames.format.pgn.{ Tag, Tags }
 import strategygames.chess.format.{ FEN, Forsyth, Uci }
-import strategygames.{ Game => StratGame, Situation => StratSituation }
+import strategygames.{ Actions, Game => StratGame, Player, Situation => StratSituation }
 
 case class Replay(setup: Game, moves: List[MoveOrDrop], state: Game) {
 
   lazy val chronoMoves = moves.reverse
+
+  lazy val chronoActions: List[List[MoveOrDrop]] =
+    chronoMoves
+      .drop(1)
+      .foldLeft(List(chronoMoves.take(1))) { case (turn, mod) =>
+        if (
+          turn.head.head.fold(_.situationBefore.player, _.situationBefore.player) != mod.fold(
+            _.situationBefore.player,
+            _.situationBefore.player
+          )
+        ) {
+          List(mod) +: turn
+        } else {
+          (turn.head :+ mod) +: turn.tail
+        }
+      }
+      .reverse
 
   def addMove(moveOrDrop: MoveOrDrop) =
     copy(
@@ -30,13 +46,13 @@ object Replay {
   def apply(game: Game) = new Replay(game, Nil, game)
 
   def apply(
-      moveStrs: Iterable[String],
+      actions: Actions,
       initialFen: Option[FEN],
       variant: strategygames.chess.variant.Variant
   ): Validated[String, Reader.Result] =
-    moveStrs.some.filter(_.nonEmpty) toValid "[replay] pgn is empty" andThen { nonEmptyMoves =>
+    actions.some.filter(_.nonEmpty) toValid "[replay] pgn is empty" andThen { nonEmptyMoves =>
       Reader.moves(
-        nonEmptyMoves,
+        nonEmptyMoves.flatten,
         Tags(
           List(
             initialFen map { fen =>
@@ -70,14 +86,14 @@ object Replay {
       recursiveGames(game, moves.value) map { game :: _ }
     }
 
-  def gameMoveWhileValid(
-      moveStrs: Seq[String],
+  def gamePlyWhileValid(
+      actions: Actions,
       initialFen: FEN,
       variant: strategygames.chess.variant.Variant
   ): (Game, List[(Game, Uci.WithSan)], Option[String]) = {
 
-    def mk(g: Game, moves: List[(San, String)]): (List[(Game, Uci.WithSan)], Option[String]) =
-      moves match {
+    def mk(g: Game, plys: List[(San, String)]): (List[(Game, Uci.WithSan)], Option[String]) =
+      plys match {
         case (san, sanStr) :: rest =>
           san(StratSituation.wrap(g.situation)).fold(
             err => (Nil, err.some),
@@ -91,12 +107,16 @@ object Replay {
           )
         case _                     => (Nil, None)
       }
-    val init                                                                                 = makeGame(variant, initialFen.some)
+    val init                                                                                = makeGame(variant, initialFen.some)
+    // TODO handle multimove
+    // The following line converts actions into a 1-dimensional structure
+    // where an action is in a tuple of itself and the boolean autoEndTurn
+    // actions.zipWithIndex.map{case (a, i) => a.zipWithIndex.map{case (a1, i1) => (a1, i1 == a.size-1 && i != actions.size-1)}}.flatten
     Parser
-      .moves(moveStrs, variant)
+      .moves(actions.flatten, variant)
       .fold(
         err => List.empty[(Game, Uci.WithSan)] -> err.some,
-        moves => mk(init, moves.value zip moveStrs)
+        moves => mk(init, moves.value zip actions.flatten)
       ) match {
       case (games, err) => (init, games, err)
     }
@@ -145,18 +165,18 @@ object Replay {
   } withVariant variant
 
   def boards(
-      moveStrs: Iterable[String],
+      actions: Actions,
       initialFen: Option[FEN],
       variant: strategygames.chess.variant.Variant
-  ): Validated[String, List[Board]] = situations(moveStrs, initialFen, variant) map (_ map (_.board))
+  ): Validated[String, List[Board]] = situations(actions, initialFen, variant) map (_ map (_.board))
 
   def situations(
-      moveStrs: Iterable[String],
+      actions: Actions,
       initialFen: Option[FEN],
       variant: strategygames.chess.variant.Variant
   ): Validated[String, List[Situation]] = {
     val sit = initialFenToSituation(initialFen, variant)
-    Parser.moves(moveStrs, sit.board.variant) andThen { moves =>
+    Parser.moves(actions.flatten, sit.board.variant) andThen { moves =>
       recursiveSituations(sit, moves.value) map { sit :: _ }
     }
   }
@@ -184,7 +204,7 @@ object Replay {
     recursiveReplayFromUci(Replay(makeGame(variant, initialFen)), moves)
 
   def plyAtFen(
-      moveStrs: Iterable[String],
+      actions: Actions,
       initialFen: Option[FEN],
       variant: strategygames.chess.variant.Variant,
       atFen: FEN
@@ -213,7 +233,7 @@ object Replay {
         Forsyth.<<@(variant, _)
       } | Situation(variant)
 
-      Parser.moves(moveStrs, sit.board.variant) andThen { moves =>
+      Parser.moves(actions.flatten, sit.board.variant) andThen { moves =>
         recursivePlyAtFen(sit, moves.value, 1)
       }
     }

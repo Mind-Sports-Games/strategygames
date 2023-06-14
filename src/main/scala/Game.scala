@@ -125,6 +125,8 @@ abstract class Game(
   def fullMoveNumber: Int = 1 + turns / 2
 
   def withTurns(t: Int): Game
+  
+  def plyCount = actions.map(_.size).sum
 
   // TODO: Again, unsafe until we figure out the better design.
   def toChess: chess.Game

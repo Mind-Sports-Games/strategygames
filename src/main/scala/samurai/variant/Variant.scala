@@ -84,6 +84,7 @@ abstract class Variant private[variant] (
                 uciMoves = situation.board.uciMoves :+ uciMove,
                 position = newPosition.some
               ),
+              autoEndTurn = true,
               capture = None,
               promotion = None
             )

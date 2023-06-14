@@ -10,12 +10,14 @@ case class Drop(
     pos: Pos,
     situationBefore: Situation,
     after: Board,
+    autoEndTurn: Boolean,
     metrics: MoveMetrics = MoveMetrics()
 ) {
 
   def before = situationBefore.board
 
-  def situationAfter = Situation(finalizeAfter, !piece.player)
+  def situationAfter =
+    Situation(finalizeAfter, if (autoEndTurn) !piece.player else piece.player)
 
   def withHistory(h: History) = copy(after = after withHistory h)
 

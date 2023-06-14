@@ -4,7 +4,14 @@ import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
-import strategygames.{ Game => StratGame, Move => StratMove, MoveOrDrop, Player, Situation => StratSituation }
+import strategygames.{
+  Actions,
+  Game => StratGame,
+  Move => StratMove,
+  MoveOrDrop,
+  Player,
+  Situation => StratSituation
+}
 import strategygames.format.pgn.{ San, Tag, Tags }
 import format.pdn.{ Parser, Reader, Std }
 import format.{ FEN, Forsyth, Uci }
@@ -13,6 +20,18 @@ import variant.Variant
 case class Replay(setup: DraughtsGame, moves: List[Move], state: DraughtsGame) {
 
   lazy val chronoMoves = moves.reverse
+
+  lazy val chronoActions: List[List[Move]] =
+    chronoMoves
+      .drop(1)
+      .foldLeft(List(chronoMoves.take(1))) { case (turn, move) =>
+        if (turn.head.head.situationBefore.player != move.situationBefore.player) {
+          List(move) +: turn
+        } else {
+          (turn.head :+ move) +: turn.tail
+        }
+      }
+      .reverse
 
   def addMove(move: Move, finalSquare: Boolean = false) = copy(
     moves = move.applyVariantEffect :: moves,
@@ -28,14 +47,14 @@ object Replay {
   def apply(game: DraughtsGame) = new Replay(game, Nil, game)
 
   def apply(
-      moveStrs: Iterable[String],
+      actions: Actions,
       initialFen: Option[FEN],
       variant: Variant,
       finalSquare: Boolean
   ): Validated[String, Reader.Result] =
-    moveStrs.some.filter(_.nonEmpty) toValid "[replay] pdn is empty" andThen { nonEmptyMoves =>
+    actions.some.filter(_.nonEmpty) toValid "[replay] pdn is empty" andThen { nonEmptyMoves =>
       Reader.moves(
-        nonEmptyMoves,
+        nonEmptyMoves.flatten,
         Tags(
           List(
             initialFen map { fen => Tag(_.FEN, fen.value) },
@@ -74,8 +93,8 @@ object Replay {
     }
 
   type ErrorMessage = String
-  def gameMoveWhileValid(
-      moveStrs: Seq[String],
+  def gamePlyWhileValid(
+      actions: Actions,
       initialFen: FEN,
       variant: Variant,
       iteratedCapts: Boolean = false
@@ -83,11 +102,11 @@ object Replay {
 
     def mk(
         g: DraughtsGame,
-        moves: List[(San, String)],
+        plys: List[(San, String)],
         ambs: List[(San, String)]
     ): (List[(DraughtsGame, Uci.WithSan)], Option[ErrorMessage]) = {
       var newAmb                                                         = none[(San, String)]
-      val res: (List[(DraughtsGame, Uci.WithSan)], Option[ErrorMessage]) = moves match {
+      val res: (List[(DraughtsGame, Uci.WithSan)], Option[ErrorMessage]) = plys match {
         case (san, sanStr) :: rest =>
           san(
             StratSituation.wrap(g.situation),
@@ -115,16 +134,17 @@ object Replay {
           )
         case _                     => (Nil, None)
       }
-      if (res._2.isDefined && newAmb.isDefined) mk(g, moves, newAmb.get :: ambs)
+      if (res._2.isDefined && newAmb.isDefined) mk(g, plys, newAmb.get :: ambs)
       else res
     }
 
     val init = makeGame(variant, initialFen.some)
+    //TODO Upgrade for multimove when draughts does multimove
     Parser
-      .moves(moveStrs, variant)
+      .moves(actions.flatten, variant)
       .fold(
         err => List.empty[(DraughtsGame, Uci.WithSan)] -> err.some,
-        moves => mk(init, moves.value zip moveStrs, Nil)
+        moves => mk(init, moves.value zip actions.flatten, Nil)
       ) match {
       case (games, err) => (init, games, err)
     }
@@ -313,12 +333,12 @@ object Replay {
     initialFen.flatMap { fen => Forsyth.<<@(variant, fen) } | Situation(variant)
 
   def boards(
-      moveStrs: Iterable[String],
+      actions: Actions,
       initialFen: Option[FEN],
       variant: Variant,
       finalSquare: Boolean = false
   ): Validated[String, List[Board]] =
-    situations(moveStrs, initialFen, variant, finalSquare) map (_ map (_.board))
+    situations(actions, initialFen, variant, finalSquare) map (_ map (_.board))
 
   def ucis(
       moveStrs: Iterable[String],
@@ -330,13 +350,13 @@ object Replay {
     }
 
   def situations(
-      moveStrs: Iterable[String],
+      actions: Actions,
       initialFen: Option[FEN],
       variant: Variant,
       finalSquare: Boolean = false
   ): Validated[String, List[Situation]] = {
     val sit = initialFenToSituation(initialFen, variant)
-    Parser.moves(moveStrs, sit.board.variant) andThen { moves =>
+    Parser.moves(actions.flatten, sit.board.variant) andThen { moves =>
       recursiveSituations(sit, moves.value, finalSquare) map { sit :: _ }
     }
   }
@@ -368,7 +388,7 @@ object Replay {
     recursiveReplayFromUci(Replay(makeGame(variant, initialFen)), moves, finalSquare)
 
   def plyAtFen(
-      moveStrs: Iterable[String],
+      actions: Actions,
       initialFen: Option[FEN],
       variant: Variant,
       atFen: FEN
@@ -397,7 +417,7 @@ object Replay {
         Forsyth.<<@(variant, _)
       } | Situation(variant)
 
-      Parser.moves(moveStrs, sit.board.variant) andThen { moves =>
+      Parser.moves(actions.flatten, sit.board.variant) andThen { moves =>
         recursivePlyAtFen(sit, moves.value, 1)
       }
     }

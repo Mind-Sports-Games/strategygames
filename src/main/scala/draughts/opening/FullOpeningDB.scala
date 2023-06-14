@@ -2,10 +2,13 @@ package strategygames.draughts
 package opening
 
 import format.FEN
+import strategygames.Actions
 
 import cats.implicits._
 
 object FullOpeningDB {
+
+  private val SEARCH_MAX_TURNS = 40
 
   private def all: Vector[FullOpening] = Vector()
   /*private def all: Vector[FullOpening] = OpeningTable.tableFMJD.positions.map { p =>
@@ -24,12 +27,10 @@ object FullOpeningDB {
 
   def findByFen(fen: String) = byFen get fen.split(':').take(3).mkString(":")
 
-  val SEARCH_MAX_PLIES = 40
-
   // assumes standard initial FEN and variant
-  def search(moveStrs: Iterable[String]): Option[FullOpening.AtPly] =
+  def search(actions: Actions): Option[FullOpening.AtPly] =
     strategygames.draughts.Replay
-      .boards(moveStrs take SEARCH_MAX_PLIES, None, variant.Standard)
+      .boards(actions.take(SEARCH_MAX_TURNS), None, variant.Standard)
       .toOption
       .flatMap {
         _.zipWithIndex.drop(1).foldRight(none[FullOpening.AtPly]) {

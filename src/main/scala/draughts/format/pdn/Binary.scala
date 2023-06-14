@@ -2,56 +2,66 @@ package strategygames.draughts
 package format.pdn
 
 import scala.util.Try
+import strategygames.Actions
 
 object Binary {
 
-  def writeMove(m: String)             = Try(Writer move m)
-  def writeMoves(ms: Iterable[String]) = Try(Writer moves ms)
+  def writeMove(m: String)             = Try(Writer ply m)
+  def writeMoves(ms: Iterable[String]) = Try(Writer plies ms)
 
-  def readMoves(bs: List[Byte])          = Try(Reader moves bs)
-  def readMoves(bs: List[Byte], nb: Int) = Try(Reader.moves(bs, nb))
+  def writeActions(as: Actions) = Try(Writer actions as)
+
+  def readActions(bs: List[Byte])          = Try(Reader actions bs)
+  def readActions(bs: List[Byte], nb: Int) = Try(Reader.actions(bs, nb))
 
   private object MoveType {
     val IsMove    = 0
     val IsCapture = 1
+    val Delimiter = 3
   }
 
-  /*private object Encoding {
-    val pieceInts: Map[String, Int] = Map("K" -> 1, "Q" -> 2, "R" -> 3, "N" -> 4, "B" -> 5, "O-O" -> 6, "O-O-O" -> 7)
-    val pieceStrs: Map[Int, String] = (pieceInts map { case (k, v) => v -> k })(breakOut)
-    val dropPieceInts: Map[String, Int] = Map("P" -> 1, "Q" -> 2, "R" -> 3, "N" -> 4, "B" -> 5)
-    val dropPieceStrs: Map[Int, String] = (dropPieceInts map { case (k, v) => v -> k })(breakOut)
-    val promotionInts: Map[String, Int] = Map("" -> 0, "Q" -> 1, "R" -> 2, "N" -> 3, "B" -> 4, "K" -> 6)
-    val promotionStrs: Map[Int, String] = (promotionInts map { case (k, v) => v -> k })(breakOut)
-    val checkInts: Map[String, Int] = Map("" -> 0, "+" -> 1, "#" -> 2)
-    val checkStrs: Map[Int, String] = (checkInts map { case (k, v) => v -> k })(breakOut)
-  }*/
+  private object Delimiter {
+    val str = ""
+    val int = 255
+  }
 
   private object Reader {
 
     private val maxPlies = 600
 
-    def moves(bs: List[Byte]): List[String]          = moves(bs, maxPlies)
-    def moves(bs: List[Byte], nb: Int): List[String] = intMoves(bs map toInt, nb, "x00")
+    def actions(bs: List[Byte]): Actions          = actions(bs, maxPlies)
+    def actions(bs: List[Byte], nb: Int): Actions = toActions(intPlies(bs map toInt, nb, "x00"))
 
-    private def intMoves(bs: List[Int], pliesToGo: Int, lastUci: String): List[String] = bs match {
+    def toActions(plies: List[String]): Actions =
+      if (plies.contains(Delimiter.str)) unflatten(plies)
+      else plies.map(List(_))
+
+    def unflatten(plies: List[String]): List[List[String]] =
+      if (plies.size == 0) List()
+      else plies.takeWhile(_ != Delimiter.str) :: unflatten(plies.dropWhile(_ != Delimiter.str).drop(1))
+
+    private def intPlies(bs: List[Int], pliesToGo: Int, lastUci: String): List[String] = bs match {
       case _ if pliesToGo < 0                                     => Nil
       case Nil                                                    => Nil
+      case b1 :: rest if moveType(b1) == MoveType.Delimiter       =>
+        Delimiter.str :: intPlies(rest, pliesToGo, "x00")
       case b1 :: b2 :: rest if moveType(b1) == MoveType.IsMove    =>
         if (pliesToGo == 0)
           Nil
         else
-          moveUci(b1, b2) :: intMoves(rest, pliesToGo - 1, "x00")
+          moveUci(b1, b2) :: intPlies(rest, pliesToGo - 1, "x00")
       case b1 :: b2 :: rest if moveType(b1) == MoveType.IsCapture =>
         val newUci = captureUci(b1, b2)
         if (lastUci.endsWith("x" + newUci.substring(0, newUci.indexOf('x'))))
-          newUci :: intMoves(rest, pliesToGo, newUci)
+          newUci :: intPlies(rest, pliesToGo, newUci)
         else if (pliesToGo == 0)
           Nil
         else
-          newUci :: intMoves(rest, pliesToGo - 1, newUci)
+          newUci :: intPlies(rest, pliesToGo - 1, newUci)
       case x                                                      => !!(x map showByte mkString ",")
     }
+
+    // 255 => 11111111 => marker for end of turn. This makes movetype == 3 => Delimiter
 
     // 2 movetype
     // 6 srcPos
@@ -75,7 +85,8 @@ object Binary {
 
   private object Writer {
 
-    def move(str: String): List[Byte] = (str match {
+    def ply(str: String): List[Byte] = (str match {
+      case Delimiter.str         => List(Delimiter.int)
       case MoveUciR(src, dst)    => moveUci(src, dst)
       case CaptureUciR(src, dst) => captureUci(src, dst)
       case _                     =>
@@ -84,7 +95,15 @@ object Binary {
         Nil
     }) map (_.toByte)
 
-    def moves(strs: Iterable[String]): Array[Byte] = strs.flatMap(move).to(Array)
+    def plies(strs: Iterable[String]): Array[Byte] = strs.flatMap(ply).to(Array)
+
+    def actions(strs: Actions): Array[Byte] =
+      if (strs.size == 0 || strs.map(_.size).max == 1) plies(strs.flatten)
+      else plies(strs.toList.map(_.toList :+ "").flatten)
+
+    // TODO confirm we should be doing this
+    def removeFinalDelimiter(strs: List[String]): List[String] =
+      strs.reverse.dropWhile(_ == "").reverse
 
     def moveUci(src: String, dst: String) = List(
       (MoveType.IsMove << 6) + src.toInt,

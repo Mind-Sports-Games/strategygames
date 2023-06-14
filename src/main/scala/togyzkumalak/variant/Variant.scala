@@ -142,6 +142,7 @@ abstract class Variant private[variant] (
                 dest = dest,
                 situationBefore = situation,
                 after = boardAfter(situation, pos, dest),
+                autoEndTurn = true,
                 capture = None,
                 promotion = None
               )

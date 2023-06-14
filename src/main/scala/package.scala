@@ -16,6 +16,8 @@ package object strategygames
 
   type MoveOrDrop = Either[Move, Drop]
 
-  type Actions = Iterable[Iterable[String]]
+  type Actions = Seq[Seq[String]]
+
+  type VActions = Vector[Vector[String]]
 
 }

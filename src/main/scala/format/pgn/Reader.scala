@@ -111,21 +111,21 @@ object Reader {
         sys.error("Sans not implemented for togyzkumalak")
     }
 
-  def movesWithPgns(
+  def movesWithActions(
       lib: GameLogic,
-      moveStrs: Iterable[String],
-      op: Iterable[String] => Iterable[String],
+      actions: Actions,
+      op: Actions => Actions,
       tags: Tags
   ): Validated[String, Result] =
     lib match {
-      case GameLogic.Chess()        => sys.error("movesWithPgns not implemented for chess")
-      case GameLogic.Draughts()     => sys.error("movesWithPgns not implemented for draughts")
+      case GameLogic.Chess()        => sys.error("movesWithActions not implemented for chess")
+      case GameLogic.Draughts()     => sys.error("movesWithActions not implemented for draughts")
       case GameLogic.FairySF()      =>
-        FairySFReader.movesWithPgns(moveStrs, op, tags).map(Result.wrap)
+        FairySFReader.movesWithActions(actions, op, tags).map(Result.wrap)
       case GameLogic.Samurai()      =>
-        SamuraiReader.movesWithPgns(moveStrs, op, tags).map(Result.wrap)
+        SamuraiReader.movesWithActions(actions, op, tags).map(Result.wrap)
       case GameLogic.Togyzkumalak() =>
-        TogyzkumalakReader.movesWithPgns(moveStrs, op, tags).map(Result.wrap)
+        TogyzkumalakReader.movesWithActions(actions, op, tags).map(Result.wrap)
     }
 
 }

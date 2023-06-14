@@ -1,6 +1,7 @@
 package strategygames.togyzkumalak
 package format.pgn
 import strategygames.{
+  Actions,
   ByoyomiClock,
   Drop => StratDrop,
   FischerClock,
@@ -49,12 +50,12 @@ object Reader {
       makeReplay(makeGame(tags), op(moves))
     }
 
-  def movesWithPgns(
-      moveStrs: Iterable[String],
-      op: Iterable[String] => Iterable[String],
+  def movesWithActions(
+      actions: Actions,
+      op: Actions => Actions,
       tags: Tags
   ): Validated[String, Result] =
-    Validated.valid(makeReplayWithPgn(makeGame(tags), op(moveStrs)))
+    Validated.valid(makeReplayWithActions(makeGame(tags), op(actions)))
 
   // remove invisible byte order mark
   def cleanUserInput(str: String) = str.replace(s"\ufeff", "")
@@ -69,8 +70,9 @@ object Reader {
       case (r: Result.Incomplete, _)      => r
     }
 
-  private def makeReplayWithPgn(game: Game, moves: Iterable[String]): Result =
-    Parser.pgnMovesToUciMoves(moves).foldLeft[Result](Result.Complete(Replay(game))) {
+  private def makeReplayWithActions(game: Game, actions: Actions): Result =
+    // TODO support multimove properly here
+    Parser.pgnMovesToUciMoves(actions.flatten).foldLeft[Result](Result.Complete(Replay(game))) {
       case (Result.Complete(replay), m) =>
         m match {
           case Uci.Move.moveR(orig, dest, _) => {

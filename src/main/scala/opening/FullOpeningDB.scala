@@ -42,37 +42,27 @@ object FullOpeningDB {
   }
 
   // assumes standard initial FEN and variant
-  def search(lib: GameLogic, moveStrs: Actions): Option[FullOpening.AtPly] =
+  def search(lib: GameLogic, actions: Actions): Option[FullOpening.AtPly] =
     lib match {
       case GameLogic.Draughts()     =>
         strategygames.draughts.opening.FullOpeningDB
-          .search(
-            moveStrs.flatten
-          )
+          .search(actions)
           .map(fo => FullOpening.AtPly(FullOpening.Draughts(fo.opening), fo.ply))
       case GameLogic.Chess()        =>
         strategygames.chess.opening.FullOpeningDB
-          .search(
-            moveStrs.flatten
-          )
+          .search(actions)
           .map(fo => FullOpening.AtPly(FullOpening.Chess(fo.opening), fo.ply))
       case GameLogic.FairySF()      =>
         strategygames.fairysf.opening.FullOpeningDB
-          .search(
-            moveStrs.flatten
-          )
+          .search(actions)
           .map(fo => FullOpening.AtPly(FullOpening.FairySF(fo.opening), fo.ply))
       case GameLogic.Samurai()      =>
         strategygames.samurai.opening.FullOpeningDB
-          .search(
-            moveStrs.flatten
-          )
+          .search(actions)
           .map(fo => FullOpening.AtPly(FullOpening.Samurai(fo.opening), fo.ply))
       case GameLogic.Togyzkumalak() =>
         strategygames.togyzkumalak.opening.FullOpeningDB
-          .search(
-            moveStrs.flatten
-          )
+          .search(actions)
           .map(fo => FullOpening.AtPly(FullOpening.Togyzkumalak(fo.opening), fo.ply))
     }
 

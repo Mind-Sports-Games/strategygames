@@ -11,6 +11,7 @@ case class Move(
     dest: Pos,
     situationBefore: Situation,
     after: Board,
+    autoEndTurn: Boolean,
     capture: Option[List[Pos]],
     taken: Option[List[Pos]],
     promotion: Option[PromotableRole] = None,
@@ -20,6 +21,7 @@ case class Move(
   def before = situationBefore.board
 
   def situationAfter: Situation                       = situationAfter(false)
+  // TODO: Use autoEndTurn when rewriting draughts
   def situationAfter(finalSquare: Boolean): Situation =
     Situation.withPlayerAfter(finalizeAfter(finalSquare), piece.player)
 

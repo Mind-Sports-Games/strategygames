@@ -10,13 +10,15 @@ case class Move(
     dest: Pos,
     situationBefore: Situation,
     after: Board,
+    autoEndTurn: Boolean,
     capture: Option[Pos] = None,
     promotion: Option[PromotableRole] = None,
     metrics: MoveMetrics = MoveMetrics()
 ) {
   def before = situationBefore.board
 
-  def situationAfter = Situation(finalizeAfter, !piece.player)
+  def situationAfter =
+    Situation(finalizeAfter, if (autoEndTurn) !piece.player else piece.player)
 
   def finalizeAfter: Board = after
 

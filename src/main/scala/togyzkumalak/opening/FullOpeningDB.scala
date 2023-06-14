@@ -3,15 +3,16 @@ package strategygames.togyzkumalak.opening
 import cats.syntax.option._
 
 import strategygames.togyzkumalak.format.FEN
+import strategygames.Actions
 
 object FullOpeningDB {
 
+  private val SEARCH_MAX_TURNS = 40
+
   def findByFen(fen: FEN): Option[FullOpening] = None // TODO: ???
 
-  val SEARCH_MAX_PLIES = 40
-
   // assumes standard initial FEN and variant
-  def search(moveStrs: Iterable[String]): Option[FullOpening.AtPly] = None // TODO: ???
+  def search(actions: Actions): Option[FullOpening.AtPly] = None // TODO: ???
 
   def searchInFens(fens: Vector[FEN]): Option[FullOpening] = None // TODO: ???
 }

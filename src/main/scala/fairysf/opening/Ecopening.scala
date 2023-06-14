@@ -1,6 +1,8 @@
 package strategygames.fairysf.opening
 import strategygames.fairysf._
 
+import strategygames.Actions
+
 import cats.syntax.option._
 
 final class Ecopening(
@@ -50,10 +52,10 @@ object Ecopening {
       })
     }
 
-  def fromGame(pgnMoves: List[String]): Option[Ecopening] =
+  def fromGame(actions: Actions): Option[Ecopening] =
     Replay
       .boards(
-        moveStrs = pgnMoves take EcopeningDB.MAX_MOVES,
+        actions = actions take EcopeningDB.MAX_MOVES,
         initialFen = None,
         variant = variant.Variant.default
       )

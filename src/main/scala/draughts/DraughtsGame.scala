@@ -107,10 +107,12 @@ case class DraughtsGame(
   def apply(uci: Uci.Move): Validated[String, (DraughtsGame, Move)] = apply(uci.orig, uci.dest, uci.promotion)
 
   private def applyAction(action: String): Vector[Vector[String]] =
-    if (Player.fromPly(actions.size) == situation.player)
-      actions :+ Vector(action)
-    else
-      actions.updated(actions.size, actions(actions.size) :+ action)
+    //whilst draughts doesnt support multimove
+    actions :+ Vector(action)
+    //if (Player.fromPly(actions.size) == situation.player)
+    //  actions :+ Vector(action)
+    //else
+    //  actions.updated(actions.size, actions(actions.size) :+ action)
 
   def displayTurns = if (situation.ghosts == 0) turns else turns + 1
 

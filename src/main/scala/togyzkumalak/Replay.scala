@@ -4,16 +4,27 @@ import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
-import strategygames.Player
 import strategygames.format.pgn.San
 import strategygames.togyzkumalak.format.pgn.{ Parser, Reader }
 import strategygames.format.pgn.{ Tag, Tags }
 import strategygames.togyzkumalak.format.{ FEN, Forsyth, Uci }
-import strategygames.{ Move => StratMove, MoveOrDrop, Situation => StratSituation }
+import strategygames.{ Actions, Move => StratMove, MoveOrDrop, Player, Situation => StratSituation }
 
 case class Replay(setup: Game, moves: List[Move], state: Game) {
 
   lazy val chronoMoves = moves.reverse
+
+  lazy val chronoActions: List[List[Move]] =
+    chronoMoves
+      .drop(1)
+      .foldLeft(List(chronoMoves.take(1))) { case (turn, move) =>
+        if (turn.head.head.situationBefore.player != move.situationBefore.player) {
+          List(move) +: turn
+        } else {
+          (turn.head :+ move) +: turn.tail
+        }
+      }
+      .reverse
 
   def addMove(move: Move) =
     copy(
@@ -30,15 +41,15 @@ object Replay {
   def apply(game: Game) = new Replay(game, Nil, game)
 
   def apply(
-      moveStrs: Iterable[String],
+      actions: Actions,
       initialFen: Option[FEN],
       variant: strategygames.togyzkumalak.variant.Variant
   ): Validated[String, Reader.Result] = {
-    val fen                  = initialFen.getOrElse(variant.initialFen)
-    val (init, moves, error) = gameMoveWhileValid__impl(moveStrs.toSeq, fen, variant)
-    val game                 = moves.reverse.last._1
+    val fen                 = initialFen.getOrElse(variant.initialFen)
+    val (init, plys, error) = gameActionWhileValid(actions, fen, variant)
+    val game                = plys.reverse.last._1
     error match {
-      case None      => Validated.valid(Reader.Result.Complete(new Replay(init, moves.reverse.map(_._2), game)))
+      case None      => Validated.valid(Reader.Result.Complete(new Replay(init, plys.reverse.map(_._2), game)))
       case Some(msg) => Validated.invalid(msg)
     }
   }
@@ -61,12 +72,13 @@ object Replay {
       dest = dest,
       situationBefore = before.situation,
       after = before.situation.board.variant.boardAfter(before.situation, orig, dest),
+      autoEndTurn = true,
       capture = None,
       promotion = None
     )
 
-  def gameMoveWhileValid__impl(
-      moveStrs: Seq[String],
+  private def gameActionWhileValid(
+      actions: Actions,
       initialFen: FEN,
       variant: strategygames.togyzkumalak.variant.Variant
   ): (Game, List[(Game, Move)], Option[String]) = {
@@ -88,8 +100,8 @@ object Replay {
         }
       }
 
-    val moves: List[(Game, Move)] = Parser
-      .pgnMovesToUciMoves(moveStrs)
+    val plys: List[(Game, Move)] = Parser
+      .pgnMovesToUciMoves(actions.flatten)
       .map {
         case Uci.Move.moveR(orig, dest, promotion) =>
           replayMoveFromUci(
@@ -97,21 +109,21 @@ object Replay {
             Pos.fromKey(dest),
             promotion
           )
-        case moveStr: String                       => sys.error(s"Invalid move for replay: $moveStr")
+        case action: String                        => sys.error(s"Invalid move for replay: $action")
       }
 
-    (init, moves, errors match { case "" => None; case _ => errors.some })
+    (init, plys, errors match { case "" => None; case _ => errors.some })
   }
 
-  def gameMoveWhileValid(
-      moveStrs: Seq[String],
+  def gamePlyWhileValid(
+      actions: Actions,
       initialFen: FEN,
       variant: strategygames.togyzkumalak.variant.Variant
   ): (Game, List[(Game, Uci.WithSan)], Option[String]) = {
-    val (game, moves, error) = gameMoveWhileValid__impl(moveStrs, initialFen, variant)
+    val (game, plys, error) = gameActionWhileValid(actions, initialFen, variant)
     (
       game,
-      moves.map { v =>
+      plys.map { v =>
         {
           val (state, move) = v
           (state, Uci.WithSan(move.toUci, "NOSAN"))
@@ -161,18 +173,18 @@ object Replay {
   } withVariant variant
 
   def boards(
-      moveStrs: Iterable[String],
+      actions: Actions,
       initialFen: Option[FEN],
       variant: strategygames.togyzkumalak.variant.Variant
-  ): Validated[String, List[Board]] = situations(moveStrs, initialFen, variant) map (_ map (_.board))
+  ): Validated[String, List[Board]] = situations(actions, initialFen, variant) map (_ map (_.board))
 
   def situations(
-      moveStrs: Iterable[String],
+      actions: Actions,
       initialFen: Option[FEN],
       variant: strategygames.togyzkumalak.variant.Variant
   ): Validated[String, List[Situation]] = {
     val sit = initialFenToSituation(initialFen, variant)
-    Parser.moves(moveStrs, sit.board.variant) andThen { moves =>
+    Parser.moves(actions.flatten, sit.board.variant) andThen { moves =>
       recursiveSituations(sit, moves.value) map { sit :: _ }
     }
   }
@@ -200,7 +212,7 @@ object Replay {
     recursiveReplayFromUci(Replay(makeGame(variant, initialFen)), moves)
 
   def plyAtFen(
-      moveStrs: Iterable[String],
+      actions: Actions,
       initialFen: Option[FEN],
       variant: strategygames.togyzkumalak.variant.Variant,
       atFen: FEN
@@ -229,7 +241,7 @@ object Replay {
         Forsyth.<<@(variant, _)
       } | Situation(variant)
 
-      Parser.moves(moveStrs, sit.board.variant) andThen { moves =>
+      Parser.moves(actions.flatten, sit.board.variant) andThen { moves =>
         recursivePlyAtFen(sit, moves.value, 1)
       }
     }

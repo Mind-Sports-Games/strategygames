@@ -97,6 +97,7 @@ abstract class Variant private[variant] (
                 pocketData = newPosition.pocketData,
                 position = newPosition.some
               ),
+              autoEndTurn = true, // have to override this function to change this (e.g. Amazons)
               capture = None,
               promotion = promotion match {
                 case "+" =>
@@ -138,7 +139,8 @@ abstract class Variant private[variant] (
               uciMoves = situation.board.uciMoves :+ uciMove,
               pocketData = newPosition.pocketData,
               position = newPosition.some
-            )
+            ),
+            autoEndTurn = true
           )
         }
         case (role, dest)             => sys.error(s"Invalid position from uci: ${role}@${dest}")

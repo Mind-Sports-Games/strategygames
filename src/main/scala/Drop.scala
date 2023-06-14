@@ -9,6 +9,7 @@ sealed abstract class Drop(
     val pos: Pos,
     val situationBefore: Situation,
     val after: Board,
+    val autoEndTurn: Boolean,
     val metrics: MoveMetrics = MoveMetrics()
 ) {
 
@@ -35,6 +36,7 @@ object Drop {
         Pos.Chess(d.pos),
         Situation.Chess(d.situationBefore),
         Board.Chess(d.after),
+        d.autoEndTurn,
         d.metrics
       ) {
 
@@ -55,6 +57,7 @@ object Drop {
         Pos.FairySF(d.pos),
         Situation.FairySF(d.situationBefore),
         Board.FairySF(d.after),
+        d.autoEndTurn,
         d.metrics
       ) {
 
