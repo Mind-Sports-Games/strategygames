@@ -14,7 +14,7 @@ case class DraughtsGame(
     clock: Option[Clock] = None,
     /** turns means plies here */
     turns: Int = 0,
-    startedAtTurn: Int = 0,
+    startedAtPly: Int = 0,
     startPlayer: Player = Player.P1
 ) {
 
@@ -100,7 +100,7 @@ case class DraughtsGame(
   private def applyClock(metrics: MoveMetrics, gameActive: Boolean) = clock.map { c =>
     {
       val newC = c.step(metrics, gameActive)
-      if (turns - startedAtTurn == 1) newC.start else newC
+      if (turns - startedAtPly == 1) newC.start else newC
     }
   }
 

@@ -39,7 +39,7 @@ case class Replay(setup: DraughtsGame, moves: List[Move], state: DraughtsGame) {
   )
 
   def moveAtPly(ply: Int): Option[Move] =
-    chronoMoves lift (ply - 1 - setup.startedAtTurn)
+    chronoMoves lift (ply - 1 - setup.startedAtPly)
 }
 
 object Replay {
@@ -424,6 +424,6 @@ object Replay {
 
   private def makeGame(variant: Variant, initialFen: Option[FEN]): DraughtsGame = {
     val g = DraughtsGame(variant.some, initialFen)
-    g.copy(startedAtTurn = g.turns, startPlayer = g.situation.player)
+    g.copy(startedAtPly = g.turns, startPlayer = g.situation.player)
   }
 }

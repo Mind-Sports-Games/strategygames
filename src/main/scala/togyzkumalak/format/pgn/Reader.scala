@@ -101,7 +101,7 @@ object Reader {
       fen = tags.togyzkumalakFen
     )
     g.copy(
-      startedAtTurn = g.turns,
+      startedAtPly = g.turns,
       startPlayer = g.situation.player,
       clock = tags.clockConfig.flatMap {
         case fc: FischerClock.Config => Some(FischerClock.apply(fc))

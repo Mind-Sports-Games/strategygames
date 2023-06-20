@@ -33,7 +33,7 @@ case class Replay(setup: Game, moves: List[Move], state: Game) {
     )
 
   def moveAtPly(ply: Int): Option[Move] =
-    chronoMoves lift (ply - 1 - setup.startedAtTurn)
+    chronoMoves lift (ply - 1 - setup.startedAtPly)
 }
 
 object Replay {
@@ -260,6 +260,6 @@ object Replay {
 
   private def makeGame(variant: strategygames.samurai.variant.Variant, initialFen: Option[FEN]): Game = {
     val g = Game(variant.some, initialFen)
-    g.copy(startedAtTurn = g.turns, startPlayer = g.situation.player)
+    g.copy(startedAtPly = g.turns, startPlayer = g.situation.player)
   }
 }

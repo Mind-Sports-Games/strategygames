@@ -24,7 +24,7 @@ sealed abstract class Replay(val setup: Game, val moves: List[MoveOrDrop], val s
       .reverse
 
   def moveAtPly(ply: Int): Option[MoveOrDrop] =
-    chronoMoves lift (ply - 1 - setup.startedAtTurn)
+    chronoMoves lift (ply - 1 - setup.startedAtPly)
 
   // TODO: If we had a case class this would be automatic.
   def copy(state: Game): Replay

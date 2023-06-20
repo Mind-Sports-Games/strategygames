@@ -10,7 +10,7 @@ case class Game(
     actions: Vector[Vector[String]] = Vector(),
     clock: Option[Clock] = None,
     turns: Int = 0, // plies
-    startedAtTurn: Int = 0,
+    startedAtPly: Int = 0,
     startPlayer: Player = Player.P1
 ) {
   def apply(
@@ -60,7 +60,7 @@ case class Game(
     clock.map { c =>
       {
         val newC = c.step(metrics, gameActive, switchClock)
-        if (turns - startedAtTurn == (2 * situation.board.variant.plysPerTurn - 1)) newC.start else newC
+        if (turns - startedAtPly == (2 * situation.board.variant.plysPerTurn - 1)) newC.start else newC
       }
     }
 
