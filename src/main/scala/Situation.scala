@@ -600,6 +600,8 @@ object Situation {
       case _                                => sys.error("Not passed Go objects")
     }
 
+    def pass(): Validated[String, Pass] = s.pass().toEither.map(p => Pass.Go(p)).toValidated
+
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.Go(variant) => Go(s.withVariant(variant))
       case _                   => sys.error("Not passed Go objects")

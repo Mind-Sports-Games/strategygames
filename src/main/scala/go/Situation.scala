@@ -53,6 +53,8 @@ case class Situation(board: Board, player: Player) {
   def drop(role: Role, pos: Pos): Validated[String, Drop] =
     board.variant.drop(this, role, pos)
 
+  def pass(): Validated[String, Pass] = board.variant.pass(this)
+
   def withVariant(variant: strategygames.go.variant.Variant) =
     copy(
       board = board withVariant variant

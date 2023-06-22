@@ -22,4 +22,9 @@ object Dumper {
     case _                                         => sys.error("Drops can only be applied to chess/fairysf/go")
   }
 
+  def apply(lib: GameLogic, data: Pass): String = (lib, data) match {
+    case (GameLogic.Go(), Pass.Go(data)) => go.format.pgn.Dumper(data)
+    case _                               => sys.error("Pass can only be applied to go")
+  }
+
 }

@@ -254,9 +254,19 @@ object Api {
   def positionFromVariantAndMoves(variant: Variant, uciMoves: List[String]): Position =
     positionFromVariant(variant).makeMoves(uciMoves.map(m => uciToMove(m)))
 
-  def uciToMove(uciMove: String): Int = Pos.fromKey(uciMove.drop(2)).map(_.index).getOrElse(0)
+  val passMove: Int = 361 // todo might need to change for each variant?
 
-  def moveToUci(move: Int): String = s"${Stone.forsyth.toUpper}@${Pos(move).map(_.key).getOrElse("a1")}"
+  def uciToMove(uciMove: String): Int =
+    if (uciMove == "pass") passMove
+    else {
+      Pos.fromKey(uciMove.drop(2)).map(_.index).getOrElse(0)
+    }
+
+  def moveToUci(move: Int): String =
+    if (move == passMove) "pass"
+    else {
+      s"${Stone.forsyth.toUpper}@${Pos(move).map(_.key).getOrElse("a1")}"
+    }
 
   val initialFen: FEN = variant.Go19x19.initialFen
 

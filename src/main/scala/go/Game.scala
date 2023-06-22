@@ -23,6 +23,17 @@ case class Game(
     )
   }
 
+  def apply(pass: Pass): Game = {
+    val newSituation = pass.situationAfter
+
+    copy(
+      situation = newSituation,
+      turns = turns + 1,
+      pgnMoves = pgnMoves :+ pass.toUci.uci,
+      clock = applyClock(pass.metrics, newSituation.status.isEmpty, newSituation.player != situation.player)
+    )
+  }
+
   def drop(
       role: Role,
       pos: Pos,
@@ -40,6 +51,24 @@ case class Game(
       turns = turns + 1,
       pgnMoves = pgnMoves :+ drop.toUci.uci,
       clock = applyClock(drop.metrics, newSituation.status.isEmpty, newSituation.player != situation.player)
+    )
+  }
+
+  def pass(
+      metrics: MoveMetrics = MoveMetrics()
+  ): Validated[String, (Game, Pass)] =
+    situation.pass().map(_ withMetrics metrics) map { pass =>
+      applyPass(pass) -> pass
+    }
+
+  def applyPass(pass: Pass): Game = {
+    val newSituation = pass.situationAfter
+
+    copy(
+      situation = newSituation,
+      turns = turns + 1,
+      pgnMoves = pgnMoves :+ pass.toUci.uci,
+      clock = applyClock(pass.metrics, newSituation.status.isEmpty, newSituation.player != situation.player)
     )
   }
 

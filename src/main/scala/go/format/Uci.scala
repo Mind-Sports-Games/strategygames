@@ -13,7 +13,7 @@ sealed trait Uci {
 
   def origDest: (Pos, Pos)
 
-  def apply(situation: Situation): Validated[String, Drop]
+  def apply(situation: Situation): Validated[String, Action]
 }
 
 object Uci {
@@ -44,9 +44,31 @@ object Uci {
 
   }
 
+  case class Pass() extends Uci {
+
+    def lilaUci    = "pass"
+    def fairySfUci = lilaUci
+    def fishnetUci = fairySfUci // Use the fairySfUci
+    def uci        = lilaUci
+
+    def piotr = "pass" // todo needs to change?
+
+    def origDest = ???
+
+    def apply(situation: Situation) = situation.pass()
+  }
+
+  object Pass {
+
+    val passR = s"^pass$$".r
+
+  }
+
   case class WithSan(uci: Uci, san: String)
 
   def apply(drop: strategygames.go.Drop) = Uci.Drop(drop.piece.role, drop.pos)
+
+  def apply(pass: strategygames.go.Pass) = Uci.Pass()
 
   def apply(move: String): Option[Uci] =
     move match {
@@ -55,14 +77,18 @@ object Uci {
           case (Some(role), Some(dest)) => Uci.Drop(role, dest).some
           case _                        => sys.error(s"Cannot apply uci drop: ${move}")
         }
+      case Pass.passR()           => Uci.Pass().some
       case _                      => sys.error(s"Cannot apply uci: ${move}")
     }
 
   def piotr(move: String): Option[Uci] = {
-    for {
-      role <- move.headOption flatMap Role.allByPgn.get
-      pos  <- move lift 2 flatMap Pos.piotr
-    } yield Uci.Drop(role, pos)
+    if (move == "pass") Uci.Pass().some
+    else {
+      for {
+        role <- move.headOption flatMap Role.allByPgn.get
+        pos  <- move lift 2 flatMap Pos.piotr
+      } yield Uci.Drop(role, pos)
+    }
   }
 
   def readList(moves: String): Option[List[Uci]] =
