@@ -238,6 +238,26 @@ object Role {
     case GameLogic.Togyzkumalak() => sys.error("allPromotableByName not implemented for togyzkumalak")
   }
 
+  def allPromotableByGroundName(lib: GameLogic): Map[String, PromotableRole] = lib match {
+    case GameLogic.Chess()        =>
+      chess.Role.allPromotableByGroundName.map { case (n, r) => (n, ChessPromotableRole(r)) }
+    case GameLogic.FairySF()      =>
+      fairysf.Role.allPromotableByGroundName.map { case (n, r) => (n, FairySFPromotableRole(r)) }
+    case GameLogic.Draughts()     => sys.error("allPromotableByGroundName not implemented for draughts")
+    case GameLogic.Samurai()      => sys.error("allPromotableByGroundName not implemented for samurai")
+    case GameLogic.Togyzkumalak() => sys.error("allPromotableByGroundName not implemented for togyzkumalak")
+  }
+
+  def allPromotableByGroundName(lib: GameLogic, gf: GameFamily): Map[String, PromotableRole] = lib match {
+    case GameLogic.Chess()        =>
+      chess.Role.allPromotableByGroundName.map { case (n, r) => (n, ChessPromotableRole(r)) }
+    case GameLogic.FairySF()      =>
+      fairysf.Role.allPromotableByGroundName(gf).map { case (n, r) => (n, FairySFPromotableRole(r)) }
+    case GameLogic.Draughts()     => sys.error("allPromotableByGroundName not implemented for draughts")
+    case GameLogic.Samurai()      => sys.error("allPromotableByGroundName not implemented for samurai")
+    case GameLogic.Togyzkumalak() => sys.error("allPromotableByGroundName not implemented for togyzkumalak")
+  }
+
   def allPromotableByForsyth(lib: GameLogic): Map[Char, PromotableRole] = lib match {
     case GameLogic.Draughts()     =>
       draughts.Role.allPromotableByForsyth.map { case (f, r) => (f, DraughtsPromotableRole(r)) }
