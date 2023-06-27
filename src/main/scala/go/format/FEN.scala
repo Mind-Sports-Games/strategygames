@@ -33,6 +33,8 @@ final case class FEN(value: String) extends AnyVal {
     else fen
   }
 
+  def gameSize: Int = value.split(' ').lift(0).map(_.split('/').length).getOrElse(0)
+
   private def intFromFen(index: Int): Option[Int] =
     value.split(' ').lift(index).flatMap(_.toIntOption)
 

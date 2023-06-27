@@ -62,16 +62,23 @@ object Api {
     // TODO: yes, this is an abuse of scala. We could get an
     //       exception here, but I'm not sure how to work around that
     //       at the moment
-    val variant = Variant.byKey("go19x19") // todo change for size?
+    val gameSize: Int    = position.toBoard().gameSize()
+    val variant: Variant = gameSize match {
+      case 9  => strategygames.go.variant.Go9x9
+      case 13 => strategygames.go.variant.Go13x13
+      case 19 => strategygames.go.variant.Go19x19
+      case _  => sys.error("Incorrect game size from position")
+    }
 
     def makeMovesWithPrevious(movesList: List[Int], previousMoves: List[String]): Position = {
 
       var pos =
-        if (previousMoves.length == 0 && Api.initialFen.value != fen.value) positionFromFen(fen.value)
-        else if (Api.initialFen.value != initialFen.value) positionFromFen(initialFen.value)
-        else new GoPosition(new GoGame(), 0, fromFen, komi)
+        if (previousMoves.length == 0 && Api.initialFen(variant.key).value != fen.value)
+          positionFromFen(fen.value)
+        else if (Api.initialFen(variant.key).value != initialFen.value) positionFromFen(initialFen.value)
+        else new GoPosition(new GoGame(gameSize), 0, fromFen, komi)
 
-      pos = pos.makeMoves(previousMoves.map(uciToMove))
+      pos = pos.makeMoves(previousMoves.map(m => uciToMove(m, variant)))
 
       movesList.map { move =>
         if (pos.legalMoves.contains(move)) pos = pos.makeMoves(List(move))
@@ -137,14 +144,14 @@ object Api {
             row.map(c => {
               c match {
                 case 'X' | 'S' =>
-                  Pos((boardWidth - rowIndex - 1) * boardWidth + colIndex).map { pos =>
+                  moveToPos((boardWidth - rowIndex - 1) * boardWidth + colIndex, variant).map { pos =>
                     {
                       pieces += (pos -> Piece(P1, Stone))
                       colIndex += 1
                     }
                   }
                 case 'O' | 's' =>
-                  Pos((boardWidth - rowIndex - 1) * boardWidth + colIndex).map { pos =>
+                  moveToPos((boardWidth - rowIndex - 1) * boardWidth + colIndex, variant).map { pos =>
                     {
                       pieces += (pos -> Piece(P2, Stone))
                       colIndex += 1
@@ -190,7 +197,7 @@ object Api {
     lazy val p1Score: Int = position.blackScore() // black
     lazy val p2Score: Int = position.whiteScore() // white + komi
 
-    val passMove: Int = 361
+    val passMove: Int = gameSize * gameSize
 
     val legalMoves: Array[Int] = {
       position.resetCursor()
@@ -205,60 +212,88 @@ object Api {
 
     val playerTurn: Int = position.turn()
 
-    val initialFen: FEN = fromFen.fold(Api.initialFen)(f => f)
+    val initialFen: FEN = fromFen.fold(Api.initialFen(variant.key))(f => f)
 
   }
 
-  def position: Position = {
-    val g    = new GoGame()
-    val komi = 6 // todo add as input from setup?
+  def position(variant: Variant, komi: Int = 6): Position = {
+    val g = new GoGame(variant.boardSize.height)
     g.setKomiScore(komi)
     new GoPosition(g)
   }
 
-  // todo handle constants in go engine for different size boards and komi
   def positionFromVariant(variant: Variant): Position =
     variant.key match {
-      case "go9x9"   => new GoPosition(new GoGame()) // todo setup 9x9
-      case "go13x13" => new GoPosition(new GoGame()) // todo setup 13x13
-      case "go19x19" => position
-      case _         => new GoPosition(new GoGame())
+      case "go9x9"   => position(variant)
+      case "go13x13" => position(variant)
+      case "go19x19" => position(variant)
+      case _         => sys.error(s"incorrect variant supplied ${variant}")
     }
 
   def positionFromFen(fenString: String): Position = {
-    val game = new GoGame()
     val fen  = FEN(fenString)
+    val game = new GoGame(fen.gameSize)
     game.setBoard(goBoardFromFen(fenString))
     game.setKomiScore(fen.komi)
     new GoPosition(game, fen.ply.getOrElse(0), Some(fen), fen.komi)
   }
 
-  def positionFromVariantNameAndFEN(variantName: String, fenString: String): Position = {
-    val game = new GoGame()
-    val fen  = FEN(fenString)
+  def positionFromVariantNameAndFEN(variantKey: String, fenString: String): Position = {
+    val gameSize: Int = variantKey match {
+      case "go9x9"   => 9
+      case "go13x13" => 13
+      case "go19x19" => 19
+      case _         => sys.error(s"incorrect variant name supplied ${variantKey}")
+    }
+    val game          = new GoGame(gameSize)
+    val fen           = FEN(fenString)
     game.setBoard(goBoardFromFen(fenString))
     game.setKomiScore(fen.komi)
-    variantName.toLowerCase() match {
-      case "go19x19" => new GoPosition(game, fen.ply.getOrElse(0), Some(fen), fen.komi)
-      case _         => new GoPosition(new GoGame(), fen.ply.getOrElse(0), Some(fen), fen.komi)
-    }
+
+    new GoPosition(game, fen.ply.getOrElse(0), Some(fen), fen.komi)
   }
 
   def goBoardFromFen(fenString: String): GoBoard = {
-    val fen = FEN(fenString)
-    val b   = new GoBoard()
-    val b2  = b.toBoard(fen.engineFen)
+    val b  = new GoBoard()
+    val b2 = b.toBoard(FEN(fenString).engineFen)
     b2
   }
 
   def positionFromVariantAndMoves(variant: Variant, uciMoves: List[String]): Position =
-    positionFromVariant(variant).makeMoves(uciMoves.map(m => uciToMove(m)))
+    positionFromVariant(variant).makeMoves(uciMoves.map(m => uciToMove(m, variant)))
 
-  def uciToMove(uciMove: String): Int = Pos.fromKey(uciMove.drop(2)).map(_.index).getOrElse(0)
+  def uciToMove(uciMove: String, variant: Variant): Int = {
+    val gameSize: Int = variant.boardSize.height
+    val dest          = uciMove.drop(2)
 
-  def moveToUci(move: Int): String = s"${Stone.forsyth.toUpper}@${Pos(move).map(_.key).getOrElse("a1")}"
+    val fileChar  = dest.charAt(0)
+    val file: Int = File.fromChar(fileChar).map(_.index).getOrElse(0) // 0 index
+    val rank: Int = dest.drop(1).toIntOption.getOrElse(0)             // 1 index
 
-  val initialFen: FEN = variant.Go19x19.initialFen
+    gameSize * (rank - 1) + file
+  }
+
+  def moveToUci(move: Int, variant: Variant): String = {
+    val gameSize: Int = variant.boardSize.height
+    val file: String  = File(move % gameSize).map(_.toString).getOrElse("a")
+    val rank: Int     = (move / gameSize) + 1
+
+    s"${Stone.forsyth.toUpper}@${file}${rank}"
+  }
+
+  def moveToPos(move: Int, variant: Variant): Option[Pos] = {
+    val gameSize: Int = variant.boardSize.height
+    val file: String  = File(move % gameSize).map(_.toString).getOrElse("a")
+    val rank: Int     = (move / gameSize) + 1
+    Pos.fromKey(s"${file}${rank}")
+  }
+
+  def initialFen(variantKey: String): FEN = variantKey match {
+    case "go9x9"   => variant.Go9x9.initialFen
+    case "go13x13" => variant.Go13x13.initialFen
+    case "go19x19" => variant.Go19x19.initialFen
+    case _         => sys.error(s"not given a go variant name: ${variantKey}")
+  }
 
   val fenRegex                                = "([0-9Ss]?){1,19}(/([0-9Ss]?){1,19}){8,18}\\[[Ss]+\\] [w|b] - [0-9]+ [0-9]+ [0-9]+ [0-9]+"
   def validateFEN(fenString: String): Boolean =
@@ -269,8 +304,8 @@ object Api {
   //      .makeMoves(convertUciMoves(movesList).getOrElse(List.empty))
   //
 
-  def pieceMapFromFen(variantName: String, fenString: String): PieceMap = {
-    positionFromVariantNameAndFEN(variantName, fenString).pieceMap
+  def pieceMapFromFen(variantKey: String, fenString: String): PieceMap = {
+    positionFromVariantNameAndFEN(variantKey, fenString).pieceMap
   }
 
 }

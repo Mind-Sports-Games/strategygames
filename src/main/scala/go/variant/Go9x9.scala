@@ -15,7 +15,7 @@ case object Go9x9
 
   def gameFamily: GameFamily = GameFamily.Go()
 
-  def perfIcon: Char = '' // todo change
+  def perfIcon: Char = ''
   def perfId: Int    = 500
 
   // cache this rather than checking with the API everytime

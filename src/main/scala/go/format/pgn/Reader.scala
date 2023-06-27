@@ -83,7 +83,9 @@ object Reader {
                       role,
                       dest,
                       replay.state.board.apiPosition
-                        .makeMoves(List(m).map(uciMove => Api.uciToMove(uciMove))),
+                        .makeMoves(
+                          List(m).map(uciMove => Api.uciToMove(uciMove, replay.state.board.variant))
+                        ),
                       replay.state.board.uciMoves :+ m
                     )
                   )

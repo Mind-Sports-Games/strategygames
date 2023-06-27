@@ -63,7 +63,10 @@ abstract class Variant private[variant] (
   def validDrops(situation: Situation): List[Drop] =
     situation.board.apiPosition.legalMoves
       .map { dest =>
-        (dest, Pos(dest))
+        (
+          dest,
+          Api.moveToPos(dest, situation.board.variant)
+        )
       }
       .map {
         case (destInt, Some(dest)) => {
