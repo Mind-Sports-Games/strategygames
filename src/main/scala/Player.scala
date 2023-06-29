@@ -67,7 +67,7 @@ object Player {
     override val hashCode = 2
   }
 
-  def fromPly(ply: Int, plysPerTurn: Int = 1) = fromP1(((ply / plysPerTurn) & 1) == 0)
+  def fromTurnCount(turn: Int) = fromP1((turn & 1) == 0)
 
   def fromP1(p1: Boolean): Player = if (p1) P1 else P2
 

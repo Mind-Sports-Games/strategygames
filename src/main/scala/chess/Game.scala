@@ -72,7 +72,7 @@ case class Game(
     }
 
   private def applyAction(action: String): Vector[Vector[String]] =
-    if (Player.fromPly(actions.size) == situation.player)
+    if (Player.fromTurnCount(actions.size + startPlayer.hashCode - 1) == situation.player)
       actions :+ Vector(action)
     else
       actions.updated(actions.size - 1, actions(actions.size - 1) :+ action)

@@ -21,7 +21,8 @@ case class Pgn(
   }
   def updatePly(ply: Int, f: Move => Move)       = {
     val fullMove = (ply + 1) / 2
-    val player   = Player.fromPly(ply - 1)
+    //Uses this as fromPly - not been upgraded for multiaction
+    val player   = Player.fromTurnCount(ply - 1)
     updateTurn(fullMove, _.update(player, f))
   }
   def updateLastPly(f: Move => Move)             = updatePly(nbPlies, f)

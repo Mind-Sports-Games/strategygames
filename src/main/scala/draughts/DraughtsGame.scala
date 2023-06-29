@@ -109,7 +109,7 @@ case class DraughtsGame(
   private def applyAction(action: String): Vector[Vector[String]] =
     //whilst draughts doesnt support multimove
     actions :+ Vector(action)
-    //if (Player.fromPly(actions.size) == situation.player)
+    //if (Player.fromTurnCount(actions.size + startPlayer.hashCode - 1) == situation.player)
     //  actions :+ Vector(action)
     //else
     //  actions.updated(actions.size, actions(actions.size) :+ action)
