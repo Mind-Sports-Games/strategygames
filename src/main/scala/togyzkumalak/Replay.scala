@@ -230,10 +230,10 @@ object Replay {
           case Nil         => invalid(s"Can't find $atFenTruncated, reached ply $ply")
           case san :: rest =>
             san(StratSituation.wrap(sit)).map(togyzkumalakMove) flatMap { move =>
-              val after = move.finalizeAfter
-              val fen   = Forsyth >> Game(Situation(after, Player.fromPly(ply)), turns = ply)
+              val after = move.situationAfter
+              val fen   = Forsyth >> Game(after, turns = ply)
               if (compareFen(fen)) Validated.valid(ply)
-              else recursivePlyAtFen(Situation(after, !sit.player), rest, ply + 1)
+              else recursivePlyAtFen(after, rest, ply + 1)
             }
         }
 
