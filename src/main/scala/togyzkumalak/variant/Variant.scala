@@ -47,7 +47,6 @@ abstract class Variant private[variant] (
   def pieces: PieceMap = initialFen.pieces
 
   def startPlayer: Player = P1
-  def plysPerTurn: Int    = 1
 
   val kingPiece: Option[Role] = None
 

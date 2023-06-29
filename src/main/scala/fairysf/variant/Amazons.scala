@@ -25,7 +25,6 @@ case object Amazons
   override def repetitionEnabled     = false
   override def dropsVariant          = true
   override val switchPlayerAfterMove = false
-  override val plysPerTurn           = 2
 
   override def hasAnalysisBoard: Boolean = false
   override def hasFishnet: Boolean       = true
