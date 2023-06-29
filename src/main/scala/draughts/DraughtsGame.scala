@@ -91,18 +91,21 @@ case class DraughtsGame(
         situation = newSituation,
         turns = turns + 1,
         actions = applyAction(pdn.Dumper(situation, move, newSituation)),
-        clock = applyClock(move.metrics, newSituation.status.isEmpty)
+        clock = applyClock(move.metrics, newSituation.status.isEmpty, newSituation.player != situation.player)
       )
     }
 
   }
 
-  private def applyClock(metrics: MoveMetrics, gameActive: Boolean) = clock.map { c =>
-    {
-      val newC = c.step(metrics, gameActive)
-      if (turns - startedAtPly == 1) newC.start else newC
+  private def applyClock(metrics: MoveMetrics, gameActive: Boolean, switchClock: Boolean) =
+    clock.map { c =>
+      {
+        val newC = c.step(metrics, gameActive, switchClock)
+       //whilst draughts doesnt support multimove
+        if (turns - startedAtPly == 1) newC.start else newC
+        //if (actions.size == 1 && switchClock) newC.start else newC
+      }
     }
-  }
 
   def apply(uci: Uci.Move): Validated[String, (DraughtsGame, Move)] = apply(uci.orig, uci.dest, uci.promotion)
 

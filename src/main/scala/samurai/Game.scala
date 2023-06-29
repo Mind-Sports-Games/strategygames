@@ -30,15 +30,15 @@ case class Game(
       situation = newSituation,
       turns = turns + 1,
       actions = applyAction(move.toUci.uci),
-      clock = applyClock(move.metrics, newSituation.status.isEmpty)
+      clock = applyClock(move.metrics, newSituation.status.isEmpty, newSituation.player != situation.player)
     )
   }
 
-  private def applyClock(metrics: MoveMetrics, gameActive: Boolean) =
+  private def applyClock(metrics: MoveMetrics, gameActive: Boolean, switchClock: Boolean) =
     clock.map { c =>
       {
-        val newC = c.step(metrics, gameActive)
-        if (turns - startedAtPly == 1) newC.start else newC
+        val newC = c.step(metrics, gameActive, switchClock)
+        if (actions.size == 1 && switchClock) newC.start else newC
       }
     }
 
