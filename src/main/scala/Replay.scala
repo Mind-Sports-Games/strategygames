@@ -6,16 +6,21 @@ import cats.implicits._
 import variant.Variant
 import format.{ FEN, Uci }
 
-sealed abstract class Replay(val setup: Game, val moves: List[MoveOrDrop], val state: Game) {
+sealed abstract class Replay(val setup: Game, val plies: List[MoveOrDrop], val state: Game) {
 
-  lazy val chronoMoves = moves.reverse
+  lazy val chronoPlies = plies.reverse
 
   // https://stackoverflow.com/questions/53016370/how-to-convert-a-list-to-list-of-lists-by-group-the-elements-when-an-element-rep
   lazy val chronoActions: List[List[MoveOrDrop]] =
-    chronoMoves
+    chronoPlies
       .drop(1)
-      .foldLeft(List(chronoMoves.take(1))) { case (turn, mod) =>
-        if (turn.head.head.fold(_.situationBefore.player, _.situationBefore.player) != mod.fold(_.situationBefore.player, _.situationBefore.player)) {
+      .foldLeft(List(chronoPlies.take(1))) { case (turn, mod) =>
+        if (
+          turn.head.head.fold(_.situationBefore.player, _.situationBefore.player) != mod.fold(
+            _.situationBefore.player,
+            _.situationBefore.player
+          )
+        ) {
           List(mod) +: turn
         } else {
           (turn.head :+ mod) +: turn.tail
@@ -24,7 +29,7 @@ sealed abstract class Replay(val setup: Game, val moves: List[MoveOrDrop], val s
       .reverse
 
   def moveAtPly(ply: Int): Option[MoveOrDrop] =
-    chronoMoves lift (ply - 1 - setup.startedAtPly)
+    chronoPlies lift (ply - 1 - setup.startedAtPly)
 
   // TODO: If we had a case class this would be automatic.
   def copy(state: Game): Replay
@@ -37,7 +42,7 @@ object Replay {
   final case class Chess(r: chess.Replay)
       extends Replay(
         Game.Chess(r.setup),
-        r.moves.map(m =>
+        r.plies.map(m =>
           m match {
             case Left(m)  => Left(Move.Chess(m))
             case Right(d) => Right(Drop.Chess(d))
@@ -54,7 +59,7 @@ object Replay {
   final case class Draughts(r: draughts.Replay)
       extends Replay(
         Game.Draughts(r.setup),
-        r.moves.map((m: draughts.Move) => Left(Move.Draughts(m))),
+        r.plies.map((m: draughts.Move) => Left(Move.Draughts(m))),
         Game.Draughts(r.state)
       ) {
     def copy(state: Game): Replay = state match {
@@ -66,7 +71,7 @@ object Replay {
   final case class FairySF(r: fairysf.Replay)
       extends Replay(
         Game.FairySF(r.setup),
-        r.moves.map(m =>
+        r.plies.map(m =>
           m match {
             case Left(m)  => Left(Move.FairySF(m))
             case Right(d) => Right(Drop.FairySF(d))
@@ -83,7 +88,7 @@ object Replay {
   final case class Samurai(r: samurai.Replay)
       extends Replay(
         Game.Samurai(r.setup),
-        r.moves.map((m: samurai.Move) => Left(Move.Samurai(m))),
+        r.plies.map((m: samurai.Move) => Left(Move.Samurai(m))),
         Game.Samurai(r.state)
       ) {
     def copy(state: Game): Replay = state match {
@@ -95,7 +100,7 @@ object Replay {
   final case class Togyzkumalak(r: togyzkumalak.Replay)
       extends Replay(
         Game.Togyzkumalak(r.setup),
-        r.moves.map((m: togyzkumalak.Move) => Left(Move.Togyzkumalak(m))),
+        r.plies.map((m: togyzkumalak.Move) => Left(Move.Togyzkumalak(m))),
         Game.Togyzkumalak(r.state)
       ) {
     def copy(state: Game): Replay = state match {
@@ -104,18 +109,18 @@ object Replay {
     }
   }
 
-  def apply(lib: GameLogic, setup: Game, moves: List[MoveOrDrop], state: Game): Replay =
+  def apply(lib: GameLogic, setup: Game, plies: List[MoveOrDrop], state: Game): Replay =
     (lib, setup, state) match {
       case (GameLogic.Draughts(), Game.Draughts(setup), Game.Draughts(state))             =>
-        Draughts(draughts.Replay(setup, moves.map(Move.toDraughts), state))
+        Draughts(draughts.Replay(setup, plies.map(Move.toDraughts), state))
       case (GameLogic.Chess(), Game.Chess(setup), Game.Chess(state))                      =>
-        Chess(chess.Replay(setup, moves.map(Move.toChess), state))
+        Chess(chess.Replay(setup, plies.map(Move.toChess), state))
       case (GameLogic.FairySF(), Game.FairySF(setup), Game.FairySF(state))                =>
-        FairySF(fairysf.Replay(setup, moves.map(Move.toFairySF), state))
+        FairySF(fairysf.Replay(setup, plies.map(Move.toFairySF), state))
       case (GameLogic.Samurai(), Game.Samurai(setup), Game.Samurai(state))                =>
-        Samurai(samurai.Replay(setup, moves.map(Move.toSamurai), state))
+        Samurai(samurai.Replay(setup, plies.map(Move.toSamurai), state))
       case (GameLogic.Togyzkumalak(), Game.Togyzkumalak(setup), Game.Togyzkumalak(state)) =>
-        Togyzkumalak(togyzkumalak.Replay(setup, moves.map(Move.toTogyzkumalak), state))
+        Togyzkumalak(togyzkumalak.Replay(setup, plies.map(Move.toTogyzkumalak), state))
       case _                                                                              => sys.error("Mismatched gamelogic types 5")
     }
 
@@ -350,38 +355,38 @@ object Replay {
 
   def apply(
       lib: GameLogic,
-      moves: List[Uci],
+      plies: List[Uci],
       initialFen: Option[FEN],
       variant: Variant,
       finalSquare: Boolean = false
   ): Validated[String, Replay] = (lib, variant) match {
     case (GameLogic.Draughts(), Variant.Draughts(variant))         =>
       draughts
-        .Replay(draughtsUcis(moves), initialFen.map(_.toDraughts), variant, finalSquare)
+        .Replay(draughtsUcis(plies), initialFen.map(_.toDraughts), variant, finalSquare)
         .toEither
         .map(r => Replay.Draughts(r))
         .toValidated
     case (GameLogic.Chess(), Variant.Chess(variant))               =>
       chess
-        .Replay(chessUcis(moves), initialFen.map(_.toChess), variant)
+        .Replay(chessUcis(plies), initialFen.map(_.toChess), variant)
         .toEither
         .map(r => Replay.Chess(r))
         .toValidated
     case (GameLogic.FairySF(), Variant.FairySF(variant))           =>
       fairysf
-        .Replay(fairysfUcis(moves), initialFen.map(_.toFairySF), variant)
+        .Replay(fairysfUcis(plies), initialFen.map(_.toFairySF), variant)
         .toEither
         .map(r => Replay.FairySF(r))
         .toValidated
     case (GameLogic.Samurai(), Variant.Samurai(variant))           =>
       samurai.Replay
-        .apply(samuraiUcis(moves), initialFen.map(_.toSamurai), variant)
+        .apply(samuraiUcis(plies), initialFen.map(_.toSamurai), variant)
         .toEither
         .map(r => Replay.Samurai(r))
         .toValidated
     case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant)) =>
       togyzkumalak.Replay
-        .apply(togyzkumalakUcis(moves), initialFen.map(_.toTogyzkumalak), variant)
+        .apply(togyzkumalakUcis(plies), initialFen.map(_.toTogyzkumalak), variant)
         .toEither
         .map(r => Replay.Togyzkumalak(r))
         .toValidated

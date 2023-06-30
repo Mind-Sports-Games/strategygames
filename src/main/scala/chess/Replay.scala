@@ -8,16 +8,16 @@ import strategygames.format.pgn.San
 import strategygames.chess.format.pgn.{ Parser, Reader }
 import strategygames.format.pgn.{ Tag, Tags }
 import strategygames.chess.format.{ FEN, Forsyth, Uci }
-import strategygames.{ Actions, Game => StratGame, Player, Situation => StratSituation }
+import strategygames.{ Actions, Game => StratGame, Situation => StratSituation }
 
-case class Replay(setup: Game, moves: List[MoveOrDrop], state: Game) {
+case class Replay(setup: Game, plies: List[MoveOrDrop], state: Game) {
 
-  lazy val chronoMoves = moves.reverse
+  lazy val chronoPlies = plies.reverse
 
   lazy val chronoActions: List[List[MoveOrDrop]] =
-    chronoMoves
+    chronoPlies
       .drop(1)
-      .foldLeft(List(chronoMoves.take(1))) { case (turn, mod) =>
+      .foldLeft(List(chronoPlies.take(1))) { case (turn, mod) =>
         if (
           turn.head.head.fold(_.situationBefore.player, _.situationBefore.player) != mod.fold(
             _.situationBefore.player,
@@ -31,14 +31,12 @@ case class Replay(setup: Game, moves: List[MoveOrDrop], state: Game) {
       }
       .reverse
 
-  def addMove(moveOrDrop: MoveOrDrop) =
+  def addPly(moveOrDrop: MoveOrDrop) =
     copy(
-      moves = moveOrDrop.left.map(_.applyVariantEffect) :: moves,
+      plies = moveOrDrop.left.map(_.applyVariantEffect) :: plies,
       state = moveOrDrop.fold(state.apply, state.applyDrop)
     )
 
-  def moveAtPly(ply: Int): Option[MoveOrDrop] =
-    chronoMoves lift (ply - 1 - setup.startedAtPly)
 }
 
 object Replay {
@@ -152,8 +150,8 @@ object Replay {
     ucis match {
       case Nil         => valid(replay)
       case uci :: rest =>
-        uci(replay.state.situation) andThen { moveOrDrop =>
-          recursiveReplayFromUci(replay addMove moveOrDrop, rest)
+        uci(replay.state.situation) andThen { ply =>
+          recursiveReplayFromUci(replay addPly ply, rest)
         }
     }
 
@@ -197,11 +195,11 @@ object Replay {
   }
 
   def apply(
-      moves: List[Uci],
+      plies: List[Uci],
       initialFen: Option[FEN],
       variant: strategygames.chess.variant.Variant
   ): Validated[String, Replay] =
-    recursiveReplayFromUci(Replay(makeGame(variant, initialFen)), moves)
+    recursiveReplayFromUci(Replay(makeGame(variant, initialFen)), plies)
 
   def plyAtFen(
       actions: Actions,

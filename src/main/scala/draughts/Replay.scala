@@ -9,7 +9,6 @@ import strategygames.{
   Game => StratGame,
   Move => StratMove,
   MoveOrDrop,
-  Player,
   Situation => StratSituation
 }
 import strategygames.format.pgn.{ San, Tag, Tags }
@@ -17,14 +16,14 @@ import format.pdn.{ Parser, Reader, Std }
 import format.{ FEN, Forsyth, Uci }
 import variant.Variant
 
-case class Replay(setup: DraughtsGame, moves: List[Move], state: DraughtsGame) {
+case class Replay(setup: DraughtsGame, plies: List[Move], state: DraughtsGame) {
 
-  lazy val chronoMoves = moves.reverse
+  lazy val chronoPlies = plies.reverse
 
   lazy val chronoActions: List[List[Move]] =
-    chronoMoves
+    chronoPlies
       .drop(1)
-      .foldLeft(List(chronoMoves.take(1))) { case (turn, move) =>
+      .foldLeft(List(chronoPlies.take(1))) { case (turn, move) =>
         if (turn.head.head.situationBefore.player != move.situationBefore.player) {
           List(move) +: turn
         } else {
@@ -33,13 +32,11 @@ case class Replay(setup: DraughtsGame, moves: List[Move], state: DraughtsGame) {
       }
       .reverse
 
-  def addMove(move: Move, finalSquare: Boolean = false) = copy(
-    moves = move.applyVariantEffect :: moves,
+  def addPly(move: Move, finalSquare: Boolean = false) = copy(
+    plies = move.applyVariantEffect :: plies,
     state = state.apply(move, finalSquare)
   )
 
-  def moveAtPly(ply: Int): Option[Move] =
-    chronoMoves lift (ply - 1 - setup.startedAtPly)
 }
 
 object Replay {
@@ -139,7 +136,7 @@ object Replay {
     }
 
     val init = makeGame(variant, initialFen.some)
-    //TODO Upgrade for multimove when draughts does multimove
+    // TODO Upgrade for multimove when draughts does multimove
     Parser
       .moves(actions.flatten, variant)
       .fold(
@@ -324,8 +321,8 @@ object Replay {
     ucis match {
       case Nil         => valid(replay)
       case uci :: rest =>
-        uci(replay.state.situation, finalSquare) andThen { move =>
-          recursiveReplayFromUci(replay.addMove(move, finalSquare), rest, finalSquare)
+        uci(replay.state.situation, finalSquare) andThen { ply =>
+          recursiveReplayFromUci(replay.addPly(ply, finalSquare), rest, finalSquare)
         }
     }
 
@@ -380,12 +377,12 @@ object Replay {
   }
 
   def apply(
-      moves: List[Uci],
+      plies: List[Uci],
       initialFen: Option[FEN],
       variant: Variant,
       finalSquare: Boolean = false
   ): Validated[String, Replay] =
-    recursiveReplayFromUci(Replay(makeGame(variant, initialFen)), moves, finalSquare)
+    recursiveReplayFromUci(Replay(makeGame(variant, initialFen)), plies, finalSquare)
 
   def plyAtFen(
       actions: Actions,

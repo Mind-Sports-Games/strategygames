@@ -8,16 +8,16 @@ import strategygames.format.pgn.San
 import strategygames.samurai.format.pgn.{ Parser, Reader }
 import strategygames.format.pgn.{ Tag, Tags }
 import strategygames.samurai.format.{ FEN, Forsyth, Uci }
-import strategygames.{ Actions, Move => StratMove, MoveOrDrop, Player, Situation => StratSituation }
+import strategygames.{ Actions, Move => StratMove, MoveOrDrop, Situation => StratSituation }
 
-case class Replay(setup: Game, moves: List[Move], state: Game) {
+case class Replay(setup: Game, plies: List[Move], state: Game) {
 
-  lazy val chronoMoves = moves.reverse
+  lazy val chronoPlies = plies.reverse
 
   lazy val chronoActions: List[List[Move]] =
-    chronoMoves
+    chronoPlies
       .drop(1)
-      .foldLeft(List(chronoMoves.take(1))) { case (turn, move) =>
+      .foldLeft(List(chronoPlies.take(1))) { case (turn, move) =>
         if (turn.head.head.situationBefore.player != move.situationBefore.player) {
           List(move) +: turn
         } else {
@@ -26,14 +26,12 @@ case class Replay(setup: Game, moves: List[Move], state: Game) {
       }
       .reverse
 
-  def addMove(move: Move) =
+  def addPly(move: Move) =
     copy(
-      moves = move.applyVariantEffect :: moves,
+      plies = move.applyVariantEffect :: plies,
       state = state.apply(move)
     )
 
-  def moveAtPly(ply: Int): Option[Move] =
-    chronoMoves lift (ply - 1 - setup.startedAtPly)
 }
 
 object Replay {
@@ -45,11 +43,11 @@ object Replay {
       initialFen: Option[FEN],
       variant: strategygames.samurai.variant.Variant
   ): Validated[String, Reader.Result] = {
-    val fen                 = initialFen.getOrElse(variant.initialFen)
-    val (init, plys, error) = gameActionWhileValid(actions, fen, variant)
-    val game                = plys.reverse.last._1
+    val fen                  = initialFen.getOrElse(variant.initialFen)
+    val (init, plies, error) = gameActionWhileValid(actions, fen, variant)
+    val game                 = plies.reverse.last._1
     error match {
-      case None      => Validated.valid(Reader.Result.Complete(new Replay(init, plys.reverse.map(_._2), game)))
+      case None      => Validated.valid(Reader.Result.Complete(new Replay(init, plies.reverse.map(_._2), game)))
       case Some(msg) => Validated.invalid(msg)
     }
   }
@@ -172,8 +170,8 @@ object Replay {
     ucis match {
       case Nil         => valid(replay)
       case uci :: rest =>
-        uci(replay.state.situation) andThen { move =>
-          recursiveReplayFromUci(replay.addMove(move), rest)
+        uci(replay.state.situation) andThen { ply =>
+          recursiveReplayFromUci(replay.addPly(ply), rest)
         }
     }
 
@@ -217,11 +215,11 @@ object Replay {
   }
 
   def apply(
-      moves: List[Uci],
+      plies: List[Uci],
       initialFen: Option[FEN],
       variant: strategygames.samurai.variant.Variant
   ): Validated[String, Replay] =
-    recursiveReplayFromUci(Replay(makeGame(variant, initialFen)), moves)
+    recursiveReplayFromUci(Replay(makeGame(variant, initialFen)), plies)
 
   def plyAtFen(
       actions: Actions,

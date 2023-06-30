@@ -80,7 +80,7 @@ object Reader {
       case (Result.Complete(replay), san) =>
         san(StratSituation.wrap(replay.state.situation)).fold(
           err => Result.Incomplete(replay, err),
-          move => Result.Complete(replay addMove StratMove.toFairySF(move))
+          ply => Result.Complete(replay addPly StratMove.toFairySF(ply))
         )
       case (r: Result.Incomplete, _)      => r
     }
@@ -90,7 +90,7 @@ object Reader {
       case (Result.Complete(replay), uci) =>
         uci(replay.state.situation).fold(
           err => Result.Incomplete(replay, err),
-          move => Result.Complete(replay addMove move)
+          ply => Result.Complete(replay addPly ply)
         )
       case (r: Result.Incomplete, _)      => r
     }
@@ -108,7 +108,7 @@ object Reader {
             (Pos.fromKey(orig), Pos.fromKey(dest)) match {
               case (Some(orig), Some(dest)) =>
                 Result.Complete(
-                  replay.addMove(
+                  replay.addPly(
                     Left {
                       if (game.situation.board.variant.switchPlayerAfterMove)
                         Replay.replayMove(
@@ -137,7 +137,7 @@ object Reader {
             (Role.allByForsyth(replay.state.board.variant.gameFamily).get(role(0)), Pos.fromKey(dest)) match {
               case (Some(role), Some(dest)) =>
                 Result.Complete(
-                  replay.addMove(
+                  replay.addPly(
                     Right {
                       val uci =
                         if (game.situation.board.variant.switchPlayerAfterMove) m

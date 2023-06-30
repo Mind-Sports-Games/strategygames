@@ -89,7 +89,7 @@ object Reader {
                     .ambiguitiesMove(move) > ambs.length + 1
                 )
                   newAmb = (san -> move.toUci.uci).some
-                mk(replay.addMove(move, iteratedCapts), rest, newAmb.fold(ambs)(_ :: ambs))
+                mk(replay.addPly(move, iteratedCapts), rest, newAmb.fold(ambs)(_ :: ambs))
               }
             )
         case _           => Result.Complete(replay)

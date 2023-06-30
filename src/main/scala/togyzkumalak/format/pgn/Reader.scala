@@ -65,7 +65,7 @@ object Reader {
       case (Result.Complete(replay), san) =>
         san(StratSituation.wrap(replay.state.situation)).fold(
           err => Result.Incomplete(replay, err),
-          move => Result.Complete(replay addMove StratMove.toTogyzkumalak(move))
+          ply => Result.Complete(replay addPly StratMove.toTogyzkumalak(ply))
         )
       case (r: Result.Incomplete, _)      => r
     }
@@ -79,7 +79,7 @@ object Reader {
             (Pos.fromKey(orig), Pos.fromKey(dest)) match {
               case (Some(orig), Some(dest)) =>
                 Result.Complete(
-                  replay.addMove(
+                  replay.addPly(
                     Replay.replayMove(
                       replay.state,
                       orig,
