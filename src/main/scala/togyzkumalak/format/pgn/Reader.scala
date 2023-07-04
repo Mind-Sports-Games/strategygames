@@ -101,7 +101,8 @@ object Reader {
       fen = tags.togyzkumalakFen
     )
     g.copy(
-      startedAtPly = g.turns,
+      //TODO this only works for multiaction if turns is turns (not plies)
+      startedAtTurn = g.turns,
       startPlayer = g.situation.player,
       clock = tags.clockConfig.flatMap {
         case fc: FischerClock.Config => Some(FischerClock.apply(fc))

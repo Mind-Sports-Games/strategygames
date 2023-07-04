@@ -380,6 +380,7 @@ object Replay {
 
   private def makeGame(variant: strategygames.fairysf.variant.Variant, initialFen: Option[FEN]): Game = {
     val g = Game(variant.some, initialFen)
-    g.copy(startedAtPly = g.turns, startPlayer = g.situation.player)
+    //TODO this only works for multiaction if turns is turns (not plies)
+    g.copy(startedAtTurn = g.turns, startPlayer = g.situation.player)
   }
 }

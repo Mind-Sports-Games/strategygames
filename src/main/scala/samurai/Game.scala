@@ -10,7 +10,7 @@ case class Game(
     actions: Vector[Vector[String]] = Vector(),
     clock: Option[Clock] = None,
     turns: Int = 0, // plies
-    startedAtPly: Int = 0,
+    startedAtTurn: Int = 0,
     startPlayer: Player = Player.P1
 ) {
   def apply(

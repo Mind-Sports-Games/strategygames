@@ -28,8 +28,10 @@ sealed abstract class Replay(val setup: Game, val plies: List[MoveOrDrop], val s
       }
       .reverse
 
+  //this is only used by fishnet which wants to deal in single ply per turn states
+  //which is why we can use startedAtTurn as startedAtPly
   def moveAtPly(ply: Int): Option[MoveOrDrop] =
-    chronoPlies lift (ply - 1 - setup.startedAtPly)
+    chronoPlies lift (ply - 1 - setup.startedAtTurn)
 
   // TODO: If we had a case class this would be automatic.
   def copy(state: Game): Replay

@@ -14,7 +14,7 @@ case class DraughtsGame(
     clock: Option[Clock] = None,
     /** turns means plies here */
     turns: Int = 0,
-    startedAtPly: Int = 0,
+    startedAtTurn: Int = 0,
     startPlayer: Player = Player.P1
 ) {
 
@@ -101,8 +101,8 @@ case class DraughtsGame(
     clock.map { c =>
       {
         val newC = c.step(metrics, gameActive, switchClock)
-       //whilst draughts doesnt support multimove
-        if (turns - startedAtPly == 1) newC.start else newC
+        //whilst draughts doesnt support multiaction, and startedAtTurn is the same as startedAtPly
+        if (turns - startedAtTurn == 1) newC.start else newC
         //if (actions.size == 1 && switchClock) newC.start else newC
       }
     }
