@@ -4,6 +4,7 @@ import org.specs2.matcher.ValidatedMatchers
 import org.specs2.mutable.Specification
 
 import strategygames.Player
+import strategygames.go.format.FEN
 
 class GoSituationTest extends Specification with ValidatedMatchers {
 
@@ -55,6 +56,47 @@ class GoSituationTest extends Specification with ValidatedMatchers {
       boardFen
         .split(' ')(0)
         .split('[')(0) must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1S17"
+    }
+  }
+
+  // creating game from position, i.e. with different starting fen
+  "valid game when starting form handicapped position" should {
+    val startingFen = FEN("9/9/2S3S2/9/9/9/9/9/9[SSSSSSSSSSssssssssss] w - 81 4 4 1")
+    val situation   = strategygames.go.format.Forsyth.<<@(variant.Go9x9, startingFen)
+
+    val game = Game(Some(variant.Go9x9), Some(startingFen))
+
+    "have the same situation piecemap from game creation and using forsyth" in {
+      game.situation.board.apiPosition.pieceMap must_== situation
+        .map(_.board.apiPosition.pieceMap)
+        .getOrElse {}
+    }
+    "have the same situation fen from game creation and using forsyth" in {
+      game.situation.board.apiPosition.fen must_== situation
+        .map(_.board.apiPosition.fen)
+        .getOrElse(FEN(""))
+    }
+
+    val drops = variant.Go9x9.validDrops(game.situation)
+    val drop  = drops(0)
+
+    val game1 = game.apply(drop)
+    "have the correct starting fen after a move" in {
+      game1.situation.board.apiPosition.initialFen.value must_== "9/9/2S3S2/9/9/9/9/9/9[SSSSSSSSSSssssssssss] w - 81 4 4 1"
+    }
+    "and the correct current fen after a move" in {
+      game1.situation.board.apiPosition.fen.value must_== "9/9/2S3S2/9/9/9/9/9/s8[SSSSSSSSSSssssssssss] b - 2 5 4 1"
+    }
+
+  }
+
+  "valid fen from new game creation handicapped" should {
+    val startingFen = FEN("9/9/2S3S2/9/9/9/9/9/9[SSSSSSSSSSssssssssss] w - 81 4 4 1")
+    val game        = Game(Some(variant.Go9x9), Some(startingFen))
+
+    val fen = strategygames.go.format.Forsyth.>>(game)
+    "fen should match that of starting fen" in {
+      startingFen must_== fen
     }
   }
 

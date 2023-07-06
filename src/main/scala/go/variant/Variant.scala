@@ -26,7 +26,7 @@ abstract class Variant private[variant] (
   def exotic = true
 
   def baseVariant: Boolean      = false
-  def fenVariant: Boolean       = false
+  def fenVariant: Boolean       = true
   def hasAnalysisBoard: Boolean = true
   def hasFishnet: Boolean       = false
 
@@ -44,8 +44,7 @@ abstract class Variant private[variant] (
   def perfId: Int
   def perfIcon: Char
 
-  def initialFen: FEN =
-    format.FEN("19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 0 6 1")
+  def initialFen: FEN = format.Forsyth.initial
 
   def pieces: PieceMap = Api.pieceMapFromFen(key, initialFen.value)
 
@@ -184,7 +183,7 @@ object Variant {
     (v.key, v)
   } toMap
 
-  val default = Go9x9
+  val default = Go19x19
 
   def apply(id: Int): Option[Variant]     = byId get id
   def apply(key: String): Option[Variant] = byKey get key

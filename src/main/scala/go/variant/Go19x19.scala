@@ -9,7 +9,7 @@ case object Go19x19
       id = 4,
       key = "go19x19",
       name = "Go 19x19",
-      standardInitialPosition = true,
+      standardInitialPosition = false,
       boardSize = Board.Dim19x19
     ) {
 

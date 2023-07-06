@@ -35,7 +35,7 @@ object Forsyth {
     )
   }
 
-  def <<(fen: FEN): Option[Situation] = <<@(Variant.default, fen)
+  def <<(fen: FEN): Option[Situation] = <<@(fen.variant, fen)
 
   case class SituationPlus(situation: Situation, fullMoveNumber: Int) {
 
@@ -51,7 +51,7 @@ object Forsyth {
       )
     }
 
-  def <<<(fen: FEN): Option[SituationPlus] = <<<@(Variant.default, fen)
+  def <<<(fen: FEN): Option[SituationPlus] = <<<@(fen.variant, fen)
 
   def >>(situation: Situation): FEN = >>(SituationPlus(situation, 1))
 

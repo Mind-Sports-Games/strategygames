@@ -1076,9 +1076,11 @@ object Variant {
     case GameLogic.FairySF()      => Variant.FairySF(fairysf.variant.Shogi)
     case GameLogic.Samurai()      => Variant.Samurai(samurai.variant.Oware)
     case GameLogic.Togyzkumalak() => Variant.Togyzkumalak(togyzkumalak.variant.Togyzkumalak)
-    case GameLogic.Go()           => Variant.Go(go.variant.Go9x9)
+    case GameLogic.Go()           => Variant.Go(go.variant.Go19x19)
   }
 
+  // todo all games will be allowed from position (go has 3 variants already!)
+  @deprecated("this method will be removed")
   def libFromPosition(lib: GameLogic): Variant = lib match {
     case GameLogic.Draughts()     => Variant.Draughts(draughts.variant.FromPosition)
     case GameLogic.Chess()        => Variant.Chess(chess.variant.FromPosition)
@@ -1086,7 +1088,7 @@ object Variant {
     case GameLogic.FairySF()      => Variant.FairySF(fairysf.variant.Shogi)
     case GameLogic.Samurai()      => Variant.Samurai(samurai.variant.Oware)
     case GameLogic.Togyzkumalak() => Variant.Togyzkumalak(togyzkumalak.variant.Togyzkumalak)
-    case GameLogic.Go()           => Variant.Go(go.variant.Go9x9)
+    case GameLogic.Go()           => Variant.Go(go.variant.Go19x19)
   }
 
   def wrap(v: chess.variant.Variant)        = Chess(v)

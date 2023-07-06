@@ -5,7 +5,7 @@ import com.joansala.game.go.GoBoard
 
 import cats.implicits._
 
-import strategygames.{ Player, Pocket, Pockets }
+import strategygames.{ Pocket, Pockets }
 import strategygames.go.format.FEN
 import strategygames.go.Pos
 import strategygames.go.variant.Variant
@@ -38,6 +38,7 @@ object Api {
     def goDiagram: String
     def setKomi(komi: Int): Unit
 
+    val initialFen: FEN
     val fen: FEN
     val pieceMap: PieceMap
     val pocketData: Option[PocketData]
@@ -71,11 +72,11 @@ object Api {
     }
 
     def makeMovesWithPrevious(movesList: List[Int], previousMoves: List[String]): Position = {
-
       var pos =
         if (previousMoves.length == 0 && Api.initialFen(variant.key).value != fen.value)
-          positionFromFen(fen.value)
-        else if (Api.initialFen(variant.key).value != initialFen.value) positionFromFen(initialFen.value)
+          positionFromFen(fen.value) // keeping current position?
+        else if (Api.initialFen(variant.key).value != initialFen.value)
+          positionFromFen(initialFen.value)
         else new GoPosition(new GoGame(gameSize), 0, fromFen, komi)
 
       pos = pos.makeMoves(previousMoves.map(m => uciToMove(m, variant)))
@@ -143,25 +144,25 @@ object Api {
             var isLastChar1 = false
             row.map(c => {
               c match {
-                case 'X' | 'S' =>
+                case 'X' | 'S'      =>
                   moveToPos((boardWidth - rowIndex - 1) * boardWidth + colIndex, variant).map { pos =>
                     {
                       pieces += (pos -> Piece(P1, Stone))
                       colIndex += 1
                     }
                   }
-                case 'O' | 's' =>
+                case 'O' | 's'      =>
                   moveToPos((boardWidth - rowIndex - 1) * boardWidth + colIndex, variant).map { pos =>
                     {
                       pieces += (pos -> Piece(P2, Stone))
                       colIndex += 1
                     }
                   }
-                case n         => {
+                case n if n.isDigit => {
                   colIndex += n.asDigit
                   if (isLastChar1) colIndex += 9
                 }
-                case _         => sys.error(s"unrecognaised character in Go fen, ${c}")
+                case _              => sys.error(s"unrecognaised character in Go fen, ${c}")
               }
               isLastChar1 = c == '1'
             })
@@ -231,36 +232,41 @@ object Api {
     }
 
   def positionFromFen(fenString: String): Position = {
-    val fen  = FEN(fenString)
-    val game = new GoGame(fen.gameSize)
-    game.setBoard(goBoardFromFen(fenString))
-    game.setKomiScore(fen.komi)
-    new GoPosition(game, fen.ply.getOrElse(0), Some(fen), fen.komi)
+    val positionFen = FEN(fenString)
+    val game        = new GoGame(positionFen.gameSize)
+    game.setBoard(goBoardFromFen(positionFen))
+    game.setKomiScore(positionFen.komi)
+    val ply         = positionFen.ply.getOrElse(1)
+    new GoPosition(game, ply, Some(positionFen), positionFen.komi)
   }
 
   def positionFromVariantNameAndFEN(variantKey: String, fenString: String): Position = {
-    val gameSize: Int = variantKey match {
-      case "go9x9"   => 9
-      case "go13x13" => 13
-      case "go19x19" => 19
-      case _         => sys.error(s"incorrect variant name supplied ${variantKey}")
+    val positionFen   = FEN(fenString)
+    val gameSize: Int = (variantKey, positionFen.gameSize) match {
+      case ("go9x9", 9)    => 9
+      case ("go13x13", 13) => 13
+      case ("go19x19", 19) => 19
+      case _               => sys.error(s"incorrect variant name (${variantKey}) and/or fen (${positionFen})")
     }
     val game          = new GoGame(gameSize)
-    val fen           = FEN(fenString)
-    game.setBoard(goBoardFromFen(fenString))
-    game.setKomiScore(fen.komi)
+    game.setBoard(goBoardFromFen(positionFen))
+    game.setKomiScore(positionFen.komi)
 
-    new GoPosition(game, fen.ply.getOrElse(0), Some(fen), fen.komi)
+    val ply = positionFen.ply.getOrElse(1)
+    new GoPosition(game, ply, Some(positionFen), positionFen.komi)
   }
 
-  def goBoardFromFen(fenString: String): GoBoard = {
-    val b  = new GoBoard()
-    val b2 = b.toBoard(FEN(fenString).engineFen)
+  def goBoardFromFen(fen: FEN): GoBoard = {
+    val b  = new GoBoard(fen.gameSize)
+    val b2 = b.toBoard(fen.engineFen)
     b2
   }
 
   def positionFromVariantAndMoves(variant: Variant, uciMoves: List[String]): Position =
     positionFromVariant(variant).makeMoves(uciMoves.map(m => uciToMove(m, variant)))
+
+  def positionFromStartingFenAndMoves(startingFen: FEN, uciMoves: List[String]): Position =
+    positionFromFen(startingFen.value).makeMoves(uciMoves.map(m => uciToMove(m, startingFen.variant)))
 
   def uciToMove(uciMove: String, variant: Variant): Int = {
     val gameSize: Int = variant.boardSize.height
@@ -297,7 +303,7 @@ object Api {
 
   val fenRegex                                = "([0-9Ss]?){1,19}(/([0-9Ss]?){1,19}){8,18}\\[[Ss]+\\] [w|b] - [0-9]+ [0-9]+ [0-9]+ [0-9]+"
   def validateFEN(fenString: String): Boolean =
-    Try(goBoardFromFen(fenString)).isSuccess && fenString.matches(fenRegex)
+    Try(goBoardFromFen(FEN(fenString))).isSuccess && fenString.matches(fenRegex)
 
   //  def positionFromMoves(variantName: String, fen: String, movesList: Option[List[String]] = None): Position =
   //    positionFromVariantNameAndFEN(variantName, fen)

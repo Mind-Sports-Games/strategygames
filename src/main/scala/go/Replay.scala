@@ -82,7 +82,7 @@ object Replay {
     var errors   = ""
 
     def getApiPosition(uciMoves: List[String]) =
-      Api.positionFromVariantAndMoves(variant, uciMoves)
+      Api.positionFromStartingFenAndMoves(initialFen, uciMoves)
 
     def replayDropFromUci(
         role: Option[Role],

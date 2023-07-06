@@ -1,6 +1,7 @@
 package strategygames.go.format
 
 import strategygames.Player
+import strategygames.go.variant.Variant
 
 final case class FEN(value: String) extends AnyVal {
 
@@ -23,7 +24,19 @@ final case class FEN(value: String) extends AnyVal {
   def komi: Int = intFromFen(5).getOrElse(0)
 
   def engineFen: String =
-    removePockets(value.split(' ').take(3).mkString(" ")).replace("S", "X").replace("s", "O")
+    removePockets(value.split(' ').take(3).mkString(" "))
+      .replace("S", "X")
+      .replace("s", "O")
+      .replace("19", "199") // goengine cant handle double digits
+      .replace("18", "189") // todo does this mess up komi?
+      .replace("17", "179")
+      .replace("16", "169")
+      .replace("15", "159")
+      .replace("14", "149")
+      .replace("13", "139")
+      .replace("12", "129")
+      .replace("11", "119")
+      .replace("10", "109")
 
   private def removePockets(fen: String): String = {
     val start = fen.indexOf("[", 0)
@@ -34,6 +47,13 @@ final case class FEN(value: String) extends AnyVal {
   }
 
   def gameSize: Int = value.split(' ').lift(0).map(_.split('/').length).getOrElse(0)
+
+  def variant: Variant = gameSize match {
+    case 9  => strategygames.go.variant.Go9x9
+    case 13 => strategygames.go.variant.Go13x13
+    case 19 => strategygames.go.variant.Go19x19
+    case _  => sys.error(s"not given correct gameSize for go ${gameSize}")
+  }
 
   private def intFromFen(index: Int): Option[Int] =
     value.split(' ').lift(index).flatMap(_.toIntOption)
