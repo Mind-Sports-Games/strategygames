@@ -46,6 +46,27 @@ abstract class Variant private[variant] (
 
   def initialFen: FEN = format.Forsyth.initial
 
+  def fenFromSetupConfig(handicap: Int, komi: Int): FEN = {
+
+    val actualKomi = komi / 10
+    val p1Score    = if (komi > 0) handicap else handicap - actualKomi
+    val p2Score    = if (komi > 0) actualKomi else 0
+    val turn       = if (handicap == 0) "b" else "w"
+
+    val board  = boardFenFromHandicap(handicap)
+    val pocket = "[SSSSSSSSSSssssssssss]"
+    FEN(s"${board}${pocket} ${turn} - ${p1Score} ${p2Score} ${actualKomi} 1")
+  }
+
+  def boardFenFromHandicap(handicap: Int): String = initialFen.board
+
+  def setupInfo(fen: FEN): Option[String] = {
+    val komi     = fen.komi
+    val handicap = fen.handicap.getOrElse(0)
+    if (fen != initialFen) Some(s"Handicap (${handicap}), komi (${komi})")
+    else None
+  }
+
   def pieces: PieceMap = Api.pieceMapFromFen(key, initialFen.value)
 
   def startPlayer: Player = P1

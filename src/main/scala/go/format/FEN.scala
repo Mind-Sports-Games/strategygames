@@ -7,6 +7,8 @@ final case class FEN(value: String) extends AnyVal {
 
   override def toString = value
 
+  def board: String = removePockets(value.split(' ').take(1).mkString(""))
+
   def player: Option[Player] =
     value.split(' ').lift(1) flatMap (_.headOption) flatMap Player.apply
 
@@ -22,6 +24,8 @@ final case class FEN(value: String) extends AnyVal {
     }
 
   def komi: Int = intFromFen(5).getOrElse(0)
+
+  def handicap: Option[Int] = if (fullMove == Some(1)) Some(board.count(_ == 'S')) else None
 
   def engineFen: String =
     removePockets(value.split(' ').take(3).mkString(" "))
