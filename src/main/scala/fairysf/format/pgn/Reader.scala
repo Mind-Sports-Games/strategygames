@@ -166,8 +166,7 @@ object Reader {
       fen = tags.fairysfFen
     )
     g.copy(
-      //TODO this only works for multiaction if turns is turns (not plies)
-      startedAtTurn = g.turns,
+      startedAtTurn = g.currentTurnCount,
       startPlayer = g.situation.player,
       clock = tags.clockConfig.flatMap {
         case fc: FischerClock.Config => Some(FischerClock.apply(fc))

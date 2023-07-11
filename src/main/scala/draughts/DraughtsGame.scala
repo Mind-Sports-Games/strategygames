@@ -12,8 +12,8 @@ case class DraughtsGame(
     situation: Situation,
     actions: Vector[Vector[String]] = Vector(),
     clock: Option[Clock] = None,
-    /** turns means plies here */
-    turns: Int = 0,
+    plies: Int = 0,
+    turnCount: Int = 0,
     startedAtTurn: Int = 0,
     startPlayer: Player = Player.P1
 ) {
@@ -82,14 +82,16 @@ case class DraughtsGame(
     if (newSituation.ghosts != 0) {
       copy(
         situation = newSituation,
-        turns = turns,
+        plies = plies,
+        turnCount = turnCount,
         actions = applyAction(pdn.Dumper(situation, move, newSituation)),
         clock = clock
       )
     } else {
       copy(
         situation = newSituation,
-        turns = turns + 1,
+        plies = plies + 1,
+        turnCount = turnCount + 1,
         actions = applyAction(pdn.Dumper(situation, move, newSituation)),
         clock = applyClock(move.metrics, newSituation.status.isEmpty, newSituation.player != situation.player)
       )
@@ -101,23 +103,21 @@ case class DraughtsGame(
     clock.map { c =>
       {
         val newC = c.step(metrics, gameActive, switchClock)
-        //whilst draughts doesnt support multiaction, and startedAtTurn is the same as startedAtPly
-        if (turns - startedAtTurn == 1) newC.start else newC
-        //if (actions.size == 1 && switchClock) newC.start else newC
+        // whilst draughts doesnt support multiaction, and startedAtTurn is the same as startedAtPly
+        if (turnCount - startedAtTurn == 1) newC.start else newC
+        // if (actions.size == 1 && switchClock) newC.start else newC
       }
     }
 
   def apply(uci: Uci.Move): Validated[String, (DraughtsGame, Move)] = apply(uci.orig, uci.dest, uci.promotion)
 
   private def applyAction(action: String): Vector[Vector[String]] =
-    //whilst draughts doesnt support multimove
+    // whilst draughts doesnt support multimove
     actions :+ Vector(action)
-    //if (Player.fromTurnCount(actions.size + startPlayer.hashCode - 1) == situation.player)
-    //  actions :+ Vector(action)
-    //else
-    //  actions.updated(actions.size, actions(actions.size) :+ action)
-
-  def displayTurns = if (situation.ghosts == 0) turns else turns + 1
+  // if (Player.fromTurnCount(actions.size + startPlayer.hashCode - 1) == situation.player)
+  //  actions :+ Vector(action)
+  // else
+  //  actions.updated(actions.size, actions(actions.size) :+ action)
 
   def player = situation.player
 
@@ -128,11 +128,16 @@ case class DraughtsGame(
 
   def halfMoveClock: Int = board.history.halfMoveClock
 
-  /** Fullmove number: The number of the full move. It starts at 1, and is incremented after P2's move.
-    */
-  def fullMoveNumber: Int = 1 + turns / 2
+  // Aka Fullmove number (in Forsyth-Edwards Notation):
+  // The number of the completed turns by each player ('full move')
+  // It starts at 1, and is incremented after P2's move (turn)
+  def fullTurnCount: Int = 1 + turnCount / 2
 
-  def moveString = s"${fullMoveNumber}${player.fold(".", "...")}"
+  //TODO: Verify this is what we want to pass startedAtTurn
+  def currentTurnCount: Int = turnCount + (if (plies > 0) 1 else 0)
+
+  // doesnt seem to be used anywhere
+  // def moveString = s"${fullTurnCount}${player.fold(".", "...")}"
 
   private def turnConcat(
       turn: Vector[String],
@@ -167,7 +172,7 @@ case class DraughtsGame(
 
   def withPlayer(c: Player) = copy(situation = situation.copy(player = c))
 
-  def withTurns(t: Int) = copy(turns = t)
+  def withTurns(p: Int, t: Int) = copy(plies = p, turnCount = t)
 }
 
 object DraughtsGame {
@@ -192,7 +197,8 @@ object DraughtsGame {
             board = parsed.situation.board withVariant g.board.variant,
             player = parsed.situation.player
           ),
-          turns = parsed.turns
+          plies = parsed.plies,
+          turnCount = parsed.turnCount
         )
       }
   }

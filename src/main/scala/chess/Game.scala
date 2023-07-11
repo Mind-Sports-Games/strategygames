@@ -10,7 +10,8 @@ case class Game(
     situation: Situation,
     actions: Vector[Vector[String]] = Vector(),
     clock: Option[Clock] = None,
-    turns: Int = 0, // plies
+    plies: Int = 0,
+    turnCount: Int = 0,
     startedAtTurn: Int = 0,
     startPlayer: Player = Player.P1
 ) {
@@ -26,12 +27,14 @@ case class Game(
 
   def apply(move: Move): Game = {
     val newSituation = move.situationAfter
+    val switchPlayer = situation.player != newSituation.player
 
     copy(
       situation = newSituation,
-      turns = turns + 1,
+      plies = plies + 1,
+      turnCount = turnCount + (if (switchPlayer) 1 else 0),
       actions = applyAction(pgn.Dumper(situation, move, newSituation)),
-      clock = applyClock(move.metrics, newSituation.status.isEmpty, newSituation.player != situation.player)
+      clock = applyClock(move.metrics, newSituation.status.isEmpty, switchPlayer)
     )
   }
 
@@ -46,12 +49,14 @@ case class Game(
 
   def applyDrop(drop: Drop): Game = {
     val newSituation = drop situationAfter
+    val switchPlayer = situation.player != newSituation.player
 
     copy(
       situation = newSituation,
-      turns = turns + 1,
+      plies = plies + 1,
+      turnCount = turnCount + (if (switchPlayer) 1 else 0),
       actions = applyAction(pgn.Dumper(drop, newSituation)),
-      clock = applyClock(drop.metrics, newSituation.status.isEmpty, newSituation.player != situation.player)
+      clock = applyClock(drop.metrics, newSituation.status.isEmpty, switchPlayer)
     )
   }
 
@@ -85,11 +90,16 @@ case class Game(
 
   def halfMoveClock: Int = board.history.halfMoveClock
 
-  /** Fullmove number: The number of the full move. It starts at 1, and is incremented after P2's move.
-    */
-  def fullMoveNumber: Int = 1 + turns / 2
+  // Aka Fullmove number (in Forsyth-Edwards Notation):
+  // The number of the completed turns by each player ('full move')
+  // It starts at 1, and is incremented after P2's move (turn)
+  def fullTurnCount: Int = 1 + turnCount / 2
 
-  def moveString = s"$fullMoveNumber${player.fold(".", "...")}"
+  //TODO: Multiaction: verify this is what we want to pass startedAtTurn
+  def currentTurnCount: Int = turnCount + (if (plies > 0) 1 else 0)
+
+  // doesnt seem to be used anywhere
+  // def moveString = s"$fullTurnCount${player.fold(".", "...")}"
 
   def withBoard(b: Board) = copy(situation = situation.copy(board = b))
 
@@ -97,7 +107,7 @@ case class Game(
 
   def withPlayer(c: Player) = copy(situation = situation.copy(player = c))
 
-  def withTurns(t: Int) = copy(turns = t)
+  def withTurns(p: Int, t: Int) = copy(plies = p, turnCount = t)
 }
 
 object Game {
@@ -123,7 +133,8 @@ object Game {
             },
             player = parsed.situation.player
           ),
-          turns = parsed.turns
+          plies = parsed.plies,
+          turnCount = parsed.turnCount
         )
       }
   }

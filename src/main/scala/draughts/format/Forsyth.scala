@@ -51,9 +51,12 @@ object Forsyth {
 
   def <<(fen: FEN): Option[Situation] = <<@(Standard, fen)
 
-  case class SituationPlus(situation: Situation, fullMoveNumber: Int) {
+  case class SituationPlus(situation: Situation, fullTurnCount: Int) {
 
-    def turns = fullMoveNumber * 2 - (if (situation.player.p1) 2 else 1)
+    def turnCount = fullTurnCount * 2 - (if (situation.player.p1) 2 else 1)
+    // when we get a multiaction variant/we convert draughts we should consider setting this
+    // we may be able to deprecate this when we do this as actions.flatten.size should count plies
+    def plies     = turnCount
 
   }
 
@@ -116,7 +119,10 @@ object Forsyth {
 
   def toAlgebraic(variant: Variant, fen: FEN): Option[FEN] =
     <<<@(variant, fen) map { case parsed @ SituationPlus(situation, _) =>
-      doExport(DraughtsGame(situation, turns = parsed.turns), algebraic = true)
+      doExport(
+        DraughtsGame(situation, plies = parsed.plies, turnCount = parsed.turnCount),
+        algebraic = true
+      )
     }
 
   def countGhosts(fen: FEN): Int =
@@ -140,7 +146,8 @@ object Forsyth {
   def >>(situation: Situation): FEN = >>(SituationPlus(situation, 1))
 
   def >>(parsed: SituationPlus): FEN = parsed match {
-    case SituationPlus(situation, _) => >>(DraughtsGame(situation, turns = parsed.turns))
+    case SituationPlus(situation, _) =>
+      >>(DraughtsGame(situation, plies = parsed.plies, turnCount = parsed.turnCount))
   }
 
   def >>(game: DraughtsGame): FEN = doExport(game, algebraic = false)
@@ -151,7 +158,7 @@ object Forsyth {
         game.player.letter.toUpper,
         exportBoard(game.board, algebraic),
         "H" + game.halfMoveClock.toString,
-        "F" + game.fullMoveNumber.toString
+        "F" + game.fullTurnCount.toString
       ) ::: {
         if (game.board.variant.frisianVariant) List(exportKingMoves(game.board))
         else List()

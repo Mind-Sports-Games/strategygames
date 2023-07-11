@@ -398,15 +398,17 @@ object Replay {
       val atFenTruncated        = truncateFen(atFen)
       def compareFen(fen: FEN)  = truncateFen(fen) == atFenTruncated
 
-      def recursivePlyAtFen(sit: Situation, sans: List[San], ply: Int): Validated[String, Int] =
+      def recursivePlyAtFen(sit: Situation, sans: List[San], ply: Int, turn: Int): Validated[String, Int] =
         sans match {
-          case Nil         => invalid(s"Can't find $atFenTruncated, reached ply $ply")
+          case Nil         => invalid(s"Can't find $atFenTruncated, reached ply $ply, turn $turn")
           case san :: rest =>
             san(StratSituation.wrap(sit)).map(draughtsMove) flatMap { move =>
-              val after = move.situationAfter
-              val fen   = Forsyth >> DraughtsGame(after, turns = ply)
+              val after        = move.situationAfter
+              val newPlies     = ply + 1
+              val newTurnCount = turn + (if (sit.player != after.player) 1 else 0)
+              val fen          = Forsyth >> DraughtsGame(after, plies = newPlies, turnCount = newTurnCount)
               if (compareFen(fen)) Validated.valid(ply)
-              else recursivePlyAtFen(after, rest, ply + 1)
+              else recursivePlyAtFen(after, rest, newPlies, newTurnCount)
             }
         }
 
@@ -415,13 +417,15 @@ object Replay {
       } | Situation(variant)
 
       Parser.moves(actions.flatten, sit.board.variant) andThen { moves =>
-        recursivePlyAtFen(sit, moves.value, 1)
+        recursivePlyAtFen(sit, moves.value, 0, 0)
       }
     }
 
   private def makeGame(variant: Variant, initialFen: Option[FEN]): DraughtsGame = {
     val g = DraughtsGame(variant.some, initialFen)
-    //TODO this only works for multiaction if turns is turns (not plies)
-    g.copy(startedAtTurn = g.turns, startPlayer = g.situation.player)
+    g.copy(
+      startedAtTurn = g.currentTurnCount,
+      startPlayer = g.situation.player
+    )
   }
 }
