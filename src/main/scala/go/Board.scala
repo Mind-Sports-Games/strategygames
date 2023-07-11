@@ -27,6 +27,8 @@ case class Board(
     (p, pieces.collect { case (pos, piece) if piece.player == p => (pos, piece) }.size)
   }.toMap
 
+  def withPosition(p: Option[Api.Position]): Board = copy(position = p)
+
   def withHistory(h: History): Board       = copy(history = h)
   def updateHistory(f: History => History) = copy(history = f(history))
 
