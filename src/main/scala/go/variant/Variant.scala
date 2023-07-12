@@ -7,6 +7,7 @@ import scala.annotation.nowarn
 import strategygames.go._
 import strategygames.go.format.{ FEN, Forsyth, Uci }
 import strategygames.{ GameFamily, Player }
+import strategygames.togyzkumalak.Score
 
 case class GoName(val name: String)
 
@@ -48,14 +49,13 @@ abstract class Variant private[variant] (
 
   def fenFromSetupConfig(handicap: Int, komi: Int): FEN = {
 
-    val actualKomi = komi / 10
-    val p1Score    = if (komi > 0) handicap else handicap - actualKomi
-    val p2Score    = if (komi > 0) actualKomi else 0
-    val turn       = if (handicap == 0) "b" else "w"
+    val p1Score = if (komi > 0) handicap * 10 else handicap * 10 - komi
+    val p2Score = if (komi > 0) komi else 0
+    val turn    = if (handicap == 0) "b" else "w"
 
     val board  = boardFenFromHandicap(handicap)
     val pocket = "[SSSSSSSSSSssssssssss]"
-    FEN(s"${board}${pocket} ${turn} - ${p1Score} ${p2Score} ${actualKomi} 1")
+    FEN(s"${board}${pocket} ${turn} - ${p1Score} ${p2Score} ${komi} 1")
   }
 
   def boardFenFromHandicap(handicap: Int): String = initialFen.board
@@ -63,7 +63,7 @@ abstract class Variant private[variant] (
   def setupInfo(fen: FEN): Option[String] = {
     val komi     = fen.komi
     val handicap = fen.handicap.getOrElse(0)
-    if (fen != initialFen) Some(s"Handicap (${handicap}), komi (${komi})")
+    if (fen != initialFen) Some(s"Handicap (${handicap}), komi (${komi})".replace(".0", ""))
     else None
   }
 
@@ -97,12 +97,23 @@ abstract class Variant private[variant] (
             piece = Piece(situation.player, Role.defaultRole),
             pos = dest,
             situationBefore = situation,
-            after = situation.board.copy(
-              pieces = newPosition.pieceMap,
-              uciMoves = situation.board.uciMoves :+ uciMove,
-              pocketData = newPosition.pocketData,
-              position = newPosition.some
-            )
+            after = situation.board
+              .copy(
+                pieces = newPosition.pieceMap,
+                uciMoves = situation.board.uciMoves :+ uciMove,
+                pocketData = newPosition.pocketData,
+                position = newPosition.some
+              )
+              .withHistory(
+                situation.history.copy(
+                  lastMove = Uci.Drop(Role.defaultRole, dest).some,
+                  score = Score(
+                    newPosition.fen.player1Score,
+                    newPosition.fen.player2Score
+                  ),
+                  halfMoveClock = situation.board.history.halfMoveClock + situation.player.fold(0, 1)
+                )
+              )
           )
         }
         case (destInt, dest)       => sys.error(s"Invalid pos from int: ${destInt}, ${dest}")

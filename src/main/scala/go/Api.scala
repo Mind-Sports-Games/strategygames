@@ -36,7 +36,7 @@ object Api {
 
     def toBoard: String
     def goDiagram: String
-    def setKomi(komi: Int): Unit
+    def setKomi(komi: Double): Unit
 
     val initialFen: FEN
     val fen: FEN
@@ -47,8 +47,8 @@ object Api {
     val gameEnd: Boolean
     val gameOutcome: Int
     val gameScore: Int
-    val p1Score: Int
-    val p2Score: Int
+    val p1Score: Double
+    val p2Score: Double
     val legalMoves: Array[Int]
     val playerTurn: Int // 1 for South (P1/black) -1 for North (P2/white)
     def fenString: String
@@ -58,7 +58,7 @@ object Api {
       position: GoGame,
       ply: Int = 0,
       fromFen: Option[FEN] = None,
-      komi: Int = 6
+      komi: Double = 6.5
   ) extends Position {
     // TODO: yes, this is an abuse of scala. We could get an
     //       exception here, but I'm not sure how to work around that
@@ -108,7 +108,7 @@ object Api {
 
     def setBoard(goBoard: GoBoard): Unit = position.setBoard(goBoard)
 
-    def setKomi(k: Int): Unit = position.setKomiScore(k)
+    def setKomi(k: Double): Unit = position.setKomiScore(k)
 
     def goDiagram: String = position.toBoard.toDiagram
 
@@ -118,12 +118,13 @@ object Api {
       val turn         =
         if (position.turn() == 1) "b"
         else "w" // cant trust engine fen - not sure why but it always returns 'b'
-      val ko           = splitDiagram.lift(2).getOrElse("-").toString()
-      val p1FinalScore = p1Score
-      val p2FinalScore = p2Score
-      val fullMoveStr  = (ply / 2 + 1).toString()
-      val pocket       = "[SSSSSSSSSSssssssssss]"
-      return s"${board}${pocket} ${turn} ${ko} ${p1FinalScore} ${p2FinalScore} ${komi} ${fullMoveStr}"
+      val ko          = splitDiagram.lift(2).getOrElse("-").toString()
+      val p1FenScore  = (p1Score * 10).toInt
+      val p2FenScore  = (p2Score * 10).toInt
+      val fenKomi     = (komi * 10).toInt
+      val fullMoveStr = (ply / 2 + 1).toString()
+      val pocket      = "[SSSSSSSSSSssssssssss]"
+      return s"${board}${pocket} ${turn} ${ko} ${p1FenScore} ${p2FenScore} ${fenKomi} ${fullMoveStr}"
     }
 
     def toPosition = position.toBoard().position()
@@ -193,10 +194,10 @@ object Api {
 
     lazy val gameOutcome: Int = position.outcome()
 
-    lazy val gameScore: Int = position.score() // black - (white + komi)
+    lazy val gameScore: Int = position.score() // 10* (black - (white + komi))
 
-    lazy val p1Score: Int = position.blackScore() // black
-    lazy val p2Score: Int = position.whiteScore() // white + komi
+    lazy val p1Score: Double = position.blackScore() // black
+    lazy val p2Score: Double = position.whiteScore() // white + komi
 
     val passMove: Int = gameSize * gameSize
 
@@ -217,7 +218,7 @@ object Api {
 
   }
 
-  def position(variant: Variant, komi: Int = 6): Position = {
+  def position(variant: Variant, komi: Double = 6.5): Position = {
     val g = new GoGame(variant.boardSize.height)
     g.setKomiScore(komi)
     new GoPosition(g)

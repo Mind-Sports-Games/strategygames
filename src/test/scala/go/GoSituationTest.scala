@@ -45,7 +45,7 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     val fen   = game1.situation.board.apiPosition.fen
 
     "have correct fen after drop b1" in {
-      "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1S17[SSSSSSSSSSssssssssss] w - 361 6 6 2" must_== drop.after.apiPosition.fen.value
+      "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1S17[SSSSSSSSSSssssssssss] w - 3610 65 65 2" must_== drop.after.apiPosition.fen.value
     }
 
     val boardFen = format.Forsyth.boardAndPlayer(game1.situation)
@@ -61,7 +61,7 @@ class GoSituationTest extends Specification with ValidatedMatchers {
 
   // creating game from position, i.e. with different starting fen
   "valid game when starting form handicapped position" should {
-    val startingFen = FEN("9/9/2S3S2/9/9/9/9/9/9[SSSSSSSSSSssssssssss] w - 81 4 4 1")
+    val startingFen = FEN("9/9/2S3S2/9/9/9/9/9/9[SSSSSSSSSSssssssssss] w - 810 40 40 1")
     val situation   = strategygames.go.format.Forsyth.<<@(variant.Go9x9, startingFen)
 
     val game = Game(Some(variant.Go9x9), Some(startingFen))
@@ -82,16 +82,16 @@ class GoSituationTest extends Specification with ValidatedMatchers {
 
     val game1 = game.apply(drop)
     "have the correct starting fen after a move" in {
-      game1.situation.board.apiPosition.initialFen.value must_== "9/9/2S3S2/9/9/9/9/9/9[SSSSSSSSSSssssssssss] w - 81 4 4 1"
+      game1.situation.board.apiPosition.initialFen.value must_== "9/9/2S3S2/9/9/9/9/9/9[SSSSSSSSSSssssssssss] w - 810 40 40 1"
     }
     "and the correct current fen after a move" in {
-      game1.situation.board.apiPosition.fen.value must_== "9/9/2S3S2/9/9/9/9/9/s8[SSSSSSSSSSssssssssss] b - 2 5 4 1"
+      game1.situation.board.apiPosition.fen.value must_== "9/9/2S3S2/9/9/9/9/9/s8[SSSSSSSSSSssssssssss] b - 20 50 40 1"
     }
 
   }
 
   "valid fen from new game creation handicapped" should {
-    val startingFen = FEN("9/9/2S3S2/9/9/9/9/9/9[SSSSSSSSSSssssssssss] w - 81 4 4 1")
+    val startingFen = FEN("9/9/2S3S2/9/9/9/9/9/9[SSSSSSSSSSssssssssss] w - 810 40 40 1")
     val game        = Game(Some(variant.Go9x9), Some(startingFen))
 
     val fen = strategygames.go.format.Forsyth.>>(game)

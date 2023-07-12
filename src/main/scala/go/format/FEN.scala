@@ -23,7 +23,7 @@ final case class FEN(value: String) extends AnyVal {
       fm * 2 - (if (player.exists(_.p1)) 2 else 1)
     }
 
-  def komi: Int = intFromFen(5).getOrElse(0)
+  def komi: Double = intFromFen(5).getOrElse(0) / 10.0
 
   def handicap: Option[Int] = if (fullMove == Some(1)) Some(board.count(_ == 'S')) else None
 
@@ -32,7 +32,7 @@ final case class FEN(value: String) extends AnyVal {
       .replace("S", "X")
       .replace("s", "O")
       .replace("19", "199") // goengine cant handle double digits
-      .replace("18", "189") // todo does this mess up komi?
+      .replace("18", "189") // todo does this mess up ko?
       .replace("17", "179")
       .replace("16", "169")
       .replace("15", "159")
