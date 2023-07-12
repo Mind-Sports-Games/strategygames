@@ -1,11 +1,8 @@
-package strategygames.chess
+package strategygames
 package format
 package pgn
 
 import cats.implicits._
-
-import strategygames.Player
-import strategygames.format.pgn.{ Glyphs, Tag, Tags }
 
 case class Pgn(
     tags: Tags,
@@ -21,7 +18,7 @@ case class Pgn(
   }
   def updatePly(ply: Int, f: Move => Move)       = {
     val fullMove = (ply + 1) / 2
-    //Uses this as fromPly - not been upgraded for multiaction
+    // Uses this as fromPly - not been upgraded for multiaction
     val player   = Player.fromTurnCount(ply - 1)
     updateTurn(fullMove, _.update(player, f))
   }
