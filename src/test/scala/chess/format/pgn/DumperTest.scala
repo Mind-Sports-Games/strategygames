@@ -1,20 +1,20 @@
 package strategygames.chess
 package format.pgn
 
-import format.Forsyth
+import format.{ FEN, Forsyth }
 import Pos._
-
-import strategygames.chess.format.FEN
+import strategygames.format.pgn.{ Move => PgnMove }
 
 class DumperTest extends ChessTest {
 
   "Check with pawn" should {
     "not be checkmate if pawn can be taken en passant" in {
       val game = Forsyth.<<<(FEN("8/3b4/6R1/1P2kp2/6pp/2N1P3/4KPPP/8 w - -")).get match {
-        case Forsyth.SituationPlus(sit, turns) =>
+        case Forsyth.SituationPlus(sit, fullTurnCount) =>
           Game(
             sit,
-            turns = turns
+            // this feels incorrect, SituationPlus has fullTurnCount
+            turnCount = fullTurnCount
           )
       }
       val move = game(Pos.F2, Pos.F4).toOption.get._2
@@ -327,10 +327,10 @@ NRKNRQBB
   }
   "move comment" should {
     "simple" in {
-      Move("e4", List("Some comment")).toString must_== "e4 { Some comment }"
+      PgnMove("e4", List("Some comment")).toString must_== "e4 { Some comment }"
     }
     "one line break" in {
-      Move(
+      PgnMove(
         "e4",
         List("""Some
 comment""")
@@ -338,7 +338,7 @@ comment""")
 comment }"""
     }
     "two line breaks" in {
-      Move(
+      PgnMove(
         "e4",
         List("""Some
 
@@ -347,7 +347,7 @@ comment""")
 comment }"""
     }
     "three line breaks" in {
-      Move(
+      PgnMove(
         "e4",
         List("""Some
 
