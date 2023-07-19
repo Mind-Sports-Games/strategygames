@@ -31,6 +31,7 @@ object Parser {
     pgnMoves.toList.map(
       _ match {
         case Uci.Drop.dropR(role, dest) => s"${role}@${dest}"
+        case Uci.Pass.passR()           => "pass"
         case s: String                  => s
       }
     )

@@ -3,7 +3,7 @@ package strategygames.fairysf.format
 import cats.data.Validated
 
 import strategygames.fairysf.variant.Variant
-import strategygames.fairysf.{ MoveOrDrop, Replay }
+import strategygames.fairysf.{ Action, Drop, Move, Replay }
 import strategygames.format.{ Uci => StratGamesUci }
 import strategygames.format.LexicalUci
 import strategygames.{ GameFamily, GameLogic }
@@ -23,14 +23,14 @@ object UciDump {
     if (moves.isEmpty) Validated.valid(Nil)
     else Replay(moves, initialFen, variant) andThen (_.valid) map apply
 
-  def move(variant: Variant)(mod: MoveOrDrop): String =
-    mod match {
-      case Left(m)  =>
+  def move(variant: Variant)(action: Action): String =
+    action match {
+      case m: Move =>
         m.castle.fold(m.toUci.lilaUci) {
           case ((kf, kt), (rf, _)) if kf == kt => kf.key + rf.key
           case ((kf, kt), _)                   => kf.key + kt.key
         }
-      case Right(d) => d.toUci.lilaUci
+      case d: Drop => d.toUci.lilaUci
     }
 
   // TODO: I'm not a big fan of the API that's resulted in the toFishnetUci and fromFishnetUci.

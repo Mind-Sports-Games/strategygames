@@ -50,6 +50,7 @@ object Api {
     val p1Score: Double
     val p2Score: Double
     val legalMoves: Array[Int]
+    val legalActions: Array[Int]
     val playerTurn: Int // 1 for South (P1/black) -1 for North (P2/white)
     def fenString: String
   }
@@ -82,10 +83,10 @@ object Api {
       pos = pos.makeMoves(previousMoves.map(m => uciToMove(m, variant)))
 
       movesList.map { move =>
-        if (pos.legalMoves.contains(move)) pos = pos.makeMoves(List(move))
+        if (pos.legalActions.contains(move)) pos = pos.makeMoves(List(move))
         else
           sys.error(
-            s"Illegal move1: ${move} from list: ${movesList} legalMoves: ${pos.legalMoves.map(_.toString()).mkString(", ")}"
+            s"Illegal move1: ${move} from list: ${movesList} legalActions: ${pos.legalActions.map(_.toString()).mkString(", ")}"
           )
       }
       pos.setKomi(komi)
@@ -201,7 +202,7 @@ object Api {
 
     val passMove: Int = gameSize * gameSize
 
-    val legalMoves: Array[Int] = {
+    val legalActions: Array[Int] = {
       position.resetCursor()
       var moves: List[Int] = List()
       var nextMove         = position.nextMove()
@@ -209,7 +210,11 @@ object Api {
         moves = moves ::: List(nextMove)
         nextMove = position.nextMove()
       }
-      moves.toArray.filter(m => m != passMove)
+      moves.toArray
+    }
+
+    val legalMoves: Array[Int] = {
+      legalActions.filter(m => m != passMove)
     }
 
     val playerTurn: Int = position.turn()
@@ -269,23 +274,34 @@ object Api {
   def positionFromStartingFenAndMoves(startingFen: FEN, uciMoves: List[String]): Position =
     positionFromFen(startingFen.value).makeMoves(uciMoves.map(m => uciToMove(m, startingFen.variant)))
 
-  def uciToMove(uciMove: String, variant: Variant): Int = {
+  def passMove(variant: Variant): Int = {
     val gameSize: Int = variant.boardSize.height
-    val dest          = uciMove.drop(2)
+    gameSize * gameSize
+  }
 
-    val fileChar  = dest.charAt(0)
-    val file: Int = File.fromChar(fileChar).map(_.index).getOrElse(0) // 0 index
-    val rank: Int = dest.drop(1).toIntOption.getOrElse(0)             // 1 index
+  def uciToMove(uciMove: String, variant: Variant): Int = {
+    if (uciMove == "pass") passMove(variant)
+    else {
+      val gameSize: Int = variant.boardSize.height
+      val dest          = uciMove.drop(2)
 
-    gameSize * (rank - 1) + file
+      val fileChar  = dest.charAt(0)
+      val file: Int = File.fromChar(fileChar).map(_.index).getOrElse(0) // 0 index
+      val rank: Int = dest.drop(1).toIntOption.getOrElse(0)             // 1 index
+
+      gameSize * (rank - 1) + file
+    }
   }
 
   def moveToUci(move: Int, variant: Variant): String = {
-    val gameSize: Int = variant.boardSize.height
-    val file: String  = File(move % gameSize).map(_.toString).getOrElse("a")
-    val rank: Int     = (move / gameSize) + 1
+    if (move == passMove(variant)) "pass"
+    else {
+      val gameSize: Int = variant.boardSize.height
+      val file: String  = File(move % gameSize).map(_.toString).getOrElse("a")
+      val rank: Int     = (move / gameSize) + 1
 
-    s"${Stone.forsyth.toUpper}@${file}${rank}"
+      s"${Stone.forsyth.toUpper}@${file}${rank}"
+    }
   }
 
   def moveToPos(move: Int, variant: Variant): Option[Pos] = {

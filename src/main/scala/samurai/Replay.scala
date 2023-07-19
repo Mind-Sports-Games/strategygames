@@ -9,7 +9,7 @@ import strategygames.format.pgn.San
 import strategygames.samurai.format.pgn.{ Parser, Reader }
 import strategygames.format.pgn.{ Tag, Tags }
 import strategygames.samurai.format.{ FEN, Forsyth, Uci }
-import strategygames.{ Move => StratMove, MoveOrDrop, Situation => StratSituation }
+import strategygames.{ Action => StratAction, Move => StratMove, Situation => StratSituation }
 
 case class Replay(setup: Game, moves: List[Move], state: Game) {
 
@@ -45,9 +45,9 @@ object Replay {
 
   // TODO: because this is primarily used in a Validation context, we should be able to
   //       return something that's runtime safe as well.
-  def samuraiMove(moveOrDrop: MoveOrDrop) = moveOrDrop match {
-    case Left(StratMove.Samurai(m)) => m
-    case _                          => sys.error("Invalid samurai move")
+  def samuraiMove(action: StratAction) = action match {
+    case StratMove.Samurai(m) => m
+    case _                    => sys.error("Invalid samurai move")
   }
 
   def replayMove(

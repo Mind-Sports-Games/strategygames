@@ -4,7 +4,7 @@ package format.pgn
 import cats.data.Validated
 import cats.syntax.option._
 
-import strategygames.{ Drop => StratDrop, Move => StratMove }
+import strategygames.{ Drop => StratDrop, Move => StratMove, Pass => StratPass }
 import strategygames.format.pgn.{ Metas, ParsedPgn, San, Sans, Suffixes, Tags }
 
 case class Std(
@@ -46,10 +46,26 @@ case class Drop(
       situation: strategygames.Situation,
       iteratedCapts: Boolean = false,
       forbiddenUci: Option[List[String]] = None
-  ) = drop(situation.toGo).map(StratDrop.wrap).map(Right.apply)
+  ) = drop(situation.toGo).map(StratDrop.wrap)
 
   def withMetas(m: Metas) = copy(metas = m)
 
   def drop(situation: Situation): Validated[String, strategygames.go.Drop] =
     situation.drop(role, pos)
+}
+
+case class Pass(
+    metas: Metas = Metas.empty
+) extends San {
+
+  def apply(
+      situation: strategygames.Situation,
+      iteratedCapts: Boolean = false,
+      forbiddenUci: Option[List[String]] = None
+  ) = pass(situation.toGo).map(StratPass.wrap)
+
+  def withMetas(m: Metas) = copy(metas = m)
+
+  def pass(situation: Situation): Validated[String, strategygames.go.Pass] =
+    situation.pass
 }

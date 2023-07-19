@@ -7,15 +7,15 @@ import scala.util.Try
 
 object Binary {
 
-  // writeMove only used in tests for chess/draughts
-  // def writeMove(m: String)             = Try(Writer.move(m))
+  // writeMove only used in tests
+  def writeMove(m: String)             = Try(Writer.move(m))
   def writeMoves(ms: Iterable[String]) = Try(Writer.moves(ms))
 
   def readMoves(bs: List[Byte])          = Try(Reader moves bs)
   def readMoves(bs: List[Byte], nb: Int) = Try(Reader.moves(bs, nb))
 
   private object MoveType {
-    val Move = 0
+    val Pass = 0
     val Drop = 1
   }
 
@@ -36,6 +36,8 @@ object Binary {
         case Nil                                                  => Nil
         case (b1 :: b2 :: rest) if headerBit(b1) == MoveType.Drop =>
           dropUci(b1, b2) :: intMoves(rest, pliesToGo - 1)
+        case (b1 :: rest) if headerBit(b1) == MoveType.Pass       =>
+          passUci :: intMoves(rest, pliesToGo - 1)
         case x                                                    => !!(x map showByte mkString ",")
       }
 
@@ -46,6 +48,7 @@ object Binary {
     def dropUci(b1: Int, b2: Int): String =
       s"s@${posFromInt(b1, b2)}"
 
+    val passUci                              = "pass"
     def posFromInt(b1: Int, b2: Int): String = Pos((right(b1, 6) << 8) + b2).get.toString()
 
     private def headerBit(i: Int) = i >> 6
@@ -58,11 +61,14 @@ object Binary {
     def move(str: String): List[Byte] =
       (str match {
         case Uci.Drop.dropR(_, dst) => dropUci(dst)
+        case Uci.Pass.passR()       => passUci
         case _                      => sys.error(s"Invalid move to write: ${str}")
       }) map (_.toByte)
 
     def moves(strs: Iterable[String]): Array[Byte] =
       strs.toList.flatMap(move).to(Array)
+
+    def passUci = List(headerBit(MoveType.Pass))
 
     def dropUci(dst: String) = List(
       (headerBit(MoveType.Drop)) + (Pos.fromKey(dst).get.index >> 8),

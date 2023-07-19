@@ -17,9 +17,7 @@ sealed abstract class Move(
     val castle: Option[((Pos, Pos), (Pos, Pos))] = None,
     val enpassant: Boolean = false,
     val metrics: MoveMetrics = MoveMetrics()
-) {
-
-  def before = situationBefore.board
+) extends Action(situationBefore, after, metrics) {
 
   def situationAfter: Situation
   def finalizeAfter(finalSquare: Boolean = false): Board
@@ -98,6 +96,7 @@ object Move {
     def toFairySF      = sys.error("Can't make a fairysf move from a chess move")
     def toSamurai      = sys.error("Can't make a samurai move from a chess move")
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak move from a chess move")
+    def toGo           = sys.error("Can't make a go move from a chess move")
 
   }
 
@@ -147,6 +146,7 @@ object Move {
     def toFairySF      = sys.error("Can't make a fairysf move from a draughts move")
     def toSamurai      = sys.error("Can't make a samurai move from a draughts move")
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak move from a draughts move")
+    def toGo           = sys.error("Can't make a go move from a draughts move")
 
   }
 
@@ -197,6 +197,7 @@ object Move {
     def toDraughts     = sys.error("Can't make a draughts move from a fairysf move")
     def toSamurai      = sys.error("Can't make a samurai move from a fairysf move")
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak move from a fairysf move")
+    def toGo           = sys.error("Can't make a go move from a fairysf move")
 
   }
 
@@ -240,6 +241,7 @@ object Move {
     def toDraughts     = sys.error("Can't make a draughts move from a samurai move")
     def toSamurai      = m
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak move from a samurai move")
+    def toGo           = sys.error("Can't make a go move from a samurai move")
 
   }
 
@@ -283,6 +285,7 @@ object Move {
     def toDraughts     = sys.error("Can't make a draughts move from a togyzkumalak move")
     def toSamurai      = sys.error("Can't make a samurai move from a togyzkumalak move")
     def toTogyzkumalak = m
+    def toGo           = sys.error("Can't make a go move from a togyzkumalak move")
 
   }
 
@@ -292,14 +295,26 @@ object Move {
   def wrap(m: samurai.Move): Move      = Move.Samurai(m)
   def wrap(m: togyzkumalak.Move): Move = Move.Togyzkumalak(m)
 
-  def toChess(moveOrDrop: MoveOrDrop): chess.MoveOrDrop         = moveOrDrop.left.map(_.toChess).right.map(_.toChess)
-  // probably not type safe
-  def toDraughts(moveOrDrop: MoveOrDrop): draughts.Move         = moveOrDrop.left.map(_.toDraughts).left.get
-  def toFairySF(moveOrDrop: MoveOrDrop): fairysf.MoveOrDrop     =
-    moveOrDrop.left.map(_.toFairySF).right.map(_.toFairySF)
-  def toSamurai(moveOrDrop: MoveOrDrop): samurai.Move           = moveOrDrop.left.map(_.toSamurai).left.get
-  def toTogyzkumalak(moveOrDrop: MoveOrDrop): togyzkumalak.Move =
-    moveOrDrop.left.map(_.toTogyzkumalak).left.get
-  def toGo(moveOrDrop: MoveOrDrop): go.Drop                     = moveOrDrop.right.map(_.toGo).right.get
+  def toChess(action: Action)        = action match {
+    case Chess(m) => m
+    case _        => sys.error("Expecting chess move action")
+  }
+  def toDraughts(action: Action)     = action match {
+    case Draughts(m) => m
+    case _           => sys.error("Expecting draughts move action")
+  }
+  def toFairySF(action: Action)      = action match {
+    case FairySF(m) => m
+    case _          => sys.error("Expecting fairysf move action")
+  }
+  def toSamurai(action: Action)      = action match {
+    case Samurai(m) => m
+    case _          => sys.error("Expecting samurai move action")
+  }
+  def toTogyzkumalak(action: Action) = action match {
+    case Togyzkumalak(m) => m
+    case _               => sys.error("Expecting Togy move action")
+  }
+  def toGo(action: Action)           = sys.error("No go move action")
 
 }

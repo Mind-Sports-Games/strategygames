@@ -3,23 +3,21 @@ import strategygames.MoveMetrics
 
 import strategygames.go.format.Uci
 
-case class Drop(
-    piece: Piece,
-    pos: Pos,
+case class Pass(
     situationBefore: Situation,
     after: Board,
     metrics: MoveMetrics = MoveMetrics()
 ) extends Action(situationBefore, after, metrics) {
 
-  def situationAfter = Situation(finalizeAfter, !piece.player)
+  def situationAfter = Situation(finalizeAfter, !situationBefore.player)
 
-  def applyVariantEffect: Drop = before.variant addVariantEffect this
+  def applyVariantEffect = this
 
-  def player = piece.player
+  def player = situationBefore.player
 
   def withMetrics(m: MoveMetrics) = copy(metrics = m)
 
-  def toUci = Uci.Drop(piece.role, pos)
+  def toUci = Uci.Pass()
 
   override def toString = toUci.uci
 

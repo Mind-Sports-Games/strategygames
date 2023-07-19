@@ -10,7 +10,7 @@ sealed abstract class Drop(
     val situationBefore: Situation,
     val after: Board,
     val metrics: MoveMetrics = MoveMetrics()
-) {
+) extends Action(situationBefore, after, metrics) {
 
   def situationAfter: Situation
 
@@ -44,10 +44,13 @@ object Drop {
 
     def toUci: Uci.Drop = Uci.ChessDrop(d.toUci)
 
-    val unwrap    = d
-    def toChess   = d
-    def toFairySF = sys.error("Can't make a fairysf drop from a chess drop")
-    def toGo      = sys.error("Can't make a go drop from a chess drop")
+    val unwrap         = d
+    def toChess        = d
+    def toFairySF      = sys.error("Can't make a fairysf drop from a chess drop")
+    def toDraughts     = sys.error("Can't make a draughts drop from a chess drop")
+    def toSamurai      = sys.error("Can't make a samurai drop from a chess drop")
+    def toTogyzkumalak = sys.error("Can't make a togy drop from a chess drop")
+    def toGo           = sys.error("Can't make a go drop from a chess drop")
 
   }
 
@@ -65,10 +68,13 @@ object Drop {
 
     def toUci: Uci.Drop = Uci.FairySFDrop(d.toUci)
 
-    val unwrap    = d
-    def toChess   = sys.error("Can't make a chess drop from a fairysf drop")
-    def toFairySF = d
-    def toGo      = sys.error("Can't make a go drop from a fairysf drop")
+    val unwrap         = d
+    def toChess        = sys.error("Can't make a chess drop from a fairysf drop")
+    def toFairySF      = d
+    def toDraughts     = sys.error("Can't make a draughts drop from a fairysf drop")
+    def toSamurai      = sys.error("Can't make a samurai drop from a fairysf drop")
+    def toTogyzkumalak = sys.error("Can't make a togy drop from a fairysf drop")
+    def toGo           = sys.error("Can't make a go drop from a fairysf drop")
 
   }
 
@@ -86,10 +92,13 @@ object Drop {
 
     def toUci: Uci.Drop = Uci.GoDrop(d.toUci)
 
-    val unwrap    = d
-    def toChess   = sys.error("Can't make a chess drop from a go drop")
-    def toFairySF = sys.error("Can't make a fairysf drop from a go drop")
-    def toGo      = d
+    val unwrap         = d
+    def toChess        = sys.error("Can't make a chess drop from a go drop")
+    def toFairySF      = sys.error("Can't make a fairysf drop from a go drop")
+    def toDraughts     = sys.error("Can't make a draughts drop from a go drop")
+    def toSamurai      = sys.error("Can't make a samurai drop from a go drop")
+    def toTogyzkumalak = sys.error("Can't make a togy drop from a go drop")
+    def toGo           = d
 
   }
 
@@ -97,14 +106,20 @@ object Drop {
   def wrap(d: fairysf.Drop): Drop = Drop.FairySF(d)
   def wrap(d: go.Drop): Drop      = Drop.Go(d)
 
-  def toChess(moveOrDrop: MoveOrDrop): chess.MoveOrDrop         = moveOrDrop.left.map(_.toChess).right.map(_.toChess)
-  // probably not type safe
-  def toDraughts(moveOrDrop: MoveOrDrop): draughts.Move         = moveOrDrop.left.map(_.toDraughts).left.get
-  def toFairySF(moveOrDrop: MoveOrDrop): fairysf.MoveOrDrop     =
-    moveOrDrop.left.map(_.toFairySF).right.map(_.toFairySF)
-  def toSamurai(moveOrDrop: MoveOrDrop): samurai.Move           = moveOrDrop.left.map(_.toSamurai).left.get
-  def toTogyzkumalak(moveOrDrop: MoveOrDrop): togyzkumalak.Move =
-    moveOrDrop.left.map(_.toTogyzkumalak).left.get
-  def toGo(moveOrDrop: MoveOrDrop): go.Drop                     = moveOrDrop.right.map(_.toGo).right.get
+  def toChess(action: Action)        = action match {
+    case Chess(d) => d
+    case _        => sys.error("Expecting chess drop action")
+  }
+  def toDraughts(action: Action)     = sys.error("Draughts has no drop action")
+  def toFairySF(action: Action)      = action match {
+    case FairySF(d) => d
+    case _          => sys.error("Expecting fairysf drop action")
+  }
+  def toSamurai(action: Action)      = sys.error("samurai has no drop action")
+  def toTogyzkumalak(action: Action) = sys.error("Togy has no drop action")
+  def toGo(action: Action)           = action match {
+    case Go(d) => d
+    case _     => sys.error("Expecting go drop action")
+  }
 
 }

@@ -6,11 +6,11 @@ import cats.implicits._
 import variant.Variant
 import format.{ FEN, Uci }
 
-sealed abstract class Replay(val setup: Game, val moves: List[MoveOrDrop], val state: Game) {
+sealed abstract class Replay(val setup: Game, val moves: List[Action], val state: Game) {
 
   lazy val chronoMoves = moves.reverse
 
-  def moveAtPly(ply: Int): Option[MoveOrDrop] =
+  def moveAtPly(ply: Int): Option[Action] =
     chronoMoves lift (ply - 1 - setup.startedAtTurn)
 
   // TODO: If we had a case class this would be automatic.
@@ -26,8 +26,8 @@ object Replay {
         Game.Chess(r.setup),
         r.moves.map(m =>
           m match {
-            case Left(m)  => Left(Move.Chess(m))
-            case Right(d) => Right(Drop.Chess(d))
+            case m: chess.Move => Move.Chess(m)
+            case d: chess.Drop => Drop.Chess(d)
           }
         ),
         Game.Chess(r.state)
@@ -41,7 +41,7 @@ object Replay {
   final case class Draughts(r: draughts.Replay)
       extends Replay(
         Game.Draughts(r.setup),
-        r.moves.map((m: draughts.Move) => Left(Move.Draughts(m))),
+        r.moves.map((m: draughts.Move) => Move.Draughts(m)),
         Game.Draughts(r.state)
       ) {
     def copy(state: Game): Replay = state match {
@@ -55,8 +55,8 @@ object Replay {
         Game.FairySF(r.setup),
         r.moves.map(m =>
           m match {
-            case Left(m)  => Left(Move.FairySF(m))
-            case Right(d) => Right(Drop.FairySF(d))
+            case m: fairysf.Move => Move.FairySF(m)
+            case d: fairysf.Drop => Drop.FairySF(d)
           }
         ),
         Game.FairySF(r.state)
@@ -70,7 +70,7 @@ object Replay {
   final case class Samurai(r: samurai.Replay)
       extends Replay(
         Game.Samurai(r.setup),
-        r.moves.map((m: samurai.Move) => Left(Move.Samurai(m))),
+        r.moves.map((m: samurai.Move) => Move.Samurai(m)),
         Game.Samurai(r.state)
       ) {
     def copy(state: Game): Replay = state match {
@@ -82,7 +82,7 @@ object Replay {
   final case class Togyzkumalak(r: togyzkumalak.Replay)
       extends Replay(
         Game.Togyzkumalak(r.setup),
-        r.moves.map((m: togyzkumalak.Move) => Left(Move.Togyzkumalak(m))),
+        r.moves.map((m: togyzkumalak.Move) => Move.Togyzkumalak(m)),
         Game.Togyzkumalak(r.state)
       ) {
     def copy(state: Game): Replay = state match {
@@ -94,7 +94,12 @@ object Replay {
   final case class Go(r: go.Replay)
       extends Replay(
         Game.Go(r.setup),
-        r.moves.map((d: go.Drop) => Right(Drop.Go(d))),
+        r.moves.map(m =>
+          m match {
+            case d: go.Drop => Drop.Go(d)
+            case p: go.Pass => Pass.Go(p)
+          }
+        ),
         Game.Go(r.state)
       ) {
     def copy(state: Game): Replay = state match {
@@ -103,7 +108,7 @@ object Replay {
     }
   }
 
-  def apply(lib: GameLogic, setup: Game, moves: List[MoveOrDrop], state: Game): Replay =
+  def apply(lib: GameLogic, setup: Game, moves: List[Action], state: Game): Replay =
     (lib, setup, state) match {
       case (GameLogic.Draughts(), Game.Draughts(setup), Game.Draughts(state))             =>
         Draughts(draughts.Replay(setup, moves.map(Move.toDraughts), state))

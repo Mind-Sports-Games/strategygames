@@ -226,6 +226,27 @@ object Uci {
     def toGo           = d
   }
 
+  sealed abstract class Pass() extends Uci {
+    def origDest: (Pos, Pos)
+  }
+
+  final case class GoPass(p: go.format.Uci.Pass) extends Pass() with Go {
+    def uci        = p.uci
+    def shortUci   = p.uci
+    def fishnetUci = p.uci
+    def piotr      = p.piotr
+
+    def origDest: (Pos, Pos) = (Pos.Go(p.origDest._1), Pos.Go(p.origDest._2))
+    val unwrap               = p
+
+    def toChess        = sys.error("Can't make a chess UCI from a go UCI")
+    def toDraughts     = sys.error("Can't make a draughts UCI from a go UCI")
+    def toFairySF      = sys.error("Can't make a fairysf UCI from a go UCI")
+    def toSamurai      = sys.error("Can't make a samurai UCI from a go UCI")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a go UCI")
+    def toGo           = p
+  }
+
   def wrap(uci: chess.format.Uci): Uci = uci match {
     case m: chess.format.Uci.Move => ChessMove(m)
     case d: chess.format.Uci.Drop => ChessDrop(d)
@@ -250,6 +271,7 @@ object Uci {
 
   def wrap(uci: go.format.Uci): Uci = uci match {
     case d: go.format.Uci.Drop => GoDrop(d)
+    case p: go.format.Uci.Pass => GoPass(p)
   }
 
   object Move {
@@ -372,6 +394,20 @@ object Uci {
 
   }
 
+  object Pass {
+
+    def apply(lib: GameLogic, gf: GameFamily): Option[Pass] =
+      lib match {
+        case GameLogic.Draughts()     => None
+        case GameLogic.Samurai()      => None
+        case GameLogic.Togyzkumalak() => None
+        case GameLogic.Chess()        => None
+        case GameLogic.FairySF()      => None
+        case GameLogic.Go()           => GoPass(go.format.Uci.Pass()).some
+      }
+
+  }
+
   sealed abstract class WithSan(val uci: Uci, val san: String)
 
   final case class ChessWithSan(w: chess.format.Uci.WithSan)
@@ -454,6 +490,15 @@ object Uci {
     case (GameLogic.Go(), strategygames.Drop.Go(drop))           => GoDrop(go.format.Uci(drop))
   }
 
+  def apply(lib: GameLogic, pass: strategygames.Pass) = (lib, pass) match {
+    case (GameLogic.Draughts(), _)                     => sys.error("Pass not implemented for Draughts")
+    case (GameLogic.Chess(), _)                        => sys.error("Pass not implemented for Chess")
+    case (GameLogic.FairySF(), _)                      => sys.error("Pass not implemented for fairysf")
+    case (GameLogic.Samurai(), _)                      => sys.error("Pass not implemented for samurai")
+    case (GameLogic.Togyzkumalak(), _)                 => sys.error("Pass not implemented for togyzkumalak")
+    case (GameLogic.Go(), strategygames.Pass.Go(pass)) => GoPass(go.format.Uci(pass))
+  }
+
   def apply(lib: GameLogic, gf: GameFamily, move: String): Option[Uci] = lib match {
     case GameLogic.Draughts()     => draughts.format.Uci(move).map(wrap)
     case GameLogic.Chess()        => chess.format.Uci(move).map(wrap)
@@ -511,6 +556,7 @@ object Uci {
          case Uci.SamuraiMove(_)      => s"3_${gf.id}_"
          case Uci.TogyzkumalakMove(_) => s"4_${gf.id}_"
          case Uci.GoDrop(_)           => s"5_${gf.id}_"
+         case Uci.GoPass(_)           => s"5_${gf.id}_"
        }
      } else "") + (moves.map(_.piotr) mkString " ")
 

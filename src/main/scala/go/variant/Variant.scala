@@ -120,6 +120,20 @@ abstract class Variant private[variant] (
       }
       .toList
 
+  def validPass(situation: Situation): Pass = {
+    val uciMove       = "pass"
+    val previousMoves = situation.board.uciMoves
+    val newPosition   = situation.board.apiPosition
+      .makeMovesWithPrevious(List(Api.passMove(situation.board.variant)), previousMoves)
+    Pass(
+      situationBefore = situation,
+      after = situation.board.copy(
+        uciMoves = situation.board.uciMoves :+ uciMove,
+        position = newPosition.some
+      )
+    )
+  }
+
   // def move(
   //     situation: Situation,
   //     from: Pos,
@@ -138,6 +152,8 @@ abstract class Variant private[variant] (
         case None       => Validated.invalid(s"$situation cannot perform the drop: $role on $pos")
       }
     else Validated.invalid(s"$this variant cannot drop $situation $role $pos")
+
+  def pass(situation: Situation): Validated[String, Pass] = Validated.valid(validPass(situation))
 
   def possibleDrops(situation: Situation): Option[List[Pos]] =
     if (dropsVariant)

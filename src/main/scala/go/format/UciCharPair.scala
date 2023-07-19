@@ -14,6 +14,7 @@ object UciCharPair {
           toChar(pos),
           dropRole2charMap.getOrElse(role, voidChar)
         )
+      case Uci.Pass()          => stratUciCharPair(toChar(Pos.A1), toChar(Pos.A1))
       case _                   => sys.error(s"Go does not have moves or promotable roles uci: ${uci}")
     }
 

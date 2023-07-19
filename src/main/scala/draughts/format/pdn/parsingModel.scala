@@ -18,8 +18,8 @@ case class Std(
       situation: strategygames.Situation,
       iteratedCapts: Boolean,
       forbiddenUci: Option[List[String]]
-  ): Validated[String, strategygames.MoveOrDrop] =
-    move(situation.toDraughts, iteratedCapts, forbiddenUci).map(m => Left(StratMove.wrap(m)))
+  ): Validated[String, strategygames.Action] =
+    move(situation.toDraughts, iteratedCapts, forbiddenUci).map(m => StratMove.wrap(m))
 
   def move(
       situation: Situation,

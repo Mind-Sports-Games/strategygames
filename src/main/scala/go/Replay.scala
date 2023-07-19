@@ -8,19 +8,31 @@ import strategygames.Player
 import strategygames.format.pgn.San
 import strategygames.go.format.pgn.{ Parser, Reader }
 import strategygames.go.format.{ FEN, Forsyth, Uci }
-import strategygames.{ Drop => StratDrop, MoveOrDrop, Situation => StratSituation }
+import strategygames.{
+  Action => StratAction,
+  Drop => StratDrop,
+  Pass => StratPass,
+  Situation => StratSituation
+}
 
-case class Replay(setup: Game, moves: List[Drop], state: Game) {
+case class Replay(setup: Game, moves: List[Action], state: Game) {
 
   lazy val chronoMoves = moves.reverse
 
-  def addMove(drop: Drop) =
-    copy(
-      moves = drop.applyVariantEffect :: moves,
-      state = state.applyDrop(drop)
-    )
+  def addMove(action: Action) = action match {
+    case d: Drop =>
+      copy(
+        moves = d.applyVariantEffect :: moves,
+        state = state.applyDrop(d)
+      )
+    case p: Pass =>
+      copy(
+        moves = p :: moves,
+        state = state.applyPass(p)
+      )
+  }
 
-  def moveAtPly(ply: Int): Option[Drop] =
+  def moveAtPly(ply: Int): Option[Action] =
     chronoMoves lift (ply - 1 - setup.startedAtTurn)
 }
 
@@ -44,9 +56,10 @@ object Replay {
 
   // TODO: because this is primarily used in a Validation context, we should be able to
   //       return something that's runtime safe as well.
-  def goDrop(moveOrDrop: MoveOrDrop) = moveOrDrop match {
-    case Right(StratDrop.Go(d)) => d
-    case _                      => sys.error("Invalid go drop")
+  def goAction(action: StratAction) = action match {
+    case StratDrop.Go(d) => d
+    case StratPass.Go(p) => p
+    case _               => sys.error("Invalid go action")
   }
 
   def replayDrop(
@@ -70,11 +83,27 @@ object Replay {
     )
   }
 
+  def replayPass(
+      before: Game,
+      apiPosition: Api.Position,
+      uciMoves: List[String]
+  ): Pass = {
+    Pass(
+      situationBefore = before.situation,
+      after = before.situation.board.copy(
+        pieces = apiPosition.pieceMap,
+        uciMoves = uciMoves,
+        pocketData = apiPosition.pocketData,
+        position = apiPosition.some
+      )
+    )
+  }
+
   private def gameMoveWhileValid__impl(
       moveStrs: Seq[String],
       initialFen: FEN,
       variant: strategygames.go.variant.Variant
-  ): (Game, List[(Game, Drop)], Option[String]) = {
+  ): (Game, List[(Game, Action)], Option[String]) = {
 
     val init     = makeGame(variant, initialFen.some)
     var state    = init
@@ -88,7 +117,7 @@ object Replay {
         role: Option[Role],
         dest: Option[Pos],
         prevStr: Option[String]
-    ): (Game, Drop) =
+    ): (Game, Action) =
       (role, dest, prevStr) match {
         case (Some(role), Some(dest), None) => {
           val uciDrop = s"${role.forsyth}@${dest.key}"
@@ -104,7 +133,14 @@ object Replay {
         }
       }
 
-    def parseDropWithPrevious(moveStr: String, prevStr: Option[String]): (Game, Drop) =
+    def replayPassFromUci: (Game, Action) = {
+      uciMoves = uciMoves :+ "pass"
+      val pass = replayPass(state, getApiPosition(uciMoves), uciMoves)
+      state = state.applyPass(pass)
+      (state, pass)
+    }
+
+    def parseActionWithPrevious(moveStr: String, prevStr: Option[String]): (Game, Action) =
       moveStr match {
         case Uci.Drop.dropR(role, dest) =>
           replayDropFromUci(
@@ -112,14 +148,15 @@ object Replay {
             Pos.fromKey(dest),
             prevStr
           )
+        case Uci.Pass.passR()           => replayPassFromUci
         case moveStr: String            => sys.error(s"Invalid drop for replay: $moveStr")
       }
 
-    def parseDrop(moveStr: String): (Game, Drop) =
-      parseDropWithPrevious(moveStr, None)
+    def parseAction(moveStr: String): (Game, Action) =
+      parseActionWithPrevious(moveStr, None)
 
-    def moves: List[(Game, Drop)] =
-      Parser.pgnMovesToUciMoves(moveStrs).map(parseDrop)
+    def moves: List[(Game, Action)] =
+      Parser.pgnMovesToUciMoves(moveStrs).map(parseAction)
 
     (init, moves, errors match { case "" => None; case _ => errors.some })
   }
@@ -146,8 +183,8 @@ object Replay {
     sans match {
       case Nil         => valid(Nil)
       case san :: rest =>
-        san(StratSituation.wrap(sit)).map(goDrop) flatMap { drop =>
-          val after = Situation(drop.finalizeAfter, !sit.player)
+        san(StratSituation.wrap(sit)).map(goAction) flatMap { action =>
+          val after = Situation(action.finalizeAfter, !sit.player)
           recursiveSituations(after, rest) map { after :: _ }
         }
     }
@@ -159,8 +196,8 @@ object Replay {
     ucis match {
       case Nil         => valid(Nil)
       case uci :: rest =>
-        uci(sit) andThen { drop =>
-          val after = Situation(drop.finalizeAfter, !sit.player)
+        uci(sit) andThen { action =>
+          val after = Situation(action.finalizeAfter, !sit.player)
           recursiveSituationsFromUci(after, rest) map { after :: _ }
         }
     }
@@ -169,8 +206,8 @@ object Replay {
     ucis match {
       case Nil         => valid(replay)
       case uci :: rest =>
-        uci(replay.state.situation) andThen { drop =>
-          recursiveReplayFromUci(replay addMove drop, rest)
+        uci(replay.state.situation) andThen { action =>
+          recursiveReplayFromUci(replay addMove action, rest)
         }
     }
 
@@ -238,8 +275,8 @@ object Replay {
         sans match {
           case Nil         => invalid(s"Can't find $atFenTruncated, reached ply $ply")
           case san :: rest =>
-            san(StratSituation.wrap(sit)).map(goDrop) flatMap { drop =>
-              val after = drop.finalizeAfter
+            san(StratSituation.wrap(sit)).map(goAction) flatMap { action =>
+              val after = action.finalizeAfter
               val fen   =
                 Forsyth >> Game(Situation(after, Player.fromPly(ply, variant.plysPerTurn)), turns = ply)
               if (compareFen(fen)) Validated.valid(ply)

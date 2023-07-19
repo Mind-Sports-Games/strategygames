@@ -19,8 +19,8 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def dropsAsDrops: List[Drop]
 
-  def actions: List[MoveOrDrop] =
-    moves.values.flatten.map(Left(_)).toList ::: dropsAsDrops.map(Right(_)).toList
+  def actions: List[Action] =
+    moves.values.flatten.toList ::: dropsAsDrops
 
   def history = board.history
 
@@ -60,6 +60,8 @@ sealed abstract class Situation(val board: Board, val player: Player) {
   def move(uci: Uci.Move): Validated[String, Move]
 
   def drop(role: Role, pos: Pos): Validated[String, Drop]
+
+  def pass: Validated[String, Pass]
 
   def withVariant(variant: Variant): Situation
 
@@ -156,6 +158,8 @@ object Situation {
         s.drop(role, pos).toEither.map(d => Drop.Chess(d)).toValidated
       case _                                      => sys.error("Not passed Chess objects")
     }
+
+    def pass: Validated[String, Pass] = sys.error("Can't do a Pass for chess")
 
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.Chess(variant) => Chess(s.withVariant(variant))
@@ -265,6 +269,8 @@ object Situation {
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
       sys.error("Can't do a Drop for draughts")
 
+    def pass: Validated[String, Pass] = sys.error("Can't do a Pass for draughts")
+
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.Draughts(variant) => Draughts(s.withVariant(variant))
       case _                         => sys.error("Not passed Draughts objects")
@@ -355,6 +361,8 @@ object Situation {
       case _                                          => sys.error("Not passed FairySF objects")
     }
 
+    def pass: Validated[String, Pass] = sys.error("Can't do a Pass for fairysf")
+
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.FairySF(variant) => FairySF(s.withVariant(variant))
       case _                        => sys.error("Not passed FairySF objects")
@@ -415,6 +423,8 @@ object Situation {
 
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
       sys.error("Can't do a Drop for samurai")
+
+    def pass: Validated[String, Pass] = sys.error("Can't do a Pass for samurai")
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -499,6 +509,8 @@ object Situation {
 
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
       sys.error("Can't do a Drop for togyzkumalak")
+
+    def pass: Validated[String, Pass] = sys.error("Can't do a Pass for togyzkumalak")
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -599,6 +611,8 @@ object Situation {
         s.drop(role, pos).toEither.map(d => Drop.Go(d)).toValidated
       case _                                => sys.error("Not passed Go objects")
     }
+
+    def pass: Validated[String, Pass] = s.pass().toEither.map(p => Pass.Go(p)).toValidated
 
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.Go(variant) => Go(s.withVariant(variant))

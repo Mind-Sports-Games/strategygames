@@ -64,7 +64,7 @@ object Reader {
       case (Result.Complete(replay), san) =>
         san(StratSituation.wrap(replay.state.situation)).fold(
           err => Result.Incomplete(replay, err),
-          move => Result.Complete(replay addMove StratMove.toGo(move))
+          action => Result.Complete(replay addMove action.toGo)
         )
       case (r: Result.Incomplete, _)      => r
     }
@@ -92,6 +92,19 @@ object Reader {
                 )
               case _                        => Result.Incomplete(replay, s"Error making replay with drop: ${m}")
             }
+          case Uci.Pass.passR()           =>
+            Result.Complete(
+              replay.addMove(
+                Replay.replayPass(
+                  replay.state,
+                  replay.state.board.apiPosition
+                    .makeMoves(
+                      List(m).map(uciMove => Api.uciToMove(uciMove, replay.state.board.variant))
+                    ),
+                  replay.state.board.uciMoves :+ m
+                )
+              )
+            )
           case _                          => Result.Incomplete(replay, s"Error making replay with uci move: ${m}")
         }
       case (r: Result.Incomplete, _)    => r
