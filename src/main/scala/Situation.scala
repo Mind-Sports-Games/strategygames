@@ -19,8 +19,10 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def dropsAsDrops: List[Drop]
 
+  def passes: List[Pass]
+
   def actions: List[Action] =
-    moves.values.flatten.toList ::: dropsAsDrops
+    moves.values.flatten.toList ::: dropsAsDrops ::: passes
 
   def history = board.history
 
@@ -130,6 +132,8 @@ object Situation {
         }
         .toList
 
+    def passes: List[Pass] = List.empty
+
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
@@ -207,6 +211,8 @@ object Situation {
     def dropsByRole: Option[Map[Role, List[Pos]]] = None
 
     def dropsAsDrops: List[Drop] = List.empty
+
+    def passes: List[Pass] = List.empty
 
     // possibly need to do something for this
     def opponentHasInsufficientMaterial: Boolean = false
@@ -332,6 +338,8 @@ object Situation {
 
     def dropsAsDrops: List[Drop] = s.dropsAsDrops.map(Drop.FairySF)
 
+    def passes: List[Pass] = List.empty
+
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
@@ -421,6 +429,8 @@ object Situation {
 
     def dropsAsDrops: List[Drop] = List.empty
 
+    def passes: List[Pass] = List.empty
+
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
       sys.error("Can't do a Drop for samurai")
 
@@ -507,6 +517,8 @@ object Situation {
 
     def dropsAsDrops: List[Drop] = List.empty
 
+    def passes: List[Pass] = List.empty
+
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
       sys.error("Can't do a Drop for togyzkumalak")
 
@@ -589,6 +601,8 @@ object Situation {
     })
 
     def dropsAsDrops: List[Drop] = s.dropsAsDrops.map(Drop.Go)
+
+    def passes: List[Pass] = pass.fold[List[Pass]](_ => List.empty, p => List(p))
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
