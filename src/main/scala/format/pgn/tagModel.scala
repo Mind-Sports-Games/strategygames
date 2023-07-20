@@ -72,6 +72,11 @@ case class Tags(value: List[Tag]) extends AnyVal {
       strategygames.togyzkumalak.variant.Variant byName _
     }
 
+  def goVariant: Option[strategygames.go.variant.Variant] =
+    apply(_.Variant).map(_.toLowerCase).flatMap {
+      strategygames.go.variant.Variant byName _
+    }
+
   // TODO: this will need to be tested. We'll want to look at the _actual_ values that
   //       come in via these tags and ensure that the order we look at them is appropriate
   //       what a mess this function is.
@@ -87,7 +92,11 @@ case class Tags(value: List[Tag]) extends AnyVal {
               samuraiVariant
                 .map(strategygames.variant.Variant.Samurai)
                 .orElse(
-                  togyzkumalakVariant.map(strategygames.variant.Variant.Togyzkumalak)
+                  togyzkumalakVariant
+                    .map(strategygames.variant.Variant.Togyzkumalak)
+                    .orElse(
+                      goVariant.map(strategygames.variant.Variant.Go)
+                    )
                 )
             )
         )
@@ -106,6 +115,7 @@ case class Tags(value: List[Tag]) extends AnyVal {
   def samuraiFen: Option[samurai.format.FEN]           = apply(_.FEN).map(strategygames.samurai.format.FEN.apply)
   def togyzkumalakFen: Option[togyzkumalak.format.FEN] =
     apply(_.FEN).map(strategygames.togyzkumalak.format.FEN.apply)
+  def goFen: Option[go.format.FEN]                     = apply(_.FEN).map(strategygames.go.format.FEN.apply)
 
   def fen: Option[format.FEN] =
     variant match {
@@ -113,6 +123,7 @@ case class Tags(value: List[Tag]) extends AnyVal {
       case Some(strategygames.variant.Variant.FairySF(_))      => fairysfFen.map(format.FEN.FairySF)
       case Some(strategygames.variant.Variant.Samurai(_))      => samuraiFen.map(format.FEN.Samurai)
       case Some(strategygames.variant.Variant.Togyzkumalak(_)) => togyzkumalakFen.map(format.FEN.Togyzkumalak)
+      case Some(strategygames.variant.Variant.Go(_))           => goFen.map(format.FEN.Go)
       case Some(strategygames.variant.Variant.Chess(_)) | None => chessFen.map(format.FEN.Chess)
     }
 

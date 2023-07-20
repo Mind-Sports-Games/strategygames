@@ -64,11 +64,20 @@ object History {
         score = h.score
       )
 
+  final case class Go(h: go.History)
+      extends History(
+        lastMove = h.lastMove.map(Uci.wrap),
+        positionHashes = h.positionHashes,
+        halfMoveClock = h.halfMoveClock,
+        score = h.score
+      )
+
   implicit def chessHistory(h: chess.History)               = Chess(h)
   implicit def draughtsHistory(h: draughts.DraughtsHistory) = Draughts(h)
   implicit def fairysfHistory(h: fairysf.History)           = FairySF(h)
   implicit def samuraiHistory(h: samurai.History)           = Samurai(h)
   implicit def togyzkumalakHistory(h: togyzkumalak.History) = Togyzkumalak(h)
+  implicit def goHistory(h: go.History)                     = Go(h)
 
   // lila
   def apply(
@@ -127,6 +136,15 @@ object History {
       Togyzkumalak(
         togyzkumalak.History(
           lastMove = lastMove.map(lm => lm.toTogyzkumalak),
+          positionHashes = positionHashes,
+          halfMoveClock = halfMoveClock,
+          score = score
+        )
+      )
+    case GameLogic.Go()           =>
+      Go(
+        go.History(
+          lastMove = lastMove.map(lm => lm.toGo),
           positionHashes = positionHashes,
           halfMoveClock = halfMoveClock,
           score = score

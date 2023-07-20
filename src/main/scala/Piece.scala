@@ -67,6 +67,16 @@ object Piece {
 
   }
 
+  final case class Go(p: go.Piece)
+      extends Piece(
+        p.player,
+        Role.GoRole(p.role)
+      ) {
+
+    def forsyth: Char = p.forsyth
+
+  }
+
   def apply(lib: GameLogic, player: Player, role: Role): Piece = (lib, role) match {
     case (GameLogic.Draughts(), Role.DraughtsRole(role))         => Draughts(draughts.Piece(player, role))
     case (GameLogic.Chess(), Role.ChessRole(role))               => Chess(chess.Piece(player, role))
@@ -74,6 +84,7 @@ object Piece {
     case (GameLogic.Samurai(), Role.SamuraiRole(role))           => Samurai(samurai.Piece(player, role))
     case (GameLogic.Togyzkumalak(), Role.TogyzkumalakRole(role)) =>
       Togyzkumalak(togyzkumalak.Piece(player, role))
+    case (GameLogic.Go(), Role.GoRole(role))                     => Go(go.Piece(player, role))
     case _                                                       => sys.error("Mismatched gamelogic types 2")
   }
 
@@ -83,6 +94,7 @@ object Piece {
     case (GameLogic.FairySF())      => fairysf.Piece.fromChar(gf, c).map(FairySF)
     case (GameLogic.Samurai())      => sys.error("cannot get piece from Char for samurai anymore")
     case (GameLogic.Togyzkumalak()) => sys.error("cannot get piece from Char for togyzkumalak anymore")
+    case (GameLogic.Go())           => sys.error("cannot get piece from Char for go anymore")
   }
 
   def chessPieceMap(pieceMap: PieceMap): chess.PieceMap = pieceMap.map {
@@ -103,6 +115,10 @@ object Piece {
 
   def togyzkumalakPieceMap(pieceMap: PieceMap): togyzkumalak.PieceMap = pieceMap.map {
     case (Pos.Togyzkumalak(pos), (Togyzkumalak(piece), count)) => (pos, (piece, count))
+  }
+
+  def goPieceMap(pieceMap: PieceMap): go.PieceMap = pieceMap.map { case (Pos.Go(pos), (Go(piece), _)) =>
+    (pos, piece)
   }
 
   def pieceMapForChess(pieces: strategygames.chess.PieceMap): PieceMap = pieces.map { case (pos, piece) =>
