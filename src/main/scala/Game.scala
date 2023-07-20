@@ -185,11 +185,6 @@ object Game {
       case _                                  => sys.error("Not passed Chess objects")
     }
 
-    def apply(move: Move): Game = move match {
-      case (Move.Chess(move)) => Chess(g.apply(move))
-      case _                  => sys.error("Not passed Chess objects")
-    }
-
     def apply(action: Action): Game =
       action match {
         case (Move.Chess(move)) => Chess(g.apply(move))
@@ -296,11 +291,6 @@ object Game {
       case _ => sys.error("Not passed Draughts objects")
     }
 
-    def apply(move: Move): Game = move match {
-      case (Move.Draughts(move)) => Draughts(g.apply(move))
-      case _                     => sys.error("Not passed Draughts objects")
-    }
-
     def apply(action: Action): Game =
       action match {
         case (Move.Draughts(move)) => Draughts(g.apply(move))
@@ -373,11 +363,6 @@ object Game {
           .map(t => (FairySF(t._1), Move.FairySF(t._2)))
           .toValidated
       case _                                      => sys.error("Not passed FairySF objects")
-    }
-
-    private def apply(move: Move): Game = move match {
-      case (Move.FairySF(move)) => FairySF(g.apply(move))
-      case _                    => sys.error("Not passed FairySF objects")
     }
 
     def apply(action: Action): Game =
@@ -457,11 +442,6 @@ object Game {
       case _                                      => sys.error("Not passed Samurai objects")
     }
 
-    private def apply(move: Move): Game = move match {
-      case (Move.Samurai(move)) => Samurai(g.apply(move))
-      case _                    => sys.error("Not passed Samurai objects")
-    }
-
     def apply(action: Action): Game =
       action match {
         case (Move.Samurai(move)) => Samurai(g.apply(move))
@@ -531,11 +511,6 @@ object Game {
       case _                                                => sys.error("Not passed Togyzkumalak objects")
     }
 
-    private def apply(move: Move): Game = move match {
-      case (Move.Togyzkumalak(move)) => Togyzkumalak(g.apply(move))
-      case _                         => sys.error("Not passed Togyzkumalak objects")
-    }
-
     def apply(action: Action): Game =
       action match {
         case (Move.Togyzkumalak(move)) => Togyzkumalak(g.apply(move))
@@ -597,16 +572,6 @@ object Game {
         captures: Option[List[Pos]] = None,
         partialCaptures: Boolean = false
     ): Validated[String, (Game, Move)] = sys.error("Can't move in Go")
-
-    // private def apply(move: Move): Game = move match {
-    //   case (Move.Go(move)) => Go(g.apply(move))
-    //   case _               => sys.error("Not passed Go objects")
-    // }
-
-    def apply(drop: Drop): Game = drop match {
-      case (Drop.Go(drop)) => Go(g.apply(drop))
-      case _               => sys.error("Not passed Go objects")
-    }
 
     def apply(action: Action): Game =
       action match {

@@ -51,4 +51,37 @@ object Action {
     case d: go.Drop => Drop.Go(d)
     case p: go.Pass => Pass.Go(p)
   }
+
+  def toChess(action: Action): chess.Action = action match {
+    case Move.Chess(m) => m
+    case Drop.Chess(d) => d
+    case _             => sys.error("Expecting a chess action e.g. move or drop")
+  }
+
+  def toDraughts(action: Action): draughts.Move = action match {
+    case Move.Draughts(m) => m
+    case _                => sys.error("Expecting a draughts action e.g. move")
+  }
+
+  def toFairySF(action: Action): fairysf.Action = action match {
+    case Move.FairySF(m) => m
+    case Drop.FairySF(d) => d
+    case _               => sys.error("Expecting a fairysf action e.g. move or drop")
+  }
+
+  def toSamurai(action: Action): samurai.Move = action match {
+    case Move.Samurai(m) => m
+    case _               => sys.error("Expecting a samurai action e.g. move")
+  }
+
+  def toTogyzkumalak(action: Action): togyzkumalak.Move = action match {
+    case Move.Togyzkumalak(m) => m
+    case _                    => sys.error("Expecting a togyzkumalak action e.g. move")
+  }
+
+  def toGo(action: Action): go.Action = action match {
+    case Drop.Go(d) => d
+    case Pass.Go(p) => p
+    case _          => sys.error("Expecting a go action e.g. drop or pass")
+  }
 }

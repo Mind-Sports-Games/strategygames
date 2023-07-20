@@ -106,20 +106,4 @@ object Drop {
   def wrap(d: fairysf.Drop): Drop = Drop.FairySF(d)
   def wrap(d: go.Drop): Drop      = Drop.Go(d)
 
-  def toChess(action: Action)        = action match {
-    case Chess(d) => d
-    case _        => sys.error("Expecting chess drop action")
-  }
-  def toDraughts(action: Action)     = sys.error("Draughts has no drop action")
-  def toFairySF(action: Action)      = action match {
-    case FairySF(d) => d
-    case _          => sys.error("Expecting fairysf drop action")
-  }
-  def toSamurai(action: Action)      = sys.error("samurai has no drop action")
-  def toTogyzkumalak(action: Action) = sys.error("Togy has no drop action")
-  def toGo(action: Action)           = action match {
-    case Go(d) => d
-    case _     => sys.error("Expecting go drop action")
-  }
-
 }

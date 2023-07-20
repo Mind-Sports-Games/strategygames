@@ -31,6 +31,7 @@ object Api {
   abstract class Position {
     val variant: Variant
 
+    // todo rename moves to actions to be consistent
     def makeMoves(movesList: List[Int]): Position
     def makeMovesWithPrevious(movesList: List[Int], previousMoves: List[String]): Position
 
@@ -49,7 +50,7 @@ object Api {
     val gameScore: Int
     val p1Score: Double
     val p2Score: Double
-    val legalMoves: Array[Int]
+    val legalDrops: Array[Int]
     val legalActions: Array[Int]
     val playerTurn: Int // 1 for South (P1/black) -1 for North (P2/white)
     def fenString: String
@@ -61,9 +62,7 @@ object Api {
       fromFen: Option[FEN] = None,
       komi: Double = 6.5
   ) extends Position {
-    // TODO: yes, this is an abuse of scala. We could get an
-    //       exception here, but I'm not sure how to work around that
-    //       at the moment
+
     val gameSize: Int    = position.toBoard().gameSize()
     val variant: Variant = gameSize match {
       case 9  => strategygames.go.variant.Go9x9
@@ -213,7 +212,7 @@ object Api {
       moves.toArray
     }
 
-    val legalMoves: Array[Int] = {
+    val legalDrops: Array[Int] = {
       legalActions.filter(m => m != passMove)
     }
 
@@ -231,10 +230,8 @@ object Api {
 
   def positionFromVariant(variant: Variant): Position =
     variant.key match {
-      case "go9x9"   => position(variant)
-      case "go13x13" => position(variant)
-      case "go19x19" => position(variant)
-      case _         => sys.error(s"incorrect variant supplied ${variant}")
+      case "go9x9" | "go13x13" | "go19x19" => position(variant)
+      case _                               => sys.error(s"incorrect variant supplied ${variant}")
     }
 
   def positionFromFen(fenString: String): Position = {

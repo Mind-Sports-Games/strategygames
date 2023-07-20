@@ -37,7 +37,7 @@ object Hash {
   private val polyglotTable    = new ZobristConstants(0)
   private lazy val randomTable = new ZobristConstants(16)
 
-  // for go hashInt is just 1 for stone
+  // go hashInt is just 0 for stone
   private def pieceIndex(piece: Piece) =
     piece.role.hashInt * 2 + piece.player.fold(1, 0)
 
@@ -66,6 +66,7 @@ object Hash {
 
 }
 
+//only actually require 2*361 hashes.
 private object ZobristTables {
   val actorMasks = Array(
     "9d39247e33776d4152b375aa7c0d7bac",

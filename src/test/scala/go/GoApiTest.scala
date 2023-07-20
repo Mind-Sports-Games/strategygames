@@ -32,18 +32,18 @@ class GoApiTest extends Specification with ValidatedMatchers {
     }
   }
 
-  "Go situation legal moves" should {
+  "Go situation legal drops" should {
     val game = Api.position(variant.Go19x19)
-    "19*19 legal moves and a pass" in {
-      game.legalMoves.size must_== 19 * 19 // 0 to 360
+    "19*19 legal drops " in {
+      game.legalDrops.size must_== 19 * 19 // 0 to 360
     }
   }
 
-  "Go situation legal moves" should {
+  "Go situation legal drops" should {
     val game    = Api.position(variant.Go19x19)
     val newGame = game.makeMoves(List(1, 2, 3, 40, 21))
-    "lots legal moves" in {
-      newGame.legalMoves.size must_== 19 * 19 - 5
+    "lots legal drops" in {
+      newGame.legalDrops.size must_== 19 * 19 - 5
     }
   }
 
@@ -215,7 +215,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
     val game    = Api.position(variant.Go19x19)
     val newGame = game.makeMoves(List(2, 59, 20, 39, 22, 41, 40, 21))
     "not allow move to recapture" in {
-      newGame.legalMoves.contains(40) must_== false
+      newGame.legalDrops.contains(40) must_== false
     }
   }
 
@@ -239,8 +239,8 @@ class GoApiTest extends Specification with ValidatedMatchers {
     "fen is 19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S3s14[SSSSSSSSSSssssssssss] b - 10 75 65 2" in {
       fen.value must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S3s14[SSSSSSSSSSssssssssss] b - 10 75 65 2"
     }
-    "360 legal moves" in {
-      pos.legalMoves.size must_== 359
+    "360 legal drops" in {
+      pos.legalDrops.size must_== 359
     }
   }
 
@@ -251,8 +251,8 @@ class GoApiTest extends Specification with ValidatedMatchers {
     "fen is 19/19/19/19/S18/19/19/19/4s14/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 10 75 65 2" in {
       fen.value must_== "19/19/19/19/S18/19/19/19/4s14/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 10 75 65 2"
     }
-    "360 legal moves" in {
-      pos.legalMoves.size must_== 359
+    "360 legal drops" in {
+      pos.legalDrops.size must_== 359
     }
   }
 
@@ -344,7 +344,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
       position.gameEnd must_== false
       position.gameOutcome must_== 1000
       position.gameResult must_== GameResult.Ongoing()
-      position.legalMoves.size must_== 2
+      position.legalDrops.size must_== 2
       position.p1Score must_== 361.0
       position.p2Score must_== 6.5
     }
@@ -359,7 +359,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
       position.gameEnd must_== false
       position.gameOutcome must_== 1000
       position.gameResult must_== GameResult.Ongoing()
-      position.legalMoves.size must_== 28
+      position.legalDrops.size must_== 28
       position.p1Score must_== 323.0
       position.p2Score must_== 44.5
     }
@@ -374,17 +374,17 @@ class GoApiTest extends Specification with ValidatedMatchers {
       position.gameEnd must_== false
       position.gameOutcome must_== 1000
       position.gameResult must_== GameResult.Ongoing()
-      position.legalMoves.size must_== 38
+      position.legalDrops.size must_== 38
       position.p1Score must_== 322.0
       position.p2Score must_== 44.5
     }
   }
 
   // go 9x9 and 13x13 tests for comparison
-  "Go situation legal moves" should {
+  "Go situation legal actions" should {
     val game = Api.position(variant.Go9x9)
-    "9*9 legal moves and a pass" in {
-      game.legalMoves.size must_== 9 * 9 // 0 to 80
+    "9*9 legal drops and a pass" in {
+      game.legalActions.size must_== 9 * 9 + 1 // 0 to 80
     }
   }
 

@@ -51,15 +51,4 @@ object Pass {
 
   def wrap(p: go.Pass): Pass = Pass.Go(p)
 
-  // todo not sure what to set here yet...
-  def toChess(action: Action)        = sys.error("no chess pass action")
-  def toDraughts(action: Action)     = sys.error("no draughts pass action")
-  def toFairySF(action: Action)      = sys.error("no fairysf pass action")
-  def toSamurai(action: Action)      = sys.error("no samurai pass action")
-  def toTogyzkumalak(action: Action) = sys.error("no Togy pass action")
-  def toGo(action: Action)           = action match {
-    case Go(p) => p
-    case _     => sys.error("Expecting go pass action")
-  }
-
 }

@@ -58,7 +58,8 @@ object Pos {
 
     def piotr: Char = p.piotr
 
-    lazy val toInt: Int = (p.file.index << 3) + p.rank.index
+    lazy val toInt: Int =
+      (p.file.index << 3) + p.rank.index // todo where is this used? Should be 4 for fairy boards?
 
     lazy val all: List[Pos] = chess.Pos.all.map(Chess)
 
@@ -94,7 +95,7 @@ object Pos {
 
     def piotr: Char = p.piotr
 
-    lazy val toInt: Int = (p.file.index << 3) + p.rank.index // todo go change this?
+    lazy val toInt: Int = (p.file.index << 5) + p.rank.index // todo where is this used?
 
     lazy val all: List[Pos] = go.Pos.all.map(Go)
 

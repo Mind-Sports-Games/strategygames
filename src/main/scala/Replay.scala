@@ -108,20 +108,20 @@ object Replay {
     }
   }
 
-  def apply(lib: GameLogic, setup: Game, moves: List[Action], state: Game): Replay =
+  def apply(lib: GameLogic, setup: Game, actions: List[Action], state: Game): Replay =
     (lib, setup, state) match {
       case (GameLogic.Draughts(), Game.Draughts(setup), Game.Draughts(state))             =>
-        Draughts(draughts.Replay(setup, moves.map(Move.toDraughts), state))
+        Draughts(draughts.Replay(setup, actions.map(Action.toDraughts), state))
       case (GameLogic.Chess(), Game.Chess(setup), Game.Chess(state))                      =>
-        Chess(chess.Replay(setup, moves.map(Move.toChess), state))
+        Chess(chess.Replay(setup, actions.map(Action.toChess), state))
       case (GameLogic.FairySF(), Game.FairySF(setup), Game.FairySF(state))                =>
-        FairySF(fairysf.Replay(setup, moves.map(Move.toFairySF), state))
+        FairySF(fairysf.Replay(setup, actions.map(Action.toFairySF), state))
       case (GameLogic.Samurai(), Game.Samurai(setup), Game.Samurai(state))                =>
-        Samurai(samurai.Replay(setup, moves.map(Move.toSamurai), state))
+        Samurai(samurai.Replay(setup, actions.map(Action.toSamurai), state))
       case (GameLogic.Togyzkumalak(), Game.Togyzkumalak(setup), Game.Togyzkumalak(state)) =>
-        Togyzkumalak(togyzkumalak.Replay(setup, moves.map(Move.toTogyzkumalak), state))
+        Togyzkumalak(togyzkumalak.Replay(setup, actions.map(Action.toTogyzkumalak), state))
       case (GameLogic.Go(), Game.Go(setup), Game.Go(state))                               =>
-        Go(go.Replay(setup, moves.map(Move.toGo), state))
+        Go(go.Replay(setup, actions.map(Action.toGo), state))
       case _                                                                              => sys.error("Mismatched gamelogic types 5")
     }
 

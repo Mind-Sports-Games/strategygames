@@ -24,13 +24,13 @@ case object Go9x9
 
   override def boardFenFromHandicap(handicap: Int): String = {
     handicap match {
-      case 1 => "9/9/6S2/9/9/9/9/9/9"
-      case 2 => "9/9/2S3S2/9/9/9/9/9/9"
-      case 3 => "9/9/2S3S2/9/9/9/2S6/9/9"
+      case 1 => "9/9/2S6/9/9/9/9/9/9"
+      case 2 => "9/9/6S2/9/9/9/2S6/9/9"
+      case 3 => "9/9/6S2/9/9/9/2S3S2/9/9"
       case 4 => "9/9/2S3S2/9/9/9/2S3S2/9/9"
       case 5 => "9/9/2S3S2/9/4S4/9/2S3S2/9/9"
-      case 6 => "9/9/2S1S1S2/9/4S4/9/2S3S2/9/9"
-      case 7 => "9/9/2S1S1S2/9/2S1S4/9/2S3S2/9/9"
+      case 6 => "9/9/2S3S2/9/2S3S2/9/2S3S2/9/9"
+      case 7 => "9/9/2S3S2/9/2S1S1S2/9/2S3S2/9/9"
       case 8 => "9/9/2S1S1S2/9/2S1S4/9/2S1S1S2/9/9"
       case 9 => "9/9/2S1S1S2/9/2S1S1S2/9/2S1S1S2/9/9"
       case _ => "9/9/9/9/9/9/9/9/9"
@@ -38,7 +38,7 @@ case object Go9x9
   }
 
   override def specialEnd(situation: Situation) =
-    (situation.board.apiPosition.legalMoves.size == 0) ||
+    (situation.board.apiPosition.legalActions.size == 0) ||
       (situation.board.apiPosition.gameEnd)
 
   override def specialDraw(situation: Situation) =

@@ -295,26 +295,4 @@ object Move {
   def wrap(m: samurai.Move): Move      = Move.Samurai(m)
   def wrap(m: togyzkumalak.Move): Move = Move.Togyzkumalak(m)
 
-  def toChess(action: Action)        = action match {
-    case Chess(m) => m
-    case _        => sys.error("Expecting chess move action")
-  }
-  def toDraughts(action: Action)     = action match {
-    case Draughts(m) => m
-    case _           => sys.error("Expecting draughts move action")
-  }
-  def toFairySF(action: Action)      = action match {
-    case FairySF(m) => m
-    case _          => sys.error("Expecting fairysf move action")
-  }
-  def toSamurai(action: Action)      = action match {
-    case Samurai(m) => m
-    case _          => sys.error("Expecting samurai move action")
-  }
-  def toTogyzkumalak(action: Action) = action match {
-    case Togyzkumalak(m) => m
-    case _               => sys.error("Expecting Togy move action")
-  }
-  def toGo(action: Action)           = sys.error("No go move action")
-
 }

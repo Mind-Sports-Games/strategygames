@@ -81,7 +81,7 @@ abstract class Variant private[variant] (
   def validMoves(situation: Situation) = None // just remove this?
 
   def validDrops(situation: Situation): List[Drop] =
-    situation.board.apiPosition.legalMoves
+    situation.board.apiPosition.legalDrops
       .map { dest =>
         (
           dest,
@@ -220,9 +220,9 @@ abstract class Variant private[variant] (
 object Variant {
 
   lazy val all: List[Variant] = List(
-    Go9x9,
+    Go19x19,
     Go13x13,
-    Go19x19
+    Go9x9
   )
   val byId                    = all map { v =>
     (v.id, v)

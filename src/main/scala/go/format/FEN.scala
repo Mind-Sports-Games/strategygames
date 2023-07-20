@@ -7,7 +7,7 @@ final case class FEN(value: String) extends AnyVal {
 
   override def toString = value
 
-  def board: String = removePockets(value.split(' ').take(1).mkString(""))
+  def board: String = removePockets(value.takeWhile(_ != ' '))
 
   def player: Option[Player] =
     value.split(' ').lift(1) flatMap (_.headOption) flatMap Player.apply
@@ -28,19 +28,19 @@ final case class FEN(value: String) extends AnyVal {
   def handicap: Option[Int] = if (fullMove == Some(1)) Some(board.count(_ == 'S')) else None
 
   def engineFen: String =
-    removePockets(value.split(' ').take(3).mkString(" "))
-      .replace("S", "X")
-      .replace("s", "O")
-      .replace("19", "199") // goengine cant handle double digits
-      .replace("18", "189") // todo does this mess up ko?
-      .replace("17", "179")
-      .replace("16", "169")
-      .replace("15", "159")
-      .replace("14", "149")
-      .replace("13", "139")
-      .replace("12", "129")
-      .replace("11", "119")
-      .replace("10", "109")
+    s"""${board
+        .replace("S", "X")
+        .replace("s", "O")
+        .replace("19", "199") // goengine cant handle double digits
+        .replace("18", "189")
+        .replace("17", "179")
+        .replace("16", "169")
+        .replace("15", "159")
+        .replace("14", "149")
+        .replace("13", "139")
+        .replace("12", "129")
+        .replace("11", "119")
+        .replace("10", "109")} ${value.split(' ').drop(1).take(2).mkString(" ")}"""
 
   private def removePockets(fen: String): String = {
     val start = fen.indexOf("[", 0)

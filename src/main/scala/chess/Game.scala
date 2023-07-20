@@ -64,11 +64,7 @@ case class Game(
 
   def apply(uci: Uci.Move): Validated[String, (Game, Move)] = apply(uci.orig, uci.dest, uci.promotion)
   def apply(uci: Uci.Drop): Validated[String, (Game, Drop)] = drop(uci.role, uci.pos)
-  def apply(uci: Uci): Validated[String, (Game, Action)]    =
-    uci match {
-      case u: Uci.Move => apply(u) map { case (g, m) => g -> m }
-      case u: Uci.Drop => apply(u) map { case (g, d) => g -> d }
-    }
+  def apply(uci: Uci): Validated[String, (Game, Action)]    = apply(uci) map { case (g, a) => g -> a }
 
   def player = situation.player
 

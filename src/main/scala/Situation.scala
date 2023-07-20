@@ -272,6 +272,7 @@ object Situation {
       case _                     => sys.error("Not passed Draughts objects")
     }
 
+    // todo convert these to validated error message?
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
       sys.error("Can't do a Drop for draughts")
 

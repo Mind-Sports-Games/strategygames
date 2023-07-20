@@ -118,7 +118,7 @@ object FEN {
 
     def player: Option[Player] = f.player
 
-    def ply: Option[Int] = sys.error("There is no ply in chess")
+    def ply: Option[Int] = sys.error("There is no ply in samurai")
 
     def initial: Boolean = f.initial
 
@@ -142,7 +142,7 @@ object FEN {
 
     def player: Option[Player] = f.player
 
-    def ply: Option[Int] = sys.error("There is no ply in chess")
+    def ply: Option[Int] = sys.error("There is no ply in togy")
 
     def initial: Boolean = f.initial
 
@@ -162,11 +162,11 @@ object FEN {
     def toTogyzkumalak = sys.error("Can't convert go to togyzkumalak")
     def toGo           = f
 
-    def fullMove: Option[Int] = sys.error("There is no fullMove in togyzkumalak")
+    def fullMove: Option[Int] = sys.error("There is no fullMove in go")
 
     def player: Option[Player] = f.player
 
-    def ply: Option[Int] = sys.error("There is no ply in chess")
+    def ply: Option[Int] = sys.error("There is no ply in go")
 
     def initial: Boolean = f.initial
 
