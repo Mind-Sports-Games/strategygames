@@ -8,19 +8,31 @@ import strategygames.Player
 import strategygames.format.pgn.San
 import strategygames.fairysf.format.pgn.{ Parser, Reader }
 import strategygames.fairysf.format.{ FEN, Forsyth, Uci }
-import strategygames.{ Situation => StratSituation }
+import strategygames.{
+  Action => StratAction,
+  Drop => StratDrop,
+  Move => StratMove,
+  Situation => StratSituation
+}
 
-case class Replay(setup: Game, moves: List[MoveOrDrop], state: Game) {
+case class Replay(setup: Game, moves: List[Action], state: Game) {
 
   lazy val chronoMoves = moves.reverse
 
-  def addMove(moveOrDrop: MoveOrDrop) =
-    copy(
-      moves = moveOrDrop.left.map(_.applyVariantEffect) :: moves,
-      state = moveOrDrop.fold(state.apply, state.applyDrop)
-    )
+  def addMove(action: Action) = action match {
+    case m: Move =>
+      copy(
+        moves = m.applyVariantEffect :: moves,
+        state = state.apply(m)
+      )
+    case d: Drop =>
+      copy(
+        moves = d :: moves,
+        state = state.applyDrop(d)
+      )
+  }
 
-  def moveAtPly(ply: Int): Option[MoveOrDrop] =
+  def moveAtPly(ply: Int): Option[Action] =
     chronoMoves lift (ply - 1 - setup.startedAtTurn)
 }
 
@@ -40,6 +52,12 @@ object Replay {
       case None      => Validated.valid(Reader.Result.Complete(new Replay(init, moves.reverse.map(_._2), game)))
       case Some(msg) => Validated.invalid(msg)
     }
+  }
+
+  def fairysfAction(action: StratAction) = action match {
+    case StratMove.FairySF(m) => m
+    case StratDrop.FairySF(d) => d
+    case _                    => sys.error("Invalid fairysf action")
   }
 
   def replayMove(
@@ -126,7 +144,7 @@ object Replay {
       moveStrs: Seq[String],
       initialFen: FEN,
       variant: strategygames.fairysf.variant.Variant
-  ): (Game, List[(Game, MoveOrDrop)], Option[String]) = {
+  ): (Game, List[(Game, Action)], Option[String]) = {
 
     val init     = makeGame(variant, initialFen.some)
     var state    = init
@@ -135,7 +153,7 @@ object Replay {
 
     def getApiPosition(uciMove: String) = state.board.apiPosition.makeMoves(List(uciMove))
 
-    def replayMoveFromUci(orig: Option[Pos], dest: Option[Pos], promotion: String): (Game, MoveOrDrop) =
+    def replayMoveFromUci(orig: Option[Pos], dest: Option[Pos], promotion: String): (Game, Action) =
       (orig, dest) match {
         case (Some(orig), Some(dest)) => {
           if (variant.switchPlayerAfterMove) {
@@ -143,12 +161,12 @@ object Replay {
             uciMoves = uciMoves :+ uciMove
             val move    = replayMove(state, orig, dest, promotion, getApiPosition(uciMove), uciMoves)
             state = state.apply(move)
-            (state, move.asLeft)
+            (state, move)
           } else {
             // Amazons
             val move = replayMoveWithoutAPI(state, state.situation.board.pieces(orig), orig, dest, promotion)
             state = state.apply(move)
-            (state, move.asLeft)
+            (state, move)
           }
         }
         case (orig, dest)             => {
@@ -162,14 +180,14 @@ object Replay {
         role: Option[Role],
         dest: Option[Pos],
         prevStr: Option[String]
-    ): (Game, MoveOrDrop) =
+    ): (Game, Action) =
       (role, dest, prevStr) match {
         case (Some(role), Some(dest), None)                                        => {
           val uciDrop = s"${role.forsyth}@${dest.key}"
           uciMoves = uciMoves :+ uciDrop
           val drop    = replayDrop(state, role, dest, getApiPosition(uciDrop), uciMoves)
           state = state.applyDrop(drop)
-          (state, drop.asRight)
+          (state, drop)
         }
         // Amazons
         case (Some(role), Some(dest), Some(Uci.Move.moveR(prevOrig, prevDest, _))) => {
@@ -177,7 +195,7 @@ object Replay {
           uciMoves = uciMoves :+ uciMove
           val drop    = replayDrop(state, role, dest, getApiPosition(uciMove), uciMoves)
           state = state.applyDrop(drop)
-          (state, drop.asRight)
+          (state, drop)
         }
         case (role, dest, _)                                                       => {
           val uciDrop = s"${role}@${dest}"
@@ -186,7 +204,7 @@ object Replay {
         }
       }
 
-    def parseMoveOrDropWithPrevious(moveStr: String, prevStr: Option[String]): (Game, MoveOrDrop) =
+    def parseActionWithPrevious(moveStr: String, prevStr: Option[String]): (Game, Action) =
       moveStr match {
         case Uci.Move.moveR(orig, dest, promotion) =>
           replayMoveFromUci(
@@ -200,23 +218,23 @@ object Replay {
             Pos.fromKey(dest),
             prevStr
           )
-        case moveStr: String                       => sys.error(s"Invalid moveordrop for replay: $moveStr")
+        case moveStr: String                       => sys.error(s"Invalid action for replay: $moveStr")
       }
 
-    def parseMoveOrDrop(moveStr: String): (Game, MoveOrDrop) =
-      parseMoveOrDropWithPrevious(moveStr, None)
+    def parseAction(moveStr: String): (Game, Action) =
+      parseActionWithPrevious(moveStr, None)
 
-    def moves: List[(Game, MoveOrDrop)] =
+    def moves: List[(Game, Action)] =
       if (!variant.switchPlayerAfterMove) {
         // Amazons. Don't want doubleMoveFormat from Parser, so dont ask for it
         val moves       = Parser.pgnMovesToUciMoves(moveStrs)
         val firstMove   = moves.headOption.toList
         val pairedMoves = if (moves == firstMove) List() else moves.sliding(2)
-        (firstMove.map(parseMoveOrDrop)) ::: pairedMoves.map { case List(prev, move) =>
-          parseMoveOrDropWithPrevious(move, Some(prev))
+        (firstMove.map(parseAction)) ::: pairedMoves.map { case List(prev, move) =>
+          parseActionWithPrevious(move, Some(prev))
         }.toList
       } else {
-        Parser.pgnMovesToUciMoves(moveStrs).map(parseMoveOrDrop)
+        Parser.pgnMovesToUciMoves(moveStrs).map(parseAction)
       }
 
     (init, moves, errors match { case "" => None; case _ => errors.some })
@@ -232,9 +250,9 @@ object Replay {
       game,
       moves.map { v =>
         {
-          val (state, moveOrDrop) = v
-          val gf                  = state.board.variant.gameFamily
-          (state, Uci.WithSan(Uci(gf, moveOrDrop.fold(_.toUci.uci, _.toUci.uci)).get, "NOSAN"))
+          val (state, action) = v
+          val gf              = state.board.variant.gameFamily
+          (state, Uci.WithSan(Uci(gf, action.toUci.uci).get, "NOSAN"))
         }
       },
       error
@@ -245,11 +263,8 @@ object Replay {
     sans match {
       case Nil         => valid(Nil)
       case san :: rest =>
-        san(StratSituation.wrap(sit)) flatMap { moveOrDrop =>
-          val after = Situation(
-            moveOrDrop.fold(m => m.finalizeAfter().toFairySF, d => d.finalizeAfter.toFairySF),
-            !sit.player
-          )
+        san(StratSituation.wrap(sit)).map(fairysfAction) flatMap { action =>
+          val after = Situation(action.finalizeAfter, !sit.player)
           recursiveSituations(after, rest) map { after :: _ }
         }
     }
@@ -261,8 +276,8 @@ object Replay {
     ucis match {
       case Nil         => valid(Nil)
       case uci :: rest =>
-        uci(sit) andThen { moveOrDrop =>
-          val after = Situation(moveOrDrop.fold(_.finalizeAfter, _.finalizeAfter), !sit.player)
+        uci(sit) andThen { action =>
+          val after = Situation(action.finalizeAfter, !sit.player)
           recursiveSituationsFromUci(after, rest) map { after :: _ }
         }
     }
@@ -271,8 +286,8 @@ object Replay {
     ucis match {
       case Nil         => valid(replay)
       case uci :: rest =>
-        uci(replay.state.situation) andThen { moveOrDrop =>
-          recursiveReplayFromUci(replay addMove moveOrDrop, rest)
+        uci(replay.state.situation) andThen { action =>
+          recursiveReplayFromUci(replay addMove action, rest)
         }
     }
 
@@ -340,8 +355,8 @@ object Replay {
         sans match {
           case Nil         => invalid(s"Can't find $atFenTruncated, reached ply $ply")
           case san :: rest =>
-            san(StratSituation.wrap(sit)) flatMap { moveOrDrop =>
-              val after = moveOrDrop.fold(m => m.finalizeAfter().toFairySF, d => d.finalizeAfter.toFairySF)
+            san(StratSituation.wrap(sit)).map(fairysfAction) flatMap { action =>
+              val after = action.finalizeAfter
               val fen   =
                 Forsyth >> Game(Situation(after, Player.fromPly(ply, variant.plysPerTurn)), turns = ply)
               if (compareFen(fen)) Validated.valid(ply)

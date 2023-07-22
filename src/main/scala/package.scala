@@ -14,6 +14,4 @@ package object strategygames
 
   type PositionHash = Array[Byte]
 
-  type MoveOrDrop = Either[Move, Drop]
-
 }

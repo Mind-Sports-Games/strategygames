@@ -14,7 +14,7 @@ abstract class Game(
     val startedAtTurn: Int = 0
 ) {
 
-  def apply(moveOrdrop: MoveOrDrop): Game
+  def apply(action: Action): Game
 
   def apply(
       orig: Pos,
@@ -32,7 +32,7 @@ abstract class Game(
       finalSquare: Boolean = false,
       captures: Option[List[Pos]] = None,
       partialCaptures: Boolean = false
-  ): Validated[String, (Game, MoveOrDrop)] =
+  ): Validated[String, (Game, Action)] =
     uci match {
       case Uci.ChessMove(uci)        =>
         apply(
@@ -41,7 +41,7 @@ abstract class Game(
           uci.promotion.map(Role.ChessPromotableRole),
           metrics
         ) map { case (ncg, move) =>
-          ncg -> Left(move)
+          ncg -> move
         }
       case Uci.DraughtsMove(uci)     =>
         apply(
@@ -53,7 +53,7 @@ abstract class Game(
           captures,
           partialCaptures
         ) map { case (ncg, move) =>
-          ncg -> Left(move)
+          ncg -> move
         }
       case Uci.FairySFMove(uci)      =>
         apply(
@@ -62,7 +62,7 @@ abstract class Game(
           uci.promotion.map(Role.FairySFPromotableRole),
           metrics
         ) map { case (ncg, move) =>
-          ncg -> Left(move)
+          ncg -> move
         }
       case Uci.SamuraiMove(uci)      =>
         apply(
@@ -71,7 +71,7 @@ abstract class Game(
           promotion = None,
           metrics
         ) map { case (ncg, move) =>
-          ncg -> Left(move)
+          ncg -> move
         }
       case Uci.TogyzkumalakMove(uci) =>
         apply(
@@ -80,7 +80,7 @@ abstract class Game(
           promotion = None,
           metrics
         ) map { case (ncg, move) =>
-          ncg -> Left(move)
+          ncg -> move
         }
       case Uci.ChessDrop(uci)        =>
         drop(
@@ -88,7 +88,7 @@ abstract class Game(
           Pos.Chess(uci.pos),
           metrics
         ) map { case (ncg, drop) =>
-          ncg -> Right(drop)
+          ncg -> drop
         }
       case Uci.FairySFDrop(uci)      =>
         drop(
@@ -96,7 +96,21 @@ abstract class Game(
           Pos.FairySF(uci.pos),
           metrics
         ) map { case (ncg, drop) =>
-          ncg -> Right(drop)
+          ncg -> drop
+        }
+      case Uci.GoDrop(uci)           =>
+        drop(
+          Role.GoRole(uci.role),
+          Pos.Go(uci.pos),
+          metrics
+        ) map { case (ncg, drop) =>
+          ncg -> drop
+        }
+      case Uci.GoPass(uci)           =>
+        pass(
+          metrics
+        ) map { case (ncg, pass) =>
+          ncg -> pass
         }
     }
 
@@ -105,6 +119,8 @@ abstract class Game(
       pos: Pos,
       metrics: MoveMetrics = MoveMetrics()
   ): Validated[String, (Game, Drop)]
+
+  def pass(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Pass)]
 
   // Because I"m unsure how to properly write a single, generic copy
   // type signature, we're getting individual ones for how we use it.
@@ -131,6 +147,7 @@ abstract class Game(
   def toFairySF: fairysf.Game
   def toSamurai: samurai.Game
   def toTogyzkumalak: togyzkumalak.Game
+  def toGo: go.Game
 
 }
 
@@ -168,20 +185,12 @@ object Game {
       case _                                  => sys.error("Not passed Chess objects")
     }
 
-    def apply(move: Move): Game = move match {
-      case (Move.Chess(move)) => Chess(g.apply(move))
-      case _                  => sys.error("Not passed Chess objects")
-    }
-
-    def apply(moveOrDrop: MoveOrDrop): Game =
-      moveOrDrop.fold(
-        apply,
-        drop =>
-          drop match {
-            case (Drop.Chess(drop)) => Chess(g.applyDrop(drop))
-            case _                  => sys.error("Not passed Chess objects")
-          }
-      )
+    def apply(action: Action): Game =
+      action match {
+        case (Move.Chess(move)) => Chess(g.apply(move))
+        case (Drop.Chess(drop)) => Chess(g.applyDrop(drop))
+        case _                  => sys.error("Not passed Chess objects")
+      }
 
     def drop(
         role: Role,
@@ -196,11 +205,13 @@ object Game {
       case _                                      => sys.error("Not passed Chess objects")
     }
 
-    def copy(clock: Option[Clock]): Game                                 = Chess(g.copy(clock = clock))
-    def copy(turns: Int, startedAtTurn: Int): Game                       = Chess(
+    def pass(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Pass)] =
+      sys.error("Can't pass in chess")
+    def copy(clock: Option[Clock]): Game                                            = Chess(g.copy(clock = clock))
+    def copy(turns: Int, startedAtTurn: Int): Game                                  = Chess(
       g.copy(turns = turns, startedAtTurn = startedAtTurn)
     )
-    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int): Game = Chess(
+    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int): Game            = Chess(
       g.copy(clock = clock, turns = turns, startedAtTurn = startedAtTurn)
     )
 
@@ -220,6 +231,7 @@ object Game {
     def toFairySF: fairysf.Game           = sys.error("Can't turn a chess game into a fairysf game")
     def toSamurai: samurai.Game           = sys.error("Can't turn a chess game into a samurai game")
     def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a chess game into a togyzkumalak game")
+    def toGo: go.Game                     = sys.error("Can't turn a chess game into a go game")
 
   }
 
@@ -279,19 +291,20 @@ object Game {
       case _ => sys.error("Not passed Draughts objects")
     }
 
-    def apply(move: Move): Game = move match {
-      case (Move.Draughts(move)) => Draughts(g.apply(move))
-      case _                     => sys.error("Not passed Draughts objects")
-    }
-
-    def apply(moveOrDrop: MoveOrDrop): Game =
-      moveOrDrop.fold(apply, _ => sys.error("Draughts doesn't support drops"))
+    def apply(action: Action): Game =
+      action match {
+        case (Move.Draughts(move)) => Draughts(g.apply(move))
+        case _                     => sys.error("Not passed Draughts objects")
+      }
 
     def drop(
         role: Role,
         pos: Pos,
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, Drop)] = sys.error("Can't drop in draughts")
+
+    def pass(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Pass)] =
+      sys.error("Can't pass in draughts")
 
     def copy(clock: Option[Clock]): Game                                 = Draughts(g.copy(clock = clock))
     def copy(turns: Int, startedAtTurn: Int): Game                       = Draughts(
@@ -316,6 +329,7 @@ object Game {
     def toFairySF: fairysf.Game           = sys.error("Can't turn a draughts game into a fairysf game")
     def toSamurai: samurai.Game           = sys.error("Can't turn a draughts game into a samurai game")
     def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a draughts game into a togyzkumalak game")
+    def toGo: go.Game                     = sys.error("Can't turn a draughts game into a go game")
 
   }
 
@@ -351,20 +365,12 @@ object Game {
       case _                                      => sys.error("Not passed FairySF objects")
     }
 
-    private def apply(move: Move): Game = move match {
-      case (Move.FairySF(move)) => FairySF(g.apply(move))
-      case _                    => sys.error("Not passed FairySF objects")
-    }
-
-    def apply(moveOrDrop: MoveOrDrop): Game =
-      moveOrDrop.fold(
-        apply,
-        drop =>
-          drop match {
-            case (Drop.FairySF(drop)) => FairySF(g.applyDrop(drop))
-            case _                    => sys.error("Not passed FairySF objects")
-          }
-      )
+    def apply(action: Action): Game =
+      action match {
+        case (Move.FairySF(move)) => FairySF(g.apply(move))
+        case (Drop.FairySF(drop)) => FairySF(g.applyDrop(drop))
+        case _                    => sys.error("Not passed FairySF objects")
+      }
 
     def drop(
         role: Role,
@@ -378,6 +384,9 @@ object Game {
           .toValidated
       case _                                          => sys.error("Not passed FairySF objects")
     }
+
+    def pass(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Pass)] =
+      sys.error("Can't pass in fairysf")
 
     def copy(clock: Option[Clock]): Game                                 = FairySF(g.copy(clock = clock))
     def copy(turns: Int, startedAtTurn: Int): Game                       = FairySF(
@@ -403,6 +412,7 @@ object Game {
     def toDraughts: draughts.DraughtsGame = sys.error("Can't turn a fairysf game into a draughts game")
     def toSamurai: samurai.Game           = sys.error("Can't turn a fairysf game into a samurai game")
     def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a fairysf game into a togyzkumalak game")
+    def toGo: go.Game                     = sys.error("Can't turn a fairysf game into a go game")
 
   }
 
@@ -432,19 +442,20 @@ object Game {
       case _                                      => sys.error("Not passed Samurai objects")
     }
 
-    private def apply(move: Move): Game = move match {
-      case (Move.Samurai(move)) => Samurai(g.apply(move))
-      case _                    => sys.error("Not passed Samurai objects")
-    }
-
-    def apply(moveOrDrop: MoveOrDrop): Game =
-      moveOrDrop.fold(apply, _ => sys.error("Samurai does not support drops"))
+    def apply(action: Action): Game =
+      action match {
+        case (Move.Samurai(move)) => Samurai(g.apply(move))
+        case _                    => sys.error("Not passed Samurai objects")
+      }
 
     def drop(
         role: Role,
         pos: Pos,
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, Drop)] = sys.error("Can't drop in Samurai")
+
+    def pass(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Pass)] =
+      sys.error("Can't pass in Samurai")
 
     def copy(clock: Option[Clock]): Game                                 = Samurai(g.copy(clock = clock))
     def copy(turns: Int, startedAtTurn: Int): Game                       = Samurai(
@@ -470,6 +481,7 @@ object Game {
     def toDraughts: draughts.DraughtsGame = sys.error("Can't turn a samurai game into a draughts game")
     def toSamurai: samurai.Game           = g
     def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a samurai game into a togyzkumalak game")
+    def toGo: go.Game                     = sys.error("Can't turn a samurai game into a go game")
 
   }
 
@@ -499,19 +511,20 @@ object Game {
       case _                                                => sys.error("Not passed Togyzkumalak objects")
     }
 
-    private def apply(move: Move): Game = move match {
-      case (Move.Togyzkumalak(move)) => Togyzkumalak(g.apply(move))
-      case _                         => sys.error("Not passed Togyzkumalak objects")
-    }
-
-    def apply(moveOrDrop: MoveOrDrop): Game =
-      moveOrDrop.fold(apply, _ => sys.error("Togyzkumalak does not support drops"))
+    def apply(action: Action): Game =
+      action match {
+        case (Move.Togyzkumalak(move)) => Togyzkumalak(g.apply(move))
+        case _                         => sys.error("Not passed Togyzkumalak objects")
+      }
 
     def drop(
         role: Role,
         pos: Pos,
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, Drop)] = sys.error("Can't drop in Togyzkumalak")
+
+    def pass(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Pass)] =
+      sys.error("Can't pass in Togyzkumalak")
 
     def copy(clock: Option[Clock]): Game                                 = Togyzkumalak(g.copy(clock = clock))
     def copy(turns: Int, startedAtTurn: Int): Game                       = Togyzkumalak(
@@ -537,6 +550,77 @@ object Game {
     def toDraughts: draughts.DraughtsGame = sys.error("Can't turn a togyzkumalak game into a draughts game")
     def toSamurai: samurai.Game           = sys.error("Can't turn a togyzkumalak game into a samurai game")
     def toTogyzkumalak: togyzkumalak.Game = g
+    def toGo: go.Game                     = sys.error("Can't turn a togyzkumalak game into a go game")
+
+  }
+
+  final case class Go(g: go.Game)
+      extends Game(
+        Situation.Go(g.situation),
+        g.pgnMoves,
+        g.clock,
+        g.turns,
+        g.startedAtTurn
+      ) {
+
+    def apply(
+        orig: Pos,
+        dest: Pos,
+        promotion: Option[PromotableRole] = None,
+        metrics: MoveMetrics = MoveMetrics(),
+        finalSquare: Boolean = false,
+        captures: Option[List[Pos]] = None,
+        partialCaptures: Boolean = false
+    ): Validated[String, (Game, Move)] = sys.error("Can't move in Go")
+
+    def apply(action: Action): Game =
+      action match {
+        case (Pass.Go(pass)) => Go(g.applyPass(pass))
+        case (Drop.Go(drop)) => Go(g.applyDrop(drop))
+        case _               => sys.error("Not passed Go objects")
+      }
+
+    def drop(
+        role: Role,
+        pos: Pos,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, Drop)] = (role, pos) match {
+      case (Role.GoRole(role), Pos.Go(pos)) =>
+        g.drop(role, pos, metrics)
+          .toEither
+          .map(t => (Go(t._1), Drop.Go(t._2)))
+          .toValidated
+      case _                                => sys.error("Not passed Go objects")
+    }
+
+    def pass(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Pass)] =
+      g.pass(metrics).toEither.map(t => (Go(t._1), Pass.Go(t._2))).toValidated
+
+    def copy(clock: Option[Clock]): Game                                 = Go(g.copy(clock = clock))
+    def copy(turns: Int, startedAtTurn: Int): Game                       = Go(
+      g.copy(turns = turns, startedAtTurn = startedAtTurn)
+    )
+    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int): Game = Go(
+      g.copy(clock = clock, turns = turns, startedAtTurn = startedAtTurn)
+    )
+
+    def copy(situation: Situation, turns: Int): Game = situation match {
+      case Situation.Go(situation) => Go(g.copy(situation = situation, turns = turns))
+      case _                       => sys.error("Unable to copy go game with non-go arguments")
+    }
+    def copy(situation: Situation): Game             = situation match {
+      case Situation.Go(situation) => Go(g.copy(situation = situation))
+      case _                       => sys.error("Unable to copy go game with non-go arguments")
+    }
+
+    def withTurns(t: Int): Game = Go(g.withTurns(t))
+
+    def toFairySF: fairysf.Game           = sys.error("Can't turn a go game into a fairysf game")
+    def toChess: chess.Game               = sys.error("Can't turn a go game into a chess game")
+    def toDraughts: draughts.DraughtsGame = sys.error("Can't turn a go game into a draughts game")
+    def toSamurai: samurai.Game           = sys.error("Can't turn a go game into a samurai game")
+    def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a go game into a togyzkumalak game")
+    def toGo: go.Game                     = g
 
   }
 
@@ -558,6 +642,8 @@ object Game {
       Samurai(samurai.Game(situation, pgnMoves, clock, turns, startedAtTurn))
     case (GameLogic.Togyzkumalak(), Situation.Togyzkumalak(situation)) =>
       Togyzkumalak(togyzkumalak.Game(situation, pgnMoves, clock, turns, startedAtTurn))
+    case (GameLogic.Go(), Situation.Go(situation))                     =>
+      Go(go.Game(situation, pgnMoves, clock, turns, startedAtTurn))
     case _                                                             => sys.error("Mismatched gamelogic types 32")
   }
 
@@ -568,6 +654,7 @@ object Game {
     case (GameLogic.Samurai(), Variant.Samurai(variant))           => Samurai(samurai.Game.apply(variant))
     case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant)) =>
       Togyzkumalak(togyzkumalak.Game.apply(variant))
+    case (GameLogic.Go(), Variant.Go(variant))                     => Go(go.Game.apply(variant))
     case _                                                         => sys.error("Mismatched gamelogic types 33")
   }
 
@@ -582,6 +669,8 @@ object Game {
       Samurai(samurai.Game.apply(variant.map(_.toSamurai), fen.map(_.toSamurai)))
     case GameLogic.Togyzkumalak() =>
       Togyzkumalak(togyzkumalak.Game.apply(variant.map(_.toTogyzkumalak), fen.map(_.toTogyzkumalak)))
+    case GameLogic.Go()           =>
+      Go(go.Game.apply(variant.map(_.toGo), fen.map(_.toGo)))
     case _                        => sys.error("Mismatched gamelogic types 36")
   }
 
@@ -590,5 +679,6 @@ object Game {
   def wrap(g: fairysf.Game)          = FairySF(g)
   def wrap(g: samurai.Game)          = Samurai(g)
   def wrap(g: togyzkumalak.Game)     = Togyzkumalak(g)
+  def wrap(g: go.Game)               = Go(g)
 
 }

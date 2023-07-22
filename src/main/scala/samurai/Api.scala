@@ -8,7 +8,7 @@ import cats.implicits._
 import strategygames.Player
 import strategygames.samurai.format.FEN
 import strategygames.samurai.variant.Variant
-import scala.util.{ Failure, Success, Try }
+import scala.util.Try
 
 sealed abstract class GameResult extends Product with Serializable
 

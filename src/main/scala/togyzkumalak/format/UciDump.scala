@@ -3,7 +3,7 @@ package strategygames.togyzkumalak.format
 import cats.data.Validated
 
 import strategygames.togyzkumalak.variant.Variant
-import strategygames.togyzkumalak.{ Move, Replay }
+import strategygames.togyzkumalak.{ Action, Move, Replay }
 
 object UciDump {
 
@@ -19,6 +19,8 @@ object UciDump {
     if (moves.isEmpty) Validated.valid(Nil)
     else Replay(moves, initialFen, variant) andThen (_.valid) map apply
 
-  def move(variant: Variant)(mod: Move): String = mod.toUci.uci
+  def move(variant: Variant)(action: Action): String = action match {
+    case m: Move => m.toUci.uci
+  }
 
 }
