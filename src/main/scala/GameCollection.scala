@@ -505,7 +505,7 @@ object GameGroup {
     def name     = "Go"
     def key      = "go"
     def variants = Variant.all(GameLogic.Go()).filter(_.gameFamily.name == this.name)
-    def medley   = false // get working first then will add in
+    def medley   = true
   }
 
   def all: List[GameGroup] =
