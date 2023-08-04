@@ -30,9 +30,10 @@ object Parser {
   def pgnMovesToUciMoves(pgnMoves: Iterable[String]): List[String] =
     pgnMoves.toList.map(
       _ match {
-        case Uci.Drop.dropR(role, dest) => s"${role}@${dest}"
-        case Uci.Pass.passR()           => "pass"
-        case s: String                  => s
+        case Uci.Drop.dropR(role, dest)          => s"${role}@${dest}"
+        case Uci.Pass.passR()                    => "pass"
+        case Uci.SelectSquares.selectSquaresR(s) => s"ss:${s}"
+        case s: String                           => s
       }
     )
 

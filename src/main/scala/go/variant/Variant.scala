@@ -123,9 +123,33 @@ abstract class Variant private[variant] (
   def validPass(situation: Situation): Pass = {
     val uciMove       = "pass"
     val previousMoves = situation.board.uciMoves
-    val newPosition   = situation.board.apiPosition
-      .makeMovesWithPrevious(List(Api.passMove(situation.board.variant)), previousMoves)
+    // todo fix this and handle in api
+    val newPosition   = if (uciMove == previousMoves.last) {
+      situation.board.apiPosition.makeMovesWithPrevious(List(), previousMoves.dropRight(1))
+    } else {
+      situation.board.apiPosition
+        .makeMovesWithPrevious(List(Api.passMove(situation.board.variant)), previousMoves)
+    }
     Pass(
+      situationBefore = situation,
+      after = situation.board.copy(
+        uciMoves = situation.board.uciMoves :+ uciMove,
+        position = newPosition.some
+      )
+    )
+  }
+
+  def createSelectSquares(situation: Situation, squares: List[Pos]): SelectSquares = {
+    val uciMove       = s"ss:${squares.mkString(",")}"
+    val previousMoves = situation.board.uciMoves
+    // todo fix this and handle in api
+    val newPosition   = situation.board.apiPosition.makeMovesWithPrevious(
+      List(Api.passMove(situation.board.variant), Api.passMove(situation.board.variant)),
+      previousMoves.dropRight(2),
+      squares
+    )
+    SelectSquares(
+      squares = squares,
       situationBefore = situation,
       after = situation.board.copy(
         uciMoves = situation.board.uciMoves :+ uciMove,
@@ -155,13 +179,20 @@ abstract class Variant private[variant] (
 
   def pass(situation: Situation): Validated[String, Pass] = Validated.valid(validPass(situation))
 
+  def selectSquares(situation: Situation, squares: List[Pos]) =
+    if (situation.canSelectSquares) {
+      Validated.valid(createSelectSquares(situation, squares))
+    } else {
+      Validated.invalid(s"$this variant cannot selectSquares $situation $squares")
+    }
+
   def possibleDrops(situation: Situation): Option[List[Pos]] =
-    if (dropsVariant)
+    if (dropsVariant && !situation.end)
       validDrops(situation).map(_.pos).some
     else None
 
   def possibleDropsByRole(situation: Situation): Option[Map[Role, List[Pos]]] =
-    if (dropsVariant)
+    if (dropsVariant && !situation.end)
       validDrops(situation)
         .map(drop => (drop.piece.role, drop.pos))
         .groupBy(_._1)

@@ -73,7 +73,7 @@ object Reader {
     Parser.pgnMovesToUciMoves(moves).foldLeft[Result](Result.Complete(Replay(game))) {
       case (Result.Complete(replay), m) =>
         m match {
-          case Uci.Drop.dropR(role, dest) =>
+          case Uci.Drop.dropR(role, dest)           =>
             (Role.allByForsyth(replay.state.board.variant.gameFamily).get(role(0)), Pos.fromKey(dest)) match {
               case (Some(role), Some(dest)) =>
                 Result.Complete(
@@ -92,7 +92,7 @@ object Reader {
                 )
               case _                        => Result.Incomplete(replay, s"Error making replay with drop: ${m}")
             }
-          case Uci.Pass.passR()           =>
+          case Uci.Pass.passR()                     =>
             Result.Complete(
               replay.addMove(
                 Replay.replayPass(
@@ -105,7 +105,21 @@ object Reader {
                 )
               )
             )
-          case _                          => Result.Incomplete(replay, s"Error making replay with uci move: ${m}")
+          case Uci.SelectSquares.selectSquaresR(ss) =>
+            Result.Complete(
+              replay.addMove(
+                Replay.replaySelectSquares(
+                  replay.state,
+                  ss.split(",").toList.flatMap(Pos.fromKey(_)),
+                  replay.state.board.apiPosition
+                    .makeMoves(
+                      List(m).map(uciMove => Api.uciToMove(uciMove, replay.state.board.variant))
+                    ),
+                  replay.state.board.uciMoves :+ m
+                )
+              )
+            )
+          case _                                    => Result.Incomplete(replay, s"Error making replay with uci move: ${m}")
         }
       case (r: Result.Incomplete, _)    => r
     }

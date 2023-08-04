@@ -55,6 +55,12 @@ case class Situation(board: Board, player: Player) {
 
   def pass(): Validated[String, Pass] = board.variant.pass(this)
 
+  def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
+    board.variant.selectSquares(this, squares)
+
+  def canSelectSquares: Boolean =
+    board.uciMoves.size > 1 && board.uciMoves.takeRight(2) == List("pass", "pass")
+
   def withVariant(variant: strategygames.go.variant.Variant) =
     copy(
       board = board withVariant variant

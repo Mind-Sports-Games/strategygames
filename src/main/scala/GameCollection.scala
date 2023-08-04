@@ -374,7 +374,8 @@ object GameFamily {
     def displayPiece      = "display"
     def pieceSetThemes    =
       List(
-        "classic_stone"
+        "classic_stone",
+        "cross"
       )
     def pieceSetDefault   = "classic_stone"
     def boardThemes       = List("light-wood", "dark-wood")

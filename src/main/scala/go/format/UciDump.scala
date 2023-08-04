@@ -3,7 +3,7 @@ package strategygames.go.format
 import cats.data.Validated
 
 import strategygames.go.variant.Variant
-import strategygames.go.{ Action, Drop, Pass, Replay }
+import strategygames.go.{ Action, Drop, Pass, Replay, SelectSquares }
 
 object UciDump {
 
@@ -20,8 +20,9 @@ object UciDump {
     else Replay(moves, initialFen, variant) andThen (_.valid) map apply
 
   def move(variant: Variant)(action: Action): String = action match {
-    case p: Pass => p.toUci.uci
-    case d: Drop => d.toUci.uci
+    case ss: SelectSquares => ss.toUci.uci
+    case p: Pass           => p.toUci.uci
+    case d: Drop           => d.toUci.uci
   }
 
 }

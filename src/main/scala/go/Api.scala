@@ -33,11 +33,16 @@ object Api {
 
     // todo rename moves to actions to be consistent
     def makeMoves(movesList: List[Int]): Position
-    def makeMovesWithPrevious(movesList: List[Int], previousMoves: List[String]): Position
+    def makeMovesWithPrevious(
+        movesList: List[Int],
+        previousMoves: List[String],
+        deadStones: List[Pos] = List[Pos]().empty
+    ): Position
 
     def toBoard: String
     def goDiagram: String
     def setKomi(komi: Double): Unit
+    def setBoard(goBoard: GoBoard): Unit
 
     val initialFen: FEN
     val fen: FEN
@@ -71,7 +76,11 @@ object Api {
       case _  => sys.error("Incorrect game size from position")
     }
 
-    def makeMovesWithPrevious(movesList: List[Int], previousMoves: List[String]): Position = {
+    def makeMovesWithPrevious(
+        movesList: List[Int],
+        previousMoves: List[String],
+        deadStones: List[Pos] = List[Pos]().empty
+    ): Position = {
       var pos =
         if (previousMoves.length == 0 && Api.initialFen(variant.key).value != fen.value)
           positionFromFen(fen.value) // keeping current position?
@@ -80,6 +89,12 @@ object Api {
         else new GoPosition(new GoGame(gameSize), 0, fromFen, komi)
 
       pos = pos.makeMoves(previousMoves.map(m => uciToMove(m, variant)))
+
+      // todo fix this (add to makemoves function) - remove dead stones before doing passes as new moves
+      if (deadStones.size > 0) {
+        val fenWithoutDeadStones = FEN(removeDeadStones(deadStones, fenString, variant))
+        pos.setBoard(goBoardFromFen(fenWithoutDeadStones))
+      }
 
       movesList.map { move =>
         if (pos.legalActions.contains(move)) pos = pos.makeMoves(List(move))
@@ -265,9 +280,11 @@ object Api {
     b2
   }
 
+  // todo fix for ss
   def positionFromVariantAndMoves(variant: Variant, uciMoves: List[String]): Position =
     positionFromVariant(variant).makeMoves(uciMoves.map(m => uciToMove(m, variant)))
 
+  // todo fix for ss
   def positionFromStartingFenAndMoves(startingFen: FEN, uciMoves: List[String]): Position =
     positionFromFen(startingFen.value).makeMoves(uciMoves.map(m => uciToMove(m, startingFen.variant)))
 
@@ -277,7 +294,7 @@ object Api {
   }
 
   def uciToMove(uciMove: String, variant: Variant): Int = {
-    if (uciMove == "pass") passMove(variant)
+    if (uciMove == "pass" || uciMove.take(3) == "ss:") passMove(variant)
     else {
       val gameSize: Int = variant.boardSize.height
       val dest          = uciMove.drop(2)
@@ -290,6 +307,7 @@ object Api {
     }
   }
 
+  // todo how to handle SelectSquares
   def moveToUci(move: Int, variant: Variant): String = {
     if (move == passMove(variant)) "pass"
     else {
@@ -326,6 +344,34 @@ object Api {
 
   def pieceMapFromFen(variantKey: String, fenString: String): PieceMap = {
     positionFromVariantNameAndFEN(variantKey, fenString).pieceMap
+  }
+
+  def writeBoardFenFromPieceMap(pieceMap: PieceMap, variant: Variant): String = {
+    val gameSize: Int      = variant.boardSize.height
+    val gameRow: List[Int] = List.range(0, gameSize)
+    val boardString        = gameRow.reverse
+      .map(y =>
+        gameRow
+          .map(x => {
+            val piece = moveToPos(y * gameSize + x, variant).flatMap(pieceMap.get(_))
+            piece.fold("1") { p => if (p.player == P1) "S" else "s" }
+          })
+          .mkString("")
+      )
+      .mkString("/")
+
+    "[1]{2,}".r.replaceAllIn(boardString, s => s.group(0).size.toString)
+  }
+
+  def removeDeadStones(deadStones: List[Pos], fenString: String, variant: Variant): String = {
+    val pieceMap        = pieceMapFromFen(variant.key, fenString)
+    val updatedPieceMap = pieceMap -- deadStones.toSet
+    val boardString     = writeBoardFenFromPieceMap(updatedPieceMap, variant)
+
+    val start = fenString.indexOf("[", 0)
+    if (start > 0)
+      boardString + fenString.substring(start, fenString.length)
+    else boardString
   }
 
 }

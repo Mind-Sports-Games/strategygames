@@ -106,11 +106,18 @@ abstract class Game(
         ) map { case (ncg, drop) =>
           ncg -> drop
         }
-      case Uci.GoPass(uci)           =>
+      case Uci.GoPass(_)             =>
         pass(
           metrics
         ) map { case (ncg, pass) =>
           ncg -> pass
+        }
+      case Uci.GoSelectSquares(uci)  =>
+        selectSquares(
+          uci.squares.map(Pos.Go(_)),
+          metrics
+        ) map { case (ncg, selectSquares) =>
+          ncg -> selectSquares
         }
     }
 
@@ -121,6 +128,11 @@ abstract class Game(
   ): Validated[String, (Game, Drop)]
 
   def pass(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Pass)]
+
+  def selectSquares(
+      squares: List[Pos],
+      metrics: MoveMetrics = MoveMetrics()
+  ): Validated[String, (Game, SelectSquares)]
 
   // Because I"m unsure how to properly write a single, generic copy
   // type signature, we're getting individual ones for how we use it.
@@ -207,11 +219,18 @@ object Game {
 
     def pass(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Pass)] =
       sys.error("Can't pass in chess")
-    def copy(clock: Option[Clock]): Game                                            = Chess(g.copy(clock = clock))
-    def copy(turns: Int, startedAtTurn: Int): Game                                  = Chess(
+
+    def selectSquares(
+        squares: List[Pos],
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, SelectSquares)] =
+      sys.error("Can't selectSquares in chess")
+
+    def copy(clock: Option[Clock]): Game                                 = Chess(g.copy(clock = clock))
+    def copy(turns: Int, startedAtTurn: Int): Game                       = Chess(
       g.copy(turns = turns, startedAtTurn = startedAtTurn)
     )
-    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int): Game            = Chess(
+    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int): Game = Chess(
       g.copy(clock = clock, turns = turns, startedAtTurn = startedAtTurn)
     )
 
@@ -306,18 +325,23 @@ object Game {
     def pass(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Pass)] =
       sys.error("Can't pass in draughts")
 
-    def copy(clock: Option[Clock]): Game                                 = Draughts(g.copy(clock = clock))
-    def copy(turns: Int, startedAtTurn: Int): Game                       = Draughts(
+    def selectSquares(
+        squares: List[Pos],
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, SelectSquares)] =
+      sys.error("Can't selectSquares in draughts")
+    def copy(clock: Option[Clock]): Game                                            = Draughts(g.copy(clock = clock))
+    def copy(turns: Int, startedAtTurn: Int): Game                                  = Draughts(
       g.copy(turns = turns, startedAtTurn = startedAtTurn)
     )
-    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int): Game = Draughts(
+    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int): Game            = Draughts(
       g.copy(clock = clock, turns = turns, startedAtTurn = startedAtTurn)
     )
-    def copy(situation: Situation, turns: Int): Game                     = situation match {
+    def copy(situation: Situation, turns: Int): Game                                = situation match {
       case Situation.Draughts(situation) => Draughts(g.copy(situation = situation, turns = turns))
       case _                             => sys.error("Unable to copy draughts game with non-draughts arguments")
     }
-    def copy(situation: Situation): Game                                 = situation match {
+    def copy(situation: Situation): Game                                            = situation match {
       case Situation.Draughts(situation) => Draughts(g.copy(situation = situation))
       case _                             => sys.error("Unable to copy draughts game with non-draughts arguments")
     }
@@ -388,11 +412,16 @@ object Game {
     def pass(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Pass)] =
       sys.error("Can't pass in fairysf")
 
-    def copy(clock: Option[Clock]): Game                                 = FairySF(g.copy(clock = clock))
-    def copy(turns: Int, startedAtTurn: Int): Game                       = FairySF(
+    def selectSquares(
+        squares: List[Pos],
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, SelectSquares)] =
+      sys.error("Can't selectSquares in fairysf")
+    def copy(clock: Option[Clock]): Game                                            = FairySF(g.copy(clock = clock))
+    def copy(turns: Int, startedAtTurn: Int): Game                                  = FairySF(
       g.copy(turns = turns, startedAtTurn = startedAtTurn)
     )
-    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int): Game = FairySF(
+    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int): Game            = FairySF(
       g.copy(clock = clock, turns = turns, startedAtTurn = startedAtTurn)
     )
 
@@ -457,11 +486,16 @@ object Game {
     def pass(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Pass)] =
       sys.error("Can't pass in Samurai")
 
-    def copy(clock: Option[Clock]): Game                                 = Samurai(g.copy(clock = clock))
-    def copy(turns: Int, startedAtTurn: Int): Game                       = Samurai(
+    def selectSquares(
+        squares: List[Pos],
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, SelectSquares)] =
+      sys.error("Can't selectSquares in Samurai")
+    def copy(clock: Option[Clock]): Game                                            = Samurai(g.copy(clock = clock))
+    def copy(turns: Int, startedAtTurn: Int): Game                                  = Samurai(
       g.copy(turns = turns, startedAtTurn = startedAtTurn)
     )
-    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int): Game = Samurai(
+    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int): Game            = Samurai(
       g.copy(clock = clock, turns = turns, startedAtTurn = startedAtTurn)
     )
 
@@ -525,6 +559,12 @@ object Game {
 
     def pass(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Pass)] =
       sys.error("Can't pass in Togyzkumalak")
+
+    def selectSquares(
+        squares: List[Pos],
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, SelectSquares)] =
+      sys.error("Can't selectSquares in Togyzkumalak")
 
     def copy(clock: Option[Clock]): Game                                 = Togyzkumalak(g.copy(clock = clock))
     def copy(turns: Int, startedAtTurn: Int): Game                       = Togyzkumalak(
@@ -595,6 +635,22 @@ object Game {
 
     def pass(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Pass)] =
       g.pass(metrics).toEither.map(t => (Go(t._1), Pass.Go(t._2))).toValidated
+
+    def selectSquares(
+        squares: List[Pos],
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, SelectSquares)] =
+      g.selectSquares(
+        squares.map(p =>
+          p match {
+            case Pos.Go(pos) => pos
+            case _           => sys.error("Not passed Go pos objects")
+          }
+        ),
+        metrics
+      ).toEither
+        .map(t => (Go(t._1), SelectSquares.Go(t._2)))
+        .toValidated
 
     def copy(clock: Option[Clock]): Game                                 = Go(g.copy(clock = clock))
     def copy(turns: Int, startedAtTurn: Int): Game                       = Go(

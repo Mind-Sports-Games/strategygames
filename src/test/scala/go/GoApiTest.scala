@@ -517,4 +517,24 @@ class GoApiTest extends Specification with ValidatedMatchers {
 
   }
 
+  "convert board string from piecemap" should {
+    val fen         = "13/13/10S2/13/13/13/13/13/7s5/13/4S8/3s9/4S8[SSSSSSSSSSssssssssss] w - 30 85 65 3"
+    val pieceMap    = Api.pieceMapFromFen(variant.Go13x13.key, fen)
+    val boardString = Api.writeBoardFenFromPieceMap(pieceMap, variant.Go13x13)
+
+    "board string should match initial part of fen" in {
+      boardString must_== strategygames.go.format.FEN(fen).board
+    }
+
+  }
+
+  "removing deadstones from fen" should {
+    val fen        = "13/13/10S2/13/13/13/13/13/7s5/13/4S8/3s9/4S8[SSSSSSSSSSssssssssss] w - 30 85 65 3"
+    val deadStones = List(Pos.E1, Pos.H5)
+    val newFen     = Api.removeDeadStones(deadStones, fen, variant.Go13x13)
+    "have new fen with fewer stones" in {
+      newFen must_== "13/13/10S2/13/13/13/13/13/13/13/4S8/3s9/13[SSSSSSSSSSssssssssss] w - 30 85 65 3"
+    }
+  }
+
 }

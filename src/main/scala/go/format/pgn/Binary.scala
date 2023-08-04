@@ -15,8 +15,9 @@ object Binary {
   def readMoves(bs: List[Byte], nb: Int) = Try(Reader.moves(bs, nb))
 
   private object MoveType {
-    val Pass = 0
-    val Drop = 1
+    val Pass          = 0
+    val Drop          = 1
+    val SelectSquares = 2
   }
 
   private def right(i: Int, x: Int): Int = i & lengthMasks(x)
@@ -32,13 +33,26 @@ object Binary {
 
     def intMoves(bs: List[Int], pliesToGo: Int): List[String] =
       bs match {
-        case _ if pliesToGo <= 0                                  => Nil
-        case Nil                                                  => Nil
-        case (b1 :: b2 :: rest) if headerBit(b1) == MoveType.Drop =>
+        case _ if pliesToGo <= 0                                           => Nil
+        case Nil                                                           => Nil
+        case (b1 :: b2 :: rest) if headerBit(b1) == MoveType.Drop          =>
           dropUci(b1, b2) :: intMoves(rest, pliesToGo - 1)
-        case (b1 :: rest) if headerBit(b1) == MoveType.Pass       =>
+        case (b1 :: rest) if headerBit(b1) == MoveType.Pass                =>
           passUci :: intMoves(rest, pliesToGo - 1)
-        case x                                                    => !!(x map showByte mkString ",")
+        case (b1 :: b2 :: rest) if headerBit(b1) == MoveType.SelectSquares => {
+          val numDS = numDeadStones(b1, b2)
+          val ds    = deadStones(rest, numDS)
+          selectSquaresUci(ds) :: intMoves(rest.drop(numDS * 2), pliesToGo - 1)
+        }
+        case x                                                             => !!(x map showByte mkString ",")
+      }
+
+    def deadStones(bs: List[Int], stonesToGo: Int): List[String] =
+      bs match {
+        case _ if stonesToGo <= 0                                          => Nil
+        case (b1 :: b2 :: rest) if headerBit(b1) == MoveType.SelectSquares =>
+          posFromInt(b1, b2) :: deadStones(rest, stonesToGo - 1)
+        case x                                                             => !!(x map showByte mkString ",")
       }
 
     // 2 movetype
@@ -48,8 +62,10 @@ object Binary {
     def dropUci(b1: Int, b2: Int): String =
       s"s@${posFromInt(b1, b2)}"
 
-    val passUci                              = "pass"
-    def posFromInt(b1: Int, b2: Int): String = Pos((right(b1, 6) << 8) + b2).get.toString()
+    val passUci                                    = "pass"
+    def selectSquaresUci(ds: List[String]): String = s"ss:${ds.mkString(",")}"
+    def numDeadStones(b1: Int, b2: Int): Int       = (right(b1, 6) << 8) + b2
+    def posFromInt(b1: Int, b2: Int): String       = Pos((right(b1, 6) << 8) + b2).get.toString()
 
     private def headerBit(i: Int) = i >> 6
 
@@ -60,15 +76,33 @@ object Binary {
 
     def move(str: String): List[Byte] =
       (str match {
-        case Uci.Drop.dropR(_, dst) => dropUci(dst)
-        case Uci.Pass.passR()       => passUci
-        case _                      => sys.error(s"Invalid move to write: ${str}")
+        case Uci.Drop.dropR(_, dst)               => dropUci(dst)
+        case Uci.Pass.passR()                     => passUci
+        case Uci.SelectSquares.selectSquaresR(ss) => selectSquaresUci(ss)
+        case _                                    => sys.error(s"Invalid move to write: ${str}")
       }) map (_.toByte)
 
     def moves(strs: Iterable[String]): Array[Byte] =
       strs.toList.flatMap(move).to(Array)
 
     def passUci = List(headerBit(MoveType.Pass))
+
+    def selectSquaresUci(selectedSquares: String) = {
+      val squares: List[String] =
+        if (selectedSquares == "") List[String]().empty else selectedSquares.split(",").toList
+      val numDeadStones         = squares.length
+      val start                 = List(
+        (headerBit(MoveType.SelectSquares)) + (numDeadStones >> 8),
+        right(numDeadStones, 8)
+      )
+      val stones                = squares.map(dst =>
+        List(
+          headerBit(MoveType.SelectSquares) + (Pos.fromKey(dst).get.index >> 8),
+          right(Pos.fromKey(dst).get.index, 8)
+        )
+      )
+      start ::: stones.flatten
+    }
 
     def dropUci(dst: String) = List(
       (headerBit(MoveType.Drop)) + (Pos.fromKey(dst).get.index >> 8),

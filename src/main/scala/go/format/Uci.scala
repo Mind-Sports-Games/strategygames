@@ -64,25 +64,53 @@ object Uci {
 
   }
 
+  case class SelectSquares(squares: List[Pos]) extends Uci {
+
+    def lilaUci    = s"ss:${squares.mkString(",")}"
+    def fairySfUci = lilaUci
+    def fishnetUci = fairySfUci
+    def uci        = lilaUci
+
+    def piotr = lilaUci
+
+    def origDest = Pos.A1 -> Pos.A1
+
+    def apply(situation: Situation) = situation.selectSquares(squares)
+  }
+
+  object SelectSquares {
+
+    def fromSquares(squares: List[Pos]) = SelectSquares(squares)
+
+    val selectSquaresR = s"^ss:([[a-z][1-9][0-9]?]?[,[a-z][1-9][0-9]?]*)$$".r
+
+  }
+
   case class WithSan(uci: Uci, san: String)
 
   def apply(drop: strategygames.go.Drop) = Uci.Drop(drop.piece.role, drop.pos)
 
   def apply(pass: strategygames.go.Pass) = Uci.Pass()
 
+  def apply(ss: strategygames.go.SelectSquares) = Uci.SelectSquares(ss.squares)
+
   def apply(move: String): Option[Uci] =
     move match {
-      case Drop.dropR(role, dest) =>
+      case Drop.dropR(role, dest)           =>
         (Role.allByPgn.get(role.charAt(0)), Pos.fromKey(dest)) match {
           case (Some(role), Some(dest)) => Uci.Drop(role, dest).some
           case _                        => sys.error(s"Cannot apply uci drop: ${move}")
         }
-      case Pass.passR()           => Uci.Pass().some
-      case _                      => sys.error(s"Cannot apply uci: ${move}")
+      case Pass.passR()                     => Uci.Pass().some
+      case SelectSquares.selectSquaresR(ss) =>
+        Uci.SelectSquares(ss.split(",").toList.flatMap(Pos.fromKey(_))).some
+      case _                                => sys.error(s"Cannot apply uci: ${move}")
     }
 
   def piotr(move: String): Option[Uci] = {
     if (move == "pass") Uci.Pass().some
+    else if (move.take(3) == "ss:")
+      Uci.SelectSquares(move.drop(3).split(",").toList.flatMap(Pos.fromKey(_))).some
     else {
       for {
         role <- move.headOption flatMap Role.allByPgn.get
