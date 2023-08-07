@@ -82,10 +82,7 @@ object Reader {
                       replay.state,
                       role,
                       dest,
-                      replay.state.board.apiPosition
-                        .makeMoves(
-                          List(m).map(uciMove => Api.uciToMove(uciMove, replay.state.board.variant))
-                        ),
+                      replay.state.board.apiPosition.makeMoves(List(m)),
                       replay.state.board.uciMoves :+ m
                     )
                   )
@@ -97,10 +94,7 @@ object Reader {
               replay.addMove(
                 Replay.replayPass(
                   replay.state,
-                  replay.state.board.apiPosition
-                    .makeMoves(
-                      List(m).map(uciMove => Api.uciToMove(uciMove, replay.state.board.variant))
-                    ),
+                  replay.state.board.apiPosition.makeMoves(List(m)),
                   replay.state.board.uciMoves :+ m
                 )
               )
@@ -111,10 +105,7 @@ object Reader {
                 Replay.replaySelectSquares(
                   replay.state,
                   ss.split(",").toList.flatMap(Pos.fromKey(_)),
-                  replay.state.board.apiPosition
-                    .makeMoves(
-                      List(m).map(uciMove => Api.uciToMove(uciMove, replay.state.board.variant))
-                    ),
+                  replay.state.board.apiPosition.makeMoves(List(m)),
                   replay.state.board.uciMoves :+ m
                 )
               )

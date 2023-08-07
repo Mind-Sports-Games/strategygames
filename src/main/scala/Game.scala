@@ -641,12 +641,10 @@ object Game {
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, SelectSquares)] =
       g.selectSquares(
-        squares.map(p =>
-          p match {
-            case Pos.Go(pos) => pos
-            case _           => sys.error("Not passed Go pos objects")
-          }
-        ),
+        squares.map {
+          case Pos.Go(pos) => pos
+          case _           => sys.error("Not passed Go pos objects")
+        },
         metrics
       ).toEither
         .map(t => (Go(t._1), SelectSquares.Go(t._2)))

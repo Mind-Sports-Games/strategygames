@@ -41,7 +41,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
 
   "Go situation legal drops" should {
     val game    = Api.position(variant.Go19x19)
-    val newGame = game.makeMoves(List(1, 2, 3, 40, 21))
+    val newGame = game.makeMoves(List(1, 2, 3, 40, 21).map(Api.moveToUci(_, variant.Go19x19)))
     "lots legal drops" in {
       newGame.legalDrops.size must_== 19 * 19 - 5
     }
@@ -99,7 +99,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
 
   "convertPieceMapFromFen" should {
     val game    = Api.position(variant.Go19x19)
-    val newGame = game.makeMoves(List(0, 60, 2, 1, 20))
+    val newGame = game.makeMoves(List(0, 60, 2, 1, 20).map(Api.moveToUci(_, variant.Go19x19)))
 
     val pieceMap                 = newGame.pieceMap
     // println(pieceMap)
@@ -124,7 +124,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
 
   "convertPieceMapFromFen" should {
     val game    = Api.position(variant.Go19x19)
-    val newGame = game.makeMoves(List(13, 360))
+    val newGame = game.makeMoves(List(13, 360).map(Api.moveToUci(_, variant.Go19x19)))
 
     val pieceMap                  = newGame.pieceMap
     // println(pieceMap)
@@ -145,7 +145,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
 
   "Piece map of Go game" should {
     val game                     = Api.position(variant.Go19x19)
-    val newGame                  = game.makeMoves(List(0, 6, 3, 7, 4))
+    val newGame                  = game.makeMoves(List(0, 6, 3, 7, 4).map(Api.moveToUci(_, variant.Go19x19)))
     val position                 = Api.positionFromFen(newGame.fen.value)
     val fen                      = newGame.fen
     val pieceMap: PieceMap       = position.pieceMap
@@ -163,7 +163,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
 
   "fen after 1 moves of Go game" should {
     val game     = Api.position(variant.Go19x19)
-    val newGame1 = game.makeMoves(List(0))
+    val newGame1 = game.makeMoves(List(0).map(Api.moveToUci(_, variant.Go19x19)))
     val fen1     = newGame1.fen
     "should be white to play after 1 ply" in {
       fen1.value must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S18[SSSSSSSSSSssssssssss] w - 3610 65 65 1"
@@ -172,7 +172,10 @@ class GoApiTest extends Specification with ValidatedMatchers {
 
   "fen after 2 moves of Go game" should {
     val game     = Api.position(variant.Go19x19)
-    val newGame2 = game.makeMovesWithPrevious(List(10), List(0).map(m => Api.moveToUci(m, variant.Go19x19)))
+    val newGame2 = game.makeMovesWithPrevious(
+      List(10).map(Api.moveToUci(_, variant.Go19x19)),
+      List(0).map(m => Api.moveToUci(m, variant.Go19x19))
+    )
     val fen2     = newGame2.fen
     "should be black to play after 2 ply" in {
       fen2.value must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S9s8[SSSSSSSSSSssssssssss] b - 10 75 65 2"
@@ -182,7 +185,10 @@ class GoApiTest extends Specification with ValidatedMatchers {
   "fen after 3 moves of Go game" should {
     val game     = Api.position(variant.Go19x19)
     val newGame3 =
-      game.makeMovesWithPrevious(List(19), List(0, 10).map(m => Api.moveToUci(m, variant.Go19x19)))
+      game.makeMovesWithPrevious(
+        List(19).map(Api.moveToUci(_, variant.Go19x19)),
+        List(0, 10).map(m => Api.moveToUci(m, variant.Go19x19))
+      )
     val fen3     = newGame3.fen
     "should be white to play after 3 ply" in {
       fen3.value must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S18/S9s8[SSSSSSSSSSssssssssss] w - 20 75 65 2"
@@ -192,7 +198,10 @@ class GoApiTest extends Specification with ValidatedMatchers {
   "fen after 4 moves of Go game" should {
     val game     = Api.position(variant.Go19x19)
     val newGame4 =
-      game.makeMovesWithPrevious(List(38), List(0, 10, 19).map(m => Api.moveToUci(m, variant.Go19x19)))
+      game.makeMovesWithPrevious(
+        List(38).map(Api.moveToUci(_, variant.Go19x19)),
+        List(0, 10, 19).map(m => Api.moveToUci(m, variant.Go19x19))
+      )
     val fen4     = newGame4.fen
     "should be black to play after 4 ply" in {
       fen4.value must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/s18/S18/S9s8[SSSSSSSSSSssssssssss] b - 20 85 65 3"
@@ -202,7 +211,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
   // todo need different example?
   // "go game with a ko point" should {
   //   val game    = Api.position(variant.Go19x19)
-  //   val newGame = game.makeMoves(List(2, 59, 20, 39, 22, 41, 40, 21))
+  //   val newGame = game.makeMoves(List(2, 59, 20, 39, 22, 41, 40, 21).map(Api.moveToUci(_, variant.Go19x19)))
   //   val fen     = newGame.fenString
   //   // println(newGame.toBoard)
   //   // println(fen)
@@ -213,7 +222,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
 
   "go game with a ko point" should {
     val game    = Api.position(variant.Go19x19)
-    val newGame = game.makeMoves(List(2, 59, 20, 39, 22, 41, 40, 21))
+    val newGame = game.makeMoves(List(2, 59, 20, 39, 22, 41, 40, 21).map(Api.moveToUci(_, variant.Go19x19)))
     "not allow move to recapture" in {
       newGame.legalDrops.contains(40) must_== false
     }
@@ -221,7 +230,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
 
   "goBoardFromFen" should {
     val game    = Api.position(variant.Go19x19)
-    val newGame = game.makeMoves(List(0, 7, 4, 1))
+    val newGame = game.makeMoves(List(0, 7, 4, 1).map(Api.moveToUci(_, variant.Go19x19)))
     val fen     = newGame.fen
     val goBoard = Api.goBoardFromFen(fen)
     "fen is 19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/Ss2S2s11[SSSSSSSSSSssssssssss] b - 20 85 65 3" in {
@@ -295,7 +304,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
     val fen      =
       "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S3s14[SSSSSSSSSSssssssssss] b - 10 75 65 2"
     val position = Api.positionFromFen(fen)
-    position.makeMoves(List(361, 361))
+    position.makeMoves(List("pass", "pass", "ss:"))
     "is not a draw if both players pass early due to komi" in {
       position.gameResult must_!= GameResult.Draw()
     }
@@ -305,7 +314,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
     val fen      =
       "SSSSSS13/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S3s14[SSSSSSSSSSssssssssss] b - 70 70 60 2"
     val position = Api.positionFromFen(fen)
-    position.makeMoves(List(361, 361))
+    position.makeMoves(List("pass", "pass", "ss:"))
     "is a draw if both players pass in given position" in {
       position.gameResult must_== GameResult.Draw()
       position.gameOutcome must_== 0
@@ -316,7 +325,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
     val fen      =
       "sssssssssssssssssss/sssssssssssssssssss/19/19/19/19/19/19/19/19/19/19/19/19/19/SSSSSSSSSSSSSSSSSSS/19/SSSSSSSSSSSSSSSSSSS/19[SSSSSSSSSSssssssssss] b - 0 65 65 39"
     val position = Api.positionFromFen(fen)
-    val newGame  = position.makeMoves(List(361, 361))
+    val newGame  = position.makeMoves(List("pass", "pass", "ss:"))
     "be a win for player 1 as more territory " in {
       newGame.gameResult must_== GameResult.VariantEnd()
       newGame.gameOutcome must_== 1000
@@ -328,7 +337,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
     val fen      =
       "19/sssssssssssssssssss/19/sssssssssssssssssss/19/19/19/19/19/19/19/19/19/19/19/19/19/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS[SSSSSSSSSSssssssssss] b - 0 65 65 39"
     val position = Api.positionFromFen(fen)
-    val newGame  = position.makeMoves(List(361, 361))
+    val newGame  = position.makeMoves(List("pass", "pass", "ss:"))
     "be a win for player 2 as more territory " in {
       newGame.gameResult must_== GameResult.VariantEnd()
       newGame.gameOutcome must_== -1000
@@ -401,7 +410,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
 
   "Piece map of 9x9 Go game" should {
     val game                     = Api.position(variant.Go9x9)
-    val newGame                  = game.makeMoves(List(0, 16, 30, 59, 4))
+    val newGame                  = game.makeMoves(List(0, 16, 30, 59, 4).map(Api.moveToUci(_, variant.Go9x9)))
     val position                 = Api.positionFromFen(newGame.fen.value)
     val fen                      = newGame.fen
     val pieceMap: PieceMap       = position.pieceMap
@@ -423,7 +432,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
 
   "Api.positonFromFen for 13x13" should {
     val game           = Api.position(variant.Go13x13)
-    val newGame        = game.makeMoves(List(4, 16, 30, 59, 140))
+    val newGame        = game.makeMoves(List(4, 16, 30, 59, 140).map(Api.moveToUci(_, variant.Go13x13)))
     val fen            = newGame.fen
     val createPosition = Api.positionFromFen(newGame.fen.value)
     val createdFen     = createPosition.fen
@@ -434,7 +443,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
 
   "Api.positonFromFen for 19x19" should {
     val game           = Api.position(variant.Go19x19)
-    val newGame        = game.makeMoves(List(4, 16, 30, 59, 140))
+    val newGame        = game.makeMoves(List(4, 16, 30, 59, 140).map(Api.moveToUci(_, variant.Go19x19)))
     val fen            = newGame.fen
     val createPosition = Api.positionFromFen(newGame.fen.value)
     val createdFen     = createPosition.fen
@@ -446,7 +455,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
 
   "Api.positonFromFen for 9x9" should {
     val game           = Api.position(variant.Go9x9)
-    val newGame        = game.makeMoves(List(4, 16, 30, 59, 70))
+    val newGame        = game.makeMoves(List(4, 16, 30, 59, 70).map(Api.moveToUci(_, variant.Go9x9)))
     val fen            = newGame.fen
     val createPosition = Api.positionFromFen(newGame.fen.value)
     val createdFen     = createPosition.fen
@@ -457,7 +466,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
 
   "Piece map of 13x13 Go game" should {
     val game                              = Api.position(variant.Go13x13)
-    val newGame                           = game.makeMoves(List(4, 16, 30, 59, 140))
+    val newGame                           = game.makeMoves(List(4, 16, 30, 59, 140).map(Api.moveToUci(_, variant.Go13x13)))
     val fen                               = newGame.fen
     val pieceMap                          = newGame.pieceMap
     val createPosition                    = Api.positionFromFen(newGame.fen.value)
@@ -507,7 +516,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
       position.pieceMap.size must_== 2
     }
 
-    val p2 = position.makeMovesWithPrevious(List(3), List())
+    val p2 = position.makeMovesWithPrevious(List(3).map(Api.moveToUci(_, variant.Go9x9)), List())
     "new position has 3 pieces" in {
       p2.pieceMap.size must_== 3
     }

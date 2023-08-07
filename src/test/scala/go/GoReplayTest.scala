@@ -56,11 +56,10 @@ class GoReplayTest extends Specification with ValidatedMatchers {
           FEN("9/9/2S3S2/9/4S4/3S3s1/2S3s2/5s3/4s3S[SSSSSSSSSSssssssssss] w - 60 105 65 5"),
           FEN("9/9/2S3S2/9/4S3s/3S3s1/2S3s2/5s3/4s3S[SSSSSSSSSSssssssssss] b - 60 115 65 5"),
           FEN("9/9/2S3S2/9/4S3s/3S3s1/2S3s2/5s3/4s3S[SSSSSSSSSSssssssssss] w - 60 115 65 6"),
-          // currently below is happening instead of actual due to droping moves from pass action in variant file?
-          FEN("9/9/2S3S2/9/4S3s/3S3s1/2S3s2/5s3/4s3S[SSSSSSSSSSssssssssss] b - 60 115 65 5"),
-          FEN("9/9/2S3S2/9/4S3s/3S3s1/2S3s2/5s3/4s4[SSSSSSSSSSssssssssss] b - 50 215 65 6")
-          // FEN("9/9/2S3S2/9/4S3s/3S3s1/2S3s2/5s3/4s3S[SSSSSSSSSSssssssssss] b - 60 115 65 6"),
-          // FEN("9/9/2S3S2/9/4S3s/3S3s1/2S3s2/5s3/4s4[SSSSSSSSSSssssssssss] w - 50 215 65 7")
+          FEN("9/9/2S3S2/9/4S3s/3S3s1/2S3s2/5s3/4s3S[SSSSSSSSSSssssssssss] b - 60 115 65 6"),
+          FEN(
+            "9/9/2S3S2/9/4S3s/3S3s1/2S3s2/5s3/4s4[SSSSSSSSSSssssssssss] b - 50 215 65 7"
+          ) // player color doesnt change as last action is not really a player action.
         )
       }
     }

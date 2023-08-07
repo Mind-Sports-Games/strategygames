@@ -32,11 +32,10 @@ object Api {
     val variant: Variant
 
     // todo rename moves to actions to be consistent
-    def makeMoves(movesList: List[Int]): Position
+    def makeMoves(movesList: List[String]): Position
     def makeMovesWithPrevious(
-        movesList: List[Int],
-        previousMoves: List[String],
-        deadStones: List[Pos] = List[Pos]().empty
+        movesList: List[String],
+        previousMoves: List[String]
     ): Position
 
     def toBoard: String
@@ -77,9 +76,8 @@ object Api {
     }
 
     def makeMovesWithPrevious(
-        movesList: List[Int],
-        previousMoves: List[String],
-        deadStones: List[Pos] = List[Pos]().empty
+        movesList: List[String],
+        previousMoves: List[String]
     ): Position = {
       var pos =
         if (previousMoves.length == 0 && Api.initialFen(variant.key).value != fen.value)
@@ -88,34 +86,48 @@ object Api {
           positionFromFen(initialFen.value)
         else new GoPosition(new GoGame(gameSize), 0, fromFen, komi)
 
-      pos = pos.makeMoves(previousMoves.map(m => uciToMove(m, variant)))
-
-      // todo fix this (add to makemoves function) - remove dead stones before doing passes as new moves
-      if (deadStones.size > 0) {
-        val fenWithoutDeadStones = FEN(removeDeadStones(deadStones, fenString, variant))
-        pos.setBoard(goBoardFromFen(fenWithoutDeadStones))
-      }
+      pos = pos.makeMoves(previousMoves)
 
       movesList.map { move =>
-        if (pos.legalActions.contains(move)) pos = pos.makeMoves(List(move))
-        else
-          sys.error(
-            s"Illegal move1: ${move} from list: ${movesList} legalActions: ${pos.legalActions.map(_.toString()).mkString(", ")}"
-          )
+        {
+          val engineMove: Int = uciToMove(move, variant)
+          if (pos.legalActions.contains(engineMove)) pos = pos.makeMoves(List(move))
+          else
+            sys.error(
+              s"Illegal move1: ${move} from list: ${movesList} legalActions: ${pos.legalActions.map(_.toString()).mkString(", ")}"
+            )
+        }
       }
       pos.setKomi(komi)
       return pos
     }
 
-    def makeMoves(movesList: List[Int]): Position = {
+    def makeMoves(movesList: List[String]): Position = {
       movesList.map { move =>
-        if (position.legalMoves.contains(move)) position.makeMove(move)
-        else
-          sys.error(
-            s"Illegal move2: ${move} from list: ${movesList} legalMoves: ${position.legalMoves.map(_.toString()).mkString(", ")}"
-          )
+        {
+          val engineMove: Int   = uciToMove(move, variant)
+          val isConsecutivePass = position.lastMove == passMove && move == "pass"
+          if (isConsecutivePass) {
+            position.unmakeMove() // allows for drops after two passes and disagreement on dead stones.
+          } else if (move.take(3) == "ss:") {
+            // update board and pass twice
+            val deadStones: List[Pos] = move.drop(3).split(",").toList.flatMap(Pos.fromKey(_))
+            if (deadStones.length > 0) {
+              val fenWithoutDeadStones = FEN(removeDeadStones(deadStones, fenString, variant))
+              position.setBoard(goBoardFromFen(fenWithoutDeadStones))
+            }
+            position.makeMove(engineMove)
+            position.makeMove(engineMove)
+          } else {
+            if (position.legalMoves.contains(engineMove)) position.makeMove(engineMove)
+            else
+              sys.error(
+                s"Illegal move2: ${engineMove} from list: ${movesList} legalMoves: ${position.legalMoves.map(_.toString()).mkString(", ")}"
+              )
+          }
+        }
       }
-      return new GoPosition(position, ply + movesList.length, fromFen, komi)
+      return new GoPosition(position, ply + movesList.size, fromFen, komi)
     }
 
     // helper
@@ -280,13 +292,11 @@ object Api {
     b2
   }
 
-  // todo fix for ss
   def positionFromVariantAndMoves(variant: Variant, uciMoves: List[String]): Position =
-    positionFromVariant(variant).makeMoves(uciMoves.map(m => uciToMove(m, variant)))
+    positionFromVariant(variant).makeMoves(uciMoves)
 
-  // todo fix for ss
   def positionFromStartingFenAndMoves(startingFen: FEN, uciMoves: List[String]): Position =
-    positionFromFen(startingFen.value).makeMoves(uciMoves.map(m => uciToMove(m, startingFen.variant)))
+    positionFromFen(startingFen.value).makeMoves(uciMoves)
 
   def passMove(variant: Variant): Int = {
     val gameSize: Int = variant.boardSize.height
@@ -307,7 +317,6 @@ object Api {
     }
   }
 
-  // todo how to handle SelectSquares
   def moveToUci(move: Int, variant: Variant): String = {
     if (move == passMove(variant)) "pass"
     else {
@@ -336,11 +345,6 @@ object Api {
   val fenRegex                                = "([0-9Ss]?){1,19}(/([0-9Ss]?){1,19}){8,18}\\[[Ss]+\\] [w|b] - [0-9]+ [0-9]+ [0-9]+ [0-9]+"
   def validateFEN(fenString: String): Boolean =
     Try(goBoardFromFen(FEN(fenString))).isSuccess && fenString.matches(fenRegex)
-
-  //  def positionFromMoves(variantName: String, fen: String, movesList: Option[List[String]] = None): Position =
-  //    positionFromVariantNameAndFEN(variantName, fen)
-  //      .makeMoves(convertUciMoves(movesList).getOrElse(List.empty))
-  //
 
   def pieceMapFromFen(variantKey: String, fenString: String): PieceMap = {
     positionFromVariantNameAndFEN(variantKey, fenString).pieceMap

@@ -92,7 +92,7 @@ abstract class Variant private[variant] (
         case (destInt, Some(dest)) => {
           val uciMove       = s"${Role.defaultRole.forsyth}@${dest.key}"
           val previousMoves = situation.board.uciMoves
-          val newPosition   = situation.board.apiPosition.makeMovesWithPrevious(List(destInt), previousMoves)
+          val newPosition   = situation.board.apiPosition.makeMovesWithPrevious(List(uciMove), previousMoves)
           Drop(
             piece = Piece(situation.player, Role.defaultRole),
             pos = dest,
@@ -123,13 +123,7 @@ abstract class Variant private[variant] (
   def validPass(situation: Situation): Pass = {
     val uciMove       = "pass"
     val previousMoves = situation.board.uciMoves
-    // todo fix this and handle in api
-    val newPosition   = if (uciMove == previousMoves.last) {
-      situation.board.apiPosition.makeMovesWithPrevious(List(), previousMoves.dropRight(1))
-    } else {
-      situation.board.apiPosition
-        .makeMovesWithPrevious(List(Api.passMove(situation.board.variant)), previousMoves)
-    }
+    val newPosition   = situation.board.apiPosition.makeMovesWithPrevious(List(uciMove), previousMoves)
     Pass(
       situationBefore = situation,
       after = situation.board.copy(
@@ -142,12 +136,7 @@ abstract class Variant private[variant] (
   def createSelectSquares(situation: Situation, squares: List[Pos]): SelectSquares = {
     val uciMove       = s"ss:${squares.mkString(",")}"
     val previousMoves = situation.board.uciMoves
-    // todo fix this and handle in api
-    val newPosition   = situation.board.apiPosition.makeMovesWithPrevious(
-      List(Api.passMove(situation.board.variant), Api.passMove(situation.board.variant)),
-      previousMoves.dropRight(2),
-      squares
-    )
+    val newPosition   = situation.board.apiPosition.makeMovesWithPrevious(List(uciMove), previousMoves)
     SelectSquares(
       squares = squares,
       situationBefore = situation,

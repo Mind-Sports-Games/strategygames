@@ -94,13 +94,11 @@ object Replay {
   final case class Go(r: go.Replay)
       extends Replay(
         Game.Go(r.setup),
-        r.moves.map(m =>
-          m match {
-            case d: go.Drop           => Drop.Go(d)
-            case p: go.Pass           => Pass.Go(p)
-            case ss: go.SelectSquares => SelectSquares.Go(ss)
-          }
-        ),
+        r.moves.map {
+          case d: go.Drop           => Drop.Go(d)
+          case p: go.Pass           => Pass.Go(p)
+          case ss: go.SelectSquares => SelectSquares.Go(ss)
+        },
         Game.Go(r.state)
       ) {
     def copy(state: Game): Replay = state match {
