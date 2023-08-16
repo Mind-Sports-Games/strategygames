@@ -216,4 +216,69 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     }
   }
 
+  "two passes triggering select stones followed by a third pass doesn't trigger select stones, even number required" should {
+    val game  = Game(variant.Go19x19)
+    val drops = variant.Go19x19.validDrops(game.situation)
+
+    val game_ply_1 = game.apply(drops(1))
+
+    val drops_ply_2 = variant.Go19x19.validDrops(game_ply_1.situation)
+    val game_ply_2  = game_ply_1.apply(drops_ply_2(1))
+
+    val drops_ply_3 = variant.Go19x19.validDrops(game_ply_2.situation)
+    val game_ply_3  = game_ply_2.apply(drops_ply_3(1))
+
+    val drops_ply_4 = variant.Go19x19.validDrops(game_ply_3.situation)
+    val game_ply_4  = game_ply_3.apply(drops_ply_4(1))
+
+    val drops_ply_5 = variant.Go19x19.validDrops(game_ply_4.situation)
+    val game_ply_5  = game_ply_4.apply(drops_ply_5(1))
+
+    val drops_ply_6 = variant.Go19x19.validDrops(game_ply_5.situation)
+    val game_ply_6  = game_ply_5.apply(drops_ply_6(1))
+
+    val drops_ply_7 = variant.Go19x19.validDrops(game_ply_6.situation)
+    val game_ply_7  = game_ply_6.apply(drops_ply_7(1))
+
+    val pass_1     = variant.Go19x19.validPass(game_ply_7.situation)
+    val game_ply_8 = game_ply_7.apply(pass_1)
+
+    val pass_2     = variant.Go19x19.validPass(game_ply_8.situation)
+    val game_ply_9 = game_ply_8.apply(pass_2)
+
+    val pass_3      = variant.Go19x19.validPass(game_ply_9.situation)
+    val game_ply_10 = game_ply_9.apply(pass_3)
+
+    val pass_4      = variant.Go19x19.validPass(game_ply_10.situation)
+    val game_ply_11 = game_ply_10.apply(pass_4)
+
+    val squares: List[Pos] = List(Pos.B1, Pos.D1)
+    val ss                 = variant.Go19x19.createSelectSquares(game_ply_11.situation, squares)
+    val game_ply_12        = game_ply_11.apply(ss)
+
+    "not be gameEnd after just two passes (both cases)" in {
+      game_ply_9.situation.end must_== false
+      game_ply_9.situation.board.apiPosition.pieceMap.size must_== 7
+      game_ply_9.situation.board.apiPosition.fen.value must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1SsSsSsS11[SSSSSSSSSSssssssssss] w - 40 95 65 6"
+      game_ply_11.situation.end must_== false
+      game_ply_11.situation.board.apiPosition.pieceMap.size must_== 7
+    }
+
+    "be gameEnd after final ss action" in {
+      game_ply_12.situation.end must_== true
+      game_ply_12.situation.board.apiPosition.pieceMap.size must_== 5
+      game_ply_12.situation.board.apiPosition.fen.value must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/2s1sSsS11[SSSSSSSSSSssssssssss] w - 20 95 65 7"
+    }
+
+    "not have a ss action after single pass" in {
+      game_ply_8.situation.canSelectSquares must_== false
+      game_ply_10.situation.canSelectSquares must_== false
+    }
+
+    "have a ss action after double pass" in {
+      game_ply_9.situation.canSelectSquares must_== true
+      game_ply_11.situation.canSelectSquares must_== true
+    }
+
+  }
 }
