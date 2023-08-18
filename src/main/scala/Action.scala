@@ -48,8 +48,9 @@ object Action {
   }
 
   def wrap(action: go.Action): Action = action match {
-    case d: go.Drop => Drop.Go(d)
-    case p: go.Pass => Pass.Go(p)
+    case d: go.Drop           => Drop.Go(d)
+    case p: go.Pass           => Pass.Go(p)
+    case ss: go.SelectSquares => SelectSquares.Go(ss)
   }
 
   def toChess(action: Action): chess.Action = action match {
@@ -80,8 +81,9 @@ object Action {
   }
 
   def toGo(action: Action): go.Action = action match {
-    case Drop.Go(d) => d
-    case Pass.Go(p) => p
-    case _          => sys.error("Expecting a go action e.g. drop or pass")
+    case Drop.Go(d)           => d
+    case Pass.Go(p)           => p
+    case SelectSquares.Go(ss) => ss
+    case _                    => sys.error("Expecting a go action e.g. drop or pass or SelectSquares")
   }
 }

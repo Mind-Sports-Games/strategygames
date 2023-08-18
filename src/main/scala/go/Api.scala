@@ -32,12 +32,16 @@ object Api {
     val variant: Variant
 
     // todo rename moves to actions to be consistent
-    def makeMoves(movesList: List[Int]): Position
-    def makeMovesWithPrevious(movesList: List[Int], previousMoves: List[String]): Position
+    def makeMoves(movesList: List[String]): Position
+    def makeMovesWithPrevious(
+        movesList: List[String],
+        previousMoves: List[String]
+    ): Position
 
     def toBoard: String
     def goDiagram: String
     def setKomi(komi: Double): Unit
+    def setBoard(goBoard: GoBoard): Unit
 
     val initialFen: FEN
     val fen: FEN
@@ -71,7 +75,10 @@ object Api {
       case _  => sys.error("Incorrect game size from position")
     }
 
-    def makeMovesWithPrevious(movesList: List[Int], previousMoves: List[String]): Position = {
+    def makeMovesWithPrevious(
+        movesList: List[String],
+        previousMoves: List[String]
+    ): Position = {
       var pos =
         if (previousMoves.length == 0 && Api.initialFen(variant.key).value != fen.value)
           positionFromFen(fen.value) // keeping current position?
@@ -79,28 +86,48 @@ object Api {
           positionFromFen(initialFen.value)
         else new GoPosition(new GoGame(gameSize), 0, fromFen, komi)
 
-      pos = pos.makeMoves(previousMoves.map(m => uciToMove(m, variant)))
+      pos = pos.makeMoves(previousMoves)
 
       movesList.map { move =>
-        if (pos.legalActions.contains(move)) pos = pos.makeMoves(List(move))
-        else
-          sys.error(
-            s"Illegal move1: ${move} from list: ${movesList} legalActions: ${pos.legalActions.map(_.toString()).mkString(", ")}"
-          )
+        {
+          val engineMove: Int = uciToMove(move, variant)
+          if (pos.legalActions.contains(engineMove)) pos = pos.makeMoves(List(move))
+          else
+            sys.error(
+              s"Illegal move1: ${move} from list: ${movesList} legalActions: ${pos.legalActions.map(_.toString()).mkString(", ")}"
+            )
+        }
       }
       pos.setKomi(komi)
       return pos
     }
 
-    def makeMoves(movesList: List[Int]): Position = {
+    def makeMoves(movesList: List[String]): Position = {
       movesList.map { move =>
-        if (position.legalMoves.contains(move)) position.makeMove(move)
-        else
-          sys.error(
-            s"Illegal move2: ${move} from list: ${movesList} legalMoves: ${position.legalMoves.map(_.toString()).mkString(", ")}"
-          )
+        {
+          val engineMove: Int   = uciToMove(move, variant)
+          val isConsecutivePass = position.lastMove == passMove && move == "pass"
+          if (isConsecutivePass) {
+            position.unmakeMove() // allows for drops after two passes and disagreement on dead stones.
+          } else if (move.take(3) == "ss:") {
+            // update board and pass twice
+            val deadStones: List[Pos] = move.drop(3).split(",").toList.flatMap(Pos.fromKey(_))
+            if (deadStones.length > 0) {
+              val fenWithoutDeadStones = FEN(removeDeadStones(deadStones, fenString, variant))
+              position.setBoard(goBoardFromFen(fenWithoutDeadStones))
+            }
+            position.makeMove(engineMove)
+            position.makeMove(engineMove)
+          } else {
+            if (position.legalMoves.contains(engineMove)) position.makeMove(engineMove)
+            else
+              sys.error(
+                s"Illegal move2: ${engineMove} from list: ${movesList} legalMoves: ${position.legalMoves.map(_.toString()).mkString(", ")}"
+              )
+          }
+        }
       }
-      return new GoPosition(position, ply + movesList.length, fromFen, komi)
+      return new GoPosition(position, ply + movesList.size, fromFen, komi)
     }
 
     // helper
@@ -266,10 +293,10 @@ object Api {
   }
 
   def positionFromVariantAndMoves(variant: Variant, uciMoves: List[String]): Position =
-    positionFromVariant(variant).makeMoves(uciMoves.map(m => uciToMove(m, variant)))
+    positionFromVariant(variant).makeMoves(uciMoves)
 
   def positionFromStartingFenAndMoves(startingFen: FEN, uciMoves: List[String]): Position =
-    positionFromFen(startingFen.value).makeMoves(uciMoves.map(m => uciToMove(m, startingFen.variant)))
+    positionFromFen(startingFen.value).makeMoves(uciMoves)
 
   def passMove(variant: Variant): Int = {
     val gameSize: Int = variant.boardSize.height
@@ -277,7 +304,7 @@ object Api {
   }
 
   def uciToMove(uciMove: String, variant: Variant): Int = {
-    if (uciMove == "pass") passMove(variant)
+    if (uciMove == "pass" || uciMove.take(3) == "ss:") passMove(variant)
     else {
       val gameSize: Int = variant.boardSize.height
       val dest          = uciMove.drop(2)
@@ -319,13 +346,36 @@ object Api {
   def validateFEN(fenString: String): Boolean =
     Try(goBoardFromFen(FEN(fenString))).isSuccess && fenString.matches(fenRegex)
 
-  //  def positionFromMoves(variantName: String, fen: String, movesList: Option[List[String]] = None): Position =
-  //    positionFromVariantNameAndFEN(variantName, fen)
-  //      .makeMoves(convertUciMoves(movesList).getOrElse(List.empty))
-  //
-
   def pieceMapFromFen(variantKey: String, fenString: String): PieceMap = {
     positionFromVariantNameAndFEN(variantKey, fenString).pieceMap
+  }
+
+  def writeBoardFenFromPieceMap(pieceMap: PieceMap, variant: Variant): String = {
+    val gameSize: Int      = variant.boardSize.height
+    val gameRow: List[Int] = List.range(0, gameSize)
+    val boardString        = gameRow.reverse
+      .map(y =>
+        gameRow
+          .map(x => {
+            val piece = moveToPos(y * gameSize + x, variant).flatMap(pieceMap.get(_))
+            piece.fold("1") { p => if (p.player == P1) "S" else "s" }
+          })
+          .mkString("")
+      )
+      .mkString("/")
+
+    "[1]{2,}".r.replaceAllIn(boardString, s => s.group(0).size.toString)
+  }
+
+  def removeDeadStones(deadStones: List[Pos], fenString: String, variant: Variant): String = {
+    val pieceMap        = pieceMapFromFen(variant.key, fenString)
+    val updatedPieceMap = pieceMap -- deadStones.toSet
+    val boardString     = writeBoardFenFromPieceMap(updatedPieceMap, variant)
+
+    val start = fenString.indexOf("[", 0)
+    if (start > 0)
+      boardString + fenString.substring(start, fenString.length)
+    else boardString
   }
 
 }

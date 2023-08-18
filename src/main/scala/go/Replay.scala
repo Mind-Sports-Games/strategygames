@@ -12,6 +12,7 @@ import strategygames.{
   Action => StratAction,
   Drop => StratDrop,
   Pass => StratPass,
+  SelectSquares => StratSelectSquares,
   Situation => StratSituation
 }
 
@@ -20,15 +21,20 @@ case class Replay(setup: Game, moves: List[Action], state: Game) {
   lazy val chronoMoves = moves.reverse
 
   def addMove(action: Action) = action match {
-    case d: Drop =>
+    case d: Drop           =>
       copy(
         moves = d.applyVariantEffect :: moves,
         state = state.applyDrop(d)
       )
-    case p: Pass =>
+    case p: Pass           =>
       copy(
         moves = p :: moves,
         state = state.applyPass(p)
+      )
+    case ss: SelectSquares =>
+      copy(
+        moves = ss :: moves,
+        state = state.applySelectSquares(ss)
       )
   }
 
@@ -57,9 +63,10 @@ object Replay {
   // TODO: because this is primarily used in a Validation context, we should be able to
   //       return something that's runtime safe as well.
   def goAction(action: StratAction) = action match {
-    case StratDrop.Go(d) => d
-    case StratPass.Go(p) => p
-    case _               => sys.error("Invalid go action")
+    case StratDrop.Go(d)           => d
+    case StratPass.Go(p)           => p
+    case StratSelectSquares.Go(ss) => ss
+    case _                         => sys.error("Invalid go action")
   }
 
   def replayDrop(
@@ -89,6 +96,24 @@ object Replay {
       uciMoves: List[String]
   ): Pass = {
     Pass(
+      situationBefore = before.situation,
+      after = before.situation.board.copy(
+        pieces = apiPosition.pieceMap,
+        uciMoves = uciMoves,
+        pocketData = apiPosition.pocketData,
+        position = apiPosition.some
+      )
+    )
+  }
+
+  def replaySelectSquares(
+      before: Game,
+      squares: List[Pos],
+      apiPosition: Api.Position,
+      uciMoves: List[String]
+  ): SelectSquares = {
+    SelectSquares(
+      squares,
       situationBefore = before.situation,
       after = before.situation.board.copy(
         pieces = apiPosition.pieceMap,
@@ -140,16 +165,25 @@ object Replay {
       (state, pass)
     }
 
+    def replaySelectSquaresFromUci(squares: List[Pos]): (Game, Action) = {
+      uciMoves = uciMoves :+ s"ss:${squares.mkString(",")}"
+      val selectSquares = replaySelectSquares(state, squares, getApiPosition(uciMoves), uciMoves)
+      state = state.applySelectSquares(selectSquares)
+      (state, selectSquares)
+    }
+
     def parseActionWithPrevious(moveStr: String, prevStr: Option[String]): (Game, Action) =
       moveStr match {
-        case Uci.Drop.dropR(role, dest) =>
+        case Uci.Drop.dropR(role, dest)           =>
           replayDropFromUci(
             Role.allByForsyth(init.situation.board.variant.gameFamily).get(role(0)),
             Pos.fromKey(dest),
             prevStr
           )
-        case Uci.Pass.passR()           => replayPassFromUci
-        case moveStr: String            => sys.error(s"Invalid drop for replay: $moveStr")
+        case Uci.Pass.passR()                     => replayPassFromUci
+        case Uci.SelectSquares.selectSquaresR(ss) =>
+          replaySelectSquaresFromUci(ss.split(",").toList.flatMap(Pos.fromKey(_)))
+        case moveStr: String                      => sys.error(s"Invalid action for replay: $moveStr")
       }
 
     def parseAction(moveStr: String): (Game, Action) =

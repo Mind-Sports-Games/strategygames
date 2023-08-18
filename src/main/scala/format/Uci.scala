@@ -247,6 +247,33 @@ object Uci {
     def toGo           = p
   }
 
+  sealed abstract class SelectSquares(
+      val squares: List[Pos]
+  ) extends Uci {
+    def origDest: (Pos, Pos)
+  }
+
+  final case class GoSelectSquares(ss: go.format.Uci.SelectSquares)
+      extends SelectSquares(
+        ss.squares.map(Pos.Go(_))
+      )
+      with Go {
+    def uci        = ss.uci
+    def shortUci   = ss.uci
+    def fishnetUci = ss.uci
+    def piotr      = ss.piotr
+
+    def origDest: (Pos, Pos) = (Pos.Go(ss.origDest._1), Pos.Go(ss.origDest._2))
+    val unwrap               = ss
+
+    def toChess        = sys.error("Can't make a chess UCI from a go UCI")
+    def toDraughts     = sys.error("Can't make a draughts UCI from a go UCI")
+    def toFairySF      = sys.error("Can't make a fairysf UCI from a go UCI")
+    def toSamurai      = sys.error("Can't make a samurai UCI from a go UCI")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a go UCI")
+    def toGo           = ss
+  }
+
   def wrap(uci: chess.format.Uci): Uci = uci match {
     case m: chess.format.Uci.Move => ChessMove(m)
     case d: chess.format.Uci.Drop => ChessDrop(d)
@@ -270,8 +297,9 @@ object Uci {
   }
 
   def wrap(uci: go.format.Uci): Uci = uci match {
-    case d: go.format.Uci.Drop => GoDrop(d)
-    case p: go.format.Uci.Pass => GoPass(p)
+    case d: go.format.Uci.Drop           => GoDrop(d)
+    case p: go.format.Uci.Pass           => GoPass(p)
+    case ss: go.format.Uci.SelectSquares => GoSelectSquares(ss)
   }
 
   object Move {
@@ -408,6 +436,32 @@ object Uci {
 
   }
 
+  object SelectSquares {
+
+    def fromSquares(lib: GameLogic, gf: GameFamily, squares: List[Pos]): Option[SelectSquares] =
+      lib match {
+        case GameLogic.Draughts()     => None
+        case GameLogic.Samurai()      => None
+        case GameLogic.Togyzkumalak() => None
+        case GameLogic.Chess()        => None
+        case GameLogic.FairySF()      => None
+        case GameLogic.Go()           =>
+          GoSelectSquares(
+            go.format.Uci.SelectSquares
+              .fromSquares(
+                squares.map(p =>
+                  p match {
+                    case Pos.Go(pos) => pos
+                    case _           => sys.error("Not passed Go pos objects")
+                  }
+                )
+              )
+          ).some
+
+      }
+
+  }
+
   sealed abstract class WithSan(val uci: Uci, val san: String)
 
   final case class ChessWithSan(w: chess.format.Uci.WithSan)
@@ -499,6 +553,16 @@ object Uci {
     case (GameLogic.Go(), strategygames.Pass.Go(pass)) => GoPass(go.format.Uci(pass))
   }
 
+  def apply(lib: GameLogic, selectSquares: strategygames.SelectSquares) = (lib, selectSquares) match {
+    case (GameLogic.Draughts(), _)                                       => sys.error("SelectSquares not implemented for Draughts")
+    case (GameLogic.Chess(), _)                                          => sys.error("SelectSquares not implemented for Chess")
+    case (GameLogic.FairySF(), _)                                        => sys.error("SelectSquares not implemented for fairysf")
+    case (GameLogic.Samurai(), _)                                        => sys.error("SelectSquares not implemented for samurai")
+    case (GameLogic.Togyzkumalak(), _)                                   => sys.error("SelectSquares not implemented for togyzkumalak")
+    case (GameLogic.Go(), strategygames.SelectSquares.Go(selectSquares)) =>
+      GoSelectSquares(go.format.Uci(selectSquares))
+  }
+
   def apply(lib: GameLogic, gf: GameFamily, move: String): Option[Uci] = lib match {
     case GameLogic.Draughts()     => draughts.format.Uci(move).map(wrap)
     case GameLogic.Chess()        => chess.format.Uci(move).map(wrap)
@@ -557,6 +621,7 @@ object Uci {
          case Uci.TogyzkumalakMove(_) => s"4_${gf.id}_"
          case Uci.GoDrop(_)           => s"5_${gf.id}_"
          case Uci.GoPass(_)           => s"5_${gf.id}_"
+         case Uci.GoSelectSquares(_)  => s"5_${gf.id}_"
        }
      } else "") + (moves.map(_.piotr) mkString " ")
 

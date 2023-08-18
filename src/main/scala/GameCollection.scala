@@ -368,13 +368,14 @@ object GameFamily {
     def key               = "go"
     def gameLogic         = GameLogic.Go()
     def hasFishnet        = false
-    def hasAnalysisBoard  = true
+    def hasAnalysisBoard  = false
     def defaultVariant    = Variant.Go(strategygames.go.variant.Go19x19)
     def variants          = Variant.all(GameLogic.Go()).filter(_.gameFamily == this)
     def displayPiece      = "display"
     def pieceSetThemes    =
       List(
-        "classic_stone"
+        "classic_stone",
+        "cross"
       )
     def pieceSetDefault   = "classic_stone"
     def boardThemes       = List("light-wood", "dark-wood")
@@ -505,7 +506,7 @@ object GameGroup {
     def name     = "Go"
     def key      = "go"
     def variants = Variant.all(GameLogic.Go()).filter(_.gameFamily.name == this.name)
-    def medley   = false // get working first then will add in
+    def medley   = true
   }
 
   def all: List[GameGroup] =

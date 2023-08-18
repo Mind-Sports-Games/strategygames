@@ -19,6 +19,8 @@ case class Situation(board: Board, player: Player) {
 
   def dropsAsDrops: List[Drop] = board.variant.validDrops(this)
 
+  def takebackable = !canSelectSquares
+
   def history = board.history
 
   private lazy val gameEnd: Boolean = board.apiPosition.gameEnd
@@ -54,6 +56,13 @@ case class Situation(board: Board, player: Player) {
     board.variant.drop(this, role, pos)
 
   def pass(): Validated[String, Pass] = board.variant.pass(this)
+
+  def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
+    board.variant.selectSquares(this, squares)
+
+  def canSelectSquares: Boolean =
+    board.uciMoves.size > 1 && board.uciMoves
+      .takeRight(2) == List("pass", "pass") && board.uciMoves.reverse.takeWhile(_ == "pass").length % 2 == 0
 
   def withVariant(variant: strategygames.go.variant.Variant) =
     copy(

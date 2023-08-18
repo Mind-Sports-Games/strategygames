@@ -24,6 +24,7 @@ case object Amazons
   override def baseVariant           = true
   override def repetitionEnabled     = false
   override def dropsVariant          = true
+  override def canOfferDraw          = false
   override val switchPlayerAfterMove = false
   override val plysPerTurn           = 2
 

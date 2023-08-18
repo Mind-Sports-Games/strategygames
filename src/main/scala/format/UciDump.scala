@@ -3,7 +3,7 @@ package strategygames.format
 import cats.data.Validated
 
 import strategygames.variant.Variant
-import strategygames.{ Action, Drop, GameFamily, GameLogic, Move, Pass }
+import strategygames.{ Action, Drop, GameFamily, GameLogic, Move, Pass, SelectSquares }
 
 object UciDump {
 
@@ -47,6 +47,8 @@ object UciDump {
     case (GameLogic.Go(), Variant.Go(variant), Drop.Go(action))                               =>
       strategygames.go.format.UciDump.move(variant)(action)
     case (GameLogic.Go(), Variant.Go(variant), Pass.Go(action))                               =>
+      strategygames.go.format.UciDump.move(variant)(action)
+    case (GameLogic.Go(), Variant.Go(variant), SelectSquares.Go(action))                      =>
       strategygames.go.format.UciDump.move(variant)(action)
     case _                                                                                    => sys.error("Mismatched gamelogic types 13")
   }

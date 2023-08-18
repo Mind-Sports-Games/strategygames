@@ -21,8 +21,12 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def passes: List[Pass]
 
+  def selectSquaresAction: List[SelectSquares]
+
   def actions: List[Action] =
-    moves.values.flatten.toList ::: dropsAsDrops ::: passes
+    moves.values.flatten.toList ::: dropsAsDrops ::: passes ::: selectSquaresAction
+
+  def takebackable: Boolean
 
   def history = board.history
 
@@ -65,6 +69,8 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def pass: Validated[String, Pass]
 
+  def selectSquares(squares: List[Pos]): Validated[String, SelectSquares]
+
   def withVariant(variant: Variant): Situation
 
   def gameLogic: GameLogic
@@ -93,6 +99,8 @@ object Situation {
     lazy val moves: Map[Pos, List[Move]] = s.moves.map { case (p: chess.Pos, l: List[chess.Move]) =>
       (Pos.Chess(p), l.map(Move.Chess))
     }
+
+    def takebackable = true
 
     lazy val check: Boolean = s.check
 
@@ -134,6 +142,8 @@ object Situation {
 
     def passes: List[Pass] = List.empty
 
+    def selectSquaresAction: List[SelectSquares] = List.empty
+
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
@@ -164,6 +174,9 @@ object Situation {
     }
 
     def pass: Validated[String, Pass] = sys.error("Can't do a Pass for chess")
+
+    def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
+      sys.error("Can't do a SelectSquare for chess")
 
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.Chess(variant) => Chess(s.withVariant(variant))
@@ -198,6 +211,8 @@ object Situation {
       case (p: draughts.Pos, l: List[draughts.Move]) => (Pos.Draughts(p), l.map(Move.Draughts))
     }
 
+    def takebackable = true
+
     lazy val check: Boolean = false
 
     def checkSquare = None
@@ -213,6 +228,8 @@ object Situation {
     def dropsAsDrops: List[Drop] = List.empty
 
     def passes: List[Pass] = List.empty
+
+    def selectSquaresAction: List[SelectSquares] = List.empty
 
     // possibly need to do something for this
     def opponentHasInsufficientMaterial: Boolean = false
@@ -278,6 +295,9 @@ object Situation {
 
     def pass: Validated[String, Pass] = sys.error("Can't do a Pass for draughts")
 
+    def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
+      sys.error("Can't do a SelectSquare for draughts")
+
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.Draughts(variant) => Draughts(s.withVariant(variant))
       case _                         => sys.error("Not passed Draughts objects")
@@ -311,6 +331,8 @@ object Situation {
       (Pos.FairySF(p), l.map(Move.FairySF))
     }
 
+    def takebackable = true
+
     lazy val check: Boolean = s.check
 
     def checkSquare = s.checkSquare.map(Pos.FairySF)
@@ -340,6 +362,8 @@ object Situation {
     def dropsAsDrops: List[Drop] = s.dropsAsDrops.map(Drop.FairySF)
 
     def passes: List[Pass] = List.empty
+
+    def selectSquaresAction: List[SelectSquares] = List.empty
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -371,6 +395,9 @@ object Situation {
     }
 
     def pass: Validated[String, Pass] = sys.error("Can't do a Pass for fairysf")
+
+    def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
+      sys.error("Can't do a SelectSquare for fairysf")
 
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.FairySF(variant) => FairySF(s.withVariant(variant))
@@ -404,6 +431,8 @@ object Situation {
       (Pos.Samurai(p), l.map(Move.Samurai))
     }
 
+    def takebackable = true
+
     lazy val check: Boolean = false
 
     def checkSquare = None
@@ -432,10 +461,15 @@ object Situation {
 
     def passes: List[Pass] = List.empty
 
+    def selectSquaresAction: List[SelectSquares] = List.empty
+
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
       sys.error("Can't do a Drop for samurai")
 
     def pass: Validated[String, Pass] = sys.error("Can't do a Pass for samurai")
+
+    def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
+      sys.error("Can't do a SelectSquare for samurai")
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -493,6 +527,8 @@ object Situation {
         (Pos.Togyzkumalak(p), l.map(Move.Togyzkumalak))
     }
 
+    def takebackable = true
+
     lazy val check: Boolean = false
 
     def checkSquare = None
@@ -520,10 +556,15 @@ object Situation {
 
     def passes: List[Pass] = List.empty
 
+    def selectSquaresAction: List[SelectSquares] = List.empty
+
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
       sys.error("Can't do a Drop for togyzkumalak")
 
     def pass: Validated[String, Pass] = sys.error("Can't do a Pass for togyzkumalak")
+
+    def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
+      sys.error("Can't do a SelectSquare for togykumalak")
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -578,6 +619,8 @@ object Situation {
 
     lazy val moves: Map[Pos, List[Move]] = Map.empty[Pos, List[Move]]
 
+    def takebackable = s.takebackable
+
     lazy val check: Boolean = false
 
     def checkSquare = None
@@ -605,6 +648,10 @@ object Situation {
 
     def passes: List[Pass] = pass.fold[List[Pass]](_ => List.empty, p => List(p))
 
+    def selectSquaresAction: List[SelectSquares] =
+      selectSquares(List[Pos]().empty)
+        .fold[List[SelectSquares]](_ => List.empty, ss => List(ss))
+
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
@@ -628,6 +675,18 @@ object Situation {
     }
 
     def pass: Validated[String, Pass] = s.pass().toEither.map(p => Pass.Go(p)).toValidated
+
+    def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
+      s.selectSquares(
+        squares.map(p =>
+          p match {
+            case Pos.Go(p) => p
+            case _         => sys.error("Not passed go pos")
+          }
+        )
+      ).toEither
+        .map(ss => SelectSquares.Go(ss))
+        .toValidated
 
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.Go(variant) => Go(s.withVariant(variant))

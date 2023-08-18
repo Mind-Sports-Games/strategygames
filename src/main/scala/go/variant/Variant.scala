@@ -28,7 +28,7 @@ abstract class Variant private[variant] (
 
   def baseVariant: Boolean      = false
   def fenVariant: Boolean       = true
-  def hasAnalysisBoard: Boolean = true
+  def hasAnalysisBoard: Boolean = false
   def hasFishnet: Boolean       = false
 
   def p1IsBetterVariant: Boolean = false
@@ -39,6 +39,7 @@ abstract class Variant private[variant] (
   def dropsVariant: Boolean     = true
   def onlyDropsVariant: Boolean = true
   def hasGameScore: Boolean     = true
+  def canOfferDraw: Boolean     = false
 
   def repetitionEnabled: Boolean = false
 
@@ -92,7 +93,7 @@ abstract class Variant private[variant] (
         case (destInt, Some(dest)) => {
           val uciMove       = s"${Role.defaultRole.forsyth}@${dest.key}"
           val previousMoves = situation.board.uciMoves
-          val newPosition   = situation.board.apiPosition.makeMovesWithPrevious(List(destInt), previousMoves)
+          val newPosition   = situation.board.apiPosition.makeMovesWithPrevious(List(uciMove), previousMoves)
           Drop(
             piece = Piece(situation.player, Role.defaultRole),
             pos = dest,
@@ -123,9 +124,22 @@ abstract class Variant private[variant] (
   def validPass(situation: Situation): Pass = {
     val uciMove       = "pass"
     val previousMoves = situation.board.uciMoves
-    val newPosition   = situation.board.apiPosition
-      .makeMovesWithPrevious(List(Api.passMove(situation.board.variant)), previousMoves)
+    val newPosition   = situation.board.apiPosition.makeMovesWithPrevious(List(uciMove), previousMoves)
     Pass(
+      situationBefore = situation,
+      after = situation.board.copy(
+        uciMoves = situation.board.uciMoves :+ uciMove,
+        position = newPosition.some
+      )
+    )
+  }
+
+  def createSelectSquares(situation: Situation, squares: List[Pos]): SelectSquares = {
+    val uciMove       = s"ss:${squares.mkString(",")}"
+    val previousMoves = situation.board.uciMoves
+    val newPosition   = situation.board.apiPosition.makeMovesWithPrevious(List(uciMove), previousMoves)
+    SelectSquares(
+      squares = squares,
       situationBefore = situation,
       after = situation.board.copy(
         uciMoves = situation.board.uciMoves :+ uciMove,
@@ -155,13 +169,20 @@ abstract class Variant private[variant] (
 
   def pass(situation: Situation): Validated[String, Pass] = Validated.valid(validPass(situation))
 
+  def selectSquares(situation: Situation, squares: List[Pos]) =
+    if (situation.canSelectSquares) {
+      Validated.valid(createSelectSquares(situation, squares))
+    } else {
+      Validated.invalid(s"$this variant cannot selectSquares $situation $squares")
+    }
+
   def possibleDrops(situation: Situation): Option[List[Pos]] =
-    if (dropsVariant)
+    if (dropsVariant && !situation.end)
       validDrops(situation).map(_.pos).some
     else None
 
   def possibleDropsByRole(situation: Situation): Option[Map[Role, List[Pos]]] =
-    if (dropsVariant)
+    if (dropsVariant && !situation.end)
       validDrops(situation)
         .map(drop => (drop.piece.role, drop.pos))
         .groupBy(_._1)

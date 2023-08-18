@@ -9,13 +9,14 @@ object UciCharPair {
 
   def apply(uci: Uci): stratUciCharPair =
     uci match {
-      case Uci.Drop(role, pos) =>
+      case Uci.Drop(role, pos)  =>
         stratUciCharPair(
           toChar(pos),
           dropRole2charMap.getOrElse(role, voidChar)
         )
-      case Uci.Pass()          => stratUciCharPair(toChar(Pos.A1), toChar(Pos.A1))
-      case _                   => sys.error(s"Go does not have moves or promotable roles uci: ${uci}")
+      case Uci.Pass()           => stratUciCharPair(toChar(Pos.A1), toChar(Pos.A1))
+      case Uci.SelectSquares(_) => stratUciCharPair(toChar(Pos.A1), toChar(Pos.A1))
+      case _                    => sys.error(s"Go does not have moves or promotable roles uci: ${uci}")
     }
 
   private[format] object implementation {
