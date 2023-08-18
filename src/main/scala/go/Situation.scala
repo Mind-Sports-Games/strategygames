@@ -19,6 +19,8 @@ case class Situation(board: Board, player: Player) {
 
   def dropsAsDrops: List[Drop] = board.variant.validDrops(this)
 
+  def takebackable = !canSelectSquares
+
   def history = board.history
 
   private lazy val gameEnd: Boolean = board.apiPosition.gameEnd

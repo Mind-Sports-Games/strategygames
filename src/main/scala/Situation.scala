@@ -26,6 +26,8 @@ sealed abstract class Situation(val board: Board, val player: Player) {
   def actions: List[Action] =
     moves.values.flatten.toList ::: dropsAsDrops ::: passes ::: selectSquaresAction
 
+  def takebackable: Boolean
+
   def history = board.history
 
   val check: Boolean
@@ -97,6 +99,8 @@ object Situation {
     lazy val moves: Map[Pos, List[Move]] = s.moves.map { case (p: chess.Pos, l: List[chess.Move]) =>
       (Pos.Chess(p), l.map(Move.Chess))
     }
+
+    def takebackable = true
 
     lazy val check: Boolean = s.check
 
@@ -206,6 +210,8 @@ object Situation {
     lazy val moves: Map[Pos, List[Move]] = s.validMoves.map {
       case (p: draughts.Pos, l: List[draughts.Move]) => (Pos.Draughts(p), l.map(Move.Draughts))
     }
+
+    def takebackable = true
 
     lazy val check: Boolean = false
 
@@ -325,6 +331,8 @@ object Situation {
       (Pos.FairySF(p), l.map(Move.FairySF))
     }
 
+    def takebackable = true
+
     lazy val check: Boolean = s.check
 
     def checkSquare = s.checkSquare.map(Pos.FairySF)
@@ -423,6 +431,8 @@ object Situation {
       (Pos.Samurai(p), l.map(Move.Samurai))
     }
 
+    def takebackable = true
+
     lazy val check: Boolean = false
 
     def checkSquare = None
@@ -517,6 +527,8 @@ object Situation {
         (Pos.Togyzkumalak(p), l.map(Move.Togyzkumalak))
     }
 
+    def takebackable = true
+
     lazy val check: Boolean = false
 
     def checkSquare = None
@@ -606,6 +618,8 @@ object Situation {
       ) {
 
     lazy val moves: Map[Pos, List[Move]] = Map.empty[Pos, List[Move]]
+
+    def takebackable = s.takebackable
 
     lazy val check: Boolean = false
 
