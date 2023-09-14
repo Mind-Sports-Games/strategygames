@@ -108,15 +108,15 @@ case class Game(
   }
 
   private def applyClock(
-    metrics: MoveMetrics,
-    gameActive: Boolean,
-    switchClock: Boolean,
-    pauseClock: Boolean = false
+      metrics: MoveMetrics,
+      gameActive: Boolean,
+      switchClock: Boolean,
+      pauseClock: Boolean = false
   ) =
     clock.map { c =>
       {
         val newC = c.step(metrics, gameActive, switchClock)
-        if (pauseClock) newC.stop
+        if (pauseClock) newC.stop.pause
         else if (turns - startedAtTurn == (2 * situation.board.variant.plysPerTurn - 1)) newC.start
         else newC
       }
