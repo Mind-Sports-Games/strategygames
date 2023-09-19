@@ -44,7 +44,8 @@ case object Go19x19
       (situation.board.apiPosition.gameEnd)
 
   override def specialDraw(situation: Situation) =
-    situation.board.apiPosition.fen.player1Score == situation.board.apiPosition.fen.player2Score
+    (situation.board.apiPosition.fen.player1Score == situation.board.apiPosition.fen.player2Score) ||
+      situation.board.apiPosition.isRepetition
 
   override def winner(situation: Situation): Option[Player] =
     if (specialEnd(situation) && !specialDraw(situation)) {

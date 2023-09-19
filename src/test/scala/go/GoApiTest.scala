@@ -546,7 +546,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
     }
   }
 
-  "repetition game should have different ending" should {
+  "repetition game with 3 kos" should {
     val game  = Api.position(variant.Go9x9)
     val moves = List(
       "s@b8",
@@ -587,7 +587,9 @@ class GoApiTest extends Specification with ValidatedMatchers {
     )
 
     val newGame1 = game.makeMoves(moves)
-    newGame1.gameResult must_== GameResult.Ongoing()
+    "be a variant end" in {
+      newGame1.gameResult must_== GameResult.VariantEnd()
+    }
   }
 
 }
