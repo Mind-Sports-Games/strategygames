@@ -546,4 +546,48 @@ class GoApiTest extends Specification with ValidatedMatchers {
     }
   }
 
+  "repetition game should have different ending" should {
+    val game  = Api.position(variant.Go9x9)
+    val moves = List(
+      "s@b8",
+      "s@b7",
+      "s@c9",
+      "s@c6",
+      "s@d8",
+      "s@d7",
+      "s@f8",
+      "s@f7",
+      "s@g9",
+      "s@g6",
+      "s@h8",
+      "s@h7",
+      "s@b2",
+      "s@b3",
+      "s@c1",
+      "s@c4",
+      "s@d2",
+      "s@d3",
+      "s@f2",
+      "s@f3",
+      "s@g1",
+      "s@g4",
+      "s@h2",
+      "s@h3",
+      "s@c7",
+      "s@c2",
+      "s@g3",
+      "s@g8",
+      "s@g7",
+      "s@c8",
+      "s@c3",
+      "s@g2",
+      "s@c7",
+      "s@c2",
+      "s@g3"
+    )
+
+    val newGame1 = game.makeMoves(moves)
+    newGame1.gameResult must_== GameResult.Ongoing()
+  }
+
 }
