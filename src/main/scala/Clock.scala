@@ -63,7 +63,7 @@ sealed trait Clock {
   // Abstract methods
   def start: Clock
   def pause: Clock
-  def stop: Clock
+  def stop(pause: Boolean = false): Clock
   def hardStop: Clock
   def switch(switchPlayer: Boolean = true): Clock
   def step(
@@ -150,9 +150,9 @@ case class FischerClock(
 
   def start = if (isRunning) this else copy(timer = Option(now), paused = false)
 
-  def pause = copy(paused = true)
+  def pause = stop(true)
 
-  def stop =
+  def stop(pause: Boolean = false) =
     if (paused) this
     else
       timer.fold(this) { t =>
@@ -162,7 +162,8 @@ case class FischerClock(
             player,
             _.takeTime(curT).copy(lastMoveTime = curT)
           ),
-          timer = None
+          timer = None,
+          paused = pause
         )
       }
 
@@ -380,11 +381,11 @@ case class ByoyomiClock(
 
   def start = if (isRunning) this else copy(timer = Option(now), paused = false)
 
-  def pause = copy(paused = true)
+  def pause = stop(true)
 
   def isPaused = paused
 
-  def stop =
+  def stop(pause: Boolean = false) =
     if (paused) this
     else
       timer.fold(this) { t =>
@@ -398,7 +399,8 @@ case class ByoyomiClock(
               .spendPeriods(periods)
               .copy(lastMoveTime = curT)
           ),
-          timer = None
+          timer = None,
+          paused = pause
         )
       }
 
