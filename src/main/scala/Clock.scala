@@ -63,6 +63,7 @@ sealed trait Clock {
   // Abstract methods
   def start: Clock
   def pause: Clock
+  def stop: Clock
   def stop(pause: Boolean = false): Clock
   def hardStop: Clock
   def switch(switchPlayer: Boolean = true): Clock
@@ -166,6 +167,8 @@ case class FischerClock(
           paused = pause
         )
       }
+
+  def stop = stop()
 
   def hardStop = copy(timer = None)
 
@@ -403,6 +406,8 @@ case class ByoyomiClock(
           paused = pause
         )
       }
+
+  def stop = stop()
 
   def hardStop = copy(timer = None)
 
