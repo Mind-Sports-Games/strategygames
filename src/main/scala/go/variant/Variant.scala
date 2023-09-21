@@ -64,8 +64,7 @@ abstract class Variant private[variant] (
   def setupInfo(fen: FEN): Option[String] = {
     val komi     = fen.komi
     val handicap = fen.handicap.getOrElse(0)
-    if (fen != initialFen) Some(s"Handicap (${handicap}), komi (${komi})".replace(".0", ""))
-    else None
+    Some(s"Handicap (${handicap}), komi (${komi})".replace(".0", ""))
   }
 
   def pieces: PieceMap = Api.pieceMapFromFen(key, initialFen.value)
