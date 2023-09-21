@@ -22,7 +22,9 @@ case object Go19x19
 
   // cache this rather than checking with the API everytime
   override def initialFen =
-    format.FEN("19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 65 65 1")
+    format.FEN(
+      "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 65 0 0 65 1"
+    )
 
   override def boardFenFromHandicap(handicap: Int): String = {
     handicap match {

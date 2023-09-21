@@ -153,7 +153,7 @@ object Api {
       val fenKomi     = (komi * 10).toInt
       val fullMoveStr = (ply / 2 + 1).toString()
       val pocket      = "[SSSSSSSSSSssssssssss]"
-      return s"${board}${pocket} ${turn} ${ko} ${p1FenScore} ${p2FenScore} ${fenKomi} ${fullMoveStr}"
+      return s"${board}${pocket} ${turn} ${ko} ${p1FenScore} ${p2FenScore} 0 0 ${fenKomi} ${fullMoveStr}"
     }
 
     def toPosition = position.toBoard().position()
@@ -346,7 +346,7 @@ object Api {
     case _         => sys.error(s"not given a go variant name: ${variantKey}")
   }
 
-  val fenRegex                                = "([0-9Ss]?){1,19}(/([0-9Ss]?){1,19}){8,18}\\[[Ss]+\\] [w|b] - [0-9]+ [0-9]+ [0-9]+ [0-9]+"
+  val fenRegex                                = "([0-9Ss]?){1,19}(/([0-9Ss]?){1,19}){8,18}\\[[Ss]+\\] [w|b] - [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+"
   def validateFEN(fenString: String): Boolean =
     Try(goBoardFromFen(FEN(fenString))).isSuccess && fenString.matches(fenRegex)
 
