@@ -18,8 +18,9 @@ object GameResult {
   final case class Draw()       extends GameResult
   final case class Ongoing()    extends GameResult
 
-  def resultFromInt(value: Int, ended: Boolean): GameResult =
+  def resultFromInt(value: Int, ended: Boolean, isRepetition: Boolean): GameResult =
     if (value.abs == 1000 && ended) GameResult.VariantEnd()
+    else if (value == 0 && ended && isRepetition) GameResult.VariantEnd() // e.g. repeating 3 ko's
     else if (value == 0 && ended) GameResult.Draw()
     else if (!ended) GameResult.Ongoing()
     else sys.error(s"Unknown game result: ${value}")
@@ -51,6 +52,7 @@ object Api {
     val gameResult: GameResult
     val gameEnd: Boolean
     val gameOutcome: Int
+    val isRepetition: Boolean
     val gameScore: Int
     val p1Score: Double
     val p2Score: Double
@@ -151,7 +153,7 @@ object Api {
       val fenKomi     = (komi * 10).toInt
       val fullMoveStr = (ply / 2 + 1).toString()
       val pocket      = "[SSSSSSSSSSssssssssss]"
-      return s"${board}${pocket} ${turn} ${ko} ${p1FenScore} ${p2FenScore} ${fenKomi} ${fullMoveStr}"
+      return s"${board}${pocket} ${turn} ${ko} ${p1FenScore} ${p2FenScore} 0 0 ${fenKomi} ${fullMoveStr}"
     }
 
     def toPosition = position.toBoard().position()
@@ -214,8 +216,12 @@ object Api {
         )
       )
 
+    val passMove: Int = gameSize * gameSize
+
+    lazy val isRepetition: Boolean = position.isRepetition() && (position.lastMove() != passMove)
+
     lazy val gameResult: GameResult =
-      GameResult.resultFromInt(position.outcome(), position.hasEnded())
+      GameResult.resultFromInt(position.outcome(), position.hasEnded(), isRepetition)
 
     lazy val gameEnd: Boolean = position.hasEnded()
 
@@ -225,8 +231,6 @@ object Api {
 
     lazy val p1Score: Double = position.blackScore() // black
     lazy val p2Score: Double = position.whiteScore() // white + komi
-
-    val passMove: Int = gameSize * gameSize
 
     val legalActions: Array[Int] = {
       position.resetCursor()
@@ -342,7 +346,7 @@ object Api {
     case _         => sys.error(s"not given a go variant name: ${variantKey}")
   }
 
-  val fenRegex                                = "([0-9Ss]?){1,19}(/([0-9Ss]?){1,19}){8,18}\\[[Ss]+\\] [w|b] - [0-9]+ [0-9]+ [0-9]+ [0-9]+"
+  val fenRegex                                = "([0-9Ss]?){1,19}(/([0-9Ss]?){1,19}){8,18}\\[[Ss]+\\] [w|b] - [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+"
   def validateFEN(fenString: String): Boolean =
     Try(goBoardFromFen(FEN(fenString))).isSuccess && fenString.matches(fenRegex)
 

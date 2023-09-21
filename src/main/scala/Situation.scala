@@ -629,7 +629,7 @@ object Situation {
 
     def threefoldRepetition: Boolean = false
 
-    def isRepetition: Boolean                    = false
+    def isRepetition: Boolean                    = s.isRepetition
     override lazy val perpetualPossible: Boolean = false // not allowed to repeat ko
 
     def end: Boolean = s.end

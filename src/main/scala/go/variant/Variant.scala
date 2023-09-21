@@ -6,8 +6,7 @@ import scala.annotation.nowarn
 
 import strategygames.go._
 import strategygames.go.format.{ FEN, Forsyth, Uci }
-import strategygames.{ GameFamily, Player }
-import strategygames.togyzkumalak.Score
+import strategygames.{ GameFamily, Player, Score }
 
 case class GoName(val name: String)
 
@@ -56,7 +55,7 @@ abstract class Variant private[variant] (
 
     val board  = boardFenFromHandicap(handicap)
     val pocket = "[SSSSSSSSSSssssssssss]"
-    FEN(s"${board}${pocket} ${turn} - ${p1Score} ${p2Score} ${komi} 1")
+    FEN(s"${board}${pocket} ${turn} - ${p1Score} ${p2Score} 0 0 ${komi} 1")
   }
 
   def boardFenFromHandicap(handicap: Int): String = initialFen.board
@@ -64,8 +63,7 @@ abstract class Variant private[variant] (
   def setupInfo(fen: FEN): Option[String] = {
     val komi     = fen.komi
     val handicap = fen.handicap.getOrElse(0)
-    if (fen != initialFen) Some(s"Handicap (${handicap}), komi (${komi})".replace(".0", ""))
-    else None
+    Some(s"Handicap (${handicap}), komi (${komi})".replace(".0", ""))
   }
 
   def pieces: PieceMap = Api.pieceMapFromFen(key, initialFen.value)
@@ -93,7 +91,8 @@ abstract class Variant private[variant] (
         case (destInt, Some(dest)) => {
           val uciMove       = s"${Role.defaultRole.forsyth}@${dest.key}"
           val previousMoves = situation.board.uciMoves
-          val newPosition   = situation.board.apiPosition.makeMovesWithPrevious(List(uciMove), previousMoves)
+          val oldPosition   = situation.board.apiPosition
+          val newPosition   = oldPosition.makeMovesWithPrevious(List(uciMove), previousMoves)
           Drop(
             piece = Piece(situation.player, Role.defaultRole),
             pos = dest,
@@ -112,7 +111,11 @@ abstract class Variant private[variant] (
                     newPosition.fen.player1Score,
                     newPosition.fen.player2Score
                   ),
-                  halfMoveClock = situation.board.history.halfMoveClock + situation.player.fold(0, 1)
+                  captures = situation.history.captures.add(
+                    situation.player,
+                    oldPosition.pieceMap.size - newPosition.pieceMap.size + 1
+                  ),
+                  halfMoveClock = situation.history.halfMoveClock + situation.player.fold(0, 1)
                 )
               )
           )

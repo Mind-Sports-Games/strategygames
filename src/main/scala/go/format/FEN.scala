@@ -16,14 +16,18 @@ final case class FEN(value: String) extends AnyVal {
 
   def player2Score: Int = intFromFen(4).getOrElse(0)
 
-  def fullMove: Option[Int] = intFromFen(6)
+  def player1Captures: Int = intFromFen(5).getOrElse(0)
+
+  def player2Captures: Int = intFromFen(6).getOrElse(0)
+
+  def fullMove: Option[Int] = intFromFen(8)
 
   def ply: Option[Int] =
     fullMove map { fm =>
       fm * 2 - (if (player.exists(_.p1)) 2 else 1)
     }
 
-  def komi: Double = intFromFen(5).getOrElse(0) / 10.0
+  def komi: Double = intFromFen(7).getOrElse(0) / 10.0
 
   def handicap: Option[Int] = if (fullMove == Some(1)) Some(board.count(_ == 'S')) else None
 

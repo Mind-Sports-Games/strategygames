@@ -62,7 +62,9 @@ sealed trait Clock {
 
   // Abstract methods
   def start: Clock
+  def pause: Clock
   def stop: Clock
+  def stop(pause: Boolean = false): Clock
   def hardStop: Clock
   def switch(switchPlayer: Boolean = true): Clock
   def step(
@@ -79,6 +81,7 @@ sealed trait Clock {
   def allClockPlayers: Seq[ClockPlayer]
   def lagCompAvg: Centis
   def setRemainingTime(p: Player, t: Centis): Clock
+  def isPaused: Boolean
 
   def currentClockFor(c: Player): ClockInfo
 
@@ -119,7 +122,8 @@ case class FischerClock(
     player: Player,
     players: Player.Map[FischerClockPlayer],
     timer: Option[Timestamp] = None,
-    timestamper: Timestamper = RealTimestamper
+    timestamper: Timestamper = RealTimestamper,
+    paused: Boolean = false
 ) extends Clock {
   import timestamper.{ now, toNow }
 
@@ -134,27 +138,37 @@ case class FischerClock(
     FischerClockInfo(remainingAfterElapsed)
   }
 
+  def isPaused = paused
+
   def outOfTime(c: Player, withGrace: Boolean) =
-    players(c).remaining <=
-      timerFor(c).fold(Centis(0)) { t =>
-        if (withGrace) (toNow(t) - (players(c).lag.quota atMost Centis(200))) nonNeg
-        else toNow(t)
+    if (paused) false
+    else
+      players(c).remaining <=
+        timerFor(c).fold(Centis(0)) { t =>
+          if (withGrace) (toNow(t) - (players(c).lag.quota atMost Centis(200))) nonNeg
+          else toNow(t)
+        }
+
+  def start = if (isRunning) this else copy(timer = Option(now), paused = false)
+
+  def pause = stop(true)
+
+  def stop(pause: Boolean = false) =
+    if (paused) this
+    else
+      timer.fold(this) { t =>
+        val curT = toNow(t)
+        copy(
+          players = players.update(
+            player,
+            _.takeTime(curT).copy(lastMoveTime = curT)
+          ),
+          timer = None,
+          paused = pause
+        )
       }
 
-  def start = if (isRunning) this else copy(timer = Option(now))
-
-  def stop = {
-    timer.fold(this) { t =>
-      val curT = toNow(t)
-      copy(
-        players = players.update(
-          player,
-          _.takeTime(curT).copy(lastMoveTime = curT)
-        ),
-        timer = None
-      )
-    }
-  }
+  def stop = stop()
 
   def hardStop = copy(timer = None)
 
@@ -327,7 +341,8 @@ case class ByoyomiClock(
     player: Player,
     players: Player.Map[ByoyomiClockPlayer],
     timer: Option[Timestamp] = None,
-    timestamper: Timestamper = RealTimestamper
+    timestamper: Timestamper = RealTimestamper,
+    paused: Boolean = false
 ) extends Clock {
   import timestamper.{ now, toNow }
 
@@ -354,34 +369,45 @@ case class ByoyomiClock(
     )
   }
 
-  def outOfTime(c: Player, withGrace: Boolean) = {
-    val player        = players(c)
-    val timeUsed      = timerFor(c).fold(Centis(0))(t =>
-      if (withGrace) (toNow(t) - (players(c).lag.quota atMost Centis(200))) nonNeg
-      else toNow(t)
-    )
-    val timeRemaining = player.remaining + player.periodsLeft * player.byoyomi
-
-    timeRemaining <= timeUsed
-  }
-
-  def start = if (isRunning) this else copy(timer = Option(now))
-
-  def stop =
-    timer.fold(this) { t =>
-      val curT    = toNow(t)
-      val periods = periodsInUse(player, curT)
-      copy(
-        players = players.update(
-          player,
-          _.takeTime(curT)
-            .giveTime(byoyomiOf(player) * periods)
-            .spendPeriods(periods)
-            .copy(lastMoveTime = curT)
-        ),
-        timer = None
+  def outOfTime(c: Player, withGrace: Boolean) =
+    if (paused) false
+    else {
+      val player        = players(c)
+      val timeUsed      = timerFor(c).fold(Centis(0))(t =>
+        if (withGrace) (toNow(t) - (players(c).lag.quota atMost Centis(200))) nonNeg
+        else toNow(t)
       )
+      val timeRemaining = player.remaining + player.periodsLeft * player.byoyomi
+
+      timeRemaining <= timeUsed
     }
+
+  def start = if (isRunning) this else copy(timer = Option(now), paused = false)
+
+  def pause = stop(true)
+
+  def isPaused = paused
+
+  def stop(pause: Boolean = false) =
+    if (paused) this
+    else
+      timer.fold(this) { t =>
+        val curT    = toNow(t)
+        val periods = periodsInUse(player, curT)
+        copy(
+          players = players.update(
+            player,
+            _.takeTime(curT)
+              .giveTime(byoyomiOf(player) * periods)
+              .spendPeriods(periods)
+              .copy(lastMoveTime = curT)
+          ),
+          timer = None,
+          paused = pause
+        )
+      }
+
+  def stop = stop()
 
   def hardStop = copy(timer = None)
 
