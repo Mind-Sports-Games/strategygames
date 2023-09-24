@@ -8,7 +8,7 @@ case class SelectSquares(
     situationBefore: Situation,
     after: Board,
     metrics: MoveMetrics = MoveMetrics()
-) extends Action(situationBefore, after, metrics) {
+) extends Action(situationBefore, after) {
 
   def situationAfter = Situation(finalizeAfter, !situationBefore.player)
 

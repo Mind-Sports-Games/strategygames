@@ -1,7 +1,6 @@
 package strategygames.go.format
 import strategygames.go._
-
-import strategygames.GameFamily
+import scala.annotation.nowarn
 
 import cats.data.Validated
 import cats.implicits._
@@ -90,7 +89,9 @@ object Uci {
 
   def apply(drop: strategygames.go.Drop) = Uci.Drop(drop.piece.role, drop.pos)
 
-  def apply(pass: strategygames.go.Pass) = Uci.Pass()
+  // TODO: do we really need this?
+  //       surely there is a better way to get this for this situation?
+  def apply(@nowarn pass: strategygames.go.Pass) = Uci.Pass()
 
   def apply(ss: strategygames.go.SelectSquares) = Uci.SelectSquares(ss.squares)
 

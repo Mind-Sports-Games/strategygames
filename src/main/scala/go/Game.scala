@@ -3,7 +3,7 @@ import strategygames.{ Clock, MoveMetrics }
 
 import cats.data.Validated
 
-import strategygames.go.format.{ pgn, FEN }
+import strategygames.go.format.FEN
 
 case class Game(
     situation: Situation,

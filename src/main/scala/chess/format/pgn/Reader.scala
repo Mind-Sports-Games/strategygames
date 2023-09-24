@@ -1,6 +1,6 @@
 package strategygames.chess
 package format.pgn
-import strategygames.{ ByoyomiClock, FischerClock, Move => StratMove, Situation => StratSituation }
+import strategygames.{ ByoyomiClock, FischerClock, Situation => StratSituation }
 
 import strategygames.format.pgn.{ ParsedPgn, Sans, Tags }
 

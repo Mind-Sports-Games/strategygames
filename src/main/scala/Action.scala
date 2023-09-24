@@ -1,13 +1,9 @@
 package strategygames
 
-import cats.syntax.option.none
-
 import strategygames.format.Uci
 
 abstract class Action(
-    situationBefore: Situation,
-    after: Board,
-    metrics: MoveMetrics = MoveMetrics()
+    situationBefore: Situation
 ) {
   def situationAfter: Situation
   // def finalizeAfter: Board //this can be added once draughts has been refactored (removing the input finalSquare)

@@ -203,6 +203,8 @@ case class FischerClock(
         val clockActive = gameActive && moveTime < competitor.remaining
         val inc         = (clockActive && switchClock) ?? competitor.increment
 
+        // TODO: This is where the increment gets added again.
+        //       can basically add in Bronstein here.
         val newC = updatePlayer(player) {
           _.takeTime(moveTime - inc)
             .copy(lag = lagTrack, lastMoveTime = moveTime)

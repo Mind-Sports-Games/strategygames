@@ -2,15 +2,10 @@ package strategygames.go
 package format.pgn
 
 import cats.data.Validated
-import cats.syntax.option._
+import scala.annotation.nowarn
 
-import strategygames.{
-  Drop => StratDrop,
-  Move => StratMove,
-  Pass => StratPass,
-  SelectSquares => StratSelectSquares
-}
-import strategygames.format.pgn.{ Metas, ParsedPgn, San, Sans, Suffixes, Tags }
+import strategygames.{ Drop => StratDrop, Pass => StratPass, SelectSquares => StratSelectSquares }
+import strategygames.format.pgn.{ Metas, San, Suffixes }
 
 case class Std(
     dest: Pos,
@@ -36,9 +31,7 @@ case class Std(
 
   def withMetas(m: Metas) = copy(metas = m)
 
-  def move(situation: Situation) = Validated.invalid("Not implemented move") // TODO: ???
-
-  private def compare[A](a: Option[A], b: A) = a.fold(true)(b ==)
+  def move(@nowarn situation: Situation) = Validated.invalid("Not implemented move") // TODO: ???
 }
 
 case class Drop(
@@ -72,7 +65,7 @@ case class Pass(
   def withMetas(m: Metas) = copy(metas = m)
 
   def pass(situation: Situation): Validated[String, strategygames.go.Pass] =
-    situation.pass
+    situation.pass()
 }
 
 case class SelectSquares(

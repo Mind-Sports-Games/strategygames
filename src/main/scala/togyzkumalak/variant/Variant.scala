@@ -5,7 +5,7 @@ import cats.syntax.option._
 import scala.annotation.nowarn
 
 import strategygames.togyzkumalak._
-import strategygames.togyzkumalak.format.{ FEN, Forsyth, Uci }
+import strategygames.togyzkumalak.format.{ FEN, Uci }
 import strategygames.{ GameFamily, Player }
 
 case class TogyzkumalakName(val name: String)
@@ -54,7 +54,7 @@ abstract class Variant private[variant] (
 
   // looks like this is only to allow King to be a valid promotion piece
   // in just atomic, so can leave as true for now
-  def isValidPromotion(promotion: Option[PromotableRole]): Boolean = true
+  def isValidPromotion(@nowarn promotion: Option[PromotableRole]): Boolean = true
 
   private def destFromOrig(pos: Pos, count: Int): Pos =
     (if (count == 1) Pos((pos.index + 1) % 18)
@@ -67,8 +67,8 @@ abstract class Variant private[variant] (
     Pos.all.map(pos => (pos, (Piece(pos.player, Stone), 0))).toMap
 
   private def pieceMapWithEmpties(pieces: PieceMap): PieceMap = emptyPieceMap.map {
-    case (pos, posInfo) if pieces.get(pos).nonEmpty => (pos -> pieces(pos))
-    case piece                                      => piece
+    case (pos, _) if pieces.get(pos).nonEmpty => (pos -> pieces(pos))
+    case piece                                => piece
   }
 
   private def stonesAfterMove(origStones: Int, thisStones: Int, origIndex: Int, thisIndex: Int): Int = {
@@ -101,7 +101,7 @@ abstract class Variant private[variant] (
           (pos, (Piece(!pos.player, Tuzdik), 1))
         case (pos, posInfo) => (pos, posInfo)
       }
-      .filterNot { case (pos, posInfo) => posInfo._2 == 0 }
+      .filterNot { case (_, posInfo) => posInfo._2 == 0 }
       .toMap
 
   def boardAfter(situation: Situation, orig: Pos, dest: Pos): Board = {
@@ -128,7 +128,7 @@ abstract class Variant private[variant] (
 
   def validMoves(situation: Situation): Map[Pos, List[Move]] =
     situation.board.pieces
-      .filter { case (pos, posInfo) =>
+      .filter { case (_, posInfo) =>
         posInfo._1.player == situation.player && posInfo._1.role == Stone
       }
       .map {
@@ -188,7 +188,7 @@ abstract class Variant private[variant] (
     board
 
   // TODO: implement
-  def valid(board: Board, strict: Boolean): Boolean = true
+  def valid(@nowarn board: Board, @nowarn strict: Boolean): Boolean = true
 
   val roles: List[Role] = Role.all
 

@@ -59,7 +59,7 @@ abstract class Variant private[variant] (
     FEN(s"${board}${pocket} ${turn} - ${p1Score} ${p2Score} ${komi} 1")
   }
 
-  def boardFenFromHandicap(handicap: Int): String = initialFen.board
+  def boardFenFromHandicap(@nowarn handicap: Int): String = initialFen.board
 
   def setupInfo(fen: FEN): Option[String] = {
     val komi     = fen.komi
@@ -77,9 +77,9 @@ abstract class Variant private[variant] (
 
   // looks like this is only to allow King to be a valid promotion piece
   // in just atomic, so can leave as true for now
-  def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false
+  def isValidPromotion(@nowarn promotion: Option[PromotableRole]): Boolean = false
 
-  def validMoves(situation: Situation) = None // just remove this?
+  def validMoves(@nowarn situation: Situation) = None // just remove this?
 
   def validDrops(situation: Situation): List[Drop] =
     situation.board.apiPosition.legalDrops
@@ -90,7 +90,7 @@ abstract class Variant private[variant] (
         )
       }
       .map {
-        case (destInt, Some(dest)) => {
+        case (_, Some(dest)) => {
           val uciMove       = s"${Role.defaultRole.forsyth}@${dest.key}"
           val previousMoves = situation.board.uciMoves
           val newPosition   = situation.board.apiPosition.makeMovesWithPrevious(List(uciMove), previousMoves)
@@ -117,7 +117,7 @@ abstract class Variant private[variant] (
               )
           )
         }
-        case (destInt, dest)       => sys.error(s"Invalid pos from int: ${destInt}, ${dest}")
+        case (destInt, dest) => sys.error(s"Invalid pos from int: ${destInt}, ${dest}")
       }
       .toList
 
@@ -216,7 +216,7 @@ abstract class Variant private[variant] (
   @nowarn def finalizeBoard(board: Board, uci: format.Uci, captured: Option[Piece]): Board =
     board
 
-  def valid(board: Board, strict: Boolean): Boolean =
+  def valid(board: Board, @nowarn strict: Boolean): Boolean =
     Api.validateFEN(Forsyth.exportBoard(board))
 
   val roles: List[Role] = Role.all

@@ -5,8 +5,7 @@ import strategygames.Player
 
 abstract class Action(
     situationBefore: Situation,
-    after: Board,
-    metrics: MoveMetrics = MoveMetrics()
+    after: Board
 ) {
   def before = situationBefore.board
 

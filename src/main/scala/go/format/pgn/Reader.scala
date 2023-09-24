@@ -1,12 +1,6 @@
 package strategygames.go
 package format.pgn
-import strategygames.{
-  ByoyomiClock,
-  Drop => StratDrop,
-  FischerClock,
-  Move => StratMove,
-  Situation => StratSituation
-}
+import strategygames.{ ByoyomiClock, FischerClock, Situation => StratSituation }
 
 import strategygames.format.pgn.{ ParsedPgn, Sans, Tags }
 
