@@ -4,7 +4,7 @@ import strategygames._
 import strategygames.chess.Pos._
 
 class ClockTest extends ChessTest {
-  val chess = GameLogic.Chess()
+  val chess       = GameLogic.Chess()
   val fakeClock60 = FischerClock(FischerClock.Config(60, 0))
     .copy(timestamper = new Timestamper {
       val now = Timestamp(0)
@@ -24,31 +24,31 @@ class ClockTest extends ChessTest {
 
   "play with a clock" should {
     val clock = FischerClock(FischerClock.Config(5 * 60 * 1000, 0))
-    val game  = makeGame withClock clock.start
-      "new game" in {
-        game.clock map { _.player } must_== Option(P1)
-      }
-      "one move played" in {
-        game.playMoves(E2 -> E4) must beValid.like { case g: strategygames.chess.Game =>
-          g.clock map { _.player } must_== Option(P2)
-        }
+    val game  = makeGame.withClock(clock.start)
+    "new game" in {
+      game.clock map { _.player } must_== Option(P1)
+    }
+    "one move played" in {
+      game.playMoves(E2 -> E4) must beValid.like { case g: strategygames.chess.Game =>
+        g.clock map { _.player } must_== Option(P2)
       }
     }
-    "create a clock" should {
-      "with time" in {
-        FischerClock(FischerClock.Config(60, 10)).limitSeconds must_== 60
-      }
-      "with increment" in {
-        FischerClock(FischerClock.Config(60, 10)).incrementSeconds must_== 10
-      }
-      "with few time" in {
-        FischerClock(FischerClock.Config(0, 10)).limitSeconds must_== 0
-      }
-      "with 30 seconds" in {
-        FischerClock(FischerClock.Config(30, 0)).limitInMinutes must_== 0.5
-      }
+  }
+  "create a clock" should {
+    "with time" in {
+      FischerClock(FischerClock.Config(60, 10)).limitSeconds must_== 60
     }
-    "lag compensation" should {
+    "with increment" in {
+      FischerClock(FischerClock.Config(60, 10)).incrementSeconds must_== 10
+    }
+    "with few time" in {
+      FischerClock(FischerClock.Config(0, 10)).limitSeconds must_== 0
+    }
+    "with 30 seconds" in {
+      FischerClock(FischerClock.Config(30, 0)).limitInMinutes must_== 0.5
+    }
+  }
+  "lag compensation" should {
     def durOf(lag: Int) = MoveMetrics(clientLag = Option(Centis(lag)))
 
     def clockStep(clock: Clock, wait: Int, lags: Int*) = {
