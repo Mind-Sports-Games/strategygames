@@ -38,6 +38,11 @@ object Api {
         movesList: List[String],
         previousMoves: List[String]
     ): Position
+    def createPosFromPrevious(previousMoves: List[String]): Position
+    def makeMovesWithPos(
+        movesList: List[String],
+        posWithPrevious: Position
+    ): Position
 
     def toBoard: String
     def goDiagram: String
@@ -75,6 +80,35 @@ object Api {
       case 13 => strategygames.go.variant.Go13x13
       case 19 => strategygames.go.variant.Go19x19
       case _  => sys.error("Incorrect game size from position")
+    }
+
+    private def initPos(previousMoves: List[String]): Position =
+      if (previousMoves.length == 0 && Api.initialFen(variant.key).value != fen.value)
+        positionFromFen(fen.value) // keeping current position?
+      else if (Api.initialFen(variant.key).value != initialFen.value)
+        positionFromFen(initialFen.value)
+      else new GoPosition(new GoGame(gameSize), 0, fromFen, komi)
+
+    def createPosFromPrevious(previousMoves: List[String]): Position =
+      initPos(previousMoves).makeMoves(previousMoves)
+
+    def makeMovesWithPos(
+        movesList: List[String],
+        posWithPrevious: Position
+    ): Position = {
+      var pos = posWithPrevious
+      movesList.map { move =>
+        {
+          val engineMove: Int = uciToMove(move, variant)
+          if (pos.legalActions.contains(engineMove)) pos = pos.makeMoves(List(move))
+          else
+            sys.error(
+              s"Illegal move1: ${move} from list: ${movesList} legalActions: ${pos.legalActions.map(_.toString()).mkString(", ")}"
+            )
+        }
+      }
+      pos.setKomi(komi)
+      return pos
     }
 
     def makeMovesWithPrevious(
@@ -346,7 +380,8 @@ object Api {
     case _         => sys.error(s"not given a go variant name: ${variantKey}")
   }
 
-  val fenRegex                                = "([0-9Ss]?){1,19}(/([0-9Ss]?){1,19}){8,18}\\[[Ss]+\\] [w|b] - [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+"
+  val fenRegex                                =
+    "([0-9Ss]?){1,19}(/([0-9Ss]?){1,19}){8,18}\\[[Ss]+\\] [w|b] - [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+"
   def validateFEN(fenString: String): Boolean =
     Try(goBoardFromFen(FEN(fenString))).isSuccess && fenString.matches(fenRegex)
 
