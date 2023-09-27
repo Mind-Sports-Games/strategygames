@@ -100,8 +100,12 @@ abstract class Variant private[variant] (
             s"${Role.defaultRole.forsyth}@${dest.key}".pp(s"${java.time.LocalDateTime.now()} uciMove")
           val newPosition = oldPosition
             .pp(s"${java.time.LocalDateTime.now()} oldPosition")
-            .makeMovesWithPos(List(uciMove), oldApiPosition)
+            .makeMovesWithPos(List(uciMove), oldApiPosition.deepCopy)
             .pp(s"${java.time.LocalDateTime.now()} newPosition")
+          // val newPosition = oldPosition
+          //  .pp(s"${java.time.LocalDateTime.now()} oldPosition")
+          //  .makeMovesWithPrevious(List(uciMove), previousMoves)
+          //  .pp(s"${java.time.LocalDateTime.now()} newPosition")
           Drop(
             piece = Piece(situation.player, Role.defaultRole),
             pos = dest,
@@ -131,7 +135,8 @@ abstract class Variant private[variant] (
         }
         case (destInt, Some(dest))                     => {
           val uciMove     = s"${Role.defaultRole.forsyth}@${dest.key}"
-          val newPosition = oldPosition.makeMovesWithPos(List(uciMove), oldApiPosition)
+          val newPosition = oldPosition.makeMovesWithPos(List(uciMove), oldApiPosition.deepCopy)
+          // val newPosition = oldPosition.makeMovesWithPrevious(List(uciMove), previousMoves)
           Drop(
             piece = Piece(situation.player, Role.defaultRole),
             pos = dest,

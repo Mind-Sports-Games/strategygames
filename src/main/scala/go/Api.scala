@@ -48,6 +48,7 @@ object Api {
     def goDiagram: String
     def setKomi(komi: Double): Unit
     def setBoard(goBoard: GoBoard): Unit
+    def deepCopy: Position
 
     val initialFen: FEN
     val fen: FEN
@@ -74,8 +75,8 @@ object Api {
       komi: Double = 6.5
   ) extends Position {
 
-    val gameSize: Int    = position.toBoard().gameSize()
-    val variant: Variant = gameSize match {
+    lazy val gameSize: Int    = position.toBoard().gameSize()
+    lazy val variant: Variant = gameSize match {
       case 9  => strategygames.go.variant.Go9x9
       case 13 => strategygames.go.variant.Go13x13
       case 19 => strategygames.go.variant.Go19x19
@@ -171,6 +172,8 @@ object Api {
 
     def setBoard(goBoard: GoBoard): Unit = position.setBoard(goBoard)
 
+    def deepCopy: Position = new GoPosition(position.deepCopy(), ply, fromFen, komi)
+
     def setKomi(k: Double): Unit = position.setKomiScore(k)
 
     def goDiagram: String = position.toBoard.toDiagram
@@ -250,7 +253,7 @@ object Api {
         )
       )
 
-    val passMove: Int = gameSize * gameSize
+    lazy val passMove: Int = gameSize * gameSize
 
     lazy val isRepetition: Boolean = position.isRepetition() && (position.lastMove() != passMove)
 
@@ -266,7 +269,7 @@ object Api {
     lazy val p1Score: Double = position.blackScore() // black
     lazy val p2Score: Double = position.whiteScore() // white + komi
 
-    val legalActions: Array[Int] = {
+    lazy val legalActions: Array[Int] = {
       position.resetCursor()
       var moves: List[Int] = List()
       var nextMove         = position.nextMove()
@@ -277,13 +280,13 @@ object Api {
       moves.toArray
     }
 
-    val legalDrops: Array[Int] = {
+    lazy val legalDrops: Array[Int] = {
       legalActions.filter(m => m != passMove)
     }
 
-    val playerTurn: Int = position.turn()
+    lazy val playerTurn: Int = position.turn()
 
-    val initialFen: FEN = fromFen.fold(Api.initialFen(variant.key))(f => f)
+    lazy val initialFen: FEN = fromFen.fold(Api.initialFen(variant.key))(f => f)
 
   }
 
