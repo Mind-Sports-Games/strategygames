@@ -113,8 +113,8 @@ abstract class Variant private[variant] (
                 situation.history.copy(
                   lastMove = Uci.Drop(Role.defaultRole, dest).some,
                   score = Score(
-                    oldPosition.fen.player1Score, // TODO: generating the scores is slow
-                    oldPosition.fen.player2Score  //        especially when we have to generate a FEN to get it
+                    newPosition.fen.player1Score, // TODO: generating the scores is slow
+                    newPosition.fen.player2Score  //        especially when we have to generate a FEN to get it
                   ),
                   captures = situation.history.captures.add(
                     situation.player,
