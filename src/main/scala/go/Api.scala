@@ -40,7 +40,7 @@ object Api {
         previousMoves: List[String]
     ): Position
     def createPosFromPrevious(previousMoves: List[String]): Position
-    def makeMovesWithPos(
+    private[go] def makeMovesWithPosUnchecked(
         movesList: List[String],
         posWithPrevious: Position
     ): Position
@@ -94,21 +94,11 @@ object Api {
     def createPosFromPrevious(previousMoves: List[String]): Position =
       initPos(previousMoves).makeMoves(previousMoves)
 
-    def makeMovesWithPos(
+    private[go] def makeMovesWithPosUnchecked(
         movesList: List[String],
         posWithPrevious: Position
     ): Position = {
-      var pos = posWithPrevious
-      movesList.map { move =>
-        {
-          val engineMove: Int = uciToMove(move, variant)
-          if (pos.legalActions.contains(engineMove)) pos = pos.makeMoves(List(move))
-          else
-            sys.error(
-              s"Illegal move1: ${move} from list: ${movesList} legalActions: ${pos.legalActions.map(_.toString()).mkString(", ")}"
-            )
-        }
-      }
+      val pos = posWithPrevious.makeMoves(movesList)
       pos.setKomi(komi)
       return pos
     }
@@ -157,7 +147,10 @@ object Api {
             position.makeMove(engineMove)
             position.makeMove(engineMove)
           } else {
-            if (position.legalMoves.contains(engineMove)) position.makeMove(engineMove)
+            // TODO: generating the legalMoves again and checking here is slow, we should
+            //       only ever be using this when we have to.
+            if (position.legalMoves.contains(engineMove))
+              position.makeMove(engineMove)
             else
               sys.error(
                 s"Illegal move2: ${engineMove} from list: ${movesList} legalMoves: ${position.legalMoves.map(_.toString()).mkString(", ")}"
@@ -186,6 +179,7 @@ object Api {
         if (position.turn() == 1) "b"
         else "w" // cant trust engine fen - not sure why but it always returns 'b'
       val ko          = splitDiagram.lift(2).getOrElse("-").toString()
+      // TODO: generating the score is slow.
       val p1FenScore  = (p1Score * 10).toInt
       val p2FenScore  = (p2Score * 10).toInt
       val fenKomi     = (komi * 10).toInt
@@ -240,7 +234,10 @@ object Api {
       pieces
     }
 
-    lazy val pieceMap: PieceMap = convertPieceMapFromFen(fenString)
+    // TODO: because generating the score is really slow and
+    //       we're immediately stripping that out in the converPieceMapFromFen
+    //       function, let's avoid it and use the goDiagram directly (pls test)
+    lazy val pieceMap: PieceMap = convertPieceMapFromFen(goDiagram)
 
     lazy val pocketData =
       Some(

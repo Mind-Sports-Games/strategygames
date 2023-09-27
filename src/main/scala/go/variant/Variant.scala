@@ -80,39 +80,31 @@ abstract class Variant private[variant] (
   def validMoves(situation: Situation) = None // just remove this?
 
   def validDrops(situation: Situation): List[Drop] = {
-    val ts1            = java.time.LocalDateTime.now().pp("start")
     val previousMoves  = situation.board.uciMoves
     val oldPosition    = situation.board.apiPosition
     val oldApiPosition = oldPosition.createPosFromPrevious(previousMoves)
+    val oldPieceMap    = oldPosition.pieceMap
 
     val drops = situation.board.apiPosition.legalDrops
-      .pp(s"${java.time.LocalDateTime.now()} legalDrops")
       .map { dest =>
         (
           dest,
           Api.moveToPos(dest, situation.board.variant)
         )
       }
-      .pp(s"${java.time.LocalDateTime.now()} map1")
       .map {
-        case (destInt, Some(dest)) if dest.key == "a1" => {
+        case (destInt, Some(dest)) => {
           val uciMove     =
-            s"${Role.defaultRole.forsyth}@${dest.key}".pp(s"${java.time.LocalDateTime.now()} uciMove")
+            s"${Role.defaultRole.forsyth}@${dest.key}"
           val newPosition = oldPosition
-            .pp(s"${java.time.LocalDateTime.now()} oldPosition")
-            .makeMovesWithPos(List(uciMove), oldApiPosition.deepCopy)
-            .pp(s"${java.time.LocalDateTime.now()} newPosition")
-          // val newPosition = oldPosition
-          //  .pp(s"${java.time.LocalDateTime.now()} oldPosition")
-          //  .makeMovesWithPrevious(List(uciMove), previousMoves)
-          //  .pp(s"${java.time.LocalDateTime.now()} newPosition")
+            .makeMovesWithPosUnchecked(List(uciMove), oldApiPosition.deepCopy)
           Drop(
             piece = Piece(situation.player, Role.defaultRole),
             pos = dest,
             situationBefore = situation,
             after = situation.board
               .copy(
-                pieces = newPosition.pieceMap,
+                pieces = newPosition.pieceMap, // TODO: Generating the piece map is SLOW
                 uciMoves = situation.board.uciMoves :+ uciMove,
                 pocketData = newPosition.pocketData,
                 position = newPosition.some
@@ -121,59 +113,28 @@ abstract class Variant private[variant] (
                 situation.history.copy(
                   lastMove = Uci.Drop(Role.defaultRole, dest).some,
                   score = Score(
-                    newPosition.fen.player1Score,
-                    newPosition.fen.player2Score
+                    oldPosition.p1Score.toInt, // TODO: generating the scores is slow
+                    oldPosition.p2Score.toInt
                   ),
                   captures = situation.history.captures.add(
                     situation.player,
-                    oldPosition.pieceMap.size - newPosition.pieceMap.size + 1
-                  ),
-                  halfMoveClock = situation.history.halfMoveClock + situation.player.fold(0, 1)
-                )
-              )
-          ).pp(s"${java.time.LocalDateTime.now()} Drop")
-        }
-        case (destInt, Some(dest))                     => {
-          val uciMove     = s"${Role.defaultRole.forsyth}@${dest.key}"
-          val newPosition = oldPosition.makeMovesWithPos(List(uciMove), oldApiPosition.deepCopy)
-          // val newPosition = oldPosition.makeMovesWithPrevious(List(uciMove), previousMoves)
-          Drop(
-            piece = Piece(situation.player, Role.defaultRole),
-            pos = dest,
-            situationBefore = situation,
-            after = situation.board
-              .copy(
-                pieces = newPosition.pieceMap,
-                uciMoves = situation.board.uciMoves :+ uciMove,
-                pocketData = newPosition.pocketData,
-                position = newPosition.some
-              )
-              .withHistory(
-                situation.history.copy(
-                  lastMove = Uci.Drop(Role.defaultRole, dest).some,
-                  score = Score(
-                    newPosition.fen.player1Score,
-                    newPosition.fen.player2Score
-                  ),
-                  captures = situation.history.captures.add(
-                    situation.player,
-                    oldPosition.pieceMap.size - newPosition.pieceMap.size + 1
+                    oldPieceMap.size - newPosition.pieceMap.size + 1
                   ),
                   halfMoveClock = situation.history.halfMoveClock + situation.player.fold(0, 1)
                 )
               )
           )
         }
-        case (destInt, dest)                           => sys.error(s"Invalid pos from int: ${destInt}, ${dest}")
+        case (destInt, dest)       => sys.error(s"Invalid pos from int: ${destInt}, ${dest}")
       }
       .toList
-    val ts2   = java.time.LocalDateTime.now().pp("end")
     drops
   }
 
   def validPass(situation: Situation): Pass = {
     val uciMove       = "pass"
     val previousMoves = situation.board.uciMoves
+    // TODO: if "pass" is always legal, then we should use the unchecked version of this method
     val newPosition   = situation.board.apiPosition.makeMovesWithPrevious(List(uciMove), previousMoves)
     Pass(
       situationBefore = situation,
@@ -187,6 +148,7 @@ abstract class Variant private[variant] (
   def createSelectSquares(situation: Situation, squares: List[Pos]): SelectSquares = {
     val uciMove       = s"ss:${squares.mkString(",")}"
     val previousMoves = situation.board.uciMoves
+    // TODO: if "ss:#" is always legal, then we should use the unchecked version of this method
     val newPosition   = situation.board.apiPosition.makeMovesWithPrevious(List(uciMove), previousMoves)
     SelectSquares(
       squares = squares,
