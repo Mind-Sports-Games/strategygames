@@ -2,6 +2,7 @@ package strategygames.go
 
 import com.joansala.game.go.GoGame
 import com.joansala.game.go.GoBoard
+import scala.collection.mutable.ArrayBuffer
 
 import cats.implicits._
 
@@ -271,10 +272,10 @@ object Api {
 
     lazy val legalActions: Array[Int] = {
       position.resetCursor()
-      var moves: List[Int] = List()
-      var nextMove         = position.nextMove()
+      val moves    = new ArrayBuffer[Int](362)
+      var nextMove = position.nextMove()
       while (nextMove != -1) {
-        moves = moves ::: List(nextMove)
+        moves += nextMove
         nextMove = position.nextMove()
       }
       moves.toArray
