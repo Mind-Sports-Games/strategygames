@@ -7,10 +7,10 @@ import variant.Variant
 case class Score(p1: Int = 0, p2: Int = 0) {
 
   def add(player: Player, increment: Int = 1) =
-   copy(
-     p1 = p1 + (increment * player.fold(1, 0)),
-     p2 = p2 + (increment * player.fold(0, 1))
-   )
+    copy(
+      p1 = p1 + (increment * player.fold(1, 0)),
+      p2 = p2 + (increment * player.fold(0, 1))
+    )
 
   def nonEmpty = p1 > 0 || p2 > 0
 

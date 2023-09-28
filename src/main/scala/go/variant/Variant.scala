@@ -80,10 +80,10 @@ abstract class Variant private[variant] (
   def validMoves(situation: Situation) = None // just remove this?
 
   def validDrops(situation: Situation): List[Drop] = {
-    val previousMoves  = situation.board.uciMoves
-    val oldPosition    = situation.board.apiPosition
-    //TODO: Is there a difference between oldPosition and oldApiPosition?
-    val oldApiPosition = oldPosition.createPosFromPrevious(previousMoves)
+    val previousMoves   = situation.board.uciMoves
+    val oldPosition     = situation.board.apiPosition
+    // TODO: Is there a difference between oldPosition and oldApiPosition?
+    val oldApiPosition  = oldPosition.createPosFromPrevious(previousMoves)
     val oldPieceMapSize = oldPosition.pieceMap.size
 
     val drops = situation.board.apiPosition.legalDrops
