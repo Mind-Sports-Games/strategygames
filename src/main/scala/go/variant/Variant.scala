@@ -82,8 +82,9 @@ abstract class Variant private[variant] (
   def validDrops(situation: Situation): List[Drop] = {
     val previousMoves  = situation.board.uciMoves
     val oldPosition    = situation.board.apiPosition
+    //TODO: Is there a difference between oldPosition and oldApiPosition?
     val oldApiPosition = oldPosition.createPosFromPrevious(previousMoves)
-    val oldPieceMap    = oldPosition.pieceMap
+    val oldPieceMapSize = oldPosition.pieceMap.size
 
     val drops = situation.board.apiPosition.legalDrops
       .map { dest =>
@@ -118,7 +119,7 @@ abstract class Variant private[variant] (
                   ),
                   captures = situation.history.captures.add(
                     situation.player,
-                    oldPieceMap.size - newPosition.pieceMap.size + 1
+                    oldPieceMapSize - newPosition.pieceMap.size + 1
                   ),
                   halfMoveClock = situation.history.halfMoveClock + situation.player.fold(0, 1)
                 )

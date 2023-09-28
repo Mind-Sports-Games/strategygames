@@ -269,7 +269,7 @@ object Api {
 
     lazy val legalActions: Array[Int] = {
       position.resetCursor()
-      val moves    = new ArrayBuffer[Int](362)
+      val moves    = new ArrayBuffer[Int](passMove+1)
       var nextMove = position.nextMove()
       while (nextMove != -1) {
         moves += nextMove
