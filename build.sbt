@@ -2,7 +2,7 @@ name := "strategygames"
 
 organization := "org.playstrategy"
 
-version := "10.2.1-pstrat100"
+version := "10.2.1-pstrat101"
 
 scalaVersion := "2.13.5"
 
@@ -17,7 +17,7 @@ libraryDependencies ++= List(
   "org.typelevel"          %% "cats-core"                % "2.2.0",
   "org.playstrategy"        % "fairystockfish"           % fairystockfishVersion,
   "com.joansala.aalina"     % "aalina"                   % "2.1.0-pstrat2",
-  "com.joansala"            % "go-engine"                % "1.0.0-pstrat1.7"
+  "com.joansala"            % "go-engine"                % "1.0.0-pstrat1.8"
 )
 
 // Explicitly add in the linux-class path

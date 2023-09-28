@@ -2,6 +2,7 @@ package strategygames.go
 
 import com.joansala.game.go.GoGame
 import com.joansala.game.go.GoBoard
+import scala.collection.mutable.ArrayBuffer
 
 import cats.implicits._
 
@@ -38,11 +39,17 @@ object Api {
         movesList: List[String],
         previousMoves: List[String]
     ): Position
+    def createPosFromPrevious(previousMoves: List[String]): Position
+    private[go] def makeMovesWithPosUnchecked(
+        movesList: List[String],
+        posWithPrevious: Position
+    ): Position
 
     def toBoard: String
     def goDiagram: String
     def setKomi(komi: Double): Unit
     def setBoard(goBoard: GoBoard): Unit
+    def deepCopy: Position
 
     val initialFen: FEN
     val fen: FEN
@@ -69,12 +76,31 @@ object Api {
       komi: Double = 6.5
   ) extends Position {
 
-    val gameSize: Int    = position.toBoard().gameSize()
-    val variant: Variant = gameSize match {
+    lazy val gameSize: Int    = position.toBoard().gameSize()
+    lazy val variant: Variant = gameSize match {
       case 9  => strategygames.go.variant.Go9x9
       case 13 => strategygames.go.variant.Go13x13
       case 19 => strategygames.go.variant.Go19x19
       case _  => sys.error("Incorrect game size from position")
+    }
+
+    private def initPos(previousMoves: List[String]): Position =
+      if (previousMoves.length == 0 && Api.initialFen(variant.key).value != fen.value)
+        positionFromFen(fen.value) // keeping current position?
+      else if (Api.initialFen(variant.key).value != initialFen.value)
+        positionFromFen(initialFen.value)
+      else new GoPosition(new GoGame(gameSize), 0, fromFen, komi)
+
+    def createPosFromPrevious(previousMoves: List[String]): Position =
+      initPos(previousMoves).makeMoves(previousMoves)
+
+    private[go] def makeMovesWithPosUnchecked(
+        movesList: List[String],
+        posWithPrevious: Position
+    ): Position = {
+      val pos = posWithPrevious.makeMoves(movesList)
+      pos.setKomi(komi)
+      return pos
     }
 
     def makeMovesWithPrevious(
@@ -121,7 +147,10 @@ object Api {
             position.makeMove(engineMove)
             position.makeMove(engineMove)
           } else {
-            if (position.legalMoves.contains(engineMove)) position.makeMove(engineMove)
+            // TODO: generating the legalMoves again and checking here is slow, we should
+            //       only ever be using this when we have to.
+            if (position.legalMoves.contains(engineMove))
+              position.makeMove(engineMove)
             else
               sys.error(
                 s"Illegal move2: ${engineMove} from list: ${movesList} legalMoves: ${position.legalMoves.map(_.toString()).mkString(", ")}"
@@ -137,6 +166,8 @@ object Api {
 
     def setBoard(goBoard: GoBoard): Unit = position.setBoard(goBoard)
 
+    def deepCopy: Position = new GoPosition(position.deepCopy(), ply, fromFen, komi)
+
     def setKomi(k: Double): Unit = position.setKomiScore(k)
 
     def goDiagram: String = position.toBoard.toDiagram
@@ -148,6 +179,7 @@ object Api {
         if (position.turn() == 1) "b"
         else "w" // cant trust engine fen - not sure why but it always returns 'b'
       val ko          = splitDiagram.lift(2).getOrElse("-").toString()
+      // TODO: generating the score is slow.
       val p1FenScore  = (p1Score * 10).toInt
       val p2FenScore  = (p2Score * 10).toInt
       val fenKomi     = (komi * 10).toInt
@@ -202,7 +234,10 @@ object Api {
       pieces
     }
 
-    lazy val pieceMap: PieceMap = convertPieceMapFromFen(fenString)
+    // TODO: because generating the score is really slow and
+    //       we're immediately stripping that out in the converPieceMapFromFen
+    //       function, let's avoid it and use the goDiagram directly (pls test)
+    lazy val pieceMap: PieceMap = convertPieceMapFromFen(goDiagram)
 
     lazy val pocketData =
       Some(
@@ -216,7 +251,7 @@ object Api {
         )
       )
 
-    val passMove: Int = gameSize * gameSize
+    lazy val passMove: Int = gameSize * gameSize
 
     lazy val isRepetition: Boolean = position.isRepetition() && (position.lastMove() != passMove)
 
@@ -232,24 +267,24 @@ object Api {
     lazy val p1Score: Double = position.blackScore() // black
     lazy val p2Score: Double = position.whiteScore() // white + komi
 
-    val legalActions: Array[Int] = {
+    lazy val legalActions: Array[Int] = {
       position.resetCursor()
-      var moves: List[Int] = List()
-      var nextMove         = position.nextMove()
+      val moves    = new ArrayBuffer[Int](passMove+1)
+      var nextMove = position.nextMove()
       while (nextMove != -1) {
-        moves = moves ::: List(nextMove)
+        moves += nextMove
         nextMove = position.nextMove()
       }
       moves.toArray
     }
 
-    val legalDrops: Array[Int] = {
+    lazy val legalDrops: Array[Int] = {
       legalActions.filter(m => m != passMove)
     }
 
-    val playerTurn: Int = position.turn()
+    lazy val playerTurn: Int = position.turn()
 
-    val initialFen: FEN = fromFen.fold(Api.initialFen(variant.key))(f => f)
+    lazy val initialFen: FEN = fromFen.fold(Api.initialFen(variant.key))(f => f)
 
   }
 
@@ -346,7 +381,8 @@ object Api {
     case _         => sys.error(s"not given a go variant name: ${variantKey}")
   }
 
-  val fenRegex                                = "([0-9Ss]?){1,19}(/([0-9Ss]?){1,19}){8,18}\\[[Ss]+\\] [w|b] - [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+"
+  val fenRegex                                =
+    "([0-9Ss]?){1,19}(/([0-9Ss]?){1,19}){8,18}\\[[Ss]+\\] [w|b] - [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+"
   def validateFEN(fenString: String): Boolean =
     Try(goBoardFromFen(FEN(fenString))).isSuccess && fenString.matches(fenRegex)
 
