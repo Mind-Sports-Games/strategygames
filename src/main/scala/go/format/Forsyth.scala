@@ -12,7 +12,7 @@ import strategygames.go.variant.Variant
 object Forsyth {
 
   val initial = FEN(
-    "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 65 0 0 65 1"
+    "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 1"
   )
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {

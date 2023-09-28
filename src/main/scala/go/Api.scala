@@ -73,7 +73,7 @@ object Api {
       position: GoGame,
       ply: Int = 0,
       fromFen: Option[FEN] = None,
-      komi: Double = 6.5
+      komi: Double = 7.5
   ) extends Position {
 
     lazy val gameSize: Int    = position.toBoard().gameSize()
@@ -269,7 +269,7 @@ object Api {
 
     lazy val legalActions: Array[Int] = {
       position.resetCursor()
-      val moves    = new ArrayBuffer[Int](passMove+1)
+      val moves    = new ArrayBuffer[Int](passMove + 1)
       var nextMove = position.nextMove()
       while (nextMove != -1) {
         moves += nextMove
@@ -288,7 +288,7 @@ object Api {
 
   }
 
-  def position(variant: Variant, komi: Double = 6.5): Position = {
+  def position(variant: Variant, komi: Double = 7.5): Position = {
     val g = new GoGame(variant.boardSize.height)
     g.setKomiScore(komi)
     new GoPosition(g)
