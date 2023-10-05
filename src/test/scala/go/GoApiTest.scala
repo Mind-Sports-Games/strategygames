@@ -48,7 +48,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
   }
 
   "Go Move to Uci " should {
-    val moves = List[Int](0, 1, 2, 3, 4, 5, 60, 70, 80, 90, 100, 110)
+    val moves = List[Int](0, 1, 2, 3, 4, 5, 60, 70, 80, 90, 100, 110, 361)
     "possible moves convert to uci (0->a1 etc)" in {
       moves.map(m => Api.moveToUci(m, variant.Go19x19)) must_== List(
         "S@a1",
@@ -62,13 +62,13 @@ class GoApiTest extends Specification with ValidatedMatchers {
         "S@e5",
         "S@o5",
         "S@f6",
-        "S@p6"
+        "S@p6",
+        "pass"
       )
     }
   }
 
   "Go Uci to Move " should {
-    println("test 2")
     val uci = List[String](
       "S@a1",
       "S@b1",
@@ -225,6 +225,28 @@ class GoApiTest extends Specification with ValidatedMatchers {
     val newGame = game.makeMoves(List(2, 59, 20, 39, 22, 41, 40, 21).map(Api.moveToUci(_, variant.Go19x19)))
     "not allow move to recapture" in {
       newGame.legalDrops.contains(40) must_== false
+    }
+  }
+
+  "(Issue#489) Go game without a ko point after pass" should {
+    val game    = Api.position(variant.Go19x19)
+    val newGame =
+      game.makeMoves(List(2, 59, 20, 39, 22, 41, 40, 21, 361).map(Api.moveToUci(_, variant.Go19x19)))
+    "allow move in former ko point" in {
+      newGame.legalDrops.contains(40) must_== true
+    }
+  }
+
+  "(Issue#490) Go game with a recapture of more than one stone after ko point" should {
+    val game    = Api.position(variant.Go9x9)
+    val newGame =
+      game.makeMoves(
+        List(40, 49, 48, 58, 57, 76, 67, 68, 59, 66, 50, 81, 67, 49, 81, 58).map(
+          Api.moveToUci(_, variant.Go9x9)
+        )
+      )
+    "allow move in former ko point" in {
+      newGame.legalDrops.contains(67) must_== true
     }
   }
 

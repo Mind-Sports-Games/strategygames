@@ -290,6 +290,87 @@ class GoSituationTest extends Specification with ValidatedMatchers {
       game_ply_9.situation.canSelectSquares must_== true
       game_ply_11.situation.canSelectSquares must_== true
     }
+  }
+
+  "(Issue#489) passing after a single stone capture shouldn't trigger ko rule" should {
+    val g9   = variant.Go9x9
+    val game = Game(g9)
+
+    val game_p1 = game.apply(g9.validDrops(game.situation).filter(_.pos.key == "e5").head)
+
+    val game_p2 = game_p1.apply(g9.validDrops(game_p1.situation).filter(_.pos.key == "e4").head)
+
+    val game_p3 = game_p2.apply(g9.validDrops(game_p2.situation).filter(_.pos.key == "d4").head)
+
+    val game_p4 = game_p3.apply(g9.validPass(game_p3.situation))
+
+    val game_p5 = game_p4.apply(g9.validDrops(game_p4.situation).filter(_.pos.key == "e3").head)
+
+    val game_p6 = game_p5.apply(g9.validPass(game_p5.situation))
+
+    val game_p7 = game_p6.apply(g9.validDrops(game_p6.situation).filter(_.pos.key == "f4").head)
+
+    val game_p8 = game_p7.apply(g9.validPass(game_p7.situation))
+
+    val drops_ply_8 = g9.validDrops(game_p7.situation)
+    val drops_ply_9 = g9.validDrops(game_p8.situation)
+
+    "number of drops for ply 8 should be 76 (ko activated)" in {
+      drops_ply_8.size must_== 76
+    }
+
+    // should be able to play e4
+    "number of drops for ply 9 should be 77 (no ko)" in {
+      drops_ply_9.size must_== 77
+      drops_ply_9.filter(_.pos.key == "e4").size must_== 1
+    }
 
   }
+
+  "(Issue#490) capturing a single stone shouldnt trigger the ko rule for a multiple capture back" should {
+    val g9   = variant.Go9x9
+    val game = Game(g9)
+
+    val game_p1 = game.apply(g9.validDrops(game.situation).filter(_.pos.key == "e5").head)
+
+    val game_p2 = game_p1.apply(g9.validDrops(game_p1.situation).filter(_.pos.key == "e6").head)
+
+    val game_p3 = game_p2.apply(g9.validDrops(game_p2.situation).filter(_.pos.key == "d6").head)
+
+    val game_p4 = game_p3.apply(g9.validDrops(game_p3.situation).filter(_.pos.key == "e7").head)
+
+    val game_p5 = game_p4.apply(g9.validDrops(game_p4.situation).filter(_.pos.key == "d7").head)
+
+    val game_p6 = game_p5.apply(g9.validDrops(game_p5.situation).filter(_.pos.key == "e9").head)
+
+    val game_p7 = game_p6.apply(g9.validDrops(game_p6.situation).filter(_.pos.key == "e8").head)
+
+    val game_p8 = game_p7.apply(g9.validDrops(game_p7.situation).filter(_.pos.key == "f8").head)
+
+    val game_p9 = game_p8.apply(g9.validDrops(game_p8.situation).filter(_.pos.key == "f7").head)
+
+    val game_p10 = game_p9.apply(g9.validDrops(game_p9.situation).filter(_.pos.key == "d8").head)
+
+    val game_p11 = game_p10.apply(g9.validDrops(game_p10.situation).filter(_.pos.key == "f6").head)
+
+    val game_p12 = game_p11.apply(g9.validPass(game_p11.situation))
+
+    val game_p13 = game_p12.apply(g9.validDrops(game_p12.situation).filter(_.pos.key == "e8").head)
+
+    val game_p14 = game_p13.apply(g9.validDrops(game_p13.situation).filter(_.pos.key == "e6").head)
+
+    val game_p15 = game_p14.apply(g9.validPass(game_p14.situation))
+
+    val game_p16 = game_p15.apply(g9.validDrops(game_p15.situation).filter(_.pos.key == "e7").head)
+
+    val drops_ply_16 = g9.validDrops(game_p16.situation)
+
+    // should be able to play e8
+    "number of drops for ply 16 should be 71 (ko not activated)" in {
+      drops_ply_16.size must_== 71
+      drops_ply_16.filter(_.pos.key == "e8").size must_== 1
+    }
+
+  }
+
 }
