@@ -2,78 +2,100 @@ package strategygames
 
 import java.text.DecimalFormat
 import cats.syntax.option._
-import scala.annotation.nowarn
+import scala.util.chaining._
 
 // Abstract timer trait
-trait Timer {
-  def takeTime(time: Centis): Timer
-  def giveTime(t: Centis): Timer
-  def postGrace(t: Centis): Centis // Increment / delay
-  def preGrace(t: Centis): Centis  // Lag
+trait TimerTrait {
+  def takeTime(time: Centis): TimerTrait
+  def giveTime(t: Centis): TimerTrait
+  def setRemaining(remaining: Centis): TimerTrait
+  def goBerserk: TimerTrait
   val limit: Centis
   val elapsed: Centis
   val remaining: Centis
 }
 
-// NOTE: This is one of those state machines we've been talking about.
-// TODO: Make this work like the book.
-trait TimerGrace {
-  def giveTime(timer: Timer, t: Centis): Tuple2[TimerGrace, Centis]
+// This modifies the amount of time remaining on the clock after the
+// move time has been applied, like increment
+trait ClockTimeGrace {
+  def timeToAdd(timer: TimerTrait, timeTaken: Centis): Tuple2[ClockTimeGrace, Centis]
+  def goBerserk: ClockTimeGrace
 }
 
-// Base timer, no increment
-case class SimpleTimer(val elapsed: Centis, val limit: Centis, val graces: List[TimerGrace] = List())
-    extends Timer {
-  def takeTime(time: Centis) = {
-    // TODO: make this work like the book
-    val newValues = graces.foldLeft[Tuple2[List[TimerGrace], Centis]]((List(), time))(
-      (l: Tuple2[List[TimerGrace], Centis], g: TimerGrace) => {
-        val res = g.giveTime(this, time)
-        (l._1 :+ res._1, res._2)
-      }
-    )
-    val newGraces = newValues._1
-    val timeTaken = newValues._2
-    copy(elapsed = elapsed + timeTaken, graces = newGraces)
-  }
-  def giveTime(t: Centis)    = takeTime(-t)
-  val remaining: Centis      = limit - elapsed
+case class NoClockTimeGrace() extends ClockTimeGrace {
+  def timeToAdd(timer: TimerTrait, timeTaken: Centis): Tuple2[ClockTimeGrace, Centis] = (this, Centis(0))
+  def goBerserk: ClockTimeGrace                                                       = this
 }
+// NOTE: if we need a list of these, we can make a ListClockTimeGrace
 
 // Fischer increment timer with increment. Increment is always subtracted from
 // the elapsed time when time is used.
 // Thus, remaining time can appear to go up
-class FischerIncrement(val increment: Centis) extends TimerGrace {
-  override def giveTime(timer: Timer, time: Centis): Tuple2[TimerGrace, Centis] = {
-    val wontEndTheGame = time < timer.remaining
-    (this, time - (wontEndTheGame ?? increment))
-  }
+case class FischerIncrementGrace(val increment: Centis) extends ClockTimeGrace {
+  override def timeToAdd(timer: TimerTrait, timeTaken: Centis): Tuple2[ClockTimeGrace, Centis] =
+    (this, (timer.remaining >= Centis(0)) ?? increment) // 0 if no time is left, else the increment
+
+  def goBerserk: ClockTimeGrace = NoClockTimeGrace()
 }
 
 // Bronstein increment timer with a delay. The minimum between the time used
 // and the delay is subracted back to the elapsed time when time is used.
 // Thus, using time will never seem to make the clock gain time.
-class BronsteinDelay(val delay: Centis)                                   extends TimerGrace           {
-  override def giveTime(timer: Timer, time: Centis): Tuple2[TimerGrace, Centis] = {
-    val wontEndTheGame = time < timer.remaining
-    (this, time - (wontEndTheGame ?? increment))
-  }
+case class BronsteinDelayGrace(val delay: Centis) extends ClockTimeGrace {
+  override def timeToAdd(timer: TimerTrait, timeTaken: Centis): Tuple2[ClockTimeGrace, Centis] =
+    (
+      this,
+      (timer.remaining >= Centis(0)) ?? timeTaken.atMost(delay)
+    ) // 0 if no time is left, else the up to the delay
+
+  def goBerserk: ClockTimeGrace = NoClockTimeGrace()
 }
-class BronsteinDelay(override val elapsed: Centis, val increment: Centis) extends SimpleTimer(elapsed) {
-  override def takeTime(time: Centis, useIncrement: Boolean = true) =
-    FischerIncrement(increment, timer.takeTime(time - (useIncrement ?? increment)))
-  BronsteinDelay(elapsed = elapsed + time - (useIncrement ?? increment.atMost(time)), increment)
-  override def giveTime(time: Centis)                               = BronsteinDelay(elapsed = elapsed + time, increment)
+
+case class Timer(
+    val limit: Centis,
+    val clockTimeGrace: ClockTimeGrace = NoClockTimeGrace(),
+    val elapsed: Centis = Centis(0),
+    val nextTimer: Option[Timer] = None
+) extends TimerTrait {
+
+  private def applyClockGrace(timeTaken: Centis): Timer =
+    // TODO: make this work like the book
+    clockTimeGrace.timeToAdd(this, timeTaken).pipe { case (newClockTimeGrace, postMoveGraceTime) =>
+      copy(
+        elapsed = elapsed + timeTaken - postMoveGraceTime,
+        clockTimeGrace = newClockTimeGrace
+      ).nextIfDone
+    }
+
+  private def next       = nextTimer.getOrElse(this)
+  private def nextIfDone = if (elapsed >= limit) next.takeTime(-remaining) else this
+
+  def takeTime(timeTaken: Centis)    = applyClockGrace(timeTaken)
+  def setRemaining(t: Centis): Timer = copy(elapsed = limit - t)
+  def goBerserk: Timer               = copy(clockTimeGrace = clockTimeGrace.goBerserk)
+  def giveTime(t: Centis)            = takeTime(-t)
+  val remaining: Centis              = limit - elapsed
 }
-object BronsteinDelay {
-  def apply(elapsed: Centis, increment: Centis): BronsteinDelay = new BronsteinDelay(elapsed, increment)
+
+object Timer {
+  def bronstein(limit: Centis, delay: Centis) = Timer(
+    limit,
+    clockTimeGrace = BronsteinDelayGrace(delay)
+  )
+
+  def fischerIncrement(limit: Centis, increment: Centis) = Timer(
+    limit,
+    clockTimeGrace = FischerIncrementGrace(increment)
+  )
 }
 
 sealed trait ClockConfig {
   // Abstract attributes
   def estimateTotalSeconds: Int
   def estimateTotalTime: Centis
+  // TODO: I don't think that every clock config should _have_ to implemenmt this
   def increment: Centis
+  // TODO: I don't think that every clock config should _have_ to implemenmt this
   def incrementSeconds: Int
   def limit: Centis
   def limitInMinutes: Double
@@ -122,7 +144,7 @@ sealed trait Clock {
   val player: Player
   // val players: Player.Map[ClockPlayer]
   val timestamper: Timestamper
-  val timer: Option[Timestamp]
+  val timestamp: Option[Timestamp]
   val config: ClockConfig
 
   // Abstract methods
@@ -150,26 +172,26 @@ sealed trait Clock {
   // Implemented attributes
   def remainingTime(c: Player)  = (clockPlayer(c).remaining - pending(c)) nonNeg
   def moretimeable(c: Player)   = clockPlayer(c).remaining.centis < 100 * 60 * 60 * 2
-  //  TODO: delete it.
+  //  TODO: Consider if we need it
   // def incrementOf(c: Player)    = clockPlayer(c).increment
   def lastMoveTimeOf(c: Player) = clockPlayer(c).lastMoveTime
 
   def takeback(switchPlayer: Boolean = true) = switch(switchPlayer)
 
-  def isRunning            = timer.isDefined
+  def isRunning            = timestamp.isDefined
   def berserked(c: Player) = clockPlayer(c).berserk
   def lag(c: Player)       = clockPlayer(c).lag
 
   // Lowball estimate of next move's lag comp for UI butter.
   def lagCompEstimate(c: Player) = clockPlayer(c).lag.compEstimate
 
-  @inline def timerFor(c: Player) = if (c == player) timer else None
+  @inline def timerFor(c: Player) = if (c == player) timestamp else None
   @inline def pending(c: Player)  = timerFor(c).fold(Centis(0))(toNow)
 
   def estimateTotalSeconds = config.estimateTotalSeconds
   def estimateTotalTime    = config.estimateTotalTime
-  def increment            = config.increment
-  def incrementSeconds     = config.incrementSeconds
+  // TODO: do we still need this? def increment            = config.increment
+  // TODO: do we still need this? def incrementSeconds     = config.incrementSeconds
   def limit                = config.limit
   def limitInMinutes       = config.limitInMinutes
   def limitSeconds         = config.limitSeconds
@@ -182,27 +204,26 @@ case class FischerClockInfo(time: Centis) extends ClockInfo {
 }
 
 case class FischerClockPlayer(
-    config: FischerClock.Config,
+    timer: Timer,
     lag: LagTracker,
-    timer: FischerTimer = FischerTimer(Centis(0), Centis(0)),
+    config: ClockConfig,
     berserk: Boolean = false,
     lastMoveTime: Centis = Centis(0)
 ) extends PlayerTimer {
-
   val elapsed = timer.elapsed
 
   def recordLag(l: Centis) = copy(lag = lag.recordLag(l))
 
-  def takeTime(t: Centis, useIncrement: Boolean = true) = copy(timer = timer.takeTime(t, useIncrement))
+  def takeTime(t: Centis) = copy(timer = timer.takeTime(t))
 
-  def setRemaining(t: Centis) = copy(timer = FischerTimer(limit - t, timer.increment))
+  def setRemaining(t: Centis) = copy(timer = timer.setRemaining(t))
 
   // Honestly going berserk should just change your clock completely and shouldn't be
   // at this level. That's lila/lichess decision, but fine.
   // Going berserk changes your timer
   def goBerserk = copy(
     berserk = true,
-    timer = FischerTimer(timer.elapsed, Centis(0))
+    timer = timer.goBerserk
   )
 
   def giveTime(t: Centis): FischerClockPlayer = takeTime(-t)
@@ -210,10 +231,10 @@ case class FischerClockPlayer(
 
 // All unspecified durations are expressed in seconds
 case class FischerClock(
-    config: FischerClock.Config,
+    config: ClockConfig,
     player: Player,
     players: Player.Map[FischerClockPlayer],
-    timer: Option[Timestamp] = None,
+    timestamp: Option[Timestamp] = None,
     timestamper: Timestamper = RealTimestamper
 ) extends Clock {
   import timestamper.{ now, toNow }
@@ -222,6 +243,7 @@ case class FischerClock(
   def clockPlayerExists(f: PlayerTimer => Boolean) = players.exists(f)
   def allClockPlayers: Seq[FischerClockPlayer]     = players.all
   def lagCompAvg                                   = players map { ~_.lag.compAvg } reduce (_ avg _)
+  def incrementSeconds                             = config.incrementSeconds
 
   def currentClockFor(c: Player) = {
     val elapsed               = pending(c)
@@ -236,22 +258,22 @@ case class FischerClock(
         else toNow(t)
       }
 
-  def start = if (isRunning) this else copy(timer = Option(now))
+  def start = if (isRunning) this else copy(timestamp = Option(now))
 
   def stop = {
-    timer.fold(this) { t =>
+    timestamp.fold(this) { t =>
       val curT = toNow(t)
       copy(
         players = players.update(
           player,
-          (p: ByoyomiClockPlayer) => p.takeTime(curT).copy(lastMoveTime = curT)
+          _.takeTime(curT).copy(lastMoveTime = curT)
         ),
-        timer = None
+        timestamp = None
       )
     }
   }
 
-  def hardStop = copy(timer = None)
+  def hardStop = copy(timestamp = None)
 
   def updatePlayer(c: Player)(f: FischerClockPlayer => FischerClockPlayer) =
     copy(players = players.update(c, f))
@@ -273,7 +295,7 @@ case class FischerClock(
   def switch(switchPlayer: Boolean = true) =
     copy(
       player = if (switchPlayer) !player else player,
-      timer = timer.map(_ => now)
+      timestamp = timestamp.map(_ => now)
     )
 
   def step(
@@ -281,31 +303,25 @@ case class FischerClock(
       gameActive: Boolean = true,
       switchClock: Boolean = true
   ) =
-    (timer match {
+    (timestamp match {
       case None    =>
         metrics.clientLag.fold(this) { l =>
           updatePlayer(player) { _.recordLag(l) }
         }
       case Some(t) =>
-        val elapsed = toNow(t)
-        val lag     = ~metrics.reportedLag(elapsed) nonNeg
-
+        val elapsed             = toNow(t)
+        val lag                 = ~metrics.reportedLag(elapsed) nonNeg
         val competitor          = players(player)
         val (lagComp, lagTrack) = competitor.lag.onMove(lag)
+        val moveTime            = (elapsed - lagComp).nonNeg
+        val clockActive         = gameActive && moveTime < competitor.remaining
 
-        val moveTime = (elapsed - lagComp) nonNeg
-
-        val clockActive  = gameActive && moveTime < competitor.remaining
-        val useIncrement = clockActive && switchClock
-
-        // TODO: This is where the increment gets added again.
-        //       can basically add in Bronstein here.
-        val newC = updatePlayer(player) {
-          _.takeTime(moveTime, useIncrement)
+        val newClock = updatePlayer(player) {
+          _.takeTime(moveTime)
             .copy(lag = lagTrack, lastMoveTime = moveTime)
         }
 
-        if (clockActive) newC else newC.hardStop
+        if (clockActive) newClock else newClock.hardStop
     }).switch(switchClock)
 
   // To do: safely add this to takeback to remove inc from player.
@@ -314,10 +330,17 @@ case class FischerClock(
 }
 
 object FischerClockPlayer {
-  def withConfig(config: FischerClock.Config) =
+  def withConfig(config: FischerClock.Config)          =
     FischerClockPlayer(
-      config,
-      LagTracker.init(config)
+      config.timer,
+      LagTracker.init(config),
+      config
+    )
+  def withConfig(config: FischerClock.BronsteinConfig) =
+    FischerClockPlayer(
+      config.timer,
+      LagTracker.init(config),
+      config
     )
 }
 
@@ -326,6 +349,9 @@ object FischerClock {
 
   // All unspecified durations are expressed in seconds
   case class Config(limitSeconds: Int, incrementSeconds: Int) extends ClockConfig {
+    private lazy val clockTimeGrace =
+      if (increment > Centis(0)) FischerIncrementGrace(increment) else NoClockTimeGrace()
+    lazy val timer                  = Timer(limit, clockTimeGrace)
 
     def berserkable = incrementSeconds == 0 || limitSeconds > 0
 
@@ -372,6 +398,62 @@ object FischerClock {
     }
   }
 
+  // TODO: someone needs to review all of these various settings in here and ensure they still
+  //       make sense for bronstein
+  case class BronsteinConfig(limitSeconds: Int, delaySeconds: Int) extends ClockConfig {
+    private lazy val clockTimeGrace =
+      if (delay > Centis(0)) BronsteinDelayGrace(delay) else NoClockTimeGrace()
+    lazy val timer                  = Timer(limit, clockTimeGrace)
+
+    def berserkable = delaySeconds == 0 || limitSeconds > 0
+
+    def emergSeconds = math.min(60, math.max(10, limitSeconds / 8))
+
+    def estimateTotalSeconds = limitSeconds + 40 * delaySeconds
+
+    def estimateTotalTime = Centis.ofSeconds(estimateTotalSeconds)
+
+    // TODO: the bronstein config should not have to implement these because it's not using them.
+    //       we should be able to calculate this properly from the rest of the information
+    def hasIncrement     = false
+    def increment        = Centis(0)
+    def incrementSeconds = 0
+
+    def delay = Centis.ofSeconds(delaySeconds)
+
+    def limit = Centis.ofSeconds(limitSeconds)
+
+    def limitInMinutes = limitSeconds / 60d
+
+    def toClock = FischerClock(this)
+
+    def limitString: String =
+      limitSeconds match {
+        case l if l % 60 == 0 => (l / 60).toString
+        case 15 => "¼"
+        case 30 => "½"
+        case 45 => "¾"
+        case 90 => "1.5"
+        case _  => limitFormatter.format(limitSeconds / 60d)
+      }
+
+    // TODO: I don't know if this is correct for fischer clocks, but this certainly unifies the interface
+    def startsAtZero = limitSeconds == 0
+
+    def show = toString
+
+    override def toString = s"${limitString}r${delaySeconds}"
+
+    def berserkPenalty =
+      if (limitSeconds < 40 * delaySeconds) Centis(0)
+      else Centis(limitSeconds * (100 / 2))
+
+    def initTime = {
+      if (limitSeconds == 0) delay.atLeast(Centis(300))
+      else limit
+    }
+  }
+
   // [TimeControl "600+2"] -> 10+2
   def readPgnConfig(str: String): Option[Config] =
     str.split('+') match {
@@ -392,7 +474,17 @@ object FischerClock {
       config = config,
       player = Player.P1,
       players = Player.Map(player, player),
-      timer = None
+      timestamp = None
+    )
+  }
+
+  def apply(config: BronsteinConfig): FischerClock = {
+    val player = FischerClockPlayer.withConfig(config)
+    FischerClock(
+      config = config,
+      player = Player.P1,
+      players = Player.Map(player, player),
+      timestamp = None
     )
   }
 }
@@ -404,7 +496,7 @@ case class ByoyomiClock(
     config: ByoyomiClock.Config,
     player: Player,
     players: Player.Map[ByoyomiClockPlayer],
-    timer: Option[Timestamp] = None,
+    timestamp: Option[Timestamp] = None,
     timestamper: Timestamper = RealTimestamper
 ) extends Clock {
   import timestamper.{ now, toNow }
@@ -413,6 +505,7 @@ case class ByoyomiClock(
   def clockPlayerExists(f: PlayerTimer => Boolean) = players.exists(f)
   def allClockPlayers: Seq[ByoyomiClockPlayer]     = players.all
   def lagCompAvg                                   = players map { ~_.lag.compAvg } reduce (_ avg _)
+  def incrementSeconds                             = config.incrementSeconds
 
   private def periodsInUse(c: Player, t: Centis): Int = {
     val player          = players(c)
@@ -443,10 +536,10 @@ case class ByoyomiClock(
     timeRemaining <= timeUsed
   }
 
-  def start = if (isRunning) this else copy(timer = Option(now))
+  def start = if (isRunning) this else copy(timestamp = Option(now))
 
   def stop =
-    timer.fold(this) { t =>
+    timestamp.fold(this) { t =>
       val curT    = toNow(t)
       val periods = periodsInUse(player, curT)
       copy(
@@ -457,11 +550,11 @@ case class ByoyomiClock(
             .spendPeriods(periods)
             .copy(lastMoveTime = curT)
         ),
-        timer = None
+        timestamp = None
       )
     }
 
-  def hardStop = copy(timer = None)
+  def hardStop = copy(timestamp = None)
 
   def withTimestamper(timestamper: Timestamper) = copy(timestamper = timestamper)
 
@@ -483,7 +576,7 @@ case class ByoyomiClock(
   def switch(switchPlayer: Boolean = true) =
     copy(
       player = if (switchPlayer) !player else player,
-      timer = timer.map(_ => now)
+      timestamp = timestamp.map(_ => now)
     )
 
   def step(
@@ -491,7 +584,7 @@ case class ByoyomiClock(
       gameActive: Boolean = true,
       switchClock: Boolean = true
   ) =
-    (timer match {
+    (timestamp match {
       case None    =>
         metrics.clientLag.fold(this) { l =>
           updatePlayer(player) { _.recordLag(l) }
@@ -514,7 +607,6 @@ case class ByoyomiClock(
           competitor.byoyomi.isPositive && (competitor.spentPeriods > 0 || periodSpan > 0)
 
         val timeRemainingAfterMove = (remaining - moveTime) + periodSpan * competitor.byoyomi
-        val useIncrement           = clockActive && switchClock
         val newC                   =
           if (usingByoyomi)
             updatePlayer(player) {
@@ -527,7 +619,7 @@ case class ByoyomiClock(
             }
           else
             updatePlayer(player) {
-              _.takeTime(moveTime, useIncrement)
+              _.takeTime(moveTime)
                 .spendPeriods(periodSpan)
                 .copy(lag = lagTrack, lastMoveTime = moveTime)
             }
@@ -564,7 +656,7 @@ case class ByoyomiClockPlayer(
   def periodsLeft = math.max(periodsTotal - spentPeriods, 0)
 
   // TODO: use the useIncrement value
-  def takeTime(t: Centis, useIncrement: Boolean = true): ByoyomiClockPlayer = copy(elapsed = elapsed + t)
+  def takeTime(t: Centis): ByoyomiClockPlayer = copy(elapsed = elapsed + t)
 
   def giveTime(t: Centis): ByoyomiClockPlayer = takeTime(-t)
 
@@ -716,7 +808,7 @@ object ByoyomiClock {
       config = config,
       player = Player.P1,
       players = Player.Map(player, player),
-      timer = None
+      timestamp = None
     )
   }
 }

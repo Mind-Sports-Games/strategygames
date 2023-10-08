@@ -256,11 +256,5 @@ object Tag {
   def tagType(name: String) =
     (tagTypesByLowercase get name.toLowerCase) | Unknown(name)
 
-  def timeControl(clock: Option[ClockConfig]) =
-    Tag(
-      TimeControl,
-      clock.fold("-") { c =>
-        s"${c.limit.roundSeconds}+${c.increment.roundSeconds}"
-      }
-    )
+  def timeControl(clock: Option[ClockConfig]) = Tag(TimeControl, clock.fold("-") { _.toString })
 }

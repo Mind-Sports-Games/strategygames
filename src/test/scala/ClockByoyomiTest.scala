@@ -41,7 +41,7 @@ class ClockByoyomiTest extends ShogiTest {
 
   "play with a clock" should {
     val clock = ByoyomiClock(5 * 60 * 1000, 0, 0, 0)
-    val game  = makeGame.copy(clock=Some(clock.start))
+    val game  = makeGame.copy(clock = Some(clock.start))
     "new game" in {
       game.clock map { _.player } must_== Some(Player.P1)
     }

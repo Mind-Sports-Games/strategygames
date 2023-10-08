@@ -17,6 +17,18 @@ class ClockTest extends ChessTest {
     })
     .start
 
+  val fakeClock60Plus1 = FischerClock(FischerClock.Config(60, 1))
+    .copy(timestamper = new Timestamper {
+      val now = Timestamp(0)
+    })
+    .start
+
+  val fakeClock180Delay2 = FischerClock(FischerClock.BronsteinConfig(180, 2))
+    .copy(timestamper = new Timestamper {
+      val now = Timestamp(0)
+    })
+    .start
+
   def advance(c: Clock, t: Int) =
     c.withTimestamper(new Timestamper {
       val now = c.timestamper.now + Centis(t)
@@ -52,17 +64,22 @@ class ClockTest extends ChessTest {
     def durOf(lag: Int) = MoveMetrics(clientLag = Option(Centis(lag)))
 
     def clockStep(clock: Clock, wait: Int, lags: Int*) = {
-      (lags.foldLeft(clock) { (clk, lag) =>
-        advance(clk.step(), wait + lag) step durOf(lag)
-      } remainingTime P2).centis
+      (lags
+        .foldLeft(clock) { (clk, lag) =>
+          advance(clk.step(), wait + lag).step(durOf(lag))
+        }
+        .remainingTime(P2))
+        .centis
     }
 
-    def clockStep60(w: Int, l: Int*)  = clockStep(fakeClock60, w, l: _*)
-    def clockStep600(w: Int, l: Int*) = clockStep(fakeClock600, w, l: _*)
+    def clockStep60(w: Int, l: Int*)        = clockStep(fakeClock60, w, l: _*)
+    def clockStep60Plus1(w: Int, l: Int*)   = clockStep(fakeClock60Plus1, w, l: _*)
+    def clockStep600(w: Int, l: Int*)       = clockStep(fakeClock600, w, l: _*)
+    def clockStep180Delay2(w: Int, l: Int*) = clockStep(fakeClock180Delay2, w, l: _*)
 
     def clockStart(lag: Int) = {
       val clock = fakeClock60.step()
-      ((clock step durOf(lag)) remainingTime P1).centis
+      ((clock.step(durOf(lag))).remainingTime(P1)).centis
     }
 
     "start" in {
@@ -124,12 +141,61 @@ class ClockTest extends ChessTest {
     "multiple premoves with fast clock" in {
       "no lag" in {
         clockStep60(0, 0, 0) must_== 60 * 100
+        clockStep60Plus1(0, 0) must_== 61 * 100
+        clockStep60Plus1(0, 0, 0) must_== 62 * 100
       }
       "no -> medium lag" in {
         clockStep60(0, 0, 300) must_== 5940
+        clockStep60Plus1(0, 0, 300) must_== 6192
       }
       "no x4 -> big lag" in {
         clockStep60(0, 0, 0, 0, 0, 700) must_== 5720
+        clockStep60Plus1(0, 0, 0, 0, 0, 700) must_== 6311
+      }
+    }
+
+    "Basic clock behavior without lag" in {
+      // Without increment our clock doesn't go up
+      "60+0 3x 3s move" in {
+        clockStep60(300, 0, 0, 0) must_== 51 * 100
+      }
+      "60+0 3x 2s move" in {
+        clockStep60(200, 0, 0, 0) must_== 54 * 100
+      }
+      "60+0 3x 1s move" in {
+        clockStep60(100, 0, 0, 0) must_== 57 * 100
+      }
+      "60+0 3x 0s move" in {
+        clockStep60(0, 0, 0, 0) must_== 60 * 100
+      }
+
+      // With increment our clock can go up.
+      "60+1 3x 3s move" in {
+        clockStep60Plus1(300, 0, 0, 0) must_== 54 * 100
+      }
+      "60+1 3x 2s move" in {
+        clockStep60Plus1(200, 0, 0, 0) must_== 57 * 100
+      }
+      "60+1 3x 1s move" in {
+        clockStep60Plus1(100, 0, 0, 0) must_== 60 * 100
+      }
+      "60+1 3x 0s move" in {
+        clockStep60Plus1(0, 0, 0, 0) must_== 63 * 100
+      }
+
+      // With delay our clock doesn't go up, but doesn't go down
+      // either until we get to above the delay for our move time
+      "180+2 3x 3s move" in {
+        clockStep180Delay2(300, 0, 0, 0) must_== 177 * 100
+      }
+      "180+2 3x 2s move" in {
+        clockStep180Delay2(200, 0, 0, 0) must_== 180 * 100
+      }
+      "180+2 3x 1s move" in {
+        clockStep180Delay2(100, 0, 0, 0) must_== 180 * 100
+      }
+      "180+2 3x 0s move" in {
+        clockStep180Delay2(0, 0, 0, 0) must_== 180 * 100
       }
     }
   }
@@ -152,4 +218,5 @@ class ClockTest extends ChessTest {
     "stall within quota" >> !advance(fakeClock600, 60190).outOfTime(P1, withGrace = true)
     "max grace stall" >> advance(fakeClock600, 602 * 100).outOfTime(P1, withGrace = true)
   }
+
 }
