@@ -1,20 +1,12 @@
 package strategygames.togyzkumalak
 package format.pgn
-import strategygames.{
-  Action => StratAction,
-  ByoyomiClock,
-  Drop => StratDrop,
-  FischerClock,
-  Move => StratMove,
-  Situation => StratSituation
-}
+import strategygames.{ Action => StratAction, ByoyomiClock, FischerClock, Situation => StratSituation }
 
 import strategygames.format.pgn.{ ParsedPgn, Sans, Tags }
 
 import strategygames.togyzkumalak.format.Uci
 
 import cats.data.Validated
-import cats.implicits._
 
 object Reader {
 

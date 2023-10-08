@@ -335,25 +335,29 @@ case object Russian
       // strong side: kings >= 1
       //    7.2.5 => 15
       if (strongPieces <= 2 && strongKings >= 1)
-        Some(10, false, true, firstPromotion) // 7.2.8: never reset, except on first promotion
+        Some((10, false, true, firstPromotion)) // 7.2.8: never reset, except on first promotion
       else if (
         strongPieces == 3 && strongKings >= 1 && weakKing.onLongDiagonal && board.piecesOnLongDiagonal == 1
       ) {
         if (board.history.kingMoves(weakPlayer) >= 10)
           Some(
-            10,
-            false,
-            true,
-            firstPromotion
+            (
+              10,
+              false,
+              true,
+              firstPromotion
+            )
           ) // 7.2.7: only draw after 5 kingmoves on the long diagonal have been recorded
         else
           Some(
-            30,
-            false,
-            true,
-            firstPromotion
+            (
+              30,
+              false,
+              true,
+              firstPromotion
+            )
           ) // 7.2.7: right combination, awaiting 5th move, do not reset on promotion!
-      } else if (strongPieces >= 3 && strongKings == strongPieces) Some(30, false, false, false) // 7.2.4
+      } else if (strongPieces >= 3 && strongKings == strongPieces) Some((30, false, false, false)) // 7.2.4
       else None
     }
     val singleKingDraw                                                                       =
@@ -367,10 +371,11 @@ case object Russian
     else if (p2Kings >= 1 && p1Kings >= 1) {
       val totalPieces = p2Pieces + p1Pieces
       if (totalPieces == 6 || totalPieces == 7)
-        Some(120, false, false, false)  // 7.2.6: "6-and 7-pieces endings"
+        Some((120, false, false, false)) // 7.2.6: "6-and 7-pieces endings"
       else if (totalPieces == 4 || totalPieces == 5)
-        Some(60, false, false, false)   // 7.2.6: "4, and 5-pieces endings"
-      else Some(30, true, false, false) // 7.2.5: "the players made 15 moves only kings without moving of men"
+        Some((60, false, false, false))  // 7.2.6: "4, and 5-pieces endings"
+      else
+        Some((30, true, false, false))   // 7.2.5: "the players made 15 moves only kings without moving of men"
     } else None
   }
 

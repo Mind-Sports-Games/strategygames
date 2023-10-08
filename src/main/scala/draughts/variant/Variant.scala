@@ -7,7 +7,7 @@ import format.FEN
 
 import cats.data.Validated
 import cats.implicits._
-import scala.annotation.tailrec
+import scala.annotation.{ nowarn, tailrec }
 
 // Correctness depends on singletons for each variant ID
 abstract class Variant private[variant] (
@@ -70,8 +70,8 @@ abstract class Variant private[variant] (
     case _          => false
   }
 
-  def getCaptureValue(board: Board, taken: List[Pos]) = taken.length
-  def getCaptureValue(board: Board, taken: Pos)       = 1
+  def getCaptureValue(@nowarn board: Board, taken: List[Pos])   = taken.length
+  def getCaptureValue(@nowarn board: Board, @nowarn taken: Pos) = 1
 
   def validMoves(situation: Situation, finalSquare: Boolean = false): Map[Pos, List[Move]] = {
     var bestLineValue = 0
@@ -250,7 +250,7 @@ abstract class Variant private[variant] (
                         }
                         extraCaptsCache.foreach { cache =>
                           if (cachedExtraCapts.isEmpty)
-                            cache += (hash, maxExtraCapts)
+                            cache.addOne(hash, maxExtraCapts)
                         }
                         newCaptureValue + maxExtraCapts
                     }
@@ -406,7 +406,7 @@ abstract class Variant private[variant] (
           }
           extraCaptsCache.foreach { cache =>
             if (cachedExtraCapts.isEmpty)
-              cache += (hash, maxExtraCapts)
+              cache.addOne(hash, maxExtraCapts)
           }
           newCaptureValue + maxExtraCapts
       }
@@ -431,8 +431,8 @@ abstract class Variant private[variant] (
   def winner(situation: Situation): Option[Player] =
     if (situation.checkMate || specialEnd(situation)) Some(!situation.player) else None
 
-  def specialEnd(situation: Situation)  = false
-  def specialDraw(situation: Situation) = false
+  def specialEnd(@nowarn situation: Situation)  = false
+  def specialDraw(@nowarn situation: Situation) = false
 
   // Some variants have an extra effect on the board on a move. For example, in Atomic, some
   // pieces surrounding a capture explode
@@ -455,7 +455,7 @@ abstract class Variant private[variant] (
   def finalizeBoard(
       board: Board,
       uci: format.Uci.Move,
-      captured: Option[List[Piece]],
+      @nowarn captured: Option[List[Piece]],
       situationBefore: Situation,
       finalSquare: Boolean
   ): Board = {

@@ -5,7 +5,7 @@ import strategygames.{ Player, Status }
 import cats.data.Validated
 import cats.implicits._
 
-import strategygames.togyzkumalak.format.{ Forsyth, Uci }
+import strategygames.togyzkumalak.format.Uci
 
 case class Situation(board: Board, player: Player) {
 
@@ -16,7 +16,7 @@ case class Situation(board: Board, player: Player) {
   def history = board.history
 
   // TODO: Implement
-  private lazy val gameEnd: Boolean = false
+  // private lazy val gameEnd: Boolean = false
 
   // private lazy val gameResult: GameResult = board.apiPosition.gameResult
 

@@ -11,7 +11,7 @@ case class Drop(
     situationBefore: Situation,
     after: Board,
     metrics: MoveMetrics = MoveMetrics()
-) extends Action(situationBefore, after, metrics) {
+) extends Action(situationBefore) {
 
   def situationAfter = Situation(finalizeAfter, !piece.player)
 

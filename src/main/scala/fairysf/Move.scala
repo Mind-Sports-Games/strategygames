@@ -1,6 +1,7 @@
 package strategygames.fairysf
 import strategygames.MoveMetrics
 
+import scala.annotation.nowarn
 import strategygames.fairysf.format.Uci
 
 case class Move(
@@ -14,7 +15,7 @@ case class Move(
     castle: Option[((Pos, Pos), (Pos, Pos))],
     enpassant: Boolean,
     metrics: MoveMetrics = MoveMetrics()
-) extends Action(situationBefore, after, metrics) {
+) extends Action(situationBefore, after) {
 
   def situationAfter =
     Situation(
@@ -39,7 +40,7 @@ case class Move(
 
   def player = piece.player
 
-  def withPromotion(op: Option[PromotableRole]): Option[Move] = None
+  def withPromotion(@nowarn op: Option[PromotableRole]): Option[Move] = None
 
   def withMetrics(m: MoveMetrics) = copy(metrics = m)
 

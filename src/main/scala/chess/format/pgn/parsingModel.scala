@@ -5,7 +5,7 @@ import cats.data.Validated
 import cats.syntax.option._
 
 import strategygames.{ Drop => StratDrop, Move => StratMove }
-import strategygames.format.pgn.{ Metas, ParsedPgn, San, Sans, Suffixes, Tags }
+import strategygames.format.pgn.{ Metas, San, Suffixes }
 
 case class Std(
     dest: Pos,

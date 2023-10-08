@@ -231,8 +231,9 @@ object Replay {
         val moves       = Parser.pgnMovesToUciMoves(moveStrs)
         val firstMove   = moves.headOption.toList
         val pairedMoves = if (moves == firstMove) List() else moves.sliding(2)
-        (firstMove.map(parseAction)) ::: pairedMoves.map { case List(prev, move) =>
-          parseActionWithPrevious(move, Some(prev))
+        (firstMove.map(parseAction)) ::: pairedMoves.flatMap {
+          case List(prev, move) => Some(parseActionWithPrevious(move, Some(prev)))
+          case _                => None
         }.toList
       } else {
         Parser.pgnMovesToUciMoves(moveStrs).map(parseAction)

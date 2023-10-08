@@ -125,6 +125,7 @@ case class Tags(value: List[Tag]) extends AnyVal {
       case Some(strategygames.variant.Variant.Togyzkumalak(_)) => togyzkumalakFen.map(format.FEN.Togyzkumalak)
       case Some(strategygames.variant.Variant.Go(_))           => goFen.map(format.FEN.Go)
       case Some(strategygames.variant.Variant.Chess(_)) | None => chessFen.map(format.FEN.Chess)
+      case Some(_)                                             => sys.error("invalid variant type for fen")
     }
 
   def exists(which: Tag.type => TagType): Boolean =

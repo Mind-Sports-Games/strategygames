@@ -58,7 +58,7 @@ trait ChessTest extends Specification with ValidatedMatchers {
         // }
         // because possible moves are asked for player highlight
         // before the move is played (on initial situation)
-        vg foreach { _.situation.destinations }
+        // vg foreach { _.situation.destinations }
         val ng = vg flatMap { g =>
           g(move._1, move._2) map (_._1)
         }

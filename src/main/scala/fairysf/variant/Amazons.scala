@@ -119,7 +119,10 @@ case object Amazons
         situation.board.apiPosition.legalMoves
           .filter(_.startsWith(s"${lastMove.uci},"))
           .map(_.split(",").reverse.headOption)
-          .map { case Some(Uci.Move.moveR(_, dest, _)) => Pos.fromKey(dest) }
+          .flatMap {
+            case Some(Uci.Move.moveR(_, dest, _)) => Some(Pos.fromKey(dest))
+            case _                                => None
+          }
           .map {
             case Some(dest) => {
               // val uciDrop     = s"${defaultDropRole.forsyth}@${dest.key}"

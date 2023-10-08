@@ -1,4 +1,5 @@
 package strategygames.chess
+import scala.language.reflectiveCalls
 
 class SituationTest extends ChessTest {
 

@@ -7,7 +7,6 @@ import cats.implicits._
 import strategygames.Player
 import strategygames.format.pgn.San
 import strategygames.togyzkumalak.format.pgn.{ Parser, Reader }
-import strategygames.format.pgn.{ Tag, Tags }
 import strategygames.togyzkumalak.format.{ FEN, Forsyth, Uci }
 import strategygames.{ Action => StratAction, Move => StratMove, Situation => StratSituation }
 

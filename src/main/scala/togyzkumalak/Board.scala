@@ -13,7 +13,7 @@ case class Board(
   def apply(at: Pos): Option[Piece] = (pieces get at).map(_._1)
   def apply(file: File, rank: Rank) = pieces get Pos(file, rank)
 
-  lazy val actors: Map[Pos, Actor] = pieces map { case (pos, (piece, count)) =>
+  lazy val actors: Map[Pos, Actor] = pieces map { case (pos, (piece, _)) =>
     (pos, Actor(piece, pos, this))
   }
 

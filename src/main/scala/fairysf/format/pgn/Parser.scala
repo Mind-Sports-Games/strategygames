@@ -1,6 +1,8 @@
 package strategygames.fairysf
 package format.pgn
 
+import scala.annotation.nowarn
+
 import strategygames.fairysf.variant.Variant
 import strategygames.fairysf.format.Uci
 
@@ -47,9 +49,9 @@ object Parser {
   def full(pgn: String): Validated[String, ParsedPgn] =
     Validated.invalid(s"Not implemented full: ${pgn}") // TODO: ???
 
-  def moves(str: String, variant: Variant): Validated[String, Sans] =
+  def moves(str: String, @nowarn variant: Variant): Validated[String, Sans] =
     Validated.invalid(s"Not implemented moves: ${str}") // TODO: ???
-  def moves(strMoves: Iterable[String], variant: Variant): Validated[String, Sans] =
+  def moves(strMoves: Iterable[String], @nowarn variant: Variant): Validated[String, Sans] =
     Validated.invalid(s"Not implemented iterable moves: ${strMoves}") // TODO: ???
 
   trait Logging { self: Parsers =>
@@ -62,7 +64,7 @@ object Parser {
 
     override val whiteSpace = """(\s|\t|\r?\n)+""".r
 
-    def apply(pgn: String): Validated[String, (InitialPosition, List[StrMove], Option[Tag])] =
+    def apply(@nowarn pgn: String): Validated[String, (InitialPosition, List[StrMove], Option[Tag])] =
       Validated.invalid("Not implemented MovesParser") // TODO: ???
 
     // def strMoves: Parser[(InitialPosition, List[StrMove], Option[String])] = //TODO: ???

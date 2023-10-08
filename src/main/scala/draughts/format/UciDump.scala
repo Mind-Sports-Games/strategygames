@@ -1,6 +1,8 @@
 package strategygames.draughts
 package format
 
+import scala.annotation.nowarn
+
 import cats.data.Validated
 
 import strategygames.draughts.variant.Variant
@@ -21,7 +23,7 @@ object UciDump {
     else
       Replay(moves, initialFen, variant, finalSquare) andThen (_.valid) map apply
 
-  def move(_variant: Variant)(action: Action): String = action match {
+  def move(@nowarn _variant: Variant)(action: Action): String = action match {
     case m: Move => m.toUci.shortUci
   }
 

@@ -56,7 +56,7 @@ case class Actor(
           board.move(pos, to) map { move(to, _, None, None) } flatMap board.variant.maybePromote
         case None if !checkPromotion =>
           board.move(pos, to) map { move(to, _, None, None) }
-        case Some(_)                 => Nil
+        case _                       => Nil
       }
     }
 

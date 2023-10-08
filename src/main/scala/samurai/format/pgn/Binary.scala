@@ -67,14 +67,14 @@ object Binary {
 
   private object Writer {
 
-    def move(gf: GameFamily, str: String): List[Byte] =
+    def move(str: String): List[Byte] =
       (str match {
         case Uci.Move.moveR(src, dst, promotion) => moveUci(src, dst, promotion)
         case _                                   => sys.error(s"Invalid move to write: ${str}")
       }) map (_.toByte)
 
     def moves(gf: GameFamily, strs: Iterable[String]): Array[Byte] =
-      (gf.id.toByte :: strs.toList.flatMap(move(gf, _))).to(Array)
+      (gf.id.toByte :: strs.toList.flatMap(move)).to(Array)
 
     def moveUci(src: String, dst: String, promotion: String) = List(
       (headerBit(MoveType.Move)) + Pos.fromKey(src).get.index,

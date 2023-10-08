@@ -270,36 +270,50 @@ object Board {
       case (GameLogic.Draughts(), Variant.Draughts(variant))         =>
         Draughts(
           draughts.Board.apply(
-            pieces.map { case (Pos.Draughts(pos), (Piece.Draughts(piece), _)) => (pos, piece) },
+            pieces.flatMap {
+              case (Pos.Draughts(pos), (Piece.Draughts(piece), _)) => Some((pos, piece))
+              case _                                               => None
+            },
             variant
           )
         )
       case (GameLogic.Chess(), Variant.Chess(variant))               =>
         Chess(
           chess.Board.apply(
-            pieces.map { case (Pos.Chess(pos), (Piece.Chess(piece), _)) => (pos, piece) },
+            pieces.flatMap {
+              case (Pos.Chess(pos), (Piece.Chess(piece), _)) => Some((pos, piece))
+              case _                                         => None
+            },
             variant
           )
         )
       case (GameLogic.FairySF(), Variant.FairySF(variant))           =>
         FairySF(
           fairysf.Board.apply(
-            pieces.map { case (Pos.FairySF(pos), (Piece.FairySF(piece), _)) => (pos, piece) },
+            pieces.flatMap {
+              case (Pos.FairySF(pos), (Piece.FairySF(piece), _)) => Some((pos, piece))
+              case _                                             => None
+            },
             variant
           )
         )
       case (GameLogic.Samurai(), Variant.Samurai(variant))           =>
         Samurai(
           samurai.Board.apply(
-            pieces.map { case (Pos.Samurai(pos), (Piece.Samurai(piece), count)) => (pos, (piece, count)) },
+            pieces.flatMap {
+              case (Pos.Samurai(pos), (Piece.Samurai(piece), count)) => Some((pos, (piece, count)))
+              case _                                                 => None
+            },
             variant
           )
         )
       case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant)) =>
         Togyzkumalak(
           togyzkumalak.Board.apply(
-            pieces.map { case (Pos.Togyzkumalak(pos), (Piece.Togyzkumalak(piece), count)) =>
-              (pos, (piece, count))
+            pieces.flatMap {
+              case (Pos.Togyzkumalak(pos), (Piece.Togyzkumalak(piece), count)) =>
+                Some((pos, (piece, count)))
+              case _                                                           => None
             },
             variant
           )
@@ -307,7 +321,10 @@ object Board {
       case (GameLogic.Go(), Variant.Go(variant))                     =>
         Go(
           go.Board.apply(
-            pieces.map { case (Pos.Go(pos), (Piece.Go(piece), _)) => (pos, piece) },
+            pieces.flatMap {
+              case (Pos.Go(pos), (Piece.Go(piece), _)) => Some((pos, piece))
+              case _                                   => None
+            },
             variant
           )
         )

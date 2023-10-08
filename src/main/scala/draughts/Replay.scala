@@ -1,5 +1,9 @@
 package strategygames.draughts
 
+import scala.annotation.nowarn
+// TODO: I think the scala compiler is wrong about the finalSquare variables being unused.
+//       but I can't quite work it out, so I left them and used nowarn
+
 import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
@@ -194,7 +198,7 @@ object Replay {
       uciMoves: Seq[String],
       initialFen: FEN,
       variant: Variant,
-      debugId: String,
+      @nowarn debugId: String,
       iteratedCapts: Boolean = false
   ): List[String] = {
 
@@ -263,7 +267,7 @@ object Replay {
   private def recursiveUcis(
       sit: Situation,
       sans: List[San],
-      finalSquare: Boolean = false
+      @nowarn finalSquare: Boolean = false
   ): Validated[String, List[Uci]] =
     sans match {
       case Nil         => valid(Nil)
@@ -277,7 +281,7 @@ object Replay {
   private def recursiveSituations(
       sit: Situation,
       sans: List[San],
-      finalSquare: Boolean = false
+      @nowarn finalSquare: Boolean = false
   ): Validated[String, List[Situation]] =
     sans match {
       case Nil         => valid(Nil)
@@ -291,7 +295,7 @@ object Replay {
   private def recursiveSituationsFromUci(
       sit: Situation,
       ucis: List[Uci],
-      finalSquare: Boolean = false
+      @nowarn finalSquare: Boolean = false
   ): Validated[String, List[Situation]] =
     ucis match {
       case Nil         => valid(Nil)
@@ -305,7 +309,7 @@ object Replay {
   private def recursiveReplayFromUci(
       replay: Replay,
       ucis: List[Uci],
-      finalSquare: Boolean = false
+      @nowarn finalSquare: Boolean = false
   ): Validated[String, Replay] =
     ucis match {
       case Nil         => valid(replay)
