@@ -4,7 +4,7 @@ import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
-import strategygames.Player
+import strategygames.{ Player, Score }
 import strategygames.format.pgn.San
 import strategygames.go.format.pgn.{ Parser, Reader }
 import strategygames.go.format.{ FEN, Forsyth, Uci }
@@ -81,12 +81,27 @@ object Replay {
       piece = piece,
       pos = dest,
       situationBefore = before.situation,
-      after = before.situation.board.copy(
-        pieces = apiPosition.pieceMap,
-        uciMoves = uciMoves,
-        pocketData = apiPosition.pocketData,
-        position = apiPosition.some
-      )
+      after = before.situation.board
+        .copy(
+          pieces = apiPosition.pieceMap,
+          uciMoves = uciMoves,
+          pocketData = apiPosition.pocketData,
+          position = apiPosition.some
+        )
+        .withHistory(
+          before.situation.history.copy(
+            lastMove = Uci.Drop(role, dest).some,
+            score = Score(
+              apiPosition.fen.player1Score,
+              apiPosition.fen.player2Score
+            ),
+            captures = before.situation.history.captures.add(
+              before.situation.player,
+              before.situation.board.apiPosition.pieceMap.size - apiPosition.pieceMap.size + 1
+            ),
+            halfMoveClock = before.situation.history.halfMoveClock + before.situation.player.fold(0, 1)
+          )
+        )
     )
   }
 
@@ -97,12 +112,19 @@ object Replay {
   ): Pass = {
     Pass(
       situationBefore = before.situation,
-      after = before.situation.board.copy(
-        pieces = apiPosition.pieceMap,
-        uciMoves = uciMoves,
-        pocketData = apiPosition.pocketData,
-        position = apiPosition.some
-      )
+      after = before.situation.board
+        .copy(
+          pieces = apiPosition.pieceMap,
+          uciMoves = uciMoves,
+          pocketData = apiPosition.pocketData,
+          position = apiPosition.some
+        )
+        .withHistory(
+          before.situation.history.copy(
+            lastMove = Uci.Pass().some,
+            halfMoveClock = before.situation.history.halfMoveClock + before.situation.player.fold(0, 1)
+          )
+        )
     )
   }
 
@@ -115,12 +137,27 @@ object Replay {
     SelectSquares(
       squares,
       situationBefore = before.situation,
-      after = before.situation.board.copy(
-        pieces = apiPosition.pieceMap,
-        uciMoves = uciMoves,
-        pocketData = apiPosition.pocketData,
-        position = apiPosition.some
-      )
+      after = before.situation.board
+        .copy(
+          pieces = apiPosition.pieceMap,
+          uciMoves = uciMoves,
+          pocketData = apiPosition.pocketData,
+          position = apiPosition.some
+        )
+        .withHistory(
+          before.situation.history.copy(
+            lastMove = Uci.SelectSquares(squares).some,
+            score = Score(
+              apiPosition.fen.player1Score,
+              apiPosition.fen.player2Score
+            ),
+            captures = before.situation.history.captures.add(
+              before.situation.player,
+              before.situation.board.apiPosition.pieceMap.size - apiPosition.pieceMap.size + 1
+            ),
+            halfMoveClock = before.situation.history.halfMoveClock + before.situation.player.fold(0, 1)
+          )
+        )
     )
   }
 

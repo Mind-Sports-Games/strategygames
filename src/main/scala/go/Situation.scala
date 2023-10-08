@@ -48,6 +48,8 @@ case class Situation(board: Board, player: Player) {
     else if (staleMate) Status.Stalemate.some
     else none
 
+  def isRepetition: Boolean = board.apiPosition.isRepetition
+
   def opponentHasInsufficientMaterial: Boolean = false
 
   def drop(role: Role, pos: Pos): Validated[String, Drop] =

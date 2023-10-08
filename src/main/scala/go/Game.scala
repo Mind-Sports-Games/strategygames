@@ -79,7 +79,12 @@ case class Game(
       situation = newSituation,
       turns = turns + 1,
       pgnMoves = pgnMoves :+ pass.toUci.uci,
-      clock = applyClock(pass.metrics, newSituation.status.isEmpty, newSituation.player != situation.player)
+      clock = applyClock(
+        pass.metrics,
+        newSituation.status.isEmpty,
+        newSituation.player != situation.player,
+        newSituation.canSelectSquares
+      )
     )
   }
 
@@ -102,11 +107,18 @@ case class Game(
     )
   }
 
-  private def applyClock(metrics: MoveMetrics, gameActive: Boolean, switchClock: Boolean) =
+  private def applyClock(
+      metrics: MoveMetrics,
+      gameActive: Boolean,
+      switchClock: Boolean,
+      pauseClock: Boolean = false
+  ) =
     clock.map { c =>
       {
         val newC = c.step(metrics, gameActive, switchClock)
-        if (turns - startedAtTurn == (2 * situation.board.variant.plysPerTurn - 1)) newC.start else newC
+        if (pauseClock) newC.pause
+        else if (turns - startedAtTurn == (2 * situation.board.variant.plysPerTurn - 1)) newC.start
+        else newC
       }
     }
 

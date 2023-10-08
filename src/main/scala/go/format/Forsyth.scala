@@ -12,7 +12,7 @@ import strategygames.go.variant.Variant
 object Forsyth {
 
   val initial = FEN(
-    "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 65 65 1"
+    "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 1"
   )
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
@@ -62,13 +62,22 @@ object Forsyth {
 
   def >>(game: Game): FEN = exportBoardFen(game.situation.board)
 
+  // TODO Should this just be returning the board part of the fen? Check what Chess does
   def exportBoard(board: Board): String = exportBoardFen(board).value
 
-  def exportBoardFen(board: Board): FEN = board.apiPosition.fen
+  def exportBoardFen(board: Board): FEN =
+    FEN(
+      board.apiPosition.fen.value
+        .split(" ")
+        .updated(5, board.history.captures.p1)
+        .updated(6, board.history.captures.p2)
+        .mkString(" ")
+    )
 
   def boardAndPlayer(situation: Situation): String =
     boardAndPlayer(situation.board, situation.player)
 
+  // TODO review this, not sure this is correct as will return full fen appended with w/b
   def boardAndPlayer(board: Board, turnPlayer: Player): String =
     s"${exportBoard(board)} ${turnPlayer.letter}"
 }
