@@ -3,7 +3,7 @@ package format.pgn
 
 import format.{ FEN, Forsyth }
 import Pos._
-import strategygames.format.pgn.{ Move => PgnMove }
+import strategygames.format.pgn.{ Turn => PgnTurn }
 
 class DumperTest extends ChessTest {
 
@@ -327,10 +327,10 @@ NRKNRQBB
   }
   "move comment" should {
     "simple" in {
-      PgnMove("e4", List("Some comment")).toString must_== "e4 { Some comment }"
+      PgnTurn("e4", List("Some comment")).toString must_== "e4 { Some comment }"
     }
     "one line break" in {
-      PgnMove(
+      PgnTurn(
         "e4",
         List("""Some
 comment""")
@@ -338,7 +338,7 @@ comment""")
 comment }"""
     }
     "two line breaks" in {
-      PgnMove(
+      PgnTurn(
         "e4",
         List("""Some
 
@@ -347,7 +347,7 @@ comment""")
 comment }"""
     }
     "three line breaks" in {
-      PgnMove(
+      PgnTurn(
         "e4",
         List("""Some
 

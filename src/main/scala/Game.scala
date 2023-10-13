@@ -344,7 +344,13 @@ object Game {
         )
       )
 
-    def copy(clock: Option[Clock], plies: Int, turnCount: Int, startedAtTurn: Int, startPlayer: Player): Game =
+    def copy(
+        clock: Option[Clock],
+        plies: Int,
+        turnCount: Int,
+        startedAtTurn: Int,
+        startPlayer: Player
+    ): Game =
       Draughts(
         g.copy(
           clock = clock,

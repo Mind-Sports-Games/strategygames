@@ -3,6 +3,7 @@ package strategygames.samurai
 import format.Uci
 import org.specs2.matcher.ValidatedMatchers
 import org.specs2.mutable.Specification
+import strategygames.Player
 
 class OwareReplayTest extends Specification with ValidatedMatchers {
 
@@ -12,7 +13,7 @@ class OwareReplayTest extends Specification with ValidatedMatchers {
     val initialFen = variant.Oware.initialFen
 
     val x: (Game, List[(Game, Uci.WithSan)], Option[String]) =
-      Replay.gamePlyWhileValid(pgnMoves.map(Vector(_)), initialFen, varaint)
+      Replay.gamePlyWhileValid(pgnMoves.map(Vector(_)), Player.P1, Player.P1, initialFen, varaint)
 
     val initGame = x._1
     val getFen   = initGame.situation.board.apiPosition.fen

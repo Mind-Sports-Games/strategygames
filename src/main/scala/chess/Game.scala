@@ -95,7 +95,7 @@ case class Game(
   // It starts at 1, and is incremented after P2's move (turn)
   def fullTurnCount: Int = 1 + turnCount / 2
 
-  //TODO: Multiaction: verify this is what we want to pass startedAtTurn
+  // TODO: Multiaction: verify this is what we want to pass startedAtTurn
   def currentTurnCount: Int = turnCount + (if (plies > 0) 1 else 0)
 
   // doesnt seem to be used anywhere
