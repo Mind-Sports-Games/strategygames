@@ -223,24 +223,28 @@ object Replay {
     def parseMoveOrDrop(action: String): (Game, MoveOrDrop) =
       parseMoveOrDropWithPrevious(action, None)
 
-    def plys: List[(Game, MoveOrDrop)] =
+    def plies: List[(Game, MoveOrDrop)] =
       if (!variant.switchPlayerAfterMove) {
         // Amazons. Don't want doubleMoveFormat from Parser, so dont ask for it
         // We flatten actions and handle as non multimove due to needing to merge
         // Amazons Moves and Drops into a single action for the FairySF API
-        val plys       = Parser.pgnMovesToUciMoves(actions.flatten)
-        val firstPly   = plys.headOption.toList
-        val pairedPlys = if (plys == firstPly) List() else plys.sliding(2)
-        (firstPly.map(parseMoveOrDrop)) ::: pairedPlys.map { case List(prev, ply) =>
+        // If we don't want to flatten then we need to do something like samurai gamelogic
+        // where we use startPlayer and activePlayer
+        val plies       = Parser.pliesToFairyUciMoves(actions.flatten)
+        val firstPly    = plies.headOption.toList
+        val pairedPlies = if (plies == firstPly) List() else plies.sliding(2)
+        (firstPly.map(parseMoveOrDrop)) ::: pairedPlies.map { case List(prev, ply) =>
           parseMoveOrDropWithPrevious(ply, Some(prev))
         }.toList
       } else {
         // We flatten actions and handle as non multimove as these variants are
         // guaranteed to be non-multimove due to FairySF API
-        Parser.pgnMovesToUciMoves(actions.flatten).map(parseMoveOrDrop)
+        // If we don't want to flatten then we need to do something like samurai gamelogic
+        // where we use startPlayer and activePlayer
+        Parser.pliesToFairyUciMoves(actions.flatten).map(parseMoveOrDrop)
       }
 
-    (init, plys, errors match { case "" => None; case _ => errors.some })
+    (init, plies, errors match { case "" => None; case _ => errors.some })
   }
 
   def gamePlyWhileValid(
@@ -316,8 +320,9 @@ object Replay {
       variant: strategygames.fairysf.variant.Variant
   ): Validated[String, List[Situation]] = {
     val sit = initialFenToSituation(initialFen, variant)
-    Parser.moves(actions.flatten, sit.board.variant) andThen { moves =>
-      recursiveSituations(sit, moves.value) map { sit :: _ }
+    // seemingly this isn't used
+    Parser.sans(actions.flatten, sit.board.variant) andThen { sans =>
+      recursiveSituations(sit, sans.value) map { sit :: _ }
     }
   }
 
@@ -375,8 +380,9 @@ object Replay {
         Forsyth.<<@(variant, _)
       } | Situation(variant)
 
-      Parser.moves(actions.flatten, sit.board.variant) andThen { moves =>
-        recursivePlyAtFen(sit, moves.value, 0, 0)
+      // seemingly this isn't used
+      Parser.sans(actions.flatten, sit.board.variant) andThen { sans =>
+        recursivePlyAtFen(sit, sans.value, 0, 0)
       }
     }
 

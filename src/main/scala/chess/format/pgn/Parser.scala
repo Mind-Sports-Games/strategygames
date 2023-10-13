@@ -26,11 +26,11 @@ import scala.util.matching.Regex
 // http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm
 object Parser {
 
-  case class StrMove(
+  case class StrAction(
       san: String,
       glyphs: Glyphs,
       comments: List[String],
-      variations: List[List[StrMove]]
+      variations: List[List[StrAction]]
   )
 
   def full(pgn: String): Validated[String, ParsedPgn] =
@@ -47,40 +47,40 @@ object Parser {
         .replace("–", "-")
         .replace("e.p.", "") // silly en-passant notation
       for {
-        splitted    <- splitTagAndMoves(preprocessed)
-        tagStr       = splitted._1
-        moveStr      = splitted._2
-        preTags     <- TagParser(tagStr)
-        parsedMoves <- MovesParser(moveStr)
-        init         = parsedMoves._1
-        strMoves     = parsedMoves._2
-        resultOption = parsedMoves._3
-        tags         = resultOption.filterNot(_ => preTags.exists(_.Result)).foldLeft(preTags)(_ + _)
-        sans        <- objMoves(strMoves, tags.chessVariant | Variant.default)
+        splitted      <- splitTagAndActions(preprocessed)
+        tagStr         = splitted._1
+        actionStr      = splitted._2
+        preTags       <- TagParser(tagStr)
+        parsedActions <- ActionsParser(actionStr)
+        init           = parsedActions._1
+        strActions     = parsedActions._2
+        resultOption   = parsedActions._3
+        tags           = resultOption.filterNot(_ => preTags.exists(_.Result)).foldLeft(preTags)(_ + _)
+        sans          <- objSans(strActions, tags.chessVariant | Variant.default)
       } yield ParsedPgn(init, tags, sans)
     } catch {
       case _: StackOverflowError =>
         sys error "### StackOverflowError ### in PGN parser"
     }
 
-  def moves(str: String, variant: Variant): Validated[String, Sans]                =
-    moves(
+  def sans(str: String, variant: Variant): Validated[String, Sans]                    =
+    sans(
       str.split(' ').toList,
       variant
     )
-  def moves(strMoves: Iterable[String], variant: Variant): Validated[String, Sans] =
-    objMoves(
-      strMoves.map { StrMove(_, Glyphs.empty, Nil, Nil) }.to(List),
+  def sans(flatActions: Iterable[String], variant: Variant): Validated[String, Sans]  =
+    objSans(
+      flatActions.map { StrAction(_, Glyphs.empty, Nil, Nil) }.to(List),
       variant
     )
-  def objMoves(strMoves: List[StrMove], variant: Variant): Validated[String, Sans] =
-    strMoves.map { case StrMove(san, glyphs, comments, variations) =>
+  def objSans(strActions: List[StrAction], variant: Variant): Validated[String, Sans] =
+    strActions.map { case StrAction(san, glyphs, comments, variations) =>
       (
-        MoveParser(san, variant) map { m =>
+        ActionParser(san, variant) map { m =>
           m withComments comments withVariations {
             variations
               .map { v =>
-                objMoves(v, variant) getOrElse Sans.empty
+                objSans(v, variant) getOrElse Sans.empty
               }
               .filter(_.value.nonEmpty)
           } mergeGlyphs glyphs
@@ -94,50 +94,50 @@ object Parser {
       if (loggingEnabled) log(p)(msg) else p
   }
 
-  object MovesParser extends RegexParsers with Logging {
+  object ActionsParser extends RegexParsers with Logging {
 
     override val whiteSpace = """(\s|\t|\r?\n)+""".r
 
     private def cleanComments(comments: List[String]) = comments.map(_.trim).filter(_.nonEmpty)
 
-    def apply(pgn: String): Validated[String, (InitialPosition, List[StrMove], Option[Tag])] =
-      parseAll(strMoves, pgn) match {
-        case Success((init, moves, result), _) =>
+    def apply(pgn: String): Validated[String, (InitialPosition, List[StrAction], Option[Tag])] =
+      parseAll(strActions, pgn) match {
+        case Success((init, actions, result), _) =>
           valid(
             (
               init,
-              moves,
+              actions,
               result map { r =>
                 Tag(_.Result, r)
               }
             )
           )
-        case err                               => invalid("Cannot parse moves: %s\n%s".format(err.toString, pgn))
+        case err                                 => invalid("Cannot parse actions: %s\n%s".format(err.toString, pgn))
       }
 
-    def strMoves: Parser[(InitialPosition, List[StrMove], Option[String])] =
-      as("moves") {
-        (commentary *) ~ (strMove *) ~ (result ?) ~ (commentary *) ^^ { case coms ~ sans ~ res ~ _ =>
+    def strActions: Parser[(InitialPosition, List[StrAction], Option[String])] =
+      as("actions") {
+        (commentary *) ~ (strAction *) ~ (result ?) ~ (commentary *) ^^ { case coms ~ sans ~ res ~ _ =>
           (InitialPosition(cleanComments(coms)), sans, res)
         }
       }
 
-    val moveRegex =
+    val actionRegex =
       """(?:(?:0\-0(?:\-0|)[\+\#]?)|[PQKRBNOoa-h@][QKRBNa-h1-8xOo\-=\+\#\@]{1,6})[\?!□]{0,2}""".r
 
-    def strMove: Parser[StrMove] =
-      as("move") {
+    def strAction: Parser[StrAction] =
+      as("action") {
         ((number | commentary) *) ~>
-          (moveRegex ~ nagGlyphs ~ rep(commentary) ~ nagGlyphs ~ rep(variation)) <~
-          (moveExtras *) ^^ { case san ~ glyphs ~ comments ~ glyphs2 ~ variations =>
-            StrMove(san, glyphs merge glyphs2, cleanComments(comments), variations)
+          (actionRegex ~ nagGlyphs ~ rep(commentary) ~ nagGlyphs ~ rep(variation)) <~
+          (actionExtras *) ^^ { case san ~ glyphs ~ comments ~ glyphs2 ~ variations =>
+            StrAction(san, glyphs merge glyphs2, cleanComments(comments), variations)
           }
       }
 
     def number: Parser[String] = """[1-9]\d*[\s\.]*""".r
 
-    def moveExtras: Parser[Unit] =
-      as("moveExtras") {
+    def actionExtras: Parser[Unit] =
+      as("actionExtras") {
         commentary.^^^(())
       }
 
@@ -160,9 +160,9 @@ object Parser {
         """\$\d+""".r | nagGlyphsRE
       }
 
-    def variation: Parser[List[StrMove]] =
+    def variation: Parser[List[StrAction]] =
       as("variation") {
-        "(" ~> strMoves <~ ")" ^^ { case (_, sms, _) => sms }
+        "(" ~> strActions <~ ")" ^^ { case (_, sms, _) => sms }
       }
 
     def commentary: Parser[String] = blockCommentary | inlineCommentary
@@ -180,7 +180,7 @@ object Parser {
     val result: Parser[String] = "*" | "1/2-1/2" | "½-½" | "0-1" | "1-0"
   }
 
-  object MoveParser extends RegexParsers with Logging {
+  object ActionParser extends RegexParsers with Logging {
 
     override def skipWhitespace = false
 
@@ -373,7 +373,7 @@ object Parser {
       }
 
     def fromFullPgn(pgn: String): Validated[String, Tags] =
-      splitTagAndMoves(pgn) flatMap { case (tags, _) =>
+      splitTagAndActions(pgn) flatMap { case (tags, _) =>
         apply(tags)
       }
 
@@ -402,10 +402,10 @@ object Parser {
   private def ensureTagsNewline(pgn: String): String =
     """"\]\s*(\d+\.)""".r.replaceAllIn(pgn, m => "\"]\n" + m.group(1))
 
-  private def splitTagAndMoves(pgn: String): Validated[String, (String, String)] =
+  private def splitTagAndActions(pgn: String): Validated[String, (String, String)] =
     augmentString(ensureTagsNewline(pgn)).linesIterator.to(List).map(_.trim).filter(_.nonEmpty) span { line =>
       line lift 0 contains '['
     } match {
-      case (tagLines, moveLines) => valid(tagLines.mkString("\n") -> moveLines.mkString("\n"))
+      case (tagLines, actionLines) => valid(tagLines.mkString("\n") -> actionLines.mkString("\n"))
     }
 }

@@ -1,6 +1,6 @@
 package strategygames.chess
 package format.pgn
-import strategygames.{ ByoyomiClock, FischerClock, Move => StratMove, Situation => StratSituation }
+import strategygames.{ Actions, ByoyomiClock, FischerClock, Move => StratMove, Situation => StratSituation }
 
 import strategygames.format.pgn.{ ParsedPgn, Sans, Tags }
 
@@ -24,8 +24,8 @@ object Reader {
   def full(pgn: String, tags: Tags = Tags.empty): Validated[String, Result] =
     fullWithSans(pgn, identity, tags)
 
-  def moves(moveStrs: Iterable[String], tags: Tags): Validated[String, Result] =
-    movesWithSans(moveStrs, identity, tags)
+  def replayResult(actions: Actions, tags: Tags): Validated[String, Result] =
+    replayResultFromActionsUsingSan(actions, identity, tags)
 
   def fullWithSans(pgn: String, op: Sans => Sans, tags: Tags = Tags.empty): Validated[String, Result] =
     Parser.full(cleanUserInput(pgn)) map { parsed =>
@@ -35,9 +35,14 @@ object Reader {
   def fullWithSans(parsed: ParsedPgn, op: Sans => Sans): Result =
     makeReplay(makeGame(parsed.tags), op(parsed.sans))
 
-  def movesWithSans(moveStrs: Iterable[String], op: Sans => Sans, tags: Tags): Validated[String, Result] =
-    Parser.moves(moveStrs, tags.chessVariant | variant.Variant.default) map { moves =>
-      makeReplay(makeGame(tags), op(moves))
+  def replayResultFromActionsUsingSan(
+      actions: Actions,
+      op: Sans => Sans,
+      tags: Tags
+  ): Validated[String, Result] =
+    // Its ok to flatten actions as the game is built back up again from the Situation
+    Parser.sans(actions.flatten, tags.chessVariant | variant.Variant.default) map { sans =>
+      makeReplay(makeGame(tags), op(sans))
     }
 
   // remove invisible byte order mark
@@ -48,6 +53,7 @@ object Reader {
       case (Result.Complete(replay), san) =>
         san(StratSituation.wrap(replay.state.situation)).fold(
           err => Result.Incomplete(replay, err),
+          // TODO probably want this extended to cover Drops and not just Moves
           move => Result.Complete(replay addPly StratMove.toChess(move))
         )
       case (r: Result.Incomplete, _)      => r

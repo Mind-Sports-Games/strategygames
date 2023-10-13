@@ -1,6 +1,7 @@
 package strategygames.draughts
 package format.pdn
 import strategygames.{
+  Actions,
   ByoyomiClock,
   FischerClock,
   Move => StratMove,
@@ -30,12 +31,12 @@ object Reader {
   def full(pdn: String, tags: Tags = Tags.empty): Validated[String, Result] =
     fullWithSans(pdn, identity, tags, true)
 
-  def moves(
-      moveStrs: Iterable[String],
+  def replayResult(
+      actions: Actions,
       tags: Tags,
       iteratedCapts: Boolean = false
   ): Validated[String, Result] =
-    movesWithSans(moveStrs, identity, tags, iteratedCapts)
+    replayResultFromActionsUsingSan(actions, identity, tags, iteratedCapts)
 
   def fullWithSans(
       pdn: String,
@@ -50,14 +51,15 @@ object Reader {
   def fullWithSans(parsed: ParsedPdn, op: Sans => Sans): Result =
     makeReplay(makeGame(parsed.tags), op(parsed.sans))
 
-  def movesWithSans(
-      moveStrs: Iterable[String],
+  def replayResultFromActionsUsingSan(
+      actions: Actions,
       op: Sans => Sans,
       tags: Tags,
       iteratedCapts: Boolean = false
   ): Validated[String, Result] =
-    Parser.moves(moveStrs, tags.draughtsVariant | variant.Variant.default) map { moves =>
-      makeReplay(makeGame(tags), op(moves), iteratedCapts)
+    // Its ok to flatten actions as the game is built back up again from the Situation
+    Parser.sans(actions.flatten, tags.draughtsVariant | variant.Variant.default) map { sans =>
+      makeReplay(makeGame(tags), op(sans), iteratedCapts)
     }
 
   // remove invisible byte order mark

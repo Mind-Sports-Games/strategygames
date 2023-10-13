@@ -4,13 +4,7 @@ import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
-import strategygames.{
-  Actions,
-  Game => StratGame,
-  Move => StratMove,
-  MoveOrDrop,
-  Situation => StratSituation
-}
+import strategygames.{ Actions, Move => StratMove, MoveOrDrop, Situation => StratSituation }
 import strategygames.format.pgn.{ San, Tag, Tags }
 import format.pdn.{ Parser, Reader, Std }
 import format.{ FEN, Forsyth, Uci }
@@ -49,9 +43,9 @@ object Replay {
       variant: Variant,
       finalSquare: Boolean
   ): Validated[String, Reader.Result] =
-    actions.some.filter(_.nonEmpty) toValid "[replay] pdn is empty" andThen { nonEmptyMoves =>
-      Reader.moves(
-        nonEmptyMoves.flatten,
+    actions.some.filter(_.nonEmpty) toValid "[replay] pdn is empty" andThen { nonEmptyActions =>
+      Reader.replayResult(
+        nonEmptyActions,
         Tags(
           List(
             initialFen map { fen => Tag(_.FEN, fen.value) },
@@ -69,25 +63,27 @@ object Replay {
     case _                           => sys.error("Invalid draughts move")
   }
 
-  private def recursiveGames(game: DraughtsGame, sans: List[San]): Validated[String, List[DraughtsGame]] =
-    sans match {
-      case Nil         => valid(Nil)
-      case san :: rest =>
-        san(StratSituation.wrap(game.situation)) flatMap { move =>
-          val newGame = StratGame.wrap(game)(move).toDraughts
-          recursiveGames(newGame, rest) map { newGame :: _ }
-        }
-    }
+  // Both of the following commented out functions are unused by the rest of strategygames
+  // and lila. Would need to upgrade to multiaction to use them
+  // private def recursiveGames(game: DraughtsGame, sans: List[San]): Validated[String, List[DraughtsGame]] =
+  //  sans match {
+  //    case Nil         => valid(Nil)
+  //    case san :: rest =>
+  //      san(StratSituation.wrap(game.situation)) flatMap { move =>
+  //        val newGame = StratGame.wrap(game)(move).toDraughts
+  //        recursiveGames(newGame, rest) map { newGame :: _ }
+  //      }
+  //  }
 
-  def games(
-      moveStrs: Iterable[String],
-      initialFen: Option[FEN],
-      variant: Variant
-  ): Validated[String, List[DraughtsGame]] =
-    Parser.moves(moveStrs, variant) andThen { moves =>
-      val game = makeGame(variant, initialFen)
-      recursiveGames(game, moves.value) map { game :: _ }
-    }
+  // def games(
+  //    moveStrs: Iterable[String],
+  //    initialFen: Option[FEN],
+  //    variant: Variant
+  // ): Validated[String, List[DraughtsGame]] =
+  //  Parser.moves(moveStrs, variant) andThen { moves =>
+  //    val game = makeGame(variant, initialFen)
+  //    recursiveGames(game, moves.value) map { game :: _ }
+  //  }
 
   type ErrorMessage = String
   def gamePlyWhileValid(
@@ -136,12 +132,14 @@ object Replay {
     }
 
     val init = makeGame(variant, initialFen.some)
-    // TODO Upgrade for multimove when draughts does multimove
     Parser
-      .moves(actions.flatten, variant)
+      // Its ok to flatten actions as the game is built back up again from the Situation
+      // If we don't want to flatten then we need to do something like samurai gamelogic
+      // where we use startPlayer and activePlayer
+      .sans(actions.flatten, variant)
       .fold(
         err => List.empty[(DraughtsGame, Uci.WithSan)] -> err.some,
-        moves => mk(init, moves.value zip actions.flatten, Nil)
+        sans => mk(init, sans.value zip actions.flatten, Nil)
       ) match {
       case (games, err) => (init, games, err)
     }
@@ -191,10 +189,10 @@ object Replay {
 
     val init = initialFenToSituation(initialFen, variant)
     Parser
-      .moves(pdnMoves, variant)
+      .sans(pdnMoves, variant)
       .fold(
         err => Nil -> err.head.some,
-        moves => mk(init, moves.value, Nil)
+        sans => mk(init, sans.value, Nil)
       ) match {
       case (_, Some(_)) => None
       case (moves, _)   => Option(moves)
@@ -342,7 +340,7 @@ object Replay {
       initialSit: Situation,
       finalSquare: Boolean = false
   ): Validated[String, List[Uci]] =
-    Parser.moves(moveStrs, initialSit.board.variant) andThen { moves =>
+    Parser.sans(moveStrs, initialSit.board.variant) andThen { moves =>
       recursiveUcis(initialSit, moves.value, finalSquare)
     }
 
@@ -353,8 +351,9 @@ object Replay {
       finalSquare: Boolean = false
   ): Validated[String, List[Situation]] = {
     val sit = initialFenToSituation(initialFen, variant)
-    Parser.moves(actions.flatten, sit.board.variant) andThen { moves =>
-      recursiveSituations(sit, moves.value, finalSquare) map { sit :: _ }
+    // Its ok to flatten actions as the game is built back up again from the Situation
+    Parser.sans(actions.flatten, sit.board.variant) andThen { sans =>
+      recursiveSituations(sit, sans.value, finalSquare) map { sit :: _ }
     }
   }
 
@@ -416,8 +415,9 @@ object Replay {
         Forsyth.<<@(variant, _)
       } | Situation(variant)
 
-      Parser.moves(actions.flatten, sit.board.variant) andThen { moves =>
-        recursivePlyAtFen(sit, moves.value, 0, 0)
+      // Its ok to flatten actions as the game is built back up again from the Situation
+      Parser.sans(actions.flatten, sit.board.variant) andThen { sans =>
+        recursivePlyAtFen(sit, sans.value, 0, 0)
       }
     }
 

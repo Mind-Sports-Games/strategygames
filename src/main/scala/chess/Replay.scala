@@ -48,9 +48,9 @@ object Replay {
       initialFen: Option[FEN],
       variant: strategygames.chess.variant.Variant
   ): Validated[String, Reader.Result] =
-    actions.some.filter(_.nonEmpty) toValid "[replay] pgn is empty" andThen { nonEmptyMoves =>
-      Reader.moves(
-        nonEmptyMoves.flatten,
+    actions.some.filter(_.nonEmpty) toValid "[replay] pgn is empty" andThen { nonEmptyActions =>
+      Reader.replayResult(
+        nonEmptyActions,
         Tags(
           List(
             initialFen map { fen =>
@@ -64,25 +64,27 @@ object Replay {
       )
     }
 
-  private def recursiveGames(game: Game, sans: List[San]): Validated[String, List[Game]] =
-    sans match {
-      case Nil         => valid(Nil)
-      case san :: rest =>
-        san(StratSituation.wrap(game.situation)) flatMap { moveOrDrop =>
-          val newGame = StratGame.wrap(game)(moveOrDrop).toChess
-          recursiveGames(newGame, rest) map { newGame :: _ }
-        }
-    }
+  // Both of the following commented out functions are unused by the rest of strategygames
+  // and lila. Would need to upgrade to multiaction to use them
+  // private def recursiveGames(game: Game, sans: List[San]): Validated[String, List[Game]] =
+  //  sans match {
+  //    case Nil         => valid(Nil)
+  //    case san :: rest =>
+  //      san(StratSituation.wrap(game.situation)) flatMap { moveOrDrop =>
+  //        val newGame = StratGame.wrap(game)(moveOrDrop).toChess
+  //        recursiveGames(newGame, rest) map { newGame :: _ }
+  //      }
+  //  }
 
-  def games(
-      moveStrs: Iterable[String],
-      initialFen: Option[FEN],
-      variant: strategygames.chess.variant.Variant
-  ): Validated[String, List[Game]] =
-    Parser.moves(moveStrs, variant) andThen { moves =>
-      val game = makeGame(variant, initialFen)
-      recursiveGames(game, moves.value) map { game :: _ }
-    }
+  // def games(
+  //    moveStrs: Iterable[String],
+  //    initialFen: Option[FEN],
+  //    variant: strategygames.chess.variant.Variant
+  // ): Validated[String, List[Game]] =
+  //  Parser.moves(moveStrs, variant) andThen { moves =>
+  //    val game = makeGame(variant, initialFen)
+  //    recursiveGames(game, moves.value) map { game :: _ }
+  //  }
 
   def gamePlyWhileValid(
       actions: Actions,
@@ -106,15 +108,17 @@ object Replay {
         case _                     => (Nil, None)
       }
     val init                                                                                = makeGame(variant, initialFen.some)
-    // TODO handle multimove
     // The following line converts actions into a 1-dimensional structure
     // where an action is in a tuple of itself and the boolean autoEndTurn
     // actions.zipWithIndex.map{case (a, i) => a.zipWithIndex.map{case (a1, i1) => (a1, i1 == a.size-1 && i != actions.size-1)}}.flatten
     Parser
-      .moves(actions.flatten, variant)
+      // Its ok to flatten actions as the game is built back up again from the Situation
+      // If we don't want to flatten then we need to do something like samurai gamelogic
+      // where we use startPlayer and activePlayer
+      .sans(actions.flatten, variant)
       .fold(
         err => List.empty[(Game, Uci.WithSan)] -> err.some,
-        moves => mk(init, moves.value zip actions.flatten)
+        sans => mk(init, sans.value zip actions.flatten)
       ) match {
       case (games, err) => (init, games, err)
     }
@@ -174,8 +178,9 @@ object Replay {
       variant: strategygames.chess.variant.Variant
   ): Validated[String, List[Situation]] = {
     val sit = initialFenToSituation(initialFen, variant)
-    Parser.moves(actions.flatten, sit.board.variant) andThen { moves =>
-      recursiveSituations(sit, moves.value) map { sit :: _ }
+    // Its ok to flatten actions as the game is built back up again from the Situation
+    Parser.sans(actions.flatten, sit.board.variant) andThen { sans =>
+      recursiveSituations(sit, sans.value) map { sit :: _ }
     }
   }
 
@@ -233,8 +238,9 @@ object Replay {
         Forsyth.<<@(variant, _)
       } | Situation(variant)
 
-      Parser.moves(actions.flatten, sit.board.variant) andThen { moves =>
-        recursivePlyAtFen(sit, moves.value, 0, 0)
+      // Its ok to flatten actions as the game is built back up again from the Situation
+      Parser.sans(actions.flatten, sit.board.variant) andThen { sans =>
+        recursivePlyAtFen(sit, sans.value, 0, 0)
       }
     }
 

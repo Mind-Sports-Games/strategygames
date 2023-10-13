@@ -6,9 +6,8 @@ import cats.implicits._
 
 import strategygames.format.pgn.San
 import strategygames.samurai.format.pgn.{ Parser, Reader }
-import strategygames.format.pgn.{ Tag, Tags }
 import strategygames.samurai.format.{ FEN, Forsyth, Uci }
-import strategygames.{ Actions, Move => StratMove, MoveOrDrop, Situation => StratSituation }
+import strategygames.{ Actions, Move => StratMove, MoveOrDrop, Player, Situation => StratSituation }
 
 case class Replay(setup: Game, plies: List[Move], state: Game) {
 
@@ -40,11 +39,13 @@ object Replay {
 
   def apply(
       actions: Actions,
+      startPlayer: Player,
+      activePlayer: Player,
       initialFen: Option[FEN],
       variant: strategygames.samurai.variant.Variant
   ): Validated[String, Reader.Result] = {
     val fen                  = initialFen.getOrElse(variant.initialFen)
-    val (init, plies, error) = gameActionWhileValid(actions, fen, variant)
+    val (init, plies, error) = gameActionWhileValid(actions, startPlayer, activePlayer, fen, variant)
     val game                 = plies.reverse.last._1
     error match {
       case None      => Validated.valid(Reader.Result.Complete(new Replay(init, plies.reverse.map(_._2), game)))
@@ -63,6 +64,7 @@ object Replay {
       before: Game,
       orig: Pos,
       dest: Pos,
+      endTurn: Boolean,
       apiPosition: Api.Position,
       uciMoves: List[String]
   ): Move =
@@ -76,13 +78,31 @@ object Replay {
         uciMoves = uciMoves,
         position = apiPosition.some
       ),
-      autoEndTurn = true,
+      autoEndTurn = endTurn,
       capture = None,
       promotion = None
     )
 
+  def pliesWithEndTurn(actions: Actions): Seq[(String, Boolean)] =
+    actions.zipWithIndex.map { case (a, i) =>
+      a.zipWithIndex.map { case (a1, i1) => (a1, i1 == a.size - 1 && i != actions.size - 1) }
+    }.flatten
+
+  private def actionsToPliesWithEndTurn(
+      actions: Actions,
+      startPlayer: Player,
+      activePlayer: Player
+  ): Seq[(String, Boolean)] =
+    pliesWithEndTurn(
+      if (Player.fromTurnCount(actions.size + startPlayer.fold(0, 1)) == activePlayer)
+        actions :+ Vector()
+      else actions
+    )
+
   private def gameActionWhileValid(
       actions: Actions,
+      startPlayer: Player,
+      activePlayer: Player,
       initialFen: FEN,
       variant: strategygames.samurai.variant.Variant
   ): (Game, List[(Game, Move)], Option[String]) = {
@@ -94,12 +114,17 @@ object Replay {
     def getApiPosition(uciMoves: List[String]) =
       Api.positionFromVariantAndMoves(variant, uciMoves)
 
-    def replayMoveFromUci(orig: Option[Pos], dest: Option[Pos], promotion: String): (Game, Move) =
+    def replayMoveFromUci(
+        orig: Option[Pos],
+        dest: Option[Pos],
+        promotion: String,
+        endTurn: Boolean
+    ): (Game, Move) =
       (orig, dest) match {
         case (Some(orig), Some(dest)) => {
           val uciMove = s"${orig.key}${dest.key}${promotion}"
           uciMoves = uciMoves :+ uciMove
-          val move    = replayMove(state, orig, dest, getApiPosition(uciMoves), uciMoves)
+          val move    = replayMove(state, orig, dest, endTurn, getApiPosition(uciMoves), uciMoves)
           state = state(move)
           (state, move)
         }
@@ -110,27 +135,36 @@ object Replay {
         }
       }
 
-    val plys: List[(Game, Move)] = Parser
-      .pgnMovesToUciMoves(actions.flatten)
-      .map {
-        case Uci.Move.moveR(orig, dest, promotion) =>
+    val plies: List[(Game, Move)] =
+      actionsToPliesWithEndTurn(actions, startPlayer, activePlayer).toList.map {
+        case (Uci.Move.moveR(orig, dest, promotion), endTurn) =>
           replayMoveFromUci(
             Pos.fromKey(orig),
             Pos.fromKey(dest),
-            promotion
+            promotion,
+            endTurn
           )
-        case action: String                        => sys.error(s"Invalid move for replay: $action")
+        case (action: String, _)                              =>
+          sys.error(s"Invalid move for replay: $action")
       }
 
-    (init, plys, errors match { case "" => None; case _ => errors.some })
+    (init, plies, errors match { case "" => None; case _ => errors.some })
   }
 
   def gamePlyWhileValid(
       actions: Actions,
+      startPlayer: Player,
+      activePlayer: Player,
       initialFen: FEN,
       variant: strategygames.samurai.variant.Variant
   ): (Game, List[(Game, Uci.WithSan)], Option[String]) = {
-    val (game, moves, error) = gameActionWhileValid(actions, initialFen, variant)
+    val (game, moves, error) = gameActionWhileValid(
+      actions,
+      startPlayer,
+      activePlayer,
+      initialFen,
+      variant
+    )
     (
       game,
       moves.map { v =>
@@ -194,8 +228,9 @@ object Replay {
       variant: strategygames.samurai.variant.Variant
   ): Validated[String, List[Situation]] = {
     val sit = initialFenToSituation(initialFen, variant)
-    Parser.moves(actions.flatten, sit.board.variant) andThen { moves =>
-      recursiveSituations(sit, moves.value) map { sit :: _ }
+    // seemingly this isn't used
+    Parser.sans(actions.flatten, sit.board.variant) andThen { sans =>
+      recursiveSituations(sit, sans.value) map { sit :: _ }
     }
   }
 
@@ -253,8 +288,9 @@ object Replay {
         Forsyth.<<@(variant, _)
       } | Situation(variant)
 
-      Parser.moves(actions.flatten, sit.board.variant) andThen { moves =>
-        recursivePlyAtFen(sit, moves.value, 0, 0)
+      // seemingly this isn't used
+      Parser.sans(actions.flatten, sit.board.variant) andThen { sans =>
+        recursivePlyAtFen(sit, sans.value, 0, 0)
       }
     }
 

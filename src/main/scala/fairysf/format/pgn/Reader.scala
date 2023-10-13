@@ -33,26 +33,24 @@ object Reader {
   def full(pgn: String, tags: Tags = Tags.empty): Validated[String, Result] =
     fullWithSans(pgn, identity, tags)
 
-  def moves(moveStrs: Iterable[String], tags: Tags): Validated[String, Result] =
-    movesWithSans(moveStrs, identity, tags)
-
   // Because fairysf deals exclusively with UCI moves, we need this version
   // for parsing replaces from uci move
-  def uciMoves(gf: GameFamily, moveStrs: Iterable[String], tags: Tags): Validated[String, Result] = {
-    val moves = moveStrs.flatMap(Uci(gf, _))
-    if (moves.size < moveStrs.size) {
+  def replayResult(gf: GameFamily, uciStrs: Iterable[String], tags: Tags): Validated[String, Result] = {
+    val uci = uciStrs.flatMap(Uci(gf, _))
+    if (uci.size < uciStrs.size) {
       Validated.invalid("Invalid UCI moves")
     } else {
       Validated.valid(
         makeReplayFromUCI(
           makeGame(tags),
-          moves.toList
+          uci.toList
         )
       )
     }
   }
 
   def fullWithSans(pgn: String, op: Sans => Sans, tags: Tags = Tags.empty): Validated[String, Result] =
+    // seemingly this isn't used
     Parser.full(cleanUserInput(pgn)) map { parsed =>
       makeReplay(makeGame(parsed.tags ++ tags), op(parsed.sans))
     }
@@ -60,12 +58,7 @@ object Reader {
   def fullWithSans(parsed: ParsedPgn, op: Sans => Sans): Result =
     makeReplay(makeGame(parsed.tags), op(parsed.sans))
 
-  def movesWithSans(moveStrs: Iterable[String], op: Sans => Sans, tags: Tags): Validated[String, Result] =
-    Parser.moves(moveStrs, tags.fairysfVariant | variant.Variant.default) map { moves =>
-      makeReplay(makeGame(tags), op(moves))
-    }
-
-  def movesWithActions(
+  def replayResultFromActions(
       actions: Actions,
       op: Actions => Actions,
       tags: Tags
@@ -98,8 +91,9 @@ object Reader {
   private def makeReplayWithActions(game: Game, actions: Actions): Result = {
     var lastMove: Option[String] = None
     var lastDest: Option[String] = None
-    // TODO support multimove properly here
-    Parser.pgnMovesToUciMoves(actions.flatten).foldLeft[Result](Result.Complete(Replay(game))) {
+    // This doesnt support multiaction properly, but it correctly handles a game like Amazons
+    // by implementing specific fairy multiaction logic using switchPlayerAfterMove
+    Parser.pliesToFairyUciMoves(actions.flatten).foldLeft[Result](Result.Complete(Replay(game))) {
       case (Result.Complete(replay), m) =>
         m match {
           case Uci.Move.moveR(orig, dest, promotion) => {

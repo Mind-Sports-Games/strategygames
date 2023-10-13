@@ -28,8 +28,8 @@ sealed abstract class Replay(val setup: Game, val plies: List[MoveOrDrop], val s
       }
       .reverse
 
-  //this is only used by fishnet which wants to deal in single ply per turn states
-  //which is why we can use startedAtTurn as startedAtPly
+  // this is only used by fishnet which wants to deal in single ply per turn states
+  // which is why we can use startedAtTurn as startedAtPly
   def moveAtPly(ply: Int): Option[MoveOrDrop] =
     chronoPlies lift (ply - 1 - setup.startedAtTurn)
 
@@ -129,12 +129,19 @@ object Replay {
   def gamePlyWhileValid(
       lib: GameLogic,
       actions: Actions,
+      startPlayer: Player,
+      activePlayer: Player,
       initialFen: FEN,
       variant: Variant,
       iteratedCapts: Boolean = false
   ): (Game, List[(Game, Uci.WithSan)], Option[String]) = (lib, initialFen, variant) match {
     case (GameLogic.Draughts(), FEN.Draughts(initialFen), Variant.Draughts(variant))             =>
-      draughts.Replay.gamePlyWhileValid(actions, initialFen, variant, iteratedCapts) match {
+      draughts.Replay.gamePlyWhileValid(
+        actions,
+        initialFen,
+        variant,
+        iteratedCapts
+      ) match {
         case (game, gameswithsan, message) =>
           (
             Game.Draughts(game),
@@ -143,7 +150,11 @@ object Replay {
           )
       }
     case (GameLogic.Chess(), FEN.Chess(initialFen), Variant.Chess(variant))                      =>
-      chess.Replay.gamePlyWhileValid(actions, initialFen, variant) match {
+      chess.Replay.gamePlyWhileValid(
+        actions,
+        initialFen,
+        variant
+      ) match {
         case (game, gameswithsan, message) =>
           (
             Game.Chess(game),
@@ -152,7 +163,11 @@ object Replay {
           )
       }
     case (GameLogic.FairySF(), FEN.FairySF(initialFen), Variant.FairySF(variant))                =>
-      fairysf.Replay.gamePlyWhileValid(actions, initialFen, variant) match {
+      fairysf.Replay.gamePlyWhileValid(
+        actions,
+        initialFen,
+        variant
+      ) match {
         case (game, gameswithsan, message) =>
           (
             Game.FairySF(game),
@@ -161,7 +176,13 @@ object Replay {
           )
       }
     case (GameLogic.Samurai(), FEN.Samurai(initialFen), Variant.Samurai(variant))                =>
-      samurai.Replay.gamePlyWhileValid(actions, initialFen, variant) match {
+      samurai.Replay.gamePlyWhileValid(
+        actions,
+        startPlayer,
+        activePlayer,
+        initialFen,
+        variant
+      ) match {
         case (game, gameswithsan, message) =>
           (
             Game.Samurai(game),
@@ -170,7 +191,13 @@ object Replay {
           )
       }
     case (GameLogic.Togyzkumalak(), FEN.Togyzkumalak(initialFen), Variant.Togyzkumalak(variant)) =>
-      togyzkumalak.Replay.gamePlyWhileValid(actions, initialFen, variant) match {
+      togyzkumalak.Replay.gamePlyWhileValid(
+        actions,
+        startPlayer,
+        activePlayer,
+        initialFen,
+        variant
+      ) match {
         case (game, gameswithsan, message) =>
           (
             Game.Togyzkumalak(game),
