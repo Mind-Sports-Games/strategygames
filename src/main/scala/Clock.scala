@@ -54,8 +54,8 @@ case class BronsteinDelayGrace(val delay: Centis) extends ClockTimeGrace {
 case class Timer(
     val limit: Centis,
     val clockTimeGrace: ClockTimeGrace = NoClockTimeGrace(),
-    val elapsed: Centis = Centis(0),
-    val nextTimer: Option[Timer] = None
+    val nextTimer: Option[Timer] = None,
+    val elapsed: Centis = Centis(0)
 ) extends TimerTrait {
 
   private def applyClockGrace(timeTaken: Centis): Timer =
