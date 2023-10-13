@@ -209,6 +209,46 @@ class ClockTest extends ChessTest {
       clock60.outOfTime(P1, withGrace = true) must beFalse
       clock60.outOfTime(P1, withGrace = false) must beTrue
     }
+    "60s stall with increment" in {
+      val clock = advance(fakeClock60Plus1, 60 * 100)
+
+      clock.remainingTime(P1).centis must_== 0
+      clock.outOfTime(P2, withGrace = true) must beFalse
+      clock.outOfTime(P1, withGrace = true) must beFalse
+      clock.outOfTime(P1, withGrace = false) must beTrue
+    }
+    "60s stall with byoyomi" in {
+      val clock = advance(fakeClock180Delay2, 180 * 100)
+
+      clock.remainingTime(P1).centis must_== 0
+      clock.outOfTime(P2, withGrace = true) must beFalse
+      clock.outOfTime(P1, withGrace = true) must beFalse
+      clock.outOfTime(P1, withGrace = false) must beTrue
+    }
+
+    def clockStep(clock: Clock, wait: Int) =
+      advance(clock, wait).step().step()
+
+    "1x30s move + 30s stall with increment" in {
+      val clockHalf = clockStep(fakeClock60Plus1, 30 * 100)
+      clockHalf.remainingTime(P1).centis must_== 31 * 100
+      val clock     = advance(clockHalf, 30 * 100)
+
+      clock.remainingTime(P1).centis must_== 1 * 100
+      clock.outOfTime(P2, withGrace = true) must beFalse
+      clock.outOfTime(P1, withGrace = true) must beFalse
+      clock.outOfTime(P1, withGrace = false) must beFalse
+    }
+    "1x100 move + 80s stall with byoyomi" in {
+      val clockHalf = clockStep(fakeClock180Delay2, 100 * 100)
+      clockHalf.remainingTime(P1).centis must_== 82 * 100
+      val clock     = advance(clockHalf, 80 * 100)
+
+      clock.remainingTime(P1).centis must_== 2 * 100
+      clock.outOfTime(P2, withGrace = true) must beFalse
+      clock.outOfTime(P1, withGrace = true) must beFalse
+      clock.outOfTime(P1, withGrace = false) must beFalse
+    }
     "61s stall" in {
       val clock61 = advance(fakeClock60, 61 * 100)
       clock61.remainingTime(P1).centis must_== 0
