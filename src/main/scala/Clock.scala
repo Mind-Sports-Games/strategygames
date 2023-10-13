@@ -62,15 +62,15 @@ case class Timer(
     // TODO: make this work like the book
     clockTimeGrace.timeToAdd(this, timeTaken).pipe { case (newClockTimeGrace, postMoveGraceTime) =>
       copy(
-        elapsed = elapsed + timeTaken - postMoveGraceTime,
+        elapsed = elapsed - postMoveGraceTime,
         clockTimeGrace = newClockTimeGrace
-      ).nextIfDone
+      )
     }
+  private def applyTimeTaken(timeTaken: Centis): Timer = copy(elapsed = elapsed + timeTaken).nextIfDone
+  private def next: Timer                              = nextTimer.getOrElse(this)
+  private def nextIfDone: Timer                        = if (elapsed >= limit) next.takeTime(-remaining) else this
 
-  private def next       = nextTimer.getOrElse(this)
-  private def nextIfDone = if (elapsed >= limit) next.takeTime(-remaining) else this
-
-  def takeTime(timeTaken: Centis)    = applyClockGrace(timeTaken)
+  def takeTime(timeTaken: Centis)    = applyTimeTaken(timeTaken).applyClockGrace(timeTaken)
   def setRemaining(t: Centis): Timer = copy(elapsed = limit - t)
   def goBerserk: Timer               = copy(clockTimeGrace = clockTimeGrace.goBerserk)
   def giveTime(t: Centis)            = takeTime(-t)
