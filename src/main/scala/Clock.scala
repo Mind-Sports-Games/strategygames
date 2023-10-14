@@ -80,7 +80,7 @@ case class Timer(
     if (elapsed >= limit && nextTimer.isDefined) next.takeTime(-remaining) else this
 
   def followedBy(timer: Timer): Timer =
-    nextTimer.fold(copy(nextTimer = Some(timer)))(t => t.followedBy(timer))
+    nextTimer.fold(copy(nextTimer = Some(timer)))(t => copy(nextTimer = Some(t.followedBy(timer))))
 
   def takeTime(timeTaken: Centis)    =
     applyTimeTaken(timeTaken)

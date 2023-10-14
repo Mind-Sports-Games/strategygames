@@ -63,51 +63,73 @@ class TimerTest extends ChessTest {
   // Byoyomi can be represented multiple different ways, but it's basically a new timer
   // without increment after the current period.
   "play with a fischer increment followed by byoyomi" should {
-    val fischerIncrement =
+    val withByoyomi    =
       Timer
         .fischerIncrement(Centis(60 * 100), Centis(1 * 100))
         .followedBy(Timer.byoyomi(Centis(5 * 100)))
+    val withTwoByoyomi =
+      Timer
+        .fischerIncrement(Centis(60 * 100), Centis(1 * 100))
+        .followedBy(Timer.byoyomi(Centis(5 * 100)))
+        .followedBy(Timer.byoyomi(Centis(5 * 100)))
     "properly increment time when game is ongoing" in {
-      fischerIncrement.remaining must_== Centis(60 * 100)
-      val afterMove = fischerIncrement.takeTime(Centis(30 * 100))
+      withByoyomi.remaining must_== Centis(60 * 100)
+      val afterMove = withByoyomi.takeTime(Centis(30 * 100))
       afterMove.remaining must_== Centis(31 * 100)
     }
     "even when there is only 1 centisecond left" in {
-      val afterMove = fischerIncrement
+      val afterMove = withByoyomi
         .takeTime(Centis(30 * 100))
         .takeTime(Centis(31 * 100 - 1))
       afterMove.remaining must_== Centis(101)
       afterMove.outOfTime must_== false
     }
     "but when the current period ends we must get a new period of time to play with" in {
-      val afterMove = fischerIncrement
+      val afterMove = withByoyomi
         .takeTime(Centis(30 * 100))
         .takeTime(Centis(31 * 100))
       afterMove.remaining must_== Centis(5 * 100)
       afterMove.outOfTime must_== false
     }
     "and so long as we continue to use less than the byoyomi, we get it back" in {
-      val afterMove = fischerIncrement
-        .takeTime(Centis(30 * 100))
-        .takeTime(Centis(31 * 100))
-        .takeTime(Centis(4 * 100))
-        .takeTime(Centis(4 * 100))
-        .takeTime(Centis(4 * 100))
-        .takeTime(Centis(4 * 100))
-        .takeTime(Centis(4 * 100))
+      val afterMove = withByoyomi
+        .takeTime(Centis(30 * 100)) // fine
+        .takeTime(Centis(31 * 100)) // period over
+        .takeTime(Centis(4 * 100))  // fine
+        .takeTime(Centis(4 * 100))  // fine
+        .takeTime(Centis(4 * 100))  // fine
+        .takeTime(Centis(4 * 100))  // fine
+        .takeTime(Centis(4 * 100))  // fine
       afterMove.remaining must_== Centis(5 * 100)
       afterMove.outOfTime must_== false
     }
     "but if we go over, we don't" in {
-      val afterMove = fischerIncrement
+      val afterMove = withByoyomi
+        .takeTime(Centis(30 * 100)) // fine
+        .takeTime(Centis(31 * 100)) // period over
+        .takeTime(Centis(4 * 100))  // fine
+        .takeTime(Centis(4 * 100))  // fine
+        .takeTime(Centis(4 * 100))  // fine
+        .takeTime(Centis(4 * 100))  // fine
+        .takeTime(Centis(4 * 100))  // fine
+        .takeTime(Centis(5 * 100))  // period over
+      afterMove.remaining must_== Centis(0 * 100)
+      afterMove.outOfTime must_== true
+    }
+    "with two periods we can go over twice" in {
+      val afterMove = withTwoByoyomi
         .takeTime(Centis(30 * 100))
         .takeTime(Centis(31 * 100))
-        .takeTime(Centis(4 * 100))
-        .takeTime(Centis(4 * 100))
-        .takeTime(Centis(4 * 100))
-        .takeTime(Centis(4 * 100))
-        .takeTime(Centis(4 * 100))
-        .takeTime(Centis(5 * 100))
+        .takeTime(Centis(4 * 100)) // fine
+        .takeTime(Centis(4 * 100)) // fine
+        .takeTime(Centis(4 * 100)) // fine
+        .takeTime(Centis(5 * 100)) // period over
+        .takeTime(Centis(4 * 100)) // fine
+        .takeTime(Centis(4 * 100)) // fine
+        .takeTime(Centis(4 * 100)) // fine
+        .takeTime(Centis(4 * 100)) // fine
+        .takeTime(Centis(4 * 100)) // fine
+        .takeTime(Centis(5 * 100)) // period over
       afterMove.remaining must_== Centis(0 * 100)
       afterMove.outOfTime must_== true
     }
