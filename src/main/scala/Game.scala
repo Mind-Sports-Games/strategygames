@@ -9,7 +9,7 @@ import strategygames.format.{ FEN, Uci }
 abstract class Game(
     val situation: Situation,
     val pgnMoves: Vector[String] = Vector(),
-    val clock: Option[Clock] = None,
+    val clock: Option[ClockBase] = None,
     val turns: Int = 0, // plies
     val startedAtTurn: Int = 0
 ) {
@@ -137,9 +137,9 @@ abstract class Game(
   // Because I"m unsure how to properly write a single, generic copy
   // type signature, we're getting individual ones for how we use it.
   // TODO: figure out if we can properly make this generic
-  def copy(clock: Option[Clock]): Game
+  def copy(clock: Option[ClockBase]): Game
   def copy(turns: Int, startedAtTurn: Int): Game
-  def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int): Game
+  def copy(clock: Option[ClockBase], turns: Int, startedAtTurn: Int): Game
   def copy(situation: Situation, turns: Int): Game
   def copy(situation: Situation): Game
 
@@ -226,11 +226,11 @@ object Game {
     ): Validated[String, (Game, SelectSquares)] =
       sys.error("Can't selectSquares in chess")
 
-    def copy(clock: Option[Clock]): Game                                 = Chess(g.copy(clock = clock))
+    def copy(clock: Option[ClockBase]): Game                                 = Chess(g.copy(clock = clock))
     def copy(turns: Int, startedAtTurn: Int): Game                       = Chess(
       g.copy(turns = turns, startedAtTurn = startedAtTurn)
     )
-    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int): Game = Chess(
+    def copy(clock: Option[ClockBase], turns: Int, startedAtTurn: Int): Game = Chess(
       g.copy(clock = clock, turns = turns, startedAtTurn = startedAtTurn)
     )
 
@@ -330,11 +330,11 @@ object Game {
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, SelectSquares)] =
       sys.error("Can't selectSquares in draughts")
-    def copy(clock: Option[Clock]): Game                                            = Draughts(g.copy(clock = clock))
+    def copy(clock: Option[ClockBase]): Game                                            = Draughts(g.copy(clock = clock))
     def copy(turns: Int, startedAtTurn: Int): Game                                  = Draughts(
       g.copy(turns = turns, startedAtTurn = startedAtTurn)
     )
-    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int): Game            = Draughts(
+    def copy(clock: Option[ClockBase], turns: Int, startedAtTurn: Int): Game            = Draughts(
       g.copy(clock = clock, turns = turns, startedAtTurn = startedAtTurn)
     )
     def copy(situation: Situation, turns: Int): Game                                = situation match {
@@ -417,11 +417,11 @@ object Game {
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, SelectSquares)] =
       sys.error("Can't selectSquares in fairysf")
-    def copy(clock: Option[Clock]): Game                                            = FairySF(g.copy(clock = clock))
+    def copy(clock: Option[ClockBase]): Game                                            = FairySF(g.copy(clock = clock))
     def copy(turns: Int, startedAtTurn: Int): Game                                  = FairySF(
       g.copy(turns = turns, startedAtTurn = startedAtTurn)
     )
-    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int): Game            = FairySF(
+    def copy(clock: Option[ClockBase], turns: Int, startedAtTurn: Int): Game            = FairySF(
       g.copy(clock = clock, turns = turns, startedAtTurn = startedAtTurn)
     )
 
@@ -491,11 +491,11 @@ object Game {
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, SelectSquares)] =
       sys.error("Can't selectSquares in Samurai")
-    def copy(clock: Option[Clock]): Game                                            = Samurai(g.copy(clock = clock))
+    def copy(clock: Option[ClockBase]): Game                                            = Samurai(g.copy(clock = clock))
     def copy(turns: Int, startedAtTurn: Int): Game                                  = Samurai(
       g.copy(turns = turns, startedAtTurn = startedAtTurn)
     )
-    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int): Game            = Samurai(
+    def copy(clock: Option[ClockBase], turns: Int, startedAtTurn: Int): Game            = Samurai(
       g.copy(clock = clock, turns = turns, startedAtTurn = startedAtTurn)
     )
 
@@ -566,11 +566,11 @@ object Game {
     ): Validated[String, (Game, SelectSquares)] =
       sys.error("Can't selectSquares in Togyzkumalak")
 
-    def copy(clock: Option[Clock]): Game                                 = Togyzkumalak(g.copy(clock = clock))
+    def copy(clock: Option[ClockBase]): Game                                 = Togyzkumalak(g.copy(clock = clock))
     def copy(turns: Int, startedAtTurn: Int): Game                       = Togyzkumalak(
       g.copy(turns = turns, startedAtTurn = startedAtTurn)
     )
-    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int): Game = Togyzkumalak(
+    def copy(clock: Option[ClockBase], turns: Int, startedAtTurn: Int): Game = Togyzkumalak(
       g.copy(clock = clock, turns = turns, startedAtTurn = startedAtTurn)
     )
 
@@ -650,11 +650,11 @@ object Game {
         .map(t => (Go(t._1), SelectSquares.Go(t._2)))
         .toValidated
 
-    def copy(clock: Option[Clock]): Game                                 = Go(g.copy(clock = clock))
+    def copy(clock: Option[ClockBase]): Game                                 = Go(g.copy(clock = clock))
     def copy(turns: Int, startedAtTurn: Int): Game                       = Go(
       g.copy(turns = turns, startedAtTurn = startedAtTurn)
     )
-    def copy(clock: Option[Clock], turns: Int, startedAtTurn: Int): Game = Go(
+    def copy(clock: Option[ClockBase], turns: Int, startedAtTurn: Int): Game = Go(
       g.copy(clock = clock, turns = turns, startedAtTurn = startedAtTurn)
     )
 
@@ -682,7 +682,7 @@ object Game {
       lib: GameLogic,
       situation: Situation,
       pgnMoves: Vector[String] = Vector(),
-      clock: Option[Clock] = None,
+      clock: Option[ClockBase] = None,
       turns: Int = 0, // plies
       startedAtTurn: Int = 0
   ): Game = (lib, situation) match {

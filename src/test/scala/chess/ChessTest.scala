@@ -1,6 +1,6 @@
 package strategygames.chess
 
-import strategygames.{ Clock, Player }
+import strategygames.{ ClockBase, Player }
 
 import cats.data.Validated
 import cats.syntax.option._
@@ -75,7 +75,7 @@ trait ChessTest extends Specification with ValidatedMatchers {
     ): Validated[String, Game] =
       game.apply(orig, dest, promotion) map (_._1)
 
-    def withClock(c: Clock) = game.copy(clock = Option(c))
+    def withClock(c: ClockBase) = game.copy(clock = Option(c))
   }
 
   implicit def richGame(game: Game) = RichGame(game)

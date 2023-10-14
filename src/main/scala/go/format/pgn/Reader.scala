@@ -1,6 +1,6 @@
 package strategygames.go
 package format.pgn
-import strategygames.{ ByoyomiClock, FischerClock, Situation => StratSituation }
+import strategygames.{ ByoyomiClock, Clock, Situation => StratSituation }
 
 import strategygames.format.pgn.{ ParsedPgn, Sans, Tags }
 
@@ -117,7 +117,7 @@ object Reader {
     g.copy(
       startedAtTurn = g.turns,
       clock = tags.clockConfig.flatMap {
-        case fc: FischerClock.Config => Some(FischerClock.apply(fc))
+        case fc: Clock.Config => Some(Clock.apply(fc))
         case bc: ByoyomiClock.Config => Some(ByoyomiClock.apply(bc))
         case _                       => None
       }

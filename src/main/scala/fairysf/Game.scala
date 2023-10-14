@@ -1,5 +1,5 @@
 package strategygames.fairysf
-import strategygames.{ Clock, MoveMetrics, Player }
+import strategygames.{ ClockBase, MoveMetrics, Player }
 
 import cats.data.Validated
 
@@ -8,7 +8,7 @@ import strategygames.fairysf.format.FEN
 case class Game(
     situation: Situation,
     pgnMoves: Vector[String] = Vector(),
-    clock: Option[Clock] = None,
+    clock: Option[ClockBase] = None,
     turns: Int = 0, // plies
     startedAtTurn: Int = 0
 ) {

@@ -1,6 +1,6 @@
 package strategygames.samurai
 package format.pgn
-import strategygames.{ Action => StratAction, ByoyomiClock, FischerClock, Situation => StratSituation }
+import strategygames.{ Action => StratAction, ByoyomiClock, Clock, Situation => StratSituation }
 
 import strategygames.format.pgn.{ ParsedPgn, Sans, Tags }
 
@@ -97,7 +97,7 @@ object Reader {
     g.copy(
       startedAtTurn = g.turns,
       clock = tags.clockConfig.flatMap {
-        case fc: FischerClock.Config => Some(FischerClock.apply(fc))
+        case fc: Clock.Config => Some(Clock.apply(fc))
         case bc: ByoyomiClock.Config => Some(ByoyomiClock.apply(bc))
         case _                       => None
       }

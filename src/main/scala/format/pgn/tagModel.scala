@@ -1,6 +1,6 @@
 package strategygames
 package format.pgn
-import strategygames.{ ClockConfig, FischerClock }
+import strategygames.{ ClockConfig, Clock }
 
 import org.joda.time.DateTimeZone
 import org.joda.time.format.DateTimeFormat
@@ -30,7 +30,7 @@ case class Tags(value: List[Tag]) extends AnyVal {
   def clockConfig: Option[ClockConfig] =
     value.collectFirst { case Tag(Tag.TimeControl, str) =>
       str
-    } flatMap FischerClock.readPgnConfig
+    } flatMap Clock.readPgnConfig
 
   def draughtsVariant: Option[strategygames.draughts.variant.Variant] =
     apply(_.GameType).fold {

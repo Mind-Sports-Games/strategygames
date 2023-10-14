@@ -1,5 +1,5 @@
 package strategygames.togyzkumalak
-import strategygames.{ Clock, MoveMetrics }
+import strategygames.{ ClockBase, MoveMetrics }
 
 import cats.data.Validated
 
@@ -8,7 +8,7 @@ import strategygames.togyzkumalak.format.FEN
 case class Game(
     situation: Situation,
     pgnMoves: Vector[String] = Vector(),
-    clock: Option[Clock] = None,
+    clock: Option[ClockBase] = None,
     turns: Int = 0, // plies
     startedAtTurn: Int = 0
 ) {

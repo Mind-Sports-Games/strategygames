@@ -138,37 +138,37 @@ class TimerTest extends ChessTest {
 
 class ClockTest extends ChessTest {
   val chess       = GameLogic.Chess()
-  val fakeClock60 = FischerClock(FischerClock.Config(60, 0))
+  val fakeClock60 = Clock(Clock.Config(60, 0))
     .copy(timestamper = new Timestamper {
       val now = Timestamp(0)
     })
     .start
 
-  val fakeClock600 = FischerClock(FischerClock.Config(600, 0))
+  val fakeClock600 = Clock(Clock.Config(600, 0))
     .copy(timestamper = new Timestamper {
       val now = Timestamp(0)
     })
     .start
 
-  val fakeClock60Plus1 = FischerClock(FischerClock.Config(60, 1))
+  val fakeClock60Plus1 = Clock(Clock.Config(60, 1))
     .copy(timestamper = new Timestamper {
       val now = Timestamp(0)
     })
     .start
 
-  val fakeClock180Delay2 = FischerClock(FischerClock.BronsteinConfig(180, 2))
+  val fakeClock180Delay2 = Clock(Clock.BronsteinConfig(180, 2))
     .copy(timestamper = new Timestamper {
       val now = Timestamp(0)
     })
     .start
 
-  def advance(c: Clock, t: Int) =
+  def advance(c: ClockBase, t: Int) =
     c.withTimestamper(new Timestamper {
       val now = c.timestamper.now + Centis(t)
     })
 
   "play with a clock" should {
-    val clock = FischerClock(FischerClock.Config(5 * 60 * 1000, 0))
+    val clock = Clock(Clock.Config(5 * 60 * 1000, 0))
     val game  = makeGame.withClock(clock.start)
     "new game" in {
       game.clock map { _.player } must_== Option(P1)
@@ -181,22 +181,22 @@ class ClockTest extends ChessTest {
   }
   "create a clock" should {
     "with time" in {
-      FischerClock(FischerClock.Config(60, 10)).limitSeconds must_== 60
+      Clock(Clock.Config(60, 10)).limitSeconds must_== 60
     }
     "with increment" in {
-      FischerClock(FischerClock.Config(60, 10)).incrementSeconds must_== 10
+      Clock(Clock.Config(60, 10)).incrementSeconds must_== 10
     }
     "with few time" in {
-      FischerClock(FischerClock.Config(0, 10)).limitSeconds must_== 0
+      Clock(Clock.Config(0, 10)).limitSeconds must_== 0
     }
     "with 30 seconds" in {
-      FischerClock(FischerClock.Config(30, 0)).limitInMinutes must_== 0.5
+      Clock(Clock.Config(30, 0)).limitInMinutes must_== 0.5
     }
   }
   "lag compensation" should {
     def durOf(lag: Int) = MoveMetrics(clientLag = Option(Centis(lag)))
 
-    def clockStep(clock: Clock, wait: Int, lags: Int*) = {
+    def clockStep(clock: ClockBase, wait: Int, lags: Int*) = {
       (lags
         .foldLeft(clock) { (clk, lag) =>
           advance(clk.step(), wait + lag).step(durOf(lag))
@@ -359,7 +359,7 @@ class ClockTest extends ChessTest {
       clock.outOfTime(P1, withGrace = false) must beTrue
     }
 
-    def clockStep(clock: Clock, wait: Int) =
+    def clockStep(clock: ClockBase, wait: Int) =
       advance(clock, wait).step().step()
 
     "1x30s move + 30s stall with increment" in {

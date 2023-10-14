@@ -2,7 +2,7 @@ package strategygames.draughts
 
 import scala.annotation.nowarn
 
-import strategygames.{ Clock, MoveMetrics, Player }
+import strategygames.{ ClockBase, MoveMetrics, Player }
 import strategygames.draughts.format.FEN
 
 import cats.data.Validated
@@ -13,7 +13,7 @@ import format.{ pdn, Uci }
 case class DraughtsGame(
     situation: Situation,
     pdnMoves: Vector[String] = Vector.empty[String],
-    clock: Option[Clock] = None,
+    clock: Option[ClockBase] = None,
     /** turns means plies here */
     turns: Int = 0,
     startedAtTurn: Int = 0

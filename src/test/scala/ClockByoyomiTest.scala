@@ -34,7 +34,7 @@ class ClockByoyomiTest extends ShogiTest {
     })
     .start
 
-  def advance(c: Clock, t: Int) =
+  def advance(c: ClockBase, t: Int) =
     c.withTimestamper(new Timestamper {
       val now = c.timestamper.now + Centis(t)
     })
@@ -80,7 +80,7 @@ class ClockByoyomiTest extends ShogiTest {
   "lag compensation" should {
     def durOf(lag: Int) = MoveMetrics(clientLag = Some(Centis(lag)))
 
-    def clockStep(clock: Clock, wait: Int, lags: Int*) = {
+    def clockStep(clock: ClockBase, wait: Int, lags: Int*) = {
       (lags.foldLeft(clock) { (clk, lag) =>
         advance(clk.step(), wait + lag) step durOf(lag)
       } currentClockFor Player.P2).time.centis

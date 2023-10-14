@@ -3,7 +3,7 @@ package format.pdn
 import strategygames.{
   Action => StratAction,
   ByoyomiClock,
-  FischerClock,
+  Clock,
   Move => StratMove,
   Situation => StratSituation
 }
@@ -110,7 +110,7 @@ object Reader {
     g.copy(
       startedAtTurn = g.turns,
       clock = tags.clockConfig.flatMap {
-        case fc: FischerClock.Config => Some(FischerClock.apply(fc))
+        case fc: Clock.Config => Some(Clock.apply(fc))
         case bc: ByoyomiClock.Config => Some(ByoyomiClock.apply(bc))
         case _                       => None
       }
