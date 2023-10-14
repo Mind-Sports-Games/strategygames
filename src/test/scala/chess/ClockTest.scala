@@ -3,6 +3,117 @@ import strategygames._
 
 import strategygames.chess.Pos._
 
+class TimerTest extends ChessTest {
+  "play with a fischer increment" should {
+    val fischerIncrement = Timer
+      .fischerIncrement(Centis(60 * 100), Centis(1 * 100))
+    "properly increment time when game is ongoing" in {
+      fischerIncrement.remaining must_== Centis(60 * 100)
+      val afterMove = fischerIncrement
+        .takeTime(Centis(30 * 100))
+      afterMove.remaining must_== Centis(31 * 100)
+    }
+    "even when there is only 1 centisecond left" in {
+      val afterMove = fischerIncrement
+        .takeTime(Centis(30 * 100))
+        .takeTime(Centis(31 * 100 - 1))
+      afterMove.remaining must_== Centis(101)
+      afterMove.outOfTime must_== false
+    }
+    "but not when game is over" in {
+      val afterMove = fischerIncrement
+        .takeTime(Centis(30 * 100))
+        .takeTime(Centis(31 * 100))
+      afterMove.remaining must_== Centis(0 * 100)
+      afterMove.outOfTime must_== true
+    }
+  }
+
+  "play with a bronstein delay increment" should {
+    val bronsteinDelay = Timer.bronsteinDelay(Centis(60 * 100), Centis(5 * 100))
+    "properly increment time when game is ongoing" in {
+      bronsteinDelay.remaining must_== Centis(60 * 100)
+      val afterMove = bronsteinDelay
+        .takeTime(Centis(30 * 100))
+      afterMove.remaining must_== Centis(35 * 100)
+    }
+    "even when there is only 1 centisecond left" in {
+      val afterMove = bronsteinDelay
+        .takeTime(Centis(30 * 100))
+        .takeTime(Centis(35 * 100 - 1))
+      afterMove.remaining must_== Centis(501)
+      afterMove.outOfTime must_== false
+    }
+    "and also when game is over and the delay would save it" in {
+      val afterMove = bronsteinDelay
+        .takeTime(Centis(30 * 100))
+        .takeTime(Centis(36 * 100))
+      afterMove.remaining must_== Centis(4 * 100)
+      afterMove.outOfTime must_== false
+    }
+    "but now when the delay + move still doesn't save it." in {
+      val afterMove = bronsteinDelay
+        .takeTime(Centis(30 * 100))
+        .takeTime(Centis(40 * 100))
+      afterMove.remaining must_== Centis(0)
+      afterMove.outOfTime must_== true
+    }
+  }
+
+  // Byoyomi can be represented multiple different ways, but it's basically a new timer
+  // without increment after the current period.
+  "play with a fischer increment followed by byoyomi" should {
+    val fischerIncrement =
+      Timer
+        .fischerIncrement(Centis(60 * 100), Centis(1 * 100))
+        .followedBy(Timer.byoyomi(Centis(5 * 100)))
+    "properly increment time when game is ongoing" in {
+      fischerIncrement.remaining must_== Centis(60 * 100)
+      val afterMove = fischerIncrement.takeTime(Centis(30 * 100))
+      afterMove.remaining must_== Centis(31 * 100)
+    }
+    "even when there is only 1 centisecond left" in {
+      val afterMove = fischerIncrement
+        .takeTime(Centis(30 * 100))
+        .takeTime(Centis(31 * 100 - 1))
+      afterMove.remaining must_== Centis(101)
+      afterMove.outOfTime must_== false
+    }
+    "but when the current period ends we must get a new period of time to play with" in {
+      val afterMove = fischerIncrement
+        .takeTime(Centis(30 * 100))
+        .takeTime(Centis(31 * 100))
+      afterMove.remaining must_== Centis(5 * 100)
+      afterMove.outOfTime must_== false
+    }
+    "and so long as we continue to use less than the byoyomi, we get it back" in {
+      val afterMove = fischerIncrement
+        .takeTime(Centis(30 * 100))
+        .takeTime(Centis(31 * 100))
+        .takeTime(Centis(4 * 100))
+        .takeTime(Centis(4 * 100))
+        .takeTime(Centis(4 * 100))
+        .takeTime(Centis(4 * 100))
+        .takeTime(Centis(4 * 100))
+      afterMove.remaining must_== Centis(5 * 100)
+      afterMove.outOfTime must_== false
+    }
+    "but if we go over, we don't" in {
+      val afterMove = fischerIncrement
+        .takeTime(Centis(30 * 100))
+        .takeTime(Centis(31 * 100))
+        .takeTime(Centis(4 * 100))
+        .takeTime(Centis(4 * 100))
+        .takeTime(Centis(4 * 100))
+        .takeTime(Centis(4 * 100))
+        .takeTime(Centis(4 * 100))
+        .takeTime(Centis(5 * 100))
+      afterMove.remaining must_== Centis(0 * 100)
+      afterMove.outOfTime must_== true
+    }
+  }
+}
+
 class ClockTest extends ChessTest {
   val chess       = GameLogic.Chess()
   val fakeClock60 = FischerClock(FischerClock.Config(60, 0))

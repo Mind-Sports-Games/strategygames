@@ -6,12 +6,6 @@ import scala.util.chaining._
 
 // Abstract timer trait
 trait TimerTrait {
-  def takeTime(time: Centis): TimerTrait
-  def giveTime(t: Centis): TimerTrait
-  def setRemaining(remaining: Centis): TimerTrait
-  def goBerserk: TimerTrait
-  val limit: Centis
-  val elapsed: Centis
   val remaining: Centis
 }
 
@@ -33,7 +27,10 @@ case class NoClockTimeGrace() extends ClockTimeGrace {
 // Thus, remaining time can appear to go up
 case class FischerIncrementGrace(val increment: Centis) extends ClockTimeGrace {
   override def timeToAdd(timer: TimerTrait, timeTaken: Centis): Tuple2[ClockTimeGrace, Centis] =
-    (this, (timer.remaining >= Centis(0)) ?? increment) // 0 if no time is left, else the increment
+    (
+      this,
+      (timer.remaining > Centis(0)) ?? increment
+    ) // 0 if no time is left, else the increment
 
   def goBerserk: ClockTimeGrace = NoClockTimeGrace()
 }
@@ -43,9 +40,19 @@ case class FischerIncrementGrace(val increment: Centis) extends ClockTimeGrace {
 // Thus, using time will never seem to make the clock gain time.
 case class BronsteinDelayGrace(val delay: Centis) extends ClockTimeGrace {
   override def timeToAdd(timer: TimerTrait, timeTaken: Centis): Tuple2[ClockTimeGrace, Centis] =
+    (this, timeTaken.atMost(delay)) // up to the delay
+
+  def goBerserk: ClockTimeGrace = NoClockTimeGrace()
+}
+
+// Byoyomi time grace gives back up to the entire amount, but only if they didn't use
+// all of it. It's similar to BronsteinDelay, but bronstein allows you to go over and eat
+// into your grace. Byoyomi does not.
+case class ByoyomiGrace(val delay: Centis) extends ClockTimeGrace {
+  override def timeToAdd(timer: TimerTrait, timeTaken: Centis): Tuple2[ClockTimeGrace, Centis] =
     (
       this,
-      (timer.remaining >= Centis(0)) ?? timeTaken.atMost(delay)
+      (timer.remaining > Centis(0)) ?? timeTaken.atMost(delay)
     ) // 0 if no time is left, else the up to the delay
 
   def goBerserk: ClockTimeGrace = NoClockTimeGrace()
@@ -66,19 +73,30 @@ case class Timer(
         clockTimeGrace = newClockTimeGrace
       )
     }
-  private def applyTimeTaken(timeTaken: Centis): Timer = copy(elapsed = elapsed + timeTaken).nextIfDone
+  private def applyTimeTaken(timeTaken: Centis): Timer =
+    copy(elapsed = elapsed + timeTaken)
   private def next: Timer                              = nextTimer.getOrElse(this)
-  private def nextIfDone: Timer                        = if (elapsed >= limit) next.takeTime(-remaining) else this
+  private def nextIfDone: Timer                        =
+    if (elapsed >= limit && nextTimer.isDefined) next.takeTime(-remaining) else this
 
-  def takeTime(timeTaken: Centis)    = applyTimeTaken(timeTaken).applyClockGrace(timeTaken)
+  def followedBy(timer: Timer): Timer =
+    nextTimer.fold(copy(nextTimer = Some(timer)))(t => t.followedBy(timer))
+
+  def takeTime(timeTaken: Centis)    =
+    applyTimeTaken(timeTaken)
+      .applyClockGrace(timeTaken)
+      .nextIfDone
   def setRemaining(t: Centis): Timer = copy(elapsed = limit - t)
   def goBerserk: Timer               = copy(clockTimeGrace = clockTimeGrace.goBerserk)
+  def outOfTime: Boolean             = remainingAll <= Centis(0)
   def giveTime(t: Centis)            = takeTime(-t)
   val remaining: Centis              = limit - elapsed
+  val remainingAll: Centis           = nextTimer.fold(remaining)(t => t.remaining + remaining)
+
 }
 
 object Timer {
-  def bronstein(limit: Centis, delay: Centis) = Timer(
+  def bronsteinDelay(limit: Centis, delay: Centis) = Timer(
     limit,
     clockTimeGrace = BronsteinDelayGrace(delay)
   )
@@ -86,6 +104,16 @@ object Timer {
   def fischerIncrement(limit: Centis, increment: Centis) = Timer(
     limit,
     clockTimeGrace = FischerIncrementGrace(increment)
+  )
+
+  def noIncrement(limit: Centis) = Timer(
+    limit,
+    clockTimeGrace = NoClockTimeGrace()
+  )
+
+  def byoyomi(limit: Centis) = Timer(
+    limit,
+    clockTimeGrace = ByoyomiGrace(limit) // The byoyomi grace is always the same as the limit
   )
 }
 
