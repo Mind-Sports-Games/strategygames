@@ -38,17 +38,17 @@ case class FischerIncrementGrace(val increment: Centis) extends ClockTimeGrace {
 // Bronstein increment timer with a delay. The minimum between the time used
 // and the delay is subracted back to the elapsed time when time is used.
 // Thus, using time will never seem to make the clock gain time.
-case class BronsteinDelayGrace(val delay: Centis) extends ClockTimeGrace {
+case class UsDelayGrace(val delay: Centis) extends ClockTimeGrace {
   override def timeToAdd(timer: TimerTrait, timeTaken: Centis): Tuple2[ClockTimeGrace, Centis] =
     (this, timeTaken.atMost(delay)) // up to the delay
 
   def goBerserk: ClockTimeGrace = NoClockTimeGrace()
 }
 
-// Byoyomi time grace gives back up to the entire amount, but only if they didn't use
-// all of it. It's similar to BronsteinDelay, but bronstein allows you to go over and eat
-// into your grace. Byoyomi does not.
-case class ByoyomiGrace(val delay: Centis) extends ClockTimeGrace {
+// BronsteinDelay gives back up to the entire amount, but only if they didn't use
+// all of it. It's similar to UsDelay, but US allows you to go over and eat
+// into your grace. Bronstein does not.
+case class BronsteinDelayGrace(val delay: Centis) extends ClockTimeGrace {
   override def timeToAdd(timer: TimerTrait, timeTaken: Centis): Tuple2[ClockTimeGrace, Centis] =
     (
       this,
@@ -96,6 +96,11 @@ case class Timer(
 }
 
 object Timer {
+  def usDelay(limit: Centis, delay: Centis) = Timer(
+    limit,
+    clockTimeGrace = UsDelayGrace(delay)
+  )
+
   def bronsteinDelay(limit: Centis, delay: Centis) = Timer(
     limit,
     clockTimeGrace = BronsteinDelayGrace(delay)
@@ -113,7 +118,7 @@ object Timer {
 
   def byoyomi(limit: Centis) = Timer(
     limit,
-    clockTimeGrace = ByoyomiGrace(limit) // The byoyomi grace is always the same as the limit
+    clockTimeGrace = BronsteinDelayGrace(limit) // The byoyomi grace is always the same as the limit
   )
 }
 
@@ -441,7 +446,7 @@ object Clock {
   //       make sense for bronstein
   case class BronsteinConfig(limitSeconds: Int, delaySeconds: Int) extends ClockConfig {
     private lazy val clockTimeGrace =
-      if (delay > Centis(0)) BronsteinDelayGrace(delay) else NoClockTimeGrace()
+      if (delay > Centis(0)) UsDelayGrace(delay) else NoClockTimeGrace()
     lazy val timer                  = Timer(limit, clockTimeGrace)
 
     def berserkable = delaySeconds == 0 || limitSeconds > 0
