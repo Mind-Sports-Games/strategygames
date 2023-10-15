@@ -208,7 +208,7 @@ class ClockTest extends ChessTest {
       Clock(Clock.Config(60, 10)).limitSeconds must_== 60
     }
     "with increment" in {
-      Clock(Clock.Config(60, 10)).incrementSeconds must_== 10
+      Clock(Clock.Config(60, 10)).graceSeconds must_== 10
     }
     "with few time" in {
       Clock(Clock.Config(0, 10)).limitSeconds must_== 0

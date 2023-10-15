@@ -126,20 +126,20 @@ sealed trait ClockConfig {
   // Abstract attributes
   def estimateTotalSeconds: Int
   def estimateTotalTime: Centis
-  // TODO: I don't think that every clock config should _have_ to implemenmt this
-  def increment: Centis
-  // TODO: I don't think that every clock config should _have_ to implemenmt this
-  def incrementSeconds: Int
   def limit: Centis
   def limitInMinutes: Double
   def limitSeconds: Int
+  // TODO: this will need to be improved when we get multi-phased clocks.
+  def graceSeconds: Int
   def initTime: Centis
   def berserkPenalty: Centis
   def berserkable: Boolean
   def emergSeconds: Int
   def show: String
   def toClock: ClockBase
+  // TODO: startsAtZero is an abstraction leak.
   def startsAtZero: Boolean
+  val timer: Timer
 }
 
 sealed trait ClockInfoBase {
@@ -206,10 +206,9 @@ sealed trait ClockBase {
   def currentClockFor(c: Player): ClockInfoBase
 
   // Implemented attributes
+  def graceSeconds              = config.graceSeconds
   def remainingTime(c: Player)  = (clockPlayer(c).remaining - pending(c)) nonNeg
   def moretimeable(c: Player)   = clockPlayer(c).remaining.centis < 100 * 60 * 60 * 2
-  //  TODO: Consider if we need it
-  // def incrementOf(c: Player)    = clockPlayer(c).increment
   def lastMoveTimeOf(c: Player) = clockPlayer(c).lastMoveTime
 
   def takeback(switchPlayer: Boolean = true) = switch(switchPlayer)
@@ -226,8 +225,6 @@ sealed trait ClockBase {
 
   def estimateTotalSeconds = config.estimateTotalSeconds
   def estimateTotalTime    = config.estimateTotalTime
-  // TODO: do we still need this? def increment            = config.increment
-  // TODO: do we still need this? def incrementSeconds     = config.incrementSeconds
   def limit                = config.limit
   def limitInMinutes       = config.limitInMinutes
   def limitSeconds         = config.limitSeconds
@@ -278,7 +275,6 @@ case class Clock(
   def clockPlayerExists(f: PlayerTimerBase => Boolean) = players.exists(f)
   def allClockPlayers: Seq[ClockPlayer]                = players.all
   def lagCompAvg                                       = players map { ~_.lag.compAvg } reduce (_ avg _)
-  def incrementSeconds                                 = config.incrementSeconds
 
   def currentClockFor(c: Player) = {
     val elapsed               = pending(c)
@@ -367,20 +363,10 @@ case class Clock(
 
         if (clockActive) newClock else newClock.hardStop
     }).switch(switchClock)
-
-  // To do: safely add this to takeback to remove inc from player.
-  // def deinc = updatePlayer(player, _.giveTime(-incrementOf(player)))
-
 }
 
 object ClockPlayer {
-  def withConfig(config: Clock.Config)          =
-    ClockPlayer(
-      config.timer,
-      LagTracker.init(config),
-      config
-    )
-  def withConfig(config: Clock.BronsteinConfig) =
+  def withConfig(config: ClockConfig) =
     ClockPlayer(
       config.timer,
       LagTracker.init(config),
@@ -391,29 +377,24 @@ object ClockPlayer {
 object Clock {
   private val limitFormatter = new DecimalFormat("#.##")
 
+  // TODO: All of these configs are a bit verbose.
   // All unspecified durations are expressed in seconds
   case class Config(limitSeconds: Int, incrementSeconds: Int) extends ClockConfig {
     private lazy val clockTimeGrace =
       if (increment > Centis(0)) FischerIncrementGrace(increment) else NoClockTimeGrace()
     lazy val timer                  = Timer(limit, clockTimeGrace)
 
-    def berserkable = incrementSeconds == 0 || limitSeconds > 0
-
-    def emergSeconds = math.min(60, math.max(10, limitSeconds / 8))
-
+    def berserkable          = incrementSeconds == 0 || limitSeconds > 0
+    def emergSeconds         = math.min(60, math.max(10, limitSeconds / 8))
     def estimateTotalSeconds = limitSeconds + 40 * incrementSeconds
+    def estimateTotalTime    = Centis.ofSeconds(estimateTotalSeconds)
+    def hasIncrement         = incrementSeconds > 0
+    def increment            = Centis.ofSeconds(incrementSeconds)
+    def graceSeconds         = incrementSeconds
 
-    def estimateTotalTime = Centis.ofSeconds(estimateTotalSeconds)
-
-    def hasIncrement = incrementSeconds > 0
-
-    def increment = Centis.ofSeconds(incrementSeconds)
-
-    def limit = Centis.ofSeconds(limitSeconds)
-
+    def limit          = Centis.ofSeconds(limitSeconds)
     def limitInMinutes = limitSeconds / 60d
-
-    def toClock = Clock(this)
+    def toClock        = Clock(this)
 
     def limitString: String =
       limitSeconds match {
@@ -446,30 +427,60 @@ object Clock {
   //       make sense for bronstein
   case class BronsteinConfig(limitSeconds: Int, delaySeconds: Int) extends ClockConfig {
     private lazy val clockTimeGrace =
+      if (delay > Centis(0)) BronsteinDelayGrace(delay) else NoClockTimeGrace()
+    lazy val timer                  = Timer(limit, clockTimeGrace)
+
+    def berserkable          = delaySeconds == 0 || limitSeconds > 0
+    def emergSeconds         = math.min(60, math.max(10, limitSeconds / 8))
+    def estimateTotalSeconds = limitSeconds + 40 * delaySeconds
+    def estimateTotalTime    = Centis.ofSeconds(estimateTotalSeconds)
+    def delay                = Centis.ofSeconds(delaySeconds)
+    def graceSeconds         = delaySeconds
+    def limit                = Centis.ofSeconds(limitSeconds)
+    def limitInMinutes       = limitSeconds / 60d
+    def toClock              = Clock(this)
+
+    def limitString: String =
+      limitSeconds match {
+        case l if l % 60 == 0 => (l / 60).toString
+        case 15 => "¼"
+        case 30 => "½"
+        case 45 => "¾"
+        case 90 => "1.5"
+        case _  => limitFormatter.format(limitSeconds / 60d)
+      }
+
+    // TODO: I don't know if this is correct for fischer clocks, but this certainly unifies the interface
+    def startsAtZero = limitSeconds == 0
+
+    def show = toString
+
+    override def toString = s"${limitString}r${delaySeconds}"
+
+    def berserkPenalty =
+      if (limitSeconds < 40 * delaySeconds) Centis(0)
+      else Centis(limitSeconds * (100 / 2))
+
+    def initTime = {
+      if (limitSeconds == 0) delay.atLeast(Centis(300))
+      else limit
+    }
+  }
+
+  case class UsDelayConfig(limitSeconds: Int, delaySeconds: Int) extends ClockConfig {
+    private lazy val clockTimeGrace =
       if (delay > Centis(0)) UsDelayGrace(delay) else NoClockTimeGrace()
     lazy val timer                  = Timer(limit, clockTimeGrace)
 
-    def berserkable = delaySeconds == 0 || limitSeconds > 0
-
-    def emergSeconds = math.min(60, math.max(10, limitSeconds / 8))
-
+    def berserkable          = delaySeconds == 0 || limitSeconds > 0
+    def emergSeconds         = math.min(60, math.max(10, limitSeconds / 8))
     def estimateTotalSeconds = limitSeconds + 40 * delaySeconds
-
-    def estimateTotalTime = Centis.ofSeconds(estimateTotalSeconds)
-
-    // TODO: the bronstein config should not have to implement these because it's not using them.
-    //       we should be able to calculate this properly from the rest of the information
-    def hasIncrement     = false
-    def increment        = Centis(0)
-    def incrementSeconds = 0
-
-    def delay = Centis.ofSeconds(delaySeconds)
-
-    def limit = Centis.ofSeconds(limitSeconds)
-
-    def limitInMinutes = limitSeconds / 60d
-
-    def toClock = Clock(this)
+    def estimateTotalTime    = Centis.ofSeconds(estimateTotalSeconds)
+    def delay                = Centis.ofSeconds(delaySeconds)
+    def limit                = Centis.ofSeconds(limitSeconds)
+    def limitInMinutes       = limitSeconds / 60d
+    def graceSeconds         = delaySeconds
+    def toClock              = Clock(this)
 
     def limitString: String =
       limitSeconds match {
@@ -523,6 +534,16 @@ object Clock {
   }
 
   def apply(config: BronsteinConfig): Clock = {
+    val player = ClockPlayer.withConfig(config)
+    Clock(
+      config = config,
+      player = Player.P1,
+      players = Player.Map(player, player),
+      timestamp = None
+    )
+  }
+
+  def apply(config: UsDelayConfig): Clock = {
     val player = ClockPlayer.withConfig(config)
     Clock(
       config = config,
@@ -695,6 +716,7 @@ case class ByoyomiClock(
   def byoyomi        = config.byoyomi
   def byoyomiSeconds = config.byoyomiSeconds
   def periodsTotal   = config.periodsTotal
+
 }
 
 case class ByoyomiClockPlayer(
@@ -745,6 +767,9 @@ object ByoyomiClock {
   case class Config(limitSeconds: Int, incrementSeconds: Int, byoyomiSeconds: Int, periods: Int)
       extends ClockConfig {
 
+    // TODO: We need to remove the ByoyomiClock completely, I think.
+    lazy val timer = Timer(limit)
+
     def berserkable = (incrementSeconds == 0 && byoyomiSeconds == 0) || limitSeconds > 0
 
     // Activate low time warning when between 10 and 90 seconds remain
@@ -752,16 +777,12 @@ object ByoyomiClock {
 
     // Estimate 60 moves (per player) per game
     def estimateTotalSeconds = limitSeconds + 60 * incrementSeconds + 25 * periodsTotal * byoyomiSeconds
-
-    def estimateTotalTime = Centis.ofSeconds(estimateTotalSeconds)
-
-    def hasIncrement = incrementSeconds > 0
-
-    def hasByoyomi = byoyomiSeconds > 0
-
-    def increment = Centis.ofSeconds(incrementSeconds)
-
-    def byoyomi = Centis.ofSeconds(byoyomiSeconds)
+    def estimateTotalTime    = Centis.ofSeconds(estimateTotalSeconds)
+    def hasIncrement         = incrementSeconds > 0
+    def hasByoyomi           = byoyomiSeconds > 0
+    def increment            = Centis.ofSeconds(incrementSeconds)
+    def graceSeconds         = incrementSeconds
+    def byoyomi              = Centis.ofSeconds(byoyomiSeconds)
 
     def limit = Centis.ofSeconds(limitSeconds)
 
