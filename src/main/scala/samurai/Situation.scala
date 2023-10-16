@@ -44,7 +44,8 @@ case class Situation(board: Board, player: Player) {
 
   def isRepetition: Boolean = board.apiPosition.isRepetition
 
-  def opponentHasInsufficientMaterial: Boolean = false
+  def opponentHasInsufficientMaterial: Boolean =
+    if (player == P1) board.apiPosition.fen.player1Score == 24 else board.apiPosition.fen.player2Score == 24
 
   def move(from: Pos, to: Pos, promotion: Option[PromotableRole]): Validated[String, Move] =
     board.variant.move(this, from, to, promotion)
