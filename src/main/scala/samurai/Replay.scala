@@ -211,6 +211,29 @@ object Replay {
   ): Validated[String, Replay] =
     recursiveReplayFromUci(Replay(makeGame(variant, initialFen)), moves)
 
+  private def recursiveGamesFromUci(
+      game: Game,
+      ucis: List[Uci]
+  ): Validated[String, List[Game]] =
+    ucis match {
+      case Nil                     => valid(List(game))
+      case (uci: Uci.Move) :: rest =>
+        game.apply(uci) andThen { case (game, _) =>
+          recursiveGamesFromUci(game, rest) map { game :: _ }
+        }
+    }
+
+  def gameFromUciStrings(
+      uciStrings: List[String],
+      initialFen: Option[FEN],
+      variant: strategygames.samurai.variant.Variant
+  ): Validated[String, Game] = {
+    val init = makeGame(variant, initialFen)
+    val ucis = uciStrings.flatMap(Uci.apply(_))
+    if (uciStrings.size != ucis.size) invalid("Invalid Ucis")
+    else recursiveGamesFromUci(init, ucis).map(_.last)
+  }
+
   def plyAtFen(
       moveStrs: Iterable[String],
       initialFen: Option[FEN],
