@@ -331,6 +331,29 @@ object Replay {
     recursiveSituationsFromUci(sit, moves) map { sit :: _ }
   }
 
+  private def recursiveGamesFromUci(
+      game: Game,
+      ucis: List[Uci]
+  ): Validated[String, List[Game]] =
+    ucis match {
+      case Nil         => valid(List(game))
+      case uci :: rest =>
+        game.apply(uci) andThen { case (game, _) =>
+          recursiveGamesFromUci(game, rest) map { game :: _ }
+        }
+    }
+
+  def gameFromUciStrings(
+      uciStrings: List[String],
+      initialFen: Option[FEN],
+      variant: strategygames.fairysf.variant.Variant
+  ): Validated[String, Game] = {
+    val init = makeGame(variant, initialFen)
+    val ucis = uciStrings.flatMap(uci => Uci.apply(variant.gameFamily, uci))
+    if (uciStrings.size != ucis.size) invalid("Invalid Ucis")
+    else recursiveGamesFromUci(init, ucis).map(_.last)
+  }
+
   def apply(
       moves: List[Uci],
       initialFen: Option[FEN],

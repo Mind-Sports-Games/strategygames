@@ -321,6 +321,41 @@ object Replay {
     recursiveSituationsFromUci(sit, moves) map { sit :: _ }
   }
 
+  private def recursiveGamesFromUci(
+      game: Game,
+      ucis: List[Uci]
+  ): Validated[String, List[Game]] =
+    ucis match {
+      case Nil         => valid(List(game))
+      case uci :: rest =>
+        game.apply(uci) andThen { case (game, _) =>
+          recursiveGamesFromUci(game, rest) map { game :: _ }
+        }
+    }
+
+  // This mirrors the gameFromUciStrings implementation for other game logics but its slow
+  def gameFromUciStringsSlow(
+      uciStrings: List[String],
+      initialFen: Option[FEN],
+      variant: strategygames.go.variant.Variant
+  ): Validated[String, Game] = {
+    val init = makeGame(variant, initialFen)
+    val ucis = uciStrings.flatMap(Uci.apply(_))
+    if (uciStrings.size != ucis.size) invalid("Invalid Ucis")
+    else recursiveGamesFromUci(init, ucis).map(_.last)
+  }
+
+  // this is a fast implementation which we can use because 'uci' is the only format we use
+  def gameFromUciStrings(
+      uciStrings: List[String],
+      initialFen: Option[FEN],
+      variant: strategygames.go.variant.Variant
+  ): Validated[String, Game] = {
+    val r = gameMoveWhileValid(uciStrings, initialFen.getOrElse(variant.initialFen), variant)
+    if (uciStrings.size > 0) valid(r._2.last._1)
+    else valid(r._1)
+  }
+
   def apply(
       moves: List[Uci],
       initialFen: Option[FEN],

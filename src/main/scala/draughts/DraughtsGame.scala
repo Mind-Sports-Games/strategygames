@@ -91,14 +91,22 @@ case class DraughtsGame(
 
   }
 
+  def apply(uci: Uci.Move): Validated[String, (DraughtsGame, Move)] = apply(uci, false)
+
+  def apply(uci: Uci.Move, finalSquare: Boolean): Validated[String, (DraughtsGame, Move)] =
+    apply(
+      orig = uci.orig,
+      dest = uci.dest,
+      promotion = uci.promotion,
+      finalSquare = finalSquare
+    )
+
   private def applyClock(metrics: MoveMetrics, gameActive: Boolean) = clock.map { c =>
     {
       val newC = c.step(metrics, gameActive)
       if (turns - startedAtTurn == 1) newC.start else newC
     }
   }
-
-  def apply(uci: Uci.Move): Validated[String, (DraughtsGame, Move)] = apply(uci.orig, uci.dest, uci.promotion)
 
   def displayTurns = if (situation.ghosts == 0) turns else turns + 1
 
