@@ -3,7 +3,7 @@ package strategygames.format
 import cats.data.Validated
 
 import strategygames.variant.Variant
-import strategygames.{ Drop, GameFamily, GameLogic, Move, MoveOrDrop }
+import strategygames.{ Action, Drop, GameFamily, GameLogic, Move, Pass, SelectSquares }
 
 object UciDump {
 
@@ -24,31 +24,64 @@ object UciDump {
       strategygames.samurai.format.UciDump(moves, initialFen.map(_.toSamurai), variant)
     case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant)) =>
       strategygames.togyzkumalak.format.UciDump(moves, initialFen.map(_.toTogyzkumalak), variant)
+    case (GameLogic.Go(), Variant.Go(variant))                     =>
+      strategygames.go.format.UciDump(moves, initialFen.map(_.toGo), variant)
     case _                                                         => sys.error("Mismatched gamelogic types 12")
   }
 
-  def move(lib: GameLogic, variant: Variant)(mod: MoveOrDrop): String = (lib, variant, mod) match {
-    case (GameLogic.Draughts(), Variant.Draughts(variant), Left(Move.Draughts(mod)))             =>
-      strategygames.draughts.format.UciDump.move(variant)(mod)
-    case (GameLogic.Chess(), Variant.Chess(variant), Left(Move.Chess(mod)))                      =>
-      strategygames.chess.format.UciDump.move(variant)(Left(mod))
-    case (GameLogic.Chess(), Variant.Chess(variant), Right(Drop.Chess(mod)))                     =>
-      strategygames.chess.format.UciDump.move(variant)(Right(mod))
-    case (GameLogic.FairySF(), Variant.FairySF(variant), Left(Move.FairySF(mod)))                =>
-      strategygames.fairysf.format.UciDump.move(variant)(Left(mod))
-    case (GameLogic.FairySF(), Variant.FairySF(variant), Right(Drop.FairySF(mod)))               =>
-      strategygames.fairysf.format.UciDump.move(variant)(Right(mod))
-    case (GameLogic.Samurai(), Variant.Samurai(variant), Left(Move.Samurai(mod)))                =>
-      strategygames.samurai.format.UciDump.move(variant)(mod)
-    case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant), Left(Move.Togyzkumalak(mod))) =>
-      strategygames.togyzkumalak.format.UciDump.move(variant)(mod)
-    case _                                                                                       => sys.error("Mismatched gamelogic types 13")
+  def move(lib: GameLogic, variant: Variant)(action: Action): String = (lib, variant, action) match {
+    case (GameLogic.Draughts(), Variant.Draughts(variant), Move.Draughts(action))             =>
+      strategygames.draughts.format.UciDump.move(variant)(action)
+    case (GameLogic.Chess(), Variant.Chess(variant), Move.Chess(action))                      =>
+      strategygames.chess.format.UciDump.move(variant)(action)
+    case (GameLogic.Chess(), Variant.Chess(variant), Drop.Chess(action))                      =>
+      strategygames.chess.format.UciDump.move(variant)(action)
+    case (GameLogic.FairySF(), Variant.FairySF(variant), Move.FairySF(action))                =>
+      strategygames.fairysf.format.UciDump.move(variant)(action)
+    case (GameLogic.FairySF(), Variant.FairySF(variant), Drop.FairySF(action))                =>
+      strategygames.fairysf.format.UciDump.move(variant)(action)
+    case (GameLogic.Samurai(), Variant.Samurai(variant), Move.Samurai(action))                =>
+      strategygames.samurai.format.UciDump.move(variant)(action)
+    case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant), Move.Togyzkumalak(action)) =>
+      strategygames.togyzkumalak.format.UciDump.move(variant)(action)
+    case (GameLogic.Go(), Variant.Go(variant), Drop.Go(action))                               =>
+      strategygames.go.format.UciDump.move(variant)(action)
+    case (GameLogic.Go(), Variant.Go(variant), Pass.Go(action))                               =>
+      strategygames.go.format.UciDump.move(variant)(action)
+    case (GameLogic.Go(), Variant.Go(variant), SelectSquares.Go(action))                      =>
+      strategygames.go.format.UciDump.move(variant)(action)
+    case _                                                                                    => sys.error("Mismatched gamelogic types 13")
   }
 
-  def fishnetUci(variant: Variant)(moves: List[Uci]): String = variant match {
+  private def moveStringToUci(variant: Variant, moves: String): List[Uci] =
+    moves.trim().split(" ") match {
+      case Array("") => Nil
+      case l         => l.toList.flatMap(m => Uci.apply(variant.gameLogic, variant.gameFamily, m))
+    }
+
+  private def moveStringToLexicalUci(moves: String): List[LexicalUci] =
+    moves.trim().split(" ") match {
+      case Array("") => Nil
+      case l         => l.toList.flatMap(m => LexicalUci.apply(m))
+    }
+
+  def fishnetUci(variant: Variant, moves: String): String =
+    fishnetUci(variant, moveStringToUci(variant, moves))
+
+  def fishnetUci(variant: Variant, moves: List[Uci]): String = variant match {
     case Variant.FairySF(variant) =>
-      strategygames.fairysf.format.UciDump.fishnetUci(variant)(moves.map(_.toFairySF))
+      strategygames.fairysf.format.UciDump.toFishnetUci(variant.gameFamily, moves.map(_.toFairySF))
     case _                        =>
       moves.map(_.fishnetUci).mkString(" ")
   }
+
+  def fromFishnetUci(variant: Variant, moves: List[LexicalUci]): List[LexicalUci] = variant match {
+    case Variant.FairySF(variant) =>
+      strategygames.fairysf.format.UciDump.fromFishnetUci(variant, moves)
+    case _                        =>
+      moves
+  }
+
+  def fromFishnetUci(variant: Variant, moves: String): List[LexicalUci] =
+    fromFishnetUci(variant, moveStringToLexicalUci(moves))
 }

@@ -6,7 +6,7 @@ import scala.annotation.nowarn
 
 import strategygames.togyzkumalak._
 import strategygames.togyzkumalak.format.{ FEN, Forsyth, Uci }
-import strategygames.{ GameFamily, Player }
+import strategygames.{ GameFamily, Player, Score }
 
 case class TogyzkumalakName(val name: String)
 
@@ -36,6 +36,7 @@ abstract class Variant private[variant] (
   def dropsVariant: Boolean     = false
   def onlyDropsVariant: Boolean = false
   def hasGameScore: Boolean     = true
+  def canOfferDraw: Boolean     = true
 
   def repetitionEnabled: Boolean = false
 

@@ -21,9 +21,9 @@ object Binary {
     val Drop = 1
   }
 
-  private object Reader {
+  val maxPlies = 600
 
-    private val maxPlies = 600
+  private object Reader {
 
     def moves(bs: List[Byte]): List[String]          = moves(bs, maxPlies)
     def moves(bs: List[Byte], nb: Int): List[String] = intMoves(bs map toInt, nb, None)

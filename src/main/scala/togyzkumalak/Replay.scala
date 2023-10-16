@@ -9,7 +9,7 @@ import strategygames.format.pgn.San
 import strategygames.togyzkumalak.format.pgn.{ Parser, Reader }
 import strategygames.format.pgn.{ Tag, Tags }
 import strategygames.togyzkumalak.format.{ FEN, Forsyth, Uci }
-import strategygames.{ Move => StratMove, MoveOrDrop, Situation => StratSituation }
+import strategygames.{ Action => StratAction, Move => StratMove, Situation => StratSituation }
 
 case class Replay(setup: Game, moves: List[Move], state: Game) {
 
@@ -45,9 +45,9 @@ object Replay {
 
   // TODO: because this is primarily used in a Validation context, we should be able to
   //       return something that's runtime safe as well.
-  def togyzkumalakMove(moveOrDrop: MoveOrDrop) = moveOrDrop match {
-    case Left(StratMove.Togyzkumalak(m)) => m
-    case _                               => sys.error("Invalid togyzkumalak move")
+  def togyzkumalakMove(action: StratAction) = action match {
+    case StratMove.Togyzkumalak(m) => m
+    case _                         => sys.error("Invalid togyzkumalak move")
   }
 
   def replayMove(
@@ -190,6 +190,29 @@ object Replay {
   ): Validated[String, List[Situation]] = {
     val sit = initialFenToSituation(initialFen, variant)
     recursiveSituationsFromUci(sit, moves) map { sit :: _ }
+  }
+
+  private def recursiveGamesFromUci(
+      game: Game,
+      ucis: List[Uci]
+  ): Validated[String, List[Game]] =
+    ucis match {
+      case Nil                     => valid(List(game))
+      case (uci: Uci.Move) :: rest =>
+        game.apply(uci) andThen { case (game, _) =>
+          recursiveGamesFromUci(game, rest) map { game :: _ }
+        }
+    }
+
+  def gameFromUciStrings(
+      uciStrings: List[String],
+      initialFen: Option[FEN],
+      variant: strategygames.togyzkumalak.variant.Variant
+  ): Validated[String, Game] = {
+    val init = makeGame(variant, initialFen)
+    val ucis = uciStrings.flatMap(Uci.apply(_))
+    if (uciStrings.size != ucis.size) invalid("Invalid Ucis")
+    else recursiveGamesFromUci(init, ucis).map(_.last)
   }
 
   def apply(

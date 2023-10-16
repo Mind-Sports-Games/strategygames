@@ -2,6 +2,8 @@ package strategygames
 
 import variant.Variant
 
+//GameLogic is for the package in the strategygames codebase
+//Used for routing the wrapper layer
 sealed abstract class GameLogic {
   def id: Int
   def name: String
@@ -36,7 +38,12 @@ object GameLogic {
     def name = "Togyzkumalak"
   }
 
-  def all: List[GameLogic] = List(Chess(), Draughts(), FairySF(), Samurai(), Togyzkumalak())
+  final case class Go() extends GameLogic {
+    def id   = 5
+    def name = "Go"
+  }
+
+  def all: List[GameLogic] = List(Chess(), Draughts(), FairySF(), Samurai(), Togyzkumalak(), Go())
 
   // TODO: I'm sure there is a better scala way of doing this
   def apply(id: Int): GameLogic = id match {
@@ -44,10 +51,13 @@ object GameLogic {
     case 2 => FairySF()
     case 3 => Samurai()
     case 4 => Togyzkumalak()
+    case 5 => Go()
     case _ => Chess()
   }
 }
 
+//GameFamily is for related games in one GameLogic
+//Used for pieceset/boardthemes
 sealed abstract class GameFamily {
   def id: Int
   def name: String
@@ -275,12 +285,12 @@ object GameFamily {
     def name              = "Amazons"
     def key               = "amazons"
     def gameLogic         = GameLogic.FairySF()
-    def hasFishnet        = false
+    def hasFishnet        = true
     def hasAnalysisBoard  = false
     def defaultVariant    = Variant.FairySF(strategygames.fairysf.variant.Amazons)
     def variants          = Variant.all(GameLogic.FairySF()).filter(_.gameFamily == this)
     def displayPiece      = "wQ"
-    def pieceSetThemes    = List("arrow", "queen")
+    def pieceSetThemes    = List("arrow", "queen", "counter", "counter_arrow")
     def pieceSetDefault   = "arrow"
     def boardThemes       = List(
       "blue",
@@ -352,6 +362,28 @@ object GameFamily {
     def playerColors      = Map(P1 -> "white", P2 -> "black")
   }
 
+  final case class Go() extends GameFamily {
+    def id                = 9
+    def name              = "Go"
+    def key               = "go"
+    def gameLogic         = GameLogic.Go()
+    def hasFishnet        = false
+    def hasAnalysisBoard  = false
+    def defaultVariant    = Variant.Go(strategygames.go.variant.Go19x19)
+    def variants          = Variant.all(GameLogic.Go()).filter(_.gameFamily == this)
+    def displayPiece      = "display"
+    def pieceSetThemes    =
+      List(
+        "classic_stone",
+        "cross"
+      )
+    def pieceSetDefault   = "classic_stone"
+    def boardThemes       = List("light-wood", "dark-wood")
+    def boardThemeDefault = "light-wood"
+    def playerNames       = Map(P1 -> "Black", P2 -> "White")
+    def playerColors      = Map(P1 -> "black", P2 -> "white")
+  }
+
   def all: List[GameFamily] = List(
     Chess(),
     Draughts(),
@@ -361,7 +393,8 @@ object GameFamily {
     Flipello(),
     Amazons(),
     Oware(),
-    Togyzkumalak()
+    Togyzkumalak(),
+    Go()
   )
 
   // TODO: I'm sure there is a better scala way of doing this
@@ -374,16 +407,21 @@ object GameFamily {
     case 6 => Oware()
     case 7 => Togyzkumalak()
     case 8 => Amazons()
+    case 9 => Go()
     case _ => Chess()
   }
 
 }
 
+//GameGroups are for collections of related games
+//A variant can be in multiple game groups!
+//Used primarily for medley grouping atm
 sealed abstract class GameGroup {
   def id: Int
   def name: String
   def key: String
   def variants: List[Variant]
+  def medley: Boolean
 
   override def toString = s"GameGroup($name)"
 }
@@ -395,6 +433,7 @@ object GameGroup {
     def name     = "Chess"
     def key      = "chess"
     def variants = Variant.all(GameLogic.Chess()).filter(_.gameFamily.name == this.name)
+    def medley   = true
   }
 
   final case class Draughts() extends GameGroup {
@@ -402,6 +441,7 @@ object GameGroup {
     def name     = "Draughts"
     def key      = "draughts"
     def variants = Variant.all(GameLogic.Draughts())
+    def medley   = true
 
   }
 
@@ -410,6 +450,7 @@ object GameGroup {
     def name     = "Lines of Action"
     def key      = "loa"
     def variants = Variant.all(GameLogic.Chess()).filter(_.gameFamily == GameFamily.LinesOfAction())
+    def medley   = true
   }
 
   final case class FairySF() extends GameGroup {
@@ -417,6 +458,7 @@ object GameGroup {
     def name     = "Fairy Stockfish"
     def key      = "fairysf"
     def variants = Variant.all(GameLogic.FairySF())
+    def medley   = false
   }
 
   final case class Shogi() extends GameGroup {
@@ -424,6 +466,7 @@ object GameGroup {
     def name     = "Shogi"
     def key      = "shogi"
     def variants = Variant.all(GameLogic.FairySF()).filter(_.gameFamily.name == this.name)
+    def medley   = true
   }
 
   final case class Xiangqi() extends GameGroup {
@@ -431,6 +474,7 @@ object GameGroup {
     def name     = "Xiangqi"
     def key      = "xiangqi"
     def variants = Variant.all(GameLogic.FairySF()).filter(_.gameFamily.name == this.name)
+    def medley   = true
   }
 
   final case class Flipello() extends GameGroup {
@@ -438,6 +482,7 @@ object GameGroup {
     def name     = "Flipello"
     def key      = "flipello"
     def variants = Variant.all(GameLogic.FairySF()).filter(_.gameFamily.name == this.name)
+    def medley   = true
   }
 
   final case class Mancala() extends GameGroup {
@@ -445,6 +490,7 @@ object GameGroup {
     def name     = "Mancala"
     def key      = "mancala"
     def variants = Variant.all(GameLogic.Togyzkumalak()) ::: Variant.all(GameLogic.Samurai())
+    def medley   = true
   }
 
   final case class Amazons() extends GameGroup {
@@ -452,6 +498,15 @@ object GameGroup {
     def name     = "Amazons"
     def key      = "amazons"
     def variants = Variant.all(GameLogic.FairySF()).filter(_.gameFamily.name == this.name)
+    def medley   = true
+  }
+
+  final case class Go() extends GameGroup {
+    def id       = 9
+    def name     = "Go"
+    def key      = "go"
+    def variants = Variant.all(GameLogic.Go()).filter(_.gameFamily.name == this.name)
+    def medley   = true
   }
 
   def all: List[GameGroup] =
@@ -464,11 +519,11 @@ object GameGroup {
       Xiangqi(),
       Flipello(),
       Mancala(),
-      Amazons()
+      Amazons(),
+      Go()
     )
 
-  def medley: List[GameGroup] =
-    List(Chess(), Draughts(), LinesOfAction(), Shogi(), Xiangqi(), Flipello(), Mancala())
+  def medley: List[GameGroup] = all.filter(_.medley)
 
   // TODO: I'm sure there is a better scala way of doing this
   def apply(id: Int): GameGroup = id match {
@@ -480,6 +535,7 @@ object GameGroup {
     case 6 => Flipello()
     case 7 => Mancala()
     case 8 => Amazons()
+    case 9 => Go()
     case _ => Chess()
   }
 }

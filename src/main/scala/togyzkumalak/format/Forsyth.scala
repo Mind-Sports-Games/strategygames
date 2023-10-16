@@ -2,7 +2,7 @@ package strategygames.togyzkumalak.format
 
 import cats.implicits._
 
-import strategygames.Player
+import strategygames.{ Player, Score }
 import strategygames.togyzkumalak._
 import strategygames.togyzkumalak.variant.Variant
 

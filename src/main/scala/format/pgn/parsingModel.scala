@@ -16,7 +16,7 @@ trait San   {
       situation: Situation,
       iteratedCapts: Boolean = false,
       forbiddenUci: Option[List[String]] = None
-  ): Validated[String, strategygames.MoveOrDrop]
+  ): Validated[String, strategygames.Action]
 
   def metas: Metas
 

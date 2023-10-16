@@ -4,7 +4,13 @@ import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
-import strategygames.{ Game => StratGame, Move => StratMove, MoveOrDrop, Player, Situation => StratSituation }
+import strategygames.{
+  Action => StratAction,
+  Game => StratGame,
+  Move => StratMove,
+  Player,
+  Situation => StratSituation
+}
 import strategygames.format.pgn.{ San, Tag, Tags }
 import format.pdn.{ Parser, Reader, Std }
 import format.{ FEN, Forsyth, Uci }
@@ -48,9 +54,9 @@ object Replay {
 
   // TODO: because this is primarily used in a Validation context, we should be able to
   //       return something that's runtime safe as well.
-  def draughtsMove(moveOrDrop: MoveOrDrop) = moveOrDrop match {
-    case Left(StratMove.Draughts(m)) => m
-    case _                           => sys.error("Invalid draughts move")
+  def draughtsMove(action: StratAction) = action match {
+    case StratMove.Draughts(m) => m
+    case _                     => sys.error("Invalid draughts move")
   }
 
   private def recursiveGames(game: DraughtsGame, sans: List[San]): Validated[String, List[DraughtsGame]] =
@@ -96,10 +102,10 @@ object Replay {
             else ambs.collect { case (ambSan, ambUci) if ambSan == san => ambUci }.some
           ).fold(
             err => (Nil, err.some),
-            moveOrDrop => {
-              val move    = moveOrDrop match {
-                case Left(StratMove.Draughts(m)) => m
-                case _                           => sys.error("Invalid draughts move")
+            action => {
+              val move    = action match {
+                case StratMove.Draughts(m) => m
+                case _                     => sys.error("Invalid draughts move")
               }
               val newGame = g(move)
               val uci     = move.toUci
@@ -357,6 +363,31 @@ object Replay {
   ): Validated[String, List[Situation]] = {
     val sit = initialFenToSituation(initialFen, variant)
     recursiveSituationsFromUci(sit, moves, finalSquare) map { sit :: _ }
+  }
+
+  private def recursiveGamesFromUci(
+      game: DraughtsGame,
+      ucis: List[Uci],
+      finalSquare: Boolean = false
+  ): Validated[String, List[DraughtsGame]] =
+    ucis match {
+      case Nil                     => valid(List(game))
+      case (uci: Uci.Move) :: rest =>
+        game.apply(uci, finalSquare) andThen { case (game, _) =>
+          recursiveGamesFromUci(game, rest, finalSquare) map { game :: _ }
+        }
+    }
+
+  def gameFromUciStrings(
+      uciStrings: List[String],
+      initialFen: Option[FEN],
+      variant: Variant,
+      finalSquare: Boolean = false
+  ): Validated[String, DraughtsGame] = {
+    val init = makeGame(variant, initialFen)
+    val ucis = uciStrings.flatMap(Uci.apply(_))
+    if (uciStrings.size != ucis.size) invalid("Invalid Ucis")
+    else recursiveGamesFromUci(init, ucis, finalSquare).map(_.last)
   }
 
   def apply(

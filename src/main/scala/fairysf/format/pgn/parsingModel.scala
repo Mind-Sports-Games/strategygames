@@ -21,7 +21,7 @@ case class Std(
       situation: strategygames.Situation,
       iteratedCapts: Boolean = false,
       forbiddenUci: Option[List[String]] = None
-  ) = move(situation.toFairySF).map(StratMove.wrap).map(Left.apply)
+  ) = move(situation.toFairySF).map(StratMove.wrap)
 
   override def withSuffixes(s: Suffixes) =
     copy(
@@ -47,7 +47,7 @@ case class Drop(
       situation: strategygames.Situation,
       iteratedCapts: Boolean = false,
       forbiddenUci: Option[List[String]] = None
-  ) = drop(situation.toFairySF).map(StratDrop.wrap).map(Right.apply)
+  ) = drop(situation.toFairySF).map(StratDrop.wrap)
 
   def withMetas(m: Metas) = copy(metas = m)
 

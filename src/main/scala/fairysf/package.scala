@@ -13,6 +13,4 @@ package object fairysf extends scalalib.Common with scalalib.OrnicarOption with 
 
   type PositionHash = Array[Byte]
 
-  type MoveOrDrop = Either[Move, Drop]
-
 }

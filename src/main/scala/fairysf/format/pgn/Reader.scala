@@ -79,7 +79,7 @@ object Reader {
       case (Result.Complete(replay), san) =>
         san(StratSituation.wrap(replay.state.situation)).fold(
           err => Result.Incomplete(replay, err),
-          move => Result.Complete(replay addMove StratMove.toFairySF(move))
+          action => Result.Complete(replay addMove action.toFairySF)
         )
       case (r: Result.Incomplete, _)      => r
     }
@@ -107,25 +107,23 @@ object Reader {
               case (Some(orig), Some(dest)) =>
                 Result.Complete(
                   replay.addMove(
-                    Left {
-                      if (game.situation.board.variant.switchPlayerAfterMove)
-                        Replay.replayMove(
-                          replay.state,
-                          orig,
-                          dest,
-                          promotion,
-                          replay.state.board.apiPosition.makeMoves(List(m)),
-                          replay.state.board.uciMoves :+ m
-                        )
-                      else
-                        Replay.replayMoveWithoutAPI(
-                          replay.state,
-                          replay.state.board.pieces(orig),
-                          orig,
-                          dest,
-                          promotion
-                        )
-                    }
+                    if (game.situation.board.variant.switchPlayerAfterMove)
+                      Replay.replayMove(
+                        replay.state,
+                        orig,
+                        dest,
+                        promotion,
+                        replay.state.board.apiPosition.makeMoves(List(m)),
+                        replay.state.board.uciMoves :+ m
+                      )
+                    else
+                      Replay.replayMoveWithoutAPI(
+                        replay.state,
+                        replay.state.board.pieces(orig),
+                        orig,
+                        dest,
+                        promotion
+                      )
                   )
                 )
               case _                        => Result.Incomplete(replay, s"Error making replay with move: ${m}")
@@ -135,20 +133,18 @@ object Reader {
             (Role.allByForsyth(replay.state.board.variant.gameFamily).get(role(0)), Pos.fromKey(dest)) match {
               case (Some(role), Some(dest)) =>
                 Result.Complete(
-                  replay.addMove(
-                    Right {
-                      val uci =
-                        if (game.situation.board.variant.switchPlayerAfterMove) m
-                        else s"${lastMove.getOrElse("")},${lastDest.getOrElse("")}${dest.key}"
-                      Replay.replayDrop(
-                        replay.state,
-                        role,
-                        dest,
-                        replay.state.board.apiPosition.makeMoves(List(uci)),
-                        replay.state.board.uciMoves :+ uci
-                      )
-                    }
-                  )
+                  replay.addMove {
+                    val uci =
+                      if (game.situation.board.variant.switchPlayerAfterMove) m
+                      else s"${lastMove.getOrElse("")},${lastDest.getOrElse("")}${dest.key}"
+                    Replay.replayDrop(
+                      replay.state,
+                      role,
+                      dest,
+                      replay.state.board.apiPosition.makeMoves(List(uci)),
+                      replay.state.board.uciMoves :+ uci
+                    )
+                  }
                 )
               case _                        => Result.Incomplete(replay, s"Error making replay with drop: ${m}")
             }

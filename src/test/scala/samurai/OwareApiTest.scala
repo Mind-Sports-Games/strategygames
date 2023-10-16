@@ -236,4 +236,19 @@ class OwareApiTest extends Specification with ValidatedMatchers {
     }
   }
 
+  // https://playstrategy.org/Pd83xW5h/p2
+  "game result" should {
+    val fen      = "4S,4S,4S,4S,4S,4S/4S,4S,4S,4S,4S,4S 0 0 S 1" // starting pos
+    val position = Api.positionFromFen(fen)
+    val moves    = List(3, 7, 5, 10, 2, 9, 2, 10, 5, 8, 1, 8, 3, 7, 0, 10, 3, 9, 4, 8, 0, 11, 4, 10, 0, 9, 5, 7,
+      0, 10, 1, 9, 4, 7, 3, 11, 5, 6, 0, 8, 0, 11, 0, 10, 2, 8, 1, 7, 3, 9, 2, 10, 3, 8, 5, 8, 1, 6, 2, 7, 4,
+      6, 3, 10, 4, 7, 5, 9, 1, 10, 0, 8, 2, 7, 1, 6, 3, 8, 2, 7, 4, 9, 3, 8, 4, 9, 5, 10, 1, 7, 0, 6, 2, 8, 1,
+      7, 3, 9, 2, 8, 4, 10, 3, 9, 4, 10, 5, 11, 5, 10, 4, 9, 3, 8, 4, 7, 2, 10, 3, 9, 4, 8, 5, 11, 1, 10, 0,
+      7, 2, 6, 4, 9, 3, 10, 1, 8, 4, 7, 2, 10, 3, 9)
+    position.makeMoves(moves)
+    "end in draw after cycle spilts stones" in {
+      position.gameResult must_== GameResult.Draw()
+    }
+  }
+
 }
