@@ -126,7 +126,7 @@ class BinaryTest extends ChessTest {
     }
     "read single move" in {
       "simple pawn" in {
-        readMove("00000000") must_== "a1"
+        readMove("00000011") must_== "a4"
         readMove("00000001") must_== "a2"
         readMove("00000010") must_== "a3"
         readMove("00111011") must_== "h4"

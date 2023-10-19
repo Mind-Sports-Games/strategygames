@@ -13,7 +13,7 @@ class UciDumpTest extends ChessTest {
     }
     "simple" in {
       UciDump(simple.split(' ').toList.map(List(_)), None, variant.Standard) must beValid.like { case moves =>
-        moves must_== "e2e3 b8c6 d2d4 g8f6".split(" ").toList
+        moves must_== "e2e3 b8c6 d2d4 g8f6".split(" ").toList.map(List(_))
       }
     }
     "complete" in {
@@ -138,7 +138,7 @@ class UciDumpTest extends ChessTest {
             "e2e1q",
             "h3g2",
             "e1e6"
-          )
+          ).map(List(_))
       }
     }
     // "960" in {

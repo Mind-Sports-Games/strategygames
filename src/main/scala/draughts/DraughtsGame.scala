@@ -114,7 +114,7 @@ case class DraughtsGame(
   private def applyAction(action: String): Vector[Vector[String]] =
     // whilst draughts doesnt support multimove
     actions :+ Vector(action)
-  // if (Player.fromTurnCount(actions.size + startPlayer.hashCode - 1) == situation.player)
+  // if (switchPlayer || actions.size == 0)
   //  actions :+ Vector(action)
   // else
   //  actions.updated(actions.size, actions(actions.size) :+ action)
@@ -133,8 +133,7 @@ case class DraughtsGame(
   // It starts at 1, and is incremented after P2's move (turn)
   def fullTurnCount: Int = 1 + turnCount / 2
 
-  // TODO: Verify this is what we want to pass startedAtTurn
-  def currentTurnCount: Int = turnCount + (if (plies > 0) 1 else 0)
+  def currentTurnCount: Int = turnCount + (if (actions.size > 0) 1 else 0)
 
   // doesnt seem to be used anywhere
   // def moveString = s"${fullTurnCount}${player.fold(".", "...")}"

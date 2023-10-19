@@ -34,7 +34,7 @@ case class Game(
       situation = newSituation,
       plies = plies + 1,
       turnCount = turnCount + (if (switchPlayer) 1 else 0),
-      actions = applyAction(move.toUci.uci),
+      actions = applyAction(move.toUci.uci, switchPlayer),
       clock = applyClock(move.metrics, newSituation.status.isEmpty, switchPlayer)
     )
   }
@@ -56,7 +56,7 @@ case class Game(
       situation = newSituation,
       plies = plies + 1,
       turnCount = turnCount + (if (switchPlayer) 1 else 0),
-      actions = applyAction(drop.toUci.uci),
+      actions = applyAction(drop.toUci.uci, switchPlayer),
       clock = applyClock(drop.metrics, newSituation.status.isEmpty, switchPlayer)
     )
   }
@@ -69,11 +69,12 @@ case class Game(
       }
     }
 
-  private def applyAction(action: String): Vector[Vector[String]] =
-    if (Player.fromTurnCount(actions.size + startPlayer.hashCode - 1) == situation.player)
+  private def applyAction(action: String, switchPlayer: Boolean): Vector[Vector[String]] = {
+    if (switchPlayer || actions.size == 0)
       actions :+ Vector(action)
     else
       actions.updated(actions.size - 1, actions(actions.size - 1) :+ action)
+  }
 
   def player = situation.player
 
@@ -86,8 +87,7 @@ case class Game(
   // It starts at 1, and is incremented after P2's move (turn)
   def fullTurnCount: Int = 1 + turnCount / 2
 
-  // TODO: Verify this is what we want to pass startedAtTurn
-  def currentTurnCount: Int = turnCount + (if (plies > 0) 1 else 0)
+  def currentTurnCount: Int = turnCount + (if (actions.size > 0) 1 else 0)
 
   def withTurns(p: Int, t: Int) = copy(plies = p, turnCount = t)
 }

@@ -132,6 +132,7 @@ class ReaderTest extends ChessTest {
     }
     "preserves initial ply" in {
       Reader.full(caissa) must beValid.like { case Complete(replay) =>
+        replay.setup.plies must_== 43
         replay.setup.startedAtTurn must_== 43
         replay.setup.startPlayer must_== strategygames.Player.P2
         replay.state.startedAtTurn must_== 43
