@@ -84,7 +84,7 @@ case class Actor(
   def move(
       dest: Pos,
       after: Board,
-      /* Set this to upgrade to multimove */
+      /* Set this to upgrade to multiaction */
       autoEndTurn: Boolean,
       /* Single capture or none */
       capture: Option[Pos],

@@ -127,7 +127,7 @@ abstract class Game(
   // It starts at 1, and is incremented after P2's move (turn)
   def fullTurnCount: Int = 1 + turnCount / 2
 
-  // TODO: When draughts is converted to multimove and we are happy that
+  // TODO: When draughts is converted to multiaction and we are happy that
   // turns - startedAtTurn == actions.size then we could consider deprecating `val turns`
   // and having it calculated from actions.size. Would need to check end of turn status
   // def turnCount = turns - startedAtTurn

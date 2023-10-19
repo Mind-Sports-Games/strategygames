@@ -224,7 +224,7 @@ final case class Actor(
       dest: Pos,
       after: Board,
       capture: Option[Pos] = None,
-      // TODO: Change this to enable multimove
+      // TODO: Change this to enable multiaction. Do when adding Monster Chess
       autoEndTurn: Boolean = true,
       castle: Option[((Pos, Pos), (Pos, Pos))] = None,
       promotion: Option[PromotableRole] = None,
