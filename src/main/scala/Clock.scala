@@ -1,4 +1,5 @@
 package strategygames
+import scala.annotation.nowarn
 
 import java.text.DecimalFormat
 import cats.syntax.option._
@@ -12,13 +13,18 @@ trait TimerTrait {
 // This modifies the amount of time remaining on the clock after the
 // move time has been applied, like increment
 trait ClockTimeGrace {
-  def timeToAdd(timer: TimerTrait, timeTaken: Centis): Tuple2[ClockTimeGrace, Centis]
+  def timeToAdd(remaining: Centis, timeTaken: Centis): Tuple2[ClockTimeGrace, Centis]
+  def timeWillAdd(remaining: Centis, timeTaken: Centis): Centis
   def goBerserk: ClockTimeGrace
+  val maxGrace: Centis
 }
 
 case class NoClockTimeGrace() extends ClockTimeGrace {
-  def timeToAdd(timer: TimerTrait, timeTaken: Centis): Tuple2[ClockTimeGrace, Centis] = (this, Centis(0))
-  def goBerserk: ClockTimeGrace                                                       = this
+  def timeToAdd(@nowarn remaining: Centis, timeTaken: Centis): Tuple2[ClockTimeGrace, Centis] =
+    (this, timeWillAdd(remaining, timeTaken))
+  def timeWillAdd(@nowarn remaining: Centis, timeTaken: Centis): Centis                       = Centis(0)
+  val maxGrace: Centis                                                                        = Centis(0)
+  def goBerserk: ClockTimeGrace                                                               = this
 }
 // NOTE: if we need a list of these, we can make a ListClockTimeGrace
 
@@ -26,36 +32,48 @@ case class NoClockTimeGrace() extends ClockTimeGrace {
 // the elapsed time when time is used.
 // Thus, remaining time can appear to go up
 case class FischerIncrementGrace(val increment: Centis) extends ClockTimeGrace {
-  override def timeToAdd(timer: TimerTrait, timeTaken: Centis): Tuple2[ClockTimeGrace, Centis] =
+  override def timeToAdd(remaining: Centis, timeTaken: Centis): Tuple2[ClockTimeGrace, Centis] =
     (
       this,
-      (timer.remaining > Centis(0)) ?? increment
+      timeWillAdd(remaining, timeTaken)
     ) // 0 if no time is left, else the increment
 
+  def timeWillAdd(remaining: Centis, timeTaken: Centis): Centis =
+    (remaining > Centis(0)) ?? increment
+
   def goBerserk: ClockTimeGrace = NoClockTimeGrace()
+  val maxGrace: Centis          = increment
 }
 
 // Bronstein increment timer with a delay. The minimum between the time used
 // and the delay is subracted back to the elapsed time when time is used.
 // Thus, using time will never seem to make the clock gain time.
 case class UsDelayGrace(val delay: Centis) extends ClockTimeGrace {
-  override def timeToAdd(timer: TimerTrait, timeTaken: Centis): Tuple2[ClockTimeGrace, Centis] =
-    (this, timeTaken.atMost(delay)) // up to the delay
+  override def timeToAdd(remaining: Centis, timeTaken: Centis): Tuple2[ClockTimeGrace, Centis] =
+    (this, timeWillAdd(remaining, timeTaken)) // up to the delay
+
+  // NOTE: This is organized the way it is so that if you take more time than you were allowed, you don't actually get
+  //       the full grace, so that you end up with not enough time remaining, otherwise the time remaining
+  //       can chain together to keep you at zero, even though you should have lost.
+  def timeWillAdd(remaining: Centis, timeTaken: Centis): Centis =
+    ((remaining + timeTaken.atMost(delay)) > Centis(0)) ?? timeTaken.atMost(delay) // up to the delay
 
   def goBerserk: ClockTimeGrace = NoClockTimeGrace()
+  val maxGrace: Centis          = delay
 }
 
 // BronsteinDelay gives back up to the entire amount, but only if they didn't use
 // all of it. It's similar to UsDelay, but US allows you to go over and eat
 // into your grace. Bronstein does not.
 case class BronsteinDelayGrace(val delay: Centis) extends ClockTimeGrace {
-  override def timeToAdd(timer: TimerTrait, timeTaken: Centis): Tuple2[ClockTimeGrace, Centis] =
-    (
-      this,
-      (timer.remaining > Centis(0)) ?? timeTaken.atMost(delay)
-    ) // 0 if no time is left, else the up to the delay
+  override def timeToAdd(remaining: Centis, timeTaken: Centis): Tuple2[ClockTimeGrace, Centis] =
+    (this, timeWillAdd(remaining, timeTaken)) // 0 if no time is left, else the up to the delay
+
+  def timeWillAdd(remaining: Centis, timeTaken: Centis): Centis =
+    (remaining > Centis(0)) ?? timeTaken.atMost(delay)
 
   def goBerserk: ClockTimeGrace = NoClockTimeGrace()
+  val maxGrace: Centis          = delay
 }
 
 case class Timer(
@@ -67,7 +85,7 @@ case class Timer(
 
   private def applyClockGrace(timeTaken: Centis): Timer =
     // TODO: make this work like the book
-    clockTimeGrace.timeToAdd(this, timeTaken).pipe { case (newClockTimeGrace, postMoveGraceTime) =>
+    clockTimeGrace.timeToAdd(this.remaining, timeTaken).pipe { case (newClockTimeGrace, postMoveGraceTime) =>
       copy(
         elapsed = elapsed - postMoveGraceTime,
         clockTimeGrace = newClockTimeGrace
@@ -82,16 +100,23 @@ case class Timer(
   def followedBy(timer: Timer): Timer =
     nextTimer.fold(copy(nextTimer = Some(timer)))(t => copy(nextTimer = Some(t.followedBy(timer))))
 
-  def takeTime(timeTaken: Centis)    =
+  def takeTime(timeTaken: Centis)       =
     applyTimeTaken(timeTaken)
       .applyClockGrace(timeTaken)
       .nextIfDone
-  def setRemaining(t: Centis): Timer = copy(elapsed = limit - t)
-  def goBerserk: Timer               = copy(clockTimeGrace = clockTimeGrace.goBerserk)
-  def outOfTime: Boolean             = remainingAll <= Centis(0)
-  def giveTime(t: Centis)            = takeTime(-t)
-  val remaining: Centis              = limit - elapsed
-  val remainingAll: Centis           = nextTimer.fold(remaining)(t => t.remaining + remaining)
+  def setRemaining(t: Centis): Timer    = copy(elapsed = limit - t)
+  def goBerserk(penalty: Centis): Timer =
+    copy(limit = limit - penalty, clockTimeGrace = clockTimeGrace.goBerserk)
+  def outOfTime: Boolean                = remainingAll <= Centis(0)
+  def giveTime(t: Centis)               = takeTime(-t)
+
+  // The remaining is whatever they have left + whatever they'll get if they were at the end of the gaming and
+  // had used the maxGrace amount of time. This is important to work together in concer with Simple Delay
+  val remaining: Centis =
+    (limit - elapsed) + clockTimeGrace
+      .timeWillAdd((limit - elapsed).atMost(Centis(0)), clockTimeGrace.maxGrace)
+
+  val remainingAll: Centis = nextTimer.fold(remaining)(t => t.remaining + remaining)
 
 }
 
@@ -160,14 +185,13 @@ sealed trait PlayerTimerBase {
   def setRemaining(t: Centis): PlayerTimerBase
   def goBerserk: PlayerTimerBase
   def giveTime(t: Centis): PlayerTimerBase
+  def remaining: Centis
 
   // Implemented attributes
   def limit = {
     if (berserk) config.initTime - config.berserkPenalty
     else config.initTime
   }
-
-  def remaining: Centis = limit - elapsed
 }
 
 sealed trait ClockBase {
@@ -254,10 +278,12 @@ case class ClockPlayer(
   // Going berserk changes your timer
   def goBerserk = copy(
     berserk = true,
-    timer = timer.goBerserk
+    timer = timer.goBerserk(config.berserkPenalty)
   )
 
   def giveTime(t: Centis): ClockPlayer = takeTime(-t)
+
+  def remaining: Centis = timer.remaining
 }
 
 // All unspecified durations are expressed in seconds
@@ -750,6 +776,8 @@ case class ByoyomiClockPlayer(
   def periodsTotal = if (berserk) 0 else config.periodsTotal
 
   def goBerserk = copy(berserk = true)
+
+  def remaining: Centis = limit - elapsed
 }
 
 object ByoyomiClockPlayer {

@@ -1,5 +1,5 @@
 package strategygames.chess
-import strategygames.{ P2, Clock, GameLogic, P1  }
+import strategygames.{ Clock, GameLogic, P1, P2 }
 
 class BerserkTest extends ChessTest {
 

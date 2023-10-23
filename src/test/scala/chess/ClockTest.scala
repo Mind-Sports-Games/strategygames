@@ -56,30 +56,30 @@ class TimerTest extends ChessTest {
   "play with a us delay increment" should {
     val usDelay = Timer.usDelay(Centis(60 * 100), Centis(5 * 100))
     "properly increment time when game is ongoing" in {
-      usDelay.remaining must_== Centis(60 * 100)
+      usDelay.remaining must_== Centis(65 * 100)
       val afterMove = usDelay
         .takeTime(Centis(30 * 100))
-      afterMove.remaining must_== Centis(35 * 100)
+      afterMove.remaining must_== Centis(40 * 100)
     }
     "even when there is only 1 centisecond left" in {
       val afterMove = usDelay
         .takeTime(Centis(30 * 100))
         .takeTime(Centis(35 * 100 - 1))
-      afterMove.remaining must_== Centis(501)
+      afterMove.remaining must_== Centis(1001)
       afterMove.outOfTime must_== false
     }
     "and also when game is over and the delay would save it" in {
       val afterMove = usDelay
         .takeTime(Centis(30 * 100))
         .takeTime(Centis(36 * 100))
-      afterMove.remaining must_== Centis(4 * 100)
+      afterMove.remaining must_== Centis(9 * 100)
       afterMove.outOfTime must_== false
     }
     "but now when the delay + move still doesn't save it." in {
       val afterMove = usDelay
         .takeTime(Centis(30 * 100))
         .takeTime(Centis(40 * 100))
-      afterMove.remaining must_== Centis(0)
+      afterMove.remaining must_== Centis(-500)
       afterMove.outOfTime must_== true
     }
   }
