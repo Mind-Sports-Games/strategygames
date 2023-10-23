@@ -12,8 +12,8 @@ case class Game(
     clock: Option[Clock] = None,
     plies: Int = 0,
     turnCount: Int = 0,
-    startedAtTurn: Int = 0,
-    startPlayer: Player = Player.P1
+    startedAtPlies: Int = 0,
+    startedAtTurn: Int = 0
 ) {
   def apply(
       orig: Pos,
@@ -94,9 +94,7 @@ case class Game(
   // Aka Fullmove number (in Forsyth-Edwards Notation):
   // The number of the completed turns by each player ('full move')
   // It starts at 1, and is incremented after P2's move (turn)
-  def fullTurnCount: Int    = 1 + turnCount / 2
-  // TODO: Multiaction: verify this is what we want to pass startedAtTurn
-  def currentTurnCount: Int = turnCount + (if (actions.size > 0) 1 else 0)
+  def fullTurnCount: Int = 1 + turnCount / 2
 
   // doesnt seem to be used anywhere
   // def moveString = s"$fullTurnCount${player.fold(".", "...")}"

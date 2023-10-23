@@ -11,8 +11,8 @@ case class Game(
     clock: Option[Clock] = None,
     plies: Int = 0,
     turnCount: Int = 0,
-    startedAtTurn: Int = 0,
-    startPlayer: Player = Player.P1
+    startedAtPlies: Int = 0,
+    startedAtTurn: Int = 0
 ) {
   def apply(
       orig: Pos,
@@ -87,7 +87,7 @@ case class Game(
   // It starts at 1, and is incremented after P2's move (turn)
   def fullTurnCount: Int = 1 + turnCount / 2
 
-  def currentTurnCount: Int = turnCount + (if (actions.size > 0) 1 else 0)
+  // def currentTurnCount: Int = turnCount + (if (actions.size > 0) 1 else 0)
 
   def withTurns(p: Int, t: Int) = copy(plies = p, turnCount = t)
 }

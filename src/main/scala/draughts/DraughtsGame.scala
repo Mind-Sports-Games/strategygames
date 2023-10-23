@@ -14,8 +14,8 @@ case class DraughtsGame(
     clock: Option[Clock] = None,
     plies: Int = 0,
     turnCount: Int = 0,
-    startedAtTurn: Int = 0,
-    startPlayer: Player = Player.P1
+    startedAtPlies: Int = 0,
+    startedAtTurn: Int = 0
 ) {
 
   def apply(
@@ -133,7 +133,7 @@ case class DraughtsGame(
   // It starts at 1, and is incremented after P2's move (turn)
   def fullTurnCount: Int = 1 + turnCount / 2
 
-  def currentTurnCount: Int = turnCount + (if (actions.size > 0) 1 else 0)
+  // def currentTurnCount: Int = turnCount + (if (actions.size > 0) 1 else 0)
 
   // doesnt seem to be used anywhere
   // def moveString = s"${fullTurnCount}${player.fold(".", "...")}"

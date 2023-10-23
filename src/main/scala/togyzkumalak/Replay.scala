@@ -285,8 +285,8 @@ object Replay {
   private def makeGame(variant: strategygames.togyzkumalak.variant.Variant, initialFen: Option[FEN]): Game = {
     val g = Game(variant.some, initialFen)
     g.copy(
-      startedAtTurn = g.currentTurnCount,
-      startPlayer = g.situation.player
+      startedAtPlies = g.plies,
+      startedAtTurn = g.turnCount
     )
   }
 }

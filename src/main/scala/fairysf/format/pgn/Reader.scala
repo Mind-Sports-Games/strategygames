@@ -160,8 +160,8 @@ object Reader {
       fen = tags.fairysfFen
     )
     g.copy(
-      startedAtTurn = g.currentTurnCount,
-      startPlayer = g.situation.player,
+      startedAtPlies = g.plies,
+      startedAtTurn = g.turnCount,
       clock = tags.clockConfig.flatMap {
         case fc: FischerClock.Config => Some(FischerClock.apply(fc))
         case bc: ByoyomiClock.Config => Some(ByoyomiClock.apply(bc))
