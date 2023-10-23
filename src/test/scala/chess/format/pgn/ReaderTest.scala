@@ -81,8 +81,8 @@ class ReaderTest extends ChessTest {
     }
     "promoting to a rook" in {
       Reader.full(fromLichessBadPromotion) must beValid.like { case Complete(replay) =>
-        replay.chronoPlies lift 10 must beSome.like { case move =>
-          move.fold(_.promotion, _ => None) must_== Option(Rook)
+        replay.chronoPlies lift 10 must beSome.like { case move: strategygames.chess.Move =>
+          move.promotion must_== Option(Rook)
         }
       }
     }
@@ -100,8 +100,8 @@ class ReaderTest extends ChessTest {
     }
     "crazyhouse 1" in {
       Reader.full(crazyhouse1) must beValid.like { case Complete(replay) =>
-        replay.chronoPlies lift 11 must beSome.like { case move =>
-          move.fold(_.toUci.uci, _.toUci.uci) must_== "P@c6"
+        replay.chronoPlies lift 11 must beSome.like {
+          _.toUci.uci must_== "P@c6"
         }
       }
     }

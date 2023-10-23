@@ -99,6 +99,16 @@ case class DraughtsGame(
 
   }
 
+  def apply(uci: Uci.Move): Validated[String, (DraughtsGame, Move)] = apply(uci, false)
+
+  def apply(uci: Uci.Move, finalSquare: Boolean): Validated[String, (DraughtsGame, Move)] =
+    apply(
+      orig = uci.orig,
+      dest = uci.dest,
+      promotion = uci.promotion,
+      finalSquare = finalSquare
+    )
+
   private def applyClock(metrics: MoveMetrics, gameActive: Boolean, switchClock: Boolean) =
     clock.map { c =>
       {
@@ -109,10 +119,8 @@ case class DraughtsGame(
       }
     }
 
-  def apply(uci: Uci.Move): Validated[String, (DraughtsGame, Move)] = apply(uci.orig, uci.dest, uci.promotion)
-
   private def applyAction(action: String): Vector[Vector[String]] =
-    // whilst draughts doesnt support multimove
+    // whilst draughts doesnt support multiaction
     actions :+ Vector(action)
   // if (switchPlayer || actions.size == 0)
   //  actions :+ Vector(action)

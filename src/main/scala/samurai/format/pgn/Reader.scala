@@ -1,6 +1,12 @@
 package strategygames.samurai
 package format.pgn
-import strategygames.{ Actions, ByoyomiClock, FischerClock, Move => StratMove, Situation => StratSituation }
+import strategygames.{
+  Action => StratAction
+  Actions,
+  ByoyomiClock,
+  FischerClock,
+  Situation => StratSituation
+}
 
 import strategygames.format.pgn.{ ParsedPgn, Sans, Tags }
 
@@ -50,7 +56,7 @@ object Reader {
       case (Result.Complete(replay), san) =>
         san(StratSituation.wrap(replay.state.situation)).fold(
           err => Result.Incomplete(replay, err),
-          ply => Result.Complete(replay addPly StratMove.toSamurai(ply))
+          action => Result.Complete(replay addPly StratAction.toSamurai(action))
         )
       case (r: Result.Incomplete, _)      => r
     }

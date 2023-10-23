@@ -53,8 +53,7 @@ object Reader {
       case (Result.Complete(replay), san) =>
         san(StratSituation.wrap(replay.state.situation)).fold(
           err => Result.Incomplete(replay, err),
-          // TODO probably want this extended to cover Drops and not just Moves
-          move => Result.Complete(replay addPly StratMove.toChess(move))
+          action => Result.Complete(replay addPly action.toChess)
         )
       case (r: Result.Incomplete, _)      => r
     }

@@ -11,7 +11,7 @@ sealed trait Uci {
 
   def origDest: (Pos, Pos)
 
-  def apply(situation: Situation): Validated[String, MoveOrDrop]
+  def apply(situation: Situation): Validated[String, Action]
 }
 
 object Uci {
@@ -32,7 +32,7 @@ object Uci {
 
     def origDest = orig -> dest
 
-    def apply(situation: Situation) = situation.move(orig, dest, promotion) map Left.apply
+    def apply(situation: Situation) = situation.move(orig, dest, promotion)
   }
 
   object Move {
@@ -67,7 +67,7 @@ object Uci {
 
     def origDest = pos -> pos
 
-    def apply(situation: Situation) = situation.drop(role, pos) map Right.apply
+    def apply(situation: Situation) = situation.drop(role, pos)
   }
 
   object Drop {

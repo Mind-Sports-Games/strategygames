@@ -21,7 +21,7 @@ case class Std(
       situation: strategygames.Situation,
       iteratedCapts: Boolean = false,
       forbiddenUci: Option[List[String]] = None
-  ) = move(situation.toTogyzkumalak).map(StratMove.wrap).map(Left.apply)
+  ) = move(situation.toTogyzkumalak).map(StratMove.wrap)
 
   override def withSuffixes(s: Suffixes) =
     copy(

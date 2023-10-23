@@ -1,11 +1,11 @@
 package strategygames.draughts
 package format.pdn
 import strategygames.{
+  Action => StratAction,
   Actions,
   ByoyomiClock,
   FischerClock,
   Move => StratMove,
-  MoveOrDrop,
   Situation => StratSituation
 }
 import strategygames.format.pgn.{ ParsedPgn => ParsedPdn, San, Sans, Tags }
@@ -67,9 +67,9 @@ object Reader {
 
   // TODO: because this is primarily used in a Validation context, we should be able to
   //       return something that's runtime safe as well.
-  def draughtsMove(moveOrDrop: MoveOrDrop) = moveOrDrop match {
-    case Left(StratMove.Draughts(m)) => m
-    case _                           => sys.error("Invalid draughts move")
+  def draughtsMove(action: StratAction) = action match {
+    case StratMove.Draughts(m) => m
+    case _                     => sys.error("Invalid draughts move")
   }
 
   private def makeReplay(game: DraughtsGame, sans: Sans, iteratedCapts: Boolean = false): Result = {

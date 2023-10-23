@@ -16,6 +16,7 @@ object UciCharPair {
     case (GameLogic.Samurai(), uci: Uci.Samurai)           => strategygames.samurai.format.UciCharPair(uci.unwrap)
     case (GameLogic.Togyzkumalak(), uci: Uci.Togyzkumalak) =>
       strategygames.togyzkumalak.format.UciCharPair(uci.unwrap)
+    case (GameLogic.Go(), uci: Uci.Go)                     => strategygames.go.format.UciCharPair(uci.unwrap)
     case _                                                 => sys.error("Mismatched gamelogic and UciCharPair")
   }
 

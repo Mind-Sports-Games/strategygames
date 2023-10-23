@@ -3,7 +3,7 @@ package strategygames.samurai.format
 import cats.data.Validated
 
 import strategygames.samurai.variant.Variant
-import strategygames.samurai.{ Move, Replay }
+import strategygames.samurai.{ Action, Move, Replay }
 import strategygames.{ Actions, Player }
 
 object UciDump {
@@ -29,6 +29,8 @@ object UciDump {
         variant = variant
       ) andThen (_.valid) map apply
 
-  def action(variant: Variant)(mod: Move): String = mod.toUci.uci
+  def action(variant: Variant)(a: Action): String = a match {
+    case m: Move => m.toUci.uci
+  }
 
 }

@@ -4,7 +4,13 @@ class DividerTest extends ChessTest {
 
   def makeReplay(moves: String) =
     format.pgn.Reader.full(moves).toOption.get match {
-      case format.pgn.Reader.Result.Complete(replay) => replay.chronoPlies.map(_.fold(_.before, _.before))
+      case format.pgn.Reader.Result.Complete(replay) =>
+        replay.chronoPlies.map(action =>
+          action match {
+            case m: Move => m.before
+            case d: Drop => d.before
+          }
+        )
       case x                                         => sys error s"Unexpected incomplete replay $x"
     }
 

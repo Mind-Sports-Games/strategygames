@@ -8,7 +8,7 @@ import cats.implicits._
 import strategygames.Player
 import strategygames.samurai.format.FEN
 import strategygames.samurai.variant.Variant
-import scala.util.{ Failure, Success, Try }
+import scala.util.Try
 
 sealed abstract class GameResult extends Product with Serializable
 
@@ -134,34 +134,11 @@ object Api {
 
     private def finalStoneScore(currentP1Score: Int, currentP2Score: Int, playerIndex: String): Int = {
       if (position.hasEnded() && currentP1Score < 25 && currentP2Score < 25) {
-        if (position.isRepetition()) {
-          val p1SideStonesLeft = owareDiagram.split('-').take(6).map(_.toInt).sum
-          val p2SideStonesLeft = owareDiagram.split('-').drop(6).take(6).map(_.toInt).sum
-          val total            = p1SideStonesLeft + p2SideStonesLeft
-          total match {
-            case _ if total % 2 == 0 =>
-              playerIndex match {
-                case "p1" => currentP1Score + total / 2
-                case "p2" => currentP2Score + total / 2
-              }
-            case _ =>
-              if (p1SideStonesLeft > p2SideStonesLeft) {
-                playerIndex match {
-                  case "p1" => currentP1Score + (total + 1) / 2
-                  case "p2" => currentP2Score + (total - 1) / 2
-                }
-              } else {
-                playerIndex match {
-                  case "p1" => currentP1Score + (total - 1) / 2
-                  case "p2" => currentP2Score + (total + 1) / 2
-                }
-              }
-          }
-        } else {
-          playerIndex match {
-            case "p1" => currentP1Score + owareDiagram.split('-').take(6).map(_.toInt).sum
-            case "p2" => currentP2Score + owareDiagram.split('-').drop(6).take(6).map(_.toInt).sum
-          }
+        val p1SideStonesLeft = owareDiagram.split('-').take(6).map(_.toInt).sum
+        val p2SideStonesLeft = owareDiagram.split('-').drop(6).take(6).map(_.toInt).sum
+        playerIndex match {
+          case "p1" => currentP1Score + p1SideStonesLeft
+          case "p2" => currentP2Score + p2SideStonesLeft
         }
       } else {
         playerIndex match {

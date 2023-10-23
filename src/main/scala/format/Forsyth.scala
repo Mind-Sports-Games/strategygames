@@ -15,6 +15,7 @@ object Forsyth {
     case GameLogic.FairySF()      => FEN.FairySF(fairysf.format.Forsyth.initial)
     case GameLogic.Samurai()      => FEN.Samurai(samurai.format.Forsyth.initial)
     case GameLogic.Togyzkumalak() => FEN.Togyzkumalak(togyzkumalak.format.Forsyth.initial)
+    case GameLogic.Go()           => FEN.Go(go.format.Forsyth.initial)
   }
 
   def <<@(lib: GameLogic, variant: Variant, fen: FEN): Option[Situation] =
@@ -29,6 +30,8 @@ object Forsyth {
         samurai.format.Forsyth.<<@(variant, fen).map(Situation.Samurai)
       case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant), FEN.Togyzkumalak(fen)) =>
         togyzkumalak.format.Forsyth.<<@(variant, fen).map(Situation.Togyzkumalak)
+      case (GameLogic.Go(), Variant.Go(variant), FEN.Go(fen))                               =>
+        go.format.Forsyth.<<@(variant, fen).map(Situation.Go)
       case _                                                                                => sys.error("Mismatched gamelogic types 14")
     }
 
@@ -39,6 +42,7 @@ object Forsyth {
     case (GameLogic.Samurai(), FEN.Samurai(fen))           => samurai.format.Forsyth.<<(fen).map(Situation.Samurai)
     case (GameLogic.Togyzkumalak(), FEN.Togyzkumalak(fen)) =>
       togyzkumalak.format.Forsyth.<<(fen).map(Situation.Togyzkumalak)
+    case (GameLogic.Go(), FEN.Go(fen))                     => go.format.Forsyth.<<(fen).map(Situation.Go)
     case _                                                 => sys.error("Mismatched gamelogic types 15")
   }
 
@@ -73,6 +77,11 @@ object Forsyth {
         togyzkumalak.format.Forsyth
           .<<<@(variant, fen)
           .map(sp => SituationPlus(Situation.Togyzkumalak(sp.situation), sp.fullTurnCount))
+      case (GameLogic.Go(), Variant.Go(variant), FEN.Go(fen))                               =>
+        go.format.Forsyth
+          .<<<@(variant, fen)
+          .map(sp => SituationPlus(Situation.Go(sp.situation), sp.fullTurnCount))
+
       case _                                                                                => sys.error("Mismatched gamelogic types 16")
     }
 
@@ -97,6 +106,10 @@ object Forsyth {
       togyzkumalak.format.Forsyth
         .<<<(fen)
         .map(sp => SituationPlus(Situation.Togyzkumalak(sp.situation), sp.fullTurnCount))
+    case (GameLogic.Go(), FEN.Go(fen))                     =>
+      go.format.Forsyth
+        .<<<(fen)
+        .map(sp => SituationPlus(Situation.Go(sp.situation), sp.fullTurnCount))
     case _                                                 => sys.error("Mismatched gamelogic types 17")
   }
 
@@ -133,6 +146,12 @@ object Forsyth {
           togyzkumalak.format.Forsyth.SituationPlus(situation, parsed.fullTurnCount)
         )
       )
+    case (GameLogic.Go(), Situation.Go(situation))                     =>
+      FEN.Go(
+        go.format.Forsyth.>>(
+          go.format.Forsyth.SituationPlus(situation, parsed.fullTurnCount)
+        )
+      )
     case _                                                             => sys.error("Mismatched gamelogic types 19")
   }
 
@@ -143,6 +162,7 @@ object Forsyth {
     case (GameLogic.Samurai(), Game.Samurai(game))           => FEN.Samurai(samurai.format.Forsyth.>>(game))
     case (GameLogic.Togyzkumalak(), Game.Togyzkumalak(game)) =>
       FEN.Togyzkumalak(togyzkumalak.format.Forsyth.>>(game))
+    case (GameLogic.Go(), Game.Go(game))                     => FEN.Go(go.format.Forsyth.>>(game))
     case _                                                   => sys.error("Mismatched gamelogic types 20")
   }
 
@@ -158,6 +178,8 @@ object Forsyth {
         samurai.format.Forsyth.exportBoard(board)
       case (GameLogic.Togyzkumalak(), Board.Togyzkumalak(board)) =>
         togyzkumalak.format.Forsyth.exportBoard(board)
+      case (GameLogic.Go(), Board.Go(board))                     =>
+        go.format.Forsyth.exportBoard(board)
       case _                                                     => sys.error("Mismatched gamelogic types 21")
     }
 
@@ -176,6 +198,8 @@ object Forsyth {
         samurai.format.Forsyth.boardAndPlayer(board, turnPlayer)
       case (GameLogic.Togyzkumalak(), Board.Togyzkumalak(board)) =>
         togyzkumalak.format.Forsyth.boardAndPlayer(board, turnPlayer)
+      case (GameLogic.Go(), Board.Go(board))                     =>
+        go.format.Forsyth.boardAndPlayer(board, turnPlayer)
       case _                                                     => sys.error("Mismatched gamelogic types 22")
     }
 

@@ -3,6 +3,23 @@ package strategygames
 import format.Uci
 import variant.Variant
 
+//same template as chess.CheckCount
+case class Score(p1: Int = 0, p2: Int = 0) {
+
+  def add(player: Player, increment: Int = 1) =
+    copy(
+      p1 = p1 + (increment * player.fold(1, 0)),
+      p2 = p2 + (increment * player.fold(0, 1))
+    )
+
+  def nonEmpty = p1 > 0 || p2 > 0
+
+  def apply(player: Player) = player.fold(p1, p2)
+
+  def fenStr = s"${p1} ${p2}"
+
+}
+
 sealed abstract class History(
     val lastMove: Option[Uci] = None,
     val positionHashes: PositionHash = Array.empty,
@@ -11,7 +28,8 @@ sealed abstract class History(
     val checkCount: chess.CheckCount = chess.CheckCount(0, 0),
     val unmovedRooks: chess.UnmovedRooks = chess.UnmovedRooks.default,
     val kingMoves: draughts.KingMoves = draughts.KingMoves(),
-    val score: togyzkumalak.Score = togyzkumalak.Score(0, 0),
+    val score: Score = Score(0, 0),
+    val captures: Score = Score(0, 0),
     val halfMoveClock: Int = 0
 ) {
 
@@ -64,11 +82,21 @@ object History {
         score = h.score
       )
 
+  final case class Go(h: go.History)
+      extends History(
+        lastMove = h.lastMove.map(Uci.wrap),
+        positionHashes = h.positionHashes,
+        halfMoveClock = h.halfMoveClock,
+        score = h.score,
+        captures = h.captures
+      )
+
   implicit def chessHistory(h: chess.History)               = Chess(h)
   implicit def draughtsHistory(h: draughts.DraughtsHistory) = Draughts(h)
   implicit def fairysfHistory(h: fairysf.History)           = FairySF(h)
   implicit def samuraiHistory(h: samurai.History)           = Samurai(h)
   implicit def togyzkumalakHistory(h: togyzkumalak.History) = Togyzkumalak(h)
+  implicit def goHistory(h: go.History)                     = Go(h)
 
   // lila
   def apply(
@@ -80,7 +108,8 @@ object History {
       checkCount: chess.CheckCount = chess.CheckCount(0, 0),
       unmovedRooks: chess.UnmovedRooks = chess.UnmovedRooks.default,
       kingMoves: draughts.KingMoves = draughts.KingMoves(),
-      score: togyzkumalak.Score = togyzkumalak.Score(0, 0),
+      score: Score = Score(0, 0),
+      captures: Score = Score(0, 0),
       halfMoveClock: Int = 0
   ): History = lib match {
     case GameLogic.Draughts()     =>
@@ -130,6 +159,16 @@ object History {
           positionHashes = positionHashes,
           halfMoveClock = halfMoveClock,
           score = score
+        )
+      )
+    case GameLogic.Go()           =>
+      Go(
+        go.History(
+          lastMove = lastMove.map(lm => lm.toGo),
+          positionHashes = positionHashes,
+          halfMoveClock = halfMoveClock,
+          score = score,
+          captures = captures
         )
       )
     case _                        => sys.error("Mismatched gamelogic types 1")

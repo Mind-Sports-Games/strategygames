@@ -12,6 +12,7 @@ object EcopeningDB {
         case GameLogic.FairySF() => strategygames.fairysf.opening.EcopeningDB.allByEco.map{ case (a,b) => a -> Ecopening.FairySF(b)}
         case GameLogic.Samurai() => strategygames.samurai.opening.EcopeningDB.allByEco.map{ case (a,b) => a -> Ecopening.Samurai(b)}
         case GameLogic.Togyzkumalak() => strategygames.togyzkumalak.opening.EcopeningDB.allByEco.map{ case (a,b) => a -> Ecopening.Togyzkumalak(b)}
+        case GameLogic.Go() => strategygames.go.opening.EcopeningDB.allByEco.map{ case (a,b) => a -> Ecopening.Go(b)}
         case _ => sys.error("Mismatched gamelogic types ecopening db")
     }
 
@@ -21,6 +22,7 @@ object EcopeningDB {
         case GameLogic.FairySF() => strategygames.fairysf.opening.EcopeningDB.allByFen.map{ case (a,b) => a -> Ecopening.FairySF(b)}
         case GameLogic.Samurai() => strategygames.samurai.opening.EcopeningDB.allByFen.map{ case (a,b) => a -> Ecopening.Samurai(b)}
         case GameLogic.Togyzkumalak() => strategygames.togyzkumalak.opening.EcopeningDB.allByFen.map{ case (a,b) => a -> Ecopening.Togyzkumalak(b)}
+        case GameLogic.Go() => strategygames.go.opening.EcopeningDB.allByFen.map{ case (a,b) => a -> Ecopening.Go(b)}
         case _ => sys.error("Mismatched gamelogic types ecopening db")
     }
 
@@ -30,6 +32,7 @@ object EcopeningDB {
         case GameLogic.FairySF() => strategygames.fairysf.opening.EcopeningDB.all.map(Ecopening.FairySF)
         case GameLogic.Samurai() => strategygames.samurai.opening.EcopeningDB.all.map(Ecopening.Samurai)
         case GameLogic.Togyzkumalak() => strategygames.togyzkumalak.opening.EcopeningDB.all.map(Ecopening.Togyzkumalak)
+        case GameLogic.Go() => strategygames.go.opening.EcopeningDB.all.map(Ecopening.Go)
         case _ => sys.error("Mismatched gamelogic types ecopening db")
     }
 

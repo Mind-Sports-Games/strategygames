@@ -18,6 +18,8 @@ case object Breakthrough
   def perfId: Int    = 117
   def perfIcon: Char = ''
 
+  override def canOfferDraw = false
+
   def pieces           = Standard.pieces
   def initialFen       = Standard.initialFen
   def startingPosition = Standard.startingPosition

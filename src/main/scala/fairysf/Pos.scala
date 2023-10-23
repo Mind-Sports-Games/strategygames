@@ -81,12 +81,12 @@ object Piotr {
     Pos.H9.index  -> ')',
     Pos.I9.index  -> '*',
     Pos.J9.index  -> '+',
-    Pos.A10.index -> ',',
+    Pos.A10.index -> '§', // NOTE: comma is not a valid piotr due to the way lila stores analysis.
     Pos.B10.index -> '-',
     Pos.C10.index -> '.',
     Pos.D10.index -> '/',
     Pos.E10.index -> ':',
-    Pos.F10.index -> ';',
+    Pos.F10.index -> '¨', // NOTE: semicolon can't be used for the same reason as above
     Pos.G10.index -> '<',
     Pos.H10.index -> '=',
     Pos.I10.index -> '>',
@@ -109,6 +109,7 @@ object Piotr {
     Pos.J7.index  -> '¤',
     Pos.I8.index  -> '¥',
     Pos.J8.index  -> '¦'
+    // NOTE: "§" and "¨" are used above
   )
 }
 

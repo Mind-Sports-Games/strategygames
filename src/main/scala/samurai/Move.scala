@@ -14,13 +14,10 @@ case class Move(
     capture: Option[Pos],
     promotion: Option[PromotableRole],
     metrics: MoveMetrics = MoveMetrics()
-) {
-  def before = situationBefore.board
+) extends Action(situationBefore, after, metrics) {
 
   def situationAfter =
     Situation(finalizeAfter, if (autoEndTurn) !piece.player else piece.player)
-
-  def finalizeAfter: Board = after
 
   def applyVariantEffect: Move = before.variant addVariantEffect this
 

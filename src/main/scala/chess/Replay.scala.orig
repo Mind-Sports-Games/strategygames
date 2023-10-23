@@ -1,0 +1,346 @@
+package strategygames.chess
+
+import cats.data.Validated
+import cats.data.Validated.{ invalid, valid }
+import cats.implicits._
+
+import strategygames.format.pgn.San
+import strategygames.chess.format.pgn.{ Parser, Reader }
+import strategygames.format.pgn.{ Tag, Tags }
+import strategygames.chess.format.{ FEN, Forsyth, Uci }
+<<<<<<< HEAD
+import strategygames.{ Actions, Game => StratGame, Situation => StratSituation }
+
+case class Replay(setup: Game, plies: List[MoveOrDrop], state: Game) {
+=======
+import strategygames.{
+  Action => StratAction,
+  Drop => StratDrop,
+  Game => StratGame,
+  Move => StratMove,
+  Situation => StratSituation
+}
+
+case class Replay(setup: Game, moves: List[Action], state: Game) {
+>>>>>>> origin/master
+
+  lazy val chronoPlies = plies.reverse
+
+<<<<<<< HEAD
+  lazy val chronoActions: List[List[MoveOrDrop]] =
+    chronoPlies
+      .drop(1)
+      .foldLeft(List(chronoPlies.take(1))) { case (turn, mod) =>
+        if (
+          turn.head.head.fold(_.situationBefore.player, _.situationBefore.player) != mod.fold(
+            _.situationBefore.player,
+            _.situationBefore.player
+          )
+        ) {
+          List(mod) +: turn
+        } else {
+          (turn.head :+ mod) +: turn.tail
+        }
+      }
+      .reverse
+
+  def addPly(moveOrDrop: MoveOrDrop) =
+    copy(
+      plies = moveOrDrop.left.map(_.applyVariantEffect) :: plies,
+      state = moveOrDrop.fold(state.apply, state.applyDrop)
+    )
+
+=======
+  def addMove(action: Action) = action match {
+    case m: Move =>
+      copy(
+        moves = m.applyVariantEffect :: moves,
+        state = state.apply(m)
+      )
+    case d: Drop =>
+      copy(
+        moves = d :: moves,
+        state = state.applyDrop(d)
+      )
+  }
+
+  def moveAtPly(ply: Int): Option[Action] =
+    chronoMoves lift (ply - 1 - setup.startedAtTurn)
+>>>>>>> origin/master
+}
+
+object Replay {
+
+  def apply(game: Game) = new Replay(game, Nil, game)
+
+  def apply(
+      actions: Actions,
+      initialFen: Option[FEN],
+      variant: strategygames.chess.variant.Variant
+  ): Validated[String, Reader.Result] =
+    actions.some.filter(_.nonEmpty) toValid "[replay] pgn is empty" andThen { nonEmptyActions =>
+      Reader.replayResult(
+        nonEmptyActions,
+        Tags(
+          List(
+            initialFen map { fen =>
+              Tag(_.FEN, fen.value)
+            },
+            variant.some.filterNot(_.standard) map { v =>
+              Tag(_.Variant, v.name)
+            }
+          ).flatten
+        )
+      )
+    }
+
+<<<<<<< HEAD
+  // Both of the following commented out functions are unused by the rest of strategygames
+  // and lila. Would need to upgrade to multiaction to use them
+  // private def recursiveGames(game: Game, sans: List[San]): Validated[String, List[Game]] =
+  //  sans match {
+  //    case Nil         => valid(Nil)
+  //    case san :: rest =>
+  //      san(StratSituation.wrap(game.situation)) flatMap { moveOrDrop =>
+  //        val newGame = StratGame.wrap(game)(moveOrDrop).toChess
+  //        recursiveGames(newGame, rest) map { newGame :: _ }
+  //      }
+  //  }
+
+  // def games(
+  //    moveStrs: Iterable[String],
+  //    initialFen: Option[FEN],
+  //    variant: strategygames.chess.variant.Variant
+  // ): Validated[String, List[Game]] =
+  //  Parser.moves(moveStrs, variant) andThen { moves =>
+  //    val game = makeGame(variant, initialFen)
+  //    recursiveGames(game, moves.value) map { game :: _ }
+  //  }
+
+  def gamePlyWhileValid(
+      actions: Actions,
+=======
+  def chessAction(action: StratAction) = action match {
+    case StratMove.Chess(m) => m
+    case StratDrop.Chess(d) => d
+    case _                  => sys.error("Invalid chess action")
+  }
+
+  private def recursiveGames(game: Game, sans: List[San]): Validated[String, List[Game]] =
+    sans match {
+      case Nil         => valid(Nil)
+      case san :: rest =>
+        san(StratSituation.wrap(game.situation)) flatMap { action =>
+          val newGame = StratGame.wrap(game)(action).toChess
+          recursiveGames(newGame, rest) map { newGame :: _ }
+        }
+    }
+
+  def games(
+      moveStrs: Iterable[String],
+      initialFen: Option[FEN],
+      variant: strategygames.chess.variant.Variant
+  ): Validated[String, List[Game]] =
+    Parser.moves(moveStrs, variant) andThen { moves =>
+      val game = makeGame(variant, initialFen)
+      recursiveGames(game, moves.value) map { game :: _ }
+    }
+
+  def gameMoveWhileValid(
+      moveStrs: Seq[String],
+>>>>>>> origin/master
+      initialFen: FEN,
+      variant: strategygames.chess.variant.Variant
+  ): (Game, List[(Game, Uci.WithSan)], Option[String]) = {
+
+    def mk(g: Game, plys: List[(San, String)]): (List[(Game, Uci.WithSan)], Option[String]) =
+      plys match {
+        case (san, sanStr) :: rest =>
+          san(StratSituation.wrap(g.situation)).fold(
+            err => (Nil, err.some),
+            action => {
+              val newGame = StratGame.wrap(g)(action).toChess
+              val uci     = action.toUci.toChess
+              mk(newGame, rest) match {
+                case (next, msg) => ((newGame, Uci.WithSan(uci, sanStr)) :: next, msg)
+              }
+            }
+          )
+        case _                     => (Nil, None)
+      }
+    val init                                                                                = makeGame(variant, initialFen.some)
+    // The following line converts actions into a 1-dimensional structure
+    // where an action is in a tuple of itself and the boolean autoEndTurn
+    // actions.zipWithIndex.map{case (a, i) => a.zipWithIndex.map{case (a1, i1) => (a1, i1 == a.size-1 && i != actions.size-1)}}.flatten
+    Parser
+      // Its ok to flatten actions as the game is built back up again from the Situation
+      // If we don't want to flatten then we need to do something like samurai gamelogic
+      // where we use startPlayer and activePlayer
+      .sans(actions.flatten, variant)
+      .fold(
+        err => List.empty[(Game, Uci.WithSan)] -> err.some,
+        sans => mk(init, sans.value zip actions.flatten)
+      ) match {
+      case (games, err) => (init, games, err)
+    }
+  }
+
+  private def recursiveSituations(sit: Situation, sans: List[San]): Validated[String, List[Situation]] =
+    sans match {
+      case Nil         => valid(Nil)
+      case san :: rest =>
+        san(StratSituation.wrap(sit)).map(chessAction) flatMap { action =>
+          val after = Situation(action.finalizeAfter, !sit.player)
+          recursiveSituations(after, rest) map { after :: _ }
+        }
+    }
+
+  private def recursiveSituationsFromUci(
+      sit: Situation,
+      ucis: List[Uci]
+  ): Validated[String, List[Situation]] =
+    ucis match {
+      case Nil         => valid(Nil)
+      case uci :: rest =>
+        uci(sit) andThen { action =>
+          val after = Situation(action.finalizeAfter, !sit.player)
+          recursiveSituationsFromUci(after, rest) map { after :: _ }
+        }
+    }
+
+  private def recursiveReplayFromUci(replay: Replay, ucis: List[Uci]): Validated[String, Replay] =
+    ucis match {
+      case Nil         => valid(replay)
+      case uci :: rest =>
+<<<<<<< HEAD
+        uci(replay.state.situation) andThen { ply =>
+          recursiveReplayFromUci(replay addPly ply, rest)
+=======
+        uci(replay.state.situation) andThen { action =>
+          recursiveReplayFromUci(replay addMove action, rest)
+>>>>>>> origin/master
+        }
+    }
+
+  private def initialFenToSituation(
+      initialFen: Option[FEN],
+      variant: strategygames.chess.variant.Variant
+  ): Situation = {
+    initialFen.flatMap(Forsyth.<<) | Situation(strategygames.chess.variant.Standard)
+  } withVariant variant
+
+  def boards(
+      actions: Actions,
+      initialFen: Option[FEN],
+      variant: strategygames.chess.variant.Variant
+  ): Validated[String, List[Board]] = situations(actions, initialFen, variant) map (_ map (_.board))
+
+  def situations(
+      actions: Actions,
+      initialFen: Option[FEN],
+      variant: strategygames.chess.variant.Variant
+  ): Validated[String, List[Situation]] = {
+    val sit = initialFenToSituation(initialFen, variant)
+    // Its ok to flatten actions as the game is built back up again from the Situation
+    Parser.sans(actions.flatten, sit.board.variant) andThen { sans =>
+      recursiveSituations(sit, sans.value) map { sit :: _ }
+    }
+  }
+
+  def boardsFromUci(
+      moves: List[Uci],
+      initialFen: Option[FEN],
+      variant: strategygames.chess.variant.Variant
+  ): Validated[String, List[Board]] = situationsFromUci(moves, initialFen, variant) map (_ map (_.board))
+
+  def situationsFromUci(
+      moves: List[Uci],
+      initialFen: Option[FEN],
+      variant: strategygames.chess.variant.Variant
+  ): Validated[String, List[Situation]] = {
+    val sit = initialFenToSituation(initialFen, variant)
+    recursiveSituationsFromUci(sit, moves) map { sit :: _ }
+  }
+
+  private def recursiveGamesFromUci(
+      game: Game,
+      ucis: List[Uci]
+  ): Validated[String, List[Game]] =
+    ucis match {
+      case Nil         => valid(List(game))
+      case uci :: rest =>
+        game.apply(uci) andThen { case (game, _) =>
+          recursiveGamesFromUci(game, rest) map { game :: _ }
+        }
+    }
+
+  def gameFromUciStrings(
+      uciStrings: List[String],
+      initialFen: Option[FEN],
+      variant: strategygames.chess.variant.Variant
+  ): Validated[String, Game] = {
+    val init = makeGame(variant, initialFen)
+    val ucis = uciStrings.flatMap(Uci.apply(_))
+    if (uciStrings.size != ucis.size) invalid("Invalid Ucis")
+    else recursiveGamesFromUci(init, ucis).map(_.last)
+  }
+
+  def apply(
+      plies: List[Uci],
+      initialFen: Option[FEN],
+      variant: strategygames.chess.variant.Variant
+  ): Validated[String, Replay] =
+    recursiveReplayFromUci(Replay(makeGame(variant, initialFen)), plies)
+
+  def plyAtFen(
+      actions: Actions,
+      initialFen: Option[FEN],
+      variant: strategygames.chess.variant.Variant,
+      atFen: FEN
+  ): Validated[String, Int] =
+    if (Forsyth.<<@(variant, atFen).isEmpty) invalid(s"Invalid FEN $atFen")
+    else {
+
+      // we don't want to compare the full move number, to match transpositions
+      def truncateFen(fen: FEN) = fen.value.split(' ').take(4) mkString " "
+      val atFenTruncated        = truncateFen(atFen)
+      def compareFen(fen: FEN)  = truncateFen(fen) == atFenTruncated
+
+      def recursivePlyAtFen(sit: Situation, sans: List[San], ply: Int, turn: Int): Validated[String, Int] =
+        sans match {
+          case Nil         => invalid(s"Can't find $atFenTruncated, reached ply $ply, turn $turn")
+          case san :: rest =>
+<<<<<<< HEAD
+            san(StratSituation.wrap(sit)) flatMap { moveOrDrop =>
+              val after        = moveOrDrop.fold(m => m.situationAfter.toChess, d => d.situationAfter.toChess)
+              val newPlies     = ply + 1
+              val newTurnCount = turn + (if (sit.player != after.player) 1 else 0)
+              val fen          = Forsyth >> Game(after, plies = newPlies, turnCount = newTurnCount)
+=======
+            san(StratSituation.wrap(sit)).map(chessAction) flatMap { action =>
+              val after = action.finalizeAfter
+              val fen   = Forsyth >> Game(Situation(after, Player.fromPly(ply)), turns = ply)
+>>>>>>> origin/master
+              if (compareFen(fen)) Validated.valid(ply)
+              else recursivePlyAtFen(after, rest, newPlies, newTurnCount)
+            }
+        }
+
+      val sit = initialFen.flatMap {
+        Forsyth.<<@(variant, _)
+      } | Situation(variant)
+
+      // Its ok to flatten actions as the game is built back up again from the Situation
+      Parser.sans(actions.flatten, sit.board.variant) andThen { sans =>
+        recursivePlyAtFen(sit, sans.value, 0, 0)
+      }
+    }
+
+  private def makeGame(variant: strategygames.chess.variant.Variant, initialFen: Option[FEN]): Game = {
+    val g = Game(variant.some, initialFen)
+    g.copy(
+      startedAtPlies = g.plies,
+      startedAtTurn = g.turnCount
+    )
+  }
+}

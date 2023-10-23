@@ -19,8 +19,14 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def dropsAsDrops: List[Drop]
 
-  def actions: List[MoveOrDrop] =
-    moves.values.flatten.map(Left(_)).toList ::: dropsAsDrops.map(Right(_)).toList
+  def passes: List[Pass]
+
+  def selectSquaresAction: List[SelectSquares]
+
+  def actions: List[Action] =
+    moves.values.flatten.toList ::: dropsAsDrops ::: passes ::: selectSquaresAction
+
+  def takebackable: Boolean
 
   def history = board.history
 
@@ -33,6 +39,8 @@ sealed abstract class Situation(val board: Board, val player: Player) {
   def opponentHasInsufficientMaterial: Boolean
 
   def threefoldRepetition: Boolean
+
+  def isRepetition: Boolean
 
   // only implemented for fairysf for Xiangqi
   lazy val perpetualPossible: Boolean = false
@@ -59,6 +67,10 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def drop(role: Role, pos: Pos): Validated[String, Drop]
 
+  def pass: Validated[String, Pass]
+
+  def selectSquares(squares: List[Pos]): Validated[String, SelectSquares]
+
   def withVariant(variant: Variant): Situation
 
   def gameLogic: GameLogic
@@ -72,6 +84,7 @@ sealed abstract class Situation(val board: Board, val player: Player) {
   def toFairySF: fairysf.Situation
   def toSamurai: samurai.Situation
   def toTogyzkumalak: togyzkumalak.Situation
+  def toGo: go.Situation
 
 }
 
@@ -87,6 +100,8 @@ object Situation {
       (Pos.Chess(p), l.map(Move.Chess))
     }
 
+    def takebackable = true
+
     lazy val check: Boolean = s.check
 
     def checkSquare = s.checkSquare.map(Pos.Chess)
@@ -94,6 +109,8 @@ object Situation {
     def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
 
     def threefoldRepetition: Boolean = s.threefoldRepetition
+
+    def isRepetition: Boolean = s.threefoldRepetition
 
     def end: Boolean = s.end
 
@@ -122,6 +139,10 @@ object Situation {
           listPos.flatMap(drop(role, _).toOption)
         }
         .toList
+
+    def passes: List[Pass] = List.empty
+
+    def selectSquaresAction: List[SelectSquares] = List.empty
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -152,6 +173,11 @@ object Situation {
       case _                                      => sys.error("Not passed Chess objects")
     }
 
+    def pass: Validated[String, Pass] = sys.error("Can't do a Pass for chess")
+
+    def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
+      sys.error("Can't do a SelectSquare for chess")
+
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.Chess(variant) => Chess(s.withVariant(variant))
       case _                      => sys.error("Not passed Chess objects")
@@ -171,6 +197,7 @@ object Situation {
     def toFairySF      = sys.error("Can't make fairysf situation from chess situation")
     def toSamurai      = sys.error("Can't make samurai situation from chess situation")
     def toTogyzkumalak = sys.error("Can't make togyzkumalak situation from chess situation")
+    def toGo           = sys.error("Can't make go situation from chess situation")
   }
 
   final case class Draughts(s: draughts.Situation)
@@ -183,6 +210,8 @@ object Situation {
     lazy val moves: Map[Pos, List[Move]] = s.validMoves.map {
       case (p: draughts.Pos, l: List[draughts.Move]) => (Pos.Draughts(p), l.map(Move.Draughts))
     }
+
+    def takebackable = true
 
     lazy val check: Boolean = false
 
@@ -198,10 +227,16 @@ object Situation {
 
     def dropsAsDrops: List[Drop] = List.empty
 
+    def passes: List[Pass] = List.empty
+
+    def selectSquaresAction: List[SelectSquares] = List.empty
+
     // possibly need to do something for this
     def opponentHasInsufficientMaterial: Boolean = false
 
     def threefoldRepetition: Boolean = s.threefoldRepetition
+
+    def isRepetition: Boolean = s.threefoldRepetition
 
     def end: Boolean = s.end
 
@@ -254,8 +289,14 @@ object Situation {
       case _                     => sys.error("Not passed Draughts objects")
     }
 
+    // todo convert these to validated error message?
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
       sys.error("Can't do a Drop for draughts")
+
+    def pass: Validated[String, Pass] = sys.error("Can't do a Pass for draughts")
+
+    def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
+      sys.error("Can't do a SelectSquare for draughts")
 
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.Draughts(variant) => Draughts(s.withVariant(variant))
@@ -276,6 +317,7 @@ object Situation {
     def toFairySF      = sys.error("Can't make fairysf situation from draughts situation")
     def toSamurai      = sys.error("Can't make samurai situation from draughts situation")
     def toTogyzkumalak = sys.error("Can't make togyzkumalak situation from draughts situation")
+    def toGo           = sys.error("Can't make go situation from draughts situation")
 
   }
 
@@ -289,6 +331,8 @@ object Situation {
       (Pos.FairySF(p), l.map(Move.FairySF))
     }
 
+    def takebackable = true
+
     lazy val check: Boolean = s.check
 
     def checkSquare = s.checkSquare.map(Pos.FairySF)
@@ -296,6 +340,8 @@ object Situation {
     def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
 
     def threefoldRepetition: Boolean = s.threefoldRepetition
+
+    def isRepetition: Boolean = s.threefoldRepetition
 
     override lazy val perpetualPossible: Boolean = s.perpetualPossible
 
@@ -314,6 +360,10 @@ object Situation {
     })
 
     def dropsAsDrops: List[Drop] = s.dropsAsDrops.map(Drop.FairySF)
+
+    def passes: List[Pass] = List.empty
+
+    def selectSquaresAction: List[SelectSquares] = List.empty
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -344,6 +394,11 @@ object Situation {
       case _                                          => sys.error("Not passed FairySF objects")
     }
 
+    def pass: Validated[String, Pass] = sys.error("Can't do a Pass for fairysf")
+
+    def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
+      sys.error("Can't do a SelectSquare for fairysf")
+
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.FairySF(variant) => FairySF(s.withVariant(variant))
       case _                        => sys.error("Not passed FairySF objects")
@@ -361,8 +416,9 @@ object Situation {
     def toFairySF      = s
     def toChess        = sys.error("Can't make chess situation from fairysf situation")
     def toDraughts     = sys.error("Can't make draughts situation from fairysf situation")
-    def toSamurai      = sys.error("Can't make samurai situation from fairy situation")
-    def toTogyzkumalak = sys.error("Can't make togyzkumalak situation from fairy situation")
+    def toSamurai      = sys.error("Can't make samurai situation from fairysf situation")
+    def toTogyzkumalak = sys.error("Can't make togyzkumalak situation from fairysf situation")
+    def toGo           = sys.error("Can't make go situation from fairysf situation")
   }
 
   final case class Samurai(s: samurai.Situation)
@@ -375,6 +431,8 @@ object Situation {
       (Pos.Samurai(p), l.map(Move.Samurai))
     }
 
+    def takebackable = true
+
     lazy val check: Boolean = false
 
     def checkSquare = None
@@ -382,6 +440,8 @@ object Situation {
     def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
 
     def threefoldRepetition: Boolean = false
+
+    def isRepetition: Boolean = s.isRepetition
 
     override lazy val perpetualPossible: Boolean = false
 
@@ -399,8 +459,17 @@ object Situation {
 
     def dropsAsDrops: List[Drop] = List.empty
 
+    def passes: List[Pass] = List.empty
+
+    def selectSquaresAction: List[SelectSquares] = List.empty
+
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
       sys.error("Can't do a Drop for samurai")
+
+    def pass: Validated[String, Pass] = sys.error("Can't do a Pass for samurai")
+
+    def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
+      sys.error("Can't do a SelectSquare for samurai")
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -444,6 +513,7 @@ object Situation {
     def toDraughts     = sys.error("Can't make draughts situation from samurai situation")
     def toSamurai      = s
     def toTogyzkumalak = sys.error("Can't make draughts situation from samurai situation")
+    def toGo           = sys.error("Can't make go situation from samurai situation")
   }
 
   final case class Togyzkumalak(s: togyzkumalak.Situation)
@@ -457,6 +527,8 @@ object Situation {
         (Pos.Togyzkumalak(p), l.map(Move.Togyzkumalak))
     }
 
+    def takebackable = true
+
     lazy val check: Boolean = false
 
     def checkSquare = None
@@ -464,6 +536,7 @@ object Situation {
     def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
 
     def threefoldRepetition: Boolean = false
+    def isRepetition: Boolean        = false
 
     override lazy val perpetualPossible: Boolean = false
 
@@ -481,8 +554,17 @@ object Situation {
 
     def dropsAsDrops: List[Drop] = List.empty
 
+    def passes: List[Pass] = List.empty
+
+    def selectSquaresAction: List[SelectSquares] = List.empty
+
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
       sys.error("Can't do a Drop for togyzkumalak")
+
+    def pass: Validated[String, Pass] = sys.error("Can't do a Pass for togyzkumalak")
+
+    def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
+      sys.error("Can't do a SelectSquare for togykumalak")
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -524,8 +606,108 @@ object Situation {
     def toFairySF      = sys.error("Can't make fairysf situation from togyzkumalak situation")
     def toChess        = sys.error("Can't make chess situation from togyzkumalak situation")
     def toDraughts     = sys.error("Can't make draughts situation from togyzkumalak situation")
-    def toSamurai      = sys.error("Can't make draughts situation from samurai situation")
+    def toSamurai      = sys.error("Can't make samurai situation from togyzkumalak situation")
     def toTogyzkumalak = s
+    def toGo           = sys.error("Can't make go situation from togyzkumalak situation")
+  }
+
+  final case class Go(s: go.Situation)
+      extends Situation(
+        Board.Go(s.board),
+        s.player
+      ) {
+
+    lazy val moves: Map[Pos, List[Move]] = Map.empty[Pos, List[Move]]
+
+    def takebackable = s.takebackable
+
+    lazy val check: Boolean = false
+
+    def checkSquare = None
+
+    def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
+
+    def threefoldRepetition: Boolean = false
+
+    def isRepetition: Boolean                    = s.isRepetition
+    override lazy val perpetualPossible: Boolean = false // not allowed to repeat ko
+
+    def end: Boolean = s.end
+
+    def winner: Option[Player] = s.winner
+
+    lazy val destinations: Map[Pos, List[Pos]] = Map.empty[Pos, List[Pos]]
+
+    def drops: Option[List[Pos]] = s.drops.map(_.map(Pos.Go))
+
+    def dropsByRole: Option[Map[Role, List[Pos]]] = s.dropsByRole.map(_.map {
+      case (r: go.Role, p: List[go.Pos]) => (Role.GoRole(r), p.map(Pos.Go))
+    })
+
+    def dropsAsDrops: List[Drop] = s.dropsAsDrops.map(Drop.Go)
+
+    def passes: List[Pass] = pass.fold[List[Pass]](_ => List.empty, p => List(p))
+
+    def selectSquaresAction: List[SelectSquares] =
+      selectSquares(List[Pos]().empty)
+        .fold[List[SelectSquares]](_ => List.empty, ss => List(ss))
+
+    def playable(strict: Boolean): Boolean = s.playable(strict)
+
+    val status: Option[Status] = s.status
+
+    def move(
+        from: Pos,
+        to: Pos,
+        promotion: Option[PromotableRole] = None,
+        finalSquare: Boolean = false,
+        forbiddenUci: Option[List[String]] = None,
+        captures: Option[List[Pos]] = None,
+        partialCaptures: Boolean = false
+    ): Validated[String, Move] = sys.error("Can't do a move dest for go")
+
+    def move(uci: Uci.Move): Validated[String, Move] = sys.error("Can't do a move dest for go")
+
+    def drop(role: Role, pos: Pos): Validated[String, Drop] = (role, pos) match {
+      case (Role.GoRole(role), Pos.Go(pos)) =>
+        s.drop(role, pos).toEither.map(d => Drop.Go(d)).toValidated
+      case _                                => sys.error("Not passed Go objects")
+    }
+
+    def pass: Validated[String, Pass] = s.pass().toEither.map(p => Pass.Go(p)).toValidated
+
+    def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
+      s.selectSquares(
+        squares.map(p =>
+          p match {
+            case Pos.Go(p) => p
+            case _         => sys.error("Not passed go pos")
+          }
+        )
+      ).toEither
+        .map(ss => SelectSquares.Go(ss))
+        .toValidated
+
+    def withVariant(variant: Variant): Situation = variant match {
+      case Variant.Go(variant) => Go(s.withVariant(variant))
+      case _                   => sys.error("Not passed Go objects")
+    }
+
+    def unary_! : Situation = Go(s.unary_!)
+
+    def copy(board: Board): Situation = Go(board match {
+      case Board.Go(board) => s.copy(board)
+      case _               => sys.error("Can't copy a go situation with a non-go board")
+    })
+
+    def gameLogic: GameLogic = GameLogic.Go()
+
+    def toFairySF      = sys.error("Can't make fairysf situation from go situation")
+    def toChess        = sys.error("Can't make chess situation from go situation")
+    def toDraughts     = sys.error("Can't make draughts situation from go situation")
+    def toSamurai      = sys.error("Can't make samurai situation from go situation")
+    def toTogyzkumalak = sys.error("Can't make togyzkumalak situation from go situation")
+    def toGo           = s
   }
 
   def apply(lib: GameLogic, board: Board, player: Player): Situation = (lib, board) match {
@@ -535,6 +717,7 @@ object Situation {
     case (GameLogic.Samurai(), Board.Samurai(board))           => Samurai(samurai.Situation(board, player))
     case (GameLogic.Togyzkumalak(), Board.Togyzkumalak(board)) =>
       Togyzkumalak(togyzkumalak.Situation(board, player))
+    case (GameLogic.Go(), Board.Go(board))                     => Go(go.Situation(board, player))
     case _                                                     => sys.error("Mismatched gamelogic types 3")
   }
 
@@ -545,6 +728,7 @@ object Situation {
     case (GameLogic.Samurai(), Variant.Samurai(variant))           => Samurai(samurai.Situation.apply(variant))
     case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant)) =>
       Togyzkumalak(togyzkumalak.Situation.apply(variant))
+    case (GameLogic.Go(), Variant.Go(variant))                     => Go(go.Situation.apply(variant))
     case _                                                         => sys.error("Mismatched gamelogic types 4")
   }
 
@@ -553,5 +737,6 @@ object Situation {
   def wrap(s: fairysf.Situation)      = FairySF(s)
   def wrap(s: samurai.Situation)      = Samurai(s)
   def wrap(s: togyzkumalak.Situation) = Togyzkumalak(s)
+  def wrap(s: go.Situation)           = Go(s)
 
 }

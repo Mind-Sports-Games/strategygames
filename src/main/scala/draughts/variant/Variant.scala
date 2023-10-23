@@ -46,6 +46,8 @@ abstract class Variant private[variant] (
   def draughts64Variant = russian || brazilian || pool || portuguese || english
   def exotic            = !standard
 
+  def canOfferDraw: Boolean = true
+
   def baseVariant: Boolean      = false
   def fenVariant: Boolean       = false
   def hasAnalysisBoard: Boolean = false

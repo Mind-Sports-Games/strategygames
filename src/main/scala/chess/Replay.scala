@@ -4,38 +4,48 @@ import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
+import strategygames.Player
 import strategygames.format.pgn.San
 import strategygames.chess.format.pgn.{ Parser, Reader }
 import strategygames.format.pgn.{ Tag, Tags }
 import strategygames.chess.format.{ FEN, Forsyth, Uci }
-import strategygames.{ Actions, Game => StratGame, Situation => StratSituation }
+import strategygames.{
+  Action => StratAction,
+  Actions,
+  Drop => StratDrop,
+  Game => StratGame,
+  Move => StratMove,
+  Situation => StratSituation
+}
 
-case class Replay(setup: Game, plies: List[MoveOrDrop], state: Game) {
+case class Replay(setup: Game, plies: List[Action], state: Game) {
 
   lazy val chronoPlies = plies.reverse
 
-  lazy val chronoActions: List[List[MoveOrDrop]] =
+  lazy val chronoActions: List[List[Action]] =
     chronoPlies
       .drop(1)
-      .foldLeft(List(chronoPlies.take(1))) { case (turn, mod) =>
-        if (
-          turn.head.head.fold(_.situationBefore.player, _.situationBefore.player) != mod.fold(
-            _.situationBefore.player,
-            _.situationBefore.player
-          )
-        ) {
-          List(mod) +: turn
+      .foldLeft(List(chronoPlies.take(1))) { case (turn, action) =>
+        if (turn.head.head.situationBefore.player != action.situationBefore.player) {
+          List(action) +: turn
         } else {
-          (turn.head :+ mod) +: turn.tail
+          (turn.head :+ action) +: turn.tail
         }
       }
       .reverse
 
-  def addPly(moveOrDrop: MoveOrDrop) =
-    copy(
-      plies = moveOrDrop.left.map(_.applyVariantEffect) :: plies,
-      state = moveOrDrop.fold(state.apply, state.applyDrop)
-    )
+  def addPly(action: Action) = action match {
+    case m: Move =>
+      copy(
+        plies = m.applyVariantEffect :: plies,
+        state = state.apply(m)
+      )
+    case d: Drop =>
+      copy(
+        plies = d :: plies,
+        state = state.applyDrop(d)
+      )
+  }
 
 }
 
@@ -64,14 +74,20 @@ object Replay {
       )
     }
 
+  def chessAction(action: StratAction) = action match {
+    case StratMove.Chess(m) => m
+    case StratDrop.Chess(d) => d
+    case _                  => sys.error("Invalid chess action")
+  }
+
   // Both of the following commented out functions are unused by the rest of strategygames
   // and lila. Would need to upgrade to multiaction to use them
-  // private def recursiveGames(game: Game, sans: List[San]): Validated[String, List[Game]] =
+  //  private def recursiveGames(game: Game, sans: List[San]): Validated[String, List[Game]] =
   //  sans match {
   //    case Nil         => valid(Nil)
   //    case san :: rest =>
-  //      san(StratSituation.wrap(game.situation)) flatMap { moveOrDrop =>
-  //        val newGame = StratGame.wrap(game)(moveOrDrop).toChess
+  //      san(StratSituation.wrap(game.situation)) flatMap { action =>
+  //        val newGame = StratGame.wrap(game)(action).toChess
   //        recursiveGames(newGame, rest) map { newGame :: _ }
   //      }
   //  }
@@ -97,9 +113,9 @@ object Replay {
         case (san, sanStr) :: rest =>
           san(StratSituation.wrap(g.situation)).fold(
             err => (Nil, err.some),
-            moveOrDrop => {
-              val newGame = StratGame.wrap(g)(moveOrDrop).toChess
-              val uci     = moveOrDrop.fold(m => m.toUci.toChess, d => d.toUci.toChess)
+            action => {
+              val newGame = StratGame.wrap(g)(action).toChess
+              val uci     = action.toUci.toChess
               mk(newGame, rest) match {
                 case (next, msg) => ((newGame, Uci.WithSan(uci, sanStr)) :: next, msg)
               }
@@ -128,11 +144,8 @@ object Replay {
     sans match {
       case Nil         => valid(Nil)
       case san :: rest =>
-        san(StratSituation.wrap(sit)) flatMap { moveOrDrop =>
-          val after = Situation(
-            moveOrDrop.fold(m => m.finalizeAfter().toChess, d => d.finalizeAfter.toChess),
-            !sit.player
-          )
+        san(StratSituation.wrap(sit)).map(chessAction) flatMap { action =>
+          val after = Situation(action.finalizeAfter, !sit.player)
           recursiveSituations(after, rest) map { after :: _ }
         }
     }
@@ -144,8 +157,8 @@ object Replay {
     ucis match {
       case Nil         => valid(Nil)
       case uci :: rest =>
-        uci(sit) andThen { moveOrDrop =>
-          val after = Situation(moveOrDrop.fold(_.finalizeAfter, _.finalizeAfter), !sit.player)
+        uci(sit) andThen { action =>
+          val after = Situation(action.finalizeAfter, !sit.player)
           recursiveSituationsFromUci(after, rest) map { after :: _ }
         }
     }
@@ -154,8 +167,8 @@ object Replay {
     ucis match {
       case Nil         => valid(replay)
       case uci :: rest =>
-        uci(replay.state.situation) andThen { ply =>
-          recursiveReplayFromUci(replay addPly ply, rest)
+        uci(replay.state.situation) andThen { action =>
+          recursiveReplayFromUci(replay addPly action, rest)
         }
     }
 
@@ -199,6 +212,29 @@ object Replay {
     recursiveSituationsFromUci(sit, moves) map { sit :: _ }
   }
 
+  private def recursiveGamesFromUci(
+      game: Game,
+      ucis: List[Uci]
+  ): Validated[String, List[Game]] =
+    ucis match {
+      case Nil         => valid(List(game))
+      case uci :: rest =>
+        game.apply(uci) andThen { case (game, _) =>
+          recursiveGamesFromUci(game, rest) map { game :: _ }
+        }
+    }
+
+  def gameFromUciStrings(
+      uciStrings: List[String],
+      initialFen: Option[FEN],
+      variant: strategygames.chess.variant.Variant
+  ): Validated[String, Game] = {
+    val init = makeGame(variant, initialFen)
+    val ucis = uciStrings.flatMap(Uci.apply(_))
+    if (uciStrings.size != ucis.size) invalid("Invalid Ucis")
+    else recursiveGamesFromUci(init, ucis).map(_.last)
+  }
+
   def apply(
       plies: List[Uci],
       initialFen: Option[FEN],
@@ -224,8 +260,8 @@ object Replay {
         sans match {
           case Nil         => invalid(s"Can't find $atFenTruncated, reached ply $ply, turn $turn")
           case san :: rest =>
-            san(StratSituation.wrap(sit)) flatMap { moveOrDrop =>
-              val after        = moveOrDrop.fold(m => m.situationAfter.toChess, d => d.situationAfter.toChess)
+            san(StratSituation.wrap(sit)).map(chessAction) flatMap { action =>
+              val after        = action.finalizeAfter
               val newPlies     = ply + 1
               val newTurnCount = turn + (if (sit.player != after.player) 1 else 0)
               val fen          = Forsyth >> Game(after, plies = newPlies, turnCount = newTurnCount)

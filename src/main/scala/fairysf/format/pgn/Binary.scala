@@ -28,9 +28,9 @@ object Binary {
     val int = 255
   }
 
-  private object Reader {
+  val maxPlies = 600
 
-    private val maxPlies = 600
+  private object Reader {
 
     def actions(bs: List[Byte]): Actions          = actions(bs, maxPlies)
     def actions(bs: List[Byte], nb: Int): Actions = toActions(intPlies(bs map toInt, nb, None))

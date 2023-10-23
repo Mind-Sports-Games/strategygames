@@ -38,7 +38,12 @@ object GameLogic {
     def name = "Togyzkumalak"
   }
 
-  def all: List[GameLogic] = List(Chess(), Draughts(), FairySF(), Samurai(), Togyzkumalak())
+  final case class Go() extends GameLogic {
+    def id   = 5
+    def name = "Go"
+  }
+
+  def all: List[GameLogic] = List(Chess(), Draughts(), FairySF(), Samurai(), Togyzkumalak(), Go())
 
   // TODO: I'm sure there is a better scala way of doing this
   def apply(id: Int): GameLogic = id match {
@@ -46,6 +51,7 @@ object GameLogic {
     case 2 => FairySF()
     case 3 => Samurai()
     case 4 => Togyzkumalak()
+    case 5 => Go()
     case _ => Chess()
   }
 }
@@ -279,12 +285,12 @@ object GameFamily {
     def name              = "Amazons"
     def key               = "amazons"
     def gameLogic         = GameLogic.FairySF()
-    def hasFishnet        = false
+    def hasFishnet        = true
     def hasAnalysisBoard  = false
     def defaultVariant    = Variant.FairySF(strategygames.fairysf.variant.Amazons)
     def variants          = Variant.all(GameLogic.FairySF()).filter(_.gameFamily == this)
     def displayPiece      = "wQ"
-    def pieceSetThemes    = List("arrow", "queen")
+    def pieceSetThemes    = List("arrow", "queen", "counter", "counter_arrow")
     def pieceSetDefault   = "arrow"
     def boardThemes       = List(
       "blue",
@@ -356,6 +362,28 @@ object GameFamily {
     def playerColors      = Map(P1 -> "white", P2 -> "black")
   }
 
+  final case class Go() extends GameFamily {
+    def id                = 9
+    def name              = "Go"
+    def key               = "go"
+    def gameLogic         = GameLogic.Go()
+    def hasFishnet        = false
+    def hasAnalysisBoard  = false
+    def defaultVariant    = Variant.Go(strategygames.go.variant.Go19x19)
+    def variants          = Variant.all(GameLogic.Go()).filter(_.gameFamily == this)
+    def displayPiece      = "display"
+    def pieceSetThemes    =
+      List(
+        "classic_stone",
+        "cross"
+      )
+    def pieceSetDefault   = "classic_stone"
+    def boardThemes       = List("light-wood", "dark-wood")
+    def boardThemeDefault = "light-wood"
+    def playerNames       = Map(P1 -> "Black", P2 -> "White")
+    def playerColors      = Map(P1 -> "black", P2 -> "white")
+  }
+
   def all: List[GameFamily] = List(
     Chess(),
     Draughts(),
@@ -365,7 +393,8 @@ object GameFamily {
     Flipello(),
     Amazons(),
     Oware(),
-    Togyzkumalak()
+    Togyzkumalak(),
+    Go()
   )
 
   // TODO: I'm sure there is a better scala way of doing this
@@ -378,6 +407,7 @@ object GameFamily {
     case 6 => Oware()
     case 7 => Togyzkumalak()
     case 8 => Amazons()
+    case 9 => Go()
     case _ => Chess()
   }
 
@@ -471,6 +501,14 @@ object GameGroup {
     def medley   = true
   }
 
+  final case class Go() extends GameGroup {
+    def id       = 9
+    def name     = "Go"
+    def key      = "go"
+    def variants = Variant.all(GameLogic.Go()).filter(_.gameFamily.name == this.name)
+    def medley   = true
+  }
+
   def all: List[GameGroup] =
     List(
       Chess(),
@@ -481,7 +519,8 @@ object GameGroup {
       Xiangqi(),
       Flipello(),
       Mancala(),
-      Amazons()
+      Amazons(),
+      Go()
     )
 
   def medley: List[GameGroup] = all.filter(_.medley)
@@ -496,6 +535,7 @@ object GameGroup {
     case 6 => Flipello()
     case 7 => Mancala()
     case 8 => Amazons()
+    case 9 => Go()
     case _ => Chess()
   }
 }

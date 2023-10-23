@@ -3,7 +3,7 @@ package strategygames.chess.format
 import cats.data.Validated
 
 import strategygames.chess.variant.Variant
-import strategygames.chess.{ MoveOrDrop, Replay }
+import strategygames.chess.{ Action, Drop, Move, Replay }
 import strategygames.Actions
 
 object UciDump {
@@ -20,13 +20,13 @@ object UciDump {
     if (actions.isEmpty) Validated.valid(Nil)
     else Replay(actions, initialFen, variant) andThen (_.valid) map apply
 
-  def action(variant: Variant)(mod: MoveOrDrop): String =
-    mod match {
-      case Left(m)  =>
+  def action(variant: Variant)(action: Action): String =
+    action match {
+      case m: Move =>
         m.castle.fold(m.toUci.uci) {
           case ((kf, kt), (rf, _)) if kf == kt || variant.chess960 || variant.fromPosition => kf.key + rf.key
           case ((kf, kt), _)                                                               => kf.key + kt.key
         }
-      case Right(d) => d.toUci.uci
+      case d: Drop => d.toUci.uci
     }
 }

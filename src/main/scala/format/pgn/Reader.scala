@@ -7,6 +7,7 @@ import strategygames.draughts.format.pdn.{ Reader => DraughtsReader }
 import strategygames.fairysf.format.pgn.{ Reader => FairySFReader }
 import strategygames.samurai.format.pgn.{ Reader => SamuraiReader }
 import strategygames.togyzkumalak.format.pgn.{ Reader => TogyzkumalakReader }
+import strategygames.go.format.pgn.{ Reader => GoReader }
 
 import cats.data.Validated
 
@@ -47,6 +48,12 @@ object Reader {
     case class TogyzkumalakIncomplete(replay: togyzkumalak.Replay, failure: String) extends Result {
       def valid = Validated.invalid(failure)
     }
+    case class GoComplete(replay: go.Replay)                                        extends Result {
+      def valid = Validated.valid(Replay.Go(replay))
+    }
+    case class GoIncomplete(replay: go.Replay, failure: String)                     extends Result {
+      def valid = Validated.invalid(failure)
+    }
 
     def wrap(result: ChessReader.Result) = result match {
       case ChessReader.Result.Complete(replay)            => Result.ChessComplete(replay)
@@ -73,6 +80,11 @@ object Reader {
       case TogyzkumalakReader.Result.Incomplete(replay, failure) =>
         Result.TogyzkumalakIncomplete(replay, failure)
     }
+
+    def wrap(result: GoReader.Result) = result match {
+      case GoReader.Result.Complete(replay)            => Result.GoComplete(replay)
+      case GoReader.Result.Incomplete(replay, failure) => Result.GoIncomplete(replay, failure)
+    }
   }
 
   def fullWithSans(
@@ -88,6 +100,7 @@ object Reader {
       case GameLogic.FairySF()      => FairySFReader.fullWithSans(pgn, op, tags).map(Result.wrap)
       case GameLogic.Samurai()      => SamuraiReader.fullWithSans(pgn, op, tags).map(Result.wrap)
       case GameLogic.Togyzkumalak() => TogyzkumalakReader.fullWithSans(pgn, op, tags).map(Result.wrap)
+      case GameLogic.Go()           => GoReader.fullWithSans(pgn, op, tags).map(Result.wrap)
     }
 
   // TODO Merge the following two functions by refactoring Sans and integrating to other libs
@@ -109,6 +122,8 @@ object Reader {
         sys.error("Sans not implemented for samurai")
       case GameLogic.Togyzkumalak() =>
         sys.error("Sans not implemented for togyzkumalak")
+      case GameLogic.Go()           =>
+        sys.error("Sans not implemented for go")
     }
 
   def replayResultFromActions(
@@ -128,6 +143,8 @@ object Reader {
         SamuraiReader.replayResultFromActions(actions, op, tags).map(Result.wrap)
       case GameLogic.Togyzkumalak() =>
         TogyzkumalakReader.replayResultFromActions(actions, op, tags).map(Result.wrap)
+      case GameLogic.Go()           =>
+        GoReader.replayResultFromActions(actions, op, tags).map(Result.wrap)
     }
 
 }

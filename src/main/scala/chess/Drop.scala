@@ -12,9 +12,7 @@ case class Drop(
     after: Board,
     autoEndTurn: Boolean,
     metrics: MoveMetrics = MoveMetrics()
-) {
-
-  def before = situationBefore.board
+) extends Action(situationBefore, after, metrics) {
 
   def situationAfter =
     Situation(finalizeAfter, if (autoEndTurn) !piece.player else piece.player)

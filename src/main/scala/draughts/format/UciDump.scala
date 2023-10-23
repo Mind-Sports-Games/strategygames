@@ -20,6 +20,8 @@ object UciDump {
     if (actions.isEmpty) Validated.valid(Nil)
     else Replay(actions, initialFen, variant, finalSquare) andThen (_.valid) map apply
 
-  def action(_variant: Variant)(mod: Move): String = mod.toUci.shortUci
+  def action(_variant: Variant)(action: Action): String = action match {
+    case m: Move => m.toUci.shortUci
+  }
 
 }

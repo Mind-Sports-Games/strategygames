@@ -3,7 +3,7 @@ import strategygames.{ Clock, MoveMetrics, Player }
 
 import cats.data.Validated
 
-import strategygames.samurai.format.FEN
+import strategygames.samurai.format.{ pgn, FEN, Uci }
 
 case class Game(
     situation: Situation,
@@ -36,6 +36,9 @@ case class Game(
       clock = applyClock(move.metrics, newSituation.status.isEmpty, switchPlayer)
     )
   }
+
+  def apply(uci: Uci.Move): Validated[String, (Game, Move)] =
+    apply(uci.orig, uci.dest, uci.promotion)
 
   private def applyClock(metrics: MoveMetrics, gameActive: Boolean, switchClock: Boolean) =
     clock.map { c =>

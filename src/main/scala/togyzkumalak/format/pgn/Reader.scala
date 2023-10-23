@@ -1,6 +1,7 @@
 package strategygames.togyzkumalak
 package format.pgn
 import strategygames.{
+  Action => StratAction,
   Actions,
   ByoyomiClock,
   Drop => StratDrop,
@@ -57,7 +58,7 @@ object Reader {
       case (Result.Complete(replay), san) =>
         san(StratSituation.wrap(replay.state.situation)).fold(
           err => Result.Incomplete(replay, err),
-          ply => Result.Complete(replay addPly StratMove.toTogyzkumalak(ply))
+          action => Result.Complete(replay addPly StratAction.toTogyzkumalak(action))
         )
       case (r: Result.Incomplete, _)      => r
     }

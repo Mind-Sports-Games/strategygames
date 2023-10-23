@@ -20,6 +20,7 @@ sealed trait Uci {
   def toFairySF: fairysf.format.Uci
   def toSamurai: samurai.format.Uci
   def toTogyzkumalak: togyzkumalak.format.Uci
+  def toGo: go.format.Uci
 
 }
 
@@ -39,6 +40,9 @@ object Uci {
   }
   sealed trait Togyzkumalak {
     def unwrap: togyzkumalak.format.Uci
+  }
+  sealed trait Go           {
+    def unwrap: go.format.Uci
   }
 
   sealed abstract class Move(
@@ -77,6 +81,7 @@ object Uci {
     def toFairySF      = sys.error("Can't make a fairysf UCI from a chess UCI")
     def toSamurai      = sys.error("Can't make a samurai UCI from a chess UCI")
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a chess UCI")
+    def toGo           = sys.error("Can't make a go UCI from a chess UCI")
   }
 
   final case class DraughtsMove(m: draughts.format.Uci.Move)
@@ -99,6 +104,7 @@ object Uci {
     def toFairySF      = sys.error("Can't make a fairysf UCI from a draughts UCI")
     def toSamurai      = sys.error("Can't make a samurai UCI from a draughts UCI")
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a draughts UCI")
+    def toGo           = sys.error("Can't make a go UCI from a draughts UCI")
   }
 
   final case class FairySFMove(m: fairysf.format.Uci.Move)
@@ -117,6 +123,7 @@ object Uci {
     def toFairySF      = m
     def toSamurai      = sys.error("Can't make a samurai UCI from a fairy UCI")
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a fairy UCI")
+    def toGo           = sys.error("Can't make a go UCI from a fairy UCI")
   }
 
   final case class SamuraiMove(m: samurai.format.Uci.Move)
@@ -134,6 +141,7 @@ object Uci {
     def toFairySF      = sys.error("Can't make a fairysf UCI from a samurai UCI")
     def toSamurai      = m
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a samurai UCI")
+    def toGo           = sys.error("Can't make a go UCI from a samurai UCI")
   }
 
   final case class TogyzkumalakMove(m: togyzkumalak.format.Uci.Move)
@@ -151,6 +159,7 @@ object Uci {
     def toFairySF      = sys.error("Can't make a fairysf UCI from a togyzkumalak UCI")
     def toSamurai      = sys.error("Can't make a samurai UCI from a togyzkumalak UCI")
     def toTogyzkumalak = m
+    def toGo           = sys.error("Can't make a go UCI from a togyzkumalak UCI")
   }
 
   sealed abstract class Drop(
@@ -176,6 +185,7 @@ object Uci {
     def toFairySF      = sys.error("Can't make a fairysf UCI from a chess UCI")
     def toSamurai      = sys.error("Can't make a samurai UCI from a chess UCI")
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a chess UCI")
+    def toGo           = sys.error("Can't make a go UCI from a chess UCI")
   }
 
   final case class FairySFDrop(d: fairysf.format.Uci.Drop)
@@ -194,6 +204,74 @@ object Uci {
     def toFairySF      = d
     def toSamurai      = sys.error("Can't make a samurai UCI from a fairysf UCI")
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a fairysf UCI")
+    def toGo           = sys.error("Can't make a go UCI from a fairysf UCI")
+  }
+
+  final case class GoDrop(d: go.format.Uci.Drop)
+      extends Drop(
+        Role.GoRole(d.role),
+        Pos.Go(d.pos)
+      )
+      with Go {
+    def uci            = d.uci
+    def shortUci       = d.uci
+    def fishnetUci     = d.fishnetUci
+    def piotr          = d.piotr
+    val unwrap         = d
+    def toChess        = sys.error("Can't make a chess UCI from a go UCI")
+    def toDraughts     = sys.error("Can't make a draughts UCI from a go UCI")
+    def toFairySF      = sys.error("Can't make a fairy UCI from a go UCI")
+    def toSamurai      = sys.error("Can't make a samurai UCI from a go UCI")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a go UCI")
+    def toGo           = d
+  }
+
+  sealed abstract class Pass() extends Uci {
+    def origDest: (Pos, Pos)
+  }
+
+  final case class GoPass(p: go.format.Uci.Pass) extends Pass() with Go {
+    def uci        = p.uci
+    def shortUci   = p.uci
+    def fishnetUci = p.uci
+    def piotr      = p.piotr
+
+    def origDest: (Pos, Pos) = (Pos.Go(p.origDest._1), Pos.Go(p.origDest._2))
+    val unwrap               = p
+
+    def toChess        = sys.error("Can't make a chess UCI from a go UCI")
+    def toDraughts     = sys.error("Can't make a draughts UCI from a go UCI")
+    def toFairySF      = sys.error("Can't make a fairysf UCI from a go UCI")
+    def toSamurai      = sys.error("Can't make a samurai UCI from a go UCI")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a go UCI")
+    def toGo           = p
+  }
+
+  sealed abstract class SelectSquares(
+      val squares: List[Pos]
+  ) extends Uci {
+    def origDest: (Pos, Pos)
+  }
+
+  final case class GoSelectSquares(ss: go.format.Uci.SelectSquares)
+      extends SelectSquares(
+        ss.squares.map(Pos.Go(_))
+      )
+      with Go {
+    def uci        = ss.uci
+    def shortUci   = ss.uci
+    def fishnetUci = ss.uci
+    def piotr      = ss.piotr
+
+    def origDest: (Pos, Pos) = (Pos.Go(ss.origDest._1), Pos.Go(ss.origDest._2))
+    val unwrap               = ss
+
+    def toChess        = sys.error("Can't make a chess UCI from a go UCI")
+    def toDraughts     = sys.error("Can't make a draughts UCI from a go UCI")
+    def toFairySF      = sys.error("Can't make a fairysf UCI from a go UCI")
+    def toSamurai      = sys.error("Can't make a samurai UCI from a go UCI")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a go UCI")
+    def toGo           = ss
   }
 
   def wrap(uci: chess.format.Uci): Uci = uci match {
@@ -216,6 +294,12 @@ object Uci {
 
   def wrap(uci: togyzkumalak.format.Uci): Uci = uci match {
     case m: togyzkumalak.format.Uci.Move => TogyzkumalakMove(m)
+  }
+
+  def wrap(uci: go.format.Uci): Uci = uci match {
+    case d: go.format.Uci.Drop           => GoDrop(d)
+    case p: go.format.Uci.Pass           => GoPass(p)
+    case ss: go.format.Uci.SelectSquares => GoSelectSquares(ss)
   }
 
   object Move {
@@ -317,6 +401,7 @@ object Uci {
         samurai.format.Uci.Move.fromStrings(gf, origS, destS, promS).map(SamuraiMove)
       case GameLogic.Togyzkumalak() =>
         togyzkumalak.format.Uci.Move.fromStrings(gf, origS, destS, promS).map(TogyzkumalakMove)
+      case GameLogic.Go()           => None
     }
   }
 
@@ -331,6 +416,48 @@ object Uci {
           chess.format.Uci.Drop.fromStrings(roleS, posS).map(ChessDrop)
         case GameLogic.FairySF()      =>
           fairysf.format.Uci.Drop.fromStrings(gf, roleS, posS).map(FairySFDrop)
+        case GameLogic.Go()           =>
+          go.format.Uci.Drop.fromStrings(roleS, posS).map(GoDrop)
+      }
+
+  }
+
+  object Pass {
+
+    def apply(lib: GameLogic, gf: GameFamily): Option[Pass] =
+      lib match {
+        case GameLogic.Draughts()     => None
+        case GameLogic.Samurai()      => None
+        case GameLogic.Togyzkumalak() => None
+        case GameLogic.Chess()        => None
+        case GameLogic.FairySF()      => None
+        case GameLogic.Go()           => GoPass(go.format.Uci.Pass()).some
+      }
+
+  }
+
+  object SelectSquares {
+
+    def fromSquares(lib: GameLogic, gf: GameFamily, squares: List[Pos]): Option[SelectSquares] =
+      lib match {
+        case GameLogic.Draughts()     => None
+        case GameLogic.Samurai()      => None
+        case GameLogic.Togyzkumalak() => None
+        case GameLogic.Chess()        => None
+        case GameLogic.FairySF()      => None
+        case GameLogic.Go()           =>
+          GoSelectSquares(
+            go.format.Uci.SelectSquares
+              .fromSquares(
+                squares.map(p =>
+                  p match {
+                    case Pos.Go(pos) => pos
+                    case _           => sys.error("Not passed Go pos objects")
+                  }
+                )
+              )
+          ).some
+
       }
 
   }
@@ -367,6 +494,12 @@ object Uci {
         w.san
       )
 
+  final case class GoWithSan(w: go.format.Uci.WithSan)
+      extends WithSan(
+        wrap(w.uci),
+        w.san
+      )
+
   object WithSan {
 
     def apply(lib: GameLogic, uci: Uci, san: String): WithSan = (lib, uci) match {
@@ -379,6 +512,8 @@ object Uci {
         Uci.SamuraiWithSan(samurai.format.Uci.WithSan(u.unwrap, san))
       case (GameLogic.Togyzkumalak(), u: Uci.Togyzkumalak) =>
         Uci.TogyzkumalakWithSan(togyzkumalak.format.Uci.WithSan(u.unwrap, san))
+      case (GameLogic.Go(), u: Uci.Go)                     =>
+        Uci.GoWithSan(go.format.Uci.WithSan(u.unwrap, san))
       case _                                               => sys.error("Mismatched gamelogic types 24")
     }
 
@@ -395,6 +530,7 @@ object Uci {
         SamuraiMove(samurai.format.Uci(move))
       case (GameLogic.Togyzkumalak(), strategygames.Move.Togyzkumalak(move)) =>
         TogyzkumalakMove(togyzkumalak.format.Uci(move))
+      case (GameLogic.Go(), _)                                               => sys.error("Move not implemented for Go")
       case _                                                                 => sys.error("Mismatched gamelogic types 25")
     }
 
@@ -405,6 +541,26 @@ object Uci {
       FairySFDrop(fairysf.format.Uci(drop))
     case (GameLogic.Samurai(), _)                                => sys.error("Drop not implemented for samurai")
     case (GameLogic.Togyzkumalak(), _)                           => sys.error("Drop not implemented for togyzkumalak")
+    case (GameLogic.Go(), strategygames.Drop.Go(drop))           => GoDrop(go.format.Uci(drop))
+  }
+
+  def apply(lib: GameLogic, pass: strategygames.Pass) = (lib, pass) match {
+    case (GameLogic.Draughts(), _)                     => sys.error("Pass not implemented for Draughts")
+    case (GameLogic.Chess(), _)                        => sys.error("Pass not implemented for Chess")
+    case (GameLogic.FairySF(), _)                      => sys.error("Pass not implemented for fairysf")
+    case (GameLogic.Samurai(), _)                      => sys.error("Pass not implemented for samurai")
+    case (GameLogic.Togyzkumalak(), _)                 => sys.error("Pass not implemented for togyzkumalak")
+    case (GameLogic.Go(), strategygames.Pass.Go(pass)) => GoPass(go.format.Uci(pass))
+  }
+
+  def apply(lib: GameLogic, selectSquares: strategygames.SelectSquares) = (lib, selectSquares) match {
+    case (GameLogic.Draughts(), _)                                       => sys.error("SelectSquares not implemented for Draughts")
+    case (GameLogic.Chess(), _)                                          => sys.error("SelectSquares not implemented for Chess")
+    case (GameLogic.FairySF(), _)                                        => sys.error("SelectSquares not implemented for fairysf")
+    case (GameLogic.Samurai(), _)                                        => sys.error("SelectSquares not implemented for samurai")
+    case (GameLogic.Togyzkumalak(), _)                                   => sys.error("SelectSquares not implemented for togyzkumalak")
+    case (GameLogic.Go(), strategygames.SelectSquares.Go(selectSquares)) =>
+      GoSelectSquares(go.format.Uci(selectSquares))
   }
 
   def apply(lib: GameLogic, gf: GameFamily, move: String): Option[Uci] = lib match {
@@ -413,6 +569,7 @@ object Uci {
     case GameLogic.FairySF()      => fairysf.format.Uci(gf, move).map(wrap)
     case GameLogic.Samurai()      => samurai.format.Uci(move).map(wrap)
     case GameLogic.Togyzkumalak() => togyzkumalak.format.Uci(move).map(wrap)
+    case GameLogic.Go()           => go.format.Uci(move).map(wrap)
   }
 
   def apply(v: Variant, move: String): Option[Uci] =
@@ -424,12 +581,16 @@ object Uci {
     case GameLogic.FairySF()      => fairysf.format.Uci.piotr(gf, move).map(wrap)
     case GameLogic.Samurai()      => samurai.format.Uci.piotr(move).map(wrap)
     case GameLogic.Togyzkumalak() => togyzkumalak.format.Uci.piotr(move).map(wrap)
+    case GameLogic.Go()           => go.format.Uci.piotr(move).map(wrap)
   }
 
   def readList(lib: GameLogic, gf: GameFamily, moves: String): Option[List[Uci]] = lib match {
-    case GameLogic.Draughts() => draughts.format.Uci.readList(moves).map(_.map(wrap))
-    case GameLogic.Chess()    => chess.format.Uci.readList(moves).map(_.map(wrap))
-    case GameLogic.FairySF()  => fairysf.format.Uci.readList(gf, moves).map(_.map(wrap))
+    case GameLogic.Draughts()     => draughts.format.Uci.readList(moves).map(_.map(wrap))
+    case GameLogic.Chess()        => chess.format.Uci.readList(moves).map(_.map(wrap))
+    case GameLogic.FairySF()      => fairysf.format.Uci.readList(gf, moves).map(_.map(wrap))
+    case GameLogic.Samurai()      => samurai.format.Uci.readList(moves).map(_.map(wrap))
+    case GameLogic.Togyzkumalak() => togyzkumalak.format.Uci.readList(moves).map(_.map(wrap))
+    case GameLogic.Go()           => go.format.Uci.readList(moves).map(_.map(wrap))
   }
 
   def writeList(moves: List[Uci]): String =
@@ -458,6 +619,9 @@ object Uci {
          case Uci.FairySFDrop(_)      => s"2_${gf.id}_"
          case Uci.SamuraiMove(_)      => s"3_${gf.id}_"
          case Uci.TogyzkumalakMove(_) => s"4_${gf.id}_"
+         case Uci.GoDrop(_)           => s"5_${gf.id}_"
+         case Uci.GoPass(_)           => s"5_${gf.id}_"
+         case Uci.GoSelectSquares(_)  => s"5_${gf.id}_"
        }
      } else "") + (moves.map(_.piotr) mkString " ")
 

@@ -21,6 +21,7 @@ case object Flipello10
   override def dropsVariant      = true
   override def onlyDropsVariant  = true
   override def hasGameScore      = true
+  override def canOfferDraw      = false
   override def repetitionEnabled = false
 
   // cache this rather than checking with the API everytime
