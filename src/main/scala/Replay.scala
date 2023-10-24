@@ -15,9 +15,7 @@ sealed abstract class Replay(val setup: Game, val plies: List[Action], val state
     chronoPlies
       .drop(1)
       .foldLeft(List(chronoPlies.take(1))) { case (turn, action) =>
-        if (
-          turn.head.head.situationBefore.player != action.situationBefore.player
-        ) {
+        if (turn.head.head.player != action.player) {
           List(action) +: turn
         } else {
           (turn.head :+ action) +: turn.tail
@@ -442,6 +440,7 @@ object Replay {
   def gameFromUciStrings(
       lib: GameLogic,
       ucis: List[String],
+      activePlayer: Player,
       initialFen: Option[FEN],
       variant: Variant,
       finalSquare: Boolean = false
@@ -468,7 +467,7 @@ object Replay {
         .map(Game.Togyzkumalak)
     case (GameLogic.Go(), Variant.Go(variant))                     =>
       go.Replay
-        .gameFromUciStrings(ucis, initialFen.map(_.toGo), variant)
+        .gameFromUciStrings(ucis, activePlayer, initialFen.map(_.toGo), variant)
         .map(Game.Go)
     case _                                                         => sys.error("Mismatched gamelogic types for Replay 10")
   }

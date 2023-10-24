@@ -87,6 +87,7 @@ object Drop {
         Pos.Go(d.pos),
         Situation.Go(d.situationBefore),
         Board.Go(d.after),
+        d.autoEndTurn,
         d.metrics
       ) {
 

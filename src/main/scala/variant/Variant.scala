@@ -949,7 +949,6 @@ object Variant {
 
     def initialFen: FEN     = FEN.Go(v.initialFen)
     def startPlayer: Player = v.startPlayer
-    def plysPerTurn: Int    = v.plysPerTurn
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false
 

@@ -29,7 +29,7 @@ object UciDump {
     case _                                                         => sys.error("Mismatched gamelogic types 12")
   }
 
-  def action(lib: GameLogic, variant: Variant)(a: Action): String = (lib, variant, mod) match {
+  def action(lib: GameLogic, variant: Variant)(a: Action): String = (lib, variant, a) match {
     case (GameLogic.Draughts(), Variant.Draughts(variant), Move.Draughts(a))             =>
       strategygames.draughts.format.UciDump.action(variant)(a)
     case (GameLogic.Chess(), Variant.Chess(variant), Move.Chess(a))                      =>

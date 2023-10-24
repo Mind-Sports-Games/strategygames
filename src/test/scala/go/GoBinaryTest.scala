@@ -76,6 +76,9 @@ class GoBinaryTest extends Specification with ValidatedMatchers {
 
 object BinaryTestUtils {
 
+  // TODO multiaction: This needs to interface with the new go/format/pgn/Binary
+  // Which now takes and gives back Actions
+
   def showByte(b: Byte): String =
     "%08d" format {
       b & 0xff
@@ -87,8 +90,8 @@ object BinaryTestUtils {
   def readMove(m: String): String =
     readMoves(m).head
 
-  def readMoves(m: String): List[String] =
-    (Binary readMoves m.split(',').toList.map(parseBinary)).get
+  def readMoves(m: String): strategygames.Actions =
+    (Binary readActions m.split(',').map(_.map(parseBinary))).get
 
   def parseBinary(s: String): Byte = {
     var i    = s.length - 1

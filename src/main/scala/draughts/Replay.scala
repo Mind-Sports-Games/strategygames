@@ -5,8 +5,8 @@ import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
 import strategygames.{
-  Actions,
   Action => StratAction,
+  Actions,
   Game => StratGame,
   Move => StratMove,
   Player,
@@ -25,7 +25,7 @@ case class Replay(setup: DraughtsGame, plies: List[Move], state: DraughtsGame) {
     chronoPlies
       .drop(1)
       .foldLeft(List(chronoPlies.take(1))) { case (turn, move) =>
-        if (turn.head.head.situationBefore.player != move.situationBefore.player) {
+        if (turn.head.head.player != move.player) {
           List(move) +: turn
         } else {
           (turn.head :+ move) +: turn.tail

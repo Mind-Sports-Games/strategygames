@@ -8,6 +8,7 @@ sealed abstract class SelectSquares(
     val squares: List[Pos],
     val situationBefore: Situation,
     val after: Board,
+    val autoEndTurn: Boolean,
     val metrics: MoveMetrics = MoveMetrics()
 ) extends Action(situationBefore, after, metrics) {
 
@@ -32,6 +33,7 @@ object SelectSquares {
         ss.squares.map(Pos.Go(_)),
         Situation.Go(ss.situationBefore),
         Board.Go(ss.after),
+        ss.autoEndTurn,
         ss.metrics
       ) {
 

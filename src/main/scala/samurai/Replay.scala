@@ -9,7 +9,7 @@ import strategygames.format.pgn.San
 import strategygames.samurai.format.pgn.{ Parser, Reader }
 import strategygames.format.pgn.{ Tag, Tags }
 import strategygames.samurai.format.{ FEN, Forsyth, Uci }
-import strategygames.{ Actions, Action => StratAction, Move => StratMove, Situation => StratSituation }
+import strategygames.{ Action => StratAction, Actions, Move => StratMove, Situation => StratSituation }
 
 case class Replay(setup: Game, plies: List[Move], state: Game) {
 
@@ -19,7 +19,7 @@ case class Replay(setup: Game, plies: List[Move], state: Game) {
     chronoPlies
       .drop(1)
       .foldLeft(List(chronoPlies.take(1))) { case (turn, move) =>
-        if (turn.head.head.situationBefore.player != move.situationBefore.player) {
+        if (turn.head.head.player != move.player) {
           List(move) +: turn
         } else {
           (turn.head :+ move) +: turn.tail

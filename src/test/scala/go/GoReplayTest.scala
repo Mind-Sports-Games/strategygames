@@ -6,14 +6,16 @@ import org.specs2.mutable.Specification
 import format.{ Forsyth, Uci }
 
 import strategygames.go.format.FEN
+import strategygames.Player
 
 class GoReplayTest extends Specification with ValidatedMatchers {
 
   "go replay " should {
     "replay from position " in {
       val fen   = FEN("""9/9/6S2/9/9/9/2S6/9/9[SSSSSSSSSSssssssssss] w - 810 65 65 1""")
-      val moves = """s@g3 s@c7 s@f2 s@e5 s@e1 s@d4 s@h4 s@i1 s@i5 pass pass ss:i1""".split(' ').toList
-      Replay.gameMoveWhileValid(moves, fen, variant.Go9x9) must beLike {
+      val moves =
+        """s@g3 s@c7 s@f2 s@e5 s@e1 s@d4 s@h4 s@i1 s@i5 pass pass ss:i1""".split(' ').toList.map(List(_))
+      Replay.gamePlyWhileValid(moves, Player.P2, Player.P2, fen, variant.Go9x9) must beLike {
         case (_, games, None)         =>
           games.size must_== 12
         case (init, games, Some(err)) =>

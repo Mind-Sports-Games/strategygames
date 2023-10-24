@@ -72,9 +72,7 @@ object FullOpeningDB {
           .map(fo => FullOpening.AtPly(FullOpening.Togyzkumalak(fo.opening), fo.ply))
       case GameLogic.Go()           =>
         strategygames.go.opening.FullOpeningDB
-          .search(
-            moveStrs
-          )
+          .search(actions)
           .map(fo => FullOpening.AtPly(FullOpening.Go(fo.opening), fo.ply))
     }
 

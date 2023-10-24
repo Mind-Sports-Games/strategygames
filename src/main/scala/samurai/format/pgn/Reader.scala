@@ -1,7 +1,7 @@
 package strategygames.samurai
 package format.pgn
 import strategygames.{
-  Action => StratAction
+  Action => StratAction,
   Actions,
   ByoyomiClock,
   FischerClock,

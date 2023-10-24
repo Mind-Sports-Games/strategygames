@@ -24,9 +24,7 @@ case class Replay(setup: Game, plies: List[Action], state: Game) {
     chronoPlies
       .drop(1)
       .foldLeft(List(chronoPlies.take(1))) { case (turn, action) =>
-        if (
-          turn.head.head.situationBefore.player != action.situationBefore.player
-        ) {
+        if (turn.head.head.player != action.player) {
           List(action) +: turn
         } else {
           (turn.head :+ action) +: turn.tail
@@ -405,7 +403,7 @@ object Replay {
           case Nil         => invalid(s"Can't find $atFenTruncated, reached ply $ply, turn $turn")
           case san :: rest =>
             san(StratSituation.wrap(sit)).map(fairysfAction) flatMap { action =>
-              val after        = action.finalizeAfter
+              val after        = action.situationAfter
               val newPlies     = ply + 1
               val newTurnCount = turn + (if (sit.player != after.player) 1 else 0)
               val fen          = Forsyth >> Game(after, plies = newPlies, turnCount = newTurnCount)

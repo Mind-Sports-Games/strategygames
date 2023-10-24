@@ -19,7 +19,7 @@ case class Replay(setup: Game, plies: List[Move], state: Game) {
     chronoPlies
       .drop(1)
       .foldLeft(List(chronoPlies.take(1))) { case (turn, move) =>
-        if (turn.head.head.situationBefore.player != move.situationBefore.player) {
+        if (turn.head.head.player != move.player) {
           List(move) +: turn
         } else {
           (turn.head :+ move) +: turn.tail

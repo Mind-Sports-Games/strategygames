@@ -82,7 +82,7 @@ object Forsyth {
           .<<<@(variant, fen)
           .map(sp => SituationPlus(Situation.Go(sp.situation), sp.fullTurnCount))
 
-      case _                                                                                => sys.error("Mismatched gamelogic types 16")
+      case _ => sys.error("Mismatched gamelogic types 16")
     }
 
   def <<<(lib: GameLogic, fen: FEN): Option[SituationPlus] = (lib, fen) match {

@@ -484,7 +484,6 @@ object Game {
     ): Validated[String, (Game, SelectSquares)] =
       sys.error("Can't selectSquares in fairysf")
 
-
     def copy(clock: Option[Clock]): Game =
       FairySF(g.copy(clock = clock))
 
@@ -828,11 +827,11 @@ object Game {
     def copy(situation: Situation, plies: Int, turnCount: Int): Game = situation match {
       case Situation.Go(situation) =>
         Go(g.copy(situation = situation, plies = plies, turnCount = turnCount))
-      case _                                 =>
+      case _                       =>
         sys.error("Unable to copy go game with non-go arguments")
     }
 
-    def copy(situation: Situation): Game             = situation match {
+    def copy(situation: Situation): Game = situation match {
       case Situation.Go(situation) => Go(g.copy(situation = situation))
       case _                       => sys.error("Unable to copy go game with non-go arguments")
     }
@@ -875,7 +874,7 @@ object Game {
     case (GameLogic.Go(), Situation.Go(situation))                     =>
       Go(go.Game(situation, actions, clock, plies, turnCount, startedAtPlies, startedAtTurn))
 
-    case _                                                             => sys.error("Mismatched gamelogic types 32")
+    case _ => sys.error("Mismatched gamelogic types 32")
   }
 
   def apply(lib: GameLogic, variant: Variant): Game = (lib, variant) match {

@@ -50,8 +50,7 @@ object Dumper {
     case d: StratDrop           => apply(lib, d)
     case p: StratPass           => apply(lib, p)
     case ss: StratSelectSquares => apply(lib, ss)
-    case _                 => sys.error("unknown action to apply to a game")
+    case _                      => sys.error("unknown action to apply to a game")
   }
-
 
 }
