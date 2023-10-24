@@ -52,14 +52,14 @@ class GoBinaryTest extends Specification with ValidatedMatchers {
     val moves         = readMoves(storedActions)
 
     "read moves " in {
-      moves must_== List("s@b4", "pass", "s@a1", "s@s2")
+      moves must_== List("s@b4", "pass", "s@a1", "s@s2").map(List(_))
     }
 
     val storedActions2 = "01000000,00111010,00000000,00000000,10000000,00000001,10000000,00111010"
     val moves2         = readMoves(storedActions2)
 
     "read moves " in {
-      moves2 must_== List("s@b4", "pass", "pass", "ss:b4")
+      moves2 must_== List("s@b4", "pass", "pass", "ss:b4").map(List(_))
     }
 
     val storedActions3 =
@@ -67,7 +67,7 @@ class GoBinaryTest extends Specification with ValidatedMatchers {
     val moves3         = readMoves(storedActions3)
 
     "read moves " in {
-      moves3 must_== List("s@b4", "s@a1", "s@s2", "pass", "pass", "ss:b4,s2")
+      moves3 must_== List("s@b4", "s@a1", "s@s2", "pass", "pass", "ss:b4,s2").map(List(_))
     }
 
   }
@@ -88,10 +88,10 @@ object BinaryTestUtils {
     (Binary writeMove m).get map showByte mkString ","
 
   def readMove(m: String): String =
-    readMoves(m).head
+    readMoves(m).flatten.head
 
   def readMoves(m: String): strategygames.Actions =
-    (Binary readActions m.split(',').map(_.map(parseBinary))).get
+    (Binary readActions m.split(',').toList.map(parseBinary)).get
 
   def parseBinary(s: String): Byte = {
     var i    = s.length - 1
