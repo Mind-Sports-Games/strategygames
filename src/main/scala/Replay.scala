@@ -142,7 +142,7 @@ object Replay {
 
   def gamePlyWhileValid(
       lib: GameLogic,
-      actions: Actions,
+      actionStrs: ActionStrs,
       startPlayer: Player,
       activePlayer: Player,
       initialFen: FEN,
@@ -151,7 +151,7 @@ object Replay {
   ): (Game, List[(Game, Uci.WithSan)], Option[String]) = (lib, initialFen, variant) match {
     case (GameLogic.Draughts(), FEN.Draughts(initialFen), Variant.Draughts(variant))             =>
       draughts.Replay.gamePlyWhileValid(
-        actions,
+        actionStrs,
         initialFen,
         variant,
         iteratedCapts
@@ -165,7 +165,7 @@ object Replay {
       }
     case (GameLogic.Chess(), FEN.Chess(initialFen), Variant.Chess(variant))                      =>
       chess.Replay.gamePlyWhileValid(
-        actions,
+        actionStrs,
         initialFen,
         variant
       ) match {
@@ -178,7 +178,7 @@ object Replay {
       }
     case (GameLogic.FairySF(), FEN.FairySF(initialFen), Variant.FairySF(variant))                =>
       fairysf.Replay.gamePlyWhileValid(
-        actions,
+        actionStrs,
         initialFen,
         variant
       ) match {
@@ -191,7 +191,7 @@ object Replay {
       }
     case (GameLogic.Samurai(), FEN.Samurai(initialFen), Variant.Samurai(variant))                =>
       samurai.Replay.gamePlyWhileValid(
-        actions,
+        actionStrs,
         startPlayer,
         activePlayer,
         initialFen,
@@ -206,7 +206,7 @@ object Replay {
       }
     case (GameLogic.Togyzkumalak(), FEN.Togyzkumalak(initialFen), Variant.Togyzkumalak(variant)) =>
       togyzkumalak.Replay.gamePlyWhileValid(
-        actions,
+        actionStrs,
         startPlayer,
         activePlayer,
         initialFen,
@@ -221,7 +221,7 @@ object Replay {
       }
     case (GameLogic.Go(), FEN.Go(initialFen), Variant.Go(variant))                               =>
       go.Replay.gamePlyWhileValid(
-        actions,
+        actionStrs,
         startPlayer,
         activePlayer,
         initialFen,
@@ -239,53 +239,53 @@ object Replay {
 
   def boards(
       lib: GameLogic,
-      actions: Actions,
+      actionStrs: ActionStrs,
       initialFen: Option[FEN],
       variant: Variant,
       finalSquare: Boolean = false
   ): Validated[String, List[Board]] =
-    situations(lib, actions, initialFen, variant, finalSquare) map (_ map (_.board))
+    situations(lib, actionStrs, initialFen, variant, finalSquare) map (_ map (_.board))
 
   def situations(
       lib: GameLogic,
-      actions: Actions,
+      actionStrs: ActionStrs,
       initialFen: Option[FEN],
       variant: Variant,
       finalSquare: Boolean = false
   ): Validated[String, List[Situation]] = (lib, variant) match {
     case (GameLogic.Draughts(), Variant.Draughts(variant))         =>
       draughts.Replay
-        .situations(actions, initialFen.map(_.toDraughts), variant, finalSquare)
+        .situations(actionStrs, initialFen.map(_.toDraughts), variant, finalSquare)
         .toEither
         .map(s => s.map(Situation.Draughts))
         .toValidated
     case (GameLogic.Chess(), Variant.Chess(variant))               =>
       chess.Replay
-        .situations(actions, initialFen.map(_.toChess), variant)
+        .situations(actionStrs, initialFen.map(_.toChess), variant)
         .toEither
         .map(s => s.map(Situation.Chess))
         .toValidated
     case (GameLogic.FairySF(), Variant.FairySF(variant))           =>
       fairysf.Replay
-        .situations(actions, initialFen.map(_.toFairySF), variant)
+        .situations(actionStrs, initialFen.map(_.toFairySF), variant)
         .toEither
         .map(s => s.map(Situation.FairySF))
         .toValidated
     case (GameLogic.Samurai(), Variant.Samurai(variant))           =>
       samurai.Replay
-        .situations(actions, initialFen.map(_.toSamurai), variant)
+        .situations(actionStrs, initialFen.map(_.toSamurai), variant)
         .toEither
         .map(s => s.map(Situation.Samurai))
         .toValidated
     case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant)) =>
       togyzkumalak.Replay
-        .situations(actions, initialFen.map(_.toTogyzkumalak), variant)
+        .situations(actionStrs, initialFen.map(_.toTogyzkumalak), variant)
         .toEither
         .map(s => s.map(Situation.Togyzkumalak))
         .toValidated
     case (GameLogic.Go(), Variant.Go(variant))                     =>
       go.Replay
-        .situations(actions, initialFen.map(_.toGo), variant)
+        .situations(actionStrs, initialFen.map(_.toGo), variant)
         .toEither
         .map(s => s.map(Situation.Go))
         .toValidated
@@ -520,23 +520,23 @@ object Replay {
 
   def plyAtFen(
       lib: GameLogic,
-      actions: Actions,
+      actionStrs: ActionStrs,
       initialFen: Option[FEN],
       variant: Variant,
       atFen: FEN
   ): Validated[String, Int] = (lib, variant, atFen) match {
     case (GameLogic.Draughts(), Variant.Draughts(variant), FEN.Draughts(atFen))             =>
-      draughts.Replay.plyAtFen(actions, initialFen.map(_.toDraughts), variant, atFen)
+      draughts.Replay.plyAtFen(actionStrs, initialFen.map(_.toDraughts), variant, atFen)
     case (GameLogic.Chess(), Variant.Chess(variant), FEN.Chess(atFen))                      =>
-      chess.Replay.plyAtFen(actions, initialFen.map(_.toChess), variant, atFen)
+      chess.Replay.plyAtFen(actionStrs, initialFen.map(_.toChess), variant, atFen)
     case (GameLogic.FairySF(), Variant.FairySF(variant), FEN.FairySF(atFen))                =>
-      fairysf.Replay.plyAtFen(actions, initialFen.map(_.toFairySF), variant, atFen)
+      fairysf.Replay.plyAtFen(actionStrs, initialFen.map(_.toFairySF), variant, atFen)
     case (GameLogic.Samurai(), Variant.Samurai(variant), FEN.Samurai(atFen))                =>
-      samurai.Replay.plyAtFen(actions, initialFen.map(_.toSamurai), variant, atFen)
+      samurai.Replay.plyAtFen(actionStrs, initialFen.map(_.toSamurai), variant, atFen)
     case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant), FEN.Togyzkumalak(atFen)) =>
-      togyzkumalak.Replay.plyAtFen(actions, initialFen.map(_.toTogyzkumalak), variant, atFen)
+      togyzkumalak.Replay.plyAtFen(actionStrs, initialFen.map(_.toTogyzkumalak), variant, atFen)
     case (GameLogic.Go(), Variant.Go(variant), FEN.Go(atFen))                               =>
-      go.Replay.plyAtFen(actions, initialFen.map(_.toGo), variant, atFen)
+      go.Replay.plyAtFen(actionStrs, initialFen.map(_.toGo), variant, atFen)
     case _                                                                                  => sys.error("Mismatched gamelogic types 10")
   }
 

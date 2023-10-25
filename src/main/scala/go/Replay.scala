@@ -10,7 +10,7 @@ import strategygames.go.format.pgn.{ Parser, Reader }
 import strategygames.go.format.{ FEN, Forsyth, Uci }
 import strategygames.{
   Action => StratAction,
-  Actions,
+  ActionStrs,
   Drop => StratDrop,
   Pass => StratPass,
   SelectSquares => StratSelectSquares,
@@ -58,14 +58,14 @@ object Replay {
   def apply(game: Game) = new Replay(game, Nil, game)
 
   def apply(
-      actions: Actions,
+      actionStrs: ActionStrs,
       startPlayer: Player,
       activePlayer: Player,
       initialFen: Option[FEN],
       variant: strategygames.go.variant.Variant
   ): Validated[String, Reader.Result] = {
     val fen                  = initialFen.getOrElse(variant.initialFen)
-    val (init, plies, error) = gameActionWhileValid(actions, startPlayer, activePlayer, fen, variant)
+    val (init, plies, error) = gameActionWhileValid(actionStrs, startPlayer, activePlayer, fen, variant)
     val game                 = plies.reverse.last._1
     error match {
       case None      => Validated.valid(Reader.Result.Complete(new Replay(init, plies.reverse.map(_._2), game)))
@@ -180,24 +180,24 @@ object Replay {
     )
   }
 
-  def pliesWithEndTurn(actions: Actions): Seq[(String, Boolean)] =
-    actions.zipWithIndex.map { case (a, i) =>
-      a.zipWithIndex.map { case (a1, i1) => (a1, i1 == a.size - 1 && i != actions.size - 1) }
+  def pliesWithEndTurn(actionStrs: ActionStrs): Seq[(String, Boolean)] =
+    actionStrs.zipWithIndex.map { case (a, i) =>
+      a.zipWithIndex.map { case (a1, i1) => (a1, i1 == a.size - 1 && i != actionStrs.size - 1) }
     }.flatten
 
-  private def actionsToPliesWithEndTurn(
-      actions: Actions,
+  private def actionStrsToPliesWithEndTurn(
+      actionStrs: ActionStrs,
       startPlayer: Player,
       activePlayer: Player
   ): Seq[(String, Boolean)] =
     pliesWithEndTurn(
-      if (Player.fromTurnCount(actions.size + startPlayer.fold(0, 1)) == activePlayer)
-        actions :+ Vector()
-      else actions
+      if (Player.fromTurnCount(actionStrs.size + startPlayer.fold(0, 1)) == activePlayer)
+        actionStrs :+ Vector()
+      else actionStrs
     )
 
   private def gameActionWhileValid(
-      actions: Actions,
+      actionStrs: ActionStrs,
       startPlayer: Player,
       activePlayer: Player,
       initialFen: FEN,
@@ -247,7 +247,7 @@ object Replay {
     }
 
     val plies: List[(Game, Action)] =
-      actionsToPliesWithEndTurn(actions, startPlayer, activePlayer).toList.map {
+      actionStrsToPliesWithEndTurn(actionStrs, startPlayer, activePlayer).toList.map {
         case (Uci.Drop.dropR(role, dest), endTurn)           =>
           replayDropFromUci(
             Role.allByForsyth(init.situation.board.variant.gameFamily).get(role(0)),
@@ -257,22 +257,22 @@ object Replay {
         case (Uci.Pass.passR(), endTurn)                     => replayPassFromUci(endTurn)
         case (Uci.SelectSquares.selectSquaresR(ss), endTurn) =>
           replaySelectSquaresFromUci(ss.split(",").toList.flatMap(Pos.fromKey(_)), endTurn)
-        case (action: String, _)                             =>
-          sys.error(s"Invalid action for replay: $action")
+        case (actionStr: String, _)                          =>
+          sys.error(s"Invalid actionStr for replay: $actionStr")
       }
 
     (init, plies, errors match { case "" => None; case _ => errors.some })
   }
 
   def gamePlyWhileValid(
-      actions: Actions,
+      actionStrs: ActionStrs,
       startPlayer: Player,
       activePlayer: Player,
       initialFen: FEN,
       variant: strategygames.go.variant.Variant
   ): (Game, List[(Game, Uci.WithSan)], Option[String]) = {
     val (game, plies, error) = gameActionWhileValid(
-      actions,
+      actionStrs,
       startPlayer,
       activePlayer,
       initialFen,
@@ -330,19 +330,19 @@ object Replay {
   } withVariant variant
 
   def boards(
-      actions: Actions,
+      actionStrs: ActionStrs,
       initialFen: Option[FEN],
       variant: strategygames.go.variant.Variant
-  ): Validated[String, List[Board]] = situations(actions, initialFen, variant) map (_ map (_.board))
+  ): Validated[String, List[Board]] = situations(actionStrs, initialFen, variant) map (_ map (_.board))
 
   def situations(
-      actions: Actions,
+      actionStrs: ActionStrs,
       initialFen: Option[FEN],
       variant: strategygames.go.variant.Variant
   ): Validated[String, List[Situation]] = {
     val sit = initialFenToSituation(initialFen, variant)
     // seemingly this isn't used
-    Parser.sans(actions.flatten, sit.board.variant) andThen { sans =>
+    Parser.sans(actionStrs.flatten, sit.board.variant) andThen { sans =>
       recursiveSituations(sit, sans.value) map { sit :: _ }
     }
   }
@@ -395,7 +395,7 @@ object Replay {
   ): Validated[String, Game] = {
     val fen = initialFen.getOrElse(variant.initialFen)
     val r   = gameActionWhileValid(
-      // TODO this needs to deal with multiaction properly (take Actions not List[String])
+      // TODO this needs to deal with multiaction properly (take ActionStrs not List[String])
       uciStrings.map(List(_)),
       fen.player.getOrElse(Player.P1),
       activePlayer,
@@ -414,7 +414,7 @@ object Replay {
     recursiveReplayFromUci(Replay(makeGame(variant, initialFen)), plies)
 
   def plyAtFen(
-      actions: Actions,
+      actionStrs: ActionStrs,
       initialFen: Option[FEN],
       variant: strategygames.go.variant.Variant,
       atFen: FEN
@@ -446,7 +446,7 @@ object Replay {
       } | Situation(variant)
 
       // seemingly this isn't used
-      Parser.sans(actions.flatten, sit.board.variant) andThen { sans =>
+      Parser.sans(actionStrs.flatten, sit.board.variant) andThen { sans =>
         recursivePlyAtFen(sit, sans.value, 0, 0)
       }
     }

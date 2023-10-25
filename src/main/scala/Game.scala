@@ -8,7 +8,7 @@ import strategygames.format.{ FEN, Uci }
 
 abstract class Game(
     val situation: Situation,
-    val actions: VActions = Vector(),
+    val actionStrs: VActionStrs = Vector(),
     val clock: Option[Clock] = None,
     // TODO We can look to remove 'plies' when draughts is converted to multiaction?
     val plies: Int = 0, // this was turns
@@ -156,10 +156,10 @@ abstract class Game(
   def fullTurnCount: Int = 1 + turnCount / 2
 
   // TODO: When draughts is converted to multiaction and we are happy that
-  // turns - startedAtTurn == actions.size then we could consider deprecating `val turns`
-  // and having it calculated from actions.size. Would need to check end of turn status
+  // turns - startedAtTurn == actionStrs.size then we could consider deprecating `val turns`
+  // and having it calculated from actionStrs.size. Would need to check end of turn status
   // def turnCount = turns - startedAtTurn
-  // def plyCount = actions.map(_.size).sum
+  // def plyCount = actionStrs.map(_.size).sum
 
   def withTurns(p: Int, t: Int): Game
 
@@ -178,7 +178,7 @@ object Game {
   final case class Chess(g: chess.Game)
       extends Game(
         Situation.Chess(g.situation),
-        g.actions,
+        g.actionStrs,
         g.clock,
         g.plies,
         g.turnCount,
@@ -293,7 +293,7 @@ object Game {
   final case class Draughts(g: draughts.DraughtsGame)
       extends Game(
         Situation.Draughts(g.situation),
-        g.actions,
+        g.actionStrs,
         g.clock,
         g.plies,
         g.turnCount,
@@ -424,7 +424,7 @@ object Game {
   final case class FairySF(g: fairysf.Game)
       extends Game(
         Situation.FairySF(g.situation),
-        g.actions,
+        g.actionStrs,
         g.clock,
         g.plies,
         g.turnCount,
@@ -539,7 +539,7 @@ object Game {
   final case class Samurai(g: samurai.Game)
       extends Game(
         Situation.Samurai(g.situation),
-        g.actions,
+        g.actionStrs,
         g.clock,
         g.plies,
         g.turnCount,
@@ -639,7 +639,7 @@ object Game {
   final case class Togyzkumalak(g: togyzkumalak.Game)
       extends Game(
         Situation.Togyzkumalak(g.situation),
-        g.actions,
+        g.actionStrs,
         g.clock,
         g.plies,
         g.turnCount,
@@ -740,7 +740,7 @@ object Game {
   final case class Go(g: go.Game)
       extends Game(
         Situation.Go(g.situation),
-        g.actions,
+        g.actionStrs,
         g.clock,
         g.plies,
         g.turnCount,
@@ -850,7 +850,7 @@ object Game {
   def apply(
       lib: GameLogic,
       situation: Situation,
-      actions: Vector[Vector[String]] = Vector(),
+      actionStrs: VActionStrs = Vector(),
       clock: Option[Clock] = None,
       plies: Int = 0,
       turnCount: Int = 0,
@@ -859,20 +859,20 @@ object Game {
   ): Game = (lib, situation) match {
     case (GameLogic.Draughts(), Situation.Draughts(situation))         =>
       Draughts(
-        draughts.DraughtsGame(situation, actions, clock, plies, turnCount, startedAtPlies, startedAtTurn)
+        draughts.DraughtsGame(situation, actionStrs, clock, plies, turnCount, startedAtPlies, startedAtTurn)
       )
     case (GameLogic.Chess(), Situation.Chess(situation))               =>
-      Chess(chess.Game(situation, actions, clock, plies, turnCount, startedAtPlies, startedAtTurn))
+      Chess(chess.Game(situation, actionStrs, clock, plies, turnCount, startedAtPlies, startedAtTurn))
     case (GameLogic.FairySF(), Situation.FairySF(situation))           =>
-      FairySF(fairysf.Game(situation, actions, clock, plies, turnCount, startedAtPlies, startedAtTurn))
+      FairySF(fairysf.Game(situation, actionStrs, clock, plies, turnCount, startedAtPlies, startedAtTurn))
     case (GameLogic.Samurai(), Situation.Samurai(situation))           =>
-      Samurai(samurai.Game(situation, actions, clock, plies, turnCount, startedAtPlies, startedAtTurn))
+      Samurai(samurai.Game(situation, actionStrs, clock, plies, turnCount, startedAtPlies, startedAtTurn))
     case (GameLogic.Togyzkumalak(), Situation.Togyzkumalak(situation)) =>
       Togyzkumalak(
-        togyzkumalak.Game(situation, actions, clock, plies, turnCount, startedAtPlies, startedAtTurn)
+        togyzkumalak.Game(situation, actionStrs, clock, plies, turnCount, startedAtPlies, startedAtTurn)
       )
     case (GameLogic.Go(), Situation.Go(situation))                     =>
-      Go(go.Game(situation, actions, clock, plies, turnCount, startedAtPlies, startedAtTurn))
+      Go(go.Game(situation, actionStrs, clock, plies, turnCount, startedAtPlies, startedAtTurn))
 
     case _ => sys.error("Mismatched gamelogic types 32")
   }

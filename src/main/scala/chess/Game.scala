@@ -1,5 +1,5 @@
 package strategygames.chess
-import strategygames.{ Clock, MoveMetrics, Player }
+import strategygames.{ Clock, MoveMetrics, Player, VActionStrs }
 
 import cats.data.Validated
 
@@ -8,7 +8,7 @@ import strategygames.chess.format.{ pgn, Uci }
 
 case class Game(
     situation: Situation,
-    actions: Vector[Vector[String]] = Vector(),
+    actionStrs: VActionStrs = Vector(),
     clock: Option[Clock] = None,
     plies: Int = 0,
     turnCount: Int = 0,
@@ -33,7 +33,7 @@ case class Game(
       situation = newSituation,
       plies = plies + 1,
       turnCount = turnCount + (if (switchPlayer) 1 else 0),
-      actions = applyAction(pgn.Dumper(situation, move, newSituation), switchPlayer),
+      actionStrs = applyActionStr(pgn.Dumper(situation, move, newSituation), switchPlayer),
       clock = applyClock(move.metrics, newSituation.status.isEmpty, switchPlayer)
     )
   }
@@ -55,7 +55,7 @@ case class Game(
       situation = newSituation,
       plies = plies + 1,
       turnCount = turnCount + (if (switchPlayer) 1 else 0),
-      actions = applyAction(pgn.Dumper(drop, newSituation), switchPlayer),
+      actionStrs = applyActionStr(pgn.Dumper(drop, newSituation), switchPlayer),
       clock = applyClock(drop.metrics, newSituation.status.isEmpty, switchPlayer)
     )
   }
@@ -64,7 +64,7 @@ case class Game(
     clock.map { c =>
       {
         val newC = c.step(metrics, gameActive, switchClock)
-        if (actions.size == 1 && switchClock) newC.start else newC
+        if (actionStrs.size == 1 && switchClock) newC.start else newC
       }
     }
 
@@ -75,11 +75,11 @@ case class Game(
     case u: Uci.Drop => apply(u)
   }) map { case (g, a) => g -> a }
 
-  private def applyAction(action: String, switchPlayer: Boolean): Vector[Vector[String]] = {
-    if (switchPlayer || actions.size == 0)
-      actions :+ Vector(action)
+  private def applyActionStr(actionStr: String, switchPlayer: Boolean): VActionStrs = {
+    if (switchPlayer || actionStrs.size == 0)
+      actionStrs :+ Vector(actionStr)
     else
-      actions.updated(actions.size - 1, actions(actions.size - 1) :+ action)
+      actionStrs.updated(actionStrs.size - 1, actionStrs(actionStrs.size - 1) :+ actionStr)
   }
 
   def player = situation.player

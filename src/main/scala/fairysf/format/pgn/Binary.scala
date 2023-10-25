@@ -1,7 +1,7 @@
 package strategygames.fairysf
 package format.pgn
 
-import strategygames.{ Actions, GameFamily }
+import strategygames.{ ActionStrs, GameFamily }
 import strategygames.fairysf.format.Uci
 
 import scala.util.Try
@@ -13,10 +13,10 @@ object Binary {
   // def writeMove(gf: GameFamily, m: String)             = Try(Writer.ply(gf, m))
   def writeMoves(gf: GameFamily, ms: Iterable[String]) = Try(Writer.plies(gf, ms))
 
-  def writeActions(gf: GameFamily, as: Actions) = Try(Writer.actions(gf, as))
+  def writeActionStrs(gf: GameFamily, as: ActionStrs) = Try(Writer.actionStrs(gf, as))
 
-  def readActions(bs: List[Byte])          = Try(Reader.actions(bs))
-  def readActions(bs: List[Byte], nb: Int) = Try(Reader.actions(bs, nb))
+  def readActionStrs(bs: List[Byte])          = Try(Reader.actionStrs(bs))
+  def readActionStrs(bs: List[Byte], nb: Int) = Try(Reader.actionStrs(bs, nb))
 
   private object MoveType {
     val Move = 0
@@ -32,10 +32,10 @@ object Binary {
 
   private object Reader {
 
-    def actions(bs: List[Byte]): Actions          = actions(bs, maxPlies)
-    def actions(bs: List[Byte], nb: Int): Actions = toActions(intPlies(bs map toInt, nb, None))
+    def actionStrs(bs: List[Byte]): ActionStrs          = actionStrs(bs, maxPlies)
+    def actionStrs(bs: List[Byte], nb: Int): ActionStrs = toActionStrs(intPlies(bs map toInt, nb, None))
 
-    def toActions(plies: List[String]): Actions =
+    def toActionStrs(plies: List[String]): ActionStrs =
       if (plies.contains(Delimiter.str)) unflatten(plies.drop(1))
       else
         plies.headOption match {
@@ -117,7 +117,7 @@ object Binary {
     def plies(gf: GameFamily, strs: Iterable[String]): Array[Byte] =
       (gf.id.toByte :: strs.toList.flatMap(ply(gf, _))).to(Array)
 
-    def actions(gf: GameFamily, strs: Actions): Array[Byte] =
+    def actionStrs(gf: GameFamily, strs: ActionStrs): Array[Byte] =
       if (strs.size == 0 || strs.map(_.size).max == 1) plies(gf, strs.flatten)
       else plies(gf, strs.toList.map(_.toList :+ "").flatten)
 

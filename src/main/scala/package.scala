@@ -14,8 +14,8 @@ package object strategygames
 
   type PositionHash = Array[Byte]
 
-  type Actions = Seq[Seq[String]]
+  type ActionStrs = Seq[Seq[String]]
 
-  type VActions = Vector[Vector[String]]
+  type VActionStrs = Vector[Vector[String]]
 
 }

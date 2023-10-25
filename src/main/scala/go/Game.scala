@@ -1,5 +1,5 @@
 package strategygames.go
-import strategygames.{ Clock, MoveMetrics, VActions }
+import strategygames.{ Clock, MoveMetrics, VActionStrs }
 
 import cats.data.Validated
 
@@ -7,7 +7,7 @@ import strategygames.go.format.{ pgn, FEN, Uci }
 
 case class Game(
     situation: Situation,
-    actions: Vector[Vector[String]] = Vector(),
+    actionStrs: VActionStrs = Vector(),
     clock: Option[Clock] = None,
     plies: Int = 0,
     turnCount: Int = 0,
@@ -22,7 +22,7 @@ case class Game(
       situation = newSituation,
       plies = plies + 1,
       turnCount = turnCount + (if (switchPlayer) 1 else 0),
-      actions = applyAction(drop.toUci.uci, switchPlayer),
+      actionStrs = applyActionStr(drop.toUci.uci, switchPlayer),
       clock = applyClock(drop.metrics, newSituation.status.isEmpty, switchPlayer)
     )
   }
@@ -35,7 +35,7 @@ case class Game(
       situation = newSituation,
       plies = plies + 1,
       turnCount = turnCount + (if (switchPlayer) 1 else 0),
-      actions = applyAction(pass.toUci.uci, switchPlayer),
+      actionStrs = applyActionStr(pass.toUci.uci, switchPlayer),
       clock = applyClock(pass.metrics, newSituation.status.isEmpty, switchPlayer)
     )
   }
@@ -48,7 +48,7 @@ case class Game(
       situation = newSituation,
       plies = plies + 1,
       turnCount = turnCount + (if (switchPlayer) 1 else 0),
-      actions = applyAction(ss.toUci.uci, switchPlayer),
+      actionStrs = applyActionStr(ss.toUci.uci, switchPlayer),
       clock = applyClock(ss.metrics, newSituation.status.isEmpty, switchPlayer)
     )
   }
@@ -92,11 +92,11 @@ case class Game(
     case u: Uci.SelectSquares => apply(u)
   }) map { case (g, a) => g -> a }
 
-  private def applyAction(action: String, switchPlayer: Boolean): VActions = {
-    if (switchPlayer || actions.size == 0)
-      actions :+ Vector(action)
+  private def applyActionStr(actionStr: String, switchPlayer: Boolean): VActionStrs = {
+    if (switchPlayer || actionStrs.size == 0)
+      actionStrs :+ Vector(actionStr)
     else
-      actions.updated(actions.size - 1, actions(actions.size - 1) :+ action)
+      actionStrs.updated(actionStrs.size - 1, actionStrs(actionStrs.size - 1) :+ actionStr)
   }
 
   private def applyClock(
@@ -109,7 +109,7 @@ case class Game(
       {
         val newC = c.step(metrics, gameActive, switchClock)
         if (pauseClock) newC.pause
-        else if (actions.size == 1 && switchClock) newC.start
+        else if (actionStrs.size == 1 && switchClock) newC.start
         else newC
       }
     }
@@ -125,7 +125,7 @@ case class Game(
   // It starts at 1, and is incremented after P2's move (turn)
   def fullTurnCount: Int = 1 + turnCount / 2
 
-  // def currentTurnCount: Int = turnCount + (if (actions.size > 0) 1 else 0)
+  // def currentTurnCount: Int = turnCount + (if (actionStrs.size > 0) 1 else 0)
 
   def withTurns(p: Int, t: Int) = copy(plies = p, turnCount = t)
 }

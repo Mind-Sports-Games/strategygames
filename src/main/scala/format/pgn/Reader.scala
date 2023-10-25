@@ -104,18 +104,20 @@ object Reader {
     }
 
   // TODO Merge the following two functions by refactoring Sans and integrating to other libs
-  def replayResultFromActionsUsingSan(
+  def replayResultFromActionStrsUsingSan(
       lib: GameLogic,
-      actions: Actions,
+      actionStrs: ActionStrs,
       op: Sans => Sans,
       tags: Tags,
       iteratedCapts: Boolean = false
   ): Validated[String, Result] =
     lib match {
       case GameLogic.Chess()        =>
-        ChessReader.replayResultFromActionsUsingSan(actions, op, tags).map(Result.wrap)
+        ChessReader.replayResultFromActionStrsUsingSan(actionStrs, op, tags).map(Result.wrap)
       case GameLogic.Draughts()     =>
-        DraughtsReader.replayResultFromActionsUsingSan(actions, op, tags, iteratedCapts).map(Result.wrap)
+        DraughtsReader
+          .replayResultFromActionStrsUsingSan(actionStrs, op, tags, iteratedCapts)
+          .map(Result.wrap)
       case GameLogic.FairySF()      =>
         sys.error("Sans not implemented for fairysf")
       case GameLogic.Samurai()      =>
@@ -126,25 +128,29 @@ object Reader {
         sys.error("Sans not implemented for go")
     }
 
-  def replayResultFromActions(
+  def replayResultFromActionStrs(
       lib: GameLogic,
-      actions: Actions,
-      op: Actions => Actions,
+      actionStrs: ActionStrs,
+      op: ActionStrs => ActionStrs,
       tags: Tags
   ): Validated[String, Result] =
     lib match {
       case GameLogic.Chess()        =>
-        sys.error("replayResultFromActions not implemented for chess. Use replayResultFromActionsUsingSan")
+        sys.error(
+          "replayResultFromActionStrs not implemented for chess. Use replayResultFromActionStrsUsingSan"
+        )
       case GameLogic.Draughts()     =>
-        sys.error("replayResultFromActions not implemented for draughts. Use replayResultFromActionsUsingSan")
+        sys.error(
+          "replayResultFromActionStrs not implemented for draughts. Use replayResultFromActionStrsUsingSan"
+        )
       case GameLogic.FairySF()      =>
-        FairySFReader.replayResultFromActions(actions, op, tags).map(Result.wrap)
+        FairySFReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
       case GameLogic.Samurai()      =>
-        SamuraiReader.replayResultFromActions(actions, op, tags).map(Result.wrap)
+        SamuraiReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
       case GameLogic.Togyzkumalak() =>
-        TogyzkumalakReader.replayResultFromActions(actions, op, tags).map(Result.wrap)
+        TogyzkumalakReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
       case GameLogic.Go()           =>
-        GoReader.replayResultFromActions(actions, op, tags).map(Result.wrap)
+        GoReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
     }
 
 }

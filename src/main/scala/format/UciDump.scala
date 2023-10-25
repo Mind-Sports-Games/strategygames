@@ -3,29 +3,29 @@ package strategygames.format
 import cats.data.Validated
 
 import strategygames.variant.Variant
-import strategygames.{ Action, Actions, Drop, GameFamily, GameLogic, Move, Pass, SelectSquares }
+import strategygames.{ Action, ActionStrs, Drop, GameFamily, GameLogic, Move, Pass, SelectSquares }
 
 object UciDump {
 
   def apply(
       lib: GameLogic,
-      actions: Actions,
+      actionStrs: ActionStrs,
       initialFen: Option[FEN],
       variant: Variant,
       finalSquare: Boolean = false
-  ): Validated[String, Actions] = (lib, variant) match {
+  ): Validated[String, ActionStrs] = (lib, variant) match {
     case (GameLogic.Draughts(), Variant.Draughts(variant))         =>
-      strategygames.draughts.format.UciDump(actions, initialFen.map(_.toDraughts), variant, finalSquare)
+      strategygames.draughts.format.UciDump(actionStrs, initialFen.map(_.toDraughts), variant, finalSquare)
     case (GameLogic.Chess(), Variant.Chess(variant))               =>
-      strategygames.chess.format.UciDump(actions, initialFen.map(_.toChess), variant)
+      strategygames.chess.format.UciDump(actionStrs, initialFen.map(_.toChess), variant)
     case (GameLogic.FairySF(), Variant.FairySF(variant))           =>
-      strategygames.fairysf.format.UciDump(actions, initialFen.map(_.toFairySF), variant)
+      strategygames.fairysf.format.UciDump(actionStrs, initialFen.map(_.toFairySF), variant)
     case (GameLogic.Samurai(), Variant.Samurai(variant))           =>
-      strategygames.samurai.format.UciDump(actions, initialFen.map(_.toSamurai), variant)
+      strategygames.samurai.format.UciDump(actionStrs, initialFen.map(_.toSamurai), variant)
     case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant)) =>
-      strategygames.togyzkumalak.format.UciDump(actions, initialFen.map(_.toTogyzkumalak), variant)
+      strategygames.togyzkumalak.format.UciDump(actionStrs, initialFen.map(_.toTogyzkumalak), variant)
     case (GameLogic.Go(), Variant.Go(variant))                     =>
-      strategygames.go.format.UciDump(actions, initialFen.map(_.toGo), variant)
+      strategygames.go.format.UciDump(actionStrs, initialFen.map(_.toGo), variant)
     case _                                                         => sys.error("Mismatched gamelogic types 12")
   }
 

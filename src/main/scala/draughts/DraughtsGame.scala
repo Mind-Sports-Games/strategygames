@@ -1,6 +1,6 @@
 package strategygames.draughts
 
-import strategygames.{ Clock, MoveMetrics, Player }
+import strategygames.{ Clock, MoveMetrics, Player, VActionStrs }
 import strategygames.draughts.format.FEN
 
 import cats.data.Validated
@@ -10,7 +10,7 @@ import format.{ pdn, Uci }
 
 case class DraughtsGame(
     situation: Situation,
-    actions: Vector[Vector[String]] = Vector(),
+    actionStrs: VActionStrs = Vector(),
     clock: Option[Clock] = None,
     plies: Int = 0,
     turnCount: Int = 0,
@@ -65,9 +65,9 @@ case class DraughtsGame(
       gameWithMove map { case (g, m) =>
         val fullSan = s"${orig.shortKey}x${dest.shortKey}"
         g.copy(
-          actions = g.actions.updated(
-            g.actions.size - 1,
-            g.actions(g.actions.size - 1).dropRight(captures.get.size) :+ fullSan
+          actionStrs = g.actionStrs.updated(
+            g.actionStrs.size - 1,
+            g.actionStrs(g.actionStrs.size - 1).dropRight(captures.get.size) :+ fullSan
           )
         ) -> m.copy(orig = orig)
       } getOrElse apply(fullMove) -> fullMove
@@ -84,7 +84,7 @@ case class DraughtsGame(
         situation = newSituation,
         plies = plies,
         turnCount = turnCount,
-        actions = applyAction(pdn.Dumper(situation, move, newSituation)),
+        actionStrs = applyActionStr(pdn.Dumper(situation, move, newSituation)),
         clock = clock
       )
     } else {
@@ -92,7 +92,7 @@ case class DraughtsGame(
         situation = newSituation,
         plies = plies + 1,
         turnCount = turnCount + 1,
-        actions = applyAction(pdn.Dumper(situation, move, newSituation)),
+        actionStrs = applyActionStr(pdn.Dumper(situation, move, newSituation)),
         clock = applyClock(move.metrics, newSituation.status.isEmpty, newSituation.player != situation.player)
       )
     }
@@ -115,17 +115,17 @@ case class DraughtsGame(
         val newC = c.step(metrics, gameActive, switchClock)
         // whilst draughts doesnt support multiaction, and startedAtTurn is the same as startedAtPly
         if (turnCount - startedAtTurn == 1) newC.start else newC
-        // if (actions.size == 1 && switchClock) newC.start else newC
+        // if (actionStrs.size == 1 && switchClock) newC.start else newC
       }
     }
 
-  private def applyAction(action: String): Vector[Vector[String]] =
+  private def applyActionStr(actionStr: String): VActionStrs =
     // whilst draughts doesnt support multiaction
-    actions :+ Vector(action)
-  // if (switchPlayer || actions.size == 0)
-  //  actions :+ Vector(action)
+    actionStrs :+ Vector(actionStr)
+  // if (switchPlayer || actionStrs.size == 0)
+  //  actionStrs :+ Vector(actionStr)
   // else
-  //  actions.updated(actions.size, actions(actions.size) :+ action)
+  //  actionStrs.updated(actionStrs.size, actionStrs(actionStrs.size) :+ actionStr)
 
   def player = situation.player
 
@@ -141,7 +141,7 @@ case class DraughtsGame(
   // It starts at 1, and is incremented after P2's move (turn)
   def fullTurnCount: Int = 1 + turnCount / 2
 
-  // def currentTurnCount: Int = turnCount + (if (actions.size > 0) 1 else 0)
+  // def currentTurnCount: Int = turnCount + (if (actionStrs.size > 0) 1 else 0)
 
   // doesnt seem to be used anywhere
   // def moveString = s"${fullTurnCount}${player.fold(".", "...")}"
@@ -170,8 +170,8 @@ case class DraughtsGame(
     else movesConcat
   }
 
-  def actionsConcat(fullCaptures: Boolean = false, dropGhosts: Boolean = false): Vector[Vector[String]] =
-    actions.map(t => turnConcat(t, fullCaptures, dropGhosts))
+  def actionStrsConcat(fullCaptures: Boolean = false, dropGhosts: Boolean = false): VActionStrs =
+    actionStrs.map(t => turnConcat(t, fullCaptures, dropGhosts))
 
   def withBoard(b: Board) = copy(situation = situation.copy(board = b))
 

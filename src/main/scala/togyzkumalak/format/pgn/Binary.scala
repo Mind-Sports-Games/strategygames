@@ -1,7 +1,7 @@
 package strategygames.togyzkumalak
 package format.pgn
 
-import strategygames.{ Actions, GameFamily }
+import strategygames.{ ActionStrs, GameFamily }
 import strategygames.togyzkumalak.format.Uci
 
 import scala.util.Try
@@ -13,10 +13,10 @@ object Binary {
   // def writeMove(gf: GameFamily, m: String)             = Try(Writer.ply(gf, m))
   def writeMoves(gf: GameFamily, ms: Iterable[String]) = Try(Writer.plies(gf, ms))
 
-  def writeActions(gf: GameFamily, ms: Actions) = Try(Writer.actions(gf, ms))
+  def writeActionStrs(gf: GameFamily, ms: ActionStrs) = Try(Writer.actionStrs(gf, ms))
 
-  def readActions(bs: List[Byte])          = Try(Reader actions bs)
-  def readActions(bs: List[Byte], nb: Int) = Try(Reader.actions(bs, nb))
+  def readActionStrs(bs: List[Byte])          = Try(Reader actionStrs bs)
+  def readActionStrs(bs: List[Byte], nb: Int) = Try(Reader.actionStrs(bs, nb))
 
   // No MoveType implemented for Delimiter/Multimove
   // MoveType could be removed as there are no Drops in Mancala
@@ -30,10 +30,10 @@ object Binary {
 
     private val maxPlies = 600
 
-    def actions(bs: List[Byte]): Actions          = actions(bs, maxPlies)
-    def actions(bs: List[Byte], nb: Int): Actions = toActions(intPlies(bs map toInt, nb, None))
+    def actionStrs(bs: List[Byte]): ActionStrs          = actionStrs(bs, maxPlies)
+    def actionStrs(bs: List[Byte], nb: Int): ActionStrs = toActionStrs(intPlies(bs map toInt, nb, None))
 
-    def toActions(plies: List[String]): Actions = plies.map(List(_))
+    def toActionStrs(plies: List[String]): ActionStrs = plies.map(List(_))
 
     def intPlies(bs: List[Int], pliesToGo: Int, gf: Option[GameFamily]): List[String] =
       (bs, gf) match {
@@ -87,7 +87,7 @@ object Binary {
       (gf.id.toByte :: strs.toList.flatMap(ply(gf, _))).to(Array)
 
     // can flatten because this GameLogic doesn't support multimove
-    def actions(gf: GameFamily, strs: Actions): Array[Byte] = plies(gf, strs.flatten)
+    def actionStrs(gf: GameFamily, strs: ActionStrs): Array[Byte] = plies(gf, strs.flatten)
 
     def moveUci(src: String, dst: String, promotion: String) = List(
       (headerBit(MoveType.Move)) + Pos.fromKey(src).get.index,

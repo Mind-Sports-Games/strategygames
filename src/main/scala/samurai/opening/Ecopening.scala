@@ -1,7 +1,7 @@
 package strategygames.samurai.opening
 import strategygames.samurai._
 
-import strategygames.Actions
+import strategygames.ActionStrs
 
 import cats.syntax.option._
 
@@ -52,10 +52,10 @@ object Ecopening {
       })
     }
 
-  def fromGame(actions: Actions): Option[Ecopening] =
+  def fromGame(actionStrs: ActionStrs): Option[Ecopening] =
     Replay
       .boards(
-        actions = actions take EcopeningDB.MAX_MOVES,
+        actionStrs = actionStrs take EcopeningDB.MAX_MOVES,
         initialFen = None,
         variant = variant.Variant.default
       )

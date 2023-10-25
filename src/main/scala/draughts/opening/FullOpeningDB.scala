@@ -2,7 +2,7 @@ package strategygames.draughts
 package opening
 
 import format.FEN
-import strategygames.Actions
+import strategygames.ActionStrs
 
 import cats.implicits._
 
@@ -28,9 +28,9 @@ object FullOpeningDB {
   def findByFen(fen: String) = byFen get fen.split(':').take(3).mkString(":")
 
   // assumes standard initial FEN and variant
-  def search(actions: Actions): Option[FullOpening.AtPly] =
+  def search(actionStrs: ActionStrs): Option[FullOpening.AtPly] =
     strategygames.draughts.Replay
-      .boards(actions.take(SEARCH_MAX_TURNS), None, variant.Standard)
+      .boards(actionStrs.take(SEARCH_MAX_TURNS), None, variant.Standard)
       .toOption
       .flatMap {
         _.zipWithIndex.drop(1).foldRight(none[FullOpening.AtPly]) {

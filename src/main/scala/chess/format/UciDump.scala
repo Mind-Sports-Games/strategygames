@@ -4,21 +4,21 @@ import cats.data.Validated
 
 import strategygames.chess.variant.Variant
 import strategygames.chess.{ Action, Drop, Move, Replay }
-import strategygames.Actions
+import strategygames.ActionStrs
 
 object UciDump {
 
   // a2a4, b8c6
-  def apply(replay: Replay): Actions =
+  def apply(replay: Replay): ActionStrs =
     replay.chronoActions.map(_.map(action(replay.setup.board.variant)))
 
   def apply(
-      actions: Actions,
+      actionStrs: ActionStrs,
       initialFen: Option[FEN],
       variant: Variant
-  ): Validated[String, Actions] =
-    if (actions.isEmpty) Validated.valid(Nil)
-    else Replay(actions, initialFen, variant) andThen (_.valid) map apply
+  ): Validated[String, ActionStrs] =
+    if (actionStrs.isEmpty) Validated.valid(Nil)
+    else Replay(actionStrs, initialFen, variant) andThen (_.valid) map apply
 
   def action(variant: Variant)(action: Action): String =
     action match {

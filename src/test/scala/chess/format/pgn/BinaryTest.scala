@@ -2,7 +2,7 @@ package strategygames.chess
 package format.pgn
 
 import scala._
-import strategygames.Actions
+import strategygames.ActionStrs
 
 //TODO A bunch of these tests now fail
 //possibly due to changes in binary storage
@@ -15,8 +15,8 @@ class BinaryTest extends ChessTest {
   import BinaryTestUtils._
 
   def compareStrAndBin(pgn: String) = {
-    val bin = (Binary writeActions pgn.split(' ').toList.map(List(_))).get.toList
-    ((Binary readActions bin).get.flatten mkString " ") must_== pgn
+    val bin = (Binary writeActionStrs pgn.split(' ').toList.map(List(_))).get.toList
+    ((Binary readActionStrs bin).get.flatten mkString " ") must_== pgn
     bin.size must be_<=(pgn.length)
   }
 
@@ -235,10 +235,10 @@ object BinaryTestUtils {
     (Binary writeMove m).get map showByte mkString ","
 
   def readMove(m: String): String =
-    readActions(m).flatten.head
+    readActionStrs(m).flatten.head
 
-  def readActions(m: String): Actions =
-    (Binary readActions m.split(',').toList.map(parseBinary)).get
+  def readActionStrs(m: String): ActionStrs =
+    (Binary readActionStrs m.split(',').toList.map(parseBinary)).get
 
   def parseBinary(s: String): Byte = {
     var i    = s.length - 1

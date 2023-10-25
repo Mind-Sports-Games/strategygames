@@ -1,7 +1,7 @@
 package strategygames.fairysf
 package format.pgn
 import strategygames.{
-  Actions,
+  ActionStrs,
   ByoyomiClock,
   FischerClock,
   GameFamily,
@@ -58,12 +58,12 @@ object Reader {
   def fullWithSans(parsed: ParsedPgn, op: Sans => Sans): Result =
     makeReplay(makeGame(parsed.tags), op(parsed.sans))
 
-  def replayResultFromActions(
-      actions: Actions,
-      op: Actions => Actions,
+  def replayResultFromActionStrs(
+      actionStrs: ActionStrs,
+      op: ActionStrs => ActionStrs,
       tags: Tags
   ): Validated[String, Result] =
-    Validated.valid(makeReplayWithActions(makeGame(tags), op(actions)))
+    Validated.valid(makeReplayWithActionStrs(makeGame(tags), op(actionStrs)))
 
   // remove invisible byte order mark
   def cleanUserInput(str: String) = str.replace(s"\ufeff", "")
@@ -88,12 +88,12 @@ object Reader {
       case (r: Result.Incomplete, _)      => r
     }
 
-  private def makeReplayWithActions(game: Game, actions: Actions): Result = {
+  private def makeReplayWithActionStrs(game: Game, actionStrs: ActionStrs): Result = {
     var lastMove: Option[String] = None
     var lastDest: Option[String] = None
     // This doesnt support multiaction properly, but it correctly handles a game like Amazons
     // by implementing specific fairy multiaction logic using switchPlayerAfterMove
-    Parser.pliesToFairyUciMoves(actions.flatten).foldLeft[Result](Result.Complete(Replay(game))) {
+    Parser.pliesToFairyUciMoves(actionStrs.flatten).foldLeft[Result](Result.Complete(Replay(game))) {
       case (Result.Complete(replay), m) =>
         m match {
           case Uci.Move.moveR(orig, dest, promotion) => {

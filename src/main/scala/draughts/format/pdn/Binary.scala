@@ -2,17 +2,17 @@ package strategygames.draughts
 package format.pdn
 
 import scala.util.Try
-import strategygames.Actions
+import strategygames.ActionStrs
 
 object Binary {
 
   def writeMove(m: String)             = Try(Writer ply m)
   def writeMoves(ms: Iterable[String]) = Try(Writer plies ms)
 
-  def writeActions(as: Actions) = Try(Writer actions as)
+  def writeActionStrs(as: ActionStrs) = Try(Writer actionStrs as)
 
-  def readActions(bs: List[Byte])          = Try(Reader actions bs)
-  def readActions(bs: List[Byte], nb: Int) = Try(Reader.actions(bs, nb))
+  def readActionStrs(bs: List[Byte])          = Try(Reader actionStrs bs)
+  def readActionStrs(bs: List[Byte], nb: Int) = Try(Reader.actionStrs(bs, nb))
 
   private object MoveType {
     val IsMove    = 0
@@ -29,10 +29,10 @@ object Binary {
 
     private val maxPlies = 600
 
-    def actions(bs: List[Byte]): Actions          = actions(bs, maxPlies)
-    def actions(bs: List[Byte], nb: Int): Actions = toActions(intPlies(bs map toInt, nb, "x00"))
+    def actionStrs(bs: List[Byte]): ActionStrs          = actionStrs(bs, maxPlies)
+    def actionStrs(bs: List[Byte], nb: Int): ActionStrs = toActionStrs(intPlies(bs map toInt, nb, "x00"))
 
-    def toActions(plies: List[String]): Actions =
+    def toActionStrs(plies: List[String]): ActionStrs =
       if (plies.contains(Delimiter.str)) unflatten(plies)
       else plies.map(List(_))
 
@@ -97,7 +97,7 @@ object Binary {
 
     def plies(strs: Iterable[String]): Array[Byte] = strs.flatMap(ply).to(Array)
 
-    def actions(strs: Actions): Array[Byte] =
+    def actionStrs(strs: ActionStrs): Array[Byte] =
       if (strs.size == 0 || strs.map(_.size).max == 1) plies(strs.flatten)
       else plies(strs.toList.map(_.toList :+ "").flatten)
 

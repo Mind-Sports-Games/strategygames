@@ -2,7 +2,7 @@ package strategygames.go
 package format.pgn
 
 import strategygames.go.format.Uci
-import strategygames.Actions
+import strategygames.ActionStrs
 
 import scala.util.Try
 
@@ -12,10 +12,10 @@ object Binary {
   def writeMove(m: String)             = Try(Writer.ply(m))
   def writeMoves(ms: Iterable[String]) = Try(Writer.plies(ms))
 
-  def writeActions(ms: Actions) = Try(Writer.actions(ms))
+  def writeActionStrs(ms: ActionStrs) = Try(Writer.actionStrs(ms))
 
-  def readActions(bs: List[Byte])          = Try(Reader actions bs)
-  def readActions(bs: List[Byte], nb: Int) = Try(Reader.actions(bs, nb))
+  def readActionStrs(bs: List[Byte])          = Try(Reader actionStrs bs)
+  def readActionStrs(bs: List[Byte], nb: Int) = Try(Reader.actionStrs(bs, nb))
 
   // No MoveType implemented for Delimiter/Multimove
 
@@ -33,10 +33,10 @@ object Binary {
 
     private val maxPlies = 600
 
-    def actions(bs: List[Byte]): Actions          = actions(bs, maxPlies)
-    def actions(bs: List[Byte], nb: Int): Actions = toActions(intPlies(bs map toInt, nb))
+    def actionStrs(bs: List[Byte]): ActionStrs          = actionStrs(bs, maxPlies)
+    def actionStrs(bs: List[Byte], nb: Int): ActionStrs = toActionStrs(intPlies(bs map toInt, nb))
 
-    def toActions(plies: List[String]): Actions = plies.map(List(_))
+    def toActionStrs(plies: List[String]): ActionStrs = plies.map(List(_))
 
     def intPlies(bs: List[Int], pliesToGo: Int): List[String] =
       bs match {
@@ -93,7 +93,7 @@ object Binary {
       strs.toList.flatMap(ply).to(Array)
 
     // can flatten because this GameLogic doesn't support multimove
-    def actions(strs: Actions): Array[Byte] = plies(strs.flatten)
+    def actionStrs(strs: ActionStrs): Array[Byte] = plies(strs.flatten)
 
     def passUci = List(headerBit(MoveType.Pass))
 

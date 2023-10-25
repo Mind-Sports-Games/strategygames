@@ -2,7 +2,7 @@ package strategygames.draughts
 package format.pdn
 import strategygames.{
   Action => StratAction,
-  Actions,
+  ActionStrs,
   ByoyomiClock,
   FischerClock,
   Move => StratMove,
@@ -32,11 +32,11 @@ object Reader {
     fullWithSans(pdn, identity, tags, true)
 
   def replayResult(
-      actions: Actions,
+      actionStrs: ActionStrs,
       tags: Tags,
       iteratedCapts: Boolean = false
   ): Validated[String, Result] =
-    replayResultFromActionsUsingSan(actions, identity, tags, iteratedCapts)
+    replayResultFromActionStrsUsingSan(actionStrs, identity, tags, iteratedCapts)
 
   def fullWithSans(
       pdn: String,
@@ -51,14 +51,14 @@ object Reader {
   def fullWithSans(parsed: ParsedPdn, op: Sans => Sans): Result =
     makeReplay(makeGame(parsed.tags), op(parsed.sans))
 
-  def replayResultFromActionsUsingSan(
-      actions: Actions,
+  def replayResultFromActionStrsUsingSan(
+      actionStrs: ActionStrs,
       op: Sans => Sans,
       tags: Tags,
       iteratedCapts: Boolean = false
   ): Validated[String, Result] =
-    // Its ok to flatten actions as the game is built back up again from the Situation
-    Parser.sans(actions.flatten, tags.draughtsVariant | variant.Variant.default) map { sans =>
+    // Its ok to flatten actionStrs as the game is built back up again from the Situation
+    Parser.sans(actionStrs.flatten, tags.draughtsVariant | variant.Variant.default) map { sans =>
       makeReplay(makeGame(tags), op(sans), iteratedCapts)
     }
 

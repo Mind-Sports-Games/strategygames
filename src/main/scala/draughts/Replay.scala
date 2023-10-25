@@ -6,7 +6,7 @@ import cats.implicits._
 
 import strategygames.{
   Action => StratAction,
-  Actions,
+  ActionStrs,
   Game => StratGame,
   Move => StratMove,
   Player,
@@ -45,14 +45,14 @@ object Replay {
   def apply(game: DraughtsGame) = new Replay(game, Nil, game)
 
   def apply(
-      actions: Actions,
+      actionStrs: ActionStrs,
       initialFen: Option[FEN],
       variant: Variant,
       finalSquare: Boolean
   ): Validated[String, Reader.Result] =
-    actions.some.filter(_.nonEmpty) toValid "[replay] pdn is empty" andThen { nonEmptyActions =>
+    actionStrs.some.filter(_.nonEmpty) toValid "[replay] pdn is empty" andThen { nonEmptyActionStrs =>
       Reader.replayResult(
-        nonEmptyActions,
+        nonEmptyActionStrs,
         Tags(
           List(
             initialFen map { fen => Tag(_.FEN, fen.value) },
@@ -94,7 +94,7 @@ object Replay {
 
   type ErrorMessage = String
   def gamePlyWhileValid(
-      actions: Actions,
+      actionStrs: ActionStrs,
       initialFen: FEN,
       variant: Variant,
       iteratedCapts: Boolean = false
@@ -140,13 +140,13 @@ object Replay {
 
     val init = makeGame(variant, initialFen.some)
     Parser
-      // Its ok to flatten actions as the game is built back up again from the Situation
+      // Its ok to flatten actionStrs as the game is built back up again from the Situation
       // If we don't want to flatten then we need to do something like samurai gamelogic
       // where we use startPlayer and activePlayer
-      .sans(actions.flatten, variant)
+      .sans(actionStrs.flatten, variant)
       .fold(
         err => List.empty[(DraughtsGame, Uci.WithSan)] -> err.some,
-        sans => mk(init, sans.value zip actions.flatten, Nil)
+        sans => mk(init, sans.value zip actionStrs.flatten, Nil)
       ) match {
       case (games, err) => (init, games, err)
     }
@@ -335,12 +335,12 @@ object Replay {
     initialFen.flatMap { fen => Forsyth.<<@(variant, fen) } | Situation(variant)
 
   def boards(
-      actions: Actions,
+      actionStrs: ActionStrs,
       initialFen: Option[FEN],
       variant: Variant,
       finalSquare: Boolean = false
   ): Validated[String, List[Board]] =
-    situations(actions, initialFen, variant, finalSquare) map (_ map (_.board))
+    situations(actionStrs, initialFen, variant, finalSquare) map (_ map (_.board))
 
   def ucis(
       moveStrs: Iterable[String],
@@ -352,14 +352,14 @@ object Replay {
     }
 
   def situations(
-      actions: Actions,
+      actionStrs: ActionStrs,
       initialFen: Option[FEN],
       variant: Variant,
       finalSquare: Boolean = false
   ): Validated[String, List[Situation]] = {
     val sit = initialFenToSituation(initialFen, variant)
-    // Its ok to flatten actions as the game is built back up again from the Situation
-    Parser.sans(actions.flatten, sit.board.variant) andThen { sans =>
+    // Its ok to flatten actionStrs as the game is built back up again from the Situation
+    Parser.sans(actionStrs.flatten, sit.board.variant) andThen { sans =>
       recursiveSituations(sit, sans.value, finalSquare) map { sit :: _ }
     }
   }
@@ -416,7 +416,7 @@ object Replay {
     recursiveReplayFromUci(Replay(makeGame(variant, initialFen)), plies, finalSquare)
 
   def plyAtFen(
-      actions: Actions,
+      actionStrs: ActionStrs,
       initialFen: Option[FEN],
       variant: Variant,
       atFen: FEN
@@ -447,8 +447,8 @@ object Replay {
         Forsyth.<<@(variant, _)
       } | Situation(variant)
 
-      // Its ok to flatten actions as the game is built back up again from the Situation
-      Parser.sans(actions.flatten, sit.board.variant) andThen { sans =>
+      // Its ok to flatten actionStrs as the game is built back up again from the Situation
+      Parser.sans(actionStrs.flatten, sit.board.variant) andThen { sans =>
         recursivePlyAtFen(sit, sans.value, 0, 0)
       }
     }

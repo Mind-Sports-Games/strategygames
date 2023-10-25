@@ -64,17 +64,17 @@ object Parser {
       sys error "### StackOverflowError ### in PDN parser"
   }
 
-  def sans(str: String, variant: Variant): Validated[String, Sans]                   =
+  def sans(str: String, variant: Variant): Validated[String, Sans]                      =
     sans(
       str.split(' ').toList,
       variant
     )
-  def sans(flatActions: Iterable[String], variant: Variant): Validated[String, Sans] =
+  def sans(flatActionStrs: Iterable[String], variant: Variant): Validated[String, Sans] =
     objMoves(
-      flatActions.map { StrMove(_, Glyphs.empty, Nil, Nil) }.to(List),
+      flatActionStrs.map { StrMove(_, Glyphs.empty, Nil, Nil) }.to(List),
       variant
     )
-  def objMoves(strMoves: List[StrMove], variant: Variant): Validated[String, Sans]   =
+  def objMoves(strMoves: List[StrMove], variant: Variant): Validated[String, Sans]      =
     strMoves.map { case StrMove(san, glyphs, comments, variations) =>
       (
         MoveParser(san, variant) map { m =>

@@ -79,16 +79,16 @@ object Centis {
   def ofMillis(i: Int)  = Centis((if (i > 0) i + 5 else i - 4) / 10)
   def ofMillis(l: Long) = Centis((if (l > 0) l + 5 else l - 4) / 10)
 
-  def withActions(
+  def withActionStrs(
       times: Vector[Centis],
-      actions: Actions,
+      actionStrs: ActionStrs,
       offset: Int = 0 // startPlayer.hashCode - 1
   ): Vector[(Vector[String], Option[Centis])] =
-    actions
+    actionStrs
       .map(_.toVector)
       .toVector
       .zip(
-        actions
+        actionStrs
           .map(_.size)
           .scanLeft(0)(_ + _)
           .drop(1)

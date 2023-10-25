@@ -3,7 +3,7 @@ package strategygames.chess.opening
 import cats.syntax.option._
 
 import strategygames.chess.format.FEN
-import strategygames.Actions
+import strategygames.ActionStrs
 
 object FullOpeningDB {
 
@@ -27,25 +27,25 @@ object FullOpeningDB {
     }
 
   // retain original logic: pgnMoves.take(SEARCH_MAX_PLIES).takeWhile(san => !san.contains('@'))
-  private def searchActions(actions: Actions): Actions = {
-    val a    = actions.toList
+  private def searchActionStrs(actionStrs: ActionStrs): ActionStrs = {
+    val a    = actionStrs.toList
       .take(SEARCH_MAX_TURNS)
       .map(t => (t.takeWhile(san => !san.contains('@')), t.filter(san => san.contains('@')).size > 0))
       .takeWhile(!_._2)
       .map(_._1)
     val last =
-      if (a.size < actions.size) {
-        val lastActions = actions.toList(a.size).takeWhile(san => !san.contains('@'))
-        if (lastActions == Vector()) List() else List(lastActions)
+      if (a.size < actionStrs.size) {
+        val lastActionStrs = actionStrs.toList(a.size).takeWhile(san => !san.contains('@'))
+        if (lastActionStrs == Vector()) List() else List(lastActionStrs)
       } else List()
     a ++ last
   }
 
   // assumes standard initial FEN and variant
-  def search(actions: Actions): Option[FullOpening.AtPly] =
+  def search(actionStrs: ActionStrs): Option[FullOpening.AtPly] =
     strategygames.chess.Replay
       .situations(
-        searchActions(actions),
+        searchActionStrs(actionStrs),
         None,
         strategygames.chess.variant.Standard
       )

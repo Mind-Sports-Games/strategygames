@@ -3,7 +3,7 @@ package strategygames.togyzkumalak.opening
 import cats.syntax.option._
 
 import strategygames.togyzkumalak.format.FEN
-import strategygames.Actions
+import strategygames.ActionStrs
 
 object FullOpeningDB {
 
@@ -12,7 +12,7 @@ object FullOpeningDB {
   def findByFen(fen: FEN): Option[FullOpening] = None // TODO: ???
 
   // assumes standard initial FEN and variant
-  def search(actions: Actions): Option[FullOpening.AtPly] = None // TODO: ???
+  def search(actionStrs: ActionStrs): Option[FullOpening.AtPly] = None // TODO: ???
 
   def searchInFens(fens: Vector[FEN]): Option[FullOpening] = None // TODO: ???
 }
