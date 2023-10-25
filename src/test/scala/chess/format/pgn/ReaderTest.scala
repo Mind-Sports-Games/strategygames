@@ -134,9 +134,9 @@ class ReaderTest extends ChessTest {
       Reader.full(caissa) must beValid.like { case Complete(replay) =>
         replay.setup.plies must_== 43
         replay.setup.startedAtTurn must_== 43
-        replay.setup.startedAtPlies must_== 43
+        replay.setup.startedAtPly must_== 43
         replay.state.startedAtTurn must_== 43
-        replay.state.startedAtPlies must_== 43
+        replay.state.startedAtPly must_== 43
       }
     }
   }

@@ -14,7 +14,7 @@ case class DraughtsGame(
     clock: Option[Clock] = None,
     plies: Int = 0,
     turnCount: Int = 0,
-    startedAtPlies: Int = 0,
+    startedAtPly: Int = 0,
     startedAtTurn: Int = 0
 ) {
 

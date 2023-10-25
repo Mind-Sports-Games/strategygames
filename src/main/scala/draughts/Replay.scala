@@ -456,7 +456,7 @@ object Replay {
   private def makeGame(variant: Variant, initialFen: Option[FEN]): DraughtsGame = {
     val g = DraughtsGame(variant.some, initialFen)
     g.copy(
-      startedAtPlies = g.plies,
+      startedAtPly = g.plies,
       startedAtTurn = g.turnCount
     )
   }

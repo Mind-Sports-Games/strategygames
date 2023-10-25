@@ -70,7 +70,7 @@ object Reader {
       fen = tags.chessFen
     )
     g.copy(
-      startedAtPlies = g.plies,
+      startedAtPly = g.plies,
       startedAtTurn = g.turnCount,
       clock = tags.clockConfig.flatMap {
         case fc: FischerClock.Config => Some(FischerClock.apply(fc))

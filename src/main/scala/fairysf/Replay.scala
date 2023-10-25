@@ -425,7 +425,7 @@ object Replay {
   private def makeGame(variant: strategygames.fairysf.variant.Variant, initialFen: Option[FEN]): Game = {
     val g = Game(variant.some, initialFen)
     g.copy(
-      startedAtPlies = g.plies,
+      startedAtPly = g.plies,
       startedAtTurn = g.turnCount
     )
   }

@@ -97,7 +97,7 @@ object Reader {
       fen = tags.samuraiFen
     )
     g.copy(
-      startedAtPlies = g.plies,
+      startedAtPly = g.plies,
       startedAtTurn = g.turnCount,
       clock = tags.clockConfig.flatMap {
         case fc: FischerClock.Config => Some(FischerClock.apply(fc))

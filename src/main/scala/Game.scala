@@ -13,7 +13,7 @@ abstract class Game(
     // TODO We can look to remove 'plies' when draughts is converted to multiaction?
     val plies: Int = 0, // this was turns
     val turnCount: Int = 0,
-    val startedAtPlies: Int = 0,
+    val startedAtPly: Int = 0,
     val startedAtTurn: Int = 0
 ) {
 
@@ -141,8 +141,8 @@ abstract class Game(
   // type signature, we're getting individual ones for how we use it.
   // TODO: figure out if we can properly make this generic
   def copy(clock: Option[Clock]): Game
-  def copy(plies: Int, turnCount: Int, startedAtPlies: Int, startedAtTurn: Int): Game
-  def copy(clock: Option[Clock], plies: Int, turnCount: Int, startedAtPlies: Int, startedAtTurn: Int): Game
+  def copy(plies: Int, turnCount: Int, startedAtPly: Int, startedAtTurn: Int): Game
+  def copy(clock: Option[Clock], plies: Int, turnCount: Int, startedAtPly: Int, startedAtTurn: Int): Game
   def copy(situation: Situation, plies: Int, turnCount: Int): Game
   def copy(situation: Situation): Game
 
@@ -182,7 +182,7 @@ object Game {
         g.clock,
         g.plies,
         g.turnCount,
-        g.startedAtPlies,
+        g.startedAtPly,
         g.startedAtTurn
       ) {
 
@@ -241,12 +241,12 @@ object Game {
     def copy(clock: Option[Clock]): Game =
       Chess(g.copy(clock = clock))
 
-    def copy(plies: Int, turnCount: Int, startedAtPlies: Int, startedAtTurn: Int): Game =
+    def copy(plies: Int, turnCount: Int, startedAtPly: Int, startedAtTurn: Int): Game =
       Chess(
         g.copy(
           plies = plies,
           turnCount = turnCount,
-          startedAtPlies = startedAtPlies,
+          startedAtPly = startedAtPly,
           startedAtTurn = startedAtTurn
         )
       )
@@ -255,7 +255,7 @@ object Game {
         clock: Option[Clock],
         plies: Int,
         turnCount: Int,
-        startedAtPlies: Int,
+        startedAtPly: Int,
         startedAtTurn: Int
     ): Game =
       Chess(
@@ -263,7 +263,7 @@ object Game {
           clock = clock,
           plies = plies,
           turnCount = turnCount,
-          startedAtPlies = startedAtPlies,
+          startedAtPly = startedAtPly,
           startedAtTurn = startedAtTurn
         )
       )
@@ -297,7 +297,7 @@ object Game {
         g.clock,
         g.plies,
         g.turnCount,
-        g.startedAtPlies,
+        g.startedAtPly,
         g.startedAtTurn
       ) {
 
@@ -372,12 +372,12 @@ object Game {
     def copy(clock: Option[Clock]): Game =
       Draughts(g.copy(clock = clock))
 
-    def copy(plies: Int, turnCount: Int, startedAtPlies: Int, startedAtTurn: Int): Game =
+    def copy(plies: Int, turnCount: Int, startedAtPly: Int, startedAtTurn: Int): Game =
       Draughts(
         g.copy(
           plies = plies,
           turnCount = turnCount,
-          startedAtPlies = startedAtPlies,
+          startedAtPly = startedAtPly,
           startedAtTurn = startedAtTurn
         )
       )
@@ -386,7 +386,7 @@ object Game {
         clock: Option[Clock],
         plies: Int,
         turnCount: Int,
-        startedAtPlies: Int,
+        startedAtPly: Int,
         startedAtTurn: Int
     ): Game =
       Draughts(
@@ -394,7 +394,7 @@ object Game {
           clock = clock,
           plies = plies,
           turnCount = turnCount,
-          startedAtPlies = startedAtPlies,
+          startedAtPly = startedAtPly,
           startedAtTurn = startedAtTurn
         )
       )
@@ -428,7 +428,7 @@ object Game {
         g.clock,
         g.plies,
         g.turnCount,
-        g.startedAtPlies,
+        g.startedAtPly,
         g.startedAtTurn
       ) {
 
@@ -487,12 +487,12 @@ object Game {
     def copy(clock: Option[Clock]): Game =
       FairySF(g.copy(clock = clock))
 
-    def copy(plies: Int, turnCount: Int, startedAtPlies: Int, startedAtTurn: Int): Game =
+    def copy(plies: Int, turnCount: Int, startedAtPly: Int, startedAtTurn: Int): Game =
       FairySF(
         g.copy(
           plies = plies,
           turnCount = turnCount,
-          startedAtPlies = startedAtPlies,
+          startedAtPly = startedAtPly,
           startedAtTurn = startedAtTurn
         )
       )
@@ -501,7 +501,7 @@ object Game {
         clock: Option[Clock],
         plies: Int,
         turnCount: Int,
-        startedAtPlies: Int,
+        startedAtPly: Int,
         startedAtTurn: Int
     ): Game =
       FairySF(
@@ -509,7 +509,7 @@ object Game {
           clock = clock,
           plies = plies,
           turnCount = turnCount,
-          startedAtPlies = startedAtPlies,
+          startedAtPly = startedAtPly,
           startedAtTurn = startedAtTurn
         )
       )
@@ -543,7 +543,7 @@ object Game {
         g.clock,
         g.plies,
         g.turnCount,
-        g.startedAtPlies,
+        g.startedAtPly,
         g.startedAtTurn
       ) {
 
@@ -588,12 +588,12 @@ object Game {
     def copy(clock: Option[Clock]): Game =
       Samurai(g.copy(clock = clock))
 
-    def copy(plies: Int, turnCount: Int, startedAtPlies: Int, startedAtTurn: Int): Game =
+    def copy(plies: Int, turnCount: Int, startedAtPly: Int, startedAtTurn: Int): Game =
       Samurai(
         g.copy(
           plies = plies,
           turnCount = turnCount,
-          startedAtPlies = startedAtPlies,
+          startedAtPly = startedAtPly,
           startedAtTurn = startedAtTurn
         )
       )
@@ -602,7 +602,7 @@ object Game {
         clock: Option[Clock],
         plies: Int,
         turnCount: Int,
-        startedAtPlies: Int,
+        startedAtPly: Int,
         startedAtTurn: Int
     ): Game =
       Samurai(
@@ -610,7 +610,7 @@ object Game {
           clock = clock,
           plies = plies,
           turnCount = turnCount,
-          startedAtPlies = startedAtPlies,
+          startedAtPly = startedAtPly,
           startedAtTurn = startedAtTurn
         )
       )
@@ -643,7 +643,7 @@ object Game {
         g.clock,
         g.plies,
         g.turnCount,
-        g.startedAtPlies,
+        g.startedAtPly,
         g.startedAtTurn
       ) {
 
@@ -688,12 +688,12 @@ object Game {
     def copy(clock: Option[Clock]): Game =
       Togyzkumalak(g.copy(clock = clock))
 
-    def copy(plies: Int, turnCount: Int, startedAtPlies: Int, startedAtTurn: Int): Game =
+    def copy(plies: Int, turnCount: Int, startedAtPly: Int, startedAtTurn: Int): Game =
       Togyzkumalak(
         g.copy(
           plies = plies,
           turnCount = turnCount,
-          startedAtPlies = startedAtPlies,
+          startedAtPly = startedAtPly,
           startedAtTurn = startedAtTurn
         )
       )
@@ -702,7 +702,7 @@ object Game {
         clock: Option[Clock],
         plies: Int,
         turnCount: Int,
-        startedAtPlies: Int,
+        startedAtPly: Int,
         startedAtTurn: Int
     ): Game =
       Togyzkumalak(
@@ -710,7 +710,7 @@ object Game {
           clock = clock,
           plies = plies,
           turnCount = turnCount,
-          startedAtPlies = startedAtPlies,
+          startedAtPly = startedAtPly,
           startedAtTurn = startedAtTurn
         )
       )
@@ -744,7 +744,7 @@ object Game {
         g.clock,
         g.plies,
         g.turnCount,
-        g.startedAtPlies,
+        g.startedAtPly,
         g.startedAtTurn
       ) {
 
@@ -797,12 +797,12 @@ object Game {
 
     def copy(clock: Option[Clock]): Game = Go(g.copy(clock = clock))
 
-    def copy(plies: Int, turnCount: Int, startedAtPlies: Int, startedAtTurn: Int): Game =
+    def copy(plies: Int, turnCount: Int, startedAtPly: Int, startedAtTurn: Int): Game =
       Go(
         g.copy(
           plies = plies,
           turnCount = turnCount,
-          startedAtPlies = startedAtPlies,
+          startedAtPly = startedAtPly,
           startedAtTurn = startedAtTurn
         )
       )
@@ -811,7 +811,7 @@ object Game {
         clock: Option[Clock],
         plies: Int,
         turnCount: Int,
-        startedAtPlies: Int,
+        startedAtPly: Int,
         startedAtTurn: Int
     ): Game =
       Go(
@@ -819,7 +819,7 @@ object Game {
           clock = clock,
           plies = plies,
           turnCount = turnCount,
-          startedAtPlies = startedAtPlies,
+          startedAtPly = startedAtPly,
           startedAtTurn = startedAtTurn
         )
       )
@@ -854,25 +854,25 @@ object Game {
       clock: Option[Clock] = None,
       plies: Int = 0,
       turnCount: Int = 0,
-      startedAtPlies: Int = 0,
+      startedAtPly: Int = 0,
       startedAtTurn: Int = 0
   ): Game = (lib, situation) match {
     case (GameLogic.Draughts(), Situation.Draughts(situation))         =>
       Draughts(
-        draughts.DraughtsGame(situation, actionStrs, clock, plies, turnCount, startedAtPlies, startedAtTurn)
+        draughts.DraughtsGame(situation, actionStrs, clock, plies, turnCount, startedAtPly, startedAtTurn)
       )
     case (GameLogic.Chess(), Situation.Chess(situation))               =>
-      Chess(chess.Game(situation, actionStrs, clock, plies, turnCount, startedAtPlies, startedAtTurn))
+      Chess(chess.Game(situation, actionStrs, clock, plies, turnCount, startedAtPly, startedAtTurn))
     case (GameLogic.FairySF(), Situation.FairySF(situation))           =>
-      FairySF(fairysf.Game(situation, actionStrs, clock, plies, turnCount, startedAtPlies, startedAtTurn))
+      FairySF(fairysf.Game(situation, actionStrs, clock, plies, turnCount, startedAtPly, startedAtTurn))
     case (GameLogic.Samurai(), Situation.Samurai(situation))           =>
-      Samurai(samurai.Game(situation, actionStrs, clock, plies, turnCount, startedAtPlies, startedAtTurn))
+      Samurai(samurai.Game(situation, actionStrs, clock, plies, turnCount, startedAtPly, startedAtTurn))
     case (GameLogic.Togyzkumalak(), Situation.Togyzkumalak(situation)) =>
       Togyzkumalak(
-        togyzkumalak.Game(situation, actionStrs, clock, plies, turnCount, startedAtPlies, startedAtTurn)
+        togyzkumalak.Game(situation, actionStrs, clock, plies, turnCount, startedAtPly, startedAtTurn)
       )
     case (GameLogic.Go(), Situation.Go(situation))                     =>
-      Go(go.Game(situation, actionStrs, clock, plies, turnCount, startedAtPlies, startedAtTurn))
+      Go(go.Game(situation, actionStrs, clock, plies, turnCount, startedAtPly, startedAtTurn))
 
     case _ => sys.error("Mismatched gamelogic types 32")
   }

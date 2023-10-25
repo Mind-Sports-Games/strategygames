@@ -453,6 +453,6 @@ object Replay {
 
   private def makeGame(variant: strategygames.go.variant.Variant, initialFen: Option[FEN]): Game = {
     val g = Game(variant.some, initialFen)
-    g.copy(startedAtPlies = g.plies, startedAtTurn = g.turnCount)
+    g.copy(startedAtPly = g.plies, startedAtTurn = g.turnCount)
   }
 }
