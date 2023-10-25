@@ -102,11 +102,11 @@ object Replay {
 
     def mk(
         g: DraughtsGame,
-        plys: List[(San, String)],
+        plies: List[(San, String)],
         ambs: List[(San, String)]
     ): (List[(DraughtsGame, Uci.WithSan)], Option[ErrorMessage]) = {
       var newAmb                                                         = none[(San, String)]
-      val res: (List[(DraughtsGame, Uci.WithSan)], Option[ErrorMessage]) = plys match {
+      val res: (List[(DraughtsGame, Uci.WithSan)], Option[ErrorMessage]) = plies match {
         case (san, sanStr) :: rest =>
           san(
             StratSituation.wrap(g.situation),
@@ -134,7 +134,7 @@ object Replay {
           )
         case _                     => (Nil, None)
       }
-      if (res._2.isDefined && newAmb.isDefined) mk(g, plys, newAmb.get :: ambs)
+      if (res._2.isDefined && newAmb.isDefined) mk(g, plies, newAmb.get :: ambs)
       else res
     }
 

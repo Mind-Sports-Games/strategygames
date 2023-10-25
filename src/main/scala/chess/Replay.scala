@@ -108,8 +108,8 @@ object Replay {
       variant: strategygames.chess.variant.Variant
   ): (Game, List[(Game, Uci.WithSan)], Option[String]) = {
 
-    def mk(g: Game, plys: List[(San, String)]): (List[(Game, Uci.WithSan)], Option[String]) =
-      plys match {
+    def mk(g: Game, plies: List[(San, String)]): (List[(Game, Uci.WithSan)], Option[String]) =
+      plies match {
         case (san, sanStr) :: rest =>
           san(StratSituation.wrap(g.situation)).fold(
             err => (Nil, err.some),

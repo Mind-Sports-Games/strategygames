@@ -56,11 +56,11 @@ object Replay {
       initialFen: Option[FEN],
       variant: strategygames.fairysf.variant.Variant
   ): Validated[String, Reader.Result] = {
-    val fen                 = initialFen.getOrElse(variant.initialFen)
-    val (init, plys, error) = gameActionWhileValid(actionStrs, fen, variant)
-    val game                = plys.reverse.last._1
+    val fen                  = initialFen.getOrElse(variant.initialFen)
+    val (init, plies, error) = gameActionWhileValid(actionStrs, fen, variant)
+    val game                 = plies.reverse.last._1
     error match {
-      case None      => Validated.valid(Reader.Result.Complete(new Replay(init, plys.reverse.map(_._2), game)))
+      case None      => Validated.valid(Reader.Result.Complete(new Replay(init, plies.reverse.map(_._2), game)))
       case Some(msg) => Validated.invalid(msg)
     }
   }
@@ -268,10 +268,10 @@ object Replay {
       initialFen: FEN,
       variant: strategygames.fairysf.variant.Variant
   ): (Game, List[(Game, Uci.WithSan)], Option[String]) = {
-    val (game, plys, error) = gameActionWhileValid(actionStrs, initialFen, variant)
+    val (game, plies, error) = gameActionWhileValid(actionStrs, initialFen, variant)
     (
       game,
-      plys.map { v =>
+      plies.map { v =>
         {
           val (state, action) = v
           val gf              = state.board.variant.gameFamily

@@ -148,7 +148,7 @@ object Replay {
       initialFen: FEN,
       variant: strategygames.togyzkumalak.variant.Variant
   ): (Game, List[(Game, Uci.WithSan)], Option[String]) = {
-    val (game, plys, error) = gameActionWhileValid(
+    val (game, plies, error) = gameActionWhileValid(
       actionStrs,
       startPlayer,
       activePlayer,
@@ -157,7 +157,7 @@ object Replay {
     )
     (
       game,
-      plys.map { v =>
+      plies.map { v =>
         {
           val (state, move) = v
           (state, Uci.WithSan(move.toUci, "NOSAN"))
