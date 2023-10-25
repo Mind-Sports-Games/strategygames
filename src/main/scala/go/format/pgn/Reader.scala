@@ -56,20 +56,20 @@ object Reader {
       case (Result.Complete(replay), san) =>
         san(StratSituation.wrap(replay.state.situation)).fold(
           err => Result.Incomplete(replay, err),
-          action => Result.Complete(replay addPly StratAction.toGo(action))
+          action => Result.Complete(replay addAction StratAction.toGo(action))
         )
       case (r: Result.Incomplete, _)      => r
     }
 
   private def makeReplayWithActionStrs(game: Game, actionStrs: ActionStrs): Result =
-    Replay.pliesWithEndTurn(actionStrs).foldLeft[Result](Result.Complete(Replay(game))) {
+    Replay.actionStrsWithEndTurn(actionStrs).foldLeft[Result](Result.Complete(Replay(game))) {
       case (Result.Complete(replay), (actionStr, endTurn)) =>
         actionStr match {
           case Uci.Drop.dropR(role, dest)           =>
             (Role.allByForsyth(replay.state.board.variant.gameFamily).get(role(0)), Pos.fromKey(dest)) match {
               case (Some(role), Some(dest)) =>
                 Result.Complete(
-                  replay.addPly(
+                  replay.addAction(
                     Replay.replayDrop(
                       replay.state,
                       role,
@@ -84,7 +84,7 @@ object Reader {
             }
           case Uci.Pass.passR()                     =>
             Result.Complete(
-              replay.addPly(
+              replay.addAction(
                 Replay.replayPass(
                   replay.state,
                   endTurn,
@@ -95,7 +95,7 @@ object Reader {
             )
           case Uci.SelectSquares.selectSquaresR(ss) =>
             Result.Complete(
-              replay.addPly(
+              replay.addAction(
                 Replay.replaySelectSquares(
                   replay.state,
                   ss.split(",").toList.flatMap(Pos.fromKey(_)),

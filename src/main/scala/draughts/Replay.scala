@@ -17,9 +17,9 @@ import format.pdn.{ Parser, Reader, Std }
 import format.{ FEN, Forsyth, Uci }
 import variant.Variant
 
-case class Replay(setup: DraughtsGame, plies: List[Move], state: DraughtsGame) {
+case class Replay(setup: DraughtsGame, actions: List[Move], state: DraughtsGame) {
 
-  lazy val chronoPlies = plies.reverse
+  lazy val chronoPlies = actions.reverse
 
   lazy val chronoActions: List[List[Move]] =
     chronoPlies
@@ -33,8 +33,8 @@ case class Replay(setup: DraughtsGame, plies: List[Move], state: DraughtsGame) {
       }
       .reverse
 
-  def addPly(move: Move, finalSquare: Boolean = false) = copy(
-    plies = move.applyVariantEffect :: plies,
+  def addAction(move: Move, finalSquare: Boolean = false) = copy(
+    actions = move.applyVariantEffect :: actions,
     state = state.apply(move, finalSquare)
   )
 
@@ -93,7 +93,7 @@ object Replay {
   //  }
 
   type ErrorMessage = String
-  def gamePlyWhileValid(
+  def gameWithUciWhileValid(
       actionStrs: ActionStrs,
       initialFen: FEN,
       variant: Variant,
@@ -327,7 +327,7 @@ object Replay {
       case Nil         => valid(replay)
       case uci :: rest =>
         uci(replay.state.situation, finalSquare) andThen { ply =>
-          recursiveReplayFromUci(replay.addPly(ply, finalSquare), rest, finalSquare)
+          recursiveReplayFromUci(replay.addAction(ply, finalSquare), rest, finalSquare)
         }
     }
 
@@ -408,12 +408,12 @@ object Replay {
   }
 
   def apply(
-      plies: List[Uci],
+      ucis: List[Uci],
       initialFen: Option[FEN],
       variant: Variant,
       finalSquare: Boolean = false
   ): Validated[String, Replay] =
-    recursiveReplayFromUci(Replay(makeGame(variant, initialFen)), plies, finalSquare)
+    recursiveReplayFromUci(Replay(makeGame(variant, initialFen)), ucis, finalSquare)
 
   def plyAtFen(
       actionStrs: ActionStrs,

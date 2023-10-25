@@ -15,10 +15,13 @@ object Parser {
   // This doesnt support multiaction properly, but it correctly handles a game like Amazons
   // which is condensed into a single action per turn. if a different type of multiaction
   // game became available from Fairy we might need to update this
-  def pliesToFairyUciMoves(plies: Seq[String], doubleMoveFormat: Boolean = false): List[String] =
+  def flatActionStrsToFairyUciMoves(
+      flatActionStrs: Seq[String],
+      doubleMoveFormat: Boolean = false
+  ): List[String] =
     if (doubleMoveFormat)
       // not sure this branch is ever used
-      plies.toList
+      flatActionStrs.toList
         .sliding(2, 2)
         .toList
         .map(
@@ -30,7 +33,7 @@ object Parser {
         )
         .flatten
     else
-      plies.toList.map(
+      flatActionStrs.toList.map(
         _ match {
           case Uci.Move.moveP(orig, dest, promotion) =>
             promotion match {

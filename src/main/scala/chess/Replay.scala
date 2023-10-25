@@ -18,9 +18,9 @@ import strategygames.{
   Situation => StratSituation
 }
 
-case class Replay(setup: Game, plies: List[Action], state: Game) {
+case class Replay(setup: Game, actions: List[Action], state: Game) {
 
-  lazy val chronoPlies = plies.reverse
+  lazy val chronoPlies = actions.reverse
 
   lazy val chronoActions: List[List[Action]] =
     chronoPlies
@@ -34,15 +34,15 @@ case class Replay(setup: Game, plies: List[Action], state: Game) {
       }
       .reverse
 
-  def addPly(action: Action) = action match {
+  def addAction(action: Action) = action match {
     case m: Move =>
       copy(
-        plies = m.applyVariantEffect :: plies,
+        actions = m.applyVariantEffect :: actions,
         state = state.apply(m)
       )
     case d: Drop =>
       copy(
-        plies = d :: plies,
+        actions = d :: actions,
         state = state.applyDrop(d)
       )
   }
@@ -102,7 +102,7 @@ object Replay {
   //    recursiveGames(game, moves.value) map { game :: _ }
   //  }
 
-  def gamePlyWhileValid(
+  def gameWithUciWhileValid(
       actionStrs: ActionStrs,
       initialFen: FEN,
       variant: strategygames.chess.variant.Variant
@@ -123,7 +123,7 @@ object Replay {
           )
         case _                     => (Nil, None)
       }
-    val init                                                                                = makeGame(variant, initialFen.some)
+    val init                                                                                 = makeGame(variant, initialFen.some)
     // The following line converts actionStrs into a 1-dimensional structure
     // where an action is in a tuple of itself and the boolean autoEndTurn
     // actionStrs.zipWithIndex.map{case (a, i) => a.zipWithIndex.map{case (a1, i1) => (a1, i1 == a.size-1 && i != actionStrs.size-1)}}.flatten
@@ -168,7 +168,7 @@ object Replay {
       case Nil         => valid(replay)
       case uci :: rest =>
         uci(replay.state.situation) andThen { action =>
-          recursiveReplayFromUci(replay addPly action, rest)
+          recursiveReplayFromUci(replay addAction action, rest)
         }
     }
 
@@ -236,11 +236,11 @@ object Replay {
   }
 
   def apply(
-      plies: List[Uci],
+      ucis: List[Uci],
       initialFen: Option[FEN],
       variant: strategygames.chess.variant.Variant
   ): Validated[String, Replay] =
-    recursiveReplayFromUci(Replay(makeGame(variant, initialFen)), plies)
+    recursiveReplayFromUci(Replay(makeGame(variant, initialFen)), ucis)
 
   def plyAtFen(
       actionStrs: ActionStrs,

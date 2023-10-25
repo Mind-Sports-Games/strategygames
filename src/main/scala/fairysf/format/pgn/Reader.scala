@@ -73,7 +73,7 @@ object Reader {
       case (Result.Complete(replay), san) =>
         san(StratSituation.wrap(replay.state.situation)).fold(
           err => Result.Incomplete(replay, err),
-          action => Result.Complete(replay addPly action.toFairySF)
+          action => Result.Complete(replay addAction action.toFairySF)
         )
       case (r: Result.Incomplete, _)      => r
     }
@@ -83,7 +83,7 @@ object Reader {
       case (Result.Complete(replay), uci) =>
         uci(replay.state.situation).fold(
           err => Result.Incomplete(replay, err),
-          ply => Result.Complete(replay addPly ply)
+          ply => Result.Complete(replay addAction ply)
         )
       case (r: Result.Incomplete, _)      => r
     }
@@ -93,7 +93,7 @@ object Reader {
     var lastDest: Option[String] = None
     // This doesnt support multiaction properly, but it correctly handles a game like Amazons
     // by implementing specific fairy multiaction logic using switchPlayerAfterMove
-    Parser.pliesToFairyUciMoves(actionStrs.flatten).foldLeft[Result](Result.Complete(Replay(game))) {
+    Parser.flatActionStrsToFairyUciMoves(actionStrs.flatten).foldLeft[Result](Result.Complete(Replay(game))) {
       case (Result.Complete(replay), m) =>
         m match {
           case Uci.Move.moveR(orig, dest, promotion) => {
@@ -102,7 +102,7 @@ object Reader {
             (Pos.fromKey(orig), Pos.fromKey(dest)) match {
               case (Some(orig), Some(dest)) =>
                 Result.Complete(
-                  replay.addPly(
+                  replay.addAction(
                     if (game.situation.board.variant.switchPlayerAfterMove)
                       Replay.replayMove(
                         replay.state,
@@ -129,7 +129,7 @@ object Reader {
             (Role.allByForsyth(replay.state.board.variant.gameFamily).get(role(0)), Pos.fromKey(dest)) match {
               case (Some(role), Some(dest)) =>
                 Result.Complete(
-                  replay.addPly {
+                  replay.addAction {
                     val uci =
                       if (game.situation.board.variant.switchPlayerAfterMove) m
                       else s"${lastMove.getOrElse("")},${lastDest.getOrElse("")}${dest.key}"

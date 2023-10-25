@@ -59,7 +59,7 @@ object Reader {
       case (Result.Complete(replay), san) =>
         san(StratSituation.wrap(replay.state.situation)).fold(
           err => Result.Incomplete(replay, err),
-          action => Result.Complete(replay addPly action.toChess)
+          action => Result.Complete(replay addAction action.toChess)
         )
       case (r: Result.Incomplete, _)      => r
     }
