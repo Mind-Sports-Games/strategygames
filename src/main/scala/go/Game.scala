@@ -36,7 +36,8 @@ case class Game(
       plies = plies + 1,
       turnCount = turnCount + (if (switchPlayer) 1 else 0),
       actionStrs = applyActionStr(pass.toUci.uci, switchPlayer),
-      clock = applyClock(pass.metrics, newSituation.status.isEmpty, switchPlayer)
+      clock =
+        applyClock(pass.metrics, newSituation.status.isEmpty, switchPlayer, newSituation.canSelectSquares)
     )
   }
 
@@ -109,7 +110,7 @@ case class Game(
       {
         val newC = c.step(metrics, gameActive, switchClock)
         if (pauseClock) newC.pause
-        else if (actionStrs.size == 1 && switchClock) newC.start
+        else if (turnCount - startedAtTurn == 1 && switchClock) newC.start
         else newC
       }
     }
