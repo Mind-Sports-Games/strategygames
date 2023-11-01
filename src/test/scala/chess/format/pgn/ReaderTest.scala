@@ -10,7 +10,7 @@ class ReaderTest extends ChessTest {
     "many games" in {
       forall(raws) { (c: String) =>
         Reader.full(c) must beValid.like { case Complete(replay) =>
-          replay.plies must have size c.split(' ').length
+          replay.actions must have size c.split(' ').length
         }
       }
     }
@@ -31,12 +31,12 @@ class ReaderTest extends ChessTest {
     }
     "and delimiters" in {
       Reader.full(withDelimiters) must beValid.like { case Complete(replay) =>
-        replay.plies must have size 33
+        replay.actions must have size 33
       }
     }
     "and delimiters on new lines" in {
       Reader.full(withDelimitersOnNewLines) must beValid.like { case Complete(replay) =>
-        replay.plies must have size 33
+        replay.actions must have size 33
       }
     }
   }

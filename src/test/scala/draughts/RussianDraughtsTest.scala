@@ -172,7 +172,7 @@ class RussianDraughtsTest extends Specification with ValidatedMatchers {
       val variantGame                                                          = variant.Russian
       val initialFen                                                           = variant.Russian.initialFen
       val x: (DraughtsGame, List[(DraughtsGame, Uci.WithSan)], Option[String]) =
-        Replay.gamePlyWhileValid(pdnMoves.map(List(_)), initialFen, variantGame)
+        Replay.gameWithUciWhileValid(pdnMoves.map(List(_)), initialFen, variantGame)
 
       val gameAfterMoves = x._2.last._1
 
@@ -181,9 +181,10 @@ class RussianDraughtsTest extends Specification with ValidatedMatchers {
     }
     // TODO: add this test back in
     // "but not replayable for brazilian variant" in {
-    // val variantGame = variant.Brazilian
-    // val initialFen  = variant.Brazilian.initialFen
-    // Replay.gamePlyWhileValid(pdnMoves, initialFen, variantGame) must throwA[RuntimeException]
+    //   val variantGame = variant.Brazilian
+    //   val initialFen  = variant.Brazilian.initialFen
+    //   Replay
+    //     .gameWithUciWhileValid(pdnMoves.map(List(_)), initialFen, variantGame) must throwA[RuntimeException]
     // }
   }
 

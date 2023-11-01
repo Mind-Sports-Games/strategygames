@@ -6,14 +6,13 @@ import strategygames.{ Pocket, Pockets, Role }
 import strategygames.chess.format.FEN
 import strategygames.chess.variant.Crazyhouse
 
-
 class CrazyhouseVariantTest extends ChessTest {
 
   "Crazyhouse" should {
 
     "nothing to drop" in {
       val fenPosition = FEN("3Nkb1r/1pQP1ppp/4p3/3N4/N5N1/6B1/PPPPBPPP/R1B2RK1 b - - 0 25")
-      val game = {
+      val game        = {
         fenToGame(fenPosition, Crazyhouse).toOption.get
       }.updateBoard { b =>
         b.withCrazyData(
@@ -32,7 +31,7 @@ class CrazyhouseVariantTest extends ChessTest {
 
     "pieces to drop, in vain" in {
       val fenPosition = FEN("3Nkb1r/1pQP1ppp/4p3/3N4/N5N1/6B1/PPPPBPPP/R1B2RK1 b - - 0 25")
-      val game = {
+      val game        = {
         fenToGame(fenPosition, Crazyhouse).toOption.get
       }.updateBoard { b =>
         b.withCrazyData(
@@ -262,7 +261,7 @@ class CrazyhouseVariantTest extends ChessTest {
       }
       "not draw when only kings left" in {
         val fenPosition = FEN("k6K/8/8/8/8/8/8/8 w - - 0 25")
-        val game = {
+        val game        = {
           fenToGame(fenPosition, Crazyhouse).toOption.get
         }
         game.situation.autoDraw must beFalse
@@ -271,17 +270,17 @@ class CrazyhouseVariantTest extends ChessTest {
       }
     }
     "prod 50 games accumulate hash" in {
-      val gameMoves = format.pgn.Fixtures.prod50crazyhouse.map {
+      val gameMoves                     = format.pgn.Fixtures.prod50crazyhouse.map {
         _.split(' ').toList
       }
-      def runOne(moves: List[String]) =
-        Replay.gamePlyWhileValid(moves.map(List(_)), format.Forsyth.initial, Crazyhouse)
+      def runOne(moves: List[String])   =
+        Replay.gameWithUciWhileValid(moves.map(List(_)), format.Forsyth.initial, Crazyhouse)
       def hex(buf: Array[Byte]): String = buf.map("%02x" format _).mkString
       val g                             = gameMoves.map(runOne)
       g.exists(_._3.nonEmpty) must beFalse
-      val m8  = java.security.MessageDigest getInstance "MD5"
-      val m16 = java.security.MessageDigest getInstance "MD5"
-      val h   = new Hash(16)
+      val m8                            = java.security.MessageDigest getInstance "MD5"
+      val m16                           = java.security.MessageDigest getInstance "MD5"
+      val h                             = new Hash(16)
       g.foreach(_._2.foreach(x => { val ph = h(x._1.situation); m8.update(ph.slice(0, 8)); m16.update(ph) }))
       hex(m8.digest) must beEqualTo("fcf5867ad3324c4be6d28108ff27212c")
       hex(m16.digest) must beEqualTo("80c4edf5fbd41eff78d3d563777beb61")
@@ -304,7 +303,7 @@ class CrazyhouseVariantTest extends ChessTest {
 
     "replay ZH" in {
       strategygames.chess.Replay.boards(
-        actions = Vector(
+        actionStrs = Vector(
           "e4",
           "c5",
           "Na3",

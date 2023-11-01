@@ -13,7 +13,7 @@ class OwareReplayTest extends Specification with ValidatedMatchers {
     val initialFen = variant.Oware.initialFen
 
     val x: (Game, List[(Game, Uci.WithSan)], Option[String]) =
-      Replay.gamePlyWhileValid(pgnMoves.map(Vector(_)), Player.P1, Player.P1, initialFen, varaint)
+      Replay.gameWithUciWhileValid(pgnMoves.map(Vector(_)), Player.P1, Player.P1, initialFen, varaint)
 
     val initGame = x._1
     val getFen   = initGame.situation.board.apiPosition.fen

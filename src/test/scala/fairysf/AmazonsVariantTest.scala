@@ -53,9 +53,9 @@ class AmazonsVariantTest extends FairySFTest {
     }
 
     "P1 win in example game" in {
-      val replay  = Replay.gamePlyWhileValid(amazonsGame, initialFen, variant.Amazons)
+      val replay  = Replay.gameWithUciWhileValid(amazonsGame, initialFen, variant.Amazons)
       val game    = replay._2.last._1
-      val actions = game.actions
+      val actions = game.actionStrs
       game.situation.moves.keys.size must_== 4
       game.situation.moves.keys.filter(_ == Pos.J9).size must_== 1
       game.situation.moves(Pos.J9).filter(_.dest == Pos.J10).size must_== 1

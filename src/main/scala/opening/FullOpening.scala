@@ -9,9 +9,9 @@ abstract class FullOpening(
 
   override def toString: String
 
-  //TODO when wanting to use multiaction variants in openings we will
-  //need to reconsider whether openings are done by plies or turns
-  //and then update other code (including lila-ws)
+  // TODO when wanting to use multiaction variants in openings we will
+  // need to reconsider whether openings are done by plies or turns
+  // and then update other code (including lila-ws)
   def atPly(ply: Int) = FullOpening.AtPly(this, ply)
 
 }

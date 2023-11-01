@@ -443,8 +443,8 @@ object Replay {
       variant: Variant,
       finalSquare: Boolean = false
   ): Validated[String, Game] = (lib, variant) match {
-    //All apart from Go can convert ucis to List[String] because the way the internal
-    //function handles this List[String] is safe for multiaction
+    // All apart from Go can convert ucis to List[String] because the way the internal
+    // function handles this List[String] is safe for multiaction
     case (GameLogic.Draughts(), Variant.Draughts(variant))         =>
       draughts.Replay
         .gameFromUciStrings(ucis.flatten.toList, initialFen.map(_.toDraughts), variant, finalSquare)
@@ -465,8 +465,8 @@ object Replay {
       togyzkumalak.Replay
         .gameFromUciStrings(ucis.flatten.toList, initialFen.map(_.toTogyzkumalak), variant)
         .map(Game.Togyzkumalak)
-    //Go doesnt convert ucis as it runs a different internal function that wants ActionStrs
-    //due to optimisation issues
+    // Go doesnt convert ucis as it runs a different internal function that wants ActionStrs
+    // due to optimisation issues
     case (GameLogic.Go(), Variant.Go(variant))                     =>
       go.Replay
         .gameFromUciStrings(ucis, activePlayer, initialFen.map(_.toGo), variant)

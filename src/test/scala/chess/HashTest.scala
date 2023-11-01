@@ -212,7 +212,7 @@ class HashTest extends ChessTest {
         _.split(' ').toList
       }
       def runOne(moves: List[String])   =
-        Replay.gamePlyWhileValid(
+        Replay.gameWithUciWhileValid(
           moves.map(List(_)),
           format.Forsyth.initial,
           strategygames.chess.variant.ThreeCheck
