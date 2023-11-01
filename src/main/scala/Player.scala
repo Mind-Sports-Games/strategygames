@@ -88,6 +88,11 @@ object Player {
     else if (c == '2' || c == 'b' || c == 'B' || c == 'N') Some(P2)
     else None
 
+  def inverseApply(c: Char): Option[Player] =
+    if (c == 'b' || c == 'B') Some(P1)
+    else if (c == 'w' || c == 'W') Some(P2)
+    else apply(c)
+
   val p1: Player = P1
   val p2: Player = P2
 

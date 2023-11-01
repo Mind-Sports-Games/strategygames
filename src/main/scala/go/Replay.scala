@@ -67,7 +67,9 @@ object Replay {
     val fen                            = initialFen.getOrElse(variant.initialFen)
     val (init, gameWithActions, error) =
       gameWithActionWhileValid(actionStrs, startPlayer, activePlayer, fen, variant)
-    val game                           = gameWithActions.reverse.last._1
+    val game                           =
+      gameWithActions.reverse.lastOption.map(_._1).getOrElse(init)
+
     error match {
       case None      =>
         Validated.valid(
@@ -394,15 +396,14 @@ object Replay {
 
   // this is a fast implementation which we can use because 'uci' is the only format we use
   def gameFromUciStrings(
-      uciStrings: List[String],
+      uciStrings: ActionStrs,
       activePlayer: Player,
       initialFen: Option[FEN],
       variant: strategygames.go.variant.Variant
   ): Validated[String, Game] = {
     val fen = initialFen.getOrElse(variant.initialFen)
     val r   = gameWithActionWhileValid(
-      // TODO this needs to deal with multiaction properly (take ActionStrs not List[String])
-      uciStrings.map(List(_)),
+      uciStrings,
       fen.player.getOrElse(Player.P1),
       activePlayer,
       fen,

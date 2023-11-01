@@ -437,32 +437,36 @@ object Replay {
 
   def gameFromUciStrings(
       lib: GameLogic,
-      ucis: List[String],
+      ucis: ActionStrs,
       activePlayer: Player,
       initialFen: Option[FEN],
       variant: Variant,
       finalSquare: Boolean = false
   ): Validated[String, Game] = (lib, variant) match {
+    //All apart from Go can convert ucis to List[String] because the way the internal
+    //function handles this List[String] is safe for multiaction
     case (GameLogic.Draughts(), Variant.Draughts(variant))         =>
       draughts.Replay
-        .gameFromUciStrings(ucis, initialFen.map(_.toDraughts), variant, finalSquare)
+        .gameFromUciStrings(ucis.flatten.toList, initialFen.map(_.toDraughts), variant, finalSquare)
         .map(Game.Draughts)
     case (GameLogic.Chess(), Variant.Chess(variant))               =>
       chess.Replay
-        .gameFromUciStrings(ucis, initialFen.map(_.toChess), variant)
+        .gameFromUciStrings(ucis.flatten.toList, initialFen.map(_.toChess), variant)
         .map(Game.Chess)
     case (GameLogic.FairySF(), Variant.FairySF(variant))           =>
       fairysf.Replay
-        .gameFromUciStrings(ucis, initialFen.map(_.toFairySF), variant)
+        .gameFromUciStrings(ucis.flatten.toList, initialFen.map(_.toFairySF), variant)
         .map(Game.FairySF)
     case (GameLogic.Samurai(), Variant.Samurai(variant))           =>
       samurai.Replay
-        .gameFromUciStrings(ucis, initialFen.map(_.toSamurai), variant)
+        .gameFromUciStrings(ucis.flatten.toList, initialFen.map(_.toSamurai), variant)
         .map(Game.Samurai)
     case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant)) =>
       togyzkumalak.Replay
-        .gameFromUciStrings(ucis, initialFen.map(_.toTogyzkumalak), variant)
+        .gameFromUciStrings(ucis.flatten.toList, initialFen.map(_.toTogyzkumalak), variant)
         .map(Game.Togyzkumalak)
+    //Go doesnt convert ucis as it runs a different internal function that wants ActionStrs
+    //due to optimisation issues
     case (GameLogic.Go(), Variant.Go(variant))                     =>
       go.Replay
         .gameFromUciStrings(ucis, activePlayer, initialFen.map(_.toGo), variant)

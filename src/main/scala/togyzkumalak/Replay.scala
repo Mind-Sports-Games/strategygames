@@ -49,7 +49,9 @@ object Replay {
     val fen                            = initialFen.getOrElse(variant.initialFen)
     val (init, gameWithActions, error) =
       gameWithActionWhileValid(actionStrs, startPlayer, activePlayer, fen, variant)
-    val game                           = gameWithActions.reverse.last._1
+    val game                           =
+      gameWithActions.reverse.lastOption.map(_._1).getOrElse(init)
+
     error match {
       case None      =>
         Validated.valid(
