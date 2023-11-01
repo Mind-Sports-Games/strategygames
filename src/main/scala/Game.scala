@@ -163,6 +163,9 @@ abstract class Game(
 
   def withTurns(p: Int, t: Int): Game
 
+  def hasJustSwitchedTurns: Boolean =
+    player == Player.fromTurnCount(actionStrs.size + startedAtTurn)
+
   // TODO: Again, unsafe until we figure out the better design.
   def toChess: chess.Game
   def toDraughts: draughts.DraughtsGame
