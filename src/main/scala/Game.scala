@@ -147,6 +147,8 @@ abstract class Game(
   def copy(situation: Situation, plies: Int, turnCount: Int): Game
   def copy(situation: Situation): Game
 
+  def hasJustSwitchedTurns: Boolean
+
   def player = situation.player
 
   def board = situation.board
@@ -164,9 +166,6 @@ abstract class Game(
   // def playedPlies = actionStrs.map(_.size).sum
 
   def withTurnsAndPlies(p: Int, t: Int): Game
-
-  def hasJustSwitchedTurns: Boolean =
-    player == Player.fromTurnCount(actionStrs.size + startedAtTurn)
 
   // TODO: Again, unsafe until we figure out the better design.
   def toChess: chess.Game
@@ -283,6 +282,8 @@ object Game {
       case Situation.Chess(situation) => Chess(g.copy(situation = situation))
       case _                          => sys.error("Unable to copy chess game with non-chess arguments")
     }
+
+    def hasJustSwitchedTurns: Boolean = g.hasJustSwitchedTurns
 
     def withTurnsAndPlies(p: Int, t: Int): Game = Chess(g.withTurnsAndPlies(p, t))
 
@@ -415,6 +416,8 @@ object Game {
       case _                             => sys.error("Unable to copy draughts game with non-draughts arguments")
     }
 
+    def hasJustSwitchedTurns: Boolean = g.hasJustSwitchedTurns
+
     def withTurnsAndPlies(p: Int, t: Int): Game = Draughts(g.withTurnsAndPlies(p, t))
 
     def toChess: chess.Game               = sys.error("Can't turn a draughts game into a chess game")
@@ -530,6 +533,8 @@ object Game {
       case _                            => sys.error("Unable to copy fairysf game with non-fairysf arguments")
     }
 
+    def hasJustSwitchedTurns: Boolean = g.hasJustSwitchedTurns
+
     def withTurnsAndPlies(p: Int, t: Int): Game = FairySF(g.withTurnsAndPlies(p, t))
 
     def toFairySF: fairysf.Game           = g
@@ -629,6 +634,8 @@ object Game {
       case Situation.Samurai(situation) => Samurai(g.copy(situation = situation))
       case _                            => sys.error("Unable to copy samurai game with non-samurai arguments")
     }
+
+    def hasJustSwitchedTurns: Boolean = g.hasJustSwitchedTurns
 
     def withTurnsAndPlies(p: Int, t: Int): Game = Samurai(g.withTurnsAndPlies(p, t))
 
@@ -730,6 +737,8 @@ object Game {
       case Situation.Togyzkumalak(situation) => Togyzkumalak(g.copy(situation = situation))
       case _                                 => sys.error("Unable to copy togyzkumalak game with non-togyzkumalak arguments")
     }
+
+    def hasJustSwitchedTurns: Boolean = g.hasJustSwitchedTurns
 
     def withTurnsAndPlies(p: Int, t: Int): Game = Togyzkumalak(g.withTurnsAndPlies(p, t))
 
@@ -840,6 +849,8 @@ object Game {
       case Situation.Go(situation) => Go(g.copy(situation = situation))
       case _                       => sys.error("Unable to copy go game with non-go arguments")
     }
+
+    def hasJustSwitchedTurns: Boolean = g.hasJustSwitchedTurns
 
     def withTurnsAndPlies(p: Int, t: Int): Game = Go(g.withTurnsAndPlies(p, t))
 

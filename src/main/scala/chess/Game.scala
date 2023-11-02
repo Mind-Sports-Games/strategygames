@@ -33,7 +33,7 @@ case class Game(
       situation = newSituation,
       plies = plies + 1,
       turnCount = turnCount + (if (switchPlayer) 1 else 0),
-      actionStrs = applyActionStr(pgn.Dumper(situation, move, newSituation), switchPlayer),
+      actionStrs = applyActionStr(pgn.Dumper(situation, move, newSituation)),
       clock = applyClock(move.metrics, newSituation.status.isEmpty, switchPlayer)
     )
   }
@@ -55,7 +55,7 @@ case class Game(
       situation = newSituation,
       plies = plies + 1,
       turnCount = turnCount + (if (switchPlayer) 1 else 0),
-      actionStrs = applyActionStr(pgn.Dumper(drop, newSituation), switchPlayer),
+      actionStrs = applyActionStr(pgn.Dumper(drop, newSituation)),
       clock = applyClock(drop.metrics, newSituation.status.isEmpty, switchPlayer)
     )
   }
@@ -75,12 +75,15 @@ case class Game(
     case u: Uci.Drop => apply(u)
   }) map { case (g, a) => g -> a }
 
-  private def applyActionStr(actionStr: String, switchPlayer: Boolean): VActionStrs = {
-    if (switchPlayer || actionStrs.size == 0)
+  private def applyActionStr(actionStr: String): VActionStrs = {
+    if (hasJustSwitchedTurns || actionStrs.size == 0)
       actionStrs :+ Vector(actionStr)
     else
       actionStrs.updated(actionStrs.size - 1, actionStrs(actionStrs.size - 1) :+ actionStr)
   }
+
+  def hasJustSwitchedTurns: Boolean =
+    player == Player.fromTurnCount(actionStrs.size + startedAtTurn)
 
   def player = situation.player
 

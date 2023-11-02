@@ -34,7 +34,7 @@ case class Game(
       situation = newSituation,
       plies = plies + 1,
       turnCount = turnCount + (if (switchPlayer) 1 else 0),
-      actionStrs = applyActionStr(move.toUci.uci, switchPlayer),
+      actionStrs = applyActionStr(move.toUci.uci),
       clock = applyClock(move.metrics, newSituation.status.isEmpty, switchPlayer)
     )
   }
@@ -56,7 +56,7 @@ case class Game(
       situation = newSituation,
       plies = plies + 1,
       turnCount = turnCount + (if (switchPlayer) 1 else 0),
-      actionStrs = applyActionStr(drop.toUci.uci, switchPlayer),
+      actionStrs = applyActionStr(drop.toUci.uci),
       clock = applyClock(drop.metrics, newSituation.status.isEmpty, switchPlayer)
     )
   }
@@ -76,12 +76,11 @@ case class Game(
       }
     }
 
-  private def applyActionStr(actionStr: String, switchPlayer: Boolean): VActionStrs = {
-    if (switchPlayer || actionStrs.size == 0)
+  private def applyActionStr(actionStr: String): VActionStrs = {
+    if (hasJustSwitchedTurns || actionStrs.size == 0)
       actionStrs :+ Vector(actionStr)
     else
       actionStrs.updated(actionStrs.size - 1, actionStrs(actionStrs.size - 1) :+ actionStr)
-
   }
 
   def player = situation.player
@@ -89,6 +88,9 @@ case class Game(
   def board = situation.board
 
   def halfMoveClock: Int = board.history.halfMoveClock
+
+  def hasJustSwitchedTurns: Boolean =
+    player == Player.fromTurnCount(actionStrs.size + startedAtTurn)
 
   // Aka Fullmove number (in Forsyth-Edwards Notation):
   // The number of the completed turns by each player ('full move')

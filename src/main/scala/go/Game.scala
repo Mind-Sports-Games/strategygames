@@ -1,5 +1,5 @@
 package strategygames.go
-import strategygames.{ Clock, MoveMetrics, VActionStrs }
+import strategygames.{ Clock, MoveMetrics, Player, VActionStrs }
 
 import cats.data.Validated
 
@@ -22,7 +22,7 @@ case class Game(
       situation = newSituation,
       plies = plies + 1,
       turnCount = turnCount + (if (switchPlayer) 1 else 0),
-      actionStrs = applyActionStr(drop.toUci.uci, switchPlayer),
+      actionStrs = applyActionStr(drop.toUci.uci),
       clock = applyClock(drop.metrics, newSituation.status.isEmpty, switchPlayer)
     )
   }
@@ -35,7 +35,7 @@ case class Game(
       situation = newSituation,
       plies = plies + 1,
       turnCount = turnCount + (if (switchPlayer) 1 else 0),
-      actionStrs = applyActionStr(pass.toUci.uci, switchPlayer),
+      actionStrs = applyActionStr(pass.toUci.uci),
       clock =
         applyClock(pass.metrics, newSituation.status.isEmpty, switchPlayer, newSituation.canSelectSquares)
     )
@@ -49,7 +49,7 @@ case class Game(
       situation = newSituation,
       plies = plies + 1,
       turnCount = turnCount + (if (switchPlayer) 1 else 0),
-      actionStrs = applyActionStr(ss.toUci.uci, switchPlayer),
+      actionStrs = applyActionStr(ss.toUci.uci),
       clock = applyClock(ss.metrics, newSituation.status.isEmpty, switchPlayer)
     )
   }
@@ -93,8 +93,8 @@ case class Game(
     case u: Uci.SelectSquares => apply(u)
   }) map { case (g, a) => g -> a }
 
-  private def applyActionStr(actionStr: String, switchPlayer: Boolean): VActionStrs = {
-    if (switchPlayer || actionStrs.size == 0)
+  private def applyActionStr(actionStr: String): VActionStrs = {
+    if (hasJustSwitchedTurns || actionStrs.size == 0)
       actionStrs :+ Vector(actionStr)
     else
       actionStrs.updated(actionStrs.size - 1, actionStrs(actionStrs.size - 1) :+ actionStr)
@@ -114,6 +114,9 @@ case class Game(
         else newC
       }
     }
+
+  def hasJustSwitchedTurns: Boolean =
+    player == Player.fromTurnCount(actionStrs.size + startedAtTurn)
 
   def player = situation.player
 

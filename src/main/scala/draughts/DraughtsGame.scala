@@ -125,6 +125,9 @@ case class DraughtsGame(
   // else
   //  actionStrs.updated(actionStrs.size, actionStrs(actionStrs.size) :+ actionStr)
 
+  def hasJustSwitchedTurns: Boolean =
+    player == Player.fromTurnCount(actionStrs.size + startedAtTurn)
+
   def player = situation.player
 
   def board = situation.board
