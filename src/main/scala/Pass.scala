@@ -7,6 +7,7 @@ import strategygames.format.Uci
 sealed abstract class Pass(
     val situationBefore: Situation,
     val after: Board,
+    val autoEndTurn: Boolean,
     val metrics: MoveMetrics = MoveMetrics()
 ) extends Action(situationBefore, after, metrics) {
 
@@ -30,6 +31,7 @@ object Pass {
       extends Pass(
         Situation.Go(p.situationBefore),
         Board.Go(p.after),
+        p.autoEndTurn,
         p.metrics
       ) {
 

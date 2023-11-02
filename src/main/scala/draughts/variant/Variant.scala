@@ -22,7 +22,6 @@ abstract class Variant private[variant] (
   def pieces: Map[Pos, Piece]
   def initialFen: FEN
   def startPlayer: Player               = P1
-  def plysPerTurn: Int                  = 1
   def startingPosition: StartingPosition
   val openingTables: List[OpeningTable] = Nil
   lazy val shortInitialFen: FEN         = FEN(initialFen.value.split(":").take(3).mkString(":"))

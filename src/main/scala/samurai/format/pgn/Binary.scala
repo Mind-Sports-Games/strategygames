@@ -1,7 +1,7 @@
 package strategygames.samurai
 package format.pgn
 
-import strategygames.GameFamily
+import strategygames.{ ActionStrs, GameFamily }
 import strategygames.samurai.format.Uci
 
 import scala.util.Try
@@ -10,11 +10,15 @@ object Binary {
 
   // writeMove only used in tests for chess/draughts
   // would need to reconsider how we do this when we write gameFamily at the start of the game
-  // def writeMove(gf: GameFamily, m: String)             = Try(Writer.move(gf, m))
-  def writeMoves(gf: GameFamily, ms: Iterable[String]) = Try(Writer.moves(gf, ms))
+  // def writeMove(gf: GameFamily, m: String)             = Try(Writer.ply(gf, m))
+  def writeMoves(gf: GameFamily, ms: Iterable[String]) = Try(Writer.plies(gf, ms))
 
-  def readMoves(bs: List[Byte])          = Try(Reader moves bs)
-  def readMoves(bs: List[Byte], nb: Int) = Try(Reader.moves(bs, nb))
+  def writeActionStrs(gf: GameFamily, ms: ActionStrs) = Try(Writer.actionStrs(gf, ms))
+
+  def readActionStrs(bs: List[Byte])          = Try(Reader actionStrs bs)
+  def readActionStrs(bs: List[Byte], nb: Int) = Try(Reader.actionStrs(bs, nb))
+
+  // No MoveType implemented for Delimiter/Multimove
 
   private object MoveType {
     val Move = 0
@@ -25,19 +29,23 @@ object Binary {
 
     private val maxPlies = 600
 
-    def moves(bs: List[Byte]): List[String]          = moves(bs, maxPlies)
-    def moves(bs: List[Byte], nb: Int): List[String] = intMoves(bs map toInt, nb, None)
+    def actionStrs(bs: List[Byte]): ActionStrs          = actionStrs(bs, maxPlies)
+    def actionStrs(bs: List[Byte], nb: Int): ActionStrs = toActionStrs(intPlies(bs map toInt, nb, None))
 
-    def intMoves(bs: List[Int], pliesToGo: Int, gf: Option[GameFamily]): List[String] =
+    def toActionStrs(plies: List[String]): ActionStrs = plies.map(List(_))
+
+    def intPlies(bs: List[Int], pliesToGo: Int, gf: Option[GameFamily]): List[String] =
       (bs, gf) match {
         case (_, _) if pliesToGo <= 0                                       => Nil
         case (Nil, _)                                                       => Nil
-        case (b1 :: rest, None)                                             => intMoves(rest, pliesToGo, Some(GameFamily(b1)))
+        case (b1 :: rest, None)                                             => intPlies(rest, pliesToGo, Some(GameFamily(b1)))
         case (b1 :: b2 :: rest, Some(gf)) if headerBit(b1) == MoveType.Move =>
-          moveUci(b1, b2) :: intMoves(rest, pliesToGo - 1, Some(gf))
+          moveUci(b1, b2) :: intPlies(rest, pliesToGo - 1, Some(gf))
         case (x, _)                                                         => !!(x map showByte mkString ",")
       }
 
+    // This is hugely inefficient for Oware
+    // Its what we put in place when we thought the GameLogic might include more than just Oware
     // 1 movetype (move or drop)
     // 7 pos (from)
     // ----
@@ -48,6 +56,7 @@ object Binary {
 
     def posFromInt(b: Int): String = Pos(right(b, 7)).get.toString()
 
+    // not even possible in Oware
     def promotionFromInt(b: Int): String = headerBit(b) match {
       case 1 => "+"
       case _ => ""
@@ -67,14 +76,17 @@ object Binary {
 
   private object Writer {
 
-    def move(gf: GameFamily, str: String): List[Byte] =
+    def ply(gf: GameFamily, str: String): List[Byte] =
       (str match {
         case Uci.Move.moveR(src, dst, promotion) => moveUci(src, dst, promotion)
         case _                                   => sys.error(s"Invalid move to write: ${str}")
       }) map (_.toByte)
 
-    def moves(gf: GameFamily, strs: Iterable[String]): Array[Byte] =
-      (gf.id.toByte :: strs.toList.flatMap(move(gf, _))).to(Array)
+    def plies(gf: GameFamily, strs: Iterable[String]): Array[Byte] =
+      (gf.id.toByte :: strs.toList.flatMap(ply(gf, _))).to(Array)
+
+    // can flatten because this GameLogic doesn't support multimove
+    def actionStrs(gf: GameFamily, strs: ActionStrs): Array[Byte] = plies(gf, strs.flatten)
 
     def moveUci(src: String, dst: String, promotion: String) = List(
       (headerBit(MoveType.Move)) + Pos.fromKey(src).get.index,

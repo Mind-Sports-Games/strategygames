@@ -53,9 +53,9 @@ case class Actor(
     dirs flatMap { _._2(pos) } flatMap { to =>
       board.pieces.get(to) match {
         case None if checkPromotion  =>
-          board.move(pos, to) map { move(to, _, None, None) } flatMap board.variant.maybePromote
+          board.move(pos, to) map { move(to, _, true, None, None) } flatMap board.variant.maybePromote
         case None if !checkPromotion =>
-          board.move(pos, to) map { move(to, _, None, None) }
+          board.move(pos, to) map { move(to, _, true, None, None) }
         case Some(_)                 => Nil
       }
     }
@@ -69,7 +69,7 @@ case class Actor(
         case Some(to) =>
           board.pieces.get(to) match {
             case None =>
-              board.move(pos, to).foreach { buf += move(to, _, None, None) }
+              board.move(pos, to).foreach { buf += move(to, _, true, None, None) }
               addAll(to, dir)
             case _    => // occupied
           }
@@ -84,6 +84,8 @@ case class Actor(
   def move(
       dest: Pos,
       after: Board,
+      /* Set this to upgrade to multiaction */
+      autoEndTurn: Boolean,
       /* Single capture or none */
       capture: Option[Pos],
       taken: Option[Pos]
@@ -93,6 +95,7 @@ case class Actor(
     dest = dest,
     situationBefore = Situation(board, piece.player),
     after = after,
+    autoEndTurn = autoEndTurn,
     capture = capture.map(List(_)),
     taken = taken.map(List(_))
   )
@@ -106,13 +109,16 @@ case class Actor(
       capture: List[Pos],
       /** Pieces taken from the board */
       taken: List[Pos],
-      promotion: Option[PromotableRole] = None
+      promotion: Option[PromotableRole] = None,
+      /** TODO Set this to upgrade to multimove */
+      autoEndTurn: Boolean = true
   ) = Move(
     piece = piece,
     orig = pos,
     dest = dest,
     situationBefore = Situation(board, piece.player),
     after = after,
+    autoEndTurn = autoEndTurn,
     capture = Some(capture),
     taken = Some(taken),
     promotion = promotion

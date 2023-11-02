@@ -2,6 +2,7 @@ package strategygames.draughts
 package format.pdn
 import strategygames.{
   Action => StratAction,
+  ActionStrs,
   ByoyomiClock,
   FischerClock,
   Move => StratMove,
@@ -30,12 +31,12 @@ object Reader {
   def full(pdn: String, tags: Tags = Tags.empty): Validated[String, Result] =
     fullWithSans(pdn, identity, tags, true)
 
-  def moves(
-      moveStrs: Iterable[String],
+  def replayResult(
+      actionStrs: ActionStrs,
       tags: Tags,
       iteratedCapts: Boolean = false
   ): Validated[String, Result] =
-    movesWithSans(moveStrs, identity, tags, iteratedCapts)
+    replayResultFromActionStrsUsingSan(actionStrs, identity, tags, iteratedCapts)
 
   def fullWithSans(
       pdn: String,
@@ -50,14 +51,15 @@ object Reader {
   def fullWithSans(parsed: ParsedPdn, op: Sans => Sans): Result =
     makeReplay(makeGame(parsed.tags), op(parsed.sans))
 
-  def movesWithSans(
-      moveStrs: Iterable[String],
+  def replayResultFromActionStrsUsingSan(
+      actionStrs: ActionStrs,
       op: Sans => Sans,
       tags: Tags,
       iteratedCapts: Boolean = false
   ): Validated[String, Result] =
-    Parser.moves(moveStrs, tags.draughtsVariant | variant.Variant.default) map { moves =>
-      makeReplay(makeGame(tags), op(moves), iteratedCapts)
+    // Its ok to flatten actionStrs as the game is built back up again from the Situation
+    Parser.sans(actionStrs.flatten, tags.draughtsVariant | variant.Variant.default) map { sans =>
+      makeReplay(makeGame(tags), op(sans), iteratedCapts)
     }
 
   // remove invisible byte order mark
@@ -89,7 +91,7 @@ object Reader {
                     .ambiguitiesMove(move) > ambs.length + 1
                 )
                   newAmb = (san -> move.toUci.uci).some
-                mk(replay.addMove(move, iteratedCapts), rest, newAmb.fold(ambs)(_ :: ambs))
+                mk(replay.addAction(move, iteratedCapts), rest, newAmb.fold(ambs)(_ :: ambs))
               }
             )
         case _           => Result.Complete(replay)
@@ -108,7 +110,8 @@ object Reader {
       fen = tags.draughtsFen
     )
     g.copy(
-      startedAtTurn = g.turns,
+      startedAtPly = g.plies,
+      startedAtTurn = g.turnCount,
       clock = tags.clockConfig.flatMap {
         case fc: FischerClock.Config => Some(FischerClock.apply(fc))
         case bc: ByoyomiClock.Config => Some(ByoyomiClock.apply(bc))

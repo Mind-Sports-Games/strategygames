@@ -1,6 +1,8 @@
 package strategygames.draughts
 package opening
 
+import strategygames.ActionStrs
+
 import cats.implicits._
 
 final class Ecopening(
@@ -50,9 +52,9 @@ object Ecopening {
       })
     }
 
-  def fromGame(pdnmoves: List[String]): Option[Ecopening] = Replay
+  def fromGame(actionStrs: ActionStrs): Option[Ecopening] = Replay
     .boards(
-      moveStrs = pdnmoves take EcopeningDB.MAX_MOVES,
+      actionStrs = actionStrs take EcopeningDB.MAX_TURNS,
       initialFen = none,
       variant = variant.Standard
     )

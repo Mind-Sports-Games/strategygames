@@ -1,6 +1,12 @@
 package strategygames.chess
 package format.pgn
-import strategygames.{ ByoyomiClock, FischerClock, Move => StratMove, Situation => StratSituation }
+import strategygames.{
+  ActionStrs,
+  ByoyomiClock,
+  FischerClock,
+  Move => StratMove,
+  Situation => StratSituation
+}
 
 import strategygames.format.pgn.{ ParsedPgn, Sans, Tags }
 
@@ -24,8 +30,8 @@ object Reader {
   def full(pgn: String, tags: Tags = Tags.empty): Validated[String, Result] =
     fullWithSans(pgn, identity, tags)
 
-  def moves(moveStrs: Iterable[String], tags: Tags): Validated[String, Result] =
-    movesWithSans(moveStrs, identity, tags)
+  def replayResult(actionStrs: ActionStrs, tags: Tags): Validated[String, Result] =
+    replayResultFromActionStrsUsingSan(actionStrs, identity, tags)
 
   def fullWithSans(pgn: String, op: Sans => Sans, tags: Tags = Tags.empty): Validated[String, Result] =
     Parser.full(cleanUserInput(pgn)) map { parsed =>
@@ -35,9 +41,14 @@ object Reader {
   def fullWithSans(parsed: ParsedPgn, op: Sans => Sans): Result =
     makeReplay(makeGame(parsed.tags), op(parsed.sans))
 
-  def movesWithSans(moveStrs: Iterable[String], op: Sans => Sans, tags: Tags): Validated[String, Result] =
-    Parser.moves(moveStrs, tags.chessVariant | variant.Variant.default) map { moves =>
-      makeReplay(makeGame(tags), op(moves))
+  def replayResultFromActionStrsUsingSan(
+      actionStrs: ActionStrs,
+      op: Sans => Sans,
+      tags: Tags
+  ): Validated[String, Result] =
+    // Its ok to flatten actionStrs as the game is built back up again from the Situation
+    Parser.sans(actionStrs.flatten, tags.chessVariant | variant.Variant.default) map { sans =>
+      makeReplay(makeGame(tags), op(sans))
     }
 
   // remove invisible byte order mark
@@ -48,7 +59,7 @@ object Reader {
       case (Result.Complete(replay), san) =>
         san(StratSituation.wrap(replay.state.situation)).fold(
           err => Result.Incomplete(replay, err),
-          action => Result.Complete(replay addMove action.toChess)
+          action => Result.Complete(replay addAction action.toChess)
         )
       case (r: Result.Incomplete, _)      => r
     }
@@ -59,7 +70,8 @@ object Reader {
       fen = tags.chessFen
     )
     g.copy(
-      startedAtTurn = g.turns,
+      startedAtPly = g.plies,
+      startedAtTurn = g.turnCount,
       clock = tags.clockConfig.flatMap {
         case fc: FischerClock.Config => Some(FischerClock.apply(fc))
         case bc: ByoyomiClock.Config => Some(ByoyomiClock.apply(bc))

@@ -1,8 +1,6 @@
 package strategygames.go.format
 import strategygames.go._
 
-import strategygames.GameFamily
-
 import cats.data.Validated
 import cats.implicits._
 

@@ -11,6 +11,7 @@ sealed abstract class Move(
     val dest: Pos,
     val situationBefore: Situation,
     val after: Board,
+    val autoEndTurn: Boolean,
     val capture: Option[List[Pos]],
     val promotion: Option[PromotableRole] = None,
     val taken: Option[List[Pos]] = None,
@@ -55,6 +56,7 @@ object Move {
         Pos.Chess(m.dest),
         Situation.Chess(m.situationBefore),
         Board.Chess(m.after),
+        m.autoEndTurn,
         m.capture match {
           case Some(capture) => Option(List(Pos.Chess(capture)))
           case None          => None
@@ -107,6 +109,7 @@ object Move {
         Pos.Draughts(m.dest),
         Situation.Draughts(m.situationBefore),
         Board.Draughts(m.after),
+        m.autoEndTurn,
         m.capture match {
           case Some(capture) => Some(capture.map(Pos.Draughts))
           case None          => None
@@ -157,6 +160,7 @@ object Move {
         Pos.FairySF(m.dest),
         Situation.FairySF(m.situationBefore),
         Board.FairySF(m.after),
+        m.autoEndTurn,
         m.capture match {
           case Some(capture) => Option(List(Pos.FairySF(capture)))
           case None          => None
@@ -208,6 +212,7 @@ object Move {
         Pos.Samurai(m.dest),
         Situation.Samurai(m.situationBefore),
         Board.Samurai(m.after),
+        m.autoEndTurn,
         m.capture match {
           case Some(capture) => Option(List(Pos.Samurai(capture)))
           case None          => None
@@ -252,6 +257,7 @@ object Move {
         Pos.Togyzkumalak(m.dest),
         Situation.Togyzkumalak(m.situationBefore),
         Board.Togyzkumalak(m.after),
+        m.autoEndTurn,
         m.capture match {
           case Some(capture) => Option(List(Pos.Togyzkumalak(capture)))
           case None          => None

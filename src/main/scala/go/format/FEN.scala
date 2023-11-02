@@ -10,7 +10,7 @@ final case class FEN(value: String) extends AnyVal {
   def board: String = removePockets(value.takeWhile(_ != ' '))
 
   def player: Option[Player] =
-    value.split(' ').lift(1) flatMap (_.headOption) flatMap Player.apply
+    value.split(' ').lift(1).flatMap(_.headOption).flatMap(Player.inverseApply)
 
   def player1Score: Int = intFromFen(3).getOrElse(0)
 

@@ -69,7 +69,6 @@ abstract class Variant private[variant] (
   def pieces: PieceMap = Api.pieceMapFromFen(key, initialFen.value)
 
   def startPlayer: Player = P1
-  def plysPerTurn: Int    = 1
 
   val kingPiece: Option[Role] = None
 
@@ -123,7 +122,8 @@ abstract class Variant private[variant] (
                   ),
                   halfMoveClock = situation.history.halfMoveClock + situation.player.fold(0, 1)
                 )
-              )
+              ),
+            autoEndTurn = true
           )
         }
         case (destInt, dest)       => sys.error(s"Invalid pos from int: ${destInt}, ${dest}")
@@ -142,7 +142,8 @@ abstract class Variant private[variant] (
       after = situation.board.copy(
         uciMoves = situation.board.uciMoves :+ uciMove,
         position = newPosition.some
-      )
+      ),
+      autoEndTurn = true
     )
   }
 
@@ -157,7 +158,8 @@ abstract class Variant private[variant] (
       after = situation.board.copy(
         uciMoves = situation.board.uciMoves :+ uciMove,
         position = newPosition.some
-      )
+      ),
+      autoEndTurn = true
     )
   }
 

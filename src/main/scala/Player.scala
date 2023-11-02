@@ -67,7 +67,7 @@ object Player {
     override val hashCode = 2
   }
 
-  def fromPly(ply: Int, plysPerTurn: Int = 1) = fromP1(((ply / plysPerTurn) & 1) == 0)
+  def fromTurnCount(turn: Int) = fromP1((turn & 1) == 0)
 
   def fromP1(p1: Boolean): Player = if (p1) P1 else P2
 
@@ -87,6 +87,11 @@ object Player {
     if (c == '1' || c == 'w' || c == 'W' || c == 'S') Some(P1)
     else if (c == '2' || c == 'b' || c == 'B' || c == 'N') Some(P2)
     else None
+
+  def inverseApply(c: Char): Option[Player] =
+    if (c == 'b' || c == 'B') Some(P1)
+    else if (c == 'w' || c == 'W') Some(P2)
+    else apply(c)
 
   val p1: Player = P1
   val p2: Player = P2

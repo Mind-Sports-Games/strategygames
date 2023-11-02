@@ -68,7 +68,6 @@ abstract class Variant private[variant] (
 
   def initialFen: FEN     = format.Forsyth.initial
   def startPlayer: Player = P1
-  def plysPerTurn: Int    = 1
 
   def isValidPromotion(promotion: Option[PromotableRole]) =
     promotion match {

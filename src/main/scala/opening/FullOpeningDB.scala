@@ -2,7 +2,7 @@ package strategygames.opening
 
 import cats.syntax.option._
 
-import strategygames.GameLogic
+import strategygames.{ ActionStrs, GameLogic }
 import strategygames.format.FEN
 
 object FullOpeningDB {
@@ -48,43 +48,31 @@ object FullOpeningDB {
   }
 
   // assumes standard initial FEN and variant
-  def search(lib: GameLogic, moveStrs: Iterable[String]): Option[FullOpening.AtPly] =
+  def search(lib: GameLogic, actionStrs: ActionStrs): Option[FullOpening.AtPly] =
     lib match {
       case GameLogic.Draughts()     =>
         strategygames.draughts.opening.FullOpeningDB
-          .search(
-            moveStrs
-          )
+          .search(actionStrs)
           .map(fo => FullOpening.AtPly(FullOpening.Draughts(fo.opening), fo.ply))
       case GameLogic.Chess()        =>
         strategygames.chess.opening.FullOpeningDB
-          .search(
-            moveStrs
-          )
+          .search(actionStrs)
           .map(fo => FullOpening.AtPly(FullOpening.Chess(fo.opening), fo.ply))
       case GameLogic.FairySF()      =>
         strategygames.fairysf.opening.FullOpeningDB
-          .search(
-            moveStrs
-          )
+          .search(actionStrs)
           .map(fo => FullOpening.AtPly(FullOpening.FairySF(fo.opening), fo.ply))
       case GameLogic.Samurai()      =>
         strategygames.samurai.opening.FullOpeningDB
-          .search(
-            moveStrs
-          )
+          .search(actionStrs)
           .map(fo => FullOpening.AtPly(FullOpening.Samurai(fo.opening), fo.ply))
       case GameLogic.Togyzkumalak() =>
         strategygames.togyzkumalak.opening.FullOpeningDB
-          .search(
-            moveStrs
-          )
+          .search(actionStrs)
           .map(fo => FullOpening.AtPly(FullOpening.Togyzkumalak(fo.opening), fo.ply))
       case GameLogic.Go()           =>
         strategygames.go.opening.FullOpeningDB
-          .search(
-            moveStrs
-          )
+          .search(actionStrs)
           .map(fo => FullOpening.AtPly(FullOpening.Go(fo.opening), fo.ply))
     }
 

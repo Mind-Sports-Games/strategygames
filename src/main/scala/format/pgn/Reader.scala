@@ -103,20 +103,22 @@ object Reader {
       case GameLogic.Go()           => GoReader.fullWithSans(pgn, op, tags).map(Result.wrap)
     }
 
-  def movesWithSans(
+  // TODO Merge the following two functions by refactoring Sans and integrating to other libs
+  def replayResultFromActionStrsUsingSan(
       lib: GameLogic,
-      moveStrs: Iterable[String],
+      actionStrs: ActionStrs,
       op: Sans => Sans,
       tags: Tags,
       iteratedCapts: Boolean = false
   ): Validated[String, Result] =
     lib match {
       case GameLogic.Chess()        =>
-        ChessReader.movesWithSans(moveStrs, op, tags).map(Result.wrap)
+        ChessReader.replayResultFromActionStrsUsingSan(actionStrs, op, tags).map(Result.wrap)
       case GameLogic.Draughts()     =>
-        DraughtsReader.movesWithSans(moveStrs, op, tags, iteratedCapts).map(Result.wrap)
+        DraughtsReader
+          .replayResultFromActionStrsUsingSan(actionStrs, op, tags, iteratedCapts)
+          .map(Result.wrap)
       case GameLogic.FairySF()      =>
-        // FairySFReader.movesWithSans(moveStrs, op, tags).map(Result.wrap)
         sys.error("Sans not implemented for fairysf")
       case GameLogic.Samurai()      =>
         sys.error("Sans not implemented for samurai")
@@ -126,23 +128,29 @@ object Reader {
         sys.error("Sans not implemented for go")
     }
 
-  def movesWithPgns(
+  def replayResultFromActionStrs(
       lib: GameLogic,
-      moveStrs: Iterable[String],
-      op: Iterable[String] => Iterable[String],
+      actionStrs: ActionStrs,
+      op: ActionStrs => ActionStrs,
       tags: Tags
   ): Validated[String, Result] =
     lib match {
-      case GameLogic.Chess()        => sys.error("movesWithPgns not implemented for chess")
-      case GameLogic.Draughts()     => sys.error("movesWithPgns not implemented for draughts")
+      case GameLogic.Chess()        =>
+        sys.error(
+          "replayResultFromActionStrs not implemented for chess. Use replayResultFromActionStrsUsingSan"
+        )
+      case GameLogic.Draughts()     =>
+        sys.error(
+          "replayResultFromActionStrs not implemented for draughts. Use replayResultFromActionStrsUsingSan"
+        )
       case GameLogic.FairySF()      =>
-        FairySFReader.movesWithPgns(moveStrs, op, tags).map(Result.wrap)
+        FairySFReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
       case GameLogic.Samurai()      =>
-        SamuraiReader.movesWithPgns(moveStrs, op, tags).map(Result.wrap)
+        SamuraiReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
       case GameLogic.Togyzkumalak() =>
-        TogyzkumalakReader.movesWithPgns(moveStrs, op, tags).map(Result.wrap)
+        TogyzkumalakReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
       case GameLogic.Go()           =>
-        GoReader.movesWithPgns(moveStrs, op, tags).map(Result.wrap)
+        GoReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
     }
 
 }

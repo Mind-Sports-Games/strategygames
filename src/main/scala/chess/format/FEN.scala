@@ -8,6 +8,7 @@ final case class FEN(value: String) extends AnyVal {
 
   def fullMove: Option[Int] = value.split(' ').lift(5).flatMap(_.toIntOption)
 
+  // this only works for LOA because the fen uses w to mean p1 and b to mean p2
   def player: Option[Player] =
     value.split(' ').lift(1) flatMap (_.headOption) flatMap Player.apply
 

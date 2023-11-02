@@ -10,30 +10,41 @@ import strategygames.fairysf.format.pgn.{ Parser, Reader }
 import strategygames.fairysf.format.{ FEN, Forsyth, Uci }
 import strategygames.{
   Action => StratAction,
+  ActionStrs,
   Drop => StratDrop,
   Move => StratMove,
   Situation => StratSituation
 }
 
-case class Replay(setup: Game, moves: List[Action], state: Game) {
+case class Replay(setup: Game, actions: List[Action], state: Game) {
 
-  lazy val chronoMoves = moves.reverse
+  lazy val chronoPlies = actions.reverse
 
-  def addMove(action: Action) = action match {
+  lazy val chronoActions: List[List[Action]] =
+    chronoPlies
+      .drop(1)
+      .foldLeft(List(chronoPlies.take(1))) { case (turn, action) =>
+        if (turn.head.head.player != action.player) {
+          List(action) +: turn
+        } else {
+          (turn.head :+ action) +: turn.tail
+        }
+      }
+      .reverse
+
+  def addAction(action: Action) = action match {
     case m: Move =>
       copy(
-        moves = m.applyVariantEffect :: moves,
+        actions = m.applyVariantEffect :: actions,
         state = state.apply(m)
       )
     case d: Drop =>
       copy(
-        moves = d :: moves,
+        actions = d :: actions,
         state = state.applyDrop(d)
       )
   }
 
-  def moveAtPly(ply: Int): Option[Action] =
-    chronoMoves lift (ply - 1 - setup.startedAtTurn)
 }
 
 object Replay {
@@ -41,15 +52,21 @@ object Replay {
   def apply(game: Game) = new Replay(game, Nil, game)
 
   def apply(
-      moveStrs: Iterable[String],
+      actionStrs: ActionStrs,
       initialFen: Option[FEN],
       variant: strategygames.fairysf.variant.Variant
   ): Validated[String, Reader.Result] = {
-    val fen                  = initialFen.getOrElse(variant.initialFen)
-    val (init, moves, error) = gameMoveWhileValid__impl(moveStrs.toSeq, fen, variant)
-    val game                 = moves.reverse.last._1
+    val fen                            = initialFen.getOrElse(variant.initialFen)
+    val (init, gameWithActions, error) = gameWithActionWhileValid(actionStrs, fen, variant)
+    val game                           = gameWithActions.reverse.lastOption.map(_._1).getOrElse(init)
+
     error match {
-      case None      => Validated.valid(Reader.Result.Complete(new Replay(init, moves.reverse.map(_._2), game)))
+      case None      =>
+        Validated.valid(
+          Reader.Result.Complete(
+            new Replay(init, gameWithActions.reverse.map(_._2), game)
+          )
+        )
       case Some(msg) => Validated.invalid(msg)
     }
   }
@@ -79,6 +96,7 @@ object Replay {
         pocketData = apiPosition.pocketData,
         position = apiPosition.some
       ),
+      autoEndTurn = true,
       capture = None,
       promotion = promotion match {
         case "" => None
@@ -107,6 +125,7 @@ object Replay {
       after = before.situation.board.copy(
         pieces = before.situation.board.pieces - orig + ((dest, piece))
       ),
+      autoEndTurn = false,
       capture = None,
       promotion = promotion match {
         case "" => None
@@ -137,12 +156,13 @@ object Replay {
         uciMoves = uciMoves,
         pocketData = apiPosition.pocketData,
         position = apiPosition.some
-      )
+      ),
+      autoEndTurn = true
     )
   }
 
-  private def gameMoveWhileValid__impl(
-      moveStrs: Seq[String],
+  private def gameWithActionWhileValid(
+      actionStrs: ActionStrs,
       initialFen: FEN,
       variant: strategygames.fairysf.variant.Variant
   ): (Game, List[(Game, Action)], Option[String]) = {
@@ -205,8 +225,8 @@ object Replay {
         }
       }
 
-    def parseActionWithPrevious(moveStr: String, prevStr: Option[String]): (Game, Action) =
-      moveStr match {
+    def parseFairyUciWithPrevious(fairyUci: String, prevStr: Option[String]): (Game, Action) =
+      fairyUci match {
         case Uci.Move.moveR(orig, dest, promotion) =>
           replayMoveFromUci(
             Pos.fromKey(orig),
@@ -219,37 +239,45 @@ object Replay {
             Pos.fromKey(dest),
             prevStr
           )
-        case moveStr: String                       => sys.error(s"Invalid action for replay: $moveStr")
+        case fairyUci: String                      => sys.error(s"Invalid fairyUci for replay: $fairyUci")
       }
 
-    def parseAction(moveStr: String): (Game, Action) =
-      parseActionWithPrevious(moveStr, None)
+    def parseFairyUci(fairyUci: String): (Game, Action) =
+      parseFairyUciWithPrevious(fairyUci, None)
 
-    def moves: List[(Game, Action)] =
+    def gameWithActions: List[(Game, Action)] =
       if (!variant.switchPlayerAfterMove) {
         // Amazons. Don't want doubleMoveFormat from Parser, so dont ask for it
-        val moves       = Parser.pgnMovesToUciMoves(moveStrs)
-        val firstMove   = moves.headOption.toList
-        val pairedMoves = if (moves == firstMove) List() else moves.sliding(2)
-        (firstMove.map(parseAction)) ::: pairedMoves.map { case List(prev, move) =>
-          parseActionWithPrevious(move, Some(prev))
+        // We flatten actionStrs and handle as non multimove due to needing to merge
+        // Amazons Moves and Drops into a single action for the FairySF API
+        // If we don't want to flatten then we need to do something like samurai gamelogic
+        // where we use startPlayer and activePlayer
+        val fairyUcis       = Parser.flatActionStrsToFairyUciMoves(actionStrs.flatten)
+        val firstFairyUci   = fairyUcis.headOption.toList
+        val pairedFairyUcis = if (fairyUcis == firstFairyUci) List() else fairyUcis.sliding(2)
+        (firstFairyUci.map(parseFairyUci)) ::: pairedFairyUcis.map { case List(prev, fairyUci) =>
+          parseFairyUciWithPrevious(fairyUci, Some(prev))
         }.toList
       } else {
-        Parser.pgnMovesToUciMoves(moveStrs).map(parseAction)
+        // We flatten actionStrs and handle as non multimove as these variants are
+        // guaranteed to be non-multimove due to FairySF API
+        // If we don't want to flatten then we need to do something like samurai gamelogic
+        // where we use startPlayer and activePlayer
+        Parser.flatActionStrsToFairyUciMoves(actionStrs.flatten).map(parseFairyUci)
       }
 
-    (init, moves, errors match { case "" => None; case _ => errors.some })
+    (init, gameWithActions, errors match { case "" => None; case _ => errors.some })
   }
 
-  def gameMoveWhileValid(
-      moveStrs: Seq[String],
+  def gameWithUciWhileValid(
+      actionStrs: ActionStrs,
       initialFen: FEN,
       variant: strategygames.fairysf.variant.Variant
   ): (Game, List[(Game, Uci.WithSan)], Option[String]) = {
-    val (game, moves, error) = gameMoveWhileValid__impl(moveStrs, initialFen, variant)
+    val (game, gameWithActions, error) = gameWithActionWhileValid(actionStrs, initialFen, variant)
     (
       game,
-      moves.map { v =>
+      gameWithActions.map { v =>
         {
           val (state, action) = v
           val gf              = state.board.variant.gameFamily
@@ -288,7 +316,7 @@ object Replay {
       case Nil         => valid(replay)
       case uci :: rest =>
         uci(replay.state.situation) andThen { action =>
-          recursiveReplayFromUci(replay addMove action, rest)
+          recursiveReplayFromUci(replay addAction action, rest)
         }
     }
 
@@ -300,19 +328,20 @@ object Replay {
   } withVariant variant
 
   def boards(
-      moveStrs: Iterable[String],
+      actionStrs: ActionStrs,
       initialFen: Option[FEN],
       variant: strategygames.fairysf.variant.Variant
-  ): Validated[String, List[Board]] = situations(moveStrs, initialFen, variant) map (_ map (_.board))
+  ): Validated[String, List[Board]] = situations(actionStrs, initialFen, variant) map (_ map (_.board))
 
   def situations(
-      moveStrs: Iterable[String],
+      actionStrs: ActionStrs,
       initialFen: Option[FEN],
       variant: strategygames.fairysf.variant.Variant
   ): Validated[String, List[Situation]] = {
     val sit = initialFenToSituation(initialFen, variant)
-    Parser.moves(moveStrs, sit.board.variant) andThen { moves =>
-      recursiveSituations(sit, moves.value) map { sit :: _ }
+    // seemingly this isn't used
+    Parser.sans(actionStrs.flatten, sit.board.variant) andThen { sans =>
+      recursiveSituations(sit, sans.value) map { sit :: _ }
     }
   }
 
@@ -355,14 +384,14 @@ object Replay {
   }
 
   def apply(
-      moves: List[Uci],
+      ucis: List[Uci],
       initialFen: Option[FEN],
       variant: strategygames.fairysf.variant.Variant
   ): Validated[String, Replay] =
-    recursiveReplayFromUci(Replay(makeGame(variant, initialFen)), moves)
+    recursiveReplayFromUci(Replay(makeGame(variant, initialFen)), ucis)
 
   def plyAtFen(
-      moveStrs: Iterable[String],
+      actionStrs: ActionStrs,
       initialFen: Option[FEN],
       variant: strategygames.fairysf.variant.Variant,
       atFen: FEN
@@ -375,16 +404,17 @@ object Replay {
       val atFenTruncated        = truncateFen(atFen)
       def compareFen(fen: FEN)  = truncateFen(fen) == atFenTruncated
 
-      def recursivePlyAtFen(sit: Situation, sans: List[San], ply: Int): Validated[String, Int] =
+      def recursivePlyAtFen(sit: Situation, sans: List[San], ply: Int, turn: Int): Validated[String, Int] =
         sans match {
-          case Nil         => invalid(s"Can't find $atFenTruncated, reached ply $ply")
+          case Nil         => invalid(s"Can't find $atFenTruncated, reached ply $ply, turn $turn")
           case san :: rest =>
             san(StratSituation.wrap(sit)).map(fairysfAction) flatMap { action =>
-              val after = action.finalizeAfter
-              val fen   =
-                Forsyth >> Game(Situation(after, Player.fromPly(ply, variant.plysPerTurn)), turns = ply)
+              val after        = action.situationAfter
+              val newPlies     = ply + 1
+              val newTurnCount = turn + (if (sit.player != after.player) 1 else 0)
+              val fen          = Forsyth >> Game(after, plies = newPlies, turnCount = newTurnCount)
               if (compareFen(fen)) Validated.valid(ply)
-              else recursivePlyAtFen(Situation(after, !sit.player), rest, ply + 1)
+              else recursivePlyAtFen(after, rest, newPlies, newTurnCount)
             }
         }
 
@@ -392,13 +422,17 @@ object Replay {
         Forsyth.<<@(variant, _)
       } | Situation(variant)
 
-      Parser.moves(moveStrs, sit.board.variant) andThen { moves =>
-        recursivePlyAtFen(sit, moves.value, 1)
+      // seemingly this isn't used
+      Parser.sans(actionStrs.flatten, sit.board.variant) andThen { sans =>
+        recursivePlyAtFen(sit, sans.value, 0, 0)
       }
     }
 
   private def makeGame(variant: strategygames.fairysf.variant.Variant, initialFen: Option[FEN]): Game = {
     val g = Game(variant.some, initialFen)
-    g.copy(startedAtTurn = g.turns)
+    g.copy(
+      startedAtPly = g.plies,
+      startedAtTurn = g.turnCount
+    )
   }
 }

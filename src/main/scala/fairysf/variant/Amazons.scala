@@ -26,7 +26,6 @@ case object Amazons
   override def dropsVariant          = true
   override def canOfferDraw          = false
   override val switchPlayerAfterMove = false
-  override val plysPerTurn           = 2
 
   override def hasAnalysisBoard: Boolean = false
   override def hasFishnet: Boolean       = true
@@ -98,6 +97,7 @@ case object Amazons
                   after = situation.board.copy(
                     pieces = situation.board.pieces - orig + ((dest, piece))
                   ),
+                  autoEndTurn = false, // always false for Amazons as we follow a Move with a Drop
                   capture = None,
                   promotion = None,
                   castle = None,
@@ -134,7 +134,8 @@ case object Amazons
                   pieces = situation.board.pieces + ((dest, piece)),
                   uciMoves = situation.board.uciMoves :+ uciMove,
                   position = newPosition.some
-                )
+                ),
+                autoEndTurn = true
               )
             }
             case dest       => sys.error(s"Invalid position from uci: ${defaultDropRole}@${dest}")

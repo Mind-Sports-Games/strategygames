@@ -6,7 +6,7 @@ object EcopeningDB {
 
   import Ecopening._
 
-  val MAX_MOVES = 25
+  val MAX_TURNS = 25
 
   lazy val all = allByEco.values.toList.sorted
 

@@ -27,18 +27,6 @@ import scala.util.matching.Regex
 // http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm
 object Parser {
 
-  def pgnMovesToUciMoves(pgnMoves: Iterable[String]): List[String] =
-    pgnMoves.toList.map(
-      _ match {
-        case Uci.Move.moveP(orig, dest, promotion) =>
-          promotion match {
-            case "" => s"${orig}${dest}"
-            case _  => s"${orig}${dest}+"
-          }
-        case s: String                             => s
-      }
-    )
-
   case class StrMove(
       san: String,
       glyphs: Glyphs,
@@ -49,9 +37,9 @@ object Parser {
   def full(pgn: String): Validated[String, ParsedPgn] =
     Validated.invalid(s"Not implemented full: ${pgn}") // TODO: ???
 
-  def moves(str: String, variant: Variant): Validated[String, Sans] =
+  def sans(str: String, variant: Variant): Validated[String, Sans] =
     Validated.invalid(s"Not implemented moves: ${str}") // TODO: ???
-  def moves(strMoves: Iterable[String], variant: Variant): Validated[String, Sans] =
+  def sans(strMoves: Iterable[String], variant: Variant): Validated[String, Sans] =
     Validated.invalid(s"Not implemented iterable moves: ${strMoves}") // TODO: ???
   private def objMoves(strMoves: List[StrMove], variant: Variant): Validated[String, Sans] =
     Validated.invalid("Not implemented objMoves") // TODO: ???

@@ -6,10 +6,12 @@ import strategygames.go.format.Uci
 case class Pass(
     situationBefore: Situation,
     after: Board,
+    autoEndTurn: Boolean,
     metrics: MoveMetrics = MoveMetrics()
 ) extends Action(situationBefore, after, metrics) {
 
-  def situationAfter = Situation(finalizeAfter, !situationBefore.player)
+  def situationAfter =
+    Situation(finalizeAfter, if (autoEndTurn) !situationBefore.player else situationBefore.player)
 
   def applyVariantEffect = this
 
