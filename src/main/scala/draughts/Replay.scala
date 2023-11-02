@@ -326,8 +326,8 @@ object Replay {
     ucis match {
       case Nil         => valid(replay)
       case uci :: rest =>
-        uci(replay.state.situation, finalSquare) andThen { ply =>
-          recursiveReplayFromUci(replay.addAction(ply, finalSquare), rest, finalSquare)
+        uci(replay.state.situation, finalSquare) andThen { action =>
+          recursiveReplayFromUci(replay.addAction(action, finalSquare), rest, finalSquare)
         }
     }
 

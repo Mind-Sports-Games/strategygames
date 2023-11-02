@@ -54,8 +54,8 @@ object Forsyth {
   case class SituationPlus(situation: Situation, fullTurnCount: Int) {
 
     def turnCount = fullTurnCount * 2 - (if (situation.player.p1) 2 else 1)
-    // when we get a multiaction variant/we convert draughts we should consider setting this
-    // we may be able to deprecate this when we do this as actions.flatten.size should count plies
+    // when we convert draughts to multiaction we should consider setting this
+    // we may be able to deprecate this at that point as actions.flatten.size should count plies
     def plies     = turnCount
 
   }

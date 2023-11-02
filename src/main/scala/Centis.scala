@@ -82,7 +82,7 @@ object Centis {
   def withActionStrs(
       times: Vector[Centis],
       actionStrs: ActionStrs,
-      offset: Int = 0 // startPlayer.hashCode - 1
+      startPlayer: Player
   ): Vector[(Vector[String], Option[Centis])] =
     actionStrs
       .map(_.toVector)
@@ -92,6 +92,6 @@ object Centis {
           .map(_.size)
           .scanLeft(0)(_ + _)
           .drop(1)
-          .map(i => times.lift(i - 1 + offset))
+          .map(i => times.lift(i - 1 + startPlayer.fold(0, 1)))
       )
 }

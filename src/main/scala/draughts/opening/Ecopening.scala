@@ -54,7 +54,7 @@ object Ecopening {
 
   def fromGame(actionStrs: ActionStrs): Option[Ecopening] = Replay
     .boards(
-      actionStrs = actionStrs take EcopeningDB.MAX_MOVES,
+      actionStrs = actionStrs take EcopeningDB.MAX_TURNS,
       initialFen = none,
       variant = variant.Standard
     )

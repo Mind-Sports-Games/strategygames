@@ -83,7 +83,7 @@ object Reader {
       case (Result.Complete(replay), uci) =>
         uci(replay.state.situation).fold(
           err => Result.Incomplete(replay, err),
-          ply => Result.Complete(replay addAction ply)
+          action => Result.Complete(replay addAction action)
         )
       case (r: Result.Incomplete, _)      => r
     }

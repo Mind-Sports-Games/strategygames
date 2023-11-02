@@ -101,10 +101,6 @@ object Binary {
       if (strs.size == 0 || strs.map(_.size).max == 1) plies(strs.flatten)
       else plies(strs.toList.map(_.toList :+ "").flatten)
 
-    // TODO confirm we should be doing this
-    def removeFinalDelimiter(strs: List[String]): List[String] =
-      strs.reverse.dropWhile(_ == "").reverse
-
     def moveUci(src: String, dst: String) = List(
       (MoveType.IsMove << 6) + src.toInt,
       dst.toInt

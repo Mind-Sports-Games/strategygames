@@ -11,6 +11,7 @@ abstract class Game(
     val actionStrs: VActionStrs = Vector(),
     val clock: Option[Clock] = None,
     // TODO We can look to remove 'plies' when draughts is converted to multiaction?
+    // as plies will then be the same as actionStrs.flatten.size + startedAtPly
     val plies: Int = 0, // this was turns
     val turnCount: Int = 0,
     val startedAtPly: Int = 0,
@@ -156,12 +157,13 @@ abstract class Game(
   def fullTurnCount: Int = 1 + turnCount / 2
 
   // TODO: When draughts is converted to multiaction and we are happy that
-  // turns - startedAtTurn == actionStrs.size then we could consider deprecating `val turns`
-  // and having it calculated from actionStrs.size. Would need to check end of turn status
-  // def turnCount = turns - startedAtTurn
-  // def plyCount = actionStrs.map(_.size).sum
+  // `turnCount - startedAtTurn == actionStrs.size` then we could consider deprecating
+  // `val turnCount` and having it calculated from actionStrs.size.
+  // However we would need to check end of turn status
+  // def playedTurns = actionStrs.size// turnCount - startedAtTurn
+  // def playedPlies = actionStrs.map(_.size).sum
 
-  def withTurns(p: Int, t: Int): Game
+  def withTurnsAndPlies(p: Int, t: Int): Game
 
   def hasJustSwitchedTurns: Boolean =
     player == Player.fromTurnCount(actionStrs.size + startedAtTurn)
@@ -282,7 +284,7 @@ object Game {
       case _                          => sys.error("Unable to copy chess game with non-chess arguments")
     }
 
-    def withTurns(p: Int, t: Int): Game = Chess(g.withTurns(p, t))
+    def withTurnsAndPlies(p: Int, t: Int): Game = Chess(g.withTurnsAndPlies(p, t))
 
     def toChess: chess.Game               = g
     def toDraughts: draughts.DraughtsGame = sys.error("Can't turn a chess game into a draughts game")
@@ -413,7 +415,7 @@ object Game {
       case _                             => sys.error("Unable to copy draughts game with non-draughts arguments")
     }
 
-    def withTurns(p: Int, t: Int): Game = Draughts(g.withTurns(p, t))
+    def withTurnsAndPlies(p: Int, t: Int): Game = Draughts(g.withTurnsAndPlies(p, t))
 
     def toChess: chess.Game               = sys.error("Can't turn a draughts game into a chess game")
     def toDraughts: draughts.DraughtsGame = g
@@ -528,7 +530,7 @@ object Game {
       case _                            => sys.error("Unable to copy fairysf game with non-fairysf arguments")
     }
 
-    def withTurns(p: Int, t: Int): Game = FairySF(g.withTurns(p, t))
+    def withTurnsAndPlies(p: Int, t: Int): Game = FairySF(g.withTurnsAndPlies(p, t))
 
     def toFairySF: fairysf.Game           = g
     def toChess: chess.Game               = sys.error("Can't turn a fairysf game into a chess game")
@@ -628,7 +630,7 @@ object Game {
       case _                            => sys.error("Unable to copy samurai game with non-samurai arguments")
     }
 
-    def withTurns(p: Int, t: Int): Game = Samurai(g.withTurns(p, t))
+    def withTurnsAndPlies(p: Int, t: Int): Game = Samurai(g.withTurnsAndPlies(p, t))
 
     def toFairySF: fairysf.Game           = sys.error("Can't turn a samurai game into a fairysf game")
     def toChess: chess.Game               = sys.error("Can't turn a samurai game into a chess game")
@@ -729,7 +731,7 @@ object Game {
       case _                                 => sys.error("Unable to copy togyzkumalak game with non-togyzkumalak arguments")
     }
 
-    def withTurns(p: Int, t: Int): Game = Togyzkumalak(g.withTurns(p, t))
+    def withTurnsAndPlies(p: Int, t: Int): Game = Togyzkumalak(g.withTurnsAndPlies(p, t))
 
     def toFairySF: fairysf.Game           = sys.error("Can't turn a togyzkumalak game into a fairysf game")
     def toChess: chess.Game               = sys.error("Can't turn a togyzkumalak game into a chess game")
@@ -839,7 +841,7 @@ object Game {
       case _                       => sys.error("Unable to copy go game with non-go arguments")
     }
 
-    def withTurns(p: Int, t: Int): Game = Go(g.withTurns(p, t))
+    def withTurnsAndPlies(p: Int, t: Int): Game = Go(g.withTurnsAndPlies(p, t))
 
     def toFairySF: fairysf.Game           = sys.error("Can't turn a go game into a fairysf game")
     def toChess: chess.Game               = sys.error("Can't turn a go game into a chess game")

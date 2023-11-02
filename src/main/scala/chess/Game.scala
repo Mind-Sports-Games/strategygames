@@ -104,7 +104,7 @@ case class Game(
 
   def withPlayer(c: Player) = copy(situation = situation.copy(player = c))
 
-  def withTurns(p: Int, t: Int) = copy(plies = p, turnCount = t)
+  def withTurnsAndPlies(p: Int, t: Int) = copy(plies = p, turnCount = t)
 }
 
 object Game {

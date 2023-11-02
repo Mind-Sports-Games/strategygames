@@ -104,7 +104,7 @@ object Forsyth {
   case class SituationPlus(situation: Situation, fullTurnCount: Int) {
 
     def turnCount = fullTurnCount * 2 - situation.player.fold(2, 1)
-    // when we get a multiaction variant we should set this
+    // TODO when we get a multiaction variant we should set this (monsterchess)
     def plies     = turnCount
 
   }

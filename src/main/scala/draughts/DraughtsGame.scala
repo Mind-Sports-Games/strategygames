@@ -113,9 +113,7 @@ case class DraughtsGame(
     clock.map { c =>
       {
         val newC = c.step(metrics, gameActive, switchClock)
-        // whilst draughts doesnt support multiaction, and startedAtTurn is the same as startedAtPly
         if (turnCount - startedAtTurn == 1) newC.start else newC
-        // if (actionStrs.size == 1 && switchClock) newC.start else newC
       }
     }
 
@@ -140,8 +138,6 @@ case class DraughtsGame(
   // The number of the completed turns by each player ('full move')
   // It starts at 1, and is incremented after P2's move (turn)
   def fullTurnCount: Int = 1 + turnCount / 2
-
-  // def currentTurnCount: Int = turnCount + (if (actionStrs.size > 0) 1 else 0)
 
   // doesnt seem to be used anywhere
   // def moveString = s"${fullTurnCount}${player.fold(".", "...")}"
@@ -179,7 +175,7 @@ case class DraughtsGame(
 
   def withPlayer(c: Player) = copy(situation = situation.copy(player = c))
 
-  def withTurns(p: Int, t: Int) = copy(plies = p, turnCount = t)
+  def withTurnsAndPlies(p: Int, t: Int) = copy(plies = p, turnCount = t)
 }
 
 object DraughtsGame {

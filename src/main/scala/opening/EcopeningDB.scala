@@ -4,7 +4,7 @@ import strategygames.GameLogic
 object EcopeningDB {
 
     import Ecopening._
-    val MAX_MOVES = 25
+    val MAX_TURNS = 25
 
     def allByEco(lib : GameLogic): Map[ECO, Ecopening] = lib match {
         case GameLogic.Chess() => strategygames.chess.opening.EcopeningDB.allByEco.map{ case (a,b) => a -> Ecopening.Chess(b)}

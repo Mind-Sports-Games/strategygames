@@ -124,9 +124,6 @@ object Replay {
         case _                     => (Nil, None)
       }
     val init                                                                                 = makeGame(variant, initialFen.some)
-    // The following line converts actionStrs into a 1-dimensional structure
-    // where an action is in a tuple of itself and the boolean autoEndTurn
-    // actionStrs.zipWithIndex.map{case (a, i) => a.zipWithIndex.map{case (a1, i1) => (a1, i1 == a.size-1 && i != actionStrs.size-1)}}.flatten
     Parser
       // Its ok to flatten actionStrs as the game is built back up again from the Situation
       // If we don't want to flatten then we need to do something like samurai gamelogic

@@ -41,8 +41,10 @@ object Forsyth {
   case class SituationPlus(situation: Situation, fullTurnCount: Int) {
 
     def turnCount = fullTurnCount * 2 - situation.player.fold(2, 1)
-    // TODO: Set this for Amazons
-    // when we get a multiaction variant we should set this
+    // TODO: Set this for Amazons. Needs to have the prev move encoded into the FEN
+    // to calculate this. This work has been done here:
+    // https://github.com/Mind-Sports-Games/strategygames/compare/master...392-support-amazons-in-analysis-page#diff-b0b2b8a0e93f9c1f675971f22eda79cc6cfedee6f2284b31a0fba54832966933R178
+    // but hasn't been merged yet
     def plies     = turnCount
 
   }

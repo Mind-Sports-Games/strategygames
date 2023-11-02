@@ -50,8 +50,6 @@ object Forsyth {
 
     def turnCount = fullTurnCount * 2 - situation.player.fold(2, 1)
     def plies     = turnCount
-    // TODO: Multiaction: verify this is what we want to pass startedAtTurn (we need actions not plies?)
-    // def currentTurnCount = turnCount + (if (plies > 0) 1 else 0)
 
   }
 
