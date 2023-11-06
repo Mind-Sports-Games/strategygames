@@ -110,35 +110,39 @@ case object LOAChecker extends Role           {
 
 object Role {
 
-  val all: List[Role]                                   = List(King, Queen, Rook, Bishop, Knight, Pawn, LOAChecker)
-  val allPromotable: List[PromotableRole]               = List(Queen, Rook, Bishop, Knight, King)
-  val allByForsyth: Map[Char, Role]                     = all map { r =>
+  val all: List[Role]                                        = List(King, Queen, Rook, Bishop, Knight, Pawn, LOAChecker)
+  val allPromotable: List[PromotableRole]                    = List(Queen, Rook, Bishop, Knight, King)
+  val allByForsyth: Map[Char, Role]                          = all map { r =>
     (r.forsyth, r)
   } toMap
-  val allByPgn: Map[Char, Role]                         = all map { r =>
+  val allByPgn: Map[Char, Role]                              = all map { r =>
     (r.pgn, r)
   } toMap
-  val allByName: Map[String, Role]                      = all map { r =>
+  val allByName: Map[String, Role]                           = all map { r =>
     (r.name, r)
   } toMap
-  val allByGroundName: Map[String, Role]                = all map { r =>
+  val allByGroundName: Map[String, Role]                     = all map { r =>
     (r.groundName, r)
   } toMap
-  val allByBinaryInt: Map[Int, Role]                    = all map { r =>
+  val allByBinaryInt: Map[Int, Role]                         = all map { r =>
     (r.binaryInt, r)
   } toMap
-  val allByHashInt: Map[Int, Role]                      = all map { r =>
+  val allByHashInt: Map[Int, Role]                           = all map { r =>
     (r.hashInt, r)
   } toMap
-  val allPromotableByName: Map[String, PromotableRole]  =
+  val allPromotableByName: Map[String, PromotableRole]       =
     allPromotable map { r =>
       (r.toString, r)
     } toMap
-  val allPromotableByForsyth: Map[Char, PromotableRole] =
+  val allPromotableByGroundName: Map[String, PromotableRole] =
+    allPromotable map { r =>
+      (r.groundName, r)
+    } toMap
+  val allPromotableByForsyth: Map[Char, PromotableRole]      =
     allPromotable map { r =>
       (r.forsyth, r)
     } toMap
-  val allPromotableByPgn: Map[Char, PromotableRole]     =
+  val allPromotableByPgn: Map[Char, PromotableRole]          =
     allPromotable map { r =>
       (r.pgn, r)
     } toMap
