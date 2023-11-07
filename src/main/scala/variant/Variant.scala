@@ -42,6 +42,7 @@ abstract class Variant(
   def fiveCheck: Boolean
   def noCastling: Boolean
   def scrambledEggs: Boolean
+  def monster: Boolean
 
   def draughtsStandard: Boolean
   def frisian: Boolean
@@ -181,6 +182,7 @@ object Variant {
     def fiveCheck: Boolean     = v.fiveCheck
     def noCastling: Boolean    = v.noCastling
     def scrambledEggs: Boolean = v.scrambledEggs
+    def monster: Boolean       = v.monster
 
     def draughtsStandard: Boolean     = false
     def frisian: Boolean              = false
@@ -326,6 +328,7 @@ object Variant {
     def fiveCheck: Boolean     = false
     def noCastling: Boolean    = false
     def scrambledEggs: Boolean = false
+    def monster: Boolean       = false
 
     def draughtsStandard: Boolean     = v.standard
     def frisian: Boolean              = v.frisian
@@ -470,6 +473,7 @@ object Variant {
     def linesOfAction: Boolean = false
     def noCastling: Boolean    = false
     def scrambledEggs: Boolean = false
+    def monster: Boolean       = false
 
     def draughtsStandard: Boolean     = false
     def frisian: Boolean              = false
@@ -614,6 +618,7 @@ object Variant {
     def linesOfAction: Boolean = false
     def noCastling: Boolean    = false
     def scrambledEggs: Boolean = false
+    def monster: Boolean       = false
 
     def draughtsStandard: Boolean     = false
     def frisian: Boolean              = false
@@ -754,6 +759,7 @@ object Variant {
     def linesOfAction: Boolean = false
     def noCastling: Boolean    = false
     def scrambledEggs: Boolean = false
+    def monster: Boolean       = false
 
     def draughtsStandard: Boolean     = false
     def frisian: Boolean              = false
@@ -893,6 +899,7 @@ object Variant {
     def linesOfAction: Boolean = false
     def noCastling: Boolean    = false
     def scrambledEggs: Boolean = false
+    def monster: Boolean       = false
 
     def draughtsStandard: Boolean     = false
     def frisian: Boolean              = false

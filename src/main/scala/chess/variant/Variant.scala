@@ -38,6 +38,7 @@ abstract class Variant private[variant] (
   def linesOfAction = this == LinesOfAction
   def noCastling    = this == NoCastling
   def scrambledEggs = this == ScrambledEggs
+  def monster       = this == Monster
 
   def exotic = !standard
 
@@ -259,6 +260,7 @@ object Variant {
     Horde,
     RacingKings,
     NoCastling,
+    Monster,
     LinesOfAction,
     ScrambledEggs
   )
