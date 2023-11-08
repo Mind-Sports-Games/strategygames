@@ -24,23 +24,7 @@ abstract class Variant private[variant] (
 
   def pieces: Map[Pos, Piece]
 
-  def standard      = this == Standard
-  def chess960      = this == Chess960
-  def fromPosition  = this == FromPosition
-  def kingOfTheHill = this == KingOfTheHill
-  def threeCheck    = this == ThreeCheck
-  def fiveCheck     = this == FiveCheck
-  def antichess     = this == Antichess
-  def atomic        = this == Atomic
-  def horde         = this == Horde
-  def racingKings   = this == RacingKings
-  def crazyhouse    = this == Crazyhouse
-  def linesOfAction = this == LinesOfAction
-  def noCastling    = this == NoCastling
-  def scrambledEggs = this == ScrambledEggs
-  def monster       = this == Monster
-
-  def exotic = !standard
+  def exotic = this != Standard
 
   // used to define chess variants medley
   def exoticChessVariant: Boolean = false

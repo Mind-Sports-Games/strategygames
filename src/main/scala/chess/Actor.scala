@@ -141,7 +141,11 @@ final case class Actor(
       castle            = Option((kingPos -> newKingPos, rookPos -> newRookPos))
     } yield {
       rookPos :: {
-        if (kingPos.file == File.E && List(File.A, File.H).contains(rookPos.file) && !board.variant.chess960)
+        if (
+          kingPos.file == File.E && List(File.A, File.H).contains(
+            rookPos.file
+          ) && board.variant != variant.Chess960
+        )
           newKingPos :: Nil
         else Nil
       }

@@ -19,10 +19,6 @@ abstract class Variant private[variant] (
     val boardSize: Board.BoardSize
 ) {
 
-  def go9x9   = this == Go9x9
-  def go13x13 = this == Go13x13
-  def go19x19 = this == Go19x19
-
   def exotic = true
 
   def baseVariant: Boolean      = false

@@ -15,7 +15,7 @@ import strategygames.{
 import strategygames.format.pgn.{ San, Tag, Tags }
 import format.pdn.{ Parser, Reader, Std }
 import format.{ FEN, Forsyth, Uci }
-import variant.Variant
+import variant._
 
 case class Replay(setup: DraughtsGame, actions: List[Move], state: DraughtsGame) {
 
@@ -56,7 +56,7 @@ object Replay {
         Tags(
           List(
             initialFen map { fen => Tag(_.FEN, fen.value) },
-            variant.some.filterNot(_.standard) map { v => Tag(_.GameType, v.gameType) }
+            variant.some.filterNot(_ == Standard) map { v => Tag(_.GameType, v.gameType) }
           ).flatten
         ),
         finalSquare

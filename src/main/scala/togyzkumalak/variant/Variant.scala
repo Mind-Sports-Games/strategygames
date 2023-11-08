@@ -19,8 +19,6 @@ abstract class Variant private[variant] (
     val boardSize: Board.BoardSize
 ) {
 
-  def togyzkumalak = this == Togyzkumalak
-
   def exotic = true
 
   def baseVariant: Boolean      = false

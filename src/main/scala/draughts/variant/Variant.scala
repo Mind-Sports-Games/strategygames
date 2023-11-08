@@ -30,21 +30,9 @@ abstract class Variant private[variant] (
   def moveDirsPlayer: Map[Player, Directions]
   def moveDirsAll: Directions
 
-  def standard     = this == Standard
-  def frisian      = this == Frisian
-  def frysk        = this == Frysk
-  def antidraughts = this == Antidraughts
-  def breakthrough = this == Breakthrough
-  def russian      = this == Russian
-  def brazilian    = this == Brazilian
-  def pool         = this == Pool
-  def portuguese   = this == Portuguese
-  def english      = this == English
-  def fromPosition = this == FromPosition
-
-  def frisianVariant    = frisian || frysk
-  def draughts64Variant = russian || brazilian || pool || portuguese || english
-  def exotic            = !standard
+  def frisianVariant    = List(Frisian, Frysk).contains(this)
+  def draughts64Variant = List(Russian, Brazilian, Pool, Portuguese, English).contains(this)
+  def exotic            = this != Standard
 
   def canOfferDraw: Boolean = true
 

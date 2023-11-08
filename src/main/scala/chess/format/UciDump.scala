@@ -2,7 +2,7 @@ package strategygames.chess.format
 
 import cats.data.Validated
 
-import strategygames.chess.variant.Variant
+import strategygames.chess.variant._
 import strategygames.chess.{ Action, Drop, Move, Replay }
 import strategygames.ActionStrs
 
@@ -24,8 +24,9 @@ object UciDump {
     action match {
       case m: Move =>
         m.castle.fold(m.toUci.uci) {
-          case ((kf, kt), (rf, _)) if kf == kt || variant.chess960 || variant.fromPosition => kf.key + rf.key
-          case ((kf, kt), _)                                                               => kf.key + kt.key
+          case ((kf, kt), (rf, _)) if kf == kt || variant == Chess960 || variant == FromPosition =>
+            kf.key + rf.key
+          case ((kf, kt), _)                                                                     => kf.key + kt.key
         }
       case d: Drop => d.toUci.uci
     }
