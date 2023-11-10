@@ -27,10 +27,10 @@ case object Monster
 
     val p1Pieces = Map(
       Pos.E1 -> Piece(P1, King),
-      Pos.C2 -> Piece(P2, Pawn),
-      Pos.D2 -> Piece(P2, Pawn),
-      Pos.E2 -> Piece(P2, Pawn),
-      Pos.F2 -> Piece(P2, Pawn)
+      Pos.C2 -> Piece(P1, Pawn),
+      Pos.D2 -> Piece(P1, Pawn),
+      Pos.E2 -> Piece(P1, Pawn),
+      Pos.F2 -> Piece(P1, Pawn)
     )
 
     val p2Pieces = (for (y <- List(Rank.Seventh, Rank.Eighth); x <- File.all) yield {
