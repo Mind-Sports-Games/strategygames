@@ -77,7 +77,7 @@ case class BronsteinDelayGrace(val delay: Centis) extends ClockTimeGrace {
 }
 
 case class Timer(
-    val limit: Centis,
+    val baseLimit: Centis,
     val clockTimeGrace: ClockTimeGrace = NoClockTimeGrace(),
     val nextTimer: Option[Timer] = None,
     val elapsed: Centis = Centis(0)
@@ -106,15 +106,15 @@ case class Timer(
       .nextIfDone
   def setRemaining(t: Centis): Timer    = copy(elapsed = limit - t)
   def goBerserk(penalty: Centis): Timer =
-    copy(limit = limit - penalty, clockTimeGrace = clockTimeGrace.goBerserk)
+    copy(baseLimit = baseLimit - penalty, clockTimeGrace = clockTimeGrace.goBerserk)
   def outOfTime: Boolean                = remainingAll <= Centis(0)
   def giveTime(t: Centis)               = takeTime(-t)
 
   // The remaining is whatever they have left + whatever they'll get if they were at the end of the gaming and
   // had used the maxGrace amount of time. This is important to work together in concer with Simple Delay
-  val remaining: Centis =
-    (limit - elapsed) + clockTimeGrace
-      .timeWillAdd((limit - elapsed).atMost(Centis(0)), clockTimeGrace.maxGrace)
+  val remaining: Centis = limit - elapsed
+  def limit             = baseLimit + clockTimeGrace
+    .timeWillAdd((baseLimit - elapsed).atMost(Centis(0)), clockTimeGrace.maxGrace)
 
   val remainingAll: Centis = nextTimer.fold(remaining)(t => t.remaining + remaining)
 
@@ -244,8 +244,8 @@ sealed trait ClockBase {
   // Lowball estimate of next move's lag comp for UI butter.
   def lagCompEstimate(c: Player) = clockPlayer(c).lag.compEstimate
 
-  @inline def timerFor(c: Player) = if (c == player) timestamp else None
-  @inline def pending(c: Player)  = timerFor(c).fold(Centis(0))(toNow)
+  @inline def timestampFor(c: Player) = if (c == player) timestamp else None
+  @inline def pending(c: Player)      = timestampFor(c).fold(Centis(0))(toNow)
 
   def estimateTotalSeconds = config.estimateTotalSeconds
   def estimateTotalTime    = config.estimateTotalTime
@@ -314,7 +314,7 @@ case class Clock(
     if (paused) false
     else
       players(c).remaining <=
-        timerFor(c).fold(Centis(0)) { t =>
+        timestampFor(c).fold(Centis(0)) { t =>
           if (withGrace) (toNow(t) - (players(c).lag.quota atMost Centis(200))) nonNeg
           else toNow(t)
         }
@@ -621,7 +621,7 @@ case class ByoyomiClock(
     if (paused) false
     else {
       val player        = players(c)
-      val timeUsed      = timerFor(c).fold(Centis(0))(t =>
+      val timeUsed      = timestampFor(c).fold(Centis(0))(t =>
         if (withGrace) (toNow(t) - (players(c).lag.quota atMost Centis(200))) nonNeg
         else toNow(t)
       )
