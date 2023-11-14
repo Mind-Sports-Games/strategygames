@@ -481,7 +481,7 @@ object Clock {
 
     def show = toString
 
-    override def toString = s"${limitString}r${delaySeconds}"
+    override def toString = s"${limitString} d+${delaySeconds}"
 
     def berserkPenalty =
       if (limitSeconds < 40 * delaySeconds) Centis(0)
@@ -523,7 +523,7 @@ object Clock {
 
     def show = toString
 
-    override def toString = s"${limitString}r${delaySeconds}"
+    override def toString = s"${limitString} d/${delaySeconds}"
 
     def berserkPenalty =
       if (limitSeconds < 40 * delaySeconds) Centis(0)
