@@ -48,7 +48,7 @@ case class FischerIncrementGrace(val increment: Centis) extends ClockTimeGrace {
 // Bronstein increment timer with a delay. The minimum between the time used
 // and the delay is subracted back to the elapsed time when time is used.
 // Thus, using time will never seem to make the clock gain time.
-case class UsDelayGrace(val delay: Centis) extends ClockTimeGrace {
+case class SimpleDelayGrace(val delay: Centis) extends ClockTimeGrace {
   override def timeToAdd(remaining: Centis, timeTaken: Centis): Tuple2[ClockTimeGrace, Centis] =
     (this, timeWillAdd(remaining, timeTaken)) // up to the delay
 
@@ -63,7 +63,7 @@ case class UsDelayGrace(val delay: Centis) extends ClockTimeGrace {
 }
 
 // BronsteinDelay gives back up to the entire amount, but only if they didn't use
-// all of it. It's similar to UsDelay, but US allows you to go over and eat
+// all of it. It's similar to SimpleDelay, but US allows you to go over and eat
 // into your grace. Bronstein does not.
 case class BronsteinDelayGrace(val delay: Centis) extends ClockTimeGrace {
   override def timeToAdd(remaining: Centis, timeTaken: Centis): Tuple2[ClockTimeGrace, Centis] =
@@ -123,7 +123,7 @@ case class Timer(
 object Timer {
   def usDelay(limit: Centis, delay: Centis) = Timer(
     limit,
-    clockTimeGrace = UsDelayGrace(delay)
+    clockTimeGrace = SimpleDelayGrace(delay)
   )
 
   def bronsteinDelay(limit: Centis, delay: Centis) = Timer(
@@ -493,9 +493,9 @@ object Clock {
     }
   }
 
-  case class UsDelayConfig(limitSeconds: Int, delaySeconds: Int) extends ClockConfig {
+  case class SimpleDelayConfig(limitSeconds: Int, delaySeconds: Int) extends ClockConfig {
     private lazy val clockTimeGrace =
-      if (delay > Centis(0)) UsDelayGrace(delay) else NoClockTimeGrace()
+      if (delay > Centis(0)) SimpleDelayGrace(delay) else NoClockTimeGrace()
     lazy val timer                  = Timer(limit, clockTimeGrace)
 
     def berserkable          = delaySeconds == 0 || limitSeconds > 0
@@ -526,8 +526,8 @@ object Clock {
     override def toString = s"${limitString} d/${delaySeconds}"
 
     def berserkPenalty =
-      if (limitSeconds < 40 * delaySeconds) Centis(0)
-      else Centis(limitSeconds * (100 / 2))
+      if (limitSeconds < 40 * delaySeconds) Centis(graceSeconds)
+      else Centis(limitSeconds * (100 / 2)) + Centis(graceSeconds)
 
     def initTime = {
       if (limitSeconds == 0) delay.atLeast(Centis(300))
@@ -569,7 +569,7 @@ object Clock {
     )
   }
 
-  def apply(config: UsDelayConfig): Clock = {
+  def apply(config: SimpleDelayConfig): Clock = {
     val player = ClockPlayer.withConfig(config)
     Clock(
       config = config,
