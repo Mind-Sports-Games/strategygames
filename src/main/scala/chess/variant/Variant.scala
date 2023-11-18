@@ -220,6 +220,10 @@ abstract class Variant private[variant] (
 
   def isUnmovedPawn(player: Player, pos: Pos) = pos.rank == player.fold(Rank.Second, Rank.Seventh)
 
+  // override on multiaction variants
+  def lastActionOfTurn(situation: Situation): Boolean     = true
+  def deactivateKingSafety(situation: Situation): Boolean = false
+
   override def toString = s"Variant($name)"
 
   override def equals(that: Any): Boolean = this eq that.asInstanceOf[AnyRef]

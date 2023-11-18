@@ -107,6 +107,8 @@ case class Situation(board: Board, player: Player) {
     }
   }
 
+  def lastActionOfTurn: Boolean = board.variant.lastActionOfTurn(this)
+
   def unary_! = copy(player = !player)
 }
 
