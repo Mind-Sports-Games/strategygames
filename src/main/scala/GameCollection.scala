@@ -43,7 +43,13 @@ object GameLogic {
     def name = "Go"
   }
 
-  def all: List[GameLogic] = List(Chess(), Draughts(), FairySF(), Samurai(), Togyzkumalak(), Go())
+  final case class Backgammon() extends GameLogic {
+    def id   = 6
+    def name = "Backgammon"
+  }
+
+  def all: List[GameLogic] =
+    List(Chess(), Draughts(), FairySF(), Samurai(), Togyzkumalak(), Go(), Backgammon())
 
   // TODO: I'm sure there is a better scala way of doing this
   def apply(id: Int): GameLogic = id match {
@@ -52,6 +58,7 @@ object GameLogic {
     case 3 => Samurai()
     case 4 => Togyzkumalak()
     case 5 => Go()
+    case 6 => Backgammon()
     case _ => Chess()
   }
 }
@@ -384,6 +391,27 @@ object GameFamily {
     def playerColors      = Map(P1 -> "black", P2 -> "white")
   }
 
+  final case class Backgammon() extends GameFamily {
+    def id                = 10
+    def name              = "Backgammon"
+    def key               = "backgammon"
+    def gameLogic         = GameLogic.Backgammon()
+    def hasFishnet        = false
+    def hasAnalysisBoard  = false
+    def defaultVariant    = Variant.Backgammon(strategygames.backgammon.variant.Backgammon)
+    def variants          = Variant.all(GameLogic.Backgammon()).filter(_.gameFamily == this)
+    def displayPiece      = "display"
+    def pieceSetThemes    =
+      List(
+        "black_gloss"
+      )
+    def pieceSetDefault   = "black_gloss"
+    def boardThemes       = List("blue", "wood")
+    def boardThemeDefault = "blue"
+    def playerNames       = Map(P1 -> "White", P2 -> "Black")
+    def playerColors      = Map(P1 -> "white", P2 -> "black")
+  }
+
   def all: List[GameFamily] = List(
     Chess(),
     Draughts(),
@@ -394,21 +422,23 @@ object GameFamily {
     Amazons(),
     Oware(),
     Togyzkumalak(),
-    Go()
+    Go(),
+    Backgammon()
   )
 
   // TODO: I'm sure there is a better scala way of doing this
   def apply(id: Int): GameFamily = id match {
-    case 1 => Draughts()
-    case 2 => LinesOfAction()
-    case 3 => Shogi()
-    case 4 => Xiangqi()
-    case 5 => Flipello()
-    case 6 => Oware()
-    case 7 => Togyzkumalak()
-    case 8 => Amazons()
-    case 9 => Go()
-    case _ => Chess()
+    case 1  => Draughts()
+    case 2  => LinesOfAction()
+    case 3  => Shogi()
+    case 4  => Xiangqi()
+    case 5  => Flipello()
+    case 6  => Oware()
+    case 7  => Togyzkumalak()
+    case 8  => Amazons()
+    case 9  => Go()
+    case 10 => Backgammon()
+    case _  => Chess()
   }
 
 }
@@ -509,6 +539,14 @@ object GameGroup {
     def medley   = true
   }
 
+  final case class Backgammon() extends GameGroup {
+    def id       = 10
+    def name     = "Backgammon"
+    def key      = "backgammon"
+    def variants = Variant.all(GameLogic.Backgammon()).filter(_.gameFamily.name == this.name)
+    def medley   = true
+  }
+
   def all: List[GameGroup] =
     List(
       Chess(),
@@ -520,22 +558,24 @@ object GameGroup {
       Flipello(),
       Mancala(),
       Amazons(),
-      Go()
+      Go(),
+      Backgammon()
     )
 
   def medley: List[GameGroup] = all.filter(_.medley)
 
   // TODO: I'm sure there is a better scala way of doing this
   def apply(id: Int): GameGroup = id match {
-    case 1 => Draughts()
-    case 2 => LinesOfAction()
-    case 3 => FairySF()
-    case 4 => Shogi()
-    case 5 => Xiangqi()
-    case 6 => Flipello()
-    case 7 => Mancala()
-    case 8 => Amazons()
-    case 9 => Go()
-    case _ => Chess()
+    case 1  => Draughts()
+    case 2  => LinesOfAction()
+    case 3  => FairySF()
+    case 4  => Shogi()
+    case 5  => Xiangqi()
+    case 6  => Flipello()
+    case 7  => Mancala()
+    case 8  => Amazons()
+    case 9  => Go()
+    case 10 => Backgammon()
+    case _  => Chess()
   }
 }

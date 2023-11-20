@@ -86,6 +86,15 @@ abstract class Game(
         ) map { case (ncg, move) =>
           ncg -> move
         }
+      case Uci.BackgammonMove(uci)   =>
+        apply(
+          Pos.Backgammon(uci.orig),
+          Pos.Backgammon(uci.dest),
+          promotion = None,
+          metrics
+        ) map { case (ncg, move) =>
+          ncg -> move
+        }
       case Uci.ChessDrop(uci)        =>
         drop(
           Role.ChessRole(uci.role),
@@ -293,6 +302,7 @@ object Game {
     def toSamurai: samurai.Game           = sys.error("Can't turn a chess game into a samurai game")
     def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a chess game into a togyzkumalak game")
     def toGo: go.Game                     = sys.error("Can't turn a chess game into a go game")
+    def toBackgammon: backgammon.Game     = sys.error("Can't turn a chess game into a backgammon game")
 
   }
 
@@ -426,6 +436,7 @@ object Game {
     def toSamurai: samurai.Game           = sys.error("Can't turn a draughts game into a samurai game")
     def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a draughts game into a togyzkumalak game")
     def toGo: go.Game                     = sys.error("Can't turn a draughts game into a go game")
+    def toBackgammon: backgammon.Game     = sys.error("Can't turn a draughts game into a backgammon game")
 
   }
 
@@ -543,6 +554,7 @@ object Game {
     def toSamurai: samurai.Game           = sys.error("Can't turn a fairysf game into a samurai game")
     def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a fairysf game into a togyzkumalak game")
     def toGo: go.Game                     = sys.error("Can't turn a fairysf game into a go game")
+    def toBackgammon: backgammon.Game     = sys.error("Can't turn a fairysf game into a backgammon game")
 
   }
 
@@ -645,6 +657,7 @@ object Game {
     def toSamurai: samurai.Game           = g
     def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a samurai game into a togyzkumalak game")
     def toGo: go.Game                     = sys.error("Can't turn a samurai game into a go game")
+    def toBackgammon: backgammon.Game     = sys.error("Can't turn a samurai game into a backgammon game")
 
   }
 
@@ -748,6 +761,7 @@ object Game {
     def toSamurai: samurai.Game           = sys.error("Can't turn a togyzkumalak game into a samurai game")
     def toTogyzkumalak: togyzkumalak.Game = g
     def toGo: go.Game                     = sys.error("Can't turn a togyzkumalak game into a go game")
+    def toBackgammon: backgammon.Game     = sys.error("Can't turn a togyzkumalak game into a backgammon game")
 
   }
 
@@ -860,6 +874,111 @@ object Game {
     def toSamurai: samurai.Game           = sys.error("Can't turn a go game into a samurai game")
     def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a go game into a togyzkumalak game")
     def toGo: go.Game                     = g
+    def toBackgammon: backgammon.Game     = sys.error("Can't turn a go game into a backgammon game")
+
+  }
+
+  final case class Backgammon(g: backgammon.Game)
+      extends Game(
+        Situation.Backgammon(g.situation),
+        g.actionStrs,
+        g.clock,
+        g.plies,
+        g.turnCount,
+        g.startedAtPly,
+        g.startedAtTurn
+      ) {
+
+    def apply(
+        orig: Pos,
+        dest: Pos,
+        promotion: Option[PromotableRole] = None,
+        metrics: MoveMetrics = MoveMetrics(),
+        finalSquare: Boolean = false,
+        captures: Option[List[Pos]] = None,
+        partialCaptures: Boolean = false
+    ): Validated[String, (Game, Move)] = (orig, dest) match {
+      case (Pos.Backgammon(orig), Pos.Backgammon(dest)) =>
+        g.apply(orig, dest, None, metrics)
+          .toEither
+          .map(t => (Backgammon(t._1), Move.Backgammon(t._2)))
+          .toValidated
+      case _                                            => sys.error("Not passed Backgammon objects")
+    }
+
+    def apply(action: Action): Game =
+      action match {
+        case (Move.Backgammon(move)) => Backgammon(g.apply(move))
+        case _                       => sys.error("Not passed Backgammon objects")
+      }
+
+    def drop(
+        role: Role,
+        pos: Pos,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, Drop)] = sys.error("Can't drop in Backgammon")
+
+    def pass(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Pass)] =
+      sys.error("Can't pass in Backgammon")
+
+    def selectSquares(
+        squares: List[Pos],
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, SelectSquares)] =
+      sys.error("Can't selectSquares in Backgammon")
+
+    def copy(clock: Option[Clock]): Game =
+      Backgammon(g.copy(clock = clock))
+
+    def copy(plies: Int, turnCount: Int, startedAtPly: Int, startedAtTurn: Int): Game =
+      Backgammon(
+        g.copy(
+          plies = plies,
+          turnCount = turnCount,
+          startedAtPly = startedAtPly,
+          startedAtTurn = startedAtTurn
+        )
+      )
+
+    def copy(
+        clock: Option[Clock],
+        plies: Int,
+        turnCount: Int,
+        startedAtPly: Int,
+        startedAtTurn: Int
+    ): Game =
+      Backgammon(
+        g.copy(
+          clock = clock,
+          plies = plies,
+          turnCount = turnCount,
+          startedAtPly = startedAtPly,
+          startedAtTurn = startedAtTurn
+        )
+      )
+
+    def copy(situation: Situation, plies: Int, turnCount: Int): Game = situation match {
+      case Situation.Backgammon(situation) =>
+        Backgammon(g.copy(situation = situation, plies = plies, turnCount = turnCount))
+      case _                               =>
+        sys.error("Unable to copy backgammon game with non-backgammon arguments")
+    }
+    def copy(situation: Situation): Game                             = situation match {
+      case Situation.Backgammon(situation) => Backgammon(g.copy(situation = situation))
+      case _                               => sys.error("Unable to copy backgammon game with non-backgammon arguments")
+    }
+
+    def hasJustSwitchedTurns: Boolean = g.hasJustSwitchedTurns
+
+    def withTurnsAndPlies(p: Int, t: Int): Game = Backgammon(g.withTurnsAndPlies(p, t))
+
+    def toFairySF: fairysf.Game           = sys.error("Can't turn a backgammon game into a fairysf game")
+    def toChess: chess.Game               = sys.error("Can't turn a backgammon game into a chess game")
+    def toDraughts: draughts.DraughtsGame = sys.error("Can't turn a backgammon game into a draughts game")
+    def toSamurai: samurai.Game           = sys.error("Can't turn a backgammon game into a samurai game")
+    def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a backgammon game into a togyzkumalak game")
+    def toGo: go.Game                     = sys.error("Can't turn a backgammon game into a go game")
+    def toBackgammon: backgammon.Game     = g
 
   }
 
@@ -889,6 +1008,8 @@ object Game {
       )
     case (GameLogic.Go(), Situation.Go(situation))                     =>
       Go(go.Game(situation, actionStrs, clock, plies, turnCount, startedAtPly, startedAtTurn))
+    case (GameLogic.Backgammon(), Situation.Backgammon(situation))     =>
+      Backgammon(backgammon.Game(situation, actionStrs, clock, plies, turnCount, startedAtPly, startedAtTurn))
 
     case _ => sys.error("Mismatched gamelogic types 32")
   }
@@ -906,6 +1027,8 @@ object Game {
       Togyzkumalak(togyzkumalak.Game.apply(variant))
     case (GameLogic.Go(), Variant.Go(variant))                     =>
       Go(go.Game.apply(variant))
+    case (GameLogic.Backgammon(), Variant.Backgammon(variant))     =>
+      Backgammon(backgammon.Game.apply(variant))
     case _                                                         =>
       sys.error("Mismatched gamelogic types 33")
   }
@@ -923,6 +1046,8 @@ object Game {
       Togyzkumalak(togyzkumalak.Game.apply(variant.map(_.toTogyzkumalak), fen.map(_.toTogyzkumalak)))
     case GameLogic.Go()           =>
       Go(go.Game.apply(variant.map(_.toGo), fen.map(_.toGo)))
+    case GameLogic.Backgammon()   =>
+      Backgammon(backgammon.Game.apply(variant.map(_.toBackgammon), fen.map(_.toBackgammon)))
     case _                        => sys.error("Mismatched gamelogic types 36")
   }
 
@@ -932,5 +1057,6 @@ object Game {
   def wrap(g: samurai.Game)          = Samurai(g)
   def wrap(g: togyzkumalak.Game)     = Togyzkumalak(g)
   def wrap(g: go.Game)               = Go(g)
+  def wrap(g: backgammon.Game)       = Backgammon(g)
 
 }

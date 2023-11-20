@@ -53,6 +53,10 @@ object Action {
     case ss: go.SelectSquares => SelectSquares.Go(ss)
   }
 
+  def wrap(action: backgammon.Action): Action = action match {
+    case m: backgammon.Move => Move.Backgammon(m)
+  }
+
   def toChess(action: Action): chess.Action = action match {
     case Move.Chess(m) => m
     case Drop.Chess(d) => d
@@ -86,4 +90,10 @@ object Action {
     case SelectSquares.Go(ss) => ss
     case _                    => sys.error("Expecting a go action e.g. drop or pass or SelectSquares")
   }
+
+  def toBackgammon(action: Action): backgammon.Move = action match {
+    case Move.Backgammon(m) => m
+    case _                  => sys.error("Expecting a backgammon action e.g. move")
+  }
+
 }

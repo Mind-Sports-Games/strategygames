@@ -26,6 +26,8 @@ object UciDump {
       strategygames.togyzkumalak.format.UciDump(actionStrs, initialFen.map(_.toTogyzkumalak), variant)
     case (GameLogic.Go(), Variant.Go(variant))                     =>
       strategygames.go.format.UciDump(actionStrs, initialFen.map(_.toGo), variant)
+    case (GameLogic.Backgammon(), Variant.Backgammon(variant))     =>
+      strategygames.backgammon.format.UciDump(actionStrs, initialFen.map(_.toBackgammon), variant)
     case _                                                         => sys.error("Mismatched gamelogic types 12")
   }
 
@@ -50,6 +52,8 @@ object UciDump {
       strategygames.go.format.UciDump.action(variant)(a)
     case (GameLogic.Go(), Variant.Go(variant), SelectSquares.Go(a))                      =>
       strategygames.go.format.UciDump.action(variant)(a)
+    case (GameLogic.Backgammon(), Variant.Backgammon(variant), Move.Backgammon(a))       =>
+      strategygames.backgammon.format.UciDump.action(variant)(a)
     case _                                                                               => sys.error("Mismatched gamelogic types 13")
   }
 
