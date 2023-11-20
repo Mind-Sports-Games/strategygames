@@ -89,7 +89,7 @@ abstract class Variant private[variant] (
 
   def kingSafety(m: Move, filter: Piece => Boolean, kingPos: Option[Pos]): Boolean =
     ! {
-      kingPos exists { kingThreatened(m.after, !m.player, _, filter) }
+      kingPos exists { kingThreatened(m.after, m.situationAfter.player, _, filter) }
     }
 
   def kingSafety(a: Actor, m: Move): Boolean =
@@ -221,8 +221,7 @@ abstract class Variant private[variant] (
   def isUnmovedPawn(player: Player, pos: Pos) = pos.rank == player.fold(Rank.Second, Rank.Seventh)
 
   // override on multiaction variants
-  def lastActionOfTurn(situation: Situation): Boolean     = true
-  def deactivateKingSafety(situation: Situation): Boolean = false
+  def lastActionOfTurn(situation: Situation): Boolean = true
 
   override def toString = s"Variant($name)"
 

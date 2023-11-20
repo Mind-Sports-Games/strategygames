@@ -11,15 +11,15 @@ case object Monster
       standardInitialPosition = false
     ) {
 
-  def perfId: Int = 23
+  def perfId: Int    = 23
   def perfIcon: Char = ''
 
   override def hasAnalysisBoard: Boolean = false
-  override def hasFishnet: Boolean = false
+  override def hasFishnet: Boolean       = false
 
-  override def exoticChessVariant = true
+  override def exoticChessVariant       = true
   // override def p1IsBetterVariant        = true
-  override def blindModeVariant = false
+  override def blindModeVariant         = false
   override def materialImbalanceVariant = true
 
   lazy val pieces: Map[Pos, Piece] = {
@@ -55,10 +55,17 @@ case object Monster
       case P2 => true
     }
 
-  override def deactivateKingSafety(situation: Situation): Boolean =
-    situation.player match {
-      case P1 => situation.board.lastActionPlayer == Some(P2)
-      case P2 => false
+  override def kingSafety(m: Move, filter: Piece => Boolean, kingPos: Option[Pos]): Boolean =
+    m.player match {
+      case P1 if lastActionOfTurn(m.situationBefore) =>
+        super.kingSafety(m, filter, kingPos)
+      case P1                                        =>
+        m.situationAfter.moves.values.flatten.size > 0
+      case P2                                        =>
+        super.kingSafety(m, filter, kingPos) && !m.situationAfter.moves.values.flatten
+          .map(nextMove => super.kingSafety(nextMove, _ => true, kingPos))
+          .toList
+          .contains(false)
     }
 
   // override def valid(board: Board, strict: Boolean) =
