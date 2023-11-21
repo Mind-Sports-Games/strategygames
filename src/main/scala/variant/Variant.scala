@@ -24,6 +24,7 @@ abstract class Variant(
   def toTogyzkumalak: strategygames.togyzkumalak.variant.Variant
   def toGo: go.variant.Variant
   def toBackgammon: backgammon.variant.Variant
+  def toAbalone: abalone.variant.Variant
 
   def pieces: PieceMap
 
@@ -120,6 +121,7 @@ object Variant {
     def toTogyzkumalak                 = sys.error("Can't convert chess to togyzkumalak")
     def toGo                           = sys.error("Can't convert chess to go")
     def toBackgammon                   = sys.error("Can't convert chess to backgammon")
+    def toAbalone                   = sys.error("Can't convert chess to abalone")
 
     def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.Chess(pos), (Piece.Chess(piece), 1)) }
@@ -225,6 +227,7 @@ object Variant {
     def toTogyzkumalak = sys.error("Can't convert draughts to togyzkumalak")
     def toGo           = sys.error("Can't convert draughts to go")
     def toBackgammon   = sys.error("Can't convert draughts to backgammon")
+    def toAbalone   = sys.error("Can't convert draughts to abalone")
 
     def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.Draughts(pos), (Piece.Draughts(piece), 1)) }
@@ -329,6 +332,7 @@ object Variant {
     def toTogyzkumalak = sys.error("Can't convert fairysf to togyzkumalak")
     def toGo           = sys.error("Can't convert fairysf to go")
     def toBackgammon   = sys.error("Can't convert fairysf to backgammon")
+    def toAbalone   = sys.error("Can't convert fairysf to abalone")
 
     def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.FairySF(pos), (Piece.FairySF(piece), 1)) }
@@ -432,6 +436,7 @@ object Variant {
     def toTogyzkumalak = sys.error("Can't convert samurai to togyzkumalak")
     def toGo           = sys.error("Can't convert samurai to go")
     def toBackgammon   = sys.error("Can't convert samurai to backgammon")
+    def toAbalone   = sys.error("Can't convert samurai to abalone")
 
     def pieces: PieceMap = v.pieces.map { case (pos, (piece, count)) =>
       (Pos.Samurai(pos), (Piece.Samurai(piece), count))
@@ -532,6 +537,7 @@ object Variant {
     def toTogyzkumalak = v
     def toGo           = sys.error("Can't convert togyzkumalak to go")
     def toBackgammon   = sys.error("Can't convert togyzkumalak to backgammon")
+    def toAbalone   = sys.error("Can't convert togyzkumalak to abalone")
 
     def pieces: PieceMap = v.pieces.map { case (pos, (piece, count)) =>
       (Pos.Togyzkumalak(pos), (Piece.Togyzkumalak(piece), count))
@@ -632,6 +638,7 @@ object Variant {
     def toTogyzkumalak = sys.error("Can't convert go to togyzkumalak")
     def toGo           = v
     def toBackgammon   = sys.error("Can't convert go to backgammon")
+    def toAbalone   = sys.error("Can't convert go to abalone")
 
     def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.Go(pos), (Piece.Go(piece), 1)) }
@@ -733,6 +740,7 @@ object Variant {
     def toTogyzkumalak = sys.error("Can't convert backgammon to togyzkumalak")
     def toGo           = sys.error("Can't convert backgammon to go")
     def toBackgammon   = v
+    def toAbalone   = sys.error("Can't convert backgammon to abalone")
 
     def pieces: PieceMap = v.pieces.map { case (pos, (piece, count)) =>
       (Pos.Backgammon(pos), (Piece.Backgammon(piece), count))
@@ -817,6 +825,106 @@ object Variant {
     def playerColors: Map[Player, String] = gameFamily.playerColors
   }
 
+  case class Abalone(v: abalone.variant.Variant)
+      extends Variant(
+        id = v.id,
+        key = v.key,
+        fishnetKey = v.key,
+        name = v.name,
+        standardInitialPosition = v.standardInitialPosition
+      ) {
+
+    def toChess        = sys.error("Can't convert abalone to chess")
+    def toDraughts     = sys.error("Can't convert abalone to draughts")
+    def toFairySF      = sys.error("Can't convert abalone to fairysf")
+    def toSamurai      = sys.error("Can't convert abalone to samurai")
+    def toTogyzkumalak = sys.error("Can't convert abalone to togyzkumalak")
+    def toGo           = sys.error("Can't convert abalone to go")
+    def toBackgammon   = sys.error("Can't convert abalone to backgammon")
+    def toAbalone   = v
+
+    def pieces: PieceMap =
+      v.pieces.map { case (pos, piece) => (Pos.Abalone(pos), (Piece.Abalone(piece), 1)) }
+
+    def standardVariant: Boolean     = false
+    def fromPositionVariant: Boolean = false
+    def exoticChessVariant: Boolean  = false
+    def frisianVariant: Boolean      = false
+    def draughts64Variant: Boolean   = false
+
+    def exotic: Boolean = v.exotic
+
+    def baseVariant: Boolean      = v.baseVariant
+    def fenVariant: Boolean       = v.fenVariant
+    def hasAnalysisBoard: Boolean = v.hasAnalysisBoard
+    def hasFishnet: Boolean       = v.hasFishnet
+
+    def p1IsBetterVariant: Boolean = v.p1IsBetterVariant
+    def blindModeVariant: Boolean  = v.blindModeVariant
+
+    def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
+
+    def dropsVariant: Boolean     = false
+    def onlyDropsVariant: Boolean = false
+    def hasGameScore: Boolean     = true
+    def canOfferDraw: Boolean     = v.canOfferDraw
+
+    def perfId: Int    = v.perfId
+    def perfIcon: Char = v.perfIcon
+
+    def initialFen: FEN     = FEN.Abalone(v.initialFen)
+    def startPlayer: Player = v.startPlayer
+
+    def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false
+
+    def checkmate(situation: Situation): Boolean = situation match {
+      case Situation.Abalone(situation) => false
+      case _                               => sys.error("Not passed Abalone objects")
+    }
+
+    def stalemateIsDraw: Boolean = v.stalemateIsDraw
+
+    def winner(situation: Situation): Option[Player] = situation match {
+      case Situation.Abalone(situation) => v.winner(situation)
+      case _                               => sys.error("Not passed Abalone objects")
+    }
+
+    @nowarn def specialEnd(situation: Situation): Boolean = situation match {
+      case Situation.Abalone(situation) => v.specialEnd(situation)
+      case _                               => sys.error("Not passed Abalone objects")
+    }
+
+    @nowarn def specialDraw(situation: Situation): Boolean = situation match {
+      case Situation.Abalone(situation) => v.specialDraw(situation)
+      case _                               => sys.error("Not passed Abalone objects")
+    }
+
+    def hasMoveEffects: Boolean = v.hasMoveEffects
+
+    def addVariantEffect(move: Move): Move            = move match {
+      case Move.Abalone(move) => Move.Abalone(v.addVariantEffect(move))
+      case _                     => sys.error("Not passed Abalone objects")
+    }
+    def valid(board: Board, strict: Boolean): Boolean = board match {
+      case Board.Abalone(board) => v.valid(board, strict)
+      case _                       => sys.error("Not passed Abalone objects")
+    }
+
+    val roles: List[Role] = v.roles.map(Role.AbaloneRole)
+
+    override def equals(that: Any): Boolean = that match {
+      case Abalone(v2) => v2.equals(v)
+      case _              => false
+    }
+
+    def chessVariant: chess.variant.Variant = sys.error("Unimplemented for Abalone")
+    def gameLogic: GameLogic                = GameLogic.Abalone()
+    def gameFamily: GameFamily              = v.gameFamily
+
+    def playerNames: Map[Player, String]  = gameFamily.playerNames
+    def playerColors: Map[Player, String] = gameFamily.playerColors
+  }
+
   def all: List[Variant] =
     chess.variant.Variant.all.map(Chess) :::
       draughts.variant.Variant.all.map(Draughts) :::
@@ -824,7 +932,8 @@ object Variant {
       samurai.variant.Variant.all.map(Samurai) :::
       togyzkumalak.variant.Variant.all.map(Togyzkumalak) :::
       go.variant.Variant.all.map(Go) :::
-      backgammon.variant.Variant.all.map(Backgammon)
+      backgammon.variant.Variant.all.map(Backgammon) :::
+      abalone.variant.Variant.all.map(Abalone)
 
   def byId = all map { v => (v.id, v) } toMap
 
@@ -838,6 +947,7 @@ object Variant {
     case GameLogic.Togyzkumalak() => togyzkumalak.variant.Variant.all.map(Togyzkumalak)
     case GameLogic.Go()           => go.variant.Variant.all.map(Go)
     case GameLogic.Backgammon()   => backgammon.variant.Variant.all.map(Backgammon)
+    case GameLogic.Abalone()   => abalone.variant.Variant.all.map(Abalone)
   }
 
   def byId(lib: GameLogic) = all(lib) map { v =>
@@ -856,6 +966,7 @@ object Variant {
     case GameLogic.Togyzkumalak() => Togyzkumalak(togyzkumalak.variant.Variant.default)
     case GameLogic.Go()           => Go(go.variant.Variant.default)
     case GameLogic.Backgammon()   => Backgammon(backgammon.variant.Variant.default)
+    case GameLogic.Abalone()   => Abalone(abalone.variant.Variant.default)
   }
 
   def apply(lib: GameLogic, id: Int): Option[Variant]     = byId(lib) get id
@@ -878,6 +989,7 @@ object Variant {
     case GameLogic.Togyzkumalak() => togyzkumalak.variant.Variant.openingSensibleVariants.map(Togyzkumalak)
     case GameLogic.Go()           => go.variant.Variant.openingSensibleVariants.map(Go)
     case GameLogic.Backgammon()   => backgammon.variant.Variant.openingSensibleVariants.map(Backgammon)
+    case GameLogic.Abalone()   => abalone.variant.Variant.openingSensibleVariants.map(Abalone)
   }
 
   def divisionSensibleVariants(lib: GameLogic): Set[Variant] = lib match {
@@ -888,6 +1000,7 @@ object Variant {
     case GameLogic.Togyzkumalak() => togyzkumalak.variant.Variant.divisionSensibleVariants.map(Togyzkumalak)
     case GameLogic.Go()           => go.variant.Variant.divisionSensibleVariants.map(Go)
     case GameLogic.Backgammon()   => backgammon.variant.Variant.divisionSensibleVariants.map(Backgammon)
+    case GameLogic.Abalone()   => abalone.variant.Variant.divisionSensibleVariants.map(Abalone)
   }
 
   def libStandard(lib: GameLogic): Variant = lib match {
@@ -898,6 +1011,7 @@ object Variant {
     case GameLogic.Togyzkumalak() => Variant.Togyzkumalak(togyzkumalak.variant.Togyzkumalak)
     case GameLogic.Go()           => Variant.Go(go.variant.Go19x19)
     case GameLogic.Backgammon()   => Variant.Backgammon(backgammon.variant.Backgammon)
+    case GameLogic.Abalone()   => Variant.Abalone(abalone.variant.Abalone)
   }
 
   // todo all games will be allowed from position (go has 3 variants already!)
@@ -911,6 +1025,7 @@ object Variant {
     case GameLogic.Togyzkumalak() => Variant.Togyzkumalak(togyzkumalak.variant.Togyzkumalak)
     case GameLogic.Go()           => Variant.Go(go.variant.Go19x19)
     case GameLogic.Backgammon()   => Variant.Backgammon(backgammon.variant.Backgammon)
+    case GameLogic.Abalone()   => Variant.Abalone(abalone.variant.Abalone)
   }
 
   def wrap(v: chess.variant.Variant)        = Chess(v)
@@ -920,5 +1035,6 @@ object Variant {
   def wrap(v: togyzkumalak.variant.Variant) = Togyzkumalak(v)
   def wrap(v: go.variant.Variant)           = Go(v)
   def wrap(v: backgammon.variant.Variant)   = Backgammon(v)
+  def wrap(v: abalone.variant.Variant)   = Abalone(v)
 
 }

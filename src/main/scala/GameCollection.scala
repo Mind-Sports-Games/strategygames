@@ -48,8 +48,13 @@ object GameLogic {
     def name = "Backgammon"
   }
 
+  final case class Abalone() extends GameLogic {
+    def id   = 7
+    def name = "Abalone"
+  }
+
   def all: List[GameLogic] =
-    List(Chess(), Draughts(), FairySF(), Samurai(), Togyzkumalak(), Go(), Backgammon())
+    List(Chess(), Draughts(), FairySF(), Samurai(), Togyzkumalak(), Go(), Backgammon(), Abalone())
 
   // TODO: I'm sure there is a better scala way of doing this
   def apply(id: Int): GameLogic = id match {
@@ -59,6 +64,7 @@ object GameLogic {
     case 4 => Togyzkumalak()
     case 5 => Go()
     case 6 => Backgammon()
+    case 7 => Abalone()
     case _ => Chess()
   }
 }
@@ -412,6 +418,26 @@ object GameFamily {
     def playerColors      = Map(P1 -> "white", P2 -> "black")
   }
 
+  final case class Abalone() extends GameFamily {
+    def id                = 11
+    def name              = "Abalone"
+    def key               = "abalone"
+    def gameLogic         = GameLogic.Abalone()
+    def hasFishnet        = false
+    def hasAnalysisBoard  = false
+    def defaultVariant    = Variant.Abalone(strategygames.abalone.variant.Abalone)
+    def variants          = Variant.all(GameLogic.Abalone()).filter(_.gameFamily == this)
+    def displayPiece      = "display"
+    def pieceSetThemes    = //TODO Abalone: Add themes
+      List(
+      )
+    def pieceSetDefault   = ""
+    def boardThemes       = List()
+    def boardThemeDefault = ""
+    def playerNames       = Map(P1 -> "Black", P2 -> "White")
+    def playerColors      = Map(P1 -> "black", P2 -> "white")
+  }
+
   def all: List[GameFamily] = List(
     Chess(),
     Draughts(),
@@ -423,7 +449,8 @@ object GameFamily {
     Oware(),
     Togyzkumalak(),
     Go(),
-    Backgammon()
+    Backgammon(),
+    Abalone()
   )
 
   // TODO: I'm sure there is a better scala way of doing this
@@ -438,6 +465,7 @@ object GameFamily {
     case 8  => Amazons()
     case 9  => Go()
     case 10 => Backgammon()
+    case 11 => Abalone()
     case _  => Chess()
   }
 
@@ -547,6 +575,14 @@ object GameGroup {
     def medley   = true
   }
 
+  final case class Abalone() extends GameGroup {
+    def id       = 11
+    def name     = "Abalone"
+    def key      = "abalone"
+    def variants = Variant.all(GameLogic.Abalone()).filter(_.gameFamily.name == this.name)
+    def medley   = true
+  }
+
   def all: List[GameGroup] =
     List(
       Chess(),
@@ -559,7 +595,8 @@ object GameGroup {
       Mancala(),
       Amazons(),
       Go(),
-      Backgammon()
+      Backgammon(),
+      Abalone()
     )
 
   def medley: List[GameGroup] = all.filter(_.medley)
@@ -576,6 +613,7 @@ object GameGroup {
     case 8  => Amazons()
     case 9  => Go()
     case 10 => Backgammon()
+    case 11 => Abalone()
     case _  => Chess()
   }
 }

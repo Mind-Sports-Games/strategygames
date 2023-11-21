@@ -28,6 +28,8 @@ object UciDump {
       strategygames.go.format.UciDump(actionStrs, initialFen.map(_.toGo), variant)
     case (GameLogic.Backgammon(), Variant.Backgammon(variant))     =>
       strategygames.backgammon.format.UciDump(actionStrs, initialFen.map(_.toBackgammon), variant)
+    case (GameLogic.Abalone(), Variant.Abalone(variant))     =>
+      strategygames.abalone.format.UciDump(actionStrs, initialFen.map(_.toAbalone), variant)
     case _                                                         => sys.error("Mismatched gamelogic types 12")
   }
 
@@ -54,6 +56,8 @@ object UciDump {
       strategygames.go.format.UciDump.action(variant)(a)
     case (GameLogic.Backgammon(), Variant.Backgammon(variant), Move.Backgammon(a))       =>
       strategygames.backgammon.format.UciDump.action(variant)(a)
+    case (GameLogic.Abalone(), Variant.Abalone(variant), Move.Abalone(a))       =>
+      strategygames.abalone.format.UciDump.action(variant)(a)
     case _                                                                               => sys.error("Mismatched gamelogic types 13")
   }
 

@@ -22,6 +22,7 @@ sealed trait PromotableRole extends Role {
   def toTogyzkumalak: togyzkumalak.PromotableRole
   def toGo: go.PromotableRole
   def toBackgammon: backgammon.PromotableRole
+  def toAbalone: abalone.PromotableRole
 }
 
 object Role {
@@ -103,6 +104,17 @@ object Role {
     override def toString() = r.name
   }
 
+  final case class AbaloneRole(r: abalone.Role) extends Role {
+    lazy val forsyth        = r.forsyth
+    lazy val pgn            = r.pgn
+    lazy val binaryInt      = r.binaryInt
+    lazy val hashInt        = r.hashInt
+    lazy val name           = r.name
+    lazy val groundName     = r.groundName
+    lazy val storable       = false
+    override def toString() = r.name
+  }
+
   final case class ChessPromotableRole(r: chess.PromotableRole) extends PromotableRole {
     lazy val forsyth                                = r.forsyth
     lazy val pgn                                    = r.pgn
@@ -119,6 +131,7 @@ object Role {
     def toTogyzkumalak: togyzkumalak.PromotableRole = sys.error("Not implemented for chess")
     def toGo: go.PromotableRole                     = sys.error("Not implemented for chess")
     def toBackgammon: backgammon.PromotableRole     = sys.error("Not implemented for chess")
+    def toAbalone: abalone.PromotableRole           = sys.error("Not implemented for chess")
   }
 
   final case class DraughtsPromotableRole(r: draughts.PromotableRole) extends PromotableRole {
@@ -137,6 +150,7 @@ object Role {
     def toTogyzkumalak: togyzkumalak.PromotableRole = sys.error("Not implemented for draughts")
     def toGo: go.PromotableRole                     = sys.error("Not implemented for draughts")
     def toBackgammon: backgammon.PromotableRole     = sys.error("Not implemented for draughts")
+    def toAbalone: abalone.PromotableRole           = sys.error("Not implemented for draughts")
   }
 
   final case class FairySFPromotableRole(r: fairysf.PromotableRole) extends PromotableRole {
@@ -155,6 +169,7 @@ object Role {
     def toTogyzkumalak: togyzkumalak.PromotableRole = sys.error("Not implemented for togyzkumalak")
     def toGo: go.PromotableRole                     = sys.error("Not implemented for go")
     def toBackgammon: backgammon.PromotableRole     = sys.error("Not implemented for backgammon")
+    def toAbalone: abalone.PromotableRole           = sys.error("Not implemented for fairysf")
   }
 
   // lila
@@ -166,6 +181,7 @@ object Role {
     case GameLogic.Togyzkumalak() => togyzkumalak.Role.all.map(TogyzkumalakRole)
     case GameLogic.Go()           => go.Role.all.map(GoRole)
     case GameLogic.Backgammon()   => backgammon.Role.all.map(BackgammonRole)
+    case GameLogic.Abalone()      => abalone.Role.all.map(AbaloneRole)
   }
 
   def allPromotable(lib: GameLogic): List[PromotableRole] = lib match {
@@ -176,6 +192,7 @@ object Role {
     case GameLogic.Togyzkumalak() => sys.error("allPromotable not implemented for togyzkumalak")
     case GameLogic.Go()           => sys.error("allPromotable not implemented for go")
     case GameLogic.Backgammon()   => sys.error("allPromotable not implemented for backgammon")
+    case GameLogic.Abalone()      => sys.error("allPromotable not implemented for abalone")
   }
 
   def allByForsyth(lib: GameLogic): Map[Char, Role] = lib match {
@@ -187,6 +204,7 @@ object Role {
       togyzkumalak.Role.allByForsyth.map { case (f, r) => (f, TogyzkumalakRole(r)) }
     case GameLogic.Go()           => go.Role.allByForsyth.map { case (f, r) => (f, GoRole(r)) }
     case GameLogic.Backgammon()   => backgammon.Role.allByForsyth.map { case (f, r) => (f, BackgammonRole(r)) }
+    case GameLogic.Abalone()      => abalone.Role.allByForsyth.map { case (f, r) => (f, AbaloneRole(r)) }
   }
 
   def allByForsyth(lib: GameLogic, gf: GameFamily): Map[Char, Role] = lib match {
@@ -199,6 +217,8 @@ object Role {
     case GameLogic.Go()           => go.Role.allByForsyth(gf).map { case (f, r) => (f, GoRole(r)) }
     case GameLogic.Backgammon()   =>
       backgammon.Role.allByForsyth(gf).map { case (f, r) => (f, BackgammonRole(r)) }
+    case GameLogic.Abalone()      =>
+      abalone.Role.allByForsyth(gf).map { case (f, r) => (f, AbaloneRole(r)) }
   }
 
   def allByPgn(lib: GameLogic): Map[Char, Role] = lib match {
@@ -210,6 +230,7 @@ object Role {
       togyzkumalak.Role.allByPgn.map { case (p, r) => (p, TogyzkumalakRole(r)) }
     case GameLogic.Go()           => go.Role.allByPgn.map { case (p, r) => (p, GoRole(r)) }
     case GameLogic.Backgammon()   => backgammon.Role.allByPgn.map { case (p, r) => (p, BackgammonRole(r)) }
+    case GameLogic.Abalone()      => abalone.Role.allByPgn.map { case (p, r) => (p, AbaloneRole(r)) }
   }
 
   def allByPgn(lib: GameLogic, gf: GameFamily): Map[Char, Role] = lib match {
@@ -221,6 +242,7 @@ object Role {
       togyzkumalak.Role.allByPgn(gf).map { case (p, r) => (p, TogyzkumalakRole(r)) }
     case GameLogic.Go()           => go.Role.allByPgn(gf).map { case (p, r) => (p, GoRole(r)) }
     case GameLogic.Backgammon()   => backgammon.Role.allByPgn(gf).map { case (p, r) => (p, BackgammonRole(r)) }
+    case GameLogic.Abalone()      => abalone.Role.allByPgn(gf).map { case (p, r) => (p, AbaloneRole(r)) }
   }
 
   def allByName(lib: GameLogic): Map[String, Role] = lib match {
@@ -232,6 +254,7 @@ object Role {
       togyzkumalak.Role.allByName.map { case (n, r) => (n, TogyzkumalakRole(r)) }
     case GameLogic.Go()           => go.Role.allByName.map { case (n, r) => (n, GoRole(r)) }
     case GameLogic.Backgammon()   => backgammon.Role.allByName.map { case (n, r) => (n, BackgammonRole(r)) }
+    case GameLogic.Abalone()      => abalone.Role.allByName.map { case (n, r) => (n, AbaloneRole(r)) }
   }
 
   def allByName(lib: GameLogic, gf: GameFamily): Map[String, Role] = lib match {
@@ -243,6 +266,7 @@ object Role {
       togyzkumalak.Role.allByName(gf).map { case (n, r) => (n, TogyzkumalakRole(r)) }
     case GameLogic.Go()           => go.Role.allByName(gf).map { case (n, r) => (n, GoRole(r)) }
     case GameLogic.Backgammon()   => backgammon.Role.allByName(gf).map { case (n, r) => (n, BackgammonRole(r)) }
+    case GameLogic.Abalone()      => abalone.Role.allByName(gf).map { case (n, r) => (n, AbaloneRole(r)) }
   }
 
   def allByGroundName(lib: GameLogic): Map[String, Role] = lib match {
@@ -255,6 +279,8 @@ object Role {
     case GameLogic.Go()           => go.Role.allByGroundName.map { case (n, r) => (n, GoRole(r)) }
     case GameLogic.Backgammon()   =>
       backgammon.Role.allByGroundName.map { case (n, r) => (n, BackgammonRole(r)) }
+    case GameLogic.Abalone()      =>
+      abalone.Role.allByGroundName.map { case (n, r) => (n, AbaloneRole(r)) }
   }
 
   def allByGroundName(lib: GameLogic, gf: GameFamily): Map[String, Role] = lib match {
@@ -267,6 +293,8 @@ object Role {
     case GameLogic.Go()           => go.Role.allByGroundName(gf).map { case (n, r) => (n, GoRole(r)) }
     case GameLogic.Backgammon()   =>
       backgammon.Role.allByGroundName(gf).map { case (n, r) => (n, BackgammonRole(r)) }
+    case GameLogic.Abalone()      =>
+      abalone.Role.allByGroundName(gf).map { case (n, r) => (n, AbaloneRole(r)) }
   }
 
   def allPromotableByName(lib: GameLogic): Map[String, PromotableRole] = lib match {
@@ -280,6 +308,7 @@ object Role {
     case GameLogic.Togyzkumalak() => sys.error("allPromotableByName not implemented for togyzkumalak")
     case GameLogic.Go()           => sys.error("allPromotableByName not implemented for go")
     case GameLogic.Backgammon()   => sys.error("allPromotableByName not implemented for backgammon")
+    case GameLogic.Abalone()      => sys.error("allPromotableByName not implemented for abalone")
   }
 
   def allPromotableByName(lib: GameLogic, gf: GameFamily): Map[String, PromotableRole] = lib match {
@@ -293,6 +322,7 @@ object Role {
     case GameLogic.Togyzkumalak() => sys.error("allPromotableByName not implemented for togyzkumalak")
     case GameLogic.Go()           => sys.error("allPromotableByName not implemented for go")
     case GameLogic.Backgammon()   => sys.error("allPromotableByName not implemented for backgammon")
+    case GameLogic.Abalone()      => sys.error("allPromotableByName not implemented for abalone")
   }
 
   def allPromotableByForsyth(lib: GameLogic): Map[Char, PromotableRole] = lib match {
@@ -306,6 +336,7 @@ object Role {
     case GameLogic.Togyzkumalak() => sys.error("allPromotableByForsyth not implemented for togyzkumalak")
     case GameLogic.Go()           => sys.error("allPromotableByForsyth not implemented for go")
     case GameLogic.Backgammon()   => sys.error("allPromotableByForsyth not implemented for backgammon")
+    case GameLogic.Abalone()      => sys.error("allPromotableByForsyth not implemented for abalone")
   }
 
   def allPromotableByForsyth(lib: GameLogic, gf: GameFamily): Map[Char, PromotableRole] = lib match {
@@ -319,6 +350,7 @@ object Role {
     case GameLogic.Togyzkumalak() => sys.error("allPromotableByForsyth not implemented for togyzkumalak")
     case GameLogic.Go()           => sys.error("allPromotableByForsyth not implemented for go")
     case GameLogic.Backgammon()   => sys.error("allPromotableByForsyth not implemented for backgammon")
+    case GameLogic.Abalone()      => sys.error("allPromotableByForsyth not implemented for abalone")
   }
 
   def allPromotableByPgn(lib: GameLogic): Map[Char, PromotableRole] = lib match {
@@ -331,6 +363,7 @@ object Role {
     case GameLogic.Togyzkumalak() => sys.error("allPromotableByPgn not implemented for togyzkumalak")
     case GameLogic.Go()           => sys.error("allPromotableByPgn not implemented for go")
     case GameLogic.Backgammon()   => sys.error("allPromotableByPgn not implemented for backgammon")
+    case GameLogic.Abalone()      => sys.error("allPromotableByPgn not implemented for abalone")
   }
 
   def allPromotableByPgn(lib: GameLogic, gf: GameFamily): Map[Char, PromotableRole] = lib match {
@@ -343,6 +376,7 @@ object Role {
     case GameLogic.Togyzkumalak() => sys.error("allPromotableByPgn not implemented for togyzkumalak")
     case GameLogic.Go()           => sys.error("allPromotableByPgn not implemented for go")
     case GameLogic.Backgammon()   => sys.error("allPromotableByPgn not implemented for backgammon")
+    case GameLogic.Abalone()      => sys.error("allPromotableByPgn not implemented for abalone")
   }
 
   def forsyth(lib: GameLogic, c: Char): Option[Role] = lib match {
@@ -353,6 +387,7 @@ object Role {
     case GameLogic.Togyzkumalak() => togyzkumalak.Role.forsyth(c).map(TogyzkumalakRole)
     case GameLogic.Go()           => go.Role.forsyth(c).map(GoRole)
     case GameLogic.Backgammon()   => backgammon.Role.forsyth(c).map(BackgammonRole)
+    case GameLogic.Abalone()      => abalone.Role.forsyth(c).map(AbaloneRole)
   }
 
   def promotable(lib: GameLogic, gf: GameFamily, c: Char): Option[PromotableRole] = lib match {
@@ -363,6 +398,7 @@ object Role {
     case GameLogic.Togyzkumalak() => sys.error("promotable not implemented for togyzkumalak")
     case GameLogic.Go()           => sys.error("promotable not implemented for go")
     case GameLogic.Backgammon()   => sys.error("promotable not implemented for backgammon")
+    case GameLogic.Abalone()      => sys.error("promotable not implemented for abalone")
   }
 
   def promotable(lib: GameLogic, gf: GameFamily, name: String): Option[PromotableRole] = lib match {
@@ -373,6 +409,7 @@ object Role {
     case GameLogic.Togyzkumalak() => sys.error("promotable not implemented for togyzkumalak")
     case GameLogic.Go()           => sys.error("promotable not implemented for go")
     case GameLogic.Backgammon()   => sys.error("promotable not implemented for backgammon")
+    case GameLogic.Abalone()      => sys.error("promotable not implemented for abalone")
   }
 
   def promotable(lib: GameLogic, gf: GameFamily, name: Option[String]): Option[PromotableRole] = lib match {
@@ -383,6 +420,7 @@ object Role {
     case GameLogic.Togyzkumalak() => sys.error("promotable not implemented for togyzkumalak")
     case GameLogic.Go()           => sys.error("promotable not implemented for go")
     case GameLogic.Backgammon()   => sys.error("promotable not implemented for backgammon")
+    case GameLogic.Abalone()      => sys.error("promotable not implemented for abalone")
   }
 
   def storable(lib: GameLogic): List[Role] = lib match {
@@ -393,6 +431,7 @@ object Role {
     case GameLogic.Togyzkumalak() => List()
     case GameLogic.Go()           => List()
     case GameLogic.Backgammon()   => List()
+    case GameLogic.Abalone()      => List()
   }
 
   def pgnMoveToRole(lib: GameLogic, gf: GameFamily, c: Char): Role = lib match {
@@ -403,6 +442,7 @@ object Role {
     case GameLogic.Togyzkumalak() => TogyzkumalakRole(togyzkumalak.Role.pgnMoveToRole(gf, c))
     case GameLogic.Go()           => GoRole(go.Role.pgnMoveToRole(gf, c))
     case GameLogic.Backgammon()   => BackgammonRole(backgammon.Role.pgnMoveToRole(gf, c))
+    case GameLogic.Abalone()      => AbaloneRole(abalone.Role.pgnMoveToRole(gf, c))
   }
 
   def javaSymbolToRole(lib: GameLogic, s: String): Role = lib match {
@@ -413,6 +453,7 @@ object Role {
     case GameLogic.Togyzkumalak() => TogyzkumalakRole(togyzkumalak.Role.javaSymbolToRole(s))
     case GameLogic.Go()           => GoRole(go.Role.javaSymbolToRole(s))
     case GameLogic.Backgammon()   => BackgammonRole(backgammon.Role.javaSymbolToRole(s))
+    case GameLogic.Abalone()      => AbaloneRole(abalone.Role.javaSymbolToRole(s))
   }
 
   def wrap(pr: chess.PromotableRole): PromotableRole    = ChessPromotableRole(pr)

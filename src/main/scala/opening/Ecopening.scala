@@ -176,4 +176,26 @@ object Ecopening {
     lazy val moveList                          = f.moves.split(' ').toList
   }
 
+  final case class Abalone(f: strategygames.abalone.opening.Ecopening)
+      extends Ecopening(
+        f.eco,
+        f.variantGrouping,
+        f.family,
+        f.name,
+        f.moves,
+        f.fen,
+        f.lastMoveUci
+      ) {
+    override def toString = f.toString()
+
+    def ecoName                                = s"${f.eco} ${f.name}"
+    def compare(other: Ecopening)              = f.eco compare other.eco
+    def possibleContinuation(other: Ecopening) =
+      (f.variantGrouping == other.variantGrouping) &&
+        ((f.lastMoveUci == "" && other.size == 1) || ((f.size + 1 == other.size) && (f.moveList == other.moveList.reverse.tail.reverse))) &&
+        other.lastMoveUci != ""
+    lazy val size                              = f.moveList.size
+    lazy val moveList                          = f.moves.split(' ').toList
+  }
+
 }

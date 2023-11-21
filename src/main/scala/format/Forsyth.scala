@@ -17,6 +17,7 @@ object Forsyth {
     case GameLogic.Togyzkumalak() => FEN.Togyzkumalak(togyzkumalak.format.Forsyth.initial)
     case GameLogic.Go()           => FEN.Go(go.format.Forsyth.initial)
     case GameLogic.Backgammon()   => FEN.Backgammon(backgammon.format.Forsyth.initial)
+    case GameLogic.Abalone()   => FEN.Abalone(abalone.format.Forsyth.initial)
   }
 
   def <<@(lib: GameLogic, variant: Variant, fen: FEN): Option[Situation] =
@@ -35,6 +36,8 @@ object Forsyth {
         go.format.Forsyth.<<@(variant, fen).map(Situation.Go)
       case (GameLogic.Backgammon(), Variant.Backgammon(variant), FEN.Backgammon(fen))       =>
         backgammon.format.Forsyth.<<@(variant, fen).map(Situation.Backgammon)
+      case (GameLogic.Abalone(), Variant.Abalone(variant), FEN.Abalone(fen))       =>
+        abalone.format.Forsyth.<<@(variant, fen).map(Situation.Abalone)
       case _                                                                                => sys.error("Mismatched gamelogic types 14")
     }
 
@@ -48,6 +51,8 @@ object Forsyth {
     case (GameLogic.Go(), FEN.Go(fen))                     => go.format.Forsyth.<<(fen).map(Situation.Go)
     case (GameLogic.Backgammon(), FEN.Backgammon(fen))     =>
       backgammon.format.Forsyth.<<(fen).map(Situation.Backgammon)
+    case (GameLogic.Abalone(), FEN.Abalone(fen))     =>
+      abalone.format.Forsyth.<<(fen).map(Situation.Abalone)
     case _                                                 => sys.error("Mismatched gamelogic types 15")
   }
 
@@ -88,7 +93,10 @@ object Forsyth {
         backgammon.format.Forsyth
           .<<<@(variant, fen)
           .map(sp => SituationPlus(Situation.Backgammon(sp.situation), sp.fullTurnCount))
-
+      case (GameLogic.Abalone(), Variant.Abalone(variant), FEN.Abalone(fen))       =>
+        abalone.format.Forsyth
+          .<<<@(variant, fen)
+          .map(sp => SituationPlus(Situation.Abalone(sp.situation), sp.fullTurnCount))
       case _ => sys.error("Mismatched gamelogic types 16")
     }
 
@@ -121,6 +129,10 @@ object Forsyth {
       backgammon.format.Forsyth
         .<<<(fen)
         .map(sp => SituationPlus(Situation.Backgammon(sp.situation), sp.fullTurnCount))
+    case (GameLogic.Abalone(), FEN.Abalone(fen))     =>
+      abalone.format.Forsyth
+        .<<<(fen)
+        .map(sp => SituationPlus(Situation.Abalone(sp.situation), sp.fullTurnCount))
     case _                                                 => sys.error("Mismatched gamelogic types 17")
   }
 
@@ -169,6 +181,12 @@ object Forsyth {
           backgammon.format.Forsyth.SituationPlus(situation, parsed.fullTurnCount)
         )
       )
+    case (GameLogic.Abalone(), Situation.Abalone(situation))     =>
+      FEN.Abalone(
+        abalone.format.Forsyth.>>(
+          abalone.format.Forsyth.SituationPlus(situation, parsed.fullTurnCount)
+        )
+      )
     case _                                                             => sys.error("Mismatched gamelogic types 19")
   }
 
@@ -182,6 +200,7 @@ object Forsyth {
     case (GameLogic.Go(), Game.Go(game))                     => FEN.Go(go.format.Forsyth.>>(game))
     case (GameLogic.Backgammon(), Game.Backgammon(game))     =>
       FEN.Backgammon(backgammon.format.Forsyth.>>(game))
+    case (GameLogic.Abalone(), Game.Abalone(game))           => FEN.Abalone(abalone.format.Forsyth.>>(game))
     case _                                                   => sys.error("Mismatched gamelogic types 20")
   }
 
@@ -201,6 +220,8 @@ object Forsyth {
         go.format.Forsyth.exportBoard(board)
       case (GameLogic.Backgammon(), Board.Backgammon(board))     =>
         backgammon.format.Forsyth.exportBoard(board)
+      case (GameLogic.Abalone(), Board.Abalone(board))     =>
+        abalone.format.Forsyth.exportBoard(board)
       case _                                                     => sys.error("Mismatched gamelogic types 21")
     }
 
@@ -223,6 +244,8 @@ object Forsyth {
         go.format.Forsyth.boardAndPlayer(board, turnPlayer)
       case (GameLogic.Backgammon(), Board.Backgammon(board))     =>
         backgammon.format.Forsyth.boardAndPlayer(board, turnPlayer)
+      case (GameLogic.Abalone(), Board.Abalone(board))     =>
+        abalone.format.Forsyth.boardAndPlayer(board, turnPlayer)
       case _                                                     => sys.error("Mismatched gamelogic types 22")
     }
 

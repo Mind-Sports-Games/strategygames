@@ -99,6 +99,14 @@ object History {
         score = h.score
       )
 
+  final case class Abalone(h: abalone.History)
+      extends History(
+        lastMove = h.lastMove.map(Uci.wrap),
+        positionHashes = h.positionHashes,
+        halfMoveClock = h.halfMoveClock,
+        score = h.score
+      )
+
   implicit def chessHistory(h: chess.History)               = Chess(h)
   implicit def draughtsHistory(h: draughts.DraughtsHistory) = Draughts(h)
   implicit def fairysfHistory(h: fairysf.History)           = FairySF(h)
@@ -106,6 +114,7 @@ object History {
   implicit def togyzkumalakHistory(h: togyzkumalak.History) = Togyzkumalak(h)
   implicit def goHistory(h: go.History)                     = Go(h)
   implicit def backgammonHistory(h: backgammon.History)     = Backgammon(h)
+  implicit def abaloneHistory(h: abalone.History)     = Abalone(h)
 
   // lila
   def apply(
@@ -184,6 +193,15 @@ object History {
       Backgammon(
         backgammon.History(
           lastMove = lastMove.map(lm => lm.toBackgammon),
+          positionHashes = positionHashes,
+          halfMoveClock = halfMoveClock,
+          score = score
+        )
+      )
+    case GameLogic.Abalone()   =>
+      Abalone(
+        abalone.History(
+          lastMove = lastMove.map(lm => lm.toAbalone),
           positionHashes = positionHashes,
           halfMoveClock = halfMoveClock,
           score = score
