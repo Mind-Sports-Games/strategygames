@@ -24,7 +24,13 @@ object Piotr {
     Pos.G2.index -> 'o',
     Pos.H2.index -> 'p',
     Pos.I1.index -> '[',
-    Pos.I2.index -> ']'
+    Pos.I2.index -> ']',
+    Pos.J1.index -> '\\',
+    Pos.J2.index -> '^',
+    Pos.K1.index -> '\u00A9',
+    Pos.K2.index -> '\u00B2',
+    Pos.L1.index -> '\u00AA',
+    Pos.L2.index -> '\u00B3'
   )
 }
 
@@ -122,17 +128,23 @@ object Pos {
   val G1 = new Pos(6)
   val H1 = new Pos(7)
   val I1 = new Pos(8)
+  val J1 = new Pos(9)
+  val K1 = new Pos(10)
+  val L1 = new Pos(11)
 
   // backwards for 2nd rank
-  val I2 = new Pos(9)
-  val H2 = new Pos(10)
-  val G2 = new Pos(11)
-  val F2 = new Pos(12)
-  val E2 = new Pos(13)
-  val D2 = new Pos(14)
-  val C2 = new Pos(15)
-  val B2 = new Pos(16)
-  val A2 = new Pos(17)
+  val I2 = new Pos(12)
+  val H2 = new Pos(13)
+  val G2 = new Pos(14)
+  val F2 = new Pos(15)
+  val E2 = new Pos(16)
+  val D2 = new Pos(17)
+  val C2 = new Pos(18)
+  val B2 = new Pos(19)
+  val A2 = new Pos(20)
+  val J2 = new Pos(21)
+  val K2 = new Pos(22)
+  val L2 = new Pos(23)
 
   val all: List[Pos] = (0 to (File.all.size * Rank.all.size) - 1).map(new Pos(_)).toList
 
@@ -149,6 +161,6 @@ object Pos {
     .to(Map)
 
   // val posR  = "([a-i][1-9]|[a-i]10)"
-  val posR = "([a-i][1-2])"
+  val posR = "([a-l][1-2])"
 
 }

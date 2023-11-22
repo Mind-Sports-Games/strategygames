@@ -35,7 +35,10 @@ object File {
   val G = new File(6)
   val H = new File(7)
   val I = new File(8)
+  val J = new File(9)
+  val K = new File(10)
+  val L = new File(11)
 
-  val all                     = List(A, B, C, D, E, F, G, H, I)
+  val all                     = List(A, B, C, D, E, F, G, H, I, J, K, L)
   val allReversed: List[File] = all.reverse
 }

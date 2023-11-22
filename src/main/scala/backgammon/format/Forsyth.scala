@@ -11,7 +11,7 @@ import strategygames.backgammon.variant.Variant
   */
 object Forsyth {
 
-  val initial = FEN("9S,9S,9S,9S,9S,9S,9S,9S,9S/9S,9S,9S,9S,9S,9S,9S,9S,9S 0 0 S 1")
+  val initial = FEN("5S,3,3s,1,5s,4,2S/5s,3,3S,1,5S,4,2s[] w - - 1")
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
     Some(
@@ -21,9 +21,9 @@ object Forsyth {
           history = History(),
           variant = variant
         ),
-        fen.value.split(' ')(3) match {
-          case "S" => P1
-          case "N" => P2
+        fen.value.split(' ')(1) match {
+          case "w" => P1
+          case "b" => P2
           case _   => sys.error("Invalid player in fen")
         }
       ).withHistory(

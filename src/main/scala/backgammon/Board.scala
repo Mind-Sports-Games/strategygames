@@ -80,12 +80,12 @@ object Board {
   }
 
   object BoardSize {
-    val all: List[BoardSize] = List(Dim9x2)
+    val all: List[BoardSize] = List(Dim12x2)
   }
 
-  case object Dim9x2
+  case object Dim12x2
       extends BoardSize(
-        width = 9,
+        width = 12,
         height = 2
       )
 

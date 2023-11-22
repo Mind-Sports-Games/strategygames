@@ -67,7 +67,7 @@ object Replay {
   //       return something that's runtime safe as well.
   def backgammonMove(action: StratAction) = action match {
     case StratMove.Backgammon(m) => m
-    case _                         => sys.error("Invalid backgammon move")
+    case _                       => sys.error("Invalid backgammon move")
   }
 
   def replayMove(

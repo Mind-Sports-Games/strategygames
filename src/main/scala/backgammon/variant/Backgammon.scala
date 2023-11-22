@@ -10,19 +10,19 @@ case object Backgammon
       key = "backgammon",
       name = "Backgammon",
       standardInitialPosition = true,
-      boardSize = Board.Dim9x2
+      boardSize = Board.Dim12x2
     ) {
 
   def gameFamily: GameFamily = GameFamily.Backgammon()
 
   def perfIcon: Char = '›'
-  def perfId: Int    = 400
+  def perfId: Int    = 600
 
   override def baseVariant: Boolean = true
 
   // cache this rather than checking with the API everytime
   override def initialFen =
-    format.FEN("9S,9S,9S,9S,9S,9S,9S,9S,9S/9S,9S,9S,9S,9S,9S,9S,9S,9S 0 0 S 1")
+    format.FEN("5S,3,3s,1,5s,4,2S/5s,3,3S,1,5S,4,2s[] w - - 1")
 
   // TODO check legalMoves.size == 0 condition
   override def specialEnd(situation: Situation) =
