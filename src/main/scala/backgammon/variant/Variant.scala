@@ -81,21 +81,15 @@ abstract class Variant private[variant] (
     }
   }
 
-  def piecesAfterMove(pieces: PieceMap, orig: Pos, dest: Pos, oppTuzdik: Option[Pos]): PieceMap =
+  def piecesAfterMove(pieces: PieceMap, orig: Pos, dest: Pos): PieceMap =
     pieceMapWithEmpties(pieces)
-      .map {
-        case (pos, posInfo) if posInfo._1.role != Tuzdik =>
-          (pos, (posInfo._1, stonesAfterMove(pieces(orig)._2, posInfo._2, orig.index, pos.index)))
-        case (pos, posInfo)                              => (pos, posInfo)
+      .map { case (pos, posInfo) =>
+        (pos, posInfo)
       }
       // now remove stones
       .map {
         case (pos, posInfo) if pos == dest && orig.player != dest.player && posInfo._2 % 2 == 0 =>
           (pos, (posInfo._1, 0))
-        case (pos, posInfo) if pos == dest && orig.player != dest.player && posInfo._2 == 3 && pieces.filter {
-              case (pos2, posInfo2) => posInfo2._1.role == Tuzdik && pos2.player == dest.player
-            }.isEmpty && oppTuzdik != Pos.opposite(dest.index) && !dest.last =>
-          (pos, (Piece(!pos.player, Tuzdik), 1))
         case (pos, posInfo) => (pos, posInfo)
       }
       .filterNot { case (pos, posInfo) => posInfo._2 == 0 }
@@ -103,20 +97,17 @@ abstract class Variant private[variant] (
 
   def boardAfter(situation: Situation, orig: Pos, dest: Pos): Board = {
     val boardAfter     = situation.board.copy(
-      pieces = piecesAfterMove(situation.board.pieces, orig, dest, situation.oppTuzdik)
+      pieces = piecesAfterMove(situation.board.pieces, orig, dest)
     )
-    val oppCaptured    = situation.oppTuzdik
-      .map(p => stonesAfterMove(situation.board.pieces(orig)._2, 0, orig.index, p.index))
-      .getOrElse(0)
     val activeCaptured =
-      if (boardAfter.playerStoneCount(!situation.player) == 0) situation.board.stoneCount - oppCaptured
-      else (situation.board.stoneCount - boardAfter.stoneCount) - oppCaptured
+      if (boardAfter.playerStoneCount(!situation.player) == 0) situation.board.stoneCount
+      else (situation.board.stoneCount - boardAfter.stoneCount)
     boardAfter.withHistory(
       situation.history.copy(
         lastMove = Some(Uci.Move(orig, dest)),
         score = Score(
-          situation.history.score.p1 + situation.player.fold(activeCaptured, oppCaptured),
-          situation.history.score.p2 + situation.player.fold(oppCaptured, activeCaptured)
+          situation.history.score.p1 + activeCaptured,
+          situation.history.score.p2 + activeCaptured
         ),
         halfMoveClock = situation.board.history.halfMoveClock + situation.player.fold(0, 1)
       )

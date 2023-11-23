@@ -27,18 +27,9 @@ case object Stone extends Role {
   val binaryInt = 0
 }
 
-case object Tuzdik extends Role {
-  val forsyth   = 't'
-  val binaryInt = 163
-}
-
 object Role {
 
-  val all: List[Role] =
-    List(
-      Stone,
-      Tuzdik
-    )
+  val all: List[Role] = List(Stone)
 
   def defaultRole: Role = Stone
 

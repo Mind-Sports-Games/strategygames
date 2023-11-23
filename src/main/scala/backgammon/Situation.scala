@@ -43,14 +43,6 @@ case class Situation(board: Board, player: Player) {
     else if (staleMate) Status.Stalemate.some
     else none
 
-  val oppTuzdik: Option[Pos] = board.pieces
-    .filter {
-      case (_, (p, _)) if p.role == Tuzdik && p.player != player => true
-      case _                                                     => false
-    }
-    .map { case (pos, _) => pos }
-    .headOption
-
   def opponentHasInsufficientMaterial: Boolean =
     if (player == P1) (board.history.score.p1 == 81) else (board.history.score.p2 == 81)
 

@@ -81,9 +81,10 @@ case class Pos private (index: Int) extends AnyVal {
   def piotr: Char = Piotr.lookup.get(index).getOrElse('?')
   def piotrStr    = piotr.toString
 
+  // todo this are no longer correct
   def player: Player = if (index < 9) Player.P1 else Player.P2
 
-  def last: Boolean = (index + 1) % 9 == 0
+  def last: Boolean = (index + 1) % 12 == 0
 
   def key               = file.toString + rank.toString
   override def toString = key
@@ -119,29 +120,29 @@ object Pos {
       b <- piotr(piotrs(1))
     } yield s"${a.key}${b.key}"
 
-  val A1 = new Pos(0)
-  val B1 = new Pos(1)
-  val C1 = new Pos(2)
-  val D1 = new Pos(3)
-  val E1 = new Pos(4)
-  val F1 = new Pos(5)
-  val G1 = new Pos(6)
-  val H1 = new Pos(7)
-  val I1 = new Pos(8)
-  val J1 = new Pos(9)
-  val K1 = new Pos(10)
-  val L1 = new Pos(11)
+  // backwards for first rank
+  val A1 = new Pos(11)
+  val B1 = new Pos(10)
+  val C1 = new Pos(9)
+  val D1 = new Pos(8)
+  val E1 = new Pos(7)
+  val F1 = new Pos(6)
+  val G1 = new Pos(5)
+  val H1 = new Pos(4)
+  val I1 = new Pos(3)
+  val J1 = new Pos(2)
+  val K1 = new Pos(1)
+  val L1 = new Pos(0)
 
-  // backwards for 2nd rank
-  val I2 = new Pos(12)
-  val H2 = new Pos(13)
-  val G2 = new Pos(14)
-  val F2 = new Pos(15)
+  val A2 = new Pos(12)
+  val B2 = new Pos(13)
+  val C2 = new Pos(14)
+  val D2 = new Pos(15)
   val E2 = new Pos(16)
-  val D2 = new Pos(17)
-  val C2 = new Pos(18)
-  val B2 = new Pos(19)
-  val A2 = new Pos(20)
+  val F2 = new Pos(17)
+  val G2 = new Pos(18)
+  val H2 = new Pos(19)
+  val I2 = new Pos(20)
   val J2 = new Pos(21)
   val K2 = new Pos(22)
   val L2 = new Pos(23)

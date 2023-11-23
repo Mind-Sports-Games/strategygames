@@ -1,18 +1,20 @@
 package strategygames.backgammon.format
 
 import strategygames.Player
-import strategygames.backgammon.{ Piece, PieceMap, Pos, Stone, Tuzdik }
+import strategygames.backgammon.{ Piece, PieceMap, Pos, PosInfo, Stone }
 
 final case class FEN(value: String) extends AnyVal {
 
   override def toString = value
 
+  def board: String = removePockets(value.takeWhile(_ != ' '))
+
   def player: Option[Player] =
-    value.split(' ').lift(3) flatMap (_.headOption) flatMap Player.apply
+    value.split(' ').lift(1) flatMap (_.headOption) flatMap Player.apply
 
-  def player1Score: Int = intFromFen(1).getOrElse(0)
+  def player1Score: Int = 0 // calculate from board fen
 
-  def player2Score: Int = intFromFen(2).getOrElse(0)
+  def player2Score: Int = 0 // calculate from board fen
 
   def fullMove: Option[Int] = intFromFen(4)
 
@@ -24,58 +26,38 @@ final case class FEN(value: String) extends AnyVal {
   private def intFromFen(index: Int): Option[Int] =
     value.split(' ').lift(index).flatMap(_.toIntOption)
 
-  private def width: Int = 9
-
-  def mancalaStoneArray: Array[Int] =
-    (
-      value.split(' ')(0).split('/')(1).split(',')
-        ++
-          value.split(' ')(0).split('/')(0).split(',').reverse
+  def stoneArray: Array[String] = (board.split('/')(0).split(',').reverse ++ board.split('/')(1).split(','))
+    .map(c =>
+      c.toString() match {
+        case x if 1 to 12 map (_.toString) contains x => Array.fill(x.toInt)("0")
+        case x                                        => Array(x)
+      }
     )
-      .map(c =>
-        c.toString() match {
-          case x if 1 to width map (_.toString) contains x => Array.fill(x.toInt)(0)
-          case x if x.length > 1                           => Array(c.dropRight(1).toInt)
-          case _                                           => Array(-1)
-        }
-      )
-      .flatten
-      .toArray
+    .flatten
+    .toArray
 
-  def pieces: PieceMap =
-    mancalaStoneArray.zipWithIndex
-      .filterNot { case (s, _) => s == 0 }
-      .map { case (stones, index) =>
-        Pos(index) -> (if (stones == -1) (Tuzdik, 1)
-                       else (Stone, stones))
-      }
-      .map {
-        case (Some(pos), (r, c)) if r == Tuzdik => (pos -> (Piece(!pos.player, r), c))
-        case (Some(pos), (r, c))                => (pos -> (Piece(pos.player, r), c))
-      }
-      .toMap
+  // def pieces: PieceMap = Map.empty[Pos, PosInfo] // todo calculate from board fen
+  def pieces: PieceMap = stoneArray.zipWithIndex
+    .filterNot { case (s, _) => s == "0" }
+    .map { case (pieceString, index) =>
+      Pos(index) -> (Stone, pieceString)
+    }
+    .map { case (Some(pos), (r, ps)) =>
+      (pos -> (Piece(
+        if (ps.takeRight(1) == "S") Player.P1 else Player.P2,
+        r
+      ),
+      ps.dropRight(1).toInt))
+    }
+    .toMap
 
-  private def tuzdikPit(playerFen: Array[String]): Option[Int] = {
-    val pit = playerFen
-      .map(c =>
-        c.toString() match {
-          case x if 1 to width map (_.toString) contains x => Array.fill(x.toInt)(0)
-          case x if x.length > 1                           => Array(0)
-          case _                                           => Array(1)
-        }
-      )
-      .flatten
-      .toArray
-      .indexOf(1)
-    if (pit < 0) None else Some(pit)
+  private def removePockets(fen: String): String = {
+    val start = fen.indexOf("[", 0)
+    val end   = fen.indexOf("]", start)
+    if (start > 0 && end > 0)
+      fen.substring(0, start) + fen.substring(end + 1, fen.length)
+    else fen
   }
-
-  // this isn't used anywhere (yet?)
-  def tuzdikPits: Map[Player, Option[Int]] =
-    Map(
-      Player.P1 -> tuzdikPit(value.split(' ')(0).split('/')(1).split(',')),
-      Player.P2 -> tuzdikPit(value.split(' ')(0).split('/')(0).split(',').reverse)
-    )
 
   def initial = value == Forsyth.initial.value
 }
