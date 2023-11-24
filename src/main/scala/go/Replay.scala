@@ -112,7 +112,7 @@ object Replay {
         )
         .withHistory(
           before.situation.history.copy(
-            lastMove = Uci.Drop(role, dest).some,
+            // lastTurn handled in Action.finalizeAfter
             score = Score(
               apiPosition.fen.player1Score,
               apiPosition.fen.player2Score
@@ -145,7 +145,7 @@ object Replay {
         )
         .withHistory(
           before.situation.history.copy(
-            lastMove = Uci.Pass().some,
+            // lastTurn handled in Action.finalizeAfter
             halfMoveClock = before.situation.history.halfMoveClock + before.situation.player.fold(0, 1)
           )
         ),
@@ -172,7 +172,7 @@ object Replay {
         )
         .withHistory(
           before.situation.history.copy(
-            lastMove = Uci.SelectSquares(squares).some,
+            // lastTurn handled in Action.finalizeAfter
             score = Score(
               apiPosition.fen.player1Score,
               apiPosition.fen.player2Score

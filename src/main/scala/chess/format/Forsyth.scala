@@ -51,6 +51,7 @@ object Forsyth {
           val fifthRank   = if (situation.player == P1) Rank.Fifth else Rank.Fourth
           val sixthRank   = if (situation.player == P1) Rank.Sixth else Rank.Third
           val seventhRank = if (situation.player == P1) Rank.Seventh else Rank.Second
+          // TODO Multiaction. This doesn't handle multiaction but is only for enpassant
           val lastMove    = for {
             pos <- splitted lift 3 flatMap Pos.fromKey
             if pos.rank == sixthRank
@@ -63,7 +64,7 @@ object Forsyth {
 
           situation withHistory {
             val history    = History(
-              lastMove = lastMove,
+              lastTurn = lastMove.toList,
               positionHashes = Array.empty,
               castles = castles,
               unmovedRooks = UnmovedRooks(unmovedRooks)

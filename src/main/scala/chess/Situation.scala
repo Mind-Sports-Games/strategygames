@@ -89,7 +89,8 @@ case class Situation(board: Board, player: Player) {
   def enPassantSquare: Option[Pos] = {
     // Before potentially expensive move generation, first ensure some basic
     // conditions are met.
-    history.lastMove match {
+    // TODO Review for multiaction variants like Monster/Progressive
+    history.lastAction match {
       case Some(move: Uci.Move) =>
         if (
           move.dest.yDist(move.orig) == 2 &&

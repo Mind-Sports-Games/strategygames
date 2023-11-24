@@ -113,7 +113,7 @@ abstract class Variant private[variant] (
       else (situation.board.stoneCount - boardAfter.stoneCount) - oppCaptured
     boardAfter.withHistory(
       situation.history.copy(
-        lastMove = Some(Uci.Move(orig, dest)),
+        // lastTurn handled on Move.finalizeAfter to keep consistency with other gamelogics
         score = Score(
           situation.history.score.p1 + situation.player.fold(activeCaptured, oppCaptured),
           situation.history.score.p2 + situation.player.fold(oppCaptured, activeCaptured)

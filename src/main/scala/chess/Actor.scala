@@ -37,7 +37,8 @@ final case class Actor(
               _         <- board(victimPos).filter(v => v == Piece(!player, Pawn))
               targetPos <- horizontal(next)
               _         <- pawnDir(victimPos) flatMap pawnDir filter { vf =>
-                             history.lastMove.exists {
+                //TODO Review for multiaction variants like Monster/Progressive
+                             history.lastAction.exists {
                                case Uci.Move(orig, dest, _) =>
                                  orig == vf && dest == victimPos
                                case _                       => false

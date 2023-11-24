@@ -107,7 +107,7 @@ abstract class Variant private[variant] (
               )
               .withHistory(
                 situation.history.copy(
-                  lastMove = Uci.Drop(Role.defaultRole, dest).some,
+                  // lastTurn handled in action.finalizeAfter
                   score = Score(
                     newPosition.fen.player1Score, // TODO: generating the scores is slow
                     newPosition.fen.player2Score  //        especially when we have to generate a FEN to get it

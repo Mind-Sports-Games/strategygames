@@ -26,7 +26,8 @@ case class Move(
   def finalizeAfter: Board = {
     val board = after updateHistory { h1 =>
       val h2 = h1.copy(
-        lastMove = Option(toUci),
+        lastTurn = if (autoEndTurn) h1.currentTurn :+ toUci else h1.lastTurn,
+        currentTurn = if (autoEndTurn) List() else h1.currentTurn :+ toUci,
         unmovedRooks = before.unmovedRooks,
         halfMoveClock =
           if ((piece is Pawn) || captures || promotes) 0

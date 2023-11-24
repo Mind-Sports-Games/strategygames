@@ -13,6 +13,13 @@ case class Pass(
   def situationAfter =
     Situation(finalizeAfter, if (autoEndTurn) !situationBefore.player else situationBefore.player)
 
+  def finalizeAfter: Board = after updateHistory { h =>
+    h.copy(
+      lastTurn = if (autoEndTurn) h.currentTurn :+ toUci else h.lastTurn,
+      currentTurn = if (autoEndTurn) List() else h.currentTurn :+ toUci
+    )
+  }
+
   def applyVariantEffect = this
 
   def player = situationBefore.player
