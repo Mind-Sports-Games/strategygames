@@ -51,7 +51,8 @@ case class Situation(board: Board, player: Player) {
     .map { case (pos, _) => pos }
     .headOption
 
-  def opponentHasInsufficientMaterial: Boolean = false
+  def opponentHasInsufficientMaterial: Boolean =
+    if (player == P1) (board.history.score.p1 == 81) else (board.history.score.p2 == 81)
 
   def move(from: Pos, to: Pos, promotion: Option[PromotableRole]): Validated[String, Move] =
     board.variant.move(this, from, to, promotion)

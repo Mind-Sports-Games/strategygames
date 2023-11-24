@@ -3,7 +3,7 @@ import strategygames.{ ClockBase, MoveMetrics }
 
 import cats.data.Validated
 
-import strategygames.go.format.FEN
+import strategygames.go.format.{ pgn, FEN, Uci }
 
 case class Game(
     situation: Situation,
@@ -106,6 +106,15 @@ case class Game(
       clock = applyClock(ss.metrics, newSituation.status.isEmpty, newSituation.player != situation.player)
     )
   }
+
+  def apply(uci: Uci.Drop): Validated[String, (Game, Drop)]                   = drop(uci.role, uci.pos)
+  def apply(uci: Uci.Pass): Validated[String, (Game, Pass)]                   = pass()
+  def apply(uci: Uci.SelectSquares): Validated[String, (Game, SelectSquares)] = selectSquares(uci.squares)
+  def apply(uci: Uci): Validated[String, (Game, Action)]                      = (uci match {
+    case u: Uci.Drop          => apply(u)
+    case u: Uci.Pass          => apply(u)
+    case u: Uci.SelectSquares => apply(u)
+  }) map { case (g, a) => g -> a }
 
   private def applyClock(
       metrics: MoveMetrics,
