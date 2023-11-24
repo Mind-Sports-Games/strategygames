@@ -26,8 +26,9 @@ case class Move(
   def finalizeAfter: Board = {
     val board = after updateHistory { h1 =>
       val h2 = h1.copy(
-        lastTurn = if (autoEndTurn) h1.currentTurn :+ toUci else h1.lastTurn,
-        currentTurn = if (autoEndTurn) List() else h1.currentTurn :+ toUci,
+        // turn info is set when creating board for Move to enable calculations for multiaction
+        // lastTurn = if (autoEndTurn) h1.currentTurn :+ toUci else h1.lastTurn,
+        // currentTurn = if (autoEndTurn) List() else h1.currentTurn :+ toUci,
         unmovedRooks = before.unmovedRooks,
         halfMoveClock =
           if ((piece is Pawn) || captures || promotes) 0
@@ -49,12 +50,18 @@ case class Move(
 
     // Update position hashes last, only after updating the board,
     // castling rights and en-passant rights.
-    board.variant.finalizeBoard(board, toUci, capture flatMap before.apply) updateHistory { h =>
+    board.variant.finalizeBoard(
+      board,
+      toUci,
+      capture flatMap before.apply
+    ) updateHistory { h =>
       lazy val positionHashesOfSituationBefore =
-        if (h.positionHashes.isEmpty) Hash(situationBefore) else h.positionHashes
+        if (h.positionHashes.isEmpty) Hash(situationBefore)
+        else h.positionHashes
       val resetsPositionHashes                 = board.variant.isIrreversible(this)
       val basePositionHashes                   =
-        if (resetsPositionHashes) Array.empty: PositionHash else positionHashesOfSituationBefore
+        if (resetsPositionHashes) Array.empty: PositionHash
+        else positionHashesOfSituationBefore
       h.copy(positionHashes = Hash(Situation(board, !piece.player)) ++ basePositionHashes)
     }
   }

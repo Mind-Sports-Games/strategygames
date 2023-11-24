@@ -2,6 +2,7 @@ package strategygames.chess.variant
 
 import strategygames.chess._
 import strategygames.chess.format.FEN
+import strategygames.Player
 
 case object Monster
     extends Variant(
@@ -55,19 +56,56 @@ case object Monster
       case P2 => true
     }
 
-  override def kingSafety(m: Move, filter: Piece => Boolean, kingPos: Option[Pos]): Boolean =
+  override def kingSafety(
+      m: Move,
+      filter: Piece => Boolean,
+      kingPos: Option[Pos]
+  ): Boolean =
     m.player match {
       case P1 if lastActionOfTurn(m.situationBefore) =>
         super.kingSafety(m, filter, kingPos)
       case P1                                        =>
-        m.situationAfter.moves.values.flatten.size > 0
+        m.situationAfter.moves.values.flatten.size > 0 || m.situationAfter.board.checkP2
       case P2                                        =>
         super.kingSafety(m, filter, kingPos) && !m.situationAfter.moves.values.flatten
           .map(nextMove => super.kingSafety(nextMove, _ => true, kingPos))
           .toList
           .contains(false)
+      // && !m.situationAfter.board.checkP2
     }
 
-  // override def valid(board: Board, strict: Boolean) =
+  override def kingThreatened(
+      board: Board,
+      player: Player,
+      to: Pos,
+      filter: Piece => Boolean = _ => true
+  ): Boolean = {
+    player match {
+      case P1 if board.history.currentTurn.isEmpty =>
+        super.kingThreatened(
+          board,
+          player,
+          to,
+          filter
+        ) || Situation(board, player).moves.values.flatten
+          .map(nextMove => super.kingThreatened(nextMove.after, player, to, _ => true))
+          .toList
+          .contains(true)
+      case _                                       => super.kingThreatened(board, player, to, filter)
+    }
+  }
+
+  override def checkmate(situation: Situation) =
+    situation.check && !situation.board.check(
+      !situation.player
+    ) && situation.moves.isEmpty
+
+  override def valid(board: Board, strict: Boolean) = validSide(board, strict)(P2) && {
+    val roles = board.rolesOf(P1)
+    roles.count(_ == King) == 1 &&
+    (!strict || roles.count(_ == Pawn) <= 4) &&
+    !pawnsOnPromotionRank(board, P1) &&
+    board.piecesOf(P1).size <= 5
+  }
 
 }

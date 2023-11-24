@@ -12,27 +12,48 @@ class MonsterVariantTest extends ChessTest {
 
     "Black be in check two moves away" in {
       import Pos._
-      "from init" in {
-        val game        = fenToGame(Monster.initialFen, Monster)
-        val successGame = game flatMap (_.playMoves(
-          E2 -> E4,
-          E4 -> E5,
-          F7 -> F6,
-          E1 -> E2,
-          E5 -> F6
-        ))
-        successGame must beValid.like { case game =>
-          // normally 21 moves are available to due to the kingSafety in Monster its only 4
-          game.situation.moves.values.flatten.size must_== 4
-        }
+      val game        = fenToGame(Monster.initialFen, Monster)
+      val successGame = game flatMap (_.playMoves(
+        E2 -> E4,
+        E4 -> E5,
+        F7 -> F6,
+        E1 -> E2,
+        E5 -> F6
+      ))
+      successGame must beValid.like { case game =>
+        // normally 21 moves are available to due to the kingSafety in Monster its only 4
+        game.situation.moves.values.flatten.size must_== 4
       }
     }
 
     "White have to work towards getting out of check if it requires two moves" in {
       import Pos._
-      "from init" in {
-        val game        = fenToGame(Monster.initialFen, Monster)
-        val successGame = game flatMap (_.playMoves(
+      val game        = fenToGame(Monster.initialFen, Monster)
+      val successGame = game flatMap (_.playMoves(
+        F2 -> F4,
+        E1 -> F1,
+        G7 -> G5,
+        F4 -> G5,
+        F1 -> G1,
+        E7 -> E6,
+        G5 -> G6,
+        G6 -> H7,
+        D8 -> G5,
+        G1 -> H1,
+        E2 -> E3,
+        H8 -> H7
+      ))
+      successGame must beValid.like { case game =>
+        // without kingSafety checks 8 moves are available
+        game.situation.moves.values.flatten.size must_== 2
+      }
+    }
+
+    "Black has to escape check rather than deliver checkmate" in {
+      import Pos._
+      val game        = fenToGame(Monster.initialFen, Monster)
+      val successGame = game flatMap (
+        _.playMoves(
           F2 -> F4,
           E1 -> F1,
           G7 -> G5,
@@ -44,12 +65,34 @@ class MonsterVariantTest extends ChessTest {
           D8 -> G5,
           G1 -> H1,
           E2 -> E3,
-          H8 -> H7
-        ))
-        successGame must beValid.like { case game =>
-          // without kingSafety checks 8 moves are available
-          game.situation.moves.values.flatten.size must_== 2
-        }
+          H8 -> H7,
+          H1 -> G1,
+          G1 -> F1,
+          A7 -> A5,
+          C2 -> C3,
+          D2 -> D3,
+          A5 -> A4,
+          C3 -> C4,
+          C4 -> C5,
+          H7 -> G7,
+          F1 -> G1,
+          G1 -> H1,
+          A4 -> A3,
+          D3 -> D4,
+          D4 -> D5,
+          A8 -> A4,
+          E3 -> E4,
+          E4 -> E5,
+          A4 -> F4,
+          C5 -> C6,
+          D5 -> D6
+        )
+      )
+      successGame must beValid.like { case game =>
+        game.situation.board.checkP1 must_== false
+        game.situation.board.checkP2 must_== true
+        // without disabling black checks, 9 moves are available
+        game.situation.moves.values.flatten.size must_== 2
       }
     }
   }

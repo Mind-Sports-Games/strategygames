@@ -37,7 +37,7 @@ final case class Actor(
               _         <- board(victimPos).filter(v => v == Piece(!player, Pawn))
               targetPos <- horizontal(next)
               _         <- pawnDir(victimPos) flatMap pawnDir filter { vf =>
-                //TODO Review for multiaction variants like Monster/Progressive
+                             // TODO Review for multiaction variants like Monster/Progressive
                              history.lastAction.exists {
                                case Uci.Move(orig, dest, _) =>
                                  orig == vf && dest == victimPos
@@ -251,19 +251,28 @@ final case class Actor(
       castle: Option[((Pos, Pos), (Pos, Pos))] = None,
       promotion: Option[PromotableRole] = None,
       enpassant: Boolean = false
-  ) =
+  ) = {
+    val situationBefore = situationOf(piece.player)
+    val autoEndTurn     = situationBefore.lastActionOfTurn
+    val uci             = Uci.Move(pos, dest, promotion)
     Move(
       piece = piece,
       orig = pos,
       dest = dest,
-      situationBefore = situationOf(piece.player),
-      after = after,
-      autoEndTurn = situationOf(piece.player).lastActionOfTurn,
+      situationBefore = situationBefore,
+      after = after updateHistory { h =>
+        h.copy(
+          lastTurn = if (autoEndTurn) h.currentTurn :+ uci else h.lastTurn,
+          currentTurn = if (autoEndTurn) List() else h.currentTurn :+ uci
+        )
+      },
+      autoEndTurn = autoEndTurn,
       capture = capture,
       castle = castle,
       promotion = promotion,
       enpassant = enpassant
     )
+  }
 
   private def history = board.history
 }
