@@ -3,7 +3,7 @@ import strategygames.{ ClockBase, MoveMetrics }
 
 import cats.data.Validated
 
-import strategygames.samurai.format.{ pgn, FEN, Uci }
+import strategygames.samurai.format.{ FEN, Uci }
 
 case class Game(
     situation: Situation,

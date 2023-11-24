@@ -3,7 +3,7 @@ import strategygames.{ ClockBase, MoveMetrics }
 
 import cats.data.Validated
 
-import strategygames.togyzkumalak.format.{ pgn, FEN, Uci }
+import strategygames.togyzkumalak.format.{ FEN, Uci }
 
 case class Game(
     situation: Situation,

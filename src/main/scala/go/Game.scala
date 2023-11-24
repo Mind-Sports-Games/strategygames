@@ -1,9 +1,11 @@
 package strategygames.go
+import scala.annotation.nowarn
+
 import strategygames.{ ClockBase, MoveMetrics }
 
 import cats.data.Validated
 
-import strategygames.go.format.{ pgn, FEN, Uci }
+import strategygames.go.format.{ FEN, Uci }
 
 case class Game(
     situation: Situation,
@@ -108,7 +110,7 @@ case class Game(
   }
 
   def apply(uci: Uci.Drop): Validated[String, (Game, Drop)]                   = drop(uci.role, uci.pos)
-  def apply(uci: Uci.Pass): Validated[String, (Game, Pass)]                   = pass()
+  def apply(@nowarn uci: Uci.Pass): Validated[String, (Game, Pass)]           = pass()
   def apply(uci: Uci.SelectSquares): Validated[String, (Game, SelectSquares)] = selectSquares(uci.squares)
   def apply(uci: Uci): Validated[String, (Game, Action)]                      = (uci match {
     case u: Uci.Drop          => apply(u)

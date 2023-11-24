@@ -372,7 +372,7 @@ object Replay {
   private def recursiveGamesFromUci(
       game: DraughtsGame,
       ucis: List[Uci],
-      finalSquare: Boolean = false
+      @nowarn finalSquare: Boolean = false
   ): Validated[String, List[DraughtsGame]] =
     ucis match {
       case Nil                     => valid(List(game))
