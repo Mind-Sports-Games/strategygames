@@ -48,7 +48,6 @@ abstract class Variant private[variant] (
   def pieces: PieceMap = Api.pieceMapFromFen(key, initialFen.value)
 
   def startPlayer: Player = P1
-  def plysPerTurn: Int    = 1
 
   val kingPiece: Option[Role] = None
 
@@ -85,6 +84,7 @@ abstract class Variant private[variant] (
                 uciMoves = situation.board.uciMoves :+ uciMove,
                 position = newPosition.some
               ),
+              autoEndTurn = true,
               capture = None,
               promotion = None
             )

@@ -9,10 +9,11 @@ class DividerPerfTest extends ChessTest {
   // val nb = 1
   // val iterations = 1
 
-  val moves       = format.pgn.Fixtures.fromProd2
-  val gameReplay  = Replay.boards(moves.split(' ').toList, None, variant.Standard).toOption.get
-  def runOne      = Divider(gameReplay)
-  def run(): Unit = { for (_ <- 1 to nb) runOne }
+  val moves      = format.pgn.Fixtures.fromProd2
+  val actions    = moves.split(' ').toList.map(List(_))
+  val gameReplay = Replay.boards(actions, None, variant.Standard).toOption.get
+  def runOne     = Divider(gameReplay)
+  def run: Unit  = { for (_ <- 1 to nb) runOne }
 
   "playing a game" should {
     "many times" in {
@@ -21,12 +22,12 @@ class DividerPerfTest extends ChessTest {
       // }
       if (nb * iterations > 1) {
         println("warming up")
-        run()
+        run
       }
       println("running tests")
       val durations  = for (_ <- 1 to iterations) yield {
         val start    = System.currentTimeMillis
-        run()
+        run
         val duration = System.currentTimeMillis - start
         println(s"$nb games in $duration ms")
         duration

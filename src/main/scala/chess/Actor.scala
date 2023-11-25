@@ -224,6 +224,8 @@ final case class Actor(
       dest: Pos,
       after: Board,
       capture: Option[Pos] = None,
+      // TODO: Change this to enable multiaction. Do when adding Monster Chess
+      autoEndTurn: Boolean = true,
       castle: Option[((Pos, Pos), (Pos, Pos))] = None,
       promotion: Option[PromotableRole] = None,
       enpassant: Boolean = false
@@ -234,6 +236,7 @@ final case class Actor(
       dest = dest,
       situationBefore = Situation(board, piece.player),
       after = after,
+      autoEndTurn = autoEndTurn,
       capture = capture,
       castle = castle,
       promotion = promotion,

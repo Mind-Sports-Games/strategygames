@@ -2,20 +2,28 @@ package strategygames.chess
 package format.pgn
 
 import scala.util.Try
+import strategygames.ActionStrs
 
 object Binary {
 
-  def writeMove(m: String)             = Try(Writer move m)
-  def writeMoves(ms: Iterable[String]) = Try(Writer moves ms)
+  def writeMove(m: String)             = Try(Writer ply m)
+  def writeMoves(ms: Iterable[String]) = Try(Writer plies ms)
 
-  def readMoves(bs: List[Byte])          = Try(Reader moves bs)
-  def readMoves(bs: List[Byte], nb: Int) = Try(Reader.moves(bs, nb))
+  def writeActionStrs(ms: ActionStrs) = Try(Writer actionStrs ms)
+
+  def readActionStrs(bs: List[Byte])          = Try(Reader actionStrs bs)
+  def readActionStrs(bs: List[Byte], nb: Int) = Try(Reader.actionStrs(bs, nb))
 
   private object MoveType {
     val SimplePawn  = 0
     val SimplePiece = 1
     val FullPawn    = 2
     val FullPiece   = 3
+  }
+
+  private object Delimiter {
+    val str = ""
+    val int = 0
   }
 
   private object Encoding {
@@ -36,30 +44,44 @@ object Binary {
 
     private val maxPlies = 600
 
-    def moves(bs: List[Byte]): List[String]          = moves(bs, maxPlies)
-    def moves(bs: List[Byte], nb: Int): List[String] = intMoves(bs map toInt, nb)
+    def actionStrs(bs: List[Byte]): ActionStrs          = actionStrs(bs, maxPlies)
+    def actionStrs(bs: List[Byte], nb: Int): ActionStrs = toActionStrs(intPlies(bs map toInt, nb))
 
-    def intMoves(bs: List[Int], pliesToGo: Int): List[String] =
+    def toActionStrs(plies: List[String]): ActionStrs =
+      if (plies.contains(Delimiter.str)) unflatten(plies)
+      else plies.map(List(_))
+
+    def unflatten(plies: List[String]): List[List[String]] =
+      if (plies.size == 0) List()
+      else plies.takeWhile(_ != Delimiter.str) :: unflatten(plies.dropWhile(_ != Delimiter.str).drop(1))
+
+    def intPlies(bs: List[Int], pliesToGo: Int): List[String] =
       bs match {
         case _ if pliesToGo <= 0                                          => Nil
         case Nil                                                          => Nil
+        case b1 :: rest if b1 == Delimiter.int                            =>
+          Delimiter.str :: intPlies(rest, pliesToGo)
         case b1 :: rest if moveType(b1) == MoveType.SimplePawn            =>
-          simplePawn(b1) :: intMoves(rest, pliesToGo - 1)
+          simplePawn(b1) :: intPlies(rest, pliesToGo - 1)
         case b1 :: b2 :: rest if moveType(b1) == MoveType.SimplePiece     =>
-          simplePiece(b1, b2) :: intMoves(rest, pliesToGo - 1)
+          simplePiece(b1, b2) :: intPlies(rest, pliesToGo - 1)
         case b1 :: b2 :: rest if moveType(b1) == MoveType.FullPawn        =>
-          fullPawn(b1, b2) :: intMoves(rest, pliesToGo - 1)
+          fullPawn(b1, b2) :: intPlies(rest, pliesToGo - 1)
         case b1 :: b2 :: b3 :: rest if moveType(b1) == MoveType.FullPiece =>
-          fullPiece(b1, b2, b3) :: intMoves(rest, pliesToGo - 1)
+          fullPiece(b1, b2, b3) :: intPlies(rest, pliesToGo - 1)
         case x                                                            => !!(x map showByte mkString ",")
       }
+
+    // 0 => 00000000 => marker for end of turn.
+    // This would normally map to simplePawn
+    // but there is no way for a simple pawn move to end on a1 (pos 0)
 
     def simplePawn(i: Int): String = posString(right(i, 6))
 
     // 2 movetype
     // 6 pos
     // ----
-    // 4 role
+    // 4 role (but not fully used)
     // 2 check
     // 1 capture
     // 1 drop
@@ -127,8 +149,9 @@ object Binary {
 
     import Encoding._
 
-    def move(str: String): List[Byte] =
+    def ply(str: String): List[Byte] =
       (str match {
+        case Delimiter.str                                => List(Delimiter.int)
         case pos if pos.length == 2                       => simplePawn(pos)
         case CastlingR(str, check)                        => castling(str, check)
         case SimplePieceR(piece, capture, pos, check)     =>
@@ -140,7 +163,11 @@ object Binary {
         case DropR(role, pos, check)                      => drop(role, pos, check)
       }) map (_.toByte)
 
-    def moves(strs: Iterable[String]): Array[Byte] = strs.flatMap(move).to(Array)
+    def plies(strs: Iterable[String]): Array[Byte] = strs.flatMap(ply).to(Array)
+
+    def actionStrs(strs: ActionStrs): Array[Byte] =
+      if (strs.size == 0 || strs.map(_.size).max == 1) plies(strs.flatten)
+      else plies(strs.toList.map(_.toList :+ "").flatten)
 
     def simplePawn(pos: String) =
       List(

@@ -159,17 +159,21 @@ class ForsythTest extends ChessTest {
     "with turns" in {
       "starting" in {
         f <<< FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") must beSome.like { s =>
-          s.turns must_== 0
+          s.turnCount must_== 0
+          s.plies must_== 0
         }
       }
       "p1 to play" in {
         f <<< FEN("r2q1rk1/ppp2pp1/1bnpbn1p/4p3/4P3/1BNPBN1P/PPPQ1PP1/R3K2R w KQ - 7 10") must beSome.like {
-          s => s.turns must_== 18
+          s =>
+            s.turnCount must_== 18
+            s.plies must_== 18
         }
       }
       "p2 to play" in {
         f <<< FEN("r1q2rk1/ppp2ppp/3p1n2/8/2PNp3/P1PnP3/2QP1PPP/R1B2K1R b - - 3 12") must beSome.like { s =>
-          s.turns must_== 23
+          s.turnCount must_== 23
+          s.plies must_== 23
         }
       }
       "last move (for en passant)" in {

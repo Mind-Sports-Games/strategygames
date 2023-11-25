@@ -10,6 +10,7 @@ case class Move(
     dest: Pos,
     situationBefore: Situation,
     after: Board,
+    autoEndTurn: Boolean,
     capture: Option[Pos],
     promotion: Option[PromotableRole],
     castle: Option[((Pos, Pos), (Pos, Pos))],
@@ -17,7 +18,8 @@ case class Move(
     metrics: MoveMetrics = MoveMetrics()
 ) extends Action(situationBefore) {
 
-  def situationAfter = Situation(finalizeAfter, !piece.player)
+  def situationAfter =
+    Situation(finalizeAfter, if (autoEndTurn) !piece.player else piece.player)
 
   def withHistory(h: History) = copy(after = after withHistory h)
 

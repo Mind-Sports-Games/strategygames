@@ -7,9 +7,11 @@ import strategygames.fairysf.format.{ FEN, Uci }
 
 case class Game(
     situation: Situation,
-    pgnMoves: Vector[String] = Vector(),
+    actionStrs: VActionStrs = Vector(),
     clock: Option[ClockBase] = None,
-    turns: Int = 0, // plies
+    plies: Int = 0,
+    turnCount: Int = 0,
+    startedAtPly: Int = 0,
     startedAtTurn: Int = 0
 ) {
   def apply(
@@ -29,9 +31,10 @@ case class Game(
 
     copy(
       situation = newSituation,
-      turns = turns + 1,
-      pgnMoves = pgnMoves :+ move.toUci.uci,
-      clock = applyClock(move.metrics, newSituation.status.isEmpty, newSituation.player != situation.player)
+      plies = plies + 1,
+      turnCount = turnCount + (if (switchPlayer) 1 else 0),
+      actionStrs = applyActionStr(move.toUci.uci),
+      clock = applyClock(move.metrics, newSituation.status.isEmpty, switchPlayer)
     )
   }
 
@@ -45,13 +48,15 @@ case class Game(
     }
 
   def applyDrop(drop: Drop): Game = {
-    val newSituation = drop situationAfter
+    val newSituation = drop.situationAfter
+    val switchPlayer = situation.player != newSituation.player
 
     copy(
       situation = newSituation,
-      turns = turns + 1,
-      pgnMoves = pgnMoves :+ drop.toUci.uci,
-      clock = applyClock(drop.metrics, newSituation.status.isEmpty, newSituation.player != situation.player)
+      plies = plies + 1,
+      turnCount = turnCount + (if (switchPlayer) 1 else 0),
+      actionStrs = applyActionStr(drop.toUci.uci),
+      clock = applyClock(drop.metrics, newSituation.status.isEmpty, switchPlayer)
     )
   }
 
@@ -66,9 +71,16 @@ case class Game(
     clock.map { c =>
       {
         val newC = c.step(metrics, gameActive, switchClock)
-        if (turns - startedAtTurn == (2 * situation.board.variant.plysPerTurn - 1)) newC.start else newC
+        if (turnCount - startedAtTurn == 1 && switchClock) newC.start else newC
       }
     }
+
+  private def applyActionStr(actionStr: String): VActionStrs = {
+    if (hasJustSwitchedTurns || actionStrs.size == 0)
+      actionStrs :+ Vector(actionStr)
+    else
+      actionStrs.updated(actionStrs.size - 1, actionStrs(actionStrs.size - 1) :+ actionStr)
+  }
 
   def player = situation.player
 
@@ -76,11 +88,15 @@ case class Game(
 
   def halfMoveClock: Int = board.history.halfMoveClock
 
-  /** Fullmove number: The number of the full move. It starts at 1, and is incremented after P2's move.
-    */
-  def fullMoveNumber: Int = 1 + turns / 2
+  def hasJustSwitchedTurns: Boolean =
+    player == Player.fromTurnCount(actionStrs.size + startedAtTurn)
 
-  def withTurns(t: Int) = copy(turns = t)
+  // Aka Fullmove number (in Forsyth-Edwards Notation):
+  // The number of the completed turns by each player ('full move')
+  // It starts at 1, and is incremented after P2's move (turn)
+  def fullTurnCount: Int = 1 + turnCount / 2
+
+  def withTurnsAndPlies(p: Int, t: Int) = copy(plies = p, turnCount = t)
 }
 
 object Game {
@@ -102,7 +118,8 @@ object Game {
             },
             player = parsed.situation.player
           ),
-          turns = parsed.turns
+          plies = parsed.plies,
+          turnCount = parsed.turnCount
         )
       }
   }

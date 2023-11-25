@@ -1,5 +1,5 @@
 package strategygames.samurai
-import strategygames.{ ClockBase, MoveMetrics }
+import strategygames.{ ClockBase, MoveMetrics, Player, VActionStrs }
 
 import cats.data.Validated
 
@@ -7,9 +7,11 @@ import strategygames.samurai.format.{ FEN, Uci }
 
 case class Game(
     situation: Situation,
-    pgnMoves: Vector[String] = Vector(),
-    clock: Option[ClockBase] = None,
-    turns: Int = 0, // plies
+    actionStrs: VActionStrs = Vector(),
+    clock: Option[Clock] = None,
+    plies: Int = 0,
+    turnCount: Int = 0,
+    startedAtPly: Int = 0,
     startedAtTurn: Int = 0
 ) {
   def apply(
@@ -24,25 +26,36 @@ case class Game(
 
   def apply(move: Move): Game = {
     val newSituation = move.situationAfter
+    val switchPlayer = situation.player != newSituation.player
 
     copy(
       situation = newSituation,
-      turns = turns + 1,
-      pgnMoves = pgnMoves :+ move.toUci.uci,
-      clock = applyClock(move.metrics, newSituation.status.isEmpty)
+      plies = plies + 1,
+      turnCount = turnCount + (if (switchPlayer) 1 else 0),
+      actionStrs = applyActionStr(move.toUci.uci),
+      clock = applyClock(move.metrics, newSituation.status.isEmpty, switchPlayer)
     )
   }
 
   def apply(uci: Uci.Move): Validated[String, (Game, Move)] =
     apply(uci.orig, uci.dest, uci.promotion)
 
-  private def applyClock(metrics: MoveMetrics, gameActive: Boolean) =
+  private def applyClock(metrics: MoveMetrics, gameActive: Boolean, switchClock: Boolean) =
     clock.map { c =>
       {
-        val newC = c.step(metrics, gameActive)
-        if (turns - startedAtTurn == 1) newC.start else newC
+        val newC = c.step(metrics, gameActive, switchClock)
+        if (turnCount - startedAtTurn == 1 && switchClock) newC.start else newC
       }
     }
+
+  private def applyActionStr(actionStr: String): VActionStrs =
+    if (hasJustSwitchedTurns || actionStrs.size == 0)
+      actionStrs :+ Vector(actionStr)
+    else
+      actionStrs.updated(actionStrs.size - 1, actionStrs(actionStrs.size - 1) :+ actionStr)
+
+  def hasJustSwitchedTurns: Boolean =
+    player == Player.fromTurnCount(actionStrs.size + startedAtTurn)
 
   def player = situation.player
 
@@ -50,11 +63,12 @@ case class Game(
 
   def halfMoveClock: Int = board.history.halfMoveClock
 
-  /** Fullmove number: The number of the full move. It starts at 1, and is incremented after P2's move.
-    */
-  def fullMoveNumber: Int = 1 + turns / 2
+  // Aka Fullmove number (in Forsyth-Edwards Notation):
+  // The number of the completed turns by each player ('full move')
+  // It starts at 1, and is incremented after P2's move (turn)
+  def fullTurnCount: Int = 1 + turnCount / 2
 
-  def withTurns(t: Int) = copy(turns = t)
+  def withTurnsAndPlies(p: Int, t: Int) = copy(plies = p, turnCount = t)
 }
 
 object Game {
@@ -74,7 +88,8 @@ object Game {
             board = parsed.situation.board withVariant g.board.variant,
             player = parsed.situation.player
           ),
-          turns = parsed.turns
+          plies = parsed.plies,
+          turnCount = parsed.turnCount
         )
       }
   }

@@ -2,17 +2,22 @@ package strategygames.go
 package format.pgn
 
 import strategygames.go.format.Uci
+import strategygames.ActionStrs
 
 import scala.util.Try
 
 object Binary {
 
   // writeMove only used in tests
-  def writeMove(m: String)             = Try(Writer.move(m))
-  def writeMoves(ms: Iterable[String]) = Try(Writer.moves(ms))
+  def writeMove(m: String)             = Try(Writer.ply(m))
+  def writeMoves(ms: Iterable[String]) = Try(Writer.plies(ms))
 
-  def readMoves(bs: List[Byte])          = Try(Reader moves bs)
-  def readMoves(bs: List[Byte], nb: Int) = Try(Reader.moves(bs, nb))
+  def writeActionStrs(ms: ActionStrs) = Try(Writer.actionStrs(ms))
+
+  def readActionStrs(bs: List[Byte])          = Try(Reader actionStrs bs)
+  def readActionStrs(bs: List[Byte], nb: Int) = Try(Reader.actionStrs(bs, nb))
+
+  // No MoveType implemented for Delimiter/Multimove
 
   private object MoveType {
     val Pass          = 0
@@ -28,21 +33,23 @@ object Binary {
 
     private val maxPlies = 600
 
-    def moves(bs: List[Byte]): List[String]          = moves(bs, maxPlies)
-    def moves(bs: List[Byte], nb: Int): List[String] = intMoves(bs map toInt, nb)
+    def actionStrs(bs: List[Byte]): ActionStrs          = actionStrs(bs, maxPlies)
+    def actionStrs(bs: List[Byte], nb: Int): ActionStrs = toActionStrs(intPlies(bs map toInt, nb))
 
-    def intMoves(bs: List[Int], pliesToGo: Int): List[String] =
+    def toActionStrs(plies: List[String]): ActionStrs = plies.map(List(_))
+
+    def intPlies(bs: List[Int], pliesToGo: Int): List[String] =
       bs match {
         case _ if pliesToGo <= 0                                           => Nil
         case Nil                                                           => Nil
         case (b1 :: b2 :: rest) if headerBit(b1) == MoveType.Drop          =>
-          dropUci(b1, b2) :: intMoves(rest, pliesToGo - 1)
+          dropUci(b1, b2) :: intPlies(rest, pliesToGo - 1)
         case (b1 :: rest) if headerBit(b1) == MoveType.Pass                =>
-          passUci :: intMoves(rest, pliesToGo - 1)
+          passUci :: intPlies(rest, pliesToGo - 1)
         case (b1 :: b2 :: rest) if headerBit(b1) == MoveType.SelectSquares => {
           val numDS = numDeadStones(b1, b2)
           val ds    = deadStones(rest, numDS)
-          selectSquaresUci(ds) :: intMoves(rest.drop(numDS * 2), pliesToGo - 1)
+          selectSquaresUci(ds) :: intPlies(rest.drop(numDS * 2), pliesToGo - 1)
         }
         case x                                                             => !!(x map showByte mkString ",")
       }
@@ -74,7 +81,7 @@ object Binary {
 
   private object Writer {
 
-    def move(str: String): List[Byte] =
+    def ply(str: String): List[Byte] =
       (str match {
         case Uci.Drop.dropR(_, dst)               => dropUci(dst)
         case Uci.Pass.passR()                     => passUci
@@ -82,8 +89,11 @@ object Binary {
         case _                                    => sys.error(s"Invalid move to write: ${str}")
       }) map (_.toByte)
 
-    def moves(strs: Iterable[String]): Array[Byte] =
-      strs.toList.flatMap(move).to(Array)
+    def plies(strs: Iterable[String]): Array[Byte] =
+      strs.toList.flatMap(ply).to(Array)
+
+    // can flatten because this GameLogic doesn't support multimove
+    def actionStrs(strs: ActionStrs): Array[Byte] = plies(strs.flatten)
 
     def passUci = List(headerBit(MoveType.Pass))
 

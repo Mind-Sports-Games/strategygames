@@ -7,6 +7,7 @@ import cats.syntax.option._
 import strategygames.{ Drop => StratDrop, Move => StratMove }
 import strategygames.format.pgn.{ Metas, San, Suffixes }
 
+//This is only for Moves, not including Castles
 case class Std(
     dest: Pos,
     role: Role,

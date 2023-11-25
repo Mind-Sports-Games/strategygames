@@ -48,7 +48,6 @@ abstract class Variant private[variant] (
   def pieces: PieceMap = initialFen.pieces
 
   def startPlayer: Player = P1
-  def plysPerTurn: Int    = 1
 
   val kingPiece: Option[Role] = None
 
@@ -143,6 +142,7 @@ abstract class Variant private[variant] (
                 dest = dest,
                 situationBefore = situation,
                 after = boardAfter(situation, pos, dest),
+                autoEndTurn = true,
                 capture = None,
                 promotion = None
               )

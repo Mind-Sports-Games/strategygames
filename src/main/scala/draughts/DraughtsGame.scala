@@ -1,7 +1,5 @@
 package strategygames.draughts
 
-import scala.annotation.nowarn
-
 import strategygames.{ ClockBase, MoveMetrics, Player }
 import strategygames.draughts.format.FEN
 
@@ -12,10 +10,11 @@ import format.{ pdn, Uci }
 
 case class DraughtsGame(
     situation: Situation,
-    pdnMoves: Vector[String] = Vector.empty[String],
+    actionStrs: VActionStrs = Vector(),
     clock: Option[ClockBase] = None,
-    /** turns means plies here */
-    turns: Int = 0,
+    plies: Int = 0,
+    turnCount: Int = 0,
+    startedAtPly: Int = 0,
     startedAtTurn: Int = 0
 ) {
 
@@ -23,7 +22,7 @@ case class DraughtsGame(
       orig: Pos,
       dest: Pos,
       promotion: Option[PromotableRole] = None,
-      @nowarn _metrics: MoveMetrics = MoveMetrics(),
+      _metrics: MoveMetrics = MoveMetrics(),
       finalSquare: Boolean = false,
       captures: Option[List[Pos]] = None,
       partialCaptures: Boolean = false
@@ -65,7 +64,12 @@ case class DraughtsGame(
         } else none
       gameWithMove map { case (g, m) =>
         val fullSan = s"${orig.shortKey}x${dest.shortKey}"
-        g.copy(pdnMoves = g.pdnMoves.dropRight(captures.get.size) :+ fullSan) -> m.copy(orig = orig)
+        g.copy(
+          actionStrs = g.actionStrs.updated(
+            g.actionStrs.size - 1,
+            g.actionStrs(g.actionStrs.size - 1).dropRight(captures.get.size) :+ fullSan
+          )
+        ) -> m.copy(orig = orig)
       } getOrElse apply(fullMove) -> fullMove
     }
 
@@ -78,16 +82,18 @@ case class DraughtsGame(
     if (newSituation.ghosts != 0) {
       copy(
         situation = newSituation,
-        turns = turns,
-        pdnMoves = pdnMoves :+ pdn.Dumper(situation, move, newSituation),
+        plies = plies,
+        turnCount = turnCount,
+        actionStrs = applyActionStr(pdn.Dumper(situation, move, newSituation)),
         clock = clock
       )
     } else {
       copy(
         situation = newSituation,
-        turns = turns + 1,
-        pdnMoves = pdnMoves :+ pdn.Dumper(situation, move, newSituation),
-        clock = applyClock(move.metrics, newSituation.status.isEmpty)
+        plies = plies + 1,
+        turnCount = turnCount + 1,
+        actionStrs = applyActionStr(pdn.Dumper(situation, move, newSituation)),
+        clock = applyClock(move.metrics, newSituation.status.isEmpty, newSituation.player != situation.player)
       )
     }
 
@@ -103,14 +109,24 @@ case class DraughtsGame(
       finalSquare = finalSquare
     )
 
-  private def applyClock(metrics: MoveMetrics, gameActive: Boolean) = clock.map { c =>
-    {
-      val newC = c.step(metrics, gameActive)
-      if (turns - startedAtTurn == 1) newC.start else newC
+  private def applyClock(metrics: MoveMetrics, gameActive: Boolean, switchClock: Boolean) =
+    clock.map { c =>
+      {
+        val newC = c.step(metrics, gameActive, switchClock)
+        if (turnCount - startedAtTurn == 1) newC.start else newC
+      }
     }
-  }
 
-  def displayTurns = if (situation.ghosts == 0) turns else turns + 1
+  private def applyActionStr(actionStr: String): VActionStrs =
+    // whilst draughts doesnt support multiaction
+    actionStrs :+ Vector(actionStr)
+  // if (switchPlayer || actionStrs.size == 0)
+  //  actionStrs :+ Vector(actionStr)
+  // else
+  //  actionStrs.updated(actionStrs.size, actionStrs(actionStrs.size) :+ actionStr)
+
+  def hasJustSwitchedTurns: Boolean =
+    player == Player.fromTurnCount(actionStrs.size + startedAtTurn)
 
   def player = situation.player
 
@@ -121,14 +137,20 @@ case class DraughtsGame(
 
   def halfMoveClock: Int = board.history.halfMoveClock
 
-  /** Fullmove number: The number of the full move. It starts at 1, and is incremented after P2's move.
-    */
-  def fullMoveNumber: Int = 1 + turns / 2
+  // Aka Fullmove number (in Forsyth-Edwards Notation):
+  // The number of the completed turns by each player ('full move')
+  // It starts at 1, and is incremented after P2's move (turn)
+  def fullTurnCount: Int = 1 + turnCount / 2
 
-  def moveString = s"${fullMoveNumber}${player.fold(".", "...")}"
+  // doesnt seem to be used anywhere
+  // def moveString = s"${fullTurnCount}${player.fold(".", "...")}"
 
-  def pdnMovesConcat(fullCaptures: Boolean = false, dropGhosts: Boolean = false): Vector[String] = {
-    val movesConcat = pdnMoves.foldLeft(Vector.empty[String]) { (moves, curMove) =>
+  private def turnConcat(
+      turn: Vector[String],
+      fullCaptures: Boolean,
+      dropGhosts: Boolean
+  ): Vector[String] = {
+    val movesConcat = turn.foldLeft(Vector.empty[String]) { (moves, curMove) =>
       if (moves.isEmpty) moves :+ curMove
       else {
         val curX = curMove.indexOf('x')
@@ -147,13 +169,16 @@ case class DraughtsGame(
     else movesConcat
   }
 
+  def actionStrsConcat(fullCaptures: Boolean = false, dropGhosts: Boolean = false): VActionStrs =
+    actionStrs.map(t => turnConcat(t, fullCaptures, dropGhosts))
+
   def withBoard(b: Board) = copy(situation = situation.copy(board = b))
 
   def updateBoard(f: Board => Board) = withBoard(f(board))
 
   def withPlayer(c: Player) = copy(situation = situation.copy(player = c))
 
-  def withTurns(t: Int) = copy(turns = t)
+  def withTurnsAndPlies(p: Int, t: Int) = copy(plies = p, turnCount = t)
 }
 
 object DraughtsGame {
@@ -178,7 +203,8 @@ object DraughtsGame {
             board = parsed.situation.board withVariant g.board.variant,
             player = parsed.situation.player
           ),
-          turns = parsed.turns
+          plies = parsed.plies,
+          turnCount = parsed.turnCount
         )
       }
   }

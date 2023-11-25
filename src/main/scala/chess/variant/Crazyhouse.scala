@@ -52,7 +52,8 @@ case object Crazyhouse
       piece = piece,
       pos = pos,
       situationBefore = situation,
-      after = board1 withCrazyData d2
+      after = board1 withCrazyData d2,
+      autoEndTurn = true
     )
 
   override def fiftyMoves(history: History): Boolean = false

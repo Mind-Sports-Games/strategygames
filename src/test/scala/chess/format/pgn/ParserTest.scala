@@ -6,13 +6,14 @@ import strategygames.format.pgn._
 import cats.syntax.option._
 
 import strategygames.chess.variant.Standard
+import strategygames.chess.format.pgn.{ Parser => ChessParser }
 
 class ParserTest extends ChessTest {
 
   import Fixtures._
 
-  val parser                 = Parser.full _
-  def parseMove(str: String) = Parser.MoveParser(str, Standard)
+  val parser                 = ChessParser.full _
+  def parseMove(str: String) = ChessParser.ActionParser(str, Standard)
 
   "promotion check" should {
     "as a queen" in {
@@ -280,7 +281,7 @@ class ParserTest extends ChessTest {
     }
   }
   "overflow 3: tags" in {
-    Parser.TagParser.fromFullPgn(overflow3) must beValid.like { case tags =>
+    ChessParser.TagParser.fromFullPgn(overflow3) must beValid.like { case tags =>
       tags.value.size must_== 9
     }
   }
@@ -330,7 +331,9 @@ class ParserTest extends ChessTest {
 
   "weird variant names" in {
     parser(stLouisFischerandom) must beValid.like { case parsed =>
-      parsed.tags.variant must_== Option(strategygames.variant.Variant.wrap(strategygames.chess.variant.Chess960))
+      parsed.tags.variant must_== Option(
+        strategygames.variant.Variant.wrap(strategygames.chess.variant.Chess960)
+      )
     }
   }
 

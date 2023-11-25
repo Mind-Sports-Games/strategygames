@@ -10,6 +10,7 @@ case class Move(
     dest: Pos,
     situationBefore: Situation,
     after: Board,
+    autoEndTurn: Boolean,
     capture: Option[Pos],
     promotion: Option[PromotableRole],
     castle: Option[((Pos, Pos), (Pos, Pos))],
@@ -18,10 +19,7 @@ case class Move(
 ) extends Action(situationBefore, after) {
 
   def situationAfter =
-    Situation(
-      finalizeAfter,
-      if (before.variant.switchPlayerAfterMove) !piece.player else piece.player
-    )
+    Situation(finalizeAfter, if (autoEndTurn) !piece.player else piece.player)
 
   def applyVariantEffect: Move = before.variant addVariantEffect this
 

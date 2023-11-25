@@ -3,15 +3,16 @@ package strategygames.fairysf.opening
 import scala.annotation.nowarn
 
 import strategygames.fairysf.format.FEN
+import strategygames.ActionStrs
 
 object FullOpeningDB {
 
+  private val SEARCH_MAX_TURNS = 40
+
   def findByFen(@nowarn fen: FEN): Option[FullOpening] = None // TODO: ???
 
-  val SEARCH_MAX_PLIES = 40
-
   // assumes standard initial FEN and variant
-  def search(@nowarn moveStrs: Iterable[String]): Option[FullOpening.AtPly] = None // TODO: ???
+  def search(@nowarn actionStrs: ActionStrs): Option[FullOpening.AtPly] = None // TODO: ???
 
   def searchInFens(@nowarn fens: Vector[FEN]): Option[FullOpening] = None // TODO: ???
 }

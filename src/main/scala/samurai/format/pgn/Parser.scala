@@ -1,15 +1,28 @@
 package strategygames.samurai
 package format.pgn
 
-import scala.annotation.nowarn
-
 import strategygames.samurai.variant.Variant
 import strategygames.samurai.format.Uci
 
-import strategygames.format.pgn.{ Glyphs, InitialPosition, ParsedPgn, Sans, Tag }
+import strategygames.format.pgn.{
+  Glyph,
+  Glyphs,
+  InitialPosition,
+  Metas,
+  ParsedPgn,
+  San,
+  Sans,
+  Suffixes,
+  Tag,
+  Tags
+}
+import strategygames.{ Role => ChessRole }
 
 import scala.util.parsing.combinator._
 import cats.data.Validated
+import cats.data.Validated.{ invalid, valid }
+import cats.implicits._
+import scala.util.matching.Regex
 
 // http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm
 object Parser {
@@ -36,10 +49,12 @@ object Parser {
   def full(pgn: String): Validated[String, ParsedPgn] =
     Validated.invalid(s"Not implemented full: ${pgn}") // TODO: ???
 
-  def moves(str: String, @nowarn variant: Variant): Validated[String, Sans] =
+  def sans(str: String, variant: Variant): Validated[String, Sans] =
     Validated.invalid(s"Not implemented moves: ${str}") // TODO: ???
-  def moves(strMoves: Iterable[String], @nowarn variant: Variant): Validated[String, Sans] =
+  def sans(strMoves: Iterable[String], variant: Variant): Validated[String, Sans] =
     Validated.invalid(s"Not implemented iterable moves: ${strMoves}") // TODO: ???
+  private def objMoves(strMoves: List[StrMove], variant: Variant): Validated[String, Sans] =
+    Validated.invalid("Not implemented objMoves") // TODO: ???
 
   trait Logging { self: Parsers =>
     protected val loggingEnabled                                 = false
@@ -51,7 +66,7 @@ object Parser {
 
     override val whiteSpace = """(\s|\t|\r?\n)+""".r
 
-    def apply(@nowarn pgn: String): Validated[String, (InitialPosition, List[StrMove], Option[Tag])] =
+    def apply(pgn: String): Validated[String, (InitialPosition, List[StrMove], Option[Tag])] =
       Validated.invalid("Not implemented MovesParser") // TODO: ???
 
     // def strMoves: Parser[(InitialPosition, List[StrMove], Option[String])] = //TODO: ???

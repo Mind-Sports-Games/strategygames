@@ -8,10 +8,12 @@ case class Drop(
     pos: Pos,
     situationBefore: Situation,
     after: Board,
+    autoEndTurn: Boolean,
     metrics: MoveMetrics = MoveMetrics()
 ) extends Action(situationBefore, after) {
 
-  def situationAfter = Situation(finalizeAfter, !piece.player)
+  def situationAfter =
+    Situation(finalizeAfter, if (autoEndTurn) !piece.player else piece.player)
 
   def applyVariantEffect: Drop = before.variant addVariantEffect this
 
