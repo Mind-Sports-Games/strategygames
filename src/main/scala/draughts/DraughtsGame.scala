@@ -1,6 +1,7 @@
 package strategygames.draughts
 
-import strategygames.{ ClockBase, MoveMetrics, Player }
+import scala.annotation.nowarn
+import strategygames.{ ClockBase, MoveMetrics, Player, VActionStrs }
 import strategygames.draughts.format.FEN
 
 import cats.data.Validated
@@ -22,7 +23,7 @@ case class DraughtsGame(
       orig: Pos,
       dest: Pos,
       promotion: Option[PromotableRole] = None,
-      _metrics: MoveMetrics = MoveMetrics(),
+      @nowarn _metrics: MoveMetrics = MoveMetrics(),
       finalSquare: Boolean = false,
       captures: Option[List[Pos]] = None,
       partialCaptures: Boolean = false

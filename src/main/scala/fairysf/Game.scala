@@ -1,5 +1,5 @@
 package strategygames.fairysf
-import strategygames.{ ClockBase, MoveMetrics, Player }
+import strategygames.{ ClockBase, MoveMetrics, Player, VActionStrs }
 
 import cats.data.Validated
 
@@ -28,6 +28,7 @@ case class Game(
 
   def apply(move: Move): Game = {
     val newSituation = move.situationAfter
+    val switchPlayer = situation.player != newSituation.player
 
     copy(
       situation = newSituation,

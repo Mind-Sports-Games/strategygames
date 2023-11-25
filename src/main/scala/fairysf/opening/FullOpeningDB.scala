@@ -7,7 +7,7 @@ import strategygames.ActionStrs
 
 object FullOpeningDB {
 
-  private val SEARCH_MAX_TURNS = 40
+  // private val SEARCH_MAX_TURNS = 40
 
   def findByFen(@nowarn fen: FEN): Option[FullOpening] = None // TODO: ???
 

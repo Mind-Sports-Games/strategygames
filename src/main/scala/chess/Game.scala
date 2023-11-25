@@ -1,5 +1,5 @@
 package strategygames.chess
-import strategygames.{ ClockBase, MoveMetrics, Player }
+import strategygames.{ ClockBase, MoveMetrics, Player, VActionStrs }
 
 import cats.data.Validated
 

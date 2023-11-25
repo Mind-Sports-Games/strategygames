@@ -6,13 +6,9 @@ import scala.annotation.nowarn
 import strategygames.go.variant.Variant
 import strategygames.go.format.Uci
 
-import strategygames.format.pgn.{ Glyphs, InitialPosition, ParsedPgn, Sans, Tag }
+import strategygames.format.pgn.{ Glyphs, ParsedPgn, Sans }
 
-import scala.util.parsing.combinator._
 import cats.data.Validated
-import cats.data.Validated.{ invalid, valid }
-import cats.implicits._
-import scala.util.matching.Regex
 
 // http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm
 object Parser {
@@ -37,12 +33,10 @@ object Parser {
   def full(pgn: String): Validated[String, ParsedPgn] =
     Validated.invalid(s"Not implemented full: ${pgn}") // TODO: ???
 
-  def sans(str: String, variant: Variant): Validated[String, Sans] =
+  def sans(str: String, @nowarn variant: Variant): Validated[String, Sans] =
     Validated.invalid(s"Not implemented moves: ${str}") // TODO: ???
-  def sans(strMoves: Iterable[String], variant: Variant): Validated[String, Sans] =
+  def sans(strMoves: Iterable[String], @nowarn variant: Variant): Validated[String, Sans] =
     Validated.invalid(s"Not implemented iterable moves: ${strMoves}") // TODO: ???
-  private def objMoves(strMoves: List[StrMove], variant: Variant): Validated[String, Sans] =
-    Validated.invalid("Not implemented objMoves") // TODO: ???
 
   // StrMove use to exist here in a copied 'TODO ???' version
   // but it was never used because everything looked at chess.format.pgn.Parser directly

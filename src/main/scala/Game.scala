@@ -143,7 +143,7 @@ abstract class Game(
   // TODO: figure out if we can properly make this generic
   def copy(clock: Option[ClockBase]): Game
   def copy(plies: Int, turnCount: Int, startedAtPly: Int, startedAtTurn: Int): Game
-  def copy(clock: Option[Clock], plies: Int, turnCount: Int, startedAtPly: Int, startedAtTurn: Int): Game
+  def copy(clock: Option[ClockBase], plies: Int, turnCount: Int, startedAtPly: Int, startedAtTurn: Int): Game
   def copy(situation: Situation, plies: Int, turnCount: Int): Game
   def copy(situation: Situation): Game
 
@@ -738,7 +738,7 @@ object Game {
       case _                                 => sys.error("Unable to copy togyzkumalak game with non-togyzkumalak arguments")
     }
 
-z    def hasJustSwitchedTurns: Boolean = g.hasJustSwitchedTurns
+    def hasJustSwitchedTurns: Boolean = g.hasJustSwitchedTurns
 
     def withTurnsAndPlies(p: Int, t: Int): Game = Togyzkumalak(g.withTurnsAndPlies(p, t))
 
@@ -867,7 +867,7 @@ z    def hasJustSwitchedTurns: Boolean = g.hasJustSwitchedTurns
       lib: GameLogic,
       situation: Situation,
       actionStrs: VActionStrs = Vector(),
-      clock: Option[Clock] = None,
+      clock: Option[ClockBase] = None,
       plies: Int = 0,
       turnCount: Int = 0,
       startedAtPly: Int = 0,

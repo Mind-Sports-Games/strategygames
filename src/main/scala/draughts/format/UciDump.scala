@@ -22,7 +22,7 @@ object UciDump {
     if (actionStrs.isEmpty) Validated.valid(Nil)
     else Replay(actionStrs, initialFen, variant, finalSquare) andThen (_.valid) map apply
 
-  def move(@nowarn _variant: Variant)(action: Action): String = action match {
+  def action(@nowarn _variant: Variant)(action: Action): String = action match {
     case m: Move => m.toUci.shortUci
   }
 

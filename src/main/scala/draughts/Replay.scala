@@ -8,14 +8,7 @@ import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
-import strategygames.{
-  Action => StratAction,
-  ActionStrs,
-  Game => StratGame,
-  Move => StratMove,
-  Player,
-  Situation => StratSituation
-}
+import strategygames.{ Action => StratAction, ActionStrs, Move => StratMove, Situation => StratSituation }
 import strategygames.format.pgn.{ San, Tag, Tags }
 import format.pdn.{ Parser, Reader, Std }
 import format.{ FEN, Forsyth, Uci }
