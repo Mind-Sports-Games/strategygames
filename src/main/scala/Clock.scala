@@ -186,6 +186,7 @@ sealed trait PlayerTimerBase {
   def goBerserk: PlayerTimerBase
   def giveTime(t: Centis): PlayerTimerBase
   def remaining: Centis
+  def graceSeconds: Int
 
   // Implemented attributes
   def limit = {
@@ -234,6 +235,7 @@ sealed trait ClockBase {
   def remainingTime(c: Player)  = (clockPlayer(c).remaining - pending(c)) nonNeg
   def moretimeable(c: Player)   = clockPlayer(c).remaining.centis < 100 * 60 * 60 * 2
   def lastMoveTimeOf(c: Player) = clockPlayer(c).lastMoveTime
+  def graceOf(c: Player)        = clockPlayer(c).graceSeconds
 
   def takeback(switchPlayer: Boolean = true) = switch(switchPlayer)
 
@@ -284,6 +286,8 @@ case class ClockPlayer(
   def giveTime(t: Centis): ClockPlayer = takeTime(-t)
 
   def remaining: Centis = timer.remaining
+
+  def graceSeconds: Int = config.graceSeconds
 }
 
 // All unspecified durations are expressed in seconds
@@ -778,6 +782,8 @@ case class ByoyomiClockPlayer(
   def goBerserk = copy(berserk = true)
 
   def remaining: Centis = limit - elapsed
+
+  def graceSeconds: Int = 0
 }
 
 object ByoyomiClockPlayer {
