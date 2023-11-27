@@ -231,11 +231,13 @@ sealed trait ClockBase {
   def currentClockFor(c: Player): ClockInfoBase
 
   // Implemented attributes
-  def graceSeconds              = config.graceSeconds
   def remainingTime(c: Player)  = (clockPlayer(c).remaining - pending(c)) nonNeg
   def moretimeable(c: Player)   = clockPlayer(c).remaining.centis < 100 * 60 * 60 * 2
   def lastMoveTimeOf(c: Player) = clockPlayer(c).lastMoveTime
+  // TODO: both of these are candidates for removal, I feel they are abstraction leaks
+  //       but I wasn't able to get that refactoring done in the time that we had
   def graceOf(c: Player)        = clockPlayer(c).graceSeconds
+  def graceSeconds              = config.graceSeconds
 
   def takeback(switchPlayer: Boolean = true) = switch(switchPlayer)
 
