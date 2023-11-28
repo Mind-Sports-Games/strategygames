@@ -18,8 +18,10 @@ case class Move(
     metrics: MoveMetrics = MoveMetrics()
 ) extends Action(situationBefore, after, metrics) {
 
+  def playerAfter = if (autoEndTurn) !piece.player else piece.player
+
   def situationAfter =
-    Situation(finalizeAfter, if (autoEndTurn) !piece.player else piece.player)
+    Situation(finalizeAfter, playerAfter)
 
   def withHistory(h: History) = copy(after = after withHistory h)
 

@@ -95,5 +95,48 @@ class MonsterVariantTest extends ChessTest {
         game.situation.moves.values.flatten.size must_== 2
       }
     }
+
+    "Must include multiple enpassant moves for Black" in {
+      import Pos._
+      val game        = fenToGame(Monster.initialFen, Monster)
+      val successGame = game flatMap (_.playMoves(
+        F2 -> F4,
+        E1 -> F1,
+        D7 -> D5,
+        F4 -> F5,
+        F1 -> F2,
+        D5 -> D4,
+        C2 -> C4,
+        E2 -> E4
+      ))
+      successGame must beValid.like { case game =>
+        game.situation.moves.values.flatten.size must_== 28
+      }
+    }
+
+    "Must only allow enpassant on Whites first move in turn" in {
+      import Pos._
+      val game        = fenToGame(Monster.initialFen, Monster)
+      val successGame = game flatMap (_.playMoves(
+        F2 -> F4,
+        E1 -> F1,
+        D7 -> D5,
+        F4 -> F5,
+        F1 -> F2,
+        D5 -> D4,
+        C2 -> C4,
+        E2 -> E4,
+        G7 -> G5,
+        F2 -> G2
+      ))
+      successGame must beValid.like { case game =>
+        game.situation.moves.values.flatten.size must_== 12
+      }
+    }
+
+    // TODO Other tests Matt can add:
+    // Castling cases (several in first 8 moves) http://localhost:9663/nvieBdKQaUtD
+    // White Checkmates with King http://localhost:9663/nvieBdKQaUtD
+    // Black Stalemate http://localhost:9663/pbJssxIP8bMy
   }
 }

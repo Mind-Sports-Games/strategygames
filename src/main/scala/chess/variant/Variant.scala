@@ -89,7 +89,7 @@ abstract class Variant private[variant] (
 
   def kingSafety(m: Move, filter: Piece => Boolean, kingPos: Option[Pos]): Boolean =
     ! {
-      kingPos exists { kingThreatened(m.after, m.situationAfter.player, _, filter) }
+      kingPos exists { kingThreatened(m.after, m.playerAfter, _, filter) }
     }
 
   def kingSafety(a: Actor, m: Move): Boolean =

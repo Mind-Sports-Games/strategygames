@@ -48,23 +48,29 @@ object Forsyth {
               } yield (c.add(player, side), r + rookPos)).getOrElse((c, r))
           }
 
-          val fifthRank   = if (situation.player == P1) Rank.Fifth else Rank.Fourth
-          val sixthRank   = if (situation.player == P1) Rank.Sixth else Rank.Third
-          val seventhRank = if (situation.player == P1) Rank.Seventh else Rank.Second
-          // TODO Multiaction. This doesn't handle multiaction but is only for enpassant
-          val lastMove    = for {
-            pos <- splitted lift 3 flatMap Pos.fromKey
-            if pos.rank == sixthRank
-            orig = Pos(pos.file, seventhRank)
-            dest = Pos(pos.file, fifthRank)
-            if situation.board(dest).contains(Piece(!situation.player, Pawn)) &&
-              situation.board(pos.file, sixthRank).isEmpty &&
-              situation.board(orig).isEmpty
-          } yield Uci.Move(orig, dest)
-
+          val fifthRank           = if (situation.player == P1) Rank.Fifth else Rank.Fourth
+          val sixthRank           = if (situation.player == P1) Rank.Sixth else Rank.Third
+          val seventhRank         = if (situation.player == P1) Rank.Seventh else Rank.Second
+          // lastTurn is only used to extract enpassant squares
+          def lastTurn: List[Uci] =
+            splitted.lift(3).map(_.split(",").toList.flatMap(Pos.fromKey)).getOrElse(List()).flatMap { pos =>
+              {
+                if (pos.rank != sixthRank) None
+                else {
+                  val orig = Pos(pos.file, seventhRank)
+                  val dest = Pos(pos.file, fifthRank)
+                  if (
+                    situation.board(dest).contains(Piece(!situation.player, Pawn)) &&
+                    situation.board(pos.file, sixthRank).isEmpty &&
+                    situation.board(orig).isEmpty
+                  ) Some(Uci.Move(orig, dest))
+                  else None
+                }
+              }
+            }
           situation withHistory {
             val history    = History(
-              lastTurn = lastMove.toList,
+              lastTurn = lastTurn,
               positionHashes = Array.empty,
               castles = castles,
               unmovedRooks = UnmovedRooks(unmovedRooks)
@@ -190,7 +196,7 @@ object Forsyth {
         exportBoard(game.board) + exportCrazyPocket(game.board),
         game.player.letter,
         exportCastles(game.board),
-        game.situation.enPassantSquare.map(_.toString).getOrElse("-"),
+        game.situation.enPassantSquaresUciString.getOrElse("-"),
         game.halfMoveClock,
         game.fullTurnCount
       ) ::: {
@@ -206,7 +212,7 @@ object Forsyth {
       exportBoard(situation.board),
       situation.player.letter,
       exportCastles(situation.board),
-      situation.enPassantSquare.map(_.toString).getOrElse("-")
+      situation.enPassantSquaresUciString.getOrElse("-")
     ) mkString " "
 
   private def exportCheckCount(board: Board) =

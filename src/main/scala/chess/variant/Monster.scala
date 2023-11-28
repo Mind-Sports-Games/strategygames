@@ -12,15 +12,15 @@ case object Monster
       standardInitialPosition = false
     ) {
 
-  def perfId: Int    = 23
+  def perfId: Int = 23
   def perfIcon: Char = ''
 
   override def hasAnalysisBoard: Boolean = false
-  override def hasFishnet: Boolean       = false
+  override def hasFishnet: Boolean = false
 
-  override def exoticChessVariant       = true
+  override def exoticChessVariant = true
   // override def p1IsBetterVariant        = true
-  override def blindModeVariant         = false
+  override def blindModeVariant = false
   override def materialImbalanceVariant = true
 
   lazy val pieces: Map[Pos, Piece] = {
@@ -56,6 +56,17 @@ case object Monster
       case P2 => true
     }
 
+  private def oneMoveKingSafety(
+      m: Move,
+      filter: Piece => Boolean,
+      kingPos: Option[Pos]
+  ): Boolean =
+    ! {
+      kingPos exists {
+        super.kingThreatened(m.after, m.playerAfter, _, filter)
+      }
+    }
+
   override def kingSafety(
       m: Move,
       filter: Piece => Boolean,
@@ -63,15 +74,20 @@ case object Monster
   ): Boolean =
     m.player match {
       case P1 if lastActionOfTurn(m.situationBefore) =>
-        super.kingSafety(m, filter, kingPos)
-      case P1                                        =>
+        oneMoveKingSafety(m, filter, kingPos)
+      case P1 =>
         m.situationAfter.moves.values.flatten.size > 0 || m.situationAfter.board.checkP2
-      case P2                                        =>
-        super.kingSafety(m, filter, kingPos) && !m.situationAfter.moves.values.flatten
-          .map(nextMove => super.kingSafety(nextMove, _ => true, kingPos))
-          .toList
-          .contains(false)
-      // && !m.situationAfter.board.checkP2
+      case P2 =>
+        super.kingSafety(m, filter, kingPos)
+      //oneMoveKingSafety(
+      //  m,
+      //  filter,
+      //  kingPos
+      //) &&
+      //!m.situationAfter.moves.values.flatten
+      //  .map(nextMove => oneMoveKingSafety(nextMove, _ => true, kingPos))
+      //  .toList
+      //  .contains(false)
     }
 
   override def kingThreatened(
@@ -81,17 +97,22 @@ case object Monster
       filter: Piece => Boolean = _ => true
   ): Boolean = {
     player match {
-      case P1 if board.history.currentTurn.isEmpty =>
-        super.kingThreatened(
-          board,
-          player,
-          to,
-          filter
-        ) || Situation(board, player).moves.values.flatten
-          .map(nextMove => super.kingThreatened(nextMove.after, player, to, _ => true))
+      case P1 if board.history.currentTurn.isEmpty => {
+        super.kingThreatened(board, player, to, filter) || Situation(
+          board.updateHistory { h =>
+            h.copy(
+              lastTurn = List.empty
+            )
+          },
+          P1
+        ).moves.values.flatten
+          .map(nextMove =>
+            super.kingThreatened(nextMove.after, player, to, _ => true)
+          )
           .toList
           .contains(true)
-      case _                                       => super.kingThreatened(board, player, to, filter)
+      }
+      case _ => super.kingThreatened(board, player, to, filter)
     }
   }
 
@@ -100,12 +121,13 @@ case object Monster
       !situation.player
     ) && situation.moves.isEmpty
 
-  override def valid(board: Board, strict: Boolean) = validSide(board, strict)(P2) && {
-    val roles = board.rolesOf(P1)
-    roles.count(_ == King) == 1 &&
-    (!strict || roles.count(_ == Pawn) <= 4) &&
-    !pawnsOnPromotionRank(board, P1) &&
-    board.piecesOf(P1).size <= 5
-  }
+  override def valid(board: Board, strict: Boolean) =
+    validSide(board, strict)(P2) && {
+      val roles = board.rolesOf(P1)
+      roles.count(_ == King) == 1 &&
+      (!strict || roles.count(_ == Pawn) <= 4) &&
+      !pawnsOnPromotionRank(board, P1) &&
+      board.piecesOf(P1).size <= 5
+    }
 
 }

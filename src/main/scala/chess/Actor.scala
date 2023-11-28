@@ -32,20 +32,23 @@ final case class Actor(
             } yield move(p, b, Option(p))
           } flatMap maybePromote
           def enpassant(horizontal: Direction): Option[Move] =
-            for {
-              victimPos <- horizontal(pos).filter(_ => pos.rank == Rank.passablePawnRank(player))
-              _         <- board(victimPos).filter(v => v == Piece(!player, Pawn))
-              targetPos <- horizontal(next)
-              _         <- pawnDir(victimPos) flatMap pawnDir filter { vf =>
-                             // TODO Review for multiaction variants like Monster/Progressive
-                             history.lastAction.exists {
-                               case Uci.Move(orig, dest, _) =>
-                                 orig == vf && dest == victimPos
-                               case _                       => false
+            if (board.history.currentTurn.nonEmpty) None
+            else
+              for {
+                victimPos <- horizontal(pos).filter(_ => pos.rank == Rank.passablePawnRank(player))
+                _         <- board(victimPos).filter(v => v == Piece(!player, Pawn))
+                targetPos <- horizontal(next)
+                _         <- pawnDir(victimPos) flatMap pawnDir filter { vf =>
+                               history.lastTurn
+                                 .map {
+                                   case Uci.Move(orig, dest, _) =>
+                                     orig == vf && dest == victimPos
+                                   case _                       => false
+                                 }
+                                 .contains(true)
                              }
-                           }
-              b         <- board.taking(pos, targetPos, Option(victimPos))
-            } yield move(targetPos, b, Option(victimPos), enpassant = true)
+                b         <- board.taking(pos, targetPos, Option(victimPos))
+              } yield move(targetPos, b, Option(victimPos), enpassant = true)
           def forward(p: Pos): Option[Move]                  =
             board.move(pos, p) map { move(p, _) } flatMap maybePromote
           def maybePromote(m: Move): Option[Move]            =
