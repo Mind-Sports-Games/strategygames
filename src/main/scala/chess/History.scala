@@ -45,7 +45,7 @@ case class History(
             case Array(x2, y2, z2) => x == x2 && y == y2 && z == z2
             case _                 => false
           }) >= times
-        case _ => times <= 1
+        case _                    => times <= 1
       }
     }
 
