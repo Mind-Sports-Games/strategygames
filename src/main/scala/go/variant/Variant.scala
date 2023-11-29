@@ -19,10 +19,6 @@ abstract class Variant private[variant] (
     val boardSize: Board.BoardSize
 ) {
 
-  def go9x9   = this == Go9x9
-  def go13x13 = this == Go13x13
-  def go19x19 = this == Go19x19
-
   def exotic = true
 
   def baseVariant: Boolean      = false
@@ -111,7 +107,7 @@ abstract class Variant private[variant] (
               )
               .withHistory(
                 situation.history.copy(
-                  lastMove = Uci.Drop(Role.defaultRole, dest).some,
+                  // lastTurn handled in action.finalizeAfter
                   score = Score(
                     newPosition.fen.player1Score, // TODO: generating the scores is slow
                     newPosition.fen.player2Score  //        especially when we have to generate a FEN to get it

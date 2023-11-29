@@ -86,11 +86,12 @@ case class Situation(board: Board, player: Player) {
 
   def canCastle = board.history.canCastle _
 
-  def enPassantSquare: Option[Pos] = {
+  // multiple squares are enpassantable in multiaction variants
+  def enPassantSquares: List[Pos] =
     // Before potentially expensive move generation, first ensure some basic
     // conditions are met.
-    history.lastMove match {
-      case Some(move: Uci.Move) =>
+    history.lastTurn.flatMap {
+      case move: Uci.Move =>
         if (
           move.dest.yDist(move.orig) == 2 &&
           board(move.dest).exists(_.is(Pawn)) &&
@@ -103,9 +104,14 @@ case class Situation(board: Board, player: Player) {
         )
           moves.values.flatten.find(_.enpassant).map(_.dest)
         else None
-      case _                    => None
+      case _              => None
     }
-  }
+
+  def enPassantSquaresUciString: Option[String] =
+    if (enPassantSquares.nonEmpty) Some(enPassantSquares.map(_.toString).mkString(","))
+    else None
+
+  def lastActionOfTurn: Boolean = board.variant.lastActionOfTurn(this)
 
   def unary_! = copy(player = !player)
 }

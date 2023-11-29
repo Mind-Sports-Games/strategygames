@@ -7,11 +7,7 @@ abstract class Action(situationBefore: Situation, after: Board, metrics: MoveMet
   def before = situationBefore.board
   def situationAfter: Situation
 
-  def finalizeAfter: Board = after updateHistory { h =>
-    h.copy(
-      lastMove = Option(toUci)
-    )
-  }
+  def finalizeAfter: Board
 
   def player: Player
 

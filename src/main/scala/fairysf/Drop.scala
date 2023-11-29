@@ -15,6 +15,13 @@ case class Drop(
   def situationAfter =
     Situation(finalizeAfter, if (autoEndTurn) !piece.player else piece.player)
 
+  def finalizeAfter: Board = after updateHistory { h =>
+    h.copy(
+      lastTurn = if (autoEndTurn) h.currentTurn :+ toUci else h.lastTurn,
+      currentTurn = if (autoEndTurn) List() else h.currentTurn :+ toUci
+    )
+  }
+
   def player = piece.player
 
   def withMetrics(m: MoveMetrics) = copy(metrics = m)

@@ -68,7 +68,7 @@ case object Amazons
     )
 
   override def validMoves(situation: Situation): Map[Pos, List[Move]] =
-    situation.board.history.lastMove match {
+    situation.board.history.lastAction match {
       case Some(_: Uci.Move) => Map.empty
       case _                 =>
         situation.board.apiPosition.legalMoves
@@ -114,7 +114,7 @@ case object Amazons
   private val defaultDropRole: Role = AmazonArrow
 
   override def validDrops(situation: Situation): List[Drop] =
-    situation.board.history.lastMove match {
+    situation.board.history.lastAction match {
       case Some(lastMove: Uci.Move) =>
         situation.board.apiPosition.legalMoves
           .filter(_.startsWith(s"${lastMove.uci},"))
