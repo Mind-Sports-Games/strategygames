@@ -134,6 +134,31 @@ class MonsterVariantTest extends ChessTest {
       }
     }
 
+    "Must be checkmate with possible Queen or Knight promotion" in {
+      import Pos._
+      val game        = fenToGame(Monster.initialFen, Monster)
+      val successGame = game flatMap (_.playMoves(
+        D2 -> D4,
+        E2 -> E4,
+        A7 -> A5,
+        D4 -> D5,
+        E4 -> E5,
+        A5 -> A4,
+        E1 -> D1,
+        D1 -> C1,
+        H7 -> H5,
+        C1 -> B2,
+        C2 -> C4,
+        E7 -> E6,
+        D5 -> E6,
+        E6 -> F7
+        // E8 -> E7
+      ))
+      successGame must beValid.like { case game =>
+        game.situation.checkMate must_== true
+      }
+    }
+
     // TODO Other tests Matt can add:
     // Castling cases (several in first 8 moves) http://localhost:9663/nvieBdKQaUtD
     // White Checkmates with King http://localhost:9663/nvieBdKQaUtD
