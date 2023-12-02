@@ -110,7 +110,7 @@ case class Timer(
   def outOfTime: Boolean                = remainingAll <= Centis(0)
   def giveTime(t: Centis)               = takeTime(-t)
 
-  // The remaining is whatever they have left + whatever they'll get if they were at the end of the gaming and
+  // The remaining is whatever they have left + whatever they'll get if they were at the end of the game and
   // had used the maxGrace amount of time. This is important to work together in concer with Simple Delay
   val remaining: Centis = limit - elapsed
   def limit             = baseLimit + clockTimeGrace
@@ -250,6 +250,7 @@ sealed trait ClockBase {
 
   @inline def timestampFor(c: Player) = if (c == player) timestamp else None
   @inline def pending(c: Player)      = timestampFor(c).fold(Centis(0))(toNow)
+  @inline def lastMoveTime(c: Player) = clockPlayer(c).lastMoveTime
 
   def estimateTotalSeconds = config.estimateTotalSeconds
   def estimateTotalTime    = config.estimateTotalTime
@@ -532,8 +533,9 @@ object Clock {
     override def toString = s"${limitString} d/${delaySeconds}"
 
     def berserkPenalty =
-      if (limitSeconds < 40 * delaySeconds) Centis(graceSeconds)
-      else Centis(limitSeconds * (100 / 2)) + Centis(graceSeconds)
+      if (limitSeconds < 40 * delaySeconds) Centis(0)
+      else
+        Centis(limitSeconds * (100 / 2))
 
     def initTime = {
       if (limitSeconds == 0) delay.atLeast(Centis(300))
