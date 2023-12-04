@@ -3,7 +3,7 @@ package strategygames.format
 import cats.data.Validated
 
 import strategygames.variant.Variant
-import strategygames.{ Action, ActionStrs, Drop, GameFamily, GameLogic, Move, Pass, SelectSquares }
+import strategygames.{ Action, ActionStrs, Drop, GameLogic, Move, Pass, SelectSquares }
 
 object UciDump {
 

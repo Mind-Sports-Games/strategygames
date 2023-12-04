@@ -1,6 +1,7 @@
 package strategygames.chess
 
 import cats.syntax.option._
+import scala.language.reflectiveCalls
 
 import strategygames.Status
 import strategygames.chess.format.FEN
@@ -240,7 +241,7 @@ K  r
     }
   }
 
-"fiveCheck" should {
+  "fiveCheck" should {
     "detect win" in {
       "not" in {
         Game(

@@ -1,12 +1,13 @@
 package strategygames.fairysf
 package format.pgn
 
+import scala.annotation.nowarn
+
 import strategygames.fairysf.variant.Variant
 import strategygames.fairysf.format.Uci
 
-import strategygames.format.pgn.{ Glyphs, InitialPosition, ParsedPgn, Sans, Tag }
+import strategygames.format.pgn.{ ParsedPgn, Sans }
 
-import scala.util.parsing.combinator._
 import cats.data.Validated
 
 // http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm
@@ -46,9 +47,9 @@ object Parser {
 
   def full(pgn: String): Validated[String, ParsedPgn] =
     Validated.invalid(s"Not implemented full: ${pgn}") // TODO: ???
-  def sans(str: String, variant: Variant): Validated[String, Sans] =
+  def sans(str: String, @nowarn variant: Variant): Validated[String, Sans] =
     Validated.invalid(s"Not implemented moves: ${str}") // TODO: ???
-  def sans(strMoves: Iterable[String], variant: Variant): Validated[String, Sans] =
+  def sans(strMoves: Iterable[String], @nowarn variant: Variant): Validated[String, Sans] =
     Validated.invalid(s"Not implemented iterable moves: ${strMoves}") // TODO: ???
 
   // StrMove use to exist here in a copied 'TODO ???' version

@@ -1,8 +1,8 @@
 package strategygames.samurai
 import strategygames.MoveMetrics
 
+import scala.annotation.nowarn
 import strategygames.samurai.format.Uci
-import cats.syntax.option._
 
 case class Move(
     piece: Piece,
@@ -14,7 +14,7 @@ case class Move(
     capture: Option[Pos],
     promotion: Option[PromotableRole],
     metrics: MoveMetrics = MoveMetrics()
-) extends Action(situationBefore, after, metrics) {
+) extends Action(situationBefore, after) {
 
   def situationAfter =
     Situation(finalizeAfter, if (autoEndTurn) !piece.player else piece.player)
@@ -35,7 +35,7 @@ case class Move(
 
   def player = piece.player
 
-  def withPromotion(op: Option[PromotableRole]): Option[Move] = None
+  def withPromotion(@nowarn op: Option[PromotableRole]): Option[Move] = None
 
   def withMetrics(m: MoveMetrics) = copy(metrics = m)
 

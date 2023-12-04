@@ -1,13 +1,6 @@
 package strategygames.fairysf
 package format.pgn
-import strategygames.{
-  ActionStrs,
-  ByoyomiClock,
-  FischerClock,
-  GameFamily,
-  Move => StratMove,
-  Situation => StratSituation
-}
+import strategygames.{ ActionStrs, ByoyomiClock, Clock, GameFamily, Situation => StratSituation }
 
 import strategygames.format.pgn.{ ParsedPgn, Sans, Tags }
 
@@ -159,7 +152,7 @@ object Reader {
       startedAtPly = g.plies,
       startedAtTurn = g.turnCount,
       clock = tags.clockConfig.flatMap {
-        case fc: FischerClock.Config => Some(FischerClock.apply(fc))
+        case fc: Clock.Config        => Some(Clock.apply(fc))
         case bc: ByoyomiClock.Config => Some(ByoyomiClock.apply(bc))
         case _                       => None
       }

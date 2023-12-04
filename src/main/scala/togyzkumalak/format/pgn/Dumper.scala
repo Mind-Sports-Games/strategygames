@@ -1,9 +1,15 @@
 package strategygames.togyzkumalak
 package format.pgn
 
+import scala.annotation.nowarn
+
 object Dumper {
 
-  def apply(situation: Situation, data: strategygames.togyzkumalak.Move, next: Situation): String =
+  def apply(
+      @nowarn situation: Situation,
+      data: strategygames.togyzkumalak.Move,
+      @nowarn next: Situation
+  ): String =
     data.toUci.uci
 
   def apply(data: strategygames.togyzkumalak.Move): String =

@@ -16,7 +16,7 @@ case class Move(
     castle: Option[((Pos, Pos), (Pos, Pos))],
     enpassant: Boolean,
     metrics: MoveMetrics = MoveMetrics()
-) extends Action(situationBefore, after, metrics) {
+) extends Action(situationBefore) {
 
   def playerAfter = if (autoEndTurn) !piece.player else piece.player
 

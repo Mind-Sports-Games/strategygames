@@ -158,7 +158,10 @@ object Api {
         .map { case (seeds, index) =>
           (Pos(index), (Piece(Player.fromP1(index < 6), variant.defaultRole), seeds))
         }
-        .map { case (Some(pos), pieceCount) => pos -> pieceCount }
+        .flatMap {
+          case (Some(pos), pieceCount) => Some(pos -> pieceCount)
+          case _                       => None
+        }
         .toMap
     }
 

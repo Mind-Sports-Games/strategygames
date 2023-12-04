@@ -1,5 +1,6 @@
 package strategygames.togyzkumalak.format
 
+import scala.annotation.nowarn
 import cats.data.Validated
 
 import strategygames.togyzkumalak.variant.Variant
@@ -29,7 +30,7 @@ object UciDump {
         variant = variant
       ) andThen (_.valid) map apply
 
-  def action(variant: Variant)(a: Action): String = a match {
+  def action(@nowarn variant: Variant)(a: Action): String = a match {
     case m: Move => m.toUci.uci
   }
 

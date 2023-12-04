@@ -1,6 +1,6 @@
 package strategygames.fairysf
 
-import strategygames.{ Clock, Player }
+import strategygames.{ ClockBase, Player }
 
 import cats.data.Validated
 import cats.syntax.option._
@@ -50,7 +50,7 @@ trait FairySFTest extends Specification with ValidatedMatchers {
         // }
         // because possible moves are asked for player highlight
         // before the move is played (on initial situation)
-        vg foreach { _.situation.destinations }
+        // vg foreach { _.situation.destinations }
         val ng = vg flatMap { g =>
           g(move._1, move._2) map (_._1)
         }
@@ -67,7 +67,7 @@ trait FairySFTest extends Specification with ValidatedMatchers {
     ): Validated[String, Game] =
       game.apply(orig, dest, promotion) map (_._1)
 
-    def withClock(c: Clock) = game.copy(clock = Option(c))
+    def withClock(c: ClockBase) = game.copy(clock = Option(c))
   }
 
   implicit def richGame(game: Game) = RichGame(game)

@@ -307,7 +307,6 @@ class ForsythTest extends ChessTest {
     }
   }
   "crazyhouse" should {
-    import variant.Crazyhouse._
     "read" in {
       "nope" in {
         f <<< FEN("2b2rk1/3p2pp/2pNp3/4PpN1/qp1P3P/4P1K1/6P1/1Q6 w - f6 0 36") must beSome.like { s =>

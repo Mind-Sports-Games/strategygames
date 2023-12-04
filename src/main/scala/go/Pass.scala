@@ -8,7 +8,7 @@ case class Pass(
     after: Board,
     autoEndTurn: Boolean,
     metrics: MoveMetrics = MoveMetrics()
-) extends Action(situationBefore, after, metrics) {
+) extends Action(situationBefore, after) {
 
   def situationAfter =
     Situation(finalizeAfter, if (autoEndTurn) !situationBefore.player else situationBefore.player)

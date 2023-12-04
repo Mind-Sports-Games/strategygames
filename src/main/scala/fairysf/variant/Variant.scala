@@ -60,7 +60,7 @@ abstract class Variant private[variant] (
 
   // looks like this is only to allow King to be a valid promotion piece
   // in just atomic, so can leave as true for now
-  def isValidPromotion(promotion: Option[PromotableRole]): Boolean = true
+  def isValidPromotion(@nowarn promotion: Option[PromotableRole]): Boolean = true
 
   def validMoves(situation: Situation): Map[Pos, List[Move]] =
     if (situation.board.uciMoves.size < Binary.maxPlies) legalMoves(situation)
@@ -229,7 +229,7 @@ abstract class Variant private[variant] (
   @nowarn def finalizeBoard(board: Board, uci: format.Uci, captured: Option[Piece]): Board =
     board
 
-  def valid(board: Board, strict: Boolean): Boolean =
+  def valid(board: Board, @nowarn strict: Boolean): Boolean =
     Api.validateFEN(fairysfName.name, Forsyth.exportBoard(board))
 
   val roles: List[Role] = Role.all

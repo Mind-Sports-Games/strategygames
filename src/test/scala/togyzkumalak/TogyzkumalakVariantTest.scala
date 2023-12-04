@@ -12,7 +12,7 @@ class TogyzkumalakVariantTest extends Specification with ValidatedMatchers {
     val p1        = Player(true)
     val situation = Situation(board, p1)
 
-    val moves = variant.Togyzkumalak.validMoves(situation).pp("validMoves")
+    val moves = variant.Togyzkumalak.validMoves(situation)
     "be valid" in {
       moves.size must_== 9
     }
