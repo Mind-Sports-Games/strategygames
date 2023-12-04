@@ -113,7 +113,7 @@ object Reader {
       startedAtPly = g.plies,
       startedAtTurn = g.turnCount,
       clock = tags.clockConfig.flatMap {
-        case fc: Clock.Config => Some(Clock.apply(fc))
+        case fc: Clock.Config        => Some(Clock.apply(fc))
         case bc: ByoyomiClock.Config => Some(ByoyomiClock.apply(bc))
         case _                       => None
       }

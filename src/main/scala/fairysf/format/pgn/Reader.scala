@@ -1,12 +1,6 @@
 package strategygames.fairysf
 package format.pgn
-import strategygames.{
-  ActionStrs,
-  ByoyomiClock,
-  Clock,
-  GameFamily,
-  Situation => StratSituation
-}
+import strategygames.{ ActionStrs, ByoyomiClock, Clock, GameFamily, Situation => StratSituation }
 
 import strategygames.format.pgn.{ ParsedPgn, Sans, Tags }
 
