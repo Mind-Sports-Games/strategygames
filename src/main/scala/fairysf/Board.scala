@@ -52,7 +52,7 @@ case class Board(
     case None           => Api.positionFromVariantAndMoves(variant, uciMoves)
   }
 
-  override def toString = s"$variant Position after ${history.lastMove}"
+  override def toString = s"$variant Position after ${history.recentTurnUciString}"
 }
 
 object Board {

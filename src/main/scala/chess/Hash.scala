@@ -77,7 +77,9 @@ object Hash {
           .fold(hactors)(_ ^ _)
       else hactors
 
-    val hep = situation.enPassantSquare.fold(hcastling) { pos =>
+    // TODO Upgrade for multiaction. Incorrect for Monster Chess
+    // Currently hash only encodes the first enPassantSqaure if there are multiple
+    val hep = situation.enPassantSquares.headOption.fold(hcastling) { pos =>
       hcastling ^ table.enPassantMasks(pos.file.index)
     }
 

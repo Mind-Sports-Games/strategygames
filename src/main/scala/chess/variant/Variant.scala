@@ -24,22 +24,7 @@ abstract class Variant private[variant] (
 
   def pieces: Map[Pos, Piece]
 
-  def standard      = this == Standard
-  def chess960      = this == Chess960
-  def fromPosition  = this == FromPosition
-  def kingOfTheHill = this == KingOfTheHill
-  def threeCheck    = this == ThreeCheck
-  def fiveCheck     = this == FiveCheck
-  def antichess     = this == Antichess
-  def atomic        = this == Atomic
-  def horde         = this == Horde
-  def racingKings   = this == RacingKings
-  def crazyhouse    = this == Crazyhouse
-  def linesOfAction = this == LinesOfAction
-  def noCastling    = this == NoCastling
-  def scrambledEggs = this == ScrambledEggs
-
-  def exotic = !standard
+  def exotic = this != Standard
 
   // used to define chess variants medley
   def exoticChessVariant: Boolean = false
@@ -104,7 +89,7 @@ abstract class Variant private[variant] (
 
   def kingSafety(m: Move, filter: Piece => Boolean, kingPos: Option[Pos]): Boolean =
     ! {
-      kingPos exists { kingThreatened(m.after, !m.player, _, filter) }
+      kingPos exists { kingThreatened(m.after, m.playerAfter, _, filter) }
     }
 
   def kingSafety(a: Actor, m: Move): Boolean =
@@ -236,6 +221,9 @@ abstract class Variant private[variant] (
 
   def isUnmovedPawn(player: Player, pos: Pos) = pos.rank == player.fold(Rank.Second, Rank.Seventh)
 
+  // override on multiaction variants
+  def lastActionOfTurn(situation: Situation): Boolean = true
+
   override def toString = s"Variant($name)"
 
   override def equals(that: Any): Boolean = this eq that.asInstanceOf[AnyRef]
@@ -260,6 +248,7 @@ object Variant {
     Horde,
     RacingKings,
     NoCastling,
+    Monster,
     LinesOfAction,
     ScrambledEggs
   )
