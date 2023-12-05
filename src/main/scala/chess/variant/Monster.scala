@@ -50,6 +50,12 @@ case object Monster
     "rnbqkbnr/pppppppp/8/8/8/8/2PPPP2/4K3 w kq - 0 1"
   )
 
+  override def isInsufficientMaterial(board: Board) = false
+  override def opponentHasInsufficientMaterial(situation: Situation) =
+    if (situation.player == P1)
+      InsufficientMatingMaterial(situation.board, !situation.player)
+    else false //P1 can never have insufficient material
+
   override def lastActionOfTurn(situation: Situation): Boolean =
     situation.player match {
       case P1 => situation.board.lastActionPlayer == Some(P1)
