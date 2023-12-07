@@ -1,5 +1,6 @@
 package strategygames.chess
 
+import scala.language.reflectiveCalls
 import strategygames.chess.Pos._
 import strategygames.chess.variant.FromPosition
 

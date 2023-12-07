@@ -1,6 +1,8 @@
 package strategygames.togyzkumalak
 package format.pgn
 
+import scala.annotation.nowarn
+
 import strategygames.{ ActionStrs, GameFamily }
 import strategygames.togyzkumalak.format.Uci
 
@@ -77,7 +79,7 @@ object Binary {
 
   private object Writer {
 
-    def ply(gf: GameFamily, str: String): List[Byte] =
+    def ply(@nowarn gf: GameFamily, str: String): List[Byte] =
       (str match {
         case Uci.Move.moveR(src, dst, promotion) => moveUci(src, dst, promotion)
         case _                                   => sys.error(s"Invalid move to write: ${str}")

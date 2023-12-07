@@ -1,7 +1,5 @@
 package strategygames.go
 
-import strategygames.Player
-
 final class Hash(size: Int) {
 
   def apply(situation: Situation): PositionHash = {

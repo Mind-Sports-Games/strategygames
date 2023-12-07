@@ -1,6 +1,6 @@
 package strategygames.go
 
-import strategygames.{ GameFamily, GameLogic, Piece => StratPiece, Pocket, Pockets }
+import strategygames.{ GameLogic, Piece => StratPiece, Pocket, Pockets }
 
 case class PocketData(
     pockets: Pockets,

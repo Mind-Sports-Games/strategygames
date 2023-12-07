@@ -33,8 +33,8 @@ case object Horde
 
     val p2Pieces = (for (y <- List(Rank.Seventh, Rank.Eighth); x <- File.all) yield {
       Pos(x, y) -> (y match {
-        case Rank.Eighth  => Piece(P2, backRank(x.index))
-        case Rank.Seventh => Piece(P2, Pawn)
+        case Rank.Eighth => Piece(P2, backRank(x.index))
+        case _           => Piece(P2, Pawn)
       })
     }).toMap
 

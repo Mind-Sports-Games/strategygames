@@ -6,8 +6,6 @@ import opening.DrawTablesIDF
 import opening.DrawTablesACF
 import variant._
 
-import cats.syntax.option._
-
 case class OpeningTable(
     key: String,
     name: String,

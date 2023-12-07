@@ -9,21 +9,21 @@ class BoardReplayPerfTest extends ChessTest {
   // val nb = 1
   // val iterations = 1
 
-  val moves     = format.pgn.Fixtures.fromProd2.split(' ').toList
-  def runOne    = Replay.boards(moves.map(List(_)), None, variant.Standard)
-  def run: Unit = { for (i <- 1 to nb) runOne }
+  val moves       = format.pgn.Fixtures.fromProd2.split(' ').toList
+  def runOne      = Replay.boards(moves.map(List(_)), None, variant.Standard)
+  def run(): Unit = { for (_ <- 1 to nb) runOne }
 
   "playing a game" should {
     "many times" in {
       runOne must beValid
       if (nb * iterations > 1) {
         println("warming up")
-        run
+        run()
       }
       println("running tests")
-      val durations  = for (i <- 1 to iterations) yield {
+      val durations  = for (_ <- 1 to iterations) yield {
         val start    = System.currentTimeMillis
-        run
+        run()
         val duration = System.currentTimeMillis - start
         println(s"$nb games in $duration ms")
         duration

@@ -101,6 +101,7 @@ object Hash {
         togyzkumalak.Hash.get(situation, table)
       case (GameLogic.Go(), Situation.Go(situation), GoZobristConstants(table))                   =>
         go.Hash.get(situation, table)
+      case _                                                                                      => sys.error("Invalid lib, situation and table combination")
     }
 
   private val h = new Hash(size)

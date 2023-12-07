@@ -130,7 +130,8 @@ abstract class Variant private[variant] (
   def drop(situation: Situation, role: Role, pos: Pos): Validated[String, Drop] =
     Validated.invalid(s"$this variant cannot drop $situation $role $pos")
 
-  def possibleDropsByRole(situation: Situation): Option[Map[Role, List[Pos]]] = None // override in crazyhouse
+  def possibleDropsByRole(@nowarn situation: Situation): Option[Map[Role, List[Pos]]] =
+    None // override in crazyhouse
 
   def staleMate(situation: Situation): Boolean = !situation.check && situation.moves.isEmpty
 
@@ -296,7 +297,7 @@ object Variant {
         case Rank.First   => Piece(P1, rank(x.index))
         case Rank.Second  => Piece(P1, Pawn)
         case Rank.Seventh => Piece(P2, Pawn)
-        case Rank.Eighth  => Piece(P2, rank(x.index))
+        case _            => Piece(P2, rank(x.index))
       })
     }).toMap
 }

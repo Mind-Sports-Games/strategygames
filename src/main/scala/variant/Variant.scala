@@ -462,8 +462,8 @@ object Variant {
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false
 
     def checkmate(situation: Situation): Boolean = situation match {
-      case Situation.Samurai(situation) => false
-      case _                            => sys.error("Not passed Samurai objects")
+      case Situation.Samurai(_) => false
+      case _                    => sys.error("Not passed Samurai objects")
     }
 
     def stalemateIsDraw: Boolean = v.stalemateIsDraw
@@ -560,8 +560,8 @@ object Variant {
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false
 
     def checkmate(situation: Situation): Boolean = situation match {
-      case Situation.Togyzkumalak(situation) => false
-      case _                                 => sys.error("Not passed Togyzkumalak objects")
+      case Situation.Togyzkumalak(_) => false
+      case _                         => sys.error("Not passed Togyzkumalak objects")
     }
 
     def stalemateIsDraw: Boolean = v.stalemateIsDraw
@@ -657,8 +657,8 @@ object Variant {
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false
 
     def checkmate(situation: Situation): Boolean = situation match {
-      case Situation.Go(situation) => false
-      case _                       => sys.error("Not passed Go objects")
+      case Situation.Go(_) => false
+      case _               => sys.error("Not passed Go objects")
     }
 
     def stalemateIsDraw: Boolean = v.stalemateIsDraw
@@ -784,7 +784,7 @@ object Variant {
   }
 
   // todo all games will be allowed from position (go has 3 variants already!)
-  @deprecated("this method will be removed")
+  @deprecated("this method will be removed", "10.2.1-pstrat98")
   def libFromPosition(lib: GameLogic): Variant = lib match {
     case GameLogic.Draughts()     => Variant.Draughts(draughts.variant.FromPosition)
     case GameLogic.Chess()        => Variant.Chess(chess.variant.FromPosition)
