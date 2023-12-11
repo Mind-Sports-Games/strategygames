@@ -5,7 +5,7 @@ import cats.syntax.option._
 import scala.annotation.nowarn
 
 import strategygames.chess._
-import strategygames.chess.format.FEN
+import strategygames.chess.format.{ FEN, Uci }
 import strategygames.{ GameFamily, Player }
 
 // Correctness depends on singletons for each variant ID
@@ -166,6 +166,26 @@ abstract class Variant private[variant] (
     */
   def opponentHasInsufficientMaterial(situation: Situation) =
     InsufficientMatingMaterial(situation.board, !situation.player)
+
+  def enPassantSquares(situation: Situation): List[Pos] =
+    // Before potentially expensive move generation, first ensure some basic
+    // conditions are met.
+    situation.history.lastTurn.flatMap {
+      case move: Uci.Move =>
+        if (
+          move.dest.yDist(move.orig) == 2 &&
+          situation.board(move.dest).exists(_.is(Pawn)) &&
+          List(
+            move.dest.file.offset(-1),
+            move.dest.file.offset(1)
+          ).flatten
+            .flatMap(situation.board(_, Rank.passablePawnRank(situation.player)))
+            .exists(_ == Piece(situation.player, Pawn))
+        )
+          situation.moves.values.flatten.find(_.enpassant).map(_.dest)
+        else None
+      case _              => None
+    }
 
   // Some variants have an extra effect on the board on a move. For example, in Atomic, some
   // pieces surrounding a capture explode

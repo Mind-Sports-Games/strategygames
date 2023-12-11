@@ -1,7 +1,7 @@
 package strategygames.chess.variant
 
 import strategygames.chess._
-import strategygames.chess.format.FEN
+import strategygames.chess.format.{ FEN, Uci }
 import strategygames.Player
 
 case object Monster
@@ -50,11 +50,11 @@ case object Monster
     "rnbqkbnr/pppppppp/8/8/8/8/2PPPP2/4K3 w kq - 0 1"
   )
 
-  override def isInsufficientMaterial(board: Board) = false
+  override def isInsufficientMaterial(board: Board)                  = false
   override def opponentHasInsufficientMaterial(situation: Situation) =
     if (situation.player == P1)
       InsufficientMatingMaterial(situation.board, !situation.player)
-    else false //P1 can never have insufficient material
+    else false // P1 can never have insufficient material
 
   override def lastActionOfTurn(situation: Situation): Boolean =
     situation.player match {
@@ -104,14 +104,7 @@ case object Monster
   ): Boolean = {
     player match {
       case P1 if board.history.currentTurn.isEmpty => {
-        super.kingThreatened(board, player, to, filter) || Situation(
-          board.updateHistory { h =>
-            h.copy(
-              lastTurn = List.empty
-            )
-          },
-          P1
-        ).moves.values.flatten
+        super.kingThreatened(board, player, to, filter) || Situation(board, P1).moves.values.flatten
           .map(nextMove =>
             super.kingThreatened(nextMove.after, player, to, _ => true) ||
               (if (nextMove.promotion.nonEmpty)
@@ -134,6 +127,29 @@ case object Monster
       case _                                       => super.kingThreatened(board, player, to, filter)
     }
   }
+
+  // For Monster we report squares which might be enpassantable
+  // But we stop before actual move generation as that causes an infinite loop
+  override def enPassantSquares(situation: Situation): List[Pos] =
+    situation.history.lastTurn.flatMap {
+      case move: Uci.Move =>
+        if (
+          move.dest.yDist(move.orig) == 2 &&
+          situation.board(move.dest).exists(_.is(Pawn)) &&
+          List(
+            move.dest.file.offset(-1),
+            move.dest.file.offset(1)
+          ).flatten
+            .flatMap(situation.board(_, Rank.passablePawnRank(situation.player)))
+            .exists(_ == Piece(situation.player, Pawn))
+        )
+          situation.player match {
+            case P1 => move.dest.up
+            case P2 => move.dest.down
+          }
+        else None
+      case _              => None
+    }
 
   override def checkmate(situation: Situation) =
     situation.check && !situation.board.check(
