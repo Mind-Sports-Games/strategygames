@@ -401,8 +401,8 @@ object GameFamily {
     def defaultVariant    = Variant.Backgammon(strategygames.backgammon.variant.Backgammon)
     def variants          = Variant.all(GameLogic.Backgammon()).filter(_.gameFamily == this)
     def displayPiece      = "display"
-    def pieceSetThemes    = List("classic", "contemporary")
-    def pieceSetDefault   = "classic"
+    def pieceSetThemes    = List("wooden", "classic", "contemporary")
+    def pieceSetDefault   = "wooden"
     def boardThemes       = List("classic", "contemporary")
     def boardThemeDefault = "classic"
     def playerNames       = Map(P1 -> "White", P2 -> "Black")

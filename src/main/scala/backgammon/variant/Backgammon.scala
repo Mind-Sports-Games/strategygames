@@ -15,7 +15,7 @@ case object Backgammon
 
   def gameFamily: GameFamily = GameFamily.Backgammon()
 
-  def perfIcon: Char = '›'
+  def perfIcon: Char = ''
   def perfId: Int    = 600
 
   override def baseVariant: Boolean = true
