@@ -87,25 +87,7 @@ case class Situation(board: Board, player: Player) {
   def canCastle = board.history.canCastle _
 
   // multiple squares are enpassantable in multiaction variants
-  def enPassantSquares: List[Pos] =
-    // Before potentially expensive move generation, first ensure some basic
-    // conditions are met.
-    history.lastTurn.flatMap {
-      case move: Uci.Move =>
-        if (
-          move.dest.yDist(move.orig) == 2 &&
-          board(move.dest).exists(_.is(Pawn)) &&
-          List(
-            move.dest.file.offset(-1),
-            move.dest.file.offset(1)
-          ).flatten
-            .flatMap(board(_, Rank.passablePawnRank(player)))
-            .exists(_ == Piece(player, Pawn))
-        )
-          moves.values.flatten.find(_.enpassant).map(_.dest)
-        else None
-      case _              => None
-    }
+  def enPassantSquares: List[Pos] = board.variant.enPassantSquares(this)
 
   def enPassantSquaresUciString: Option[String] =
     if (enPassantSquares.nonEmpty) Some(enPassantSquares.map(_.toString).mkString(","))

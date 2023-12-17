@@ -130,6 +130,24 @@ class MonsterVariantTest extends ChessTest {
       }
     }
 
+    "Must now allow pawn move that sets up an enpassant checkmate" in {
+      import Pos._
+      val game        = fenToGame(Monster.initialFen, Monster)
+      val successGame = game flatMap (_.playMoves(
+        E2 -> E4,
+        E4 -> E5,
+        E7 -> E6,
+        E1 -> E2,
+        E2 -> E3,
+        E8 -> E7,
+        E3 -> E2,
+        E2 -> E3
+      ))
+      successGame must beValid.like { case game =>
+        game.situation.moves.values.flatten.pp("moves").size must_== 15
+      }
+    }
+
     "Must be checkmate with possible Queen or Knight promotion" in {
       import Pos._
       val game        = fenToGame(Monster.initialFen, Monster)
