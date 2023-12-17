@@ -216,6 +216,9 @@ class ClockTest extends ChessTest {
     "with 30 seconds" in {
       Clock(Clock.Config(30, 0)).limitInMinutes must_== 0.5
     }
+    "with few time has minimum time" in {
+      Clock(Clock.Config(0, 3)).limit.centis must_== 300
+    }
   }
   "lag compensation" should {
     def durOf(lag: Int) = MoveMetrics(clientLag = Option(Centis(lag)))
