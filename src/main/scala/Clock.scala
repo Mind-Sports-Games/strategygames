@@ -423,7 +423,7 @@ object Clock {
   case class Config(limitSeconds: Int, incrementSeconds: Int) extends ClockConfig {
     private lazy val clockTimeGrace =
       if (increment > Centis(0)) FischerIncrementGrace(increment) else NoClockTimeGrace()
-    lazy val timer                  = Timer(configLimit, clockTimeGrace)
+    lazy val timer                  = Timer(limit, clockTimeGrace)
 
     def berserkable          = incrementSeconds == 0 || limitSeconds > 0
     def emergSeconds         = math.min(60, math.max(10, limitSeconds / 8))
@@ -433,8 +433,7 @@ object Clock {
     def increment            = Centis.ofSeconds(incrementSeconds)
     def graceSeconds         = incrementSeconds
 
-    def limit          = timer.limit
-    def configLimit    = Centis.ofSeconds(limitSeconds)
+    def limit          = Centis.ofSeconds(limitSeconds)
     def limitInMinutes = limitSeconds / 60d
     def toClock        = Clock(this)
 
@@ -470,7 +469,7 @@ object Clock {
   case class BronsteinConfig(limitSeconds: Int, delaySeconds: Int) extends ClockConfig {
     private lazy val clockTimeGrace =
       if (delay > Centis(0)) BronsteinDelayGrace(delay) else NoClockTimeGrace()
-    lazy val timer                  = Timer(configLimit, clockTimeGrace)
+    lazy val timer                  = Timer(limit, clockTimeGrace)
 
     def berserkable          = delaySeconds == 0 || limitSeconds > 0
     def emergSeconds         = math.min(60, math.max(10, limitSeconds / 8))
@@ -478,8 +477,7 @@ object Clock {
     def estimateTotalTime    = Centis.ofSeconds(estimateTotalSeconds)
     def delay                = Centis.ofSeconds(delaySeconds)
     def graceSeconds         = delaySeconds
-    def limit                = timer.limit
-    def configLimit          = Centis.ofSeconds(limitSeconds)
+    def limit                = Centis.ofSeconds(limitSeconds)
     def limitInMinutes       = limitSeconds / 60d
     def toClock              = Clock(this)
 
@@ -513,15 +511,14 @@ object Clock {
   case class SimpleDelayConfig(limitSeconds: Int, delaySeconds: Int) extends ClockConfig {
     private lazy val clockTimeGrace =
       if (delay > Centis(0)) SimpleDelayGrace(delay) else NoClockTimeGrace()
-    lazy val timer                  = Timer(configLimit, clockTimeGrace)
+    lazy val timer                  = Timer(limit, clockTimeGrace)
 
     def berserkable          = delaySeconds == 0 || limitSeconds > 0
     def emergSeconds         = math.min(60, math.max(10, limitSeconds / 8))
     def estimateTotalSeconds = limitSeconds + 40 * delaySeconds
     def estimateTotalTime    = Centis.ofSeconds(estimateTotalSeconds)
     def delay                = Centis.ofSeconds(delaySeconds)
-    def limit                = timer.limit
-    def configLimit          = Centis.ofSeconds(limitSeconds)
+    def limit                = Centis.ofSeconds(limitSeconds)
     def limitInMinutes       = limitSeconds / 60d
     def graceSeconds         = delaySeconds
     def toClock              = Clock(this)
