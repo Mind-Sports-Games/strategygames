@@ -178,17 +178,17 @@ class ForsythTest extends ChessTest {
       }
       "last move (for en passant)" in {
         f <<< FEN("2b2rk1/3p2pp/2pNp3/4PpN1/qp1P3P/4P1K1/6P1/1Q6 w - f6 0 36") must beSome.like { s =>
-          s.situation.board.history.lastMove must_== Option(Uci.Move(Pos.F7, Pos.F5))
+          s.situation.board.history.lastTurn must_== List(Uci.Move(Pos.F7, Pos.F5))
         }
       }
       "last move (for en passant in Pretrov's defense)" in {
         f <<< FEN("rnbqkb1r/ppp2ppp/8/3pP3/3Qn3/5N2/PPP2PPP/RNB1KB1R w KQkq d6 0 6") must beSome.like { s =>
-          s.situation.board.history.lastMove must_== Option(Uci.Move(Pos.D7, Pos.D5))
+          s.situation.board.history.lastTurn must_== List(Uci.Move(Pos.D7, Pos.D5))
         }
       }
       "last move (for en passant with p2 to move)" in {
         f <<< FEN("4k3/8/8/8/4pP2/8/2K5/8 b - f3 0 1") must beSome.like { s =>
-          s.situation.board.history.lastMove must_== Option(Uci.Move(Pos.F2, Pos.F4))
+          s.situation.board.history.lastTurn must_== List(Uci.Move(Pos.F2, Pos.F4))
         }
       }
     }
@@ -196,7 +196,7 @@ class ForsythTest extends ChessTest {
       "starting" in {
         f <<< FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") must beSome.like {
           case SituationPlus(
-                Situation(Board(_, History(_, _, Castles(true, true, true, true), _, _, _), _, _), _),
+                Situation(Board(_, History(_, _, _, Castles(true, true, true, true), _, _, _), _, _), _),
                 _
               ) =>
             ok
@@ -205,7 +205,7 @@ class ForsythTest extends ChessTest {
       "p1 to play" in {
         f <<< FEN("r2q1rk1/ppp2pp1/1bnpbn1p/4p3/4P3/1BNPBN1P/PPPQ1PP1/R3K2R w KQ - 7 10") must beSome.like {
           case SituationPlus(
-                Situation(Board(_, History(_, _, Castles(true, true, false, false), _, _, _), _, _), _),
+                Situation(Board(_, History(_, _, _, Castles(true, true, false, false), _, _, _), _, _), _),
                 _
               ) =>
             ok
@@ -214,7 +214,7 @@ class ForsythTest extends ChessTest {
       "p2 to play" in {
         f <<< FEN("r1q2rk1/ppp2ppp/3p1n2/8/2PNp3/P1PnP3/2QP1PPP/R1B2K1R b - - 3 12") must beSome.like {
           case SituationPlus(
-                Situation(Board(_, History(_, _, Castles(false, false, false, false), _, _, _), _, _), _),
+                Situation(Board(_, History(_, _, _, Castles(false, false, false, false), _, _, _), _, _), _),
                 _
               ) =>
             ok
@@ -287,22 +287,22 @@ class ForsythTest extends ChessTest {
   "ignore impossible en passant squares" should {
     "with queen instead of pawn" in {
       f <<< FEN("8/4k3/8/6K1/1pp5/2q5/1P6/8 w - c3 0 1") must beSome.like { s =>
-        s.situation.board.history.lastMove isEmpty
+        s.situation.board.history.lastTurn isEmpty
       }
     }
     "with no pawn" in {
       f <<< FEN("8/8/8/5k2/5p2/8/5K2/8 b - g3 0 1") must beSome.like { s =>
-        s.situation.board.history.lastMove isEmpty
+        s.situation.board.history.lastTurn isEmpty
       }
     }
     "with non empty en passant squares" should {
       f <<< FEN("8/8/8/5k2/5pP1/8/6K1/8 b - g3 0 1") must beSome.like { s =>
-        s.situation.board.history.lastMove isEmpty
+        s.situation.board.history.lastTurn isEmpty
       }
     }
     "with wrong side to move" should {
       f <<< FEN("8/8/8/5k2/5pP1/8/1K6/8 w - g3 0 1") must beSome.like { s =>
-        s.situation.board.history.lastMove isEmpty
+        s.situation.board.history.lastTurn isEmpty
       }
     }
   }

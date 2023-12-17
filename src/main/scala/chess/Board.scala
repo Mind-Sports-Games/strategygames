@@ -2,6 +2,8 @@ package strategygames.chess
 
 import strategygames.Player
 
+import format.Uci
+
 import variant.Variant
 
 case class Board(
@@ -157,6 +159,16 @@ case class Board(
 
   def materialImbalance: Int = variant.materialImbalance(this)
 
+  // used for multiaction variants like Monster Chess.
+  // Won't always produce a result for Atomic - but this isnt needed for that variant
+  def lastActionPlayer: Option[Player] = history.lastAction
+    .map {
+      case m: Uci.Move => m.dest
+      case d: Uci.Drop => d.pos
+    }
+    .flatMap(apply)
+    .map(_.player)
+
   def fileOccupation(file: File): Map[Pos, Piece] = pieces.filter(_._1.file == file)
 
   def rankOccupation(rank: Rank): Map[Pos, Piece] = pieces.filter(_._1.rank == rank)
@@ -187,7 +199,7 @@ case class Board(
     else
       diagOccupation(pos, _.upLeft) ++ diagOccupation(pos, _.downRight)
 
-  override def toString = s"$variant Position after ${history.lastMove}\n$visual"
+  override def toString = s"$variant Position after ${history.recentTurnUciString}\n$visual"
 }
 
 object Board {

@@ -8,6 +8,7 @@ import strategygames.format.pgn.San
 import strategygames.chess.format.pgn.{ Parser, Reader }
 import strategygames.format.pgn.{ Tag, Tags }
 import strategygames.chess.format.{ FEN, Forsyth, Uci }
+import strategygames.chess.variant._
 import strategygames.{
   Action => StratAction,
   ActionStrs,
@@ -55,7 +56,7 @@ object Replay {
   def apply(
       actionStrs: ActionStrs,
       initialFen: Option[FEN],
-      variant: strategygames.chess.variant.Variant
+      variant: Variant
   ): Validated[String, Reader.Result] =
     actionStrs.some.filter(_.nonEmpty) toValid "[replay] pgn is empty" andThen { nonEmptyActionStrs =>
       Reader.replayResult(
@@ -65,7 +66,7 @@ object Replay {
             initialFen map { fen =>
               Tag(_.FEN, fen.value)
             },
-            variant.some.filterNot(_.standard) map { v =>
+            variant.some.filterNot(_ == Standard) map { v =>
               Tag(_.Variant, v.name)
             }
           ).flatten
@@ -94,7 +95,7 @@ object Replay {
   // def games(
   //    moveStrs: Iterable[String],
   //    initialFen: Option[FEN],
-  //    variant: strategygames.chess.variant.Variant
+  //    variant: Variant
   // ): Validated[String, List[Game]] =
   //  Parser.moves(moveStrs, variant) andThen { moves =>
   //    val game = makeGame(variant, initialFen)
@@ -104,7 +105,7 @@ object Replay {
   def gameWithUciWhileValid(
       actionStrs: ActionStrs,
       initialFen: FEN,
-      variant: strategygames.chess.variant.Variant
+      variant: Variant
   ): (Game, List[(Game, Uci.WithSan)], Option[String]) = {
 
     def mk(g: Game, plies: List[(San, String)]): (List[(Game, Uci.WithSan)], Option[String]) =
@@ -170,21 +171,21 @@ object Replay {
 
   private def initialFenToSituation(
       initialFen: Option[FEN],
-      variant: strategygames.chess.variant.Variant
+      variant: Variant
   ): Situation = {
-    initialFen.flatMap(Forsyth.<<) | Situation(strategygames.chess.variant.Standard)
+    initialFen.flatMap(Forsyth.<<) | Situation(Standard)
   } withVariant variant
 
   def boards(
       actionStrs: ActionStrs,
       initialFen: Option[FEN],
-      variant: strategygames.chess.variant.Variant
+      variant: Variant
   ): Validated[String, List[Board]] = situations(actionStrs, initialFen, variant) map (_ map (_.board))
 
   def situations(
       actionStrs: ActionStrs,
       initialFen: Option[FEN],
-      variant: strategygames.chess.variant.Variant
+      variant: Variant
   ): Validated[String, List[Situation]] = {
     val sit = initialFenToSituation(initialFen, variant)
     // Its ok to flatten actionStrs as the game is built back up again from the Situation
@@ -196,13 +197,13 @@ object Replay {
   def boardsFromUci(
       moves: List[Uci],
       initialFen: Option[FEN],
-      variant: strategygames.chess.variant.Variant
+      variant: Variant
   ): Validated[String, List[Board]] = situationsFromUci(moves, initialFen, variant) map (_ map (_.board))
 
   def situationsFromUci(
       moves: List[Uci],
       initialFen: Option[FEN],
-      variant: strategygames.chess.variant.Variant
+      variant: Variant
   ): Validated[String, List[Situation]] = {
     val sit = initialFenToSituation(initialFen, variant)
     recursiveSituationsFromUci(sit, moves) map { sit :: _ }
@@ -223,7 +224,7 @@ object Replay {
   def gameFromUciStrings(
       uciStrings: List[String],
       initialFen: Option[FEN],
-      variant: strategygames.chess.variant.Variant
+      variant: Variant
   ): Validated[String, Game] = {
     val init = makeGame(variant, initialFen)
     val ucis = uciStrings.flatMap(Uci.apply(_))
@@ -234,14 +235,14 @@ object Replay {
   def apply(
       ucis: List[Uci],
       initialFen: Option[FEN],
-      variant: strategygames.chess.variant.Variant
+      variant: Variant
   ): Validated[String, Replay] =
     recursiveReplayFromUci(Replay(makeGame(variant, initialFen)), ucis)
 
   def plyAtFen(
       actionStrs: ActionStrs,
       initialFen: Option[FEN],
-      variant: strategygames.chess.variant.Variant,
+      variant: Variant,
       atFen: FEN
   ): Validated[String, Int] =
     if (Forsyth.<<@(variant, atFen).isEmpty) invalid(s"Invalid FEN $atFen")
@@ -276,7 +277,7 @@ object Replay {
       }
     }
 
-  private def makeGame(variant: strategygames.chess.variant.Variant, initialFen: Option[FEN]): Game = {
+  private def makeGame(variant: Variant, initialFen: Option[FEN]): Game = {
     val g = Game(variant.some, initialFen)
     g.copy(
       startedAtPly = g.plies,

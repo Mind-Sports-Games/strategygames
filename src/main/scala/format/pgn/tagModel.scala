@@ -1,6 +1,6 @@
 package strategygames
 package format.pgn
-import strategygames.{ ClockConfig, Clock }
+import strategygames.{ Clock, ClockConfig }
 
 import org.joda.time.DateTimeZone
 import org.joda.time.format.DateTimeFormat

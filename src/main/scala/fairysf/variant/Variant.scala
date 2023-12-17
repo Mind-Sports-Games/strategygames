@@ -21,14 +21,6 @@ abstract class Variant private[variant] (
     val boardSize: Board.BoardSize
 ) {
 
-  def shogi       = this == Shogi
-  def xiangqi     = this == Xiangqi
-  def minishogi   = this == MiniShogi
-  def minixiangqi = this == MiniXiangqi
-  def flipello    = this == Flipello
-  def flipello10  = this == Flipello10
-  def amazons     = this == Amazons
-
   def exotic = true
 
   def baseVariant: Boolean      = false
