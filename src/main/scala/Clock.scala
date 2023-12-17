@@ -100,22 +100,30 @@ case class Timer(
   def followedBy(timer: Timer): Timer =
     nextTimer.fold(copy(nextTimer = Some(timer)))(t => copy(nextTimer = Some(t.followedBy(timer))))
 
-  def takeTime(timeTaken: Centis)       =
-    applyTimeTaken(timeTaken)
-      .applyClockGrace(timeTaken)
-      .nextIfDone
-  def setRemaining(t: Centis): Timer    = copy(elapsed = limit - t)
-  def goBerserk(penalty: Centis): Timer =
+  def takeTime(timeTaken: Centis, applyGrace: Boolean = true) =
+    if (applyGrace)
+      applyTimeTaken(timeTaken)
+        .applyClockGrace(timeTaken)
+        .nextIfDone
+    else
+      applyTimeTaken(timeTaken).nextIfDone
+  def setRemaining(t: Centis): Timer                          = copy(elapsed = limit - t)
+  def goBerserk(penalty: Centis): Timer                       =
     copy(baseLimit = baseLimit - penalty, clockTimeGrace = clockTimeGrace.goBerserk)
-  def outOfTime: Boolean                = remainingAll <= Centis(0)
-  def giveTime(t: Centis)               = takeTime(-t)
+  def outOfTime: Boolean                                      = remainingAll <= Centis(0)
+  def giveTime(t: Centis)                                     = takeTime(-t, false)
+
+  // We need to deal with 0 second limits.
+  def willAdd  = clockTimeGrace
+    .timeWillAdd((baseLimit - elapsed).atMost(Centis(0)), clockTimeGrace.maxGrace)
+  def initTime =
+    if (baseLimit.centis == 0) willAdd.atLeast(Centis(300))
+    else baseLimit
 
   // The remaining is whatever they have left + whatever they'll get if they were at the end of the game and
   // had used the maxGrace amount of time. This is important to work together in concer with Simple Delay
-  val remaining: Centis = limit - elapsed
-  def limit             = baseLimit + clockTimeGrace
-    .timeWillAdd((baseLimit - elapsed).atMost(Centis(0)), clockTimeGrace.maxGrace)
-
+  val remaining: Centis    = limit - elapsed
+  def limit                = initTime + willAdd
   val remainingAll: Centis = nextTimer.fold(remaining)(t => t.remaining + remaining)
 
 }
@@ -181,7 +189,7 @@ sealed trait PlayerTimerBase {
   val lastMoveTime: Centis
 
   def recordLag(l: Centis): PlayerTimerBase
-  def takeTime(t: Centis): PlayerTimerBase
+  def takeTime(t: Centis, applyGrace: Boolean = true): PlayerTimerBase
   def setRemaining(t: Centis): PlayerTimerBase
   def goBerserk: PlayerTimerBase
   def giveTime(t: Centis): PlayerTimerBase
@@ -274,19 +282,19 @@ case class ClockPlayer(
 
   def recordLag(l: Centis) = copy(lag = lag.recordLag(l))
 
-  def takeTime(t: Centis) = copy(timer = timer.takeTime(t))
+  def takeTime(t: Centis, applyGrace: Boolean = true) = copy(timer = timer.takeTime(t, applyGrace))
 
   def setRemaining(t: Centis) = copy(timer = timer.setRemaining(t))
 
   // Honestly going berserk should just change your clock completely and shouldn't be
   // at this level. That's lila/lichess decision, but fine.
   // Going berserk changes your timer
-  def goBerserk = copy(
+  def goBerserk                        = copy(
     berserk = true,
     timer = timer.goBerserk(config.berserkPenalty)
   )
-
-  def giveTime(t: Centis): ClockPlayer = takeTime(-t)
+  def withBerserk(berserk: Boolean)    = if (berserk) goBerserk else this
+  def giveTime(t: Centis): ClockPlayer = takeTime(-t, false)
 
   def remaining: Centis = timer.remaining
 
@@ -415,7 +423,7 @@ object Clock {
   case class Config(limitSeconds: Int, incrementSeconds: Int) extends ClockConfig {
     private lazy val clockTimeGrace =
       if (increment > Centis(0)) FischerIncrementGrace(increment) else NoClockTimeGrace()
-    lazy val timer                  = Timer(limit, clockTimeGrace)
+    lazy val timer                  = Timer(configLimit, clockTimeGrace)
 
     def berserkable          = incrementSeconds == 0 || limitSeconds > 0
     def emergSeconds         = math.min(60, math.max(10, limitSeconds / 8))
@@ -425,7 +433,8 @@ object Clock {
     def increment            = Centis.ofSeconds(incrementSeconds)
     def graceSeconds         = incrementSeconds
 
-    def limit          = Centis.ofSeconds(limitSeconds)
+    def limit          = timer.limit
+    def configLimit    = Centis.ofSeconds(limitSeconds)
     def limitInMinutes = limitSeconds / 60d
     def toClock        = Clock(this)
 
@@ -451,7 +460,7 @@ object Clock {
       else Centis(limitSeconds * (100 / 2))
 
     def initTime = {
-      if (limitSeconds == 0) increment atLeast Centis(300)
+      if (limitSeconds == 0) increment.atLeast(Centis(300))
       else limit
     }
   }
@@ -461,7 +470,7 @@ object Clock {
   case class BronsteinConfig(limitSeconds: Int, delaySeconds: Int) extends ClockConfig {
     private lazy val clockTimeGrace =
       if (delay > Centis(0)) BronsteinDelayGrace(delay) else NoClockTimeGrace()
-    lazy val timer                  = Timer(limit, clockTimeGrace)
+    lazy val timer                  = Timer(configLimit, clockTimeGrace)
 
     def berserkable          = delaySeconds == 0 || limitSeconds > 0
     def emergSeconds         = math.min(60, math.max(10, limitSeconds / 8))
@@ -469,7 +478,8 @@ object Clock {
     def estimateTotalTime    = Centis.ofSeconds(estimateTotalSeconds)
     def delay                = Centis.ofSeconds(delaySeconds)
     def graceSeconds         = delaySeconds
-    def limit                = Centis.ofSeconds(limitSeconds)
+    def limit                = timer.limit
+    def configLimit          = Centis.ofSeconds(limitSeconds)
     def limitInMinutes       = limitSeconds / 60d
     def toClock              = Clock(this)
 
@@ -503,14 +513,15 @@ object Clock {
   case class SimpleDelayConfig(limitSeconds: Int, delaySeconds: Int) extends ClockConfig {
     private lazy val clockTimeGrace =
       if (delay > Centis(0)) SimpleDelayGrace(delay) else NoClockTimeGrace()
-    lazy val timer                  = Timer(limit, clockTimeGrace)
+    lazy val timer                  = Timer(configLimit, clockTimeGrace)
 
     def berserkable          = delaySeconds == 0 || limitSeconds > 0
     def emergSeconds         = math.min(60, math.max(10, limitSeconds / 8))
     def estimateTotalSeconds = limitSeconds + 40 * delaySeconds
     def estimateTotalTime    = Centis.ofSeconds(estimateTotalSeconds)
     def delay                = Centis.ofSeconds(delaySeconds)
-    def limit                = Centis.ofSeconds(limitSeconds)
+    def limit                = timer.limit
+    def configLimit          = Centis.ofSeconds(limitSeconds)
     def limitInMinutes       = limitSeconds / 60d
     def graceSeconds         = delaySeconds
     def toClock              = Clock(this)
@@ -767,9 +778,9 @@ case class ByoyomiClockPlayer(
   def periodsLeft = math.max(periodsTotal - spentPeriods, 0)
 
   // TODO: use the useIncrement value
-  def takeTime(t: Centis): ByoyomiClockPlayer = copy(elapsed = elapsed + t)
+  def takeTime(t: Centis, applyGrace: Boolean = true): ByoyomiClockPlayer = copy(elapsed = elapsed + t)
 
-  def giveTime(t: Centis): ByoyomiClockPlayer = takeTime(-t)
+  def giveTime(t: Centis): ByoyomiClockPlayer = takeTime(-t, false)
 
   def setRemaining(t: Centis) = copy(elapsed = limit - t)
 
