@@ -1,10 +1,6 @@
 package strategygames.chess
 
-import cats.syntax.option._
-
-import strategygames.{ P1, P2, Player, Status }
 import strategygames.chess.variant.Monster
-import strategygames.chess.format.FEN
 
 class MonsterVariantTest extends ChessTest {
 

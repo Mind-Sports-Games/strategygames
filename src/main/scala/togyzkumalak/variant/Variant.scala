@@ -5,7 +5,7 @@ import cats.syntax.option._
 import scala.annotation.nowarn
 
 import strategygames.togyzkumalak._
-import strategygames.togyzkumalak.format.{ FEN, Uci }
+import strategygames.togyzkumalak.format.FEN
 import strategygames.{ GameFamily, Player, Score }
 
 case class TogyzkumalakName(val name: String)

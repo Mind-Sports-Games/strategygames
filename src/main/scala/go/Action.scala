@@ -3,10 +3,7 @@ import strategygames.go.format.Uci
 import strategygames.MoveMetrics
 import strategygames.Player
 
-abstract class Action(
-    situationBefore: Situation,
-    after: Board
-) {
+abstract class Action(situationBefore: Situation) {
   def before = situationBefore.board
 
   def situationAfter: Situation

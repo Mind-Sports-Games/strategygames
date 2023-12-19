@@ -5,7 +5,7 @@ import cats.syntax.option._
 import scala.annotation.nowarn
 
 import strategygames.go._
-import strategygames.go.format.{ FEN, Forsyth, Uci }
+import strategygames.go.format.{ FEN, Forsyth }
 import strategygames.{ GameFamily, Player, Score }
 
 case class GoName(val name: String)

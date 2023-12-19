@@ -14,7 +14,7 @@ case class Move(
     capture: Option[Pos],
     promotion: Option[PromotableRole],
     metrics: MoveMetrics = MoveMetrics()
-) extends Action(situationBefore, after) {
+) extends Action(situationBefore) {
 
   def situationAfter =
     Situation(finalizeAfter, if (autoEndTurn) !piece.player else piece.player)
