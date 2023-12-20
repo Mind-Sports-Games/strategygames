@@ -346,7 +346,7 @@ case class Clock(
         copy(
           players = players.update(
             player,
-            _.takeTime(curT).copy(lastMoveTime = curT)
+            _.takeTime(curT, applyGrace = pause).copy(lastMoveTime = curT)
           ),
           timestamp = None,
           paused = pause
@@ -398,7 +398,7 @@ case class Clock(
         val clockActive         = gameActive && moveTime < competitor.remaining
 
         val newClock = updatePlayer(player) {
-          _.takeTime(moveTime)
+          _.takeTime(moveTime, switchClock)
             .copy(lag = lagTrack, lastMoveTime = moveTime)
         }
 
@@ -774,8 +774,8 @@ case class ByoyomiClockPlayer(
 
   def periodsLeft = math.max(periodsTotal - spentPeriods, 0)
 
-  // TODO: use the useIncrement value
-  def takeTime(t: Centis, applyGrace: Boolean = true): ByoyomiClockPlayer = copy(elapsed = elapsed + t)
+  def takeTime(t: Centis, @nowarn applyGrace: Boolean = true): ByoyomiClockPlayer =
+    copy(elapsed = elapsed + t)
 
   def giveTime(t: Centis): ByoyomiClockPlayer = takeTime(-t, false)
 
