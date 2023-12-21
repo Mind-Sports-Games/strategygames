@@ -11,9 +11,9 @@ sealed trait Uci {
   def uci: String
   def piotr: String
 
-  def origDest: (Pos, Pos)
+  def origDest: Option[(Pos, Pos)]
 
-  def apply(situation: Situation): Validated[String, Move]
+  def apply(situation: Situation): Validated[String, Action]
 }
 
 object Uci {
@@ -32,7 +32,7 @@ object Uci {
 
     def promotionString = promotion.fold("")(_.forsyth.toString)
 
-    def origDest = orig -> dest
+    def origDest = Some(orig -> dest)
 
     def apply(situation: Situation) = situation.move(orig, dest, promotion)
   }
@@ -77,23 +77,83 @@ object Uci {
     val movePR = s"^${Pos.posR}${Pos.posR}${Role.rolePR}$$".r
   }
 
+  case class Drop(role: Role, pos: Pos) extends Uci {
+
+    def lilaUci    = s"${role.pgn}@${pos.key}"
+    def fishnetUci = lilaUci
+    def uci        = lilaUci
+
+    def piotr = s"${role.pgn}@${pos.piotrStr}"
+
+    def origDest = Some(pos -> pos)
+
+    def apply(situation: Situation) = situation.drop(role, pos)
+  }
+
+  object Drop {
+
+    def fromStrings(roleS: String, posS: String) =
+      for {
+        role <- Role.allByName get roleS
+        pos  <- Pos.fromKey(posS)
+      } yield Drop(role, pos)
+
+    val dropR = s"^${Role.roleR}@${Pos.posR}$$".r
+
+  }
+
+  case class DiceRoll(dice: List[Int]) extends Uci {
+
+    def uci = dice.mkString("|")
+
+    def piotr = uci
+
+    def origDest = None
+
+    def apply(situation: Situation) = situation.diceRoll(dice)
+  }
+
+  object DiceRoll {
+
+    def fromStrings(dice: String) = DiceRoll(dice.split('|').flatMap(_.toIntOption).toList)
+
+    val diceRollR = s"^([[1-6][?]?[|[1-6]?]*)$$".r
+
+  }
+
   case class WithSan(uci: Uci, san: String)
 
-  def apply(move: strategygames.backgammon.Move) = Uci.Move(move.orig, move.dest, move.promotion)
+  def apply(move: strategygames.backgammon.Move) = Uci.Move(move.orig, move.dest)
 
-  def apply(move: String) = Uci.Move(move)
+  def apply(drop: strategygames.backgammon.Drop) = Uci.Drop(drop.piece.role, drop.pos)
 
-  def piotr(move: String): Option[Uci] = Uci.Move.piotr(move)
+  def apply(diceRoll: strategygames.backgammon.DiceRoll) = Uci.DiceRoll(diceRoll.dice)
 
-  def readList(moves: String): Option[List[Uci]] =
-    moves.split(' ').toList.map(apply(_)).sequence
+  def apply(action: String): Option[Uci] =
+    if (action lift 1 contains '@') for {
+      role <- action.headOption flatMap Role.allByPgn.get
+      pos  <- Pos.fromKey(action.slice(2, 4))
+    } yield Uci.Drop(role, pos)
+    else if (action.contains('|')) Some(Uci.DiceRoll.fromStrings(action))
+    else Uci.Move(action)
 
-  def writeList(moves: List[Uci]): String =
-    moves.map(_.uci) mkString " "
+  def piotr(action: String): Option[Uci] =
+    if (action lift 1 contains '@') for {
+      role <- action.headOption flatMap Role.allByPgn.get
+      pos  <- action lift 2 flatMap Pos.piotr
+    } yield Uci.Drop(role, pos)
+    else if (action.contains('|')) Some(Uci.DiceRoll.fromStrings(action))
+    else Uci.Move.piotr(action)
 
-  def readListPiotr(moves: String): Option[List[Uci]] =
-    moves.split(' ').toList.map(piotr).sequence
+  def readList(actions: String): Option[List[Uci]] =
+    actions.split(' ').toList.map(apply(_)).sequence
 
-  def writeListPiotr(moves: List[Uci]): String =
-    moves.map(_.piotr) mkString " "
+  def writeList(actions: List[Uci]): String =
+    actions.map(_.uci) mkString " "
+
+  def readListPiotr(actions: String): Option[List[Uci]] =
+    actions.split(' ').toList.map(piotr).sequence
+
+  def writeListPiotr(actions: List[Uci]): String =
+    actions.map(_.piotr) mkString " "
 }

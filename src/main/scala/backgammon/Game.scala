@@ -37,8 +37,58 @@ case class Game(
     )
   }
 
-  def apply(uci: Uci.Move): Validated[String, (Game, Move)] =
+  def drop(
+      role: Role,
+      pos: Pos,
+      metrics: MoveMetrics = MoveMetrics()
+  ): Validated[String, (Game, Drop)] =
+    situation.drop(role, pos).map(_ withMetrics metrics) map { drop =>
+      applyDrop(drop) -> drop
+    }
+
+  def applyDrop(drop: Drop): Game = {
+    val newSituation = drop.situationAfter
+    val switchPlayer = situation.player != newSituation.player
+
+    copy(
+      situation = newSituation,
+      plies = plies + 1,
+      turnCount = turnCount + (if (switchPlayer) 1 else 0),
+      actionStrs = applyActionStr(drop.toUci.uci),
+      clock = applyClock(drop.metrics, newSituation.status.isEmpty, switchPlayer)
+    )
+  }
+
+  def diceRoll(
+      dice: List[Int],
+      metrics: MoveMetrics = MoveMetrics()
+  ): Validated[String, (Game, DiceRoll)] =
+    situation.diceRoll(dice).map(_ withMetrics metrics) map { dr =>
+      applyDiceRoll(dr) -> dr
+    }
+
+  def applyDiceRoll(dr: DiceRoll): Game = {
+    val newSituation = dr.situationAfter
+    val switchPlayer = situation.player != newSituation.player
+
+    copy(
+      situation = newSituation,
+      plies = plies + 1,
+      turnCount = turnCount + (if (switchPlayer) 1 else 0),
+      actionStrs = applyActionStr(dr.toUci.uci),
+      clock = applyClock(dr.metrics, newSituation.status.isEmpty, switchPlayer)
+    )
+  }
+
+  def apply(uci: Uci.Move): Validated[String, (Game, Move)]         =
     apply(uci.orig, uci.dest, uci.promotion)
+  def apply(uci: Uci.Drop): Validated[String, (Game, Drop)]         = drop(uci.role, uci.pos)
+  def apply(uci: Uci.DiceRoll): Validated[String, (Game, DiceRoll)] = diceRoll(uci.dice)
+  def apply(uci: Uci): Validated[String, (Game, Action)]            = (uci match {
+    case u: Uci.Move     => apply(u)
+    case u: Uci.Drop     => apply(u)
+    case u: Uci.DiceRoll => apply(u)
+  }) map { case (g, a) => g -> a }
 
   private def applyClock(metrics: MoveMetrics, gameActive: Boolean, switchClock: Boolean) =
     clock.map { c =>

@@ -27,6 +27,7 @@ sealed abstract class Drop(
   def toChess: chess.Drop
   def toFairySF: fairysf.Drop
   def toGo: go.Drop
+  def toBackgammon: backgammon.Drop
 }
 
 object Drop {
@@ -109,8 +110,35 @@ object Drop {
 
   }
 
-  def wrap(d: chess.Drop): Drop   = Drop.Chess(d)
-  def wrap(d: fairysf.Drop): Drop = Drop.FairySF(d)
-  def wrap(d: go.Drop): Drop      = Drop.Go(d)
+  final case class Backgammon(d: backgammon.Drop)
+      extends Drop(
+        Piece.Backgammon(d.piece),
+        Pos.Backgammon(d.pos),
+        Situation.Backgammon(d.situationBefore),
+        Board.Backgammon(d.after),
+        d.autoEndTurn,
+        d.metrics
+      ) {
+
+    def situationAfter: Situation = Situation.Backgammon(d.situationAfter)
+    def finalizeAfter: Board      = d.finalizeAfter
+
+    def toUci: Uci.Drop = Uci.BackgammonDrop(d.toUci)
+
+    val unwrap         = d
+    def toChess        = sys.error("Can't make a chess drop from a backgammon drop")
+    def toFairySF      = sys.error("Can't make a fairysf drop from a backgammon drop")
+    def toDraughts     = sys.error("Can't make a draughts drop from a backgammon drop")
+    def toSamurai      = sys.error("Can't make a samurai drop from a backgammon drop")
+    def toTogyzkumalak = sys.error("Can't make a togy drop from a backgammon drop")
+    def toGo           = sys.error("Can't make a go drop from a backgammon drop")
+    def toBackgammon   = d
+
+  }
+
+  def wrap(d: chess.Drop): Drop      = Drop.Chess(d)
+  def wrap(d: fairysf.Drop): Drop    = Drop.FairySF(d)
+  def wrap(d: go.Drop): Drop         = Drop.Go(d)
+  def wrap(d: backgammon.Drop): Drop = Drop.Backgammon(d)
 
 }

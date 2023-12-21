@@ -124,7 +124,11 @@ object Replay {
   final case class Backgammon(r: backgammon.Replay)
       extends Replay(
         Game.Backgammon(r.setup),
-        r.actions.map((m: backgammon.Move) => Move.Backgammon(m)),
+        r.actions.map {
+          case m: backgammon.Move      => Move.Backgammon(m)
+          case d: backgammon.Drop      => Drop.Backgammon(d)
+          case dr: backgammon.DiceRoll => DiceRoll.Backgammon(dr)
+        },
         Game.Backgammon(r.state)
       ) {
     def copy(state: Game): Replay = state match {

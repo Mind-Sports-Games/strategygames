@@ -152,6 +152,12 @@ abstract class Variant private[variant] (
       s"Not a valid move: ${from}${to} with prom: ${promotion}. Allowed moves: ${situation.moves}"
   }
 
+  def drop(situation: Situation, role: Role, pos: Pos): Validated[String, Drop] =
+    Validated.invalid(s"$this variant cannot drop $situation $role $pos")
+
+  def diceRoll(situation: Situation, dice: List[Int]): Validated[String, DiceRoll] =
+    Validated.invalid(s"$this variant cannot roll dice $situation $dice")
+
   def stalemateIsDraw = false
 
   def winner(situation: Situation): Option[Player]

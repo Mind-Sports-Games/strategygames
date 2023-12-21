@@ -130,6 +130,9 @@ abstract class Variant private[variant] (
   def drop(situation: Situation, role: Role, pos: Pos): Validated[String, Drop] =
     Validated.invalid(s"$this variant cannot drop $situation $role $pos")
 
+  def diceRoll(situation: Situation, dice: List[Int]): Validated[String, DiceRoll] =
+    Validated.invalid(s"$this variant cannot roll dice $situation $dice")
+
   def possibleDropsByRole(situation: Situation): Option[Map[Role, List[Pos]]] = None // override in crazyhouse
 
   def staleMate(situation: Situation): Boolean = !situation.check && situation.moves.isEmpty

@@ -11,7 +11,7 @@ sealed trait Uci {
   def uci: String
   def piotr: String
 
-  def origDest: (Pos, Pos)
+  def origDest: Option[(Pos, Pos)]
 
   def apply(situation: Situation): Validated[String, Move]
 }
@@ -32,7 +32,7 @@ object Uci {
 
     def promotionString = promotion.fold("")(_.forsyth.toString)
 
-    def origDest = orig -> dest
+    def origDest = Some(orig -> dest)
 
     def apply(situation: Situation) = situation.move(orig, dest, promotion)
   }

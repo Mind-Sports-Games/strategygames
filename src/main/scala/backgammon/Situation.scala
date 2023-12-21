@@ -52,6 +52,12 @@ case class Situation(board: Board, player: Player) {
   def move(uci: Uci.Move): Validated[String, Move] =
     board.variant.move(this, uci.orig, uci.dest, uci.promotion)
 
+  def drop(role: Role, pos: Pos): Validated[String, Drop] =
+    board.variant.drop(this, role, pos)
+
+  def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
+    board.variant.diceRoll(this, dice)
+
   def withHistory(history: History) =
     copy(
       board = board withHistory history

@@ -72,6 +72,9 @@ case class Situation(board: Board, player: Player) {
   def drop(role: Role, pos: Pos): Validated[String, Drop] =
     board.variant.drop(this, role, pos)
 
+  def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
+    board.variant.diceRoll(this, dice)
+
   def fixCastles = copy(board = board fixCastles)
 
   def withHistory(history: History) =

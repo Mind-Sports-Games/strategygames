@@ -11,27 +11,39 @@ import strategygames.format.pgn.{ Tag, Tags }
 import strategygames.backgammon.format.{ FEN, Forsyth, Uci }
 import strategygames.{ Action => StratAction, ActionStrs, Move => StratMove, Situation => StratSituation }
 
-case class Replay(setup: Game, actions: List[Move], state: Game) {
+case class Replay(setup: Game, actions: List[Action], state: Game) {
 
   lazy val chronoPlies = actions.reverse
 
-  lazy val chronoActions: List[List[Move]] =
+  lazy val chronoActions: List[List[Action]] =
     chronoPlies
       .drop(1)
-      .foldLeft(List(chronoPlies.take(1))) { case (turn, move) =>
-        if (turn.head.head.player != move.player) {
-          List(move) +: turn
+      .foldLeft(List(chronoPlies.take(1))) { case (turn, action) =>
+        if (turn.head.head.player != action.player) {
+          List(action) +: turn
         } else {
-          (turn.head :+ move) +: turn.tail
+          (turn.head :+ action) +: turn.tail
         }
       }
       .reverse
 
-  def addAction(move: Move) =
-    copy(
-      actions = move.applyVariantEffect :: actions,
-      state = state.apply(move)
-    )
+  def addAction(action: Action) = action match {
+    case m: Move      =>
+      copy(
+        actions = m.applyVariantEffect :: actions,
+        state = state.apply(m)
+      )
+    case d: Drop      =>
+      copy(
+        actions = d :: actions,
+        state = state.applyDrop(d)
+      )
+    case dr: DiceRoll =>
+      copy(
+        actions = dr :: actions,
+        state = state.applyDiceRoll(dr)
+      )
+  }
 
 }
 
@@ -87,6 +99,35 @@ object Replay {
       promotion = None
     )
 
+  def replayDrop(
+      before: Game,
+      role: Role,
+      dest: Pos,
+      endTurn: Boolean
+  ): Drop =
+    Drop(
+      piece = Piece(before.situation.player, role),
+      pos = dest,
+      situationBefore = before.situation,
+      // TODO implement properly
+      after = before.situation.board,
+      autoEndTurn = endTurn
+    )
+
+  def replayDiceRoll(
+      before: Game,
+      dice: List[Int],
+      endTurn: Boolean
+  ): DiceRoll = {
+    DiceRoll(
+      dice,
+      situationBefore = before.situation,
+      // TODO implement properly
+      after = before.situation.board,
+      autoEndTurn = endTurn
+    )
+  }
+
   def actionStrsWithEndTurn(actionStrs: ActionStrs): Seq[(String, Boolean)] =
     actionStrs.zipWithIndex.map { case (a, i) =>
       a.zipWithIndex.map { case (a1, i1) => (a1, i1 == a.size - 1 && i != actionStrs.size - 1) }
@@ -109,7 +150,7 @@ object Replay {
       activePlayer: Player,
       initialFen: FEN,
       variant: strategygames.backgammon.variant.Variant
-  ): (Game, List[(Game, Move)], Option[String]) = {
+  ): (Game, List[(Game, Action)], Option[String]) = {
     val init   = makeGame(variant, initialFen.some)
     var state  = init
     var errors = ""
@@ -133,7 +174,32 @@ object Replay {
         }
       }
 
-    val gameWithActions: List[(Game, Move)] =
+    def replayDropFromUci(
+        role: Option[Role],
+        dest: Option[Pos],
+        endTurn: Boolean
+    ): (Game, Drop) =
+      (role, dest) match {
+        case (Some(role), Some(dest)) => {
+          val uciDrop = s"${role.forsyth}@${dest.key}"
+          val drop    = replayDrop(state, role, dest, endTurn)
+          state = state.applyDrop(drop)
+          (state, drop)
+        }
+        case (role, dest)             => {
+          val uciDrop = s"${role}@${dest}"
+          errors += uciDrop + ","
+          sys.error(s"Invalid drop for replay: ${uciDrop}")
+        }
+      }
+
+    def replayDiceRollFromUci(dice: List[Int], endTurn: Boolean): (Game, DiceRoll) = {
+      val diceRoll = replayDiceRoll(state, dice, endTurn)
+      state = state.applyDiceRoll(diceRoll)
+      (state, diceRoll)
+    }
+
+    val gameWithActions: List[(Game, Action)] =
       combineActionStrsWithEndTurn(actionStrs, startPlayer, activePlayer).toList.map {
         case (Uci.Move.moveR(orig, dest, promotion), endTurn) =>
           replayMoveFromUci(
@@ -142,8 +208,16 @@ object Replay {
             promotion,
             endTurn
           )
+        case (Uci.Drop.dropR(role, dest), endTurn)            =>
+          replayDropFromUci(
+            Role.allByForsyth(init.situation.board.variant.gameFamily).get(role(0)),
+            Pos.fromKey(dest),
+            endTurn
+          )
+        case (Uci.DiceRoll.diceRollR(dr), endTurn)            =>
+          replayDiceRollFromUci(Uci.DiceRoll.fromStrings(dr).dice, endTurn)
         case (action: String, _)                              =>
-          sys.error(s"Invalid move for replay: $action")
+          sys.error(s"Invalid action for replay: $action")
       }
 
     (init, gameWithActions, errors match { case "" => None; case _ => errors.some })
