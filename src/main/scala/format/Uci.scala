@@ -331,6 +331,27 @@ object Uci {
     def origDest: Option[(Pos, Pos)] = None
   }
 
+  final case class ChessDiceRoll(dr: chess.format.Uci.DiceRoll)
+      extends DiceRoll(
+        dr.dice
+      )
+      with Chess {
+    def uci        = dr.uci
+    def shortUci   = dr.uci
+    def fishnetUci = dr.uci
+    def piotr      = dr.piotr
+
+    val unwrap = dr
+
+    def toChess        = dr
+    def toDraughts     = sys.error("Can't make a draughts UCI from a chess UCI")
+    def toFairySF      = sys.error("Can't make a fairysf UCI from a chess UCI")
+    def toSamurai      = sys.error("Can't make a samurai UCI from a chess UCI")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a chess UCI")
+    def toGo           = sys.error("Can't make a go UCI from a chess UCI")
+    def toBackgammon   = sys.error("Can't make a backgammon UCI from a chess UCI")
+  }
+
   final case class BackgammonDiceRoll(dr: backgammon.format.Uci.DiceRoll)
       extends DiceRoll(
         dr.dice
@@ -353,8 +374,9 @@ object Uci {
   }
 
   def wrap(uci: chess.format.Uci): Uci = uci match {
-    case m: chess.format.Uci.Move => ChessMove(m)
-    case d: chess.format.Uci.Drop => ChessDrop(d)
+    case m: chess.format.Uci.Move      => ChessMove(m)
+    case d: chess.format.Uci.Drop      => ChessDrop(d)
+    case dr: chess.format.Uci.DiceRoll => ChessDiceRoll(dr)
   }
 
   def wrap(uci: draughts.format.Uci): Uci = uci match {

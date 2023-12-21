@@ -71,6 +71,8 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def selectSquares(squares: List[Pos]): Validated[String, SelectSquares]
 
+  def diceRoll(dice: List[Int]): Validated[String, DiceRoll]
+
   def withVariant(variant: Variant): Situation
 
   def gameLogic: GameLogic
@@ -178,6 +180,9 @@ object Situation {
 
     def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
       sys.error("Can't do a SelectSquare for chess")
+
+    def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
+      s.diceRoll(dice).map(dr => DiceRoll.Chess(dr))
 
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.Chess(variant) => Chess(s.withVariant(variant))
@@ -300,6 +305,9 @@ object Situation {
     def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
       sys.error("Can't do a SelectSquare for draughts")
 
+    def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
+      sys.error("Can't do a DiceRoll for draughts")
+
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.Draughts(variant) => Draughts(s.withVariant(variant))
       case _                         => sys.error("Not passed Draughts objects")
@@ -402,6 +410,9 @@ object Situation {
     def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
       sys.error("Can't do a SelectSquare for fairysf")
 
+    def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
+      sys.error("Can't do a DiceRoll for draughts")
+
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.FairySF(variant) => FairySF(s.withVariant(variant))
       case _                        => sys.error("Not passed FairySF objects")
@@ -474,6 +485,9 @@ object Situation {
 
     def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
       sys.error("Can't do a SelectSquare for samurai")
+
+    def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
+      sys.error("Can't do a DiceRoll for draughts")
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -570,6 +584,9 @@ object Situation {
 
     def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
       sys.error("Can't do a SelectSquare for togykumalak")
+
+    def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
+      sys.error("Can't do a DiceRoll for draughts")
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -694,6 +711,9 @@ object Situation {
         .map(ss => SelectSquares.Go(ss))
         .toValidated
 
+    def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
+      sys.error("Can't do a DiceRoll for draughts")
+
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.Go(variant) => Go(s.withVariant(variant))
       case _                   => sys.error("Not passed Go objects")
@@ -765,6 +785,9 @@ object Situation {
 
     def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
       sys.error("Can't do a SelectSquare for togykumalak")
+
+    def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
+      s.diceRoll(dice).map(dr => DiceRoll.Backgammon(dr))
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
