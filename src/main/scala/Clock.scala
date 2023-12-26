@@ -188,6 +188,7 @@ sealed trait PlayerTimerBase {
   val elapsed: Centis
   val berserk: Boolean
   val lastMoveTime: Centis
+  val completedActionsOfTurnTime: Centis
 
   def recordLag(l: Centis): PlayerTimerBase
   def takeTime(t: Centis, applyGrace: Boolean = true): PlayerTimerBase
@@ -246,13 +247,15 @@ sealed trait ClockBase {
   def currentClockFor(c: Player): ClockInfoBase
 
   // Implemented attributes
-  def remainingTime(c: Player)  = (clockPlayer(c).remaining - pending(c)) nonNeg
-  def moretimeable(c: Player)   = clockPlayer(c).remaining.centis < 100 * 60 * 60 * 2
-  def lastMoveTimeOf(c: Player) = clockPlayer(c).lastMoveTime
+  def remainingTime(c: Player)                = (clockPlayer(c).remaining - pending(c)) nonNeg
+  def moretimeable(c: Player)                 = clockPlayer(c).remaining.centis < 100 * 60 * 60 * 2
+  def lastMoveTimeOf(c: Player)               = clockPlayer(c).lastMoveTime
+  def completedActionsOfTurnTimeOf(c: Player) = clockPlayer(c).completedActionsOfTurnTime
+
   // TODO: both of these are candidates for removal, I feel they are abstraction leaks
   //       but I wasn't able to get that refactoring done in the time that we had
-  def graceOf(c: Player)        = clockPlayer(c).graceSeconds
-  def graceSeconds              = config.graceSeconds
+  def graceOf(c: Player) = clockPlayer(c).graceSeconds
+  def graceSeconds       = config.graceSeconds
 
   def takeback(switchPlayer: Boolean = true) = switch(switchPlayer)
 
@@ -263,10 +266,10 @@ sealed trait ClockBase {
   // Lowball estimate of next move's lag comp for UI butter.
   def lagCompEstimate(c: Player) = clockPlayer(c).lag.compEstimate
 
-  @inline def timestampFor(c: Player) = if (c == player) timestamp else None
-  @inline def pending(c: Player)      =
-    timestampFor(c).fold(Centis(0))(toNow)
-  @inline def lastMoveTime(c: Player) = clockPlayer(c).lastMoveTime
+  @inline def timestampFor(c: Player)               = if (c == player) timestamp else None
+  @inline def pending(c: Player)                    = timestampFor(c).fold(Centis(0))(toNow)
+  @inline def lastMoveTime(c: Player)               = clockPlayer(c).lastMoveTime
+  @inline def completedActionsOfTurnTime(c: Player) = clockPlayer(c).completedActionsOfTurnTime
 
   def estimateTotalSeconds = config.estimateTotalSeconds
   def estimateTotalTime    = config.estimateTotalTime
@@ -284,7 +287,8 @@ case class ClockPlayer(
     lag: LagTracker,
     config: ClockConfig,
     berserk: Boolean = false,
-    lastMoveTime: Centis = Centis(0)
+    lastMoveTime: Centis = Centis(0),
+    completedActionsOfTurnTime: Centis = Centis(0)
 ) extends PlayerTimerBase {
   val elapsed = timer.elapsed
 
@@ -354,7 +358,11 @@ case class Clock(
         copy(
           players = players.update(
             player,
-            _.takeTime(curT, applyGrace = pause).copy(lastMoveTime = curT)
+            _.takeTime(curT, applyGrace = pause)
+              .copy(
+                lastMoveTime = curT,
+                completedActionsOfTurnTime = completedActionsOfTurnTimeOf(player) + curT
+              )
           ),
           timestamp = None,
           paused = pause
@@ -410,7 +418,12 @@ case class Clock(
 
         val newClock = updatePlayer(player) {
           _.takeTime(moveTime, applyGrace)
-            .copy(lag = lagTrack, lastMoveTime = moveTime)
+            .copy(
+              lag = lagTrack,
+              lastMoveTime = moveTime,
+              completedActionsOfTurnTime =
+                if (switchClock) Centis(0) else completedActionsOfTurnTimeOf(player) + moveTime
+            )
         }
 
         if (clockActive) newClock else newClock.hardStop
@@ -693,7 +706,10 @@ case class ByoyomiClock(
             _.takeTime(curT)
               .giveTime(byoyomiOf(player) * periods)
               .spendPeriods(periods)
-              .copy(lastMoveTime = curT)
+              .copy(
+                lastMoveTime = curT,
+                completedActionsOfTurnTime = completedActionsOfTurnTimeOf(player) + curT
+              )
           ),
           timestamp = None,
           paused = pause
@@ -768,13 +784,23 @@ case class ByoyomiClock(
                                                 else timeRemainingAfterMove)
               )
                 .spendPeriods(periodSpan)
-                .copy(lag = lagTrack, lastMoveTime = moveTime)
+                .copy(
+                  lag = lagTrack,
+                  lastMoveTime = moveTime,
+                  completedActionsOfTurnTime =
+                    if (switchClock) Centis(0) else completedActionsOfTurnTimeOf(player) + moveTime
+                )
             }
           else
             updatePlayer(player) {
               _.takeTime(moveTime)
                 .spendPeriods(periodSpan)
-                .copy(lag = lagTrack, lastMoveTime = moveTime)
+                .copy(
+                  lag = lagTrack,
+                  lastMoveTime = moveTime,
+                  completedActionsOfTurnTime =
+                    if (switchClock) Centis(0) else completedActionsOfTurnTimeOf(player) + moveTime
+                )
             }
 
         if (clockActive) newC else newC.hardStop
@@ -786,9 +812,10 @@ case class ByoyomiClock(
       _.refundPeriods(p)
     }
 
-  def byoyomiOf(c: Player)               = players(c).byoyomi
-  def spentPeriodsOf(c: Player)          = players(c).spentPeriods
-  override def lastMoveTimeOf(c: Player) = players(c).lastMoveTime
+  def byoyomiOf(c: Player)                             = players(c).byoyomi
+  def spentPeriodsOf(c: Player)                        = players(c).spentPeriods
+  override def lastMoveTimeOf(c: Player)               = players(c).lastMoveTime
+  override def completedActionsOfTurnTimeOf(c: Player) = players(c).completedActionsOfTurnTime
 
   def byoyomi        = config.byoyomi
   def byoyomiSeconds = config.byoyomiSeconds
@@ -802,7 +829,8 @@ case class ByoyomiClockPlayer(
     elapsed: Centis = Centis(0),
     spentPeriods: Int = 0,
     berserk: Boolean = false,
-    lastMoveTime: Centis = Centis(0)
+    lastMoveTime: Centis = Centis(0),
+    completedActionsOfTurnTime: Centis = Centis(0)
 ) extends PlayerTimerBase {
 
   def recordLag(l: Centis) = copy(lag = lag.recordLag(l))
