@@ -197,7 +197,7 @@ class ClockTest extends ChessTest {
       val now = c.timestamper.now + Centis(t)
     })
 
-  /*"play with a clock" should {
+  "play with a clock" should {
     val clock = Clock(Clock.Config(5 * 60 * 1000, 0))
     val game  = makeGame.withClock(clock.start)
     "new game" in {
@@ -227,7 +227,7 @@ class ClockTest extends ChessTest {
       Clock(Clock.Config(0, 3)).clockPlayer(P1).remaining.centis must_== 300
       Clock(Clock.Config(0, 3)).clockPlayer(P2).remaining.centis must_== 300
     }
-  }*/
+  }
   "multiaction clocks" should {
     val bullet1Plus0            = fakeClock60
     val rapid10Plus0            = fakeClock600
@@ -241,15 +241,20 @@ class ClockTest extends ChessTest {
 
     def seconds(s: Int): Centis = Centis(s * 100)
 
+    def withClockUseTimeForAction(clock: ClockBase)(s: Centis) =
+      recordActionTime(clock, s)
+
     "bullet no increment" in {
-      val baseClock                                              = bullet1Plus0
-      def withClockUseTimeForAction(clock: ClockBase)(s: Centis) =
-        recordActionTime(clock, s)
+      val baseClock = bullet1Plus0
 
       def useTimeForAction = withClockUseTimeForAction(baseClock) _
 
       "no action uses no time" in {
         baseClock.remainingTime(P1) must_== seconds(60)
+      }
+      "giveTime adds exact amount of grace without increment/delay" in {
+        val clock = baseClock.giveTime(P1, seconds(1))
+        clock.remainingTime(P1) must_== seconds(61)
       }
       "pre action uses no time" in {
         val clock = useTimeForAction(seconds(0))
@@ -284,14 +289,16 @@ class ClockTest extends ChessTest {
       }
     }
     "bullet with increment" in {
-      val baseClock                                              = bullet1Plus1
-      def withClockUseTimeForAction(clock: ClockBase)(s: Centis) =
-        recordActionTime(clock, s)
+      val baseClock = bullet1Plus1
 
       def useTimeForAction = withClockUseTimeForAction(baseClock) _
 
       "no action uses no time" in {
         baseClock.remainingTime(P1) must_== seconds(60)
+      }
+      "giveTime adds exact amount of grace without increment/delay" in {
+        val clock = baseClock.giveTime(P1, seconds(1))
+        clock.remainingTime(P1) must_== seconds(61)
       }
       "pre action uses no time" in {
         val clock = useTimeForAction(seconds(0))
@@ -326,14 +333,15 @@ class ClockTest extends ChessTest {
       }
     }
     "blitz with Bronstein Delay" in {
-      val baseClock                                              = blitz3DelayPlus2
-      def withClockUseTimeForAction(clock: ClockBase)(s: Centis) =
-        recordActionTime(clock, s)
-
+      val baseClock        = blitz3DelayPlus2
       def useTimeForAction = withClockUseTimeForAction(baseClock) _
 
       "no action uses no time" in {
         baseClock.remainingTime(P1) must_== seconds(180)
+      }
+      "giveTime adds exact amount of grace without increment/delay" in {
+        val clock = baseClock.giveTime(P1, seconds(1))
+        clock.remainingTime(P1) must_== seconds(181)
       }
       "pre action uses no time" in {
         val clock = useTimeForAction(seconds(0))
@@ -368,14 +376,16 @@ class ClockTest extends ChessTest {
       }
     }
     "rapid with no increment" in {
-      val baseClock                                              = rapid10Plus0
-      def withClockUseTimeForAction(clock: ClockBase)(s: Centis) =
-        recordActionTime(clock, s)
+      val baseClock = rapid10Plus0
 
       def useTimeForAction = withClockUseTimeForAction(baseClock) _
 
       "no action uses no time" in {
         baseClock.remainingTime(P1) must_== seconds(600)
+      }
+      "giveTime adds exact amount of grace without increment/delay" in {
+        val clock = baseClock.giveTime(P1, seconds(1))
+        clock.remainingTime(P1) must_== seconds(601)
       }
       "pre action uses no time" in {
         val clock = useTimeForAction(seconds(0))
@@ -410,14 +420,15 @@ class ClockTest extends ChessTest {
       }
     }
     "rapid with simple delay" in {
-      val baseClock                                              = rapid10SimpleDelayPlus5
-      def withClockUseTimeForAction(clock: ClockBase)(s: Centis) =
-        recordActionTime(clock, s)
-
+      val baseClock        = rapid10SimpleDelayPlus5
       def useTimeForAction = withClockUseTimeForAction(baseClock) _
 
       "no action uses no time" in {
         baseClock.remainingTime(P1) must_== seconds(605)
+      }
+      "giveTime adds time" in {
+        val clock = baseClock.giveTime(P1, seconds(1))
+        clock.remainingTime(P1) must_== seconds(606)
       }
       "pre action uses no time" in {
         val clock = useTimeForAction(seconds(0))
@@ -448,12 +459,12 @@ class ClockTest extends ChessTest {
         clockBeforeTurn.remainingTime(P1) must_== seconds(579)
         val clock = clockBeforeTurn.endTurn
         clock.player must_== P2                      // switches turns
-        clock.remainingTime(P1) must_== seconds(579) // Does add increment
+        clock.remainingTime(P1) must_== seconds(584) // Does add increment
       }
     }
 
   }
-  /*"lag compensation" should {
+  "lag compensation" should {
     def durOf(lag: Int) = MoveMetrics(clientLag = Option(Centis(lag)))
 
     def clockStep(clock: ClockBase, wait: Int, lags: Int*) = {
@@ -650,6 +661,6 @@ class ClockTest extends ChessTest {
     "over quota stall" >> advanceTimeByCentis(fakeClock60, 6190).outOfTime(P1, withGrace = true)
     "stall within quota" >> !advanceTimeByCentis(fakeClock600, 60190).outOfTime(P1, withGrace = true)
     "max grace stall" >> advanceTimeByCentis(fakeClock600, 602 * 100).outOfTime(P1, withGrace = true)
-  }*/
+  }
 
 }

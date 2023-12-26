@@ -67,8 +67,7 @@ case class SimpleDelayGrace(val delay: Centis) extends ClockTimeGrace {
 // into your grace. Bronstein does not.
 case class BronsteinDelayGrace(val delay: Centis) extends ClockTimeGrace {
   override def timeToAdd(remaining: Centis, timeTaken: Centis): Tuple2[ClockTimeGrace, Centis] =
-    (this, timeWillAdd(remaining, timeTaken.pp("timeTaken")))
-      .pp("WHTFU") // 0 if no time is left, else the up to the delay
+    (this, timeWillAdd(remaining, timeTaken)) // 0 if no time is left, else the up to the delay
 
   def timeWillAdd(remaining: Centis, timeTaken: Centis): Centis =
     (remaining > Centis(0)) ?? timeTaken.atMost(delay)
@@ -84,7 +83,7 @@ case class Timer(
     val elapsed: Centis = Centis(0)
 ) extends TimerTrait {
 
-  private def applyClockGrace(timeTaken: Centis): Timer =
+  def applyClockGrace(timeTaken: Centis): Timer =
     // TODO: make this work like the book
     clockTimeGrace.timeToAdd(this.remaining, timeTaken).pipe { case (newClockTimeGrace, postMoveGraceTime) =>
       copy(
@@ -101,18 +100,13 @@ case class Timer(
   def followedBy(timer: Timer): Timer =
     nextTimer.fold(copy(nextTimer = Some(timer)))(t => copy(nextTimer = Some(t.followedBy(timer))))
 
-  def takeTime(timeTaken: Centis, applyGrace: Boolean = true) =
-    if (applyGrace)
-      applyTimeTaken(timeTaken)
-        .applyClockGrace(timeTaken)
-        .nextIfDone
-    else
-      applyTimeTaken(timeTaken).nextIfDone
-  def setRemaining(t: Centis): Timer                          = copy(elapsed = limit - t)
-  def goBerserk(penalty: Centis): Timer                       =
+  def takeTime(timeTaken: Centis)       =
+    applyTimeTaken(timeTaken).nextIfDone
+  def setRemaining(t: Centis): Timer    = copy(elapsed = limit - t)
+  def goBerserk(penalty: Centis): Timer =
     copy(baseLimit = baseLimit - penalty, clockTimeGrace = clockTimeGrace.goBerserk)
-  def outOfTime: Boolean                                      = remainingAll <= Centis(0)
-  def giveTime(t: Centis)                                     = takeTime(-t, false)
+  def outOfTime: Boolean                = remainingAll <= Centis(0)
+  def giveTime(t: Centis)               = takeTime(-t)
 
   // We need to deal with 0 second limits.
   def willAdd  = clockTimeGrace
@@ -191,7 +185,7 @@ sealed trait PlayerTimerBase {
   val completedActionsOfTurnTime: Centis
 
   def recordLag(l: Centis): PlayerTimerBase
-  def takeTime(t: Centis, applyGrace: Boolean = true): PlayerTimerBase
+  def takeTime(t: Centis): PlayerTimerBase
   def setRemaining(t: Centis): PlayerTimerBase
   def goBerserk: PlayerTimerBase
   def giveTime(t: Centis): PlayerTimerBase
@@ -224,8 +218,7 @@ sealed trait ClockBase {
   def switch(switchPlayer: Boolean = true): ClockBase
   def recordActionTime(
       metrics: MoveMetrics = MoveMetrics(),
-      gameActive: Boolean = true,
-      applyGrace: Boolean = false
+      gameActive: Boolean = true
   ): ClockBase
   def endTurn: ClockBase
   def step(
@@ -294,7 +287,9 @@ case class ClockPlayer(
 
   def recordLag(l: Centis) = copy(lag = lag.recordLag(l))
 
-  def takeTime(t: Centis, applyGrace: Boolean = true) = copy(timer = timer.takeTime(t, applyGrace))
+  def applyClockGrace(t: Centis) =
+    copy(timer = timer.applyClockGrace(t), completedActionsOfTurnTime = Centis(0))
+  def takeTime(t: Centis)        = copy(timer = timer.takeTime(t))
 
   def setRemaining(t: Centis) = copy(timer = timer.setRemaining(t))
 
@@ -306,7 +301,7 @@ case class ClockPlayer(
     timer = timer.goBerserk(config.berserkPenalty)
   )
   def withBerserk(berserk: Boolean)    = if (berserk) goBerserk else this
-  def giveTime(t: Centis): ClockPlayer = takeTime(-t, false)
+  def giveTime(t: Centis): ClockPlayer = takeTime(-t)
 
   def remaining: Centis = timer.remaining
 
@@ -358,7 +353,7 @@ case class Clock(
         copy(
           players = players.update(
             player,
-            _.takeTime(curT, applyGrace = pause)
+            _.takeTime(curT)
               .copy(
                 lastMoveTime = curT,
                 completedActionsOfTurnTime = completedActionsOfTurnTimeOf(player) + curT
@@ -400,8 +395,7 @@ case class Clock(
 
   def recordActionTime(
       metrics: MoveMetrics = MoveMetrics(),
-      gameActive: Boolean = true,
-      applyGrace: Boolean = false
+      gameActive: Boolean = true
   ): ClockBase =
     (timestamp match {
       case None    =>
@@ -417,12 +411,11 @@ case class Clock(
         val clockActive         = gameActive && moveTime < competitor.remaining
 
         val newClock = updatePlayer(player) {
-          _.takeTime(moveTime, applyGrace)
+          _.takeTime(moveTime)
             .copy(
               lag = lagTrack,
               lastMoveTime = moveTime,
-              completedActionsOfTurnTime =
-                if (switchClock) Centis(0) else completedActionsOfTurnTimeOf(player) + moveTime
+              completedActionsOfTurnTime = completedActionsOfTurnTimeOf(player) + moveTime
             )
         }
 
@@ -431,9 +424,12 @@ case class Clock(
     }).resetTimeStamper
 
   def endTurn: ClockBase =
-    updatePlayer(player) {
-      _.takeTime(Centis(0), true)
-      // Assume that lag is the same and was recorded by the last action
+    updatePlayer(player) { t =>
+      t.applyClockGrace(t.completedActionsOfTurnTime)
+        .copy(
+          completedActionsOfTurnTime = Centis(0)
+        )
+    // Assume that lag is the same and was recorded by the last action
     }.switch(true)
 
   def step(
@@ -441,7 +437,7 @@ case class Clock(
       gameActive: Boolean = true,
       switchClock: Boolean = true
   ) = {
-    val newClock = recordActionTime(metrics, gameActive, applyGrace = switchClock)
+    val newClock = recordActionTime(metrics, gameActive)
     if (switchClock) newClock.endTurn else newClock
   }
 }
@@ -743,8 +739,7 @@ case class ByoyomiClock(
   // TODO: consider if we want to implement these or not
   def recordActionTime(
       metrics: MoveMetrics = MoveMetrics(),
-      gameActive: Boolean = true,
-      applyGrace: Boolean = false
+      gameActive: Boolean = true
   ): ClockBase = ???
   def endTurn: ClockBase = ???
 
@@ -837,10 +832,10 @@ case class ByoyomiClockPlayer(
 
   def periodsLeft = math.max(periodsTotal - spentPeriods, 0)
 
-  def takeTime(t: Centis, @nowarn applyGrace: Boolean = true): ByoyomiClockPlayer =
+  def takeTime(t: Centis): ByoyomiClockPlayer =
     copy(elapsed = elapsed + t)
 
-  def giveTime(t: Centis): ByoyomiClockPlayer = takeTime(-t, false)
+  def giveTime(t: Centis): ByoyomiClockPlayer = takeTime(-t)
 
   def setRemaining(t: Centis) = copy(elapsed = limit - t)
 
