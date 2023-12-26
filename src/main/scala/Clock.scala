@@ -736,7 +736,7 @@ case class ByoyomiClock(
       timestamp = timestamp.map(_ => now)
     )
 
-  // TODO: consider if we want to implement these or not
+  // TODO: consider if we want to implement these or not for byoyomi? I kinda don't want to touch it
   def recordActionTime(
       metrics: MoveMetrics = MoveMetrics(),
       gameActive: Boolean = true
