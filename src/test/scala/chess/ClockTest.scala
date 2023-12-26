@@ -4,9 +4,17 @@ import strategygames._
 import strategygames.chess.Pos._
 
 class TimerTest extends ChessTest {
+  case class TimerTest(timer: Timer) {
+    // Override to also apply grace everytime (not multiaction)
+    def takeTime(c: Centis) = copy(timer = timer.takeTime(c).applyClockGrace(c))
+    val remaining           = timer.remaining
+    val outOfTime           = timer.outOfTime
+  }
   "play with a fischer increment" should {
-    val fischerIncrement = Timer
-      .fischerIncrement(Centis(60 * 100), Centis(1 * 100))
+    val fischerIncrement = TimerTest(
+      Timer
+        .fischerIncrement(Centis(60 * 100), Centis(1 * 100))
+    )
     "properly increment time when game is ongoing" in {
       fischerIncrement.remaining must_== Centis(60 * 100)
       val afterMove = fischerIncrement
@@ -30,7 +38,7 @@ class TimerTest extends ChessTest {
   }
 
   "play with a bronstein delay increment" should {
-    val bronsteinDelay = Timer.bronsteinDelay(Centis(60 * 100), Centis(5 * 100))
+    val bronsteinDelay = TimerTest(Timer.bronsteinDelay(Centis(60 * 100), Centis(5 * 100)))
     "properly increment time when game is ongoing" in {
       bronsteinDelay.remaining must_== Centis(60 * 100)
       val afterMove = bronsteinDelay
@@ -54,7 +62,7 @@ class TimerTest extends ChessTest {
   }
 
   "play with a us delay increment" should {
-    val usDelay = Timer.usDelay(Centis(60 * 100), Centis(5 * 100))
+    val usDelay = TimerTest(Timer.usDelay(Centis(60 * 100), Centis(5 * 100)))
     "properly increment time when game is ongoing" in {
       usDelay.remaining must_== Centis(65 * 100)
       val afterMove = usDelay
@@ -88,14 +96,18 @@ class TimerTest extends ChessTest {
   // without increment after the current period.
   "play with a fischer increment followed by byoyomi" should {
     val withByoyomi    =
-      Timer
-        .fischerIncrement(Centis(60 * 100), Centis(1 * 100))
-        .followedBy(Timer.byoyomi(Centis(5 * 100)))
+      TimerTest(
+        Timer
+          .fischerIncrement(Centis(60 * 100), Centis(1 * 100))
+          .followedBy(Timer.byoyomi(Centis(5 * 100)))
+      )
     val withTwoByoyomi =
-      Timer
-        .fischerIncrement(Centis(60 * 100), Centis(1 * 100))
-        .followedBy(Timer.byoyomi(Centis(5 * 100)))
-        .followedBy(Timer.byoyomi(Centis(5 * 100)))
+      TimerTest(
+        Timer
+          .fischerIncrement(Centis(60 * 100), Centis(1 * 100))
+          .followedBy(Timer.byoyomi(Centis(5 * 100)))
+          .followedBy(Timer.byoyomi(Centis(5 * 100)))
+      )
     "properly increment time when game is ongoing" in {
       withByoyomi.remaining must_== Centis(60 * 100)
       val afterMove = withByoyomi.takeTime(Centis(30 * 100))

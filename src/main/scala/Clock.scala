@@ -89,7 +89,7 @@ case class Timer(
       copy(
         elapsed = elapsed - postMoveGraceTime,
         clockTimeGrace = newClockTimeGrace
-      )
+      ).nextIfDone
     }
   private def applyTimeTaken(timeTaken: Centis): Timer =
     copy(elapsed = elapsed + timeTaken)
@@ -101,7 +101,7 @@ case class Timer(
     nextTimer.fold(copy(nextTimer = Some(timer)))(t => copy(nextTimer = Some(t.followedBy(timer))))
 
   def takeTime(timeTaken: Centis)       =
-    applyTimeTaken(timeTaken).nextIfDone
+    applyTimeTaken(timeTaken)
   def setRemaining(t: Centis): Timer    = copy(elapsed = limit - t)
   def goBerserk(penalty: Centis): Timer =
     copy(baseLimit = baseLimit - penalty, clockTimeGrace = clockTimeGrace.goBerserk)
