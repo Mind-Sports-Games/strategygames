@@ -67,7 +67,8 @@ case class SimpleDelayGrace(val delay: Centis) extends ClockTimeGrace {
 // into your grace. Bronstein does not.
 case class BronsteinDelayGrace(val delay: Centis) extends ClockTimeGrace {
   override def timeToAdd(remaining: Centis, timeTaken: Centis): Tuple2[ClockTimeGrace, Centis] =
-    (this, timeWillAdd(remaining, timeTaken)) // 0 if no time is left, else the up to the delay
+    (this, timeWillAdd(remaining, timeTaken.pp("timeTaken")))
+      .pp("WHTFU") // 0 if no time is left, else the up to the delay
 
   def timeWillAdd(remaining: Centis, timeTaken: Centis): Centis =
     (remaining > Centis(0)) ?? timeTaken.atMost(delay)
@@ -220,6 +221,12 @@ sealed trait ClockBase {
   def stop(pause: Boolean = false): ClockBase
   def hardStop: ClockBase
   def switch(switchPlayer: Boolean = true): ClockBase
+  def recordActionTime(
+      metrics: MoveMetrics = MoveMetrics(),
+      gameActive: Boolean = true,
+      applyGrace: Boolean = false
+  ): ClockBase
+  def endTurn: ClockBase
   def step(
       metrics: MoveMetrics = MoveMetrics(),
       gameActive: Boolean = true,
@@ -257,7 +264,8 @@ sealed trait ClockBase {
   def lagCompEstimate(c: Player) = clockPlayer(c).lag.compEstimate
 
   @inline def timestampFor(c: Player) = if (c == player) timestamp else None
-  @inline def pending(c: Player)      = timestampFor(c).fold(Centis(0))(toNow)
+  @inline def pending(c: Player)      =
+    timestampFor(c).fold(Centis(0))(toNow)
   @inline def lastMoveTime(c: Player) = clockPlayer(c).lastMoveTime
 
   def estimateTotalSeconds = config.estimateTotalSeconds
@@ -373,23 +381,26 @@ case class Clock(
 
   def withTimestamper(timestamper: Timestamper) = copy(timestamper = timestamper)
 
+  def resetTimeStamper = copy(
+    timestamp = timestamp.map(_ => now)
+  )
+
   def switch(switchPlayer: Boolean = true) =
     copy(
-      player = if (switchPlayer) !player else player,
-      timestamp = timestamp.map(_ => now)
-    )
+      player = if (switchPlayer) !player else player
+    ).resetTimeStamper
 
-  def step(
+  def recordActionTime(
       metrics: MoveMetrics = MoveMetrics(),
       gameActive: Boolean = true,
-      switchClock: Boolean = true
-  ) =
+      applyGrace: Boolean = false
+  ): ClockBase =
     (timestamp match {
       case None    =>
         metrics.clientLag.fold(this) { l =>
           updatePlayer(player) { _.recordLag(l) }
         }
-      case Some(t) =>
+      case Some(t) => {
         val elapsed             = toNow(t)
         val lag                 = ~metrics.reportedLag(elapsed) nonNeg
         val competitor          = players(player)
@@ -398,12 +409,28 @@ case class Clock(
         val clockActive         = gameActive && moveTime < competitor.remaining
 
         val newClock = updatePlayer(player) {
-          _.takeTime(moveTime, switchClock)
+          _.takeTime(moveTime, applyGrace)
             .copy(lag = lagTrack, lastMoveTime = moveTime)
         }
 
         if (clockActive) newClock else newClock.hardStop
-    }).switch(switchClock)
+      }
+    }).resetTimeStamper
+
+  def endTurn: ClockBase =
+    updatePlayer(player) {
+      _.takeTime(Centis(0), true)
+      // Assume that lag is the same and was recorded by the last action
+    }.switch(true)
+
+  def step(
+      metrics: MoveMetrics = MoveMetrics(),
+      gameActive: Boolean = true,
+      switchClock: Boolean = true
+  ) = {
+    val newClock = recordActionTime(metrics, gameActive, applyGrace = switchClock)
+    if (switchClock) newClock.endTurn else newClock
+  }
 }
 
 object ClockPlayer {
@@ -696,6 +723,14 @@ case class ByoyomiClock(
       player = if (switchPlayer) !player else player,
       timestamp = timestamp.map(_ => now)
     )
+
+  // TODO: consider if we want to implement these or not
+  def recordActionTime(
+      metrics: MoveMetrics = MoveMetrics(),
+      gameActive: Boolean = true,
+      applyGrace: Boolean = false
+  ): ClockBase = ???
+  def endTurn: ClockBase = ???
 
   def step(
       metrics: MoveMetrics = MoveMetrics(),

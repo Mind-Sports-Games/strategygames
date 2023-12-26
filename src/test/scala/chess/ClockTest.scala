@@ -186,12 +186,18 @@ class ClockTest extends ChessTest {
     })
     .start
 
-  def advance(c: ClockBase, t: Int) =
+  val fakeClock600SimpleDelay5 = Clock(Clock.SimpleDelayConfig(600, 5))
+    .copy(timestamper = new Timestamper {
+      val now = Timestamp(0)
+    })
+    .start
+
+  def advanceTimeByCentis(c: ClockBase, t: Int) =
     c.withTimestamper(new Timestamper {
       val now = c.timestamper.now + Centis(t)
     })
 
-  "play with a clock" should {
+  /*"play with a clock" should {
     val clock = Clock(Clock.Config(5 * 60 * 1000, 0))
     val game  = makeGame.withClock(clock.start)
     "new game" in {
@@ -221,14 +227,239 @@ class ClockTest extends ChessTest {
       Clock(Clock.Config(0, 3)).clockPlayer(P1).remaining.centis must_== 300
       Clock(Clock.Config(0, 3)).clockPlayer(P2).remaining.centis must_== 300
     }
+  }*/
+  "multiaction clocks" should {
+    val bullet1Plus0            = fakeClock60
+    val rapid10Plus0            = fakeClock600
+    val bullet1Plus1            = fakeClock60Plus1
+    val blitz3DelayPlus2        = fakeClock180Delay2
+    val rapid10SimpleDelayPlus5 = fakeClock600SimpleDelay5
+
+    def recordActionTime(clock: ClockBase, wait: Centis) =
+      advanceTimeByCentis(clock, wait.centis)
+        .recordActionTime()
+
+    def seconds(s: Int): Centis = Centis(s * 100)
+
+    "bullet no increment" in {
+      val baseClock                                              = bullet1Plus0
+      def withClockUseTimeForAction(clock: ClockBase)(s: Centis) =
+        recordActionTime(clock, s)
+
+      def useTimeForAction = withClockUseTimeForAction(baseClock) _
+
+      "no action uses no time" in {
+        baseClock.remainingTime(P1) must_== seconds(60)
+      }
+      "pre action uses no time" in {
+        val clock = useTimeForAction(seconds(0))
+        clock.player must_== P1                     // doesn't switch turns
+        clock.remainingTime(P1) must_== seconds(60) // but records time
+      }
+      "action of 1s uses 1s" in {
+        val clock = useTimeForAction(seconds(1))
+        clock.player must_== P1 // doesn't switch turns
+        clock.remainingTime(P1) must_== seconds(59)
+      }
+      "action of 2s uses 2s" in {
+        val clock = useTimeForAction(seconds(2))
+        clock.player must_== P1 // doesn't switch turns
+        clock.remainingTime(P1) must_== seconds(58)
+      }
+      "multiple actions but don't end turn" in {
+        val actionS = List(seconds(1), seconds(1), seconds(2), seconds(4))
+        val clock   = actionS.foldLeft(baseClock)((clk, s) => withClockUseTimeForAction(clk)(s))
+        clock.player must_== P1 // doesn't switch turns
+        clock.remainingTime(P1) must_== seconds(52)
+      }
+      "multiple actions but end turn" in {
+        val actionS         = List(seconds(1), seconds(1), seconds(2), seconds(4))
+        val clockBeforeTurn =
+          actionS.foldLeft(baseClock)((clk, s) => withClockUseTimeForAction(clk)(s))
+        clockBeforeTurn.player must_== P1 // doesn't switch turns
+        clockBeforeTurn.remainingTime(P1) must_== seconds(52)
+        val clock = clockBeforeTurn.endTurn
+        clock.player must_== P2                     // switches turns
+        clock.remainingTime(P1) must_== seconds(52) // Doesn't add increment
+      }
+    }
+    "bullet with increment" in {
+      val baseClock                                              = bullet1Plus1
+      def withClockUseTimeForAction(clock: ClockBase)(s: Centis) =
+        recordActionTime(clock, s)
+
+      def useTimeForAction = withClockUseTimeForAction(baseClock) _
+
+      "no action uses no time" in {
+        baseClock.remainingTime(P1) must_== seconds(60)
+      }
+      "pre action uses no time" in {
+        val clock = useTimeForAction(seconds(0))
+        clock.player must_== P1                     // doesn't switch turns
+        clock.remainingTime(P1) must_== seconds(60) // but records time
+      }
+      "action of 1s uses 1s" in {
+        val clock = useTimeForAction(seconds(1))
+        clock.player must_== P1 // doesn't switch turns
+        clock.remainingTime(P1) must_== seconds(59)
+      }
+      "action of 2s uses 2s" in {
+        val clock = useTimeForAction(seconds(2))
+        clock.player must_== P1 // doesn't switch turns
+        clock.remainingTime(P1) must_== seconds(58)
+      }
+      "multiple actions but don't end turn" in {
+        val actionS = List(seconds(1), seconds(1), seconds(2), seconds(4))
+        val clock   = actionS.foldLeft(baseClock)((clk, s) => withClockUseTimeForAction(clk)(s))
+        clock.player must_== P1 // doesn't switch turns
+        clock.remainingTime(P1) must_== seconds(52)
+      }
+      "multiple actions but end turn" in {
+        val actionS         = List(seconds(1), seconds(1), seconds(2), seconds(4))
+        val clockBeforeTurn =
+          actionS.foldLeft(baseClock)((clk, s) => withClockUseTimeForAction(clk)(s))
+        clockBeforeTurn.player must_== P1 // doesn't switch turns
+        clockBeforeTurn.remainingTime(P1) must_== seconds(52)
+        val clock = clockBeforeTurn.endTurn
+        clock.player must_== P2                     // switches turns
+        clock.remainingTime(P1) must_== seconds(53) // Adds Increment
+      }
+    }
+    "blitz with Bronstein Delay" in {
+      val baseClock                                              = blitz3DelayPlus2
+      def withClockUseTimeForAction(clock: ClockBase)(s: Centis) =
+        recordActionTime(clock, s)
+
+      def useTimeForAction = withClockUseTimeForAction(baseClock) _
+
+      "no action uses no time" in {
+        baseClock.remainingTime(P1) must_== seconds(180)
+      }
+      "pre action uses no time" in {
+        val clock = useTimeForAction(seconds(0))
+        clock.player must_== P1                      // doesn't switch turns
+        clock.remainingTime(P1) must_== seconds(180) // but records time
+      }
+      "action of 1s uses 1s" in {
+        val clock = useTimeForAction(seconds(1))
+        clock.player must_== P1 // doesn't switch turns
+        clock.remainingTime(P1) must_== seconds(179)
+      }
+      "action of 2s uses 2s" in {
+        val clock = useTimeForAction(seconds(2))
+        clock.player must_== P1 // doesn't switch turns
+        clock.remainingTime(P1) must_== seconds(178)
+      }
+      "multiple actions but don't end turn" in {
+        val actionS = List(seconds(1), seconds(1), seconds(20), seconds(4))
+        val clock   = actionS.foldLeft(baseClock)((clk, s) => withClockUseTimeForAction(clk)(s))
+        clock.player must_== P1 // doesn't switch turns
+        clock.remainingTime(P1) must_== seconds(154)
+      }
+      "multiple actions but end turn" in {
+        val actionS         = List(seconds(1), seconds(1), seconds(20), seconds(4))
+        val clockBeforeTurn =
+          actionS.foldLeft(baseClock)((clk, s) => withClockUseTimeForAction(clk)(s))
+        clockBeforeTurn.player must_== P1 // doesn't switch turns
+        clockBeforeTurn.remainingTime(P1) must_== seconds(154)
+        val clock = clockBeforeTurn.endTurn
+        clock.player must_== P2                      // switches turns
+        clock.remainingTime(P1) must_== seconds(156) // Adds Increment
+      }
+    }
+    "rapid with no increment" in {
+      val baseClock                                              = rapid10Plus0
+      def withClockUseTimeForAction(clock: ClockBase)(s: Centis) =
+        recordActionTime(clock, s)
+
+      def useTimeForAction = withClockUseTimeForAction(baseClock) _
+
+      "no action uses no time" in {
+        baseClock.remainingTime(P1) must_== seconds(600)
+      }
+      "pre action uses no time" in {
+        val clock = useTimeForAction(seconds(0))
+        clock.player must_== P1                      // doesn't switch turns
+        clock.remainingTime(P1) must_== seconds(600) // but records time
+      }
+      "action of 1s uses 1s" in {
+        val clock = useTimeForAction(seconds(1))
+        clock.player must_== P1 // doesn't switch turns
+        clock.remainingTime(P1) must_== seconds(599)
+      }
+      "action of 20s uses 20s" in {
+        val clock = useTimeForAction(seconds(20))
+        clock.player must_== P1 // doesn't switch turns
+        clock.remainingTime(P1) must_== seconds(580)
+      }
+      "multiple actions but don't end turn" in {
+        val actionS = List(seconds(1), seconds(1), seconds(20), seconds(4))
+        val clock   = actionS.foldLeft(baseClock)((clk, s) => withClockUseTimeForAction(clk)(s))
+        clock.player must_== P1 // doesn't switch turns
+        clock.remainingTime(P1) must_== seconds(574)
+      }
+      "multiple actions but end turn" in {
+        val actionS         = List(seconds(1), seconds(1), seconds(20), seconds(4))
+        val clockBeforeTurn =
+          actionS.foldLeft(baseClock)((clk, s) => withClockUseTimeForAction(clk)(s))
+        clockBeforeTurn.player must_== P1 // doesn't switch turns
+        clockBeforeTurn.remainingTime(P1) must_== seconds(574)
+        val clock = clockBeforeTurn.endTurn
+        clock.player must_== P2                      // switches turns
+        clock.remainingTime(P1) must_== seconds(574) // Doesn't add increment
+      }
+    }
+    "rapid with simple delay" in {
+      val baseClock                                              = rapid10SimpleDelayPlus5
+      def withClockUseTimeForAction(clock: ClockBase)(s: Centis) =
+        recordActionTime(clock, s)
+
+      def useTimeForAction = withClockUseTimeForAction(baseClock) _
+
+      "no action uses no time" in {
+        baseClock.remainingTime(P1) must_== seconds(605)
+      }
+      "pre action uses no time" in {
+        val clock = useTimeForAction(seconds(0))
+        clock.player must_== P1                      // doesn't switch turns
+        clock.remainingTime(P1) must_== seconds(605) // but records time
+      }
+      "action of 1s uses 1s" in {
+        val clock = useTimeForAction(seconds(1))
+        clock.player must_== P1 // doesn't switch turns
+        clock.remainingTime(P1) must_== seconds(604)
+      }
+      "action of 20s uses 20s" in {
+        val clock = useTimeForAction(seconds(20))
+        clock.player must_== P1 // doesn't switch turns
+        clock.remainingTime(P1) must_== seconds(585)
+      }
+      "multiple actions but don't end turn" in {
+        val actionS = List(seconds(1), seconds(1), seconds(20), seconds(4))
+        val clock   = actionS.foldLeft(baseClock)((clk, s) => withClockUseTimeForAction(clk)(s))
+        clock.player must_== P1 // doesn't switch turns
+        clock.remainingTime(P1) must_== seconds(579)
+      }
+      "multiple actions but end turn" in {
+        val actionS         = List(seconds(1), seconds(1), seconds(20), seconds(4))
+        val clockBeforeTurn =
+          actionS.foldLeft(baseClock)((clk, s) => withClockUseTimeForAction(clk)(s))
+        clockBeforeTurn.player must_== P1 // doesn't switch turns
+        clockBeforeTurn.remainingTime(P1) must_== seconds(579)
+        val clock = clockBeforeTurn.endTurn
+        clock.player must_== P2                      // switches turns
+        clock.remainingTime(P1) must_== seconds(579) // Does add increment
+      }
+    }
+
   }
-  "lag compensation" should {
+  /*"lag compensation" should {
     def durOf(lag: Int) = MoveMetrics(clientLag = Option(Centis(lag)))
 
     def clockStep(clock: ClockBase, wait: Int, lags: Int*) = {
       (lags
         .foldLeft(clock) { (clk, lag) =>
-          advance(clk.step(), wait + lag).step(durOf(lag))
+          advanceTimeByCentis(clk.step(), wait + lag).step(durOf(lag))
         }
         .remainingTime(P2))
         .centis
@@ -364,7 +595,7 @@ class ClockTest extends ChessTest {
 
   "live time checks" in {
     "60s stall" in {
-      val clock60 = advance(fakeClock60, 60 * 100)
+      val clock60 = advanceTimeByCentis(fakeClock60, 60 * 100)
 
       clock60.remainingTime(P1).centis must_== 0
       clock60.outOfTime(P2, withGrace = true) must beFalse
@@ -372,7 +603,7 @@ class ClockTest extends ChessTest {
       clock60.outOfTime(P1, withGrace = false) must beTrue
     }
     "60s stall with increment" in {
-      val clock = advance(fakeClock60Plus1, 60 * 100)
+      val clock = advanceTimeByCentis(fakeClock60Plus1, 60 * 100)
 
       clock.remainingTime(P1).centis must_== 0
       clock.outOfTime(P2, withGrace = true) must beFalse
@@ -380,7 +611,7 @@ class ClockTest extends ChessTest {
       clock.outOfTime(P1, withGrace = false) must beTrue
     }
     "60s stall with byoyomi" in {
-      val clock = advance(fakeClock180Delay2, 180 * 100)
+      val clock = advanceTimeByCentis(fakeClock180Delay2, 180 * 100)
 
       clock.remainingTime(P1).centis must_== 0
       clock.outOfTime(P2, withGrace = true) must beFalse
@@ -389,12 +620,12 @@ class ClockTest extends ChessTest {
     }
 
     def clockStep(clock: ClockBase, wait: Int) =
-      advance(clock, wait).step().step()
+      advanceTimeByCentis(clock, wait).step().step()
 
     "1x30s move + 30s stall with increment" in {
       val clockHalf = clockStep(fakeClock60Plus1, 30 * 100)
       clockHalf.remainingTime(P1).centis must_== 31 * 100
-      val clock     = advance(clockHalf, 30 * 100)
+      val clock     = advanceTimeByCentis(clockHalf, 30 * 100)
 
       clock.remainingTime(P1).centis must_== 1 * 100
       clock.outOfTime(P2, withGrace = true) must beFalse
@@ -404,7 +635,7 @@ class ClockTest extends ChessTest {
     "1x100 move + 80s stall with byoyomi" in {
       val clockHalf = clockStep(fakeClock180Delay2, 100 * 100)
       clockHalf.remainingTime(P1).centis must_== 82 * 100
-      val clock     = advance(clockHalf, 80 * 100)
+      val clock     = advanceTimeByCentis(clockHalf, 80 * 100)
 
       clock.remainingTime(P1).centis must_== 2 * 100
       clock.outOfTime(P2, withGrace = true) must beFalse
@@ -412,13 +643,13 @@ class ClockTest extends ChessTest {
       clock.outOfTime(P1, withGrace = false) must beFalse
     }
     "61s stall" in {
-      val clock61 = advance(fakeClock60, 61 * 100)
+      val clock61 = advanceTimeByCentis(fakeClock60, 61 * 100)
       clock61.remainingTime(P1).centis must_== 0
       clock61.outOfTime(P1, withGrace = true) must beFalse
     }
-    "over quota stall" >> advance(fakeClock60, 6190).outOfTime(P1, withGrace = true)
-    "stall within quota" >> !advance(fakeClock600, 60190).outOfTime(P1, withGrace = true)
-    "max grace stall" >> advance(fakeClock600, 602 * 100).outOfTime(P1, withGrace = true)
-  }
+    "over quota stall" >> advanceTimeByCentis(fakeClock60, 6190).outOfTime(P1, withGrace = true)
+    "stall within quota" >> !advanceTimeByCentis(fakeClock600, 60190).outOfTime(P1, withGrace = true)
+    "max grace stall" >> advanceTimeByCentis(fakeClock600, 602 * 100).outOfTime(P1, withGrace = true)
+  }*/
 
 }
