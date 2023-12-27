@@ -95,7 +95,7 @@ class TimerTest extends ChessTest {
   // Byoyomi can be represented multiple different ways, but it's basically a new timer
   // without increment after the current period.
   "play with a fischer increment followed by byoyomi" should {
-    val withByoyomi    =
+    val withByoyomi =
       TimerTest(
         Timer
           .fischerIncrement(Centis(60 * 100), Centis(1 * 100))
@@ -173,7 +173,7 @@ class TimerTest extends ChessTest {
 }
 
 class ClockTest extends ChessTest {
-  val chess       = GameLogic.Chess()
+  val chess = GameLogic.Chess()
   val fakeClock60 = Clock(Clock.Config(60, 0))
     .copy(timestamper = new Timestamper {
       val now = Timestamp(0)
@@ -257,27 +257,12 @@ class ClockTest extends ChessTest {
       recordActionTime(clock, s)
 
     case class MultiActionTest(clock: ClockBase) {
-      def useTimes(actions: List[Centis])             =
+      def useTimes(actions: List[Centis]) =
         copy(clock = actions.foldLeft(clock)((clk, s) => withClockUseTimeForAction(clk)(s)))
-      def useTime(action: Centis)                     = useTimes(List(action))
-      def endTurn                                     = copy(clock = clock.endTurn)
-      def giveTime(player: Player, s: Centis)         = copy(clock.giveTime(player, s))
-      def remainingTime(player: Player): Centis       = clock.remainingTime(player)
-      def p1TimeRemainingMustBe(expectedTime: Centis) = {
-        clock.remainingTime(P1) must_== expectedTime
-        this
-      }
-      def turnMustBe(whosTurnIsIt: Player)            = {
-        clock.player must_== whosTurnIsIt
-        this
-      }
-
-      def finalizeTest = true.must_==(true)
-
-      def ensureTurnAndRemainingTime(player: Player, player1TimeExpected: Centis) = {
-        clock.player must_== player
-        clock.remainingTime(P1) must_== player1TimeExpected
-      }
+      def useTime(action: Centis)               = useTimes(List(action))
+      def endTurn                               = copy(clock = clock.endTurn)
+      def giveTime(player: Player, s: Centis)   = copy(clock.giveTime(player, s))
+      def remainingTime(player: Player): Centis = clock.remainingTime(player)
     }
 
     "bullet no increment" in {
@@ -286,194 +271,205 @@ class ClockTest extends ChessTest {
         clock.remainingTime(P1) must_== seconds(60)
       }
       "giveTime adds exact amount of grace without increment/delay" in {
-        clock
+        val newClock = clock
           .giveTime(P1, seconds(1))
-          .p1TimeRemainingMustBe(seconds(61))
-          .finalizeTest
+        newClock.remainingTime(P1) must_== seconds(61)
+        newClock.clock.player must_== P1
       }
       "pre action uses no time" in {
-        clock
+        val newClock = clock
           .useTime(seconds(0))
-          .p1TimeRemainingMustBe(seconds(60))
-          .finalizeTest
+        newClock.remainingTime(P1) must_== seconds(60)
+        newClock.clock.player must_== P1
       }
       "action of 1s uses 1s" in {
-        clock
+        val newClock = clock
           .useTime(seconds(1))
-          .turnMustBe(P1)
-          .p1TimeRemainingMustBe(seconds(59))
-          .finalizeTest
+        newClock.remainingTime(P1) must_== seconds(59)
+        newClock.clock.player must_== P1
       }
       "action of 2s uses 2s" in {
-        clock
+        val newClock = clock
           .useTime(seconds(2))
-          .p1TimeRemainingMustBe(seconds(58))
-          .finalizeTest
+        newClock.remainingTime(P1) must_== seconds(58)
+        newClock.clock.player must_== P1
       }
       "multiple actions but don't end turn" in {
         val times = List(seconds(1), seconds(1), seconds(2), seconds(4))
-        clock
+        val newClock = clock
           .useTimes(times)
-          .turnMustBe(P1)
-          .p1TimeRemainingMustBe(seconds(52))
-          .finalizeTest
+        newClock.remainingTime(P1) must_== seconds(52)
+        newClock.clock.player must_== P1
       }
       "multiple actions but end turn" in {
-        val times = List(seconds(1), seconds(1), seconds(2), seconds(4))
-        clock.useTimes(times).turnMustBe(P1).p1TimeRemainingMustBe(seconds(52))
-        clock
-          .useTimes(times)
-          .endTurn
-          .turnMustBe(P2)                     // must be player 2's turn now
-          .p1TimeRemainingMustBe(seconds(52)) // Doesn't add increment even after switching turns
-          .finalizeTest
+        val times    = List(seconds(1), seconds(1), seconds(2), seconds(4))
+        val newClock = clock.useTimes(times).endTurn
+        newClock.remainingTime(P1) must_== seconds(52) // Doesn't add increment even after switching turns
+        newClock.clock.player must_== P2               // must be player 2's turn now
       }
     }
     "bullet with increment" in {
-      val baseClock = bullet1Plus1
-      def clock     = MultiActionTest(baseClock)
+      def clock = MultiActionTest(bullet1Plus1)
       "no action uses no time" in {
-        baseClock.remainingTime(P1) must_== seconds(60)
+        clock.remainingTime(P1) must_== seconds(60)
       }
       "giveTime adds exact amount of grace without increment/delay" in {
-        val clock = baseClock.giveTime(P1, seconds(1))
-        clock.remainingTime(P1) must_== seconds(61)
+        val newClock = clock.giveTime(P1, seconds(1))
+        newClock.remainingTime(P1) must_== seconds(61)
+        newClock.clock.player must_== P1
       }
       "pre action uses no time" in {
-        clock.useTime(seconds(0)).ensureTurnAndRemainingTime(P1, seconds(60))
+        val newClock = clock.useTime(seconds(0))
+        newClock.remainingTime(P1) must_== seconds(60)
+        newClock.clock.player must_== P1
       }
       "action of 1s uses 1s" in {
-        clock.useTime(seconds(1)).ensureTurnAndRemainingTime(P1, seconds(59))
+        val newClock = clock.useTime(seconds(1))
+        newClock.remainingTime(P1) must_== seconds(59)
+        newClock.clock.player must_== P1
       }
       "action of 2s uses 2s" in {
-        clock.useTime(seconds(2)).ensureTurnAndRemainingTime(P1, seconds(58))
+        val newClock = clock.useTime(seconds(2))
+        newClock.remainingTime(P1) must_== seconds(58)
+        newClock.clock.player must_== P1
       }
       "multiple actions but don't end turn" in {
-        val times = List(seconds(1), seconds(1), seconds(2), seconds(4))
-        clock.useTimes(times).ensureTurnAndRemainingTime(P1, seconds(52))
+        val times    = List(seconds(1), seconds(1), seconds(2), seconds(4))
+        val newClock = clock.useTimes(times)
+        newClock.remainingTime(P1) must_== seconds(52) // No increment before switching turns
+        newClock.clock.player must_== P1               // Still must be player 1's turn
       }
       "multiple actions but end turn" in {
-        val times = List(seconds(1), seconds(1), seconds(2), seconds(4))
-        clock
-          .useTimes(times)
-          .ensureTurnAndRemainingTime(P1, seconds(52)) // Does NOT add increment before we switch
-        clock
-          .useTimes(times)
-          .endTurn
-          .ensureTurnAndRemainingTime(P2, seconds(53)) // Adds increment AFTER we switch turns
+        val times    = List(seconds(1), seconds(1), seconds(2), seconds(4))
+        val newClock = clock.useTimes(times).endTurn
+        newClock.remainingTime(P1) must_== seconds(53) // Adds increment AFTER we switch turns
+        newClock.clock.player must_== P2               // Must have switched to P2's turn
       }
     }
     "blitz with Bronstein Delay" in {
-      val baseClock = blitz3DelayPlus2
-      def clock     = MultiActionTest(baseClock)
+      def clock = MultiActionTest(blitz3DelayPlus2)
       "no action uses no time" in {
-        baseClock.remainingTime(P1) must_== seconds(180)
+        clock.remainingTime(P1) must_== seconds(180)
       }
       "giveTime adds exact amount of grace without increment/delay" in {
-        val clock = baseClock.giveTime(P1, seconds(1))
-        clock.remainingTime(P1) must_== seconds(181)
+        val newClock = clock.giveTime(P1, seconds(1))
+        newClock.remainingTime(P1) must_== seconds(181)
       }
       "pre action uses no time" in {
-        clock.useTime(seconds(0)).ensureTurnAndRemainingTime(P1, seconds(180))
+        val newClock = clock.useTime(seconds(0))
+        newClock.remainingTime(P1) must_== seconds(180)
+        newClock.clock.player must_== P1
       }
       "action of 1s uses 1s" in {
-        clock.useTime(seconds(1)).ensureTurnAndRemainingTime(P1, seconds(179))
+        val newClock = clock.useTime(seconds(1))
+        newClock.remainingTime(P1) must_== seconds(179)
+        newClock.clock.player must_== P1
       }
       "action of 2s uses 2s" in {
-        clock.useTime(seconds(2)).ensureTurnAndRemainingTime(P1, seconds(178))
+        val newClock = clock.useTime(seconds(2))
+        newClock.remainingTime(P1) must_== seconds(178)
+        newClock.clock.player must_== P1
       }
       "multiple actions but don't end turn" in {
-        val times = List(seconds(1), seconds(1), seconds(20), seconds(4))
-        clock.useTimes(times).ensureTurnAndRemainingTime(P1, seconds(154))
+        val times    = List(seconds(1), seconds(1), seconds(20), seconds(4))
+        val newClock = clock.useTimes(times)
+        newClock.remainingTime(P1) must_== seconds(154) // Doesn't add delay because the turn isn't over
+        newClock.clock.player must_== P1                // Turn isn't over so it's still P1 to play
       }
       "multiple actions but end turn" in {
         val times = List(seconds(1), seconds(1), seconds(20), seconds(4))
-        clock
-          .useTimes(times)
-          .ensureTurnAndRemainingTime(P1, seconds(154)) // Does NOT add delay before we switch
-        clock
+        val newClock = clock
           .useTimes(times)
           .endTurn
-          .ensureTurnAndRemainingTime(P2, seconds(156)) // Adds delay AFTER we switch turns
+        newClock.remainingTime(P1) must_== seconds(156) // Adds delay AFTER we switch turns
+        newClock.clock.player must_== P2                // Must have switched to P2's turn
       }
     }
     "rapid with no increment" in {
-      val baseClock = rapid10Plus0
-      def clock     = MultiActionTest(baseClock)
+      def clock = MultiActionTest(rapid10Plus0)
       "no action uses no time" in {
-        baseClock.remainingTime(P1) must_== seconds(600)
+        clock.remainingTime(P1) must_== seconds(600)
       }
       "giveTime adds exact amount of grace without increment/delay" in {
-        val clock = baseClock.giveTime(P1, seconds(1))
-        clock.remainingTime(P1) must_== seconds(601)
+        val newClock = clock.giveTime(P1, seconds(1))
+        newClock.remainingTime(P1) must_== seconds(601)
       }
       "pre action uses no time" in {
-        clock.useTime(seconds(0)).ensureTurnAndRemainingTime(P1, seconds(600))
+        val newClock = clock.useTime(seconds(0))
+        newClock.remainingTime(P1) must_== seconds(600)
+        newClock.clock.player must_== P1
       }
       "action of 1s uses 1s" in {
-        clock.useTime(seconds(1)).ensureTurnAndRemainingTime(P1, seconds(599))
+        val newClock = clock.useTime(seconds(1))
+        newClock.remainingTime(P1) must_== seconds(599)
+        newClock.clock.player must_== P1
       }
       "action of 2s uses 2s" in {
-        clock.useTime(seconds(2)).ensureTurnAndRemainingTime(P1, seconds(598))
+        val newClock = clock.useTime(seconds(2))
+        newClock.remainingTime(P1) must_== seconds(598)
+        newClock.clock.player must_== P1
       }
       "multiple actions but don't end turn" in {
-        val times = List(seconds(1), seconds(1), seconds(20), seconds(4))
-        clock.useTimes(times).ensureTurnAndRemainingTime(P1, seconds(574))
+        val times    = List(seconds(1), seconds(1), seconds(20), seconds(4))
+        val newClock = clock.useTimes(times)
+        newClock.remainingTime(P1) must_== seconds(574) // Doesn't add delay because the turn isn't over
+        newClock.clock.player must_== P1                // Turn isn't over so it's still P1 to play
       }
       "multiple actions but end turn" in {
-        val times = List(seconds(1), seconds(1), seconds(20), seconds(4))
-        clock
-          .useTimes(times)
-          .ensureTurnAndRemainingTime(P1, seconds(574)) // Does NOT add delay before we switch
-        clock
-          .useTimes(times)
-          .endTurn
-          .ensureTurnAndRemainingTime(P2, seconds(574)) // Still nothing AFTER we switch
+        val times    = List(seconds(1), seconds(1), seconds(20), seconds(4))
+        val newClock = clock.useTimes(times).endTurn
+        newClock.remainingTime(P1) must_== seconds(574) // Adds delay AFTER we switch turns
+        newClock.clock.player must_== P2                // Must have switched to P2's turn
       }
     }
     "rapid with simple delay" in {
-      val baseClock = rapid10SimpleDelayPlus5
-      def clock     = MultiActionTest(baseClock)
+      def clock = MultiActionTest(rapid10SimpleDelayPlus5)
       "no action uses no time" in {
-        baseClock.remainingTime(P1) must_== seconds(605)
+        clock.remainingTime(P1) must_== seconds(605)
       }
       "giveTime adds exact amount of grace without increment/delay" in {
-        val clock = baseClock.giveTime(P1, seconds(1))
-        clock.remainingTime(P1) must_== seconds(606)
+        val newClock = clock.giveTime(P1, seconds(1))
+        newClock.remainingTime(P1) must_== seconds(606)
       }
       "pre action uses no time" in {
-        clock.useTime(seconds(0)).ensureTurnAndRemainingTime(P1, seconds(605))
+        val newClock = clock.useTime(seconds(0))
+        newClock.remainingTime(P1) must_== seconds(605)
+        newClock.clock.player must_== P1
       }
       "action of 1s uses 1s" in {
-        clock.useTime(seconds(1)).ensureTurnAndRemainingTime(P1, seconds(604))
+        val newClock = clock.useTime(seconds(1))
+        newClock.remainingTime(P1) must_== seconds(604)
+        newClock.clock.player must_== P1
       }
       "action of 2s uses 2s" in {
-        clock.useTime(seconds(2)).ensureTurnAndRemainingTime(P1, seconds(603))
+        val newClock = clock.useTime(seconds(2))
+        newClock.remainingTime(P1) must_== seconds(603)
+        newClock.clock.player must_== P1
       }
       "multiple actions but don't end turn" in {
-        val times = List(seconds(1), seconds(1), seconds(20), seconds(4))
-        clock.useTimes(times).ensureTurnAndRemainingTime(P1, seconds(579))
+        val times    = List(seconds(1), seconds(1), seconds(20), seconds(4))
+        val newClock = clock.useTimes(times)
+        newClock.remainingTime(P1) must_== seconds(579)
+        newClock.clock.player must_== P1
       }
-      "multiple actions but end turn" in {
+      "multiple actions, end turn, total time more than delay" in {
         val times = List(seconds(1), seconds(1), seconds(20), seconds(4))
-        clock
-          .useTimes(times)
-          .ensureTurnAndRemainingTime(P1, seconds(579)) // Does NOT add delay before we switch
 
-        // NOTE: notably, this test ensures that the final action time
+        // NOTE: this test ensures that the final action time
         //       is less than the delay, but the entire turn takes longer than the delay
-        clock
-          .useTimes(times)
-          .endTurn
-          .ensureTurnAndRemainingTime(P2, seconds(584)) // We get back the full delay after the switch
+        val newClock1 = clock.useTimes(times).endTurn
+        newClock1.remainingTime(P1) must_== seconds(584) // We get back the full delay after the switch
+        newClock1.clock.player must_== P2                // Must have switched to P2's turn
+      }
+      "multiple actions, end turn, total time less than delay" in {
+        val times = List(seconds(1), seconds(1), seconds(20), seconds(4))
 
-        // NOTE: notably, this test ensures that the final action time
-        //       is less than the delay, and the entire turn takes longer than the delay
+        // NOTE: this test ensures that the final action time
+        //       is less than the delay, and the entire turn is less than the delay
         val timesShort = List(seconds(1), seconds(1), seconds(1), seconds(1))
-        clock
-          .useTimes(timesShort)
-          .endTurn
-          .ensureTurnAndRemainingTime(P2, seconds(605)) // We get back a partial delay after the switch
+        val newClock2  = clock.useTimes(timesShort).endTurn
+        newClock2.remainingTime(P1) must_== seconds(605) // We get back a partial delay after the switch
+        newClock2.clock.player must_== P2                // Must have switched to P2's turn
       }
     }
 
@@ -650,7 +646,7 @@ class ClockTest extends ChessTest {
     "1x30s move + 30s stall with increment" in {
       val clockHalf = clockStep(fakeClock60Plus1, 30 * 100)
       clockHalf.remainingTime(P1).centis must_== 31 * 100
-      val clock     = advanceTimeByCentis(clockHalf, 30 * 100)
+      val clock = advanceTimeByCentis(clockHalf, 30 * 100)
 
       clock.remainingTime(P1).centis must_== 1 * 100
       clock.outOfTime(P2, withGrace = true) must beFalse
@@ -660,7 +656,7 @@ class ClockTest extends ChessTest {
     "1x100 move + 80s stall with byoyomi" in {
       val clockHalf = clockStep(fakeClock180Delay2, 100 * 100)
       clockHalf.remainingTime(P1).centis must_== 82 * 100
-      val clock     = advanceTimeByCentis(clockHalf, 80 * 100)
+      val clock = advanceTimeByCentis(clockHalf, 80 * 100)
 
       clock.remainingTime(P1).centis must_== 2 * 100
       clock.outOfTime(P2, withGrace = true) must beFalse
