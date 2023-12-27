@@ -257,10 +257,23 @@ class ClockTest extends ChessTest {
       recordActionTime(clock, s)
 
     case class MultiActionTest(clock: ClockBase) {
-      def useTimes(actions: List[Centis]): MultiActionTest                        =
+      def useTimes(actions: List[Centis])             =
         copy(clock = actions.foldLeft(clock)((clk, s) => withClockUseTimeForAction(clk)(s)))
-      def useTime(action: Centis): MultiActionTest                                = useTimes(List(action))
-      def endTurn                                                                 = copy(clock = clock.endTurn)
+      def useTime(action: Centis)                     = useTimes(List(action))
+      def endTurn                                     = copy(clock = clock.endTurn)
+      def giveTime(player: Player, s: Centis)         = copy(clock.giveTime(player, s))
+      def remainingTime(player: Player): Centis       = clock.remainingTime(player)
+      def p1TimeRemainingMustBe(expectedTime: Centis) = {
+        clock.remainingTime(P1) must_== expectedTime
+        this
+      }
+      def turnMustBe(whosTurnIsIt: Player)            = {
+        clock.player must_== whosTurnIsIt
+        this
+      }
+
+      def finalizeTest = true.must_==(true)
+
       def ensureTurnAndRemainingTime(player: Player, player1TimeExpected: Centis) = {
         clock.player must_== player
         clock.remainingTime(P1) must_== player1TimeExpected
@@ -268,35 +281,52 @@ class ClockTest extends ChessTest {
     }
 
     "bullet no increment" in {
-      val baseClock = bullet1Plus0
-      def clock     = MultiActionTest(baseClock)
+      def clock = MultiActionTest(bullet1Plus0)
       "no action uses no time" in {
-        baseClock.remainingTime(P1) must_== seconds(60)
+        clock.remainingTime(P1) must_== seconds(60)
       }
       "giveTime adds exact amount of grace without increment/delay" in {
-        val clock = baseClock.giveTime(P1, seconds(1))
-        clock.remainingTime(P1) must_== seconds(61)
+        clock
+          .giveTime(P1, seconds(1))
+          .p1TimeRemainingMustBe(seconds(61))
+          .finalizeTest
       }
       "pre action uses no time" in {
-        clock.useTime(seconds(0)).ensureTurnAndRemainingTime(P1, seconds(60))
+        clock
+          .useTime(seconds(0))
+          .p1TimeRemainingMustBe(seconds(60))
+          .finalizeTest
       }
       "action of 1s uses 1s" in {
-        clock.useTime(seconds(1)).ensureTurnAndRemainingTime(P1, seconds(59))
+        clock
+          .useTime(seconds(1))
+          .turnMustBe(P1)
+          .p1TimeRemainingMustBe(seconds(59))
+          .finalizeTest
       }
       "action of 2s uses 2s" in {
-        clock.useTime(seconds(2)).ensureTurnAndRemainingTime(P1, seconds(58))
+        clock
+          .useTime(seconds(2))
+          .p1TimeRemainingMustBe(seconds(58))
+          .finalizeTest
       }
       "multiple actions but don't end turn" in {
         val times = List(seconds(1), seconds(1), seconds(2), seconds(4))
-        clock.useTimes(times).ensureTurnAndRemainingTime(P1, seconds(52))
+        clock
+          .useTimes(times)
+          .turnMustBe(P1)
+          .p1TimeRemainingMustBe(seconds(52))
+          .finalizeTest
       }
       "multiple actions but end turn" in {
         val times = List(seconds(1), seconds(1), seconds(2), seconds(4))
-        clock.useTimes(times).ensureTurnAndRemainingTime(P1, seconds(52))
+        clock.useTimes(times).turnMustBe(P1).p1TimeRemainingMustBe(seconds(52))
         clock
           .useTimes(times)
           .endTurn
-          .ensureTurnAndRemainingTime(P2, seconds(52)) // Doesn't add increment even after switching turns
+          .turnMustBe(P2)                     // must be player 2's turn now
+          .p1TimeRemainingMustBe(seconds(52)) // Doesn't add increment even after switching turns
+          .finalizeTest
       }
     }
     "bullet with increment" in {
