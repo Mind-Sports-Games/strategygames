@@ -83,13 +83,13 @@ case class Timer(
     val elapsed: Centis = Centis(0)
 ) extends TimerTrait {
 
-  private def applyClockGrace(timeTaken: Centis): Timer =
+  def applyClockGrace(timeTaken: Centis): Timer =
     // TODO: make this work like the book
     clockTimeGrace.timeToAdd(this.remaining, timeTaken).pipe { case (newClockTimeGrace, postMoveGraceTime) =>
       copy(
         elapsed = elapsed - postMoveGraceTime,
         clockTimeGrace = newClockTimeGrace
-      )
+      ).nextIfDone
     }
   private def applyTimeTaken(timeTaken: Centis): Timer =
     copy(elapsed = elapsed + timeTaken)
@@ -100,18 +100,13 @@ case class Timer(
   def followedBy(timer: Timer): Timer =
     nextTimer.fold(copy(nextTimer = Some(timer)))(t => copy(nextTimer = Some(t.followedBy(timer))))
 
-  def takeTime(timeTaken: Centis, applyGrace: Boolean = true) =
-    if (applyGrace)
-      applyTimeTaken(timeTaken)
-        .applyClockGrace(timeTaken)
-        .nextIfDone
-    else
-      applyTimeTaken(timeTaken).nextIfDone
-  def setRemaining(t: Centis): Timer                          = copy(elapsed = limit - t)
-  def goBerserk(penalty: Centis): Timer                       =
+  def takeTime(timeTaken: Centis)       =
+    applyTimeTaken(timeTaken)
+  def setRemaining(t: Centis): Timer    = copy(elapsed = limit - t)
+  def goBerserk(penalty: Centis): Timer =
     copy(baseLimit = baseLimit - penalty, clockTimeGrace = clockTimeGrace.goBerserk)
-  def outOfTime: Boolean                                      = remainingAll <= Centis(0)
-  def giveTime(t: Centis)                                     = takeTime(-t, false)
+  def outOfTime: Boolean                = remainingAll <= Centis(0)
+  def giveTime(t: Centis)               = takeTime(-t)
 
   // We need to deal with 0 second limits.
   def willAdd  = clockTimeGrace
@@ -187,9 +182,10 @@ sealed trait PlayerTimerBase {
   val elapsed: Centis
   val berserk: Boolean
   val lastMoveTime: Centis
+  val completedActionsOfTurnTime: Centis
 
   def recordLag(l: Centis): PlayerTimerBase
-  def takeTime(t: Centis, applyGrace: Boolean = true): PlayerTimerBase
+  def takeTime(t: Centis): PlayerTimerBase
   def setRemaining(t: Centis): PlayerTimerBase
   def goBerserk: PlayerTimerBase
   def giveTime(t: Centis): PlayerTimerBase
@@ -220,6 +216,11 @@ sealed trait ClockBase {
   def stop(pause: Boolean = false): ClockBase
   def hardStop: ClockBase
   def switch(switchPlayer: Boolean = true): ClockBase
+  def recordActionTime(
+      metrics: MoveMetrics = MoveMetrics(),
+      gameActive: Boolean = true
+  ): ClockBase
+  def endTurn: ClockBase
   def step(
       metrics: MoveMetrics = MoveMetrics(),
       gameActive: Boolean = true,
@@ -239,13 +240,15 @@ sealed trait ClockBase {
   def currentClockFor(c: Player): ClockInfoBase
 
   // Implemented attributes
-  def remainingTime(c: Player)  = (clockPlayer(c).remaining - pending(c)) nonNeg
-  def moretimeable(c: Player)   = clockPlayer(c).remaining.centis < 100 * 60 * 60 * 2
-  def lastMoveTimeOf(c: Player) = clockPlayer(c).lastMoveTime
+  def remainingTime(c: Player)                = (clockPlayer(c).remaining - pending(c)) nonNeg
+  def moretimeable(c: Player)                 = clockPlayer(c).remaining.centis < 100 * 60 * 60 * 2
+  def lastMoveTimeOf(c: Player)               = clockPlayer(c).lastMoveTime
+  def completedActionsOfTurnTimeOf(c: Player) = clockPlayer(c).completedActionsOfTurnTime
+
   // TODO: both of these are candidates for removal, I feel they are abstraction leaks
   //       but I wasn't able to get that refactoring done in the time that we had
-  def graceOf(c: Player)        = clockPlayer(c).graceSeconds
-  def graceSeconds              = config.graceSeconds
+  def graceOf(c: Player) = clockPlayer(c).graceSeconds
+  def graceSeconds       = config.graceSeconds
 
   def takeback(switchPlayer: Boolean = true) = switch(switchPlayer)
 
@@ -256,9 +259,10 @@ sealed trait ClockBase {
   // Lowball estimate of next move's lag comp for UI butter.
   def lagCompEstimate(c: Player) = clockPlayer(c).lag.compEstimate
 
-  @inline def timestampFor(c: Player) = if (c == player) timestamp else None
-  @inline def pending(c: Player)      = timestampFor(c).fold(Centis(0))(toNow)
-  @inline def lastMoveTime(c: Player) = clockPlayer(c).lastMoveTime
+  @inline def timestampFor(c: Player)               = if (c == player) timestamp else None
+  @inline def pending(c: Player)                    = timestampFor(c).fold(Centis(0))(toNow)
+  @inline def lastMoveTime(c: Player)               = clockPlayer(c).lastMoveTime
+  @inline def completedActionsOfTurnTime(c: Player) = clockPlayer(c).completedActionsOfTurnTime
 
   def estimateTotalSeconds = config.estimateTotalSeconds
   def estimateTotalTime    = config.estimateTotalTime
@@ -276,13 +280,16 @@ case class ClockPlayer(
     lag: LagTracker,
     config: ClockConfig,
     berserk: Boolean = false,
-    lastMoveTime: Centis = Centis(0)
+    lastMoveTime: Centis = Centis(0),
+    completedActionsOfTurnTime: Centis = Centis(0)
 ) extends PlayerTimerBase {
   val elapsed = timer.elapsed
 
   def recordLag(l: Centis) = copy(lag = lag.recordLag(l))
 
-  def takeTime(t: Centis, applyGrace: Boolean = true) = copy(timer = timer.takeTime(t, applyGrace))
+  def applyClockGrace(t: Centis) =
+    copy(timer = timer.applyClockGrace(t), completedActionsOfTurnTime = Centis(0))
+  def takeTime(t: Centis)        = copy(timer = timer.takeTime(t))
 
   def setRemaining(t: Centis) = copy(timer = timer.setRemaining(t))
 
@@ -294,7 +301,7 @@ case class ClockPlayer(
     timer = timer.goBerserk(config.berserkPenalty)
   )
   def withBerserk(berserk: Boolean)    = if (berserk) goBerserk else this
-  def giveTime(t: Centis): ClockPlayer = takeTime(-t, false)
+  def giveTime(t: Centis): ClockPlayer = takeTime(-t)
 
   def remaining: Centis = timer.remaining
 
@@ -346,7 +353,11 @@ case class Clock(
         copy(
           players = players.update(
             player,
-            _.takeTime(curT, applyGrace = pause).copy(lastMoveTime = curT)
+            _.takeTime(curT)
+              .copy(
+                lastMoveTime = curT,
+                completedActionsOfTurnTime = completedActionsOfTurnTimeOf(player) + curT
+              )
           ),
           timestamp = None,
           paused = pause
@@ -373,23 +384,25 @@ case class Clock(
 
   def withTimestamper(timestamper: Timestamper) = copy(timestamper = timestamper)
 
+  def resetTimeStamper = copy(
+    timestamp = timestamp.map(_ => now)
+  )
+
   def switch(switchPlayer: Boolean = true) =
     copy(
-      player = if (switchPlayer) !player else player,
-      timestamp = timestamp.map(_ => now)
-    )
+      player = if (switchPlayer) !player else player
+    ).resetTimeStamper
 
-  def step(
+  def recordActionTime(
       metrics: MoveMetrics = MoveMetrics(),
-      gameActive: Boolean = true,
-      switchClock: Boolean = true
-  ) =
+      gameActive: Boolean = true
+  ): ClockBase =
     (timestamp match {
       case None    =>
         metrics.clientLag.fold(this) { l =>
           updatePlayer(player) { _.recordLag(l) }
         }
-      case Some(t) =>
+      case Some(t) => {
         val elapsed             = toNow(t)
         val lag                 = ~metrics.reportedLag(elapsed) nonNeg
         val competitor          = players(player)
@@ -398,12 +411,35 @@ case class Clock(
         val clockActive         = gameActive && moveTime < competitor.remaining
 
         val newClock = updatePlayer(player) {
-          _.takeTime(moveTime, switchClock)
-            .copy(lag = lagTrack, lastMoveTime = moveTime)
+          _.takeTime(moveTime)
+            .copy(
+              lag = lagTrack,
+              lastMoveTime = moveTime,
+              completedActionsOfTurnTime = completedActionsOfTurnTimeOf(player) + moveTime
+            )
         }
 
         if (clockActive) newClock else newClock.hardStop
-    }).switch(switchClock)
+      }
+    }).resetTimeStamper
+
+  def endTurn: ClockBase =
+    updatePlayer(player) { t =>
+      t.applyClockGrace(t.completedActionsOfTurnTime)
+        .copy(
+          completedActionsOfTurnTime = Centis(0)
+        )
+    // Assume that lag is the same and was recorded by the last action
+    }.switch(true)
+
+  def step(
+      metrics: MoveMetrics = MoveMetrics(),
+      gameActive: Boolean = true,
+      switchClock: Boolean = true
+  ) = {
+    val newClock = recordActionTime(metrics, gameActive)
+    if (switchClock) newClock.endTurn else newClock
+  }
 }
 
 object ClockPlayer {
@@ -666,7 +702,10 @@ case class ByoyomiClock(
             _.takeTime(curT)
               .giveTime(byoyomiOf(player) * periods)
               .spendPeriods(periods)
-              .copy(lastMoveTime = curT)
+              .copy(
+                lastMoveTime = curT,
+                completedActionsOfTurnTime = completedActionsOfTurnTimeOf(player) + curT
+              )
           ),
           timestamp = None,
           paused = pause
@@ -696,6 +735,13 @@ case class ByoyomiClock(
       player = if (switchPlayer) !player else player,
       timestamp = timestamp.map(_ => now)
     )
+
+  // TODO: consider if we want to implement these or not for byoyomi? I kinda don't want to touch it
+  def recordActionTime(
+      metrics: MoveMetrics = MoveMetrics(),
+      gameActive: Boolean = true
+  ): ClockBase = ???
+  def endTurn: ClockBase = ???
 
   def step(
       metrics: MoveMetrics = MoveMetrics(),
@@ -733,13 +779,27 @@ case class ByoyomiClock(
                                                 else timeRemainingAfterMove)
               )
                 .spendPeriods(periodSpan)
-                .copy(lag = lagTrack, lastMoveTime = moveTime)
+                .copy(
+                  lag = lagTrack,
+                  lastMoveTime = moveTime,
+                  completedActionsOfTurnTime =
+                    if (switchClock) Centis(0) else completedActionsOfTurnTimeOf(player) + moveTime
+                )
             }
           else
             updatePlayer(player) {
-              _.takeTime(moveTime)
+              _.takeTime(
+                moveTime - ((clockActive && switchClock) ?? Centis(
+                  competitor.graceSeconds * 100
+                ))
+              )
                 .spendPeriods(periodSpan)
-                .copy(lag = lagTrack, lastMoveTime = moveTime)
+                .copy(
+                  lag = lagTrack,
+                  lastMoveTime = moveTime,
+                  completedActionsOfTurnTime =
+                    if (switchClock) Centis(0) else completedActionsOfTurnTimeOf(player) + moveTime
+                )
             }
 
         if (clockActive) newC else newC.hardStop
@@ -751,9 +811,10 @@ case class ByoyomiClock(
       _.refundPeriods(p)
     }
 
-  def byoyomiOf(c: Player)               = players(c).byoyomi
-  def spentPeriodsOf(c: Player)          = players(c).spentPeriods
-  override def lastMoveTimeOf(c: Player) = players(c).lastMoveTime
+  def byoyomiOf(c: Player)                             = players(c).byoyomi
+  def spentPeriodsOf(c: Player)                        = players(c).spentPeriods
+  override def lastMoveTimeOf(c: Player)               = players(c).lastMoveTime
+  override def completedActionsOfTurnTimeOf(c: Player) = players(c).completedActionsOfTurnTime
 
   def byoyomi        = config.byoyomi
   def byoyomiSeconds = config.byoyomiSeconds
@@ -767,17 +828,18 @@ case class ByoyomiClockPlayer(
     elapsed: Centis = Centis(0),
     spentPeriods: Int = 0,
     berserk: Boolean = false,
-    lastMoveTime: Centis = Centis(0)
+    lastMoveTime: Centis = Centis(0),
+    completedActionsOfTurnTime: Centis = Centis(0)
 ) extends PlayerTimerBase {
 
   def recordLag(l: Centis) = copy(lag = lag.recordLag(l))
 
   def periodsLeft = math.max(periodsTotal - spentPeriods, 0)
 
-  def takeTime(t: Centis, @nowarn applyGrace: Boolean = true): ByoyomiClockPlayer =
+  def takeTime(t: Centis): ByoyomiClockPlayer =
     copy(elapsed = elapsed + t)
 
-  def giveTime(t: Centis): ByoyomiClockPlayer = takeTime(-t, false)
+  def giveTime(t: Centis): ByoyomiClockPlayer = takeTime(-t)
 
   def setRemaining(t: Centis) = copy(elapsed = limit - t)
 
@@ -795,7 +857,7 @@ case class ByoyomiClockPlayer(
 
   def remaining: Centis = limit - elapsed
 
-  def graceSeconds: Int = 0
+  def graceSeconds: Int = config.graceSeconds
 }
 
 object ByoyomiClockPlayer {
