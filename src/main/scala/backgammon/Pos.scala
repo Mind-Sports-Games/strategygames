@@ -81,9 +81,6 @@ case class Pos private (index: Int) extends AnyVal {
   def piotr: Char = Piotr.lookup.get(index).getOrElse('?')
   def piotrStr    = piotr.toString
 
-  // todo this are no longer correct
-  def player: Player = if (index < 9) Player.P1 else Player.P2
-
   def last: Boolean = (index + 1) % 12 == 0
 
   def key               = file.toString + rank.toString
@@ -102,7 +99,7 @@ object Pos {
       Some(new Pos(x + (File.all.size - x) * y))
     else None
 
-  def opposite(index: Int): Option[Pos] = apply(if (index < 9) index + 9 else index - 9)
+  def opposite(index: Int): Option[Pos] = apply(if (index < 12) index + 12 else index - 12)
 
   def fromKey(key: String): Option[Pos] = allKeys get key
 
@@ -161,7 +158,6 @@ object Pos {
     }
     .to(Map)
 
-  // val posR  = "([a-i][1-9]|[a-i]10)"
   val posR = "([a-l][1-2])"
 
 }

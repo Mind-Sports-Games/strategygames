@@ -13,6 +13,13 @@ case class Situation(board: Board, player: Player) {
 
   lazy val destinations: Map[Pos, List[Pos]] = moves.view.mapValues { _ map (_.dest) }.to(Map)
 
+  def drops: Option[List[Pos]] = board.variant.possibleDrops(this)
+
+  //Do we need this - role is always the same for Backgammon
+  def dropsByRole: Option[Map[Role, List[Pos]]] = board.variant.possibleDropsByRole(this)
+
+  def dropsAsDrops: List[Drop] = board.variant.validDrops(this)
+
   def history = board.history
 
   // TODO: Implement

@@ -18,12 +18,12 @@ case class DiceRoll(
 
   def withHistory(h: History) = copy(after = after withHistory h)
 
-  // def finalizeAfter: Board = after updateHistory { h =>
-  //  h.copy(
-  //    lastTurn = if (autoEndTurn) h.currentTurn :+ toUci else h.lastTurn,
-  //    currentTurn = if (autoEndTurn) List() else h.currentTurn :+ toUci
-  //  )
-  // }
+  override def finalizeAfter: Board = after.setDice(dice).updateHistory{ h =>
+    h.copy(
+      //lastTurn = if (autoEndTurn) h.currentTurn :+ toUci else h.lastTurn,
+      //currentTurn = if (autoEndTurn) List() else h.currentTurn :+ toUci
+    )
+  }
 
   def player = situationBefore.player
 

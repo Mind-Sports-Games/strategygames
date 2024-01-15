@@ -7,11 +7,30 @@ import variant.Variant
 case class Board(
     pieces: PieceMap,
     history: History,
-    variant: Variant
+    variant: Variant,
+    pocketData: Option[PocketData] = None,
+    unusedDice: List[Int] = List.empty,
 ) {
 
   def apply(at: Pos): Option[Piece] = (pieces get at).map(_._1)
   def apply(file: File, rank: Rank) = pieces get Pos(file, rank)
+
+  def piecesOf(player: Player): PieceMap = pieces filter (_._2._1 is player)
+
+  def setDice(dice: List[Int]): Board =
+    if (dice.distinct.size == 1)
+      copy(unusedDice = List.fill(4)(dice.distinct).flatten)
+    else
+      copy(unusedDice = dice)
+
+  def useDie(die: Int): Board = copy(unusedDice = unusedDice.diff(List(die)))
+
+  def piecesOnBar(player: Player): Boolean =
+    pocketData.fold(false){ pocketData => pocketData.pockets(player).roles.nonEmpty }
+
+  def firstPosIndex(player: Player): Int = player.fold(Pos.L1, Pos.L2).index
+
+  def posIndexDirection(player: Player): Int = player.fold(1, -1)
 
   lazy val actors: Map[Pos, Actor] = pieces map { case (pos, (piece, count)) =>
     (pos, Actor(piece, pos, this))

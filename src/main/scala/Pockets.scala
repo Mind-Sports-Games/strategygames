@@ -60,14 +60,21 @@ object PocketData {
   case class Go(p: go.PocketData)
       extends PocketData(
         p.pockets,
-        p.promoted.map(Pos.Go)
+        Set.empty
+      )
+
+  case class Backgammon(p: backgammon.PocketData)
+      extends PocketData(
+        p.pockets,
+        Set.empty
       )
 
   def init(lib: GameLogic): PocketData = lib match {
-    case GameLogic.Chess()   => Chess(chess.PocketData.init)
-    case GameLogic.FairySF() => FairySF(fairysf.PocketData.init)
-    case GameLogic.Go()      => Go(go.PocketData.init)
-    case _                   => sys.error("Unable to initialise pocket data for non chess/fairysf/go lib")
+    case GameLogic.Chess()      => Chess(chess.PocketData.init)
+    case GameLogic.FairySF()    => FairySF(fairysf.PocketData.init)
+    case GameLogic.Go()         => Go(go.PocketData.init)
+    case GameLogic.Backgammon() => Backgammon(backgammon.PocketData.init)
+    case _                      => sys.error("Unable to initialise pocket data for non chess/fairysf/go lib")
   }
 
 }

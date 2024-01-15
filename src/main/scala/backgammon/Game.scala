@@ -3,6 +3,8 @@ import strategygames.{ Clock, MoveMetrics, Player, VActionStrs }
 
 import cats.data.Validated
 
+import scala.util.Random
+
 import strategygames.backgammon.format.{ pgn, FEN, Uci }
 
 case class Game(
@@ -79,6 +81,9 @@ case class Game(
       clock = applyClock(dr.metrics, newSituation.status.isEmpty, switchPlayer)
     )
   }
+
+  def randomizeDiceRoll: Option[DiceRoll] =
+    Random.shuffle(situation.board.variant.validDiceRolls(situation)).headOption
 
   def apply(uci: Uci.Move): Validated[String, (Game, Move)]         =
     apply(uci.orig, uci.dest, uci.promotion)

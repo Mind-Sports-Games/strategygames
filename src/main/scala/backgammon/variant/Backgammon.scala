@@ -20,21 +20,17 @@ case object Backgammon
 
   override def baseVariant: Boolean = true
 
-  // cache this rather than checking with the API everytime
   override def initialFen =
     format.FEN("5S,3,3s,1,5s,4,2S/5s,3,3S,1,5S,4,2s[] w - - 1")
 
-  // TODO check legalMoves.size == 0 condition
   override def specialEnd(situation: Situation) =
-    (situation.board.history.score.p1 > 81) ||
-      (situation.board.history.score.p2 > 81) ||
-      (situation.moves.size == 0)
+    (situation.board.history.score.p1 == 15) ||
+      (situation.board.history.score.p2 == 15)
 
-  override def specialDraw(situation: Situation) =
-    situation.board.history.score.p1 == situation.board.history.score.p2
+  override def specialDraw(situation: Situation) = false
 
   override def winner(situation: Situation): Option[Player] =
-    if (specialEnd(situation) && !specialDraw(situation)) {
+    if (specialEnd(situation)) {
       if (situation.board.history.score.p1 > situation.board.history.score.p2)
         Player.fromName("p1")
       else Player.fromName("p2")
