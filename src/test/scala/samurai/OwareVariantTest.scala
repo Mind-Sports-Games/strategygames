@@ -404,8 +404,9 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
     }
   }
 
+  // https://playstrategy.dev/GzK8qh5k
   "Cycle position in oware - what is result?" should {
-    // should this test be a draw - have to ask experts, as position repeats while 2 remaining stones left on South Side.
+    // Our new rules now state this is a draw (game end if repetition with stones on both sides)
     val fen             = "4S,4S,4S,4S,4S,4S/4S,4S,4S,4S,4S,4S 0 0 S 1"
     val initialPosition = Api.positionFromFen(fen)
     val uciMoves        = List(
@@ -514,167 +515,181 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
       cycleGame.gameOutcome must_== 1000
     }
     "and game has ended" in {
-      cycleGame.gameEnd must_== true
+      cycleGame.gameEnd must_== false
     }
     "but still legal moves for some reason" in {
       cycleGame.legalMoves must_== Array(5)
     }
+
+    val finalMove = cycleGame.makeMovesWithPrevious(List(5), uciMoves)
+
+    "after final move, result in a draw" in {
+      finalMove.gameResult must_== GameResult.Draw()
+    }
+    "game score is draw" in {
+      finalMove.gameOutcome must_== 0
+    }
+    "and game has ended" in {
+      finalMove.gameEnd must_== true
+    }
   }
+
+  val nOnJqb7UMoves = List(
+    "f1c2",
+    "a2d1",
+    "c1e2",
+    "e2b1",
+    "b1e2",
+    "d2c1",
+    "f1e2",
+    "a2b1",
+    "a1d2",
+    "f2d1",
+    "a1b1",
+    "c2f1",
+    "c1f1",
+    "d2b2",
+    "b1f1",
+    "c2b2",
+    "f1e2",
+    "f2e2",
+    "c1d1",
+    "e2d2",
+    "a1b1",
+    "a2b1",
+    "a1b1",
+    "d2c2",
+    "b1c1",
+    "b2d2",
+    "a1b1",
+    "f2e2",
+    "d1f2",
+    "d2b2",
+    "a1b1",
+    "a2b1",
+    "a1b1",
+    "b2a1",
+    "a1b1",
+    "e2b2",
+    "c1f1",
+    "d2c2",
+    "d1e1",
+    "b2a2",
+    "e1d2",
+    "c2d1",
+    "b1b2",
+    "a2d1",
+    "e1f1",
+    "c2b2",
+    "b1c1",
+    "b2a2",
+    "c1d1",
+    "d2c2",
+    "d1e1",
+    "c2b2",
+    "a1d1",
+    "b2a2",
+    "d1e1",
+    "f2e2",
+    "b1c1",
+    "e2c2",
+    "e1f2",
+    "c2b2",
+    "f1c1",
+    "b2a1",
+    "c1f1",
+    "f2d2",
+    "e1f1",
+    "e2c2",
+    "d1e1",
+    "c2a2",
+    "e1f1",
+    "b2a2",
+    "b1c1",
+    "d2a1",
+    "c1d1",
+    "a2f2",
+    "d1f1",
+    "b2a2",
+    "a1c1",
+    "f2e2",
+    "c1e1",
+    "e2d2",
+    "d1e1",
+    "c2b2",
+    "e1d2",
+    "a2a1",
+    "b1d1",
+    "b2a2",
+    "a1b1",
+    "e2d2",
+    "d1e1",
+    "f2e2",
+    "f1a2",
+    "b2a2",
+    "e1f1",
+    "f2e2",
+    "c1d1",
+    "c2b2",
+    "b1c1",
+    "b2a2",
+    "d1e1",
+    "d2b2",
+    "e1f1",
+    "b2a2",
+    "c1d1",
+    "c2b2",
+    "d1e1",
+    "e2b2",
+    "e1f1",
+    "d2c2",
+    "f1d2",
+    "b2a1",
+    "a1b1",
+    "e2d2",
+    "b1c1",
+    "f2e2",
+    "c1d1",
+    "a2d1",
+    "b1c1",
+    "c2a2",
+    "a1b1",
+    "b2a2",
+    "b1c1",
+    "d2b2",
+    "c1f1",
+    "e2d2",
+    "e1f1",
+    "b2a2",
+    "d1e1",
+    "c2b2",
+    "e1f1",
+    "d2c2",
+    "f1d2",
+    "a2c1",
+    "b1c1",
+    "b2a2",
+    "a1b1",
+    "e2d2",
+    "c1e1",
+    "c2b2",
+    "e1f1",
+    "f2e2",
+    "b1c1",
+    "b2a2",
+    "d1e1",
+    "d2b2",
+    "e1f1",
+    "e2d2",
+    "c1d1"
+  )
 
   // https://playstrategy.org/nOnJqb7U/p1
   // game played before rule change so is now not a draw....
   "Cycle position in oware - does end game as stones are split on repetition" should {
     val fen             = "4S,4S,4S,4S,4S,4S/4S,4S,4S,4S,4S,4S 0 0 S 1"
     val initialPosition = Api.positionFromFen(fen)
-    val uciMoves        = List(
-      "f1c2",
-      "a2d1",
-      "c1e2",
-      "e2b1",
-      "b1e2",
-      "d2c1",
-      "f1e2",
-      "a2b1",
-      "a1d2",
-      "f2d1",
-      "a1b1",
-      "c2f1",
-      "c1f1",
-      "d2b2",
-      "b1f1",
-      "c2b2",
-      "f1e2",
-      "f2e2",
-      "c1d1",
-      "e2d2",
-      "a1b1",
-      "a2b1",
-      "a1b1",
-      "d2c2",
-      "b1c1",
-      "b2d2",
-      "a1b1",
-      "f2e2",
-      "d1f2",
-      "d2b2",
-      "a1b1",
-      "a2b1",
-      "a1b1",
-      "b2a1",
-      "a1b1",
-      "e2b2",
-      "c1f1",
-      "d2c2",
-      "d1e1",
-      "b2a2",
-      "e1d2",
-      "c2d1",
-      "b1b2",
-      "a2d1",
-      "e1f1",
-      "c2b2",
-      "b1c1",
-      "b2a2",
-      "c1d1",
-      "d2c2",
-      "d1e1",
-      "c2b2",
-      "a1d1",
-      "b2a2",
-      "d1e1",
-      "f2e2",
-      "b1c1",
-      "e2c2",
-      "e1f2",
-      "c2b2",
-      "f1c1",
-      "b2a1",
-      "c1f1",
-      "f2d2",
-      "e1f1",
-      "e2c2",
-      "d1e1",
-      "c2a2",
-      "e1f1",
-      "b2a2",
-      "b1c1",
-      "d2a1",
-      "c1d1",
-      "a2f2",
-      "d1f1",
-      "b2a2",
-      "a1c1",
-      "f2e2",
-      "c1e1",
-      "e2d2",
-      "d1e1",
-      "c2b2",
-      "e1d2",
-      "a2a1",
-      "b1d1",
-      "b2a2",
-      "a1b1",
-      "e2d2",
-      "d1e1",
-      "f2e2",
-      "f1a2",
-      "b2a2",
-      "e1f1",
-      "f2e2",
-      "c1d1",
-      "c2b2",
-      "b1c1",
-      "b2a2",
-      "d1e1",
-      "d2b2",
-      "e1f1",
-      "b2a2",
-      "c1d1",
-      "c2b2",
-      "d1e1",
-      "e2b2",
-      "e1f1",
-      "d2c2",
-      "f1d2",
-      "b2a1",
-      "a1b1",
-      "e2d2",
-      "b1c1",
-      "f2e2",
-      "c1d1",
-      "a2d1",
-      "b1c1",
-      "c2a2",
-      "a1b1",
-      "b2a2",
-      "b1c1",
-      "d2b2",
-      "c1f1",
-      "e2d2",
-      "e1f1",
-      "b2a2",
-      "d1e1",
-      "c2b2",
-      "e1f1",
-      "d2c2",
-      "f1d2",
-      "a2c1",
-      "b1c1",
-      "b2a2",
-      "a1b1",
-      "e2d2",
-      "c1e1",
-      "c2b2",
-      "e1f1",
-      "f2e2",
-      "b1c1",
-      "b2a2",
-      "d1e1",
-      "d2b2",
-      "e1f1",
-      "e2d2",
-      "c1d1"
-    )
+    val uciMoves        = nOnJqb7UMoves
     val moves           = uciMoves.dropRight(1).map(Api.uciToMove)
     val newGame         = initialPosition.makeMovesWithPrevious(moves, List[String]())
     val cycleEndGame    = newGame.makeMovesWithPrevious(List(2), uciMoves.dropRight(1))
@@ -685,6 +700,9 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
     }
     "and game has not ended" in {
       newGame.gameEnd must_== false
+    }
+    "and game is not yet repepition" in {
+      newGame.isRepetition must_== false
     }
 
     // move of cycle - ending the game
@@ -697,166 +715,199 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
     "and game has ended" in {
       cycleEndGame.gameEnd must_== true
     }
+    "and game is repepition" in {
+      cycleEndGame.isRepetition must_== true
+    }
   }
+
+  "Oware Situation test of game" should {
+    val oware    = variant.Oware
+    val game     = Game(oware)
+    val uciMoves = nOnJqb7UMoves
+
+    def applyMove(cGame: Game, move: String): Game = {
+      cGame.apply(cGame.situation.moves.get(Pos.fromKey(move.take(2)).getOrElse(Pos.A1)).head.head)
+    }
+
+    def doMoves(cGame: Game, moveList: List[String]): Game = {
+      moveList match {
+        case Nil          => cGame
+        case move :: rest => doMoves(applyMove(cGame, move), rest)
+      }
+    }
+
+    val newGame = doMoves(game, uciMoves.dropRight(1))
+    "not end after all but one moves" in {
+      newGame.situation.end must_== false
+    }
+
+    val finalGame = doMoves(game, uciMoves)
+    "end after all moves" in {
+      finalGame.situation.end must_== true
+    }
+
+  }
+
+  val SnPn3aqdMoves = List(
+    "f1c2",
+    "c2c1",
+    "d1e2",
+    "e2b1",
+    "b1e2",
+    "a2f1",
+    "a1e2",
+    "c2b2",
+    "f1f2",
+    "b2f1",
+    "c1a2",
+    "e2d2",
+    "d1d2",
+    "b2a2",
+    "a1b1",
+    "e2d2",
+    "b1f1",
+    "c2b2",
+    "d1e1",
+    "b2a2",
+    "c1d1",
+    "d2f2",
+    "c1d1",
+    "c2b2",
+    "a1b1",
+    "f2e2",
+    "d1e2",
+    "d2c2",
+    "c1d1",
+    "f2e2",
+    "d1e1",
+    "e2d2",
+    "a1b1",
+    "d2c2",
+    "f1a1",
+    "e2d2",
+    "b1f1",
+    "f2e2",
+    "d1e1",
+    "b2c1",
+    "b1c1",
+    "a2f1",
+    "b1c1",
+    "c2b1",
+    "d1e1",
+    "a2a1",
+    "c1f1",
+    "b2a2",
+    "a1f1",
+    "d2b2",
+    "f1e2",
+    "b2a2",
+    "d1f1",
+    "f2e2",
+    "c1d1",
+    "a2b1",
+    "d1e1",
+    "c2b2",
+    "a1b1",
+    "b2a2",
+    "b1c1",
+    "e2d2",
+    "e1e2",
+    "b2a1",
+    "f1c2",
+    "a2d1",
+    "c1f2",
+    "d2a1",
+    "e1f1",
+    "e2d2",
+    "d1e1",
+    "b2a2",
+    "e1f1",
+    "a2b1",
+    "f1d2",
+    "e2d2",
+    "b1f1",
+    "f2e2",
+    "e1f1",
+    "e2d2",
+    "d1e1",
+    "c2b2",
+    "e1f1",
+    "d2b2",
+    "a1b1",
+    "c2b2",
+    "b1c1",
+    "b2b1",
+    "a1b1",
+    "a2a1",
+    "f1d2",
+    "d2c2",
+    "c1e1",
+    "e2d2",
+    "e1f1",
+    "f2e2",
+    "d1e1",
+    "c2b2",
+    "b1d1",
+    "b2a2",
+    "a1b1",
+    "d2c2",
+    "e1f1",
+    "e2d2",
+    "d1e1",
+    "c2b2",
+    "c1d1",
+    "b2a2",
+    "b1c1",
+    "d2c2",
+    "d1e1",
+    "c2b2",
+    "c1d1",
+    "b2a2",
+    "e1f2",
+    "f2e2",
+    "d1e1",
+    "e2d2",
+    "e1f1",
+    "d2c2",
+    "f1c2",
+    "a2c1",
+    "c1d1",
+    "d2c2",
+    "d1e1",
+    "e2d2",
+    "e1f1",
+    "f2e2",
+    "b1c1",
+    "c2b2",
+    "c1d1",
+    "b2a2",
+    "a1b1",
+    "d2c2",
+    "d1e1",
+    "e2d2",
+    "e1f1",
+    "c2b2",
+    "b1c1",
+    "d2c2",
+    "c1d1",
+    "b2a2",
+    "d1e1",
+    "c2b2",
+    "e1f1",
+    "b2a2",
+    "f1d2",
+    "a2c1"
+  )
 
   // https://playstrategy.org/SnPn3aqd#1 Issue 509
   "Cycle position in oware - dont end game if all stones on one side" should {
     val fen             = "4S,4S,4S,4S,4S,4S/4S,4S,4S,4S,4S,4S 0 0 S 1"
     val initialPosition = Api.positionFromFen(fen)
-    val uciMoves        = List(
-      "f1c2",
-      "c2c1",
-      "d1e2",
-      "e2b1",
-      "b1e2",
-      "a2f1",
-      "a1e2",
-      "c2b2",
-      "f1f2",
-      "b2f1",
-      "c1a2",
-      "e2d2",
-      "d1d2",
-      "b2a2",
-      "a1b1",
-      "e2d2",
-      "b1f1",
-      "c2b2",
-      "d1e1",
-      "b2a2",
-      "c1d1",
-      "d2f2",
-      "c1d1",
-      "c2b2",
-      "a1b1",
-      "f2e2",
-      "d1e2",
-      "d2c2",
-      "c1d1",
-      "f2e2",
-      "d1e1",
-      "e2d2",
-      "a1b1",
-      "d2c2",
-      "f1a1",
-      "e2d2",
-      "b1f1",
-      "f2e2",
-      "d1e1",
-      "b2c1",
-      "b1c1",
-      "a2f1",
-      "b1c1",
-      "c2b1",
-      "d1e1",
-      "a2a1",
-      "c1f1",
-      "b2a2",
-      "a1f1",
-      "d2b2",
-      "f1e2",
-      "b2a2",
-      "d1f1",
-      "f2e2",
-      "c1d1",
-      "a2b1",
-      "d1e1",
-      "c2b2",
-      "a1b1",
-      "b2a2",
-      "b1c1",
-      "e2d2",
-      "e1e2",
-      "b2a1",
-      "f1c2",
-      "a2d1",
-      "c1f2",
-      "d2a1",
-      "e1f1",
-      "e2d2",
-      "d1e1",
-      "b2a2",
-      "e1f1",
-      "a2b1",
-      "f1d2",
-      "e2d2",
-      "b1f1",
-      "f2e2",
-      "e1f1",
-      "e2d2",
-      "d1e1",
-      "c2b2",
-      "e1f1",
-      "d2b2",
-      "a1b1",
-      "c2b2",
-      "b1c1",
-      "b2b1",
-      "a1b1",
-      "a2a1",
-      "f1d2",
-      "d2c2",
-      "c1e1",
-      "e2d2",
-      "e1f1",
-      "f2e2",
-      "d1e1",
-      "c2b2",
-      "b1d1",
-      "b2a2",
-      "a1b1",
-      "d2c2",
-      "e1f1",
-      "e2d2",
-      "d1e1",
-      "c2b2",
-      "c1d1",
-      "b2a2",
-      "b1c1",
-      "d2c2",
-      "d1e1",
-      "c2b2",
-      "c1d1",
-      "b2a2",
-      "e1f2",
-      "f2e2",
-      "d1e1",
-      "e2d2",
-      "e1f1",
-      "d2c2",
-      "f1c2",
-      "a2c1",
-      "c1d1",
-      "d2c2",
-      "d1e1",
-      "e2d2",
-      "e1f1",
-      "f2e2",
-      "b1c1",
-      "c2b2",
-      "c1d1",
-      "b2a2",
-      "a1b1",
-      "d2c2",
-      "d1e1",
-      "e2d2",
-      "e1f1",
-      "c2b2",
-      "b1c1",
-      "d2c2",
-      "c1d1",
-      "b2a2",
-      "d1e1",
-      "c2b2",
-      "e1f1",
-      "b2a2",
-      "f1d2",
-      "a2c1"
-    )
+    val uciMoves        = SnPn3aqdMoves
     val moves           = uciMoves.dropRight(1).map(Api.uciToMove)
     val newGame         = initialPosition.makeMovesWithPrevious(moves, List[String]())
     val cycleEndGame    = newGame.makeMovesWithPrevious(List(11), uciMoves.dropRight(1))
-    "currently be ongoing game" in {
+    "game is ongoing" in {
       newGame.gameResult must_== GameResult.Ongoing()
     }
     "game score is 0 as not ended" in {
@@ -865,8 +916,11 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
     "Only 1 legal move left" in {
       newGame.legalMoves.size must_== 1
     }
-    "and game has ended" in {
+    "and game has not ended" in {
       newGame.gameEnd must_== false
+    }
+    "and game is not repepition" in {
+      newGame.isRepetition must_== false
     }
 
     "after cycle move, result in a variant end" in {
@@ -878,6 +932,36 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
     "and game has ended" in {
       cycleEndGame.gameEnd must_== true
     }
+    "and game is repepition" in {
+      cycleEndGame.isRepetition must_== true
+    }
   }
 
+  "Oware Situation test of game" should {
+    val oware    = variant.Oware
+    val game     = Game(oware)
+    val uciMoves = SnPn3aqdMoves
+
+    def applyMove(cGame: Game, move: String): Game = {
+      cGame.apply(cGame.situation.moves.get(Pos.fromKey(move.take(2)).getOrElse(Pos.A1)).head.head)
+    }
+
+    def doMoves(cGame: Game, moveList: List[String]): Game = {
+      moveList match {
+        case Nil          => cGame
+        case move :: rest => doMoves(applyMove(cGame, move), rest)
+      }
+    }
+
+    val newGame = doMoves(game, uciMoves.dropRight(1))
+    "not end after all but one moves" in {
+      newGame.situation.end must_== false
+    }
+
+    val finalGame = doMoves(game, uciMoves)
+    "end after all moves" in {
+      finalGame.situation.end must_== true
+    }
+
+  }
 }
