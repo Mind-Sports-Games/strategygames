@@ -7,7 +7,7 @@ abstract class Action(situationBefore: Situation, after: Board, metrics: MoveMet
   def before = situationBefore.board
 
   def situationAfter: Situation
-  def finalizeAfter: Board = after
+  def finalizeAfter: Board
 
   def player: Player
 

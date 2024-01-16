@@ -2,6 +2,8 @@ package strategygames.backgammon
 
 import strategygames.Player
 
+import format.Uci
+
 import variant.Variant
 
 case class Board(
@@ -9,7 +11,7 @@ case class Board(
     history: History,
     variant: Variant,
     pocketData: Option[PocketData] = None,
-    unusedDice: List[Int] = List.empty,
+    unusedDice: List[Int] = List.empty
 ) {
 
   def apply(at: Pos): Option[Piece] = (pieces get at).map(_._1)
@@ -17,24 +19,34 @@ case class Board(
 
   def piecesOf(player: Player): PieceMap = pieces filter (_._2._1 is player)
 
+  // doubles the number of dice if a double is rolled
+  private def diceToActionDice(dice: List[Int]): List[Int] =
+    if (dice.distinct.size == 1) List.fill(4)(dice.distinct).flatten else dice
+
   def setDice(dice: List[Int]): Board =
-    if (dice.distinct.size == 1)
-      copy(unusedDice = List.fill(4)(dice.distinct).flatten)
-    else
-      copy(unusedDice = dice)
+    copy(unusedDice = diceToActionDice(dice))
 
   def useDie(die: Int): Board = copy(unusedDice = unusedDice.diff(List(die)))
 
   def unusedDiceStr: String = unusedDice.mkString("|")
 
+  def usedDice: List[Int] = diceToActionDice(
+    history.currentTurn.flatMap {
+      case u: Uci.DiceRoll => Some(u.dice)
+      case _               => None
+    }.flatten
+  ).diff(unusedDice)
+
+  def usedDiceStr: String = usedDice.mkString("|")
+
   def piecesOnBar(player: Player): Boolean =
-    pocketData.fold(false){ pocketData => pocketData.pockets(player).roles.nonEmpty }
+    pocketData.fold(false) { pocketData => pocketData.pockets(player).roles.nonEmpty }
 
   def firstPosIndex(player: Player): Int = player.fold(Pos.L1, Pos.L2).index
 
   def posIndexDirection(player: Player): Int = player.fold(1, -1)
 
-  lazy val actors: Map[Pos, Actor] = pieces map { case (pos, (piece, count)) =>
+  lazy val actors: Map[Pos, Actor] = pieces map { case (pos, (piece, _)) =>
     (pos, Actor(piece, pos, this))
   }
 
