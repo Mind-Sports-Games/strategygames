@@ -21,7 +21,7 @@ object Forsyth {
           history = History(),
           variant = variant
         ),
-        fen.value.split(' ')(1) match {
+        fen.value.split(' ')(3) match {
           case "w" => P1
           case "b" => P2
           case _   => sys.error("Invalid player in fen")
