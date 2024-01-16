@@ -71,7 +71,8 @@ object Forsyth {
     val player     = game.situation.player.fold('w', 'b')
     val unusedDice = game.situation.board.unusedDiceStr
     val usedDice   = game.situation.board.usedDiceStr
-    FEN(s"${boardFen} ${scoreStr} ${player} ${unusedDice} ${usedDice}")
+    val moves      = game.situation.board.history.halfMoveClock
+    FEN(s"${boardFen} ${scoreStr} ${player} ${unusedDice} ${usedDice} ${moves}")
   }
 
   def exportBoard(board: Board): String = {

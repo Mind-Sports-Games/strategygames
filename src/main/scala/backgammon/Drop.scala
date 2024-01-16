@@ -18,7 +18,8 @@ case class Drop(
   def finalizeAfter: Board = after updateHistory { h =>
     h.copy(
       lastTurn = if (autoEndTurn) h.currentTurn :+ toUci else h.lastTurn,
-      currentTurn = if (autoEndTurn) List() else h.currentTurn :+ toUci
+      currentTurn = if (autoEndTurn) List() else h.currentTurn :+ toUci,
+      halfMoveClock = h.halfMoveClock + (if (autoEndTurn && piece.player == P2) 1 else 0)
     )
   }
 
