@@ -93,8 +93,7 @@ object Replay {
       orig = orig,
       dest = dest,
       situationBefore = before.situation,
-      // TODO implement properly
-      after = before.situation.board,
+      after = before.situation.board.variant.boardAfter(before.situation, Some(orig), dest),
       autoEndTurn = endTurn,
       capture = None,
       promotion = None
@@ -110,8 +109,7 @@ object Replay {
       piece = Piece(before.situation.player, role),
       pos = dest,
       situationBefore = before.situation,
-      // TODO implement properly
-      after = before.situation.board,
+      after = before.situation.board.variant.boardAfter(before.situation, None, dest),
       autoEndTurn = endTurn
     )
 

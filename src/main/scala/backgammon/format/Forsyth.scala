@@ -68,9 +68,8 @@ object Forsyth {
   def >>(game: Game): FEN = {
     val boardFen = boardPart(game.situation.board)
     val scoreStr = game.situation.board.history.score.fenStr
-    val player   = game.situation.player.fold('S', 'N')
-    val moves    = game.situation.board.history.halfMoveClock
-    FEN(s"${boardFen} ${scoreStr} ${player} ${moves}")
+    val player   = game.situation.player.fold('1', '2')
+    FEN(s"${boardFen} ${scoreStr} ${player} ${game.situation.board.unusedDiceStr}")
   }
 
   def exportBoard(board: Board): String = {

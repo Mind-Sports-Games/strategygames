@@ -25,6 +25,8 @@ case class Board(
 
   def useDie(die: Int): Board = copy(unusedDice = unusedDice.diff(List(die)))
 
+  def unusedDiceStr: String = unusedDice.mkString("|")
+
   def piecesOnBar(player: Player): Boolean =
     pocketData.fold(false){ pocketData => pocketData.pockets(player).roles.nonEmpty }
 
