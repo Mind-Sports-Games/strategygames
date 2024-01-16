@@ -7,6 +7,7 @@ import ornicar.scalalib.Zero
 
 sealed trait Role {
   val forsyth: Char
+  val forsythUpper: Char
   // lazy val forsythUpper: Char = forsyth.toUpper //this contradicts what the piece is now!
   lazy val pgn: Char              = forsyth
   lazy val name                   = toString
@@ -23,8 +24,9 @@ sealed trait Role {
 sealed trait PromotableRole extends Role
 
 case object Stone extends Role {
-  val forsyth   = 's'
-  val binaryInt = 0
+  val forsyth      = 's'
+  val forsythUpper = 'S'
+  val binaryInt    = 0
 }
 
 object Role {

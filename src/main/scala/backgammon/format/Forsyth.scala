@@ -67,26 +67,28 @@ object Forsyth {
 
   def >>(game: Game): FEN = {
     val boardFen   = boardPart(game.situation.board)
+    val pocketFen  = pocketPart(game.situation.board)
     val scoreStr   = game.situation.board.history.score.fenStr
     val player     = game.situation.player.fold('w', 'b')
     val unusedDice = game.situation.board.unusedDiceStr
     val usedDice   = game.situation.board.usedDiceStr
     val moves      = game.situation.board.history.halfMoveClock
-    FEN(s"${boardFen} ${scoreStr} ${player} ${unusedDice} ${usedDice} ${moves}")
+    FEN(s"${boardFen}[${pocketFen}] ${scoreStr} ${player} ${unusedDice} ${usedDice} ${moves}")
   }
 
   def exportBoard(board: Board): String = {
-    val boardFen = boardPart(board)
-    val scoreStr = board.history.score.fenStr
-    s"${boardFen} ${scoreStr}"
+    val boardFen  = boardPart(board)
+    val pocketFen = pocketPart(board)
+    val scoreStr  = board.history.score.fenStr
+    s"${boardFen}[${pocketFen}] ${scoreStr}"
   }
 
   def boardPart(board: Board): String = {
     val fen   = new scala.collection.mutable.StringBuilder(70)
     var empty = 0
-    for (y <- Rank.allReversed) {
+    for (y <- Rank.all) {
       empty = 0
-      val files = if (y.index == 0) File.all else File.allReversed
+      val files = if (y.index == 0) File.allReversed else File.all
       for (x <- files) {
         board(x, y) match {
           case None                 => empty = empty + 1
@@ -96,7 +98,7 @@ object Forsyth {
               empty = 0
             }
             if (piece.role == Role.defaultRole)
-              fen.append(s"${count}${piece.forsyth.toString.toUpperCase()},")
+              fen.append(s"${count}${piece.forsyth.toString},")
             else fen.append(s"${piece.forsyth},")
         }
       }
@@ -105,6 +107,14 @@ object Forsyth {
     }
     fen.toString.replace(",/", "/").dropRight(1)
   }
+
+  def pocketPart(board: Board) =
+    board.pocketData match {
+      case Some(PocketData(pockets)) =>
+        pockets.p1.roles.map(_.forsyth).map(_.toUpper).mkString +
+          pockets.p2.roles.map(_.forsyth).mkString
+      case _                         => ""
+    }
 
   def boardAndPlayer(situation: Situation): String =
     boardAndPlayer(situation.board, situation.player)

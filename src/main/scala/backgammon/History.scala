@@ -10,7 +10,8 @@ case class History(
     positionHashes: PositionHash = Array.empty,
     score: Score = Score(0, 0),
     // this might be tracking fullMove for Backgammon
-    halfMoveClock: Int = 0
+    // TODO is this inconsistent with chess for default?
+    halfMoveClock: Int = 1
 ) {
 
   lazy val lastAction: Option[Uci] =
