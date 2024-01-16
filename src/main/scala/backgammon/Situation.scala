@@ -20,6 +20,8 @@ case class Situation(board: Board, player: Player) {
 
   def dropsAsDrops: List[Drop] = board.variant.validDrops(this)
 
+  def canRollDice: Boolean = board.variant.validDiceRolls(this).nonEmpty
+
   def history = board.history
 
   // TODO: Implement
