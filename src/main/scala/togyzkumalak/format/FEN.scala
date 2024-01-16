@@ -49,9 +49,10 @@ final case class FEN(value: String) extends AnyVal {
         Pos(index) -> (if (stones == -1) (Tuzdik, 1)
                        else (Stone, stones))
       }
-      .map {
-        case (Some(pos), (r, c)) if r == Tuzdik => (pos -> (Piece(!pos.player, r), c))
-        case (Some(pos), (r, c))                => (pos -> (Piece(pos.player, r), c))
+      .flatMap {
+        case (Some(pos), (r, c)) if r == Tuzdik => Some((pos -> Tuple2(Piece(!pos.player, r), c)))
+        case (Some(pos), (r, c))                => Some((pos -> Tuple2(Piece(pos.player, r), c)))
+        case _                                  => None
       }
       .toMap
 

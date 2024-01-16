@@ -4,7 +4,6 @@ import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
-import strategygames.Player
 import strategygames.format.pgn.San
 import strategygames.fairysf.format.pgn.{ Parser, Reader }
 import strategygames.fairysf.format.{ FEN, Forsyth, Uci }
@@ -255,8 +254,10 @@ object Replay {
         val fairyUcis       = Parser.flatActionStrsToFairyUciMoves(actionStrs.flatten)
         val firstFairyUci   = fairyUcis.headOption.toList
         val pairedFairyUcis = if (fairyUcis == firstFairyUci) List() else fairyUcis.sliding(2)
-        (firstFairyUci.map(parseFairyUci)) ::: pairedFairyUcis.map { case List(prev, fairyUci) =>
-          parseFairyUciWithPrevious(fairyUci, Some(prev))
+        (firstFairyUci.map(parseFairyUci)) ::: pairedFairyUcis.flatMap {
+          case List(prev, fairyUci) =>
+            Some(parseFairyUciWithPrevious(fairyUci, Some(prev)))
+          case _                    => None
         }.toList
       } else {
         // We flatten actionStrs and handle as non multimove as these variants are

@@ -4,7 +4,7 @@ import strategygames.{
   Action => StratAction,
   ActionStrs,
   ByoyomiClock,
-  FischerClock,
+  Clock,
   Move => StratMove,
   Situation => StratSituation
 }
@@ -113,7 +113,7 @@ object Reader {
       startedAtPly = g.plies,
       startedAtTurn = g.turnCount,
       clock = tags.clockConfig.flatMap {
-        case fc: FischerClock.Config => Some(FischerClock.apply(fc))
+        case fc: Clock.Config        => Some(Clock.apply(fc))
         case bc: ByoyomiClock.Config => Some(ByoyomiClock.apply(bc))
         case _                       => None
       }

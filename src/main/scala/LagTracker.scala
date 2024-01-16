@@ -12,6 +12,7 @@ final case class LagTracker(
     compEstOvers: Centis = Centis(0),
     compEstimate: Option[Centis] = None
 ) {
+  // TODO: This is also the state machine from the book, should also be refactored to make use of it.
   def onMove(lag: Centis) = {
     val comp     = lag atMost quota
     val uncomped = lag - comp
@@ -20,7 +21,7 @@ final case class LagTracker(
     (
       comp,
       copy(
-        quota = (quota + quotaGain - comp) atMost quotaMax,
+        quota = (quota + quotaGain - comp).atMost(quotaMax),
         uncompStats = {
           // start recording after first uncomp.
           if (uncomped == Centis(0) && uncompStats.samples == 0) uncompStats
@@ -37,7 +38,7 @@ final case class LagTracker(
     val e = lagEstimator.record((lag atMost quotaMax).centis.toFloat)
     copy(
       lagEstimator = e,
-      compEstimate = Option(Centis(e.mean - .8f * e.deviation).nonNeg atMost quota)
+      compEstimate = Option(Centis(e.mean - .8f * e.deviation).nonNeg.atMost(quota))
     )
   }
 

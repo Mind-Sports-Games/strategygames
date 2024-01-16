@@ -9,7 +9,7 @@ case class DiceRoll(
     after: Board,
     autoEndTurn: Boolean,
     metrics: MoveMetrics = MoveMetrics()
-) extends Action(situationBefore, after, metrics) {
+) extends Action(situationBefore) {
 
   def playerAfter = if (autoEndTurn) !situationBefore.player else situationBefore.player
 

@@ -104,7 +104,7 @@ object Parser {
     def apply(pdn: String): Validated[String, (InitialPosition, List[StrMove], Option[Tag])] =
       parseAll(strMoves, pdn) match {
         case Success((init, moves, result), _) =>
-          valid(init, moves, result map { r => Tag(_.Result, r) })
+          valid((init, moves, result.map { r => Tag(_.Result, r) }))
         case err                               =>
           invalid("Cannot parse moves: %s\n%s".format(err.toString, pdn))
       }

@@ -5,7 +5,7 @@ import org.playstrategy.FairyStockfish
 import org.specs2.matcher.ValidatedMatchers
 import org.specs2.mutable.Specification
 
-class FairySfTest extends Specification with ValidatedMatchers {
+class FairySFTestInit extends Specification with ValidatedMatchers {
 
   "fairystockfish" should {
     "be inititalized" in {

@@ -1,6 +1,7 @@
 package strategygames.togyzkumalak.format
 import strategygames.togyzkumalak._
 
+import scala.annotation.nowarn
 import strategygames.GameFamily
 
 import cats.data.Validated
@@ -65,7 +66,7 @@ object Uci {
         dest <- move lift 1 flatMap Pos.piotr
       } yield Move(orig, dest, promotion = None)
 
-    def fromStrings(gf: GameFamily, origS: String, destS: String, promS: Option[String]) =
+    def fromStrings(@nowarn gf: GameFamily, origS: String, destS: String, @nowarn promS: Option[String]) =
       for {
         orig     <- Pos.fromKey(origS)
         dest     <- Pos.fromKey(destS)

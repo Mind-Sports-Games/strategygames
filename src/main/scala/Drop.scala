@@ -1,7 +1,5 @@
 package strategygames
 
-import cats.syntax.option.none
-
 import strategygames.format.Uci
 
 sealed abstract class Drop(
@@ -11,7 +9,7 @@ sealed abstract class Drop(
     val after: Board,
     val autoEndTurn: Boolean,
     val metrics: MoveMetrics = MoveMetrics()
-) extends Action(situationBefore, after, metrics) {
+) extends Action(situationBefore) {
 
   def situationAfter: Situation
 

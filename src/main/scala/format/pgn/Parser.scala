@@ -1,13 +1,7 @@
 package strategygames
 package format.pgn
 
-import strategygames.variant.Variant
-
 import scala.util.parsing.combinator._
-import cats.data.Validated
-import cats.data.Validated.{ invalid, valid }
-import cats.implicits._
-import scala.util.matching.Regex
 
 // http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm
 object Parser {

@@ -20,7 +20,7 @@ case class Piece(player: Player, role: Role) {
     else if (role == King) GhostKing
     else role
 
-  override def toString = (player + "-" + role).toLowerCase
+  override def toString = s"${player}-${role}".toLowerCase
 }
 
 object Piece {

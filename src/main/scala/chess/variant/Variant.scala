@@ -5,7 +5,7 @@ import cats.syntax.option._
 import scala.annotation.nowarn
 
 import strategygames.chess._
-import strategygames.chess.format.FEN
+import strategygames.chess.format.{ FEN, Uci }
 import strategygames.{ GameFamily, Player }
 
 // Correctness depends on singletons for each variant ID
@@ -89,7 +89,7 @@ abstract class Variant private[variant] (
 
   def kingSafety(m: Move, filter: Piece => Boolean, kingPos: Option[Pos]): Boolean =
     ! {
-      kingPos exists { kingThreatened(m.after, m.situationAfter.player, _, filter) }
+      kingPos exists { kingThreatened(m.after, m.playerAfter, _, filter) }
     }
 
   def kingSafety(a: Actor, m: Move): Boolean =
@@ -133,7 +133,8 @@ abstract class Variant private[variant] (
   def diceRoll(situation: Situation, dice: List[Int]): Validated[String, DiceRoll] =
     Validated.invalid(s"$this variant cannot roll dice $situation $dice")
 
-  def possibleDropsByRole(situation: Situation): Option[Map[Role, List[Pos]]] = None // override in crazyhouse
+  def possibleDropsByRole(@nowarn situation: Situation): Option[Map[Role, List[Pos]]] =
+    None // override in crazyhouse
 
   def staleMate(situation: Situation): Boolean = !situation.check && situation.moves.isEmpty
 
@@ -168,6 +169,26 @@ abstract class Variant private[variant] (
     */
   def opponentHasInsufficientMaterial(situation: Situation) =
     InsufficientMatingMaterial(situation.board, !situation.player)
+
+  def enPassantSquares(situation: Situation): List[Pos] =
+    // Before potentially expensive move generation, first ensure some basic
+    // conditions are met.
+    situation.history.lastTurn.flatMap {
+      case move: Uci.Move =>
+        if (
+          move.dest.yDist(move.orig) == 2 &&
+          situation.board(move.dest).exists(_.is(Pawn)) &&
+          List(
+            move.dest.file.offset(-1),
+            move.dest.file.offset(1)
+          ).flatten
+            .flatMap(situation.board(_, Rank.passablePawnRank(situation.player)))
+            .exists(_ == Piece(situation.player, Pawn))
+        )
+          situation.moves.values.flatten.find(_.enpassant).map(_.dest)
+        else None
+      case _              => None
+    }
 
   // Some variants have an extra effect on the board on a move. For example, in Atomic, some
   // pieces surrounding a capture explode
@@ -224,7 +245,7 @@ abstract class Variant private[variant] (
   def isUnmovedPawn(player: Player, pos: Pos) = pos.rank == player.fold(Rank.Second, Rank.Seventh)
 
   // override on multiaction variants
-  def lastActionOfTurn(situation: Situation): Boolean = true
+  def lastActionOfTurn(@nowarn situation: Situation): Boolean = true
 
   override def toString = s"Variant($name)"
 
@@ -299,7 +320,7 @@ object Variant {
         case Rank.First   => Piece(P1, rank(x.index))
         case Rank.Second  => Piece(P1, Pawn)
         case Rank.Seventh => Piece(P2, Pawn)
-        case Rank.Eighth  => Piece(P2, rank(x.index))
+        case _            => Piece(P2, rank(x.index))
       })
     }).toMap
 }

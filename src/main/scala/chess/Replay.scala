@@ -4,7 +4,6 @@ import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
-import strategygames.Player
 import strategygames.format.pgn.San
 import strategygames.chess.format.pgn.{ Parser, Reader }
 import strategygames.format.pgn.{ Tag, Tags }

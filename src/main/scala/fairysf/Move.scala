@@ -1,6 +1,7 @@
 package strategygames.fairysf
 import strategygames.MoveMetrics
 
+import scala.annotation.nowarn
 import strategygames.fairysf.format.Uci
 
 case class Move(
@@ -15,10 +16,17 @@ case class Move(
     castle: Option[((Pos, Pos), (Pos, Pos))],
     enpassant: Boolean,
     metrics: MoveMetrics = MoveMetrics()
-) extends Action(situationBefore, after, metrics) {
+) extends Action(situationBefore) {
 
   def situationAfter =
     Situation(finalizeAfter, if (autoEndTurn) !piece.player else piece.player)
+
+  def finalizeAfter: Board = after updateHistory { h =>
+    h.copy(
+      lastTurn = if (autoEndTurn) h.currentTurn :+ toUci else h.lastTurn,
+      currentTurn = if (autoEndTurn) List() else h.currentTurn :+ toUci
+    )
+  }
 
   def applyVariantEffect: Move = before.variant addVariantEffect this
 
@@ -37,7 +45,7 @@ case class Move(
 
   def player = piece.player
 
-  def withPromotion(op: Option[PromotableRole]): Option[Move] = None
+  def withPromotion(@nowarn op: Option[PromotableRole]): Option[Move] = None
 
   def withMetrics(m: MoveMetrics) = copy(metrics = m)
 

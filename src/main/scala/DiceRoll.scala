@@ -10,7 +10,7 @@ sealed abstract class DiceRoll(
     val after: Board,
     val autoEndTurn: Boolean,
     val metrics: MoveMetrics = MoveMetrics()
-) extends Action(situationBefore, after, metrics) {
+) extends Action(situationBefore) {
 
   def situationAfter: Situation
 

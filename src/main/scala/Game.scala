@@ -9,7 +9,7 @@ import strategygames.format.{ FEN, Uci }
 abstract class Game(
     val situation: Situation,
     val actionStrs: VActionStrs = Vector(),
-    val clock: Option[Clock] = None,
+    val clock: Option[ClockBase] = None,
     // TODO We can look to remove 'plies' when draughts is converted to multiaction?
     // as plies will then be the same as actionStrs.flatten.size + startedAtPly
     val plies: Int = 0, // this was turns
@@ -150,9 +150,9 @@ abstract class Game(
   // Because I"m unsure how to properly write a single, generic copy
   // type signature, we're getting individual ones for how we use it.
   // TODO: figure out if we can properly make this generic
-  def copy(clock: Option[Clock]): Game
+  def copy(clock: Option[ClockBase]): Game
   def copy(plies: Int, turnCount: Int, startedAtPly: Int, startedAtTurn: Int): Game
-  def copy(clock: Option[Clock], plies: Int, turnCount: Int, startedAtPly: Int, startedAtTurn: Int): Game
+  def copy(clock: Option[ClockBase], plies: Int, turnCount: Int, startedAtPly: Int, startedAtTurn: Int): Game
   def copy(situation: Situation, plies: Int, turnCount: Int): Game
   def copy(situation: Situation): Game
 
@@ -251,7 +251,7 @@ object Game {
     ): Validated[String, (Game, SelectSquares)] =
       sys.error("Can't selectSquares in chess")
 
-    def copy(clock: Option[Clock]): Game =
+    def copy(clock: Option[ClockBase]): Game =
       Chess(g.copy(clock = clock))
 
     def copy(plies: Int, turnCount: Int, startedAtPly: Int, startedAtTurn: Int): Game =
@@ -265,7 +265,7 @@ object Game {
       )
 
     def copy(
-        clock: Option[Clock],
+        clock: Option[ClockBase],
         plies: Int,
         turnCount: Int,
         startedAtPly: Int,
@@ -385,7 +385,7 @@ object Game {
     ): Validated[String, (Game, SelectSquares)] =
       sys.error("Can't selectSquares in draughts")
 
-    def copy(clock: Option[Clock]): Game =
+    def copy(clock: Option[ClockBase]): Game =
       Draughts(g.copy(clock = clock))
 
     def copy(plies: Int, turnCount: Int, startedAtPly: Int, startedAtTurn: Int): Game =
@@ -399,7 +399,7 @@ object Game {
       )
 
     def copy(
-        clock: Option[Clock],
+        clock: Option[ClockBase],
         plies: Int,
         turnCount: Int,
         startedAtPly: Int,
@@ -503,7 +503,7 @@ object Game {
     ): Validated[String, (Game, SelectSquares)] =
       sys.error("Can't selectSquares in fairysf")
 
-    def copy(clock: Option[Clock]): Game =
+    def copy(clock: Option[ClockBase]): Game =
       FairySF(g.copy(clock = clock))
 
     def copy(plies: Int, turnCount: Int, startedAtPly: Int, startedAtTurn: Int): Game =
@@ -517,7 +517,7 @@ object Game {
       )
 
     def copy(
-        clock: Option[Clock],
+        clock: Option[ClockBase],
         plies: Int,
         turnCount: Int,
         startedAtPly: Int,
@@ -607,7 +607,7 @@ object Game {
     ): Validated[String, (Game, SelectSquares)] =
       sys.error("Can't selectSquares in Samurai")
 
-    def copy(clock: Option[Clock]): Game =
+    def copy(clock: Option[ClockBase]): Game =
       Samurai(g.copy(clock = clock))
 
     def copy(plies: Int, turnCount: Int, startedAtPly: Int, startedAtTurn: Int): Game =
@@ -621,7 +621,7 @@ object Game {
       )
 
     def copy(
-        clock: Option[Clock],
+        clock: Option[ClockBase],
         plies: Int,
         turnCount: Int,
         startedAtPly: Int,
@@ -710,7 +710,7 @@ object Game {
     ): Validated[String, (Game, SelectSquares)] =
       sys.error("Can't selectSquares in Togyzkumalak")
 
-    def copy(clock: Option[Clock]): Game =
+    def copy(clock: Option[ClockBase]): Game =
       Togyzkumalak(g.copy(clock = clock))
 
     def copy(plies: Int, turnCount: Int, startedAtPly: Int, startedAtTurn: Int): Game =
@@ -724,7 +724,7 @@ object Game {
       )
 
     def copy(
-        clock: Option[Clock],
+        clock: Option[ClockBase],
         plies: Int,
         turnCount: Int,
         startedAtPly: Int,
@@ -823,7 +823,7 @@ object Game {
         .map(t => (Go(t._1), SelectSquares.Go(t._2)))
         .toValidated
 
-    def copy(clock: Option[Clock]): Game = Go(g.copy(clock = clock))
+    def copy(clock: Option[ClockBase]): Game = Go(g.copy(clock = clock))
 
     def copy(plies: Int, turnCount: Int, startedAtPly: Int, startedAtTurn: Int): Game =
       Go(
@@ -836,7 +836,7 @@ object Game {
       )
 
     def copy(
-        clock: Option[Clock],
+        clock: Option[ClockBase],
         plies: Int,
         turnCount: Int,
         startedAtPly: Int,
@@ -927,7 +927,7 @@ object Game {
     ): Validated[String, (Game, SelectSquares)] =
       sys.error("Can't selectSquares in Backgammon")
 
-    def copy(clock: Option[Clock]): Game =
+    def copy(clock: Option[ClockBase]): Game =
       Backgammon(g.copy(clock = clock))
 
     def copy(plies: Int, turnCount: Int, startedAtPly: Int, startedAtTurn: Int): Game =
@@ -941,7 +941,7 @@ object Game {
       )
 
     def copy(
-        clock: Option[Clock],
+        clock: Option[ClockBase],
         plies: Int,
         turnCount: Int,
         startedAtPly: Int,
@@ -986,7 +986,7 @@ object Game {
       lib: GameLogic,
       situation: Situation,
       actionStrs: VActionStrs = Vector(),
-      clock: Option[Clock] = None,
+      clock: Option[ClockBase] = None,
       plies: Int = 0,
       turnCount: Int = 0,
       startedAtPly: Int = 0,

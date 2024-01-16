@@ -73,7 +73,7 @@ case class Board(
 
   def materialImbalance: Int = variant.materialImbalance(this)
 
-  override def toString = s"$variant Position after ${history.lastMove}"
+  override def toString = s"$variant Position after ${history.recentTurnUciString}"
 }
 
 object Board {

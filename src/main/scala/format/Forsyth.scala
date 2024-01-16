@@ -1,6 +1,5 @@
 package strategygames.format
 
-import cats.implicits._
 import strategygames._
 import strategygames.variant.Variant
 

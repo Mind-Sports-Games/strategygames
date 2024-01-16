@@ -111,6 +111,7 @@ object Hash {
         go.Hash.get(situation, table)
       case (GameLogic.Backgammon(), Situation.Backgammon(situation), BackgammonZobristConstants(table)) =>
         backgammon.Hash.get(situation, table)
+      case _                                                                                            => sys.error("Invalid lib, situation and table combination")
     }
 
   private val h = new Hash(size)

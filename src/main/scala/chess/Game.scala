@@ -1,5 +1,5 @@
 package strategygames.chess
-import strategygames.{ Clock, MoveMetrics, Player, VActionStrs }
+import strategygames.{ ClockBase, MoveMetrics, Player, VActionStrs }
 
 import cats.data.Validated
 
@@ -9,7 +9,7 @@ import strategygames.chess.format.{ pgn, Uci }
 case class Game(
     situation: Situation,
     actionStrs: VActionStrs = Vector(),
-    clock: Option[Clock] = None,
+    clock: Option[ClockBase] = None,
     plies: Int = 0,
     turnCount: Int = 0,
     startedAtPly: Int = 0,

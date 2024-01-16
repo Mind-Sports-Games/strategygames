@@ -161,7 +161,7 @@ case class Board(
 
   // used for multiaction variants like Monster Chess.
   // Won't always produce a result for Atomic - but this isnt needed for that variant
-  def lastActionPlayer: Option[Player] = history.lastMove
+  def lastActionPlayer: Option[Player] = history.lastAction
     .map {
       case m: Uci.Move => m.dest
       case d: Uci.Drop => d.pos
@@ -199,7 +199,7 @@ case class Board(
     else
       diagOccupation(pos, _.upLeft) ++ diagOccupation(pos, _.downRight)
 
-  override def toString = s"$variant Position after ${history.lastMove}\n$visual"
+  override def toString = s"$variant Position after ${history.recentTurnUciString}\n$visual"
 }
 
 object Board {

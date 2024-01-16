@@ -1,5 +1,6 @@
 package strategygames.format
 
+import scala.annotation.nowarn
 import strategygames._
 import strategygames.variant.Variant
 
@@ -491,6 +492,7 @@ object Uci {
       case GameLogic.Samurai()      => samurai.format.Uci.Move(move).map(SamuraiMove)
       case GameLogic.Togyzkumalak() => togyzkumalak.format.Uci.Move(move).map(TogyzkumalakMove)
       case GameLogic.Backgammon()   => backgammon.format.Uci.Move(move).map(BackgammonMove)
+      case _                        => sys.error("Invalid lib gf and move combo for Uci")
     }
 
     def piotr(lib: GameLogic, gf: GameFamily, move: String): Option[Move] = lib match {
@@ -500,6 +502,7 @@ object Uci {
       case GameLogic.Samurai()      => samurai.format.Uci.Move.piotr(move).map(SamuraiMove)
       case GameLogic.Togyzkumalak() => togyzkumalak.format.Uci.Move.piotr(move).map(TogyzkumalakMove)
       case GameLogic.Backgammon()   => backgammon.format.Uci.Move.piotr(move).map(BackgammonMove)
+      case _                        => sys.error("Invalid lib gf and move combo for piotr")
     }
 
     def fromStrings(
@@ -545,7 +548,7 @@ object Uci {
 
   object Pass {
 
-    def apply(lib: GameLogic, gf: GameFamily): Option[Pass] =
+    def apply(lib: GameLogic, @nowarn gf: GameFamily): Option[Pass] =
       lib match {
         case GameLogic.Draughts()     => None
         case GameLogic.Samurai()      => None
@@ -560,7 +563,7 @@ object Uci {
 
   object SelectSquares {
 
-    def fromSquares(lib: GameLogic, gf: GameFamily, squares: List[Pos]): Option[SelectSquares] =
+    def fromSquares(lib: GameLogic, @nowarn gf: GameFamily, squares: List[Pos]): Option[SelectSquares] =
       lib match {
         case GameLogic.Draughts()     => None
         case GameLogic.Samurai()      => None
@@ -693,6 +696,7 @@ object Uci {
     case (GameLogic.Go(), strategygames.Drop.Go(drop))                 => GoDrop(go.format.Uci(drop))
     case (GameLogic.Backgammon(), strategygames.Drop.Backgammon(drop)) =>
       BackgammonDrop(backgammon.format.Uci(drop))
+    case _                                                             => sys.error(s"Drop not implemented for ${lib}")
   }
 
   def apply(lib: GameLogic, pass: strategygames.Pass) = (lib, pass) match {

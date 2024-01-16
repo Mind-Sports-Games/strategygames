@@ -3,11 +3,11 @@ import strategygames.togyzkumalak.format.Uci
 import strategygames.MoveMetrics
 import strategygames.Player
 
-abstract class Action(situationBefore: Situation, after: Board, metrics: MoveMetrics = MoveMetrics()) {
+abstract class Action(situationBefore: Situation) {
   def before = situationBefore.board
 
   def situationAfter: Situation
-  def finalizeAfter: Board = after
+  def finalizeAfter: Board
 
   def player: Player
 

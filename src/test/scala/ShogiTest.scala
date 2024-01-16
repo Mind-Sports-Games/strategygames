@@ -44,7 +44,7 @@ trait ShogiTest extends Specification with ValidatedMatchers {
     //): Validated[String, Game] =
       //game.applyDrop(Uci.Drop(role, dest))
 
-    def withClock(c: Clock) = game.copy(clock = Some(c))
+    def withClock(c: ClockBase) = game.copy(clock = Some(c))
   }
 
   implicit def richGame(game: Game) = RichGame(game)
