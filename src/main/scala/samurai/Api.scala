@@ -133,7 +133,7 @@ object Api {
     }
 
     private def finalStoneScore(currentP1Score: Int, currentP2Score: Int, playerIndex: String): Int = {
-      if (position.hasEnded() && currentP1Score < 25 && currentP2Score < 25) {
+      if (gameEnd && currentP1Score < 25 && currentP2Score < 25) {
         val p1SideStonesLeft = owareDiagram.split('-').take(6).map(_.toInt).sum
         val p2SideStonesLeft = owareDiagram.split('-').drop(6).take(6).map(_.toInt).sum
         playerIndex match {
@@ -168,12 +168,16 @@ object Api {
     lazy val pieceMap: PieceMap = convertPieceMapFromFen(fenString)
 
     lazy val gameResult: GameResult =
-      GameResult.resultFromInt(position.outcome(), position.hasEnded())
+      GameResult.resultFromInt(position.outcome(), gameEnd)
 
-    lazy val gameEnd: Boolean = position.hasEnded()
+    lazy val gameEnd: Boolean = position.hasEnded() && (!position.isRepetition() || isRepetition)
 
     lazy val gameOutcome: Int      = position.outcome()
-    lazy val isRepetition: Boolean = position.isRepetition()
+    lazy val isRepetition: Boolean = position.isRepetition() && !allSeedsOnSameSide
+
+    lazy val allSeedsOnSameSide: Boolean = toPosition
+      .take(variant.boardSize.width)
+      .sum === 0 || toPosition.drop(variant.boardSize.width).take(variant.boardSize.width).sum === 0;
 
     val legalMoves: Array[Int] = {
       position.resetCursor()
