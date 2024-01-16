@@ -60,112 +60,136 @@ abstract class Variant private[variant] (
       case None       => sys.error(s"Invalid dest from orig(${pos.index}) in togyz move(${count})")
     }
 
-  //returns the updated piecemap for pieces on the board and an optional captured piece to put in the pocket
-  def piecesAfterAction(pieces: PieceMap, player: Player, orig: Option[Pos], dest: Pos): (PieceMap, Option[Piece]) = {
+  // returns the updated piecemap for pieces on the board and an optional captured piece to put in the pocket
+  def piecesAfterAction(
+      pieces: PieceMap,
+      player: Player,
+      orig: Option[Pos],
+      dest: Pos
+  ): (PieceMap, Option[Piece]) = {
     var capture = false
-    val p1 = pieces.map {
-      //adding a piece to a stack we already own
-      case (pos, posInfo) if pos == dest && posInfo._1.player == player =>
+    val p1      = pieces.map {
+      // adding a piece to a stack we already own
+      case (pos, posInfo) if pos == dest && posInfo._1.player == player                    =>
         (pos, (posInfo._1, posInfo._2 + 1))
-      //adding a piece to a square where opponent has an unguarded piece
+      // adding a piece to a square where opponent has an unguarded piece
       case (pos, posInfo) if pos == dest && posInfo._1.player != player && posInfo._2 == 1 => {
         capture = true
         (pos, (Piece(player, Role.defaultRole), 1))
       }
-      //removing a piece from a square where we still have more pieces on it
-      case (pos, posInfo) if Some(pos) == orig && posInfo._2 > 1 =>
+      // removing a piece from a square where we still have more pieces on it
+      case (pos, posInfo) if Some(pos) == orig && posInfo._2 > 1                           =>
         (pos, (posInfo._1, posInfo._2 - 1))
-      case (pos, posInfo) => (pos, posInfo)
+      case (pos, posInfo)                                                                  => (pos, posInfo)
     }
-    //adding a piece to a previously unoccupied square
-    val p2 = if (pieces.get(dest).isEmpty) p1 + (dest -> (Piece(player, Role.defaultRole), 1)) else p1
-    //removing a piece from a square that is now free
-    val p3 = orig match {
-      case Some(pos) => pieces.get(pos) match {
-        case Some((_, count)) if count == 1 => p2 - pos
-        case _ => p2
-      }
-      case _ => p2
+    // adding a piece to a previously unoccupied square
+    val p2      = if (pieces.get(dest).isEmpty) p1 + (dest -> (Piece(player, Role.defaultRole), 1)) else p1
+    // removing a piece from a square that is now free
+    val p3      = orig match {
+      case Some(pos) =>
+        pieces.get(pos) match {
+          case Some((_, count)) if count == 1 => p2 - pos
+          case _                              => p2
+        }
+      case _         => p2
     }
     (p3, if (capture) Some(Piece(!player, Role.defaultRole)) else None)
   }
 
   def boardAfter(situation: Situation, orig: Option[Pos], dest: Pos): Board = {
-    val (pieces, capture) = piecesAfterAction(situation.board.pieces, situation.player, orig, dest)
-    val pocketsAfterDrop = orig match {
+    val (pieces, capture)   = piecesAfterAction(situation.board.pieces, situation.player, orig, dest)
+    val pocketsAfterDrop    = orig match {
       case None => situation.board.pocketData.flatMap(_.drop(Piece(situation.player, Role.defaultRole)))
-      case _ => situation.board.pocketData
+      case _    => situation.board.pocketData
     }
     val pocketsAfterCapture = capture match {
       case Some(piece) => situation.board.pocketData.map(_.store(piece))
-      case None => situation.board.pocketData
+      case None        => situation.board.pocketData
     }
-    situation.board.copy(
-      pieces = pieces,
-      pocketData = pocketsAfterCapture
-    ).withHistory(
-      situation.history.copy(
-        score = Score(
-          //need to actually update here
-          situation.history.score.p1,
-          situation.history.score.p2
+    situation.board
+      .copy(
+        pieces = pieces,
+        pocketData = pocketsAfterCapture
+      )
+      .withHistory(
+        situation.history.copy(
+          score = Score(
+            // need to actually update here
+            situation.history.score.p1,
+            situation.history.score.p2
+          )
         )
       )
-    )
   }
 
   def validMoves(situation: Situation): Map[Pos, List[Move]] =
     if (situation.board.unusedDice.nonEmpty && !situation.board.piecesOnBar(situation.player))
-      situation.board.piecesOf(situation.player).map{ case (pos, _) =>
-        situation.board.unusedDice.flatMap { die =>
-          Pos(pos.index + situation.board.posIndexDirection(situation.player) * die).map((die, pos, _))
-        }.filterNot{
-        case (_, _, dest) => {
-          situation.board.pieces.get(dest) match {
-            case Some((piece, count)) => piece.player != situation.player && count > 1
-            case _                    => false
-          }
+      situation.board
+        .piecesOf(situation.player)
+        .map { case (pos, _) =>
+          situation.board.unusedDice
+            .flatMap { die =>
+              Pos(pos.index + situation.board.posIndexDirection(situation.player) * die).map((die, pos, _))
+            }
+            .filterNot {
+              case (_, _, dest) => {
+                situation.board.pieces.get(dest) match {
+                  case Some((piece, count)) => piece.player != situation.player && count > 1
+                  case _                    => false
+                }
+              }
+            }
         }
-      }}.flatten.map{ case (die, orig, dest) => (
-        orig,
-        Move(
-          piece = Piece(situation.player, Role.defaultRole),
-          orig = orig,
-          dest = dest,
-          situationBefore = situation,
-          after = boardAfter(situation, Some(orig), dest).useDie(die),
-          //might want to change this to false because turns will only end with confirmation
-          autoEndTurn = situation.board.unusedDice.size == 1,
-          //TODO review if we want to use capture and promotion fields for backgammon or not
-          capture = None,
-          promotion = None
-        )
-      )}
-      .groupBy(_._1)
-      .map { case (k, v) => (k, v.toList.map(_._2)) }
+        .flatten
+        .map { case (die, orig, dest) =>
+          (
+            orig,
+            Move(
+              piece = Piece(situation.player, Role.defaultRole),
+              orig = orig,
+              dest = dest,
+              situationBefore = situation,
+              after = boardAfter(situation, Some(orig), dest).useDie(die),
+              // might want to change this to false because turns will only end with confirmation
+              autoEndTurn = situation.board.unusedDice.size == 1,
+              // TODO review if we want to use capture and promotion fields for backgammon or not
+              capture = None,
+              promotion = None
+            )
+          )
+        }
+        .groupBy(_._1)
+        .map { case (k, v) => (k, v.toList.map(_._2)) }
     else Map.empty
 
   def validDrops(situation: Situation): List[Drop] =
     if (situation.board.unusedDice.nonEmpty && situation.board.piecesOnBar(situation.player))
-      situation.board.unusedDice.flatMap { die =>
-        Pos(situation.board.firstPosIndex(situation.player) + situation.board.posIndexDirection(situation.player) * die).map(pos => (die, pos))
-      }.filterNot{
-        case (_, pos) => {
-          situation.board.pieces.get(pos) match {
-            case Some((piece, count)) => piece.player != situation.player && count > 1
-            case None                 => false
+      situation.board.unusedDice
+        .flatMap { die =>
+          Pos(
+            situation.board.firstPosIndex(situation.player) + situation.board.posIndexDirection(
+              situation.player
+            ) * die
+          ).map(pos => (die, pos))
+        }
+        .filterNot {
+          case (_, pos) => {
+            situation.board.pieces.get(pos) match {
+              case Some((piece, count)) => piece.player != situation.player && count > 1
+              case None                 => false
+            }
           }
         }
-      }.map{ case (die, dest) =>
-        Drop(
-          piece = Piece(situation.player, Role.defaultRole),
-          pos = dest,
-          situationBefore = situation,
-          after = boardAfter(situation, None, dest).useDie(die),
-          //might want to change this to false because turns will only end with confirmation
-          autoEndTurn = situation.board.unusedDice.size == 1,
-        )
-      }
+        .map { case (die, dest) =>
+          Drop(
+            piece = Piece(situation.player, Role.defaultRole),
+            pos = dest,
+            situationBefore = situation,
+            after = boardAfter(situation, None, dest).useDie(die),
+            // might want to change this to false because turns will only end with confirmation
+            autoEndTurn = situation.board.unusedDice.size == 1
+          )
+        }
     else List.empty
 
   private def diceCombinations(diceCount: Int, diceMax: Int = 6): Iterator[List[Int]] =
@@ -177,7 +201,7 @@ abstract class Variant private[variant] (
 
   def validDiceRolls(situation: Situation): List[DiceRoll] =
     if (situation.board.unusedDice.isEmpty)
-      diceCombinations(2).toList.map{dice =>
+      diceCombinations(2).toList.map { dice =>
         DiceRoll(
           dice,
           situation,
@@ -215,7 +239,7 @@ abstract class Variant private[variant] (
       validDrops(situation).map(_.pos).some
     else None
 
-  //do we need this. always the same role
+  // do we need this. always the same role
   def possibleDropsByRole(situation: Situation): Option[Map[Role, List[Pos]]] =
     if (dropsVariant && !situation.end)
       validDrops(situation)

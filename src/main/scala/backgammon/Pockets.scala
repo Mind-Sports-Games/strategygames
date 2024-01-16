@@ -16,7 +16,7 @@ case class PocketData(
       pockets = pockets.store(
         GameLogic.Backgammon(),
         StratPiece.Backgammon(piece)
-      ),
+      )
     )
 
 }
