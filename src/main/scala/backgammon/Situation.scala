@@ -5,7 +5,7 @@ import strategygames.{ Player, Status }
 import cats.data.Validated
 import cats.implicits._
 
-import strategygames.backgammon.format.{ Forsyth, Uci }
+import strategygames.backgammon.format.{ Uci }
 
 case class Situation(board: Board, player: Player) {
 
@@ -22,18 +22,11 @@ case class Situation(board: Board, player: Player) {
 
   def canRollDice: Boolean = board.variant.validDiceRolls(this).nonEmpty
 
+  def canOnlyRollDice: Boolean = canRollDice && dropsAsDrops.isEmpty && moves.isEmpty
+
   def history = board.history
 
-  // TODO: Implement
-  private lazy val gameEnd: Boolean = false
-
-  // private lazy val gameResult: GameResult = board.apiPosition.gameResult
-
-  // private lazy val result =
-  //  if (gameEnd) gameResult
-  //  else GameResult.Ongoing()
-
-  // these dont exist in Oware. Normal ending tracked in VariantEnd
+  // these dont exist in Backgammon. Normal ending tracked in VariantEnd
   def checkMate: Boolean = false
   def staleMate: Boolean = false
 

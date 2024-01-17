@@ -21,6 +21,8 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def canRollDice: Boolean
 
+  def canOnlyRollDice: Boolean
+
   def passes: List[Pass]
 
   def selectSquaresAction: List[SelectSquares]
@@ -151,6 +153,8 @@ object Situation {
 
     def canRollDice: Boolean = s.canRollDice
 
+    def canOnlyRollDice: Boolean = s.canRollDice
+
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
@@ -243,6 +247,8 @@ object Situation {
     def selectSquaresAction: List[SelectSquares] = List.empty
 
     def canRollDice: Boolean = false
+
+    def canOnlyRollDice: Boolean = false
 
     // possibly need to do something for this
     def opponentHasInsufficientMaterial: Boolean = false
@@ -384,6 +390,8 @@ object Situation {
 
     def canRollDice: Boolean = false
 
+    def canOnlyRollDice: Boolean = false
+
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
@@ -488,6 +496,8 @@ object Situation {
 
     def canRollDice: Boolean = false
 
+    def canOnlyRollDice: Boolean = false
+
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
       sys.error("Can't do a Drop for samurai")
 
@@ -589,6 +599,8 @@ object Situation {
 
     def canRollDice: Boolean = false
 
+    def canOnlyRollDice: Boolean = false
+
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
       sys.error("Can't do a Drop for togyzkumalak")
 
@@ -688,6 +700,8 @@ object Situation {
         .fold[List[SelectSquares]](_ => List.empty, ss => List(ss))
 
     def canRollDice: Boolean = false
+
+    def canOnlyRollDice: Boolean = false
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -793,6 +807,8 @@ object Situation {
     def selectSquaresAction: List[SelectSquares] = List.empty
 
     def canRollDice: Boolean = s.canRollDice
+
+    def canOnlyRollDice: Boolean = s.canOnlyRollDice
 
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
       sys.error("Can't do a Drop for backgammon")

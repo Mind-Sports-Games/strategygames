@@ -642,6 +642,21 @@ object Uci {
 
   }
 
+  object DoRoll {
+
+    def apply(lib: GameLogic): Option[DoRoll] =
+      lib match {
+        case GameLogic.Chess()        => ChessDoRoll(chess.format.Uci.DoRoll()).some
+        case GameLogic.Draughts()     => None
+        case GameLogic.FairySF()      => None
+        case GameLogic.Samurai()      => None
+        case GameLogic.Togyzkumalak() => None
+        case GameLogic.Go()           => None
+        case GameLogic.Backgammon()   => BackgammonDoRoll(backgammon.format.Uci.DoRoll()).some
+      }
+
+  }
+
   sealed abstract class WithSan(val uci: Uci, val san: String)
 
   final case class ChessWithSan(w: chess.format.Uci.WithSan)
@@ -768,6 +783,7 @@ object Uci {
     case (GameLogic.Go(), _)                                                   => sys.error("DiceRoll not implemented for go")
     case (GameLogic.Backgammon(), strategygames.DiceRoll.Backgammon(diceRoll)) =>
       BackgammonDiceRoll(backgammon.format.Uci(diceRoll))
+    case _                                                             => sys.error(s"DiceRoll not implemented for ${lib}")
   }
 
   def apply(lib: GameLogic, gf: GameFamily, action: String): Option[Uci] = lib match {
