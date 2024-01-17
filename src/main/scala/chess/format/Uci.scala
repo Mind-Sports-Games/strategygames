@@ -96,6 +96,21 @@ object Uci {
 
   }
 
+  // this is a stub Uci case class that doesn't marry up to an Action type
+  // this stub class says i need to do a roll, i don't know the dice i have rolled
+  // its used by lila but not internally by strategygames
+  case class DoRoll() extends Uci {
+
+    def uci = "roll"
+
+    def piotr = uci
+
+    def origDest = None
+
+    def apply(situation: Situation) = sys.error("Cannot apply a DoRoll")
+
+  }
+
   case class WithSan(uci: Uci, san: String)
 
   def apply(move: strategygames.chess.Move) = Uci.Move(move.orig, move.dest, move.promotion)

@@ -374,10 +374,49 @@ object Uci {
     def toBackgammon   = dr
   }
 
+  sealed abstract class DoRoll() extends Uci {
+    def origDest: Option[(Pos, Pos)] = None
+  }
+
+  final case class ChessDoRoll(dr: chess.format.Uci.DoRoll) extends DoRoll() with Chess {
+    def uci        = dr.uci
+    def shortUci   = dr.uci
+    def fishnetUci = dr.uci
+    def piotr      = dr.piotr
+
+    val unwrap = dr
+
+    def toChess        = dr
+    def toDraughts     = sys.error("Can't make a draughts UCI from a chess UCI")
+    def toFairySF      = sys.error("Can't make a fairysf UCI from a chess UCI")
+    def toSamurai      = sys.error("Can't make a samurai UCI from a chess UCI")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a chess UCI")
+    def toGo           = sys.error("Can't make a go UCI from a chess UCI")
+    def toBackgammon   = sys.error("Can't make a backgammon UCI from a chess UCI")
+  }
+
+  final case class BackgammonDoRoll(dr: backgammon.format.Uci.DoRoll) extends DoRoll() with Backgammon {
+    def uci        = dr.uci
+    def shortUci   = dr.uci
+    def fishnetUci = dr.uci
+    def piotr      = dr.piotr
+
+    val unwrap = dr
+
+    def toChess        = sys.error("Can't make a chess UCI from a backgammon UCI")
+    def toDraughts     = sys.error("Can't make a draughts UCI from a backgammon UCI")
+    def toFairySF      = sys.error("Can't make a fairysf UCI from a backgammon UCI")
+    def toSamurai      = sys.error("Can't make a samurai UCI from a backgammon UCI")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a backgammon UCI")
+    def toGo           = sys.error("Can't make a go UCI from a backgammon UCI")
+    def toBackgammon   = dr
+  }
+
   def wrap(uci: chess.format.Uci): Uci = uci match {
     case m: chess.format.Uci.Move      => ChessMove(m)
     case d: chess.format.Uci.Drop      => ChessDrop(d)
     case dr: chess.format.Uci.DiceRoll => ChessDiceRoll(dr)
+    case dr: chess.format.Uci.DoRoll   => ChessDoRoll(dr)
   }
 
   def wrap(uci: draughts.format.Uci): Uci = uci match {
@@ -407,6 +446,7 @@ object Uci {
     case m: backgammon.format.Uci.Move      => BackgammonMove(m)
     case d: backgammon.format.Uci.Drop      => BackgammonDrop(d)
     case dr: backgammon.format.Uci.DiceRoll => BackgammonDiceRoll(dr)
+    case dr: backgammon.format.Uci.DoRoll   => BackgammonDoRoll(dr)
   }
 
   object Move {
@@ -533,7 +573,6 @@ object Uci {
         case GameLogic.Draughts()     => None
         case GameLogic.Samurai()      => None
         case GameLogic.Togyzkumalak() => None
-        case GameLogic.Backgammon()   => None
         case GameLogic.Chess()        =>
           chess.format.Uci.Drop.fromStrings(roleS, posS).map(ChessDrop)
         case GameLogic.FairySF()      =>
@@ -543,7 +582,6 @@ object Uci {
         case GameLogic.Backgammon()   =>
           backgammon.format.Uci.Drop.fromStrings(roleS, posS).map(BackgammonDrop)
       }
-
   }
 
   object Pass {
@@ -722,7 +760,8 @@ object Uci {
 
   def apply(lib: GameLogic, diceRoll: strategygames.DiceRoll) = (lib, diceRoll) match {
     case (GameLogic.Draughts(), _)                                             => sys.error("DiceRoll not implemented for Draughts")
-    case (GameLogic.Chess(), _)                                                => sys.error("DiceRoll not implemented for Chess")
+    case (GameLogic.Chess(), strategygames.DiceRoll.Chess(diceRoll))           =>
+      ChessDiceRoll(chess.format.Uci(diceRoll))
     case (GameLogic.FairySF(), _)                                              => sys.error("DiceRoll not implemented for fairysf")
     case (GameLogic.Samurai(), _)                                              => sys.error("DiceRoll not implemented for samurai")
     case (GameLogic.Togyzkumalak(), _)                                         => sys.error("DiceRoll not implemented for togyzkumalak")
@@ -781,21 +820,8 @@ object Uci {
     }
 
   def writeListPiotr(gf: GameFamily, actions: List[Uci]): String =
-    (if (actions.length > 0) {
-       actions.head match {
-         case Uci.ChessMove(_)          => s"0_${gf.id}_"
-         case Uci.ChessDrop(_)          => s"0_${gf.id}_"
-         case Uci.DraughtsMove(_)       => s"1_${gf.id}_"
-         case Uci.FairySFMove(_)        => s"2_${gf.id}_"
-         case Uci.FairySFDrop(_)        => s"2_${gf.id}_"
-         case Uci.SamuraiMove(_)        => s"3_${gf.id}_"
-         case Uci.TogyzkumalakMove(_)   => s"4_${gf.id}_"
-         case Uci.GoDrop(_)             => s"5_${gf.id}_"
-         case Uci.GoPass(_)             => s"5_${gf.id}_"
-         case Uci.GoSelectSquares(_)    => s"5_${gf.id}_"
-         case Uci.BackgammonMove(_)     => s"6_${gf.id}_"
-         case Uci.BackgammonDiceRoll(_) => s"6_${gf.id}_"
-       }
-     } else "") + (actions.map(_.piotr) mkString " ")
+    (if (actions.length > 0)
+       s"${gf.gameLogic.id}_${gf.id}_"
+     else "") + (actions.map(_.piotr) mkString " ")
 
 }

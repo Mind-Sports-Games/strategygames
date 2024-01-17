@@ -37,17 +37,15 @@ abstract class Game(
       captures: Option[List[Pos]] = None,
       partialCaptures: Boolean = false
   ): Validated[String, (Game, Action)] =
-    uci match {
-      case Uci.ChessMove(uci)        =>
+    (uci match {
+      case Uci.ChessMove(uci)                           =>
         apply(
           Pos.Chess(uci.orig),
           Pos.Chess(uci.dest),
           uci.promotion.map(Role.ChessPromotableRole),
           metrics
-        ) map { case (ncg, move) =>
-          ncg -> move
-        }
-      case Uci.DraughtsMove(uci)     =>
+        )
+      case Uci.DraughtsMove(uci)                        =>
         apply(
           Pos.Draughts(uci.orig),
           Pos.Draughts(uci.dest),
@@ -56,82 +54,78 @@ abstract class Game(
           finalSquare,
           captures,
           partialCaptures
-        ) map { case (ncg, move) =>
-          ncg -> move
-        }
-      case Uci.FairySFMove(uci)      =>
+        )
+      case Uci.FairySFMove(uci)                         =>
         apply(
           Pos.FairySF(uci.orig),
           Pos.FairySF(uci.dest),
           uci.promotion.map(Role.FairySFPromotableRole),
           metrics
-        ) map { case (ncg, move) =>
-          ncg -> move
-        }
-      case Uci.SamuraiMove(uci)      =>
+        )
+      case Uci.SamuraiMove(uci)                         =>
         apply(
           Pos.Samurai(uci.orig),
           Pos.Samurai(uci.dest),
           promotion = None,
           metrics
-        ) map { case (ncg, move) =>
-          ncg -> move
-        }
-      case Uci.TogyzkumalakMove(uci) =>
+        )
+      case Uci.TogyzkumalakMove(uci)                    =>
         apply(
           Pos.Togyzkumalak(uci.orig),
           Pos.Togyzkumalak(uci.dest),
           promotion = None,
           metrics
-        ) map { case (ncg, move) =>
-          ncg -> move
-        }
-      case Uci.BackgammonMove(uci)   =>
+        )
+      case Uci.BackgammonMove(uci)                      =>
         apply(
           Pos.Backgammon(uci.orig),
           Pos.Backgammon(uci.dest),
           promotion = None,
           metrics
-        ) map { case (ncg, move) =>
-          ncg -> move
-        }
-      case Uci.ChessDrop(uci)        =>
+        )
+      case Uci.ChessDrop(uci)                           =>
         drop(
           Role.ChessRole(uci.role),
           Pos.Chess(uci.pos),
           metrics
-        ) map { case (ncg, drop) =>
-          ncg -> drop
-        }
-      case Uci.FairySFDrop(uci)      =>
+        )
+      case Uci.FairySFDrop(uci)                         =>
         drop(
           Role.FairySFRole(uci.role),
           Pos.FairySF(uci.pos),
           metrics
-        ) map { case (ncg, drop) =>
-          ncg -> drop
-        }
-      case Uci.GoDrop(uci)           =>
+        )
+      case Uci.GoDrop(uci)                              =>
         drop(
           Role.GoRole(uci.role),
           Pos.Go(uci.pos),
           metrics
-        ) map { case (ncg, drop) =>
-          ncg -> drop
-        }
-      case Uci.GoPass(_)             =>
-        pass(
+        )
+      case Uci.BackgammonDrop(uci)                      =>
+        drop(
+          Role.BackgammonRole(uci.role),
+          Pos.Backgammon(uci.pos),
           metrics
-        ) map { case (ncg, pass) =>
-          ncg -> pass
-        }
-      case Uci.GoSelectSquares(uci)  =>
+        )
+      case Uci.GoSelectSquares(uci)                     =>
         selectSquares(
           uci.squares.map(Pos.Go(_)),
           metrics
-        ) map { case (ncg, selectSquares) =>
-          ncg -> selectSquares
-        }
+        )
+      case Uci.ChessDiceRoll(uci)                       =>
+        diceRoll(
+          uci.dice,
+          metrics
+        )
+      case Uci.BackgammonDiceRoll(uci)                  =>
+        diceRoll(
+          uci.dice,
+          metrics
+        )
+      case Uci.GoPass(_)                                => pass(metrics)
+      case Uci.ChessDoRoll(_) | Uci.BackgammonDoRoll(_) => randomizeAndApplyDiceRoll
+    }).map { case (game, action) =>
+      game -> action
     }
 
   def drop(
@@ -148,8 +142,8 @@ abstract class Game(
   ): Validated[String, (Game, SelectSquares)]
 
   def diceRoll(
-    dice: List[Int],
-    metrics: MoveMetrics = MoveMetrics()
+      dice: List[Int],
+      metrics: MoveMetrics = MoveMetrics()
   ): Validated[String, (Game, DiceRoll)]
 
   def randomizeDiceRoll: Option[DiceRoll]
@@ -261,8 +255,8 @@ object Game {
       sys.error("Can't selectSquares in chess")
 
     def diceRoll(
-      dice: List[Int],
-      metrics: MoveMetrics = MoveMetrics()
+        dice: List[Int],
+        metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, DiceRoll)] =
       sys.error("Can't diceroll in chess")
 
@@ -406,8 +400,8 @@ object Game {
       sys.error("Can't selectSquares in draughts")
 
     def diceRoll(
-      dice: List[Int],
-      metrics: MoveMetrics = MoveMetrics()
+        dice: List[Int],
+        metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, DiceRoll)] =
       sys.error("Can't diceroll in draughts")
 
@@ -535,8 +529,8 @@ object Game {
       sys.error("Can't selectSquares in fairysf")
 
     def diceRoll(
-      dice: List[Int],
-      metrics: MoveMetrics = MoveMetrics()
+        dice: List[Int],
+        metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, DiceRoll)] =
       sys.error("Can't diceroll in fairysf")
 
@@ -650,8 +644,8 @@ object Game {
       sys.error("Can't selectSquares in Samurai")
 
     def diceRoll(
-      dice: List[Int],
-      metrics: MoveMetrics = MoveMetrics()
+        dice: List[Int],
+        metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, DiceRoll)] =
       sys.error("Can't diceroll in samurai")
 
@@ -764,8 +758,8 @@ object Game {
       sys.error("Can't selectSquares in Togyzkumalak")
 
     def diceRoll(
-      dice: List[Int],
-      metrics: MoveMetrics = MoveMetrics()
+        dice: List[Int],
+        metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, DiceRoll)] =
       sys.error("Can't diceroll in togyzkumalak")
 
@@ -888,8 +882,8 @@ object Game {
         .toValidated
 
     def diceRoll(
-      dice: List[Int],
-      metrics: MoveMetrics = MoveMetrics()
+        dice: List[Int],
+        metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, DiceRoll)] =
       sys.error("Can't diceroll in Go")
 
@@ -1003,8 +997,8 @@ object Game {
       sys.error("Can't selectSquares in Backgammon")
 
     def diceRoll(
-      dice: List[Int],
-      metrics: MoveMetrics = MoveMetrics()
+        dice: List[Int],
+        metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, DiceRoll)] =
       g.diceRoll(dice, metrics)
         .toEither
@@ -1014,8 +1008,7 @@ object Game {
     def randomizeDiceRoll: Option[DiceRoll] = g.randomizeDiceRoll.map(DiceRoll.Backgammon)
 
     def randomizeAndApplyDiceRoll: Validated[String, (Game, DiceRoll)] =
-      g.randomizeAndApplyDiceRoll
-        .toEither
+      g.randomizeAndApplyDiceRoll.toEither
         .map(t => (Backgammon(t._1), DiceRoll.Backgammon(t._2)))
         .toValidated
 
