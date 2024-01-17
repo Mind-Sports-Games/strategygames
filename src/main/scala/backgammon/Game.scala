@@ -85,6 +85,12 @@ case class Game(
   def randomizeDiceRoll: Option[DiceRoll] =
     Random.shuffle(situation.board.variant.validDiceRolls(situation)).headOption
 
+  def randomizeAndApplyDiceRoll: Validated[String, (Game, DiceRoll)] =
+    randomizeDiceRoll.map(dr => (applyDiceRoll(dr), dr)) match {
+      case Some(gdr) => Validated.valid(gdr)
+      case None      => Validated.invalid(s"$situation cannot randomize a dice roll")
+    }
+
   def apply(uci: Uci.Move): Validated[String, (Game, Move)]         =
     apply(uci.orig, uci.dest, uci.promotion)
   def apply(uci: Uci.Drop): Validated[String, (Game, Drop)]         = drop(uci.role, uci.pos)

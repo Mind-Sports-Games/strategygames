@@ -154,6 +154,8 @@ abstract class Game(
 
   def randomizeDiceRoll: Option[DiceRoll]
 
+  def randomizeAndApplyDiceRoll: Validated[String, (Game, DiceRoll)]
+
   // Because I"m unsure how to properly write a single, generic copy
   // type signature, we're getting individual ones for how we use it.
   // TODO: figure out if we can properly make this generic
@@ -265,6 +267,9 @@ object Game {
       sys.error("Can't diceroll in chess")
 
     def randomizeDiceRoll: Option[DiceRoll] = None
+
+    def randomizeAndApplyDiceRoll: Validated[String, (Game, DiceRoll)] =
+      sys.error("Can't apply diceroll in chess")
 
     def copy(clock: Option[ClockBase]): Game =
       Chess(g.copy(clock = clock))
@@ -408,6 +413,9 @@ object Game {
 
     def randomizeDiceRoll: Option[DiceRoll] = None
 
+    def randomizeAndApplyDiceRoll: Validated[String, (Game, DiceRoll)] =
+      sys.error("Can't apply diceroll in draughts")
+
     def copy(clock: Option[ClockBase]): Game =
       Draughts(g.copy(clock = clock))
 
@@ -534,6 +542,9 @@ object Game {
 
     def randomizeDiceRoll: Option[DiceRoll] = None
 
+    def randomizeAndApplyDiceRoll: Validated[String, (Game, DiceRoll)] =
+      sys.error("Can't apply diceroll in fairysf")
+
     def copy(clock: Option[ClockBase]): Game =
       FairySF(g.copy(clock = clock))
 
@@ -646,6 +657,9 @@ object Game {
 
     def randomizeDiceRoll: Option[DiceRoll] = None
 
+    def randomizeAndApplyDiceRoll: Validated[String, (Game, DiceRoll)] =
+      sys.error("Can't apply diceroll in samurai")
+
     def copy(clock: Option[ClockBase]): Game =
       Samurai(g.copy(clock = clock))
 
@@ -756,6 +770,9 @@ object Game {
       sys.error("Can't diceroll in togyzkumalak")
 
     def randomizeDiceRoll: Option[DiceRoll] = None
+
+    def randomizeAndApplyDiceRoll: Validated[String, (Game, DiceRoll)] =
+      sys.error("Can't apply diceroll in togyzkumalak")
 
     def copy(clock: Option[ClockBase]): Game =
       Togyzkumalak(g.copy(clock = clock))
@@ -878,6 +895,9 @@ object Game {
 
     def randomizeDiceRoll: Option[DiceRoll] = None
 
+    def randomizeAndApplyDiceRoll: Validated[String, (Game, DiceRoll)] =
+      sys.error("Can't apply diceroll in go")
+
     def copy(clock: Option[ClockBase]): Game = Go(g.copy(clock = clock))
 
     def copy(plies: Int, turnCount: Int, startedAtPly: Int, startedAtTurn: Int): Game =
@@ -991,7 +1011,13 @@ object Game {
         .map(t => (Backgammon(t._1), DiceRoll.Backgammon(t._2)))
         .toValidated
 
-    def randomizeDiceRoll: Option[DiceRoll] = g.randomizeDiceRoll
+    def randomizeDiceRoll: Option[DiceRoll] = g.randomizeDiceRoll.map(DiceRoll.Backgammon)
+
+    def randomizeAndApplyDiceRoll: Validated[String, (Game, DiceRoll)] =
+      g.randomizeAndApplyDiceRoll
+        .toEither
+        .map(t => (Backgammon(t._1), DiceRoll.Backgammon(t._2)))
+        .toValidated
 
     def copy(clock: Option[ClockBase]): Game =
       Backgammon(g.copy(clock = clock))
