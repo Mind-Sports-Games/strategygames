@@ -783,7 +783,7 @@ object Uci {
     case (GameLogic.Go(), _)                                                   => sys.error("DiceRoll not implemented for go")
     case (GameLogic.Backgammon(), strategygames.DiceRoll.Backgammon(diceRoll)) =>
       BackgammonDiceRoll(backgammon.format.Uci(diceRoll))
-    case _                                                             => sys.error(s"DiceRoll not implemented for ${lib}")
+    case _                                                                     => sys.error(s"DiceRoll not implemented for ${lib}")
   }
 
   def apply(lib: GameLogic, gf: GameFamily, action: String): Option[Uci] = lib match {

@@ -5,7 +5,7 @@ import strategygames.{ Player, Status }
 import cats.data.Validated
 import cats.implicits._
 
-import strategygames.backgammon.format.{ Uci }
+import strategygames.backgammon.format.Uci
 
 case class Situation(board: Board, player: Player) {
 

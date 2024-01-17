@@ -150,6 +150,7 @@ object Uci {
       pos  <- Pos.fromKey(action.slice(2, 4))
     } yield Uci.Drop(role, pos)
     else if (action.contains('|')) Some(Uci.DiceRoll.fromStrings(action))
+    else if (action == "roll") Some(Uci.DoRoll())
     else Uci.Move(action)
 
   def piotr(action: String): Option[Uci] =
@@ -158,6 +159,7 @@ object Uci {
       pos  <- action lift 2 flatMap Pos.piotr
     } yield Uci.Drop(role, pos)
     else if (action.contains('|')) Some(Uci.DiceRoll.fromStrings(action))
+    else if (action == "roll") Some(Uci.DoRoll())
     else Uci.Move.piotr(action)
 
   def readList(actions: String): Option[List[Uci]] =
