@@ -147,6 +147,13 @@ abstract class Game(
       metrics: MoveMetrics = MoveMetrics()
   ): Validated[String, (Game, SelectSquares)]
 
+  def diceRoll(
+    dice: List[Int],
+    metrics: MoveMetrics = MoveMetrics()
+  ): Validated[String, (Game, DiceRoll)]
+
+  def randomizeDiceRoll: Option[DiceRoll]
+
   // Because I"m unsure how to properly write a single, generic copy
   // type signature, we're getting individual ones for how we use it.
   // TODO: figure out if we can properly make this generic
@@ -250,6 +257,14 @@ object Game {
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, SelectSquares)] =
       sys.error("Can't selectSquares in chess")
+
+    def diceRoll(
+      dice: List[Int],
+      metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, DiceRoll)] =
+      sys.error("Can't diceroll in chess")
+
+    def randomizeDiceRoll: Option[DiceRoll] = None
 
     def copy(clock: Option[ClockBase]): Game =
       Chess(g.copy(clock = clock))
@@ -385,6 +400,14 @@ object Game {
     ): Validated[String, (Game, SelectSquares)] =
       sys.error("Can't selectSquares in draughts")
 
+    def diceRoll(
+      dice: List[Int],
+      metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, DiceRoll)] =
+      sys.error("Can't diceroll in draughts")
+
+    def randomizeDiceRoll: Option[DiceRoll] = None
+
     def copy(clock: Option[ClockBase]): Game =
       Draughts(g.copy(clock = clock))
 
@@ -503,6 +526,14 @@ object Game {
     ): Validated[String, (Game, SelectSquares)] =
       sys.error("Can't selectSquares in fairysf")
 
+    def diceRoll(
+      dice: List[Int],
+      metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, DiceRoll)] =
+      sys.error("Can't diceroll in fairysf")
+
+    def randomizeDiceRoll: Option[DiceRoll] = None
+
     def copy(clock: Option[ClockBase]): Game =
       FairySF(g.copy(clock = clock))
 
@@ -607,6 +638,14 @@ object Game {
     ): Validated[String, (Game, SelectSquares)] =
       sys.error("Can't selectSquares in Samurai")
 
+    def diceRoll(
+      dice: List[Int],
+      metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, DiceRoll)] =
+      sys.error("Can't diceroll in samurai")
+
+    def randomizeDiceRoll: Option[DiceRoll] = None
+
     def copy(clock: Option[ClockBase]): Game =
       Samurai(g.copy(clock = clock))
 
@@ -709,6 +748,14 @@ object Game {
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, SelectSquares)] =
       sys.error("Can't selectSquares in Togyzkumalak")
+
+    def diceRoll(
+      dice: List[Int],
+      metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, DiceRoll)] =
+      sys.error("Can't diceroll in togyzkumalak")
+
+    def randomizeDiceRoll: Option[DiceRoll] = None
 
     def copy(clock: Option[ClockBase]): Game =
       Togyzkumalak(g.copy(clock = clock))
@@ -823,6 +870,14 @@ object Game {
         .map(t => (Go(t._1), SelectSquares.Go(t._2)))
         .toValidated
 
+    def diceRoll(
+      dice: List[Int],
+      metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, DiceRoll)] =
+      sys.error("Can't diceroll in Go")
+
+    def randomizeDiceRoll: Option[DiceRoll] = None
+
     def copy(clock: Option[ClockBase]): Game = Go(g.copy(clock = clock))
 
     def copy(plies: Int, turnCount: Int, startedAtPly: Int, startedAtTurn: Int): Game =
@@ -926,6 +981,17 @@ object Game {
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, SelectSquares)] =
       sys.error("Can't selectSquares in Backgammon")
+
+    def diceRoll(
+      dice: List[Int],
+      metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, DiceRoll)] =
+      g.diceRoll(dice, metrics)
+        .toEither
+        .map(t => (Backgammon(t._1), DiceRoll.Backgammon(t._2)))
+        .toValidated
+
+    def randomizeDiceRoll: Option[DiceRoll] = g.randomizeDiceRoll
 
     def copy(clock: Option[ClockBase]): Game =
       Backgammon(g.copy(clock = clock))

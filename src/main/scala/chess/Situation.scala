@@ -29,6 +29,8 @@ case class Situation(board: Board, player: Player) {
       case _                          => None
     }
 
+  def canRollDice: Boolean = board.variant.validDiceRolls(this).nonEmpty
+
   lazy val kingPos: Option[Pos] = board kingPosOf player
 
   lazy val check: Boolean = board check player

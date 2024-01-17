@@ -19,6 +19,8 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def dropsAsDrops: List[Drop]
 
+  def canRollDice: Boolean
+
   def passes: List[Pass]
 
   def selectSquaresAction: List[SelectSquares]
@@ -147,6 +149,8 @@ object Situation {
 
     def selectSquaresAction: List[SelectSquares] = List.empty
 
+    def canRollDice: Boolean = s.canRollDice
+
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
@@ -237,6 +241,8 @@ object Situation {
     def passes: List[Pass] = List.empty
 
     def selectSquaresAction: List[SelectSquares] = List.empty
+
+    def canRollDice: Boolean = false
 
     // possibly need to do something for this
     def opponentHasInsufficientMaterial: Boolean = false
@@ -376,6 +382,8 @@ object Situation {
 
     def selectSquaresAction: List[SelectSquares] = List.empty
 
+    def canRollDice: Boolean = false
+
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
@@ -478,6 +486,8 @@ object Situation {
 
     def selectSquaresAction: List[SelectSquares] = List.empty
 
+    def canRollDice: Boolean = false
+
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
       sys.error("Can't do a Drop for samurai")
 
@@ -577,6 +587,8 @@ object Situation {
 
     def selectSquaresAction: List[SelectSquares] = List.empty
 
+    def canRollDice: Boolean = false
+
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
       sys.error("Can't do a Drop for togyzkumalak")
 
@@ -674,6 +686,8 @@ object Situation {
     def selectSquaresAction: List[SelectSquares] =
       selectSquares(List[Pos]().empty)
         .fold[List[SelectSquares]](_ => List.empty, ss => List(ss))
+
+    def canRollDice: Boolean = false
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -777,6 +791,8 @@ object Situation {
     def passes: List[Pass] = List.empty
 
     def selectSquaresAction: List[SelectSquares] = List.empty
+
+    def canRollDice: Boolean = s.canRollDice
 
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
       sys.error("Can't do a Drop for backgammon")
