@@ -31,7 +31,7 @@ case class Situation(board: Board, player: Player) {
 
   def canRollDice: Boolean = board.variant.validDiceRolls(this).nonEmpty
 
-  //safe because no variant has dice rolling and drops
+  // safe because no variant has dice rolling and drops
   def canOnlyRollDice: Boolean = canRollDice && moves.isEmpty
 
   lazy val kingPos: Option[Pos] = board kingPosOf player
