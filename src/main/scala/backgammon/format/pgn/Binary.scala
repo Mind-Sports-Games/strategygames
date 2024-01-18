@@ -40,11 +40,12 @@ object Binary {
     def actionStrs(bs: List[Byte], nb: Int): ActionStrs = toActionStrs(intPlies(bs map toInt, nb))
 
     // currently abusing the fact that a diceRoll signifies a new turn
+    // will change this when confirm action is in place
     def toActionStrs(plies: List[String]): ActionStrs = plies
       .map { ply =>
         ply match {
-          case Uci.DiceRoll.diceRollR(_, _) => s"#${ply}"
-          case _                            => s",${ply}"
+          case Uci.DiceRoll.diceRollR(_) => s"#${ply}"
+          case _                         => s",${ply}"
         }
       }
       .mkString
@@ -117,12 +118,12 @@ object Binary {
 
     def ply(str: String): List[Byte] =
       (str match {
-        case Uci.DiceRoll.diceRollR(d1, d2) => diceRollUci(d1.toInt, d2.toInt)
-        case Uci.Move.moveR(orig, dest)     => moveUci(orig, dest)
+        case Uci.DiceRoll.diceRollR(dr) => diceRollUci(dr)
+        case Uci.Move.moveR(orig, dest) => moveUci(orig, dest)
         // case Uci.Drop.dropR(_, dst) => dropUci(dst)
         // case Uci.Pass.passR()                     => passUci
         // case Uci.SelectSquares.selectSquaresR(ss) => selectSquaresUci(ss)
-        case _                              => sys.error(s"Invalid move to write: ${str}")
+        case _                          => sys.error(s"Invalid action to write: ${str}")
       }) map (_.toByte)
 
     def plies(strs: Iterable[String]): Array[Byte] =
@@ -133,9 +134,12 @@ object Binary {
 
     // def passUci = List(headerBit(MoveType.Pass))
 
-    def diceRollUci(d1: Int, d2: Int) = List(
-      headerBit(ActionType.DiceRoll) + (d1 << 3) + d2
-    )
+    def diceRollUci(dr: String) = {
+      val dice = Uci.DiceRoll.fromStrings(dr).dice
+      List(
+        headerBit(ActionType.DiceRoll) + (dice(0) << 3) + dice(1)
+      )
+    }
 
     def moveUci(orig: String, dest: String) = List(
       (headerBit(ActionType.TwoPos)) + Pos.fromKey(orig).get.index,

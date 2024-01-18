@@ -52,9 +52,9 @@ object Uci {
                 dest = dest
               ).some
             }
-            case _                           => None
+            case _                        => None
           }
-        case _                            => None
+        case _                 => None
       }
 
     def piotr(move: String) =
@@ -113,8 +113,7 @@ object Uci {
 
     def fromStrings(dice: String) = DiceRoll(dice.split('|').flatMap(_.toIntOption).toList)
 
-    val diceR     = "([1-6])"
-    val diceRollR = s"^${diceR}\\|${diceR}$$".r
+    val diceRollR = s"^([1-6]\\|[1-6])$$".r
 
   }
 
