@@ -23,6 +23,8 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def canOnlyRollDice: Boolean
 
+  def canEndTurn: Boolean = false
+
   def passes: List[Pass]
 
   def selectSquaresAction: List[SelectSquares]
@@ -31,6 +33,8 @@ sealed abstract class Situation(val board: Board, val player: Player) {
     moves.values.flatten.toList ::: dropsAsDrops ::: passes ::: selectSquaresAction
 
   def takebackable: Boolean
+
+  def canUndo: Boolean = true
 
   def history = board.history
 

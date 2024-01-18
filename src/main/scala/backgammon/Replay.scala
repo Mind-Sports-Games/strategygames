@@ -121,8 +121,7 @@ object Replay {
     DiceRoll(
       dice,
       situationBefore = before.situation,
-      // TODO implement properly
-      after = before.situation.board,
+      after = before.situation.board.setDice(dice),
       autoEndTurn = endTurn
     )
   }
@@ -157,7 +156,6 @@ object Replay {
     def replayMoveFromUci(
         orig: Option[Pos],
         dest: Option[Pos],
-        promotion: String,
         endTurn: Boolean
     ): (Game, Move) =
       (orig, dest) match {
@@ -167,7 +165,7 @@ object Replay {
           (state, move)
         }
         case (orig, dest)             => {
-          val uciMove = s"${orig}${dest}${promotion}"
+          val uciMove = s"${orig}${dest}"
           errors += uciMove + ","
           sys.error(s"Invalid move for replay: ${uciMove}")
         }
@@ -200,11 +198,10 @@ object Replay {
 
     val gameWithActions: List[(Game, Action)] =
       combineActionStrsWithEndTurn(actionStrs, startPlayer, activePlayer).toList.map {
-        case (Uci.Move.moveR(orig, dest, promotion), endTurn) =>
+        case (Uci.Move.moveR(orig, dest), endTurn) =>
           replayMoveFromUci(
             Pos.fromKey(orig),
             Pos.fromKey(dest),
-            promotion,
             endTurn
           )
         case (Uci.Drop.dropR(role, dest), endTurn)            =>
