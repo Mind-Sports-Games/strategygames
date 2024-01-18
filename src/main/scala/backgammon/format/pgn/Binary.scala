@@ -1,103 +1,153 @@
 package strategygames.backgammon
 package format.pgn
 
-import strategygames.{ ActionStrs, GameFamily }
 import strategygames.backgammon.format.Uci
+import strategygames.ActionStrs
 
 import scala.util.Try
 
 object Binary {
 
-  // writeMove only used in tests for chess/draughts
-  // would need to reconsider how we do this when we write gameFamily at the start of the game
-  // def writeMove(gf: GameFamily, m: String)             = Try(Writer.ply(gf, m))
-  def writeMoves(gf: GameFamily, ms: Iterable[String]) = Try(Writer.plies(gf, ms))
+  // writeMove only used in tests
+  def writeMove(m: String)             = Try(Writer.ply(m))
+  def writeMoves(ms: Iterable[String]) = Try(Writer.plies(ms))
 
-  def writeActionStrs(gf: GameFamily, ms: ActionStrs) = Try(Writer.actionStrs(gf, ms))
+  def writeActionStrs(ms: ActionStrs) = Try(Writer.actionStrs(ms))
 
   def readActionStrs(bs: List[Byte])          = Try(Reader actionStrs bs)
   def readActionStrs(bs: List[Byte], nb: Int) = Try(Reader.actionStrs(bs, nb))
 
   // No MoveType implemented for Delimiter/Multimove
-  // MoveType could be removed as there are no Drops in Mancala
-  // similarly gamefamily doesnt need to be stored either but we do
-  private object MoveType {
-    val Move = 0
-    val Drop = 1
+
+  private object ActionType {
+    val DiceRoll = 0 // needs 6 bits, 3 for each dice
+    val OnePos   = 1 // needs 6 bits, 1 for Drop/PickUp, 5 for Pos, 1 for Player?
+    val TwoPos   = 2 // needs 10 bits, handles Move, 5 for each Pos
+    val Boolean  = 3 // needs 3 bits to determine type as it handles:
+    //                  Pass, Confirm, Undo, Double Offer, Double Accept
   }
+
+  private def right(i: Int, x: Int): Int          = i & lengthMasks(x)
+  private def subset(i: Int, a: Int, b: Int): Int = right(right(i, a) >> b, b)
+  private val lengthMasks                         =
+    Map(1 -> 0x01, 2 -> 0x03, 3 -> 0x07, 4 -> 0x0f, 5 -> 0x1f, 6 -> 0x3f, 7 -> 0x7f, 8 -> 0xff)
 
   private object Reader {
 
     private val maxPlies = 600
 
     def actionStrs(bs: List[Byte]): ActionStrs          = actionStrs(bs, maxPlies)
-    def actionStrs(bs: List[Byte], nb: Int): ActionStrs = toActionStrs(intPlies(bs map toInt, nb, None))
+    def actionStrs(bs: List[Byte], nb: Int): ActionStrs = toActionStrs(intPlies(bs map toInt, nb))
 
-    def toActionStrs(plies: List[String]): ActionStrs = plies.map(List(_))
+    // currently abusing the fact that a diceRoll signifies a new turn
+    def toActionStrs(plies: List[String]): ActionStrs = plies
+      .map { ply =>
+        ply match {
+          case Uci.DiceRoll.diceRollR(_, _) => s"#${ply}"
+          case _                            => s",${ply}"
+        }
+      }
+      .mkString
+      .split("#")
+      .drop(1)
+      .map(_.split(",").toList)
+      .toList
 
-    def intPlies(bs: List[Int], pliesToGo: Int, gf: Option[GameFamily]): List[String] =
-      (bs, gf) match {
-        case (_, _) if pliesToGo <= 0                                       => Nil
-        case (Nil, _)                                                       => Nil
-        case (b1 :: rest, None)                                             => intPlies(rest, pliesToGo, Some(GameFamily(b1)))
-        case (b1 :: b2 :: rest, Some(gf)) if headerBit(b1) == MoveType.Move =>
-          moveUci(b1, b2) :: intPlies(rest, pliesToGo - 1, Some(gf))
-        case (x, _)                                                         => !!(x map showByte mkString ",")
+    def intPlies(bs: List[Int], pliesToGo: Int): List[String] =
+      bs match {
+        case _ if pliesToGo <= 0                                      => Nil
+        case Nil                                                      => Nil
+        case (b1 :: rest) if headerBit(b1) == ActionType.DiceRoll     =>
+          rollDiceUci(b1) :: intPlies(rest, pliesToGo - 1)
+        case (b1 :: rest) if headerBit(b1) == ActionType.OnePos       =>
+          onePosUci(b1) :: intPlies(rest, pliesToGo - 1)
+        case (b1 :: b2 :: rest) if headerBit(b1) == ActionType.TwoPos =>
+          twoPosUci(b1, b2) :: intPlies(rest, pliesToGo - 1)
+        case (b1 :: rest) if headerBit(b1) == ActionType.Boolean      =>
+          booleanUci(b1) :: intPlies(rest, pliesToGo - 1)
+        case x                                                        =>
+          !!(x map showByte mkString ",")
       }
 
-    // This is hugely inefficient for Backgammon
-    // Its what we put in place when we thought the GameLogic might include more than just Backgammon
-    // 1 movetype (move or drop)
-    // 7 pos (from)
-    // ----
-    // 1 promotion (bool)
-    // 7 pos (dest)
-    def moveUci(b1: Int, b2: Int): String =
-      s"${posFromInt(b1)}${posFromInt(b2)}${promotionFromInt(b2)}"
+    // 2 action type
+    // 3 first dice (1-6)
+    // 3 second dice (1-6)
+    def rollDiceUci(b1: Int): String = List(subset(b1, 6, 3), right(b1, 3)).mkString("|")
 
-    def posFromInt(b: Int): String = Pos(right(b, 7)).get.toString()
+    // 2 action type
+    // 1 drop (0) or pickup (1)
+    // 1 player (P1: 0, P2: 1)
+    // 1 offset
+    // 3 pos (1-6)
+    def onePosUci(b1: Int): String =
+      if (subset(b1, 5, 1) == 1) {
+        // pickup
+        sys.error("Pickup not encoded yet")
+      } else {
+        // drop
+        val role   = if (subset(b1, 4, 1) == 1) "S" else "s"
+        val offset = if (subset(b1, 3, 1) == 1) 0 else 18
+        val pos    = Pos(right(b1, 3) + offset).get.toString()
+        s"${role}@${pos}"
+      }
 
-    // not even possible in Backgammon
-    def promotionFromInt(b: Int): String = headerBit(b) match {
-      case 1 => "+"
-      case _ => ""
+    // 2 action type
+    // 6 from pos (needs 5)
+    // ---------
+    // 8 to pos (needs 5)
+    def twoPosUci(b1: Int, b2: Int): String =
+      s"${posFromInt(right(b1, 6))}${posFromInt(b2)}"
+
+    // 2 action type
+    // 6 boolean type: 0 confirm, 1 pass. Others uncoded yet
+    def booleanUci(b1: Int): String = right(b1, 6) match {
+      case 0 => "lock"
+      case 1 => "pass"
+      case _ => sys.error("uncoded boolean type")
     }
 
-    // not needed for backgammon as no drops
-    // def pieceFromInt(gf: GameFamily, b: Int): String =
-    //  Role.allByBinaryInt(gf).get(right(b, 7)).get.forsyth.toString
+    def posFromInt(b1: Int): String = Pos(right(b1, 6)).get.toString()
 
-    private def headerBit(i: Int) = i >> 7
+    private def headerBit(i: Int) = i >> 6
 
-    private def right(i: Int, x: Int): Int = i & lengthMasks(x)
-    private val lengthMasks                =
-      Map(1 -> 0x01, 2 -> 0x03, 3 -> 0x07, 4 -> 0x0f, 5 -> 0x1f, 6 -> 0x3f, 7 -> 0x7f, 8 -> 0xff)
-    private def !!(msg: String)            = throw new Exception("Binary reader failed: " + msg)
+    private def !!(msg: String) = throw new Exception("Binary reader failed: " + msg)
   }
 
   private object Writer {
 
-    def ply(gf: GameFamily, str: String): List[Byte] =
+    def ply(str: String): List[Byte] =
       (str match {
-        case Uci.Move.moveR(src, dst, promotion) => moveUci(src, dst, promotion)
-        case _                                   => sys.error(s"Invalid move to write: ${str}")
+        case Uci.DiceRoll.diceRollR(d1, d2) => diceRollUci(d1.toInt, d2.toInt)
+        case Uci.Move.moveR(orig, dest)     => moveUci(orig, dest)
+        // case Uci.Drop.dropR(_, dst) => dropUci(dst)
+        // case Uci.Pass.passR()                     => passUci
+        // case Uci.SelectSquares.selectSquaresR(ss) => selectSquaresUci(ss)
+        case _                              => sys.error(s"Invalid move to write: ${str}")
       }) map (_.toByte)
 
-    def plies(gf: GameFamily, strs: Iterable[String]): Array[Byte] =
-      (gf.id.toByte :: strs.toList.flatMap(ply(gf, _))).to(Array)
+    def plies(strs: Iterable[String]): Array[Byte] =
+      strs.toList.flatMap(ply).to(Array)
 
-    // can flatten because this GameLogic doesn't support multimove
-    def actionStrs(gf: GameFamily, strs: ActionStrs): Array[Byte] = plies(gf, strs.flatten)
+    // can flatten because this GameLogic has a clear definition of an end of a turn in the actions
+    def actionStrs(strs: ActionStrs): Array[Byte] = plies(strs.flatten)
 
-    def moveUci(src: String, dst: String, promotion: String) = List(
-      (headerBit(MoveType.Move)) + Pos.fromKey(src).get.index,
-      (headerBit(promotion.headOption match {
-        case Some(_) => 1
-        case None    => 0
-      })) + Pos.fromKey(dst).get.index
+    // def passUci = List(headerBit(MoveType.Pass))
+
+    def diceRollUci(d1: Int, d2: Int) = List(
+      headerBit(ActionType.DiceRoll) + (d1 << 3) + d2
     )
 
-    private def headerBit(i: Int) = i << 7
+    def moveUci(orig: String, dest: String) = List(
+      (headerBit(ActionType.TwoPos)) + Pos.fromKey(orig).get.index,
+      Pos.fromKey(dest).get.index
+    )
+
+    // def dropUci(dst: String) = List(
+    //  (headerBit(ActionType.OnePos)) + (Pos.fromKey(dst).get.index >> 8),
+    //  right(Pos.fromKey(dst).get.index, 8)
+    // )
+
+    private def headerBit(i: Int) = i << 6
 
   }
 

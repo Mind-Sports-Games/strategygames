@@ -41,17 +41,15 @@ object Uci {
 
     def apply(move: String): Option[Move] =
       move match {
-        case moveP(orig, dest, promotion) =>
+        case moveR(orig, dest) =>
           (
             Pos.fromKey(orig),
-            Pos.fromKey(dest),
-            promotion
+            Pos.fromKey(dest)
           ) match {
-            case (Some(orig), Some(dest), _) => {
+            case (Some(orig), Some(dest)) => {
               Move(
                 orig = orig,
-                dest = dest,
-                promotion = None
+                dest = dest
               ).some
             }
             case _                           => None
@@ -72,9 +70,7 @@ object Uci {
         promotion = None
       } yield Move(orig, dest, promotion)
 
-    val moveR  = s"^${Pos.posR}${Pos.posR}(\\+?)$$".r
-    val moveP  = s"^${Pos.posR}${Pos.posR}${Role.roleRr}$$".r
-    val movePR = s"^${Pos.posR}${Pos.posR}${Role.rolePR}$$".r
+    val moveR = s"^${Pos.posR}${Pos.posR}$$".r
   }
 
   case class Drop(role: Role, pos: Pos) extends Uci {
@@ -98,7 +94,7 @@ object Uci {
         pos  <- Pos.fromKey(posS)
       } yield Drop(role, pos)
 
-    val dropR = s"^${Role.roleR}@${Pos.posR}$$".r
+    val dropR = s"^${Role.roleRr}@${Pos.posR}$$".r
 
   }
 
@@ -117,7 +113,8 @@ object Uci {
 
     def fromStrings(dice: String) = DiceRoll(dice.split('|').flatMap(_.toIntOption).toList)
 
-    val diceRollR = s"^([[1-6][?]?[|[1-6]?]*)$$".r
+    val diceR     = "([1-6])"
+    val diceRollR = s"^${diceR}\\|${diceR}$$".r
 
   }
 
