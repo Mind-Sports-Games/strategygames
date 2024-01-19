@@ -127,7 +127,7 @@ abstract class Variant private[variant] (
       situation.board
         .piecesOf(situation.player)
         .map { case (pos, _) =>
-          situation.board.unusedDice
+          situation.board.unusedDice.distinct
             .flatMap { die =>
               Pos(pos.index + situation.board.posIndexDirection(situation.player) * die).map((die, pos, _))
             }
@@ -164,7 +164,7 @@ abstract class Variant private[variant] (
 
   def validDrops(situation: Situation): List[Drop] =
     if (situation.board.unusedDice.nonEmpty && situation.board.piecesOnBar(situation.player))
-      situation.board.unusedDice
+      situation.board.unusedDice.distinct
         .flatMap { die =>
           Pos(
             situation.board.firstPosIndex(situation.player) + situation.board.posIndexDirection(
