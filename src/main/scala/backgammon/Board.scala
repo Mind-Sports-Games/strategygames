@@ -43,9 +43,9 @@ case class Board(
     pocketData.fold(false) { pocketData => pocketData.pockets(player).roles.nonEmpty }
 
   def firstPosIndex(player: Player): Int =
-    player.fold(Pos.L1, Pos.L2).index - posIndexDirection(player)
+    player.fold(Pos.L2, Pos.L1).index - posIndexDirection(player)
 
-  def posIndexDirection(player: Player): Int = player.fold(1, -1)
+  def posIndexDirection(player: Player): Int = player.fold(-1, 1)
 
   lazy val actors: Map[Pos, Actor] = pieces map { case (pos, (piece, _)) =>
     (pos, Actor(piece, pos, this))

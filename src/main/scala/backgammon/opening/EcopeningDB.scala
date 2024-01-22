@@ -14,6 +14,6 @@ object EcopeningDB {
   }
 
   lazy val allByEco: Map[ECO, Ecopening] = Map(
-"A00" -> new Ecopening("A00", "backgammon", "Backgammon Start Pos", "Backgammon Start Pos", "", "5S,3,3s,1,5s,4,2S/5s,3,3S,1,5S,4,2s[] w - - 1", "")
+"A00" -> new Ecopening("A00", "backgammon", "Backgammon Start Pos", "Backgammon Start Pos", "", "5s,3,3S,1,5S,4,2s/5S,3,3s,1,5s,4,2S[] w - - 1", "")
   )
 }

@@ -11,7 +11,7 @@ import strategygames.backgammon.variant.Variant
   */
 object Forsyth {
 
-  val initial = FEN("5S,3,3s,1,5s,4,2S/5s,3,3S,1,5S,4,2s[] 0 0 w - - 1")
+  val initial = FEN("5s,3,3S,1,5S,4,2s/5S,3,3s,1,5s,4,2S[] 0 0 w - - 1")
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
     Some(
