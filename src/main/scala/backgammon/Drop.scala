@@ -25,6 +25,11 @@ case class Drop(
 
   def player = piece.player
 
+  private def beforeBoard = situationBefore.board
+
+  def diceUsed =
+    beforeBoard.firstPosIndex(player) + (pos.index * beforeBoard.posIndexDirection(player))
+
   def withMetrics(m: MoveMetrics) = copy(metrics = m)
 
   def toUci = Uci.Drop(piece.role, pos)

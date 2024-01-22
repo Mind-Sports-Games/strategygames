@@ -42,7 +42,8 @@ case class Board(
   def piecesOnBar(player: Player): Boolean =
     pocketData.fold(false) { pocketData => pocketData.pockets(player).roles.nonEmpty }
 
-  def firstPosIndex(player: Player): Int = player.fold(Pos.L1, Pos.L2).index
+  def firstPosIndex(player: Player): Int =
+    player.fold(Pos.L1, Pos.L2).index - posIndexDirection(player)
 
   def posIndexDirection(player: Player): Int = player.fold(1, -1)
 

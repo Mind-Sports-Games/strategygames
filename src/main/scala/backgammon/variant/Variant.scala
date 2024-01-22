@@ -122,42 +122,54 @@ abstract class Variant private[variant] (
       )
   }
 
-  def validMoves(situation: Situation): Map[Pos, List[Move]] =
-    if (situation.board.unusedDice.nonEmpty && !situation.board.piecesOnBar(situation.player))
-      situation.board
-        .piecesOf(situation.player)
-        .map { case (pos, _) =>
-          situation.board.unusedDice.distinct
-            .flatMap { die =>
-              Pos(pos.index + situation.board.posIndexDirection(situation.player) * die).map((die, pos, _))
-            }
-            .filterNot {
-              case (_, _, dest) => {
-                situation.board.pieces.get(dest) match {
-                  case Some((piece, count)) => piece.player != situation.player && count > 1
-                  case _                    => false
-                }
+  private def generateMoves(situation: Situation) =
+    situation.board
+      .piecesOf(situation.player)
+      .map { case (pos, _) =>
+        situation.board.unusedDice.distinct
+          .flatMap { die =>
+            Pos(pos.index + situation.board.posIndexDirection(situation.player) * die).map((die, pos, _))
+          }
+          .filterNot {
+            case (_, _, dest) => {
+              situation.board.pieces.get(dest) match {
+                case Some((piece, count)) => piece.player != situation.player && count > 1
+                case _                    => false
               }
             }
-        }
-        .flatten
-        .map { case (die, orig, dest) =>
-          (
-            orig,
-            Move(
-              piece = Piece(situation.player, Role.defaultRole),
-              orig = orig,
-              dest = dest,
-              situationBefore = situation,
-              after = boardAfter(situation, Some(orig), dest).useDie(die),
-              // might want to change this to false because turns will only end with confirmation
-              autoEndTurn = situation.board.unusedDice.size == 1,
-              // TODO review if we want to use capture and promotion fields for backgammon or not
-              capture = None,
-              promotion = None
-            )
-          )
-        }
+          }
+      }
+      .flatten
+      .map { case (die, orig, dest) =>
+        Move(
+          piece = Piece(situation.player, Role.defaultRole),
+          orig = orig,
+          dest = dest,
+          situationBefore = situation,
+          after = boardAfter(situation, Some(orig), dest).useDie(die),
+          // might want to change this to false because turns will only end with confirmation
+          autoEndTurn = situation.board.unusedDice.size == 1,
+          // TODO review if we want to use capture and promotion fields for backgammon or not
+          capture = None,
+          promotion = None
+        )
+      }
+
+  private def canMove(situation: Situation): Boolean =
+    situation.board.unusedDice.nonEmpty && !situation.board.piecesOnBar(situation.player)
+
+  def validMoves(situation: Situation): Map[Pos, List[Move]] =
+    if (canMove(situation))
+      generateMoves(situation)
+        .map { m => (m.orig, m) }
+        .groupBy(_._1)
+        .map { case (k, v) => (k, v.toList.map(_._2)) }
+    else Map.empty
+
+  def movesByDice(situation: Situation): Map[Int, List[Move]] =
+    if (canMove(situation))
+      generateMoves(situation)
+        .map { m => (m.diceUsed, m) }
         .groupBy(_._1)
         .map { case (k, v) => (k, v.toList.map(_._2)) }
     else Map.empty
@@ -191,6 +203,16 @@ abstract class Variant private[variant] (
           )
         }
     else List.empty
+
+  def dropsByDice(situation: Situation): Map[Int, List[Drop]] = {
+    val drops = validDrops(situation)
+    if (drops.nonEmpty)
+      validDrops(situation)
+        .map { d => (d.diceUsed, d) }
+        .groupBy(_._1)
+        .map { case (k, v) => (k, v.toList.map(_._2)) }
+    else Map.empty
+  }
 
   private def diceCombinations(diceCount: Int, diceMax: Int = 6): Iterator[List[Int]] =
     List

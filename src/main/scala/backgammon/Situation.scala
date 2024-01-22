@@ -11,6 +11,8 @@ case class Situation(board: Board, player: Player) {
 
   lazy val moves: Map[Pos, List[Move]] = board.variant.validMoves(this)
 
+  lazy val movesByDice: Map[Int, List[Move]] = board.variant.movesByDice(this)
+
   lazy val destinations: Map[Pos, List[Pos]] = moves.view.mapValues { _ map (_.dest) }.to(Map)
 
   def drops: Option[List[Pos]] = board.variant.possibleDrops(this)
@@ -19,6 +21,8 @@ case class Situation(board: Board, player: Player) {
   def dropsByRole: Option[Map[Role, List[Pos]]] = board.variant.possibleDropsByRole(this)
 
   def dropsAsDrops: List[Drop] = board.variant.validDrops(this)
+
+  def dropsByDice: Map[Int, List[Drop]] = board.variant.dropsByDice(this)
 
   def canRollDice: Boolean = board.variant.validDiceRolls(this).nonEmpty
 

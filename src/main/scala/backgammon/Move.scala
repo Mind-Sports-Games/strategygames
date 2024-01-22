@@ -34,6 +34,8 @@ case class Move(
 
   def promotes = promotion.isDefined
 
+  def diceUsed = (orig.index - dest.index).abs
+
   def player = piece.player
 
   def withPromotion(op: Option[PromotableRole]): Option[Move] = None

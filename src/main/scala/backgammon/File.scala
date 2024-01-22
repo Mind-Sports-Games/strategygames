@@ -21,7 +21,7 @@ object File {
 
   @inline def of(pos: Pos): File = {
     val rank: Int = if (pos.index > 11) 1 else 0
-    new File(pos.index + ((pos.index - all.size) * -2 - 1) * rank)
+    new File(if (rank == 0) all.size - 1 - pos.index else pos.index - all.size)
   }
 
   def fromChar(ch: Char): Option[File] = apply(ch.toInt - 97)
