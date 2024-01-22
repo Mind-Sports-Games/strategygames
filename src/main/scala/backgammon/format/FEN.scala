@@ -26,7 +26,7 @@ final case class FEN(value: String) extends AnyVal {
   private def intFromFen(index: Int): Option[Int] =
     value.split(' ').lift(index).flatMap(_.toIntOption)
 
-  def stoneArray: Array[String] = (board.split('/')(0).split(',').reverse ++ board.split('/')(1).split(','))
+  def stoneArray: Array[String] = (board.split('/')(1).split(',').reverse ++ board.split('/')(0).split(','))
     .map(c =>
       c.toString() match {
         case x if 1 to 12 map (_.toString) contains x => Array.fill(x.toInt)("0")
@@ -36,7 +36,6 @@ final case class FEN(value: String) extends AnyVal {
     .flatten
     .toArray
 
-  // def pieces: PieceMap = Map.empty[Pos, PosInfo] // todo calculate from board fen
   def pieces: PieceMap = stoneArray.zipWithIndex
     .filterNot { case (s, _) => s == "0" }
     .map { case (pieceString, index) =>

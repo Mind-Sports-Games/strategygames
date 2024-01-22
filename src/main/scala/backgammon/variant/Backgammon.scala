@@ -21,7 +21,7 @@ case object Backgammon
   override def baseVariant: Boolean = true
 
   override def initialFen =
-    format.FEN("5s,3,3S,1,5S,4,2s/5S,3,3s,1,5s,4,2S[] 0 0 w - - 1")
+    format.FEN("5S,3,3s,1,5s,4,2S/5s,3,3S,1,5S,4,2s[] 0 0 w - - 1")
 
   override def specialEnd(situation: Situation) =
     (situation.board.history.score.p1 == 15) ||
