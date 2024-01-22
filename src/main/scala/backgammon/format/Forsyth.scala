@@ -86,7 +86,7 @@ object Forsyth {
   def boardPart(board: Board): String = {
     val fen   = new scala.collection.mutable.StringBuilder(70)
     var empty = 0
-    for (y <- Rank.all) {
+    for (y <- Rank.allReversed) {
       empty = 0
       val files = if (y.index == 0) File.allReversed else File.all
       for (x <- files) {
