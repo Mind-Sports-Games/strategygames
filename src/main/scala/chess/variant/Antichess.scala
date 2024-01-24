@@ -27,7 +27,7 @@ case object Antichess
   override val initialFen = FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 0 1")
 
   // In antichess, the king can't be put into check so we always return false
-  override def kingThreatened(board: Board, player: Player, to: Pos, filter: Piece => Boolean = _ => true) =
+  override def kingThreatened(board: Board, player: Player, to: Pos, filter: Piece => Boolean = _ => true, validatingCheck: Boolean = false) =
     false
 
   // In this variant, a player must capture if a capturing move is available

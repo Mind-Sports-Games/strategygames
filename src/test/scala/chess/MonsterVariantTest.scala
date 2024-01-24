@@ -130,7 +130,7 @@ class MonsterVariantTest extends ChessTest {
       }
     }
 
-    "Must now allow pawn move that sets up an enpassant checkmate" in {
+    "Must not allow pawn move that sets up an enpassant checkmate" in {
       import Pos._
       val game        = fenToGame(Monster.initialFen, Monster)
       val successGame = game flatMap (_.playMoves(
@@ -144,7 +144,7 @@ class MonsterVariantTest extends ChessTest {
         E2 -> E3
       ))
       successGame must beValid.like { case game =>
-        game.situation.moves.values.flatten.pp("moves").size must_== 15
+        game.situation.moves.values.flatten.size must_== 15
       }
     }
 
@@ -173,9 +173,135 @@ class MonsterVariantTest extends ChessTest {
       }
     }
 
-    // TODO Other tests Matt can add:
-    // Castling cases (several in first 8 moves) http://localhost:9663/nvieBdKQaUtD
-    // White Checkmates with King http://localhost:9663/nvieBdKQaUtD
-    // Black Stalemate http://localhost:9663/pbJssxIP8bMy
+    "Must be checkmate with White King two moves from capturing Black's King (and not stalemate)" in {
+      import Pos._
+      val game        = fenToGame(Monster.initialFen, Monster)
+      val successGame = game flatMap (_.playMoves(
+        E2 -> E4,
+        E1 -> E2,
+        F7 -> F5,
+        E2 -> E3,
+        E4 -> F5,
+        E7 -> E5,
+        E3 -> E4,
+        E4 -> E5,
+        G8 -> E7,
+        F2 -> F3,
+        F3 -> F4,
+        G7 -> G5,
+        F4 -> G5,
+        E5 -> F6
+      ))
+      successGame must beValid.like { case game =>
+        game.situation.checkMate must_== true
+        game.situation.staleMate must_== false
+      }
+    }
+
+    "Black can't castle when in check" in {
+      import Pos._
+      val game        = fenToGame(Monster.initialFen, Monster)
+      val successGame = game flatMap (_.playMoves(
+        F2 -> F4,
+        F4 -> F5,
+        G7 -> G6,
+        E2 -> E4,
+        D2 -> D4,
+        F8 -> G7,
+        C2 -> C4,
+        E1 -> E2,
+        G8 -> F6,
+        E2 -> E3,
+        E3 -> D3,
+        B8 -> A6,
+        F5 -> G6,
+        D3 -> E3
+      ))
+      successGame must beValid.like { case game =>
+        game.situation.moves.values.flatten.size must_== 3
+      }
+    }
+
+    "Black can't castle through in check" in {
+      import Pos._
+      val game        = fenToGame(Monster.initialFen, Monster)
+      val successGame = game flatMap (_.playMoves(
+        F2 -> F4,
+        F4 -> F5,
+        G7 -> G6,
+        E2 -> E4,
+        D2 -> D4,
+        F8 -> G7,
+        C2 -> C4,
+        E1 -> E2,
+        G8 -> F6,
+        E2 -> E3,
+        E3 -> D3,
+        B8 -> A6,
+        F5 -> G6,
+        D3 -> E3,
+        H7 -> G6,
+        E4 -> E5,
+        E5 -> F6
+      ))
+      successGame must beValid.like { case game =>
+        game.situation.moves.values.flatten.size must_== 26
+      }
+    }
+
+    "Black Stalemate" in {
+      import Pos._
+      val game        = fenToGame(Monster.initialFen, Monster)
+      val successGame = game flatMap (
+        _.playMoves(
+          E2 -> E4,
+          E1 -> E2,
+          E7 -> E6,
+          E2 -> E3,
+          E3 -> F4,
+          F8 -> A3,
+          F4 -> G5,
+          G5 -> H5,
+          D7 -> D6,
+          H5 -> G6,
+          G6 -> G7,
+          E8 -> D7,
+          G7 -> H8,
+          H8 -> H7,
+          D7 -> C6,
+          H7 -> G8,
+          G8 -> F7,
+          C6 -> B6,
+          F7 -> E8,
+          E8 -> D8,
+          B6 -> A5,
+          D8 -> C8,
+          C8 -> B7,
+          A5 -> A4,
+          B7 -> B8,
+          B8 -> A8,
+          A7 -> A5,
+          A8 -> B8,
+          B8 -> C7,
+          A3 -> C5,
+          C7 -> D6,
+          D6 -> E6,
+          C5 -> D6,
+          E6 -> D6,
+          F2 -> F4,
+          A4 -> A3,
+          F4 -> F5,
+          F5 -> F6,
+          A3 -> A4,
+          F6 -> F7,
+          D6 -> D5
+        )
+      )
+      successGame must beValid.like { case game =>
+        game.situation.checkMate must_== false
+        game.situation.staleMate must_== true
+      }
+    }
+
   }
 }
