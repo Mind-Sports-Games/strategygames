@@ -1,14 +1,15 @@
 package strategygames.go
-import strategygames.{ Clock, MoveMetrics, Player, VActionStrs }
+import strategygames.{ ClockBase, MoveMetrics, Player, VActionStrs }
 
+import scala.annotation.nowarn
 import cats.data.Validated
 
-import strategygames.go.format.{ pgn, FEN, Uci }
+import strategygames.go.format.{ FEN, Uci }
 
 case class Game(
     situation: Situation,
     actionStrs: VActionStrs = Vector(),
-    clock: Option[Clock] = None,
+    clock: Option[ClockBase] = None,
     plies: Int = 0,
     turnCount: Int = 0,
     startedAtPly: Int = 0,
@@ -85,7 +86,7 @@ case class Game(
   def applySelectSquares(ss: SelectSquares): Game = apply(ss)
 
   def apply(uci: Uci.Drop): Validated[String, (Game, Drop)]                   = drop(uci.role, uci.pos)
-  def apply(uci: Uci.Pass): Validated[String, (Game, Pass)]                   = pass()
+  def apply(@nowarn uci: Uci.Pass): Validated[String, (Game, Pass)]           = pass()
   def apply(uci: Uci.SelectSquares): Validated[String, (Game, SelectSquares)] = selectSquares(uci.squares)
   def apply(uci: Uci): Validated[String, (Game, Action)]                      = (uci match {
     case u: Uci.Drop          => apply(u)

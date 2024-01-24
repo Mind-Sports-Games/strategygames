@@ -1,21 +1,18 @@
 package strategygames.draughts
 
+import scala.annotation.nowarn
+// TODO: I think the scala compiler is wrong about the finalSquare variables being unused.
+//       but I can't quite work it out, so I left them and used nowarn
+
 import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
-import strategygames.{
-  Action => StratAction,
-  ActionStrs,
-  Game => StratGame,
-  Move => StratMove,
-  Player,
-  Situation => StratSituation
-}
+import strategygames.{ Action => StratAction, ActionStrs, Move => StratMove, Situation => StratSituation }
 import strategygames.format.pgn.{ San, Tag, Tags }
 import format.pdn.{ Parser, Reader, Std }
 import format.{ FEN, Forsyth, Uci }
-import variant.Variant
+import variant._
 
 case class Replay(setup: DraughtsGame, actions: List[Move], state: DraughtsGame) {
 
@@ -56,7 +53,7 @@ object Replay {
         Tags(
           List(
             initialFen map { fen => Tag(_.FEN, fen.value) },
-            variant.some.filterNot(_.standard) map { v => Tag(_.GameType, v.gameType) }
+            variant.some.filterNot(_ == Standard) map { v => Tag(_.GameType, v.gameType) }
           ).flatten
         ),
         finalSquare
@@ -210,7 +207,7 @@ object Replay {
       uciMoves: Seq[String],
       initialFen: FEN,
       variant: Variant,
-      debugId: String,
+      @nowarn debugId: String,
       iteratedCapts: Boolean = false
   ): List[String] = {
 
@@ -279,7 +276,7 @@ object Replay {
   private def recursiveUcis(
       sit: Situation,
       sans: List[San],
-      finalSquare: Boolean = false
+      @nowarn finalSquare: Boolean = false
   ): Validated[String, List[Uci]] =
     sans match {
       case Nil         => valid(Nil)
@@ -293,7 +290,7 @@ object Replay {
   private def recursiveSituations(
       sit: Situation,
       sans: List[San],
-      finalSquare: Boolean = false
+      @nowarn finalSquare: Boolean = false
   ): Validated[String, List[Situation]] =
     sans match {
       case Nil         => valid(Nil)
@@ -307,7 +304,7 @@ object Replay {
   private def recursiveSituationsFromUci(
       sit: Situation,
       ucis: List[Uci],
-      finalSquare: Boolean = false
+      @nowarn finalSquare: Boolean = false
   ): Validated[String, List[Situation]] =
     ucis match {
       case Nil         => valid(Nil)
@@ -321,7 +318,7 @@ object Replay {
   private def recursiveReplayFromUci(
       replay: Replay,
       ucis: List[Uci],
-      finalSquare: Boolean = false
+      @nowarn finalSquare: Boolean = false
   ): Validated[String, Replay] =
     ucis match {
       case Nil         => valid(replay)
@@ -385,7 +382,7 @@ object Replay {
   private def recursiveGamesFromUci(
       game: DraughtsGame,
       ucis: List[Uci],
-      finalSquare: Boolean = false
+      @nowarn finalSquare: Boolean = false
   ): Validated[String, List[DraughtsGame]] =
     ucis match {
       case Nil                     => valid(List(game))

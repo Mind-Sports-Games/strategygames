@@ -1,6 +1,6 @@
 package strategygames.chess
 
-import strategygames.{ GameLogic, Piece => StratPiece, Player, Pocket, Pockets }
+import strategygames.{ GameLogic, Piece => StratPiece, Pocket, Pockets }
 
 case class PocketData(
     pockets: Pockets,

@@ -12,7 +12,7 @@ case class Drop(
     after: Board,
     autoEndTurn: Boolean,
     metrics: MoveMetrics = MoveMetrics()
-) extends Action(situationBefore, after, metrics) {
+) extends Action(situationBefore) {
 
   def situationAfter =
     Situation(finalizeAfter, if (autoEndTurn) !piece.player else piece.player)
@@ -23,7 +23,8 @@ case class Drop(
     val board = after.variant.finalizeBoard(
       after updateHistory { h =>
         h.copy(
-          lastMove = Option(Uci.Drop(piece.role, pos)),
+          lastTurn = if (autoEndTurn) h.currentTurn :+ toUci else h.lastTurn,
+          currentTurn = if (autoEndTurn) List() else h.currentTurn :+ toUci,
           unmovedRooks = before.unmovedRooks,
           halfMoveClock = if (piece is Pawn) 0 else h.halfMoveClock + 1
         )
@@ -38,13 +39,6 @@ case class Drop(
       h.copy(positionHashes = Hash(Situation(board, !piece.player)) ++ basePositionHashes)
     }
   }
-
-  def afterWithLastMove =
-    after.variant.finalizeBoard(
-      after.copy(history = after.history.withLastMove(toUci)),
-      toUci,
-      none
-    )
 
   def player = piece.player
 

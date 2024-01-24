@@ -5,8 +5,6 @@ import strategygames.{ Player, Status }
 import cats.data.Validated
 import cats.implicits._
 
-import strategygames.go.format.{ Forsyth, Uci }
-
 case class Situation(board: Board, player: Player) {
 
   // lazy val moves: Map[Pos, List[Move]] = board.variant.validMoves(this)

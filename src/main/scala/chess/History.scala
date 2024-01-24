@@ -25,7 +25,8 @@ object UnmovedRooks {
 }
 
 case class History(
-    lastMove: Option[Uci] = None,
+    lastTurn: List[Uci] = List.empty,
+    currentTurn: List[Uci] = List.empty,
     positionHashes: PositionHash = Array.empty,
     castles: Castles = Castles.all,
     checkCount: CheckCount = CheckCount(0, 0),
@@ -54,15 +55,24 @@ case class History(
 
   def canCastle(player: Player) = castles can player
 
+  lazy val lastAction: Option[Uci] =
+    if (currentTurn.nonEmpty) currentTurn.reverse.headOption
+    else lastTurn.reverse.headOption
+
+  lazy val recentTurn: List[Uci] =
+    if (currentTurn.nonEmpty) currentTurn else lastTurn
+
+  lazy val recentTurnUciString: Option[String] =
+    if (recentTurn.nonEmpty) Some(recentTurn.map(_.uci).mkString(",")) else None
+
   def withoutCastles(player: Player) = copy(castles = castles without player)
 
   def withoutAnyCastles = copy(castles = Castles.none)
 
-  def withoutCastle(player: Player, side: Side) = copy(castles = castles.without(player, side))
+  def withoutCastle(player: Player, side: Side) =
+    copy(castles = castles.without(player, side))
 
   def withCastles(c: Castles) = copy(castles = c)
-
-  def withLastMove(m: Uci) = copy(lastMove = Option(m))
 
   def withCheck(player: Player, v: Boolean) =
     if (v) copy(checkCount = checkCount add player) else this
@@ -71,21 +81,11 @@ case class History(
 
   override def toString = {
     val positions = (positionHashes grouped Hash.size).toList
-    s"${lastMove.fold("-")(_.uci)} ${positions.map(Hash.debug).mkString(" ")}"
+    s"${recentTurnUciString.getOrElse("-")} ${positions.map(Hash.debug).mkString(" ")}"
   }
 }
 
 object History {
-
-  def make(
-      lastMove: Option[String], // a2a4
-      castles: String
-  ): History =
-    History(
-      lastMove = lastMove flatMap Uci.apply,
-      castles = Castles(castles),
-      positionHashes = Array()
-    )
 
   def castle(player: Player, kingSide: Boolean, queenSide: Boolean) =
     History(

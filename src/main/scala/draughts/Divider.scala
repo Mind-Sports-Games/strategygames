@@ -74,7 +74,7 @@ object Divider {
   }.toList
 
   private def mixedness(board: Board): Int = {
-    val boardValues = board.pieces.mapValues(_ is Player.p1)
+    val boardValues = board.pieces.view.mapValues(_ is Player.p1)
     mixednessRegions.foldLeft(0) { case (mix, region) =>
       var p1 = 0
       var p2 = 0

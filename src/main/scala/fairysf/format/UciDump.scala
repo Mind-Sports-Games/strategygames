@@ -1,13 +1,12 @@
 package strategygames.fairysf.format
 
+import scala.annotation.nowarn
 import cats.data.Validated
 
 import strategygames.fairysf.variant.Variant
 import strategygames.fairysf.{ Action, Drop, Move, Replay }
-import strategygames.format.{ Uci => StratGamesUci }
 import strategygames.format.LexicalUci
-import strategygames.{ ActionStrs, GameFamily, GameLogic }
-import strategygames.fairysf.Api
+import strategygames.{ ActionStrs, GameFamily }
 
 object UciDump {
 
@@ -23,7 +22,7 @@ object UciDump {
     if (actionStrs.isEmpty) Validated.valid(Nil)
     else Replay(actionStrs, initialFen, variant) andThen (_.valid) map apply
 
-  def action(variant: Variant)(action: Action): String =
+  def action(@nowarn variant: Variant)(action: Action): String =
     action match {
       case m: Move =>
         m.castle.fold(m.toUci.lilaUci) {

@@ -3,7 +3,6 @@ package variant
 
 import strategygames.Player
 
-import scala.annotation.tailrec
 import cats.implicits._
 
 case object Portuguese
@@ -154,7 +153,7 @@ case object Portuguese
                         }
                         extraCaptsCache.foreach { cache =>
                           if (cachedExtraCapts.isEmpty)
-                            cache += (hash, maxExtraCapts)
+                            cache.addOne(hash, maxExtraCapts)
                         }
                         newCaptureValue + maxExtraCapts
                     }
@@ -215,10 +214,10 @@ case object Portuguese
       else None
 
     if (p1Kings == 1 && p2Kings == 3 && totalPieces == 4 && playerOnLongDiagonal == Some(Player.P2))
-      Some(24, longDiagCheck(p2Actors, p2ActorsBefore)) // 3.2.b
+      Some((24, longDiagCheck(p2Actors, p2ActorsBefore))) // 3.2.b
     else if (p1Kings == 3 && p2Kings == 1 && totalPieces == 4 && playerOnLongDiagonal == Some(Player.P1))
-      Some(24, longDiagCheck(p1Actors, p1ActorsBefore)) // 3.2.b
-    else Some(40, false)                                // 3.2.a
+      Some((24, longDiagCheck(p1Actors, p1ActorsBefore))) // 3.2.b
+    else Some((40, false))                                // 3.2.a
   }
 
   /** Update position hashes for Portuguese drawing rules

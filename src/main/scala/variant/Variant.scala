@@ -26,51 +26,6 @@ abstract class Variant(
 
   def pieces: PieceMap
 
-  // An abstraction leak, we probably won't need this long term
-  // but in the short term it helps us with the port.
-  def standard: Boolean
-  def chess960: Boolean
-  def fromPosition: Boolean
-  def kingOfTheHill: Boolean
-  def threeCheck: Boolean
-  def antichess: Boolean
-  def atomic: Boolean
-  def horde: Boolean
-  def racingKings: Boolean
-  def crazyhouse: Boolean
-  def linesOfAction: Boolean
-  def fiveCheck: Boolean
-  def noCastling: Boolean
-  def scrambledEggs: Boolean
-
-  def draughtsStandard: Boolean
-  def frisian: Boolean
-  def frysk: Boolean
-  def antidraughts: Boolean
-  def breakthrough: Boolean
-  def russian: Boolean
-  def brazilian: Boolean
-  def pool: Boolean
-  def portuguese: Boolean
-  def english: Boolean
-  def draughtsFromPosition: Boolean
-
-  def shogi: Boolean
-  def xiangqi: Boolean
-  def minishogi: Boolean
-  def minixiangqi: Boolean
-  def flipello: Boolean
-  def flipello10: Boolean
-  def amazons: Boolean
-
-  def oware: Boolean
-
-  def togyzkumalak: Boolean
-
-  def go9x9: Boolean
-  def go13x13: Boolean
-  def go19x19: Boolean
-
   def standardVariant: Boolean
   def fromPositionVariant: Boolean
   def exoticChessVariant: Boolean
@@ -167,49 +122,8 @@ object Variant {
     def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.Chess(pos), (Piece.Chess(piece), 1)) }
 
-    def standard: Boolean      = v.standard
-    def chess960: Boolean      = v.chess960
-    def fromPosition: Boolean  = v.fromPosition
-    def kingOfTheHill: Boolean = v.kingOfTheHill
-    def threeCheck: Boolean    = v.threeCheck
-    def antichess: Boolean     = v.antichess
-    def atomic: Boolean        = v.atomic
-    def horde: Boolean         = v.horde
-    def racingKings: Boolean   = v.racingKings
-    def crazyhouse: Boolean    = v.crazyhouse
-    def linesOfAction: Boolean = v.linesOfAction
-    def fiveCheck: Boolean     = v.fiveCheck
-    def noCastling: Boolean    = v.noCastling
-    def scrambledEggs: Boolean = v.scrambledEggs
-
-    def draughtsStandard: Boolean     = false
-    def frisian: Boolean              = false
-    def frysk: Boolean                = false
-    def antidraughts: Boolean         = false
-    def breakthrough: Boolean         = false
-    def russian: Boolean              = false
-    def brazilian: Boolean            = false
-    def pool: Boolean                 = false
-    def portuguese: Boolean           = false
-    def english: Boolean              = false
-    def draughtsFromPosition: Boolean = false
-
-    def shogi: Boolean       = false
-    def xiangqi: Boolean     = false
-    def minishogi: Boolean   = false
-    def minixiangqi: Boolean = false
-    def flipello: Boolean    = false
-    def flipello10: Boolean  = false
-    def amazons: Boolean     = false
-
-    def oware: Boolean = false
-
-    def togyzkumalak: Boolean        = false
-    def go9x9: Boolean               = false
-    def go13x13: Boolean             = false
-    def go19x19: Boolean             = false
-    def standardVariant: Boolean     = v.standard
-    def fromPositionVariant: Boolean = v.fromPosition
+    def standardVariant: Boolean     = v == chess.variant.Standard
+    def fromPositionVariant: Boolean = v == chess.variant.FromPosition
     def exoticChessVariant: Boolean  = v.exoticChessVariant
     def frisianVariant: Boolean      = false
     def draughts64Variant: Boolean   = false
@@ -312,50 +226,8 @@ object Variant {
     def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.Draughts(pos), (Piece.Draughts(piece), 1)) }
 
-    def standard: Boolean      = false
-    def chess960: Boolean      = false
-    def fromPosition: Boolean  = false
-    def kingOfTheHill: Boolean = false
-    def threeCheck: Boolean    = false
-    def antichess: Boolean     = false
-    def atomic: Boolean        = false
-    def horde: Boolean         = false
-    def racingKings: Boolean   = false
-    def crazyhouse: Boolean    = false
-    def linesOfAction: Boolean = false
-    def fiveCheck: Boolean     = false
-    def noCastling: Boolean    = false
-    def scrambledEggs: Boolean = false
-
-    def draughtsStandard: Boolean     = v.standard
-    def frisian: Boolean              = v.frisian
-    def frysk: Boolean                = v.frysk
-    def antidraughts: Boolean         = v.antidraughts
-    def breakthrough: Boolean         = v.breakthrough
-    def russian: Boolean              = v.russian
-    def brazilian: Boolean            = v.brazilian
-    def pool: Boolean                 = v.pool
-    def portuguese: Boolean           = v.portuguese
-    def english: Boolean              = v.english
-    def draughtsFromPosition: Boolean = v.fromPosition
-
-    def shogi: Boolean       = false
-    def xiangqi: Boolean     = false
-    def minishogi: Boolean   = false
-    def minixiangqi: Boolean = false
-    def flipello: Boolean    = false
-    def flipello10: Boolean  = false
-    def amazons: Boolean     = false
-
-    def oware: Boolean = false
-
-    def togyzkumalak: Boolean = false
-    def go9x9: Boolean        = false
-    def go13x13: Boolean      = false
-    def go19x19: Boolean      = false
-
-    def standardVariant: Boolean     = v.standard
-    def fromPositionVariant: Boolean = v.fromPosition
+    def standardVariant: Boolean     = v == draughts.variant.Standard
+    def fromPositionVariant: Boolean = v == draughts.variant.FromPosition
     def exoticChessVariant: Boolean  = false
     def frisianVariant: Boolean      = v.frisianVariant
     def draughts64Variant: Boolean   = v.draughts64Variant
@@ -456,50 +328,8 @@ object Variant {
     def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.FairySF(pos), (Piece.FairySF(piece), 1)) }
 
-    def standard: Boolean      = false
-    def chess960: Boolean      = false
-    def fromPosition: Boolean  = false
-    def kingOfTheHill: Boolean = false
-    def threeCheck: Boolean    = false
-    def fiveCheck: Boolean     = false
-    def antichess: Boolean     = false
-    def atomic: Boolean        = false
-    def horde: Boolean         = false
-    def racingKings: Boolean   = false
-    def crazyhouse: Boolean    = false
-    def linesOfAction: Boolean = false
-    def noCastling: Boolean    = false
-    def scrambledEggs: Boolean = false
-
-    def draughtsStandard: Boolean     = false
-    def frisian: Boolean              = false
-    def frysk: Boolean                = false
-    def antidraughts: Boolean         = false
-    def breakthrough: Boolean         = false
-    def russian: Boolean              = false
-    def brazilian: Boolean            = false
-    def pool: Boolean                 = false
-    def portuguese: Boolean           = false
-    def english: Boolean              = false
-    def draughtsFromPosition: Boolean = false
-
-    def shogi: Boolean       = v.shogi
-    def xiangqi: Boolean     = v.xiangqi
-    def minishogi: Boolean   = v.minishogi
-    def minixiangqi: Boolean = v.minixiangqi
-    def flipello: Boolean    = v.flipello
-    def flipello10: Boolean  = v.flipello10
-    def amazons: Boolean     = v.amazons
-
-    def oware: Boolean = false
-
-    def togyzkumalak: Boolean = false
-    def go9x9: Boolean        = false
-    def go13x13: Boolean      = false
-    def go19x19: Boolean      = false
-
-    def standardVariant: Boolean     = standard || draughtsStandard
-    def fromPositionVariant: Boolean = fromPosition || draughtsFromPosition
+    def standardVariant: Boolean     = false
+    def fromPositionVariant: Boolean = false
     def exoticChessVariant: Boolean  = false
     def frisianVariant: Boolean      = false
     def draughts64Variant: Boolean   = false
@@ -600,50 +430,8 @@ object Variant {
       (Pos.Samurai(pos), (Piece.Samurai(piece), count))
     }
 
-    def standard: Boolean      = false
-    def chess960: Boolean      = false
-    def fromPosition: Boolean  = false
-    def kingOfTheHill: Boolean = false
-    def threeCheck: Boolean    = false
-    def fiveCheck: Boolean     = false
-    def antichess: Boolean     = false
-    def atomic: Boolean        = false
-    def horde: Boolean         = false
-    def racingKings: Boolean   = false
-    def crazyhouse: Boolean    = false
-    def linesOfAction: Boolean = false
-    def noCastling: Boolean    = false
-    def scrambledEggs: Boolean = false
-
-    def draughtsStandard: Boolean     = false
-    def frisian: Boolean              = false
-    def frysk: Boolean                = false
-    def antidraughts: Boolean         = false
-    def breakthrough: Boolean         = false
-    def russian: Boolean              = false
-    def brazilian: Boolean            = false
-    def pool: Boolean                 = false
-    def portuguese: Boolean           = false
-    def english: Boolean              = false
-    def draughtsFromPosition: Boolean = false
-
-    def shogi: Boolean       = false
-    def xiangqi: Boolean     = false
-    def minishogi: Boolean   = false
-    def minixiangqi: Boolean = false
-    def flipello: Boolean    = false
-    def flipello10: Boolean  = false
-    def amazons: Boolean     = false
-
-    def oware: Boolean = v.oware
-
-    def togyzkumalak: Boolean = false
-    def go9x9: Boolean        = false
-    def go13x13: Boolean      = false
-    def go19x19: Boolean      = false
-
-    def standardVariant: Boolean     = standard || draughtsStandard
-    def fromPositionVariant: Boolean = fromPosition || draughtsFromPosition
+    def standardVariant: Boolean     = false
+    def fromPositionVariant: Boolean = false
     def exoticChessVariant: Boolean  = false
     def frisianVariant: Boolean      = false
     def draughts64Variant: Boolean   = false
@@ -674,8 +462,8 @@ object Variant {
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false
 
     def checkmate(situation: Situation): Boolean = situation match {
-      case Situation.Samurai(situation) => false
-      case _                            => sys.error("Not passed Samurai objects")
+      case Situation.Samurai(_) => false
+      case _                    => sys.error("Not passed Samurai objects")
     }
 
     def stalemateIsDraw: Boolean = v.stalemateIsDraw
@@ -740,50 +528,8 @@ object Variant {
       (Pos.Togyzkumalak(pos), (Piece.Togyzkumalak(piece), count))
     }
 
-    def standard: Boolean      = false
-    def chess960: Boolean      = false
-    def fromPosition: Boolean  = false
-    def kingOfTheHill: Boolean = false
-    def threeCheck: Boolean    = false
-    def fiveCheck: Boolean     = false
-    def antichess: Boolean     = false
-    def atomic: Boolean        = false
-    def horde: Boolean         = false
-    def racingKings: Boolean   = false
-    def crazyhouse: Boolean    = false
-    def linesOfAction: Boolean = false
-    def noCastling: Boolean    = false
-    def scrambledEggs: Boolean = false
-
-    def draughtsStandard: Boolean     = false
-    def frisian: Boolean              = false
-    def frysk: Boolean                = false
-    def antidraughts: Boolean         = false
-    def breakthrough: Boolean         = false
-    def russian: Boolean              = false
-    def brazilian: Boolean            = false
-    def pool: Boolean                 = false
-    def portuguese: Boolean           = false
-    def english: Boolean              = false
-    def draughtsFromPosition: Boolean = false
-
-    def shogi: Boolean       = false
-    def xiangqi: Boolean     = false
-    def minishogi: Boolean   = false
-    def minixiangqi: Boolean = false
-    def flipello: Boolean    = false
-    def flipello10: Boolean  = false
-    def amazons: Boolean     = false
-
-    def oware: Boolean = false
-
-    def togyzkumalak: Boolean = v.togyzkumalak
-    def go9x9: Boolean        = false
-    def go13x13: Boolean      = false
-    def go19x19: Boolean      = false
-
-    def standardVariant: Boolean     = standard || draughtsStandard
-    def fromPositionVariant: Boolean = fromPosition || draughtsFromPosition
+    def standardVariant: Boolean     = false
+    def fromPositionVariant: Boolean = false
     def exoticChessVariant: Boolean  = false
     def frisianVariant: Boolean      = false
     def draughts64Variant: Boolean   = false
@@ -814,8 +560,8 @@ object Variant {
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false
 
     def checkmate(situation: Situation): Boolean = situation match {
-      case Situation.Togyzkumalak(situation) => false
-      case _                                 => sys.error("Not passed Togyzkumalak objects")
+      case Situation.Togyzkumalak(_) => false
+      case _                         => sys.error("Not passed Togyzkumalak objects")
     }
 
     def stalemateIsDraw: Boolean = v.stalemateIsDraw
@@ -879,50 +625,8 @@ object Variant {
     def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.Go(pos), (Piece.Go(piece), 1)) }
 
-    def standard: Boolean      = false
-    def chess960: Boolean      = false
-    def fromPosition: Boolean  = false
-    def kingOfTheHill: Boolean = false
-    def threeCheck: Boolean    = false
-    def fiveCheck: Boolean     = false
-    def antichess: Boolean     = false
-    def atomic: Boolean        = false
-    def horde: Boolean         = false
-    def racingKings: Boolean   = false
-    def crazyhouse: Boolean    = false
-    def linesOfAction: Boolean = false
-    def noCastling: Boolean    = false
-    def scrambledEggs: Boolean = false
-
-    def draughtsStandard: Boolean     = false
-    def frisian: Boolean              = false
-    def frysk: Boolean                = false
-    def antidraughts: Boolean         = false
-    def breakthrough: Boolean         = false
-    def russian: Boolean              = false
-    def brazilian: Boolean            = false
-    def pool: Boolean                 = false
-    def portuguese: Boolean           = false
-    def english: Boolean              = false
-    def draughtsFromPosition: Boolean = false
-
-    def shogi: Boolean       = false
-    def xiangqi: Boolean     = false
-    def minishogi: Boolean   = false
-    def minixiangqi: Boolean = false
-    def flipello: Boolean    = false
-    def flipello10: Boolean  = false
-    def amazons: Boolean     = false
-
-    def oware: Boolean = false
-
-    def togyzkumalak: Boolean = false
-    def go9x9: Boolean        = v.go9x9
-    def go13x13: Boolean      = v.go13x13
-    def go19x19: Boolean      = v.go19x19
-
-    def standardVariant: Boolean     = standard || draughtsStandard
-    def fromPositionVariant: Boolean = fromPosition || draughtsFromPosition
+    def standardVariant: Boolean     = false
+    def fromPositionVariant: Boolean = false
     def exoticChessVariant: Boolean  = false
     def frisianVariant: Boolean      = false
     def draughts64Variant: Boolean   = false
@@ -953,8 +657,8 @@ object Variant {
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false
 
     def checkmate(situation: Situation): Boolean = situation match {
-      case Situation.Go(situation) => false
-      case _                       => sys.error("Not passed Go objects")
+      case Situation.Go(_) => false
+      case _               => sys.error("Not passed Go objects")
     }
 
     def stalemateIsDraw: Boolean = v.stalemateIsDraw
@@ -1080,7 +784,7 @@ object Variant {
   }
 
   // todo all games will be allowed from position (go has 3 variants already!)
-  @deprecated("this method will be removed")
+  @deprecated("this method will be removed", "10.2.1-pstrat98")
   def libFromPosition(lib: GameLogic): Variant = lib match {
     case GameLogic.Draughts()     => Variant.Draughts(draughts.variant.FromPosition)
     case GameLogic.Chess()        => Variant.Chess(chess.variant.FromPosition)

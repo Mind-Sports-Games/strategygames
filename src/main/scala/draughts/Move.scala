@@ -16,7 +16,7 @@ case class Move(
     taken: Option[List[Pos]],
     promotion: Option[PromotableRole] = None,
     metrics: MoveMetrics = MoveMetrics()
-) extends Action(situationBefore, after, metrics) {
+) extends Action(situationBefore) {
 
   def situationAfter: Situation = situationAfter(false)
 
