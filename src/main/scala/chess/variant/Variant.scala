@@ -47,7 +47,8 @@ abstract class Variant private[variant] (
 
   def allowsCastling = !castles.isEmpty
 
-  protected val backRank = Vector(Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook)
+  protected val backRank =
+    Vector(Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook)
 
   def castles: Castles = Castles.all
 
@@ -84,10 +85,20 @@ abstract class Variant private[variant] (
     }
   }
 
-  def kingThreatened(board: Board, player: Player, to: Pos, filter: Piece => Boolean = _ => true) =
+  def kingThreatened(
+      board: Board,
+      player: Player,
+      to: Pos,
+      filter: Piece => Boolean = _ => true,
+      validatingCheck: Boolean = false
+  ) =
     pieceThreatened(board, player, to, filter)
 
-  def kingSafety(m: Move, filter: Piece => Boolean, kingPos: Option[Pos]): Boolean =
+  def kingSafety(
+      m: Move,
+      filter: Piece => Boolean,
+      kingPos: Option[Pos]
+  ): Boolean =
     ! {
       kingPos exists { kingThreatened(m.after, m.playerAfter, _, filter) }
     }
@@ -99,9 +110,15 @@ abstract class Variant private[variant] (
       if (a.piece.role == King) None else a.board kingPosOf a.player
     )
 
-  def longRangeThreatens(board: Board, p: Pos, dir: Direction, to: Pos): Boolean =
+  def longRangeThreatens(
+      board: Board,
+      p: Pos,
+      dir: Direction,
+      to: Pos
+  ): Boolean =
     dir(p) exists { next =>
-      next == to || (!board.pieces.contains(next) && longRangeThreatens(board, next, dir, to))
+      next == to || (!board.pieces
+        .contains(next) && longRangeThreatens(board, next, dir, to))
     }
 
   def move(
@@ -112,37 +129,54 @@ abstract class Variant private[variant] (
   ): Validated[String, Move] = {
 
     // Find the move in the variant specific list of valid moves
-    def findMove(from: Pos, to: Pos) = situation.moves get from flatMap (_.find(_.dest == to))
+    def findMove(from: Pos, to: Pos) =
+      situation.moves get from flatMap (_.find(_.dest == to))
 
     for {
       actor <- situation.board.actors get from toValid "No piece on " + from
       _     <-
         if (actor is situation.player) Validated.valid(actor)
         else Validated.invalid("Not my piece on " + from)
-      m1    <- findMove(from, to) toValid "Piece on " + from + " cannot move to " + to
-      m2    <- m1 withPromotion promotion toValid "Piece on " + from + " cannot promote to " + promotion
+      m1    <- findMove(
+                 from,
+                 to
+               ) toValid "Piece on " + from + " cannot move to " + to
+      m2    <-
+        m1 withPromotion promotion toValid "Piece on " + from + " cannot promote to " + promotion
       m3    <-
         if (isValidPromotion(promotion)) Validated.valid(m2)
-        else Validated.invalid("Cannot promote to " + promotion + " in this game mode")
+        else
+          Validated.invalid(
+            "Cannot promote to " + promotion + " in this game mode"
+          )
     } yield m3
   }
 
-  def drop(situation: Situation, role: Role, pos: Pos): Validated[String, Drop] =
+  def drop(
+      situation: Situation,
+      role: Role,
+      pos: Pos
+  ): Validated[String, Drop] =
     Validated.invalid(s"$this variant cannot drop $situation $role $pos")
 
-  def possibleDropsByRole(@nowarn situation: Situation): Option[Map[Role, List[Pos]]] =
+  def possibleDropsByRole(
+      @nowarn situation: Situation
+  ): Option[Map[Role, List[Pos]]] =
     None // override in crazyhouse
 
-  def staleMate(situation: Situation): Boolean = !situation.check && situation.moves.isEmpty
+  def staleMate(situation: Situation): Boolean =
+    !situation.check && situation.moves.isEmpty
 
-  def checkmate(situation: Situation) = situation.check && situation.moves.isEmpty
+  def checkmate(situation: Situation) =
+    situation.check && situation.moves.isEmpty
 
   def stalemateIsDraw = true
 
   // In most variants, the winner is the last player to have played and there is a possibility of either a traditional
   // checkmate or a variant end condition
   def winner(situation: Situation): Option[Player] =
-    if (situation.checkMate || specialEnd(situation)) Option(!situation.player) else None
+    if (situation.checkMate || specialEnd(situation)) Option(!situation.player)
+    else None
 
   @nowarn def specialEnd(situation: Situation) = false
 
@@ -179,7 +213,9 @@ abstract class Variant private[variant] (
             move.dest.file.offset(-1),
             move.dest.file.offset(1)
           ).flatten
-            .flatMap(situation.board(_, Rank.passablePawnRank(situation.player)))
+            .flatMap(
+              situation.board(_, Rank.passablePawnRank(situation.player))
+            )
             .exists(_ == Piece(situation.player, Pawn))
         )
           situation.moves.values.flatten.find(_.enpassant).map(_.dest)
@@ -203,13 +239,20 @@ abstract class Variant private[variant] (
 
   /** Once a move has been decided upon from the available legal moves, the board is finalized
     */
-  @nowarn def finalizeBoard(board: Board, uci: format.Uci, captured: Option[Piece]): Board = board
+  @nowarn def finalizeBoard(
+      board: Board,
+      uci: format.Uci,
+      captured: Option[Piece]
+  ): Board = board
 
   protected def pawnsOnPromotionRank(board: Board, player: Player) = {
     board.pieces.exists {
-      case (pos, Piece(c, r)) if c == player && r == Pawn && pos.rank == Rank.promotablePawnRank(player) =>
+      case (pos, Piece(c, r))
+          if c == player && r == Pawn && pos.rank == Rank.promotablePawnRank(
+            player
+          ) =>
         true
-      case _                                                                                             => false
+      case _ => false
     }
   }
 
@@ -220,7 +263,8 @@ abstract class Variant private[variant] (
     !pawnsOnPromotionRank(board, player)
   }
 
-  def valid(board: Board, strict: Boolean) = Player.all forall validSide(board, strict)
+  def valid(board: Board, strict: Boolean) =
+    Player.all forall validSide(board, strict)
 
   val roles = List(Rook, Knight, King, Bishop, King, Queen, Pawn)
 
@@ -239,7 +283,8 @@ abstract class Variant private[variant] (
       }
       .to(Map)
 
-  def isUnmovedPawn(player: Player, pos: Pos) = pos.rank == player.fold(Rank.Second, Rank.Seventh)
+  def isUnmovedPawn(player: Player, pos: Pos) =
+    pos.rank == player.fold(Rank.Second, Rank.Seventh)
 
   // override on multiaction variants
   def lastActionOfTurn(@nowarn situation: Situation): Boolean = true
@@ -312,7 +357,10 @@ object Variant {
   )
 
   private[variant] def symmetricRank(rank: IndexedSeq[Role]): Map[Pos, Piece] =
-    (for (y <- Seq(Rank.First, Rank.Second, Rank.Seventh, Rank.Eighth); x <- File.all) yield {
+    (for (
+      y <- Seq(Rank.First, Rank.Second, Rank.Seventh, Rank.Eighth);
+      x <- File.all
+    ) yield {
       Pos(x, y) -> (y match {
         case Rank.First   => Piece(P1, rank(x.index))
         case Rank.Second  => Piece(P1, Pawn)

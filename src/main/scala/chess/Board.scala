@@ -36,8 +36,9 @@ case class Board(
 
   def piecesOf(c: Player): Map[Pos, Piece] = pieces filter (_._2 is c)
 
-  lazy val kingPos: Map[Player, Pos] = pieces.collect { case (pos, Piece(player, King)) =>
-    player -> pos
+  lazy val kingPos: Map[Player, Pos] = pieces.collect {
+    case (pos, Piece(player, King)) =>
+      player -> pos
   }
 
   def kingPosOf(c: Player): Option[Pos] = kingPos get c
@@ -49,10 +50,16 @@ case class Board(
 
   private def checkOf(c: Player): Boolean =
     kingPosOf(c) exists { kingPos =>
-      variant.kingThreatened(this, !c, kingPos)
+      variant.kingThreatened(
+        board = this,
+        player = !c,
+        to = kingPos,
+        validatingCheck = true
+      )
     }
 
-  def destsFrom(from: Pos): Option[List[Pos]] = actorAt(from) map (_.destinations)
+  def destsFrom(from: Pos): Option[List[Pos]] =
+    actorAt(from) map (_.destinations)
 
   def seq(actions: Board => Option[Board]*): Option[Board] =
     actions.foldLeft(Option(this): Option[Board])(_ flatMap _)
@@ -74,7 +81,7 @@ case class Board(
 
   def taking(orig: Pos, dest: Pos, taking: Option[Pos] = None): Option[Board] =
     for {
-      piece   <- pieces get orig
+      piece <- pieces get orig
       takenPos = taking getOrElse dest
       if pieces contains takenPos
     } yield copy(pieces = pieces - takenPos - orig + (dest -> piece))
@@ -89,8 +96,8 @@ case class Board(
     for {
       pawn <- apply(pos)
       if pawn is Pawn
-      b2   <- take(pos)
-      b3   <- b2.place(Piece(pawn.player, Queen), pos)
+      b2 <- take(pos)
+      b3 <- b2.place(Piece(pawn.player, Queen), pos)
     } yield b3
 
   def castles: Castles = history.castles
@@ -105,8 +112,8 @@ case class Board(
     if (v.dropsVariant) copy(variant = v).ensureCrazyData
     else copy(variant = v)
 
-  def withCrazyData(data: PocketData)                   = copy(pocketData = Option(data))
-  def withCrazyData(data: Option[PocketData])           = copy(pocketData = data)
+  def withCrazyData(data: PocketData) = copy(pocketData = Option(data))
+  def withCrazyData(data: Option[PocketData]) = copy(pocketData = data)
   def withCrazyData(f: PocketData => PocketData): Board =
     withCrazyData(f(pocketData | PocketData.init))
 
@@ -115,41 +122,52 @@ case class Board(
   def unmovedRooks =
     UnmovedRooks {
       history.unmovedRooks.pos.filter(pos =>
-        apply(pos).exists(piece => piece.is(Rook) && Rank.backRank(piece.player) == pos.rank)
+        apply(pos).exists(piece =>
+          piece.is(Rook) && Rank.backRank(piece.player) == pos.rank
+        )
       )
     }
 
   def fixCastles: Board =
     withCastles {
       if (variant.allowsCastling) {
-        val wkPos                                                       = kingPosOf(P1)
-        val bkPos                                                       = kingPosOf(P2)
-        val wkReady                                                     = wkPos.fold(false)(_.rank == Rank.First)
-        val bkReady                                                     = bkPos.fold(false)(_.rank == Rank.Eighth)
+        val wkPos = kingPosOf(P1)
+        val bkPos = kingPosOf(P2)
+        val wkReady = wkPos.fold(false)(_.rank == Rank.First)
+        val bkReady = bkPos.fold(false)(_.rank == Rank.Eighth)
         def rookReady(player: Player, kPos: Option[Pos], left: Boolean) =
           kPos.fold(false) { kp =>
             actorsOf(player) exists { a =>
-              a.piece.is(Rook) && a.pos ?- kp && (left ^ (a.pos ?> kp)) && history.unmovedRooks.pos(
-                a.pos
-              )
+              a.piece.is(
+                Rook
+              ) && a.pos ?- kp && (left ^ (a.pos ?> kp)) && history.unmovedRooks
+                .pos(
+                  a.pos
+                )
             }
           }
         Castles(
-          p1KingSide = castles.p1KingSide && wkReady && rookReady(P1, wkPos, left = false),
-          p1QueenSide = castles.p1QueenSide && wkReady && rookReady(P1, wkPos, left = true),
-          p2KingSide = castles.p2KingSide && bkReady && rookReady(P2, bkPos, left = false),
-          p2QueenSide = castles.p2QueenSide && bkReady && rookReady(P2, bkPos, left = true)
+          p1KingSide =
+            castles.p1KingSide && wkReady && rookReady(P1, wkPos, left = false),
+          p1QueenSide =
+            castles.p1QueenSide && wkReady && rookReady(P1, wkPos, left = true),
+          p2KingSide =
+            castles.p2KingSide && bkReady && rookReady(P2, bkPos, left = false),
+          p2QueenSide =
+            castles.p2QueenSide && bkReady && rookReady(P2, bkPos, left = true)
         )
       } else Castles.none
     }
 
   def updateHistory(f: History => History) = copy(history = f(history))
 
-  def count(p: Piece): Int  = pieces.values count (_ == p)
+  def count(p: Piece): Int = pieces.values count (_ == p)
   def count(c: Player): Int = pieces.values count (_.player == c)
 
   def autoDraw: Boolean =
-    variant.fiftyMoves(history) || variant.isInsufficientMaterial(this) || history.fivefoldRepetition
+    variant.fiftyMoves(history) || variant.isInsufficientMaterial(
+      this
+    ) || history.fivefoldRepetition
 
   def situationOf(player: Player) = Situation(this, player)
 
@@ -169,9 +187,11 @@ case class Board(
     .flatMap(apply)
     .map(_.player)
 
-  def fileOccupation(file: File): Map[Pos, Piece] = pieces.filter(_._1.file == file)
+  def fileOccupation(file: File): Map[Pos, Piece] =
+    pieces.filter(_._1.file == file)
 
-  def rankOccupation(rank: Rank): Map[Pos, Piece] = pieces.filter(_._1.rank == rank)
+  def rankOccupation(rank: Rank): Map[Pos, Piece] =
+    pieces.filter(_._1.rank == rank)
 
   private def diagOccupation(
       p: Pos,
@@ -181,36 +201,61 @@ case class Board(
     dir(p) match {
       case Some(diagPos) =>
         if (pieces.contains(diagPos))
-          diagOccupation(diagPos, dir, diagPieces ++ Map(diagPos -> pieces(diagPos)))
+          diagOccupation(
+            diagPos,
+            dir,
+            diagPieces ++ Map(diagPos -> pieces(diagPos))
+          )
         else
           diagOccupation(diagPos, dir, diagPieces)
-      case None          => return diagPieces
+      case None => return diagPieces
     }
 
   def diagAscOccupation(pos: Pos): Map[Pos, Piece] =
     if (pieces.contains(pos))
-      Map[Pos, Piece](pos -> pieces(pos)) ++ diagOccupation(pos, _.upRight) ++ diagOccupation(pos, _.downLeft)
+      Map[Pos, Piece](pos -> pieces(pos)) ++ diagOccupation(
+        pos,
+        _.upRight
+      ) ++ diagOccupation(pos, _.downLeft)
     else
       diagOccupation(pos, _.upRight) ++ diagOccupation(pos, _.downLeft)
 
   def diagDescOccupation(pos: Pos): Map[Pos, Piece] =
     if (pieces.contains(pos))
-      Map[Pos, Piece](pos -> pieces(pos)) ++ diagOccupation(pos, _.upLeft) ++ diagOccupation(pos, _.downRight)
+      Map[Pos, Piece](pos -> pieces(pos)) ++ diagOccupation(
+        pos,
+        _.upLeft
+      ) ++ diagOccupation(pos, _.downRight)
     else
       diagOccupation(pos, _.upLeft) ++ diagOccupation(pos, _.downRight)
 
-  override def toString = s"$variant Position after ${history.recentTurnUciString}\n$visual"
+  override def toString =
+    s"$variant Position after ${history.recentTurnUciString}\n$visual"
 }
 
 object Board {
 
   def apply(pieces: Iterable[(Pos, Piece)], variant: Variant): Board =
-    Board(pieces.toMap, if (variant.allowsCastling) Castles.all else Castles.none, variant)
+    Board(
+      pieces.toMap,
+      if (variant.allowsCastling) Castles.all else Castles.none,
+      variant
+    )
 
-  def apply(pieces: Iterable[(Pos, Piece)], castles: Castles, variant: Variant): Board =
-    Board(pieces.toMap, History(castles = castles), variant, variantCrazyData(variant))
+  def apply(
+      pieces: Iterable[(Pos, Piece)],
+      castles: Castles,
+      variant: Variant
+  ): Board =
+    Board(
+      pieces.toMap,
+      History(castles = castles),
+      variant,
+      variantCrazyData(variant)
+    )
 
-  def init(variant: Variant): Board = Board(variant.pieces, variant.castles, variant)
+  def init(variant: Variant): Board =
+    Board(variant.pieces, variant.castles, variant)
 
   def empty(variant: Variant): Board = Board(Nil, variant)
 

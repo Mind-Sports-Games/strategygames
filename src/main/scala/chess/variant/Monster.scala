@@ -100,11 +100,22 @@ case object Monster
       board: Board,
       player: Player,
       to: Pos,
-      filter: Piece => Boolean = _ => true
+      filter: Piece => Boolean = _ => true,
+      validatingCheck: Boolean = false
   ): Boolean = {
     player match {
       case P1 if board.history.currentTurn.isEmpty => {
-        super.kingThreatened(board, player, to, filter) || Situation(board, P1).moves.values.flatten
+        super.kingThreatened(board, player, to, filter) || Situation(
+          (if (validatingCheck)
+             // when validating check, we have to wipe history's lastTurn because we are
+             // now looking a turn ahead and so lastTurn is technically two turns ago,
+             // with an unspecified turn as the lastTurn from p2 and now we need to see
+             // if p2 king is threatened from capture in one move after the first move
+             // of p1's next turn
+             board.updateHistory { h => h.copy(lastTurn = List.empty) }
+           else board),
+          P1
+        ).moves.values.flatten
           .map(nextMove =>
             super.kingThreatened(nextMove.after, player, to, _ => true) ||
               (if (nextMove.promotion.nonEmpty)
