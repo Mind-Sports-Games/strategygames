@@ -80,6 +80,13 @@ case class Board(
     if (v.dropsVariant) copy(variant = v)
     else copy(variant = v)
 
+  def withPocketData(data: PocketData)                   = copy(pocketData = Option(data))
+  def withPocketData(data: Option[PocketData])           = copy(pocketData = data)
+  def withPocketData(f: PocketData => PocketData): Board =
+    withPocketData(f(pocketData | PocketData.init))
+
+  def ensurePocketData = withPocketData(pocketData | PocketData.init)
+
   def situationOf(player: Player) = Situation(this, player)
 
   def valid(strict: Boolean) = variant.valid(this, strict)
