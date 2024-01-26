@@ -13,7 +13,7 @@ case class PocketData(
 
   def store(piece: Piece) =
     copy(
-      pockets = pockets.store(
+      pockets = pockets.returnToPocket(
         GameLogic.Backgammon(),
         StratPiece.Backgammon(piece)
       )

@@ -16,11 +16,20 @@ case class Pockets(p1: Pocket, p2: Pocket) {
       }
     )
 
+  // the captured piece switches owner
   def store(lib: GameLogic, piece: Piece) =
     piece.player.fold(
       copy(p2 = p2 store (lib, piece.role)),
       copy(p1 = p1 store (lib, piece.role))
     )
+
+  // the captured piece returns to the original owner
+  def returnToPocket(lib: GameLogic, piece: Piece) =
+    piece.player.fold(
+      copy(p1 = p1 store (lib, piece.role)),
+      copy(p2 = p2 store (lib, piece.role))
+    )
+
 }
 
 case class Pocket(roles: List[Role]) {

@@ -92,7 +92,7 @@ case class Board(
 object Board {
 
   def apply(pieces: Iterable[(Pos, (Piece, Int))], variant: Variant): Board =
-    Board(pieces.toMap, History(), variant)
+    Board(pieces.toMap, History(), variant, Some(PocketData.init))
 
   def init(variant: Variant): Board = Board(variant.pieces, variant)
 

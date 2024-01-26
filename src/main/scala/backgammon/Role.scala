@@ -14,6 +14,7 @@ sealed trait Role {
   lazy val groundName             = s"${forsyth}-piece"
   val binaryInt: Int
   lazy val hashInt: Int           = binaryInt
+  val storable: Boolean
   lazy val valueOf: Option[Int]   = Option(1)
   lazy val gameFamily: GameFamily = GameFamily.Backgammon()
   final def -(player: Player)     = Piece(player, this)
@@ -27,6 +28,7 @@ case object Stone extends Role {
   val forsyth      = 's'
   val forsythUpper = 'S'
   val binaryInt    = 0
+  val storable     = true
 }
 
 object Role {
@@ -77,6 +79,8 @@ object Role {
   def binaryInt(i: Int): Option[Role] = allByBinaryInt get i
 
   def hashInt(i: Int): Option[Role] = allByHashInt get i
+
+  def storable: List[Role] = all.filter(_.storable)
 
   // only used in lila by insight module
   def pgnMoveToRole(gf: GameFamily, c: Char): Role =

@@ -103,8 +103,9 @@ abstract class Variant private[variant] (
       case _    => situation.board.pocketData
     }
     val pocketsAfterCapture = capture match {
-      case Some(piece) => situation.board.pocketData.map(_.store(piece))
-      case None        => situation.board.pocketData
+      case Some(piece) =>
+        pocketsAfterDrop.map(_.store(piece))
+      case None        => pocketsAfterDrop
     }
     situation.board
       .copy(
@@ -166,14 +167,6 @@ abstract class Variant private[variant] (
         .map { case (k, v) => (k, v.toList.map(_._2)) }
     else Map.empty
 
-  def movesByDice(situation: Situation): Map[Int, List[Move]] =
-    if (canMove(situation))
-      generateMoves(situation)
-        .map { m => (m.diceUsed, m) }
-        .groupBy(_._1)
-        .map { case (k, v) => (k, v.toList.map(_._2)) }
-    else Map.empty
-
   def validDrops(situation: Situation): List[Drop] =
     if (situation.board.unusedDice.nonEmpty && situation.board.piecesOnBar(situation.player))
       situation.board.unusedDice.distinct
@@ -203,16 +196,6 @@ abstract class Variant private[variant] (
           )
         }
     else List.empty
-
-  def dropsByDice(situation: Situation): Map[Int, List[Drop]] = {
-    val drops = validDrops(situation)
-    if (drops.nonEmpty)
-      validDrops(situation)
-        .map { d => (d.diceUsed, d) }
-        .groupBy(_._1)
-        .map { case (k, v) => (k, v.toList.map(_._2)) }
-    else Map.empty
-  }
 
   private def diceCombinations(diceCount: Int, diceMax: Int = 6): Iterator[List[Int]] =
     List
