@@ -12,9 +12,9 @@ final case class FEN(value: String) extends AnyVal {
   def player: Option[Player] =
     value.split(' ').lift(3) flatMap (_.headOption) flatMap Player.apply
 
-  def player1Score: Int = intFromFen(1).getOrElse(0)
+  def player1Score: Int = intFromFen(4).getOrElse(0)
 
-  def player2Score: Int = intFromFen(2).getOrElse(0)
+  def player2Score: Int = intFromFen(5).getOrElse(0)
 
   def fullMove: Option[Int] = intFromFen(6)
 

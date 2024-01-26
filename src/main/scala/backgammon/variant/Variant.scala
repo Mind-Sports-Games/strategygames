@@ -41,7 +41,7 @@ abstract class Variant private[variant] (
   def perfId: Int
   def perfIcon: Char
 
-  def initialFen: FEN = format.FEN("5S,3,3s,1,5s,4,2S/5s,3,3S,1,5S,4,2s[] 0 0 w - - 1")
+  def initialFen: FEN = format.FEN("5S,3,3s,1,5s,4,2S/5s,3,3S,1,5S,4,2s[] - - w 0 0 1")
 
   def pieces: PieceMap = initialFen.pieces
 

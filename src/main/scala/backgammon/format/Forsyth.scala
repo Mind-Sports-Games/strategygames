@@ -11,7 +11,7 @@ import strategygames.backgammon.variant.Variant
   */
 object Forsyth {
 
-  val initial = FEN("5S,3,3s,1,5s,4,2S/5s,3,3S,1,5S,4,2s[] 0 0 w - - 1")
+  val initial = FEN("5S,3,3s,1,5s,4,2S/5s,3,3S,1,5S,4,2s[] - - w 0 0 1")
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
     Some(
@@ -66,22 +66,15 @@ object Forsyth {
     }
 
   def >>(game: Game): FEN = {
-    val boardFen   = boardPart(game.situation.board)
-    val pocketFen  = pocketPart(game.situation.board)
-    val scoreStr   = game.situation.board.history.score.fenStr
-    val player     = game.situation.player.fold('w', 'b')
-    val unusedDice = game.situation.board.unusedDiceStr
-    val usedDice   = game.situation.board.usedDiceStr
-    val moves      = game.situation.board.history.halfMoveClock
-    FEN(s"${boardFen}[${pocketFen}] ${scoreStr} ${player} ${unusedDice} ${usedDice} ${moves}")
+    val boardFen = exportBoard(game.situation.board)
+    val scoreStr = game.situation.board.history.score.fenStr
+    val player   = game.situation.player.fold('w', 'b')
+    val moves    = game.situation.board.history.halfMoveClock
+    FEN(s"${boardFen} ${player} ${scoreStr} ${moves}")
   }
 
-  def exportBoard(board: Board): String = {
-    val boardFen  = boardPart(board)
-    val pocketFen = pocketPart(board)
-    val scoreStr  = board.history.score.fenStr
-    s"${boardFen}[${pocketFen}] ${scoreStr}"
-  }
+  def exportBoard(board: Board): String =
+    s"${boardPart(board)}[${pocketPart(board)}] ${board.unusedDiceStr} ${board.usedDiceStr}"
 
   def boardPart(board: Board): String = {
     val fen   = new scala.collection.mutable.StringBuilder(70)
