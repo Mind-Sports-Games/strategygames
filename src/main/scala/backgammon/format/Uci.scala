@@ -100,7 +100,7 @@ object Uci {
 
   case class DiceRoll(dice: List[Int]) extends Uci {
 
-    def uci = dice.mkString("|")
+    def uci = dice.mkString("/")
 
     def piotr = uci
 
@@ -111,9 +111,9 @@ object Uci {
 
   object DiceRoll {
 
-    def fromStrings(dice: String) = DiceRoll(dice.split('|').flatMap(_.toIntOption).toList)
+    def fromStrings(dice: String) = DiceRoll(dice.split('/').flatMap(_.toIntOption).toList)
 
-    val diceRollR = s"^([1-6]\\|[1-6])$$".r
+    val diceRollR = s"^([1-6]\\/[1-6])$$".r
 
   }
 
@@ -145,7 +145,7 @@ object Uci {
       role <- action.headOption flatMap Role.allByPgn.get
       pos  <- Pos.fromKey(action.slice(2, 4))
     } yield Uci.Drop(role, pos)
-    else if (action.contains('|')) Some(Uci.DiceRoll.fromStrings(action))
+    else if (action.contains('/')) Some(Uci.DiceRoll.fromStrings(action))
     else if (action == "roll") Some(Uci.DoRoll())
     else Uci.Move(action)
 
@@ -154,7 +154,7 @@ object Uci {
       role <- action.headOption flatMap Role.allByPgn.get
       pos  <- action lift 2 flatMap Pos.piotr
     } yield Uci.Drop(role, pos)
-    else if (action.contains('|')) Some(Uci.DiceRoll.fromStrings(action))
+    else if (action.contains('/')) Some(Uci.DiceRoll.fromStrings(action))
     else if (action == "roll") Some(Uci.DoRoll())
     else Uci.Move.piotr(action)
 

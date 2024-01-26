@@ -28,7 +28,7 @@ case class Board(
 
   def useDie(die: Int): Board = copy(unusedDice = unusedDice.diff(List(die)))
 
-  lazy val unusedDiceStr: String = if (unusedDice.isEmpty) "-" else unusedDice.mkString("|")
+  lazy val unusedDiceStr: String = if (unusedDice.isEmpty) "-" else unusedDice.mkString("/")
 
   lazy val usedDice: List[Int] = diceToActionDice(
     history.currentTurn.flatMap {
@@ -37,7 +37,7 @@ case class Board(
     }.flatten
   ).diff(unusedDice)
 
-  lazy val usedDiceStr: String = if (usedDice.isEmpty) "-" else usedDice.mkString("|")
+  lazy val usedDiceStr: String = if (usedDice.isEmpty) "-" else usedDice.mkString("/")
 
   def piecesOnBar(player: Player): Boolean =
     pocketData.fold(false) { pocketData => pocketData.pockets(player).roles.nonEmpty }

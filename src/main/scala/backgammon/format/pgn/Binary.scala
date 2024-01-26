@@ -73,7 +73,7 @@ object Binary {
     // 2 action type
     // 3 first dice (1-6)
     // 3 second dice (1-6)
-    def rollDiceUci(b1: Int): String = List(subset(b1, 6, 3), right(b1, 3)).mkString("|")
+    def rollDiceUci(b1: Int): String = List(subset(b1, 6, 3), right(b1, 3)).mkString("/")
 
     // 2 action type
     // 1 drop (0) or pickup (1)
