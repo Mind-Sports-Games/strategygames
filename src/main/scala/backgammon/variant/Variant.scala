@@ -96,7 +96,7 @@ abstract class Variant private[variant] (
     (p3, if (capture) Some(Piece(!player, Role.defaultRole)) else None)
   }
 
-  def boardAfter(situation: Situation, orig: Option[Pos], dest: Pos): Board = {
+  def boardAfter(situation: Situation, orig: Option[Pos], dest: Pos, die: Int): Board = {
     val (pieces, capture)   = piecesAfterAction(situation.board.pieces, situation.player, orig, dest)
     val pocketsAfterDrop    = orig match {
       case None => situation.board.pocketData.flatMap(_.drop(Piece(situation.player, Role.defaultRole)))
@@ -121,6 +121,7 @@ abstract class Variant private[variant] (
           )
         )
       )
+      .useDie(die)
   }
 
   private def generateMoves(situation: Situation) =
@@ -147,7 +148,7 @@ abstract class Variant private[variant] (
           orig = orig,
           dest = dest,
           situationBefore = situation,
-          after = boardAfter(situation, Some(orig), dest).useDie(die),
+          after = boardAfter(situation, Some(orig), dest, die),
           // might want to change this to false because turns will only end with confirmation
           autoEndTurn = situation.board.unusedDice.size == 1,
           // TODO review if we want to use capture and promotion fields for backgammon or not
@@ -190,7 +191,7 @@ abstract class Variant private[variant] (
             piece = Piece(situation.player, Role.defaultRole),
             pos = dest,
             situationBefore = situation,
-            after = boardAfter(situation, None, dest).useDie(die),
+            after = boardAfter(situation, None, dest, die),
             // might want to change this to false because turns will only end with confirmation
             autoEndTurn = situation.board.unusedDice.size == 1
           )

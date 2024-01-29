@@ -93,7 +93,12 @@ object Replay {
       orig = orig,
       dest = dest,
       situationBefore = before.situation,
-      after = before.situation.board.variant.boardAfter(before.situation, Some(orig), dest),
+      after = before.situation.board.variant.boardAfter(
+        before.situation,
+        Some(orig),
+        dest,
+        (orig.index - dest.index).abs
+      ),
       autoEndTurn = endTurn,
       capture = None,
       promotion = None
@@ -109,7 +114,12 @@ object Replay {
       piece = Piece(before.situation.player, role),
       pos = dest,
       situationBefore = before.situation,
-      after = before.situation.board.variant.boardAfter(before.situation, None, dest),
+      after = before.situation.board.variant.boardAfter(
+        before.situation,
+        None,
+        dest,
+        before.situation.board.firstPosIndex(before.situation.player) + (dest.index * before.situation.board.posIndexDirection(before.situation.player))
+      ),
       autoEndTurn = endTurn
     )
 
