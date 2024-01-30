@@ -29,6 +29,10 @@ case class Situation(board: Board, player: Player) {
       case _                          => None
     }
 
+  def canDrop: Boolean = drops.map(_.nonEmpty) == Some(true)
+
+  def canOnlyDrop: Boolean = canDrop && moves.isEmpty
+
   def canRollDice: Boolean = board.variant.validDiceRolls(this).nonEmpty
 
   // safe because no variant has dice rolling and drops

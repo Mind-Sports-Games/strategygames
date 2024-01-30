@@ -20,6 +20,11 @@ case class Situation(board: Board, player: Player) {
 
   def dropsAsDrops: List[Drop] = board.variant.validDrops(this)
 
+  def canDrop: Boolean = dropsAsDrops.nonEmpty
+
+  // In Backgammon when we can drop we have to drop - we can't do anything else
+  def canOnlyDrop: Boolean = canDrop
+
   def canRollDice: Boolean = board.variant.validDiceRolls(this).nonEmpty
 
   def canOnlyRollDice: Boolean = canRollDice && dropsAsDrops.isEmpty && moves.isEmpty

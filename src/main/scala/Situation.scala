@@ -19,6 +19,10 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def dropsAsDrops: List[Drop]
 
+  def canDrop: Boolean
+
+  def canOnlyDrop: Boolean
+
   def canRollDice: Boolean
 
   def canOnlyRollDice: Boolean
@@ -110,6 +114,10 @@ object Situation {
     lazy val moves: Map[Pos, List[Move]] = s.moves.map { case (p: chess.Pos, l: List[chess.Move]) =>
       (Pos.Chess(p), l.map(Move.Chess))
     }
+
+    def canDrop: Boolean = s.canDrop
+
+    def canOnlyDrop: Boolean = s.canOnlyDrop
 
     def takebackable = true
 
@@ -248,6 +256,10 @@ object Situation {
     def passes: List[Pass] = List.empty
 
     def selectSquaresAction: List[SelectSquares] = List.empty
+
+    def canDrop: Boolean = false
+
+    def canOnlyDrop: Boolean = false
 
     def canRollDice: Boolean = false
 
@@ -391,6 +403,10 @@ object Situation {
 
     def selectSquaresAction: List[SelectSquares] = List.empty
 
+    def canDrop: Boolean = s.canDrop
+
+    def canOnlyDrop: Boolean = s.canOnlyDrop
+
     def canRollDice: Boolean = false
 
     def canOnlyRollDice: Boolean = false
@@ -497,6 +513,10 @@ object Situation {
 
     def selectSquaresAction: List[SelectSquares] = List.empty
 
+    def canDrop: Boolean = false
+
+    def canOnlyDrop: Boolean = false
+
     def canRollDice: Boolean = false
 
     def canOnlyRollDice: Boolean = false
@@ -600,6 +620,10 @@ object Situation {
 
     def selectSquaresAction: List[SelectSquares] = List.empty
 
+    def canDrop: Boolean = false
+
+    def canOnlyDrop: Boolean = false
+
     def canRollDice: Boolean = false
 
     def canOnlyRollDice: Boolean = false
@@ -701,6 +725,10 @@ object Situation {
     def selectSquaresAction: List[SelectSquares] =
       selectSquares(List[Pos]().empty)
         .fold[List[SelectSquares]](_ => List.empty, ss => List(ss))
+
+    def canDrop: Boolean = s.canDrop
+
+    def canOnlyDrop: Boolean = s.canOnlyDrop
 
     def canRollDice: Boolean = false
 
@@ -811,6 +839,10 @@ object Situation {
     def passes: List[Pass] = List.empty
 
     def selectSquaresAction: List[SelectSquares] = List.empty
+
+    def canDrop: Boolean = s.canDrop
+
+    def canOnlyDrop: Boolean = s.canOnlyDrop
 
     def canRollDice: Boolean = s.canRollDice
 
