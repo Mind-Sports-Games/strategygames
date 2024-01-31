@@ -104,8 +104,12 @@ object Forsyth {
   def pocketPart(board: Board) =
     board.pocketData match {
       case Some(PocketData(pockets)) =>
-        pockets.p1.roles.map(_.forsyth).map(_.toUpper).mkString +
-          pockets.p2.roles.map(_.forsyth).mkString
+        List(
+          (if (pockets.p1.roles.isEmpty) None
+           else Some(s"${pockets.p1.roles.size}${Role.defaultRole.forsythUpper}")),
+          (if (pockets.p2.roles.isEmpty) None
+           else Some(s"${pockets.p2.roles.size}${Role.defaultRole.forsyth}"))
+        ).flatten.mkString(",")
       case _                         => ""
     }
 

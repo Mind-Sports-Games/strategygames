@@ -455,9 +455,9 @@ object Variant {
 
     def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
 
-    def dropsVariant: Boolean     = false
-    def onlyDropsVariant: Boolean = false
-    def hasGameScore: Boolean     = true
+    def dropsVariant: Boolean     = v.dropsVariant
+    def onlyDropsVariant: Boolean = v.onlyDropsVariant
+    def hasGameScore: Boolean     = v.hasGameScore
     def canOfferDraw: Boolean     = v.canOfferDraw
 
     def perfId: Int    = v.perfId
@@ -555,9 +555,9 @@ object Variant {
 
     def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
 
-    def dropsVariant: Boolean     = false
-    def onlyDropsVariant: Boolean = false
-    def hasGameScore: Boolean     = true
+    def dropsVariant: Boolean     = v.dropsVariant
+    def onlyDropsVariant: Boolean = v.onlyDropsVariant
+    def hasGameScore: Boolean     = v.hasGameScore
     def canOfferDraw: Boolean     = v.canOfferDraw
 
     def perfId: Int    = v.perfId
@@ -654,9 +654,9 @@ object Variant {
 
     def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
 
-    def dropsVariant: Boolean     = true
-    def onlyDropsVariant: Boolean = true
-    def hasGameScore: Boolean     = true
+    def dropsVariant: Boolean     = v.dropsVariant
+    def onlyDropsVariant: Boolean = v.onlyDropsVariant
+    def hasGameScore: Boolean     = v.hasGameScore
     def canOfferDraw: Boolean     = v.canOfferDraw
 
     def perfId: Int    = v.perfId
@@ -756,9 +756,9 @@ object Variant {
 
     def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
 
-    def dropsVariant: Boolean     = false
-    def onlyDropsVariant: Boolean = false
-    def hasGameScore: Boolean     = true
+    def dropsVariant: Boolean     = v.dropsVariant
+    def onlyDropsVariant: Boolean = v.onlyDropsVariant
+    def hasGameScore: Boolean     = v.hasGameScore
     def canOfferDraw: Boolean     = v.canOfferDraw
 
     def perfId: Int    = v.perfId

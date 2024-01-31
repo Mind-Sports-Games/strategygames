@@ -34,7 +34,7 @@ abstract class Variant private[variant] (
   def dropsVariant: Boolean     = true
   def onlyDropsVariant: Boolean = false
   def hasGameScore: Boolean     = true
-  def canOfferDraw: Boolean     = true
+  def canOfferDraw: Boolean     = false
 
   def repetitionEnabled: Boolean = false
 

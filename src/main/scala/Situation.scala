@@ -807,7 +807,7 @@ object Situation {
         (Pos.Backgammon(p), l.map(Move.Backgammon))
       }
 
-    def takebackable = true
+    def takebackable = false
 
     lazy val check: Boolean = false
 
