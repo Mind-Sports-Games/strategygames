@@ -229,6 +229,7 @@ object Game {
       action match {
         case (Move.Chess(move)) => Chess(g.apply(move))
         case (Drop.Chess(drop)) => Chess(g.applyDrop(drop))
+        //case (DiceRoll.Chess(diceRoll)) => Chess(g.applyDiceRoll(diceRoll))
         case _                  => sys.error("Not passed Chess objects")
       }
 
@@ -978,6 +979,8 @@ object Game {
     def apply(action: Action): Game =
       action match {
         case (Move.Backgammon(move)) => Backgammon(g.apply(move))
+        case (Drop.Backgammon(drop)) => Backgammon(g.applyDrop(drop))
+        case (DiceRoll.Backgammon(diceRoll)) => Backgammon(g.applyDiceRoll(diceRoll))
         case _                       => sys.error("Not passed Backgammon objects")
       }
 
@@ -985,7 +988,14 @@ object Game {
         role: Role,
         pos: Pos,
         metrics: MoveMetrics = MoveMetrics()
-    ): Validated[String, (Game, Drop)] = sys.error("Can't drop in Backgammon")
+    ): Validated[String, (Game, Drop)] = (role, pos) match {
+      case (Role.BackgammonRole(role), Pos.Backgammon(pos)) =>
+        g.drop(role, pos, metrics)
+          .toEither
+          .map(t => (Backgammon(t._1), Drop.Backgammon(t._2)))
+          .toValidated
+      case _                                => sys.error("Not passed Backgammon objects")
+    }
 
     def pass(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Pass)] =
       sys.error("Can't pass in Backgammon")
