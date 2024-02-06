@@ -61,6 +61,27 @@ case class Game(
     )
   }
 
+  def lift(
+      pos: Pos,
+      metrics: MoveMetrics = MoveMetrics()
+  ): Validated[String, (Game, Lift)] =
+    situation.lift(pos).map(_ withMetrics metrics) map { lift =>
+      applyLift(lift) -> lift
+    }
+
+  def applyLift(lift: Lift): Game = {
+    val newSituation = lift.situationAfter
+    val switchPlayer = situation.player != newSituation.player
+
+    copy(
+      situation = newSituation,
+      plies = plies + 1,
+      turnCount = turnCount + (if (switchPlayer) 1 else 0),
+      actionStrs = applyActionStr(lift.toUci.uci),
+      clock = applyClock(lift.metrics, newSituation.status.isEmpty, switchPlayer)
+    )
+  }
+
   def diceRoll(
       dice: List[Int],
       metrics: MoveMetrics = MoveMetrics()
@@ -82,6 +103,26 @@ case class Game(
     )
   }
 
+  def endTurn(
+      metrics: MoveMetrics = MoveMetrics()
+  ): Validated[String, (Game, EndTurn)] =
+    situation.endTurn().map(_ withMetrics metrics) map { endTurn =>
+      applyEndTurn(endTurn) -> endTurn
+    }
+
+  def applyEndTurn(endTurn: EndTurn): Game = {
+    val newSituation = endTurn.situationAfter
+    val switchPlayer = situation.player != newSituation.player
+
+    copy(
+      situation = newSituation,
+      plies = plies + 1,
+      turnCount = turnCount + (if (switchPlayer) 1 else 0),
+      actionStrs = applyActionStr(endTurn.toUci.uci),
+      clock = applyClock(endTurn.metrics, newSituation.status.isEmpty, switchPlayer)
+    )
+  }
+
   def randomizeDiceRoll: Option[DiceRoll] =
     Random.shuffle(situation.board.variant.validDiceRolls(situation)).headOption
 
@@ -94,11 +135,15 @@ case class Game(
   def apply(uci: Uci.Move): Validated[String, (Game, Move)]         =
     apply(uci.orig, uci.dest, uci.promotion)
   def apply(uci: Uci.Drop): Validated[String, (Game, Drop)]         = drop(uci.role, uci.pos)
+  def apply(uci: Uci.Lift): Validated[String, (Game, Lift)]         = lift(uci.pos)
   def apply(uci: Uci.DiceRoll): Validated[String, (Game, DiceRoll)] = diceRoll(uci.dice)
+  def apply(uci: Uci.EndTurn): Validated[String, (Game, EndTurn)]   = endTurn()
   def apply(uci: Uci): Validated[String, (Game, Action)]            = (uci match {
     case u: Uci.Move     => apply(u)
     case u: Uci.Drop     => apply(u)
+    case u: Uci.Lift     => apply(u)
     case u: Uci.DiceRoll => apply(u)
+    case u: Uci.EndTurn  => apply(u)
   }) map { case (g, a) => g -> a }
 
   private def applyClock(metrics: MoveMetrics, gameActive: Boolean, switchClock: Boolean) =

@@ -2,6 +2,7 @@ package strategygames.backgammon.format
 import strategygames.backgammon._
 
 //think this is only used for analysis/puzzles?
+//TODO extend this to include new Uci types. Might need to check other gamelogics
 object UciCharPair {
 
   import strategygames.format.{ UciCharPair => stratUciCharPair }

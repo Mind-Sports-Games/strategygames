@@ -96,7 +96,7 @@ object Replay {
       after = before.situation.board.variant.boardAfter(
         before.situation,
         Some(orig),
-        dest,
+        Some(dest),
         (orig.index - dest.index).abs
       ),
       autoEndTurn = endTurn,
@@ -117,8 +117,26 @@ object Replay {
       after = before.situation.board.variant.boardAfter(
         before.situation,
         None,
-        dest,
-        before.situation.board.firstPosIndex(before.situation.player) + (dest.index * before.situation.board.posIndexDirection(before.situation.player))
+        Some(dest),
+        Pos.barIndex(before.situation.player) + (dest.index * Pos.indexDirection(before.situation.player))
+      ),
+      autoEndTurn = endTurn
+    )
+
+  def replayLift(
+      before: Game,
+      orig: Pos,
+      endTurn: Boolean
+  ): Lift =
+    Lift(
+      pos = orig,
+      situationBefore = before.situation,
+      after = before.situation.board.variant.boardAfter(
+        before.situation,
+        Some(orig),
+        None,
+        // TODO fix this do we need to know dice used?
+        Pos.barIndex(before.situation.player) + (orig.index * Pos.indexDirection(before.situation.player))
       ),
       autoEndTurn = endTurn
     )
@@ -133,6 +151,15 @@ object Replay {
       situationBefore = before.situation,
       after = before.situation.board.setDice(dice),
       autoEndTurn = endTurn
+    )
+  }
+
+  def replayEndTurn(
+      before: Game
+  ): EndTurn = {
+    EndTurn(
+      situationBefore = before.situation,
+      after = before.situation.board
     )
   }
 
@@ -200,10 +227,34 @@ object Replay {
         }
       }
 
+    def replayLiftFromUci(
+        orig: Option[Pos],
+        endTurn: Boolean
+    ): (Game, Lift) =
+      orig match {
+        case Some(orig) => {
+          val uciLift = s"^${orig.key}"
+          val lift    = replayLift(state, orig, endTurn)
+          state = state.applyLift(lift)
+          (state, lift)
+        }
+        case orig       => {
+          val uciLift = s"^orig"
+          errors += uciLift + ","
+          sys.error(s"Invalid lift for replay: ${uciLift}")
+        }
+      }
+
     def replayDiceRollFromUci(dice: List[Int], endTurn: Boolean): (Game, DiceRoll) = {
       val diceRoll = replayDiceRoll(state, dice, endTurn)
       state = state.applyDiceRoll(diceRoll)
       (state, diceRoll)
+    }
+
+    def replayEndTurnFromUci(oldEndTurn: Boolean): (Game, Action) = {
+      val endTurn = replayEndTurn(state)
+      state = state.applyEndTurn(endTurn)
+      (state, endTurn)
     }
 
     val gameWithActions: List[(Game, Action)] =
@@ -214,15 +265,22 @@ object Replay {
             Pos.fromKey(dest),
             endTurn
           )
-        case (Uci.Drop.dropR(role, dest), endTurn)            =>
+        case (Uci.Drop.dropR(role, dest), endTurn) =>
           replayDropFromUci(
             Role.allByForsyth(init.situation.board.variant.gameFamily).get(role(0)),
             Pos.fromKey(dest),
             endTurn
           )
-        case (Uci.DiceRoll.diceRollR(dr), endTurn)            =>
+        case (Uci.Lift.liftR(orig), endTurn)       =>
+          replayLiftFromUci(
+            Pos.fromKey(orig),
+            endTurn
+          )
+        case (Uci.DiceRoll.diceRollR(dr), endTurn) =>
           replayDiceRollFromUci(Uci.DiceRoll.fromStrings(dr).dice, endTurn)
-        case (action: String, _)                              =>
+        case (Uci.EndTurn.endTurnR(), endTurn)     =>
+          replayEndTurnFromUci(endTurn)
+        case (action: String, _)                   =>
           sys.error(s"Invalid action for replay: $action")
       }
 
@@ -332,8 +390,8 @@ object Replay {
       ucis: List[Uci]
   ): Validated[String, List[Game]] =
     ucis match {
-      case Nil                     => valid(List(game))
-      case (uci: Uci.Move) :: rest =>
+      case Nil         => valid(List(game))
+      case uci :: rest =>
         game.apply(uci) andThen { case (game, _) =>
           recursiveGamesFromUci(game, rest) map { game :: _ }
         }

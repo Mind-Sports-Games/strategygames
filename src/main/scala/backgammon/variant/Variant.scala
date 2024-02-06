@@ -65,25 +65,28 @@ abstract class Variant private[variant] (
       pieces: PieceMap,
       player: Player,
       orig: Option[Pos],
-      dest: Pos
+      dest: Option[Pos]
   ): (PieceMap, Option[Piece]) = {
     var capture = false
     val p1      = pieces.map {
       // adding a piece to a stack we already own
-      case (pos, posInfo) if pos == dest && posInfo._1.player == player                    =>
+      case (pos, posInfo) if Some(pos) == dest && posInfo._1.player == player                    =>
         (pos, (posInfo._1, posInfo._2 + 1))
       // adding a piece to a square where opponent has an unguarded piece
-      case (pos, posInfo) if pos == dest && posInfo._1.player != player && posInfo._2 == 1 => {
+      case (pos, posInfo) if Some(pos) == dest && posInfo._1.player != player && posInfo._2 == 1 => {
         capture = true
         (pos, (Piece(player, Role.defaultRole), 1))
       }
       // removing a piece from a square where we still have more pieces on it
-      case (pos, posInfo) if Some(pos) == orig && posInfo._2 > 1                           =>
+      case (pos, posInfo) if Some(pos) == orig && posInfo._2 > 1                                 =>
         (pos, (posInfo._1, posInfo._2 - 1))
-      case (pos, posInfo)                                                                  => (pos, posInfo)
+      case (pos, posInfo)                                                                        => (pos, posInfo)
     }
     // adding a piece to a previously unoccupied square
-    val p2      = if (pieces.get(dest).isEmpty) p1 + (dest -> (Piece(player, Role.defaultRole), 1)) else p1
+    val p2      = dest match {
+      case Some(pos) if pieces.get(pos).isEmpty => p1 + (pos -> (Piece(player, Role.defaultRole), 1));
+      case _                                    => p1
+    }
     // removing a piece from a square that is now free
     val p3      = orig match {
       case Some(pos) =>
@@ -96,7 +99,7 @@ abstract class Variant private[variant] (
     (p3, if (capture) Some(Piece(!player, Role.defaultRole)) else None)
   }
 
-  def boardAfter(situation: Situation, orig: Option[Pos], dest: Pos, die: Int): Board = {
+  def boardAfter(situation: Situation, orig: Option[Pos], dest: Option[Pos], die: Int): Board = {
     val (pieces, capture)   = piecesAfterAction(situation.board.pieces, situation.player, orig, dest)
     val pocketsAfterDrop    = orig match {
       case None => situation.board.pocketData.flatMap(_.drop(Piece(situation.player, Role.defaultRole)))
@@ -130,7 +133,7 @@ abstract class Variant private[variant] (
       .map { case (pos, _) =>
         situation.board.unusedDice.distinct
           .flatMap { die =>
-            Pos(pos.index + situation.board.posIndexDirection(situation.player) * die).map((die, pos, _))
+            Pos(pos.index + Pos.indexDirection(situation.player) * die).map((die, pos, _))
           }
           .filterNot {
             case (_, _, dest) => {
@@ -148,9 +151,10 @@ abstract class Variant private[variant] (
           orig = orig,
           dest = dest,
           situationBefore = situation,
-          after = boardAfter(situation, Some(orig), dest, die),
+          after = boardAfter(situation, Some(orig), Some(dest), die),
           // might want to change this to false because turns will only end with confirmation
-          autoEndTurn = situation.board.unusedDice.size == 1,
+          autoEndTurn = false,
+          // autoEndTurn = situation.board.unusedDice.size == 1,
           // TODO review if we want to use capture and promotion fields for backgammon or not
           capture = None,
           promotion = None
@@ -173,9 +177,7 @@ abstract class Variant private[variant] (
       situation.board.unusedDice.distinct
         .flatMap { die =>
           Pos(
-            situation.board.firstPosIndex(situation.player) + situation.board.posIndexDirection(
-              situation.player
-            ) * die
+            Pos.barIndex(situation.player) + Pos.indexDirection(situation.player) * die
           ).map(pos => (die, pos))
         }
         .filterNot {
@@ -191,9 +193,51 @@ abstract class Variant private[variant] (
             piece = Piece(situation.player, Role.defaultRole),
             pos = dest,
             situationBefore = situation,
-            after = boardAfter(situation, None, dest, die),
+            after = boardAfter(situation, None, Some(dest), die),
             // might want to change this to false because turns will only end with confirmation
-            autoEndTurn = situation.board.unusedDice.size == 1
+            autoEndTurn = false
+            // autoEndTurn = situation.board.unusedDice.size == 1
+          )
+        }
+    else List.empty
+
+  private def canLift(situation: Situation): Boolean =
+    situation.board.unusedDice.nonEmpty && !situation.board.piecesOnBar(situation.player) && situation.board
+      .piecesOf(situation.player)
+      .keys
+      .toList
+      .diff(Pos.endQuarter(situation.player))
+      .isEmpty
+
+  def validLifts(situation: Situation): List[Lift] =
+    if (canLift(situation))
+      situation.board.unusedDice.distinct
+        .flatMap { die =>
+          Pos(
+            (
+              List(
+                situation.board.furthestFromHome(situation.player),
+                die
+              ).min - (Pos.barIndex(!situation.player) * Pos.indexDirection(situation.player))
+            ).abs
+          ).map(pos => (die, pos))
+        }
+        .filter {
+          case (_, pos) => {
+            situation.board.pieces.get(pos) match {
+              case Some((piece, count)) => piece.player == situation.player && count > 0
+              case None                 => false
+            }
+          }
+        }
+        .map { case (die, orig) =>
+          Lift(
+            pos = orig,
+            situationBefore = situation,
+            after = boardAfter(situation, Some(orig), None, die),
+            // might want to change this to false because turns will only end with confirmation
+            autoEndTurn = false
+            // autoEndTurn = situation.board.unusedDice.size == 1
           )
         }
     else List.empty
@@ -217,6 +261,19 @@ abstract class Variant private[variant] (
       }
     else List.empty
 
+  def validEndTurn(situation: Situation): Option[EndTurn] =
+    if (
+      (situation.board.unusedDice.isEmpty || !situation.canUseDice) &&
+      situation.board.history.currentTurn.filter { case _: Uci.DiceRoll => true; case _ => false }.nonEmpty
+    )
+      Some(
+        EndTurn(
+          situationBefore = situation,
+          after = situation.board.setDice(List())
+        )
+      )
+    else None
+
   def move(
       situation: Situation,
       from: Pos,
@@ -234,10 +291,25 @@ abstract class Variant private[variant] (
       case None       => Validated.invalid(s"$situation cannot perform the drop: $role on $pos")
     }
 
+  def lift(
+      situation: Situation,
+      pos: Pos
+  ): Validated[String, Lift] =
+    validLifts(situation).filter(_.pos == pos).headOption match {
+      case Some(lift) => Validated.valid(lift)
+      case None       => Validated.invalid(s"$situation cannot perform the lift from: $pos")
+    }
+
   def diceRoll(situation: Situation, dice: List[Int]): Validated[String, DiceRoll] =
     validDiceRolls(situation).filter(dr => dr.dice == dice).headOption match {
       case Some(dr) => Validated.valid(dr)
       case None     => Validated.invalid(s"$situation cannot do a dice roll of: $dice")
+    }
+
+  def endTurn(situation: Situation): Validated[String, EndTurn] =
+    validEndTurn(situation) match {
+      case Some(et) => Validated.valid(et)
+      case None     => Validated.invalid(s"$situation cannot do endTurn")
     }
 
   def possibleDrops(situation: Situation): Option[List[Pos]] =

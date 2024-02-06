@@ -107,6 +107,11 @@ abstract class Game(
           Pos.Backgammon(uci.pos),
           metrics
         )
+      case Uci.BackgammonLift(uci)                      =>
+        lift(
+          Pos.Backgammon(uci.pos),
+          metrics
+        )
       case Uci.GoSelectSquares(uci)                     =>
         selectSquares(
           uci.squares.map(Pos.Go(_)),
@@ -123,7 +128,9 @@ abstract class Game(
           metrics
         )
       case Uci.GoPass(_)                                => pass(metrics)
+      // TODO Backgammon should this be passing metrics?
       case Uci.ChessDoRoll(_) | Uci.BackgammonDoRoll(_) => randomizeAndApplyDiceRoll
+      case Uci.BackgammonEndTurn(_)                     => endTurn(metrics)
     }).map { case (game, action) =>
       game -> action
     }
@@ -133,6 +140,11 @@ abstract class Game(
       pos: Pos,
       metrics: MoveMetrics = MoveMetrics()
   ): Validated[String, (Game, Drop)]
+
+  def lift(
+      pos: Pos,
+      metrics: MoveMetrics = MoveMetrics()
+  ): Validated[String, (Game, Lift)]
 
   def pass(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Pass)]
 
@@ -145,6 +157,8 @@ abstract class Game(
       dice: List[Int],
       metrics: MoveMetrics = MoveMetrics()
   ): Validated[String, (Game, DiceRoll)]
+
+  def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)]
 
   def randomizeDiceRoll: Option[DiceRoll]
 
@@ -229,7 +243,7 @@ object Game {
       action match {
         case (Move.Chess(move)) => Chess(g.apply(move))
         case (Drop.Chess(drop)) => Chess(g.applyDrop(drop))
-        //case (DiceRoll.Chess(diceRoll)) => Chess(g.applyDiceRoll(diceRoll))
+        // case (DiceRoll.Chess(diceRoll)) => Chess(g.applyDiceRoll(diceRoll))
         case _                  => sys.error("Not passed Chess objects")
       }
 
@@ -246,6 +260,12 @@ object Game {
       case _                                      => sys.error("Not passed Chess objects")
     }
 
+    def lift(
+        pos: Pos,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, Lift)] =
+      sys.error("Can't lift in chess")
+
     def pass(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Pass)] =
       sys.error("Can't pass in chess")
 
@@ -260,6 +280,9 @@ object Game {
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, DiceRoll)] =
       sys.error("Can't diceroll in chess")
+
+    def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)] =
+      sys.error("Can't endTurn in chess")
 
     def randomizeDiceRoll: Option[DiceRoll] = None
 
@@ -391,6 +414,12 @@ object Game {
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, Drop)] = sys.error("Can't drop in draughts")
 
+    def lift(
+        pos: Pos,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, Lift)] =
+      sys.error("Can't lift in draughts")
+
     def pass(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Pass)] =
       sys.error("Can't pass in draughts")
 
@@ -405,6 +434,9 @@ object Game {
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, DiceRoll)] =
       sys.error("Can't diceroll in draughts")
+
+    def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)] =
+      sys.error("Can't endTurn in draughts")
 
     def randomizeDiceRoll: Option[DiceRoll] = None
 
@@ -520,6 +552,12 @@ object Game {
       case _                                          => sys.error("Not passed FairySF objects")
     }
 
+    def lift(
+        pos: Pos,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, Lift)] =
+      sys.error("Can't lift in fairysf")
+
     def pass(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Pass)] =
       sys.error("Can't pass in fairysf")
 
@@ -534,6 +572,9 @@ object Game {
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, DiceRoll)] =
       sys.error("Can't diceroll in fairysf")
+
+    def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)] =
+      sys.error("Can't endTurn in fairysf")
 
     def randomizeDiceRoll: Option[DiceRoll] = None
 
@@ -635,6 +676,12 @@ object Game {
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, Drop)] = sys.error("Can't drop in Samurai")
 
+    def lift(
+        pos: Pos,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, Lift)] =
+      sys.error("Can't lift in samurai")
+
     def pass(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Pass)] =
       sys.error("Can't pass in Samurai")
 
@@ -649,6 +696,9 @@ object Game {
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, DiceRoll)] =
       sys.error("Can't diceroll in samurai")
+
+    def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)] =
+      sys.error("Can't endTurn in samurai")
 
     def randomizeDiceRoll: Option[DiceRoll] = None
 
@@ -749,6 +799,12 @@ object Game {
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, Drop)] = sys.error("Can't drop in Togyzkumalak")
 
+    def lift(
+        pos: Pos,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, Lift)] =
+      sys.error("Can't lift in togyzkumalak")
+
     def pass(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Pass)] =
       sys.error("Can't pass in Togyzkumalak")
 
@@ -763,6 +819,9 @@ object Game {
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, DiceRoll)] =
       sys.error("Can't diceroll in togyzkumalak")
+
+    def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)] =
+      sys.error("Can't endTurn in togyzkumalak")
 
     def randomizeDiceRoll: Option[DiceRoll] = None
 
@@ -865,6 +924,12 @@ object Game {
       case _                                => sys.error("Not passed Go objects")
     }
 
+    def lift(
+        pos: Pos,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, Lift)] =
+      sys.error("Can't lift in go")
+
     def pass(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Pass)] =
       g.pass(metrics).toEither.map(t => (Go(t._1), Pass.Go(t._2))).toValidated
 
@@ -887,6 +952,9 @@ object Game {
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, DiceRoll)] =
       sys.error("Can't diceroll in Go")
+
+    def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)] =
+      sys.error("Can't endTurn in go")
 
     def randomizeDiceRoll: Option[DiceRoll] = None
 
@@ -978,10 +1046,12 @@ object Game {
 
     def apply(action: Action): Game =
       action match {
-        case (Move.Backgammon(move)) => Backgammon(g.apply(move))
-        case (Drop.Backgammon(drop)) => Backgammon(g.applyDrop(drop))
+        case (Move.Backgammon(move))         => Backgammon(g.apply(move))
+        case (Drop.Backgammon(drop))         => Backgammon(g.applyDrop(drop))
+        case (Lift.Backgammon(lift))         => Backgammon(g.applyLift(lift))
         case (DiceRoll.Backgammon(diceRoll)) => Backgammon(g.applyDiceRoll(diceRoll))
-        case _                       => sys.error("Not passed Backgammon objects")
+        case (EndTurn.Backgammon(endTurn))   => Backgammon(g.applyEndTurn(endTurn))
+        case _                               => sys.error("Not passed Backgammon objects")
       }
 
     def drop(
@@ -994,7 +1064,19 @@ object Game {
           .toEither
           .map(t => (Backgammon(t._1), Drop.Backgammon(t._2)))
           .toValidated
-      case _                                => sys.error("Not passed Backgammon objects")
+      case _                                                => sys.error("Not passed Backgammon objects")
+    }
+
+    def lift(
+        pos: Pos,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, Lift)] = pos match {
+      case Pos.Backgammon(pos) =>
+        g.lift(pos, metrics)
+          .toEither
+          .map(t => (Backgammon(t._1), Lift.Backgammon(t._2)))
+          .toValidated
+      case _                   => sys.error("Not passed Backgammon objects")
     }
 
     def pass(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Pass)] =
@@ -1014,6 +1096,9 @@ object Game {
         .toEither
         .map(t => (Backgammon(t._1), DiceRoll.Backgammon(t._2)))
         .toValidated
+
+    def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)] =
+      g.endTurn(metrics).toEither.map(t => (Backgammon(t._1), EndTurn.Backgammon(t._2))).toValidated
 
     def randomizeDiceRoll: Option[DiceRoll] = g.randomizeDiceRoll.map(DiceRoll.Backgammon)
 

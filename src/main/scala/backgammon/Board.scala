@@ -42,10 +42,11 @@ case class Board(
   def piecesOnBar(player: Player): Boolean =
     pocketData.fold(false) { pocketData => pocketData.pockets(player).roles.nonEmpty }
 
-  def firstPosIndex(player: Player): Int =
-    player.fold(Pos.L2, Pos.L1).index - posIndexDirection(player)
+  def piecesCanLift(player: Player): Boolean =
+    !piecesOnBar(player) && piecesOf(player).keys.toList.diff(Pos.endQuarter(player)).isEmpty
 
-  def posIndexDirection(player: Player): Int = player.fold(-1, 1)
+  def furthestFromHome(player: Player): Int =
+    (Pos.barIndex(!player) + (piecesOf(player).keys.map(_.index * Pos.indexDirection(!player)).max * Pos.indexDirection(player))).abs
 
   lazy val actors: Map[Pos, Actor] = pieces map { case (pos, (piece, _)) =>
     (pos, Actor(piece, pos, this))

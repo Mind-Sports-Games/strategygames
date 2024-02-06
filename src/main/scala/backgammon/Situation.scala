@@ -20,14 +20,26 @@ case class Situation(board: Board, player: Player) {
 
   def dropsAsDrops: List[Drop] = board.variant.validDrops(this)
 
+  def lifts: List[Lift] = board.variant.validLifts(this)
+
+  def diceRolls: List[DiceRoll] = board.variant.validDiceRolls(this)
+
+  def canMove: Boolean = moves.nonEmpty
+
   def canDrop: Boolean = dropsAsDrops.nonEmpty
 
   // In Backgammon when we can drop we have to drop - we can't do anything else
   def canOnlyDrop: Boolean = canDrop
 
-  def canRollDice: Boolean = board.variant.validDiceRolls(this).nonEmpty
+  def canLift: Boolean = lifts.nonEmpty
 
-  def canOnlyRollDice: Boolean = canRollDice && dropsAsDrops.isEmpty && moves.isEmpty
+  def canOnlyLift: Boolean = canLift && !canMove && !canDrop
+
+  def canRollDice: Boolean = diceRolls.nonEmpty
+
+  def canOnlyRollDice: Boolean = canRollDice && !canMove && !canDrop && !canLift
+
+  def canUseDice: Boolean = board.unusedDice.nonEmpty && (canMove || canDrop || canLift)
 
   def history = board.history
 
@@ -62,8 +74,13 @@ case class Situation(board: Board, player: Player) {
   def drop(role: Role, pos: Pos): Validated[String, Drop] =
     board.variant.drop(this, role, pos)
 
+  def lift(pos: Pos): Validated[String, Lift] =
+    board.variant.lift(this, pos)
+
   def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
     board.variant.diceRoll(this, dice)
+
+  def endTurn(): Validated[String, EndTurn] = board.variant.endTurn(this)
 
   def withHistory(history: History) =
     copy(

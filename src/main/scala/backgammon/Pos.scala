@@ -158,6 +158,16 @@ object Pos {
     }
     .to(Map)
 
+  def barIndex(player: Player): Int =
+    player.fold(L2, L1).index - indexDirection(player)
+
+  def indexDirection(player: Player): Int = player.fold(-1, 1)
+
+  def endQuarter(player: Player): List[Pos] = player.fold(
+    all.filter(_.index < 6),
+    all.filter(_.index > 17)
+  )
+
   val posR = "([a-l][1-2])"
 
 }

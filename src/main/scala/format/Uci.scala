@@ -278,6 +278,31 @@ object Uci {
     def toBackgammon   = d
   }
 
+  sealed abstract class Lift(
+      val pos: Pos
+  ) extends Uci {
+    def origDest = Some(pos -> pos)
+  }
+
+  final case class BackgammonLift(l: backgammon.format.Uci.Lift)
+      extends Lift(
+        Pos.Backgammon(l.pos)
+      )
+      with Backgammon {
+    def uci            = l.uci
+    def shortUci       = l.uci
+    def fishnetUci     = l.fishnetUci
+    def piotr          = l.piotr
+    val unwrap         = l
+    def toChess        = sys.error("Can't make a chess UCI from a backgammon UCI")
+    def toDraughts     = sys.error("Can't make a draughts UCI from a backgammon UCI")
+    def toFairySF      = sys.error("Can't make a fairy UCI from a backgammon UCI")
+    def toSamurai      = sys.error("Can't make a samurai UCI from a backgammon UCI")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a backgammon UCI")
+    def toGo           = sys.error("Can't make a go UCI from a backgammon UCI")
+    def toBackgammon   = l
+  }
+
   sealed abstract class Pass() extends Uci {
     def origDest: Option[(Pos, Pos)] = None
   }
@@ -412,6 +437,27 @@ object Uci {
     def toBackgammon   = dr
   }
 
+  sealed abstract class EndTurn() extends Uci {
+    def origDest: Option[(Pos, Pos)] = None
+  }
+
+  final case class BackgammonEndTurn(et: backgammon.format.Uci.EndTurn) extends EndTurn() with Backgammon {
+    def uci        = et.uci
+    def shortUci   = et.uci
+    def fishnetUci = et.uci
+    def piotr      = et.piotr
+
+    val unwrap = et
+
+    def toChess        = sys.error("Can't make a chess UCI from a backgammon UCI")
+    def toDraughts     = sys.error("Can't make a draughts UCI from a backgammon UCI")
+    def toFairySF      = sys.error("Can't make a fairysf UCI from a backgammon UCI")
+    def toSamurai      = sys.error("Can't make a samurai UCI from a backgammon UCI")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a backgammon UCI")
+    def toGo           = sys.error("Can't make a go UCI from a backgammon UCI")
+    def toBackgammon   = et
+  }
+
   def wrap(uci: chess.format.Uci): Uci = uci match {
     case m: chess.format.Uci.Move      => ChessMove(m)
     case d: chess.format.Uci.Drop      => ChessDrop(d)
@@ -445,8 +491,10 @@ object Uci {
   def wrap(uci: backgammon.format.Uci): Uci = uci match {
     case m: backgammon.format.Uci.Move      => BackgammonMove(m)
     case d: backgammon.format.Uci.Drop      => BackgammonDrop(d)
+    case l: backgammon.format.Uci.Lift      => BackgammonLift(l)
     case dr: backgammon.format.Uci.DiceRoll => BackgammonDiceRoll(dr)
     case dr: backgammon.format.Uci.DoRoll   => BackgammonDoRoll(dr)
+    case et: backgammon.format.Uci.EndTurn  => BackgammonEndTurn(et)
   }
 
   object Move {
@@ -584,6 +632,21 @@ object Uci {
       }
   }
 
+  object Lift {
+
+    def fromStrings(lib: GameLogic, @nowarn gf: GameFamily, posS: String): Option[Lift] =
+      lib match {
+        case GameLogic.Chess()        => None
+        case GameLogic.Draughts()     => None
+        case GameLogic.FairySF()      => None
+        case GameLogic.Samurai()      => None
+        case GameLogic.Togyzkumalak() => None
+        case GameLogic.Go()           => None
+        case GameLogic.Backgammon()   =>
+          backgammon.format.Uci.Lift.fromStrings(posS).map(BackgammonLift)
+      }
+  }
+
   object Pass {
 
     def apply(lib: GameLogic, @nowarn gf: GameFamily): Option[Pass] =
@@ -653,6 +716,21 @@ object Uci {
         case GameLogic.Togyzkumalak() => None
         case GameLogic.Go()           => None
         case GameLogic.Backgammon()   => BackgammonDoRoll(backgammon.format.Uci.DoRoll()).some
+      }
+
+  }
+
+  object EndTurn {
+
+    def apply(lib: GameLogic, @nowarn gf: GameFamily): Option[EndTurn] =
+      lib match {
+        case GameLogic.Draughts()     => None
+        case GameLogic.Samurai()      => None
+        case GameLogic.Togyzkumalak() => None
+        case GameLogic.Chess()        => None
+        case GameLogic.FairySF()      => None
+        case GameLogic.Go()           => None
+        case GameLogic.Backgammon()   => BackgammonEndTurn(backgammon.format.Uci.EndTurn()).some
       }
 
   }
@@ -752,6 +830,18 @@ object Uci {
     case _                                                             => sys.error(s"Drop not implemented for ${lib}")
   }
 
+  def apply(lib: GameLogic, lift: strategygames.Lift) = (lib, lift) match {
+    case (GameLogic.Draughts(), _)                                     => sys.error("Lift not implemented for Draughts")
+    case (GameLogic.Chess(), _)                                        => sys.error("Lift not implemented for Chess")
+    case (GameLogic.FairySF(), _)                                      => sys.error("Lift not implemented for fairysf")
+    case (GameLogic.Samurai(), _)                                      => sys.error("Lift not implemented for samurai")
+    case (GameLogic.Togyzkumalak(), _)                                 => sys.error("Lift not implemented for togyzkumalak")
+    case (GameLogic.Go(), _)                                           => sys.error("Lift not implemented for Go")
+    case (GameLogic.Backgammon(), strategygames.Lift.Backgammon(lift)) =>
+      BackgammonLift(backgammon.format.Uci(lift))
+    case _                                                             => sys.error(s"Lift not implemented for ${lib}")
+  }
+
   def apply(lib: GameLogic, pass: strategygames.Pass) = (lib, pass) match {
     case (GameLogic.Draughts(), _)                     => sys.error("Pass not implemented for Draughts")
     case (GameLogic.Chess(), _)                        => sys.error("Pass not implemented for Chess")
@@ -784,6 +874,16 @@ object Uci {
     case (GameLogic.Backgammon(), strategygames.DiceRoll.Backgammon(diceRoll)) =>
       BackgammonDiceRoll(backgammon.format.Uci(diceRoll))
     case _                                                                     => sys.error(s"DiceRoll not implemented for ${lib}")
+  }
+
+  def apply(lib: GameLogic, endTurn: strategygames.EndTurn) = (lib, endTurn) match {
+    case (GameLogic.Draughts(), _)                     => sys.error("EndTurn not implemented for Draughts")
+    case (GameLogic.Chess(), _)                        => sys.error("EndTurn not implemented for Chess")
+    case (GameLogic.FairySF(), _)                      => sys.error("EndTurn not implemented for fairysf")
+    case (GameLogic.Samurai(), _)                      => sys.error("EndTurn not implemented for samurai")
+    case (GameLogic.Togyzkumalak(), _)                 => sys.error("EndTurn not implemented for togyzkumalak")
+    case (GameLogic.Go(), _) => sys.error("Pass not implemented for go")
+    case (GameLogic.Backgammon(), strategygames.EndTurn.Backgammon(endTurn))                   => BackgammonEndTurn(backgammon.format.Uci(endTurn))
   }
 
   def apply(lib: GameLogic, gf: GameFamily, action: String): Option[Uci] = lib match {

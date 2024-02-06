@@ -3,6 +3,7 @@ import strategygames.backgammon._
 
 import strategygames.GameFamily
 
+import scala.annotation.nowarn
 import cats.data.Validated
 import cats.implicits._
 
@@ -98,6 +99,32 @@ object Uci {
 
   }
 
+  case class Lift(pos: Pos) extends Uci {
+
+    def lilaUci    = s"^${pos.key}"
+    def fishnetUci = lilaUci
+    def uci        = lilaUci
+
+    def piotr = s"^${pos.piotrStr}"
+
+    def origDest = Some(pos -> pos)
+
+    def apply(situation: Situation) = situation.drop(Role.defaultRole, pos)
+  }
+
+  object Lift {
+
+    def piotr(action: String) = action.lift(1).flatMap(Pos.piotr).map(Lift(_))
+
+    def fromStrings(posS: String) =
+      for {
+        pos <- Pos.fromKey(posS)
+      } yield Lift(pos)
+
+    val liftR = s"^\\^${Pos.posR}$$".r
+
+  }
+
   case class DiceRoll(dice: List[Int]) extends Uci {
 
     def uci = dice.mkString("/")
@@ -111,6 +138,7 @@ object Uci {
 
   object DiceRoll {
 
+    // TODO make this return an option like the other fromStrings?
     def fromStrings(dice: String) = DiceRoll(dice.split('/').flatMap(_.toIntOption).toList)
 
     val diceRollR = s"^([1-6]\\/[1-6])$$".r
@@ -132,21 +160,45 @@ object Uci {
 
   }
 
+  case class EndTurn() extends Uci {
+
+    def uci = "endturn"
+
+    def piotr = uci
+
+    def origDest = None
+
+    def apply(situation: Situation) = situation.endTurn()
+  }
+
+  object EndTurn {
+
+    val endTurnR = s"^endturn$$".r
+
+  }
+
   case class WithSan(uci: Uci, san: String)
 
   def apply(move: strategygames.backgammon.Move) = Uci.Move(move.orig, move.dest)
 
   def apply(drop: strategygames.backgammon.Drop) = Uci.Drop(drop.piece.role, drop.pos)
 
+  def apply(lift: strategygames.backgammon.Lift) = Uci.Lift(lift.pos)
+
   def apply(diceRoll: strategygames.backgammon.DiceRoll) = Uci.DiceRoll(diceRoll.dice)
+
+  // TODO: do we really need this? surely there is a better way to get this for this situation?
+  def apply(@nowarn endTurn: strategygames.backgammon.EndTurn) = Uci.EndTurn()
 
   def apply(action: String): Option[Uci] =
     if (action lift 1 contains '@') for {
       role <- action.headOption flatMap Role.allByPgn.get
       pos  <- Pos.fromKey(action.slice(2, 4))
     } yield Uci.Drop(role, pos)
+    else if (action.contains('^')) Uci.Lift.fromStrings(action)
     else if (action.contains('/')) Some(Uci.DiceRoll.fromStrings(action))
     else if (action == "roll") Some(Uci.DoRoll())
+    else if (action == "endturn") Some(Uci.EndTurn())
     else Uci.Move(action)
 
   def piotr(action: String): Option[Uci] =
@@ -154,8 +206,10 @@ object Uci {
       role <- action.headOption flatMap Role.allByPgn.get
       pos  <- action lift 2 flatMap Pos.piotr
     } yield Uci.Drop(role, pos)
+    else if (action.contains('^')) Uci.Lift.piotr(action)
     else if (action.contains('/')) Some(Uci.DiceRoll.fromStrings(action))
     else if (action == "roll") Some(Uci.DoRoll())
+    else if (action == "endturn") Some(Uci.EndTurn())
     else Uci.Move.piotr(action)
 
   def readList(actions: String): Option[List[Uci]] =

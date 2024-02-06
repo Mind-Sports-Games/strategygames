@@ -27,8 +27,7 @@ case class Drop(
 
   private def beforeBoard = situationBefore.board
 
-  def diceUsed =
-    beforeBoard.firstPosIndex(player) + (pos.index * beforeBoard.posIndexDirection(player))
+  def diceUsed = (Pos.barIndex(player) - pos.index).abs
 
   def withMetrics(m: MoveMetrics) = copy(metrics = m)
 
