@@ -264,7 +264,7 @@ abstract class Variant private[variant] (
   def validEndTurn(situation: Situation): Option[EndTurn] =
     if (
       (situation.board.unusedDice.isEmpty || !situation.canUseDice) &&
-      situation.board.history.currentTurn.filter { case _: Uci.DiceRoll => true; case _ => false }.nonEmpty
+      situation.board.history.hasRolledDiceThisTurn
     )
       Some(
         EndTurn(

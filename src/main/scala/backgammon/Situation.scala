@@ -37,7 +37,11 @@ case class Situation(board: Board, player: Player) {
 
   def canRollDice: Boolean = diceRolls.nonEmpty
 
-  def canOnlyRollDice: Boolean = canRollDice && !canMove && !canDrop && !canLift
+  def canOnlyRollDice: Boolean = canRollDice && !canMove && !canDrop && !canLift && !canEndTurn
+
+  def canEndTurn: Boolean = board.variant.validEndTurn(this).nonEmpty
+
+  def canOnlyEndTurn: Boolean = canEndTurn && !canMove && !canDrop && !canLift
 
   def canUseDice: Boolean = board.unusedDice.nonEmpty && (canMove || canDrop || canLift)
 

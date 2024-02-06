@@ -22,4 +22,7 @@ case class History(
   lazy val recentTurnUciString: Option[String] =
     if (recentTurn.nonEmpty) Some(recentTurn.map(_.uci).mkString(",")) else None
 
+  def hasRolledDiceThisTurn: Boolean =
+    currentTurn.filter { case _: Uci.DiceRoll => true; case _ => false }.nonEmpty
+
 }

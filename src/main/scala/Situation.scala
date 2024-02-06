@@ -50,7 +50,9 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def canOnlyRollDice: Boolean
 
-  def canEndTurn: Boolean = false
+  def canEndTurn: Boolean
+
+  def canOnlyEndTurn: Boolean
 
   def takebackable: Boolean
 
@@ -197,6 +199,10 @@ object Situation {
 
     def canOnlyRollDice: Boolean = s.canRollDice
 
+    def canEndTurn: Boolean = false
+
+    def canOnlyEndTurn: Boolean = false
+
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
@@ -308,6 +314,10 @@ object Situation {
     def canRollDice: Boolean = false
 
     def canOnlyRollDice: Boolean = false
+
+    def canEndTurn: Boolean = false
+
+    def canOnlyEndTurn: Boolean = false
 
     // possibly need to do something for this
     def opponentHasInsufficientMaterial: Boolean = false
@@ -469,6 +479,10 @@ object Situation {
 
     def canOnlyRollDice: Boolean = false
 
+    def canEndTurn: Boolean = false
+
+    def canOnlyEndTurn: Boolean = false
+
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
@@ -593,6 +607,10 @@ object Situation {
 
     def canOnlyRollDice: Boolean = false
 
+    def canEndTurn: Boolean = false
+
+    def canOnlyEndTurn: Boolean = false
+
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
       sys.error("Can't do a Drop for samurai")
 
@@ -714,6 +732,10 @@ object Situation {
 
     def canOnlyRollDice: Boolean = false
 
+    def canEndTurn: Boolean = false
+
+    def canOnlyEndTurn: Boolean = false
+
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
       sys.error("Can't do a Drop for togyzkumalak")
 
@@ -833,6 +855,10 @@ object Situation {
     def canRollDice: Boolean = false
 
     def canOnlyRollDice: Boolean = false
+
+    def canEndTurn: Boolean = false
+
+    def canOnlyEndTurn: Boolean = false
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -961,6 +987,10 @@ object Situation {
     def canRollDice: Boolean = s.canRollDice
 
     def canOnlyRollDice: Boolean = s.canOnlyRollDice
+
+    def canEndTurn: Boolean = s.canEndTurn
+
+    def canOnlyEndTurn: Boolean = s.canOnlyEndTurn
 
     def drop(role: Role, pos: Pos): Validated[String, Drop] = (role, pos) match {
       case (Role.BackgammonRole(role), Pos.Backgammon(pos)) =>
