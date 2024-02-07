@@ -158,8 +158,7 @@ object Pos {
     }
     .to(Map)
 
-  def barIndex(player: Player): Int =
-    player.fold(L2, L1).index - indexDirection(player)
+  def barIndex(player: Player): Int = player.fold(L2, L1).index - indexDirection(player)
 
   def indexDirection(player: Player): Int = player.fold(-1, 1)
 

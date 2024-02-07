@@ -21,14 +21,17 @@ object Binary {
 
   private object ActionType {
     val DiceRoll = 0 // needs 6 bits, 3 for each dice
-    val OnePos   = 1 // needs 6 bits, 1 for Drop/PickUp, 5 for Pos, 1 for Player?
+    val OnePos   = 1 // needs 5 bits, 1 for Drop/Lift, 1 for Player, 3 for pos offset
     val TwoPos   = 2 // needs 10 bits, handles Move, 5 for each Pos
-    val Boolean  = 3 // needs 3 bits to determine type as it handles:
-    //                  Pass, Confirm, Undo, Double Offer, Double Accept
+    val Boolean  = 3 // needs 2-3 bits to determine type as it handles:
+    //                  EndTurn, Undo?, Double Offer, Double Accept
   }
 
   private def right(i: Int, x: Int): Int          = i & lengthMasks(x)
+  // subset and bitAt have been added for backgammon be careful when using these
+  // havent tested outside the cases used for
   private def subset(i: Int, a: Int, b: Int): Int = right(right(i, a) >> b, b)
+  private def bitAt(i: Int, a: Int, b: Int): Int  = (i - a) >> b
   private val lengthMasks                         =
     Map(1 -> 0x01, 2 -> 0x03, 3 -> 0x07, 4 -> 0x0f, 5 -> 0x1f, 6 -> 0x3f, 7 -> 0x7f, 8 -> 0xff)
 
@@ -39,18 +42,15 @@ object Binary {
     def actionStrs(bs: List[Byte]): ActionStrs          = actionStrs(bs, maxPlies)
     def actionStrs(bs: List[Byte], nb: Int): ActionStrs = toActionStrs(intPlies(bs map toInt, nb))
 
-    // currently abusing the fact that a diceRoll signifies a new turn
-    // will change this when confirm action is in place
     def toActionStrs(plies: List[String]): ActionStrs = plies
       .map { ply =>
         ply match {
-          case Uci.DiceRoll.diceRollR(_) => s"#${ply}"
-          case _                         => s",${ply}"
+          case Uci.EndTurn.endTurnR() => s"${ply}#"
+          case _                      => s"${ply},"
         }
       }
       .mkString
       .split("#")
-      .drop(1)
       .map(_.split(",").toList)
       .toList
 
@@ -76,20 +76,25 @@ object Binary {
     def rollDiceUci(b1: Int): String = List(subset(b1, 6, 3), right(b1, 3)).mkString("/")
 
     // 2 action type
-    // 1 drop (0) or pickup (1)
+    // 1 drop (0) or lift (1)
     // 1 player (P1: 0, P2: 1)
-    // 1 offset
     // 3 pos (1-6)
+    // as drops can only be into the first 6 or last 6 squares (depending on player)
+    // and also lifts can only come from the last 6 or first 6 squares (depending on player)
+    // we only need to cater for 6 possible pos, which then get mapped to correct pos
+    // depending on player and action
     def onePosUci(b1: Int): String =
-      if (subset(b1, 5, 1) == 1) {
-        // pickup
-        sys.error("Pickup not encoded yet")
-      } else {
+      if (bitAt(b1, ActionType.OnePos << 6, 5) == 0) {
         // drop
-        val role   = if (subset(b1, 4, 1) == 1) "S" else "s"
-        val offset = if (subset(b1, 3, 1) == 1) 0 else 18
-        val pos    = Pos(right(b1, 3) + offset).get.toString()
+        val player = bitAt(b1, ActionType.OnePos << 6, 4)
+        val role   = if (player == 0) "S" else "s"
+        val pos    = Pos(right(b1, 3) + (if (player == 0) 18 else 0)).get.toString()
         s"${role}@${pos}"
+      } else {
+        // lift
+        val player = bitAt(b1, (ActionType.OnePos << 6) + (1 << 5), 4)
+        val pos    = Pos(right(b1, 3) + (if (player == 0) 0 else 18)).get.toString()
+        s"^${pos}"
       }
 
     // 2 action type
@@ -100,10 +105,9 @@ object Binary {
       s"${posFromInt(right(b1, 6))}${posFromInt(b2)}"
 
     // 2 action type
-    // 6 boolean type: 0 confirm, 1 pass. Others uncoded yet
+    // 6 boolean type: 0 EndTurn. Others uncoded yet
     def booleanUci(b1: Int): String = right(b1, 6) match {
-      case 0 => "lock"
-      case 1 => "pass"
+      case 0 => "endturn"
       case _ => sys.error("uncoded boolean type")
     }
 
@@ -118,12 +122,12 @@ object Binary {
 
     def ply(str: String): List[Byte] =
       (str match {
-        case Uci.DiceRoll.diceRollR(dr) => diceRollUci(dr)
-        case Uci.Move.moveR(orig, dest) => moveUci(orig, dest)
-        // case Uci.Drop.dropR(_, dst) => dropUci(dst)
-        // case Uci.Pass.passR()                     => passUci
-        // case Uci.SelectSquares.selectSquaresR(ss) => selectSquaresUci(ss)
-        case _                          => sys.error(s"Invalid action to write: ${str}")
+        case Uci.DiceRoll.diceRollR(dr)  => diceRollUci(dr)
+        case Uci.Move.moveR(orig, dest)  => moveUci(orig, dest)
+        case Uci.Drop.dropR(piece, dest) => dropUci(piece, dest)
+        case Uci.Lift.liftR(orig)        => liftUci(orig)
+        case Uci.EndTurn.endTurnR()      => endTurnUci()
+        case _                           => sys.error(s"Invalid action to write: ${str}")
       }) map (_.toByte)
 
     def plies(strs: Iterable[String]): Array[Byte] =
@@ -146,10 +150,21 @@ object Binary {
       Pos.fromKey(dest).get.index
     )
 
-    // def dropUci(dst: String) = List(
-    //  (headerBit(ActionType.OnePos)) + (Pos.fromKey(dst).get.index >> 8),
-    //  right(Pos.fromKey(dst).get.index, 8)
-    // )
+    def dropUci(piece: String, dest: String) = {
+      val playerBit = if (piece == "S") 0 else 1 << 4
+      val offset    = if (piece == "S") 18 else 0
+      List(headerBit(ActionType.OnePos) + playerBit + Pos.fromKey(dest).get.index - offset)
+    }
+
+    def liftUci(orig: String) = {
+      val liftBit   = 1 << 5
+      val posIndex  = Pos.fromKey(orig).get.index
+      val playerBit = if (posIndex < 18) 0 else 1 << 4
+      val offset    = if (posIndex < 18) 0 else 18
+      List(headerBit(ActionType.OnePos) + liftBit + playerBit + posIndex - offset)
+    }
+
+    def endTurnUci() = List((headerBit(ActionType.Boolean)))
 
     private def headerBit(i: Int) = i << 6
 
