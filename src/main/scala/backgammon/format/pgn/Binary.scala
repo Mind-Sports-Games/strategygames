@@ -42,17 +42,20 @@ object Binary {
     def actionStrs(bs: List[Byte]): ActionStrs          = actionStrs(bs, maxPlies)
     def actionStrs(bs: List[Byte], nb: Int): ActionStrs = toActionStrs(intPlies(bs map toInt, nb))
 
-    def toActionStrs(plies: List[String]): ActionStrs = plies
-      .map { ply =>
-        ply match {
-          case Uci.EndTurn.endTurnR() => s"${ply}#"
-          case _                      => s"${ply},"
-        }
-      }
-      .mkString
-      .split("#")
-      .map(_.split(",").toList)
-      .toList
+    def toActionStrs(plies: List[String]): ActionStrs =
+      if (plies.isEmpty) List()
+      else
+        plies
+          .map { ply =>
+            ply match {
+              case Uci.EndTurn.endTurnR() => s"${ply}#"
+              case _                      => s"${ply},"
+            }
+          }
+          .mkString
+          .split("#")
+          .map(_.split(",").toList)
+          .toList
 
     def intPlies(bs: List[Int], pliesToGo: Int): List[String] =
       bs match {
