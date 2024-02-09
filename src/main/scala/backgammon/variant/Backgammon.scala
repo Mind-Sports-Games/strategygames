@@ -27,8 +27,6 @@ case object Backgammon
     (situation.board.history.score.p1 == 15) ||
       (situation.board.history.score.p2 == 15)
 
-  override def specialDraw(situation: Situation) = false
-
   override def winner(situation: Situation): Option[Player] =
     if (specialEnd(situation)) {
       if (situation.board.history.score.p1 > situation.board.history.score.p2)

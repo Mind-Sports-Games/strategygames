@@ -1,5 +1,5 @@
 package strategygames.backgammon
-import strategygames.MoveMetrics
+import strategygames.{ MoveMetrics, Score }
 
 import strategygames.backgammon.format.Uci
 
@@ -17,7 +17,11 @@ case class Lift(
 
   def finalizeAfter: Board = after updateHistory { h =>
     h.copy(
-      currentTurn = h.currentTurn :+ toUci
+      currentTurn = h.currentTurn :+ toUci,
+      score = Score(
+        h.score.p1 + player.fold(1, 0),
+        h.score.p2 + player.fold(0, 1)
+      )
     )
   }
 

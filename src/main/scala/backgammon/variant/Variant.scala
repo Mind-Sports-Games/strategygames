@@ -8,8 +8,6 @@ import strategygames.backgammon._
 import strategygames.backgammon.format.{ FEN, Forsyth, Uci }
 import strategygames.{ GameFamily, Player, Score }
 
-case class BackgammonName(val name: String)
-
 // Correctness depends on singletons for each variant ID
 abstract class Variant private[variant] (
     val id: Int,
@@ -116,15 +114,6 @@ abstract class Variant private[variant] (
       .copy(
         pieces = pieces,
         pocketData = pocketsAfterCapture
-      )
-      .withHistory(
-        situation.history.copy(
-          score = Score(
-            // need to actually update here
-            situation.history.score.p1,
-            situation.history.score.p2
-          )
-        )
       )
       .useDie(die)
   }
