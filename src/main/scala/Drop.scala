@@ -114,7 +114,7 @@ object Drop {
         Pos.Backgammon(d.pos),
         Situation.Backgammon(d.situationBefore),
         Board.Backgammon(d.after),
-        d.autoEndTurn,
+        false,
         d.metrics
       ) {
 

@@ -253,8 +253,6 @@ object Replay {
     case (GameLogic.Backgammon(), FEN.Backgammon(initialFen), Variant.Backgammon(variant))       =>
       backgammon.Replay.gameWithUciWhileValid(
         actionStrs,
-        startPlayer,
-        activePlayer,
         initialFen,
         variant
       ) match {

@@ -1,14 +1,6 @@
 package strategygames.backgammon
 package format.pgn
-import strategygames.{
-  Action => StratAction,
-  ActionStrs,
-  ByoyomiClock,
-  Clock,
-  Drop => StratDrop,
-  Move => StratMove,
-  Situation => StratSituation
-}
+import strategygames.{ Action => StratAction, ActionStrs, ByoyomiClock, Clock, Situation => StratSituation }
 
 import strategygames.format.pgn.{ ParsedPgn, Sans, Tags }
 
@@ -64,30 +56,68 @@ object Reader {
     }
 
   private def makeReplayWithActionStrs(game: Game, actionStrs: ActionStrs): Result =
-    Replay.actionStrsWithEndTurn(actionStrs).foldLeft[Result](Result.Complete(Replay(game))) {
-      case (Result.Complete(replay), (actionStr, endTurn)) =>
+    actionStrs.flatten.foldLeft[Result](Result.Complete(Replay(game))) {
+      case (Result.Complete(replay), actionStr) =>
         actionStr match {
-          case Uci.Move.moveR(orig, dest) => {
+          case Uci.Move.moveR(orig, dest)   => {
             (Pos.fromKey(orig), Pos.fromKey(dest)) match {
               case (Some(orig), Some(dest)) =>
                 Result.Complete(
                   replay.addAction(
-                    Replay.replayMove(
-                      replay.state,
-                      orig,
-                      dest,
-                      endTurn
-                    )
+                    Replay.replayMove(replay.state, orig, dest)
                   )
                 )
               case _                        =>
                 Result.Incomplete(replay, s"Error making replay with move: ${actionStr}")
             }
           }
-          case _                             =>
-            Result.Incomplete(replay, s"Error making replay with uci move: ${actionStr}")
+          case Uci.Drop.dropR(role, dest)   => {
+            (Role.allByForsyth(replay.state.board.variant.gameFamily).get(role(0)), Pos.fromKey(dest)) match {
+              case (Some(role), Some(dest)) =>
+                Result.Complete(
+                  replay.addAction(
+                    Replay.replayDrop(replay.state, role, dest)
+                  )
+                )
+              case _                        =>
+                Result.Incomplete(replay, s"Error making replay with drop: ${actionStr}")
+            }
+          }
+          case Uci.Lift.liftR(orig)         => {
+            (Pos.fromKey(orig)) match {
+              case (Some(orig)) =>
+                Result.Complete(
+                  replay.addAction(
+                    Replay.replayLift(replay.state, orig)
+                  )
+                )
+              case _            =>
+                Result.Incomplete(replay, s"Error making replay with lift: ${actionStr}")
+            }
+          }
+          case Uci.DiceRoll.diceRollR(dice) => {
+            (Uci.DiceRoll.fromStrings(dice).dice) match {
+              case dice if dice.size == 2 =>
+                Result.Complete(
+                  replay.addAction(
+                    Replay.replayDiceRoll(replay.state, dice)
+                  )
+                )
+              case _                      =>
+                Result.Incomplete(replay, s"Error making replay with dice: ${actionStr}")
+            }
+          }
+          case Uci.EndTurn.endTurnR()       => {
+            Result.Complete(
+              replay.addAction(
+                Replay.replayEndTurn(replay.state)
+              )
+            )
+          }
+          case _                            =>
+            Result.Incomplete(replay, s"Error making replay with uci action: ${actionStr}")
         }
-      case (r: Result.Incomplete, _)                       => r
+      case (r: Result.Incomplete, _)            => r
     }
 
   private def makeGame(tags: Tags) = {

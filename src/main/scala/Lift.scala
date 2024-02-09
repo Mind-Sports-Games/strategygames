@@ -31,7 +31,7 @@ object Lift {
         Pos.Backgammon(l.pos),
         Situation.Backgammon(l.situationBefore),
         Board.Backgammon(l.after),
-        l.autoEndTurn,
+        false,
         l.metrics
       ) {
 

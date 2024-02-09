@@ -152,9 +152,6 @@ abstract class Variant private[variant] (
           dest = dest,
           situationBefore = situation,
           after = boardAfter(situation, Some(orig), Some(dest), die),
-          // might want to change this to false because turns will only end with confirmation
-          autoEndTurn = false,
-          // autoEndTurn = situation.board.unusedDice.size == 1,
           // TODO review if we want to use capture and promotion fields for backgammon or not
           capture = None,
           promotion = None
@@ -193,10 +190,7 @@ abstract class Variant private[variant] (
             piece = Piece(situation.player, Role.defaultRole),
             pos = dest,
             situationBefore = situation,
-            after = boardAfter(situation, None, Some(dest), die),
-            // might want to change this to false because turns will only end with confirmation
-            autoEndTurn = false
-            // autoEndTurn = situation.board.unusedDice.size == 1
+            after = boardAfter(situation, None, Some(dest), die)
           )
         }
     else List.empty
@@ -234,10 +228,7 @@ abstract class Variant private[variant] (
           Lift(
             pos = orig,
             situationBefore = situation,
-            after = boardAfter(situation, Some(orig), None, die),
-            // might want to change this to false because turns will only end with confirmation
-            autoEndTurn = false
-            // autoEndTurn = situation.board.unusedDice.size == 1
+            after = boardAfter(situation, Some(orig), None, die)
           )
         }
     else List.empty
@@ -255,8 +246,7 @@ abstract class Variant private[variant] (
         DiceRoll(
           dice,
           situation,
-          situation.board.setDice(dice),
-          false
+          situation.board.setDice(dice)
         )
       }
     else List.empty

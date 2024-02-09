@@ -60,7 +60,7 @@ object DiceRoll {
         dr.dice,
         Situation.Backgammon(dr.situationBefore),
         Board.Backgammon(dr.after),
-        dr.autoEndTurn,
+        false,
         dr.metrics
       ) {
 

@@ -308,7 +308,7 @@ object Move {
         Pos.Backgammon(m.dest),
         Situation.Backgammon(m.situationBefore),
         Board.Backgammon(m.after),
-        m.autoEndTurn,
+        false,
         m.capture match {
           case Some(capture) => Option(List(Pos.Backgammon(capture)))
           case None          => None

@@ -10,20 +10,17 @@ case class Move(
     dest: Pos,
     situationBefore: Situation,
     after: Board,
-    autoEndTurn: Boolean,
     capture: Option[Pos] = None,
     promotion: Option[PromotableRole] = None,
     metrics: MoveMetrics = MoveMetrics()
 ) extends Action(situationBefore, after, metrics) {
 
   def situationAfter =
-    Situation(finalizeAfter, if (autoEndTurn) !piece.player else piece.player)
+    Situation(finalizeAfter, situationBefore.player)
 
   def finalizeAfter: Board = after updateHistory { h =>
     h.copy(
-      lastTurn = if (autoEndTurn) h.currentTurn :+ toUci else h.lastTurn,
-      currentTurn = if (autoEndTurn) List() else h.currentTurn :+ toUci,
-      halfMoveClock = h.halfMoveClock + (if (autoEndTurn && piece.player == P2) 1 else 0)
+      currentTurn = h.currentTurn :+ toUci,
     )
   }
 

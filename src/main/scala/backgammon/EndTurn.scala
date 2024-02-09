@@ -9,13 +9,16 @@ case class EndTurn(
     metrics: MoveMetrics = MoveMetrics()
 ) extends Action(situationBefore, after, metrics) {
 
+  def playerAfter = !situationBefore.player
+
   def situationAfter =
-    Situation(finalizeAfter, !situationBefore.player)
+    Situation(finalizeAfter, playerAfter)
 
   def finalizeAfter: Board = after updateHistory { h =>
     h.copy(
       lastTurn = h.currentTurn :+ toUci,
-      currentTurn = List()
+      currentTurn = List(),
+      halfMoveClock = h.halfMoveClock + (if (playerAfter == P1) 1 else 0)
     )
   }
 

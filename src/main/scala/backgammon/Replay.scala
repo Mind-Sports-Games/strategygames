@@ -4,7 +4,6 @@ import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
-import strategygames.Player
 import strategygames.format.pgn.San
 import strategygames.backgammon.format.pgn.{ Parser, Reader }
 import strategygames.format.pgn.{ Tag, Tags }
@@ -53,14 +52,12 @@ object Replay {
 
   def apply(
       actionStrs: ActionStrs,
-      startPlayer: Player,
-      activePlayer: Player,
       initialFen: Option[FEN],
       variant: strategygames.backgammon.variant.Variant
   ): Validated[String, Reader.Result] = {
     val fen                            = initialFen.getOrElse(variant.initialFen)
     val (init, gameWithActions, error) =
-      gameWithActionWhileValid(actionStrs, startPlayer, activePlayer, fen, variant)
+      gameWithActionWhileValid(actionStrs, fen, variant)
     val game                           =
       gameWithActions.reverse.lastOption.map(_._1).getOrElse(init)
 
@@ -82,12 +79,7 @@ object Replay {
     case _                       => sys.error("Invalid backgammon move")
   }
 
-  def replayMove(
-      before: Game,
-      orig: Pos,
-      dest: Pos,
-      endTurn: Boolean
-  ): Move =
+  def replayMove(before: Game, orig: Pos, dest: Pos): Move =
     Move(
       piece = before.situation.board.pieces(orig)._1,
       orig = orig,
@@ -99,17 +91,11 @@ object Replay {
         Some(dest),
         (orig.index - dest.index).abs
       ),
-      autoEndTurn = endTurn,
       capture = None,
       promotion = None
     )
 
-  def replayDrop(
-      before: Game,
-      role: Role,
-      dest: Pos,
-      endTurn: Boolean
-  ): Drop =
+  def replayDrop(before: Game, role: Role, dest: Pos): Drop =
     Drop(
       piece = Piece(before.situation.player, role),
       pos = dest,
@@ -119,15 +105,10 @@ object Replay {
         None,
         Some(dest),
         Pos.barIndex(before.situation.player) + (dest.index * Pos.indexDirection(before.situation.player))
-      ),
-      autoEndTurn = endTurn
+      )
     )
 
-  def replayLift(
-      before: Game,
-      orig: Pos,
-      endTurn: Boolean
-  ): Lift =
+  def replayLift(before: Game, orig: Pos): Lift =
     Lift(
       pos = orig,
       situationBefore = before.situation,
@@ -137,52 +118,26 @@ object Replay {
         None,
         // TODO fix this do we need to know dice used?
         Pos.barIndex(before.situation.player) + (orig.index * Pos.indexDirection(before.situation.player))
-      ),
-      autoEndTurn = endTurn
+      )
     )
 
-  def replayDiceRoll(
-      before: Game,
-      dice: List[Int],
-      endTurn: Boolean
-  ): DiceRoll = {
+  def replayDiceRoll(before: Game, dice: List[Int]): DiceRoll = {
     DiceRoll(
       dice,
       situationBefore = before.situation,
-      after = before.situation.board.setDice(dice),
-      autoEndTurn = endTurn
+      after = before.situation.board.setDice(dice)
     )
   }
 
-  def replayEndTurn(
-      before: Game
-  ): EndTurn = {
+  def replayEndTurn(before: Game): EndTurn = {
     EndTurn(
       situationBefore = before.situation,
       after = before.situation.board
     )
   }
 
-  def actionStrsWithEndTurn(actionStrs: ActionStrs): Seq[(String, Boolean)] =
-    actionStrs.zipWithIndex.map { case (a, i) =>
-      a.zipWithIndex.map { case (a1, i1) => (a1, i1 == a.size - 1 && i != actionStrs.size - 1) }
-    }.flatten
-
-  private def combineActionStrsWithEndTurn(
-      actionStrs: ActionStrs,
-      startPlayer: Player,
-      activePlayer: Player
-  ): Seq[(String, Boolean)] =
-    actionStrsWithEndTurn(
-      if (Player.fromTurnCount(actionStrs.size + startPlayer.fold(0, 1)) == activePlayer)
-        actionStrs :+ Vector()
-      else actionStrs
-    )
-
   private def gameWithActionWhileValid(
       actionStrs: ActionStrs,
-      startPlayer: Player,
-      activePlayer: Player,
       initialFen: FEN,
       variant: strategygames.backgammon.variant.Variant
   ): (Game, List[(Game, Action)], Option[String]) = {
@@ -190,14 +145,10 @@ object Replay {
     var state  = init
     var errors = ""
 
-    def replayMoveFromUci(
-        orig: Option[Pos],
-        dest: Option[Pos],
-        endTurn: Boolean
-    ): (Game, Move) =
+    def replayMoveFromUci(orig: Option[Pos], dest: Option[Pos]): (Game, Move) =
       (orig, dest) match {
         case (Some(orig), Some(dest)) => {
-          val move = replayMove(state, orig, dest, endTurn)
+          val move = replayMove(state, orig, dest)
           state = state(move)
           (state, move)
         }
@@ -208,15 +159,10 @@ object Replay {
         }
       }
 
-    def replayDropFromUci(
-        role: Option[Role],
-        dest: Option[Pos],
-        endTurn: Boolean
-    ): (Game, Drop) =
+    def replayDropFromUci(role: Option[Role], dest: Option[Pos]): (Game, Drop) =
       (role, dest) match {
         case (Some(role), Some(dest)) => {
-          val uciDrop = s"${role.forsyth}@${dest.key}"
-          val drop    = replayDrop(state, role, dest, endTurn)
+          val drop = replayDrop(state, role, dest)
           state = state.applyDrop(drop)
           (state, drop)
         }
@@ -227,60 +173,52 @@ object Replay {
         }
       }
 
-    def replayLiftFromUci(
-        orig: Option[Pos],
-        endTurn: Boolean
-    ): (Game, Lift) =
+    def replayLiftFromUci(orig: Option[Pos]): (Game, Lift) =
       orig match {
         case Some(orig) => {
-          val uciLift = s"^${orig.key}"
-          val lift    = replayLift(state, orig, endTurn)
+          val lift = replayLift(state, orig)
           state = state.applyLift(lift)
           (state, lift)
         }
         case orig       => {
-          val uciLift = s"^orig"
+          val uciLift = s"^${orig}"
           errors += uciLift + ","
           sys.error(s"Invalid lift for replay: ${uciLift}")
         }
       }
 
-    def replayDiceRollFromUci(dice: List[Int], endTurn: Boolean): (Game, DiceRoll) = {
-      val diceRoll = replayDiceRoll(state, dice, endTurn)
+    def replayDiceRollFromUci(dice: List[Int]): (Game, DiceRoll) = {
+      val diceRoll = replayDiceRoll(state, dice)
       state = state.applyDiceRoll(diceRoll)
       (state, diceRoll)
     }
 
-    def replayEndTurnFromUci(oldEndTurn: Boolean): (Game, Action) = {
+    def replayEndTurnFromUci(): (Game, Action) = {
       val endTurn = replayEndTurn(state)
       state = state.applyEndTurn(endTurn)
       (state, endTurn)
     }
 
     val gameWithActions: List[(Game, Action)] =
-      combineActionStrsWithEndTurn(actionStrs, startPlayer, activePlayer).toList.map {
-        case (Uci.Move.moveR(orig, dest), endTurn) =>
+      // can flatten as specific EndTurn action marks turn end
+      actionStrs.flatten.toList.map {
+        case Uci.Move.moveR(orig, dest) =>
           replayMoveFromUci(
             Pos.fromKey(orig),
-            Pos.fromKey(dest),
-            endTurn
+            Pos.fromKey(dest)
           )
-        case (Uci.Drop.dropR(role, dest), endTurn) =>
+        case Uci.Drop.dropR(role, dest) =>
           replayDropFromUci(
             Role.allByForsyth(init.situation.board.variant.gameFamily).get(role(0)),
-            Pos.fromKey(dest),
-            endTurn
+            Pos.fromKey(dest)
           )
-        case (Uci.Lift.liftR(orig), endTurn)       =>
-          replayLiftFromUci(
-            Pos.fromKey(orig),
-            endTurn
-          )
-        case (Uci.DiceRoll.diceRollR(dr), endTurn) =>
-          replayDiceRollFromUci(Uci.DiceRoll.fromStrings(dr).dice, endTurn)
-        case (Uci.EndTurn.endTurnR(), endTurn)     =>
-          replayEndTurnFromUci(endTurn)
-        case (action: String, _)                   =>
+        case Uci.Lift.liftR(orig)       =>
+          replayLiftFromUci(Pos.fromKey(orig))
+        case Uci.DiceRoll.diceRollR(dr) =>
+          replayDiceRollFromUci(Uci.DiceRoll.fromStrings(dr).dice)
+        case Uci.EndTurn.endTurnR()     =>
+          replayEndTurnFromUci()
+        case (action: String)           =>
           sys.error(s"Invalid action for replay: $action")
       }
 
@@ -289,15 +227,11 @@ object Replay {
 
   def gameWithUciWhileValid(
       actionStrs: ActionStrs,
-      startPlayer: Player,
-      activePlayer: Player,
       initialFen: FEN,
       variant: strategygames.backgammon.variant.Variant
   ): (Game, List[(Game, Uci.WithSan)], Option[String]) = {
     val (game, gameWithActions, error) = gameWithActionWhileValid(
       actionStrs,
-      startPlayer,
-      activePlayer,
       initialFen,
       variant
     )

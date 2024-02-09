@@ -195,7 +195,7 @@ object Uci {
       role <- action.headOption flatMap Role.allByPgn.get
       pos  <- Pos.fromKey(action.slice(2, 4))
     } yield Uci.Drop(role, pos)
-    else if (action.contains('^')) Uci.Lift.fromStrings(action)
+    else if (action.contains('^')) Uci.Lift.fromStrings(action.drop(1))
     else if (action.contains('/')) Some(Uci.DiceRoll.fromStrings(action))
     else if (action == "roll") Some(Uci.DoRoll())
     else if (action == "endturn") Some(Uci.EndTurn())

@@ -21,10 +21,6 @@ object UciDump {
     else
       Replay(
         actionStrs = actionStrs,
-        // we can default to this because in UciDump we are only looking to validate
-        // the current actionStrs, not work out future actionStrs
-        startPlayer = Player.P1,
-        activePlayer = Player.fromTurnCount(actionStrs.size),
         initialFen = initialFen,
         variant = variant
       ) andThen (_.valid) map apply
