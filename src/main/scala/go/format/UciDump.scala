@@ -30,10 +30,6 @@ object UciDump {
         variant = variant
       ) andThen (_.valid) map apply
 
-  def action(@nowarn variant: Variant)(a: Action): String = a match {
-    case ss: SelectSquares => ss.toUci.uci
-    case p: Pass           => p.toUci.uci
-    case d: Drop           => d.toUci.uci
-  }
+  def action(@nowarn variant: Variant)(a: Action): String = a.toUci.uci
 
 }

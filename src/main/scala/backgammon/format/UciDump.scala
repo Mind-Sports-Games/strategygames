@@ -1,5 +1,6 @@
 package strategygames.backgammon.format
 
+import scala.annotation.nowarn
 import cats.data.Validated
 
 import strategygames.backgammon.variant.Variant
@@ -25,8 +26,6 @@ object UciDump {
         variant = variant
       ) andThen (_.valid) map apply
 
-  def action(variant: Variant)(a: Action): String = a match {
-    case m: Move => m.toUci.uci
-  }
+  def action(@nowarn variant: Variant)(a: Action): String = a.toUci.uci
 
 }
