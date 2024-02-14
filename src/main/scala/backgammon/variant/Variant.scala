@@ -33,7 +33,7 @@ abstract class Variant private[variant] (
   def onlyDropsVariant: Boolean = false
   def hasGameScore: Boolean     = true
 
-  def canOfferDraw: Boolean     = false
+  def canOfferDraw: Boolean       = false
   def ignoreSubmitAction: Boolean = true
 
   def repetitionEnabled: Boolean = false
@@ -357,7 +357,8 @@ abstract class Variant private[variant] (
 object Variant {
 
   lazy val all: List[Variant] = List(
-    Backgammon
+    Backgammon,
+    Nackgammon
   )
   val byId                    = all map { v =>
     (v.id, v)
