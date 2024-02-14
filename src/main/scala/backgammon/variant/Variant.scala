@@ -33,7 +33,7 @@ abstract class Variant private[variant] (
   def onlyDropsVariant: Boolean = false
   def hasGameScore: Boolean     = true
 
-  def canOfferDraw: Boolean     = false
+  def canOfferDraw: Boolean       = false
   def ignoreSubmitAction: Boolean = true
 
   def repetitionEnabled: Boolean = false
@@ -232,8 +232,10 @@ abstract class Variant private[variant] (
       .flatMap(_.permutations)
 
   def validDiceRolls(situation: Situation): List[DiceRoll] =
-    if (situation.board.unusedDice.isEmpty)
-      diceCombinations(2).toList.map { dice =>
+    if (situation.board.unusedDice.isEmpty && !situation.board.history.hasRolledDiceThisTurn)
+      diceCombinations(2).toList.filter{dr =>
+        situation.board.history.didRollDiceLastTurn || dr.toSet.size == 2
+      }.map { dice =>
         DiceRoll(
           dice,
           situation,

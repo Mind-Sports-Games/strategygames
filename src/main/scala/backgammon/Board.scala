@@ -46,7 +46,8 @@ case class Board(
     !piecesOnBar(player) && piecesOf(player).keys.toList.diff(Pos.endQuarter(player)).isEmpty
 
   def furthestFromHome(player: Player): Int =
-    (Pos.barIndex(!player) + (piecesOf(player).keys.map(_.index * Pos.indexDirection(!player)).max * Pos.indexDirection(player))).abs
+    (Pos.barIndex(!player) + (piecesOf(player).keys.map(_.index * Pos.indexDirection(!player)).max * Pos
+      .indexDirection(player))).abs
 
   lazy val actors: Map[Pos, Actor] = pieces map { case (pos, (piece, _)) =>
     (pos, Actor(piece, pos, this))
@@ -69,9 +70,9 @@ case class Board(
 
   lazy val posMap: Map[(Piece, Int), Iterable[Pos]] = pieces.groupMap(_._2)(_._1)
 
-  lazy val piecesOnBoardCount: Int                    = pieces.keys.size
+  lazy val piecesOnBoardCount: Int                    = pieces.map(_._2._2).sum
   lazy val playerPiecesOnBoardCount: Map[Player, Int] = Player.all.map { p =>
-    (p, pieces.collect { case (pos, (piece, count)) if piece.player == p => (pos, (piece, count)) }.size)
+    (p, pieces.collect { case (pos, (piece, count)) if piece.player == p => count }.sum)
   }.toMap
 
   def withHistory(h: History): Board       = copy(history = h)

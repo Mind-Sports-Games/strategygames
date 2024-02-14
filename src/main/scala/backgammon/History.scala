@@ -25,4 +25,8 @@ case class History(
   def hasRolledDiceThisTurn: Boolean =
     currentTurn.filter { case _: Uci.DiceRoll => true; case _ => false }.nonEmpty
 
+  // can be used to determine whether this is the first turn or not
+  def didRollDiceLastTurn: Boolean =
+    lastTurn.filter { case _: Uci.DiceRoll => true; case _ => false }.nonEmpty
+
 }
