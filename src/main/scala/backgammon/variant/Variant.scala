@@ -359,7 +359,8 @@ abstract class Variant private[variant] (
 object Variant {
 
   lazy val all: List[Variant] = List(
-    Backgammon
+    Backgammon,
+    Nackgammon
   )
   val byId                    = all map { v =>
     (v.id, v)
