@@ -16,7 +16,7 @@ case object MiniShogi
 
   def gameFamily: GameFamily = GameFamily.Shogi()
 
-  override def dropsVariant            = true
+  override def dropsVariant       = true
   override def hasDetatchedPocket = true
 
   override def useFairyOptionalGameEnd = true

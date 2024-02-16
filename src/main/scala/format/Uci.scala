@@ -876,13 +876,14 @@ object Uci {
   }
 
   def apply(lib: GameLogic, endTurn: strategygames.EndTurn) = (lib, endTurn) match {
-    case (GameLogic.Draughts(), _)                     => sys.error("EndTurn not implemented for Draughts")
-    case (GameLogic.Chess(), _)                        => sys.error("EndTurn not implemented for Chess")
-    case (GameLogic.FairySF(), _)                      => sys.error("EndTurn not implemented for fairysf")
-    case (GameLogic.Samurai(), _)                      => sys.error("EndTurn not implemented for samurai")
-    case (GameLogic.Togyzkumalak(), _)                 => sys.error("EndTurn not implemented for togyzkumalak")
-    case (GameLogic.Go(), _) => sys.error("Pass not implemented for go")
-    case (GameLogic.Backgammon(), strategygames.EndTurn.Backgammon(endTurn))                   => BackgammonEndTurn(backgammon.format.Uci(endTurn))
+    case (GameLogic.Draughts(), _)                                           => sys.error("EndTurn not implemented for Draughts")
+    case (GameLogic.Chess(), _)                                              => sys.error("EndTurn not implemented for Chess")
+    case (GameLogic.FairySF(), _)                                            => sys.error("EndTurn not implemented for fairysf")
+    case (GameLogic.Samurai(), _)                                            => sys.error("EndTurn not implemented for samurai")
+    case (GameLogic.Togyzkumalak(), _)                                       => sys.error("EndTurn not implemented for togyzkumalak")
+    case (GameLogic.Go(), _)                                                 => sys.error("Pass not implemented for go")
+    case (GameLogic.Backgammon(), strategygames.EndTurn.Backgammon(endTurn)) =>
+      BackgammonEndTurn(backgammon.format.Uci(endTurn))
   }
 
   def apply(lib: GameLogic, gf: GameFamily, action: String): Option[Uci] = lib match {

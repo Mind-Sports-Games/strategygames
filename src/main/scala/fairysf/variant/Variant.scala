@@ -33,12 +33,12 @@ abstract class Variant private[variant] (
 
   def materialImbalanceVariant: Boolean = false
 
-  def dropsVariant: Boolean     = false
-  def onlyDropsVariant: Boolean = false
+  def dropsVariant: Boolean       = false
+  def onlyDropsVariant: Boolean   = false
   def hasDetatchedPocket: Boolean = false
 
-  def hasGameScore: Boolean     = false
-  def canOfferDraw: Boolean     = true
+  def hasGameScore: Boolean = false
+  def canOfferDraw: Boolean = true
 
   def repetitionEnabled: Boolean       = true
   def useFairyOptionalGameEnd: Boolean = false

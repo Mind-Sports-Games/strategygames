@@ -19,7 +19,7 @@ case class Move(
 
   def finalizeAfter: Board = after updateHistory { h =>
     h.copy(
-      currentTurn = h.currentTurn :+ toUci,
+      currentTurn = h.currentTurn :+ toUci
     )
   }
 
