@@ -127,7 +127,9 @@ object Replay {
         r.actions.map {
           case m: backgammon.Move      => Move.Backgammon(m)
           case d: backgammon.Drop      => Drop.Backgammon(d)
+          case l: backgammon.Lift      => Lift.Backgammon(l)
           case dr: backgammon.DiceRoll => DiceRoll.Backgammon(dr)
+          case et: backgammon.EndTurn  => EndTurn.Backgammon(et)
         },
         Game.Backgammon(r.state)
       ) {

@@ -45,15 +45,11 @@ case class Situation(board: Board, player: Player) {
 
   def canUseDice: Boolean = board.unusedDice.nonEmpty && (canMove || canDrop || canLift)
 
+  def canUndo: Boolean = board.history.lastAction.map(_.undoable).getOrElse(false)
+
   def history = board.history
 
-  // these dont exist in Backgammon. Normal ending tracked in VariantEnd
-  def checkMate: Boolean = false
-  def staleMate: Boolean = false
-
-  private def variantEnd = false || board.variant.specialEnd(this)
-
-  def end: Boolean = checkMate || staleMate || variantEnd
+  def end: Boolean = board.variant.specialEnd(this)
 
   def winner: Option[Player] = board.variant.winner(this)
 
@@ -61,19 +57,19 @@ case class Situation(board: Board, player: Player) {
     (board valid strict) && !end
 
   lazy val status: Option[Status] =
-    if (checkMate) Status.Mate.some
-    else if (variantEnd) Status.VariantEnd.some
-    else if (staleMate) Status.Stalemate.some
+    if (board.variant.backgammonWin(this)) Status.BackgammonWin.some
+    else if (board.variant.gammonWin(this)) Status.GammonWin.some
+    else if (end) Status.SingleWin.some
     else none
 
   def opponentHasInsufficientMaterial: Boolean =
     if (player == P1) (board.history.score.p1 == 81) else (board.history.score.p2 == 81)
 
-  def move(from: Pos, to: Pos, promotion: Option[PromotableRole]): Validated[String, Move] =
-    board.variant.move(this, from, to, promotion)
+  def move(from: Pos, to: Pos): Validated[String, Move] =
+    board.variant.move(this, from, to)
 
   def move(uci: Uci.Move): Validated[String, Move] =
-    board.variant.move(this, uci.orig, uci.dest, uci.promotion)
+    board.variant.move(this, uci.orig, uci.dest)
 
   def drop(role: Role, pos: Pos): Validated[String, Drop] =
     board.variant.drop(this, role, pos)

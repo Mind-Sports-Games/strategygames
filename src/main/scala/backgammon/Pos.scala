@@ -162,7 +162,7 @@ object Pos {
 
   def indexDirection(player: Player): Int = player.fold(-1, 1)
 
-  def endQuarter(player: Player): List[Pos] = player.fold(
+  def home(player: Player): List[Pos] = player.fold(
     all.filter(_.index < 6),
     all.filter(_.index > 17)
   )

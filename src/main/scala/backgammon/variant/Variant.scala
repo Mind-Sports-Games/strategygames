@@ -49,10 +49,6 @@ abstract class Variant private[variant] (
 
   val kingPiece: Option[Role] = None
 
-  // looks like this is only to allow King to be a valid promotion piece
-  // in just atomic, so can leave as true for now
-  def isValidPromotion(promotion: Option[PromotableRole]): Boolean = true
-
   private def destFromOrig(pos: Pos, count: Int): Pos =
     (if (count == 1) Pos((pos.index + 1) % 18)
      else Pos((pos.index + count - 1)    % 18)) match {
@@ -143,9 +139,7 @@ abstract class Variant private[variant] (
           dest = dest,
           situationBefore = situation,
           after = boardAfter(situation, Some(orig), Some(dest), die),
-          // TODO review if we want to use capture and promotion fields for backgammon or not
-          capture = None,
-          promotion = None
+          capture = None
         )
       }
 
@@ -187,12 +181,7 @@ abstract class Variant private[variant] (
     else List.empty
 
   private def canLift(situation: Situation): Boolean =
-    situation.board.unusedDice.nonEmpty && !situation.board.piecesOnBar(situation.player) && situation.board
-      .piecesOf(situation.player)
-      .keys
-      .toList
-      .diff(Pos.endQuarter(situation.player))
-      .isEmpty
+    situation.board.unusedDice.nonEmpty && situation.board.piecesCanLift(situation.player)
 
   def validLifts(situation: Situation): List[Lift] =
     if (canLift(situation))
@@ -201,7 +190,7 @@ abstract class Variant private[variant] (
           Pos(
             (
               List(
-                situation.board.furthestFromHome(situation.player),
+                situation.board.furthestFromEnd(situation.player),
                 die
               ).min - (Pos.barIndex(!situation.player) * Pos.indexDirection(situation.player))
             ).abs
@@ -233,15 +222,17 @@ abstract class Variant private[variant] (
 
   def validDiceRolls(situation: Situation): List[DiceRoll] =
     if (situation.board.unusedDice.isEmpty && !situation.board.history.hasRolledDiceThisTurn)
-      diceCombinations(2).toList.filter{dr =>
-        situation.board.history.didRollDiceLastTurn || dr.toSet.size == 2
-      }.map { dice =>
-        DiceRoll(
-          dice,
-          situation,
-          situation.board.setDice(dice)
-        )
-      }
+      diceCombinations(2).toList
+        .filter { dr =>
+          situation.board.history.didRollDiceLastTurn || dr.toSet.size == 2
+        }
+        .map { dice =>
+          DiceRoll(
+            dice,
+            situation,
+            situation.board.setDice(dice)
+          )
+        }
     else List.empty
 
   def validEndTurn(situation: Situation): Option[EndTurn] =
@@ -260,12 +251,11 @@ abstract class Variant private[variant] (
   def move(
       situation: Situation,
       from: Pos,
-      to: Pos,
-      promotion: Option[PromotableRole]
+      to: Pos
   ): Validated[String, Move] = {
     // Find the move in the variant specific list of valid moves
-    situation.moves get from flatMap (_.find(m => m.dest == to && m.promotion == promotion)) toValid
-      s"Not a valid move: ${from}${to} with prom: ${promotion}. Allowed moves: ${situation.moves}"
+    situation.moves get from flatMap (_.find(m => m.dest == to)) toValid
+      s"Not a valid move: ${from}${to}. Allowed moves: ${situation.moves}"
   }
 
   def drop(situation: Situation, role: Role, pos: Pos): Validated[String, Drop] =
@@ -310,13 +300,33 @@ abstract class Variant private[variant] (
         .some
     else None
 
-  def stalemateIsDraw = false
+  def specialEnd(situation: Situation) =
+    (situation.board.history.score.p1 == 15) ||
+      (situation.board.history.score.p2 == 15)
 
-  def winner(situation: Situation): Option[Player]
+  def gammonWin(situation: Situation) =
+    (situation.board.history.score.p1 == 15 && situation.board.history.score.p2 == 0) ||
+      (situation.board.history.score.p2 == 15 && situation.board.history.score.p1 == 0)
 
-  @nowarn def specialEnd(situation: Situation) = false
+  def backgammonWin(situation: Situation) =
+    (
+      situation.board.history.score.p1 == 15 &&
+        situation.board.history.score.p2 == 0 && (
+          situation.board.piecesOnBar(P2) || situation.board.pieceInOpponentsHome(P2)
+        )
+    ) || (
+      situation.board.history.score.p2 == 15 &&
+        situation.board.history.score.p1 == 0 && (
+          situation.board.piecesOnBar(P1) || situation.board.pieceInOpponentsHome(P1)
+        )
+    )
 
-  @nowarn def specialDraw(situation: Situation) = false
+  def winner(situation: Situation): Option[Player] =
+    if (specialEnd(situation)) {
+      if (situation.board.history.score.p1 > situation.board.history.score.p2)
+        Player.fromName("p1")
+      else Player.fromName("p2")
+    } else None
 
   def materialImbalance(board: Board): Int =
     board.pieces.values.foldLeft(0) { case (acc, (Piece(player, _), count)) =>

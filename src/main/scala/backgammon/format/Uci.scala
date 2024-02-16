@@ -14,6 +14,8 @@ sealed trait Uci {
 
   def origDest: Option[(Pos, Pos)]
 
+  def undoable: Boolean
+
   def apply(situation: Situation): Validated[String, Action]
 }
 
@@ -21,21 +23,20 @@ object Uci {
 
   case class Move(
       orig: Pos,
-      dest: Pos,
-      promotion: Option[PromotableRole] = None
+      dest: Pos
   ) extends Uci {
 
     def keys = orig.key + dest.key
-    def uci  = keys + promotionString
+    def uci  = keys
 
     def keysPiotr = orig.piotrStr + dest.piotrStr
-    def piotr     = keysPiotr + promotionString
-
-    def promotionString = promotion.fold("")(_.forsyth.toString)
+    def piotr     = keysPiotr
 
     def origDest = Some(orig -> dest)
 
-    def apply(situation: Situation) = situation.move(orig, dest, promotion)
+    def undoable = true
+
+    def apply(situation: Situation) = situation.move(orig, dest)
   }
 
   object Move {
@@ -62,14 +63,13 @@ object Uci {
       for {
         orig <- move.headOption flatMap Pos.piotr
         dest <- move lift 1 flatMap Pos.piotr
-      } yield Move(orig, dest, promotion = None)
+      } yield Move(orig, dest)
 
     def fromStrings(gf: GameFamily, origS: String, destS: String, promS: Option[String]) =
       for {
-        orig     <- Pos.fromKey(origS)
-        dest     <- Pos.fromKey(destS)
-        promotion = None
-      } yield Move(orig, dest, promotion)
+        orig <- Pos.fromKey(origS)
+        dest <- Pos.fromKey(destS)
+      } yield Move(orig, dest)
 
     val moveR = s"^${Pos.posR}${Pos.posR}$$".r
   }
@@ -83,6 +83,8 @@ object Uci {
     def piotr = s"${role.pgn}@${pos.piotrStr}"
 
     def origDest = Some(pos -> pos)
+
+    def undoable = true
 
     def apply(situation: Situation) = situation.drop(role, pos)
   }
@@ -109,6 +111,8 @@ object Uci {
 
     def origDest = Some(pos -> pos)
 
+    def undoable = true
+
     def apply(situation: Situation) = situation.drop(Role.defaultRole, pos)
   }
 
@@ -133,6 +137,8 @@ object Uci {
 
     def origDest = None
 
+    def undoable = false
+
     def apply(situation: Situation) = situation.diceRoll(dice)
   }
 
@@ -156,6 +162,8 @@ object Uci {
 
     def origDest = None
 
+    def undoable = false
+
     def apply(situation: Situation) = sys.error("Cannot apply a DoRoll")
 
   }
@@ -167,6 +175,8 @@ object Uci {
     def piotr = uci
 
     def origDest = None
+
+    def undoable = false
 
     def apply(situation: Situation) = situation.endTurn()
   }

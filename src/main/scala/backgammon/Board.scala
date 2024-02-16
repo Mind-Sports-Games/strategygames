@@ -42,10 +42,15 @@ case class Board(
   def piecesOnBar(player: Player): Boolean =
     pocketData.fold(false) { pocketData => pocketData.pockets(player).roles.nonEmpty }
 
-  def piecesCanLift(player: Player): Boolean =
-    !piecesOnBar(player) && piecesOf(player).keys.toList.diff(Pos.endQuarter(player)).isEmpty
+  // At least one piece in opponents home
+  def pieceInOpponentsHome(player: Player): Boolean =
+    piecesOf(player).keys.toList.intersect(Pos.home(!player)).nonEmpty
 
-  def furthestFromHome(player: Player): Int =
+  // all pieces in home
+  def piecesCanLift(player: Player): Boolean =
+    !piecesOnBar(player) && piecesOf(player).keys.toList.diff(Pos.home(player)).isEmpty
+
+  def furthestFromEnd(player: Player): Int =
     (Pos.barIndex(!player) + (piecesOf(player).keys.map(_.index * Pos.indexDirection(!player)).max * Pos
       .indexDirection(player))).abs
 

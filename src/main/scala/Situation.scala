@@ -56,7 +56,7 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def takebackable: Boolean
 
-  def canUndo: Boolean = true
+  def canUndo: Boolean
 
   def history = board.history
 
@@ -138,6 +138,8 @@ object Situation {
     }
 
     def takebackable = true
+
+    def canUndo = false
 
     lazy val check: Boolean = s.check
 
@@ -278,6 +280,8 @@ object Situation {
     }
 
     def takebackable = true
+
+    def canUndo = false
 
     lazy val check: Boolean = false
 
@@ -429,6 +433,8 @@ object Situation {
 
     def takebackable = true
 
+    def canUndo = false
+
     lazy val check: Boolean = s.check
 
     def checkSquare = s.checkSquare.map(Pos.FairySF)
@@ -559,6 +565,8 @@ object Situation {
 
     def takebackable = true
 
+    def canUndo = false
+
     lazy val check: Boolean = false
 
     def checkSquare = None
@@ -685,6 +693,8 @@ object Situation {
 
     def takebackable = true
 
+    def canUndo = false
+
     lazy val check: Boolean = false
 
     def checkSquare = None
@@ -806,6 +816,8 @@ object Situation {
     lazy val moves: Map[Pos, List[Move]] = Map.empty[Pos, List[Move]]
 
     def takebackable = s.takebackable
+
+    def canUndo = false
 
     lazy val check: Boolean = false
 
@@ -939,6 +951,8 @@ object Situation {
 
     def takebackable = false
 
+    def canUndo = s.canUndo
+
     lazy val check: Boolean = false
 
     def checkSquare = None
@@ -1028,7 +1042,7 @@ object Situation {
         partialCaptures: Boolean = false
     ): Validated[String, Move] = (from, to) match {
       case (Pos.Backgammon(from), Pos.Backgammon(to)) =>
-        s.move(from, to, promotion.map(_.toBackgammon)).toEither.map(m => Move.Backgammon(m)).toValidated
+        s.move(from, to).toEither.map(m => Move.Backgammon(m)).toValidated
       case _                                          => sys.error("Not passed Backgammon objects")
     }
 

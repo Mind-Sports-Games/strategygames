@@ -13,7 +13,6 @@ case class Std(
     capture: Boolean = false,
     file: Option[Int] = None,
     rank: Option[Int] = None,
-    promotion: Option[PromotableRole] = None,
     metas: Metas = Metas.empty
 ) extends San {
 
@@ -25,8 +24,7 @@ case class Std(
 
   override def withSuffixes(s: Suffixes) =
     copy(
-      metas = metas withSuffixes s,
-      promotion = s.promotion.map(_.toBackgammon)
+      metas = metas withSuffixes s
     )
 
   def withMetas(m: Metas) = copy(metas = m)

@@ -19,10 +19,9 @@ case class Game(
   def apply(
       orig: Pos,
       dest: Pos,
-      promotion: Option[PromotableRole] = None,
       metrics: MoveMetrics = MoveMetrics()
   ): Validated[String, (Game, Move)] =
-    situation.move(orig, dest, promotion).map(_ withMetrics metrics) map { move =>
+    situation.move(orig, dest).map(_ withMetrics metrics) map { move =>
       apply(move) -> move
     }
 
@@ -132,8 +131,7 @@ case class Game(
       case None      => Validated.invalid(s"$situation cannot randomize a dice roll")
     }
 
-  def apply(uci: Uci.Move): Validated[String, (Game, Move)]         =
-    apply(uci.orig, uci.dest, uci.promotion)
+  def apply(uci: Uci.Move): Validated[String, (Game, Move)]         = apply(uci.orig, uci.dest)
   def apply(uci: Uci.Drop): Validated[String, (Game, Drop)]         = drop(uci.role, uci.pos)
   def apply(uci: Uci.Lift): Validated[String, (Game, Lift)]         = lift(uci.pos)
   def apply(uci: Uci.DiceRoll): Validated[String, (Game, DiceRoll)] = diceRoll(uci.dice)
@@ -178,13 +176,31 @@ case class Game(
 }
 
 object Game {
-  def apply(variant: strategygames.backgammon.variant.Variant): Game =
+  // used for tests
+  def applyWithoutRandomness(variant: strategygames.backgammon.variant.Variant): Game =
     new Game(Situation(Board init variant, P1))
 
+  def apply(variant: strategygames.backgammon.variant.Variant): Game = {
+    val initGame = new Game(Situation(Board init variant, P1))
+    Random
+      .shuffle(Player.all)
+      .head
+      .fold(
+        initGame,
+        initGame.applyEndTurn(
+          EndTurn(
+            initGame.situation,
+            initGame.situation.board
+          )
+        )
+      )
+  }
+
   def apply(variantOption: Option[strategygames.backgammon.variant.Variant], fen: Option[FEN]): Game = {
-    val variant = variantOption | strategygames.backgammon.variant.Variant.default
-    val g       = apply(variant)
-    fen
+    val variant    = variantOption | strategygames.backgammon.variant.Variant.default
+    val g          = apply(variant)
+    val fenToParse = if (variantOption.map(_.initialFen) == fen) None else fen
+    fenToParse
       .flatMap {
         format.Forsyth.<<<@(variant, _)
       }

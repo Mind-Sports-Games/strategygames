@@ -1037,7 +1037,7 @@ object Game {
         partialCaptures: Boolean = false
     ): Validated[String, (Game, Move)] = (orig, dest) match {
       case (Pos.Backgammon(orig), Pos.Backgammon(dest)) =>
-        g.apply(orig, dest, None, metrics)
+        g.apply(orig, dest, metrics)
           .toEither
           .map(t => (Backgammon(t._1), Move.Backgammon(t._2)))
           .toValidated

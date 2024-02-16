@@ -37,10 +37,20 @@ case class Replay(setup: Game, actions: List[Action], state: Game) {
         actions = d :: actions,
         state = state.applyDrop(d)
       )
+    case l: Lift      =>
+      copy(
+        actions = l :: actions,
+        state = state.applyLift(l)
+      )
     case dr: DiceRoll =>
       copy(
         actions = dr :: actions,
         state = state.applyDiceRoll(dr)
+      )
+    case et: EndTurn  =>
+      copy(
+        actions = et :: actions,
+        state = state.applyEndTurn(et)
       )
   }
 
@@ -91,8 +101,7 @@ object Replay {
         Some(dest),
         (orig.index - dest.index).abs
       ),
-      capture = None,
-      promotion = None
+      capture = None
     )
 
   def replayDrop(before: Game, role: Role, dest: Pos): Drop =

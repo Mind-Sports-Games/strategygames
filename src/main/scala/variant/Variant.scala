@@ -798,7 +798,7 @@ object Variant {
       case _                               => sys.error("Not passed Backgammon objects")
     }
 
-    def stalemateIsDraw: Boolean = v.stalemateIsDraw
+    def stalemateIsDraw: Boolean = false
 
     def winner(situation: Situation): Option[Player] = situation match {
       case Situation.Backgammon(situation) => v.winner(situation)
@@ -811,7 +811,7 @@ object Variant {
     }
 
     @nowarn def specialDraw(situation: Situation): Boolean = situation match {
-      case Situation.Backgammon(situation) => v.specialDraw(situation)
+      case Situation.Backgammon(situation) => false
       case _                               => sys.error("Not passed Backgammon objects")
     }
 

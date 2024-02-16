@@ -26,6 +26,9 @@ object Status {
   case object NoStart        extends Status(37) // the player did not make the first move in time
   case object UnknownFinish  extends Status(38) // we don't know why the game ended
   case object PerpetualCheck extends Status(39) // For Shogi/Xiangqi
+  case object SingleWin      extends Status(40) // For Backgammon
+  case object GammonWin      extends Status(41) // For Backgammon
+  case object BackgammonWin  extends Status(42) // For Backgammon
   case object VariantEnd     extends Status(60) // the variant has a special ending
 
   val all = List(

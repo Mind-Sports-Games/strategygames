@@ -566,8 +566,7 @@ object Uci {
           BackgammonMove(
             backgammon.format.Uci.Move.apply(
               orig,
-              dest,
-              promotion.map(_.toBackgammon)
+              dest
             )
           )
         case _                                                                          => sys.error("Mismatched gamelogic types 23")

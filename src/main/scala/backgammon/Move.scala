@@ -11,7 +11,6 @@ case class Move(
     situationBefore: Situation,
     after: Board,
     capture: Option[Pos] = None,
-    promotion: Option[PromotableRole] = None,
     metrics: MoveMetrics = MoveMetrics()
 ) extends Action(situationBefore, after, metrics) {
 
@@ -29,17 +28,13 @@ case class Move(
   // does this move capture an opponent piece?
   def captures = capture.isDefined
 
-  def promotes = promotion.isDefined
-
   def diceUsed = (orig.index - dest.index).abs
 
   def player = piece.player
 
-  def withPromotion(op: Option[PromotableRole]): Option[Move] = None
-
   def withMetrics(m: MoveMetrics) = copy(metrics = m)
 
-  def toUci = Uci.Move(orig, dest, promotion)
+  def toUci = Uci.Move(orig, dest)
 
   override def toString = s"$piece ${toUci.uci}"
 }

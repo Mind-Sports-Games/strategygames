@@ -23,15 +23,4 @@ case object Nackgammon
   override def initialFen =
     format.FEN("4S,3,3s,1,4s,3,2S,2S/4s,3,3S,1,4S,3,2s,2s[] - - w 0 0 1")
 
-  override def specialEnd(situation: Situation) =
-    (situation.board.history.score.p1 == 15) ||
-      (situation.board.history.score.p2 == 15)
-
-  override def winner(situation: Situation): Option[Player] =
-    if (specialEnd(situation)) {
-      if (situation.board.history.score.p1 > situation.board.history.score.p2)
-        Player.fromName("p1")
-      else Player.fromName("p2")
-    } else None
-
 }
