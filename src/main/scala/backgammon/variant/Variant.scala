@@ -328,10 +328,8 @@ abstract class Variant private[variant] (
       else Player.fromName("p2")
     } else None
 
-  def materialImbalance(board: Board): Int =
-    board.pieces.values.foldLeft(0) { case (acc, (Piece(player, _), count)) =>
-      acc + count * player.fold(1, -1)
-    }
+  // need to count pieces in pockets so just look at score
+  def materialImbalance(board: Board): Int = board.history.score.p2 - board.history.score.p1
 
   // Some variants have an extra effect on the board on a move. For example, in Atomic, some
   // pieces surrounding a capture explode

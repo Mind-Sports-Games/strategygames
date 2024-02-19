@@ -24,8 +24,6 @@ case class DiceRoll(
 
   def withMetrics(m: MoveMetrics) = copy(metrics = m)
 
-  // lazy val rollDice
-
   def toUci = Uci.DiceRoll(dice)
 
   override def toString = toUci.uci

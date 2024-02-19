@@ -16,7 +16,7 @@ final case class FEN(value: String) extends AnyVal {
 
   def player2Score: Int = intFromFen(5).getOrElse(0)
 
-  def fullMove: Option[Int] = intFromFen(6)
+  def fullMove: Option[Int] = intFromFen(FEN.fullMoveIndex)
 
   def ply: Option[Int] =
     fullMove map { fm =>
@@ -64,4 +64,6 @@ final case class FEN(value: String) extends AnyVal {
 object FEN {
 
   def clean(source: String): FEN = FEN(source.replace("_", " ").trim)
+
+  def fullMoveIndex: Int = 6
 }

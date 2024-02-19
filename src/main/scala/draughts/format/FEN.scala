@@ -17,4 +17,6 @@ object FEN {
 
   def clean(source: String): FEN = FEN(source.replace("_", " ").trim)
 
+  def fullMoveIndex: Int = 4
+
 }

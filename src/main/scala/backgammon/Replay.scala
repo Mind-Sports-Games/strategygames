@@ -8,7 +8,16 @@ import strategygames.format.pgn.San
 import strategygames.backgammon.format.pgn.{ Parser, Reader }
 import strategygames.format.pgn.{ Tag, Tags }
 import strategygames.backgammon.format.{ FEN, Forsyth, Uci }
-import strategygames.{ Action => StratAction, ActionStrs, Move => StratMove, Situation => StratSituation }
+import strategygames.{
+  Action => StratAction,
+  ActionStrs,
+  DiceRoll => StratDiceRoll,
+  Drop => StratDrop,
+  EndTurn => StratEndTurn,
+  Lift => StratLift,
+  Move => StratMove,
+  Situation => StratSituation
+}
 
 case class Replay(setup: Game, actions: List[Action], state: Game) {
 
@@ -84,9 +93,13 @@ object Replay {
 
   // TODO: because this is primarily used in a Validation context, we should be able to
   //       return something that's runtime safe as well.
-  def backgammonMove(action: StratAction) = action match {
-    case StratMove.Backgammon(m) => m
-    case _                       => sys.error("Invalid backgammon move")
+  private def backgammonAction(action: StratAction) = action match {
+    case StratMove.Backgammon(m)      => m
+    case StratDrop.Backgammon(d)      => d
+    case StratLift.Backgammon(l)      => l
+    case StratDiceRoll.Backgammon(dr) => dr
+    case StratEndTurn.Backgammon(et)  => et
+    case _                            => sys.error("Invalid backgammon action")
   }
 
   def replayMove(before: Game, orig: Pos, dest: Pos): Move =
@@ -260,7 +273,7 @@ object Replay {
     sans match {
       case Nil         => valid(Nil)
       case san :: rest =>
-        san(StratSituation.wrap(sit)).map(backgammonMove) flatMap { move =>
+        san(StratSituation.wrap(sit)).map(backgammonAction) flatMap { move =>
           val after = Situation(move.finalizeAfter, !sit.player)
           recursiveSituations(after, rest) map { after :: _ }
         }
@@ -368,7 +381,7 @@ object Replay {
     else {
 
       // we don't want to compare the full move number, to match transpositions
-      def truncateFen(fen: FEN) = fen.value.split(' ').take(4) mkString " "
+      def truncateFen(fen: FEN) = fen.value.split(' ').take(FEN.fullMoveIndex) mkString " "
       val atFenTruncated        = truncateFen(atFen)
       def compareFen(fen: FEN)  = truncateFen(fen) == atFenTruncated
 
@@ -376,7 +389,7 @@ object Replay {
         sans match {
           case Nil         => invalid(s"Can't find $atFenTruncated, reached ply $ply, turn $turn")
           case san :: rest =>
-            san(StratSituation.wrap(sit)).map(backgammonMove) flatMap { move =>
+            san(StratSituation.wrap(sit)).map(backgammonAction) flatMap { move =>
               val after        = move.situationAfter
               val newPlies     = ply + 1
               val newTurnCount = turn + (if (sit.player != after.player) 1 else 0)

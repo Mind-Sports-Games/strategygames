@@ -70,7 +70,7 @@ object Replay {
     }
   }
 
-  def fairysfAction(action: StratAction) = action match {
+  private def fairysfAction(action: StratAction) = action match {
     case StratMove.FairySF(m) => m
     case StratDrop.FairySF(d) => d
     case _                    => sys.error("Invalid fairysf action")
@@ -401,7 +401,7 @@ object Replay {
     else {
 
       // we don't want to compare the full move number, to match transpositions
-      def truncateFen(fen: FEN) = fen.value.split(' ').take(4) mkString " "
+      def truncateFen(fen: FEN) = fen.value.split(' ').take(FEN.fullMoveIndex) mkString " "
       val atFenTruncated        = truncateFen(atFen)
       def compareFen(fen: FEN)  = truncateFen(fen) == atFenTruncated
 

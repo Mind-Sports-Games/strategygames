@@ -83,7 +83,7 @@ object Replay {
 
   // TODO: because this is primarily used in a Validation context, we should be able to
   //       return something that's runtime safe as well.
-  def goAction(action: StratAction) = action match {
+  private def goAction(action: StratAction) = action match {
     case StratDrop.Go(d)           => d
     case StratPass.Go(p)           => p
     case StratSelectSquares.Go(ss) => ss
