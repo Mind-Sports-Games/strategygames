@@ -815,12 +815,10 @@ object Variant {
       case _                               => sys.error("Not passed Backgammon objects")
     }
 
-    def hasMoveEffects: Boolean = v.hasMoveEffects
+    //backgammon has no variant effects for any action
+    def hasMoveEffects: Boolean            = false
+    def addVariantEffect(move: Move): Move = move
 
-    def addVariantEffect(move: Move): Move            = move match {
-      case Move.Backgammon(move) => Move.Backgammon(v.addVariantEffect(move))
-      case _                     => sys.error("Not passed Backgammon objects")
-    }
     def valid(board: Board, strict: Boolean): Boolean = board match {
       case Board.Backgammon(board) => v.valid(board, strict)
       case _                       => sys.error("Not passed Backgammon objects")

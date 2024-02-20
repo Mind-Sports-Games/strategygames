@@ -76,18 +76,19 @@ case class Pos private (index: Int) extends AnyVal {
   @inline def file = File of this
   @inline def rank = Rank of this
 
-  // We're going to use the chess piotr's which are not based on the
-  // indices that we use.
+  // We're going to use the chess piotr's which are not based on the indices that we use.
   def piotr: Char = Piotr.lookup.get(index).getOrElse('?')
   def piotrStr    = piotr.toString
 
-  def last: Boolean = (index + 1) % 12 == 0
+  def last: Boolean = (index + 1) % File.all.size == 0
 
   def key               = file.toString + rank.toString
   override def toString = key
+
 }
 
 object Pos {
+
   def apply(index: Int): Option[Pos] =
     if (0 <= index && index < File.all.size * Rank.all.size) Some(new Pos(index))
     else None
@@ -99,7 +100,8 @@ object Pos {
       Some(new Pos(x + (File.all.size - x) * y))
     else None
 
-  def opposite(index: Int): Option[Pos] = apply(if (index < 12) index + 12 else index - 12)
+  def opposite(index: Int): Option[Pos] =
+    apply(if (index < File.all.size) index + File.all.size else index - File.all.size)
 
   def fromKey(key: String): Option[Pos] = allKeys get key
 

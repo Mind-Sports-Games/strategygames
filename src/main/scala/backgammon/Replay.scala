@@ -39,7 +39,7 @@ case class Replay(setup: Game, actions: List[Action], state: Game) {
   def addAction(action: Action) = action match {
     case m: Move      =>
       copy(
-        actions = m.applyVariantEffect :: actions,
+        actions = m :: actions,
         state = state.apply(m)
       )
     case d: Drop      =>

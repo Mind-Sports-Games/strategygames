@@ -61,8 +61,7 @@ case class Situation(board: Board, player: Player) {
     else if (end) Status.SingleWin.some
     else none
 
-  def opponentHasInsufficientMaterial: Boolean =
-    if (player == P1) (board.history.score.p1 == 81) else (board.history.score.p2 == 81)
+  def opponentHasInsufficientMaterial: Boolean = false
 
   def move(from: Pos, to: Pos): Validated[String, Move] =
     board.variant.move(this, from, to)
@@ -98,4 +97,5 @@ object Situation {
 
   def apply(variant: strategygames.backgammon.variant.Variant): Situation =
     Situation(Board init variant, variant.startPlayer)
+
 }

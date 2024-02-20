@@ -9,7 +9,9 @@ case class EndTurn(
     metrics: MoveMetrics = MoveMetrics()
 ) extends Action(situationBefore, after, metrics) {
 
-  def playerAfter = !situationBefore.player
+  def player = situationBefore.player
+
+  def playerAfter = !player
 
   def situationAfter =
     Situation(finalizeAfter, playerAfter)
@@ -21,10 +23,6 @@ case class EndTurn(
       halfMoveClock = h.halfMoveClock + playerAfter.fold(1, 0)
     )
   }
-
-  def applyVariantEffect = this
-
-  def player = situationBefore.player
 
   def withMetrics(m: MoveMetrics) = copy(metrics = m)
 

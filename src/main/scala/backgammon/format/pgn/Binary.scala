@@ -17,8 +17,6 @@ object Binary {
   def readActionStrs(bs: List[Byte])          = Try(Reader actionStrs bs)
   def readActionStrs(bs: List[Byte], nb: Int) = Try(Reader.actionStrs(bs, nb))
 
-  // No MoveType implemented for Delimiter/Multimove
-
   private object ActionType {
     val DiceRoll = 0 // needs 6 bits, 3 for each dice
     val OnePos   = 1 // needs 5 bits, 1 for Drop/Lift, 1 for Player, 3 for pos offset
@@ -175,4 +173,5 @@ object Binary {
 
   @inline private def toInt(b: Byte): Int = b & 0xff
   private def showByte(b: Int): String    = "%08d" format (b.toBinaryString.toInt)
+
 }

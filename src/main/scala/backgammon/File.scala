@@ -1,5 +1,7 @@
 package strategygames.backgammon
+
 case class File private (val index: Int) extends AnyVal with Ordered[File] {
+
   @inline def -(that: File): Int           = index - that.index
   @inline override def compare(that: File) = this - that
 
@@ -12,15 +14,17 @@ case class File private (val index: Int) extends AnyVal with Ordered[File] {
 
   @inline def upperCaseChar: Char = (65 + index).toChar
   def toUpperCaseString           = upperCaseChar.toString
+
 }
 
 object File {
+
   def apply(index: Int): Option[File] =
     if (0 <= index && index < all.size) Some(new File(index))
     else None
 
   @inline def of(pos: Pos): File = {
-    val rank: Int = if (pos.index > 11) 1 else 0
+    val rank: Int = if (pos.index >= all.size) 1 else 0
     new File(if (rank == 0) all.size - 1 - pos.index else pos.index - all.size)
   }
 
@@ -41,4 +45,5 @@ object File {
 
   val all                     = List(A, B, C, D, E, F, G, H, I, J, K, L)
   val allReversed: List[File] = all.reverse
+
 }

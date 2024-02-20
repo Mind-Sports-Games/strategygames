@@ -23,11 +23,8 @@ case class Move(
     )
   }
 
-  def applyVariantEffect: Move = before.variant addVariantEffect this
-
-  // does this move capture an opponent piece?
   // this isn't really used for Backgammon and isnt defined for drop
-  // but should work if uncommented
+  // but should work if uncommented and represent "does this move capture an opponent piece?"
   // def captures = capture.isDefined
 
   def diceUsed = (orig.index - dest.index).abs

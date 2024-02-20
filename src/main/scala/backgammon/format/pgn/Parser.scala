@@ -16,7 +16,6 @@ import strategygames.format.pgn.{
   Tag,
   Tags
 }
-import strategygames.{ Role => ChessRole }
 
 import scala.util.parsing.combinator._
 import cats.data.Validated

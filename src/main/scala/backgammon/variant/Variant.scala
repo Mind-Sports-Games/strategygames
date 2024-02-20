@@ -47,17 +47,8 @@ abstract class Variant private[variant] (
 
   def startPlayer: Player = P1
 
-  val kingPiece: Option[Role] = None
-
-  private def destFromOrig(pos: Pos, count: Int): Pos =
-    (if (count == 1) Pos((pos.index + 1) % 18)
-     else Pos((pos.index + count - 1)    % 18)) match {
-      case Some(dest) => dest
-      case None       => sys.error(s"Invalid dest from orig(${pos.index}) in togyz move(${count})")
-    }
-
   // returns the updated piecemap for pieces on the board and an optional captured piece to put in the pocket
-  def piecesAfterAction(
+  private def piecesAfterAction(
       pieces: PieceMap,
       player: Player,
       orig: Option[Pos],
@@ -138,10 +129,10 @@ abstract class Variant private[variant] (
           orig = orig,
           dest = dest,
           situationBefore = situation,
-          after = boardAfter(situation, Some(orig), Some(dest), die),
+          after = boardAfter(situation, Some(orig), Some(dest), die)
           // this isn't really used for Backgammon and isnt defined for drop
           // but should work if uncommented
-          //capture = situation.board.piecesOf(!situation.player).get(dest).map(_ => dest)
+          // capture = situation.board.piecesOf(!situation.player).get(dest).map(_ => dest)
         )
       }
 
@@ -332,17 +323,6 @@ abstract class Variant private[variant] (
 
   // need to count pieces in pockets so just look at score
   def materialImbalance(board: Board): Int = board.history.score.p2 - board.history.score.p1
-
-  // Some variants have an extra effect on the board on a move. For example, in Atomic, some
-  // pieces surrounding a capture explode
-  def hasMoveEffects = false
-
-  def addVariantEffect(move: Move): Move = move
-
-  /** Once a move has been decided upon from the available legal moves, the board is finalized
-    */
-  @nowarn def finalizeBoard(board: Board, uci: format.Uci, captured: Option[Piece]): Board =
-    board
 
   // TODO: implement
   def valid(board: Board, strict: Boolean): Boolean = true

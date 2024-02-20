@@ -13,6 +13,7 @@ case class Piece(player: Player, role: Role) {
 
   def forsyth: Char     = player.fold(role.forsythUpper, role.forsyth)
   override def toString = s"${player.toString.toLowerCase}-$role"
+
 }
 
 object Piece {

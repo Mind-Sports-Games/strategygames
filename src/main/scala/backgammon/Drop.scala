@@ -11,18 +11,16 @@ case class Drop(
     metrics: MoveMetrics = MoveMetrics()
 ) extends Action(situationBefore, after, metrics) {
 
+  def player = situationBefore.player
+
   def situationAfter =
-    Situation(finalizeAfter, situationBefore.player)
+    Situation(finalizeAfter, player)
 
   def finalizeAfter: Board = after updateHistory { h =>
     h.copy(
       currentTurn = h.currentTurn :+ toUci
     )
   }
-
-  def player = piece.player
-
-  private def beforeBoard = situationBefore.board
 
   def diceUsed = (Pos.barIndex(player) - pos.index).abs
 

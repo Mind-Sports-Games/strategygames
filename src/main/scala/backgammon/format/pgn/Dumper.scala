@@ -47,4 +47,5 @@ object Dumper {
       data,
       data.finalizeAfter.situationOf(!data.player)
     )
+
 }

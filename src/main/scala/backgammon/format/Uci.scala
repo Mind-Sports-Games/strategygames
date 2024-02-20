@@ -152,7 +152,7 @@ object Uci {
   }
 
   // this is a stub Uci case class that doesn't marry up to an Action type
-  // this stub class says i need to do a roll, i don't know the dice i have rolled
+  // this stub class says "I need to do a roll, I don't know the dice I have rolled"
   // its used by lila but not internally by strategygames
   case class DoRoll() extends Uci {
 
@@ -197,7 +197,6 @@ object Uci {
 
   def apply(diceRoll: strategygames.backgammon.DiceRoll) = Uci.DiceRoll(diceRoll.dice)
 
-  // TODO: do we really need this? surely there is a better way to get this for this situation?
   def apply(@nowarn endTurn: strategygames.backgammon.EndTurn) = Uci.EndTurn()
 
   def apply(action: String): Option[Uci] =
@@ -233,4 +232,5 @@ object Uci {
 
   def writeListPiotr(actions: List[Uci]): String =
     actions.map(_.piotr) mkString " "
+
 }

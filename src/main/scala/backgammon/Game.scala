@@ -17,6 +17,7 @@ case class Game(
     startedAtPly: Int = 0,
     startedAtTurn: Int = 0
 ) {
+
   def apply(
       orig: Pos,
       dest: Pos,
@@ -192,9 +193,11 @@ case class Game(
   def fullTurnCount: Int = 1 + turnCount / 2
 
   def withTurnsAndPlies(p: Int, t: Int) = copy(plies = p, turnCount = t)
+
 }
 
 object Game {
+
   def apply(variant: Variant): Game =
     new Game(Situation(Board init variant, P1))
 
@@ -218,4 +221,5 @@ object Game {
         )
       }
   }
+
 }

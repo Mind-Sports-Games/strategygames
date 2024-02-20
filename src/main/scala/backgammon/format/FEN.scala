@@ -26,15 +26,16 @@ final case class FEN(value: String) extends AnyVal {
   private def intFromFen(index: Int): Option[Int] =
     value.split(' ').lift(index).flatMap(_.toIntOption)
 
-  def stoneArray: Array[String] = (board.split('/')(1).split(',').reverse ++ board.split('/')(0).split(','))
-    .map(c =>
-      c.toString() match {
-        case x if 1 to 12 map (_.toString) contains x => Array.fill(x.toInt)("0")
-        case x                                        => Array(x)
-      }
-    )
-    .flatten
-    .toArray
+  private def stoneArray: Array[String] =
+    (board.split('/')(1).split(',').reverse ++ board.split('/')(0).split(','))
+      .map(c =>
+        c.toString() match {
+          case x if 1 to 12 map (_.toString) contains x => Array.fill(x.toInt)("0")
+          case x                                        => Array(x)
+        }
+      )
+      .flatten
+      .toArray
 
   def pieces: PieceMap = stoneArray.zipWithIndex
     .filterNot { case (s, _) => s == "0" }
@@ -59,6 +60,7 @@ final case class FEN(value: String) extends AnyVal {
   }
 
   def initial = value == Forsyth.initial.value
+
 }
 
 object FEN {
@@ -66,4 +68,5 @@ object FEN {
   def clean(source: String): FEN = FEN(source.replace("_", " ").trim)
 
   def fullMoveIndex: Int = 6
+
 }

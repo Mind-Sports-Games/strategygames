@@ -27,4 +27,5 @@ case class DiceRoll(
   def toUci = Uci.DiceRoll(dice)
 
   override def toString = toUci.uci
+
 }

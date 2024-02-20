@@ -25,8 +25,6 @@ case class Lift(
     )
   }
 
-  private def beforeBoard = situationBefore.board
-
   def diceUsed = situationBefore.board.unusedDice.diff(after.unusedDice).head
 
   def withMetrics(m: MoveMetrics) = copy(metrics = m)

@@ -4,6 +4,7 @@ import strategygames.MoveMetrics
 import strategygames.Player
 
 abstract class Action(situationBefore: Situation, after: Board, metrics: MoveMetrics = MoveMetrics()) {
+
   def before = situationBefore.board
 
   def situationAfter: Situation
