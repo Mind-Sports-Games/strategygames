@@ -6,6 +6,7 @@ import cats.data.Validated
 import scala.util.Random
 
 import strategygames.backgammon.format.{ pgn, FEN, Uci }
+import strategygames.backgammon.variant.Variant
 
 case class Game(
     situation: Situation,
@@ -90,16 +91,33 @@ case class Game(
     }
 
   def applyDiceRoll(dr: DiceRoll): Game = {
-    val newSituation = dr.situationAfter
-    val switchPlayer = situation.player != newSituation.player
+    if (
+      !situation.board.history.didRollDiceLastTurn &&
+      plies == 0 &&
+      startedAtPly == 0 &&
+      actionStrs.isEmpty &&
+      dr.dice(0) > dr.dice(1)
+    ) {
+      // 50% of the time at the start of the game we need to flip the start player
+      val gameBeforeDiceRoll = applyEndTurn(EndTurn(situation, situation.board))
+      val diceRoll           = gameBeforeDiceRoll.situation.diceRoll(dr.dice).map(_ withMetrics dr.metrics) match {
+        case Validated.Valid(diceRoll) => diceRoll
+        case Validated.Invalid(e)      => sys.error(e)
+      }
+      gameBeforeDiceRoll.applyDiceRoll(diceRoll)
+    } else {
+      // apply a dice roll as normal
+      val newSituation = dr.situationAfter
+      val switchPlayer = situation.player != newSituation.player
 
-    copy(
-      situation = newSituation,
-      plies = plies + 1,
-      turnCount = turnCount + (if (switchPlayer) 1 else 0),
-      actionStrs = applyActionStr(dr.toUci.uci),
-      clock = applyClock(dr.metrics, newSituation.status.isEmpty, switchPlayer)
-    )
+      copy(
+        situation = newSituation,
+        plies = plies + 1,
+        turnCount = turnCount + (if (switchPlayer) 1 else 0),
+        actionStrs = applyActionStr(dr.toUci.uci),
+        clock = applyClock(dr.metrics, newSituation.status.isEmpty, switchPlayer)
+      )
+    }
   }
 
   def endTurn(
@@ -176,31 +194,13 @@ case class Game(
 }
 
 object Game {
-  // used for tests
-  def applyWithoutRandomness(variant: strategygames.backgammon.variant.Variant): Game =
+  def apply(variant: Variant): Game =
     new Game(Situation(Board init variant, P1))
 
-  def apply(variant: strategygames.backgammon.variant.Variant): Game = {
-    val initGame = new Game(Situation(Board init variant, P1))
-    Random
-      .shuffle(Player.all)
-      .head
-      .fold(
-        initGame,
-        initGame.applyEndTurn(
-          EndTurn(
-            initGame.situation,
-            initGame.situation.board
-          )
-        )
-      )
-  }
-
-  def apply(variantOption: Option[strategygames.backgammon.variant.Variant], fen: Option[FEN]): Game = {
-    val variant    = variantOption | strategygames.backgammon.variant.Variant.default
-    val g          = apply(variant)
-    val fenToParse = if (variantOption.map(_.initialFen) == fen) None else fen
-    fenToParse
+  def apply(variantOption: Option[Variant], fen: Option[FEN]): Game = {
+    val variant = variantOption | Variant.default
+    val g       = apply(variant)
+    fen
       .flatMap {
         format.Forsyth.<<<@(variant, _)
       }
