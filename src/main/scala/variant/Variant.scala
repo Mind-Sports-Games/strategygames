@@ -794,8 +794,8 @@ object Variant {
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false
 
     def checkmate(situation: Situation): Boolean = situation match {
-      case Situation.Backgammon(situation) => false
-      case _                               => sys.error("Not passed Backgammon objects")
+      case Situation.Backgammon(_) => false
+      case _                       => sys.error("Not passed Backgammon objects")
     }
 
     def stalemateIsDraw: Boolean = false
@@ -810,9 +810,9 @@ object Variant {
       case _                               => sys.error("Not passed Backgammon objects")
     }
 
-    @nowarn def specialDraw(situation: Situation): Boolean = situation match {
-      case Situation.Backgammon(situation) => false
-      case _                               => sys.error("Not passed Backgammon objects")
+    def specialDraw(situation: Situation): Boolean = situation match {
+      case Situation.Backgammon(_) => false
+      case _                       => sys.error("Not passed Backgammon objects")
     }
 
     //backgammon has no variant effects for any action

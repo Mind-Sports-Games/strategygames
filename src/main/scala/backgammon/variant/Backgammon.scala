@@ -2,7 +2,7 @@ package strategygames.backgammon
 package variant
 
 import strategygames.backgammon._
-import strategygames.{ GameFamily, Player }
+import strategygames.GameFamily
 
 case object Backgammon
     extends Variant(

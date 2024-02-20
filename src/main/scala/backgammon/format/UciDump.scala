@@ -4,8 +4,8 @@ import scala.annotation.nowarn
 import cats.data.Validated
 
 import strategygames.backgammon.variant.Variant
-import strategygames.backgammon.{ Action, Move, Replay }
-import strategygames.{ ActionStrs, Player }
+import strategygames.backgammon.{ Action, Replay }
+import strategygames.ActionStrs
 
 object UciDump {
 

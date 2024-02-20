@@ -2,7 +2,6 @@ package strategygames.backgammon
 import strategygames.MoveMetrics
 
 import strategygames.backgammon.format.Uci
-import cats.syntax.option._
 
 case class Move(
     piece: Piece,

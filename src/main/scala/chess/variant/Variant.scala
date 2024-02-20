@@ -138,7 +138,7 @@ abstract class Variant private[variant] (
   def possibleDropsByRole(@nowarn situation: Situation): Option[Map[Role, List[Pos]]] =
     None // override in crazyhouse
 
-  def validDiceRolls(situation: Situation): List[DiceRoll] = List.empty
+  @nowarn def validDiceRolls(situation: Situation): List[DiceRoll] = List.empty
 
   def staleMate(situation: Situation): Boolean = !situation.check && situation.moves.isEmpty
 

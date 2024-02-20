@@ -1,7 +1,5 @@
 package strategygames.backgammon
 
-import strategygames.Player
-
 case class Rank private (val index: Int) extends AnyVal with Ordered[Rank] {
 
   @inline def -(that: Rank): Int           = index - that.index

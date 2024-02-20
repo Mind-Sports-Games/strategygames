@@ -2,9 +2,6 @@ package strategygames.backgammon
 
 import strategygames.{ GameFamily, P1, P2, Player }
 
-import cats.implicits._
-import ornicar.scalalib.Zero
-
 sealed trait Role {
   val forsyth: Char
   val forsythUpper: Char

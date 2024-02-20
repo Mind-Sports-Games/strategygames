@@ -67,7 +67,7 @@ case class Board(
 
   lazy val piecesOnBoardCount: Int                    = pieces.map(_._2._2).sum
   lazy val playerPiecesOnBoardCount: Map[Player, Int] = Player.all.map { p =>
-    (p, pieces.collect { case (pos, (piece, count)) if piece.player == p => count }.sum)
+    (p, pieces.collect { case (_, (piece, count)) if piece.player == p => count }.sum)
   }.toMap
 
   def withHistory(h: History): Board       = copy(history = h)

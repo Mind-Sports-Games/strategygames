@@ -1,7 +1,7 @@
 package strategygames.backgammon.format
 
 import strategygames.Player
-import strategygames.backgammon.{ Piece, PieceMap, Pos, PosInfo, Stone }
+import strategygames.backgammon.{ Piece, PieceMap, Pos, Role }
 
 final case class FEN(value: String) extends AnyVal {
 
@@ -40,14 +40,14 @@ final case class FEN(value: String) extends AnyVal {
   def pieces: PieceMap = stoneArray.zipWithIndex
     .filterNot { case (s, _) => s == "0" }
     .map { case (pieceString, index) =>
-      Pos(index) -> (Stone, pieceString)
+      (Pos(index), (Role.defaultRole, pieceString))
     }
     .map { case (Some(pos), (r, ps)) =>
-      (pos -> (Piece(
+      ((pos, (Piece(
         if (ps.takeRight(1) == "S") Player.P1 else Player.P2,
         r
       ),
-      ps.dropRight(1).toInt))
+      ps.dropRight(1).toInt)))
     }
     .toMap
 

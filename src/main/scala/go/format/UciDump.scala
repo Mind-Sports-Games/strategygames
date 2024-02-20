@@ -4,7 +4,7 @@ import scala.annotation.nowarn
 import cats.data.Validated
 
 import strategygames.go.variant.Variant
-import strategygames.go.{ Action, Drop, Pass, Replay, SelectSquares }
+import strategygames.go.{ Action, Replay }
 import strategygames.{ ActionStrs, Player }
 
 object UciDump {

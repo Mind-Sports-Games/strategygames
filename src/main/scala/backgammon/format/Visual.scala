@@ -23,7 +23,7 @@ object Visual {
         // role   <- Role forsyth c.toLower
       } yield {
         Pos.at(x, Rank.all.size - 1 - y) map { pos =>
-          pos -> ((Piece(Player.fromP1(c isUpper), Stone)), c.toInt)
+          (pos, ((Piece(Player.fromP1(c isUpper), Stone)), c.toInt))
         }
       }) flatten,
       variant = strategygames.backgammon.variant.Variant.default

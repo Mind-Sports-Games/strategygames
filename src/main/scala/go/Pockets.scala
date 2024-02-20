@@ -11,18 +11,9 @@ case class PocketData(
       copy(pockets = nps)
     }
 
-  def store(piece: Piece, from: Pos) =
-    copy(
-      pockets = pockets.store(
-        GameLogic.Go(),
-        StratPiece.Go(piece)
-      )
-    )
-
 }
 
 object PocketData {
-  // val init = PocketData(Pockets(Pocket(Nil), Pocket(Nil)), Set.empty)
   val init = PocketData(
     Pockets(
       Pocket(List(strategygames.Role.GoRole(Stone), strategygames.Role.GoRole(Stone))),

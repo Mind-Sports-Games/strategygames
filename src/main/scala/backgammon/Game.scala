@@ -3,9 +3,11 @@ import strategygames.{ ClockBase, MoveMetrics, Player, VActionStrs }
 
 import cats.data.Validated
 
+import scala.annotation.nowarn
+
 import scala.util.Random
 
-import strategygames.backgammon.format.{ pgn, FEN, Uci }
+import strategygames.backgammon.format.{ FEN, Uci }
 import strategygames.backgammon.variant.Variant
 
 case class Game(
@@ -151,12 +153,12 @@ case class Game(
       case None      => Validated.invalid(s"$situation cannot randomize a dice roll")
     }
 
-  def apply(uci: Uci.Move): Validated[String, (Game, Move)]         = apply(uci.orig, uci.dest)
-  def apply(uci: Uci.Drop): Validated[String, (Game, Drop)]         = drop(uci.role, uci.pos)
-  def apply(uci: Uci.Lift): Validated[String, (Game, Lift)]         = lift(uci.pos)
-  def apply(uci: Uci.DiceRoll): Validated[String, (Game, DiceRoll)] = diceRoll(uci.dice)
-  def apply(uci: Uci.EndTurn): Validated[String, (Game, EndTurn)]   = endTurn()
-  def apply(uci: Uci): Validated[String, (Game, Action)]            = (uci match {
+  def apply(uci: Uci.Move): Validated[String, (Game, Move)]               = apply(uci.orig, uci.dest)
+  def apply(uci: Uci.Drop): Validated[String, (Game, Drop)]               = drop(uci.role, uci.pos)
+  def apply(uci: Uci.Lift): Validated[String, (Game, Lift)]               = lift(uci.pos)
+  def apply(uci: Uci.DiceRoll): Validated[String, (Game, DiceRoll)]       = diceRoll(uci.dice)
+  def apply(@nowarn uci: Uci.EndTurn): Validated[String, (Game, EndTurn)] = endTurn()
+  def apply(uci: Uci): Validated[String, (Game, Action)]                  = (uci match {
     case u: Uci.Move     => apply(u)
     case u: Uci.Drop     => apply(u)
     case u: Uci.Lift     => apply(u)
