@@ -115,8 +115,6 @@ object Board {
 
   def init(variant: Variant): Board = Board(variant.pieces, variant)
 
-  // def empty(variant: Variant): Board = Board(Nil, variant)
-
   sealed abstract class BoardSize(
       val width: Int,
       val height: Int

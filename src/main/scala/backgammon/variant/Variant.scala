@@ -139,7 +139,9 @@ abstract class Variant private[variant] (
           dest = dest,
           situationBefore = situation,
           after = boardAfter(situation, Some(orig), Some(dest), die),
-          capture = None
+          // this isn't really used for Backgammon and isnt defined for drop
+          // but should work if uncommented
+          //capture = situation.board.piecesOf(!situation.player).get(dest).map(_ => dest)
         )
       }
 

@@ -10,7 +10,7 @@ case class Move(
     dest: Pos,
     situationBefore: Situation,
     after: Board,
-    capture: Option[Pos] = None,
+    // capture: Option[Pos] = None,
     metrics: MoveMetrics = MoveMetrics()
 ) extends Action(situationBefore, after, metrics) {
 
@@ -26,7 +26,9 @@ case class Move(
   def applyVariantEffect: Move = before.variant addVariantEffect this
 
   // does this move capture an opponent piece?
-  def captures = capture.isDefined
+  // this isn't really used for Backgammon and isnt defined for drop
+  // but should work if uncommented
+  // def captures = capture.isDefined
 
   def diceUsed = (orig.index - dest.index).abs
 

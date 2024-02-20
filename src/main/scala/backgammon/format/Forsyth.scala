@@ -40,8 +40,8 @@ object Forsyth {
 
   case class SituationPlus(situation: Situation, fullTurnCount: Int) {
 
+    //This is all incorrect for Backgammon, but does it matter?
     def turnCount = fullTurnCount * 2 - situation.player.fold(2, 1)
-    // when we get a multiaction variant we should set this
     def plies     = turnCount
 
   }

@@ -23,10 +23,4 @@ object Piece {
       Piece(Player.fromP1(c.isUpper), _)
     }
 
-  // This is now wrong when changing fen format for Oware to include count
-  // def fromStoneNumber(player: Player, n: Int): Option[Piece] =
-  //  Role.allByBinaryInt get n map {
-  //    Piece(player, _)
-  //  }
-
 }

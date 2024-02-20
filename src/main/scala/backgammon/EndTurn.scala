@@ -18,7 +18,7 @@ case class EndTurn(
     h.copy(
       lastTurn = h.currentTurn :+ toUci,
       currentTurn = List(),
-      halfMoveClock = h.halfMoveClock + (if (playerAfter == P1) 1 else 0)
+      halfMoveClock = h.halfMoveClock + playerAfter.fold(1, 0)
     )
   }
 

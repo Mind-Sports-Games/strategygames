@@ -27,8 +27,7 @@ case class Lift(
 
   private def beforeBoard = situationBefore.board
 
-  // TODO this isn't going to work when a larger dice is used to bear off a closer stone
-  def diceUsed = (Pos.barIndex(!player) - pos.index).abs
+  def diceUsed = situationBefore.board.unusedDice.diff(after.unusedDice).head
 
   def withMetrics(m: MoveMetrics) = copy(metrics = m)
 

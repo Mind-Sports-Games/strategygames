@@ -9,9 +9,8 @@ case class History(
     currentTurn: List[Uci] = List.empty,
     positionHashes: PositionHash = Array.empty,
     score: Score = Score(0, 0),
-    // this might be tracking fullMove for Backgammon
-    // TODO is this inconsistent with chess for default?
-    halfMoveClock: Int = 1
+    // this is tracking fullMove for Backgammon
+    halfMoveClock: Int = 0
 ) {
 
   lazy val lastAction: Option[Uci] =

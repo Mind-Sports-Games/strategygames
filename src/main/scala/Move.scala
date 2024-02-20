@@ -309,10 +309,7 @@ object Move {
         Situation.Backgammon(m.situationBefore),
         Board.Backgammon(m.after),
         false,
-        m.capture match {
-          case Some(capture) => Option(List(Pos.Backgammon(capture)))
-          case None          => None
-        },
+        None,
         None,
         None,
         None,

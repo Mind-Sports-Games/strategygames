@@ -16,6 +16,7 @@ import strategygames.{
   EndTurn => StratEndTurn,
   Lift => StratLift,
   Move => StratMove,
+  Player,
   Situation => StratSituation
 }
 
@@ -113,8 +114,8 @@ object Replay {
         Some(orig),
         Some(dest),
         (orig.index - dest.index).abs
-      ),
-      capture = None
+      )
+      // capture = before.situation.board.piecesOf(!before.situation.player).get(dest).map(_ => dest)
     )
 
   def replayDrop(before: Game, role: Role, dest: Pos): Drop =
@@ -130,6 +131,9 @@ object Replay {
       )
     )
 
+  private def liftDistance(orig: Pos, player: Player): Int =
+    Pos.barIndex(player) + (orig.index * Pos.indexDirection(player))
+
   def replayLift(before: Game, orig: Pos): Lift =
     Lift(
       pos = orig,
@@ -138,8 +142,7 @@ object Replay {
         before.situation,
         Some(orig),
         None,
-        // TODO fix this do we need to know dice used?
-        Pos.barIndex(before.situation.player) + (orig.index * Pos.indexDirection(before.situation.player))
+        before.situation.board.unusedDice.filter(_ >= liftDistance(orig, before.situation.player)).min
       )
     )
 

@@ -8,7 +8,6 @@ import ornicar.scalalib.Zero
 sealed trait Role {
   val forsyth: Char
   val forsythUpper: Char
-  // lazy val forsythUpper: Char = forsyth.toUpper //this contradicts what the piece is now!
   lazy val pgn: Char              = forsyth
   lazy val name                   = toString
   lazy val groundName             = s"${forsyth}-piece"

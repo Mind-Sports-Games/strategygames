@@ -26,7 +26,6 @@ object Rank {
   val First  = new Rank(0)
   val Second = new Rank(1)
 
-  // val all = List(First, Second, Third, Fourth, Fifth, Sixth, Seventh, Eighth, Ninth, Tenth)
   val all                     = List(First, Second)
   val allReversed: List[Rank] = all.reverse
 
