@@ -5,8 +5,8 @@ import cats.syntax.option._
 import scala.annotation.nowarn
 
 import strategygames.backgammon._
-import strategygames.backgammon.format.{ FEN, Forsyth, Uci }
-import strategygames.{ GameFamily, Player, Score }
+import strategygames.backgammon.format.FEN
+import strategygames.{ GameFamily, Player }
 
 // Correctness depends on singletons for each variant ID
 abstract class Variant private[variant] (
@@ -71,7 +71,7 @@ abstract class Variant private[variant] (
     }
     // adding a piece to a previously unoccupied square
     val p2      = dest match {
-      case Some(pos) if pieces.get(pos).isEmpty => p1 + (pos -> (Piece(player, Role.defaultRole), 1));
+      case Some(pos) if pieces.get(pos).isEmpty => p1 + ((pos, (Piece(player, Role.defaultRole), 1)))
       case _                                    => p1
     }
     // removing a piece from a square that is now free
@@ -230,8 +230,9 @@ abstract class Variant private[variant] (
 
   def validEndTurn(situation: Situation): Option[EndTurn] =
     if (
-      (situation.board.unusedDice.isEmpty || !situation.canUseDice) &&
-      situation.board.history.hasRolledDiceThisTurn
+      ((situation.board.unusedDice.isEmpty || !situation.canUseDice) &&
+        situation.board.history.hasRolledDiceThisTurn) ||
+      (situation.board.history.lastTurn.isEmpty && situation.board.history.currentTurn.isEmpty)
     )
       Some(
         EndTurn(
