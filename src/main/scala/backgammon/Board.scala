@@ -51,8 +51,13 @@ case class Board(
     !piecesOnBar(player) && piecesOf(player).keys.toList.diff(Pos.home(player)).isEmpty
 
   def furthestFromEnd(player: Player): Int =
-    (Pos.barIndex(!player) + (piecesOf(player).keys.map(_.index * Pos.indexDirection(!player)).max * Pos
-      .indexDirection(player))).abs
+    if (piecesOf(player).isEmpty) 0
+    else
+      (Pos.barIndex(!player) +
+        (piecesOf(player).keys.map(_.index * Pos.indexDirection(!player)).max *
+          Pos.indexDirection(player)
+        )
+      ).abs
 
   lazy val actors: Map[Pos, Actor] = pieces map { case (pos, (piece, _)) =>
     (pos, Actor(piece, pos, this))
