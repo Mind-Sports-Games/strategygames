@@ -9,6 +9,7 @@ sealed abstract class Status(val id: Int) extends Ordered[Status] {
   def is(s: Status): Boolean = this == s
 
   def is(f: Status.type => Status): Boolean = is(f(Status))
+
 }
 
 object Status {
@@ -45,6 +46,9 @@ object Status {
     NoStart,
     UnknownFinish,
     PerpetualCheck,
+    SingleWin,
+    GammonWin,
+    BackgammonWin,
     VariantEnd
   )
 
@@ -59,4 +63,5 @@ object Status {
   } toMap
 
   def apply(id: Int): Option[Status] = byId get id
+
 }
