@@ -6,7 +6,6 @@ import cats.implicits._
 
 import strategygames.format.pgn.San
 import strategygames.backgammon.format.pgn.{ Parser, Reader }
-import strategygames.format.pgn.{ Tag, Tags }
 import strategygames.backgammon.format.{ FEN, Forsyth, Uci }
 import strategygames.{
   Action => StratAction,

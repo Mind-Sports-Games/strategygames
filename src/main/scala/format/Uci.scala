@@ -608,8 +608,7 @@ object Uci {
       case GameLogic.Togyzkumalak() =>
         togyzkumalak.format.Uci.Move.fromStrings(gf, origS, destS, promS).map(TogyzkumalakMove)
       case GameLogic.Go()           => None
-      case GameLogic.Backgammon()   =>
-        backgammon.format.Uci.Move.fromStrings(gf, origS, destS, promS).map(BackgammonMove)
+      case GameLogic.Backgammon()   => backgammon.format.Uci.Move.fromStrings(origS, destS).map(BackgammonMove)
     }
   }
 
