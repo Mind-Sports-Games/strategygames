@@ -9,46 +9,66 @@ object Dumper {
   // Would want to check how other gamelogics handle this
   // Also dont like determining playerAfter here in this code. Use the Action?
 
-  def apply(@nowarn situation: Situation, data: Move, @nowarn next: Situation): String     =
+  def apply(
+      @nowarn situation: Situation,
+      data: strategygames.backgammon.Move,
+      @nowarn next: Situation
+  ): String =
     data.toUci.uci
-  def apply(@nowarn situation: Situation, data: Drop, @nowarn next: Situation): String     =
+  def apply(
+      @nowarn situation: Situation,
+      data: strategygames.backgammon.Drop,
+      @nowarn next: Situation
+  ): String =
     data.toUci.uci
-  def apply(@nowarn situation: Situation, data: Lift, @nowarn next: Situation): String     =
+  def apply(
+      @nowarn situation: Situation,
+      data: strategygames.backgammon.Lift,
+      @nowarn next: Situation
+  ): String =
     data.toUci.uci
-  def apply(@nowarn situation: Situation, data: DiceRoll, @nowarn next: Situation): String =
+  def apply(
+      @nowarn situation: Situation,
+      data: strategygames.backgammon.DiceRoll,
+      @nowarn next: Situation
+  ): String =
     data.toUci.uci
-  def apply(@nowarn situation: Situation, data: EndTurn, @nowarn next: Situation): String  =
+  def apply(
+      @nowarn situation: Situation,
+      data: strategygames.backgammon.EndTurn,
+      @nowarn next: Situation
+  ): String =
     data.toUci.uci
 
-  def apply(data: Move): String =
+  def apply(data: strategygames.backgammon.Move): String =
     apply(
       data.situationBefore,
       data,
       data.finalizeAfter.situationOf(data.player)
     )
 
-  def apply(data: Drop): String =
+  def apply(data: strategygames.backgammon.Drop): String =
     apply(
       data.situationBefore,
       data,
       data.finalizeAfter.situationOf(data.player)
     )
 
-  def apply(data: Lift): String =
+  def apply(data: strategygames.backgammon.Lift): String =
     apply(
       data.situationBefore,
       data,
       data.finalizeAfter.situationOf(data.player)
     )
 
-  def apply(data: DiceRoll): String =
+  def apply(data: strategygames.backgammon.DiceRoll): String =
     apply(
       data.situationBefore,
       data,
       data.finalizeAfter.situationOf(data.player)
     )
 
-  def apply(data: EndTurn): String =
+  def apply(data: strategygames.backgammon.EndTurn): String =
     apply(
       data.situationBefore,
       data,
