@@ -10,9 +10,9 @@ object Visual {
   def <<(source: String): Board = {
     val lines    = augmentString(source).linesIterator.to(List)
     val filtered = lines.size match {
-      case Rank.all.size          => lines
-      case n if n > Rank.all.size => lines.slice(1, File.all.size + 1)
-      case n                      => (List.fill(File.all.size - n)("")) ::: lines
+      case n if n == Rank.all.size => lines
+      case n if n > Rank.all.size  => lines.slice(1, File.all.size + 1)
+      case n                       => (List.fill(File.all.size - n)("")) ::: lines
     }
     Board(
       pieces = (for {
