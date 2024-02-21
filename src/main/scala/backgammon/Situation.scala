@@ -38,7 +38,11 @@ case class Situation(board: Board, player: Player) {
 
   def canOnlyRollDice: Boolean = canRollDice && !canMove && !canDrop && !canLift && !canEndTurn
 
-  def canEndTurn: Boolean = board.variant.validEndTurn(this).nonEmpty
+  // Users can't make the decision to endTurn at the start of the game
+  // only SG can make that decision (using random diceRoll) so don't set
+  // canEndTurn to true at the start of the game
+  def canEndTurn: Boolean = board.variant.validEndTurn(this).nonEmpty &&
+    !(board.history.lastTurn.isEmpty && board.history.currentTurn.isEmpty)
 
   def canOnlyEndTurn: Boolean = canEndTurn && !canMove && !canDrop && !canLift
 
