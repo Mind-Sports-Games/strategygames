@@ -88,9 +88,8 @@ object Binary {
       if (bitAt(b1, ActionType.OnePos << 6, 5) == 0) {
         // drop
         val player = bitAt(b1, ActionType.OnePos << 6, 4)
-        val role   = if (player == 0) "S" else "s"
         val pos    = Pos(right(b1, 3) + (if (player == 0) 18 else 0)).get.toString()
-        s"${role}@${pos}"
+        s"${Role.defaultRole.forsyth}@${pos}"
       } else {
         // lift
         val player = bitAt(b1, (ActionType.OnePos << 6) + (1 << 5), 4)
