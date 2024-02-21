@@ -123,12 +123,12 @@ object Binary {
 
     def ply(str: String): List[Byte] =
       (str match {
-        case Uci.DiceRoll.diceRollR(dr)  => diceRollUci(dr)
-        case Uci.Move.moveR(orig, dest)  => moveUci(orig, dest)
-        case Uci.Drop.dropR(piece, dest) => dropUci(piece, dest)
-        case Uci.Lift.liftR(orig)        => liftUci(orig)
-        case Uci.EndTurn.endTurnR()      => endTurnUci()
-        case _                           => sys.error(s"Invalid action to write: ${str}")
+        case Uci.DiceRoll.diceRollR(dr) => diceRollUci(dr)
+        case Uci.Move.moveR(orig, dest) => moveUci(orig, dest)
+        case Uci.Drop.dropR(_, dest)    => dropUci(dest)
+        case Uci.Lift.liftR(orig)       => liftUci(orig)
+        case Uci.EndTurn.endTurnR()     => endTurnUci()
+        case _                          => sys.error(s"Invalid action to write: ${str}")
       }) map (_.toByte)
 
     def plies(strs: Iterable[String]): Array[Byte] =
@@ -151,10 +151,11 @@ object Binary {
       Pos.fromKey(dest).get.index
     )
 
-    def dropUci(piece: String, dest: String) = {
-      val playerBit = if (piece == "S") 0 else 1 << 4
-      val offset    = if (piece == "S") 18 else 0
-      List(headerBit(ActionType.OnePos) + playerBit + Pos.fromKey(dest).get.index - offset)
+    def dropUci(dest: String) = {
+      val posIndex  = Pos.fromKey(dest).get.index
+      val playerBit = if (posIndex < 18) 1 << 4 else 0
+      val offset    = if (posIndex < 18) 0 else 18
+      List(headerBit(ActionType.OnePos) + playerBit + posIndex - offset)
     }
 
     def liftUci(orig: String) = {

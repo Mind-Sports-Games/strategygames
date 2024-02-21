@@ -131,7 +131,7 @@ object Replay {
     )
 
   private def liftDistance(orig: Pos, player: Player): Int =
-    Pos.barIndex(player) + (orig.index * Pos.indexDirection(player))
+    (Pos.barIndex(!player) - orig.index).abs
 
   def replayLift(before: Game, orig: Pos): Lift =
     Lift(
