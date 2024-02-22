@@ -111,7 +111,10 @@ object Forsyth {
   case class SituationPlus(situation: Situation, fullTurnCount: Int) {
 
     def turnCount = fullTurnCount * 2 - situation.player.fold(2, 1)
-    // TODO when we get a multiaction variant we should set this (monsterchess)
+    // This is incorrect, but does it matter? Monster chess plays without this
+    // Think this is used when created fromPosition and we wouldn't necessarily need
+    // to know the number of plies that have happened from before we start
+    // See also fairysf equivalent
     def plies     = turnCount
 
   }

@@ -85,6 +85,17 @@ object FullOpening {
 
   }
 
+  final case class Backgammon(f: strategygames.backgammon.opening.FullOpening)
+      extends FullOpening(
+        f.eco,
+        f.name,
+        f.fen
+      ) {
+
+    override def toString = f.toString()
+
+  }
+
   case class AtPly(opening: FullOpening, ply: Int)
 
 }

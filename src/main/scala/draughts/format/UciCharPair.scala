@@ -6,14 +6,15 @@ object UciCharPair {
   import implementation._
   import strategygames.format.{ UciCharPair => stratUciCharPair }
 
-  def apply(uci: Uci): stratUciCharPair                   = stratUciCharPair(toChar(uci.origDest._1), toChar(uci.origDest._2))
+  def apply(uci: Uci): stratUciCharPair                   =
+    stratUciCharPair(toChar(uci.origDest.map(_._1)), toChar(uci.origDest.map(_._2)))
   def apply(uci: Uci, ambiguity: Int): stratUciCharPair   =
-    stratUciCharPair(toChar(uci.origDest._1), ambiguity2charMap.getOrElse(ambiguity, voidChar))
+    stratUciCharPair(toChar(uci.origDest.map(_._1)), ambiguity2charMap.getOrElse(ambiguity, voidChar))
   def apply(orig: Char, ambiguity: Int): stratUciCharPair =
     stratUciCharPair(orig, ambiguity2charMap.getOrElse(ambiguity, voidChar))
 
   def combine(uci1: Uci, uci2: Uci): stratUciCharPair =
-    stratUciCharPair(toChar(uci1.origDest._1), toChar(uci2.origDest._2))
+    stratUciCharPair(toChar(uci1.origDest.map(_._1)), toChar(uci2.origDest.map(_._2)))
 
   private[format] object implementation {
 
@@ -28,7 +29,8 @@ object UciCharPair {
       }
       .to(Map)
 
-    def toChar(pos: Pos) = pos2charMap.getOrElse(pos, voidChar)
+    def toChar(pos: Option[Pos]) =
+      pos.map(p => pos2charMap.getOrElse(p, voidChar)).getOrElse(voidChar)
 
     /** Allow for 50 ambiguities per destination, should be enough
       */

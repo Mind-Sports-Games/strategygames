@@ -121,6 +121,24 @@ object Replay {
     }
   }
 
+  final case class Backgammon(r: backgammon.Replay)
+      extends Replay(
+        Game.Backgammon(r.setup),
+        r.actions.map {
+          case m: backgammon.Move      => Move.Backgammon(m)
+          case d: backgammon.Drop      => Drop.Backgammon(d)
+          case l: backgammon.Lift      => Lift.Backgammon(l)
+          case dr: backgammon.DiceRoll => DiceRoll.Backgammon(dr)
+          case et: backgammon.EndTurn  => EndTurn.Backgammon(et)
+        },
+        Game.Backgammon(r.state)
+      ) {
+    def copy(state: Game): Replay = state match {
+      case Game.Backgammon(state) => Replay.wrap(r.copy(state = state))
+      case _                      => sys.error("Unable to copy a backgammon replay with a non-backgammon state")
+    }
+  }
+
   def apply(lib: GameLogic, setup: Game, actions: List[Action], state: Game): Replay =
     (lib, setup, state) match {
       case (GameLogic.Draughts(), Game.Draughts(setup), Game.Draughts(state))             =>
@@ -135,6 +153,8 @@ object Replay {
         Togyzkumalak(togyzkumalak.Replay(setup, actions.map(Action.toTogyzkumalak), state))
       case (GameLogic.Go(), Game.Go(setup), Game.Go(state))                               =>
         Go(go.Replay(setup, actions.map(Action.toGo), state))
+      case (GameLogic.Backgammon(), Game.Backgammon(setup), Game.Backgammon(state))       =>
+        Backgammon(backgammon.Replay(setup, actions.map(Action.toBackgammon), state))
       case _                                                                              => sys.error("Mismatched gamelogic types 5")
     }
 
@@ -232,6 +252,19 @@ object Replay {
             message
           )
       }
+    case (GameLogic.Backgammon(), FEN.Backgammon(initialFen), Variant.Backgammon(variant))       =>
+      backgammon.Replay.gameWithUciWhileValid(
+        actionStrs,
+        initialFen,
+        variant
+      ) match {
+        case (game, gameswithsan, message) =>
+          (
+            Game.Backgammon(game),
+            gameswithsan.map { case (g, u) => (Game.Backgammon(g), Uci.BackgammonWithSan(u)) },
+            message
+          )
+      }
     case _                                                                                       => sys.error("Mismatched gamelogic types 7")
   }
 
@@ -287,6 +320,12 @@ object Replay {
         .toEither
         .map(s => s.map(Situation.Go))
         .toValidated
+    case (GameLogic.Backgammon(), Variant.Backgammon(variant))     =>
+      backgammon.Replay
+        .situations(actionStrs, initialFen.map(_.toBackgammon), variant)
+        .toEither
+        .map(s => s.map(Situation.Backgammon))
+        .toValidated
     case _                                                         => sys.error("Mismatched gamelogic types 8")
   }
 
@@ -338,6 +377,14 @@ object Replay {
       }
     )
 
+  private def backgammonUcis(ucis: List[Uci]): List[backgammon.format.Uci] =
+    ucis.flatMap(u =>
+      u match {
+        case u: Uci.Backgammon => Some(u.unwrap)
+        case _                 => None
+      }
+    )
+
   def boardsFromUci(
       lib: GameLogic,
       ucis: List[Uci],
@@ -386,6 +433,12 @@ object Replay {
         .toEither
         .map(b => b.map(Board.Go))
         .toValidated
+    case (GameLogic.Backgammon(), Variant.Backgammon(variant))     =>
+      backgammon.Replay
+        .boardsFromUci(backgammonUcis(ucis), initialFen.map(_.toBackgammon), variant)
+        .toEither
+        .map(b => b.map(Board.Backgammon))
+        .toValidated
     case _                                                         => sys.error("Mismatched gamelogic types 8a")
   }
 
@@ -432,6 +485,12 @@ object Replay {
         .toEither
         .map(s => s.map(Situation.Go))
         .toValidated
+    case (GameLogic.Backgammon(), Variant.Backgammon(variant))     =>
+      backgammon.Replay
+        .situationsFromUci(backgammonUcis(ucis), initialFen.map(_.toBackgammon), variant)
+        .toEither
+        .map(s => s.map(Situation.Backgammon))
+        .toValidated
     case _                                                         => sys.error("Mismatched gamelogic types 9")
   }
 
@@ -471,6 +530,10 @@ object Replay {
       go.Replay
         .gameFromUciStrings(ucis, activePlayer, initialFen.map(_.toGo), variant)
         .map(Game.Go)
+    case (GameLogic.Backgammon(), Variant.Backgammon(variant))     =>
+      backgammon.Replay
+        .gameFromUciStrings(ucis.flatten.toList, initialFen.map(_.toBackgammon), variant)
+        .map(Game.Backgammon)
     case _                                                         => sys.error("Mismatched gamelogic types for Replay 10")
   }
 
@@ -517,6 +580,12 @@ object Replay {
         .toEither
         .map(r => Replay.Go(r))
         .toValidated
+    case (GameLogic.Backgammon(), Variant.Backgammon(variant))     =>
+      backgammon.Replay
+        .apply(backgammonUcis(ucis), initialFen.map(_.toBackgammon), variant)
+        .toEither
+        .map(r => Replay.Backgammon(r))
+        .toValidated
     case _                                                         => sys.error("Mismatched gamelogic types Replay 11")
   }
 
@@ -539,6 +608,8 @@ object Replay {
       togyzkumalak.Replay.plyAtFen(actionStrs, initialFen.map(_.toTogyzkumalak), variant, atFen)
     case (GameLogic.Go(), Variant.Go(variant), FEN.Go(atFen))                               =>
       go.Replay.plyAtFen(actionStrs, initialFen.map(_.toGo), variant, atFen)
+    case (GameLogic.Backgammon(), Variant.Backgammon(variant), FEN.Backgammon(atFen))       =>
+      backgammon.Replay.plyAtFen(actionStrs, initialFen.map(_.toBackgammon), variant, atFen)
     case _                                                                                  => sys.error("Mismatched gamelogic types 10")
   }
 
@@ -548,5 +619,6 @@ object Replay {
   def wrap(r: samurai.Replay)      = Samurai(r)
   def wrap(r: togyzkumalak.Replay) = Togyzkumalak(r)
   def wrap(r: go.Replay)           = Go(r)
+  def wrap(r: backgammon.Replay)   = Backgammon(r)
 
 }

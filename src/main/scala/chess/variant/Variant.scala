@@ -39,7 +39,9 @@ abstract class Variant private[variant] (
 
   def materialImbalanceVariant: Boolean = false
 
-  def dropsVariant: Boolean = false
+  def dropsVariant: Boolean       = false
+  def hasDetatchedPocket: Boolean = false
+
   def canOfferDraw: Boolean = true
 
   def perfId: Int
@@ -159,13 +161,15 @@ abstract class Variant private[variant] (
   ): Validated[String, Drop] =
     Validated.invalid(s"$this variant cannot drop $situation $role $pos")
 
-  def possibleDropsByRole(
-      @nowarn situation: Situation
-  ): Option[Map[Role, List[Pos]]] =
+  def diceRoll(situation: Situation, dice: List[Int]): Validated[String, DiceRoll] =
+    Validated.invalid(s"$this variant cannot roll dice $situation $dice")
+
+  def possibleDropsByRole(@nowarn situation: Situation): Option[Map[Role, List[Pos]]] =
     None // override in crazyhouse
 
-  def staleMate(situation: Situation): Boolean =
-    !situation.check && situation.moves.isEmpty
+  @nowarn def validDiceRolls(situation: Situation): List[DiceRoll] = List.empty
+
+  def staleMate(situation: Situation): Boolean = !situation.check && situation.moves.isEmpty
 
   def checkmate(situation: Situation) =
     situation.check && situation.moves.isEmpty

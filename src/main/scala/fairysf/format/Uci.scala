@@ -12,7 +12,7 @@ sealed trait Uci {
   def fishnetUci: String
   def piotr: String
 
-  def origDest: (Pos, Pos)
+  def origDest: Option[(Pos, Pos)]
 
   def apply(situation: Situation): Validated[String, Action]
 }
@@ -38,7 +38,7 @@ object Uci {
     def fairySfPromotionString = promotion.fold("")(_ => "+")
     def promotionString        = lilaPromotionString
 
-    def origDest = orig -> dest
+    def origDest = Some(orig -> dest)
 
     def apply(situation: Situation) = situation.move(orig, dest, promotion)
   }
@@ -96,7 +96,7 @@ object Uci {
 
     def piotr = s"${role.pgn}@${pos.piotrStr}"
 
-    def origDest = pos -> pos
+    def origDest = Some(pos -> pos)
 
     def apply(situation: Situation) = situation.drop(role, pos)
   }

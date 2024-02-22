@@ -64,9 +64,9 @@ object UciDump {
               .sliding(2, 2)
               .flatMap(both => {
                 Uci(variant.gameFamily, both(1)) match {
-                  case Some(uci) =>
-                    List(both(0), s"P@${uci.origDest._2}")
-                  case None      => sys.error(s"Unable to parse uci: ${both(1)}")
+                  case Some(uci: Uci.Drop) =>
+                    List(both(0), s"P@${uci.pos}")
+                  case _                   => sys.error(s"Unable to parse uci: ${both(1)}")
                 }
               })
           )

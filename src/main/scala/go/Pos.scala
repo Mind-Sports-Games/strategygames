@@ -812,6 +812,7 @@ object Pos {
   val R19 = new Pos(359)
   val S19 = new Pos(360)
 
+  // if adding new Pos check for use of Pos.all
   val all: List[Pos] = (0 to (File.all.size * Rank.all.size) - 1).map(new Pos(_)).toList
 
   val allKeys: Map[String, Pos] = all

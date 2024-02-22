@@ -101,6 +101,18 @@ object Pos {
 
   }
 
+  final case class Backgammon(p: backgammon.Pos) extends Pos {
+
+    val key: String = p.key
+
+    def piotr: Char = p.piotr
+
+    lazy val toInt: Int = (p.file.index << 3) + p.rank.index
+
+    lazy val all: List[Pos] = backgammon.Pos.all.map(Backgammon)
+
+  }
+
   // need to equivalate this method for draughts probably
   // think we need to figure out a way to map into Draughts with a board size at this point
   def fromKey(lib: GameLogic, key: String): Option[Pos] = lib match {
@@ -110,6 +122,7 @@ object Pos {
     case GameLogic.Samurai()      => samurai.Pos.fromKey(key).map(Samurai)
     case GameLogic.Togyzkumalak() => togyzkumalak.Pos.fromKey(key).map(Togyzkumalak)
     case GameLogic.Go()           => go.Pos.fromKey(key).map(Go)
+    case GameLogic.Backgammon()   => backgammon.Pos.fromKey(key).map(Backgammon)
   }
 
   // def at(lib: GameLogic, x: Int, y: Int): Option[Pos] = lib match {

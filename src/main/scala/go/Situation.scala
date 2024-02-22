@@ -17,6 +17,10 @@ case class Situation(board: Board, player: Player) {
 
   def dropsAsDrops: List[Drop] = board.variant.validDrops(this)
 
+  def canDrop: Boolean = dropsAsDrops.nonEmpty
+
+  def canOnlyDrop: Boolean = canDrop && !canSelectSquares
+
   def takebackable = !canSelectSquares
 
   def history = board.history

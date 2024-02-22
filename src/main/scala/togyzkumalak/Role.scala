@@ -9,7 +9,7 @@ sealed trait Role {
   lazy val name                   = toString
   lazy val groundName             = s"${forsyth}-piece"
   val binaryInt: Int
-  lazy val hashInt: Int           = binaryInt
+  val hashInt: Int
   lazy val valueOf: Option[Int]   = Option(1)
   lazy val gameFamily: GameFamily = GameFamily.Togyzkumalak()
   final def -(player: Player)     = Piece(player, this)
@@ -22,11 +22,13 @@ sealed trait PromotableRole extends Role
 case object Stone extends Role {
   val forsyth   = 's'
   val binaryInt = 0
+  val hashInt   = 1
 }
 
 case object Tuzdik extends Role {
   val forsyth   = 't'
   val binaryInt = 163
+  val hashInt   = 163
 }
 
 object Role {

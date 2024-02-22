@@ -36,9 +36,8 @@ case class Board(
 
   def piecesOf(c: Player): Map[Pos, Piece] = pieces filter (_._2 is c)
 
-  lazy val kingPos: Map[Player, Pos] = pieces.collect {
-    case (pos, Piece(player, King)) =>
-      player -> pos
+  lazy val kingPos: Map[Player, Pos] = pieces.collect { case (pos, Piece(player, King)) =>
+    player -> pos
   }
 
   def kingPosOf(c: Player): Option[Pos] = kingPos get c
@@ -81,7 +80,7 @@ case class Board(
 
   def taking(orig: Pos, dest: Pos, taking: Option[Pos] = None): Option[Board] =
     for {
-      piece <- pieces get orig
+      piece   <- pieces get orig
       takenPos = taking getOrElse dest
       if pieces contains takenPos
     } yield copy(pieces = pieces - takenPos - orig + (dest -> piece))
@@ -96,8 +95,8 @@ case class Board(
     for {
       pawn <- apply(pos)
       if pawn is Pawn
-      b2 <- take(pos)
-      b3 <- b2.place(Piece(pawn.player, Queen), pos)
+      b2   <- take(pos)
+      b3   <- b2.place(Piece(pawn.player, Queen), pos)
     } yield b3
 
   def castles: Castles = history.castles
@@ -112,8 +111,8 @@ case class Board(
     if (v.dropsVariant) copy(variant = v).ensureCrazyData
     else copy(variant = v)
 
-  def withCrazyData(data: PocketData) = copy(pocketData = Option(data))
-  def withCrazyData(data: Option[PocketData]) = copy(pocketData = data)
+  def withCrazyData(data: PocketData)                   = copy(pocketData = Option(data))
+  def withCrazyData(data: Option[PocketData])           = copy(pocketData = data)
   def withCrazyData(f: PocketData => PocketData): Board =
     withCrazyData(f(pocketData | PocketData.init))
 
@@ -122,19 +121,17 @@ case class Board(
   def unmovedRooks =
     UnmovedRooks {
       history.unmovedRooks.pos.filter(pos =>
-        apply(pos).exists(piece =>
-          piece.is(Rook) && Rank.backRank(piece.player) == pos.rank
-        )
+        apply(pos).exists(piece => piece.is(Rook) && Rank.backRank(piece.player) == pos.rank)
       )
     }
 
   def fixCastles: Board =
     withCastles {
       if (variant.allowsCastling) {
-        val wkPos = kingPosOf(P1)
-        val bkPos = kingPosOf(P2)
-        val wkReady = wkPos.fold(false)(_.rank == Rank.First)
-        val bkReady = bkPos.fold(false)(_.rank == Rank.Eighth)
+        val wkPos                                                       = kingPosOf(P1)
+        val bkPos                                                       = kingPosOf(P2)
+        val wkReady                                                     = wkPos.fold(false)(_.rank == Rank.First)
+        val bkReady                                                     = bkPos.fold(false)(_.rank == Rank.Eighth)
         def rookReady(player: Player, kPos: Option[Pos], left: Boolean) =
           kPos.fold(false) { kp =>
             actorsOf(player) exists { a =>
@@ -147,21 +144,17 @@ case class Board(
             }
           }
         Castles(
-          p1KingSide =
-            castles.p1KingSide && wkReady && rookReady(P1, wkPos, left = false),
-          p1QueenSide =
-            castles.p1QueenSide && wkReady && rookReady(P1, wkPos, left = true),
-          p2KingSide =
-            castles.p2KingSide && bkReady && rookReady(P2, bkPos, left = false),
-          p2QueenSide =
-            castles.p2QueenSide && bkReady && rookReady(P2, bkPos, left = true)
+          p1KingSide = castles.p1KingSide && wkReady && rookReady(P1, wkPos, left = false),
+          p1QueenSide = castles.p1QueenSide && wkReady && rookReady(P1, wkPos, left = true),
+          p2KingSide = castles.p2KingSide && bkReady && rookReady(P2, bkPos, left = false),
+          p2QueenSide = castles.p2QueenSide && bkReady && rookReady(P2, bkPos, left = true)
         )
       } else Castles.none
     }
 
   def updateHistory(f: History => History) = copy(history = f(history))
 
-  def count(p: Piece): Int = pieces.values count (_ == p)
+  def count(p: Piece): Int  = pieces.values count (_ == p)
   def count(c: Player): Int = pieces.values count (_.player == c)
 
   def autoDraw: Boolean =
@@ -208,7 +201,7 @@ case class Board(
           )
         else
           diagOccupation(diagPos, dir, diagPieces)
-      case None => return diagPieces
+      case None          => return diagPieces
     }
 
   def diagAscOccupation(pos: Pos): Map[Pos, Piece] =

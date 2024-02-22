@@ -44,6 +44,7 @@ sealed abstract class Move(
   def toFairySF: fairysf.Move
   def toSamurai: samurai.Move
   def toTogyzkumalak: togyzkumalak.Move
+  def toBackgammon: backgammon.Move
 
 }
 
@@ -99,6 +100,7 @@ object Move {
     def toSamurai      = sys.error("Can't make a samurai move from a chess move")
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak move from a chess move")
     def toGo           = sys.error("Can't make a go move from a chess move")
+    def toBackgammon   = sys.error("Can't make a backgammon move from a chess move")
 
   }
 
@@ -150,6 +152,7 @@ object Move {
     def toSamurai      = sys.error("Can't make a samurai move from a draughts move")
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak move from a draughts move")
     def toGo           = sys.error("Can't make a go move from a draughts move")
+    def toBackgammon   = sys.error("Can't make a backgammon move from a draughts move")
 
   }
 
@@ -202,6 +205,7 @@ object Move {
     def toSamurai      = sys.error("Can't make a samurai move from a fairysf move")
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak move from a fairysf move")
     def toGo           = sys.error("Can't make a go move from a fairysf move")
+    def toBackgammon   = sys.error("Can't make a backgammon move from a fairysf move")
 
   }
 
@@ -247,6 +251,7 @@ object Move {
     def toSamurai      = m
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak move from a samurai move")
     def toGo           = sys.error("Can't make a go move from a samurai move")
+    def toBackgammon   = sys.error("Can't make a backgammon move from a samurai move")
 
   }
 
@@ -292,6 +297,50 @@ object Move {
     def toSamurai      = sys.error("Can't make a samurai move from a togyzkumalak move")
     def toTogyzkumalak = m
     def toGo           = sys.error("Can't make a go move from a togyzkumalak move")
+    def toBackgammon   = sys.error("Can't make a backgammon move from a togyzkumalak move")
+
+  }
+
+  final case class Backgammon(m: backgammon.Move)
+      extends Move(
+        Piece.Backgammon(m.piece),
+        Pos.Backgammon(m.orig),
+        Pos.Backgammon(m.dest),
+        Situation.Backgammon(m.situationBefore),
+        Board.Backgammon(m.after),
+        false,
+        None,
+        None,
+        None,
+        None,
+        false,
+        m.metrics
+      ) {
+
+    def situationAfter: Situation                          = Situation.Backgammon(m.situationAfter)
+    def finalizeAfter(finalSquare: Boolean = false): Board = m.finalizeAfter
+
+    def toUci: Uci.Move = Uci.BackgammonMove(m.toUci)
+
+    def toShortUci: Uci.Move =
+      Uci.Move(
+        GameLogic.Backgammon(),
+        orig,
+        dest,
+        promotion,
+        if (capture.isDefined) capture.get.takeRight(1).some else None
+      )
+
+    def first: Move = this
+
+    val unwrap         = m
+    def toFairySF      = sys.error("Can't make a fairysf move from a backgammon move")
+    def toChess        = sys.error("Can't make a chess move from a backgammon move")
+    def toDraughts     = sys.error("Can't make a draughts move from a backgammon move")
+    def toSamurai      = sys.error("Can't make a samurai move from a backgammon move")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak move from a backgammon move")
+    def toGo           = sys.error("Can't make a go move from a backgammon move")
+    def toBackgammon   = m
 
   }
 
@@ -300,5 +349,6 @@ object Move {
   def wrap(m: fairysf.Move): Move      = Move.FairySF(m)
   def wrap(m: samurai.Move): Move      = Move.Samurai(m)
   def wrap(m: togyzkumalak.Move): Move = Move.Togyzkumalak(m)
+  def wrap(m: backgammon.Move): Move   = Move.Backgammon(m)
 
 }

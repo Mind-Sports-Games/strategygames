@@ -111,12 +111,22 @@ object History {
         captures = h.captures
       )
 
+  final case class Backgammon(h: backgammon.History)
+      extends History(
+        lastTurn = h.lastTurn.map(Uci.wrap),
+        currentTurn = h.currentTurn.map(Uci.wrap),
+        positionHashes = h.positionHashes,
+        halfMoveClock = h.halfMoveClock,
+        score = h.score
+      )
+
   implicit def chessHistory(h: chess.History)               = Chess(h)
   implicit def draughtsHistory(h: draughts.DraughtsHistory) = Draughts(h)
   implicit def fairysfHistory(h: fairysf.History)           = FairySF(h)
   implicit def samuraiHistory(h: samurai.History)           = Samurai(h)
   implicit def togyzkumalakHistory(h: togyzkumalak.History) = Togyzkumalak(h)
   implicit def goHistory(h: go.History)                     = Go(h)
+  implicit def backgammonHistory(h: backgammon.History)     = Backgammon(h)
 
   // lila
   def apply(
@@ -195,6 +205,16 @@ object History {
           halfMoveClock = halfMoveClock,
           score = score,
           captures = captures
+        )
+      )
+    case GameLogic.Backgammon()   =>
+      Backgammon(
+        backgammon.History(
+          lastTurn = lastTurn.map(lm => lm.toBackgammon),
+          currentTurn = currentTurn.map(lm => lm.toBackgammon),
+          positionHashes = positionHashes,
+          halfMoveClock = halfMoveClock,
+          score = score
         )
       )
     case _                        => sys.error("Mismatched gamelogic types 1")

@@ -24,6 +24,8 @@ object Dumper {
       togyzkumalak.format.pgn.Dumper(data)
     case (GameLogic.Go(), _)                                      =>
       sys.error("Gamelogic Go has no moves, only drops")
+    case (GameLogic.Backgammon(), StratMove.Backgammon(data))     =>
+      backgammon.format.pgn.Dumper(data)
     case _                                                        =>
       sys.error("Mismatched gamelogic types 31")
   }
