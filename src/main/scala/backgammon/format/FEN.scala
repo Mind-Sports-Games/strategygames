@@ -43,11 +43,18 @@ final case class FEN(value: String) extends AnyVal {
       (Pos(index), (Role.defaultRole, pieceString))
     }
     .map { case (Some(pos), (r, ps)) =>
-      ((pos, (Piece(
-        if (ps.takeRight(1) == "S") Player.P1 else Player.P2,
-        r
-      ),
-      ps.dropRight(1).toInt)))
+      (
+        (
+          pos,
+          (
+            Piece(
+              if (ps.takeRight(1) == "S") Player.P1 else Player.P2,
+              r
+            ),
+            ps.dropRight(1).toInt
+          )
+        )
+      )
     }
     .toMap
 

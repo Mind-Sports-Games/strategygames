@@ -7,7 +7,7 @@ import scala.annotation.nowarn
 
 object FullOpeningDB {
 
-  //private val SEARCH_MAX_TURNS = 40
+  // private val SEARCH_MAX_TURNS = 40
 
   @nowarn def findByFen(fen: FEN): Option[FullOpening] = None // TODO: ???
 

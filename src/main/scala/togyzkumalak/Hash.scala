@@ -63,7 +63,7 @@ object Hash {
 }
 
 private object ZobristTables {
-  //to work out the size of this calculate what the max value actorIndex can produce
+  // to work out the size of this calculate what the max value actorIndex can produce
   val actorMasks = Array(
     "9d39247e33776d4152b375aa7c0d7bac",
     "2af7398005aaa5c7208d169a534f2cf5",

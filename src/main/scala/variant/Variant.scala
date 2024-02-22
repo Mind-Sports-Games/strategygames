@@ -815,7 +815,7 @@ object Variant {
       case _                       => sys.error("Not passed Backgammon objects")
     }
 
-    //backgammon has no variant effects for any action
+    // backgammon has no variant effects for any action
     def hasMoveEffects: Boolean            = false
     def addVariantEffect(move: Move): Move = move
 
