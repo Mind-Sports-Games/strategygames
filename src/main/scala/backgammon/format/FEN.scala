@@ -26,7 +26,7 @@ final case class FEN(value: String) extends AnyVal {
   private def intFromFen(index: Int): Option[Int] =
     value.split(' ').lift(index).flatMap(_.toIntOption)
 
-  private def stoneArray: Array[String] =
+  def stoneArray: Array[String] =
     (board.split('/')(1).split(',').reverse ++ board.split('/')(0).split(','))
       .map(c =>
         c.toString() match {
