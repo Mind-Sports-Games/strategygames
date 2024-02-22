@@ -40,7 +40,7 @@ object Hash {
 
   // for backgammon hashInt is just 1 for stone
   private def pieceIndex(piece: Piece, count: Int) =
-    (piece.role.hashInt * count) * 2 + piece.player.fold(1, 0)
+    (piece.role.hashInt * (count - 1)) * 2 + piece.player.fold(1, 0)
 
   private def actorIndex(actorCount: (Actor, Int)) =
     Pos.all.size * pieceIndex(actorCount._1.piece, actorCount._2) + actorCount._1.pos.hashCode
@@ -804,56 +804,7 @@ private object ZobristTables {
     "f9f4892ed96bd438beb9cec18b163f7c",
     "1af3dbe25d8f45dadc75195297484115",
     "f5b4b0b0d2deeeb4548955be3bde572b",
-    "962aceefa82e1c84c8281bde4d280b81",
-    "046e3ecaaf453ce9914da129a132922b",
-    "f05d129681949a4cff11d08f1cee77a4",
-    "964781ce734b3c848070295bd01f6bfd",
-    "9c2ed44081ce5fbd006a9346f317a9c9",
-    "522e23f3925e319e37e62ccdf9739fc3",
-    "177e00f9fc32f7915cbf8b753a7e703c",
-    "2bc60a63a6f3b3f2fe0f162fcebe01c8",
-    "222bbfae61725606094f481a19d464ff",
-    "486289ddcc3d67809737e370b3c679cf",
-    "7dc7785b8efdfc8060d67575f3b9b1c2",
-    "8af38731c02ba9803948fbaf41196093",
-    "1fab64ea29a2ddf70c204d1cfdbf6e2a",
-    "e4d9429322cd065ab7d2d42a9be29c2a",
-    "9da058c67844f20c49fae729fc2974b3",
-    "24c0e332b70019b06fb26356dad98ed6",
-    "233003b5a6cfe6ad4847b6cc14eeffd4",
-    "d586bd01c5c217f63b5285a9f0152c99",
-    "5e5637885f29bc2bff1fe7f4b91cff4c",
-    "7eba726d8c94094b16e20774363e99d0",
-    "0a56a5f0bfe39272437d1aa9cb4159e0",
-    "d79476a84ee20d067bdcc9d5c1c4da0b",
-    "9e4c1269baa4bf378fd087733782eecd",
-    "17efee45b0dee640bf94dee3ad478cda",
-    "1d95b0a5fcf90bc683c94bbe4c623bf5",
-    "93cbe0b699c2585d08fda03aa45ee9ba",
-    "65fa4f227a2b6d79c188f92d4d403856",
-    "d5f9e858292504d5fd6611dfb12345fc",
-    "c2b5a03f71471a6fef003ffd18aecc12",
-    "59300222b4561e00b7b474cbf2934019",
-    "ce2f8642ca0712dcbc2a55e58b30deee",
-    "7ca9723fbb2e89883e77de18337cda42",
-    "2785338347f2ba082f81e058ffb75885",
-    "c61bb3a141e50e8c8f0c300cf585707e",
-    "150f361dab9dec26cf4f4c536e0e2af2",
-    "9f6a419d382595f424c81ee5fd39a8e4",
-    "64a53dc924fe7ac92841577e66ad726e",
-    "142de49fff7a7c3d68090c81a1357214",
-    "0c335248857fa9e7a6aa70d44a613a24",
-    "0a9c32d5eae45305db805d26087f4db9",
-    "e6c42178c4bbb92e6dd954b45a122182",
-    "71f1ce2490d20b07c34729fd9f1948a3",
-    "f1bcc3d275afe51af0682ca0764cc153",
-    "e728e8c83c334074bf29824279ca73e1",
-    "96fbf83a12884624f0c70fb4e725caff",
-    "81a1549fd6573da51e18cad809e9eedc",
-    "5fa7867caf35e149a893a8fa258f383e",
-    "56986e2ef3ed091be78c30cc1179b849",
-    "917f1dd5f8886c612e4432e6ce4996d9",
-    "d20d8c88c8ffe65f576ec7a84e0b932d"
+    "962aceefa82e1c84c8281bde4d280b81"
   )
 
   val p1TurnMask = "f8d626aaaf2785093815e537b6222c85"

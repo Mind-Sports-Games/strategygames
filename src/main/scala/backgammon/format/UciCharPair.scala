@@ -25,6 +25,7 @@ object UciCharPair {
           dice2char(dice(0)),
           dice2char(dice(1))
         )
+      case Uci.DoRoll()         => stratUciCharPair(toChar(Pos.B1), toChar(Pos.B1))
       case Uci.EndTurn()        => stratUciCharPair(toChar(Pos.A1), toChar(Pos.A1))
       case _                    => sys.error(s"Not implemented UciCharPair for $uci")
     }
