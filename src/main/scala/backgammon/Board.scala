@@ -42,6 +42,9 @@ case class Board(
   def piecesOnBar(player: Player): Boolean =
     pocketData.fold(false) { pocketData => pocketData.pockets(player).roles.nonEmpty }
 
+  def pieceCountOnBar(player: Player): Int =
+    pocketData.fold(0) { pocketData => pocketData.pockets(player).roles.size }
+
   // At least one piece in opponents home
   def pieceInOpponentsHome(player: Player): Boolean =
     piecesOf(player).keys.toList.intersect(Pos.home(!player)).nonEmpty
@@ -55,12 +58,10 @@ case class Board(
     else
       (Pos.barIndex(!player) +
         (piecesOf(player).keys.map(_.index * Pos.indexDirection(!player)).max *
-          Pos.indexDirection(player)
-        )
-      ).abs
+          Pos.indexDirection(player))).abs
 
-  lazy val actors: Map[Pos, Actor] = pieces map { case (pos, (piece, _)) =>
-    (pos, Actor(piece, pos, this))
+  lazy val actors: Map[Pos, (Actor, Int)] = pieces map { case (pos, (piece, count)) =>
+    (pos, (Actor(piece, pos, this), count))
   }
 
   lazy val posMap: Map[(Piece, Int), Iterable[Pos]] = pieces.groupMap(_._2)(_._1)
@@ -69,6 +70,11 @@ case class Board(
   lazy val playerPiecesOnBoardCount: Map[Player, Int] = Player.all.map { p =>
     (p, pieces.collect { case (_, (piece, count)) if piece.player == p => count }.sum)
   }.toMap
+
+  def piecesOnBoardOrInPocket: Int = Player.all.map(playerPiecesOnBoardOrInPocket).sum
+
+  def playerPiecesOnBoardOrInPocket(player: Player): Int =
+    playerPiecesOnBoardCount(player) + pieceCountOnBar(player)
 
   def withHistory(h: History): Board       = copy(history = h)
   def updateHistory(f: History => History) = copy(history = f(history))

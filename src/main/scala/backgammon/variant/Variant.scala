@@ -7,6 +7,8 @@ import strategygames.backgammon._
 import strategygames.backgammon.format.FEN
 import strategygames.{ GameFamily, Player }
 
+import scala.annotation.nowarn
+
 // Correctness depends on singletons for each variant ID
 abstract class Variant private[variant] (
     val id: Int,
@@ -324,8 +326,9 @@ abstract class Variant private[variant] (
   // need to count pieces in pockets so just look at score
   def materialImbalance(board: Board): Int = board.history.score.p2 - board.history.score.p1
 
-  // TODO: implement
-  def valid(board: Board, strict: Boolean): Boolean = true
+  def valid(board: Board, @nowarn strict: Boolean): Boolean =
+    board.playerPiecesOnBoardOrInPocket(P1) + board.history.score.p1 == 15 &&
+      board.playerPiecesOnBoardOrInPocket(P2) + board.history.score.p2 == 15
 
   val roles: List[Role] = Role.all
 

@@ -9,7 +9,7 @@ sealed trait Role {
   lazy val name                   = toString
   lazy val groundName             = s"${forsyth}-piece"
   val binaryInt: Int
-  lazy val hashInt: Int           = binaryInt
+  val hashInt: Int
   val storable: Boolean
   lazy val valueOf: Option[Int]   = Option(1)
   lazy val gameFamily: GameFamily = GameFamily.Backgammon()
@@ -24,6 +24,7 @@ case object Stone extends Role {
   val forsyth      = 's'
   val forsythUpper = 'S'
   val binaryInt    = 0
+  val hashInt      = 1
   val storable     = true
 }
 
