@@ -142,7 +142,8 @@ object Uci {
 
   object DiceRoll {
 
-    // TODO make this return an option like the other fromStrings?
+    // This doesn't return an Option like the other fromStrings functions
+    // But its more usable like this and its what Backgammon has been tested with
     def fromStrings(dice: String) = DiceRoll(dice.split('/').flatMap(_.toIntOption).toList)
 
     val diceRollR = s"^([1-6]\\/[1-6])$$".r

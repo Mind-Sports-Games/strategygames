@@ -40,8 +40,11 @@ object Forsyth {
 
   case class SituationPlus(situation: Situation, fullTurnCount: Int) {
 
-    //This is all incorrect for Backgammon, but does it matter?
     def turnCount = fullTurnCount * 2 - situation.player.fold(2, 1)
+    // This is incorrect, but does it matter? We haven't set this for Monster Chess
+    // Think this is used when created fromPosition and we wouldn't necessarily need
+    // to know the number of plies that have happened from before we start
+    // See also fairysf equivalent
     def plies     = turnCount
 
   }
