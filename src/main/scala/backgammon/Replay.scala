@@ -126,7 +126,7 @@ object Replay {
         before.situation,
         None,
         Some(dest),
-        Pos.barIndex(before.situation.player) + (dest.index * Pos.indexDirection(before.situation.player))
+        (Pos.barIndex(before.situation.player) - dest.index).abs
       )
     )
 
@@ -233,7 +233,7 @@ object Replay {
           )
         case Uci.Drop.dropR(role, dest) =>
           replayDropFromUci(
-            Role.allByForsyth(init.situation.board.variant.gameFamily).get(role(0)),
+            Role.allByForsyth(init.situation.board.variant.gameFamily).get(role(0).toLower),
             Pos.fromKey(dest)
           )
         case Uci.Lift.liftR(orig)       =>

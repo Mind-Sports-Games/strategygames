@@ -20,7 +20,7 @@ object Piece {
 
   // This is only currently used for the pockets
   def fromChar(c: Char): Option[Piece] =
-    Role.allByPgn get c.toUpper map {
+    Role.allByPgn get c.toLower map {
       Piece(Player.fromP1(c.isUpper), _)
     }
 
