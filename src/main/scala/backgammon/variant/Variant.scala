@@ -22,7 +22,7 @@ abstract class Variant private[variant] (
 
   def baseVariant: Boolean      = false
   def fenVariant: Boolean       = false
-  def hasAnalysisBoard: Boolean = true
+  def hasAnalysisBoard: Boolean = false
   def hasFishnet: Boolean       = false
 
   def p1IsBetterVariant: Boolean = false
@@ -137,12 +137,27 @@ abstract class Variant private[variant] (
         )
       }
 
+  private def checkMovesWithLookAhead(situation: Situation) = {
+    val baseMoves = generateMoves(situation)
+    situation.board.unusedDice.toSet.size match {
+      case 2 => {
+        val movesWithLookAhead = baseMoves.map { m =>
+          (m, m.situationAfter.canMove || m.situationAfter.canLift)
+        }
+        if (movesWithLookAhead.map(_._2).toSet.contains(true))
+          movesWithLookAhead.filter(_._2).map(_._1)
+        else baseMoves
+      }
+      case _ => baseMoves
+    }
+  }
+
   private def canMove(situation: Situation): Boolean =
     situation.board.unusedDice.nonEmpty && !situation.board.piecesOnBar(situation.player)
 
   def validMoves(situation: Situation): Map[Pos, List[Move]] =
     if (canMove(situation))
-      generateMoves(situation)
+      checkMovesWithLookAhead(situation)
         .map { m => (m.orig, m) }
         .groupBy(_._1)
         .map { case (k, v) => (k, v.toList.map(_._2)) }
@@ -174,37 +189,55 @@ abstract class Variant private[variant] (
         }
     else List.empty
 
+  private def generateLifts(situation: Situation) =
+    situation.board.unusedDice.distinct
+      .flatMap { die =>
+        Pos(
+          (
+            List(
+              situation.board.furthestFromEnd(situation.player),
+              die
+            ).min - (Pos.barIndex(!situation.player) * Pos.indexDirection(situation.player))
+          ).abs
+        ).map(pos => (die, pos))
+      }
+      .filter {
+        case (_, pos) => {
+          situation.board.pieces.get(pos) match {
+            case Some((piece, count)) => piece.player == situation.player && count > 0
+            case None                 => false
+          }
+        }
+      }
+      .map { case (die, orig) =>
+        Lift(
+          pos = orig,
+          situationBefore = situation,
+          after = boardAfter(situation, Some(orig), None, die)
+        )
+      }
+
+  private def checkLiftsWithLookAhead(situation: Situation) = {
+    val baseLifts = generateLifts(situation)
+    situation.board.unusedDice.toSet.size match {
+      case 2 => {
+        val liftsWithLookAhead = baseLifts.map { l =>
+          (l, l.situationAfter.canMove || l.situationAfter.canLift)
+        }
+        if (liftsWithLookAhead.map(_._2).toSet.contains(true))
+          liftsWithLookAhead.filter(_._2).map(_._1)
+        else baseLifts
+      }
+      case _ => baseLifts
+    }
+  }
+
   private def canLift(situation: Situation): Boolean =
     situation.board.unusedDice.nonEmpty && situation.board.piecesCanLift(situation.player)
 
   def validLifts(situation: Situation): List[Lift] =
     if (canLift(situation))
-      situation.board.unusedDice.distinct
-        .flatMap { die =>
-          Pos(
-            (
-              List(
-                situation.board.furthestFromEnd(situation.player),
-                die
-              ).min - (Pos.barIndex(!situation.player) * Pos.indexDirection(situation.player))
-            ).abs
-          ).map(pos => (die, pos))
-        }
-        .filter {
-          case (_, pos) => {
-            situation.board.pieces.get(pos) match {
-              case Some((piece, count)) => piece.player == situation.player && count > 0
-              case None                 => false
-            }
-          }
-        }
-        .map { case (die, orig) =>
-          Lift(
-            pos = orig,
-            situationBefore = situation,
-            after = boardAfter(situation, Some(orig), None, die)
-          )
-        }
+      checkLiftsWithLookAhead(situation)
     else List.empty
 
   private def diceCombinations(diceCount: Int, diceMax: Int = 6): Iterator[List[Int]] =
