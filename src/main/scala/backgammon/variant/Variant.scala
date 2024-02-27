@@ -163,30 +163,51 @@ abstract class Variant private[variant] (
         .map { case (k, v) => (k, v.toList.map(_._2)) }
     else Map.empty
 
-  def validDrops(situation: Situation): List[Drop] =
-    if (situation.board.unusedDice.nonEmpty && situation.board.piecesOnBar(situation.player))
-      situation.board.unusedDice.distinct
-        .flatMap { die =>
-          Pos(
-            Pos.barIndex(situation.player) + Pos.indexDirection(situation.player) * die
-          ).map(pos => (die, pos))
-        }
-        .filterNot {
-          case (_, pos) => {
-            situation.board.pieces.get(pos) match {
-              case Some((piece, count)) => piece.player != situation.player && count > 1
-              case None                 => false
-            }
+  private def generateDrops(situation: Situation) =
+    situation.board.unusedDice.distinct
+      .flatMap { die =>
+        Pos(
+          Pos.barIndex(situation.player) + Pos.indexDirection(situation.player) * die
+        ).map(pos => (die, pos))
+      }
+      .filterNot {
+        case (_, pos) => {
+          situation.board.pieces.get(pos) match {
+            case Some((piece, count)) => piece.player != situation.player && count > 1
+            case None                 => false
           }
         }
-        .map { case (die, dest) =>
-          Drop(
-            piece = Piece(situation.player, Role.defaultRole),
-            pos = dest,
-            situationBefore = situation,
-            after = boardAfter(situation, None, Some(dest), die)
-          )
+      }
+      .map { case (die, dest) =>
+        Drop(
+          piece = Piece(situation.player, Role.defaultRole),
+          pos = dest,
+          situationBefore = situation,
+          after = boardAfter(situation, None, Some(dest), die)
+        )
+      }
+
+  private def checkDropsWithLookAhead(situation: Situation) = {
+    val baseDrops = generateDrops(situation)
+    situation.board.unusedDice.toSet.size match {
+      case 2 => {
+        val dropsWithLookAhead = baseDrops.map { d =>
+          (d, d.situationAfter.canMove || d.situationAfter.canLift || d.situationAfter.canDrop)
         }
+        if (dropsWithLookAhead.map(_._2).toSet.contains(true))
+          dropsWithLookAhead.filter(_._2).map(_._1)
+        else baseDrops
+      }
+      case _ => baseDrops
+    }
+  }
+
+  private def canDrop(situation: Situation): Boolean =
+    situation.board.unusedDice.nonEmpty && situation.board.piecesOnBar(situation.player)
+
+  def validDrops(situation: Situation): List[Drop] =
+    if (canDrop(situation))
+      checkDropsWithLookAhead(situation)
     else List.empty
 
   private def generateLifts(situation: Situation) =
