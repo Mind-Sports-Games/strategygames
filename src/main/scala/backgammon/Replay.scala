@@ -126,7 +126,7 @@ object Replay {
         before.situation,
         None,
         Some(dest),
-        Pos.barIndex(before.situation.player) + (dest.index * Pos.indexDirection(before.situation.player))
+        (Pos.barIndex(before.situation.player) - dest.index).abs
       )
     )
 
