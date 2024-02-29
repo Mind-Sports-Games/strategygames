@@ -8,6 +8,8 @@ import cats.implicits._
 
 sealed trait Uci {
 
+  def gameLogic: GameLogic
+
   def uci: String
   def shortUci: String
   def fishnetUci: String
@@ -77,6 +79,7 @@ object Uci {
         m.promotion.map(Role.ChessPromotableRole)
       )
       with Chess {
+    def gameLogic      = GameLogic.Chess()
     def uci            = m.uci
     def shortUci       = m.uci
     def fishnetUci     = m.uci
@@ -101,6 +104,7 @@ object Uci {
         }
       )
       with Draughts {
+    def gameLogic      = GameLogic.Draughts()
     def uci            = m.uci
     def shortUci       = m.shortUci
     def fishnetUci     = m.uci
@@ -121,6 +125,7 @@ object Uci {
         m.promotion.map(Role.FairySFPromotableRole)
       )
       with FairySF {
+    def gameLogic      = GameLogic.FairySF()
     def uci            = m.uci
     def shortUci       = m.uci
     def fishnetUci     = m.fishnetUci
@@ -140,6 +145,7 @@ object Uci {
         Pos.Samurai(m.dest)
       )
       with Samurai {
+    def gameLogic      = GameLogic.Samurai()
     def uci            = m.uci
     def shortUci       = m.uci
     def fishnetUci     = m.uci
@@ -159,6 +165,7 @@ object Uci {
         Pos.Togyzkumalak(m.dest)
       )
       with Togyzkumalak {
+    def gameLogic      = GameLogic.Togyzkumalak()
     def uci            = m.uci
     def shortUci       = m.uci
     def fishnetUci     = m.uci
@@ -178,6 +185,7 @@ object Uci {
         Pos.Backgammon(m.dest)
       )
       with Backgammon {
+    def gameLogic      = GameLogic.Backgammon()
     def uci            = m.uci
     def shortUci       = m.uci
     def fishnetUci     = m.uci
@@ -204,6 +212,7 @@ object Uci {
         Pos.Chess(d.pos)
       )
       with Chess {
+    def gameLogic      = GameLogic.Chess()
     def uci            = d.uci
     def shortUci       = d.uci
     def fishnetUci     = d.uci
@@ -224,6 +233,7 @@ object Uci {
         Pos.FairySF(d.pos)
       )
       with FairySF {
+    def gameLogic      = GameLogic.FairySF()
     def uci            = d.uci
     def shortUci       = d.uci
     def fishnetUci     = d.fishnetUci
@@ -244,6 +254,7 @@ object Uci {
         Pos.Go(d.pos)
       )
       with Go {
+    def gameLogic      = GameLogic.Go()
     def uci            = d.uci
     def shortUci       = d.uci
     def fishnetUci     = d.fishnetUci
@@ -264,6 +275,7 @@ object Uci {
         Pos.Backgammon(d.pos)
       )
       with Backgammon {
+    def gameLogic      = GameLogic.Backgammon()
     def uci            = d.uci
     def shortUci       = d.uci
     def fishnetUci     = d.fishnetUci
@@ -289,6 +301,7 @@ object Uci {
         Pos.Backgammon(l.pos)
       )
       with Backgammon {
+    def gameLogic      = GameLogic.Backgammon()
     def uci            = l.uci
     def shortUci       = l.uci
     def fishnetUci     = l.fishnetUci
@@ -308,6 +321,7 @@ object Uci {
   }
 
   final case class GoPass(p: go.format.Uci.Pass) extends Pass() with Go {
+    def gameLogic  = GameLogic.Go()
     def uci        = p.uci
     def shortUci   = p.uci
     def fishnetUci = p.uci
@@ -335,6 +349,7 @@ object Uci {
         ss.squares.map(Pos.Go(_))
       )
       with Go {
+    def gameLogic  = GameLogic.Go()
     def uci        = ss.uci
     def shortUci   = ss.uci
     def fishnetUci = ss.uci
@@ -362,6 +377,7 @@ object Uci {
         dr.dice
       )
       with Chess {
+    def gameLogic  = GameLogic.Chess()
     def uci        = dr.uci
     def shortUci   = dr.uci
     def fishnetUci = dr.uci
@@ -383,6 +399,7 @@ object Uci {
         dr.dice
       )
       with Backgammon {
+    def gameLogic  = GameLogic.Backgammon()
     def uci        = dr.uci
     def shortUci   = dr.uci
     def fishnetUci = dr.uci
@@ -404,6 +421,7 @@ object Uci {
   }
 
   final case class ChessDoRoll(dr: chess.format.Uci.DoRoll) extends DoRoll() with Chess {
+    def gameLogic  = GameLogic.Chess()
     def uci        = dr.uci
     def shortUci   = dr.uci
     def fishnetUci = dr.uci
@@ -421,6 +439,7 @@ object Uci {
   }
 
   final case class BackgammonDoRoll(dr: backgammon.format.Uci.DoRoll) extends DoRoll() with Backgammon {
+    def gameLogic  = GameLogic.Backgammon()
     def uci        = dr.uci
     def shortUci   = dr.uci
     def fishnetUci = dr.uci
@@ -442,6 +461,7 @@ object Uci {
   }
 
   final case class BackgammonEndTurn(et: backgammon.format.Uci.EndTurn) extends EndTurn() with Backgammon {
+    def gameLogic  = GameLogic.Backgammon()
     def uci        = et.uci
     def shortUci   = et.uci
     def fishnetUci = et.uci

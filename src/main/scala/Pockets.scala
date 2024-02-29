@@ -1,6 +1,6 @@
 package strategygames
 
-import strategygames.Player
+import strategygames.{ GameLogic, Player }
 
 case class Pockets(p1: Pocket, p2: Pocket) {
 
@@ -44,6 +44,7 @@ case class Pocket(roles: List[Role]) {
 }
 
 sealed abstract class PocketData(
+    val gameLogic: GameLogic,
     val pockets: Pockets,
     // in crazyhouse, a promoted piece becomes a pawn
     // when captured and put in the pocket.
@@ -56,24 +57,28 @@ object PocketData {
 
   case class Chess(p: chess.PocketData)
       extends PocketData(
+        GameLogic.Chess(),
         p.pockets,
         p.promoted.map(Pos.Chess)
       )
 
   case class FairySF(p: fairysf.PocketData)
       extends PocketData(
+        GameLogic.FairySF(),
         p.pockets,
         p.promoted.map(Pos.FairySF)
       )
 
   case class Go(p: go.PocketData)
       extends PocketData(
+        GameLogic.Go(),
         p.pockets,
         Set.empty
       )
 
   case class Backgammon(p: backgammon.PocketData)
       extends PocketData(
+        GameLogic.Backgammon(),
         p.pockets,
         Set.empty
       )
