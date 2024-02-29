@@ -28,7 +28,8 @@ object Binary {
     val int = 255
   }
 
-  val maxPlies = 600
+  // If changing this, consider changing other gamelogics and also lila game maxPlies
+  private val maxPlies = 1000
 
   private object Reader {
 
