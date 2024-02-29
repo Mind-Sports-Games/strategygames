@@ -146,7 +146,7 @@ abstract class Variant private[variant] (
         }
         if (movesWithLookAhead.map(_._2).toSet.contains(true))
           movesWithLookAhead.filter(_._2).map(_._1)
-        else baseMoves
+        else baseMoves.filter(_.diceUsed == baseMoves.map(_.diceUsed).max)
       }
       case _ => baseMoves
     }
@@ -196,7 +196,7 @@ abstract class Variant private[variant] (
         }
         if (dropsWithLookAhead.map(_._2).toSet.contains(true))
           dropsWithLookAhead.filter(_._2).map(_._1)
-        else baseDrops
+        else baseDrops.filter(_.diceUsed == baseDrops.map(_.diceUsed).max)
       }
       case _ => baseDrops
     }
@@ -247,7 +247,7 @@ abstract class Variant private[variant] (
         }
         if (liftsWithLookAhead.map(_._2).toSet.contains(true))
           liftsWithLookAhead.filter(_._2).map(_._1)
-        else baseLifts
+        else baseLifts.filter(_.diceUsed == baseLifts.map(_.diceUsed).max)
       }
       case _ => baseLifts
     }
@@ -259,6 +259,17 @@ abstract class Variant private[variant] (
   def validLifts(situation: Situation): List[Lift] =
     if (canLift(situation))
       checkLiftsWithLookAhead(situation)
+        // all of this is to filter out a duplicated lift but with a different dice value
+        .map { l => (l.pos, l) }
+        .groupBy(_._1)
+        .map {
+          case (_, v) => {
+            val lifts = v.toList.map(_._2)
+            lifts.filter(_.diceUsed == lifts.map(_.diceUsed).max)
+          }
+        }
+        .toList
+        .flatten
     else List.empty
 
   private def diceCombinations(diceCount: Int, diceMax: Int = 6): Iterator[List[Int]] =
