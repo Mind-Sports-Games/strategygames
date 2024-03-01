@@ -38,8 +38,7 @@ object Hash {
 
   object ZobristConstants {}
 
-  // The following masks are compatible with the Polyglot
-  // opening book format.
+  // The following masks are compatible with the Polyglot opening book format.
   private val polyglotTable    = new ZobristConstants(0)
   private lazy val randomTable = new ZobristConstants(16)
 
@@ -47,7 +46,7 @@ object Hash {
     piece.role.hashInt * 2 + piece.player.fold(1, 0)
 
   private def actorIndex(actor: Actor) =
-    64 * pieceIndex(actor.piece) + actor.pos.hashCode
+    Pos.all.size * pieceIndex(actor.piece) + actor.pos.hashCode
 
   def get(situation: Situation, table: ZobristConstants): Long = {
 
@@ -127,6 +126,7 @@ object Hash {
 }
 
 private object ZobristTables {
+  // to work out the size of this calculate what the max value actorIndex can produce
   val actorMasks = Array(
     "9d39247e33776d4152b375aa7c0d7bac",
     "2af7398005aaa5c7208d169a534f2cf5",

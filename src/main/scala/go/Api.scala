@@ -245,9 +245,7 @@ object Api {
           Pockets(
             Pocket(List(strategygames.Role.GoRole(Stone), strategygames.Role.GoRole(Stone))),
             Pocket(List(strategygames.Role.GoRole(Stone), strategygames.Role.GoRole(Stone)))
-          ),
-          // Can make an empty Set of Pos because we dont have to track promoted pieces
-          Set[Pos]()
+          )
         )
       )
 

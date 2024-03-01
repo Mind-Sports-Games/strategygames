@@ -13,7 +13,7 @@ sealed trait Uci {
   def toSan: String
   def toFullSan: String
 
-  def origDest: (Pos, Pos)
+  def origDest: Option[(Pos, Pos)]
 
   def apply(situation: Situation, finalSquare: Boolean = false): Validated[String, Move]
 
@@ -37,7 +37,7 @@ object Uci {
 
     def promotionString = promotion.fold("")(_.forsyth.toString)
 
-    def origDest = orig -> dest
+    def origDest = Some(orig -> dest)
 
     def apply(situation: Situation, finalSquare: Boolean = false) =
       situation.move(orig, dest, promotion, finalSquare, none, capture)
@@ -83,14 +83,14 @@ object Uci {
 
   }
 
-  case class WithSan(uci: Uci, san: String)
+  case class WithSan(uci: Uci.Move, san: String)
 
   def apply(move: strategygames.draughts.Move, withCaptures: Boolean) =
     Uci.Move(move.orig, move.dest, move.promotion, if (withCaptures) move.capture else none)
 
-  def combine(uci1: Uci, uci2: Uci)          =
-    apply(uci1.uci + uci2.uci.drop(2)).getOrElse(Uci.Move(uci1.origDest._1, uci2.origDest._2))
-  def combineSan(san1: String, san2: String) =
+  def combine(uci1: Uci.Move, uci2: Uci.Move) =
+    apply(uci1.uci + uci2.uci.drop(2)).getOrElse(Uci.Move(uci1.orig, uci2.dest))
+  def combineSan(san1: String, san2: String)  =
     san1.substring(0, san1.indexOf('x')) + san2.substring(san2.indexOf('x'))
 
   def apply(move: String): Option[Uci] = Uci.Move(move)

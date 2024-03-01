@@ -29,7 +29,8 @@ object Binary {
 
   private object Reader {
 
-    private val maxPlies = 600
+    // If changing this, consider changing other gamelogics and also lila game maxPlies
+    private val maxPlies = 1000
 
     def actionStrs(bs: List[Byte]): ActionStrs          = actionStrs(bs, maxPlies)
     def actionStrs(bs: List[Byte], nb: Int): ActionStrs = toActionStrs(intPlies(bs map toInt, nb, None))

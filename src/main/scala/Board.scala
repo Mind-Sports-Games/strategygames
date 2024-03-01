@@ -6,12 +6,15 @@ sealed abstract class Board(
     val pieces: PieceMap,
     val history: History,
     val variant: Variant,
-    val pocketData: Option[PocketData] = None
+    val pocketData: Option[PocketData] = None,
+    val unusedDice: List[Int] = List.empty
 ) {
 
   def apply(at: Pos): Option[Piece] = (pieces get at).map(_._1)
 
   def hasPiece(p: Piece) = pieces.values.map(_._1) exists (p ==)
+
+  def usedDice: List[Int]
 
   def withHistory(h: History): Board
 
@@ -34,6 +37,7 @@ sealed abstract class Board(
   def toSamurai: samurai.Board
   def toTogyzkumalak: togyzkumalak.Board
   def toGo: go.Board
+  def toBackgammon: backgammon.Board
 }
 
 object Board {
@@ -50,6 +54,8 @@ object Board {
       case History.Chess(h) => Chess(b.withHistory(h))
       case _                => sys.error("Not passed Chess objects")
     }
+
+    def usedDice: List[Int] = List.empty
 
     def situationOf(player: Player): Situation = Situation.Chess(b.situationOf(player))
 
@@ -73,6 +79,7 @@ object Board {
     def toSamurai      = sys.error("Can't make a samurai board from a chess board")
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak board from a chess board")
     def toGo           = sys.error("Can't make a go board from a chess board")
+    def toBackgammon   = sys.error("Can't make a backgammon board from a chess board")
 
   }
 
@@ -87,6 +94,8 @@ object Board {
       case History.Draughts(h) => Draughts(b.withHistory(h))
       case _                   => sys.error("Not passed Draughts objects")
     }
+
+    def usedDice: List[Int] = List.empty
 
     def situationOf(player: Player): Situation = Situation.Draughts(b.situationOf(player))
 
@@ -110,6 +119,7 @@ object Board {
     def toSamurai      = sys.error("Can't make a samurai board from a draughts board")
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak board from a draughts board")
     def toGo           = sys.error("Can't make a go board from a draughts board")
+    def toBackgammon   = sys.error("Can't make a backgammon board from a draughts board")
 
   }
 
@@ -125,6 +135,8 @@ object Board {
       case History.FairySF(h) => FairySF(b.withHistory(h))
       case _                  => sys.error("Not passed FairySF objects")
     }
+
+    def usedDice: List[Int] = List.empty
 
     def situationOf(player: Player): Situation = Situation.FairySF(b.situationOf(player))
 
@@ -148,6 +160,7 @@ object Board {
     def toSamurai      = sys.error("Can't make a samurai board from a fairysf board")
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak board from a fairysf board")
     def toGo           = sys.error("Can't make a go board from a fairysf board")
+    def toBackgammon   = sys.error("Can't make a backgammon board from a fairysf board")
 
   }
 
@@ -162,6 +175,8 @@ object Board {
       case History.Samurai(h) => Samurai(b.withHistory(h))
       case _                  => sys.error("Not passed samurai objects")
     }
+
+    def usedDice: List[Int] = List.empty
 
     def situationOf(player: Player): Situation = Situation.Samurai(b.situationOf(player))
 
@@ -185,6 +200,7 @@ object Board {
     def toSamurai      = b
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak board from a samurai board")
     def toGo           = sys.error("Can't make a go board from a samurai board")
+    def toBackgammon   = sys.error("Can't make a backgammon board from a samurai board")
 
   }
 
@@ -201,6 +217,8 @@ object Board {
       case History.Togyzkumalak(h) => Togyzkumalak(b.withHistory(h))
       case _                       => sys.error("Not passed togyzkumalak objects")
     }
+
+    def usedDice: List[Int] = List.empty
 
     def situationOf(player: Player): Situation = Situation.Togyzkumalak(b.situationOf(player))
 
@@ -224,6 +242,7 @@ object Board {
     def toSamurai      = sys.error("Can't make a samurai board from a togyzkumalak board")
     def toTogyzkumalak = b
     def toGo           = sys.error("Can't make a go board from a togyzkumalak board")
+    def toBackgammon   = sys.error("Can't make a backgammon board from a togyzkumalak board")
 
   }
 
@@ -239,6 +258,8 @@ object Board {
       case History.Go(h) => Go(b.withHistory(h))
       case _             => sys.error("Not passed go objects")
     }
+
+    def usedDice: List[Int] = List.empty
 
     def situationOf(player: Player): Situation = Situation.Go(b.situationOf(player))
 
@@ -262,6 +283,51 @@ object Board {
     def toSamurai      = sys.error("Can't make a samurai board from a go board")
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak board from a go board")
     def toGo           = b
+    def toBackgammon   = sys.error("Can't make a backgammon board from a go board")
+
+  }
+
+  case class Backgammon(b: backgammon.Board)
+      extends Board(
+        b.pieces.map { case (pos, (piece, count)) =>
+          (Pos.Backgammon(pos), (Piece.Backgammon(piece), count))
+        },
+        History.Backgammon(b.history),
+        Variant.Backgammon(b.variant),
+        b.pocketData.map(PocketData.Backgammon),
+        b.unusedDice
+      ) {
+
+    def withHistory(h: History): Board = h match {
+      case History.Backgammon(h) => Backgammon(b.withHistory(h))
+      case _                     => sys.error("Not passed backgammon objects")
+    }
+
+    def usedDice: List[Int] = b.usedDice
+
+    def situationOf(player: Player): Situation = Situation.Backgammon(b.situationOf(player))
+
+    def materialImbalance: Int = b.materialImbalance
+
+    override def toString: String = b.toString
+
+    def copy(history: History, variant: Variant): Board = (history, variant) match {
+      case (History.Backgammon(history), Variant.Backgammon(variant)) =>
+        Backgammon(b.copy(history = history, variant = variant))
+      case _                                                          => sys.error("Unable to copy a backgammon board with non-backgammon arguments")
+    }
+    def copy(history: History): Board                   = history match {
+      case History.Backgammon(history) => Backgammon(b.copy(history = history))
+      case _                           => sys.error("Unable to copy a backgammon board with non-backgammon arguments")
+    }
+
+    def toFairySF      = sys.error("Can't make a fairysf board from a backgammon board")
+    def toChess        = sys.error("Can't make a chess board from a backgammon board")
+    def toDraughts     = sys.error("Can't make a draughts board from a backgammon board")
+    def toSamurai      = sys.error("Can't make a samurai board from a backgammon board")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak board from a backgammon board")
+    def toGo           = sys.error("Can't make a go board from a backgammon board")
+    def toBackgammon   = b
 
   }
 
@@ -328,6 +394,15 @@ object Board {
             variant
           )
         )
+      case (GameLogic.Backgammon(), Variant.Backgammon(variant))     =>
+        Backgammon(
+          backgammon.Board.apply(
+            pieces.map { case (Pos.Backgammon(pos), (Piece.Backgammon(piece), count)) =>
+              (pos, (piece, count))
+            },
+            variant
+          )
+        )
       case _                                                         => sys.error("Mismatched gamelogic types 27")
     }
 
@@ -337,6 +412,7 @@ object Board {
   implicit def samuraiBoard(b: samurai.Board)           = Board.Samurai(b)
   implicit def togyzkumalakBoard(b: togyzkumalak.Board) = Board.Togyzkumalak(b)
   implicit def goBoard(b: go.Board)                     = Board.Go(b)
+  implicit def backgammonBoard(b: backgammon.Board)     = Board.Backgammon(b)
 
   def init(lib: GameLogic, variant: Variant): Board = (lib, variant) match {
     case (GameLogic.Draughts(), Variant.Draughts(variant))         => Draughts(draughts.Board.init(variant))
@@ -346,6 +422,7 @@ object Board {
     case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant)) =>
       Togyzkumalak(togyzkumalak.Board.init(variant))
     case (GameLogic.Go(), Variant.Go(variant))                     => Go(go.Board.init(variant))
+    case (GameLogic.Backgammon(), Variant.Backgammon(variant))     => Backgammon(backgammon.Board.init(variant))
     case _                                                         => sys.error("Mismatched gamelogic types 28")
   }
 

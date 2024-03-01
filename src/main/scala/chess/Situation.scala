@@ -29,6 +29,15 @@ case class Situation(board: Board, player: Player) {
       case _                          => None
     }
 
+  def canDrop: Boolean = drops.map(_.nonEmpty) == Some(true)
+
+  def canOnlyDrop: Boolean = canDrop && moves.isEmpty
+
+  def canRollDice: Boolean = board.variant.validDiceRolls(this).nonEmpty
+
+  // safe because no variant has dice rolling and drops
+  def canOnlyRollDice: Boolean = canRollDice && moves.isEmpty
+
   lazy val kingPos: Option[Pos] = board kingPosOf player
 
   lazy val check: Boolean = board check player
@@ -71,6 +80,9 @@ case class Situation(board: Board, player: Player) {
 
   def drop(role: Role, pos: Pos): Validated[String, Drop] =
     board.variant.drop(this, role, pos)
+
+  def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
+    board.variant.diceRoll(this, dice)
 
   def fixCastles = copy(board = board fixCastles)
 

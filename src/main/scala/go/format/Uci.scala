@@ -10,7 +10,7 @@ sealed trait Uci {
   def uci: String
   def piotr: String
 
-  def origDest: (Pos, Pos)
+  def origDest: Option[(Pos, Pos)]
 
   def apply(situation: Situation): Validated[String, Action]
 }
@@ -26,7 +26,7 @@ object Uci {
 
     def piotr = s"${role.pgn}@${pos.piotrStr}"
 
-    def origDest = pos -> pos
+    def origDest = Some(pos -> pos)
 
     def apply(situation: Situation) = situation.drop(role, pos)
   }
@@ -52,7 +52,7 @@ object Uci {
 
     def piotr = "pass"
 
-    def origDest = Pos.A1 -> Pos.A1
+    def origDest = None
 
     def apply(situation: Situation) = situation.pass()
   }
@@ -72,7 +72,7 @@ object Uci {
 
     def piotr = lilaUci
 
-    def origDest = Pos.A1 -> Pos.A1
+    def origDest = None
 
     def apply(situation: Situation) = situation.selectSquares(squares)
   }

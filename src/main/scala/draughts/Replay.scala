@@ -62,7 +62,7 @@ object Replay {
 
   // TODO: because this is primarily used in a Validation context, we should be able to
   //       return something that's runtime safe as well.
-  def draughtsMove(action: StratAction) = action match {
+  private def draughtsMove(action: StratAction) = action match {
     case StratMove.Draughts(m) => m
     case _                     => sys.error("Invalid draughts move")
   }
@@ -422,7 +422,7 @@ object Replay {
     else {
 
       // we don't want to compare the full move number, to match transpositions
-      def truncateFen(fen: FEN) = fen.value.split(' ').take(4) mkString " "
+      def truncateFen(fen: FEN) = fen.value.split(' ').take(FEN.fullMoveIndex) mkString " "
       val atFenTruncated        = truncateFen(atFen)
       def compareFen(fen: FEN)  = truncateFen(fen) == atFenTruncated
 

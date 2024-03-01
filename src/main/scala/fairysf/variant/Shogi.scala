@@ -16,7 +16,8 @@ case object Shogi
 
   def gameFamily: GameFamily = GameFamily.Shogi()
 
-  override def dropsVariant = true
+  override def dropsVariant       = true
+  override def hasDetatchedPocket = true
 
   def perfIcon: Char = ''
   def perfId: Int    = 200

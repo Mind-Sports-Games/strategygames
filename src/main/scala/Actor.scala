@@ -57,4 +57,11 @@ object Actor {
         Board.Go(a.board)
       ) {}
 
+  final case class Backgammon(a: backgammon.Actor)
+      extends Actor(
+        Piece.Backgammon(a.piece),
+        Pos.Backgammon(a.pos),
+        Board.Backgammon(a.board)
+      ) {}
+
 }

@@ -74,7 +74,7 @@ object Replay {
       )
     }
 
-  def chessAction(action: StratAction) = action match {
+  private def chessAction(action: StratAction) = action match {
     case StratMove.Chess(m) => m
     case StratDrop.Chess(d) => d
     case _                  => sys.error("Invalid chess action")
@@ -248,6 +248,7 @@ object Replay {
     if (Forsyth.<<@(variant, atFen).isEmpty) invalid(s"Invalid FEN $atFen")
     else {
 
+      // TODO fullMoveIndex is at 5, not 4, but this has always worked
       // we don't want to compare the full move number, to match transpositions
       def truncateFen(fen: FEN) = fen.value.split(' ').take(4) mkString " "
       val atFenTruncated        = truncateFen(atFen)

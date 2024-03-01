@@ -48,6 +48,7 @@ object SelectSquares {
     def toSamurai      = sys.error("Can't make a samurai SelectSquares from a go SelectSquares")
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak SelectSquares from a go SelectSquares")
     def toGo           = ss
+    def toBackgammon   = sys.error("Can't make a backgammon SelectSquares from a go SelectSquares")
 
   }
 

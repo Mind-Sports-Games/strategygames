@@ -112,6 +112,7 @@ object Pos {
   val B2 = new Pos(10)
   val A2 = new Pos(11)
 
+  // if adding new Pos check for use of Pos.all
   val all: List[Pos] = (0 to (File.all.size * Rank.all.size) - 1).map(new Pos(_)).toList
 
   val allKeys: Map[String, Pos] = all

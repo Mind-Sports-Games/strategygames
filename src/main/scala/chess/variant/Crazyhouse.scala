@@ -22,7 +22,8 @@ case object Crazyhouse
   override def blindModeVariant         = false
   override def materialImbalanceVariant = true
 
-  override def dropsVariant = true
+  override def dropsVariant       = true
+  override def hasDetatchedPocket = true
 
   def pieces = Standard.pieces
 
