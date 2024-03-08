@@ -132,6 +132,92 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
     }
   }
 
+  "Backgammon Variant handles endturn" should {
+    "be valid game that can endturn early" in {
+      val actionStrs = List(
+        "4/5",
+        "l2h2",
+        "a2e1",
+        "endturn",
+        "4/2",
+        "l1h1",
+        "l1j1",
+        "endturn",
+        "5/6",
+        "e1j1",
+        "l2f2",
+        "endturn",
+        "4/2",
+        "s@k1",
+        "a1d2",
+        "endturn",
+        "6/1",
+        "e1k1",
+        "j1k1",
+        "endturn",
+        "6/2",
+        "endturn"
+      )
+      playActionStrs(actionStrs) must beValid.like { g =>
+        g.situation.board.unusedDice.isEmpty must_== true
+        g.situation.board.usedDice.size must_== 2
+        g.situation.canOnlyRollDice must_== true
+      }
+    }
+
+    "be valid game that can endturn even after a single move/drop/lift" in {
+      val actionStrs = List(
+        "endturn",
+        "3/1",
+        "e2h2",
+        "g2h2",
+        "endturn",
+        "5/3",
+        "e1j1",
+        "l2i2",
+        "endturn",
+        "4/4",
+        "e2i2",
+        "e2i2",
+        "a1d2",
+        "a1d2",
+        "endturn",
+        "3/1",
+        "s@j2",
+        "g1h1",
+        "endturn",
+        "1/6",
+        "g2h2",
+        "l1f1",
+        "endturn",
+        "5/5",
+        "g1l1",
+        "j2e2",
+        "a2e1",
+        "a2e1",
+        "endturn",
+        "1/2",
+        "s@l1",
+        "l1j1",
+        "endturn",
+        "6/5",
+        "endturn",
+        "5/1",
+        "f1a1",
+        "j1i1",
+        "endturn",
+        "5/3",
+        "s@j2",
+        "endturn"
+      )
+      playActionStrs(actionStrs) must beValid.like { g =>
+        g.situation.board.unusedDice.isEmpty must_== true
+        g.situation.board.usedDice.size must_== 2
+        g.situation.canOnlyRollDice must_== true
+      }
+    }
+  }
+
   "Backgammon Variant handles drops" should {
     "be valid game and obey drop rules and must skip turn when no valid drops" in {
       val actionStrs = List(
