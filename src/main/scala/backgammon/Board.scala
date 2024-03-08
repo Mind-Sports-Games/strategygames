@@ -31,7 +31,7 @@ case class Board(
   lazy val unusedDiceStr: String = if (unusedDice.isEmpty) "-" else unusedDice.mkString("/")
 
   lazy val usedDice: List[Int] = diceToActionDice(
-    history.recentTurn.flatMap {
+    history.currentTurn.flatMap {
       case u: Uci.DiceRoll => Some(u.dice)
       case _               => None
     }.flatten
