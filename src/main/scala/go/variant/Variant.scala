@@ -43,6 +43,8 @@ abstract class Variant private[variant] (
 
   def initialFen: FEN = format.Forsyth.initial
 
+  def komi: Double = 7.5
+
   def fenFromSetupConfig(handicap: Int, komi: Int): FEN = {
 
     val p1Score = if (komi > 0) handicap * 10 else handicap * 10 - komi

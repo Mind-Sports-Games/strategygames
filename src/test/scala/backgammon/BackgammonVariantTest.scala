@@ -160,7 +160,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
       )
       playActionStrs(actionStrs) must beValid.like { g =>
         g.situation.board.unusedDice.isEmpty must_== true
-        g.situation.board.usedDice.size must_== 2
+        g.situation.board.usedDice.isEmpty must_== true
         g.situation.canOnlyRollDice must_== true
       }
     }
@@ -212,7 +212,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
       )
       playActionStrs(actionStrs) must beValid.like { g =>
         g.situation.board.unusedDice.isEmpty must_== true
-        g.situation.board.usedDice.size must_== 2
+        g.situation.board.usedDice.isEmpty must_== true
         g.situation.canOnlyRollDice must_== true
       }
     }

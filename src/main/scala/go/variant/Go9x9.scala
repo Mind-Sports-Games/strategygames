@@ -22,6 +22,8 @@ case object Go9x9
   override def initialFen =
     format.FEN("9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 1")
 
+  override def komi: Double = 5.5
+
   override def boardFenFromHandicap(handicap: Int): String = {
     handicap match {
       case 1 => "9/9/2S6/9/9/9/9/9/9"
