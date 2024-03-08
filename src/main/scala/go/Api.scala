@@ -289,12 +289,12 @@ object Api {
   def position(variant: Variant, komi: Double = 7.5): Position = {
     val g = new GoGame(variant.boardSize.height)
     g.setKomiScore(komi)
-    new GoPosition(g)
+    new GoPosition(position = g, komi = komi)
   }
 
   def positionFromVariant(variant: Variant): Position =
     variant.key match {
-      case "go9x9" | "go13x13" | "go19x19" => position(variant)
+      case "go9x9" | "go13x13" | "go19x19" => position(variant, variant.komi)
       case _                               => sys.error(s"incorrect variant supplied ${variant}")
     }
 
