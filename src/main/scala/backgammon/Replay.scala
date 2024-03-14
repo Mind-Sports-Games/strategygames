@@ -156,7 +156,7 @@ object Replay {
   def replayEndTurn(before: Game): EndTurn = {
     EndTurn(
       situationBefore = before.situation,
-      after = before.situation.board
+      after = before.situation.board.setDice(List())
     )
   }
 
