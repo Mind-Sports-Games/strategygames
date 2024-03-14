@@ -13,7 +13,7 @@ class FairyStockfishTest extends Specification with ValidatedMatchers {
   "Shogi initial fen" should {
     "be expected string" in {
       format.FEN(
-        "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL[-] w 0 1"
+        "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL[] w - - 0 1"
       ) must_== variant.Shogi.initialFen
     }
   }
@@ -31,7 +31,7 @@ class FairyStockfishTest extends Specification with ValidatedMatchers {
     "be invalid" in {
       FairyStockfish.validateFEN(
         variant.Shogi.fairysfName.name,
-        "lnsgkgsnl/1r5b1/ppppppppp/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL[-] w 0 1"
+        "lnsgkgsnl/1r5b1/ppppppppp/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL[] w - - 0 1"
       ) must_== false
     }
   }

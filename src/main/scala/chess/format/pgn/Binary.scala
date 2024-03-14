@@ -42,7 +42,7 @@ object Binary {
 
     import Encoding._
 
-    //If changing this, consider changing other gamelogics and also lila game maxPlies
+    // If changing this, consider changing other gamelogics and also lila game maxPlies
     private val maxPlies = 1000
 
     def actionStrs(bs: List[Byte]): ActionStrs          = actionStrs(bs, maxPlies)
