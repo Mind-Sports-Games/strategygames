@@ -164,6 +164,7 @@ sealed trait ClockConfig {
   def berserkable: Boolean
   def emergSeconds: Int
   def show: String
+  def showBerserk: String
   def toClock: ClockBase
   // TODO: startsAtZero is an abstraction leak.
   def startsAtZero: Boolean
@@ -452,7 +453,16 @@ object ClockPlayer {
 }
 
 object Clock {
-  private val limitFormatter = new DecimalFormat("#.##")
+  private val limitFormatter                      = new DecimalFormat("#.##")
+  private def secondsToString(limit: Int): String =
+    limit match {
+      case l if l % 60 == 0 => (l / 60).toString
+      case 15 => "¼"
+      case 30 => "½"
+      case 45 => "¾"
+      case 90 => "1.5"
+      case _  => limitFormatter.format(limit / 60d)
+    }
 
   // TODO: All of these configs are a bit verbose.
   // All unspecified durations are expressed in seconds
@@ -473,20 +483,15 @@ object Clock {
     def limitInMinutes = limitSeconds / 60d
     def toClock        = Clock(this)
 
-    def limitString: String =
-      limitSeconds match {
-        case l if l % 60 == 0 => (l / 60).toString
-        case 15 => "¼"
-        case 30 => "½"
-        case 45 => "¾"
-        case 90 => "1.5"
-        case _  => limitFormatter.format(limitSeconds / 60d)
-      }
+    def limitString: String = secondsToString(limitSeconds)
 
     // TODO: I don't know if this is correct for fischer clocks, but this certainly unifies the interface
     def startsAtZero = limitSeconds == 0
 
     def show = toString
+
+    def showBerserk =
+      if (berserkable) s"${secondsToString((initTime - berserkPenalty).roundSeconds)}+0" else show
 
     override def toString = s"$limitString+$incrementSeconds"
 
@@ -517,20 +522,15 @@ object Clock {
     def limitInMinutes       = limitSeconds / 60d
     def toClock              = Clock(this)
 
-    def limitString: String =
-      limitSeconds match {
-        case l if l % 60 == 0 => (l / 60).toString
-        case 15 => "¼"
-        case 30 => "½"
-        case 45 => "¾"
-        case 90 => "1.5"
-        case _  => limitFormatter.format(limitSeconds / 60d)
-      }
+    def limitString: String = secondsToString(limitSeconds)
 
     // TODO: I don't know if this is correct for fischer clocks, but this certainly unifies the interface
     def startsAtZero = limitSeconds == 0
 
     def show = toString
+
+    def showBerserk =
+      if (berserkable) s"${secondsToString((initTime - berserkPenalty).roundSeconds)} d+0" else show
 
     override def toString = s"${limitString} d+${delaySeconds}"
 
@@ -559,20 +559,15 @@ object Clock {
     def graceSeconds         = delaySeconds
     def toClock              = Clock(this)
 
-    def limitString: String =
-      limitSeconds match {
-        case l if l % 60 == 0 => (l / 60).toString
-        case 15 => "¼"
-        case 30 => "½"
-        case 45 => "¾"
-        case 90 => "1.5"
-        case _  => limitFormatter.format(limitSeconds / 60d)
-      }
+    def limitString: String = secondsToString(limitSeconds)
 
     // TODO: I don't know if this is correct for fischer clocks, but this certainly unifies the interface
     def startsAtZero = limitSeconds == 0
 
     def show = toString
+
+    def showBerserk =
+      if (berserkable) s"${secondsToString((initTime - berserkPenalty).roundSeconds)} d/0" else show
 
     override def toString = s"${limitString} d/${delaySeconds}"
 
@@ -869,7 +864,16 @@ object ByoyomiClockPlayer {
 }
 
 object ByoyomiClock {
-  private val limitFormatter = new DecimalFormat("#.##")
+  private val limitFormatter                      = new DecimalFormat("#.##")
+  private def secondsToString(limit: Int): String =
+    limit match {
+      case l if l % 60 == 0 => (l / 60).toString
+      case 15 => "¼"
+      case 30 => "½"
+      case 45 => "¾"
+      case 90 => "1.5"
+      case _  => limitFormatter.format(limit / 60d)
+    }
 
   // All unspecified durations are expressed in seconds
   case class Config(limitSeconds: Int, incrementSeconds: Int, byoyomiSeconds: Int, periods: Int)
@@ -902,15 +906,7 @@ object ByoyomiClock {
 
     def toClock = ByoyomiClock(this)
 
-    def limitString: String =
-      limitSeconds match {
-        case l if l % 60 == 0 => (l / 60).toString
-        case 15 => "¼"
-        case 30 => "½"
-        case 45 => "¾"
-        case 90 => "1.5"
-        case _  => limitFormatter.format(limitSeconds / 60d)
-      }
+    def limitString: String = secondsToString(limitSeconds)
 
     def startsAtZero = limitSeconds == 0 && hasByoyomi
 
@@ -932,6 +928,9 @@ object ByoyomiClock {
     def show: String = if (hasByoyomi) s"${baseString}|${byoyomiSeconds}${periodsString}"
     else if (hasIncrement) baseString
     else s"${baseString}|0"
+
+    def showBerserk: String =
+      if (berserkable) s"${secondsToString((initTime - berserkPenalty).roundSeconds)}|0" else show
 
     override def toString = s"${limitSeconds}.${incrementSeconds}.${byoyomiSeconds}.${periodsTotal}"
   }
