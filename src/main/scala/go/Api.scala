@@ -195,32 +195,18 @@ object Api {
     lazy val pieceMap: PieceMap = {
       val goBoard   = position.toBoard()
       val occupants = goBoard.toOccupants(goBoard.position())
-      val pm        = occupants.zipWithIndex
-        .flatMap { case (row, rank) =>
-          row.zipWithIndex.map { case (piece, file) =>
-            (piece, file, rank)
+      var pieces    = Map.empty[Pos, Piece]
+      (0 to occupants.size - 1).foreach(rank => {
+        (0 to occupants(rank).size - 1).foreach(file => {
+          val piece = occupants(rank)(file)
+          if (piece == 0) {
+            pieces = pieces + (Pos.at(file, rank).get -> Piece(P1, Stone))
+          } else if (piece == 1) {
+            pieces = pieces + (Pos.at(file, rank).get -> Piece(P2, Stone))
           }
-        }
-        .flatMap {
-          case (piece, file, rank) => {
-            piece match {
-              case 0 => Some((P1, file, rank))
-              case 1 =>
-                Some((P2, file, rank))
-              case _ => None
-            }
-          }
-        }
-        .flatMap {
-          case (player, file, rank) => {
-            Pos.at(file, rank).map((player, _))
-          }
-        }
-        .map { case (player, pos) =>
-          (pos, Piece(player, Stone))
-        }
-        .toMap
-      pm
+        })
+      })
+      pieces
     }
 
     lazy val pocketData =
