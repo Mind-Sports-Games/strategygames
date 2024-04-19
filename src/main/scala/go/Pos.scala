@@ -429,12 +429,13 @@ object Pos {
     if (0 <= index && index < File.all.size * Rank.all.size) Some(new Pos(index))
     else None
 
-  def apply(file: File, rank: Rank): Pos = new Pos(file.index + (File.all.size - file.index) * rank.index)
+  def apply(file: File, rank: Rank): Pos = new Pos(File.all.size * rank.index + file.index)
 
   def at(x: Int, y: Int): Option[Pos] =
-    if (0 <= x && x < File.all.size && 0 <= y && y < Rank.all.size)
-      Some(new Pos(x + (File.all.size - x) * y))
-    else None
+    File(x) zip Rank(y) map { case (file, rank) =>
+        Pos(file, rank)
+    }
+
 
   def fromKey(key: String): Option[Pos] = allKeys get key
 

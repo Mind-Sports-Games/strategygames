@@ -78,7 +78,7 @@ abstract class Variant private[variant] (
     val previousMoves   = situation.board.uciMoves
     val oldPosition     = situation.board.apiPosition
     // TODO: Is there a difference between oldPosition and oldApiPosition?
-    val oldApiPosition  = oldPosition.createPosFromPrevious(previousMoves)
+    val oldApiPosition  = oldPosition // .createPosFromPrevious(previousMoves)
     val oldPieceMapSize = oldPosition.pieceMap.size
 
     val drops = situation.board.apiPosition.legalDrops

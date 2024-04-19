@@ -192,52 +192,36 @@ object Api {
 
     lazy val fen: FEN = FEN(fenString)
 
-    private def convertPieceMapFromFen(fenString: String): PieceMap = {
-      val boardWidth            = variant.boardSize.width
-      val boardFen              = fenString.split(' ').take(1).mkString("")
-      val boardFenWithoutPocket = boardFen.split('[').take(1).mkString("")
-      var pieces                = Map.empty[Pos, Piece]
-      boardFenWithoutPocket
-        .split('/')
-        .zipWithIndex
-        .map {
-          case (row, rowIndex) => {
-            var colIndex    = 0
-            var isLastChar1 = false
-            row.map(c => {
-              c match {
-                case 'X' | 'S'      =>
-                  moveToPos((boardWidth - rowIndex - 1) * boardWidth + colIndex, variant).map { pos =>
-                    {
-                      pieces += (pos -> Piece(P1, Stone))
-                      colIndex += 1
-                    }
-                  }
-                case 'O' | 's'      =>
-                  moveToPos((boardWidth - rowIndex - 1) * boardWidth + colIndex, variant).map { pos =>
-                    {
-                      pieces += (pos -> Piece(P2, Stone))
-                      colIndex += 1
-                    }
-                  }
-                case n if n.isDigit => {
-                  colIndex += n.asDigit
-                  if (isLastChar1) colIndex += 9
-                }
-                case _              => sys.error(s"unrecognaised character in Go fen, ${c}")
-              }
-              isLastChar1 = c == '1'
-            })
+    lazy val pieceMap: PieceMap = {
+      val goBoard   = position.toBoard()
+      val occupants = goBoard.toOccupants(goBoard.position())
+      val pm        = occupants.zipWithIndex
+        .flatMap { case (row, rank) =>
+          row.zipWithIndex.map { case (piece, file) =>
+            (piece, file, rank)
           }
         }
-
-      pieces
+        .flatMap {
+          case (piece, file, rank) => {
+            piece match {
+              case 0 => Some((P1, file, rank))
+              case 1 =>
+                Some((P2, file, rank))
+              case _ => None
+            }
+          }
+        }
+        .flatMap {
+          case (player, file, rank) => {
+            Pos.at(file, rank).map((player, _))
+          }
+        }
+        .map { case (player, pos) =>
+          (pos, Piece(player, Stone))
+        }
+        .toMap
+      pm
     }
-
-    // TODO: because generating the score is really slow and
-    //       we're immediately stripping that out in the converPieceMapFromFen
-    //       function, let's avoid it and use the goDiagram directly (pls test)
-    lazy val pieceMap: PieceMap = convertPieceMapFromFen(goDiagram)
 
     lazy val pocketData =
       Some(
