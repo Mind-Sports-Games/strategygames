@@ -98,27 +98,29 @@ abstract class Variant private[variant] (
             piece = Piece(situation.player, Role.defaultRole),
             pos = dest,
             situationBefore = situation,
-            after = situation.board
-              .copy(
-                pieces = newPosition.pieceMap, // TODO: Generating the piece map is SLOW
-                uciMoves = situation.board.uciMoves :+ uciMove,
-                pocketData = newPosition.pocketData,
-                position = newPosition.some
-              )
-              .withHistory(
-                situation.history.copy(
-                  // lastTurn handled in action.finalizeAfter
-                  score = Score(
-                    newPosition.fen.player1Score, // TODO: generating the scores is slow
-                    newPosition.fen.player2Score  //        especially when we have to generate a FEN to get it
-                  ),
-                  captures = situation.history.captures.add(
-                    situation.player,
-                    oldPieceMapSize - newPosition.pieceMap.size + 1
-                  ),
-                  halfMoveClock = situation.history.halfMoveClock + situation.player.fold(0, 1)
+            genNextBoard = LazyBoardAfter(() =>
+              situation.board
+                .copy(
+                  pieces = newPosition.pieceMap, // TODO: Generating the piece map is SLOW
+                  uciMoves = situation.board.uciMoves :+ uciMove,
+                  pocketData = newPosition.pocketData,
+                  position = newPosition.some
                 )
-              ),
+                .withHistory(
+                  situation.history.copy(
+                    // lastTurn handled in action.finalizeAfter
+                    score = Score(
+                      newPosition.fen.player1Score, // TODO: generating the scores is slow
+                      newPosition.fen.player2Score  //        especially when we have to generate a FEN to get it
+                    ),
+                    captures = situation.history.captures.add(
+                      situation.player,
+                      oldPieceMapSize - newPosition.pieceMap.size + 1
+                    ),
+                    halfMoveClock = situation.history.halfMoveClock + situation.player.fold(0, 1)
+                  )
+                )
+            ),
             autoEndTurn = true
           )
         }

@@ -103,27 +103,29 @@ object Replay {
       piece = piece,
       pos = dest,
       situationBefore = before.situation,
-      after = before.situation.board
-        .copy(
-          pieces = apiPosition.pieceMap,
-          uciMoves = uciMoves,
-          pocketData = apiPosition.pocketData,
-          position = apiPosition.some
-        )
-        .withHistory(
-          before.situation.history.copy(
-            // lastTurn handled in Action.finalizeAfter
-            score = Score(
-              apiPosition.fen.player1Score,
-              apiPosition.fen.player2Score
-            ),
-            captures = before.situation.history.captures.add(
-              before.situation.player,
-              before.situation.board.apiPosition.pieceMap.size - apiPosition.pieceMap.size + 1
-            ),
-            halfMoveClock = before.situation.history.halfMoveClock + before.situation.player.fold(0, 1)
+      genNextBoard = LazyBoardAfter(() =>
+        before.situation.board
+          .copy(
+            pieces = apiPosition.pieceMap,
+            uciMoves = uciMoves,
+            pocketData = apiPosition.pocketData,
+            position = apiPosition.some
           )
-        ),
+          .withHistory(
+            before.situation.history.copy(
+              // lastTurn handled in Action.finalizeAfter
+              score = Score(
+                apiPosition.fen.player1Score,
+                apiPosition.fen.player2Score
+              ),
+              captures = before.situation.history.captures.add(
+                before.situation.player,
+                before.situation.board.apiPosition.pieceMap.size - apiPosition.pieceMap.size + 1
+              ),
+              halfMoveClock = before.situation.history.halfMoveClock + before.situation.player.fold(0, 1)
+            )
+          )
+      ),
       autoEndTurn = endTurn
     )
   }
