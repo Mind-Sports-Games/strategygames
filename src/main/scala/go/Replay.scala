@@ -94,38 +94,14 @@ object Replay {
       before: Game,
       role: Role,
       dest: Pos,
-      endTurn: Boolean,
-      apiPosition: Api.Position,
-      uciMoves: List[String]
+      endTurn: Boolean
   ): Drop = {
     val piece = Piece(before.situation.player, role)
     Drop(
       piece = piece,
       pos = dest,
       situationBefore = before.situation,
-      genNextBoard = LazyBoardAfter(() =>
-        before.situation.board
-          .copy(
-            pieces = apiPosition.pieceMap,
-            uciMoves = uciMoves,
-            pocketData = apiPosition.pocketData,
-            position = apiPosition.some
-          )
-          .withHistory(
-            before.situation.history.copy(
-              // lastTurn handled in Action.finalizeAfter
-              score = Score(
-                apiPosition.fen.player1Score,
-                apiPosition.fen.player2Score
-              ),
-              captures = before.situation.history.captures.add(
-                before.situation.player,
-                before.situation.board.apiPosition.pieceMap.size - apiPosition.pieceMap.size + 1
-              ),
-              halfMoveClock = before.situation.history.halfMoveClock + before.situation.player.fold(0, 1)
-            )
-          )
-      ),
+      nextBoard = LazyBoardAfter(() => before.situation.board.afterDrop(before.situation.player, dest)),
       autoEndTurn = endTurn
     )
   }
@@ -231,7 +207,7 @@ object Replay {
         case (Some(role), Some(dest)) => {
           val uciDrop = s"${role.forsyth}@${dest.key}"
           uciMoves = uciMoves :+ uciDrop
-          val drop    = replayDrop(state, role, dest, endTurn, getApiPosition(uciMoves), uciMoves)
+          val drop    = replayDrop(state, role, dest, endTurn)
           state = state.applyDrop(drop)
           (state, drop)
         }

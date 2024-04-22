@@ -3,12 +3,12 @@ import strategygames.MoveMetrics
 
 import strategygames.go.format.Uci
 
-trait GenNextBoard {
+trait NextBoard {
   val boardAfter: Board
 }
 
-case class ExplicitBoardAfter(boardAfter: Board)    extends GenNextBoard
-case class LazyBoardAfter(boardAfterF: () => Board) extends GenNextBoard {
+case class ExplicitBoardAfter(boardAfter: Board)    extends NextBoard
+case class LazyBoardAfter(boardAfterF: () => Board) extends NextBoard {
   lazy val boardAfter = boardAfterF()
 }
 
@@ -16,12 +16,12 @@ case class Drop(
     piece: Piece,
     pos: Pos,
     situationBefore: Situation,
-    genNextBoard: GenNextBoard,
+    nextBoard: NextBoard,
     autoEndTurn: Boolean,
     metrics: MoveMetrics = MoveMetrics()
 ) extends Action(situationBefore) {
 
-  lazy val after = genNextBoard.boardAfter
+  lazy val after = nextBoard.boardAfter
 
   def situationAfter =
     Situation(finalizeAfter, if (autoEndTurn) !piece.player else piece.player)
