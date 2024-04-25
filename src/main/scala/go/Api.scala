@@ -35,6 +35,7 @@ object Api {
 
     // todo rename moves to actions to be consistent
     def makeMoves(movesList: List[String]): Position
+    private[go] def makeMovesNoLegalCheck(movesList: List[String]): Position
     def makeMovesWithPrevious(
         movesList: List[String],
         previousMoves: List[String]
@@ -98,7 +99,7 @@ object Api {
         movesList: List[String],
         posWithPrevious: Position
     ): Position = {
-      val pos = posWithPrevious.makeMoves(movesList)
+      val pos = posWithPrevious.makeMovesNoLegalCheck(movesList)
       pos.setKomi(komi)
       return pos
     }
@@ -130,7 +131,10 @@ object Api {
       return pos
     }
 
-    def makeMoves(movesList: List[String]): Position = {
+    def makeMovesNoLegalCheck(movesList: List[String]): Position = makeMovesImpl(movesList, false)
+    def makeMoves(movesList: List[String]): Position             = makeMovesImpl(movesList, true)
+
+    def makeMovesImpl(movesList: List[String], checkLegal: Boolean = true): Position = {
       movesList.map { move =>
         {
           val engineMove: Int   = uciToMove(move, variant)
@@ -147,14 +151,15 @@ object Api {
             position.makeMove(engineMove)
             position.makeMove(engineMove)
           } else {
-            // TODO: generating the legalMoves again and checking here is slow, we should
-            //       only ever be using this when we have to.
-            if (position.legalMoves.contains(engineMove))
+            if (!checkLegal) {
               position.makeMove(engineMove)
-            else
+            } else if (position.legalMoves.contains(engineMove)) {
+              position.makeMove(engineMove)
+            } else {
               sys.error(
                 s"Illegal move2: ${engineMove} from list: ${movesList} legalMoves: ${position.legalMoves.map(_.toString()).mkString(", ")}"
               )
+            }
           }
         }
       }

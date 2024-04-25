@@ -1,6 +1,7 @@
 package strategygames.go
 
 import strategygames.Player
+import strategygames.Score
 
 import variant.Variant
 
@@ -52,6 +53,34 @@ case class Board(
   lazy val apiPosition = position match {
     case Some(position) => position
     case None           => Api.positionFromVariantAndMoves(variant, uciMoves)
+  }
+
+  def afterDrop(player: Player, dest: Pos): Board = {
+    val oldPieceMapSize = apiPosition.pieceMap.size
+    val uciMove         =
+      s"${Role.defaultRole.forsyth}@${dest.key}"
+    val newPosition     = apiPosition.makeMovesWithPosUnchecked(List(uciMove), apiPosition.deepCopy)
+    copy(
+      pieces = newPosition.pieceMap,
+      uciMoves = uciMoves :+ uciMove,
+      pocketData = newPosition.pocketData,
+      position = Some(newPosition)
+    )
+      .withHistory(
+        history.copy(
+          // lastTurn handled in action.finalizeAfter
+          score = Score(
+            newPosition.fen.player1Score, // TODO: generating the scores is slow
+            newPosition.fen.player2Score  //        especially when we have to generate a FEN to get it
+          ),
+          captures = history.captures.add(
+            player,
+            oldPieceMapSize - newPosition.pieceMap.size + 1
+          ),
+          halfMoveClock = history.halfMoveClock + player.fold(0, 1)
+        )
+      )
+
   }
 
   override def toString = s"$variant Position after ${history.recentTurnUciString}"
