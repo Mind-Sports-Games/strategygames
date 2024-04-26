@@ -433,9 +433,8 @@ object Pos {
 
   def at(x: Int, y: Int): Option[Pos] =
     File(x) zip Rank(y) map { case (file, rank) =>
-        Pos(file, rank)
+      Pos(file, rank)
     }
-
 
   def fromKey(key: String): Option[Pos] = allKeys get key
 

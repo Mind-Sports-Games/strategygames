@@ -375,7 +375,7 @@ object GameFamily {
     def key               = "go"
     def gameLogic         = GameLogic.Go()
     def hasFishnet        = false
-    def hasAnalysisBoard  = false
+    def hasAnalysisBoard  = true
     def defaultVariant    = Variant.Go(strategygames.go.variant.Go19x19)
     def variants          = Variant.all(GameLogic.Go()).filter(_.gameFamily == this)
     def displayPiece      = "display"

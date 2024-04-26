@@ -6,7 +6,7 @@ import scala.annotation.nowarn
 
 import strategygames.go._
 import strategygames.go.format.{ FEN, Forsyth }
-import strategygames.{ GameFamily, Player, Score }
+import strategygames.{ GameFamily, Player }
 
 case class GoName(val name: String)
 
@@ -23,7 +23,7 @@ abstract class Variant private[variant] (
 
   def baseVariant: Boolean      = false
   def fenVariant: Boolean       = true
-  def hasAnalysisBoard: Boolean = false
+  def hasAnalysisBoard: Boolean = true
   def hasFishnet: Boolean       = false
 
   def p1IsBetterVariant: Boolean = false

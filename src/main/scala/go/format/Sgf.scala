@@ -20,7 +20,7 @@ object Sgf {
   def turnToString(posWithPlayer: (Char, String)): String =
     s";${posWithPlayer._1}[${posWithPlayer._2}]"
 
-  def actionStrsToOutput(actionStrs: ActionStrs, d: Int=0) =
+  def actionStrsToOutput(actionStrs: ActionStrs, d: Int = 0) =
     sgfPosWithPlayer(actionStrsToSGFPos(actionStrs)).map(turnToString).drop(d).mkString("\n")
 
 }
