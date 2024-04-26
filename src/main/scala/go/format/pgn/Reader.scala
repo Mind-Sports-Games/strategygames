@@ -68,9 +68,7 @@ object Reader {
                       replay.state,
                       role,
                       dest,
-                      endTurn,
-                      replay.state.board.apiPosition.makeMoves(List(actionStr)),
-                      replay.state.board.uciMoves :+ actionStr
+                      endTurn
                     )
                   )
                 )

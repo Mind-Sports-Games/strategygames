@@ -6,7 +6,7 @@ import scala.annotation.nowarn
 
 import strategygames.go._
 import strategygames.go.format.{ FEN, Forsyth }
-import strategygames.{ GameFamily, Player, Score }
+import strategygames.{ GameFamily, Player }
 
 case class GoName(val name: String)
 
@@ -23,7 +23,7 @@ abstract class Variant private[variant] (
 
   def baseVariant: Boolean      = false
   def fenVariant: Boolean       = true
-  def hasAnalysisBoard: Boolean = false
+  def hasAnalysisBoard: Boolean = true
   def hasFishnet: Boolean       = false
 
   def p1IsBetterVariant: Boolean = false
@@ -75,11 +75,6 @@ abstract class Variant private[variant] (
   def validMoves(@nowarn situation: Situation) = None // just remove this?
 
   def validDrops(situation: Situation): List[Drop] = {
-    val previousMoves   = situation.board.uciMoves
-    val oldPosition     = situation.board.apiPosition
-    // TODO: Is there a difference between oldPosition and oldApiPosition?
-    val oldApiPosition  = oldPosition.createPosFromPrevious(previousMoves)
-    val oldPieceMapSize = oldPosition.pieceMap.size
 
     val drops = situation.board.apiPosition.legalDrops
       .map { dest =>
@@ -90,35 +85,11 @@ abstract class Variant private[variant] (
       }
       .map {
         case (_, Some(dest)) => {
-          val uciMove     =
-            s"${Role.defaultRole.forsyth}@${dest.key}"
-          val newPosition = oldPosition
-            .makeMovesWithPosUnchecked(List(uciMove), oldApiPosition.deepCopy)
           Drop(
             piece = Piece(situation.player, Role.defaultRole),
             pos = dest,
             situationBefore = situation,
-            after = situation.board
-              .copy(
-                pieces = newPosition.pieceMap, // TODO: Generating the piece map is SLOW
-                uciMoves = situation.board.uciMoves :+ uciMove,
-                pocketData = newPosition.pocketData,
-                position = newPosition.some
-              )
-              .withHistory(
-                situation.history.copy(
-                  // lastTurn handled in action.finalizeAfter
-                  score = Score(
-                    newPosition.fen.player1Score, // TODO: generating the scores is slow
-                    newPosition.fen.player2Score  //        especially when we have to generate a FEN to get it
-                  ),
-                  captures = situation.history.captures.add(
-                    situation.player,
-                    oldPieceMapSize - newPosition.pieceMap.size + 1
-                  ),
-                  halfMoveClock = situation.history.halfMoveClock + situation.player.fold(0, 1)
-                )
-              ),
+            nextBoard = LazyBoardAfter(() => situation.board.afterDrop(situation.player, dest)),
             autoEndTurn = true
           )
         }
