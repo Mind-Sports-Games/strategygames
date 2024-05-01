@@ -19,4 +19,4 @@ class BackgammonTest extends Specification with ValidatedMatchers {
       Uci.readList(actionStrs.mkString(" ")).getOrElse(List())
     )
 
-  }
+}

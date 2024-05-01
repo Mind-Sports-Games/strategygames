@@ -8,6 +8,7 @@ case class Drop(
     pos: Pos,
     situationBefore: Situation,
     after: Board,
+    capture: Option[Pos] = None,
     metrics: MoveMetrics = MoveMetrics()
 ) extends Action(situationBefore, after, metrics) {
 
@@ -17,6 +18,16 @@ case class Drop(
     Situation(finalizeAfter, player)
 
   def finalizeAfter: Board = after updateHistory { h =>
+    h.copy(
+      currentTurn = h.currentTurn :+ toUci,
+      forcedTurn = h.forcedTurnPersists(situationBefore)
+    )
+  }
+
+  def lazySituationAfter =
+    Situation(lazyFinalizeAfter, situationBefore.player)
+
+  def lazyFinalizeAfter: Board = after updateHistory { h =>
     h.copy(
       currentTurn = h.currentTurn :+ toUci
     )

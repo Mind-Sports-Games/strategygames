@@ -14,13 +14,15 @@ case class DiceRoll(
 
   def situationAfter = Situation(finalizeAfter, player)
 
-  def withHistory(h: History) = copy(after = after withHistory h)
-
   def finalizeAfter: Board = after updateHistory { h =>
     h.copy(
       currentTurn = h.currentTurn :+ toUci
     )
   }
+
+  def lazySituationAfter = situationAfter
+
+  def withHistory(h: History) = copy(after = after withHistory h)
 
   def withMetrics(m: MoveMetrics) = copy(metrics = m)
 

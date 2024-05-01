@@ -23,6 +23,7 @@ case class Score(p1: Int = 0, p2: Int = 0) {
 sealed abstract class History(
     val lastTurn: List[Uci] = List.empty,
     val currentTurn: List[Uci] = List.empty,
+    val forcedTurn: Boolean = false,
     val positionHashes: PositionHash = Array.empty,
     val variant: Option[Variant] = None,
     val castles: chess.Castles = chess.Castles.all,
@@ -115,6 +116,7 @@ object History {
       extends History(
         lastTurn = h.lastTurn.map(Uci.wrap),
         currentTurn = h.currentTurn.map(Uci.wrap),
+        forcedTurn = h.forcedTurn,
         positionHashes = h.positionHashes,
         halfMoveClock = h.halfMoveClock,
         score = h.score
@@ -133,6 +135,7 @@ object History {
       lib: GameLogic,
       lastTurn: List[Uci] = List.empty,
       currentTurn: List[Uci] = List.empty,
+      forcedTurn: Boolean = false,
       positionHashes: PositionHash = Array.empty,
       variant: Option[Variant] = None,
       castles: chess.Castles = chess.Castles.all,
@@ -212,6 +215,7 @@ object History {
         backgammon.History(
           lastTurn = lastTurn.map(lm => lm.toBackgammon),
           currentTurn = currentTurn.map(lm => lm.toBackgammon),
+          forcedTurn = forcedTurn,
           positionHashes = positionHashes,
           halfMoveClock = halfMoveClock,
           score = score

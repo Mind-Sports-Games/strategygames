@@ -58,6 +58,8 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def canUndo: Boolean
 
+  def forcedAction: Option[Action]
+
   def history = board.history
 
   val check: Boolean
@@ -140,6 +142,8 @@ object Situation {
     def takebackable = true
 
     def canUndo = false
+
+    def forcedAction: Option[Action] = None
 
     lazy val check: Boolean = s.check
 
@@ -282,6 +286,8 @@ object Situation {
     def takebackable = true
 
     def canUndo = false
+
+    def forcedAction: Option[Action] = None
 
     lazy val check: Boolean = false
 
@@ -435,6 +441,8 @@ object Situation {
 
     def canUndo = false
 
+    def forcedAction: Option[Action] = None
+
     lazy val check: Boolean = s.check
 
     def checkSquare = s.checkSquare.map(Pos.FairySF)
@@ -567,6 +575,8 @@ object Situation {
 
     def canUndo = false
 
+    def forcedAction: Option[Action] = None
+
     lazy val check: Boolean = false
 
     def checkSquare = None
@@ -695,6 +705,8 @@ object Situation {
 
     def canUndo = false
 
+    def forcedAction: Option[Action] = None
+
     lazy val check: Boolean = false
 
     def checkSquare = None
@@ -818,6 +830,8 @@ object Situation {
     def takebackable = s.takebackable
 
     def canUndo = false
+
+    def forcedAction: Option[Action] = None
 
     lazy val check: Boolean = false
 
@@ -953,6 +967,8 @@ object Situation {
 
     def canUndo = s.canUndo
 
+    def forcedAction: Option[Action] = s.forcedAction.map(Action.wrap)
+
     lazy val check: Boolean = false
 
     def checkSquare = None
@@ -988,7 +1004,7 @@ object Situation {
 
     def diceRolls: List[DiceRoll] = s.diceRolls.map(DiceRoll.Backgammon)
 
-    def endTurns: List[EndTurn] = endTurn.fold[List[EndTurn]](_ => List.empty, et => List(et))
+    def endTurns: List[EndTurn] = s.endTurns.map(EndTurn.Backgammon)
 
     def canDrop: Boolean = s.canDrop
 
@@ -1026,7 +1042,7 @@ object Situation {
       s.diceRoll(dice).map(dr => DiceRoll.Backgammon(dr))
 
     def endTurn: Validated[String, EndTurn] =
-      s.endTurn().toEither.map(et => EndTurn.Backgammon(et)).toValidated
+      s.endTurn.toEither.map(et => EndTurn.Backgammon(et)).toValidated
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 

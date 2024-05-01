@@ -177,7 +177,7 @@ object Uci {
 
     def undoable = false
 
-    def apply(situation: Situation) = situation.endTurn()
+    def apply(situation: Situation) = situation.endTurn
   }
 
   object EndTurn {

@@ -127,7 +127,7 @@ case class Game(
   def endTurn(
       metrics: MoveMetrics = MoveMetrics()
   ): Validated[String, (Game, EndTurn)] =
-    situation.endTurn().map(_ withMetrics metrics) map { endTurn =>
+    situation.endTurn.map(_ withMetrics metrics) map { endTurn =>
       applyEndTurn(endTurn) -> endTurn
     }
 

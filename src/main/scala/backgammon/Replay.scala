@@ -113,8 +113,8 @@ object Replay {
         Some(orig),
         Some(dest),
         (orig.index - dest.index).abs
-      )
-      // capture = before.situation.board.piecesOf(!before.situation.player).get(dest).map(_ => dest)
+      ),
+      capture = before.situation.board.piecesOf(!before.situation.player).get(dest).map(_ => dest)
     )
 
   def replayDrop(before: Game, role: Role, dest: Pos): Drop =
@@ -127,7 +127,8 @@ object Replay {
         None,
         Some(dest),
         (Pos.barIndex(before.situation.player) - dest.index).abs
-      )
+      ),
+      capture = before.situation.board.piecesOf(!before.situation.player).get(dest).map(_ => dest)
     )
 
   private def liftDistance(orig: Pos, player: Player): Int =

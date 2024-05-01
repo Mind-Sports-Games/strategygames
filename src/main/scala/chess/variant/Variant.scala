@@ -92,7 +92,7 @@ abstract class Variant private[variant] (
       player: Player,
       to: Pos,
       filter: Piece => Boolean = _ => true,
-      validatingCheck: Boolean = false
+      @nowarn validatingCheck: Boolean = false
   ) =
     pieceThreatened(board, player, to, filter)
 
