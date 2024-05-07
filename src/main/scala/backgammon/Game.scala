@@ -166,6 +166,7 @@ case class Game(
     case u: Uci.Lift     => apply(u)
     case u: Uci.DiceRoll => apply(u)
     case u: Uci.EndTurn  => apply(u)
+    case u               => sys.error(s"Cannot apply uci $u")
   }) map { case (g, a) => g -> a }
 
   private def applyClock(metrics: MoveMetrics, gameActive: Boolean, switchClock: Boolean) =
