@@ -21,6 +21,8 @@ class BackgammonSituationTest extends Specification with ValidatedMatchers {
       situation.canOnlyLift must_== false
       situation.canOnlyRollDice must_== true
       situation.canOnlyEndTurn must_== false
+      situation.canCapture must_== false
+      situation.forcedAction.nonEmpty must_== false
       situation.board.unusedDice.isEmpty must_== true
       situation.board.usedDice.isEmpty must_== true
       situation.board.piecesOnBar(Player.P1) must_== false
@@ -57,6 +59,8 @@ class BackgammonSituationTest extends Specification with ValidatedMatchers {
       g1.situation.canOnlyLift must_== false
       g1.situation.canOnlyRollDice must_== false
       g1.situation.canOnlyEndTurn must_== false
+      g1.situation.canCapture must_== false
+      g1.situation.forcedAction.nonEmpty must_== false
       g1.situation.board.unusedDice.size must_== 2
       g1.situation.board.usedDice.size must_== 0
       g1.situation.board.piecesOnBar(Player.P1) must_== false
@@ -81,6 +85,8 @@ class BackgammonSituationTest extends Specification with ValidatedMatchers {
       g2.situation.canOnlyLift must_== false
       g2.situation.canOnlyRollDice must_== false
       g2.situation.canOnlyEndTurn must_== false
+      g2.situation.canCapture must_== false
+      g2.situation.forcedAction.nonEmpty must_== false
       g2.situation.board.unusedDice.size must_== 1
       g2.situation.board.usedDice.size must_== 1
       g2.situation.board.piecesOnBar(Player.P1) must_== false
@@ -92,7 +98,7 @@ class BackgammonSituationTest extends Specification with ValidatedMatchers {
     }
     val m2       = g2.situation.moves.values.flatten.head
     val g3       = g2.apply(m2)
-    "be valid after initial first move" in {
+    "be valid after initial second move" in {
       g3.situation.canMove must_== false
       g3.situation.canDrop must_== false
       g3.situation.canLift must_== false
@@ -102,6 +108,8 @@ class BackgammonSituationTest extends Specification with ValidatedMatchers {
       g3.situation.canOnlyLift must_== false
       g3.situation.canOnlyRollDice must_== false
       g3.situation.canOnlyEndTurn must_== true
+      g3.situation.canCapture must_== false
+      g3.situation.forcedAction.nonEmpty must_== false
       g3.situation.board.unusedDice.size must_== 0
       g3.situation.board.usedDice.size must_== 2
       g3.situation.board.piecesOnBar(Player.P1) must_== false
@@ -126,6 +134,8 @@ class BackgammonSituationTest extends Specification with ValidatedMatchers {
       g4.situation.canOnlyLift must_== false
       g4.situation.canOnlyRollDice must_== true
       g4.situation.canOnlyEndTurn must_== false
+      g4.situation.canCapture must_== false
+      g4.situation.forcedAction.nonEmpty must_== false
       g4.situation.diceRolls.size must_== 36
       g4.situation.board.unusedDice.size must_== 0
       g4.situation.board.usedDice.size must_== 0

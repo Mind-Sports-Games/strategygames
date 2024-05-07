@@ -110,6 +110,6 @@ case class EndTurn(
   def withMetas(m: Metas) = copy(metas = m)
 
   def endTurn(situation: Situation): Validated[String, strategygames.backgammon.EndTurn] =
-    situation.endTurn()
+    situation.endTurn
 
 }

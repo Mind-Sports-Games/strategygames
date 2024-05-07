@@ -127,7 +127,7 @@ case class Game(
   def endTurn(
       metrics: MoveMetrics = MoveMetrics()
   ): Validated[String, (Game, EndTurn)] =
-    situation.endTurn().map(_ withMetrics metrics) map { endTurn =>
+    situation.endTurn.map(_ withMetrics metrics) map { endTurn =>
       applyEndTurn(endTurn) -> endTurn
     }
 
@@ -166,6 +166,7 @@ case class Game(
     case u: Uci.Lift     => apply(u)
     case u: Uci.DiceRoll => apply(u)
     case u: Uci.EndTurn  => apply(u)
+    case u               => sys.error(s"Cannot apply uci $u")
   }) map { case (g, a) => g -> a }
 
   private def applyClock(metrics: MoveMetrics, gameActive: Boolean, switchClock: Boolean) =

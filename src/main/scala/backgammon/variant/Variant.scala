@@ -130,10 +130,8 @@ abstract class Variant private[variant] (
           orig = orig,
           dest = dest,
           situationBefore = situation,
-          after = boardAfter(situation, Some(orig), Some(dest), die)
-          // this isn't really used for Backgammon and isnt defined for drop
-          // but should work if uncommented
-          // capture = situation.board.piecesOf(!situation.player).get(dest).map(_ => dest)
+          after = boardAfter(situation, Some(orig), Some(dest), die),
+          capture = situation.board.piecesOf(!situation.player).get(dest).map(_ => dest)
         )
       }
 
@@ -142,7 +140,7 @@ abstract class Variant private[variant] (
     situation.board.unusedDice.toSet.size match {
       case 2 => {
         val movesWithLookAhead = baseMoves.map { m =>
-          (m, m.situationAfter.canMove || m.situationAfter.canLift)
+          (m, m.lazySituationAfter.canMove || m.lazySituationAfter.canLift)
         }
         if (movesWithLookAhead.map(_._2).toSet.contains(true))
           movesWithLookAhead.filter(_._2).map(_._1)
@@ -183,7 +181,8 @@ abstract class Variant private[variant] (
           piece = Piece(situation.player, Role.defaultRole),
           pos = dest,
           situationBefore = situation,
-          after = boardAfter(situation, None, Some(dest), die)
+          after = boardAfter(situation, None, Some(dest), die),
+          capture = situation.board.piecesOf(!situation.player).get(dest).map(_ => dest)
         )
       }
 
@@ -192,7 +191,7 @@ abstract class Variant private[variant] (
     situation.board.unusedDice.toSet.size match {
       case 2 => {
         val dropsWithLookAhead = baseDrops.map { d =>
-          (d, d.situationAfter.canMove || d.situationAfter.canLift || d.situationAfter.canDrop)
+          (d, d.lazySituationAfter.canMove || d.lazySituationAfter.canLift || d.lazySituationAfter.canDrop)
         }
         if (dropsWithLookAhead.map(_._2).toSet.contains(true))
           dropsWithLookAhead.filter(_._2).map(_._1)
@@ -243,7 +242,7 @@ abstract class Variant private[variant] (
     situation.board.unusedDice.toSet.size match {
       case 2 => {
         val liftsWithLookAhead = baseLifts.map { l =>
-          (l, l.situationAfter.canMove || l.situationAfter.canLift)
+          (l, l.lazySituationAfter.canMove || l.lazySituationAfter.canLift)
         }
         if (liftsWithLookAhead.map(_._2).toSet.contains(true))
           liftsWithLookAhead.filter(_._2).map(_._1)

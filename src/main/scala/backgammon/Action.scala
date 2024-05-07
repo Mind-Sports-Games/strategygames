@@ -14,6 +14,7 @@ abstract class Action(
   def before = situationBefore.board
 
   def situationAfter: Situation
+  def lazySituationAfter: Situation
   def finalizeAfter: Board
 
   def player: Player

@@ -7,6 +7,7 @@ import format.Uci
 case class History(
     lastTurn: List[Uci] = List.empty,
     currentTurn: List[Uci] = List.empty,
+    forcedTurn: Boolean = false,
     positionHashes: PositionHash = Array.empty,
     score: Score = Score(0, 0),
     // this is tracking fullMove for Backgammon
@@ -27,5 +28,9 @@ case class History(
   // can be used to determine whether this is the first turn or not
   def didRollDiceLastTurn: Boolean =
     lastTurn.filter { case _: Uci.DiceRoll => true; case _ => false }.nonEmpty
+
+  def forcedTurnPersists(situation: Situation) =
+    if (currentTurn.size == 1) situation.forcedAction.nonEmpty
+    else forcedTurn && situation.forcedAction.nonEmpty
 
 }

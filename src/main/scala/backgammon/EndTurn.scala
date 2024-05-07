@@ -20,9 +20,12 @@ case class EndTurn(
     h.copy(
       lastTurn = h.currentTurn :+ toUci,
       currentTurn = List(),
+      forcedTurn = false,
       halfMoveClock = h.halfMoveClock + playerAfter.fold(1, 0)
     )
   }
+
+  def lazySituationAfter = situationAfter
 
   def withMetrics(m: MoveMetrics) = copy(metrics = m)
 
