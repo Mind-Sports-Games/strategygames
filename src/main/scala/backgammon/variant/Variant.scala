@@ -106,6 +106,14 @@ abstract class Variant private[variant] (
       .useDie(die)
   }
 
+  private def actionsContinueTurn(actionsWithLookAhead: Iterable[(Action, Boolean)]): Boolean =
+    actionsWithLookAhead.map(_._2).toSet.contains(true)
+
+  private def actionCanContinueTurn(action: Action): Boolean =
+    action.lazySituationAfter.canMove ||
+      action.lazySituationAfter.canLift ||
+      action.lazySituationAfter.canDrop
+
   private def generateMoves(situation: Situation) =
     situation.board
       .piecesOf(situation.player)
@@ -139,16 +147,19 @@ abstract class Variant private[variant] (
     val baseMoves = generateMoves(situation)
     situation.board.unusedDice.toSet.size match {
       case 2 => {
-        val movesWithLookAhead = baseMoves.map { m =>
-          (m, m.lazySituationAfter.canMove || m.lazySituationAfter.canLift)
-        }
-        if (movesWithLookAhead.map(_._2).toSet.contains(true))
+        val movesWithLookAhead = baseMoves.map { m => (m, actionCanContinueTurn(m)) }
+        if (actionsContinueTurn(movesWithLookAhead) || liftsCanContinueTurn(situation))
           movesWithLookAhead.filter(_._2).map(_._1)
         else baseMoves.filter(_.diceUsed == baseMoves.map(_.diceUsed).max)
       }
       case _ => baseMoves
     }
   }
+
+  private def movesCanContinueTurn(situation: Situation) =
+    canMove(situation) && actionsContinueTurn(generateMoves(situation).map { m =>
+      (m, actionCanContinueTurn(m))
+    })
 
   private def canMove(situation: Situation): Boolean =
     situation.board.unusedDice.nonEmpty && !situation.board.piecesOnBar(situation.player)
@@ -190,10 +201,8 @@ abstract class Variant private[variant] (
     val baseDrops = generateDrops(situation)
     situation.board.unusedDice.toSet.size match {
       case 2 => {
-        val dropsWithLookAhead = baseDrops.map { d =>
-          (d, d.lazySituationAfter.canMove || d.lazySituationAfter.canLift || d.lazySituationAfter.canDrop)
-        }
-        if (dropsWithLookAhead.map(_._2).toSet.contains(true))
+        val dropsWithLookAhead = baseDrops.map { d => (d, actionCanContinueTurn(d)) }
+        if (actionsContinueTurn(dropsWithLookAhead))
           dropsWithLookAhead.filter(_._2).map(_._1)
         else baseDrops.filter(_.diceUsed == baseDrops.map(_.diceUsed).max)
       }
@@ -241,16 +250,19 @@ abstract class Variant private[variant] (
     val baseLifts = generateLifts(situation)
     situation.board.unusedDice.toSet.size match {
       case 2 => {
-        val liftsWithLookAhead = baseLifts.map { l =>
-          (l, l.lazySituationAfter.canMove || l.lazySituationAfter.canLift)
-        }
-        if (liftsWithLookAhead.map(_._2).toSet.contains(true))
+        val liftsWithLookAhead = baseLifts.map { l => (l, actionCanContinueTurn(l)) }
+        if (actionsContinueTurn(liftsWithLookAhead) || movesCanContinueTurn(situation))
           liftsWithLookAhead.filter(_._2).map(_._1)
         else baseLifts.filter(_.diceUsed == baseLifts.map(_.diceUsed).max)
       }
       case _ => baseLifts
     }
   }
+
+  private def liftsCanContinueTurn(situation: Situation) =
+    canLift(situation) && actionsContinueTurn(generateLifts(situation).map { l =>
+      (l, actionCanContinueTurn(l))
+    })
 
   private def canLift(situation: Situation): Boolean =
     situation.board.unusedDice.nonEmpty && situation.board.piecesCanLift(situation.player)
