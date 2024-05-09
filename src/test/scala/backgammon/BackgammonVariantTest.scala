@@ -3567,6 +3567,10 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
       playActionStrs(actionStrs) must beValid.like { g =>
         g.situation.forcedAction.map(_.toUci.uci) must_== Some("b2h2")
       }
+      // Undoing, and playing a non forced action should not result in a forcedTurn
+      playActionStrs(actionStrs ++ List("g2j2", "b2h2")) must beValid.like { g =>
+        g.situation.board.history.forcedTurn must_== false
+      }
     }
 
     "have correct forced action when forcedSingle is true" in {

@@ -18,7 +18,7 @@ case class Lift(
   def finalizeAfter: Board = after updateHistory { h =>
     h.copy(
       currentTurn = h.currentTurn :+ toUci,
-      forcedTurn = h.forcedTurnPersists(situationBefore),
+      forcedTurn = h.forcedTurnPersists(situationBefore, this),
       score = Score(
         h.score.p1 + player.fold(1, 0),
         h.score.p2 + player.fold(0, 1)
