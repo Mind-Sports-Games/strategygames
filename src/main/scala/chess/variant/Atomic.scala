@@ -44,7 +44,8 @@ case object Atomic
       board: Board,
       player: Player,
       to: Pos,
-      filter: Piece => Boolean = _ => true
+      filter: Piece => Boolean = _ => true,
+      validatingCheck: Boolean = false
   ): Boolean = {
     board.pieces exists {
       case (pos, piece)

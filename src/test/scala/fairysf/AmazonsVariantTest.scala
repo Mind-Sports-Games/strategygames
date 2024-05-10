@@ -28,7 +28,7 @@ class AmazonsVariantTest extends FairySFTest {
     "P@h9",
     "j10i10",
     "P@i9" // then after j9j10,P@j9 p2 has no moves
-  )
+  ).map(Vector(_))
 
   "Amazons" should {
 
@@ -37,7 +37,6 @@ class AmazonsVariantTest extends FairySFTest {
       game must beValid.like {
         case game => {
           game.situation.end must beFalse
-          // game.situation.playable(false).pp("playable") must beTrue
           game.situation.status == None must beTrue
           game.situation.winner == None must beTrue
         }
@@ -54,7 +53,7 @@ class AmazonsVariantTest extends FairySFTest {
     }
 
     "P1 win in example game" in {
-      val replay  = Replay.gameMoveWhileValid(amazonsGame, initialFen, variant.Amazons)
+      val replay  = Replay.gameWithUciWhileValid(amazonsGame, initialFen, variant.Amazons)
       val game    = replay._2.last._1
       game.situation.moves.keys.size must_== 4
       game.situation.moves.keys.filter(_ == Pos.J9).size must_== 1

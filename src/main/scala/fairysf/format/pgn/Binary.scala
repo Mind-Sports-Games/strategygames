@@ -1,7 +1,7 @@
 package strategygames.fairysf
 package format.pgn
 
-import strategygames.GameFamily
+import strategygames.{ ActionStrs, GameFamily }
 import strategygames.fairysf.format.Uci
 
 import scala.util.Try
@@ -10,37 +10,62 @@ object Binary {
 
   // writeMove only used in tests for chess/draughts
   // would need to reconsider how we do this when we write gameFamily at the start of the game
-  // def writeMove(gf: GameFamily, m: String)             = Try(Writer.move(gf, m))
-  def writeMoves(gf: GameFamily, ms: Iterable[String]) = Try(Writer.moves(gf, ms))
+  // def writeMove(gf: GameFamily, m: String)             = Try(Writer.ply(gf, m))
+  def writeMoves(gf: GameFamily, ms: Iterable[String]) = Try(Writer.plies(gf, ms))
 
-  def readMoves(bs: List[Byte])          = Try(Reader moves bs)
-  def readMoves(bs: List[Byte], nb: Int) = Try(Reader.moves(bs, nb))
+  def writeActionStrs(gf: GameFamily, as: ActionStrs) = Try(Writer.actionStrs(gf, as))
+
+  def readActionStrs(bs: List[Byte])          = Try(Reader.actionStrs(bs))
+  def readActionStrs(bs: List[Byte], nb: Int) = Try(Reader.actionStrs(bs, nb))
 
   private object MoveType {
     val Move = 0
     val Drop = 1
   }
 
-  val maxPlies = 600
+  private object Delimiter {
+    val str = ""
+    val int = 255
+  }
+
+  // If changing this, consider changing other gamelogics and also lila game maxPlies
+  val maxPlies = 1000
 
   private object Reader {
 
-    def moves(bs: List[Byte]): List[String]          = moves(bs, maxPlies)
-    def moves(bs: List[Byte], nb: Int): List[String] = intMoves(bs map toInt, nb, None)
+    def actionStrs(bs: List[Byte]): ActionStrs          = actionStrs(bs, maxPlies)
+    def actionStrs(bs: List[Byte], nb: Int): ActionStrs = toActionStrs(intPlies(bs map toInt, nb, None))
 
-    def intMoves(bs: List[Int], pliesToGo: Int, gf: Option[GameFamily]): List[String] =
+    def toActionStrs(plies: List[String]): ActionStrs =
+      if (plies.contains(Delimiter.str)) unflatten(plies.drop(1))
+      else
+        plies.headOption match {
+          // handle old Amazons
+          case Some(gameFamilyId) if gameFamilyId == "8" => plies.drop(1).sliding(2, 2).toList
+          case Some(_)                                   => plies.drop(1).map(List(_))
+          case None                                      => List(plies)
+        }
+
+    def unflatten(plies: List[String]): List[List[String]] =
+      if (plies.size == 0) List()
+      else plies.takeWhile(_ != Delimiter.str) :: unflatten(plies.dropWhile(_ != Delimiter.str).drop(1))
+
+    def intPlies(bs: List[Int], pliesToGo: Int, gf: Option[GameFamily]): List[String] =
       (bs, gf) match {
         case (_, _) if pliesToGo <= 0                                                                => Nil
         case (Nil, _)                                                                                => Nil
-        case (b1 :: rest, None)                                                                      => intMoves(rest, pliesToGo, Some(GameFamily(b1)))
+        case (b1 :: rest, None)                                                                      => b1.toString() :: intPlies(rest, pliesToGo, Some(GameFamily(b1)))
+        case (b1 :: rest, gf) if b1 == Delimiter.int                                                 => Delimiter.str :: intPlies(rest, pliesToGo, gf)
         case (b1 :: b2 :: rest, Some(gf)) if headerBit(b1) == MoveType.Move                          =>
-          moveUci(b1, b2) :: intMoves(rest, pliesToGo - 1, Some(gf))
+          moveUci(b1, b2) :: intPlies(rest, pliesToGo - 1, Some(gf))
         case (b1 :: rest, Some(gf)) if headerBit(b1) == MoveType.Drop && gf == GameFamily.Flipello() =>
-          dropUciFlipello(b1) :: intMoves(rest, pliesToGo - 1, Some(gf))
+          dropUciFlipello(b1) :: intPlies(rest, pliesToGo - 1, Some(gf))
         case (b1 :: b2 :: rest, Some(gf)) if headerBit(b1) == MoveType.Drop                          =>
-          dropUciDefault(gf, b1, b2) :: intMoves(rest, pliesToGo - 1, Some(gf))
+          dropUciDefault(gf, b1, b2) :: intPlies(rest, pliesToGo - 1, Some(gf))
         case (x, _)                                                                                  => !!(x map showByte mkString ",")
       }
+
+    // 255 => 11111111 => marker for end of turn
 
     // 1 movetype (move or drop)
     // 7 pos (from)
@@ -82,15 +107,20 @@ object Binary {
 
   private object Writer {
 
-    def move(gf: GameFamily, str: String): List[Byte] =
+    def ply(gf: GameFamily, str: String): List[Byte] =
       (str match {
         case Uci.Move.moveR(src, dst, promotion) => moveUci(src, dst, promotion)
         case Uci.Drop.dropR(piece, dst)          => dropUci(gf, piece, dst)
+        case Delimiter.str                       => List(Delimiter.int)
         case _                                   => sys.error(s"Invalid move to write: ${str}")
       }) map (_.toByte)
 
-    def moves(gf: GameFamily, strs: Iterable[String]): Array[Byte] =
-      (gf.id.toByte :: strs.toList.flatMap(move(gf, _))).to(Array)
+    def plies(gf: GameFamily, strs: Iterable[String]): Array[Byte] =
+      (gf.id.toByte :: strs.toList.flatMap(ply(gf, _))).to(Array)
+
+    def actionStrs(gf: GameFamily, strs: ActionStrs): Array[Byte] =
+      if (strs.size == 0 || strs.map(_.size).max == 1) plies(gf, strs.flatten)
+      else plies(gf, strs.toList.map(_.toList :+ "").flatten)
 
     def moveUci(src: String, dst: String, promotion: String) = List(
       (headerBit(MoveType.Move)) + Pos.fromKey(src).get.index,
@@ -100,10 +130,9 @@ object Binary {
       })) + Pos.fromKey(dst).get.index
     )
 
-    def dropUci(gf: GameFamily, piece: String, dst: String) = gf match {
-      case GameFamily.Flipello() => dropUciFlipello(dst: String)
-      case _                     => dropUciDefault(gf, piece, dst)
-    }
+    def dropUci(gf: GameFamily, piece: String, dst: String) =
+      if (gf == GameFamily.Flipello()) dropUciFlipello(dst)
+      else dropUciDefault(gf, piece, dst)
 
     def dropUciFlipello(dst: String) = List(
       (headerBit(MoveType.Drop)) + Pos.fromKey(dst).get.index

@@ -4,7 +4,7 @@ package format
 import Forsyth.SituationPlus
 import Pos._
 import variant._
-import strategygames.{Pocket, Pockets}
+import strategygames.{ Pocket, Pockets }
 import strategygames.chess.PocketData
 import strategygames.{ Role => StratRole }
 
@@ -87,7 +87,7 @@ class ForsythTest extends ChessTest {
       }
     }
     "import" in {
-      val moves = List(E2 -> E4, C7 -> C5, G1 -> F3, G8 -> H6, A2 -> A3)
+      val moves                                      = List(E2 -> E4, C7 -> C5, G1 -> F3, G8 -> H6, A2 -> A3)
       def compare(ms: List[(Pos, Pos)], fen: String) =
         makeGame.playMoveList(ms) must beValid.like { g =>
           (f << FEN(fen)) must beSome.like { situation =>
@@ -159,32 +159,36 @@ class ForsythTest extends ChessTest {
     "with turns" in {
       "starting" in {
         f <<< FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") must beSome.like { s =>
-          s.turns must_== 0
+          s.turnCount must_== 0
+          s.plies must_== 0
         }
       }
       "p1 to play" in {
         f <<< FEN("r2q1rk1/ppp2pp1/1bnpbn1p/4p3/4P3/1BNPBN1P/PPPQ1PP1/R3K2R w KQ - 7 10") must beSome.like {
-          s => s.turns must_== 18
+          s =>
+            s.turnCount must_== 18
+            s.plies must_== 18
         }
       }
       "p2 to play" in {
         f <<< FEN("r1q2rk1/ppp2ppp/3p1n2/8/2PNp3/P1PnP3/2QP1PPP/R1B2K1R b - - 3 12") must beSome.like { s =>
-          s.turns must_== 23
+          s.turnCount must_== 23
+          s.plies must_== 23
         }
       }
       "last move (for en passant)" in {
         f <<< FEN("2b2rk1/3p2pp/2pNp3/4PpN1/qp1P3P/4P1K1/6P1/1Q6 w - f6 0 36") must beSome.like { s =>
-          s.situation.board.history.lastMove must_== Option(Uci.Move(Pos.F7, Pos.F5))
+          s.situation.board.history.lastTurn must_== List(Uci.Move(Pos.F7, Pos.F5))
         }
       }
       "last move (for en passant in Pretrov's defense)" in {
         f <<< FEN("rnbqkb1r/ppp2ppp/8/3pP3/3Qn3/5N2/PPP2PPP/RNB1KB1R w KQkq d6 0 6") must beSome.like { s =>
-          s.situation.board.history.lastMove must_== Option(Uci.Move(Pos.D7, Pos.D5))
+          s.situation.board.history.lastTurn must_== List(Uci.Move(Pos.D7, Pos.D5))
         }
       }
       "last move (for en passant with p2 to move)" in {
         f <<< FEN("4k3/8/8/8/4pP2/8/2K5/8 b - f3 0 1") must beSome.like { s =>
-          s.situation.board.history.lastMove must_== Option(Uci.Move(Pos.F2, Pos.F4))
+          s.situation.board.history.lastTurn must_== List(Uci.Move(Pos.F2, Pos.F4))
         }
       }
     }
@@ -192,7 +196,7 @@ class ForsythTest extends ChessTest {
       "starting" in {
         f <<< FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") must beSome.like {
           case SituationPlus(
-                Situation(Board(_, History(_, _, Castles(true, true, true, true), _, _, _), _, _), _),
+                Situation(Board(_, History(_, _, _, Castles(true, true, true, true), _, _, _), _, _), _),
                 _
               ) =>
             ok
@@ -201,7 +205,7 @@ class ForsythTest extends ChessTest {
       "p1 to play" in {
         f <<< FEN("r2q1rk1/ppp2pp1/1bnpbn1p/4p3/4P3/1BNPBN1P/PPPQ1PP1/R3K2R w KQ - 7 10") must beSome.like {
           case SituationPlus(
-                Situation(Board(_, History(_, _, Castles(true, true, false, false), _, _, _), _, _), _),
+                Situation(Board(_, History(_, _, _, Castles(true, true, false, false), _, _, _), _, _), _),
                 _
               ) =>
             ok
@@ -210,7 +214,7 @@ class ForsythTest extends ChessTest {
       "p2 to play" in {
         f <<< FEN("r1q2rk1/ppp2ppp/3p1n2/8/2PNp3/P1PnP3/2QP1PPP/R1B2K1R b - - 3 12") must beSome.like {
           case SituationPlus(
-                Situation(Board(_, History(_, _, Castles(false, false, false, false), _, _, _), _, _), _),
+                Situation(Board(_, History(_, _, _, Castles(false, false, false, false), _, _, _), _, _), _),
                 _
               ) =>
             ok
@@ -283,27 +287,26 @@ class ForsythTest extends ChessTest {
   "ignore impossible en passant squares" should {
     "with queen instead of pawn" in {
       f <<< FEN("8/4k3/8/6K1/1pp5/2q5/1P6/8 w - c3 0 1") must beSome.like { s =>
-        s.situation.board.history.lastMove isEmpty
+        s.situation.board.history.lastTurn isEmpty
       }
     }
     "with no pawn" in {
       f <<< FEN("8/8/8/5k2/5p2/8/5K2/8 b - g3 0 1") must beSome.like { s =>
-        s.situation.board.history.lastMove isEmpty
+        s.situation.board.history.lastTurn isEmpty
       }
     }
     "with non empty en passant squares" should {
       f <<< FEN("8/8/8/5k2/5pP1/8/6K1/8 b - g3 0 1") must beSome.like { s =>
-        s.situation.board.history.lastMove isEmpty
+        s.situation.board.history.lastTurn isEmpty
       }
     }
     "with wrong side to move" should {
       f <<< FEN("8/8/8/5k2/5pP1/8/1K6/8 w - g3 0 1") must beSome.like { s =>
-        s.situation.board.history.lastMove isEmpty
+        s.situation.board.history.lastTurn isEmpty
       }
     }
   }
   "crazyhouse" should {
-    import variant.Crazyhouse._
     "read" in {
       "nope" in {
         f <<< FEN("2b2rk1/3p2pp/2pNp3/4PpN1/qp1P3P/4P1K1/6P1/1Q6 w - f6 0 36") must beSome.like { s =>
@@ -318,10 +321,13 @@ class ForsythTest extends ChessTest {
       "pockets" in {
         f <<< FEN("2b2rk1/3p2pp/2pNp3/4PpN1/qp1P3P/4P1K1/6P1/1Q6/pPP w - f6 0 36") must beSome.like { s =>
           s.situation.board.pocketData must beSome.like {
-            case PocketData(Pockets(
-              Pocket(StratRole.ChessRole(Pawn) :: StratRole.ChessRole(Pawn) :: Nil),
-              Pocket(StratRole.ChessRole(Pawn) :: Nil)
-            ), promoted) =>
+            case PocketData(
+                  Pockets(
+                    Pocket(StratRole.ChessRole(Pawn) :: StratRole.ChessRole(Pawn) :: Nil),
+                    Pocket(StratRole.ChessRole(Pawn) :: Nil)
+                  ),
+                  promoted
+                ) =>
               promoted must beEmpty
           }
         }
@@ -330,10 +336,13 @@ class ForsythTest extends ChessTest {
         f <<< FEN("r1bk3r/ppp2ppp/4p3/1B1pP3/1b1N4/2N2qPp/PPP2NbP/4R1KR[PNq] b - - 39 20") must beSome.like {
           s =>
             s.situation.board.pocketData must beSome.like {
-              case PocketData(Pockets(
-                Pocket(StratRole.ChessRole(Pawn) :: StratRole.ChessRole(Knight) :: Nil),
-                Pocket(StratRole.ChessRole(Queen) :: Nil)
-              ), promoted) =>
+              case PocketData(
+                    Pockets(
+                      Pocket(StratRole.ChessRole(Pawn) :: StratRole.ChessRole(Knight) :: Nil),
+                      Pocket(StratRole.ChessRole(Queen) :: Nil)
+                    ),
+                    promoted
+                  ) =>
                 promoted must beEmpty
             }
         }
@@ -389,28 +398,37 @@ class ForsythTest extends ChessTest {
     }
     "read" in {
       "no checks" in {
-        f.<<<@(ThreeCheck, FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3")) must beSome.like { s =>
-          s.situation.board.history.checkCount.p1 must_== 0
-          s.situation.board.history.checkCount.p2 must_== 0
-        }
+        f.<<<@(ThreeCheck, FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3")) must beSome
+          .like { s =>
+            s.situation.board.history.checkCount.p1 must_== 0
+            s.situation.board.history.checkCount.p2 must_== 0
+          }
       }
       "explicitely no checks" in {
-        f.<<<@(ThreeCheck, FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3 +0+0")) must beSome.like { s =>
+        f.<<<@(
+          ThreeCheck,
+          FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3 +0+0")
+        ) must beSome.like { s =>
           s.situation.board.history.checkCount.p1 must_== 0
           s.situation.board.history.checkCount.p2 must_== 0
         }
       }
       "checks" in {
-        f.<<<@(ThreeCheck, FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3 +1+2")) must beSome.like { s =>
+        f.<<<@(
+          ThreeCheck,
+          FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3 +1+2")
+        ) must beSome.like { s =>
           s.situation.board.history.checkCount.p1 must_== 2
           s.situation.board.history.checkCount.p2 must_== 1
         }
       }
       "winboard checks" in {
-        f.<<<@(ThreeCheck, FEN("r1bqkbnr/pppp1Qpp/2n5/4p3/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 2+3 0 3")) must beSome.like {
-          s =>
-            s.situation.board.history.checkCount.p1 must_== 0
-            s.situation.board.history.checkCount.p2 must_== 1
+        f.<<<@(
+          ThreeCheck,
+          FEN("r1bqkbnr/pppp1Qpp/2n5/4p3/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 2+3 0 3")
+        ) must beSome.like { s =>
+          s.situation.board.history.checkCount.p1 must_== 0
+          s.situation.board.history.checkCount.p2 must_== 1
         }
       }
     }
@@ -433,28 +451,37 @@ class ForsythTest extends ChessTest {
     }
     "read" in {
       "no checks" in {
-        f.<<<@(FiveCheck,FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3")) must beSome.like { s =>
-          s.situation.board.history.checkCount.p1 must_== 0
-          s.situation.board.history.checkCount.p2 must_== 0
-        }
+        f.<<<@(FiveCheck, FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3")) must beSome
+          .like { s =>
+            s.situation.board.history.checkCount.p1 must_== 0
+            s.situation.board.history.checkCount.p2 must_== 0
+          }
       }
       "explicitely no checks" in {
-        f.<<<@(FiveCheck,FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3 +0+0")) must beSome.like { s =>
+        f.<<<@(
+          FiveCheck,
+          FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3 +0+0")
+        ) must beSome.like { s =>
           s.situation.board.history.checkCount.p1 must_== 0
           s.situation.board.history.checkCount.p2 must_== 0
         }
       }
       "checks" in {
-        f.<<<@(FiveCheck,FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3 +1+2")) must beSome.like { s =>
+        f.<<<@(
+          FiveCheck,
+          FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3 +1+2")
+        ) must beSome.like { s =>
           s.situation.board.history.checkCount.p1 must_== 2
           s.situation.board.history.checkCount.p2 must_== 1
         }
       }
       "winboard checks" in {
-        f.<<<@(FiveCheck,FEN("r1bqkbnr/pppp1Qpp/2n5/4p3/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 4+5 0 3")) must beSome.like {
-          s =>
-            s.situation.board.history.checkCount.p1 must_== 0
-            s.situation.board.history.checkCount.p2 must_== 1
+        f.<<<@(
+          FiveCheck,
+          FEN("r1bqkbnr/pppp1Qpp/2n5/4p3/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 4+5 0 3")
+        ) must beSome.like { s =>
+          s.situation.board.history.checkCount.p1 must_== 0
+          s.situation.board.history.checkCount.p2 must_== 1
         }
       }
     }

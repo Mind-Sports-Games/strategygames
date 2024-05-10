@@ -26,7 +26,6 @@ case object Amazons
   override def dropsVariant          = true
   override def canOfferDraw          = false
   override val switchPlayerAfterMove = false
-  override val plysPerTurn           = 2
 
   override def hasAnalysisBoard: Boolean = false
   override def hasFishnet: Boolean       = true
@@ -69,7 +68,7 @@ case object Amazons
     )
 
   override def validMoves(situation: Situation): Map[Pos, List[Move]] =
-    situation.board.history.lastMove match {
+    situation.board.history.lastAction match {
       case Some(_: Uci.Move) => Map.empty
       case _                 =>
         situation.board.apiPosition.legalMoves
@@ -98,6 +97,7 @@ case object Amazons
                   after = situation.board.copy(
                     pieces = situation.board.pieces - orig + ((dest, piece))
                   ),
+                  autoEndTurn = false, // always false for Amazons as we follow a Move with a Drop
                   capture = None,
                   promotion = None,
                   castle = None,
@@ -114,12 +114,15 @@ case object Amazons
   private val defaultDropRole: Role = AmazonArrow
 
   override def validDrops(situation: Situation): List[Drop] =
-    situation.board.history.lastMove match {
+    situation.board.history.lastAction match {
       case Some(lastMove: Uci.Move) =>
         situation.board.apiPosition.legalMoves
           .filter(_.startsWith(s"${lastMove.uci},"))
           .map(_.split(",").reverse.headOption)
-          .map { case Some(Uci.Move.moveR(_, dest, _)) => Pos.fromKey(dest) }
+          .flatMap {
+            case Some(Uci.Move.moveR(_, dest, _)) => Some(Pos.fromKey(dest))
+            case _                                => None
+          }
           .map {
             case Some(dest) => {
               // val uciDrop     = s"${defaultDropRole.forsyth}@${dest.key}"
@@ -134,7 +137,8 @@ case object Amazons
                   pieces = situation.board.pieces + ((dest, piece)),
                   uciMoves = situation.board.uciMoves :+ uciMove,
                   position = newPosition.some
-                )
+                ),
+                autoEndTurn = true
               )
             }
             case dest       => sys.error(s"Invalid position from uci: ${defaultDropRole}@${dest}")

@@ -148,6 +148,7 @@ object Pos {
   val G8 = new Pos(62)
   val H8 = new Pos(63)
 
+  // if adding new Pos check for use of Pos.all
   val all: List[Pos] = (0 to 63).map(new Pos(_)).toList
 
   val p1Backrank = (A1 <-> H1).toList

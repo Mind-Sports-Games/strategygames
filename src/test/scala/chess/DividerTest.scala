@@ -5,7 +5,7 @@ class DividerTest extends ChessTest {
   def makeReplay(moves: String) =
     format.pgn.Reader.full(moves).toOption.get match {
       case format.pgn.Reader.Result.Complete(replay) =>
-        replay.chronoMoves.map(action =>
+        replay.chronoPlies.map(action =>
           action match {
             case m: Move => m.before
             case d: Drop => d.before

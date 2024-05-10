@@ -77,6 +77,16 @@ object Piece {
 
   }
 
+  final case class Backgammon(p: backgammon.Piece)
+      extends Piece(
+        p.player,
+        Role.BackgammonRole(p.role)
+      ) {
+
+    def forsyth: Char = p.forsyth
+
+  }
+
   def apply(lib: GameLogic, player: Player, role: Role): Piece = (lib, role) match {
     case (GameLogic.Draughts(), Role.DraughtsRole(role))         => Draughts(draughts.Piece(player, role))
     case (GameLogic.Chess(), Role.ChessRole(role))               => Chess(chess.Piece(player, role))
@@ -85,6 +95,7 @@ object Piece {
     case (GameLogic.Togyzkumalak(), Role.TogyzkumalakRole(role)) =>
       Togyzkumalak(togyzkumalak.Piece(player, role))
     case (GameLogic.Go(), Role.GoRole(role))                     => Go(go.Piece(player, role))
+    case (GameLogic.Backgammon(), Role.BackgammonRole(role))     => Backgammon(backgammon.Piece(player, role))
     case _                                                       => sys.error("Mismatched gamelogic types 2")
   }
 
@@ -95,34 +106,49 @@ object Piece {
     case (GameLogic.Samurai())      => sys.error("cannot get piece from Char for samurai anymore")
     case (GameLogic.Togyzkumalak()) => sys.error("cannot get piece from Char for togyzkumalak anymore")
     case (GameLogic.Go())           => sys.error("cannot get piece from Char for go anymore")
+    case (GameLogic.Backgammon())   => sys.error("cannot get piece from Char for backgammon anymore")
   }
 
-  def chessPieceMap(pieceMap: PieceMap): chess.PieceMap = pieceMap.map {
-    case (Pos.Chess(pos), (Chess(piece), _)) => (pos, piece)
+  def chessPieceMap(pieceMap: PieceMap): chess.PieceMap = pieceMap.flatMap {
+    case (Pos.Chess(pos), (Chess(piece), _)) => Some((pos, piece))
+    case _                                   => None
   }
 
-  def draughtsPieceMap(pieceMap: PieceMap): draughts.PieceMap = pieceMap.map {
-    case (Pos.Draughts(pos), (Draughts(piece), _)) => (pos, piece)
+  def draughtsPieceMap(pieceMap: PieceMap): draughts.PieceMap = pieceMap.flatMap {
+    case (Pos.Draughts(pos), (Draughts(piece), _)) => Some((pos, piece))
+    case _                                         => None
   }
 
-  def fairySFPieceMap(pieceMap: PieceMap): fairysf.PieceMap = pieceMap.map {
-    case (Pos.FairySF(pos), (FairySF(piece), _)) => (pos, piece)
+  def fairySFPieceMap(pieceMap: PieceMap): fairysf.PieceMap = pieceMap.flatMap {
+    case (Pos.FairySF(pos), (FairySF(piece), _)) => Some((pos, piece))
+    case _                                       => None
   }
 
-  def samuraiPieceMap(pieceMap: PieceMap): samurai.PieceMap = pieceMap.map {
-    case (Pos.Samurai(pos), (Samurai(piece), count)) => (pos, (piece, count))
+  def samuraiPieceMap(pieceMap: PieceMap): samurai.PieceMap = pieceMap.flatMap {
+    case (Pos.Samurai(pos), (Samurai(piece), count)) => Some((pos, (piece, count)))
+    case _                                           => None
   }
 
-  def togyzkumalakPieceMap(pieceMap: PieceMap): togyzkumalak.PieceMap = pieceMap.map {
-    case (Pos.Togyzkumalak(pos), (Togyzkumalak(piece), count)) => (pos, (piece, count))
+  def togyzkumalakPieceMap(pieceMap: PieceMap): togyzkumalak.PieceMap = pieceMap.flatMap {
+    case (Pos.Togyzkumalak(pos), (Togyzkumalak(piece), count)) => Some((pos, (piece, count)))
+    case _                                                     => None
   }
 
-  def goPieceMap(pieceMap: PieceMap): go.PieceMap = pieceMap.map { case (Pos.Go(pos), (Go(piece), _)) =>
-    (pos, piece)
+  def goPieceMap(pieceMap: PieceMap): go.PieceMap = pieceMap.flatMap {
+    case (Pos.Go(pos), (Go(piece), _)) =>
+      Some((pos, piece))
+    case _                             => None
   }
 
-  def pieceMapForChess(pieces: strategygames.chess.PieceMap): PieceMap = pieces.map { case (pos, piece) =>
-    (Pos.Chess(pos), (Piece.Chess(piece), 1))
+  def backgammonPieceMap(pieceMap: PieceMap): backgammon.PieceMap = pieceMap.flatMap {
+    case (Pos.Backgammon(pos), (Backgammon(piece), count)) => Some((pos, (piece, count)))
+    case _                                                 => None
+  }
+
+  def pieceMapForChess(pieces: strategygames.chess.PieceMap): PieceMap = pieces.flatMap {
+    case (pos, piece) =>
+      Some((Pos.Chess(pos), (Piece.Chess(piece), 1)))
+    case _            => None
   }
 
 }

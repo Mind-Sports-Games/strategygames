@@ -2,7 +2,7 @@ package strategygames.chess
 
 import cats.syntax.option._
 
-import strategygames.{ P2, Player, Status, P1 }
+import strategygames.{ P2, Status }
 import strategygames.chess.variant.Atomic
 import strategygames.chess.format.FEN
 
@@ -340,7 +340,7 @@ class AtomicVariantTest extends ChessTest {
     "End move regression" in {
       import Pos._
       "from init" in {
-        val game = fenToGame(format.Forsyth.initial, Atomic)
+        val game        = fenToGame(format.Forsyth.initial, Atomic)
         val successGame = game flatMap (_.playMoves(
           E2 -> E4,
           D7 -> D5,
@@ -406,7 +406,7 @@ class AtomicVariantTest extends ChessTest {
     "Not draw inappropriately on bishops vs bishops (where an explosion taking out the king is possible)" in {
       val position = FEN("B2BBBB1/7P/8/8/8/8/3kb3/4K3 w - - 1 53")
       val game     = fenToGame(position, Atomic)
-      val newGame = game flatMap (_.playMove(
+      val newGame  = game flatMap (_.playMove(
         Pos.H7,
         Pos.H8,
         Bishop.some
@@ -420,7 +420,7 @@ class AtomicVariantTest extends ChessTest {
     "Not draw inappropriately on two bishops (of both square players)" in {
       val position = FEN("8/5k2/8/8/8/8/4pK2/5b2 b - - 1 44")
       val game     = fenToGame(position, Atomic)
-      val newGame = game flatMap (_.playMove(
+      val newGame  = game flatMap (_.playMove(
         Pos.E2,
         Pos.E1,
         Bishop.some
@@ -434,7 +434,7 @@ class AtomicVariantTest extends ChessTest {
     "Not draw inappropriately on bishop and knight" in {
       val position = FEN("8/5k2/8/8/8/8/4pK2/5b2 b - - 1 44")
       val game     = fenToGame(position, Atomic)
-      val newGame = game flatMap (_.playMove(
+      val newGame  = game flatMap (_.playMove(
         Pos.E2,
         Pos.E1,
         Knight.some
@@ -448,7 +448,7 @@ class AtomicVariantTest extends ChessTest {
     "Not draw inappropriately on three bishops (of both square players)" in {
       val position = FEN("8/5k2/8/8/8/8/4pKB1/5B2 b - - 1 44")
       val game     = fenToGame(position, Atomic)
-      val newGame = game flatMap (_.playMove(
+      val newGame  = game flatMap (_.playMove(
         Pos.E2,
         Pos.E1,
         Bishop.some
@@ -462,7 +462,7 @@ class AtomicVariantTest extends ChessTest {
     "Not draw inappropriately on three bishops (of both square players)" in {
       val position = FEN("8/5k2/8/8/8/8/4pKB1/6B1 b - - 1 44")
       val game     = fenToGame(position, Atomic)
-      val newGame = game flatMap (_.playMove(
+      val newGame  = game flatMap (_.playMove(
         Pos.E2,
         Pos.E1,
         Bishop.some
@@ -476,7 +476,7 @@ class AtomicVariantTest extends ChessTest {
     "Not draw inappropriately on two bishops and a knight" in {
       val position = FEN("8/5k2/8/8/8/8/4pKB1/6N1 b - - 1 44")
       val game     = fenToGame(position, Atomic)
-      val newGame = game flatMap (_.playMove(
+      val newGame  = game flatMap (_.playMove(
         Pos.E2,
         Pos.E1,
         Bishop.some
@@ -490,7 +490,7 @@ class AtomicVariantTest extends ChessTest {
     "Not draw inappropriately on two bishops and a knight" in {
       val position = FEN("8/5k2/8/8/8/8/4pKN1/6B1 b - - 1 44")
       val game     = fenToGame(position, Atomic)
-      val newGame = game flatMap (_.playMove(
+      val newGame  = game flatMap (_.playMove(
         Pos.E2,
         Pos.E1,
         Bishop.some
@@ -504,7 +504,7 @@ class AtomicVariantTest extends ChessTest {
     "Not draw inappropriately on two knights and a bishop" in {
       val position = FEN("8/5k2/8/8/8/8/4pKN1/6N1 b - - 1 44")
       val game     = fenToGame(position, Atomic)
-      val newGame = game flatMap (_.playMove(
+      val newGame  = game flatMap (_.playMove(
         Pos.E2,
         Pos.E1,
         Bishop.some
@@ -518,7 +518,7 @@ class AtomicVariantTest extends ChessTest {
     "Not draw inappropriately on three knights (of two players)" in {
       val position = FEN("8/5k2/8/8/8/8/4pKN1/6N1 b - - 1 44")
       val game     = fenToGame(position, Atomic)
-      val newGame = game flatMap (_.playMove(
+      val newGame  = game flatMap (_.playMove(
         Pos.E2,
         Pos.E1,
         Knight.some
@@ -532,7 +532,7 @@ class AtomicVariantTest extends ChessTest {
     "Not draw inappropriately on three knights (of two players)" in {
       val position = FEN("8/5k2/8/8/8/8/4pKN1/6n1 b - - 1 44")
       val game     = fenToGame(position, Atomic)
-      val newGame = game flatMap (_.playMove(
+      val newGame  = game flatMap (_.playMove(
         Pos.E2,
         Pos.E1,
         Knight.some
@@ -546,7 +546,7 @@ class AtomicVariantTest extends ChessTest {
     "Not draw inappropriately on three knights (of the same player)" in {
       val position = FEN("8/5k2/8/8/8/8/4pKn1/6n1 b - - 1 44")
       val game     = fenToGame(position, Atomic)
-      val newGame = game flatMap (_.playMove(
+      val newGame  = game flatMap (_.playMove(
         Pos.E2,
         Pos.E1,
         Knight.some

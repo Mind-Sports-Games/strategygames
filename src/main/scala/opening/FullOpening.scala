@@ -9,6 +9,9 @@ abstract class FullOpening(
 
   override def toString: String
 
+  // TODO when wanting to use multiaction variants in openings we will
+  // need to reconsider whether openings are done by plies or turns
+  // and then update other code (including lila-ws)
   def atPly(ply: Int) = FullOpening.AtPly(this, ply)
 
 }
@@ -72,6 +75,17 @@ object FullOpening {
   }
 
   final case class Go(f: strategygames.go.opening.FullOpening)
+      extends FullOpening(
+        f.eco,
+        f.name,
+        f.fen
+      ) {
+
+    override def toString = f.toString()
+
+  }
+
+  final case class Backgammon(f: strategygames.backgammon.opening.FullOpening)
       extends FullOpening(
         f.eco,
         f.name,

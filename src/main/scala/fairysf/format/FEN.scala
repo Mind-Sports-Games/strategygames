@@ -8,8 +8,9 @@ final case class FEN(value: String) extends AnyVal {
 
   override def toString = value
 
-  def fullMove: Option[Int] = value.split(' ').lift(5).flatMap(_.toIntOption)
+  def fullMove: Option[Int] = value.split(' ').lift(FEN.fullMoveIndex).flatMap(_.toIntOption)
 
+  // this only works for Othello because the fen uses w to mean p1 and b to mean p2
   def player: Option[Player] =
     value.split(' ').lift(1) flatMap (_.headOption) flatMap Player.apply
 
@@ -31,4 +32,7 @@ object FEN {
     case _                    =>
       fen
   }
+
+  def fullMoveIndex: Int = 5
+
 }

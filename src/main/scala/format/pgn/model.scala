@@ -1,36 +1,35 @@
-package strategygames.fairysf
+package strategygames
 package format
 package pgn
 
 import cats.implicits._
 
-import strategygames.Player
-import strategygames.format.pgn.{ Glyphs, Tag, Tags }
-
 case class Pgn(
     tags: Tags,
-    turns: List[Turn],
+    fullTurns: List[FullTurn],
     initial: Initial = Initial.empty
 ) {
 
-  def updateTurn(fullMove: Int, f: Turn => Turn) = {
-    val index = fullMove - 1
-    (turns lift index).fold(this) { turn =>
-      copy(turns = turns.updated(index, f(turn)))
+  def updateFullTurn(fullTurnNumber: Int, f: FullTurn => FullTurn) = {
+    val index = fullTurnNumber - 1
+    (fullTurns lift index).fold(this) { fullTurn =>
+      copy(fullTurns = fullTurns.updated(index, f(fullTurn)))
     }
   }
-  def updatePly(ply: Int, f: Move => Move)       = {
-    val fullMove = (ply + 1) / 2
-    val player   = Player.fromPly(ply - 1, tags.fairysfVariant.map(_.plysPerTurn).getOrElse(1))
-    updateTurn(fullMove, _.update(player, f))
+
+  def updateTurnCount(turnCount: Int, f: Turn => Turn) = {
+    val fullTurnNumber = (turnCount + 1) / 2
+    val player         = Player.fromTurnCount(turnCount - 1)
+    updateFullTurn(fullTurnNumber, _.update(player, f))
   }
-  def updateLastPly(f: Move => Move)             = updatePly(nbPlies, f)
 
-  def nbPlies = turns.foldLeft(0)(_ + _.count)
+  def updateLastTurnCount(f: Turn => Turn) = updateTurnCount(nbTurns, f)
 
-  def moves =
-    turns.flatMap { t =>
-      List(t.p1, t.p2).flatten
+  def nbTurns = fullTurns.foldLeft(0)(_ + _.count)
+
+  def turns =
+    fullTurns.flatMap { fullTurn =>
+      List(fullTurn.p1, fullTurn.p2).flatten
     }
 
   def withEvent(title: String) =
@@ -39,15 +38,15 @@ case class Pgn(
     )
 
   def render: String = {
-    val initStr   =
+    val initStr     =
       if (initial.comments.nonEmpty) initial.comments.mkString("{ ", " } { ", " }\n")
       else ""
-    val turnStr   = turns mkString " "
-    val resultStr = tags(_.Result) | ""
-    val endStr    =
-      if (turnStr.nonEmpty) s" $resultStr"
+    val fullTurnStr = fullTurns mkString " "
+    val resultStr   = tags(_.Result) | ""
+    val endStr      =
+      if (fullTurnStr.nonEmpty) s" $resultStr"
       else resultStr
-    s"$tags\n\n$initStr$turnStr$endStr"
+    s"$tags\n\n$initStr$fullTurnStr$endStr"
   }.trim
 
   override def toString = render
@@ -59,72 +58,71 @@ object Initial {
   val empty = Initial(Nil)
 }
 
-case class Turn(
-    number: Int,
-    p1: Option[Move],
-    p2: Option[Move]
+case class FullTurn(
+    fullTurnNumber: Int,
+    p1: Option[Turn],
+    p2: Option[Turn]
 ) {
 
-  def update(player: Player, f: Move => Move) =
+  def update(player: Player, f: Turn => Turn) =
     player.fold(
       copy(p1 = p1 map f),
       copy(p2 = p2 map f)
     )
 
-  def updateLast(f: Move => Move) = {
+  def updateLast(f: Turn => Turn) = {
     p2.map(m => copy(p2 = f(m).some)) orElse
       p1.map(m => copy(p1 = f(m).some))
   } | this
 
   def isEmpty = p1.isEmpty && p2.isEmpty
 
-  // TODO This might be wrong for Amazons
-  def plyOf(player: Player) = number * 2 - player.fold(1, 0)
+  def turnOf(player: Player) = fullTurnNumber * 2 - player.fold(1, 0)
 
   def count = List(p1, p2) count (_.isDefined)
 
   override def toString = {
     val text = (p1, p2) match {
-      case (Some(w), Some(b)) if w.isLong => s" $w $number... $b"
+      case (Some(w), Some(b)) if w.isLong => s" $w $fullTurnNumber... $b"
       case (Some(w), Some(b))             => s" $w $b"
       case (Some(w), None)                => s" $w"
       case (None, Some(b))                => s".. $b"
       case _                              => ""
     }
-    s"$number.$text"
+    s"$fullTurnNumber.$text"
   }
 }
 
-object Turn {
+object FullTurn {
 
-  // TODO This might be wrong for Amazons
-  def fromMoves(moves: List[Move], ply: Int): List[Turn] = {
-    moves.foldLeft((List[Turn](), ply)) {
-      case ((turns, p), move) if p % 2 == 1 =>
-        (Turn((p + 1) / 2, move.some, none) :: turns) -> (p + 1)
-      case ((Nil, p), move) =>
-        (Turn((p + 1) / 2, none, move.some) :: Nil) -> (p + 1)
-      case ((t :: tt, p), move) =>
-        (t.copy(p2 = move.some) :: tt) -> (p + 1)
+  def fromTurns(turns: List[Turn], turnCount: Int): List[FullTurn] = {
+    turns.foldLeft((List[FullTurn](), turnCount)) {
+      case ((fullTurns, t), turn) if t % 2 == 1 =>
+        (FullTurn((t + 1) / 2, turn.some, none) :: fullTurns) -> (t + 1)
+      case ((Nil, t), turn) =>
+        (FullTurn((t + 1) / 2, none, turn.some) :: Nil) -> (t + 1)
+      case ((ft :: tt, t), turn) =>
+        (ft.copy(p2 = turn.some) :: tt) -> (t + 1)
     }
   }._1.reverse
 }
 
-case class Move(
+//san should contain a combination of actions for a single turn
+case class Turn(
     san: String,
     comments: List[String] = Nil,
     glyphs: Glyphs = Glyphs.empty,
     opening: Option[String] = None,
     result: Option[String] = None,
-    variations: List[List[Turn]] = Nil,
-    // time left for the user who made the move, after he made it
+    variations: List[List[FullTurn]] = Nil,
+    // time left for the user who made the turn, after he made it
     secondsLeft: Option[Int] = None
 ) {
 
   def isLong = comments.nonEmpty || variations.nonEmpty || secondsLeft.isDefined
 
   private def clockString: Option[String] =
-    secondsLeft.map(seconds => "[%clk " + Move.formatPgnSeconds(seconds) + "]")
+    secondsLeft.map(seconds => "[%clk " + Turn.formatPgnSeconds(seconds) + "]")
 
   override def toString = {
     val glyphStr        = glyphs.toList.map {
@@ -134,7 +132,7 @@ case class Move(
     val commentsOrTime  =
       if (comments.nonEmpty || secondsLeft.isDefined || opening.isDefined || result.isDefined)
         List(clockString, opening, result).flatten
-          .:::(comments map Move.noDoubleLineBreak)
+          .:::(comments map Turn.noDoubleLineBreak)
           .map { text =>
             s" { $text }"
           }
@@ -147,7 +145,7 @@ case class Move(
   }
 }
 
-object Move {
+object Turn {
 
   private val noDoubleLineBreakRegex = "(\r?\n){2,}".r
 

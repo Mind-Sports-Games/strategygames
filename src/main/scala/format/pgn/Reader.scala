@@ -8,6 +8,7 @@ import strategygames.fairysf.format.pgn.{ Reader => FairySFReader }
 import strategygames.samurai.format.pgn.{ Reader => SamuraiReader }
 import strategygames.togyzkumalak.format.pgn.{ Reader => TogyzkumalakReader }
 import strategygames.go.format.pgn.{ Reader => GoReader }
+import strategygames.backgammon.format.pgn.{ Reader => BackgammonReader }
 
 import cats.data.Validated
 
@@ -54,6 +55,12 @@ object Reader {
     case class GoIncomplete(replay: go.Replay, failure: String)                     extends Result {
       def valid = Validated.invalid(failure)
     }
+    case class BackgammonComplete(replay: backgammon.Replay)                        extends Result {
+      def valid = Validated.valid(Replay.Backgammon(replay))
+    }
+    case class BackgammonIncomplete(replay: backgammon.Replay, failure: String)     extends Result {
+      def valid = Validated.invalid(failure)
+    }
 
     def wrap(result: ChessReader.Result) = result match {
       case ChessReader.Result.Complete(replay)            => Result.ChessComplete(replay)
@@ -85,6 +92,13 @@ object Reader {
       case GoReader.Result.Complete(replay)            => Result.GoComplete(replay)
       case GoReader.Result.Incomplete(replay, failure) => Result.GoIncomplete(replay, failure)
     }
+
+    def wrap(result: BackgammonReader.Result) = result match {
+      case BackgammonReader.Result.Complete(replay)            => Result.BackgammonComplete(replay)
+      case BackgammonReader.Result.Incomplete(replay, failure) =>
+        Result.BackgammonIncomplete(replay, failure)
+    }
+
   }
 
   def fullWithSans(
@@ -101,22 +115,25 @@ object Reader {
       case GameLogic.Samurai()      => SamuraiReader.fullWithSans(pgn, op, tags).map(Result.wrap)
       case GameLogic.Togyzkumalak() => TogyzkumalakReader.fullWithSans(pgn, op, tags).map(Result.wrap)
       case GameLogic.Go()           => GoReader.fullWithSans(pgn, op, tags).map(Result.wrap)
+      case GameLogic.Backgammon()   => BackgammonReader.fullWithSans(pgn, op, tags).map(Result.wrap)
     }
 
-  def movesWithSans(
+  // TODO Merge the following two functions by refactoring Sans and integrating to other libs
+  def replayResultFromActionStrsUsingSan(
       lib: GameLogic,
-      moveStrs: Iterable[String],
+      actionStrs: ActionStrs,
       op: Sans => Sans,
       tags: Tags,
       iteratedCapts: Boolean = false
   ): Validated[String, Result] =
     lib match {
       case GameLogic.Chess()        =>
-        ChessReader.movesWithSans(moveStrs, op, tags).map(Result.wrap)
+        ChessReader.replayResultFromActionStrsUsingSan(actionStrs, op, tags).map(Result.wrap)
       case GameLogic.Draughts()     =>
-        DraughtsReader.movesWithSans(moveStrs, op, tags, iteratedCapts).map(Result.wrap)
+        DraughtsReader
+          .replayResultFromActionStrsUsingSan(actionStrs, op, tags, iteratedCapts)
+          .map(Result.wrap)
       case GameLogic.FairySF()      =>
-        // FairySFReader.movesWithSans(moveStrs, op, tags).map(Result.wrap)
         sys.error("Sans not implemented for fairysf")
       case GameLogic.Samurai()      =>
         sys.error("Sans not implemented for samurai")
@@ -124,25 +141,35 @@ object Reader {
         sys.error("Sans not implemented for togyzkumalak")
       case GameLogic.Go()           =>
         sys.error("Sans not implemented for go")
+      case GameLogic.Backgammon()   =>
+        sys.error("Sans not implemented for backgammon")
     }
 
-  def movesWithPgns(
+  def replayResultFromActionStrs(
       lib: GameLogic,
-      moveStrs: Iterable[String],
-      op: Iterable[String] => Iterable[String],
+      actionStrs: ActionStrs,
+      op: ActionStrs => ActionStrs,
       tags: Tags
   ): Validated[String, Result] =
     lib match {
-      case GameLogic.Chess()        => sys.error("movesWithPgns not implemented for chess")
-      case GameLogic.Draughts()     => sys.error("movesWithPgns not implemented for draughts")
+      case GameLogic.Chess()        =>
+        sys.error(
+          "replayResultFromActionStrs not implemented for chess. Use replayResultFromActionStrsUsingSan"
+        )
+      case GameLogic.Draughts()     =>
+        sys.error(
+          "replayResultFromActionStrs not implemented for draughts. Use replayResultFromActionStrsUsingSan"
+        )
       case GameLogic.FairySF()      =>
-        FairySFReader.movesWithPgns(moveStrs, op, tags).map(Result.wrap)
+        FairySFReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
       case GameLogic.Samurai()      =>
-        SamuraiReader.movesWithPgns(moveStrs, op, tags).map(Result.wrap)
+        SamuraiReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
       case GameLogic.Togyzkumalak() =>
-        TogyzkumalakReader.movesWithPgns(moveStrs, op, tags).map(Result.wrap)
+        TogyzkumalakReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
       case GameLogic.Go()           =>
-        GoReader.movesWithPgns(moveStrs, op, tags).map(Result.wrap)
+        GoReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
+      case GameLogic.Backgammon()   =>
+        BackgammonReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
     }
 
 }

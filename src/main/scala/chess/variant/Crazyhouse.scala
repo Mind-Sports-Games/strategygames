@@ -22,7 +22,8 @@ case object Crazyhouse
   override def blindModeVariant         = false
   override def materialImbalanceVariant = true
 
-  override def dropsVariant = true
+  override def dropsVariant       = true
+  override def hasDetatchedPocket = true
 
   def pieces = Standard.pieces
 
@@ -52,7 +53,8 @@ case object Crazyhouse
       piece = piece,
       pos = pos,
       situationBefore = situation,
-      after = board1 withCrazyData d2
+      after = board1 withCrazyData d2,
+      autoEndTurn = true
     )
 
   override def fiftyMoves(history: History): Boolean = false

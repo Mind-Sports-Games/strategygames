@@ -543,7 +543,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
       p2.pieceMap.size must_== 3
     }
     "new position has fen of 3 pieces" in {
-      p2.fen.value must_== "9/9/2S3S2/9/9/9/9/9/3s5[SSSSSSSSSSssssssssss] b - 20 55 0 0 45 1"
+      p2.fen.value must_== "9/9/2S3S2/9/9/9/9/9/3s5[SSSSSSSSSSssssssssss] b - 20 55 0 0 45 2"
     }
 
   }

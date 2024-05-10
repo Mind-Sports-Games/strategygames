@@ -1,13 +1,12 @@
 package strategygames.samurai
 package format.pgn
-import strategygames.{ Action => StratAction, ByoyomiClock, FischerClock, Situation => StratSituation }
+import strategygames.{ Action => StratAction, ActionStrs, ByoyomiClock, Clock, Situation => StratSituation }
 
 import strategygames.format.pgn.{ ParsedPgn, Sans, Tags }
 
 import strategygames.samurai.format.Uci
 
 import cats.data.Validated
-import cats.implicits._
 
 object Reader {
 
@@ -27,9 +26,6 @@ object Reader {
   def full(pgn: String, tags: Tags = Tags.empty): Validated[String, Result] =
     fullWithSans(pgn, identity, tags)
 
-  def moves(moveStrs: Iterable[String], tags: Tags): Validated[String, Result] =
-    movesWithSans(moveStrs, identity, tags)
-
   def fullWithSans(pgn: String, op: Sans => Sans, tags: Tags = Tags.empty): Validated[String, Result] =
     Parser.full(cleanUserInput(pgn)) map { parsed =>
       makeReplay(makeGame(parsed.tags ++ tags), op(parsed.sans))
@@ -38,17 +34,12 @@ object Reader {
   def fullWithSans(parsed: ParsedPgn, op: Sans => Sans): Result =
     makeReplay(makeGame(parsed.tags), op(parsed.sans))
 
-  def movesWithSans(moveStrs: Iterable[String], op: Sans => Sans, tags: Tags): Validated[String, Result] =
-    Parser.moves(moveStrs, tags.samuraiVariant | variant.Variant.default) map { moves =>
-      makeReplay(makeGame(tags), op(moves))
-    }
-
-  def movesWithPgns(
-      moveStrs: Iterable[String],
-      op: Iterable[String] => Iterable[String],
+  def replayResultFromActionStrs(
+      actionStrs: ActionStrs,
+      op: ActionStrs => ActionStrs,
       tags: Tags
   ): Validated[String, Result] =
-    Validated.valid(makeReplayWithPgn(makeGame(tags), op(moveStrs)))
+    Validated.valid(makeReplayWithActionStrs(makeGame(tags), op(actionStrs)))
 
   // remove invisible byte order mark
   def cleanUserInput(str: String) = str.replace(s"\ufeff", "")
@@ -58,36 +49,39 @@ object Reader {
       case (Result.Complete(replay), san) =>
         san(StratSituation.wrap(replay.state.situation)).fold(
           err => Result.Incomplete(replay, err),
-          action => Result.Complete(replay addMove StratAction.toSamurai(action))
+          action => Result.Complete(replay addAction StratAction.toSamurai(action))
         )
       case (r: Result.Incomplete, _)      => r
     }
 
-  private def makeReplayWithPgn(game: Game, moves: Iterable[String]): Result =
-    Parser.pgnMovesToUciMoves(moves).foldLeft[Result](Result.Complete(Replay(game))) {
-      case (Result.Complete(replay), m) =>
-        m match {
+  private def makeReplayWithActionStrs(game: Game, actionStrs: ActionStrs): Result =
+    Replay.actionStrsWithEndTurn(actionStrs).foldLeft[Result](Result.Complete(Replay(game))) {
+      case (Result.Complete(replay), (actionStr, endTurn)) =>
+        actionStr match {
           case Uci.Move.moveR(orig, dest, _) => {
             (Pos.fromKey(orig), Pos.fromKey(dest)) match {
               case (Some(orig), Some(dest)) =>
                 Result.Complete(
-                  replay.addMove(
+                  replay.addAction(
                     Replay.replayMove(
                       replay.state,
                       orig,
                       dest,
+                      endTurn,
                       replay.state.board.apiPosition
-                        .makeMoves(List(m).map(uciMove => Api.uciToMove(uciMove))),
-                      replay.state.board.uciMoves :+ m
+                        .makeMoves(List(actionStr).map(uciMove => Api.uciToMove(uciMove))),
+                      replay.state.board.uciMoves :+ actionStr
                     )
                   )
                 )
-              case _                        => Result.Incomplete(replay, s"Error making replay with move: ${m}")
+              case _                        =>
+                Result.Incomplete(replay, s"Error making replay with move: ${actionStr}")
             }
           }
-          case _                             => Result.Incomplete(replay, s"Error making replay with uci move: ${m}")
+          case _                             =>
+            Result.Incomplete(replay, s"Error making replay with uci move: ${actionStr}")
         }
-      case (r: Result.Incomplete, _)    => r
+      case (r: Result.Incomplete, _)                       => r
     }
 
   private def makeGame(tags: Tags) = {
@@ -96,9 +90,10 @@ object Reader {
       fen = tags.samuraiFen
     )
     g.copy(
-      startedAtTurn = g.turns,
+      startedAtPly = g.plies,
+      startedAtTurn = g.turnCount,
       clock = tags.clockConfig.flatMap {
-        case fc: FischerClock.Config => Some(FischerClock.apply(fc))
+        case fc: Clock.Config        => Some(Clock.apply(fc))
         case bc: ByoyomiClock.Config => Some(ByoyomiClock.apply(bc))
         case _                       => None
       }

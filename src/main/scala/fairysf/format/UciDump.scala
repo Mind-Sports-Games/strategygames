@@ -1,29 +1,28 @@
 package strategygames.fairysf.format
 
+import scala.annotation.nowarn
 import cats.data.Validated
 
 import strategygames.fairysf.variant.Variant
 import strategygames.fairysf.{ Action, Drop, Move, Replay }
-import strategygames.format.{ Uci => StratGamesUci }
 import strategygames.format.LexicalUci
-import strategygames.{ GameFamily, GameLogic }
-import strategygames.fairysf.Api
+import strategygames.{ ActionStrs, GameFamily }
 
 object UciDump {
 
   // a2a4, b8c6
-  def apply(replay: Replay): List[String] =
-    replay.chronoMoves map move(replay.setup.board.variant)
+  def apply(replay: Replay): ActionStrs =
+    replay.chronoActions.map(_.map(action(replay.setup.board.variant)))
 
   def apply(
-      moves: Seq[String],
+      actionStrs: ActionStrs,
       initialFen: Option[FEN],
       variant: Variant
-  ): Validated[String, List[String]] =
-    if (moves.isEmpty) Validated.valid(Nil)
-    else Replay(moves, initialFen, variant) andThen (_.valid) map apply
+  ): Validated[String, ActionStrs] =
+    if (actionStrs.isEmpty) Validated.valid(Nil)
+    else Replay(actionStrs, initialFen, variant) andThen (_.valid) map apply
 
-  def move(variant: Variant)(action: Action): String =
+  def action(@nowarn variant: Variant)(action: Action): String =
     action match {
       case m: Move =>
         m.castle.fold(m.toUci.lilaUci) {
@@ -65,9 +64,9 @@ object UciDump {
               .sliding(2, 2)
               .flatMap(both => {
                 Uci(variant.gameFamily, both(1)) match {
-                  case Some(uci) =>
-                    List(both(0), s"P@${uci.origDest._2}")
-                  case None      => sys.error(s"Unable to parse uci: ${both(1)}")
+                  case Some(uci: Uci.Drop) =>
+                    List(both(0), s"P@${uci.pos}")
+                  case _                   => sys.error(s"Unable to parse uci: ${both(1)}")
                 }
               })
           )

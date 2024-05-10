@@ -22,7 +22,7 @@ object Visual {
         // role   <- Role forsyth c.toLower
       } yield {
         Pos.at(x, 7 - y) map { pos =>
-          pos -> ((Piece(Player.fromP1(c isUpper), Stone)), c.toInt)
+          pos -> Tuple2((Piece(Player.fromP1(c isUpper), Stone)), c.toInt)
         }
       }) flatten,
       variant = strategygames.togyzkumalak.variant.Variant.default

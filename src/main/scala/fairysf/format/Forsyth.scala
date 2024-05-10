@@ -14,7 +14,7 @@ object Forsyth {
   // lishogi
   // val initial = FEN("lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1")
   // pychess shogi
-  val initial = FEN("lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL[-] w 0 1")
+  val initial = FEN("lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL[] w - - 0 1")
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
     val apiPosition = Api.positionFromVariantNameAndFEN(variant.fairysfName.name, fen.value)
@@ -38,9 +38,15 @@ object Forsyth {
 
   def <<(fen: FEN): Option[Situation] = <<@(Variant.default, fen)
 
-  case class SituationPlus(situation: Situation, fullMoveNumber: Int) {
+  case class SituationPlus(situation: Situation, fullTurnCount: Int) {
 
-    def turns = fullMoveNumber * 2 - situation.player.fold(2, 1)
+    def turnCount = fullTurnCount * 2 - situation.player.fold(2, 1)
+    // TODO: Set this for Amazons. Needs to have the prev move encoded into the FEN
+    // to calculate this. This work has been done here:
+    // https://github.com/Mind-Sports-Games/strategygames/compare/master...392-support-amazons-in-analysis-page#diff-b0b2b8a0e93f9c1f675971f22eda79cc6cfedee6f2284b31a0fba54832966933R178
+    // but hasn't been merged yet
+    def plies     = turnCount
+
   }
 
   def <<<@(variant: Variant, fen: FEN): Option[SituationPlus] =
@@ -58,7 +64,8 @@ object Forsyth {
 
   def >>(parsed: SituationPlus): FEN =
     parsed match {
-      case SituationPlus(situation, _) => >>(Game(situation, turns = parsed.turns))
+      case SituationPlus(situation, _) =>
+        >>(Game(situation, plies = parsed.plies, turnCount = parsed.turnCount))
     }
 
   def >>(game: Game): FEN = exportBoardFen(game.situation.board)

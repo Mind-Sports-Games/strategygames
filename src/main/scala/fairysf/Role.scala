@@ -376,64 +376,72 @@ object Role {
   def allPromotableByGameFamily(gf: GameFamily): List[PromotableRole] =
     allPromotable.filter(r => r.gameFamily == gf)
 
-  val allByForsyth: Map[Char, Role]                                     = all map { r =>
+  val allByForsyth: Map[Char, Role]                                          = all map { r =>
     (r.forsyth, r)
   } toMap
-  def allByForsyth(gf: GameFamily): Map[Char, Role]                     = allNonPromotableByGameFamily(gf) map { r =>
+  def allByForsyth(gf: GameFamily): Map[Char, Role]                          = allNonPromotableByGameFamily(gf) map { r =>
     (r.forsyth, r)
   } toMap
-  val allByPgn: Map[Char, Role]                                         = all map { r =>
+  val allByPgn: Map[Char, Role]                                              = all map { r =>
     (r.pgn, r)
   } toMap
-  def allByPgn(gf: GameFamily): Map[Char, Role]                         = allNonPromotableByGameFamily(gf) map { r =>
+  def allByPgn(gf: GameFamily): Map[Char, Role]                              = allNonPromotableByGameFamily(gf) map { r =>
     (r.pgn, r)
   } toMap
-  val allByName: Map[String, Role]                                      = all map { r =>
+  val allByName: Map[String, Role]                                           = all map { r =>
     (r.name, r)
   } toMap
-  def allByName(gf: GameFamily): Map[String, Role]                      = allByGameFamily(gf) map { r =>
+  def allByName(gf: GameFamily): Map[String, Role]                           = allByGameFamily(gf) map { r =>
     (r.name, r)
   } toMap
-  val allByGroundName: Map[String, Role]                                = all map { r =>
+  val allByGroundName: Map[String, Role]                                     = all map { r =>
     (r.groundName, r)
   } toMap
-  def allByGroundName(gf: GameFamily): Map[String, Role]                = allByGameFamily(gf) map { r =>
+  def allByGroundName(gf: GameFamily): Map[String, Role]                     = allByGameFamily(gf) map { r =>
     (r.groundName, r)
   } toMap
-  val allByBinaryInt: Map[Int, Role]                                    = all map { r =>
+  val allByBinaryInt: Map[Int, Role]                                         = all map { r =>
     (r.binaryInt, r)
   } toMap
-  def allByBinaryInt(gf: GameFamily): Map[Int, Role]                    = allByGameFamily(gf) map { r =>
+  def allByBinaryInt(gf: GameFamily): Map[Int, Role]                         = allByGameFamily(gf) map { r =>
     (r.binaryInt, r)
   } toMap
-  val allByHashInt: Map[Int, Role]                                      = all map { r =>
+  val allByHashInt: Map[Int, Role]                                           = all map { r =>
     (r.hashInt, r)
   } toMap
-  val allPromotableByName: Map[String, PromotableRole]                  =
+  val allPromotableByName: Map[String, PromotableRole]                       =
     allPromotable map { r =>
       (r.toString, r)
     } toMap
-  def allPromotableByName(gf: GameFamily): Map[String, PromotableRole]  =
+  def allPromotableByName(gf: GameFamily): Map[String, PromotableRole]       =
     allPromotableByGameFamily(gf) map { r =>
       (r.toString, r)
     } toMap
-  val allPromotableByForsyth: Map[Char, PromotableRole]                 =
+  val allPromotableByGroundName: Map[String, PromotableRole]                 =
+    allPromotable map { r =>
+      (r.groundName, r)
+    } toMap
+  def allPromotableByGroundName(gf: GameFamily): Map[String, PromotableRole] =
+    allPromotableByGameFamily(gf) map { r =>
+      (r.groundName, r)
+    } toMap
+  val allPromotableByForsyth: Map[Char, PromotableRole]                      =
     allPromotable map { r =>
       (r.forsyth, r)
     } toMap
-  def allPromotableByForsyth(gf: GameFamily): Map[Char, PromotableRole] =
+  def allPromotableByForsyth(gf: GameFamily): Map[Char, PromotableRole]      =
     allPromotableByGameFamily(gf) map { r =>
       (r.forsyth, r)
     } toMap
-  val allPromotableByPgn: Map[Char, PromotableRole]                     =
+  val allPromotableByPgn: Map[Char, PromotableRole]                          =
     allPromotable map { r =>
       (r.pgn, r)
     } toMap
-  def allPromotableByPgn(gf: GameFamily): Map[Char, PromotableRole]     =
+  def allPromotableByPgn(gf: GameFamily): Map[Char, PromotableRole]          =
     allPromotableByGameFamily(gf) map { r =>
       (r.pgn, r)
     } toMap
-  def allByFairySFID(gf: GameFamily): Map[Int, Role]                    = allByGameFamily(gf) map { r =>
+  def allByFairySFID(gf: GameFamily): Map[Int, Role]                         = allByGameFamily(gf) map { r =>
     (r.fairySFID.id, r)
   } toMap
 

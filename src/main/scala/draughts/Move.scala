@@ -11,14 +11,16 @@ case class Move(
     dest: Pos,
     situationBefore: Situation,
     after: Board,
+    autoEndTurn: Boolean,
     capture: Option[List[Pos]],
     taken: Option[List[Pos]],
     promotion: Option[PromotableRole] = None,
     metrics: MoveMetrics = MoveMetrics()
-) extends Action(situationBefore, after, metrics) {
+) extends Action(situationBefore) {
 
   def situationAfter: Situation = situationAfter(false)
 
+  // TODO: Use autoEndTurn when rewriting draughts
   def situationAfter(finalSquare: Boolean): Situation =
     Situation.withPlayerAfter(finalizeAfter(finalSquare), piece.player)
 

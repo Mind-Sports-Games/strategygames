@@ -16,7 +16,9 @@ case object MiniShogi
 
   def gameFamily: GameFamily = GameFamily.Shogi()
 
-  override def dropsVariant            = true
+  override def dropsVariant       = true
+  override def hasDetatchedPocket = true
+
   override def useFairyOptionalGameEnd = true
 
   def perfIcon: Char = ''
@@ -25,7 +27,7 @@ case object MiniShogi
   override val kingPiece: Option[Role] = Some(ShogiKing)
 
   // cache this rather than checking with the API everytime
-  override def initialFen = format.FEN("rbsgk/4p/5/P4/KGSBR[-] w 0 1")
+  override def initialFen = format.FEN("rbsgk/4p/5/P4/KGSBR[] w - - 0 1")
 
   // manually calculated where might put king in mate
   // this was done for optimisation but could go back to just checking the api lots?

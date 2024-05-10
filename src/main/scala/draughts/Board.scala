@@ -72,7 +72,7 @@ case class Board(
     if (pieces contains at) None
     else Some(copy(pieces = pieces + ((at, piece))))
 
-  def take(at: Pos): Option[Board] = pieces get at map { piece =>
+  def take(at: Pos): Option[Board] = pieces get at map { _ =>
     copy(pieces = pieces - at)
   }
 

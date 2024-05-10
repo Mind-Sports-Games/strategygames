@@ -302,6 +302,7 @@ object Pos {
 
   // current pos limit in db is 128, if adding more perhaps use a different method (map of index to file, rank)
 
+  // if adding new Pos check for use of Pos.all
   val all: List[Pos] = (0 to (File.all.size * Rank.all.size) - 1).map(new Pos(_)).toList
 
   val allKeys: Map[String, Pos] = all

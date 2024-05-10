@@ -1,7 +1,5 @@
 package strategygames
 
-import cats.syntax.option.none
-
 import strategygames.format.Uci
 
 sealed abstract class Drop(
@@ -9,8 +7,9 @@ sealed abstract class Drop(
     val pos: Pos,
     val situationBefore: Situation,
     val after: Board,
+    val autoEndTurn: Boolean,
     val metrics: MoveMetrics = MoveMetrics()
-) extends Action(situationBefore, after, metrics) {
+) extends Action(situationBefore) {
 
   def situationAfter: Situation
 
@@ -26,6 +25,7 @@ sealed abstract class Drop(
   def toChess: chess.Drop
   def toFairySF: fairysf.Drop
   def toGo: go.Drop
+  def toBackgammon: backgammon.Drop
 }
 
 object Drop {
@@ -36,6 +36,7 @@ object Drop {
         Pos.Chess(d.pos),
         Situation.Chess(d.situationBefore),
         Board.Chess(d.after),
+        d.autoEndTurn,
         d.metrics
       ) {
 
@@ -51,6 +52,7 @@ object Drop {
     def toSamurai      = sys.error("Can't make a samurai drop from a chess drop")
     def toTogyzkumalak = sys.error("Can't make a togy drop from a chess drop")
     def toGo           = sys.error("Can't make a go drop from a chess drop")
+    def toBackgammon   = sys.error("Can't make a backgammon drop from a chess drop")
 
   }
 
@@ -60,6 +62,7 @@ object Drop {
         Pos.FairySF(d.pos),
         Situation.FairySF(d.situationBefore),
         Board.FairySF(d.after),
+        d.autoEndTurn,
         d.metrics
       ) {
 
@@ -75,6 +78,7 @@ object Drop {
     def toSamurai      = sys.error("Can't make a samurai drop from a fairysf drop")
     def toTogyzkumalak = sys.error("Can't make a togy drop from a fairysf drop")
     def toGo           = sys.error("Can't make a go drop from a fairysf drop")
+    def toBackgammon   = sys.error("Can't make a backgammon drop from a fairysf drop")
 
   }
 
@@ -84,6 +88,7 @@ object Drop {
         Pos.Go(d.pos),
         Situation.Go(d.situationBefore),
         Board.Go(d.after),
+        d.autoEndTurn,
         d.metrics
       ) {
 
@@ -99,11 +104,39 @@ object Drop {
     def toSamurai      = sys.error("Can't make a samurai drop from a go drop")
     def toTogyzkumalak = sys.error("Can't make a togy drop from a go drop")
     def toGo           = d
+    def toBackgammon   = sys.error("Can't make a backgammon drop from a go drop")
 
   }
 
-  def wrap(d: chess.Drop): Drop   = Drop.Chess(d)
-  def wrap(d: fairysf.Drop): Drop = Drop.FairySF(d)
-  def wrap(d: go.Drop): Drop      = Drop.Go(d)
+  final case class Backgammon(d: backgammon.Drop)
+      extends Drop(
+        Piece.Backgammon(d.piece),
+        Pos.Backgammon(d.pos),
+        Situation.Backgammon(d.situationBefore),
+        Board.Backgammon(d.after),
+        false,
+        d.metrics
+      ) {
+
+    def situationAfter: Situation = Situation.Backgammon(d.situationAfter)
+    def finalizeAfter: Board      = d.finalizeAfter
+
+    def toUci: Uci.Drop = Uci.BackgammonDrop(d.toUci)
+
+    val unwrap         = d
+    def toChess        = sys.error("Can't make a chess drop from a backgammon drop")
+    def toFairySF      = sys.error("Can't make a fairysf drop from a backgammon drop")
+    def toDraughts     = sys.error("Can't make a draughts drop from a backgammon drop")
+    def toSamurai      = sys.error("Can't make a samurai drop from a backgammon drop")
+    def toTogyzkumalak = sys.error("Can't make a togy drop from a backgammon drop")
+    def toGo           = sys.error("Can't make a go drop from a backgammon drop")
+    def toBackgammon   = d
+
+  }
+
+  def wrap(d: chess.Drop): Drop      = Drop.Chess(d)
+  def wrap(d: fairysf.Drop): Drop    = Drop.FairySF(d)
+  def wrap(d: go.Drop): Drop         = Drop.Go(d)
+  def wrap(d: backgammon.Drop): Drop = Drop.Backgammon(d)
 
 }

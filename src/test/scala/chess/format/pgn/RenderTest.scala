@@ -1,7 +1,7 @@
 package strategygames.chess
 package format.pgn
 
-import strategygames.format.pgn._
+import strategygames.format.pgn.{ Turn => PgnTurn, _ }
 
 import cats.syntax.option._
 
@@ -48,35 +48,35 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
             Tag(_.ECO, "D14")
           )
         ),
-        turns = List(
-          Turn(
-            number = 1,
-            p1 = Move("d4").some,
-            p2 = Move("d5").some
+        fullTurns = List(
+          FullTurn(
+            fullTurnNumber = 1,
+            p1 = PgnTurn("d4").some,
+            p2 = PgnTurn("d5").some
           ),
-          Turn(
-            number = 2,
-            p1 = Move("c4", glyphs = glyphs(1)).some,
-            p2 = Move("c6", glyphs = glyphs(2)).some
+          FullTurn(
+            fullTurnNumber = 2,
+            p1 = PgnTurn("c4", glyphs = glyphs(1)).some,
+            p2 = PgnTurn("c6", glyphs = glyphs(2)).some
           ),
-          Turn(
-            number = 3,
-            p1 = Move("Nc3", glyphs = glyphs(3)).some,
-            p2 = Move("Nf6").some
+          FullTurn(
+            fullTurnNumber = 3,
+            p1 = PgnTurn("Nc3", glyphs = glyphs(3)).some,
+            p2 = PgnTurn("Nf6").some
           ),
-          Turn(
-            number = 4,
-            p1 = Move(
+          FullTurn(
+            fullTurnNumber = 4,
+            p1 = PgnTurn(
               "cxd5",
               comments =
                 "The Exchange Slav, the sure way to play with zero losing chances so an ideal choice for game one" :: Nil
             ).some,
-            p2 = Move("cxd5").some
+            p2 = PgnTurn("cxd5").some
           ),
-          Turn(
-            number = 5,
-            p1 = Move("Bf4").some,
-            p2 = Move("Nc6").some
+          FullTurn(
+            fullTurnNumber = 5,
+            p1 = PgnTurn("Bf4").some,
+            p2 = PgnTurn("Nc6").some
           )
         )
       )
@@ -96,36 +96,36 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
             Tag(_.ECO, "A00e")
           )
         ),
-        turns = List(
-          Turn(
-            number = 1,
-            p1 = Move("a4", secondsLeft = 298.some).some,
-            p2 = Move("Nf6", secondsLeft = 299.some).some
+        fullTurns = List(
+          FullTurn(
+            fullTurnNumber = 1,
+            p1 = PgnTurn("a4", secondsLeft = 298.some).some,
+            p2 = PgnTurn("Nf6", secondsLeft = 299.some).some
           ),
-          Turn(
-            number = 2,
-            p1 = Move("d4", secondsLeft = 295.some).some,
-            p2 = Move("d5", secondsLeft = 298.some).some
+          FullTurn(
+            fullTurnNumber = 2,
+            p1 = PgnTurn("d4", secondsLeft = 295.some).some,
+            p2 = PgnTurn("d5", secondsLeft = 298.some).some
           ),
-          Turn(
-            number = 3,
-            p1 = Move("h4", secondsLeft = 292.some).some,
-            p2 = Move("e6", secondsLeft = 297.some).some
+          FullTurn(
+            fullTurnNumber = 3,
+            p1 = PgnTurn("h4", secondsLeft = 292.some).some,
+            p2 = PgnTurn("e6", secondsLeft = 297.some).some
           ),
-          Turn(
-            number = 4,
-            p1 = Move(
+          FullTurn(
+            fullTurnNumber = 4,
+            p1 = PgnTurn(
               "Qd3",
               glyphs = glyphs(1),
               secondsLeft = 288.some,
               comments = "An invention of true genius." :: Nil
             ).some,
-            p2 = Move("c5", secondsLeft = 296.some).some
+            p2 = PgnTurn("c5", secondsLeft = 296.some).some
           ),
-          Turn(
-            number = 5,
-            p1 = Move("dxc5", secondsLeft = 258.some).some,
-            p2 = Move("Bxc5", glyphs = glyphs(1), secondsLeft = 295.some).some
+          FullTurn(
+            fullTurnNumber = 5,
+            p1 = PgnTurn("dxc5", secondsLeft = 258.some).some,
+            p2 = PgnTurn("Bxc5", glyphs = glyphs(1), secondsLeft = 295.some).some
           )
         )
       )
@@ -140,16 +140,16 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
     "be correct with NAGs" in {
       val pgn = Pgn(
         tags = Tags.empty,
-        turns = List(
-          Turn(
-            number = 1,
-            p1 = Move("d3", glyphs = glyphs(6)).some,
-            p2 = Move("Nc6", glyphs = glyphs(10)).some
+        fullTurns = List(
+          FullTurn(
+            fullTurnNumber = 1,
+            p1 = PgnTurn("d3", glyphs = glyphs(6)).some,
+            p2 = PgnTurn("Nc6", glyphs = glyphs(10)).some
           ),
-          Turn(
-            number = 2,
-            p1 = Move("Qd2").some,
-            p2 = Move(
+          FullTurn(
+            fullTurnNumber = 2,
+            p1 = PgnTurn("Qd2").some,
+            p2 = PgnTurn(
               "Nb4",
               glyphs = Glyphs(
                 Glyph.MoveAssessment.blunder.some,
@@ -158,9 +158,9 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
               )
             ).some
           ),
-          Turn(
-            number = 3,
-            p1 = Move("Qxb4", glyphs = glyphs(7)).some,
+          FullTurn(
+            fullTurnNumber = 3,
+            p1 = PgnTurn("Qxb4", glyphs = glyphs(7)).some,
             p2 = None
           )
         )
@@ -171,29 +171,29 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
     "be correct with variations" in {
       val pgn = Pgn(
         tags = Tags.empty,
-        turns = List(
-          Turn(
-            number = 1,
-            p1 = Move(
+        fullTurns = List(
+          FullTurn(
+            fullTurnNumber = 1,
+            p1 = PgnTurn(
               "d4",
               variations = List(
                 List(
-                  Turn(
-                    number = 1,
-                    p1 = Move("e4").some,
+                  FullTurn(
+                    fullTurnNumber = 1,
+                    p1 = PgnTurn("e4").some,
                     p2 = None
                   )
                 )
               )
             ).some,
-            p2 = Move(
+            p2 = PgnTurn(
               "Nf6",
               variations = List(
                 List(
-                  Turn(
-                    number = 1,
+                  FullTurn(
+                    fullTurnNumber = 1,
                     p1 = None,
-                    p2 = Move("d5").some
+                    p2 = PgnTurn("d5").some
                   )
                 )
               )
@@ -213,36 +213,36 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
             Tag(_.ECO, "A00e")
           )
         ),
-        turns = List(
-          Turn(
-            number = 1,
-            p1 = Move("a4", secondsLeft = 298.some).some,
-            p2 = Move("Nf6", secondsLeft = 299.some).some
+        fullTurns = List(
+          FullTurn(
+            fullTurnNumber = 1,
+            p1 = PgnTurn("a4", secondsLeft = 298.some).some,
+            p2 = PgnTurn("Nf6", secondsLeft = 299.some).some
           ),
-          Turn(
-            number = 2,
-            p1 = Move("d4", secondsLeft = 295.some).some,
-            p2 = Move("d5", secondsLeft = 298.some).some
+          FullTurn(
+            fullTurnNumber = 2,
+            p1 = PgnTurn("d4", secondsLeft = 295.some).some,
+            p2 = PgnTurn("d5", secondsLeft = 298.some).some
           ),
-          Turn(
-            number = 3,
-            p1 = Move("h4", secondsLeft = 292.some).some,
-            p2 = Move("e6", secondsLeft = 297.some).some
+          FullTurn(
+            fullTurnNumber = 3,
+            p1 = PgnTurn("h4", secondsLeft = 292.some).some,
+            p2 = PgnTurn("e6", secondsLeft = 297.some).some
           ),
-          Turn(
-            number = 4,
-            p1 = Move(
+          FullTurn(
+            fullTurnNumber = 4,
+            p1 = PgnTurn(
               "Qd3",
               glyphs = glyphs(1),
               secondsLeft = 288.some,
               comments = "An invention of true genius." :: Nil
             ).some,
-            p2 = Move("c5", secondsLeft = 296.some).some
+            p2 = PgnTurn("c5", secondsLeft = 296.some).some
           ),
-          Turn(
-            number = 5,
-            p1 = Move("dxc5", secondsLeft = 258.some).some,
-            p2 = Move("Bxc5", glyphs = glyphs(1), secondsLeft = 295.some).some
+          FullTurn(
+            fullTurnNumber = 5,
+            p1 = PgnTurn("dxc5", secondsLeft = 258.some).some,
+            p2 = PgnTurn("Bxc5", glyphs = glyphs(1), secondsLeft = 295.some).some
           )
         )
       )
@@ -260,7 +260,7 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
             Tag(_.Result, "0-1")
           )
         ),
-        turns = List()
+        fullTurns = List()
       )
       pgn.toString must_== """[Result "0-1"]
 
@@ -272,14 +272,14 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
     "empty" in {
       val pgn = Pgn(
         tags = Tags.empty,
-        turns = List()
+        fullTurns = List()
       )
       pgn.toString must_== """"""
     }
     "empty with initial comment" in {
       val pgn = Pgn(
         tags = Tags.empty,
-        turns = List(),
+        fullTurns = List(),
         initial = Initial(List("Why hello there!"))
       )
       pgn.toString must_== """{ Why hello there! }"""
@@ -287,7 +287,7 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
     "empty with initial comments" in {
       val pgn = Pgn(
         tags = Tags.empty,
-        turns = List(),
+        fullTurns = List(),
         initial = Initial(
           List(
             "Why hello there!",
@@ -300,29 +300,29 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
     "moves with initial comments" in {
       val pgn = Pgn(
         tags = Tags.empty,
-        turns = List(
-          Turn(
-            number = 1,
-            p1 = Move(
+        fullTurns = List(
+          FullTurn(
+            fullTurnNumber = 1,
+            p1 = PgnTurn(
               "d4",
               variations = List(
                 List(
-                  Turn(
-                    number = 1,
-                    p1 = Move("e4").some,
+                  FullTurn(
+                    fullTurnNumber = 1,
+                    p1 = PgnTurn("e4").some,
                     p2 = None
                   )
                 )
               )
             ).some,
-            p2 = Move(
+            p2 = PgnTurn(
               "Nf6",
               variations = List(
                 List(
-                  Turn(
-                    number = 1,
+                  FullTurn(
+                    fullTurnNumber = 1,
                     p1 = None,
-                    p2 = Move("d5").some
+                    p2 = PgnTurn("d5").some
                   )
                 )
               )

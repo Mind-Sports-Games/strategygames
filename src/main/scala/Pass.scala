@@ -1,14 +1,13 @@
 package strategygames
 
-import cats.syntax.option.none
-
 import strategygames.format.Uci
 
 sealed abstract class Pass(
     val situationBefore: Situation,
     val after: Board,
+    val autoEndTurn: Boolean,
     val metrics: MoveMetrics = MoveMetrics()
-) extends Action(situationBefore, after, metrics) {
+) extends Action(situationBefore) {
 
   def situationAfter: Situation
 
@@ -30,6 +29,7 @@ object Pass {
       extends Pass(
         Situation.Go(p.situationBefore),
         Board.Go(p.after),
+        p.autoEndTurn,
         p.metrics
       ) {
 
@@ -46,6 +46,7 @@ object Pass {
     def toSamurai      = sys.error("Can't make a samurai pass from a go pass")
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak pass from a go pass")
     def toGo           = p
+    def toBackgammon   = sys.error("Can't make a backgammon pass from a go pass")
 
   }
 

@@ -5,7 +5,7 @@ import cats.syntax.option._
 import scala.annotation.nowarn
 
 import strategygames.chess._
-import strategygames.chess.format.FEN
+import strategygames.chess.format.{ FEN, Uci }
 import strategygames.{ GameFamily, Player }
 
 // Correctness depends on singletons for each variant ID
@@ -24,22 +24,7 @@ abstract class Variant private[variant] (
 
   def pieces: Map[Pos, Piece]
 
-  def standard      = this == Standard
-  def chess960      = this == Chess960
-  def fromPosition  = this == FromPosition
-  def kingOfTheHill = this == KingOfTheHill
-  def threeCheck    = this == ThreeCheck
-  def fiveCheck     = this == FiveCheck
-  def antichess     = this == Antichess
-  def atomic        = this == Atomic
-  def horde         = this == Horde
-  def racingKings   = this == RacingKings
-  def crazyhouse    = this == Crazyhouse
-  def linesOfAction = this == LinesOfAction
-  def noCastling    = this == NoCastling
-  def scrambledEggs = this == ScrambledEggs
-
-  def exotic = !standard
+  def exotic = this != Standard
 
   // used to define chess variants medley
   def exoticChessVariant: Boolean = false
@@ -54,7 +39,9 @@ abstract class Variant private[variant] (
 
   def materialImbalanceVariant: Boolean = false
 
-  def dropsVariant: Boolean = false
+  def dropsVariant: Boolean       = false
+  def hasDetatchedPocket: Boolean = false
+
   def canOfferDraw: Boolean = true
 
   def perfId: Int
@@ -62,13 +49,13 @@ abstract class Variant private[variant] (
 
   def allowsCastling = !castles.isEmpty
 
-  protected val backRank = Vector(Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook)
+  protected val backRank =
+    Vector(Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook)
 
   def castles: Castles = Castles.all
 
   def initialFen: FEN     = format.Forsyth.initial
   def startPlayer: Player = P1
-  def plysPerTurn: Int    = 1
 
   def isValidPromotion(promotion: Option[PromotableRole]) =
     promotion match {
@@ -100,12 +87,22 @@ abstract class Variant private[variant] (
     }
   }
 
-  def kingThreatened(board: Board, player: Player, to: Pos, filter: Piece => Boolean = _ => true) =
+  def kingThreatened(
+      board: Board,
+      player: Player,
+      to: Pos,
+      filter: Piece => Boolean = _ => true,
+      @nowarn validatingCheck: Boolean = false
+  ) =
     pieceThreatened(board, player, to, filter)
 
-  def kingSafety(m: Move, filter: Piece => Boolean, kingPos: Option[Pos]): Boolean =
+  def kingSafety(
+      m: Move,
+      filter: Piece => Boolean,
+      kingPos: Option[Pos]
+  ): Boolean =
     ! {
-      kingPos exists { kingThreatened(m.after, !m.player, _, filter) }
+      kingPos exists { kingThreatened(m.after, m.playerAfter, _, filter) }
     }
 
   def kingSafety(a: Actor, m: Move): Boolean =
@@ -115,9 +112,15 @@ abstract class Variant private[variant] (
       if (a.piece.role == King) None else a.board kingPosOf a.player
     )
 
-  def longRangeThreatens(board: Board, p: Pos, dir: Direction, to: Pos): Boolean =
+  def longRangeThreatens(
+      board: Board,
+      p: Pos,
+      dir: Direction,
+      to: Pos
+  ): Boolean =
     dir(p) exists { next =>
-      next == to || (!board.pieces.contains(next) && longRangeThreatens(board, next, dir, to))
+      next == to || (!board.pieces
+        .contains(next) && longRangeThreatens(board, next, dir, to))
     }
 
   def move(
@@ -128,36 +131,56 @@ abstract class Variant private[variant] (
   ): Validated[String, Move] = {
 
     // Find the move in the variant specific list of valid moves
-    def findMove(from: Pos, to: Pos) = situation.moves get from flatMap (_.find(_.dest == to))
+    def findMove(from: Pos, to: Pos) =
+      situation.moves get from flatMap (_.find(_.dest == to))
 
     for {
       actor <- situation.board.actors get from toValid "No piece on " + from
       _     <-
         if (actor is situation.player) Validated.valid(actor)
         else Validated.invalid("Not my piece on " + from)
-      m1    <- findMove(from, to) toValid "Piece on " + from + " cannot move to " + to
-      m2    <- m1 withPromotion promotion toValid "Piece on " + from + " cannot promote to " + promotion
+      m1    <- findMove(
+                 from,
+                 to
+               ) toValid "Piece on " + from + " cannot move to " + to
+      m2    <-
+        m1 withPromotion promotion toValid "Piece on " + from + " cannot promote to " + promotion
       m3    <-
         if (isValidPromotion(promotion)) Validated.valid(m2)
-        else Validated.invalid("Cannot promote to " + promotion + " in this game mode")
+        else
+          Validated.invalid(
+            "Cannot promote to " + promotion + " in this game mode"
+          )
     } yield m3
   }
 
-  def drop(situation: Situation, role: Role, pos: Pos): Validated[String, Drop] =
+  def drop(
+      situation: Situation,
+      role: Role,
+      pos: Pos
+  ): Validated[String, Drop] =
     Validated.invalid(s"$this variant cannot drop $situation $role $pos")
 
-  def possibleDropsByRole(situation: Situation): Option[Map[Role, List[Pos]]] = None // override in crazyhouse
+  def diceRoll(situation: Situation, dice: List[Int]): Validated[String, DiceRoll] =
+    Validated.invalid(s"$this variant cannot roll dice $situation $dice")
+
+  def possibleDropsByRole(@nowarn situation: Situation): Option[Map[Role, List[Pos]]] =
+    None // override in crazyhouse
+
+  @nowarn def validDiceRolls(situation: Situation): List[DiceRoll] = List.empty
 
   def staleMate(situation: Situation): Boolean = !situation.check && situation.moves.isEmpty
 
-  def checkmate(situation: Situation) = situation.check && situation.moves.isEmpty
+  def checkmate(situation: Situation) =
+    situation.check && situation.moves.isEmpty
 
   def stalemateIsDraw = true
 
   // In most variants, the winner is the last player to have played and there is a possibility of either a traditional
   // checkmate or a variant end condition
   def winner(situation: Situation): Option[Player] =
-    if (situation.checkMate || specialEnd(situation)) Option(!situation.player) else None
+    if (situation.checkMate || specialEnd(situation)) Option(!situation.player)
+    else None
 
   @nowarn def specialEnd(situation: Situation) = false
 
@@ -182,6 +205,28 @@ abstract class Variant private[variant] (
   def opponentHasInsufficientMaterial(situation: Situation) =
     InsufficientMatingMaterial(situation.board, !situation.player)
 
+  def enPassantSquares(situation: Situation): List[Pos] =
+    // Before potentially expensive move generation, first ensure some basic
+    // conditions are met.
+    situation.history.lastTurn.flatMap {
+      case move: Uci.Move =>
+        if (
+          move.dest.yDist(move.orig) == 2 &&
+          situation.board(move.dest).exists(_.is(Pawn)) &&
+          List(
+            move.dest.file.offset(-1),
+            move.dest.file.offset(1)
+          ).flatten
+            .flatMap(
+              situation.board(_, Rank.passablePawnRank(situation.player))
+            )
+            .exists(_ == Piece(situation.player, Pawn))
+        )
+          situation.moves.values.flatten.find(_.enpassant).map(_.dest)
+        else None
+      case _              => None
+    }
+
   // Some variants have an extra effect on the board on a move. For example, in Atomic, some
   // pieces surrounding a capture explode
   def hasMoveEffects = false
@@ -198,13 +243,20 @@ abstract class Variant private[variant] (
 
   /** Once a move has been decided upon from the available legal moves, the board is finalized
     */
-  @nowarn def finalizeBoard(board: Board, uci: format.Uci, captured: Option[Piece]): Board = board
+  @nowarn def finalizeBoard(
+      board: Board,
+      uci: format.Uci,
+      captured: Option[Piece]
+  ): Board = board
 
   protected def pawnsOnPromotionRank(board: Board, player: Player) = {
     board.pieces.exists {
-      case (pos, Piece(c, r)) if c == player && r == Pawn && pos.rank == Rank.promotablePawnRank(player) =>
+      case (pos, Piece(c, r))
+          if c == player && r == Pawn && pos.rank == Rank.promotablePawnRank(
+            player
+          ) =>
         true
-      case _                                                                                             => false
+      case _ => false
     }
   }
 
@@ -215,7 +267,8 @@ abstract class Variant private[variant] (
     !pawnsOnPromotionRank(board, player)
   }
 
-  def valid(board: Board, strict: Boolean) = Player.all forall validSide(board, strict)
+  def valid(board: Board, strict: Boolean) =
+    Player.all forall validSide(board, strict)
 
   val roles = List(Rook, Knight, King, Bishop, King, Queen, Pawn)
 
@@ -234,7 +287,11 @@ abstract class Variant private[variant] (
       }
       .to(Map)
 
-  def isUnmovedPawn(player: Player, pos: Pos) = pos.rank == player.fold(Rank.Second, Rank.Seventh)
+  def isUnmovedPawn(player: Player, pos: Pos) =
+    pos.rank == player.fold(Rank.Second, Rank.Seventh)
+
+  // override on multiaction variants
+  def lastActionOfTurn(@nowarn situation: Situation): Boolean = true
 
   override def toString = s"Variant($name)"
 
@@ -260,6 +317,7 @@ object Variant {
     Horde,
     RacingKings,
     NoCastling,
+    Monster,
     LinesOfAction,
     ScrambledEggs
   )
@@ -303,12 +361,15 @@ object Variant {
   )
 
   private[variant] def symmetricRank(rank: IndexedSeq[Role]): Map[Pos, Piece] =
-    (for (y <- Seq(Rank.First, Rank.Second, Rank.Seventh, Rank.Eighth); x <- File.all) yield {
+    (for (
+      y <- Seq(Rank.First, Rank.Second, Rank.Seventh, Rank.Eighth);
+      x <- File.all
+    ) yield {
       Pos(x, y) -> (y match {
         case Rank.First   => Piece(P1, rank(x.index))
         case Rank.Second  => Piece(P1, Pawn)
         case Rank.Seventh => Piece(P2, Pawn)
-        case Rank.Eighth  => Piece(P2, rank(x.index))
+        case _            => Piece(P2, rank(x.index))
       })
     }).toMap
 }

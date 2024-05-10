@@ -14,7 +14,9 @@ final case class Actor(
 
   import Actor._
 
-  lazy val moves: List[Move] = kingSafetyMoveFilter(trustedMoves(board.variant.allowsCastling))
+  lazy val moves: List[Move] = kingSafetyMoveFilter(
+    trustedMoves(board.variant.allowsCastling)
+  )
 
   /** The moves without taking defending the king into account */
   def trustedMoves(withCastle: Boolean): List[Move] = {
@@ -30,18 +32,23 @@ final case class Actor(
             } yield move(p, b, Option(p))
           } flatMap maybePromote
           def enpassant(horizontal: Direction): Option[Move] =
-            for {
-              victimPos <- horizontal(pos).filter(_ => pos.rank == Rank.passablePawnRank(player))
-              _         <- board(victimPos).filter(v => v == Piece(!player, Pawn))
-              targetPos <- horizontal(next)
-              _         <- pawnDir(victimPos) flatMap pawnDir filter { vf =>
-                             history.lastMove.exists {
-                               case Uci.Move(orig, dest, _) => orig == vf && dest == victimPos
-                               case _                       => false
+            if (board.history.currentTurn.nonEmpty) None
+            else
+              for {
+                victimPos <- horizontal(pos).filter(_ => pos.rank == Rank.passablePawnRank(player))
+                _         <- board(victimPos).filter(v => v == Piece(!player, Pawn))
+                targetPos <- horizontal(next)
+                _         <- pawnDir(victimPos) flatMap pawnDir filter { vf =>
+                               history.lastTurn
+                                 .map {
+                                   case Uci.Move(orig, dest, _) =>
+                                     orig == vf && dest == victimPos
+                                   case _                       => false
+                                 }
+                                 .contains(true)
                              }
-                           }
-              b         <- board.taking(pos, targetPos, Option(victimPos))
-            } yield move(targetPos, b, Option(victimPos), enpassant = true)
+                b         <- board.taking(pos, targetPos, Option(victimPos))
+              } yield move(targetPos, b, Option(victimPos), enpassant = true)
           def forward(p: Pos): Option[Move]                  =
             board.move(pos, p) map { move(p, _) } flatMap maybePromote
           def maybePromote(m: Move): Option[Move]            =
@@ -82,7 +89,8 @@ final case class Actor(
 
     // We apply the current game variant's effects if there are any so that we can accurately decide if the king would
     // be in danger after the move was made.
-    if (board.variant.hasMoveEffects) moves map (_.applyVariantEffect) else moves
+    if (board.variant.hasMoveEffects) moves map (_.applyVariantEffect)
+    else moves
   }
 
   lazy val destinations: List[Pos] = moves map (_.dest)
@@ -102,7 +110,11 @@ final case class Actor(
       if ((piece is King) || check) _ => true else _.role.projection
     val stableKingPos            = if (piece is King) None else board kingPosOf player
     ms filter { m =>
-      board.variant.kingSafety(m, filter, stableKingPos orElse (m.after kingPosOf player))
+      board.variant.kingSafety(
+        m,
+        filter,
+        stableKingPos orElse (m.after kingPosOf player)
+      )
     }
   }
 
@@ -122,7 +134,9 @@ final case class Actor(
       newRookPos        = Pos(side.castledRookFile, rookPos.rank)
       kingPath          = kingPos <-> newKingPos
       rookPath          = rookPos <-> newRookPos
-      mustBeUnoccupied  = (kingPath ++ rookPath).filter(_ != kingPos).filter(_ != rookPos)
+      mustBeUnoccupied  = (kingPath ++ rookPath)
+                            .filter(_ != kingPos)
+                            .filter(_ != rookPos)
       if !mustBeUnoccupied.exists(board.pieces.contains)
       // Check the king is not currently attacked, and none of the squares it
       // passes *through* are attacked. We do this after removing the old king,
@@ -130,7 +144,9 @@ final case class Actor(
       // Atomic chess, where touching kings can shield attacks without being in
       // check.
       b1               <- board take kingPos
-      mustNotBeAttacked = kingPath.filter(_ != newKingPos || kingPos == newKingPos)
+      mustNotBeAttacked = kingPath.filter(
+                            _ != newKingPos || kingPos == newKingPos
+                          )
       if !mustNotBeAttacked.exists(p => board.variant.kingThreatened(b1, !player, p))
       // Test the final king position seperately, after the rook has been moved.
       b2               <- b1 take rookPos
@@ -141,7 +157,11 @@ final case class Actor(
       castle            = Option((kingPos -> newKingPos, rookPos -> newRookPos))
     } yield {
       rookPos :: {
-        if (kingPos.file == File.E && List(File.A, File.H).contains(rookPos.file) && !board.variant.chess960)
+        if (
+          kingPos.file == File.E && List(File.A, File.H).contains(
+            rookPos.file
+          ) && board.variant != variant.Chess960
+        )
           newKingPos :: Nil
         else Nil
       }
@@ -205,7 +225,12 @@ final case class Actor(
       }
     }
 
-    def lookBothWays(pos: Pos, range: Int, dir1: Direction, dir2: Direction): Unit = {
+    def lookBothWays(
+        pos: Pos,
+        range: Int,
+        dir1: Direction,
+        dir2: Direction
+    ): Unit = {
       addDir(pos, range, dir1)
       addDir(pos, range, dir2)
     }
@@ -220,6 +245,8 @@ final case class Actor(
 
   private def pawnDir = pawnDirOf(player)
 
+  private def situationOf(player: Player) = board.situationOf(player)
+
   private def move(
       dest: Pos,
       after: Board,
@@ -227,25 +254,40 @@ final case class Actor(
       castle: Option[((Pos, Pos), (Pos, Pos))] = None,
       promotion: Option[PromotableRole] = None,
       enpassant: Boolean = false
-  ) =
+  ) = {
+    val situationBefore = situationOf(piece.player)
+    val autoEndTurn     = situationBefore.lastActionOfTurn
+    val uci             = Uci.Move(pos, dest, promotion)
     Move(
       piece = piece,
       orig = pos,
       dest = dest,
-      situationBefore = Situation(board, piece.player),
-      after = after,
+      situationBefore = situationBefore,
+      after = after updateHistory { h =>
+        h.copy(
+          lastTurn = if (autoEndTurn) h.currentTurn :+ uci else h.lastTurn,
+          currentTurn = if (autoEndTurn) List() else h.currentTurn :+ uci
+        )
+      },
+      autoEndTurn = autoEndTurn,
       capture = capture,
       castle = castle,
       promotion = promotion,
       enpassant = enpassant
     )
+  }
 
   private def history = board.history
 }
 
 object Actor {
 
-  def longRangeThreatens(board: Board, p: Pos, dir: Direction, to: Pos): Boolean =
+  def longRangeThreatens(
+      board: Board,
+      p: Pos,
+      dir: Direction,
+      to: Pos
+  ): Boolean =
     board.variant.longRangeThreatens(board, p, dir, to)
 
   def pawnDirOf(player: Player): Direction = player.fold(_.up, _.down)
@@ -253,7 +295,8 @@ object Actor {
   /** Determines the position one ahead of a pawn based on the player of the piece. P1 pawns move up and p2
     * pawns move down.
     */
-  def posAheadOfPawn(pos: Pos, player: Player): Option[Pos] = pawnDirOf(player)(pos)
+  def posAheadOfPawn(pos: Pos, player: Player): Option[Pos] =
+    pawnDirOf(player)(pos)
 
   /** Determines the squares that a pawn attacks based on the colour of the pawn.
     */

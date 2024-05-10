@@ -4,7 +4,7 @@ import strategygames.GameLogic
 object EcopeningDB {
 
     import Ecopening._
-    val MAX_MOVES = 25
+    val MAX_TURNS = 25
 
     def allByEco(lib : GameLogic): Map[ECO, Ecopening] = lib match {
         case GameLogic.Chess() => strategygames.chess.opening.EcopeningDB.allByEco.map{ case (a,b) => a -> Ecopening.Chess(b)}
@@ -13,6 +13,7 @@ object EcopeningDB {
         case GameLogic.Samurai() => strategygames.samurai.opening.EcopeningDB.allByEco.map{ case (a,b) => a -> Ecopening.Samurai(b)}
         case GameLogic.Togyzkumalak() => strategygames.togyzkumalak.opening.EcopeningDB.allByEco.map{ case (a,b) => a -> Ecopening.Togyzkumalak(b)}
         case GameLogic.Go() => strategygames.go.opening.EcopeningDB.allByEco.map{ case (a,b) => a -> Ecopening.Go(b)}
+        case GameLogic.Backgammon() => strategygames.backgammon.opening.EcopeningDB.allByEco.map{ case (a,b) => a -> Ecopening.Backgammon(b)}
         case _ => sys.error("Mismatched gamelogic types ecopening db")
     }
 
@@ -23,6 +24,7 @@ object EcopeningDB {
         case GameLogic.Samurai() => strategygames.samurai.opening.EcopeningDB.allByFen.map{ case (a,b) => a -> Ecopening.Samurai(b)}
         case GameLogic.Togyzkumalak() => strategygames.togyzkumalak.opening.EcopeningDB.allByFen.map{ case (a,b) => a -> Ecopening.Togyzkumalak(b)}
         case GameLogic.Go() => strategygames.go.opening.EcopeningDB.allByFen.map{ case (a,b) => a -> Ecopening.Go(b)}
+        case GameLogic.Backgammon() => strategygames.backgammon.opening.EcopeningDB.allByFen.map{ case (a,b) => a -> Ecopening.Backgammon(b)}
         case _ => sys.error("Mismatched gamelogic types ecopening db")
     }
 
@@ -33,6 +35,7 @@ object EcopeningDB {
         case GameLogic.Samurai() => strategygames.samurai.opening.EcopeningDB.all.map(Ecopening.Samurai)
         case GameLogic.Togyzkumalak() => strategygames.togyzkumalak.opening.EcopeningDB.all.map(Ecopening.Togyzkumalak)
         case GameLogic.Go() => strategygames.go.opening.EcopeningDB.all.map(Ecopening.Go)
+        case GameLogic.Backgammon() => strategygames.backgammon.opening.EcopeningDB.all.map(Ecopening.Backgammon)
         case _ => sys.error("Mismatched gamelogic types ecopening db")
     }
 

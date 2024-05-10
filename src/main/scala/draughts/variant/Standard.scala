@@ -58,8 +58,8 @@ case object Standard
           else if (p1Pieces.size <= 2) 10
           else 32
         } else 50
-      Some(drawingMoves, drawingMoves != 50 && firstPromotion)
-    } else Some(50, false)
+      Some((drawingMoves, drawingMoves != 50 && firstPromotion))
+    } else Some((50, false))
 
   /** Update position hashes for standard drawing rules:
     *   - The game is drawn if three (or more) times the same position is repeated, with each time the same

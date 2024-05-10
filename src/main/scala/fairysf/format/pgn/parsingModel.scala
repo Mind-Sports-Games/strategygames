@@ -1,11 +1,11 @@
 package strategygames.fairysf
 package format.pgn
 
+import scala.annotation.nowarn
 import cats.data.Validated
-import cats.syntax.option._
 
 import strategygames.{ Drop => StratDrop, Move => StratMove }
-import strategygames.format.pgn.{ Metas, ParsedPgn, San, Sans, Suffixes, Tags }
+import strategygames.format.pgn.{ Metas, San, Suffixes }
 
 case class Std(
     dest: Pos,
@@ -31,10 +31,9 @@ case class Std(
 
   def withMetas(m: Metas) = copy(metas = m)
 
-  def move(situation: Situation): Validated[String, strategygames.fairysf.Move] =
+  def move(@nowarn situation: Situation): Validated[String, strategygames.fairysf.Move] =
     Validated.invalid("Not implemented move") // TODO: ???
 
-  private def compare[A](a: Option[A], b: A) = a.fold(true)(b ==)
 }
 
 case class Drop(

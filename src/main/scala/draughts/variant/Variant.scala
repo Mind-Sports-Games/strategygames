@@ -7,7 +7,7 @@ import format.FEN
 
 import cats.data.Validated
 import cats.implicits._
-import scala.annotation.tailrec
+import scala.annotation.{ nowarn, tailrec }
 
 // Correctness depends on singletons for each variant ID
 abstract class Variant private[variant] (
@@ -22,7 +22,6 @@ abstract class Variant private[variant] (
   def pieces: Map[Pos, Piece]
   def initialFen: FEN
   def startPlayer: Player               = P1
-  def plysPerTurn: Int                  = 1
   def startingPosition: StartingPosition
   val openingTables: List[OpeningTable] = Nil
   lazy val shortInitialFen: FEN         = FEN(initialFen.value.split(":").take(3).mkString(":"))
@@ -31,21 +30,9 @@ abstract class Variant private[variant] (
   def moveDirsPlayer: Map[Player, Directions]
   def moveDirsAll: Directions
 
-  def standard     = this == Standard
-  def frisian      = this == Frisian
-  def frysk        = this == Frysk
-  def antidraughts = this == Antidraughts
-  def breakthrough = this == Breakthrough
-  def russian      = this == Russian
-  def brazilian    = this == Brazilian
-  def pool         = this == Pool
-  def portuguese   = this == Portuguese
-  def english      = this == English
-  def fromPosition = this == FromPosition
-
-  def frisianVariant    = frisian || frysk
-  def draughts64Variant = russian || brazilian || pool || portuguese || english
-  def exotic            = !standard
+  def frisianVariant    = List(Frisian, Frysk).contains(this)
+  def draughts64Variant = List(Russian, Brazilian, Pool, Portuguese, English).contains(this)
+  def exotic            = this != Standard
 
   def canOfferDraw: Boolean = true
 
@@ -70,8 +57,8 @@ abstract class Variant private[variant] (
     case _          => false
   }
 
-  def getCaptureValue(board: Board, taken: List[Pos]) = taken.length
-  def getCaptureValue(board: Board, taken: Pos)       = 1
+  def getCaptureValue(@nowarn board: Board, taken: List[Pos])   = taken.length
+  def getCaptureValue(@nowarn board: Board, @nowarn taken: Pos) = 1
 
   def validMoves(situation: Situation, finalSquare: Boolean = false): Map[Pos, List[Move]] = {
     var bestLineValue = 0
@@ -250,7 +237,7 @@ abstract class Variant private[variant] (
                         }
                         extraCaptsCache.foreach { cache =>
                           if (cachedExtraCapts.isEmpty)
-                            cache += (hash, maxExtraCapts)
+                            cache.addOne(hash, maxExtraCapts)
                         }
                         newCaptureValue + maxExtraCapts
                     }
@@ -406,7 +393,7 @@ abstract class Variant private[variant] (
           }
           extraCaptsCache.foreach { cache =>
             if (cachedExtraCapts.isEmpty)
-              cache += (hash, maxExtraCapts)
+              cache.addOne(hash, maxExtraCapts)
           }
           newCaptureValue + maxExtraCapts
       }
@@ -431,8 +418,8 @@ abstract class Variant private[variant] (
   def winner(situation: Situation): Option[Player] =
     if (situation.checkMate || specialEnd(situation)) Some(!situation.player) else None
 
-  def specialEnd(situation: Situation)  = false
-  def specialDraw(situation: Situation) = false
+  def specialEnd(@nowarn situation: Situation)  = false
+  def specialDraw(@nowarn situation: Situation) = false
 
   // Some variants have an extra effect on the board on a move. For example, in Atomic, some
   // pieces surrounding a capture explode
@@ -455,7 +442,7 @@ abstract class Variant private[variant] (
   def finalizeBoard(
       board: Board,
       uci: format.Uci.Move,
-      captured: Option[List[Piece]],
+      @nowarn captured: Option[List[Piece]],
       situationBefore: Situation,
       finalSquare: Boolean
   ): Board = {

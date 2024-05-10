@@ -1,7 +1,6 @@
 package strategygames.go.format
 import strategygames.go._
-
-import strategygames.GameFamily
+import scala.annotation.nowarn
 
 import cats.data.Validated
 import cats.implicits._
@@ -11,7 +10,7 @@ sealed trait Uci {
   def uci: String
   def piotr: String
 
-  def origDest: (Pos, Pos)
+  def origDest: Option[(Pos, Pos)]
 
   def apply(situation: Situation): Validated[String, Action]
 }
@@ -27,7 +26,7 @@ object Uci {
 
     def piotr = s"${role.pgn}@${pos.piotrStr}"
 
-    def origDest = pos -> pos
+    def origDest = Some(pos -> pos)
 
     def apply(situation: Situation) = situation.drop(role, pos)
   }
@@ -53,7 +52,7 @@ object Uci {
 
     def piotr = "pass"
 
-    def origDest = Pos.A1 -> Pos.A1
+    def origDest = None
 
     def apply(situation: Situation) = situation.pass()
   }
@@ -73,7 +72,7 @@ object Uci {
 
     def piotr = lilaUci
 
-    def origDest = Pos.A1 -> Pos.A1
+    def origDest = None
 
     def apply(situation: Situation) = situation.selectSquares(squares)
   }
@@ -90,7 +89,9 @@ object Uci {
 
   def apply(drop: strategygames.go.Drop) = Uci.Drop(drop.piece.role, drop.pos)
 
-  def apply(pass: strategygames.go.Pass) = Uci.Pass()
+  // TODO: do we really need this?
+  //       surely there is a better way to get this for this situation?
+  def apply(@nowarn pass: strategygames.go.Pass) = Uci.Pass()
 
   def apply(ss: strategygames.go.SelectSquares) = Uci.SelectSquares(ss.squares)
 

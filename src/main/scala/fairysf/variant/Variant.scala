@@ -21,14 +21,6 @@ abstract class Variant private[variant] (
     val boardSize: Board.BoardSize
 ) {
 
-  def shogi       = this == Shogi
-  def xiangqi     = this == Xiangqi
-  def minishogi   = this == MiniShogi
-  def minixiangqi = this == MiniXiangqi
-  def flipello    = this == Flipello
-  def flipello10  = this == Flipello10
-  def amazons     = this == Amazons
-
   def exotic = true
 
   def baseVariant: Boolean      = false
@@ -41,10 +33,12 @@ abstract class Variant private[variant] (
 
   def materialImbalanceVariant: Boolean = false
 
-  def dropsVariant: Boolean     = false
-  def onlyDropsVariant: Boolean = false
-  def hasGameScore: Boolean     = false
-  def canOfferDraw: Boolean     = true
+  def dropsVariant: Boolean       = false
+  def onlyDropsVariant: Boolean   = false
+  def hasDetatchedPocket: Boolean = false
+
+  def hasGameScore: Boolean = false
+  def canOfferDraw: Boolean = true
 
   def repetitionEnabled: Boolean       = true
   def useFairyOptionalGameEnd: Boolean = false
@@ -64,13 +58,11 @@ abstract class Variant private[variant] (
 
   val switchPlayerAfterMove: Boolean = true
 
-  val plysPerTurn: Int = 1
-
   val kingPiece: Option[Role] = None
 
   // looks like this is only to allow King to be a valid promotion piece
   // in just atomic, so can leave as true for now
-  def isValidPromotion(promotion: Option[PromotableRole]): Boolean = true
+  def isValidPromotion(@nowarn promotion: Option[PromotableRole]): Boolean = true
 
   def validMoves(situation: Situation): Map[Pos, List[Move]] =
     if (situation.board.uciMoves.size < Binary.maxPlies) legalMoves(situation)
@@ -103,6 +95,7 @@ abstract class Variant private[variant] (
                 pocketData = newPosition.pocketData,
                 position = newPosition.some
               ),
+              autoEndTurn = true, // have to override this function to change this (e.g. Amazons)
               capture = None,
               promotion = promotion match {
                 case "+" =>
@@ -148,7 +141,8 @@ abstract class Variant private[variant] (
               uciMoves = situation.board.uciMoves :+ uciMove,
               pocketData = newPosition.pocketData,
               position = newPosition.some
-            )
+            ),
+            autoEndTurn = true
           )
         }
         case (role, dest)             => sys.error(s"Invalid position from uci: ${role}@${dest}")
@@ -237,7 +231,7 @@ abstract class Variant private[variant] (
   @nowarn def finalizeBoard(board: Board, uci: format.Uci, captured: Option[Piece]): Board =
     board
 
-  def valid(board: Board, strict: Boolean): Boolean =
+  def valid(board: Board, @nowarn strict: Boolean): Boolean =
     Api.validateFEN(fairysfName.name, Forsyth.exportBoard(board))
 
   val roles: List[Role] = Role.all

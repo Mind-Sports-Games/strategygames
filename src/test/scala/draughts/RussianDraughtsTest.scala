@@ -10,7 +10,7 @@ import format.Uci
 
 class RussianDraughtsTest extends Specification with ValidatedMatchers {
   val brazilian = Situation(variant.Brazilian)
-  val russian = Situation(variant.Russian)
+  val russian   = Situation(variant.Russian)
 
   // https://playstrategy.dev/JqkbmbEX
   val moves = List(
@@ -159,12 +159,12 @@ class RussianDraughtsTest extends Specification with ValidatedMatchers {
         .:+("2420")
         .foldLeft(russian)((sit, uci) => move(sit, uci)) must throwA[RuntimeException]
     }
-    // TODO: add this test back in 
-    //"be invalid when playing a non possible move for variant " in {
-      //moves
-        //.take(30)
-        //.foldLeft(brazilian)((sit, uci) => move(sit, uci)) must throwA[RuntimeException]
-    //}
+    // TODO: add this test back in
+    // "be invalid when playing a non possible move for variant " in {
+    // moves
+    // .take(30)
+    // .foldLeft(brazilian)((sit, uci) => move(sit, uci)) must throwA[RuntimeException]
+    // }
   }
 
   "Russian Draughts game " should {
@@ -172,19 +172,20 @@ class RussianDraughtsTest extends Specification with ValidatedMatchers {
       val variantGame                                                          = variant.Russian
       val initialFen                                                           = variant.Russian.initialFen
       val x: (DraughtsGame, List[(DraughtsGame, Uci.WithSan)], Option[String]) =
-        Replay.gameMoveWhileValid(pdnMoves, initialFen, variantGame)
+        Replay.gameWithUciWhileValid(pdnMoves.map(List(_)), initialFen, variantGame)
 
       val gameAfterMoves = x._2.last._1
 
       gameAfterMoves.situation.winner must_== Some(Player.P1)
 
     }
-    // TODO: add this test back in 
-    //"but not replayable for brazilian variant" in {
-      //val variantGame = variant.Brazilian
-      //val initialFen  = variant.Brazilian.initialFen
-      //Replay.gameMoveWhileValid(pdnMoves, initialFen, variantGame) must throwA[RuntimeException]
-    //}
+    // TODO: add this test back in
+    // "but not replayable for brazilian variant" in {
+    //   val variantGame = variant.Brazilian
+    //   val initialFen  = variant.Brazilian.initialFen
+    //   Replay
+    //     .gameWithUciWhileValid(pdnMoves.map(List(_)), initialFen, variantGame) must throwA[RuntimeException]
+    // }
   }
 
 }

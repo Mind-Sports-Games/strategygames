@@ -1,6 +1,6 @@
 package strategygames
 
-import strategygames.Player
+import strategygames.{ GameLogic, Player }
 
 case class Pockets(p1: Pocket, p2: Pocket) {
 
@@ -16,11 +16,20 @@ case class Pockets(p1: Pocket, p2: Pocket) {
       }
     )
 
+  // the captured piece switches owner
   def store(lib: GameLogic, piece: Piece) =
     piece.player.fold(
       copy(p2 = p2 store (lib, piece.role)),
       copy(p1 = p1 store (lib, piece.role))
     )
+
+  // the captured piece returns to the original owner
+  def returnToPocket(lib: GameLogic, piece: Piece) =
+    piece.player.fold(
+      copy(p1 = p1 store (lib, piece.role)),
+      copy(p2 = p2 store (lib, piece.role))
+    )
+
 }
 
 case class Pocket(roles: List[Role]) {
@@ -35,6 +44,7 @@ case class Pocket(roles: List[Role]) {
 }
 
 sealed abstract class PocketData(
+    val gameLogic: GameLogic,
     val pockets: Pockets,
     // in crazyhouse, a promoted piece becomes a pawn
     // when captured and put in the pocket.
@@ -47,27 +57,38 @@ object PocketData {
 
   case class Chess(p: chess.PocketData)
       extends PocketData(
+        GameLogic.Chess(),
         p.pockets,
         p.promoted.map(Pos.Chess)
       )
 
   case class FairySF(p: fairysf.PocketData)
       extends PocketData(
+        GameLogic.FairySF(),
         p.pockets,
         p.promoted.map(Pos.FairySF)
       )
 
   case class Go(p: go.PocketData)
       extends PocketData(
+        GameLogic.Go(),
         p.pockets,
-        p.promoted.map(Pos.Go)
+        Set.empty
+      )
+
+  case class Backgammon(p: backgammon.PocketData)
+      extends PocketData(
+        GameLogic.Backgammon(),
+        p.pockets,
+        Set.empty
       )
 
   def init(lib: GameLogic): PocketData = lib match {
-    case GameLogic.Chess()   => Chess(chess.PocketData.init)
-    case GameLogic.FairySF() => FairySF(fairysf.PocketData.init)
-    case GameLogic.Go()      => Go(go.PocketData.init)
-    case _                   => sys.error("Unable to initialise pocket data for non chess/fairysf/go lib")
+    case GameLogic.Chess()      => Chess(chess.PocketData.init)
+    case GameLogic.FairySF()    => FairySF(fairysf.PocketData.init)
+    case GameLogic.Go()         => Go(go.PocketData.init)
+    case GameLogic.Backgammon() => Backgammon(backgammon.PocketData.init)
+    case _                      => sys.error("Unable to initialise pocket data for non chess/fairysf/go lib")
   }
 
 }

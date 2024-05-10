@@ -63,6 +63,12 @@ object Hash {
     val actorMasks: Array[Long]    = zc.actorMasks
   }
 
+  final case class BackgammonZobristConstants(zc: backgammon.Hash.ZobristConstants) extends ZobristConstants {
+    def hexToLong(s: String): Long = zc.hexToLong(s)
+    val p1TurnMask: Long           = zc.p1TurnMask
+    val actorMasks: Array[Long]    = zc.actorMasks
+  }
+
   // The following masks are compatible with the Polyglot
   // opening book format.
   private def polyglotTable(lib: GameLogic): ZobristConstants = lib match {
@@ -72,6 +78,7 @@ object Hash {
     case GameLogic.Samurai()      => SamuraiZobristConstants(new samurai.Hash.ZobristConstants(0))
     case GameLogic.Togyzkumalak() => TogyzkumalakZobristConstants(new togyzkumalak.Hash.ZobristConstants(0))
     case GameLogic.Go()           => GoZobristConstants(new go.Hash.ZobristConstants(0))
+    case GameLogic.Backgammon()   => BackgammonZobristConstants(new backgammon.Hash.ZobristConstants(0))
   }
 
   private def randomTable(lib: GameLogic): ZobristConstants = lib match {
@@ -81,17 +88,18 @@ object Hash {
     case GameLogic.Samurai()      => SamuraiZobristConstants(new samurai.Hash.ZobristConstants(16))
     case GameLogic.Togyzkumalak() => TogyzkumalakZobristConstants(new togyzkumalak.Hash.ZobristConstants(16))
     case GameLogic.Go()           => GoZobristConstants(new go.Hash.ZobristConstants(16))
+    case GameLogic.Backgammon()   => BackgammonZobristConstants(new backgammon.Hash.ZobristConstants(16))
   }
 
   private def get(lib: GameLogic, situation: Situation, table: ZobristConstants): Long =
     (lib, situation, table) match {
-      case (GameLogic.Draughts(), Situation.Draughts(situation), DraughtsZobristConstants(table)) =>
+      case (GameLogic.Draughts(), Situation.Draughts(situation), DraughtsZobristConstants(table))       =>
         draughts.Hash.get(situation, table)
-      case (GameLogic.Chess(), Situation.Chess(situation), ChessZobristConstants(table))          =>
+      case (GameLogic.Chess(), Situation.Chess(situation), ChessZobristConstants(table))                =>
         chess.Hash.get(situation, table)
-      case (GameLogic.FairySF(), Situation.FairySF(situation), FairySFZobristConstants(table))    =>
+      case (GameLogic.FairySF(), Situation.FairySF(situation), FairySFZobristConstants(table))          =>
         fairysf.Hash.get(situation, table)
-      case (GameLogic.Samurai(), Situation.Samurai(situation), SamuraiZobristConstants(table))    =>
+      case (GameLogic.Samurai(), Situation.Samurai(situation), SamuraiZobristConstants(table))          =>
         samurai.Hash.get(situation, table)
       case (
             GameLogic.Togyzkumalak(),
@@ -99,8 +107,11 @@ object Hash {
             TogyzkumalakZobristConstants(table)
           ) =>
         togyzkumalak.Hash.get(situation, table)
-      case (GameLogic.Go(), Situation.Go(situation), GoZobristConstants(table))                   =>
+      case (GameLogic.Go(), Situation.Go(situation), GoZobristConstants(table))                         =>
         go.Hash.get(situation, table)
+      case (GameLogic.Backgammon(), Situation.Backgammon(situation), BackgammonZobristConstants(table)) =>
+        backgammon.Hash.get(situation, table)
+      case _                                                                                            => sys.error("Invalid lib, situation and table combination")
     }
 
   private val h = new Hash(size)

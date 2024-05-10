@@ -1,7 +1,5 @@
 package strategygames
 
-import cats.syntax.option.none
-
 case class Division(middle: Option[Int], end: Option[Int], plies: Int) {
 
   def openingSize: Int        = middle | plies
@@ -47,6 +45,8 @@ object Divider {
       strategygames.draughts.Divider(draughtsBoards(boards))
     case GameLogic.Chess()    =>
       strategygames.chess.Divider(chessBoards(boards))
+    case _                    =>
+      sys.error("Divider is unimplemented for this GameLogic")
   }
 
 }

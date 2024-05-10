@@ -3,8 +3,11 @@ package strategygames.chess.opening
 import cats.syntax.option._
 
 import strategygames.chess.format.FEN
+import strategygames.ActionStrs
 
 object FullOpeningDB {
+
+  private val SEARCH_MAX_TURNS = 40
 
   private lazy val byFen: collection.Map[String, FullOpening] = {
     FullOpeningPartA.db ++ FullOpeningPartB.db ++ FullOpeningPartC.db ++ FullOpeningPartD.db ++ FullOpeningPartE.db
@@ -23,13 +26,26 @@ object FullOpeningDB {
       case _                                    => None
     }
 
-  val SEARCH_MAX_PLIES = 40
+  // retain original logic: pgnMoves.take(SEARCH_MAX_PLIES).takeWhile(san => !san.contains('@'))
+  private def searchActionStrs(actionStrs: ActionStrs): ActionStrs = {
+    val a    = actionStrs.toList
+      .take(SEARCH_MAX_TURNS)
+      .map(t => (t.takeWhile(san => !san.contains('@')), t.filter(san => san.contains('@')).size > 0))
+      .takeWhile(!_._2)
+      .map(_._1)
+    val last =
+      if (a.size < actionStrs.size) {
+        val lastActionStrs = actionStrs.toList(a.size).takeWhile(san => !san.contains('@'))
+        if (lastActionStrs == Vector()) List() else List(lastActionStrs)
+      } else List()
+    a ++ last
+  }
 
   // assumes standard initial FEN and variant
-  def search(moveStrs: Iterable[String]): Option[FullOpening.AtPly] =
+  def search(actionStrs: ActionStrs): Option[FullOpening.AtPly] =
     strategygames.chess.Replay
       .situations(
-        moveStrs.take(SEARCH_MAX_PLIES).takeWhile(san => !san.contains('@')),
+        searchActionStrs(actionStrs),
         None,
         strategygames.chess.variant.Standard
       )

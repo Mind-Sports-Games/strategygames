@@ -2,7 +2,7 @@ package strategygames.draughts
 package format.pdn
 
 import strategygames.{ Move => StratMove }
-import strategygames.format.pgn.{ Metas, San, Sans, Tags }
+import strategygames.format.pgn.{ Metas, San }
 
 import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }

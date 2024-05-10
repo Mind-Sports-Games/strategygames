@@ -5,7 +5,7 @@ object EcopeningDB {
 
   import Ecopening._
 
-  val MAX_MOVES = 25
+  val MAX_TURNS = 25
 
   lazy val all = allByEco.values.toList.sorted
 
@@ -14,7 +14,7 @@ object EcopeningDB {
   }
 
   lazy val allByEco: Map[ECO, Ecopening] = Map(
-"A00" -> new Ecopening("A00", "go9x9", "Go Start Pos", "Go Start Pos", "", "9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 1", ""),
+"A00" -> new Ecopening("A00", "go9x9", "Go Start Pos", "Go Start Pos", "", "9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 1", ""),
 "B00" -> new Ecopening("B00", "go13x13", "Go Start Pos", "Go Start Pos", "", "13/13/13/13/13/13/13/13/13/13/13/13/13[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 1", ""),
 "C00" -> new Ecopening("C00", "go19x19", "Go Start Pos", "Go Start Pos", "", "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 1", "")
   )

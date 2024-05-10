@@ -19,14 +19,46 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def dropsAsDrops: List[Drop]
 
+  def lifts: List[Lift]
+
   def passes: List[Pass]
 
   def selectSquaresAction: List[SelectSquares]
 
+  def diceRolls: List[DiceRoll]
+
+  def endTurns: List[EndTurn]
+
   def actions: List[Action] =
-    moves.values.flatten.toList ::: dropsAsDrops ::: passes ::: selectSquaresAction
+    moves.values.flatten.toList :::
+      dropsAsDrops :::
+      lifts :::
+      passes :::
+      selectSquaresAction :::
+      diceRolls :::
+      endTurns
+
+  def canDrop: Boolean
+
+  def canOnlyDrop: Boolean
+
+  def canLift: Boolean
+
+  def canOnlyLift: Boolean
+
+  def canRollDice: Boolean
+
+  def canOnlyRollDice: Boolean
+
+  def canEndTurn: Boolean
+
+  def canOnlyEndTurn: Boolean
 
   def takebackable: Boolean
+
+  def canUndo: Boolean
+
+  def forcedAction: Option[Action]
 
   def history = board.history
 
@@ -67,9 +99,15 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def drop(role: Role, pos: Pos): Validated[String, Drop]
 
+  def lift(pos: Pos): Validated[String, Lift]
+
   def pass: Validated[String, Pass]
 
   def selectSquares(squares: List[Pos]): Validated[String, SelectSquares]
+
+  def diceRoll(dice: List[Int]): Validated[String, DiceRoll]
+
+  def endTurn: Validated[String, EndTurn]
 
   def withVariant(variant: Variant): Situation
 
@@ -85,6 +123,7 @@ sealed abstract class Situation(val board: Board, val player: Player) {
   def toSamurai: samurai.Situation
   def toTogyzkumalak: togyzkumalak.Situation
   def toGo: go.Situation
+  def toBackgammon: backgammon.Situation
 
 }
 
@@ -101,6 +140,10 @@ object Situation {
     }
 
     def takebackable = true
+
+    def canUndo = false
+
+    def forcedAction: Option[Action] = None
 
     lazy val check: Boolean = s.check
 
@@ -140,9 +183,31 @@ object Situation {
         }
         .toList
 
+    def lifts: List[Lift] = List.empty
+
     def passes: List[Pass] = List.empty
 
     def selectSquaresAction: List[SelectSquares] = List.empty
+
+    def diceRolls: List[DiceRoll] = List.empty
+
+    def endTurns: List[EndTurn] = List.empty
+
+    def canDrop: Boolean = s.canDrop
+
+    def canOnlyDrop: Boolean = s.canOnlyDrop
+
+    def canLift: Boolean = false
+
+    def canOnlyLift: Boolean = false
+
+    def canRollDice: Boolean = s.canRollDice
+
+    def canOnlyRollDice: Boolean = s.canRollDice
+
+    def canEndTurn: Boolean = false
+
+    def canOnlyEndTurn: Boolean = false
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -173,10 +238,17 @@ object Situation {
       case _                                      => sys.error("Not passed Chess objects")
     }
 
+    def lift(pos: Pos): Validated[String, Lift] = sys.error("Can't do a Lift for chess")
+
     def pass: Validated[String, Pass] = sys.error("Can't do a Pass for chess")
 
     def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
       sys.error("Can't do a SelectSquare for chess")
+
+    def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
+      s.diceRoll(dice).map(dr => DiceRoll.Chess(dr))
+
+    def endTurn: Validated[String, EndTurn] = sys.error("Can't do EndTurn for chess")
 
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.Chess(variant) => Chess(s.withVariant(variant))
@@ -198,6 +270,7 @@ object Situation {
     def toSamurai      = sys.error("Can't make samurai situation from chess situation")
     def toTogyzkumalak = sys.error("Can't make togyzkumalak situation from chess situation")
     def toGo           = sys.error("Can't make go situation from chess situation")
+    def toBackgammon   = sys.error("Can't make backgammon situation from chess situation")
   }
 
   final case class Draughts(s: draughts.Situation)
@@ -206,12 +279,15 @@ object Situation {
         s.player
       ) {
 
-    // TODO: DRAUGHTS I think that .validMoves is correct, but unsure. needs testing.
     lazy val moves: Map[Pos, List[Move]] = s.validMoves.map {
       case (p: draughts.Pos, l: List[draughts.Move]) => (Pos.Draughts(p), l.map(Move.Draughts))
     }
 
     def takebackable = true
+
+    def canUndo = false
+
+    def forcedAction: Option[Action] = None
 
     lazy val check: Boolean = false
 
@@ -227,9 +303,31 @@ object Situation {
 
     def dropsAsDrops: List[Drop] = List.empty
 
+    def lifts: List[Lift] = List.empty
+
     def passes: List[Pass] = List.empty
 
     def selectSquaresAction: List[SelectSquares] = List.empty
+
+    def diceRolls: List[DiceRoll] = List.empty
+
+    def endTurns: List[EndTurn] = List.empty
+
+    def canDrop: Boolean = false
+
+    def canOnlyDrop: Boolean = false
+
+    def canLift: Boolean = false
+
+    def canOnlyLift: Boolean = false
+
+    def canRollDice: Boolean = false
+
+    def canOnlyRollDice: Boolean = false
+
+    def canEndTurn: Boolean = false
+
+    def canOnlyEndTurn: Boolean = false
 
     // possibly need to do something for this
     def opponentHasInsufficientMaterial: Boolean = false
@@ -293,10 +391,17 @@ object Situation {
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
       sys.error("Can't do a Drop for draughts")
 
+    def lift(pos: Pos): Validated[String, Lift] = sys.error("Can't do a Lift for draughts")
+
     def pass: Validated[String, Pass] = sys.error("Can't do a Pass for draughts")
 
     def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
       sys.error("Can't do a SelectSquare for draughts")
+
+    def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
+      sys.error("Can't do a DiceRoll for draughts")
+
+    def endTurn: Validated[String, EndTurn] = sys.error("Can't do EndTurn for draughts")
 
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.Draughts(variant) => Draughts(s.withVariant(variant))
@@ -318,6 +423,7 @@ object Situation {
     def toSamurai      = sys.error("Can't make samurai situation from draughts situation")
     def toTogyzkumalak = sys.error("Can't make togyzkumalak situation from draughts situation")
     def toGo           = sys.error("Can't make go situation from draughts situation")
+    def toBackgammon   = sys.error("Can't make backgammon situation from draughts situation")
 
   }
 
@@ -332,6 +438,10 @@ object Situation {
     }
 
     def takebackable = true
+
+    def canUndo = false
+
+    def forcedAction: Option[Action] = None
 
     lazy val check: Boolean = s.check
 
@@ -361,9 +471,31 @@ object Situation {
 
     def dropsAsDrops: List[Drop] = s.dropsAsDrops.map(Drop.FairySF)
 
+    def lifts: List[Lift] = List.empty
+
     def passes: List[Pass] = List.empty
 
     def selectSquaresAction: List[SelectSquares] = List.empty
+
+    def diceRolls: List[DiceRoll] = List.empty
+
+    def endTurns: List[EndTurn] = List.empty
+
+    def canDrop: Boolean = s.canDrop
+
+    def canOnlyDrop: Boolean = s.canOnlyDrop
+
+    def canLift: Boolean = false
+
+    def canOnlyLift: Boolean = false
+
+    def canRollDice: Boolean = false
+
+    def canOnlyRollDice: Boolean = false
+
+    def canEndTurn: Boolean = false
+
+    def canOnlyEndTurn: Boolean = false
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -394,10 +526,17 @@ object Situation {
       case _                                          => sys.error("Not passed FairySF objects")
     }
 
+    def lift(pos: Pos): Validated[String, Lift] = sys.error("Can't do a Lift for fairysf")
+
     def pass: Validated[String, Pass] = sys.error("Can't do a Pass for fairysf")
 
     def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
       sys.error("Can't do a SelectSquare for fairysf")
+
+    def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
+      sys.error("Can't do a DiceRoll for fairysf")
+
+    def endTurn: Validated[String, EndTurn] = sys.error("Can't do EndTurn for fairysf")
 
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.FairySF(variant) => FairySF(s.withVariant(variant))
@@ -419,6 +558,7 @@ object Situation {
     def toSamurai      = sys.error("Can't make samurai situation from fairysf situation")
     def toTogyzkumalak = sys.error("Can't make togyzkumalak situation from fairysf situation")
     def toGo           = sys.error("Can't make go situation from fairysf situation")
+    def toBackgammon   = sys.error("Can't make backgammon situation from fairysf situation")
   }
 
   final case class Samurai(s: samurai.Situation)
@@ -432,6 +572,10 @@ object Situation {
     }
 
     def takebackable = true
+
+    def canUndo = false
+
+    def forcedAction: Option[Action] = None
 
     lazy val check: Boolean = false
 
@@ -459,17 +603,46 @@ object Situation {
 
     def dropsAsDrops: List[Drop] = List.empty
 
+    def lifts: List[Lift] = List.empty
+
     def passes: List[Pass] = List.empty
 
     def selectSquaresAction: List[SelectSquares] = List.empty
 
+    def diceRolls: List[DiceRoll] = List.empty
+
+    def endTurns: List[EndTurn] = List.empty
+
+    def canDrop: Boolean = false
+
+    def canOnlyDrop: Boolean = false
+
+    def canLift: Boolean = false
+
+    def canOnlyLift: Boolean = false
+
+    def canRollDice: Boolean = false
+
+    def canOnlyRollDice: Boolean = false
+
+    def canEndTurn: Boolean = false
+
+    def canOnlyEndTurn: Boolean = false
+
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
       sys.error("Can't do a Drop for samurai")
+
+    def lift(pos: Pos): Validated[String, Lift] = sys.error("Can't do a Lift for samurai")
 
     def pass: Validated[String, Pass] = sys.error("Can't do a Pass for samurai")
 
     def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
       sys.error("Can't do a SelectSquare for samurai")
+
+    def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
+      sys.error("Can't do a DiceRoll for samurai")
+
+    def endTurn: Validated[String, EndTurn] = sys.error("Can't do EndTurn for samurai")
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -514,6 +687,7 @@ object Situation {
     def toSamurai      = s
     def toTogyzkumalak = sys.error("Can't make draughts situation from samurai situation")
     def toGo           = sys.error("Can't make go situation from samurai situation")
+    def toBackgammon   = sys.error("Can't make backgammon situation from samurai situation")
   }
 
   final case class Togyzkumalak(s: togyzkumalak.Situation)
@@ -528,6 +702,10 @@ object Situation {
     }
 
     def takebackable = true
+
+    def canUndo = false
+
+    def forcedAction: Option[Action] = None
 
     lazy val check: Boolean = false
 
@@ -554,17 +732,46 @@ object Situation {
 
     def dropsAsDrops: List[Drop] = List.empty
 
+    def lifts: List[Lift] = List.empty
+
     def passes: List[Pass] = List.empty
 
     def selectSquaresAction: List[SelectSquares] = List.empty
 
+    def diceRolls: List[DiceRoll] = List.empty
+
+    def endTurns: List[EndTurn] = List.empty
+
+    def canDrop: Boolean = false
+
+    def canOnlyDrop: Boolean = false
+
+    def canLift: Boolean = false
+
+    def canOnlyLift: Boolean = false
+
+    def canRollDice: Boolean = false
+
+    def canOnlyRollDice: Boolean = false
+
+    def canEndTurn: Boolean = false
+
+    def canOnlyEndTurn: Boolean = false
+
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
       sys.error("Can't do a Drop for togyzkumalak")
+
+    def lift(pos: Pos): Validated[String, Lift] = sys.error("Can't do a Lift for togyzkumalak")
 
     def pass: Validated[String, Pass] = sys.error("Can't do a Pass for togyzkumalak")
 
     def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
       sys.error("Can't do a SelectSquare for togykumalak")
+
+    def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
+      sys.error("Can't do a DiceRoll for togykumalak")
+
+    def endTurn: Validated[String, EndTurn] = sys.error("Can't do EndTurn for togykumalak")
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -609,6 +816,7 @@ object Situation {
     def toSamurai      = sys.error("Can't make samurai situation from togyzkumalak situation")
     def toTogyzkumalak = s
     def toGo           = sys.error("Can't make go situation from togyzkumalak situation")
+    def toBackgammon   = sys.error("Can't make backgammon situation from togyzkumalak situation")
   }
 
   final case class Go(s: go.Situation)
@@ -620,6 +828,10 @@ object Situation {
     lazy val moves: Map[Pos, List[Move]] = Map.empty[Pos, List[Move]]
 
     def takebackable = s.takebackable
+
+    def canUndo = false
+
+    def forcedAction: Option[Action] = None
 
     lazy val check: Boolean = false
 
@@ -646,11 +858,33 @@ object Situation {
 
     def dropsAsDrops: List[Drop] = s.dropsAsDrops.map(Drop.Go)
 
+    def lifts: List[Lift] = List.empty
+
     def passes: List[Pass] = pass.fold[List[Pass]](_ => List.empty, p => List(p))
 
     def selectSquaresAction: List[SelectSquares] =
       selectSquares(List[Pos]().empty)
         .fold[List[SelectSquares]](_ => List.empty, ss => List(ss))
+
+    def diceRolls: List[DiceRoll] = List.empty
+
+    def endTurns: List[EndTurn] = List.empty
+
+    def canDrop: Boolean = s.canDrop
+
+    def canOnlyDrop: Boolean = s.canOnlyDrop
+
+    def canLift: Boolean = false
+
+    def canOnlyLift: Boolean = false
+
+    def canRollDice: Boolean = false
+
+    def canOnlyRollDice: Boolean = false
+
+    def canEndTurn: Boolean = false
+
+    def canOnlyEndTurn: Boolean = false
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -674,6 +908,8 @@ object Situation {
       case _                                => sys.error("Not passed Go objects")
     }
 
+    def lift(pos: Pos): Validated[String, Lift] = sys.error("Can't do a Lift for go")
+
     def pass: Validated[String, Pass] = s.pass().toEither.map(p => Pass.Go(p)).toValidated
 
     def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
@@ -687,6 +923,11 @@ object Situation {
       ).toEither
         .map(ss => SelectSquares.Go(ss))
         .toValidated
+
+    def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
+      sys.error("Can't do a DiceRoll for go")
+
+    def endTurn: Validated[String, EndTurn] = sys.error("Can't do EndTurn for go")
 
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.Go(variant) => Go(s.withVariant(variant))
@@ -708,6 +949,145 @@ object Situation {
     def toSamurai      = sys.error("Can't make samurai situation from go situation")
     def toTogyzkumalak = sys.error("Can't make togyzkumalak situation from go situation")
     def toGo           = s
+    def toBackgammon   = sys.error("Can't make backgammon situation from go situation")
+  }
+
+  final case class Backgammon(s: backgammon.Situation)
+      extends Situation(
+        Board.Backgammon(s.board),
+        s.player
+      ) {
+
+    lazy val moves: Map[Pos, List[Move]] =
+      s.moves.map { case (p: backgammon.Pos, l: List[backgammon.Move]) =>
+        (Pos.Backgammon(p), l.map(Move.Backgammon))
+      }
+
+    def takebackable = false
+
+    def canUndo = s.canUndo
+
+    def forcedAction: Option[Action] = s.forcedAction.map(Action.wrap)
+
+    lazy val check: Boolean = false
+
+    def checkSquare = None
+
+    def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
+
+    def threefoldRepetition: Boolean = false
+    def isRepetition: Boolean        = false
+
+    override lazy val perpetualPossible: Boolean = false
+
+    def end: Boolean = s.end
+
+    def winner: Option[Player] = s.winner
+
+    lazy val destinations: Map[Pos, List[Pos]] = s.destinations.map {
+      case (p: backgammon.Pos, l: List[backgammon.Pos]) => (Pos.Backgammon(p), l.map(Pos.Backgammon))
+    }
+
+    def drops: Option[List[Pos]] = s.drops.map(_.map(Pos.Backgammon))
+
+    def dropsByRole: Option[Map[Role, List[Pos]]] = s.dropsByRole.map(_.map {
+      case (r: backgammon.Role, p: List[backgammon.Pos]) => (Role.BackgammonRole(r), p.map(Pos.Backgammon))
+    })
+
+    def dropsAsDrops: List[Drop] = s.dropsAsDrops.map(Drop.Backgammon)
+
+    def lifts: List[Lift] = s.lifts.map(Lift.Backgammon)
+
+    def passes: List[Pass] = List.empty
+
+    def selectSquaresAction: List[SelectSquares] = List.empty
+
+    def diceRolls: List[DiceRoll] = s.diceRolls.map(DiceRoll.Backgammon)
+
+    def endTurns: List[EndTurn] = s.endTurns.map(EndTurn.Backgammon)
+
+    def canDrop: Boolean = s.canDrop
+
+    def canOnlyDrop: Boolean = s.canOnlyDrop
+
+    def canLift: Boolean = s.canLift
+
+    def canOnlyLift: Boolean = s.canOnlyLift
+
+    def canRollDice: Boolean = s.canRollDice
+
+    def canOnlyRollDice: Boolean = s.canOnlyRollDice
+
+    def canEndTurn: Boolean = s.canEndTurn
+
+    def canOnlyEndTurn: Boolean = s.canOnlyEndTurn
+
+    def drop(role: Role, pos: Pos): Validated[String, Drop] = (role, pos) match {
+      case (Role.BackgammonRole(role), Pos.Backgammon(pos)) =>
+        s.drop(role, pos).toEither.map(d => Drop.Backgammon(d)).toValidated
+      case _                                                => sys.error("Not passed Backgammon objects")
+    }
+
+    def lift(pos: Pos): Validated[String, Lift] = pos match {
+      case Pos.Backgammon(pos) => s.lift(pos).toEither.map(l => Lift.Backgammon(l)).toValidated
+      case _                   => sys.error("Not passed Backgammon objects")
+    }
+
+    def pass: Validated[String, Pass] = sys.error("Can't do a Pass for backgammon")
+
+    def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
+      sys.error("Can't do a SelectSquare for togykumalak")
+
+    def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
+      s.diceRoll(dice).map(dr => DiceRoll.Backgammon(dr))
+
+    def endTurn: Validated[String, EndTurn] =
+      s.endTurn.toEither.map(et => EndTurn.Backgammon(et)).toValidated
+
+    def playable(strict: Boolean): Boolean = s.playable(strict)
+
+    val status: Option[Status] = s.status
+
+    def move(
+        from: Pos,
+        to: Pos,
+        promotion: Option[PromotableRole] = None,
+        finalSquare: Boolean = false,
+        forbiddenUci: Option[List[String]] = None,
+        captures: Option[List[Pos]] = None,
+        partialCaptures: Boolean = false
+    ): Validated[String, Move] = (from, to) match {
+      case (Pos.Backgammon(from), Pos.Backgammon(to)) =>
+        s.move(from, to).toEither.map(m => Move.Backgammon(m)).toValidated
+      case _                                          => sys.error("Not passed Backgammon objects")
+    }
+
+    def move(uci: Uci.Move): Validated[String, Move] = uci match {
+      case Uci.BackgammonMove(uci) => s.move(uci).toEither.map(m => Move.Backgammon(m)).toValidated
+      case _                       => sys.error("Not passed Backgammon objects")
+    }
+
+    def withVariant(variant: Variant): Situation = variant match {
+      case Variant.Backgammon(variant) => Backgammon(s.withVariant(variant))
+      case _                           => sys.error("Not passed Backgammon objects")
+    }
+
+    def unary_! : Situation = Backgammon(s.unary_!)
+
+    def copy(board: Board): Situation = Backgammon(board match {
+      case Board.Backgammon(board) => s.copy(board)
+      case _                       => sys.error("Can't copy a backgammon situation with a non-backgammon board")
+    })
+
+    def gameLogic: GameLogic = GameLogic.Backgammon()
+
+    def toFairySF      = sys.error("Can't make fairysf situation from backgammon situation")
+    def toChess        = sys.error("Can't make chess situation from backgammon situation")
+    def toDraughts     = sys.error("Can't make draughts situation from backgammon situation")
+    def toSamurai      = sys.error("Can't make samurai situation from backgammon situation")
+    def toTogyzkumalak = sys.error("Can't make togyzkumalak situation from backgammon situation")
+    def toGo           = sys.error("Can't make go situation from backgammon situation")
+    def toBackgammon   = s
   }
 
   def apply(lib: GameLogic, board: Board, player: Player): Situation = (lib, board) match {
@@ -718,6 +1098,7 @@ object Situation {
     case (GameLogic.Togyzkumalak(), Board.Togyzkumalak(board)) =>
       Togyzkumalak(togyzkumalak.Situation(board, player))
     case (GameLogic.Go(), Board.Go(board))                     => Go(go.Situation(board, player))
+    case (GameLogic.Backgammon(), Board.Backgammon(board))     => Backgammon(backgammon.Situation(board, player))
     case _                                                     => sys.error("Mismatched gamelogic types 3")
   }
 
@@ -729,6 +1110,8 @@ object Situation {
     case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant)) =>
       Togyzkumalak(togyzkumalak.Situation.apply(variant))
     case (GameLogic.Go(), Variant.Go(variant))                     => Go(go.Situation.apply(variant))
+    case (GameLogic.Backgammon(), Variant.Backgammon(variant))     =>
+      Backgammon(backgammon.Situation.apply(variant))
     case _                                                         => sys.error("Mismatched gamelogic types 4")
   }
 
@@ -738,5 +1121,6 @@ object Situation {
   def wrap(s: samurai.Situation)      = Samurai(s)
   def wrap(s: togyzkumalak.Situation) = Togyzkumalak(s)
   def wrap(s: go.Situation)           = Go(s)
+  def wrap(s: backgammon.Situation)   = Backgammon(s)
 
 }

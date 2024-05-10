@@ -7,7 +7,7 @@ import org.specs2.mutable.Specification
 //import scala.annotation.nowarn
 
 import strategygames.fairysf.variant._
-import strategygames.fairysf.{Board, Game, Situation, Pos, PromotableRole}
+import strategygames.fairysf.{ Board, Game, Pos, PromotableRole, Situation }
 
 trait ShogiTest extends Specification with ValidatedMatchers {
 
@@ -34,26 +34,26 @@ trait ShogiTest extends Specification with ValidatedMatchers {
     def playMove(
         orig: Pos,
         dest: Pos,
-        promotion: Option[PromotableRole] = None,
+        promotion: Option[PromotableRole] = None
     ): Validated[String, Game] =
       game.apply(orig, dest, promotion).map(t => t._1)
 
-    //def playDrop(
-        //role: Role,
-        //dest: Pos
-    //): Validated[String, Game] =
-      //game.applyDrop(Uci.Drop(role, dest))
+    // def playDrop(
+    // role: Role,
+    // dest: Pos
+    // ): Validated[String, Game] =
+    // game.applyDrop(Uci.Drop(role, dest))
 
-    def withClock(c: Clock) = game.copy(clock = Some(c))
+    def withClock(c: ClockBase) = game.copy(clock = Some(c))
   }
 
   implicit def richGame(game: Game) = RichGame(game)
 
   def makeSituation: Situation = Situation(Shogi)
 
-  def makeEmptySituation: Situation = Situation(Shogi).copy(board=Board.empty(Shogi))
+  def makeEmptySituation: Situation                   = Situation(Shogi).copy(board = Board.empty(Shogi))
   def makeEmptySituation(variant: Variant): Situation =
-    Situation(variant).copy(board=Board.empty(variant))
+    Situation(variant).copy(board = Board.empty(variant))
 
   def makeGame: Game = Game(makeSituation)
 

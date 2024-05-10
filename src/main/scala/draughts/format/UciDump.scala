@@ -1,27 +1,28 @@
 package strategygames.draughts
 package format
 
+import scala.annotation.nowarn
+
 import cats.data.Validated
 
 import strategygames.draughts.variant.Variant
+import strategygames.ActionStrs
 
 object UciDump {
 
-  def apply(replay: Replay): List[String] =
-    replay.chronoMoves map move(replay.setup.board.variant)
+  def apply(replay: Replay): ActionStrs =
+    replay.chronoActions.map(_.map(action(replay.setup.board.variant)))
 
   def apply(
-      moves: Seq[String],
+      actionStrs: ActionStrs,
       initialFen: Option[FEN],
       variant: Variant,
       finalSquare: Boolean = false
-  ): Validated[String, List[String]] =
-    if (moves.isEmpty)
-      Validated.valid(Nil)
-    else
-      Replay(moves, initialFen, variant, finalSquare) andThen (_.valid) map apply
+  ): Validated[String, ActionStrs] =
+    if (actionStrs.isEmpty) Validated.valid(Nil)
+    else Replay(actionStrs, initialFen, variant, finalSquare) andThen (_.valid) map apply
 
-  def move(_variant: Variant)(action: Action): String = action match {
+  def action(@nowarn _variant: Variant)(action: Action): String = action match {
     case m: Move => m.toUci.shortUci
   }
 

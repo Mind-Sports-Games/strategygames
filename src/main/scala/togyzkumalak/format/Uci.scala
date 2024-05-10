@@ -1,6 +1,7 @@
 package strategygames.togyzkumalak.format
 import strategygames.togyzkumalak._
 
+import scala.annotation.nowarn
 import strategygames.GameFamily
 
 import cats.data.Validated
@@ -11,7 +12,7 @@ sealed trait Uci {
   def uci: String
   def piotr: String
 
-  def origDest: (Pos, Pos)
+  def origDest: Option[(Pos, Pos)]
 
   def apply(situation: Situation): Validated[String, Move]
 }
@@ -32,7 +33,7 @@ object Uci {
 
     def promotionString = promotion.fold("")(_.forsyth.toString)
 
-    def origDest = orig -> dest
+    def origDest = Some(orig -> dest)
 
     def apply(situation: Situation) = situation.move(orig, dest, promotion)
   }
@@ -65,7 +66,7 @@ object Uci {
         dest <- move lift 1 flatMap Pos.piotr
       } yield Move(orig, dest, promotion = None)
 
-    def fromStrings(gf: GameFamily, origS: String, destS: String, promS: Option[String]) =
+    def fromStrings(@nowarn gf: GameFamily, origS: String, destS: String, @nowarn promS: Option[String]) =
       for {
         orig     <- Pos.fromKey(origS)
         dest     <- Pos.fromKey(destS)

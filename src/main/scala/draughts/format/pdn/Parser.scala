@@ -24,6 +24,8 @@ import strategygames.format.pgn.{
 // https://pdn.fmjd.org/index.html
 object Parser {
 
+  // TODO As part of Draughts upgrade to multiaction we should rename all the 'Move'
+  // in this file to Action (like in chess.format.pgn.Parser
   private case class StrMove(
       san: String,
       glyphs: Glyphs,
@@ -62,15 +64,17 @@ object Parser {
       sys error "### StackOverflowError ### in PDN parser"
   }
 
-  def moves(str: String, variant: Variant): Validated[String, Sans]                = moves(
-    str.split(' ').toList,
-    variant
-  )
-  def moves(strMoves: Iterable[String], variant: Variant): Validated[String, Sans] = objMoves(
-    strMoves.map { StrMove(_, Glyphs.empty, Nil, Nil) }.to(List),
-    variant
-  )
-  def objMoves(strMoves: List[StrMove], variant: Variant): Validated[String, Sans] =
+  def sans(str: String, variant: Variant): Validated[String, Sans]                      =
+    sans(
+      str.split(' ').toList,
+      variant
+    )
+  def sans(flatActionStrs: Iterable[String], variant: Variant): Validated[String, Sans] =
+    objMoves(
+      flatActionStrs.map { StrMove(_, Glyphs.empty, Nil, Nil) }.to(List),
+      variant
+    )
+  def objMoves(strMoves: List[StrMove], variant: Variant): Validated[String, Sans]      =
     strMoves.map { case StrMove(san, glyphs, comments, variations) =>
       (
         MoveParser(san, variant) map { m =>
@@ -100,7 +104,7 @@ object Parser {
     def apply(pdn: String): Validated[String, (InitialPosition, List[StrMove], Option[Tag])] =
       parseAll(strMoves, pdn) match {
         case Success((init, moves, result), _) =>
-          valid(init, moves, result map { r => Tag(_.Result, r) })
+          valid((init, moves, result.map { r => Tag(_.Result, r) }))
         case err                               =>
           invalid("Cannot parse moves: %s\n%s".format(err.toString, pdn))
       }

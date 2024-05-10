@@ -7,10 +7,19 @@ case class SelectSquares(
     squares: List[Pos],
     situationBefore: Situation,
     after: Board,
+    autoEndTurn: Boolean,
     metrics: MoveMetrics = MoveMetrics()
-) extends Action(situationBefore, after, metrics) {
+) extends Action(situationBefore) {
 
-  def situationAfter = Situation(finalizeAfter, !situationBefore.player)
+  def situationAfter =
+    Situation(finalizeAfter, if (autoEndTurn) !situationBefore.player else situationBefore.player)
+
+  def finalizeAfter: Board = after updateHistory { h =>
+    h.copy(
+      lastTurn = if (autoEndTurn) h.currentTurn :+ toUci else h.lastTurn,
+      currentTurn = if (autoEndTurn) List() else h.currentTurn :+ toUci
+    )
+  }
 
   def applyVariantEffect = this
 

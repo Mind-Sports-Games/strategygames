@@ -5,7 +5,7 @@ import cats.syntax.option._
 import scala.annotation.nowarn
 
 import strategygames.samurai._
-import strategygames.samurai.format.{ FEN, Forsyth, Uci }
+import strategygames.samurai.format.{ FEN, Forsyth }
 import strategygames.{ GameFamily, Player }
 
 case class SamuraiName(val name: String)
@@ -18,8 +18,6 @@ abstract class Variant private[variant] (
     val standardInitialPosition: Boolean,
     val boardSize: Board.BoardSize
 ) {
-
-  def oware = this == Oware
 
   def exotic = true
 
@@ -48,13 +46,10 @@ abstract class Variant private[variant] (
   def pieces: PieceMap = Api.pieceMapFromFen(key, initialFen.value)
 
   def startPlayer: Player = P1
-  def plysPerTurn: Int    = 1
-
-  val kingPiece: Option[Role] = None
 
   // looks like this is only to allow King to be a valid promotion piece
   // in just atomic, so can leave as true for now
-  def isValidPromotion(promotion: Option[PromotableRole]): Boolean = true
+  def isValidPromotion(@nowarn promotion: Option[PromotableRole]): Boolean = true
 
   def validMoves(situation: Situation): Map[Pos, List[Move]] =
     situation.board.apiPosition.legalMoves
@@ -85,6 +80,7 @@ abstract class Variant private[variant] (
                 uciMoves = situation.board.uciMoves :+ uciMove,
                 position = newPosition.some
               ),
+              autoEndTurn = true,
               capture = None,
               promotion = None
             )
@@ -130,7 +126,7 @@ abstract class Variant private[variant] (
   @nowarn def finalizeBoard(board: Board, uci: format.Uci, captured: Option[Piece]): Board =
     board
 
-  def valid(board: Board, strict: Boolean): Boolean =
+  def valid(board: Board, @nowarn strict: Boolean): Boolean =
     Api.validateFEN(Forsyth.exportBoard(board))
 
   val roles: List[Role] = Role.all

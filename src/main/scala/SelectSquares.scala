@@ -1,15 +1,14 @@
 package strategygames
 
-import cats.syntax.option.none
-
 import strategygames.format.Uci
 
 sealed abstract class SelectSquares(
     val squares: List[Pos],
     val situationBefore: Situation,
     val after: Board,
+    val autoEndTurn: Boolean,
     val metrics: MoveMetrics = MoveMetrics()
-) extends Action(situationBefore, after, metrics) {
+) extends Action(situationBefore) {
 
   def situationAfter: Situation
 
@@ -32,6 +31,7 @@ object SelectSquares {
         ss.squares.map(Pos.Go(_)),
         Situation.Go(ss.situationBefore),
         Board.Go(ss.after),
+        ss.autoEndTurn,
         ss.metrics
       ) {
 
@@ -48,6 +48,7 @@ object SelectSquares {
     def toSamurai      = sys.error("Can't make a samurai SelectSquares from a go SelectSquares")
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak SelectSquares from a go SelectSquares")
     def toGo           = ss
+    def toBackgammon   = sys.error("Can't make a backgammon SelectSquares from a go SelectSquares")
 
   }
 
