@@ -30,7 +30,7 @@ case class History(
     lastTurn.filter { case _: Uci.DiceRoll => true; case _ => false }.nonEmpty
 
   def forcedTurnPersists(situation: Situation, action: Action) =
-    if (currentTurn.size == 1) situation.forcedAction == Some(action)
-    else forcedTurn && situation.forcedAction == Some(action)
+    if (currentTurn.size == 1) situation.forcedAction.map(_.toUci) == Some(action.toUci)
+    else forcedTurn && situation.forcedAction.map(_.toUci) == Some(action.toUci)
 
 }
