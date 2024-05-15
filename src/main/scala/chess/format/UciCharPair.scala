@@ -15,6 +15,9 @@ object UciCharPair {
           toChar(pos),
           dropRole2charMap.getOrElse(role, voidChar)
         )
+      // TODO: what should these be?
+      case Uci.DiceRoll(_)                  => sys.error("DiceRoll not supported")
+      case Uci.DoRoll()                     => sys.error("DoRoll Not supported")
     }
 
   private[format] object implementation {

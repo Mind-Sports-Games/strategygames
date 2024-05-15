@@ -397,8 +397,10 @@ object Board {
       case (GameLogic.Backgammon(), Variant.Backgammon(variant))     =>
         Backgammon(
           backgammon.Board.apply(
-            pieces.map { case (Pos.Backgammon(pos), (Piece.Backgammon(piece), count)) =>
-              (pos, (piece, count))
+            pieces.flatMap {
+              case (Pos.Backgammon(pos), (Piece.Backgammon(piece), count)) =>
+                Some((pos, (piece, count)))
+              case _                                                       => None
             },
             variant
           )
