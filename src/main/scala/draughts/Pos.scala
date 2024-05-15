@@ -15,7 +15,7 @@ sealed abstract class Pos(val fieldNumber: Int) {
   }
 
   def all: List[Pos]
-  def getDistFromSide(): Int {}
+  def getDistFromSide: Int
 }
 
 sealed abstract class PosMotion(field: Int) extends Pos(field) {
@@ -45,7 +45,7 @@ sealed case class Pos100 private (x: Int, y: Int) extends PosMotion(5 * (y - 1) 
   lazy val moveLeft  = movesHorizontal.get(fieldNumber).map(_(0)).filter(_ > 0) flatMap posAt
   lazy val moveRight = movesHorizontal.get(fieldNumber).map(_(1)).filter(_ > 0) flatMap posAt
 
-  def getDistFromSide(): Int = {
+  def getDistFromSide: Int =
     fieldNumber % 10 match {
       case 5 | 6 => 0
       case 1 | 0 => 1
@@ -53,7 +53,6 @@ sealed case class Pos100 private (x: Int, y: Int) extends PosMotion(5 * (y - 1) 
       case 2 | 9 => 3
       case _     => 4
     }
-  }
 
   def all: List[Pos] = Pos100.all
 }
@@ -72,14 +71,13 @@ sealed case class Pos64 private (x: Int, y: Int) extends PosMotion(4 * (y - 1) +
   lazy val moveLeft  = movesHorizontal.get(fieldNumber).map(_(0)).filter(_ > 0) flatMap posAt
   lazy val moveRight = movesHorizontal.get(fieldNumber).map(_(1)).filter(_ > 0) flatMap posAt
 
-  def getDistFromSide(): Int = {
+  def getDistFromSide: Int =
     Math.floorMod(fieldNumber, 8) match {
       case 4 | 5 => 0
       case 0 | 1 => 1
       case 3 | 6 => 2
       case _     => 3
     }
-  }
 
   def all: List[Pos] = Pos64.all
 }
