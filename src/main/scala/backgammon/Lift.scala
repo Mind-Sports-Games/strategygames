@@ -31,7 +31,11 @@ case class Lift(
 
   def lazyFinalizeAfter: Board = after updateHistory { h =>
     h.copy(
-      currentTurn = h.currentTurn :+ toUci
+      currentTurn = h.currentTurn :+ toUci,
+      score = Score(
+        h.score.p1 + player.fold(1, 0),
+        h.score.p2 + player.fold(0, 1)
+      )
     )
   }
 
