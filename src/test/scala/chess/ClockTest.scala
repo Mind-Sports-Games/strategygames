@@ -95,7 +95,7 @@ class TimerTest extends ChessTest {
   // Byoyomi can be represented multiple different ways, but it's basically a new timer
   // without increment after the current period.
   "play with a fischer increment followed by byoyomi" should {
-    val withByoyomi =
+    val withByoyomi    =
       TimerTest(
         Timer
           .fischerIncrement(Centis(60 * 100), Centis(1 * 100))
@@ -173,7 +173,7 @@ class TimerTest extends ChessTest {
 }
 
 class ClockTest extends ChessTest {
-  val chess = GameLogic.Chess()
+  val chess       = GameLogic.Chess()
   val fakeClock60 = Clock(Clock.Config(60, 0))
     .copy(timestamper = new Timestamper {
       val now = Timestamp(0)
@@ -257,7 +257,7 @@ class ClockTest extends ChessTest {
       recordActionTime(clock, s)
 
     case class MultiActionTest(clock: ClockBase) {
-      def useTimes(actions: List[Centis]) =
+      def useTimes(actions: List[Centis])       =
         copy(clock = actions.foldLeft(clock)((clk, s) => withClockUseTimeForAction(clk)(s)))
       def useTime(action: Centis)               = useTimes(List(action))
       def endTurn                               = copy(clock = clock.endTurn)
@@ -295,7 +295,7 @@ class ClockTest extends ChessTest {
         newClock.clock.player must_== P1
       }
       "multiple actions but don't end turn" in {
-        val times = List(seconds(1), seconds(1), seconds(2), seconds(4))
+        val times    = List(seconds(1), seconds(1), seconds(2), seconds(4))
         val newClock = clock
           .useTimes(times)
         newClock.remainingTime(P1) must_== seconds(52)
@@ -377,7 +377,7 @@ class ClockTest extends ChessTest {
         newClock.clock.player must_== P1                // Turn isn't over so it's still P1 to play
       }
       "multiple actions but end turn" in {
-        val times = List(seconds(1), seconds(1), seconds(20), seconds(4))
+        val times    = List(seconds(1), seconds(1), seconds(20), seconds(4))
         val newClock = clock
           .useTimes(times)
           .endTurn
@@ -462,8 +462,6 @@ class ClockTest extends ChessTest {
         newClock1.clock.player must_== P2                // Must have switched to P2's turn
       }
       "multiple actions, end turn, total time less than delay" in {
-        val times = List(seconds(1), seconds(1), seconds(20), seconds(4))
-
         // NOTE: this test ensures that the final action time
         //       is less than the delay, and the entire turn is less than the delay
         val timesShort = List(seconds(1), seconds(1), seconds(1), seconds(1))
@@ -646,7 +644,7 @@ class ClockTest extends ChessTest {
     "1x30s move + 30s stall with increment" in {
       val clockHalf = clockStep(fakeClock60Plus1, 30 * 100)
       clockHalf.remainingTime(P1).centis must_== 31 * 100
-      val clock = advanceTimeByCentis(clockHalf, 30 * 100)
+      val clock     = advanceTimeByCentis(clockHalf, 30 * 100)
 
       clock.remainingTime(P1).centis must_== 1 * 100
       clock.outOfTime(P2, withGrace = true) must beFalse
@@ -656,7 +654,7 @@ class ClockTest extends ChessTest {
     "1x100 move + 80s stall with byoyomi" in {
       val clockHalf = clockStep(fakeClock180Delay2, 100 * 100)
       clockHalf.remainingTime(P1).centis must_== 82 * 100
-      val clock = advanceTimeByCentis(clockHalf, 80 * 100)
+      val clock     = advanceTimeByCentis(clockHalf, 80 * 100)
 
       clock.remainingTime(P1).centis must_== 2 * 100
       clock.outOfTime(P2, withGrace = true) must beFalse

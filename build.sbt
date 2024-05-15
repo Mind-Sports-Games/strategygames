@@ -34,6 +34,7 @@ resolvers ++= Seq(
   .getOrElse(Seq())
 
 scalacOptions ++= Seq(
+  "-Xfatal-warnings",
   "-encoding",
   "utf-8",
   "-explaintypes",
