@@ -306,7 +306,7 @@ case class ClockPlayer(
 
   def remaining: Centis = timer.remaining
 
-  def graceSeconds: Int = config.graceSeconds
+  def graceSeconds: Int = if (berserk) 0 else config.graceSeconds
 }
 
 // All unspecified durations are expressed in seconds
@@ -852,7 +852,7 @@ case class ByoyomiClockPlayer(
 
   def remaining: Centis = limit - elapsed
 
-  def graceSeconds: Int = config.graceSeconds
+  def graceSeconds: Int = if (berserk) 0 else config.graceSeconds
 }
 
 object ByoyomiClockPlayer {
