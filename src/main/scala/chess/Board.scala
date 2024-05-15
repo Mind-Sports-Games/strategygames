@@ -173,9 +173,11 @@ case class Board(
   // used for multiaction variants like Monster Chess.
   // Won't always produce a result for Atomic - but this isnt needed for that variant
   def lastActionPlayer: Option[Player] = history.lastAction
-    .map {
-      case m: Uci.Move => m.dest
-      case d: Uci.Drop => d.pos
+    .flatMap {
+      case m: Uci.Move => Some(m.dest)
+      case d: Uci.Drop => Some(d.pos)
+      // TODO: this probably needs to be fixed?
+      case _           => sys.error("Dice Rolls are not supported (lastActionPlayer)")
     }
     .flatMap(apply)
     .map(_.player)

@@ -73,6 +73,7 @@ case class Game(
   def apply(uci: Uci): Validated[String, (Game, Action)]    = (uci match {
     case u: Uci.Move => apply(u)
     case u: Uci.Drop => apply(u)
+    case _           => sys.error("Dice Rolls are not supported (game.apply)")
   }) map { case (g, a) => g -> a }
 
   private def applyActionStr(actionStr: String): VActionStrs = {
