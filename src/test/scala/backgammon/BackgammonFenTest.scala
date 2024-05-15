@@ -101,7 +101,7 @@ class BackgammonFenTest extends BackgammonTest with ValidatedMatchers {
       pieces.size must_== 7
     }
     "pieces at g1, h1, i1, j1, k1, l1, g2" in {
-      pieces.keys.toList.pp("keys").contains(Pos.G2) must_== true
+      pieces.keys.toList.contains(Pos.G2) must_== true
       pieces.keys.toList.contains(Pos.H2) must_== true
       pieces.keys.toList.contains(Pos.I2) must_== true
       pieces.keys.toList.contains(Pos.J2) must_== true
