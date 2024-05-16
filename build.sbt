@@ -2,7 +2,7 @@ name := "strategygames"
 
 organization := "org.playstrategy"
 
-version := "10.2.1-pstrat129"
+version := "10.2.1-pstrat131"
 
 scalaVersion := "2.13.5"
 
@@ -34,6 +34,7 @@ resolvers ++= Seq(
   .getOrElse(Seq())
 
 scalacOptions ++= Seq(
+  "-Xfatal-warnings",
   "-encoding",
   "utf-8",
   "-explaintypes",

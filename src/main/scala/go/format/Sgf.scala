@@ -5,12 +5,12 @@ import strategygames.ActionStrs
 object Sgf {
 
   def actionStrsToSGFPos(actionStrs: ActionStrs): List[String] =
-    actionStrs.flatten
-      .map { str =>
-        Uci.apply(str).map { case uci: Uci.Drop => uci.pos.sgf }
+    actionStrs.flatten.flatMap { str =>
+      Uci.apply(str).flatMap {
+        case uci: Uci.Drop => Some(uci.pos.sgf)
+        case _             => None
       }
-      .flatten
-      .toList
+    }.toList
 
   def indexToPlayer(index: Int): Char = if (index % 2 == 0) 'B' else 'W'
 
