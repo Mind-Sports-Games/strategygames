@@ -38,6 +38,8 @@ object Uci {
     def fairySfPromotionString = promotion.fold("")(_ => "+")
     def promotionString        = lilaPromotionString
 
+    def sgfPromotionString = promotion.fold("")(_.forsyth.toString + "+")
+
     def origDest = Some(orig -> dest)
 
     def apply(situation: Situation) = situation.move(orig, dest, promotion)

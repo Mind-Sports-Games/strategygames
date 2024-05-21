@@ -11,6 +11,7 @@ case class Rank private (val index: Int) extends AnyVal with Ordered[Rank] {
     else None
 
   @inline def char: Char = (49 + index).toChar
+  def sgfChar: Char      = (97 + (7 - index)).toChar
   override def toString  = char.toString
 }
 
