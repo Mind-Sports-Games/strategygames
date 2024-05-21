@@ -158,6 +158,8 @@ case class Pos private (index: Int) extends AnyVal {
   def piotr: Char = Piotr.lookup.get(index).getOrElse('?')
   def piotrStr    = piotr.toString
 
+  def sgf(numRanks: Int) = file.sgfChar.toString + rank.sgfChar(numRanks).toString
+
   def key               = file.toString + rank.toString
   override def toString = key
 }
