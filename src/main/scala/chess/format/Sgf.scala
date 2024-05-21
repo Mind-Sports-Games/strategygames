@@ -6,7 +6,7 @@ import strategygames.Player.P1
 
 object Sgf {
 
-  def actionStrsToSGFPos(actionStrs: ActionStrs): List[String] =
+  private def actionStrsToSGFPos(actionStrs: ActionStrs): List[String] =
     actionStrs.map { turnActions =>
       turnActions
         .flatMap(Uci.apply(_).flatMap {
@@ -17,13 +17,13 @@ object Sgf {
         .mkString("")
     }.toList
 
-  def indexToPlayer(whiteStarts: Boolean, index: Int): Char =
+  private def indexToPlayer(whiteStarts: Boolean, index: Int): Char =
     if ((index % 2 == 0 && whiteStarts) || (index % 2 == 1 && !whiteStarts)) 'W' else 'B'
 
-  def sgfPosWithPlayer(sgfPos: List[String], whiteStarts: Boolean): List[(Char, String)] =
+  private def sgfPosWithPlayer(sgfPos: List[String], whiteStarts: Boolean): List[(Char, String)] =
     sgfPos.zipWithIndex.map { case (pos, index) => (indexToPlayer(whiteStarts, index), pos) }
 
-  def turnToString(posWithPlayer: (Char, String)): String =
+  private def turnToString(posWithPlayer: (Char, String)): String =
     s";${posWithPlayer._1}[${posWithPlayer._2}]"
 
   def actionStrsToOutput(variant: Variant, actionStrs: ActionStrs, d: Int = 0): String =

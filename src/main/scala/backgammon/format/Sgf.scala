@@ -4,7 +4,7 @@ import strategygames.ActionStrs
 
 object Sgf {
 
-  def actionStrsToSGF(actionStrs: ActionStrs): List[String] =
+  private def actionStrsToSGF(actionStrs: ActionStrs): List[String] =
     actionStrs.map { turnActions =>
       turnActions
         .flatMap(Uci.apply(_).flatMap {
@@ -18,12 +18,12 @@ object Sgf {
         .mkString("")
     }.toList
 
-  def indexToPlayer(index: Int): Char = if (index % 2 == 0) 'W' else 'B'
+  private def indexToPlayer(index: Int): Char = if (index % 2 == 0) 'W' else 'B'
 
-  def sgfWithPlayer(sgf: List[String]): List[(Char, String)] =
+  private def sgfWithPlayer(sgf: List[String]): List[(Char, String)] =
     sgf.zipWithIndex.map { case (notation, index) => (indexToPlayer(index), notation) }
 
-  def turnToString(turnWithPlayer: (Char, String)): String =
+  private def turnToString(turnWithPlayer: (Char, String)): String =
     s";${turnWithPlayer._1}[${turnWithPlayer._2}]"
 
   def actionStrsToOutput(actionStrs: ActionStrs, d: Int = 0) =

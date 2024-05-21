@@ -20,15 +20,6 @@ class SgfTest extends Specification with ValidatedMatchers {
   val LOA           = Variant.Chess(strategygames.chess.variant.LinesOfAction)
   val ScrambledEggs = Variant.Chess(strategygames.chess.variant.ScrambledEggs)
 
-  "Go19x19 => s@b1 in actionStrsToSGFPos" should {
-    "have an sgf output" in {
-      val output                 = List("bs")
-      val actionStrs: ActionStrs = Vector(Vector("s@b1"))
-      strategygames.go.format.Sgf
-        .actionStrsToSGFPos(strategygames.go.variant.Go19x19, actionStrs) must_== output
-    }
-  }
-
   "Go19x19 => s@b1 in actionStrsToOutput" should {
     "have an sgf output" in {
       val output                 = ";B[bs]"
