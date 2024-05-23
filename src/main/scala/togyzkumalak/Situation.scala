@@ -15,16 +15,7 @@ case class Situation(board: Board, player: Player) {
 
   def history = board.history
 
-  // TODO: Implement
-  // private lazy val gameEnd: Boolean = false
-
-  // private lazy val gameResult: GameResult = board.apiPosition.gameResult
-
-  // private lazy val result =
-  //  if (gameEnd) gameResult
-  //  else GameResult.Ongoing()
-
-  // these dont exist in Oware. Normal ending tracked in VariantEnd
+  // these dont exist in Togyzkumalak. Normal ending tracked in VariantEnd
   def checkMate: Boolean = false
   def staleMate: Boolean = false
 
