@@ -3,7 +3,8 @@ package strategygames.backgammon
 import strategygames.{ Player, Status }
 
 import cats.data.Validated
-import cats.implicits._
+//import cats implicits in this file causes mindtrap to have problems
+//import cats.implicits._
 
 import strategygames.backgammon.format.Uci
 
@@ -160,10 +161,10 @@ case class Situation(board: Board, player: Player) {
     (board valid strict) && !end
 
   lazy val status: Option[Status] =
-    if (board.variant.backgammonWin(this)) Status.BackgammonWin.some
-    else if (board.variant.gammonWin(this)) Status.GammonWin.some
-    else if (end) Status.SingleWin.some
-    else none
+    if (board.variant.backgammonWin(this)) Some(Status.BackgammonWin)
+    else if (board.variant.gammonWin(this)) Some(Status.GammonWin)
+    else if (end) Some(Status.SingleWin)
+    else None
 
   def opponentHasInsufficientMaterial: Boolean = false
 
