@@ -1,11 +1,12 @@
-package strategygames.format
+package strategygames
+package format.sgf
 
 import strategygames._
 import strategygames.variant.Variant
 
-object Sgf {
+object Dumper {
 
-  def actionStrsToOutput(variant: Variant, actionStrs: ActionStrs, d: Int = 0): String =
+  def apply(variant: Variant, actionStrs: ActionStrs, d: Int = 0): String =
     variant match {
       case Variant.Chess(variant) if variant.gameFamily == GameFamily.LinesOfAction() =>
         chess.format.Sgf.actionStrsToOutput(variant, actionStrs, d)
