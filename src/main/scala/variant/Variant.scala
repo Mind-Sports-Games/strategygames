@@ -66,6 +66,8 @@ abstract class Variant(
 
   def stalemateIsDraw: Boolean
 
+  def useRuleOfGinOnInsufficientMaterial: Boolean
+
   // In most variants, the winner is the last player to have played and there is a possibility of either a traditional
   // checkmate or a variant end condition
   def winner(situation: Situation): Option[Player]
@@ -171,6 +173,8 @@ object Variant {
     }
 
     def stalemateIsDraw: Boolean = v.stalemateIsDraw
+
+    def useRuleOfGinOnInsufficientMaterial: Boolean = false
 
     def winner(situation: Situation): Option[Player] = situation match {
       case Situation.Chess(situation) => v.winner(situation)
@@ -281,6 +285,8 @@ object Variant {
     // stalemate not referenced in draughts
     def stalemateIsDraw: Boolean = true
 
+    def useRuleOfGinOnInsufficientMaterial: Boolean = false
+
     def winner(situation: Situation): Option[Player] = situation match {
       case Situation.Draughts(situation) => v.winner(situation)
       case _                             => sys.error("Not passed Draughts objects")
@@ -387,6 +393,8 @@ object Variant {
 
     def stalemateIsDraw: Boolean = v.stalemateIsDraw
 
+    def useRuleOfGinOnInsufficientMaterial: Boolean = false
+
     def winner(situation: Situation): Option[Player] = situation match {
       case Situation.FairySF(situation) => v.winner(situation)
       case _                            => sys.error("Not passed FairySF objects")
@@ -489,6 +497,8 @@ object Variant {
     }
 
     def stalemateIsDraw: Boolean = v.stalemateIsDraw
+
+    def useRuleOfGinOnInsufficientMaterial: Boolean = false
 
     def winner(situation: Situation): Option[Player] = situation match {
       case Situation.Samurai(situation) => v.winner(situation)
@@ -593,6 +603,8 @@ object Variant {
 
     def stalemateIsDraw: Boolean = v.stalemateIsDraw
 
+    def useRuleOfGinOnInsufficientMaterial: Boolean = false
+
     def winner(situation: Situation): Option[Player] = situation match {
       case Situation.Togyzkumalak(situation) => v.winner(situation)
       case _                                 => sys.error("Not passed Togyzkumalak objects")
@@ -694,6 +706,8 @@ object Variant {
     }
 
     def stalemateIsDraw: Boolean = v.stalemateIsDraw
+
+    def useRuleOfGinOnInsufficientMaterial: Boolean = false
 
     def winner(situation: Situation): Option[Player] = situation match {
       case Situation.Go(situation) => v.winner(situation)
@@ -799,6 +813,8 @@ object Variant {
     }
 
     def stalemateIsDraw: Boolean = false
+
+    def useRuleOfGinOnInsufficientMaterial: Boolean = v.useRuleOfGinOnInsufficientMaterial
 
     def winner(situation: Situation): Option[Player] = situation match {
       case Situation.Backgammon(situation) => v.winner(situation)

@@ -415,6 +415,8 @@ abstract class Variant private[variant] (
     }
     .to(Map)
 
+  def useRuleOfGinOnInsufficientMaterial: Boolean = true
+
   override def toString = s"Variant($name)"
 
   override def equals(that: Any): Boolean = this eq that.asInstanceOf[AnyRef]

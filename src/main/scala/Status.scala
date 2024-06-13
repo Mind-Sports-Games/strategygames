@@ -30,6 +30,7 @@ object Status {
   case object SingleWin      extends Status(40) // For Backgammon
   case object GammonWin      extends Status(41) // For Backgammon
   case object BackgammonWin  extends Status(42) // For Backgammon
+  case object RuleOfGin      extends Status(45) // clock flag but still awarded to player who flagged
   case object VariantEnd     extends Status(60) // the variant has a special ending
 
   val all = List(
@@ -49,6 +50,7 @@ object Status {
     SingleWin,
     GammonWin,
     BackgammonWin,
+    RuleOfGin,
     VariantEnd
   )
 
@@ -56,7 +58,9 @@ object Status {
     s.id >= Mate.id && s.id != Cheat.id
   }
 
-  val finishedWithWinner = List(Mate, Resign, Timeout, Outoftime, Cheat, NoStart, VariantEnd)
+  val finishedWithWinner = List(Mate, Resign, Timeout, Outoftime, RuleOfGin, Cheat, NoStart, VariantEnd)
+
+  val flagged = List(Outoftime, RuleOfGin)
 
   val byId = all map { v =>
     (v.id, v)

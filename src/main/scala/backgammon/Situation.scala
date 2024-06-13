@@ -165,7 +165,51 @@ case class Situation(board: Board, player: Player) {
     else if (end) Status.SingleWin.some
     else none
 
-  def opponentHasInsufficientMaterial: Boolean = false
+  // only works when we are not mid turn and have not rolled dice
+  def maxTurnsFromEnd(player: Player): Option[Int] =
+    if (board.racePosition)
+      // min dice roll is 3. min pieces that can move is 2.
+      Some(
+        Math
+          .ceil(board.pipCount(player).toDouble / 3)
+          .toInt
+          .max(
+            Math.ceil(board.playerPiecesOnBoardCount(player).toDouble / 2).toInt
+          )
+      )
+    else None
+
+  // only works when we are not mid turn and have not rolled dice
+  def minTurnsFromEnd(player: Player): Option[Int] =
+    if (board.racePosition)
+      // max dice roll is 24. max pieces that can move is 4.
+      Some(
+        Math
+          .ceil(board.pipCount(player).toDouble / 24)
+          .toInt
+          .max(
+            Math.ceil(board.playerPiecesOnBoardCount(player).toDouble / 4).toInt
+          )
+      )
+    else None
+
+  // no unused dice so we can do a simple gin position calculation
+  def noUnusedDiceGinPosition: Boolean =
+    if (board.unusedDice.isEmpty)
+      maxTurnsFromEnd(player)
+        .map { turns =>
+          turns <= minTurnsFromEnd(!player).getOrElse(0) - (if (board.history.hasRolledDiceThisTurn) 1 else 0)
+        }
+        .getOrElse(false)
+    else false
+
+  def opponentHasInsufficientMaterial: Boolean =
+    if (board.unusedDice.isEmpty)
+      noUnusedDiceGinPosition
+    else
+      !validTurns
+        .map(t => t.last.lazySituationAfter.end || t.last.lazySituationAfter.noUnusedDiceGinPosition)
+        .contains(false)
 
   def move(from: Pos, to: Pos): Validated[String, Move] =
     board.variant.move(this, from, to)

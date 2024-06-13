@@ -53,12 +53,33 @@ case class Board(
   def piecesCanLift(player: Player): Boolean =
     !piecesOnBar(player) && piecesOf(player).keys.toList.diff(Pos.home(player)).isEmpty
 
+  def pipCount(player: Player): Int =
+    piecesOf(player).map {
+      case (pos, piece) => (
+        ((Pos.barIndex(!piece._1.player) * Pos.indexDirection(piece._1.player)) +
+          (pos.index * Pos.indexDirection(!piece._1.player))) * piece._2
+      )
+    }.sum + (pieceCountOnBar(player) * 25)
+
+  // only looks at pieces on board not pieces on bar
   def furthestFromEnd(player: Player): Int =
     if (piecesOf(player).isEmpty) 0
     else
       (Pos.barIndex(!player) +
         (piecesOf(player).keys.map(_.index * Pos.indexDirection(!player)).max *
           Pos.indexDirection(player))).abs
+
+  private def onlySafeOnePointPieces(player: Player) =
+    (furthestFromEnd(player) == 1 &&
+      (playerPiecesOnBoardCount(player) - unusedDice.size).max(0) % 2 == 0) ||
+      (playerPiecesOnBoardCount(player) == 1 && !history.hasRolledDiceThisTurn)
+
+  def racePosition: Boolean =
+    (!piecesOnBar(Player.P1) &&
+      !piecesOnBar(Player.P2) &&
+      furthestFromEnd(Player.P1) <= 24 - furthestFromEnd(Player.P2)) ||
+      onlySafeOnePointPieces(Player.P1) ||
+      onlySafeOnePointPieces(Player.P2)
 
   lazy val actors: Map[Pos, (Actor, Int)] = pieces map { case (pos, (piece, count)) =>
     (pos, (Actor(piece, pos, this), count))

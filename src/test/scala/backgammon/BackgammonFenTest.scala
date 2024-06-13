@@ -1,9 +1,8 @@
 package strategygames.backgammon
-import strategygames.Player
-
+import strategygames.{ Player, Score }
 import org.specs2.matcher.ValidatedMatchers
 
-import strategygames.backgammon.format.{ FEN, Forsyth }
+import strategygames.backgammon.format.{ FEN, Forsyth, Uci }
 import strategygames.backgammon.variant.Backgammon
 
 class BackgammonFenTest extends BackgammonTest with ValidatedMatchers {
@@ -53,6 +52,9 @@ class BackgammonFenTest extends BackgammonTest with ValidatedMatchers {
       pieces.keys.toList.contains(Pos.G2) must_== true
       pieces.keys.toList.contains(Pos.L2) must_== true
     }
+    "have no pieces in the pockets" in {
+      fen.pocketData must_== Some(PocketData.init)
+    }
   }
 
   "Initial fen starting player" should {
@@ -62,8 +64,9 @@ class BackgammonFenTest extends BackgammonTest with ValidatedMatchers {
     }
   }
 
-  "fen 6,2s,2s,2s,2s,2s,2s/6,5S,5[2S] - - b 8 3 10" should {
-    val fen    = FEN("6,2s,2s,2s,2s,2s,2s/6,5S,5[2S] 5 6 b 8 3 10")
+  val fenStr1 = "6,2s,2s,2s,2s,2s,2s/6,5S,5[2S] - - b 8 3 10"
+  s"fen $fenStr1" should {
+    val fen    = FEN(fenStr1)
     val pieces = fen.pieces
 
     "Player turn is black/p2" in {
@@ -109,6 +112,10 @@ class BackgammonFenTest extends BackgammonTest with ValidatedMatchers {
       pieces.keys.toList.contains(Pos.L2) must_== true
       pieces.keys.toList.contains(Pos.G1) must_== true
     }
+    "have the correct number of pieces in the pockets" in {
+      fen.pocketData.map(_.pockets(Player.P1).roles.size) must_== Some(2)
+      fen.pocketData.map(_.pockets(Player.P2).roles.size) must_== Some(0)
+    }
     "score" in {
       fen.player1Score must_== 8
       fen.player2Score must_== 3
@@ -130,9 +137,169 @@ class BackgammonFenTest extends BackgammonTest with ValidatedMatchers {
         "s@k2"
       )
       playActionStrs(actionStrs) must beValid.like { g =>
-        Forsyth.>>(g) must_== FEN("5S,3,3s,1,4s,3,1S,1S/5s,3,2S,1,5S,2,1s,1,1s[1S,1s] 1 2 w 0 0 1")
+        val fen = Forsyth.>>(g)
+        fen must_== FEN("5S,3,3s,1,4s,3,1S,1S/5s,3,2S,1,5S,2,1s,1,1s[1S,1s] 1 2 w 0 0 1")
+        fen.pocketData.map(_.pockets(Player.P1).roles.size) must_== Some(1)
+        fen.pocketData.map(_.pockets(Player.P2).roles.size) must_== Some(1)
       }
     }
   }
 
+  // also use fen test to check gin position
+  "P1 is just 3 points from the end with 2 pieces" should {
+    val fen   = FEN("4,3s,1,5s,5/5s,9,1S,1S[] - - w 13 2 99")
+    val board = Board(fen.pieces, History(), variant.Backgammon, fen.pocketData)
+    "this is a gin position for P1" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterial must_== true
+      Situation(board, Player.P2).opponentHasInsufficientMaterial must_== false
+    }
+  }
+
+  "Both P1 and P2 are just 4 points from the end with 2 pieces" should {
+    val fen   = FEN("9,1s,1,1s/9,1S,1,1S[] - - w 13 13 99")
+    val board = Board(fen.pieces, History(), variant.Backgammon, fen.pocketData)
+    "this is a gin position for neither player" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterial must_== false
+      Situation(board, Player.P2).opponentHasInsufficientMaterial must_== false
+    }
+  }
+
+  "Both P1 and P2 are just 3 points from the end with 3 pieces" should {
+    val fen   = FEN("11,3s/11,3S[] - - w 12 12 99")
+    val board = Board(fen.pieces, History(), variant.Backgammon, fen.pocketData)
+    "this is a gin position for neither player" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterial must_== false
+      Situation(board, Player.P2).opponentHasInsufficientMaterial must_== false
+    }
+  }
+
+  "P1 is just 4 points from the end with 2 pieces, P2 has 4 pieces on the 6 point" should {
+    val fen   = FEN("6,4s,5/9,1S,1,1S[] - - w 13 11 99")
+    val board = Board(fen.pieces, History(), variant.Backgammon, fen.pocketData)
+    "this is a gin position for neither player" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterial must_== false
+      Situation(board, Player.P2).opponentHasInsufficientMaterial must_== false
+    }
+  }
+
+  "P1 is just 4 points from the end with 2 pieces, P2 has 4 pieces on the 6 point but the player has rolled 6/6" should {
+    val fen   = FEN("6,4s,5/9,1S,1,1S[] 6/6/6/6 - b 13 11 99")
+    val board = Board(
+      fen.pieces,
+      History(
+        lastTurn = List(Uci.EndTurn()),
+        currentTurn = List(Uci.DiceRoll(List(6, 6))),
+        score = Score(13, 11)
+      ),
+      variant.Backgammon,
+      fen.pocketData,
+      List(6, 6, 6, 6)
+    )
+    "this is a gin position for both players with this roll" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterial must_== true
+      Situation(board, Player.P2).opponentHasInsufficientMaterial must_== true
+    }
+  }
+
+  "P1 is just 4 points from the end with 2 pieces, P2 has 4 pieces on the 6 point but the player has rolled 6/6" should {
+    val fen   = FEN("5,2s,2s,5/5,2S,2S,5[] 6/6/6/6 - w 11 11 99")
+    val board = Board(
+      fen.pieces,
+      History(
+        lastTurn = List(Uci.EndTurn()),
+        currentTurn = List(Uci.DiceRoll(List(6, 6))),
+        score = Score(11, 11)
+      ),
+      variant.Backgammon,
+      fen.pocketData,
+      List(6, 6, 6, 6)
+    )
+    "this is a gin position for both players with this roll as it moves them a turn away from winning" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterial must_== true
+      Situation(board, Player.P2).opponentHasInsufficientMaterial must_== true
+    }
+  }
+
+  "when opponent has piece on bar but we have an even number on 1 point" should {
+    val fen   = FEN("4,3s,1,5s,5/5s,10,2S[1s] - - w 13 1 99")
+    val board = Board(fen.pieces, History(), variant.Backgammon, fen.pocketData)
+    "this is a gin position for P1" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterial must_== true
+      Situation(board, Player.P2).opponentHasInsufficientMaterial must_== false
+    }
+  }
+  "when opponent has piece on bar but we have an even number on 1 point" should {
+    val fen   = FEN("4,3s,1,5s,5/5s,10,2S[1s] - - w 13 1 99")
+    val board = Board(fen.pieces, History(), variant.Backgammon, fen.pocketData)
+    "this is a gin position for P1" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterial must_== true
+      Situation(board, Player.P2).opponentHasInsufficientMaterial must_== false
+    }
+  }
+  "when opponent has piece on bar but we have an even number on 1 point" should {
+    val fen   = FEN("4,3s,1,5s,5/5s,10,2S[1s] - - w 13 1 99")
+    val board = Board(fen.pieces, History(), variant.Backgammon, fen.pocketData)
+    "this is a gin position for P1" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterial must_== true
+      Situation(board, Player.P2).opponentHasInsufficientMaterial must_== false
+    }
+  }
+  "when opponent has piece on bar but we have an even number on 1 point" should {
+    val fen   = FEN("4,3s,1,5s,5/5s,10,2S[1s] - - w 13 1 99")
+    val board = Board(fen.pieces, History(), variant.Backgammon, fen.pocketData)
+    "this is a gin position for P1" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterial must_== true
+      Situation(board, Player.P2).opponentHasInsufficientMaterial must_== false
+    }
+  }
+  "when opponent has piece on bar but we have an even number on 1 point" should {
+    val fen   = FEN("4,3s,1,5s,5/5s,10,2S[1s] - - w 13 1 99")
+    val board = Board(fen.pieces, History(), variant.Backgammon, fen.pocketData)
+    "this is a gin position for P1" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterial must_== true
+      Situation(board, Player.P2).opponentHasInsufficientMaterial must_== false
+    }
+  }
+  "when opponent has piece on bar but we have an even number on 1 point" should {
+    val fen   = FEN("4,3s,1,5s,5/5s,10,2S[1s] - - w 13 1 99")
+    val board = Board(fen.pieces, History(), variant.Backgammon, fen.pocketData)
+    "this is a gin position for P1" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterial must_== true
+      Situation(board, Player.P2).opponentHasInsufficientMaterial must_== false
+    }
+  }
+  "when opponent has piece on bar but we have an even number on 1 point" should {
+    val fen   = FEN("4,3s,1,5s,5/5s,10,2S[1s] - - w 13 1 99")
+    val board = Board(fen.pieces, History(), variant.Backgammon, fen.pocketData)
+    "this is a gin position for P1" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterial must_== true
+      Situation(board, Player.P2).opponentHasInsufficientMaterial must_== false
+    }
+  }
+  "when opponent has piece on bar but we have an even number on 1 point" should {
+    val fen   = FEN("4,3s,1,5s,5/5s,10,2S[1s] - - w 13 1 99")
+    val board = Board(fen.pieces, History(), variant.Backgammon, fen.pocketData)
+    "this is a gin position for P1" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterial must_== true
+      Situation(board, Player.P2).opponentHasInsufficientMaterial must_== false
+    }
+  }
+
+  "when opponent has piece on bar but we have an odd number on 1 point" should {
+    val fen   = FEN("4,3s,1,5s,5/5s,10,3S[1s] - - w 12 1 99")
+    val board = Board(fen.pieces, History(), variant.Backgammon, fen.pocketData)
+    "this is not a gin position" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterial must_== false
+      Situation(board, Player.P2).opponentHasInsufficientMaterial must_== false
+    }
+  }
+
+  "when opponent has just one piece on bar but we have six pieces on 1 point" should {
+    val fen   = FEN("12/11,6S[1s] - - w 9 14 99")
+    val board = Board(fen.pieces, History(), variant.Backgammon, fen.pocketData)
+    "this is not a gin position" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterial must_== false
+      Situation(board, Player.P2).opponentHasInsufficientMaterial must_== false
+    }
+  }
 }
