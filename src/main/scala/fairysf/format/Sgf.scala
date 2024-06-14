@@ -9,20 +9,28 @@ object Sgf {
   private def actionStrsToSGFPos(variant: Variant, actionStrs: ActionStrs): List[String] =
     actionStrs.map { turnActions =>
       turnActions
-        .flatMap(Uci.apply(variant.gameFamily, _).flatMap {
-          case uci: Uci.Drop                         =>
-            variant.gameFamily match {
-              case GameFamily.Shogi() => Some("*" + uci.role.pgn + uci.pos.sgf(variant.boardSize.height))
-              case _                  => Some(uci.pos.sgf(variant.boardSize.height))
+        .flatMap(a =>
+          {
+            (a, variant.gameFamily) match {
+              case (s, GameFamily.Shogi()) if s.takeRight(1) == "+" =>
+                Uci.Move(variant.gameFamily, a.dropRight(1) ++ "P") // require a role to get promotion output
+              case (_, _)                                           => Uci.apply(variant.gameFamily, a)
             }
-          case uci: Uci.Move if uci.orig == uci.dest => Some("") // pass in othello
-          case uci: Uci.Move                         =>
-            Some(
-              uci.orig.sgf(variant.boardSize.height) + uci.dest
-                .sgf(variant.boardSize.height) + uci.sgfPromotionString
-            )
-          case _                                     => None
-        })
+          }.flatMap {
+            case uci: Uci.Drop                         =>
+              variant.gameFamily match {
+                case GameFamily.Shogi() => Some("*" + uci.role.pgn + uci.pos.sgf(variant.boardSize.height))
+                case _                  => Some(uci.pos.sgf(variant.boardSize.height))
+              }
+            case uci: Uci.Move if uci.orig == uci.dest => Some("") // pass in othello
+            case uci: Uci.Move                         =>
+              Some(
+                uci.orig.sgf(variant.boardSize.height) + uci.dest
+                  .sgf(variant.boardSize.height) + uci.sgfPromotionString
+              )
+            case _                                     => None
+          }
+        )
         .toList
         .mkString("")
     }.toList

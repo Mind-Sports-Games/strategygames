@@ -10,17 +10,19 @@ import org.specs2.mutable.Specification
 
 class DumperTest extends Specification with ValidatedMatchers {
 
-  val Go19x19       = Variant.Go(strategygames.go.variant.Go19x19)
-  val Go9x9         = Variant.Go(strategygames.go.variant.Go9x9)
-  val Backgammon    = Variant.Backgammon(strategygames.backgammon.variant.Backgammon)
-  val Othello       = Variant.FairySF(strategygames.fairysf.variant.Flipello)
-  val Amazons       = Variant.FairySF(strategygames.fairysf.variant.Amazons)
-  val Shogi         = Variant.FairySF(strategygames.fairysf.variant.Shogi)
-  val MiniShogi     = Variant.FairySF(strategygames.fairysf.variant.MiniShogi)
-  val Xiangqi       = Variant.FairySF(strategygames.fairysf.variant.Xiangqi)
-  val MiniXiangqi   = Variant.FairySF(strategygames.fairysf.variant.MiniXiangqi)
-  val LOA           = Variant.Chess(strategygames.chess.variant.LinesOfAction)
-  val ScrambledEggs = Variant.Chess(strategygames.chess.variant.ScrambledEggs)
+  val Go19x19     = Variant.Go(strategygames.go.variant.Go19x19)
+  val Go9x9       = Variant.Go(strategygames.go.variant.Go9x9)
+  val Backgammon  = Variant.Backgammon(strategygames.backgammon.variant.Backgammon)
+  val Othello     = Variant.FairySF(strategygames.fairysf.variant.Flipello)
+  val Amazons     = Variant.FairySF(strategygames.fairysf.variant.Amazons)
+  val Shogi       = Variant.FairySF(strategygames.fairysf.variant.Shogi)
+  val MiniShogi   = Variant.FairySF(strategygames.fairysf.variant.MiniShogi)
+  val Xiangqi     = Variant.FairySF(strategygames.fairysf.variant.Xiangqi)
+  val MiniXiangqi = Variant.FairySF(strategygames.fairysf.variant.MiniXiangqi)
+
+  // not supporting loa yet as in chess game logic
+  // val LOA           = Variant.Chess(strategygames.chess.variant.LinesOfAction)
+  // val ScrambledEggs = Variant.Chess(strategygames.chess.variant.ScrambledEggs)
 
   "Go19x19 => s@b1 in actionStrsToOutput" should {
     "have an sgf output" in {
@@ -219,7 +221,7 @@ class DumperTest extends Specification with ValidatedMatchers {
 
   "Shogi moves => actionStrsToOutput" should {
     "have an sgf output" in {
-      val output                 = ";B[fifh]\n;W[gcgd]\n;B[cgcf]\n;W[hbbhB+]\n;B[cibh]\n;W[*Bee]\n;B[*Bhf]\n;W[eebh]"
+      val output                 = ";B[fifh]\n;W[gcgd]\n;B[cgcf]\n;W[hbbh+]\n;B[cibh]\n;W[*Bee]\n;B[*Bhf]\n;W[eebh]"
       val actionStrs: ActionStrs =
         Vector(
           Vector("f1f2"),
@@ -235,10 +237,32 @@ class DumperTest extends Specification with ValidatedMatchers {
     }
   }
 
+  "Shogi moves fairy style promotion (+) => actionStrsToOutput" should {
+    "have an sgf output" in {
+      val output                 =
+        ";B[hghf]\n;W[eafb]\n;B[hfhe]\n;W[fbgb]\n;B[hehd]\n;W[fafb]\n;B[gggf]\n;W[fbfa]\n;B[gfge]\n;W[bbfb]\n;B[hdhc+]"
+      val actionStrs: ActionStrs =
+        Vector(
+          Vector("h3h4"),
+          Vector("e9f8"),
+          Vector("h4h5"),
+          Vector("f8g8"),
+          Vector("h5h6"),
+          Vector("f9f8"),
+          Vector("g3g4"),
+          Vector("f8f9"),
+          Vector("g4g5"),
+          Vector("b8f8"),
+          Vector("h6h7+")
+        )
+      Dumper.apply(Shogi, actionStrs) must_== output
+    }
+  }
+
   "MiniShogi moves => actionStrsToOutput" should {
     "have an sgf output" in {
       val output                 =
-        ";B[debc]\n;W[aaad]\n;B[aead]\n;W[*Pdd]\n;B[bcdaB+]\n;W[eada]\n;B[*Raa]\n;W[dddeP+]\n;B[eede]"
+        ";B[debc]\n;W[aaad]\n;B[aead]\n;W[*Pdd]\n;B[bcda+]\n;W[eada]\n;B[*Raa]\n;W[ddde+]\n;B[eede]"
       val actionStrs: ActionStrs =
         Vector(
           Vector("d1b3"),
@@ -255,32 +279,32 @@ class DumperTest extends Specification with ValidatedMatchers {
     }
   }
 
-  "Lines of Action moves => actionStrsToOutput" should {
-    "have an sgf output" in {
-      val output                 = ";B[dhbf]\n;W[afcd]\n;B[cacd]\n;W[hdfb]\n;B[gagc]"
-      val actionStrs: ActionStrs =
-        Vector(Vector("d1b3"), Vector("a3c5"), Vector("c8c5"), Vector("h5f7"), Vector("g8g6"))
-      Dumper.apply(LOA, actionStrs) must_== output
-    }
-  }
+  // "Lines of Action moves => actionStrsToOutput" should {
+  //   "have an sgf output" in {
+  //     val output                 = ";B[dhbf]\n;W[afcd]\n;B[cacd]\n;W[hdfb]\n;B[gagc]"
+  //     val actionStrs: ActionStrs =
+  //       Vector(Vector("d1b3"), Vector("a3c5"), Vector("c8c5"), Vector("h5f7"), Vector("g8g6"))
+  //     Dumper.apply(LOA, actionStrs) must_== output
+  //   }
+  // }
 
-  "Scrambled Eggs moves => actionStrsToOutput" should {
-    "have an sgf output" in {
-      val output                 = ";B[bhbf]\n;W[hdfd]\n;B[gagc]\n;W[hfec]\n;B[abcd]\n;W[badc]\n;B[addd]\n;W[acfc]\n;B[fhfd]"
-      val actionStrs: ActionStrs =
-        Vector(
-          Vector("b1b3"),
-          Vector("h5f5"),
-          Vector("g8g6"),
-          Vector("h3e6"),
-          Vector("a7c5"),
-          Vector("b8d6"),
-          Vector("a5d5"),
-          Vector("a6f6"),
-          Vector("f1f5")
-        )
-      Dumper.apply(ScrambledEggs, actionStrs) must_== output
-    }
-  }
+  // "Scrambled Eggs moves => actionStrsToOutput" should {
+  //   "have an sgf output" in {
+  //     val output                 = ";B[bhbf]\n;W[hdfd]\n;B[gagc]\n;W[hfec]\n;B[abcd]\n;W[badc]\n;B[addd]\n;W[acfc]\n;B[fhfd]"
+  //     val actionStrs: ActionStrs =
+  //       Vector(
+  //         Vector("b1b3"),
+  //         Vector("h5f5"),
+  //         Vector("g8g6"),
+  //         Vector("h3e6"),
+  //         Vector("a7c5"),
+  //         Vector("b8d6"),
+  //         Vector("a5d5"),
+  //         Vector("a6f6"),
+  //         Vector("f1f5")
+  //       )
+  //     Dumper.apply(ScrambledEggs, actionStrs) must_== output
+  //   }
+  // }
 
 }

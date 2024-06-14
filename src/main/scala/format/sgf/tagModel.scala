@@ -137,7 +137,7 @@ object Tag {
     (tagTypesByLowercase get name.toLowerCase) | Unknown(name)
 
   def matchInfo(length: Int, gameNb: Int, p1Score: Int, p2Score: Int) =
-    Tag(MI, s"[length:${length}][game:${gameNb}][ws:${p1Score}][bs:${p2Score}]")
+    Tag(MI, s"length:${length}][game:${gameNb}][ws:${p1Score}][bs:${p2Score}")
 
   def timeControl(clock: Option[ClockConfig]) = Tag(TM, clock.fold("-") { _.toString })
 }
