@@ -270,6 +270,16 @@ case object AmazonArrow extends Role {
   val gameFamily = GameFamily.Amazons()
 }
 
+case object BreakthroughPawn extends Role {
+  val fairySFID  = Role.breakthrough
+  val forsyth    = 'P'
+  val binaryInt  = 1         // encodedNumber of the piece in db (has to be unique within the game)
+  val hashInt    = 1         // used when creating a hash for the position
+  val storable   = false
+  val valueOf    = Option(1) // calculating material balance (when taking pieces)
+  val gameFamily = GameFamily.Breakthrough()
+}
+
 object Role {
   // ---------------------------------------------------
   // These are all of the pieces that fairysf supports
@@ -343,7 +353,8 @@ object Role {
       XiangqiKing,
       FlipCounter,
       AmazonQueen,
-      AmazonArrow
+      AmazonArrow,
+      BreakthroughPawn
     )
 
   val allPromotable: List[PromotableRole] =
