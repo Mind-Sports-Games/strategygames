@@ -30,7 +30,7 @@ case object MiniBreakthroughTroyka
 
   // cache this rather than checking with the API everytime
   override def initialFen =
-    format.FEN("ppppp/ppppp/5/PPPPP/PPPPP w - - 0 1")
+    format.FEN("ppppp/ppppp/5/PPPPP/PPPPP w 0 1")
 
   override def staleMate(situation: Situation): Boolean = situation.board.apiPosition.legalMoves.isEmpty
 

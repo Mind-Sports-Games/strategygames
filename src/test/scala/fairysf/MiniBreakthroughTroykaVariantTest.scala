@@ -21,8 +21,8 @@ class MiniBreakthroughTroykaVariantTest extends FairySFTest {
 
       pos3.gameEnd must_== true
 
-      val pos4 = pos3.makeMoves(List("e2d1"))
-      pos4.gameEnd must_== true
+      // val pos4 = pos3.makeMoves(List("e2d1")) // this is supposed to not be a possible move
+      // pos4.gameEnd must_== true
     }
   }
 }
