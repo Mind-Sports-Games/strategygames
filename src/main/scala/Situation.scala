@@ -85,6 +85,8 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   val status: Option[Status]
 
+  def resignStatus(player: Player): Status.type => Status
+
   def move(
       from: Pos,
       to: Pos,
@@ -212,6 +214,8 @@ object Situation {
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
+
+    def resignStatus(player: Player): Status.type => Status = _.Resign
 
     def move(
         from: Pos,
@@ -343,6 +347,8 @@ object Situation {
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
+
+    def resignStatus(player: Player): Status.type => Status = _.Resign
 
     private def draughtsCaptures(captures: Option[List[Pos]]): Option[List[draughts.Pos]] =
       captures match {
@@ -501,6 +507,8 @@ object Situation {
 
     val status: Option[Status] = s.status
 
+    def resignStatus(player: Player): Status.type => Status = _.Resign
+
     def move(
         from: Pos,
         to: Pos,
@@ -648,6 +656,8 @@ object Situation {
 
     val status: Option[Status] = s.status
 
+    def resignStatus(player: Player): Status.type => Status = _.Resign
+
     def move(
         from: Pos,
         to: Pos,
@@ -777,6 +787,8 @@ object Situation {
 
     val status: Option[Status] = s.status
 
+    def resignStatus(player: Player): Status.type => Status = _.Resign
+
     def move(
         from: Pos,
         to: Pos,
@@ -889,6 +901,8 @@ object Situation {
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
+
+    def resignStatus(player: Player): Status.type => Status = _.Resign
 
     def move(
         from: Pos,
@@ -1047,6 +1061,8 @@ object Situation {
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
+
+    def resignStatus(player: Player): Status.type => Status = s.resignStatus(player)
 
     def move(
         from: Pos,

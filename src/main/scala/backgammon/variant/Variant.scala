@@ -376,9 +376,20 @@ abstract class Variant private[variant] (
     (situation.board.history.score.p1 == 15) ||
       (situation.board.history.score.p2 == 15)
 
+  def gammonPosition(situation: Situation, player: Player) =
+    situation.board.history.score(player) == 0 &&
+      !situation.board.piecesOnBar(player) &&
+      !situation.board.pieceInOpponentsHome(player)
+
+  // doesnt check for not a backgammonWin
   def gammonWin(situation: Situation) =
     (situation.board.history.score.p1 == 15 && situation.board.history.score.p2 == 0) ||
       (situation.board.history.score.p2 == 15 && situation.board.history.score.p1 == 0)
+
+  def backgammonPosition(situation: Situation, player: Player) =
+    situation.board.history.score(player) == 0 &&
+      (situation.board.piecesOnBar(player) ||
+        situation.board.pieceInOpponentsHome(player))
 
   def backgammonWin(situation: Situation) =
     (

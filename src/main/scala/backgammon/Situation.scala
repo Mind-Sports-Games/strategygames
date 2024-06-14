@@ -165,6 +165,11 @@ case class Situation(board: Board, player: Player) {
     else if (end) Status.SingleWin.some
     else none
 
+  def resignStatus(player: Player): Status.type => Status =
+    if (board.variant.backgammonPosition(this, player)) _.ResignBackgammon
+    else if (board.variant.gammonPosition(this, player)) _.ResignGammon
+    else _.Resign
+
   // only works when we are not mid turn and have not rolled dice
   def maxTurnsFromEnd(player: Player): Option[Int] =
     if (board.racePosition)
