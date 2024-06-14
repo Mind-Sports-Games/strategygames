@@ -7,6 +7,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      JAVA_OPTS: "-Xmx6G -XX:+UseG1GC"
+      SBT_OPTS: "-Dsbt.ci=true"
     steps:
       - name: Checkout current branch
         uses: actions/checkout@v4
@@ -23,6 +26,9 @@ jobs:
 
   compile:
     runs-on: ubuntu-latest
+    env:
+      JAVA_OPTS: "-Xmx6G -XX:+UseG1GC"
+      SBT_OPTS: "-Dsbt.ci=true"
     steps:
       - name: Checkout current branch
         uses: actions/checkout@v4
@@ -39,6 +45,8 @@ jobs:
 
   format:
     runs-on: ubuntu-latest
+    env:
+      SBT_OPTS: "-Dsbt.ci=true"
     steps:
       - name: Checkout current branch
         uses: actions/checkout@v4
