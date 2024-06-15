@@ -114,7 +114,11 @@ class BreakthroughTroykaApiTest extends FairySFTest {
       val game = fenToGame(position2.fen, MiniBreakthroughTroyka)
       game must beValid.like {
         case game => {
-          game.situation.winner == P2 must beTrue
+          // TODO: you'll need to get some form of this working for breakthrough
+          game.situation.checkMate must_== true
+          game.situation.winner must beSome.like(
+            winner => winner must_== P1
+          )
         }
       }
     }
