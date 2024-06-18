@@ -25,7 +25,7 @@ case object MiniBreakthroughTroyka
   override def startPlayer: Player = P1
 
   override def initialFen =
-    format.FEN("ppppp/ppppp/5/PPPPP/PPPPP w 0 1")
+    format.FEN("ppppp/ppppp/5/PPPPP/PPPPP w - - 0 1")
 
   override def checkmate(situation: Situation) = false
 

@@ -10,7 +10,7 @@ class MiniBreakthroughTroykaFenTest extends Specification with ValidatedMatchers
     val pieces = fen.toString()
 
     "be valid" in {
-      pieces must_== "ppppp/ppppp/5/PPPPP/PPPPP w 0 1"
+      pieces must_== "ppppp/ppppp/5/PPPPP/PPPPP w - - 0 1"
     }
   }
 }

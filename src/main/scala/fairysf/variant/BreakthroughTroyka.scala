@@ -22,13 +22,13 @@ case object BreakthroughTroyka
   override def p1IsBetterVariant: Boolean = true
 
   override def initialFen =
-    format.FEN("pppppppp/pppppppp/8/8/8/8/PPPPPPPP/PPPPPPPP w 0 1")
+    format.FEN("pppppppp/pppppppp/8/8/8/8/PPPPPPPP/PPPPPPPP w - - 0 1")
 
   override def checkmate(situation: Situation) = false
 
   override def staleMate(situation: Situation) = false
 
-  // The game ends with a win when one player lost all their pieces or reached opposite final rank
+  // The game ends with a loss if you run out of piece or if opponent reaches opposite final rank
   override def specialEnd(situation: Situation): Boolean =
     (situation.board.pieces.filter(e => e._2.player.p2).isEmpty
       || situation.board.pieces.filter(e => e._2.player.p1).isEmpty
