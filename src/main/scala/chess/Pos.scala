@@ -52,6 +52,8 @@ case class Pos private (index: Int) extends AnyVal {
     else '?'
   def piotrStr = piotr.toString
 
+  def sgf = file.sgfChar.toString + rank.sgfChar.toString
+
   def key               = file.toString + rank.toString
   override def toString = key
 }

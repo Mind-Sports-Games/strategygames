@@ -1,0 +1,49 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+    branches: ['**']
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current branch
+        uses: actions/checkout@v2
+
+      - name: Setup JVM
+        uses: actions/setup-java@v1
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Test
+        run: sbt test 
+
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current branch
+        uses: actions/checkout@v2
+
+      - name: Setup JVM
+        uses: actions/setup-java@v1
+        with:
+          java-version: 13
+
+      - name: compile
+        run: sbt compile 
+
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current branch
+        uses: actions/checkout@v2
+
+      - name: Setup JVM
+        uses: actions/setup-java@v1
+        with:
+          java-version: 13
+
+      - name: Check Formatting
+        run: sbt scalafmt
