@@ -2,12 +2,11 @@ package strategygames.fairysf
 
 import strategygames.Player
 
-class BreakthroughTroykaVariantTest extends FairySFTest {
+class BreakthroughTroykaReplayTest extends FairySFTest {
   "BreakthroughTroyka" should {
     val initialFen = variant.BreakthroughTroyka.initialFen
     "not have winner from start position" in {
       val game = fenToGame(initialFen, variant.BreakthroughTroyka)
-      println(game.map(g => g.situation.board.pieces))
       game must beValid.like {
         case game => {
           game.situation.end must beFalse
@@ -17,7 +16,7 @@ class BreakthroughTroykaVariantTest extends FairySFTest {
       }
     }
 
-    "P1 win in example game" in {
+    "P1 wins in example game" in {
       val breakthroughGame = Vector(
           // @formatter:off
           "a2b3", "h7h6",
@@ -37,7 +36,6 @@ class BreakthroughTroykaVariantTest extends FairySFTest {
       game2.situation.board.variant.exportBoardFen(game2.situation.board) must_== format.FEN(
         "Pppppppp/p1ppppp1/8/8/8/8/1PPPPPpP/PPPPPPPP b - - 0 6"
       )
-      game2.situation.pp("test situation")
       game2.situation.end must beTrue
       game2.situation.winner must_== Some(Player.P1)
     }
