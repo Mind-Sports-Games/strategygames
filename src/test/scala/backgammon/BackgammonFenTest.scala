@@ -146,20 +146,24 @@ class BackgammonFenTest extends BackgammonTest with ValidatedMatchers {
   }
 
   // also use fen test to check gin position
-  "P1 is just 3 points from the end with 2 pieces" should {
-    val fen   = FEN("4,3s,1,5s,5/5s,9,1S,1S[] - - w 13 2 99")
-    val board = Board(fen.pieces, History(), variant.Backgammon, fen.pocketData)
-    "this is a gin position for P1" in {
-      Situation(board, Player.P1).opponentHasInsufficientMaterial must_== true
-      Situation(board, Player.P2).opponentHasInsufficientMaterial must_== false
-    }
-  }
-
   "Both P1 and P2 are just 4 points from the end with 2 pieces" should {
     val fen   = FEN("9,1s,1,1s/9,1S,1,1S[] - - w 13 13 99")
     val board = Board(fen.pieces, History(), variant.Backgammon, fen.pocketData)
     "this is a gin position for neither player" in {
       Situation(board, Player.P1).opponentHasInsufficientMaterial must_== false
+      Situation(board, Player.P2).opponentHasInsufficientMaterial must_== false
+      Situation(board, Player.P1).opponentHasInsufficientMaterialForGammon must_== false
+      Situation(board, Player.P2).opponentHasInsufficientMaterialForGammon must_== false
+      Situation(board, Player.P1).opponentHasInsufficientMaterialForBackgammon must_== false
+      Situation(board, Player.P2).opponentHasInsufficientMaterialForBackgammon must_== false
+    }
+  }
+
+  "P1 is just 3 points from the end with 2 pieces" should {
+    val fen   = FEN("4,3s,1,5s,5/5s,9,1S,1S[] - - w 13 2 99")
+    val board = Board(fen.pieces, History(), variant.Backgammon, fen.pocketData)
+    "this is a gin position for P1" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterial must_== true
       Situation(board, Player.P2).opponentHasInsufficientMaterial must_== false
     }
   }
@@ -302,4 +306,191 @@ class BackgammonFenTest extends BackgammonTest with ValidatedMatchers {
       Situation(board, Player.P2).opponentHasInsufficientMaterial must_== false
     }
   }
+
+  "P1 is just 3 points from the end with 2 pieces and opponent hasn't scored" should {
+    val fen   = FEN("4,3s,1,5s,5/7s,9,1S,1S[] - - w 13 0 99")
+    val board = Board(fen.pieces, History(), variant.Backgammon, fen.pocketData)
+    "this is a gammon gin position for P1" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterialForGammon must_== true
+      Situation(board, Player.P1).opponentHasInsufficientMaterial must_== true
+      Situation(board, Player.P2).opponentHasInsufficientMaterialForGammon must_== false
+    }
+  }
+
+  "P1 is just 3 points from the end with 2 pieces and opponent has scored" should {
+    val fen   = FEN("4,3s,1,5s,5/6s,9,1S,1S[] - - w 13 1 99")
+    val board = Board(
+      fen.pieces,
+      History(
+        score = Score(13, 1)
+      ),
+      variant.Backgammon,
+      fen.pocketData
+    )
+    "this is not a gammon gin position for P1" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterialForGammon must_== false
+      Situation(board, Player.P2).opponentHasInsufficientMaterialForGammon must_== false
+    }
+  }
+
+  "P1 is 4 points from the end with 2 pieces and opponent is one turn away from scoring" should {
+    val fen   = FEN("4,3s,1,12s,5/9,1S,1,1S[] - - w 13 0 99")
+    val board = Board(fen.pieces, History(), variant.Backgammon, fen.pocketData)
+    "this is not a gammon gin position for P1" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterialForGammon must_== false
+      Situation(board, Player.P2).opponentHasInsufficientMaterialForGammon must_== false
+    }
+  }
+
+  "P1 is 4 points from the end with 2 pieces and opponent is two turns away from scoring" should {
+    val fen   = FEN("4,4s,1,11s,5/9,1S,1,1S[] - - w 13 0 99")
+    val board = Board(fen.pieces, History(), variant.Backgammon, fen.pocketData)
+    "this is a gammon gin position for P1" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterialForGammon must_== true
+      Situation(board, Player.P1).opponentHasInsufficientMaterial must_== true
+      Situation(board, Player.P2).opponentHasInsufficientMaterialForGammon must_== false
+    }
+  }
+
+  "P1 is 4 points from the end with 2 pieces and opponent is one turn away from scoring" should {
+    val fen   = FEN("6,14s,5/8,1s,1S,1,1S[] - - w 13 0 99")
+    val board = Board(fen.pieces, History(), variant.Backgammon, fen.pocketData)
+    "this is not a gammon gin position for P1" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterialForGammon must_== false
+      Situation(board, Player.P2).opponentHasInsufficientMaterialForGammon must_== false
+    }
+  }
+
+  "P1 is 4 points from the end with 2 pieces and opponent is two turns away from scoring" should {
+    val fen   = FEN("5,1s,13s,5/8,1s,1S,1,1S[] - - w 13 0 99")
+    val board = Board(fen.pieces, History(), variant.Backgammon, fen.pocketData)
+    "this is a gammon gin position for P1" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterialForGammon must_== true
+      Situation(board, Player.P1).opponentHasInsufficientMaterial must_== true
+      Situation(board, Player.P2).opponentHasInsufficientMaterialForGammon must_== false
+    }
+  }
+
+  "P1 is just 4 points from the end with 2 pieces, P2 has 4 pieces on the 6 point but the player has rolled 6/6" should {
+    val fen   = FEN("5,4s,11s,5/5,2S,2S,5[] 6/6/6/6 - w 11 0 99")
+    val board = Board(
+      fen.pieces,
+      History(
+        lastTurn = List(Uci.EndTurn()),
+        currentTurn = List(Uci.DiceRoll(List(6, 6))),
+        score = Score(11, 0)
+      ),
+      variant.Backgammon,
+      fen.pocketData,
+      List(6, 6, 6, 6)
+    )
+    "this is a gammon gin position for P1 with this roll as it moves them a turn away from winning" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterialForGammon must_== true
+      Situation(board, Player.P1).opponentHasInsufficientMaterial must_== true
+    }
+  }
+
+  "P1 is just 3 points from the end with 2 pieces and opponent has pieces in opponents home" should {
+    val fen   = FEN("4,3s,1,5s,5/5s,8,2s,1S,1S[] - - w 13 0 99")
+    val board = Board(fen.pieces, History(), variant.Backgammon, fen.pocketData)
+    "this is a backgammon gin position for P1" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterialForBackgammon must_== true
+      Situation(board, Player.P1).opponentHasInsufficientMaterial must_== true
+      Situation(board, Player.P2).opponentHasInsufficientMaterialForBackgammon must_== false
+    }
+  }
+
+  "P1 is just 3 points from the end with 2 pieces and opponent has scored" should {
+    val fen   = FEN("4,3s,1,4s,5/5s,8,2s,1S,1S[] - - w 13 1 99")
+    val board = Board(
+      fen.pieces,
+      History(
+        score = Score(13, 1)
+      ),
+      variant.Backgammon,
+      fen.pocketData
+    )
+    "this is not a gammon gin position for P1" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterialForBackgammon must_== false
+      Situation(board, Player.P2).opponentHasInsufficientMaterialForBackgammon must_== false
+    }
+  }
+
+  "P1 is 4 points from the end with 2 pieces and opponent is one turn away from fleeing home" should {
+    val fen   = FEN("5,12s,5/8,3s,1S,1,1S[] - - w 13 0 99")
+    val board = Board(fen.pieces, History(), variant.Backgammon, fen.pocketData)
+    "this is not a backgammon gin position for P1" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterialForBackgammon must_== false
+      Situation(board, Player.P2).opponentHasInsufficientMaterialForBackgammon must_== false
+    }
+  }
+
+  "P1 is 4 points from the end with 2 pieces and opponent is two turns away from scoring" should {
+    val fen   = FEN("5,10s,5/8,5s,1S,1,1S[] - - w 13 0 99")
+    val board = Board(fen.pieces, History(), variant.Backgammon, fen.pocketData)
+    "this is a backgammon gin position for P1" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterialForBackgammon must_== true
+      Situation(board, Player.P1).opponentHasInsufficientMaterial must_== true
+      Situation(board, Player.P2).opponentHasInsufficientMaterialForBackgammon must_== false
+    }
+  }
+
+  "P1 is 4 points from the end with 2 pieces and opponent is one turn away from scoring" should {
+    val fen   = FEN("6,10s,5/8,4s,1S,1,1S[] - - w 13 0 99")
+    val board = Board(fen.pieces, History(), variant.Backgammon, fen.pocketData)
+    "this is not a backgammon gin position for P1" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterialForBackgammon must_== false
+      Situation(board, Player.P2).opponentHasInsufficientMaterialForBackgammon must_== false
+    }
+  }
+
+  "P1 is 4 points from the end with 2 pieces and opponent is two turns away from scoring" should {
+    val fen   = FEN("5,1s,9s,5/8,5s,1S,1,1S[] - - w 13 0 99")
+    val board = Board(fen.pieces, History(), variant.Backgammon, fen.pocketData)
+    "this is a backgammon gin position for P1" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterialForBackgammon must_== true
+      Situation(board, Player.P1).opponentHasInsufficientMaterial must_== true
+      Situation(board, Player.P2).opponentHasInsufficientMaterialForBackgammon must_== false
+    }
+  }
+
+  "P1 is just 4 points from the end with 2 pieces, P2 has 4 pieces on the 6 point but the player has rolled 6/6" should {
+    val fen   = FEN("6,10s,5/10,5s,6S[] 6/6/6/6 - w 9 0 99")
+    val board = Board(
+      fen.pieces,
+      History(
+        lastTurn = List(Uci.EndTurn()),
+        currentTurn = List(Uci.DiceRoll(List(6, 6))),
+        score = Score(9, 0)
+      ),
+      variant.Backgammon,
+      fen.pocketData,
+      List(6, 6, 6, 6)
+    )
+    "this is a backgammon gin position for P1 with this roll as it moves them a turn away from winning" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterialForBackgammon must_== true
+      Situation(board, Player.P1).opponentHasInsufficientMaterial must_== true
+    }
+  }
+
+  "Gammon position isnt backgammon" should {
+    val fen   = FEN("1s,1s,2,1s,4,1s,1,4s/1s,1s,1,1s,1,4s,4,1S,1[] 3/4 - w 14 0 99")
+    val board = Board(
+      fen.pieces,
+      History(
+        lastTurn = List(Uci.EndTurn()),
+        currentTurn = List(Uci.DiceRoll(List(4, 3))),
+        score = Score(14, 0)
+      ),
+      variant.Backgammon,
+      fen.pocketData,
+      List(4, 3)
+    )
+    "this is a gammon gin position for P1 and not backgammon" in {
+      Situation(board, Player.P1).opponentHasInsufficientMaterialForBackgammon must_== false
+      Situation(board, Player.P1).opponentHasInsufficientMaterialForGammon must_== true
+      Situation(board, Player.P1).opponentHasInsufficientMaterial must_== true
+    }
+  }
+
 }

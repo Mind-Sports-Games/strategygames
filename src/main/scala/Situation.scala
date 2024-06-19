@@ -70,6 +70,8 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def opponentHasInsufficientMaterial: Boolean
 
+  def insufficientMaterialStatus: Status.type => Status
+
   def threefoldRepetition: Boolean
 
   def isRepetition: Boolean
@@ -152,6 +154,8 @@ object Situation {
     def checkSquare = s.checkSquare.map(Pos.Chess)
 
     def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
+
+    def insufficientMaterialStatus: Status.type => Status = _.Outoftime
 
     def threefoldRepetition: Boolean = s.threefoldRepetition
 
@@ -336,6 +340,8 @@ object Situation {
     // possibly need to do something for this
     def opponentHasInsufficientMaterial: Boolean = false
 
+    def insufficientMaterialStatus: Status.type => Status = _.Outoftime
+
     def threefoldRepetition: Boolean = s.threefoldRepetition
 
     def isRepetition: Boolean = s.threefoldRepetition
@@ -454,6 +460,8 @@ object Situation {
     def checkSquare = s.checkSquare.map(Pos.FairySF)
 
     def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
+
+    def insufficientMaterialStatus: Status.type => Status = _.Outoftime
 
     def threefoldRepetition: Boolean = s.threefoldRepetition
 
@@ -591,6 +599,8 @@ object Situation {
 
     def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
 
+    def insufficientMaterialStatus: Status.type => Status = _.Outoftime
+
     def threefoldRepetition: Boolean = false
 
     def isRepetition: Boolean = s.isRepetition
@@ -723,6 +733,8 @@ object Situation {
 
     def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
 
+    def insufficientMaterialStatus: Status.type => Status = _.Outoftime
+
     def threefoldRepetition: Boolean = false
     def isRepetition: Boolean        = false
 
@@ -850,6 +862,8 @@ object Situation {
     def checkSquare = None
 
     def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
+
+    def insufficientMaterialStatus: Status.type => Status = _.Outoftime
 
     def threefoldRepetition: Boolean = false
 
@@ -988,6 +1002,8 @@ object Situation {
     def checkSquare = None
 
     def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
+
+    def insufficientMaterialStatus: Status.type => Status = s.insufficientMaterialStatus
 
     def threefoldRepetition: Boolean = false
     def isRepetition: Boolean        = false

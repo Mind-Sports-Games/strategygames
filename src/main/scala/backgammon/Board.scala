@@ -49,6 +49,13 @@ case class Board(
   def pieceInOpponentsHome(player: Player): Boolean =
     piecesOf(player).keys.toList.intersect(Pos.home(!player)).nonEmpty
 
+  def piecesInQuarter(player: Player, quarter: Int): Int =
+    piecesOf(player)
+      .filter{case (pos, _) => Pos.byQuarter(player, quarter).contains(pos)}
+      .values
+      .map(_._2)
+      .sum
+
   // all pieces in home
   def piecesCanLift(player: Player): Boolean =
     !piecesOnBar(player) && piecesOf(player).keys.toList.diff(Pos.home(player)).isEmpty
