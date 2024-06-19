@@ -55,6 +55,8 @@ object Status {
     GammonWin,
     BackgammonWin,
     RuleOfGin,
+    GinGammon,
+    GinBackgammon,
     VariantEnd
   )
 
@@ -62,9 +64,10 @@ object Status {
     s.id >= Mate.id && s.id != Cheat.id
   }
 
-  val finishedWithWinner = List(Mate, Resign, Timeout, Outoftime, RuleOfGin, Cheat, NoStart, VariantEnd)
+  val finishedWithWinner =
+    List(Mate, Resign, Timeout, Outoftime, RuleOfGin, GinGammon, GinBackgammon, Cheat, NoStart, VariantEnd)
 
-  val flagged = List(Outoftime, RuleOfGin)
+  val flagged = List(Outoftime, RuleOfGin, GinGammon, GinBackgammon)
 
   val resigned = List(Resign, ResignGammon, ResignBackgammon)
 
