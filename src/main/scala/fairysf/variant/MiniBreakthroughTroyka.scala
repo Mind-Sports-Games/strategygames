@@ -14,7 +14,7 @@ case object MiniBreakthroughTroyka
       boardSize = Board.Dim5x5
     ) {
 
-  def gameFamily: GameFamily = GameFamily.Breakthrough()
+  def gameFamily: GameFamily = GameFamily.BreakthroughTroyka()
 
   def perfIcon: Char                      = 'a'
   def perfId: Int                         = 209

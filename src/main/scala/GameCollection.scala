@@ -409,10 +409,10 @@ object GameFamily {
     def playerColors      = Map(P1 -> "white", P2 -> "black")
   }
 
-  final case class Breakthrough() extends GameFamily {
+  final case class BreakthroughTroyka() extends GameFamily {
     def id                = 11
-    def name              = "Breakthrough"
-    def key               = "breakthrough"
+    def name              = "BreakthroughTroyka"
+    def key               = "breakthroughtroyka"
     def gameLogic         = GameLogic.FairySF()
     def hasFishnet        = true
     def hasAnalysisBoard  = true
@@ -442,7 +442,7 @@ object GameFamily {
     Togyzkumalak(),
     Go(),
     Backgammon(),
-    Breakthrough()
+    BreakthroughTroyka()
   )
 
   // TODO: I'm sure there is a better scala way of doing this
@@ -457,7 +457,7 @@ object GameFamily {
     case 8  => Amazons()
     case 9  => Go()
     case 10 => Backgammon()
-    case 11 => Breakthrough()
+    case 11 => BreakthroughTroyka()
     case _  => Chess()
   }
 
@@ -567,10 +567,10 @@ object GameGroup {
     def medley   = true
   }
 
-  final case class Breakthrough() extends GameGroup {
+  final case class BreakthroughTroyka() extends GameGroup {
     def id       = 11
-    def name     = "Breakthrough"
-    def key      = "breakthrough"
+    def name     = "BreakthroughTroyka"
+    def key      = "breakthroughtroyka"
     def variants = Variant.all(GameLogic.FairySF()).filter(_.gameFamily.name == this.name)
     def medley   = true
   }
@@ -588,7 +588,7 @@ object GameGroup {
       Amazons(),
       Go(),
       Backgammon(),
-      Breakthrough()
+      BreakthroughTroyka()
     )
 
   def medley: List[GameGroup] = all.filter(_.medley)
@@ -605,7 +605,7 @@ object GameGroup {
     case 8  => Amazons()
     case 9  => Go()
     case 10 => Backgammon()
-    case 11 => Breakthrough()
+    case 11 => BreakthroughTroyka()
     case _  => Chess()
   }
 }

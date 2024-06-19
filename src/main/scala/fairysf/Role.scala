@@ -277,7 +277,7 @@ case object BreakthroughPawn extends Role {
   val hashInt    = 1         // used when creating a hash for the position
   val storable   = false
   val valueOf    = Option(1) // calculating material balance (when taking pieces)
-  val gameFamily = GameFamily.Breakthrough()
+  val gameFamily = GameFamily.BreakthroughTroyka()
 }
 
 object Role {

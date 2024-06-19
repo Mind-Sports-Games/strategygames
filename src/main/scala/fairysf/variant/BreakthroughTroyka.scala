@@ -13,7 +13,7 @@ case object BreakthroughTroyka
       boardSize = Board.Dim8x8
     ) {
 
-  def gameFamily: GameFamily = GameFamily.Breakthrough()
+  def gameFamily: GameFamily = GameFamily.BreakthroughTroyka()
 
   def perfIcon: Char                      = 'a' // @TODO: adapt
   def perfId: Int                         = 208 // just need to be unique accross all variants
