@@ -1,7 +1,7 @@
 package strategygames.backgammon.format
 
 import strategygames.Player
-import strategygames.backgammon.{ Piece, PieceMap, Pos, Role }
+import strategygames.backgammon.{ Piece, PieceMap, PocketData, Pos, Role }
 
 final case class FEN(value: String) extends AnyVal {
 
@@ -59,6 +59,22 @@ final case class FEN(value: String) extends AnyVal {
       case _                    => None
     }
     .toMap
+
+  def pocketData: Option[PocketData] = {
+    val start = value.indexOf("[", 0)
+    val end   = value.indexOf("]", start)
+    if (start > 0 && end > 0) {
+      value
+        .substring(start + 1, end)
+        .split(",")
+        .filterNot(_ == "")
+        .flatMap(p => p.takeRight(1) * p.dropRight(1).toInt)
+        .map(p => Piece(if (p == 'S') Player.P1 else Player.P2, Role.defaultRole))
+        .foldLeft[Option[PocketData]](Some(PocketData.init)) { (pockets, piece) =>
+          pockets.map(_.store(piece))
+        }
+    } else None
+  }
 
   private def removePockets(fen: String): String = {
     val start = fen.indexOf("[", 0)
