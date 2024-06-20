@@ -32,6 +32,9 @@ class BackgammonSituationTest extends Specification with ValidatedMatchers {
       situation.board.piecesCanLift(Player.P2) must_== false
       situation.board.furthestFromEnd(Player.P1) must_== 24
       situation.board.furthestFromEnd(Player.P2) must_== 24
+      situation.board.pipCount(Player.P1) must_== 167
+      situation.board.pipCount(Player.P2) must_== 167
+      situation.board.racePosition must_== false
       situation.board.history.hasRolledDiceThisTurn must_== false
     }
     "have valid dice rolls" in {
@@ -70,6 +73,9 @@ class BackgammonSituationTest extends Specification with ValidatedMatchers {
       g1.situation.board.piecesCanLift(Player.P2) must_== false
       g1.situation.board.furthestFromEnd(Player.P1) must_== 24
       g1.situation.board.furthestFromEnd(Player.P2) must_== 24
+      g1.situation.board.pipCount(Player.P1) must_== 167
+      g1.situation.board.pipCount(Player.P2) must_== 167
+      g1.situation.board.racePosition must_== false
       g1.situation.board.history.hasRolledDiceThisTurn must_== true
       init.situation.board.pieces must_== g1.situation.board.pieces
     }
@@ -94,6 +100,11 @@ class BackgammonSituationTest extends Specification with ValidatedMatchers {
       g2.situation.board.piecesOnBoardCount must_== 30
       g2.situation.board.piecesCanLift(Player.P1) must_== false
       g2.situation.board.piecesCanLift(Player.P2) must_== false
+      g2.situation.board.furthestFromEnd(Player.P1) must_== 24
+      g2.situation.board.furthestFromEnd(Player.P2) must_== 24
+      g2.situation.board.pipCount(g2.situation.player) < 167 must_== true
+      g2.situation.board.pipCount(!g2.situation.player) must_== 167
+      g2.situation.board.racePosition must_== false
       g2.situation.board.history.hasRolledDiceThisTurn must_== true
     }
     val m2       = g2.situation.moves.values.flatten.head
@@ -117,6 +128,7 @@ class BackgammonSituationTest extends Specification with ValidatedMatchers {
       g3.situation.board.piecesOnBoardCount must_== 30
       g3.situation.board.piecesCanLift(Player.P1) must_== false
       g3.situation.board.piecesCanLift(Player.P2) must_== false
+      g3.situation.board.racePosition must_== false
       g3.situation.board.history.hasRolledDiceThisTurn must_== true
       g3.situation.board.history.didRollDiceLastTurn must_== false
     }
@@ -144,6 +156,7 @@ class BackgammonSituationTest extends Specification with ValidatedMatchers {
       g4.situation.board.piecesOnBoardCount must_== 30
       g4.situation.board.piecesCanLift(Player.P1) must_== false
       g4.situation.board.piecesCanLift(Player.P2) must_== false
+      g4.situation.board.racePosition must_== false
       g4.situation.board.history.hasRolledDiceThisTurn must_== false
       g4.situation.board.history.didRollDiceLastTurn must_== true
       g4.situation.player must_!= g3.situation.player

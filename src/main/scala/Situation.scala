@@ -70,6 +70,8 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def opponentHasInsufficientMaterial: Boolean
 
+  def insufficientMaterialStatus: Status.type => Status
+
   def threefoldRepetition: Boolean
 
   def isRepetition: Boolean
@@ -84,6 +86,8 @@ sealed abstract class Situation(val board: Board, val player: Player) {
   def playable(strict: Boolean): Boolean
 
   val status: Option[Status]
+
+  def resignStatus(player: Player): Status.type => Status
 
   def move(
       from: Pos,
@@ -151,6 +155,8 @@ object Situation {
 
     def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
 
+    def insufficientMaterialStatus: Status.type => Status = _.Outoftime
+
     def threefoldRepetition: Boolean = s.threefoldRepetition
 
     def isRepetition: Boolean = s.threefoldRepetition
@@ -212,6 +218,8 @@ object Situation {
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
+
+    def resignStatus(player: Player): Status.type => Status = _.Resign
 
     def move(
         from: Pos,
@@ -332,6 +340,8 @@ object Situation {
     // possibly need to do something for this
     def opponentHasInsufficientMaterial: Boolean = false
 
+    def insufficientMaterialStatus: Status.type => Status = _.Outoftime
+
     def threefoldRepetition: Boolean = s.threefoldRepetition
 
     def isRepetition: Boolean = s.threefoldRepetition
@@ -343,6 +353,8 @@ object Situation {
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
+
+    def resignStatus(player: Player): Status.type => Status = _.Resign
 
     private def draughtsCaptures(captures: Option[List[Pos]]): Option[List[draughts.Pos]] =
       captures match {
@@ -449,6 +461,8 @@ object Situation {
 
     def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
 
+    def insufficientMaterialStatus: Status.type => Status = _.Outoftime
+
     def threefoldRepetition: Boolean = s.threefoldRepetition
 
     def isRepetition: Boolean = s.threefoldRepetition
@@ -500,6 +514,8 @@ object Situation {
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
+
+    def resignStatus(player: Player): Status.type => Status = _.Resign
 
     def move(
         from: Pos,
@@ -583,6 +599,8 @@ object Situation {
 
     def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
 
+    def insufficientMaterialStatus: Status.type => Status = _.Outoftime
+
     def threefoldRepetition: Boolean = false
 
     def isRepetition: Boolean = s.isRepetition
@@ -647,6 +665,8 @@ object Situation {
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
+
+    def resignStatus(player: Player): Status.type => Status = _.Resign
 
     def move(
         from: Pos,
@@ -713,6 +733,8 @@ object Situation {
 
     def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
 
+    def insufficientMaterialStatus: Status.type => Status = _.Outoftime
+
     def threefoldRepetition: Boolean = false
     def isRepetition: Boolean        = false
 
@@ -777,6 +799,8 @@ object Situation {
 
     val status: Option[Status] = s.status
 
+    def resignStatus(player: Player): Status.type => Status = _.Resign
+
     def move(
         from: Pos,
         to: Pos,
@@ -839,6 +863,8 @@ object Situation {
 
     def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
 
+    def insufficientMaterialStatus: Status.type => Status = _.Outoftime
+
     def threefoldRepetition: Boolean = false
 
     def isRepetition: Boolean                    = s.isRepetition
@@ -889,6 +915,8 @@ object Situation {
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
+
+    def resignStatus(player: Player): Status.type => Status = _.Resign
 
     def move(
         from: Pos,
@@ -975,6 +1003,8 @@ object Situation {
 
     def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
 
+    def insufficientMaterialStatus: Status.type => Status = s.insufficientMaterialStatus
+
     def threefoldRepetition: Boolean = false
     def isRepetition: Boolean        = false
 
@@ -1047,6 +1077,8 @@ object Situation {
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
+
+    def resignStatus(player: Player): Status.type => Status = s.resignStatus(player)
 
     def move(
         from: Pos,

@@ -56,6 +56,8 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
       playActionStrs(actionStrs) must beValid.like { g =>
         g.situation.moves.values.flatten.size must_== 0
         g.situation.canEndTurn must_== true
+        g.situation.board.pipCount(Player.P1) must_== 161
+        g.situation.board.pipCount(Player.P2) must_== 167
       }
     }
 
@@ -164,6 +166,8 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         g.situation.canDrop must_== false
         g.situation.canEndTurn must_== true
         g.situation.canOnlyEndTurn must_== true
+        g.situation.board.furthestFromEnd(Player.P1) must_== 20
+        g.situation.board.furthestFromEnd(Player.P2) must_== 20
         g.situation.forcedAction.nonEmpty must_== true
       }
       playActionStrs(actionStrs ++ List("endturn")) must beValid.like { g =>
@@ -262,6 +266,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
       playActionStrs(actionStrs) must beValid.like { g =>
         g.situation.board.pieceCountOnBar(Player.P1) must_== 1
         g.situation.board.pieceCountOnBar(Player.P2) must_== 1
+        g.situation.board.pipCount(Player.P1) must_== 183
         g.situation.canMove must_== false
         g.situation.dropsAsDrops.map(_.toUci.uci) must_== List("s@l2")
       }
@@ -1877,11 +1882,25 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "5/3",
         "^j1"
       )
+      playActionStrs(actionStrs.dropRight(1)) must beValid.like { g =>
+        g.situation.board.history.score must_== Score(14, 12)
+        g.situation.end must_== false
+        g.situation.winner must_== None
+        g.situation.status must_== None
+        g.situation.board.racePosition must_== true
+        g.situation.board.pipCount(Player.P1) must_== 3
+        g.situation.maxTurnsFromEnd(Player.P1) must_== Some(1)
+        g.situation.minTurnsFromEnd(Player.P1) must_== Some(1)
+        g.situation.board.pipCount(Player.P2) must_== 3
+        g.situation.maxTurnsFromEnd(Player.P2) must_== Some(2)
+        g.situation.minTurnsFromEnd(Player.P2) must_== Some(1)
+      }
       playActionStrs(actionStrs) must beValid.like { g =>
         g.situation.board.history.score must_== Score(15, 12)
         g.situation.end must_== true
         g.situation.winner must_== Some(Player.P1)
         g.situation.status must_== Some(Status.SingleWin)
+        g.situation.board.pipCount(Player.P1) must_== 0
       }
     }
 
@@ -2174,6 +2193,12 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "^k2",
         "^k2"
       )
+      playActionStrs(actionStrs.dropRight(1)) must beValid.like { g =>
+        g.situation.board.history.score must_== Score(0, 14)
+        g.situation.end must_== false
+        g.situation.winner must_== None
+        g.situation.status must_== None
+      }
       playActionStrs(actionStrs) must beValid.like { g =>
         g.situation.board.history.score must_== Score(0, 15)
         g.situation.end must_== true
