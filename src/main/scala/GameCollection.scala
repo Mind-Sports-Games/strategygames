@@ -419,11 +419,11 @@ object GameFamily {
     def defaultVariant    = Variant.FairySF(strategygames.fairysf.variant.BreakthroughTroyka)
     def variants          = Variant.all(GameLogic.FairySF()).filter(_.gameFamily == this)
     def displayPiece      = "RH"
-    def pieceSetThemes    = List("staunton", "checkers")
-    def pieceSetDefault   = "staunton"
+    def pieceSetThemes    = List("staunty", "checkers")
+    def pieceSetDefault   = "staunty"
     def boardThemes       = List(
       "purple-diag",
-      "leather"
+      "wood"
     )
     def boardThemeDefault = "purple-diag"
     def playerNames       = Map(P1 -> "White", P2 -> "Black")

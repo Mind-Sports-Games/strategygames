@@ -309,7 +309,7 @@ enclosingDropStart = e5 f5 e6 f6
 [ps-minibreakthrough:breakthrough]
 maxFile = 5
 maxRank = 5
-startFen = ppppp/ppppp/5/PPPPP/PPPPP w 0 1
+startFen = ppppp/ppppp/5/PPPPP/PPPPP w - - 0 1
 whiteFlag = *5
 blackFlag = *1
   """
