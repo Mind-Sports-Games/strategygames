@@ -172,7 +172,7 @@ object Pos {
     all.filter(_.index > 17)
   )
 
-  //1 is opponents home, 4 is your home section.
+  // 1 is opponents home, 4 is your home section.
   def byQuarter(player: Player, quarter: Int) =
     player.fold(
       all.filter(p => p.index < 6 * (5 - quarter) && p.index >= (6 * (4 - quarter))),
