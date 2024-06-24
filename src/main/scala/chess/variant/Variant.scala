@@ -39,8 +39,8 @@ abstract class Variant private[variant] (
 
   def materialImbalanceVariant: Boolean = false
 
-  def dropsVariant: Boolean       = false
-  def hasDetatchedPocket: Boolean = false
+  def dropsVariant: Boolean      = false
+  def hasDetachedPocket: Boolean = false
 
   def canOfferDraw: Boolean = true
 

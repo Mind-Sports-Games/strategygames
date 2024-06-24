@@ -306,6 +306,11 @@ maxRank = 10
 maxFile = 10
 startFen = 10/10/10/10/4pP4/4Pp4/10/10/10/10[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp] w 0 1
 enclosingDropStart = e5 f5 e6 f6
+[ps-minibreakthrough:breakthrough]
+maxFile = 5
+maxRank = 5
+startFen = ppppp/ppppp/5/PPPPP/PPPPP w - - 0 1
+whiteFlag = *5
+blackFlag = *1
   """
-
 }
