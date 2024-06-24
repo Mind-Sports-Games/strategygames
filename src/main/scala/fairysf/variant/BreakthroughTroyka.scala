@@ -15,7 +15,7 @@ case object BreakthroughTroyka
 
   def gameFamily: GameFamily = GameFamily.BreakthroughTroyka()
 
-  def perfIcon: Char                      = 'a' // @TODO: adapt
+  def perfIcon: Char                      = ''
   def perfId: Int                         = 208 // just need to be unique accross all variants
   override def canOfferDraw               = false
   override def baseVariant: Boolean       = true

@@ -16,7 +16,7 @@ case object MiniBreakthroughTroyka
 
   def gameFamily: GameFamily = GameFamily.BreakthroughTroyka()
 
-  def perfIcon: Char                      = 'a'
+  def perfIcon: Char                      = ''
   def perfId: Int                         = 209
   override def canOfferDraw               = false
   override def repetitionEnabled: Boolean = true

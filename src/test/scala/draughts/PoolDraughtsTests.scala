@@ -192,7 +192,6 @@ class PoolDraughtsTests extends Specification with ValidatedMatchers {
 
       val s5 = buggyMovesKingPromotion
         .foldLeft(Situation(variant.Pool))((sit, uci) => move(sit, uci))
-      // println(s5.validMoves)
       s5.player must_== Player.P1
 
     }

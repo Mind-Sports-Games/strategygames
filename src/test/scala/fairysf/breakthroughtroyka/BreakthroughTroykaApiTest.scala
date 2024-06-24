@@ -33,6 +33,15 @@ class BreakthroughTroykaApiTest extends FairySFTest {
     "produce no legal move" in {
       position2.legalMoves.size must_== 0L
     }
+
+    "should produce game end" in {
+      position2.gameEnd must_== true
+      position2.immediateGameEnd must_== true
+    }
+
+    "should be stalemate for api" in {
+      position2.gameResult must_== GameResult.Stalemate() // because this is not Chess
+    }
   }
 
   "BreakthroughTroyka quickest win for black" should {
@@ -52,6 +61,15 @@ class BreakthroughTroykaApiTest extends FairySFTest {
 
     "produce no legal move" in {
       position2.legalMoves.size must_== 0L
+    }
+
+    "should produce game end" in {
+      position2.gameEnd must_== true
+      position2.immediateGameEnd must_== true
+    }
+
+    "should be stalemate for api" in {
+      position2.gameResult must_== GameResult.Stalemate() // because this is not Chess (resultFromInt)
     }
   }
 }
