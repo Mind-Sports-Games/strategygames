@@ -19,7 +19,6 @@ case object MiniBreakthroughTroyka
   def perfIcon: Char                      = ''
   def perfId: Int                         = 209
   override def canOfferDraw               = false
-  override def repetitionEnabled: Boolean = true
   override def p1IsBetterVariant: Boolean = true
 
   override def startPlayer: Player = P1
