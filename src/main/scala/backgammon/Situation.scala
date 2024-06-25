@@ -199,7 +199,7 @@ case class Situation(board: Board, player: Player) {
       )
     else None
 
-  def minTurnsFromScoring(player: Player): Option[Int] =
+  private def minTurnsFromScoring(player: Player): Option[Int] =
     if (board.racePosition)
       if (board.history.score(player) == 0)
         Some(
@@ -216,7 +216,7 @@ case class Situation(board: Board, player: Player) {
       else Some(0)
     else None
 
-  def minTurnsFromExitingOpponentHome(player: Player): Option[Int] =
+  private def minTurnsFromExitingOpponentHome(player: Player): Option[Int] =
     if (board.racePosition)
       if (board.history.score(player) == 0)
         Some(
@@ -300,6 +300,11 @@ case class Situation(board: Board, player: Player) {
     if (opponentHasInsufficientMaterialForBackgammon) _.GinBackgammon
     else if (opponentHasInsufficientMaterialForGammon) _.GinGammon
     else _.RuleOfGin
+
+  def outOfTimeStatus: Status.type => Status =
+    if (board.variant.backgammonPosition(this, player)) _.OutoftimeBackgammon
+    else if (board.variant.gammonPosition(this, player)) _.OutoftimeGammon
+    else _.Outoftime
 
   def move(from: Pos, to: Pos): Validated[String, Move] =
     board.variant.move(this, from, to)
