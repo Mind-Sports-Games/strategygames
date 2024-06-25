@@ -171,14 +171,16 @@ case class Situation(board: Board, player: Player) {
       if (board.variant.backgammonPosition(this, player)) _.ResignBackgammon
       else if (board.variant.gammonPosition(this, player)) _.ResignGammon
       else _.Resign
-    else _.ResignBackgammon
+    else if (board.history.score(player) == 0) _.ResignBackgammon
+    else _.Resign
 
   def outOfTimeStatus: Status.type => Status =
     if (board.racePosition)
       if (board.variant.backgammonPosition(this, player)) _.OutoftimeBackgammon
       else if (board.variant.gammonPosition(this, player)) _.OutoftimeGammon
       else _.Outoftime
-    else _.OutoftimeBackgammon
+    else if (board.history.score(player) == 0) _.OutoftimeBackgammon
+    else _.Outoftime
 
   // only works when we are not mid turn and have not rolled dice
   def maxTurnsFromEnd(player: Player): Option[Int] =
