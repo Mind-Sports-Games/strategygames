@@ -1,6 +1,7 @@
 package strategygames.fairysf
 
 import variant.BreakthroughTroyka
+import strategygames.fairysf.variant.MiniBreakthroughTroyka
 
 class BreakthroughTroykaApiTest extends FairySFTest {
 
@@ -55,6 +56,58 @@ class BreakthroughTroykaApiTest extends FairySFTest {
         "b5a6", "h4h3",
         "a6b7", "h3g2",
         "a1a2", "g2h1"
+        // @formatter:on
+      )
+    )
+
+    "produce no legal move" in {
+      position2.legalMoves.size must_== 0L
+    }
+
+    "should produce game end" in {
+      position2.gameEnd must_== true
+      position2.immediateGameEnd must_== true
+    }
+
+    "should be stalemate for api" in {
+      position2.gameResult must_== GameResult.Stalemate() // because this is not Chess (resultFromInt)
+    }
+  }
+
+  "MiniBreakthroughTroyka quickest win for white" should {
+    val position  = Api.positionFromVariant(MiniBreakthroughTroyka)
+    val position2 = position.makeMoves(
+      List(
+        // @formatter:off
+        "a2b3", "e4e3",
+        "b3a4", "e3d2",
+        "a4b5"
+        // @formatter:on
+      )
+    )
+
+    "produce no legal move" in {
+      position2.legalMoves.size must_== 0L
+    }
+
+    "should produce game end" in {
+      position2.gameEnd must_== true
+      position2.immediateGameEnd must_== true
+    }
+
+    "should be stalemate for api" in {
+      position2.gameResult must_== GameResult.Stalemate() // because this is not Chess (resultFromInt)
+    }
+  }
+
+  "MiniBreakthroughTroyka quickest win for black" should {
+    val position  = Api.positionFromVariant(MiniBreakthroughTroyka)
+    val position2 = position.makeMoves(
+      List(
+        // @formatter:off
+        "a2b3", "e4e3",
+        "b3a4", "e3d2",
+        "a1a2", "d2c1"
         // @formatter:on
       )
     )

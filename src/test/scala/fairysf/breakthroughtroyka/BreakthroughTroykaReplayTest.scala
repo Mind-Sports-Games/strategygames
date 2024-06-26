@@ -40,4 +40,42 @@ class BreakthroughTroykaReplayTest extends FairySFTest {
       game2.situation.winner must_== Some(Player.P1)
     }
   }
+
+  "MiniBreakthroughTroyka" should {
+    "not have winner from start position" in {
+      val game = fenToGame(variant.BreakthroughTroyka.initialFen, variant.BreakthroughTroyka)
+      game must beValid.like {
+        case game => {
+          game.situation.end must beFalse
+          game.situation.status == None must beTrue
+          game.situation.winner == None must beTrue
+        }
+      }
+    }
+
+    "P1 wins in example game" in {
+      val breakthroughGame = Vector(
+          // @formatter:off
+          "a2b3", "e4e3",
+          "b3a4", "e3d2"
+          // @formatter:on
+      ).map(Vector(_))
+
+      val replay = Replay.gameWithUciWhileValid(
+        breakthroughGame,
+        variant.MiniBreakthroughTroyka.initialFen,
+        variant.MiniBreakthroughTroyka
+      )
+      val game   = replay._2.last._1
+      game.situation.board.variant.exportBoardFen(game.situation.board) must_== format.FEN(
+        "ppppp/Pppp1/5/1PPpP/PPPPP w - - 0 3"
+      )
+      val game2  = game.apply(game.situation.moves(Pos.A4).filter(_.dest == Pos.B5)(0))
+      game2.situation.board.variant.exportBoardFen(game2.situation.board) must_== format.FEN(
+        "pPppp/1ppp1/5/1PPpP/PPPPP b - - 0 3"
+      )
+      game2.situation.end must beTrue
+      game2.situation.winner must_== Some(Player.P1)
+    }
+  }
 }
