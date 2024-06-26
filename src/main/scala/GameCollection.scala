@@ -423,7 +423,7 @@ object GameFamily {
     def pieceSetDefault   = "staunty"
     def boardThemes       = List(
       "purple-diag",
-      "wood"
+      "maple"
     )
     def boardThemeDefault = "purple-diag"
     def playerNames       = Map(P1 -> "White", P2 -> "Black")
