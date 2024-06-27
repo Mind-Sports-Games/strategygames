@@ -2,11 +2,11 @@ name := "strategygames"
 
 organization := "org.playstrategy"
 
-version := "10.2.1-pstrat144"
+version := "10.2.1-pstrat145"
 
 scalaVersion := "2.13.5"
 
-val fairystockfishVersion = "0.0.20rc1"
+val fairystockfishVersion = "0.0.20rc2"
 
 libraryDependencies ++= List(
   "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
