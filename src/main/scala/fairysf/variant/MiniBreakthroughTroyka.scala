@@ -21,6 +21,8 @@ case object MiniBreakthroughTroyka
   override def canOfferDraw               = false
   override def p1IsBetterVariant: Boolean = true
 
+  override def hasFishnet: Boolean = false
+
   override def startPlayer: Player = P1
 
   override def initialFen =
