@@ -48,7 +48,7 @@ abstract class Variant(
 
   def dropsVariant: Boolean
   def onlyDropsVariant: Boolean
-  def hasDetatchedPocket: Boolean
+  def hasDetachedPocket: Boolean
   def hasGameScore: Boolean
 
   def canOfferDraw: Boolean
@@ -147,10 +147,10 @@ object Variant {
 
     def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
 
-    def dropsVariant: Boolean       = v.dropsVariant
-    def onlyDropsVariant: Boolean   = false
-    def hasDetatchedPocket: Boolean = v.hasDetatchedPocket
-    def hasGameScore: Boolean       = false
+    def dropsVariant: Boolean      = v.dropsVariant
+    def onlyDropsVariant: Boolean  = false
+    def hasDetachedPocket: Boolean = v.hasDetachedPocket
+    def hasGameScore: Boolean      = false
 
     def canOfferDraw: Boolean       = v.canOfferDraw
     def ignoreSubmitAction: Boolean = false
@@ -257,10 +257,10 @@ object Variant {
 
     def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
 
-    def dropsVariant: Boolean       = false
-    def onlyDropsVariant: Boolean   = false
-    def hasDetatchedPocket: Boolean = false
-    def hasGameScore: Boolean       = false
+    def dropsVariant: Boolean      = false
+    def onlyDropsVariant: Boolean  = false
+    def hasDetachedPocket: Boolean = false
+    def hasGameScore: Boolean      = false
 
     def canOfferDraw: Boolean       = v.canOfferDraw
     def ignoreSubmitAction: Boolean = false
@@ -366,10 +366,10 @@ object Variant {
 
     def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
 
-    def dropsVariant: Boolean       = v.dropsVariant
-    def onlyDropsVariant: Boolean   = v.onlyDropsVariant
-    def hasDetatchedPocket: Boolean = v.hasDetatchedPocket
-    def hasGameScore: Boolean       = v.hasGameScore
+    def dropsVariant: Boolean      = v.dropsVariant
+    def onlyDropsVariant: Boolean  = v.onlyDropsVariant
+    def hasDetachedPocket: Boolean = v.hasDetachedPocket
+    def hasGameScore: Boolean      = v.hasGameScore
 
     def canOfferDraw: Boolean       = v.canOfferDraw
     def ignoreSubmitAction: Boolean = false
@@ -475,10 +475,10 @@ object Variant {
 
     def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
 
-    def dropsVariant: Boolean       = v.dropsVariant
-    def onlyDropsVariant: Boolean   = v.onlyDropsVariant
-    def hasDetatchedPocket: Boolean = false
-    def hasGameScore: Boolean       = v.hasGameScore
+    def dropsVariant: Boolean      = v.dropsVariant
+    def onlyDropsVariant: Boolean  = v.onlyDropsVariant
+    def hasDetachedPocket: Boolean = false
+    def hasGameScore: Boolean      = v.hasGameScore
 
     def canOfferDraw: Boolean       = v.canOfferDraw
     def ignoreSubmitAction: Boolean = false
@@ -580,10 +580,10 @@ object Variant {
 
     def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
 
-    def dropsVariant: Boolean       = v.dropsVariant
-    def onlyDropsVariant: Boolean   = v.onlyDropsVariant
-    def hasDetatchedPocket: Boolean = false
-    def hasGameScore: Boolean       = v.hasGameScore
+    def dropsVariant: Boolean      = v.dropsVariant
+    def onlyDropsVariant: Boolean  = v.onlyDropsVariant
+    def hasDetachedPocket: Boolean = false
+    def hasGameScore: Boolean      = v.hasGameScore
 
     def canOfferDraw: Boolean       = v.canOfferDraw
     def ignoreSubmitAction: Boolean = false
@@ -684,10 +684,10 @@ object Variant {
 
     def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
 
-    def dropsVariant: Boolean       = v.dropsVariant
-    def onlyDropsVariant: Boolean   = v.onlyDropsVariant
-    def hasDetatchedPocket: Boolean = false
-    def hasGameScore: Boolean       = v.hasGameScore
+    def dropsVariant: Boolean      = v.dropsVariant
+    def onlyDropsVariant: Boolean  = v.onlyDropsVariant
+    def hasDetachedPocket: Boolean = false
+    def hasGameScore: Boolean      = v.hasGameScore
 
     def canOfferDraw: Boolean       = v.canOfferDraw
     def ignoreSubmitAction: Boolean = false
@@ -791,10 +791,10 @@ object Variant {
 
     def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
 
-    def dropsVariant: Boolean       = v.dropsVariant
-    def onlyDropsVariant: Boolean   = v.onlyDropsVariant
-    def hasDetatchedPocket: Boolean = false
-    def hasGameScore: Boolean       = v.hasGameScore
+    def dropsVariant: Boolean      = v.dropsVariant
+    def onlyDropsVariant: Boolean  = v.onlyDropsVariant
+    def hasDetachedPocket: Boolean = false
+    def hasGameScore: Boolean      = v.hasGameScore
 
     def canOfferDraw: Boolean       = v.canOfferDraw
     def ignoreSubmitAction: Boolean = v.ignoreSubmitAction

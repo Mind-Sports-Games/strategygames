@@ -4,7 +4,7 @@ import org.specs2.mutable.Specification
 
 class StatsTest extends Specification {
 
-  import strategygames.{ Stats, StatHolder }
+  import strategygames.{ StatHolder, Stats }
 
   def realMean(elts: Seq[Float]): Float = elts.sum / elts.size
 

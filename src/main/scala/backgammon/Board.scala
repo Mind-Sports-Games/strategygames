@@ -51,7 +51,7 @@ case class Board(
 
   def piecesInQuarter(player: Player, quarter: Int): Int =
     piecesOf(player)
-      .filter{case (pos, _) => Pos.byQuarter(player, quarter).contains(pos)}
+      .filter { case (pos, _) => Pos.byQuarter(player, quarter).contains(pos) }
       .values
       .map(_._2)
       .sum

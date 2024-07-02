@@ -409,7 +409,7 @@ K   bB""".autoDraw must_== false
     "on knight versus pawn" in {
       val position = FEN("7K/5k2/7P/6n1/8/8/8/8 b - - 0 40")
       val game     = fenToGame(position, Standard)
-      val newGame = game flatMap (_.playMove(
+      val newGame  = game flatMap (_.playMove(
         Pos.F7,
         Pos.F8
       ))
@@ -422,7 +422,7 @@ K   bB""".autoDraw must_== false
     "on bishops versus pawn" in {
       val position = FEN("1b1b3K/8/5k1P/8/8/8/8/8 b - - 0 40")
       val game     = fenToGame(position, Standard)
-      val newGame = game flatMap (_.playMove(
+      val newGame  = game flatMap (_.playMove(
         Pos.B8,
         Pos.E5
       ))
@@ -435,7 +435,7 @@ K   bB""".autoDraw must_== false
     "on bishops versus queen" in {
       val position = FEN("b2b3K/8/5k1Q/8/8/8/8/8 b - -")
       val game     = fenToGame(position, Standard)
-      val newGame = game flatMap (_.playMove(
+      val newGame  = game flatMap (_.playMove(
         Pos.F6,
         Pos.E5
       ))
@@ -448,7 +448,7 @@ K   bB""".autoDraw must_== false
     "on bishops versus queen" in {
       val position = FEN("1b1b3K/8/5k1Q/8/8/8/8/8 b - -")
       val game     = fenToGame(position, Standard)
-      val newGame = game flatMap (_.playMove(
+      val newGame  = game flatMap (_.playMove(
         Pos.F6,
         Pos.E5
       ))
@@ -461,7 +461,7 @@ K   bB""".autoDraw must_== false
     "on knight versus pawns" in {
       val position = FEN("8/8/5N2/8/6p1/8/5K1p/7k w - - 0 37")
       val game     = fenToGame(position, Standard)
-      val newGame = game flatMap (_.playMove(
+      val newGame  = game flatMap (_.playMove(
         Pos.F6,
         Pos.E4
       ))
@@ -474,7 +474,7 @@ K   bB""".autoDraw must_== false
     "on knight versus pieces" in {
       val position = FEN("8/8/8/4N3/4k1p1/6K1/8/3b4 w - - 5 59")
       val game     = fenToGame(position, Standard)
-      val newGame = game flatMap (_.playMove(
+      val newGame  = game flatMap (_.playMove(
         Pos.E5,
         Pos.F7
       ))
@@ -487,7 +487,7 @@ K   bB""".autoDraw must_== false
     "on opposite bishops with queen" in {
       val position = FEN("8/8/3Q4/2bK4/B7/8/8/k7 b - - 0 67")
       val game     = fenToGame(position, Standard)
-      val newGame = game flatMap (_.playMove(
+      val newGame  = game flatMap (_.playMove(
         Pos.A1,
         Pos.B2
       ))

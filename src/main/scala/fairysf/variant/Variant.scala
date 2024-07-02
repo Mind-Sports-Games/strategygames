@@ -33,9 +33,9 @@ abstract class Variant private[variant] (
 
   def materialImbalanceVariant: Boolean = false
 
-  def dropsVariant: Boolean       = false
-  def onlyDropsVariant: Boolean   = false
-  def hasDetatchedPocket: Boolean = false
+  def dropsVariant: Boolean      = false
+  def onlyDropsVariant: Boolean  = false
+  def hasDetachedPocket: Boolean = false
 
   def hasGameScore: Boolean = false
   def canOfferDraw: Boolean = true
@@ -271,7 +271,9 @@ object Variant {
     MiniXiangqi,
     Flipello,
     Flipello10,
-    Amazons
+    Amazons,
+    BreakthroughTroyka,
+    MiniBreakthroughTroyka
   )
   val byId                    = all map { v =>
     (v.id, v)
@@ -302,7 +304,9 @@ object Variant {
     strategygames.fairysf.variant.MiniXiangqi,
     strategygames.fairysf.variant.Flipello,
     strategygames.fairysf.variant.Flipello10,
-    strategygames.fairysf.variant.Amazons
+    strategygames.fairysf.variant.Amazons,
+    strategygames.fairysf.variant.BreakthroughTroyka,
+    strategygames.fairysf.variant.MiniBreakthroughTroyka
   )
 
   val divisionSensibleVariants: Set[Variant] = Set()
