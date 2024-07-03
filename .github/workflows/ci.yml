@@ -15,8 +15,8 @@ jobs:
           username: ${{ github.actor }}
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Check Failed
-        if: |
-          ${{ steps.check_org_member.outputs.result == 'false' }}
+        run: echo ${{ steps.check_org_member.outputs.result }} 
+        if: ${{ steps.check_org_member.outputs.result == 'false' }}
         run: |
           echo User Does Not Belong to Mind-Sports-Games
           exit 1
