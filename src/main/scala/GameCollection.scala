@@ -409,6 +409,27 @@ object GameFamily {
     def playerColors      = Map(P1 -> "white", P2 -> "black")
   }
 
+  final case class BreakthroughTroyka() extends GameFamily {
+    def id                = 11
+    def name              = "BreakthroughTroyka"
+    def key               = "breakthroughtroyka"
+    def gameLogic         = GameLogic.FairySF()
+    def hasFishnet        = true
+    def hasAnalysisBoard  = true
+    def defaultVariant    = Variant.FairySF(strategygames.fairysf.variant.BreakthroughTroyka)
+    def variants          = Variant.all(GameLogic.FairySF()).filter(_.gameFamily == this)
+    def displayPiece      = "bP"
+    def pieceSetThemes    = List("staunty", "checkers", "fabirovsky")
+    def pieceSetDefault   = "staunty"
+    def boardThemes       = List(
+      "purple-diag",
+      "maple"
+    )
+    def boardThemeDefault = "purple-diag"
+    def playerNames       = Map(P1 -> "White", P2 -> "Black")
+    def playerColors      = Map(P1 -> "white", P2 -> "black")
+  }
+
   def all: List[GameFamily] = List(
     Chess(),
     Draughts(),
@@ -420,7 +441,8 @@ object GameFamily {
     Oware(),
     Togyzkumalak(),
     Go(),
-    Backgammon()
+    Backgammon(),
+    BreakthroughTroyka()
   )
 
   // TODO: I'm sure there is a better scala way of doing this
@@ -435,6 +457,7 @@ object GameFamily {
     case 8  => Amazons()
     case 9  => Go()
     case 10 => Backgammon()
+    case 11 => BreakthroughTroyka()
     case _  => Chess()
   }
 
@@ -544,6 +567,14 @@ object GameGroup {
     def medley   = true
   }
 
+  final case class BreakthroughTroyka() extends GameGroup {
+    def id       = 11
+    def name     = "BreakthroughTroyka"
+    def key      = "breakthroughtroyka"
+    def variants = Variant.all(GameLogic.FairySF()).filter(_.gameFamily.name == this.name)
+    def medley   = true
+  }
+
   def all: List[GameGroup] =
     List(
       Chess(),
@@ -556,7 +587,8 @@ object GameGroup {
       Mancala(),
       Amazons(),
       Go(),
-      Backgammon()
+      Backgammon(),
+      BreakthroughTroyka()
     )
 
   def medley: List[GameGroup] = all.filter(_.medley)
@@ -573,6 +605,7 @@ object GameGroup {
     case 8  => Amazons()
     case 9  => Go()
     case 10 => Backgammon()
+    case 11 => BreakthroughTroyka()
     case _  => Chess()
   }
 }

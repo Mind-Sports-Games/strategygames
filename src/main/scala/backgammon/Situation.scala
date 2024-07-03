@@ -167,9 +167,20 @@ case class Situation(board: Board, player: Player) {
     else None
 
   def resignStatus(player: Player): Status.type => Status =
-    if (board.variant.backgammonPosition(this, player)) _.ResignBackgammon
-    else if (board.variant.gammonPosition(this, player)) _.ResignGammon
+    if (board.racePosition)
+      if (board.variant.backgammonPosition(this, player)) _.ResignBackgammon
+      else if (board.variant.gammonPosition(this, player)) _.ResignGammon
+      else _.Resign
+    else if (board.history.score(player) == 0) _.ResignBackgammon
     else _.Resign
+
+  def outOfTimeStatus: Status.type => Status =
+    if (board.racePosition)
+      if (board.variant.backgammonPosition(this, player)) _.OutoftimeBackgammon
+      else if (board.variant.gammonPosition(this, player)) _.OutoftimeGammon
+      else _.Outoftime
+    else if (board.history.score(player) == 0) _.OutoftimeBackgammon
+    else _.Outoftime
 
   // only works when we are not mid turn and have not rolled dice
   def maxTurnsFromEnd(player: Player): Option[Int] =
@@ -199,7 +210,7 @@ case class Situation(board: Board, player: Player) {
       )
     else None
 
-  def minTurnsFromScoring(player: Player): Option[Int] =
+  private def minTurnsFromScoring(player: Player): Option[Int] =
     if (board.racePosition)
       if (board.history.score(player) == 0)
         Some(
@@ -216,7 +227,7 @@ case class Situation(board: Board, player: Player) {
       else Some(0)
     else None
 
-  def minTurnsFromExitingOpponentHome(player: Player): Option[Int] =
+  private def minTurnsFromExitingOpponentHome(player: Player): Option[Int] =
     if (board.racePosition)
       if (board.history.score(player) == 0)
         Some(
