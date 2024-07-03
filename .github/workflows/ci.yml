@@ -10,7 +10,7 @@ jobs:
     steps:
       - name: Check if organization member
         id: check_org_member
-        uses: Mind-Sports-Games/check-org-member@1.0.0
+        uses: Mind-Sports-Games/check-org-member@v1.0.0
         with:
           username: ${{ github.actor }}
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -39,7 +39,7 @@ jobs:
     steps:
       - name: Check if organization member
         id: check_org_member
-        uses: Mind-Sports-Games/check-org-member@1.0.0
+        uses: Mind-Sports-Games/check-org-member@v1.0.0
         with:
           username: ${{ github.actor }}
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -68,7 +68,7 @@ jobs:
     steps:
       - name: Check if organization member
         id: check_org_member
-        uses: Mind-Sports-Games/check-org-member@1.0.0
+        uses: Mind-Sports-Games/check-org-member@v1.0.0
         with:
           username: ${{ github.actor }}
           token: ${{ secrets.GITHUB_TOKEN }}
