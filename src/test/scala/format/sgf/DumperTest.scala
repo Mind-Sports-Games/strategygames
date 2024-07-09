@@ -4,6 +4,7 @@ import strategygames._
 import strategygames.variant.Variant
 
 import strategygames.format.sgf.Dumper
+import strategygames.format.FEN
 
 import org.specs2.matcher.ValidatedMatchers
 import org.specs2.mutable.Specification
@@ -11,6 +12,7 @@ import org.specs2.mutable.Specification
 class DumperTest extends Specification with ValidatedMatchers {
 
   val Go19x19     = Variant.Go(strategygames.go.variant.Go19x19)
+  val Go13x13     = Variant.Go(strategygames.go.variant.Go13x13)
   val Go9x9       = Variant.Go(strategygames.go.variant.Go9x9)
   val Backgammon  = Variant.Backgammon(strategygames.backgammon.variant.Backgammon)
   val Othello     = Variant.FairySF(strategygames.fairysf.variant.Flipello)
@@ -40,6 +42,48 @@ class DumperTest extends Specification with ValidatedMatchers {
     }
   }
 
+  "Go19x19 => longer game with handicap has actionStrsToOutput" should {
+    "have an sgf output" in {
+      val initialFen             = Some(
+        FEN(
+          Go19x19,
+          "19/19/19/15S3/19/19/19/19/19/19/19/19/19/19/19/3S11S3/19/19/19[SSSSSSSSSSssssssssss] w - 0 75 0 0 75 1"
+        )
+      )
+      val output                 = ";B[dp]\n;B[pd]\n;B[pp]\n;W[bs]\n;B[cr]\n;W[dq]\n;B[ep]"
+      val actionStrs: ActionStrs = Vector(Vector("s@b1"), Vector("s@c2"), Vector("s@d3"), Vector("s@e4"))
+      Dumper.apply(Go19x19, actionStrs, initialFen) must_== output
+    }
+  }
+
+  "Go13x13 => game with handicap has actionStrsToOutput" should {
+    "have an sgf output" in {
+      val initialFen             = Some(
+        FEN(
+          Go13x13,
+          "13/13/13/3S5S3/13/13/3S2S2S3/13/13/3S5S3/13/13/13[SSSSSSSSSSssssssssss] w - 0 75 0 0 75 1"
+        )
+      )
+      val output                 = ";B[dd]\n;B[dg]\n;B[dj]\n;B[gg]\n;B[jd]\n;B[jg]\n;B[jj]\n;W[bm]\n;B[cl]\n;W[dk]\n;B[ej]"
+      val actionStrs: ActionStrs = Vector(Vector("s@b1"), Vector("s@c2"), Vector("s@d3"), Vector("s@e4"))
+      Dumper.apply(Go13x13, actionStrs, initialFen) must_== output
+    }
+  }
+
+  "Go13x13 => game with handicap 0 but komi has actionStrsToOutput" should {
+    "have an sgf output" in {
+      val initialFen             = Some(
+        FEN(
+          Go13x13,
+          "13/13/13/13/13/13/13/13/13/13/13/13/13[SSSSSSSSSSssssssssss] b - 0 40 0 0 40 1"
+        )
+      )
+      val output                 = ";B[bm]\n;W[cl]\n;B[dk]\n;W[ej]"
+      val actionStrs: ActionStrs = Vector(Vector("s@b1"), Vector("s@c2"), Vector("s@d3"), Vector("s@e4"))
+      Dumper.apply(Go13x13, actionStrs, initialFen) must_== output
+    }
+  }
+
   "Go9x9 => longer game has actionStrsToOutput" should {
     "have an sgf output" in {
       val output                 = ";B[bi]\n;W[ch]\n;B[dg]\n;W[ef]"
@@ -53,6 +97,27 @@ class DumperTest extends Specification with ValidatedMatchers {
       val output                 = ";B[bi]\n;W[ch]\n;B[]\n;W[dc]"
       val actionStrs: ActionStrs = Vector(Vector("s@b1"), Vector("s@c2"), Vector("pass"), Vector("s@d7"))
       Dumper.apply(Go9x9, actionStrs) must_== output
+    }
+  }
+
+  "Go9x9 with initial fen handicap" should {
+    "have an sgf output with just additioanl moves" in {
+      val initialFen             =
+        Some(FEN(Go9x9, "9/9/2S3S2/9/2S3S2/9/2S3S2/9/9[SSSSSSSSSSssssssssss] w - 0 865 0 0 55 1"))
+      val output                 = ";B[cc]\n;B[ce]\n;B[cg]\n;B[gc]\n;B[ge]\n;B[gg]"
+      val actionStrs: ActionStrs = Vector()
+
+      Dumper.apply(Go9x9, actionStrs, initialFen) must_== output
+    }
+  }
+
+  "Go9x9 with initial fen handicap" should {
+    "have an sgf output with additionl moves" in {
+      val initialFen             =
+        Some(FEN(Go9x9, "9/9/2S3S2/9/2S3S2/9/2S3S2/9/9[SSSSSSSSSSssssssssss] w - 0 865 0 0 55 1"))
+      val output                 = ";B[cc]\n;B[ce]\n;B[cg]\n;B[gc]\n;B[ge]\n;B[gg]\n;W[bi]\n;B[ch]\n;W[]\n;B[dc]"
+      val actionStrs: ActionStrs = Vector(Vector("s@b1"), Vector("s@c2"), Vector("pass"), Vector("s@d7"))
+      Dumper.apply(Go9x9, actionStrs, initialFen) must_== output
     }
   }
 
