@@ -87,6 +87,13 @@ object Status {
     VariantEnd
   )
 
+  val finishedWithPossibleDraw = List(
+    Stalemate,
+    Draw,
+    Outoftime,
+    VariantEnd
+  )
+
   val flagged = List(Outoftime, OutoftimeGammon, OutoftimeBackgammon, RuleOfGin, GinGammon, GinBackgammon)
 
   val resigned = List(Resign, ResignGammon, ResignBackgammon)
