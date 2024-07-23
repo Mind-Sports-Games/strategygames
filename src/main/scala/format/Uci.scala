@@ -456,6 +456,28 @@ object Uci {
     def toBackgammon   = dr
   }
 
+  sealed abstract class Undo() extends Uci {
+    def origDest: Option[(Pos, Pos)] = None
+  }
+
+  final case class BackgammonUndo(u: backgammon.format.Uci.Undo) extends Undo() with Backgammon {
+    def gameLogic  = GameLogic.Backgammon()
+    def uci        = u.uci
+    def shortUci   = u.uci
+    def fishnetUci = u.uci
+    def piotr      = u.piotr
+
+    val unwrap = u
+
+    def toChess        = sys.error("Can't make a chess UCI from a backgammon UCI")
+    def toDraughts     = sys.error("Can't make a draughts UCI from a backgammon UCI")
+    def toFairySF      = sys.error("Can't make a fairysf UCI from a backgammon UCI")
+    def toSamurai      = sys.error("Can't make a samurai UCI from a backgammon UCI")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a backgammon UCI")
+    def toGo           = sys.error("Can't make a go UCI from a backgammon UCI")
+    def toBackgammon   = u
+  }
+
   sealed abstract class EndTurn() extends Uci {
     def origDest: Option[(Pos, Pos)] = None
   }
@@ -514,6 +536,7 @@ object Uci {
     case l: backgammon.format.Uci.Lift      => BackgammonLift(l)
     case dr: backgammon.format.Uci.DiceRoll => BackgammonDiceRoll(dr)
     case dr: backgammon.format.Uci.DoRoll   => BackgammonDoRoll(dr)
+    case u: backgammon.format.Uci.Undo      => BackgammonUndo(u)
     case et: backgammon.format.Uci.EndTurn  => BackgammonEndTurn(et)
   }
 
@@ -734,6 +757,21 @@ object Uci {
         case GameLogic.Togyzkumalak() => None
         case GameLogic.Go()           => None
         case GameLogic.Backgammon()   => BackgammonDoRoll(backgammon.format.Uci.DoRoll()).some
+      }
+
+  }
+
+  object Undo {
+
+    def apply(lib: GameLogic): Option[Undo] =
+      lib match {
+        case GameLogic.Chess()        => None
+        case GameLogic.Draughts()     => None
+        case GameLogic.FairySF()      => None
+        case GameLogic.Samurai()      => None
+        case GameLogic.Togyzkumalak() => None
+        case GameLogic.Go()           => None
+        case GameLogic.Backgammon()   => BackgammonUndo(backgammon.format.Uci.Undo()).some
       }
 
   }

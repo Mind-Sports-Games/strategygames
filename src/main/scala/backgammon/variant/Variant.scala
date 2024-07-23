@@ -4,7 +4,7 @@ import cats.data.Validated
 import cats.syntax.option._
 
 import strategygames.backgammon._
-import strategygames.backgammon.format.FEN
+import strategygames.backgammon.format.{ FEN, Uci }
 import strategygames.{ GameFamily, Player }
 
 import scala.annotation.nowarn
@@ -104,6 +104,31 @@ abstract class Variant private[variant] (
         pocketData = pocketsAfterCapture
       )
       .useDie(die)
+  }
+
+  // for undos
+  private def boardBefore(
+      situation: Situation,
+      orig: Option[Pos],
+      dest: Option[Pos],
+      die: Int,
+      capture: Boolean
+  ): Board = {
+    val (pieces, _)          = piecesAfterAction(situation.board.pieces, situation.player, orig, dest)
+    val pocketsBeforeDrop    = dest match {
+      case None => situation.board.pocketData.map(_.store(Piece(situation.player, Role.defaultRole)))
+      case _    => situation.board.pocketData
+    }
+    val pocketsBeforeCapture =
+      if (capture)
+        pocketsBeforeDrop.flatMap(_.drop(Piece(!situation.player, Role.defaultRole)))
+      else pocketsBeforeDrop
+    situation.board
+      .copy(
+        pieces = pieces,
+        pocketData = pocketsBeforeCapture
+      )
+      .undoUseDie(die)
   }
 
   private def actionsContinueTurnOrEnd(actionsWithLookAhead: Iterable[(Action, Boolean)]): Boolean =
@@ -306,6 +331,40 @@ abstract class Variant private[variant] (
         }
     else List.empty
 
+  def validUndo(situation: Situation): Option[Undo] =
+    situation.board.history.lastAction
+      .flatMap {
+        case a: Uci.Move =>
+          Some(boardBefore(situation, Some(a.dest), Some(a.orig), a.diceUsed, false))
+        case a: Uci.Drop =>
+          Some(
+            boardBefore(
+              situation,
+              Some(a.pos),
+              None,
+              (Pos.barIndex(situation.player) - a.pos.index).abs,
+              false
+            )
+          )
+        case a: Uci.Lift =>
+          Some(
+            boardBefore(
+              situation,
+              None,
+              Some(a.pos),
+              /*i think we do need to know the dice used here :( imagine we start the turn with pieces on the 6 and 4 point, and we rolled 6/5. and the second action was to lift the 4. we dont know from this action alone whether this was using the 5 (because the first action was to lift the 6) or using the 6 (because suboptimally, the first action was to use the 5 to move the 6 to 1)*/ 0,
+              false
+            )
+          )
+        case _           => None
+      }
+      .map { board =>
+        Undo(
+          situationBefore = situation,
+          after = board
+        )
+      }
+
   def validEndTurn(situation: Situation): Option[EndTurn] =
     if (
       ((situation.board.unusedDice.isEmpty || !situation.canUseDice) &&
@@ -349,6 +408,12 @@ abstract class Variant private[variant] (
     validDiceRolls(situation).filter(dr => dr.dice == dice).headOption match {
       case Some(dr) => Validated.valid(dr)
       case None     => Validated.invalid(s"$situation cannot do a dice roll of: $dice")
+    }
+
+  def undo(situation: Situation): Validated[String, Undo] =
+    validUndo(situation) match {
+      case Some(u) => Validated.valid(u)
+      case None    => Validated.invalid(s"$situation cannot do undo")
     }
 
   def endTurn(situation: Situation): Validated[String, EndTurn] =

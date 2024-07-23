@@ -32,6 +32,8 @@ object Uci {
 
     def origDest = Some(orig -> dest)
 
+    def diceUsed = (orig.index - dest.index).abs
+
     def undoable = true
 
     def apply(situation: Situation) = situation.move(orig, dest)
@@ -152,7 +154,7 @@ object Uci {
 
   // this is a stub Uci case class that doesn't marry up to an Action type
   // this stub class says "I need to do a roll, I don't know the dice I have rolled"
-  // its used by lila but not internally by strategygames
+  // its used by lila but not internally by strategygames - it never ends up in actionStrs
   case class DoRoll() extends Uci {
 
     def uci = "roll"
@@ -164,6 +166,21 @@ object Uci {
     def undoable = false
 
     def apply(situation: Situation) = sys.error("Cannot apply a DoRoll")
+
+  }
+
+  // another stub Uci case class that doesn't end up in actionStrs
+  case class Undo() extends Uci {
+
+    def uci = "undo"
+
+    def piotr = uci
+
+    def origDest = None
+
+    def undoable = false
+
+    def apply(situation: Situation) = situation.undo
 
   }
 
@@ -196,6 +213,8 @@ object Uci {
 
   def apply(diceRoll: strategygames.backgammon.DiceRoll) = Uci.DiceRoll(diceRoll.dice)
 
+  def apply(@nowarn undo: strategygames.backgammon.Undo) = Uci.Undo()
+
   def apply(@nowarn endTurn: strategygames.backgammon.EndTurn) = Uci.EndTurn()
 
   def apply(action: String): Option[Uci] =
@@ -206,6 +225,7 @@ object Uci {
     else if (action.contains('^')) Uci.Lift.fromStrings(action.drop(1))
     else if (action.contains('/')) Some(Uci.DiceRoll.fromStrings(action))
     else if (action == "roll") Some(Uci.DoRoll())
+    else if (action == "undo") Some(Uci.Undo())
     else if (action == "endturn") Some(Uci.EndTurn())
     else Uci.Move(action)
 
@@ -217,6 +237,7 @@ object Uci {
     else if (action.contains('^')) Uci.Lift.piotr(action)
     else if (action.contains('/')) Some(Uci.DiceRoll.fromStrings(action))
     else if (action == "roll") Some(Uci.DoRoll())
+    else if (action == "undo") Some(Uci.Undo())
     else if (action == "endturn") Some(Uci.EndTurn())
     else Uci.Move.piotr(action)
 
