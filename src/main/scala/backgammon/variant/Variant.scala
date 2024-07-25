@@ -335,7 +335,7 @@ abstract class Variant private[variant] (
     situation.board.history.lastAction
       .flatMap {
         case a: Uci.Move =>
-          Some(boardBefore(situation, Some(a.dest), Some(a.orig), a.diceUsed, false))
+          Some(boardBefore(situation, Some(a.dest), Some(a.orig), a.diceUsed, a.capture.isDefined))
         case a: Uci.Drop =>
           Some(
             boardBefore(
@@ -343,16 +343,17 @@ abstract class Variant private[variant] (
               Some(a.pos),
               None,
               (Pos.barIndex(situation.player) - a.pos.index).abs,
-              false
+              a.capture.isDefined
             )
           )
         case a: Uci.Lift =>
-          Some(
+          // if we dont know the dice we cant reliably undo the lift
+          a.dice.map(
             boardBefore(
               situation,
               None,
               Some(a.pos),
-              /*i think we do need to know the dice used here :( imagine we start the turn with pieces on the 6 and 4 point, and we rolled 6/5. and the second action was to lift the 4. we dont know from this action alone whether this was using the 5 (because the first action was to lift the 6) or using the 6 (because suboptimally, the first action was to use the 5 to move the 6 to 1)*/ 0,
+              _,
               false
             )
           )
