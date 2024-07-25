@@ -85,7 +85,11 @@ object Replay {
       uciMoves: List[String]
   ): Move =
     Move(
-      piece = before.situation.board.pieces(orig),
+      piece =
+        if (orig == dest)
+          // flipello pass. Will remove reference to FlipCounter when refactoring in PLA-309
+          Piece(before.situation.player, FlipCounter)
+        else before.situation.board.pieces(orig),
       orig = orig,
       dest = dest,
       situationBefore = before.situation,
