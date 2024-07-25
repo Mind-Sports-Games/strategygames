@@ -8,9 +8,8 @@ import org.specs2.matcher.Matcher
 import org.specs2.matcher.ValidatedMatchers
 import org.specs2.mutable.Specification
 
-import strategygames.fairysf.format.{ Forsyth, Visual }
+import strategygames.fairysf.format.{ FEN, Forsyth, Uci, Visual }
 import strategygames.fairysf.variant.Variant
-import strategygames.fairysf.format.FEN
 
 trait FairySFTest extends Specification with ValidatedMatchers {
 
@@ -104,5 +103,18 @@ trait FairySFTest extends Specification with ValidatedMatchers {
     }
 
   def sortPoss(poss: Seq[Pos]): Seq[Pos] = poss sortBy (_.toString)
+
+  def playUciList(game: Game, ucis: List[Uci]): Validated[String, Game] =
+    ucis.foldLeft(Validated.valid(game): Validated[String, Game]) { (vg, action) =>
+      vg.flatMap { g => g.apply(action).map(_._1) }
+    }
+
+  def playActionStrs(actionStrs: List[String], game: Option[Game] = None): Validated[String, Game] = {
+    val g = game.getOrElse(Game.apply(variant.Variant.default))
+    playUciList(
+      g,
+      Uci.readList(g.situation.board.variant.gameFamily, actionStrs.mkString(" ")).getOrElse(List())
+    )
+  }
 
 }
