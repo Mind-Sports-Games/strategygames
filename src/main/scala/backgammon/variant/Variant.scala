@@ -5,7 +5,7 @@ import cats.syntax.option._
 
 import strategygames.backgammon._
 import strategygames.backgammon.format.{ FEN, Uci }
-import strategygames.{ GameFamily, Player }
+import strategygames.{ GameFamily, Player, Score }
 
 import scala.annotation.nowarn
 
@@ -123,10 +123,26 @@ abstract class Variant private[variant] (
       if (capture)
         pocketsBeforeDrop.flatMap(_.drop(Piece(!situation.player, Role.defaultRole)))
       else pocketsBeforeDrop
+    val piecesBeforeCapture  =
+      orig match {
+        case Some(pos) if capture && pieces.get(pos).isEmpty =>
+          pieces + ((pos, (Piece(!situation.player, Role.defaultRole), 1)))
+        case _                                               => pieces
+      }
     situation.board
       .copy(
-        pieces = pieces,
-        pocketData = pocketsBeforeCapture
+        pieces = piecesBeforeCapture,
+        pocketData = pocketsBeforeCapture,
+        history = situation.board.history.copy(
+          score = orig match {
+            case None =>
+              Score(
+                situation.board.history.score.p1 - situation.player.fold(1, 0),
+                situation.board.history.score.p2 - situation.player.fold(0, 1)
+              )
+            case _    => situation.board.history.score
+          }
+        )
       )
       .undoUseDie(die)
   }
