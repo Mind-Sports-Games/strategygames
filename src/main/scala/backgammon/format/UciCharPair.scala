@@ -9,26 +9,27 @@ object UciCharPair {
 
   def apply(uci: Uci): stratUciCharPair =
     uci match {
-      case Uci.Move(orig, dest) => stratUciCharPair(toChar(orig), toChar(dest))
-      case Uci.Drop(role, pos)  =>
+      case Uci.Move(orig, dest, _) => stratUciCharPair(toChar(orig), toChar(dest))
+      case Uci.Drop(role, pos, _)  =>
         stratUciCharPair(
           toChar(pos),
           dropRole2charMap.getOrElse(role, voidChar)
         )
-      case Uci.Lift(pos)        =>
+      case Uci.Lift(pos, dice)     =>
         stratUciCharPair(
-          dropRole2charMap.getOrElse(Role.defaultRole, voidChar),
+          // dropRole2charMap.getOrElse(Role.defaultRole, voidChar),
+          dice2char(dice.getOrElse(7)),
           toChar(pos)
         )
-      case Uci.DiceRoll(dice)   =>
+      case Uci.DiceRoll(dice)      =>
         stratUciCharPair(
           dice2char(dice(0)),
           dice2char(dice(1))
         )
-      case Uci.Undo()           => stratUciCharPair(toChar(Pos.C1), toChar(Pos.C1))
-      case Uci.DoRoll()         => stratUciCharPair(toChar(Pos.B1), toChar(Pos.B1))
-      case Uci.EndTurn()        => stratUciCharPair(toChar(Pos.A1), toChar(Pos.A1))
-      case _                    => sys.error(s"Not implemented UciCharPair for $uci")
+      case Uci.Undo()              => stratUciCharPair(toChar(Pos.C1), toChar(Pos.C1))
+      case Uci.DoRoll()            => stratUciCharPair(toChar(Pos.B1), toChar(Pos.B1))
+      case Uci.EndTurn()           => stratUciCharPair(toChar(Pos.A1), toChar(Pos.A1))
+      case _                       => sys.error(s"Not implemented UciCharPair for $uci")
     }
 
   private[format] object implementation {

@@ -36,13 +36,15 @@ case class Move(
   // but should work if uncommented and represent "does this move capture an opponent piece?"
   // def captures = capture.isDefined
 
+  def captureList = capture.map(List(_))
+
   def diceUsed = (orig.index - dest.index).abs
 
   def player = piece.player
 
   def withMetrics(m: MoveMetrics) = copy(metrics = m)
 
-  def toUci = Uci.Move(orig, dest)
+  def toUci = Uci.Move(orig, dest, captureList)
 
   override def toString = s"$piece ${toUci.uci}"
 }

@@ -58,6 +58,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         g.situation.canEndTurn must_== true
         g.situation.board.pipCount(Player.P1) must_== 161
         g.situation.board.pipCount(Player.P2) must_== 167
+        g.situation.board.history.currentTurn.map(_.uci) must_== actionStrs
       }
     }
 
@@ -70,6 +71,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
       )
       playActionStrs(actionStrs) must beValid.like { g =>
         g.situation.player must_== Player.P2
+        g.situation.board.history.lastTurn.map(_.uci) must_== actionStrs
       }
     }
 
@@ -83,14 +85,14 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
       )
       playActionStrs(actionStrs) must beValid.like { g =>
         g.situation.moves.values.flatten.map(_.toUci.uci).toSet must_== Set(
-          "l1j1",
+          "l1j1x",
           "l1h1",
           "a1b2",
           "a1d2",
           "e2g2",
           "e2i2",
           "g2i2",
-          "g2k2"
+          "g2k2x"
         )
         g.situation.canCapture must_== true
       }
@@ -111,9 +113,10 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
           "j1f1",
           "a1d2",
           "e2i2",
-          "g2k2"
+          "g2k2x"
         )
         g.situation.board.pieceCountOnBar(Player.P1) must_== 1
+        g.situation.board.history.currentTurn.map(_.uci) must_== List("2/4", "l1j1x")
       }
     }
 
@@ -269,6 +272,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         g.situation.board.pipCount(Player.P1) must_== 183
         g.situation.canMove must_== false
         g.situation.dropsAsDrops.map(_.toUci.uci) must_== List("s@l2")
+        g.situation.board.history.currentTurn.map(_.uci) must_== List("2/1", "s@k2x")
       }
     }
 
@@ -341,7 +345,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
           "j1d1",
           "h1b1",
           "a1f2",
-          "e2k2"
+          "e2k2x"
         )
       }
     }
@@ -497,6 +501,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         g.situation.board.piecesCanLift(Player.P1) must_== true
         g.situation.board.playerPiecesOnBoardOrInPocket(Player.P1) must_== 9
         g.situation.board.history.score must_== Score(6, 0)
+        g.situation.board.history.currentTurn.map(_.uci) must_== List("5/4", "5^j1", "4^k1")
       }
     }
   }

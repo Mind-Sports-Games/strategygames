@@ -182,7 +182,11 @@ object Uci {
   final case class BackgammonMove(m: backgammon.format.Uci.Move)
       extends Move(
         Pos.Backgammon(m.orig),
-        Pos.Backgammon(m.dest)
+        Pos.Backgammon(m.dest),
+        capture = m.capture match {
+          case Some(capture) => Some(capture.map(Pos.Backgammon))
+          case None          => None
+        }
       )
       with Backgammon {
     def gameLogic      = GameLogic.Backgammon()
@@ -201,7 +205,8 @@ object Uci {
 
   sealed abstract class Drop(
       val role: Role,
-      val pos: Pos
+      val pos: Pos,
+      val capture: Option[List[Pos]] = None
   ) extends Uci {
     def origDest = Some(pos -> pos)
   }
@@ -272,7 +277,11 @@ object Uci {
   final case class BackgammonDrop(d: backgammon.format.Uci.Drop)
       extends Drop(
         Role.BackgammonRole(d.role),
-        Pos.Backgammon(d.pos)
+        Pos.Backgammon(d.pos),
+        d.capture match {
+          case Some(capture) => Some(capture.map(Pos.Backgammon))
+          case None          => None
+        }
       )
       with Backgammon {
     def gameLogic      = GameLogic.Backgammon()
@@ -291,14 +300,16 @@ object Uci {
   }
 
   sealed abstract class Lift(
-      val pos: Pos
+      val pos: Pos,
+      val dice: Option[Int] = None
   ) extends Uci {
     def origDest = Some(pos -> pos)
   }
 
   final case class BackgammonLift(l: backgammon.format.Uci.Lift)
       extends Lift(
-        Pos.Backgammon(l.pos)
+        Pos.Backgammon(l.pos),
+        l.dice
       )
       with Backgammon {
     def gameLogic      = GameLogic.Backgammon()
@@ -556,6 +567,20 @@ object Uci {
         case None           => None
       }
 
+    private def backgammonCaptures(captures: Option[List[Pos]]): Option[List[backgammon.Pos]] =
+      captures match {
+        case Some(captures) =>
+          Some(
+            captures.flatMap(c =>
+              c match {
+                case Pos.Backgammon(c) => Some(c)
+                case _                 => None
+              }
+            )
+          )
+        case None           => None
+      }
+
     def apply(
         lib: GameLogic,
         orig: Pos,
@@ -609,7 +634,8 @@ object Uci {
           BackgammonMove(
             backgammon.format.Uci.Move.apply(
               orig,
-              dest
+              dest,
+              backgammonCaptures(capture)
             )
           )
         case _                                                                          => sys.error("Mismatched gamelogic types 23")
@@ -675,7 +701,12 @@ object Uci {
 
   object Lift {
 
-    def fromStrings(lib: GameLogic, @nowarn gf: GameFamily, posS: String): Option[Lift] =
+    def fromStrings(
+        lib: GameLogic,
+        @nowarn gf: GameFamily,
+        posS: String,
+        diceS: Option[String]
+    ): Option[Lift] =
       lib match {
         case GameLogic.Chess()        => None
         case GameLogic.Draughts()     => None
@@ -684,7 +715,7 @@ object Uci {
         case GameLogic.Togyzkumalak() => None
         case GameLogic.Go()           => None
         case GameLogic.Backgammon()   =>
-          backgammon.format.Uci.Lift.fromStrings(posS).map(BackgammonLift)
+          backgammon.format.Uci.Lift.fromStrings(posS, diceS).map(BackgammonLift)
       }
   }
 

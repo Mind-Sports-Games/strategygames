@@ -227,23 +227,23 @@ object Replay {
     val gameWithActions: List[(Game, Action)] =
       // can flatten as specific EndTurn action marks turn end
       actionStrs.flatten.toList.map {
-        case Uci.Move.moveR(orig, dest) =>
+        case Uci.Move.moveR(orig, dest, _) =>
           replayMoveFromUci(
             Pos.fromKey(orig),
             Pos.fromKey(dest)
           )
-        case Uci.Drop.dropR(role, dest) =>
+        case Uci.Drop.dropR(role, dest, _) =>
           replayDropFromUci(
             Role.allByForsyth(init.situation.board.variant.gameFamily).get(role(0).toLower),
             Pos.fromKey(dest)
           )
-        case Uci.Lift.liftR(orig)       =>
+        case Uci.Lift.liftR(_, orig)       =>
           replayLiftFromUci(Pos.fromKey(orig))
-        case Uci.DiceRoll.diceRollR(dr) =>
+        case Uci.DiceRoll.diceRollR(dr)    =>
           replayDiceRollFromUci(Uci.DiceRoll.fromStrings(dr).dice)
-        case Uci.EndTurn.endTurnR()     =>
+        case Uci.EndTurn.endTurnR()        =>
           replayEndTurnFromUci()
-        case (action: String)           =>
+        case (action: String)              =>
           sys.error(s"Invalid action for replay: $action")
       }
 
