@@ -20,7 +20,8 @@ case class Drop(
   def finalizeAfter: Board = after updateHistory { h =>
     h.copy(
       currentTurn = h.currentTurn :+ toUci,
-      forcedTurn = h.forcedTurnPersists(situationBefore, this)
+      forcedTurn = h.forcedTurnPersists(situationBefore, this),
+      justUsedUndo = false
     )
   }
 

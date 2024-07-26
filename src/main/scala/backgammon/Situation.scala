@@ -149,7 +149,8 @@ case class Situation(board: Board, player: Player) {
       .flatMap(uci => actions.filter(a => uciWithDice(a) == uci).headOption)
 
   lazy val forcedAction: Option[Action] =
-    if ((canTouchPieces && actions.length == 1) || forcedEndTurn || (canTouchPieces && forcedPair))
+    if (board.history.justUsedUndo) None
+    else if ((canTouchPieces && actions.length == 1) || forcedEndTurn || (canTouchPieces && forcedPair))
       actions.headOption
     else if (canTouchPieces && !canCapture && forcedSingle.nonEmpty) forcedSingle
     else if (canTouchPieces && forcedInTurn.nonEmpty) forcedInTurn

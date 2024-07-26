@@ -808,7 +808,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         g.situation.board.piecesCanLift(Player.P1) must_== true
         g.situation.board.playerPiecesOnBoardOrInPocket(Player.P1) must_== 11
         g.situation.board.history.score must_== Score(4, 0)
-        g.situation.lifts.map(_.toUci.uci).toSet must_== Set("5^j1")
+        g.situation.lifts.map(_.toUci.uci).toSet must_== Set("^j1")
       }
     }
 
@@ -817,7 +817,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         g.situation.board.piecesCanLift(Player.P1) must_== true
         g.situation.board.playerPiecesOnBoardOrInPocket(Player.P1) must_== 9
         g.situation.board.history.score must_== Score(6, 0)
-        g.situation.board.history.currentTurn.map(_.uci) must_== List("5/4", "5^j1", "4^k1")
+        g.situation.board.history.currentTurn.map(_.uci) must_== List("5/4", "^j1", "^k1")
       }
     }
 

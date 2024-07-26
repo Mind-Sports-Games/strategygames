@@ -17,7 +17,8 @@ case class Undo(
   def finalizeAfter: Board = after updateHistory { h =>
     h.copy(
       currentTurn = h.currentTurn.dropRight(1),
-      forcedTurn = false
+      forcedTurn = false,
+      justUsedUndo = true
     )
   }
 

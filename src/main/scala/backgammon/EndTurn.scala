@@ -21,6 +21,7 @@ case class EndTurn(
       lastTurn = h.currentTurn :+ toUci,
       currentTurn = List(),
       forcedTurn = false,
+      justUsedUndo = false,
       halfMoveClock = h.halfMoveClock + playerAfter.fold(1, 0)
     )
   }

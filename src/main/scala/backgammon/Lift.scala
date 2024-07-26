@@ -19,6 +19,7 @@ case class Lift(
     h.copy(
       currentTurn = h.currentTurn :+ toUci,
       forcedTurn = h.forcedTurnPersists(situationBefore, this),
+      justUsedUndo = false,
       score = Score(
         h.score.p1 + player.fold(1, 0),
         h.score.p2 + player.fold(0, 1)
