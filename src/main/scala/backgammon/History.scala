@@ -8,6 +8,7 @@ case class History(
     lastTurn: List[Uci] = List.empty,
     currentTurn: List[Uci] = List.empty,
     forcedTurn: Boolean = false,
+    justUsedUndo: Boolean = false,
     positionHashes: PositionHash = Array.empty,
     score: Score = Score(0, 0),
     // this is tracking fullMove for Backgammon

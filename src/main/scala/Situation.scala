@@ -27,6 +27,8 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def diceRolls: List[DiceRoll]
 
+  def undos: List[Undo]
+
   def endTurns: List[EndTurn]
 
   def actions: List[Action] =
@@ -36,7 +38,9 @@ sealed abstract class Situation(val board: Board, val player: Player) {
       passes :::
       selectSquaresAction :::
       diceRolls :::
-      endTurns
+      endTurns :::
+      //important to keep non progressive actions at the end
+      undos
 
   def canDrop: Boolean
 
@@ -50,13 +54,13 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def canOnlyRollDice: Boolean
 
+  def canUndo: Boolean
+
   def canEndTurn: Boolean
 
   def canOnlyEndTurn: Boolean
 
   def takebackable: Boolean
-
-  def canUndo: Boolean
 
   def forcedAction: Option[Action]
 
@@ -113,6 +117,8 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def diceRoll(dice: List[Int]): Validated[String, DiceRoll]
 
+  def undo: Validated[String, Undo]
+
   def endTurn: Validated[String, EndTurn]
 
   def withVariant(variant: Variant): Situation
@@ -146,8 +152,6 @@ object Situation {
     }
 
     def takebackable = true
-
-    def canUndo = false
 
     def forcedAction: Option[Action] = None
 
@@ -201,6 +205,8 @@ object Situation {
 
     def diceRolls: List[DiceRoll] = List.empty
 
+    def undos: List[Undo] = List.empty
+
     def endTurns: List[EndTurn] = List.empty
 
     def canDrop: Boolean = s.canDrop
@@ -214,6 +220,8 @@ object Situation {
     def canRollDice: Boolean = s.canRollDice
 
     def canOnlyRollDice: Boolean = s.canRollDice
+
+    def canUndo = false
 
     def canEndTurn: Boolean = false
 
@@ -260,6 +268,8 @@ object Situation {
     def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
       s.diceRoll(dice).map(dr => DiceRoll.Chess(dr))
 
+    def undo: Validated[String, Undo] = sys.error("Can't do Undo for chess")
+
     def endTurn: Validated[String, EndTurn] = sys.error("Can't do EndTurn for chess")
 
     def withVariant(variant: Variant): Situation = variant match {
@@ -297,8 +307,6 @@ object Situation {
 
     def takebackable = true
 
-    def canUndo = false
-
     def forcedAction: Option[Action] = None
 
     lazy val check: Boolean = false
@@ -323,6 +331,8 @@ object Situation {
 
     def diceRolls: List[DiceRoll] = List.empty
 
+    def undos: List[Undo] = List.empty
+
     def endTurns: List[EndTurn] = List.empty
 
     def canDrop: Boolean = false
@@ -336,6 +346,8 @@ object Situation {
     def canRollDice: Boolean = false
 
     def canOnlyRollDice: Boolean = false
+
+    def canUndo: Boolean = false
 
     def canEndTurn: Boolean = false
 
@@ -419,6 +431,8 @@ object Situation {
     def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
       sys.error("Can't do a DiceRoll for draughts")
 
+    def undo: Validated[String, Undo] = sys.error("Can't do Undo for draughts")
+
     def endTurn: Validated[String, EndTurn] = sys.error("Can't do EndTurn for draughts")
 
     def withVariant(variant: Variant): Situation = variant match {
@@ -456,8 +470,6 @@ object Situation {
     }
 
     def takebackable = true
-
-    def canUndo = false
 
     def forcedAction: Option[Action] = None
 
@@ -501,6 +513,8 @@ object Situation {
 
     def diceRolls: List[DiceRoll] = List.empty
 
+    def undos: List[Undo] = List.empty
+
     def endTurns: List[EndTurn] = List.empty
 
     def canDrop: Boolean = s.canDrop
@@ -514,6 +528,8 @@ object Situation {
     def canRollDice: Boolean = false
 
     def canOnlyRollDice: Boolean = false
+
+    def canUndo: Boolean = false
 
     def canEndTurn: Boolean = false
 
@@ -560,6 +576,8 @@ object Situation {
     def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
       sys.error("Can't do a DiceRoll for fairysf")
 
+    def undo: Validated[String, Undo] = sys.error("Can't do Undo for fairysf")
+
     def endTurn: Validated[String, EndTurn] = sys.error("Can't do EndTurn for fairysf")
 
     def withVariant(variant: Variant): Situation = variant match {
@@ -596,8 +614,6 @@ object Situation {
     }
 
     def takebackable = true
-
-    def canUndo = false
 
     def forcedAction: Option[Action] = None
 
@@ -639,6 +655,8 @@ object Situation {
 
     def diceRolls: List[DiceRoll] = List.empty
 
+    def undos: List[Undo] = List.empty
+
     def endTurns: List[EndTurn] = List.empty
 
     def canDrop: Boolean = false
@@ -652,6 +670,8 @@ object Situation {
     def canRollDice: Boolean = false
 
     def canOnlyRollDice: Boolean = false
+
+    def canUndo: Boolean = false
 
     def canEndTurn: Boolean = false
 
@@ -669,6 +689,8 @@ object Situation {
 
     def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
       sys.error("Can't do a DiceRoll for samurai")
+
+    def undo: Validated[String, Undo] = sys.error("Can't do Undo for samurai")
 
     def endTurn: Validated[String, EndTurn] = sys.error("Can't do EndTurn for samurai")
 
@@ -733,8 +755,6 @@ object Situation {
 
     def takebackable = true
 
-    def canUndo = false
-
     def forcedAction: Option[Action] = None
 
     lazy val check: Boolean = false
@@ -774,6 +794,8 @@ object Situation {
 
     def diceRolls: List[DiceRoll] = List.empty
 
+    def undos: List[Undo] = List.empty
+
     def endTurns: List[EndTurn] = List.empty
 
     def canDrop: Boolean = false
@@ -787,6 +809,8 @@ object Situation {
     def canRollDice: Boolean = false
 
     def canOnlyRollDice: Boolean = false
+
+    def canUndo: Boolean = false
 
     def canEndTurn: Boolean = false
 
@@ -804,6 +828,8 @@ object Situation {
 
     def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
       sys.error("Can't do a DiceRoll for togykumalak")
+
+    def undo: Validated[String, Undo] = sys.error("Can't do Undo for togykumalak")
 
     def endTurn: Validated[String, EndTurn] = sys.error("Can't do EndTurn for togykumalak")
 
@@ -865,8 +891,6 @@ object Situation {
 
     def takebackable = s.takebackable
 
-    def canUndo = false
-
     def forcedAction: Option[Action] = None
 
     lazy val check: Boolean = false
@@ -908,6 +932,8 @@ object Situation {
 
     def diceRolls: List[DiceRoll] = List.empty
 
+    def undos: List[Undo] = List.empty
+
     def endTurns: List[EndTurn] = List.empty
 
     def canDrop: Boolean = s.canDrop
@@ -921,6 +947,8 @@ object Situation {
     def canRollDice: Boolean = false
 
     def canOnlyRollDice: Boolean = false
+
+    def canUndo: Boolean = false
 
     def canEndTurn: Boolean = false
 
@@ -969,6 +997,8 @@ object Situation {
     def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
       sys.error("Can't do a DiceRoll for go")
 
+    def undo: Validated[String, Undo] = sys.error("Can't do Undo for go")
+
     def endTurn: Validated[String, EndTurn] = sys.error("Can't do EndTurn for go")
 
     def withVariant(variant: Variant): Situation = variant match {
@@ -1006,8 +1036,6 @@ object Situation {
       }
 
     def takebackable = false
-
-    def canUndo = s.canUndo
 
     def forcedAction: Option[Action] = s.forcedAction.map(Action.wrap)
 
@@ -1050,6 +1078,8 @@ object Situation {
 
     def diceRolls: List[DiceRoll] = s.diceRolls.map(DiceRoll.Backgammon)
 
+    def undos: List[Undo] = s.undos.map(Undo.Backgammon)
+
     def endTurns: List[EndTurn] = s.endTurns.map(EndTurn.Backgammon)
 
     def canDrop: Boolean = s.canDrop
@@ -1063,6 +1093,8 @@ object Situation {
     def canRollDice: Boolean = s.canRollDice
 
     def canOnlyRollDice: Boolean = s.canOnlyRollDice
+
+    def canUndo: Boolean = s.canUndo
 
     def canEndTurn: Boolean = s.canEndTurn
 
@@ -1086,6 +1118,9 @@ object Situation {
 
     def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
       s.diceRoll(dice).map(dr => DiceRoll.Backgammon(dr))
+
+    def undo: Validated[String, Undo] =
+      s.undo.toEither.map(u => Undo.Backgammon(u)).toValidated
 
     def endTurn: Validated[String, EndTurn] =
       s.endTurn.toEither.map(et => EndTurn.Backgammon(et)).toValidated

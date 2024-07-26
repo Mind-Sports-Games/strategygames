@@ -19,4 +19,7 @@ class BackgammonTest extends Specification with ValidatedMatchers {
       Uci.readList(actionStrs.mkString(" ")).getOrElse(List())
     )
 
+  def forceValidGameToGame(validGame: Validated[String, Game]): Game =
+    validGame.toOption.head
+
 }

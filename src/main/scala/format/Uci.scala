@@ -182,7 +182,11 @@ object Uci {
   final case class BackgammonMove(m: backgammon.format.Uci.Move)
       extends Move(
         Pos.Backgammon(m.orig),
-        Pos.Backgammon(m.dest)
+        Pos.Backgammon(m.dest),
+        capture = m.capture match {
+          case Some(capture) => Some(capture.map(Pos.Backgammon))
+          case None          => None
+        }
       )
       with Backgammon {
     def gameLogic      = GameLogic.Backgammon()
@@ -201,7 +205,8 @@ object Uci {
 
   sealed abstract class Drop(
       val role: Role,
-      val pos: Pos
+      val pos: Pos,
+      val capture: Option[List[Pos]] = None
   ) extends Uci {
     def origDest = Some(pos -> pos)
   }
@@ -272,7 +277,11 @@ object Uci {
   final case class BackgammonDrop(d: backgammon.format.Uci.Drop)
       extends Drop(
         Role.BackgammonRole(d.role),
-        Pos.Backgammon(d.pos)
+        Pos.Backgammon(d.pos),
+        d.capture match {
+          case Some(capture) => Some(capture.map(Pos.Backgammon))
+          case None          => None
+        }
       )
       with Backgammon {
     def gameLogic      = GameLogic.Backgammon()
@@ -456,6 +465,28 @@ object Uci {
     def toBackgammon   = dr
   }
 
+  sealed abstract class Undo() extends Uci {
+    def origDest: Option[(Pos, Pos)] = None
+  }
+
+  final case class BackgammonUndo(u: backgammon.format.Uci.Undo) extends Undo() with Backgammon {
+    def gameLogic  = GameLogic.Backgammon()
+    def uci        = u.uci
+    def shortUci   = u.uci
+    def fishnetUci = u.uci
+    def piotr      = u.piotr
+
+    val unwrap = u
+
+    def toChess        = sys.error("Can't make a chess UCI from a backgammon UCI")
+    def toDraughts     = sys.error("Can't make a draughts UCI from a backgammon UCI")
+    def toFairySF      = sys.error("Can't make a fairysf UCI from a backgammon UCI")
+    def toSamurai      = sys.error("Can't make a samurai UCI from a backgammon UCI")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a backgammon UCI")
+    def toGo           = sys.error("Can't make a go UCI from a backgammon UCI")
+    def toBackgammon   = u
+  }
+
   sealed abstract class EndTurn() extends Uci {
     def origDest: Option[(Pos, Pos)] = None
   }
@@ -514,6 +545,7 @@ object Uci {
     case l: backgammon.format.Uci.Lift      => BackgammonLift(l)
     case dr: backgammon.format.Uci.DiceRoll => BackgammonDiceRoll(dr)
     case dr: backgammon.format.Uci.DoRoll   => BackgammonDoRoll(dr)
+    case u: backgammon.format.Uci.Undo      => BackgammonUndo(u)
     case et: backgammon.format.Uci.EndTurn  => BackgammonEndTurn(et)
   }
 
@@ -527,6 +559,20 @@ object Uci {
               c match {
                 case Pos.Draughts(c) => Some(c)
                 case _               => None
+              }
+            )
+          )
+        case None           => None
+      }
+
+    private def backgammonCaptures(captures: Option[List[Pos]]): Option[List[backgammon.Pos]] =
+      captures match {
+        case Some(captures) =>
+          Some(
+            captures.flatMap(c =>
+              c match {
+                case Pos.Backgammon(c) => Some(c)
+                case _                 => None
               }
             )
           )
@@ -586,7 +632,8 @@ object Uci {
           BackgammonMove(
             backgammon.format.Uci.Move.apply(
               orig,
-              dest
+              dest,
+              backgammonCaptures(capture)
             )
           )
         case _                                                                          => sys.error("Mismatched gamelogic types 23")
@@ -652,7 +699,11 @@ object Uci {
 
   object Lift {
 
-    def fromStrings(lib: GameLogic, @nowarn gf: GameFamily, posS: String): Option[Lift] =
+    def fromStrings(
+        lib: GameLogic,
+        @nowarn gf: GameFamily,
+        posS: String
+    ): Option[Lift] =
       lib match {
         case GameLogic.Chess()        => None
         case GameLogic.Draughts()     => None
@@ -734,6 +785,21 @@ object Uci {
         case GameLogic.Togyzkumalak() => None
         case GameLogic.Go()           => None
         case GameLogic.Backgammon()   => BackgammonDoRoll(backgammon.format.Uci.DoRoll()).some
+      }
+
+  }
+
+  object Undo {
+
+    def apply(lib: GameLogic): Option[Undo] =
+      lib match {
+        case GameLogic.Chess()        => None
+        case GameLogic.Draughts()     => None
+        case GameLogic.FairySF()      => None
+        case GameLogic.Samurai()      => None
+        case GameLogic.Togyzkumalak() => None
+        case GameLogic.Go()           => None
+        case GameLogic.Backgammon()   => BackgammonUndo(backgammon.format.Uci.Undo()).some
       }
 
   }

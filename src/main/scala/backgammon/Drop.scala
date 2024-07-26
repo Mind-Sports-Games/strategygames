@@ -20,7 +20,8 @@ case class Drop(
   def finalizeAfter: Board = after updateHistory { h =>
     h.copy(
       currentTurn = h.currentTurn :+ toUci,
-      forcedTurn = h.forcedTurnPersists(situationBefore, this)
+      forcedTurn = h.forcedTurnPersists(situationBefore, this),
+      justUsedUndo = false
     )
   }
 
@@ -33,11 +34,13 @@ case class Drop(
     )
   }
 
+  def captureList = capture.map(List(_))
+
   def diceUsed = (Pos.barIndex(player) - pos.index).abs
 
   def withMetrics(m: MoveMetrics) = copy(metrics = m)
 
-  def toUci = Uci.Drop(piece.role, pos)
+  def toUci = Uci.Drop(piece.role, pos, captureList)
 
   override def toString = toUci.uci
 

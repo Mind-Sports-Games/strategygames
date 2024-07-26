@@ -4,8 +4,8 @@ import cats.data.Validated
 import cats.syntax.option._
 
 import strategygames.backgammon._
-import strategygames.backgammon.format.FEN
-import strategygames.{ GameFamily, Player }
+import strategygames.backgammon.format.{ FEN, Uci }
+import strategygames.{ GameFamily, Player, Score }
 
 import scala.annotation.nowarn
 
@@ -104,6 +104,47 @@ abstract class Variant private[variant] (
         pocketData = pocketsAfterCapture
       )
       .useDie(die)
+  }
+
+  // for undos
+  private def boardBefore(
+      situation: Situation,
+      orig: Option[Pos],
+      dest: Option[Pos],
+      die: Int,
+      capture: Boolean
+  ): Board = {
+    val (pieces, _)          = piecesAfterAction(situation.board.pieces, situation.player, orig, dest)
+    val pocketsBeforeDrop    = dest match {
+      case None => situation.board.pocketData.map(_.store(Piece(situation.player, Role.defaultRole)))
+      case _    => situation.board.pocketData
+    }
+    val pocketsBeforeCapture =
+      if (capture)
+        pocketsBeforeDrop.flatMap(_.drop(Piece(!situation.player, Role.defaultRole)))
+      else pocketsBeforeDrop
+    val piecesBeforeCapture  =
+      orig match {
+        case Some(pos) if capture && pieces.get(pos).isEmpty =>
+          pieces + ((pos, (Piece(!situation.player, Role.defaultRole), 1)))
+        case _                                               => pieces
+      }
+    situation.board
+      .copy(
+        pieces = piecesBeforeCapture,
+        pocketData = pocketsBeforeCapture,
+        history = situation.board.history.copy(
+          score = orig match {
+            case None =>
+              Score(
+                situation.board.history.score.p1 - situation.player.fold(1, 0),
+                situation.board.history.score.p2 - situation.player.fold(0, 1)
+              )
+            case _    => situation.board.history.score
+          }
+        )
+      )
+      .undoUseDie(die)
   }
 
   private def actionsContinueTurnOrEnd(actionsWithLookAhead: Iterable[(Action, Boolean)]): Boolean =
@@ -306,6 +347,65 @@ abstract class Variant private[variant] (
         }
     else List.empty
 
+  private def diceUsedInHistoricLift(situation: Situation): Option[Int] =
+    situation.board.history.lastAction match {
+      case Some(l: Uci.Lift) =>
+        situation.board.history.currentTurn.headOption match {
+          case Some(d: Uci.DiceRoll) =>
+            // if we rolled a double, then there was only one number to use on the lift
+            if (d.dice.toSet.size == 1) d.dice.headOption
+            // if we have only done one action since the roll then just reset unusedDice to the roll
+            else if (situation.board.history.currentTurn.size == 2)
+              d.dice.diff(situation.board.unusedDice).headOption
+            else
+              // if we've done two actions since the roll lets look at the action we are not undoing
+              situation.board.history.currentTurn.lift(1) match {
+                // if the first was a move we know exactly what dice was used, so the lift used the other one
+                case Some(m: Uci.Move) => d.dice.diff(List(m.diceUsed)).headOption
+                // if both were lifts get the smallest dice that can do the lift that we are undoing
+                case Some(_: Uci.Lift) => d.dice.filter(_ >= l.pos.liftDistance(situation.player)).minOption
+                case _                 => None
+              }
+          case _                     => None
+        }
+      case _                 => None
+    }
+
+  def validUndo(situation: Situation): Option[Undo] =
+    situation.board.history.lastAction
+      .flatMap {
+        case a: Uci.Move =>
+          Some(boardBefore(situation, Some(a.dest), Some(a.orig), a.diceUsed, a.capture.isDefined))
+        case a: Uci.Drop =>
+          Some(
+            boardBefore(
+              situation,
+              Some(a.pos),
+              None,
+              (Pos.barIndex(situation.player) - a.pos.index).abs,
+              a.capture.isDefined
+            )
+          )
+        case a: Uci.Lift =>
+          // if we dont know the dice we cant reliably undo the lift
+          diceUsedInHistoricLift(situation).map(
+            boardBefore(
+              situation,
+              None,
+              Some(a.pos),
+              _,
+              false
+            )
+          )
+        case _           => None
+      }
+      .map { board =>
+        Undo(
+          situationBefore = situation,
+          after = board
+        )
+      }
+
   def validEndTurn(situation: Situation): Option[EndTurn] =
     if (
       ((situation.board.unusedDice.isEmpty || !situation.canUseDice) &&
@@ -349,6 +449,12 @@ abstract class Variant private[variant] (
     validDiceRolls(situation).filter(dr => dr.dice == dice).headOption match {
       case Some(dr) => Validated.valid(dr)
       case None     => Validated.invalid(s"$situation cannot do a dice roll of: $dice")
+    }
+
+  def undo(situation: Situation): Validated[String, Undo] =
+    validUndo(situation) match {
+      case Some(u) => Validated.valid(u)
+      case None    => Validated.invalid(s"$situation cannot do undo")
     }
 
   def endTurn(situation: Situation): Validated[String, EndTurn] =

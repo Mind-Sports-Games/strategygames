@@ -58,7 +58,7 @@ object Reader {
     actionStrs.flatten.foldLeft[Result](Result.Complete(Replay(game))) {
       case (Result.Complete(replay), actionStr) =>
         actionStr match {
-          case Uci.Move.moveR(orig, dest)   => {
+          case Uci.Move.moveR(orig, dest, _) => {
             (Pos.fromKey(orig), Pos.fromKey(dest)) match {
               case (Some(orig), Some(dest)) =>
                 Result.Complete(
@@ -70,7 +70,7 @@ object Reader {
                 Result.Incomplete(replay, s"Error making replay with move: ${actionStr}")
             }
           }
-          case Uci.Drop.dropR(role, dest)   => {
+          case Uci.Drop.dropR(role, dest, _) => {
             (Role.allByForsyth(replay.state.board.variant.gameFamily).get(role(0)), Pos.fromKey(dest)) match {
               case (Some(role), Some(dest)) =>
                 Result.Complete(
@@ -82,7 +82,7 @@ object Reader {
                 Result.Incomplete(replay, s"Error making replay with drop: ${actionStr}")
             }
           }
-          case Uci.Lift.liftR(orig)         => {
+          case Uci.Lift.liftR(_, orig)       => {
             (Pos.fromKey(orig)) match {
               case (Some(orig)) =>
                 Result.Complete(
@@ -94,7 +94,7 @@ object Reader {
                 Result.Incomplete(replay, s"Error making replay with lift: ${actionStr}")
             }
           }
-          case Uci.DiceRoll.diceRollR(dice) => {
+          case Uci.DiceRoll.diceRollR(dice)  => {
             (Uci.DiceRoll.fromStrings(dice).dice) match {
               case dice if dice.size == 2 =>
                 Result.Complete(
@@ -106,14 +106,14 @@ object Reader {
                 Result.Incomplete(replay, s"Error making replay with dice: ${actionStr}")
             }
           }
-          case Uci.EndTurn.endTurnR()       => {
+          case Uci.EndTurn.endTurnR()        => {
             Result.Complete(
               replay.addAction(
                 Replay.replayEndTurn(replay.state)
               )
             )
           }
-          case _                            =>
+          case _                             =>
             Result.Incomplete(replay, s"Error making replay with uci action: ${actionStr}")
         }
       case (r: Result.Incomplete, _)            => r

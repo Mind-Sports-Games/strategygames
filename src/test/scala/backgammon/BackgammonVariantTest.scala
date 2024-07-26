@@ -7,6 +7,7 @@ import strategygames.{ Player, Score, Status }
 class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
 
   "Backgammon Variant handles dice rolls and moves" should {
+
     val game = Game.apply(variant.Backgammon)
 
     "be valid game after first dice roll" in {
@@ -47,6 +48,31 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
       }
     }
 
+    "be unchanged after undoing first choice action" in {
+      val actionStrs = List(
+        "1/5",
+        "l2k2",
+        "undo"
+      )
+      playActionStrs(actionStrs) must beValid.like { g =>
+        val gamePreUndo = forceValidGameToGame(playActionStrs(actionStrs.dropRight(2)))
+        g.actionStrs must_== gamePreUndo.actionStrs
+        g.plies must_== gamePreUndo.plies
+        g.turnCount must_== gamePreUndo.turnCount
+        g.situation.player must_== gamePreUndo.situation.player
+        g.situation.board.pieces must_== gamePreUndo.board.pieces
+        g.situation.board.pocketData must_== gamePreUndo.board.pocketData
+        g.situation.board.unusedDice.sorted must_== gamePreUndo.board.unusedDice.sorted
+        g.situation.board.history.lastTurn must_== gamePreUndo.board.history.lastTurn
+        g.situation.board.history.currentTurn must_== gamePreUndo.board.history.currentTurn
+        g.situation.board.history.score must_== gamePreUndo.board.history.score
+        g.situation.board.history.halfMoveClock must_== gamePreUndo.board.history.halfMoveClock
+        g.situation.moves.values.flatten
+          .map(_.toUci.uci)
+          .toSet must_== gamePreUndo.situation.moves.values.flatten.map(_.toUci.uci).toSet
+      }
+    }
+
     "be valid game after first dice roll and first two moves" in {
       val actionStrs = List(
         "1/5",
@@ -58,6 +84,60 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         g.situation.canEndTurn must_== true
         g.situation.board.pipCount(Player.P1) must_== 161
         g.situation.board.pipCount(Player.P2) must_== 167
+        g.situation.board.history.currentTurn.map(_.uci) must_== actionStrs
+      }
+    }
+
+    "be unchanged after undoing second choice action" in {
+      val actionStrs = List(
+        "1/5",
+        "l2k2",
+        "e1j1",
+        "undo"
+      )
+      playActionStrs(actionStrs) must beValid.like { g =>
+        val gamePreUndo = forceValidGameToGame(playActionStrs(actionStrs.dropRight(2)))
+        g.actionStrs must_== gamePreUndo.actionStrs
+        g.plies must_== gamePreUndo.plies
+        g.turnCount must_== gamePreUndo.turnCount
+        g.situation.player must_== gamePreUndo.situation.player
+        g.situation.board.pieces must_== gamePreUndo.board.pieces
+        g.situation.board.pocketData must_== gamePreUndo.board.pocketData
+        g.situation.board.unusedDice.sorted must_== gamePreUndo.board.unusedDice.sorted
+        g.situation.board.history.lastTurn must_== gamePreUndo.board.history.lastTurn
+        g.situation.board.history.currentTurn must_== gamePreUndo.board.history.currentTurn
+        g.situation.board.history.score must_== gamePreUndo.board.history.score
+        g.situation.board.history.halfMoveClock must_== gamePreUndo.board.history.halfMoveClock
+        g.situation.moves.values.flatten
+          .map(_.toUci.uci)
+          .toSet must_== gamePreUndo.situation.moves.values.flatten.map(_.toUci.uci).toSet
+      }
+    }
+
+    "be unchanged after undoing both choice actions in first turn" in {
+      val actionStrs = List(
+        "1/5",
+        "l2k2",
+        "e1j1",
+        "undo",
+        "undo"
+      )
+      playActionStrs(actionStrs) must beValid.like { g =>
+        val gamePreUndo = forceValidGameToGame(playActionStrs(actionStrs.dropRight(4)))
+        g.actionStrs must_== gamePreUndo.actionStrs
+        g.plies must_== gamePreUndo.plies
+        g.turnCount must_== gamePreUndo.turnCount
+        g.situation.player must_== gamePreUndo.situation.player
+        g.situation.board.pieces must_== gamePreUndo.board.pieces
+        g.situation.board.pocketData must_== gamePreUndo.board.pocketData
+        g.situation.board.unusedDice.sorted must_== gamePreUndo.board.unusedDice.sorted
+        g.situation.board.history.lastTurn must_== gamePreUndo.board.history.lastTurn
+        g.situation.board.history.currentTurn must_== gamePreUndo.board.history.currentTurn
+        g.situation.board.history.score must_== gamePreUndo.board.history.score
+        g.situation.board.history.halfMoveClock must_== gamePreUndo.board.history.halfMoveClock
+        g.situation.moves.values.flatten
+          .map(_.toUci.uci)
+          .toSet must_== gamePreUndo.situation.moves.values.flatten.map(_.toUci.uci).toSet
       }
     }
 
@@ -70,6 +150,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
       )
       playActionStrs(actionStrs) must beValid.like { g =>
         g.situation.player must_== Player.P2
+        g.situation.board.history.lastTurn.map(_.uci) must_== actionStrs
       }
     }
 
@@ -83,14 +164,14 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
       )
       playActionStrs(actionStrs) must beValid.like { g =>
         g.situation.moves.values.flatten.map(_.toUci.uci).toSet must_== Set(
-          "l1j1",
+          "l1j1x",
           "l1h1",
           "a1b2",
           "a1d2",
           "e2g2",
           "e2i2",
           "g2i2",
-          "g2k2"
+          "g2k2x"
         )
         g.situation.canCapture must_== true
       }
@@ -111,9 +192,39 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
           "j1f1",
           "a1d2",
           "e2i2",
-          "g2k2"
+          "g2k2x"
         )
         g.situation.board.pieceCountOnBar(Player.P1) must_== 1
+        g.situation.board.history.currentTurn.map(_.uci) must_== List("2/4", "l1j1x")
+      }
+    }
+
+    "be unchanged after undoing capture action" in {
+      val actionStrs = List(
+        "1/5",
+        "l2k2",
+        "e1j1",
+        "endturn",
+        "2/4",
+        "l1j1",
+        "undo"
+      )
+      playActionStrs(actionStrs) must beValid.like { g =>
+        val gamePreUndo = forceValidGameToGame(playActionStrs(actionStrs.dropRight(2)))
+        g.actionStrs must_== gamePreUndo.actionStrs
+        g.plies must_== gamePreUndo.plies
+        g.turnCount must_== gamePreUndo.turnCount
+        g.situation.player must_== gamePreUndo.situation.player
+        g.situation.board.pieces must_== gamePreUndo.board.pieces
+        g.situation.board.pocketData must_== gamePreUndo.board.pocketData
+        g.situation.board.unusedDice.sorted must_== gamePreUndo.board.unusedDice.sorted
+        g.situation.board.history.lastTurn must_== gamePreUndo.board.history.lastTurn
+        g.situation.board.history.currentTurn must_== gamePreUndo.board.history.currentTurn
+        g.situation.board.history.score must_== gamePreUndo.board.history.score
+        g.situation.board.history.halfMoveClock must_== gamePreUndo.board.history.halfMoveClock
+        g.situation.moves.values.flatten
+          .map(_.toUci.uci)
+          .toSet must_== gamePreUndo.situation.moves.values.flatten.map(_.toUci.uci).toSet
       }
     }
 
@@ -131,6 +242,70 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
       playActionStrs(actionStrs) must beValid.like { g =>
         g.situation.board.pieceCountOnBar(Player.P1) must_== 2
         g.situation.canOnlyRollDice must_== true
+      }
+    }
+
+    "be unchanged after undoing second capture action" in {
+      val actionStrs = List(
+        "1/5",
+        "l2k2",
+        "e1j1",
+        "endturn",
+        "2/4",
+        "l1j1",
+        "g2k2",
+        "undo"
+      )
+      playActionStrs(actionStrs) must beValid.like { g =>
+        val gamePreUndo = forceValidGameToGame(playActionStrs(actionStrs.dropRight(2)))
+        g.actionStrs must_== gamePreUndo.actionStrs
+        g.plies must_== gamePreUndo.plies
+        g.turnCount must_== gamePreUndo.turnCount
+        g.situation.player must_== gamePreUndo.situation.player
+        g.situation.board.pieces must_== gamePreUndo.board.pieces
+        g.situation.board.pocketData must_== gamePreUndo.board.pocketData
+        g.situation.board.unusedDice.sorted must_== gamePreUndo.board.unusedDice.sorted
+        g.situation.board.history.lastTurn must_== gamePreUndo.board.history.lastTurn
+        g.situation.board.history.currentTurn must_== gamePreUndo.board.history.currentTurn
+        g.situation.board.history.score must_== gamePreUndo.board.history.score
+        g.situation.board.history.halfMoveClock must_== gamePreUndo.board.history.halfMoveClock
+        g.situation.board.pieceCountOnBar(Player.P1) must_== gamePreUndo.situation.board.pieceCountOnBar(
+          Player.P1
+        )
+        g.situation.moves.values.flatten
+          .map(_.toUci.uci)
+          .toSet must_== gamePreUndo.situation.moves.values.flatten.map(_.toUci.uci).toSet
+      }
+    }
+
+    "be unchanged after undoing two capture actions" in {
+      val actionStrs = List(
+        "1/5",
+        "l2k2",
+        "e1j1",
+        "endturn",
+        "2/4",
+        "l1j1",
+        "g2k2",
+        "undo",
+        "undo"
+      )
+      playActionStrs(actionStrs) must beValid.like { g =>
+        val gamePreUndo = forceValidGameToGame(playActionStrs(actionStrs.dropRight(4)))
+        g.actionStrs must_== gamePreUndo.actionStrs
+        g.plies must_== gamePreUndo.plies
+        g.turnCount must_== gamePreUndo.turnCount
+        g.situation.player must_== gamePreUndo.situation.player
+        g.situation.board.pieces must_== gamePreUndo.board.pieces
+        g.situation.board.pocketData must_== gamePreUndo.board.pocketData
+        g.situation.board.unusedDice.sorted must_== gamePreUndo.board.unusedDice.sorted
+        g.situation.board.history.lastTurn must_== gamePreUndo.board.history.lastTurn
+        g.situation.board.history.currentTurn must_== gamePreUndo.board.history.currentTurn
+        g.situation.board.history.score must_== gamePreUndo.board.history.score
+        g.situation.board.history.halfMoveClock must_== gamePreUndo.board.history.halfMoveClock
+        g.situation.moves.values.flatten
+          .map(_.toUci.uci)
+          .toSet must_== gamePreUndo.situation.moves.values.flatten.map(_.toUci.uci).toSet
       }
     }
   }
@@ -231,6 +406,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
   }
 
   "Backgammon Variant handles drops" should {
+
     "be valid game and obey drop rules and must skip turn when no valid drops" in {
       val actionStrs = List(
         "1/5",
@@ -247,6 +423,25 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         g.situation.canMove must_== false
         g.situation.canDrop must_== false
         g.situation.canOnlyEndTurn must_== true
+      }
+    }
+
+    "be valid game and have valid drops when roll is accomodating" in {
+      val actionStrs = List(
+        "1/5",
+        "l2k2",
+        "e1j1",
+        "endturn",
+        "2/4",
+        "l1j1",
+        "g2k2",
+        "endturn",
+        "2/1"
+      )
+      playActionStrs(actionStrs) must beValid.like { g =>
+        g.situation.canMove must_== false
+        g.situation.canDrop must_== true
+        g.situation.canOnlyEndTurn must_== false
       }
     }
 
@@ -269,6 +464,43 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         g.situation.board.pipCount(Player.P1) must_== 183
         g.situation.canMove must_== false
         g.situation.dropsAsDrops.map(_.toUci.uci) must_== List("s@l2")
+        g.situation.board.history.currentTurn.map(_.uci) must_== List("2/1", "s@k2x")
+      }
+    }
+
+    "be unchanged after undoing a drop action" in {
+      val actionStrs = List(
+        "1/5",
+        "l2k2",
+        "e1j1",
+        "endturn",
+        "2/4",
+        "l1j1",
+        "g2k2",
+        "endturn",
+        "2/1",
+        "s@k2",
+        "undo"
+      )
+      playActionStrs(actionStrs) must beValid.like { g =>
+        val gamePreUndo = forceValidGameToGame(playActionStrs(actionStrs.dropRight(2)))
+        g.actionStrs must_== gamePreUndo.actionStrs
+        g.plies must_== gamePreUndo.plies
+        g.turnCount must_== gamePreUndo.turnCount
+        g.situation.player must_== gamePreUndo.situation.player
+        g.situation.board.pieces must_== gamePreUndo.board.pieces
+        g.situation.board.pocketData must_== gamePreUndo.board.pocketData
+        g.situation.board.unusedDice.sorted must_== gamePreUndo.board.unusedDice.sorted
+        g.situation.board.history.lastTurn must_== gamePreUndo.board.history.lastTurn
+        g.situation.board.history.currentTurn must_== gamePreUndo.board.history.currentTurn
+        g.situation.board.history.score must_== gamePreUndo.board.history.score
+        g.situation.board.history.halfMoveClock must_== gamePreUndo.board.history.halfMoveClock
+        g.situation.dropsAsDrops
+          .map(_.toUci.uci)
+          .toSet must_== gamePreUndo.situation.dropsAsDrops.map(_.toUci.uci).toSet
+        g.situation.canMove must_== gamePreUndo.situation.canMove
+        g.situation.canDrop must_== gamePreUndo.situation.canDrop
+        g.situation.canOnlyEndTurn must_== gamePreUndo.situation.canOnlyEndTurn
       }
     }
 
@@ -290,6 +522,86 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
       playActionStrs(actionStrs) must beValid.like { g =>
         g.situation.board.pieceCountOnBar(Player.P1) must_== 0
         g.situation.board.pieceCountOnBar(Player.P2) must_== 1
+      }
+    }
+
+    "be unchanged after undoing second drop action" in {
+      val actionStrs = List(
+        "1/5",
+        "l2k2",
+        "e1j1",
+        "endturn",
+        "2/4",
+        "l1j1",
+        "g2k2",
+        "endturn",
+        "2/1",
+        "s@k2",
+        "s@l2",
+        "undo"
+      )
+      playActionStrs(actionStrs) must beValid.like { g =>
+        val gamePreUndo = forceValidGameToGame(playActionStrs(actionStrs.dropRight(2)))
+        g.actionStrs must_== gamePreUndo.actionStrs
+        g.plies must_== gamePreUndo.plies
+        g.turnCount must_== gamePreUndo.turnCount
+        g.situation.player must_== gamePreUndo.situation.player
+        g.situation.board.pieces must_== gamePreUndo.board.pieces
+        g.situation.board.pocketData must_== gamePreUndo.board.pocketData
+        g.situation.board.unusedDice.sorted must_== gamePreUndo.board.unusedDice.sorted
+        g.situation.board.history.lastTurn must_== gamePreUndo.board.history.lastTurn
+        g.situation.board.history.currentTurn must_== gamePreUndo.board.history.currentTurn
+        g.situation.board.history.score must_== gamePreUndo.board.history.score
+        g.situation.board.history.halfMoveClock must_== gamePreUndo.board.history.halfMoveClock
+        g.situation.dropsAsDrops
+          .map(_.toUci.uci)
+          .toSet must_== gamePreUndo.situation.dropsAsDrops.map(_.toUci.uci).toSet
+        g.situation.board.pieceCountOnBar(Player.P1) must_== gamePreUndo.situation.board.pieceCountOnBar(
+          Player.P1
+        )
+        g.situation.board.pieceCountOnBar(Player.P2) must_== gamePreUndo.situation.board.pieceCountOnBar(
+          Player.P2
+        )
+        g.situation.board.pipCount(Player.P1) must_== gamePreUndo.situation.board.pipCount(Player.P1)
+        g.situation.canMove must_== gamePreUndo.situation.canMove
+      }
+    }
+
+    "be unchanged after undoing two drop actions" in {
+      val actionStrs = List(
+        "1/5",
+        "l2k2",
+        "e1j1",
+        "endturn",
+        "2/4",
+        "l1j1",
+        "g2k2",
+        "endturn",
+        "2/1",
+        "s@k2",
+        "s@l2",
+        "undo",
+        "undo"
+      )
+      playActionStrs(actionStrs) must beValid.like { g =>
+        val gamePreUndo = forceValidGameToGame(playActionStrs(actionStrs.dropRight(4)))
+        g.actionStrs must_== gamePreUndo.actionStrs
+        g.plies must_== gamePreUndo.plies
+        g.turnCount must_== gamePreUndo.turnCount
+        g.situation.player must_== gamePreUndo.situation.player
+        g.situation.board.pieces must_== gamePreUndo.board.pieces
+        g.situation.board.pocketData must_== gamePreUndo.board.pocketData
+        g.situation.board.unusedDice.sorted must_== gamePreUndo.board.unusedDice.sorted
+        g.situation.board.history.lastTurn must_== gamePreUndo.board.history.lastTurn
+        g.situation.board.history.currentTurn must_== gamePreUndo.board.history.currentTurn
+        g.situation.board.history.score must_== gamePreUndo.board.history.score
+        g.situation.board.history.halfMoveClock must_== gamePreUndo.board.history.halfMoveClock
+        g.situation.dropsAsDrops
+          .map(_.toUci.uci)
+          .toSet must_== gamePreUndo.situation.dropsAsDrops.map(_.toUci.uci).toSet
+        g.situation.canMove must_== gamePreUndo.situation.canMove
+        g.situation.canDrop must_== gamePreUndo.situation.canDrop
+        g.situation.canOnlyEndTurn must_== gamePreUndo.situation.canOnlyEndTurn
       }
     }
 
@@ -341,7 +653,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
           "j1d1",
           "h1b1",
           "a1f2",
-          "e2k2"
+          "e2k2x"
         )
       }
     }
@@ -349,156 +661,235 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
   }
 
   "Backgammon Variant handles lifts" should {
-    "be valid game that can handle a variety of lift scenarios" in {
-      val actionStrs = List(
-        "4/5",
-        "l2h2",
-        "a2e1",
-        "endturn",
-        "4/2",
-        "l1h1",
-        "l1j1",
-        "endturn",
-        "5/6",
-        "e1j1",
-        "l2f2",
-        "endturn",
-        "4/2",
-        "s@k1",
-        "a1d2",
-        "endturn",
-        "6/1",
-        "e1k1",
-        "j1k1",
-        "endturn",
-        "6/2",
-        "endturn",
-        "4/1",
-        "h2d2",
-        "d2c2",
-        "endturn",
-        "1/5",
-        "s@h1",
-        "s@l1",
-        "endturn",
-        "4/3",
-        "a2d1",
-        "f2c2",
-        "endturn",
-        "2/3",
-        "h1f1",
-        "g2j2",
-        "endturn",
-        "5/5",
-        "g1l1",
-        "g1l1",
-        "e1j1",
-        "e1j1",
-        "endturn",
-        "4/2",
-        "s@i1",
-        "g2i2",
-        "endturn",
-        "1/3",
-        "d1e1",
-        "a2c1",
-        "endturn",
-        "6/5",
-        "a1f2",
-        "f2k2",
-        "endturn",
-        "4/6",
-        "e1i1",
-        "c1i1",
-        "endturn",
-        "1/3",
-        "endturn",
-        "5/3",
-        "c2c1",
-        "c1f1",
-        "endturn",
-        "3/4",
-        "endturn",
-        "1/2",
-        "f1h1",
-        "h1i1",
-        "endturn",
-        "4/4",
-        "endturn",
-        "6/4",
-        "c2d1",
-        "a2d1",
-        "endturn",
-        "2/4",
-        "endturn",
-        "3/4",
-        "a2c1",
-        "c1g1",
-        "endturn",
-        "1/4",
-        "endturn",
-        "1/4",
-        "d1h1",
-        "h1i1",
-        "endturn",
-        "4/3",
-        "endturn",
-        "3/4",
-        "d1g1",
-        "g1k1",
-        "endturn",
-        "2/6",
-        "endturn",
-        "4/5",
-        "g1k1",
-        "g1l1",
-        "endturn",
-        "2/5",
-        "s@h1",
-        "endturn",
-        "3/5",
-        "g1j1",
-        "g1l1",
-        "endturn",
-        "2/5",
-        "s@h1",
-        "endturn",
-        "4/5",
-        "^i1",
-        "^i1",
-        "endturn",
-        "4/6",
-        "s@g1",
-        "h1d1",
-        "endturn",
-        "4/2",
-        "^i1",
-        "i1k1",
-        "endturn",
-        "1/6",
-        "a1a2",
-        "a2g2",
-        "endturn",
-        "6/2",
-        "j1l1",
-        "^j1",
-        "endturn",
-        "6/6",
-        "h1b1",
-        "d1c2",
-        "c2i2",
-        "g1a1",
-        "endturn",
-        "5/4",
-        "^j1",
-        "^k1"
-      )
+
+    val actionStrs = List(
+      "4/5",
+      "l2h2",
+      "a2e1",
+      "endturn",
+      "4/2",
+      "l1h1",
+      "l1j1",
+      "endturn",
+      "5/6",
+      "e1j1",
+      "l2f2",
+      "endturn",
+      "4/2",
+      "s@k1",
+      "a1d2",
+      "endturn",
+      "6/1",
+      "e1k1",
+      "j1k1",
+      "endturn",
+      "6/2",
+      "endturn",
+      "4/1",
+      "h2d2",
+      "d2c2",
+      "endturn",
+      "1/5",
+      "s@h1",
+      "s@l1",
+      "endturn",
+      "4/3",
+      "a2d1",
+      "f2c2",
+      "endturn",
+      "2/3",
+      "h1f1",
+      "g2j2",
+      "endturn",
+      "5/5",
+      "g1l1",
+      "g1l1",
+      "e1j1",
+      "e1j1",
+      "endturn",
+      "4/2",
+      "s@i1",
+      "g2i2",
+      "endturn",
+      "1/3",
+      "d1e1",
+      "a2c1",
+      "endturn",
+      "6/5",
+      "a1f2",
+      "f2k2",
+      "endturn",
+      "4/6",
+      "e1i1",
+      "c1i1",
+      "endturn",
+      "1/3",
+      "endturn",
+      "5/3",
+      "c2c1",
+      "c1f1",
+      "endturn",
+      "3/4",
+      "endturn",
+      "1/2",
+      "f1h1",
+      "h1i1",
+      "endturn",
+      "4/4",
+      "endturn",
+      "6/4",
+      "c2d1",
+      "a2d1",
+      "endturn",
+      "2/4",
+      "endturn",
+      "3/4",
+      "a2c1",
+      "c1g1",
+      "endturn",
+      "1/4",
+      "endturn",
+      "1/4",
+      "d1h1",
+      "h1i1",
+      "endturn",
+      "4/3",
+      "endturn",
+      "3/4",
+      "d1g1",
+      "g1k1",
+      "endturn",
+      "2/6",
+      "endturn",
+      "4/5",
+      "g1k1",
+      "g1l1",
+      "endturn",
+      "2/5",
+      "s@h1",
+      "endturn",
+      "3/5",
+      "g1j1",
+      "g1l1",
+      "endturn",
+      "2/5",
+      "s@h1",
+      "endturn",
+      "4/5",
+      "^i1",
+      "^i1",
+      "endturn",
+      "4/6",
+      "s@g1",
+      "h1d1",
+      "endturn",
+      "4/2",
+      "^i1",
+      "i1k1",
+      "endturn",
+      "1/6",
+      "a1a2",
+      "a2g2",
+      "endturn",
+      "6/2",
+      "j1l1",
+      "^j1",
+      "endturn",
+      "6/6",
+      "h1b1",
+      "d1c2",
+      "c2i2",
+      "g1a1",
+      "endturn",
+      "5/4"
+    )
+    "be valid game that generates valid lifts" in {
       playActionStrs(actionStrs) must beValid.like { g =>
+        g.situation.board.piecesCanLift(Player.P1) must_== true
+        g.situation.board.playerPiecesOnBoardOrInPocket(Player.P1) must_== 11
+        g.situation.board.history.score must_== Score(4, 0)
+        g.situation.lifts.map(_.toUci.uci).toSet must_== Set("^j1")
+      }
+    }
+
+    "be valid game that can handle a variety of lift scenarios" in {
+      playActionStrs(actionStrs ::: List("^j1", "^k1")) must beValid.like { g =>
         g.situation.board.piecesCanLift(Player.P1) must_== true
         g.situation.board.playerPiecesOnBoardOrInPocket(Player.P1) must_== 9
         g.situation.board.history.score must_== Score(6, 0)
+        g.situation.board.history.currentTurn.map(_.uci) must_== List("5/4", "^j1", "^k1")
       }
     }
+
+    "be unchanged after undoing a lift action" in {
+      playActionStrs(actionStrs ::: List("^j1", "undo")) must beValid.like { g =>
+        val gamePreUndo = forceValidGameToGame(playActionStrs(actionStrs))
+        g.actionStrs must_== gamePreUndo.actionStrs
+        g.plies must_== gamePreUndo.plies
+        g.turnCount must_== gamePreUndo.turnCount
+        g.situation.player must_== gamePreUndo.situation.player
+        g.situation.board.pieces must_== gamePreUndo.board.pieces
+        g.situation.board.pocketData must_== gamePreUndo.board.pocketData
+        g.situation.board.unusedDice.sorted must_== gamePreUndo.board.unusedDice.sorted
+        g.situation.board.history.lastTurn must_== gamePreUndo.board.history.lastTurn
+        g.situation.board.history.currentTurn must_== gamePreUndo.board.history.currentTurn
+        g.situation.board.history.score must_== gamePreUndo.board.history.score
+        g.situation.board.history.halfMoveClock must_== gamePreUndo.board.history.halfMoveClock
+        g.situation.lifts.map(_.toUci.uci).toSet must_== gamePreUndo.situation.lifts.map(_.toUci.uci).toSet
+        g.situation.board.piecesCanLift(Player.P1) must_== gamePreUndo.situation.board.piecesCanLift(
+          Player.P1
+        )
+        g.situation.board.playerPiecesOnBoardOrInPocket(Player.P1) must_== gamePreUndo.situation.board
+          .playerPiecesOnBoardOrInPocket(Player.P1)
+      }
+    }
+
+    "be unchanged after undoing second lift action" in {
+      playActionStrs(actionStrs ::: List("^j1", "^k1", "undo")) must beValid.like { g =>
+        val gamePreUndo = forceValidGameToGame(playActionStrs(actionStrs ::: List("^j1")))
+        g.actionStrs must_== gamePreUndo.actionStrs
+        g.plies must_== gamePreUndo.plies
+        g.turnCount must_== gamePreUndo.turnCount
+        g.situation.player must_== gamePreUndo.situation.player
+        g.situation.board.pieces must_== gamePreUndo.board.pieces
+        g.situation.board.pocketData must_== gamePreUndo.board.pocketData
+        g.situation.board.unusedDice.sorted must_== gamePreUndo.board.unusedDice.sorted
+        g.situation.board.history.lastTurn must_== gamePreUndo.board.history.lastTurn
+        g.situation.board.history.currentTurn must_== gamePreUndo.board.history.currentTurn
+        g.situation.board.history.score must_== gamePreUndo.board.history.score
+        g.situation.board.history.halfMoveClock must_== gamePreUndo.board.history.halfMoveClock
+        g.situation.lifts.map(_.toUci.uci).toSet must_== gamePreUndo.situation.lifts.map(_.toUci.uci).toSet
+        g.situation.board.piecesCanLift(Player.P1) must_== gamePreUndo.situation.board.piecesCanLift(
+          Player.P1
+        )
+        g.situation.board.playerPiecesOnBoardOrInPocket(Player.P1) must_== gamePreUndo.situation.board
+          .playerPiecesOnBoardOrInPocket(Player.P1)
+      }
+    }
+
+    "be unchanged after undoing two lift actions" in {
+      playActionStrs(actionStrs ::: List("^j1", "^k1", "undo", "undo")) must beValid.like { g =>
+        val gamePreUndo = forceValidGameToGame(playActionStrs(actionStrs))
+        g.actionStrs must_== gamePreUndo.actionStrs
+        g.plies must_== gamePreUndo.plies
+        g.turnCount must_== gamePreUndo.turnCount
+        g.situation.player must_== gamePreUndo.situation.player
+        g.situation.board.pieces must_== gamePreUndo.board.pieces
+        g.situation.board.pocketData must_== gamePreUndo.board.pocketData
+        g.situation.board.unusedDice.sorted must_== gamePreUndo.board.unusedDice.sorted
+        g.situation.board.history.lastTurn must_== gamePreUndo.board.history.lastTurn
+        g.situation.board.history.currentTurn must_== gamePreUndo.board.history.currentTurn
+        g.situation.board.history.score must_== gamePreUndo.board.history.score
+        g.situation.board.history.halfMoveClock must_== gamePreUndo.board.history.halfMoveClock
+        g.situation.lifts.map(_.toUci.uci).toSet must_== gamePreUndo.situation.lifts.map(_.toUci.uci).toSet
+        g.situation.board.piecesCanLift(Player.P1) must_== gamePreUndo.situation.board.piecesCanLift(
+          Player.P1
+        )
+        g.situation.board.playerPiecesOnBoardOrInPocket(Player.P1) must_== gamePreUndo.situation.board
+          .playerPiecesOnBoardOrInPocket(Player.P1)
+      }
+    }
+
   }
 
   "Backgammon Variant handles rule requiring highest dice to be used if both can't be used" should {

@@ -129,6 +129,7 @@ abstract class Game(
         )
       case Uci.GoPass(_)                                => pass(metrics)
       case Uci.ChessDoRoll(_) | Uci.BackgammonDoRoll(_) => randomizeAndApplyDiceRoll(metrics)
+      case Uci.BackgammonUndo(_)                        => undo(metrics)
       case Uci.BackgammonEndTurn(_)                     => endTurn(metrics)
     }).map { case (game, action) =>
       game -> action
@@ -156,6 +157,8 @@ abstract class Game(
       dice: List[Int],
       metrics: MoveMetrics = MoveMetrics()
   ): Validated[String, (Game, DiceRoll)]
+
+  def undo(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Undo)]
 
   def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)]
 
@@ -279,6 +282,9 @@ object Game {
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, DiceRoll)] =
       sys.error("Can't diceroll in chess")
+
+    def undo(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Undo)] =
+      sys.error("Can't undo in chess")
 
     def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)] =
       sys.error("Can't endTurn in chess")
@@ -436,6 +442,9 @@ object Game {
     ): Validated[String, (Game, DiceRoll)] =
       sys.error("Can't diceroll in draughts")
 
+    def undo(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Undo)] =
+      sys.error("Can't undo in draughts")
+
     def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)] =
       sys.error("Can't endTurn in draughts")
 
@@ -576,6 +585,9 @@ object Game {
     ): Validated[String, (Game, DiceRoll)] =
       sys.error("Can't diceroll in fairysf")
 
+    def undo(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Undo)] =
+      sys.error("Can't undo in fairysf")
+
     def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)] =
       sys.error("Can't endTurn in fairysf")
 
@@ -702,6 +714,9 @@ object Game {
     ): Validated[String, (Game, DiceRoll)] =
       sys.error("Can't diceroll in samurai")
 
+    def undo(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Undo)] =
+      sys.error("Can't undo in samurai")
+
     def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)] =
       sys.error("Can't endTurn in samurai")
 
@@ -826,6 +841,9 @@ object Game {
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, DiceRoll)] =
       sys.error("Can't diceroll in togyzkumalak")
+
+    def undo(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Undo)] =
+      sys.error("Can't undo in togyzkumalak")
 
     def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)] =
       sys.error("Can't endTurn in togyzkumalak")
@@ -961,6 +979,9 @@ object Game {
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, DiceRoll)] =
       sys.error("Can't diceroll in Go")
+
+    def undo(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Undo)] =
+      sys.error("Can't undo in go")
 
     def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)] =
       sys.error("Can't endTurn in go")
@@ -1107,6 +1128,9 @@ object Game {
         .toEither
         .map(t => (Backgammon(t._1), DiceRoll.Backgammon(t._2)))
         .toValidated
+
+    def undo(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Undo)] =
+      g.undo(metrics).toEither.map(t => (Backgammon(t._1), Undo.Backgammon(t._2))).toValidated
 
     def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)] =
       g.endTurn(metrics).toEither.map(t => (Backgammon(t._1), EndTurn.Backgammon(t._2))).toValidated
