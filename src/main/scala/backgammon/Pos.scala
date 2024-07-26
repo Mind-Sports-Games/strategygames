@@ -84,6 +84,8 @@ case class Pos private (index: Int) extends AnyVal {
 
   def last: Boolean = (index + 1) % File.all.size == 0
 
+  def liftDistance(player: Player): Int = (Pos.barIndex(!player) - index).abs
+
   def key               = file.toString + rank.toString
   override def toString = key
 

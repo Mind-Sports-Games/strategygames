@@ -15,10 +15,9 @@ object UciCharPair {
           toChar(pos),
           dropRole2charMap.getOrElse(role, voidChar)
         )
-      case Uci.Lift(pos, dice)     =>
+      case Uci.Lift(pos)           =>
         stratUciCharPair(
-          // dropRole2charMap.getOrElse(Role.defaultRole, voidChar),
-          dice2char(dice.getOrElse(7)),
+          dropRole2charMap.getOrElse(Role.defaultRole, voidChar),
           toChar(pos)
         )
       case Uci.DiceRoll(dice)      =>

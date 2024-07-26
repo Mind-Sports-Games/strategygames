@@ -127,13 +127,13 @@ object Uci {
 
   }
 
-  case class Lift(pos: Pos, dice: Option[Int]) extends Uci {
+  case class Lift(pos: Pos) extends Uci {
 
     def lilaUci    = s"^${pos.key}"
     def fishnetUci = lilaUci
-    def uci        = s"${dice.map(_.toString).getOrElse("")}${lilaUci}"
+    def uci        = lilaUci
 
-    def piotr = s"${dice.getOrElse("")}^${pos.piotrStr}"
+    def piotr = s"^${pos.piotrStr}"
 
     def origDest = Some(pos -> pos)
 
@@ -150,14 +150,14 @@ object Uci {
       action
         .lift(action.length - 1)
         .flatMap(Pos.piotr)
-        .map(Lift(_, action.lift(0).flatMap(_.toString.toIntOption)))
+        .map(Lift(_))
 
-    def fromStrings(posS: String, diceS: Option[String]) =
+    def fromStrings(posS: String) =
       for {
-        pos  <- Pos.fromKey(posS)
-        dice <- diceS.map(_.toIntOption)
-      } yield Lift(pos, dice)
+        pos <- Pos.fromKey(posS)
+      } yield Lift(pos)
 
+    // allow both "^a1" and "1^a1" formats
     val liftR = s"^([1-6]?)\\^${Pos.posR}$$".r
 
   }
@@ -242,7 +242,7 @@ object Uci {
 
   def apply(drop: strategygames.backgammon.Drop) = Uci.Drop(drop.piece.role, drop.pos, drop.captureList)
 
-  def apply(lift: strategygames.backgammon.Lift) = Uci.Lift(lift.pos, Some(lift.diceUsed))
+  def apply(lift: strategygames.backgammon.Lift) = Uci.Lift(lift.pos)
 
   def apply(diceRoll: strategygames.backgammon.DiceRoll) = Uci.DiceRoll(diceRoll.dice)
 
@@ -252,7 +252,7 @@ object Uci {
 
   def apply(action: String): Option[Uci] =
     if (action lift 1 contains '@') Uci.Drop(action)
-    else if (action.contains('^')) Uci.Lift.fromStrings(action.split('^')(1), action.split('^').headOption)
+    else if (action.contains('^')) Uci.Lift.fromStrings(action.split('^')(1))
     else if (action.contains('/')) Some(Uci.DiceRoll.fromStrings(action))
     else if (action == "roll") Some(Uci.DoRoll())
     else if (action == "undo") Some(Uci.Undo())

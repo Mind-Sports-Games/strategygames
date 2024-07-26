@@ -347,6 +347,30 @@ abstract class Variant private[variant] (
         }
     else List.empty
 
+  private def diceUsedInHistoricLift(situation: Situation): Option[Int] =
+    situation.board.history.lastAction match {
+      case Some(l: Uci.Lift) =>
+        situation.board.history.currentTurn.headOption match {
+          case Some(d: Uci.DiceRoll) =>
+            // if we rolled a double, then there was only one number to use on the lift
+            if (d.dice.toSet.size == 1) d.dice.headOption
+            // if we have only done one action since the roll then just reset unusedDice to the roll
+            else if (situation.board.history.currentTurn.size == 2)
+              d.dice.diff(situation.board.unusedDice).headOption
+            else
+              // if we've done two actions since the roll lets look at the action we are not undoing
+              situation.board.history.currentTurn.lift(1) match {
+                // if the first was a move we know exactly what dice was used, so the lift used the other one
+                case Some(m: Uci.Move) => d.dice.diff(List(m.diceUsed)).headOption
+                // if both were lifts get the smallest dice that can do the lift that we are undoing
+                case Some(_: Uci.Lift) => d.dice.filter(_ >= l.pos.liftDistance(situation.player)).minOption
+                case _                 => None
+              }
+          case _                     => None
+        }
+      case _                 => None
+    }
+
   def validUndo(situation: Situation): Option[Undo] =
     situation.board.history.lastAction
       .flatMap {
@@ -364,7 +388,7 @@ abstract class Variant private[variant] (
           )
         case a: Uci.Lift =>
           // if we dont know the dice we cant reliably undo the lift
-          a.dice.map(
+          diceUsedInHistoricLift(situation).map(
             boardBefore(
               situation,
               None,

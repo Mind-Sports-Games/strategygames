@@ -15,7 +15,6 @@ import strategygames.{
   EndTurn => StratEndTurn,
   Lift => StratLift,
   Move => StratMove,
-  Player,
   Situation => StratSituation
 }
 
@@ -131,9 +130,6 @@ object Replay {
       capture = before.situation.board.piecesOf(!before.situation.player).get(dest).map(_ => dest)
     )
 
-  private def liftDistance(orig: Pos, player: Player): Int =
-    (Pos.barIndex(!player) - orig.index).abs
-
   def replayLift(before: Game, orig: Pos): Lift =
     Lift(
       pos = orig,
@@ -142,7 +138,7 @@ object Replay {
         before.situation,
         Some(orig),
         None,
-        before.situation.board.unusedDice.filter(_ >= liftDistance(orig, before.situation.player)).min
+        before.situation.board.unusedDice.filter(_ >= orig.liftDistance(before.situation.player)).min
       )
     )
 

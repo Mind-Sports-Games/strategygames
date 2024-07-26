@@ -43,7 +43,7 @@ case class Lift(
 
   def withMetrics(m: MoveMetrics) = copy(metrics = m)
 
-  def toUci = Uci.Lift(pos, Some(diceUsed))
+  def toUci = Uci.Lift(pos)
 
   override def toString = toUci.uci
 

@@ -38,8 +38,9 @@ sealed abstract class Situation(val board: Board, val player: Player) {
       passes :::
       selectSquaresAction :::
       diceRolls :::
-      undos :::
-      endTurns
+      endTurns :::
+      //important to keep non progressive actions at the end
+      undos
 
   def canDrop: Boolean
 

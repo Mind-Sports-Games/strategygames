@@ -300,16 +300,14 @@ object Uci {
   }
 
   sealed abstract class Lift(
-      val pos: Pos,
-      val dice: Option[Int] = None
+      val pos: Pos
   ) extends Uci {
     def origDest = Some(pos -> pos)
   }
 
   final case class BackgammonLift(l: backgammon.format.Uci.Lift)
       extends Lift(
-        Pos.Backgammon(l.pos),
-        l.dice
+        Pos.Backgammon(l.pos)
       )
       with Backgammon {
     def gameLogic      = GameLogic.Backgammon()
@@ -704,8 +702,7 @@ object Uci {
     def fromStrings(
         lib: GameLogic,
         @nowarn gf: GameFamily,
-        posS: String,
-        diceS: Option[String]
+        posS: String
     ): Option[Lift] =
       lib match {
         case GameLogic.Chess()        => None
@@ -715,7 +712,7 @@ object Uci {
         case GameLogic.Togyzkumalak() => None
         case GameLogic.Go()           => None
         case GameLogic.Backgammon()   =>
-          backgammon.format.Uci.Lift.fromStrings(posS, diceS).map(BackgammonLift)
+          backgammon.format.Uci.Lift.fromStrings(posS).map(BackgammonLift)
       }
   }
 
