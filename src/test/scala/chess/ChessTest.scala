@@ -1,7 +1,7 @@
 package strategygames.chess
 
-import strategygames.{ Game => StratGame, GameLogic, Pos => StratPos }
-import strategygames.format.{ FEN => StratFen, Forsyth => StratForsyth }
+import strategygames.{ Game => StratGame, GameLogic, MoveMetrics }
+import strategygames.format.{ FEN => StratFen, Forsyth => StratForsyth, Uci => StratUci }
 import strategygames.variant.{ Variant => StratVariant }
 
 import strategygames.{ ClockBase, Player }
@@ -101,16 +101,19 @@ case class GameIsometryTest(lib: GameLogic) extends Specification with Validated
       v: StratVariant,
       basePlies: Int = 0,
       baseTurnCount: Int = 0
-  )(moves: List[Tuple2[StratPos, StratPos]]) = {
+  )(moves: List[StratUci]) = {
+    println(s"Initial Fen: $initialFen")
     stratFenToGame(initialFen, v).flatMap(game => {
       val gameData = GameFenIsometryData(game, game, basePlies, baseTurnCount).valid
       moves.foldLeft[Validated[String, GameFenIsometryData]](gameData) {
-        case (vGame, move) => {
+        case (vGame, uci) => {
+          println(s"Applying UCI: $uci")
           vGame.flatMap(gameData => {
             for {
-              newBaseGame <- gameData.game(move._1, move._2).map(_._1)
-              newFenGame  <- gameData.fenGame(move._1, move._2).map(_._1)
+              newBaseGame <- gameData.game.applyUci(uci, MoveMetrics()).map(_._1)
+              newFenGame  <- gameData.fenGame.applyUci(uci, MoveMetrics()).map(_._1)
               fen1         = StratForsyth.>>(lib, newBaseGame)
+              _            = println(s"fen1: $fen1")
               newFenGame2 <- stratFenToGame(fen1, v)
             } yield {
               val newGameData = gameData.nextPly(newBaseGame, newFenGame)
