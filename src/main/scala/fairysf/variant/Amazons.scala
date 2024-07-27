@@ -27,7 +27,7 @@ case object Amazons
   override def canOfferDraw          = false
   override val switchPlayerAfterMove = false
 
-  override def hasAnalysisBoard: Boolean = false
+  override def hasAnalysisBoard: Boolean = true
   override def hasFishnet: Boolean       = true
 
   // cache this rather than checking with the API everytime
@@ -62,10 +62,25 @@ case object Amazons
 
   private def fullPockets: String = s"[${"P" * 46}${"p" * 46}]"
 
-  override def exportBoardFen(board: Board): FEN =
+  override def exportBoardFen(board: Board): FEN = {
+    val halfMoveClock = board.apiPosition.fen.value.split(" ").drop(1).mkString(" ")
+
     FEN(
       s"${boardPart(board)}${fullPockets} ${board.apiPosition.fen.value.split(" ").drop(1).mkString(" ")}"
     )
+  }
+
+  override def exportBoardFenWithLastMove(board: Board, lastMove: Move): FEN =
+    FEN(
+      s"${exportBoardFen(board)} ½${lastMove.toUci.uci}"
+    )
+
+  override def paramsForFen(game: Game): Tuple2[Board, Option[Move]] =
+    if (game.turns % 2 == 1)
+      game.situation.lastMove.fold[Tuple2[Board, Option[Move]]]((game.situation.board, None))(move =>
+        (move.situationBefore.board, Some(move))
+      )
+    else (game.situation.board, None)
 
   override def validMoves(situation: Situation): Map[Pos, List[Move]] =
     situation.board.history.lastAction match {

@@ -52,7 +52,9 @@ abstract class Variant private[variant] (
 
   def pieces: Map[Pos, Piece] = Api.pieceMapFromFen(fairysfName.name, initialFen.value)
 
-  def exportBoardFen(board: Board): FEN = board.apiPosition.fen
+  def exportBoardFen(board: Board): FEN                                      = board.apiPosition.fen
+  def exportBoardFenWithLastMove(board: Board, @nowarn _lastMove: Move): FEN = board.apiPosition.fen
+  def paramsForFen(game: Game): Tuple2[Board, Option[Move]]                  = (game.situation.board, None)
 
   def startPlayer: Player = P1
 
