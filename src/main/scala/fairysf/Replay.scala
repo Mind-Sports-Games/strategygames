@@ -169,7 +169,6 @@ object Replay {
     val init     = makeGame(variant, initialFen.some)
     var state    = init
     var errors   = ""
-    val lastMove = init.situation.lastMove
     var uciMoves = init.situation.board.uciMoves
 
     def getApiPosition(uciMove: String) = state.board.apiPosition.makeMoves(List(uciMove))
