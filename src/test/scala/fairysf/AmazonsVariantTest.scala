@@ -1,12 +1,11 @@
 package strategygames.fairysf
 
+import strategygames.{ Player, Status }
 import strategygames.format.{ FEN => StratFen, Forsyth => StratForsyth, Uci => StratUci }
 import strategygames.variant.{ Variant => StratVariant }
 import strategygames.GameFamily
 import variant.Amazons
 import format.{ FEN, Forsyth, Uci }
-
-// import strategygames.{ Player, Status }
 
 class AmazonsVariantTest extends FairySFTest {
 
@@ -39,7 +38,7 @@ class AmazonsVariantTest extends FairySFTest {
 
   "Amazons" should {
 
-    /*"not have winner from start position" in {
+    "not have winner from start position" in {
       val game = fenToGame(initialFen, Amazons)
       game must beValid.like {
         case game => {
@@ -58,7 +57,6 @@ class AmazonsVariantTest extends FairySFTest {
       game.situation.moves.toList.map(_._2.size).sum must_== 80
       // strategygames.fairysf.Game.apply(strategygames.fairysf.variant.Amazons).situation.moves.toList.map(_._2.size).sum
     }
-
     "P1 win in example game" in {
       val replay  = Replay.gameWithUciWhileValid(amazonsGame, initialFen, variant.Amazons)
       val game    = replay._2.last._1
@@ -80,8 +78,9 @@ class AmazonsVariantTest extends FairySFTest {
 
   "Amazon Fens" should {
     "Ensure fen contains half move" in {
-      val onePlyGame        = fromMoves(Vector("g1j1"))
-      val onePlyFen         = Forsyth >> onePlyGame
+      val emptyGame         = fenToGame(Amazons.initialFen, Amazons).toOption.get
+      val onePlyGame        = makeMove(emptyGame, "g1j1").get
+      val onePlyFen         = Forsyth.>>(onePlyGame)
       onePlyFen.value must contain(" ½")
       onePlyFen.value must contain(" ½g1j1")
       val onePlyGameFromFen = Game(Some(Amazons), Some(onePlyFen))
@@ -89,8 +88,8 @@ class AmazonsVariantTest extends FairySFTest {
         move.toUci.uci must_== "g1j1"
       }
 
-      val twoPlyGame         = fromMoves(Vector("g1j1", "P@i2"))
-      val twoPlyFen          = Forsyth >> twoPlyGame
+      val twoPlyGame         = makeMove(onePlyGame, "P@i2").get
+      val twoPlyFen          = Forsyth.>>(twoPlyGame)
       twoPlyFen.value must not contain " ½"
       val twoPlayGameFromFen = Game(Some(Amazons), Some(twoPlyFen))
       twoPlayGameFromFen.situation.lastMove must beNone
@@ -98,11 +97,12 @@ class AmazonsVariantTest extends FairySFTest {
     }
 
     "Creating game from fen after move one should allow for drops" in {
-      val initialGame  = fromMoves(Vector("g1j1"))
-      val afterPly1Fen = Forsyth >> initialGame
+      val emptyGame    = fenToGame(Amazons.initialFen, Amazons).toOption.get
+      val onePlyGame   = makeMove(emptyGame, "g1j1").get
+      val afterPly1Fen = Forsyth.>>(onePlyGame)
       afterPly1Fen.value must contain(" ½")
       afterPly1Fen.value must contain(" ½g1j1")
-      initialGame.situation.drops must beSome.like {
+      onePlyGame.situation.drops must beSome.like {
         case drops => {
           drops == List() must beFalse
           val game = Game(Some(Amazons), Some(afterPly1Fen))
@@ -113,51 +113,7 @@ class AmazonsVariantTest extends FairySFTest {
           }
         }
       }
-    }*/
-
-    /*"FEN parsing turn numbers numbers" in {
-      val game0 = Game(Amazons)
-      println(s"--> 0: ${(Forsyth >> game0).value}")
-      (Forsyth >> game0).value must contain("0 1")
-
-      val game1 = fromMoves(Vector("g1j1"))
-      game1.turnCount must_== 1
-      println(s"--> 1: ${game1.turnCount}")
-      println(s"--> 1: ${(Forsyth >> game1).value}")
-      (Forsyth >> game1).value must contain("0 1")
-      (Forsyth >> game1).value must contain("½g1j1")
-
-      val game2 = fromMoves(Vector("g1j1", "P@i2"))
-      game2.turnCount must_== 2
-      println(s"--> 2: ${game2.turnCount}")
-      println(s"--> 2: ${(Forsyth >> game2).value}")
-      (Forsyth >> game2).value must contain("1 1")
-
-      val game3 = fromMoves(Vector("g1j1", "P@i2", "j7i6"))
-      game3.turnCount must_== 3
-      println(s"--> 3: ${game3.turnCount}")
-      println(s"--> 3: ${(Forsyth >> game3).value}")
-      (Forsyth >> game3).value must contain("1 1")
-      (Forsyth >> game3).value must contain("½j7i6")
-
-      val game4 = fromMoves(Vector("g1j1", "P@i2", "j7i6", "P@i5"))
-      game4.turnCount must_== 4
-      println(s"--> 4: ${game4.turnCount}")
-      println(s"--> 4: ${(Forsyth >> game4).value}")
-      (Forsyth >> game4).value must contain("2 2")
-
-      val game5 = fromMoves(Vector("g1j1", "P@i2", "j7i6", "P@i5", "j1g1"))
-      game5.turnCount must_== 5
-      println(s"--> 5: ${game5.turnCount}")
-      println(s"--> 5: ${(Forsyth >> game5).value}")
-      (Forsyth >> game5).value must contain("2 2")
-
-      val game6 = fromMoves(Vector("g1j1", "P@i2", "j7i6", "P@i5", "j1g1", "P@g2"))
-      game6.turnCount must_== 6
-      println(s"--> 6: ${game6.turnCount}")
-      println(s"--> 6: ${(Forsyth >> game6).value}")
-      (Forsyth >> game6).value must contain("3 2")
-    }*/
+    }
 
     "Ensuring fens keep pawns when using them to create games further in" in {
       val emptyGame    = fenToGame(Amazons.initialFen, Amazons).toOption.get
