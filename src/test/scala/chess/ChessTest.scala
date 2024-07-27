@@ -102,18 +102,15 @@ case class GameIsometryTest(lib: GameLogic) extends Specification with Validated
       basePlies: Int = 0,
       baseTurnCount: Int = 0
   )(moves: List[StratUci]) = {
-    println(s"Initial Fen: $initialFen")
     stratFenToGame(initialFen, v).flatMap(game => {
       val gameData = GameFenIsometryData(game, game, basePlies, baseTurnCount).valid
       moves.foldLeft[Validated[String, GameFenIsometryData]](gameData) {
         case (vGame, uci) => {
-          println(s"Applying UCI: $uci")
           vGame.flatMap(gameData => {
             for {
               newBaseGame <- gameData.game.applyUci(uci, MoveMetrics()).map(_._1)
               newFenGame  <- gameData.fenGame.applyUci(uci, MoveMetrics()).map(_._1)
               fen1         = StratForsyth.>>(lib, newBaseGame)
-              _            = println(s"fen1: $fen1")
               newFenGame2 <- stratFenToGame(fen1, v)
             } yield {
               val newGameData = gameData.nextPly(newBaseGame, newFenGame)
