@@ -74,7 +74,7 @@ case object Amazons
     )
 
   override def paramsForFen(game: Game): Tuple2[Board, Option[Move]] =
-    if (game.turns % 2 == 1)
+    if (game.plies % 2 == 1)
       game.situation.lastMove.fold[Tuple2[Board, Option[Move]]]((game.situation.board, None))(move =>
         (move.situationBefore.board, Some(move))
       )
