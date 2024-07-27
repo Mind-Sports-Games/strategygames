@@ -206,11 +206,11 @@ object Forsyth {
     {
       List(
         exportBoard(game.board) + exportCrazyPocket(game.board),
-        game.player.letter,
+        game.player.letter.toString,
         exportCastles(game.board),
         game.situation.enPassantSquaresUciString.getOrElse("-"),
-        game.halfMoveClock,
-        game.fenTurnCount
+        game.halfMoveClock.toString,
+        game.fenTurnCount.toString
       ) ::: {
         if (game.board.variant == variant.ThreeCheck || game.board.variant == variant.FiveCheck)
           List(exportCheckCount(game.board))
@@ -228,7 +228,7 @@ object Forsyth {
   def exportStandardPositionTurnCastlingEp(situation: Situation): String =
     List(
       exportBoard(situation.board),
-      situation.player.letter,
+      situation.player.letter.toString,
       exportCastles(situation.board),
       situation.enPassantSquaresUciString.getOrElse("-")
     ) mkString " "

@@ -10,10 +10,6 @@ import strategygames.fairysf.variant.Variant
   * http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
   */
 object Forsyth {
-  def pp[A](s: String, a: A): A = {
-    println(s"${s}: ${a}")
-    a
-  }
 
   // lishogi
   // val initial = FEN("lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1")
@@ -21,6 +17,7 @@ object Forsyth {
   val initial = FEN("lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL[] w - - 0 1")
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
+    println("HERE!")
     val (fsfFen, moveStr) =
       if (fen.value.contains("½")) {
         val parts = fen.value.split("½")
@@ -54,35 +51,31 @@ object Forsyth {
 
   def <<(fen: FEN): Option[Situation] = <<@(Variant.default, fen)
 
-  case class SituationPlus(situation: Situation, fullTurnCount: Int) {
+  case class SituationPlus(situation: Situation, fullTurnCount: Int, halfTurnMarker: Boolean = false) {
 
     def turnCount = fullTurnCount * 2 - situation.player.fold(2, 1)
     // TODO: Set this for Amazons. Needs to have the prev move encoded into the FEN
     // to calculate this. This work has been done here:
     // https://github.com/Mind-Sports-Games/strategygames/compare/master...392-support-amazons-in-analysis-page#diff-b0b2b8a0e93f9c1f675971f22eda79cc6cfedee6f2284b31a0fba54832966933R178
     // but hasn't been merged yet
-    def plies     = turnCount
+    def plies     = turnCount * 2 + (if (halfTurnMarker) 1 else 0)
   }
 
-  def <<<@(variant: Variant, fen: FEN): Option[SituationPlus] =
+  def <<<@(variant: Variant, fen: FEN): Option[SituationPlus] = {
     <<@(variant, fen) map { sit =>
-      SituationPlus(
-        // not doing half move clock history like we do in chess
-        sit,
-        pp(
-          "final",
-          (pp(
-            "fullMoveNumber",
-            pp("fen", fen).value
-              .split(' ')
-              .reverse
-              .head
-              .toIntOption
-          )
-            .map(_ max 1 min 500) | 1) + (pp("halfMoveCount", fen.value.count('½'.==)))
+      {
+        val splitted       = fen.value.split(' ').reverse
+        val halfTurnMarker = splitted.lift(0).filter(_.startsWith("½")).fold(false)(_ => true)
+        val fullTurnCount  = splitted.lift(1).flatMap(_.toIntOption).map(_ max 1 min 500) | 1
+        SituationPlus(
+          // not doing half move clock history like we do in chess
+          sit,
+          fullTurnCount,
+          halfTurnMarker
         )
-      )
+      }
     }
+  }
 
   def <<<(fen: FEN): Option[SituationPlus] = <<<@(Variant.default, fen)
 
@@ -90,7 +83,7 @@ object Forsyth {
 
   def >>(parsed: SituationPlus): FEN =
     parsed match {
-      case SituationPlus(situation, _) =>
+      case SituationPlus(situation, _, _) =>
         >>(Game(situation, plies = parsed.plies, turnCount = parsed.turnCount))
     }
 
