@@ -1,5 +1,7 @@
 package strategygames.fairysf
 
+import strategygames.format.{ FEN => StratFen, Forsyth => StratForsyth, Uci => StratUci }
+import strategygames.variant.{ Variant => StratVariant }
 import variant.Amazons
 import strategygames.fairysf.format.FEN
 
@@ -70,5 +72,38 @@ class AmazonsVariantTest extends FairySFTest {
       gameEnd.situation.winner must_== Some(Player.P1)
     }
 
+  }
+}
+
+class AmazonsVariantTestIsometry extends strategygames.chess.ChessTest {
+  "Test Every move can be loaded from fen" in {
+    val gameFamily   = Amazons.gameFamily
+    val lib          = gameFamily.gameLogic
+    val stratVariant = StratVariant(lib, Amazons.key).get
+
+    isometryTest(lib).testEveryMoveLoadFenIsometry(StratFen(lib, Amazons.initialFen.value), stratVariant)(
+      List(
+        "d1d6",
+        "P@g9",
+        "d10f10",
+        "P@e10",
+        "a4f9",
+        "P@e9",
+        "a7a10",
+        "P@b10",
+        "d6a9",
+        "P@b9",
+        "j7j10",
+        "P@h10",
+        "j4j9",
+        "P@h9",
+        "j10i10",
+        "P@i9" // then after j9j10,P@j9 p2 has no moves
+      ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
+    ) must beValid.like(gameData => {
+      val fen1 = StratForsyth.>>(lib, gameData.game)
+      val fen2 = StratForsyth.>>(lib, gameData.fenGame)
+      fen1 must_== fen2
+    })
   }
 }

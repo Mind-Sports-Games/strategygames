@@ -1,8 +1,7 @@
 package strategygames.chess
 
-import strategygames.{GameLogic, Pos => StratPos}
-import strategygames.format.{FEN => StratFen, Forsyth => StratForsyth}
-import strategygames.variant.{Variant => StratVariant}
+import strategygames.format.{ FEN => StratFen, Forsyth => StratForsyth, Uci => StratUci }
+import strategygames.variant.{ Variant => StratVariant }
 import strategygames.chess.variant.Monster
 
 class MonsterVariantTest extends ChessTest {
@@ -307,54 +306,55 @@ class MonsterVariantTest extends ChessTest {
     }
 
     "Test Every move can be loaded from fen" in {
-      import Pos._
-      val lib = GameLogic.Chess()
+      val gameFamily   = Monster.gameFamily
+      val lib          = gameFamily.gameLogic
       val stratVariant = StratVariant(lib, Monster.key).get
       println(stratVariant)
 
-      isometryTest(lib).testEveryMoveLoadFenIsometry(StratFen(lib, Monster.initialFen.value), stratVariant)(List(
-        E2 -> E4,
-        E1 -> E2,
-        E7 -> E6,
-        E2 -> E3,
-        E3 -> F4,
-        F8 -> A3,
-        F4 -> G5,
-        G5 -> H5,
-        D7 -> D6,
-        H5 -> G6,
-        G6 -> G7,
-        E8 -> D7,
-        G7 -> H8,
-        H8 -> H7,
-        D7 -> C6,
-        H7 -> G8,
-        G8 -> F7,
-        C6 -> B6,
-        F7 -> E8,
-        E8 -> D8,
-        B6 -> A5,
-        D8 -> C8,
-        C8 -> B7,
-        A5 -> A4,
-        B7 -> B8,
-        B8 -> A8,
-        A7 -> A5,
-        A8 -> B8,
-        B8 -> C7,
-        A3 -> C5,
-        C7 -> D6,
-        D6 -> E6,
-        C5 -> D6,
-        E6 -> D6,
-        F2 -> F4,
-        A4 -> A3,
-        F4 -> F5,
-        F5 -> F6,
-        A3 -> A4,
-        F6 -> F7,
-        D6 -> D5
-        ).map(move => (StratPos.Chess(move._1), StratPos.Chess(move._2)))
+      isometryTest(lib).testEveryMoveLoadFenIsometry(StratFen(lib, Monster.initialFen.value), stratVariant)(
+        List(
+          "e2e4",
+          "e1e2",
+          "e7e6",
+          "e2e3",
+          "e3f4",
+          "f8a3",
+          "f4g5",
+          "g5h5",
+          "d7d6",
+          "h5g6",
+          "g6g7",
+          "e8d7",
+          "g7h8",
+          "h8h7",
+          "d7c6",
+          "h7g8",
+          "g8f7",
+          "c6b6",
+          "f7e8",
+          "e8d8",
+          "b6a5",
+          "d8c8",
+          "c8b7",
+          "a5a4",
+          "b7b8",
+          "b8a8",
+          "a7a5",
+          "a8b8",
+          "b8c7",
+          "a3c5",
+          "c7d6",
+          "d6e6",
+          "c5d6",
+          "e6d6",
+          "f2f4",
+          "a4a3",
+          "f4f5",
+          "f5f6",
+          "a3a4",
+          "f6f7",
+          "d6d5"
+        ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
       ) must beValid.like(gameData => {
         val fen1 = StratForsyth.>>(lib, gameData.game)
         val fen2 = StratForsyth.>>(lib, gameData.fenGame)
