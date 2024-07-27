@@ -73,7 +73,14 @@ object Forsyth {
               lastTurn = lastTurn,
               positionHashes = Array.empty,
               castles = castles,
-              unmovedRooks = UnmovedRooks(unmovedRooks)
+              unmovedRooks = UnmovedRooks(unmovedRooks),
+              currentTurn = splitted
+                .filter(_.startsWith("½"))
+                .map(_.replace("½", ""))
+                .lift(0)
+                .flatMap(format.Uci.apply)
+                .map(List(_))
+                .getOrElse(List())
             )
             val checkCount =
               splitted
@@ -108,25 +115,27 @@ object Forsyth {
     }
   }
 
-  case class SituationPlus(situation: Situation, fullTurnCount: Int) {
+  case class SituationPlus(situation: Situation, fullTurnCount: Int, isHalfTurn: Boolean = false) {
 
-    def turnCount = fullTurnCount * 2 - situation.player.fold(2, 1)
-    // This is incorrect, but does it matter? Monster chess plays without this
-    // Think this is used when created fromPosition and we wouldn't necessarily need
-    // to know the number of plies that have happened from before we start
-    // See also fairysf equivalent
-    def plies     = turnCount
+    private def playerNumber = situation.player.fold(2, 1)
+
+    def turnCount = fullTurnCount * 2 - playerNumber
+    def plies     =
+      situation.board.variant.pliesFromFen(fullTurnCount, situation.player, isHalfTurn)
 
   }
 
   def <<<@(variant: Variant, fen: FEN): Option[SituationPlus] =
     <<@(variant, fen) map { sit =>
       val splitted       = fen.value.split(' ').drop(4).dropWhile(_.contains('+'))
-      val fullMoveNumber = splitted lift 1 flatMap (_.toIntOption) map (_ max 1 min 500)
-      val halfMoveClock  = splitted lift 0 flatMap (_.toIntOption) map (_ max 0 min 100)
+      val isHalfTurn     = splitted.lift(2).filter(_.startsWith("½")).fold(false)(_ => true)
+      val fullMoveNumber =
+        splitted.lift(1).flatMap(_.toIntOption).map(_ max 1 min 500)
+      val halfMoveClock  = splitted.lift(0).flatMap(_.toIntOption).map(_ max 0 min 100)
       SituationPlus(
         halfMoveClock.map(sit.history.setHalfMoveClock).fold(sit)(sit.withHistory),
-        fullMoveNumber | 1
+        fullMoveNumber | 1,
+        isHalfTurn
       )
     }
 
@@ -189,7 +198,7 @@ object Forsyth {
 
   def >>(parsed: SituationPlus): FEN =
     parsed match {
-      case SituationPlus(situation, _) =>
+      case SituationPlus(situation, _, _) =>
         >>(Game(situation, plies = parsed.plies, turnCount = parsed.turnCount))
     }
 
@@ -201,11 +210,17 @@ object Forsyth {
         exportCastles(game.board),
         game.situation.enPassantSquaresUciString.getOrElse("-"),
         game.halfMoveClock,
-        game.fullTurnCount
+        game.fenTurnCount
       ) ::: {
         if (game.board.variant == variant.ThreeCheck || game.board.variant == variant.FiveCheck)
           List(exportCheckCount(game.board))
         else List()
+      } ::: {
+        // NOTE: yes, this is a fold, but because the default value
+        //       comes first in the fold, I have to explicitly type annotate it.
+        //       I wish there was a shorter getOrElse, mebbe:
+        //       game.fenHalfTurnMarker.map(List(_)).or(List())
+        game.fenHalfTurnMarker.map(List(_)).getOrElse(List())
       }
     } mkString " "
   }

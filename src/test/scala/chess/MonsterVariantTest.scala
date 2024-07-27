@@ -1,6 +1,7 @@
 package strategygames.chess
 
 import strategygames.chess.variant.Monster
+import strategygames.chess.format.Forsyth
 
 class MonsterVariantTest extends ChessTest {
 
@@ -301,6 +302,57 @@ class MonsterVariantTest extends ChessTest {
         game.situation.checkMate must_== false
         game.situation.staleMate must_== true
       }
+    }
+
+    "Test Every move can be loaded from fen" in {
+      import Pos._
+      testEveryMoveLoadFenIsometry(Monster.initialFen, Monster)(
+        E2 -> E4,
+        E1 -> E2,
+        E7 -> E6,
+        E2 -> E3,
+        E3 -> F4,
+        F8 -> A3,
+        F4 -> G5,
+        G5 -> H5,
+        D7 -> D6,
+        H5 -> G6,
+        G6 -> G7,
+        E8 -> D7,
+        G7 -> H8,
+        H8 -> H7,
+        D7 -> C6,
+        H7 -> G8,
+        G8 -> F7,
+        C6 -> B6,
+        F7 -> E8,
+        E8 -> D8,
+        B6 -> A5,
+        D8 -> C8,
+        C8 -> B7,
+        A5 -> A4,
+        B7 -> B8,
+        B8 -> A8,
+        A7 -> A5,
+        A8 -> B8,
+        B8 -> C7,
+        A3 -> C5,
+        C7 -> D6,
+        D6 -> E6,
+        C5 -> D6,
+        E6 -> D6,
+        F2 -> F4,
+        A4 -> A3,
+        F4 -> F5,
+        F5 -> F6,
+        A3 -> A4,
+        F6 -> F7,
+        D6 -> D5
+      ) must beValid.like(gameData => {
+        val fen1 = Forsyth.>>(gameData.game)
+        val fen2 = Forsyth.>>(gameData.fenGame)
+        fen1 must_== fen2
+      })
     }
 
   }
