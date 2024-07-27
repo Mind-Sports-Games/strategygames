@@ -299,7 +299,19 @@ abstract class Variant private[variant] (
 
   override def hashCode: Int = id
 
-  def gameFamily: GameFamily = GameFamily.Chess()
+  def gameFamily: GameFamily            = GameFamily.Chess()
+  def fenTurnCount(turnCount: Int): Int = 1 + turnCount / 2
+
+  def fenHalfTurnMarker(
+      @nowarn situation: Situation,
+      @nowarn turnCount: Int,
+      @nowarn plies: Int
+  ): Option[String] =
+    None
+
+  def pliesFromFen(fenTurnCount: Int, player: Player, @nowarn fenHalfTurnMarker: Boolean) =
+    // TODO: not sure these are actually correct
+    fenTurnCount * 2 - player.fold(2, 1)
 }
 
 object Variant {
@@ -372,4 +384,5 @@ object Variant {
         case _            => Piece(P2, rank(x.index))
       })
     }).toMap
+
 }
