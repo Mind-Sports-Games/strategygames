@@ -75,7 +75,7 @@ trait FairySFTest extends Specification with ValidatedMatchers {
   // this isnt how we initialise games for fairy and so isn't a good test
   // It doesn't work all the time either
   def fenToGame(positionString: FEN, variant: Variant) = {
-    val situation = Forsyth << positionString
+    val situation = Forsyth.<<@(variant, positionString)
     situation map { sit =>
       sit.player -> sit.withVariant(variant).board
     } toValid "Could not construct situation from FEN" map { case (player, board) =>
