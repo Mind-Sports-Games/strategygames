@@ -57,7 +57,7 @@ case object Amazons
       if (empty > 0) fen.append(s"${empty},")
       fen.append('/')
     }
-    fen.toString.replace(",/", "/").dropRight(1)
+    fen.toString.replace("P", "p").replace(",/", "/").dropRight(1)
   }
 
   private def fullPockets: String = s"[${"P" * 46}${"p" * 46}]"
