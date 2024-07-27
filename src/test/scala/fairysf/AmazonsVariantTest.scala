@@ -34,7 +34,7 @@ class AmazonsVariantTest extends FairySFTest {
   ).map(Vector(_))
 
   def makeMove(game: Game, uci: String): Option[Game] = {
-    Uci(GameFamily.Amazons(), uci.pp("uci")).flatMap(uci => game.apply(uci.pp("uci2")).toOption.map(_._1))
+    Uci(GameFamily.Amazons(), uci).flatMap(uci => game.apply(uci).toOption.map(_._1))
   }
 
   "Amazons" should {

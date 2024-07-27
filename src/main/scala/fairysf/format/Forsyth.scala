@@ -17,7 +17,6 @@ object Forsyth {
   val initial = FEN("lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL[] w - - 0 1")
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
-    println("HERE!")
     val (fsfFen, moveStr) =
       if (fen.value.contains("½")) {
         val parts = fen.value.split("½")
