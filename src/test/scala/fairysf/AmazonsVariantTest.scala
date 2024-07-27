@@ -165,8 +165,6 @@ class AmazonsVariantTest extends FairySFTest {
       gamePly1.turnCount must_== 0
       gamePly1.plies must_== 1
       val afterPly1Fen = Forsyth.>>(gamePly1)
-      println("----------------------------------------------------")
-      println(afterPly1Fen)
       afterPly1Fen.value.toLowerCase() must contain("d1d6")
       val gameFromFen  = Game(Some(Amazons), Some(afterPly1Fen))
       gameFromFen.turnCount must_== 0
@@ -178,20 +176,23 @@ class AmazonsVariantTest extends FairySFTest {
       afterPly1Fen must_== afterPly1FenAgain
 
       val gamePly2     = makeMove(gamePly1, "P@g9").get
-      gamePly2.turnCount must_== 0
+      gamePly2.turnCount must_== 1
       gamePly2.plies must_== 2
       val afterPly2Fen = Forsyth.>>(gamePly2)
-      println(afterPly2Fen)
       afterPly2Fen.value.toLowerCase() must not contain "8p1"
       afterPly2Fen.value.toLowerCase() must not contain " ½"
 
       val gamePly3     = makeMove(gamePly2, "d10f10").get
       gamePly3.turnCount must_== 1
-      gamePly3.plies must_== 4
+      gamePly3.plies must_== 3
       val afterPly3Fen = Forsyth.>>(gamePly3)
-      println(afterPly3Fen)
       afterPly3Fen.value.toLowerCase() must contain("½d10f10")
-      afterPly3Fen.value.toLowerCase() must not contain "8p1"
+
+      val gamePly4     = makeMove(gamePly3, "P@f9").get
+      gamePly4.turnCount must_== 2
+      gamePly4.plies must_== 4
+      val afterPly4Fen = Forsyth.>>(gamePly4)
+      afterPly4Fen.value.toLowerCase() must not contain "½d10f10"
     }
   }
 
