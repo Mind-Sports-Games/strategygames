@@ -1,7 +1,9 @@
 package strategygames.chess
 
+import strategygames.{GameLogic, Pos => StratPos}
+import strategygames.format.{FEN => StratFen, Forsyth => StratForsyth}
+import strategygames.variant.{Variant => StratVariant}
 import strategygames.chess.variant.Monster
-import strategygames.chess.format.Forsyth
 
 class MonsterVariantTest extends ChessTest {
 
@@ -306,7 +308,11 @@ class MonsterVariantTest extends ChessTest {
 
     "Test Every move can be loaded from fen" in {
       import Pos._
-      testEveryMoveLoadFenIsometry(Monster.initialFen, Monster)(
+      val lib = GameLogic.Chess()
+      val stratVariant = StratVariant(lib, Monster.key).get
+      println(stratVariant)
+
+      isometryTest(lib).testEveryMoveLoadFenIsometry(StratFen(lib, Monster.initialFen.value), stratVariant)(List(
         E2 -> E4,
         E1 -> E2,
         E7 -> E6,
@@ -348,9 +354,10 @@ class MonsterVariantTest extends ChessTest {
         A3 -> A4,
         F6 -> F7,
         D6 -> D5
+        ).map(move => (StratPos.Chess(move._1), StratPos.Chess(move._2)))
       ) must beValid.like(gameData => {
-        val fen1 = Forsyth.>>(gameData.game)
-        val fen2 = Forsyth.>>(gameData.fenGame)
+        val fen1 = StratForsyth.>>(lib, gameData.game)
+        val fen2 = StratForsyth.>>(lib, gameData.fenGame)
         fen1 must_== fen2
       })
     }
