@@ -63,8 +63,6 @@ case object Amazons
   private def fullPockets: String = s"[${"P" * 46}${"p" * 46}]"
 
   override def exportBoardFen(board: Board): FEN = {
-    val halfMoveClock = board.apiPosition.fen.value.split(" ").drop(1).mkString(" ")
-
     FEN(
       s"${boardPart(board)}${fullPockets} ${board.apiPosition.fen.value.split(" ").drop(1).mkString(" ")}"
     )
