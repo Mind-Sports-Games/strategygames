@@ -177,7 +177,7 @@ class AmazonsVariantTestIsometry extends strategygames.chess.ChessTest {
         "j4j9",
         "P@h9",
         "j10i10",
-        "P@i9" // then after j9j10,P@j9 p2 has no moves
+        "P@i9"
       ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
     ) must beValid.like(gameData => {
       val fen1 = StratForsyth.>>(lib, gameData.game)
