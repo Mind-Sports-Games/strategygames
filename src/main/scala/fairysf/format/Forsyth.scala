@@ -63,9 +63,9 @@ object Forsyth {
   def <<<@(variant: Variant, fen: FEN): Option[SituationPlus] = {
     <<@(variant, fen) map { sit =>
       {
-        val splitted       = fen.value.split(' ').reverse
-        val halfTurnMarker = splitted.lift(0).filter(_.startsWith("½")).fold(false)(_ => true)
-        val fullTurnCount  = splitted.lift(1).flatMap(_.toIntOption).map(_ max 1 min 500) | 1
+        val splitted       = fen.value.split(' ')
+        val halfTurnMarker = splitted.lift(6).filter(_.startsWith("½")).fold(false)(_ => true)
+        val fullTurnCount  = splitted.lift(5).flatMap(_.toIntOption).map(_ max 1 min 500) | 1
         SituationPlus(
           // not doing half move clock history like we do in chess
           sit,
