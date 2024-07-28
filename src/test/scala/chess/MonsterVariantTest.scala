@@ -311,7 +311,7 @@ class MonsterVariantTest extends ChessTest {
       val stratVariant = StratVariant(lib, Monster.key).get
       println(stratVariant)
 
-      isometryTest(lib).testEveryMoveLoadFenIsometry(StratFen(lib, Monster.initialFen.value), stratVariant)(
+      isometryTest(lib)._testEveryMoveLoadFenIsometry(StratFen(lib, Monster.initialFen.value), stratVariant)(
         List(
           "e2e4",
           "e1e2",

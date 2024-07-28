@@ -68,7 +68,7 @@ class AmazonsVariantTest extends FairySFTest {
       game2.situation.dropsAsDrops.filter(_.pos.key == "j9").size must_== 1
       val gameEnd = game2.applyDrop(game2.situation.dropsAsDrops.filter(_.pos.key == "j9")(0))
       gameEnd.situation.board.variant.exportBoardFen(game.situation.board) must_== FEN(
-        "qp2pqqpq1/QP2PQPPpQ/10/10/10/10/10/10/10/6Q3[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppp] w - - 8 5"
+        "qp2pqqpq1/Qp2pQpppQ/10/10/10/10/10/10/10/6Q3[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppp] w - - 8 5"
       )
       gameEnd.situation.end must beTrue
       gameEnd.situation.status must_== Some(Status.VariantEnd)
@@ -160,7 +160,7 @@ class AmazonsVariantTestIsometry extends strategygames.chess.ChessTest {
     val lib          = gameFamily.gameLogic
     val stratVariant = StratVariant(lib, Amazons.key).get
 
-    isometryTest(lib).testEveryMoveLoadFenIsometry(StratFen(lib, Amazons.initialFen.value), stratVariant)(
+    isometryTest(lib)._testEveryMoveLoadFenIsometry(StratFen(lib, Amazons.initialFen.value), stratVariant)(
       List(
         "d1d6",
         "P@g9",
