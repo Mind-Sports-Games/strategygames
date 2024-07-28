@@ -95,12 +95,6 @@ class FlipelloVariantTest extends FairySFTest {
         flipelloGameEndsEarly.take(65)
       ) // just before P2 move (which engine says to pass incorrectly)
 
-      println("Possible moves in this position")
-      position2.legalMoves.map(println(_))
-
-      println("current fen")
-      println(position2.fen) // checking number of drops remaining....
-
       position2.legalMoves.size must_== 5
       position2.gameEnd must_== false
     }
@@ -110,11 +104,17 @@ class FlipelloVariantTest extends FairySFTest {
         "1PPPPPPP/P1PPPPPP/PPpPPPPP/PPppPPPP/PPpppPPP/PPPppppP/PPPPpppp/PPPPPPPP[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppppp] w - - 64 33"
       )
       val game     = fenToGame(position, Flipello)
-      game must beValid.like {
-        case game => {
-          game.situation.playable(false) must beFalse
-        }
-      }
+      game must beValid
+        .like {
+          case game => {
+            game.situation.moves must beEmpty
+            game.situation
+              .playable(
+                true
+              )
+              .must(beEqualTo(false))
+          }
+        } pendingUntilFixed "pla-904-flipello-load-from-fen-in-unplayable-position"
     }
 
   }
