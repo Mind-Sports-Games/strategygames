@@ -96,7 +96,7 @@ case class GameIsometryTest(lib: GameLogic) extends Specification with Validated
     gameData.turnCount must_== g1.turnCount
   }
 
-  def testEveryMoveLoadFenIsometry(
+  def _testEveryMoveLoadFenIsometry(
       initialFen: StratFen,
       v: StratVariant,
       basePlies: Int = 0,
