@@ -160,7 +160,7 @@ class AmazonsVariantTestIsometry extends strategygames.chess.ChessTest {
     val lib          = gameFamily.gameLogic
     val stratVariant = StratVariant(lib, Amazons.key).get
 
-    isometryTest(lib)._testEveryMoveLoadFenIsometry(StratFen(lib, Amazons.initialFen.value), stratVariant)(
+    _testEveryMoveLoadFenIsometry(lib, StratFen(lib, Amazons.initialFen.value), stratVariant)(
       List(
         "d1d6",
         "P@g9",
