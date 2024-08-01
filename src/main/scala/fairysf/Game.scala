@@ -117,7 +117,8 @@ object Game {
             board = parsed.situation.board withVariant g.board.variant withPocketData {
               parsed.situation.board.pocketData orElse g.board.pocketData
             },
-            player = parsed.situation.player
+            player = parsed.situation.player,
+            lastMove = parsed.situation.lastMove
           ),
           plies = parsed.plies,
           turnCount = parsed.turnCount

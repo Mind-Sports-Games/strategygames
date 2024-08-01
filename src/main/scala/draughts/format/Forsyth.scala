@@ -155,7 +155,7 @@ object Forsyth {
   private def doExport(game: DraughtsGame, algebraic: Boolean): FEN = FEN {
     {
       List(
-        game.player.letter.toUpper,
+        game.player.letter.toUpper.toString,
         exportBoard(game.board, algebraic),
         "H" + game.halfMoveClock.toString,
         "F" + game.fullTurnCount.toString
@@ -167,7 +167,7 @@ object Forsyth {
   }
 
   def exportStandardPositionTurn(board: Board, ply: Int): String = List(
-    Player(ply % 2 == 0).letter,
+    Player(ply % 2 == 0).letter.toString,
     exportBoard(board)
   ) mkString ":"
 

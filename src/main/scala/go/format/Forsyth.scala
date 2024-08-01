@@ -73,8 +73,8 @@ object Forsyth {
     FEN(
       board.apiPosition.fen.value
         .split(" ")
-        .updated(5, board.history.captures.p1)
-        .updated(6, board.history.captures.p2)
+        .updated(5, board.history.captures.p1.toString)
+        .updated(6, board.history.captures.p2.toString)
         .mkString(" ")
     )
 

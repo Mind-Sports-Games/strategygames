@@ -50,11 +50,133 @@ object Forsyth {
     case _                                                 => sys.error("Mismatched gamelogic types 15")
   }
 
-  case class SituationPlus(situation: Situation, fullTurnCount: Int) {
+  sealed trait SituationPlus {
 
-    def turnCount = fullTurnCount * 2 - situation.player.fold(2, 1)
-    def plies     = turnCount
+    val situation: Situation
+    val fullTurnCount: Int
+    def turnCount: Int
+    def plies: Int
 
+  }
+
+  // TODO: This is probably a situation where bog-standard inheritance works
+  //       probably the SituationPlus from each of the various sections could
+  //       implement the appropriate trait and then we could have a single
+  //       implementation of this, but I don't have time to deal with this right now
+  case class SituationPlusChess(
+      situationPlus: strategygames.chess.format.Forsyth.SituationPlus
+  ) extends SituationPlus {
+    val situation     = Situation.Chess(situationPlus.situation)
+    val fullTurnCount = situationPlus.fullTurnCount
+    def turnCount     = situationPlus.turnCount
+    def plies         = situationPlus.plies
+  }
+
+  case class SituationPlusDraughts(
+      situationPlus: strategygames.draughts.format.Forsyth.SituationPlus
+  ) extends SituationPlus {
+    val situation     = Situation.Draughts(situationPlus.situation)
+    val fullTurnCount = situationPlus.fullTurnCount
+    def turnCount     = situationPlus.turnCount
+    def plies         = situationPlus.plies
+  }
+
+  case class SituationPlusFairySF(
+      situationPlus: strategygames.fairysf.format.Forsyth.SituationPlus
+  ) extends SituationPlus {
+    val situation     = Situation.FairySF(situationPlus.situation)
+    val fullTurnCount = situationPlus.fullTurnCount
+    def turnCount     = situationPlus.turnCount
+    def plies         = situationPlus.plies
+  }
+
+  case class SituationPlusSamurai(
+      situationPlus: strategygames.samurai.format.Forsyth.SituationPlus
+  ) extends SituationPlus {
+    val situation     = Situation.Samurai(situationPlus.situation)
+    val fullTurnCount = situationPlus.fullTurnCount
+    def turnCount     = situationPlus.turnCount
+    def plies         = situationPlus.plies
+  }
+
+  case class SituationPlusTogyzkumalak(
+      situationPlus: strategygames.togyzkumalak.format.Forsyth.SituationPlus
+  ) extends SituationPlus {
+    val situation     = Situation.Togyzkumalak(situationPlus.situation)
+    val fullTurnCount = situationPlus.fullTurnCount
+    def turnCount     = situationPlus.turnCount
+    def plies         = situationPlus.plies
+  }
+
+  case class SituationPlusGo(
+      situationPlus: strategygames.go.format.Forsyth.SituationPlus
+  ) extends SituationPlus {
+    val situation     = Situation.Go(situationPlus.situation)
+    val fullTurnCount = situationPlus.fullTurnCount
+    def turnCount     = situationPlus.turnCount
+    def plies         = situationPlus.plies
+  }
+
+  case class SituationPlusBackgammon(
+      situationPlus: strategygames.backgammon.format.Forsyth.SituationPlus
+  ) extends SituationPlus {
+    val situation     = Situation.Backgammon(situationPlus.situation)
+    val fullTurnCount = situationPlus.fullTurnCount
+    def turnCount     = situationPlus.turnCount
+    def plies         = situationPlus.plies
+  }
+
+  def situationPlus(variant: Variant): SituationPlus = (variant, variant.gameLogic) match {
+    case (Variant.Chess(v), GameLogic.Chess())               =>
+      SituationPlusChess(
+        chess.format.Forsyth.SituationPlus(
+          chess.Situation(v),
+          1
+        )
+      )
+    case (Variant.Draughts(v), GameLogic.Draughts())         =>
+      SituationPlusDraughts(
+        draughts.format.Forsyth.SituationPlus(
+          draughts.Situation(v),
+          1
+        )
+      )
+    case (Variant.FairySF(v), GameLogic.FairySF())           =>
+      SituationPlusFairySF(
+        fairysf.format.Forsyth.SituationPlus(
+          fairysf.Situation(v),
+          1
+        )
+      )
+    case (Variant.Samurai(v), GameLogic.Samurai())           =>
+      SituationPlusSamurai(
+        samurai.format.Forsyth.SituationPlus(
+          samurai.Situation(v),
+          1
+        )
+      )
+    case (Variant.Togyzkumalak(v), GameLogic.Togyzkumalak()) =>
+      SituationPlusTogyzkumalak(
+        togyzkumalak.format.Forsyth.SituationPlus(
+          togyzkumalak.Situation(v),
+          1
+        )
+      )
+    case (Variant.Go(v), GameLogic.Go())                     =>
+      SituationPlusGo(
+        go.format.Forsyth.SituationPlus(
+          go.Situation(v),
+          1
+        )
+      )
+    case (Variant.Backgammon(v), GameLogic.Backgammon())     =>
+      SituationPlusBackgammon(
+        backgammon.format.Forsyth.SituationPlus(
+          backgammon.Situation(v),
+          1
+        )
+      )
+    case _                                                   => sys.error("Invalid gameLogic / variant match")
   }
 
   def <<<@(lib: GameLogic, variant: Variant, fen: FEN): Option[SituationPlus] =
@@ -62,31 +184,29 @@ object Forsyth {
       case (GameLogic.Draughts(), Variant.Draughts(variant), FEN.Draughts(fen))             =>
         draughts.format.Forsyth
           .<<<@(variant, fen)
-          .map(sp => SituationPlus(Situation.Draughts(sp.situation), sp.fullTurnCount))
+          .map(SituationPlusDraughts)
       case (GameLogic.Chess(), Variant.Chess(variant), FEN.Chess(fen))                      =>
-        chess.format.Forsyth
-          .<<<@(variant, fen)
-          .map(sp => SituationPlus(Situation.Chess(sp.situation), sp.fullTurnCount))
+        chess.format.Forsyth.<<<@(variant, fen).map(SituationPlusChess)
       case (GameLogic.FairySF(), Variant.FairySF(variant), FEN.FairySF(fen))                =>
         fairysf.format.Forsyth
           .<<<@(variant, fen)
-          .map(sp => SituationPlus(Situation.FairySF(sp.situation), sp.fullTurnCount))
+          .map(SituationPlusFairySF)
       case (GameLogic.Samurai(), Variant.Samurai(variant), FEN.Samurai(fen))                =>
         samurai.format.Forsyth
           .<<<@(variant, fen)
-          .map(sp => SituationPlus(Situation.Samurai(sp.situation), sp.fullTurnCount))
+          .map(SituationPlusSamurai)
       case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant), FEN.Togyzkumalak(fen)) =>
         togyzkumalak.format.Forsyth
           .<<<@(variant, fen)
-          .map(sp => SituationPlus(Situation.Togyzkumalak(sp.situation), sp.fullTurnCount))
+          .map(SituationPlusTogyzkumalak)
       case (GameLogic.Go(), Variant.Go(variant), FEN.Go(fen))                               =>
         go.format.Forsyth
           .<<<@(variant, fen)
-          .map(sp => SituationPlus(Situation.Go(sp.situation), sp.fullTurnCount))
+          .map(SituationPlusGo)
       case (GameLogic.Backgammon(), Variant.Backgammon(variant), FEN.Backgammon(fen))       =>
         backgammon.format.Forsyth
           .<<<@(variant, fen)
-          .map(sp => SituationPlus(Situation.Backgammon(sp.situation), sp.fullTurnCount))
+          .map(SituationPlusBackgammon)
 
       case _ => sys.error("Mismatched gamelogic types 16")
     }
@@ -95,77 +215,77 @@ object Forsyth {
     case (GameLogic.Draughts(), FEN.Draughts(fen))         =>
       draughts.format.Forsyth
         .<<<(fen)
-        .map(sp => SituationPlus(Situation.Draughts(sp.situation), sp.fullTurnCount))
+        .map(SituationPlusDraughts)
     case (GameLogic.Chess(), FEN.Chess(fen))               =>
       chess.format.Forsyth
         .<<<(fen)
-        .map(sp => SituationPlus(Situation.Chess(sp.situation), sp.fullTurnCount))
+        .map(SituationPlusChess)
     case (GameLogic.FairySF(), FEN.FairySF(fen))           =>
       fairysf.format.Forsyth
         .<<<(fen)
-        .map(sp => SituationPlus(Situation.FairySF(sp.situation), sp.fullTurnCount))
+        .map(SituationPlusFairySF)
     case (GameLogic.Samurai(), FEN.Samurai(fen))           =>
       samurai.format.Forsyth
         .<<<(fen)
-        .map(sp => SituationPlus(Situation.Samurai(sp.situation), sp.fullTurnCount))
+        .map(SituationPlusSamurai)
     case (GameLogic.Togyzkumalak(), FEN.Togyzkumalak(fen)) =>
       togyzkumalak.format.Forsyth
         .<<<(fen)
-        .map(sp => SituationPlus(Situation.Togyzkumalak(sp.situation), sp.fullTurnCount))
+        .map(SituationPlusTogyzkumalak)
     case (GameLogic.Go(), FEN.Go(fen))                     =>
       go.format.Forsyth
         .<<<(fen)
-        .map(sp => SituationPlus(Situation.Go(sp.situation), sp.fullTurnCount))
+        .map(SituationPlusGo)
     case (GameLogic.Backgammon(), FEN.Backgammon(fen))     =>
       backgammon.format.Forsyth
         .<<<(fen)
-        .map(sp => SituationPlus(Situation.Backgammon(sp.situation), sp.fullTurnCount))
+        .map(SituationPlusBackgammon)
     case _                                                 => sys.error("Mismatched gamelogic types 17")
   }
 
-  def >>(lib: GameLogic, situation: Situation): FEN = >>(lib, SituationPlus(situation, 1))
+  def >>(lib: GameLogic, situation: SituationPlus): FEN = >>(lib, situation.situation, situation.turnCount)
 
-  def >>(lib: GameLogic, parsed: SituationPlus): FEN = (lib, parsed.situation) match {
+  def >>(lib: GameLogic, situation: Situation, turnCount: Int = 1): FEN = (lib, situation) match {
     case (GameLogic.Draughts(), Situation.Draughts(situation))         =>
       FEN.Draughts(
         draughts.format.Forsyth.>>(
-          draughts.format.Forsyth.SituationPlus(situation, parsed.fullTurnCount)
+          draughts.format.Forsyth.SituationPlus(situation, turnCount)
         )
       )
     case (GameLogic.Chess(), Situation.Chess(situation))               =>
       FEN.Chess(
         chess.format.Forsyth.>>(
-          chess.format.Forsyth.SituationPlus(situation, parsed.fullTurnCount)
+          chess.format.Forsyth.SituationPlus(situation, turnCount)
         )
       )
     case (GameLogic.FairySF(), Situation.FairySF(situation))           =>
       FEN.FairySF(
         fairysf.format.Forsyth.>>(
-          fairysf.format.Forsyth.SituationPlus(situation, parsed.fullTurnCount)
+          fairysf.format.Forsyth.SituationPlus(situation, turnCount)
         )
       )
     case (GameLogic.Samurai(), Situation.Samurai(situation))           =>
       FEN.Samurai(
         samurai.format.Forsyth.>>(
-          samurai.format.Forsyth.SituationPlus(situation, parsed.fullTurnCount)
+          samurai.format.Forsyth.SituationPlus(situation, turnCount)
         )
       )
     case (GameLogic.Togyzkumalak(), Situation.Togyzkumalak(situation)) =>
       FEN.Togyzkumalak(
         togyzkumalak.format.Forsyth.>>(
-          togyzkumalak.format.Forsyth.SituationPlus(situation, parsed.fullTurnCount)
+          togyzkumalak.format.Forsyth.SituationPlus(situation, turnCount)
         )
       )
     case (GameLogic.Go(), Situation.Go(situation))                     =>
       FEN.Go(
         go.format.Forsyth.>>(
-          go.format.Forsyth.SituationPlus(situation, parsed.fullTurnCount)
+          go.format.Forsyth.SituationPlus(situation, turnCount)
         )
       )
     case (GameLogic.Backgammon(), Situation.Backgammon(situation))     =>
       FEN.Backgammon(
         backgammon.format.Forsyth.>>(
-          backgammon.format.Forsyth.SituationPlus(situation, parsed.fullTurnCount)
+          backgammon.format.Forsyth.SituationPlus(situation, turnCount)
         )
       )
     case _                                                             => sys.error("Mismatched gamelogic types 19")
