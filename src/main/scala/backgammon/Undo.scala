@@ -3,7 +3,7 @@ import strategygames.MoveMetrics
 
 import strategygames.backgammon.format.Uci
 
-case class EndTurn(
+case class Undo(
     situationBefore: Situation,
     after: Board,
     metrics: MoveMetrics = MoveMetrics()
@@ -11,18 +11,14 @@ case class EndTurn(
 
   def player = situationBefore.player
 
-  def playerAfter = !player
-
   def situationAfter =
-    Situation(finalizeAfter, playerAfter)
+    Situation(finalizeAfter, player)
 
   def finalizeAfter: Board = after updateHistory { h =>
     h.copy(
-      lastTurn = h.currentTurn :+ toUci,
-      currentTurn = List(),
+      currentTurn = h.currentTurn.dropRight(1),
       forcedTurn = false,
-      justUsedUndo = false,
-      halfMoveClock = h.halfMoveClock + playerAfter.fold(1, 0)
+      justUsedUndo = true
     )
   }
 
@@ -30,7 +26,7 @@ case class EndTurn(
 
   def withMetrics(m: MoveMetrics) = copy(metrics = m)
 
-  def toUci = Uci.EndTurn()
+  def toUci = Uci.Undo()
 
   override def toString = toUci.uci
 

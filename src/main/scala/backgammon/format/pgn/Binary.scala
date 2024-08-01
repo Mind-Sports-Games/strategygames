@@ -22,7 +22,7 @@ object Binary {
     val OnePos   = 1 // needs 5 bits, 1 for Drop/Lift, 1 for Player, 3 for pos offset
     val TwoPos   = 2 // needs 10 bits, handles Move, 5 for each Pos
     val Boolean  = 3 // needs 2-3 bits to determine type as it handles:
-    //                  EndTurn, Undo?, Double Offer, Double Accept
+    //                  EndTurn, Double Offer, Double Accept
   }
 
   private def right(i: Int, x: Int): Int          = i & lengthMasks(x)
@@ -123,12 +123,12 @@ object Binary {
 
     def ply(str: String): List[Byte] =
       (str match {
-        case Uci.DiceRoll.diceRollR(dr) => diceRollUci(dr)
-        case Uci.Move.moveR(orig, dest) => moveUci(orig, dest)
-        case Uci.Drop.dropR(_, dest)    => dropUci(dest)
-        case Uci.Lift.liftR(orig)       => liftUci(orig)
-        case Uci.EndTurn.endTurnR()     => endTurnUci()
-        case _                          => sys.error(s"Invalid action to write: ${str}")
+        case Uci.DiceRoll.diceRollR(dr)    => diceRollUci(dr)
+        case Uci.Move.moveR(orig, dest, _) => moveUci(orig, dest)
+        case Uci.Drop.dropR(_, dest, _)    => dropUci(dest)
+        case Uci.Lift.liftR(_, orig)       => liftUci(orig)
+        case Uci.EndTurn.endTurnR()        => endTurnUci()
+        case _                             => sys.error(s"Invalid action to write: ${str}")
       }) map (_.toByte)
 
     def plies(strs: Iterable[String]): Array[Byte] =

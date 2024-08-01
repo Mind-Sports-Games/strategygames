@@ -124,6 +124,26 @@ case class Game(
     }
   }
 
+  def undo(
+      metrics: MoveMetrics = MoveMetrics()
+  ): Validated[String, (Game, Undo)] =
+    situation.undo.map(_ withMetrics metrics) map { undo =>
+      applyUndo(undo) -> undo
+    }
+
+  def applyUndo(undo: Undo): Game = {
+    val newSituation = undo.situationAfter
+
+    copy(
+      situation = newSituation,
+      plies = plies - 1,
+      actionStrs = actionStrs
+        .updated(actionStrs.size - 1, actionStrs(actionStrs.size - 1).dropRight(1)),
+      // TODO check this is correct way to handle the clock for undos - check how takeback does it
+      clock = applyClock(undo.metrics, newSituation.status.isEmpty, false)
+    )
+  }
+
   def endTurn(
       metrics: MoveMetrics = MoveMetrics()
   ): Validated[String, (Game, EndTurn)] =
@@ -159,12 +179,14 @@ case class Game(
   def apply(uci: Uci.Drop): Validated[String, (Game, Drop)]               = drop(uci.role, uci.pos)
   def apply(uci: Uci.Lift): Validated[String, (Game, Lift)]               = lift(uci.pos)
   def apply(uci: Uci.DiceRoll): Validated[String, (Game, DiceRoll)]       = diceRoll(uci.dice)
+  def apply(@nowarn uci: Uci.Undo): Validated[String, (Game, Undo)]       = undo()
   def apply(@nowarn uci: Uci.EndTurn): Validated[String, (Game, EndTurn)] = endTurn()
   def apply(uci: Uci): Validated[String, (Game, Action)]                  = (uci match {
     case u: Uci.Move     => apply(u)
     case u: Uci.Drop     => apply(u)
     case u: Uci.Lift     => apply(u)
     case u: Uci.DiceRoll => apply(u)
+    case u: Uci.Undo     => apply(u)
     case u: Uci.EndTurn  => apply(u)
     case u               => sys.error(s"Cannot apply uci $u")
   }) map { case (g, a) => g -> a }

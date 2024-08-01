@@ -28,6 +28,8 @@ case class Board(
 
   def useDie(die: Int): Board = copy(unusedDice = unusedDice.diff(List(die)))
 
+  def undoUseDie(die: Int): Board = copy(unusedDice = unusedDice :+ die)
+
   lazy val unusedDiceStr: String = if (unusedDice.isEmpty) "-" else unusedDice.mkString("/")
 
   lazy val usedDice: List[Int] = diceToActionDice(
