@@ -2,6 +2,7 @@ package strategygames.go.format
 
 import cats.implicits._
 
+import strategygames.Score
 import strategygames.Player
 import strategygames.go._
 import strategygames.go.variant.Variant
@@ -17,11 +18,14 @@ object Forsyth {
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
     val apiPosition = Api.positionFromVariantNameAndFEN(variant.key, fen.value)
+    val fenParts = fen.value.split(' ').toList
+    val p1Captures = fenParts.lift(5).flatMap(_.toIntOption).getOrElse(0)
+    val p2Captures = fenParts.lift(6).flatMap(_.toIntOption).getOrElse(1)
     Some(
       Situation(
         Board(
           pieces = apiPosition.pieceMap,
-          history = History(),
+          history = History().copy(captures=Score(p1Captures, p2Captures)),
           variant = variant,
           pocketData = apiPosition.pocketData,
           position = apiPosition.some
