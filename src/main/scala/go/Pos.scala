@@ -418,6 +418,8 @@ case class Pos private (index: Int) extends AnyVal {
   def piotr: Char = Piotr.lookup.get(index).getOrElse('?')
   def piotrStr    = piotr.toString
 
+  def sgf(numRanks: Int) = file.sgfChar.toString + rank.sgfChar(numRanks).toString
+
   def key               = file.toString + rank.toString
   override def toString = key
 }
@@ -427,12 +429,12 @@ object Pos {
     if (0 <= index && index < File.all.size * Rank.all.size) Some(new Pos(index))
     else None
 
-  def apply(file: File, rank: Rank): Pos = new Pos(file.index + (File.all.size - file.index) * rank.index)
+  def apply(file: File, rank: Rank): Pos = new Pos(File.all.size * rank.index + file.index)
 
   def at(x: Int, y: Int): Option[Pos] =
-    if (0 <= x && x < File.all.size && 0 <= y && y < Rank.all.size)
-      Some(new Pos(x + (File.all.size - x) * y))
-    else None
+    File(x) zip Rank(y) map { case (file, rank) =>
+      Pos(file, rank)
+    }
 
   def fromKey(key: String): Option[Pos] = allKeys get key
 
@@ -812,6 +814,7 @@ object Pos {
   val R19 = new Pos(359)
   val S19 = new Pos(360)
 
+  // if adding new Pos check for use of Pos.all
   val all: List[Pos] = (0 to (File.all.size * Rank.all.size) - 1).map(new Pos(_)).toList
 
   val allKeys: Map[String, Pos] = all

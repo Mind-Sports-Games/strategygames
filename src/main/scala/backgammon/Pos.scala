@@ -24,7 +24,13 @@ object Piotr {
     Pos.G2.index -> 'o',
     Pos.H2.index -> 'p',
     Pos.I1.index -> '[',
-    Pos.I2.index -> ']'
+    Pos.I2.index -> ']',
+    Pos.J1.index -> '\\',
+    Pos.J2.index -> '^',
+    Pos.K1.index -> '\u00A9',
+    Pos.K2.index -> '\u00B2',
+    Pos.L1.index -> '\u00AA',
+    Pos.L2.index -> '\u00B3'
   )
 }
 
@@ -70,20 +76,23 @@ case class Pos private (index: Int) extends AnyVal {
   @inline def file = File of this
   @inline def rank = Rank of this
 
-  // We're going to use the chess piotr's which are not based on the
-  // indices that we use.
+  // We're going to use the chess piotr's which are not based on the indices that we use.
   def piotr: Char = Piotr.lookup.get(index).getOrElse('?')
   def piotrStr    = piotr.toString
 
-  def player: Player = if (index < 9) Player.P1 else Player.P2
+  def sgf = (97 + (23 - index)).toChar.toString()
 
-  def last: Boolean = (index + 1) % 9 == 0
+  def last: Boolean = (index + 1) % File.all.size == 0
+
+  def liftDistance(player: Player): Int = (Pos.barIndex(!player) - index).abs
 
   def key               = file.toString + rank.toString
   override def toString = key
+
 }
 
 object Pos {
+
   def apply(index: Int): Option[Pos] =
     if (0 <= index && index < File.all.size * Rank.all.size) Some(new Pos(index))
     else None
@@ -95,7 +104,8 @@ object Pos {
       Some(new Pos(x + (File.all.size - x) * y))
     else None
 
-  def opposite(index: Int): Option[Pos] = apply(if (index < 9) index + 9 else index - 9)
+  def opposite(index: Int): Option[Pos] =
+    apply(if (index < File.all.size) index + File.all.size else index - File.all.size)
 
   def fromKey(key: String): Option[Pos] = allKeys get key
 
@@ -113,27 +123,34 @@ object Pos {
       b <- piotr(piotrs(1))
     } yield s"${a.key}${b.key}"
 
-  val A1 = new Pos(0)
-  val B1 = new Pos(1)
-  val C1 = new Pos(2)
-  val D1 = new Pos(3)
-  val E1 = new Pos(4)
-  val F1 = new Pos(5)
-  val G1 = new Pos(6)
-  val H1 = new Pos(7)
-  val I1 = new Pos(8)
+  // backwards for first rank
+  val A1 = new Pos(11)
+  val B1 = new Pos(10)
+  val C1 = new Pos(9)
+  val D1 = new Pos(8)
+  val E1 = new Pos(7)
+  val F1 = new Pos(6)
+  val G1 = new Pos(5)
+  val H1 = new Pos(4)
+  val I1 = new Pos(3)
+  val J1 = new Pos(2)
+  val K1 = new Pos(1)
+  val L1 = new Pos(0)
 
-  // backwards for 2nd rank
-  val I2 = new Pos(9)
-  val H2 = new Pos(10)
-  val G2 = new Pos(11)
-  val F2 = new Pos(12)
-  val E2 = new Pos(13)
-  val D2 = new Pos(14)
-  val C2 = new Pos(15)
-  val B2 = new Pos(16)
-  val A2 = new Pos(17)
+  val A2 = new Pos(12)
+  val B2 = new Pos(13)
+  val C2 = new Pos(14)
+  val D2 = new Pos(15)
+  val E2 = new Pos(16)
+  val F2 = new Pos(17)
+  val G2 = new Pos(18)
+  val H2 = new Pos(19)
+  val I2 = new Pos(20)
+  val J2 = new Pos(21)
+  val K2 = new Pos(22)
+  val L2 = new Pos(23)
 
+  // if adding new Pos check for use of Pos.all
   val all: List[Pos] = (0 to (File.all.size * Rank.all.size) - 1).map(new Pos(_)).toList
 
   val allKeys: Map[String, Pos] = all
@@ -148,7 +165,22 @@ object Pos {
     }
     .to(Map)
 
-  // val posR  = "([a-i][1-9]|[a-i]10)"
-  val posR = "([a-i][1-2])"
+  def barIndex(player: Player): Int = player.fold(L2, L1).index - indexDirection(player)
+
+  def indexDirection(player: Player): Int = player.fold(-1, 1)
+
+  def home(player: Player): List[Pos] = player.fold(
+    all.filter(_.index < 6),
+    all.filter(_.index > 17)
+  )
+
+  // 1 is opponents home, 4 is your home section.
+  def byQuarter(player: Player, quarter: Int) =
+    player.fold(
+      all.filter(p => p.index < 6 * (5 - quarter) && p.index >= (6 * (4 - quarter))),
+      all.filter(p => p.index >= 6 * (quarter - 1) && p.index < (6 * quarter))
+    )
+
+  val posR = "([a-l][1-2])"
 
 }

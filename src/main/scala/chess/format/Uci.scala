@@ -9,7 +9,7 @@ sealed trait Uci {
   def uci: String
   def piotr: String
 
-  def origDest: (Pos, Pos)
+  def origDest: Option[(Pos, Pos)]
 
   def apply(situation: Situation): Validated[String, Action]
 }
@@ -30,7 +30,7 @@ object Uci {
 
     def promotionString = promotion.fold("")(_.forsyth.toString)
 
-    def origDest = orig -> dest
+    def origDest = Some(orig -> dest)
 
     def apply(situation: Situation) = situation.move(orig, dest, promotion)
   }
@@ -65,7 +65,7 @@ object Uci {
 
     def piotr = s"${role.pgn}@${pos.piotrStr}"
 
-    def origDest = pos -> pos
+    def origDest = Some(pos -> pos)
 
     def apply(situation: Situation) = situation.drop(role, pos)
   }
@@ -79,35 +79,71 @@ object Uci {
       } yield Drop(role, pos)
   }
 
+  case class DiceRoll(dice: List[Int]) extends Uci {
+
+    def uci = dice.mkString("|")
+
+    def piotr = uci
+
+    def origDest = None
+
+    def apply(situation: Situation) = situation.diceRoll(dice)
+  }
+
+  object DiceRoll {
+
+    def fromStrings(dice: String) = DiceRoll(dice.split('|').flatMap(_.toIntOption).toList)
+
+  }
+
+  // this is a stub Uci case class that doesn't marry up to an Action type
+  // this stub class says i need to do a roll, i don't know the dice i have rolled
+  // its used by lila but not internally by strategygames
+  case class DoRoll() extends Uci {
+
+    def uci = "roll"
+
+    def piotr = uci
+
+    def origDest = None
+
+    def apply(situation: Situation) = sys.error("Cannot apply a DoRoll")
+
+  }
+
   case class WithSan(uci: Uci, san: String)
 
   def apply(move: strategygames.chess.Move) = Uci.Move(move.orig, move.dest, move.promotion)
 
   def apply(drop: strategygames.chess.Drop) = Uci.Drop(drop.piece.role, drop.pos)
 
-  def apply(move: String): Option[Uci] =
-    if (move lift 1 contains '@') for {
-      role <- move.headOption flatMap Role.allByPgn.get
-      pos  <- Pos.fromKey(move.slice(2, 4))
+  def apply(diceRoll: strategygames.chess.DiceRoll) = Uci.DiceRoll(diceRoll.dice)
+
+  def apply(action: String): Option[Uci] =
+    if (action lift 1 contains '@') for {
+      role <- action.headOption flatMap Role.allByPgn.get
+      pos  <- Pos.fromKey(action.slice(2, 4))
     } yield Uci.Drop(role, pos)
-    else Uci.Move(move)
+    else if (action.contains('|')) Some(Uci.DiceRoll.fromStrings(action))
+    else Uci.Move(action)
 
-  def piotr(move: String): Option[Uci] =
-    if (move lift 1 contains '@') for {
-      role <- move.headOption flatMap Role.allByPgn.get
-      pos  <- move lift 2 flatMap Pos.piotr
+  def piotr(action: String): Option[Uci] =
+    if (action lift 1 contains '@') for {
+      role <- action.headOption flatMap Role.allByPgn.get
+      pos  <- action lift 2 flatMap Pos.piotr
     } yield Uci.Drop(role, pos)
-    else Uci.Move.piotr(move)
+    else if (action.contains('|')) Some(Uci.DiceRoll.fromStrings(action))
+    else Uci.Move.piotr(action)
 
-  def readList(moves: String): Option[List[Uci]] =
-    moves.split(' ').toList.map(apply).sequence
+  def readList(actions: String): Option[List[Uci]] =
+    actions.split(' ').toList.map(apply).sequence
 
-  def writeList(moves: List[Uci]): String =
-    moves.map(_.uci) mkString " "
+  def writeList(actions: List[Uci]): String =
+    actions.map(_.uci) mkString " "
 
-  def readListPiotr(moves: String): Option[List[Uci]] =
-    moves.split(' ').toList.map(piotr).sequence
+  def readListPiotr(actions: String): Option[List[Uci]] =
+    actions.split(' ').toList.map(piotr).sequence
 
-  def writeListPiotr(moves: List[Uci]): String =
-    moves.map(_.piotr) mkString " "
+  def writeListPiotr(actions: List[Uci]): String =
+    actions.map(_.piotr) mkString " "
 }

@@ -1,10 +1,11 @@
 package strategygames.backgammon.format
 
+import scala.annotation.nowarn
 import cats.data.Validated
 
 import strategygames.backgammon.variant.Variant
-import strategygames.backgammon.{ Action, Move, Replay }
-import strategygames.{ ActionStrs, Player }
+import strategygames.backgammon.{ Action, Replay }
+import strategygames.ActionStrs
 
 object UciDump {
 
@@ -21,16 +22,10 @@ object UciDump {
     else
       Replay(
         actionStrs = actionStrs,
-        // we can default to this because in UciDump we are only looking to validate
-        // the current actionStrs, not work out future actionStrs
-        startPlayer = Player.P1,
-        activePlayer = Player.fromTurnCount(actionStrs.size),
         initialFen = initialFen,
         variant = variant
       ) andThen (_.valid) map apply
 
-  def action(variant: Variant)(a: Action): String = a match {
-    case m: Move => m.toUci.uci
-  }
+  def action(@nowarn variant: Variant)(a: Action): String = a.toUci.uci
 
 }

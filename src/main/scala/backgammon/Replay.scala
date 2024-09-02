@@ -4,34 +4,63 @@ import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
-import strategygames.Player
 import strategygames.format.pgn.San
 import strategygames.backgammon.format.pgn.{ Parser, Reader }
-import strategygames.format.pgn.{ Tag, Tags }
 import strategygames.backgammon.format.{ FEN, Forsyth, Uci }
-import strategygames.{ Action => StratAction, ActionStrs, Move => StratMove, Situation => StratSituation }
+import strategygames.{
+  Action => StratAction,
+  ActionStrs,
+  DiceRoll => StratDiceRoll,
+  Drop => StratDrop,
+  EndTurn => StratEndTurn,
+  Lift => StratLift,
+  Move => StratMove,
+  Situation => StratSituation
+}
 
-case class Replay(setup: Game, actions: List[Move], state: Game) {
+case class Replay(setup: Game, actions: List[Action], state: Game) {
 
   lazy val chronoPlies = actions.reverse
 
-  lazy val chronoActions: List[List[Move]] =
+  lazy val chronoActions: List[List[Action]] =
     chronoPlies
       .drop(1)
-      .foldLeft(List(chronoPlies.take(1))) { case (turn, move) =>
-        if (turn.head.head.player != move.player) {
-          List(move) +: turn
+      .foldLeft(List(chronoPlies.take(1))) { case (turn, action) =>
+        if (turn.head.head.player != action.player) {
+          List(action) +: turn
         } else {
-          (turn.head :+ move) +: turn.tail
+          (turn.head :+ action) +: turn.tail
         }
       }
       .reverse
 
-  def addAction(move: Move) =
-    copy(
-      actions = move.applyVariantEffect :: actions,
-      state = state.apply(move)
-    )
+  def addAction(action: Action) = action match {
+    case m: Move      =>
+      copy(
+        actions = m :: actions,
+        state = state.apply(m)
+      )
+    case d: Drop      =>
+      copy(
+        actions = d :: actions,
+        state = state.applyDrop(d)
+      )
+    case l: Lift      =>
+      copy(
+        actions = l :: actions,
+        state = state.applyLift(l)
+      )
+    case dr: DiceRoll =>
+      copy(
+        actions = dr :: actions,
+        state = state.applyDiceRoll(dr)
+      )
+    case et: EndTurn  =>
+      copy(
+        actions = et :: actions,
+        state = state.applyEndTurn(et)
+      )
+  }
 
 }
 
@@ -41,14 +70,12 @@ object Replay {
 
   def apply(
       actionStrs: ActionStrs,
-      startPlayer: Player,
-      activePlayer: Player,
       initialFen: Option[FEN],
       variant: strategygames.backgammon.variant.Variant
   ): Validated[String, Reader.Result] = {
     val fen                            = initialFen.getOrElse(variant.initialFen)
     val (init, gameWithActions, error) =
-      gameWithActionWhileValid(actionStrs, startPlayer, activePlayer, fen, variant)
+      gameWithActionWhileValid(actionStrs, fen, variant)
     val game                           =
       gameWithActions.reverse.lastOption.map(_._1).getOrElse(init)
 
@@ -65,85 +92,155 @@ object Replay {
 
   // TODO: because this is primarily used in a Validation context, we should be able to
   //       return something that's runtime safe as well.
-  def backgammonMove(action: StratAction) = action match {
-    case StratMove.Backgammon(m) => m
-    case _                         => sys.error("Invalid backgammon move")
+  private def backgammonAction(action: StratAction) = action match {
+    case StratMove.Backgammon(m)      => m
+    case StratDrop.Backgammon(d)      => d
+    case StratLift.Backgammon(l)      => l
+    case StratDiceRoll.Backgammon(dr) => dr
+    case StratEndTurn.Backgammon(et)  => et
+    case _                            => sys.error("Invalid backgammon action")
   }
 
-  def replayMove(
-      before: Game,
-      orig: Pos,
-      dest: Pos,
-      endTurn: Boolean
-  ): Move =
+  def replayMove(before: Game, orig: Pos, dest: Pos): Move =
     Move(
       piece = before.situation.board.pieces(orig)._1,
       orig = orig,
       dest = dest,
       situationBefore = before.situation,
-      after = before.situation.board.variant.boardAfter(before.situation, orig, dest),
-      autoEndTurn = endTurn,
-      capture = None,
-      promotion = None
+      after = before.situation.board.variant.boardAfter(
+        before.situation,
+        Some(orig),
+        Some(dest),
+        (orig.index - dest.index).abs
+      ),
+      capture = before.situation.board.piecesOf(!before.situation.player).get(dest).map(_ => dest)
     )
 
-  def actionStrsWithEndTurn(actionStrs: ActionStrs): Seq[(String, Boolean)] =
-    actionStrs.zipWithIndex.map { case (a, i) =>
-      a.zipWithIndex.map { case (a1, i1) => (a1, i1 == a.size - 1 && i != actionStrs.size - 1) }
-    }.flatten
-
-  private def combineActionStrsWithEndTurn(
-      actionStrs: ActionStrs,
-      startPlayer: Player,
-      activePlayer: Player
-  ): Seq[(String, Boolean)] =
-    actionStrsWithEndTurn(
-      if (Player.fromTurnCount(actionStrs.size + startPlayer.fold(0, 1)) == activePlayer)
-        actionStrs :+ Vector()
-      else actionStrs
+  def replayDrop(before: Game, role: Role, dest: Pos): Drop =
+    Drop(
+      piece = Piece(before.situation.player, role),
+      pos = dest,
+      situationBefore = before.situation,
+      after = before.situation.board.variant.boardAfter(
+        before.situation,
+        None,
+        Some(dest),
+        (Pos.barIndex(before.situation.player) - dest.index).abs
+      ),
+      capture = before.situation.board.piecesOf(!before.situation.player).get(dest).map(_ => dest)
     )
+
+  def replayLift(before: Game, orig: Pos): Lift =
+    Lift(
+      pos = orig,
+      situationBefore = before.situation,
+      after = before.situation.board.variant.boardAfter(
+        before.situation,
+        Some(orig),
+        None,
+        before.situation.board.unusedDice.filter(_ >= orig.liftDistance(before.situation.player)).min
+      )
+    )
+
+  def replayDiceRoll(before: Game, dice: List[Int]): DiceRoll = {
+    DiceRoll(
+      dice,
+      situationBefore = before.situation,
+      after = before.situation.board.setDice(dice)
+    )
+  }
+
+  def replayEndTurn(before: Game): EndTurn = {
+    EndTurn(
+      situationBefore = before.situation,
+      after = before.situation.board.setDice(List())
+    )
+  }
 
   private def gameWithActionWhileValid(
       actionStrs: ActionStrs,
-      startPlayer: Player,
-      activePlayer: Player,
       initialFen: FEN,
       variant: strategygames.backgammon.variant.Variant
-  ): (Game, List[(Game, Move)], Option[String]) = {
+  ): (Game, List[(Game, Action)], Option[String]) = {
     val init   = makeGame(variant, initialFen.some)
     var state  = init
     var errors = ""
 
-    def replayMoveFromUci(
-        orig: Option[Pos],
-        dest: Option[Pos],
-        promotion: String,
-        endTurn: Boolean
-    ): (Game, Move) =
+    def replayMoveFromUci(orig: Option[Pos], dest: Option[Pos]): (Game, Move) =
       (orig, dest) match {
         case (Some(orig), Some(dest)) => {
-          val move = replayMove(state, orig, dest, endTurn)
+          val move = replayMove(state, orig, dest)
           state = state(move)
           (state, move)
         }
         case (orig, dest)             => {
-          val uciMove = s"${orig}${dest}${promotion}"
+          val uciMove = s"${orig}${dest}"
           errors += uciMove + ","
           sys.error(s"Invalid move for replay: ${uciMove}")
         }
       }
 
-    val gameWithActions: List[(Game, Move)] =
-      combineActionStrsWithEndTurn(actionStrs, startPlayer, activePlayer).toList.map {
-        case (Uci.Move.moveR(orig, dest, promotion), endTurn) =>
+    def replayDropFromUci(role: Option[Role], dest: Option[Pos]): (Game, Drop) =
+      (role, dest) match {
+        case (Some(role), Some(dest)) => {
+          val drop = replayDrop(state, role, dest)
+          state = state.applyDrop(drop)
+          (state, drop)
+        }
+        case (role, dest)             => {
+          val uciDrop = s"${role}@${dest}"
+          errors += uciDrop + ","
+          sys.error(s"Invalid drop for replay: ${uciDrop}")
+        }
+      }
+
+    def replayLiftFromUci(orig: Option[Pos]): (Game, Lift) =
+      orig match {
+        case Some(orig) => {
+          val lift = replayLift(state, orig)
+          state = state.applyLift(lift)
+          (state, lift)
+        }
+        case orig       => {
+          val uciLift = s"^${orig}"
+          errors += uciLift + ","
+          sys.error(s"Invalid lift for replay: ${uciLift}")
+        }
+      }
+
+    def replayDiceRollFromUci(dice: List[Int]): (Game, DiceRoll) = {
+      val diceRoll = replayDiceRoll(state, dice)
+      state = state.applyDiceRoll(diceRoll)
+      (state, diceRoll)
+    }
+
+    def replayEndTurnFromUci(): (Game, Action) = {
+      val endTurn = replayEndTurn(state)
+      state = state.applyEndTurn(endTurn)
+      (state, endTurn)
+    }
+
+    val gameWithActions: List[(Game, Action)] =
+      // can flatten as specific EndTurn action marks turn end
+      actionStrs.flatten.toList.map {
+        case Uci.Move.moveR(orig, dest, _) =>
           replayMoveFromUci(
             Pos.fromKey(orig),
-            Pos.fromKey(dest),
-            promotion,
-            endTurn
+            Pos.fromKey(dest)
           )
-        case (action: String, _)                              =>
-          sys.error(s"Invalid move for replay: $action")
+        case Uci.Drop.dropR(role, dest, _) =>
+          replayDropFromUci(
+            Role.allByForsyth(init.situation.board.variant.gameFamily).get(role(0).toLower),
+            Pos.fromKey(dest)
+          )
+        case Uci.Lift.liftR(_, orig)       =>
+          replayLiftFromUci(Pos.fromKey(orig))
+        case Uci.DiceRoll.diceRollR(dr)    =>
+          replayDiceRollFromUci(Uci.DiceRoll.fromStrings(dr).dice)
+        case Uci.EndTurn.endTurnR()        =>
+          replayEndTurnFromUci()
+        case (action: String)              =>
+          sys.error(s"Invalid action for replay: $action")
       }
 
     (init, gameWithActions, errors match { case "" => None; case _ => errors.some })
@@ -151,15 +248,11 @@ object Replay {
 
   def gameWithUciWhileValid(
       actionStrs: ActionStrs,
-      startPlayer: Player,
-      activePlayer: Player,
       initialFen: FEN,
       variant: strategygames.backgammon.variant.Variant
   ): (Game, List[(Game, Uci.WithSan)], Option[String]) = {
     val (game, gameWithActions, error) = gameWithActionWhileValid(
       actionStrs,
-      startPlayer,
-      activePlayer,
       initialFen,
       variant
     )
@@ -179,7 +272,7 @@ object Replay {
     sans match {
       case Nil         => valid(Nil)
       case san :: rest =>
-        san(StratSituation.wrap(sit)).map(backgammonMove) flatMap { move =>
+        san(StratSituation.wrap(sit)).map(backgammonAction) flatMap { move =>
           val after = Situation(move.finalizeAfter, !sit.player)
           recursiveSituations(after, rest) map { after :: _ }
         }
@@ -252,8 +345,8 @@ object Replay {
       ucis: List[Uci]
   ): Validated[String, List[Game]] =
     ucis match {
-      case Nil                     => valid(List(game))
-      case (uci: Uci.Move) :: rest =>
+      case Nil         => valid(List(game))
+      case uci :: rest =>
         game.apply(uci) andThen { case (game, _) =>
           recursiveGamesFromUci(game, rest) map { game :: _ }
         }
@@ -287,7 +380,7 @@ object Replay {
     else {
 
       // we don't want to compare the full move number, to match transpositions
-      def truncateFen(fen: FEN) = fen.value.split(' ').take(4) mkString " "
+      def truncateFen(fen: FEN) = fen.value.split(' ').take(FEN.fullMoveIndex) mkString " "
       val atFenTruncated        = truncateFen(atFen)
       def compareFen(fen: FEN)  = truncateFen(fen) == atFenTruncated
 
@@ -295,7 +388,7 @@ object Replay {
         sans match {
           case Nil         => invalid(s"Can't find $atFenTruncated, reached ply $ply, turn $turn")
           case san :: rest =>
-            san(StratSituation.wrap(sit)).map(backgammonMove) flatMap { move =>
+            san(StratSituation.wrap(sit)).map(backgammonAction) flatMap { move =>
               val after        = move.situationAfter
               val newPlies     = ply + 1
               val newTurnCount = turn + (if (sit.player != after.player) 1 else 0)

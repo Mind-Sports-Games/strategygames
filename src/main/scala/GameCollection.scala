@@ -381,7 +381,7 @@ object GameFamily {
     def key               = "go"
     def gameLogic         = GameLogic.Go()
     def hasFishnet        = false
-    def hasAnalysisBoard  = false
+    def hasAnalysisBoard  = true
     def defaultVariant    = Variant.Go(strategygames.go.variant.Go19x19)
     def variants          = Variant.all(GameLogic.Go()).filter(_.gameFamily == this)
     def displayPiece      = "display"
@@ -407,19 +407,37 @@ object GameFamily {
     def defaultVariant    = Variant.Backgammon(strategygames.backgammon.variant.Backgammon)
     def variants          = Variant.all(GameLogic.Backgammon()).filter(_.gameFamily == this)
     def displayPiece      = "display"
-    def pieceSetThemes    =
-      List(
-        "black_gloss"
-      )
-    def pieceSetDefault   = "black_gloss"
-    def boardThemes       = List("blue", "wood")
-    def boardThemeDefault = "blue"
+    def pieceSetThemes    = List("wooden", "classic", "contemporary")
+    def pieceSetDefault   = "wooden"
+    def boardThemes       = List("classic", "contemporary")
+    def boardThemeDefault = "classic"
+    def playerNames       = Map(P1 -> "White", P2 -> "Black")
+    def playerColors      = Map(P1 -> "white", P2 -> "black")
+  }
+
+  final case class BreakthroughTroyka() extends GameFamily {
+    def id                = 11
+    def name              = "BreakthroughTroyka"
+    def key               = "breakthroughtroyka"
+    def gameLogic         = GameLogic.FairySF()
+    def hasFishnet        = true
+    def hasAnalysisBoard  = true
+    def defaultVariant    = Variant.FairySF(strategygames.fairysf.variant.BreakthroughTroyka)
+    def variants          = Variant.all(GameLogic.FairySF()).filter(_.gameFamily == this)
+    def displayPiece      = "bP"
+    def pieceSetThemes    = List("staunty", "checkers", "fabirovsky")
+    def pieceSetDefault   = "staunty"
+    def boardThemes       = List(
+      "purple-diag",
+      "maple"
+    )
+    def boardThemeDefault = "purple-diag"
     def playerNames       = Map(P1 -> "White", P2 -> "Black")
     def playerColors      = Map(P1 -> "white", P2 -> "black")
   }
 
   final case class Abalone() extends GameFamily {
-    def id                = 11
+    def id                = 12
     def name              = "Abalone"
     def key               = "abalone"
     def gameLogic         = GameLogic.Abalone()
@@ -428,7 +446,7 @@ object GameFamily {
     def defaultVariant    = Variant.Abalone(strategygames.abalone.variant.Abalone)
     def variants          = Variant.all(GameLogic.Abalone()).filter(_.gameFamily == this)
     def displayPiece      = "display"
-    def pieceSetThemes    = //TODO Abalone: Add themes
+    def pieceSetThemes    = // TODO Abalone: Add themes
       List(
       )
     def pieceSetDefault   = ""
@@ -450,6 +468,7 @@ object GameFamily {
     Togyzkumalak(),
     Go(),
     Backgammon(),
+    BreakthroughTroyka(),
     Abalone()
   )
 
@@ -465,7 +484,8 @@ object GameFamily {
     case 8  => Amazons()
     case 9  => Go()
     case 10 => Backgammon()
-    case 11 => Abalone()
+    case 11 => BreakthroughTroyka()
+    case 12 => Abalone()
     case _  => Chess()
   }
 
@@ -575,8 +595,16 @@ object GameGroup {
     def medley   = true
   }
 
-  final case class Abalone() extends GameGroup {
+  final case class BreakthroughTroyka() extends GameGroup {
     def id       = 11
+    def name     = "BreakthroughTroyka"
+    def key      = "breakthroughtroyka"
+    def variants = Variant.all(GameLogic.FairySF()).filter(_.gameFamily.name == this.name)
+    def medley   = true
+  }
+
+  final case class Abalone() extends GameGroup {
+    def id       = 12
     def name     = "Abalone"
     def key      = "abalone"
     def variants = Variant.all(GameLogic.Abalone()).filter(_.gameFamily.name == this.name)
@@ -596,6 +624,7 @@ object GameGroup {
       Amazons(),
       Go(),
       Backgammon(),
+      BreakthroughTroyka(),
       Abalone()
     )
 
@@ -613,7 +642,8 @@ object GameGroup {
     case 8  => Amazons()
     case 9  => Go()
     case 10 => Backgammon()
-    case 11 => Abalone()
+    case 11 => BreakthroughTroyka()
+    case 12 => Abalone()
     case _  => Chess()
   }
 }

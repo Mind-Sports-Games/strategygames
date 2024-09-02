@@ -158,6 +158,8 @@ case class Pos private (index: Int) extends AnyVal {
   def piotr: Char = Piotr.lookup.get(index).getOrElse('?')
   def piotrStr    = piotr.toString
 
+  def sgf(numRanks: Int) = file.sgfChar.toString + rank.sgfChar(numRanks).toString
+
   def key               = file.toString + rank.toString
   override def toString = key
 }
@@ -302,6 +304,7 @@ object Pos {
 
   // current pos limit in db is 128, if adding more perhaps use a different method (map of index to file, rank)
 
+  // if adding new Pos check for use of Pos.all
   val all: List[Pos] = (0 to (File.all.size * Rank.all.size) - 1).map(new Pos(_)).toList
 
   val allKeys: Map[String, Pos] = all

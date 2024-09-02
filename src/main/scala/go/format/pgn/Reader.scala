@@ -1,12 +1,6 @@
 package strategygames.go
 package format.pgn
-import strategygames.{
-  Action => StratAction,
-  ActionStrs,
-  ByoyomiClock,
-  FischerClock,
-  Situation => StratSituation
-}
+import strategygames.{ Action => StratAction, ActionStrs, ByoyomiClock, Clock, Situation => StratSituation }
 
 import strategygames.format.pgn.{ ParsedPgn, Sans, Tags }
 
@@ -74,9 +68,7 @@ object Reader {
                       replay.state,
                       role,
                       dest,
-                      endTurn,
-                      replay.state.board.apiPosition.makeMoves(List(actionStr)),
-                      replay.state.board.uciMoves :+ actionStr
+                      endTurn
                     )
                   )
                 )
@@ -119,7 +111,7 @@ object Reader {
       startedAtPly = g.plies,
       startedAtTurn = g.turnCount,
       clock = tags.clockConfig.flatMap {
-        case fc: FischerClock.Config => Some(FischerClock.apply(fc))
+        case fc: Clock.Config        => Some(Clock.apply(fc))
         case bc: ByoyomiClock.Config => Some(ByoyomiClock.apply(bc))
         case _                       => None
       }

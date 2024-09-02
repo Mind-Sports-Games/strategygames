@@ -1,7 +1,7 @@
 package strategygames.abalone
 package format.pgn
 
-import strategygames.{ ActionStrs, GameFamily }
+import strategygames.ActionStrs
 import strategygames.abalone.format.Uci
 
 import scala.util.Try
@@ -12,11 +12,10 @@ import scala.util.Try
 object Binary {
 
   // writeMove only used in tests for chess/draughts
-  // would need to reconsider how we do this when we write gameFamily at the start of the game
-  // def writeMove(gf: GameFamily, m: String)             = Try(Writer.ply(gf, m))
-  def writeMoves(gf: GameFamily, ms: Iterable[String]) = Try(Writer.plies(gf, ms))
+  // def writeMove(m: String)             = Try(Writer.ply(gf, m))
+  def writeMoves(ms: Iterable[String]) = Try(Writer.plies(ms))
 
-  def writeActionStrs(gf: GameFamily, ms: ActionStrs) = Try(Writer.actionStrs(gf, ms))
+  def writeActionStrs(ms: ActionStrs) = Try(Writer.actionStrs(ms))
 
   def readActionStrs(bs: List[Byte])          = Try(Reader actionStrs bs)
   def readActionStrs(bs: List[Byte], nb: Int) = Try(Reader.actionStrs(bs, nb))
@@ -34,22 +33,20 @@ object Binary {
     private val maxPlies = 600
 
     def actionStrs(bs: List[Byte]): ActionStrs          = actionStrs(bs, maxPlies)
-    def actionStrs(bs: List[Byte], nb: Int): ActionStrs = toActionStrs(intPlies(bs map toInt, nb, None))
+    def actionStrs(bs: List[Byte], nb: Int): ActionStrs = toActionStrs(intPlies(bs map toInt, nb))
 
     def toActionStrs(plies: List[String]): ActionStrs = plies.map(List(_))
 
-    def intPlies(bs: List[Int], pliesToGo: Int, gf: Option[GameFamily]): List[String] =
-      (bs, gf) match {
-        case (_, _) if pliesToGo <= 0                                       => Nil
-        case (Nil, _)                                                       => Nil
-        case (b1 :: rest, None)                                             => intPlies(rest, pliesToGo, Some(GameFamily(b1)))
-        case (b1 :: b2 :: rest, Some(gf)) if headerBit(b1) == MoveType.Move =>
-          moveUci(b1, b2) :: intPlies(rest, pliesToGo - 1, Some(gf))
-        case (x, _)                                                         => !!(x map showByte mkString ",")
+    def intPlies(bs: List[Int], pliesToGo: Int): List[String] =
+      bs match {
+        case _ if pliesToGo <= 0                                  => Nil
+        case Nil                                                  => Nil
+        case (b1 :: b2 :: rest) if headerBit(b1) == MoveType.Move =>
+          moveUci(b1, b2) :: intPlies(rest, pliesToGo - 1)
+        case x                                                    => !!(x map showByte mkString ",")
       }
 
-    // This is hugely inefficient for Abalone
-    // Its what we put in place when we thought the GameLogic might include more than just Abalone
+    // TODO: This is hugely inefficient for Abalone - speak to Matt about how to improve this
     // 1 movetype (move or drop)
     // 7 pos (from)
     // ----
@@ -66,10 +63,6 @@ object Binary {
       case _ => ""
     }
 
-    // not needed for abalone as no drops
-    // def pieceFromInt(gf: GameFamily, b: Int): String =
-    //  Role.allByBinaryInt(gf).get(right(b, 7)).get.forsyth.toString
-
     private def headerBit(i: Int) = i >> 7
 
     private def right(i: Int, x: Int): Int = i & lengthMasks(x)
@@ -80,17 +73,17 @@ object Binary {
 
   private object Writer {
 
-    def ply(gf: GameFamily, str: String): List[Byte] =
+    def ply(str: String): List[Byte] =
       (str match {
         case Uci.Move.moveR(src, dst, promotion) => moveUci(src, dst, promotion)
         case _                                   => sys.error(s"Invalid move to write: ${str}")
       }) map (_.toByte)
 
-    def plies(gf: GameFamily, strs: Iterable[String]): Array[Byte] =
-      (gf.id.toByte :: strs.toList.flatMap(ply(gf, _))).to(Array)
+    def plies(strs: Iterable[String]): Array[Byte] =
+      strs.toList.flatMap(ply).to(Array)
 
     // can flatten because this GameLogic doesn't support multimove
-    def actionStrs(gf: GameFamily, strs: ActionStrs): Array[Byte] = plies(gf, strs.flatten)
+    def actionStrs(strs: ActionStrs): Array[Byte] = plies(strs.flatten)
 
     def moveUci(src: String, dst: String, promotion: String) = List(
       (headerBit(MoveType.Move)) + Pos.fromKey(src).get.index,

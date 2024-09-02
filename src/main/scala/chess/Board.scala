@@ -49,10 +49,16 @@ case class Board(
 
   private def checkOf(c: Player): Boolean =
     kingPosOf(c) exists { kingPos =>
-      variant.kingThreatened(this, !c, kingPos)
+      variant.kingThreatened(
+        board = this,
+        player = !c,
+        to = kingPos,
+        validatingCheck = true
+      )
     }
 
-  def destsFrom(from: Pos): Option[List[Pos]] = actorAt(from) map (_.destinations)
+  def destsFrom(from: Pos): Option[List[Pos]] =
+    actorAt(from) map (_.destinations)
 
   def seq(actions: Board => Option[Board]*): Option[Board] =
     actions.foldLeft(Option(this): Option[Board])(_ flatMap _)
@@ -129,9 +135,12 @@ case class Board(
         def rookReady(player: Player, kPos: Option[Pos], left: Boolean) =
           kPos.fold(false) { kp =>
             actorsOf(player) exists { a =>
-              a.piece.is(Rook) && a.pos ?- kp && (left ^ (a.pos ?> kp)) && history.unmovedRooks.pos(
-                a.pos
-              )
+              a.piece.is(
+                Rook
+              ) && a.pos ?- kp && (left ^ (a.pos ?> kp)) && history.unmovedRooks
+                .pos(
+                  a.pos
+                )
             }
           }
         Castles(
@@ -149,7 +158,9 @@ case class Board(
   def count(c: Player): Int = pieces.values count (_.player == c)
 
   def autoDraw: Boolean =
-    variant.fiftyMoves(history) || variant.isInsufficientMaterial(this) || history.fivefoldRepetition
+    variant.fiftyMoves(history) || variant.isInsufficientMaterial(
+      this
+    ) || history.fivefoldRepetition
 
   def situationOf(player: Player) = Situation(this, player)
 
@@ -159,16 +170,23 @@ case class Board(
 
   def materialImbalance: Int = variant.materialImbalance(this)
 
-  //used for multiaction variants like Monster Chess.
-  //Won't always produce a result for Atomic - but this isnt needed for that variant
-  def lastActionPlayer: Option[Player] = history.lastMove.map{
-    case m: Uci.Move => m.dest
-    case d: Uci.Drop => d.pos
-  }.flatMap(apply).map(_.player)
+  // used for multiaction variants like Monster Chess.
+  // Won't always produce a result for Atomic - but this isnt needed for that variant
+  def lastActionPlayer: Option[Player] = history.lastAction
+    .flatMap {
+      case m: Uci.Move => Some(m.dest)
+      case d: Uci.Drop => Some(d.pos)
+      // TODO: this probably needs to be fixed?
+      case _           => sys.error("Dice Rolls are not supported (lastActionPlayer)")
+    }
+    .flatMap(apply)
+    .map(_.player)
 
-  def fileOccupation(file: File): Map[Pos, Piece] = pieces.filter(_._1.file == file)
+  def fileOccupation(file: File): Map[Pos, Piece] =
+    pieces.filter(_._1.file == file)
 
-  def rankOccupation(rank: Rank): Map[Pos, Piece] = pieces.filter(_._1.rank == rank)
+  def rankOccupation(rank: Rank): Map[Pos, Piece] =
+    pieces.filter(_._1.rank == rank)
 
   private def diagOccupation(
       p: Pos,
@@ -178,7 +196,11 @@ case class Board(
     dir(p) match {
       case Some(diagPos) =>
         if (pieces.contains(diagPos))
-          diagOccupation(diagPos, dir, diagPieces ++ Map(diagPos -> pieces(diagPos)))
+          diagOccupation(
+            diagPos,
+            dir,
+            diagPieces ++ Map(diagPos -> pieces(diagPos))
+          )
         else
           diagOccupation(diagPos, dir, diagPieces)
       case None          => return diagPieces
@@ -186,28 +208,49 @@ case class Board(
 
   def diagAscOccupation(pos: Pos): Map[Pos, Piece] =
     if (pieces.contains(pos))
-      Map[Pos, Piece](pos -> pieces(pos)) ++ diagOccupation(pos, _.upRight) ++ diagOccupation(pos, _.downLeft)
+      Map[Pos, Piece](pos -> pieces(pos)) ++ diagOccupation(
+        pos,
+        _.upRight
+      ) ++ diagOccupation(pos, _.downLeft)
     else
       diagOccupation(pos, _.upRight) ++ diagOccupation(pos, _.downLeft)
 
   def diagDescOccupation(pos: Pos): Map[Pos, Piece] =
     if (pieces.contains(pos))
-      Map[Pos, Piece](pos -> pieces(pos)) ++ diagOccupation(pos, _.upLeft) ++ diagOccupation(pos, _.downRight)
+      Map[Pos, Piece](pos -> pieces(pos)) ++ diagOccupation(
+        pos,
+        _.upLeft
+      ) ++ diagOccupation(pos, _.downRight)
     else
       diagOccupation(pos, _.upLeft) ++ diagOccupation(pos, _.downRight)
 
-  override def toString = s"$variant Position after ${history.lastMove}\n$visual"
+  override def toString =
+    s"$variant Position after ${history.recentTurnUciString}\n$visual"
 }
 
 object Board {
 
   def apply(pieces: Iterable[(Pos, Piece)], variant: Variant): Board =
-    Board(pieces.toMap, if (variant.allowsCastling) Castles.all else Castles.none, variant)
+    Board(
+      pieces.toMap,
+      if (variant.allowsCastling) Castles.all else Castles.none,
+      variant
+    )
 
-  def apply(pieces: Iterable[(Pos, Piece)], castles: Castles, variant: Variant): Board =
-    Board(pieces.toMap, History(castles = castles), variant, variantCrazyData(variant))
+  def apply(
+      pieces: Iterable[(Pos, Piece)],
+      castles: Castles,
+      variant: Variant
+  ): Board =
+    Board(
+      pieces.toMap,
+      History(castles = castles),
+      variant,
+      variantCrazyData(variant)
+    )
 
-  def init(variant: Variant): Board = Board(variant.pieces, variant.castles, variant)
+  def init(variant: Variant): Board =
+    Board(variant.pieces, variant.castles, variant)
 
   def empty(variant: Variant): Board = Board(Nil, variant)
 

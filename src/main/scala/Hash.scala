@@ -121,6 +121,7 @@ object Hash {
         backgammon.Hash.get(situation, table)
       case (GameLogic.Abalone(), Situation.Abalone(situation), AbaloneZobristConstants(table)) =>
         abalone.Hash.get(situation, table)
+      case _                                                                                            => sys.error("Invalid lib, situation and table combination")
     }
 
   private val h = new Hash(size)

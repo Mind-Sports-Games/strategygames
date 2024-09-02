@@ -35,6 +35,7 @@ object Api {
 
     // todo rename moves to actions to be consistent
     def makeMoves(movesList: List[String]): Position
+    private[go] def makeMovesNoLegalCheck(movesList: List[String]): Position
     def makeMovesWithPrevious(
         movesList: List[String],
         previousMoves: List[String]
@@ -98,7 +99,7 @@ object Api {
         movesList: List[String],
         posWithPrevious: Position
     ): Position = {
-      val pos = posWithPrevious.makeMoves(movesList)
+      val pos = posWithPrevious.makeMovesNoLegalCheck(movesList)
       pos.setKomi(komi)
       return pos
     }
@@ -130,7 +131,10 @@ object Api {
       return pos
     }
 
-    def makeMoves(movesList: List[String]): Position = {
+    def makeMovesNoLegalCheck(movesList: List[String]): Position = makeMovesImpl(movesList, false)
+    def makeMoves(movesList: List[String]): Position             = makeMovesImpl(movesList, true)
+
+    def makeMovesImpl(movesList: List[String], checkLegal: Boolean = true): Position = {
       movesList.map { move =>
         {
           val engineMove: Int   = uciToMove(move, variant)
@@ -147,14 +151,15 @@ object Api {
             position.makeMove(engineMove)
             position.makeMove(engineMove)
           } else {
-            // TODO: generating the legalMoves again and checking here is slow, we should
-            //       only ever be using this when we have to.
-            if (position.legalMoves.contains(engineMove))
+            if (!checkLegal) {
               position.makeMove(engineMove)
-            else
+            } else if (position.legalMoves.contains(engineMove)) {
+              position.makeMove(engineMove)
+            } else {
               sys.error(
                 s"Illegal move2: ${engineMove} from list: ${movesList} legalMoves: ${position.legalMoves.map(_.toString()).mkString(", ")}"
               )
+            }
           }
         }
       }
@@ -192,52 +197,22 @@ object Api {
 
     lazy val fen: FEN = FEN(fenString)
 
-    private def convertPieceMapFromFen(fenString: String): PieceMap = {
-      val boardWidth            = variant.boardSize.width
-      val boardFen              = fenString.split(' ').take(1).mkString("")
-      val boardFenWithoutPocket = boardFen.split('[').take(1).mkString("")
-      var pieces                = Map.empty[Pos, Piece]
-      boardFenWithoutPocket
-        .split('/')
-        .zipWithIndex
-        .map {
-          case (row, rowIndex) => {
-            var colIndex    = 0
-            var isLastChar1 = false
-            row.map(c => {
-              c match {
-                case 'X' | 'S'      =>
-                  moveToPos((boardWidth - rowIndex - 1) * boardWidth + colIndex, variant).map { pos =>
-                    {
-                      pieces += (pos -> Piece(P1, Stone))
-                      colIndex += 1
-                    }
-                  }
-                case 'O' | 's'      =>
-                  moveToPos((boardWidth - rowIndex - 1) * boardWidth + colIndex, variant).map { pos =>
-                    {
-                      pieces += (pos -> Piece(P2, Stone))
-                      colIndex += 1
-                    }
-                  }
-                case n if n.isDigit => {
-                  colIndex += n.asDigit
-                  if (isLastChar1) colIndex += 9
-                }
-                case _              => sys.error(s"unrecognaised character in Go fen, ${c}")
-              }
-              isLastChar1 = c == '1'
-            })
+    lazy val pieceMap: PieceMap = {
+      val goBoard   = position.toBoard()
+      val occupants = goBoard.toOccupants(goBoard.position())
+      var pieces    = Map.empty[Pos, Piece]
+      (0 to occupants.size - 1).foreach(rank => {
+        (0 to occupants(rank).size - 1).foreach(file => {
+          val piece = occupants(rank)(file)
+          if (piece == 0) {
+            pieces = pieces + (Pos.at(file, rank).get -> Piece(P1, Stone))
+          } else if (piece == 1) {
+            pieces = pieces + (Pos.at(file, rank).get -> Piece(P2, Stone))
           }
-        }
-
+        })
+      })
       pieces
     }
-
-    // TODO: because generating the score is really slow and
-    //       we're immediately stripping that out in the converPieceMapFromFen
-    //       function, let's avoid it and use the goDiagram directly (pls test)
-    lazy val pieceMap: PieceMap = convertPieceMapFromFen(goDiagram)
 
     lazy val pocketData =
       Some(
@@ -245,9 +220,7 @@ object Api {
           Pockets(
             Pocket(List(strategygames.Role.GoRole(Stone), strategygames.Role.GoRole(Stone))),
             Pocket(List(strategygames.Role.GoRole(Stone), strategygames.Role.GoRole(Stone)))
-          ),
-          // Can make an empty Set of Pos because we dont have to track promoted pieces
-          Set[Pos]()
+          )
         )
       )
 
@@ -291,12 +264,12 @@ object Api {
   def position(variant: Variant, komi: Double = 7.5): Position = {
     val g = new GoGame(variant.boardSize.height)
     g.setKomiScore(komi)
-    new GoPosition(g)
+    new GoPosition(position = g, komi = komi)
   }
 
   def positionFromVariant(variant: Variant): Position =
     variant.key match {
-      case "go9x9" | "go13x13" | "go19x19" => position(variant)
+      case "go9x9" | "go13x13" | "go19x19" => position(variant, variant.komi)
       case _                               => sys.error(s"incorrect variant supplied ${variant}")
     }
 

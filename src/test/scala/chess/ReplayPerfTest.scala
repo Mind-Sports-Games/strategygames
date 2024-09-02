@@ -18,16 +18,16 @@ class ReplayPerfTest extends ChessTest {
       format.Forsyth.initial,
       strategygames.chess.variant.Standard
     )
-  def run: Unit                   = { gameMoves foreach runOne }
+  def run(): Unit                 = { gameMoves foreach runOne }
 
   "playing a game" should {
     "many times" in {
       runOne(gameMoves.head)._3 must beEmpty
-      run
+      run()
       println("running tests")
-      val durations  = for (i <- 1 to iterations) yield {
+      val durations  = for (_ <- 1 to iterations) yield {
         val start    = System.currentTimeMillis
-        run
+        run()
         val duration = System.currentTimeMillis - start
         println(s"$nb games in $duration ms")
         duration

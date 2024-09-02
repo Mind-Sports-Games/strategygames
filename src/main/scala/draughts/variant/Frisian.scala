@@ -109,7 +109,6 @@ case object Frisian
             val promotedLastMan = uci.promotion.nonEmpty
             if (tookLastMan)
               board updateHistory { h =>
-                val hist = if (promotedLastMan) h.withKingMove(act.player, none, false) else h
                 h.withKingMove(!act.player, none, false)
               }
             else if (promotedLastMan)
@@ -143,12 +142,12 @@ case object Frisian
   ): PositionHash = {
     val newHash = Hash(Situation(board, !move.piece.player))
     maxDrawingMoves(board) match {
-      case Some(drawingMoves) =>
+      case Some(_) =>
         if (move.captures || move.promotes)
           newHash         // 7 move rule resets only when another piece disappears, activating the "2-move rule"
         else
           newHash ++ hash // 2 move rule never resets once activated
-      case _                  => newHash
+      case _       => newHash
     }
   }
 

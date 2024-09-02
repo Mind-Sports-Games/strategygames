@@ -1,13 +1,9 @@
 package strategygames
 
-import cats.syntax.option.none
-
 import strategygames.format.Uci
 
 abstract class Action(
-    situationBefore: Situation,
-    after: Board,
-    metrics: MoveMetrics = MoveMetrics()
+    situationBefore: Situation
 ) {
   def situationAfter: Situation
   // def finalizeAfter: Board //this can be added once draughts has been refactored (removing the input finalSquare)
@@ -56,7 +52,11 @@ object Action {
   }
 
   def wrap(action: backgammon.Action): Action = action match {
-    case m: backgammon.Move => Move.Backgammon(m)
+    case m: backgammon.Move      => Move.Backgammon(m)
+    case d: backgammon.Drop      => Drop.Backgammon(d)
+    case l: backgammon.Lift      => Lift.Backgammon(l)
+    case dr: backgammon.DiceRoll => DiceRoll.Backgammon(dr)
+    case et: backgammon.EndTurn  => EndTurn.Backgammon(et)
   }
 
   def wrap(action: abalone.Action): Action = action match {
@@ -97,9 +97,13 @@ object Action {
     case _                    => sys.error("Expecting a go action e.g. drop or pass or SelectSquares")
   }
 
-  def toBackgammon(action: Action): backgammon.Move = action match {
-    case Move.Backgammon(m) => m
-    case _                  => sys.error("Expecting a backgammon action e.g. move")
+  def toBackgammon(action: Action): backgammon.Action = action match {
+    case Move.Backgammon(m)      => m
+    case Drop.Backgammon(d)      => d
+    case Lift.Backgammon(l)      => l
+    case DiceRoll.Backgammon(dr) => dr
+    case EndTurn.Backgammon(et)  => et
+    case _                       => sys.error("Expecting a backgammon action e.g. move, drop, lift, diceroll or endTurn")
   }
 
   def toAbalone(action: Action): abalone.Move = action match {

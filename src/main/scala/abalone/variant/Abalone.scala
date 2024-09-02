@@ -15,8 +15,7 @@ case object Abalone
 
   def gameFamily: GameFamily = GameFamily.Abalone()
 
-  // TODO Abalone get a new icon for Abalone into the font (requires help from Matt/James)
-  def perfIcon: Char = '›'
+  def perfIcon: Char = ''
   def perfId: Int    = 700
 
   override def baseVariant: Boolean = true

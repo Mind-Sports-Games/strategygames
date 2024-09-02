@@ -4,14 +4,15 @@ import strategygames.Player
 
 /** r bqkb r p ppp pp pr P p QnB PP N P PPP RN K R
   */
+//Never been tested for Backgammon
 object Visual {
 
   def <<(source: String): Board = {
     val lines    = augmentString(source).linesIterator.to(List)
     val filtered = lines.size match {
-      case 8          => lines
-      case n if n > 8 => lines.slice(1, 9)
-      case n          => (List.fill(8 - n)("")) ::: lines
+      case n if n == Rank.all.size => lines
+      case n if n > Rank.all.size  => lines.slice(1, File.all.size + 1)
+      case n                       => (List.fill(File.all.size - n)("")) ::: lines
     }
     Board(
       pieces = (for {
@@ -21,8 +22,8 @@ object Visual {
         // but then the whole file will need changing! only used for tests
         // role   <- Role forsyth c.toLower
       } yield {
-        Pos.at(x, 7 - y) map { pos =>
-          pos -> ((Piece(Player.fromP1(c isUpper), Stone)), c.toInt)
+        Pos.at(x, Rank.all.size - 1 - y) map { pos =>
+          (pos, ((Piece(Player.fromP1(c isUpper), Stone)), c.toInt))
         }
       }) flatten,
       variant = strategygames.backgammon.variant.Variant.default

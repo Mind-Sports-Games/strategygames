@@ -16,7 +16,8 @@ case object Shogi
 
   def gameFamily: GameFamily = GameFamily.Shogi()
 
-  override def dropsVariant = true
+  override def dropsVariant      = true
+  override def hasDetachedPocket = true
 
   def perfIcon: Char = ''
   def perfId: Int    = 200
@@ -28,7 +29,7 @@ case object Shogi
 
   // cache this rather than checking with the API everytime
   override def initialFen =
-    format.FEN("lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL[-] w 0 1")
+    format.FEN("lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL[] w - - 0 1")
 
   // manually calculated where might put king in mate
   // this was done for optimisation but could go back to just checking the api lots?

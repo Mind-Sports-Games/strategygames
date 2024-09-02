@@ -2,9 +2,11 @@ package strategygames.backgammon
 
 import strategygames.Division
 
+import scala.annotation.nowarn
+
 object Divider {
 
   // TODO set this
-  def apply(boards: List[Board]): Division = Division.empty
+  def apply(@nowarn boards: List[Board]): Division = Division.empty
 
 }

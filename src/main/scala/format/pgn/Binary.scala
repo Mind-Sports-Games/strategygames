@@ -11,8 +11,8 @@ object Binary {
     case GameLogic.Samurai()      => strategygames.samurai.format.pgn.Binary.writeMoves(gf, ms)
     case GameLogic.Togyzkumalak() => strategygames.togyzkumalak.format.pgn.Binary.writeMoves(gf, ms)
     case GameLogic.Go()           => strategygames.go.format.pgn.Binary.writeMoves(ms)
-    case GameLogic.Backgammon()   => strategygames.backgammon.format.pgn.Binary.writeMoves(gf, ms)
-    case GameLogic.Abalone()   => strategygames.abalone.format.pgn.Binary.writeMoves(gf, ms)
+    case GameLogic.Backgammon()   => strategygames.backgammon.format.pgn.Binary.writeMoves(ms)
+    case GameLogic.Abalone()      => strategygames.abalone.format.pgn.Binary.writeMoves(ms)
   }
 
   def writeActionStrs(gf: GameFamily, ms: ActionStrs) = gf.gameLogic match {
@@ -22,8 +22,8 @@ object Binary {
     case GameLogic.Samurai()      => strategygames.samurai.format.pgn.Binary.writeActionStrs(gf, ms)
     case GameLogic.Togyzkumalak() => strategygames.togyzkumalak.format.pgn.Binary.writeActionStrs(gf, ms)
     case GameLogic.Go()           => strategygames.go.format.pgn.Binary.writeActionStrs(ms)
-    case GameLogic.Backgammon()   => strategygames.backgammon.format.pgn.Binary.writeActionStrs(gf, ms)
-    case GameLogic.Abalone()   => strategygames.abalone.format.pgn.Binary.writeActionStrs(gf, ms)
+    case GameLogic.Backgammon()   => strategygames.backgammon.format.pgn.Binary.writeActionStrs(ms)
+    case GameLogic.Abalone()      => strategygames.abalone.format.pgn.Binary.writeActionStrs(ms)
   }
 
   def readActionStrs(gl: GameLogic, bs: List[Byte]) = gl match {
@@ -34,7 +34,7 @@ object Binary {
     case GameLogic.Togyzkumalak() => strategygames.togyzkumalak.format.pgn.Binary.readActionStrs(bs)
     case GameLogic.Go()           => strategygames.go.format.pgn.Binary.readActionStrs(bs)
     case GameLogic.Backgammon()   => strategygames.backgammon.format.pgn.Binary.readActionStrs(bs)
-    case GameLogic.Abalone()   => strategygames.abalone.format.pgn.Binary.readActionStrs(bs)
+    case GameLogic.Abalone()      => strategygames.abalone.format.pgn.Binary.readActionStrs(bs)
   }
 
   def readActionStrs(gl: GameLogic, bs: List[Byte], nb: Int) = gl match {
@@ -45,7 +45,7 @@ object Binary {
     case GameLogic.Togyzkumalak() => strategygames.togyzkumalak.format.pgn.Binary.readActionStrs(bs, nb)
     case GameLogic.Go()           => strategygames.go.format.pgn.Binary.readActionStrs(bs, nb)
     case GameLogic.Backgammon()   => strategygames.backgammon.format.pgn.Binary.readActionStrs(bs, nb)
-    case GameLogic.Abalone()   => strategygames.abalone.format.pgn.Binary.readActionStrs(bs, nb)
+    case GameLogic.Abalone()      => strategygames.abalone.format.pgn.Binary.readActionStrs(bs, nb)
   }
 
 }

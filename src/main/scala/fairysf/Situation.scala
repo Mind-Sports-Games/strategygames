@@ -19,7 +19,9 @@ case class Situation(board: Board, player: Player) {
 
   def dropsAsDrops: List[Drop] = board.variant.validDrops(this)
 
-  // lazy val kingPos: Option[Pos] = board kingPosOf player
+  def canDrop: Boolean = dropsAsDrops.nonEmpty
+
+  def canOnlyDrop: Boolean = canDrop && moves.isEmpty
 
   lazy val check: Boolean = board.apiPosition.givesCheck
 

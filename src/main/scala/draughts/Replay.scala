@@ -1,17 +1,14 @@
 package strategygames.draughts
 
+import scala.annotation.nowarn
+// TODO: I think the scala compiler is wrong about the finalSquare variables being unused.
+//       but I can't quite work it out, so I left them and used nowarn
+
 import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
-import strategygames.{
-  Action => StratAction,
-  ActionStrs,
-  Game => StratGame,
-  Move => StratMove,
-  Player,
-  Situation => StratSituation
-}
+import strategygames.{ Action => StratAction, ActionStrs, Move => StratMove, Situation => StratSituation }
 import strategygames.format.pgn.{ San, Tag, Tags }
 import format.pdn.{ Parser, Reader, Std }
 import format.{ FEN, Forsyth, Uci }
@@ -65,7 +62,7 @@ object Replay {
 
   // TODO: because this is primarily used in a Validation context, we should be able to
   //       return something that's runtime safe as well.
-  def draughtsMove(action: StratAction) = action match {
+  private def draughtsMove(action: StratAction) = action match {
     case StratMove.Draughts(m) => m
     case _                     => sys.error("Invalid draughts move")
   }
@@ -210,7 +207,7 @@ object Replay {
       uciMoves: Seq[String],
       initialFen: FEN,
       variant: Variant,
-      debugId: String,
+      @nowarn debugId: String,
       iteratedCapts: Boolean = false
   ): List[String] = {
 
@@ -279,7 +276,7 @@ object Replay {
   private def recursiveUcis(
       sit: Situation,
       sans: List[San],
-      finalSquare: Boolean = false
+      @nowarn finalSquare: Boolean = false
   ): Validated[String, List[Uci]] =
     sans match {
       case Nil         => valid(Nil)
@@ -293,7 +290,7 @@ object Replay {
   private def recursiveSituations(
       sit: Situation,
       sans: List[San],
-      finalSquare: Boolean = false
+      @nowarn finalSquare: Boolean = false
   ): Validated[String, List[Situation]] =
     sans match {
       case Nil         => valid(Nil)
@@ -307,7 +304,7 @@ object Replay {
   private def recursiveSituationsFromUci(
       sit: Situation,
       ucis: List[Uci],
-      finalSquare: Boolean = false
+      @nowarn finalSquare: Boolean = false
   ): Validated[String, List[Situation]] =
     ucis match {
       case Nil         => valid(Nil)
@@ -321,7 +318,7 @@ object Replay {
   private def recursiveReplayFromUci(
       replay: Replay,
       ucis: List[Uci],
-      finalSquare: Boolean = false
+      @nowarn finalSquare: Boolean = false
   ): Validated[String, Replay] =
     ucis match {
       case Nil         => valid(replay)
@@ -385,7 +382,7 @@ object Replay {
   private def recursiveGamesFromUci(
       game: DraughtsGame,
       ucis: List[Uci],
-      finalSquare: Boolean = false
+      @nowarn finalSquare: Boolean = false
   ): Validated[String, List[DraughtsGame]] =
     ucis match {
       case Nil                     => valid(List(game))
@@ -425,7 +422,7 @@ object Replay {
     else {
 
       // we don't want to compare the full move number, to match transpositions
-      def truncateFen(fen: FEN) = fen.value.split(' ').take(4) mkString " "
+      def truncateFen(fen: FEN) = fen.value.split(' ').take(FEN.fullMoveIndex) mkString " "
       val atFenTruncated        = truncateFen(atFen)
       def compareFen(fen: FEN)  = truncateFen(fen) == atFenTruncated
 

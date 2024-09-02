@@ -14,7 +14,7 @@ final case class FEN(value: String) extends AnyVal {
 
   def player2Score: Int = intFromFen(2).getOrElse(0)
 
-  def fullMove: Option[Int] = intFromFen(4)
+  def fullMove: Option[Int] = intFromFen(FEN.fullMoveIndex)
 
   def ply: Option[Int] =
     fullMove map { fm =>
@@ -49,9 +49,10 @@ final case class FEN(value: String) extends AnyVal {
         Pos(index) -> (if (stones == -1) (Tuzdik, 1)
                        else (Stone, stones))
       }
-      .map {
-        case (Some(pos), (r, c)) if r == Tuzdik => (pos -> (Piece(!pos.player, r), c))
-        case (Some(pos), (r, c))                => (pos -> (Piece(pos.player, r), c))
+      .flatMap {
+        case (Some(pos), (r, c)) if r == Tuzdik => Some((pos -> Tuple2(Piece(!pos.player, r), c)))
+        case (Some(pos), (r, c))                => Some((pos -> Tuple2(Piece(pos.player, r), c)))
+        case _                                  => None
       }
       .toMap
 
@@ -83,4 +84,7 @@ final case class FEN(value: String) extends AnyVal {
 object FEN {
 
   def clean(source: String): FEN = FEN(source.replace("_", " ").trim)
+
+  def fullMoveIndex: Int = 4
+
 }

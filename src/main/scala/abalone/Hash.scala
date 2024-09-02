@@ -1,7 +1,5 @@
 package strategygames.abalone
 
-import strategygames.Player
-
 //TODO Need to rewrite/set this for Abalone. James/Matt has done this for other games
 
 final class Hash(size: Int) {

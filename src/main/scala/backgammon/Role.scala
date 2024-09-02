@@ -2,17 +2,15 @@ package strategygames.backgammon
 
 import strategygames.{ GameFamily, P1, P2, Player }
 
-import cats.implicits._
-import ornicar.scalalib.Zero
-
 sealed trait Role {
   val forsyth: Char
-  // lazy val forsythUpper: Char = forsyth.toUpper //this contradicts what the piece is now!
+  val forsythUpper: Char
   lazy val pgn: Char              = forsyth
   lazy val name                   = toString
   lazy val groundName             = s"${forsyth}-piece"
   val binaryInt: Int
-  lazy val hashInt: Int           = binaryInt
+  val hashInt: Int
+  val storable: Boolean
   lazy val valueOf: Option[Int]   = Option(1)
   lazy val gameFamily: GameFamily = GameFamily.Backgammon()
   final def -(player: Player)     = Piece(player, this)
@@ -23,22 +21,16 @@ sealed trait Role {
 sealed trait PromotableRole extends Role
 
 case object Stone extends Role {
-  val forsyth   = 's'
-  val binaryInt = 0
-}
-
-case object Tuzdik extends Role {
-  val forsyth   = 't'
-  val binaryInt = 163
+  val forsyth      = 's'
+  val forsythUpper = 'S'
+  val binaryInt    = 0
+  val hashInt      = 1
+  val storable     = true
 }
 
 object Role {
 
-  val all: List[Role] =
-    List(
-      Stone,
-      Tuzdik
-    )
+  val all: List[Role] = List(Stone)
 
   def defaultRole: Role = Stone
 
@@ -85,6 +77,8 @@ object Role {
 
   def hashInt(i: Int): Option[Role] = allByHashInt get i
 
+  def storable: List[Role] = all.filter(_.storable)
+
   // only used in lila by insight module
   def pgnMoveToRole(gf: GameFamily, c: Char): Role =
     allByPgn(gf).get(c) match {
@@ -115,6 +109,5 @@ object Role {
 
   val roleR  = s"([${allByForsyth.keys.mkString("")}])"
   val roleRr = s"([${allByForsyth.keys.map(k => s"${k.toLower}${k.toUpper}").mkString("")}]?)"
-  val rolePR = s"([${allByForsyth.keys.map(k => s"${k.toLower}${k.toUpper}").mkString("")}]|\\+?)"
 
 }

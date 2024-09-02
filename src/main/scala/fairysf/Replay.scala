@@ -4,7 +4,6 @@ import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
-import strategygames.Player
 import strategygames.format.pgn.San
 import strategygames.fairysf.format.pgn.{ Parser, Reader }
 import strategygames.fairysf.format.{ FEN, Forsyth, Uci }
@@ -71,7 +70,7 @@ object Replay {
     }
   }
 
-  def fairysfAction(action: StratAction) = action match {
+  private def fairysfAction(action: StratAction) = action match {
     case StratMove.FairySF(m) => m
     case StratDrop.FairySF(d) => d
     case _                    => sys.error("Invalid fairysf action")
@@ -86,7 +85,11 @@ object Replay {
       uciMoves: List[String]
   ): Move =
     Move(
-      piece = before.situation.board.pieces(orig),
+      piece =
+        if (orig == dest)
+          // flipello pass. Will remove reference to FlipCounter when refactoring in PLA-309
+          Piece(before.situation.player, FlipCounter)
+        else before.situation.board.pieces(orig),
       orig = orig,
       dest = dest,
       situationBefore = before.situation,
@@ -255,8 +258,10 @@ object Replay {
         val fairyUcis       = Parser.flatActionStrsToFairyUciMoves(actionStrs.flatten)
         val firstFairyUci   = fairyUcis.headOption.toList
         val pairedFairyUcis = if (fairyUcis == firstFairyUci) List() else fairyUcis.sliding(2)
-        (firstFairyUci.map(parseFairyUci)) ::: pairedFairyUcis.map { case List(prev, fairyUci) =>
-          parseFairyUciWithPrevious(fairyUci, Some(prev))
+        (firstFairyUci.map(parseFairyUci)) ::: pairedFairyUcis.flatMap {
+          case List(prev, fairyUci) =>
+            Some(parseFairyUciWithPrevious(fairyUci, Some(prev)))
+          case _                    => None
         }.toList
       } else {
         // We flatten actionStrs and handle as non multimove as these variants are
@@ -400,7 +405,7 @@ object Replay {
     else {
 
       // we don't want to compare the full move number, to match transpositions
-      def truncateFen(fen: FEN) = fen.value.split(' ').take(4) mkString " "
+      def truncateFen(fen: FEN) = fen.value.split(' ').take(FEN.fullMoveIndex) mkString " "
       val atFenTruncated        = truncateFen(atFen)
       def compareFen(fen: FEN)  = truncateFen(fen) == atFenTruncated
 

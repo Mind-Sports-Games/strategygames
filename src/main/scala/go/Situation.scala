@@ -5,8 +5,6 @@ import strategygames.{ Player, Status }
 import cats.data.Validated
 import cats.implicits._
 
-import strategygames.go.format.{ Forsyth, Uci }
-
 case class Situation(board: Board, player: Player) {
 
   // lazy val moves: Map[Pos, List[Move]] = board.variant.validMoves(this)
@@ -18,6 +16,10 @@ case class Situation(board: Board, player: Player) {
   def dropsByRole: Option[Map[Role, List[Pos]]] = board.variant.possibleDropsByRole(this)
 
   def dropsAsDrops: List[Drop] = board.variant.validDrops(this)
+
+  def canDrop: Boolean = dropsAsDrops.nonEmpty
+
+  def canOnlyDrop: Boolean = canDrop && !canSelectSquares
 
   def takebackable = !canSelectSquares
 

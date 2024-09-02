@@ -1,10 +1,12 @@
 package strategygames.go
 
+import scala.annotation.nowarn
+
 import strategygames.Division
 
 object Divider {
 
   // TODO set this
-  def apply(boards: List[Board]): Division = Division.empty
+  def apply(@nowarn boards: List[Board]): Division = Division.empty
 
 }

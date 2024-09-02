@@ -1,6 +1,6 @@
 package strategygames.samurai
 
-import strategygames.{ GameFamily, Player }
+import strategygames.Player
 
 case class Piece(player: Player, role: Role) {
 

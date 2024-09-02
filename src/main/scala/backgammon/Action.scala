@@ -3,11 +3,19 @@ import strategygames.backgammon.format.Uci
 import strategygames.MoveMetrics
 import strategygames.Player
 
-abstract class Action(situationBefore: Situation, after: Board, metrics: MoveMetrics = MoveMetrics()) {
+import scala.annotation.nowarn
+
+abstract class Action(
+    situationBefore: Situation,
+    @nowarn after: Board,
+    @nowarn metrics: MoveMetrics = MoveMetrics()
+) {
+
   def before = situationBefore.board
 
   def situationAfter: Situation
-  def finalizeAfter: Board = after
+  def lazySituationAfter: Situation
+  def finalizeAfter: Board
 
   def player: Player
 

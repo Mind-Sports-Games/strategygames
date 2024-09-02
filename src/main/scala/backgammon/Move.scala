@@ -2,7 +2,6 @@ package strategygames.backgammon
 import strategygames.MoveMetrics
 
 import strategygames.backgammon.format.Uci
-import cats.syntax.option._
 
 case class Move(
     piece: Piece,
@@ -10,29 +9,43 @@ case class Move(
     dest: Pos,
     situationBefore: Situation,
     after: Board,
-    autoEndTurn: Boolean,
     capture: Option[Pos] = None,
-    promotion: Option[PromotableRole] = None,
     metrics: MoveMetrics = MoveMetrics()
 ) extends Action(situationBefore, after, metrics) {
 
   def situationAfter =
-    Situation(finalizeAfter, if (autoEndTurn) !piece.player else piece.player)
+    Situation(finalizeAfter, situationBefore.player)
 
-  def applyVariantEffect: Move = before.variant addVariantEffect this
+  def finalizeAfter: Board = after updateHistory { h =>
+    h.copy(
+      currentTurn = h.currentTurn :+ toUci,
+      forcedTurn = h.forcedTurnPersists(situationBefore, this),
+      justUsedUndo = false
+    )
+  }
 
-  // does this move capture an opponent piece?
-  def captures = capture.isDefined
+  def lazySituationAfter =
+    Situation(lazyFinalizeAfter, situationBefore.player)
 
-  def promotes = promotion.isDefined
+  def lazyFinalizeAfter: Board = after updateHistory { h =>
+    h.copy(
+      currentTurn = h.currentTurn :+ toUci
+    )
+  }
+
+  // this isn't really used for Backgammon and isnt defined for drop
+  // but should work if uncommented and represent "does this move capture an opponent piece?"
+  // def captures = capture.isDefined
+
+  def captureList = capture.map(List(_))
+
+  def diceUsed = (orig.index - dest.index).abs
 
   def player = piece.player
 
-  def withPromotion(op: Option[PromotableRole]): Option[Move] = None
-
   def withMetrics(m: MoveMetrics) = copy(metrics = m)
 
-  def toUci = Uci.Move(orig, dest, promotion)
+  def toUci = Uci.Move(orig, dest, captureList)
 
   override def toString = s"$piece ${toUci.uci}"
 }

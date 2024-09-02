@@ -16,6 +16,8 @@ sealed abstract class FEN(val value: String) {
 
   override def toString = value
 
+  def gameLogic: GameLogic
+
   def fullMove: Option[Int]
 
   def player: Option[Player]
@@ -44,6 +46,8 @@ object FEN {
     def toBackgammon   = sys.error("Can't convert chess to backgammon")
     def toAbalone   = sys.error("Can't convert chess to abalone")
 
+    def gameLogic = GameLogic.Chess()
+
     def fullMove: Option[Int] = f.fullMove
 
     def player: Option[Player] = f.player
@@ -69,6 +73,8 @@ object FEN {
     def toGo           = sys.error("Can't convert draughts to go")
     def toBackgammon   = sys.error("Can't convert draughts to backgammon")
     def toAbalone   = sys.error("Can't convert draughts to abalone")
+
+    def gameLogic = GameLogic.Draughts()
 
     // need to consider an implementation for draughts?
     def fullMove: Option[Int] = None
@@ -98,6 +104,8 @@ object FEN {
     def toBackgammon   = sys.error("Can't convert fairysf to backgammon")
     def toAbalone   = sys.error("Can't convert fairysf to abalone")
 
+    def gameLogic = GameLogic.FairySF()
+
     def fullMove: Option[Int] = f.fullMove
 
     def player: Option[Player] = f.player
@@ -123,6 +131,8 @@ object FEN {
     def toGo           = sys.error("Can't convert samurai to go")
     def toBackgammon   = sys.error("Can't convert samurai to backgammon")
     def toAbalone   = sys.error("Can't convert samurai to abalone")
+
+    def gameLogic = GameLogic.Samurai()
 
     def fullMove: Option[Int] = sys.error("There is no fullMove in samurai")
 
@@ -150,6 +160,8 @@ object FEN {
     def toBackgammon   = sys.error("Can't convert togyzkumalak to backgammon")
     def toAbalone   = sys.error("Can't convert togyzkumalak to abalone")
 
+    def gameLogic = GameLogic.Togyzkumalak()
+
     def fullMove: Option[Int] = sys.error("There is no fullMove in togyzkumalak")
 
     def player: Option[Player] = f.player
@@ -175,6 +187,8 @@ object FEN {
     def toGo           = f
     def toBackgammon   = sys.error("Can't convert go to backgammon")
     def toAbalone   = sys.error("Can't convert go to abalone")
+
+    def gameLogic = GameLogic.Go()
 
     def fullMove: Option[Int] = sys.error("There is no fullMove in go")
 
@@ -202,6 +216,8 @@ object FEN {
     def toBackgammon   = f
     def toAbalone   = sys.error("Can't convert backgammon to abalone")
 
+    def gameLogic = GameLogic.Backgammon()
+
     def fullMove: Option[Int] = sys.error("There is no fullMove in backgammon")
 
     def player: Option[Player] = f.player
@@ -227,6 +243,8 @@ object FEN {
     def toGo           = sys.error("Can't convert abalone to go")
     def toBackgammon   = sys.error("Can't convert abalone to backgammon")
     def toAbalone   = f
+
+    def gameLogic = GameLogic.Abalone()
 
     def fullMove: Option[Int] = sys.error("There is no fullMove in abalone")
 

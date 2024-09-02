@@ -1,9 +1,10 @@
 package strategygames.go.format
 
+import scala.annotation.nowarn
 import cats.data.Validated
 
 import strategygames.go.variant.Variant
-import strategygames.go.{ Action, Drop, Pass, Replay, SelectSquares }
+import strategygames.go.{ Action, Replay }
 import strategygames.{ ActionStrs, Player }
 
 object UciDump {
@@ -29,10 +30,6 @@ object UciDump {
         variant = variant
       ) andThen (_.valid) map apply
 
-  def action(variant: Variant)(a: Action): String = a match {
-    case ss: SelectSquares => ss.toUci.uci
-    case p: Pass           => p.toUci.uci
-    case d: Drop           => d.toUci.uci
-  }
+  def action(@nowarn variant: Variant)(a: Action): String = a.toUci.uci
 
 }

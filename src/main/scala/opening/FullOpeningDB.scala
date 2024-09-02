@@ -1,7 +1,5 @@
 package strategygames.opening
 
-import cats.syntax.option._
-
 import strategygames.{ ActionStrs, GameLogic }
 import strategygames.format.FEN
 

@@ -18,7 +18,7 @@ sealed abstract class Move(
     val castle: Option[((Pos, Pos), (Pos, Pos))] = None,
     val enpassant: Boolean = false,
     val metrics: MoveMetrics = MoveMetrics()
-) extends Action(situationBefore, after, metrics) {
+) extends Action(situationBefore) {
 
   def situationAfter: Situation
   def finalizeAfter(finalSquare: Boolean = false): Board
@@ -314,11 +314,8 @@ object Move {
         Pos.Backgammon(m.dest),
         Situation.Backgammon(m.situationBefore),
         Board.Backgammon(m.after),
-        m.autoEndTurn,
-        m.capture match {
-          case Some(capture) => Option(List(Pos.Backgammon(capture)))
-          case None          => None
-        },
+        false,
+        None,
         None,
         None,
         None,

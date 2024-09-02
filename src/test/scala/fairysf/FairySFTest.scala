@@ -1,6 +1,6 @@
 package strategygames.fairysf
 
-import strategygames.{ Clock, Player }
+import strategygames.{ ClockBase, Player }
 
 import cats.data.Validated
 import cats.syntax.option._
@@ -8,9 +8,8 @@ import org.specs2.matcher.Matcher
 import org.specs2.matcher.ValidatedMatchers
 import org.specs2.mutable.Specification
 
-import strategygames.fairysf.format.{ Forsyth, Visual }
+import strategygames.fairysf.format.{ FEN, Forsyth, Uci, Visual }
 import strategygames.fairysf.variant.Variant
-import strategygames.fairysf.format.FEN
 
 trait FairySFTest extends Specification with ValidatedMatchers {
 
@@ -50,7 +49,7 @@ trait FairySFTest extends Specification with ValidatedMatchers {
         // }
         // because possible moves are asked for player highlight
         // before the move is played (on initial situation)
-        vg foreach { _.situation.destinations }
+        // vg foreach { _.situation.destinations }
         val ng = vg flatMap { g =>
           g(move._1, move._2) map (_._1)
         }
@@ -67,7 +66,7 @@ trait FairySFTest extends Specification with ValidatedMatchers {
     ): Validated[String, Game] =
       game.apply(orig, dest, promotion) map (_._1)
 
-    def withClock(c: Clock) = game.copy(clock = Option(c))
+    def withClock(c: ClockBase) = game.copy(clock = Option(c))
   }
 
   implicit def richGame(game: Game) = RichGame(game)
@@ -104,5 +103,18 @@ trait FairySFTest extends Specification with ValidatedMatchers {
     }
 
   def sortPoss(poss: Seq[Pos]): Seq[Pos] = poss sortBy (_.toString)
+
+  def playUciList(game: Game, ucis: List[Uci]): Validated[String, Game] =
+    ucis.foldLeft(Validated.valid(game): Validated[String, Game]) { (vg, action) =>
+      vg.flatMap { g => g.apply(action).map(_._1) }
+    }
+
+  def playActionStrs(actionStrs: List[String], game: Option[Game] = None): Validated[String, Game] = {
+    val g = game.getOrElse(Game.apply(variant.Variant.default))
+    playUciList(
+      g,
+      Uci.readList(g.situation.board.variant.gameFamily, actionStrs.mkString(" ")).getOrElse(List())
+    )
+  }
 
 }

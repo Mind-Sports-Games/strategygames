@@ -49,8 +49,11 @@ abstract class Variant(
 
   def dropsVariant: Boolean
   def onlyDropsVariant: Boolean
+  def hasDetachedPocket: Boolean
   def hasGameScore: Boolean
+
   def canOfferDraw: Boolean
+  def ignoreSubmitAction: Boolean
 
   def perfId: Int
   def perfIcon: Char
@@ -63,6 +66,8 @@ abstract class Variant(
   def checkmate(situation: Situation): Boolean
 
   def stalemateIsDraw: Boolean
+
+  def useRuleOfGinOnInsufficientMaterial: Boolean
 
   // In most variants, the winner is the last player to have played and there is a possibility of either a traditional
   // checkmate or a variant end condition
@@ -144,10 +149,13 @@ object Variant {
 
     def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
 
-    def dropsVariant: Boolean     = v.dropsVariant
-    def onlyDropsVariant: Boolean = false
-    def hasGameScore: Boolean     = false
-    def canOfferDraw: Boolean     = v.canOfferDraw
+    def dropsVariant: Boolean      = v.dropsVariant
+    def onlyDropsVariant: Boolean  = false
+    def hasDetachedPocket: Boolean = v.hasDetachedPocket
+    def hasGameScore: Boolean      = false
+
+    def canOfferDraw: Boolean       = v.canOfferDraw
+    def ignoreSubmitAction: Boolean = false
 
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
@@ -167,6 +175,8 @@ object Variant {
     }
 
     def stalemateIsDraw: Boolean = v.stalemateIsDraw
+
+    def useRuleOfGinOnInsufficientMaterial: Boolean = false
 
     def winner(situation: Situation): Option[Player] = situation match {
       case Situation.Chess(situation) => v.winner(situation)
@@ -250,10 +260,13 @@ object Variant {
 
     def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
 
-    def dropsVariant: Boolean     = false
-    def onlyDropsVariant: Boolean = false
-    def hasGameScore: Boolean     = false
-    def canOfferDraw: Boolean     = v.canOfferDraw
+    def dropsVariant: Boolean      = false
+    def onlyDropsVariant: Boolean  = false
+    def hasDetachedPocket: Boolean = false
+    def hasGameScore: Boolean      = false
+
+    def canOfferDraw: Boolean       = v.canOfferDraw
+    def ignoreSubmitAction: Boolean = false
 
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
@@ -274,6 +287,8 @@ object Variant {
 
     // stalemate not referenced in draughts
     def stalemateIsDraw: Boolean = true
+
+    def useRuleOfGinOnInsufficientMaterial: Boolean = false
 
     def winner(situation: Situation): Option[Player] = situation match {
       case Situation.Draughts(situation) => v.winner(situation)
@@ -355,10 +370,13 @@ object Variant {
 
     def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
 
-    def dropsVariant: Boolean     = v.dropsVariant
-    def onlyDropsVariant: Boolean = v.onlyDropsVariant
-    def hasGameScore: Boolean     = v.hasGameScore
-    def canOfferDraw: Boolean     = v.canOfferDraw
+    def dropsVariant: Boolean      = v.dropsVariant
+    def onlyDropsVariant: Boolean  = v.onlyDropsVariant
+    def hasDetachedPocket: Boolean = v.hasDetachedPocket
+    def hasGameScore: Boolean      = v.hasGameScore
+
+    def canOfferDraw: Boolean       = v.canOfferDraw
+    def ignoreSubmitAction: Boolean = false
 
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
@@ -378,6 +396,8 @@ object Variant {
     }
 
     def stalemateIsDraw: Boolean = v.stalemateIsDraw
+
+    def useRuleOfGinOnInsufficientMaterial: Boolean = false
 
     def winner(situation: Situation): Option[Player] = situation match {
       case Situation.FairySF(situation) => v.winner(situation)
@@ -460,10 +480,13 @@ object Variant {
 
     def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
 
-    def dropsVariant: Boolean     = false
-    def onlyDropsVariant: Boolean = false
-    def hasGameScore: Boolean     = true
-    def canOfferDraw: Boolean     = v.canOfferDraw
+    def dropsVariant: Boolean      = v.dropsVariant
+    def onlyDropsVariant: Boolean  = v.onlyDropsVariant
+    def hasDetachedPocket: Boolean = false
+    def hasGameScore: Boolean      = v.hasGameScore
+
+    def canOfferDraw: Boolean       = v.canOfferDraw
+    def ignoreSubmitAction: Boolean = false
 
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
@@ -474,11 +497,13 @@ object Variant {
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false
 
     def checkmate(situation: Situation): Boolean = situation match {
-      case Situation.Samurai(situation) => false
-      case _                            => sys.error("Not passed Samurai objects")
+      case Situation.Samurai(_) => false
+      case _                    => sys.error("Not passed Samurai objects")
     }
 
     def stalemateIsDraw: Boolean = v.stalemateIsDraw
+
+    def useRuleOfGinOnInsufficientMaterial: Boolean = false
 
     def winner(situation: Situation): Option[Player] = situation match {
       case Situation.Samurai(situation) => v.winner(situation)
@@ -561,10 +586,13 @@ object Variant {
 
     def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
 
-    def dropsVariant: Boolean     = false
-    def onlyDropsVariant: Boolean = false
-    def hasGameScore: Boolean     = true
-    def canOfferDraw: Boolean     = v.canOfferDraw
+    def dropsVariant: Boolean      = v.dropsVariant
+    def onlyDropsVariant: Boolean  = v.onlyDropsVariant
+    def hasDetachedPocket: Boolean = false
+    def hasGameScore: Boolean      = v.hasGameScore
+
+    def canOfferDraw: Boolean       = v.canOfferDraw
+    def ignoreSubmitAction: Boolean = false
 
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
@@ -575,11 +603,13 @@ object Variant {
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false
 
     def checkmate(situation: Situation): Boolean = situation match {
-      case Situation.Togyzkumalak(situation) => false
-      case _                                 => sys.error("Not passed Togyzkumalak objects")
+      case Situation.Togyzkumalak(_) => false
+      case _                         => sys.error("Not passed Togyzkumalak objects")
     }
 
     def stalemateIsDraw: Boolean = v.stalemateIsDraw
+
+    def useRuleOfGinOnInsufficientMaterial: Boolean = false
 
     def winner(situation: Situation): Option[Player] = situation match {
       case Situation.Togyzkumalak(situation) => v.winner(situation)
@@ -661,10 +691,13 @@ object Variant {
 
     def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
 
-    def dropsVariant: Boolean     = true
-    def onlyDropsVariant: Boolean = true
-    def hasGameScore: Boolean     = true
-    def canOfferDraw: Boolean     = v.canOfferDraw
+    def dropsVariant: Boolean      = v.dropsVariant
+    def onlyDropsVariant: Boolean  = v.onlyDropsVariant
+    def hasDetachedPocket: Boolean = false
+    def hasGameScore: Boolean      = v.hasGameScore
+
+    def canOfferDraw: Boolean       = v.canOfferDraw
+    def ignoreSubmitAction: Boolean = false
 
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
@@ -675,11 +708,13 @@ object Variant {
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false
 
     def checkmate(situation: Situation): Boolean = situation match {
-      case Situation.Go(situation) => false
-      case _                       => sys.error("Not passed Go objects")
+      case Situation.Go(_) => false
+      case _               => sys.error("Not passed Go objects")
     }
 
     def stalemateIsDraw: Boolean = v.stalemateIsDraw
+
+    def useRuleOfGinOnInsufficientMaterial: Boolean = false
 
     def winner(situation: Situation): Option[Player] = situation match {
       case Situation.Go(situation) => v.winner(situation)
@@ -764,10 +799,13 @@ object Variant {
 
     def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
 
-    def dropsVariant: Boolean     = false
-    def onlyDropsVariant: Boolean = false
-    def hasGameScore: Boolean     = true
-    def canOfferDraw: Boolean     = v.canOfferDraw
+    def dropsVariant: Boolean      = v.dropsVariant
+    def onlyDropsVariant: Boolean  = v.onlyDropsVariant
+    def hasDetachedPocket: Boolean = false
+    def hasGameScore: Boolean      = v.hasGameScore
+
+    def canOfferDraw: Boolean       = v.canOfferDraw
+    def ignoreSubmitAction: Boolean = v.ignoreSubmitAction
 
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
@@ -778,11 +816,13 @@ object Variant {
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false
 
     def checkmate(situation: Situation): Boolean = situation match {
-      case Situation.Backgammon(situation) => false
-      case _                               => sys.error("Not passed Backgammon objects")
+      case Situation.Backgammon(_) => false
+      case _                       => sys.error("Not passed Backgammon objects")
     }
 
-    def stalemateIsDraw: Boolean = v.stalemateIsDraw
+    def stalemateIsDraw: Boolean = false
+
+    def useRuleOfGinOnInsufficientMaterial: Boolean = v.useRuleOfGinOnInsufficientMaterial
 
     def winner(situation: Situation): Option[Player] = situation match {
       case Situation.Backgammon(situation) => v.winner(situation)
@@ -794,17 +834,15 @@ object Variant {
       case _                               => sys.error("Not passed Backgammon objects")
     }
 
-    @nowarn def specialDraw(situation: Situation): Boolean = situation match {
-      case Situation.Backgammon(situation) => v.specialDraw(situation)
-      case _                               => sys.error("Not passed Backgammon objects")
+    def specialDraw(situation: Situation): Boolean = situation match {
+      case Situation.Backgammon(_) => false
+      case _                       => sys.error("Not passed Backgammon objects")
     }
 
-    def hasMoveEffects: Boolean = v.hasMoveEffects
+    // backgammon has no variant effects for any action
+    def hasMoveEffects: Boolean            = false
+    def addVariantEffect(move: Move): Move = move
 
-    def addVariantEffect(move: Move): Move            = move match {
-      case Move.Backgammon(move) => Move.Backgammon(v.addVariantEffect(move))
-      case _                     => sys.error("Not passed Backgammon objects")
-    }
     def valid(board: Board, strict: Boolean): Boolean = board match {
       case Board.Backgammon(board) => v.valid(board, strict)
       case _                       => sys.error("Not passed Backgammon objects")
@@ -864,10 +902,13 @@ object Variant {
 
     def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
 
-    def dropsVariant: Boolean     = false
-    def onlyDropsVariant: Boolean = false
-    def hasGameScore: Boolean     = true
-    def canOfferDraw: Boolean     = v.canOfferDraw
+    def dropsVariant: Boolean      = false
+    def onlyDropsVariant: Boolean  = false
+    def hasDetachedPocket: Boolean = false
+    def hasGameScore: Boolean      = true
+
+    def canOfferDraw: Boolean       = v.canOfferDraw
+    def ignoreSubmitAction: Boolean = false
 
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
@@ -883,6 +924,8 @@ object Variant {
     }
 
     def stalemateIsDraw: Boolean = v.stalemateIsDraw
+
+    def useRuleOfGinOnInsufficientMaterial: Boolean = false
 
     def winner(situation: Situation): Option[Player] = situation match {
       case Situation.Abalone(situation) => v.winner(situation)
@@ -1015,7 +1058,7 @@ object Variant {
   }
 
   // todo all games will be allowed from position (go has 3 variants already!)
-  @deprecated("this method will be removed")
+  @deprecated("this method will be removed", "10.2.1-pstrat98")
   def libFromPosition(lib: GameLogic): Variant = lib match {
     case GameLogic.Draughts()     => Variant.Draughts(draughts.variant.FromPosition)
     case GameLogic.Chess()        => Variant.Chess(chess.variant.FromPosition)

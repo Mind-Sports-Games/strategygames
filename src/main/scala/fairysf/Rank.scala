@@ -1,7 +1,5 @@
 package strategygames.fairysf
 
-import strategygames.Player
-
 case class Rank private (val index: Int) extends AnyVal with Ordered[Rank] {
   @inline def -(that: Rank): Int           = index - that.index
   @inline override def compare(that: Rank) = this - that
@@ -10,8 +8,9 @@ case class Rank private (val index: Int) extends AnyVal with Ordered[Rank] {
     if (-Rank.all.size < delta && delta < Rank.all.size) Rank(index + delta)
     else None
 
-  @inline def char: Char = if (index < 9) (49 + index).toChar else 48.toChar // 0
-  override def toString  = (index + 1).toString
+  @inline def char: Char           = if (index < 9) (49 + index).toChar else 48.toChar // 0
+  def sgfChar(numRanks: Int): Char = (97 + (numRanks - 1 - index)).toChar
+  override def toString            = (index + 1).toString
 }
 
 object Rank {

@@ -19,14 +19,50 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def dropsAsDrops: List[Drop]
 
+  def lifts: List[Lift]
+
   def passes: List[Pass]
 
   def selectSquaresAction: List[SelectSquares]
 
+  def diceRolls: List[DiceRoll]
+
+  def undos: List[Undo]
+
+  def endTurns: List[EndTurn]
+
   def actions: List[Action] =
-    moves.values.flatten.toList ::: dropsAsDrops ::: passes ::: selectSquaresAction
+    moves.values.flatten.toList :::
+      dropsAsDrops :::
+      lifts :::
+      passes :::
+      selectSquaresAction :::
+      diceRolls :::
+      endTurns :::
+      //important to keep non progressive actions at the end
+      undos
+
+  def canDrop: Boolean
+
+  def canOnlyDrop: Boolean
+
+  def canLift: Boolean
+
+  def canOnlyLift: Boolean
+
+  def canRollDice: Boolean
+
+  def canOnlyRollDice: Boolean
+
+  def canUndo: Boolean
+
+  def canEndTurn: Boolean
+
+  def canOnlyEndTurn: Boolean
 
   def takebackable: Boolean
+
+  def forcedAction: Option[Action]
 
   def history = board.history
 
@@ -37,6 +73,10 @@ sealed abstract class Situation(val board: Board, val player: Player) {
   def checkMate: Boolean = board.variant checkmate this
 
   def opponentHasInsufficientMaterial: Boolean
+
+  def insufficientMaterialStatus: Status.type => Status
+
+  def outOfTimeStatus: Status.type => Status
 
   def threefoldRepetition: Boolean
 
@@ -53,6 +93,8 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   val status: Option[Status]
 
+  def resignStatus(player: Player): Status.type => Status
+
   def move(
       from: Pos,
       to: Pos,
@@ -67,9 +109,17 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def drop(role: Role, pos: Pos): Validated[String, Drop]
 
+  def lift(pos: Pos): Validated[String, Lift]
+
   def pass: Validated[String, Pass]
 
   def selectSquares(squares: List[Pos]): Validated[String, SelectSquares]
+
+  def diceRoll(dice: List[Int]): Validated[String, DiceRoll]
+
+  def undo: Validated[String, Undo]
+
+  def endTurn: Validated[String, EndTurn]
 
   def withVariant(variant: Variant): Situation
 
@@ -104,11 +154,17 @@ object Situation {
 
     def takebackable = true
 
+    def forcedAction: Option[Action] = None
+
     lazy val check: Boolean = s.check
 
     def checkSquare = s.checkSquare.map(Pos.Chess)
 
     def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
+
+    def insufficientMaterialStatus: Status.type => Status = _.Outoftime
+
+    def outOfTimeStatus: Status.type => Status = _.Outoftime
 
     def threefoldRepetition: Boolean = s.threefoldRepetition
 
@@ -142,13 +198,41 @@ object Situation {
         }
         .toList
 
+    def lifts: List[Lift] = List.empty
+
     def passes: List[Pass] = List.empty
 
     def selectSquaresAction: List[SelectSquares] = List.empty
 
+    def diceRolls: List[DiceRoll] = List.empty
+
+    def undos: List[Undo] = List.empty
+
+    def endTurns: List[EndTurn] = List.empty
+
+    def canDrop: Boolean = s.canDrop
+
+    def canOnlyDrop: Boolean = s.canOnlyDrop
+
+    def canLift: Boolean = false
+
+    def canOnlyLift: Boolean = false
+
+    def canRollDice: Boolean = s.canRollDice
+
+    def canOnlyRollDice: Boolean = s.canRollDice
+
+    def canUndo = false
+
+    def canEndTurn: Boolean = false
+
+    def canOnlyEndTurn: Boolean = false
+
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
+
+    def resignStatus(player: Player): Status.type => Status = _.Resign
 
     def move(
         from: Pos,
@@ -175,10 +259,19 @@ object Situation {
       case _                                      => sys.error("Not passed Chess objects")
     }
 
+    def lift(pos: Pos): Validated[String, Lift] = sys.error("Can't do a Lift for chess")
+
     def pass: Validated[String, Pass] = sys.error("Can't do a Pass for chess")
 
     def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
       sys.error("Can't do a SelectSquare for chess")
+
+    def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
+      s.diceRoll(dice).map(dr => DiceRoll.Chess(dr))
+
+    def undo: Validated[String, Undo] = sys.error("Can't do Undo for chess")
+
+    def endTurn: Validated[String, EndTurn] = sys.error("Can't do EndTurn for chess")
 
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.Chess(variant) => Chess(s.withVariant(variant))
@@ -210,12 +303,13 @@ object Situation {
         s.player
       ) {
 
-    // TODO: DRAUGHTS I think that .validMoves is correct, but unsure. needs testing.
     lazy val moves: Map[Pos, List[Move]] = s.validMoves.map {
       case (p: draughts.Pos, l: List[draughts.Move]) => (Pos.Draughts(p), l.map(Move.Draughts))
     }
 
     def takebackable = true
+
+    def forcedAction: Option[Action] = None
 
     lazy val check: Boolean = false
 
@@ -231,12 +325,42 @@ object Situation {
 
     def dropsAsDrops: List[Drop] = List.empty
 
+    def lifts: List[Lift] = List.empty
+
     def passes: List[Pass] = List.empty
 
     def selectSquaresAction: List[SelectSquares] = List.empty
 
+    def diceRolls: List[DiceRoll] = List.empty
+
+    def undos: List[Undo] = List.empty
+
+    def endTurns: List[EndTurn] = List.empty
+
+    def canDrop: Boolean = false
+
+    def canOnlyDrop: Boolean = false
+
+    def canLift: Boolean = false
+
+    def canOnlyLift: Boolean = false
+
+    def canRollDice: Boolean = false
+
+    def canOnlyRollDice: Boolean = false
+
+    def canUndo: Boolean = false
+
+    def canEndTurn: Boolean = false
+
+    def canOnlyEndTurn: Boolean = false
+
     // possibly need to do something for this
     def opponentHasInsufficientMaterial: Boolean = false
+
+    def insufficientMaterialStatus: Status.type => Status = _.Outoftime
+
+    def outOfTimeStatus: Status.type => Status = _.Outoftime
 
     def threefoldRepetition: Boolean = s.threefoldRepetition
 
@@ -249,6 +373,8 @@ object Situation {
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
+
+    def resignStatus(player: Player): Status.type => Status = _.Resign
 
     private def draughtsCaptures(captures: Option[List[Pos]]): Option[List[draughts.Pos]] =
       captures match {
@@ -297,10 +423,19 @@ object Situation {
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
       sys.error("Can't do a Drop for draughts")
 
+    def lift(pos: Pos): Validated[String, Lift] = sys.error("Can't do a Lift for draughts")
+
     def pass: Validated[String, Pass] = sys.error("Can't do a Pass for draughts")
 
     def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
       sys.error("Can't do a SelectSquare for draughts")
+
+    def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
+      sys.error("Can't do a DiceRoll for draughts")
+
+    def undo: Validated[String, Undo] = sys.error("Can't do Undo for draughts")
+
+    def endTurn: Validated[String, EndTurn] = sys.error("Can't do EndTurn for draughts")
 
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.Draughts(variant) => Draughts(s.withVariant(variant))
@@ -339,11 +474,17 @@ object Situation {
 
     def takebackable = true
 
+    def forcedAction: Option[Action] = None
+
     lazy val check: Boolean = s.check
 
     def checkSquare = s.checkSquare.map(Pos.FairySF)
 
     def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
+
+    def insufficientMaterialStatus: Status.type => Status = _.Outoftime
+
+    def outOfTimeStatus: Status.type => Status = _.Outoftime
 
     def threefoldRepetition: Boolean = s.threefoldRepetition
 
@@ -367,13 +508,41 @@ object Situation {
 
     def dropsAsDrops: List[Drop] = s.dropsAsDrops.map(Drop.FairySF)
 
+    def lifts: List[Lift] = List.empty
+
     def passes: List[Pass] = List.empty
 
     def selectSquaresAction: List[SelectSquares] = List.empty
 
+    def diceRolls: List[DiceRoll] = List.empty
+
+    def undos: List[Undo] = List.empty
+
+    def endTurns: List[EndTurn] = List.empty
+
+    def canDrop: Boolean = s.canDrop
+
+    def canOnlyDrop: Boolean = s.canOnlyDrop
+
+    def canLift: Boolean = false
+
+    def canOnlyLift: Boolean = false
+
+    def canRollDice: Boolean = false
+
+    def canOnlyRollDice: Boolean = false
+
+    def canUndo: Boolean = false
+
+    def canEndTurn: Boolean = false
+
+    def canOnlyEndTurn: Boolean = false
+
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
+
+    def resignStatus(player: Player): Status.type => Status = _.Resign
 
     def move(
         from: Pos,
@@ -400,10 +569,19 @@ object Situation {
       case _                                          => sys.error("Not passed FairySF objects")
     }
 
+    def lift(pos: Pos): Validated[String, Lift] = sys.error("Can't do a Lift for fairysf")
+
     def pass: Validated[String, Pass] = sys.error("Can't do a Pass for fairysf")
 
     def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
       sys.error("Can't do a SelectSquare for fairysf")
+
+    def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
+      sys.error("Can't do a DiceRoll for fairysf")
+
+    def undo: Validated[String, Undo] = sys.error("Can't do Undo for fairysf")
+
+    def endTurn: Validated[String, EndTurn] = sys.error("Can't do EndTurn for fairysf")
 
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.FairySF(variant) => FairySF(s.withVariant(variant))
@@ -441,11 +619,17 @@ object Situation {
 
     def takebackable = true
 
+    def forcedAction: Option[Action] = None
+
     lazy val check: Boolean = false
 
     def checkSquare = None
 
     def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
+
+    def insufficientMaterialStatus: Status.type => Status = _.Outoftime
+
+    def outOfTimeStatus: Status.type => Status = _.Outoftime
 
     def threefoldRepetition: Boolean = false
 
@@ -467,21 +651,58 @@ object Situation {
 
     def dropsAsDrops: List[Drop] = List.empty
 
+    def lifts: List[Lift] = List.empty
+
     def passes: List[Pass] = List.empty
 
     def selectSquaresAction: List[SelectSquares] = List.empty
 
+    def diceRolls: List[DiceRoll] = List.empty
+
+    def undos: List[Undo] = List.empty
+
+    def endTurns: List[EndTurn] = List.empty
+
+    def canDrop: Boolean = false
+
+    def canOnlyDrop: Boolean = false
+
+    def canLift: Boolean = false
+
+    def canOnlyLift: Boolean = false
+
+    def canRollDice: Boolean = false
+
+    def canOnlyRollDice: Boolean = false
+
+    def canUndo: Boolean = false
+
+    def canEndTurn: Boolean = false
+
+    def canOnlyEndTurn: Boolean = false
+
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
       sys.error("Can't do a Drop for samurai")
+
+    def lift(pos: Pos): Validated[String, Lift] = sys.error("Can't do a Lift for samurai")
 
     def pass: Validated[String, Pass] = sys.error("Can't do a Pass for samurai")
 
     def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
       sys.error("Can't do a SelectSquare for samurai")
 
+    def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
+      sys.error("Can't do a DiceRoll for samurai")
+
+    def undo: Validated[String, Undo] = sys.error("Can't do Undo for samurai")
+
+    def endTurn: Validated[String, EndTurn] = sys.error("Can't do EndTurn for samurai")
+
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
+
+    def resignStatus(player: Player): Status.type => Status = _.Resign
 
     def move(
         from: Pos,
@@ -539,11 +760,17 @@ object Situation {
 
     def takebackable = true
 
+    def forcedAction: Option[Action] = None
+
     lazy val check: Boolean = false
 
     def checkSquare = None
 
     def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
+
+    def insufficientMaterialStatus: Status.type => Status = _.Outoftime
+
+    def outOfTimeStatus: Status.type => Status = _.Outoftime
 
     def threefoldRepetition: Boolean = false
     def isRepetition: Boolean        = false
@@ -564,21 +791,58 @@ object Situation {
 
     def dropsAsDrops: List[Drop] = List.empty
 
+    def lifts: List[Lift] = List.empty
+
     def passes: List[Pass] = List.empty
 
     def selectSquaresAction: List[SelectSquares] = List.empty
 
+    def diceRolls: List[DiceRoll] = List.empty
+
+    def undos: List[Undo] = List.empty
+
+    def endTurns: List[EndTurn] = List.empty
+
+    def canDrop: Boolean = false
+
+    def canOnlyDrop: Boolean = false
+
+    def canLift: Boolean = false
+
+    def canOnlyLift: Boolean = false
+
+    def canRollDice: Boolean = false
+
+    def canOnlyRollDice: Boolean = false
+
+    def canUndo: Boolean = false
+
+    def canEndTurn: Boolean = false
+
+    def canOnlyEndTurn: Boolean = false
+
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
       sys.error("Can't do a Drop for togyzkumalak")
+
+    def lift(pos: Pos): Validated[String, Lift] = sys.error("Can't do a Lift for togyzkumalak")
 
     def pass: Validated[String, Pass] = sys.error("Can't do a Pass for togyzkumalak")
 
     def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
       sys.error("Can't do a SelectSquare for togykumalak")
 
+    def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
+      sys.error("Can't do a DiceRoll for togykumalak")
+
+    def undo: Validated[String, Undo] = sys.error("Can't do Undo for togykumalak")
+
+    def endTurn: Validated[String, EndTurn] = sys.error("Can't do EndTurn for togykumalak")
+
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
+
+    def resignStatus(player: Player): Status.type => Status = _.Resign
 
     def move(
         from: Pos,
@@ -633,11 +897,17 @@ object Situation {
 
     def takebackable = s.takebackable
 
+    def forcedAction: Option[Action] = None
+
     lazy val check: Boolean = false
 
     def checkSquare = None
 
     def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
+
+    def insufficientMaterialStatus: Status.type => Status = _.Outoftime
+
+    def outOfTimeStatus: Status.type => Status = _.Outoftime
 
     def threefoldRepetition: Boolean = false
 
@@ -658,15 +928,43 @@ object Situation {
 
     def dropsAsDrops: List[Drop] = s.dropsAsDrops.map(Drop.Go)
 
+    def lifts: List[Lift] = List.empty
+
     def passes: List[Pass] = pass.fold[List[Pass]](_ => List.empty, p => List(p))
 
     def selectSquaresAction: List[SelectSquares] =
       selectSquares(List[Pos]().empty)
         .fold[List[SelectSquares]](_ => List.empty, ss => List(ss))
 
+    def diceRolls: List[DiceRoll] = List.empty
+
+    def undos: List[Undo] = List.empty
+
+    def endTurns: List[EndTurn] = List.empty
+
+    def canDrop: Boolean = s.canDrop
+
+    def canOnlyDrop: Boolean = s.canOnlyDrop
+
+    def canLift: Boolean = false
+
+    def canOnlyLift: Boolean = false
+
+    def canRollDice: Boolean = false
+
+    def canOnlyRollDice: Boolean = false
+
+    def canUndo: Boolean = false
+
+    def canEndTurn: Boolean = false
+
+    def canOnlyEndTurn: Boolean = false
+
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
+
+    def resignStatus(player: Player): Status.type => Status = _.Resign
 
     def move(
         from: Pos,
@@ -686,6 +984,8 @@ object Situation {
       case _                                => sys.error("Not passed Go objects")
     }
 
+    def lift(pos: Pos): Validated[String, Lift] = sys.error("Can't do a Lift for go")
+
     def pass: Validated[String, Pass] = s.pass().toEither.map(p => Pass.Go(p)).toValidated
 
     def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
@@ -699,6 +999,13 @@ object Situation {
       ).toEither
         .map(ss => SelectSquares.Go(ss))
         .toValidated
+
+    def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
+      sys.error("Can't do a DiceRoll for go")
+
+    def undo: Validated[String, Undo] = sys.error("Can't do Undo for go")
+
+    def endTurn: Validated[String, EndTurn] = sys.error("Can't do EndTurn for go")
 
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.Go(variant) => Go(s.withVariant(variant))
@@ -730,17 +1037,24 @@ object Situation {
         s.player
       ) {
 
-    lazy val moves: Map[Pos, List[Move]] = s.moves.map { case (p: backgammon.Pos, l: List[backgammon.Move]) =>
-      (Pos.Backgammon(p), l.map(Move.Backgammon))
-    }
+    lazy val moves: Map[Pos, List[Move]] =
+      s.moves.map { case (p: backgammon.Pos, l: List[backgammon.Move]) =>
+        (Pos.Backgammon(p), l.map(Move.Backgammon))
+      }
 
-    def takebackable = true
+    def takebackable = false
+
+    def forcedAction: Option[Action] = s.forcedAction.map(Action.wrap)
 
     lazy val check: Boolean = false
 
     def checkSquare = None
 
     def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
+
+    def insufficientMaterialStatus: Status.type => Status = s.insufficientMaterialStatus
+
+    def outOfTimeStatus: Status.type => Status = s.outOfTimeStatus
 
     def threefoldRepetition: Boolean = false
     def isRepetition: Boolean        = false
@@ -755,27 +1069,74 @@ object Situation {
       case (p: backgammon.Pos, l: List[backgammon.Pos]) => (Pos.Backgammon(p), l.map(Pos.Backgammon))
     }
 
-    def drops: Option[List[Pos]] = None
+    def drops: Option[List[Pos]] = s.drops.map(_.map(Pos.Backgammon))
 
-    def dropsByRole: Option[Map[Role, List[Pos]]] = None
+    def dropsByRole: Option[Map[Role, List[Pos]]] = s.dropsByRole.map(_.map {
+      case (r: backgammon.Role, p: List[backgammon.Pos]) => (Role.BackgammonRole(r), p.map(Pos.Backgammon))
+    })
 
-    def dropsAsDrops: List[Drop] = List.empty
+    def dropsAsDrops: List[Drop] = s.dropsAsDrops.map(Drop.Backgammon)
+
+    def lifts: List[Lift] = s.lifts.map(Lift.Backgammon)
 
     def passes: List[Pass] = List.empty
 
     def selectSquaresAction: List[SelectSquares] = List.empty
 
-    def drop(role: Role, pos: Pos): Validated[String, Drop] =
-      sys.error("Can't do a Drop for backgammon")
+    def diceRolls: List[DiceRoll] = s.diceRolls.map(DiceRoll.Backgammon)
+
+    def undos: List[Undo] = s.undos.map(Undo.Backgammon)
+
+    def endTurns: List[EndTurn] = s.endTurns.map(EndTurn.Backgammon)
+
+    def canDrop: Boolean = s.canDrop
+
+    def canOnlyDrop: Boolean = s.canOnlyDrop
+
+    def canLift: Boolean = s.canLift
+
+    def canOnlyLift: Boolean = s.canOnlyLift
+
+    def canRollDice: Boolean = s.canRollDice
+
+    def canOnlyRollDice: Boolean = s.canOnlyRollDice
+
+    def canUndo: Boolean = s.canUndo
+
+    def canEndTurn: Boolean = s.canEndTurn
+
+    def canOnlyEndTurn: Boolean = s.canOnlyEndTurn
+
+    def drop(role: Role, pos: Pos): Validated[String, Drop] = (role, pos) match {
+      case (Role.BackgammonRole(role), Pos.Backgammon(pos)) =>
+        s.drop(role, pos).toEither.map(d => Drop.Backgammon(d)).toValidated
+      case _                                                => sys.error("Not passed Backgammon objects")
+    }
+
+    def lift(pos: Pos): Validated[String, Lift] = pos match {
+      case Pos.Backgammon(pos) => s.lift(pos).toEither.map(l => Lift.Backgammon(l)).toValidated
+      case _                   => sys.error("Not passed Backgammon objects")
+    }
 
     def pass: Validated[String, Pass] = sys.error("Can't do a Pass for backgammon")
 
     def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
       sys.error("Can't do a SelectSquare for togykumalak")
 
+    def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
+      s.diceRoll(dice).map(dr => DiceRoll.Backgammon(dr))
+
+    def undo: Validated[String, Undo] =
+      s.undo.toEither.map(u => Undo.Backgammon(u)).toValidated
+
+    def endTurn: Validated[String, EndTurn] =
+      s.endTurn.toEither.map(et => EndTurn.Backgammon(et)).toValidated
+
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
+
+    def resignStatus(player: Player): Status.type => Status = s.resignStatus(player)
 
     def move(
         from: Pos,
@@ -787,7 +1148,7 @@ object Situation {
         partialCaptures: Boolean = false
     ): Validated[String, Move] = (from, to) match {
       case (Pos.Backgammon(from), Pos.Backgammon(to)) =>
-        s.move(from, to, promotion.map(_.toBackgammon)).toEither.map(m => Move.Backgammon(m)).toValidated
+        s.move(from, to).toEither.map(m => Move.Backgammon(m)).toValidated
       case _                                          => sys.error("Not passed Backgammon objects")
     }
 
@@ -832,11 +1193,17 @@ object Situation {
 
     def takebackable = true
 
+    def forcedAction: Option[Action] = None
+
     lazy val check: Boolean = false
 
     def checkSquare = None
 
     def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
+
+    def insufficientMaterialStatus: Status.type => Status = _.Outoftime
+
+    def outOfTimeStatus: Status.type => Status = _.Outoftime
 
     def threefoldRepetition: Boolean = false
     def isRepetition: Boolean        = false
@@ -857,21 +1224,58 @@ object Situation {
 
     def dropsAsDrops: List[Drop] = List.empty
 
+    def lifts: List[Lift] = List.empty
+
     def passes: List[Pass] = List.empty
 
     def selectSquaresAction: List[SelectSquares] = List.empty
 
+    def diceRolls: List[DiceRoll] = List.empty
+
+    def undos: List[Undo] = List.empty
+
+    def endTurns: List[EndTurn] = List.empty
+
+    def canDrop: Boolean = false
+
+    def canOnlyDrop: Boolean = false
+
+    def canLift: Boolean = false
+
+    def canOnlyLift: Boolean = false
+
+    def canRollDice: Boolean = false
+
+    def canOnlyRollDice: Boolean = false
+
+    def canUndo: Boolean = false
+
+    def canEndTurn: Boolean = false
+
+    def canOnlyEndTurn: Boolean = false
+
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
       sys.error("Can't do a Drop for abalone")
+
+    def lift(pos: Pos): Validated[String, Lift] = sys.error("Can't do a Lift for abalone")
 
     def pass: Validated[String, Pass] = sys.error("Can't do a Pass for abalone")
 
     def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
       sys.error("Can't do a SelectSquare for togykumalak")
 
+    def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
+      sys.error("Can't do a DiceRoll for abalone")
+
+    def undo: Validated[String, Undo] = sys.error("Can't do Undo for abalone")
+
+    def endTurn: Validated[String, EndTurn] = sys.error("Can't do EndTurn for abalone")
+
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
     val status: Option[Status] = s.status
+
+    def resignStatus(player: Player): Status.type => Status = _.Resign
 
     def move(
         from: Pos,

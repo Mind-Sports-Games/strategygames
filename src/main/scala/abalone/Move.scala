@@ -2,7 +2,6 @@ package strategygames.abalone
 import strategygames.MoveMetrics
 
 import strategygames.abalone.format.Uci
-import cats.syntax.option._
 
 case class Move(
     piece: Piece,
@@ -27,8 +26,6 @@ case class Move(
   def promotes = promotion.isDefined
 
   def player = piece.player
-
-  def withPromotion(op: Option[PromotableRole]): Option[Move] = None
 
   def withMetrics(m: MoveMetrics) = copy(metrics = m)
 

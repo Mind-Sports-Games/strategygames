@@ -33,10 +33,12 @@ abstract class Variant private[variant] (
 
   def materialImbalanceVariant: Boolean = false
 
-  def dropsVariant: Boolean     = false
-  def onlyDropsVariant: Boolean = false
-  def hasGameScore: Boolean     = false
-  def canOfferDraw: Boolean     = true
+  def dropsVariant: Boolean      = false
+  def onlyDropsVariant: Boolean  = false
+  def hasDetachedPocket: Boolean = false
+
+  def hasGameScore: Boolean = false
+  def canOfferDraw: Boolean = true
 
   def repetitionEnabled: Boolean       = true
   def useFairyOptionalGameEnd: Boolean = false
@@ -60,7 +62,7 @@ abstract class Variant private[variant] (
 
   // looks like this is only to allow King to be a valid promotion piece
   // in just atomic, so can leave as true for now
-  def isValidPromotion(promotion: Option[PromotableRole]): Boolean = true
+  def isValidPromotion(@nowarn promotion: Option[PromotableRole]): Boolean = true
 
   def validMoves(situation: Situation): Map[Pos, List[Move]] =
     if (situation.board.uciMoves.size < Binary.maxPlies) legalMoves(situation)
@@ -229,7 +231,7 @@ abstract class Variant private[variant] (
   @nowarn def finalizeBoard(board: Board, uci: format.Uci, captured: Option[Piece]): Board =
     board
 
-  def valid(board: Board, strict: Boolean): Boolean =
+  def valid(board: Board, @nowarn strict: Boolean): Boolean =
     Api.validateFEN(fairysfName.name, Forsyth.exportBoard(board))
 
   val roles: List[Role] = Role.all
@@ -269,7 +271,9 @@ object Variant {
     MiniXiangqi,
     Flipello,
     Flipello10,
-    Amazons
+    Amazons,
+    BreakthroughTroyka,
+    MiniBreakthroughTroyka
   )
   val byId                    = all map { v =>
     (v.id, v)
@@ -300,7 +304,9 @@ object Variant {
     strategygames.fairysf.variant.MiniXiangqi,
     strategygames.fairysf.variant.Flipello,
     strategygames.fairysf.variant.Flipello10,
-    strategygames.fairysf.variant.Amazons
+    strategygames.fairysf.variant.Amazons,
+    strategygames.fairysf.variant.BreakthroughTroyka,
+    strategygames.fairysf.variant.MiniBreakthroughTroyka
   )
 
   val divisionSensibleVariants: Set[Variant] = Set()

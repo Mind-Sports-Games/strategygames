@@ -2,9 +2,6 @@ package strategygames.abalone
 
 import strategygames.{ GameFamily, P1, P2, Player }
 
-import cats.implicits._
-import ornicar.scalalib.Zero
-
 sealed trait Role {
   val forsyth: Char
   // lazy val forsythUpper: Char = forsyth.toUpper //this contradicts what the piece is now!

@@ -11,7 +11,7 @@ import strategygames.backgammon.variant.Variant
   */
 object Forsyth {
 
-  val initial = FEN("9S,9S,9S,9S,9S,9S,9S,9S,9S/9S,9S,9S,9S,9S,9S,9S,9S,9S 0 0 S 1")
+  val initial = FEN("5S,3,3s,1,5s,4,2S/5s,3,3S,1,5S,4,2s[] - - w 0 0 1")
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
     Some(
@@ -22,8 +22,8 @@ object Forsyth {
           variant = variant
         ),
         fen.value.split(' ')(3) match {
-          case "S" => P1
-          case "N" => P2
+          case "w" => P1
+          case "b" => P2
           case _   => sys.error("Invalid player in fen")
         }
       ).withHistory(
@@ -41,7 +41,10 @@ object Forsyth {
   case class SituationPlus(situation: Situation, fullTurnCount: Int) {
 
     def turnCount = fullTurnCount * 2 - situation.player.fold(2, 1)
-    // when we get a multiaction variant we should set this
+    // This is incorrect, but does it matter? We haven't set this for Monster Chess
+    // Think this is used when created fromPosition and we wouldn't necessarily need
+    // to know the number of plies that have happened from before we start
+    // See also fairysf equivalent
     def plies     = turnCount
 
   }
@@ -66,25 +69,22 @@ object Forsyth {
     }
 
   def >>(game: Game): FEN = {
-    val boardFen = boardPart(game.situation.board)
+    val boardFen = exportBoard(game.situation.board)
     val scoreStr = game.situation.board.history.score.fenStr
-    val player   = game.situation.player.fold('S', 'N')
+    val player   = game.situation.player.fold('w', 'b')
     val moves    = game.situation.board.history.halfMoveClock
-    FEN(s"${boardFen} ${scoreStr} ${player} ${moves}")
+    FEN(s"${boardFen} ${player} ${scoreStr} ${moves}")
   }
 
-  def exportBoard(board: Board): String = {
-    val boardFen = boardPart(board)
-    val scoreStr = board.history.score.fenStr
-    s"${boardFen} ${scoreStr}"
-  }
+  def exportBoard(board: Board): String =
+    s"${boardPart(board)}[${pocketPart(board)}] ${board.unusedDiceStr} ${board.usedDiceStr}"
 
   def boardPart(board: Board): String = {
     val fen   = new scala.collection.mutable.StringBuilder(70)
     var empty = 0
     for (y <- Rank.allReversed) {
       empty = 0
-      val files = if (y.index == 0) File.all else File.allReversed
+      val files = if (y.index == 0) File.allReversed else File.all
       for (x <- files) {
         board(x, y) match {
           case None                 => empty = empty + 1
@@ -94,7 +94,7 @@ object Forsyth {
               empty = 0
             }
             if (piece.role == Role.defaultRole)
-              fen.append(s"${count}${piece.forsyth.toString.toUpperCase()},")
+              fen.append(s"${count}${piece.forsyth.toString},")
             else fen.append(s"${piece.forsyth},")
         }
       }
@@ -103,6 +103,18 @@ object Forsyth {
     }
     fen.toString.replace(",/", "/").dropRight(1)
   }
+
+  def pocketPart(board: Board) =
+    board.pocketData match {
+      case Some(PocketData(pockets)) =>
+        List(
+          (if (pockets.p1.roles.isEmpty) None
+           else Some(s"${pockets.p1.roles.size}${Role.defaultRole.forsythUpper}")),
+          (if (pockets.p2.roles.isEmpty) None
+           else Some(s"${pockets.p2.roles.size}${Role.defaultRole.forsyth}"))
+        ).flatten.mkString(",")
+      case _                         => ""
+    }
 
   def boardAndPlayer(situation: Situation): String =
     boardAndPlayer(situation.board, situation.player)

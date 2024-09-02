@@ -1,6 +1,7 @@
 package strategygames
 
 sealed trait Role {
+  val gameLogic: GameLogic
   val forsyth: Char
   // draughts.Role.pdn will be referred to by pgn from this point
   val pgn: Char
@@ -28,6 +29,7 @@ sealed trait PromotableRole extends Role {
 object Role {
 
   final case class ChessRole(r: chess.Role) extends Role {
+    val gameLogic           = GameLogic.Chess()
     val forsyth             = r.forsyth
     val pgn                 = r.pgn
     val binaryInt           = r.binaryInt
@@ -39,6 +41,7 @@ object Role {
   }
 
   final case class DraughtsRole(r: draughts.Role) extends Role {
+    lazy val gameLogic      = GameLogic.Draughts()
     lazy val forsyth        = r.forsyth
     lazy val pgn            = r.pdn
     lazy val binaryInt      = r.binaryInt
@@ -50,6 +53,7 @@ object Role {
   }
 
   final case class FairySFRole(r: fairysf.Role) extends Role {
+    lazy val gameLogic      = GameLogic.FairySF()
     lazy val forsyth        = r.forsyth
     lazy val pgn            = r.pgn
     lazy val binaryInt      = r.binaryInt
@@ -61,6 +65,7 @@ object Role {
   }
 
   final case class SamuraiRole(r: samurai.Role) extends Role {
+    lazy val gameLogic      = GameLogic.Samurai()
     lazy val forsyth        = r.forsyth
     lazy val pgn            = r.pgn
     lazy val binaryInt      = r.binaryInt
@@ -72,6 +77,7 @@ object Role {
   }
 
   final case class TogyzkumalakRole(r: togyzkumalak.Role) extends Role {
+    lazy val gameLogic      = GameLogic.Togyzkumalak()
     lazy val forsyth        = r.forsyth
     lazy val pgn            = r.pgn
     lazy val binaryInt      = r.binaryInt
@@ -83,6 +89,7 @@ object Role {
   }
 
   final case class GoRole(r: go.Role) extends Role {
+    lazy val gameLogic      = GameLogic.Go()
     lazy val forsyth        = r.forsyth
     lazy val pgn            = r.pgn
     lazy val binaryInt      = r.binaryInt
@@ -94,17 +101,19 @@ object Role {
   }
 
   final case class BackgammonRole(r: backgammon.Role) extends Role {
+    lazy val gameLogic      = GameLogic.Backgammon()
     lazy val forsyth        = r.forsyth
     lazy val pgn            = r.pgn
     lazy val binaryInt      = r.binaryInt
     lazy val hashInt        = r.hashInt
     lazy val name           = r.name
     lazy val groundName     = r.groundName
-    lazy val storable       = false
+    lazy val storable       = r.storable
     override def toString() = r.name
   }
 
   final case class AbaloneRole(r: abalone.Role) extends Role {
+    lazy val gameLogic      = GameLogic.Abalone()
     lazy val forsyth        = r.forsyth
     lazy val pgn            = r.pgn
     lazy val binaryInt      = r.binaryInt
@@ -116,6 +125,7 @@ object Role {
   }
 
   final case class ChessPromotableRole(r: chess.PromotableRole) extends PromotableRole {
+    lazy val gameLogic                              = GameLogic.Chess()
     lazy val forsyth                                = r.forsyth
     lazy val pgn                                    = r.pgn
     lazy val binaryInt                              = r.binaryInt
@@ -135,6 +145,7 @@ object Role {
   }
 
   final case class DraughtsPromotableRole(r: draughts.PromotableRole) extends PromotableRole {
+    lazy val gameLogic                              = GameLogic.Draughts()
     lazy val forsyth                                = r.forsyth
     lazy val pgn                                    = r.pdn
     lazy val binaryInt                              = r.binaryInt
@@ -154,6 +165,7 @@ object Role {
   }
 
   final case class FairySFPromotableRole(r: fairysf.PromotableRole) extends PromotableRole {
+    lazy val gameLogic                              = GameLogic.FairySF()
     lazy val forsyth                                = r.forsyth
     lazy val pgn                                    = r.pgn
     lazy val binaryInt                              = r.binaryInt
@@ -325,6 +337,30 @@ object Role {
     case GameLogic.Abalone()      => sys.error("allPromotableByName not implemented for abalone")
   }
 
+  def allPromotableByGroundName(lib: GameLogic): Map[String, PromotableRole] = lib match {
+    case GameLogic.Chess()        =>
+      chess.Role.allPromotableByGroundName.map { case (n, r) => (n, ChessPromotableRole(r)) }
+    case GameLogic.FairySF()      =>
+      fairysf.Role.allPromotableByGroundName.map { case (n, r) => (n, FairySFPromotableRole(r)) }
+    case GameLogic.Draughts()     => sys.error("allPromotableByGroundName not implemented for draughts")
+    case GameLogic.Samurai()      => sys.error("allPromotableByGroundName not implemented for samurai")
+    case GameLogic.Togyzkumalak() => sys.error("allPromotableByGroundName not implemented for togyzkumalak")
+    case GameLogic.Go()           => sys.error("allPromotableByGroundName not implemented for go")
+    case GameLogic.Backgammon()   => sys.error("allPromotableByGroundName not implemented for backgammon")
+  }
+
+  def allPromotableByGroundName(lib: GameLogic, gf: GameFamily): Map[String, PromotableRole] = lib match {
+    case GameLogic.Chess()        =>
+      chess.Role.allPromotableByGroundName.map { case (n, r) => (n, ChessPromotableRole(r)) }
+    case GameLogic.FairySF()      =>
+      fairysf.Role.allPromotableByGroundName(gf).map { case (n, r) => (n, FairySFPromotableRole(r)) }
+    case GameLogic.Draughts()     => sys.error("allPromotableByGroundName not implemented for draughts")
+    case GameLogic.Samurai()      => sys.error("allPromotableByGroundName not implemented for samurai")
+    case GameLogic.Togyzkumalak() => sys.error("allPromotableByGroundName not implemented for togyzkumalak")
+    case GameLogic.Go()           => sys.error("allPromotableByGroundName not implemented for go")
+    case GameLogic.Backgammon()   => sys.error("allPromotableByGroundName not implemented for backgammon")
+  }
+
   def allPromotableByForsyth(lib: GameLogic): Map[Char, PromotableRole] = lib match {
     case GameLogic.Draughts()     =>
       draughts.Role.allPromotableByForsyth.map { case (f, r) => (f, DraughtsPromotableRole(r)) }
@@ -430,7 +466,7 @@ object Role {
     case GameLogic.Samurai()      => List()
     case GameLogic.Togyzkumalak() => List()
     case GameLogic.Go()           => List()
-    case GameLogic.Backgammon()   => List()
+    case GameLogic.Backgammon()   => backgammon.Role.storable.map(BackgammonRole)
     case GameLogic.Abalone()      => List()
   }
 

@@ -10,6 +10,12 @@ class ClockByoyomiTest extends ShogiTest {
     })
     .start
 
+  val fakeClock60Plus1 = ByoyomiClock(60, 1, 0, 0)
+    .copy(timestamper = new Timestamper {
+      val now = Timestamp(0)
+    })
+    .start
+
   val fakeClock600 = ByoyomiClock(600, 0, 0, 0)
     .copy(timestamper = new Timestamper {
       val now = Timestamp(0)
@@ -34,14 +40,14 @@ class ClockByoyomiTest extends ShogiTest {
     })
     .start
 
-  def advance(c: Clock, t: Int) =
+  def advance(c: ClockBase, t: Int) =
     c.withTimestamper(new Timestamper {
       val now = c.timestamper.now + Centis(t)
     })
 
   "play with a clock" should {
     val clock = ByoyomiClock(5 * 60 * 1000, 0, 0, 0)
-    val game  = makeGame.copy(clock=Some(clock.start))
+    val game  = makeGame.copy(clock = Some(clock.start))
     "new game" in {
       game.clock map { _.player } must_== Some(Player.P1)
     }
@@ -80,14 +86,15 @@ class ClockByoyomiTest extends ShogiTest {
   "lag compensation" should {
     def durOf(lag: Int) = MoveMetrics(clientLag = Some(Centis(lag)))
 
-    def clockStep(clock: Clock, wait: Int, lags: Int*) = {
+    def clockStep(clock: ClockBase, wait: Int, lags: Int*) = {
       (lags.foldLeft(clock) { (clk, lag) =>
         advance(clk.step(), wait + lag) step durOf(lag)
       } currentClockFor Player.P2).time.centis
     }
 
-    def clockStep60(w: Int, l: Int*)  = clockStep(fakeClock60, w, l: _*)
-    def clockStep600(w: Int, l: Int*) = clockStep(fakeClock600, w, l: _*)
+    def clockStep60(w: Int, l: Int*)      = clockStep(fakeClock60, w, l: _*)
+    def clockStep60Plus1(w: Int, l: Int*) = clockStep(fakeClock60Plus1, w, l: _*)
+    def clockStep600(w: Int, l: Int*)     = clockStep(fakeClock600, w, l: _*)
 
     def clockStart(lag: Int) = {
       val clock = fakeClock60.step()
@@ -124,6 +131,15 @@ class ClockByoyomiTest extends ShogiTest {
       }
       "1s move, big lag" in {
         clockStep600(100, 400) must_== 598 * 100
+      }
+      "1s move, no lag with increment" in {
+        clockStep60Plus1(100, 0) must_== 60 * 100
+      }
+      "2s move, no lag with increment" in {
+        clockStep60Plus1(200, 0) must_== 59 * 100
+      }
+      "0s move, no lag with increment" in {
+        clockStep60Plus1(0, 0) must_== 61 * 100
       }
     }
 

@@ -124,7 +124,13 @@ object Replay {
   final case class Backgammon(r: backgammon.Replay)
       extends Replay(
         Game.Backgammon(r.setup),
-        r.actions.map((m: backgammon.Move) => Move.Backgammon(m)),
+        r.actions.map {
+          case m: backgammon.Move      => Move.Backgammon(m)
+          case d: backgammon.Drop      => Drop.Backgammon(d)
+          case l: backgammon.Lift      => Lift.Backgammon(l)
+          case dr: backgammon.DiceRoll => DiceRoll.Backgammon(dr)
+          case et: backgammon.EndTurn  => EndTurn.Backgammon(et)
+        },
         Game.Backgammon(r.state)
       ) {
     def copy(state: Game): Replay = state match {
@@ -263,8 +269,6 @@ object Replay {
     case (GameLogic.Backgammon(), FEN.Backgammon(initialFen), Variant.Backgammon(variant))       =>
       backgammon.Replay.gameWithUciWhileValid(
         actionStrs,
-        startPlayer,
-        activePlayer,
         initialFen,
         variant
       ) match {

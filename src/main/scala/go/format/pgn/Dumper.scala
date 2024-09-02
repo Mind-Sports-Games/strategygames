@@ -1,13 +1,21 @@
 package strategygames.go
 package format.pgn
 
+import scala.annotation.nowarn
+
 object Dumper {
 
-  def apply(situation: Situation, data: strategygames.go.Drop, next: Situation): String = data.toUci.uci
+  def apply(@nowarn situation: Situation, data: strategygames.go.Drop, @nowarn next: Situation): String =
+    data.toUci.uci
 
-  def apply(situation: Situation, data: strategygames.go.Pass, next: Situation): String = data.toUci.uci
+  def apply(@nowarn situation: Situation, data: strategygames.go.Pass, @nowarn next: Situation): String =
+    data.toUci.uci
 
-  def apply(situation: Situation, data: strategygames.go.SelectSquares, next: Situation): String =
+  def apply(
+      @nowarn situation: Situation,
+      data: strategygames.go.SelectSquares,
+      @nowarn next: Situation
+  ): String =
     data.toUci.uci
 
   def apply(data: strategygames.go.Drop): String =

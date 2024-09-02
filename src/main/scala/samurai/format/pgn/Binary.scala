@@ -1,6 +1,8 @@
 package strategygames.samurai
 package format.pgn
 
+import scala.annotation.nowarn
+
 import strategygames.{ ActionStrs, GameFamily }
 import strategygames.samurai.format.Uci
 
@@ -27,7 +29,8 @@ object Binary {
 
   private object Reader {
 
-    private val maxPlies = 600
+    // If changing this, consider changing other gamelogics and also lila game maxPlies
+    private val maxPlies = 1000
 
     def actionStrs(bs: List[Byte]): ActionStrs          = actionStrs(bs, maxPlies)
     def actionStrs(bs: List[Byte], nb: Int): ActionStrs = toActionStrs(intPlies(bs map toInt, nb, None))
@@ -76,7 +79,7 @@ object Binary {
 
   private object Writer {
 
-    def ply(gf: GameFamily, str: String): List[Byte] =
+    def ply(@nowarn gf: GameFamily, str: String): List[Byte] =
       (str match {
         case Uci.Move.moveR(src, dst, promotion) => moveUci(src, dst, promotion)
         case _                                   => sys.error(s"Invalid move to write: ${str}")

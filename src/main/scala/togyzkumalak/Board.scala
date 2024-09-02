@@ -13,8 +13,8 @@ case class Board(
   def apply(at: Pos): Option[Piece] = (pieces get at).map(_._1)
   def apply(file: File, rank: Rank) = pieces get Pos(file, rank)
 
-  lazy val actors: Map[Pos, Actor] = pieces map { case (pos, (piece, count)) =>
-    (pos, Actor(piece, pos, this))
+  lazy val actors: Map[Pos, (Actor, Int)] = pieces map { case (pos, (piece, count)) =>
+    (pos, (Actor(piece, pos, this), count))
   }
 
   lazy val stoneCount: Int                    =
@@ -52,7 +52,7 @@ case class Board(
 
   def materialImbalance: Int = variant.materialImbalance(this)
 
-  override def toString = s"$variant Position after ${history.lastMove}"
+  override def toString = s"$variant Position after ${history.recentTurnUciString}"
 }
 
 object Board {

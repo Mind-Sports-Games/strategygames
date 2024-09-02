@@ -1,6 +1,6 @@
 package strategygames
 package format.pgn
-import strategygames.{ ClockConfig, FischerClock }
+import strategygames.{ Clock, ClockConfig }
 
 import org.joda.time.DateTimeZone
 import org.joda.time.format.DateTimeFormat
@@ -30,7 +30,7 @@ case class Tags(value: List[Tag]) extends AnyVal {
   def clockConfig: Option[ClockConfig] =
     value.collectFirst { case Tag(Tag.TimeControl, str) =>
       str
-    } flatMap FischerClock.readPgnConfig
+    } flatMap Clock.readPgnConfig
 
   def draughtsVariant: Option[strategygames.draughts.variant.Variant] =
     apply(_.GameType).fold {
@@ -149,6 +149,7 @@ case class Tags(value: List[Tag]) extends AnyVal {
       case Some(strategygames.variant.Variant.Backgammon(_))   => backgammonFen.map(format.FEN.Backgammon)
       case Some(strategygames.variant.Variant.Abalone(_))   => abaloneFen.map(format.FEN.Abalone)
       case Some(strategygames.variant.Variant.Chess(_)) | None => chessFen.map(format.FEN.Chess)
+      case Some(_)                                             => sys.error("invalid variant type for fen")
     }
 
   def exists(which: Tag.type => TagType): Boolean =
@@ -280,11 +281,5 @@ object Tag {
   def tagType(name: String) =
     (tagTypesByLowercase get name.toLowerCase) | Unknown(name)
 
-  def timeControl(clock: Option[ClockConfig]) =
-    Tag(
-      TimeControl,
-      clock.fold("-") { c =>
-        s"${c.limit.roundSeconds}+${c.increment.roundSeconds}"
-      }
-    )
+  def timeControl(clock: Option[ClockConfig]) = Tag(TimeControl, clock.fold("-") { _.toString })
 }

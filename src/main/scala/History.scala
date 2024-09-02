@@ -21,7 +21,9 @@ case class Score(p1: Int = 0, p2: Int = 0) {
 }
 
 sealed abstract class History(
-    val lastMove: Option[Uci] = None,
+    val lastTurn: List[Uci] = List.empty,
+    val currentTurn: List[Uci] = List.empty,
+    val forcedTurn: Boolean = false,
     val positionHashes: PositionHash = Array.empty,
     val variant: Option[Variant] = None,
     val castles: chess.Castles = chess.Castles.all,
@@ -33,9 +35,23 @@ sealed abstract class History(
     val halfMoveClock: Int = 0
 ) {
 
+  lazy val lastAction: Option[Uci] =
+    if (currentTurn.nonEmpty) currentTurn.reverse.headOption else lastTurn.reverse.headOption
+
+  lazy val recentTurn: List[Uci] = if (currentTurn.nonEmpty) currentTurn else lastTurn
+
+  private def turnToUciString(turn: List[Uci]): Option[String] =
+    if (turn.nonEmpty) Some(turn.map(_.uci).mkString(",")) else None
+
+  lazy val lastTurnUciString = turnToUciString(lastTurn)
+
+  lazy val currentTurnUciString = turnToUciString(currentTurn)
+
+  lazy val recentTurnUciString = turnToUciString(recentTurn)
+
   override def toString = {
     val positions = (positionHashes grouped Hash.size).toList
-    s"${lastMove.fold("-")(_.uci)} ${positions.map(Hash.debug).mkString(" ")}"
+    s"${recentTurnUciString.getOrElse("-")} ${positions.map(Hash.debug).mkString(" ")}"
   }
 
 }
@@ -44,7 +60,8 @@ object History {
 
   final case class Chess(h: chess.History)
       extends History(
-        lastMove = h.lastMove.map(Uci.wrap),
+        lastTurn = h.lastTurn.map(Uci.wrap),
+        currentTurn = h.currentTurn.map(Uci.wrap),
         positionHashes = h.positionHashes,
         castles = h.castles,
         checkCount = h.checkCount,
@@ -54,7 +71,7 @@ object History {
 
   final case class Draughts(h: draughts.DraughtsHistory)
       extends History(
-        lastMove = h.lastMove.map(Uci.wrap),
+        lastTurn = h.lastMove.map(Uci.wrap).toList,
         positionHashes = h.positionHashes,
         variant = Some(Variant.Draughts(h.variant)),
         kingMoves = h.kingMoves
@@ -62,21 +79,24 @@ object History {
 
   final case class FairySF(h: fairysf.History)
       extends History(
-        lastMove = h.lastMove.map(Uci.wrap),
+        lastTurn = h.lastTurn.map(Uci.wrap),
+        currentTurn = h.currentTurn.map(Uci.wrap),
         positionHashes = h.positionHashes,
         halfMoveClock = h.halfMoveClock
       )
 
   final case class Samurai(h: samurai.History)
       extends History(
-        lastMove = h.lastMove.map(Uci.wrap),
+        lastTurn = h.lastTurn.map(Uci.wrap),
+        currentTurn = h.currentTurn.map(Uci.wrap),
         positionHashes = h.positionHashes,
         halfMoveClock = h.halfMoveClock
       )
 
   final case class Togyzkumalak(h: togyzkumalak.History)
       extends History(
-        lastMove = h.lastMove.map(Uci.wrap),
+        lastTurn = h.lastTurn.map(Uci.wrap),
+        currentTurn = h.currentTurn.map(Uci.wrap),
         positionHashes = h.positionHashes,
         halfMoveClock = h.halfMoveClock,
         score = h.score
@@ -84,7 +104,8 @@ object History {
 
   final case class Go(h: go.History)
       extends History(
-        lastMove = h.lastMove.map(Uci.wrap),
+        lastTurn = h.lastTurn.map(Uci.wrap),
+        currentTurn = h.currentTurn.map(Uci.wrap),
         positionHashes = h.positionHashes,
         halfMoveClock = h.halfMoveClock,
         score = h.score,
@@ -93,7 +114,9 @@ object History {
 
   final case class Backgammon(h: backgammon.History)
       extends History(
-        lastMove = h.lastMove.map(Uci.wrap),
+        lastTurn = h.lastTurn.map(Uci.wrap),
+        currentTurn = h.currentTurn.map(Uci.wrap),
+        forcedTurn = h.forcedTurn,
         positionHashes = h.positionHashes,
         halfMoveClock = h.halfMoveClock,
         score = h.score
@@ -101,7 +124,8 @@ object History {
 
   final case class Abalone(h: abalone.History)
       extends History(
-        lastMove = h.lastMove.map(Uci.wrap),
+        lastTurn = h.lastTurn.map(Uci.wrap),
+        currentTurn = h.currentTurn.map(Uci.wrap),
         positionHashes = h.positionHashes,
         halfMoveClock = h.halfMoveClock,
         score = h.score
@@ -114,12 +138,14 @@ object History {
   implicit def togyzkumalakHistory(h: togyzkumalak.History) = Togyzkumalak(h)
   implicit def goHistory(h: go.History)                     = Go(h)
   implicit def backgammonHistory(h: backgammon.History)     = Backgammon(h)
-  implicit def abaloneHistory(h: abalone.History)     = Abalone(h)
+  implicit def abaloneHistory(h: abalone.History)           = Abalone(h)
 
   // lila
   def apply(
       lib: GameLogic,
-      lastMove: Option[Uci] = None,
+      lastTurn: List[Uci] = List.empty,
+      currentTurn: List[Uci] = List.empty,
+      forcedTurn: Boolean = false,
       positionHashes: PositionHash = Array.empty,
       variant: Option[Variant] = None,
       castles: chess.Castles = chess.Castles.all,
@@ -133,7 +159,7 @@ object History {
     case GameLogic.Draughts()     =>
       Draughts(
         draughts.DraughtsHistory(
-          lastMove = lastMove.map(lm => lm.toDraughts),
+          lastMove = lastTurn.headOption.map(lm => lm.toDraughts),
           positionHashes = positionHashes,
           variant = variant match {
             case Some(Variant.Draughts(variant)) => variant
@@ -146,7 +172,8 @@ object History {
     case GameLogic.Chess()        =>
       Chess(
         chess.History(
-          lastMove = lastMove.map(lm => lm.toChess),
+          lastTurn = lastTurn.map(lm => lm.toChess),
+          currentTurn = currentTurn.map(lm => lm.toChess),
           positionHashes = positionHashes,
           castles = castles,
           checkCount = checkCount,
@@ -157,7 +184,8 @@ object History {
     case GameLogic.FairySF()      =>
       FairySF(
         fairysf.History(
-          lastMove = lastMove.map(lm => lm.toFairySF),
+          lastTurn = lastTurn.map(lm => lm.toFairySF),
+          currentTurn = currentTurn.map(lm => lm.toFairySF),
           positionHashes = positionHashes,
           halfMoveClock = halfMoveClock
         )
@@ -165,7 +193,8 @@ object History {
     case GameLogic.Samurai()      =>
       Samurai(
         samurai.History(
-          lastMove = lastMove.map(lm => lm.toSamurai),
+          lastTurn = lastTurn.map(lm => lm.toSamurai),
+          currentTurn = currentTurn.map(lm => lm.toSamurai),
           positionHashes = positionHashes,
           halfMoveClock = halfMoveClock
         )
@@ -173,7 +202,8 @@ object History {
     case GameLogic.Togyzkumalak() =>
       Togyzkumalak(
         togyzkumalak.History(
-          lastMove = lastMove.map(lm => lm.toTogyzkumalak),
+          lastTurn = lastTurn.map(lm => lm.toTogyzkumalak),
+          currentTurn = currentTurn.map(lm => lm.toTogyzkumalak),
           positionHashes = positionHashes,
           halfMoveClock = halfMoveClock,
           score = score
@@ -182,7 +212,8 @@ object History {
     case GameLogic.Go()           =>
       Go(
         go.History(
-          lastMove = lastMove.map(lm => lm.toGo),
+          lastTurn = lastTurn.map(lm => lm.toGo),
+          currentTurn = currentTurn.map(lm => lm.toGo),
           positionHashes = positionHashes,
           halfMoveClock = halfMoveClock,
           score = score,
@@ -192,16 +223,19 @@ object History {
     case GameLogic.Backgammon()   =>
       Backgammon(
         backgammon.History(
-          lastMove = lastMove.map(lm => lm.toBackgammon),
+          lastTurn = lastTurn.map(lm => lm.toBackgammon),
+          currentTurn = currentTurn.map(lm => lm.toBackgammon),
+          forcedTurn = forcedTurn,
           positionHashes = positionHashes,
           halfMoveClock = halfMoveClock,
           score = score
         )
       )
-    case GameLogic.Abalone()   =>
+    case GameLogic.Abalone()      =>
       Abalone(
         abalone.History(
-          lastMove = lastMove.map(lm => lm.toAbalone),
+          lastTurn = lastTurn.map(lm => lm.toAbalone),
+          currentTurn = currentTurn.map(lm => lm.toAbalone),
           positionHashes = positionHashes,
           halfMoveClock = halfMoveClock,
           score = score

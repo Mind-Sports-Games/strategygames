@@ -2,11 +2,11 @@ name := "strategygames"
 
 organization := "org.playstrategy"
 
-version := "10.2.1-pstrat106"
+version := "10.2.1-pstrat154"
 
 scalaVersion := "2.13.5"
 
-val fairystockfishVersion = "0.0.18"
+val fairystockfishVersion = "0.0.20"
 
 libraryDependencies ++= List(
   "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
@@ -17,7 +17,7 @@ libraryDependencies ++= List(
   "org.typelevel"          %% "cats-core"                % "2.2.0",
   "org.playstrategy"        % "fairystockfish"           % fairystockfishVersion,
   "com.joansala.aalina"     % "aalina"                   % "2.1.0-pstrat2",
-  "com.joansala"            % "go-engine"                % "1.0.0-pstrat1.10"
+  "com.joansala"            % "go-engine"                % "1.0.0-pstrat1.11"
 )
 
 // Explicitly add in the linux-class path
@@ -34,6 +34,7 @@ resolvers ++= Seq(
   .getOrElse(Seq())
 
 scalacOptions ++= Seq(
+  "-Xfatal-warnings",
   "-encoding",
   "utf-8",
   "-explaintypes",

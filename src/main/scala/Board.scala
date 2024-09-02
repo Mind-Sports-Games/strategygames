@@ -6,12 +6,15 @@ sealed abstract class Board(
     val pieces: PieceMap,
     val history: History,
     val variant: Variant,
-    val pocketData: Option[PocketData] = None
+    val pocketData: Option[PocketData] = None,
+    val unusedDice: List[Int] = List.empty
 ) {
 
   def apply(at: Pos): Option[Piece] = (pieces get at).map(_._1)
 
   def hasPiece(p: Piece) = pieces.values.map(_._1) exists (p ==)
+
+  def usedDice: List[Int]
 
   def withHistory(h: History): Board
 
@@ -53,6 +56,8 @@ object Board {
       case _                => sys.error("Not passed Chess objects")
     }
 
+    def usedDice: List[Int] = List.empty
+
     def situationOf(player: Player): Situation = Situation.Chess(b.situationOf(player))
 
     def materialImbalance: Int = b.materialImbalance
@@ -91,6 +96,8 @@ object Board {
       case History.Draughts(h) => Draughts(b.withHistory(h))
       case _                   => sys.error("Not passed Draughts objects")
     }
+
+    def usedDice: List[Int] = List.empty
 
     def situationOf(player: Player): Situation = Situation.Draughts(b.situationOf(player))
 
@@ -132,6 +139,8 @@ object Board {
       case _                  => sys.error("Not passed FairySF objects")
     }
 
+    def usedDice: List[Int] = List.empty
+
     def situationOf(player: Player): Situation = Situation.FairySF(b.situationOf(player))
 
     def materialImbalance: Int = b.materialImbalance
@@ -170,6 +179,8 @@ object Board {
       case History.Samurai(h) => Samurai(b.withHistory(h))
       case _                  => sys.error("Not passed samurai objects")
     }
+
+    def usedDice: List[Int] = List.empty
 
     def situationOf(player: Player): Situation = Situation.Samurai(b.situationOf(player))
 
@@ -212,6 +223,8 @@ object Board {
       case _                       => sys.error("Not passed togyzkumalak objects")
     }
 
+    def usedDice: List[Int] = List.empty
+
     def situationOf(player: Player): Situation = Situation.Togyzkumalak(b.situationOf(player))
 
     def materialImbalance: Int = b.materialImbalance
@@ -252,6 +265,8 @@ object Board {
       case _             => sys.error("Not passed go objects")
     }
 
+    def usedDice: List[Int] = List.empty
+
     def situationOf(player: Player): Situation = Situation.Go(b.situationOf(player))
 
     def materialImbalance: Int = b.materialImbalance
@@ -285,13 +300,17 @@ object Board {
           (Pos.Backgammon(pos), (Piece.Backgammon(piece), count))
         },
         History.Backgammon(b.history),
-        Variant.Backgammon(b.variant)
+        Variant.Backgammon(b.variant),
+        b.pocketData.map(PocketData.Backgammon),
+        b.unusedDice
       ) {
 
     def withHistory(h: History): Board = h match {
       case History.Backgammon(h) => Backgammon(b.withHistory(h))
       case _                     => sys.error("Not passed backgammon objects")
     }
+
+    def usedDice: List[Int] = b.usedDice
 
     def situationOf(player: Player): Situation = Situation.Backgammon(b.situationOf(player))
 
@@ -332,6 +351,8 @@ object Board {
       case _                     => sys.error("Not passed abalone objects")
     }
 
+    def usedDice: List[Int] = List.empty
+
     def situationOf(player: Player): Situation = Situation.Abalone(b.situationOf(player))
 
     def materialImbalance: Int = b.materialImbalance
@@ -364,36 +385,50 @@ object Board {
       case (GameLogic.Draughts(), Variant.Draughts(variant))         =>
         Draughts(
           draughts.Board.apply(
-            pieces.map { case (Pos.Draughts(pos), (Piece.Draughts(piece), _)) => (pos, piece) },
+            pieces.flatMap {
+              case (Pos.Draughts(pos), (Piece.Draughts(piece), _)) => Some((pos, piece))
+              case _                                               => None
+            },
             variant
           )
         )
       case (GameLogic.Chess(), Variant.Chess(variant))               =>
         Chess(
           chess.Board.apply(
-            pieces.map { case (Pos.Chess(pos), (Piece.Chess(piece), _)) => (pos, piece) },
+            pieces.flatMap {
+              case (Pos.Chess(pos), (Piece.Chess(piece), _)) => Some((pos, piece))
+              case _                                         => None
+            },
             variant
           )
         )
       case (GameLogic.FairySF(), Variant.FairySF(variant))           =>
         FairySF(
           fairysf.Board.apply(
-            pieces.map { case (Pos.FairySF(pos), (Piece.FairySF(piece), _)) => (pos, piece) },
+            pieces.flatMap {
+              case (Pos.FairySF(pos), (Piece.FairySF(piece), _)) => Some((pos, piece))
+              case _                                             => None
+            },
             variant
           )
         )
       case (GameLogic.Samurai(), Variant.Samurai(variant))           =>
         Samurai(
           samurai.Board.apply(
-            pieces.map { case (Pos.Samurai(pos), (Piece.Samurai(piece), count)) => (pos, (piece, count)) },
+            pieces.flatMap {
+              case (Pos.Samurai(pos), (Piece.Samurai(piece), count)) => Some((pos, (piece, count)))
+              case _                                                 => None
+            },
             variant
           )
         )
       case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant)) =>
         Togyzkumalak(
           togyzkumalak.Board.apply(
-            pieces.map { case (Pos.Togyzkumalak(pos), (Piece.Togyzkumalak(piece), count)) =>
-              (pos, (piece, count))
+            pieces.flatMap {
+              case (Pos.Togyzkumalak(pos), (Piece.Togyzkumalak(piece), count)) =>
+                Some((pos, (piece, count)))
+              case _                                                           => None
             },
             variant
           )
@@ -401,15 +436,20 @@ object Board {
       case (GameLogic.Go(), Variant.Go(variant))                     =>
         Go(
           go.Board.apply(
-            pieces.map { case (Pos.Go(pos), (Piece.Go(piece), _)) => (pos, piece) },
+            pieces.flatMap {
+              case (Pos.Go(pos), (Piece.Go(piece), _)) => Some((pos, piece))
+              case _                                   => None
+            },
             variant
           )
         )
       case (GameLogic.Backgammon(), Variant.Backgammon(variant))     =>
         Backgammon(
           backgammon.Board.apply(
-            pieces.map { case (Pos.Backgammon(pos), (Piece.Backgammon(piece), count)) =>
-              (pos, (piece, count))
+            pieces.flatMap {
+              case (Pos.Backgammon(pos), (Piece.Backgammon(piece), count)) =>
+                Some((pos, (piece, count)))
+              case _                                                       => None
             },
             variant
           )

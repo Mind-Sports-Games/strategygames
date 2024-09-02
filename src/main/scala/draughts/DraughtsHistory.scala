@@ -36,6 +36,7 @@ case class KingMoves(
 }
 
 case class DraughtsHistory(
+    // TODO When converting Draughts to Multiaction we need to change this
     lastMove: Option[Uci] = None,
     positionHashes: PositionHash = Hash.zero,
     kingMoves: KingMoves = KingMoves(),
