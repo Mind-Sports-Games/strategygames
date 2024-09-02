@@ -341,14 +341,14 @@ object Board {
 
   case class Abalone(b: abalone.Board)
       extends Board(
-        b.pieces.map { case (pos, piece) => (Pos.Abalone(pos), (Piece.Abalone(piece), 1))},
+        b.pieces.map { case (pos, piece) => (Pos.Abalone(pos), (Piece.Abalone(piece), 1)) },
         History.Abalone(b.history),
         Variant.Abalone(b.variant)
       ) {
 
     def withHistory(h: History): Board = h match {
       case History.Abalone(h) => Abalone(b.withHistory(h))
-      case _                     => sys.error("Not passed abalone objects")
+      case _                  => sys.error("Not passed abalone objects")
     }
 
     def usedDice: List[Int] = List.empty
@@ -362,11 +362,11 @@ object Board {
     def copy(history: History, variant: Variant): Board = (history, variant) match {
       case (History.Abalone(history), Variant.Abalone(variant)) =>
         Abalone(b.copy(history = history, variant = variant))
-      case _                                                          => sys.error("Unable to copy a abalone board with non-abalone arguments")
+      case _                                                    => sys.error("Unable to copy a abalone board with non-abalone arguments")
     }
     def copy(history: History): Board                   = history match {
       case History.Abalone(history) => Abalone(b.copy(history = history))
-      case _                           => sys.error("Unable to copy a abalone board with non-abalone arguments")
+      case _                        => sys.error("Unable to copy a abalone board with non-abalone arguments")
     }
 
     def toFairySF      = sys.error("Can't make a fairysf board from a abalone board")
@@ -375,8 +375,8 @@ object Board {
     def toSamurai      = sys.error("Can't make a samurai board from a abalone board")
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak board from a abalone board")
     def toGo           = sys.error("Can't make a go board from a abalone board")
-    def toBackgammon      = sys.error("Can't make a backgammon board from a abalone board")
-    def toAbalone   = b
+    def toBackgammon   = sys.error("Can't make a backgammon board from a abalone board")
+    def toAbalone      = b
 
   }
 
@@ -454,10 +454,13 @@ object Board {
             variant
           )
         )
-      case (GameLogic.Abalone(), Variant.Abalone(variant))                     =>
+      case (GameLogic.Abalone(), Variant.Abalone(variant))           =>
         Abalone(
           abalone.Board.apply(
-            pieces.map { case (Pos.Abalone(pos), (Piece.Abalone(piece), _)) => (pos, piece) },
+            pieces.flatMap {
+              case (Pos.Abalone(pos), (Piece.Abalone(piece), _)) => Some((pos, piece))
+              case _                                             => None
+            },
             variant
           )
         )
@@ -471,7 +474,7 @@ object Board {
   implicit def togyzkumalakBoard(b: togyzkumalak.Board) = Board.Togyzkumalak(b)
   implicit def goBoard(b: go.Board)                     = Board.Go(b)
   implicit def backgammonBoard(b: backgammon.Board)     = Board.Backgammon(b)
-  implicit def abaloneBoard(b: abalone.Board)     = Board.Abalone(b)
+  implicit def abaloneBoard(b: abalone.Board)           = Board.Abalone(b)
 
   def init(lib: GameLogic, variant: Variant): Board = (lib, variant) match {
     case (GameLogic.Draughts(), Variant.Draughts(variant))         => Draughts(draughts.Board.init(variant))
@@ -482,7 +485,7 @@ object Board {
       Togyzkumalak(togyzkumalak.Board.init(variant))
     case (GameLogic.Go(), Variant.Go(variant))                     => Go(go.Board.init(variant))
     case (GameLogic.Backgammon(), Variant.Backgammon(variant))     => Backgammon(backgammon.Board.init(variant))
-    case (GameLogic.Abalone(), Variant.Abalone(variant))     => Abalone(abalone.Board.init(variant))
+    case (GameLogic.Abalone(), Variant.Abalone(variant))           => Abalone(abalone.Board.init(variant))
     case _                                                         => sys.error("Mismatched gamelogic types 28")
   }
 

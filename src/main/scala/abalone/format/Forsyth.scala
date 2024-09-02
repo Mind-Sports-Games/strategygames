@@ -80,8 +80,8 @@ object Forsyth {
     s"${boardFen} ${scoreStr}"
   }
 
-  // TODO Abalone Set
-  def boardPart(board: Board): String = ""
+  // TODO Abalone Set - it shouldnt be nothing like board.toString!
+  def boardPart(board: Board): String = board.toString
 
   def boardAndPlayer(situation: Situation): String =
     boardAndPlayer(situation.board, situation.player)

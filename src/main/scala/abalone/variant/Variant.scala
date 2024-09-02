@@ -5,8 +5,8 @@ import cats.syntax.option._
 import scala.annotation.nowarn
 
 import strategygames.abalone._
-import strategygames.abalone.format.{ FEN, Forsyth, Uci }
-import strategygames.{ GameFamily, Player, Score }
+import strategygames.abalone.format.FEN
+import strategygames.{ GameFamily, Player }
 
 case class AbaloneName(val name: String)
 
@@ -52,10 +52,10 @@ abstract class Variant private[variant] (
 
   // looks like this is only to allow King to be a valid promotion piece
   // in just atomic, so can leave as true for now
-  def isValidPromotion(promotion: Option[PromotableRole]): Boolean = true
+  def isValidPromotion(@nowarn promotion: Option[PromotableRole]): Boolean = true
 
   // TODO Abalone
-  def validMoves(situation: Situation): Map[Pos, List[Move]] = Map.empty()
+  def validMoves(@nowarn situation: Situation): Map[Pos, List[Move]] = Map.empty
 
   def move(
       situation: Situation,
@@ -77,7 +77,7 @@ abstract class Variant private[variant] (
   @nowarn def specialDraw(situation: Situation) = false
 
   // TODO Abalone Set
-  def materialImbalance(board: Board): Int = 0
+  def materialImbalance(@nowarn board: Board): Int = 0
 
   // Some variants have an extra effect on the board on a move. For example, in Atomic, some
   // pieces surrounding a capture explode
@@ -91,7 +91,7 @@ abstract class Variant private[variant] (
     board
 
   // TODO: Abalone. Add some sensible validation checks here if appropriate
-  def valid(board: Board, strict: Boolean): Boolean = true
+  def valid(@nowarn board: Board, @nowarn strict: Boolean): Boolean = true
 
   val roles: List[Role] = Role.all
 

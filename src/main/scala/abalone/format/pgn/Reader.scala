@@ -1,21 +1,12 @@
 package strategygames.abalone
 package format.pgn
-import strategygames.{
-  Action => StratAction,
-  ActionStrs,
-  ByoyomiClock,
-  Clock,
-  Drop => StratDrop,
-  Move => StratMove,
-  Situation => StratSituation
-}
+import strategygames.{ Action => StratAction, ActionStrs, ByoyomiClock, Clock, Situation => StratSituation }
 
 import strategygames.format.pgn.{ ParsedPgn, Sans, Tags }
 
 import strategygames.abalone.format.Uci
 
 import cats.data.Validated
-import cats.implicits._
 
 object Reader {
 

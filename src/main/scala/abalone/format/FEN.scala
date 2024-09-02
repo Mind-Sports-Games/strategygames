@@ -1,7 +1,7 @@
 package strategygames.abalone.format
 
 import strategygames.Player
-import strategygames.abalone.{ Piece, PieceMap, Pos }
+import strategygames.abalone.PieceMap
 
 final case class FEN(value: String) extends AnyVal {
 
@@ -27,7 +27,7 @@ final case class FEN(value: String) extends AnyVal {
   def initial = value == Forsyth.initial.value
 
   // TODO Abalone Set
-  def pieces: PieceMap = Map.empty()
+  def pieces: PieceMap = Map.empty
 }
 
 object FEN {

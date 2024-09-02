@@ -347,6 +347,7 @@ object Role {
     case GameLogic.Togyzkumalak() => sys.error("allPromotableByGroundName not implemented for togyzkumalak")
     case GameLogic.Go()           => sys.error("allPromotableByGroundName not implemented for go")
     case GameLogic.Backgammon()   => sys.error("allPromotableByGroundName not implemented for backgammon")
+    case GameLogic.Abalone()      => sys.error("allPromotableByGroundName not implemented for abalone")
   }
 
   def allPromotableByGroundName(lib: GameLogic, gf: GameFamily): Map[String, PromotableRole] = lib match {
@@ -359,6 +360,7 @@ object Role {
     case GameLogic.Togyzkumalak() => sys.error("allPromotableByGroundName not implemented for togyzkumalak")
     case GameLogic.Go()           => sys.error("allPromotableByGroundName not implemented for go")
     case GameLogic.Backgammon()   => sys.error("allPromotableByGroundName not implemented for backgammon")
+    case GameLogic.Abalone()      => sys.error("allPromotableByGroundName not implemented for abalone")
   }
 
   def allPromotableByForsyth(lib: GameLogic): Map[Char, PromotableRole] = lib match {

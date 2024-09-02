@@ -1,6 +1,8 @@
 package strategygames.abalone.format
 import strategygames.abalone._
 
+import scala.annotation.nowarn
+
 import cats.data.Validated
 import cats.implicits._
 
@@ -63,7 +65,7 @@ object Uci {
         dest <- move lift 1 flatMap Pos.piotr
       } yield Move(orig, dest, promotion = None)
 
-    def fromStrings(origS: String, destS: String, promS: Option[String]) =
+    def fromStrings(origS: String, destS: String, @nowarn promS: Option[String]) =
       for {
         orig     <- Pos.fromKey(origS)
         dest     <- Pos.fromKey(destS)

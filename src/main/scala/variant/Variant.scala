@@ -919,8 +919,8 @@ object Variant {
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false
 
     def checkmate(situation: Situation): Boolean = situation match {
-      case Situation.Abalone(situation) => false
-      case _                               => sys.error("Not passed Abalone objects")
+      case Situation.Abalone(_) => false
+      case _                    => sys.error("Not passed Abalone objects")
     }
 
     def stalemateIsDraw: Boolean = v.stalemateIsDraw

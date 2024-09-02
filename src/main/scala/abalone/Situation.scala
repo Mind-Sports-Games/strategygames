@@ -5,7 +5,7 @@ import strategygames.{ Player, Status }
 import cats.data.Validated
 import cats.implicits._
 
-import strategygames.abalone.format.{ Forsyth, Uci }
+import strategygames.abalone.format.Uci
 
 case class Situation(board: Board, player: Player) {
 

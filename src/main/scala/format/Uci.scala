@@ -773,6 +773,7 @@ object Uci {
         case GameLogic.Go()           => None
         case GameLogic.Backgammon()   =>
           backgammon.format.Uci.Lift.fromStrings(posS).map(BackgammonLift)
+        case GameLogic.Abalone()      => None
       }
   }
 
@@ -784,7 +785,7 @@ object Uci {
         case GameLogic.Samurai()      => None
         case GameLogic.Togyzkumalak() => None
         case GameLogic.Backgammon()   => None
-        case GameLogic.Abalone()   => None
+        case GameLogic.Abalone()      => None
         case GameLogic.Chess()        => None
         case GameLogic.FairySF()      => None
         case GameLogic.Go()           => GoPass(go.format.Uci.Pass()).some
@@ -800,7 +801,7 @@ object Uci {
         case GameLogic.Samurai()      => None
         case GameLogic.Togyzkumalak() => None
         case GameLogic.Backgammon()   => None
-        case GameLogic.Abalone()   => None
+        case GameLogic.Abalone()      => None
         case GameLogic.Chess()        => None
         case GameLogic.FairySF()      => None
         case GameLogic.Go()           =>
@@ -832,6 +833,7 @@ object Uci {
         case GameLogic.Go()           => None
         case GameLogic.Backgammon()   =>
           BackgammonDiceRoll(backgammon.format.Uci.DiceRoll.fromStrings(dice)).some
+        case GameLogic.Abalone()      => None
       }
 
   }
@@ -847,6 +849,7 @@ object Uci {
         case GameLogic.Togyzkumalak() => None
         case GameLogic.Go()           => None
         case GameLogic.Backgammon()   => BackgammonDoRoll(backgammon.format.Uci.DoRoll()).some
+        case GameLogic.Abalone()      => None
       }
 
   }
@@ -862,6 +865,7 @@ object Uci {
         case GameLogic.Togyzkumalak() => None
         case GameLogic.Go()           => None
         case GameLogic.Backgammon()   => BackgammonUndo(backgammon.format.Uci.Undo()).some
+        case GameLogic.Abalone()      => None
       }
 
   }
@@ -877,6 +881,7 @@ object Uci {
         case GameLogic.FairySF()      => None
         case GameLogic.Go()           => None
         case GameLogic.Backgammon()   => BackgammonEndTurn(backgammon.format.Uci.EndTurn()).some
+        case GameLogic.Abalone()      => None
       }
 
   }
