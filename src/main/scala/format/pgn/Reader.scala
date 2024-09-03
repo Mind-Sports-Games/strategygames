@@ -62,10 +62,10 @@ object Reader {
     case class BackgammonIncomplete(replay: backgammon.Replay, failure: String)     extends Result {
       def valid = Validated.invalid(failure)
     }
-    case class AbaloneComplete(replay: abalone.Replay)                        extends Result {
+    case class AbaloneComplete(replay: abalone.Replay)                              extends Result {
       def valid = Validated.valid(Replay.Abalone(replay))
     }
-    case class AbaloneIncomplete(replay: abalone.Replay, failure: String)     extends Result {
+    case class AbaloneIncomplete(replay: abalone.Replay, failure: String)           extends Result {
       def valid = Validated.invalid(failure)
     }
 
@@ -128,7 +128,7 @@ object Reader {
       case GameLogic.Togyzkumalak() => TogyzkumalakReader.fullWithSans(pgn, op, tags).map(Result.wrap)
       case GameLogic.Go()           => GoReader.fullWithSans(pgn, op, tags).map(Result.wrap)
       case GameLogic.Backgammon()   => BackgammonReader.fullWithSans(pgn, op, tags).map(Result.wrap)
-      case GameLogic.Abalone()   => AbaloneReader.fullWithSans(pgn, op, tags).map(Result.wrap)
+      case GameLogic.Abalone()      => AbaloneReader.fullWithSans(pgn, op, tags).map(Result.wrap)
     }
 
   // TODO Merge the following two functions by refactoring Sans and integrating to other libs
@@ -156,7 +156,7 @@ object Reader {
         sys.error("Sans not implemented for go")
       case GameLogic.Backgammon()   =>
         sys.error("Sans not implemented for backgammon")
-      case GameLogic.Abalone()   =>
+      case GameLogic.Abalone()      =>
         sys.error("Sans not implemented for abalone")
     }
 
@@ -185,7 +185,7 @@ object Reader {
         GoReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
       case GameLogic.Backgammon()   =>
         BackgammonReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
-      case GameLogic.Abalone()   =>
+      case GameLogic.Abalone()      =>
         AbaloneReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
     }
 

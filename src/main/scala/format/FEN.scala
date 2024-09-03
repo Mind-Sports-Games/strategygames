@@ -44,7 +44,7 @@ object FEN {
     def toTogyzkumalak = sys.error("Can't convert chess to togyzkumalak")
     def toGo           = sys.error("Can't convert chess to go")
     def toBackgammon   = sys.error("Can't convert chess to backgammon")
-    def toAbalone   = sys.error("Can't convert chess to abalone")
+    def toAbalone      = sys.error("Can't convert chess to abalone")
 
     def gameLogic = GameLogic.Chess()
 
@@ -72,7 +72,7 @@ object FEN {
     def toTogyzkumalak = sys.error("Can't convert draughts to togyzkumalak")
     def toGo           = sys.error("Can't convert draughts to go")
     def toBackgammon   = sys.error("Can't convert draughts to backgammon")
-    def toAbalone   = sys.error("Can't convert draughts to abalone")
+    def toAbalone      = sys.error("Can't convert draughts to abalone")
 
     def gameLogic = GameLogic.Draughts()
 
@@ -102,7 +102,7 @@ object FEN {
     def toTogyzkumalak = sys.error("Can't convert fairysf to togyzkumalak")
     def toGo           = sys.error("Can't convert fairysf to go")
     def toBackgammon   = sys.error("Can't convert fairysf to backgammon")
-    def toAbalone   = sys.error("Can't convert fairysf to abalone")
+    def toAbalone      = sys.error("Can't convert fairysf to abalone")
 
     def gameLogic = GameLogic.FairySF()
 
@@ -130,7 +130,7 @@ object FEN {
     def toTogyzkumalak = sys.error("Can't convert samurai to togyzkumalak")
     def toGo           = sys.error("Can't convert samurai to go")
     def toBackgammon   = sys.error("Can't convert samurai to backgammon")
-    def toAbalone   = sys.error("Can't convert samurai to abalone")
+    def toAbalone      = sys.error("Can't convert samurai to abalone")
 
     def gameLogic = GameLogic.Samurai()
 
@@ -158,7 +158,7 @@ object FEN {
     def toTogyzkumalak = f
     def toGo           = sys.error("Can't convert togyzkumalak to go")
     def toBackgammon   = sys.error("Can't convert togyzkumalak to backgammon")
-    def toAbalone   = sys.error("Can't convert togyzkumalak to abalone")
+    def toAbalone      = sys.error("Can't convert togyzkumalak to abalone")
 
     def gameLogic = GameLogic.Togyzkumalak()
 
@@ -186,7 +186,7 @@ object FEN {
     def toTogyzkumalak = sys.error("Can't convert go to togyzkumalak")
     def toGo           = f
     def toBackgammon   = sys.error("Can't convert go to backgammon")
-    def toAbalone   = sys.error("Can't convert go to abalone")
+    def toAbalone      = sys.error("Can't convert go to abalone")
 
     def gameLogic = GameLogic.Go()
 
@@ -214,7 +214,7 @@ object FEN {
     def toTogyzkumalak = sys.error("Can't convert backgammon to togyzkumalak")
     def toGo           = sys.error("Can't convert backgammon to go")
     def toBackgammon   = f
-    def toAbalone   = sys.error("Can't convert backgammon to abalone")
+    def toAbalone      = sys.error("Can't convert backgammon to abalone")
 
     def gameLogic = GameLogic.Backgammon()
 
@@ -242,7 +242,7 @@ object FEN {
     def toTogyzkumalak = sys.error("Can't convert abalone to togyzkumalak")
     def toGo           = sys.error("Can't convert abalone to go")
     def toBackgammon   = sys.error("Can't convert abalone to backgammon")
-    def toAbalone   = f
+    def toAbalone      = f
 
     def gameLogic = GameLogic.Abalone()
 
@@ -268,7 +268,7 @@ object FEN {
   def wrap(fen: strategygames.togyzkumalak.format.FEN) = Togyzkumalak(fen)
   def wrap(fen: strategygames.go.format.FEN)           = Go(fen)
   def wrap(fen: strategygames.backgammon.format.FEN)   = Backgammon(fen)
-  def wrap(fen: strategygames.abalone.format.FEN)   = Abalone(fen)
+  def wrap(fen: strategygames.abalone.format.FEN)      = Abalone(fen)
 
   def apply(lib: GameLogic, value: String): FEN = lib match {
     case GameLogic.Draughts()     => FEN.Draughts(strategygames.draughts.format.FEN(value))
@@ -278,7 +278,7 @@ object FEN {
     case GameLogic.Go()           => FEN.Go(strategygames.go.format.FEN(value))
     case GameLogic.Togyzkumalak() => FEN.Togyzkumalak(strategygames.togyzkumalak.format.FEN(value))
     case GameLogic.Backgammon()   => FEN.Backgammon(strategygames.backgammon.format.FEN(value))
-    case GameLogic.Abalone()   => FEN.Abalone(strategygames.abalone.format.FEN(value))
+    case GameLogic.Abalone()      => FEN.Abalone(strategygames.abalone.format.FEN(value))
   }
 
   def apply(v: Variant, value: String): FEN = apply(v.gameLogic, value)
@@ -293,7 +293,7 @@ object FEN {
     case GameLogic.Go()           => Go(strategygames.go.format.FEN(source.replace("_", " ").trim))
     case GameLogic.Backgammon()   =>
       Backgammon(strategygames.backgammon.format.FEN(source.replace("_", " ").trim))
-    case GameLogic.Abalone()   =>
+    case GameLogic.Abalone()      =>
       Abalone(strategygames.abalone.format.FEN(source.replace("_", " ").trim))
   }
 

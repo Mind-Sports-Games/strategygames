@@ -147,7 +147,7 @@ object Replay {
       ) {
     def copy(state: Game): Replay = state match {
       case Game.Abalone(state) => Replay.wrap(r.copy(state = state))
-      case _                      => sys.error("Unable to copy a abalone replay with a non-abalone state")
+      case _                   => sys.error("Unable to copy a abalone replay with a non-abalone state")
     }
   }
 
@@ -167,7 +167,7 @@ object Replay {
         Go(go.Replay(setup, actions.map(Action.toGo), state))
       case (GameLogic.Backgammon(), Game.Backgammon(setup), Game.Backgammon(state))       =>
         Backgammon(backgammon.Replay(setup, actions.map(Action.toBackgammon), state))
-      case (GameLogic.Abalone(), Game.Abalone(setup), Game.Abalone(state))       =>
+      case (GameLogic.Abalone(), Game.Abalone(setup), Game.Abalone(state))                =>
         Abalone(abalone.Replay(setup, actions.map(Action.toAbalone), state))
       case _                                                                              => sys.error("Mismatched gamelogic types 5")
     }
@@ -279,7 +279,7 @@ object Replay {
             message
           )
       }
-    case (GameLogic.Abalone(), FEN.Abalone(initialFen), Variant.Abalone(variant))       =>
+    case (GameLogic.Abalone(), FEN.Abalone(initialFen), Variant.Abalone(variant))                =>
       abalone.Replay.gameWithUciWhileValid(
         actionStrs,
         startPlayer,
@@ -355,7 +355,7 @@ object Replay {
         .toEither
         .map(s => s.map(Situation.Backgammon))
         .toValidated
-    case (GameLogic.Abalone(), Variant.Abalone(variant))     =>
+    case (GameLogic.Abalone(), Variant.Abalone(variant))           =>
       abalone.Replay
         .situations(actionStrs, initialFen.map(_.toAbalone), variant)
         .toEither
@@ -424,7 +424,7 @@ object Replay {
     ucis.flatMap(u =>
       u match {
         case u: Uci.Abalone => Some(u.unwrap)
-        case _                 => None
+        case _              => None
       }
     )
 
@@ -482,7 +482,7 @@ object Replay {
         .toEither
         .map(b => b.map(Board.Backgammon))
         .toValidated
-    case (GameLogic.Abalone(), Variant.Abalone(variant))     =>
+    case (GameLogic.Abalone(), Variant.Abalone(variant))           =>
       abalone.Replay
         .boardsFromUci(abaloneUcis(ucis), initialFen.map(_.toAbalone), variant)
         .toEither
@@ -540,7 +540,7 @@ object Replay {
         .toEither
         .map(s => s.map(Situation.Backgammon))
         .toValidated
-    case (GameLogic.Abalone(), Variant.Abalone(variant))     =>
+    case (GameLogic.Abalone(), Variant.Abalone(variant))           =>
       abalone.Replay
         .situationsFromUci(abaloneUcis(ucis), initialFen.map(_.toAbalone), variant)
         .toEither
@@ -589,7 +589,7 @@ object Replay {
       backgammon.Replay
         .gameFromUciStrings(ucis.flatten.toList, initialFen.map(_.toBackgammon), variant)
         .map(Game.Backgammon)
-    case (GameLogic.Abalone(), Variant.Abalone(variant))     =>
+    case (GameLogic.Abalone(), Variant.Abalone(variant))           =>
       abalone.Replay
         .gameFromUciStrings(ucis.flatten.toList, initialFen.map(_.toAbalone), variant)
         .map(Game.Abalone)
@@ -645,7 +645,7 @@ object Replay {
         .toEither
         .map(r => Replay.Backgammon(r))
         .toValidated
-    case (GameLogic.Abalone(), Variant.Abalone(variant))     =>
+    case (GameLogic.Abalone(), Variant.Abalone(variant))           =>
       abalone.Replay
         .apply(abaloneUcis(ucis), initialFen.map(_.toAbalone), variant)
         .toEither
@@ -675,7 +675,7 @@ object Replay {
       go.Replay.plyAtFen(actionStrs, initialFen.map(_.toGo), variant, atFen)
     case (GameLogic.Backgammon(), Variant.Backgammon(variant), FEN.Backgammon(atFen))       =>
       backgammon.Replay.plyAtFen(actionStrs, initialFen.map(_.toBackgammon), variant, atFen)
-    case (GameLogic.Abalone(), Variant.Abalone(variant), FEN.Abalone(atFen))       =>
+    case (GameLogic.Abalone(), Variant.Abalone(variant), FEN.Abalone(atFen))                =>
       abalone.Replay.plyAtFen(actionStrs, initialFen.map(_.toAbalone), variant, atFen)
     case _                                                                                  => sys.error("Mismatched gamelogic types 10")
   }
@@ -687,6 +687,6 @@ object Replay {
   def wrap(r: togyzkumalak.Replay) = Togyzkumalak(r)
   def wrap(r: go.Replay)           = Go(r)
   def wrap(r: backgammon.Replay)   = Backgammon(r)
-  def wrap(r: abalone.Replay)   = Abalone(r)
+  def wrap(r: abalone.Replay)      = Abalone(r)
 
 }

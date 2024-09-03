@@ -39,7 +39,7 @@ sealed abstract class Situation(val board: Board, val player: Player) {
       selectSquaresAction :::
       diceRolls :::
       endTurns :::
-      //important to keep non progressive actions at the end
+      // important to keep non progressive actions at the end
       undos
 
   def canDrop: Boolean
@@ -294,7 +294,7 @@ object Situation {
     def toTogyzkumalak = sys.error("Can't make togyzkumalak situation from chess situation")
     def toGo           = sys.error("Can't make go situation from chess situation")
     def toBackgammon   = sys.error("Can't make backgammon situation from chess situation")
-    def toAbalone   = sys.error("Can't make abalone situation from chess situation")
+    def toAbalone      = sys.error("Can't make abalone situation from chess situation")
   }
 
   final case class Draughts(s: draughts.Situation)
@@ -458,7 +458,7 @@ object Situation {
     def toTogyzkumalak = sys.error("Can't make togyzkumalak situation from draughts situation")
     def toGo           = sys.error("Can't make go situation from draughts situation")
     def toBackgammon   = sys.error("Can't make backgammon situation from draughts situation")
-    def toAbalone   = sys.error("Can't make abalone situation from draughts situation")
+    def toAbalone      = sys.error("Can't make abalone situation from draughts situation")
 
   }
 
@@ -604,7 +604,7 @@ object Situation {
     def toTogyzkumalak = sys.error("Can't make togyzkumalak situation from fairysf situation")
     def toGo           = sys.error("Can't make go situation from fairysf situation")
     def toBackgammon   = sys.error("Can't make backgammon situation from fairysf situation")
-    def toAbalone   = sys.error("Can't make abalone situation from fairysf situation")
+    def toAbalone      = sys.error("Can't make abalone situation from fairysf situation")
   }
 
   final case class Samurai(s: samurai.Situation)
@@ -744,7 +744,7 @@ object Situation {
     def toTogyzkumalak = sys.error("Can't make draughts situation from samurai situation")
     def toGo           = sys.error("Can't make go situation from samurai situation")
     def toBackgammon   = sys.error("Can't make backgammon situation from samurai situation")
-    def toAbalone   = sys.error("Can't make abalone situation from samurai situation")
+    def toAbalone      = sys.error("Can't make abalone situation from samurai situation")
   }
 
   final case class Togyzkumalak(s: togyzkumalak.Situation)
@@ -884,7 +884,7 @@ object Situation {
     def toTogyzkumalak = s
     def toGo           = sys.error("Can't make go situation from togyzkumalak situation")
     def toBackgammon   = sys.error("Can't make backgammon situation from togyzkumalak situation")
-    def toAbalone   = sys.error("Can't make abalone situation from togyzkumalak situation")
+    def toAbalone      = sys.error("Can't make abalone situation from togyzkumalak situation")
   }
 
   final case class Go(s: go.Situation)
@@ -1028,7 +1028,7 @@ object Situation {
     def toTogyzkumalak = sys.error("Can't make togyzkumalak situation from go situation")
     def toGo           = s
     def toBackgammon   = sys.error("Can't make backgammon situation from go situation")
-    def toAbalone   = sys.error("Can't make abalone situation from go situation")
+    def toAbalone      = sys.error("Can't make abalone situation from go situation")
   }
 
   final case class Backgammon(s: backgammon.Situation)
@@ -1178,7 +1178,7 @@ object Situation {
     def toTogyzkumalak = sys.error("Can't make togyzkumalak situation from backgammon situation")
     def toGo           = sys.error("Can't make go situation from backgammon situation")
     def toBackgammon   = s
-    def toAbalone   = sys.error("Can't make abalone situation from backgammon situation")
+    def toAbalone      = sys.error("Can't make abalone situation from backgammon situation")
   }
 
   final case class Abalone(s: abalone.Situation)
@@ -1288,24 +1288,24 @@ object Situation {
     ): Validated[String, Move] = (from, to) match {
       case (Pos.Abalone(from), Pos.Abalone(to)) =>
         s.move(from, to, promotion.map(_.toAbalone)).toEither.map(m => Move.Abalone(m)).toValidated
-      case _                                          => sys.error("Not passed Abalone objects")
+      case _                                    => sys.error("Not passed Abalone objects")
     }
 
     def move(uci: Uci.Move): Validated[String, Move] = uci match {
       case Uci.AbaloneMove(uci) => s.move(uci).toEither.map(m => Move.Abalone(m)).toValidated
-      case _                       => sys.error("Not passed Abalone objects")
+      case _                    => sys.error("Not passed Abalone objects")
     }
 
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.Abalone(variant) => Abalone(s.withVariant(variant))
-      case _                           => sys.error("Not passed Abalone objects")
+      case _                        => sys.error("Not passed Abalone objects")
     }
 
     def unary_! : Situation = Abalone(s.unary_!)
 
     def copy(board: Board): Situation = Abalone(board match {
       case Board.Abalone(board) => s.copy(board)
-      case _                       => sys.error("Can't copy a abalone situation with a non-abalone board")
+      case _                    => sys.error("Can't copy a abalone situation with a non-abalone board")
     })
 
     def gameLogic: GameLogic = GameLogic.Abalone()
@@ -1317,7 +1317,7 @@ object Situation {
     def toTogyzkumalak = sys.error("Can't make togyzkumalak situation from abalone situation")
     def toGo           = sys.error("Can't make go situation from abalone situation")
     def toBackgammon   = sys.error("Can't make backgammon situation from abalone situation")
-    def toAbalone   = s
+    def toAbalone      = s
   }
 
   def apply(lib: GameLogic, board: Board, player: Player): Situation = (lib, board) match {
@@ -1329,7 +1329,7 @@ object Situation {
       Togyzkumalak(togyzkumalak.Situation(board, player))
     case (GameLogic.Go(), Board.Go(board))                     => Go(go.Situation(board, player))
     case (GameLogic.Backgammon(), Board.Backgammon(board))     => Backgammon(backgammon.Situation(board, player))
-    case (GameLogic.Abalone(), Board.Abalone(board))     => Abalone(abalone.Situation(board, player))
+    case (GameLogic.Abalone(), Board.Abalone(board))           => Abalone(abalone.Situation(board, player))
     case _                                                     => sys.error("Mismatched gamelogic types 3")
   }
 
@@ -1343,7 +1343,7 @@ object Situation {
     case (GameLogic.Go(), Variant.Go(variant))                     => Go(go.Situation.apply(variant))
     case (GameLogic.Backgammon(), Variant.Backgammon(variant))     =>
       Backgammon(backgammon.Situation.apply(variant))
-    case (GameLogic.Abalone(), Variant.Abalone(variant))     =>
+    case (GameLogic.Abalone(), Variant.Abalone(variant))           =>
       Abalone(abalone.Situation.apply(variant))
     case _                                                         => sys.error("Mismatched gamelogic types 4")
   }
@@ -1355,6 +1355,6 @@ object Situation {
   def wrap(s: togyzkumalak.Situation) = Togyzkumalak(s)
   def wrap(s: go.Situation)           = Go(s)
   def wrap(s: backgammon.Situation)   = Backgammon(s)
-  def wrap(s: abalone.Situation)   = Abalone(s)
+  def wrap(s: abalone.Situation)      = Abalone(s)
 
 }

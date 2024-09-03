@@ -48,7 +48,7 @@ object FullOpeningDB {
         .map(
           FullOpening.Backgammon
         )
-    case (GameLogic.Abalone(), FEN.Abalone(fen))     =>
+    case (GameLogic.Abalone(), FEN.Abalone(fen))           =>
       strategygames.abalone.opening.FullOpeningDB
         .findByFen(fen)
         .map(
@@ -88,7 +88,7 @@ object FullOpeningDB {
         strategygames.backgammon.opening.FullOpeningDB
           .search(actionStrs)
           .map(fo => FullOpening.AtPly(FullOpening.Backgammon(fo.opening), fo.ply))
-      case GameLogic.Abalone()   =>
+      case GameLogic.Abalone()      =>
         strategygames.abalone.opening.FullOpeningDB
           .search(actionStrs)
           .map(fo => FullOpening.AtPly(FullOpening.Abalone(fo.opening), fo.ply))
@@ -154,7 +154,7 @@ object FullOpeningDB {
     fens.flatMap(f =>
       f match {
         case f: FEN.Abalone => Some(f.f)
-        case _                 => None
+        case _              => None
       }
     )
 
@@ -201,7 +201,7 @@ object FullOpeningDB {
           backgammonFENs(fens)
         )
         .map(FullOpening.Backgammon)
-    case GameLogic.Abalone()   =>
+    case GameLogic.Abalone()      =>
       strategygames.abalone.opening.FullOpeningDB
         .searchInFens(
           abaloneFENs(fens)

@@ -102,7 +102,7 @@ object Move {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak move from a chess move")
     def toGo           = sys.error("Can't make a go move from a chess move")
     def toBackgammon   = sys.error("Can't make a backgammon move from a chess move")
-    def toAbalone   = sys.error("Can't make a abalone move from a chess move")
+    def toAbalone      = sys.error("Can't make a abalone move from a chess move")
 
   }
 
@@ -155,7 +155,7 @@ object Move {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak move from a draughts move")
     def toGo           = sys.error("Can't make a go move from a draughts move")
     def toBackgammon   = sys.error("Can't make a backgammon move from a draughts move")
-    def toAbalone   = sys.error("Can't make a abalone move from a draughts move")
+    def toAbalone      = sys.error("Can't make a abalone move from a draughts move")
 
   }
 
@@ -209,7 +209,7 @@ object Move {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak move from a fairysf move")
     def toGo           = sys.error("Can't make a go move from a fairysf move")
     def toBackgammon   = sys.error("Can't make a backgammon move from a fairysf move")
-    def toAbalone   = sys.error("Can't make a abalone move from a fairysf move")
+    def toAbalone      = sys.error("Can't make a abalone move from a fairysf move")
 
   }
 
@@ -256,7 +256,7 @@ object Move {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak move from a samurai move")
     def toGo           = sys.error("Can't make a go move from a samurai move")
     def toBackgammon   = sys.error("Can't make a backgammon move from a samurai move")
-    def toAbalone   = sys.error("Can't make a abalone move from a samurai move")
+    def toAbalone      = sys.error("Can't make a abalone move from a samurai move")
 
   }
 
@@ -303,7 +303,7 @@ object Move {
     def toTogyzkumalak = m
     def toGo           = sys.error("Can't make a go move from a togyzkumalak move")
     def toBackgammon   = sys.error("Can't make a backgammon move from a togyzkumalak move")
-    def toAbalone   = sys.error("Can't make a abalone move from a togyzkumalak move")
+    def toAbalone      = sys.error("Can't make a abalone move from a togyzkumalak move")
 
   }
 
@@ -347,7 +347,7 @@ object Move {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak move from a backgammon move")
     def toGo           = sys.error("Can't make a go move from a backgammon move")
     def toBackgammon   = m
-    def toAbalone   = sys.error("Can't make a abalone move from a backgammon move")
+    def toAbalone      = sys.error("Can't make a abalone move from a backgammon move")
 
   }
 
@@ -394,7 +394,7 @@ object Move {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak move from a abalone move")
     def toGo           = sys.error("Can't make a go move from a abalone move")
     def toBackgammon   = sys.error("Can't make a backgammon move from a abalone move")
-    def toAbalone   = m
+    def toAbalone      = m
 
   }
 
@@ -404,6 +404,6 @@ object Move {
   def wrap(m: samurai.Move): Move      = Move.Samurai(m)
   def wrap(m: togyzkumalak.Move): Move = Move.Togyzkumalak(m)
   def wrap(m: backgammon.Move): Move   = Move.Backgammon(m)
-  def wrap(m: abalone.Move): Move   = Move.Abalone(m)
+  def wrap(m: abalone.Move): Move      = Move.Abalone(m)
 
 }

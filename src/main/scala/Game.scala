@@ -357,7 +357,7 @@ object Game {
     def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a chess game into a togyzkumalak game")
     def toGo: go.Game                     = sys.error("Can't turn a chess game into a go game")
     def toBackgammon: backgammon.Game     = sys.error("Can't turn a chess game into a backgammon game")
-    def toAbalone: abalone.Game      = sys.error("Can't turn a chess game into a abalone game")
+    def toAbalone: abalone.Game           = sys.error("Can't turn a chess game into a abalone game")
 
   }
 
@@ -1241,13 +1241,13 @@ object Game {
           .toEither
           .map(t => (Abalone(t._1), Move.Abalone(t._2)))
           .toValidated
-      case _                                            => sys.error("Not passed Abalone objects")
+      case _                                      => sys.error("Not passed Abalone objects")
     }
 
     def apply(action: Action): Game =
       action match {
         case (Move.Abalone(move)) => Abalone(g.apply(move))
-        case _                       => sys.error("Not passed Abalone objects")
+        case _                    => sys.error("Not passed Abalone objects")
       }
 
     def drop(
@@ -1272,8 +1272,8 @@ object Game {
       sys.error("Can't selectSquares in Abalone")
 
     def diceRoll(
-      dice: List[Int],
-      metrics: MoveMetrics = MoveMetrics()
+        dice: List[Int],
+        metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, DiceRoll)] =
       sys.error("Can't diceroll in Abalone")
 
@@ -1286,7 +1286,7 @@ object Game {
     def randomizeDiceRoll: Option[DiceRoll] = None
 
     def randomizeAndApplyDiceRoll(
-      metrics: MoveMetrics = MoveMetrics()
+        metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, DiceRoll)] =
       sys.error("Can't apply diceroll in abalone")
 
@@ -1323,12 +1323,12 @@ object Game {
     def copy(situation: Situation, plies: Int, turnCount: Int): Game = situation match {
       case Situation.Abalone(situation) =>
         Abalone(g.copy(situation = situation, plies = plies, turnCount = turnCount))
-      case _                               =>
+      case _                            =>
         sys.error("Unable to copy abalone game with non-abalone arguments")
     }
     def copy(situation: Situation): Game                             = situation match {
       case Situation.Abalone(situation) => Abalone(g.copy(situation = situation))
-      case _                               => sys.error("Unable to copy abalone game with non-abalone arguments")
+      case _                            => sys.error("Unable to copy abalone game with non-abalone arguments")
     }
 
     def hasJustSwitchedTurns: Boolean = g.hasJustSwitchedTurns
@@ -1374,9 +1374,9 @@ object Game {
       Go(go.Game(situation, actionStrs, clock, plies, turnCount, startedAtPly, startedAtTurn))
     case (GameLogic.Backgammon(), Situation.Backgammon(situation))     =>
       Backgammon(backgammon.Game(situation, actionStrs, clock, plies, turnCount, startedAtPly, startedAtTurn))
-    case (GameLogic.Abalone(), Situation.Abalone(situation))     =>
+    case (GameLogic.Abalone(), Situation.Abalone(situation))           =>
       Abalone(abalone.Game(situation, actionStrs, clock, plies, turnCount, startedAtPly, startedAtTurn))
-    case _ => sys.error("Mismatched gamelogic types 32")
+    case _                                                             => sys.error("Mismatched gamelogic types 32")
   }
 
   def apply(lib: GameLogic, variant: Variant): Game = (lib, variant) match {
@@ -1394,7 +1394,7 @@ object Game {
       Go(go.Game.apply(variant))
     case (GameLogic.Backgammon(), Variant.Backgammon(variant))     =>
       Backgammon(backgammon.Game.apply(variant))
-    case (GameLogic.Abalone(), Variant.Abalone(variant))     =>
+    case (GameLogic.Abalone(), Variant.Abalone(variant))           =>
       Abalone(abalone.Game.apply(variant))
     case _                                                         =>
       sys.error("Mismatched gamelogic types 33")
@@ -1415,7 +1415,7 @@ object Game {
       Go(go.Game.apply(variant.map(_.toGo), fen.map(_.toGo)))
     case GameLogic.Backgammon()   =>
       Backgammon(backgammon.Game.apply(variant.map(_.toBackgammon), fen.map(_.toBackgammon)))
-    case GameLogic.Abalone()   =>
+    case GameLogic.Abalone()      =>
       Abalone(abalone.Game.apply(variant.map(_.toAbalone), fen.map(_.toAbalone)))
     case _                        => sys.error("Mismatched gamelogic types 36")
   }
@@ -1427,6 +1427,6 @@ object Game {
   def wrap(g: togyzkumalak.Game)     = Togyzkumalak(g)
   def wrap(g: go.Game)               = Go(g)
   def wrap(g: backgammon.Game)       = Backgammon(g)
-  def wrap(g: abalone.Game)       = Abalone(g)
+  def wrap(g: abalone.Game)          = Abalone(g)
 
 }

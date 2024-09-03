@@ -61,12 +61,12 @@ object Board {
 
   }
 
-  //TODO Abalone Set
+  // TODO Abalone Set
   object BoardSize {
     val all: List[BoardSize] = List(Dim9x2)
   }
 
-  //TODO Abalone Set
+  // TODO Abalone Set
   case object Dim9x2
       extends BoardSize(
         width = 9,
