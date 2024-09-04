@@ -5095,7 +5095,7 @@ class BackgammonVariantTestIsometry extends strategygames.chess.ChessTest {
   )
 
   val bgGameP1StartsActionStrs = Vector(
-    Vector("2/3", "13/10", "13/11", "endturn"),
+    Vector("2/3", "l2i2", "g1i1", "endturn"),
     Vector("3/1")
   )
 

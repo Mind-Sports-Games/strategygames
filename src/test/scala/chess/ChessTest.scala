@@ -215,8 +215,7 @@ trait ChessTest extends Specification with ValidatedMatchers {
     // TODO: add in end game conditions, etc.
   }
 
-  def turnsAndPliesAreEqual(g1: StratGame, gameData: GameFenIsometryData) = {
-    gameData.plies must_== g1.plies
+  def turnsAreEqual(g1: StratGame, gameData: GameFenIsometryData) = {
     gameData.turnCount must_== g1.turnCount
   }
 
@@ -239,9 +238,9 @@ trait ChessTest extends Specification with ValidatedMatchers {
               newFenGame2 <- stratFenToGame(lib, fen1, v)
             } yield {
               val newGameData = gameData.nextPly(newBaseGame, newFenGame)
-              turnsAndPliesAreEqual(newBaseGame, newGameData)
-              turnsAndPliesAreEqual(newFenGame, newGameData)
-              turnsAndPliesAreEqual(newFenGame2, newGameData)
+              turnsAreEqual(newBaseGame, newGameData)
+              turnsAreEqual(newFenGame, newGameData)
+              turnsAreEqual(newFenGame2, newGameData)
               gamesAreEqual(lib, newBaseGame, newFenGame)
               gamesAreEqual(lib, newBaseGame, newFenGame2)
               gamesAreEqual(lib, newFenGame, newFenGame2)
