@@ -215,9 +215,8 @@ trait ChessTest extends Specification with ValidatedMatchers {
     // TODO: add in end game conditions, etc.
   }
 
-  def turnsAreEqual(g1: StratGame, gameData: GameFenIsometryData) = {
+  def turnsAreEqual(g1: StratGame, gameData: GameFenIsometryData) =
     gameData.turnCount must_== g1.turnCount
-  }
 
   def _testEveryMoveLoadFenIsometry(
       lib: GameLogic,
