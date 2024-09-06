@@ -101,20 +101,15 @@ class FlipelloVariantTest extends FairySFTest {
 
     "Should detect pending double passes as a game end" in {
       val position = FEN(
-        "1PPPPPPP/P1PPPPPP/PPpPPPPP/PPppPPPP/PPpppPPP/PPPppppP/PPPPpppp/PPPPPPPP[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppppp] w - - 64 33"
+        "3P4/3P3P/3PPPPP/1PPPPPPP/3PPPPP/1p1PPPPP/2pp1P2/1ppp4[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp] b - - 0 15"
       )
       val game     = fenToGame(position, Flipello)
       game must beValid
         .like {
           case game => {
-            game.situation.moves must beEmpty
-            game.situation
-              .playable(
-                true
-              )
-              .must(beEqualTo(false))
+            game.situation.end must beTrue
           }
-        } pendingUntilFixed "pla-904-flipello-load-from-fen-in-unplayable-position"
+        }
     }
 
   }
