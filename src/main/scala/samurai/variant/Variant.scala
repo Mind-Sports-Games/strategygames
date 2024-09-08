@@ -52,44 +52,46 @@ abstract class Variant private[variant] (
   def isValidPromotion(@nowarn promotion: Option[PromotableRole]): Boolean = true
 
   def validMoves(situation: Situation): Map[Pos, List[Move]] =
-    situation.board.apiPosition.legalMoves
-      .map { move =>
-        val numSeeds = situation.board.apiPosition.fen.owareStoneArray(move)
-        (
-          move,
-          Pos(move),
-          Pos(
-            (numSeeds + move + (numSeeds - 1) / 11) % 12
-          ) // dest = seeds + move position + skipping own house
-        )
-      }
-      .map {
-        case (move, Some(orig), Some(dest)) => {
-          val uciMove       = s"${orig.key}${dest.key}"
-          val previousMoves = situation.board.uciMoves
-          val newPosition   = situation.board.apiPosition.makeMovesWithPrevious(List(move), previousMoves)
+    if (situation.status.isEmpty)
+      situation.board.apiPosition.legalMoves
+        .map { move =>
+          val numSeeds = situation.board.apiPosition.fen.owareStoneArray(move)
           (
-            orig,
-            Move(
-              piece = situation.board.pieces(orig)._1,
-              orig = orig,
-              dest = dest,
-              situationBefore = situation,
-              after = situation.board.copy(
-                pieces = newPosition.pieceMap,
-                uciMoves = situation.board.uciMoves :+ uciMove,
-                position = newPosition.some
-              ),
-              autoEndTurn = true,
-              capture = None,
-              promotion = None
-            )
+            move,
+            Pos(move),
+            Pos(
+              (numSeeds + move + (numSeeds - 1) / 11) % 12
+            ) // dest = seeds + move position + skipping own house
           )
         }
-        case (_, orig, dest)                => sys.error(s"Invalid position from uci: ${orig}${dest}")
-      }
-      .groupBy(_._1)
-      .map { case (k, v) => (k, v.toList.map(_._2)) }
+        .map {
+          case (move, Some(orig), Some(dest)) => {
+            val uciMove       = s"${orig.key}${dest.key}"
+            val previousMoves = situation.board.uciMoves
+            val newPosition   = situation.board.apiPosition.makeMovesWithPrevious(List(move), previousMoves)
+            (
+              orig,
+              Move(
+                piece = situation.board.pieces(orig)._1,
+                orig = orig,
+                dest = dest,
+                situationBefore = situation,
+                after = situation.board.copy(
+                  pieces = newPosition.pieceMap,
+                  uciMoves = situation.board.uciMoves :+ uciMove,
+                  position = newPosition.some
+                ),
+                autoEndTurn = true,
+                capture = None,
+                promotion = None
+              )
+            )
+          }
+          case (_, orig, dest)                => sys.error(s"Invalid position from uci: ${orig}${dest}")
+        }
+        .groupBy(_._1)
+        .map { case (k, v) => (k, v.toList.map(_._2)) }
+    else Map.empty
 
   def move(
       situation: Situation,

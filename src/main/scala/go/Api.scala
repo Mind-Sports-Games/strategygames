@@ -52,6 +52,7 @@ object Api {
     def setBoard(goBoard: GoBoard): Unit
     def deepCopy: Position
 
+    val turn: String
     val initialFen: FEN
     val fen: FEN
     val pieceMap: PieceMap
@@ -177,20 +178,21 @@ object Api {
 
     def goDiagram: String = position.toBoard.toDiagram
 
+    val turn =
+      if (position.turn() == 1) "b"
+      else "w" // cant trust engine fen - not sure why but it always returns 'b'
+
     def fenString: String = {
       val splitDiagram = goDiagram.split(' ')
       val board        = splitDiagram.lift(0).getOrElse(" board fen error ").replace("X", "S").replace("O", "s")
-      val turn         =
-        if (position.turn() == 1) "b"
-        else "w" // cant trust engine fen - not sure why but it always returns 'b'
-      val ko          = splitDiagram.lift(2).getOrElse("-").toString()
+      val pocket       = "[SSSSSSSSSSssssssssss]"
+      val ko           = splitDiagram.lift(2).getOrElse("-").toString()
       // TODO: generating the score is slow.
-      val p1FenScore  = (p1Score * 10).toInt
-      val p2FenScore  = (p2Score * 10).toInt
-      val fenKomi     = (komi * 10).toInt
-      val fullMoveStr = (ply / 2 + 1).toString()
-      val pocket      = "[SSSSSSSSSSssssssssss]"
-      return s"${board}${pocket} ${turn} ${ko} ${p1FenScore} ${p2FenScore} 0 0 ${fenKomi} ${fullMoveStr}"
+      val p1FenScore   = (p1Score * 10).toInt
+      val p2FenScore   = (p2Score * 10).toInt
+      val fenKomi      = (komi * 10).toInt
+      val fullMoveStr  = (ply / 2 + 1).toString()
+      return s"${board}${pocket} ${turn} ${ko} ${p1FenScore} ${p2FenScore} 0 0 ${fenKomi} 0 ${fullMoveStr}"
     }
 
     def toPosition = position.toBoard().position()
@@ -354,8 +356,8 @@ object Api {
     case _         => sys.error(s"not given a go variant name: ${variantKey}")
   }
 
-  val fenRegex                                =
-    "([0-9Ss]?){1,19}(/([0-9Ss]?){1,19}){8,18}\\[[Ss]+\\] [w|b] - [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+"
+  private val fenRegex                        =
+    "([0-9Ss]?){1,19}(/([0-9Ss]?){1,19}){8,18}\\[[Ss]+\\] [w|b] - [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-3] [0-9]+"
   def validateFEN(fenString: String): Boolean =
     Try(goBoardFromFen(FEN(fenString))).isSuccess && fenString.matches(fenRegex)
 

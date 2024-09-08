@@ -95,26 +95,21 @@ class FlipelloVariantTest extends FairySFTest {
         flipelloGameEndsEarly.take(65)
       ) // just before P2 move (which engine says to pass incorrectly)
 
-      println("Possible moves in this position")
-      position2.legalMoves.map(println(_))
-
-      println("current fen")
-      println(position2.fen) // checking number of drops remaining....
-
       position2.legalMoves.size must_== 5
       position2.gameEnd must_== false
     }
 
     "Should detect pending double passes as a game end" in {
       val position = FEN(
-        "1PPPPPPP/P1PPPPPP/PPpPPPPP/PPppPPPP/PPpppPPP/PPPppppP/PPPPpppp/PPPPPPPP[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppppp] w - - 64 33"
+        "3P4/3P3P/3PPPPP/1PPPPPPP/3PPPPP/1p1PPPPP/2pp1P2/1ppp4[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp] b - - 0 15"
       )
       val game     = fenToGame(position, Flipello)
-      game must beValid.like {
-        case game => {
-          game.situation.playable(false) must beFalse
+      game must beValid
+        .like {
+          case game => {
+            game.situation.end must beTrue
+          }
         }
-      }
     }
 
   }

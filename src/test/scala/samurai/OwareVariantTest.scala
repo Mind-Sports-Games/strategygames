@@ -4,6 +4,9 @@ import org.specs2.matcher.ValidatedMatchers
 import org.specs2.mutable.Specification
 
 import strategygames.Player
+import strategygames.format.{ FEN => StratFen, Forsyth => StratForsyth, Uci => StratUci }
+import strategygames.variant.{ Variant => StratVariant }
+import variant.Oware
 
 class OwareVariantTest extends Specification with ValidatedMatchers {
 
@@ -326,7 +329,7 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
       "c2a2",
       "f1c2",
       "b2e1",
-      "b1d2",
+      "b1d1",
       "a2d1",
       "a1d1",
       "e2c2",
@@ -963,5 +966,111 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
       finalGame.situation.end must_== true
     }
 
+  }
+}
+
+class OwareVariantTestIsometry extends strategygames.chess.ChessTest {
+  "Test Every move can be loaded from fen" in {
+    val gameFamily   = Oware.gameFamily
+    val lib          = gameFamily.gameLogic
+    val stratVariant = StratVariant(lib, Oware.key).get
+
+    // Cycle game from above
+    _testEveryMoveLoadFenIsometry(lib, StratFen(lib, Oware.initialFen.value), stratVariant)(
+      List(
+        "d1e2",
+        "b2c1",
+        "b1f2",
+        "a2e1",
+        "c1c2",
+        "e2b1",
+        "e1a1",
+        "c2e1",
+        "f1b1",
+        "b2c1",
+        "d1e2",
+        "f2e1",
+        "a1b1",
+        "c2a1",
+        "f1e2",
+        "d2f2",
+        "d1f2",
+        "b2c1",
+        "c1f2",
+        "a2c2",
+        "e1c2",
+        "e2c2",
+        "f1b2",
+        "c2c1",
+        "a1f1",
+        "f2b2",
+        "b1c2",
+        "d2c1",
+        "e1f2",
+        "e2b2",
+        "d1e2",
+        "c2a2",
+        "f1c2",
+        "b2e1",
+        "b1d1",
+        "a2d1",
+        "a1d1",
+        "e2c2",
+        "b1d1",
+        "c2a2",
+        "c1e1",
+        "d2a2",
+        "d1f2",
+        "a2b1",
+        "a1b1",
+        "b2a1",
+        "a1b1",
+        "a2a1",
+        "a1b1",
+        "c2b2",
+        "b1f1",
+        "b2a2",
+        "e1e2",
+        "e2d2",
+        "c1d1",
+        "f2e2",
+        "f1d2",
+        "f2e2",
+        "d1f1",
+        "a2a1",
+        "e1f1",
+        "e2d2",
+        "f1e2",
+        "f2e2",
+        "a1b1",
+        "e2c2",
+        "b1c1",
+        "d2b2",
+        "c1d1",
+        "c2a2",
+        "d1e1",
+        "b2a1",
+        "e1f1",
+        "a2b1",
+        "f1f2",
+        "f2e2",
+        "a1c1",
+        "e2d2",
+        "b1d1",
+        "d2c2",
+        "c1e1",
+        "c2b2",
+        "d1f1",
+        "b2a2",
+        "e1f2",
+        "a2a1",
+        "f1e2",
+        "f2d2" // TODO doesn't like final move for some reason?
+      ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
+    ) must beValid.like(gameData => {
+      val fen1 = StratForsyth.>>(lib, gameData.game)
+      val fen2 = StratForsyth.>>(lib, gameData.fenGame)
+      fen1 must_== fen2
+    })
   }
 }

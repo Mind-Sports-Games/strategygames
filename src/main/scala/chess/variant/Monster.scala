@@ -1,5 +1,7 @@
 package strategygames.chess.variant
 
+import scala.annotation.nowarn
+
 import strategygames.chess._
 import strategygames.chess.format.{ FEN, Uci }
 import strategygames.Player
@@ -15,7 +17,7 @@ case object Monster
   def perfId: Int    = 23
   def perfIcon: Char = ''
 
-  override def hasAnalysisBoard: Boolean = false
+  override def hasAnalysisBoard: Boolean = true
   override def hasFishnet: Boolean       = false
 
   override def exoticChessVariant       = true
@@ -176,4 +178,15 @@ case object Monster
       board.piecesOf(P1).size <= 5
     }
 
+  override def fenTurnCount(turnCount: Int): Int = 1 + turnCount / 2
+  override def fenHalfTurnMarker(
+      situation: Situation,
+      @nowarn turnCount: Int,
+      @nowarn plies: Int
+  ): Option[String] =
+    situation.history.currentTurn.lift(0).map(m => f"½${m.uci}")
+
+  override def pliesFromFen(fenTurnCount: Int, player: Player, @nowarn fenHalfTurnMarker: Boolean) =
+    (fenTurnCount - 1) * 3 + player.fold(0, 2) + (if (fenHalfTurnMarker) 1
+                                                  else 0)
 }

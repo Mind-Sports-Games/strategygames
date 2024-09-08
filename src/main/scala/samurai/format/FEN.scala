@@ -25,12 +25,10 @@ final case class FEN(value: String) extends AnyVal {
   private def intFromFen(index: Int): Option[Int] =
     value.split(' ').lift(index).flatMap(_.toIntOption)
 
+  private def boardStr = value.split(' ')(0)
+
   def owareStoneArray: Array[Int] =
-    (
-      value.split(' ')(0).split('/')(1).split(',')
-        ++
-          value.split(' ')(0).split('/')(0).split(',').reverse
-    )
+    (boardStr.split('/')(1).split(',') ++ boardStr.split('/')(0).split(',').reverse)
       .map(c =>
         c.toString() match {
           case x if 1 to 6 map (_.toString) contains x => Array.fill(x.toInt)(0)
@@ -40,7 +38,25 @@ final case class FEN(value: String) extends AnyVal {
       .flatten
       .toArray
 
+  def stonesOwnedByPlayer(player: Player) = {
+    val stonesByPlayer = owareStoneArray.splitAt(6)
+    player.fold(stonesByPlayer._1, stonesByPlayer._2).sum
+  }
+
   def initial = value == Forsyth.initial.value
+
+  private def rawPlayerScore(player: Player) =
+    player.fold(player1Score, player2Score) - stonesOwnedByPlayer(player)
+
+  def finalStonesScored = player1Score + player2Score == 48
+
+  def withoutFinalStonesScored =
+    if (finalStonesScored)
+      FEN(
+        s"${boardStr} ${rawPlayerScore(Player.P1)} ${rawPlayerScore(Player.P2)} ${value.split(' ').drop(3).mkString(" ")}"
+      )
+    else this
+
 }
 
 object FEN {

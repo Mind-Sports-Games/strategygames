@@ -51,7 +51,8 @@ object Api {
   private class OwarePosition(
       position: OwareGame,
       ply: Int = 0,
-      fromFen: Option[FEN] = None
+      fromFen: Option[FEN] = None,
+      forceEnd: Boolean = false
   ) extends Position {
     // TODO: yes, this is an abuse of scala. We could get an
     //       exception here, but I'm not sure how to work around that
@@ -170,7 +171,8 @@ object Api {
     lazy val gameResult: GameResult =
       GameResult.resultFromInt(position.outcome(), gameEnd)
 
-    lazy val gameEnd: Boolean = position.hasEnded() && (!position.isRepetition() || isRepetition)
+    lazy val gameEnd: Boolean =
+      forceEnd || (position.hasEnded() && (!position.isRepetition() || isRepetition))
 
     lazy val gameOutcome: Int      = position.outcome()
     lazy val isRepetition: Boolean = position.isRepetition() && !allSeedsOnSameSide
@@ -212,13 +214,17 @@ object Api {
     new OwarePosition(game, fen.ply.getOrElse(0), Some(fen))
   }
 
-  def positionFromVariantNameAndFEN(variantName: String, fenString: String): Position = {
+  def positionFromVariantNameAndFEN(
+      variantName: String,
+      fenString: String,
+      forceEnd: Boolean = false
+  ): Position = {
     val game = new OwareGame()
     val fen  = FEN(fenString)
     game.setBoard(owareBoardFromFen(fenString))
     variantName.toLowerCase() match {
-      case "oware" => new OwarePosition(game, fen.ply.getOrElse(0), Some(fen))
-      case _       => new OwarePosition(new OwareGame(), fen.ply.getOrElse(0), Some(fen))
+      case "oware" => new OwarePosition(game, fen.ply.getOrElse(0), Some(fen), forceEnd)
+      case _       => new OwarePosition(new OwareGame(), fen.ply.getOrElse(0), Some(fen), forceEnd)
     }
   }
 

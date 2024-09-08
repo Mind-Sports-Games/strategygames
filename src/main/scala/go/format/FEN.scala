@@ -20,14 +20,17 @@ final case class FEN(value: String) extends AnyVal {
 
   def player2Captures: Int = intFromFen(6).getOrElse(0)
 
-  def fullMove: Option[Int] = intFromFen(8)
+  def komi: Double = intFromFen(7).getOrElse(0) / 10.0
+
+  // Consecutive Pass count. Capped at 2, 3 is reserved for end game (after "ss:")
+  def fenPassCount: Int = intFromFen(8).getOrElse(0)
+
+  def fullMove: Option[Int] = intFromFen(9)
 
   def ply: Option[Int] =
     fullMove map { fm =>
       fm * 2 - (if (player.exists(_.p1)) 2 else 1)
     }
-
-  def komi: Double = intFromFen(7).getOrElse(0) / 10.0
 
   def handicap: Option[Int] = if (fullMove == Some(1)) Some(board.count(_ == 'S')) else None
 

@@ -1,5 +1,7 @@
 package strategygames.chess
 
+import strategygames.format.{ FEN => StratFen, Forsyth => StratForsyth, Uci => StratUci }
+import strategygames.variant.{ Variant => StratVariant }
 import strategygames.chess.variant.Monster
 
 class MonsterVariantTest extends ChessTest {
@@ -301,6 +303,62 @@ class MonsterVariantTest extends ChessTest {
         game.situation.checkMate must_== false
         game.situation.staleMate must_== true
       }
+    }
+
+    "Test Every move can be loaded from fen" in {
+      val gameFamily   = Monster.gameFamily
+      val lib          = gameFamily.gameLogic
+      val stratVariant = StratVariant(lib, Monster.key).get
+
+      _testEveryMoveLoadFenIsometry(lib, StratFen(lib, Monster.initialFen.value), stratVariant)(
+        List(
+          "e2e4",
+          "e1e2",
+          "e7e6",
+          "e2e3",
+          "e3f4",
+          "f8a3",
+          "f4g5",
+          "g5h5",
+          "d7d6",
+          "h5g6",
+          "g6g7",
+          "e8d7",
+          "g7h8",
+          "h8h7",
+          "d7c6",
+          "h7g8",
+          "g8f7",
+          "c6b6",
+          "f7e8",
+          "e8d8",
+          "b6a5",
+          "d8c8",
+          "c8b7",
+          "a5a4",
+          "b7b8",
+          "b8a8",
+          "a7a5",
+          "a8b8",
+          "b8c7",
+          "a3c5",
+          "c7d6",
+          "d6e6",
+          "c5d6",
+          "e6d6",
+          "f2f4",
+          "a4a3",
+          "f4f5",
+          "f5f6",
+          "a3a4",
+          "f6f7",
+          "d6d5"
+        ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
+      ) must beValid.like(gameData => {
+        val fen1 = StratForsyth.>>(lib, gameData.game)
+        val fen2 = StratForsyth.>>(lib, gameData.fenGame)
+        fen1 must_== fen2
+      })
     }
 
   }
