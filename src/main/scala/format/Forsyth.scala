@@ -243,7 +243,37 @@ object Forsyth {
     case _                                                 => sys.error("Mismatched gamelogic types 17")
   }
 
-  def >>(lib: GameLogic, situation: SituationPlus): FEN = >>(lib, situation.situation, situation.turnCount)
+  def >>(lib: GameLogic, situation: SituationPlus): FEN = (lib, situation) match {
+    case (GameLogic.Draughts(), SituationPlusDraughts(situation))         =>
+      FEN.Draughts(
+        draughts.format.Forsyth.>>(situation)
+      )
+    case (GameLogic.Chess(), SituationPlusChess(situation))               =>
+      FEN.Chess(
+        chess.format.Forsyth.>>(situation)
+      )
+    case (GameLogic.FairySF(), SituationPlusFairySF(situation))           =>
+      FEN.FairySF(
+        fairysf.format.Forsyth.>>(situation)
+      )
+    case (GameLogic.Samurai(), SituationPlusSamurai(situation))           =>
+      FEN.Samurai(
+        samurai.format.Forsyth.>>(situation)
+      )
+    case (GameLogic.Togyzkumalak(), SituationPlusTogyzkumalak(situation)) =>
+      FEN.Togyzkumalak(
+        togyzkumalak.format.Forsyth.>>(situation)
+      )
+    case (GameLogic.Go(), SituationPlusGo(situation))                     =>
+      FEN.Go(
+        go.format.Forsyth.>>(situation)
+      )
+    case (GameLogic.Backgammon(), SituationPlusBackgammon(situation))     =>
+      FEN.Backgammon(
+        backgammon.format.Forsyth.>>(situation)
+      )
+    case _                                                                => sys.error("Mismatched gamelogic types 19")
+  }
 
   def >>(lib: GameLogic, situation: Situation, turnCount: Int = 1): FEN = (lib, situation) match {
     case (GameLogic.Draughts(), Situation.Draughts(situation))         =>
