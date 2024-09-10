@@ -75,9 +75,15 @@ case class Pos private (index: Int) extends AnyVal {
   def piotr: Char = Piotr.lookup.get(index).getOrElse('?')
   def piotrStr    = piotr.toString
 
-  def player: Player = if (index < 9) Player.P1 else Player.P2
+  def player: Player = if (index < File.all.size) Player.P1 else Player.P2
 
-  def last: Boolean = (index + 1) % 9 == 0
+  def last(width: Int): Boolean =
+    if (rank.index == 0) (index + 1) % width == 0
+    else index == Pos.all.size - 1
+
+  def indexByWidth(width: Int): Int =
+    if (rank.index == 0) index
+    else index - (File.all.size - width) * 2
 
   def key               = file.toString + rank.toString
   override def toString = key
@@ -95,7 +101,8 @@ object Pos {
       Some(new Pos(x + (File.all.size - x) * y))
     else None
 
-  def opposite(index: Int): Option[Pos] = apply(if (index < 9) index + 9 else index - 9)
+  def opposite(index: Int): Option[Pos] =
+    apply(if (index < File.all.size) index + File.all.size else index - File.all.size)
 
   def fromKey(key: String): Option[Pos] = allKeys get key
 
@@ -136,6 +143,8 @@ object Pos {
 
   // if adding new Pos check for use of Pos.all
   val all: List[Pos] = (0 to (File.all.size * Rank.all.size) - 1).map(new Pos(_)).toList
+
+  def allByWidth(width: Int): List[Pos] = all.filter(_.file.index < width)
 
   val allKeys: Map[String, Pos] = all
     .map { pos =>
