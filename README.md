@@ -4,8 +4,7 @@ It is entirely functional, immutable, and free of side effects.
 
 strategygames is a fork from [scalachess](https://github.com/lichess-org/scalachess) which is the equivalent Chess API for [lichess.org](https://lichess.org).
 
-INSTALL
--------
+## INSTALL
 
 Clone scalachess
 
@@ -26,7 +25,12 @@ To run the tests (with coverage):
     clean coverage test
     coverageReport
 
+To run only 1 test:
+
+    sbt "testOnly **.TestNameTest"
+
 Code formatting
+
 ###
 
 This repository uses [scalafmt](https://scalameta.org/scalafmt/).
