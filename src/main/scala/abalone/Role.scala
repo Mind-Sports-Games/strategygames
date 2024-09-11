@@ -19,7 +19,7 @@ sealed trait Role {
 
 sealed trait PromotableRole extends Role
 
-case object Stone extends Role {
+case object Stone extends Role { // @TODO VFR: just use Stone for Marbles
   val forsyth   = 's'
   val binaryInt = 0
 }

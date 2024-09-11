@@ -61,16 +61,15 @@ object Board {
 
   }
 
-  // TODO Abalone Set
+  // an Hexagon of width 5 fits in a square of width 9
   object BoardSize {
-    val all: List[BoardSize] = List(Dim9x2)
+    val all: List[BoardSize] = List(Dim9x9)
   }
 
-  // TODO Abalone Set
-  case object Dim9x2
+  case object Dim9x9
       extends BoardSize(
         width = 9,
-        height = 2
+        height = 9
       )
 
 }

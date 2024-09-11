@@ -34,7 +34,10 @@ case class Situation(board: Board, player: Player) {
     else none
 
   // TODO Abalone set this
-  def opponentHasInsufficientMaterial: Boolean = false
+  // in case someone does not have more than 2 pieces, it could be considered as insufficient material to do anything
+  // But I'm not sure we do not want to allow having a board containing only 1 marble for a player : Could be interesting for teaching or puzzle purpose.  
+  def opponentHasInsufficientMaterial: Boolean =
+    false
 
   def move(from: Pos, to: Pos, promotion: Option[PromotableRole]): Validated[String, Move] =
     board.variant.move(this, from, to, promotion)

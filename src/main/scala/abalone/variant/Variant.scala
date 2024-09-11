@@ -41,8 +41,7 @@ abstract class Variant private[variant] (
   def perfId: Int
   def perfIcon: Char
 
-  // TODO: Abalone Set
-  def initialFen: FEN = format.FEN("")
+  def initialFen: FEN = format.FEN("pp1PP/pppPPP/1pp1pp1/8/9/8/1PP1pp1/PPPppp/PP1pp 0 0 b 0 0") // Belgian Daisy
 
   def pieces: PieceMap = initialFen.pieces
 

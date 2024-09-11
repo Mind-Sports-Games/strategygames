@@ -14,14 +14,14 @@ case class File private (val index: Int) extends AnyVal with Ordered[File] {
   def toUpperCaseString           = upperCaseChar.toString
 }
 
+// column (as if it was an index in a 1D array)
 object File {
   def apply(index: Int): Option[File] =
     if (0 <= index && index < all.size) Some(new File(index))
     else None
 
   @inline def of(pos: Pos): File = {
-    val rank: Int = if (pos.index > 8) 1 else 0
-    new File(pos.index + ((pos.index - all.size) * -2 - 1) * rank)
+    new File(pos.index % all.size)
   }
 
   def fromChar(ch: Char): Option[File] = apply(ch.toInt - 97)
