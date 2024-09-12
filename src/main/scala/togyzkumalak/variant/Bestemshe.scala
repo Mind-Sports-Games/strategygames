@@ -20,6 +20,8 @@ case object Bestemshe
 
   override def baseVariant: Boolean = false
 
+  override def canOfferDraw = false
+
   // cache this rather than checking with the API everytime
   override def initialFen =
     format.FEN("5S,5S,5S,5S,5S/5S,5S,5S,5S,5S 0 0 S 1")
