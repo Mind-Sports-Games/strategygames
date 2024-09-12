@@ -15,7 +15,7 @@ case object Bestemshe
 
   def gameFamily: GameFamily = GameFamily.Togyzkumalak()
 
-  def perfIcon: Char = '›'
+  def perfIcon: Char = ''
   def perfId: Int    = 401
 
   override def baseVariant: Boolean = false
