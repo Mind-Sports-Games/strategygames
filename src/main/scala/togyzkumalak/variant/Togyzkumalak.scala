@@ -24,7 +24,6 @@ case object Togyzkumalak
   override def initialFen =
     format.FEN("9S,9S,9S,9S,9S,9S,9S,9S,9S/9S,9S,9S,9S,9S,9S,9S,9S,9S 0 0 S 1")
 
-  // TODO check legalMoves.size == 0 condition
   override def specialEnd(situation: Situation) =
     (situation.board.history.score.p1 > 81) ||
       (situation.board.history.score.p2 > 81) ||

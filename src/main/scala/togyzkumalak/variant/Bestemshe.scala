@@ -28,12 +28,12 @@ case object Bestemshe
 
   override def usesTuzdik = false
 
-  // TODO check legalMoves.size == 0 condition
   override def specialEnd(situation: Situation) =
     (situation.board.history.score.p1 > 25) ||
       (situation.board.history.score.p2 > 25) ||
       (situation.moves.size == 0)
 
+  // shouldn't happen from starting fen as scores have to always be even so 25=25 is not possible
   override def specialDraw(situation: Situation) =
     situation.board.history.score.p1 == situation.board.history.score.p2
 
