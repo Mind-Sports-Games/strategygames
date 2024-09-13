@@ -306,7 +306,6 @@ abstract class Variant private[variant] (
     None
 
   def pliesFromFen(fenTurnCount: Int, player: Player, @nowarn fenHalfTurnMarker: Boolean) =
-    // TODO: not sure these are actually correct
     fenTurnCount * 2 - player.fold(2, 1)
 }
 
