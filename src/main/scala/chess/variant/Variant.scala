@@ -302,11 +302,7 @@ abstract class Variant private[variant] (
   def gameFamily: GameFamily            = GameFamily.Chess()
   def fenTurnCount(turnCount: Int): Int = 1 + turnCount / 2
 
-  def fenHalfTurnMarker(
-      @nowarn situation: Situation,
-      @nowarn turnCount: Int,
-      @nowarn plies: Int
-  ): Option[String] =
+  def fenHalfTurnMarker(@nowarn situation: Situation): Option[String] =
     None
 
   def pliesFromFen(fenTurnCount: Int, player: Player, @nowarn fenHalfTurnMarker: Boolean) =
