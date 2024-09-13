@@ -214,11 +214,7 @@ object Forsyth {
           List(exportCheckCount(game.board))
         else List()
       } ::: {
-        // NOTE: yes, this is a fold, but because the default value
-        //       comes first in the fold, I have to explicitly type annotate it.
-        //       I wish there was a shorter getOrElse, mebbe:
-        //       game.fenHalfTurnMarker.map(List(_)).or(List())
-        game.fenHalfTurnMarker.map(List(_)).getOrElse(List())
+        game.fenHalfTurnMarker.toList
       }
     } mkString " "
   }
