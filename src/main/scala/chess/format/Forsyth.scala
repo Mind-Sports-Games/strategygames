@@ -208,7 +208,7 @@ object Forsyth {
         exportCastles(game.board),
         game.situation.enPassantSquaresUciString.getOrElse("-"),
         game.halfMoveClock.toString,
-        game.fenTurnCount.toString
+        game.fullTurnCount.toString
       ) ::: {
         if (game.board.variant == variant.ThreeCheck || game.board.variant == variant.FiveCheck)
           List(exportCheckCount(game.board))

@@ -178,7 +178,6 @@ case object Monster
       board.piecesOf(P1).size <= 5
     }
 
-  override def fenTurnCount(turnCount: Int): Int = 1 + turnCount / 2
   override def fenHalfTurnMarker(
       situation: Situation,
       @nowarn turnCount: Int,

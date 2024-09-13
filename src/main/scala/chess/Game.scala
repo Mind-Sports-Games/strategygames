@@ -102,7 +102,6 @@ case class Game(
   // doesnt seem to be used anywhere
   // def moveString = s"$fullTurnCount${player.fold(".", "...")}"
 
-  def fenTurnCount: Int                 = situation.board.variant.fenTurnCount(turnCount)
   def fenHalfTurnMarker: Option[String] =
     situation.board.variant.fenHalfTurnMarker(situation, turnCount, plies)
 
