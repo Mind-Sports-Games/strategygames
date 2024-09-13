@@ -115,27 +115,25 @@ object Forsyth {
     }
   }
 
-  case class SituationPlus(situation: Situation, fullTurnCount: Int, isHalfTurn: Boolean = false) {
+  case class SituationPlus(situation: Situation, fullTurnCount: Int) {
 
     private def playerNumber = situation.player.fold(2, 1)
 
     def turnCount = fullTurnCount * 2 - playerNumber
     def plies     =
-      situation.board.variant.pliesFromFen(fullTurnCount, situation.player, isHalfTurn)
+      situation.board.variant.pliesFromFen(fullTurnCount, situation.player, situation.board.history.currentTurn.size > 0)
 
   }
 
   def <<<@(variant: Variant, fen: FEN): Option[SituationPlus] =
     <<@(variant, fen) map { sit =>
       val splitted       = fen.value.split(' ').drop(4).dropWhile(_.contains('+'))
-      val isHalfTurn     = splitted.lift(2).filter(_.startsWith("½")).fold(false)(_ => true)
       val fullMoveNumber =
         splitted.lift(1).flatMap(_.toIntOption).map(_ max 1 min 500)
       val halfMoveClock  = splitted.lift(0).flatMap(_.toIntOption).map(_ max 0 min 100)
       SituationPlus(
         halfMoveClock.map(sit.history.setHalfMoveClock).fold(sit)(sit.withHistory),
-        fullMoveNumber | 1,
-        isHalfTurn
+        fullMoveNumber | 1
       )
     }
 
@@ -198,7 +196,7 @@ object Forsyth {
 
   def >>(parsed: SituationPlus): FEN =
     parsed match {
-      case SituationPlus(situation, _, _) =>
+      case SituationPlus(situation, _) =>
         >>(Game(situation, plies = parsed.plies, turnCount = parsed.turnCount))
     }
 
