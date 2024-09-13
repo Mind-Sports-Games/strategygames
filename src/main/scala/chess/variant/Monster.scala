@@ -1,7 +1,5 @@
 package strategygames.chess.variant
 
-import scala.annotation.nowarn
-
 import strategygames.chess._
 import strategygames.chess.format.{ FEN, Uci }
 import strategygames.Player
@@ -181,7 +179,7 @@ case object Monster
   override def fenHalfTurnMarker(situation: Situation): Option[String] =
     situation.history.currentTurn.lift(0).map(m => f"½${m.uci}")
 
-  override def pliesFromFen(fenTurnCount: Int, player: Player, @nowarn fenHalfTurnMarker: Boolean) =
+  override def pliesFromFen(fenTurnCount: Int, player: Player, fenHalfTurnMarker: Boolean) =
     (fenTurnCount - 1) * 3 + player.fold(0, 2) + (if (fenHalfTurnMarker) 1
                                                   else 0)
 }
