@@ -176,10 +176,6 @@ case object Monster
       board.piecesOf(P1).size <= 5
     }
 
-  override def fenHalfTurnMarker(situation: Situation): Option[String] =
-    situation.history.currentTurn.lift(0).map(m => f"½${m.uci}")
-
-  override def pliesFromFen(fenTurnCount: Int, player: Player, fenHalfTurnMarker: Boolean) =
-    (fenTurnCount - 1) * 3 + player.fold(0, 2) + (if (fenHalfTurnMarker) 1
-                                                  else 0)
+  override def pliesFromFen(fenTurnCount: Int, player: Player, currentTurnPlies: Int = 0) =
+    (fenTurnCount - 1) * 3 + player.fold(0, 2) + currentTurnPlies
 }

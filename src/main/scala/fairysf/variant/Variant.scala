@@ -52,9 +52,7 @@ abstract class Variant private[variant] (
 
   def pieces: Map[Pos, Piece] = Api.pieceMapFromFen(fairysfName.name, initialFen.value)
 
-  def exportBoardFen(board: Board): FEN                                      = board.apiPosition.fen
-  def exportBoardFenWithLastMove(board: Board, @nowarn _lastMove: Move): FEN = board.apiPosition.fen
-  def paramsForFen(game: Game): Tuple2[Board, Option[Move]]                  = (game.situation.board, None)
+  def exportBoardFen(board: Board): FEN = board.apiPosition.fen
 
   def startPlayer: Player = P1
 
@@ -262,6 +260,9 @@ abstract class Variant private[variant] (
   override def hashCode: Int = id
 
   def gameFamily: GameFamily
+
+  def pliesFromFen(fenTurnCount: Int, player: Player, currentTurnPlies: Int = 0) =
+    fenTurnCount * 2 - player.fold(2, 1) + currentTurnPlies
 }
 
 object Variant {

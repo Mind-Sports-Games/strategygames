@@ -117,11 +117,13 @@ object Forsyth {
 
   case class SituationPlus(situation: Situation, fullTurnCount: Int) {
 
-    private def playerNumber = situation.player.fold(2, 1)
-
-    def turnCount = fullTurnCount * 2 - playerNumber
+    def turnCount = fullTurnCount * 2 - situation.player.fold(2, 1)
     def plies     =
-      situation.board.variant.pliesFromFen(fullTurnCount, situation.player, situation.board.history.currentTurn.size > 0)
+      situation.board.variant.pliesFromFen(
+        fullTurnCount,
+        situation.player,
+        situation.board.history.currentTurn.size
+      )
 
   }
 
@@ -214,7 +216,8 @@ object Forsyth {
           List(exportCheckCount(game.board))
         else List()
       } ::: {
-        game.fenHalfTurnMarker.toList
+        // Only used by Monster currently
+        game.situation.history.currentTurn.lift(0).map(m => f"½${m.uci}").toList
       }
     } mkString " "
   }

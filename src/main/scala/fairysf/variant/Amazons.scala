@@ -62,23 +62,14 @@ case object Amazons
 
   private def fullPockets: String = s"[${"P" * 46}${"p" * 46}]"
 
-  override def exportBoardFen(board: Board): FEN = {
+  override def exportBoardFen(board: Board): FEN =
     FEN(
-      s"${boardPart(board)}${fullPockets} ${board.apiPosition.fen.value.split(" ").drop(1).mkString(" ")}"
+      List(
+        s"${boardPart(board)}${fullPockets}",
+        board.apiPosition.fen.value.split(" ").drop(1).mkString(" "),
+        board.history.currentTurn.headOption.map(u => s"½${u.uci}").getOrElse("")
+      ).mkString(" ").strip
     )
-  }
-
-  override def exportBoardFenWithLastMove(board: Board, lastMove: Move): FEN =
-    FEN(
-      s"${exportBoardFen(board)} ½${lastMove.toUci.uci}"
-    )
-
-  override def paramsForFen(game: Game): Tuple2[Board, Option[Move]] =
-    if (game.plies % 2 == 1)
-      game.situation.lastMove.fold[Tuple2[Board, Option[Move]]]((game.situation.board, None))(move =>
-        (move.situationBefore.board, Some(move))
-      )
-    else (game.situation.board, None)
 
   override def validMoves(situation: Situation): Map[Pos, List[Move]] =
     situation.board.history.lastAction match {
@@ -169,4 +160,6 @@ case object Amazons
     if (specialEnd(situation)) Option(!situation.player)
     else None
 
+  override def pliesFromFen(fenTurnCount: Int, player: Player, currentTurnPlies: Int = 0) =
+    (fenTurnCount - 1) * 4 + player.fold(0, 2) + currentTurnPlies
 }

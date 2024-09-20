@@ -228,7 +228,7 @@ object Replay {
         }
       }
 
-    def parseFairyUciWithPrevious(fairyUci: String, prevStr: Option[String]): (Game, Action) = {
+    def parseFairyUciWithPrevious(fairyUci: String, prevStr: Option[String]): (Game, Action) =
       fairyUci match {
         case Uci.Move.moveR(orig, dest, promotion) =>
           replayMoveFromUci(
@@ -244,7 +244,6 @@ object Replay {
           )
         case fairyUci: String                      => sys.error(s"Invalid fairyUci for replay: $fairyUci")
       }
-    }
 
     def parseFairyUci(fairyUci: String): (Game, Action) =
       parseFairyUciWithPrevious(fairyUci, None)

@@ -7,7 +7,7 @@ import cats.implicits._
 
 import strategygames.fairysf.format.Uci
 
-case class Situation(board: Board, player: Player, lastMove: Option[Move] = None) {
+case class Situation(board: Board, player: Player) {
 
   lazy val moves: Map[Pos, List[Move]] = board.variant.validMoves(this)
 

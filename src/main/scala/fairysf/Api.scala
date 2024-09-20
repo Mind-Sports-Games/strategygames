@@ -233,7 +233,7 @@ object Api {
     pieceMap.toMap
   }
 
-  def wallPiece(gf: GameFamily): Option[Piece] = gf match {
+  private def wallPiece(gf: GameFamily): Option[Piece] = gf match {
     case GameFamily.Amazons() => Piece.fromChar(gf, 'P')
     case _                    => None
   }

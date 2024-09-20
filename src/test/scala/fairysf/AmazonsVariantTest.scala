@@ -57,6 +57,7 @@ class AmazonsVariantTest extends FairySFTest {
       game.situation.moves.toList.map(_._2.size).sum must_== 80
       // strategygames.fairysf.Game.apply(strategygames.fairysf.variant.Amazons).situation.moves.toList.map(_._2.size).sum
     }
+
     "P1 win in example game" in {
       val replay  = Replay.gameWithUciWhileValid(amazonsGame, initialFen, variant.Amazons)
       val game    = replay._2.last._1
@@ -84,15 +85,15 @@ class AmazonsVariantTest extends FairySFTest {
       onePlyFen.value must contain(" ½")
       onePlyFen.value must contain(" ½g1j1")
       val onePlyGameFromFen = Game(Some(Amazons), Some(onePlyFen))
-      onePlyGameFromFen.situation.lastMove must beSome.like { case move =>
-        move.toUci.uci must_== "g1j1"
+      onePlyGameFromFen.situation.board.history.currentTurn.headOption must beSome.like { case action =>
+        action.uci must_== "g1j1"
       }
 
       val twoPlyGame         = makeMove(onePlyGame, "P@i2").get
       val twoPlyFen          = Forsyth.>>(twoPlyGame)
       twoPlyFen.value must not contain " ½"
       val twoPlayGameFromFen = Game(Some(Amazons), Some(twoPlyFen))
-      twoPlayGameFromFen.situation.lastMove must beNone
+      twoPlayGameFromFen.situation.board.history.currentTurn.headOption must beNone
 
     }
 

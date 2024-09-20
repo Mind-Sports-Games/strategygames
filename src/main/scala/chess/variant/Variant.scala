@@ -300,13 +300,9 @@ abstract class Variant private[variant] (
   override def hashCode: Int = id
 
   def gameFamily: GameFamily            = GameFamily.Chess()
-  def fenTurnCount(turnCount: Int): Int = 1 + turnCount / 2
 
-  def fenHalfTurnMarker(@nowarn situation: Situation): Option[String] =
-    None
-
-  def pliesFromFen(fenTurnCount: Int, player: Player, @nowarn fenHalfTurnMarker: Boolean) =
-    fenTurnCount * 2 - player.fold(2, 1)
+  def pliesFromFen(fenTurnCount: Int, player: Player, currentTurnPlies: Int = 0) =
+    fenTurnCount * 2 - player.fold(2, 1) + currentTurnPlies
 }
 
 object Variant {
