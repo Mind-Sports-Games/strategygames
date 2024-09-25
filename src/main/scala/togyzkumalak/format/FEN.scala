@@ -1,7 +1,7 @@
 package strategygames.togyzkumalak.format
 
 import strategygames.Player
-import strategygames.togyzkumalak.{ Piece, PieceMap, Pos, Stone, Tuzdik }
+import strategygames.togyzkumalak.{ File, Piece, PieceMap, Pos, Stone, Tuzdik }
 
 final case class FEN(value: String) extends AnyVal {
 
@@ -24,7 +24,7 @@ final case class FEN(value: String) extends AnyVal {
   private def intFromFen(index: Int): Option[Int] =
     value.split(' ').lift(index).flatMap(_.toIntOption)
 
-  private def width: Int = 9
+  private def width: Int = mancalaStoneArray.size / 2
 
   def mancalaStoneArray: Array[Int] =
     (
@@ -34,9 +34,9 @@ final case class FEN(value: String) extends AnyVal {
     )
       .map(c =>
         c.toString() match {
-          case x if 1 to width map (_.toString) contains x => Array.fill(x.toInt)(0)
-          case x if x.length > 1                           => Array(c.dropRight(1).toInt)
-          case _                                           => Array(-1)
+          case x if 1 to File.all.size map (_.toString) contains x => Array.fill(x.toInt)(0)
+          case x if x.length > 1                                   => Array(c.dropRight(1).toInt)
+          case _                                                   => Array(-1)
         }
       )
       .flatten
@@ -46,8 +46,8 @@ final case class FEN(value: String) extends AnyVal {
     mancalaStoneArray.zipWithIndex
       .filterNot { case (s, _) => s == 0 }
       .map { case (stones, index) =>
-        Pos(index) -> (if (stones == -1) (Tuzdik, 1)
-                       else (Stone, stones))
+        Pos.allByWidth(width).lift(index) -> (if (stones == -1) (Tuzdik, 1)
+                                              else (Stone, stones))
       }
       .flatMap {
         case (Some(pos), (r, c)) if r == Tuzdik => Some((pos -> Tuple2(Piece(!pos.player, r), c)))
