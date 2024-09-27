@@ -48,6 +48,12 @@ object FullOpeningDB {
         .map(
           FullOpening.Backgammon
         )
+    case (GameLogic.Abalone(), FEN.Abalone(fen))           =>
+      strategygames.abalone.opening.FullOpeningDB
+        .findByFen(fen)
+        .map(
+          FullOpening.Abalone
+        )
     case _                                                 => sys.error("Mismatched gamelogic types full opening db")
   }
 
@@ -82,6 +88,10 @@ object FullOpeningDB {
         strategygames.backgammon.opening.FullOpeningDB
           .search(actionStrs)
           .map(fo => FullOpening.AtPly(FullOpening.Backgammon(fo.opening), fo.ply))
+      case GameLogic.Abalone()      =>
+        strategygames.abalone.opening.FullOpeningDB
+          .search(actionStrs)
+          .map(fo => FullOpening.AtPly(FullOpening.Abalone(fo.opening), fo.ply))
     }
 
   private def draughtsFENs(fens: Vector[FEN]): Vector[strategygames.draughts.format.FEN] =
@@ -140,6 +150,14 @@ object FullOpeningDB {
       }
     )
 
+  private def abaloneFENs(fens: Vector[FEN]): Vector[strategygames.abalone.format.FEN] =
+    fens.flatMap(f =>
+      f match {
+        case f: FEN.Abalone => Some(f.f)
+        case _              => None
+      }
+    )
+
   def searchInFens(lib: GameLogic, fens: Vector[FEN]): Option[FullOpening] = lib match {
     case GameLogic.Draughts()     =>
       strategygames.draughts.opening.FullOpeningDB
@@ -183,6 +201,12 @@ object FullOpeningDB {
           backgammonFENs(fens)
         )
         .map(FullOpening.Backgammon)
+    case GameLogic.Abalone()      =>
+      strategygames.abalone.opening.FullOpeningDB
+        .searchInFens(
+          abaloneFENs(fens)
+        )
+        .map(FullOpening.Abalone)
   }
 
 }
