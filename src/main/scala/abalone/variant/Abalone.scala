@@ -20,7 +20,7 @@ case object Abalone
 
   override def baseVariant: Boolean = true
 
-  // pieces, turn, scoreP1, scoreP2, halfMovesSinceLastCapture (when = 100? => draw), total moves
+  // pieces, scoreP1, scoreP2, turn, halfMovesSinceLastCapture (triggering condition could be when == 100 && total moves > 50 ? => draw), total moves
   override def initialFen = format.FEN("pp1PP/pppPPP/1pp1pp1/8/9/8/1PP1pp1/PPPppp/PP1pp 0 0 b 0 0")
 
   // TODO: Abalone set

@@ -11,7 +11,13 @@ case class Board(
 ) {
 
   def apply(at: Pos): Option[Piece] = pieces get at
-  def apply(file: File, rank: Rank) = pieces get Pos(file, rank)
+  def apply(file: File, rank: Rank): Option[Piece] = {
+    val pos = Pos(file, rank)
+    pos match {
+      case Some(pos) => pieces get pos
+      case None => None
+    }
+  }
 
   lazy val actors: Map[Pos, Actor] = pieces map { case (pos, piece) =>
     (pos, Actor(piece, pos, this))
@@ -50,12 +56,12 @@ object Board {
       val width: Int,
       val height: Int
   ) {
+    val regular = false
 
     val key   = s"${width}x${height}"
     val sizes = List(width, height)
 
-    val validPos: List[Pos] =
-      Pos.all.filter(p => p.file.index < width && p.rank.index < height)
+    val validPos: List[Pos] = Pos.all
 
     override def toString = key
 

@@ -74,9 +74,9 @@ Abalone official coordinates system and "standard start position" are drawn belo
 
  */
 
-// Piotr is what is saved in Database and is used to in Uci
-// In the lookup val, we target as "FileAsLetterRowAsNumber" squares already defined in Pos object
-// The .index refer to the value that was given when the Pos was created, and is then associated to the char (which should match match src/main/scala/fairysf/Pos.scala for use in analysis and stratops)
+// Piotr is what is saved in Database and is used in Uci
+// In the lookup val, we target a "FileAsLetterRowAsNumber" square already defined in Pos object
+// The .index refer to the value that was given when the Pos was created, and is then associated to the char (which should match src/main/scala/fairysf/Pos.scala for use in analysis and stratops)
 object Piotr {
   val lookup: Map[Int, Char] = Map(
     Pos.A1.index -> 'a',
@@ -183,7 +183,7 @@ case class Pos private (index: Int) extends AnyVal {
   \   /
   - o -
   /   \
-   */
+  */
   def left: Option[Pos]      = Pos.at(file.index - 1, rank.index)
   def downLeft: Option[Pos]  = Pos.at(file.index - 1, rank.index - 1)
   def upLeft: Option[Pos]    = Pos.at(file.index, rank.index + 1)
@@ -231,7 +231,7 @@ case class Pos private (index: Int) extends AnyVal {
   def piotr: Char = Piotr.lookup
     .get(index)
     .getOrElse(
-      '?' // @TODO VFR: check if we really want this default value, or even a default value at all ??? Currently it returns the character in H8.
+      '*' // will default to char in i9
     )
   def piotrStr = piotr.toString
 
@@ -241,24 +241,44 @@ case class Pos private (index: Int) extends AnyVal {
 }
 
 object Pos {
+/*
+                                  row col
+9 -  72 73 74 75 &  \' (  )  *    8:   >3 (<9)
+8 -  63 64 65 7  8  9  !  ?  ¥    7:   >2 (<9)
+7 -  54 55 Y  Z  0  1  2  3  £    6:   >1 (<9)
+6 -  45 P  Q  R  S  T  U  V  ¡    5:   >0 (<9)
+5 -  G  H  I  J  K  L  M  N  }    4:   <9
+4 -  y  z  A  B  C  D  E  F  35   3:   <8
+3 -  q  r  s  t  u  v  w  25 26   2:   <7
+2 -  i  j  k  l  m  n  15 16 17   1:   <6
+1 -  a  b  c  d  e  5  6  7  8    0:   <5
+     |  |  |  |  |  |  |  |  |
+     A  B  C  D  E  F  G  H  I
+*/
+  def isInHexagon(index: Int): Boolean = {
+    if (index < 0) return false
+    val row = index / File.all.size
+    val remainder = index % File.all.size
+    if (index >= File.all.size * Rank.all.size) return false
+    if (row < (File.all.size / 2 + 1)) {
+      if (remainder >= (File.all.size / 2 + 1 + row)) return false
+    } else {
+      if (remainder <= (row - (File.all.size / 2 + 1))) return false
+    }
+    return true
+  }
+
   def apply(index: Int): Option[Pos] =
-    if (0 <= index && index < File.all.size * Rank.all.size) Some(new Pos(index))
+    if (isInHexagon(index)) Some(new Pos(index))
     else None
 
-  // @TODO VFR: determine if we want this code to work for hexagons or not (because we compute index based on a regular row size)
-  def apply(file: File, rank: Rank): Pos = new Pos(file.index + File.all.size * rank.index)
+  def apply(file: File, rank: Rank): Option[Pos] =
+    if (isInHexagon(file.index + File.all.size * rank.index)) Some(new Pos(file.index + File.all.size * rank.index))
+    else None
 
   def at(x: Int, y: Int): Option[Pos] =
-    if (0 <= x && x < File.all.size && 0 <= y && y < Rank.all.size) {
-      if (Piotr.lookup.keySet.exists(_ == x + File.all.size * y))
-        Some(new Pos(x + File.all.size * y))
-      else None
-    } else if (x == (File.all.size - 1) && 0 <= y && y < Rank.all.size) {
-      if (Piotr.lookup.keySet.exists(_ == y + File.all.size * Rank.all.size))
-        Some(new Pos(y + File.all.size * Rank.all.size))
-      else None
-    } else None
-
+    if (isInHexagon(x + File.all.size * y)) Some(new Pos(x + File.all.size * y))
+    else None
 
   def fromKey(key: String): Option[Pos] = allKeys get key
 
@@ -359,8 +379,7 @@ object Pos {
   val H9 = new Pos(79)
   val I9 = new Pos(80)
 
-  // @TODO: does not generate the hexagon coordinates, just the 9x9 square - do we want it to generate the hexagon only ?
-  val all: List[Pos] = (0 to (File.all.size * Rank.all.size) - 1).map(new Pos(_)).toList
+  val all: List[Pos] = (0 to (File.all.size * Rank.all.size) - 1).map(new Pos(_)).toList.filter(i => isInHexagon(i.index))
 
   val allKeys: Map[String, Pos] = all
     .map { pos =>

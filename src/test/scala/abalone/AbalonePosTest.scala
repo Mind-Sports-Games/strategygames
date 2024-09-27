@@ -5,7 +5,89 @@ import org.specs2.matcher.ValidatedMatchers
 class AbalonePosTest extends AbaloneTest with ValidatedMatchers {
     "grid coordinates" should {
         "describe 61 positions" in {
-            Pos.allPiotrs.size must_== 61
+            Pos.all.size must_== 61
+        }
+
+        "be shaped as an hexagon when accessed in 1D" in {
+            Pos.isInHexagon(-1) must_== false
+
+            Pos.isInHexagon(0) must_== true
+            Pos.isInHexagon(1) must_== true
+            Pos.isInHexagon(4) must_== true
+            Pos.isInHexagon(5) must_== false
+            Pos.isInHexagon(6) must_== false
+            Pos.isInHexagon(7) must_== false
+            Pos.isInHexagon(8) must_== false
+
+            Pos.isInHexagon(9) must_== true
+            Pos.isInHexagon(14) must_== true
+            Pos.isInHexagon(15) must_== false
+            Pos.isInHexagon(16) must_== false
+            Pos.isInHexagon(17) must_== false
+
+            Pos.isInHexagon(18) must_== true
+            Pos.isInHexagon(25) must_== false
+            Pos.isInHexagon(26) must_== false
+
+            Pos.isInHexagon(35) must_== false
+            Pos.isInHexagon(36) must_== true
+            Pos.isInHexagon(44) must_== true
+
+            Pos.isInHexagon(45) must_== false
+            Pos.isInHexagon(53) must_== true
+
+            Pos.isInHexagon(54) must_== false
+            Pos.isInHexagon(55) must_== false
+            Pos.isInHexagon(60) must_== true
+
+            Pos.isInHexagon(63) must_== false
+            Pos.isInHexagon(54) must_== false
+            Pos.isInHexagon(65) must_== false
+            Pos.isInHexagon(71) must_== true
+
+            Pos.isInHexagon(72) must_== false
+            Pos.isInHexagon(73) must_== false
+            Pos.isInHexagon(74) must_== false
+            Pos.isInHexagon(75) must_== false
+            Pos.isInHexagon(80) must_== true
+
+            Pos.isInHexagon(81) must_== false
+            Pos.isInHexagon(88) must_== false
+
+            Pos.isInHexagon(9001) must_== false
+        }
+
+        "be shaped as an hexagon when accessed in 2D" in {
+            // testing first row
+            Pos(File(0).get, Rank(0).get) must_!= None
+            Pos(File(1).get, Rank(0).get) must_!= None
+            Pos(File(2).get, Rank(0).get) must_!= None
+            Pos(File(3).get, Rank(0).get) must_!= None
+            Pos(File(4).get, Rank(0).get) must_!= None
+            Pos(File(5).get, Rank(0).get) must_== None
+            Pos(File(6).get, Rank(0).get) must_== None
+            Pos(File(7).get, Rank(0).get) must_== None
+            Pos(File(8).get, Rank(0).get) must_== None
+
+            // testing last row
+            Pos(File(0).get, Rank(8).get) must_== None
+            Pos(File(1).get, Rank(8).get) must_== None
+            Pos(File(2).get, Rank(8).get) must_== None
+            Pos(File(3).get, Rank(8).get) must_== None
+            Pos(File(4).get, Rank(8).get) must_!= None
+            Pos(File(5).get, Rank(8).get) must_!= None
+            Pos(File(6).get, Rank(8).get) must_!= None
+            Pos(File(7).get, Rank(8).get) must_!= None
+            Pos(File(8).get, Rank(8).get) must_!= None
+        }
+
+        "compute its index based on a shape of square when accessed in 2D" in {
+            Pos(File(0).get, Rank(0).get) must_== Pos(0)
+            Pos(File(8).get, Rank(0).get) must_== Pos(8)
+
+            Pos(File(0).get, Rank(1).get) must_== Pos(9)
+
+            Pos(File(8).get, Rank(8).get) must_== Pos(80)
         }
     }
 
@@ -14,7 +96,7 @@ class AbalonePosTest extends AbaloneTest with ValidatedMatchers {
             Pos.E5.right must_== Some(Pos.F5)
         }
         "decrement letter only when moving to the left" in {
-            Pos.E5.right must_== Some(Pos.F5)
+            Pos.E5.left must_== Some(Pos.D5)
         }
         "increment number and letter when moving upRight" in {
             Pos.E5.upRight must_== Some(Pos.F6)
@@ -70,5 +152,5 @@ class AbalonePosTest extends AbaloneTest with ValidatedMatchers {
             Pos.C7.downRight must_== Some(Pos.C6)
             Pos.C7.upRight must_== Some(Pos.D8)
         }
-    }    
+    }
 }
