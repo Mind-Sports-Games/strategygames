@@ -30,33 +30,36 @@ final case class FEN(value: String) extends AnyVal {
       |   |   |   |   |   |   |   |   |
       A   B   C   D   E   F   G   H   I
  */
-
-    val position                                                 = value.split(' ').lift(0).get.split('/')
-    val blackPiecesMap: scala.collection.mutable.Map[Pos, Piece] = scala.collection.mutable.Map.empty
-    val whitePiecesMap: scala.collection.mutable.Map[Pos, Piece] = scala.collection.mutable.Map.empty
-    var currentIndex                                             = 0
-    var i                                                        = 0
-    var j                                                        = 0
-    while (i < position.length) {
-      j = 0
-      while (j < position(i).length) {
-        if (position(i)(j).isDigit) { // describes 1+ empty squares
-          currentIndex = currentIndex + position(i)(j).asDigit
-        } else {
-          if (position(i)(j).equals('p')) {
-            blackPiecesMap(Pos.apply(currentIndex).getOrElse(Pos.apply(0).get)) = new Piece(strategygames.abalone.P1, Stone)
-          } else {
-            whitePiecesMap(Pos.apply(currentIndex).getOrElse(Pos.apply(0).get)) = new Piece(strategygames.abalone.P2, Stone)
-          }
-          currentIndex = currentIndex + 1
-        }
-        j = j + 1
+    val position     = value.split(' ')(0)
+    var currentIndex = 0
+    var currentLine = 0
+    position.map {
+      case 'p' => {
+        currentIndex = currentIndex + 1
+        Some((Pos.apply(currentIndex - 1), new Piece(strategygames.abalone.P1, Stone)))
       }
-      i = i + 1
-      currentIndex = if(i < 5) { currentIndex + (File.all.size / 2 + 1) - i } else { currentIndex + Math.abs((File.all.size / 2 + 1) - i) + 1 }
-    }
-
-    return (blackPiecesMap ++ whitePiecesMap).toMap
+      case 'P' => {
+        currentIndex = currentIndex + 1
+        Some((Pos.apply(currentIndex - 1), new Piece(strategygames.abalone.P2, Stone)))
+      }
+      case d if d.isDigit => {
+        currentIndex = currentIndex + d.asDigit
+        None
+      }
+      case '/' => {
+        currentLine = currentLine + 1
+        currentIndex =  if(currentLine < 5) {
+          currentIndex + (File.all.size / 2 + 1) - (currentLine)
+        }
+        else {
+          currentIndex + Math.abs((File.all.size / 2 + 1) - currentLine - 1)
+        }
+        None
+      }
+    }.flatten.flatMap { // flatMap = map + flatten, which gets rid of None and returns the Object instead of a Some(Object) which we would get with map
+      case (Some(pos), piece) => Some(pos -> piece)
+      case _ => None
+    }.toMap
   }
 
   def player1Score: Int = intFromFen(1).getOrElse(0)
@@ -64,7 +67,7 @@ final case class FEN(value: String) extends AnyVal {
   def player2Score: Int = intFromFen(2).getOrElse(0)
 
   def player: Option[Player] =
-    value.split(' ').lift(3) flatMap (_.headOption) flatMap Player.apply
+    value.split(' ').lift(3) flatMap (_.headOption) flatMap  Player.apply map( !_ )
 
   def halfMovesSinceLastCapture: Option[Int] = intFromFen(4)
 
