@@ -26,7 +26,7 @@ abstract class Variant private[variant] (
   def hasAnalysisBoard: Boolean = true
   def hasFishnet: Boolean       = false
 
-  def p1IsBetterVariant: Boolean = false
+  def p1IsBetterVariant: Boolean = true
   def blindModeVariant: Boolean  = true
 
   def materialImbalanceVariant: Boolean = false
@@ -36,12 +36,12 @@ abstract class Variant private[variant] (
   def hasGameScore: Boolean     = true
   def canOfferDraw: Boolean     = true
 
-  def repetitionEnabled: Boolean = false
+  def repetitionEnabled: Boolean = true
 
   def perfId: Int
   def perfIcon: Char
 
-  def initialFen: FEN = format.FEN("pp1PP/pppPPP/1pp1pp1/8/9/8/1PP1pp1/PPPppp/PP1pp 0 0 b 0 0") // Belgian Daisy
+  def initialFen: FEN = format.FEN("pp1PP/pppPPP/1pp1PP1/8/9/8/1PP1pp1/PPPppp/PP1pp 0 0 b 0 0") // Belgian Daisy
 
   def pieces: PieceMap = initialFen.pieces
 
@@ -53,7 +53,7 @@ abstract class Variant private[variant] (
   // in just atomic, so can leave as true for now
   def isValidPromotion(@nowarn promotion: Option[PromotableRole]): Boolean = true
 
-  // TODO Abalone
+  // TODO Abalone pla-924-sg-variant-tests
   def validMoves(@nowarn situation: Situation): Map[Pos, List[Move]] = Map.empty
 
   def move(
@@ -67,10 +67,12 @@ abstract class Variant private[variant] (
       s"Not a valid move: ${from}${to} with prom: ${promotion}. Allowed moves: ${situation.moves}"
   }
 
+  // @TODO: check what is stalemate to know if the notion could apply
   def stalemateIsDraw = false
 
   def winner(situation: Situation): Option[Player]
 
+  // @TODO: check if specialEnd could be the correct place for the condition of some1 not able to move
   @nowarn def specialEnd(situation: Situation) = false
 
   @nowarn def specialDraw(situation: Situation) = false

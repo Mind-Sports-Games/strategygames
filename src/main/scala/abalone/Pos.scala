@@ -242,18 +242,19 @@ case class Pos private (index: Int) extends AnyVal {
 
 object Pos {
 /*
-                                  row col
-9 -  72 73 74 75 &  \' (  )  *    8:   >3 (<9)
-8 -  63 64 65 7  8  9  !  ?  ¥    7:   >2 (<9)
-7 -  54 55 Y  Z  0  1  2  3  £    6:   >1 (<9)
-6 -  45 P  Q  R  S  T  U  V  ¡    5:   >0 (<9)
-5 -  G  H  I  J  K  L  M  N  }    4:   <9
-4 -  y  z  A  B  C  D  E  F  35   3:   <8
-3 -  q  r  s  t  u  v  w  25 26   2:   <7
-2 -  i  j  k  l  m  n  15 16 17   1:   <6
-1 -  a  b  c  d  e  5  6  7  8    0:   <5
-     |  |  |  |  |  |  |  |  |
-     A  B  C  D  E  F  G  H  I
+  indexes of Pos outside of the hexagon :
+                                          row   col
+9 -   72  73  74  75 '&' ''' '(' ')' '*'   8:   >3 (<9)
+8 -   63  64  65 '7' '8' '9' '!' '?' '¥'   7:   >2 (<9)
+7 -   54  55 'Y' 'Z' '0' '1' '2' '3' '£'   6:   >1 (<9)
+6 -   45 'P' 'Q' 'R' 'S' 'T' 'U' 'V' '¡'   5:   >0 (<9)
+5 -  'G' 'H' 'I' 'J' 'K' 'L' 'M' 'N' '}'   4:   <9
+4 -  'y' 'z' 'A' 'B' 'C' 'D' 'E' 'F' 35    3:   <8
+3 -  'q' 'r' 's' 't' 'u' 'v' 'w' 25  26    2:   <7
+2 -  'i' 'j' 'k' 'l' 'm' 'n' 15  16  17    1:   <6
+1 -  'a' 'b' 'c' 'd' 'e'  5   6   7   8    0:   <5
+      |   |   |   |   |   |   |   |   |
+      A   B   C   D   E   F   G   H   I
 */
   def isInHexagon(index: Int): Boolean = {
     if (index < 0) return false
