@@ -41,7 +41,8 @@ abstract class Variant private[variant] (
   def perfId: Int
   def perfIcon: Char
 
-  def initialFen: FEN = format.FEN("pp1PP/pppPPP/1pp1PP1/8/9/8/1PP1pp1/PPPppp/PP1pp 0 0 b 0 0") // Belgian Daisy
+  // pieces, scoreP1, scoreP2, turn, halfMovesSinceLastCapture (triggering condition could be when == 100 && total moves > 50 ? => draw), total moves
+  def initialFen: FEN = format.FEN("SS1ss/SSSsss/1SS1ss1/8/9/8/1ss1SS1/sssSSS/ss1SS 0 0 b 0 0") // Belgian Daisy
 
   def pieces: PieceMap = initialFen.pieces
 
@@ -60,9 +61,9 @@ abstract class Variant private[variant] (
       situation: Situation,
       from: Pos,
       to: Pos,
-      promotion: Option[PromotableRole]
+      promotion: Option[PromotableRole] // @TODO: try to see if it can be removed, check if it needs an update on the wrapperLayer. Not mandatory though
   ): Validated[String, Move] = {
-    // Find the move in the variant specific list of valid moves
+    // Find the move in the variant specific list of valid moves !
     situation.moves get from flatMap (_.find(m => m.dest == to && m.promotion == promotion)) toValid
       s"Not a valid move: ${from}${to} with prom: ${promotion}. Allowed moves: ${situation.moves}"
   }

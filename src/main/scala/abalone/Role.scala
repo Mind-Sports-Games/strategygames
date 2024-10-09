@@ -4,7 +4,7 @@ import strategygames.{ GameFamily, P1, P2, Player }
 
 sealed trait Role {
   val forsyth: Char
-  // lazy val forsythUpper: Char = forsyth.toUpper //this contradicts what the piece is now!
+  lazy val forsythUpper: Char     = forsyth.toUpper
   lazy val pgn: Char              = forsyth
   lazy val name                   = toString
   lazy val groundName             = s"${forsyth}-piece"
@@ -19,7 +19,7 @@ sealed trait Role {
 
 sealed trait PromotableRole extends Role
 
-case object Stone extends Role { // @TODO VFR: just use Stone for Marbles
+case object Stone extends Role { // @TODO VFR: consider if we want a new "Marble" Role or if we just use Stone for Marbles (because these can move)
   val forsyth   = 's'
   val binaryInt = 0
 }

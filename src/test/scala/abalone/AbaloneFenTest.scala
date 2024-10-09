@@ -65,7 +65,7 @@ class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
     }
 
     "Snakes start position" should {
-        val snakesFen = new format.FEN("PPPPP/5P/6P/1ppppp1P/1p5P1/p1PPPPP1/p6/p5/ppppp 0 0 b 0 0")
+        val snakesFen = new format.FEN("sssss/s5/s6/s1SSSSS1/1s5S1/1sssss1S/6S/5S/SSSSS 0 0 b 0 0")
         val pieces = snakesFen.pieces
 
         "have Black starting the game" in {
@@ -80,7 +80,7 @@ class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
     }
 
     "Atomouche start position" should {
-        val atomoucheFen = new format.FEN("3pP/PpP2p/4P2/p4p1P/P2p1P2p/p1P4P/2p4/P2pPp/pP3 0 0 b 0 0")
+        val atomoucheFen = new format.FEN("sS3/S2sSs/2s4/s1S4S/S2s1S2s/s4s1S/4S2/SsS2s/3sS 0 0 b 0 0")
         val pieces = atomoucheFen.pieces
 
         "have Black starting the game" in {
@@ -122,6 +122,43 @@ class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
         }
     }
 
+    "Fun little game situation \"5/6/2s4/2ssss2/2SSsS3/1SSSsss1/2s4/1SSs2/3S1 5 3 b 11 42\"" should {
+        val puzzleFen = new format.FEN("5/6/2s4/2ssss2/2SSsS3/1SSSsss1/2s4/1SSs2/3S1 5 3 b 11 42")
+        val pieces = puzzleFen.pieces
+
+        "have a score of 5 for P1 and a score of 3 for P2" in {
+            puzzleFen.player1Score must_== 5
+            puzzleFen.player2Score must_== 3
+        }
+
+        "have a total of 14 marbles per player, on the board and pushed out" in {
+            pieces.filter(p => p._2.player == P1).size + puzzleFen.player2Score must_== 14
+            pieces.filter(p => p._2.player == P2).size + puzzleFen.player1Score must_== 14
+        }
+
+        "11 plies were played since last time a marble was pushed out" in {
+            puzzleFen.halfMovesSinceLastCapture must_== Some(11)
+        }
+
+        "42 moves were played in total" in {
+            puzzleFen.fullMove must_== Some(42)
+        }
+    }
+
+    // @TODO: keep adding interesting cases once we are able to instanciate a Board from a FEN.
+
+    // "Game in progress since ages" should {
+    //     val ongoingGame = new format.FEN("")
+
+    //     "have a score of 3 for P2 and 2 for P1" in {
+    //         fen.player1Score must_== 2
+    //         fen.player2Score must_== 3
+    //     }
+
+    //     "be declared a draw" in {
+    //       ...
+    //      }
+    // }
 
     /*
     "a score of 6" should {
