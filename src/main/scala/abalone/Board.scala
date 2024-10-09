@@ -54,9 +54,9 @@ object Board {
 
   sealed abstract class BoardSize(
       val width: Int,
-      val height: Int
+      val height: Int,
+      val irregular: Boolean = true
   ) {
-    val regular = false
 
     val key   = s"${width}x${height}"
     val sizes = List(width, height)
