@@ -47,9 +47,11 @@ case class Situation(board: Board, player: Player) {
 
   def staleMate: Boolean = result == GameResult.Stalemate()
 
+  def autoDraw: Boolean = board.autoDraw || board.variant.specialDraw(this)
+
   private def variantEnd = result == GameResult.VariantEnd() || board.variant.specialEnd(this)
 
-  def end: Boolean = checkMate || perpetual || staleMate || variantEnd
+  def end: Boolean = checkMate || perpetual || staleMate || variantEnd || autoDraw
 
   def winner: Option[Player] = board.variant.winner(this)
 
@@ -61,6 +63,7 @@ case class Situation(board: Board, player: Player) {
     // alot of variantEnds appear as checkMate in fairysf
     else if (variantEnd) Status.VariantEnd.some
     else if (staleMate) Status.Stalemate.some
+    else if (autoDraw) Status.Draw.some
     else none
 
   // TODO: test P1/P2 map is correct

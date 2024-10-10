@@ -213,6 +213,11 @@ abstract class Variant private[variant] (
       }
     }
 
+  /** Returns true if neither player can win. The game should end immediately.
+   */
+  def isInsufficientMaterial(board: Board) =
+    board.apiPosition.insufficientMaterial._1 && board.apiPosition.insufficientMaterial._2
+
   // Some variants have an extra effect on the board on a move. For example, in Atomic, some
   // pieces surrounding a capture explode
   def hasMoveEffects = false

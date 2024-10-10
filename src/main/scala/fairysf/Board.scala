@@ -41,6 +41,8 @@ case class Board(
 
   def ensurePocketData = withPocketData(pocketData | PocketData.init)
 
+  def autoDraw: Boolean = variant.isInsufficientMaterial(this)
+
   def situationOf(player: Player) = Situation(this, player)
 
   def valid(strict: Boolean) = variant.valid(this, strict)
