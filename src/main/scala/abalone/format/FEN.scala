@@ -1,11 +1,7 @@
 package strategygames.abalone.format
 
 import strategygames.Player
-import strategygames.abalone.File
-import strategygames.abalone.Piece
-import strategygames.abalone.PieceMap
-import strategygames.abalone.Pos
-import strategygames.abalone.Stone
+import strategygames.abalone.{ P1, P2, Piece, PieceMap, Pos, Role }
 
 final case class FEN(value: String) extends AnyVal {
   // squares are described from topLeft to bottomRight in the FEN :
@@ -14,18 +10,16 @@ final case class FEN(value: String) extends AnyVal {
 
   override def toString = value
 
-  def pieces: PieceMap = squares.zipWithIndex.map {
-      case (pieces, row) => pieces.zipWithIndex.map[Option[(Option[strategygames.abalone.Pos], strategygames.abalone.Piece)]] { 
-        case (piece, index) => piece match {
-          case Stone.forsyth => Some((Pos.at(index, (File.all.size - 1 - row)), new Piece(strategygames.abalone.P1, Stone)))
-          case Stone.forsythUpper => Some((Pos.at(index, (File.all.size - 1 - row)), new Piece(strategygames.abalone.P2, Stone)))
-          case _ => None
-        }
-      }.flatMap {
-        case Some((Some(pos), piece)) => Some(pos -> piece)
-        case _ => None
-      }
-    }.flatten.toMap
+  def pieces: PieceMap = value.split(' ')(0).split('/').reverse.flatMap {
+    _.toCharArray
+  }.flatMap{ 
+    case square if (square.isDigit) => { Array.fill(square.asDigit)('1') }
+    case square => Array(square)
+  }.zip(Pos.all).flatMap { // map + flatten (that get rid of the 'Some' and the 'None' (meaning we map to None for cases we want to filter out))
+    case (piece, pos) if (piece == Role.defaultRole.forsyth) => Some((pos, Piece(P1, Role.defaultRole)))
+    case (piece, pos) if (piece == Role.defaultRole.forsythUpper) => Some((pos, Piece(P2, Role.defaultRole)))
+    case _ => None
+  }.toMap
 
   def player1Score: Int = intFromFen(1).getOrElse(0)
 
@@ -46,15 +40,6 @@ final case class FEN(value: String) extends AnyVal {
 
   private def intFromFen(index: Int): Option[Int] =
     value.split(' ').lift(index).flatMap(_.toIntOption)
-
-  // represents pieces on the Board, and '0' or '1' depending if the empty square is in the hexagon or not
-  private def squares: Array[Array[Char]] = value.split(' ')(0).split('/').zipWithIndex.map {
-      case (pieces, row) if (row < (File.all.size / 2 + 1)) => { Array.fill(Math.abs(row + (File.all.size / 2 + 1) - File.all.size)){'0'} ++ pieces.toArray }
-      case (pieces, row) => { pieces.toArray ++ Array.fill(Math.abs((File.all.size / 2) - row)){'0'} }
-    }.flatten.flatMap {
-        case (d) if (d.isDigit && d.asDigit > 0) => Array.fill(d.asDigit){Array('1')}        
-        case (d) => Array.fill(1){Array(d)}
-    }.flatten.grouped(File.all.size).toArray
 }
 
 object FEN {

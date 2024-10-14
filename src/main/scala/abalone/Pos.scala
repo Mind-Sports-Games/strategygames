@@ -194,6 +194,11 @@ case class Pos private (index: Int) extends AnyVal {
   @inline def file = File of this // column (as if it was an index in a 1D array)
   @inline def rank = Rank of this // horizontal row, makes sense in a 2D array
 
+  // these 3 below might be handy
+  // def touches(other: Pos): Boolean = xDist(other) <= 1 && yDist(other) <= 1
+  // def xDist(other: Pos) = abs(file - other.file)
+  // def yDist(other: Pos) = abs(rank - other.rank)
+
   // @TODO VFR: test these
   def >|(stop: Pos => Boolean): List[Pos]                   = |<>|(stop, _.right)
   def |<(stop: Pos => Boolean): List[Pos]                   = |<>|(stop, _.left)
@@ -214,14 +219,9 @@ case class Pos private (index: Int) extends AnyVal {
   def <->(other: Pos): Iterable[Pos] =
     min(file.index, other.file.index) to max(file.index, other.file.index) flatMap { Pos.at(_, rank.index) }
 
-  def touches(other: Pos): Boolean = xDist(other) <= 1 && yDist(other) <= 1
-
   def onSameDiagonal(other: Pos): Boolean =
     file.index - rank.index == other.file.index - other.rank.index || file.index + rank.index == other.file.index + other.rank.index
   def onSameLine(other: Pos): Boolean     = ?-(other) || ?|(other)
-
-  def xDist(other: Pos) = abs(file - other.file)
-  def yDist(other: Pos) = abs(rank - other.rank)
 
   def isLight: Boolean = (file.index + rank.index) % 2 == 1
    */
@@ -235,9 +235,9 @@ case class Pos private (index: Int) extends AnyVal {
     )
   def piotrStr = piotr.toString
 
-  def key               = file.toString + rank.toString
-  override def toString = key
-
+  def key                 = file.toString + rank.toString
+  def officialNotationKey = File(rank.index).getOrElse("").toString + "" + Rank(file.index).getOrElse("").toString
+  override def toString   = officialNotationKey
 }
 
 object Pos {

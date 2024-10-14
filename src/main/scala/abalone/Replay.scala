@@ -83,7 +83,7 @@ object Replay {
       // TODO Abalone Set
       after = before.situation.board.copy(),
       autoEndTurn = endTurn,
-      capture = None,
+      capture = None, // @TODO:  consider if it's difficult to determine if a capture was made from here (a marble pushed off the board)
       promotion = None
     )
 

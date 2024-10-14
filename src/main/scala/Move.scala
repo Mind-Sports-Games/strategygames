@@ -359,10 +359,7 @@ object Move {
         Situation.Abalone(m.situationBefore),
         Board.Abalone(m.after),
         m.autoEndTurn,
-        m.capture match {
-          case Some(capture) => Option(List(Pos.Abalone(capture)))
-          case None          => None
-        },
+        None, // capture. @TODO: Could be the pos of the piece that was on targetSquare described by the move (because line moves are basically just marbles jumping over other ones)
         None,
         None,
         None,

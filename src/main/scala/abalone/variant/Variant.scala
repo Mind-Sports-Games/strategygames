@@ -3,10 +3,11 @@ package strategygames.abalone.variant
 import cats.data.Validated
 import cats.syntax.option._
 import scala.annotation.nowarn
+import scala.collection.mutable.ListBuffer
 
+import strategygames.{ GameFamily, Player }
 import strategygames.abalone._
 import strategygames.abalone.format.FEN
-import strategygames.{ GameFamily, Player }
 
 case class AbaloneName(val name: String)
 
@@ -54,8 +55,134 @@ abstract class Variant private[variant] (
   // in just atomic, so can leave as true for now
   def isValidPromotion(@nowarn promotion: Option[PromotableRole]): Boolean = true
 
-  // TODO Abalone pla-924-sg-variant-tests
-  def validMoves(@nowarn situation: Situation): Map[Pos, List[Move]] = Map.empty
+
+  // private def validMovesFromPos(situation: Situation, pos: Pos): List[Move] = {
+  //   val moves = List()
+  //   if(pos.downLeft != None && situation.board.pieces.get(pos.downLeft.get) == None) {
+  //     moves :: Move()
+  //   }
+  //   return moves.toList
+  // }
+
+        // Move(
+        //   piece = Piece(situation.player, Role.defaultRole),
+        //   orig = orig,
+        //   dest = dest,
+        //   situationBefore = situation,
+        //   after = boardAfter(situation, Some(orig), Some(dest), die),
+        //   capture = situation.board.piecesOf(!situation.player).get(dest).map(_ => dest)
+        // )
+
+  // def validMovesComplete(situation: Situation): Map[Pos, List[Move]] = {
+
+  // }
+
+  // we want to have :
+  // 1. moves of 1 marble, distinguished from pushes (2 or 3 marbles in the same line)
+  // 2. side moves, based on these moves of 1 marbles already generated (can move in side if both neighbours can move in the same direction as 1) does it mean it will be a lazy val ?
+  def validMoves(situation: Situation): Map[Pos, List[Move]] = {
+    validMovesOf1(situation)
+
+    // return combination of validMovesOf1 + validPushes + validSideMoves (based on validMovesOf1)
+  }
+
+
+  /* 
+  Pushes :
+      - A B C a b
+  from B or C, we can not push towards the right
+  A can move towards the right (as a push) because there is enough "weight"
+  that means the move is coordsAcoordsa (and then a is moved from coordsa to coordsb + 1 right (off the board in this example)
+
+  when generating side moves, imagine we have the following :
+    - - - - -
+   - A B C - -
+  1 2 3 4 5 6 7
+  We want to consider the longest diagonal, that means (coordsOfA, 5) is a side move of 3 marbles but (coordsOfC, 5) means only C will move to 5
+  Same for :
+    (B, 2) is a side move while (A, 2) or (A, 3) move 1 single marble (the player has to find the correct orig square to unlock the possibility of the correct side move)
+  */
+
+    def validMovesOf1(situation: Situation): Map[Pos, List[Move]] = {
+    situation.board.pieces.filter(_._2.player == situation.player).map { // for each piece of active player
+      case ((pos: Pos, piece: Piece))  => {
+        val moves = new ListBuffer[Move]()
+        if (pos.downLeft != None && situation.board.pieces.get(pos.downLeft.get) == None) {
+          moves += Move(piece, pos, pos.downLeft.get, situation, boardAfter(situation, pos, pos.downLeft.get), false)
+        }
+        if (pos.left != None && situation.board.pieces.get(pos.left.get) == None) {
+          moves += Move(piece, pos, pos.left.get, situation, boardAfter(situation, pos, pos.left.get), false)
+        }
+        if (pos.upLeft != None && situation.board.pieces.get(pos.upLeft.get) == None) {
+          moves += Move(piece, pos, pos.upLeft.get, situation, boardAfter(situation, pos, pos.upLeft.get), false)
+        }
+        if (pos.upRight != None && situation.board.pieces.get(pos.upRight.get) == None) {
+          moves += Move(piece, pos, pos.upRight.get, situation, boardAfter(situation, pos, pos.upRight.get), false)
+        }
+        if (pos.right != None && situation.board.pieces.get(pos.right.get) == None) {
+          moves += Move(piece, pos, pos.right.get, situation, boardAfter(situation, pos, pos.right.get), false)
+        }
+        if (pos.downRight != None && situation.board.pieces.get(pos.downRight.get) == None) {
+          moves += Move(piece, pos, pos.downRight.get, situation, boardAfter(situation, pos, pos.downRight.get), false)
+        }
+        val movesList = moves.toList
+        moves.clear()
+        Some((pos, movesList))
+      }
+    }
+    .flatMap {
+      case Some((pos: Pos, moves: List[Move])) => Some(pos -> moves)
+      case _ => None
+    }
+    .toMap
+  }
+
+  // @TODO: adapt
+  // update the score in case a capture has been made
+  // take care of generating new board state with new PieceMap and updated score
+  // anything else ?
+  def boardAfter(situation: Situation, orig: Pos, dest: Pos): Board = {
+    // 1. move pieces and get the score
+    /*val (pieces1, capture)   =*/ piecesAfterAction(situation.board.pieces, situation.player, orig, dest)
+
+    // 2. update the score
+    
+
+    // val pocketsAfterDrop    = orig match {
+    //   case None => situation.board.pocketData.flatMap(_.drop(Piece(situation.player, Role.defaultRole)))
+    //   case _    => situation.board.pocketData
+    // }
+    // val pocketsAfterCapture = capture match {
+    //   case Some(piece) =>
+    //     pocketsAfterDrop.map(_.store(piece))
+    //   case None        => pocketsAfterDrop
+    // }
+    situation.board.copy(
+      pieces = pieces,
+        // pocketData = pocketsAfterCapture
+    )
+  }
+
+  // @TODO: adapt
+  // will take care of moving the marbles and determine if a capture has been made
+  def piecesAfterAction(pieces: PieceMap, player: Player, @nowarn orig: Pos, @nowarn dest: Pos): (PieceMap, Boolean) = {
+    var capture = false
+
+    if (true) { // push
+      // compute direction between orig and dest to push the opponent marble
+
+
+
+      //     val truc = pieces.filter(_._1 != orig)
+
+      // use the direction until we reach an empty space or the edge 
+      capture = true
+    }
+    if (player == P1)
+      (pieces, capture)
+    else
+      (pieces, capture)
+  }
 
   def move(
       situation: Situation,
@@ -68,15 +195,20 @@ abstract class Variant private[variant] (
       s"Not a valid move: ${from}${to} with prom: ${promotion}. Allowed moves: ${situation.moves}"
   }
 
-  // @TODO: check what is stalemate to know if the notion could apply
-  def stalemateIsDraw = false
+  // if a player runs out of move, the match is a draw
+  def stalemateIsDraw = true
 
-  def winner(situation: Situation): Option[Player]
+  def winner(situation: Situation): Option[Player] = {
+    if (situation.board.history.score.p1 == 6) Some(P1)
+    else if (situation.board.history.score.p2 == 6) Some(P2)
+    else None
+  }
 
-  // @TODO: check if specialEnd could be the correct place for the condition of some1 not able to move
-  @nowarn def specialEnd(situation: Situation) = false
+  def specialEnd(situation: Situation) =
+    (situation.board.history.score.p1 == 6) ||
+      (situation.board.history.score.p2 == 6)
 
-  @nowarn def specialDraw(situation: Situation) = false
+  def specialDraw(situation: Situation) = situation.moves.size == 0
 
   // TODO Abalone Set
   def materialImbalance(@nowarn board: Board): Int = 0

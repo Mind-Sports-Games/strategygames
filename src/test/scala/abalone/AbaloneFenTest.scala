@@ -2,6 +2,8 @@ package strategygames.abalone
 
 import org.specs2.matcher.ValidatedMatchers
 
+import _root_.strategygames.{ Score, Status }
+
 class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
     "initial default FEN (Belgian Daisy start position)" should {
         val fen    = variant.Abalone.initialFen
@@ -125,15 +127,30 @@ class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
     "Fun little game situation \"5/6/2s4/2ssss2/2SSsS3/1SSSsss1/2s4/1SSs2/3S1 5 3 b 11 42\"" should {
         val puzzleFen = new format.FEN("5/6/2s4/2ssss2/2SSsS3/1SSSsss1/2s4/1SSs2/3S1 5 3 b 11 42")
         val pieces = puzzleFen.pieces
+        val board = Board(
+            pieces,
+            History(
+                score = Score(5, 3)
+            ),
+            variant.Abalone
+        )
+        val situation = Situation(board, P1)
+
 
         "have a score of 5 for P1 and a score of 3 for P2" in {
             puzzleFen.player1Score must_== 5
             puzzleFen.player2Score must_== 3
         }
 
-        "have a total of 14 marbles per player, on the board and pushed out" in {
+        "still have a total of 14 pieces per player if we include the ones pushed out" in {
             pieces.filter(p => p._2.player == P1).size + puzzleFen.player2Score must_== 14
             pieces.filter(p => p._2.player == P2).size + puzzleFen.player1Score must_== 14
+        }
+
+        "have a board containing 20 pieces" in {
+            board.piecesOnBoardCount must_== 20
+            board.piecesOf(P1).size + board.history.score.p2 must_== 14
+            board.piecesOf(P2).size + board.history.score.p1 must_== 14
         }
 
         "11 plies were played since last time a marble was pushed out" in {
@@ -142,6 +159,72 @@ class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
 
         "42 moves were played in total" in {
             puzzleFen.fullMove must_== Some(42)
+        }
+
+        "board should be valid and have no winner" in {
+            board.valid(true) must_== true
+            situation.winner must_== None
+            situation.status must_== None
+        }
+    }
+
+    "Game just finished having FEN \"5/2SSS1/4sss/4SSss/3S1Sss1/2ss4/S6/6/5 6 5 w 0 58\"" should {
+        val fen = format.FEN("5/2SSS1/4sss/4SSss/3S1Sss1/2ss4/S6/6/5 6 5 w 0 58")
+        val pieces = fen.pieces
+        val board = Board(
+            pieces,
+            History(
+                score = Score(6, 5)
+            ),
+            variant.Abalone
+        )
+        val situation = Situation(board, P2)
+
+
+        "have a score of 6 for P1 and a score of 5 for P2" in {
+            fen.player1Score must_== 6
+            fen.player2Score must_== 5
+        }
+
+        "have a total of 14 marbles per player, on the board and pushed out" in {
+            pieces.filter(p => p._2.player == P1).size + fen.player2Score must_== 14
+            pieces.filter(p => p._2.player == P2).size + fen.player1Score must_== 14
+        }
+
+        // @TODO: adapt size when validMoves does work entirely
+        "see potential valid moves" in {
+            situation.moves.size must_== 8
+        }
+
+        "but is ended and P1 is the winner" in {
+            situation.end must_== true
+            situation.playable(true) must_== false
+            situation.staleMate must_== false
+            situation.winner must_== Some(P1)
+            situation.status must_== Some(Status.VariantEnd)
+        }
+    }
+
+    "Game having a player unable to move" should {
+        val board = Board(
+            format.FEN("PPPPP/pppppP/5pP/6pP/7pP/7p/7/6/5 5 5 w 0 42").pieces,
+            History(
+                score = Score(5, 5)
+            ),
+            variant.Abalone
+        )
+        val situation = Situation(board, P2)
+
+        "see no potential valid move for that player" in {
+            situation.moves.size must_== 0
+        }
+
+        "end in a draw" in {
+            situation.end must_== true
+            situation.playable(true) must_== false
+            situation.staleMate must_== true
+            situation.winner must_== None
+            situation.status must_== Some(Status.Stalemate)
         }
     }
 
@@ -156,31 +239,7 @@ class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
     //     }
 
     //     "be declared a draw" in {
-    //       ...
+    //       ... @TODO
     //      }
     // }
-
-    /*
-    "a score of 6" should {
-        val winningByScoreFen = ""
-
-        "have a winner" in {
-        
-        }
-        "have no valid move" in {
-        
-        }
-    }
-
-    "a situation in which a player can not play" should {
-        val stuckPlayerFen = new format.FEN("PPPPP/pppppP/5pP/6pP/7pP/7p/7/6/5 5 5 w 0 42")
-
-        "have a winner" in {
-            
-        }
-        "have no valid move" in {
-        
-        }
-    }
-    */
 }
