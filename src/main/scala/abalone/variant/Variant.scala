@@ -161,15 +161,7 @@ abstract class Variant private[variant] (
       )
     )
   }
-/* 
-case class History(
-    lastTurn: List[Uci] = List.empty,
-    currentTurn: List[Uci] = List.empty,
-    positionHashes: PositionHash = Array.empty,
-    score: Score = Score(0, 0),
-    // this is tracking fullMove for Abalone
-    halfMoveClock: Int = 0
- */
+
   // @TODO: adapt
   // will take care of moving the marbles and determine if a capture has been made
   def piecesAfterAction(pieces: PieceMap, player: Player, @nowarn orig: Pos, dest: Pos): (PieceMap, Boolean) = {

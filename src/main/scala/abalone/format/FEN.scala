@@ -15,7 +15,7 @@ final case class FEN(value: String) extends AnyVal {
   }.flatMap{ 
     case square if (square.isDigit) => { Array.fill(square.asDigit)('1') }
     case square => Array(square)
-  }.zip(Pos.all).flatMap { // map + flatten (that get rid of the 'Some' and the 'None' (meaning we map to None for cases we want to filter out))
+  }.zip(Pos.all).flatMap {
     case (piece, pos) if (piece == Role.defaultRole.forsyth) => Some((pos, Piece(P1, Role.defaultRole)))
     case (piece, pos) if (piece == Role.defaultRole.forsythUpper) => Some((pos, Piece(P2, Role.defaultRole)))
     case _ => None

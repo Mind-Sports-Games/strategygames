@@ -19,7 +19,7 @@ sealed trait Role {
 
 sealed trait PromotableRole extends Role
 
-case object Stone extends Role { // @TODO VFR: consider if we want a new "Marble" Role or if we just use Stone for Marbles (because these can be rolling stones, not Oware "Stones")
+case object Stone extends Role {
   val forsyth   = 's'
   val binaryInt = 0
 
