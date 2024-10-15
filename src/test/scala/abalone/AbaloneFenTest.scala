@@ -8,6 +8,14 @@ class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
     "initial default FEN (Belgian Daisy start position)" should {
         val fen    = variant.Abalone.initialFen
         val pieces = fen.pieces
+        val board = Board(
+            pieces,
+            History(
+                score = Score(0, 0)
+            ),
+            variant.Abalone
+        )
+        val situation = Situation(board, P1)
 
         "have Black starting the game" in {
             fen.player must_== Some(P1)
@@ -64,11 +72,28 @@ class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
             pieces.get(Pos.H9) must_== Some(Piece(P1, Stone))
             pieces.get(Pos.I9) must_== Some(Piece(P1, Stone))
         }
+
+        // @TODO: ensure other types of moves are generated correctly when validMoves does work entirely
+        "see 14 marbles able to move as 1" in {
+            board.variant.validMovesOf1(situation).size must_== 14
+        }
+        // @TODO: ensure other types of moves are generated correctly when validMoves does work entirely
+        "see 20 different moves of 1 marble" in {
+            board.variant.validMovesOf1(situation).foldLeft(0)(_ + _._2.size) must_== 20
+        }
     }
 
     "Snakes start position" should {
         val snakesFen = new format.FEN("sssss/s5/s6/s1SSSSS1/1s5S1/1sssss1S/6S/5S/SSSSS 0 0 b 0 0")
         val pieces = snakesFen.pieces
+        val board = Board(
+            pieces,
+            History(
+                score = Score(0, 0)
+            ),
+            variant.Abalone
+        )
+        val situation = Situation(board, P1)
 
         "have Black starting the game" in {
             snakesFen.player must_== Some(P1)
@@ -78,6 +103,10 @@ class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
         "have a total of 14 marbles per player" in {
             pieces.filter(p => p._2.player == P1).size must_== 14
             pieces.filter(p => p._2.player == P2).size must_== 14
+        }
+
+        "has an even number of valid moves, as the position is symetrical" in {
+            board.variant.validMoves(situation).foldLeft(0)(_ + _._2.size) % 2 must_== 0
         }
     }
 
@@ -168,6 +197,17 @@ class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
         }
     }
 
+    /*
+        * * * * *
+       * * S S S *
+      * * * * s s s
+     * * * * S S s s
+    * * * S * S s s *
+     * * s s * * * *
+      S * * * * * *
+       * * * * * *
+        * * * * *
+    */
     "Game just finished having FEN \"5/2SSS1/4sss/4SSss/3S1Sss1/2ss4/S6/6/5 6 5 w 0 58\"" should {
         val fen = format.FEN("5/2SSS1/4sss/4SSss/3S1Sss1/2ss4/S6/6/5 6 5 w 0 58")
         val pieces = fen.pieces
@@ -191,9 +231,13 @@ class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
             pieces.filter(p => p._2.player == P2).size + fen.player1Score must_== 14
         }
 
-        // @TODO: adapt size when validMoves does work entirely
-        "see potential valid moves" in {
-            situation.moves.size must_== 8
+        // @TODO: ensure other types of moves are generated correctly when validMoves does work entirely
+        "see 8 marbles able to move as 1" in {
+            board.variant.validMovesOf1(situation).size must_== 8
+        }
+        // @TODO: ensure other types of moves are generated correctly when validMoves does work entirely
+        "see 25 different moves of 1 marble" in {
+            board.variant.validMovesOf1(situation).foldLeft(0)(_ + _._2.size) must_== 25
         }
 
         "but is ended and P1 is the winner" in {
@@ -215,8 +259,9 @@ class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
         )
         val situation = Situation(board, P2)
 
+        // @TODO: ensure other types of moves are generated correctly when validMoves does work entirely
         "see no potential valid move for that player" in {
-            situation.moves.size must_== 0
+            board.variant.validMovesOf1(situation).size must_== 0
         }
 
         "end in a draw" in {
@@ -228,8 +273,7 @@ class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
         }
     }
 
-    // @TODO: keep adding interesting cases once we are able to instanciate a Board from a FEN.
-
+    // @TODO: play a move triggering a game end because no marble was pushed out for too long :
     // "Game in progress since ages" should {
     //     val ongoingGame = new format.FEN("")
 
