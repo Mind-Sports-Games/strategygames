@@ -98,8 +98,8 @@ abstract class Variant private[variant] (
     situation.board.piecesOf(situation.player).flatMap {
       case ((pos, piece)) =>
         Map(pos ->
-          Stone.dirs.flatMap { _(pos) } // if the piece would remain on the board after applying a direction...
-          .filterNot(situation.board.pieces.contains(_)) // ...keep it only if the landing square is free of marble
+          pos.neighbours.flatten // for each direction that would remain on the board...
+          .filterNot(situation.board.pieces.contains(_)) // ...keep the piece only if the landing square is empty
           .map(landingSquare => 
             Move(piece, pos, landingSquare, situation, boardAfter(situation, pos, landingSquare), false)
           )
@@ -123,10 +123,17 @@ abstract class Variant private[variant] (
     //   case ((pos, piece)) => {
     //     Map(pos -> List({
     //       Stone.dirs.flatMap { // if the piece would remain on the board after applying a direction...
-    //         case dir => dir(pos)
+    //         case dir => (dir, dir(pos))
+    //         case _ => None
     //       }.flatMap { // ...check that it would move to square occupied by one of our pieces
-    //         case (landingSquare) if (situation.board.pieces.contains(landingSquare) && situation.board.pieces(landingSquare).player == situation.player) => 
-    //             Some(Move(piece, pos, landingSquare, situation, boardAfter(situation, pos, landingSquare), false))
+    //         case ((dir: Direction, landingSquare: Option[Pos]))
+    //           if (situation.board.pieces.contains(landingSquare) && situation.board.pieces(landingSquare).player == situation.player) => 
+    //             // let's check if the next square is occupied by us too, or empty :
+    //             if(dir(landingSquare))
+    //               Some(Move(piece, pos, landingSquare, situation, boardAfter(situation, pos, landingSquare), false))
+    //             else
+    //               None
+            
     //         case _ => None
     //       }
     //     }).flatten)

@@ -105,7 +105,7 @@ class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
             pieces.filter(p => p._2.player == P2).size must_== 14
         }
 
-        "has an even number of valid moves, as the position is symetrical" in {
+        "has an even number of valid moves, as the position is symmetrical" in {
             board.variant.validMoves(situation).foldLeft(0)(_ + _._2.size) % 2 must_== 0
         }
     }
