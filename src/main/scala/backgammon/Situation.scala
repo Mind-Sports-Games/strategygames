@@ -30,7 +30,7 @@ case class Situation(board: Board, player: Player) {
 
   def endTurns: List[EndTurn] = endTurn.toList
 
-  //don't include undos as it is not a progressive action
+  // don't include undos as it is not a progressive action
   def actions: List[Action] =
     movesList ::: dropsAsDrops ::: lifts ::: diceRolls ::: endTurns
 
@@ -62,7 +62,7 @@ case class Situation(board: Board, player: Player) {
   def canOnlyRollDice: Boolean = canRollDice && !canMove && !canDrop && !canLift && !canEndTurn
 
   def canUndo: Boolean = undos.nonEmpty
-  //def canUndo: Boolean = board.history.lastAction.map(_.undoable).getOrElse(false)
+  // def canUndo: Boolean = board.history.lastAction.map(_.undoable).getOrElse(false)
 
   // Users can't make the decision to endTurn at the start of the game
   // only SG can make that decision (using random diceRoll) so don't set
