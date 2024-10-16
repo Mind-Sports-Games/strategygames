@@ -10,7 +10,7 @@ case class Move(
     situationBefore: Situation,
     after: Board,
     autoEndTurn: Boolean,
-    capture: Option[Pos] = None,
+    capture: Option[Pos] = None, // @TODO: could just be the dest Pos in a capture move (because line moves are basically just marbles jumping over other ones)
     promotion: Option[PromotableRole] = None,
     metrics: MoveMetrics = MoveMetrics()
 ) extends Action(situationBefore, after, metrics) {

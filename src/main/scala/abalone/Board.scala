@@ -9,23 +9,16 @@ case class Board(
     history: History,
     variant: Variant
 ) {
-
-  def apply(at: Pos): Option[Piece] = pieces get at
+  def apply(at: Pos): Option[Piece] = pieces.get(at)
   def apply(file: File, rank: Rank): Option[Piece] = {
     val pos = Pos(file, rank)
     pos match {
-      case Some(pos) => pieces get pos
+      case Some(pos) => pieces.get(pos)
       case None => None
     }
   }
 
-  lazy val actors: Map[Pos, Actor] = pieces map { case (pos, piece) =>
-    (pos, Actor(piece, pos, this))
-  }
-
-  lazy val posMap: Map[Piece, Iterable[Pos]] = pieces.groupMap(_._2)(_._1)
-
-  lazy val piecesOnBoardCount: Int = pieces.keys.size
+  def piecesOf(player: Player): PieceMap = pieces.filter(_._2.is(player))
 
   def withHistory(h: History): Board       = copy(history = h)
   def updateHistory(f: History => History) = copy(history = f(history))
@@ -41,6 +34,14 @@ case class Board(
   def materialImbalance: Int = variant.materialImbalance(this)
 
   override def toString = s"$variant Position after ${history.recentTurnUciString}"
+
+  lazy val actors: Map[Pos, Actor] = pieces.map {
+    case (pos, piece) => (pos, Actor(piece, pos, this))
+  }
+
+  lazy val posMap: Map[Piece, Iterable[Pos]] = pieces.groupMap(_._2)(_._1)
+
+  lazy val piecesOnBoardCount: Int = pieces.keys.size
 }
 
 object Board {
@@ -54,9 +55,9 @@ object Board {
 
   sealed abstract class BoardSize(
       val width: Int,
-      val height: Int
+      val height: Int,
+      val irregular: Boolean = true
   ) {
-    val regular = false
 
     val key   = s"${width}x${height}"
     val sizes = List(width, height)

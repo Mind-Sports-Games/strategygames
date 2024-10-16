@@ -1,8 +1,8 @@
 package strategygames.abalone
 package variant
 
+import strategygames.GameFamily
 import strategygames.abalone._
-import strategygames.{ GameFamily, Player }
 
 case object Abalone
     extends Variant(
@@ -18,13 +18,5 @@ case object Abalone
   def perfIcon: Char = ''
   def perfId: Int    = 700
 
-  override def baseVariant: Boolean = true
-
-  // pieces, scoreP1, scoreP2, turn, halfMovesSinceLastCapture (triggering condition could be when == 100 && total moves > 50 ? => draw), total moves
-  override def initialFen = format.FEN("pp1PP/pppPPP/1pp1pp1/8/9/8/1PP1pp1/PPPppp/PP1pp 0 0 b 0 0")
-
-  // TODO: Abalone set
-  override def winner(situation: Situation): Option[Player] =
-    None // winner is the one who pushed out 6 or when the opponent can not move anymore (which is an extremely rare case)
-
+  override def baseVariant: Boolean = true // Belgian Daisy initialFen is defined in Abalone default "Variant" file
 }

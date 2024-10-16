@@ -9,7 +9,7 @@ case class History(
     currentTurn: List[Uci] = List.empty,
     positionHashes: PositionHash = Array.empty,
     score: Score = Score(0, 0),
-    // this might be tracking fullMove for Abalone
+    // this is tracking fullMove for Abalone
     halfMoveClock: Int = 0
 ) {
 

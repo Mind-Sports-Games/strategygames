@@ -4,11 +4,9 @@ import cats.data.Validated
 import cats.syntax.option._
 import scala.annotation.nowarn
 
+import strategygames.{ GameFamily, Player }
 import strategygames.abalone._
 import strategygames.abalone.format.FEN
-import strategygames.{ GameFamily, Player }
-
-case class AbaloneName(val name: String)
 
 // Correctness depends on singletons for each variant ID
 abstract class Variant private[variant] (
@@ -26,7 +24,7 @@ abstract class Variant private[variant] (
   def hasAnalysisBoard: Boolean = true
   def hasFishnet: Boolean       = false
 
-  def p1IsBetterVariant: Boolean = false
+  def p1IsBetterVariant: Boolean = true
   def blindModeVariant: Boolean  = true
 
   def materialImbalanceVariant: Boolean = false
@@ -36,12 +34,13 @@ abstract class Variant private[variant] (
   def hasGameScore: Boolean     = true
   def canOfferDraw: Boolean     = true
 
-  def repetitionEnabled: Boolean = false
+  def repetitionEnabled: Boolean = true
 
   def perfId: Int
   def perfIcon: Char
 
-  def initialFen: FEN = format.FEN("pp1PP/pppPPP/1pp1pp1/8/9/8/1PP1pp1/PPPppp/PP1pp 0 0 b 0 0") // Belgian Daisy
+  // pieces, scoreP1, scoreP2, turn, halfMovesSinceLastCapture (triggering condition could be when == 100 && total moves > 50 ? => draw), total moves
+  def initialFen: FEN = format.FEN("SS1ss/SSSsss/1SS1ss1/8/9/8/1ss1SS1/sssSSS/ss1SS 0 0 b 0 0") // Belgian Daisy
 
   def pieces: PieceMap = initialFen.pieces
 
@@ -53,27 +52,133 @@ abstract class Variant private[variant] (
   // in just atomic, so can leave as true for now
   def isValidPromotion(@nowarn promotion: Option[PromotableRole]): Boolean = true
 
-  // TODO Abalone
-  def validMoves(@nowarn situation: Situation): Map[Pos, List[Move]] = Map.empty
+  /*
+  In Abalone there are 3 kinds of moves.
+  Let's use the top 2 rows of a board to illustrate (numbers are empty squares, Z is an opponent marble)
+
+        Z a b c 7
+       1 2 3 4 5 6
+    
+    - line moves are marbles moving in line to an empty square :
+       'a' to '7' would move three marbles to the right. This is the same as if 'a' jumped over 'b' and 'c' to land on '7'.
+       'c' to '7' would move one marble to the right.
+    - pushes are line moves targeting a square hosting an opponent marble
+       They will be processed as two line moves (one jump per player).
+       'c' to 'Z' and 'b' to 'Z' are pushes to the left
+    - side moves can only be described starting from the right origin (figure out the longest diagonal) :
+       'a' to '5' is a downRight side move of three marbles.
+       'c' to '2' is a downLeft side move of three marbles.
+       'a' to '4' is a downRight side move of two marbles (only 'a' and 'b' would move).
+       'c' to '3' is a downLeft side move of two marbles (only 'c' and 'b' would move)
+       'a' to '3' or 'c' to '4' are line moves of a single marble
+
+  we want to have :
+  1. moves of 1 marble + side moves (as we are reusing moves of 1 marble)
+  2. line moves of 2+ marbles + pushes ((re-do a pass on line moves that were stuck ?))
+  then merge these as valid moves.
+  */
+  def validMoves(situation: Situation): Map[Pos, List[Move]] = {
+    val movesOf1 = validMovesOf1(situation)
+    val lineMoves = movesOf1 ++ validLineMoves(situation).map {
+      case (k, v) => k -> (v ++ movesOf1.getOrElse(k, Iterable.empty))
+    }
+    val lineMovesAndPushes = lineMoves ++ validPushes(situation).map {
+      case (k, v) => k -> (v ++ lineMoves.getOrElse(k, Iterable.empty))
+    }
+    lineMovesAndPushes ++ validSideMoves(situation).map { // @TODO: this should reuse what was computed in validMovesOf1
+      case (k, v) => k -> (v ++ lineMovesAndPushes.getOrElse(k, Iterable.empty))
+    }
+  }
+
+  def validMovesOf1(situation: Situation): Map[Pos, List[Move]] =
+    situation.board.piecesOf(situation.player).flatMap {
+      case ((pos, piece)) =>
+        Map(pos ->
+          pos.neighbours.flatten
+          .filterNot(situation.board.pieces.contains(_))
+          .map(landingSquare => 
+            Move(piece, pos, landingSquare, situation, boardAfter(situation, pos, landingSquare), false)
+          )
+        )
+    }.toMap
+
+  def validSideMoves(@nowarn situation: Situation):  Map[Pos, List[Move]] = {
+    Map()
+  }
+
+  def validLineMoves(@nowarn situation: Situation):  Map[Pos, List[Move]] = {
+    Map()
+  }
+    
+
+  def validPushes(@nowarn situation: Situation):  Map[Pos, List[Move]] = {
+    Map()
+  }
+
+  def boardAfter(situation: Situation, orig: Pos, dest: Pos): Board = {
+    // 1. move pieces and get the score
+    val (pieces, capture)   = piecesAfterAction(situation.board.pieces, situation.player, orig, dest)
+
+    // 2. update the board
+    situation.board.copy(
+      pieces = pieces,
+      history = History(
+        situation.history.currentTurn,
+        situation.history.currentTurn, // @TODO: fix this, understand how to create the new Uci with the move being played
+        situation.history.positionHashes,
+        if (capture) situation.history.score.add(situation.player) else situation.history.score,
+        situation.history.halfMoveClock + 1
+      )
+    )
+  }
+
+  // @TODO: adapt
+  // will take care of moving the marbles and determine if a capture has been made
+  def piecesAfterAction(pieces: PieceMap, player: Player, @nowarn orig: Pos, dest: Pos): (PieceMap, Boolean) = {
+    var capture = false
+
+    if (pieces.contains(dest)) { // push
+      // compute direction between orig and dest to push the opponent marble
+
+      // apply that direction from orig, until we find an empty square or get out of the board (considering a max distance of 3 from dest)
+
+      // then move the 2 marbles :
+      // pieces(finalDest) = pieces(dest)
+      // pieces(dest) = pieces(orig)
+      // pieces(orig) = None
+      capture = true
+    }
+    if (player == P1)
+      (pieces, capture)
+    else
+      (pieces, capture)
+  }
 
   def move(
       situation: Situation,
       from: Pos,
       to: Pos,
-      promotion: Option[PromotableRole]
+      promotion: Option[PromotableRole] // @TODO: try to see if it can be removed, check if it needs an update on the wrapperLayer. Not mandatory though
   ): Validated[String, Move] = {
-    // Find the move in the variant specific list of valid moves
+    // Find the move in the variant specific list of valid moves !
     situation.moves get from flatMap (_.find(m => m.dest == to && m.promotion == promotion)) toValid
       s"Not a valid move: ${from}${to} with prom: ${promotion}. Allowed moves: ${situation.moves}"
   }
 
-  def stalemateIsDraw = false
+  // if a player runs out of move, the match is a draw
+  def stalemateIsDraw = true
 
-  def winner(situation: Situation): Option[Player]
+  def winner(situation: Situation): Option[Player] = {
+    if (situation.board.history.score.p1 == 6) Some(P1)
+    else if (situation.board.history.score.p2 == 6) Some(P2)
+    else None
+  }
 
-  @nowarn def specialEnd(situation: Situation) = false
+  def specialEnd(situation: Situation) =
+    (situation.board.history.score.p1 == 6) ||
+      (situation.board.history.score.p2 == 6)
 
-  @nowarn def specialDraw(situation: Situation) = false
+  def specialDraw(situation: Situation) = situation.moves.size == 0
 
   // TODO Abalone Set
   def materialImbalance(@nowarn board: Board): Int = 0

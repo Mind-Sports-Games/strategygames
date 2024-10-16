@@ -190,9 +190,15 @@ case class Pos private (index: Int) extends AnyVal {
   def right: Option[Pos]     = Pos.at(file.index + 1, rank.index)
   def downRight: Option[Pos] = Pos.at(file.index, rank.index - 1)
   def upRight: Option[Pos]   = Pos.at(file.index + 1, rank.index + 1)
+  def neighbours: List[Option[Pos]] = List(left, downLeft, upLeft, right, downRight, upRight)
 
   @inline def file = File of this // column (as if it was an index in a 1D array)
   @inline def rank = Rank of this // horizontal row, makes sense in a 2D array
+
+  // these 3 below might be handy
+  // def touches(other: Pos): Boolean = xDist(other) <= 1 && yDist(other) <= 1
+  // def xDist(other: Pos) = abs(file - other.file)
+  // def yDist(other: Pos) = abs(rank - other.rank)
 
   // @TODO VFR: test these
   def >|(stop: Pos => Boolean): List[Pos]                   = |<>|(stop, _.right)
@@ -214,14 +220,9 @@ case class Pos private (index: Int) extends AnyVal {
   def <->(other: Pos): Iterable[Pos] =
     min(file.index, other.file.index) to max(file.index, other.file.index) flatMap { Pos.at(_, rank.index) }
 
-  def touches(other: Pos): Boolean = xDist(other) <= 1 && yDist(other) <= 1
-
   def onSameDiagonal(other: Pos): Boolean =
     file.index - rank.index == other.file.index - other.rank.index || file.index + rank.index == other.file.index + other.rank.index
   def onSameLine(other: Pos): Boolean     = ?-(other) || ?|(other)
-
-  def xDist(other: Pos) = abs(file - other.file)
-  def yDist(other: Pos) = abs(rank - other.rank)
 
   def isLight: Boolean = (file.index + rank.index) % 2 == 1
    */
@@ -235,25 +236,26 @@ case class Pos private (index: Int) extends AnyVal {
     )
   def piotrStr = piotr.toString
 
-  def key               = file.toString + rank.toString
-  override def toString = key
-
+  def key                 = file.toString + rank.toString
+  def officialNotationKey = s"${File(rank.index).getOrElse("")}${Rank(file.index).getOrElse("")}"
+  override def toString   = officialNotationKey
 }
 
 object Pos {
 /*
-                                  row col
-9 -  72 73 74 75 &  \' (  )  *    8:   >3 (<9)
-8 -  63 64 65 7  8  9  !  ?  ¥    7:   >2 (<9)
-7 -  54 55 Y  Z  0  1  2  3  £    6:   >1 (<9)
-6 -  45 P  Q  R  S  T  U  V  ¡    5:   >0 (<9)
-5 -  G  H  I  J  K  L  M  N  }    4:   <9
-4 -  y  z  A  B  C  D  E  F  35   3:   <8
-3 -  q  r  s  t  u  v  w  25 26   2:   <7
-2 -  i  j  k  l  m  n  15 16 17   1:   <6
-1 -  a  b  c  d  e  5  6  7  8    0:   <5
-     |  |  |  |  |  |  |  |  |
-     A  B  C  D  E  F  G  H  I
+  indexes of Pos outside of the hexagon :
+                                          row   col
+9 -   72  73  74  75 '&' ''' '(' ')' '*'   8:   >3 (<9)
+8 -   63  64  65 '7' '8' '9' '!' '?' '¥'   7:   >2 (<9)
+7 -   54  55 'Y' 'Z' '0' '1' '2' '3' '£'   6:   >1 (<9)
+6 -   45 'P' 'Q' 'R' 'S' 'T' 'U' 'V' '¡'   5:   >0 (<9)
+5 -  'G' 'H' 'I' 'J' 'K' 'L' 'M' 'N' '}'   4:   <9
+4 -  'y' 'z' 'A' 'B' 'C' 'D' 'E' 'F' 35    3:   <8
+3 -  'q' 'r' 's' 't' 'u' 'v' 'w' 25  26    2:   <7
+2 -  'i' 'j' 'k' 'l' 'm' 'n' 15  16  17    1:   <6
+1 -  'a' 'b' 'c' 'd' 'e'  5   6   7   8    0:   <5
+      |   |   |   |   |   |   |   |   |
+      A   B   C   D   E   F   G   H   I
 */
   def isInHexagon(index: Int): Boolean = {
     if (index < 0) return false
