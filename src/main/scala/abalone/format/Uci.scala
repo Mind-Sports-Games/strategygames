@@ -24,7 +24,7 @@ object Uci {
       promotion: Option[PromotableRole] = None
   ) extends Uci {
 
-    def keys = orig.officialNotationKey + dest.officialNotationKey
+    def keys = orig.key + dest.key
     def uci  = keys + promotionString
 
     def keysPiotr = orig.piotrStr + dest.piotrStr

@@ -237,7 +237,7 @@ case class Pos private (index: Int) extends AnyVal {
   def piotrStr = piotr.toString
 
   def key                 = file.toString + rank.toString
-  def officialNotationKey = File(rank.index).getOrElse("").toString + "" + Rank(file.index).getOrElse("").toString
+  def officialNotationKey = s"${File(rank.index).getOrElse("")}${Rank(file.index).getOrElse("")}"
   override def toString   = officialNotationKey
 }
 

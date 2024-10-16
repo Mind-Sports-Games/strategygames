@@ -8,8 +8,6 @@ import strategygames.{ GameFamily, Player }
 import strategygames.abalone._
 import strategygames.abalone.format.FEN
 
-case class AbaloneName(val name: String)
-
 // Correctness depends on singletons for each variant ID
 abstract class Variant private[variant] (
     val id: Int,
