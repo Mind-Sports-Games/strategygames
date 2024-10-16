@@ -75,10 +75,8 @@ abstract class Variant private[variant] (
        'a' to '3' or 'c' to '4' are line moves of a single marble
 
   we want to have :
-  1. moves of 1 marble (to an empty square) + side moves
-  2. side moves (as they are based on moves of 1 marble)
-  3. line moves of 2+ marbles
-  4. pushes
+  1. moves of 1 marble + side moves (as we are reusing moves of 1 marble)
+  2. line moves of 2+ marbles + pushes ((re-do a pass on line moves that were stuck ?))
   then merge these as valid moves.
   */
   def validMoves(situation: Situation): Map[Pos, List[Move]] = {
@@ -98,18 +96,11 @@ abstract class Variant private[variant] (
     situation.board.piecesOf(situation.player).flatMap {
       case ((pos, piece)) =>
         Map(pos ->
-          pos.neighbours.flatten // for each direction that would remain on the board...
-          .filterNot(situation.board.pieces.contains(_)) // ...keep the piece only if the landing square is empty
+          pos.neighbours.flatten
+          .filterNot(situation.board.pieces.contains(_))
           .map(landingSquare => 
             Move(piece, pos, landingSquare, situation, boardAfter(situation, pos, landingSquare), false)
           )
-          // instead of .filterNot etc, if we wanted to take care of several cases directly from here, we could have written :
-          // .flatMap {
-          //   case (landingSquare) if (!situation.board.pieces.contains(landingSquare)) =>
-          //       Some(Move(piece, pos, landingSquare, situation, boardAfter(situation, pos, landingSquare), false))
-          //   case (landingSquare) if (another condition)
-          //   case _ => None
-          // }
         )
     }.toMap
 
@@ -119,27 +110,8 @@ abstract class Variant private[variant] (
 
   def validLineMoves(@nowarn situation: Situation):  Map[Pos, List[Move]] = {
     Map()
-    // situation.board.piecesOf(situation.player).flatMap {
-    //   case ((pos, piece)) => {
-    //     Map(pos -> List({
-    //       Stone.dirs.flatMap { // if the piece would remain on the board after applying a direction...
-    //         case dir => (dir, dir(pos))
-    //         case _ => None
-    //       }.flatMap { // ...check that it would move to square occupied by one of our pieces
-    //         case ((dir: Direction, landingSquare: Option[Pos]))
-    //           if (situation.board.pieces.contains(landingSquare) && situation.board.pieces(landingSquare).player == situation.player) => 
-    //             // let's check if the next square is occupied by us too, or empty :
-    //             if(dir(landingSquare))
-    //               Some(Move(piece, pos, landingSquare, situation, boardAfter(situation, pos, landingSquare), false))
-    //             else
-    //               None
-            
-    //         case _ => None
-    //       }
-    //     }).flatten)
-    //   }
-    // }.toMap
   }
+    
 
   def validPushes(@nowarn situation: Situation):  Map[Pos, List[Move]] = {
     Map()

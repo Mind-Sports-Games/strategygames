@@ -190,11 +190,10 @@ case class Pos private (index: Int) extends AnyVal {
   def right: Option[Pos]     = Pos.at(file.index + 1, rank.index)
   def downRight: Option[Pos] = Pos.at(file.index, rank.index - 1)
   def upRight: Option[Pos]   = Pos.at(file.index + 1, rank.index + 1)
+  def neighbours: List[Option[Pos]] = List(left, downLeft, upLeft, right, downRight, upRight)
 
   @inline def file = File of this // column (as if it was an index in a 1D array)
   @inline def rank = Rank of this // horizontal row, makes sense in a 2D array
-
-  def neighbours: List[Option[Pos]] = List(left, downLeft, upLeft, right, downRight, upRight)
 
   // these 3 below might be handy
   // def touches(other: Pos): Boolean = xDist(other) <= 1 && yDist(other) <= 1
