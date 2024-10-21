@@ -73,8 +73,9 @@ abstract class Variant private[variant] (
        'a' to '3' or 'c' to '4' are line moves of a single marble
 
   we want to have :
-  1. moves of 1 marble + side moves (as we are reusing moves of 1 marble)
-  2. line moves of 2+ marbles + pushes ((re-do a pass on line moves that were stuck ?))
+  1. moves of 1 marble
+  2. moves of 2 marbles, using moves of 1
+  3. moves of 3 marbles, using moves of 2
   then merge these as valid moves.
   */
   def validMoves(situation: Situation): Map[Pos, List[Move]] = {
@@ -101,6 +102,144 @@ abstract class Variant private[variant] (
           )
         )
     }.toMap
+
+  def validMovesOf2(situation: Situation, validMoves1: Map[Pos, List[Move]]): Map[Pos, List[(String, Move)]] =
+    situation.board.piecesOf(situation.player).flatMap {
+      case ((pos, piece)) => {
+        Map(
+          pos -> pos.neighbours.flatMap {
+            case Some(neighbour) if(situation.board.piecesOf(situation.player).contains(neighbour)) => {
+              neighbour.neighbours.flatMap {
+                case Some(neighbourOfNeighbour)
+                  if (situation.board.isEmptySquare(Some(neighbourOfNeighbour))
+                  && (pos.isInLine(neighbour, neighbourOfNeighbour) || situation.board.isEmptySquare(pos.dir(neighbour.dir(neighbourOfNeighbour))))
+                  && !validMoves1.get(pos).toList.flatMap(_.map(_.toUci)).exists(m => m.toString == s"Move(${pos},${neighbourOfNeighbour},None)")) =>
+                    Some( ("nopush", Move(piece, pos, neighbourOfNeighbour, situation, boardAfter(situation, neighbour, neighbourOfNeighbour), false)) )
+                case Some(neighbourOfNeighbour)
+                  if (pos.isInLine(neighbour, neighbourOfNeighbour) && situation.board.piecesOf(!situation.player).contains(neighbourOfNeighbour)) =>
+                    if (neighbourOfNeighbour.dir(pos.dir(neighbour)) == None)
+                      Some( ("pushout", Move(piece, pos, neighbourOfNeighbour, situation, boardAfter(situation, neighbour, neighbourOfNeighbour), false, neighbour.dir(pos.dir(neighbour)))) )
+                    else
+                      if (situation.board.isEmptySquare(neighbourOfNeighbour.dir(pos.dir(neighbour))))
+                        Some( ("push", Move(piece, pos, neighbourOfNeighbour, situation, boardAfter(situation, neighbour, neighbourOfNeighbour), false)) )
+                      else None
+                case _ => None
+              }
+            }
+            case _ => None
+          }
+        )
+      }
+    }.toMap
+
+  // def validMovesOf3(situation: Situation, @nowarn validMoves2: Map[Pos, List[(String, Move)]]): Map[Pos, List[(String, Move)]] =
+  //   situation.board.piecesOf(situation.player).flatMap {
+  //     case ((pos, piece)) => {
+  //       Map(
+  //         pos -> pos.neighbours.flatMap {
+  //           case Some(neighbour)
+  //             if(situation.board.piecesOf(situation.player).contains(neighbour)
+  //             && (neighbour.dir(pos.dir(neighbour).getOrElse("")) != None)
+  //             && situation.board.piecesOf(situation.player).contains((neighbour.dir(pos.dir(neighbour).getOrElse("")).get))
+  //           ) => { // in case we could potentially have a 3rd marble...
+  //             // if (neighbour.dir(pos.dir(neighbour)).getOrElse("") != None) {
+  //               val thirdMarblePos = neighbour.dir(pos.dir(neighbour).getOrElse("")).get
+  //               thirdMarblePos.neighbours.flatMap {
+  //                 case Some(neighbourOf3rdMarble)
+  //                   if (
+  //                     !situation.board.pieces.contains(neighbourOf3rdMarble)
+
+  //                     // && !validMoves2.contains()
+  //                   ) => { // line or side move, but we need to remove the 2 marbles moves
+  //                   // if (neighbour)
+  //                   Some(
+  //                     (
+  //                       "lineOrSide",
+  //                       Move(
+  //                         situation.board.pieces.getOrElse(
+  //                           pos,
+  //                           Piece(!piece.player, piece.role)
+  //                         ),
+  //                         pos,
+  //                         neighbourOf3rdMarble,
+  //                         situation,
+  //                         situation.board.variant.boardAfter(situation, neighbour, neighbourOf3rdMarble),
+  //                         false
+  //                       )
+  //                     )
+  //                   )
+  //                 }
+  //                 case Some(neighbourOf3rdMarble) if (situation.board.piecesOf(!situation.player).contains(neighbourOf3rdMarble)) => { // push
+  //                   Some(
+  //                     (
+  //                       "push",
+  //                       Move(
+  //                         situation.board.pieces.getOrElse(
+  //                           pos,
+  //                           Piece(!piece.player, piece.role)
+  //                         ),
+  //                         pos,
+  //                         neighbourOf3rdMarble,
+  //                         situation,
+  //                         situation.board.variant.boardAfter(situation, neighbour, neighbourOf3rdMarble),
+  //                         false
+  //                       )
+  //                     )
+  //                   )
+  //                 }
+  //                 case _ => None
+  //               // }
+  //             }
+  //           }
+  //           case _ => None
+  //         }
+  //       )
+  //     }
+  //   }
+
+
+  // def validMovesOf3(situation: Situation, validMoves2: Map[Pos, List[Move]], validMoves1: Map[Pos, List[Move]]): Map[Pos, List[Move]] =
+  //   situation.board.piecesOf(situation.player).flatMap {
+  //     case ((pos, piece)) => {
+  //       Map(
+  //         pos -> pos.neighbours.flatMap {
+  //           case Some(neighbour) if(situation.board.piecesOf(situation.player).contains(neighbour)) => {
+  //             neighbour.neighbours.flatMap {
+  //               case Some(neighbourOfNeighbour) => {
+  //                 if (
+  //                   !situation.board.pieces.contains(neighbourOfNeighbour)
+  //                   && pos.dir(neighbour.dir(neighbourOfNeighbour).getOrElse("")) != None
+  //                   && (
+  //                     (
+  //                       !situation.board.piecesOf(!situation.player).contains(pos.dir(neighbour.dir(neighbourOfNeighbour).getOrElse("")).getOrElse(pos))
+  //                       && !situation.board.piecesOf(situation.player).contains(pos.dir(neighbour.dir(neighbourOfNeighbour).getOrElse("")).getOrElse(pos))
+  //                     )
+  //                     || pos.dir(neighbour) == neighbour.dir(neighbourOfNeighbour) // line moves
+  //                   )
+  //                   && !(validMoves1.get(pos).get.contains(
+  //                     Move(
+  //                       situation.board.pieces.getOrElse(
+  //                         pos,
+  //                         Piece(
+  //                           !piece.player, piece.role)
+  //                       ),
+  //                       pos,
+  //                       neighbourOfNeighbour,
+  //                       situation,
+  //                       situation.board.variant.boardAfter(situation, neighbour, neighbourOfNeighbour),
+  //                       false
+  //                 )))
+  //                 ) {
+  //                   Some(move)
+  //                 }
+  //               }
+  //             }
+  //           }
+  //         }
+  //       )
+  //     }
+  //   }
+
 
   def validSideMoves(@nowarn situation: Situation):  Map[Pos, List[Move]] = {
     Map()
