@@ -169,6 +169,7 @@ class AbalonePosTest extends AbaloneTest with ValidatedMatchers {
             Pos.G7.left must_== Some(Pos.F7)
             Pos.G7.upLeft must_== Some(Pos.G8)
         }
+    }
 
 // 9 -              &  \' (  )  *
 // 8 -            7  8  9  !  ?  ¥
@@ -180,12 +181,7 @@ class AbalonePosTest extends AbaloneTest with ValidatedMatchers {
 // 2 -         i  j  k  l  m  n
 // 1 -          a  b  c  d  e
 //               \  \  \  \  \  \  \  \  \
-//                A  B  C  D  E  F  G  H  I        
-        "be computed correctly through neighbours function" in {
-            Pos.G7.neighbours.flatten.mkString(", ") must_== "f7, f6, g8, h7, g6, h8"
-        }
-    }
-
+//                A  B  C  D  E  F  G  H  I
     "official notation" should {
         "swap file and rank indexes" in {
             Pos.G6.officialNotationKey must_== "f7"

@@ -11,14 +11,14 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
         val board = Board(fen.pieces, History(score = Score(0, 0)), variant.Abalone)
         val situation = Situation(board, P1)
         val movesOf1 = board.variant.validMovesOf1(situation)
-        val movesOf2 = board.variant.validMovesOf2(situation, movesOf1)
+        val movesOf2 = board.variant.validMovesOf2(situation)
 
         "compute the correct number of moves of 1 marble" in {
             movesOf1.foldLeft(0)(_ + _._2.size) must_== 11
         }
 
         "compute the following moves of 2 marbles : 1 push 1 line move and 5 side moves" in {
-            movesOf2.foldLeft(0)(_ + _._2.size) must_== 1 + 1 + 5
+            movesOf2.pp.foldLeft(0)(_ + _._2.size) must_== 1 + 1 + 5
         }        
     }
 
@@ -27,7 +27,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
         val board = Board(fen.pieces, History(score = Score(0, 0)), variant.Abalone)
         val situation = Situation(board, P1)
         val movesOf1 = board.variant.validMovesOf1(situation)
-        val movesOf2 = board.variant.validMovesOf2(situation, movesOf1)
+        val movesOf2 = board.variant.validMovesOf2(situation)
 
         "compute the correct number of moves of 1 marble" in {
             movesOf1.foldLeft(0)(_ + _._2.size) must_== 20
@@ -43,7 +43,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
         val board = Board(fen.pieces, History(score = Score(0, 0)), variant.Abalone)
         val situation = Situation(board, P1)
         val movesOf1 = board.variant.validMovesOf1(situation)
-        val movesOf2 = board.variant.validMovesOf2(situation, movesOf1)
+        val movesOf2 = board.variant.validMovesOf2(situation)
 
         "compute the correct number of moves of 1 marble" in {
             movesOf1.foldLeft(0)(_ + _._2.size) must_== 40
@@ -59,7 +59,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
         val board = Board(fen.pieces, History(score = Score(0, 0)), variant.Abalone)
         val situation = Situation(board, P1)
         val movesOf1 = board.variant.validMovesOf1(situation)
-        val movesOf2 = board.variant.validMovesOf2(situation, movesOf1)
+        val movesOf2 = board.variant.validMovesOf2(situation)
 
         "compute 28 moves of 1 marble" in {
             movesOf1.foldLeft(0)(_ + _._2.size) must_== 4 + 6 + 2 * (8) + 2
@@ -75,7 +75,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
         val board = Board(fen.pieces, History(score = Score(0, 0)), variant.Abalone)
         val situation = Situation(board, P1)
         val movesOf1 = board.variant.validMovesOf1(situation)
-        val movesOf2 = board.variant.validMovesOf2(situation, movesOf1)
+        val movesOf2 = board.variant.validMovesOf2(situation)
 
         "compute 28 moves of 1 marble" in {
             movesOf1.foldLeft(0)(_ + _._2.size) must_== 14 * 2
@@ -91,7 +91,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
         val board = Board(fen.pieces, History(score = Score(0, 0)), variant.Abalone)
         val situation = Situation(board, P1)
         val movesOf1 = board.variant.validMovesOf1(situation)
-        val movesOf2 = board.variant.validMovesOf2(situation, movesOf1)
+        val movesOf2 = board.variant.validMovesOf2(situation)
 
         "compute 32 moves of 1 marble" in {
             movesOf1.foldLeft(0)(_ + _._2.size) must_== 3 + 4 + (4 + 3 + 4 + 4 + 4 + 4 + 2)
@@ -103,7 +103,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
 
         val situationP2 = Situation(board, P2)
         val movesOf1P2 = board.variant.validMovesOf1(situationP2)
-        val movesOf2P2 = board.variant.validMovesOf2(situationP2, movesOf1P2)        
+        val movesOf2P2 = board.variant.validMovesOf2(situationP2)        
         "for P2 : compute 31 moves of 1 marble" in {
             movesOf1P2.foldLeft(0)(_ + _._2.size) must_== 3 + 2 + 4 + 3 + 4 + 2 + 4 + 3 + 3 + 3
         }
