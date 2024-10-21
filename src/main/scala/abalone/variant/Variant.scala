@@ -54,28 +54,38 @@ abstract class Variant private[variant] (
 
   /*
   In Abalone there are 3 kinds of moves.
-  Let's use the top 2 rows of a board to illustrate (numbers are empty squares, Z is an opponent marble)
+  Let's use the top 3 rows of a board to illustrate (capital letters are empty squares, 1 is an opponent marble)
 
-        Z a b c 7
-       1 2 3 4 5 6
+         A B C D E
+        1 a b c G H 
+       I J K L M N O 
     
     - line moves are marbles moving in line to an empty square :
-       'a' to '7' would move three marbles to the right. This is the same as if 'a' jumped over 'b' and 'c' to land on '7'.
-       'c' to '7' would move one marble to the right.
+       'a' to 'G' would move three marbles to the right.
+         This is the same as if 'a' jumped over 'b' and 'c' to land on 'G'.
+       'c' to 'G' would move one marble to the right.
     - pushes are line moves targeting a square hosting an opponent marble
-       They will be processed as two line moves (one jump per player).
-       'c' to 'Z' and 'b' to 'Z' are pushes to the left
+       They will be processed later on as two line moves (one jump per player).
+       'c' to '1' and 'b' to '1' are pushes to the left.
+       In case we play a move from 'c' to '1', c will land on 1 and 1 will be removed from the board.
+       When a piece is pushed off the board, the Move is created with an extra parameter.
     - side moves can only be described starting from the right origin (figure out the longest diagonal) :
-       'a' to '5' is a downRight side move of three marbles.
-       'c' to '2' is a downLeft side move of three marbles.
-       'a' to '4' is a downRight side move of two marbles (only 'a' and 'b' would move).
-       'c' to '3' is a downLeft side move of two marbles (only 'c' and 'b' would move)
-       'a' to '3' or 'c' to '4' are line moves of a single marble
+       'a' to 'M' is a downRight side move of three marbles.
+       'c' to 'J' is a downLeft side move of three marbles.
+       'a' to 'L' is a downRight side move of two marbles (only 'a' and 'b' would move).
+       'c' to 'K' is a downLeft side move of two marbles (only 'c' and 'b' would move)
+       'a' to 'K' or 'c' to 'L' are line moves of a single marble
 
-  we want to have :
+  For moves of 2 marbles or more, once you get the direction of the line,
+   you can easily generate the side moves as being the one before and the one after,
+   following a rotation :
+    \   /
+   -  o  -
+    /   \
+  e.g. if you are moving upRight the side moves to consider are "upLeft" and "right".
+
   1. moves of 1 marble
-  2. moves of 2 marbles, using moves of 1
-  3. moves of 3 marbles, using moves of 2
+  2. generate any possible pair of marbles and use it to generate moves of 2 and 3 marbles
   then merge these as valid moves.
   */
   def validMoves(situation: Situation): Map[Pos, List[Move]] = {
@@ -91,155 +101,81 @@ abstract class Variant private[variant] (
     }
   }
 
-  def validMovesOf1(situation: Situation): Map[Pos, List[Move]] =
-    situation.board.piecesOf(situation.player).flatMap {
+  // @TODO: move this into the validMoves method and make it become private as it's used by validMovesOf1 AND validMovesOf2
+  def turnPieces(s: Situation): PieceMap = s.board.piecesOf(s.player)
+
+  def validMovesOf1(s: Situation): Map[Pos, List[Move]] =
+    this.turnPieces(s).flatMap {
       case ((pos, piece)) =>
         Map(pos ->
           pos.neighbours.flatten
-          .filterNot(situation.board.pieces.contains(_))
+          .filterNot(s.board.pieces.contains(_))
           .map(landingSquare => 
-            Move(piece, pos, landingSquare, situation, boardAfter(situation, pos, landingSquare), false)
+            Move(piece, pos, landingSquare, s, boardAfter(s, pos, landingSquare), false)
           )
         )
     }.toMap
 
-  def validMovesOf2(situation: Situation, validMoves1: Map[Pos, List[Move]]): Map[Pos, List[(String, Move)]] =
-    situation.board.piecesOf(situation.player).flatMap {
-      case ((pos, piece)) => {
-        Map(
-          pos -> pos.neighbours.flatMap {
-            case Some(neighbour) if(situation.board.piecesOf(situation.player).contains(neighbour)) => {
-              neighbour.neighbours.flatMap {
-                case Some(neighbourOfNeighbour)
-                  if (situation.board.isEmptySquare(Some(neighbourOfNeighbour))
-                  && (pos.isInLine(neighbour, neighbourOfNeighbour) || situation.board.isEmptySquare(pos.dir(neighbour.dir(neighbourOfNeighbour))))
-                  && !validMoves1.get(pos).toList.flatMap(_.map(_.toUci)).exists(m => m.toString == s"Move(${pos},${neighbourOfNeighbour},None)")) =>
-                    Some( ("nopush", Move(piece, pos, neighbourOfNeighbour, situation, boardAfter(situation, neighbour, neighbourOfNeighbour), false)) )
-                case Some(neighbourOfNeighbour)
-                  if (pos.isInLine(neighbour, neighbourOfNeighbour) && situation.board.piecesOf(!situation.player).contains(neighbourOfNeighbour)) =>
-                    if (neighbourOfNeighbour.dir(pos.dir(neighbour)) == None)
-                      Some( ("pushout", Move(piece, pos, neighbourOfNeighbour, situation, boardAfter(situation, neighbour, neighbourOfNeighbour), false, neighbour.dir(pos.dir(neighbour)))) )
-                    else
-                      if (situation.board.isEmptySquare(neighbourOfNeighbour.dir(pos.dir(neighbour))))
-                        Some( ("push", Move(piece, pos, neighbourOfNeighbour, situation, boardAfter(situation, neighbour, neighbourOfNeighbour), false)) )
+  def validMovesOf2(s: Situation): Map[Pos, List[(String, Move)]] = {
+    def generateMove(orig: Pos, dest: Pos, category: String) = category match {
+      case "pushout" => Some( (category, Move(Piece(s.player, Role.defaultRole), orig, dest, s, boardAfter(s, orig, dest), true, Some(dest))) )
+      case _ =>       Some( (category, Move(Piece(s.player, Role.defaultRole), orig, dest, s, boardAfter(s, orig, dest), true)) )
+    }
+
+    def generateSideMovesOf2(pos: Pos, neighbour: Pos, direction: Option[String]): List[(String, Move)] = List(
+      if (
+        pos.sideMovesDirsFromDir(direction)._1 != None &&
+        s.board.isEmptySquare(pos.sideMovesDirsFromDir(direction)._1) &&
+        neighbour.sideMovesDirsFromDir(direction)._1 != None &&
+        s.board.isEmptySquare(neighbour.sideMovesDirsFromDir(direction)._1)
+      )
+        generateMove(pos, neighbour.sideMovesDirsFromDir(direction)._1.get, "side")
+      else
+        None,
+      if (
+        pos.sideMovesDirsFromDir(direction)._2 != None &&
+        s.board.isEmptySquare(pos.sideMovesDirsFromDir(direction)._2) &&
+        neighbour.sideMovesDirsFromDir(direction)._2 != None &&
+        s.board.isEmptySquare(neighbour.sideMovesDirsFromDir(direction)._2)
+      )
+        generateMove(pos, neighbour.sideMovesDirsFromDir(direction)._2.get, "side")
+      else
+        None
+    ).flatten
+
+    this.turnPieces(s).map {
+      case ( (pos, _) ) => pos ->
+        pos.neighbours.flatMap {
+          case Some(neighbour) if(s.board.piecesOf(s.player).contains(neighbour)) => Some( (neighbour, pos.dir(neighbour)) )
+          case _ => None
+        }
+      }.flatMap {
+        case (pos, neighbourAndDir) => Map( pos -> 
+          neighbourAndDir.flatMap {
+            case (neighbour, direction) =>
+              neighbour.dir(direction) match {
+                case Some(neighbourOfNeighbour) =>
+                  List(
+                    if (s.board.isEmptySquare(Some(neighbourOfNeighbour)))
+                      generateMove(pos, neighbourOfNeighbour, "line")
+                    else None,
+                    if (s.board.piecesOf(!s.player).contains(neighbourOfNeighbour))
+                      if(neighbourOfNeighbour.dir(direction) == None)
+                        generateMove(pos, neighbourOfNeighbour, "pushout")
+                      else if (s.board.isEmptySquare(neighbourOfNeighbour.dir(direction)))
+                        generateMove(pos, neighbourOfNeighbour, "push")
                       else None
-                case _ => None
+                    else None, // here, adding else if (s.board.piecesOf(s.player).contains(neighbourOfNeighbour)), we could generate moves of 2 marbles 
+                    generateSideMovesOf2(pos, neighbour, direction)
+                  ).flatten
+                case None => {
+                  generateSideMovesOf2(pos, neighbour, direction)
+                }
               }
             }
-            case _ => None
-          }
-        )
-      }
-    }.toMap
-
-  // def validMovesOf3(situation: Situation, @nowarn validMoves2: Map[Pos, List[(String, Move)]]): Map[Pos, List[(String, Move)]] =
-  //   situation.board.piecesOf(situation.player).flatMap {
-  //     case ((pos, piece)) => {
-  //       Map(
-  //         pos -> pos.neighbours.flatMap {
-  //           case Some(neighbour)
-  //             if(situation.board.piecesOf(situation.player).contains(neighbour)
-  //             && (neighbour.dir(pos.dir(neighbour).getOrElse("")) != None)
-  //             && situation.board.piecesOf(situation.player).contains((neighbour.dir(pos.dir(neighbour).getOrElse("")).get))
-  //           ) => { // in case we could potentially have a 3rd marble...
-  //             // if (neighbour.dir(pos.dir(neighbour)).getOrElse("") != None) {
-  //               val thirdMarblePos = neighbour.dir(pos.dir(neighbour).getOrElse("")).get
-  //               thirdMarblePos.neighbours.flatMap {
-  //                 case Some(neighbourOf3rdMarble)
-  //                   if (
-  //                     !situation.board.pieces.contains(neighbourOf3rdMarble)
-
-  //                     // && !validMoves2.contains()
-  //                   ) => { // line or side move, but we need to remove the 2 marbles moves
-  //                   // if (neighbour)
-  //                   Some(
-  //                     (
-  //                       "lineOrSide",
-  //                       Move(
-  //                         situation.board.pieces.getOrElse(
-  //                           pos,
-  //                           Piece(!piece.player, piece.role)
-  //                         ),
-  //                         pos,
-  //                         neighbourOf3rdMarble,
-  //                         situation,
-  //                         situation.board.variant.boardAfter(situation, neighbour, neighbourOf3rdMarble),
-  //                         false
-  //                       )
-  //                     )
-  //                   )
-  //                 }
-  //                 case Some(neighbourOf3rdMarble) if (situation.board.piecesOf(!situation.player).contains(neighbourOf3rdMarble)) => { // push
-  //                   Some(
-  //                     (
-  //                       "push",
-  //                       Move(
-  //                         situation.board.pieces.getOrElse(
-  //                           pos,
-  //                           Piece(!piece.player, piece.role)
-  //                         ),
-  //                         pos,
-  //                         neighbourOf3rdMarble,
-  //                         situation,
-  //                         situation.board.variant.boardAfter(situation, neighbour, neighbourOf3rdMarble),
-  //                         false
-  //                       )
-  //                     )
-  //                   )
-  //                 }
-  //                 case _ => None
-  //               // }
-  //             }
-  //           }
-  //           case _ => None
-  //         }
-  //       )
-  //     }
-  //   }
-
-
-  // def validMovesOf3(situation: Situation, validMoves2: Map[Pos, List[Move]], validMoves1: Map[Pos, List[Move]]): Map[Pos, List[Move]] =
-  //   situation.board.piecesOf(situation.player).flatMap {
-  //     case ((pos, piece)) => {
-  //       Map(
-  //         pos -> pos.neighbours.flatMap {
-  //           case Some(neighbour) if(situation.board.piecesOf(situation.player).contains(neighbour)) => {
-  //             neighbour.neighbours.flatMap {
-  //               case Some(neighbourOfNeighbour) => {
-  //                 if (
-  //                   !situation.board.pieces.contains(neighbourOfNeighbour)
-  //                   && pos.dir(neighbour.dir(neighbourOfNeighbour).getOrElse("")) != None
-  //                   && (
-  //                     (
-  //                       !situation.board.piecesOf(!situation.player).contains(pos.dir(neighbour.dir(neighbourOfNeighbour).getOrElse("")).getOrElse(pos))
-  //                       && !situation.board.piecesOf(situation.player).contains(pos.dir(neighbour.dir(neighbourOfNeighbour).getOrElse("")).getOrElse(pos))
-  //                     )
-  //                     || pos.dir(neighbour) == neighbour.dir(neighbourOfNeighbour) // line moves
-  //                   )
-  //                   && !(validMoves1.get(pos).get.contains(
-  //                     Move(
-  //                       situation.board.pieces.getOrElse(
-  //                         pos,
-  //                         Piece(
-  //                           !piece.player, piece.role)
-  //                       ),
-  //                       pos,
-  //                       neighbourOfNeighbour,
-  //                       situation,
-  //                       situation.board.variant.boardAfter(situation, neighbour, neighbourOfNeighbour),
-  //                       false
-  //                 )))
-  //                 ) {
-  //                   Some(move)
-  //                 }
-  //               }
-  //             }
-  //           }
-  //         }
-  //       )
-  //     }
-  //   }
-
+          )
+        }.toMap
+  }
 
   def validSideMoves(@nowarn situation: Situation):  Map[Pos, List[Move]] = {
     Map()

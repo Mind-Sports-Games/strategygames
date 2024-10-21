@@ -191,28 +191,34 @@ case class Pos private (index: Int) extends AnyVal {
   def downRight: Option[Pos] = Pos.at(file.index, rank.index - 1)
   def upRight: Option[Pos]   = Pos.at(file.index + 1, rank.index + 1)
 
-  def neighbours: List[Option[Pos]] = List(left, downLeft, upLeft, right, downRight, upRight)
+  def neighbours: List[Option[Pos]] = List(left, upLeft, upRight, right, downRight, downLeft)
+  def sideMovesDirsFromDir(dir: Option[String]): (Option[Pos], Option[Pos]) = Map(
+    "left"      -> ((this.downLeft, this.upLeft)),
+    "upLeft"    -> ((this.left, this.upRight)),
+    "upRight"   -> ((this.upLeft, this.right)),
+    "right"     -> ((this.upRight, this.downRight)),
+    "downRight" -> ((this.right, this.downLeft)),
+    "downLeft"  -> ((this.downRight, this.left))
+  ).getOrElse(dir.getOrElse(""), (None, None))
 
   // NOTE - *neighbourhood
   // these below only work for neighbour pos but that's probably fine as in Abalone we only move to (potentially extended) neighbourhood
-  def dir(dir: Option[String]): Option[Pos]  =
-    dir match {
-      case Some("left") => this.left
-      case Some("downLeft") => this.downLeft
-      case Some("upLeft") => this.upLeft
-      case Some("right") => this.right
-      case Some("downRight") => this.downRight
-      case Some("upRight") => this.upRight
-      case _ => None
-    }
+  def dir(dir: Option[String]): Option[Pos]  =  Map(
+    "left"      -> (this.left),
+    "upLeft"    -> (this.upLeft),
+    "upRight"   -> (this.upRight),
+    "right"     -> (this.right),
+    "downRight" -> (this.downRight),
+    "downLeft"  -> (this.downLeft)
+  ).getOrElse(dir.getOrElse(""), (None))
 
   def dir(pos: Pos): Option[String] =
     (pos.file.index - this.file.index, pos.rank.index - this.rank.index) match {
-      case (0, 1) => Some("upLeft")
-      case (0, -1) => Some("downRight")
-      case (1, 1) => Some("upRight")
-      case (1, 0) => Some("right")
-      case (-1, 0) => Some("left")
+      case (0, 1)   => Some("upLeft")
+      case (0, -1)  => Some("downRight")
+      case (1, 1)   => Some("upRight")
+      case (1, 0)   => Some("right")
+      case (-1, 0)  => Some("left")
       case (-1, -1) => Some("downLeft")
       case _ => None
     }
