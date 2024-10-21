@@ -20,10 +20,7 @@ case class Board(
 
   def piecesOf(player: Player): PieceMap = pieces.filter(_._2.is(player))
 
-  def isEmptySquare(pos: Option[Pos]): Boolean = pos match {
-      case Some(pos) => !this.pieces.contains(pos)
-      case None => false
-    }
+  def isEmptySquare(pos: Option[Pos]): Boolean = pos.fold(false)(!this.pieces.contains(_))
 
   def withHistory(h: History): Board       = copy(history = h)
   def updateHistory(f: History => History) = copy(history = f(history))
