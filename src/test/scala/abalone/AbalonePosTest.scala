@@ -123,6 +123,9 @@ class AbalonePosTest extends AbaloneTest with ValidatedMatchers {
             Pos.A1.right must_== Some(Pos.B1)
             Pos.A1.upLeft must_== Some(Pos.A2)
             Pos.A1.upRight must_== Some(Pos.B2)
+            Pos.A1.dir(Pos.A2) must_== Some("upLeft")
+            Pos.A1.dir(Pos.B2) must_== Some("upRight")
+            Pos.A1.dir(Pos.B1) must_== Some("right")
         }
     }
 
@@ -137,6 +140,9 @@ class AbalonePosTest extends AbaloneTest with ValidatedMatchers {
             Pos.I9.left must_== Some(Pos.H9)
             Pos.I9.downLeft must_== Some(Pos.H8)
             Pos.I9.downRight must_== Some(Pos.I8)
+            Pos.I9.dir(Pos.I8) must_== Some("downRight")
+            Pos.I9.dir(Pos.H9) must_== Some("left")
+            Pos.I9.dir(Pos.H8) must_== Some("downLeft")            
         }
     }
 
@@ -153,4 +159,37 @@ class AbalonePosTest extends AbaloneTest with ValidatedMatchers {
             Pos.C7.upRight must_== Some(Pos.D8)
         }
     }
+
+    "directions from G7" should {
+        "allow moving everywhere inside the grid" in {
+            Pos.G7.downLeft must_== Some(Pos.F6)
+            Pos.G7.right must_== Some(Pos.H7)
+            Pos.G7.downRight must_== Some(Pos.G6)
+            Pos.G7.upRight must_== Some(Pos.H8)
+            Pos.G7.left must_== Some(Pos.F7)
+            Pos.G7.upLeft must_== Some(Pos.G8)
+        }
+
+// 9 -              &  \' (  )  *
+// 8 -            7  8  9  !  ?  ¥
+// 7 -          Y  Z  0  1  2  3  £
+// 6 -        P  Q  R  S  T  U  V  ¡
+// 5 -      G  H  I  J  K  L  M  N  }
+// 4 -       y  z  A  B  C  D  E  F
+// 3 -        q  r  s  t  u  v  w
+// 2 -         i  j  k  l  m  n
+// 1 -          a  b  c  d  e
+//               \  \  \  \  \  \  \  \  \
+//                A  B  C  D  E  F  G  H  I        
+        "be computed correctly through neighbours function" in {
+            Pos.G7.neighbours.flatten.mkString(", ") must_== "f7, f6, g8, h7, g6, h8"
+        }
+    }
+
+    "official notation" should {
+        "swap file and rank indexes" in {
+            Pos.G6.officialNotationKey must_== "f7"
+        }
+    }
+
 }

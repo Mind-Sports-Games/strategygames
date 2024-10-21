@@ -190,7 +190,37 @@ case class Pos private (index: Int) extends AnyVal {
   def right: Option[Pos]     = Pos.at(file.index + 1, rank.index)
   def downRight: Option[Pos] = Pos.at(file.index, rank.index - 1)
   def upRight: Option[Pos]   = Pos.at(file.index + 1, rank.index + 1)
+
   def neighbours: List[Option[Pos]] = List(left, downLeft, upLeft, right, downRight, upRight)
+
+  // NOTE - *neighbourhood
+  // these below only work for neighbour pos but that's probably fine as in Abalone we only move to (potentially extended) neighbourhood
+  def dir(dir: Option[String]): Option[Pos]  = {
+    dir match {
+      case Some("left") => this.left
+      case Some("downLeft") => this.downLeft
+      case Some("upLeft") => this.upLeft
+      case Some("right") => this.right
+      case Some("downRight") => this.downRight
+      case Some("upRight") => this.upRight
+      case _ => None
+    }
+  }
+  def dir(pos: Pos): Option[String] = {
+    (pos.file.index - this.file.index, pos.rank.index - this.rank.index) match {
+      case (0, 1) => Some("upLeft")
+      case (0, -1) => Some("downRight")
+      case (1, 1) => Some("upRight")
+      case (1, 0) => Some("right")
+      case (-1, 0) => Some("left")
+      case (-1, -1) => Some("downLeft")
+      case _ => None
+    }
+  }
+  def isInLine(pos1: Pos, pos2: Pos): Boolean = {
+    this.dir(pos1) == pos1.dir(pos2)
+  }
+  // *end of note about neighbourhood
 
   @inline def file = File of this // column (as if it was an index in a 1D array)
   @inline def rank = Rank of this // horizontal row, makes sense in a 2D array
@@ -238,7 +268,7 @@ case class Pos private (index: Int) extends AnyVal {
 
   def key                 = file.toString + rank.toString
   def officialNotationKey = s"${File(rank.index).getOrElse("")}${Rank(file.index).getOrElse("")}"
-  override def toString   = officialNotationKey
+  override def toString   = key
 }
 
 object Pos {
