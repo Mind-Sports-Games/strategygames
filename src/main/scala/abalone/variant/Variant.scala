@@ -103,8 +103,11 @@ abstract class Variant private[variant] (
     }.toMap
 
   def validMovesOf2And3(situation: Situation): Map[Pos, List[(String, Move)]] = {
-    def generateMove(orig: Pos, dest: Pos, category: String): Some[(String, Move)] =
-      Some( (category, Move(Piece(situation.player, Role.defaultRole), orig, dest, situation, boardAfter(situation, orig, dest), true, if (category == "pushout") Some(dest) else None)) )
+    val activePlayerPieces = situation.board.piecesOf(situation.player)
+    val opponentPieces = situation.board.piecesOf(!situation.player)
+    
+    def createMove(orig: Pos, dest: Pos, category: String): (String, Move) =
+      (category, Move(Piece(situation.player, Role.defaultRole), orig, dest, situation, boardAfter(situation, orig, dest), true, if (category == "pushout") Some(dest) else None))
 
     def generateSideMoves(lineOfMarbles: List[Pos], direction: Option[String]): List[(String, Move)] = {
       // "left" is related to the direction
@@ -117,27 +120,25 @@ abstract class Variant private[variant] (
         if (lineOfMarbles.size == 3) generateSideMoves(lineOfMarbles.dropRight(1), direction)
         else None,
         if (!lineOfMarbles.map(canLeftSideMove).contains(false))
-          generateMove(lineOfMarbles(0), lineOfMarbles.last.sideMovesDirsFromDir(direction)._1.get, "side")
+          Some(createMove(lineOfMarbles(0), lineOfMarbles.last.sideMovesDirsFromDir(direction)._1.get, "side"))
         else None,
         if (!lineOfMarbles.map(canRightSideMove).contains(false))
-          generateMove(lineOfMarbles(0), lineOfMarbles.last.sideMovesDirsFromDir(direction)._2.get, "side")
+          Some(createMove(lineOfMarbles(0), lineOfMarbles.last.sideMovesDirsFromDir(direction)._2.get, "side"))
         else None,
       ).flatten
     }
 
     def generateMovesForNeighbours(pos: Pos, neighbour: Pos, direction: Option[String]): List[(String, Move)] = {
-      val activePlayerPieces = situation.board.piecesOf(situation.player)
-      val opponentPieces = situation.board.piecesOf(!situation.player)
       val moves = List(
         neighbour.dir(direction).toList.flatMap {
           case (thirdSquareInLine) => {
             if (situation.board.isEmptySquare(Some(thirdSquareInLine))) // xx.
-              generateMove(pos, thirdSquareInLine, "line")
+              Some(createMove(pos, thirdSquareInLine, "line"))
             else if (opponentPieces.contains(thirdSquareInLine)) // xxo
               thirdSquareInLine.dir(direction) match { // xxo?
-                case None => generateMove(pos, thirdSquareInLine, "pushout") // xxo\
+                case None => Some(createMove(pos, thirdSquareInLine, "pushout")) // xxo\
                 case Some(emptySquare) if situation.board.isEmptySquare(Some(emptySquare)) => {
-                  generateMove(pos, thirdSquareInLine, "push") // xxo.
+                  Some(createMove(pos, thirdSquareInLine, "push")) // xxo.
                 }
                 case _ => None
               }
@@ -145,17 +146,17 @@ abstract class Variant private[variant] (
               thirdSquareInLine.dir(direction).flatMap {
                 case (fourthSquareInLine) => // xxx_
                   if (situation.board.isEmptySquare(Some(fourthSquareInLine))) // xxx.
-                    generateMove(pos, fourthSquareInLine, "line")
+                    Some(createMove(pos, fourthSquareInLine, "line"))
                   else if (opponentPieces.contains(fourthSquareInLine)) // xxxo
                     fourthSquareInLine.dir(direction) match { // xxxo?
-                      case None => generateMove(pos, fourthSquareInLine, "pushout") // xxxo\
-                      case Some(emptyPos) if (situation.board.isEmptySquare(Some(emptyPos))) => generateMove(pos, fourthSquareInLine, "push") // xxxo.
+                      case None => Some(createMove(pos, fourthSquareInLine, "pushout")) // xxxo\
+                      case Some(emptyPos) if (situation.board.isEmptySquare(Some(emptyPos))) => Some(createMove(pos, fourthSquareInLine, "push")) // xxxo.
                       case _ => fourthSquareInLine.dir(direction).flatMap { // xxxo?
                         case (fifthSquareInLine) =>
                           if (opponentPieces.contains(fifthSquareInLine)) // xxxoo
                             fifthSquareInLine.dir(direction) match {
-                              case None => generateMove(pos, fourthSquareInLine, "pushout") // xxxoo\
-                              case Some(emptySquare) if situation.board.isEmptySquare(Some(emptySquare)) => generateMove(pos, emptySquare, "push") // xxxoo.
+                              case None => Some(createMove(pos, fourthSquareInLine, "pushout")) // xxxoo\
+                              case Some(emptySquare) if situation.board.isEmptySquare(Some(emptySquare)) => Some(createMove(pos, emptySquare, "push")) // xxxoo.
                               case _ => None
                             }
                           else None
@@ -177,7 +178,7 @@ abstract class Variant private[variant] (
     turnPieces(situation).flatMap {
       case (pos, _) =>
         Map(pos -> pos.neighbours.collect {
-          case Some(neighbour) if situation.board.piecesOf(situation.player).contains(neighbour) => (pos, neighbour, pos.dir(neighbour))
+          case Some(neighbour) if activePlayerPieces.contains(neighbour) => (pos, neighbour, pos.dir(neighbour))
         }.flatMap {
           case (pos, neighbour, direction) =>
             generateMovesForNeighbours(pos, neighbour, direction)
