@@ -20,7 +20,7 @@ case object Go13x13
 
   // cache this rather than checking with the API everytime
   override def initialFen =
-    format.FEN("13/13/13/13/13/13/13/13/13/13/13/13/13[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 1")
+    format.FEN("13/13/13/13/13/13/13/13/13/13/13/13/13[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 0 1")
 
   override def boardFenFromHandicap(handicap: Int): String = {
     handicap match {
