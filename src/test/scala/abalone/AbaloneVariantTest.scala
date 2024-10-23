@@ -21,11 +21,11 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
             movesOf23.foldLeft(0)(_ + _._2.size) must_== (1 + 1 + 5) + (1 + 1 + 2)
         }
 
-        "moves of 1 marble and other moves do not intersect" in {
+        "not have an intersection between moves of 1 marble and other moves" in {
             board.variant.validMoves(situation).foldLeft(0)(_ + _._2.size) must_== movesOf1.foldLeft(0)(_ + _._2.size) + movesOf23.foldLeft(0)(_ + _._2.size)
         }
 
-        "compute the moves of 2 and 3 marbles" in {
+        "compute the right set of moves of 2 and 3 marbles" in {
             movesOf23.get(Pos.E5).get.map(x =>x._2.toUci.toString) should contain ( ("Move(e5,h5,None)"))
             movesOf23.get(Pos.E5).get.map(x =>x._2.toUci.toString) should contain ( ("Move(e5,g6,None)"))
             movesOf23.get(Pos.E5).get.map(x =>x._2.toUci.toString) should contain ( ("Move(e5,h6,None)"))
@@ -64,7 +64,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
             movesOf23.get(Pos.C3).get.size must_== 3
         }
 
-        "moves of 1 marble and other moves do not intersect" in {
+        "not have an intersection between moves of 1 marble and other moves" in {
             board.variant.validMoves(situation).foldLeft(0)(_ + _._2.size) must_== movesOf1.foldLeft(0)(_ + _._2.size) + movesOf23.foldLeft(0)(_ + _._2.size)
         }        
     }
@@ -86,7 +86,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
                 (0 + 4 + (2 + 2 + 3 + 2 + 2 + 2 + 2 + 1 + 1 + 1 + 1))
         }
 
-        "moves of 1 marble and other moves do not intersect" in {
+        "not have an intersection between moves of 1 marble and other moves" in {
             board.variant.validMoves(situation).foldLeft(0)(_ + _._2.size) must_== movesOf1.foldLeft(0)(_ + _._2.size) + movesOf23.foldLeft(0)(_ + _._2.size)
         }
     }
@@ -106,7 +106,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
             movesOf23.foldLeft(0)(_ + _._2.size) must_== 6 + (2 * 2 + 4 + 2) + 4
         }
 
-        "moves of 1 marble and other moves do not intersect" in {
+        "not have an intersection between moves of 1 marble and other moves" in {
             board.variant.validMoves(situation).foldLeft(0)(_ + _._2.size) must_== movesOf1.foldLeft(0)(_ + _._2.size) + movesOf23.foldLeft(0)(_ + _._2.size)
         }
     }
@@ -126,11 +126,11 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
             movesOf23.foldLeft(0)(_ + _._2.size) must_== 2 * (1 + 7 + 9) + 2 * (1 + 3 + 5)
         }
 
-        "moves of 1 marble and other moves do not intersect" in {
+        "not have an intersection between moves of 1 marble and other moves" in {
             board.variant.validMoves(situation).foldLeft(0)(_ + _._2.size) must_== movesOf1.foldLeft(0)(_ + _._2.size) + movesOf23.foldLeft(0)(_ + _._2.size)
         }
 
-        "find the valid pushes for P1" in {
+        "find the moves pushing marbles" in {
             movesOf23.get(Pos.B3).get.map(x =>x._2.toString) should contain ( ("p1-Stone b3e6") )
             movesOf23.get(Pos.C4).get.map(x =>x._2.toString) should contain ( ("p1-Stone c4e6") )
             movesOf23.get(Pos.H7).get.map(x =>x._2.toString) should contain ( ("p1-Stone h7e4") )
@@ -153,7 +153,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
             movesOf23.foldLeft(0)(_ + _._2.size) must_== (0 + 6 + 14) + (0 + 3 + 3) 
         }
 
-        "moves of 1 marble and other moves do not intersect" in {
+        "not have an intersection between moves of 1 marble and other moves" in {
             board.variant.validMoves(situation).foldLeft(0)(_ + _._2.size) must_== movesOf1.foldLeft(0)(_ + _._2.size) + movesOf23.foldLeft(0)(_ + _._2.size)
         }
 
@@ -164,7 +164,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
             movesOf1P2.foldLeft(0)(_ + _._2.size) must_== 3 + 2 + 4 + 3 + 4 + 2 + 4 + 3 + 3 + 3
         }
 
-        "for P2 : compute the following moves of 2 marbles : 0 push 2 line moves and 9 side moves" in {
+        "for P2 : compute the correct number of moves of 2 and 3 marbles" in {
             movesOf23P2.foldLeft(0)(_ + _._2.size) must_== (0 + 2 + (1 + 3 + 3 + 2)) + (0 + 1 + 1)
         }
     }
@@ -184,11 +184,11 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
             movesOf23.foldLeft(0)(_ + _._2.size) must_== (3 + 4 + (1 + 1 + 1 + 2 + 2 + 3 + 2)) + (3 + 1 + 3)
         }
 
-        "moves of 1 marble and other moves do not intersect" in {
+        "not have an intersection between moves of 1 marble and other moves" in {
             board.variant.validMoves(situation).foldLeft(0)(_ + _._2.size) must_== movesOf1.foldLeft(0)(_ + _._2.size) + movesOf23.foldLeft(0)(_ + _._2.size)
         }
 
-        "do not generate a move for a marble that is blocked" in {
+        "not generate a move for a marble that is blocked" in {
             movesOf1.get(Pos.A1).get should beEmpty
             movesOf23.get(Pos.A1).get should beEmpty
         }
@@ -206,7 +206,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
         val situation = Situation(board, P1)
         val validMoves = board.variant.validMoves(situation);
 
-        "do not generate a push when a same color marble prevents it (oooxo)" in {
+        "not generate a push when a same color marble prevents it (oooxo)" in {
             validMoves.get(Pos.E5).get.map(x =>x.toString) should not contain ("p1-Stone e5e2")
             validMoves.get(Pos.E5).get.map(x =>x.toString) should not contain ("p1-Stone e5e1")
         }
@@ -217,7 +217,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
             validMoves.get(Pos.E1).get should beEmpty // (oooxo)
         }
 
-        "do not move more than 3 marbles" in {
+        "not move more than 3 marbles" in {
             validMoves.get(Pos.E3).get.map(x =>x.toString) should not contain ("p1-Stone e3e7")
             validMoves.get(Pos.E3).get.map(x =>x.toString) should not contain ("p1-Stone e3e8")
             validMoves.get(Pos.E3).get.map(x =>x.toString) should not contain ("p1-Stone e3e9")
@@ -236,12 +236,12 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
             validMoves.get(Pos.A1).get.map(x =>x.toString) should not contain ("p1-Stone a1a5")
         }
 
-        "do not push 2v2" in {
+        "not create a move in case of 2v2 push" in {
             validMoves.get(Pos.A2).get.map(x =>x.toString) should not contain ("p1-Stone a2a4")
             validMoves.get(Pos.A2).get.map(x =>x.toString) should not contain ("p1-Stone a2a5")
         }
 
-        "do not push 3v3" in {
+        "not create a move in case of 3v3 push" in {
             validMoves.get(Pos.E4).get.map(x =>x.toString) should not contain ("p1-Stone e4e7")
             validMoves.get(Pos.E4).get.map(x =>x.toString) should not contain ("p1-Stone e4e8")
             validMoves.get(Pos.E4).get.map(x =>x.toString) should not contain ("p1-Stone e4e9")
