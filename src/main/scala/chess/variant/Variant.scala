@@ -299,7 +299,7 @@ abstract class Variant private[variant] (
 
   override def hashCode: Int = id
 
-  def gameFamily: GameFamily            = GameFamily.Chess()
+  def gameFamily: GameFamily = GameFamily.Chess()
 
   def pliesFromFen(fenTurnCount: Int, player: Player, currentTurnPlies: Int = 0) =
     fenTurnCount * 2 - player.fold(2, 1) + currentTurnPlies
