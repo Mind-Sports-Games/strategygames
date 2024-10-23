@@ -128,7 +128,8 @@ abstract class Variant private[variant] (
       ).flatten
     }
 
-    def generateMovesForNeighbours(pos: Pos, neighbour: Pos, direction: Option[String]): List[(String, Move)] = {
+    def generateMovesForNeighbours(pos: Pos, neighbour: Pos): List[(String, Move)] = {
+      val direction = pos.dir(neighbour)
       val moves = List(
         neighbour.dir(direction).toList.flatMap {
           case (thirdSquareInLine) => {
@@ -178,10 +179,10 @@ abstract class Variant private[variant] (
     turnPieces(situation).flatMap {
       case (pos, _) =>
         Map(pos -> pos.neighbours.collect {
-          case Some(neighbour) if activePlayerPieces.contains(neighbour) => (pos, neighbour, pos.dir(neighbour))
+          case Some(neighbour) if activePlayerPieces.contains(neighbour) => (pos, neighbour)
         }.flatMap {
-          case (pos, neighbour, direction) =>
-            generateMovesForNeighbours(pos, neighbour, direction)
+          case (pos, neighbour) =>
+            generateMovesForNeighbours(pos, neighbour)
         }
         ).view.toList
       }
