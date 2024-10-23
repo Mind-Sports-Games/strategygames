@@ -114,7 +114,7 @@ abstract class Variant private[variant] (
         pos.sideMovesDirsFromDir(direction)._2.fold(false)(p => situation.board.isEmptySquare(Some(p)))
 
       List(
-        if (lineOfMarbles.size == 3) generateSideMoves(List(lineOfMarbles(0), lineOfMarbles(1)), direction)
+        if (lineOfMarbles.size == 3) generateSideMoves(lineOfMarbles.dropRight(1), direction)
         else None,
         if (!lineOfMarbles.map(canLeftSideMove(_)).contains(false))
           generateMove(lineOfMarbles(0), lineOfMarbles.last.sideMovesDirsFromDir(direction)._1.get, "side")
