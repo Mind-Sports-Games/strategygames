@@ -126,12 +126,14 @@ abstract class Variant private[variant] (
     }
 
     def generateMovesForNeighbours(pos: Pos, neighbour: Pos, direction: Option[String]): List[(String, Move)] = {
+      val activePlayerPieces = situation.board.piecesOf(situation.player)
+      val opponentPieces = situation.board.piecesOf(!situation.player)
       val moves = List(
         neighbour.dir(direction).toList.flatMap {
           case (thirdSquareInLine) => {
             if (situation.board.isEmptySquare(Some(thirdSquareInLine))) // xx.
               generateMove(pos, thirdSquareInLine, "line")
-            else if (situation.board.piecesOf(!situation.player).contains(thirdSquareInLine)) // xxo
+            else if (opponentPieces.contains(thirdSquareInLine)) // xxo
               thirdSquareInLine.dir(direction) match { // xxo?
                 case None => generateMove(pos, thirdSquareInLine, "pushout") // xxo\
                 case Some(emptySquare) if situation.board.isEmptySquare(Some(emptySquare)) => {
@@ -139,18 +141,18 @@ abstract class Variant private[variant] (
                 }
                 case _ => None
               }
-            else if (situation.board.piecesOf(situation.player).contains(thirdSquareInLine)) // xxx
+            else if (activePlayerPieces.contains(thirdSquareInLine)) // xxx
               thirdSquareInLine.dir(direction).flatMap {
                 case (fourthSquareInLine) => // xxx_
                   if (situation.board.isEmptySquare(Some(fourthSquareInLine))) // xxx.
                     generateMove(pos, fourthSquareInLine, "line")
-                  else if (situation.board.piecesOf(!situation.player).contains(fourthSquareInLine)) // xxxo
+                  else if (opponentPieces.contains(fourthSquareInLine)) // xxxo
                     fourthSquareInLine.dir(direction) match { // xxxo?
                       case None => generateMove(pos, fourthSquareInLine, "pushout") // xxxo\
                       case Some(emptyPos) if (situation.board.isEmptySquare(Some(emptyPos))) => generateMove(pos, fourthSquareInLine, "push") // xxxo.
                       case _ => fourthSquareInLine.dir(direction).flatMap { // xxxo?
                         case (fifthSquareInLine) =>
-                          if (situation.board.piecesOf(!situation.player).contains(fifthSquareInLine)) // xxxoo
+                          if (opponentPieces.contains(fifthSquareInLine)) // xxxoo
                             fifthSquareInLine.dir(direction) match {
                               case None => generateMove(pos, fourthSquareInLine, "pushout") // xxxoo\
                               case Some(emptySquare) if situation.board.isEmptySquare(Some(emptySquare)) => generateMove(pos, emptySquare, "push") // xxxoo.
@@ -167,7 +169,7 @@ abstract class Variant private[variant] (
       )
 
       moves.flatten ++ generateSideMoves(
-        List(Some(pos), Some(neighbour), neighbour.dir(direction).flatMap{x => if (situation.board.piecesOf(situation.player).contains(x)) Some(x) else None}).flatten,
+        List(Some(pos), Some(neighbour), neighbour.dir(direction).flatMap{x => if (activePlayerPieces.contains(x)) Some(x) else None}).flatten,
         direction
       )
     }
