@@ -107,13 +107,19 @@ abstract class Variant private[variant] (
       Some( (category, Move(Piece(situation.player, Role.defaultRole), orig, dest, situation, boardAfter(situation, orig, dest), true, if (category == "pushout") Some(dest) else None)) )
 
     def generateSideMoves(lineOfMarbles: List[Pos], direction: Option[String]): List[(String, Move)] = {
+      // "left" is related to the direction
+      def canLeftSideMove(pos: Pos): Boolean =
+        pos.sideMovesDirsFromDir(direction)._1.fold(false)(p => situation.board.isEmptySquare(Some(p)))
+      def canRightSideMove(pos: Pos): Boolean =
+        pos.sideMovesDirsFromDir(direction)._2.fold(false)(p => situation.board.isEmptySquare(Some(p)))
+
       List(
         if (lineOfMarbles.size == 3) generateSideMoves(List(lineOfMarbles(0), lineOfMarbles(1)), direction)
         else None,
-        if (!lineOfMarbles.map(canLeftSideMove(situation, _, direction)).contains(false))
+        if (!lineOfMarbles.map(canLeftSideMove(_)).contains(false))
           generateMove(lineOfMarbles(0), lineOfMarbles.last.sideMovesDirsFromDir(direction)._1.get, "side")
         else None,
-        if (!lineOfMarbles.map(canRightSideMove(situation, _, direction)).contains(false))
+        if (!lineOfMarbles.map(canRightSideMove(_)).contains(false))
           generateMove(lineOfMarbles(0), lineOfMarbles.last.sideMovesDirsFromDir(direction)._2.get, "side")
         else None,
       ).flatten
@@ -271,13 +277,6 @@ abstract class Variant private[variant] (
   override def hashCode: Int = id
 
   private def turnPieces(situation: Situation): PieceMap = situation.board.piecesOf(situation.player)
-
-  // "left" is related to the direction
-  private def canLeftSideMove(situation: Situation, pos: Pos, direction: Option[String]): Boolean =
-    pos.sideMovesDirsFromDir(direction)._1.fold(false)(p => situation.board.isEmptySquare(Some(p)))
-
-  private def canRightSideMove(situation: Situation, pos: Pos, direction: Option[String]): Boolean =
-    pos.sideMovesDirsFromDir(direction)._2.fold(false)(p => situation.board.isEmptySquare(Some(p)))
 
   val kingPiece: Option[Role] = None
 
