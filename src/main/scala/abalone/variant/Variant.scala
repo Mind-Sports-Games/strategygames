@@ -116,10 +116,10 @@ abstract class Variant private[variant] (
       List(
         if (lineOfMarbles.size == 3) generateSideMoves(lineOfMarbles.dropRight(1), direction)
         else None,
-        if (!lineOfMarbles.map(canLeftSideMove(_)).contains(false))
+        if (!lineOfMarbles.map(canLeftSideMove).contains(false))
           generateMove(lineOfMarbles(0), lineOfMarbles.last.sideMovesDirsFromDir(direction)._1.get, "side")
         else None,
-        if (!lineOfMarbles.map(canRightSideMove(_)).contains(false))
+        if (!lineOfMarbles.map(canRightSideMove).contains(false))
           generateMove(lineOfMarbles(0), lineOfMarbles.last.sideMovesDirsFromDir(direction)._2.get, "side")
         else None,
       ).flatten
