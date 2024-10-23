@@ -46,8 +46,6 @@ abstract class Variant private[variant] (
 
   def startPlayer: Player = P1
 
-  val kingPiece: Option[Role] = None
-
   // looks like this is only to allow King to be a valid promotion piece
   // in just atomic, so can leave as true for now
   def isValidPromotion(@nowarn promotion: Option[PromotableRole]): Boolean = true
@@ -88,106 +86,96 @@ abstract class Variant private[variant] (
   2. generate any possible pair of marbles and use it to generate moves of 2 and 3 marbles
   then merge these as valid moves.
   */
-  def validMoves(situation: Situation): Map[Pos, List[Move]] = {
-    val movesOf1 = validMovesOf1(situation)
-    val lineMoves = movesOf1 ++ validLineMoves(situation).map {
-      case (k, v) => k -> (v ++ movesOf1.getOrElse(k, Iterable.empty))
-    }
-    val lineMovesAndPushes = lineMoves ++ validPushes(situation).map {
-      case (k, v) => k -> (v ++ lineMoves.getOrElse(k, Iterable.empty))
-    }
-    lineMovesAndPushes ++ validSideMoves(situation).map { // @TODO: this should reuse what was computed in validMovesOf1
-      case (k, v) => k -> (v ++ lineMovesAndPushes.getOrElse(k, Iterable.empty))
-    }
-  }
+  def validMoves(situation: Situation): Map[Pos, List[Move]] =
+    (validMovesOf1(situation).toList ++ validMovesOf2And3(situation).view.mapValues(_.map(_._2)).toList)
+      .groupBy(_._1).map{case(k, v) => k -> v.map(_._2).toSeq.flatten}.toMap
 
-  // @TODO: move this into the validMoves method and make it become private as it's used by validMovesOf1 AND validMovesOf2
-  def turnPieces(s: Situation): PieceMap = s.board.piecesOf(s.player)
-
-  def validMovesOf1(s: Situation): Map[Pos, List[Move]] =
-    this.turnPieces(s).flatMap {
+  def validMovesOf1(situation: Situation): Map[Pos, List[Move]] =
+    turnPieces(situation).flatMap {
       case ((pos, piece)) =>
         Map(pos ->
           pos.neighbours.flatten
-          .filterNot(s.board.pieces.contains(_))
+          .filterNot(situation.board.pieces.contains(_))
           .map(landingSquare => 
-            Move(piece, pos, landingSquare, s, boardAfter(s, pos, landingSquare), false)
+            Move(piece, pos, landingSquare, situation, boardAfter(situation, pos, landingSquare), false)
           )
         )
     }.toMap
 
-  def validMovesOf2(s: Situation): Map[Pos, List[(String, Move)]] = {
-    def generateMove(orig: Pos, dest: Pos, category: String) = category match {
-      case "pushout" => Some( (category, Move(Piece(s.player, Role.defaultRole), orig, dest, s, boardAfter(s, orig, dest), true, Some(dest))) )
-      case _ =>       Some( (category, Move(Piece(s.player, Role.defaultRole), orig, dest, s, boardAfter(s, orig, dest), true)) )
+  def validMovesOf2And3(situation: Situation): Map[Pos, List[(String, Move)]] = {
+    def generateMove(orig: Pos, dest: Pos, category: String): Some[(String, Move)] =
+      Some( (category, Move(Piece(situation.player, Role.defaultRole), orig, dest, situation, boardAfter(situation, orig, dest), true, if (category == "pushout") Some(dest) else None)) )
+
+    def generateSideMoves(lineOfMarbles: List[Pos], direction: Option[String]): List[(String, Move)] = {
+      List(
+        if (lineOfMarbles.size == 3) generateSideMoves(List(lineOfMarbles(0), lineOfMarbles(1)), direction)
+        else None,
+        if (!lineOfMarbles.map(canLeftSideMove(situation, _, direction)).contains(false))
+          generateMove(lineOfMarbles(0), lineOfMarbles.last.sideMovesDirsFromDir(direction)._1.get, "side")
+        else None,
+        if (!lineOfMarbles.map(canRightSideMove(situation, _, direction)).contains(false))
+          generateMove(lineOfMarbles(0), lineOfMarbles.last.sideMovesDirsFromDir(direction)._2.get, "side")
+        else None,
+      ).flatten
     }
 
-    def generateSideMovesOf2(pos: Pos, neighbour: Pos, direction: Option[String]): List[(String, Move)] = List(
-      if (
-        pos.sideMovesDirsFromDir(direction)._1 != None &&
-        s.board.isEmptySquare(pos.sideMovesDirsFromDir(direction)._1) &&
-        neighbour.sideMovesDirsFromDir(direction)._1 != None &&
-        s.board.isEmptySquare(neighbour.sideMovesDirsFromDir(direction)._1)
-      )
-        generateMove(pos, neighbour.sideMovesDirsFromDir(direction)._1.get, "side")
-      else
-        None,
-      if (
-        pos.sideMovesDirsFromDir(direction)._2 != None &&
-        s.board.isEmptySquare(pos.sideMovesDirsFromDir(direction)._2) &&
-        neighbour.sideMovesDirsFromDir(direction)._2 != None &&
-        s.board.isEmptySquare(neighbour.sideMovesDirsFromDir(direction)._2)
-      )
-        generateMove(pos, neighbour.sideMovesDirsFromDir(direction)._2.get, "side")
-      else
-        None
-    ).flatten
-
-    this.turnPieces(s).map {
-      case ( (pos, _) ) => pos ->
-        pos.neighbours.flatMap {
-          case Some(neighbour) if(s.board.piecesOf(s.player).contains(neighbour)) => Some( (neighbour, pos.dir(neighbour)) )
-          case _ => None
-        }
-      }.flatMap {
-        case (pos, neighbourAndDir) => Map( pos -> 
-          neighbourAndDir.flatMap {
-            case (neighbour, direction) =>
-              neighbour.dir(direction) match {
-                case Some(neighbourOfNeighbour) =>
-                  List(
-                    if (s.board.isEmptySquare(Some(neighbourOfNeighbour)))
-                      generateMove(pos, neighbourOfNeighbour, "line")
-                    else None,
-                    if (s.board.piecesOf(!s.player).contains(neighbourOfNeighbour))
-                      if(neighbourOfNeighbour.dir(direction) == None)
-                        generateMove(pos, neighbourOfNeighbour, "pushout")
-                      else if (s.board.isEmptySquare(neighbourOfNeighbour.dir(direction)))
-                        generateMove(pos, neighbourOfNeighbour, "push")
-                      else None
-                    else None, // here, adding else if (s.board.piecesOf(s.player).contains(neighbourOfNeighbour)), we could generate moves of 2 marbles 
-                    generateSideMovesOf2(pos, neighbour, direction)
-                  ).flatten
-                case None => {
-                  generateSideMovesOf2(pos, neighbour, direction)
+    def generateMovesForNeighbours(pos: Pos, neighbour: Pos, direction: Option[String]): List[(String, Move)] = {
+      val moves = List(
+        neighbour.dir(direction).toList.flatMap {
+          case (thirdSquareInLine) => {
+            if (situation.board.isEmptySquare(Some(thirdSquareInLine))) // xx.
+              generateMove(pos, thirdSquareInLine, "line")
+            else if (situation.board.piecesOf(!situation.player).contains(thirdSquareInLine)) // xxo
+              thirdSquareInLine.dir(direction) match { // xxo?
+                case None => generateMove(pos, thirdSquareInLine, "pushout") // xxo\
+                case Some(emptySquare) if situation.board.isEmptySquare(Some(emptySquare)) => {
+                  generateMove(pos, thirdSquareInLine, "push") // xxo.
                 }
+                case _ => None
               }
-            }
-          )
-        }.toMap
-  }
+            else if (situation.board.piecesOf(situation.player).contains(thirdSquareInLine)) // xxx
+              thirdSquareInLine.dir(direction).flatMap {
+                case (fourthSquareInLine) => // xxx_
+                  if (situation.board.isEmptySquare(Some(fourthSquareInLine))) // xxx.
+                    generateMove(pos, fourthSquareInLine, "line")
+                  else if (situation.board.piecesOf(!situation.player).contains(fourthSquareInLine)) // xxxo
+                    fourthSquareInLine.dir(direction) match { // xxxo?
+                      case None => generateMove(pos, fourthSquareInLine, "pushout") // xxxo\
+                      case Some(emptyPos) if (situation.board.isEmptySquare(Some(emptyPos))) => generateMove(pos, fourthSquareInLine, "push") // xxxo.
+                      case _ => fourthSquareInLine.dir(direction).flatMap { // xxxo?
+                        case (fifthSquareInLine) =>
+                          if (situation.board.piecesOf(!situation.player).contains(fifthSquareInLine)) // xxxoo
+                            fifthSquareInLine.dir(direction) match {
+                              case None => generateMove(pos, fourthSquareInLine, "pushout") // xxxoo\
+                              case Some(emptySquare) if situation.board.isEmptySquare(Some(emptySquare)) => generateMove(pos, emptySquare, "push") // xxxoo.
+                              case _ => None
+                            }
+                          else None
+                      }
+                    }
+                  else None
+              }
+            else None
+          }
+        }
+      )
 
-  def validSideMoves(@nowarn situation: Situation):  Map[Pos, List[Move]] = {
-    Map()
-  }
+      moves.flatten ++ generateSideMoves(
+        List(Some(pos), Some(neighbour), neighbour.dir(direction).flatMap{x => if (situation.board.piecesOf(situation.player).contains(x)) Some(x) else None}).flatten,
+        direction
+      )
+    }
 
-  def validLineMoves(@nowarn situation: Situation):  Map[Pos, List[Move]] = {
-    Map()
-  }
-    
-
-  def validPushes(@nowarn situation: Situation):  Map[Pos, List[Move]] = {
-    Map()
+    turnPieces(situation).flatMap {
+      case (pos, _) =>
+        Map(pos -> pos.neighbours.collect {
+          case Some(neighbour) if situation.board.piecesOf(situation.player).contains(neighbour) => (pos, neighbour, pos.dir(neighbour))
+        }.flatMap {
+          case (pos, neighbour, direction) =>
+            generateMovesForNeighbours(pos, neighbour, direction)
+        }
+        ).view.toList
+      }
   }
 
   def boardAfter(situation: Situation, orig: Pos, dest: Pos): Board = {
@@ -272,13 +260,9 @@ abstract class Variant private[variant] (
   // TODO: Abalone. Add some sensible validation checks here if appropriate
   def valid(@nowarn board: Board, @nowarn strict: Boolean): Boolean = true
 
-  val roles: List[Role] = Role.all
+  def defaultRole: Role = Role.defaultRole
 
-  lazy val rolesByPgn: Map[Char, Role] = roles
-    .map { r =>
-      (r.pgn, r)
-    }
-    .to(Map)
+  def gameFamily: GameFamily
 
   override def toString = s"Variant($name)"
 
@@ -286,25 +270,27 @@ abstract class Variant private[variant] (
 
   override def hashCode: Int = id
 
-  def defaultRole: Role = Role.defaultRole
+  private def turnPieces(situation: Situation): PieceMap = situation.board.piecesOf(situation.player)
 
-  def gameFamily: GameFamily
+  // "left" is related to the direction
+  private def canLeftSideMove(situation: Situation, pos: Pos, direction: Option[String]): Boolean =
+    pos.sideMovesDirsFromDir(direction)._1.fold(false)(p => situation.board.isEmptySquare(Some(p)))
+
+  private def canRightSideMove(situation: Situation, pos: Pos, direction: Option[String]): Boolean =
+    pos.sideMovesDirsFromDir(direction)._2.fold(false)(p => situation.board.isEmptySquare(Some(p)))
+
+  val kingPiece: Option[Role] = None
+
+  val roles: List[Role] = Role.all
+
+  lazy val rolesByPgn: Map[Char, Role] = roles
+    .map { r =>
+      (r.pgn, r)
+    }
+    .to(Map)
 }
 
 object Variant {
-
-  lazy val all: List[Variant] = List(
-    Abalone
-  )
-  val byId                    = all map { v =>
-    (v.id, v)
-  } toMap
-  val byKey                   = all map { v =>
-    (v.key, v)
-  } toMap
-
-  val default = Abalone
-
   def apply(id: Int): Option[Variant]     = byId get id
   def apply(key: String): Option[Variant] = byKey get key
   def orDefault(id: Int): Variant         = apply(id) | default
@@ -319,4 +305,16 @@ object Variant {
 
   val divisionSensibleVariants: Set[Variant] = Set()
 
+  val byId                    = all map { v =>
+    (v.id, v)
+  } toMap
+  val byKey                   = all map { v =>
+    (v.key, v)
+  } toMap
+
+  val default = Abalone
+
+  lazy val all: List[Variant] = List(
+    Abalone
+  )
 }
