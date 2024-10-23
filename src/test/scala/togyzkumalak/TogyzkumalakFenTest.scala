@@ -13,8 +13,31 @@ class TogyzkumalakFenTest extends Specification with ValidatedMatchers {
     }
   }
 
+  "MancalastoneArray from Bestemshe initial fen" should {
+    val fen = variant.Bestemshe.initialFen
+    "be valid" in {
+      fen.mancalaStoneArray must_== Array.fill(10)(5)
+    }
+  }
+
   "Initial fen scores, no tuzdiks and starting player" should {
     val fen = variant.Togyzkumalak.initialFen
+    "player 1 score be 0" in {
+      fen.player1Score must_== 0
+    }
+    "player 2 score be 0" in {
+      fen.player2Score must_== 0
+    }
+    "Tuzdik pits must be empty" in {
+      fen.tuzdikPits must_== Map(Player.P1 -> None, Player.P2 -> None)
+    }
+    "Starting player is South" in {
+      fen.player must_== Some(Player.P1)
+    }
+  }
+
+  "Initial Bestemshe fen scores, no tuzdiks and starting player" should {
+    val fen = variant.Bestemshe.initialFen
     "player 1 score be 0" in {
       fen.player1Score must_== 0
     }
@@ -107,6 +130,23 @@ class TogyzkumalakFenTest extends Specification with ValidatedMatchers {
     }
     "player 2 score be 43" in {
       fen.player2Score must_== 43
+    }
+  }
+
+  val bfen1 = "5S,5S,1,6S,6S/5S,5S,5S,1S,6S, 6 0 N 1"
+  s"fen $bfen1" should {
+    val fen = strategygames.togyzkumalak.format.FEN(bfen1)
+    "player 1 score be 10" in {
+      fen.player1Score must_== 6
+    }
+    "player 2 score be 0" in {
+      fen.player2Score must_== 0
+    }
+    "Player turn is North" in {
+      fen.player must_== Some(Player.P2)
+    }
+    "Stone Array is valid" in {
+      fen.mancalaStoneArray must_== Array(5, 5, 5, 1, 6, 6, 6, 0, 5, 5)
     }
   }
 

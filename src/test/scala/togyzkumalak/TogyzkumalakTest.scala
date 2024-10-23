@@ -5,6 +5,7 @@ import org.specs2.matcher.ValidatedMatchers
 import org.specs2.mutable.Specification
 
 import strategygames.togyzkumalak.format.Uci
+import strategygames.togyzkumalak.variant.Variant
 
 class TogyzkumalakTest extends Specification with ValidatedMatchers {
 
@@ -16,9 +17,13 @@ class TogyzkumalakTest extends Specification with ValidatedMatchers {
       }
     }
 
-  def playActionStrs(actionStrs: List[String], game: Option[Game] = None): Validated[String, Game] =
+  def playActionStrs(
+      actionStrs: List[String],
+      game: Option[Game] = None,
+      variant: Option[Variant] = None
+  ): Validated[String, Game] =
     playUciList(
-      game.getOrElse(Game.apply(variant.Togyzkumalak)),
+      game.getOrElse(Game.apply(variant.getOrElse(Variant.default))),
       Uci.readList(actionStrs.mkString(" ")).getOrElse(List())
     )
 
