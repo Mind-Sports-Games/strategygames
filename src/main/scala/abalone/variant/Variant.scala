@@ -46,75 +46,157 @@ abstract class Variant private[variant] (
 
   def startPlayer: Player = P1
 
-  val kingPiece: Option[Role] = None
-
   // looks like this is only to allow King to be a valid promotion piece
   // in just atomic, so can leave as true for now
   def isValidPromotion(@nowarn promotion: Option[PromotableRole]): Boolean = true
 
   /*
   In Abalone there are 3 kinds of moves.
-  Let's use the top 2 rows of a board to illustrate (numbers are empty squares, Z is an opponent marble)
+  Let's use the top 3 rows of a board to illustrate (capital letters are empty squares, 1 is an opponent marble)
 
-        Z a b c 7
-       1 2 3 4 5 6
+         A B C D E
+        1 a b c G H 
+       I J K L M N O 
     
     - line moves are marbles moving in line to an empty square :
-       'a' to '7' would move three marbles to the right. This is the same as if 'a' jumped over 'b' and 'c' to land on '7'.
-       'c' to '7' would move one marble to the right.
+       'a' to 'G' would move three marbles to the right.
+         This is the same as if 'a' jumped over 'b' and 'c' to land on 'G'.
+       'c' to 'G' would move one marble to the right.
     - pushes are line moves targeting a square hosting an opponent marble
-       They will be processed as two line moves (one jump per player).
-       'c' to 'Z' and 'b' to 'Z' are pushes to the left
+       They will be processed later on as two line moves (one jump per player).
+       'c' to '1' and 'b' to '1' are pushes to the left.
+       In case we play a move from 'c' to '1', c will land on 1 and 1 will be removed from the board.
+       When a piece is pushed off the board, the Move is created with an extra parameter.
     - side moves can only be described starting from the right origin (figure out the longest diagonal) :
-       'a' to '5' is a downRight side move of three marbles.
-       'c' to '2' is a downLeft side move of three marbles.
-       'a' to '4' is a downRight side move of two marbles (only 'a' and 'b' would move).
-       'c' to '3' is a downLeft side move of two marbles (only 'c' and 'b' would move)
-       'a' to '3' or 'c' to '4' are line moves of a single marble
+       'a' to 'M' is a downRight side move of three marbles.
+       'c' to 'J' is a downLeft side move of three marbles.
+       'a' to 'L' is a downRight side move of two marbles (only 'a' and 'b' would move).
+       'c' to 'K' is a downLeft side move of two marbles (only 'c' and 'b' would move)
+       'a' to 'K' or 'c' to 'L' are line moves of a single marble
 
-  we want to have :
-  1. moves of 1 marble + side moves (as we are reusing moves of 1 marble)
-  2. line moves of 2+ marbles + pushes ((re-do a pass on line moves that were stuck ?))
+  For moves of 2 marbles or more, once you get the direction of the line,
+   you can easily generate the side moves as being the one before and the one after,
+   following a rotation :
+    \   /
+   -  o  -
+    /   \
+  e.g. if you are moving upRight the side moves to consider are "upLeft" and "right".
+
+  1. moves of 1 marble
+  2. generate any possible pair of marbles and use it to generate moves of 2 and 3 marbles
   then merge these as valid moves.
   */
-  def validMoves(situation: Situation): Map[Pos, List[Move]] = {
-    val movesOf1 = validMovesOf1(situation)
-    val lineMoves = movesOf1 ++ validLineMoves(situation).map {
-      case (k, v) => k -> (v ++ movesOf1.getOrElse(k, Iterable.empty))
-    }
-    val lineMovesAndPushes = lineMoves ++ validPushes(situation).map {
-      case (k, v) => k -> (v ++ lineMoves.getOrElse(k, Iterable.empty))
-    }
-    lineMovesAndPushes ++ validSideMoves(situation).map { // @TODO: this should reuse what was computed in validMovesOf1
-      case (k, v) => k -> (v ++ lineMovesAndPushes.getOrElse(k, Iterable.empty))
-    }
-  }
+  def validMoves(situation: Situation): Map[Pos, List[Move]] =
+    (validMovesOf1(situation).toList ++ validMovesOf2And3(situation).view.mapValues(_.map(_._2)).toList)
+      .groupBy(_._1).map{case(k, v) => k -> v.map(_._2).toSeq.flatten}.toMap
 
   def validMovesOf1(situation: Situation): Map[Pos, List[Move]] =
-    situation.board.piecesOf(situation.player).flatMap {
+    turnPieces(situation).flatMap {
       case ((pos, piece)) =>
         Map(pos ->
           pos.neighbours.flatten
           .filterNot(situation.board.pieces.contains(_))
-          .map(landingSquare => 
+          .map(landingSquare =>
             Move(piece, pos, landingSquare, situation, boardAfter(situation, pos, landingSquare), false)
           )
         )
     }.toMap
 
-  def validSideMoves(@nowarn situation: Situation):  Map[Pos, List[Move]] = {
-    Map()
+  def validMovesOf2And3(situation: Situation): Map[Pos, List[(String, Move)]] = {
+    val activePlayerPieces = situation.board.piecesOf(situation.player)
+    val opponentPieces = situation.board.piecesOf(!situation.player)
+
+    def createMove(orig: Pos, dest: Pos, category: String): (String, Move) =
+      (category, Move(Piece(situation.player, Role.defaultRole), orig, dest, situation, boardAfter(situation, orig, dest), true, if (category == "pushout") Some(dest) else None))
+
+    def generateSideMoves(lineOfMarbles: List[Pos], direction: Option[String]): List[(String, Move)] = {
+      def canMoveTowards(pos: Pos, dir: String): Boolean = {
+        situation.board.isEmptySquare(pos.dir(dir))
+      }
+
+      def possibleSideMoves: List[(Pos, Pos)] = Pos.sideMovesDirsFromDir(direction).map(
+        dir =>
+          if (lineOfMarbles.map(
+            (pos) => canMoveTowards(pos, dir)
+          ).contains(false)) None
+          else (
+            lineOfMarbles.headOption,
+            lineOfMarbles.reverse.headOption.flatMap(_.dir(dir))
+          ) match {
+            case (Some(head), Some(tail)) => Some( (head, tail) )
+            case _ => None
+          }
+      ).flatten
+
+    List(
+        if (lineOfMarbles.size == 3) generateSideMoves(lineOfMarbles.dropRight(1), direction) else List(),
+        possibleSideMoves.flatMap {
+            case ( (orig, dest) ) => Some(createMove(orig, dest, "side"))
+            case _ => None
+          }
+      ).flatten
+    }
+
+    def generateMovesForNeighbours(pos: Pos, neighbour: Pos): List[(String, Move)] = {
+      val direction = pos.dir(neighbour)
+      val moves = List(
+        neighbour.dir(direction).toList.flatMap {
+          case (thirdSquareInLine) => {
+            if (situation.board.isEmptySquare(Some(thirdSquareInLine))) // xx.
+              Some(createMove(pos, thirdSquareInLine, "line"))
+            else if (opponentPieces.contains(thirdSquareInLine)) // xxo
+              thirdSquareInLine.dir(direction) match { // xxo?
+                case None => Some(createMove(pos, thirdSquareInLine, "pushout")) // xxo\
+                case Some(emptySquare) if situation.board.isEmptySquare(Some(emptySquare)) => {
+                  Some(createMove(pos, thirdSquareInLine, "push")) // xxo.
+                }
+                case _ => None
+              }
+            else if (activePlayerPieces.contains(thirdSquareInLine)) // xxx
+              thirdSquareInLine.dir(direction).flatMap {
+                case (fourthSquareInLine) => // xxx_
+                  if (situation.board.isEmptySquare(Some(fourthSquareInLine))) // xxx.
+                    Some(createMove(pos, fourthSquareInLine, "line"))
+                  else if (opponentPieces.contains(fourthSquareInLine)) // xxxo
+                    fourthSquareInLine.dir(direction) match { // xxxo?
+                      case None => Some(createMove(pos, fourthSquareInLine, "pushout")) // xxxo\
+                      case Some(emptyPos) if (situation.board.isEmptySquare(Some(emptyPos))) => Some(createMove(pos, fourthSquareInLine, "push")) // xxxo.
+                      case _ => fourthSquareInLine.dir(direction).flatMap { // xxxo?
+                        case (fifthSquareInLine) =>
+                          if (opponentPieces.contains(fifthSquareInLine)) // xxxoo
+                            fifthSquareInLine.dir(direction) match {
+                              case None => Some(createMove(pos, fourthSquareInLine, "pushout")) // xxxoo\
+                              case Some(emptySquare) if situation.board.isEmptySquare(Some(emptySquare)) => Some(createMove(pos, emptySquare, "push")) // xxxoo.
+                              case _ => None
+                            }
+                          else None
+                      }
+                    }
+                  else None
+              }
+            else None
+          }
+        }
+      )
+
+      moves.flatten ++ generateSideMoves(
+        List(Some(pos), Some(neighbour), neighbour.dir(direction).flatMap{x => if (activePlayerPieces.contains(x)) Some(x) else None}).flatten,
+        direction
+      )
+    }
+
+    turnPieces(situation).flatMap {
+      case (pos, _) =>
+        Map(pos -> pos.neighbours.collect {
+          case Some(neighbour) if activePlayerPieces.contains(neighbour) => (pos, neighbour)
+        }.flatMap {
+          case (pos, neighbour) =>
+            generateMovesForNeighbours(pos, neighbour)
+        }).view.toList
+      }
   }
 
-  def validLineMoves(@nowarn situation: Situation):  Map[Pos, List[Move]] = {
-    Map()
-  }
-    
-
-  def validPushes(@nowarn situation: Situation):  Map[Pos, List[Move]] = {
-    Map()
-  }
-
+  // @TODO: would be interesting to pass the direction so we can easily differenciate a side move from a line move (orig meets dest in case of line move)
   def boardAfter(situation: Situation, orig: Pos, dest: Pos): Board = {
     // 1. move pieces and get the score
     val (pieces, capture)   = piecesAfterAction(situation.board.pieces, situation.player, orig, dest)
@@ -137,9 +219,34 @@ abstract class Variant private[variant] (
   def piecesAfterAction(pieces: PieceMap, player: Player, @nowarn orig: Pos, dest: Pos): (PieceMap, Boolean) = {
     var capture = false
 
-    if (pieces.contains(dest)) { // push
-      // compute direction between orig and dest to push the opponent marble
+    /*
 
+        * * * * *
+       * a A B C 1
+      * * * * * 2 *
+      How to move pieces based on orig and dest :
+        1. identify the type of move :
+          - push : dest contains a marble (orig=C, dest=a)
+          - line move : orig meets dest thanks to the direction we passed as extra parameter
+          - side move : NOT a push or a side move
+
+        2. play the move
+          - line move :
+              - move from orig to dest
+          - push :
+            - dest contains a marble
+            - we know the direction :
+              - apply the direction from dest until there is an empty square or being off the board
+                - in case of being off the board, increment the score (capture = true)
+              - do the line move (orig to dest)
+          - side move :
+            - apply the direction to orig and dest : but still have to find the marble in the middle in case of a move of 3 marbles ?
+    
+      in case of a side move, orig=A and dest=1, how do we determine how to move A and B ?
+    
+    */
+
+    if (pieces.contains(dest)) { // push
       // apply that direction from orig, until we find an empty square or get out of the board (considering a max distance of 3 from dest)
 
       // then move the 2 marbles :
@@ -197,13 +304,9 @@ abstract class Variant private[variant] (
   // TODO: Abalone. Add some sensible validation checks here if appropriate
   def valid(@nowarn board: Board, @nowarn strict: Boolean): Boolean = true
 
-  val roles: List[Role] = Role.all
+  def defaultRole: Role = Role.defaultRole
 
-  lazy val rolesByPgn: Map[Char, Role] = roles
-    .map { r =>
-      (r.pgn, r)
-    }
-    .to(Map)
+  def gameFamily: GameFamily
 
   override def toString = s"Variant($name)"
 
@@ -211,25 +314,20 @@ abstract class Variant private[variant] (
 
   override def hashCode: Int = id
 
-  def defaultRole: Role = Role.defaultRole
+  private def turnPieces(situation: Situation): PieceMap = situation.board.piecesOf(situation.player)
 
-  def gameFamily: GameFamily
+  val kingPiece: Option[Role] = None
+
+  val roles: List[Role] = Role.all
+
+  lazy val rolesByPgn: Map[Char, Role] = roles
+    .map { r =>
+      (r.pgn, r)
+    }
+    .to(Map)
 }
 
 object Variant {
-
-  lazy val all: List[Variant] = List(
-    Abalone
-  )
-  val byId                    = all map { v =>
-    (v.id, v)
-  } toMap
-  val byKey                   = all map { v =>
-    (v.key, v)
-  } toMap
-
-  val default = Abalone
-
   def apply(id: Int): Option[Variant]     = byId get id
   def apply(key: String): Option[Variant] = byKey get key
   def orDefault(id: Int): Variant         = apply(id) | default
@@ -244,4 +342,16 @@ object Variant {
 
   val divisionSensibleVariants: Set[Variant] = Set()
 
+  val byId                    = all map { v =>
+    (v.id, v)
+  } toMap
+  val byKey                   = all map { v =>
+    (v.key, v)
+  } toMap
+
+  val default = Abalone
+
+  lazy val all: List[Variant] = List(
+    Abalone
+  )
 }
