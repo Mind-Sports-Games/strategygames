@@ -114,28 +114,26 @@ abstract class Variant private[variant] (
         situation.board.isEmptySquare(pos.dir(dir))
       }
 
-      val possibleSideMovesDirections = Pos.sideMovesDirsFromDir(direction)
-      def possibleSideMoves: List[Option[(Pos, Pos)]] = possibleSideMovesDirections.map(
+      def possibleSideMoves: List[(Pos, Pos)] = Pos.sideMovesDirsFromDir(direction).map(
         dir =>
-          if (lineOfMarbles.flatMap(
-            (pos) => Some(canMoveTowards(pos, dir))
+          if (lineOfMarbles.map(
+            (pos) => canMoveTowards(pos, dir)
           ).contains(false)) None
-          else List(
+          else (
             lineOfMarbles.headOption,
             lineOfMarbles.reverse.headOption.flatMap(_.dir(dir))
           ) match {
-            case List(Some(head), Some(tail)) => Some( (head, tail) )
+            case (Some(head), Some(tail)) => Some( (head, tail) )
             case _ => None
           }
-      )
+      ).flatten
 
-      List(
-        if (lineOfMarbles.size == 3) generateSideMoves(lineOfMarbles.dropRight(1), direction)
-        else None,
+    List(
+        if (lineOfMarbles.size == 3) generateSideMoves(lineOfMarbles.dropRight(1), direction) else List(),
         possibleSideMoves.flatMap {
-          case Some((orig, dest)) => Some(createMove(orig, dest, "side"))
-          case _ => None
-        }
+            case ( (orig, dest) ) => Some(createMove(orig, dest, "side"))
+            case _ => None
+          }
       ).flatten
     }
 
