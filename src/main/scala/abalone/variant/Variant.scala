@@ -96,7 +96,7 @@ abstract class Variant private[variant] (
         Map(pos ->
           pos.neighbours.flatten
           .filterNot(situation.board.pieces.contains(_))
-          .map(landingSquare => 
+          .map(landingSquare =>
             Move(piece, pos, landingSquare, situation, boardAfter(situation, pos, landingSquare), false)
           )
         )
@@ -105,26 +105,37 @@ abstract class Variant private[variant] (
   def validMovesOf2And3(situation: Situation): Map[Pos, List[(String, Move)]] = {
     val activePlayerPieces = situation.board.piecesOf(situation.player)
     val opponentPieces = situation.board.piecesOf(!situation.player)
-    
+
     def createMove(orig: Pos, dest: Pos, category: String): (String, Move) =
       (category, Move(Piece(situation.player, Role.defaultRole), orig, dest, situation, boardAfter(situation, orig, dest), true, if (category == "pushout") Some(dest) else None))
 
     def generateSideMoves(lineOfMarbles: List[Pos], direction: Option[String]): List[(String, Move)] = {
-      // "left" is related to the direction
-      def canLeftSideMove(pos: Pos): Boolean =
-        pos.sideMovesDirsFromDir(direction)._1.fold(false)(p => situation.board.isEmptySquare(Some(p)))
-      def canRightSideMove(pos: Pos): Boolean =
-        pos.sideMovesDirsFromDir(direction)._2.fold(false)(p => situation.board.isEmptySquare(Some(p)))
+      def canMoveTowards(pos: Pos, dir: String): Boolean = {
+        situation.board.isEmptySquare(pos.dir(dir))
+      }
+
+      val possibleSideMovesDirections = Pos.sideMovesDirsFromDir(direction)
+      def possibleSideMoves: List[Option[(Pos, Pos)]] = possibleSideMovesDirections.map(
+        dir =>
+          if (lineOfMarbles.flatMap(
+            (pos) => Some(canMoveTowards(pos, dir))
+          ).contains(false)) None
+          else List(
+            lineOfMarbles.headOption,
+            lineOfMarbles.reverse.headOption.flatMap(_.dir(dir))
+          ) match {
+            case List(Some(head), Some(tail)) => Some( (head, tail) )
+            case _ => None
+          }
+      )
 
       List(
         if (lineOfMarbles.size == 3) generateSideMoves(lineOfMarbles.dropRight(1), direction)
         else None,
-        if (!lineOfMarbles.map(canLeftSideMove).contains(false))
-          Some(createMove(lineOfMarbles(0), lineOfMarbles.last.sideMovesDirsFromDir(direction)._1.get, "side"))
-        else None,
-        if (!lineOfMarbles.map(canRightSideMove).contains(false))
-          Some(createMove(lineOfMarbles(0), lineOfMarbles.last.sideMovesDirsFromDir(direction)._2.get, "side"))
-        else None,
+        possibleSideMoves.flatMap {
+          case Some((orig, dest)) => Some(createMove(orig, dest, "side"))
+          case _ => None
+        }
       ).flatten
     }
 
@@ -183,11 +194,11 @@ abstract class Variant private[variant] (
         }.flatMap {
           case (pos, neighbour) =>
             generateMovesForNeighbours(pos, neighbour)
-        }
-        ).view.toList
+        }).view.toList
       }
   }
 
+  // @TODO: would be interesting to pass the direction so we can easily differenciate a side move from a line move (orig meets dest in case of line move)
   def boardAfter(situation: Situation, orig: Pos, dest: Pos): Board = {
     // 1. move pieces and get the score
     val (pieces, capture)   = piecesAfterAction(situation.board.pieces, situation.player, orig, dest)
@@ -210,9 +221,34 @@ abstract class Variant private[variant] (
   def piecesAfterAction(pieces: PieceMap, player: Player, @nowarn orig: Pos, dest: Pos): (PieceMap, Boolean) = {
     var capture = false
 
-    if (pieces.contains(dest)) { // push
-      // compute direction between orig and dest to push the opponent marble
+    /*
 
+        * * * * *
+       * a A B C 1
+      * * * * * 2 *
+      How to move pieces based on orig and dest :
+        1. identify the type of move :
+          - push : dest contains a marble (orig=C, dest=a)
+          - line move : orig meets dest thanks to the direction we passed as extra parameter
+          - side move : NOT a push or a side move
+
+        2. play the move
+          - line move :
+              - move from orig to dest
+          - push :
+            - dest contains a marble
+            - we know the direction :
+              - apply the direction from dest until there is an empty square or being off the board
+                - in case of being off the board, increment the score (capture = true)
+              - do the line move (orig to dest)
+          - side move :
+            - apply the direction to orig and dest : but still have to find the marble in the middle in case of a move of 3 marbles ?
+    
+      in case of a side move, orig=A and dest=1, how do we determine how to move A and B ?
+    
+    */
+
+    if (pieces.contains(dest)) { // push
       // apply that direction from orig, until we find an empty square or get out of the board (considering a max distance of 3 from dest)
 
       // then move the 2 marbles :
