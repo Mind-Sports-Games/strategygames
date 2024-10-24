@@ -192,15 +192,6 @@ case class Pos private (index: Int) extends AnyVal {
   def upRight: Option[Pos]   = Pos.at(file.index + 1, rank.index + 1)
 
   def neighbours: List[Option[Pos]] = List(left, upLeft, upRight, right, downRight, downLeft)
-  def sideMovesDirsFromDir(dir: Option[String]): (Option[Pos], Option[Pos]) = dir match {
-    case Some("left")       => (this.downLeft, this.upLeft)
-    case Some("upLeft")     => (this.left, this.upRight)
-    case Some("upRight")    => (this.upLeft, this.right)
-    case Some("right")      => (this.upRight, this.downRight)
-    case Some("downRight")  => (this.right, this.downLeft)
-    case Some("downLeft")   => (this.downRight, this.left)
-    case _                  => (None, None)
-  }
 
   // NOTE - *neighbourhood
   // these below only work for neighbour pos but that's probably fine as in Abalone we only move to (potentially extended) neighbourhood
@@ -212,6 +203,15 @@ case class Pos private (index: Int) extends AnyVal {
     case Some("downRight")  => this.downRight
     case Some("downLeft")   => this.downLeft
     case _                  => None
+  }
+  def dir(dir: String): Option[Pos]  = dir match {
+    case "left"       => this.left
+    case "upLeft"     => this.upLeft
+    case "upRight"    => this.upRight
+    case "right"      => this.right
+    case "downRight"  => this.downRight
+    case "downLeft"   => this.downLeft
+    case _            => None
   }
 
   def dir(pos: Pos): Option[String] =
@@ -317,6 +317,16 @@ object Pos {
   def at(x: Int, y: Int): Option[Pos] =
     if (isInHexagon(x + File.all.size * y)) Some(new Pos(x + File.all.size * y))
     else None
+
+  def sideMovesDirsFromDir(dir: Option[String]): List[String] = dir match {
+    case Some("left")       => List("downLeft", "upLeft")
+    case Some("upLeft")     => List("left", "upRight")
+    case Some("upRight")    => List("upLeft", "right")
+    case Some("right")      => List("upRight", "downRight")
+    case Some("downRight")  => List("right", "downLeft")
+    case Some("downLeft")   => List("downRight", "left")
+    case _                  => List()
+  }
 
   def fromKey(key: String): Option[Pos] = allKeys get key
 
