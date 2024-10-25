@@ -192,6 +192,7 @@ case class Pos private (index: Int) extends AnyVal {
   def upRight: Option[Pos]   = Pos.at(file.index + 1, rank.index + 1)
 
   def neighbours: List[Option[Pos]] = List(left, upLeft, upRight, right, downRight, downLeft)
+  def neighboursAsDirs: Directions = List(_.left, _.upLeft, _.upRight, _.right, _.downRight, _.downLeft)
 
   // NOTE - *neighbourhood
   // these below only work for neighbour pos but that's probably fine as in Abalone we only move to (potentially extended) neighbourhood
@@ -318,14 +319,28 @@ object Pos {
     if (isInHexagon(x + File.all.size * y)) Some(new Pos(x + File.all.size * y))
     else None
 
-  def sideMovesDirsFromDir(dir: Option[String]): List[String] = dir match {
-    case Some("left")       => List("downLeft", "upLeft")
-    case Some("upLeft")     => List("left", "upRight")
-    case Some("upRight")    => List("upLeft", "right")
-    case Some("right")      => List("upRight", "downRight")
-    case Some("downRight")  => List("right", "downLeft")
-    case Some("downLeft")   => List("downRight", "left")
-    case _                  => List()
+  def dirsFromString(dir: Option[String]): Direction = dir match {
+    case Some("left")       => _.left
+    case Some("upLeft")     => _.upLeft
+    case Some("upRight")    => _.upRight
+    case Some("right")      => _.right
+    case Some("downRight")  => _.downRight
+    case Some("downLeft")   => _.downLeft
+    case _                  => (_:Pos) => None
+  }
+
+  def sideMovesDirsFromDir(dir: Direction): Directions = {
+    val x = Pos.E5
+    val y = dir(x).getOrElse(Pos.A1)
+    x.dir(y) match {
+      case Some("left")       => List(_.downLeft, _.upLeft)
+      case Some("upLeft")     => List(_.left, _.upRight)
+      case Some("upRight")    => List(_.upLeft, _.right)
+      case Some("right")      => List(_.upRight, _.downRight)
+      case Some("downRight")  => List(_.right, _.downLeft)
+      case Some("downLeft")   => List(_.downRight, _.left)
+      case _                  => List()
+    }
   }
 
   def fromKey(key: String): Option[Pos] = allKeys get key
