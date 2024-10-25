@@ -16,7 +16,7 @@ case class Move(
 ) extends Action(situationBefore, after, metrics) {
 
   def situationAfter =
-    Situation(finalizeAfter, if (autoEndTurn) !piece.player else piece.player)
+    Situation(finalizeAfter, !piece.player)
 
   def applyVariantEffect: Move = before.variant addVariantEffect this
 
