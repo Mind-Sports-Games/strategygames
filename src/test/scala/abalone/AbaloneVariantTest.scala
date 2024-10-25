@@ -268,6 +268,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
         val game2 = game.apply(validMoves(Pos.F5)(5))
 
         "increment the score of P1" in {
+            board.history.score must_== Score(0,0)
             game2.situation.board.history.score must_== Score(1,0)
         }
 
@@ -291,7 +292,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
            _ _ _ _ _ _
             _ _ _ _ _
     */
-    "pushing out the only marble of P2 with as score of 5" should {
+    "pushing out the only marble of P2 with a score of 5" should {
         val fenEndedGame = format.FEN("5/6/7/8/5sssS/8/7/6/5 5 0 b 0 0")
         val board = Board(fenEndedGame.pieces, History(score = Score(5, 0)), variant.Abalone)
         val situation = Situation(board, P1)
@@ -300,6 +301,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
         val game2 = game.apply(validMoves(Pos.F5)(5))
 
         "increment the score of P1" in {
+            board.history.score must_== Score(5,0) // game.situation.board.history.score is Score(0,0)
             game2.situation.board.history.score must_== Score(6,0)
         }
 
@@ -353,6 +355,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
 
 
         "increment the score of P1 each time he plays a move" in {
+            board.history.score must_== Score(0,0)
             game2.situation.board.history.score must_== Score(1,0)
             game4.situation.board.history.score must_== Score(2,0)
             game6.situation.board.history.score must_== Score(3,0)
