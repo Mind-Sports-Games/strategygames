@@ -129,7 +129,7 @@ abstract class Variant private[variant] (
       List(
         if (lineOfMarbles.size == 3) generateSideMoves(lineOfMarbles.dropRight(1), direction) else List(),
         possibleSideMoves.flatMap {
-          case ( (orig, dest, dir) ) => Some(createMove("side", orig, dest, List(dir, direction))) // @TODO: get rid of this getOrElse. was added for quick testing purpose
+          case ( (orig, dest, dir) ) => Some(createMove("side", orig, dest, List(dir, direction)))
           case _ => None
         }
       ).flatten
@@ -144,9 +144,9 @@ abstract class Variant private[variant] (
               Some(createMove("line", pos, thirdSquareInLine))
             else if (opponentPieces.contains(thirdSquareInLine)) // xxo
               direction(thirdSquareInLine) match { // xxo?
-                case None => Some(createMove("pushout", pos, thirdSquareInLine, List(direction))) // xxo\  // @TODO: get rid of this getOrElse. was added for quick testing purpose
+                case None => Some(createMove("pushout", pos, thirdSquareInLine, List(direction))) // xxo\
                 case Some(emptySquare) if situation.board.isEmptySquare(Some(emptySquare)) => {
-                  Some(createMove("push", pos, thirdSquareInLine, List(direction))) // xxo. // @TODO: get rid of this getOrElse. was added for quick testing purpose
+                  Some(createMove("push", pos, thirdSquareInLine, List(direction))) // xxo.
                 }
                 case _ => None
               }
@@ -157,14 +157,14 @@ abstract class Variant private[variant] (
                     Some(createMove("line", pos, fourthSquareInLine))
                   else if (opponentPieces.contains(fourthSquareInLine)) // xxxo
                     direction(fourthSquareInLine) match { // xxxo?
-                      case None => Some(createMove("pushout", pos, fourthSquareInLine, List(direction))) // xxxo\ // @TODO: get rid of this getOrElse. was added for quick testing purpose
-                      case Some(emptyPos) if (situation.board.isEmptySquare(Some(emptyPos))) => Some(createMove("push", pos, fourthSquareInLine, List(direction))) // xxxo. // @TODO: get rid of this getOrElse. was added for quick testing purpose
+                      case None => Some(createMove("pushout", pos, fourthSquareInLine, List(direction))) // xxxo\
+                      case Some(emptyPos) if (situation.board.isEmptySquare(Some(emptyPos))) => Some(createMove("push", pos, fourthSquareInLine, List(direction))) // xxxo.
                       case _ => direction(fourthSquareInLine).flatMap { // xxxo?
                         case (fifthSquareInLine) =>
                           if (opponentPieces.contains(fifthSquareInLine)) // xxxoo
                             direction(fifthSquareInLine) match {
-                              case None => Some(createMove("pushout", pos, fourthSquareInLine, List(direction))) // xxxoo\ // @TODO: get rid of this getOrElse. was added for quick testing purpose
-                              case Some(emptySquare) if situation.board.isEmptySquare(Some(emptySquare)) => Some(createMove("push", pos, emptySquare, List(direction))) // xxxoo. // @TODO: get rid of this getOrElse. was added for quick testing purpose
+                              case None => Some(createMove("pushout", pos, fourthSquareInLine, List(direction))) // xxxoo\
+                              case Some(emptySquare) if situation.board.isEmptySquare(Some(emptySquare)) => Some(createMove("push", pos, emptySquare, List(direction))) // xxxoo.
                               case _ => None
                             }
                           else None
