@@ -2,6 +2,7 @@ package strategygames.go.format
 
 import cats.implicits._
 
+import strategygames.Score
 import strategygames.Player
 import strategygames.go._
 import strategygames.go.variant.Variant
@@ -12,7 +13,7 @@ import strategygames.go.variant.Variant
 object Forsyth {
 
   val initial = FEN(
-    "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 1"
+    "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 0 1"
   )
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
@@ -21,9 +22,15 @@ object Forsyth {
       Situation(
         Board(
           pieces = apiPosition.pieceMap,
-          history = History(),
+          history = History(captures = Score(fen.player1Captures, fen.player2Captures)),
           variant = variant,
           pocketData = apiPosition.pocketData,
+          uciMoves = fen.fenPassCount match {
+            case 0 => List()
+            case 1 => List("pass")
+            case 2 => List("pass", "pass")
+            case 3 => List("ss:")
+          },
           position = apiPosition.some
         ),
         fen.value.split(' ')(1) match {
@@ -48,7 +55,6 @@ object Forsyth {
   def <<<@(variant: Variant, fen: FEN): Option[SituationPlus] =
     <<@(variant, fen) map { sit =>
       SituationPlus(
-        // not doing half move clock history like we do in chess
         sit,
         fen.value.split(' ').last.toIntOption.map(_ max 1 min 500) | 1
       )
@@ -73,8 +79,41 @@ object Forsyth {
     FEN(
       board.apiPosition.fen.value
         .split(" ")
-        .updated(5, board.history.captures.p1)
-        .updated(6, board.history.captures.p2)
+        // Update player if we have a last action of select squares that the API doesnt know about
+        .updated(
+          1,
+          board.history.lastTurn.headOption match {
+            case Some(_: Uci.SelectSquares) if board.apiPosition.turn == "w" => "b"
+            case Some(_: Uci.SelectSquares) if board.apiPosition.turn == "b" => "w"
+            case _                                                           => board.apiPosition.turn
+          }
+        )
+        // Update captures
+        .updated(5, board.history.captures.p1.toString)
+        .updated(6, board.history.captures.p2.toString)
+        // Update current consecutive Pass count. Use 3 to represent end of game
+        .updated(
+          8,
+          (board.uciMoves.reverse.headOption match {
+            case Some(uci) if uci.startsWith("ss:") => 3
+            case Some(uci) if uci == "pass"         => {
+              board.uciMoves.reverse.drop(1).headOption match {
+                case Some(uci) if uci == "pass" => 2
+                case _                          => 1
+              }
+            }
+            case _                                  => 0
+          }).toString
+        )
+        // Update fullTurnCount if we have a last action of select squares that the API doesnt know about
+        .updated(
+          9,
+          board.history.lastTurn.headOption match {
+            case Some(_: Uci.SelectSquares) if board.apiPosition.turn == "w" =>
+              board.apiPosition.fen.value.split(" ")(9) + 1
+            case _                                                           => board.apiPosition.fen.value.split(" ")(9)
+          }
+        )
         .mkString(" ")
     )
 

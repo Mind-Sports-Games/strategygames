@@ -15,7 +15,7 @@ case object Monster
   def perfId: Int    = 23
   def perfIcon: Char = ''
 
-  override def hasAnalysisBoard: Boolean = false
+  override def hasAnalysisBoard: Boolean = true
   override def hasFishnet: Boolean       = false
 
   override def exoticChessVariant       = true
@@ -176,4 +176,6 @@ case object Monster
       board.piecesOf(P1).size <= 5
     }
 
+  override def pliesFromFen(fenTurnCount: Int, player: Player, currentTurnPlies: Int = 0) =
+    (fenTurnCount - 1) * 3 + player.fold(0, 2) + currentTurnPlies
 }

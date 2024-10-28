@@ -2,9 +2,9 @@ name := "strategygames"
 
 organization := "org.playstrategy"
 
-version := "10.2.1-pstrat155"
+version := "10.2.1-pstrat157"
 
-scalaVersion := "2.13.5"
+scalaVersion := "2.13.10"
 
 val fairystockfishVersion = "0.0.20"
 
