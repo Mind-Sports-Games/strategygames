@@ -9,6 +9,7 @@ case class Move(
     dest: Pos,
     situationBefore: Situation,
     after: Board,
+    autoEndTurn: Boolean,
     capture: Option[Pos] = None,
     promotion: Option[PromotableRole] = None,
     metrics: MoveMetrics = MoveMetrics()
@@ -17,13 +18,13 @@ case class Move(
   def withHistory(h: History) = copy(after = after withHistory h)
 
   override def finalizeAfter: Board = {
-    val board = after.updateHistory({ h1 => h1.copy(
-      lastTurn = h1.currentTurn :+ toUci,
-      currentTurn = List(),
-      score = if (captures) h1.score.add(situationBefore.player) else h1.score,
+    val board = after.updateHistory({ h => h.copy(
+      lastTurn = if (autoEndTurn) h.currentTurn :+ toUci else h.lastTurn,
+      currentTurn = if (autoEndTurn) List() else h.currentTurn :+ toUci,
+      score = if (captures) h.score.add(situationBefore.player) else h.score,
       halfMoveClock =
         if (captures) 0
-        else h1.halfMoveClock + 1
+        else h.halfMoveClock + 1
     )
     })
 
@@ -44,7 +45,7 @@ case class Move(
     }))
   }
 
-  def situationAfter = Situation(finalizeAfter, !piece.player)
+  def situationAfter = Situation(finalizeAfter, if (autoEndTurn) !piece.player else piece.player)
 
   def applyVariantEffect: Move = before.variant addVariantEffect this
 

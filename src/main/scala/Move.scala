@@ -358,8 +358,8 @@ object Move {
         Pos.Abalone(m.dest),
         Situation.Abalone(m.situationBefore),
         Board.Abalone(m.after),
-        false,
-        None, // capture. @TODO: Could be the pos of the piece that was on targetSquare described by the move (because line moves (and by extension, pushes) are basically just marbles jumping over other ones)
+        m.autoEndTurn,
+        None, // capture. @TODO: check: we probably need to pass the infos here ?
         None,
         None,
         None,

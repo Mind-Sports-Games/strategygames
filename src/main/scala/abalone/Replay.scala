@@ -9,6 +9,7 @@ import strategygames.format.pgn.San
 import strategygames.abalone.format.pgn.{ Parser, Reader }
 import strategygames.abalone.format.{ FEN, Forsyth, Uci }
 import strategygames.{ Action => StratAction, ActionStrs, Move => StratMove, Situation => StratSituation }
+import scala.annotation.nowarn
 
 case class Replay(setup: Game, actions: List[Move], state: Game) {
 
@@ -69,12 +70,13 @@ object Replay {
     case _                    => sys.error("Invalid abalone move")
   }
 
-  def replayMove(
+  @nowarn def replayMove(
       before: Game,
       orig: Pos,
-      dest: Pos
+      dest: Pos,
+      endTurn: Boolean
   ): Move = {
-    before.situation.moves.get(orig).flatMap(_.find(m => m.dest == dest)).get
+    before.situation.moves.get(orig).flatMap(_.find(m => m.dest == dest)).get // @TODO: adapt
   }
 
   def actionStrsWithEndTurn(actionStrs: ActionStrs): Seq[(String, Boolean)] =
@@ -106,11 +108,12 @@ object Replay {
 
     def replayMoveFromUci(
         orig: Option[Pos],
-        dest: Option[Pos]
+        dest: Option[Pos],
+        endTurn: Boolean
     ): (Game, Move) =
       (orig, dest) match {
         case (Some(orig), Some(dest)) => {
-          val move = replayMove(state, orig, dest)
+          val move = replayMove(state, orig, dest, endTurn)
           state = state(move)
           (state, move)
         }
@@ -123,10 +126,11 @@ object Replay {
 
     val gameWithActions: List[(Game, Move)] =
       combineActionStrsWithEndTurn(actionStrs, startPlayer, activePlayer).toList.map {
-        case (Uci.Move.moveR(orig, dest), _) =>
+        case (Uci.Move.moveR(orig, dest), endTurn) =>
           replayMoveFromUci(
             Pos.fromKey(orig),
-            Pos.fromKey(dest)
+            Pos.fromKey(dest),
+            endTurn
           )
         case (action: String, _)                              =>
           sys.error(s"Invalid move for replay: $action")
