@@ -56,7 +56,7 @@ object Reader {
 
   private def makeReplayWithActionStrs(game: Game, actionStrs: ActionStrs): Result =
     Replay.actionStrsWithEndTurn(actionStrs).foldLeft[Result](Result.Complete(Replay(game))) {
-      case (Result.Complete(replay), (actionStr, endTurn)) =>
+      case (Result.Complete(replay), (actionStr, _)) =>
         actionStr match {
           case Uci.Move.moveR(orig, dest, _) => {
             (Pos.fromKey(orig), Pos.fromKey(dest)) match {
@@ -66,8 +66,7 @@ object Reader {
                     Replay.replayMove(
                       replay.state,
                       orig,
-                      dest,
-                      endTurn
+                      dest
                     )
                   )
                 )

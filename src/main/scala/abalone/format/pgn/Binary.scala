@@ -53,15 +53,9 @@ object Binary {
     // 1 promotion (bool)
     // 7 pos (dest)
     def moveUci(b1: Int, b2: Int): String =
-      s"${posFromInt(b1)}${posFromInt(b2)}${promotionFromInt(b2)}"
+      s"${posFromInt(b1)}${posFromInt(b2)}"
 
     def posFromInt(b: Int): String = Pos(right(b, 7)).get.toString()
-
-    // not even possible in Abalone
-    def promotionFromInt(b: Int): String = headerBit(b) match {
-      case 1 => "+"
-      case _ => ""
-    }
 
     private def headerBit(i: Int) = i >> 7
 
@@ -75,7 +69,7 @@ object Binary {
 
     def ply(str: String): List[Byte] =
       (str match {
-        case Uci.Move.moveR(src, dst, promotion) => moveUci(src, dst, promotion)
+        case Uci.Move.moveR(src, dst) => moveUci(src, dst)
         case _                                   => sys.error(s"Invalid move to write: ${str}")
       }) map (_.toByte)
 
@@ -85,12 +79,9 @@ object Binary {
     // can flatten because this GameLogic doesn't support multimove
     def actionStrs(strs: ActionStrs): Array[Byte] = plies(strs.flatten)
 
-    def moveUci(src: String, dst: String, promotion: String) = List(
+    def moveUci(src: String, dst: String) = List(
       (headerBit(MoveType.Move)) + Pos.fromKey(src).get.index,
-      (headerBit(promotion.headOption match {
-        case Some(_) => 1
-        case None    => 0
-      })) + Pos.fromKey(dst).get.index
+      (headerBit(MoveType.Move)) + Pos.fromKey(dst).get.index
     )
 
     private def headerBit(i: Int) = i << 7

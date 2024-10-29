@@ -35,6 +35,8 @@ case class Board(
 
   def materialImbalance: Int = variant.materialImbalance(this)
 
+  def autoDraw: Boolean = history.threefoldRepetition && variant.repetitionEnabled
+
   override def toString = s"$variant Position after ${history.recentTurnUciString}"
 
   lazy val actors: Map[Pos, Actor] = pieces.map {

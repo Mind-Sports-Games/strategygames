@@ -1,8 +1,10 @@
-package strategygames.abalone
+package abalone
 
 import org.specs2.matcher.ValidatedMatchers
 
-import _root_.strategygames.{ Score, Status }
+import strategygames.abalone.{ Board, format, History, Piece, Pos, P1, P2, Situation, Stone, variant }
+
+import strategygames.{ Score, Status }
 
 class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
     "initial default FEN (Belgian Daisy start position)" should {
