@@ -226,12 +226,13 @@ abstract class Variant private[variant] (
     val lineDir: Option[Direction]    = directions.headOption
     val sideDir: Option[Direction]    = directions.reverse.headOption
     val origLineMove: Option[Pos]     = lineDir.flatMap(direction => direction(orig))
-    val origSideMove: Option[Pos]     = sideDir.flatMap(direction => direction(orig))
+    val origLineOneMove: Option[Pos]  = origLineMove.flatMap(direction => lineDir.flatMap(_(direction)))
     val destLineMove: Option[Pos]     = lineDir.flatMap(direction => direction(dest))
-    val destLineOneMove: Option[Pos]  = lineDir.flatMap(direction => if (destLineMove.isDefined) direction(destLineMove.get) else None)
-    val destLineTwoMove: Option[Pos]  = lineDir.flatMap(direction => if (destLineOneMove.isDefined) direction(destLineOneMove.get) else None)
+    val destLineOneMove: Option[Pos]  = destLineMove.flatMap(direction => lineDir.flatMap(_(direction)))
+    val destLineTwoMove: Option[Pos]  = destLineOneMove.flatMap(direction => lineDir.flatMap(_(direction)))
+    val origSideMove: Option[Pos]     = sideDir.flatMap(direction => direction(orig))
     val origDiagonalMove: Option[Pos] = (lineDir, origSideMove) match {
-      case ( Some(lineDir), Some(sideMove) ) => lineDir.apply(sideMove)
+      case ( Some(lineDir), Some(sideMove) ) => lineDir(sideMove)
       case _ => None
     }
 
@@ -243,18 +244,19 @@ abstract class Variant private[variant] (
         case ( (Some(destLinePos), _, _) ) if (!pieces.contains(destLinePos)) => pieces + (destLinePos -> pieces(dest)) + (dest -> pieces(orig)) - orig // __(_)o.
         case ( (Some(destLinePos), None, _) ) => pieces + (destLinePos -> pieces(dest)) + (dest -> pieces(orig)) - orig // ___oo\
         case ( (_, _, Some(desLineTwoPos)) ) => pieces + (desLineTwoPos -> pieces(dest)) + (dest -> pieces(orig)) - orig // ___oo.
-        case ( _ ) => pieces
+        case _ => pieces
       }
     else // side move
-      (origLineMove, origSideMove, origDiagonalMove)  match {
-        case ( Some(lineMovePos), Some(sideMovePos), Some(diagonalPos) ) =>
-          if (diagonalPos.index == dest.index) // oo
-            pieces + (sideMovePos -> pieces(orig)) - orig +
-              (diagonalPos -> pieces(lineMovePos)) - lineMovePos
-          else // ooo
-            pieces + (sideMovePos -> pieces(orig)) - orig +
-              (diagonalPos -> pieces(lineMovePos)) - lineMovePos +
-              (diagonalPos -> pieces(lineMovePos)) - diagonalPos
+      (origLineMove, origLineOneMove, origSideMove, origDiagonalMove) match {
+        case ( Some(origLineMovePos), _, Some(sideMovePos), Some(diagonalPos) ) if (diagonalPos.index == dest.index) => // oo
+          pieces +
+            (sideMovePos -> pieces(orig)) - orig +
+            (diagonalPos -> pieces(origLineMovePos)) - origLineMovePos
+        case ( Some(origLineMovePos), Some(origLineOneMovePos), Some(sideMovePos), Some(diagonalPos) ) => // ooo
+          pieces +
+            (sideMovePos -> pieces(orig)) - orig +
+            (diagonalPos -> pieces(origLineMovePos)) - origLineMovePos +
+            (dest -> pieces(origLineOneMovePos)) - origLineOneMovePos
         case _ => pieces
       }
   }
