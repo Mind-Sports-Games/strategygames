@@ -72,20 +72,10 @@ object Replay {
   def replayMove(
       before: Game,
       orig: Pos,
-      dest: Pos,
-      endTurn: Boolean
-  ): Move =
-    Move(
-      piece = before.situation.board.pieces(orig),
-      orig = orig,
-      dest = dest,
-      situationBefore = before.situation,
-      // TODO Abalone Set
-      after = before.situation.board.copy(),
-      autoEndTurn = endTurn,
-      capture = None, // @TODO:  consider if it's difficult to determine if a capture was made from here (a marble pushed off the board)
-      promotion = None
-    )
+      dest: Pos
+  ): Move = {
+    before.situation.moves.get(orig).flatMap(_.find(m => m.dest == dest)).get
+  }
 
   def actionStrsWithEndTurn(actionStrs: ActionStrs): Seq[(String, Boolean)] =
     actionStrs.zipWithIndex.map { case (a, i) =>
@@ -116,18 +106,16 @@ object Replay {
 
     def replayMoveFromUci(
         orig: Option[Pos],
-        dest: Option[Pos],
-        promotion: String,
-        endTurn: Boolean
+        dest: Option[Pos]
     ): (Game, Move) =
       (orig, dest) match {
         case (Some(orig), Some(dest)) => {
-          val move = replayMove(state, orig, dest, endTurn)
+          val move = replayMove(state, orig, dest)
           state = state(move)
           (state, move)
         }
         case (orig, dest)             => {
-          val uciMove = s"${orig}${dest}${promotion}"
+          val uciMove = s"${orig}${dest}"
           errors += uciMove + ","
           sys.error(s"Invalid move for replay: ${uciMove}")
         }
@@ -135,12 +123,10 @@ object Replay {
 
     val gameWithActions: List[(Game, Move)] =
       combineActionStrsWithEndTurn(actionStrs, startPlayer, activePlayer).toList.map {
-        case (Uci.Move.moveR(orig, dest, promotion), endTurn) =>
+        case (Uci.Move.moveR(orig, dest), _) =>
           replayMoveFromUci(
             Pos.fromKey(orig),
-            Pos.fromKey(dest),
-            promotion,
-            endTurn
+            Pos.fromKey(dest)
           )
         case (action: String, _)                              =>
           sys.error(s"Invalid move for replay: $action")

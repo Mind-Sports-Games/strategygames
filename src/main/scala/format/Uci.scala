@@ -688,8 +688,7 @@ object Uci {
           AbaloneMove(
             abalone.format.Uci.Move.apply(
               orig,
-              dest,
-              promotion.map(_.toAbalone)
+              dest
             )
           )
         case _                                                                          => sys.error("Mismatched gamelogic types 23")
@@ -734,7 +733,7 @@ object Uci {
         togyzkumalak.format.Uci.Move.fromStrings(gf, origS, destS, promS).map(TogyzkumalakMove)
       case GameLogic.Go()           => None
       case GameLogic.Backgammon()   => backgammon.format.Uci.Move.fromStrings(origS, destS).map(BackgammonMove)
-      case GameLogic.Abalone()      => abalone.format.Uci.Move.fromStrings(origS, destS, promS).map(AbaloneMove)
+      case GameLogic.Abalone()      => abalone.format.Uci.Move.fromStrings(origS, destS).map(AbaloneMove)
     }
   }
 

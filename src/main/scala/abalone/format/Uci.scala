@@ -1,8 +1,6 @@
 package strategygames.abalone.format
 import strategygames.abalone._
 
-import scala.annotation.nowarn
-
 import cats.data.Validated
 import cats.implicits._
 
@@ -20,38 +18,33 @@ object Uci {
 
   case class Move(
       orig: Pos,
-      dest: Pos,
-      promotion: Option[PromotableRole] = None
+      dest: Pos
   ) extends Uci {
 
     def keys = orig.key + dest.key
-    def uci  = keys + promotionString
+    def uci  = keys
 
     def keysPiotr = orig.piotrStr + dest.piotrStr
-    def piotr     = keysPiotr + promotionString
-
-    def promotionString = promotion.fold("")(_.forsyth.toString)
+    def piotr     = keysPiotr
 
     def origDest = orig -> dest
 
-    def apply(situation: Situation) = situation.move(orig, dest, promotion)
+    def apply(situation: Situation) = situation.move(orig, dest)
   }
 
   object Move {
 
     def apply(move: String): Option[Move] =
       move match {
-        case moveP(orig, dest, promotion) =>
+        case moveR(orig, dest) =>
           (
             Pos.fromKey(orig),
-            Pos.fromKey(dest),
-            promotion
+            Pos.fromKey(dest)
           ) match {
-            case (Some(orig), Some(dest), _) => {
+            case (Some(orig), Some(dest)) => {
               Move(
                 orig = orig,
-                dest = dest,
-                promotion = None
+                dest = dest
               ).some
             }
             case _                           => None
@@ -63,23 +56,20 @@ object Uci {
       for {
         orig <- move.headOption flatMap Pos.piotr
         dest <- move lift 1 flatMap Pos.piotr
-      } yield Move(orig, dest, promotion = None)
+      } yield Move(orig, dest)
 
-    def fromStrings(origS: String, destS: String, @nowarn promS: Option[String]) =
+    def fromStrings(origS: String, destS: String) =
       for {
         orig     <- Pos.fromKey(origS)
         dest     <- Pos.fromKey(destS)
-        promotion = None
-      } yield Move(orig, dest, promotion)
+      } yield Move(orig, dest)
 
     val moveR  = s"^${Pos.posR}${Pos.posR}(\\+?)$$".r
-    val moveP  = s"^${Pos.posR}${Pos.posR}${Role.roleRr}$$".r
-    val movePR = s"^${Pos.posR}${Pos.posR}${Role.rolePR}$$".r
   }
 
   case class WithSan(uci: Uci, san: String)
 
-  def apply(move: strategygames.abalone.Move) = Uci.Move(move.orig, move.dest, move.promotion)
+  def apply(move: strategygames.abalone.Move) = Uci.Move(move.orig, move.dest)
 
   def apply(move: String) = Uci.Move(move)
 
