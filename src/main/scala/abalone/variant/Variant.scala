@@ -4,7 +4,7 @@ import cats.data.Validated
 import cats.syntax.option._
 import scala.annotation.nowarn
 
-import strategygames.{ GameFamily, Player, Score }
+import strategygames.{ GameFamily, Player }
 import strategygames.abalone._
 import strategygames.abalone.format.FEN
 
@@ -129,7 +129,7 @@ abstract class Variant private[variant] (
       List(
         if (lineOfMarbles.size == 3) generateSideMoves(lineOfMarbles.dropRight(1), direction) else List(),
         possibleSideMoves.flatMap {
-          case ( (orig, dest, dir) ) => Some(createMove("side", orig, dest, List(dir, direction)))
+          case ( (orig, dest, dir) ) => Some(createMove("side", orig, dest, List(direction, dir)))
           case _ => None
         }
       ).flatten
@@ -194,108 +194,77 @@ abstract class Variant private[variant] (
     }
   }
 
+  // move pieces on the board. Other bits (including score) are handled by Move.finalizeAfter()
   def boardAfter(situation: Situation, orig: Pos, dest: Pos, directions: Directions = List()): Board = {
-    // 1. move pieces and get the score
-    val (pieces, capture)   = piecesAfterAction(situation.board.pieces, orig, dest, directions)
-    val score = Score(situation.history.score.p1, situation.history.score.p2)
-
-    val boardAfter = situation.board.copy(pieces = pieces)
-    boardAfter.withHistory(
-      situation.history.copy(
-        // @TODO: lastTurn handled on Move.finalizeAfter to keep consistency with other gamelogics ?
-        score = if (capture) score.add(situation.player) else score,
-        halfMoveClock = situation.board.history.halfMoveClock + 1 // situation.player.fold(0, 1)
-      )
-    )
+    situation.board.copy(pieces = piecesAfterAction(situation.board.pieces, orig, dest, directions))
   }
 
-  // @TODO: rewrite this code properly as it's currently full of get()
-  // move the marbles and determine if a capture has been made
-  private def piecesAfterAction(pieces: PieceMap, orig: Pos, dest: Pos, directions: Directions): (PieceMap, Boolean) = {
-    var capture = false
-    var updatedPieceMap: PieceMap = Map()
-    // @TODO: iteratively create a Map of things to Add and a List of things to Remove (listing the keys of the marbles to remove)
-    // then just return : pieces + thingsToAdd - thingsToRemove
+  /*
+    How to move pieces based on orig, dest, and directions :
+      1. identify the type of move
+        - line move : no direction to apply (a line move is just 1 marble moving)
+        - push : 1 direction, and dest contains a marble
+        - side move : 2 directions
+          - HEAD contains the direction to apply to move through all these marbles from orig
+          - TAIL contains the direction to apply the direction to apply to each marble for doing effectively the side move
 
-    /*
-      How to move pieces based on orig, dest, and directions :
-        1. identify the type of move
-          - line move : no direction to apply (a line move is just 1 marble moving)
-          - push : 1 direction, and dest contains a marble
-          - side move : 2 directions
-              - HEAD will contain the direction to apply to each marble for doing effectively the side move
-              - TAIL will contain the direction to apply to move through all these marbles from orig
-
-        2. play the move
-          - line move :
-              - move from orig to dest, without considering the direction
-          - push :
-            - dest contains a marble
-            - we have the direction :
-              - apply the direction from dest until there is an empty square or being off the board
-                - in case of being off the board, increment the score (capture = true)
-              - do the line move (orig to dest)
-          - side move :
-            - we received both directions :
-              - 1st direction : we know how to move through all these marbles
-              - 2nd direction : we know what direction we want to apply to all these 2 or 3 marbles
-    */
-
-    if (directions.size == 0) { // line move
-      updatedPieceMap = pieces + (dest -> pieces(orig)) - (orig)
-    } else if (directions.size == 1) { // push
-      if(directions(0)(dest) == None) {
-        // __(_)o\
-        capture = true
-        updatedPieceMap = pieces + (dest -> pieces(orig)) - orig
-      } else if (!pieces.contains(directions(0)(dest).get)) { 
-        // __(_)o.
-        updatedPieceMap = pieces + (directions(0)(dest).get -> pieces(dest)) + (dest -> pieces(orig)) - orig
-      } else if (directions(0)((directions(0)(dest)).get) == None) {
-        // ___oo\
-        capture = true
-        updatedPieceMap = pieces + ((directions(0)(dest)).get -> pieces(dest)) + (dest -> pieces(orig)) - orig
-      } else  {
-        // ___oo.
-        updatedPieceMap = pieces + (directions(0)((directions(0)(dest)).get).get -> pieces(dest)) + (dest -> pieces(orig)) - orig
-      }
-    } else { // side move
-        // from orig, move of the second direction
-        // then move from orig of the first direction and repeat until we have reached dest
-
-      // @TODO: reuse these in the whole function and replace directions(0) directions(1) with the headOptions trick
-      val sideMoveDir: Option[Pos] = directions(0)(orig)
-      val lineOfMarblesDir: Option[Pos] = directions(1)(orig)
-      val diagonalMove: Option[Pos] = directions(1)(orig).flatMap(directions(0)(_))
-
-      // @TODO: get rid of get inside the match, by handling more variables (which could by extension get rid of the if else)
-      (lineOfMarblesDir, sideMoveDir, diagonalMove)  match {
-        case ( Some(lineOfMarblesPos2), Some(sideMovePos), Some(diagonalPos) ) => {
-          if (diagonalPos.index == dest.index) { // oo
-            updatedPieceMap = pieces + (sideMovePos -> pieces(orig)) - orig +
-              (diagonalPos -> pieces(lineOfMarblesPos2)) - lineOfMarblesPos2
-          } else { // ooo
-            updatedPieceMap = pieces + (sideMovePos -> pieces(orig)) - orig +
-              (diagonalPos -> pieces(lineOfMarblesPos2)) - lineOfMarblesPos2 +
-              (directions(1)(lineOfMarblesPos2).get -> pieces(lineOfMarblesPos2)) - directions(1)(lineOfMarblesPos2).get
-          }
-        }
-        case _ => {}
-      }
+      2. play the move
+        - line move :
+          - move from orig to dest, without considering the direction
+        - push :
+          - dest contains a marble
+          - we have the direction :
+            - apply the direction from dest until there is an empty square or being off the board
+              - in case of being off the board, increment the score (capture = true)
+            - do the line move (orig to dest)
+        - side move :
+          - we received both directions :
+            - 1st direction : we know how to move through all these marbles
+            - 2nd direction : we know what direction we want to apply to all these 2 or 3 marbles
+  */
+  private def piecesAfterAction(pieces: PieceMap, orig: Pos, dest: Pos, directions: Directions): (PieceMap) = {
+    val lineDir: Option[Direction] = directions.headOption
+    val sideDir: Option[Direction] = directions.reverse.headOption
+    val origLineMove: Option[Pos] = lineDir.map((direction) => direction(orig).get)
+    val origSideMove: Option[Pos] = sideDir.map((direction) => direction(orig).get)
+    val diagonalMove: Option[Pos] = (lineDir, origSideMove) match {
+      case ( Some(lineDir), Some(sideMove) ) => lineDir.apply(sideMove)
+      case _ => None
     }
 
-    (updatedPieceMap, capture)
+    if (directions.size == 0) // line move
+      pieces + (dest -> pieces(orig)) - (orig)
+    else if (directions.size == 1) // push
+      if(directions(0)(dest) == None) // __(_)o\
+        pieces + (dest -> pieces(orig)) - orig
+      else if (!pieces.contains(directions(0)(dest).get)) // __(_)o.
+        pieces + (directions(0)(dest).get -> pieces(dest)) + (dest -> pieces(orig)) - orig
+      else if (directions(0)((directions(0)(dest)).get) == None) // ___oo\
+        pieces + ((directions(0)(dest)).get -> pieces(dest)) + (dest -> pieces(orig)) - orig
+      else // ___oo.
+        pieces + (directions(0)((directions(0)(dest)).get).get -> pieces(dest)) + (dest -> pieces(orig)) - orig
+    else // side move
+      (origLineMove, origSideMove, diagonalMove)  match {
+        case ( Some(lineMovePos), Some(sideMovePos), Some(diagonalPos) ) =>
+          if (diagonalPos.index == dest.index) // oo
+            pieces + (sideMovePos -> pieces(orig)) - orig +
+              (diagonalPos -> pieces(lineMovePos)) - lineMovePos
+          else // ooo
+            pieces + (sideMovePos -> pieces(orig)) - orig +
+              (diagonalPos -> pieces(lineMovePos)) - lineMovePos +
+              (directions(1)(lineMovePos).get -> pieces(lineMovePos)) - diagonalPos
+        case _ => pieces
+      }
   }
 
   def move(
       situation: Situation,
       from: Pos,
-      to: Pos,
-      promotion: Option[PromotableRole] // @TODO: try to see if it can be removed, check if it needs an update on the wrapperLayer. Not mandatory though
+      to: Pos
   ): Validated[String, Move] = {
     // Find the move in the variant specific list of valid moves !
-    situation.moves get from flatMap (_.find(m => m.dest == to && m.promotion == promotion)) toValid
-      s"Not a valid move: ${from}${to} with prom: ${promotion}. Allowed moves: ${situation.moves}"
+    situation.moves get from flatMap (_.find(m => m.dest == to)) toValid
+      s"Not a valid move: ${from}${to}. Allowed moves: ${situation.moves}"
   }
 
   // if a player runs out of move, the match is a draw
@@ -325,11 +294,11 @@ abstract class Variant private[variant] (
 
   /** Once a move has been decided upon from the available legal moves, the board is finalized
     */
-  @nowarn def finalizeBoard(board: Board, uci: format.Uci, captured: Option[Piece]): Board =
-    board
+  @nowarn def finalizeBoard(board: Board, uci: format.Uci, captured: Option[Piece]): Board = board
 
-  // TODO: Abalone. Add some sensible validation checks here if appropriate
   def valid(@nowarn board: Board, @nowarn strict: Boolean): Boolean = true
+
+  def isIrreversible(move: Move): Boolean = move.capture != None
 
   def defaultRole: Role = Role.defaultRole
 

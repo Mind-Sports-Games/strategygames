@@ -17,10 +17,9 @@ case class Game(
   def apply(
       orig: Pos,
       dest: Pos,
-      promotion: Option[PromotableRole] = None,
       metrics: MoveMetrics = MoveMetrics()
   ): Validated[String, (Game, Move)] =
-    situation.move(orig, dest, promotion).map(_ withMetrics metrics) map { move =>
+    situation.move(orig, dest).map(_ withMetrics metrics) map { move =>
       apply(move) -> move
     }
 
@@ -38,7 +37,7 @@ case class Game(
   }
 
   def apply(uci: Uci.Move): Validated[String, (Game, Move)] =
-    apply(uci.orig, uci.dest, uci.promotion)
+    apply(uci.orig, uci.dest)
 
   private def applyClock(metrics: MoveMetrics, gameActive: Boolean, switchClock: Boolean) =
     clock.map { c =>
