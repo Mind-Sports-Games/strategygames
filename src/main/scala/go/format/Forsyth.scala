@@ -26,10 +26,10 @@ object Forsyth {
           variant = variant,
           pocketData = apiPosition.pocketData,
           uciMoves = fen.fenPassCount match {
-            case 0 => List()
             case 1 => List("pass")
             case 2 => List("pass", "pass")
             case 3 => List("ss:")
+            case _ => List()
           },
           position = apiPosition.some
         ),

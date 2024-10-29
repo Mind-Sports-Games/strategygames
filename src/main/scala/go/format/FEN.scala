@@ -22,10 +22,13 @@ final case class FEN(value: String) extends AnyVal {
 
   def komi: Double = intFromFen(7).getOrElse(0) / 10.0
 
-  // Consecutive Pass count. Capped at 2, 3 is reserved for end game (after "ss:")
-  def fenPassCount: Int = intFromFen(8).getOrElse(0)
+  // need to account for old style of fen without pass info due to studies and setup info
+  def oldFenSytle: Boolean = value.split(' ').length == 9
 
-  def fullMove: Option[Int] = intFromFen(9)
+  // Consecutive Pass count. Capped at 2, 3 is reserved for end game (after "ss:")
+  def fenPassCount: Int = if (oldFenSytle) 0 else intFromFen(8).getOrElse(0)
+
+  def fullMove: Option[Int] = if (oldFenSytle) intFromFen(8) else intFromFen(9)
 
   def ply: Option[Int] =
     fullMove map { fm =>
