@@ -53,19 +53,19 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
         }
 
         "compute the right set of moves of 2 and 3 marbles" in {
-            movesOf23.get(Pos.E5).get.map(x =>x._2.toUci.toString) should contain ( ("Move(e5,h5)"))
-            movesOf23.get(Pos.E5).get.map(x =>x._2.toUci.toString) should contain ( ("Move(e5,g6)"))
-            movesOf23.get(Pos.E5).get.map(x =>x._2.toUci.toString) should contain ( ("Move(e5,h6)"))
+            movesOf23.get(Pos.E5).get.map(x =>x.toUci.toString) should contain ( ("Move(e5,h5)"))
+            movesOf23.get(Pos.E5).get.map(x =>x.toUci.toString) should contain ( ("Move(e5,g6)"))
+            movesOf23.get(Pos.E5).get.map(x =>x.toUci.toString) should contain ( ("Move(e5,h6)"))
 
-            movesOf23.get(Pos.F5).get.map(x =>x._2.toUci.toString) should contain ( ("Move(f5,d5)"))
-            movesOf23.get(Pos.F5).get.map(x =>x._2.toUci.toString) should contain ( ("Move(f5,e6)"))
-            movesOf23.get(Pos.F5).get.map(x =>x._2.toUci.toString) should contain ( ("Move(f5,h5)"))
-            movesOf23.get(Pos.F5).get.map(x =>x._2.toUci.toString) should contain ( ("Move(f5,h6)"))
-            movesOf23.get(Pos.F5).get.map(x =>x._2.toUci.toString) should contain ( ("Move(f5,g4)"))
+            movesOf23.get(Pos.F5).get.map(x =>x.toUci.toString) should contain ( ("Move(f5,d5)"))
+            movesOf23.get(Pos.F5).get.map(x =>x.toUci.toString) should contain ( ("Move(f5,e6)"))
+            movesOf23.get(Pos.F5).get.map(x =>x.toUci.toString) should contain ( ("Move(f5,h5)"))
+            movesOf23.get(Pos.F5).get.map(x =>x.toUci.toString) should contain ( ("Move(f5,h6)"))
+            movesOf23.get(Pos.F5).get.map(x =>x.toUci.toString) should contain ( ("Move(f5,g4)"))
 
-            movesOf23.get(Pos.G5).get.map(x =>x._2.toUci.toString) should contain ( ("Move(g5,d5)"))
-            movesOf23.get(Pos.G5).get.map(x =>x._2.toUci.toString) should contain ( ("Move(g5,e6)"))
-            movesOf23.get(Pos.G5).get.map(x =>x._2.toUci.toString) should contain ( ("Move(g5,f6)"))
+            movesOf23.get(Pos.G5).get.map(x =>x.toUci.toString) should contain ( ("Move(g5,d5)"))
+            movesOf23.get(Pos.G5).get.map(x =>x.toUci.toString) should contain ( ("Move(g5,e6)"))
+            movesOf23.get(Pos.G5).get.map(x =>x.toUci.toString) should contain ( ("Move(g5,f6)"))
         }
 
         "side moves of 3 do move 3 marbles" in {
@@ -186,10 +186,10 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
         }
 
         "find the moves pushing marbles" in {
-            movesOf23.get(Pos.B3).get.map(x =>x._2.toString) should contain ( ("p1-Stone b3e6") )
-            movesOf23.get(Pos.C4).get.map(x =>x._2.toString) should contain ( ("p1-Stone c4e6") )
-            movesOf23.get(Pos.H7).get.map(x =>x._2.toString) should contain ( ("p1-Stone h7e4") )
-            movesOf23.get(Pos.G6).get.map(x =>x._2.toString) should contain ( ("p1-Stone g6e4") )
+            movesOf23.get(Pos.B3).get.map(x =>x.toString) should contain ( ("p1-Stone b3e6") )
+            movesOf23.get(Pos.C4).get.map(x =>x.toString) should contain ( ("p1-Stone c4e6") )
+            movesOf23.get(Pos.H7).get.map(x =>x.toString) should contain ( ("p1-Stone h7e4") )
+            movesOf23.get(Pos.G6).get.map(x =>x.toString) should contain ( ("p1-Stone g6e4") )
         }
     }
 
@@ -249,9 +249,9 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
         }
 
         "find and compute all moves that push off (3v2, 3v1, 2v1)" in {
-            movesOf23.get(Pos.B1).get.map(x =>x._2.toUci.toString) should contain ( ("Move(b1,e1)") )
-            movesOf23.get(Pos.C1).get.map(x =>x._2.toUci.toString) should contain ( ("Move(c1,e1)") )
-            movesOf23.get(Pos.E6).get.map(x =>x._2.toUci.toString) should contain ( ("Move(e6,b3)") )
+            movesOf23.get(Pos.B1).get.map(x =>x.toUci.toString) should contain ( ("Move(b1,e1)") )
+            movesOf23.get(Pos.C1).get.map(x =>x.toUci.toString) should contain ( ("Move(c1,e1)") )
+            movesOf23.get(Pos.E6).get.map(x =>x.toUci.toString) should contain ( ("Move(e6,b3)") )
         }
     }
 

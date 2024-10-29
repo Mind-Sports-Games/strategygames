@@ -87,8 +87,7 @@ abstract class Variant private[variant] (
   then merge these as valid moves.
   */
   def validMoves(situation: Situation): Map[Pos, List[Move]] =
-    (validMovesOf1(situation).toList ++ validMovesOf2And3(situation).view.mapValues(_.map(_._2)).toList)
-      .groupBy(_._1).map{case(k, v) => k -> v.map(_._2).toSeq.flatten}.toMap
+    (validMovesOf1(situation).toList ++ validMovesOf2And3(situation).toList).groupBy(_._1).map{case(k, v) => k -> v.map(_._2).toSeq.flatten}.toMap
 
   def validMovesOf1(situation: Situation): Map[Pos, List[Move]] =
     turnPieces(situation).flatMap {
@@ -101,14 +100,13 @@ abstract class Variant private[variant] (
         )
     }.toMap
 
-  def validMovesOf2And3(situation: Situation): Map[Pos, List[(String, Move)]] = {
+  def validMovesOf2And3(situation: Situation): Map[Pos, List[Move]] = {
     val activePlayerPieces = situation.board.piecesOf(situation.player)
     val opponentPieces = situation.board.piecesOf(!situation.player)
 
-    def createMove(category: String, orig: Pos, dest: Pos, directions: Directions = List()): (String, Move) =
-      (category, Move(Piece(situation.player, Role.defaultRole), orig, dest, situation, boardAfter(situation, orig, dest, directions), true, if (category == "pushout") Some(dest) else None))
+    def createMove(category: String, orig: Pos, dest: Pos, directions: Directions = List()) = Move(Piece(situation.player, Role.defaultRole), orig, dest, situation, boardAfter(situation, orig, dest, directions), true, if (category == "pushout") Some(dest) else None)
 
-    def generateSideMoves(lineOfMarbles: List[Pos], direction: Direction): List[(String, Move)] = {
+    def generateSideMoves(lineOfMarbles: List[Pos], direction: Direction): List[Move] = {
       def canMoveTowards(pos: Pos, direction: Direction): Boolean = situation.board.isEmptySquare(direction(pos))
 
       def possibleSideMoves: List[(Pos, Pos, Direction)] = Pos.sideMovesDirsFromDir(direction).flatMap(
@@ -135,7 +133,7 @@ abstract class Variant private[variant] (
       ).flatten
     }
 
-    def generateMovesForNeighbours(pos: Pos, neighbour: Pos): List[(String, Move)] = {
+    def generateMovesForNeighbours(pos: Pos, neighbour: Pos): List[Move] = {
       val direction = Pos.dirsFromString(pos.dir(neighbour))
       val moves = List(
         direction(neighbour).toList.flatMap {
