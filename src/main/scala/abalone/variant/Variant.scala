@@ -96,7 +96,7 @@ abstract class Variant private[variant] (
         Map(pos ->
           pos.neighboursAsDirs.flatMap(d => d(pos)).filterNot(situation.board.pieces.contains(_))
           .map(landingSquare =>
-            Move(piece, pos, landingSquare, situation, boardAfter(situation, pos, landingSquare))
+            Move(piece, pos, landingSquare, situation, boardAfter(situation, pos, landingSquare), true)
           )
         )
     }.toMap
@@ -106,7 +106,7 @@ abstract class Variant private[variant] (
     val opponentPieces = situation.board.piecesOf(!situation.player)
 
     def createMove(category: String, orig: Pos, dest: Pos, directions: Directions = List()): (String, Move) =
-      (category, Move(Piece(situation.player, Role.defaultRole), orig, dest, situation, boardAfter(situation, orig, dest, directions), if (category == "pushout") Some(dest) else None))
+      (category, Move(Piece(situation.player, Role.defaultRole), orig, dest, situation, boardAfter(situation, orig, dest, directions), true, if (category == "pushout") Some(dest) else None))
 
     def generateSideMoves(lineOfMarbles: List[Pos], direction: Direction): List[(String, Move)] = {
       def canMoveTowards(pos: Pos, direction: Direction): Boolean = situation.board.isEmptySquare(direction(pos))
@@ -300,7 +300,7 @@ abstract class Variant private[variant] (
 
   def valid(@nowarn board: Board, @nowarn strict: Boolean): Boolean = true
 
-  def isIrreversible(move: Move): Boolean = move.capture != None
+  def isIrreversible(move: Move): Boolean = move.capture.nonEmpty
 
   def defaultRole: Role = Role.defaultRole
 

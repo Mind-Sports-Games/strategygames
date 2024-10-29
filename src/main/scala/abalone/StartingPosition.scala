@@ -20,7 +20,6 @@ case class StartingPosition(
   def initial = fen == format.Forsyth.initial
 }
 
-// @TODO: adapt these
 object StartingPosition {
 
   case class Category(name: String, positions: List[StartingPosition])
