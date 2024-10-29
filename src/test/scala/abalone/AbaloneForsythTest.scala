@@ -1,10 +1,11 @@
-package abalone
+package strategygames.abalone
 
 import org.specs2.matcher.ValidatedMatchers
 
-import strategygames.Score
-import strategygames.abalone.format.{ FEN, Forsyth }
-import strategygames.abalone.{ Board, Game, History, Pos, P1, variant }
+import format.{ FEN, Forsyth }
+
+import _root_.strategygames.Score
+
 
 class AbaloneForsythTest extends AbaloneTest with ValidatedMatchers {
 

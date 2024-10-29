@@ -1,4 +1,4 @@
-package abalone
+package strategygames.abalone
 
 import org.specs2.matcher.ValidatedMatchers
 import org.specs2.mutable.Specification

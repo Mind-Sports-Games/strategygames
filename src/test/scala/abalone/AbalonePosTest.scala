@@ -1,8 +1,6 @@
-package abalone
+package strategygames.abalone
 
 import org.specs2.matcher.ValidatedMatchers
-
-import strategygames.abalone.{ File, Pos, Rank }
 
 class AbalonePosTest extends AbaloneTest with ValidatedMatchers {
     "grid coordinates" should {
