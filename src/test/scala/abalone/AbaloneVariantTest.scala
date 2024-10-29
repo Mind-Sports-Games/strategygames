@@ -1,21 +1,44 @@
-package abalone
+package strategygames.abalone
 
 import org.specs2.matcher.ValidatedMatchers
 
-import strategygames.abalone.{ Board, format, Game, History, Pos, P1, P2, Situation, variant }
-
-import strategygames.{Score, Status}
+import _root_.strategygames.{ Score, Status }
 
 class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
 
 // @TODO:  use new type of tests Lakin did - named "asymmetric"
 
+    /*
+            _ _ _ _ _
+           _ _ _ _ _ _
+          _ _ _ _ _ _ _
+         _ _ _ _ _ _ _ _
+        _ _ _ _ 0 0 0 * _
+         _ _ _ _ * _ _ _
+          _ _ _ _ _ _ _
+           _ _ _ _ _ _
+            _ _ _ _ _
+        P1: E5, F5, G5.
+        P2. E4, H5
+    */
     "custom basic position" should {
         val fen = format.FEN("5/6/7/8/4sssS1/4S3/7/6/5 0 0 b 0 0")
         val board = Board(fen.pieces, History(score = Score(0, 0)), variant.Abalone)
         val situation = Situation(board, P1)
         val movesOf1 = board.variant.validMovesOf1(situation)
         val movesOf23 = board.variant.validMovesOf2And3(situation)
+        val game = Game(board.variant) // @TODO : check why it does not set the piecemap correctly. See a few lines below we have to use board.pieces instead.
+        val validMoves = game.board.variant.validMoves(situation)
+        val game2 = game(validMoves(Pos.G5)(6)) // 3 marbles upLeft: g5e6
+        val validMoves2 = game2.board.variant.validMoves(game2.situation)
+        val game3 = game2(validMoves2(Pos.H5)(5)) // 1 marble downLeft h5g4
+        val validMoves3 = game3.board.variant.validMoves(game3.situation)
+        val game4 = game3(validMoves3(Pos.E6)(9)) // 3 marbles downRight e6g5
+        val validMoves4 = game4.board.variant.validMoves(game4.situation)
+        val game5 = game4(validMoves4(Pos.G4)(1)) // 1 marble upRight g4h5
+        val validMoves5 = game5.board.variant.validMoves(game5.situation)
+        val game6 = game5(validMoves5(Pos.F5)(7)) // 2 marbles downRight f5g4
+        val validMoves6 = game6.board.variant.validMoves(game6.situation)
 
         "compute the correct number of moves of 1 marble" in {
             movesOf1.foldLeft(0)(_ + _._2.size) must_== 11
@@ -43,6 +66,34 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
             movesOf23.get(Pos.G5).get.map(x =>x._2.toUci.toString) should contain ( ("Move(g5,d5)"))
             movesOf23.get(Pos.G5).get.map(x =>x._2.toUci.toString) should contain ( ("Move(g5,e6)"))
             movesOf23.get(Pos.G5).get.map(x =>x._2.toUci.toString) should contain ( ("Move(g5,f6)"))
+        }
+
+        "side moves of 3 do move 3 marbles" in {
+            game2.situation.board.pieces.contains(Pos.E6) must_== true
+            game2.situation.board.pieces.contains(Pos.F6) must_== true
+            game2.situation.board.pieces.contains(Pos.G6) must_== true
+            game2.situation.board.pieces.contains(Pos.E4) must_== true
+            game2.situation.board.pieces.contains(Pos.H5) must_== true
+            game2.situation.board.pieces.size must_== 5
+            validMoves2(Pos.E4).map(x =>x.toUci.toString) should contain ( ("Move(e4,e5)"))
+            validMoves2(Pos.E4).map(x =>x.toUci.toString) should contain ( ("Move(e4,f5)"))
+            validMoves2(Pos.H5).map(x =>x.toUci.toString) should contain ( ("Move(h5,g5)"))
+
+            board.pieces must_== game5.situation.board.pieces
+            game5.situation.board.pieces.size must_== 5
+        }
+
+        "side moves of 2 do move 2 marbles" in {
+            game6.situation.board.pieces.contains(Pos.E5) must_== true
+            game6.situation.board.pieces.contains(Pos.F4) must_== true
+            game6.situation.board.pieces.contains(Pos.G4) must_== true
+            game6.situation.board.pieces.contains(Pos.E4) must_== true
+            game6.situation.board.pieces.contains(Pos.H5) must_== true            
+            game6.situation.board.pieces.size must_== 5
+            validMoves6(Pos.E4).map(x =>x.toUci.toString) should not contain ( ("Move(e4,f4)"))
+            validMoves6(Pos.E4).map(x =>x.toUci.toString) should not contain ( ("Move(e4,e5)"))
+            validMoves6(Pos.E4).map(x =>x.toUci.toString) should contain ( ("Move(e4,f5)"))
+            validMoves6(Pos.H5).map(x =>x.toUci.toString) should contain ( ("Move(h5,g5)"))
         }
     }
 
@@ -382,6 +433,16 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
             game8.situation.board.history.halfMoveClock must_== 0
             game10.situation.board.history.halfMoveClock must_== 0
             game12.situation.board.history.halfMoveClock must_== 0
+        }
+
+        "reduce the number of marbles on the board after P1 push out" in {
+            board.pieces.size must_== 7 + 7
+            game2.situation.board.pieces.size must_== 7 + 6
+            game4.situation.board.pieces.size must_== 7 + 5
+            game6.situation.board.pieces.size must_== 7 + 4
+            game8.situation.board.pieces.size must_== 7 + 3
+            game10.situation.board.pieces.size must_== 7 + 2
+            game12.situation.board.pieces.size must_== 7 + 1
         }
 
         "trigger a win condition defined by the variant, and no stalemate is detected" in {
