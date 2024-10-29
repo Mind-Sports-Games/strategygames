@@ -8,7 +8,7 @@ import strategygames.{Score, Status}
 
 class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
 
-// @TODO:  use new type of tests Lakin did
+// @TODO:  use new type of tests Lakin did - named "asymmetric"
 
     "custom basic position" should {
         val fen = format.FEN("5/6/7/8/4sssS1/4S3/7/6/5 0 0 b 0 0")

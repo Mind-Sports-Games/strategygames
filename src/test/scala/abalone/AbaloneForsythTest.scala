@@ -42,6 +42,4 @@ class AbaloneForsythTest extends AbaloneTest with ValidatedMatchers {
             Forsyth>>(game4.situation) must_== FEN("1S1ss/SSSsss/1SS1ss1/3S4/4s4/3s4/1ss1SS1/s1sSSS/1s1SS 0 0 w 3 1")
         }
     }
-
-
 }
