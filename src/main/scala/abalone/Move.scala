@@ -9,7 +9,6 @@ case class Move(
     dest: Pos,
     situationBefore: Situation,
     after: Board,
-    autoEndTurn: Boolean,
     capture: Option[Pos] = None,
     promotion: Option[PromotableRole] = None,
     metrics: MoveMetrics = MoveMetrics()
@@ -19,8 +18,8 @@ case class Move(
 
   override def finalizeAfter: Board = {
     val board = after.updateHistory({ h1 => h1.copy(
-      lastTurn = if (autoEndTurn) h1.currentTurn :+ toUci else h1.lastTurn,
-      currentTurn = if (autoEndTurn) List() else h1.currentTurn :+ toUci,
+      lastTurn = h1.currentTurn :+ toUci,
+      currentTurn = List(),
       score = if (captures) h1.score.add(situationBefore.player) else h1.score,
       halfMoveClock =
         if (captures) 0
