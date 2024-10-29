@@ -88,7 +88,7 @@ object Forsyth {
       empty = 0
       for (x <- File.all) {
         board(x, y) match {
-          case None        => if(Pos.fromKey(s"${x.toString}${y.toString}").isDefined) empty = empty + 1
+          case None        => if(Pos(x, y).isDefined) empty = empty + 1
           case Some(piece) =>
             if (empty > 0) {
               fen.append(empty)
