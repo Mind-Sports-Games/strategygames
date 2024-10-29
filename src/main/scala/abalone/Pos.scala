@@ -196,25 +196,6 @@ case class Pos private (index: Int) extends AnyVal {
 
   // NOTE - *neighbourhood
   // these below only work for neighbour pos but that's probably fine as in Abalone we only move to (potentially extended) neighbourhood
-  def dir(dir: Option[String]): Option[Pos]  = dir match {
-    case Some("left")       => this.left
-    case Some("upLeft")     => this.upLeft
-    case Some("upRight")    => this.upRight
-    case Some("right")      => this.right
-    case Some("downRight")  => this.downRight
-    case Some("downLeft")   => this.downLeft
-    case _                  => None
-  }
-  def dir(dir: String): Option[Pos]  = dir match {
-    case "left"       => this.left
-    case "upLeft"     => this.upLeft
-    case "upRight"    => this.upRight
-    case "right"      => this.right
-    case "downRight"  => this.downRight
-    case "downLeft"   => this.downLeft
-    case _            => None
-  }
-
   def dir(pos: Pos): Option[String] =
     (pos.file.index - this.file.index, pos.rank.index - this.rank.index) match {
       case (0, 1)   => Some("upLeft")
