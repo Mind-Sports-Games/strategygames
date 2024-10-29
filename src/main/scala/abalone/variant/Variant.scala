@@ -223,11 +223,14 @@ abstract class Variant private[variant] (
             - 2nd direction : we know what direction we want to apply to all these 2 or 3 marbles
   */
   private def piecesAfterAction(pieces: PieceMap, orig: Pos, dest: Pos, directions: Directions): (PieceMap) = {
-    val lineDir: Option[Direction] = directions.headOption
-    val sideDir: Option[Direction] = directions.reverse.headOption
-    val origLineMove: Option[Pos] = lineDir.map((direction) => direction(orig).get)
-    val origSideMove: Option[Pos] = sideDir.map((direction) => direction(orig).get)
-    val diagonalMove: Option[Pos] = (lineDir, origSideMove) match {
+    val lineDir: Option[Direction]    = directions.headOption
+    val sideDir: Option[Direction]    = directions.reverse.headOption
+    val origLineMove: Option[Pos]     = lineDir.flatMap(direction => direction(orig))
+    val origSideMove: Option[Pos]     = sideDir.flatMap(direction => direction(orig))
+    val destLineMove: Option[Pos]     = lineDir.flatMap(direction => direction(dest))
+    val destLineOneMove: Option[Pos]  = lineDir.flatMap(direction => if (destLineMove.isDefined) direction(destLineMove.get) else None)
+    val destLineTwoMove: Option[Pos]  = lineDir.flatMap(direction => if (destLineOneMove.isDefined) direction(destLineOneMove.get) else None)
+    val origDiagonalMove: Option[Pos] = (lineDir, origSideMove) match {
       case ( Some(lineDir), Some(sideMove) ) => lineDir.apply(sideMove)
       case _ => None
     }
@@ -235,16 +238,15 @@ abstract class Variant private[variant] (
     if (directions.size == 0) // line move
       pieces + (dest -> pieces(orig)) - (orig)
     else if (directions.size == 1) // push
-      if(directions(0)(dest) == None) // __(_)o\
-        pieces + (dest -> pieces(orig)) - orig
-      else if (!pieces.contains(directions(0)(dest).get)) // __(_)o.
-        pieces + (directions(0)(dest).get -> pieces(dest)) + (dest -> pieces(orig)) - orig
-      else if (directions(0)((directions(0)(dest)).get) == None) // ___oo\
-        pieces + ((directions(0)(dest)).get -> pieces(dest)) + (dest -> pieces(orig)) - orig
-      else // ___oo.
-        pieces + (directions(0)((directions(0)(dest)).get).get -> pieces(dest)) + (dest -> pieces(orig)) - orig
+      ( destLineMove, destLineOneMove, destLineTwoMove ) match {
+        case ( (None, _, _) ) => pieces + (dest -> pieces(orig)) - orig // __(_)o\
+        case ( (Some(destLinePos), _, _) ) if (!pieces.contains(destLinePos)) => pieces + (destLinePos -> pieces(dest)) + (dest -> pieces(orig)) - orig // __(_)o.
+        case ( (Some(destLinePos), None, _) ) => pieces + (destLinePos -> pieces(dest)) + (dest -> pieces(orig)) - orig // ___oo\
+        case ( (_, _, Some(desLineTwoPos)) ) => pieces + (desLineTwoPos -> pieces(dest)) + (dest -> pieces(orig)) - orig // ___oo.
+        case ( _ ) => pieces
+      }
     else // side move
-      (origLineMove, origSideMove, diagonalMove)  match {
+      (origLineMove, origSideMove, origDiagonalMove)  match {
         case ( Some(lineMovePos), Some(sideMovePos), Some(diagonalPos) ) =>
           if (diagonalPos.index == dest.index) // oo
             pieces + (sideMovePos -> pieces(orig)) - orig +
@@ -252,7 +254,7 @@ abstract class Variant private[variant] (
           else // ooo
             pieces + (sideMovePos -> pieces(orig)) - orig +
               (diagonalPos -> pieces(lineMovePos)) - lineMovePos +
-              (directions(1)(lineMovePos).get -> pieces(lineMovePos)) - diagonalPos
+              (diagonalPos -> pieces(lineMovePos)) - diagonalPos
         case _ => pieces
       }
   }
