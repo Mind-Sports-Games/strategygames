@@ -64,7 +64,7 @@ object Uci {
         dest     <- Pos.fromKey(destS)
       } yield Move(orig, dest)
 
-    val moveR  = s"^${Pos.posR}${Pos.posR}(\\+?)$$".r
+    val moveR  = s"^${Pos.posR}${Pos.posR}(\\+?)$$".r // @TODO: check if it needs to be changed to match Replay.replayMoveFromUci
   }
 
   case class WithSan(uci: Uci, san: String)
