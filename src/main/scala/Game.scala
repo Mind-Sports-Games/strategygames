@@ -1237,7 +1237,7 @@ object Game {
         partialCaptures: Boolean = false
     ): Validated[String, (Game, Move)] = (orig, dest) match {
       case (Pos.Abalone(orig), Pos.Abalone(dest)) =>
-        g.apply(orig, dest)
+        g.apply(orig, dest, metrics)
           .toEither
           .map(t => (Abalone(t._1), Move.Abalone(t._2)))
           .toValidated
