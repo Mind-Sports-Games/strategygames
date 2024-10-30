@@ -104,22 +104,21 @@ abstract class Variant private[variant] (
     val activePlayerPieces = situation.board.piecesOf(situation.player)
     val opponentPieces = situation.board.piecesOf(!situation.player)
 
-    def createMove(category: String, orig: Pos, dest: Pos) = Move(Piece(situation.player, Role.defaultRole), orig, dest, situation, boardAfter(situation, orig, dest), true, if (category == "pushout") Some(dest) else None)
+    def createMove(orig: Pos, dest: Pos, capture: Boolean = false) = Move(Piece(situation.player, Role.defaultRole), orig, dest, situation, boardAfter(situation, orig, dest), true, if(capture) Some(dest) else None)
 
     def generateSideMoves(lineOfMarbles: List[Pos], direction: Direction): List[Move] = {
       def canMoveTowards(pos: Pos, direction: Direction): Boolean = situation.board.isEmptySquare(direction(pos))
 
-      def possibleSideMoves: List[(Pos, Pos, Direction)] = Pos.sideMovesDirsFromDir(direction).flatMap(
+      def possibleSideMoves: List[(Pos, Pos)] = Pos.sideMovesDirsFromDir(direction).flatMap(
         dir =>
           if (lineOfMarbles.map(
             (pos) => canMoveTowards(pos, dir)
           ).contains(false)) None
           else (
             lineOfMarbles.headOption,
-            lineOfMarbles.reverse.headOption.flatMap(dir(_)),
-            dir
+            lineOfMarbles.reverse.headOption.flatMap(dir(_))
           ) match {
-            case ( (Some(head), Some(tail), dir) ) => Some( (head, tail, dir) )
+            case ( (Some(head), Some(tail)) ) => Some( (head, tail) )
             case _ => None
           }
       )
@@ -127,7 +126,7 @@ abstract class Variant private[variant] (
       List(
         if (lineOfMarbles.size == 3) generateSideMoves(lineOfMarbles.dropRight(1), direction) else List(),
         possibleSideMoves.flatMap {
-          case ( (orig, dest, _) ) => Some(createMove("side", orig, dest))
+          case ( (orig, dest) ) => Some(createMove(orig, dest))
           case _ => None
         }
       ).flatten
@@ -139,12 +138,12 @@ abstract class Variant private[variant] (
         direction(neighbour).toList.flatMap {
           case (thirdSquareInLine) => {
             if (situation.board.isEmptySquare(Some(thirdSquareInLine))) // xx.
-              Some(createMove("line", pos, thirdSquareInLine))
+              Some(createMove(pos, thirdSquareInLine))
             else if (opponentPieces.contains(thirdSquareInLine)) // xxo
               direction(thirdSquareInLine) match { // xxo?
-                case None => Some(createMove("pushout", pos, thirdSquareInLine)) // xxo\
+                case None => Some(createMove(pos, thirdSquareInLine, true)) // xxo\
                 case Some(emptySquare) if situation.board.isEmptySquare(Some(emptySquare)) => {
-                  Some(createMove("push", pos, thirdSquareInLine)) // xxo.
+                  Some(createMove(pos, thirdSquareInLine)) // xxo.
                 }
                 case _ => None
               }
@@ -152,17 +151,17 @@ abstract class Variant private[variant] (
               direction(thirdSquareInLine).flatMap {
                 case (fourthSquareInLine) => // xxx_
                   if (situation.board.isEmptySquare(Some(fourthSquareInLine))) // xxx.
-                    Some(createMove("line", pos, fourthSquareInLine))
+                    Some(createMove(pos, fourthSquareInLine))
                   else if (opponentPieces.contains(fourthSquareInLine)) // xxxo
                     direction(fourthSquareInLine) match { // xxxo?
-                      case None => Some(createMove("pushout", pos, fourthSquareInLine)) // xxxo\
-                      case Some(emptyPos) if (situation.board.isEmptySquare(Some(emptyPos))) => Some(createMove("push", pos, fourthSquareInLine)) // xxxo.
+                      case None => Some(createMove(pos, fourthSquareInLine, true)) // xxxo\
+                      case Some(emptyPos) if (situation.board.isEmptySquare(Some(emptyPos))) => Some(createMove(pos, fourthSquareInLine)) // xxxo.
                       case _ => direction(fourthSquareInLine).flatMap { // xxxo?
                         case (fifthSquareInLine) =>
                           if (opponentPieces.contains(fifthSquareInLine)) // xxxoo
                             direction(fifthSquareInLine) match {
-                              case None => Some(createMove("pushout", pos, fourthSquareInLine)) // xxxoo\
-                              case Some(emptySquare) if situation.board.isEmptySquare(Some(emptySquare)) => Some(createMove("push", pos, emptySquare)) // xxxoo.
+                              case None => Some(createMove(pos, fourthSquareInLine, true)) // xxxoo\
+                              case Some(emptySquare) if situation.board.isEmptySquare(Some(emptySquare)) => Some(createMove(pos, emptySquare)) // xxxoo.
                               case _ => None
                             }
                           else None
@@ -197,23 +196,16 @@ abstract class Variant private[variant] (
     situation.board.copy(pieces = piecesAfterAction(situation.board.pieces, orig, dest))
   }
 
-  def isSideMove(orig: Pos, dest: Pos): Boolean = orig.dir(dest) match {
-    case dirString if (dirString == "upRight" || dirString == "downLeft") =>
-      if (orig.|<>|((square) => square.index == dest.index, Pos.dirFromString(orig.dir(dest))) == Nil) true
-      else false
-    case _ => orig.rank.index != dest.rank.index && orig.file.index != dest.file.index
-  }
-
   /*
     How to move pieces based on orig, dest :
-      A. Find direction between orig and dest
+      A. Find direction between orig and dest (in case of a sideMove this will always be "upY" or "downX")
       B. Determine the kind of move (side move or not)
       C. play the move
         - side move :
-          Based on the 2 directions computed in A, applied to origin to land on a square,
+          Based on the 2 directions computed in A (vertical + horizontal), applied to origin to land on a square,
           find out which square :
-            - is the empty square (it's the sideMoveSideDir)
-            - contains the marble used to do a side move (it's the sideMoveLineDir)
+            - is the empty square
+            - contains the marble used to do a side move
         - else:
           - push :
             - dest contains a marble
@@ -233,7 +225,7 @@ abstract class Variant private[variant] (
           case _ => None
         }
       }.headOption
-      val sideMoveSideDir: Option[Direction] = Pos.possibleLineDirsFromSideMoveDir(origToDestDir).flatMap {
+      val sideDir: Option[Direction] = Pos.possibleLineDirsFromSideMoveDir(origToDestDir).flatMap {
         direction => direction(orig) match {
           case (Some(squareInLine)) if(!pieces.contains(squareInLine)) => Some(direction)
           case _ => None
@@ -241,7 +233,7 @@ abstract class Variant private[variant] (
       }.headOption
       val lineDirSecondPos: Option[Pos] = lineDir.flatMap(direction => direction(orig))
       val lineDirThirdPos: Option[Pos] = lineDirSecondPos.flatMap(direction => lineDir.flatMap(_(direction)))
-      val sideMovePosFromOrig: Option[Pos] = sideMoveSideDir.flatMap(direction => direction(orig))
+      val sideMovePosFromOrig: Option[Pos] = sideDir.flatMap(direction => direction(orig))
       val diagonalPosFromOrig: Option[Pos] = (lineDir, sideMovePosFromOrig) match {
         case ( Some(someLineDir), Some(origSideMove) ) => someLineDir(origSideMove)
         case _ => None
@@ -326,6 +318,13 @@ abstract class Variant private[variant] (
   override def equals(that: Any): Boolean = this eq that.asInstanceOf[AnyRef]
 
   override def hashCode: Int = id
+
+  private def isSideMove(orig: Pos, dest: Pos): Boolean = orig.dir(dest) match {
+    case dirString if (dirString == "upRight" || dirString == "downLeft") =>
+      if (orig.|<>|((square) => square.index == dest.index, Pos.dirFromString(orig.dir(dest))) == Nil) true // if we can't reach dest from orig using only the same direction.
+      else false
+    case _ => orig.rank.index != dest.rank.index && orig.file.index != dest.file.index
+  }
 
   private def turnPieces(situation: Situation): PieceMap = situation.board.piecesOf(situation.player)
 
