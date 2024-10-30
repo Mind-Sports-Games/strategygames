@@ -123,9 +123,9 @@ class AbalonePosTest extends AbaloneTest with ValidatedMatchers {
             Pos.A1.right must_== Some(Pos.B1)
             Pos.A1.upLeft must_== Some(Pos.A2)
             Pos.A1.upRight must_== Some(Pos.B2)
-            Pos.A1.dir(Pos.A2) must_== Some("upLeft")
-            Pos.A1.dir(Pos.B2) must_== Some("upRight")
-            Pos.A1.dir(Pos.B1) must_== Some("right")
+            Pos.A1.dir(Pos.A2) must_== "upLeft"
+            Pos.A1.dir(Pos.B2) must_== "upRight"
+            Pos.A1.dir(Pos.B1) must_== "right"
         }
     }
 
@@ -140,9 +140,9 @@ class AbalonePosTest extends AbaloneTest with ValidatedMatchers {
             Pos.I9.left must_== Some(Pos.H9)
             Pos.I9.downLeft must_== Some(Pos.H8)
             Pos.I9.downRight must_== Some(Pos.I8)
-            Pos.I9.dir(Pos.I8) must_== Some("downRight")
-            Pos.I9.dir(Pos.H9) must_== Some("left")
-            Pos.I9.dir(Pos.H8) must_== Some("downLeft")            
+            Pos.I9.dir(Pos.I8) must_== "downRight"
+            Pos.I9.dir(Pos.H9) must_== "left"
+            Pos.I9.dir(Pos.H8) must_== "downLeft"
         }
     }
 
