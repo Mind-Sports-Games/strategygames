@@ -97,6 +97,17 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
         }
     }
 
+    /*
+            0 0 _ * *
+           0 0 0 * * *
+          _ 0 0 _ * * _
+         _ _ _ _ _ _ _ _
+        _ _ _ _ _ _ _ _ _
+         _ _ _ _ _ _ _ _
+          _ * * _ 0 0 _
+           * * * 0 0 0
+            * * _ 0 0
+    */
     "\"Belgian Daisy\" start position" should {
         val fen = variant.Abalone.initialFen
         val board = Board(fen.pieces, History(score = Score(0, 0)), variant.Abalone)

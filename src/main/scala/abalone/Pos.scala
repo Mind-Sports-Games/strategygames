@@ -194,21 +194,29 @@ case class Pos private (index: Int) extends AnyVal {
   def neighbours: List[Option[Pos]] = List(left, upLeft, upRight, right, downRight, downLeft)
   def neighboursAsDirs: Directions = List(_.left, _.upLeft, _.upRight, _.right, _.downRight, _.downLeft)
 
-  // NOTE - *neighbourhood
-  // these below only work for neighbour pos but that's probably fine as in Abalone we only move to (potentially extended) neighbourhood
-  def dir(pos: Pos): Option[String] =
-    (pos.file.index - this.file.index, pos.rank.index - this.rank.index) match {
-      case (0, 1)   => Some("upLeft")
-      case (0, -1)  => Some("downRight")
-      case (1, 1)   => Some("upRight")
-      case (1, 0)   => Some("right")
-      case (-1, 0)  => Some("left")
-      case (-1, -1) => Some("downLeft")
-      case _ => None
+  def dir(dest: Pos): String =
+    (file.index - dest.file.index, rank.index - dest.rank.index) match {
+      case ( (fileDiff, 0) ) =>
+        if (fileDiff > 0) "left"
+        else "right"
+      case ( (0, rankDiff) ) =>
+        if (rankDiff > 0) "downRight"
+        else "upLeft"
+      case ( (fileDiff, rankDiff) ) =>
+        if (fileDiff > 0 && rankDiff > 0) "downLeft"
+        else if (fileDiff < 0 && rankDiff < 0) "upRight"
+        else if (fileDiff < 0 && rankDiff > 0) "downRight"
+        else "upLeft"
     }
 
-  def isInLine(pos1: Pos, pos2: Pos): Boolean = this.dir(pos1) == pos1.dir(pos2)
-  // *end of note about neighbourhood
+  def >|(stop: Pos => Boolean): List[Pos]                   = |<>|(stop, _.right)
+  def |<(stop: Pos => Boolean): List[Pos]                   = |<>|(stop, _.left)
+  def |<>|(stop: Pos => Boolean, dir: Direction): List[Pos] =
+    dir(this) map { p =>
+      p :: (if (stop(p)) Nil else p.|<>|(stop, dir))
+    } getOrElse Nil
+
+  def isSameDirection(pos1: Pos, pos2: Pos): Boolean = dir(pos1) == pos1.dir(pos2)
 
   @inline def file = File of this // column (as if it was an index in a 1D array)
   @inline def rank = Rank of this // horizontal row, makes sense in a 2D array
@@ -217,14 +225,6 @@ case class Pos private (index: Int) extends AnyVal {
   // def touches(other: Pos): Boolean = xDist(other) <= 1 && yDist(other) <= 1
   // def xDist(other: Pos) = abs(file - other.file)
   // def yDist(other: Pos) = abs(rank - other.rank)
-
-  // @TODO VFR: test these
-  def >|(stop: Pos => Boolean): List[Pos]                   = |<>|(stop, _.right)
-  def |<(stop: Pos => Boolean): List[Pos]                   = |<>|(stop, _.left)
-  def |<>|(stop: Pos => Boolean, dir: Direction): List[Pos] =
-    dir(this) map { p =>
-      p :: (if (stop(p)) Nil else p.|<>|(stop, dir))
-    } getOrElse Nil
 
   // @TODO: understand if these are useful for Abalone, adapt if needed
   /*
@@ -300,13 +300,13 @@ object Pos {
     if (isInHexagon(x + File.all.size * y)) Some(new Pos(x + File.all.size * y))
     else None
 
-  def dirsFromString(dir: Option[String]): Direction = dir match {
-    case Some("left")       => _.left
-    case Some("upLeft")     => _.upLeft
-    case Some("upRight")    => _.upRight
-    case Some("right")      => _.right
-    case Some("downRight")  => _.downRight
-    case Some("downLeft")   => _.downLeft
+  def dirFromString(dir: String): Direction = dir match {
+    case "left"       => _.left
+    case "upLeft"     => _.upLeft
+    case "upRight"    => _.upRight
+    case "right"      => _.right
+    case "downRight"  => _.downRight
+    case "downLeft"   => _.downLeft
     case _                  => (_:Pos) => None
   }
 
@@ -314,13 +314,25 @@ object Pos {
     val x = Pos.E5
     val y = dir(x).getOrElse(Pos.A1)
     x.dir(y) match {
-      case Some("left")       => List(_.downLeft, _.upLeft)
-      case Some("upLeft")     => List(_.left, _.upRight)
-      case Some("upRight")    => List(_.upLeft, _.right)
-      case Some("right")      => List(_.upRight, _.downRight)
-      case Some("downRight")  => List(_.right, _.downLeft)
-      case Some("downLeft")   => List(_.downRight, _.left)
-      case _                  => List()
+      case "left"       => List(_.downLeft, _.upLeft)
+      case "upLeft"     => List(_.left, _.upRight)
+      case "upRight"    => List(_.upLeft, _.right)
+      case "right"      => List(_.upRight, _.downRight)
+      case "downRight"  => List(_.right, _.downLeft)
+      case "downLeft"   => List(_.downRight, _.left)
+      case _            => List()
+    }
+  }
+
+  def possibleLineDirsFromSideMoveDir(dir: Direction): Directions = {
+    val x = Pos.E5
+    val y = dir(x).getOrElse(Pos.A1)
+    x.dir(y) match {
+      case "upLeft"     => List(_.left, _.upLeft)
+      case "upRight"    => List(_.upRight, _.right)
+      case "downRight"  => List(_.right, _.downRight)
+      case "downLeft"   => List(_.downLeft, _.left)
+      case _            => List()
     }
   }
 
