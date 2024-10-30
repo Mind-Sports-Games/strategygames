@@ -1287,7 +1287,7 @@ object Situation {
         partialCaptures: Boolean = false
     ): Validated[String, Move] = (from, to) match {
       case (Pos.Abalone(from), Pos.Abalone(to)) =>
-        s.move(from, to, promotion.map(_.toAbalone)).toEither.map(m => Move.Abalone(m)).toValidated
+        s.move(from, to).toEither.map(m => Move.Abalone(m)).toValidated
       case _                                    => sys.error("Not passed Abalone objects")
     }
 

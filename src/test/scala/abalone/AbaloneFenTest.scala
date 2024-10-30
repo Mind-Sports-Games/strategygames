@@ -220,7 +220,6 @@ class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
         )
         val situation = Situation(board, P2)
 
-
         "have a score of 6 for P1 and a score of 5 for P2" in {
             fen.player1Score must_== 6
             fen.player2Score must_== 5

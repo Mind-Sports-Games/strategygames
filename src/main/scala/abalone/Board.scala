@@ -20,6 +20,8 @@ case class Board(
 
   def piecesOf(player: Player): PieceMap = pieces.filter(_._2.is(player))
 
+  def isEmptySquare(pos: Option[Pos]): Boolean = pos.fold(false)(!this.pieces.contains(_))
+
   def withHistory(h: History): Board       = copy(history = h)
   def updateHistory(f: History => History) = copy(history = f(history))
 
@@ -32,6 +34,8 @@ case class Board(
   def valid(strict: Boolean) = variant.valid(this, strict)
 
   def materialImbalance: Int = variant.materialImbalance(this)
+
+  def autoDraw: Boolean = history.threefoldRepetition && variant.repetitionEnabled
 
   override def toString = s"$variant Position after ${history.recentTurnUciString}"
 

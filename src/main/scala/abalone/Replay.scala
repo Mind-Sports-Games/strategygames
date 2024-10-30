@@ -69,22 +69,19 @@ object Replay {
     case _                    => sys.error("Invalid abalone move")
   }
 
-  def replayMove(
-      before: Game,
-      orig: Pos,
-      dest: Pos,
-      endTurn: Boolean
-  ): Move =
+  def replayMove(before: Game, orig: Pos, dest: Pos, endTurn: Boolean): Move =
     Move(
       piece = before.situation.board.pieces(orig),
       orig = orig,
       dest = dest,
       situationBefore = before.situation,
-      // TODO Abalone Set
-      after = before.situation.board.copy(),
+      after = before.situation.board.variant.boardAfter(
+        before.situation,
+        orig,
+        dest
+      ),
       autoEndTurn = endTurn,
-      capture = None, // @TODO:  consider if it's difficult to determine if a capture was made from here (a marble pushed off the board)
-      promotion = None
+      capture = before.situation.board.piecesOf(!before.situation.player).get(dest).map(_ => dest)
     )
 
   def actionStrsWithEndTurn(actionStrs: ActionStrs): Seq[(String, Boolean)] =
@@ -117,7 +114,6 @@ object Replay {
     def replayMoveFromUci(
         orig: Option[Pos],
         dest: Option[Pos],
-        promotion: String,
         endTurn: Boolean
     ): (Game, Move) =
       (orig, dest) match {
@@ -127,7 +123,7 @@ object Replay {
           (state, move)
         }
         case (orig, dest)             => {
-          val uciMove = s"${orig}${dest}${promotion}"
+          val uciMove = s"${orig}${dest}"
           errors += uciMove + ","
           sys.error(s"Invalid move for replay: ${uciMove}")
         }
@@ -135,11 +131,10 @@ object Replay {
 
     val gameWithActions: List[(Game, Move)] =
       combineActionStrsWithEndTurn(actionStrs, startPlayer, activePlayer).toList.map {
-        case (Uci.Move.moveR(orig, dest, promotion), endTurn) =>
+        case (Uci.Move.moveR(orig, dest), endTurn) =>
           replayMoveFromUci(
             Pos.fromKey(orig),
             Pos.fromKey(dest),
-            promotion,
             endTurn
           )
         case (action: String, _)                              =>

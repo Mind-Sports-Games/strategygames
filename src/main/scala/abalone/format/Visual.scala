@@ -2,8 +2,6 @@ package strategygames.abalone.format
 import strategygames.abalone._
 import strategygames.Player
 
-/** r bqkb r p ppp pp pr P p QnB PP N P PPP RN K R
-  */
 object Visual {
 
   def <<(source: String): Board = {
