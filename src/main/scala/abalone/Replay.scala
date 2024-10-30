@@ -9,7 +9,6 @@ import strategygames.format.pgn.San
 import strategygames.abalone.format.pgn.{ Parser, Reader }
 import strategygames.abalone.format.{ FEN, Forsyth, Uci }
 import strategygames.{ Action => StratAction, ActionStrs, Move => StratMove, Situation => StratSituation }
-import scala.annotation.nowarn
 
 case class Replay(setup: Game, actions: List[Move], state: Game) {
 
@@ -70,14 +69,20 @@ object Replay {
     case _                    => sys.error("Invalid abalone move")
   }
 
-  @nowarn def replayMove(
-      before: Game,
-      orig: Pos,
-      dest: Pos,
-      endTurn: Boolean
-  ): Move = {
-    before.situation.moves.get(orig).flatMap(_.find(m => m.dest == dest)).get // @TODO: adapt
-  }
+  def replayMove(before: Game, orig: Pos, dest: Pos, endTurn: Boolean): Move =
+    Move(
+      piece = before.situation.board.pieces(orig),
+      orig = orig,
+      dest = dest,
+      situationBefore = before.situation,
+      after = before.situation.board.variant.boardAfter(
+        before.situation,
+        orig,
+        dest
+      ),
+      autoEndTurn = endTurn,
+      capture = before.situation.board.piecesOf(!before.situation.player).get(dest).map(_ => dest)
+    )
 
   def actionStrsWithEndTurn(actionStrs: ActionStrs): Seq[(String, Boolean)] =
     actionStrs.zipWithIndex.map { case (a, i) =>
