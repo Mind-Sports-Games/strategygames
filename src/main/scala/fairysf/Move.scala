@@ -19,7 +19,10 @@ case class Move(
 ) extends Action(situationBefore) {
 
   def situationAfter =
-    Situation(finalizeAfter, if (autoEndTurn) !piece.player else piece.player)
+    Situation(
+      finalizeAfter,
+      if (autoEndTurn) !piece.player else piece.player
+    )
 
   def finalizeAfter: Board = after updateHistory { h =>
     h.copy(

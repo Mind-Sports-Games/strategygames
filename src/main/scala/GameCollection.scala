@@ -298,8 +298,8 @@ object GameFamily {
     def name              = "Amazons"
     def key               = "amazons"
     def gameLogic         = GameLogic.FairySF()
-    def hasFishnet        = true
-    def hasAnalysisBoard  = false
+    def hasFishnet        = false
+    def hasAnalysisBoard  = true
     def defaultVariant    = Variant.FairySF(strategygames.fairysf.variant.Amazons)
     def variants          = Variant.all(GameLogic.FairySF()).filter(_.gameFamily == this)
     def displayPiece      = "wQ"

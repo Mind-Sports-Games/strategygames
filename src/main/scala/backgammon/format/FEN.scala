@@ -60,6 +60,10 @@ final case class FEN(value: String) extends AnyVal {
     }
     .toMap
 
+  def unusedDice: List[Int] = value.split(' ')(1).split('/').flatMap(_.toIntOption).toList
+
+  def usedDice: List[Int] = value.split(' ')(2).split('/').flatMap(_.toIntOption).toList
+
   def pocketData: Option[PocketData] = {
     val start = value.indexOf("[", 0)
     val end   = value.indexOf("]", start)

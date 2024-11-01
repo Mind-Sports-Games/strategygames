@@ -84,7 +84,7 @@ object Forsyth {
     var empty = 0
     for (y <- Rank.allReversed) {
       empty = 0
-      val files = if (y.index == 0) File.all else File.allReversed
+      val files = File.allByWidth(board.variant.boardSize.width)
       for (x <- files) {
         board(x, y) match {
           case None                 => empty = empty + 1

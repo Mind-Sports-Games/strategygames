@@ -27,8 +27,8 @@ case object Amazons
   override def canOfferDraw          = false
   override val switchPlayerAfterMove = false
 
-  override def hasAnalysisBoard: Boolean = false
-  override def hasFishnet: Boolean       = true
+  override def hasAnalysisBoard: Boolean = true
+  override def hasFishnet: Boolean       = false
 
   // cache this rather than checking with the API everytime
   override def initialFen =
@@ -57,14 +57,18 @@ case object Amazons
       if (empty > 0) fen.append(s"${empty},")
       fen.append('/')
     }
-    fen.toString.replace(",/", "/").dropRight(1)
+    fen.toString.replace("P", "p").replace(",/", "/").dropRight(1)
   }
 
   private def fullPockets: String = s"[${"P" * 46}${"p" * 46}]"
 
   override def exportBoardFen(board: Board): FEN =
     FEN(
-      s"${boardPart(board)}${fullPockets} ${board.apiPosition.fen.value.split(" ").drop(1).mkString(" ")}"
+      List(
+        s"${boardPart(board)}${fullPockets}",
+        board.apiPosition.fen.value.split(" ").drop(1).mkString(" "),
+        board.history.currentTurn.headOption.map(u => s"½${u.uci}").getOrElse("")
+      ).mkString(" ").strip
     )
 
   override def validMoves(situation: Situation): Map[Pos, List[Move]] =
@@ -156,4 +160,6 @@ case object Amazons
     if (specialEnd(situation)) Option(!situation.player)
     else None
 
+  override def pliesFromFen(fenTurnCount: Int, player: Player, currentTurnPlies: Int = 0) =
+    (fenTurnCount - 1) * 4 + player.fold(0, 2) + currentTurnPlies
 }
