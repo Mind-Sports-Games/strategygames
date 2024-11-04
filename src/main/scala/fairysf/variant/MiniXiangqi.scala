@@ -9,7 +9,7 @@ case object MiniXiangqi
       key = "minixiangqi",
       name = "Mini Xiangqi",
       standardInitialPosition = true,
-      fairysfName = FairySFName("minixiangqi"),
+      fairysfName = FairySFName("ps-minixiangqi"),
       boardSize = Board.Dim7x7
     ) {
 
@@ -20,7 +20,7 @@ case object MiniXiangqi
 
   override val kingPiece: Option[Role] = Some(XiangqiKing)
 
-  override def repetitionEnabled: Boolean = false
+  override def repetitionEnabled: Boolean = true
   override def useFairyOptionalGameEnd    = true
 
   // cache this rather than checking with the API everytime
