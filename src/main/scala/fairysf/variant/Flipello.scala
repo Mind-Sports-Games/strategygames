@@ -48,7 +48,8 @@ case object Flipello
     pendingPass(situation) && applyPass(situation).fold(false)(pendingPass(_))
 
   override def specialDraw(situation: Situation) =
-    situation.board.playerPiecesOnBoardCount(P1) == situation.board.playerPiecesOnBoardCount(P2)
+    specialEnd(situation) &&
+      (situation.board.playerPiecesOnBoardCount(P1) == situation.board.playerPiecesOnBoardCount(P2))
 
   override def winner(situation: Situation): Option[Player] =
     (specialEnd(situation) && !specialDraw(situation)) option

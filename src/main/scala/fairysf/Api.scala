@@ -330,5 +330,9 @@ maxRank = 5
 startFen = ppppp/ppppp/5/PPPPP/PPPPP w - - 0 1
 flagRegionWhite = *5
 flagRegionBlack = *1
+[ps-xiangqi:xiangqi]
+nFoldRule = 4
+[ps-minixiangqi:minixiangqi]
+nFoldRule = 4
   """
 }
