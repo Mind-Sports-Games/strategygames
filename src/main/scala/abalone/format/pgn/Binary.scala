@@ -6,9 +6,6 @@ import strategygames.abalone.format.Uci
 
 import scala.util.Try
 
-// TODO Abalone. Need to rewrite most of this to make binary storage of games
-// efficient and correct for Abalone. Speak to Matt as he has done this for most games
-
 object Binary {
 
   // writeMove only used in tests for chess/draughts
@@ -19,14 +16,6 @@ object Binary {
 
   def readActionStrs(bs: List[Byte])          = Try(Reader actionStrs bs)
   def readActionStrs(bs: List[Byte], nb: Int) = Try(Reader.actionStrs(bs, nb))
-
-  // No MoveType implemented for Delimiter/Multimove
-  // MoveType could be removed as there are no Drops in Mancala
-  // similarly gamefamily doesnt need to be stored either but we do
-  private object MoveType {
-    val Move = 0
-    val Drop = 1
-  }
 
   private object Reader {
 
@@ -39,25 +28,22 @@ object Binary {
 
     def intPlies(bs: List[Int], pliesToGo: Int): List[String] =
       bs match {
-        case _ if pliesToGo <= 0                                  => Nil
-        case Nil                                                  => Nil
-        case (b1 :: b2 :: rest) if headerBit(b1) == MoveType.Move =>
+        case _ if pliesToGo <= 0 => Nil
+        case Nil                 => Nil
+        case (b1 :: b2 :: rest)  =>
           moveUci(b1, b2) :: intPlies(rest, pliesToGo - 1)
-        case x                                                    => !!(x map showByte mkString ",")
+        case x                   => !!(x map showByte mkString ",")
       }
 
-    // TODO: This is hugely inefficient for Abalone - speak to Matt about how to improve this
-    // 1 movetype (move or drop)
+    // 1 freebit (0)
     // 7 pos (from)
     // ----
-    // 1 promotion (bool)
+    // 1 freebit (0)
     // 7 pos (dest)
     def moveUci(b1: Int, b2: Int): String =
       s"${posFromInt(b1)}${posFromInt(b2)}"
 
     def posFromInt(b: Int): String = Pos(right(b, 7)).get.toString()
-
-    private def headerBit(i: Int) = i >> 7
 
     private def right(i: Int, x: Int): Int = i & lengthMasks(x)
     private val lengthMasks                =
@@ -70,7 +56,7 @@ object Binary {
     def ply(str: String): List[Byte] =
       (str match {
         case Uci.Move.moveR(src, dst) => moveUci(src, dst)
-        case _                                   => sys.error(s"Invalid move to write: ${str}")
+        case _                        => sys.error(s"Invalid move to write: ${str}")
       }) map (_.toByte)
 
     def plies(strs: Iterable[String]): Array[Byte] =
@@ -80,11 +66,9 @@ object Binary {
     def actionStrs(strs: ActionStrs): Array[Byte] = plies(strs.flatten)
 
     def moveUci(src: String, dst: String) = List(
-      (headerBit(MoveType.Move)) + Pos.fromKey(src).get.index,
-      (headerBit(MoveType.Move)) + Pos.fromKey(dst).get.index
+      Pos.fromKey(src).get.index,
+      Pos.fromKey(dst).get.index
     )
-
-    private def headerBit(i: Int) = i << 7
 
   }
 
