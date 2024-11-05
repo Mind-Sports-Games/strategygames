@@ -109,7 +109,7 @@ abstract class Variant private[variant] (
     def generateSideMoves(lineOfMarbles: List[Pos], direction: Direction): List[Move] = {
       def canMoveTowards(pos: Pos, direction: Direction): Boolean = situation.board.isEmptySquare(direction(pos))
 
-      def possibleSideMoves: List[(Pos, Pos)] = Pos.sideMovesDirsFromDir(direction).flatMap(
+      def possibleSideMoves: List[(Pos, Pos)] = Pos.sideMoveDirsFromLineDir(direction).flatMap(
         dir =>
           if (lineOfMarbles.map(
             (pos) => canMoveTowards(pos, dir)
@@ -133,7 +133,7 @@ abstract class Variant private[variant] (
     }
 
     def generateMovesForNeighbours(pos: Pos, neighbour: Pos): List[Move] = {
-      val direction = Pos.dirFromString(pos.dir(neighbour))
+      val direction = Pos.dirFromString(pos.directionString(neighbour))
       val moves = List(
         direction(neighbour).toList.flatMap {
           case (thirdSquareInLine) => {
@@ -161,7 +161,7 @@ abstract class Variant private[variant] (
                           if (opponentPieces.contains(fifthSquareInLine)) // xxxoo
                             direction(fifthSquareInLine) match {
                               case None => Some(createMove(pos, fourthSquareInLine, true)) // xxxoo\
-                              case Some(emptySquare) if situation.board.isEmptySquare(Some(emptySquare)) => Some(createMove(pos, emptySquare)) // xxxoo.
+                              case Some(emptySquare) if situation.board.isEmptySquare(Some(emptySquare)) => Some(createMove(pos, fourthSquareInLine)) // xxxoo.
                               case _ => None
                             }
                           else None
@@ -198,68 +198,80 @@ abstract class Variant private[variant] (
 
   /*
     How to move pieces based on orig, dest :
-      A. Find direction between orig and dest (in case of a sideMove this will always be "upY" or "downX")
-      B. Determine the kind of move (side move or not)
+      A. Find "globalDir" direction between orig and dest (in case of a sideMove this will always be "upY" or "downX")
+      B. Determine the type of move
       C. play the move
         - side move :
-          Based on the 2 directions computed in A (vertical + horizontal), applied to origin to land on a square,
-          find out which square :
-            - is the empty square
-            - contains the marble used to do a side move
+          Based on the <globalDir> computed in A, determine correct combination of <lineDir> and <sideDir> (the direction that is to be applied to each marble)
+            allowing to land on <dest>.
+            Example:
+               _ A B _ _
+              _ x _ x C _
+             _ _ x x _ D _
+            _ _ _ Y x x _ _
+          Y can do a side move to A B C D (if the "x" of some of the other axis are missing)
+          origToDestDir: "upRight"
+          3 potentialSideMoveDirsFromDirs : "upLeft", "upRight", "right"
+            A: lineDir: upLeft, sideDir: upRight
+            B: lineDir: upRight, sideDir: upLeft
+            C: lineDir: upRight, sideDir: right
+            D: lineDir: right, sideDir: upRight
+
         - else:
           - push :
             - dest contains a marble
-              - apply the direction from dest until there is an empty square or being off the board
-                - in case of being off the board, increment the score (capture = true)
-              - do the line move (orig to dest)
+              - move dest marble to the next available square (or off the board)
+              - do the line move
           - line move :
-            - move from orig to dest, without considering the direction
+            - move from orig to dest
   */
   private def piecesAfterAction(pieces: PieceMap, orig: Pos, dest: Pos): (PieceMap) = {
-    val origToDestDir: Direction = Pos.dirFromString(orig.dir(dest))
-
+    val origToDestDirString = orig.directionString(dest)
+    val origToDestDir: Direction = Pos.dirFromString(origToDestDirString)
+ 
     if (isSideMove(orig, dest)) {
-      val lineDir: Option[Direction] = Pos.possibleLineDirsFromSideMoveDir(origToDestDir).flatMap {
-        direction => direction(orig) match {
-          case (Some(squareInLine)) if(pieces.contains(squareInLine) && pieces(squareInLine).player == pieces(orig).player) => Some(direction)
-          case _ => None
+      val potentialLineDirs = Pos.potentialLineDirsFromSideMoveDir(origToDestDir)
+
+      potentialLineDirs.foreach { lineDir =>
+        val lineDir2ndPos: Option[Pos] = lineDir(orig)
+        val sideDirs = Pos.deducePotentialSideDirs(origToDestDir, lineDir)
+
+        lineDir2ndPos.foreach { secondPos =>
+          sideDirs.foreach { sideDir =>
+            sideDir(secondPos).foreach { side2ndPos =>
+              if (pieces.contains(secondPos))
+                if (side2ndPos == dest && sideDir(orig).isDefined)
+                  return pieces +
+                    (sideDir(orig).get -> pieces(orig)) - orig +
+                    (dest -> pieces(secondPos)) - secondPos
+                else {
+                  val lineDir3rdPos: Option[Pos] = lineDir(secondPos)
+                  lineDir3rdPos.foreach { thirdPos =>
+                    sideDir(thirdPos).foreach { side3rdPos =>
+                      if (pieces.contains(thirdPos) && side3rdPos == dest && sideDir(orig).isDefined) {
+                        return pieces +
+                          (sideDir(orig).get -> pieces(orig)) - orig +
+                          (side2ndPos -> pieces(secondPos)) - secondPos +
+                          (dest -> pieces(thirdPos)) - thirdPos
+                      }
+                    }
+                  }
+                }
+            }
+          }
         }
-      }.headOption
-      val sideDir: Option[Direction] = Pos.possibleLineDirsFromSideMoveDir(origToDestDir).flatMap {
-        direction => direction(orig) match {
-          case (Some(squareInLine)) if(!pieces.contains(squareInLine)) => Some(direction)
-          case _ => None
-        }
-      }.headOption
-      val lineDirSecondPos: Option[Pos] = lineDir.flatMap(direction => direction(orig))
-      val lineDirThirdPos: Option[Pos] = lineDirSecondPos.flatMap(direction => lineDir.flatMap(_(direction)))
-      val sideMovePosFromOrig: Option[Pos] = sideDir.flatMap(direction => direction(orig))
-      val diagonalPosFromOrig: Option[Pos] = (lineDir, sideMovePosFromOrig) match {
-        case ( Some(someLineDir), Some(origSideMove) ) => someLineDir(origSideMove)
-        case _ => None
       }
-      (lineDirSecondPos, lineDirThirdPos, sideMovePosFromOrig, diagonalPosFromOrig) match {
-        case ( Some(lineDirSecondPos), _, Some(sideMovePosFromOrig), Some(diagonalPosFromOrig) ) if (diagonalPosFromOrig.index == dest.index) => // oo
-          pieces +
-            (sideMovePosFromOrig -> pieces(orig)) - orig +
-            (diagonalPosFromOrig -> pieces(lineDirSecondPos)) - lineDirSecondPos
-        case ( Some(lineDirSecondPos), Some(lineDirThirdPos), Some(sideMovePosFromOrig), Some(diagonalPosFromOrig) ) => // ooo
-          pieces +
-            (sideMovePosFromOrig -> pieces(orig)) - orig +
-            (diagonalPosFromOrig -> pieces(lineDirSecondPos)) - lineDirSecondPos +
-            (dest -> pieces(lineDirThirdPos)) - lineDirThirdPos
-        case _ => pieces
-      }
+      return pieces
     } else {
       if (pieces.contains(dest)) {
-        val destLineMove: Option[Pos]     = origToDestDir(dest)
-        val destLineOneMove: Option[Pos]  = destLineMove.flatMap(direction => origToDestDir(direction))
-        val destLineTwoMove: Option[Pos]  = destLineOneMove.flatMap(direction => origToDestDir(direction))      
-        ( destLineMove, destLineOneMove, destLineTwoMove ) match {
-          case ( (None, _, _) ) => pieces + (dest -> pieces(orig)) - orig // __(_)o\
-          case ( (Some(destLinePos), _, _) ) if (!pieces.contains(destLinePos)) => pieces + (destLinePos -> pieces(dest)) + (dest -> pieces(orig)) - orig // __(_)o.
-          case ( (Some(destLinePos), None, _) ) => pieces + (destLinePos -> pieces(dest)) + (dest -> pieces(orig)) - orig // ___oo\
-          case ( (_, _, Some(desLineTwoPos)) ) => pieces + (desLineTwoPos -> pieces(dest)) + (dest -> pieces(orig)) - orig // ___oo.
+        val destLineOneMove: Option[Pos]    = origToDestDir(dest)
+        val destLineTwoMove: Option[Pos]    = destLineOneMove.flatMap(direction => origToDestDir(direction))
+
+        ( destLineOneMove, destLineTwoMove ) match {
+          case ( (None, _) ) /*__(_)o\*/ => pieces + (dest -> pieces(orig)) - orig
+          case ( (Some(destLineOnePos), _) ) if (!pieces.contains(destLineOnePos)) /*__(_)o.*/ => pieces + (destLineOnePos -> pieces(dest)) + (dest -> pieces(orig)) - orig
+          case ( (Some(destLineOnePos), None) ) /*___o(o.)\*/ => pieces + (destLineOnePos -> pieces(dest)) + (dest -> pieces(orig)) - orig
+          case ( (_, Some(destLineTwoPos)) ) /*___oo.*/ => pieces + (destLineTwoPos -> pieces(dest)) + (dest -> pieces(orig)) - orig
           case _ => pieces
         }
       } else pieces + (dest -> pieces(orig)) - (orig)
@@ -319,10 +331,10 @@ abstract class Variant private[variant] (
 
   override def hashCode: Int = id
 
-  private def isSideMove(orig: Pos, dest: Pos): Boolean = orig.dir(dest) match {
-    case dirString if (dirString == "upRight" || dirString == "downLeft") =>
-      if (orig.|<>|((square) => square.index == dest.index, Pos.dirFromString(orig.dir(dest))) == Nil) true // if we can't reach dest from orig using only the same direction.
-      else false
+  private def isSideMove(orig: Pos, dest: Pos): Boolean = orig.directionString(dest) match {
+    case direction if (direction == "upRight" || direction == "downLeft") =>
+      if ( (orig.|<>|((square) => square.index == dest.index, Pos.dirFromString(orig.directionString(dest)))).contains(dest) ) false
+      else true
     case _ => orig.rank.index != dest.rank.index && orig.file.index != dest.file.index
   }
 

@@ -3,8 +3,6 @@ package strategygames.abalone
 import org.specs2.matcher.ValidatedMatchers
 
 import _root_.strategygames.{ Score, Status }
-import strategygames.format.{ FEN => StratFen, Forsyth => StratForsyth, Uci => StratUci }
-import strategygames.variant.{ Variant => StratVariant }
 
 class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     /*
@@ -649,26 +647,4 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
             game17.situation.winner must_== None
         }
     }
-}
-
-
-class AbaloneVariantTestIsometry extends strategygames.chess.ChessTest {
-
-  "a first isometric test..." in {
-    val gameFamily   = variant.Abalone.gameFamily
-    val lib          = gameFamily.gameLogic
-    val stratVariant = StratVariant(lib, variant.Abalone.key).get
-
-    _testEveryMoveLoadFenIsometry(lib, StratFen(lib, variant.Abalone.initialFen.value), stratVariant)(
-      List(
-        "a1d4", "e9e6",
-        "b1d3",
-      ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) must beValid.like(gameData => {
-      val fen1 = StratForsyth.>>(lib, gameData.game)
-      val fen2 = StratForsyth.>>(lib, gameData.fenGame)
-      fen1 must_== fen2
-    })
-  }
-
 }

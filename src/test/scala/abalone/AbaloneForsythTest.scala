@@ -39,7 +39,7 @@ class AbaloneForsythTest extends AbaloneTest with ValidatedMatchers {
         }
 
         "describe the board, score, player and number of ply" in {
-            Forsyth>>(situationFromFen) must_== FEN("SS1ss/SSSsss/1SS1ss1/8/9/8/1ss1SS1/sssSSS/ss1SS 0 0 b 0 0")
+            Forsyth>>(situationFromFen) must_== FEN("SS1ss/SSSsss/1SS1ss1/8/9/8/1ss1SS1/sssSSS/ss1SS 0 0 b 0 1")
             Forsyth>>(game4.situation) must_== FEN("1S1ss/SSSsss/1SS1ss1/3S4/4s4/3s4/1ss1SS1/s1sSSS/1s1SS 0 0 w 3 1")
         }
     }

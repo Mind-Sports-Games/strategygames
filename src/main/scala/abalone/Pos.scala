@@ -194,7 +194,7 @@ case class Pos private (index: Int) extends AnyVal {
   def neighbours: List[Option[Pos]] = List(left, upLeft, upRight, right, downRight, downLeft)
   def neighboursAsDirs: Directions = List(_.left, _.upLeft, _.upRight, _.right, _.downRight, _.downLeft)
 
-  def dir(dest: Pos): String =
+  def directionString(dest: Pos): String =
     (file.index - dest.file.index, rank.index - dest.rank.index) match {
       case ( (fileDiff, 0) ) =>
         if (fileDiff > 0) "left"
@@ -216,7 +216,7 @@ case class Pos private (index: Int) extends AnyVal {
       p :: (if (stop(p)) Nil else p.|<>|(stop, dir))
     } getOrElse Nil
 
-  def isSameDirection(pos1: Pos, pos2: Pos): Boolean = dir(pos1) == pos1.dir(pos2)
+  def isSameDirection(pos1: Pos, pos2: Pos): Boolean = directionString(pos1) == pos1.directionString(pos2)
 
   @inline def file = File of this // column (as if it was an index in a 1D array)
   @inline def rank = Rank of this // horizontal row, makes sense in a 2D array
@@ -310,10 +310,11 @@ object Pos {
     case _                  => (_:Pos) => None
   }
 
-  def sideMovesDirsFromDir(dir: Direction): Directions = {
+  // used by valid moves generator, based on the lineDir currently considered
+  def sideMoveDirsFromLineDir(lineDir: Direction): Directions = {
     val x = Pos.E5
-    val y = dir(x).getOrElse(Pos.A1)
-    x.dir(y) match {
+    val y = lineDir(x).getOrElse(Pos.A1)
+    x.directionString(y) match {
       case "left"       => List(_.downLeft, _.upLeft)
       case "upLeft"     => List(_.left, _.upRight)
       case "upRight"    => List(_.upLeft, _.right)
@@ -324,15 +325,72 @@ object Pos {
     }
   }
 
-  def possibleLineDirsFromSideMoveDir(dir: Direction): Directions = {
+  def potentialLineDirsFromSideMoveDir(sideMoveDir: Direction): Directions = {
+    val x = Pos.E5
+    val y = sideMoveDir(x).getOrElse(Pos.A1)
+    x.directionString(y) match {
+      case "upLeft"     => List(_.left, _.upLeft)
+      case "upRight"    => List(_.upLeft, _.upRight, _.right)
+      case "downRight"  => List(_.right, _.downRight)
+      case "downLeft"   => List(_.downRight, _.downLeft, _.left)
+      case _            => List()
+    }
+  }
+  def potentialSideMoveDirsFromGlobalDir(globalDir: Direction): Directions = {
+    val x = Pos.E5
+    val y = globalDir(x).getOrElse(Pos.A1)
+    x.directionString(y) match {
+      case "upLeft"     => List(_.left, _.upLeft)
+      case "upRight"    => List(_.upLeft, _.upRight, _.right)
+      case "downRight"  => List(_.right, _.downRight)
+      case "downLeft"   => List(_.downLeft, _.left, _.downRight)
+      case _            => List()
+    }
+  }
+  def deducePotentialSideDirs(globalDir: Direction, lineDir: Direction): Directions = {
+    val x = Pos.E5
+    val y = globalDir(x).getOrElse(Pos.A1)
+    val z = lineDir(x).getOrElse(Pos.A1)
+    x.directionString(y) match {
+      case "downLeft" => {
+        x.directionString(z) match {
+          case "downLeft" => List(_.left, _.downRight)
+          case "downRight" => List(_.downLeft)
+          case "left" => List(_.downLeft)
+        }
+      }
+      case "upRight" => {
+        x.directionString(z) match {
+          case "upLeft" => List(_.upRight)
+          case "upRight" => List(_.right, _.upLeft)
+          case "right" => List(_.upRight)
+        }
+      }
+      case "upLeft" => {
+        x.directionString(z) match {
+          case "upLeft" => List(_.left)
+          case "left" => List(_.upLeft)
+        }
+      }
+      case "downRight" => {
+        x.directionString(z) match {
+          case "downRight" => List(_.right)
+          case "right" => List(_.downRight)
+        }
+      }
+    }
+  }
+
+  def reverseDir(dir: Direction): Direction = {
     val x = Pos.E5
     val y = dir(x).getOrElse(Pos.A1)
-    x.dir(y) match {
-      case "upLeft"     => List(_.left, _.upLeft)
-      case "upRight"    => List(_.upRight, _.right)
-      case "downRight"  => List(_.right, _.downRight)
-      case "downLeft"   => List(_.downLeft, _.left)
-      case _            => List()
+    x.directionString(y) match {
+      case "left"       => _.right
+      case "upLeft"     => _.downRight
+      case "upRight"    => _.downLeft
+      case "right"      => _.left
+      case "downRight"  => _.upLeft
+      case "downLeft"   => _.upRight
     }
   }
 

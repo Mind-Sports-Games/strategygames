@@ -29,8 +29,7 @@ object Forsyth {
       ).withHistory(
         History(
           score = Score(fen.player1Score, fen.player2Score),
-          // seems like we might be using History.halfMoveClock incorrectly
-          halfMoveClock = fen.fullMove.getOrElse(0)
+          halfMoveClock = fen.halfMovesSinceLastCapture.getOrElse(0)
         )
       )
     )
@@ -70,7 +69,7 @@ object Forsyth {
     val scoreStr  = game.situation.board.history.score.fenStr
     val player    = game.situation.player.fold('b', 'w')
     val halfMoves = game.situation.board.history.halfMoveClock
-    val fullMoves  = game.turnCount
+    val fullMoves  = game.fullTurnCount
     FEN(s"${boardFen} ${scoreStr} ${player} ${halfMoves} ${fullMoves}")
   }
 
