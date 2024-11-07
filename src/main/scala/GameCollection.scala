@@ -442,7 +442,7 @@ object GameFamily {
     def key               = "abalone"
     def gameLogic         = GameLogic.Abalone()
     def hasFishnet        = false
-    def hasAnalysisBoard  = false
+    def hasAnalysisBoard  = true
     def defaultVariant    = Variant.Abalone(strategygames.abalone.variant.Abalone)
     def variants          = Variant.all(GameLogic.Abalone()).filter(_.gameFamily == this)
     def displayPiece      = "display"

@@ -11,7 +11,7 @@ import strategygames.abalone.variant.Variant
   */
 object Forsyth {
 
-  val initial = FEN("SS1ss/SSSsss/1SS1ss1/8/9/8/1ss1SS1/sssSSS/ss1SS 0 0 b 0 0")
+  val initial = FEN("SS1ss/SSSsss/1SS1ss1/8/9/8/1ss1SS1/sssSSS/ss1SS 0 0 b 0 1")
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
     Some(
@@ -95,13 +95,14 @@ object Forsyth {
             }
             if (piece.player == Player.P1)
               fen.append(piece.forsyth.toString.toLowerCase())
-            else fen.append(piece.forsyth.toString.toUpperCase())
+            else
+              fen.append(piece.forsyth.toString.toUpperCase())
         }
       }
       if (empty > 0) fen.append(s"${empty},")
       fen.append('/')
     }
-    fen.toString.replace(",/", "/").dropRight(1)
+    fen.toString.replace(",/", "/").dropRight(1).pp("abalone Forsyth boardPart()")
   }
 
   def boardAndPlayer(situation: Situation): String =
