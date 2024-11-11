@@ -669,7 +669,7 @@ case class ByoyomiClock(
     else {
       val player        = players(c)
       val timeUsed      = timestampFor(c).fold(Centis(0))(t =>
-        if (withGrace) (toNow(t) - (players(c).lag.quota atMost Centis(200))) nonNeg
+        if (withGrace) (toNow(t) - (player.lag.quota atMost Centis(200))) nonNeg
         else toNow(t)
       )
       val timeRemaining = player.remaining + player.periodsLeft * player.byoyomi
@@ -770,7 +770,8 @@ case class ByoyomiClock(
           if (usingByoyomi)
             updatePlayer(player) {
               _.setRemaining(
-                (remaining - moveTime) atLeast (if (switchClock) competitor.byoyomi
+                (remaining - moveTime) atLeast (if (!clockActive) Centis(0)
+                                                else if (switchClock) competitor.byoyomi
                                                 else timeRemainingAfterMove)
               )
                 .spendPeriods(periodSpan)
