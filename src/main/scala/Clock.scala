@@ -770,7 +770,8 @@ case class ByoyomiClock(
           if (usingByoyomi)
             updatePlayer(player) {
               _.setRemaining(
-                (remaining - moveTime) atLeast (if (switchClock) competitor.byoyomi
+                (remaining - moveTime) atLeast (if (!clockActive) Centis(0)
+                                                else if (switchClock) competitor.byoyomi
                                                 else timeRemainingAfterMove)
               )
                 .spendPeriods(periodSpan)
