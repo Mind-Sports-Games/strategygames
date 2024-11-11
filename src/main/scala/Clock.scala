@@ -669,11 +669,18 @@ case class ByoyomiClock(
     else {
       val player        = players(c)
       val timeUsed      = timestampFor(c).fold(Centis(0))(t =>
-        if (withGrace) (toNow(t) - (players(c).lag.quota atMost Centis(200))) nonNeg
+        // NOTE: Step 1 (withGrace = true): This only takes into account the total quota, not the lag included in the move
+        // NOTE: Step 6 (withGrace = false): Only take into account the clock itself.
+        if (withGrace) (toNow(t) - (player.lag.quota atMost Centis(200))) nonNeg
         else toNow(t)
       )
       val timeRemaining = player.remaining + player.periodsLeft * player.byoyomi
 
+      // NOTE: the timeUsed is based on the timestamp, when it's none the timeUsed is 0, when it's not none, the timeUsed is greater than 0
+      // NOTE: Step 1: during step one the move time hasn't been applied, so the time remaining is fine. Because the bot was in their last byoyomi periods
+      //               they have at most the amount of time for a single byoyomi period left
+      // NOTE: Step 6: The odd part was that after the move was played we would expect this to be fals as well, but it wasn't.
+      //               This is due to the remaining being set to the byoyomi period time, due to a bug
       timeRemaining <= timeUsed
     }
 
@@ -758,6 +765,8 @@ case class ByoyomiClock(
         val moveTime            = (elapsed - lagComp) nonNeg
 
         // As long as game is still in progress, and we have enough time left (including byoyomi and periods)
+        // NOTE: Step 1 - this would have evaluated to true, and things are good
+        // NOTE: Step 6 - this properly evaluated to false and things should have been good
         val clockActive  = gameActive && moveTime < remaining + competitor.periodsLeft * competitor.byoyomi
         // The number of periods the move stretched over
         val periodSpan   = periodsInUse(player, moveTime)
@@ -769,8 +778,14 @@ case class ByoyomiClock(
         val newC                   =
           if (usingByoyomi)
             updatePlayer(player) {
+              // NOTE: Step 6: The bug was that, when we were evaluating this section, the atLeast() was correctly
+              //               always set to the competitor byoyomi, because we were changing who's turn it was,
+              //               this would set the remaining time to the byoyomi time, which was then used
+              //               in the above outOfTime check and the outOfTime check was then incorrectly saying that they
+              //               were not out of time, which prevented the Flagged operation in lila.
               _.setRemaining(
-                (remaining - moveTime) atLeast (if (switchClock) competitor.byoyomi
+                (remaining - moveTime) atLeast (if (!clockActive) Centis(0)
+                                                else if (switchClock) competitor.byoyomi
                                                 else timeRemainingAfterMove)
               )
                 .spendPeriods(periodSpan)
@@ -797,6 +812,8 @@ case class ByoyomiClock(
                 )
             }
 
+        // NOTE: Step 1: This was true, so hardStop was not called.
+        // NOTE: Step 6: This was false, so hardStop was not called (correctly).
         if (clockActive) newC else newC.hardStop
       }
     }).switch(switchClock)
