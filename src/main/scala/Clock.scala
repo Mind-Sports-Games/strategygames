@@ -778,11 +778,11 @@ case class ByoyomiClock(
         val newC                   =
           if (usingByoyomi)
             updatePlayer(player) {
-              // NOTE: Step 6: The bug was that, when we were evaluating this section, the atLeast() was correctly
-              //               always set to the competitor byoyomi, because we were changing who's turn it was,
-              //               this would set the remaining time to the byoyomi time, which was then used
-              //               in the above outOfTime check and the outOfTime check was then incorrectly saying that they
-              //               were not out of time, which prevented the Flagged operation in lila.
+              // NOTE: Step 6: The bug was: the atLeast() was incorrectly setting the remaining time to the
+              //               a single byoyomi period (competitor.byoyomi). This value was then used
+              //               in the above outOfTime check and the outOfTime check incorrectly (correctly?)
+              //               determined that the player still had remaining time. This prevented Flagged
+              //               case in lila.
               _.setRemaining(
                 (remaining - moveTime) atLeast (if (!clockActive) Centis(0)
                                                 else if (switchClock) competitor.byoyomi
