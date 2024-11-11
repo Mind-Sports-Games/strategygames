@@ -758,7 +758,6 @@ case class ByoyomiClock(
         val moveTime            = (elapsed - lagComp) nonNeg
 
         // As long as game is still in progress, and we have enough time left (including byoyomi and periods)
-        // NOTE: Step 6 - this properly evaluated to false and things should have been good
         val clockActive  = gameActive && moveTime < remaining + competitor.periodsLeft * competitor.byoyomi
         // The number of periods the move stretched over
         val periodSpan   = periodsInUse(player, moveTime)
@@ -770,11 +769,6 @@ case class ByoyomiClock(
         val newC                   =
           if (usingByoyomi)
             updatePlayer(player) {
-              // NOTE: Step 6: The bug was: the atLeast() was incorrectly setting the remaining time to the
-              //               a single byoyomi period (competitor.byoyomi). This value was then used
-              //               in the above outOfTime check and the outOfTime check incorrectly (correctly?)
-              //               determined that the player still had remaining time. This prevented Flagged
-              //               case in lila.
               _.setRemaining(
                 (remaining - moveTime) atLeast (if (switchClock) competitor.byoyomi
                                                 else timeRemainingAfterMove)
@@ -803,8 +797,6 @@ case class ByoyomiClock(
                 )
             }
 
-        // NOTE: Step 1: This was true, so hardStop was not called.
-        // NOTE: Step 6: This was false, so hardStop was not called (correctly).
         if (clockActive) newC else newC.hardStop
       }
     }).switch(switchClock)
