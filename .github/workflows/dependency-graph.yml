@@ -12,6 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: scalacenter/sbt-dependency-submissions@v3
+      - uses: scalacenter/sbt-dependency-submission@v3
         with:
           working-directory: './'
