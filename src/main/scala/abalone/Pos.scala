@@ -87,7 +87,7 @@ object Piotr {
     // Pos.F1.index -> 'f', // does not need to exist
     // Pos.G1.index -> 'g',
     // Pos.H1.index -> 'h',
-    Pos.A2.index -> 'i',  // Pos.A1.index = 9, which is associated to 'i' : Piotr.lookup(9) will return 'i'
+    Pos.A2.index -> 'i', // Pos.A1.index = 9, which is associated to 'i' : Piotr.lookup(9) will return 'i'
     Pos.B2.index -> 'j',
     Pos.C2.index -> 'k',
     Pos.D2.index -> 'l',
@@ -183,7 +183,7 @@ case class Pos private (index: Int) extends AnyVal {
   \   /
   - o -
   /   \
-  */
+   */
   def left: Option[Pos]      = Pos.at(file.index - 1, rank.index)
   def downLeft: Option[Pos]  = Pos.at(file.index - 1, rank.index - 1)
   def upLeft: Option[Pos]    = Pos.at(file.index, rank.index + 1)
@@ -192,17 +192,17 @@ case class Pos private (index: Int) extends AnyVal {
   def upRight: Option[Pos]   = Pos.at(file.index + 1, rank.index + 1)
 
   def neighbours: List[Option[Pos]] = List(left, upLeft, upRight, right, downRight, downLeft)
-  def neighboursAsDirs: Directions = List(_.left, _.upLeft, _.upRight, _.right, _.downRight, _.downLeft)
+  def neighboursAsDirs: Directions  = List(_.left, _.upLeft, _.upRight, _.right, _.downRight, _.downLeft)
 
   def directionString(dest: Pos): String =
     (file.index - dest.file.index, rank.index - dest.rank.index) match {
-      case ( (fileDiff, 0) ) =>
+      case (fileDiff, 0)        =>
         if (fileDiff > 0) "left"
         else "right"
-      case ( (0, rankDiff) ) =>
+      case (0, rankDiff)        =>
         if (rankDiff > 0) "downRight"
         else "upLeft"
-      case ( (fileDiff, rankDiff) ) =>
+      case (fileDiff, rankDiff) =>
         if (fileDiff > 0 && rankDiff > 0) "downLeft"
         else if (fileDiff < 0 && rankDiff < 0) "upRight"
         else if (fileDiff < 0 && rankDiff > 0) "downRight"
@@ -260,7 +260,7 @@ case class Pos private (index: Int) extends AnyVal {
 }
 
 object Pos {
-/*
+  /*
   indexes of Pos outside of the hexagon :
                                           row   col
 9 -   72  73  74  75 '&' ''' '(' ')' '*'   8:   >3 (<9)
@@ -274,10 +274,10 @@ object Pos {
 1 -  'a' 'b' 'c' 'd' 'e'  5   6   7   8    0:   <5
       |   |   |   |   |   |   |   |   |
       A   B   C   D   E   F   G   H   I
-*/
+   */
   def isInHexagon(index: Int): Boolean = {
     if (index < 0) return false
-    val row = index / File.all.size
+    val row       = index / File.all.size
     val remainder = index % File.all.size
     if (index >= File.all.size * Rank.all.size) return false
     if (row < (File.all.size / 2 + 1)) {
@@ -293,7 +293,8 @@ object Pos {
     else None
 
   def apply(file: File, rank: Rank): Option[Pos] =
-    if (isInHexagon(file.index + File.all.size * rank.index)) Some(new Pos(file.index + File.all.size * rank.index))
+    if (isInHexagon(file.index + File.all.size * rank.index))
+      Some(new Pos(file.index + File.all.size * rank.index))
     else None
 
   def at(x: Int, y: Int): Option[Pos] =
@@ -301,13 +302,13 @@ object Pos {
     else None
 
   def dirFromString(dir: String): Direction = dir match {
-    case "left"       => _.left
-    case "upLeft"     => _.upLeft
-    case "upRight"    => _.upRight
-    case "right"      => _.right
-    case "downRight"  => _.downRight
-    case "downLeft"   => _.downLeft
-    case _                  => (_:Pos) => None
+    case "left"      => _.left
+    case "upLeft"    => _.upLeft
+    case "upRight"   => _.upRight
+    case "right"     => _.right
+    case "downRight" => _.downRight
+    case "downLeft"  => _.downLeft
+    case _           => (_: Pos) => None
   }
 
   // used by valid moves generator, based on the lineDir currently considered
@@ -315,36 +316,36 @@ object Pos {
     val x = Pos.E5
     val y = lineDir(x).getOrElse(Pos.A1)
     x.directionString(y) match {
-      case "left"       => List(_.downLeft, _.upLeft)
-      case "upLeft"     => List(_.left, _.upRight)
-      case "upRight"    => List(_.upLeft, _.right)
-      case "right"      => List(_.upRight, _.downRight)
-      case "downRight"  => List(_.right, _.downLeft)
-      case "downLeft"   => List(_.downRight, _.left)
-      case _            => List()
+      case "left"      => List(_.downLeft, _.upLeft)
+      case "upLeft"    => List(_.left, _.upRight)
+      case "upRight"   => List(_.upLeft, _.right)
+      case "right"     => List(_.upRight, _.downRight)
+      case "downRight" => List(_.right, _.downLeft)
+      case "downLeft"  => List(_.downRight, _.left)
+      case _           => List()
     }
   }
 
-  def potentialLineDirsFromSideMoveDir(sideMoveDir: Direction): Directions = {
+  def potentialLineDirsFromSideMoveDir(sideMoveDir: Direction): Directions          = {
     val x = Pos.E5
     val y = sideMoveDir(x).getOrElse(Pos.A1)
     x.directionString(y) match {
-      case "upLeft"     => List(_.left, _.upLeft)
-      case "upRight"    => List(_.upLeft, _.upRight, _.right)
-      case "downRight"  => List(_.right, _.downRight)
-      case "downLeft"   => List(_.downRight, _.downLeft, _.left)
-      case _            => List()
+      case "upLeft"    => List(_.left, _.upLeft)
+      case "upRight"   => List(_.upLeft, _.upRight, _.right)
+      case "downRight" => List(_.right, _.downRight)
+      case "downLeft"  => List(_.downRight, _.downLeft, _.left)
+      case _           => List()
     }
   }
-  def potentialSideMoveDirsFromGlobalDir(globalDir: Direction): Directions = {
+  def potentialSideMoveDirsFromGlobalDir(globalDir: Direction): Directions          = {
     val x = Pos.E5
     val y = globalDir(x).getOrElse(Pos.A1)
     x.directionString(y) match {
-      case "upLeft"     => List(_.left, _.upLeft)
-      case "upRight"    => List(_.upLeft, _.upRight, _.right)
-      case "downRight"  => List(_.right, _.downRight)
-      case "downLeft"   => List(_.downLeft, _.left, _.downRight)
-      case _            => List()
+      case "upLeft"    => List(_.left, _.upLeft)
+      case "upRight"   => List(_.upLeft, _.upRight, _.right)
+      case "downRight" => List(_.right, _.downRight)
+      case "downLeft"  => List(_.downLeft, _.left, _.downRight)
+      case _           => List()
     }
   }
   def deducePotentialSideDirs(globalDir: Direction, lineDir: Direction): Directions = {
@@ -352,30 +353,30 @@ object Pos {
     val y = globalDir(x).getOrElse(Pos.A1)
     val z = lineDir(x).getOrElse(Pos.A1)
     x.directionString(y) match {
-      case "downLeft" => {
+      case "downLeft"  => {
         x.directionString(z) match {
-          case "downLeft" => List(_.left, _.downRight)
+          case "downLeft"  => List(_.left, _.downRight)
           case "downRight" => List(_.downLeft)
-          case "left" => List(_.downLeft)
+          case "left"      => List(_.downLeft)
         }
       }
-      case "upRight" => {
+      case "upRight"   => {
         x.directionString(z) match {
-          case "upLeft" => List(_.upRight)
+          case "upLeft"  => List(_.upRight)
           case "upRight" => List(_.right, _.upLeft)
-          case "right" => List(_.upRight)
+          case "right"   => List(_.upRight)
         }
       }
-      case "upLeft" => {
+      case "upLeft"    => {
         x.directionString(z) match {
           case "upLeft" => List(_.left)
-          case "left" => List(_.upLeft)
+          case "left"   => List(_.upLeft)
         }
       }
       case "downRight" => {
         x.directionString(z) match {
           case "downRight" => List(_.right)
-          case "right" => List(_.downRight)
+          case "right"     => List(_.downRight)
         }
       }
     }
@@ -385,12 +386,12 @@ object Pos {
     val x = Pos.E5
     val y = dir(x).getOrElse(Pos.A1)
     x.directionString(y) match {
-      case "left"       => _.right
-      case "upLeft"     => _.downRight
-      case "upRight"    => _.downLeft
-      case "right"      => _.left
-      case "downRight"  => _.upLeft
-      case "downLeft"   => _.upRight
+      case "left"      => _.right
+      case "upLeft"    => _.downRight
+      case "upRight"   => _.downLeft
+      case "right"     => _.left
+      case "downRight" => _.upLeft
+      case "downLeft"  => _.upRight
     }
   }
 
@@ -420,7 +421,8 @@ object Pos {
   // val G1 = new Pos(6) //
   // val H1 = new Pos(7) //
   // val I1 = new Pos(8) //
-  val A2 = new Pos(9) // means the 9th square of our square grid is represented by A2 (index starting bottom left)
+  val A2 =
+    new Pos(9) // means the 9th square of our square grid is represented by A2 (index starting bottom left)
   val B2 = new Pos(10)
   val C2 = new Pos(11)
   val D2 = new Pos(12)
@@ -493,7 +495,8 @@ object Pos {
   val H9 = new Pos(79)
   val I9 = new Pos(80)
 
-  val all: List[Pos] = (0 to (File.all.size * Rank.all.size) - 1).map(new Pos(_)).toList.filter(i => isInHexagon(i.index))
+  val all: List[Pos] =
+    (0 to (File.all.size * Rank.all.size) - 1).map(new Pos(_)).toList.filter(i => isInHexagon(i.index))
 
   val allKeys: Map[String, Pos] = all
     .map { pos =>

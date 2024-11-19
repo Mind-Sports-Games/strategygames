@@ -18,31 +18,34 @@ case class Move(
   def withHistory(h: History) = copy(after = after withHistory h)
 
   override def finalizeAfter: Board = {
-    val board = after.updateHistory({ h => h.copy(
-      lastTurn = if (autoEndTurn) h.currentTurn :+ toUci else h.lastTurn,
-      currentTurn = if (autoEndTurn) List() else h.currentTurn :+ toUci,
-      score = if (captures) h.score.add(situationBefore.player) else h.score,
-      halfMoveClock =
-        if (captures) 0
-        else h.halfMoveClock + 1
-    )
-    })
+    val board = after.updateHistory { h =>
+      h.copy(
+        lastTurn = if (autoEndTurn) h.currentTurn :+ toUci else h.lastTurn,
+        currentTurn = if (autoEndTurn) List() else h.currentTurn :+ toUci,
+        score = if (captures) h.score.add(situationBefore.player) else h.score,
+        halfMoveClock =
+          if (captures) 0
+          else h.halfMoveClock + 1
+      )
+    }
 
     // Update position hashes last, only after updating the board.
-    (board.variant.finalizeBoard(
-      board,
-      toUci,
-      capture.flatMap(before.apply)
-    ).updateHistory({ h =>
-      lazy val positionHashesOfSituationBefore =
-        if (h.positionHashes.isEmpty) Hash(situationBefore)
-        else h.positionHashes
-      val resetsPositionHashes                 = board.variant.isIrreversible(this)
-      val basePositionHashes                   =
-        if (resetsPositionHashes) Array.empty: PositionHash
-        else positionHashesOfSituationBefore
-      h.copy(positionHashes = Hash(Situation(after, !piece.player)) ++ basePositionHashes)
-    }))
+    board.variant
+      .finalizeBoard(
+        board,
+        toUci,
+        capture.flatMap(before.apply)
+      )
+      .updateHistory { h =>
+        lazy val positionHashesOfSituationBefore =
+          if (h.positionHashes.isEmpty) Hash(situationBefore)
+          else h.positionHashes
+        val resetsPositionHashes                 = board.variant.isIrreversible(this)
+        val basePositionHashes                   =
+          if (resetsPositionHashes) Array.empty: PositionHash
+          else positionHashesOfSituationBefore
+        h.copy(positionHashes = Hash(Situation(after, !piece.player)) ++ basePositionHashes)
+      }
   }
 
   def situationAfter = Situation(finalizeAfter, if (autoEndTurn) !piece.player else piece.player)

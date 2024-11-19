@@ -39,8 +39,8 @@ object Visual {
       for (x <- File.all) yield {
         val pos = Pos(x, y)
         pos match {
-          case Some(pos) =>         markedPoss.get(pos) getOrElse board(pos).fold(' ')(_ forsyth)
-          case None => None
+          case Some(pos) => markedPoss.get(pos) getOrElse board(pos).fold(' ')(_ forsyth)
+          case None      => None
         }
       }
     } mkString

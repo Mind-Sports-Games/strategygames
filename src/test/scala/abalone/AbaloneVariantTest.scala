@@ -2,7 +2,7 @@ package strategygames.abalone
 
 import org.specs2.matcher.ValidatedMatchers
 
-import _root_.strategygames.{ Score, Status }
+import strategygames.{ Score, Status }
 
 class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     /*

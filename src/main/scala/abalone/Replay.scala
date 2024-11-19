@@ -137,7 +137,7 @@ object Replay {
             Pos.fromKey(dest),
             endTurn
           )
-        case (action: String, _)                              =>
+        case (action: String, _)                   =>
           sys.error(s"Invalid move for replay: $action")
       }
 

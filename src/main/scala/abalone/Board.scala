@@ -9,12 +9,12 @@ case class Board(
     history: History,
     variant: Variant
 ) {
-  def apply(at: Pos): Option[Piece] = pieces.get(at)
+  def apply(at: Pos): Option[Piece]                = pieces.get(at)
   def apply(file: File, rank: Rank): Option[Piece] = {
     val pos = Pos(file, rank)
     pos match {
       case Some(pos) => pieces.get(pos)
-      case None => None
+      case None      => None
     }
   }
 
@@ -39,8 +39,8 @@ case class Board(
 
   override def toString = s"$variant Position after ${history.recentTurnUciString}"
 
-  lazy val actors: Map[Pos, Actor] = pieces.map {
-    case (pos, piece) => (pos, Actor(piece, pos, this))
+  lazy val actors: Map[Pos, Actor] = pieces.map { case (pos, piece) =>
+    (pos, Actor(piece, pos, this))
   }
 
   lazy val posMap: Map[Piece, Iterable[Pos]] = pieces.groupMap(_._2)(_._1)

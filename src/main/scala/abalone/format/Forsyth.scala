@@ -11,7 +11,7 @@ import strategygames.abalone.variant.Variant
   */
 object Forsyth {
 
-  val initial = FEN("SS1ss/SSSsss/1SS1ss1/8/9/8/1ss1SS1/sssSSS/ss1SS 0 0 b 0 1")
+  val initial = FEN("ss1SS/sssSSS/1ss1SS1/8/9/8/1SS1ss1/SSSsss/SS1ss 0 0 b 0 1")
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
     Some(
@@ -69,7 +69,7 @@ object Forsyth {
     val scoreStr  = game.situation.board.history.score.fenStr
     val player    = game.situation.player.fold('b', 'w')
     val halfMoves = game.situation.board.history.halfMoveClock
-    val fullMoves  = game.fullTurnCount
+    val fullMoves = game.fullTurnCount
     FEN(s"${boardFen} ${scoreStr} ${player} ${halfMoves} ${fullMoves}")
   }
 
@@ -87,16 +87,16 @@ object Forsyth {
       empty = 0
       for (x <- File.all) {
         board(x, y) match {
-          case None        => if(Pos(x, y).isDefined) empty = empty + 1
+          case None        => if (Pos(x, y).isDefined) empty = empty + 1
           case Some(piece) =>
             if (empty > 0) {
               fen.append(empty)
               empty = 0
             }
             if (piece.player == Player.P1)
-              fen.append(piece.forsyth.toString.toLowerCase())
-            else
               fen.append(piece.forsyth.toString.toUpperCase())
+            else
+              fen.append(piece.forsyth.toString.toLowerCase())
         }
       }
       if (empty > 0) fen.append(s"${empty},")
