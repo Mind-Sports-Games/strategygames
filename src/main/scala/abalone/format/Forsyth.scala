@@ -102,7 +102,7 @@ object Forsyth {
       if (empty > 0) fen.append(s"${empty},")
       fen.append('/')
     }
-    fen.toString.replace(",/", "/").dropRight(1).pp("abalone Forsyth boardPart()")
+    fen.toString.replace(",/", "/").dropRight(1)
   }
 
   def boardAndPlayer(situation: Situation): String =
