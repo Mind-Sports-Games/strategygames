@@ -3,8 +3,6 @@ package strategygames.samurai
 import com.joansala.game.oware.OwareGame
 import com.joansala.game.oware.OwareBoard
 
-import cats.implicits._
-
 import strategygames.Player
 import strategygames.samurai.format.FEN
 import strategygames.samurai.variant.Variant
@@ -177,9 +175,9 @@ object Api {
     lazy val gameOutcome: Int      = position.outcome()
     lazy val isRepetition: Boolean = position.isRepetition() && !allSeedsOnSameSide
 
-    lazy val allSeedsOnSameSide: Boolean = toPosition
-      .take(variant.boardSize.width)
-      .sum === 0 || toPosition.drop(variant.boardSize.width).take(variant.boardSize.width).sum === 0;
+    lazy val allSeedsOnSameSide: Boolean =
+      toPosition.take(variant.boardSize.width).sum == 0 ||
+        toPosition.drop(variant.boardSize.width).take(variant.boardSize.width).sum == 0
 
     val legalMoves: Array[Int] = {
       position.resetCursor()
