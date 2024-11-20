@@ -176,7 +176,7 @@ case class Situation(board: Board, player: Player) {
       if (board.variant.backgammonPosition(this, player)) _.ResignBackgammon
       else if (board.variant.gammonPosition(this, player)) _.ResignGammon
       else _.Resign
-    else if (board.history.score(player) == 0) _.ResignBackgammon
+    else if (board.history.score(player) == 0 && board.variant.key != "hyper") _.ResignBackgammon
     else _.Resign
 
   def outOfTimeStatus: Status.type => Status =
@@ -184,7 +184,7 @@ case class Situation(board: Board, player: Player) {
       if (board.variant.backgammonPosition(this, player)) _.OutoftimeBackgammon
       else if (board.variant.gammonPosition(this, player)) _.OutoftimeGammon
       else _.Outoftime
-    else if (board.history.score(player) == 0) _.OutoftimeBackgammon
+    else if (board.history.score(player) == 0 && board.variant.key != "hyper") _.OutoftimeBackgammon
     else _.Outoftime
 
   // only works when we are not mid turn and have not rolled dice
@@ -313,7 +313,8 @@ case class Situation(board: Board, player: Player) {
         .contains(false)
 
   def insufficientMaterialStatus: Status.type => Status =
-    if (opponentHasInsufficientMaterialForBackgammon) _.GinBackgammon
+    if (board.variant.key == "hyper") _.RuleOfGin // TODO fix correctly when using doubling cube
+    else if (opponentHasInsufficientMaterialForBackgammon) _.GinBackgammon
     else if (opponentHasInsufficientMaterialForGammon) _.GinGammon
     else _.RuleOfGin
 
