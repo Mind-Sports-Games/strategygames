@@ -255,36 +255,32 @@ abstract class Variant private[variant] (
     if (isSideMove(orig, dest)) {
       val potentialLineDirs = Pos.potentialLineDirsFromSideMoveDir(origToDestDir)
 
-      potentialLineDirs.foreach { lineDir =>
-        val lineDir2ndPos: Option[Pos] = lineDir(orig)
-        val sideDirs                   = Pos.deducePotentialSideDirs(origToDestDir, lineDir)
-
-        lineDir2ndPos.foreach { secondPos =>
-          sideDirs.foreach { sideDir =>
-            sideDir(secondPos).foreach { side2ndPos =>
-              if (pieces.contains(secondPos))
-                if (side2ndPos == dest && sideDir(orig).isDefined)
-                  return pieces +
+      potentialLineDirs.flatMap { lineDir =>
+        lineDir(orig).toList.flatMap { secondPos =>
+          Pos.deducePotentialSideDirs(origToDestDir, lineDir).flatMap { sideDir =>
+            sideDir(secondPos).toList.flatMap { side2ndPos =>
+              if (pieces.contains(secondPos)) {
+                if (side2ndPos == dest && sideDir(orig).isDefined) {
+                  List(pieces +
                     (sideDir(orig).get -> pieces(orig)) - orig +
-                    (dest              -> pieces(secondPos)) - secondPos
-                else {
-                  val lineDir3rdPos: Option[Pos] = lineDir(secondPos)
-                  lineDir3rdPos.foreach { thirdPos =>
-                    sideDir(thirdPos).foreach { side3rdPos =>
-                      if (pieces.contains(thirdPos) && side3rdPos == dest && sideDir(orig).isDefined) {
-                        return pieces +
+                    (dest              -> pieces(secondPos)) - secondPos)
+                } else {
+                  lineDir(secondPos).toList.flatMap { thirdPos =>
+                    sideDir(thirdPos).toList.flatMap { side3rdPos =>
+                      if (pieces.contains(thirdPos) && side3rdPos == dest && sideDir(orig).isDefined)
+                        List(pieces +
                           (sideDir(orig).get -> pieces(orig)) - orig +
                           (side2ndPos        -> pieces(secondPos)) - secondPos +
-                          (dest              -> pieces(thirdPos)) - thirdPos
-                      }
+                          (dest              -> pieces(thirdPos)) - thirdPos)
+                      else List.empty
                     }
                   }
                 }
+              } else List.empty
             }
           }
         }
-      }
-      return pieces
+      }.headOption.getOrElse(pieces)
     } else {
       if (pieces.contains(dest)) {
         val destLineOneMove: Option[Pos] = origToDestDir(dest)
