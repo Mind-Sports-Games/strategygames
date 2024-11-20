@@ -2,7 +2,7 @@ package strategygames.backgammon
 package variant
 
 import strategygames.backgammon._
-import strategygames.GameFamily
+import strategygames.{ GameFamily, Player }
 
 case object Hyper
     extends Variant(
@@ -21,8 +21,10 @@ case object Hyper
   override def numStartingPiecesPerPlayer: Int = 3
 
   // gammon and backgammon only count when the cube has been doubled in this variant
-  override def gammonWin(situation: Situation)     = false
-  override def backgammonWin(situation: Situation) = false
+  override def gammonWin(situation: Situation)                          = false
+  override def gammonPosition(situation: Situation, player: Player)     = false
+  override def backgammonWin(situation: Situation)                      = false
+  override def backgammonPosition(situation: Situation, player: Player) = false
 
   override def baseVariant: Boolean = false
 
