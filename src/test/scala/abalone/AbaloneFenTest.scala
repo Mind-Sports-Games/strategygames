@@ -32,8 +32,8 @@ class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
             fen.player2Score must_== 0
         }
 
-        "set both moves counters to zero" in {
-            fen.fullMove.get must_== 0
+        "set both moves counters to expected initial value" in {
+            fen.fullMove.get must_== 1
             fen.halfMovesSinceLastCapture.get must_== 0
         }
 
@@ -84,7 +84,7 @@ class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
     }
 
     "Snakes start position" should {
-        val snakesFen = new format.FEN("sssss/s5/s6/s1SSSSS1/1s5S1/1sssss1S/6S/5S/SSSSS 0 0 b 0 0")
+        val snakesFen = new format.FEN("SSSSS/S5/S6/S1sssss1/1S5s1/1SSSSS1s/6s/5s/sssss 0 0 b 0 0")
         val pieces = snakesFen.pieces
         val board = Board(
             pieces,
@@ -111,7 +111,7 @@ class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
     }
 
     "Atomouche start position" should {
-        val atomoucheFen = new format.FEN("sS3/S2sSs/2s4/s1S4S/S2s1S2s/s4s1S/4S2/SsS2s/3sS 0 0 b 0 0")
+        val atomoucheFen = new format.FEN("Ss3/s2SsS/2S4/S1s4s/s2S1s2S/S4S1s/4s2/sSs2S/3Ss 0 0 b 0 0")
         val pieces = atomoucheFen.pieces
 
         "have Black starting the game" in {
@@ -153,8 +153,8 @@ class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
         }
     }
 
-    "Fun little game situation \"5/6/2s4/2ssss2/2SSsS3/1SSSsss1/2s4/1SSs2/3S1 5 3 b 11 42\"" should {
-        val puzzleFen = new format.FEN("5/6/2s4/2ssss2/2SSsS3/1SSSsss1/2s4/1SSs2/3S1 5 3 b 11 42")
+    "Fun little game situation \"5/6/2S4/2SSSS2/2ssSs3/1sssSSS1/2S4/1ssS2/3s1 5 3 b 11 42\"" should {
+        val puzzleFen = new format.FEN("5/6/2S4/2SSSS2/2ssSs3/1sssSSS1/2S4/1ssS2/3s1 5 3 b 11 42")
         val pieces = puzzleFen.pieces
         val board = Board(
             pieces,
@@ -208,8 +208,8 @@ class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
        * * * * * *
         * * * * *
     */
-    "Game just finished having FEN \"5/2SSS1/4sss/4SSss/3S1Sss1/2ss4/S6/6/5 6 5 w 0 58\"" should {
-        val fen = format.FEN("5/2SSS1/4sss/4SSss/3S1Sss1/2ss4/S6/6/5 6 5 w 0 58")
+    "Game just finished having FEN \"5/2sss1/4SSS/4ssSS/3s1sSS1/2SS4/s6/6/5 6 5 w 0 58\"" should {
+        val fen = format.FEN("5/2sss1/4SSS/4ssSS/3s1sSS1/2SS4/s6/6/5 6 5 w 0 58")
         val pieces = fen.pieces
         val board = Board(
             pieces,
@@ -250,7 +250,7 @@ class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
 
     "Game having a player unable to move" should {
         val board = Board(
-            format.FEN("PPPPP/pppppP/5pP/6pP/7pP/7p/7/6/5 5 5 w 0 42").pieces,
+            format.FEN("PPPPP/PPPPPp/5Pp/6Pp/7Pp/7P/7/6/5 5 5 w 0 42").pieces,
             History(
                 score = Score(5, 5)
             ),

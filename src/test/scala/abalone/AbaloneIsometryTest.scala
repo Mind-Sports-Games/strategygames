@@ -20,7 +20,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ _ _ _ _
             _ _ _ _ _
 */
-        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("5/6/7/6s1/6ss1/8/7/6/5 0 0 b 0 0").value), stratVariant)(
+        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("5/6/7/6S1/6SS1/8/7/6/5 0 0 b 0 0").value), stratVariant)(
             List(
                 "h6i5"
             ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
@@ -28,7 +28,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
             val fen1 = StratForsyth.>>(lib, gameData.game)
             val fen2 = StratForsyth.>>(lib, gameData.fenGame)
             fen1 must_== fen2
-            fen1.value must_== "5/6/7/7s/6s1s/8/7/6/5 0 0 w 1 1"
+            fen1.value must_== "5/6/7/7S/6S1S/8/7/6/5 0 0 w 1 1"
 /*
             _ _ _ _ _
            _ _ _ _ _ _
@@ -55,7 +55,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ _ _ _ _
             _ _ _ _ _
 */
-        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("5/6/7/6s1/5ss2/8/7/6/5 0 0 b 0 0").value), stratVariant)(
+        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("5/6/7/6S1/5SS2/8/7/6/5 0 0 b 0 0").value), stratVariant)(
             List(
                 "g5f6"
             ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
@@ -63,7 +63,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
             val fen1 = StratForsyth.>>(lib, gameData.game)
             val fen2 = StratForsyth.>>(lib, gameData.fenGame)
             fen1 must_== fen2
-            fen1.value must_== "5/6/7/4sss1/9/8/7/6/5 0 0 w 1 1"
+            fen1.value must_== "5/6/7/4SSS1/9/8/7/6/5 0 0 w 1 1"
 /*
             _ _ _ _ _
            _ _ _ _ _ _
@@ -90,7 +90,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ _ _ _ _
             _ _ _ _ _
 */
-        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("5/6/SS5/sss5/9/8/7/6/5 0 0 b 0 0").value), stratVariant)(
+        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("5/6/ss5/SSS5/9/8/7/6/5 0 0 b 0 0").value), stratVariant)(
             List(
                 "b6d5", "c7d6",
                 "b5d4", "c6d5",
@@ -102,7 +102,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
             val fen1 = StratForsyth.>>(lib, gameData.game)
             val fen2 = StratForsyth.>>(lib, gameData.fenGame)
             fen1 must_== fen2
-            fen1.value must_== "5/6/7/8/9/8/7/2SS2/1sss1 0 0 b 10 6"
+            fen1.value must_== "5/6/7/8/9/8/7/2ss2/1SSS1 0 0 b 10 6"
 /*
             _ _ _ _ _
            _ _ _ _ _ _
@@ -129,7 +129,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ _ _ _ _
             _ _ _ _ _
 */
-        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("5/6/7/6s1/6ss1/8/7/6/5 0 0 b 0 0").value), stratVariant)(
+        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("5/6/7/6S1/6SS1/8/7/6/5 0 0 b 0 0").value), stratVariant)(
             List(
                 "h6f5"
             ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
@@ -137,7 +137,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
             val fen1 = StratForsyth.>>(lib, gameData.game)
             val fen2 = StratForsyth.>>(lib, gameData.fenGame)
             fen1 must_== fen2
-            fen1.value must_== "5/6/7/5s2/5s1s1/8/7/6/5 0 0 w 1 1"
+            fen1.value must_== "5/6/7/5S2/5S1S1/8/7/6/5 0 0 w 1 1"
 /*
             _ _ _ _ _
            _ _ _ _ _ _
@@ -164,7 +164,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ _ _ _ _
             _ _ _ _ _
 */
-        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("5/6/7/5ss1/7s1/8/7/6/5 0 0 b 0 0").value), stratVariant)(
+        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("5/6/7/5SS1/7S1/8/7/6/5 0 0 b 0 0").value), stratVariant)(
             List(
                 "h6f5"
             ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
@@ -172,7 +172,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
             val fen1 = StratForsyth.>>(lib, gameData.game)
             val fen2 = StratForsyth.>>(lib, gameData.fenGame)
             fen1 must_== fen2
-            fen1.value must_== "5/6/7/8/5sss1/8/7/6/5 0 0 w 1 1"
+            fen1.value must_== "5/6/7/8/5SSS1/8/7/6/5 0 0 w 1 1"
 /*
             _ _ _ _ _
            _ _ _ _ _ _
@@ -199,7 +199,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ _ _ _ _
             _ _ _ _ _
 */
-        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("5/6/7/5ss1/7s1/8/7/6/5 0 0 b 0 0").value), stratVariant)(
+        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("5/6/7/5SS1/7S1/8/7/6/5 0 0 b 0 0").value), stratVariant)(
             List(
                 "h6g4"
             ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
@@ -207,7 +207,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
             val fen1 = StratForsyth.>>(lib, gameData.game)
             val fen2 = StratForsyth.>>(lib, gameData.fenGame)
             fen1 must_== fen2
-            fen1.value must_== "5/6/7/5s2/6s2/6s1/7/6/5 0 0 w 1 1"
+            fen1.value must_== "5/6/7/5S2/6S2/6S1/7/6/5 0 0 w 1 1"
 /*
             _ _ _ _ _
            _ _ _ _ _ _
@@ -234,7 +234,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ _ _ _ _
             _ _ _ _ _
 */
-        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("5/6/7/5s2/5s3/4s3/7/6/5 0 0 b 0 0").value), stratVariant)(
+        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("5/6/7/5S2/5S3/4S3/7/6/5 0 0 b 0 0").value), stratVariant)(
             List(
                 "g6d4"
             ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
@@ -242,7 +242,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
             val fen1 = StratForsyth.>>(lib, gameData.game)
             val fen2 = StratForsyth.>>(lib, gameData.fenGame)
             fen1 must_== fen2
-            fen1.value must_== "5/6/7/4s3/4s4/3s4/7/6/5 0 0 w 1 1"
+            fen1.value must_== "5/6/7/4S3/4S4/3S4/7/6/5 0 0 w 1 1"
 /*
             _ _ _ _ _
            _ _ _ _ _ _
@@ -269,7 +269,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ _ _ _ _
             _ _ _ _ _
 */
-        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("5/6/7/5s2/5s3/4s3/7/6/5 0 0 b 0 0").value), stratVariant)(
+        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("5/6/7/5S2/5S3/4S3/7/6/5 0 0 b 0 0").value), stratVariant)(
             List(
                 "g6e3"
             ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
@@ -277,7 +277,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
             val fen1 = StratForsyth.>>(lib, gameData.game)
             val fen2 = StratForsyth.>>(lib, gameData.fenGame)
             fen1 must_== fen2
-            fen1.value must_== "5/6/7/8/6s2/5s2/4s2/6/5 0 0 w 1 1"
+            fen1.value must_== "5/6/7/8/6S2/5S2/4S2/6/5 0 0 w 1 1"
 /*
             _ _ _ _ _
            _ _ _ _ _ _
@@ -304,7 +304,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ _ _ _ _
             _ _ _ _ _
 */
-        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("5/6/7/5s2/5s3/4s3/7/6/5 0 0 b 0 0").value), stratVariant)(
+        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("5/6/7/5S2/5S3/4S3/7/6/5 0 0 b 0 0").value), stratVariant)(
             List(
                 "e4h6"
             ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
@@ -312,7 +312,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
             val fen1 = StratForsyth.>>(lib, gameData.game)
             val fen2 = StratForsyth.>>(lib, gameData.fenGame)
             fen1 must_== fen2
-            fen1.value must_== "5/6/7/6s1/6s2/5s2/7/6/5 0 0 w 1 1"
+            fen1.value must_== "5/6/7/6S1/6S2/5S2/7/6/5 0 0 w 1 1"
 /*
             _ _ _ _ _
            _ _ _ _ _ _
@@ -339,7 +339,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ _ _ _ _
             _ _ _ _ _
 */
-        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("5/6/7/5s2/5s3/4s3/7/6/5 0 0 b 0 0").value), stratVariant)(
+        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("5/6/7/5S2/5S3/4S3/7/6/5 0 0 b 0 0").value), stratVariant)(
             List(
                 "e4g7"
             ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
@@ -347,7 +347,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
             val fen1 = StratForsyth.>>(lib, gameData.game)
             val fen2 = StratForsyth.>>(lib, gameData.fenGame)
             fen1 must_== fen2
-            fen1.value must_== "5/6/4s2/4s3/4s4/8/7/6/5 0 0 w 1 1"
+            fen1.value must_== "5/6/4S2/4S3/4S4/8/7/6/5 0 0 w 1 1"
 /*
             _ _ _ _ _
            _ _ _ _ _ _
@@ -374,7 +374,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ _ 2 _ _
             _ _ _ _ _
 */
-        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("5/2s3/3s3/4sss1/9/8/2SS3/3S2/5 0 0 b 0 0").value), stratVariant)(
+        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("5/2S3/3S3/4SSS1/9/8/2ss3/3s2/5 0 0 b 0 0").value), stratVariant)(
             List(
                 "f6i7", "d3c1", // 1
                 "i7f6", "c1d3", // 2
@@ -386,7 +386,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
             fen1 must_== fen2
             // fen1.value must_== "5/2s3/3ssss/8/9/8/2S4/2S3/2S2 0 0 b 2 2" // 1
             // fen1.value must_== "5/2s3/3s3/4sss1/9/8/2SS3/3S2/5 0 0 b 4 3" // 2
-            fen1.value must_== "2s2/3s2/4s2/5ss1/9/8/7/1SSS2/5 0 0 b 6 4"
+            fen1.value must_== "2S2/3S2/4S2/5SS1/9/8/7/1sss2/5 0 0 b 6 4"
 /*
             _ _ 1 _ _
            _ _ _ 1 _ _
@@ -413,7 +413,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ _ _ _ _
             _ _ _ _ _
 */
-        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("1sSS1/4S1/4s2/4s3/9/8/7/6/5 0 0 b 0 0").value), stratVariant)(
+        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("1Sss1/4s1/4S2/4S3/9/8/7/6/5 0 0 b 0 0").value), stratVariant)(
             List(
                 "f6h8", "i9f9"
             ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
@@ -421,7 +421,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
             val fen1 = StratForsyth.>>(lib, gameData.game)
             val fen2 = StratForsyth.>>(lib, gameData.fenGame)
             fen1 must_== fen2
-            fen1.value must_== "sSSS1/4s1/4s2/8/9/8/7/6/5 0 0 b 2 2"
+            fen1.value must_== "Ssss1/4S1/4S2/8/9/8/7/6/5 0 0 b 2 2"
 
         })
   }
@@ -438,7 +438,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ _ _ _ _
             _ _ _ _ _
 */
-        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("5/6/7/8/S1SSsss2/8/7/6/5 0 0 b 0 0").value), stratVariant)(
+        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("5/6/7/8/s1ssSSS2/8/7/6/5 0 0 b 0 0").value), stratVariant)(
             List(
                 "g5d5"
             ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
@@ -446,7 +446,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
             val fen1 = StratForsyth.>>(lib, gameData.game)
             val fen2 = StratForsyth.>>(lib, gameData.fenGame)
             fen1 must_== fen2
-            fen1.value must_== "5/6/7/8/SSSsss3/8/7/6/5 0 0 w 1 1"
+            fen1.value must_== "5/6/7/8/sssSSS3/8/7/6/5 0 0 w 1 1"
 
         })
   }
@@ -463,7 +463,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ _ _ _ _
             * * * * 0
 */
-        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("5/6/7/8/SSsss4/8/7/6/SSSSs 0 0 b 0 0").value), stratVariant)(
+        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("5/6/7/8/ssSSS4/8/7/6/ssssS 0 0 b 0 0").value), stratVariant)(
             List(
                 "e5b5", "b1e1",
                 "c5a5"
@@ -472,7 +472,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
             val fen1 = StratForsyth.>>(lib, gameData.game)
             val fen2 = StratForsyth.>>(lib, gameData.fenGame)
             fen1 must_== fen2
-            fen1.value must_== "5/6/7/8/ss1s5/8/7/6/S1SSS 2 1 w 0 2"
+            fen1.value must_== "5/6/7/8/SS1S5/8/7/6/s1sss 2 1 w 0 2"
 
         })
   }
@@ -489,7 +489,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ _ _ _ _
             _ _ _ _ _
 */
-        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("5/6/7/8/SS1Sss3/8/7/6/5 0 0 b 0 0").value), stratVariant)(
+        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("5/6/7/8/ss1sSS3/8/7/6/5 0 0 b 0 0").value), stratVariant)(
             List(
                 "f5d5", "a5d5",
             ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
@@ -497,7 +497,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
             val fen1 = StratForsyth.>>(lib, gameData.game)
             val fen2 = StratForsyth.>>(lib, gameData.fenGame)
             fen1 must_== fen2
-            fen1.value must_== "5/6/7/8/1SSSss3/8/7/6/5 0 0 b 2 2"
+            fen1.value must_== "5/6/7/8/1sssSS3/8/7/6/5 0 0 b 2 2"
 
         })
   }
@@ -514,7 +514,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ * _ 0 0 _
             * _ * 0 0
 */
-        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("3SS/3sSS/4ss1/s5sS/1s1sssS1s/1s3SS1/5S1/1S1ss1/S1Sss 0 0 b 0 0").value), stratVariant)(
+        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("3ss/3Sss/4SS1/S5Ss/1S1SSSs1S/1S3ss1/5s1/1s1SS1/s1sSS 0 0 b 0 0").value), stratVariant)(
             List(
                 "d5g5", "h5e2",
                 "e1c1", "b1b3", // 00
@@ -534,7 +534,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
             // fen1.value must_== "3SS/3sSS/4ss1/s5sS/1s2sss1s/1s3SS1/1S3S1/1S1sS1/S1ss1 0 1 b 2 3" // 00
             // fen1.value must_== "3SS/3sSS/4ss1/6sS/1s2sss1s/1s3SS1/1s3S1/1S1sS1/SSss1 0 1 w 3 3" // 01
             // fen1.value must_== "3SS/3sSS/4ss1/6sS/1s2sss1s/1s3SS1/1sS2S1/1S1sS1/1Sss1 0 1 b 4 4" // 02
-            fen1.value must_== "2s2/3ss1/5s1/6sS/8s/5SS1/1sS2S1/1s1sS1/1ss2 6 4 w 0 10"
+            fen1.value must_== "2S2/3SS1/5S1/6Ss/8S/5ss1/1Ss2s1/1S1Ss1/1SS2 6 4 w 0 10"
 /*
             _ _ 0 _ _   0 0 0
            _ _ _ 0 0 _   0 _
@@ -561,7 +561,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ _ _ _ _
             _ _ _ _ _
 */
-        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("s1s2/1s1s2/1SSSs2/5ss1/2s6/8/7/6/5 0 0 b 0 0").value), stratVariant)(
+        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("S1S2/1S1S2/1sssS2/5SS1/2S6/8/7/6/5 0 0 b 0 0").value), stratVariant)(
             List(
                 "c5c6", "d7f6", // 1
                 "g6i7",/* 2 */ "f6e7", // 3
@@ -587,7 +587,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
             // fen1.value must_== "5/s1s3/1sSs3/SS2sss1/9/8/7/6/5 0 1 w 3 6" // 7.5
             // fen1.value must_== "5/s1s3/1s1s3/SSS1sss1/9/8/7/6/5 0 1 b 4 7" // 8
             // fen1.value must_== "5/2s3/1s1s3/1SSssss1/3s5/8/7/6/5 0 1 b 4 3" // 9
-            fen1.value must_== "5/3s2/1s2s2/2ss1ss1/1SSS5/8/7/6/5 0 1 w 9 9"
+            fen1.value must_== "5/3S2/1S2S2/2SS1SS1/1sss5/8/7/6/5 0 1 w 9 9"
 /*
             _ _ _ _ _   1 _ _
            _ _ _ 1 _ _   _ _
@@ -613,7 +613,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
             val fen1 = StratForsyth.>>(lib, gameData.game)
             val fen2 = StratForsyth.>>(lib, gameData.fenGame)
             fen1 must_== fen2
-            fen1.value must_== "1SsSs/SSSsss/1S3s1/8/9/3s4/1sssSS1/sssSSS/3SS 1 1 w 0 3"
+            fen1.value must_== "1sSsS/sssSSS/1s3S1/8/9/3S4/1SSSss1/SSSsss/3ss 1 1 w 0 3"
         })
     }
 
@@ -629,7 +629,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ _ _ _ _
             * _ _ _ _
 */
-        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("3SS/3sSS/4ss1/6s1/4sssSS/8/7/6/S4 0 0 b 0 0").value), stratVariant)(
+        _testEveryMoveLoadFenIsometry(lib, StratFen(lib, format.FEN("3ss/3Sss/4SS1/6S1/4SSSss/8/7/6/s4 0 0 b 0 0").value), stratVariant)(
             List(
                 "e5h5", "a1a2",
                 "f5i5", "a2a1",
@@ -642,7 +642,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
             val fen1 = StratForsyth.>>(lib, gameData.game)
             val fen2 = StratForsyth.>>(lib, gameData.fenGame)
             fen1 must_== fen2
-            fen1.value must_== "3ss/4ss/5s1/8/6s1s/8/7/S5/5 6 0 w 0 6"
+            fen1.value must_== "3SS/4SS/5S1/8/6S1S/8/7/s5/5 6 0 w 0 6"
 /*
             _ _ _ 0 0   _ _ _
            _ _ _ _ 0 0   _ _
@@ -703,7 +703,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ _ _ _ _
             _ _ _ * _
 */
-            fen1.value must_== "S3s/4S1/1SSsssS/SSsss1s1/2sssssS1/3SSS2/5S1/6/3S1 1 1 w 14 24"
+            fen1.value must_== "s3S/4s1/1ssSSSs/ssSSS1S1/2SSSSSs1/3sss2/5s1/6/3s1 1 1 w 14 24"
 /*
             * _ _ _ 0   0 _ _
            _ _ _ _ * _   _ _
@@ -796,7 +796,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
             // fen1.value must_== "2s2/3ssS/2SSSS1/2SSSss1/1Ss1SsSs1/3ss3/2S1s2/4s1/2S2 1 2 b 20 36" // 07
             // fen1.value must_== "2s2/3Ss1/2S1SS1/3S1S2/1Ss1SS1s1/3sSss1/2S1sS1/3s1s/2S2 1 4 b 0 41" // 08
             // fen1.value must_== "5/2s1s1/2S1SS1/4sS2/1Ss1SsS2/4Sss1/2sSS2/2sSS1/2Ss1 1 4 b 10 46" // 09
-            fen1.value must_== "5/2s1s1/2S1SS1/5S2/1Ss2sS2/3sss2/2S1S2/1sSSS1/1S1S1 1 6 b 0 51" // 10
+            fen1.value must_== "5/2S1S1/2s1ss1/5s2/1sS2Ss2/3SSS2/2s1s2/1Ssss1/1s1s1 1 6 b 0 51" // 10
 /*
             _ _ _ _ _   0 0 0
            _ _ 0 _ 0 _   0 0
@@ -882,7 +882,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
             // fen1.value must_== "4s/3s1s/1SSS1S1/2SsSsss/4SSSs1/2SS1sS1/2ss3/ss4/3SS 0 1 b 14 31" // 06
             // fen1.value must_== "4s/3ss1/1SSSs2/4SSSs/3sSSSSs/2SSss2/2ss3/3s2/3SS 0 2 b 2 36" // 07
             // fen1.value must_== "5/4Ss/2SsSs1/5SSS/3s1SsSS/2SSsS2/3ss2/4s1/3SS 0 5 b 0 41" // 08
-            fen1.value must_== "4s/4SS/2Ss1S1/5SSS/3ssssSS/2SSsS2/4s2/6/3SS 0 6 b 0 44"
+            fen1.value must_== "4S/4ss/2sS1s1/5sss/3SSSSss/2ssSs2/4S2/6/3ss 0 6 b 0 44"
 /*
             _ _ _ _ 0   0 0 0
            _ _ _ _ * *   0 0
