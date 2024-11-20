@@ -15,7 +15,7 @@ case object Hyper
 
   def gameFamily: GameFamily = GameFamily.Backgammon()
 
-  def perfIcon: Char = '' // TODO change when available
+  def perfIcon: Char = ''
   def perfId: Int    = 602
 
   override def numStartingPiecesPerPlayer: Int = 3
