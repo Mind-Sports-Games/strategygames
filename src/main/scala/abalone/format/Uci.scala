@@ -47,9 +47,9 @@ object Uci {
                 dest = dest
               ).some
             }
-            case _                           => None
+            case _                        => None
           }
-        case _                            => None
+        case _                 => None
       }
 
     def piotr(move: String) =
@@ -60,11 +60,11 @@ object Uci {
 
     def fromStrings(origS: String, destS: String) =
       for {
-        orig     <- Pos.fromKey(origS)
-        dest     <- Pos.fromKey(destS)
+        orig <- Pos.fromKey(origS)
+        dest <- Pos.fromKey(destS)
       } yield Move(orig, dest)
 
-    val moveR  = s"^${Pos.posR}${Pos.posR}".r
+    val moveR = s"^${Pos.posR}${Pos.posR}".r
   }
 
   case class WithSan(uci: Uci, san: String)

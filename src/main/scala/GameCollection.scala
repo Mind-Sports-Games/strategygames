@@ -448,7 +448,7 @@ object GameFamily {
     def displayPiece      = "display"
     def pieceSetThemes    =
       List(
-        "newspaper",
+        "newspaper"
       )
     def pieceSetDefault   = "newspaper"
     def boardThemes       = List(
