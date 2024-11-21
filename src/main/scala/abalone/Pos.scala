@@ -359,15 +359,6 @@ object Pos {
     }
   }
 
-  def potentialSideMoveDirsFromGlobalDir(globalDir: Direction): Directions = {
-    diagonalDirectionStringFromDirection(globalDir) match {
-      case DiagonalDirectionString.UpLeft    => List(_.left, _.upLeft)
-      case DiagonalDirectionString.UpRight   => List(_.upLeft, _.upRight, _.right)
-      case DiagonalDirectionString.DownRight => List(_.right, _.downRight)
-      case DiagonalDirectionString.DownLeft  => List(_.downLeft, _.left, _.downRight)
-    }
-  }
-
   def deducePotentialSideDirs(globalDir: Direction, lineDir: Direction): Directions = {
     diagonalDirectionStringFromDirection(globalDir) match {
       case DiagonalDirectionString.DownLeft  => {
