@@ -364,11 +364,14 @@ abstract class Variant private[variant] (
     case direction if direction == DirectionString.UpRight || direction == DirectionString.DownLeft =>
       if (
         (orig
-          .|<>|(square => square.index == dest.index, Pos.directionFromDirectionString(orig.directionString(dest))))
+          .|<>|(
+            square => square.index == dest.index,
+            Pos.directionFromDirectionString(orig.directionString(dest))
+          ))
           .contains(dest)
       ) false
       else true
-    case _                                                              => orig.rank.index != dest.rank.index && orig.file.index != dest.file.index
+    case _                                                                                          => orig.rank.index != dest.rank.index && orig.file.index != dest.file.index
   }
 
   private def turnPieces(situation: Situation): PieceMap = situation.board.piecesOf(situation.player)

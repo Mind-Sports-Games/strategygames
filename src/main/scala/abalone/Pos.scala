@@ -75,12 +75,12 @@ Abalone official coordinates system and "standard start position" are drawn belo
 sealed trait DirectionString
 
 object DirectionString {
-  case object Left extends DirectionString
-  case object UpLeft extends DirectionString
-  case object UpRight extends DirectionString
-  case object Right extends DirectionString
+  case object Left      extends DirectionString
+  case object UpLeft    extends DirectionString
+  case object UpRight   extends DirectionString
+  case object Right     extends DirectionString
   case object DownRight extends DirectionString
-  case object DownLeft extends DirectionString
+  case object DownLeft  extends DirectionString
 
   val all: List[DirectionString] = List(Left, UpLeft, UpRight, Right, DownRight, DownLeft)
 }
@@ -88,10 +88,10 @@ object DirectionString {
 sealed trait DiagonalDirectionString
 
 object DiagonalDirectionString {
-  case object UpLeft extends DiagonalDirectionString
-  case object UpRight extends DiagonalDirectionString
+  case object UpLeft    extends DiagonalDirectionString
+  case object UpRight   extends DiagonalDirectionString
   case object DownRight extends DiagonalDirectionString
-  case object DownLeft extends DiagonalDirectionString
+  case object DownLeft  extends DiagonalDirectionString
 
   val all: List[DiagonalDirectionString] = List(UpLeft, UpRight, DownRight, DownLeft)
 }
@@ -280,7 +280,6 @@ case class Pos private (index: Int) extends AnyVal {
   def officialNotationKey = s"${File(rank.index).getOrElse("")}${Rank(file.index).getOrElse("")}"
   override def toString   = key
 
-
   private def diagonalDirectionString(dest: Pos): DiagonalDirectionString =
     (file.index - dest.file.index, rank.index - dest.rank.index) match {
       case (0, rankDiff)        =>
@@ -338,74 +337,74 @@ object Pos {
     else None
 
   def directionFromDirectionString(directionString: DirectionString): Direction = directionString match {
-    case DirectionString.Left => _.left
-    case DirectionString.UpLeft => _.upLeft
-    case DirectionString.UpRight => _.upRight
-    case DirectionString.Right => _.right
+    case DirectionString.Left      => _.left
+    case DirectionString.UpLeft    => _.upLeft
+    case DirectionString.UpRight   => _.upRight
+    case DirectionString.Right     => _.right
     case DirectionString.DownRight => _.downRight
-    case DirectionString.DownLeft => _.downLeft
+    case DirectionString.DownLeft  => _.downLeft
   }
 
   // used by valid moves generator, based on the Direction currently considered
   def diagonalDirectionsFromDirection(direction: Direction): Directions = {
     directionStringFromDirection(direction) match {
-      case DirectionString.Left => List(_.downLeft, _.upLeft)
-      case DirectionString.UpLeft => List(_.left, _.upRight)
-      case DirectionString.UpRight => List(_.upLeft, _.right)
-      case DirectionString.Right => List(_.upRight, _.downRight)
+      case DirectionString.Left      => List(_.downLeft, _.upLeft)
+      case DirectionString.UpLeft    => List(_.left, _.upRight)
+      case DirectionString.UpRight   => List(_.upLeft, _.right)
+      case DirectionString.Right     => List(_.upRight, _.downRight)
       case DirectionString.DownRight => List(_.right, _.downLeft)
-      case DirectionString.DownLeft => List(_.downRight, _.left)
+      case DirectionString.DownLeft  => List(_.downRight, _.left)
     }
   }
 
-  def potentialLineDirsFromSideMoveDir(sideMoveDirection: Direction): Directions          = {
+  def potentialLineDirsFromSideMoveDir(sideMoveDirection: Direction): Directions = {
     diagonalDirectionStringFromDirection(sideMoveDirection) match {
-      case DiagonalDirectionString.UpLeft => List(_.left, _.upLeft)
-      case DiagonalDirectionString.UpRight => List(_.upLeft, _.upRight, _.right)
+      case DiagonalDirectionString.UpLeft    => List(_.left, _.upLeft)
+      case DiagonalDirectionString.UpRight   => List(_.upLeft, _.upRight, _.right)
       case DiagonalDirectionString.DownRight => List(_.right, _.downRight)
-      case DiagonalDirectionString.DownLeft => List(_.downRight, _.downLeft, _.left)
+      case DiagonalDirectionString.DownLeft  => List(_.downRight, _.downLeft, _.left)
     }
   }
 
-  def potentialSideMoveDirsFromGlobalDir(globalDir: Direction): Directions          = {
+  def potentialSideMoveDirsFromGlobalDir(globalDir: Direction): Directions = {
     diagonalDirectionStringFromDirection(globalDir) match {
-      case DiagonalDirectionString.UpLeft => List(_.left, _.upLeft)
-      case DiagonalDirectionString.UpRight => List(_.upLeft, _.upRight, _.right)
+      case DiagonalDirectionString.UpLeft    => List(_.left, _.upLeft)
+      case DiagonalDirectionString.UpRight   => List(_.upLeft, _.upRight, _.right)
       case DiagonalDirectionString.DownRight => List(_.right, _.downRight)
-      case DiagonalDirectionString.DownLeft => List(_.downLeft, _.left, _.downRight)
+      case DiagonalDirectionString.DownLeft  => List(_.downLeft, _.left, _.downRight)
     }
   }
 
   def deducePotentialSideDirs(globalDir: Direction, lineDir: Direction): Directions = {
     diagonalDirectionStringFromDirection(globalDir) match {
-      case DiagonalDirectionString.DownLeft => {
+      case DiagonalDirectionString.DownLeft  => {
         directionStringFromDirection(lineDir) match {
           case DirectionString.DownLeft  => List(_.left, _.downRight)
           case DirectionString.DownRight => List(_.downLeft)
           case DirectionString.Left      => List(_.downLeft)
-          case _ => List()
+          case _                         => List()
         }
       }
-      case DiagonalDirectionString.UpRight => {
+      case DiagonalDirectionString.UpRight   => {
         directionStringFromDirection(lineDir) match {
           case DirectionString.UpLeft  => List(_.upRight)
           case DirectionString.UpRight => List(_.right, _.upLeft)
-          case DirectionString.Right    => List(_.upRight)
-          case _ => List()
+          case DirectionString.Right   => List(_.upRight)
+          case _                       => List()
         }
       }
-      case DiagonalDirectionString.UpLeft => {
+      case DiagonalDirectionString.UpLeft    => {
         directionStringFromDirection(lineDir) match {
           case DirectionString.UpLeft => List(_.left)
-          case DirectionString.Left    => List(_.upLeft)
-          case _ => List()
+          case DirectionString.Left   => List(_.upLeft)
+          case _                      => List()
         }
       }
       case DiagonalDirectionString.DownRight => {
         directionStringFromDirection(lineDir) match {
           case DirectionString.DownRight => List(_.right)
-          case DirectionString.Right      => List(_.downRight)
-          case _ => List()
+          case DirectionString.Right     => List(_.downRight)
+          case _                         => List()
         }
       }
     }
