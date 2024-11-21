@@ -123,8 +123,8 @@ class AbalonePosTest extends AbaloneTest with ValidatedMatchers {
       Pos.A1.right must_== Some(Pos.B1)
       Pos.A1.upLeft must_== Some(Pos.A2)
       Pos.A1.upRight must_== Some(Pos.B2)
-      Pos.A1.directionString(Pos.A2) must_== DirectionString.UpLeft
-      Pos.A1.directionString(Pos.B2) must_== DirectionString.UpRight
+      Pos.A1.directionString(Pos.A2) must_== DiagonalDirectionString.UpLeft
+      Pos.A1.directionString(Pos.B2) must_== DiagonalDirectionString.UpRight
       Pos.A1.directionString(Pos.B1) must_== DirectionString.Right
     }
   }
@@ -140,9 +140,9 @@ class AbalonePosTest extends AbaloneTest with ValidatedMatchers {
       Pos.I9.left must_== Some(Pos.H9)
       Pos.I9.downLeft must_== Some(Pos.H8)
       Pos.I9.downRight must_== Some(Pos.I8)
-      Pos.I9.directionString(Pos.I8) must_== DirectionString.DownRight
+      Pos.I9.directionString(Pos.I8) must_== DiagonalDirectionString.DownRight
       Pos.I9.directionString(Pos.H9) must_== DirectionString.Left
-      Pos.I9.directionString(Pos.H8) must_== DirectionString.DownLeft
+      Pos.I9.directionString(Pos.H8) must_== DiagonalDirectionString.DownLeft
     }
   }
 

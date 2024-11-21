@@ -73,19 +73,7 @@ Abalone official coordinates system and "standard start position" are drawn belo
  */
 
 sealed trait DirectionString
-
-object DirectionString {
-  case object Left      extends DirectionString
-  case object UpLeft    extends DirectionString
-  case object UpRight   extends DirectionString
-  case object Right     extends DirectionString
-  case object DownRight extends DirectionString
-  case object DownLeft  extends DirectionString
-
-  val all: List[DirectionString] = List(Left, UpLeft, UpRight, Right, DownRight, DownLeft)
-}
-
-sealed trait DiagonalDirectionString
+sealed trait DiagonalDirectionString extends DirectionString
 
 object DiagonalDirectionString {
   case object UpLeft    extends DiagonalDirectionString
@@ -94,6 +82,13 @@ object DiagonalDirectionString {
   case object DownLeft  extends DiagonalDirectionString
 
   val all: List[DiagonalDirectionString] = List(UpLeft, UpRight, DownRight, DownLeft)
+}
+
+object DirectionString {
+  case object Left  extends DirectionString
+  case object Right extends DirectionString
+
+  val all: List[DirectionString] = DiagonalDirectionString.all ++ List(Left, Right)
 }
 
 // Piotr is what is saved in Database and is used in Uci
@@ -222,13 +217,13 @@ case class Pos private (index: Int) extends AnyVal {
         if (fileDiff > 0) DirectionString.Left
         else DirectionString.Right
       case (0, rankDiff)        =>
-        if (rankDiff > 0) DirectionString.DownRight
-        else DirectionString.UpLeft
+        if (rankDiff > 0) DiagonalDirectionString.DownRight
+        else DiagonalDirectionString.UpLeft
       case (fileDiff, rankDiff) =>
-        if (fileDiff > 0 && rankDiff > 0) DirectionString.DownLeft
-        else if (fileDiff < 0 && rankDiff < 0) DirectionString.UpRight
-        else if (fileDiff < 0 && rankDiff > 0) DirectionString.DownRight
-        else DirectionString.UpLeft
+        if (fileDiff > 0 && rankDiff > 0) DiagonalDirectionString.DownLeft
+        else if (fileDiff < 0 && rankDiff < 0) DiagonalDirectionString.UpRight
+        else if (fileDiff < 0 && rankDiff > 0) DiagonalDirectionString.DownRight
+        else DiagonalDirectionString.UpLeft
     }
 
   def >|(stop: Pos => Boolean): List[Pos]                   = |<>|(stop, _.right)
@@ -335,23 +330,23 @@ object Pos {
     else None
 
   def directionFromDirectionString(directionString: DirectionString): Direction = directionString match {
-    case DirectionString.Left      => _.left
-    case DirectionString.UpLeft    => _.upLeft
-    case DirectionString.UpRight   => _.upRight
-    case DirectionString.Right     => _.right
-    case DirectionString.DownRight => _.downRight
-    case DirectionString.DownLeft  => _.downLeft
+    case DirectionString.Left              => _.left
+    case DiagonalDirectionString.UpLeft    => _.upLeft
+    case DiagonalDirectionString.UpRight   => _.upRight
+    case DirectionString.Right             => _.right
+    case DiagonalDirectionString.DownRight => _.downRight
+    case DiagonalDirectionString.DownLeft  => _.downLeft
   }
 
   // used by valid moves generator, based on the Direction currently considered
   def diagonalDirectionsFromDirection(direction: Direction): Directions = {
     directionStringFromDirection(direction) match {
-      case DirectionString.Left      => List(_.downLeft, _.upLeft)
-      case DirectionString.UpLeft    => List(_.left, _.upRight)
-      case DirectionString.UpRight   => List(_.upLeft, _.right)
-      case DirectionString.Right     => List(_.upRight, _.downRight)
-      case DirectionString.DownRight => List(_.right, _.downLeft)
-      case DirectionString.DownLeft  => List(_.downRight, _.left)
+      case DirectionString.Left              => List(_.downLeft, _.upLeft)
+      case DiagonalDirectionString.UpLeft    => List(_.left, _.upRight)
+      case DiagonalDirectionString.UpRight   => List(_.upLeft, _.right)
+      case DirectionString.Right             => List(_.upRight, _.downRight)
+      case DiagonalDirectionString.DownRight => List(_.right, _.downLeft)
+      case DiagonalDirectionString.DownLeft  => List(_.downRight, _.left)
     }
   }
 
@@ -377,32 +372,32 @@ object Pos {
     diagonalDirectionStringFromDirection(globalDir) match {
       case DiagonalDirectionString.DownLeft  => {
         directionStringFromDirection(lineDir) match {
-          case DirectionString.DownLeft  => List(_.left, _.downRight)
-          case DirectionString.DownRight => List(_.downLeft)
-          case DirectionString.Left      => List(_.downLeft)
-          case _                         => List()
+          case DiagonalDirectionString.DownLeft  => List(_.left, _.downRight)
+          case DiagonalDirectionString.DownRight => List(_.downLeft)
+          case DirectionString.Left              => List(_.downLeft)
+          case _                                 => List()
         }
       }
       case DiagonalDirectionString.UpRight   => {
         directionStringFromDirection(lineDir) match {
-          case DirectionString.UpLeft  => List(_.upRight)
-          case DirectionString.UpRight => List(_.right, _.upLeft)
-          case DirectionString.Right   => List(_.upRight)
-          case _                       => List()
+          case DiagonalDirectionString.UpLeft  => List(_.upRight)
+          case DiagonalDirectionString.UpRight => List(_.right, _.upLeft)
+          case DirectionString.Right           => List(_.upRight)
+          case _                               => List()
         }
       }
       case DiagonalDirectionString.UpLeft    => {
         directionStringFromDirection(lineDir) match {
-          case DirectionString.UpLeft => List(_.left)
-          case DirectionString.Left   => List(_.upLeft)
-          case _                      => List()
+          case DiagonalDirectionString.UpLeft => List(_.left)
+          case DirectionString.Left           => List(_.upLeft)
+          case _                              => List()
         }
       }
       case DiagonalDirectionString.DownRight => {
         directionStringFromDirection(lineDir) match {
-          case DirectionString.DownRight => List(_.right)
-          case DirectionString.Right     => List(_.downRight)
-          case _                         => List()
+          case DiagonalDirectionString.DownRight => List(_.right)
+          case DirectionString.Right             => List(_.downRight)
+          case _                                 => List()
         }
       }
     }

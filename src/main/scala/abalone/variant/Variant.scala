@@ -359,7 +359,8 @@ abstract class Variant private[variant] (
   override def hashCode: Int = id
 
   private def isSideMove(orig: Pos, dest: Pos): Boolean = orig.directionString(dest) match {
-    case direction if direction == DirectionString.UpRight || direction == DirectionString.DownLeft =>
+    case direction
+        if direction == DiagonalDirectionString.UpRight || direction == DiagonalDirectionString.DownLeft =>
       if (
         (orig
           .|<>|(
@@ -369,7 +370,7 @@ abstract class Variant private[variant] (
           .contains(dest)
       ) false
       else true
-    case _                                                                                          => orig.rank.index != dest.rank.index && orig.file.index != dest.file.index
+    case _ => orig.rank.index != dest.rank.index && orig.file.index != dest.file.index
   }
 
   private def turnPieces(situation: Situation): PieceMap = situation.board.piecesOf(situation.player)
