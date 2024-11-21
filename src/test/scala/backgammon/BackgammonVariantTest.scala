@@ -4988,8 +4988,73 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         g.situation.forcedAction.isEmpty must_== true
       }
     }
-
   }
+
+  "A Hyper Backgammon game " should {
+    "have 3 moves from start" in {
+      val actionStrs = List(
+        "4/2",
+        "l1h1"
+      )
+      playActionStrs(actionStrs, Some(Game.apply(variant.Hyper))) must beValid.like { g =>
+        g.situation.moves.values.flatten.map(_.toUci.uci).toSet must_== Set("h1f1", "j1h1", "k1i1")
+      }
+    }
+
+    "end in single win even if in backgammon position" in {
+      val actionStrs = List(
+        "endturn",
+        "6/2",
+        "l1j1",
+        "k1e1",
+        "endturn",
+        "3/1",
+        "l2i2",
+        "j2i2",
+        "endturn",
+        "4/4",
+        "j1f1",
+        "f1b1",
+        "b1c2",
+        "c2g2",
+        "endturn",
+        "6/4",
+        "k2e2",
+        "e2a2",
+        "endturn",
+        "6/6",
+        "e1b2",
+        "b2h2",
+        "j1d1",
+        "d1c2",
+        "endturn",
+        "2/1",
+        "a2a1",
+        "a1c1",
+        "endturn",
+        "5/5",
+        "c2h2",
+        "g2l2",
+        "^h2",
+        "^h2",
+        "endturn",
+        "2/1",
+        "c1d1",
+        "d1f1",
+        "endturn",
+        "1/2",
+        "^l2"
+      )
+      playActionStrs(actionStrs, Some(Game.apply(variant.Hyper))) must beValid.like { g =>
+        g.situation.board.history.score must_== Score(0, 3)
+        g.situation.end must_== true
+        g.situation.board.pieceInOpponentsHome(Player.P1) must_== true
+        g.situation.winner must_== Some(Player.P2)
+        g.situation.status must_== Some(Status.SingleWin) // not a backgammon due to no double of cube
+      }
+    }
+  }
+
 }
 
 class BackgammonVariantTestIsometry extends strategygames.chess.ChessTest {
