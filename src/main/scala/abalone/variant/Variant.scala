@@ -125,7 +125,7 @@ abstract class Variant private[variant] (
         situation.board.isEmptySquare(direction(pos))
 
       def possibleSideMoves: List[(Pos, Pos)] = Pos
-        .sideMoveDirsFromLineDir(direction)
+        .diagonalDirectionsFromDirection(direction)
         .flatMap(dir =>
           if (lineOfMarbles.map(pos => canMoveTowards(pos, dir)).contains(false)) None
           else
@@ -148,7 +148,7 @@ abstract class Variant private[variant] (
     }
 
     def generateMovesForNeighbours(pos: Pos, neighbour: Pos): List[Move] = {
-      val direction = Pos.dirFromString(pos.directionString(neighbour))
+      val direction = Pos.directionFromDirectionString(pos.directionString(neighbour))
       val moves     = List(
         direction(neighbour).toList.flatMap {
           case (thirdSquareInLine) => {
@@ -250,7 +250,7 @@ abstract class Variant private[variant] (
    */
   private def piecesAfterAction(pieces: PieceMap, orig: Pos, dest: Pos): PieceMap = {
     val origToDestDirString      = orig.directionString(dest)
-    val origToDestDir: Direction = Pos.dirFromString(origToDestDirString)
+    val origToDestDir: Direction = Pos.directionFromDirectionString(origToDestDirString)
 
     if (isSideMove(orig, dest)) {
       val potentialLineDirs = Pos.potentialLineDirsFromSideMoveDir(origToDestDir)
@@ -361,10 +361,10 @@ abstract class Variant private[variant] (
   override def hashCode: Int = id
 
   private def isSideMove(orig: Pos, dest: Pos): Boolean = orig.directionString(dest) match {
-    case direction if direction == "upRight" || direction == "downLeft" =>
+    case direction if direction == DirectionString.UpRight || direction == DirectionString.DownLeft =>
       if (
         (orig
-          .|<>|(square => square.index == dest.index, Pos.dirFromString(orig.directionString(dest))))
+          .|<>|(square => square.index == dest.index, Pos.directionFromDirectionString(orig.directionString(dest))))
           .contains(dest)
       ) false
       else true

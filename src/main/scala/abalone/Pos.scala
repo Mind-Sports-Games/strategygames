@@ -70,9 +70,31 @@ Abalone official coordinates system and "standard start position" are drawn belo
         1 2 3 4 5
 
 
-!!! be mindful about the fact that when we write the FEN we start from topleft to bottom right
-
  */
+
+sealed trait DirectionString
+
+object DirectionString {
+  case object Left extends DirectionString
+  case object UpLeft extends DirectionString
+  case object UpRight extends DirectionString
+  case object Right extends DirectionString
+  case object DownRight extends DirectionString
+  case object DownLeft extends DirectionString
+
+  val all: List[DirectionString] = List(Left, UpLeft, UpRight, Right, DownRight, DownLeft)
+}
+
+sealed trait DiagonalDirectionString
+
+object DiagonalDirectionString {
+  case object UpLeft extends DiagonalDirectionString
+  case object UpRight extends DiagonalDirectionString
+  case object DownRight extends DiagonalDirectionString
+  case object DownLeft extends DiagonalDirectionString
+
+  val all: List[DiagonalDirectionString] = List(UpLeft, UpRight, DownRight, DownLeft)
+}
 
 // Piotr is what is saved in Database and is used in Uci
 // In the lookup val, we target a "FileAsLetterRowAsNumber" square already defined in Pos object
@@ -194,19 +216,19 @@ case class Pos private (index: Int) extends AnyVal {
   def neighbours: List[Option[Pos]] = List(left, upLeft, upRight, right, downRight, downLeft)
   def neighboursAsDirs: Directions  = List(_.left, _.upLeft, _.upRight, _.right, _.downRight, _.downLeft)
 
-  def directionString(dest: Pos): String =
+  def directionString(dest: Pos): DirectionString =
     (file.index - dest.file.index, rank.index - dest.rank.index) match {
       case (fileDiff, 0)        =>
-        if (fileDiff > 0) "left"
-        else "right"
+        if (fileDiff > 0) DirectionString.Left
+        else DirectionString.Right
       case (0, rankDiff)        =>
-        if (rankDiff > 0) "downRight"
-        else "upLeft"
+        if (rankDiff > 0) DirectionString.DownRight
+        else DirectionString.UpLeft
       case (fileDiff, rankDiff) =>
-        if (fileDiff > 0 && rankDiff > 0) "downLeft"
-        else if (fileDiff < 0 && rankDiff < 0) "upRight"
-        else if (fileDiff < 0 && rankDiff > 0) "downRight"
-        else "upLeft"
+        if (fileDiff > 0 && rankDiff > 0) DirectionString.DownLeft
+        else if (fileDiff < 0 && rankDiff < 0) DirectionString.UpRight
+        else if (fileDiff < 0 && rankDiff > 0) DirectionString.DownRight
+        else DirectionString.UpLeft
     }
 
   def >|(stop: Pos => Boolean): List[Pos]                   = |<>|(stop, _.right)
@@ -257,6 +279,20 @@ case class Pos private (index: Int) extends AnyVal {
   def key                 = file.toString + rank.toString
   def officialNotationKey = s"${File(rank.index).getOrElse("")}${Rank(file.index).getOrElse("")}"
   override def toString   = key
+
+
+  private def diagonalDirectionString(dest: Pos): DiagonalDirectionString =
+    (file.index - dest.file.index, rank.index - dest.rank.index) match {
+      case (0, rankDiff)        =>
+        if (rankDiff > 0) DiagonalDirectionString.DownRight
+        else DiagonalDirectionString.UpLeft
+      case (fileDiff, rankDiff) =>
+        if (fileDiff > 0 && rankDiff > 0) DiagonalDirectionString.DownLeft
+        else if (fileDiff < 0 && rankDiff < 0) DiagonalDirectionString.UpRight
+        else if (fileDiff < 0 && rankDiff > 0) DiagonalDirectionString.DownRight
+        else if (fileDiff > 0 && rankDiff < 0) DiagonalDirectionString.UpLeft
+        else sys.error("impossible Abalone direction due to weird fileDiff and rankDiff")
+    }
 }
 
 object Pos {
@@ -301,97 +337,77 @@ object Pos {
     if (isInHexagon(x + File.all.size * y)) Some(new Pos(x + File.all.size * y))
     else None
 
-  def dirFromString(dir: String): Direction = dir match {
-    case "left"      => _.left
-    case "upLeft"    => _.upLeft
-    case "upRight"   => _.upRight
-    case "right"     => _.right
-    case "downRight" => _.downRight
-    case "downLeft"  => _.downLeft
-    case _           => (_: Pos) => None
+  def directionFromDirectionString(directionString: DirectionString): Direction = directionString match {
+    case DirectionString.Left => _.left
+    case DirectionString.UpLeft => _.upLeft
+    case DirectionString.UpRight => _.upRight
+    case DirectionString.Right => _.right
+    case DirectionString.DownRight => _.downRight
+    case DirectionString.DownLeft => _.downLeft
   }
 
-  // used by valid moves generator, based on the lineDir currently considered
-  def sideMoveDirsFromLineDir(lineDir: Direction): Directions = {
-    val x = Pos.E5
-    val y = lineDir(x).getOrElse(Pos.A1)
-    x.directionString(y) match {
-      case "left"      => List(_.downLeft, _.upLeft)
-      case "upLeft"    => List(_.left, _.upRight)
-      case "upRight"   => List(_.upLeft, _.right)
-      case "right"     => List(_.upRight, _.downRight)
-      case "downRight" => List(_.right, _.downLeft)
-      case "downLeft"  => List(_.downRight, _.left)
-      case _           => List()
+  // used by valid moves generator, based on the Direction currently considered
+  def diagonalDirectionsFromDirection(direction: Direction): Directions = {
+    directionStringFromDirection(direction) match {
+      case DirectionString.Left => List(_.downLeft, _.upLeft)
+      case DirectionString.UpLeft => List(_.left, _.upRight)
+      case DirectionString.UpRight => List(_.upLeft, _.right)
+      case DirectionString.Right => List(_.upRight, _.downRight)
+      case DirectionString.DownRight => List(_.right, _.downLeft)
+      case DirectionString.DownLeft => List(_.downRight, _.left)
     }
   }
 
-  def potentialLineDirsFromSideMoveDir(sideMoveDir: Direction): Directions          = {
-    val x = Pos.E5
-    val y = sideMoveDir(x).getOrElse(Pos.A1)
-    x.directionString(y) match {
-      case "upLeft"    => List(_.left, _.upLeft)
-      case "upRight"   => List(_.upLeft, _.upRight, _.right)
-      case "downRight" => List(_.right, _.downRight)
-      case "downLeft"  => List(_.downRight, _.downLeft, _.left)
-      case _           => List()
+  def potentialLineDirsFromSideMoveDir(sideMoveDirection: Direction): Directions          = {
+    diagonalDirectionStringFromDirection(sideMoveDirection) match {
+      case DiagonalDirectionString.UpLeft => List(_.left, _.upLeft)
+      case DiagonalDirectionString.UpRight => List(_.upLeft, _.upRight, _.right)
+      case DiagonalDirectionString.DownRight => List(_.right, _.downRight)
+      case DiagonalDirectionString.DownLeft => List(_.downRight, _.downLeft, _.left)
     }
   }
+
   def potentialSideMoveDirsFromGlobalDir(globalDir: Direction): Directions          = {
-    val x = Pos.E5
-    val y = globalDir(x).getOrElse(Pos.A1)
-    x.directionString(y) match {
-      case "upLeft"    => List(_.left, _.upLeft)
-      case "upRight"   => List(_.upLeft, _.upRight, _.right)
-      case "downRight" => List(_.right, _.downRight)
-      case "downLeft"  => List(_.downLeft, _.left, _.downRight)
-      case _           => List()
-    }
-  }
-  def deducePotentialSideDirs(globalDir: Direction, lineDir: Direction): Directions = {
-    val x = Pos.E5
-    val y = globalDir(x).getOrElse(Pos.A1)
-    val z = lineDir(x).getOrElse(Pos.A1)
-    x.directionString(y) match {
-      case "downLeft"  => {
-        x.directionString(z) match {
-          case "downLeft"  => List(_.left, _.downRight)
-          case "downRight" => List(_.downLeft)
-          case "left"      => List(_.downLeft)
-        }
-      }
-      case "upRight"   => {
-        x.directionString(z) match {
-          case "upLeft"  => List(_.upRight)
-          case "upRight" => List(_.right, _.upLeft)
-          case "right"   => List(_.upRight)
-        }
-      }
-      case "upLeft"    => {
-        x.directionString(z) match {
-          case "upLeft" => List(_.left)
-          case "left"   => List(_.upLeft)
-        }
-      }
-      case "downRight" => {
-        x.directionString(z) match {
-          case "downRight" => List(_.right)
-          case "right"     => List(_.downRight)
-        }
-      }
+    diagonalDirectionStringFromDirection(globalDir) match {
+      case DiagonalDirectionString.UpLeft => List(_.left, _.upLeft)
+      case DiagonalDirectionString.UpRight => List(_.upLeft, _.upRight, _.right)
+      case DiagonalDirectionString.DownRight => List(_.right, _.downRight)
+      case DiagonalDirectionString.DownLeft => List(_.downLeft, _.left, _.downRight)
     }
   }
 
-  def reverseDir(dir: Direction): Direction = {
-    val x = Pos.E5
-    val y = dir(x).getOrElse(Pos.A1)
-    x.directionString(y) match {
-      case "left"      => _.right
-      case "upLeft"    => _.downRight
-      case "upRight"   => _.downLeft
-      case "right"     => _.left
-      case "downRight" => _.upLeft
-      case "downLeft"  => _.upRight
+  def deducePotentialSideDirs(globalDir: Direction, lineDir: Direction): Directions = {
+    diagonalDirectionStringFromDirection(globalDir) match {
+      case DiagonalDirectionString.DownLeft => {
+        directionStringFromDirection(lineDir) match {
+          case DirectionString.DownLeft  => List(_.left, _.downRight)
+          case DirectionString.DownRight => List(_.downLeft)
+          case DirectionString.Left      => List(_.downLeft)
+          case _ => List()
+        }
+      }
+      case DiagonalDirectionString.UpRight => {
+        directionStringFromDirection(lineDir) match {
+          case DirectionString.UpLeft  => List(_.upRight)
+          case DirectionString.UpRight => List(_.right, _.upLeft)
+          case DirectionString.Right    => List(_.upRight)
+          case _ => List()
+        }
+      }
+      case DiagonalDirectionString.UpLeft => {
+        directionStringFromDirection(lineDir) match {
+          case DirectionString.UpLeft => List(_.left)
+          case DirectionString.Left    => List(_.upLeft)
+          case _ => List()
+        }
+      }
+      case DiagonalDirectionString.DownRight => {
+        directionStringFromDirection(lineDir) match {
+          case DirectionString.DownRight => List(_.right)
+          case DirectionString.Right      => List(_.downRight)
+          case _ => List()
+        }
+      }
     }
   }
 
@@ -411,6 +427,18 @@ object Pos {
       a <- piotr(piotrs.head)
       b <- piotr(piotrs(1))
     } yield s"${a.key}${b.key}"
+
+  private def directionStringFromDirection(direction: Direction): DirectionString = {
+    val x = Pos.E5
+    val y = direction(x).getOrElse(Pos.A1)
+    x.directionString(y)
+  }
+
+  private def diagonalDirectionStringFromDirection(direction: Direction): DiagonalDirectionString = {
+    val x = Pos.E5
+    val y = direction(x).getOrElse(Pos.A1)
+    x.diagonalDirectionString(y)
+  }
 
   val A1 = new Pos(0)
   val B1 = new Pos(1)

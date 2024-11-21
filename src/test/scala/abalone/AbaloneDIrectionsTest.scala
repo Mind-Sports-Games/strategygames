@@ -23,10 +23,10 @@ class AbaloneDirectionsTest extends AbaloneTest with ValidatedMatchers {
       val B = Pos.B3
       val C = Pos.C2
       val D = Pos.D2
-      Pos.E5.directionString(A) must_== "downLeft"
-      Pos.E5.directionString(B) must_== "downLeft"
-      Pos.E5.directionString(C) must_== "downLeft"
-      Pos.E5.directionString(D) must_== "downLeft"
+      Pos.E5.directionString(A) must_== DirectionString.DownLeft
+      Pos.E5.directionString(B) must_== DirectionString.DownLeft
+      Pos.E5.directionString(C) must_== DirectionString.DownLeft
+      Pos.E5.directionString(D) must_== DirectionString.DownLeft
       a.downLeft.get.index must_== A.index
       b.left.get.index must_== B.index
       b.downRight.get.index must_== C.index
@@ -49,8 +49,8 @@ class AbaloneDirectionsTest extends AbaloneTest with ValidatedMatchers {
       val b = Pos.G5
       val A = Pos.F3
       val B = Pos.G4
-      Pos.E5.directionString(A) must_== "downRight"
-      Pos.E5.directionString(B) must_== "downRight"
+      Pos.E5.directionString(A) must_== DirectionString.DownRight
+      Pos.E5.directionString(B) must_== DirectionString.DownRight
       a.right.get.index must_== A.index
       b.downRight.get.index must_== B.index
     }
@@ -74,10 +74,10 @@ class AbaloneDirectionsTest extends AbaloneTest with ValidatedMatchers {
       val B = Pos.H7
       val C = Pos.G8
       val D = Pos.F8
-      Pos.E5.directionString(A) must_== "upRight"
-      Pos.E5.directionString(B) must_== "upRight"
-      Pos.E5.directionString(C) must_== "upRight"
-      Pos.E5.directionString(D) must_== "upRight"
+      Pos.E5.directionString(A) must_== DirectionString.UpRight
+      Pos.E5.directionString(B) must_== DirectionString.UpRight
+      Pos.E5.directionString(C) must_== DirectionString.UpRight
+      Pos.E5.directionString(D) must_== DirectionString.UpRight
       a.upRight.get.index must_== A.index
       b.right.get.index must_== B.index
       b.upLeft.get.index must_== C.index
@@ -100,8 +100,8 @@ class AbaloneDirectionsTest extends AbaloneTest with ValidatedMatchers {
       val b = Pos.E7
       val A = Pos.C6
       val B = Pos.D7
-      Pos.E5.directionString(A) must_== "upLeft"
-      Pos.E5.directionString(B) must_== "upLeft"
+      Pos.E5.directionString(A) must_== DirectionString.UpLeft
+      Pos.E5.directionString(B) must_== DirectionString.UpLeft
       a.upLeft.get.index must_== A.index
       b.left.get.index must_== B.index
     }
