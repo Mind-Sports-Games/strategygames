@@ -238,8 +238,6 @@ case class Pos private (index: Int) extends AnyVal {
       p :: (if (stop(p)) Nil else p.|<>|(stop, dir))
     } getOrElse Nil
 
-  def isSameDirection(pos1: Pos, pos2: Pos): Boolean = directionString(pos1) == pos1.directionString(pos2)
-
   @inline def file = File of this // column (as if it was an index in a 1D array)
   @inline def rank = Rank of this // horizontal row, makes sense in a 2D array
 

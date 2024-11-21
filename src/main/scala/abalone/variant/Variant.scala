@@ -249,62 +249,60 @@ abstract class Variant private[variant] (
             - move from orig to dest
    */
   private def piecesAfterAction(pieces: PieceMap, orig: Pos, dest: Pos): PieceMap = {
-    val origToDestDirString      = orig.directionString(dest)
-    val origToDestDir: Direction = Pos.directionFromDirectionString(origToDestDirString)
+    val origToDestDir: Direction = Pos.directionFromDirectionString(orig.directionString(dest))
 
     if (isSideMove(orig, dest)) {
-      val potentialLineDirs = Pos.potentialLineDirsFromSideMoveDir(origToDestDir)
+      Pos.potentialLineDirsFromSideMoveDir(origToDestDir).flatMap { lineDir =>
+        val sideDirs = Pos.deducePotentialSideDirs(origToDestDir, lineDir)
 
-      potentialLineDirs
-        .flatMap { lineDir =>
-          lineDir(orig).toList.flatMap { secondPos =>
-            Pos.deducePotentialSideDirs(origToDestDir, lineDir).flatMap { sideDir =>
-              sideDir(secondPos).toList.flatMap { side2ndPos =>
-                if (pieces.contains(secondPos)) {
-                  if (side2ndPos == dest && sideDir(orig).isDefined) {
-                    List(
-                      pieces +
-                        (sideDir(orig).get -> pieces(orig)) - orig +
-                        (dest              -> pieces(secondPos)) - secondPos
-                    )
-                  } else {
-                    lineDir(secondPos).toList.flatMap { thirdPos =>
-                      sideDir(thirdPos).toList.flatMap { side3rdPos =>
-                        if (pieces.contains(thirdPos) && side3rdPos == dest && sideDir(orig).isDefined)
-                          List(
-                            pieces +
-                              (sideDir(orig).get -> pieces(orig)) - orig +
-                              (side2ndPos        -> pieces(secondPos)) - secondPos +
-                              (dest              -> pieces(thirdPos)) - thirdPos
-                          )
-                        else List.empty
-                      }
+        lineDir(orig).toList.flatMap { secondPos =>
+          sideDirs.flatMap { sideDir =>
+            val side2ndPos = sideDir(secondPos)
+
+            side2ndPos.collect {
+              case destPos if pieces.contains(secondPos) && sideDir(orig).isDefined =>
+                if (destPos == dest) {
+                  return pieces +
+                    (sideDir(orig).get -> pieces(orig)) - orig +
+                    (dest              -> pieces(secondPos)) - secondPos
+                } else {
+                  lineDir(secondPos).toList.flatMap { thirdPos =>
+                    sideDir(thirdPos).collect {
+                      case destPos3
+                          if pieces.contains(thirdPos) && destPos3 == dest && sideDir(orig).isDefined =>
+                        return pieces +
+                          (sideDir(orig).get -> pieces(orig)) - orig +
+                          (destPos           -> pieces(secondPos)) - secondPos +
+                          (dest              -> pieces(thirdPos)) - thirdPos
                     }
                   }
-                } else List.empty
-              }
+                }
             }
           }
         }
-        .headOption
-        .getOrElse(pieces)
-    } else {
-      if (pieces.contains(dest)) {
-        val destLineOneMove: Option[Pos] = origToDestDir(dest)
-        val destLineTwoMove: Option[Pos] = destLineOneMove.flatMap(direction => origToDestDir(direction))
-
-        (destLineOneMove, destLineTwoMove) match {
-          case ((None, _)) /*__(_)o\*/                                                   => pieces + (dest -> pieces(orig)) - orig
-          case (Some(destLineOnePos), _) if !pieces.contains(destLineOnePos) /*__(_)o.*/ =>
-            pieces + (destLineOnePos -> pieces(dest)) + (dest -> pieces(orig)) - orig
-          case ((Some(destLineOnePos), None)) /*___o(o.)\*/                              =>
-            pieces + (destLineOnePos -> pieces(dest)) + (dest -> pieces(orig)) - orig
-          case ((_, Some(destLineTwoPos))) /*___oo.*/                                    =>
-            pieces + (destLineTwoPos -> pieces(dest)) + (dest -> pieces(orig)) - orig
-          case _                                                                         => pieces
-        }
-      } else pieces + (dest -> pieces(orig)) - orig
+      }
+      return pieces
     }
+    if (pieces.contains(dest)) {
+      val destLineOneMove: Option[Pos] = origToDestDir(dest)
+      val destLineTwoMove: Option[Pos] = destLineOneMove.flatMap(direction => origToDestDir(direction))
+
+      (destLineOneMove, destLineTwoMove) match {
+        /*__(_)o\*/
+        case (None, _)                                                     => return pieces + (dest -> pieces(orig)) - orig
+        /*__(_)o.*/
+        case (Some(destLineOnePos), _) if !pieces.contains(destLineOnePos) =>
+          return pieces + (destLineOnePos -> pieces(dest)) + (dest -> pieces(orig)) - orig
+        /*___o(o.)\*/
+        case (Some(destLineOnePos), None)                                  =>
+          return pieces + (destLineOnePos -> pieces(dest)) + (dest -> pieces(orig)) - orig
+        /*___oo.*/
+        case (_, Some(destLineTwoPos))                                     =>
+          return pieces + (destLineTwoPos -> pieces(dest)) + (dest -> pieces(orig)) - orig
+        case _                                                             => return pieces
+      }
+    }
+    pieces + (dest -> pieces(orig)) - orig
   }
 
   def move(
