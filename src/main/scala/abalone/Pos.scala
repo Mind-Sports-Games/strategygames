@@ -427,15 +427,15 @@ object Pos {
       b <- piotr(piotrs(1))
     } yield s"${a.key}${b.key}"
 
-  private def directionStringFromDirection(direction: Direction): DirectionString = {
+  // E5 is the center of the board. We use it as a reference to calculate the DirectionString from the movement of the piece
+  private def directionStringFromDirection(direction: Direction): DirectionString                 = {
     val x = Pos.E5
-    val y = direction(x).getOrElse(Pos.A1)
+    val y = direction(x).get
     x.directionString(y)
   }
-
   private def diagonalDirectionStringFromDirection(direction: Direction): DiagonalDirectionString = {
     val x = Pos.E5
-    val y = direction(x).getOrElse(Pos.A1)
+    val y = direction(x).get
     x.diagonalDirectionString(y)
   }
 
