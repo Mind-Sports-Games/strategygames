@@ -21,7 +21,6 @@ object Forsyth {
           pocketData = fen.pocketData,
           history = History(),
           variant = variant,
-          pocketData = fen.pocketData,
           unusedDice = fen.unusedDice
         ),
         fen.value.split(' ')(3) match {
