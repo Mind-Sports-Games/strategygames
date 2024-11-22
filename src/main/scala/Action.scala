@@ -19,6 +19,7 @@ abstract class Action(
   def toTogyzkumalak: togyzkumalak.Action
   def toGo: go.Action
   def toBackgammon: backgammon.Action
+  def toAbalone: abalone.Action
 }
 
 object Action {
@@ -56,6 +57,10 @@ object Action {
     case l: backgammon.Lift      => Lift.Backgammon(l)
     case dr: backgammon.DiceRoll => DiceRoll.Backgammon(dr)
     case et: backgammon.EndTurn  => EndTurn.Backgammon(et)
+  }
+
+  def wrap(action: abalone.Action): Action = action match {
+    case m: abalone.Move => Move.Abalone(m)
   }
 
   def toChess(action: Action): chess.Action = action match {
@@ -99,6 +104,11 @@ object Action {
     case DiceRoll.Backgammon(dr) => dr
     case EndTurn.Backgammon(et)  => et
     case _                       => sys.error("Expecting a backgammon action e.g. move, drop, lift, diceroll or endTurn")
+  }
+
+  def toAbalone(action: Action): abalone.Move = action match {
+    case Move.Abalone(m) => m
+    case _               => sys.error("Expecting a abalone action e.g. move")
   }
 
 }
