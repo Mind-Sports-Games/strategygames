@@ -4993,14 +4993,13 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "4/2",
         "l1h1"
       )
-      playActionStrs(actionStrs, Some(Game.apply(variant.Hyper))) must beValid.like { g =>
+      playActionStrs(actionStrs, None, Some(variant.Hyper), Player.P2) must beValid.like { g =>
         g.situation.moves.values.flatten.map(_.toUci.uci).toSet must_== Set("h1f1", "j1h1", "k1i1")
       }
     }
 
     "end in single win even if in backgammon position" in {
       val actionStrs = List(
-        "endturn",
         "6/2",
         "l1j1",
         "k1e1",
@@ -5042,7 +5041,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "1/2",
         "^l2"
       )
-      playActionStrs(actionStrs, Some(Game.apply(variant.Hyper))) must beValid.like { g =>
+      playActionStrs(actionStrs, None, Some(variant.Hyper), Player.P2) must beValid.like { g =>
         g.situation.board.history.score must_== Score(0, 3)
         g.situation.end must_== true
         g.situation.board.pieceInOpponentsHome(Player.P1) must_== true
