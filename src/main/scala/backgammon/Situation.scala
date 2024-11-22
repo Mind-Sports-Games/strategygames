@@ -1,12 +1,13 @@
 package strategygames.backgammon
 
 import strategygames.{ Player, Status }
+import strategygames.backgammon.format.Uci
 
 import cats.data.Validated
 //import cats implicits in this file causes mindtrap to have problems
 //import cats.implicits._
 
-import strategygames.backgammon.format.Uci
+import scala.util.Random
 
 case class Situation(board: Board, player: Player) {
 
@@ -353,6 +354,6 @@ case class Situation(board: Board, player: Player) {
 object Situation {
 
   def apply(variant: strategygames.backgammon.variant.Variant): Situation =
-    Situation(Board init variant, variant.startPlayer)
+    Situation(Board init variant, Random.shuffle(Player.all).head)
 
 }
