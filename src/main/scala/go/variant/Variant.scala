@@ -55,7 +55,7 @@ abstract class Variant private[variant] (
 
     val board  = boardFenFromHandicap(handicap)
     val pocket = "[SSSSSSSSSSssssssssss]"
-    FEN(s"${board}${pocket} ${turn} - ${p1Score} ${p2Score} 0 0 ${komi} 1")
+    FEN(s"${board}${pocket} ${turn} - ${p1Score} ${p2Score} 0 0 ${komi} 0 1")
   }
 
   def boardFenFromHandicap(@nowarn handicap: Int): String = initialFen.board

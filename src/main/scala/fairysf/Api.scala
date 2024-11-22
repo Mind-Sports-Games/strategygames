@@ -93,7 +93,7 @@ object Api {
     lazy val hasRepeated: Boolean       = position.hasRepeated()
 
     lazy val pieceMap: PieceMap =
-      convertPieceMap(position.piecesOnBoard(), variant.gameFamily)
+      convertPieceMap(position.piecesOnBoard(), position.wallsOnBoard(), variant.gameFamily)
 
     lazy val piecesInHand: Array[Piece] =
       vectorOfPiecesToPieceArray(position.piecesInHand(), variant.gameFamily)
@@ -207,7 +207,11 @@ object Api {
   def vectorOfPiecesToPieceArray(pieces: FairyStockfish.VectorOfPieces, gf: GameFamily): Array[Piece] =
     pieces.get().map(pieceFromFSPiece(_, gf))
 
-  private def convertPieceMap(fsPieceMap: FairyStockfish.PieceMap, gf: GameFamily): PieceMap = {
+  private def convertPieceMap(
+      fsPieceMap: FairyStockfish.PieceMap,
+      fsWallMap: FairyStockfish.WallMap,
+      gf: GameFamily
+  ): PieceMap = {
     var first    = fsPieceMap.begin()
     val end      = fsPieceMap.end()
     val pieceMap = scala.collection.mutable.Map[Pos, Piece]()
@@ -217,7 +221,21 @@ object Api {
       ) = pieceFromFSPiece(first.second(), gf)
       first = first.increment()
     }
+    // Add in the walls if this game family has them.
+    wallPiece(gf).map(wall => {
+      var firstWall = fsWallMap.begin()
+      val endWall   = fsWallMap.end()
+      while (!firstWall.equals(endWall)) {
+        pieceMap(Pos.fromFairy(firstWall.first()).get) = wall
+        firstWall = firstWall.increment()
+      }
+    })
     pieceMap.toMap
+  }
+
+  private def wallPiece(gf: GameFamily): Option[Piece] = gf match {
+    case GameFamily.Amazons() => Piece.fromChar(gf, 'P')
+    case _                    => None
   }
 
   def lilaUciToFairyUci(movesList: Option[List[String]]): Option[List[String]] =
@@ -312,5 +330,9 @@ maxRank = 5
 startFen = ppppp/ppppp/5/PPPPP/PPPPP w - - 0 1
 flagRegionWhite = *5
 flagRegionBlack = *1
+[ps-xiangqi:xiangqi]
+nFoldRule = 4
+[ps-minixiangqi:minixiangqi]
+nFoldRule = 4
   """
 }

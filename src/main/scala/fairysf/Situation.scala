@@ -47,9 +47,11 @@ case class Situation(board: Board, player: Player) {
 
   def staleMate: Boolean = result == GameResult.Stalemate()
 
+  def autoDraw: Boolean = board.autoDraw || board.variant.specialDraw(this)
+
   private def variantEnd = result == GameResult.VariantEnd() || board.variant.specialEnd(this)
 
-  def end: Boolean = checkMate || perpetual || staleMate || variantEnd
+  def end: Boolean = checkMate || perpetual || staleMate || variantEnd || autoDraw
 
   def winner: Option[Player] = board.variant.winner(this)
 
@@ -61,6 +63,7 @@ case class Situation(board: Board, player: Player) {
     // alot of variantEnds appear as checkMate in fairysf
     else if (variantEnd) Status.VariantEnd.some
     else if (staleMate) Status.Stalemate.some
+    else if (autoDraw) Status.Draw.some
     else none
 
   // TODO: test P1/P2 map is correct
@@ -74,7 +77,7 @@ case class Situation(board: Board, player: Player) {
 
   // called threefold actually will return for xfold
   def threefoldRepetition: Boolean =
-    board.variant.repetitionEnabled && board.apiPosition.optionalGameEnd
+    board.variant.repetitionEnabled && board.apiPosition.optionalGameEnd && !perpetualPossible
 
   lazy val perpetualPossible: Boolean =
     board.variant.validMoves(this).values.flatMap(_.map(_.situationAfter.perpetual)).toList.contains(true) ||
@@ -88,6 +91,9 @@ case class Situation(board: Board, player: Player) {
 
   def drop(role: Role, pos: Pos): Validated[String, Drop] =
     board.variant.drop(this, role, pos)
+
+  def drop(uci: Uci.Drop): Validated[String, Drop] =
+    board.variant.drop(this, uci.role, uci.pos)
 
   def withVariant(variant: strategygames.fairysf.variant.Variant) =
     copy(

@@ -57,6 +57,8 @@ abstract class Variant private[variant] (
 
   def recalcStartPlayerForStats: Boolean = true
 
+  def numStartingPiecesPerPlayer: Int = 15
+
   // returns the updated piecemap for pieces on the board and an optional captured piece to put in the pocket
   private def piecesAfterAction(
       pieces: PieceMap,
@@ -488,8 +490,8 @@ abstract class Variant private[variant] (
     else None
 
   def specialEnd(situation: Situation) =
-    (situation.board.history.score.p1 == 15) ||
-      (situation.board.history.score.p2 == 15)
+    (situation.board.history.score.p1 == numStartingPiecesPerPlayer) ||
+      (situation.board.history.score.p2 == numStartingPiecesPerPlayer)
 
   def gammonPosition(situation: Situation, player: Player) =
     situation.board.history.score(player) == 0 &&
@@ -498,8 +500,8 @@ abstract class Variant private[variant] (
 
   // doesnt check for not a backgammonWin
   def gammonWin(situation: Situation) =
-    (situation.board.history.score.p1 == 15 && situation.board.history.score.p2 == 0) ||
-      (situation.board.history.score.p2 == 15 && situation.board.history.score.p1 == 0)
+    (situation.board.history.score.p1 == numStartingPiecesPerPlayer && situation.board.history.score.p2 == 0) ||
+      (situation.board.history.score.p2 == numStartingPiecesPerPlayer && situation.board.history.score.p1 == 0)
 
   def backgammonPosition(situation: Situation, player: Player) =
     situation.board.history.score(player) == 0 &&
@@ -508,12 +510,12 @@ abstract class Variant private[variant] (
 
   def backgammonWin(situation: Situation) =
     (
-      situation.board.history.score.p1 == 15 &&
+      situation.board.history.score.p1 == numStartingPiecesPerPlayer &&
         situation.board.history.score.p2 == 0 && (
           situation.board.piecesOnBar(P2) || situation.board.pieceInOpponentsHome(P2)
         )
     ) || (
-      situation.board.history.score.p2 == 15 &&
+      situation.board.history.score.p2 == numStartingPiecesPerPlayer &&
         situation.board.history.score.p1 == 0 && (
           situation.board.piecesOnBar(P1) || situation.board.pieceInOpponentsHome(P1)
         )
@@ -530,8 +532,8 @@ abstract class Variant private[variant] (
   def materialImbalance(board: Board): Int = board.history.score.p2 - board.history.score.p1
 
   def valid(board: Board, @nowarn strict: Boolean): Boolean =
-    board.playerPiecesOnBoardOrInPocket(P1) + board.history.score.p1 == 15 &&
-      board.playerPiecesOnBoardOrInPocket(P2) + board.history.score.p2 == 15
+    board.playerPiecesOnBoardOrInPocket(P1) + board.history.score.p1 == numStartingPiecesPerPlayer &&
+      board.playerPiecesOnBoardOrInPocket(P2) + board.history.score.p2 == numStartingPiecesPerPlayer
 
   val roles: List[Role] = Role.all
 
@@ -558,7 +560,8 @@ object Variant {
 
   lazy val all: List[Variant] = List(
     Backgammon,
-    Nackgammon
+    Nackgammon,
+    Hyper
   )
   val byId                    = all map { v =>
     (v.id, v)

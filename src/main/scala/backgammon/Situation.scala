@@ -31,7 +31,7 @@ case class Situation(board: Board, player: Player) {
 
   def endTurns: List[EndTurn] = endTurn.toList
 
-  //don't include undos as it is not a progressive action
+  // don't include undos as it is not a progressive action
   def actions: List[Action] =
     movesList ::: dropsAsDrops ::: lifts ::: diceRolls ::: endTurns
 
@@ -63,7 +63,7 @@ case class Situation(board: Board, player: Player) {
   def canOnlyRollDice: Boolean = canRollDice && !canMove && !canDrop && !canLift && !canEndTurn
 
   def canUndo: Boolean = undos.nonEmpty
-  //def canUndo: Boolean = board.history.lastAction.map(_.undoable).getOrElse(false)
+  // def canUndo: Boolean = board.history.lastAction.map(_.undoable).getOrElse(false)
 
   // Users can't make the decision to endTurn at the start of the game
   // only SG can make that decision (using random diceRoll) so don't set
@@ -177,7 +177,7 @@ case class Situation(board: Board, player: Player) {
       if (board.variant.backgammonPosition(this, player)) _.ResignBackgammon
       else if (board.variant.gammonPosition(this, player)) _.ResignGammon
       else _.Resign
-    else if (board.history.score(player) == 0) _.ResignBackgammon
+    else if (board.history.score(player) == 0 && board.variant.key != "hyper") _.ResignBackgammon
     else _.Resign
 
   def outOfTimeStatus: Status.type => Status =
@@ -185,7 +185,7 @@ case class Situation(board: Board, player: Player) {
       if (board.variant.backgammonPosition(this, player)) _.OutoftimeBackgammon
       else if (board.variant.gammonPosition(this, player)) _.OutoftimeGammon
       else _.Outoftime
-    else if (board.history.score(player) == 0) _.OutoftimeBackgammon
+    else if (board.history.score(player) == 0 && board.variant.key != "hyper") _.OutoftimeBackgammon
     else _.Outoftime
 
   // only works when we are not mid turn and have not rolled dice
@@ -314,7 +314,8 @@ case class Situation(board: Board, player: Player) {
         .contains(false)
 
   def insufficientMaterialStatus: Status.type => Status =
-    if (opponentHasInsufficientMaterialForBackgammon) _.GinBackgammon
+    if (board.variant.key == "hyper") _.RuleOfGin // TODO fix correctly when using doubling cube
+    else if (opponentHasInsufficientMaterialForBackgammon) _.GinBackgammon
     else if (opponentHasInsufficientMaterialForGammon) _.GinGammon
     else _.RuleOfGin
 

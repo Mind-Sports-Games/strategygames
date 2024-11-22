@@ -20,7 +20,9 @@ object Forsyth {
           pieces = fen.pieces,
           pocketData = fen.pocketData,
           history = History(),
-          variant = variant
+          variant = variant,
+          pocketData = fen.pocketData,
+          unusedDice = fen.unusedDice
         ),
         fen.value.split(' ')(3) match {
           case "w" => P1
@@ -29,6 +31,9 @@ object Forsyth {
         }
       ).withHistory(
         History(
+          currentTurn = List((fen.unusedDice ++ fen.usedDice).take(2))
+            .filter(_.nonEmpty)
+            .map(Uci.DiceRoll(_)),
           score = Score(fen.player1Score, fen.player2Score),
           // seems like we might be using History.halfMoveClock incorrectly
           halfMoveClock = fen.fullMove.getOrElse(0)

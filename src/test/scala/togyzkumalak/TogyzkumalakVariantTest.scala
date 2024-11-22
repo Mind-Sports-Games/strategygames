@@ -3,6 +3,9 @@ package strategygames.togyzkumalak
 import org.specs2.matcher.ValidatedMatchers
 
 import strategygames.{ Player, Score }
+import strategygames.format.{ FEN => StratFen, Forsyth => StratForsyth, Uci => StratUci }
+import strategygames.variant.{ Variant => StratVariant }
+import variant.Togyzkumalak
 
 class TogyzkumalakVariantTest extends TogyzkumalakTest with ValidatedMatchers {
 
@@ -207,4 +210,96 @@ class TogyzkumalakVariantTest extends TogyzkumalakTest with ValidatedMatchers {
     }
   }
 
+}
+
+class TogyzkumalakVariantTestIsometry extends strategygames.chess.ChessTest {
+  "Test Every move can be loaded from fen" in {
+    val gameFamily   = Togyzkumalak.gameFamily
+    val lib          = gameFamily.gameLogic
+    val stratVariant = StratVariant(lib, Togyzkumalak.key).get
+
+    _testEveryMoveLoadFenIsometry(lib, StratFen(lib, Togyzkumalak.initialFen.value), stratVariant)(
+      List(
+        "g1d2",
+        "a2h1",
+        "f1d2",
+        "c2f1",
+        "a1h2",
+        "b2h1",
+        "b1e2",
+        "b2a2",
+        "i1c1",
+        "g2f1",
+        "d1a2",
+        "f2i1",
+        "h1i2",
+        "h2f2",
+        "i1g2",
+        "d2a1",
+        "e1c1",
+        "b2d1",
+        "g1d2",
+        "a2i2",
+        "i1g2",
+        "i2e2",
+        "a1c1",
+        "a2a1",
+        "h1h2",
+        "c2d1",
+        "a1b1",
+        "b2a2",
+        "b1h2",
+        "f2b2",
+        "b1c1",
+        "c2b2",
+        "f1i2",
+        "c2b2",
+        "f1g1",
+        "a2a1",
+        "a1b1",
+        "b2b1",
+        "a1b1",
+        "b2a2",
+        "i1g2",
+        "h2g2",
+        "h1i2",
+        "a2b1",
+        "a1b1",
+        "e2c1",
+        "a1b1",
+        "b2a2",
+        "b1d1",
+        "a2b1",
+        "a1b1",
+        "g2b2",
+        "i1i2",
+        "i2h2",
+        "g1h2",
+        "i2h2",
+        "g1h1",
+        "h2g2",
+        "h1i2",
+        "f2e2",
+        "e1g1",
+        "b2a2",
+        "g1h1",
+        "c2b2",
+        "f1g1",
+        "c2b2",
+        "g1h1",
+        "b2a2",
+        "h1i2",
+        "b2a2",
+        "c1i2",
+        "b2a2",
+        "h1i2",
+        "i2h2",
+        "i1d2"
+      ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
+    ) must beValid.like(gameData => {
+      val fen1 = StratForsyth.>>(lib, gameData.game)
+      val fen2 = StratForsyth.>>(lib, gameData.fenGame)
+      fen1 must_== fen2
+    })
+  }
 }
