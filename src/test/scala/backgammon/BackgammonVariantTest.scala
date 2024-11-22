@@ -8,7 +8,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
 
   "Backgammon Variant handles dice rolls and moves" should {
 
-    val game = Game.apply(variant.Backgammon)
+    val game = Game.makeGame(variant.Backgammon, Some(Player.P1))
 
     "be valid game after first dice roll" in {
       game.diceRoll(List(3, 4)) must beValid.like { g =>
@@ -18,7 +18,8 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
 
       game.diceRoll(List(4, 3)) must beValid.like { g =>
         g._1.situation.moves.values.flatten.size must_== 8
-        g._1.situation.player must_== Player.P2
+        // now P1 after changing how start player works
+        g._1.situation.player must_== Player.P1
       }
 
       game.diceRoll(List(1, 5)) must beValid.like { g =>
@@ -354,7 +355,6 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
 
     "be valid game that can endturn even after a single move/drop/lift" in {
       val actionStrs = List(
-        "endturn",
         "3/1",
         "e2h2",
         "g2h2",
@@ -397,7 +397,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "s@j2",
         "endturn"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
+      playActionStrs(actionStrs, None, None, Player.P2) must beValid.like { g =>
         g.situation.board.unusedDice.isEmpty must_== true
         g.situation.board.usedDice.isEmpty must_== true
         g.situation.canOnlyRollDice must_== true
@@ -1266,7 +1266,6 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
     // https://playstrategy.dev/lOx6ysxb
     "be valid game that forces use of max dice when either can be used but not both" in {
       val actionStrs = List(
-        "endturn",
         "4/2",
         "g2i2",
         "e2i2",
@@ -1561,7 +1560,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn",
         "6/3"
       )
-      playActionStrs(actionStrs, Some(Game.apply(variant.Nackgammon))) must beValid.like { g =>
+      playActionStrs(actionStrs, None, Some(variant.Nackgammon), Player.P2) must beValid.like { g =>
         g.situation.moves.values.flatten.map(_.toUci.uci).toSet must_== Set("e2b1")
       }
     }
@@ -1917,7 +1916,6 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
 
     "be valid game that ends in a StandardWin when both sides score" in {
       val actionStrs = List(
-        "endturn",
         "3/1",
         "e2h2",
         "g2h2",
@@ -2273,7 +2271,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "5/3",
         "^j1"
       )
-      playActionStrs(actionStrs.dropRight(1)) must beValid.like { g =>
+      playActionStrs(actionStrs.dropRight(1), None, None, Player.P2) must beValid.like { g =>
         g.situation.board.history.score must_== Score(14, 12)
         g.situation.end must_== false
         g.situation.winner must_== None
@@ -2286,7 +2284,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         g.situation.maxTurnsFromEnd(Player.P2) must_== Some(2)
         g.situation.minTurnsFromEnd(Player.P2) must_== Some(1)
       }
-      playActionStrs(actionStrs) must beValid.like { g =>
+      playActionStrs(actionStrs, None, None, Player.P2) must beValid.like { g =>
         g.situation.board.history.score must_== Score(15, 12)
         g.situation.end must_== true
         g.situation.winner must_== Some(Player.P1)
@@ -2297,7 +2295,6 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
 
     "be valid game that ends in a BackgammonWin when one side has pieces in opponent home" in {
       val actionStrs = List(
-        "endturn",
         "5/1",
         "a1e2",
         "l1k1",
@@ -2584,13 +2581,13 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "^k2",
         "^k2"
       )
-      playActionStrs(actionStrs.dropRight(1)) must beValid.like { g =>
+      playActionStrs(actionStrs.dropRight(1), None, None, Player.P2) must beValid.like { g =>
         g.situation.board.history.score must_== Score(0, 14)
         g.situation.end must_== false
         g.situation.winner must_== None
         g.situation.status must_== None
       }
-      playActionStrs(actionStrs) must beValid.like { g =>
+      playActionStrs(actionStrs, None, None, Player.P2) must beValid.like { g =>
         g.situation.board.history.score must_== Score(0, 15)
         g.situation.end must_== true
         g.situation.winner must_== Some(Player.P2)
@@ -3557,13 +3554,13 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn",
         "5/3"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
+      playActionStrs(actionStrs, None, None, Player.P2) must beValid.like { g =>
         g.situation.canMove must_== true
         g.situation.canDrop must_== false
         g.situation.canLift must_== true
         g.situation.forcedAction.nonEmpty must_== true
       }
-      playActionStrs(actionStrs ++ List("^h2")) must beValid.like { g =>
+      playActionStrs(actionStrs ++ List("^h2"), None, None, Player.P2) must beValid.like { g =>
         g.situation.canMove must_== true
         g.situation.canDrop must_== false
         g.situation.canLift must_== true
@@ -3769,7 +3766,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn",
         "6/5"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
+      playActionStrs(actionStrs, None, None, Player.P2) must beValid.like { g =>
         g.situation.canLift must_== true
         g.situation.board.unusedDice.size must_== 2
         g.situation.forcedAction.nonEmpty must_== true
@@ -3980,11 +3977,11 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn",
         "3/6"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
+      playActionStrs(actionStrs, None, None, Player.P2) must beValid.like { g =>
         g.situation.forcedAction.map(_.toUci.uci) must_== Some("b2h2")
       }
       // Undoing, and playing a non forced action should not result in a forcedTurn
-      playActionStrs(actionStrs ++ List("g2j2", "b2h2")) must beValid.like { g =>
+      playActionStrs(actionStrs ++ List("g2j2", "b2h2"), None, None, Player.P2) must beValid.like { g =>
         g.situation.board.history.forcedTurn must_== false
       }
     }
@@ -4179,7 +4176,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn",
         "3/6"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
+      playActionStrs(actionStrs, None, None, Player.P2) must beValid.like { g =>
         g.situation.forcedAction.map(_.toUci.uci) must_== Some("h2b2")
       }
     }
@@ -4980,7 +4977,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn",
         "4/3"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
+      playActionStrs(actionStrs, None, None, Player.P2) must beValid.like { g =>
         g.situation.canMove must_== true
         g.situation.forcedAction.isEmpty must_== true
       }

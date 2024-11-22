@@ -36,8 +36,10 @@ abstract class Variant private[variant] (
 
   def canOfferDraw: Boolean = true
 
-  def baseVariant: Boolean      = false
-  def fenVariant: Boolean       = false
+  def baseVariant: Boolean        = false
+  def fenVariant: Boolean         = false
+  def variableInitialFen: Boolean = false
+
   def hasAnalysisBoard: Boolean = false
   def hasFishnet: Boolean       = false
 
