@@ -69,20 +69,18 @@ object Replay {
     case _                    => sys.error("Invalid abalone move")
   }
 
-  def replayMove(before: Game, orig: Pos, dest: Pos, endTurn: Boolean): Move =
+  def replayMove(before: Game, orig: Pos, dest: Pos, endTurn: Boolean): Move = {
+    val after = before.situation.board.variant.boardAfter(before.situation, orig, dest);
     Move(
       piece = before.situation.board.pieces(orig),
       orig = orig,
       dest = dest,
       situationBefore = before.situation,
-      after = before.situation.board.variant.boardAfter(
-        before.situation,
-        orig,
-        dest
-      ),
+      after = after,
       autoEndTurn = endTurn,
-      capture = before.situation.board.piecesOf(!before.situation.player).get(dest).map(_ => dest)
+      capture = if (before.situation.board.pieces.size != after.pieces.size) Some(dest) else None
     )
+  }
 
   def actionStrsWithEndTurn(actionStrs: ActionStrs): Seq[(String, Boolean)] =
     actionStrs.zipWithIndex.map { case (a, i) =>

@@ -3,6 +3,9 @@ package strategygames.abalone
 import org.specs2.matcher.ValidatedMatchers
 
 import strategygames.{ Score, Status }
+import strategygames.format.{ FEN => StratFen, Forsyth => StratForsyth, Uci => StratUci }
+import strategygames.variant.{ Variant => StratVariant }
+import variant.Abalone
 
 class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
   /*
@@ -675,4 +678,47 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
       game17.situation.winner must_== None
     }
   }
+}
+
+class AbaloneVariantTestIsometry extends strategygames.chess.ChessTest {
+
+  val abaloneGameActionStrs = Vector(
+    Vector("a1d4"),
+    Vector("e9e6"),
+    Vector("b1d3"),
+    Vector("e1e4"),
+    Vector("c2e4"),
+    Vector("d8d6"),
+    Vector("b3e3"),
+    Vector("g3f4"),
+    Vector("i9f6"),
+    Vector("e8e5"),
+    Vector("a2c2"),
+    Vector("f2c2"),
+    Vector("h9f7"),
+    Vector("e2b2"),
+    Vector("a2b3"),
+    Vector("e7e4"),
+    Vector("i8g6"),
+    Vector("e6e3"),
+    Vector("b3e3"),
+    Vector("d7e6"),
+    Vector("h8h6"),
+    Vector("g4d4")
+  )
+
+  "Test Every move can be loaded from fen" in {
+    val gameFamily   = Abalone.gameFamily
+    val lib          = gameFamily.gameLogic
+    val stratVariant = StratVariant(lib, Abalone.key).get
+
+    _testEveryMoveLoadFenIsometry(lib, StratFen(lib, Abalone.initialFen.value), stratVariant)(
+      abaloneGameActionStrs.flatten.toList.map(uciStr => StratUci(lib, gameFamily, uciStr).get)
+    ) must beValid.like(gameData => {
+      val fen1 = StratForsyth.>>(lib, gameData.game)
+      val fen2 = StratForsyth.>>(lib, gameData.fenGame)
+      fen1 must_== fen2
+    })
+  }
+
 }
