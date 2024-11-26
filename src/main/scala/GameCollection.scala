@@ -442,16 +442,19 @@ object GameFamily {
     def key               = "abalone"
     def gameLogic         = GameLogic.Abalone()
     def hasFishnet        = false
-    def hasAnalysisBoard  = false
+    def hasAnalysisBoard  = true
     def defaultVariant    = Variant.Abalone(strategygames.abalone.variant.Abalone)
     def variants          = Variant.all(GameLogic.Abalone()).filter(_.gameFamily == this)
     def displayPiece      = "display"
-    def pieceSetThemes    = // TODO Abalone: Add themes
+    def pieceSetThemes    =
       List(
+        "newspaper"
       )
-    def pieceSetDefault   = ""
-    def boardThemes       = List()
-    def boardThemeDefault = ""
+    def pieceSetDefault   = "newspaper"
+    def boardThemes       = List(
+      "newspaper"
+    )
+    def boardThemeDefault = "newspaper"
     def playerNames       = Map(P1 -> "Black", P2 -> "White")
     def playerColors      = Map(P1 -> "black", P2 -> "white")
   }

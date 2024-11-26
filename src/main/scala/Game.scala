@@ -1237,7 +1237,7 @@ object Game {
         partialCaptures: Boolean = false
     ): Validated[String, (Game, Move)] = (orig, dest) match {
       case (Pos.Abalone(orig), Pos.Abalone(dest)) =>
-        g.apply(orig, dest, None, metrics)
+        g.apply(orig, dest, metrics)
           .toEither
           .map(t => (Abalone(t._1), Move.Abalone(t._2)))
           .toValidated
@@ -1278,7 +1278,7 @@ object Game {
       sys.error("Can't diceroll in Abalone")
 
     def undo(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Undo)] =
-      sys.error("Can't undo in abalone")
+      sys.error("Can't undo in abalone") // @TODO: might want to be able to undo, actually
 
     def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)] =
       sys.error("Can't endTurn in abalone")

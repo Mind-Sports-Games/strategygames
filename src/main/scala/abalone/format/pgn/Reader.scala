@@ -58,7 +58,7 @@ object Reader {
     Replay.actionStrsWithEndTurn(actionStrs).foldLeft[Result](Result.Complete(Replay(game))) {
       case (Result.Complete(replay), (actionStr, endTurn)) =>
         actionStr match {
-          case Uci.Move.moveR(orig, dest, _) => {
+          case Uci.Move.moveR(orig, dest) => {
             (Pos.fromKey(orig), Pos.fromKey(dest)) match {
               case (Some(orig), Some(dest)) =>
                 Result.Complete(
@@ -75,7 +75,7 @@ object Reader {
                 Result.Incomplete(replay, s"Error making replay with move: ${actionStr}")
             }
           }
-          case _                             =>
+          case _                          =>
             Result.Incomplete(replay, s"Error making replay with uci move: ${actionStr}")
         }
       case (r: Result.Incomplete, _)                       => r

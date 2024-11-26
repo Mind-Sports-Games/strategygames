@@ -15,8 +15,9 @@ case object Abalone
 
   def gameFamily: GameFamily = GameFamily.Abalone()
 
-  def perfIcon: Char = ''
+  def perfIcon: Char = '\ue927'
   def perfId: Int    = 700
 
-  override def baseVariant: Boolean = true // Belgian Daisy initialFen is defined in Abalone default "Variant" file
+  override def baseVariant: Boolean =
+    true // Belgian Daisy initialFen is defined in Abalone default "Variant" file
 }

@@ -17,6 +17,12 @@ case class Piece(player: Player, role: Role) {
 
 object Piece {
 
+  // is it wrong ??
+  def fromChar(c: Char): Option[Piece] =
+    Role.allByPgn get c.toUpper map {
+      Piece(Player.fromP1(c.isUpper), _)
+    }
+
   // This is wrong
   // def fromChar(gf: GameFamily, c: Char): Option[Piece] =
   //  Role.allByPgn(gf) get c.toUpper map {

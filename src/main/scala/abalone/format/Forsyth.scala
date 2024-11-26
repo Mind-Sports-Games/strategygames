@@ -11,8 +11,7 @@ import strategygames.abalone.variant.Variant
   */
 object Forsyth {
 
-  // TODO Abalone Set
-  val initial = FEN("")
+  val initial = FEN("ss1SS/sssSSS/1ss1SS1/8/9/8/1SS1ss1/SSSsss/SS1ss 0 0 b 0 1")
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
     Some(
@@ -23,15 +22,14 @@ object Forsyth {
           variant = variant
         ),
         fen.value.split(' ')(3) match {
-          case "S" => P1
-          case "N" => P2
+          case "b" => P1
+          case "w" => P2
           case _   => sys.error("Invalid player in fen")
         }
       ).withHistory(
         History(
           score = Score(fen.player1Score, fen.player2Score),
-          // seems like we might be using History.halfMoveClock incorrectly
-          halfMoveClock = fen.fullMove.getOrElse(0)
+          halfMoveClock = fen.halfMovesSinceLastCapture.getOrElse(0)
         )
       )
     )
@@ -67,11 +65,12 @@ object Forsyth {
     }
 
   def >>(game: Game): FEN = {
-    val boardFen = boardPart(game.situation.board)
-    val scoreStr = game.situation.board.history.score.fenStr
-    val player   = game.situation.player.fold('S', 'N')
-    val moves    = game.situation.board.history.halfMoveClock
-    FEN(s"${boardFen} ${scoreStr} ${player} ${moves}")
+    val boardFen  = boardPart(game.situation.board)
+    val scoreStr  = game.situation.board.history.score.fenStr
+    val player    = game.situation.player.fold('b', 'w')
+    val halfMoves = game.situation.board.history.halfMoveClock
+    val fullMoves = game.fullTurnCount
+    FEN(s"${boardFen} ${scoreStr} ${player} ${halfMoves} ${fullMoves}")
   }
 
   def exportBoard(board: Board): String = {
@@ -80,8 +79,31 @@ object Forsyth {
     s"${boardFen} ${scoreStr}"
   }
 
-  // TODO Abalone Set - it shouldnt be nothing like board.toString!
-  def boardPart(board: Board): String = board.toString
+  // return the FEN
+  def boardPart(board: Board): String = {
+    val fen   = new scala.collection.mutable.StringBuilder(70)
+    var empty = 0
+    for (y <- Rank.allReversed) {
+      empty = 0
+      for (x <- File.all) {
+        board(x, y) match {
+          case None        => if (Pos(x, y).isDefined) empty = empty + 1
+          case Some(piece) =>
+            if (empty > 0) {
+              fen.append(empty)
+              empty = 0
+            }
+            if (piece.player == Player.P1)
+              fen.append(piece.forsyth.toString.toUpperCase())
+            else
+              fen.append(piece.forsyth.toString.toLowerCase())
+        }
+      }
+      if (empty > 0) fen.append(s"${empty},")
+      fen.append('/')
+    }
+    fen.toString.replace(",/", "/").dropRight(1)
+  }
 
   def boardAndPlayer(situation: Situation): String =
     boardAndPlayer(situation.board, situation.player)

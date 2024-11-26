@@ -13,6 +13,7 @@ object EcopeningDB {
     case (_, opening) => opening.fen -> opening
   }
 
+  // @TODO: create these
   lazy val allByEco: Map[ECO, Ecopening] = Map(
 "A00" -> new Ecopening("A00", "abalone", "Abalone Start Pos", "Abalone Start Pos", "", "9S,9S,9S,9S,9S,9S,9S,9S,9S/9S,9S,9S,9S,9S,9S,9S,9S,9S 0 0 S 1", "")
   )
