@@ -254,23 +254,27 @@ object Api {
 
   private val fairyPromotion = "^(.*)\\+$".r
 
+  def singleFairyUciToLilaUci(m: String, position: Position): String = {
+    m match {
+      case fairyPromotion(baseUci) => {
+        Uci(position.variant.gameFamily, baseUci) match {
+          case Some(baseMove: Uci.Move) => {
+            f"${baseUci}${position.pieceMap(baseMove.orig).forsyth}"
+          }
+          case _                        => m
+        }
+      }
+      case _                       => m
+    }
+  }
+
   def fairyUciToLilaUci(variant: Variant, movesList: Option[List[String]]): Option[List[String]] = {
     movesList.map(moveList => {
       var position = positionFromVariant(variant)
       moveList.map(m => {
-        val pieceMap = position.pieceMap
-        position = position.makeMoves(List(m));
-        m match {
-          case fairyPromotion(baseUci) => {
-            Uci(variant.gameFamily, baseUci) match {
-              case Some(baseMove: Uci.Move) => {
-                f"${baseUci}${pieceMap(baseMove.orig).forsyth}"
-              }
-              case _                        => m
-            }
-          }
-          case _                       => m
-        }
+        val newUci = singleFairyUciToLilaUci(m, position)
+        position = position.makeMoves(List(m))
+        newUci
       })
     })
   }
