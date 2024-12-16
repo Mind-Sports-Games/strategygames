@@ -138,7 +138,7 @@ class BackgammonFenTest extends BackgammonTest with ValidatedMatchers {
       )
       playActionStrs(actionStrs) must beValid.like { g =>
         val fen = Forsyth.>>(g)
-        fen must_== FEN("5S,3,3s,1,4s,3,1S,1S/5s,3,2S,1,5S,2,1s,1,1s[1S,1s] 1 2 w 0 0 1")
+        fen must_== FEN("5S,3,3s,1,4s,3,1S,1S/5s,3,2S,1,5S,2,1s,1,1s[1S,1s] 1 2 w 0 0 2")
         fen.pocketData.map(_.pockets(Player.P1).roles.size) must_== Some(1)
         fen.pocketData.map(_.pockets(Player.P2).roles.size) must_== Some(1)
       }
