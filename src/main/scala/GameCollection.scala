@@ -448,13 +448,18 @@ object GameFamily {
     def displayPiece      = "display"
     def pieceSetThemes    =
       List(
-        "newspaper"
+        "classic",
+        "spatial",
+        "newspaper",
+        "fantasy"
       )
-    def pieceSetDefault   = "newspaper"
+    def pieceSetDefault   = "classic"
     def boardThemes       = List(
-      "newspaper"
+      "classic",
+      "dark",
+      "yellow"
     )
-    def boardThemeDefault = "newspaper"
+    def boardThemeDefault = "classic"
     def playerNames       = Map(P1 -> "Black", P2 -> "White")
     def playerColors      = Map(P1 -> "black", P2 -> "white")
   }
