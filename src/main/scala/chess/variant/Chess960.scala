@@ -14,8 +14,9 @@ case object Chess960
   def perfId: Int    = 11
   def perfIcon: Char = '\''
 
-  override def baseVariant = true
-  override def fenVariant  = true
+  override def baseVariant        = true
+  override def fenVariant         = true
+  override def variableInitialFen = true
 
   def pieces =
     Variant.symmetricRank {

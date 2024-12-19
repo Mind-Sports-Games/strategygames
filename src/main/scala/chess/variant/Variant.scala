@@ -29,8 +29,10 @@ abstract class Variant private[variant] (
   // used to define chess variants medley
   def exoticChessVariant: Boolean = false
 
-  def baseVariant: Boolean      = false
-  def fenVariant: Boolean       = false
+  def baseVariant: Boolean        = false
+  def fenVariant: Boolean         = false
+  def variableInitialFen: Boolean = false
+
   def hasAnalysisBoard: Boolean = true
   def hasFishnet: Boolean       = true
 

@@ -39,8 +39,11 @@ abstract class Variant(
   // used in lila setup/src/main/Config.scala
   def baseVariant: Boolean
   def fenVariant: Boolean
+  def variableInitialFen: Boolean
+
   def hasAnalysisBoard: Boolean
   def hasFishnet: Boolean
+
   // used in lila modules/game/src/main/Game.scala
   def p1IsBetterVariant: Boolean
   def blindModeVariant: Boolean
@@ -59,7 +62,10 @@ abstract class Variant(
   def perfIcon: Char
 
   def initialFen: FEN
+  def initialFens: List[FEN]
   def startPlayer: Player
+
+  def recalcStartPlayerForStats: Boolean
 
   def isValidPromotion(promotion: Option[PromotableRole]): Boolean
 
@@ -139,8 +145,10 @@ object Variant {
 
     def exotic: Boolean = v.exotic
 
-    def baseVariant: Boolean      = v.baseVariant
-    def fenVariant: Boolean       = v.fenVariant
+    def baseVariant: Boolean        = v.baseVariant
+    def fenVariant: Boolean         = v.fenVariant
+    def variableInitialFen: Boolean = v.variableInitialFen
+
     def hasAnalysisBoard: Boolean = v.hasAnalysisBoard
     def hasFishnet: Boolean       = v.hasFishnet
 
@@ -160,8 +168,11 @@ object Variant {
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
 
-    def initialFen: FEN     = FEN.Chess(v.initialFen)
-    def startPlayer: Player = v.startPlayer
+    def initialFen: FEN        = FEN.Chess(v.initialFen)
+    def initialFens: List[FEN] = List(initialFen)
+    def startPlayer: Player    = v.startPlayer
+
+    def recalcStartPlayerForStats: Boolean = false
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = promotion match {
       case Some(Role.ChessPromotableRole(pr)) => v.isValidPromotion(pr.some)
@@ -250,8 +261,10 @@ object Variant {
 
     def exotic: Boolean = v.exotic
 
-    def baseVariant: Boolean      = v.baseVariant
-    def fenVariant: Boolean       = v.fenVariant
+    def baseVariant: Boolean        = v.baseVariant
+    def fenVariant: Boolean         = v.fenVariant
+    def variableInitialFen: Boolean = v.variableInitialFen
+
     def hasAnalysisBoard: Boolean = v.hasAnalysisBoard
     def hasFishnet: Boolean       = v.hasFishnet
 
@@ -271,8 +284,11 @@ object Variant {
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
 
-    def initialFen: FEN     = FEN.Draughts(v.initialFen)
-    def startPlayer: Player = v.startPlayer
+    def initialFen: FEN        = FEN.Draughts(v.initialFen)
+    def initialFens: List[FEN] = List(initialFen)
+    def startPlayer: Player    = v.startPlayer
+
+    def recalcStartPlayerForStats: Boolean = false
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = promotion match {
       case Some(Role.DraughtsPromotableRole(pr)) => v.isValidPromotion(pr.some)
@@ -360,8 +376,10 @@ object Variant {
 
     def exotic: Boolean = v.exotic
 
-    def baseVariant: Boolean      = v.baseVariant
-    def fenVariant: Boolean       = v.fenVariant
+    def baseVariant: Boolean        = v.baseVariant
+    def fenVariant: Boolean         = v.fenVariant
+    def variableInitialFen: Boolean = v.variableInitialFen
+
     def hasAnalysisBoard: Boolean = v.hasAnalysisBoard
     def hasFishnet: Boolean       = v.hasFishnet
 
@@ -381,8 +399,11 @@ object Variant {
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
 
-    def initialFen: FEN     = FEN.FairySF(v.initialFen)
-    def startPlayer: Player = v.startPlayer
+    def initialFen: FEN        = FEN.FairySF(v.initialFen)
+    def initialFens: List[FEN] = List(initialFen)
+    def startPlayer: Player    = v.startPlayer
+
+    def recalcStartPlayerForStats: Boolean = false
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = promotion match {
       case Some(Role.FairySFPromotableRole(pr)) => v.isValidPromotion(pr.some)
@@ -470,8 +491,10 @@ object Variant {
 
     def exotic: Boolean = v.exotic
 
-    def baseVariant: Boolean      = v.baseVariant
-    def fenVariant: Boolean       = v.fenVariant
+    def baseVariant: Boolean        = v.baseVariant
+    def fenVariant: Boolean         = v.fenVariant
+    def variableInitialFen: Boolean = v.variableInitialFen
+
     def hasAnalysisBoard: Boolean = v.hasAnalysisBoard
     def hasFishnet: Boolean       = v.hasFishnet
 
@@ -491,8 +514,11 @@ object Variant {
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
 
-    def initialFen: FEN     = FEN.Samurai(v.initialFen)
-    def startPlayer: Player = v.startPlayer
+    def initialFen: FEN        = FEN.Samurai(v.initialFen)
+    def initialFens: List[FEN] = List(initialFen)
+    def startPlayer: Player    = v.startPlayer
+
+    def recalcStartPlayerForStats: Boolean = false
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false
 
@@ -576,8 +602,10 @@ object Variant {
 
     def exotic: Boolean = v.exotic
 
-    def baseVariant: Boolean      = v.baseVariant
-    def fenVariant: Boolean       = v.fenVariant
+    def baseVariant: Boolean        = v.baseVariant
+    def fenVariant: Boolean         = v.fenVariant
+    def variableInitialFen: Boolean = v.variableInitialFen
+
     def hasAnalysisBoard: Boolean = v.hasAnalysisBoard
     def hasFishnet: Boolean       = v.hasFishnet
 
@@ -597,8 +625,11 @@ object Variant {
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
 
-    def initialFen: FEN     = FEN.Togyzkumalak(v.initialFen)
-    def startPlayer: Player = v.startPlayer
+    def initialFen: FEN        = FEN.Togyzkumalak(v.initialFen)
+    def initialFens: List[FEN] = List(initialFen)
+    def startPlayer: Player    = v.startPlayer
+
+    def recalcStartPlayerForStats: Boolean = false
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false
 
@@ -681,8 +712,10 @@ object Variant {
 
     def exotic: Boolean = v.exotic
 
-    def baseVariant: Boolean      = v.baseVariant
-    def fenVariant: Boolean       = v.fenVariant
+    def baseVariant: Boolean        = v.baseVariant
+    def fenVariant: Boolean         = v.fenVariant
+    def variableInitialFen: Boolean = v.variableInitialFen
+
     def hasAnalysisBoard: Boolean = v.hasAnalysisBoard
     def hasFishnet: Boolean       = v.hasFishnet
 
@@ -702,8 +735,11 @@ object Variant {
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
 
-    def initialFen: FEN     = FEN.Go(v.initialFen)
-    def startPlayer: Player = v.startPlayer
+    def initialFen: FEN        = FEN.Go(v.initialFen)
+    def initialFens: List[FEN] = List(initialFen)
+    def startPlayer: Player    = v.startPlayer
+
+    def recalcStartPlayerForStats: Boolean = false
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false
 
@@ -789,8 +825,10 @@ object Variant {
 
     def exotic: Boolean = v.exotic
 
-    def baseVariant: Boolean      = v.baseVariant
-    def fenVariant: Boolean       = v.fenVariant
+    def baseVariant: Boolean        = v.baseVariant
+    def fenVariant: Boolean         = v.fenVariant
+    def variableInitialFen: Boolean = v.variableInitialFen
+
     def hasAnalysisBoard: Boolean = v.hasAnalysisBoard
     def hasFishnet: Boolean       = v.hasFishnet
 
@@ -810,8 +848,11 @@ object Variant {
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
 
-    def initialFen: FEN     = FEN.Backgammon(v.initialFen)
-    def startPlayer: Player = v.startPlayer
+    def initialFen: FEN        = FEN.Backgammon(v.initialFen)
+    def initialFens: List[FEN] = v.initialFens.map(FEN.Backgammon)
+    def startPlayer: Player    = v.startPlayer
+
+    def recalcStartPlayerForStats: Boolean = v.recalcStartPlayerForStats
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false
 
@@ -892,8 +933,10 @@ object Variant {
 
     def exotic: Boolean = v.exotic
 
-    def baseVariant: Boolean      = v.baseVariant
-    def fenVariant: Boolean       = v.fenVariant
+    def baseVariant: Boolean        = v.baseVariant
+    def fenVariant: Boolean         = v.fenVariant
+    def variableInitialFen: Boolean = v.variableInitialFen
+
     def hasAnalysisBoard: Boolean = v.hasAnalysisBoard
     def hasFishnet: Boolean       = v.hasFishnet
 
@@ -914,7 +957,10 @@ object Variant {
     def perfIcon: Char = v.perfIcon
 
     def initialFen: FEN     = FEN.Abalone(v.initialFen)
+    def initialFens: List[FEN] = List(initialFen)
     def startPlayer: Player = v.startPlayer
+
+    def recalcStartPlayerForStats: Boolean = false
 
     def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false
 

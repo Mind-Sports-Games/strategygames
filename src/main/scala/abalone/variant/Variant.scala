@@ -21,6 +21,8 @@ abstract class Variant private[variant] (
 
   def baseVariant: Boolean      = false
   def fenVariant: Boolean       = false
+  def variableInitialFen: Boolean = false
+
   def hasAnalysisBoard: Boolean = true
   def hasFishnet: Boolean       = false
 
@@ -38,6 +40,8 @@ abstract class Variant private[variant] (
 
   def perfId: Int
   def perfIcon: Char
+
+  def recalcStartPlayerForStats: Boolean = false
 
   // pieces, scoreP1, scoreP2, turn, halfMovesSinceLastCapture (triggering condition could be when == 100 && total moves > 50 ? => draw), total moves
   def initialFen: FEN =

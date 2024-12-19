@@ -18,9 +18,9 @@ object Forsyth {
       Situation(
         Board(
           pieces = fen.pieces,
+          pocketData = fen.pocketData,
           history = History(),
           variant = variant,
-          pocketData = fen.pocketData,
           unusedDice = fen.unusedDice
         ),
         fen.value.split(' ')(3) match {
@@ -77,7 +77,7 @@ object Forsyth {
     val boardFen = exportBoard(game.situation.board)
     val scoreStr = game.situation.board.history.score.fenStr
     val player   = game.situation.player.fold('w', 'b')
-    val moves    = game.situation.board.history.halfMoveClock
+    val moves    = game.fullTurnCount
     FEN(s"${boardFen} ${player} ${scoreStr} ${moves}")
   }
 
