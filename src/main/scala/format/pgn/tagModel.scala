@@ -82,6 +82,11 @@ case class Tags(value: List[Tag]) extends AnyVal {
       strategygames.backgammon.variant.Variant byName _
     }
 
+  def abaloneVariant: Option[strategygames.abalone.variant.Variant] =
+    apply(_.Variant).map(_.toLowerCase).flatMap {
+      strategygames.abalone.variant.Variant byName _
+    }
+
   // TODO: this will need to be tested. We'll want to look at the _actual_ values that
   //       come in via these tags and ensure that the order we look at them is appropriate
   //       what a mess this function is.
@@ -105,6 +110,10 @@ case class Tags(value: List[Tag]) extends AnyVal {
                         .orElse(
                           backgammonVariant
                             .map(strategygames.variant.Variant.Backgammon)
+                            .orElse(
+                              abaloneVariant
+                                .map(strategygames.variant.Variant.Abalone)
+                            )
                         )
                     )
                 )
@@ -128,6 +137,7 @@ case class Tags(value: List[Tag]) extends AnyVal {
   def goFen: Option[go.format.FEN]                     = apply(_.FEN).map(strategygames.go.format.FEN.apply)
   def backgammonFen: Option[backgammon.format.FEN]     =
     apply(_.FEN).map(strategygames.backgammon.format.FEN.apply)
+  def abaloneFen: Option[abalone.format.FEN]           = apply(_.FEN).map(strategygames.abalone.format.FEN.apply)
 
   def fen: Option[format.FEN] =
     variant match {
@@ -137,6 +147,7 @@ case class Tags(value: List[Tag]) extends AnyVal {
       case Some(strategygames.variant.Variant.Togyzkumalak(_)) => togyzkumalakFen.map(format.FEN.Togyzkumalak)
       case Some(strategygames.variant.Variant.Go(_))           => goFen.map(format.FEN.Go)
       case Some(strategygames.variant.Variant.Backgammon(_))   => backgammonFen.map(format.FEN.Backgammon)
+      case Some(strategygames.variant.Variant.Abalone(_))      => abaloneFen.map(format.FEN.Abalone)
       case Some(strategygames.variant.Variant.Chess(_)) | None => chessFen.map(format.FEN.Chess)
       case Some(_)                                             => sys.error("invalid variant type for fen")
     }

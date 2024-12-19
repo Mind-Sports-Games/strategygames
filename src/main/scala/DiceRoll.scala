@@ -50,6 +50,7 @@ object DiceRoll {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak DiceRoll from a chess DiceRoll")
     def toGo           = sys.error("Can't make a go DiceRoll from a chess DiceRoll")
     def toBackgammon   = sys.error("Can't make a backgammon DiceRoll from a chess DiceRoll")
+    def toAbalone      = sys.error("Can't make a abalone DiceRoll from a chess DiceRoll")
 
   }
 
@@ -76,6 +77,7 @@ object DiceRoll {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak DiceRoll from a backgammon DiceRoll")
     def toGo           = sys.error("Can't make a go DiceRoll from a backgammon DiceRoll")
     def toBackgammon   = dr
+    def toAbalone      = sys.error("Can't make a abalone DiceRoll from a backgammon DiceRoll")
 
   }
 

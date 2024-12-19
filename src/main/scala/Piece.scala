@@ -87,6 +87,16 @@ object Piece {
 
   }
 
+  final case class Abalone(p: abalone.Piece)
+      extends Piece(
+        p.player,
+        Role.AbaloneRole(p.role)
+      ) {
+
+    def forsyth: Char = p.forsyth
+
+  }
+
   def apply(lib: GameLogic, player: Player, role: Role): Piece = (lib, role) match {
     case (GameLogic.Draughts(), Role.DraughtsRole(role))         => Draughts(draughts.Piece(player, role))
     case (GameLogic.Chess(), Role.ChessRole(role))               => Chess(chess.Piece(player, role))
@@ -96,6 +106,7 @@ object Piece {
       Togyzkumalak(togyzkumalak.Piece(player, role))
     case (GameLogic.Go(), Role.GoRole(role))                     => Go(go.Piece(player, role))
     case (GameLogic.Backgammon(), Role.BackgammonRole(role))     => Backgammon(backgammon.Piece(player, role))
+    case (GameLogic.Abalone(), Role.AbaloneRole(role))           => Abalone(abalone.Piece(player, role))
     case _                                                       => sys.error("Mismatched gamelogic types 2")
   }
 
@@ -107,6 +118,7 @@ object Piece {
     case (GameLogic.Togyzkumalak()) => sys.error("cannot get piece from Char for togyzkumalak anymore")
     case (GameLogic.Go())           => sys.error("cannot get piece from Char for go anymore")
     case (GameLogic.Backgammon())   => sys.error("cannot get piece from Char for backgammon anymore")
+    case (GameLogic.Abalone())      => sys.error("cannot get piece from Char for abalone anymore")
   }
 
   def chessPieceMap(pieceMap: PieceMap): chess.PieceMap = pieceMap.flatMap {
@@ -143,6 +155,11 @@ object Piece {
   def backgammonPieceMap(pieceMap: PieceMap): backgammon.PieceMap = pieceMap.flatMap {
     case (Pos.Backgammon(pos), (Backgammon(piece), count)) => Some((pos, (piece, count)))
     case _                                                 => None
+  }
+
+  def abalonePieceMap(pieceMap: PieceMap): abalone.PieceMap = pieceMap.flatMap {
+    case (Pos.Abalone(pos), (Abalone(piece), _)) => Some((pos, piece))
+    case _                                       => None
   }
 
   def pieceMapForChess(pieces: strategygames.chess.PieceMap): PieceMap = pieces.flatMap {
