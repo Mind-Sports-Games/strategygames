@@ -2,8 +2,6 @@ package strategygames.abalone.format
 import strategygames.abalone._
 import strategygames.Player
 
-/** r bqkb r p ppp pp pr P p QnB PP N P PPP RN K R
-  */
 object Visual {
 
   def <<(source: String): Board = {
@@ -41,8 +39,8 @@ object Visual {
       for (x <- File.all) yield {
         val pos = Pos(x, y)
         pos match {
-          case Some(pos) =>         markedPoss.get(pos) getOrElse board(pos).fold(' ')(_ forsyth)
-          case None => None
+          case Some(pos) => markedPoss.get(pos) getOrElse board(pos).fold(' ')(_ forsyth)
+          case None      => None
         }
       }
     } mkString

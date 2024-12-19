@@ -15,24 +15,21 @@ case class Situation(board: Board, player: Player) {
 
   def staleMate: Boolean = board.variant.specialDraw(this)
 
-  def end: Boolean = staleMate || variantEnd
+  def autoDraw: Boolean = board.autoDraw
+
+  def end: Boolean = staleMate || autoDraw || variantEnd
 
   def winner: Option[Player] = board.variant.winner(this)
 
-  def playable(strict: Boolean): Boolean =
-    (board.valid(strict)) && !end
+  def playable(strict: Boolean): Boolean = (board.valid(strict)) && !end
 
-  // TODO Abalone set this
-  // in case someone does not have more than 2 pieces, it could be considered as insufficient material to do anything
-  // But I'm not sure we do not want to allow having a board containing only 1 marble for a player : for didactic consideration e.g. the famous "hunt as 4 v 1"
-  def opponentHasInsufficientMaterial: Boolean =
-    false
+  def opponentHasInsufficientMaterial: Boolean = false
 
-  def move(from: Pos, to: Pos, promotion: Option[PromotableRole]): Validated[String, Move] =
-    board.variant.move(this, from, to, promotion)
+  def move(from: Pos, to: Pos): Validated[String, Move] =
+    board.variant.move(this, from, to)
 
   def move(uci: Uci.Move): Validated[String, Move] =
-    board.variant.move(this, uci.orig, uci.dest, uci.promotion)
+    board.variant.move(this, uci.orig, uci.dest)
 
   def withHistory(history: History) = copy(board = board.withHistory(history))
 
@@ -47,6 +44,7 @@ case class Situation(board: Board, player: Player) {
   lazy val status: Option[Status] =
     if (variantEnd) Status.VariantEnd.some
     else if (staleMate) Status.Stalemate.some
+    else if (autoDraw) Status.Draw.some
     else none
 
   private def variantEnd = board.variant.specialEnd(this)

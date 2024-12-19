@@ -7,6 +7,8 @@ import org.specs2.mutable.Specification
 import strategygames.backgammon.format.Uci
 import strategygames.backgammon.variant.Variant
 
+import strategygames.Player
+
 class BackgammonTest extends Specification with ValidatedMatchers {
 
   def playUciList(game: Game, ucis: List[Uci]): Validated[String, Game] =
@@ -17,10 +19,11 @@ class BackgammonTest extends Specification with ValidatedMatchers {
   def playActionStrs(
       actionStrs: List[String],
       game: Option[Game] = None,
-      variant: Option[Variant] = None
+      variant: Option[Variant] = None,
+      startPlayer: Player = Player.P1
   ): Validated[String, Game] =
     playUciList(
-      game.getOrElse(Game.apply(variant.getOrElse(Variant.default))),
+      game.getOrElse(Game.makeGame(variant.getOrElse(Variant.default), Some(startPlayer))),
       Uci.readList(actionStrs.mkString(" ")).getOrElse(List())
     )
 

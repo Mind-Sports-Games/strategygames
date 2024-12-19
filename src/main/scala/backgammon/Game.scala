@@ -95,33 +95,16 @@ case class Game(
     }
 
   def applyDiceRoll(dr: DiceRoll): Game = {
-    if (
-      !situation.board.history.didRollDiceLastTurn &&
-      plies == 0 &&
-      startedAtPly == 0 &&
-      actionStrs.isEmpty &&
-      dr.dice(0) > dr.dice(1)
-    ) {
-      // 50% of the time at the start of the game we need to flip the start player
-      val gameBeforeDiceRoll = applyEndTurn(EndTurn(situation, situation.board))
-      val diceRoll           = gameBeforeDiceRoll.situation.diceRoll(dr.dice).map(_ withMetrics dr.metrics) match {
-        case Validated.Valid(diceRoll) => diceRoll
-        case Validated.Invalid(e)      => sys.error(e)
-      }
-      gameBeforeDiceRoll.applyDiceRoll(diceRoll)
-    } else {
-      // apply a dice roll as normal
-      val newSituation = dr.situationAfter
-      val switchPlayer = situation.player != newSituation.player
+    val newSituation = dr.situationAfter
+    val switchPlayer = situation.player != newSituation.player
 
-      copy(
-        situation = newSituation,
-        plies = plies + 1,
-        turnCount = turnCount + (if (switchPlayer) 1 else 0),
-        actionStrs = applyActionStr(dr.toUci.uci),
-        clock = applyClock(dr.metrics, newSituation.status.isEmpty, switchPlayer)
-      )
-    }
+    copy(
+      situation = newSituation,
+      plies = plies + 1,
+      turnCount = turnCount + (if (switchPlayer) 1 else 0),
+      actionStrs = applyActionStr(dr.toUci.uci),
+      clock = applyClock(dr.metrics, newSituation.status.isEmpty, switchPlayer)
+    )
   }
 
   def undo(
@@ -225,12 +208,23 @@ case class Game(
 
 object Game {
 
-  def apply(variant: Variant): Game =
-    new Game(Situation(Board init variant, P1))
+  def makeGame(variant: Variant, startPlayer: Player): Game =
+    new Game(
+      situation = Situation(Board init variant, startPlayer),
+      plies = startPlayer.fold(0, 1),
+      turnCount = startPlayer.fold(0, 1),
+      startedAtPly = startPlayer.fold(0, 1),
+      startedAtTurn = startPlayer.fold(0, 1)
+    )
+
+  def makeGame(variant: Variant, startPlayer: Option[Player] = None): Game =
+    makeGame(variant, startPlayer.getOrElse(scala.util.Random.shuffle(Player.all).head))
+
+  def apply(variant: Variant) = makeGame(variant)
 
   def apply(variantOption: Option[Variant], fen: Option[FEN]): Game = {
     val variant = variantOption | Variant.default
-    val g       = apply(variant)
+    val g       = fen.fold(apply(variant)) { f => makeGame(variant, f.player) }
     fen
       .flatMap {
         format.Forsyth.<<<@(variant, _)

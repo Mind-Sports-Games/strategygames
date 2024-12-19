@@ -9,8 +9,7 @@ object UciCharPair {
 
   def apply(uci: Uci): stratUciCharPair =
     uci match {
-      case Uci.Move(orig, dest, None) => stratUciCharPair(toChar(orig), toChar(dest))
-      case Uci.Move(_, _, Some(role)) => sys.error(s"Abalone does not have promotable roles, ${role}")
+      case Uci.Move(orig, dest) => stratUciCharPair(toChar(orig), toChar(dest))
     }
 
   private[format] object implementation {
