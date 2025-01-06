@@ -1,6 +1,7 @@
 package strategygames.backgammon.format
 
 import cats.implicits._
+import scala.math.log
 
 import strategygames.{ Player, Score }
 import strategygames.backgammon._
@@ -11,7 +12,7 @@ import strategygames.backgammon.variant.Variant
   */
 object Forsyth {
 
-  val initial = FEN("5S,3,3s,1,5s,4,2S/5s,3,3S,1,5S,4,2s[] - - w 0 0 1")
+  val initial = FEN("5S,3,3s,1,5s,4,2S/5s,3,3S,1,5S,4,2s[] - - w 0 0 - 1")
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
     Some(
@@ -21,7 +22,8 @@ object Forsyth {
           pocketData = fen.pocketData,
           history = History(),
           variant = variant,
-          unusedDice = fen.unusedDice
+          unusedDice = fen.unusedDice,
+          cubeData = fen.cubeData
         ),
         fen.value.split(' ')(3) match {
           case "w" => P1
@@ -75,14 +77,15 @@ object Forsyth {
 
   def >>(game: Game): FEN = {
     val boardFen = exportBoard(game.situation.board)
-    val scoreStr = game.situation.board.history.score.fenStr
     val player   = game.situation.player.fold('w', 'b')
+    val scoreStr = game.situation.board.history.score.fenStr
+    val cube     = cubePart(game.situation.board.cubeData)
     val moves    = game.fullTurnCount
-    FEN(s"${boardFen} ${player} ${scoreStr} ${moves}")
+    FEN(s"${boardFen} ${player} ${scoreStr} ${cube} ${moves}")
   }
 
   def exportBoard(board: Board): String =
-    s"${boardPart(board)}[${pocketPart(board)}] ${board.unusedDiceStr} ${board.usedDiceStr}"
+    s"${boardPart(board)}[${pocketPart(board.pocketData)}] ${board.unusedDiceStr} ${board.usedDiceStr}"
 
   def boardPart(board: Board): String = {
     val fen   = new scala.collection.mutable.StringBuilder(70)
@@ -109,8 +112,8 @@ object Forsyth {
     fen.toString.replace(",/", "/").dropRight(1)
   }
 
-  def pocketPart(board: Board) =
-    board.pocketData match {
+  def pocketPart(pocketData: Option[PocketData]) =
+    pocketData match {
       case Some(PocketData(pockets)) =>
         List(
           (if (pockets.p1.roles.isEmpty) None
@@ -119,6 +122,15 @@ object Forsyth {
            else Some(s"${pockets.p2.roles.size}${Role.defaultRole.forsyth}"))
         ).flatten.mkString(",")
       case _                         => ""
+    }
+
+  def cubePart(cubeData: Option[CubeData]) =
+    cubeData match {
+      case Some(cubeData) =>
+        s"${(log(cubeData.value) / log(2)).toInt}${cubeData.owner
+            .map(p => if (cubeData.underOffer) p.letter else p.letter.toUpper)
+            .getOrElse("")}"
+      case _              => "-"
     }
 
   def boardAndPlayer(situation: Situation): String =

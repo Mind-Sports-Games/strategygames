@@ -11,7 +11,8 @@ case class Board(
     history: History,
     variant: Variant,
     pocketData: Option[PocketData] = None,
-    unusedDice: List[Int] = List.empty
+    unusedDice: List[Int] = List.empty,
+    cubeData: Option[CubeData] = None
 ) {
 
   def apply(at: Pos): Option[Piece] = (pieces get at).map(_._1)

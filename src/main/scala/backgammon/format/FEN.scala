@@ -1,7 +1,9 @@
 package strategygames.backgammon.format
 
 import strategygames.Player
-import strategygames.backgammon.{ Piece, PieceMap, PocketData, Pos, Role }
+import strategygames.backgammon.{ CubeData, Piece, PieceMap, PocketData, Pos, Role }
+
+import scala.math.pow
 
 final case class FEN(value: String) extends AnyVal {
 
@@ -60,9 +62,13 @@ final case class FEN(value: String) extends AnyVal {
     }
     .toMap
 
-  def unusedDice: List[Int] = value.split(' ')(1).split('/').flatMap(_.toIntOption).toList
+  private def diceFromFen(diceStr: String): List[Int] =
+    if (diceStr == '-') List.empty
+    else diceStr.split('/').flatMap(_.toIntOption).toList
 
-  def usedDice: List[Int] = value.split(' ')(2).split('/').flatMap(_.toIntOption).toList
+  def unusedDice: List[Int] = diceFromFen(value.split(' ')(1))
+
+  def usedDice: List[Int] = diceFromFen(value.split(' ')(2))
 
   def pocketData: Option[PocketData] = {
     val start = value.indexOf("[", 0)
@@ -80,6 +86,16 @@ final case class FEN(value: String) extends AnyVal {
     } else None
   }
 
+  def cubeData: Option[CubeData] =
+    value.split(' ').lift(6) match {
+      case Some("0")                           => Some(CubeData.init)
+      case Some(FEN.cubeOwnedR(value, player)) =>
+        Some(CubeData(pow(2, value.toInt).toInt, Player(player.toCharArray.head), false))
+      case Some(FEN.cubeOfferR(value, player)) =>
+        Some(CubeData(pow(2, value.toInt).toInt, Player(player.toCharArray.head), true))
+      case _                                   => None
+    }
+
   private def removePockets(fen: String): String = {
     val start = fen.indexOf("[", 0)
     val end   = fen.indexOf("]", start)
@@ -96,6 +112,10 @@ object FEN {
 
   def clean(source: String): FEN = FEN(source.replace("_", " ").trim)
 
-  def fullMoveIndex: Int = 6
+  def fullMoveIndex: Int = 7
+
+  // val cubeDataR  = s"^([0-6])([WwBb])$$".r
+  val cubeOwnedR = s"^([0-6])([WB])$$".r
+  val cubeOfferR = s"^([0-6])([wb])$$".r
 
 }

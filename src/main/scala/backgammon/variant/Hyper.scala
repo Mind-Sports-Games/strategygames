@@ -29,11 +29,11 @@ case object Hyper
   override def baseVariant: Boolean = false
 
   override def initialFen =
-    format.FEN("9,1S,1S,1S/9,1s,1s,1s[] - - w 0 0 1")
+    format.FEN("9,1S,1S,1S/9,1s,1s,1s[] - - w 0 0 - 1")
 
   override def initialFens = List(
-    format.FEN("9,1S,1S,1S/9,1s,1s,1s[] - - w 0 0 1"),
-    format.FEN("9,1S,1S,1S/9,1s,1s,1s[] - - b 0 0 1")
+    format.FEN("9,1S,1S,1S/9,1s,1s,1s[] - - w 0 0 - 1"),
+    format.FEN("9,1S,1S,1S/9,1s,1s,1s[] - - b 0 0 - 1")
   )
 
 }
