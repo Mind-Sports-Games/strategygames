@@ -7,6 +7,7 @@ import strategygames.backgammon._
 import strategygames.backgammon.format.{ FEN, Uci }
 import strategygames.{ GameFamily, Player, Score }
 
+import scala.util.Random
 import scala.annotation.nowarn
 
 // Correctness depends on singletons for each variant ID
@@ -44,12 +45,16 @@ abstract class Variant private[variant] (
   def perfId: Int
   def perfIcon: Char
 
-  def initialFen: FEN = format.FEN("5S,3,3s,1,5s,4,2S/5s,3,3S,1,5S,4,2s[] - - w 0 0 - 1")
+  def initialFen: FEN = FEN("5S,3,3s,1,5s,4,2S/5s,3,3S,1,5S,4,2s[] - - w 0 0 - 1")
 
   def initialFens = List(
-    format.FEN("5S,3,3s,1,5s,4,2S/5s,3,3S,1,5S,4,2s[] - - w 0 0 - 1"),
-    format.FEN("5S,3,3s,1,5s,4,2S/5s,3,3S,1,5S,4,2s[] - - b 0 0 - 1")
+    FEN("5S,3,3s,1,5s,4,2S/5s,3,3S,1,5S,4,2s[] - - w 0 0 - 1"),
+    FEN("5S,3,3s,1,5s,4,2S/5s,3,3S,1,5S,4,2s[] - - b 0 0 - 1")
   )
+
+  def fenFromSetupConfig(multipoint: Boolean): FEN =
+    if (multipoint) Random.shuffle(initialFens).head.initialiseCube
+    else Random.shuffle(initialFens).head
 
   def pieces: PieceMap = initialFen.pieces
 
