@@ -53,6 +53,7 @@ object Drop {
     def toTogyzkumalak = sys.error("Can't make a togy drop from a chess drop")
     def toGo           = sys.error("Can't make a go drop from a chess drop")
     def toBackgammon   = sys.error("Can't make a backgammon drop from a chess drop")
+    def toAbalone      = sys.error("Can't make a abalone drop from a chess drop")
 
   }
 
@@ -79,6 +80,7 @@ object Drop {
     def toTogyzkumalak = sys.error("Can't make a togy drop from a fairysf drop")
     def toGo           = sys.error("Can't make a go drop from a fairysf drop")
     def toBackgammon   = sys.error("Can't make a backgammon drop from a fairysf drop")
+    def toAbalone      = sys.error("Can't make a abalone drop from a fairysf drop")
 
   }
 
@@ -105,6 +107,7 @@ object Drop {
     def toTogyzkumalak = sys.error("Can't make a togy drop from a go drop")
     def toGo           = d
     def toBackgammon   = sys.error("Can't make a backgammon drop from a go drop")
+    def toAbalone      = sys.error("Can't make a abalone drop from a go drop")
 
   }
 
@@ -131,6 +134,7 @@ object Drop {
     def toTogyzkumalak = sys.error("Can't make a togy drop from a backgammon drop")
     def toGo           = sys.error("Can't make a go drop from a backgammon drop")
     def toBackgammon   = d
+    def toAbalone      = sys.error("Can't make a abalone drop from a backgammon drop")
 
   }
 
