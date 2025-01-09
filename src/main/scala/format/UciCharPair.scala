@@ -19,6 +19,7 @@ object UciCharPair {
     case (GameLogic.Go(), uci: Uci.Go)                     => strategygames.go.format.UciCharPair(uci.unwrap)
     case (GameLogic.Backgammon(), uci: Uci.Backgammon)     =>
       strategygames.backgammon.format.UciCharPair(uci.unwrap)
+    case (GameLogic.Abalone(), uci: Uci.Abalone)           => strategygames.abalone.format.UciCharPair(uci.unwrap)
     case _                                                 => sys.error("Mismatched gamelogic and UciCharPair")
   }
 

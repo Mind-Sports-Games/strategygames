@@ -25,6 +25,7 @@ sealed trait Uci {
   def toTogyzkumalak: togyzkumalak.format.Uci
   def toGo: go.format.Uci
   def toBackgammon: backgammon.format.Uci
+  def toAbalone: abalone.format.Uci
 
 }
 
@@ -50,6 +51,9 @@ object Uci {
   }
   sealed trait Backgammon   {
     def unwrap: backgammon.format.Uci
+  }
+  sealed trait Abalone      {
+    def unwrap: abalone.format.Uci
   }
 
   sealed abstract class Move(
@@ -91,6 +95,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a chess UCI")
     def toGo           = sys.error("Can't make a go UCI from a chess UCI")
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a chess UCI")
+    def toAbalone      = sys.error("Can't make a abalone UCI from a chess UCI")
   }
 
   final case class DraughtsMove(m: draughts.format.Uci.Move)
@@ -116,6 +121,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a draughts UCI")
     def toGo           = sys.error("Can't make a go UCI from a draughts UCI")
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a draughts UCI")
+    def toAbalone      = sys.error("Can't make a abalone UCI from a draughts UCI")
   }
 
   final case class FairySFMove(m: fairysf.format.Uci.Move)
@@ -137,6 +143,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a fairy UCI")
     def toGo           = sys.error("Can't make a go UCI from a fairy UCI")
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a fairysf UCI")
+    def toAbalone      = sys.error("Can't make a abalone UCI from a fairysf UCI")
   }
 
   final case class SamuraiMove(m: samurai.format.Uci.Move)
@@ -157,6 +164,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a samurai UCI")
     def toGo           = sys.error("Can't make a go UCI from a samurai UCI")
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a samurai UCI")
+    def toAbalone      = sys.error("Can't make a abalone UCI from a samurai UCI")
   }
 
   final case class TogyzkumalakMove(m: togyzkumalak.format.Uci.Move)
@@ -177,6 +185,7 @@ object Uci {
     def toTogyzkumalak = m
     def toGo           = sys.error("Can't make a go UCI from a togyzkumalak UCI")
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a togyzkumalak UCI")
+    def toAbalone      = sys.error("Can't make a abalone UCI from a togyzkumalak UCI")
   }
 
   final case class BackgammonMove(m: backgammon.format.Uci.Move)
@@ -201,6 +210,28 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a backgammon UCI")
     def toGo           = sys.error("Can't make a go UCI from a backgammon UCI")
     def toBackgammon   = m
+    def toAbalone      = sys.error("Can't make a abalone UCI from a backgammon UCI")
+  }
+
+  final case class AbaloneMove(m: abalone.format.Uci.Move)
+      extends Move(
+        Pos.Abalone(m.orig),
+        Pos.Abalone(m.dest)
+      )
+      with Abalone {
+    def gameLogic      = GameLogic.Abalone()
+    def uci            = m.uci
+    def shortUci       = m.uci
+    def fishnetUci     = m.uci
+    val unwrap         = m
+    def toChess        = sys.error("Can't make a chess UCI from a abalone UCI")
+    def toDraughts     = sys.error("Can't make a draughts UCI from a abalone UCI")
+    def toFairySF      = sys.error("Can't make a fairysf UCI from a abalone UCI")
+    def toSamurai      = sys.error("Can't make a samurai UCI from a abalone UCI")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a abalone UCI")
+    def toGo           = sys.error("Can't make a go UCI from a abalone UCI")
+    def toBackgammon   = sys.error("Can't make a backgammon UCI from a abalone UCI")
+    def toAbalone      = m
   }
 
   sealed abstract class Drop(
@@ -230,6 +261,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a chess UCI")
     def toGo           = sys.error("Can't make a go UCI from a chess UCI")
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a chess UCI")
+    def toAbalone      = sys.error("Can't make a abalone UCI from a chess UCI")
   }
 
   final case class FairySFDrop(d: fairysf.format.Uci.Drop)
@@ -251,6 +283,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a fairysf UCI")
     def toGo           = sys.error("Can't make a go UCI from a fairysf UCI")
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a fairysf UCI")
+    def toAbalone      = sys.error("Can't make a abalone UCI from a fairysf UCI")
   }
 
   final case class GoDrop(d: go.format.Uci.Drop)
@@ -272,6 +305,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a go UCI")
     def toGo           = d
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a go UCI")
+    def toAbalone      = sys.error("Can't make a abalone UCI from a go UCI")
   }
 
   final case class BackgammonDrop(d: backgammon.format.Uci.Drop)
@@ -297,6 +331,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a backgammon UCI")
     def toGo           = sys.error("Can't make a go UCI from a backgammon UCI")
     def toBackgammon   = d
+    def toAbalone      = sys.error("Can't make a abalone UCI from a backgammon UCI")
   }
 
   sealed abstract class Lift(
@@ -323,6 +358,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a backgammon UCI")
     def toGo           = sys.error("Can't make a go UCI from a backgammon UCI")
     def toBackgammon   = l
+    def toAbalone      = sys.error("Can't make a abalone UCI from a backgammon UCI")
   }
 
   sealed abstract class Pass() extends Uci {
@@ -345,6 +381,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a go UCI")
     def toGo           = p
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a go UCI")
+    def toAbalone      = sys.error("Can't make a abalone UCI from a go UCI")
   }
 
   sealed abstract class SelectSquares(
@@ -373,6 +410,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a go UCI")
     def toGo           = ss
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a go UCI")
+    def toAbalone      = sys.error("Can't make a abalone UCI from a go UCI")
   }
 
   sealed abstract class DiceRoll(
@@ -401,6 +439,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a chess UCI")
     def toGo           = sys.error("Can't make a go UCI from a chess UCI")
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a chess UCI")
+    def toAbalone      = sys.error("Can't make a abalone UCI from a chess UCI")
   }
 
   final case class BackgammonDiceRoll(dr: backgammon.format.Uci.DiceRoll)
@@ -423,6 +462,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a backgammon UCI")
     def toGo           = sys.error("Can't make a go UCI from a backgammon UCI")
     def toBackgammon   = dr
+    def toAbalone      = sys.error("Can't make a abalone UCI from a backgammon UCI")
   }
 
   sealed abstract class DoRoll() extends Uci {
@@ -445,6 +485,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a chess UCI")
     def toGo           = sys.error("Can't make a go UCI from a chess UCI")
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a chess UCI")
+    def toAbalone      = sys.error("Can't make a abalone UCI from a chess UCI")
   }
 
   final case class BackgammonDoRoll(dr: backgammon.format.Uci.DoRoll) extends DoRoll() with Backgammon {
@@ -463,6 +504,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a backgammon UCI")
     def toGo           = sys.error("Can't make a go UCI from a backgammon UCI")
     def toBackgammon   = dr
+    def toAbalone      = sys.error("Can't make a abalone UCI from a backgammon UCI")
   }
 
   sealed abstract class Undo() extends Uci {
@@ -485,6 +527,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a backgammon UCI")
     def toGo           = sys.error("Can't make a go UCI from a backgammon UCI")
     def toBackgammon   = u
+    def toAbalone      = sys.error("Can't make a abalone UCI from a backgammon UCI")
   }
 
   sealed abstract class EndTurn() extends Uci {
@@ -507,6 +550,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a backgammon UCI")
     def toGo           = sys.error("Can't make a go UCI from a backgammon UCI")
     def toBackgammon   = et
+    def toAbalone      = sys.error("Can't make a abalone UCI from a backgammon UCI")
   }
 
   def wrap(uci: chess.format.Uci): Uci = uci match {
@@ -547,6 +591,10 @@ object Uci {
     case dr: backgammon.format.Uci.DoRoll   => BackgammonDoRoll(dr)
     case u: backgammon.format.Uci.Undo      => BackgammonUndo(u)
     case et: backgammon.format.Uci.EndTurn  => BackgammonEndTurn(et)
+  }
+
+  def wrap(uci: abalone.format.Uci): Uci = uci match {
+    case m: abalone.format.Uci.Move => AbaloneMove(m)
   }
 
   object Move {
@@ -636,6 +684,13 @@ object Uci {
               backgammonCaptures(capture)
             )
           )
+        case (GameLogic.Abalone(), Pos.Abalone(orig), Pos.Abalone(dest))                =>
+          AbaloneMove(
+            abalone.format.Uci.Move.apply(
+              orig,
+              dest
+            )
+          )
         case _                                                                          => sys.error("Mismatched gamelogic types 23")
       }
 
@@ -646,6 +701,7 @@ object Uci {
       case GameLogic.Samurai()      => samurai.format.Uci.Move(move).map(SamuraiMove)
       case GameLogic.Togyzkumalak() => togyzkumalak.format.Uci.Move(move).map(TogyzkumalakMove)
       case GameLogic.Backgammon()   => backgammon.format.Uci.Move(move).map(BackgammonMove)
+      case GameLogic.Abalone()      => abalone.format.Uci.Move(move).map(AbaloneMove)
       case _                        => sys.error("Invalid lib gf and move combo for Uci")
     }
 
@@ -656,6 +712,7 @@ object Uci {
       case GameLogic.Samurai()      => samurai.format.Uci.Move.piotr(move).map(SamuraiMove)
       case GameLogic.Togyzkumalak() => togyzkumalak.format.Uci.Move.piotr(move).map(TogyzkumalakMove)
       case GameLogic.Backgammon()   => backgammon.format.Uci.Move.piotr(move).map(BackgammonMove)
+      case GameLogic.Abalone()      => abalone.format.Uci.Move.piotr(move).map(AbaloneMove)
       case _                        => sys.error("Invalid lib gf and move combo for piotr")
     }
 
@@ -676,6 +733,7 @@ object Uci {
         togyzkumalak.format.Uci.Move.fromStrings(gf, origS, destS, promS).map(TogyzkumalakMove)
       case GameLogic.Go()           => None
       case GameLogic.Backgammon()   => backgammon.format.Uci.Move.fromStrings(origS, destS).map(BackgammonMove)
+      case GameLogic.Abalone()      => abalone.format.Uci.Move.fromStrings(origS, destS).map(AbaloneMove)
     }
   }
 
@@ -686,6 +744,7 @@ object Uci {
         case GameLogic.Draughts()     => None
         case GameLogic.Samurai()      => None
         case GameLogic.Togyzkumalak() => None
+        case GameLogic.Abalone()      => None
         case GameLogic.Chess()        =>
           chess.format.Uci.Drop.fromStrings(roleS, posS).map(ChessDrop)
         case GameLogic.FairySF()      =>
@@ -713,6 +772,7 @@ object Uci {
         case GameLogic.Go()           => None
         case GameLogic.Backgammon()   =>
           backgammon.format.Uci.Lift.fromStrings(posS).map(BackgammonLift)
+        case GameLogic.Abalone()      => None
       }
   }
 
@@ -724,6 +784,7 @@ object Uci {
         case GameLogic.Samurai()      => None
         case GameLogic.Togyzkumalak() => None
         case GameLogic.Backgammon()   => None
+        case GameLogic.Abalone()      => None
         case GameLogic.Chess()        => None
         case GameLogic.FairySF()      => None
         case GameLogic.Go()           => GoPass(go.format.Uci.Pass()).some
@@ -739,6 +800,7 @@ object Uci {
         case GameLogic.Samurai()      => None
         case GameLogic.Togyzkumalak() => None
         case GameLogic.Backgammon()   => None
+        case GameLogic.Abalone()      => None
         case GameLogic.Chess()        => None
         case GameLogic.FairySF()      => None
         case GameLogic.Go()           =>
@@ -770,6 +832,7 @@ object Uci {
         case GameLogic.Go()           => None
         case GameLogic.Backgammon()   =>
           BackgammonDiceRoll(backgammon.format.Uci.DiceRoll.fromStrings(dice)).some
+        case GameLogic.Abalone()      => None
       }
 
   }
@@ -785,6 +848,7 @@ object Uci {
         case GameLogic.Togyzkumalak() => None
         case GameLogic.Go()           => None
         case GameLogic.Backgammon()   => BackgammonDoRoll(backgammon.format.Uci.DoRoll()).some
+        case GameLogic.Abalone()      => None
       }
 
   }
@@ -800,6 +864,7 @@ object Uci {
         case GameLogic.Togyzkumalak() => None
         case GameLogic.Go()           => None
         case GameLogic.Backgammon()   => BackgammonUndo(backgammon.format.Uci.Undo()).some
+        case GameLogic.Abalone()      => None
       }
 
   }
@@ -815,6 +880,7 @@ object Uci {
         case GameLogic.FairySF()      => None
         case GameLogic.Go()           => None
         case GameLogic.Backgammon()   => BackgammonEndTurn(backgammon.format.Uci.EndTurn()).some
+        case GameLogic.Abalone()      => None
       }
 
   }
@@ -863,6 +929,12 @@ object Uci {
         w.san
       )
 
+  final case class AbaloneWithSan(w: abalone.format.Uci.WithSan)
+      extends WithSan(
+        wrap(w.uci),
+        w.san
+      )
+
   object WithSan {
 
     def apply(lib: GameLogic, uci: Uci, san: String): WithSan = (lib, uci) match {
@@ -879,6 +951,8 @@ object Uci {
         Uci.GoWithSan(go.format.Uci.WithSan(u.unwrap, san))
       case (GameLogic.Backgammon(), u: Uci.Backgammon)     =>
         Uci.BackgammonWithSan(backgammon.format.Uci.WithSan(u.unwrap, san))
+      case (GameLogic.Abalone(), u: Uci.Abalone)           =>
+        Uci.AbaloneWithSan(abalone.format.Uci.WithSan(u.unwrap, san))
       case _                                               => sys.error("Mismatched gamelogic types 24")
     }
 
@@ -898,6 +972,8 @@ object Uci {
       case (GameLogic.Go(), _)                                               => sys.error("Move not implemented for Go")
       case (GameLogic.Backgammon(), strategygames.Move.Backgammon(move))     =>
         BackgammonMove(backgammon.format.Uci(move))
+      case (GameLogic.Abalone(), strategygames.Move.Abalone(move))           =>
+        AbaloneMove(abalone.format.Uci(move))
       case _                                                                 => sys.error("Mismatched gamelogic types 25")
     }
 
@@ -911,6 +987,7 @@ object Uci {
     case (GameLogic.Go(), strategygames.Drop.Go(drop))                 => GoDrop(go.format.Uci(drop))
     case (GameLogic.Backgammon(), strategygames.Drop.Backgammon(drop)) =>
       BackgammonDrop(backgammon.format.Uci(drop))
+    case (GameLogic.Abalone(), _)                                      => sys.error("Drop not implemented for abalone")
     case _                                                             => sys.error(s"Drop not implemented for ${lib}")
   }
 
@@ -923,6 +1000,7 @@ object Uci {
     case (GameLogic.Go(), _)                                           => sys.error("Lift not implemented for Go")
     case (GameLogic.Backgammon(), strategygames.Lift.Backgammon(lift)) =>
       BackgammonLift(backgammon.format.Uci(lift))
+    case (GameLogic.Abalone(), _)                                      => sys.error("Lift not implemented for abalone")
     case _                                                             => sys.error(s"Lift not implemented for ${lib}")
   }
 
@@ -934,6 +1012,7 @@ object Uci {
     case (GameLogic.Togyzkumalak(), _)                 => sys.error("Pass not implemented for togyzkumalak")
     case (GameLogic.Go(), strategygames.Pass.Go(pass)) => GoPass(go.format.Uci(pass))
     case (GameLogic.Backgammon(), _)                   => sys.error("Pass not implemented for backgammon")
+    case (GameLogic.Abalone(), _)                      => sys.error("Pass not implemented for abalone")
   }
 
   def apply(lib: GameLogic, selectSquares: strategygames.SelectSquares) = (lib, selectSquares) match {
@@ -945,6 +1024,7 @@ object Uci {
     case (GameLogic.Go(), strategygames.SelectSquares.Go(selectSquares)) =>
       GoSelectSquares(go.format.Uci(selectSquares))
     case (GameLogic.Backgammon(), _)                                     => sys.error("SelectSquares not implemented for backgammon")
+    case (GameLogic.Abalone(), _)                                        => sys.error("SelectSquares not implemented for abalone")
   }
 
   def apply(lib: GameLogic, diceRoll: strategygames.DiceRoll) = (lib, diceRoll) match {
@@ -957,6 +1037,7 @@ object Uci {
     case (GameLogic.Go(), _)                                                   => sys.error("DiceRoll not implemented for go")
     case (GameLogic.Backgammon(), strategygames.DiceRoll.Backgammon(diceRoll)) =>
       BackgammonDiceRoll(backgammon.format.Uci(diceRoll))
+    case (GameLogic.Abalone(), _)                                              => sys.error("DiceRoll not implemented for abalone")
     case _                                                                     => sys.error(s"DiceRoll not implemented for ${lib}")
   }
 
@@ -966,9 +1047,10 @@ object Uci {
     case (GameLogic.FairySF(), _)                                            => sys.error("EndTurn not implemented for fairysf")
     case (GameLogic.Samurai(), _)                                            => sys.error("EndTurn not implemented for samurai")
     case (GameLogic.Togyzkumalak(), _)                                       => sys.error("EndTurn not implemented for togyzkumalak")
-    case (GameLogic.Go(), _)                                                 => sys.error("Pass not implemented for go")
+    case (GameLogic.Go(), _)                                                 => sys.error("EndTurn not implemented for go")
     case (GameLogic.Backgammon(), strategygames.EndTurn.Backgammon(endTurn)) =>
       BackgammonEndTurn(backgammon.format.Uci(endTurn))
+    case (GameLogic.Abalone(), _)                                            => sys.error("EndTurn not implemented for abalone")
   }
 
   def apply(lib: GameLogic, gf: GameFamily, action: String): Option[Uci] = lib match {
@@ -979,6 +1061,7 @@ object Uci {
     case GameLogic.Togyzkumalak() => togyzkumalak.format.Uci(action).map(wrap)
     case GameLogic.Go()           => go.format.Uci(action).map(wrap)
     case GameLogic.Backgammon()   => backgammon.format.Uci(action).map(wrap)
+    case GameLogic.Abalone()      => abalone.format.Uci(action).map(wrap)
   }
 
   def apply(v: Variant, action: String): Option[Uci] =
@@ -992,6 +1075,7 @@ object Uci {
     case GameLogic.Togyzkumalak() => togyzkumalak.format.Uci.piotr(action).map(wrap)
     case GameLogic.Go()           => go.format.Uci.piotr(action).map(wrap)
     case GameLogic.Backgammon()   => backgammon.format.Uci.piotr(action).map(wrap)
+    case GameLogic.Abalone()      => abalone.format.Uci.piotr(action).map(wrap)
   }
 
   def readList(lib: GameLogic, gf: GameFamily, actions: String): Option[List[Uci]] = lib match {
@@ -1002,6 +1086,7 @@ object Uci {
     case GameLogic.Togyzkumalak() => togyzkumalak.format.Uci.readList(actions).map(_.map(wrap))
     case GameLogic.Go()           => go.format.Uci.readList(actions).map(_.map(wrap))
     case GameLogic.Backgammon()   => backgammon.format.Uci.readList(actions).map(_.map(wrap))
+    case GameLogic.Abalone()      => abalone.format.Uci.readList(actions).map(_.map(wrap))
   }
 
   def writeList(actions: List[Uci]): String =

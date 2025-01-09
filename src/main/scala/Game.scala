@@ -83,6 +83,13 @@ abstract class Game(
           promotion = None,
           metrics
         )
+      case Uci.AbaloneMove(uci)                         =>
+        apply(
+          Pos.Abalone(uci.orig),
+          Pos.Abalone(uci.dest),
+          promotion = None,
+          metrics
+        )
       case Uci.ChessDrop(uci)                           =>
         drop(
           Role.ChessRole(uci.role),
@@ -202,6 +209,8 @@ abstract class Game(
   def toSamurai: samurai.Game
   def toTogyzkumalak: togyzkumalak.Game
   def toGo: go.Game
+  def toBackgammon: backgammon.Game
+  def toAbalone: abalone.Game
 
 }
 
@@ -348,6 +357,7 @@ object Game {
     def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a chess game into a togyzkumalak game")
     def toGo: go.Game                     = sys.error("Can't turn a chess game into a go game")
     def toBackgammon: backgammon.Game     = sys.error("Can't turn a chess game into a backgammon game")
+    def toAbalone: abalone.Game           = sys.error("Can't turn a chess game into a abalone game")
 
   }
 
@@ -507,6 +517,7 @@ object Game {
     def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a draughts game into a togyzkumalak game")
     def toGo: go.Game                     = sys.error("Can't turn a draughts game into a go game")
     def toBackgammon: backgammon.Game     = sys.error("Can't turn a draughts game into a backgammon game")
+    def toAbalone: abalone.Game           = sys.error("Can't turn a draughts game into a abalone game")
 
   }
 
@@ -650,6 +661,7 @@ object Game {
     def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a fairysf game into a togyzkumalak game")
     def toGo: go.Game                     = sys.error("Can't turn a fairysf game into a go game")
     def toBackgammon: backgammon.Game     = sys.error("Can't turn a fairysf game into a backgammon game")
+    def toAbalone: abalone.Game           = sys.error("Can't turn a fairysf game into a abalone game")
 
   }
 
@@ -778,6 +790,7 @@ object Game {
     def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a samurai game into a togyzkumalak game")
     def toGo: go.Game                     = sys.error("Can't turn a samurai game into a go game")
     def toBackgammon: backgammon.Game     = sys.error("Can't turn a samurai game into a backgammon game")
+    def toAbalone: abalone.Game           = sys.error("Can't turn a samurai game into a abalone game")
 
   }
 
@@ -907,6 +920,7 @@ object Game {
     def toTogyzkumalak: togyzkumalak.Game = g
     def toGo: go.Game                     = sys.error("Can't turn a togyzkumalak game into a go game")
     def toBackgammon: backgammon.Game     = sys.error("Can't turn a togyzkumalak game into a backgammon game")
+    def toAbalone: abalone.Game           = sys.error("Can't turn a togyzkumalak game into a abalone game")
 
   }
 
@@ -1045,6 +1059,7 @@ object Game {
     def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a go game into a togyzkumalak game")
     def toGo: go.Game                     = g
     def toBackgammon: backgammon.Game     = sys.error("Can't turn a go game into a backgammon game")
+    def toAbalone: abalone.Game           = sys.error("Can't turn a go game into a abalone game")
 
   }
 
@@ -1197,6 +1212,137 @@ object Game {
     def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a backgammon game into a togyzkumalak game")
     def toGo: go.Game                     = sys.error("Can't turn a backgammon game into a go game")
     def toBackgammon: backgammon.Game     = g
+    def toAbalone: abalone.Game           = sys.error("Can't turn a backgammon game into a abalone game")
+
+  }
+
+  final case class Abalone(g: abalone.Game)
+      extends Game(
+        Situation.Abalone(g.situation),
+        g.actionStrs,
+        g.clock,
+        g.plies,
+        g.turnCount,
+        g.startedAtPly,
+        g.startedAtTurn
+      ) {
+
+    def apply(
+        orig: Pos,
+        dest: Pos,
+        promotion: Option[PromotableRole] = None,
+        metrics: MoveMetrics = MoveMetrics(),
+        finalSquare: Boolean = false,
+        captures: Option[List[Pos]] = None,
+        partialCaptures: Boolean = false
+    ): Validated[String, (Game, Move)] = (orig, dest) match {
+      case (Pos.Abalone(orig), Pos.Abalone(dest)) =>
+        g.apply(orig, dest, metrics)
+          .toEither
+          .map(t => (Abalone(t._1), Move.Abalone(t._2)))
+          .toValidated
+      case _                                      => sys.error("Not passed Abalone objects")
+    }
+
+    def apply(action: Action): Game =
+      action match {
+        case (Move.Abalone(move)) => Abalone(g.apply(move))
+        case _                    => sys.error("Not passed Abalone objects")
+      }
+
+    def drop(
+        role: Role,
+        pos: Pos,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, Drop)] = sys.error("Can't drop in Abalone")
+
+    def lift(
+        pos: Pos,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, Lift)] =
+      sys.error("Can't lift in abalone")
+
+    def pass(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Pass)] =
+      sys.error("Can't pass in Abalone")
+
+    def selectSquares(
+        squares: List[Pos],
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, SelectSquares)] =
+      sys.error("Can't selectSquares in Abalone")
+
+    def diceRoll(
+        dice: List[Int],
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, DiceRoll)] =
+      sys.error("Can't diceroll in Abalone")
+
+    def undo(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Undo)] =
+      sys.error("Can't undo in abalone") // @TODO: might want to be able to undo, actually
+
+    def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)] =
+      sys.error("Can't endTurn in abalone")
+
+    def randomizeDiceRoll: Option[DiceRoll] = None
+
+    def randomizeAndApplyDiceRoll(
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, DiceRoll)] =
+      sys.error("Can't apply diceroll in abalone")
+
+    def copy(clock: Option[ClockBase]): Game =
+      Abalone(g.copy(clock = clock))
+
+    def copy(plies: Int, turnCount: Int, startedAtPly: Int, startedAtTurn: Int): Game =
+      Abalone(
+        g.copy(
+          plies = plies,
+          turnCount = turnCount,
+          startedAtPly = startedAtPly,
+          startedAtTurn = startedAtTurn
+        )
+      )
+
+    def copy(
+        clock: Option[ClockBase],
+        plies: Int,
+        turnCount: Int,
+        startedAtPly: Int,
+        startedAtTurn: Int
+    ): Game =
+      Abalone(
+        g.copy(
+          clock = clock,
+          plies = plies,
+          turnCount = turnCount,
+          startedAtPly = startedAtPly,
+          startedAtTurn = startedAtTurn
+        )
+      )
+
+    def copy(situation: Situation, plies: Int, turnCount: Int): Game = situation match {
+      case Situation.Abalone(situation) =>
+        Abalone(g.copy(situation = situation, plies = plies, turnCount = turnCount))
+      case _                            =>
+        sys.error("Unable to copy abalone game with non-abalone arguments")
+    }
+    def copy(situation: Situation): Game                             = situation match {
+      case Situation.Abalone(situation) => Abalone(g.copy(situation = situation))
+      case _                            => sys.error("Unable to copy abalone game with non-abalone arguments")
+    }
+
+    def hasJustSwitchedTurns: Boolean = g.hasJustSwitchedTurns
+
+    def withTurnsAndPlies(p: Int, t: Int): Game = Abalone(g.withTurnsAndPlies(p, t))
+
+    def toFairySF: fairysf.Game           = sys.error("Can't turn a abalone game into a fairysf game")
+    def toChess: chess.Game               = sys.error("Can't turn a abalone game into a chess game")
+    def toDraughts: draughts.DraughtsGame = sys.error("Can't turn a abalone game into a draughts game")
+    def toSamurai: samurai.Game           = sys.error("Can't turn a abalone game into a samurai game")
+    def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a abalone game into a togyzkumalak game")
+    def toGo: go.Game                     = sys.error("Can't turn a abalone game into a go game")
+    def toBackgammon: backgammon.Game     = sys.error("Can't turn a abalone game into a backgammon game")
+    def toAbalone: abalone.Game           = g
 
   }
 
@@ -1228,8 +1374,9 @@ object Game {
       Go(go.Game(situation, actionStrs, clock, plies, turnCount, startedAtPly, startedAtTurn))
     case (GameLogic.Backgammon(), Situation.Backgammon(situation))     =>
       Backgammon(backgammon.Game(situation, actionStrs, clock, plies, turnCount, startedAtPly, startedAtTurn))
-
-    case _ => sys.error("Mismatched gamelogic types 32")
+    case (GameLogic.Abalone(), Situation.Abalone(situation))           =>
+      Abalone(abalone.Game(situation, actionStrs, clock, plies, turnCount, startedAtPly, startedAtTurn))
+    case _                                                             => sys.error("Mismatched gamelogic types 32")
   }
 
   def apply(lib: GameLogic, variant: Variant): Game = (lib, variant) match {
@@ -1247,6 +1394,8 @@ object Game {
       Go(go.Game.apply(variant))
     case (GameLogic.Backgammon(), Variant.Backgammon(variant))     =>
       Backgammon(backgammon.Game.apply(variant))
+    case (GameLogic.Abalone(), Variant.Abalone(variant))           =>
+      Abalone(abalone.Game.apply(variant))
     case _                                                         =>
       sys.error("Mismatched gamelogic types 33")
   }
@@ -1266,6 +1415,8 @@ object Game {
       Go(go.Game.apply(variant.map(_.toGo), fen.map(_.toGo)))
     case GameLogic.Backgammon()   =>
       Backgammon(backgammon.Game.apply(variant.map(_.toBackgammon), fen.map(_.toBackgammon)))
+    case GameLogic.Abalone()      =>
+      Abalone(abalone.Game.apply(variant.map(_.toAbalone), fen.map(_.toAbalone)))
     case _                        => sys.error("Mismatched gamelogic types 36")
   }
 
@@ -1276,5 +1427,6 @@ object Game {
   def wrap(g: togyzkumalak.Game)     = Togyzkumalak(g)
   def wrap(g: go.Game)               = Go(g)
   def wrap(g: backgammon.Game)       = Backgammon(g)
+  def wrap(g: abalone.Game)          = Abalone(g)
 
 }
