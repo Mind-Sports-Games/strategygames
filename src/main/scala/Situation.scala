@@ -31,6 +31,8 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def endTurns: List[EndTurn]
 
+  def cubeActions: List[CubeAction]
+
   def actions: List[Action] =
     moves.values.flatten.toList :::
       dropsAsDrops :::
@@ -39,6 +41,7 @@ sealed abstract class Situation(val board: Board, val player: Player) {
       selectSquaresAction :::
       diceRolls :::
       endTurns :::
+      cubeActions :::
       // important to keep non progressive actions at the end
       undos
 
@@ -59,6 +62,10 @@ sealed abstract class Situation(val board: Board, val player: Player) {
   def canEndTurn: Boolean
 
   def canOnlyEndTurn: Boolean
+
+  def canCubeAction: Boolean
+
+  def canOnlyCubeAction: Boolean
 
   def takebackable: Boolean
 
@@ -120,6 +127,8 @@ sealed abstract class Situation(val board: Board, val player: Player) {
   def undo: Validated[String, Undo]
 
   def endTurn: Validated[String, EndTurn]
+
+  def cubeAction(interaction: CubeInteraction): Validated[String, CubeAction]
 
   def withVariant(variant: Variant): Situation
 
@@ -210,6 +219,8 @@ object Situation {
 
     def endTurns: List[EndTurn] = List.empty
 
+    def cubeActions: List[CubeAction] = List.empty
+
     def canDrop: Boolean = s.canDrop
 
     def canOnlyDrop: Boolean = s.canOnlyDrop
@@ -227,6 +238,10 @@ object Situation {
     def canEndTurn: Boolean = false
 
     def canOnlyEndTurn: Boolean = false
+
+    def canCubeAction: Boolean = false
+
+    def canOnlyCubeAction: Boolean = false
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -272,6 +287,9 @@ object Situation {
     def undo: Validated[String, Undo] = sys.error("Can't do Undo for chess")
 
     def endTurn: Validated[String, EndTurn] = sys.error("Can't do EndTurn for chess")
+
+    def cubeAction(interaction: CubeInteraction): Validated[String, CubeAction] =
+      sys.error("Can't do CubeAction for chess")
 
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.Chess(variant) => Chess(s.withVariant(variant))
@@ -337,6 +355,8 @@ object Situation {
 
     def endTurns: List[EndTurn] = List.empty
 
+    def cubeActions: List[CubeAction] = List.empty
+
     def canDrop: Boolean = false
 
     def canOnlyDrop: Boolean = false
@@ -354,6 +374,10 @@ object Situation {
     def canEndTurn: Boolean = false
 
     def canOnlyEndTurn: Boolean = false
+
+    def canCubeAction: Boolean = false
+
+    def canOnlyCubeAction: Boolean = false
 
     // possibly need to do something for this
     def opponentHasInsufficientMaterial: Boolean = false
@@ -436,6 +460,9 @@ object Situation {
     def undo: Validated[String, Undo] = sys.error("Can't do Undo for draughts")
 
     def endTurn: Validated[String, EndTurn] = sys.error("Can't do EndTurn for draughts")
+
+    def cubeAction(interaction: CubeInteraction): Validated[String, CubeAction] =
+      sys.error("Can't do CubeAction for draughts")
 
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.Draughts(variant) => Draughts(s.withVariant(variant))
@@ -520,6 +547,8 @@ object Situation {
 
     def endTurns: List[EndTurn] = List.empty
 
+    def cubeActions: List[CubeAction] = List.empty
+
     def canDrop: Boolean = s.canDrop
 
     def canOnlyDrop: Boolean = s.canOnlyDrop
@@ -537,6 +566,10 @@ object Situation {
     def canEndTurn: Boolean = false
 
     def canOnlyEndTurn: Boolean = false
+
+    def canCubeAction: Boolean = false
+
+    def canOnlyCubeAction: Boolean = false
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -582,6 +615,9 @@ object Situation {
     def undo: Validated[String, Undo] = sys.error("Can't do Undo for fairysf")
 
     def endTurn: Validated[String, EndTurn] = sys.error("Can't do EndTurn for fairysf")
+
+    def cubeAction(interaction: CubeInteraction): Validated[String, CubeAction] =
+      sys.error("Can't do CubeAction for fairysf")
 
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.FairySF(variant) => FairySF(s.withVariant(variant))
@@ -663,6 +699,8 @@ object Situation {
 
     def endTurns: List[EndTurn] = List.empty
 
+    def cubeActions: List[CubeAction] = List.empty
+
     def canDrop: Boolean = false
 
     def canOnlyDrop: Boolean = false
@@ -681,6 +719,10 @@ object Situation {
 
     def canOnlyEndTurn: Boolean = false
 
+    def canCubeAction: Boolean = false
+
+    def canOnlyCubeAction: Boolean = false
+
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
       sys.error("Can't do a Drop for samurai")
 
@@ -697,6 +739,9 @@ object Situation {
     def undo: Validated[String, Undo] = sys.error("Can't do Undo for samurai")
 
     def endTurn: Validated[String, EndTurn] = sys.error("Can't do EndTurn for samurai")
+
+    def cubeAction(interaction: CubeInteraction): Validated[String, CubeAction] =
+      sys.error("Can't do CubeAction for samurai")
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -803,6 +848,8 @@ object Situation {
 
     def endTurns: List[EndTurn] = List.empty
 
+    def cubeActions: List[CubeAction] = List.empty
+
     def canDrop: Boolean = false
 
     def canOnlyDrop: Boolean = false
@@ -821,6 +868,10 @@ object Situation {
 
     def canOnlyEndTurn: Boolean = false
 
+    def canCubeAction: Boolean = false
+
+    def canOnlyCubeAction: Boolean = false
+
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
       sys.error("Can't do a Drop for togyzkumalak")
 
@@ -829,14 +880,17 @@ object Situation {
     def pass: Validated[String, Pass] = sys.error("Can't do a Pass for togyzkumalak")
 
     def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
-      sys.error("Can't do a SelectSquare for togykumalak")
+      sys.error("Can't do a SelectSquare for togyzkumalak")
 
     def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
-      sys.error("Can't do a DiceRoll for togykumalak")
+      sys.error("Can't do a DiceRoll for togyzkumalak")
 
-    def undo: Validated[String, Undo] = sys.error("Can't do Undo for togykumalak")
+    def undo: Validated[String, Undo] = sys.error("Can't do Undo for togyzkumalak")
 
-    def endTurn: Validated[String, EndTurn] = sys.error("Can't do EndTurn for togykumalak")
+    def endTurn: Validated[String, EndTurn] = sys.error("Can't do EndTurn for togyzkumalak")
+
+    def cubeAction(interaction: CubeInteraction): Validated[String, CubeAction] =
+      sys.error("Can't do CubeAction for togyzkumalak")
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -942,6 +996,8 @@ object Situation {
 
     def endTurns: List[EndTurn] = List.empty
 
+    def cubeActions: List[CubeAction] = List.empty
+
     def canDrop: Boolean = s.canDrop
 
     def canOnlyDrop: Boolean = s.canOnlyDrop
@@ -959,6 +1015,10 @@ object Situation {
     def canEndTurn: Boolean = false
 
     def canOnlyEndTurn: Boolean = false
+
+    def canCubeAction: Boolean = false
+
+    def canOnlyCubeAction: Boolean = false
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -1006,6 +1066,9 @@ object Situation {
     def undo: Validated[String, Undo] = sys.error("Can't do Undo for go")
 
     def endTurn: Validated[String, EndTurn] = sys.error("Can't do EndTurn for go")
+
+    def cubeAction(interaction: CubeInteraction): Validated[String, CubeAction] =
+      sys.error("Can't do a CubeAction for go")
 
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.Go(variant) => Go(s.withVariant(variant))
@@ -1089,6 +1152,8 @@ object Situation {
 
     def endTurns: List[EndTurn] = s.endTurns.map(EndTurn.Backgammon)
 
+    def cubeActions: List[CubeAction] = s.cubeActions.map(CubeAction.Backgammon)
+
     def canDrop: Boolean = s.canDrop
 
     def canOnlyDrop: Boolean = s.canOnlyDrop
@@ -1107,6 +1172,10 @@ object Situation {
 
     def canOnlyEndTurn: Boolean = s.canOnlyEndTurn
 
+    def canCubeAction: Boolean = s.canCubeAction
+
+    def canOnlyCubeAction: Boolean = s.canOnlyCubeAction
+
     def drop(role: Role, pos: Pos): Validated[String, Drop] = (role, pos) match {
       case (Role.BackgammonRole(role), Pos.Backgammon(pos)) =>
         s.drop(role, pos).toEither.map(d => Drop.Backgammon(d)).toValidated
@@ -1121,7 +1190,7 @@ object Situation {
     def pass: Validated[String, Pass] = sys.error("Can't do a Pass for backgammon")
 
     def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
-      sys.error("Can't do a SelectSquare for togykumalak")
+      sys.error("Can't do a SelectSquare for togyzkumalak")
 
     def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
       s.diceRoll(dice).map(dr => DiceRoll.Backgammon(dr))
@@ -1131,6 +1200,13 @@ object Situation {
 
     def endTurn: Validated[String, EndTurn] =
       s.endTurn.toEither.map(et => EndTurn.Backgammon(et)).toValidated
+
+    def cubeAction(interaction: CubeInteraction): Validated[String, CubeAction] =
+      interaction match {
+        case CubeInteraction.Backgammon(interaction) =>
+          s.cubeAction(interaction).toEither.map(ca => CubeAction.Backgammon(ca)).toValidated
+        case _                                       => sys.error("Not passed Backgammon objects")
+      }
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -1236,6 +1312,8 @@ object Situation {
 
     def endTurns: List[EndTurn] = List.empty
 
+    def cubeActions: List[CubeAction] = List.empty
+
     def canDrop: Boolean = false
 
     def canOnlyDrop: Boolean = false
@@ -1254,6 +1332,10 @@ object Situation {
 
     def canOnlyEndTurn: Boolean = false
 
+    def canCubeAction: Boolean = false
+
+    def canOnlyCubeAction: Boolean = false
+
     def drop(role: Role, pos: Pos): Validated[String, Drop] =
       sys.error("Can't do a Drop for abalone")
 
@@ -1262,7 +1344,7 @@ object Situation {
     def pass: Validated[String, Pass] = sys.error("Can't do a Pass for abalone")
 
     def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
-      sys.error("Can't do a SelectSquare for togykumalak")
+      sys.error("Can't do a SelectSquare for togyzkumalak")
 
     def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
       sys.error("Can't do a DiceRoll for abalone")
@@ -1270,6 +1352,9 @@ object Situation {
     def undo: Validated[String, Undo] = sys.error("Can't do Undo for abalone")
 
     def endTurn: Validated[String, EndTurn] = sys.error("Can't do EndTurn for abalone")
+
+    def cubeAction(interaction: CubeInteraction): Validated[String, CubeAction] =
+      sys.error("Can't do CubeAction for abalone")
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 

@@ -31,9 +31,11 @@ case class Situation(board: Board, player: Player) {
 
   def endTurns: List[EndTurn] = endTurn.toList
 
+  def cubeActions: List[CubeAction] = board.variant.validCubeActions(this)
+
   // don't include undos as it is not a progressive action
   def actions: List[Action] =
-    movesList ::: dropsAsDrops ::: lifts ::: diceRolls ::: endTurns
+    movesList ::: dropsAsDrops ::: lifts ::: diceRolls ::: endTurns ::: cubeActions
 
   private def nextTurn(actions: List[Action]): List[List[Action]] =
     actions match {
@@ -60,7 +62,13 @@ case class Situation(board: Board, player: Player) {
 
   def canRollDice: Boolean = diceRolls.nonEmpty
 
-  def canOnlyRollDice: Boolean = canRollDice && !canMove && !canDrop && !canLift && !canEndTurn
+  def canOnlyRollDice: Boolean =
+    canRollDice && !canMove && !canDrop && !canLift && !canEndTurn && !canCubeAction
+
+  def canCubeAction: Boolean = cubeActions.nonEmpty
+
+  def canOnlyCubeAction: Boolean =
+    canCubeAction && !canRollDice && !canMove && !canDrop && !canLift && !canEndTurn
 
   def canUndo: Boolean = undos.nonEmpty
   // def canUndo: Boolean = board.history.lastAction.map(_.undoable).getOrElse(false)
@@ -337,6 +345,9 @@ case class Situation(board: Board, player: Player) {
   def undo: Validated[String, Undo] = board.variant.undo(this)
 
   def endTurn: Validated[String, EndTurn] = board.variant.endTurn(this)
+
+  def cubeAction(interaction: CubeInteraction): Validated[String, CubeAction] =
+    board.variant.cubeAction(this, interaction)
 
   def withHistory(history: History) =
     copy(

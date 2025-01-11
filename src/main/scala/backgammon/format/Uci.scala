@@ -236,6 +236,32 @@ object Uci {
 
   }
 
+  case class CubeAction(interaction: CubeInteraction) extends Uci {
+
+    def uci = s"cube${interaction.char}"
+
+    def piotr = uci
+
+    def origDest = None
+
+    def undoable = false
+
+    def apply(situation: Situation) = situation.endTurn // situation.cubeAction(interaction)
+  }
+
+  object CubeAction {
+
+    def fromStrings(uci: String): Option[CubeAction] = uci match {
+      case "cubeo" => Some(CubeAction(OfferDouble))
+      case "cubey" => Some(CubeAction(AcceptDouble))
+      case "cuben" => Some(CubeAction(RejectDouble))
+      case _       => None
+    }
+
+    val cubeActionR = s"^cube([oyn])$$".r
+
+  }
+
   case class WithSan(uci: Uci, san: String)
 
   def apply(move: strategygames.backgammon.Move) = Uci.Move(move.orig, move.dest, move.captureList)
@@ -250,6 +276,8 @@ object Uci {
 
   def apply(@nowarn endTurn: strategygames.backgammon.EndTurn) = Uci.EndTurn()
 
+  def apply(cubeAction: strategygames.backgammon.CubeAction) = Uci.CubeAction(cubeAction.interaction)
+
   def apply(action: String): Option[Uci] =
     if (action lift 1 contains '@') Uci.Drop(action)
     else if (action.contains('^')) Uci.Lift.fromStrings(action.split('^')(1))
@@ -257,6 +285,7 @@ object Uci {
     else if (action == "roll") Some(Uci.DoRoll())
     else if (action == "undo") Some(Uci.Undo())
     else if (action == "endturn") Some(Uci.EndTurn())
+    else if (action.startsWith("cube")) Uci.CubeAction.fromStrings(action)
     else Uci.Move(action)
 
   def piotr(action: String): Option[Uci] =
@@ -266,6 +295,7 @@ object Uci {
     else if (action == "roll") Some(Uci.DoRoll())
     else if (action == "undo") Some(Uci.Undo())
     else if (action == "endturn") Some(Uci.EndTurn())
+    else if (action.startsWith("cube")) Uci.CubeAction.fromStrings(action)
     else Uci.Move.piotr(action)
 
   def readList(actions: String): Option[List[Uci]] =

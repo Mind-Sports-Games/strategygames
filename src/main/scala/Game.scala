@@ -134,6 +134,11 @@ abstract class Game(
           uci.dice,
           metrics
         )
+      case Uci.BackgammonCubeAction(uci)                =>
+        cubeAction(
+          CubeInteraction.Backgammon(uci.interaction),
+          metrics
+        )
       case Uci.GoPass(_)                                => pass(metrics)
       case Uci.ChessDoRoll(_) | Uci.BackgammonDoRoll(_) => randomizeAndApplyDiceRoll(metrics)
       case Uci.BackgammonUndo(_)                        => undo(metrics)
@@ -168,6 +173,11 @@ abstract class Game(
   def undo(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Undo)]
 
   def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)]
+
+  def cubeAction(
+      interaction: CubeInteraction,
+      metrics: MoveMetrics = MoveMetrics()
+  ): Validated[String, (Game, CubeAction)]
 
   def randomizeDiceRoll: Option[DiceRoll]
 
@@ -297,6 +307,12 @@ object Game {
 
     def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)] =
       sys.error("Can't endTurn in chess")
+
+    def cubeAction(
+        interaction: CubeInteraction,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, CubeAction)] =
+      sys.error("Can't cubeaction in chess")
 
     def randomizeDiceRoll: Option[DiceRoll] = None
 
@@ -458,6 +474,12 @@ object Game {
     def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)] =
       sys.error("Can't endTurn in draughts")
 
+    def cubeAction(
+        interaction: CubeInteraction,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, CubeAction)] =
+      sys.error("Can't cubeaction in draughts")
+
     def randomizeDiceRoll: Option[DiceRoll] = None
 
     def randomizeAndApplyDiceRoll(
@@ -602,6 +624,12 @@ object Game {
     def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)] =
       sys.error("Can't endTurn in fairysf")
 
+    def cubeAction(
+        interaction: CubeInteraction,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, CubeAction)] =
+      sys.error("Can't cubeaction in fairysf")
+
     def randomizeDiceRoll: Option[DiceRoll] = None
 
     def randomizeAndApplyDiceRoll(
@@ -732,6 +760,12 @@ object Game {
     def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)] =
       sys.error("Can't endTurn in samurai")
 
+    def cubeAction(
+        interaction: CubeInteraction,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, CubeAction)] =
+      sys.error("Can't cubeaction in samurai")
+
     def randomizeDiceRoll: Option[DiceRoll] = None
 
     def randomizeAndApplyDiceRoll(
@@ -860,6 +894,12 @@ object Game {
 
     def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)] =
       sys.error("Can't endTurn in togyzkumalak")
+
+    def cubeAction(
+        interaction: CubeInteraction,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, CubeAction)] =
+      sys.error("Can't cubeaction in togyzkumalak")
 
     def randomizeDiceRoll: Option[DiceRoll] = None
 
@@ -999,6 +1039,12 @@ object Game {
 
     def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)] =
       sys.error("Can't endTurn in go")
+
+    def cubeAction(
+        interaction: CubeInteraction,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, CubeAction)] =
+      sys.error("Can't cubeaction in go")
 
     def randomizeDiceRoll: Option[DiceRoll] = None
 
@@ -1150,6 +1196,18 @@ object Game {
     def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)] =
       g.endTurn(metrics).toEither.map(t => (Backgammon(t._1), EndTurn.Backgammon(t._2))).toValidated
 
+    def cubeAction(
+        interaction: CubeInteraction,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, CubeAction)] = interaction match {
+      case CubeInteraction.Backgammon(interaction) =>
+        g.cubeAction(interaction, metrics)
+          .toEither
+          .map(t => (Backgammon(t._1), CubeAction.Backgammon(t._2)))
+          .toValidated
+      case _                                       => sys.error("Not passed Backgammon objects")
+    }
+
     def randomizeDiceRoll: Option[DiceRoll] = g.randomizeDiceRoll.map(DiceRoll.Backgammon)
 
     def randomizeAndApplyDiceRoll(
@@ -1282,6 +1340,12 @@ object Game {
 
     def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)] =
       sys.error("Can't endTurn in abalone")
+
+    def cubeAction(
+        interaction: CubeInteraction,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, CubeAction)] =
+      sys.error("Can't cubeaction in abalone")
 
     def randomizeDiceRoll: Option[DiceRoll] = None
 

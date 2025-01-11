@@ -436,6 +436,11 @@ abstract class Variant private[variant] (
       )
     else None
 
+  def validCubeActions(situation: Situation): List[CubeAction] =
+    if (situation.board.history.hasRolledDiceThisTurn) List.empty
+    // TODO write this
+    else List.empty
+
   def move(
       situation: Situation,
       from: Pos,
@@ -477,6 +482,15 @@ abstract class Variant private[variant] (
     validEndTurn(situation) match {
       case Some(et) => Validated.valid(et)
       case None     => Validated.invalid(s"$situation cannot do endTurn")
+    }
+
+  def cubeAction(
+      situation: Situation,
+      interaction: CubeInteraction
+  ): Validated[String, CubeAction] =
+    validCubeActions(situation).filter(ca => ca.interaction == interaction).headOption match {
+      case Some(ca) => Validated.valid(ca)
+      case None     => Validated.invalid(s"$situation cannot do a cube action of: $interaction")
     }
 
   def possibleDrops(situation: Situation): Option[List[Pos]] =
