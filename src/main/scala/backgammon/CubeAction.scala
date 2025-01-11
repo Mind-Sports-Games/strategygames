@@ -12,14 +12,18 @@ case class CubeAction(
 
   def player = situationBefore.player
 
+  def playerAfter = !player
+
   def situationAfter =
-    Situation(finalizeAfter, player)
+    Situation(finalizeAfter, playerAfter)
 
   def finalizeAfter: Board = after updateHistory { h =>
     h.copy(
-      currentTurn = h.currentTurn :+ toUci,
+      lastTurn = h.currentTurn :+ toUci,
+      currentTurn = List(),
       forcedTurn = false,
-      justUsedUndo = false
+      justUsedUndo = false,
+      halfMoveClock = h.halfMoveClock + playerAfter.fold(1, 0)
     )
   }
 

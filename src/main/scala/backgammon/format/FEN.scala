@@ -88,12 +88,14 @@ final case class FEN(value: String) extends AnyVal {
 
   def cubeData: Option[CubeData] =
     value.split(' ').lift(6) match {
-      case Some("0")                           => Some(CubeData.init)
-      case Some(FEN.cubeOwnedR(value, player)) =>
-        Some(CubeData(pow(2, value.toInt).toInt, Player(player.toCharArray.head), false))
-      case Some(FEN.cubeOfferR(value, player)) =>
-        Some(CubeData(pow(2, value.toInt).toInt, Player(player.toCharArray.head), true))
-      case _                                   => None
+      case Some("0")                            => Some(CubeData.init)
+      case Some(FEN.cubeOwnedR(value, player))  =>
+        Some(CubeData(pow(2, value.toInt).toInt, Player(player.toCharArray.head), false, false))
+      case Some(FEN.cubeOfferR(value, player))  =>
+        Some(CubeData(pow(2, value.toInt).toInt, Player(player.toCharArray.head), true, false))
+      case Some(FEN.cubeRejectR(value, player)) =>
+        Some(CubeData(pow(2, value.toInt).toInt, Player(player.toCharArray.head), true, true))
+      case _                                    => None
     }
 
   private def removePockets(fen: String): String = {
@@ -119,7 +121,8 @@ object FEN {
   def fullMoveIndex: Int = 7
 
   // val cubeDataR  = s"^([0-6])([WwBb])$$".r
-  val cubeOwnedR = s"^([0-6])([WB])$$".r
-  val cubeOfferR = s"^([0-6])([wb])$$".r
+  val cubeOwnedR  = s"^([0-6])([WB])$$".r
+  val cubeOfferR  = s"^([0-6])([wb])$$".r
+  val cubeRejectR = s"^([0-6])([wb])x$$".r
 
 }

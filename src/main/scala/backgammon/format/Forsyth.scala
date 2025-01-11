@@ -129,7 +129,7 @@ object Forsyth {
       case Some(cubeData) =>
         s"${(log(cubeData.value) / log(2)).toInt}${cubeData.owner
             .map(p => if (cubeData.underOffer) p.letter else p.letter.toUpper)
-            .getOrElse("")}"
+            .getOrElse("")}${if (cubeData.rejected) "x" else ""}"
       case _              => "-"
     }
 

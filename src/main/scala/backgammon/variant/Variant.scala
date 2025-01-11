@@ -349,7 +349,11 @@ abstract class Variant private[variant] (
       .flatMap(_.permutations)
 
   def validDiceRolls(situation: Situation): List[DiceRoll] =
-    if (situation.board.unusedDice.isEmpty && !situation.board.history.hasRolledDiceThisTurn)
+    if (
+      situation.board.unusedDice.isEmpty &&
+      !situation.board.history.hasRolledDiceThisTurn &&
+      situation.board.cubeData.map(_.underOffer) != Some(true)
+    )
       diceCombinations(2).toList
         .filter { dr =>
           situation.board.history.didRollDiceLastTurn || dr.toSet.size == 2
@@ -438,8 +442,39 @@ abstract class Variant private[variant] (
 
   def validCubeActions(situation: Situation): List[CubeAction] =
     if (situation.board.history.hasRolledDiceThisTurn) List.empty
-    // TODO write this
-    else List.empty
+    else
+      situation.board.cubeData match {
+        case Some(cubeData) =>
+          if (cubeData.owner != Some(!situation.player) && !cubeData.underOffer)
+            List(
+              CubeAction(
+                interaction = OfferDouble,
+                situationBefore = situation,
+                after = situation.board.copy(
+                  cubeData = Some(cubeData.offer(situation.player))
+                )
+              )
+            )
+          else if (cubeData.underOffer)
+            List(
+              CubeAction(
+                interaction = AcceptDouble,
+                situationBefore = situation,
+                after = situation.board.copy(
+                  cubeData = Some(cubeData.double(situation.player))
+                )
+              ),
+              CubeAction(
+                interaction = RejectDouble,
+                situationBefore = situation,
+                after = situation.board.copy(
+                  cubeData = Some(cubeData.reject(situation.player))
+                )
+              )
+            )
+          else List.empty
+        case None           => List.empty
+      }
 
   def move(
       situation: Situation,
@@ -508,9 +543,13 @@ abstract class Variant private[variant] (
         .some
     else None
 
+  private def cubeRejected(situation: Situation) =
+    situation.board.cubeData.map(_.rejected) == Some(true)
+
   def specialEnd(situation: Situation) =
     (situation.board.history.score.p1 == numStartingPiecesPerPlayer) ||
-      (situation.board.history.score.p2 == numStartingPiecesPerPlayer)
+      (situation.board.history.score.p2 == numStartingPiecesPerPlayer) ||
+      (cubeRejected(situation))
 
   def gammonPosition(situation: Situation, player: Player) =
     situation.board.history.score(player) == 0 &&
@@ -541,7 +580,8 @@ abstract class Variant private[variant] (
     )
 
   def winner(situation: Situation): Option[Player] =
-    if (specialEnd(situation)) {
+    if (cubeRejected(situation)) situation.board.cubeData.fold(None: Option[Player])(_.owner)
+    else if (specialEnd(situation)) {
       if (situation.board.history.score.p1 > situation.board.history.score.p2)
         Player.fromName("p1")
       else Player.fromName("p2")
