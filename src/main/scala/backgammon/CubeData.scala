@@ -9,6 +9,9 @@ case class CubeData(
     rejected: Boolean
 ) {
 
+  def canOffer(player: Player): Boolean =
+    !underOffer && value < 64 && owner != Some(!player)
+
   def offer(player: Player): CubeData =
     if (value >= 64) sys.error("Cannot offer cube beyond 64")
     else if (value > 1 && Some(player) != owner) sys.error("Cube offer from invalid player")
