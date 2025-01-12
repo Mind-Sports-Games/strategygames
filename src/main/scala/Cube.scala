@@ -6,7 +6,8 @@ sealed abstract class CubeData(
     val gameLogic: GameLogic,
     val value: Int,
     val owner: Option[Player],
-    val underOffer: Boolean
+    val underOffer: Boolean,
+    val rejected: Boolean
 )
 
 object CubeData {
@@ -16,7 +17,8 @@ object CubeData {
         GameLogic.Backgammon(),
         c.value,
         c.owner,
-        c.underOffer
+        c.underOffer,
+        c.rejected
       )
 
   def init(lib: GameLogic): CubeData = lib match {

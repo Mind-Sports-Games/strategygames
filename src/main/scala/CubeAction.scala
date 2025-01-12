@@ -6,6 +6,7 @@ sealed abstract class CubeAction(
     val interaction: CubeInteraction,
     val situationBefore: Situation,
     val after: Board,
+    val autoEndTurn: Boolean,
     val metrics: MoveMetrics = MoveMetrics()
 ) extends Action(situationBefore) {
 
@@ -30,6 +31,7 @@ object CubeAction {
         CubeInteraction.Backgammon(c.interaction),
         Situation.Backgammon(c.situationBefore),
         Board.Backgammon(c.after),
+        true,
         c.metrics
       ) {
 

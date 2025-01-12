@@ -26,9 +26,12 @@ case class History(
   def hasRolledDiceThisTurn: Boolean =
     currentTurn.filter { case _: Uci.DiceRoll => true; case _ => false }.nonEmpty
 
-  // can be used to determine whether this is the first turn or not
-  def didRollDiceLastTurn: Boolean =
-    lastTurn.filter { case _: Uci.DiceRoll => true; case _ => false }.nonEmpty
+  def firstDiceRollHappened: Boolean =
+    lastTurn.filter {
+      case _: Uci.DiceRoll   => true
+      case _: Uci.CubeAction => true
+      case _                 => false
+    }.nonEmpty
 
   def forcedTurnPersists(situation: Situation, action: Action) =
     if (currentTurn.size == 1) situation.forcedAction.map(_.toUci) == Some(action.toUci)

@@ -356,7 +356,7 @@ abstract class Variant private[variant] (
     )
       diceCombinations(2).toList
         .filter { dr =>
-          situation.board.history.didRollDiceLastTurn || dr.toSet.size == 2
+          situation.board.history.firstDiceRollHappened || dr.toSet.size == 2
         }
         .map { dice =>
           DiceRoll(
@@ -441,7 +441,8 @@ abstract class Variant private[variant] (
     else None
 
   def validCubeActions(situation: Situation): List[CubeAction] =
-    if (situation.board.history.hasRolledDiceThisTurn) List.empty
+    if (situation.board.history.hasRolledDiceThisTurn || !situation.board.history.firstDiceRollHappened)
+      List.empty
     else
       situation.board.cubeData match {
         case Some(cubeData) =>

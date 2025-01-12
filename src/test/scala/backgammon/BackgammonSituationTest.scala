@@ -130,7 +130,7 @@ class BackgammonSituationTest extends Specification with ValidatedMatchers {
       g3.situation.board.piecesCanLift(Player.P2) must_== false
       g3.situation.board.racePosition must_== false
       g3.situation.board.history.hasRolledDiceThisTurn must_== true
-      g3.situation.board.history.didRollDiceLastTurn must_== false
+      g3.situation.board.history.firstDiceRollHappened must_== false
     }
     val g4       = g3.endTurn() match {
       case Valid((g, _)) => g
@@ -158,7 +158,7 @@ class BackgammonSituationTest extends Specification with ValidatedMatchers {
       g4.situation.board.piecesCanLift(Player.P2) must_== false
       g4.situation.board.racePosition must_== false
       g4.situation.board.history.hasRolledDiceThisTurn must_== false
-      g4.situation.board.history.didRollDiceLastTurn must_== true
+      g4.situation.board.history.firstDiceRollHappened must_== true
       g4.situation.player must_!= g3.situation.player
     }
 

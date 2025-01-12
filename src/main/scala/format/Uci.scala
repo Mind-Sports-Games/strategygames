@@ -917,7 +917,7 @@ object Uci {
 
   object CubeAction {
 
-    def fromStrings(lib: GameLogic, @nowarn gf: GameFamily, interaction: String): Option[CubeAction] =
+    def fromStrings(lib: GameLogic, interaction: String): Option[CubeAction] =
       lib match {
         case GameLogic.Draughts()     => None
         case GameLogic.Samurai()      => None
