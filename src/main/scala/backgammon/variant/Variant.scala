@@ -456,7 +456,7 @@ abstract class Variant private[variant] (
                 )
               )
             )
-          else if (cubeData.underOffer)
+          else if (cubeData.underOffer && !cubeData.rejected)
             List(
               CubeAction(
                 interaction = AcceptDouble,
