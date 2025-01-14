@@ -516,6 +516,7 @@ class BackgammonFenTest extends BackgammonTest with ValidatedMatchers {
       board.cubeData.map(_.value) must_== Some(1)
       board.cubeData.map(_.owner) must_== Some(None)
       board.cubeData.map(_.underOffer) must_== Some(false)
+      board.cubeData.map(_.rejected) must_== Some(false)
       Forsyth.>>(Situation(board, fen.player.getOrElse(Player.P1))).value must_== fenStr
     }
   }
@@ -535,6 +536,7 @@ class BackgammonFenTest extends BackgammonTest with ValidatedMatchers {
       board.cubeData.map(_.value) must_== Some(1)
       board.cubeData.map(_.owner) must_== Some(Some(Player.P1))
       board.cubeData.map(_.underOffer) must_== Some(true)
+      board.cubeData.map(_.rejected) must_== Some(false)
       Forsyth.>>(Situation(board, fen.player.getOrElse(Player.P1))).value must_== fenStr
     }
   }
@@ -554,6 +556,7 @@ class BackgammonFenTest extends BackgammonTest with ValidatedMatchers {
       board.cubeData.map(_.value) must_== Some(1)
       board.cubeData.map(_.owner) must_== Some(Some(Player.P2))
       board.cubeData.map(_.underOffer) must_== Some(true)
+      board.cubeData.map(_.rejected) must_== Some(false)
       Forsyth.>>(Situation(board, fen.player.getOrElse(Player.P1))).value must_== fenStr
     }
   }
@@ -573,6 +576,7 @@ class BackgammonFenTest extends BackgammonTest with ValidatedMatchers {
       board.cubeData.map(_.value) must_== Some(2)
       board.cubeData.map(_.owner) must_== Some(Some(Player.P1))
       board.cubeData.map(_.underOffer) must_== Some(false)
+      board.cubeData.map(_.rejected) must_== Some(false)
       Forsyth.>>(Situation(board, fen.player.getOrElse(Player.P1))).value must_== fenStr
     }
   }
@@ -592,6 +596,7 @@ class BackgammonFenTest extends BackgammonTest with ValidatedMatchers {
       board.cubeData.map(_.value) must_== Some(2)
       board.cubeData.map(_.owner) must_== Some(Some(Player.P2))
       board.cubeData.map(_.underOffer) must_== Some(false)
+      board.cubeData.map(_.rejected) must_== Some(false)
       Forsyth.>>(Situation(board, fen.player.getOrElse(Player.P1))).value must_== fenStr
     }
   }
@@ -611,6 +616,7 @@ class BackgammonFenTest extends BackgammonTest with ValidatedMatchers {
       board.cubeData.map(_.value) must_== Some(2)
       board.cubeData.map(_.owner) must_== Some(Some(Player.P1))
       board.cubeData.map(_.underOffer) must_== Some(true)
+      board.cubeData.map(_.rejected) must_== Some(false)
       Forsyth.>>(Situation(board, fen.player.getOrElse(Player.P1))).value must_== fenStr
     }
   }
@@ -630,7 +636,30 @@ class BackgammonFenTest extends BackgammonTest with ValidatedMatchers {
       board.cubeData.map(_.value) must_== Some(2)
       board.cubeData.map(_.owner) must_== Some(Some(Player.P2))
       board.cubeData.map(_.underOffer) must_== Some(true)
+      board.cubeData.map(_.rejected) must_== Some(false)
       Forsyth.>>(Situation(board, fen.player.getOrElse(Player.P1))).value must_== fenStr
+    }
+  }
+
+  "Fen with an rejected cube offer" should {
+    val fenStr = "5S,3,3s,1,5s,4,2S/5s,3,3S,1,5S,4,2s[] - - w 0 0 1bx 1"
+    val fen    = FEN(fenStr)
+    val board  = Board(
+      fen.pieces,
+      History(),
+      variant.Backgammon,
+      fen.pocketData,
+      fen.unusedDice,
+      fen.cubeData
+    )
+    val situation = Situation(
+      board,
+      fen.player.getOrElse(Player.P1)
+    )
+    "has a rejected cube and game is over" in {
+      board.cubeData.map(_.rejected) must_== Some(true)
+      Forsyth.>>(situation).value must_== fenStr
+      situation.end must_== true
     }
   }
 

@@ -258,6 +258,9 @@ object Uci {
       case _       => None
     }
 
+    def fromChar(c: Char): Option[CubeAction]   = fromStrings(s"cube${c}")
+    def fromChar(c: String): Option[CubeAction] = fromStrings(s"cube${c}")
+
     val cubeActionR = s"^cube([oyn])$$".r
 
   }

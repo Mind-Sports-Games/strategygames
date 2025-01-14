@@ -42,6 +42,8 @@ case class Board(
 
   lazy val usedDiceStr: String = if (usedDice.isEmpty) "-" else usedDice.mkString("/")
 
+  def initialiseCube: Board = copy(cubeData = Some(CubeData.init))
+
   def piecesOnBar(player: Player): Boolean =
     pocketData.fold(false) { pocketData => pocketData.pockets(player).roles.nonEmpty }
 
