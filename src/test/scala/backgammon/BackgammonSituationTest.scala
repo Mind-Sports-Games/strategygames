@@ -4,7 +4,7 @@ import cats.data.Validated._
 import org.specs2.matcher.ValidatedMatchers
 import org.specs2.mutable.Specification
 
-import strategygames.Player
+import strategygames.{ Player, Status }
 
 class BackgammonSituationTest extends Specification with ValidatedMatchers {
 
@@ -206,6 +206,8 @@ class BackgammonSituationTest extends Specification with ValidatedMatchers {
     val g6       = g5.applyCubeAction(ca2)
     "be valid after cube offer rejected" in {
       g6.situation.end must_== true
+      g6.situation.winner.nonEmpty must_== true
+      g6.situation.status must_== Some(Status.CubeDropped)
       g6.situation.board.unusedDice.size must_== 0
       g6.situation.board.usedDice.size must_== 0
       g6.situation.board.cubeData.map(_.rejected) must_== Some(true)

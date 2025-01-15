@@ -175,7 +175,8 @@ case class Situation(board: Board, player: Player) {
     (board valid strict) && !end
 
   lazy val status: Option[Status] =
-    if (board.variant.backgammonWin(this)) Some(Status.BackgammonWin)
+    if (board.variant.cubeRejected(this)) Some(Status.CubeDropped)
+    else if (board.variant.backgammonWin(this)) Some(Status.BackgammonWin)
     else if (board.variant.gammonWin(this)) Some(Status.GammonWin)
     else if (end) Some(Status.SingleWin)
     else None

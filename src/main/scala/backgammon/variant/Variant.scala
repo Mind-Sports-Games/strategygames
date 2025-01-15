@@ -544,7 +544,7 @@ abstract class Variant private[variant] (
         .some
     else None
 
-  private def cubeRejected(situation: Situation) =
+  def cubeRejected(situation: Situation) =
     situation.board.cubeData.map(_.rejected) == Some(true)
 
   def specialEnd(situation: Situation) =
