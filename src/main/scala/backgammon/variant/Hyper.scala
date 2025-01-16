@@ -21,10 +21,21 @@ case object Hyper
   override def numStartingPiecesPerPlayer: Int = 3
 
   // gammon and backgammon only count when the cube has been doubled in this variant
-  override def gammonWin(situation: Situation)                          = false
-  override def gammonPosition(situation: Situation, player: Player)     = false
-  override def backgammonWin(situation: Situation)                      = false
-  override def backgammonPosition(situation: Situation, player: Player) = false
+  override def gammonWin(situation: Situation) =
+    if (situation.board.cubeData.map(_.value).getOrElse(1) == 1) false
+    else super.gammonWin(situation)
+
+  override def gammonPosition(situation: Situation, player: Player) =
+    if (situation.board.cubeData.map(_.value).getOrElse(1) == 1) false
+    else super.gammonPosition(situation, player)
+
+  override def backgammonWin(situation: Situation) =
+    if (situation.board.cubeData.map(_.value).getOrElse(1) == 1) false
+    else super.backgammonWin(situation)
+
+  override def backgammonPosition(situation: Situation, player: Player) =
+    if (situation.board.cubeData.map(_.value).getOrElse(1) == 1) false
+    else super.backgammonPosition(situation, player)
 
   override def baseVariant: Boolean = false
 

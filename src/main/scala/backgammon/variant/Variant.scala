@@ -5,7 +5,7 @@ import cats.syntax.option._
 
 import strategygames.backgammon._
 import strategygames.backgammon.format.{ FEN, Uci }
-import strategygames.{ GameFamily, Player, Score }
+import strategygames.{ GameFamily, Player, Score, Status }
 
 import scala.util.Random
 import scala.annotation.nowarn
@@ -587,6 +587,18 @@ abstract class Variant private[variant] (
         Player.fromName("p1")
       else Player.fromName("p2")
     } else None
+
+  private def gameValue(situation: Situation) =
+    situation.board.cubeData.map(_.value).getOrElse(1)
+
+  def pointValue(situation: Situation): Option[Int] =
+    situation.status match {
+      case Some(Status.CubeDropped)   => Some(gameValue(situation))
+      case Some(Status.BackgammonWin) => Some(gameValue(situation) * 3)
+      case Some(Status.GammonWin)     => Some(gameValue(situation) * 2)
+      case Some(Status.SingleWin)     => Some(gameValue(situation))
+      case _                          => None
+    }
 
   // need to count pieces in pockets so just look at score
   def materialImbalance(board: Board): Int = board.history.score.p2 - board.history.score.p1
