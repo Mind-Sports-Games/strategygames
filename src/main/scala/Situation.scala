@@ -102,6 +102,8 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def resignStatus(player: Player): Status.type => Status
 
+  def pointValue: Option[Int]
+
   def move(
       from: Pos,
       to: Pos,
@@ -248,6 +250,8 @@ object Situation {
     val status: Option[Status] = s.status
 
     def resignStatus(player: Player): Status.type => Status = _.Resign
+
+    def pointValue: Option[Int] = None
 
     def move(
         from: Pos,
@@ -399,6 +403,8 @@ object Situation {
     val status: Option[Status] = s.status
 
     def resignStatus(player: Player): Status.type => Status = _.Resign
+
+    def pointValue: Option[Int] = None
 
     private def draughtsCaptures(captures: Option[List[Pos]]): Option[List[draughts.Pos]] =
       captures match {
@@ -577,6 +583,8 @@ object Situation {
 
     def resignStatus(player: Player): Status.type => Status = _.Resign
 
+    def pointValue: Option[Int] = None
+
     def move(
         from: Pos,
         to: Pos,
@@ -749,6 +757,8 @@ object Situation {
 
     def resignStatus(player: Player): Status.type => Status = _.Resign
 
+    def pointValue: Option[Int] = None
+
     def move(
         from: Pos,
         to: Pos,
@@ -898,6 +908,8 @@ object Situation {
 
     def resignStatus(player: Player): Status.type => Status = _.Resign
 
+    def pointValue: Option[Int] = None
+
     def move(
         from: Pos,
         to: Pos,
@@ -1025,6 +1037,8 @@ object Situation {
     val status: Option[Status] = s.status
 
     def resignStatus(player: Player): Status.type => Status = _.Resign
+
+    def pointValue: Option[Int] = None
 
     def move(
         from: Pos,
@@ -1214,6 +1228,8 @@ object Situation {
 
     def resignStatus(player: Player): Status.type => Status = s.resignStatus(player)
 
+    def pointValue: Option[Int] = s.pointValue
+
     def move(
         from: Pos,
         to: Pos,
@@ -1361,6 +1377,8 @@ object Situation {
     val status: Option[Status] = s.status
 
     def resignStatus(player: Player): Status.type => Status = _.Resign
+
+    def pointValue: Option[Int] = None
 
     def move(
         from: Pos,

@@ -83,8 +83,6 @@ abstract class Variant(
 
   @nowarn def specialDraw(situation: Situation): Boolean
 
-  def pointValue(situation: Situation): Option[Int]
-
   // Some variants have an extra effect on the board on a move. For example, in Atomic, some
   // pieces surrounding a capture explode
   def hasMoveEffects: Boolean
@@ -206,8 +204,6 @@ object Variant {
       case _                          => sys.error("Not passed Chess objects")
     }
 
-    def pointValue(situation: Situation): Option[Int] = None
-
     def hasMoveEffects: Boolean = v.hasMoveEffects
 
     def addVariantEffect(move: Move): Move = move match {
@@ -325,8 +321,6 @@ object Variant {
       case _                             => sys.error("Not passed Draughts objects")
     }
 
-    def pointValue(situation: Situation): Option[Int] = None
-
     def hasMoveEffects: Boolean = v.hasMoveEffects
 
     def addVariantEffect(move: Move): Move            = move match {
@@ -441,8 +435,6 @@ object Variant {
       case _                            => sys.error("Not passed FairySF objects")
     }
 
-    def pointValue(situation: Situation): Option[Int] = None
-
     def hasMoveEffects: Boolean = v.hasMoveEffects
 
     def addVariantEffect(move: Move): Move            = move match {
@@ -553,8 +545,6 @@ object Variant {
       case Situation.Samurai(situation) => v.specialDraw(situation)
       case _                            => sys.error("Not passed Samurai objects")
     }
-
-    def pointValue(situation: Situation): Option[Int] = None
 
     def hasMoveEffects: Boolean = v.hasMoveEffects
 
@@ -667,8 +657,6 @@ object Variant {
       case _                                 => sys.error("Not passed Togyzkumalak objects")
     }
 
-    def pointValue(situation: Situation): Option[Int] = None
-
     def hasMoveEffects: Boolean = v.hasMoveEffects
 
     def addVariantEffect(move: Move): Move            = move match {
@@ -778,8 +766,6 @@ object Variant {
       case Situation.Go(situation) => v.specialDraw(situation)
       case _                       => sys.error("Not passed Go objects")
     }
-
-    def pointValue(situation: Situation): Option[Int] = None
 
     def hasMoveEffects: Boolean = v.hasMoveEffects
 
@@ -894,11 +880,6 @@ object Variant {
       case _                       => sys.error("Not passed Backgammon objects")
     }
 
-    def pointValue(situation: Situation): Option[Int] = situation match {
-      case Situation.Backgammon(situation) => v.pointValue(situation)
-      case _                               => sys.error("Not passed Backgammon objects")
-    }
-
     // backgammon has no variant effects for any action
     def hasMoveEffects: Boolean            = false
     def addVariantEffect(move: Move): Move = move
@@ -1006,8 +987,6 @@ object Variant {
       case Situation.Abalone(situation) => v.specialDraw(situation)
       case _                            => sys.error("Not passed Abalone objects")
     }
-
-    def pointValue(situation: Situation): Option[Int] = None
 
     def hasMoveEffects: Boolean = v.hasMoveEffects
 

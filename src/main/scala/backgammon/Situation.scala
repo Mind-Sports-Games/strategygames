@@ -328,6 +328,8 @@ case class Situation(board: Board, player: Player) {
     else if (opponentHasInsufficientMaterialForGammon) _.GinGammon
     else _.RuleOfGin
 
+  def pointValue: Option[Int] = board.variant.pointValue(this)
+
   def move(from: Pos, to: Pos): Validated[String, Move] =
     board.variant.move(this, from, to)
 
