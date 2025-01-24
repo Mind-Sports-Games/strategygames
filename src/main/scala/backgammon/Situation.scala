@@ -31,9 +31,11 @@ case class Situation(board: Board, player: Player) {
 
   def endTurns: List[EndTurn] = endTurn.toList
 
+  def cubeActions: List[CubeAction] = board.variant.validCubeActions(this)
+
   // don't include undos as it is not a progressive action
   def actions: List[Action] =
-    movesList ::: dropsAsDrops ::: lifts ::: diceRolls ::: endTurns
+    movesList ::: dropsAsDrops ::: lifts ::: diceRolls ::: endTurns ::: cubeActions
 
   private def nextTurn(actions: List[Action]): List[List[Action]] =
     actions match {
@@ -60,7 +62,13 @@ case class Situation(board: Board, player: Player) {
 
   def canRollDice: Boolean = diceRolls.nonEmpty
 
-  def canOnlyRollDice: Boolean = canRollDice && !canMove && !canDrop && !canLift && !canEndTurn
+  def canOnlyRollDice: Boolean =
+    canRollDice && !canMove && !canDrop && !canLift && !canEndTurn && !canCubeAction
+
+  def canCubeAction: Boolean = cubeActions.nonEmpty
+
+  def canOnlyCubeAction: Boolean =
+    canCubeAction && !canRollDice && !canMove && !canDrop && !canLift && !canEndTurn
 
   def canUndo: Boolean = undos.nonEmpty
   // def canUndo: Boolean = board.history.lastAction.map(_.undoable).getOrElse(false)
@@ -167,7 +175,8 @@ case class Situation(board: Board, player: Player) {
     (board valid strict) && !end
 
   lazy val status: Option[Status] =
-    if (board.variant.backgammonWin(this)) Some(Status.BackgammonWin)
+    if (board.variant.cubeRejected(this)) Some(Status.CubeDropped)
+    else if (board.variant.backgammonWin(this)) Some(Status.BackgammonWin)
     else if (board.variant.gammonWin(this)) Some(Status.GammonWin)
     else if (end) Some(Status.SingleWin)
     else None
@@ -319,6 +328,8 @@ case class Situation(board: Board, player: Player) {
     else if (opponentHasInsufficientMaterialForGammon) _.GinGammon
     else _.RuleOfGin
 
+  def pointValue: Option[Int] = board.variant.pointValue(this)
+
   def move(from: Pos, to: Pos): Validated[String, Move] =
     board.variant.move(this, from, to)
 
@@ -337,6 +348,9 @@ case class Situation(board: Board, player: Player) {
   def undo: Validated[String, Undo] = board.variant.undo(this)
 
   def endTurn: Validated[String, EndTurn] = board.variant.endTurn(this)
+
+  def cubeAction(interaction: CubeInteraction): Validated[String, CubeAction] =
+    board.variant.cubeAction(this, interaction)
 
   def withHistory(history: History) =
     copy(

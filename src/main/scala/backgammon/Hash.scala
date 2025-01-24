@@ -29,6 +29,7 @@ object Hash {
     val p1TurnMask                 = hexToLong(ZobristTables.p1TurnMask)
     val actorMasks                 = ZobristTables.actorMasks.map(hexToLong)
     val pocketMasks                = ZobristTables.pocketMasks.map(hexToLong)
+    val cubeMasks                  = ZobristTables.cubeMasks.map(hexToLong)
   }
 
   object ZobristConstants {}
@@ -53,6 +54,15 @@ object Hash {
       else None
     }
 
+    def cubeMask(cubeData: CubeData) = {
+      val rejected      = if (cubeData.rejected) 1 << 5 else 0
+      val underOffer    = if (cubeData.underOffer) 1 << 4 else 0
+      val owner         = if (cubeData.owner == Some(Player.P2)) 6 else 0
+      val value         = (math.log(cubeData.value) / math.log(2)).toInt
+      val ownerAndValue = if (cubeData.owner.isEmpty) 13 else owner + value
+      rejected + underOffer + ownerAndValue
+    }
+
     val board = situation.board
     val hturn = situation.player.fold(table.p1TurnMask, 0L)
 
@@ -62,7 +72,7 @@ object Hash {
       }
       .fold(hturn)(_ ^ _)
 
-    board.pocketData.fold(hactors) { data =>
+    val hactorsAndPockets = board.pocketData.fold(hactors) { data =>
       Player.all
         .flatMap { player =>
           val playershift = player.fold(14, -1)
@@ -71,6 +81,10 @@ object Hash {
           }
         }
         .fold(hactors)(_ ^ _)
+    }
+
+    board.cubeData.fold(hactorsAndPockets) { data =>
+      hactorsAndPockets ^ table.cubeMasks(cubeMask(data))
     }
 
   }
@@ -840,6 +854,71 @@ private object ZobristTables {
     "ac2940b688a1d0f92b75316dfa1b15e2",
     "e51acb5b336db0df0283b57f325ea495",
     "cf7517fbdcb16174146e60f56ab91765"
+  )
+
+  // max value of 61
+  val cubeMasks = Array(
+    "2f9900cc2b7a19ca2b9178eb57f3db25",
+    "f75235beb01886d317d16678351d3778",
+    "8ae7e29889ac996488b17afbdae836b1",
+    "ad30091ce7cb4204a8985bb047c388b1",
+    "aae118773ddd4e4d2577b875de120fd2",
+    "8ec514ce4736aa07bdf2fdea13ee21fd",
+    "26a412bd8cef4f153bcf1cf1605da5e7",
+    "1bdce26bd9af059f6ea6f4fb2ca4d856",
+    "ea5f4ade5acc0516b1198a9621b237f4",
+    "69ab7ebc076505656c87686b28782362",
+    "3e655f895a188a1c5158703d9536de86",
+    "f394f6882a114d65b3126fafbea75501",
+    "3173cfa2be5bd4d380d3335852547580",
+    "434d20d2ca00ae71c5afc4f44d5ab019",
+    "3ba297f73d338c937aff7035ddcde586",
+    "099ba1b0205a5ea5c338837c953120b2",
+    "c49f050b5e1c56537f8b4b715fc6eee8",
+    "e14eec50a9c690e876d1cd962b7c0005",
+    "2571cc79f4ce0169ad3db13d420b8915",
+    "de0f98d6002f4323e5a6076284061351",
+    "0682220b02e5c3e87f61ddc8b19de688",
+    "cb900d3a6b38c39d8648ca9be5696f33",
+    "24620fbf09d50d66469dc25e1b32d323",
+    "0f40a9b2781a119d4f529fa289578425",
+    "83c6980df0d0493282d550f6a40a3d66",
+    "ab6f9af720cb5df48e791844cfb87476",
+    "1c906974166ee8d4b229ab8bb6054dad",
+    "9c1ba3db0784ebda50a0b7e3c796ad7e",
+    "81a19098d16aa929186c0c4a7a5d68d1",
+    "fce56173c63ccefd748301e9e571a670",
+    "43cb7aa20c6209c22119955cd577ee40",
+    "7e96e2ae86924bab6c57c1380ffb21fb",
+    "01860725034b0fefadd607ff5aaaf995",
+    "f74d369066ec4e96d41ec439c73a3e0f",
+    "1ae9962c6e0d12323ee343c1d9837a9e",
+    "5d66fa465ccfc56097707414bf743321",
+    "e9c13ae1fc36afaae6a8ec453ed67917",
+    "caec4035fb840be403845f0849e183df",
+    "839d28adafad0f8fccd5f9e7ce7e601f",
+    "e4703b6e30422003e2c04ba3484232d8",
+    "1e2fd5b2827d5e435d9b925a3e6af022",
+    "96f1e8d8b94bd960a852b77063b9e148",
+    "90f2075c3f43960c279d2c0c53ecaac6",
+    "c48e0774c4f9134f39f0827a4f811c72",
+    "f17e5f6a2cb000c73b064b8614517b48",
+    "6248409bf55a4925db19bcf000dd394a",
+    "967bd94eb30505cca63dddb617c59634",
+    "e91e89853f9e844fece83ffa46fd173a",
+    "b841038e24193f0801c4d4d39c11557f",
+    "46f3b25cae82a6cca618dd21a5f6b67f",
+    "3e97e042449e3ed58356bdf440563fb0",
+    "868a166af46dcbd2f35ad55d727351a1",
+    "f71be788b3fd1a7aa3a0c83ec173d41c",
+    "cb6d65410533cc37a8b2fe93fc5ddd19",
+    "7e30d70559efaedc984fd612fa3936bd",
+    "32db0f5ca18159ce71c7e142bb029d2a",
+    "97a9116e874228c5759f8a9460c634a6",
+    "85ee68ee3a1752976fa2ca2ca3bdeb90",
+    "076a14170b409e2aea5f0228fc314b97",
+    "bad49d47dc95855bc40c265d97e763c0",
+    "636187d94ded991e201d68d0d89f0e31"
   )
 
 }

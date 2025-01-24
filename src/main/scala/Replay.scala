@@ -125,11 +125,12 @@ object Replay {
       extends Replay(
         Game.Backgammon(r.setup),
         r.actions.map {
-          case m: backgammon.Move      => Move.Backgammon(m)
-          case d: backgammon.Drop      => Drop.Backgammon(d)
-          case l: backgammon.Lift      => Lift.Backgammon(l)
-          case dr: backgammon.DiceRoll => DiceRoll.Backgammon(dr)
-          case et: backgammon.EndTurn  => EndTurn.Backgammon(et)
+          case m: backgammon.Move        => Move.Backgammon(m)
+          case d: backgammon.Drop        => Drop.Backgammon(d)
+          case l: backgammon.Lift        => Lift.Backgammon(l)
+          case dr: backgammon.DiceRoll   => DiceRoll.Backgammon(dr)
+          case ca: backgammon.CubeAction => CubeAction.Backgammon(ca)
+          case et: backgammon.EndTurn    => EndTurn.Backgammon(et)
         },
         Game.Backgammon(r.state)
       ) {

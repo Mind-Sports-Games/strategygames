@@ -10,6 +10,7 @@ import strategygames.backgammon.format.{ FEN, Forsyth, Uci }
 import strategygames.{
   Action => StratAction,
   ActionStrs,
+  CubeAction => StratCubeAction,
   DiceRoll => StratDiceRoll,
   Drop => StratDrop,
   EndTurn => StratEndTurn,
@@ -35,27 +36,32 @@ case class Replay(setup: Game, actions: List[Action], state: Game) {
       .reverse
 
   def addAction(action: Action) = action match {
-    case m: Move      =>
+    case m: Move        =>
       copy(
         actions = m :: actions,
         state = state.apply(m)
       )
-    case d: Drop      =>
+    case d: Drop        =>
       copy(
         actions = d :: actions,
         state = state.applyDrop(d)
       )
-    case l: Lift      =>
+    case l: Lift        =>
       copy(
         actions = l :: actions,
         state = state.applyLift(l)
       )
-    case dr: DiceRoll =>
+    case dr: DiceRoll   =>
       copy(
         actions = dr :: actions,
         state = state.applyDiceRoll(dr)
       )
-    case et: EndTurn  =>
+    case ca: CubeAction =>
+      copy(
+        actions = ca :: actions,
+        state = state.applyCubeAction(ca)
+      )
+    case et: EndTurn    =>
       copy(
         actions = et :: actions,
         state = state.applyEndTurn(et)
@@ -93,12 +99,13 @@ object Replay {
   // TODO: because this is primarily used in a Validation context, we should be able to
   //       return something that's runtime safe as well.
   private def backgammonAction(action: StratAction) = action match {
-    case StratMove.Backgammon(m)      => m
-    case StratDrop.Backgammon(d)      => d
-    case StratLift.Backgammon(l)      => l
-    case StratDiceRoll.Backgammon(dr) => dr
-    case StratEndTurn.Backgammon(et)  => et
-    case _                            => sys.error("Invalid backgammon action")
+    case StratMove.Backgammon(m)        => m
+    case StratDrop.Backgammon(d)        => d
+    case StratLift.Backgammon(l)        => l
+    case StratDiceRoll.Backgammon(dr)   => dr
+    case StratCubeAction.Backgammon(ca) => ca
+    case StratEndTurn.Backgammon(et)    => et
+    case _                              => sys.error(s"Invalid backgammon action $action")
   }
 
   def replayMove(before: Game, orig: Pos, dest: Pos): Move =
@@ -142,20 +149,33 @@ object Replay {
       )
     )
 
-  def replayDiceRoll(before: Game, dice: List[Int]): DiceRoll = {
+  def replayDiceRoll(before: Game, dice: List[Int]): DiceRoll =
     DiceRoll(
       dice,
       situationBefore = before.situation,
       after = before.situation.board.setDice(dice)
     )
-  }
 
-  def replayEndTurn(before: Game): EndTurn = {
+  def replayCubeAction(before: Game, interaction: CubeInteraction): CubeAction =
+    CubeAction(
+      interaction,
+      situationBefore = before.situation,
+      after = before.situation.board.copy(
+        cubeData = before.situation.board.cubeData.map { cd =>
+          interaction.name match {
+            case "offer"  => cd.offer(before.situation.player)
+            case "accept" => cd.double(before.situation.player)
+            case "reject" => cd.reject(before.situation.player)
+          }
+        }
+      )
+    )
+
+  def replayEndTurn(before: Game): EndTurn =
     EndTurn(
       situationBefore = before.situation,
       after = before.situation.board.setDice(List())
     )
-  }
 
   private def gameWithActionWhileValid(
       actionStrs: ActionStrs,
@@ -214,7 +234,21 @@ object Replay {
       (state, diceRoll)
     }
 
-    def replayEndTurnFromUci(): (Game, Action) = {
+    def replayCubeActionFromUci(interaction: Option[CubeInteraction]): (Game, CubeAction) =
+      interaction match {
+        case Some(interaction) => {
+          val cubeAction = replayCubeAction(state, interaction)
+          state = state.applyCubeAction(cubeAction)
+          (state, cubeAction)
+        }
+        case interaction       => {
+          val uciCubeAction = s"cube${interaction}"
+          errors += uciCubeAction + ","
+          sys.error(s"Invalid cube action for replay: ${uciCubeAction}")
+        }
+      }
+
+    def replayEndTurnFromUci(): (Game, EndTurn) = {
       val endTurn = replayEndTurn(state)
       state = state.applyEndTurn(endTurn)
       (state, endTurn)
@@ -223,23 +257,25 @@ object Replay {
     val gameWithActions: List[(Game, Action)] =
       // can flatten as specific EndTurn action marks turn end
       actionStrs.flatten.toList.map {
-        case Uci.Move.moveR(orig, dest, _) =>
+        case Uci.Move.moveR(orig, dest, _)  =>
           replayMoveFromUci(
             Pos.fromKey(orig),
             Pos.fromKey(dest)
           )
-        case Uci.Drop.dropR(role, dest, _) =>
+        case Uci.Drop.dropR(role, dest, _)  =>
           replayDropFromUci(
             Role.allByForsyth(init.situation.board.variant.gameFamily).get(role(0).toLower),
             Pos.fromKey(dest)
           )
-        case Uci.Lift.liftR(_, orig)       =>
+        case Uci.Lift.liftR(_, orig)        =>
           replayLiftFromUci(Pos.fromKey(orig))
-        case Uci.DiceRoll.diceRollR(dr)    =>
+        case Uci.DiceRoll.diceRollR(dr)     =>
           replayDiceRollFromUci(Uci.DiceRoll.fromStrings(dr).dice)
-        case Uci.EndTurn.endTurnR()        =>
+        case Uci.CubeAction.cubeActionR(ca) =>
+          replayCubeActionFromUci(Uci.CubeAction.fromChar(ca).map(_.interaction))
+        case Uci.EndTurn.endTurnR()         =>
           replayEndTurnFromUci()
-        case (action: String)              =>
+        case (action: String)               =>
           sys.error(s"Invalid action for replay: $action")
       }
 
