@@ -11,7 +11,8 @@ case class Board(
     history: History,
     variant: Variant,
     pocketData: Option[PocketData] = None,
-    unusedDice: List[Int] = List.empty
+    unusedDice: List[Int] = List.empty,
+    cubeData: Option[CubeData] = None
 ) {
 
   def apply(at: Pos): Option[Piece] = (pieces get at).map(_._1)
@@ -40,6 +41,8 @@ case class Board(
   ).diff(unusedDice)
 
   lazy val usedDiceStr: String = if (usedDice.isEmpty) "-" else usedDice.mkString("/")
+
+  def initialiseCube: Board = copy(cubeData = Some(CubeData.init))
 
   def piecesOnBar(player: Player): Boolean =
     pocketData.fold(false) { pocketData => pocketData.pockets(player).roles.nonEmpty }

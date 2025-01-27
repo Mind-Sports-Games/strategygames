@@ -147,6 +147,27 @@ case class Game(
     )
   }
 
+  def cubeAction(
+      interaction: CubeInteraction,
+      metrics: MoveMetrics = MoveMetrics()
+  ): Validated[String, (Game, CubeAction)] =
+    situation.cubeAction(interaction).map(_ withMetrics metrics) map { ca =>
+      applyCubeAction(ca) -> ca
+    }
+
+  def applyCubeAction(ca: CubeAction): Game = {
+    val newSituation = ca.situationAfter
+    val switchPlayer = situation.player != newSituation.player
+
+    copy(
+      situation = newSituation,
+      plies = plies + 1,
+      turnCount = turnCount + (if (switchPlayer) 1 else 0),
+      actionStrs = applyActionStr(ca.toUci.uci),
+      clock = applyClock(ca.metrics, newSituation.status.isEmpty, switchPlayer)
+    )
+  }
+
   def randomizeDiceRoll: Option[DiceRoll] =
     Random.shuffle(situation.board.variant.validDiceRolls(situation)).headOption
 
@@ -164,14 +185,16 @@ case class Game(
   def apply(uci: Uci.DiceRoll): Validated[String, (Game, DiceRoll)]       = diceRoll(uci.dice)
   def apply(@nowarn uci: Uci.Undo): Validated[String, (Game, Undo)]       = undo()
   def apply(@nowarn uci: Uci.EndTurn): Validated[String, (Game, EndTurn)] = endTurn()
+  def apply(uci: Uci.CubeAction): Validated[String, (Game, CubeAction)]   = cubeAction(uci.interaction)
   def apply(uci: Uci): Validated[String, (Game, Action)]                  = (uci match {
-    case u: Uci.Move     => apply(u)
-    case u: Uci.Drop     => apply(u)
-    case u: Uci.Lift     => apply(u)
-    case u: Uci.DiceRoll => apply(u)
-    case u: Uci.Undo     => apply(u)
-    case u: Uci.EndTurn  => apply(u)
-    case u               => sys.error(s"Cannot apply uci $u")
+    case u: Uci.Move       => apply(u)
+    case u: Uci.Drop       => apply(u)
+    case u: Uci.Lift       => apply(u)
+    case u: Uci.DiceRoll   => apply(u)
+    case u: Uci.Undo       => apply(u)
+    case u: Uci.EndTurn    => apply(u)
+    case u: Uci.CubeAction => apply(u)
+    case u                 => sys.error(s"Cannot apply uci $u")
   }) map { case (g, a) => g -> a }
 
   private def applyClock(metrics: MoveMetrics, gameActive: Boolean, switchClock: Boolean) =

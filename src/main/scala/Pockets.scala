@@ -88,7 +88,7 @@ object PocketData {
     case GameLogic.FairySF()    => FairySF(fairysf.PocketData.init)
     case GameLogic.Go()         => Go(go.PocketData.init)
     case GameLogic.Backgammon() => Backgammon(backgammon.PocketData.init)
-    case _                      => sys.error("Unable to initialise pocket data for non chess/fairysf/go lib")
+    case _                      => sys.error("Unable to initialise pocket data for non chess/fairysf/go/backgammon lib")
   }
 
 }

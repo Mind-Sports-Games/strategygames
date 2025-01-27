@@ -553,6 +553,35 @@ object Uci {
     def toAbalone      = sys.error("Can't make a abalone UCI from a backgammon UCI")
   }
 
+  sealed abstract class CubeAction(
+      val interaction: CubeInteraction
+  ) extends Uci {
+    def origDest: Option[(Pos, Pos)] = None
+  }
+
+  final case class BackgammonCubeAction(ca: backgammon.format.Uci.CubeAction)
+      extends CubeAction(
+        CubeInteraction.Backgammon(ca.interaction)
+      )
+      with Backgammon {
+    def gameLogic  = GameLogic.Backgammon()
+    def uci        = ca.uci
+    def shortUci   = ca.uci
+    def fishnetUci = ca.uci
+    def piotr      = ca.piotr
+
+    val unwrap = ca
+
+    def toChess        = sys.error("Can't make a chess UCI from a backgammon UCI")
+    def toDraughts     = sys.error("Can't make a draughts UCI from a backgammon UCI")
+    def toFairySF      = sys.error("Can't make a fairysf UCI from a backgammon UCI")
+    def toSamurai      = sys.error("Can't make a samurai UCI from a backgammon UCI")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a backgammon UCI")
+    def toGo           = sys.error("Can't make a go UCI from a backgammon UCI")
+    def toBackgammon   = ca
+    def toAbalone      = sys.error("Can't make a abalone UCI from a backgammon UCI")
+  }
+
   def wrap(uci: chess.format.Uci): Uci = uci match {
     case m: chess.format.Uci.Move      => ChessMove(m)
     case d: chess.format.Uci.Drop      => ChessDrop(d)
@@ -584,13 +613,14 @@ object Uci {
   }
 
   def wrap(uci: backgammon.format.Uci): Uci = uci match {
-    case m: backgammon.format.Uci.Move      => BackgammonMove(m)
-    case d: backgammon.format.Uci.Drop      => BackgammonDrop(d)
-    case l: backgammon.format.Uci.Lift      => BackgammonLift(l)
-    case dr: backgammon.format.Uci.DiceRoll => BackgammonDiceRoll(dr)
-    case dr: backgammon.format.Uci.DoRoll   => BackgammonDoRoll(dr)
-    case u: backgammon.format.Uci.Undo      => BackgammonUndo(u)
-    case et: backgammon.format.Uci.EndTurn  => BackgammonEndTurn(et)
+    case m: backgammon.format.Uci.Move        => BackgammonMove(m)
+    case d: backgammon.format.Uci.Drop        => BackgammonDrop(d)
+    case l: backgammon.format.Uci.Lift        => BackgammonLift(l)
+    case dr: backgammon.format.Uci.DiceRoll   => BackgammonDiceRoll(dr)
+    case dr: backgammon.format.Uci.DoRoll     => BackgammonDoRoll(dr)
+    case u: backgammon.format.Uci.Undo        => BackgammonUndo(u)
+    case et: backgammon.format.Uci.EndTurn    => BackgammonEndTurn(et)
+    case ca: backgammon.format.Uci.CubeAction => BackgammonCubeAction(ca)
   }
 
   def wrap(uci: abalone.format.Uci): Uci = uci match {
@@ -885,6 +915,23 @@ object Uci {
 
   }
 
+  object CubeAction {
+
+    def fromStrings(lib: GameLogic, interaction: String): Option[CubeAction] =
+      lib match {
+        case GameLogic.Draughts()     => None
+        case GameLogic.Samurai()      => None
+        case GameLogic.Togyzkumalak() => None
+        case GameLogic.Chess()        => None
+        case GameLogic.FairySF()      => None
+        case GameLogic.Go()           => None
+        case GameLogic.Backgammon()   =>
+          backgammon.format.Uci.CubeAction.fromStrings(interaction).map(BackgammonCubeAction)
+        case GameLogic.Abalone()      => None
+      }
+
+  }
+
   sealed abstract class WithSan(val uci: Uci, val san: String)
 
   final case class ChessWithSan(w: chess.format.Uci.WithSan)
@@ -1051,6 +1098,19 @@ object Uci {
     case (GameLogic.Backgammon(), strategygames.EndTurn.Backgammon(endTurn)) =>
       BackgammonEndTurn(backgammon.format.Uci(endTurn))
     case (GameLogic.Abalone(), _)                                            => sys.error("EndTurn not implemented for abalone")
+  }
+
+  def apply(lib: GameLogic, cubeAction: strategygames.CubeAction) = (lib, cubeAction) match {
+    case (GameLogic.Draughts(), _)                                                 => sys.error("CubeAction not implemented for Draughts")
+    case (GameLogic.Chess(), _)                                                    => sys.error("CubeAction not implemented for Chess")
+    case (GameLogic.FairySF(), _)                                                  => sys.error("CubeAction not implemented for fairysf")
+    case (GameLogic.Samurai(), _)                                                  => sys.error("CubeAction not implemented for samurai")
+    case (GameLogic.Togyzkumalak(), _)                                             => sys.error("CubeAction not implemented for togyzkumalak")
+    case (GameLogic.Go(), _)                                                       => sys.error("CubeAction not implemented for go")
+    case (GameLogic.Backgammon(), strategygames.CubeAction.Backgammon(cubeAction)) =>
+      BackgammonCubeAction(backgammon.format.Uci(cubeAction))
+    case (GameLogic.Abalone(), _)                                                  => sys.error("CubeAction not implemented for abalone")
+    case _                                                                         => sys.error(s"CubeAction not implemented for ${lib}")
   }
 
   def apply(lib: GameLogic, gf: GameFamily, action: String): Option[Uci] = lib match {

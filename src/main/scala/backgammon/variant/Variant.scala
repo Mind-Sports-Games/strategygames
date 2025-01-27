@@ -5,8 +5,9 @@ import cats.syntax.option._
 
 import strategygames.backgammon._
 import strategygames.backgammon.format.{ FEN, Uci }
-import strategygames.{ GameFamily, Player, Score }
+import strategygames.{ GameFamily, Player, Score, Status }
 
+import scala.util.Random
 import scala.annotation.nowarn
 
 // Correctness depends on singletons for each variant ID
@@ -44,12 +45,16 @@ abstract class Variant private[variant] (
   def perfId: Int
   def perfIcon: Char
 
-  def initialFen: FEN = format.FEN("5S,3,3s,1,5s,4,2S/5s,3,3S,1,5S,4,2s[] - - w 0 0 1")
+  def initialFen: FEN = FEN("5S,3,3s,1,5s,4,2S/5s,3,3S,1,5S,4,2s[] - - w 0 0 - 1")
 
   def initialFens = List(
-    format.FEN("5S,3,3s,1,5s,4,2S/5s,3,3S,1,5S,4,2s[] - - w 0 0 1"),
-    format.FEN("5S,3,3s,1,5s,4,2S/5s,3,3S,1,5S,4,2s[] - - b 0 0 1")
+    FEN("5S,3,3s,1,5s,4,2S/5s,3,3S,1,5S,4,2s[] - - w 0 0 - 1"),
+    FEN("5S,3,3s,1,5s,4,2S/5s,3,3S,1,5S,4,2s[] - - b 0 0 - 1")
   )
+
+  def fenFromSetupConfig(multipoint: Boolean): FEN =
+    if (multipoint) Random.shuffle(initialFens).head.initialiseCube
+    else Random.shuffle(initialFens).head
 
   def pieces: PieceMap = initialFen.pieces
 
@@ -344,10 +349,14 @@ abstract class Variant private[variant] (
       .flatMap(_.permutations)
 
   def validDiceRolls(situation: Situation): List[DiceRoll] =
-    if (situation.board.unusedDice.isEmpty && !situation.board.history.hasRolledDiceThisTurn)
+    if (
+      situation.board.unusedDice.isEmpty &&
+      !situation.board.history.hasRolledDiceThisTurn &&
+      situation.board.cubeData.map(_.underOffer) != Some(true)
+    )
       diceCombinations(2).toList
         .filter { dr =>
-          situation.board.history.didRollDiceLastTurn || dr.toSet.size == 2
+          situation.board.history.firstDiceRollHappened || dr.toSet.size == 2
         }
         .map { dice =>
           DiceRoll(
@@ -431,6 +440,43 @@ abstract class Variant private[variant] (
       )
     else None
 
+  def validCubeActions(situation: Situation): List[CubeAction] =
+    if (situation.board.history.hasRolledDiceThisTurn || !situation.board.history.firstDiceRollHappened)
+      List.empty
+    else
+      situation.board.cubeData match {
+        case Some(cubeData) =>
+          if (cubeData.canOffer(situation.player))
+            List(
+              CubeAction(
+                interaction = OfferDouble,
+                situationBefore = situation,
+                after = situation.board.copy(
+                  cubeData = Some(cubeData.offer(situation.player))
+                )
+              )
+            )
+          else if (cubeData.underOffer && !cubeData.rejected)
+            List(
+              CubeAction(
+                interaction = AcceptDouble,
+                situationBefore = situation,
+                after = situation.board.copy(
+                  cubeData = Some(cubeData.double(situation.player))
+                )
+              ),
+              CubeAction(
+                interaction = RejectDouble,
+                situationBefore = situation,
+                after = situation.board.copy(
+                  cubeData = Some(cubeData.reject(situation.player))
+                )
+              )
+            )
+          else List.empty
+        case None           => List.empty
+      }
+
   def move(
       situation: Situation,
       from: Pos,
@@ -474,6 +520,15 @@ abstract class Variant private[variant] (
       case None     => Validated.invalid(s"$situation cannot do endTurn")
     }
 
+  def cubeAction(
+      situation: Situation,
+      interaction: CubeInteraction
+  ): Validated[String, CubeAction] =
+    validCubeActions(situation).filter(ca => ca.interaction == interaction).headOption match {
+      case Some(ca) => Validated.valid(ca)
+      case None     => Validated.invalid(s"$situation cannot do a cube action of: $interaction")
+    }
+
   def possibleDrops(situation: Situation): Option[List[Pos]] =
     if (dropsVariant && !situation.end)
       validDrops(situation).map(_.pos).some
@@ -489,9 +544,13 @@ abstract class Variant private[variant] (
         .some
     else None
 
+  def cubeRejected(situation: Situation) =
+    situation.board.cubeData.map(_.rejected) == Some(true)
+
   def specialEnd(situation: Situation) =
     (situation.board.history.score.p1 == numStartingPiecesPerPlayer) ||
-      (situation.board.history.score.p2 == numStartingPiecesPerPlayer)
+      (situation.board.history.score.p2 == numStartingPiecesPerPlayer) ||
+      (cubeRejected(situation))
 
   def gammonPosition(situation: Situation, player: Player) =
     situation.board.history.score(player) == 0 &&
@@ -522,11 +581,24 @@ abstract class Variant private[variant] (
     )
 
   def winner(situation: Situation): Option[Player] =
-    if (specialEnd(situation)) {
+    if (cubeRejected(situation)) situation.board.cubeData.fold(None: Option[Player])(_.owner)
+    else if (specialEnd(situation)) {
       if (situation.board.history.score.p1 > situation.board.history.score.p2)
         Player.fromName("p1")
       else Player.fromName("p2")
     } else None
+
+  private def gameValue(situation: Situation) =
+    situation.board.cubeData.map(_.value).getOrElse(1)
+
+  def pointValue(situation: Situation): Option[Int] =
+    situation.status match {
+      case Some(Status.CubeDropped)   => Some(gameValue(situation))
+      case Some(Status.BackgammonWin) => Some(gameValue(situation) * 3)
+      case Some(Status.GammonWin)     => Some(gameValue(situation) * 2)
+      case Some(Status.SingleWin)     => Some(gameValue(situation))
+      case _                          => None
+    }
 
   // need to count pieces in pockets so just look at score
   def materialImbalance(board: Board): Int = board.history.score.p2 - board.history.score.p1

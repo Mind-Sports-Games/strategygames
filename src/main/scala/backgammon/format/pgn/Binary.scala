@@ -22,7 +22,7 @@ object Binary {
     val OnePos   = 1 // needs 5 bits, 1 for Drop/Lift, 1 for Player, 3 for pos offset
     val TwoPos   = 2 // needs 10 bits, handles Move, 5 for each Pos
     val Boolean  = 3 // needs 2-3 bits to determine type as it handles:
-    //                  EndTurn, Double Offer, Double Accept
+    //                  EndTurn, Double Offer, Double Accept, Double Reject
   }
 
   private def right(i: Int, x: Int): Int          = i & lengthMasks(x)
@@ -47,8 +47,8 @@ object Binary {
         plies
           .map { ply =>
             ply match {
-              case Uci.EndTurn.endTurnR() => s"${ply}#"
-              case _                      => s"${ply},"
+              case Uci.EndTurn.endTurnR() | Uci.CubeAction.cubeActionR() => s"${ply}#"
+              case _                                                     => s"${ply},"
             }
           }
           .mkString
@@ -106,9 +106,12 @@ object Binary {
       s"${posFromInt(right(b1, 6))}${posFromInt(b2)}"
 
     // 2 action type
-    // 6 boolean type: 0 EndTurn. Others uncoded yet
+    // 6 boolean type: 0 EndTurn, 1 OfferDouble, 2 AcceptDouble, 3 RejectDouble
     def booleanUci(b1: Int): String = right(b1, 6) match {
       case 0 => "endturn"
+      case 1 => "cubeo"
+      case 2 => "cubey"
+      case 3 => "cuben"
       case _ => sys.error("uncoded boolean type")
     }
 
@@ -128,6 +131,7 @@ object Binary {
         case Uci.Drop.dropR(_, dest, _)    => dropUci(dest)
         case Uci.Lift.liftR(_, orig)       => liftUci(orig)
         case Uci.EndTurn.endTurnR()        => endTurnUci()
+        case Uci.CubeAction.cubeActionR(c) => cubeActionUci(c)
         case _                             => sys.error(s"Invalid action to write: ${str}")
       }) map (_.toByte)
 
@@ -167,6 +171,13 @@ object Binary {
     }
 
     def endTurnUci() = List((headerBit(ActionType.Boolean)))
+
+    def cubeActionUci(c: String) = c match {
+      case "o" => List((headerBit(ActionType.Boolean) + 1))
+      case "y" => List((headerBit(ActionType.Boolean) + 2))
+      case "n" => List((headerBit(ActionType.Boolean) + 3))
+      case _   => sys.error(s"Invalid cube action to write: ${c}")
+    }
 
     private def headerBit(i: Int) = i << 6
 

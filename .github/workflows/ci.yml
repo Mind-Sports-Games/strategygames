@@ -6,7 +6,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Check if organization member
         id: check_org_member
@@ -34,7 +34,7 @@ jobs:
         run: sbt test 
 
   compile:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Check if organization member
         id: check_org_member
@@ -62,7 +62,7 @@ jobs:
         run: sbt compile 
 
   format:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Check if organization member
         id: check_org_member

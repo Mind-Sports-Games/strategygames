@@ -7,7 +7,8 @@ sealed abstract class Board(
     val history: History,
     val variant: Variant,
     val pocketData: Option[PocketData] = None,
-    val unusedDice: List[Int] = List.empty
+    val unusedDice: List[Int] = List.empty,
+    val cubeData: Option[CubeData] = None
 ) {
 
   def apply(at: Pos): Option[Piece] = (pieces get at).map(_._1)
@@ -302,7 +303,8 @@ object Board {
         History.Backgammon(b.history),
         Variant.Backgammon(b.variant),
         b.pocketData.map(PocketData.Backgammon),
-        b.unusedDice
+        b.unusedDice,
+        b.cubeData.map(CubeData.Backgammon),
       ) {
 
     def withHistory(h: History): Board = h match {
