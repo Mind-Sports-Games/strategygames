@@ -104,7 +104,7 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def resignMatchStatus: Status.type => Status = _.ResignMatch
 
-  def pointValue: Option[Int]
+  def pointValue(player: Option[Player]): Option[Int]
 
   def move(
       from: Pos,
@@ -253,7 +253,7 @@ object Situation {
 
     def resignStatus(player: Player): Status.type => Status = _.Resign
 
-    def pointValue: Option[Int] = None
+    def pointValue(player: Option[Player]): Option[Int] = None
 
     def move(
         from: Pos,
@@ -406,7 +406,7 @@ object Situation {
 
     def resignStatus(player: Player): Status.type => Status = _.Resign
 
-    def pointValue: Option[Int] = None
+    def pointValue(player: Option[Player]): Option[Int] = None
 
     private def draughtsCaptures(captures: Option[List[Pos]]): Option[List[draughts.Pos]] =
       captures match {
@@ -585,7 +585,7 @@ object Situation {
 
     def resignStatus(player: Player): Status.type => Status = _.Resign
 
-    def pointValue: Option[Int] = None
+    def pointValue(player: Option[Player]): Option[Int] = None
 
     def move(
         from: Pos,
@@ -759,7 +759,7 @@ object Situation {
 
     def resignStatus(player: Player): Status.type => Status = _.Resign
 
-    def pointValue: Option[Int] = None
+    def pointValue(player: Option[Player]): Option[Int] = None
 
     def move(
         from: Pos,
@@ -910,7 +910,7 @@ object Situation {
 
     def resignStatus(player: Player): Status.type => Status = _.Resign
 
-    def pointValue: Option[Int] = None
+    def pointValue(player: Option[Player]): Option[Int] = None
 
     def move(
         from: Pos,
@@ -1040,7 +1040,7 @@ object Situation {
 
     def resignStatus(player: Player): Status.type => Status = _.Resign
 
-    def pointValue: Option[Int] = None
+    def pointValue(player: Option[Player]): Option[Int] = None
 
     def move(
         from: Pos,
@@ -1230,7 +1230,7 @@ object Situation {
 
     def resignStatus(player: Player): Status.type => Status = s.resignStatus(player)
 
-    def pointValue: Option[Int] = s.pointValue
+    def pointValue(player: Option[Player]): Option[Int] = s.pointValue(player)
 
     def move(
         from: Pos,
@@ -1380,7 +1380,7 @@ object Situation {
 
     def resignStatus(player: Player): Status.type => Status = _.Resign
 
-    def pointValue: Option[Int] = None
+    def pointValue(player: Option[Player]): Option[Int] = None
 
     def move(
         from: Pos,

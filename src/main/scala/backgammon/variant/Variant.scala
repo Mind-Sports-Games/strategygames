@@ -591,18 +591,12 @@ abstract class Variant private[variant] (
   private def gameValue(situation: Situation) =
     situation.board.cubeData.map(_.value).getOrElse(1)
 
-  // TODO support outoftime and rules of gin
-  def pointValue(situation: Situation): Option[Int] =
-    situation.status match {
-      case Some(Status.CubeDropped)      => Some(gameValue(situation))
-      case Some(Status.BackgammonWin)    => Some(gameValue(situation) * 3)
-      case Some(Status.GammonWin)        => Some(gameValue(situation) * 2)
-      case Some(Status.SingleWin)        => Some(gameValue(situation))
-      case Some(Status.Resign)           => Some(gameValue(situation))
-      case Some(Status.ResignGammon)     => Some(gameValue(situation) * 2)
-      case Some(Status.ResignBackgammon) => Some(gameValue(situation) * 3)
-      case Some(Status.ResignMatch)      => Some(64) // TODO calculate points for winner to reach target?
-      case _                             => None
+  def pointValue(situation: Situation, player: Option[Player]): Option[Int] =
+    (situation.status, player) match {
+      case (Some(Status.CubeDropped), _)                    => Some(gameValue(situation))
+      case (_, Some(p)) if backgammonPosition(situation, p) => Some(gameValue(situation) * 3)
+      case (_, Some(p)) if gammonPosition(situation, p)     => Some(gameValue(situation) * 2)
+      case _                                                => Some(gameValue(situation))
     }
 
   // need to count pieces in pockets so just look at score
