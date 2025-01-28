@@ -38,6 +38,7 @@ object Status {
   case object OutoftimeGammon     extends Status(48) // clock flag and loss for Backgammon
   case object OutoftimeBackgammon extends Status(49) // clock flag and loss for Backgammon
   case object CubeDropped         extends Status(50) // For Backgammon
+  case object ResignMatch         extends Status(51) // For multipoint matches (e.g. backgammon)
   case object VariantEnd          extends Status(60) // the variant has a special ending
 
   val all = List(
@@ -65,6 +66,7 @@ object Status {
     OutoftimeGammon,
     OutoftimeBackgammon,
     CubeDropped,
+    ResignMatch,
     VariantEnd
   )
 
@@ -77,6 +79,7 @@ object Status {
     Resign,
     ResignGammon,
     ResignBackgammon,
+    ResignMatch,
     Timeout,
     Outoftime,
     OutoftimeGammon,
@@ -99,7 +102,7 @@ object Status {
 
   val flagged = List(Outoftime, OutoftimeGammon, OutoftimeBackgammon, RuleOfGin, GinGammon, GinBackgammon)
 
-  val resigned = List(Resign, ResignGammon, ResignBackgammon)
+  val resigned = List(Resign, ResignGammon, ResignBackgammon, ResignMatch)
 
   val byId = all map { v =>
     (v.id, v)

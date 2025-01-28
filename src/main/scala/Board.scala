@@ -304,7 +304,7 @@ object Board {
         Variant.Backgammon(b.variant),
         b.pocketData.map(PocketData.Backgammon),
         b.unusedDice,
-        b.cubeData.map(CubeData.Backgammon),
+        b.cubeData.map(CubeData.Backgammon)
       ) {
 
     def withHistory(h: History): Board = h match {

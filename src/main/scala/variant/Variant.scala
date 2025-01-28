@@ -956,9 +956,9 @@ object Variant {
     def perfId: Int    = v.perfId
     def perfIcon: Char = v.perfIcon
 
-    def initialFen: FEN     = FEN.Abalone(v.initialFen)
+    def initialFen: FEN        = FEN.Abalone(v.initialFen)
     def initialFens: List[FEN] = List(initialFen)
-    def startPlayer: Player = v.startPlayer
+    def startPlayer: Player    = v.startPlayer
 
     def recalcStartPlayerForStats: Boolean = false
 

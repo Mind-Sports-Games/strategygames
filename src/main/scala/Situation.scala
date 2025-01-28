@@ -102,6 +102,8 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def resignStatus(player: Player): Status.type => Status
 
+  def resignMatchStatus: Status.type => Status = _.ResignMatch
+
   def pointValue: Option[Int]
 
   def move(
