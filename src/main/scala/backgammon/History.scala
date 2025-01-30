@@ -1,6 +1,6 @@
 package strategygames.backgammon
 
-import strategygames.Score
+import strategygames.{ MultiPointState, Score }
 
 import format.Uci
 
@@ -11,6 +11,7 @@ case class History(
     justUsedUndo: Boolean = false,
     positionHashes: PositionHash = Array.empty,
     score: Score = Score(0, 0),
+    multiPointState: Option[MultiPointState] = None,
     // this is tracking fullMove for Backgammon
     halfMoveClock: Int = 0
 ) {

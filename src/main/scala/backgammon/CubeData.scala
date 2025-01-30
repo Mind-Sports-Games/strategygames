@@ -1,6 +1,6 @@
 package strategygames.backgammon
 
-import strategygames.Player
+import strategygames.{ MultiPointState, Player }
 
 case class CubeData(
     value: Int,
@@ -9,11 +9,16 @@ case class CubeData(
     rejected: Boolean
 ) {
 
-  def canOffer(player: Player): Boolean =
-    !underOffer && value < 64 && owner != Some(!player)
+  def canOffer(player: Player, multiPointState: Option[MultiPointState]): Boolean =
+    !underOffer &&
+      owner != Some(!player) &&
+      value < CubeData.MAX_VALUE &&
+      value < multiPointState.fold(CubeData.MAX_VALUE)(mps =>
+        mps.target - player.fold(mps.p1Points, mps.p2Points)
+      )
 
   def offer(player: Player): CubeData =
-    if (value >= 64) sys.error("Cannot offer cube beyond 64")
+    if (value >= CubeData.MAX_VALUE) sys.error(s"Cannot offer cube beyond {CubeData.MAX_VALUE}")
     else if (value > 1 && Some(player) != owner) sys.error(s"Cube offer from invalid player: ${player}")
     else if (value == 1) copy(owner = Some(player), underOffer = true)
     else copy(underOffer = true)
@@ -31,5 +36,9 @@ case class CubeData(
 }
 
 object CubeData {
+
   val init = CubeData(1, None, false, false)
+
+  val MAX_VALUE = 64
+
 }
