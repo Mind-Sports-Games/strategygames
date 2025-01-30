@@ -20,6 +20,8 @@ case class Score(p1: Int = 0, p2: Int = 0) {
 
 }
 
+case class MultiPointState(target: Int, p1Points: Int = 0, p2Points: Int = 0)
+
 sealed abstract class History(
     val lastTurn: List[Uci] = List.empty,
     val currentTurn: List[Uci] = List.empty,
@@ -32,6 +34,7 @@ sealed abstract class History(
     val kingMoves: draughts.KingMoves = draughts.KingMoves(),
     val score: Score = Score(0, 0),
     val captures: Score = Score(0, 0),
+    val multiPointState: Option[MultiPointState] = None,
     val halfMoveClock: Int = 0
 ) {
 
@@ -119,7 +122,8 @@ object History {
         forcedTurn = h.forcedTurn,
         positionHashes = h.positionHashes,
         halfMoveClock = h.halfMoveClock,
-        score = h.score
+        score = h.score,
+        multiPointState = h.multiPointState
       )
 
   final case class Abalone(h: abalone.History)
@@ -154,6 +158,7 @@ object History {
       kingMoves: draughts.KingMoves = draughts.KingMoves(),
       score: Score = Score(0, 0),
       captures: Score = Score(0, 0),
+      multiPointState: Option[MultiPointState] = None,
       halfMoveClock: Int = 0
   ): History = lib match {
     case GameLogic.Draughts()     =>
@@ -228,7 +233,8 @@ object History {
           forcedTurn = forcedTurn,
           positionHashes = positionHashes,
           halfMoveClock = halfMoveClock,
-          score = score
+          score = score,
+          multiPointState = multiPointState
         )
       )
     case GameLogic.Abalone()      =>

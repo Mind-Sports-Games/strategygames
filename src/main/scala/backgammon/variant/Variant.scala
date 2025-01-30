@@ -446,7 +446,7 @@ abstract class Variant private[variant] (
     else
       situation.board.cubeData match {
         case Some(cubeData) =>
-          if (cubeData.canOffer(situation.player))
+          if (cubeData.canOffer(situation.player, situation.board.history.multiPointState))
             List(
               CubeAction(
                 interaction = OfferDouble,
