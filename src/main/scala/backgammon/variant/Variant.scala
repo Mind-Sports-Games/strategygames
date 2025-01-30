@@ -594,6 +594,7 @@ abstract class Variant private[variant] (
   def pointValue(situation: Situation, player: Option[Player]): Option[Int] =
     (situation.status, player) match {
       case (Some(Status.CubeDropped), _)                    => Some(gameValue(situation))
+      case _ if !situation.board.racePosition               => Some(gameValue(situation) * 3)
       case (_, Some(p)) if backgammonPosition(situation, p) => Some(gameValue(situation) * 3)
       case (_, Some(p)) if gammonPosition(situation, p)     => Some(gameValue(situation) * 2)
       case _                                                => Some(gameValue(situation))
