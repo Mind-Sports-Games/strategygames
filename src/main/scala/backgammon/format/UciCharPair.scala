@@ -25,11 +25,15 @@ object UciCharPair {
           dice2char(dice(0)),
           dice2char(dice(1))
         )
-      case Uci.Undo()              => stratUciCharPair(toChar(Pos.C1), toChar(Pos.C1))
-      case Uci.DoRoll()            => stratUciCharPair(toChar(Pos.B1), toChar(Pos.B1))
-      case Uci.EndTurn()           => stratUciCharPair(toChar(Pos.A1), toChar(Pos.A1))
+      case Uci.Undo()              => uciCharToCharPair(toChar(Pos.C1))
+      case Uci.DoRoll()            => uciCharToCharPair(toChar(Pos.B1))
+      case Uci.EndTurn()           => uciCharToCharPair(toChar(Pos.A1))
+      // OfferDouble => L1, AcceptDouble => K1, RejectDouble => J1
+      case Uci.CubeAction(ci)      => uciCharToCharPair(toChar(Pos(ci.index).getOrElse(Pos.D1)))
       case _                       => sys.error(s"Not implemented UciCharPair for $uci")
     }
+
+  private def uciCharToCharPair(c: Char) = stratUciCharPair(c, c)
 
   private[format] object implementation {
 

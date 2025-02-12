@@ -40,24 +40,28 @@ case class CubeAction(
 sealed trait CubeInteraction {
   val index: Int
   val name: String
+  val sgf: String
   val char: Char
 }
 
 case object OfferDouble extends CubeInteraction {
   val index = 0
   val name  = "offer"
+  val sgf   = "double"
   val char  = 'o'
 }
 
 case object AcceptDouble extends CubeInteraction {
   val index = 1
   val name  = "accept"
+  val sgf   = "take"
   val char  = 'y'
 }
 
 case object RejectDouble extends CubeInteraction {
   val index = 2
   val name  = "reject"
+  val sgf   = "drop"
   val char  = 'n'
 }
 

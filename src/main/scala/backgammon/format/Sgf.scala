@@ -8,11 +8,12 @@ object Sgf {
     actionStrs.map { turnActions =>
       turnActions
         .flatMap(Uci.apply(_).flatMap {
-          case uci: Uci.Drop     => Some("y" + uci.pos.sgf)
-          case uci: Uci.Move     => Some(uci.orig.sgf + uci.dest.sgf)
-          case uci: Uci.Lift     => Some(uci.pos.sgf + "z")
-          case uci: Uci.DiceRoll => Some(uci.dice.take(2).sorted.reverse.mkString(""))
-          case _                 => None
+          case uci: Uci.Drop       => Some("y" + uci.pos.sgf)
+          case uci: Uci.Move       => Some(uci.orig.sgf + uci.dest.sgf)
+          case uci: Uci.Lift       => Some(uci.pos.sgf + "z")
+          case uci: Uci.DiceRoll   => Some(uci.dice.take(2).sorted.reverse.mkString(""))
+          case uci: Uci.CubeAction => Some(uci.interaction.sgf)
+          case _                   => None
         })
         .toList
         .mkString("")
