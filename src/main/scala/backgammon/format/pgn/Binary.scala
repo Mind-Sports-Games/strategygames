@@ -47,8 +47,8 @@ object Binary {
         plies
           .map { ply =>
             ply match {
-              case Uci.EndTurn.endTurnR() | Uci.CubeAction.cubeActionR() => s"${ply}#"
-              case _                                                     => s"${ply},"
+              case Uci.EndTurn.endTurnR() | Uci.CubeAction.cubeActionR(_) => s"${ply}#"
+              case _                                                      => s"${ply},"
             }
           }
           .mkString
