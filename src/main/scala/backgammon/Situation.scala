@@ -182,20 +182,9 @@ case class Situation(board: Board, player: Player) {
     else None
 
   def resignStatus(player: Player): Status.type => Status =
-    if (board.racePosition)
-      if (board.variant.backgammonPosition(this, player)) _.ResignBackgammon
-      else if (board.variant.gammonPosition(this, player)) _.ResignGammon
-      else _.Resign
-    else if (board.history.score(player) == 0 && board.variant.key != "hyper") _.ResignBackgammon
-    else _.Resign
+    board.variant.resignStatus(this, player)
 
-  def outOfTimeStatus: Status.type => Status =
-    if (board.racePosition)
-      if (board.variant.backgammonPosition(this, player)) _.OutoftimeBackgammon
-      else if (board.variant.gammonPosition(this, player)) _.OutoftimeGammon
-      else _.Outoftime
-    else if (board.history.score(player) == 0 && board.variant.key != "hyper") _.OutoftimeBackgammon
-    else _.Outoftime
+  def outOfTimeStatus: Status.type => Status = board.variant.outOfTimeStatus(this)
 
   // only works when we are not mid turn and have not rolled dice
   def maxTurnsFromEnd(player: Player): Option[Int] =
@@ -323,10 +312,7 @@ case class Situation(board: Board, player: Player) {
         .contains(false)
 
   def insufficientMaterialStatus: Status.type => Status =
-    if (board.variant.key == "hyper") _.RuleOfGin // TODO fix correctly when using doubling cube
-    else if (opponentHasInsufficientMaterialForBackgammon) _.GinBackgammon
-    else if (opponentHasInsufficientMaterialForGammon) _.GinGammon
-    else _.RuleOfGin
+    board.variant.insufficientMaterialStatus(this)
 
   def pointValue(player: Option[Player]): Option[Int] = board.variant.pointValue(this, player)
 

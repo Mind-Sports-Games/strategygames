@@ -12,8 +12,14 @@ case class Lift(
 
   def player = situationBefore.player
 
-  def situationAfter =
-    Situation(finalizeAfter, player)
+  def situationAfter = {
+    val s = Situation(finalizeAfter, player)
+    // s.end needs to be called on a situation but who is set as player is irrelevant as
+    // s.end doesn't check player. but this enables us to know who the player in the
+    // situationAfter should be
+    if (s.end) s.copy(player = !player)
+    else s
+  }
 
   def finalizeAfter: Board = after updateHistory { h =>
     h.copy(

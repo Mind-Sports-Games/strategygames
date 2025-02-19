@@ -580,6 +580,27 @@ abstract class Variant private[variant] (
         )
     )
 
+  def resignStatus(situation: Situation, player: Player): Status.type => Status =
+    if (situation.board.racePosition)
+      if (backgammonPosition(situation, player)) _.ResignBackgammon
+      else if (gammonPosition(situation, player)) _.ResignGammon
+      else _.Resign
+    else if (situation.board.history.score(player) == 0) _.ResignBackgammon
+    else _.Resign
+
+  def outOfTimeStatus(situation: Situation): Status.type => Status =
+    if (situation.board.racePosition)
+      if (backgammonPosition(situation, situation.player)) _.OutoftimeBackgammon
+      else if (gammonPosition(situation, situation.player)) _.OutoftimeGammon
+      else _.Outoftime
+    else if (situation.board.history.score(situation.player) == 0) _.OutoftimeBackgammon
+    else _.Outoftime
+
+  def insufficientMaterialStatus(situation: Situation): Status.type => Status =
+    if (situation.opponentHasInsufficientMaterialForBackgammon) _.GinBackgammon
+    else if (situation.opponentHasInsufficientMaterialForGammon) _.GinGammon
+    else _.RuleOfGin
+
   def winner(situation: Situation): Option[Player] =
     if (cubeRejected(situation)) situation.board.cubeData.fold(None: Option[Player])(_.owner)
     else if (specialEnd(situation)) {
