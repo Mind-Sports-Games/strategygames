@@ -75,7 +75,7 @@ case class Game(
   def applyLift(lift: Lift): Game = {
     val newSituation = lift.situationAfter
     // if the lift triggers the end of the game we want to end the turn
-    val switchPlayer = situation.player != newSituation.player || situation.end
+    val switchPlayer = situation.player != newSituation.player || newSituation.end
 
     copy(
       situation = newSituation,
