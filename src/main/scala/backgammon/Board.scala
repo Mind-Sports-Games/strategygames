@@ -93,6 +93,8 @@ case class Board(
       onlySafeOnePointPieces(Player.P1) ||
       onlySafeOnePointPieces(Player.P2)
 
+  def hasDoubledCube: Boolean = !(cubeData.map(_.value).getOrElse(1) == 1)
+
   lazy val actors: Map[Pos, (Actor, Int)] = pieces map { case (pos, (piece, count)) =>
     (pos, (Actor(piece, pos, this), count))
   }
