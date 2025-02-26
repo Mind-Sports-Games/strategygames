@@ -26,8 +26,8 @@ class TagTest extends Specification with ValidatedMatchers {
         )
       ).sorted.value.map(_.name) must_== List(
         Tag.FF,
-        Tag.CA,
         Tag.GM,
+        Tag.CA,
         Tag.DT,
         Tag.EV,
         Tag.PW,
