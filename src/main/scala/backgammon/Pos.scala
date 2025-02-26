@@ -80,7 +80,7 @@ case class Pos private (index: Int) extends AnyVal {
   def piotr: Char = Piotr.lookup.get(index).getOrElse('?')
   def piotrStr    = piotr.toString
 
-  def sgf = (97 + (23 - index)).toChar.toString()
+  def sgf = (97 + index).toChar.toString()
 
   def last: Boolean = (index + 1) % File.all.size == 0
 
