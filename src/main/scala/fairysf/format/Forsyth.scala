@@ -45,7 +45,7 @@ object Forsyth {
           Some(History(currentTurn = uciMove.toList))
         )
       } else (fen, None, None)
-    val apiPosition = Api.positionFromVariantNameAndFEN(variant.fairysfName.name, fsfFen.value)
+    val apiPosition = Api.positionFromVariantNameAndFEN(variant.fishnetKey, fsfFen.value)
     Some(
       Situation(
         Board(

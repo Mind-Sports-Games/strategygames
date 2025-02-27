@@ -21,7 +21,7 @@ class FairyStockfishTest extends Specification with ValidatedMatchers {
   "Shogi initial fen" should {
     "be valid" in {
       FairyStockfish.validateFEN(
-        variant.Shogi.fairysfName.name,
+        variant.Shogi.fishnetKey,
         variant.Shogi.initialFen.value
       ) must_== true
     }
@@ -30,7 +30,7 @@ class FairyStockfishTest extends Specification with ValidatedMatchers {
   "Shogi initial fen minus middle rank" should {
     "be invalid" in {
       FairyStockfish.validateFEN(
-        variant.Shogi.fairysfName.name,
+        variant.Shogi.fishnetKey,
         "lnsgkgsnl/1r5b1/ppppppppp/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL[] w - - 0 1"
       ) must_== false
     }
@@ -39,7 +39,7 @@ class FairyStockfishTest extends Specification with ValidatedMatchers {
   "Random string" should {
     "be invalid fen" in {
       FairyStockfish.validateFEN(
-        variant.Shogi.fairysfName.name,
+        variant.Shogi.fishnetKey,
         "I'm a Shogi FEN! (not)"
       ) must_== false
     }

@@ -180,7 +180,7 @@ class AmazonsApiTest extends FairySFTest {
     }
     "be valid" in {
       // NOTE: this test only makes sense at the API level, because we can convert it
-      val name       = variant.Amazons.fairysfName.name
+      val name       = variant.Amazons.fishnetKey
       val initialFen = Api.toFairySFFen(name, variant.Amazons.initialFen.value)
       FairyStockfish.validateFEN(name, initialFen) must_== true
     }
