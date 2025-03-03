@@ -9,7 +9,7 @@ case object MiniXiangqi
       key = "minixiangqi",
       name = "Mini Xiangqi",
       standardInitialPosition = true,
-      fairysfName = FairySFName("ps-minixiangqi"),
+      fishnetKey = "ps-minixiangqi",
       boardSize = Board.Dim7x7
     ) {
 

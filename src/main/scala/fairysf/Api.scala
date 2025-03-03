@@ -68,7 +68,7 @@ object Api {
     //       at the moment
     // NOTE: this means we can't use this API to test chess related things
     //       only the variants we support
-    val variant = Variant.byFairySFName(position.variant())
+    val variant = Variant.byFishnetKey(position.variant())
 
     def makeMoves(movesList: List[String]): Position =
       if (movesList.isEmpty) this
@@ -133,7 +133,7 @@ object Api {
   }
 
   def positionFromVariant(variant: Variant): Position =
-    new FairyPosition(new FairyStockfish.Position(variant.fairysfName.name))
+    new FairyPosition(new FairyStockfish.Position(variant.fishnetKey))
 
   def positionFromVariantName(variantName: String): Position =
     new FairyPosition(new FairyStockfish.Position(variantName))
