@@ -22,6 +22,7 @@ abstract class Variant private[variant] (
     case "noCastling"    => "nocastle"
     case "racingKings"   => "racingkings"
     case "kingOfTheHill" => "kingofthehill"
+    case "chess960"      => "fischerandom"
     case _               => key // defaults to chess in fairystockfish if unknown
   }
 
