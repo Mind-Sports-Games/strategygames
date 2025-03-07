@@ -26,6 +26,7 @@ sealed trait Uci {
   def toGo: go.format.Uci
   def toBackgammon: backgammon.format.Uci
   def toAbalone: abalone.format.Uci
+  def toDameo: dameo.format.Uci
 
 }
 
@@ -54,6 +55,9 @@ object Uci {
   }
   sealed trait Abalone      {
     def unwrap: abalone.format.Uci
+  }
+  sealed trait Dameo        {
+    def unwrap: dameo.format.Uci
   }
 
   sealed abstract class Move(
@@ -96,6 +100,7 @@ object Uci {
     def toGo           = sys.error("Can't make a go UCI from a chess UCI")
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a chess UCI")
     def toAbalone      = sys.error("Can't make a abalone UCI from a chess UCI")
+    def toDameo        = sys.error("Can't make a dameo UCI from a chess UCI")
   }
 
   final case class DraughtsMove(m: draughts.format.Uci.Move)
@@ -122,6 +127,7 @@ object Uci {
     def toGo           = sys.error("Can't make a go UCI from a draughts UCI")
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a draughts UCI")
     def toAbalone      = sys.error("Can't make a abalone UCI from a draughts UCI")
+    def toDameo        = sys.error("Can't make a dameo UCI from a draughts UCI")
   }
 
   final case class FairySFMove(m: fairysf.format.Uci.Move)
@@ -144,6 +150,7 @@ object Uci {
     def toGo           = sys.error("Can't make a go UCI from a fairy UCI")
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a fairysf UCI")
     def toAbalone      = sys.error("Can't make a abalone UCI from a fairysf UCI")
+    def toDameo        = sys.error("Can't make a dameo UCI from a fairysf UCI")
   }
 
   final case class SamuraiMove(m: samurai.format.Uci.Move)
@@ -165,6 +172,7 @@ object Uci {
     def toGo           = sys.error("Can't make a go UCI from a samurai UCI")
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a samurai UCI")
     def toAbalone      = sys.error("Can't make a abalone UCI from a samurai UCI")
+    def toDameo        = sys.error("Can't make a dameo UCI from a samurai UCI")
   }
 
   final case class TogyzkumalakMove(m: togyzkumalak.format.Uci.Move)
@@ -186,6 +194,7 @@ object Uci {
     def toGo           = sys.error("Can't make a go UCI from a togyzkumalak UCI")
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a togyzkumalak UCI")
     def toAbalone      = sys.error("Can't make a abalone UCI from a togyzkumalak UCI")
+    def toDameo        = sys.error("Can't make a dameo UCI from a togyzkumalak UCI")
   }
 
   final case class BackgammonMove(m: backgammon.format.Uci.Move)
@@ -211,6 +220,7 @@ object Uci {
     def toGo           = sys.error("Can't make a go UCI from a backgammon UCI")
     def toBackgammon   = m
     def toAbalone      = sys.error("Can't make a abalone UCI from a backgammon UCI")
+    def toDameo        = sys.error("Can't make a dameo UCI from a backgammon UCI")
   }
 
   final case class AbaloneMove(m: abalone.format.Uci.Move)
@@ -232,6 +242,34 @@ object Uci {
     def toGo           = sys.error("Can't make a go UCI from a abalone UCI")
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a abalone UCI")
     def toAbalone      = m
+    def toDameo        = sys.error("Can't make a dameo UCI from a abalone UCI")
+  }
+
+  final case class DameoMove(m: dameo.format.Uci.Move)
+      extends Move(
+        Pos.Dameo(m.orig),
+        Pos.Dameo(m.dest),
+        m.promotion.map(Role.DameoPromotableRole),
+        m.capture match {
+          case Some(capture) => Some(List(Pos.Dameo(capture)))
+          case None          => None
+        }
+      )
+      with Dameo {
+    def gameLogic      = GameLogic.Dameo()
+    def uci            = m.uci
+    def shortUci       = m.shortUci
+    def fishnetUci     = m.uci
+    val unwrap         = m
+    def toDraughts     = sys.error("Can't make a draughts UCI from a dameo UCI")
+    def toChess        = sys.error("Can't make a chess UCI from a dameo UCI")
+    def toFairySF      = sys.error("Can't make a fairysf UCI from a dameo UCI")
+    def toSamurai      = sys.error("Can't make a samurai UCI from a dameo UCI")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a dameo UCI")
+    def toGo           = sys.error("Can't make a go UCI from a dameo UCI")
+    def toBackgammon   = sys.error("Can't make a backgammon UCI from a dameo UCI")
+    def toAbalone      = sys.error("Can't make a abalone UCI from a dameo UCI")
+    def toDameo        = m
   }
 
   sealed abstract class Drop(
@@ -262,6 +300,7 @@ object Uci {
     def toGo           = sys.error("Can't make a go UCI from a chess UCI")
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a chess UCI")
     def toAbalone      = sys.error("Can't make a abalone UCI from a chess UCI")
+    def toDameo        = sys.error("Can't make a dameo UCI from a chess UCI")
   }
 
   final case class FairySFDrop(d: fairysf.format.Uci.Drop)
@@ -284,6 +323,7 @@ object Uci {
     def toGo           = sys.error("Can't make a go UCI from a fairysf UCI")
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a fairysf UCI")
     def toAbalone      = sys.error("Can't make a abalone UCI from a fairysf UCI")
+    def toDameo        = sys.error("Can't make a dameo UCI from a fairysf UCI")
   }
 
   final case class GoDrop(d: go.format.Uci.Drop)
@@ -306,6 +346,7 @@ object Uci {
     def toGo           = d
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a go UCI")
     def toAbalone      = sys.error("Can't make a abalone UCI from a go UCI")
+    def toDameo        = sys.error("Can't make a dameo UCI from a go UCI")
   }
 
   final case class BackgammonDrop(d: backgammon.format.Uci.Drop)
@@ -332,6 +373,7 @@ object Uci {
     def toGo           = sys.error("Can't make a go UCI from a backgammon UCI")
     def toBackgammon   = d
     def toAbalone      = sys.error("Can't make a abalone UCI from a backgammon UCI")
+    def toDameo        = sys.error("Can't make a dameo UCI from a backgammon UCI")
   }
 
   sealed abstract class Lift(
@@ -359,6 +401,7 @@ object Uci {
     def toGo           = sys.error("Can't make a go UCI from a backgammon UCI")
     def toBackgammon   = l
     def toAbalone      = sys.error("Can't make a abalone UCI from a backgammon UCI")
+    def toDameo        = sys.error("Can't make a dameo UCI from a backgammon UCI")
   }
 
   sealed abstract class Pass() extends Uci {
@@ -382,6 +425,7 @@ object Uci {
     def toGo           = p
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a go UCI")
     def toAbalone      = sys.error("Can't make a abalone UCI from a go UCI")
+    def toDameo        = sys.error("Can't make a dameo UCI from a go UCI")
   }
 
   sealed abstract class SelectSquares(
@@ -411,6 +455,7 @@ object Uci {
     def toGo           = ss
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a go UCI")
     def toAbalone      = sys.error("Can't make a abalone UCI from a go UCI")
+    def toDameo        = sys.error("Can't make a dameo UCI from a go UCI")
   }
 
   sealed abstract class DiceRoll(
@@ -440,6 +485,7 @@ object Uci {
     def toGo           = sys.error("Can't make a go UCI from a chess UCI")
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a chess UCI")
     def toAbalone      = sys.error("Can't make a abalone UCI from a chess UCI")
+    def toDameo        = sys.error("Can't make a dameo UCI from a chess UCI")
   }
 
   final case class BackgammonDiceRoll(dr: backgammon.format.Uci.DiceRoll)
@@ -463,6 +509,7 @@ object Uci {
     def toGo           = sys.error("Can't make a go UCI from a backgammon UCI")
     def toBackgammon   = dr
     def toAbalone      = sys.error("Can't make a abalone UCI from a backgammon UCI")
+    def toDameo        = sys.error("Can't make a dameo UCI from a backgammon UCI")
   }
 
   sealed abstract class DoRoll() extends Uci {
@@ -486,6 +533,7 @@ object Uci {
     def toGo           = sys.error("Can't make a go UCI from a chess UCI")
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a chess UCI")
     def toAbalone      = sys.error("Can't make a abalone UCI from a chess UCI")
+    def toDameo        = sys.error("Can't make a dameo UCI from a chess UCI")
   }
 
   final case class BackgammonDoRoll(dr: backgammon.format.Uci.DoRoll) extends DoRoll() with Backgammon {
@@ -505,6 +553,7 @@ object Uci {
     def toGo           = sys.error("Can't make a go UCI from a backgammon UCI")
     def toBackgammon   = dr
     def toAbalone      = sys.error("Can't make a abalone UCI from a backgammon UCI")
+    def toDameo        = sys.error("Can't make a dameo UCI from a backgammon UCI")
   }
 
   sealed abstract class Undo() extends Uci {
@@ -528,6 +577,7 @@ object Uci {
     def toGo           = sys.error("Can't make a go UCI from a backgammon UCI")
     def toBackgammon   = u
     def toAbalone      = sys.error("Can't make a abalone UCI from a backgammon UCI")
+    def toDameo        = sys.error("Can't make a dameo UCI from a backgammon UCI")
   }
 
   sealed abstract class EndTurn() extends Uci {
@@ -551,6 +601,7 @@ object Uci {
     def toGo           = sys.error("Can't make a go UCI from a backgammon UCI")
     def toBackgammon   = et
     def toAbalone      = sys.error("Can't make a abalone UCI from a backgammon UCI")
+    def toDameo        = sys.error("Can't make a dameo UCI from a backgammon UCI")
   }
 
   sealed abstract class CubeAction(
@@ -580,6 +631,7 @@ object Uci {
     def toGo           = sys.error("Can't make a go UCI from a backgammon UCI")
     def toBackgammon   = ca
     def toAbalone      = sys.error("Can't make a abalone UCI from a backgammon UCI")
+    def toDameo        = sys.error("Can't make a dameo UCI from a backgammon UCI")
   }
 
   def wrap(uci: chess.format.Uci): Uci = uci match {
@@ -627,6 +679,10 @@ object Uci {
     case m: abalone.format.Uci.Move => AbaloneMove(m)
   }
 
+  def wrap(uci: dameo.format.Uci): Uci = uci match {
+    case m: dameo.format.Uci.Move => DameoMove(m)
+  }
+
   object Move {
 
     private def draughtsCaptures(captures: Option[List[Pos]]): Option[List[draughts.Pos]] =
@@ -656,6 +712,12 @@ object Uci {
           )
         case None           => None
       }
+
+    private def dameoCaptures(captures: Option[List[Pos]]): Option[dameo.Pos] =
+      captures.flatMap(_.headOption match {
+        case Some(Pos.Dameo(c)) => Some(c)
+        case _                  => None
+      })
 
     def apply(
         lib: GameLogic,
@@ -721,6 +783,15 @@ object Uci {
               dest
             )
           )
+        case (GameLogic.Dameo(), Pos.Dameo(orig), Pos.Dameo(dest))                =>
+          DameoMove(
+            dameo.format.Uci.Move.apply(
+              orig,
+              dest,
+              promotion.map(_.toDameo),
+              dameoCaptures(capture)
+            )
+          )
         case _                                                                          => sys.error("Mismatched gamelogic types 23")
       }
 
@@ -732,6 +803,7 @@ object Uci {
       case GameLogic.Togyzkumalak() => togyzkumalak.format.Uci.Move(move).map(TogyzkumalakMove)
       case GameLogic.Backgammon()   => backgammon.format.Uci.Move(move).map(BackgammonMove)
       case GameLogic.Abalone()      => abalone.format.Uci.Move(move).map(AbaloneMove)
+      case GameLogic.Dameo()        => dameo.format.Uci.Move(move).map(DameoMove)
       case _                        => sys.error("Invalid lib gf and move combo for Uci")
     }
 
@@ -743,6 +815,7 @@ object Uci {
       case GameLogic.Togyzkumalak() => togyzkumalak.format.Uci.Move.piotr(move).map(TogyzkumalakMove)
       case GameLogic.Backgammon()   => backgammon.format.Uci.Move.piotr(move).map(BackgammonMove)
       case GameLogic.Abalone()      => abalone.format.Uci.Move.piotr(move).map(AbaloneMove)
+      case GameLogic.Dameo()        => dameo.format.Uci.Move.piotr(move).map(DameoMove)
       case _                        => sys.error("Invalid lib gf and move combo for piotr")
     }
 
@@ -764,6 +837,7 @@ object Uci {
       case GameLogic.Go()           => None
       case GameLogic.Backgammon()   => backgammon.format.Uci.Move.fromStrings(origS, destS).map(BackgammonMove)
       case GameLogic.Abalone()      => abalone.format.Uci.Move.fromStrings(origS, destS).map(AbaloneMove)
+      case GameLogic.Dameo()        => dameo.format.Uci.Move.fromStrings(origS, destS, promS).map(DameoMove)
     }
   }
 
@@ -775,6 +849,7 @@ object Uci {
         case GameLogic.Samurai()      => None
         case GameLogic.Togyzkumalak() => None
         case GameLogic.Abalone()      => None
+        case GameLogic.Dameo()        => None
         case GameLogic.Chess()        =>
           chess.format.Uci.Drop.fromStrings(roleS, posS).map(ChessDrop)
         case GameLogic.FairySF()      =>
@@ -803,6 +878,7 @@ object Uci {
         case GameLogic.Backgammon()   =>
           backgammon.format.Uci.Lift.fromStrings(posS).map(BackgammonLift)
         case GameLogic.Abalone()      => None
+        case GameLogic.Dameo()        => None
       }
   }
 
@@ -815,6 +891,7 @@ object Uci {
         case GameLogic.Togyzkumalak() => None
         case GameLogic.Backgammon()   => None
         case GameLogic.Abalone()      => None
+        case GameLogic.Dameo()        => None
         case GameLogic.Chess()        => None
         case GameLogic.FairySF()      => None
         case GameLogic.Go()           => GoPass(go.format.Uci.Pass()).some
@@ -831,6 +908,7 @@ object Uci {
         case GameLogic.Togyzkumalak() => None
         case GameLogic.Backgammon()   => None
         case GameLogic.Abalone()      => None
+        case GameLogic.Dameo()        => None
         case GameLogic.Chess()        => None
         case GameLogic.FairySF()      => None
         case GameLogic.Go()           =>
@@ -863,6 +941,7 @@ object Uci {
         case GameLogic.Backgammon()   =>
           BackgammonDiceRoll(backgammon.format.Uci.DiceRoll.fromStrings(dice)).some
         case GameLogic.Abalone()      => None
+        case GameLogic.Dameo()        => None
       }
 
   }
@@ -879,6 +958,7 @@ object Uci {
         case GameLogic.Go()           => None
         case GameLogic.Backgammon()   => BackgammonDoRoll(backgammon.format.Uci.DoRoll()).some
         case GameLogic.Abalone()      => None
+        case GameLogic.Dameo()        => None
       }
 
   }
@@ -895,6 +975,7 @@ object Uci {
         case GameLogic.Go()           => None
         case GameLogic.Backgammon()   => BackgammonUndo(backgammon.format.Uci.Undo()).some
         case GameLogic.Abalone()      => None
+        case GameLogic.Dameo()        => None
       }
 
   }
@@ -911,6 +992,7 @@ object Uci {
         case GameLogic.Go()           => None
         case GameLogic.Backgammon()   => BackgammonEndTurn(backgammon.format.Uci.EndTurn()).some
         case GameLogic.Abalone()      => None
+        case GameLogic.Dameo()        => None
       }
 
   }
@@ -928,6 +1010,7 @@ object Uci {
         case GameLogic.Backgammon()   =>
           backgammon.format.Uci.CubeAction.fromStrings(interaction).map(BackgammonCubeAction)
         case GameLogic.Abalone()      => None
+        case GameLogic.Dameo()        => None
       }
 
   }
@@ -982,6 +1065,12 @@ object Uci {
         w.san
       )
 
+  final case class DameoWithSan(w: dameo.format.Uci.WithSan)
+      extends WithSan(
+        wrap(w.uci),
+        w.san
+      )
+
   object WithSan {
 
     def apply(lib: GameLogic, uci: Uci, san: String): WithSan = (lib, uci) match {
@@ -1000,6 +1089,8 @@ object Uci {
         Uci.BackgammonWithSan(backgammon.format.Uci.WithSan(u.unwrap, san))
       case (GameLogic.Abalone(), u: Uci.Abalone)           =>
         Uci.AbaloneWithSan(abalone.format.Uci.WithSan(u.unwrap, san))
+      case (GameLogic.Dameo(), Uci.DameoMove(uci))               =>
+        Uci.DameoWithSan(dameo.format.Uci.WithSan(uci, san))
       case _                                               => sys.error("Mismatched gamelogic types 24")
     }
 
@@ -1021,6 +1112,8 @@ object Uci {
         BackgammonMove(backgammon.format.Uci(move))
       case (GameLogic.Abalone(), strategygames.Move.Abalone(move))           =>
         AbaloneMove(abalone.format.Uci(move))
+      case (GameLogic.Dameo(), strategygames.Move.Dameo(move))               =>
+        DameoMove(dameo.format.Uci(move, withCaptures))
       case _                                                                 => sys.error("Mismatched gamelogic types 25")
     }
 
@@ -1035,6 +1128,7 @@ object Uci {
     case (GameLogic.Backgammon(), strategygames.Drop.Backgammon(drop)) =>
       BackgammonDrop(backgammon.format.Uci(drop))
     case (GameLogic.Abalone(), _)                                      => sys.error("Drop not implemented for abalone")
+    case (GameLogic.Dameo(), _)                                        => sys.error("Drop not implemented for abalone")
     case _                                                             => sys.error(s"Drop not implemented for ${lib}")
   }
 
@@ -1048,6 +1142,7 @@ object Uci {
     case (GameLogic.Backgammon(), strategygames.Lift.Backgammon(lift)) =>
       BackgammonLift(backgammon.format.Uci(lift))
     case (GameLogic.Abalone(), _)                                      => sys.error("Lift not implemented for abalone")
+    case (GameLogic.Dameo(), _)                                        => sys.error("Lift not implemented for abalone")
     case _                                                             => sys.error(s"Lift not implemented for ${lib}")
   }
 
@@ -1060,6 +1155,7 @@ object Uci {
     case (GameLogic.Go(), strategygames.Pass.Go(pass)) => GoPass(go.format.Uci(pass))
     case (GameLogic.Backgammon(), _)                   => sys.error("Pass not implemented for backgammon")
     case (GameLogic.Abalone(), _)                      => sys.error("Pass not implemented for abalone")
+    case (GameLogic.Dameo(), _)                        => sys.error("Pass not implemented for dameo")
   }
 
   def apply(lib: GameLogic, selectSquares: strategygames.SelectSquares) = (lib, selectSquares) match {
@@ -1072,6 +1168,7 @@ object Uci {
       GoSelectSquares(go.format.Uci(selectSquares))
     case (GameLogic.Backgammon(), _)                                     => sys.error("SelectSquares not implemented for backgammon")
     case (GameLogic.Abalone(), _)                                        => sys.error("SelectSquares not implemented for abalone")
+    case (GameLogic.Dameo(), _)                                          => sys.error("SelectSquares not implemented for dameo")
   }
 
   def apply(lib: GameLogic, diceRoll: strategygames.DiceRoll) = (lib, diceRoll) match {
@@ -1085,6 +1182,7 @@ object Uci {
     case (GameLogic.Backgammon(), strategygames.DiceRoll.Backgammon(diceRoll)) =>
       BackgammonDiceRoll(backgammon.format.Uci(diceRoll))
     case (GameLogic.Abalone(), _)                                              => sys.error("DiceRoll not implemented for abalone")
+    case (GameLogic.Dameo(), _)                                                => sys.error("DiceRoll not implemented for dameo")
     case _                                                                     => sys.error(s"DiceRoll not implemented for ${lib}")
   }
 
@@ -1098,6 +1196,7 @@ object Uci {
     case (GameLogic.Backgammon(), strategygames.EndTurn.Backgammon(endTurn)) =>
       BackgammonEndTurn(backgammon.format.Uci(endTurn))
     case (GameLogic.Abalone(), _)                                            => sys.error("EndTurn not implemented for abalone")
+    case (GameLogic.Dameo(), _)                                              => sys.error("EndTurn not implemented for dameo")
   }
 
   def apply(lib: GameLogic, cubeAction: strategygames.CubeAction) = (lib, cubeAction) match {
@@ -1110,6 +1209,7 @@ object Uci {
     case (GameLogic.Backgammon(), strategygames.CubeAction.Backgammon(cubeAction)) =>
       BackgammonCubeAction(backgammon.format.Uci(cubeAction))
     case (GameLogic.Abalone(), _)                                                  => sys.error("CubeAction not implemented for abalone")
+    case (GameLogic.Dameo(), _)                                                    => sys.error("CubeAction not implemented for dameo")
     case _                                                                         => sys.error(s"CubeAction not implemented for ${lib}")
   }
 
@@ -1122,6 +1222,7 @@ object Uci {
     case GameLogic.Go()           => go.format.Uci(action).map(wrap)
     case GameLogic.Backgammon()   => backgammon.format.Uci(action).map(wrap)
     case GameLogic.Abalone()      => abalone.format.Uci(action).map(wrap)
+    case GameLogic.Dameo()        => dameo.format.Uci(action).map(wrap)
   }
 
   def apply(v: Variant, action: String): Option[Uci] =
@@ -1136,6 +1237,7 @@ object Uci {
     case GameLogic.Go()           => go.format.Uci.piotr(action).map(wrap)
     case GameLogic.Backgammon()   => backgammon.format.Uci.piotr(action).map(wrap)
     case GameLogic.Abalone()      => abalone.format.Uci.piotr(action).map(wrap)
+    case GameLogic.Dameo()        => dameo.format.Uci.piotr(action).map(wrap)
   }
 
   def readList(lib: GameLogic, gf: GameFamily, actions: String): Option[List[Uci]] = lib match {
@@ -1147,6 +1249,7 @@ object Uci {
     case GameLogic.Go()           => go.format.Uci.readList(actions).map(_.map(wrap))
     case GameLogic.Backgammon()   => backgammon.format.Uci.readList(actions).map(_.map(wrap))
     case GameLogic.Abalone()      => abalone.format.Uci.readList(actions).map(_.map(wrap))
+    case GameLogic.Dameo()        => dameo.format.Uci.readList(actions).map(_.map(wrap))
   }
 
   def writeList(actions: List[Uci]): String =

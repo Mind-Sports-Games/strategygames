@@ -10,6 +10,7 @@ import strategygames.togyzkumalak.format.pgn.{ Reader => TogyzkumalakReader }
 import strategygames.go.format.pgn.{ Reader => GoReader }
 import strategygames.backgammon.format.pgn.{ Reader => BackgammonReader }
 import strategygames.abalone.format.pgn.{ Reader => AbaloneReader }
+import strategygames.dameo.format.pdn.{ Reader => DameoReader }
 
 import cats.data.Validated
 
@@ -68,6 +69,12 @@ object Reader {
     case class AbaloneIncomplete(replay: abalone.Replay, failure: String)           extends Result {
       def valid = Validated.invalid(failure)
     }
+    case class DameoComplete(replay: dameo.Replay)                                  extends Result {
+      def valid = Validated.valid(Replay.Dameo(replay))
+    }
+    case class DameoIncomplete(replay: dameo.Replay, failure: String)               extends Result {
+      def valid = Validated.invalid(failure)
+    }
 
     def wrap(result: ChessReader.Result) = result match {
       case ChessReader.Result.Complete(replay)            => Result.ChessComplete(replay)
@@ -111,6 +118,11 @@ object Reader {
       case AbaloneReader.Result.Incomplete(replay, failure) => Result.AbaloneIncomplete(replay, failure)
     }
 
+    def wrap(result: DameoReader.Result) = result match {
+      case DameoReader.Result.Complete(replay)            => Result.DameoComplete(replay)
+      case DameoReader.Result.Incomplete(replay, failure) => Result.DameoIncomplete(replay, failure)
+    }
+
   }
 
   def fullWithSans(
@@ -129,6 +141,7 @@ object Reader {
       case GameLogic.Go()           => GoReader.fullWithSans(pgn, op, tags).map(Result.wrap)
       case GameLogic.Backgammon()   => BackgammonReader.fullWithSans(pgn, op, tags).map(Result.wrap)
       case GameLogic.Abalone()      => AbaloneReader.fullWithSans(pgn, op, tags).map(Result.wrap)
+      case GameLogic.Dameo()        => DameoReader.fullWithSans(pgn, op, tags, iteratedCapts).map(Result.wrap)
     }
 
   // TODO Merge the following two functions by refactoring Sans and integrating to other libs
@@ -158,6 +171,10 @@ object Reader {
         sys.error("Sans not implemented for backgammon")
       case GameLogic.Abalone()      =>
         sys.error("Sans not implemented for abalone")
+      case GameLogic.Dameo()        =>
+        DameoReader
+          .replayResultFromActionStrsUsingSan(actionStrs, op, tags)
+          .map(Result.wrap)
     }
 
   def replayResultFromActionStrs(
@@ -187,6 +204,10 @@ object Reader {
         BackgammonReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
       case GameLogic.Abalone()      =>
         AbaloneReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
+      case GameLogic.Dameo()        =>
+        sys.error(
+          "replayResultFromActionStrs not implemented for dameo. Use replayResultFromActionStrsUsingSan"
+        )
     }
 
 }

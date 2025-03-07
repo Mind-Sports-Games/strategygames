@@ -13,6 +13,7 @@ sealed abstract class FEN(val value: String) {
   def toGo: strategygames.go.format.FEN
   def toBackgammon: strategygames.backgammon.format.FEN
   def toAbalone: strategygames.abalone.format.FEN
+  def toDameo: strategygames.dameo.format.FEN
 
   override def toString = value
 
@@ -45,6 +46,7 @@ object FEN {
     def toGo           = sys.error("Can't convert chess to go")
     def toBackgammon   = sys.error("Can't convert chess to backgammon")
     def toAbalone      = sys.error("Can't convert chess to abalone")
+    def toDameo        = sys.error("Can't convert chess to dameo")
 
     def gameLogic = GameLogic.Chess()
 
@@ -73,6 +75,7 @@ object FEN {
     def toGo           = sys.error("Can't convert draughts to go")
     def toBackgammon   = sys.error("Can't convert draughts to backgammon")
     def toAbalone      = sys.error("Can't convert draughts to abalone")
+    def toDameo        = sys.error("Can't convert draughts to dameo")
 
     def gameLogic = GameLogic.Draughts()
 
@@ -103,6 +106,7 @@ object FEN {
     def toGo           = sys.error("Can't convert fairysf to go")
     def toBackgammon   = sys.error("Can't convert fairysf to backgammon")
     def toAbalone      = sys.error("Can't convert fairysf to abalone")
+    def toDameo        = sys.error("Can't convert fairysf to dameo")
 
     def gameLogic = GameLogic.FairySF()
 
@@ -131,6 +135,7 @@ object FEN {
     def toGo           = sys.error("Can't convert samurai to go")
     def toBackgammon   = sys.error("Can't convert samurai to backgammon")
     def toAbalone      = sys.error("Can't convert samurai to abalone")
+    def toDameo        = sys.error("Can't convert samurai to dameo")
 
     def gameLogic = GameLogic.Samurai()
 
@@ -159,6 +164,7 @@ object FEN {
     def toGo           = sys.error("Can't convert togyzkumalak to go")
     def toBackgammon   = sys.error("Can't convert togyzkumalak to backgammon")
     def toAbalone      = sys.error("Can't convert togyzkumalak to abalone")
+    def toDameo        = sys.error("Can't convert togyzkumalak to dameo")
 
     def gameLogic = GameLogic.Togyzkumalak()
 
@@ -187,6 +193,7 @@ object FEN {
     def toGo           = f
     def toBackgammon   = sys.error("Can't convert go to backgammon")
     def toAbalone      = sys.error("Can't convert go to abalone")
+    def toDameo        = sys.error("Can't convert go to dameo")
 
     def gameLogic = GameLogic.Go()
 
@@ -215,6 +222,7 @@ object FEN {
     def toGo           = sys.error("Can't convert backgammon to go")
     def toBackgammon   = f
     def toAbalone      = sys.error("Can't convert backgammon to abalone")
+    def toDameo        = sys.error("Can't convert backgammon to dameo")
 
     def gameLogic = GameLogic.Backgammon()
 
@@ -243,6 +251,7 @@ object FEN {
     def toGo           = sys.error("Can't convert abalone to go")
     def toBackgammon   = sys.error("Can't convert abalone to backgammon")
     def toAbalone      = f
+    def toDameo        = sys.error("Can't convert abalone to dameo")
 
     def gameLogic = GameLogic.Abalone()
 
@@ -261,6 +270,35 @@ object FEN {
 
   }
 
+  final case class Dameo(f: strategygames.dameo.format.FEN) extends FEN(f.value) {
+
+    def toChess        = sys.error("Can't convert dameo to chess")
+    def toDraughts     = sys.error("Can't convert dameo to draughts")
+    def toFairySF      = sys.error("Can't convert dameo to fairysf")
+    def toSamurai      = sys.error("Can't convert dameo to samurai")
+    def toTogyzkumalak = sys.error("Can't convert dameo to togyzkumalak")
+    def toGo           = sys.error("Can't convert dameo to go")
+    def toBackgammon   = sys.error("Can't convert dameo to backgammon")
+    def toAbalone      = sys.error("Can't convert dameo to abalone")
+    def toDameo        = f
+
+    def gameLogic = GameLogic.Dameo()
+
+    def fullMove: Option[Int] = sys.error("There is no fullMove in dameo")
+
+    def player: Option[Player] = f.player
+
+    def ply: Option[Int] = sys.error("There is no ply in dameo")
+
+    def initial: Boolean = f.initial
+
+    def chessFen: Option[strategygames.chess.format.FEN] = None
+
+    def player1Score = sys.error("There is no player1 score in dameo")
+    def player2Score = sys.error("There is no player2 score in dameo")
+
+  }
+
   def wrap(fen: strategygames.chess.format.FEN)        = Chess(fen)
   def wrap(fen: strategygames.draughts.format.FEN)     = Draughts(fen)
   def wrap(fen: strategygames.fairysf.format.FEN)      = FairySF(fen)
@@ -269,6 +307,7 @@ object FEN {
   def wrap(fen: strategygames.go.format.FEN)           = Go(fen)
   def wrap(fen: strategygames.backgammon.format.FEN)   = Backgammon(fen)
   def wrap(fen: strategygames.abalone.format.FEN)      = Abalone(fen)
+  def wrap(fen: strategygames.dameo.format.FEN)        = Dameo(fen)
 
   def apply(lib: GameLogic, value: String): FEN = lib match {
     case GameLogic.Draughts()     => FEN.Draughts(strategygames.draughts.format.FEN(value))
@@ -279,6 +318,7 @@ object FEN {
     case GameLogic.Togyzkumalak() => FEN.Togyzkumalak(strategygames.togyzkumalak.format.FEN(value))
     case GameLogic.Backgammon()   => FEN.Backgammon(strategygames.backgammon.format.FEN(value))
     case GameLogic.Abalone()      => FEN.Abalone(strategygames.abalone.format.FEN(value))
+    case GameLogic.Dameo()        => FEN.Dameo(strategygames.dameo.format.FEN(value))
   }
 
   def apply(v: Variant, value: String): FEN = apply(v.gameLogic, value)
@@ -295,6 +335,8 @@ object FEN {
       Backgammon(strategygames.backgammon.format.FEN(source.replace("_", " ").trim))
     case GameLogic.Abalone()      =>
       Abalone(strategygames.abalone.format.FEN(source.replace("_", " ").trim))
+    case GameLogic.Dameo()        =>
+      Dameo(strategygames.dameo.format.FEN(source.replace("_", " ").trim))
   }
 
   def fishnetFen(variant: Variant)(fen: FEN): FEN = variant match {

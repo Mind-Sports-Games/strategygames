@@ -28,6 +28,8 @@ object Dumper {
       backgammon.format.pgn.Dumper(data)
     case (GameLogic.Abalone(), StratMove.Abalone(data))           =>
       abalone.format.pgn.Dumper(data)
+    case (GameLogic.Dameo(), StratMove.Dameo(data))               =>
+      dameo.format.pdn.Dumper(data)
     case _                                                        =>
       sys.error("Mismatched gamelogic types 31")
   }

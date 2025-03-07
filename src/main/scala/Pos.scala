@@ -119,10 +119,21 @@ object Pos {
 
     def piotr: Char = p.piotr
 
-    // TODO Abalone check this
     lazy val toInt: Int = (p.file.index << 3) + p.rank.index
 
     lazy val all: List[Pos] = abalone.Pos.all.map(Abalone)
+
+  }
+
+  final case class Dameo(p: dameo.Pos) extends Pos {
+
+    val key: String = p.key
+
+    def piotr: Char = p.piotr
+
+    lazy val toInt: Int = (p.file.index << 4) + p.rank.index
+
+    lazy val all: List[Pos] = dameo.Pos.all.map(Dameo)
 
   }
 
@@ -137,6 +148,7 @@ object Pos {
     case GameLogic.Go()           => go.Pos.fromKey(key).map(Go)
     case GameLogic.Backgammon()   => backgammon.Pos.fromKey(key).map(Backgammon)
     case GameLogic.Abalone()      => abalone.Pos.fromKey(key).map(Abalone)
+    case GameLogic.Dameo()        => dameo.Pos.fromKey(key).map(Dameo)
   }
 
   // def at(lib: GameLogic, x: Int, y: Int): Option[Pos] = lib match {

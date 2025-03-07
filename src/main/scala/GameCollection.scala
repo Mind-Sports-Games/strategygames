@@ -53,8 +53,13 @@ object GameLogic {
     def name = "Abalone"
   }
 
+  final case class Dameo() extends GameLogic {
+    def id   = 8
+    def name = "Dameo"
+  }
+
   def all: List[GameLogic] =
-    List(Chess(), Draughts(), FairySF(), Samurai(), Togyzkumalak(), Go(), Backgammon(), Abalone())
+    List(Chess(), Draughts(), FairySF(), Samurai(), Togyzkumalak(), Go(), Backgammon(), Abalone(), Dameo())
 
   // TODO: I'm sure there is a better scala way of doing this
   def apply(id: Int): GameLogic = id match {
@@ -65,6 +70,7 @@ object GameLogic {
     case 5 => Go()
     case 6 => Backgammon()
     case 7 => Abalone()
+    case 8 => Dameo()
     case _ => Chess()
   }
 }
@@ -464,6 +470,41 @@ object GameFamily {
     def playerColors      = Map(P1 -> "black", P2 -> "white")
   }
 
+  final case class Dameo() extends GameFamily {
+    def id                = 13
+    def name              = GameLogic.Dameo().name
+    def key               = GameLogic.Dameo().name.toLowerCase()
+    def gameLogic         = GameLogic.Dameo()
+    def hasFishnet        = false
+    def hasAnalysisBoard  = false
+    def defaultVariant    = Variant.Dameo(strategygames.dameo.variant.Dameo)
+    def variants          = Variant.all(GameLogic.Dameo())
+    def displayPiece      = "wK"
+    def pieceSetThemes    = List("wide_crown", "fabirovsky", "check_yb")
+    def pieceSetDefault   = "wide_crown"
+    def boardThemes       = List(
+      "blue",
+      "blue2",
+      "blue3",
+      "canvas",
+      "wood",
+      "wood2",
+      "wood3",
+      "maple",
+      "brown",
+      "leather",
+      "green",
+      "marble",
+      "grey",
+      "metal",
+      "olive",
+      "purple"
+    )
+    def boardThemeDefault = "blue3"
+    def playerNames       = Map(P1 -> "White", P2 -> "Black")
+    def playerColors      = Map(P1 -> "white", P2 -> "black")
+  }
+
   def all: List[GameFamily] = List(
     Chess(),
     Draughts(),
@@ -477,7 +518,8 @@ object GameFamily {
     Go(),
     Backgammon(),
     BreakthroughTroyka(),
-    Abalone()
+    Abalone(),
+    Dameo()
   )
 
   // TODO: I'm sure there is a better scala way of doing this
@@ -494,6 +536,7 @@ object GameFamily {
     case 10 => Backgammon()
     case 11 => BreakthroughTroyka()
     case 12 => Abalone()
+    case 13 => Dameo()
     case _  => Chess()
   }
 
@@ -619,6 +662,14 @@ object GameGroup {
     def medley   = true
   }
 
+  final case class Dameo() extends GameGroup {
+    def id       = 13
+    def name     = "Dameo"
+    def key      = "dameo"
+    def variants = Variant.all(GameLogic.Dameo()).filter(_.gameFamily.name == this.name)
+    def medley   = true
+  }
+
   def all: List[GameGroup] =
     List(
       Chess(),
@@ -633,7 +684,8 @@ object GameGroup {
       Go(),
       Backgammon(),
       BreakthroughTroyka(),
-      Abalone()
+      Abalone(),
+      Dameo()
     )
 
   def medley: List[GameGroup] = all.filter(_.medley)
@@ -652,6 +704,7 @@ object GameGroup {
     case 10 => Backgammon()
     case 11 => BreakthroughTroyka()
     case 12 => Abalone()
+    case 13 => Dameo()
     case _  => Chess()
   }
 }

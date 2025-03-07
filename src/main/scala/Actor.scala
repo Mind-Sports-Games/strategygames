@@ -71,4 +71,11 @@ object Actor {
         Board.Abalone(a.board)
       ) {}
 
+  final case class Dameo(a: dameo.Actor)
+      extends Actor(
+        Piece.Dameo(a.piece),
+        Pos.Dameo(a.pos),
+        Board.Dameo(a.board)
+      ) {}
+
 }
