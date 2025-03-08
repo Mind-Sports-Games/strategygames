@@ -53,7 +53,6 @@ object Uci {
           (
             Pos.fromKey(orig),
             Pos.fromKey(dest),
-            // TODO Dameo set this
             capture.length == 1
           ) match {
             case (Some(orig), Some(dest), capture) =>
@@ -63,7 +62,7 @@ object Uci {
                   dest = dest,
                   // TODO Dameo set this
                   promotion = None,
-                  capture = if (capture) Some(orig) else None
+                  capture = if (capture) Pos.capturePos(orig, dest) else None
                 )
               )
             case _                                 => None
@@ -77,7 +76,7 @@ object Uci {
       orig    <- move.headOption.flatMap(Pos.piotr)
       dest    <- move.lift(1).flatMap(Pos.piotr)
       capture <- move.lift(2).nonEmpty.some
-    } yield Move(orig, dest, None, (if (capture) Some(orig) else None))
+    } yield Move(orig, dest, None, (if (capture) Pos.capturePos(orig, dest) else None))
 
     // TODO Dameo use capture and promotion properly
     def fromStrings(origS: String, destS: String, promS: Option[String]) = for {

@@ -67,7 +67,7 @@ object Replay {
   }
 
   def replayMove(before: Game, orig: Pos, dest: Pos, capture: Option[Pos], endTurn: Boolean): Move =
-    // TODO Dameo set this
+    // TODO Dameo set this. Probably need to pass through promotion as well?
     Move(
       piece = before.situation.board.pieces(orig),
       orig = orig,
@@ -88,10 +88,16 @@ object Replay {
     var state  = init
     var errors = ""
 
-    def replayMoveFromUci(orig: Option[Pos], dest: Option[Pos], capture: Option[Pos]): (Game, Move) =
+    def replayMoveFromUci(orig: Option[Pos], dest: Option[Pos], capture: Boolean): (Game, Move) =
       (orig, dest) match {
         case (Some(orig), Some(dest)) => {
-          val move = replayMove(state, orig, dest, capture, true)
+          val move = replayMove(
+            state,
+            orig,
+            dest,
+            if (capture) Pos.capturePos(orig, dest) else None,
+            true
+          )
           state = state(move)
           (state, move)
         }
@@ -103,13 +109,13 @@ object Replay {
       }
 
     val gameWithActions: List[(Game, Move)] =
-      // can flatten as specific EndTurn action marks turn end
+      // TODO check that using flatten works for Dameo
       actionStrs.flatten.toList.map {
         case Uci.Move.moveR(orig, capture, dest) =>
           replayMoveFromUci(
             Pos.fromKey(orig),
             Pos.fromKey(dest),
-            if (capture.length == 1) Pos.fromKey(orig) else None
+            capture.length == 1
           )
         case (action: String)                    =>
           sys.error(s"Invalid action for replay: $action")
