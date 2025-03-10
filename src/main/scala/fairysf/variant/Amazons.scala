@@ -12,7 +12,7 @@ case object Amazons
       key = "amazons",
       name = "Amazons",
       standardInitialPosition = true,
-      fairysfName = FairySFName("amazons"),
+      fishnetKey = "amazons",
       boardSize = Board.Dim10x10
     ) {
 
@@ -152,7 +152,7 @@ case object Amazons
     }
 
   override def valid(board: Board, strict: Boolean): Boolean =
-    Api.validateFEN(fairysfName.name, board.apiPosition.fen.value)
+    Api.validateFEN(fishnetKey, board.apiPosition.fen.value)
 
   override def staleMate(situation: Situation): Boolean     = false
   override def specialEnd(situation: Situation): Boolean    = situation.board.apiPosition.legalMoves.isEmpty

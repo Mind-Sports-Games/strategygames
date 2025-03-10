@@ -17,9 +17,13 @@ abstract class Variant private[variant] (
 ) {
 
   val fishnetKey = key match {
-    case "fiveCheck"  => "5check"
-    case "noCastling" => "nocastle"
-    case _            => key
+    case "threeCheck"    => "3check"
+    case "fiveCheck"     => "5check"
+    case "noCastling"    => "nocastle"
+    case "racingKings"   => "racingkings"
+    case "kingOfTheHill" => "kingofthehill"
+    case "chess960"      => "fischerandom"
+    case _               => key // defaults to chess in fairystockfish if unknown
   }
 
   def pieces: Map[Pos, Piece]
