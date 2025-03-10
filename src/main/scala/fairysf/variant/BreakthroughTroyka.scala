@@ -9,7 +9,7 @@ case object BreakthroughTroyka
       key = "breakthroughtroyka",
       name = "Breakthrough",
       standardInitialPosition = true,
-      fairysfName = FairySFName("breakthrough"),
+      fishnetKey = "breakthrough",
       boardSize = Board.Dim8x8
     ) {
 

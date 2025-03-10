@@ -9,7 +9,7 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
     val position = Api.positionFromVariant(variant.Shogi)
     "be valid" in {
       Api.validateFEN(
-        variant.Shogi.fairysfName.name,
+        variant.Shogi.fishnetKey,
         variant.Shogi.initialFen.value
       ) must_== true
     }
@@ -37,7 +37,7 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
     }
     "be valid" in {
       Api.validateFEN(
-        variant.Xiangqi.fairysfName.name,
+        variant.Xiangqi.fishnetKey,
         variant.Xiangqi.initialFen.value
       ) must_== true
     }

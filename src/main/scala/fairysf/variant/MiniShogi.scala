@@ -10,7 +10,7 @@ case object MiniShogi
       key = "minishogi",
       name = "Mini Shogi",
       standardInitialPosition = true,
-      fairysfName = FairySFName("minishogi"),
+      fishnetKey = "minishogi",
       boardSize = Board.Dim5x5
     ) {
 

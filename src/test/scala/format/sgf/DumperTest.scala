@@ -124,7 +124,7 @@ class DumperTest extends Specification with ValidatedMatchers {
   // https://www.red-bean.com/sgf/backgammon.html
   "Backgammon drop=> s@l1 actionStrsToOutput" should {
     "have an sgf output" in {
-      val output                 = ";W[ya]"
+      val output                 = ";W[yx]"
       val actionStrs: ActionStrs = Vector(Vector("s@l2"))
       Dumper.apply(Backgammon, actionStrs) must_== output
     }
@@ -132,7 +132,7 @@ class DumperTest extends Specification with ValidatedMatchers {
 
   "Backgammon lift=> ^h1 actionStrsToOutput" should {
     "have an sgf output" in {
-      val output                 = ";W[tz]"
+      val output                 = ";W[ez]"
       val actionStrs: ActionStrs = Vector(Vector("^h1"))
       Dumper.apply(Backgammon, actionStrs) must_== output
     }
@@ -140,7 +140,7 @@ class DumperTest extends Specification with ValidatedMatchers {
 
   "Backgammon move=> ^h1 actionStrsToOutput" should {
     "have an sgf output" in {
-      val output                 = ";W[lr]"
+      val output                 = ";W[mg]"
       val actionStrs: ActionStrs = Vector(Vector("a2f1"))
       Dumper.apply(Backgammon, actionStrs) must_== output
     }
@@ -156,7 +156,7 @@ class DumperTest extends Specification with ValidatedMatchers {
 
   "Backgammon part of game actionStrsToOutput" should {
     "have an sgf output" in {
-      val output                 = ";W[31qtst]\n;B[66]"
+      val output                 = ";W[31hefe]\n;B[66]"
       val actionStrs: ActionStrs =
         Vector(Vector("1/3", "e1h1", "g1h1", "endTurn"), Vector("6/6"))
       Dumper.apply(Backgammon, actionStrs) must_== output
@@ -165,7 +165,7 @@ class DumperTest extends Specification with ValidatedMatchers {
 
   "Backgammon p2 starts actionStrsToOutput" should {
     "have an sgf output" in {
-      val output                 = ";W[]\n;B[44xtxtmimi]\n;W[43]"
+      val output                 = ";W[]\n;B[44aeaelplp]\n;W[43]"
       val actionStrs: ActionStrs =
         Vector(Vector("endTurn"), Vector("4/4", "l1h1", "l1h1", "a1d2", "a1d2", "endTurn"), Vector("3/4"))
       Dumper.apply(Backgammon, actionStrs) must_== output

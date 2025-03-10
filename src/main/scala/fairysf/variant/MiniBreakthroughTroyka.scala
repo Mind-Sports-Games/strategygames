@@ -10,7 +10,7 @@ case object MiniBreakthroughTroyka
       key = "minibreakthroughtroyka",
       name = "Mini Breakthrough",
       standardInitialPosition = true,
-      fairysfName = FairySFName("ps-minibreakthrough"),
+      fishnetKey = "ps-minibreakthrough",
       boardSize = Board.Dim5x5
     ) {
 

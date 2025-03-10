@@ -354,7 +354,7 @@ object Variant {
       extends Variant(
         id = v.id,
         key = v.key,
-        fishnetKey = v.fairysfName.name,
+        fishnetKey = v.fishnetKey,
         name = v.name,
         standardInitialPosition = v.standardInitialPosition
       ) {

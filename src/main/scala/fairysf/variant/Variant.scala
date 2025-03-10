@@ -9,15 +9,13 @@ import strategygames.fairysf.format.{ FEN, Forsyth, Uci }
 import strategygames.fairysf.format.pgn.Binary
 import strategygames.{ GameFamily, Player }
 
-case class FairySFName(val name: String)
-
 // Correctness depends on singletons for each variant ID
 abstract class Variant private[variant] (
     val id: Int,
     val key: String,
     val name: String,
     val standardInitialPosition: Boolean,
-    val fairysfName: FairySFName,
+    val fishnetKey: String,
     val boardSize: Board.BoardSize
 ) {
 
@@ -48,11 +46,11 @@ abstract class Variant private[variant] (
   def perfId: Int
   def perfIcon: Char
 
-  def initialFen: FEN = Api.initialFen(fairysfName.name)
+  def initialFen: FEN = Api.initialFen(fishnetKey)
 
-  lazy val position: Api.Position = Api.positionFromVariantName(this.fairysfName.name)
+  lazy val position: Api.Position = Api.positionFromVariantName(fishnetKey)
 
-  def pieces: Map[Pos, Piece] = Api.pieceMapFromFen(fairysfName.name, initialFen.value)
+  def pieces: Map[Pos, Piece] = Api.pieceMapFromFen(fishnetKey, initialFen.value)
 
   def exportBoardFen(board: Board): FEN = board.apiPosition.fen
 
@@ -239,7 +237,7 @@ abstract class Variant private[variant] (
     board
 
   def valid(board: Board, @nowarn strict: Boolean): Boolean =
-    Api.validateFEN(fairysfName.name, Forsyth.exportBoard(board))
+    Api.validateFEN(fishnetKey, Forsyth.exportBoard(board))
 
   val roles: List[Role] = Role.all
 
@@ -291,8 +289,8 @@ object Variant {
   val byKey                   = all map { v =>
     (v.key, v)
   } toMap
-  val byFairySFName           = all map { v =>
-    (v.fairysfName.name, v)
+  val byFishnetKey            = all map { v =>
+    (v.fishnetKey, v)
   } toMap
 
   val default = Shogi

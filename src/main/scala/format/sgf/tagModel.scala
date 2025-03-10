@@ -42,8 +42,9 @@ object Tags {
 
   val importantTagRoster          = List(
     Tag.FF,
-    Tag.CA,
     Tag.GM,
+    Tag.CA,
+    Tag.AP,
     Tag.DT,
     Tag.EV,
     Tag.TM,
@@ -59,6 +60,7 @@ object Tag {
   case object FF extends TagType // File Format
   case object CA extends TagType // Character
   case object GN extends TagType // Game Name
+  case object AP extends TagType // Application
   case object DT extends TagType { // Date time
     val format = DateTimeFormat forPattern "yyyy.MM.dd" withZone DateTimeZone.UTC
   }
@@ -94,8 +96,9 @@ object Tag {
 
   val tagTypes                                  = List(
     FF,
-    CA,
     GN,
+    CA,
+    AP,
     DT,
     PC,
     EV,
