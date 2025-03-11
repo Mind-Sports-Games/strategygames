@@ -2,6 +2,7 @@ package strategygames
 
 sealed trait Role {
   val gameLogic: GameLogic
+  val gameFamily: GameFamily
   val forsyth: Char
   // draughts.Role.pdn will be referred to by pgn from this point
   val pgn: Char
@@ -31,6 +32,7 @@ object Role {
 
   final case class ChessRole(r: chess.Role) extends Role {
     val gameLogic           = GameLogic.Chess()
+    val gameFamily          = r.gameFamily
     val forsyth             = r.forsyth
     val pgn                 = r.pgn
     val binaryInt           = r.binaryInt
@@ -43,6 +45,7 @@ object Role {
 
   final case class DraughtsRole(r: draughts.Role) extends Role {
     lazy val gameLogic      = GameLogic.Draughts()
+    lazy val gameFamily     = GameFamily.Draughts()
     lazy val forsyth        = r.forsyth
     lazy val pgn            = r.pdn
     lazy val binaryInt      = r.binaryInt
@@ -55,6 +58,7 @@ object Role {
 
   final case class FairySFRole(r: fairysf.Role) extends Role {
     lazy val gameLogic      = GameLogic.FairySF()
+    lazy val gameFamily     = r.gameFamily
     lazy val forsyth        = r.forsyth
     lazy val pgn            = r.pgn
     lazy val binaryInt      = r.binaryInt
@@ -67,6 +71,7 @@ object Role {
 
   final case class SamuraiRole(r: samurai.Role) extends Role {
     lazy val gameLogic      = GameLogic.Samurai()
+    lazy val gameFamily     = r.gameFamily
     lazy val forsyth        = r.forsyth
     lazy val pgn            = r.pgn
     lazy val binaryInt      = r.binaryInt
@@ -79,6 +84,7 @@ object Role {
 
   final case class TogyzkumalakRole(r: togyzkumalak.Role) extends Role {
     lazy val gameLogic      = GameLogic.Togyzkumalak()
+    lazy val gameFamily     = r.gameFamily
     lazy val forsyth        = r.forsyth
     lazy val pgn            = r.pgn
     lazy val binaryInt      = r.binaryInt
@@ -91,6 +97,7 @@ object Role {
 
   final case class GoRole(r: go.Role) extends Role {
     lazy val gameLogic      = GameLogic.Go()
+    lazy val gameFamily     = r.gameFamily
     lazy val forsyth        = r.forsyth
     lazy val pgn            = r.pgn
     lazy val binaryInt      = r.binaryInt
@@ -103,6 +110,7 @@ object Role {
 
   final case class BackgammonRole(r: backgammon.Role) extends Role {
     lazy val gameLogic      = GameLogic.Backgammon()
+    lazy val gameFamily     = r.gameFamily
     lazy val forsyth        = r.forsyth
     lazy val pgn            = r.pgn
     lazy val binaryInt      = r.binaryInt
@@ -115,6 +123,7 @@ object Role {
 
   final case class AbaloneRole(r: abalone.Role) extends Role {
     lazy val gameLogic      = GameLogic.Abalone()
+    lazy val gameFamily     = r.gameFamily
     lazy val forsyth        = r.forsyth
     lazy val pgn            = r.pgn
     lazy val binaryInt      = r.binaryInt
@@ -127,6 +136,7 @@ object Role {
 
   final case class DameoRole(r: dameo.Role) extends Role {
     lazy val gameLogic      = GameLogic.Dameo()
+    lazy val gameFamily     = r.gameFamily
     lazy val forsyth        = r.forsyth
     lazy val pgn            = r.pdn
     lazy val binaryInt      = r.binaryInt
@@ -139,6 +149,7 @@ object Role {
 
   final case class ChessPromotableRole(r: chess.PromotableRole) extends PromotableRole {
     lazy val gameLogic                              = GameLogic.Chess()
+    lazy val gameFamily                             = r.gameFamily
     lazy val forsyth                                = r.forsyth
     lazy val pgn                                    = r.pgn
     lazy val binaryInt                              = r.binaryInt
@@ -160,6 +171,7 @@ object Role {
 
   final case class DraughtsPromotableRole(r: draughts.PromotableRole) extends PromotableRole {
     lazy val gameLogic                              = GameLogic.Draughts()
+    lazy val gameFamily                             = GameFamily.Draughts()
     lazy val forsyth                                = r.forsyth
     lazy val pgn                                    = r.pdn
     lazy val binaryInt                              = r.binaryInt
@@ -181,6 +193,7 @@ object Role {
 
   final case class FairySFPromotableRole(r: fairysf.PromotableRole) extends PromotableRole {
     lazy val gameLogic                              = GameLogic.FairySF()
+    lazy val gameFamily                             = r.gameFamily
     lazy val forsyth                                = r.forsyth
     lazy val pgn                                    = r.pgn
     lazy val binaryInt                              = r.binaryInt
@@ -202,6 +215,7 @@ object Role {
 
   final case class DameoPromotableRole(r: dameo.PromotableRole) extends PromotableRole {
     lazy val gameLogic                              = GameLogic.Dameo()
+    lazy val gameFamily                             = r.gameFamily
     lazy val forsyth                                = r.forsyth
     lazy val pgn                                    = r.pdn
     lazy val binaryInt                              = r.binaryInt

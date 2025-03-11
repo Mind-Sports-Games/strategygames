@@ -1143,8 +1143,8 @@ object Variant {
       togyzkumalak.variant.Variant.all.map(Togyzkumalak) :::
       go.variant.Variant.all.map(Go) :::
       backgammon.variant.Variant.all.map(Backgammon) :::
-      abalone.variant.Variant.all.map(Abalone) :::
-      dameo.variant.Variant.all.map(Dameo)
+      abalone.variant.Variant.all.map(Abalone)// :::
+      //dameo.variant.Variant.all.map(Dameo)
 
   def byId = all map { v => (v.id, v) } toMap
 

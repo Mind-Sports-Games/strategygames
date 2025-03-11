@@ -4,17 +4,17 @@ import strategygames.{ GameFamily, P1, P2, Player }
 
 sealed trait Role {
   val forsyth: Char
-  val forsythUpper: Char          = forsyth.toUpper
-  lazy val pdn: Char              = forsyth
-  lazy val name                   = toString
-  lazy val groundName             = s"${forsyth}-piece"
+  lazy val forsythUpper: Char = forsyth.toUpper
+  lazy val pdn: Char          = forsyth
+  lazy val name               = toString
+  lazy val groundName         = s"${forsyth}-piece"
   val binaryInt: Int
-  val hashInt: Int                = binaryInt
+  lazy val hashInt: Int       = binaryInt
   val valueOf: Option[Int]
-  lazy val gameFamily: GameFamily = GameFamily.Dameo()
-  final def -(player: Player)     = Piece(player, this)
-  final def p1                    = this - P1
-  final def p2                    = this - P2
+  val gameFamily: GameFamily  = GameFamily.Dameo()
+  final def -(player: Player) = Piece(player, this)
+  final def p1                = this - P1
+  final def p2                = this - P2
 }
 
 sealed trait PromotableRole extends Role
@@ -23,30 +23,30 @@ sealed trait PromotableRole extends Role
 case object King extends PromotableRole {
   val forsyth   = 'k'
   val binaryInt = 1
-  val valueOf = Some(2)
+  val valueOf   = Some(2)
 }
 
 case object Man extends Role {
   val forsyth   = 'm'
   val binaryInt = 2
-  val valueOf = Some(1)
+  val valueOf   = Some(1)
 }
 
 case object GhostMan extends Role {
   val forsyth   = 'g'
   val binaryInt = 4
-  val valueOf = Some(0)
+  val valueOf   = Some(0)
 }
 
 case object GhostKing extends Role {
   val forsyth   = 'p'
   val binaryInt = 3
-  val valueOf = Some(0)
+  val valueOf   = Some(0)
 }
 
 object Role {
 
-  val all: List[Role] = List(King, Man)
+  val all: List[Role]                     = List(King, Man)
   val allPromotable: List[PromotableRole] = List(King)
 
   def defaultRole: Role = Man
@@ -54,43 +54,43 @@ object Role {
   def allByGameFamily(gf: GameFamily): List[Role] =
     all.filter(r => r.gameFamily == gf)
 
-  val allByForsyth: Map[Char, Role]                      = all map { r =>
+  val allByForsyth: Map[Char, Role]                          = all map { r =>
     (r.forsyth, r)
   } toMap
-  def allByForsyth(gf: GameFamily): Map[Char, Role]      = allByGameFamily(gf) map { r =>
+  def allByForsyth(gf: GameFamily): Map[Char, Role]          = allByGameFamily(gf) map { r =>
     (r.forsyth, r)
   } toMap
-  val allByPdn: Map[Char, Role]                          = all map { r =>
+  val allByPdn: Map[Char, Role]                              = all map { r =>
     (r.pdn, r)
   } toMap
-  def allByPdn(gf: GameFamily): Map[Char, Role]          = allByGameFamily(gf) map { r =>
+  def allByPdn(gf: GameFamily): Map[Char, Role]              = allByGameFamily(gf) map { r =>
     (r.pdn, r)
   } toMap
-  val allByName: Map[String, Role]                       = all map { r =>
+  val allByName: Map[String, Role]                           = all map { r =>
     (r.name, r)
   } toMap
-  def allByName(gf: GameFamily): Map[String, Role]       = allByGameFamily(gf) map { r =>
+  def allByName(gf: GameFamily): Map[String, Role]           = allByGameFamily(gf) map { r =>
     (r.name, r)
   } toMap
-  val allByGroundName: Map[String, Role]                 = all map { r =>
+  val allByGroundName: Map[String, Role]                     = all map { r =>
     (r.groundName, r)
   } toMap
-  def allByGroundName(gf: GameFamily): Map[String, Role] = allByGameFamily(gf) map { r =>
+  def allByGroundName(gf: GameFamily): Map[String, Role]     = allByGameFamily(gf) map { r =>
     (r.groundName, r)
   } toMap
-  val allByBinaryInt: Map[Int, Role]                     = all map { r =>
+  val allByBinaryInt: Map[Int, Role]                         = all map { r =>
     (r.binaryInt, r)
   } toMap
-  def allByBinaryInt(gf: GameFamily): Map[Int, Role]     = allByGameFamily(gf) map { r =>
+  def allByBinaryInt(gf: GameFamily): Map[Int, Role]         = allByGameFamily(gf) map { r =>
     (r.binaryInt, r)
   } toMap
-  val allByHashInt: Map[Int, Role]                       = all map { r =>
+  val allByHashInt: Map[Int, Role]                           = all map { r =>
     (r.hashInt, r)
   } toMap
-  val allPromotableByName: Map[String, PromotableRole]  = allPromotable.map(r => (r.toString, r)) toMap
-  val allPromotableByForsyth: Map[Char, PromotableRole] = allPromotable.map(r => (r.forsyth, r)) toMap
-  val allPromotableByPdn: Map[Char, PromotableRole]     = allPromotable.map(r => (r.pdn, r)) toMap
-  val allPromotableByGroundName: Map[String, PromotableRole]                 =
+  val allPromotableByName: Map[String, PromotableRole]       = allPromotable.map(r => (r.toString, r)) toMap
+  val allPromotableByForsyth: Map[Char, PromotableRole]      = allPromotable.map(r => (r.forsyth, r)) toMap
+  val allPromotableByPdn: Map[Char, PromotableRole]          = allPromotable.map(r => (r.pdn, r)) toMap
+  val allPromotableByGroundName: Map[String, PromotableRole] =
     allPromotable map { r =>
       (r.groundName, r)
     } toMap

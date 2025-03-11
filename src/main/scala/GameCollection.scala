@@ -59,7 +59,16 @@ object GameLogic {
   }
 
   def all: List[GameLogic] =
-    List(Chess(), Draughts(), FairySF(), Samurai(), Togyzkumalak(), Go(), Backgammon(), Abalone(), Dameo())
+    List(
+      Chess(),
+      Draughts(),
+      FairySF(),
+      Samurai(),
+      Togyzkumalak(),
+      Go(),
+      Backgammon(),
+      Abalone()
+    ) // , Dameo())
 
   // TODO: I'm sure there is a better scala way of doing this
   def apply(id: Int): GameLogic = id match {
@@ -518,8 +527,8 @@ object GameFamily {
     Go(),
     Backgammon(),
     BreakthroughTroyka(),
-    Abalone(),
-    Dameo()
+    Abalone() // ,
+    // Dameo()
   )
 
   // TODO: I'm sure there is a better scala way of doing this
@@ -684,8 +693,8 @@ object GameGroup {
       Go(),
       Backgammon(),
       BreakthroughTroyka(),
-      Abalone(),
-      Dameo()
+      Abalone() // ,
+      // Dameo()
     )
 
   def medley: List[GameGroup] = all.filter(_.medley)

@@ -18,62 +18,90 @@ object Reader {
 
   sealed trait Result {
     def valid: Validated[String, Replay]
+    def evenIncomplete: Replay
   }
 
   object Result {
     case class ChessComplete(replay: chess.Replay)                                  extends Result {
-      def valid = Validated.valid(Replay.Chess(replay))
+      private def r      = Replay.Chess(replay)
+      def valid          = Validated.valid(r)
+      def evenIncomplete = r
     }
     case class ChessIncomplete(replay: chess.Replay, failure: String)               extends Result {
-      def valid = Validated.invalid(failure)
+      def valid          = Validated.invalid(failure)
+      def evenIncomplete = Replay.Chess(replay)
     }
     case class DraughtsComplete(replay: draughts.Replay)                            extends Result {
-      def valid = Validated.valid(Replay.Draughts(replay))
+      private def r      = Replay.Draughts(replay)
+      def valid          = Validated.valid(r)
+      def evenIncomplete = r
     }
     case class DraughtsIncomplete(replay: draughts.Replay, failure: String)         extends Result {
-      def valid = Validated.invalid(failure)
+      def valid          = Validated.invalid(failure)
+      def evenIncomplete = Replay.Draughts(replay)
     }
     case class FairySFComplete(replay: fairysf.Replay)                              extends Result {
-      def valid = Validated.valid(Replay.FairySF(replay))
+      private def r      = Replay.FairySF(replay)
+      def valid          = Validated.valid(r)
+      def evenIncomplete = r
     }
     case class FairySFIncomplete(replay: fairysf.Replay, failure: String)           extends Result {
-      def valid = Validated.invalid(failure)
+      def valid          = Validated.invalid(failure)
+      def evenIncomplete = Replay.FairySF(replay)
     }
     case class SamuraiComplete(replay: samurai.Replay)                              extends Result {
-      def valid = Validated.valid(Replay.Samurai(replay))
+      private def r      = Replay.Samurai(replay)
+      def valid          = Validated.valid(r)
+      def evenIncomplete = r
     }
     case class SamuraiIncomplete(replay: samurai.Replay, failure: String)           extends Result {
-      def valid = Validated.invalid(failure)
+      def valid          = Validated.invalid(failure)
+      def evenIncomplete = Replay.Samurai(replay)
     }
     case class TogyzkumalakComplete(replay: togyzkumalak.Replay)                    extends Result {
-      def valid = Validated.valid(Replay.Togyzkumalak(replay))
+      private def r      = Replay.Togyzkumalak(replay)
+      def valid          = Validated.valid(r)
+      def evenIncomplete = r
     }
     case class TogyzkumalakIncomplete(replay: togyzkumalak.Replay, failure: String) extends Result {
-      def valid = Validated.invalid(failure)
+      def valid          = Validated.invalid(failure)
+      def evenIncomplete = Replay.Togyzkumalak(replay)
     }
     case class GoComplete(replay: go.Replay)                                        extends Result {
-      def valid = Validated.valid(Replay.Go(replay))
+      private def r      = Replay.Go(replay)
+      def valid          = Validated.valid(r)
+      def evenIncomplete = r
     }
     case class GoIncomplete(replay: go.Replay, failure: String)                     extends Result {
-      def valid = Validated.invalid(failure)
+      def valid          = Validated.invalid(failure)
+      def evenIncomplete = Replay.Go(replay)
     }
     case class BackgammonComplete(replay: backgammon.Replay)                        extends Result {
-      def valid = Validated.valid(Replay.Backgammon(replay))
+      private def r      = Replay.Backgammon(replay)
+      def valid          = Validated.valid(r)
+      def evenIncomplete = r
     }
     case class BackgammonIncomplete(replay: backgammon.Replay, failure: String)     extends Result {
-      def valid = Validated.invalid(failure)
+      def valid          = Validated.invalid(failure)
+      def evenIncomplete = Replay.Backgammon(replay)
     }
     case class AbaloneComplete(replay: abalone.Replay)                              extends Result {
-      def valid = Validated.valid(Replay.Abalone(replay))
+      private def r      = Replay.Abalone(replay)
+      def valid          = Validated.valid(r)
+      def evenIncomplete = r
     }
     case class AbaloneIncomplete(replay: abalone.Replay, failure: String)           extends Result {
-      def valid = Validated.invalid(failure)
+      def valid          = Validated.invalid(failure)
+      def evenIncomplete = Replay.Abalone(replay)
     }
     case class DameoComplete(replay: dameo.Replay)                                  extends Result {
-      def valid = Validated.valid(Replay.Dameo(replay))
+      private def r      = Replay.Dameo(replay)
+      def valid          = Validated.valid(r)
+      def evenIncomplete = r
     }
     case class DameoIncomplete(replay: dameo.Replay, failure: String)               extends Result {
-      def valid = Validated.invalid(failure)
+      def valid          = Validated.invalid(failure)
+      def evenIncomplete = Replay.Dameo(replay)
     }
 
     def wrap(result: ChessReader.Result) = result match {
