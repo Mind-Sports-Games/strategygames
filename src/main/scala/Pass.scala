@@ -48,6 +48,7 @@ object Pass {
     def toGo           = p
     def toBackgammon   = sys.error("Can't make a backgammon pass from a go pass")
     def toAbalone      = sys.error("Can't make a abalone pass from a go pass")
+    def toDameo        = sys.error("Can't make a dameo pass from a go pass")
 
   }
 

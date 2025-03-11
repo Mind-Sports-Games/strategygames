@@ -50,6 +50,7 @@ object SelectSquares {
     def toGo           = ss
     def toBackgammon   = sys.error("Can't make a backgammon SelectSquares from a go SelectSquares")
     def toAbalone      = sys.error("Can't make a abalone SelectSquares from a go SelectSquares")
+    def toDameo        = sys.error("Can't make a dameo SelectSquares from a go SelectSquares")
 
   }
 

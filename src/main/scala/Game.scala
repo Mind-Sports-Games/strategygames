@@ -90,6 +90,13 @@ abstract class Game(
           promotion = None,
           metrics
         )
+      case Uci.DameoMove(uci)                         =>
+        apply(
+          Pos.Dameo(uci.orig),
+          Pos.Dameo(uci.dest),
+          promotion = None,
+          metrics
+        )
       case Uci.ChessDrop(uci)                           =>
         drop(
           Role.ChessRole(uci.role),
@@ -221,6 +228,7 @@ abstract class Game(
   def toGo: go.Game
   def toBackgammon: backgammon.Game
   def toAbalone: abalone.Game
+  def toDameo: dameo.Game
 
 }
 
@@ -374,6 +382,7 @@ object Game {
     def toGo: go.Game                     = sys.error("Can't turn a chess game into a go game")
     def toBackgammon: backgammon.Game     = sys.error("Can't turn a chess game into a backgammon game")
     def toAbalone: abalone.Game           = sys.error("Can't turn a chess game into a abalone game")
+    def toDameo: dameo.Game               = sys.error("Can't turn a chess game into a dameo game")
 
   }
 
@@ -540,6 +549,7 @@ object Game {
     def toGo: go.Game                     = sys.error("Can't turn a draughts game into a go game")
     def toBackgammon: backgammon.Game     = sys.error("Can't turn a draughts game into a backgammon game")
     def toAbalone: abalone.Game           = sys.error("Can't turn a draughts game into a abalone game")
+    def toDameo: dameo.Game               = sys.error("Can't turn a draughts game into a dameo game")
 
   }
 
@@ -690,6 +700,7 @@ object Game {
     def toGo: go.Game                     = sys.error("Can't turn a fairysf game into a go game")
     def toBackgammon: backgammon.Game     = sys.error("Can't turn a fairysf game into a backgammon game")
     def toAbalone: abalone.Game           = sys.error("Can't turn a fairysf game into a abalone game")
+    def toDameo: dameo.Game               = sys.error("Can't turn a fairysf game into a dameo game")
 
   }
 
@@ -825,6 +836,7 @@ object Game {
     def toGo: go.Game                     = sys.error("Can't turn a samurai game into a go game")
     def toBackgammon: backgammon.Game     = sys.error("Can't turn a samurai game into a backgammon game")
     def toAbalone: abalone.Game           = sys.error("Can't turn a samurai game into a abalone game")
+    def toDameo: dameo.Game               = sys.error("Can't turn a samurai game into a dameo game")
 
   }
 
@@ -961,6 +973,7 @@ object Game {
     def toGo: go.Game                     = sys.error("Can't turn a togyzkumalak game into a go game")
     def toBackgammon: backgammon.Game     = sys.error("Can't turn a togyzkumalak game into a backgammon game")
     def toAbalone: abalone.Game           = sys.error("Can't turn a togyzkumalak game into a abalone game")
+    def toDameo: dameo.Game               = sys.error("Can't turn a togyzkumalak game into a dameo game")
 
   }
 
@@ -1106,6 +1119,7 @@ object Game {
     def toGo: go.Game                     = g
     def toBackgammon: backgammon.Game     = sys.error("Can't turn a go game into a backgammon game")
     def toAbalone: abalone.Game           = sys.error("Can't turn a go game into a abalone game")
+    def toDameo: dameo.Game               = sys.error("Can't turn a go game into a dameo game")
 
   }
 
@@ -1271,6 +1285,7 @@ object Game {
     def toGo: go.Game                     = sys.error("Can't turn a backgammon game into a go game")
     def toBackgammon: backgammon.Game     = g
     def toAbalone: abalone.Game           = sys.error("Can't turn a backgammon game into a abalone game")
+    def toDameo: dameo.Game               = sys.error("Can't turn a backgammon game into a dameo game")
 
   }
 
@@ -1407,6 +1422,144 @@ object Game {
     def toGo: go.Game                     = sys.error("Can't turn a abalone game into a go game")
     def toBackgammon: backgammon.Game     = sys.error("Can't turn a abalone game into a backgammon game")
     def toAbalone: abalone.Game           = g
+    def toDameo: dameo.Game               = sys.error("Can't turn a abalone game into a dameo game")
+
+  }
+
+  final case class Dameo(g: dameo.Game)
+      extends Game(
+        Situation.Dameo(g.situation),
+        g.actionStrs,
+        g.clock,
+        g.plies,
+        g.turnCount,
+        g.startedAtPly,
+        g.startedAtTurn
+      ) {
+
+    def apply(
+        orig: Pos,
+        dest: Pos,
+        promotion: Option[PromotableRole] = None,
+        metrics: MoveMetrics = MoveMetrics(),
+        finalSquare: Boolean = false,
+        captures: Option[List[Pos]] = None,
+        partialCaptures: Boolean = false
+    ): Validated[String, (Game, Move)] = (orig, dest) match {
+      case (Pos.Dameo(orig), Pos.Dameo(dest)) =>
+        g.apply(orig, dest, metrics)
+          .toEither
+          .map(t => (Dameo(t._1), Move.Dameo(t._2)))
+          .toValidated
+      case _                                      => sys.error("Not passed Dameo objects")
+    }
+
+    def apply(action: Action): Game =
+      action match {
+        case (Move.Dameo(move)) => Dameo(g.apply(move))
+        case _                    => sys.error("Not passed Dameo objects")
+      }
+
+    def drop(
+        role: Role,
+        pos: Pos,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, Drop)] = sys.error("Can't drop in Dameo")
+
+    def lift(
+        pos: Pos,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, Lift)] =
+      sys.error("Can't lift in dameo")
+
+    def pass(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Pass)] =
+      sys.error("Can't pass in Dameo")
+
+    def selectSquares(
+        squares: List[Pos],
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, SelectSquares)] =
+      sys.error("Can't selectSquares in Dameo")
+
+    def diceRoll(
+        dice: List[Int],
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, DiceRoll)] =
+      sys.error("Can't diceroll in Dameo")
+
+    def undo(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Undo)] =
+      sys.error("Can't undo in dameo")
+
+    def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)] =
+      sys.error("Can't endTurn in dameo")
+
+    def cubeAction(
+        interaction: CubeInteraction,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, CubeAction)] =
+      sys.error("Can't cubeaction in dameo")
+
+    def randomizeDiceRoll: Option[DiceRoll] = None
+
+    def randomizeAndApplyDiceRoll(
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, DiceRoll)] =
+      sys.error("Can't apply diceroll in dameo")
+
+    def copy(clock: Option[ClockBase]): Game =
+      Dameo(g.copy(clock = clock))
+
+    def copy(plies: Int, turnCount: Int, startedAtPly: Int, startedAtTurn: Int): Game =
+      Dameo(
+        g.copy(
+          plies = plies,
+          turnCount = turnCount,
+          startedAtPly = startedAtPly,
+          startedAtTurn = startedAtTurn
+        )
+      )
+
+    def copy(
+        clock: Option[ClockBase],
+        plies: Int,
+        turnCount: Int,
+        startedAtPly: Int,
+        startedAtTurn: Int
+    ): Game =
+      Dameo(
+        g.copy(
+          clock = clock,
+          plies = plies,
+          turnCount = turnCount,
+          startedAtPly = startedAtPly,
+          startedAtTurn = startedAtTurn
+        )
+      )
+
+    def copy(situation: Situation, plies: Int, turnCount: Int): Game = situation match {
+      case Situation.Dameo(situation) =>
+        Dameo(g.copy(situation = situation, plies = plies, turnCount = turnCount))
+      case _                            =>
+        sys.error("Unable to copy dameo game with non-dameo arguments")
+    }
+    def copy(situation: Situation): Game                             = situation match {
+      case Situation.Dameo(situation) => Dameo(g.copy(situation = situation))
+      case _                            => sys.error("Unable to copy dameo game with non-dameo arguments")
+    }
+
+    def hasJustSwitchedTurns: Boolean = g.hasJustSwitchedTurns
+
+    def withTurnsAndPlies(p: Int, t: Int): Game = Dameo(g.withTurnsAndPlies(p, t))
+
+    def toFairySF: fairysf.Game           = sys.error("Can't turn a dameo game into a fairysf game")
+    def toChess: chess.Game               = sys.error("Can't turn a dameo game into a chess game")
+    def toDraughts: draughts.DraughtsGame = sys.error("Can't turn a dameo game into a draughts game")
+    def toSamurai: samurai.Game           = sys.error("Can't turn a dameo game into a samurai game")
+    def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a dameo game into a togyzkumalak game")
+    def toGo: go.Game                     = sys.error("Can't turn a dameo game into a go game")
+    def toBackgammon: backgammon.Game     = sys.error("Can't turn a dameo game into a backgammon game")
+    def toAbalone: abalone.Game           = sys.error("Can't turn a dameo game into a abalone game")
+    def toDameo: dameo.Game               = g
 
   }
 
@@ -1440,6 +1593,8 @@ object Game {
       Backgammon(backgammon.Game(situation, actionStrs, clock, plies, turnCount, startedAtPly, startedAtTurn))
     case (GameLogic.Abalone(), Situation.Abalone(situation))           =>
       Abalone(abalone.Game(situation, actionStrs, clock, plies, turnCount, startedAtPly, startedAtTurn))
+    case (GameLogic.Dameo(), Situation.Dameo(situation))               =>
+      Dameo(dameo.Game(situation, actionStrs, clock, plies, turnCount, startedAtPly, startedAtTurn))
     case _                                                             => sys.error("Mismatched gamelogic types 32")
   }
 
@@ -1460,6 +1615,8 @@ object Game {
       Backgammon(backgammon.Game.apply(variant))
     case (GameLogic.Abalone(), Variant.Abalone(variant))           =>
       Abalone(abalone.Game.apply(variant))
+    case (GameLogic.Dameo(), Variant.Dameo(variant))               =>
+      Dameo(dameo.Game.apply(variant))
     case _                                                         =>
       sys.error("Mismatched gamelogic types 33")
   }
@@ -1481,6 +1638,8 @@ object Game {
       Backgammon(backgammon.Game.apply(variant.map(_.toBackgammon), fen.map(_.toBackgammon)))
     case GameLogic.Abalone()      =>
       Abalone(abalone.Game.apply(variant.map(_.toAbalone), fen.map(_.toAbalone)))
+    case GameLogic.Dameo()      =>
+      Dameo(dameo.Game.apply(variant.map(_.toDameo), fen.map(_.toDameo)))
     case _                        => sys.error("Mismatched gamelogic types 36")
   }
 
@@ -1492,5 +1651,6 @@ object Game {
   def wrap(g: go.Game)               = Go(g)
   def wrap(g: backgammon.Game)       = Backgammon(g)
   def wrap(g: abalone.Game)          = Abalone(g)
+  def wrap(g: dameo.Game)            = Dameo(g)
 
 }

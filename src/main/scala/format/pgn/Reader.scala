@@ -10,6 +10,7 @@ import strategygames.togyzkumalak.format.pgn.{ Reader => TogyzkumalakReader }
 import strategygames.go.format.pgn.{ Reader => GoReader }
 import strategygames.backgammon.format.pgn.{ Reader => BackgammonReader }
 import strategygames.abalone.format.pgn.{ Reader => AbaloneReader }
+import strategygames.dameo.format.pdn.{ Reader => DameoReader }
 
 import cats.data.Validated
 
@@ -17,56 +18,90 @@ object Reader {
 
   sealed trait Result {
     def valid: Validated[String, Replay]
+    def evenIncomplete: Replay
   }
 
   object Result {
     case class ChessComplete(replay: chess.Replay)                                  extends Result {
-      def valid = Validated.valid(Replay.Chess(replay))
+      private def r      = Replay.Chess(replay)
+      def valid          = Validated.valid(r)
+      def evenIncomplete = r
     }
     case class ChessIncomplete(replay: chess.Replay, failure: String)               extends Result {
-      def valid = Validated.invalid(failure)
+      def valid          = Validated.invalid(failure)
+      def evenIncomplete = Replay.Chess(replay)
     }
     case class DraughtsComplete(replay: draughts.Replay)                            extends Result {
-      def valid = Validated.valid(Replay.Draughts(replay))
+      private def r      = Replay.Draughts(replay)
+      def valid          = Validated.valid(r)
+      def evenIncomplete = r
     }
     case class DraughtsIncomplete(replay: draughts.Replay, failure: String)         extends Result {
-      def valid = Validated.invalid(failure)
+      def valid          = Validated.invalid(failure)
+      def evenIncomplete = Replay.Draughts(replay)
     }
     case class FairySFComplete(replay: fairysf.Replay)                              extends Result {
-      def valid = Validated.valid(Replay.FairySF(replay))
+      private def r      = Replay.FairySF(replay)
+      def valid          = Validated.valid(r)
+      def evenIncomplete = r
     }
     case class FairySFIncomplete(replay: fairysf.Replay, failure: String)           extends Result {
-      def valid = Validated.invalid(failure)
+      def valid          = Validated.invalid(failure)
+      def evenIncomplete = Replay.FairySF(replay)
     }
     case class SamuraiComplete(replay: samurai.Replay)                              extends Result {
-      def valid = Validated.valid(Replay.Samurai(replay))
+      private def r      = Replay.Samurai(replay)
+      def valid          = Validated.valid(r)
+      def evenIncomplete = r
     }
     case class SamuraiIncomplete(replay: samurai.Replay, failure: String)           extends Result {
-      def valid = Validated.invalid(failure)
+      def valid          = Validated.invalid(failure)
+      def evenIncomplete = Replay.Samurai(replay)
     }
     case class TogyzkumalakComplete(replay: togyzkumalak.Replay)                    extends Result {
-      def valid = Validated.valid(Replay.Togyzkumalak(replay))
+      private def r      = Replay.Togyzkumalak(replay)
+      def valid          = Validated.valid(r)
+      def evenIncomplete = r
     }
     case class TogyzkumalakIncomplete(replay: togyzkumalak.Replay, failure: String) extends Result {
-      def valid = Validated.invalid(failure)
+      def valid          = Validated.invalid(failure)
+      def evenIncomplete = Replay.Togyzkumalak(replay)
     }
     case class GoComplete(replay: go.Replay)                                        extends Result {
-      def valid = Validated.valid(Replay.Go(replay))
+      private def r      = Replay.Go(replay)
+      def valid          = Validated.valid(r)
+      def evenIncomplete = r
     }
     case class GoIncomplete(replay: go.Replay, failure: String)                     extends Result {
-      def valid = Validated.invalid(failure)
+      def valid          = Validated.invalid(failure)
+      def evenIncomplete = Replay.Go(replay)
     }
     case class BackgammonComplete(replay: backgammon.Replay)                        extends Result {
-      def valid = Validated.valid(Replay.Backgammon(replay))
+      private def r      = Replay.Backgammon(replay)
+      def valid          = Validated.valid(r)
+      def evenIncomplete = r
     }
     case class BackgammonIncomplete(replay: backgammon.Replay, failure: String)     extends Result {
-      def valid = Validated.invalid(failure)
+      def valid          = Validated.invalid(failure)
+      def evenIncomplete = Replay.Backgammon(replay)
     }
     case class AbaloneComplete(replay: abalone.Replay)                              extends Result {
-      def valid = Validated.valid(Replay.Abalone(replay))
+      private def r      = Replay.Abalone(replay)
+      def valid          = Validated.valid(r)
+      def evenIncomplete = r
     }
     case class AbaloneIncomplete(replay: abalone.Replay, failure: String)           extends Result {
-      def valid = Validated.invalid(failure)
+      def valid          = Validated.invalid(failure)
+      def evenIncomplete = Replay.Abalone(replay)
+    }
+    case class DameoComplete(replay: dameo.Replay)                                  extends Result {
+      private def r      = Replay.Dameo(replay)
+      def valid          = Validated.valid(r)
+      def evenIncomplete = r
+    }
+    case class DameoIncomplete(replay: dameo.Replay, failure: String)               extends Result {
+      def valid          = Validated.invalid(failure)
+      def evenIncomplete = Replay.Dameo(replay)
     }
 
     def wrap(result: ChessReader.Result) = result match {
@@ -111,6 +146,11 @@ object Reader {
       case AbaloneReader.Result.Incomplete(replay, failure) => Result.AbaloneIncomplete(replay, failure)
     }
 
+    def wrap(result: DameoReader.Result) = result match {
+      case DameoReader.Result.Complete(replay)            => Result.DameoComplete(replay)
+      case DameoReader.Result.Incomplete(replay, failure) => Result.DameoIncomplete(replay, failure)
+    }
+
   }
 
   def fullWithSans(
@@ -129,6 +169,7 @@ object Reader {
       case GameLogic.Go()           => GoReader.fullWithSans(pgn, op, tags).map(Result.wrap)
       case GameLogic.Backgammon()   => BackgammonReader.fullWithSans(pgn, op, tags).map(Result.wrap)
       case GameLogic.Abalone()      => AbaloneReader.fullWithSans(pgn, op, tags).map(Result.wrap)
+      case GameLogic.Dameo()        => DameoReader.fullWithSans(pgn, op, tags, iteratedCapts).map(Result.wrap)
     }
 
   // TODO Merge the following two functions by refactoring Sans and integrating to other libs
@@ -158,6 +199,10 @@ object Reader {
         sys.error("Sans not implemented for backgammon")
       case GameLogic.Abalone()      =>
         sys.error("Sans not implemented for abalone")
+      case GameLogic.Dameo()        =>
+        DameoReader
+          .replayResultFromActionStrsUsingSan(actionStrs, op, tags)
+          .map(Result.wrap)
     }
 
   def replayResultFromActionStrs(
@@ -187,6 +232,10 @@ object Reader {
         BackgammonReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
       case GameLogic.Abalone()      =>
         AbaloneReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
+      case GameLogic.Dameo()        =>
+        sys.error(
+          "replayResultFromActionStrs not implemented for dameo. Use replayResultFromActionStrsUsingSan"
+        )
     }
 
 }
