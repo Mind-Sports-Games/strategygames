@@ -17,6 +17,8 @@ sealed abstract class Pos {
 
   def toInt: Int
 
+  def gameLogic: GameLogic
+
   override def toString = key
 
   def all: List[Pos]
@@ -33,6 +35,8 @@ object Pos {
 
     lazy val toInt: Int = (p.file.index << 3) + p.rank.index
 
+    def gameLogic: GameLogic = GameLogic.Chess()
+
     lazy val all: List[Pos] = chess.Pos.all.map(Chess)
 
   }
@@ -45,6 +49,8 @@ object Pos {
 
     // TODO: not sure this is appropriate, but I don't see why not?
     lazy val toInt: Int = p.fieldNumber
+
+    def gameLogic: GameLogic = GameLogic.Draughts()
 
     // TODO: this only handl 8x8 boards. we should include 10x10 as well.
     //       Not sure if we need a separate type, probably?
@@ -61,6 +67,8 @@ object Pos {
     lazy val toInt: Int =
       (p.file.index << 3) + p.rank.index // todo where is this used? Should be 4 for fairy boards?
 
+    def gameLogic: GameLogic = GameLogic.FairySF()
+
     lazy val all: List[Pos] = chess.Pos.all.map(Chess)
 
   }
@@ -72,6 +80,8 @@ object Pos {
     def piotr: Char = p.piotr
 
     lazy val toInt: Int = (p.file.index << 3) + p.rank.index
+
+    def gameLogic: GameLogic = GameLogic.Samurai()
 
     lazy val all: List[Pos] = samurai.Pos.all.map(Samurai)
 
@@ -85,6 +95,8 @@ object Pos {
 
     lazy val toInt: Int = (p.file.index << 3) + p.rank.index
 
+    def gameLogic: GameLogic = GameLogic.Togyzkumalak()
+
     lazy val all: List[Pos] = togyzkumalak.Pos.all.map(Togyzkumalak)
 
   }
@@ -96,6 +108,8 @@ object Pos {
     def piotr: Char = p.piotr
 
     lazy val toInt: Int = (p.file.index << 5) + p.rank.index // todo where is this used?
+
+    def gameLogic: GameLogic = GameLogic.Go()
 
     lazy val all: List[Pos] = go.Pos.all.map(Go)
 
@@ -109,6 +123,8 @@ object Pos {
 
     lazy val toInt: Int = (p.file.index << 3) + p.rank.index
 
+    def gameLogic: GameLogic = GameLogic.Backgammon()
+
     lazy val all: List[Pos] = backgammon.Pos.all.map(Backgammon)
 
   }
@@ -119,10 +135,25 @@ object Pos {
 
     def piotr: Char = p.piotr
 
-    // TODO Abalone check this
     lazy val toInt: Int = (p.file.index << 3) + p.rank.index
 
+    def gameLogic: GameLogic = GameLogic.Abalone()
+
     lazy val all: List[Pos] = abalone.Pos.all.map(Abalone)
+
+  }
+
+  final case class Dameo(p: dameo.Pos) extends Pos {
+
+    val key: String = p.key
+
+    def piotr: Char = p.piotr
+
+    lazy val toInt: Int = (p.file.index << 4) + p.rank.index
+
+    def gameLogic: GameLogic = GameLogic.Dameo()
+
+    lazy val all: List[Pos] = dameo.Pos.all.map(Dameo)
 
   }
 
@@ -137,6 +168,7 @@ object Pos {
     case GameLogic.Go()           => go.Pos.fromKey(key).map(Go)
     case GameLogic.Backgammon()   => backgammon.Pos.fromKey(key).map(Backgammon)
     case GameLogic.Abalone()      => abalone.Pos.fromKey(key).map(Abalone)
+    case GameLogic.Dameo()        => dameo.Pos.fromKey(key).map(Dameo)
   }
 
   // def at(lib: GameLogic, x: Int, y: Int): Option[Pos] = lib match {

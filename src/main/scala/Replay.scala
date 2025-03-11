@@ -152,6 +152,18 @@ object Replay {
     }
   }
 
+  final case class Dameo(r: dameo.Replay)
+      extends Replay(
+        Game.Dameo(r.setup),
+        r.actions.map((m: dameo.Move) => Move.Dameo(m)),
+        Game.Dameo(r.state)
+      ) {
+    def copy(state: Game): Replay = state match {
+      case Game.Dameo(state) => Replay.wrap(r.copy(state = state))
+      case _                 => sys.error("Unable to copy a dameo replay with a non-dameo state")
+    }
+  }
+
   def apply(lib: GameLogic, setup: Game, actions: List[Action], state: Game): Replay =
     (lib, setup, state) match {
       case (GameLogic.Draughts(), Game.Draughts(setup), Game.Draughts(state))             =>
@@ -170,6 +182,8 @@ object Replay {
         Backgammon(backgammon.Replay(setup, actions.map(Action.toBackgammon), state))
       case (GameLogic.Abalone(), Game.Abalone(setup), Game.Abalone(state))                =>
         Abalone(abalone.Replay(setup, actions.map(Action.toAbalone), state))
+      case (GameLogic.Dameo(), Game.Dameo(setup), Game.Dameo(state))                      =>
+        Dameo(dameo.Replay(setup, actions.map(Action.toDameo), state))
       case _                                                                              => sys.error("Mismatched gamelogic types 5")
     }
 
@@ -295,6 +309,19 @@ object Replay {
             message
           )
       }
+    case (GameLogic.Dameo(), FEN.Dameo(initialFen), Variant.Dameo(variant))                =>
+      dameo.Replay.gameWithUciWhileValid(
+        actionStrs,
+        initialFen,
+        variant
+      ) match {
+        case (game, gameswithsan, message) =>
+          (
+            Game.Dameo(game),
+            gameswithsan.map { case (g, u) => (Game.Dameo(g), Uci.DameoWithSan(u)) },
+            message
+          )
+      }
     case _                                                                                       => sys.error("Mismatched gamelogic types 7")
   }
 
@@ -361,6 +388,12 @@ object Replay {
         .situations(actionStrs, initialFen.map(_.toAbalone), variant)
         .toEither
         .map(s => s.map(Situation.Abalone))
+        .toValidated
+    case (GameLogic.Dameo(), Variant.Dameo(variant))           =>
+      dameo.Replay
+        .situations(actionStrs, initialFen.map(_.toDameo), variant)
+        .toEither
+        .map(s => s.map(Situation.Dameo))
         .toValidated
     case _                                                         => sys.error("Mismatched gamelogic types 8")
   }
@@ -429,6 +462,14 @@ object Replay {
       }
     )
 
+  private def dameoUcis(ucis: List[Uci]): List[dameo.format.Uci] =
+    ucis.flatMap(u =>
+      u match {
+        case u: Uci.Dameo => Some(u.unwrap)
+        case _            => None
+      }
+    )
+
   def boardsFromUci(
       lib: GameLogic,
       ucis: List[Uci],
@@ -489,6 +530,12 @@ object Replay {
         .toEither
         .map(b => b.map(Board.Abalone))
         .toValidated
+    case (GameLogic.Dameo(), Variant.Dameo(variant))           =>
+      dameo.Replay
+        .boardsFromUci(dameoUcis(ucis), initialFen.map(_.toDameo), variant)
+        .toEither
+        .map(b => b.map(Board.Dameo))
+        .toValidated
     case _                                                         => sys.error("Mismatched gamelogic types 8a")
   }
 
@@ -547,6 +594,12 @@ object Replay {
         .toEither
         .map(s => s.map(Situation.Abalone))
         .toValidated
+    case (GameLogic.Dameo(), Variant.Dameo(variant))               =>
+      dameo.Replay
+        .situationsFromUci(dameoUcis(ucis), initialFen.map(_.toDameo), variant)
+        .toEither
+        .map(s => s.map(Situation.Dameo))
+        .toValidated
     case _                                                         => sys.error("Mismatched gamelogic types 9")
   }
 
@@ -594,6 +647,10 @@ object Replay {
       abalone.Replay
         .gameFromUciStrings(ucis.flatten.toList, initialFen.map(_.toAbalone), variant)
         .map(Game.Abalone)
+    case (GameLogic.Dameo(), Variant.Dameo(variant))           =>
+      dameo.Replay
+        .gameFromUciStrings(ucis.flatten.toList, initialFen.map(_.toDameo), variant)
+        .map(Game.Dameo)
     case _                                                         => sys.error("Mismatched gamelogic types for Replay 10")
   }
 
@@ -652,6 +709,12 @@ object Replay {
         .toEither
         .map(r => Replay.Abalone(r))
         .toValidated
+    case (GameLogic.Dameo(), Variant.Dameo(variant))           =>
+      dameo.Replay
+        .apply(dameoUcis(ucis), initialFen.map(_.toDameo), variant)
+        .toEither
+        .map(r => Replay.Dameo(r))
+        .toValidated
     case _                                                         => sys.error("Mismatched gamelogic types Replay 11")
   }
 
@@ -678,6 +741,8 @@ object Replay {
       backgammon.Replay.plyAtFen(actionStrs, initialFen.map(_.toBackgammon), variant, atFen)
     case (GameLogic.Abalone(), Variant.Abalone(variant), FEN.Abalone(atFen))                =>
       abalone.Replay.plyAtFen(actionStrs, initialFen.map(_.toAbalone), variant, atFen)
+    case (GameLogic.Dameo(), Variant.Dameo(variant), FEN.Dameo(atFen))                =>
+      dameo.Replay.plyAtFen(actionStrs, initialFen.map(_.toDameo), variant, atFen)
     case _                                                                                  => sys.error("Mismatched gamelogic types 10")
   }
 
@@ -689,5 +754,6 @@ object Replay {
   def wrap(r: go.Replay)           = Go(r)
   def wrap(r: backgammon.Replay)   = Backgammon(r)
   def wrap(r: abalone.Replay)      = Abalone(r)
+  def wrap(r: dameo.Replay)        = Dameo(r)
 
 }

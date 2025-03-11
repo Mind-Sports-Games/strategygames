@@ -1,6 +1,6 @@
 package strategygames.chess
 
-import strategygames.{ P1, P2, Player }
+import strategygames.{ GameFamily, P1, P2, Player }
 
 sealed trait Role {
   val forsyth: Char
@@ -12,6 +12,7 @@ sealed trait Role {
   val binaryInt: Int
   val hashInt: Int
   val storable: Boolean
+  val gameFamily: GameFamily
   val dirs: Directions
   def dir(from: Pos, to: Pos): Option[Direction]
   final def -(player: Player) = Piece(player, this)
@@ -29,6 +30,7 @@ case object King extends PromotableRole {
   val projection              = false
   val binaryInt               = 1
   val hashInt                 = 5
+  val gameFamily: GameFamily  = GameFamily.Chess()
   val storable                = false
 }
 
@@ -39,6 +41,7 @@ case object Queen      extends PromotableRole {
   val projection              = true
   val binaryInt               = 2
   val hashInt                 = 4
+  val gameFamily: GameFamily  = GameFamily.Chess()
   val storable                = true
 }
 case object Rook       extends PromotableRole {
@@ -53,6 +56,7 @@ case object Rook       extends PromotableRole {
   val projection              = true
   val binaryInt               = 3
   val hashInt                 = 3
+  val gameFamily: GameFamily  = GameFamily.Chess()
   val storable                = true
 }
 case object Bishop     extends PromotableRole {
@@ -69,6 +73,7 @@ case object Bishop     extends PromotableRole {
   val projection              = true
   val binaryInt               = 5
   val hashInt                 = 2
+  val gameFamily: GameFamily  = GameFamily.Chess()
   val storable                = true
 }
 case object Knight     extends PromotableRole {
@@ -87,6 +92,7 @@ case object Knight     extends PromotableRole {
   val projection              = false
   val binaryInt               = 4
   val hashInt                 = 1
+  val gameFamily: GameFamily  = GameFamily.Chess()
   val storable                = true
 }
 case object Pawn       extends Role           {
@@ -96,6 +102,7 @@ case object Pawn       extends Role           {
   val projection              = false
   val binaryInt               = 6
   val hashInt                 = 0
+  val gameFamily: GameFamily  = GameFamily.Chess()
   val storable                = true
 }
 case object LOAChecker extends Role           {
@@ -105,6 +112,7 @@ case object LOAChecker extends Role           {
   val projection              = false
   val binaryInt               = 8
   val hashInt                 = 6
+  val gameFamily: GameFamily  = GameFamily.LinesOfAction()
   val storable                = false
 }
 

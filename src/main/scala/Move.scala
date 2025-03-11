@@ -46,6 +46,7 @@ sealed abstract class Move(
   def toTogyzkumalak: togyzkumalak.Move
   def toBackgammon: backgammon.Move
   def toAbalone: abalone.Move
+  def toDameo: dameo.Move
 
 }
 
@@ -103,6 +104,7 @@ object Move {
     def toGo           = sys.error("Can't make a go move from a chess move")
     def toBackgammon   = sys.error("Can't make a backgammon move from a chess move")
     def toAbalone      = sys.error("Can't make a abalone move from a chess move")
+    def toDameo        = sys.error("Can't make a dameo move from a chess move")
 
   }
 
@@ -156,6 +158,7 @@ object Move {
     def toGo           = sys.error("Can't make a go move from a draughts move")
     def toBackgammon   = sys.error("Can't make a backgammon move from a draughts move")
     def toAbalone      = sys.error("Can't make a abalone move from a draughts move")
+    def toDameo        = sys.error("Can't make a dameo move from a draughts move")
 
   }
 
@@ -210,6 +213,7 @@ object Move {
     def toGo           = sys.error("Can't make a go move from a fairysf move")
     def toBackgammon   = sys.error("Can't make a backgammon move from a fairysf move")
     def toAbalone      = sys.error("Can't make a abalone move from a fairysf move")
+    def toDameo        = sys.error("Can't make a dameo move from a fairysf move")
 
   }
 
@@ -257,6 +261,7 @@ object Move {
     def toGo           = sys.error("Can't make a go move from a samurai move")
     def toBackgammon   = sys.error("Can't make a backgammon move from a samurai move")
     def toAbalone      = sys.error("Can't make a abalone move from a samurai move")
+    def toDameo        = sys.error("Can't make a dameo move from a samurai move")
 
   }
 
@@ -304,6 +309,7 @@ object Move {
     def toGo           = sys.error("Can't make a go move from a togyzkumalak move")
     def toBackgammon   = sys.error("Can't make a backgammon move from a togyzkumalak move")
     def toAbalone      = sys.error("Can't make a abalone move from a togyzkumalak move")
+    def toDameo        = sys.error("Can't make a dameo move from a togyzkumalak move")
 
   }
 
@@ -348,6 +354,7 @@ object Move {
     def toGo           = sys.error("Can't make a go move from a backgammon move")
     def toBackgammon   = m
     def toAbalone      = sys.error("Can't make a abalone move from a backgammon move")
+    def toDameo        = sys.error("Can't make a dameo move from a backgammon move")
 
   }
 
@@ -392,6 +399,58 @@ object Move {
     def toGo           = sys.error("Can't make a go move from a abalone move")
     def toBackgammon   = sys.error("Can't make a backgammon move from a abalone move")
     def toAbalone      = m
+    def toDameo        = sys.error("Can't make a dameo move from a abalone move")
+
+  }
+
+  final case class Dameo(m: dameo.Move)
+      extends Move(
+        Piece.Dameo(m.piece),
+        Pos.Dameo(m.orig),
+        Pos.Dameo(m.dest),
+        Situation.Dameo(m.situationBefore),
+        Board.Dameo(m.after),
+        m.autoEndTurn,
+        m.capture match {
+          case Some(capture) => Option(List(Pos.Dameo(capture)))
+          case None          => None
+        },
+        m.promotion match {
+          case Some(promotion) => Some(Role.DameoPromotableRole(promotion))
+          case None            => None
+        },
+        None,
+        None,
+        false,
+        m.metrics
+      ) {
+
+    def situationAfter: Situation                          = Situation.Dameo(m.situationAfter)
+    def finalizeAfter(finalSquare: Boolean = false): Board = m.finalizeAfter
+
+    def toUci: Uci.Move = Uci.DameoMove(m.toUci)
+
+    def toShortUci: Uci.Move =
+      Uci.Move(
+        GameLogic.Dameo(),
+        orig,
+        dest,
+        promotion,
+        if (capture.isDefined) capture.get.takeRight(1).some else None
+      )
+
+    def first: Move = this
+
+    val unwrap         = m
+    def toFairySF      = sys.error("Can't make a fairysf move from a dameo move")
+    def toChess        = sys.error("Can't make a chess move from a dameo move")
+    def toDraughts     = sys.error("Can't make a draughts move from a dameo move")
+    def toSamurai      = sys.error("Can't make a samurai move from a dameo move")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak move from a dameo move")
+    def toGo           = sys.error("Can't make a go move from a dameo move")
+    def toBackgammon   = sys.error("Can't make a backgammon move from a dameo move")
+    def toAbalone      = sys.error("Can't make a abalone move from a dameo move")
+    def toDameo        = m
 
   }
 
@@ -402,5 +461,6 @@ object Move {
   def wrap(m: togyzkumalak.Move): Move = Move.Togyzkumalak(m)
   def wrap(m: backgammon.Move): Move   = Move.Backgammon(m)
   def wrap(m: abalone.Move): Move      = Move.Abalone(m)
+  def wrap(m: dameo.Move): Move        = Move.Dameo(m)
 
 }

@@ -40,6 +40,7 @@ sealed abstract class Board(
   def toGo: go.Board
   def toBackgammon: backgammon.Board
   def toAbalone: abalone.Board
+  def toDameo: dameo.Board
 }
 
 object Board {
@@ -83,6 +84,7 @@ object Board {
     def toGo           = sys.error("Can't make a go board from a chess board")
     def toBackgammon   = sys.error("Can't make a backgammon board from a chess board")
     def toAbalone      = sys.error("Can't make a abalone board from a chess board")
+    def toDameo        = sys.error("Can't make a dameo board from a chess board")
 
   }
 
@@ -124,6 +126,7 @@ object Board {
     def toGo           = sys.error("Can't make a go board from a draughts board")
     def toBackgammon   = sys.error("Can't make a backgammon board from a draughts board")
     def toAbalone      = sys.error("Can't make a abalone board from a draughts board")
+    def toDameo        = sys.error("Can't make a dameo board from a draughts board")
 
   }
 
@@ -166,6 +169,7 @@ object Board {
     def toGo           = sys.error("Can't make a go board from a fairysf board")
     def toBackgammon   = sys.error("Can't make a backgammon board from a fairysf board")
     def toAbalone      = sys.error("Can't make a abalone board from a fairysf board")
+    def toDameo        = sys.error("Can't make a dameo board from a fairysf board")
 
   }
 
@@ -207,6 +211,7 @@ object Board {
     def toGo           = sys.error("Can't make a go board from a samurai board")
     def toBackgammon   = sys.error("Can't make a backgammon board from a samurai board")
     def toAbalone      = sys.error("Can't make a abalone board from a samurai board")
+    def toDameo        = sys.error("Can't make a dameo board from a samurai board")
 
   }
 
@@ -250,6 +255,7 @@ object Board {
     def toGo           = sys.error("Can't make a go board from a togyzkumalak board")
     def toBackgammon   = sys.error("Can't make a backgammon board from a togyzkumalak board")
     def toAbalone      = sys.error("Can't make a abalone board from a togyzkumalak board")
+    def toDameo        = sys.error("Can't make a dameo board from a togyzkumalak board")
 
   }
 
@@ -292,6 +298,7 @@ object Board {
     def toGo           = b
     def toBackgammon   = sys.error("Can't make a backgammon board from a go board")
     def toAbalone      = sys.error("Can't make a abalone board from a go board")
+    def toDameo        = sys.error("Can't make a dameo board from a go board")
 
   }
 
@@ -338,6 +345,7 @@ object Board {
     def toGo           = sys.error("Can't make a go board from a backgammon board")
     def toBackgammon   = b
     def toAbalone      = sys.error("Can't make a abalone board from a backgammon board")
+    def toDameo        = sys.error("Can't make a dameo board from a backgammon board")
 
   }
 
@@ -379,6 +387,49 @@ object Board {
     def toGo           = sys.error("Can't make a go board from a abalone board")
     def toBackgammon   = sys.error("Can't make a backgammon board from a abalone board")
     def toAbalone      = b
+    def toDameo        = sys.error("Can't make a dameo board from a abalone board")
+
+  }
+
+  case class Dameo(b: dameo.Board)
+      extends Board(
+        b.pieces.map { case (pos, piece) => (Pos.Dameo(pos), (Piece.Dameo(piece), 1)) },
+        History.Dameo(b.history),
+        Variant.Dameo(b.variant)
+      ) {
+
+    def withHistory(h: History): Board = h match {
+      case History.Dameo(h) => Dameo(b.withHistory(h))
+      case _                  => sys.error("Not passed dameo objects")
+    }
+
+    def usedDice: List[Int] = List.empty
+
+    def situationOf(player: Player): Situation = Situation.Dameo(b.situationOf(player))
+
+    def materialImbalance: Int = b.materialImbalance
+
+    override def toString: String = b.toString
+
+    def copy(history: History, variant: Variant): Board = (history, variant) match {
+      case (History.Dameo(history), Variant.Dameo(variant)) =>
+        Dameo(b.copy(history = history, variant = variant))
+      case _                                                    => sys.error("Unable to copy a dameo board with non-dameo arguments")
+    }
+    def copy(history: History): Board                   = history match {
+      case History.Dameo(history) => Dameo(b.copy(history = history))
+      case _                        => sys.error("Unable to copy a dameo board with non-dameo arguments")
+    }
+
+    def toFairySF      = sys.error("Can't make a fairysf board from a dameo board")
+    def toChess        = sys.error("Can't make a chess board from a dameo board")
+    def toDraughts     = sys.error("Can't make a draughts board from a dameo board")
+    def toSamurai      = sys.error("Can't make a samurai board from a dameo board")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak board from a dameo board")
+    def toGo           = sys.error("Can't make a go board from a dameo board")
+    def toBackgammon   = sys.error("Can't make a backgammon board from a dameo board")
+    def toAbalone      = sys.error("Can't make a abalone board from a dameo board")
+    def toDameo        = b
 
   }
 
@@ -466,6 +517,16 @@ object Board {
             variant
           )
         )
+      case (GameLogic.Dameo(), Variant.Dameo(variant))           =>
+        Dameo(
+          dameo.Board.apply(
+            pieces.flatMap {
+              case (Pos.Dameo(pos), (Piece.Dameo(piece), _)) => Some((pos, piece))
+              case _                                         => None
+            },
+            variant
+          )
+        )
       case _                                                         => sys.error("Mismatched gamelogic types 27")
     }
 
@@ -477,6 +538,7 @@ object Board {
   implicit def goBoard(b: go.Board)                     = Board.Go(b)
   implicit def backgammonBoard(b: backgammon.Board)     = Board.Backgammon(b)
   implicit def abaloneBoard(b: abalone.Board)           = Board.Abalone(b)
+  implicit def dameoBoard(b: dameo.Board)               = Board.Dameo(b)
 
   def init(lib: GameLogic, variant: Variant): Board = (lib, variant) match {
     case (GameLogic.Draughts(), Variant.Draughts(variant))         => Draughts(draughts.Board.init(variant))
@@ -488,6 +550,7 @@ object Board {
     case (GameLogic.Go(), Variant.Go(variant))                     => Go(go.Board.init(variant))
     case (GameLogic.Backgammon(), Variant.Backgammon(variant))     => Backgammon(backgammon.Board.init(variant))
     case (GameLogic.Abalone(), Variant.Abalone(variant))           => Abalone(abalone.Board.init(variant))
+    case (GameLogic.Dameo(), Variant.Dameo(variant))               => Dameo(dameo.Board.init(variant))
     case _                                                         => sys.error("Mismatched gamelogic types 28")
   }
 

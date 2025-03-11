@@ -135,6 +135,14 @@ object History {
         score = h.score
       )
 
+  final case class Dameo(h: dameo.History)
+      extends History(
+        lastTurn = h.lastTurn.map(Uci.wrap),
+        currentTurn = h.currentTurn.map(Uci.wrap),
+        positionHashes = h.positionHashes,
+        halfMoveClock = h.halfMoveClock
+      )
+
   implicit def chessHistory(h: chess.History)               = Chess(h)
   implicit def draughtsHistory(h: draughts.DraughtsHistory) = Draughts(h)
   implicit def fairysfHistory(h: fairysf.History)           = FairySF(h)
@@ -143,6 +151,7 @@ object History {
   implicit def goHistory(h: go.History)                     = Go(h)
   implicit def backgammonHistory(h: backgammon.History)     = Backgammon(h)
   implicit def abaloneHistory(h: abalone.History)           = Abalone(h)
+  implicit def dameoHistory(h: dameo.History)               = Dameo(h)
 
   // lila
   def apply(
@@ -245,6 +254,15 @@ object History {
           positionHashes = positionHashes,
           halfMoveClock = halfMoveClock,
           score = score
+        )
+      )
+    case GameLogic.Dameo()      =>
+      Dameo(
+        dameo.History(
+          lastTurn = lastTurn.map(lm => lm.toDameo),
+          currentTurn = currentTurn.map(lm => lm.toDameo),
+          positionHashes = positionHashes,
+          halfMoveClock = halfMoveClock
         )
       )
     case _                        => sys.error("Mismatched gamelogic types 1")
