@@ -3,21 +3,23 @@ package strategygames.abalone
 import strategygames.Player
 
 case class Piece(player: Player, role: Role) {
+  def is(p: Player) = p == player
 
-  def is(c: Player)    = c == player
-  def is(r: Role)      = r == role
-  def isNot(c: Player) = c != player
-  def isNot(r: Role)   = r != role
+  def is(r: Role) = r == role
 
-  def oneOf(rs: Set[Role]) = rs(role)
+  def isNot(p: Player) = p != player
 
-  def forsyth: Char     = role.forsyth
+  def isNot(r: Role) = r != role
+
+  def oneOf(roles: Set[Role]) = roles(role)
+
+  def forsyth: Char = role.forsyth
+
   override def toString = s"${player.toString.toLowerCase}-$role"
 }
 
 object Piece {
-
-  // is it wrong ??
+  // Is it wrong??
   def fromChar(c: Char): Option[Piece] =
     Role.allByPgn get c.toUpper map {
       Piece(Player.fromP1(c.isUpper), _)
@@ -34,5 +36,4 @@ object Piece {
   //  Role.allByBinaryInt get n map {
   //    Piece(player, _)
   //  }
-
 }

@@ -1,14 +1,12 @@
 package strategygames.abalone
 
-import strategygames.{ Player, Status }
-
 import cats.data.Validated
 import cats.implicits._
-
 import strategygames.abalone.format.Uci
+import strategygames.abalone.variant.Variant
+import strategygames.{Player, Status}
 
 case class Situation(board: Board, player: Player) {
-
   def history = board.history
 
   def checkMate: Boolean = false
@@ -33,11 +31,13 @@ case class Situation(board: Board, player: Player) {
 
   def withHistory(history: History) = copy(board = board.withHistory(history))
 
-  def withVariant(variant: strategygames.abalone.variant.Variant) = copy(board = board.withVariant(variant))
+  def withVariant(variant: Variant) = copy(board = board.withVariant(variant))
 
   def unary_! = copy(player = !player)
 
-  lazy val destinations: Map[Pos, List[Pos]] = moves.view.mapValues { _.map(_.dest) }.to(Map)
+  lazy val destinations: Map[Pos, List[Pos]] = moves.view.mapValues {
+    _.map(_.dest)
+  }.to(Map)
 
   lazy val moves: Map[Pos, List[Move]] = board.variant.validMoves(this)
 
@@ -51,7 +51,6 @@ case class Situation(board: Board, player: Player) {
 }
 
 object Situation {
-
-  def apply(variant: strategygames.abalone.variant.Variant): Situation =
+  def apply(variant: Variant): Situation =
     Situation(Board init variant, variant.startPlayer)
 }

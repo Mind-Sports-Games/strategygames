@@ -1,28 +1,29 @@
 package strategygames.abalone
 
+import abalone.Cell
 import strategygames.Player
-
-import variant.Variant
+import strategygames.abalone.variant.Variant
 
 case class Board(
-    pieces: PieceMap,
-    history: History,
-    variant: Variant
-) {
-  def apply(at: Pos): Option[Piece]                = pieces.get(at)
+                  pieces: PieceMap,
+                  history: History,
+                  variant: Variant
+                ) {
+  def apply(at: Pos): Option[Piece] = pieces.get(at)
+
   def apply(file: File, rank: Rank): Option[Piece] = {
-    val pos = Pos(file, rank)
-    pos match {
-      case Some(pos) => pieces.get(pos)
-      case None      => None
+    Pos(file, rank) match {
+      case Some(pos) => apply(pos)
+      case None => None
     }
   }
 
   def piecesOf(player: Player): PieceMap = pieces.filter(_._2.is(player))
 
-  def isEmptySquare(pos: Option[Pos]): Boolean = pos.fold(false)(!this.pieces.contains(_))
+  def isEmptyPos(pos: Option[Pos]): Boolean = pos.fold(false)(!pieces.contains(_))
 
-  def withHistory(h: History): Board       = copy(history = h)
+  def withHistory(h: History): Board = copy(history = h)
+
   def updateHistory(f: History => History) = copy(history = f(history))
 
   def withVariant(v: Variant): Board =
@@ -49,7 +50,6 @@ case class Board(
 }
 
 object Board {
-
   def apply(pieces: Iterable[(Pos, Piece)], variant: Variant): Board =
     Board(pieces.toMap, History(), variant)
 
@@ -57,30 +57,60 @@ object Board {
 
   // def empty(variant: Variant): Board = Board(Nil, variant)
 
-  sealed abstract class BoardSize(
-      val width: Int,
-      val height: Int,
-      val irregular: Boolean = true
-  ) {
+  sealed abstract class BoardType(
+                                   val width: Int,
+                                   val height: Int,
+                                   val irregular: Boolean = true
+                                 ) {
+    val key = s"${width}x${height}"
+    //val validPos: List[Pos] = Pos.all
+    final val cells: Set[Cell] = Range(0, width)
+      .flatMap(x => Range(0, height)
+        .filter(y => isCell(x, y))
+        .map(y => new Cell(x, y))
+      ).toSet
 
-    val key   = s"${width}x${height}"
-    val sizes = List(width, height)
+    //
+    // Norm
+    final def isCell(a: Cell): Boolean = isCell(a.x, a.y)
 
-    val validPos: List[Pos] = Pos.all
+    def isCell(x: Int, y: Int): Boolean = 0 <= x & x < width & 0 <= y & y < height
 
+    final def dist(a: Cell, b: Cell): Int = dist(a, b.x, b.y)
+
+    final def dist(a: Cell, x: Int, y: Int): Int = dist(a.x, a.y, x, y)
+
+    def dist(x: Int, y: Int, z: Int, t: Int): Int = norm(z - x, t - y)
+
+    final def norm(a: Cell): Int = norm(a.x, a.y)
+
+    def norm(x: Int, y: Int): Int = math.abs(x) + math.abs(y)
+
+
+    //
+    //
     override def toString = key
-
   }
 
-  // an Hexagon of width 5 fits in a square of width 9
-  object BoardSize {
-    val all: List[BoardSize] = List(Dim9x9)
+  object BoardType {
+    val all: List[BoardType] = List(Hex5, Hex6)
   }
 
-  case object Dim9x9
-      extends BoardSize(
-        width = 9,
-        height = 9
-      )
+  /** A Hexagon of side n fits in a square of side 2n - 1 */
+  sealed abstract class HexBoardType(val side: Int) extends BoardType(width = 2 * side - 1, height = 2 * side - 1) {
+    val centre = new Cell(side - 1, side - 1)
 
+    override val key = s"hex-${side}"
+
+    override def isCell(x: Int, y: Int) = dist(centre, x, y) < side
+
+    override def norm(x: Int, y: Int) = {
+      if (x * y < 0) math.abs(x) + math.abs(y)
+      else math.max(math.abs(x), math.abs(y))
+    }
+  }
+
+  case object Hex5 extends HexBoardType(5)
+
+  case object Hex6 extends HexBoardType(6)
 }

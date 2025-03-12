@@ -140,7 +140,6 @@ object Pos {
     def gameLogic: GameLogic = GameLogic.Abalone()
 
     lazy val all: List[Pos] = abalone.Pos.all.map(Abalone)
-
   }
 
   final case class Dameo(p: dameo.Pos) extends Pos {

@@ -1,7 +1,8 @@
 package strategygames.abalone
 
-case class File private (val index: Int) extends AnyVal with Ordered[File] {
-  @inline def -(that: File): Int           = index - that.index
+case class File private(index: Int) extends AnyVal with Ordered[File] {
+  @inline def -(that: File): Int = index - that.index
+
   @inline override def compare(that: File) = this - that
 
   def offset(delta: Int): Option[File] =
@@ -9,13 +10,15 @@ case class File private (val index: Int) extends AnyVal with Ordered[File] {
     else None
 
   @inline def char: Char = (97 + index).toChar
-  override def toString  = char.toString
+
+  override def toString = char.toString
 
   @inline def upperCaseChar: Char = (65 + index).toChar
-  def toUpperCaseString           = upperCaseChar.toString
+
+  def toUpperCaseString = upperCaseChar.toString
 }
 
-// column (as if it was an index in a 1D array)
+/** Column (as if it were an index in a 1D array) */
 object File {
   def apply(index: Int): Option[File] =
     if (0 <= index && index < all.size) Some(new File(index))
@@ -37,6 +40,6 @@ object File {
   val H = new File(7)
   val I = new File(8)
 
-  val all                     = List(A, B, C, D, E, F, G, H, I)
+  val all = List(A, B, C, D, E, F, G, H, I)
   val allReversed: List[File] = all.reverse
 }

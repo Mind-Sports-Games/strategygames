@@ -1,8 +1,7 @@
 package strategygames.abalone
 
 /*
-Extended Piotr representation :
-
+Extended Piotr representation:
 9 -  \" #  $  %  &  \' (  )  *
 8 -  4  5  6  7  8  9  !  ?  ¥
 7 -  W  X  Y  Z  0  1  2  3  £
@@ -27,9 +26,7 @@ Extended Piotr representation :
               \  \  \  \  \  \  \  \  \
                A  B  C  D  E  F  G  H  I
 
-
-Actual Piotr representation :
-
+Actual Piotr representation:
 Seen as an hexagon
 9 -              &  \' (  )  *
 8 -            7  8  9  !  ?  ¥
@@ -43,7 +40,7 @@ Seen as an hexagon
               \  \  \  \  \  \  \  \  \
                A  B  C  D  E  F  G  H  I
 
-Seen as a square without the bottomright and topleft triangle
+Seen as a square without the bottom-right and top-left triangles
 9 -              &  \' (  )  *
 8 -           7  8  9  !  ?  ¥
 7 -        Y  Z  0  1  2  3  £
@@ -56,8 +53,7 @@ Seen as a square without the bottomright and topleft triangle
      |  |  |  |  |  |  |  |  |
      A  B  C  D  E  F  G  H  I
 
-
-Abalone official coordinates system and "standard start position" are drawn below :
+Abalone official coordinates system and "standard start position" are drawn below:
      I O O O O O
     H O O O O O O
    G + + O O O + +
@@ -68,24 +64,27 @@ Abalone official coordinates system and "standard start position" are drawn belo
     B @ @ @ @ @ @ 7
      A @ @ @ @ @ 6
         1 2 3 4 5
-
-
  */
 
 sealed trait DirectionString
+
 sealed trait DiagonalDirectionString extends DirectionString
 
 object DiagonalDirectionString {
-  case object UpLeft    extends DiagonalDirectionString
-  case object UpRight   extends DiagonalDirectionString
+  case object UpLeft extends DiagonalDirectionString
+
+  case object UpRight extends DiagonalDirectionString
+
   case object DownRight extends DiagonalDirectionString
-  case object DownLeft  extends DiagonalDirectionString
+
+  case object DownLeft extends DiagonalDirectionString
 
   val all: List[DiagonalDirectionString] = List(UpLeft, UpRight, DownRight, DownLeft)
 }
 
 object DirectionString {
-  case object Left  extends DirectionString
+  case object Left extends DirectionString
+
   case object Right extends DirectionString
 
   val all: List[DirectionString] = DiagonalDirectionString.all ++ List(Left, Right)
@@ -193,7 +192,7 @@ object Piotr {
 // Pos represents a square (by it's index (an Int))
 // We can use this index to find the char associated with the Pos
 // There are utility functions to move in a direction and do some checks, from an instance of Pos
-case class Pos private (index: Int) extends AnyVal {
+case class Pos private(index: Int) extends AnyVal {
 
   /*
   hexagonal grids have 6 directions only
@@ -201,22 +200,28 @@ case class Pos private (index: Int) extends AnyVal {
   - o -
   /   \
    */
-  def left: Option[Pos]      = Pos.at(file.index - 1, rank.index)
-  def downLeft: Option[Pos]  = Pos.at(file.index - 1, rank.index - 1)
-  def upLeft: Option[Pos]    = Pos.at(file.index, rank.index + 1)
-  def right: Option[Pos]     = Pos.at(file.index + 1, rank.index)
+  def left: Option[Pos] = Pos.at(file.index - 1, rank.index)
+
+  def downLeft: Option[Pos] = Pos.at(file.index - 1, rank.index - 1)
+
+  def upLeft: Option[Pos] = Pos.at(file.index, rank.index + 1)
+
+  def right: Option[Pos] = Pos.at(file.index + 1, rank.index)
+
   def downRight: Option[Pos] = Pos.at(file.index, rank.index - 1)
-  def upRight: Option[Pos]   = Pos.at(file.index + 1, rank.index + 1)
+
+  def upRight: Option[Pos] = Pos.at(file.index + 1, rank.index + 1)
 
   def neighbours: List[Option[Pos]] = List(left, upLeft, upRight, right, downRight, downLeft)
-  def neighboursAsDirs: Directions  = List(_.left, _.upLeft, _.upRight, _.right, _.downRight, _.downLeft)
+
+  def neighboursAsDirs: Directions = List(_.left, _.upLeft, _.upRight, _.right, _.downRight, _.downLeft)
 
   def directionString(dest: Pos): DirectionString =
     (file.index - dest.file.index, rank.index - dest.rank.index) match {
-      case (fileDiff, 0)        =>
+      case (fileDiff, 0) =>
         if (fileDiff > 0) DirectionString.Left
         else DirectionString.Right
-      case (0, rankDiff)        =>
+      case (0, rankDiff) =>
         if (rankDiff > 0) DiagonalDirectionString.DownRight
         else DiagonalDirectionString.UpLeft
       case (fileDiff, rankDiff) =>
@@ -226,14 +231,17 @@ case class Pos private (index: Int) extends AnyVal {
         else DiagonalDirectionString.UpLeft
     }
 
-  def >|(stop: Pos => Boolean): List[Pos]                   = |<>|(stop, _.right)
-  def |<(stop: Pos => Boolean): List[Pos]                   = |<>|(stop, _.left)
+  def >|(stop: Pos => Boolean): List[Pos] = |<>|(stop, _.right)
+
+  def |<(stop: Pos => Boolean): List[Pos] = |<>|(stop, _.left)
+
   def |<>|(stop: Pos => Boolean, dir: Direction): List[Pos] =
     dir(this) map { p =>
       p :: (if (stop(p)) Nil else p.|<>|(stop, dir))
     } getOrElse Nil
 
   @inline def file = File of this // column (as if it was an index in a 1D array)
+
   @inline def rank = Rank of this // horizontal row, makes sense in a 2D array
 
   // these 3 below might be handy
@@ -267,15 +275,18 @@ case class Pos private (index: Int) extends AnyVal {
     .getOrElse(
       '*' // will default to char in i9
     )
+
   def piotrStr = piotr.toString
 
-  def key                 = file.toString + rank.toString
+  def key = file.toString + rank.toString
+
   def officialNotationKey = s"${File(rank.index).getOrElse("")}${Rank(file.index).getOrElse("")}"
-  override def toString   = key
+
+  override def toString = key
 
   private def diagonalDirectionString(dest: Pos): DiagonalDirectionString =
     (file.index - dest.file.index, rank.index - dest.rank.index) match {
-      case (0, rankDiff)        =>
+      case (0, rankDiff) =>
         if (rankDiff > 0) DiagonalDirectionString.DownRight
         else DiagonalDirectionString.UpLeft
       case (fileDiff, rankDiff) =>
@@ -305,7 +316,7 @@ object Pos {
    */
   def isInHexagon(index: Int): Boolean = {
     if (index < 0) return false
-    val row       = index / File.all.size
+    val row = index / File.all.size
     val remainder = index % File.all.size
     if (index >= File.all.size * Rank.all.size) return false
     if (row < (File.all.size / 2 + 1)) {
@@ -330,65 +341,65 @@ object Pos {
     else None
 
   def directionFromDirectionString(directionString: DirectionString): Direction = directionString match {
-    case DirectionString.Left              => _.left
-    case DiagonalDirectionString.UpLeft    => _.upLeft
-    case DiagonalDirectionString.UpRight   => _.upRight
-    case DirectionString.Right             => _.right
+    case DirectionString.Left => _.left
+    case DiagonalDirectionString.UpLeft => _.upLeft
+    case DiagonalDirectionString.UpRight => _.upRight
+    case DirectionString.Right => _.right
     case DiagonalDirectionString.DownRight => _.downRight
-    case DiagonalDirectionString.DownLeft  => _.downLeft
+    case DiagonalDirectionString.DownLeft => _.downLeft
   }
 
   // used by valid moves generator, based on the Direction currently considered
   def diagonalDirectionsFromDirection(direction: Direction): Directions = {
     directionStringFromDirection(direction) match {
-      case DirectionString.Left              => List(_.downLeft, _.upLeft)
-      case DiagonalDirectionString.UpLeft    => List(_.left, _.upRight)
-      case DiagonalDirectionString.UpRight   => List(_.upLeft, _.right)
-      case DirectionString.Right             => List(_.upRight, _.downRight)
+      case DirectionString.Left => List(_.downLeft, _.upLeft)
+      case DiagonalDirectionString.UpLeft => List(_.left, _.upRight)
+      case DiagonalDirectionString.UpRight => List(_.upLeft, _.right)
+      case DirectionString.Right => List(_.upRight, _.downRight)
       case DiagonalDirectionString.DownRight => List(_.right, _.downLeft)
-      case DiagonalDirectionString.DownLeft  => List(_.downRight, _.left)
+      case DiagonalDirectionString.DownLeft => List(_.downRight, _.left)
     }
   }
 
   def potentialLineDirsFromSideMoveDir(sideMoveDirection: Direction): Directions = {
     diagonalDirectionStringFromDirection(sideMoveDirection) match {
-      case DiagonalDirectionString.UpLeft    => List(_.left, _.upLeft)
-      case DiagonalDirectionString.UpRight   => List(_.upLeft, _.upRight, _.right)
+      case DiagonalDirectionString.UpLeft => List(_.left, _.upLeft)
+      case DiagonalDirectionString.UpRight => List(_.upLeft, _.upRight, _.right)
       case DiagonalDirectionString.DownRight => List(_.right, _.downRight)
-      case DiagonalDirectionString.DownLeft  => List(_.downRight, _.downLeft, _.left)
+      case DiagonalDirectionString.DownLeft => List(_.downRight, _.downLeft, _.left)
     }
   }
 
   def deducePotentialSideDirs(globalDir: Direction, lineDir: Direction): Directions = {
     diagonalDirectionStringFromDirection(globalDir) match {
-      case DiagonalDirectionString.DownLeft  => {
+      case DiagonalDirectionString.DownLeft => {
         directionStringFromDirection(lineDir) match {
-          case DiagonalDirectionString.DownLeft  => List(_.left, _.downRight)
+          case DiagonalDirectionString.DownLeft => List(_.left, _.downRight)
           case DiagonalDirectionString.DownRight => List(_.downLeft)
-          case DirectionString.Left              => List(_.downLeft)
-          case _                                 => List()
+          case DirectionString.Left => List(_.downLeft)
+          case _ => List()
         }
       }
-      case DiagonalDirectionString.UpRight   => {
+      case DiagonalDirectionString.UpRight => {
         directionStringFromDirection(lineDir) match {
-          case DiagonalDirectionString.UpLeft  => List(_.upRight)
+          case DiagonalDirectionString.UpLeft => List(_.upRight)
           case DiagonalDirectionString.UpRight => List(_.right, _.upLeft)
-          case DirectionString.Right           => List(_.upRight)
-          case _                               => List()
+          case DirectionString.Right => List(_.upRight)
+          case _ => List()
         }
       }
-      case DiagonalDirectionString.UpLeft    => {
+      case DiagonalDirectionString.UpLeft => {
         directionStringFromDirection(lineDir) match {
           case DiagonalDirectionString.UpLeft => List(_.left)
-          case DirectionString.Left           => List(_.upLeft)
-          case _                              => List()
+          case DirectionString.Left => List(_.upLeft)
+          case _ => List()
         }
       }
       case DiagonalDirectionString.DownRight => {
         directionStringFromDirection(lineDir) match {
           case DiagonalDirectionString.DownRight => List(_.right)
-          case DirectionString.Right             => List(_.downRight)
-          case _                                 => List()
+          case DirectionString.Right => List(_.downRight)
+          case _ => List()
         }
       }
     }
@@ -399,12 +410,14 @@ object Pos {
   def piotr(c: Char): Option[Pos] = allPiotrs get c
 
   // @TODO VFR: check these piotrKey funcs work as expected, did not test yet
-  def keyToPiotr(key: String)          = fromKey(key) map (_.piotr)
-  def doubleKeyToPiotr(key: String)    =
+  def keyToPiotr(key: String) = fromKey(key) map (_.piotr)
+
+  def doubleKeyToPiotr(key: String) =
     for {
       a <- keyToPiotr(key take 2)
       b <- keyToPiotr(key drop 2)
     } yield s"$a$b"
+
   def doublePiotrToKey(piotrs: String) =
     for {
       a <- piotr(piotrs.head)
@@ -412,11 +425,12 @@ object Pos {
     } yield s"${a.key}${b.key}"
 
   // E5 is the center of the board. We use it as a reference to calculate the DirectionString from the movement of the piece
-  private def directionStringFromDirection(direction: Direction): DirectionString                 = {
+  private def directionStringFromDirection(direction: Direction): DirectionString = {
     val x = Pos.E5
     val y = direction(x).get
     x.directionString(y)
   }
+
   private def diagonalDirectionStringFromDirection(direction: Direction): DiagonalDirectionString = {
     val x = Pos.E5
     val y = direction(x).get
@@ -428,20 +442,19 @@ object Pos {
   val C1 = new Pos(2)
   val D1 = new Pos(3)
   val E1 = new Pos(4)
-  // val F1 = new Pos(5) //
-  // val G1 = new Pos(6) //
-  // val H1 = new Pos(7) //
-  // val I1 = new Pos(8) //
-  val A2 =
-    new Pos(9) // means the 9th square of our square grid is represented by A2 (index starting bottom left)
+  val F1 = new Pos(5)
+  val G1 = new Pos(6)
+  val H1 = new Pos(7)
+  val I1 = new Pos(8)
+  val A2 = new Pos(9) // means the 9th square of our square grid is represented by A2 (index starting at the bottom left)
   val B2 = new Pos(10)
   val C2 = new Pos(11)
   val D2 = new Pos(12)
   val E2 = new Pos(13)
   val F2 = new Pos(14)
-  // val G2 = new Pos(15)
-  // val H2 = new Pos(16)
-  // val I2 = new Pos(17)
+  val G2 = new Pos(15)
+  val H2 = new Pos(16)
+  val I2 = new Pos(17)
   val A3 = new Pos(18)
   val B3 = new Pos(19)
   val C3 = new Pos(20)
@@ -449,8 +462,8 @@ object Pos {
   val E3 = new Pos(22)
   val F3 = new Pos(23)
   val G3 = new Pos(24)
-  // val H3 = new Pos(25) //
-  // val I3 = new Pos(26) //
+  val H3 = new Pos(25)
+  val I3 = new Pos(26)
   val A4 = new Pos(27)
   val B4 = new Pos(28)
   val C4 = new Pos(29)
@@ -459,7 +472,7 @@ object Pos {
   val F4 = new Pos(32)
   val G4 = new Pos(33)
   val H4 = new Pos(34)
-  // val I4 = new Pos(35) //
+  val I4 = new Pos(35)
   val A5 = new Pos(36)
   val B5 = new Pos(37)
   val C5 = new Pos(38)
@@ -469,7 +482,7 @@ object Pos {
   val G5 = new Pos(42)
   val H5 = new Pos(43)
   val I5 = new Pos(44)
-  // val A6 = new Pos(45) //
+  val A6 = new Pos(45)
   val B6 = new Pos(46)
   val C6 = new Pos(47)
   val D6 = new Pos(48)
@@ -478,8 +491,8 @@ object Pos {
   val G6 = new Pos(51)
   val H6 = new Pos(52)
   val I6 = new Pos(53)
-  // val A7 = new Pos(54) //
-  // val B7 = new Pos(55) //
+  val A7 = new Pos(54)
+  val B7 = new Pos(55)
   val C7 = new Pos(56)
   val D7 = new Pos(57)
   val E7 = new Pos(58)
@@ -487,27 +500,29 @@ object Pos {
   val G7 = new Pos(60)
   val H7 = new Pos(61)
   val I7 = new Pos(62)
-  // val A8 = new Pos(63) //
-  // val B8 = new Pos(64) //
-  // val C8 = new Pos(65) //
+  val A8 = new Pos(63)
+  val B8 = new Pos(64)
+  val C8 = new Pos(65)
   val D8 = new Pos(66)
   val E8 = new Pos(67)
   val F8 = new Pos(68)
   val G8 = new Pos(69)
   val H8 = new Pos(70)
   val I8 = new Pos(71)
-  // val A9 = new Pos(72) //
-  // val B9 = new Pos(73) //
-  // val C9 = new Pos(74) //
-  // val D9 = new Pos(75) //
+  val A9 = new Pos(72)
+  val B9 = new Pos(73)
+  val C9 = new Pos(74)
+  val D9 = new Pos(75)
   val E9 = new Pos(76)
   val F9 = new Pos(77)
   val G9 = new Pos(78)
   val H9 = new Pos(79)
   val I9 = new Pos(80)
 
-  val all: List[Pos] =
-    (0 to (File.all.size * Rank.all.size) - 1).map(new Pos(_)).toList.filter(i => isInHexagon(i.index))
+  val all: List[Pos] = (0 to (File.all.size * Rank.all.size) - 1)
+    .map(new Pos(_))
+    .toList
+    .filter(i => isInHexagon(i.index))
 
   val allKeys: Map[String, Pos] = all
     .map { pos =>

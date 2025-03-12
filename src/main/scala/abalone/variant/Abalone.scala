@@ -2,22 +2,21 @@ package strategygames.abalone
 package variant
 
 import strategygames.GameFamily
-import strategygames.abalone._
 
 case object Abalone
-    extends Variant(
-      id = 1,
-      key = "abalone",
-      name = "Abalone",
-      standardInitialPosition = true,
-      boardSize = Board.Dim9x9
-    ) {
+  extends Variant(
+    id = 1,
+    key = "abalone",
+    name = "Abalone",
+    standardInitialPosition = true,
+    boardType = Board.Hex5
+  ) {
 
-  def gameFamily: GameFamily = GameFamily.Abalone()
+  override def gameFamily: GameFamily = GameFamily.Abalone()
 
-  def perfIcon: Char = '\ue927'
-  def perfId: Int    = 700
+  override def perfIcon: Char = '\ue927'
 
-  override def baseVariant: Boolean =
-    true // Belgian Daisy initialFen is defined in Abalone default "Variant" file
+  override def perfId: Int = 700
+
+  override def baseVariant: Boolean = true // Belgian Daisy initialFen is defined in Abalone default "Variant" file
 }
