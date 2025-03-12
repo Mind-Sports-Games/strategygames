@@ -783,7 +783,7 @@ object Uci {
               dest
             )
           )
-        case (GameLogic.Dameo(), Pos.Dameo(orig), Pos.Dameo(dest))                =>
+        case (GameLogic.Dameo(), Pos.Dameo(orig), Pos.Dameo(dest))                      =>
           DameoMove(
             dameo.format.Uci.Move.apply(
               orig,
@@ -1089,7 +1089,7 @@ object Uci {
         Uci.BackgammonWithSan(backgammon.format.Uci.WithSan(u.unwrap, san))
       case (GameLogic.Abalone(), u: Uci.Abalone)           =>
         Uci.AbaloneWithSan(abalone.format.Uci.WithSan(u.unwrap, san))
-      case (GameLogic.Dameo(), Uci.DameoMove(uci))               =>
+      case (GameLogic.Dameo(), Uci.DameoMove(uci))         =>
         Uci.DameoWithSan(dameo.format.Uci.WithSan(uci, san))
       case _                                               => sys.error("Mismatched gamelogic types 24")
     }
