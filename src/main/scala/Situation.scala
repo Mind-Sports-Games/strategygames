@@ -1552,24 +1552,24 @@ object Situation {
     ): Validated[String, Move] = (from, to) match {
       case (Pos.Dameo(from), Pos.Dameo(to)) =>
         s.move(from, to).toEither.map(m => Move.Dameo(m)).toValidated
-      case _                                    => sys.error("Not passed Dameo objects")
+      case _                                => sys.error("Not passed Dameo objects")
     }
 
     def move(uci: Uci.Move): Validated[String, Move] = uci match {
       case Uci.DameoMove(uci) => s.move(uci).toEither.map(m => Move.Dameo(m)).toValidated
-      case _                    => sys.error("Not passed Dameo objects")
+      case _                  => sys.error("Not passed Dameo objects")
     }
 
     def withVariant(variant: Variant): Situation = variant match {
       case Variant.Dameo(variant) => Dameo(s.withVariant(variant))
-      case _                        => sys.error("Not passed Dameo objects")
+      case _                      => sys.error("Not passed Dameo objects")
     }
 
     def unary_! : Situation = Dameo(s.unary_!)
 
     def copy(board: Board): Situation = Dameo(board match {
       case Board.Dameo(board) => s.copy(board)
-      case _                    => sys.error("Can't copy a dameo situation with a non-dameo board")
+      case _                  => sys.error("Can't copy a dameo situation with a non-dameo board")
     })
 
     def gameLogic: GameLogic = GameLogic.Dameo()

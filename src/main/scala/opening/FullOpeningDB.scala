@@ -54,7 +54,7 @@ object FullOpeningDB {
         .map(
           FullOpening.Abalone
         )
-    case (GameLogic.Dameo(), FEN.Dameo(fen))           =>
+    case (GameLogic.Dameo(), FEN.Dameo(fen))               =>
       strategygames.dameo.opening.FullOpeningDB
         .findByFen(fen)
         .map(
