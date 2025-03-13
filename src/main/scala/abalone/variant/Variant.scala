@@ -54,9 +54,11 @@ abstract class Variant private[variant](
 
   // pieces, scoreP1, scoreP2, turn, halfMovesSinceLastCapture (triggering condition could be when == 100 && total moves > 50 ? => draw), total moves
   def initialFen: FEN =
-    format.FEN("ss1SS/sssSSS/1ss1SS1/8/9/8/1SS1ss1/SSSsss/SS1ss 0 0 b 0 1") // Belgian Daisy
+    FEN("ss1SS/sssSSS/1ss1SS1/8/9/8/1SS1ss1/SSSsss/SS1ss 0 0 b 0 1") // Belgian Daisy //TODO reverse
 
   def pieces: PieceMap = initialFen.pieces
+
+  def ppieces: Map[Cell, Piece] = initialFen.pieces(boardType)
 
   def startPlayer: Player = P1
 
@@ -392,6 +394,8 @@ abstract class Variant private[variant](
   @nowarn def finalizeBoard(board: BBoard, uci: format.Uci, captured: Option[Piece]): BBoard = board
 
   def valid(@nowarn board: Board, @nowarn strict: Boolean): Boolean = true
+
+  def valid(@nowarn board: BBoard, @nowarn strict: Boolean): Boolean = true
 
   def isIrreversible(move: Move): Boolean = move.capture.nonEmpty
 

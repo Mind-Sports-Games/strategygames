@@ -1,5 +1,6 @@
 package abalone
 
+import abalone.format.UUci
 import abalone.util.geometry.Cell
 import strategygames.MoveMetrics
 import strategygames.abalone.format.Uci
@@ -60,7 +61,7 @@ case class MMove(
 
   def withMetrics(m: MoveMetrics) = copy(metrics = m)
 
-  def toUci = Uci.Move(orig, dest)
+  def toUci = UUci.MMove(orig, dest)
 
   override def toString = s"$piece ${toUci.uci}"
 }

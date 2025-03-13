@@ -1,8 +1,22 @@
 package strategygames.abalone
 
-final class Hash(size: Int) {
+import abalone.SSituation
 
+final class Hash(size: Int) {
   def apply(situation: Situation): PositionHash = {
+    val l = Hash.get(situation, Hash.polyglotTable)
+    if (size <= 8) {
+      Array.tabulate(size)(i => (l >>> ((7 - i) * 8)).toByte)
+    } else {
+      val m = Hash.get(situation, Hash.randomTable)
+      Array.tabulate(size)(i =>
+        if (i < 8) (l >>> ((7 - i) * 8)).toByte
+        else (m >>> ((15 - i) * 8)).toByte
+      )
+    }
+  }
+
+  def apply(situation: SSituation): PositionHash = {
     val l = Hash.get(situation, Hash.polyglotTable)
     if (size <= 8) {
       Array.tabulate(size)(i => (l >>> ((7 - i) * 8)).toByte)
@@ -24,21 +38,34 @@ object Hash {
     def hexToLong(s: String): Long =
       (java.lang.Long.parseLong(s.substring(start, start + 8), 16) << 32) |
         java.lang.Long.parseLong(s.substring(start + 8, start + 16), 16)
-    val p1TurnMask                 = hexToLong(ZobristTables.p1TurnMask)
-    val actorMasks                 = ZobristTables.actorMasks.map(hexToLong)
+
+    val p1TurnMask = hexToLong(ZobristTables.p1TurnMask)
+    val actorMasks = ZobristTables.actorMasks.map(hexToLong)
   }
 
   object ZobristConstants {}
 
   // The following masks are compatible with the Polyglot
   // opening book format.
-  private val polyglotTable    = new ZobristConstants(0)
+  private val polyglotTable = new ZobristConstants(0)
   private lazy val randomTable = new ZobristConstants(16)
 
   private def actorIndex(actor: Actor) = 80 * actor.piece.player.fold(1, 0) + actor.pos.hashCode
 
   def get(situation: Situation, table: ZobristConstants): Long = {
+    val board = situation.board
+    val hturn = situation.player.fold(table.p1TurnMask, 0L)
 
+    val hactors = board.actors.values.view
+      .map {
+        table.actorMasks compose actorIndex _
+      }
+      .fold(hturn)(_ ^ _)
+
+    hactors
+  }
+
+  def get(situation: SSituation, table: ZobristConstants): Long = {
     val board = situation.board
     val hturn = situation.player.fold(table.p1TurnMask, 0L)
 

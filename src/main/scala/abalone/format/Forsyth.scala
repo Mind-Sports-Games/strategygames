@@ -38,12 +38,10 @@ object Forsyth {
   def <<(fen: FEN): Option[Situation] = <<@(Variant.default, fen)
 
   case class SituationPlus(situation: Situation, fullTurnCount: Int) {
-
     def turnCount = fullTurnCount * 2 - situation.player.fold(2, 1)
 
     // when we get a multiaction variant we should set this
     def plies = turnCount
-
   }
 
   def <<<@(variant: Variant, fen: FEN): Option[SituationPlus] =
@@ -104,36 +102,6 @@ object Forsyth {
       fen.append('/')
     }
     fen.toString.replace(",/", "/").dropRight(1)
-  }
-
-  def getFen_board(board: BBoard): String = {
-    val res = new StringBuilder(board.variant.boardType.cellList.size)
-
-    var prev: Option[Cell] = Option.empty
-    var emptyNb = 0
-
-    def writeEmptyNb = if (emptyNb > 0) {
-      res.append(s"$emptyNb")
-      emptyNb = 0
-    }
-
-    board.variant.boardType.cellList.foreach(a => {
-      if (prev.isDefined & prev.get.y != a.y) {
-        writeEmptyNb
-        res.append("/")
-      }
-
-      board.getPiece(a) match {
-        case None => emptyNb += 1
-        case Some(piece) =>
-          writeEmptyNb
-          res.append(if (piece.player == P1) piece.forsyth.toString.toUpperCase() else piece.forsyth.toString.toLowerCase())
-      }
-
-      prev = Option(a);
-    })
-
-    res.toString
   }
 
   def boardAndPlayer(situation: Situation): String = boardAndPlayer(situation.board, situation.player)

@@ -2,12 +2,12 @@ package abalone
 
 import abalone.util.geometry.Cell
 import strategygames.Player
+import strategygames.abalone.Piece
 import strategygames.abalone.variant.Variant
-import strategygames.abalone.{Actor, History, Piece, Situation}
 
 case class BBoard(
                    pieces: Map[Cell, Piece],
-                   history: History,
+                   history: HHistory,
                    variant: Variant
                  ) {
   def piecesOf(player: Player): Map[Cell, Piece] = pieces.filter(_._2.is(player))
@@ -16,13 +16,13 @@ case class BBoard(
 
   def getPiece(a: Cell): Option[Piece] = pieces.get(a)
 
-  def withHistory(h: History): BBoard = copy(history = h)
+  def withHistory(h: HHistory): BBoard = copy(history = h)
 
-  def updateHistory(f: History => History) = copy(history = f(history))
+  def updateHistory(f: HHistory => HHistory) = copy(history = f(history))
 
   def withVariant(v: Variant): BBoard = copy(variant = v)
 
-  def situationOf(player: Player) = Situation(this, player)
+  def situationOf(player: Player) = SSituation(this, player)
 
   def valid(strict: Boolean) = variant.valid(this, strict)
 
@@ -30,10 +30,18 @@ case class BBoard(
 
   override def toString = s"$variant Position after ${history.recentTurnUciString}"
 
-  lazy val actors: Map[Cell, Actor] = pieces.map { case (a, piece) => (a, Actor(piece, a, this)) }
+  lazy val actors: Map[Cell, AActor] = pieces.map { case (a, piece) => (a, AActor(piece, a, this)) }
 
   lazy val posMap: Map[Piece, Iterable[Cell]] = pieces.groupMap(_._2)(_._1)
 
   lazy val piecesOnBoardCount: Int = pieces.keys.size
 }
 
+object BBoard {
+  def apply(pieces: Iterable[(Cell, Piece)], variant: Variant): BBoard =
+    BBoard(pieces.toMap, HHistory(), variant)
+
+  def init(variant: Variant): BBoard = BBoard(variant.ppieces, variant)
+
+  // def empty(variant: Variant): Board = Board(Nil, variant)
+}

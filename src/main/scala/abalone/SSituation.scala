@@ -9,10 +9,6 @@ import strategygames.abalone.variant.Variant
 import strategygames.{Player, Status}
 
 case class SSituation(board: BBoard, player: Player) {
-  def history = board.history
-
-  def checkmate: Boolean = false
-
   def stalemate: Boolean = board.variant.specialDraw(this)
 
   def autoDraw: Boolean = board.autoDraw
@@ -25,10 +21,10 @@ case class SSituation(board: BBoard, player: Player) {
 
   def opponentHasInsufficientMaterial: Boolean = false
 
-  def move(from: Cell, to: Cell): Validated[String, Move] =
+  def move(from: Cell, to: Cell): Validated[String, MMove] =
     board.variant.move(this, from, to)
 
-  def move(uci: Uci.Move): Validated[String, Move] =
+  def move(uci: Uci.Move): Validated[String, MMove] =
     board.variant.move(this, uci.orig, uci.dest)
 
   def withHistory(history: History) = copy(board = board.withHistory(history))
