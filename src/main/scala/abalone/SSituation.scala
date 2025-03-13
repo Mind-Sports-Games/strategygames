@@ -1,12 +1,14 @@
-package strategygames.abalone
+package abalone
 
+import abalone.util.geometry.Cell
 import cats.data.Validated
 import cats.implicits._
+import strategygames.abalone.History
 import strategygames.abalone.format.Uci
 import strategygames.abalone.variant.Variant
 import strategygames.{Player, Status}
 
-case class Situation(board: Board, player: Player) {
+case class SSituation(board: BBoard, player: Player) {
   def history = board.history
 
   def checkmate: Boolean = false
@@ -23,7 +25,7 @@ case class Situation(board: Board, player: Player) {
 
   def opponentHasInsufficientMaterial: Boolean = false
 
-  def move(from: Pos, to: Pos): Validated[String, Move] =
+  def move(from: Cell, to: Cell): Validated[String, Move] =
     board.variant.move(this, from, to)
 
   def move(uci: Uci.Move): Validated[String, Move] =
@@ -35,11 +37,11 @@ case class Situation(board: Board, player: Player) {
 
   def unary_! = copy(player = !player)
 
-  lazy val destinations: Map[Pos, List[Pos]] = moves.view.mapValues {
+  lazy val destinations: Map[Cell, List[Cell]] = moves.view.mapValues {
     _.map(_.dest)
   }.to(Map)
 
-  lazy val moves: Map[Pos, List[Move]] = board.variant.validMoves(this)
+  lazy val moves: Map[Cell, List[MMove]] = board.variant.validMoves(this)
 
   lazy val status: Option[Status] =
     if (variantEnd) Status.VariantEnd.some
@@ -50,7 +52,3 @@ case class Situation(board: Board, player: Player) {
   private def variantEnd = board.variant.specialEnd(this)
 }
 
-object Situation {
-  def apply(variant: Variant): Situation =
-    Situation(Board init variant, variant.startPlayer)
-}

@@ -1,5 +1,7 @@
 package strategygames.abalone.variant
 
+import abalone.util.geometry.Cell
+import abalone.{BBoard, BoardType, MMove, SSituation}
 import cats.data.Validated
 import cats.syntax.option._
 import strategygames.abalone._
@@ -14,7 +16,7 @@ abstract class Variant private[variant](
                                          val key: String,
                                          val name: String,
                                          val standardInitialPosition: Boolean,
-                                         val boardType: Board.BoardType
+                                         val boardType: BoardType
                                        ) {
   def exotic = true
 
@@ -99,7 +101,11 @@ abstract class Variant private[variant](
       .groupBy(_._1)
       .map { case (k, v) => k -> v.map(_._2).flatten }
 
-  def validMovesOf1(situation: Situation): Map[Pos, List[Move]] =
+  def validMoves(situation: SSituation): Map[Cell, List[MMove]] =
+  //TODO
+    null
+
+  def validMovesOf1(situation: Situation): Map[Pos, List[Move]] = {
     turnPieces(situation).flatMap { case (pos, piece) =>
       Map(
         pos ->
@@ -110,7 +116,8 @@ abstract class Variant private[variant](
               Move(piece, pos, landingSquare, situation, boardAfter(situation, pos, landingSquare), true)
             )
       )
-    }.toMap
+    }
+  }
 
   def validMovesOf2And3(situation: Situation): Map[Pos, List[Move]] = {
     val activePlayerPieces = situation.board.piecesOf(situation.player)
@@ -225,6 +232,11 @@ abstract class Variant private[variant](
     situation.board.copy(pieces = piecesAfterAction(situation.board.pieces, orig, dest))
   }
 
+  // move pieces on the board. Other bits (including score) are handled by Move.finalizeAfter()
+  def boardAfter(situation: SSituation, orig: Cell, dest: Cell): BBoard = {
+    situation.board.copy(pieces = piecesAfterAction(situation.board.pieces, orig, dest))
+  }
+
   /*
     How to move pieces based on orig, dest :
       A. Find "globalDir" direction between orig and dest (in case of a sideMove this will always be "upY" or "downX")
@@ -311,6 +323,11 @@ abstract class Variant private[variant](
     pieces + (dest -> pieces(orig)) - orig
   }
 
+  private def piecesAfterAction(pieces: Map[Cell, Piece], orig: Cell, dest: Cell): Map[Cell, Piece] = {
+    //TODO
+    pieces
+  }
+
   def move(
             situation: Situation,
             from: Pos,
@@ -319,6 +336,16 @@ abstract class Variant private[variant](
     // Find the move in the variant specific list of valid moves !
     situation.moves get from flatMap (_.find(m => m.dest == to)) toValid
       s"Not a valid move: ${from}${to}. Allowed moves: ${situation.moves}"
+  }
+
+  def move(
+            situation: SSituation,
+            from: Cell,
+            to: Cell
+          ): Validated[String, MMove] = {
+    // Find the move in the variant specific list of valid moves !
+    situation.moves get from flatMap (_.find(m => m.dest == to)) toValid
+      s"Not a valid move: $from$to. Allowed moves: ${situation.moves}"
   }
 
   /** If a player runs out of move, the match is a draw. */
@@ -333,9 +360,19 @@ abstract class Variant private[variant](
     else None
   }
 
+  def winner(situation: SSituation): Option[Player] = {
+    if (situation.board.history.score.p1 >= winningScore) Some(P1)
+    else if (situation.board.history.score.p2 >= winningScore) Some(P2)
+    else None
+  }
+
   def specialEnd(situation: Situation) = winner(situation).isDefined
 
+  def specialEnd(situation: SSituation) = winner(situation).isDefined
+
   def specialDraw(situation: Situation) = situation.moves.size == 0
+
+  def specialDraw(situation: SSituation) = situation.moves.size == 0
 
   // TODO Abalone Set
   def materialImbalance(@nowarn board: Board): Int = 0
@@ -346,13 +383,19 @@ abstract class Variant private[variant](
 
   def addVariantEffect(move: Move): Move = move
 
-  /** Once a move has been decided upon from the available legal moves, the board is finalized
-    */
+  def addVariantEffect(move: MMove): MMove = move
+
+  /** Once a move has been decided upon from the available legal moves, the board is finalized. */
   @nowarn def finalizeBoard(board: Board, uci: format.Uci, captured: Option[Piece]): Board = board
+
+  /** Once a move has been decided upon amongst the available legal ones, the board is finalized. */
+  @nowarn def finalizeBoard(board: BBoard, uci: format.Uci, captured: Option[Piece]): BBoard = board
 
   def valid(@nowarn board: Board, @nowarn strict: Boolean): Boolean = true
 
   def isIrreversible(move: Move): Boolean = move.capture.nonEmpty
+
+  def isIrreversible(move: MMove): Boolean = move.capture.nonEmpty
 
   def defaultRole: Role = Role.defaultRole
 
@@ -380,6 +423,8 @@ abstract class Variant private[variant](
   }
 
   private def turnPieces(situation: Situation): PieceMap = situation.board.piecesOf(situation.player)
+
+  private def turnPieces(situation: SSituation): Map[Cell, Piece] = situation.board.piecesOf(situation.player)
 
   val kingPiece: Option[Role] = None
 

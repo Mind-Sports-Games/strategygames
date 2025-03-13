@@ -356,7 +356,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
 
     "trigger a stalemate" in {
       game2.situation.end must_== true
-      game2.situation.staleMate must_== true
+      game2.situation.stalemate must_== true
       game2.situation.playable(true) must_== false
       game2.situation.status must_== Some(Status.Stalemate)
       game2.situation.winner must_== None
@@ -389,7 +389,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
 
     "trigger a win condition defined by the variant, even though it detects the stalemate" in {
       game2.situation.end must_== true
-      game2.situation.staleMate must_== true
+      game2.situation.stalemate must_== true
       game2.situation.playable(true) must_== false
       game2.situation.status must_== Some(Status.VariantEnd)
       game2.situation.winner must_== Some(P1)
@@ -474,7 +474,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
 
     "trigger a win condition defined by the variant, and no stalemate is detected" in {
       game12.situation.end must_== true
-      game12.situation.staleMate must_== false
+      game12.situation.stalemate must_== false
       game12.situation.playable(true) must_== false
       game12.situation.status must_== Some(Status.VariantEnd)
       game12.situation.winner must_== Some(P1)
@@ -524,7 +524,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
       game8.situation.playable(true) must_== true
 
       game9.situation.end must_== true
-      game9.situation.staleMate must_== false
+      game9.situation.stalemate must_== false
       game9.situation.playable(true) must_== false
       game9.situation.status must_== Some(Status.Draw)
       game9.situation.winner must_== None

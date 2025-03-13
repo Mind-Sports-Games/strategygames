@@ -241,7 +241,7 @@ class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
     "but is ended and P1 is the winner" in {
       situation.end must_== true
       situation.playable(true) must_== false
-      situation.staleMate must_== false
+      situation.stalemate must_== false
       situation.winner must_== Some(P1)
       situation.status must_== Some(Status.VariantEnd)
     }
@@ -265,7 +265,7 @@ class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
     "end in a draw" in {
       situation.end must_== true
       situation.playable(true) must_== false
-      situation.staleMate must_== true
+      situation.stalemate must_== true
       situation.winner must_== None
       situation.status must_== Some(Status.Stalemate)
     }

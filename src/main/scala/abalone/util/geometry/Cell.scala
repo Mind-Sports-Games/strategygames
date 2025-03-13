@@ -1,4 +1,4 @@
-package abalone
+package abalone.util.geometry
 
 class Cell(var x: Int, var y: Int) extends AnyRef {
   def copy(a: Cell): Cell = new Cell(a.x, a.y)

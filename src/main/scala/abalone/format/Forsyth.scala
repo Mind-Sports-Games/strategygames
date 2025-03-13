@@ -1,10 +1,10 @@
 package strategygames.abalone.format
 
-import cats.implicits._
-
-import strategygames.{ Player, Score }
+import abalone.BBoard
+import abalone.util.geometry.Cell
 import strategygames.abalone._
 import strategygames.abalone.variant.Variant
+import strategygames.{Player, Score}
 
 /** Transform a game to standard Forsyth Edwards Notation
   * http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
@@ -24,7 +24,7 @@ object Forsyth {
         fen.value.split(' ')(3) match {
           case "b" => P1
           case "w" => P2
-          case _   => sys.error("Invalid player in fen")
+          case _ => sys.error("Invalid player in fen")
         }
       ).withHistory(
         History(
@@ -40,8 +40,9 @@ object Forsyth {
   case class SituationPlus(situation: Situation, fullTurnCount: Int) {
 
     def turnCount = fullTurnCount * 2 - situation.player.fold(2, 1)
+
     // when we get a multiaction variant we should set this
-    def plies     = turnCount
+    def plies = turnCount
 
   }
 
@@ -65,9 +66,9 @@ object Forsyth {
     }
 
   def >>(game: Game): FEN = {
-    val boardFen  = boardPart(game.situation.board)
-    val scoreStr  = game.situation.board.history.score.fenStr
-    val player    = game.situation.player.fold('b', 'w')
+    val boardFen = boardPart(game.situation.board)
+    val scoreStr = game.situation.board.history.score.fenStr
+    val player = game.situation.player.fold('b', 'w')
     val halfMoves = game.situation.board.history.halfMoveClock
     val fullMoves = game.fullTurnCount
     FEN(s"${boardFen} ${scoreStr} ${player} ${halfMoves} ${fullMoves}")
@@ -81,13 +82,13 @@ object Forsyth {
 
   // return the FEN
   def boardPart(board: Board): String = {
-    val fen   = new scala.collection.mutable.StringBuilder(70)
+    val fen = new scala.collection.mutable.StringBuilder(70)
     var empty = 0
     for (y <- Rank.allReversed) {
       empty = 0
       for (x <- File.all) {
         board(x, y) match {
-          case None        => if (Pos(x, y).isDefined) empty = empty + 1
+          case None => if (Pos(x, y).isDefined) empty = empty + 1
           case Some(piece) =>
             if (empty > 0) {
               fen.append(empty)
@@ -105,10 +106,37 @@ object Forsyth {
     fen.toString.replace(",/", "/").dropRight(1)
   }
 
-  def boardAndPlayer(situation: Situation): String =
-    boardAndPlayer(situation.board, situation.player)
+  def getFen_board(board: BBoard): String = {
+    val res = new StringBuilder(board.variant.boardType.cellList.size)
 
-  def boardAndPlayer(board: Board, turnPlayer: Player): String =
-    s"${exportBoard(board)} ${turnPlayer.letter}"
+    var prev: Option[Cell] = Option.empty
+    var emptyNb = 0
 
+    def writeEmptyNb = if (emptyNb > 0) {
+      res.append(s"$emptyNb")
+      emptyNb = 0
+    }
+
+    board.variant.boardType.cellList.foreach(a => {
+      if (prev.isDefined & prev.get.y != a.y) {
+        writeEmptyNb
+        res.append("/")
+      }
+
+      board.getPiece(a) match {
+        case None => emptyNb += 1
+        case Some(piece) =>
+          writeEmptyNb
+          res.append(if (piece.player == P1) piece.forsyth.toString.toUpperCase() else piece.forsyth.toString.toLowerCase())
+      }
+
+      prev = Option(a);
+    })
+
+    res.toString
+  }
+
+  def boardAndPlayer(situation: Situation): String = boardAndPlayer(situation.board, situation.player)
+
+  def boardAndPlayer(board: Board, turnPlayer: Player): String = s"${exportBoard(board)} ${turnPlayer.letter}"
 }

@@ -920,107 +920,106 @@ object Variant {
         name = v.name,
         standardInitialPosition = v.standardInitialPosition
       ) {
+    override def toChess        = sys.error("Can't convert abalone to chess")
+    override def toDraughts     = sys.error("Can't convert abalone to draughts")
+    override def toFairySF      = sys.error("Can't convert abalone to fairysf")
+    override def toSamurai      = sys.error("Can't convert abalone to samurai")
+    override def toTogyzkumalak = sys.error("Can't convert abalone to togyzkumalak")
+    override def toGo           = sys.error("Can't convert abalone to go")
+    override def toBackgammon   = sys.error("Can't convert abalone to backgammon")
+    override def toAbalone      = v
+    override def toDameo        = sys.error("Can't convert abalone to dameo")
 
-    def toChess        = sys.error("Can't convert abalone to chess")
-    def toDraughts     = sys.error("Can't convert abalone to draughts")
-    def toFairySF      = sys.error("Can't convert abalone to fairysf")
-    def toSamurai      = sys.error("Can't convert abalone to samurai")
-    def toTogyzkumalak = sys.error("Can't convert abalone to togyzkumalak")
-    def toGo           = sys.error("Can't convert abalone to go")
-    def toBackgammon   = sys.error("Can't convert abalone to backgammon")
-    def toAbalone      = v
-    def toDameo        = sys.error("Can't convert abalone to dameo")
-
-    def pieces: PieceMap =
+    override def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.Abalone(pos), (Piece.Abalone(piece), 1)) }
 
-    def standardVariant: Boolean     = false
-    def fromPositionVariant: Boolean = false
-    def exoticChessVariant: Boolean  = false
-    def frisianVariant: Boolean      = false
-    def draughts64Variant: Boolean   = false
+    override def standardVariant: Boolean     = false
+    override def fromPositionVariant: Boolean = false
+    override def exoticChessVariant: Boolean  = false
+    override def frisianVariant: Boolean      = false
+    override def draughts64Variant: Boolean   = false
 
-    def exotic: Boolean = v.exotic
+    override def exotic: Boolean = v.exotic
 
-    def baseVariant: Boolean        = v.baseVariant
-    def fenVariant: Boolean         = v.fenVariant
-    def variableInitialFen: Boolean = v.variableInitialFen
+    override def baseVariant: Boolean        = v.baseVariant
+    override def fenVariant: Boolean         = v.fenVariant
+    override def variableInitialFen: Boolean = v.variableInitialFen
 
-    def hasAnalysisBoard: Boolean = v.hasAnalysisBoard
-    def hasFishnet: Boolean       = v.hasFishnet
+    override def hasAnalysisBoard: Boolean = v.hasAnalysisBoard
+    override def hasFishnet: Boolean       = v.hasFishnet
 
-    def p1IsBetterVariant: Boolean = v.p1IsBetterVariant
-    def blindModeVariant: Boolean  = v.blindModeVariant
+    override def p1IsBetterVariant: Boolean = v.p1IsBetterVariant
+    override def blindModeVariant: Boolean  = v.blindModeVariant
 
-    def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
+    override def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
 
-    def dropsVariant: Boolean      = false
-    def onlyDropsVariant: Boolean  = false
-    def hasDetachedPocket: Boolean = false
-    def hasGameScore: Boolean      = true
+    override def dropsVariant: Boolean      = false
+    override def onlyDropsVariant: Boolean  = false
+    override def hasDetachedPocket: Boolean = false
+    override def hasGameScore: Boolean      = true
 
-    def canOfferDraw: Boolean       = v.canOfferDraw
-    def ignoreSubmitAction: Boolean = false
+    override def canOfferDraw: Boolean       = v.canOfferDraw
+    override def ignoreSubmitAction: Boolean = false
 
-    def perfId: Int    = v.perfId
-    def perfIcon: Char = v.perfIcon
+    override def perfId: Int    = v.perfId
+    override def perfIcon: Char = v.perfIcon
 
-    def initialFen: FEN        = FEN.Abalone(v.initialFen)
-    def initialFens: List[FEN] = List(initialFen)
-    def startPlayer: Player    = v.startPlayer
+    override def initialFen: FEN        = FEN.Abalone(v.initialFen)
+    override def initialFens: List[FEN] = List(initialFen)
+    override def startPlayer: Player    = v.startPlayer
 
-    def recalcStartPlayerForStats: Boolean = false
+    override def recalcStartPlayerForStats: Boolean = false
 
-    def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false
+    override def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false
 
-    def checkmate(situation: Situation): Boolean = situation match {
+    override def checkmate(situation: Situation): Boolean = situation match {
       case Situation.Abalone(_) => false
       case _                    => sys.error("Not passed Abalone objects")
     }
 
-    def stalemateIsDraw: Boolean = v.stalemateIsDraw
+    override def stalemateIsDraw: Boolean = v.stalemateIsDraw
 
-    def useRuleOfGinOnInsufficientMaterial: Boolean = false
+    override def useRuleOfGinOnInsufficientMaterial: Boolean = false
 
-    def winner(situation: Situation): Option[Player] = situation match {
+    override def winner(situation: Situation): Option[Player] = situation match {
       case Situation.Abalone(situation) => v.winner(situation)
       case _                            => sys.error("Not passed Abalone objects")
     }
 
-    @nowarn def specialEnd(situation: Situation): Boolean = situation match {
+    @nowarn override def specialEnd(situation: Situation): Boolean = situation match {
       case Situation.Abalone(situation) => v.specialEnd(situation)
       case _                            => sys.error("Not passed Abalone objects")
     }
 
-    @nowarn def specialDraw(situation: Situation): Boolean = situation match {
+    @nowarn override def specialDraw(situation: Situation): Boolean = situation match {
       case Situation.Abalone(situation) => v.specialDraw(situation)
       case _                            => sys.error("Not passed Abalone objects")
     }
 
-    def hasMoveEffects: Boolean = v.hasMoveEffects
+    override def hasMoveEffects: Boolean = v.hasMoveEffects
 
-    def addVariantEffect(move: Move): Move            = move match {
+    override def addVariantEffect(move: Move): Move            = move match {
       case Move.Abalone(move) => Move.Abalone(v.addVariantEffect(move))
       case _                  => sys.error("Not passed Abalone objects")
     }
-    def valid(board: Board, strict: Boolean): Boolean = board match {
+    override def valid(board: Board, strict: Boolean): Boolean = board match {
       case Board.Abalone(board) => v.valid(board, strict)
       case _                    => sys.error("Not passed Abalone objects")
     }
 
-    val roles: List[Role] = v.roles.map(Role.AbaloneRole)
+    override val roles: List[Role] = v.roles.map(Role.AbaloneRole)
 
     override def equals(that: Any): Boolean = that match {
       case Abalone(v2) => v2.equals(v)
       case _           => false
     }
 
-    def chessVariant: chess.variant.Variant = sys.error("Unimplemented for Abalone")
-    def gameLogic: GameLogic                = GameLogic.Abalone()
-    def gameFamily: GameFamily              = v.gameFamily
+    override def chessVariant: chess.variant.Variant = sys.error("Unimplemented for Abalone")
+    override def gameLogic: GameLogic                = GameLogic.Abalone()
+    override def gameFamily: GameFamily              = v.gameFamily
 
-    def playerNames: Map[Player, String]  = gameFamily.playerNames
-    def playerColors: Map[Player, String] = gameFamily.playerColors
+    override def playerNames: Map[Player, String]  = gameFamily.playerNames
+    override def playerColors: Map[Player, String] = gameFamily.playerColors
   }
 
   case class Dameo(v: dameo.variant.Variant)

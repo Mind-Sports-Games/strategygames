@@ -25,8 +25,6 @@ sealed trait PromotableRole extends Role
 case object Stone extends Role {
   val forsyth = 's'
   val binaryInt = 1
-
-  val dirs: Directions = List(_.right, _.left, _.upLeft, _.upRight, _.downLeft, _.downRight)
 }
 
 object Role {
