@@ -52,7 +52,7 @@ object RReplay {
     error match {
       case None =>
         Validated.valid(
-          Reader.Result.Complete(
+          Reader.Result.CComplete(
             new RReplay(init, gameWithActions.reverse.map(_._2), game)
           )
         )
@@ -101,7 +101,7 @@ object RReplay {
                                         startPlayer: Player,
                                         activePlayer: Player,
                                         initialFen: FEN,
-                                        variant: strategygames.abalone.variant.Variant
+                                        variant: Variant
                                       ): (GGame, List[(GGame, MMove)], Option[String]) = {
     val init = makeGame(variant, initialFen.some)
     var state = init
@@ -148,7 +148,7 @@ object RReplay {
                              startPlayer: Player,
                              activePlayer: Player,
                              initialFen: FEN,
-                             variant: strategygames.abalone.variant.Variant
+                             variant: Variant
                            ): (GGame, List[(GGame, UUci.WithSan)], Option[String]) = {
     val (game, gameWithActions, error) = gameWithActionWhileValid(
       actionStrs,

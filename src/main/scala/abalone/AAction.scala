@@ -1,6 +1,6 @@
 package abalone
 
-import strategygames.abalone.format.Uci
+import abalone.format.UUci
 import strategygames.{MoveMetrics, Player}
 
 import scala.annotation.nowarn
@@ -20,5 +20,5 @@ abstract class AAction(
 
   def withMetrics(m: MoveMetrics): AAction
 
-  def toUci: Uci
+  def toUci: UUci
 }

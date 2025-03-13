@@ -3,8 +3,7 @@ package abalone
 import abalone.format.UUci
 import abalone.util.geometry.Cell
 import strategygames.MoveMetrics
-import strategygames.abalone.format.Uci
-import strategygames.abalone.{Hash, History, Piece, PositionHash}
+import strategygames.abalone.{Hash, Piece, PositionHash}
 
 case class MMove(
                   piece: Piece,
@@ -15,7 +14,7 @@ case class MMove(
                   capture: Option[Cell] = None,
                   metrics: MoveMetrics = MoveMetrics()
                 ) extends AAction(situationBefore, after, metrics) {
-  def withHistory(h: History) = copy(after = after withHistory h)
+  def withHistory(h: HHistory) = copy(after = after withHistory h)
 
   override def finalizeAfter: BBoard = {
     val board = after.updateHistory { h =>
@@ -48,20 +47,18 @@ case class MMove(
       }
   }
 
-  def situationAfter = SSituation(finalizeAfter, if (autoEndTurn) !piece.player else piece.player)
+  override def situationAfter = SSituation(finalizeAfter, if (autoEndTurn) !piece.player else piece.player)
 
   def applyVariantEffect: MMove = before.variant addVariantEffect this
 
   // does this move capture an opponent piece?
   def captures = capture.isDefined
 
-  def promotes = promotion.isDefined
+  override def player = piece.player
 
-  def player = piece.player
+  override def withMetrics(m: MoveMetrics) = copy(metrics = m)
 
-  def withMetrics(m: MoveMetrics) = copy(metrics = m)
-
-  def toUci = UUci.MMove(orig, dest)
+  override def toUci = UUci.MMove(orig, dest)
 
   override def toString = s"$piece ${toUci.uci}"
 }

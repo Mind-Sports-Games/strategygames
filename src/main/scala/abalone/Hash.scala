@@ -66,24 +66,26 @@ object Hash {
   }
 
   def get(situation: SSituation, table: ZobristConstants): Long = {
-    val board = situation.board
-    val hturn = situation.player.fold(table.p1TurnMask, 0L)
-
-    val hactors = board.actors.values.view
-      .map {
-        table.actorMasks compose actorIndex _
-      }
-      .fold(hturn)(_ ^ _)
-
-    hactors
+    //    val board = situation.board
+    //    val hturn = situation.player.fold(table.p1TurnMask, 0L)
+    //
+    //    val hactors = board.actors.values.view
+    //      .map {
+    //        table.actorMasks compose actorIndex _
+    //      }
+    //      .fold(hturn)(_ ^ _)
+    //
+    //    hactors
+    0L //TODO
   }
 
   private val h = new Hash(size)
 
   def apply(situation: Situation): PositionHash = h.apply(situation)
 
-  def debug(hashes: PositionHash) = hashes.map(_.toInt).sum.toString
+  def apply(situation: SSituation): PositionHash = h.apply(situation)
 
+  def debug(hashes: PositionHash) = hashes.map(_.toInt).sum.toString
 }
 
 // Although an Abalone board has 61 squares, our Pos index goes up to 81 so we need 2*81 masks.

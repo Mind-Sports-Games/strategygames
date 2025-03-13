@@ -1,7 +1,5 @@
 package strategygames.abalone.format
 
-import abalone.BBoard
-import abalone.util.geometry.Cell
 import strategygames.abalone._
 import strategygames.abalone.variant.Variant
 import strategygames.{Player, Score}

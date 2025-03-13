@@ -1,11 +1,12 @@
 package strategygames.abalone.variant
 
+import abalone.format.UUci
 import abalone.util.geometry.Cell
 import abalone.{BBoard, BoardType, MMove, SSituation}
 import cats.data.Validated
 import cats.syntax.option._
 import strategygames.abalone._
-import strategygames.abalone.format.FEN
+import strategygames.abalone.format.{FEN, Uci}
 import strategygames.{GameFamily, Player}
 
 import scala.annotation.nowarn
@@ -103,9 +104,11 @@ abstract class Variant private[variant](
       .groupBy(_._1)
       .map { case (k, v) => k -> v.map(_._2).flatten }
 
-  def validMoves(situation: SSituation): Map[Cell, List[MMove]] =
-  //TODO
+  def validMoves(situation: SSituation): Map[Cell, List[MMove]] = {
+    turnPieces(situation)
+    //TODO
     null
+  }
 
   def validMovesOf1(situation: Situation): Map[Pos, List[Move]] = {
     turnPieces(situation).flatMap { case (pos, piece) =>
@@ -327,6 +330,7 @@ abstract class Variant private[variant](
 
   private def piecesAfterAction(pieces: Map[Cell, Piece], orig: Cell, dest: Cell): Map[Cell, Piece] = {
     //TODO
+    println(s"$orig $dest")
     pieces
   }
 
@@ -388,10 +392,10 @@ abstract class Variant private[variant](
   def addVariantEffect(move: MMove): MMove = move
 
   /** Once a move has been decided upon from the available legal moves, the board is finalized. */
-  @nowarn def finalizeBoard(board: Board, uci: format.Uci, captured: Option[Piece]): Board = board
+  @nowarn def finalizeBoard(board: Board, uci: Uci, captured: Option[Piece]): Board = board
 
   /** Once a move has been decided upon amongst the available legal ones, the board is finalized. */
-  @nowarn def finalizeBoard(board: BBoard, uci: format.Uci, captured: Option[Piece]): BBoard = board
+  @nowarn def finalizeBoard(board: BBoard, uci: UUci, captured: Option[Piece]): BBoard = board
 
   def valid(@nowarn board: Board, @nowarn strict: Boolean): Boolean = true
 

@@ -1,12 +1,11 @@
 package strategygames.abalone
 package format.pgn
-import strategygames.{ Action => StratAction, ActionStrs, ByoyomiClock, Clock, Situation => StratSituation }
 
-import strategygames.format.pgn.{ ParsedPgn, Sans, Tags }
-
-import strategygames.abalone.format.Uci
-
+import abalone.RReplay
 import cats.data.Validated
+import strategygames.abalone.format.Uci
+import strategygames.format.pgn.{ParsedPgn, Sans, Tags}
+import strategygames.{ActionStrs, ByoyomiClock, Clock, Action => StratAction, Situation => StratSituation}
 
 object Reader {
 
@@ -15,10 +14,19 @@ object Reader {
   }
 
   object Result {
-    case class Complete(replay: Replay)                    extends Result {
+    case class Complete(replay: Replay) extends Result {
       def valid = Validated.valid(replay)
     }
+
     case class Incomplete(replay: Replay, failure: String) extends Result {
+      def valid = Validated.invalid(failure)
+    }
+
+    case class CComplete(replay: RReplay) extends Result {
+      def valid = Validated.valid(replay)
+    }
+
+    case class IIncomplete(replay: RReplay, failure: String) extends Result {
       def valid = Validated.invalid(failure)
     }
   }
@@ -35,10 +43,10 @@ object Reader {
     makeReplay(makeGame(parsed.tags), op(parsed.sans))
 
   def replayResultFromActionStrs(
-      actionStrs: ActionStrs,
-      op: ActionStrs => ActionStrs,
-      tags: Tags
-  ): Validated[String, Result] =
+                                  actionStrs: ActionStrs,
+                                  op: ActionStrs => ActionStrs,
+                                  tags: Tags
+                                ): Validated[String, Result] =
     Validated.valid(makeReplayWithActionStrs(makeGame(tags), op(actionStrs)))
 
   // remove invisible byte order mark
@@ -51,7 +59,7 @@ object Reader {
           err => Result.Incomplete(replay, err),
           action => Result.Complete(replay addAction StratAction.toAbalone(action))
         )
-      case (r: Result.Incomplete, _)      => r
+      case (r: Result.Incomplete, _) => r
     }
 
   private def makeReplayWithActionStrs(game: Game, actionStrs: ActionStrs): Result =
@@ -71,14 +79,14 @@ object Reader {
                     )
                   )
                 )
-              case _                        =>
+              case _ =>
                 Result.Incomplete(replay, s"Error making replay with move: ${actionStr}")
             }
           }
-          case _                          =>
+          case _ =>
             Result.Incomplete(replay, s"Error making replay with uci move: ${actionStr}")
         }
-      case (r: Result.Incomplete, _)                       => r
+      case (r: Result.Incomplete, _) => r
     }
 
   private def makeGame(tags: Tags) = {
@@ -90,9 +98,9 @@ object Reader {
       startedAtPly = g.plies,
       startedAtTurn = g.turnCount,
       clock = tags.clockConfig.flatMap {
-        case fc: Clock.Config        => Some(Clock.apply(fc))
+        case fc: Clock.Config => Some(Clock.apply(fc))
         case bc: ByoyomiClock.Config => Some(ByoyomiClock.apply(bc))
-        case _                       => None
+        case _ => None
       }
     )
   }

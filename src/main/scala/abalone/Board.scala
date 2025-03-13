@@ -1,6 +1,5 @@
 package strategygames.abalone
 
-import abalone.util.geometry.Cell
 import strategygames.Player
 import strategygames.abalone.variant.Variant
 

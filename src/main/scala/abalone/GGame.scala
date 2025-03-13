@@ -1,11 +1,11 @@
 package abalone
 
-import abalone.format.UUci
+import abalone.format.{FForsyth, UUci}
 import abalone.util.geometry.Cell
 import cats.data.Validated
+import strategygames.abalone.P1
 import strategygames.abalone.format.FEN
 import strategygames.abalone.variant.Variant
-import strategygames.abalone.{Game, P1, format}
 import strategygames.{ClockBase, MoveMetrics, Player, VActionStrs}
 
 case class GGame(
@@ -76,15 +76,14 @@ case class GGame(
 }
 
 object GGame {
-  def apply(variant: Variant): Game =
-    new GGame(SSituation(BBoard init variant, P1))
+  def apply(variant: Variant): GGame = new GGame(SSituation(BBoard init variant, P1))
 
-  def apply(variantOption: Option[Variant], fen: Option[FEN]): Game = {
+  def apply(variantOption: Option[Variant], fen: Option[FEN]): GGame = {
     val variant = variantOption | Variant.default
     val g = apply(variant)
     fen
       .flatMap {
-        format.Forsyth.<<<@(variant, _)
+        FForsyth.<<<@(variant, _)
       }
       .fold(g) { parsed =>
         g.copy(

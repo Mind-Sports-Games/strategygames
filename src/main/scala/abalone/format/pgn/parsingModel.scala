@@ -1,28 +1,26 @@
 package strategygames.abalone
 package format.pgn
 
+import cats.data.Validated
+import strategygames.format.pgn.{Metas, San, Suffixes}
+import strategygames.{Move => StratMove}
+
 import scala.annotation.nowarn
 
-import cats.data.Validated
-
-import strategygames.{ Move => StratMove }
-import strategygames.format.pgn.{ Metas, San, Suffixes }
-
 case class Std(
-    dest: Pos,
-    role: Role,
-    capture: Boolean = false,
-    file: Option[Int] = None,
-    rank: Option[Int] = None,
-    promotion: Option[PromotableRole] = None,
-    metas: Metas = Metas.empty
-) extends San {
-
+                dest: Pos,
+                role: Role,
+                capture: Boolean = false,
+                file: Option[Int] = None,
+                rank: Option[Int] = None,
+                promotion: Option[PromotableRole] = None,
+                metas: Metas = Metas.empty
+              ) extends San {
   def apply(
-      situation: strategygames.Situation,
-      iteratedCapts: Boolean = false,
-      forbiddenUci: Option[List[String]] = None
-  ) = move(situation.toAbalone).map(StratMove.wrap)
+             situation: strategygames.Situation,
+             iteratedCapts: Boolean = false,
+             forbiddenUci: Option[List[String]] = None
+           ) = move(situation.toAbalone).map(StratMove.wrap)
 
   override def withSuffixes(s: Suffixes) =
     copy(
@@ -34,5 +32,4 @@ case class Std(
 
   def move(@nowarn situation: Situation): Validated[String, strategygames.abalone.Move] =
     Validated.invalid("Not implemented move") // TODO: ???
-
 }

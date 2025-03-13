@@ -58,7 +58,7 @@ object UUci {
     val moveR = s"^${Cell.re}${Cell.re}".r
   }
 
-  case class WithSan(uci: Uci, san: String)
+  case class WithSan(uci: UUci, san: String)
 
   def apply(move: abalone.MMove) = UUci.MMove(move.orig, move.dest)
 
