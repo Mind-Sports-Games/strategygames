@@ -1,5 +1,6 @@
 package abalone.util.geometry
 
+import scala.annotation.nowarn
 import scala.util.matching.Regex
 
 class Cell(var x: Int, var y: Int) extends AnyRef {
@@ -59,6 +60,8 @@ class Cell(var x: Int, var y: Int) extends AnyRef {
 
   //
   //
+  def vectTo3: (Double, Double) = Cell.vectTo3(x, y)
+
   def scal(a: Cell): Int = scal(a.x, a.y)
 
   def scal(a: Int, b: Int): Int = x * a + y * b
@@ -73,13 +76,37 @@ class Cell(var x: Int, var y: Int) extends AnyRef {
 
   def cross3(a: Cell): Double = cross3(a.x, a.y)
 
-  def cross3(a: Int, b: Int): Double = Cell.cross(x - y / 2d, y * math.sqrt(3) / 2, a - b / 2d, b * math.sqrt(3) / 2)
+  def cross3(a: Int, b: Int): Double = Cell.cross(vectTo3, Cell.vectTo3(a, b))
 }
 
 object Cell {
+  private val sr3 = math.sqrt(3)
+
   def copy(a: Cell): Cell = new Cell(a.x, a.y)
 
-  def cross(x: Double, y: Double, a: Double, b: Double): Double = x * b - y * a
+  def fromPoint(x: (Double, Double)): Cell = fromPoint(x._1, x._2)
+
+  def fromPoint(x: Double, y: Double): Cell = new Cell(math.round(x).toInt, math.round(y).toInt)
+
+  private def vectTo3(x: Int, y: Int): (Double, Double) = (x - y / 2d, y * sr3 / 2)
+
+  @nowarn private def vectTo3(x: (Double, Double)): (Double, Double) = vectTo3(x._1, x._2)
+
+  @nowarn private def vectTo3(x: Double, y: Double): (Double, Double) = (x - y / 2, y * sr3 / 2)
+
+  private def cross(x: (Double, Double), a: (Double, Double)): Double = cross(x._1, x._2, a._1, a._2)
+
+  private def cross(x: Double, y: Double, a: Double, b: Double): Double = x * b - y * a
+
+  def getRotated(a: Cell, deg: Double): (Double, Double) = getRotated(a.x, a.y, deg)
+
+  def getRotated(x: (Double, Double), deg: Double): (Double, Double) = getRotated(x._1, x._2, deg)
+
+  def getRotated(x: Double, y: Double, deg: Double): (Double, Double) = {
+    val cos = math.cos(math.toRadians(deg))
+    val sin = math.sin(math.toRadians(deg))
+    (cos * x - sin * y, sin * x + cos * y)
+  }
 
   private val _rex: String = "(0|-?[1-9][0-9]*)"
 

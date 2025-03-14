@@ -13,6 +13,10 @@ object Reader {
     def valid: Validated[String, Replay]
   }
 
+  sealed trait RResult {
+    def valid: Validated[String, RReplay]
+  }
+
   object Result {
     case class Complete(replay: Replay) extends Result {
       def valid = Validated.valid(replay)
@@ -22,11 +26,11 @@ object Reader {
       def valid = Validated.invalid(failure)
     }
 
-    case class CComplete(replay: RReplay) extends Result {
+    case class CComplete(replay: RReplay) extends RResult {
       def valid = Validated.valid(replay)
     }
 
-    case class IIncomplete(replay: RReplay, failure: String) extends Result {
+    case class IIncomplete(replay: RReplay, failure: String) extends RResult {
       def valid = Validated.invalid(failure)
     }
   }

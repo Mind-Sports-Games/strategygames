@@ -2,6 +2,7 @@ package strategygames.abalone
 
 import strategygames.abalone.format.FEN
 
+//TODO this is from chess
 case class StartingPosition(
     eco: String,
     name: String,

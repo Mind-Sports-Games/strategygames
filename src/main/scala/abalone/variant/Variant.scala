@@ -54,8 +54,7 @@ abstract class Variant private[variant](
   def recalcStartPlayerForStats: Boolean = false
 
   // pieces, scoreP1, scoreP2, turn, halfMovesSinceLastCapture (triggering condition could be when == 100 && total moves > 50 ? => draw), total moves
-  def initialFen: FEN =
-    FEN("ss1SS/sssSSS/1ss1SS1/8/9/8/1SS1ss1/SSSsss/SS1ss 0 0 b 0 1") // Belgian Daisy //TODO reverse
+  def initialFen: FEN
 
   def pieces: PieceMap = initialFen.pieces
 
@@ -63,42 +62,42 @@ abstract class Variant private[variant](
 
   def startPlayer: Player = P1
 
-  /*
-  In Abalone there are 3 kinds of moves.
-  Let's use the top 3 rows of a board to illustrate (capital letters are empty squares, 1 is an opponent marble)
-
-         A B C D E
-        1 a b c G H
-       I J K L M N O
-
-    - line moves are marbles moving in line to an empty square :
-       'a' to 'G' would move three marbles to the right.
-         This is the same as if 'a' jumped over 'b' and 'c' to land on 'G'.
-       'c' to 'G' would move one marble to the right.
-    - pushes are line moves targeting a square hosting an opponent marble
-       They will be processed later on as two line moves (one jump per player).
-       'c' to '1' and 'b' to '1' are pushes to the left.
-       In case we play a move from 'c' to '1', c will land on 1 and 1 will be removed from the board.
-       When a piece is pushed off the board, the Move is created with an extra parameter.
-    - side moves can only be described starting from the right origin (figure out the longest diagonal) :
-       'a' to 'M' is a downRight side move of three marbles.
-       'c' to 'J' is a downLeft side move of three marbles.
-       'a' to 'L' is a downRight side move of two marbles (only 'a' and 'b' would move).
-       'c' to 'K' is a downLeft side move of two marbles (only 'c' and 'b' would move)
-       'a' to 'K' or 'c' to 'L' are line moves of a single marble
-
-  For moves of 2 marbles or more, once you get the direction of the line,
-   you can easily generate the side moves as being the one before and the one after,
-   following a rotation :
-    \   /
-   -  o  -
-    /   \
-  e.g. if you are moving upRight the side moves to consider are "upLeft" and "right".
-
-  1. moves of 1 marble
-  2. generate any possible pair of marbles and use it to generate moves of 2 and 3 marbles
-  then merge these as valid moves.
-   */
+  /**
+    * In Abalone there are 3 kinds of moves.
+    * Let's use the top 3 rows of a board to illustrate (capital letters are empty squares, 1 is an opponent marble)
+    *
+    * A B C D E
+    * 1 a b c G H
+    * I J K L M N O
+    *
+    * - line moves are marbles moving in line to an empty square :
+    * 'a' to 'G' would move three marbles to the right.
+    * This is the same as if 'a' jumped over 'b' and 'c' to land on 'G'.
+    * 'c' to 'G' would move one marble to the right.
+    * - pushes are line moves targeting a square hosting an opponent marble
+    * They will be processed later on as two line moves (one jump per player).
+    * 'c' to '1' and 'b' to '1' are pushes to the left.
+    * In case we play a move from 'c' to '1', c will land on 1 and 1 will be removed from the board.
+    * When a piece is pushed off the board, the Move is created with an extra parameter.
+    * - side moves can only be described starting from the right origin (figure out the longest diagonal) :
+    * 'a' to 'M' is a downRight side move of three marbles.
+    * 'c' to 'J' is a downLeft side move of three marbles.
+    * 'a' to 'L' is a downRight side move of two marbles (only 'a' and 'b' would move).
+    * 'c' to 'K' is a downLeft side move of two marbles (only 'c' and 'b' would move)
+    * 'a' to 'K' or 'c' to 'L' are line moves of a single marble
+    *
+    * For moves of 2 marbles or more, once you get the direction of the line,
+    * you can easily generate the side moves as being the one before and the one after,
+    * following a rotation :
+    * \   /
+    * -  o  -
+    * /   \
+    * e.g. if you are moving upRight the side moves to consider are "upLeft" and "right".
+    *
+    * 1. moves of 1 marble
+    * 2. generate any possible pair of marbles and use it to generate moves of 2 and 3 marbles
+    * then merge these as valid moves.
+    */
   def validMoves(situation: Situation): Map[Pos, List[Move]] =
     (validMovesOf1(situation).toList ++ validMovesOf2And3(situation).toList)
       .groupBy(_._1)
@@ -109,68 +108,116 @@ abstract class Variant private[variant](
       .groupBy(_._1)
       .map { case (k, v) => k -> v.map(_._2).flatten }
 
-  private def validMoves_line(situation: SSituation): Map[Cell, List[MMove]] = {
-    getPieces_usable(situation).toMap({
-      case (a, pa) => (a, boardType.norm.getNeigh(a)
-        .map { case (vect, b) =>
-          var dest = Option.empty
+  private def validMoves_line(sit: SSituation): Map[Cell, List[MMove]] = {
+    getPieces_usable(sit).map { case (a, pa) =>
+      (a, boardType.norm.getNeigh(a).map { case (vect, b) =>
+        var dest = Option.empty[Cell]
+        var out = false
+        var opp = false
 
+        var c = Cell.copy(b)
+        var u = 1
+        var max = false
+        while (!max && !opp && boardType.isCell(c) && sit.board.isPiece(c)) {
+          if (sit.board.getPiece(c).get.isNot(sit.player)) {
+            opp = true
+          } else {
+            u += 1
+            max = u > maxUsable
+          }
+
+          c += vect
+        }
+
+        if (!max) {
+          var p = 0
+          var empty = false
+          opp = true
+          while (!out && !empty && opp && !max) {
+            out = !boardType.isCell(c)
+
+            if (!out) {
+              val pc = sit.board.getPiece(c)
+              empty = pc.isEmpty
+
+              if (!empty) {
+                opp = pc.get.isNot(sit.player)
+
+                if (opp) {
+                  p += 1
+                  max = p >= u
+                }
+              }
+
+              c += vect // Notice we only increment if !out
+            }
+          }
+
+          if (max || out && !opp) dest = Option.empty
+          else dest = Option(c)
+        }
+
+        (dest, out && opp)
+      }
+        .filter(_._1.isDefined)
+        .map(b => MMove(pa, a, b._1.get, sit, boardAfter(sit, a, b._1.get), capture = if (b._2) b._1 else None, autoEndTurn = true))
+        .toList
+      )
+    }
+  }
+
+  private def validMoves_jump(sit: SSituation): Map[Cell, List[MMove]] = {
+    getPieces_usable(sit).map { case (a, pa) =>
+      (a, boardType.norm.getNeigh(a).flatMap { case (vect, b) =>
+        val a: Cell = a
+        var dest = List[Cell]()
+
+        val pvect = boardType.norm.getPrev(vect)
+        val nvect = boardType.norm.getNext(vect)
+
+        var pj = canJumpTo(sit, a + pvect)
+        var nj = canJumpTo(sit, a + nvect)
+
+        if (pj || nj) {
           var c = Cell.copy(b)
           var u = 1
           var max = false
-          var opp = false
-          while (!max && !opp && boardType.isCell(c) && situation.board.isPiece(c)) {
-            if (situation.board.getPiece(c).get.isNot(situation.player)) {
-              opp = true
-            } else {
-              u += 1
+          while (!max && (pj || nj) && sit.board.isPiece(c)) {
+            if (sit.board.getPiece(c).get.is(sit.player)) {
+              u += 1 // When u = 1, the only possible moves are already accounted for as in-line
               max = u > maxUsable
-            }
-            c += vect
-          }
 
-          if (!max) {
-            dest = Option(c)
+              if (!max) {
+                if (pj) {
+                  val d = c + pvect
 
-            var p = 0
-            var out = false
-            var empty = false
-            opp = true
-            while (!out && !empty && opp && !max) {
-              out = !boardType.isCell(c)
-
-              if (!out) {
-                val pc = situation.board.getPiece(c)
-                empty = pc.isEmpty
-
-                if (!empty) {
-                  opp = pc.get.isNot(situation.player)
-
-                  if (opp) {
-                    p += 1
-                    max = p >= u
-                  }
-                  c += vect
+                  if (canJumpTo(sit, d)) dest :+= d
+                  else pj = false
                 }
+                if (nj) {
+                  val d = c + nvect
+
+                  if (canJumpTo(sit, d)) dest :+= d
+                  else nj = false
+                }
+
+                c += vect
               }
+            } else {
+              max = true
             }
-
-            if (max || out && !opp) dest = Option.empty
           }
-
-          dest
         }
-        .filter(_.isDefined)
-        .map(b => MMove(pa, a, b.get, situation, boardAfter(situation, a, b.get), autoEndTurn = true))
+
+        dest
+      }
+        .map(b => MMove(pa, a, b, sit, boardAfter(sit, a, b), autoEndTurn = true))
         .toList
       )
-    })
+    }
   }
 
-  private def validMoves_jump(situation: SSituation): Map[Cell, List[MMove]] = {
-    //TODO
-    null
-  }
+  private def canJumpTo(sit: SSituation, a: Cell): Boolean = !sit.board.isPiece(a) && boardType.isCell(a)
 
   def validMovesOf1(situation: Situation): Map[Pos, List[Move]] = {
     turnPieces(situation).flatMap { case (pos, piece) =>
@@ -471,7 +518,7 @@ abstract class Variant private[variant](
 
   def defaultRole: Role = Role.defaultRole
 
-  def gameFamily: GameFamily
+  def gameFamily: GameFamily = GameFamily.Abalone()
 
   override def toString = s"Variant($name)"
 
@@ -495,8 +542,6 @@ abstract class Variant private[variant](
   }
 
   private def turnPieces(situation: Situation): PieceMap = situation.board.piecesOf(situation.player)
-
-  private def turnPieces(situation: SSituation): Map[Cell, Piece] = getPieces_usable(situation)
 
   private def getPieces_usable(situation: SSituation): Map[Cell, Piece] = situation.board.piecesOf(situation.player)
 
