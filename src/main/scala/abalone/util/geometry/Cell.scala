@@ -3,9 +3,7 @@ package abalone.util.geometry
 import scala.util.matching.Regex
 
 class Cell(var x: Int, var y: Int) extends AnyRef {
-  def copy(a: Cell): Cell = new Cell(a.x, a.y)
-
-  def +(a: Cell): Cell = copy(this).add(a)
+  def +(a: Cell): Cell = Cell.copy(this).add(a)
 
   def add(a: Cell): Cell = add(a.x, a.y)
 
@@ -15,15 +13,15 @@ class Cell(var x: Int, var y: Int) extends AnyRef {
     this
   }
 
-  def -(a: Cell): Cell = copy(this).sub(a)
+  def -(a: Cell): Cell = Cell.copy(this).sub(a)
 
   def sub(a: Cell): Cell = sub(a.x, a.y)
 
   def sub(a: Int, b: Int): Cell = add(-a, -b)
 
-  def *(a: Int): Cell = copy(this).mult(a)
+  def *(a: Int): Cell = Cell.copy(this).mult(a)
 
-  def *(a: Int, b: Int): Cell = copy(this).mult(a, b)
+  def *(a: Int, b: Int): Cell = Cell.copy(this).mult(a, b)
 
   def mult(a: Int): Cell = mult(a, a)
 
@@ -33,9 +31,9 @@ class Cell(var x: Int, var y: Int) extends AnyRef {
     this
   }
 
-  def /(a: Int): Cell = copy(this).div(a)
+  def /(a: Int): Cell = Cell.copy(this).div(a)
 
-  def /(a: Int, b: Int): Cell = copy(this).div(a, b)
+  def /(a: Int, b: Int): Cell = Cell.copy(this).div(a, b)
 
   def div(a: Int): Cell = div(a, a)
 
@@ -79,6 +77,8 @@ class Cell(var x: Int, var y: Int) extends AnyRef {
 }
 
 object Cell {
+  def copy(a: Cell): Cell = new Cell(a.x, a.y)
+
   def cross(x: Double, y: Double, a: Double, b: Double): Double = x * b - y * a
 
   private val _rex: String = "(0|-?[1-9][0-9]*)"

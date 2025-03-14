@@ -104,8 +104,70 @@ abstract class Variant private[variant](
       .groupBy(_._1)
       .map { case (k, v) => k -> v.map(_._2).flatten }
 
-  def validMoves(situation: SSituation): Map[Cell, List[MMove]] = {
-    turnPieces(situation)
+  def validMoves(situation: SSituation): Map[Cell, List[MMove]] =
+    (validMoves_line(situation).toList ++ validMoves_jump(situation).toList)
+      .groupBy(_._1)
+      .map { case (k, v) => k -> v.map(_._2).flatten }
+
+  private def validMoves_line(situation: SSituation): Map[Cell, List[MMove]] = {
+    getPieces_usable(situation).toMap({
+      case (a, pa) => (a, boardType.norm.getNeigh(a)
+        .map { case (vect, b) =>
+          var dest = Option.empty
+
+          var c = Cell.copy(b)
+          var u = 1
+          var max = false
+          var opp = false
+          while (!max && !opp && boardType.isCell(c) && situation.board.isPiece(c)) {
+            if (situation.board.getPiece(c).get.isNot(situation.player)) {
+              opp = true
+            } else {
+              u += 1
+              max = u > maxUsable
+            }
+            c += vect
+          }
+
+          if (!max) {
+            dest = Option(c)
+
+            var p = 0
+            var out = false
+            var empty = false
+            opp = true
+            while (!out && !empty && opp && !max) {
+              out = !boardType.isCell(c)
+
+              if (!out) {
+                val pc = situation.board.getPiece(c)
+                empty = pc.isEmpty
+
+                if (!empty) {
+                  opp = pc.get.isNot(situation.player)
+
+                  if (opp) {
+                    p += 1
+                    max = p >= u
+                  }
+                  c += vect
+                }
+              }
+            }
+
+            if (max || out && !opp) dest = Option.empty
+          }
+
+          dest
+        }
+        .filter(_.isDefined)
+        .map(b => MMove(pa, a, b.get, situation, boardAfter(situation, a, b.get), autoEndTurn = true))
+        .toList
+      )
+    })
+  }
+
+  private def validMoves_jump(situation: SSituation): Map[Cell, List[MMove]] = {
     //TODO
     null
   }
@@ -357,6 +419,8 @@ abstract class Variant private[variant](
   /** If a player runs out of move, the match is a draw. */
   def stalemateIsDraw = true
 
+  def maxUsable = 3
+
   def winningScore = 6
 
   // @TODO: might want to use this winner method in specialEnd method below ? code is duplicated...
@@ -432,7 +496,9 @@ abstract class Variant private[variant](
 
   private def turnPieces(situation: Situation): PieceMap = situation.board.piecesOf(situation.player)
 
-  private def turnPieces(situation: SSituation): Map[Cell, Piece] = situation.board.piecesOf(situation.player)
+  private def turnPieces(situation: SSituation): Map[Cell, Piece] = getPieces_usable(situation)
+
+  private def getPieces_usable(situation: SSituation): Map[Cell, Piece] = situation.board.piecesOf(situation.player)
 
   val kingPiece: Option[Role] = None
 

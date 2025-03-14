@@ -18,6 +18,7 @@ case object GrandAbalone extends Variant(
 
   override def perfId: Int = 701
 
+  override def maxUsable: Int = 4
   override def winningScore: Int = 10
 
   override def baseVariant: Boolean = true

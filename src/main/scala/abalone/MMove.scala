@@ -21,10 +21,8 @@ case class MMove(
       h.copy(
         lastTurn = if (autoEndTurn) h.currentTurn :+ toUci else h.lastTurn,
         currentTurn = if (autoEndTurn) List() else h.currentTurn :+ toUci,
-        score = if (captures) h.score.add(situationBefore.player) else h.score,
-        halfMoveClock =
-          if (captures) 0
-          else h.halfMoveClock + 1
+        score = if (captures) h.score.add(situationBefore.player) else h.score,// This assumes the player cannot eject their own pieces
+        halfMoveClock = if (captures) 0 else h.halfMoveClock + 1
       )
     }
 
@@ -60,5 +58,5 @@ case class MMove(
 
   override def toUci = UUci.MMove(orig, dest)
 
-  override def toString = s"$piece ${toUci.uci}"
+  override def toString = s"$piece ${toUci.uci}"//TODO? why specify the piece? it only depends on the board
 }

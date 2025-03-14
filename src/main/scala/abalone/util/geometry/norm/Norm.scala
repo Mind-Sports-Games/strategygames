@@ -22,5 +22,5 @@ abstract class Norm(val radius: Int) {
     )
     .toSet
 
-  final def getNeigh(a: Cell): Set[Cell] = neighVectors.map(a + _)
+  final def getNeigh(a: Cell): Set[(Cell, Cell)] = neighVectors.map((_, a + _))
 }

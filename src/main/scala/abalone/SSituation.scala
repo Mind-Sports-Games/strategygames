@@ -16,7 +16,7 @@ case class SSituation(board: BBoard, player: Player) {
 
   def winner: Option[Player] = board.variant.winner(this)
 
-  def playable(strict: Boolean): Boolean = (board.valid(strict)) && !end
+  def playable(strict: Boolean): Boolean = board.valid(strict) && !end
 
   def opponentHasInsufficientMaterial: Boolean = false
 
