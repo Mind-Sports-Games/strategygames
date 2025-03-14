@@ -1,5 +1,7 @@
 package abalone.util.geometry
 
+import scala.util.matching.Regex
+
 class Cell(var x: Int, var y: Int) extends AnyRef {
   def copy(a: Cell): Cell = new Cell(a.x, a.y)
 
@@ -45,9 +47,17 @@ class Cell(var x: Int, var y: Int) extends AnyRef {
 
   //
   //
+  def key: String = (y match {
+    case _ if (y >= 0) => ('a' + y).toChar.toString
+    case -1 => "0"
+    case _ => "-" + ('a' - y - 2).toChar.toString
+  }) + (x + 1).toString
+
   def piotr: Char = Piotr.cellToPiotr(this)
 
   def piotrStr = piotr.toString
+
+  override def toString = "(" + x + ", " + y + ")"
 
   //
   //
@@ -70,6 +80,45 @@ class Cell(var x: Int, var y: Int) extends AnyRef {
 
 object Cell {
   def cross(x: Double, y: Double, a: Double, b: Double): Double = x * b - y * a
+
+  private val _rex: String = "(0|[1-9][0-9]*)"
+
+  private val _rey: String = "(0|-?[a-z])"
+
+  private val _re: String = _rey + _rex
+
+  private val rex: Regex = _rex.r
+
+  private val rey: Regex = _rey.r
+
+  val re: Regex = _re.r
+
+  def fromKey(key: String): Option[Cell] = {
+    val _y = rey.findFirstMatchIn(key)
+
+    if (_y.isDefined) {
+      val _x = rex.findFirstMatchIn(key.substring(_y.get.end))
+
+      if (_x.isDefined) {
+        val x = _x.get.matched.toInt
+
+        var sy = _y.get.matched
+        val neg = if (sy.startsWith("-")) {
+          sy = sy.substring(1)
+          true
+        } else false
+
+        if (sy.length == 1) {
+          var y = if ("0".equals(sy)) -1 else sy.charAt(0).toInt
+          if (neg) y = -y - 1
+
+          Option(new Cell(x, y))
+        }
+      }
+    }
+
+    Option.empty
+  }
 }
 
 object Piotr {
