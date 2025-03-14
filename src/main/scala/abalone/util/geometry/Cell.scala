@@ -81,7 +81,7 @@ class Cell(var x: Int, var y: Int) extends AnyRef {
 object Cell {
   def cross(x: Double, y: Double, a: Double, b: Double): Double = x * b - y * a
 
-  private val _rex: String = "(0|[1-9][0-9]*)"
+  private val _rex: String = "(0|-?[1-9][0-9]*)"
 
   private val _rey: String = "(0|-?[a-z])"
 
