@@ -119,6 +119,8 @@ object Cell {
 
     Option.empty
   }
+
+  def piotr(c: Char): Option[Cell] = Piotr.piotrToCell.get(c)
 }
 
 object Piotr {

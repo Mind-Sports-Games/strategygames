@@ -25,7 +25,7 @@ object FForsyth {
           case _ => sys.error("Invalid player in fen")
         }
       ).withHistory(
-        History(
+        HHistory(
           score = Score(fen.player1Score, fen.player2Score),
           halfMoveClock = fen.halfMovesSinceLastCapture.getOrElse(0)
         )

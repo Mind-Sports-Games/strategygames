@@ -1,10 +1,9 @@
 package abalone
 
+import abalone.format.UUci
 import abalone.util.geometry.Cell
 import cats.data.Validated
 import cats.implicits._
-import strategygames.abalone.History
-import strategygames.abalone.format.Uci
 import strategygames.abalone.variant.Variant
 import strategygames.{Player, Status}
 
@@ -24,10 +23,10 @@ case class SSituation(board: BBoard, player: Player) {
   def move(from: Cell, to: Cell): Validated[String, MMove] =
     board.variant.move(this, from, to)
 
-  def move(uci: Uci.Move): Validated[String, MMove] =
+  def move(uci: UUci.MMove): Validated[String, MMove] =
     board.variant.move(this, uci.orig, uci.dest)
 
-  def withHistory(history: History) = copy(board = board.withHistory(history))
+  def withHistory(history: HHistory) = copy(board = board.withHistory(history))
 
   def withVariant(variant: Variant) = copy(board = board.withVariant(variant))
 
@@ -48,3 +47,7 @@ case class SSituation(board: BBoard, player: Player) {
   private def variantEnd = board.variant.specialEnd(this)
 }
 
+object SSituation {
+  def apply(variant: Variant): SSituation =
+    SSituation(BBoard init variant, variant.startPlayer)
+}

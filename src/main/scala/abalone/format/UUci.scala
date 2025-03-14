@@ -3,6 +3,7 @@ package abalone.format
 import abalone.SSituation
 import abalone.util.geometry.Cell
 import cats.data.Validated
+import cats.implicits._
 
 sealed trait UUci {
   def uci: String
@@ -20,7 +21,7 @@ object UUci {
 
     override def uci = keys
 
-    override def keysPiotr = orig.piotrStr + dest.piotrStr
+    def keysPiotr = orig.piotrStr + dest.piotrStr
 
     override def piotr = keysPiotr
 

@@ -6,7 +6,7 @@ import cats.data.Validated
 import strategygames.abalone.P1
 import strategygames.abalone.format.FEN
 import strategygames.abalone.variant.Variant
-import strategygames.{ClockBase, MoveMetrics, Player, VActionStrs}
+import strategygames.{ClockBase, MoveMetrics, Player, VActionStrs, toOrnicarOption}
 
 case class GGame(
                   situation: SSituation,
