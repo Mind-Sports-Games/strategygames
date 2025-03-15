@@ -126,14 +126,6 @@ object History {
         multiPointState = h.multiPointState
       )
 
-//  @deprecated("Alex", since="1.5.5") final case class Abalone(h: abalone.History)
-//      extends History(
-//        lastTurn = h.lastTurn.map(Uci.wrap),
-//        currentTurn = h.currentTurn.map(Uci.wrap),
-//        positionHashes = h.positionHashes,
-//        halfMoveClock = h.halfMoveClock,
-//        score = h.score
-//      )
   final case class Abalone(h: abalone.HHistory)
       extends History(
         lastTurn = h.lastTurn.map(Uci.wrap),
