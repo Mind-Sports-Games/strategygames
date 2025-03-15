@@ -1,4 +1,4 @@
-package abalone.util.geometry.norm
+package strategygames.abalone.util.geometry.norm
 
 object N12 extends Norm(radius = 2, is3 = true) {
   override def apply(x: Int, y: Int): Int = {

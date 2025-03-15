@@ -1,10 +1,9 @@
 package strategygames.abalone
 package format.pgn
 
-import abalone.format.UUci
-import abalone.util.geometry.Cell
-import abalone.{GGame, RReplay}
 import cats.data.Validated
+import strategygames.abalone.format.UUci
+import strategygames.abalone.util.geometry.Cell
 import strategygames.format.pgn.{ParsedPgn, Sans, Tags}
 import strategygames.{ActionStrs, ByoyomiClock, Clock, Action => StratAction, Situation => StratSituation}
 

@@ -1,9 +1,8 @@
-package abalone
+package strategygames.abalone
 
-import abalone.format.UUci
-import abalone.util.geometry.Cell
 import strategygames.MoveMetrics
-import strategygames.abalone.{Hash, Piece, PositionHash}
+import strategygames.abalone.format.UUci
+import strategygames.abalone.util.geometry.Cell
 
 case class MMove(
                   piece: Piece,//TODO seems totally unnecessary

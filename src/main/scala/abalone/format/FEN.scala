@@ -1,9 +1,8 @@
 package strategygames.abalone.format
 
-import abalone.BoardType
-import abalone.util.geometry.Cell
 import strategygames.Player
-import strategygames.abalone.{P1, P2, Piece, PieceMap, Pos, Role}
+import strategygames.abalone.util.geometry.Cell
+import strategygames.abalone.{BoardType, P1, P2, Piece, PieceMap, Pos, Role}
 
 final case class FEN(value: String) extends AnyVal {
   override def toString = value

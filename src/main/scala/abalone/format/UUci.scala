@@ -1,9 +1,9 @@
-package abalone.format
+package strategygames.abalone.format
 
-import abalone.SSituation
-import abalone.util.geometry.Cell
 import cats.data.Validated
 import cats.implicits._
+import strategygames.abalone.SSituation
+import strategygames.abalone.util.geometry.Cell
 
 sealed trait UUci {
   def uci: String
@@ -12,7 +12,7 @@ sealed trait UUci {
 
   def origDest: (Cell, Cell)
 
-  def apply(situation: SSituation): Validated[String, abalone.MMove]
+  def apply(situation: SSituation): Validated[String, strategygames.abalone.MMove]
 }
 
 object UUci {
@@ -61,7 +61,7 @@ object UUci {
 
   case class WithSan(uci: UUci, san: String)
 
-  def apply(move: abalone.MMove) = UUci.MMove(move.orig, move.dest)
+  def apply(move: strategygames.abalone.MMove) = UUci.MMove(move.orig, move.dest)
 
   def apply(move: String) = UUci.MMove(move)
 

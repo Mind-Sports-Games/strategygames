@@ -1,9 +1,7 @@
-package abalone.format
+package strategygames.abalone.format
 
-import abalone.{BBoard, GGame, HHistory, SSituation}
-import abalone.util.geometry.Cell
 import strategygames.abalone._
-import strategygames.abalone.format.FEN
+import strategygames.abalone.util.geometry.Cell
 import strategygames.abalone.variant.Variant
 import strategygames.{Player, Score}
 

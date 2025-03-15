@@ -129,16 +129,27 @@ object Pos {
 
   }
 
-  final case class Abalone(p: abalone.Pos) extends Pos {
+//  final case class Abalone(p: abalone.Pos) extends Pos {
+//    override val key: String = p.key
+//
+//    override def piotr: Char = p.piotr
+//
+//    override lazy val toInt: Int = (p.file.index << 3) + p.rank.index
+//
+//    override def gameLogic: GameLogic = GameLogic.Abalone()
+//
+//    override lazy val all: List[Pos] = abalone.Pos.all.map(Abalone)
+//  }
+  final case class Abalone(p: abalone.util.geometry.Cell) extends Pos {
     override val key: String = p.key
 
     override def piotr: Char = p.piotr
 
-    override lazy val toInt: Int = (p.file.index << 3) + p.rank.index
+    override lazy val toInt: Int = (p.x << 3) + p.y
 
     override def gameLogic: GameLogic = GameLogic.Abalone()
 
-    override lazy val all: List[Pos] = abalone.Pos.all.map(Abalone)
+    override lazy val all: List[Pos] = List.empty//abalone.util.geometry.Cell.all.map(Abalone)//FIXME?
   }
 
   final case class Dameo(p: dameo.Pos) extends Pos {
@@ -165,7 +176,7 @@ object Pos {
     case GameLogic.Togyzkumalak() => togyzkumalak.Pos.fromKey(key).map(Togyzkumalak)
     case GameLogic.Go() => go.Pos.fromKey(key).map(Go)
     case GameLogic.Backgammon() => backgammon.Pos.fromKey(key).map(Backgammon)
-    case GameLogic.Abalone() => abalone.Pos.fromKey(key).map(Abalone)
+    case GameLogic.Abalone() => abalone.util.geometry.Cell.fromKey(key).map(Abalone)
     case GameLogic.Dameo() => dameo.Pos.fromKey(key).map(Dameo)
   }
 

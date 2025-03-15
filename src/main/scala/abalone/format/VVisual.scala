@@ -1,9 +1,8 @@
 package abalone.format
 
-import abalone.BBoard
-import abalone.util.geometry.Cell
 import strategygames.Player
 import strategygames.abalone._
+import strategygames.abalone.util.geometry.Cell
 import strategygames.abalone.variant.Variant
 
 object VVisual {

@@ -1,15 +1,14 @@
-package abalone
+package strategygames.abalone
 
-import abalone.format.{FForsyth, UUci}
-import abalone.util.geometry.Cell
 import cats.data.Validated
 import cats.data.Validated.{invalid, valid}
 import cats.implicits.catsSyntaxOptionId
-import strategygames.abalone.format.FEN
 import strategygames.abalone.format.pgn.{Parser, RReader}
+import strategygames.abalone.format.{FEN, FForsyth, UUci}
+import strategygames.abalone.util.geometry.Cell
 import strategygames.abalone.variant.Variant
 import strategygames.format.pgn.San
-import strategygames.{ActionStrs, Player, toOrnicarOption, Action => StratAction, Move => StratMove, Situation => StratSituation}
+import strategygames.{ActionStrs, Player, Action => StratAction, Move => StratMove, Situation => StratSituation}
 
 case class RReplay(setup: GGame, actions: List[MMove], state: GGame) {
   lazy val chronoPlies = actions.reverse

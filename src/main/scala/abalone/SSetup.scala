@@ -1,4 +1,4 @@
-package abalone
+package strategygames.abalone
 
 import strategygames.abalone.variant.Variant
 

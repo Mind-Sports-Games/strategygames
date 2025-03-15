@@ -1,7 +1,7 @@
-package abalone
+package strategygames.abalone
 
-import abalone.util.geometry.Cell
-import abalone.util.geometry.norm.{N6, Norm}
+import strategygames.abalone.util.geometry.Cell
+import strategygames.abalone.util.geometry.norm.{N6, Norm}
 
 sealed abstract class BoardType(
                                  val width: Int,

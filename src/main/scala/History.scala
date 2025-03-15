@@ -126,7 +126,15 @@ object History {
         multiPointState = h.multiPointState
       )
 
-  final case class Abalone(h: abalone.History)
+//  @deprecated("Alex", since="1.5.5") final case class Abalone(h: abalone.History)
+//      extends History(
+//        lastTurn = h.lastTurn.map(Uci.wrap),
+//        currentTurn = h.currentTurn.map(Uci.wrap),
+//        positionHashes = h.positionHashes,
+//        halfMoveClock = h.halfMoveClock,
+//        score = h.score
+//      )
+  final case class Abalone(h: abalone.HHistory)
       extends History(
         lastTurn = h.lastTurn.map(Uci.wrap),
         currentTurn = h.currentTurn.map(Uci.wrap),
@@ -150,7 +158,7 @@ object History {
   implicit def togyzkumalakHistory(h: togyzkumalak.History) = Togyzkumalak(h)
   implicit def goHistory(h: go.History)                     = Go(h)
   implicit def backgammonHistory(h: backgammon.History)     = Backgammon(h)
-  implicit def abaloneHistory(h: abalone.History)           = Abalone(h)
+  implicit def abaloneHistory(h: abalone.HHistory)           = Abalone(h)
   implicit def dameoHistory(h: dameo.History)               = Dameo(h)
 
   // lila
@@ -248,7 +256,7 @@ object History {
       )
     case GameLogic.Abalone()      =>
       Abalone(
-        abalone.History(
+        abalone.HHistory(
           lastTurn = lastTurn.map(lm => lm.toAbalone),
           currentTurn = currentTurn.map(lm => lm.toAbalone),
           positionHashes = positionHashes,

@@ -1,9 +1,7 @@
 package strategygames.abalone
 
-import abalone.SSituation
-
 final class Hash(size: Int) {
-  def apply(situation: Situation): PositionHash = {
+  @deprecated("Alex", since = "1.5.5") def apply(situation: Situation): PositionHash = {
     val l = Hash.get(situation, Hash.polyglotTable)
     if (size <= 8) {
       Array.tabulate(size)(i => (l >>> ((7 - i) * 8)).toByte)

@@ -242,7 +242,6 @@ object FEN {
   }
 
   final case class Abalone(f: strategygames.abalone.format.FEN) extends FEN(f.value) {
-
     def toChess        = sys.error("Can't convert abalone to chess")
     def toDraughts     = sys.error("Can't convert abalone to draughts")
     def toFairySF      = sys.error("Can't convert abalone to fairysf")
@@ -267,7 +266,6 @@ object FEN {
 
     def player1Score = f.player1Score
     def player2Score = f.player2Score
-
   }
 
   final case class Dameo(f: strategygames.dameo.format.FEN) extends FEN(f.value) {

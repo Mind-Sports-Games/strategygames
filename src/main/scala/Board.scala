@@ -1,6 +1,6 @@
 package strategygames
 
-import variant.Variant
+import strategygames.variant.Variant
 
 sealed abstract class Board(
     val pieces: PieceMap,
@@ -10,7 +10,6 @@ sealed abstract class Board(
     val unusedDice: List[Int] = List.empty,
     val cubeData: Option[CubeData] = None
 ) {
-
   def apply(at: Pos): Option[Piece] = (pieces get at).map(_._1)
 
   def hasPiece(p: Piece) = pieces.values.map(_._1) exists (p ==)
@@ -39,7 +38,7 @@ sealed abstract class Board(
   def toTogyzkumalak: togyzkumalak.Board
   def toGo: go.Board
   def toBackgammon: backgammon.Board
-  def toAbalone: abalone.Board
+  def toAbalone: abalone.BBoard
   def toDameo: dameo.Board
 }
 
@@ -349,46 +348,84 @@ object Board {
 
   }
 
-  case class Abalone(b: abalone.Board)
-      extends Board(
-        b.pieces.map { case (pos, piece) => (Pos.Abalone(pos), (Piece.Abalone(piece), 1)) },
-        History.Abalone(b.history),
-        Variant.Abalone(b.variant)
-      ) {
-
-    def withHistory(h: History): Board = h match {
+//  @deprecated("Alex", since="1.5.5") case class Abalone(b: abalone.Board)
+//      extends Board(
+//        b.pieces.map { case (pos, piece) => (Pos.Abalone(pos), (Piece.Abalone(piece), 1)) },
+//        History.Abalone(b.history),
+//        Variant.Abalone(b.variant)
+//      ) {
+//
+//    def withHistory(h: History): Board = h match {
+//      case History.Abalone(h) => Abalone(b.withHistory(h))
+//      case _                  => sys.error("Not passed abalone objects")
+//    }
+//
+//    def usedDice: List[Int] = List.empty
+//
+//    def situationOf(player: Player): Situation = Situation.Abalone(b.situationOf(player))
+//
+//    def materialImbalance: Int = b.materialImbalance
+//
+//    override def toString: String = b.toString
+//
+//    def copy(history: History, variant: Variant): Board = (history, variant) match {
+//      case (History.Abalone(history), Variant.Abalone(variant)) =>
+//        Abalone(b.copy(history = history, variant = variant))
+//      case _                                                    => sys.error("Unable to copy a abalone board with non-abalone arguments")
+//    }
+//    def copy(history: History): Board                   = history match {
+//      case History.Abalone(history) => Abalone(b.copy(history = history))
+//      case _                        => sys.error("Unable to copy a abalone board with non-abalone arguments")
+//    }
+//
+//    def toFairySF      = sys.error("Can't make a fairysf board from a abalone board")
+//    def toChess        = sys.error("Can't make a chess board from a abalone board")
+//    def toDraughts     = sys.error("Can't make a draughts board from a abalone board")
+//    def toSamurai      = sys.error("Can't make a samurai board from a abalone board")
+//    def toTogyzkumalak = sys.error("Can't make a togyzkumalak board from a abalone board")
+//    def toGo           = sys.error("Can't make a go board from a abalone board")
+//    def toBackgammon   = sys.error("Can't make a backgammon board from a abalone board")
+//    def toAbalone      = b
+//    def toDameo        = sys.error("Can't make a dameo board from a abalone board")
+//
+//  }
+  case class Abalone(b: abalone.BBoard) extends Board(
+    b.pieces.map { case (pos, piece) => (Pos.Abalone(pos), (Piece.Abalone(piece), 1)) },
+    History.Abalone(b.history),
+    Variant.Abalone(b.variant)
+  ) {
+    override def withHistory(h: History): Board = h match {
       case History.Abalone(h) => Abalone(b.withHistory(h))
       case _                  => sys.error("Not passed abalone objects")
     }
 
-    def usedDice: List[Int] = List.empty
+    override def usedDice: List[Int] = List.empty
 
-    def situationOf(player: Player): Situation = Situation.Abalone(b.situationOf(player))
+    override def situationOf(player: Player): Situation = Situation.Abalone(b.situationOf(player))
 
-    def materialImbalance: Int = b.materialImbalance
+    override  def materialImbalance: Int = b.materialImbalance
 
     override def toString: String = b.toString
 
-    def copy(history: History, variant: Variant): Board = (history, variant) match {
+    override def copy(history: History, variant: Variant): Board = (history, variant) match {
       case (History.Abalone(history), Variant.Abalone(variant)) =>
         Abalone(b.copy(history = history, variant = variant))
       case _                                                    => sys.error("Unable to copy a abalone board with non-abalone arguments")
     }
-    def copy(history: History): Board                   = history match {
+    override def copy(history: History): Board                   = history match {
       case History.Abalone(history) => Abalone(b.copy(history = history))
       case _                        => sys.error("Unable to copy a abalone board with non-abalone arguments")
     }
 
-    def toFairySF      = sys.error("Can't make a fairysf board from a abalone board")
-    def toChess        = sys.error("Can't make a chess board from a abalone board")
-    def toDraughts     = sys.error("Can't make a draughts board from a abalone board")
-    def toSamurai      = sys.error("Can't make a samurai board from a abalone board")
-    def toTogyzkumalak = sys.error("Can't make a togyzkumalak board from a abalone board")
-    def toGo           = sys.error("Can't make a go board from a abalone board")
-    def toBackgammon   = sys.error("Can't make a backgammon board from a abalone board")
-    def toAbalone      = b
-    def toDameo        = sys.error("Can't make a dameo board from a abalone board")
-
+    override def toFairySF      = sys.error("Can't make a fairysf board from a abalone board")
+    override def toChess        = sys.error("Can't make a chess board from a abalone board")
+    override def toDraughts     = sys.error("Can't make a draughts board from a abalone board")
+    override def toSamurai      = sys.error("Can't make a samurai board from a abalone board")
+    override def toTogyzkumalak = sys.error("Can't make a togyzkumalak board from a abalone board")
+    override def toGo           = sys.error("Can't make a go board from a abalone board")
+    override def toBackgammon   = sys.error("Can't make a backgammon board from a abalone board")
+    override def toAbalone      = b
+    override def toDameo        = sys.error("Can't make a dameo board from a abalone board")
   }
 
   case class Dameo(b: dameo.Board)
@@ -509,7 +546,7 @@ object Board {
         )
       case (GameLogic.Abalone(), Variant.Abalone(variant))           =>
         Abalone(
-          abalone.Board.apply(
+          abalone.BBoard.apply(
             pieces.flatMap {
               case (Pos.Abalone(pos), (Piece.Abalone(piece), _)) => Some((pos, piece))
               case _                                             => None
@@ -537,7 +574,7 @@ object Board {
   implicit def togyzkumalakBoard(b: togyzkumalak.Board) = Board.Togyzkumalak(b)
   implicit def goBoard(b: go.Board)                     = Board.Go(b)
   implicit def backgammonBoard(b: backgammon.Board)     = Board.Backgammon(b)
-  implicit def abaloneBoard(b: abalone.Board)           = Board.Abalone(b)
+  implicit def abaloneBoard(b: abalone.BBoard)          = Board.Abalone(b)
   implicit def dameoBoard(b: dameo.Board)               = Board.Dameo(b)
 
   def init(lib: GameLogic, variant: Variant): Board = (lib, variant) match {
@@ -545,13 +582,11 @@ object Board {
     case (GameLogic.Chess(), Variant.Chess(variant))               => Chess(chess.Board.init(variant))
     case (GameLogic.FairySF(), Variant.FairySF(variant))           => FairySF(fairysf.Board.init(variant))
     case (GameLogic.Samurai(), Variant.Samurai(variant))           => Samurai(samurai.Board.init(variant))
-    case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant)) =>
-      Togyzkumalak(togyzkumalak.Board.init(variant))
+    case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant)) => Togyzkumalak(togyzkumalak.Board.init(variant))
     case (GameLogic.Go(), Variant.Go(variant))                     => Go(go.Board.init(variant))
     case (GameLogic.Backgammon(), Variant.Backgammon(variant))     => Backgammon(backgammon.Board.init(variant))
-    case (GameLogic.Abalone(), Variant.Abalone(variant))           => Abalone(abalone.Board.init(variant))
+    case (GameLogic.Abalone(), Variant.Abalone(variant))           => Abalone(abalone.BBoard.init(variant))
     case (GameLogic.Dameo(), Variant.Dameo(variant))               => Dameo(dameo.Board.init(variant))
     case _                                                         => sys.error("Mismatched gamelogic types 28")
   }
-
 }

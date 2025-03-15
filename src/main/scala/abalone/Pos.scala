@@ -66,11 +66,11 @@ Abalone official coordinates system and "standard start position" are drawn belo
         1 2 3 4 5
  */
 
-sealed trait DirectionString
+@deprecated("Alex", since="1.5.5") sealed trait DirectionString
 
-sealed trait DiagonalDirectionString extends DirectionString
+@deprecated("Alex", since="1.5.5") sealed trait DiagonalDirectionString extends DirectionString
 
-object DiagonalDirectionString {
+@deprecated("Alex", since="1.5.5") object DiagonalDirectionString {
   case object UpLeft extends DiagonalDirectionString
 
   case object UpRight extends DiagonalDirectionString
@@ -82,7 +82,7 @@ object DiagonalDirectionString {
   val all: List[DiagonalDirectionString] = List(UpLeft, UpRight, DownRight, DownLeft)
 }
 
-object DirectionString {
+@deprecated("Alex", since="1.5.5") object DirectionString {
   case object Left extends DirectionString
 
   case object Right extends DirectionString
@@ -93,7 +93,7 @@ object DirectionString {
 // Piotr is what is saved in Database and is used in Uci
 // In the lookup val, we target a "FileAsLetterRowAsNumber" square already defined in Pos object
 // The .index refer to the value that was given when the Pos was created, and is then associated to the char (which should match src/main/scala/fairysf/Pos.scala for use in analysis and stratops)
-object Piotr {
+@deprecated("Alex", since="1.5.5") object Piotr {
   val lookup: Map[Int, Char] = Map(
     Pos.A1.index -> 'a',
     Pos.B1.index -> 'b',
@@ -192,7 +192,7 @@ object Piotr {
 // Pos represents a square (by it's index (an Int))
 // We can use this index to find the char associated with the Pos
 // There are utility functions to move in a direction and do some checks, from an instance of Pos
-case class Pos private(index: Int) extends AnyVal {
+@deprecated("Alex", since="1.5.5") case class Pos private(index: Int) extends AnyVal {
 
   /*
   hexagonal grids have 6 directions only
@@ -298,7 +298,7 @@ case class Pos private(index: Int) extends AnyVal {
     }
 }
 
-object Pos {
+@deprecated("Alex", since="1.5.5") object Pos {
   /*
   indexes of Pos outside of the hexagon :
                                           row   col

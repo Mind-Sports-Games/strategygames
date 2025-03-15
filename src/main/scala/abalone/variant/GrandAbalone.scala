@@ -1,7 +1,6 @@
 package strategygames.abalone
 package variant
 
-import abalone.Hex6
 import strategygames.abalone.format.FEN
 
 case object GrandAbalone extends Variant(

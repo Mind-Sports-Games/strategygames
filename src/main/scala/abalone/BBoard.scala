@@ -1,8 +1,7 @@
-package abalone
+package strategygames.abalone
 
-import abalone.util.geometry.Cell
 import strategygames.Player
-import strategygames.abalone.Piece
+import strategygames.abalone.util.geometry.Cell
 import strategygames.abalone.variant.Variant
 
 case class BBoard(
@@ -25,6 +24,8 @@ case class BBoard(
   def situationOf(player: Player) = SSituation(this, player)
 
   def valid(strict: Boolean) = variant.valid(this, strict)
+
+  def materialImbalance: Int = variant.materialImbalance(this)
 
   def autoDraw: Boolean = history.threefoldRepetition && variant.repetitionEnabled
 

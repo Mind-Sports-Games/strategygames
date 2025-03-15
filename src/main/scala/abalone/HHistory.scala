@@ -1,8 +1,7 @@
-package abalone
+package strategygames.abalone
 
-import abalone.format.UUci
 import strategygames.Score
-import strategygames.abalone.{Hash, PositionHash}
+import strategygames.abalone.format.UUci
 
 case class HHistory(
                      lastTurn: List[UUci] = List.empty,

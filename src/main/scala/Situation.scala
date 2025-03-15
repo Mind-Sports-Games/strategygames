@@ -149,7 +149,7 @@ sealed abstract class Situation(val board: Board, val player: Player) {
   def toTogyzkumalak: togyzkumalak.Situation
   def toGo: go.Situation
   def toBackgammon: backgammon.Situation
-  def toAbalone: abalone.Situation
+  def toAbalone: abalone.SSituation
   def toDameo: dameo.Situation
 
 }
@@ -1283,13 +1283,163 @@ object Situation {
     def toDameo        = sys.error("Can't make dameo situation from backgammon situation")
   }
 
-  final case class Abalone(s: abalone.Situation)
-      extends Situation(
-        Board.Abalone(s.board),
-        s.player
-      ) {
+//  @deprecated("Alex", since="1.5.5") final case class Abalone(s: abalone.Situation)
+//      extends Situation(
+//        Board.Abalone(s.board),
+//        s.player
+//      ) {
+//
+//    lazy val moves: Map[Pos, List[Move]] = s.moves.map { case (p: abalone.Pos, l: List[abalone.Move]) =>
+//      (Pos.Abalone(p), l.map(Move.Abalone))
+//    }
+//
+//    def takebackable = true
+//
+//    def forcedAction: Option[Action] = None
+//
+//    lazy val check: Boolean = false
+//
+//    def checkSquare = None
+//
+//    def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
+//
+//    def insufficientMaterialStatus: Status.type => Status = _.Outoftime
+//
+//    def outOfTimeStatus: Status.type => Status = _.Outoftime
+//
+//    def threefoldRepetition: Boolean = false
+//    def isRepetition: Boolean        = false
+//
+//    override lazy val perpetualPossible: Boolean = false
+//
+//    def end: Boolean = s.end
+//
+//    def winner: Option[Player] = s.winner
+//
+//    lazy val destinations: Map[Pos, List[Pos]] = s.destinations.map {
+//      case (p: abalone.Pos, l: List[abalone.Pos]) => (Pos.Abalone(p), l.map(Pos.Abalone))
+//    }
+//
+//    def drops: Option[List[Pos]] = None
+//
+//    def dropsByRole: Option[Map[Role, List[Pos]]] = None
+//
+//    def dropsAsDrops: List[Drop] = List.empty
+//
+//    def lifts: List[Lift] = List.empty
+//
+//    def passes: List[Pass] = List.empty
+//
+//    def selectSquaresAction: List[SelectSquares] = List.empty
+//
+//    def diceRolls: List[DiceRoll] = List.empty
+//
+//    def undos: List[Undo] = List.empty
+//
+//    def endTurns: List[EndTurn] = List.empty
+//
+//    def cubeActions: List[CubeAction] = List.empty
+//
+//    def canDrop: Boolean = false
+//
+//    def canOnlyDrop: Boolean = false
+//
+//    def canLift: Boolean = false
+//
+//    def canOnlyLift: Boolean = false
+//
+//    def canRollDice: Boolean = false
+//
+//    def canOnlyRollDice: Boolean = false
+//
+//    def canUndo: Boolean = false
+//
+//    def canEndTurn: Boolean = false
+//
+//    def canOnlyEndTurn: Boolean = false
+//
+//    def canCubeAction: Boolean = false
+//
+//    def canOnlyCubeAction: Boolean = false
+//
+//    def drop(role: Role, pos: Pos): Validated[String, Drop] =
+//      sys.error("Can't do a Drop for abalone")
+//
+//    def lift(pos: Pos): Validated[String, Lift] = sys.error("Can't do a Lift for abalone")
+//
+//    def pass: Validated[String, Pass] = sys.error("Can't do a Pass for abalone")
+//
+//    def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
+//      sys.error("Can't do a SelectSquare for togyzkumalak")
+//
+//    def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
+//      sys.error("Can't do a DiceRoll for abalone")
+//
+//    def undo: Validated[String, Undo] = sys.error("Can't do Undo for abalone")
+//
+//    def endTurn: Validated[String, EndTurn] = sys.error("Can't do EndTurn for abalone")
+//
+//    def cubeAction(interaction: CubeInteraction): Validated[String, CubeAction] =
+//      sys.error("Can't do CubeAction for abalone")
+//
+//    def playable(strict: Boolean): Boolean = s.playable(strict)
+//
+//    val status: Option[Status] = s.status
+//
+//    def resignStatus(player: Player): Status.type => Status = _.Resign
+//
+//    def pointValue(player: Option[Player]): Option[Int] = None
+//
+//    def move(
+//        from: Pos,
+//        to: Pos,
+//        promotion: Option[PromotableRole] = None,
+//        finalSquare: Boolean = false,
+//        forbiddenUci: Option[List[String]] = None,
+//        captures: Option[List[Pos]] = None,
+//        partialCaptures: Boolean = false
+//    ): Validated[String, Move] = (from, to) match {
+//      case (Pos.Abalone(from), Pos.Abalone(to)) =>
+//        s.move(from, to).toEither.map(m => Move.Abalone(m)).toValidated
+//      case _                                    => sys.error("Not passed Abalone objects")
+//    }
+//
+//    def move(uci: Uci.Move): Validated[String, Move] = uci match {
+//      case Uci.AbaloneMove(uci) => s.move(uci).toEither.map(m => Move.Abalone(m)).toValidated
+//      case _                    => sys.error("Not passed Abalone objects")
+//    }
+//
+//    def withVariant(variant: Variant): Situation = variant match {
+//      case Variant.Abalone(variant) => Abalone(s.withVariant(variant))
+//      case _                        => sys.error("Not passed Abalone objects")
+//    }
+//
+//    def unary_! : Situation = Abalone(s.unary_!)
+//
+//    def copy(board: Board): Situation = Abalone(board match {
+//      case Board.Abalone(board) => s.copy(board)
+//      case _                    => sys.error("Can't copy a abalone situation with a non-abalone board")
+//    })
+//
+//    def gameLogic: GameLogic = GameLogic.Abalone()
+//
+//    def toFairySF      = sys.error("Can't make fairysf situation from abalone situation")
+//    def toChess        = sys.error("Can't make chess situation from abalone situation")
+//    def toDraughts     = sys.error("Can't make draughts situation from abalone situation")
+//    def toSamurai      = sys.error("Can't make samurai situation from abalone situation")
+//    def toTogyzkumalak = sys.error("Can't make togyzkumalak situation from abalone situation")
+//    def toGo           = sys.error("Can't make go situation from abalone situation")
+//    def toBackgammon   = sys.error("Can't make backgammon situation from abalone situation")
+//    def toAbalone      = s
+//    def toDameo        = sys.error("Can't make dameo situation from abalone situation")
+//  }
+  final case class Abalone(s: abalone.SSituation)
+    extends Situation(
+      Board.Abalone(s.board),
+      s.player
+    ) {
 
-    lazy val moves: Map[Pos, List[Move]] = s.moves.map { case (p: abalone.Pos, l: List[abalone.Move]) =>
+    lazy val moves: Map[Pos, List[Move]] = s.moves.map { case (p: strategygames.abalone.util.geometry.Cell, l: List[abalone.MMove]) =>
       (Pos.Abalone(p), l.map(Move.Abalone))
     }
 
@@ -1317,7 +1467,7 @@ object Situation {
     def winner: Option[Player] = s.winner
 
     lazy val destinations: Map[Pos, List[Pos]] = s.destinations.map {
-      case (p: abalone.Pos, l: List[abalone.Pos]) => (Pos.Abalone(p), l.map(Pos.Abalone))
+      case (p: abalone.util.geometry.Cell, l: List[abalone.util.geometry.Cell]) => (Pos.Abalone(p), l.map(Pos.Abalone))
     }
 
     def drops: Option[List[Pos]] = None
@@ -1391,14 +1541,14 @@ object Situation {
     def pointValue(player: Option[Player]): Option[Int] = None
 
     def move(
-        from: Pos,
-        to: Pos,
-        promotion: Option[PromotableRole] = None,
-        finalSquare: Boolean = false,
-        forbiddenUci: Option[List[String]] = None,
-        captures: Option[List[Pos]] = None,
-        partialCaptures: Boolean = false
-    ): Validated[String, Move] = (from, to) match {
+              from: Pos,
+              to: Pos,
+              promotion: Option[PromotableRole] = None,
+              finalSquare: Boolean = false,
+              forbiddenUci: Option[List[String]] = None,
+              captures: Option[List[Pos]] = None,
+              partialCaptures: Boolean = false
+            ): Validated[String, Move] = (from, to) match {
       case (Pos.Abalone(from), Pos.Abalone(to)) =>
         s.move(from, to).toEither.map(m => Move.Abalone(m)).toValidated
       case _                                    => sys.error("Not passed Abalone objects")
@@ -1594,7 +1744,7 @@ object Situation {
       Togyzkumalak(togyzkumalak.Situation(board, player))
     case (GameLogic.Go(), Board.Go(board))                     => Go(go.Situation(board, player))
     case (GameLogic.Backgammon(), Board.Backgammon(board))     => Backgammon(backgammon.Situation(board, player))
-    case (GameLogic.Abalone(), Board.Abalone(board))           => Abalone(abalone.Situation(board, player))
+    case (GameLogic.Abalone(), Board.Abalone(board))           => Abalone(abalone.SSituation(board, player))
     case (GameLogic.Dameo(), Board.Dameo(board))               => Dameo(dameo.Situation(board, player))
     case _                                                     => sys.error("Mismatched gamelogic types 3")
   }
@@ -1610,7 +1760,7 @@ object Situation {
     case (GameLogic.Backgammon(), Variant.Backgammon(variant))     =>
       Backgammon(backgammon.Situation.apply(variant))
     case (GameLogic.Abalone(), Variant.Abalone(variant))           =>
-      Abalone(abalone.Situation.apply(variant))
+      Abalone(abalone.SSituation.apply(variant))
     case (GameLogic.Dameo(), Variant.Dameo(variant))               =>
       Dameo(dameo.Situation.apply(variant))
     case _                                                         => sys.error("Mismatched gamelogic types 4")
@@ -1623,7 +1773,7 @@ object Situation {
   def wrap(s: togyzkumalak.Situation) = Togyzkumalak(s)
   def wrap(s: go.Situation)           = Go(s)
   def wrap(s: backgammon.Situation)   = Backgammon(s)
-  def wrap(s: abalone.Situation)      = Abalone(s)
+  def wrap(s: abalone.SSituation)     = Abalone(s)
   def wrap(s: dameo.Situation)        = Dameo(s)
 
 }

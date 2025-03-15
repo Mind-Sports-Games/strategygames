@@ -1,12 +1,10 @@
-package abalone
+package strategygames.abalone
 
-import abalone.format.{FForsyth, UUci}
-import abalone.util.geometry.Cell
 import cats.data.Validated
-import strategygames.abalone.P1
-import strategygames.abalone.format.FEN
+import strategygames.abalone.format.{FEN, FForsyth, UUci}
+import strategygames.abalone.util.geometry.Cell
 import strategygames.abalone.variant.Variant
-import strategygames.{ClockBase, MoveMetrics, Player, VActionStrs, toOrnicarOption}
+import strategygames.{ClockBase, MoveMetrics, Player, VActionStrs}
 
 case class GGame(
                   situation: SSituation,

@@ -1,4 +1,4 @@
-package abalone.util.geometry
+package strategygames.abalone.util.geometry
 
 import scala.annotation.nowarn
 import scala.util.matching.Regex

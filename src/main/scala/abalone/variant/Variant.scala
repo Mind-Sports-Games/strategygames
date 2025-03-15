@@ -1,12 +1,10 @@
 package strategygames.abalone.variant
 
-import abalone.format.UUci
-import abalone.util.geometry.Cell
-import abalone.{BBoard, BoardType, MMove, SSituation}
 import cats.data.Validated
 import cats.syntax.option._
+import strategygames.abalone.format.{FEN, UUci, Uci}
+import strategygames.abalone.util.geometry.Cell
 import strategygames.abalone._
-import strategygames.abalone.format.{FEN, Uci}
 import strategygames.{GameFamily, Player}
 
 import scala.annotation.nowarn
@@ -522,7 +520,7 @@ abstract class Variant private[variant](
   def specialDraw(sit: SSituation) = sit.moves.size == 0
 
   // TODO Abalone Set
-  @deprecated("Alex", since = "1.5.5") def materialImbalance(@nowarn board: Board): Int = 0
+  def materialImbalance(@nowarn board: Board): Int = 0
 
   def materialImbalance(@nowarn board: BBoard): Int = 0
 

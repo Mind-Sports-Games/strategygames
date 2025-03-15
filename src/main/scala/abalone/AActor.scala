@@ -1,7 +1,6 @@
-package abalone
+package strategygames.abalone
 
-import abalone.util.geometry.Cell
-import strategygames.abalone.Piece
+import strategygames.abalone.util.geometry.Cell
 
 final case class AActor(
                          piece: Piece,
