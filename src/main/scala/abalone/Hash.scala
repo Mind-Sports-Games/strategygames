@@ -1,19 +1,18 @@
 package strategygames.abalone
 
 final class Hash(size: Int) {
-  @deprecated("Alex", since = "1.5.5") def apply(situation: Situation): PositionHash = {
-    val l = Hash.get(situation, Hash.polyglotTable)
-    if (size <= 8) {
-      Array.tabulate(size)(i => (l >>> ((7 - i) * 8)).toByte)
-    } else {
-      val m = Hash.get(situation, Hash.randomTable)
-      Array.tabulate(size)(i =>
-        if (i < 8) (l >>> ((7 - i) * 8)).toByte
-        else (m >>> ((15 - i) * 8)).toByte
-      )
-    }
-  }
-
+  //  @deprecated("Alex", since = "1.5.5") def apply(situation: Situation): PositionHash = {
+  //    val l = Hash.get(situation, Hash.polyglotTable)
+  //    if (size <= 8) {
+  //      Array.tabulate(size)(i => (l >>> ((7 - i) * 8)).toByte)
+  //    } else {
+  //      val m = Hash.get(situation, Hash.randomTable)
+  //      Array.tabulate(size)(i =>
+  //        if (i < 8) (l >>> ((7 - i) * 8)).toByte
+  //        else (m >>> ((15 - i) * 8)).toByte
+  //      )
+  //    }
+  //  }
   def apply(situation: SSituation): PositionHash = {
     val l = Hash.get(situation, Hash.polyglotTable)
     if (size <= 8) {
@@ -29,7 +28,6 @@ final class Hash(size: Int) {
 }
 
 object Hash {
-
   val size = 3
 
   class ZobristConstants(start: Int) {
@@ -48,9 +46,22 @@ object Hash {
   private val polyglotTable = new ZobristConstants(0)
   private lazy val randomTable = new ZobristConstants(16)
 
-  private def actorIndex(actor: Actor) = 80 * actor.piece.player.fold(1, 0) + actor.pos.hashCode
+  //  private def actorIndex(actor: Actor) = 80 * actor.piece.player.fold(1, 0) + actor.pos.hashCode
+  private def actorIndex(actor: AActor) = 80 * actor.piece.player.fold(1, 0) + actor.pos.hashCode
 
-  def get(situation: Situation, table: ZobristConstants): Long = {
+  //  def get(situation: Situation, table: ZobristConstants): Long = {
+  //    val board = situation.board
+  //    val hturn = situation.player.fold(table.p1TurnMask, 0L)
+  //
+  //    val hactors = board.actors.values.view
+  //      .map {
+  //        table.actorMasks compose actorIndex _
+  //      }
+  //      .fold(hturn)(_ ^ _)
+  //
+  //    hactors
+  //  }
+  def get(situation: SSituation, table: ZobristConstants): Long = {
     val board = situation.board
     val hturn = situation.player.fold(table.p1TurnMask, 0L)
 
@@ -63,24 +74,9 @@ object Hash {
     hactors
   }
 
-  def get(situation: SSituation, table: ZobristConstants): Long = {
-    //    val board = situation.board
-    //    val hturn = situation.player.fold(table.p1TurnMask, 0L)
-    //
-    //    val hactors = board.actors.values.view
-    //      .map {
-    //        table.actorMasks compose actorIndex _
-    //      }
-    //      .fold(hturn)(_ ^ _)
-    //
-    //    hactors
-    0L //TODO
-  }
-
   private val h = new Hash(size)
 
-  def apply(situation: Situation): PositionHash = h.apply(situation)
-
+  //  def apply(situation: Situation): PositionHash = h.apply(situation)
   def apply(situation: SSituation): PositionHash = h.apply(situation)
 
   def debug(hashes: PositionHash) = hashes.map(_.toInt).sum.toString
@@ -251,8 +247,8 @@ private object ZobristTables {
     "aef3af4a563dfe43ec504bd0c7ae79a1",
     "19afe59ae451497f0bc761ea4004d2ae",
     "52593803dff1e8403a0748078a78fd4d"
+    //TODO add strings for BoardType Hex6
   )
 
   val p1TurnMask = "f8d626aaaf2785093815e537b6222c85"
-
 }

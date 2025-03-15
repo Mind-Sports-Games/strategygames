@@ -3,7 +3,7 @@ package strategygames.abalone.format
 import cats.data.Validated
 import cats.implicits._
 import strategygames.abalone.SSituation
-import strategygames.abalone.util.geometry.Cell
+import strategygames.abalone.geometry.Cell
 
 sealed trait UUci {
   def uci: String

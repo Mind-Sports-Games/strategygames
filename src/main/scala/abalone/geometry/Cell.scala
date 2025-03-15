@@ -1,4 +1,4 @@
-package strategygames.abalone.util.geometry
+package strategygames.abalone.geometry
 
 import scala.annotation.nowarn
 import scala.util.matching.Regex
@@ -52,9 +52,11 @@ class Cell(var x: Int, var y: Int) extends AnyRef {
     case _ => "-" + ('a' - y - 2).toChar.toString
   }) + (x + 1).toString
 
+  def index: Int = Piotr.cellToIndex(this)
+
   def piotr: Char = Piotr.cellToPiotr(this)
 
-  def piotrStr = piotr.toString
+  def piotrStr: String = piotr.toString
 
   override def toString = "(" + x + ", " + y + ")"
 
@@ -146,6 +148,8 @@ object Cell {
 
     Option.empty
   }
+
+  def fromIndex(i: Int): Cell = Piotr.indexToCell(i)
 
   def piotr(c: Char): Option[Cell] = Piotr.piotrToCell.get(c)
 }
@@ -353,7 +357,7 @@ object Piotr {
   val piotrToIndex: Map[Char, Int] = indexToPiotr.keys.map(i => (indexToPiotr(i), i)).toMap
   val piotrToCell: Map[Char, Cell] = cellToPiotr.keys.map(a => (cellToPiotr(a), a)).toMap // <=> allPiotrs
 
-  private def indexToCell(i: Int): Cell = {
+  def indexToCell(i: Int): Cell = {
     var j = i
     if (j < 64) new Cell(j % 8, j / 8) // A1-H1, ..., A8-H8
 

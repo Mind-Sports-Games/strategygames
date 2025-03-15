@@ -3,7 +3,7 @@ package format.pgn
 
 import cats.data.Validated
 import strategygames.abalone.format.UUci
-import strategygames.abalone.util.geometry.Cell
+import strategygames.abalone.geometry.Cell
 import strategygames.format.pgn.{ParsedPgn, Sans, Tags}
 import strategygames.{ActionStrs, ByoyomiClock, Clock, Action => StratAction, Situation => StratSituation}
 
@@ -54,7 +54,7 @@ object RReader {
     }
 
   private def makeReplayWithActionStrs(game: GGame, actionStrs: ActionStrs): Result =
-    Replay.actionStrsWithEndTurn(actionStrs).foldLeft[Result](Result.Complete(RReplay(game))) {
+    RReplay.actionStrsWithEndTurn(actionStrs).foldLeft[Result](Result.Complete(RReplay(game))) {
       case (Result.Complete(replay), (actionStr, endTurn)) => actionStr match {
         case UUci.MMove.moveR(orig, dest) => (Cell.fromKey(orig), Cell.fromKey(dest)) match {
           case (Some(orig), Some(dest)) => Result.Complete(

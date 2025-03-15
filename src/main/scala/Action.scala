@@ -19,7 +19,7 @@ abstract class Action(
   def toTogyzkumalak: togyzkumalak.Action
   def toGo: go.Action
   def toBackgammon: backgammon.Action
-  def toAbalone: abalone.Action
+  def toAbalone: abalone.AAction
   def toDameo: dameo.Action
 }
 

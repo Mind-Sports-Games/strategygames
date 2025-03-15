@@ -1,15 +1,15 @@
 package strategygames.abalone
 
 import strategygames.Player
-import strategygames.abalone.util.geometry.Cell
+import strategygames.abalone.geometry.Cell
 import strategygames.abalone.variant.Variant
 
 case class BBoard(
-                   pieces: Map[Cell, Piece],
+                   pieces: PieceMap,
                    history: HHistory,
                    variant: Variant
                  ) {
-  def piecesOf(player: Player): Map[Cell, Piece] = pieces.filter(_._2.is(player))
+  def piecesOf(player: Player): PieceMap = pieces.filter(_._2.is(player))
 
   def isPiece(a: Cell): Boolean = pieces.contains(a)
 

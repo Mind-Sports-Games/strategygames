@@ -1,6 +1,6 @@
-package strategygames.abalone.util.geometry.norm
+package strategygames.abalone.geometry.norm
 
-import strategygames.abalone.util.geometry.Cell
+import strategygames.abalone.geometry.Cell
 
 abstract class Norm(val radius: Int, is3: Boolean = false) {
   final def apply(a: Cell): Int = this (a.x, a.y)

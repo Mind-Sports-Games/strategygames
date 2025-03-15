@@ -1,7 +1,7 @@
 package strategygames.abalone.format
 
 import strategygames.abalone._
-import strategygames.abalone.util.geometry.Cell
+import strategygames.abalone.geometry.Cell
 import strategygames.abalone.variant.Variant
 import strategygames.{Player, Score}
 
@@ -9,6 +9,9 @@ import strategygames.{Player, Score}
   * http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
   */
 object FForsyth {
+  //    val initial = FEN("ss1SS/sssSSS/1ss1SS1/8/9/8/1SS1ss1/SSSsss/SS1ss 0 0 b 0 1")
+  val initial = FEN("SS1ss/SSSsss/1SS1ss1/8/9/8/1ss1SS1/sssSSS/ss1SS 0 0 b 0 1") //TODO should NOT be here (I suppose)
+
   def <<@(variant: Variant, fen: FEN): Option[SSituation] = {
     Some(
       SSituation(
@@ -80,21 +83,21 @@ object FForsyth {
     var prev: Option[Cell] = Option.empty
     var emptyNb = 0
 
-    def writeEmptyNb = if (emptyNb > 0) {
+    def writeEmptyNb() = if (emptyNb > 0) {
       res.append(s"$emptyNb")
       emptyNb = 0
     }
 
     board.variant.boardType.cellList.foreach(a => {
       if (prev.isDefined & prev.get.y != a.y) {
-        writeEmptyNb
+        writeEmptyNb()
         res.append("/")
       }
 
       board.getPiece(a) match {
         case None => emptyNb += 1
         case Some(piece) =>
-          writeEmptyNb
+          writeEmptyNb()
           res.append(if (piece.player == P1) piece.forsyth.toString.toUpperCase() else piece.forsyth.toString.toLowerCase())
       }
 

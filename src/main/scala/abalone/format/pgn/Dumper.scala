@@ -4,19 +4,17 @@ package format.pgn
 import scala.annotation.nowarn
 
 object Dumper {
-
   def apply(
-      @nowarn situation: Situation,
-      data: strategygames.abalone.Move,
-      @nowarn next: Situation
-  ): String =
+             @nowarn situation: SSituation,
+             data: MMove,
+             @nowarn next: SSituation
+           ): String =
     data.toUci.uci
 
-  def apply(data: strategygames.abalone.Move): String =
+  def apply(data: MMove): String =
     apply(
       data.situationBefore,
       data,
       data.finalizeAfter situationOf !data.player
     )
-
 }

@@ -2,7 +2,7 @@ package strategygames.abalone
 
 import strategygames.MoveMetrics
 import strategygames.abalone.format.UUci
-import strategygames.abalone.util.geometry.Cell
+import strategygames.abalone.geometry.Cell
 
 case class MMove(
                   piece: Piece,//TODO seems totally unnecessary

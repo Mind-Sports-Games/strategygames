@@ -4,13 +4,13 @@ import strategygames.abalone.format.FEN
 
 //TODO this is from chess
 case class StartingPosition(
-    eco: String,
-    name: String,
-    fen: FEN,
-    wikiPath: String,
-    moves: String,
-    featurable: Boolean = true
-) {
+                             eco: String,
+                             name: String,
+                             fen: FEN,
+                             wikiPath: String,
+                             moves: String,
+                             featurable: Boolean = true
+                           ) {
 
   def url = s"https://en.wikipedia.org/wiki/$wikiPath"
 
@@ -18,14 +18,14 @@ case class StartingPosition(
 
   def fullName = s"$eco $name"
 
-  def initial = fen == format.Forsyth.initial
+  //  def initial = fen == format.Forsyth.initial
+  def initial = fen == format.FForsyth.initial
 }
 
 object StartingPosition {
-
   case class Category(name: String, positions: List[StartingPosition])
 
-  val categories: List[Category] = List(
+  val categories: List[Category] = List( //FIXME chess
     Category(
       "e4",
       List(
@@ -1075,7 +1075,8 @@ object StartingPosition {
 
   val all: IndexedSeq[StartingPosition] = categories.flatMap(_.positions).toIndexedSeq
 
-  val initial = StartingPosition("---", "Initial position", format.Forsyth.initial, "Chess", "")
+  //  val initial = StartingPosition("---", "Initial position", format.Forsyth.initial, "Chess", "")
+  val initial = StartingPosition("---", "Initial position", format.FForsyth.initial, "Chess", "") //FIXME chess?
 
   def allWithInitial = initial +: all
 
@@ -1084,14 +1085,14 @@ object StartingPosition {
   def randomFeaturable = featurable(scala.util.Random.nextInt(featurable.size))
 
   object presets {
-    val halloween    = StartingPosition(
+    val halloween = StartingPosition( //FIXME chess
       "C47",
       "Halloween Gambit",
       FEN("r1bqkb1r/pppp1ppp/2n2n2/4N3/4P3/2N5/PPPP1PPP/R1BQKB1R b KQkq - 0 4"),
       "Halloween_Gambit",
       "1. e4 e5 2. Nf3 Nc6 3. Nc3 Nf6 4. Nxe5"
     )
-    val frankenstein = StartingPosition(
+    val frankenstein = StartingPosition( //FIXME chess
       "C27",
       "Frankenstein-Dracula Variation",
       FEN("rnbqkb1r/pppp1ppp/8/4p3/2B1n3/2N5/PPPP1PPP/R1BQK1NR w KQkq - 0 4"),

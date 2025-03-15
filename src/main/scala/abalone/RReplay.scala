@@ -5,7 +5,7 @@ import cats.data.Validated.{invalid, valid}
 import cats.implicits.catsSyntaxOptionId
 import strategygames.abalone.format.pgn.{Parser, RReader}
 import strategygames.abalone.format.{FEN, FForsyth, UUci}
-import strategygames.abalone.util.geometry.Cell
+import strategygames.abalone.geometry.Cell
 import strategygames.abalone.variant.Variant
 import strategygames.format.pgn.San
 import strategygames.{ActionStrs, Player, Action => StratAction, Move => StratMove, Situation => StratSituation}

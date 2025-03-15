@@ -2,7 +2,7 @@ package strategygames.abalone
 package format.pgn
 
 import cats.data.Validated
-import strategygames.abalone.util.geometry.Cell
+import strategygames.abalone.geometry.Cell
 import strategygames.format.pgn.{Metas, San, Suffixes}
 import strategygames.{Move => StratMove}
 

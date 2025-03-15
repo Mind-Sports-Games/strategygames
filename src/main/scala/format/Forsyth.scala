@@ -16,7 +16,7 @@ object Forsyth {
     case GameLogic.Togyzkumalak() => FEN.Togyzkumalak(togyzkumalak.format.Forsyth.initial)
     case GameLogic.Go()           => FEN.Go(go.format.Forsyth.initial)
     case GameLogic.Backgammon()   => FEN.Backgammon(backgammon.format.Forsyth.initial)
-    case GameLogic.Abalone()      => FEN.Abalone(abalone.format.Forsyth.initial)
+    case GameLogic.Abalone()      => FEN.Abalone(abalone.format.FForsyth.initial)
     case GameLogic.Dameo()        => FEN.Dameo(dameo.format.Forsyth.initial)
   }
 
@@ -37,7 +37,7 @@ object Forsyth {
       case (GameLogic.Backgammon(), Variant.Backgammon(variant), FEN.Backgammon(fen))       =>
         backgammon.format.Forsyth.<<@(variant, fen).map(Situation.Backgammon)
       case (GameLogic.Abalone(), Variant.Abalone(variant), FEN.Abalone(fen))                =>
-        abalone.format.Forsyth.<<@(variant, fen).map(Situation.Abalone)
+        abalone.format.FForsyth.<<@(variant, fen).map(Situation.Abalone)
       case (GameLogic.Dameo(), Variant.Dameo(variant), FEN.Dameo(fen))                      =>
         dameo.format.Forsyth.<<@(variant, fen).map(Situation.Dameo)
       case _                                                                                => sys.error("Mismatched gamelogic types 14")
@@ -54,7 +54,7 @@ object Forsyth {
     case (GameLogic.Backgammon(), FEN.Backgammon(fen))     =>
       backgammon.format.Forsyth.<<(fen).map(Situation.Backgammon)
     case (GameLogic.Abalone(), FEN.Abalone(fen))           =>
-      abalone.format.Forsyth.<<(fen).map(Situation.Abalone)
+      abalone.format.FForsyth.<<(fen).map(Situation.Abalone)
     case (GameLogic.Dameo(), FEN.Dameo(fen))               =>
       dameo.format.Forsyth.<<(fen).map(Situation.Dameo)
     case _                                                 => sys.error("Mismatched gamelogic types 15")
@@ -98,7 +98,7 @@ object Forsyth {
           .<<<@(variant, fen)
           .map(sp => SituationPlus(Situation.Backgammon(sp.situation), sp.fullTurnCount))
       case (GameLogic.Abalone(), Variant.Abalone(variant), FEN.Abalone(fen))                =>
-        abalone.format.Forsyth
+        abalone.format.FForsyth
           .<<<@(variant, fen)
           .map(sp => SituationPlus(Situation.Abalone(sp.situation), sp.fullTurnCount))
       case (GameLogic.Dameo(), Variant.Dameo(variant), FEN.Dameo(fen))                      =>
@@ -138,7 +138,7 @@ object Forsyth {
         .<<<(fen)
         .map(sp => SituationPlus(Situation.Backgammon(sp.situation), sp.fullTurnCount))
     case (GameLogic.Abalone(), FEN.Abalone(fen))           =>
-      abalone.format.Forsyth
+      abalone.format.FForsyth
         .<<<(fen)
         .map(sp => SituationPlus(Situation.Abalone(sp.situation), sp.fullTurnCount))
     case (GameLogic.Dameo(), FEN.Dameo(fen))               =>
@@ -195,8 +195,8 @@ object Forsyth {
       )
     case (GameLogic.Abalone(), Situation.Abalone(situation))           =>
       FEN.Abalone(
-        abalone.format.Forsyth.>>(
-          abalone.format.Forsyth.SituationPlus(situation, parsed.fullTurnCount)
+        abalone.format.FForsyth.>>(
+          abalone.format.FForsyth.SituationPlus(situation, parsed.fullTurnCount)
         )
       )
     case (GameLogic.Dameo(), Situation.Dameo(situation))               =>
@@ -218,7 +218,7 @@ object Forsyth {
     case (GameLogic.Go(), Game.Go(game))                     => FEN.Go(go.format.Forsyth.>>(game))
     case (GameLogic.Backgammon(), Game.Backgammon(game))     =>
       FEN.Backgammon(backgammon.format.Forsyth.>>(game))
-    case (GameLogic.Abalone(), Game.Abalone(game))           => FEN.Abalone(abalone.format.Forsyth.>>(game))
+    case (GameLogic.Abalone(), Game.Abalone(game))           => FEN.Abalone(abalone.format.FForsyth.>>(game))
     case (GameLogic.Dameo(), Game.Dameo(game))               => FEN.Dameo(dameo.format.Forsyth.>>(game))
     case _                                                   => sys.error("Mismatched gamelogic types 20")
   }
@@ -240,7 +240,7 @@ object Forsyth {
       case (GameLogic.Backgammon(), Board.Backgammon(board))     =>
         backgammon.format.Forsyth.exportBoard(board)
       case (GameLogic.Abalone(), Board.Abalone(board))           =>
-        abalone.format.Forsyth.exportBoard(board)
+        abalone.format.FForsyth.exportBoard(board)
       case (GameLogic.Dameo(), Board.Dameo(board))               =>
         dameo.format.Forsyth.exportBoard(board)
       case _                                                     => sys.error("Mismatched gamelogic types 21")
@@ -266,7 +266,7 @@ object Forsyth {
       case (GameLogic.Backgammon(), Board.Backgammon(board))     =>
         backgammon.format.Forsyth.boardAndPlayer(board, turnPlayer)
       case (GameLogic.Abalone(), Board.Abalone(board))           =>
-        abalone.format.Forsyth.boardAndPlayer(board, turnPlayer)
+        abalone.format.FForsyth.boardAndPlayer(board, turnPlayer)
       case (GameLogic.Dameo(), Board.Dameo(board))               =>
         dameo.format.Forsyth.boardAndPlayer(board, turnPlayer)
       case _                                                     => sys.error("Mismatched gamelogic types 22")

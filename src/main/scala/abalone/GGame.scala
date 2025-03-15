@@ -2,7 +2,7 @@ package strategygames.abalone
 
 import cats.data.Validated
 import strategygames.abalone.format.{FEN, FForsyth, UUci}
-import strategygames.abalone.util.geometry.Cell
+import strategygames.abalone.geometry.Cell
 import strategygames.abalone.variant.Variant
 import strategygames.{ClockBase, MoveMetrics, Player, VActionStrs}
 

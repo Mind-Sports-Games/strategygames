@@ -2,7 +2,7 @@ package abalone.format
 
 import strategygames.Player
 import strategygames.abalone._
-import strategygames.abalone.util.geometry.Cell
+import strategygames.abalone.geometry.Cell
 import strategygames.abalone.variant.Variant
 
 object VVisual {
@@ -13,6 +13,9 @@ object VVisual {
       case n if n > 8 => lines.slice(1, 9)
       case n => (List.fill(8 - n)("")) ::: lines
     }
+
+    val v = Variant.default //FIXME?
+
     BBoard(
       pieces = (for {
         (l, y) <- (filtered zipWithIndex)
@@ -21,36 +24,28 @@ object VVisual {
         // but then the whole file will need changing! only used for tests
         // role   <- Role forsyth c.toLower
       } yield {
-        Pos.at(x, 7 - y) map { pos =>
+        val a = new Cell(x, 7 - y)
+        (if (v.boardType.isCell(a)) Option(a) else None) map { pos =>
           pos -> Piece(Player.fromP1(c isUpper), Stone)
         }
       }) flatten,
-      variant = Variant.default
+      variant = v
     )
   }
 
   def >>(board: BBoard): String = >>|(board, Map.empty)
 
   def >>|(board: BBoard, marks: Map[Iterable[Cell], Char]): String = {
-    val markedPoss: Map[Cell, Char] = marks.foldLeft(Map[Cell, Char]()) { case (marks, (poss, char)) =>
-      marks ++ (poss.toList map { pos =>
-        (pos, char)
-      })
+    val markedCells: Map[Cell, Char] = marks.foldLeft(Map[Cell, Char]()) { case (marks, (cells, char)) =>
+      marks ++ cells.toList.map(a => (a, char))
     }
 
-    //TODO
-    for (y <- Rank.allReversed) yield {
-      for (x <- File.all) yield {
-        val pos = Pos(x, y)
-        pos match {
-          case Some(pos) => markedPoss.get(pos) getOrElse board(pos).fold(' ')(_ forsyth)
-          case None => None
-        }
-      }
-    } mkString
-  } map {
-    """\s*$""".r.replaceFirstIn(_, "")
-  } mkString "\n"
+    board.variant.boardType.cellSet
+      .map(a => markedCells.get(a).getOrElse(board.getPiece(a).fold(' ')(_ forsyth)))
+      .mkString
+  }
+    .map(char => """\s*$""".r.replaceFirstIn(char.toString, ""))
+    .mkString("\n")
 
   def addNewLines(str: String) = "\n" + str + "\n"
 }

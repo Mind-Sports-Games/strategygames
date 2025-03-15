@@ -1,36 +1,35 @@
 package strategygames.abalone.format
 
 import strategygames.Player
-import strategygames.abalone.util.geometry.Cell
-import strategygames.abalone.{BoardType, P1, P2, Piece, PieceMap, Pos, Role}
+import strategygames.abalone.{BoardType, P1, P2, Piece, PieceMap, Role}
 
 final case class FEN(value: String) extends AnyVal {
   override def toString = value
 
   // squares are described from topLeft to bottomRight in the FEN
-  def pieces: PieceMap = value
-    .split(' ')(0)
-    .split('/')
-    .reverse
-    .flatMap {
-      _.toCharArray
-    }
-    .flatMap {
-      case square if square.isDigit => {
-        Array.fill(square.asDigit)('1')
-      }
-      case square => Array(square)
-    }
-    .zip(Pos.all)
-    .flatMap {
-      case (piece, pos) if piece == Role.defaultRole.forsythUpper => Some((pos, Piece(P1, Role.defaultRole)))
-      case (piece, pos) if piece == Role.defaultRole.forsyth => Some((pos, Piece(P2, Role.defaultRole)))
-      case _ => None
-    }
-    .toMap
+  //  def pieces: PieceMap = value
+  //    .split(' ')(0)
+  //    .split('/')
+  //    .reverse
+  //    .flatMap {
+  //      _.toCharArray
+  //    }
+  //    .flatMap {
+  //      case square if square.isDigit => {
+  //        Array.fill(square.asDigit)('1')
+  //      }
+  //      case square => Array(square)
+  //    }
+  //    .zip(Pos.all)
+  //    .flatMap {
+  //      case (piece, pos) if piece == Role.defaultRole.forsythUpper => Some((pos, Piece(P1, Role.defaultRole)))
+  //      case (piece, pos) if piece == Role.defaultRole.forsyth => Some((pos, Piece(P2, Role.defaultRole)))
+  //      case _ => None
+  //    }
+  //    .toMap
 
   // Notice cells are described from bottom left to top right in the FEN
-  def pieces(boardType: BoardType): Map[Cell, Piece] = value
+  def pieces(boardType: BoardType): PieceMap = value
     .split(' ')(0)
     .split('/')
     .flatMap {
@@ -63,7 +62,8 @@ final case class FEN(value: String) extends AnyVal {
       fm * 2 - (if (player.exists(_.p1)) 2 else 1)
     }
 
-  def initial = value == Forsyth.initial.value
+  //  def initial = value == Forsyth.initial.value
+  def initial = value == FForsyth.initial.value
 
   private def intFromFen(index: Int): Option[Int] =
     value.split(' ').lift(index).flatMap(_.toIntOption)
