@@ -6,6 +6,9 @@ import strategygames.format.{UciCharPair => stratUciCharPair}
 
 //think this is only used for analysis/puzzles?
 object UciCharPair {
+
+  import implementation._
+
   def apply(uci: UUci): stratUciCharPair =
     uci match {
       case UUci.MMove(orig, dest) => stratUciCharPair(toChar(orig), toChar(dest))
