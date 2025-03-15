@@ -3,7 +3,7 @@ import strategygames.MoveMetrics
 
 import strategygames.abalone.format.Uci
 
-case class Move(
+@deprecated("Alex", since="1.5.5") case class Move(
     piece: Piece,
     orig: Pos,
     dest: Pos,

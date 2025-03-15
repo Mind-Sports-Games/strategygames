@@ -10,7 +10,7 @@ import strategygames.abalone.format.pgn.{ Parser, Reader }
 import strategygames.abalone.format.{ FEN, Forsyth, Uci }
 import strategygames.{ Action => StratAction, ActionStrs, Move => StratMove, Situation => StratSituation }
 
-case class Replay(setup: Game, actions: List[Move], state: Game) {
+@deprecated("Alex", since="1.5.5") case class Replay(setup: Game, actions: List[Move], state: Game) {
 
   lazy val chronoPlies = actions.reverse
 

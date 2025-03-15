@@ -130,16 +130,15 @@ object Pos {
   }
 
   final case class Abalone(p: abalone.Pos) extends Pos {
+    override val key: String = p.key
 
-    val key: String = p.key
+    override def piotr: Char = p.piotr
 
-    def piotr: Char = p.piotr
+    override lazy val toInt: Int = (p.file.index << 3) + p.rank.index
 
-    lazy val toInt: Int = (p.file.index << 3) + p.rank.index
+    override def gameLogic: GameLogic = GameLogic.Abalone()
 
-    def gameLogic: GameLogic = GameLogic.Abalone()
-
-    lazy val all: List[Pos] = abalone.Pos.all.map(Abalone)
+    override lazy val all: List[Pos] = abalone.Pos.all.map(Abalone)
   }
 
   final case class Dameo(p: dameo.Pos) extends Pos {
@@ -159,15 +158,15 @@ object Pos {
   // need to equivalate this method for draughts probably
   // think we need to figure out a way to map into Draughts with a board size at this point
   def fromKey(lib: GameLogic, key: String): Option[Pos] = lib match {
-    case GameLogic.Draughts()     => sys.error("Not implemented yet for draughts")
-    case GameLogic.Chess()        => chess.Pos.fromKey(key).map(Chess)
-    case GameLogic.FairySF()      => fairysf.Pos.fromKey(key).map(FairySF)
-    case GameLogic.Samurai()      => samurai.Pos.fromKey(key).map(Samurai)
+    case GameLogic.Draughts() => sys.error("Not implemented yet for draughts")
+    case GameLogic.Chess() => chess.Pos.fromKey(key).map(Chess)
+    case GameLogic.FairySF() => fairysf.Pos.fromKey(key).map(FairySF)
+    case GameLogic.Samurai() => samurai.Pos.fromKey(key).map(Samurai)
     case GameLogic.Togyzkumalak() => togyzkumalak.Pos.fromKey(key).map(Togyzkumalak)
-    case GameLogic.Go()           => go.Pos.fromKey(key).map(Go)
-    case GameLogic.Backgammon()   => backgammon.Pos.fromKey(key).map(Backgammon)
-    case GameLogic.Abalone()      => abalone.Pos.fromKey(key).map(Abalone)
-    case GameLogic.Dameo()        => dameo.Pos.fromKey(key).map(Dameo)
+    case GameLogic.Go() => go.Pos.fromKey(key).map(Go)
+    case GameLogic.Backgammon() => backgammon.Pos.fromKey(key).map(Backgammon)
+    case GameLogic.Abalone() => abalone.Pos.fromKey(key).map(Abalone)
+    case GameLogic.Dameo() => dameo.Pos.fromKey(key).map(Dameo)
   }
 
   // def at(lib: GameLogic, x: Int, y: Int): Option[Pos] = lib match {

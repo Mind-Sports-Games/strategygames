@@ -4,7 +4,7 @@ import strategygames.abalone._
 import cats.data.Validated
 import cats.implicits._
 
-sealed trait Uci {
+@deprecated("Alex", since="1.5.5") sealed trait Uci {
 
   def uci: String
   def piotr: String

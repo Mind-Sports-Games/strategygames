@@ -2,7 +2,7 @@ package strategygames.abalone.format
 import strategygames.abalone._
 import strategygames.Player
 
-object Visual {
+@deprecated("Alex", since="1.5.5") object Visual {
 
   def <<(source: String): Board = {
     val lines    = augmentString(source).linesIterator.to(List)

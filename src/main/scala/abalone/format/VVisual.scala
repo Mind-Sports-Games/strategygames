@@ -13,8 +13,8 @@ object VVisual {
       case 8 => lines
       case n if n > 8 => lines.slice(1, 9)
       case n => (List.fill(8 - n)("")) ::: lines
-    }//TODO
-    BBoard(//TODO use cells
+    }
+    BBoard(
       pieces = (for {
         (l, y) <- (filtered zipWithIndex)
         (c, x) <- (l zipWithIndex)
@@ -23,7 +23,7 @@ object VVisual {
         // role   <- Role forsyth c.toLower
       } yield {
         Pos.at(x, 7 - y) map { pos =>
-          pos -> (Piece(Player.fromP1(c isUpper), Stone))
+          pos -> Piece(Player.fromP1(c isUpper), Stone)
         }
       }) flatten,
       variant = Variant.default

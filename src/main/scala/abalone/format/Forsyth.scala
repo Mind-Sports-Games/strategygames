@@ -7,7 +7,7 @@ import strategygames.{Player, Score}
 /** Transform a game to standard Forsyth Edwards Notation
   * http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
   */
-object Forsyth {
+@deprecated("Alex", since="1.5.5") object Forsyth {
 
   val initial = FEN("ss1SS/sssSSS/1ss1SS1/8/9/8/1SS1ss1/SSSsss/SS1ss 0 0 b 0 1")
 

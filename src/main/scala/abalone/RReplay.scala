@@ -6,7 +6,7 @@ import cats.data.Validated
 import cats.data.Validated.{invalid, valid}
 import cats.implicits.catsSyntaxOptionId
 import strategygames.abalone.format.FEN
-import strategygames.abalone.format.pgn.{Parser, Reader}
+import strategygames.abalone.format.pgn.{Parser, RReader}
 import strategygames.abalone.variant.Variant
 import strategygames.format.pgn.San
 import strategygames.{ActionStrs, Player, toOrnicarOption, Action => StratAction, Move => StratMove, Situation => StratSituation}
@@ -43,7 +43,7 @@ object RReplay {
              activePlayer: Player,
              initialFen: Option[FEN],
              variant: Variant
-           ): Validated[String, Reader.Result] = {
+           ): Validated[String, RReader.Result] = {
     val fen = initialFen.getOrElse(variant.initialFen)
     val (init, gameWithActions, error) =
       gameWithActionWhileValid(actionStrs, startPlayer, activePlayer, fen, variant)
@@ -53,7 +53,7 @@ object RReplay {
     error match {
       case None =>
         Validated.valid(
-          Reader.Result.CComplete(
+          RReader.Result.Complete(
             new RReplay(init, gameWithActions.reverse.map(_._2), game)
           )
         )
@@ -69,7 +69,8 @@ object RReplay {
   }
 
   def replayMove(before: GGame, orig: Cell, dest: Cell, endTurn: Boolean): MMove = {
-    val after = before.situation.board.variant.boardAfter(before.situation, orig, dest);
+    val after = before.situation.board.variant.boardAfter(before.situation, orig, dest)
+
     MMove(
       piece = before.situation.board.pieces(orig),
       orig = orig,
@@ -78,6 +79,7 @@ object RReplay {
       after = after,
       autoEndTurn = endTurn,
       capture = if (before.situation.board.pieces.size != after.pieces.size) Some(dest) else None
+      //capture = if (before.situation.board.variant.boardType.isCell(dest) None else Some(dest)// Also valid
     )
   }
 

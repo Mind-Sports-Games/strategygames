@@ -1,6 +1,7 @@
 package strategygames.abalone
 package format.pgn
 
+import abalone.SSituation
 import cats.data.Validated
 import strategygames.format.pgn.{Metas, San, Suffixes}
 import strategygames.{Move => StratMove}
@@ -30,6 +31,9 @@ case class Std(
 
   def withMetas(m: Metas) = copy(metas = m)
 
-  def move(@nowarn situation: Situation): Validated[String, strategygames.abalone.Move] =
+  def move(@nowarn sit: Situation): Validated[String, strategygames.abalone.Move] =
+    Validated.invalid("Not implemented move") // TODO: ???
+
+  def move(@nowarn sit: SSituation): Validated[String, strategygames.abalone.Move] =
     Validated.invalid("Not implemented move") // TODO: ???
 }

@@ -56,7 +56,7 @@ abstract class Variant private[variant](
   // pieces, scoreP1, scoreP2, turn, halfMovesSinceLastCapture (triggering condition could be when == 100 && total moves > 50 ? => draw), total moves
   def initialFen: FEN
 
-  def pieces: PieceMap = initialFen.pieces
+  @deprecated("Alex", since = "1.5.5") def pieces: PieceMap = initialFen.pieces
 
   def ppieces: Map[Cell, Piece] = initialFen.pieces(boardType)
 
@@ -98,13 +98,13 @@ abstract class Variant private[variant](
     * 2. generate any possible pair of marbles and use it to generate moves of 2 and 3 marbles
     * then merge these as valid moves.
     */
-  def validMoves(situation: Situation): Map[Pos, List[Move]] =
+  @deprecated("Alex", since = "1.5.5") def validMoves(situation: Situation): Map[Pos, List[Move]] =
     (validMovesOf1(situation).toList ++ validMovesOf2And3(situation).toList)
       .groupBy(_._1)
       .map { case (k, v) => k -> v.map(_._2).flatten }
 
-  def validMoves(situation: SSituation): Map[Cell, List[MMove]] =
-    (validMoves_line(situation).toList ++ validMoves_jump(situation).toList)
+  def validMoves(sit: SSituation): Map[Cell, List[MMove]] =
+    (validMoves_line(sit).toList ++ validMoves_jump(sit).toList)
       .groupBy(_._1)
       .map { case (k, v) => k -> v.map(_._2).flatten }
 
@@ -219,7 +219,7 @@ abstract class Variant private[variant](
 
   private def canJumpTo(sit: SSituation, a: Cell): Boolean = !sit.board.isPiece(a) && boardType.isCell(a)
 
-  def validMovesOf1(situation: Situation): Map[Pos, List[Move]] = {
+  @deprecated("Alex", since = "1.5.5") def validMovesOf1(situation: Situation): Map[Pos, List[Move]] = {
     turnPieces(situation).flatMap { case (pos, piece) =>
       Map(
         pos ->
@@ -233,7 +233,7 @@ abstract class Variant private[variant](
     }
   }
 
-  def validMovesOf2And3(situation: Situation): Map[Pos, List[Move]] = {
+  @deprecated("Alex", since = "1.5.5") def validMovesOf2And3(situation: Situation): Map[Pos, List[Move]] = {
     val activePlayerPieces = situation.board.piecesOf(situation.player)
     val opponentPieces = situation.board.piecesOf(!situation.player)
 
@@ -342,13 +342,13 @@ abstract class Variant private[variant](
   }
 
   // move pieces on the board. Other bits (including score) are handled by Move.finalizeAfter()
-  def boardAfter(situation: Situation, orig: Pos, dest: Pos): Board = {
+  @deprecated("Alex", since = "1.5.5") def boardAfter(situation: Situation, orig: Pos, dest: Pos): Board = {
     situation.board.copy(pieces = piecesAfterAction(situation.board.pieces, orig, dest))
   }
 
-  // move pieces on the board. Other bits (including score) are handled by Move.finalizeAfter()
-  def boardAfter(situation: SSituation, orig: Cell, dest: Cell): BBoard = {
-    situation.board.copy(pieces = piecesAfterAction(situation.board.pieces, orig, dest))
+  // Move pieces on the board. Other bits (including score) are handled by MMove.finalizeAfter()
+  def boardAfter(sit: SSituation, orig: Cell, dest: Cell): BBoard = {
+    sit.board.copy(pieces = piecesAfterAction(sit.board.pieces, orig, dest))
   }
 
   /*
@@ -380,7 +380,7 @@ abstract class Variant private[variant](
           - line move :
             - move from orig to dest
    */
-  private def piecesAfterAction(pieces: PieceMap, orig: Pos, dest: Pos): PieceMap = {
+  @deprecated("Alex", since = "1.5.5") private def piecesAfterAction(pieces: PieceMap, orig: Pos, dest: Pos): PieceMap = {
     val origToDestDir: Direction = Pos.directionFromDirectionString(orig.directionString(dest))
 
     if (isSideMove(orig, dest)) {
@@ -438,29 +438,59 @@ abstract class Variant private[variant](
   }
 
   private def piecesAfterAction(pieces: Map[Cell, Piece], orig: Cell, dest: Cell): Map[Cell, Piece] = {
-    //TODO
-    println(s"$orig $dest")
-    pieces
+    var res = pieces - orig
+
+    var vector = dest - orig
+    var n = boardType.norm(vector) // Assumed > 0, always the case if the move is legal
+    val neighVect = boardType.norm.neighVectors.find(vect => vect * n == vector)
+
+    if (neighVect.isEmpty) { // Jump: n > 1
+      // If the move is legal, exactly one vector matches the conditions below
+      n -= 1
+      val vvector = boardType.norm.neighVectors
+        .filter(vect => boardType.norm.dist(vector, vect * n) == 1)
+        .find(vect => {
+          val to = orig + vect
+          boardType.isCell(to) && pieces.contains(to)
+        }).get
+      vector = if (boardType.norm.cross(vvector, vector) > 0) boardType.norm.getNext(vvector)
+      else boardType.norm.getPrev(vvector)
+
+      (0 to n).foreach(i => {
+        val from = orig + vvector * i
+        val to = from + vector
+
+        if (i > 0) res = res - from
+        res += (to -> pieces(from))
+      })
+    } else { // Line
+      vector /= n
+      n -= 1
+      (0 to n).foreach(i => {
+        val from = orig + vector * i
+        val to = from + vector
+
+        if (i < n || boardType.isCell(to)) res += (to -> pieces(from))
+      })
+    }
+
+    res
   }
 
-  def move(
-            situation: Situation,
-            from: Pos,
-            to: Pos
-          ): Validated[String, Move] = {
+  @deprecated("Alex", since = "1.5.5") def move(
+                                                 situation: Situation,
+                                                 from: Pos,
+                                                 to: Pos
+                                               ): Validated[String, Move] = {
     // Find the move in the variant specific list of valid moves !
     situation.moves get from flatMap (_.find(m => m.dest == to)) toValid
       s"Not a valid move: ${from}${to}. Allowed moves: ${situation.moves}"
   }
 
-  def move(
-            situation: SSituation,
-            from: Cell,
-            to: Cell
-          ): Validated[String, MMove] = {
+  def move(sit: SSituation, from: Cell, to: Cell): Validated[String, MMove] = {
     // Find the move in the variant specific list of valid moves !
-    situation.moves get from flatMap (_.find(m => m.dest == to)) toValid
-      s"Not a valid move: $from$to. Allowed moves: ${situation.moves}"
+    sit.moves.get(from).flatMap(_.find(m => m.dest == to)) toValid
+      s"Not a valid move: $from$to. Allowed moves: ${sit.moves}"
   }
 
   /** If a player runs out of move, the match is a draw. */
@@ -471,34 +501,36 @@ abstract class Variant private[variant](
   def winningScore = 6
 
   // @TODO: might want to use this winner method in specialEnd method below ? code is duplicated...
-  def winner(situation: Situation): Option[Player] = {
+  @deprecated("Alex", since = "1.5.5") def winner(situation: Situation): Option[Player] = {
     if (situation.board.history.score.p1 >= winningScore) Some(P1)
     else if (situation.board.history.score.p2 >= winningScore) Some(P2)
     else None
   }
 
-  def winner(situation: SSituation): Option[Player] = {
-    if (situation.board.history.score.p1 >= winningScore) Some(P1)
-    else if (situation.board.history.score.p2 >= winningScore) Some(P2)
+  def winner(sit: SSituation): Option[Player] = {
+    if (sit.board.history.score.p1 >= winningScore) Some(P1)
+    else if (sit.board.history.score.p2 >= winningScore) Some(P2)
     else None
   }
 
-  def specialEnd(situation: Situation) = winner(situation).isDefined
+  @deprecated("Alex", since = "1.5.5") def specialEnd(situation: Situation) = winner(situation).isDefined
 
-  def specialEnd(situation: SSituation) = winner(situation).isDefined
+  def specialEnd(sit: SSituation) = winner(sit).isDefined
 
-  def specialDraw(situation: Situation) = situation.moves.size == 0
+  @deprecated("Alex", since = "1.5.5") def specialDraw(situation: Situation) = situation.moves.size == 0
 
-  def specialDraw(situation: SSituation) = situation.moves.size == 0
+  def specialDraw(sit: SSituation) = sit.moves.size == 0
 
   // TODO Abalone Set
-  def materialImbalance(@nowarn board: Board): Int = 0
+  @deprecated("Alex", since = "1.5.5") def materialImbalance(@nowarn board: Board): Int = 0
+
+  def materialImbalance(@nowarn board: BBoard): Int = 0
 
   // Some variants have an extra effect on the board on a move. For example, in Atomic, some
   // pieces surrounding a capture explode
   def hasMoveEffects = false
 
-  def addVariantEffect(move: Move): Move = move
+  @deprecated("Alex", since = "1.5.5") def addVariantEffect(move: Move): Move = move
 
   def addVariantEffect(move: MMove): MMove = move
 
@@ -508,11 +540,11 @@ abstract class Variant private[variant](
   /** Once a move has been decided upon amongst the available legal ones, the board is finalized. */
   @nowarn def finalizeBoard(board: BBoard, uci: UUci, captured: Option[Piece]): BBoard = board
 
-  def valid(@nowarn board: Board, @nowarn strict: Boolean): Boolean = true
+  @deprecated("Alex", since = "1.5.5") def valid(@nowarn board: Board, @nowarn strict: Boolean): Boolean = true
 
   def valid(@nowarn board: BBoard, @nowarn strict: Boolean): Boolean = true
 
-  def isIrreversible(move: Move): Boolean = move.capture.nonEmpty
+  @deprecated("Alex", since = "1.5.5") def isIrreversible(move: Move): Boolean = move.capture.nonEmpty
 
   def isIrreversible(move: MMove): Boolean = move.capture.nonEmpty
 
@@ -526,7 +558,7 @@ abstract class Variant private[variant](
 
   override def hashCode: Int = id
 
-  private def isSideMove(orig: Pos, dest: Pos): Boolean = orig.directionString(dest) match {
+  @deprecated("Alex", since = "1.5.5") private def isSideMove(orig: Pos, dest: Pos): Boolean = orig.directionString(dest) match {
     case direction
       if direction == DiagonalDirectionString.UpRight || direction == DiagonalDirectionString.DownLeft =>
       if (
@@ -541,11 +573,9 @@ abstract class Variant private[variant](
     case _ => orig.rank.index != dest.rank.index && orig.file.index != dest.file.index
   }
 
-  private def turnPieces(situation: Situation): PieceMap = situation.board.piecesOf(situation.player)
+  @deprecated("Alex", since = "1.5.5") private def turnPieces(situation: Situation): PieceMap = situation.board.piecesOf(situation.player)
 
-  private def getPieces_usable(situation: SSituation): Map[Cell, Piece] = situation.board.piecesOf(situation.player)
-
-  val kingPiece: Option[Role] = None
+  private def getPieces_usable(sit: SSituation): Map[Cell, Piece] = sit.board.piecesOf(sit.player)
 
   val roles: List[Role] = Role.all
 
@@ -570,7 +600,7 @@ object Variant {
 
   def exists(id: Int): Boolean = byId contains id
 
-  val openingSensibleVariants: Set[Variant] = Set(strategygames.abalone.variant.Abalone)
+  val openingSensibleVariants: Set[Variant] = Set(Abalone, GrandAbalone)
 
   val divisionSensibleVariants: Set[Variant] = Set()
 
@@ -583,7 +613,5 @@ object Variant {
 
   val default = Abalone
 
-  lazy val all: List[Variant] = List(
-    Abalone
-  )
+  lazy val all: List[Variant] = List(Abalone, GrandAbalone)
 }

@@ -9,7 +9,7 @@ package object abalone extends scalalib.Common with scalalib.OrnicarOption with 
   type Direction = Pos => Option[Pos]
   type Directions = List[Direction]
 
-  type PieceMap = Map[Pos, Piece]
+  @deprecated("Alex", since="1.5.5") type PieceMap = Map[Pos, Piece]
 
   type PositionHash = Array[Byte]
 }

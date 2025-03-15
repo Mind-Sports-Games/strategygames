@@ -6,7 +6,7 @@ import strategygames.MoveMetrics
 import strategygames.abalone.{Hash, Piece, PositionHash}
 
 case class MMove(
-                  piece: Piece,
+                  piece: Piece,//TODO seems totally unnecessary
                   orig: Cell, dest: Cell,
                   situationBefore: SSituation,
                   after: BBoard,

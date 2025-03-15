@@ -41,6 +41,18 @@ abstract class Norm(val radius: Int, is3: Boolean = false) {
   final def getNeigh(a: Cell): Set[(Cell, Cell)] = neighVectors.map(vect => (vect, a + vect))
 
   //
+  // Products
+  final def scal(a: Cell, b: Cell): Double = {
+    if (is3) a.scal3(b)
+    else a.scal(b)
+  }
+
+  final def cross(a: Cell, b: Cell): Double = {
+    if (is3) a.cross3(b)
+    else a.cross(b)
+  }
+
+  //
   // Rotation
   val unitDeg = 360d / neighVectors.size
 

@@ -1,22 +1,24 @@
 package strategygames.abalone
 package format.pgn
 
+import abalone.format.UUci
+import abalone.util.geometry.Cell
+import abalone.{GGame, RReplay}
 import cats.data.Validated
-import strategygames.abalone.format.Uci
 import strategygames.format.pgn.{ParsedPgn, Sans, Tags}
 import strategygames.{ActionStrs, ByoyomiClock, Clock, Action => StratAction, Situation => StratSituation}
 
-object Reader {
+object RReader {
   sealed trait Result {
-    def valid: Validated[String, Replay]
+    def valid: Validated[String, RReplay]
   }
 
   object Result {
-    case class Complete(replay: Replay) extends Result {
+    case class Complete(replay: RReplay) extends Result {
       def valid = Validated.valid(replay)
     }
 
-    case class Incomplete(replay: Replay, failure: String) extends Result {
+    case class Incomplete(replay: RReplay, failure: String) extends Result {
       def valid = Validated.invalid(failure)
     }
   }
@@ -42,8 +44,8 @@ object Reader {
   // remove invisible byte order mark
   def cleanUserInput(str: String) = str.replace(s"\ufeff", "")
 
-  private def makeReplay(game: Game, sans: Sans): Result =
-    sans.value.foldLeft[Result](Result.Complete(Replay(game))) {
+  private def makeReplay(game: GGame, sans: Sans): Result =
+    sans.value.foldLeft[Result](Result.Complete(RReplay(game))) {
       case (Result.Complete(replay), san) =>
         san(StratSituation.wrap(replay.state.situation)).fold(
           err => Result.Incomplete(replay, err),
@@ -52,35 +54,29 @@ object Reader {
       case (r: Result.Incomplete, _) => r
     }
 
-  private def makeReplayWithActionStrs(game: Game, actionStrs: ActionStrs): Result =
-    Replay.actionStrsWithEndTurn(actionStrs).foldLeft[Result](Result.Complete(Replay(game))) {
-      case (Result.Complete(replay), (actionStr, endTurn)) =>
-        actionStr match {
-          case Uci.Move.moveR(orig, dest) => {
-            (Pos.fromKey(orig), Pos.fromKey(dest)) match {
-              case (Some(orig), Some(dest)) =>
-                Result.Complete(
-                  replay.addAction(
-                    Replay.replayMove(
-                      replay.state,
-                      orig,
-                      dest,
-                      endTurn
-                    )
-                  )
-                )
-              case _ =>
-                Result.Incomplete(replay, s"Error making replay with move: ${actionStr}")
-            }
-          }
-          case _ =>
-            Result.Incomplete(replay, s"Error making replay with uci move: ${actionStr}")
+  private def makeReplayWithActionStrs(game: GGame, actionStrs: ActionStrs): Result =
+    Replay.actionStrsWithEndTurn(actionStrs).foldLeft[Result](Result.Complete(RReplay(game))) {
+      case (Result.Complete(replay), (actionStr, endTurn)) => actionStr match {
+        case UUci.MMove.moveR(orig, dest) => (Cell.fromKey(orig), Cell.fromKey(dest)) match {
+          case (Some(orig), Some(dest)) => Result.Complete(
+            replay.addAction(
+              RReplay.replayMove(
+                replay.state,
+                orig,
+                dest,
+                endTurn
+              )
+            )
+          )
+          case _ => Result.Incomplete(replay, s"Error making replay with move: ${actionStr}")
         }
+        case _ => Result.Incomplete(replay, s"Error making replay with uci move: ${actionStr}")
+      }
       case (r: Result.Incomplete, _) => r
     }
 
   private def makeGame(tags: Tags) = {
-    val g = Game(
+    val g = GGame(
       variantOption = tags.abaloneVariant,
       fen = tags.abaloneFen
     )

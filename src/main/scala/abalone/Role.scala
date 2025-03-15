@@ -28,10 +28,7 @@ case object Stone extends Role {
 }
 
 object Role {
-  val all: List[Role] =
-    List(
-      Stone
-    )
+  val all: List[Role] = List(Stone)
 
   def defaultRole: Role = Stone
 

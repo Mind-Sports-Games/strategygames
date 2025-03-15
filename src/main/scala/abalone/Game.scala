@@ -5,7 +5,7 @@ import cats.data.Validated
 
 import strategygames.abalone.format.{ FEN, Uci }
 
-case class Game(
+@deprecated("Alex", since="1.5.5") case class Game(
     situation: Situation,
     actionStrs: VActionStrs = Vector(),
     clock: Option[ClockBase] = None,
