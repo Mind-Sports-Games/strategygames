@@ -11,11 +11,11 @@ sealed trait Uci {
 
   def origDest: (Pos, Pos)
 
-  def apply(situation: Situation): Validated[String, strategygames.abalone.Move]
+  def apply(sit: Situation): Validated[String, strategygames.abalone.Move]
 }
 
 object Uci {
-  case class MMove(orig: Pos, dest: Pos) extends Uci {
+  case class Move(orig: Pos, dest: Pos) extends Uci {
     def keys: String = orig.key + dest.key
 
     override def uci = keys
@@ -26,18 +26,18 @@ object Uci {
 
     override def origDest = orig -> dest
 
-    override def apply(situation: Situation) = situation.move(orig, dest)
+    override def apply(sit: Situation) = sit.move(orig, dest)
   }
 
-  object MMove {
-    def apply(move: String): Option[MMove] =
+  object Move {
+    def apply(move: String): Option[Move] =
       move match {
         case moveR(orig, dest) =>
           (
             Pos.fromKey(orig),
             Pos.fromKey(dest)
           ) match {
-            case (Some(orig), Some(dest)) => MMove(orig = orig, dest = dest).some
+            case (Some(orig), Some(dest)) => Move(orig = orig, dest = dest).some
             case _ => None
           }
         case _ => None
@@ -47,24 +47,24 @@ object Uci {
       for {
         orig <- move.headOption flatMap Pos.piotr
         dest <- move lift 1 flatMap Pos.piotr
-      } yield MMove(orig, dest)
+      } yield Move(orig, dest)
 
     def fromStrings(origS: String, destS: String) =
       for {
         orig <- Pos.fromKey(origS)
         dest <- Pos.fromKey(destS)
-      } yield MMove(orig, dest)
+      } yield Move(orig, dest)
 
     val moveR = s"^${Pos.re}${Pos.re}".r
   }
 
   case class WithSan(uci: Uci, san: String)
 
-  def apply(move: strategygames.abalone.Move) = Uci.MMove(move.orig, move.dest)
+  def apply(move: strategygames.abalone.Move) = Uci.Move(move.orig, move.dest)
 
-  def apply(move: String) = Uci.MMove(move)
+  def apply(move: String) = Uci.Move(move)
 
-  def piotr(move: String): Option[Uci] = Uci.MMove.piotr(move)
+  def piotr(move: String): Option[Uci] = Uci.Move.piotr(move)
 
   def readList(moves: String): Option[List[Uci]] =
     moves.split(' ').toList.map(apply(_)).sequence

@@ -43,7 +43,7 @@ case class Move(
       }
   }
 
-  override def situationAfter = Situation(finalizeAfter, if (autoEndTurn) !piece.player else piece.player)
+  override def situationAfter = Situation(finalizeAfter, if (autoEndTurn) !piece.player else piece.player)//TODO Grand Abalone?
 
   def applyVariantEffect: Move = before.variant addVariantEffect this
 
@@ -54,7 +54,7 @@ case class Move(
 
   override def withMetrics(m: MoveMetrics) = copy(metrics = m)
 
-  override def toUci = Uci.MMove(orig, dest)
+  override def toUci = Uci.Move(orig, dest)
 
   override def toString = s"$piece ${toUci.uci}"//TODO? why specify the piece? it only depends on the board
 }

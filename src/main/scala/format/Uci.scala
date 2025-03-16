@@ -223,7 +223,7 @@ object Uci {
     def toDameo        = sys.error("Can't make a dameo UCI from a backgammon UCI")
   }
 
-  final case class AbaloneMove(m: abalone.format.Uci.MMove)
+  final case class AbaloneMove(m: abalone.format.Uci.Move)
       extends Move(
         Pos.Abalone(m.orig),
         Pos.Abalone(m.dest)
@@ -676,7 +676,7 @@ object Uci {
   }
 
   def wrap(uci: abalone.format.Uci): Uci = uci match {
-    case m: abalone.format.Uci.MMove => AbaloneMove(m)
+    case m: abalone.format.Uci.Move => AbaloneMove(m)
   }
 
   def wrap(uci: dameo.format.Uci): Uci = uci match {
@@ -778,7 +778,7 @@ object Uci {
           )
         case (GameLogic.Abalone(), Pos.Abalone(orig), Pos.Abalone(dest))                =>
           AbaloneMove(
-            abalone.format.Uci.MMove.apply(
+            abalone.format.Uci.Move.apply(
               orig,
               dest
             )
@@ -802,7 +802,7 @@ object Uci {
       case GameLogic.Samurai()      => samurai.format.Uci.Move(move).map(SamuraiMove)
       case GameLogic.Togyzkumalak() => togyzkumalak.format.Uci.Move(move).map(TogyzkumalakMove)
       case GameLogic.Backgammon()   => backgammon.format.Uci.Move(move).map(BackgammonMove)
-      case GameLogic.Abalone()      => abalone.format.Uci.MMove(move).map(AbaloneMove)
+      case GameLogic.Abalone()      => abalone.format.Uci.Move(move).map(AbaloneMove)
       case GameLogic.Dameo()        => dameo.format.Uci.Move(move).map(DameoMove)
       case _                        => sys.error("Invalid lib gf and move combo for Uci")
     }
@@ -814,7 +814,7 @@ object Uci {
       case GameLogic.Samurai()      => samurai.format.Uci.Move.piotr(move).map(SamuraiMove)
       case GameLogic.Togyzkumalak() => togyzkumalak.format.Uci.Move.piotr(move).map(TogyzkumalakMove)
       case GameLogic.Backgammon()   => backgammon.format.Uci.Move.piotr(move).map(BackgammonMove)
-      case GameLogic.Abalone()      => abalone.format.Uci.MMove.piotr(move).map(AbaloneMove)
+      case GameLogic.Abalone()      => abalone.format.Uci.Move.piotr(move).map(AbaloneMove)
       case GameLogic.Dameo()        => dameo.format.Uci.Move.piotr(move).map(DameoMove)
       case _                        => sys.error("Invalid lib gf and move combo for piotr")
     }
@@ -836,7 +836,7 @@ object Uci {
         togyzkumalak.format.Uci.Move.fromStrings(gf, origS, destS, promS).map(TogyzkumalakMove)
       case GameLogic.Go()           => None
       case GameLogic.Backgammon()   => backgammon.format.Uci.Move.fromStrings(origS, destS).map(BackgammonMove)
-      case GameLogic.Abalone()      => abalone.format.Uci.MMove.fromStrings(origS, destS).map(AbaloneMove)
+      case GameLogic.Abalone()      => abalone.format.Uci.Move.fromStrings(origS, destS).map(AbaloneMove)
       case GameLogic.Dameo()        => dameo.format.Uci.Move.fromStrings(origS, destS, promS).map(DameoMove)
     }
   }

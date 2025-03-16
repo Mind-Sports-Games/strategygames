@@ -10,14 +10,14 @@ object UciCharPair {
 
   def apply(uci: Uci): stratUciCharPair =
     uci match {
-      case Uci.MMove(orig, dest) => stratUciCharPair(toChar(orig), toChar(dest))
+      case Uci.Move(orig, dest) => stratUciCharPair(toChar(orig), toChar(dest))
     }
 
   private[format] object implementation {
     val charShift = 35 // Start at Char(35) == '#'
     val voidChar = 33.toChar // '!'. We skipped Char(34) == '"'.
 
-    val pos2charMap: Map[Pos, Char] = Piotr.cellToPiotr.keys
+    val pos2charMap: Map[Pos, Char] = Piotr.posToPiotr.keys
       .map { pos =>
         pos -> (pos.hashCode + charShift).toChar
       }

@@ -22,7 +22,7 @@ case class Situation(board: Board, player: Player) {
   def move(from: Pos, to: Pos): Validated[String, Move] =
     board.variant.move(this, from, to)
 
-  def move(uci: Uci.MMove): Validated[String, Move] =
+  def move(uci: Uci.Move): Validated[String, Move] =
     board.variant.move(this, uci.orig, uci.dest)
 
   def withHistory(history: History) = copy(board = board.withHistory(history))
@@ -31,9 +31,7 @@ case class Situation(board: Board, player: Player) {
 
   def unary_! = copy(player = !player)
 
-  lazy val destinations: Map[Pos, List[Pos]] = moves.view.mapValues {
-    _.map(_.dest)
-  }.to(Map)
+  lazy val destinations: Map[Pos, List[Pos]] = moves.view.mapValues { _.map(_.dest) }.to(Map)
 
   lazy val moves: Map[Pos, List[Move]] = board.variant.validMoves(this)
 

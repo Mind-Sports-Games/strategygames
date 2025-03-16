@@ -128,7 +128,7 @@ object Replay {
 
     val gameWithActions: List[(Game, Move)] =
       combineActionStrsWithEndTurn(actionStrs, startPlayer, activePlayer).toList.map {
-        case (Uci.MMove.moveR(orig, dest), endTurn) =>
+        case (Uci.Move.moveR(orig, dest), endTurn) =>
           replayMoveFromUci(
             Pos.fromKey(orig),
             Pos.fromKey(dest),
@@ -255,7 +255,7 @@ object Replay {
                                    ): Validated[String, List[Game]] =
     ucis match {
       case Nil => valid(List(game))
-      case (uci: Uci.MMove) :: rest =>
+      case (uci: Uci.Move) :: rest =>
         game.apply(uci) andThen { case (game, _) =>
           recursiveGamesFromUci(game, rest) map {
             game :: _

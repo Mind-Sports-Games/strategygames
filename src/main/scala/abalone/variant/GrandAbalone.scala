@@ -18,8 +18,6 @@ case object GrandAbalone extends Variant(
 
   override def winningScore: Int = 10
 
-  override def baseVariant: Boolean = true
-
   /** Belgian daisy. */
   override def initialFen: FEN = format.FEN("SS2ss/SSS1sss/1SS2ss1/9/ss6SS/sss5SSS/ss6SS/9/1SS2ss1/SSS1sss/SS2ss 0 0 b 0 1")
 }

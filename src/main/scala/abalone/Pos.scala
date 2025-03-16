@@ -52,9 +52,9 @@ class Pos(var x: Int, var y: Int) extends AnyRef {
     case _ => "-" + ('a' - y - 2).toChar.toString
   }) + (x + 1).toString
 
-  def index: Int = Piotr.cellToIndex(this)
+  def index: Int = Piotr.posToIndex(this)
 
-  def piotr: Char = Piotr.cellToPiotr(this)
+  def piotr: Char = Piotr.posToPiotr(this)
 
   def piotrStr: String = piotr.toString
 
@@ -149,9 +149,9 @@ object Pos {
     Option.empty
   }
 
-  def fromIndex(i: Int): Pos = Piotr.indexToCell(i)
+  def fromIndex(i: Int): Pos = Piotr.indexToPos(i)
 
-  def piotr(c: Char): Option[Pos] = Piotr.piotrToCell.get(c)
+  def piotr(c: Char): Option[Pos] = Piotr.piotrToPos.get(c)
 }
 
 object Piotr {
@@ -350,14 +350,14 @@ object Piotr {
     '\u0103'
   ) ++ (260 to 328).map(_.toChar) ++ (330 to 431).map(_.toChar) // NOTE: 329 is deprecated
 
-  val cellToIndex: Map[Pos, Int] = Range(0, piotrs.size).map(i => (indexToCell(i), i)).toMap
+  val posToIndex: Map[Pos, Int] = Range(0, piotrs.size).map(i => (indexToPos(i), i)).toMap
   val indexToPiotr: Map[Int, Char] = Range(0, piotrs.size).map(i => (i, piotrs(i))).toMap // <=> lookup
-  val cellToPiotr: Map[Pos, Char] = cellToIndex.keys.map(a => (a, indexToPiotr(cellToIndex(a)))).toMap
+  val posToPiotr: Map[Pos, Char] = posToIndex.keys.map(a => (a, indexToPiotr(posToIndex(a)))).toMap
 
   val piotrToIndex: Map[Char, Int] = indexToPiotr.keys.map(i => (indexToPiotr(i), i)).toMap
-  val piotrToCell: Map[Char, Pos] = cellToPiotr.keys.map(a => (cellToPiotr(a), a)).toMap // <=> allPiotrs
+  val piotrToPos: Map[Char, Pos] = posToPiotr.keys.map(a => (posToPiotr(a), a)).toMap // <=> allPiotrs
 
-  def indexToCell(i: Int): Pos = {
+  def indexToPos(i: Int): Pos = {
     var j = i
     if (j < 64) new Pos(j % 8, j / 8) // A1-H1, ..., A8-H8
 

@@ -26,8 +26,8 @@ final class Ecopening(
       .zipWithIndex
       .map {
         case (List(w, b), i) => s"${i + 1}. $w $b"
-        case (List(w), i) => s"${i + 1}. $w"
-        case _ => ""
+        case (List(w), i)    => s"${i + 1}. $w"
+        case _               => ""
       }
       .mkString(" ")
 
@@ -40,8 +40,8 @@ final class Ecopening(
 
 object Ecopening {
   type FamilyName = String
-  type ECO = String
-  type FEN = String
+  type ECO        = String
+  type FEN        = String
 
   case class Family(name: FamilyName, ecos: List[FEN])
 

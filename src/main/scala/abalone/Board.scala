@@ -7,7 +7,7 @@ case class Board(
                   pieces: PieceMap,
                   history: History,
                   variant: Variant
-                 ) {
+                ) {
   def piecesOf(player: Player): PieceMap = pieces.filter(_._2.is(player))
 
   def isPiece(a: Pos): Boolean = pieces.contains(a)
@@ -41,7 +41,7 @@ object Board {
   def apply(pieces: Iterable[(Pos, Piece)], variant: Variant): Board =
     Board(pieces.toMap, History(), variant)
 
-  def init(variant: Variant): Board = Board(variant.ppieces, variant)
+  def init(variant: Variant): Board = Board(variant.pieces, variant)
 
   // def empty(variant: Variant): Board = Board(Nil, variant)
 }

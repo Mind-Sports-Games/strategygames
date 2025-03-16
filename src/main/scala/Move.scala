@@ -358,50 +358,6 @@ object Move {
 
   }
 
-//  final case class Abalone(m: abalone.Move)
-//      extends Move(
-//        Piece.Abalone(m.piece),
-//        Pos.Abalone(m.orig),
-//        Pos.Abalone(m.dest),
-//        Situation.Abalone(m.situationBefore),
-//        Board.Abalone(m.after),
-//        m.autoEndTurn,
-//        None, // capture. @TODO: check: we probably need to pass the infos here ?
-//        None,
-//        None,
-//        None,
-//        false,
-//        m.metrics
-//      ) {
-//
-//    def situationAfter: Situation                          = Situation.Abalone(m.situationAfter)
-//    def finalizeAfter(finalSquare: Boolean = false): Board = m.finalizeAfter
-//
-//    def toUci: Uci.Move = Uci.AbaloneMove(m.toUci)
-//
-//    def toShortUci: Uci.Move =
-//      Uci.Move(
-//        GameLogic.Abalone(),
-//        orig,
-//        dest,
-//        promotion,
-//        if (capture.isDefined) capture.get.takeRight(1).some else None
-//      )
-//
-//    def first: Move = this
-//
-//    val unwrap         = m
-//    def toFairySF      = sys.error("Can't make a fairysf move from a abalone move")
-//    def toChess        = sys.error("Can't make a chess move from a abalone move")
-//    def toDraughts     = sys.error("Can't make a draughts move from a abalone move")
-//    def toSamurai      = sys.error("Can't make a samurai move from a abalone move")
-//    def toTogyzkumalak = sys.error("Can't make a togyzkumalak move from a abalone move")
-//    def toGo           = sys.error("Can't make a go move from a abalone move")
-//    def toBackgammon   = sys.error("Can't make a backgammon move from a abalone move")
-//    def toAbalone      = m
-//    def toDameo        = sys.error("Can't make a dameo move from a abalone move")
-//
-//  }
   final case class Abalone(m: abalone.Move)
       extends Move(
         Piece.Abalone(m.piece),
@@ -417,12 +373,12 @@ object Move {
         false,
         m.metrics
       ) {
-    def situationAfter: Situation                          = Situation.Abalone(m.situationAfter)
-    def finalizeAfter(finalSquare: Boolean = false): Board = m.finalizeAfter
+    override def situationAfter: Situation                          = Situation.Abalone(m.situationAfter)
+    override def finalizeAfter(finalSquare: Boolean = false): Board = m.finalizeAfter
 
-    def toUci: Uci.Move = Uci.AbaloneMove(m.toUci)
+    override def toUci: Uci.Move = Uci.AbaloneMove(m.toUci)
 
-    def toShortUci: Uci.Move =
+    override def toShortUci: Uci.Move =
       Uci.Move(
         GameLogic.Abalone(),
         orig,
@@ -443,7 +399,6 @@ object Move {
     override def toBackgammon   = sys.error("Can't make a backgammon move from a abalone move")
     override def toAbalone      = m
     override def toDameo        = sys.error("Can't make a dameo move from a abalone move")
-
   }
 
   final case class Dameo(m: dameo.Move)
@@ -503,7 +458,7 @@ object Move {
   def wrap(m: samurai.Move): Move      = Move.Samurai(m)
   def wrap(m: togyzkumalak.Move): Move = Move.Togyzkumalak(m)
   def wrap(m: backgammon.Move): Move   = Move.Backgammon(m)
-  def wrap(m: abalone.Move): Move     = Move.Abalone(m)
+  def wrap(m: abalone.Move): Move      = Move.Abalone(m)
   def wrap(m: dameo.Move): Move        = Move.Dameo(m)
 
 }

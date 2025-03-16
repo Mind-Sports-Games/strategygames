@@ -1388,16 +1388,14 @@ object Situation {
     override def pointValue(player: Option[Player]): Option[Int] = None
 
     override def move(
-              from: Pos,
-              to: Pos,
+              from: Pos, to: Pos,
               promotion: Option[PromotableRole] = None,
               finalSquare: Boolean = false,
               forbiddenUci: Option[List[String]] = None,
               captures: Option[List[Pos]] = None,
               partialCaptures: Boolean = false
             ): Validated[String, Move] = (from, to) match {
-      case (Pos.Abalone(from), Pos.Abalone(to)) =>
-        s.move(from, to).toEither.map(m => Move.Abalone(m)).toValidated
+      case (Pos.Abalone(from), Pos.Abalone(to)) => s.move(from, to).toEither.map(m => Move.Abalone(m)).toValidated
       case _                                    => sys.error("Not passed Abalone objects")
     }
 
@@ -1620,7 +1618,7 @@ object Situation {
   def wrap(s: togyzkumalak.Situation) = Togyzkumalak(s)
   def wrap(s: go.Situation)           = Go(s)
   def wrap(s: backgammon.Situation)   = Backgammon(s)
-  def wrap(s: abalone.Situation)     = Abalone(s)
+  def wrap(s: abalone.Situation)      = Abalone(s)
   def wrap(s: dameo.Situation)        = Dameo(s)
 
 }

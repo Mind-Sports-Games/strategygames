@@ -1413,15 +1413,15 @@ object Game {
 
     override def withTurnsAndPlies(p: Int, t: Int): Game = Abalone(g.withTurnsAndPlies(p, t))
 
-    override def toFairySF: fairysf.Game           = sys.error("Can't turn a abalone game into a fairysf game")
-    override def toChess: chess.Game               = sys.error("Can't turn a abalone game into a chess game")
-    override def toDraughts: draughts.DraughtsGame = sys.error("Can't turn a abalone game into a draughts game")
-    override def toSamurai: samurai.Game           = sys.error("Can't turn a abalone game into a samurai game")
-    override def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a abalone game into a togyzkumalak game")
-    override def toGo: go.Game                     = sys.error("Can't turn a abalone game into a go game")
-    override def toBackgammon: backgammon.Game     = sys.error("Can't turn a abalone game into a backgammon game")
+    override def toFairySF: fairysf.Game           = sys.error("Can't turn an abalone game into a fairysf game")
+    override def toChess: chess.Game               = sys.error("Can't turn an abalone game into a chess game")
+    override def toDraughts: draughts.DraughtsGame = sys.error("Can't turn an abalone game into a draughts game")
+    override def toSamurai: samurai.Game           = sys.error("Can't turn an abalone game into a samurai game")
+    override def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn an abalone game into a togyzkumalak game")
+    override def toGo: go.Game                     = sys.error("Can't turn an abalone game into a go game")
+    override def toBackgammon: backgammon.Game     = sys.error("Can't turn an abalone game into a backgammon game")
     override def toAbalone: abalone.Game           = g
-    override def toDameo: dameo.Game               = sys.error("Can't turn a abalone game into a dameo game")
+    override def toDameo: dameo.Game               = sys.error("Can't turn an abalone game into a dameo game")
   }
 
   final case class Dameo(g: dameo.Game)

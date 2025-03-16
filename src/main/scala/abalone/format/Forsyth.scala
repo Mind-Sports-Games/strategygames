@@ -21,7 +21,7 @@ object Forsyth {
         fen.value.split(' ')(3) match {
           case "b" => P1
           case "w" => P2
-          case _ => sys.error("Invalid player in fen")
+          case _   => sys.error("Invalid player in fen")
         }
       ).withHistory(
         History(
@@ -35,7 +35,7 @@ object Forsyth {
   def <<(fen: FEN): Option[Situation] = <<@(Variant.default, fen)
 
   case class SituationPlus(situation: Situation, fullTurnCount: Int) {
-    def turnCount = fullTurnCount * 2 - situation.player.fold(2, 1)
+    def turnCount = fullTurnCount * 2 - situation.player.fold(2, 1)//TODO Grand Abalone
 
     // when we get a multiaction variant we should set this
     def plies = turnCount

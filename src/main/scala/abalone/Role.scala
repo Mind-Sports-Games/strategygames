@@ -4,20 +4,17 @@ import strategygames.{GameFamily, Player}
 
 sealed trait Role {
   val forsyth: Char
-  lazy val forsythUpper: Char = forsyth.toUpper
-  lazy val pgn: Char = forsyth
-  lazy val name = toString
-  lazy val groundName = s"${forsyth}-piece"
+  lazy val forsythUpper: Char     = forsyth.toUpper
+  lazy val pgn: Char              = forsyth
+  lazy val name                   = toString
+  lazy val groundName             = s"${forsyth}-piece"
   val binaryInt: Int
-  lazy val hashInt: Int = binaryInt
-  lazy val valueOf: Option[Int] = Option(1)
+  lazy val hashInt: Int           = binaryInt
+  lazy val valueOf: Option[Int]   = Option(1)
   lazy val gameFamily: GameFamily = GameFamily.Abalone()
-
-  final def -(player: Player) = Piece(player, this)
-
-  final def p1 = this - P1
-
-  final def p2 = this - P2
+  final def -(player: Player)     = Piece(player, this)
+  final def p1                    = this - P1
+  final def p2                    = this - P2
 }
 
 sealed trait PromotableRole extends Role

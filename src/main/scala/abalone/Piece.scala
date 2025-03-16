@@ -3,13 +3,10 @@ package strategygames.abalone
 import strategygames.Player
 
 case class Piece(player: Player, role: Role) {
-  def is(p: Player) = p == player
-
-  def is(r: Role) = r == role
-
+  def is(p: Player)    = p == player
+  def is(r: Role)      = r == role
   def isNot(p: Player) = p != player
-
-  def isNot(r: Role) = r != role
+  def isNot(r: Role)   = r != role
 
   def oneOf(roles: Set[Role]) = roles(role)
 

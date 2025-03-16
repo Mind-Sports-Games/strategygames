@@ -52,7 +52,7 @@ object Binary {
 
   private object Writer {
     def ply(str: String): List[Byte] = (str match {
-      case Uci.MMove.moveR(src, dst) => moveUci(src, dst)
+      case Uci.Move.moveR(src, dst) => moveUci(src, dst)
       case _ => sys.error(s"Invalid move to write: $str")
     }).map(_.toByte)
 

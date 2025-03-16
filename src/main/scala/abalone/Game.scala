@@ -13,7 +13,7 @@ case class Game(
                  turnCount: Int = 0,
                  startedAtPly: Int = 0,
                  startedAtTurn: Int = 0
-                ) {
+               ) {
   def apply(
              orig: Pos, dest: Pos,
              metrics: MoveMetrics = MoveMetrics()
@@ -35,11 +35,11 @@ case class Game(
     )
   }
 
-  def apply(uci: Uci.MMove): Validated[String, (Game, Move)] =
+  def apply(uci: Uci.Move): Validated[String, (Game, Move)] =
     apply(uci.orig, uci.dest)
 
   def apply(uci: Uci): Validated[String, (Game, Action)] = (uci match {
-    case u: Uci.MMove => apply(u)
+    case u: Uci.Move => apply(u)
   }) map { case (g, a) => g -> a }
 
   private def applyClock(metrics: MoveMetrics, gameActive: Boolean, switchClock: Boolean) =

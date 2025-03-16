@@ -931,7 +931,7 @@ object Variant {
     override def toDameo        = sys.error("Can't convert abalone to dameo")
 
     override def pieces: PieceMap =
-      v.ppieces.map { case (pos, piece) => (Pos.Abalone(pos), (Piece.Abalone(piece), 1)) }
+      v.pieces.map { case (pos, piece) => (Pos.Abalone(pos), (Piece.Abalone(piece), 1)) }
 
     override def standardVariant: Boolean     = false
     override def fromPositionVariant: Boolean = false

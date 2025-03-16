@@ -9,8 +9,8 @@ abstract class Action(
                        situationBefore: Situation,
                        after: Board,
                        @nowarn metrics: MoveMetrics = MoveMetrics()
-                      ) {
-  def before = situationBefore.board
+                     ) {
+  def before: Board = situationBefore.board
 
   def situationAfter: Situation
 
