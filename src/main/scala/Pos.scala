@@ -1,7 +1,5 @@
 package strategygames
 
-import strategygames.abalone.geometry.Cell
-
 //------------------------------------------------------------------------------
 // At the moment these are the main fields that I see exposed to lila.
 //
@@ -114,7 +112,7 @@ object Pos {
     lazy val all: List[Pos] = backgammon.Pos.all.map(Backgammon)
   }
 
-  final case class Abalone(p: Cell) extends Pos {
+  final case class Abalone(p: abalone.Pos) extends Pos {
     override val key: String = p.key
 
     override def piotr: Char = p.piotr
@@ -148,7 +146,7 @@ object Pos {
     case GameLogic.Togyzkumalak() => togyzkumalak.Pos.fromKey(key).map(Togyzkumalak)
     case GameLogic.Go() => go.Pos.fromKey(key).map(Go)
     case GameLogic.Backgammon() => backgammon.Pos.fromKey(key).map(Backgammon)
-    case GameLogic.Abalone() => Cell.fromKey(key).map(Abalone)
+    case GameLogic.Abalone() => abalone.Pos.fromKey(key).map(Abalone)
     case GameLogic.Dameo() => dameo.Pos.fromKey(key).map(Dameo)
   }
 

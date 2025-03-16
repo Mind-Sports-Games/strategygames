@@ -3,7 +3,6 @@ package strategygames
 import strategygames.variant.Variant
 import cats.data.Validated
 import cats.implicits._
-import strategygames.abalone.geometry.Cell
 import strategygames.format.Uci
 
 sealed abstract class Situation(val board: Board, val player: Player) {
@@ -148,7 +147,7 @@ sealed abstract class Situation(val board: Board, val player: Player) {
   def toTogyzkumalak: togyzkumalak.Situation
   def toGo: go.Situation
   def toBackgammon: backgammon.Situation
-  def toAbalone: abalone.SSituation
+  def toAbalone: abalone.Situation
   def toDameo: dameo.Situation
 
 }
@@ -1282,12 +1281,12 @@ object Situation {
     def toDameo        = sys.error("Can't make dameo situation from backgammon situation")
   }
 
-  final case class Abalone(s: abalone.SSituation)
+  final case class Abalone(s: abalone.Situation)
     extends Situation(
       Board.Abalone(s.board),
       s.player
     ) {
-    override lazy val moves: Map[Pos, List[Move]] = s.moves.map { case (p: Cell, l: List[abalone.MMove]) =>
+    override lazy val moves: Map[Pos, List[Move]] = s.moves.map { case (p: abalone.Pos, l: List[abalone.Move]) =>
       (Pos.Abalone(p), l.map(Move.Abalone))
     }
 
@@ -1315,7 +1314,7 @@ object Situation {
     override def winner: Option[Player] = s.winner
 
     override lazy val destinations: Map[Pos, List[Pos]] = s.destinations.map {
-      case (p: Cell, l: List[Cell]) => (Pos.Abalone(p), l.map(Pos.Abalone))
+      case (p: abalone.Pos, l: List[abalone.Pos]) => (Pos.Abalone(p), l.map(Pos.Abalone))
     }
 
     override def drops: Option[List[Pos]] = None
@@ -1592,7 +1591,7 @@ object Situation {
       Togyzkumalak(togyzkumalak.Situation(board, player))
     case (GameLogic.Go(), Board.Go(board))                     => Go(go.Situation(board, player))
     case (GameLogic.Backgammon(), Board.Backgammon(board))     => Backgammon(backgammon.Situation(board, player))
-    case (GameLogic.Abalone(), Board.Abalone(board))           => Abalone(abalone.SSituation(board, player))
+    case (GameLogic.Abalone(), Board.Abalone(board))           => Abalone(abalone.Situation(board, player))
     case (GameLogic.Dameo(), Board.Dameo(board))               => Dameo(dameo.Situation(board, player))
     case _                                                     => sys.error("Mismatched gamelogic types 3")
   }
@@ -1608,7 +1607,7 @@ object Situation {
     case (GameLogic.Backgammon(), Variant.Backgammon(variant))     =>
       Backgammon(backgammon.Situation.apply(variant))
     case (GameLogic.Abalone(), Variant.Abalone(variant))           =>
-      Abalone(abalone.SSituation.apply(variant))
+      Abalone(abalone.Situation.apply(variant))
     case (GameLogic.Dameo(), Variant.Dameo(variant))               =>
       Dameo(dameo.Situation.apply(variant))
     case _                                                         => sys.error("Mismatched gamelogic types 4")
@@ -1621,7 +1620,7 @@ object Situation {
   def wrap(s: togyzkumalak.Situation) = Togyzkumalak(s)
   def wrap(s: go.Situation)           = Go(s)
   def wrap(s: backgammon.Situation)   = Backgammon(s)
-  def wrap(s: abalone.SSituation)     = Abalone(s)
+  def wrap(s: abalone.Situation)     = Abalone(s)
   def wrap(s: dameo.Situation)        = Dameo(s)
 
 }

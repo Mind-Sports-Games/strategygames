@@ -1,7 +1,6 @@
 package strategygames.abalone.format
 
 import strategygames.abalone._
-import strategygames.abalone.geometry.{Cell, Piotr}
 import strategygames.format.{UciCharPair => stratUciCharPair}
 
 //think this is only used for analysis/puzzles?
@@ -9,22 +8,22 @@ object UciCharPair {
 
   import implementation._
 
-  def apply(uci: UUci): stratUciCharPair =
+  def apply(uci: Uci): stratUciCharPair =
     uci match {
-      case UUci.MMove(orig, dest) => stratUciCharPair(toChar(orig), toChar(dest))
+      case Uci.MMove(orig, dest) => stratUciCharPair(toChar(orig), toChar(dest))
     }
 
   private[format] object implementation {
     val charShift = 35 // Start at Char(35) == '#'
     val voidChar = 33.toChar // '!'. We skipped Char(34) == '"'.
 
-    val pos2charMap: Map[Cell, Char] = Piotr.cellToPiotr.keys
+    val pos2charMap: Map[Pos, Char] = Piotr.cellToPiotr.keys
       .map { pos =>
         pos -> (pos.hashCode + charShift).toChar
       }
       .to(Map)
 
-    def toChar(pos: Cell) = pos2charMap.getOrElse(pos, voidChar)
+    def toChar(pos: Pos) = pos2charMap.getOrElse(pos, voidChar)
 
     def toChar(file: Int, prom: PromotableRole) = (file -> prom, voidChar)
 

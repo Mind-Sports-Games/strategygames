@@ -1,9 +1,9 @@
-package strategygames.abalone.geometry.norm
+package strategygames.abalone.norm
 
-import strategygames.abalone.geometry.Cell
+import strategygames.abalone.Pos
 
 abstract class Norm(val radius: Int, is3: Boolean = false) {
-  final def apply(a: Cell): Int = this (a.x, a.y)
+  final def apply(a: Pos): Int = this (a.x, a.y)
 
   def apply(x: Int, y: Int): Int
 
@@ -13,11 +13,11 @@ abstract class Norm(val radius: Int, is3: Boolean = false) {
 
   //
   // Distance
-  final def dist(a: Cell, b: Cell): Int = dist(a, b.x, b.y)
+  final def dist(a: Pos, b: Pos): Int = dist(a, b.x, b.y)
 
-  final def dist(a: Cell, x: Int, y: Int): Int = dist(a.x, a.y, x, y)
+  final def dist(a: Pos, x: Int, y: Int): Int = dist(a.x, a.y, x, y)
 
-  final def dist(x: Int, y: Int, a: Cell): Int = dist(x, y, a.x, a.y)
+  final def dist(x: Int, y: Int, a: Pos): Int = dist(x, y, a.x, a.y)
 
   final def dist(x: Int, y: Int, z: Int, t: Int): Int = this (z - x, t - y)
 
@@ -31,23 +31,23 @@ abstract class Norm(val radius: Int, is3: Boolean = false) {
 
   //
   // Neighbourhood
-  val neighVectors: Set[Cell] = (0 to radius)
+  val neighVectors: Set[Pos] = (0 to radius)
     .flatMap(y => (0 to radius)
       .filter(x => this (x, y) == 1)
-      .map(x => new Cell(x, y))
+      .map(x => new Pos(x, y))
     )
     .toSet
 
-  final def getNeigh(a: Cell): Set[(Cell, Cell)] = neighVectors.map(vect => (vect, a + vect))
+  final def getNeigh(a: Pos): Set[(Pos, Pos)] = neighVectors.map(vect => (vect, a + vect))
 
   //
   // Products
-  final def scal(a: Cell, b: Cell): Double = {
+  final def scal(a: Pos, b: Pos): Double = {
     if (is3) a.scal3(b)
     else a.scal(b)
   }
 
-  final def cross(a: Cell, b: Cell): Double = {
+  final def cross(a: Pos, b: Pos): Double = {
     if (is3) a.cross3(b)
     else a.cross(b)
   }
@@ -56,11 +56,11 @@ abstract class Norm(val radius: Int, is3: Boolean = false) {
   // Rotation
   val unitDeg = 360d / neighVectors.size
 
-  final def getNext(a: Cell): Cell = getRotatedKeepNorm(a, unitDeg)
+  final def getNext(a: Pos): Pos = getRotatedKeepNorm(a, unitDeg)
 
-  final def getPrev(a: Cell): Cell = getRotatedKeepNorm(a, -unitDeg)
+  final def getPrev(a: Pos): Pos = getRotatedKeepNorm(a, -unitDeg)
 
-  final def getRotatedKeepNorm(a: Cell, deg: Double, rot: (Cell, Double) => (Double, Double) = (b, d) => getRotated(b, d)): Cell = {
+  final def getRotatedKeepNorm(a: Pos, deg: Double, rot: (Pos, Double) => (Double, Double) = (b, d) => getRotated(b, d)): Pos = {
     var p = rot(a, deg)
 
     var n = this (p)
@@ -69,10 +69,10 @@ abstract class Norm(val radius: Int, is3: Boolean = false) {
       p = (p._1 * n, p._2 * n)
     }
 
-    Cell.fromPoint(p)
+    Pos.fromPoint(p)
   }
 
-  private final def getRotated(a: Cell, deg: Double): (Double, Double) =
-    if (is3) Cell.getRotated(a.vectTo3, deg)
-    else Cell.getRotated(a, deg)
+  private final def getRotated(a: Pos, deg: Double): (Double, Double) =
+    if (is3) Pos.getRotated(a.vectTo3, deg)
+    else Pos.getRotated(a, deg)
 }

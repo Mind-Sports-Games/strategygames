@@ -5,13 +5,13 @@ import scala.annotation.nowarn
 
 object Dumper {
   def apply(
-             @nowarn situation: SSituation,
-             data: MMove,
-             @nowarn next: SSituation
+             @nowarn situation: Situation,
+             data: Move,
+             @nowarn next: Situation
            ): String =
     data.toUci.uci
 
-  def apply(data: MMove): String =
+  def apply(data: Move): String =
     apply(
       data.situationBefore,
       data,

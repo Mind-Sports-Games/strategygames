@@ -140,10 +140,10 @@ object Replay {
     }
   }
 
-  final case class Abalone(r: abalone.RReplay)
+  final case class Abalone(r: abalone.Replay)
       extends Replay(
         Game.Abalone(r.setup),
-        r.actions.map((m: abalone.MMove) => Move.Abalone(m)),
+        r.actions.map((m: abalone.Move) => Move.Abalone(m)),
         Game.Abalone(r.state)
       ) {
     def copy(state: Game): Replay = state match {
@@ -181,7 +181,7 @@ object Replay {
       case (GameLogic.Backgammon(), Game.Backgammon(setup), Game.Backgammon(state))       =>
         Backgammon(backgammon.Replay(setup, actions.map(Action.toBackgammon), state))
       case (GameLogic.Abalone(), Game.Abalone(setup), Game.Abalone(state))                =>
-        Abalone(abalone.RReplay(setup, actions.map(Action.toAbalone), state))
+        Abalone(abalone.Replay(setup, actions.map(Action.toAbalone), state))
       case (GameLogic.Dameo(), Game.Dameo(setup), Game.Dameo(state))                      =>
         Dameo(dameo.Replay(setup, actions.map(Action.toDameo), state))
       case _                                                                              => sys.error("Mismatched gamelogic types 5")
@@ -295,7 +295,7 @@ object Replay {
           )
       }
     case (GameLogic.Abalone(), FEN.Abalone(initialFen), Variant.Abalone(variant))                =>
-      abalone.RReplay.gameWithUciWhileValid(
+      abalone.Replay.gameWithUciWhileValid(
         actionStrs,
         startPlayer,
         activePlayer,
@@ -384,7 +384,7 @@ object Replay {
         .map(s => s.map(Situation.Backgammon))
         .toValidated
     case (GameLogic.Abalone(), Variant.Abalone(variant))           =>
-      abalone.RReplay
+      abalone.Replay
         .situations(actionStrs, initialFen.map(_.toAbalone), variant)
         .toEither
         .map(s => s.map(Situation.Abalone))
@@ -454,7 +454,7 @@ object Replay {
       }
     )
 
-  private def abaloneUcis(ucis: List[Uci]): List[abalone.format.UUci] =
+  private def abaloneUcis(ucis: List[Uci]): List[abalone.format.Uci] =
     ucis.flatMap(u =>
       u match {
         case u: Uci.Abalone => Some(u.unwrap)
@@ -525,7 +525,7 @@ object Replay {
         .map(b => b.map(Board.Backgammon))
         .toValidated
     case (GameLogic.Abalone(), Variant.Abalone(variant))           =>
-      abalone.RReplay
+      abalone.Replay
         .boardsFromUci(abaloneUcis(ucis), initialFen.map(_.toAbalone), variant)
         .toEither
         .map(b => b.map(Board.Abalone))
@@ -589,7 +589,7 @@ object Replay {
         .map(s => s.map(Situation.Backgammon))
         .toValidated
     case (GameLogic.Abalone(), Variant.Abalone(variant))           =>
-      abalone.RReplay
+      abalone.Replay
         .situationsFromUci(abaloneUcis(ucis), initialFen.map(_.toAbalone), variant)
         .toEither
         .map(s => s.map(Situation.Abalone))
@@ -644,7 +644,7 @@ object Replay {
         .gameFromUciStrings(ucis.flatten.toList, initialFen.map(_.toBackgammon), variant)
         .map(Game.Backgammon)
     case (GameLogic.Abalone(), Variant.Abalone(variant))           =>
-      abalone.RReplay
+      abalone.Replay
         .gameFromUciStrings(ucis.flatten.toList, initialFen.map(_.toAbalone), variant)
         .map(Game.Abalone)
     case (GameLogic.Dameo(), Variant.Dameo(variant))               =>
@@ -704,7 +704,7 @@ object Replay {
         .map(r => Replay.Backgammon(r))
         .toValidated
     case (GameLogic.Abalone(), Variant.Abalone(variant))           =>
-      abalone.RReplay
+      abalone.Replay
         .apply(abaloneUcis(ucis), initialFen.map(_.toAbalone), variant)
         .toEither
         .map(r => Replay.Abalone(r))
@@ -740,7 +740,7 @@ object Replay {
     case (GameLogic.Backgammon(), Variant.Backgammon(variant), FEN.Backgammon(atFen))       =>
       backgammon.Replay.plyAtFen(actionStrs, initialFen.map(_.toBackgammon), variant, atFen)
     case (GameLogic.Abalone(), Variant.Abalone(variant), FEN.Abalone(atFen))                =>
-      abalone.RReplay.plyAtFen(actionStrs, initialFen.map(_.toAbalone), variant, atFen)
+      abalone.Replay.plyAtFen(actionStrs, initialFen.map(_.toAbalone), variant, atFen)
     case (GameLogic.Dameo(), Variant.Dameo(variant), FEN.Dameo(atFen))                      =>
       dameo.Replay.plyAtFen(actionStrs, initialFen.map(_.toDameo), variant, atFen)
     case _                                                                                  => sys.error("Mismatched gamelogic types 10")
@@ -753,7 +753,7 @@ object Replay {
   def wrap(r: togyzkumalak.Replay) = Togyzkumalak(r)
   def wrap(r: go.Replay)           = Go(r)
   def wrap(r: backgammon.Replay)   = Backgammon(r)
-  def wrap(r: abalone.RReplay)      = Abalone(r)
+  def wrap(r: abalone.Replay)      = Abalone(r)
   def wrap(r: dameo.Replay)        = Dameo(r)
 
 }

@@ -1,7 +1,6 @@
 package strategygames.abalone
 
-import strategygames.abalone.geometry.Cell
-import strategygames.abalone.geometry.norm.{N6, Norm}
+import strategygames.abalone.norm.{N6, Norm}
 
 sealed abstract class BoardType(
                                  val width: Int,
@@ -11,16 +10,16 @@ sealed abstract class BoardType(
   val key = s"${width}x${height}"
   //val validPos: List[Pos] = Pos.all
 
-  final val cellList: List[Cell] = Range(0, height)
+  final val cellList: List[Pos] = Range(0, height)
     .flatMap(y => Range(0, width)
       .filter(x => isCell(x, y))
-      .map(x => new Cell(x, y))
+      .map(x => new Pos(x, y))
     ).toList
-  final val cellSet: Set[Cell] = cellList.toSet
+  final val cellSet: Set[Pos] = cellList.toSet
 
   //
   // Cell
-  final def isCell(a: Cell): Boolean = isCell(a.x, a.y)
+  final def isCell(a: Pos): Boolean = isCell(a.x, a.y)
 
   def isCell(x: Int, y: Int): Boolean = 0 <= x & x < width & 0 <= y & y < height
 
@@ -35,7 +34,7 @@ object BoardType {
 
 /** A Hexagon of side n fits in a square of side 2n - 1 */
 sealed abstract class HexBoardType(val side: Int) extends BoardType(width = 2 * side - 1, height = 2 * side - 1) {
-  val centre = new Cell(side - 1, side - 1)
+  val centre = new Pos(side - 1, side - 1)
 
   override val key = s"hex-${side}"
 

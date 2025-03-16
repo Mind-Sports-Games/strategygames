@@ -38,7 +38,7 @@ sealed abstract class Board(
   def toTogyzkumalak: togyzkumalak.Board
   def toGo: go.Board
   def toBackgammon: backgammon.Board
-  def toAbalone: abalone.BBoard
+  def toAbalone: abalone.Board
   def toDameo: dameo.Board
 }
 
@@ -389,7 +389,7 @@ object Board {
 //    def toDameo        = sys.error("Can't make a dameo board from a abalone board")
 //
 //  }
-  case class Abalone(b: abalone.BBoard) extends Board(
+  case class Abalone(b: abalone.Board) extends Board(
     b.pieces.map { case (pos, piece) => (Pos.Abalone(pos), (Piece.Abalone(piece), 1)) },
     History.Abalone(b.history),
     Variant.Abalone(b.variant)
@@ -546,7 +546,7 @@ object Board {
         )
       case (GameLogic.Abalone(), Variant.Abalone(variant))           =>
         Abalone(
-          abalone.BBoard.apply(
+          abalone.Board.apply(
             pieces.flatMap {
               case (Pos.Abalone(pos), (Piece.Abalone(piece), _)) => Some((pos, piece))
               case _                                             => None
@@ -574,7 +574,7 @@ object Board {
   implicit def togyzkumalakBoard(b: togyzkumalak.Board) = Board.Togyzkumalak(b)
   implicit def goBoard(b: go.Board)                     = Board.Go(b)
   implicit def backgammonBoard(b: backgammon.Board)     = Board.Backgammon(b)
-  implicit def abaloneBoard(b: abalone.BBoard)          = Board.Abalone(b)
+  implicit def abaloneBoard(b: abalone.Board)          = Board.Abalone(b)
   implicit def dameoBoard(b: dameo.Board)               = Board.Dameo(b)
 
   def init(lib: GameLogic, variant: Variant): Board = (lib, variant) match {
@@ -585,7 +585,7 @@ object Board {
     case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant)) => Togyzkumalak(togyzkumalak.Board.init(variant))
     case (GameLogic.Go(), Variant.Go(variant))                     => Go(go.Board.init(variant))
     case (GameLogic.Backgammon(), Variant.Backgammon(variant))     => Backgammon(backgammon.Board.init(variant))
-    case (GameLogic.Abalone(), Variant.Abalone(variant))           => Abalone(abalone.BBoard.init(variant))
+    case (GameLogic.Abalone(), Variant.Abalone(variant))           => Abalone(abalone.Board.init(variant))
     case (GameLogic.Dameo(), Variant.Dameo(variant))               => Dameo(dameo.Board.init(variant))
     case _                                                         => sys.error("Mismatched gamelogic types 28")
   }

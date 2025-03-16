@@ -64,7 +64,7 @@ object Actor {
         Board.Backgammon(a.board)
       ) {}
 
-  final case class Abalone(a: abalone.AActor)
+  final case class Abalone(a: abalone.Actor)
       extends Actor(
         Piece.Abalone(a.piece),
         Pos.Abalone(a.pos),

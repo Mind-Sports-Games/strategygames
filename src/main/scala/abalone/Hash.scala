@@ -13,7 +13,7 @@ final class Hash(size: Int) {
   //      )
   //    }
   //  }
-  def apply(situation: SSituation): PositionHash = {
+  def apply(situation: Situation): PositionHash = {
     val l = Hash.get(situation, Hash.polyglotTable)
     if (size <= 8) {
       Array.tabulate(size)(i => (l >>> ((7 - i) * 8)).toByte)
@@ -47,7 +47,7 @@ object Hash {
   private lazy val randomTable = new ZobristConstants(16)
 
   //  private def actorIndex(actor: Actor) = 80 * actor.piece.player.fold(1, 0) + actor.pos.hashCode
-  private def actorIndex(actor: AActor) = 80 * actor.piece.player.fold(1, 0) + actor.pos.hashCode
+  private def actorIndex(actor: Actor) = 80 * actor.piece.player.fold(1, 0) + actor.pos.hashCode
 
   //  def get(situation: Situation, table: ZobristConstants): Long = {
   //    val board = situation.board
@@ -61,7 +61,7 @@ object Hash {
   //
   //    hactors
   //  }
-  def get(situation: SSituation, table: ZobristConstants): Long = {
+  def get(situation: Situation, table: ZobristConstants): Long = {
     val board = situation.board
     val hturn = situation.player.fold(table.p1TurnMask, 0L)
 
@@ -77,7 +77,7 @@ object Hash {
   private val h = new Hash(size)
 
   //  def apply(situation: Situation): PositionHash = h.apply(situation)
-  def apply(situation: SSituation): PositionHash = h.apply(situation)
+  def apply(situation: Situation): PositionHash = h.apply(situation)
 
   def debug(hashes: PositionHash) = hashes.map(_.toInt).sum.toString
 }

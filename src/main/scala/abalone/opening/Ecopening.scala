@@ -3,7 +3,7 @@ package strategygames.abalone.opening
 import cats.syntax.option._
 import strategygames.ActionStrs
 import strategygames.abalone._
-import strategygames.abalone.format.FForsyth
+import strategygames.abalone.format.Forsyth
 
 final class Ecopening(
                        val eco: Ecopening.ECO,
@@ -52,7 +52,7 @@ object Ecopening {
       })
     }
 
-  def fromGame(actionStrs: ActionStrs): Option[Ecopening] = RReplay
+  def fromGame(actionStrs: ActionStrs): Option[Ecopening] = Replay
     .boards(
       actionStrs = actionStrs take EcopeningDB.MAX_TURNS,
       initialFen = None,
@@ -60,10 +60,10 @@ object Ecopening {
     )
     .toOption flatMap matchChronoBoards
 
-  private def matchChronoBoards(boards: List[BBoard]): Option[Ecopening] =
+  private def matchChronoBoards(boards: List[Board]): Option[Ecopening] =
     boards.reverse.foldLeft(none[Ecopening]) { case (acc, board) =>
       acc orElse {
-        EcopeningDB.allByFen get FForsyth.exportBoard(board)
+        EcopeningDB.allByFen get Forsyth.exportBoard(board)
       }
     }
 }

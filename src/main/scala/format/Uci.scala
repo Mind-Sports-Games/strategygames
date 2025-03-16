@@ -25,7 +25,7 @@ sealed trait Uci {
   def toTogyzkumalak: togyzkumalak.format.Uci
   def toGo: go.format.Uci
   def toBackgammon: backgammon.format.Uci
-  def toAbalone: abalone.format.UUci
+  def toAbalone: abalone.format.Uci
   def toDameo: dameo.format.Uci
 
 }
@@ -54,7 +54,7 @@ object Uci {
     def unwrap: backgammon.format.Uci
   }
   sealed trait Abalone      {
-    def unwrap: abalone.format.UUci
+    def unwrap: abalone.format.Uci
   }
   sealed trait Dameo        {
     def unwrap: dameo.format.Uci
@@ -223,7 +223,7 @@ object Uci {
     def toDameo        = sys.error("Can't make a dameo UCI from a backgammon UCI")
   }
 
-  final case class AbaloneMove(m: abalone.format.UUci.MMove)
+  final case class AbaloneMove(m: abalone.format.Uci.MMove)
       extends Move(
         Pos.Abalone(m.orig),
         Pos.Abalone(m.dest)
@@ -675,8 +675,8 @@ object Uci {
     case ca: backgammon.format.Uci.CubeAction => BackgammonCubeAction(ca)
   }
 
-  def wrap(uci: abalone.format.UUci): Uci = uci match {
-    case m: abalone.format.UUci.MMove => AbaloneMove(m)
+  def wrap(uci: abalone.format.Uci): Uci = uci match {
+    case m: abalone.format.Uci.MMove => AbaloneMove(m)
   }
 
   def wrap(uci: dameo.format.Uci): Uci = uci match {
@@ -778,7 +778,7 @@ object Uci {
           )
         case (GameLogic.Abalone(), Pos.Abalone(orig), Pos.Abalone(dest))                =>
           AbaloneMove(
-            abalone.format.UUci.MMove.apply(
+            abalone.format.Uci.MMove.apply(
               orig,
               dest
             )
@@ -802,7 +802,7 @@ object Uci {
       case GameLogic.Samurai()      => samurai.format.Uci.Move(move).map(SamuraiMove)
       case GameLogic.Togyzkumalak() => togyzkumalak.format.Uci.Move(move).map(TogyzkumalakMove)
       case GameLogic.Backgammon()   => backgammon.format.Uci.Move(move).map(BackgammonMove)
-      case GameLogic.Abalone()      => abalone.format.UUci.MMove(move).map(AbaloneMove)
+      case GameLogic.Abalone()      => abalone.format.Uci.MMove(move).map(AbaloneMove)
       case GameLogic.Dameo()        => dameo.format.Uci.Move(move).map(DameoMove)
       case _                        => sys.error("Invalid lib gf and move combo for Uci")
     }
@@ -814,7 +814,7 @@ object Uci {
       case GameLogic.Samurai()      => samurai.format.Uci.Move.piotr(move).map(SamuraiMove)
       case GameLogic.Togyzkumalak() => togyzkumalak.format.Uci.Move.piotr(move).map(TogyzkumalakMove)
       case GameLogic.Backgammon()   => backgammon.format.Uci.Move.piotr(move).map(BackgammonMove)
-      case GameLogic.Abalone()      => abalone.format.UUci.MMove.piotr(move).map(AbaloneMove)
+      case GameLogic.Abalone()      => abalone.format.Uci.MMove.piotr(move).map(AbaloneMove)
       case GameLogic.Dameo()        => dameo.format.Uci.Move.piotr(move).map(DameoMove)
       case _                        => sys.error("Invalid lib gf and move combo for piotr")
     }
@@ -836,7 +836,7 @@ object Uci {
         togyzkumalak.format.Uci.Move.fromStrings(gf, origS, destS, promS).map(TogyzkumalakMove)
       case GameLogic.Go()           => None
       case GameLogic.Backgammon()   => backgammon.format.Uci.Move.fromStrings(origS, destS).map(BackgammonMove)
-      case GameLogic.Abalone()      => abalone.format.UUci.MMove.fromStrings(origS, destS).map(AbaloneMove)
+      case GameLogic.Abalone()      => abalone.format.Uci.MMove.fromStrings(origS, destS).map(AbaloneMove)
       case GameLogic.Dameo()        => dameo.format.Uci.Move.fromStrings(origS, destS, promS).map(DameoMove)
     }
   }
@@ -1059,7 +1059,7 @@ object Uci {
         w.san
       )
 
-  final case class AbaloneWithSan(w: abalone.format.UUci.WithSan)
+  final case class AbaloneWithSan(w: abalone.format.Uci.WithSan)
       extends WithSan(
         wrap(w.uci),
         w.san
@@ -1088,7 +1088,7 @@ object Uci {
       case (GameLogic.Backgammon(), u: Uci.Backgammon)     =>
         Uci.BackgammonWithSan(backgammon.format.Uci.WithSan(u.unwrap, san))
       case (GameLogic.Abalone(), u: Uci.Abalone)           =>
-        Uci.AbaloneWithSan(abalone.format.UUci.WithSan(u.unwrap, san))
+        Uci.AbaloneWithSan(abalone.format.Uci.WithSan(u.unwrap, san))
       case (GameLogic.Dameo(), Uci.DameoMove(uci))         =>
         Uci.DameoWithSan(dameo.format.Uci.WithSan(uci, san))
       case _                                               => sys.error("Mismatched gamelogic types 24")
@@ -1111,7 +1111,7 @@ object Uci {
       case (GameLogic.Backgammon(), strategygames.Move.Backgammon(move))     =>
         BackgammonMove(backgammon.format.Uci(move))
       case (GameLogic.Abalone(), strategygames.Move.Abalone(move))           =>
-        AbaloneMove(abalone.format.UUci(move))
+        AbaloneMove(abalone.format.Uci(move))
       case (GameLogic.Dameo(), strategygames.Move.Dameo(move))               =>
         DameoMove(dameo.format.Uci(move, withCaptures))
       case _                                                                 => sys.error("Mismatched gamelogic types 25")
@@ -1221,7 +1221,7 @@ object Uci {
     case GameLogic.Togyzkumalak() => togyzkumalak.format.Uci(action).map(wrap)
     case GameLogic.Go()           => go.format.Uci(action).map(wrap)
     case GameLogic.Backgammon()   => backgammon.format.Uci(action).map(wrap)
-    case GameLogic.Abalone()      => abalone.format.UUci(action).map(wrap)
+    case GameLogic.Abalone()      => abalone.format.Uci(action).map(wrap)
     case GameLogic.Dameo()        => dameo.format.Uci(action).map(wrap)
   }
 
@@ -1236,7 +1236,7 @@ object Uci {
     case GameLogic.Togyzkumalak() => togyzkumalak.format.Uci.piotr(action).map(wrap)
     case GameLogic.Go()           => go.format.Uci.piotr(action).map(wrap)
     case GameLogic.Backgammon()   => backgammon.format.Uci.piotr(action).map(wrap)
-    case GameLogic.Abalone()      => abalone.format.UUci.piotr(action).map(wrap)
+    case GameLogic.Abalone()      => abalone.format.Uci.piotr(action).map(wrap)
     case GameLogic.Dameo()        => dameo.format.Uci.piotr(action).map(wrap)
   }
 
@@ -1248,7 +1248,7 @@ object Uci {
     case GameLogic.Togyzkumalak() => togyzkumalak.format.Uci.readList(actions).map(_.map(wrap))
     case GameLogic.Go()           => go.format.Uci.readList(actions).map(_.map(wrap))
     case GameLogic.Backgammon()   => backgammon.format.Uci.readList(actions).map(_.map(wrap))
-    case GameLogic.Abalone()      => abalone.format.UUci.readList(actions).map(_.map(wrap))
+    case GameLogic.Abalone()      => abalone.format.Uci.readList(actions).map(_.map(wrap))
     case GameLogic.Dameo()        => dameo.format.Uci.readList(actions).map(_.map(wrap))
   }
 

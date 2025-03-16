@@ -2,14 +2,13 @@ package strategygames.abalone
 package format.pgn
 
 import cats.data.Validated
-import strategygames.abalone.geometry.Cell
 import strategygames.format.pgn.{Metas, San, Suffixes}
 import strategygames.{Move => StratMove}
 
 import scala.annotation.nowarn
 
 case class Std(
-                dest: Cell,
+                dest: Pos,
                 role: Role,
                 capture: Boolean = false,
                 file: Option[Int] = None,
@@ -31,6 +30,6 @@ case class Std(
 
   def withMetas(m: Metas) = copy(metas = m)
 
-  def move(@nowarn sit: SSituation): Validated[String, strategygames.abalone.MMove] =
+  def move(@nowarn sit: Situation): Validated[String, strategygames.abalone.Move] =
     Validated.invalid("Not implemented move") // TODO: ???
 }

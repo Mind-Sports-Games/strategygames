@@ -12,7 +12,7 @@ object Binary {
     case GameLogic.Togyzkumalak() => strategygames.togyzkumalak.format.pgn.Binary.writeMoves(gf, ms)
     case GameLogic.Go()           => strategygames.go.format.pgn.Binary.writeMoves(ms)
     case GameLogic.Backgammon()   => strategygames.backgammon.format.pgn.Binary.writeMoves(ms)
-    case GameLogic.Abalone()      => strategygames.abalone.format.pgn.BBinary.writeMoves(ms)
+    case GameLogic.Abalone()      => strategygames.abalone.format.pgn.Binary.writeMoves(ms)
     case GameLogic.Dameo()        => strategygames.dameo.format.pdn.Binary.writeMoves(ms)
   }
 
@@ -24,7 +24,7 @@ object Binary {
     case GameLogic.Togyzkumalak() => strategygames.togyzkumalak.format.pgn.Binary.writeActionStrs(gf, ms)
     case GameLogic.Go()           => strategygames.go.format.pgn.Binary.writeActionStrs(ms)
     case GameLogic.Backgammon()   => strategygames.backgammon.format.pgn.Binary.writeActionStrs(ms)
-    case GameLogic.Abalone()      => strategygames.abalone.format.pgn.BBinary.writeActionStrs(ms)
+    case GameLogic.Abalone()      => strategygames.abalone.format.pgn.Binary.writeActionStrs(ms)
     case GameLogic.Dameo()        => strategygames.dameo.format.pdn.Binary.writeActionStrs(ms)
   }
 
@@ -36,7 +36,7 @@ object Binary {
     case GameLogic.Togyzkumalak() => strategygames.togyzkumalak.format.pgn.Binary.readActionStrs(bs)
     case GameLogic.Go()           => strategygames.go.format.pgn.Binary.readActionStrs(bs)
     case GameLogic.Backgammon()   => strategygames.backgammon.format.pgn.Binary.readActionStrs(bs)
-    case GameLogic.Abalone()      => strategygames.abalone.format.pgn.BBinary.readActionStrs(bs)
+    case GameLogic.Abalone()      => strategygames.abalone.format.pgn.Binary.readActionStrs(bs)
     case GameLogic.Dameo()        => strategygames.dameo.format.pdn.Binary.readActionStrs(bs)
   }
 
@@ -48,7 +48,7 @@ object Binary {
     case GameLogic.Togyzkumalak() => strategygames.togyzkumalak.format.pgn.Binary.readActionStrs(bs, nb)
     case GameLogic.Go()           => strategygames.go.format.pgn.Binary.readActionStrs(bs, nb)
     case GameLogic.Backgammon()   => strategygames.backgammon.format.pgn.Binary.readActionStrs(bs, nb)
-    case GameLogic.Abalone()      => strategygames.abalone.format.pgn.BBinary.readActionStrs(bs, nb)
+    case GameLogic.Abalone()      => strategygames.abalone.format.pgn.Binary.readActionStrs(bs, nb)
     case GameLogic.Dameo()        => strategygames.dameo.format.pdn.Binary.readActionStrs(bs, nb)
   }
 

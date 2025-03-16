@@ -9,7 +9,7 @@ import strategygames.samurai.format.pgn.{ Reader => SamuraiReader }
 import strategygames.togyzkumalak.format.pgn.{ Reader => TogyzkumalakReader }
 import strategygames.go.format.pgn.{ Reader => GoReader }
 import strategygames.backgammon.format.pgn.{ Reader => BackgammonReader }
-import strategygames.abalone.format.pgn.{ RReader => AbaloneReader }
+import strategygames.abalone.format.pgn.{ Reader => AbaloneReader }
 import strategygames.dameo.format.pdn.{ Reader => DameoReader }
 
 import cats.data.Validated
@@ -85,12 +85,12 @@ object Reader {
       def valid          = Validated.invalid(failure)
       def evenIncomplete = Replay.Backgammon(replay)
     }
-    case class AbaloneComplete(replay: abalone.RReplay)                              extends Result {
+    case class AbaloneComplete(replay: abalone.Replay)                              extends Result {
       private def r      = Replay.Abalone(replay)
       def valid          = Validated.valid(r)
       def evenIncomplete = r
     }
-    case class AbaloneIncomplete(replay: abalone.RReplay, failure: String)           extends Result {
+    case class AbaloneIncomplete(replay: abalone.Replay, failure: String)           extends Result {
       def valid          = Validated.invalid(failure)
       def evenIncomplete = Replay.Abalone(replay)
     }

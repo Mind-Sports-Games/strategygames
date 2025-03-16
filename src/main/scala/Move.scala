@@ -45,7 +45,7 @@ sealed abstract class Move(
   def toSamurai: samurai.Move
   def toTogyzkumalak: togyzkumalak.Move
   def toBackgammon: backgammon.Move
-  def toAbalone: abalone.MMove
+  def toAbalone: abalone.Move
   def toDameo: dameo.Move
 
 }
@@ -402,7 +402,7 @@ object Move {
 //    def toDameo        = sys.error("Can't make a dameo move from a abalone move")
 //
 //  }
-  final case class Abalone(m: abalone.MMove)
+  final case class Abalone(m: abalone.Move)
       extends Move(
         Piece.Abalone(m.piece),
         Pos.Abalone(m.orig),
@@ -503,7 +503,7 @@ object Move {
   def wrap(m: samurai.Move): Move      = Move.Samurai(m)
   def wrap(m: togyzkumalak.Move): Move = Move.Togyzkumalak(m)
   def wrap(m: backgammon.Move): Move   = Move.Backgammon(m)
-  def wrap(m: abalone.MMove): Move     = Move.Abalone(m)
+  def wrap(m: abalone.Move): Move     = Move.Abalone(m)
   def wrap(m: dameo.Move): Move        = Move.Dameo(m)
 
 }

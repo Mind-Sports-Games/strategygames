@@ -3,8 +3,7 @@ package strategygames.abalone.variant
 import cats.data.Validated
 import cats.syntax.option._
 import strategygames.abalone._
-import strategygames.abalone.format.{FEN, UUci}
-import strategygames.abalone.geometry.Cell
+import strategygames.abalone.format.{FEN, Uci}
 import strategygames.{GameFamily, Player}
 
 import scala.annotation.nowarn
@@ -60,114 +59,74 @@ abstract class Variant private[variant](
 
   def startPlayer: Player = P1
 
-  /**
-    * In Abalone there are 3 kinds of moves.
-    * Let's use the top 3 rows of a board to illustrate (capital letters are empty squares, 1 is an opponent marble)
-    *
-    * A B C D E
-    * 1 a b c G H
-    * I J K L M N O
-    *
-    * - line moves are marbles moving in line to an empty square :
-    * 'a' to 'G' would move three marbles to the right.
-    * This is the same as if 'a' jumped over 'b' and 'c' to land on 'G'.
-    * 'c' to 'G' would move one marble to the right.
-    * - pushes are line moves targeting a square hosting an opponent marble
-    * They will be processed later on as two line moves (one jump per player).
-    * 'c' to '1' and 'b' to '1' are pushes to the left.
-    * In case we play a move from 'c' to '1', c will land on 1 and 1 will be removed from the board.
-    * When a piece is pushed off the board, the Move is created with an extra parameter.
-    * - side moves can only be described starting from the right origin (figure out the longest diagonal) :
-    * 'a' to 'M' is a downRight side move of three marbles.
-    * 'c' to 'J' is a downLeft side move of three marbles.
-    * 'a' to 'L' is a downRight side move of two marbles (only 'a' and 'b' would move).
-    * 'c' to 'K' is a downLeft side move of two marbles (only 'c' and 'b' would move)
-    * 'a' to 'K' or 'c' to 'L' are line moves of a single marble
-    *
-    * For moves of 2 marbles or more, once you get the direction of the line,
-    * you can easily generate the side moves as being the one before and the one after,
-    * following a rotation :
-    * \   /
-    * -  o  -
-    * /   \
-    * e.g. if you are moving upRight the side moves to consider are "upLeft" and "right".
-    *
-    * 1. moves of 1 marble
-    * 2. generate any possible pair of marbles and use it to generate moves of 2 and 3 marbles
-    * then merge these as valid moves.
-    */
-  //  @deprecated("Alex", since = "1.5.5") def validMoves(situation: Situation): Map[Pos, List[Move]] =
-  //    (validMovesOf1(situation).toList ++ validMovesOf2And3(situation).toList)
-  //      .groupBy(_._1)
-  //      .map { case (k, v) => k -> v.map(_._2).flatten }
-
-  def validMoves(sit: SSituation): Map[Cell, List[MMove]] =
+  def validMoves(sit: Situation): Map[Pos, List[Move]] =
     (validMoves_line(sit).toList ++ validMoves_jump(sit).toList)
       .groupBy(_._1)
       .map { case (k, v) => k -> v.map(_._2).flatten }
 
-  private def validMoves_line(sit: SSituation): Map[Cell, List[MMove]] = {
-    getPieces_usable(sit).map { case (a, pa) =>
+  private def validMoves_line(sit: Situation): Map[Pos, List[Move]] = {
+    sit.board.pieces.filter(t => isUsable(sit, t._2)).map { case (a, pa) =>
       (a, boardType.norm.getNeigh(a).map { case (vect, b) =>
-        var dest = Option.empty[Cell]
+        var dest = Option.empty[Pos]
         var out = false
-        var opp = false
 
-        var c = Cell.copy(b)
+        var c = Pos.copy(b)
+        var cp = sit.board.getPiece(c)
+        var hasProperty = true
         var u = 1
         var max = false
-        while (!max && !opp && boardType.isCell(c) && sit.board.isPiece(c)) {
-          if (sit.board.getPiece(c).get.isNot(sit.player)) {
-            opp = true
-          } else {
+        while (hasProperty && !max && cp.isDefined) {
+          hasProperty = isUsable(sit, cp.get)
+
+          if (hasProperty) {
             u += 1
-            max = u > maxUsable
+            max = maxUsable.isDefined && u > maxUsable.get
           }
 
           c += vect
+          cp = sit.board.getPiece(c)
         }
 
         if (!max) {
           var p = 0
-          var empty = false
-          opp = true
-          while (!out && !empty && opp && !max) {
-            out = !boardType.isCell(c)
+          hasProperty = true
+          while (hasProperty && !max && cp.isDefined) {
+            hasProperty = isPushable(sit, cp.get)
 
-            if (!out) {
-              val pc = sit.board.getPiece(c)
-              empty = pc.isEmpty
-
-              if (!empty) {
-                opp = pc.get.isNot(sit.player)
-
-                if (opp) {
-                  p += 1
-                  max = p >= u
-                }
-              }
-
-              c += vect // Notice we only increment if !out
+            if (hasProperty) {
+              p += 1
+              max = p >= u
             }
+
+            c += vect
+            cp = sit.board.getPiece(c)
           }
 
-          if (max || out && !opp) dest = Option.empty
-          else dest = Option(c)
+          if (!max && cp.isEmpty) { // is cp.isDefined, there is an immovable piece that blocks the line
+            out = !boardType.isCell(c)
+
+            if (out) {
+              c -= vect
+              if (isEjectable(sit, sit.board.getPiece(c).get)) dest = Option(c)
+            } else {
+              dest = Option(c)
+            }
+          }
         }
 
-        (dest, out && opp)
+        (dest, out)
       }
         .filter(_._1.isDefined)
-        .map(b => MMove(pa, a, b._1.get, sit, boardAfter(sit, a, b._1.get), capture = if (b._2) b._1 else None, autoEndTurn = true))
+        .map(b => Move(pa, a, b._1.get, sit, boardAfter(sit, a, b._1.get), capture = if (b._2) b._1 else None, autoEndTurn = true))
         .toList
       )
     }
   }
 
-  private def validMoves_jump(sit: SSituation): Map[Cell, List[MMove]] = {
-    getPieces_usable(sit).map { case (a, pa) =>
+  private def validMoves_jump(sit: Situation): Map[Pos, List[Move]] = {
+    sit.board.pieces.filter(t => isUsable(sit, t._2)).map { case (a, pa) =>
       (a, boardType.norm.getNeigh(a).flatMap { case (vect, b) =>
-        var dest = List[Cell]()
+        var dests = List[Pos]()
 
         val pvect = boardType.norm.getPrev(vect)
         val nvect = boardType.norm.getNext(vect)
@@ -176,29 +135,31 @@ abstract class Variant private[variant](
         var nj = canJumpTo(sit, a + nvect)
 
         if (pj || nj) {
-          var c = Cell.copy(b)
+          var c = Pos.copy(b)
           var u = 1
           var max = false
-          while (!max && (pj || nj) && sit.board.isPiece(c)) {
-            if (sit.board.getPiece(c).get.is(sit.player)) {
+          var cp = sit.board.getPiece(c)
+          while (!max && (pj || nj) && cp.isDefined) {
+            if (isUsable(sit, cp.get)) {
               u += 1 // When u = 1, the only possible moves are already accounted for as in-line
-              max = u > maxUsable
+              max = maxUsable.isDefined && u > maxUsable.get
 
               if (!max) {
                 if (pj) {
                   val d = c + pvect
 
-                  if (canJumpTo(sit, d)) dest :+= d
+                  if (canJumpTo(sit, d)) dests :+= d
                   else pj = false
                 }
                 if (nj) {
                   val d = c + nvect
 
-                  if (canJumpTo(sit, d)) dest :+= d
+                  if (canJumpTo(sit, d)) dests :+= d
                   else nj = false
                 }
 
                 c += vect
+                cp = sit.board.getPiece(c)
               }
             } else {
               max = true
@@ -206,15 +167,15 @@ abstract class Variant private[variant](
           }
         }
 
-        dest
+        dests
       }
-        .map(b => MMove(pa, a, b, sit, boardAfter(sit, a, b), autoEndTurn = true))
+        .map(b => Move(pa, a, b, sit, boardAfter(sit, a, b), autoEndTurn = true))
         .toList
       )
     }
   }
 
-  private def canJumpTo(sit: SSituation, a: Cell): Boolean = !sit.board.isPiece(a) && boardType.isCell(a)
+  private def canJumpTo(sit: Situation, a: Pos): Boolean = !sit.board.isPiece(a) && boardType.isCell(a)
 
   //  @deprecated("Alex", since = "1.5.5") def validMovesOf1(situation: Situation): Map[Pos, List[Move]] = {
   //    turnPieces(situation).flatMap { case (pos, piece) =>
@@ -344,7 +305,7 @@ abstract class Variant private[variant](
   //  }
 
   // Move pieces on the board. Other bits (including score) are handled by MMove.finalizeAfter()
-  def boardAfter(sit: SSituation, orig: Cell, dest: Cell): BBoard = {
+  def boardAfter(sit: Situation, orig: Pos, dest: Pos): Board = {
     sit.board.copy(pieces = piecesAfterAction(sit.board.pieces, orig, dest))
   }
 
@@ -434,7 +395,7 @@ abstract class Variant private[variant](
   //    pieces + (dest -> pieces(orig)) - orig
   //  }
 
-  private def piecesAfterAction(pieces: PieceMap, orig: Cell, dest: Cell): PieceMap = {
+  private def piecesAfterAction(pieces: PieceMap, orig: Pos, dest: Pos): PieceMap = {
     var res = pieces - orig
 
     var vector = dest - orig
@@ -484,7 +445,7 @@ abstract class Variant private[variant](
   //      s"Not a valid move: ${from}${to}. Allowed moves: ${situation.moves}"
   //  }
 
-  def move(sit: SSituation, from: Cell, to: Cell): Validated[String, MMove] = {
+  def move(sit: Situation, from: Pos, to: Pos): Validated[String, Move] = {
     // Find the move in the variant specific list of valid moves !
     sit.moves.get(from).flatMap(_.find(m => m.dest == to)) toValid
       s"Not a valid move: $from$to. Allowed moves: ${sit.moves}"
@@ -493,7 +454,7 @@ abstract class Variant private[variant](
   /** If a player runs out of move, the match is a draw. */
   def stalemateIsDraw = true
 
-  def maxUsable = 3
+  def maxUsable: Option[Int] = Option(3)
 
   def winningScore = 6
 
@@ -504,7 +465,7 @@ abstract class Variant private[variant](
   //    else None
   //  }
 
-  def winner(sit: SSituation): Option[Player] = {
+  def winner(sit: Situation): Option[Player] = {
     if (sit.board.history.score.p1 >= winningScore) Some(P1)
     else if (sit.board.history.score.p2 >= winningScore) Some(P2)
     else None
@@ -512,16 +473,16 @@ abstract class Variant private[variant](
 
   //  @deprecated("Alex", since = "1.5.5") def specialEnd(situation: Situation) = winner(situation).isDefined
 
-  def specialEnd(sit: SSituation) = winner(sit).isDefined
+  def specialEnd(sit: Situation) = winner(sit).isDefined
 
   //  @deprecated("Alex", since = "1.5.5") def specialDraw(situation: Situation) = situation.moves.size == 0
 
-  def specialDraw(sit: SSituation) = sit.moves.size == 0
+  def specialDraw(sit: Situation) = sit.moves.size == 0
 
   // TODO Abalone Set
   //  def materialImbalance(@nowarn board: Board): Int = 0
 
-  def materialImbalance(@nowarn board: BBoard): Int = 0
+  def materialImbalance(@nowarn board: Board): Int = 0
 
   // Some variants have an extra effect on the board on a move. For example, in Atomic, some
   // pieces surrounding a capture explode
@@ -529,17 +490,17 @@ abstract class Variant private[variant](
 
   //  @deprecated("Alex", since = "1.5.5") def addVariantEffect(move: Move): Move = move
 
-  def addVariantEffect(move: MMove): MMove = move
+  def addVariantEffect(move: Move): Move = move
 
   /** Once a move has been decided upon from the available legal moves, the board is finalized. */
   //  @nowarn def finalizeBoard(board: Board, uci: Uci, captured: Option[Piece]): Board = board
 
   /** Once a move has been decided upon amongst the available legal ones, the board is finalized. */
-  @nowarn def finalizeBoard(board: BBoard, uci: UUci, captured: Option[Piece]): BBoard = board
+  @nowarn def finalizeBoard(board: Board, uci: Uci, captured: Option[Piece]): Board = board
 
-  def valid(@nowarn board: BBoard, @nowarn strict: Boolean): Boolean = true
+  def valid(@nowarn board: Board, @nowarn strict: Boolean): Boolean = true
 
-  def isIrreversible(move: MMove): Boolean = move.capture.nonEmpty
+  def isIrreversible(move: Move): Boolean = move.capture.nonEmpty
 
   def defaultRole: Role = Role.defaultRole
 
@@ -551,24 +512,11 @@ abstract class Variant private[variant](
 
   override def hashCode: Int = id
 
-  //  @deprecated("Alex", since = "1.5.5") private def isSideMove(orig: Pos, dest: Pos): Boolean = orig.directionString(dest) match {
-  //    case direction
-  //      if direction == DiagonalDirectionString.UpRight || direction == DiagonalDirectionString.DownLeft =>
-  //      if (
-  //        (orig
-  //          .|<>|(
-  //            square => square.index == dest.index,
-  //            Pos.directionFromDirectionString(orig.directionString(dest))
-  //          ))
-  //          .contains(dest)
-  //      ) false
-  //      else true
-  //    case _ => orig.rank.index != dest.rank.index && orig.file.index != dest.file.index
-  //  }
+  protected def isUsable(sit: Situation, piece: Piece): Boolean = piece.is(sit.player)
 
-  //  @deprecated("Alex", since = "1.5.5") private def turnPieces(situation: Situation): PieceMap = situation.board.piecesOf(situation.player)
+  protected def isPushable(sit: Situation, piece: Piece): Boolean = isEjectable(sit, piece)
 
-  private def getPieces_usable(sit: SSituation): PieceMap = sit.board.piecesOf(sit.player)
+  protected def isEjectable(sit: Situation, piece: Piece): Boolean = piece.isNot(sit.player) && Player.all.find(p => piece.is(p)).isDefined
 
   val roles: List[Role] = Role.all
 
