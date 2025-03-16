@@ -40,7 +40,6 @@ final case class FEN(value: String) extends AnyVal {
       fm * 2 - (if (player.exists(_.p1)) 2 else 1)
     }
 
-  //  def initial = value == Forsyth.initial.value
   def initial = value == Forsyth.initial.value
 
   private def intFromFen(index: Int): Option[Int] =
