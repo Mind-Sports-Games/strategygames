@@ -34,8 +34,8 @@ object Forsyth {
 
   def <<(fen: FEN): Option[Situation] = <<@(Variant.default, fen)
 
-  case class SituationPlus(situation: Situation, fullTurnCount: Int) {
-    def turnCount = fullTurnCount * 2 - situation.player.fold(2, 1)//TODO Grand Abalone
+  case class SituationPlus(sit: Situation, fullTurnCount: Int) {
+    def turnCount = fullTurnCount * 2 - sit.player.fold(2, 1)//TODO Grand Abalone
 
     // when we get a multiaction variant we should set this
     def plies = turnCount
@@ -52,12 +52,12 @@ object Forsyth {
 
   def <<<(fen: FEN): Option[SituationPlus] = <<<@(Variant.default, fen)
 
-  def >>(situation: Situation): FEN = >>(SituationPlus(situation, 1))
+  def >>(sit: Situation): FEN = >>(SituationPlus(sit, 1))
 
   def >>(parsed: SituationPlus): FEN =
     parsed match {
-      case SituationPlus(situation, _) =>
-        >>(Game(situation, plies = parsed.plies, turnCount = parsed.turnCount))
+      case SituationPlus(sit, _) =>
+        >>(Game(sit, plies = parsed.plies, turnCount = parsed.turnCount))
     }
 
   def >>(game: Game): FEN = {
@@ -105,7 +105,7 @@ object Forsyth {
     res.toString
   }
 
-  def boardAndPlayer(situation: Situation): String = boardAndPlayer(situation.board, situation.player)
+  def boardAndPlayer(sit: Situation): String = boardAndPlayer(sit.board, sit.player)
 
-  def boardAndPlayer(board: Board, turnPlayer: Player): String = s"${exportBoard(board)} ${turnPlayer.letter}"
+  def boardAndPlayer(board: Board, nextPlayer: Player): String = s"${exportBoard(board)} ${nextPlayer.letter}"
 }
