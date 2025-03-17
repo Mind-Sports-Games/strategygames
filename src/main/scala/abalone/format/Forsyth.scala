@@ -15,23 +15,33 @@ object Forsyth {
       Situation(
         board = Board(
           pieces = fen.pieces(variant.boardType),
-          history = History(),
+          history = History(
+            moves = variant match {
+              case GrandAbalone => fen.value.split(' ')(3) match {
+                case "0" => List.empty
+                case "b"
+              }List.empty//TODO Grand Abalone
+              case _ => List.empty
+            },//TODO Grand Abalone: prev player within list, if any, moves = (prevPlayer, null)
+            score = Score(fen.player1Score, fen.player2Score),
+            halfMoveClock = fen.halfMovesSinceLastCapture.getOrElse(0)
+          ),
           variant = variant
         ),
-        player = fen.value.split(' ')(3) match {
-          case "b" => P1
-          case "w" => P2
-          case _   => sys.error("Invalid player in fen")
-        },
-        prevPlayer = Option.empty//TODO Grand Abalone
-      ).withHistory(
-        History(
-          score = Score(fen.player1Score, fen.player2Score),
-          halfMoveClock = fen.halfMovesSinceLastCapture.getOrElse(0)
-        )
+        player = getPlayerFromStr(fen.value.split(' ')(variant match {
+          case GrandAbalone => 4
+        }3)).get
       )
     )
   }
+
+  private def hasPrevPlayer(variant: Variant): Boolean = variant == GrandAbalone
+  private def getPlayerFromStr(player: String, allowNone: Boolean = false): Option[Player] =
+    player match {
+      case "b" => Option(P1)
+      case "w" => Option(P2)
+      case _ => if (allowNone) None else sys.error("Invalid player in fen")
+    }
 
   def <<(fen: FEN): Option[Situation] = <<@(Variant.default, fen)
 

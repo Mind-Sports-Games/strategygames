@@ -19,8 +19,8 @@ final case class FEN(value: String) extends AnyVal {
     }
     .zip(boardType.cellList)
     .flatMap {
-      case (piece, a) if piece == Role.defaultRole.forsythUpper => Some((a, Piece(P1, Role.defaultRole)))
-      case (piece, a) if piece == Role.defaultRole.forsyth => Some((a, Piece(P2, Role.defaultRole)))
+      case (piece, pos) if piece == Role.defaultRole.forsythUpper => Some((pos, Piece(P1, Role.defaultRole)))
+      case (piece, pos) if piece == Role.defaultRole.forsyth => Some((pos, Piece(P2, Role.defaultRole)))
       case _ => None
     }
     .toMap
