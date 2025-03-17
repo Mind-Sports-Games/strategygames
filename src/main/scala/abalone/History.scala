@@ -1,11 +1,12 @@
 package strategygames.abalone
 
-import strategygames.Score
+import strategygames.{Player, Score}
 import strategygames.abalone.format.Uci
 
 case class History(
                     lastTurn: List[Uci] = List.empty,
                     currentTurn: List[Uci] = List.empty,
+                    moves: List[(Player, Move)] = List.empty,
                     positionHashes: PositionHash = Array.empty,
                     score: Score = Score(),
                     halfMoveClock: Int = 0

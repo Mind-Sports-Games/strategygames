@@ -63,7 +63,7 @@ abstract class Variant private[variant](
       .map { case (k, v) => k -> v.map(_._2).flatten }
 
   private def validMoves_line(sit: Situation): Map[Pos, List[Move]] = {
-    sit.board.pieces.filter(t => isUsable(sit, t._2)).map { case (a, pa) =>
+    sit.board.pieces.filter(t => isUsable(sit, t._2)).map { case (a, _) =>
       (a, boardType.norm.getNeigh(a).map { case (vect, b) =>
         var dest = Option.empty[Pos]
         var out = false
@@ -115,14 +115,14 @@ abstract class Variant private[variant](
         (dest, out)
       }
         .filter(_._1.isDefined)
-        .map(b => Move(pa, a, b._1.get, sit, boardAfter(sit, a, b._1.get), capture = if (b._2) b._1 else None, autoEndTurn = true))
+        .map(b => computeMove(a, b._1.get, sit, capture = if (b._2) b._1 else None))
         .toList
       )
     }
   }
 
   private def validMoves_jump(sit: Situation): Map[Pos, List[Move]] = {
-    sit.board.pieces.filter(t => isUsable(sit, t._2)).map { case (a, pa) =>
+    sit.board.pieces.filter(t => isUsable(sit, t._2)).map { case (a, _) =>
       (a, boardType.norm.getNeigh(a).flatMap { case (vect, b) =>
         var dests = List[Pos]()
 
@@ -167,11 +167,16 @@ abstract class Variant private[variant](
 
         dests
       }
-        .map(b => Move(pa, a, b, sit, boardAfter(sit, a, b), autoEndTurn = true))
+        .map(b => computeMove(a, b, sit)) //TODO Grand Abalone autoEndTurn
         .toList
       )
     }
   }
+
+  def computeMove(orig: Pos, dest: Pos, sit: Situation, capture: Option[Pos] = Option.empty): Move =
+    Move(orig, dest, sit, boardAfter(sit, orig, dest), capture = capture, autoEndTurn = isAutoEndTurn(orig, dest, sit, capture))
+
+  def isAutoEndTurn(orig: Pos, dest: Pos, sit: Situation, capture: Option[Pos]): Boolean = true
 
   private def canJumpTo(sit: Situation, a: Pos): Boolean = !sit.board.isPiece(a) && boardType.isCell(a)
 

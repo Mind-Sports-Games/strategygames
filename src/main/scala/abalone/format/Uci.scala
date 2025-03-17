@@ -2,6 +2,7 @@ package strategygames.abalone.format
 
 import cats.data.Validated
 import cats.implicits._
+import strategygames.Player
 import strategygames.abalone.{Pos, Situation}
 
 sealed trait Uci {

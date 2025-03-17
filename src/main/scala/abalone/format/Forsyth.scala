@@ -1,7 +1,7 @@
 package strategygames.abalone.format
 
 import strategygames.abalone._
-import strategygames.abalone.variant.Variant
+import strategygames.abalone.variant.{Abalone, GrandAbalone, Variant}
 import strategygames.{Player, Score}
 
 /** Transform a game to standard Forsyth Edwards Notation
@@ -13,16 +13,17 @@ object Forsyth {
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
     Some(
       Situation(
-        Board(
+        board = Board(
           pieces = fen.pieces(variant.boardType),
           history = History(),
           variant = variant
         ),
-        fen.value.split(' ')(3) match {
+        player = fen.value.split(' ')(3) match {
           case "b" => P1
           case "w" => P2
           case _   => sys.error("Invalid player in fen")
-        }
+        },
+        prevPlayer = Option.empty//TODO Grand Abalone
       ).withHistory(
         History(
           score = Score(fen.player1Score, fen.player2Score),
@@ -35,10 +36,13 @@ object Forsyth {
   def <<(fen: FEN): Option[Situation] = <<@(Variant.default, fen)
 
   case class SituationPlus(sit: Situation, fullTurnCount: Int) {
-    def turnCount = fullTurnCount * 2 - sit.player.fold(2, 1)//TODO Grand Abalone
+    def turnCount = sit.board.variant match {
+      case Abalone => fullTurnCount * 2 - sit.player.fold(2, 1)
+      case GrandAbalone => fullTurnCount * 2 - sit.player.fold(2, 1)//TODO Grand Abalone
+    }
 
     // when we get a multiaction variant we should set this
-    def plies = turnCount
+    def plies = turnCount//TODO Grand Abalone
   }
 
   def <<<@(variant: Variant, fen: FEN): Option[SituationPlus] =

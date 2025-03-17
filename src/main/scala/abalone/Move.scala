@@ -1,10 +1,9 @@
 package strategygames.abalone
 
-import strategygames.MoveMetrics
+import strategygames.{MoveMetrics, Player}
 import strategygames.abalone.format.Uci
 
 case class Move(
-                 piece: Piece, //TODO seems totally unnecessary
                  orig: Pos, dest: Pos,
                  situationBefore: Situation,
                  after: Board,
@@ -19,6 +18,7 @@ case class Move(
       h.copy(
         lastTurn = if (autoEndTurn) h.currentTurn :+ toUci else h.lastTurn,
         currentTurn = if (autoEndTurn) List() else h.currentTurn :+ toUci,
+        moves = h.moves :+ (situationBefore.player, this),
         score = if (captures) h.score.add(situationBefore.player) else h.score,// This assumes the player cannot eject their own pieces
         halfMoveClock = if (captures) 0 else h.halfMoveClock + 1
       )
@@ -39,22 +39,21 @@ case class Move(
         val basePositionHashes =
           if (resetsPositionHashes) Array.empty: PositionHash
           else positionHashesOfSituationBefore
-        h.copy(positionHashes = Hash(Situation(after, !piece.player)) ++ basePositionHashes)
+
+        h.copy(positionHashes = Hash(Situation(after, !situationBefore.player)) ++ basePositionHashes)//TODO Grand Abalone
       }
   }
 
-  override def situationAfter = Situation(finalizeAfter, if (autoEndTurn) !piece.player else piece.player)//TODO Grand Abalone?
+  override def situationAfter = Situation(finalizeAfter, if (autoEndTurn) !situationBefore.player else situationBefore.player)//TODO Grand Abalone
 
   def applyVariantEffect: Move = before.variant addVariantEffect this
 
   // does this move capture an opponent piece?
   def captures = capture.isDefined
 
-  override def player = piece.player
-
   override def withMetrics(m: MoveMetrics) = copy(metrics = m)
 
   override def toUci = Uci.Move(orig, dest)
 
-  override def toString = s"$piece ${toUci.uci}"//TODO? why specify the piece? it only depends on the board
+  override def toString = s"${toUci.uci}"
 }

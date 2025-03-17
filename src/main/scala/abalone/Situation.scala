@@ -45,6 +45,5 @@ case class Situation(board: Board, player: Player) {
 }
 
 object Situation {
-  def apply(variant: Variant): Situation =
-    Situation(Board init variant, variant.startPlayer)
+  def apply(variant: Variant): Situation = Situation(Board init variant, variant.startPlayer)
 }

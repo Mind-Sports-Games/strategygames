@@ -16,8 +16,6 @@ abstract class Action(
 
   def finalizeAfter: Board = after
 
-  def player: Player
-
   def withMetrics(m: MoveMetrics): Action
 
   def toUci: Uci

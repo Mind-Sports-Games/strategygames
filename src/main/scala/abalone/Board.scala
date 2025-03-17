@@ -1,6 +1,7 @@
 package strategygames.abalone
 
 import strategygames.Player
+import strategygames.abalone.format.Uci
 import strategygames.abalone.variant.Variant
 
 case class Board(
@@ -27,6 +28,16 @@ case class Board(
   def materialImbalance: Int = variant.materialImbalance(this)
 
   def autoDraw: Boolean = history.threefoldRepetition && variant.repetitionEnabled
+
+  def lastActionPlayer: Option[Player] = history.lastAction
+    .flatMap {
+      case m: Uci.Move => Some(m.dest)
+      case d: Uci.Drop => Some(d.pos)
+      // TODO: this probably needs to be fixed?
+      case _           => sys.error("Dice Rolls are not supported (lastActionPlayer)")
+    }
+    .flatMap(apply)
+    .map(_.player)
 
   override def toString = s"$variant Position after ${history.recentTurnUciString}"
 
