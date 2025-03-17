@@ -100,7 +100,7 @@ object Forsyth {
       case (GameLogic.Abalone(), Variant.Abalone(variant), FEN.Abalone(fen))                =>
         abalone.format.Forsyth
           .<<<@(variant, fen)
-          .map(sp => SituationPlus(Situation.Abalone(sp.situation), sp.fullTurnCount))
+          .map(sp => SituationPlus(Situation.Abalone(sp.sit), sp.fullTurnCount))
       case (GameLogic.Dameo(), Variant.Dameo(variant), FEN.Dameo(fen))                      =>
         dameo.format.Forsyth
           .<<<@(variant, fen)
@@ -140,7 +140,7 @@ object Forsyth {
     case (GameLogic.Abalone(), FEN.Abalone(fen))           =>
       abalone.format.Forsyth
         .<<<(fen)
-        .map(sp => SituationPlus(Situation.Abalone(sp.situation), sp.fullTurnCount))
+        .map(sp => SituationPlus(Situation.Abalone(sp.sit), sp.fullTurnCount))
     case (GameLogic.Dameo(), FEN.Dameo(fen))               =>
       dameo.format.Forsyth
         .<<<(fen)
