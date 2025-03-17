@@ -11,31 +11,28 @@ object Forsyth {
   val initial = FEN("SS1ss/SSSsss/1SS1ss1/8/9/8/1ss1SS1/sssSSS/ss1SS 0 0 b 0 1") //TODO should NOT be here (I suppose)
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
-    Some(
+    val pp = hasPrevPlayer(variant)
+    Option(
       Situation(
         board = Board(
           pieces = fen.pieces(variant.boardType),
           history = History(
-            moves = variant match {
-              case GrandAbalone => fen.value.split(' ')(3) match {
-                case "0" => List.empty
-                case "b"
-              }List.empty//TODO Grand Abalone
-              case _ => List.empty
-            },//TODO Grand Abalone: prev player within list, if any, moves = (prevPlayer, null)
+            moves = if (pp) getPlayerFromStr(fen.value.split(' ')(3)) match {
+              case Some(_) => List((_, Option.empty))
+              case None => List.empty
+            } else List.empty,
             score = Score(fen.player1Score, fen.player2Score),
             halfMoveClock = fen.halfMovesSinceLastCapture.getOrElse(0)
           ),
           variant = variant
         ),
-        player = getPlayerFromStr(fen.value.split(' ')(variant match {
-          case GrandAbalone => 4
-        }3)).get
+        player = getPlayerFromStr(fen.value.split(' ')(if (pp) 4 else 3))
       )
     )
   }
 
   private def hasPrevPlayer(variant: Variant): Boolean = variant == GrandAbalone
+
   private def getPlayerFromStr(player: String, allowNone: Boolean = false): Option[Player] =
     player match {
       case "b" => Option(P1)

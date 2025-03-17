@@ -6,7 +6,7 @@ import strategygames.abalone.format.Uci
 case class History(
                     lastTurn: List[Uci] = List.empty,
                     currentTurn: List[Uci] = List.empty,
-                    moves: List[(Player, Move)] = List.empty,
+                    moves: List[(Player, Option[Move])] = List.empty,
                     positionHashes: PositionHash = Array.empty,
                     score: Score = Score(),
                     halfMoveClock: Int = 0

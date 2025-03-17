@@ -1,7 +1,7 @@
 package strategygames.abalone
 
+import strategygames.MoveMetrics
 import strategygames.abalone.format.Uci
-import strategygames.{MoveMetrics, Player}
 
 import scala.annotation.nowarn
 

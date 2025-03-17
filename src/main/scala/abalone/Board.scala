@@ -29,16 +29,6 @@ case class Board(
 
   def autoDraw: Boolean = history.threefoldRepetition && variant.repetitionEnabled
 
-  def lastActionPlayer: Option[Player] = history.lastAction
-    .flatMap {
-      case m: Uci.Move => Some(m.dest)
-      case d: Uci.Drop => Some(d.pos)
-      // TODO: this probably needs to be fixed?
-      case _           => sys.error("Dice Rolls are not supported (lastActionPlayer)")
-    }
-    .flatMap(apply)
-    .map(_.player)
-
   override def toString = s"$variant Position after ${history.recentTurnUciString}"
 
   lazy val actors: Map[Pos, Actor] = pieces.map { case (a, piece) => (a, Actor(piece, a, this)) }

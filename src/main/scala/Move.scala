@@ -360,7 +360,7 @@ object Move {
 
   final case class Abalone(m: abalone.Move)
       extends Move(
-        m.situationBefore.board.getPiece(m.orig).get,
+        Piece.Abalone(m.situationBefore.board.getPiece(m.orig).get),
         Pos.Abalone(m.orig),
         Pos.Abalone(m.dest),
         Situation.Abalone(m.situationBefore),

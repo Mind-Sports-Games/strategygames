@@ -1,6 +1,6 @@
 package strategygames.abalone
 
-import strategygames.{MoveMetrics, Player}
+import strategygames.MoveMetrics
 import strategygames.abalone.format.Uci
 
 case class Move(
@@ -10,7 +10,7 @@ case class Move(
                  autoEndTurn: Boolean,
                  capture: Option[Pos] = None,
                  metrics: MoveMetrics = MoveMetrics()
-                ) extends Action(situationBefore, after, metrics) {
+               ) extends Action(situationBefore, after, metrics) {
   def withHistory(h: History) = copy(after = after withHistory h)
 
   override def finalizeAfter: Board = {
@@ -18,8 +18,8 @@ case class Move(
       h.copy(
         lastTurn = if (autoEndTurn) h.currentTurn :+ toUci else h.lastTurn,
         currentTurn = if (autoEndTurn) List() else h.currentTurn :+ toUci,
-        moves = h.moves :+ (situationBefore.player, this),
-        score = if (captures) h.score.add(situationBefore.player) else h.score,// This assumes the player cannot eject their own pieces
+        moves = h.moves :+ (situationBefore.player, Option(this)),
+        score = if (captures) h.score.add(situationBefore.player) else h.score, // This assumes the player cannot eject their own pieces
         halfMoveClock = if (captures) 0 else h.halfMoveClock + 1
       )
     }
@@ -40,11 +40,11 @@ case class Move(
           if (resetsPositionHashes) Array.empty: PositionHash
           else positionHashesOfSituationBefore
 
-        h.copy(positionHashes = Hash(Situation(after, !situationBefore.player)) ++ basePositionHashes)//TODO Grand Abalone
+        h.copy(positionHashes = Hash(Situation(after, !situationBefore.player)) ++ basePositionHashes) //TODO Grand Abalone
       }
   }
 
-  override def situationAfter = Situation(finalizeAfter, if (autoEndTurn) !situationBefore.player else situationBefore.player)//TODO Grand Abalone
+  override def situationAfter = Situation(finalizeAfter, if (autoEndTurn) !situationBefore.player else situationBefore.player) //TODO Grand Abalone
 
   def applyVariantEffect: Move = before.variant addVariantEffect this
 
