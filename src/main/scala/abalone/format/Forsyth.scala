@@ -11,27 +11,25 @@ object Forsyth {
   val initial = FEN("SS1ss/SSSsss/1SS1ss1/8/9/8/1ss1SS1/sssSSS/ss1SS 0 0 b 0 1") //TODO should NOT be here (I suppose)
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
-    val pp = hasPrevPlayer(variant)
+    val pp = FEN.hasPrevPlayer(variant)
     Option(
       Situation(
         board = Board(
           pieces = fen.pieces(variant.boardType),
           history = History(
             moves = if (pp) getPlayerFromStr(fen.value.split(' ')(3)) match {
-              case Some(_) => List((_, Option.empty))
+              case Some(prevPlayer) => List((prevPlayer, Option.empty))
               case None => List.empty
             } else List.empty,
             score = Score(fen.player1Score, fen.player2Score),
-            halfMoveClock = fen.halfMovesSinceLastCapture.getOrElse(0)
+            halfMoveClock = fen.halfMovesSinceLastCapture(variant).getOrElse(0)
           ),
           variant = variant
         ),
-        player = getPlayerFromStr(fen.value.split(' ')(if (pp) 4 else 3))
+        player = getPlayerFromStr(fen.value.split(' ')(if (pp) 4 else 3)).get
       )
     )
   }
-
-  private def hasPrevPlayer(variant: Variant): Boolean = variant == GrandAbalone
 
   private def getPlayerFromStr(player: String, allowNone: Boolean = false): Option[Player] =
     player match {
@@ -74,10 +72,14 @@ object Forsyth {
   def >>(game: Game): FEN = {
     val boardFen = getFen_board(game.situation.board)
     val scoreStr = game.situation.board.history.score.fenStr
+    val prevPlayer = if (FEN.hasPrevPlayer(game.situation.board.variant)) {
+      if (game.situation.board.history.moves.isEmpty) " 0"
+      else game.situation.board.history.moves.last._1.fold(" b", " w")
+    } else ""
     val player = game.situation.player.fold('b', 'w')
     val halfMoves = game.situation.board.history.halfMoveClock
     val fullMoves = game.fullTurnCount
-    FEN(s"${boardFen} ${scoreStr} ${player} ${halfMoves} ${fullMoves}")
+    FEN(s"$boardFen $scoreStr$prevPlayer $player $halfMoves $fullMoves")
   }
 
   def exportBoard(board: Board): String = {

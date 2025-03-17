@@ -1,6 +1,8 @@
 package strategygames.abalone.format
 
 import strategygames.Player
+import strategygames.abalone.format.FEN.hasPrevPlayer
+import strategygames.abalone.variant.{GrandAbalone, Variant}
 import strategygames.abalone.{BoardType, P1, P2, Piece, PieceMap, Role}
 
 final case class FEN(value: String) extends AnyVal {
@@ -31,12 +33,12 @@ final case class FEN(value: String) extends AnyVal {
 
   def player: Option[Player] = value.split(' ').lift(3).flatMap(_.headOption).flatMap(Player.apply).map(!_)
 
-  def halfMovesSinceLastCapture: Option[Int] = intFromFen(4)
+  def halfMovesSinceLastCapture(variant: Variant): Option[Int] = intFromFen(if (hasPrevPlayer(variant)) 5 else 4)
 
-  def fullMove: Option[Int] = intFromFen(5)
+  def fullMove(variant: Variant): Option[Int] = intFromFen(if (hasPrevPlayer(variant)) 6 else 5)
 
-  def ply: Option[Int] =
-    fullMove map { fm =>
+  def ply(variant: Variant): Option[Int] =
+    fullMove(variant) map { fm =>
       fm * 2 - (if (player.exists(_.p1)) 2 else 1)
     }
 
@@ -48,4 +50,6 @@ final case class FEN(value: String) extends AnyVal {
 
 object FEN {
   def clean(source: String): FEN = FEN(source.replace("_", " ").trim)
+
+  def hasPrevPlayer(variant: Variant): Boolean = variant == GrandAbalone
 }

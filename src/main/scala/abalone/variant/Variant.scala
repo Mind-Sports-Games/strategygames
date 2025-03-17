@@ -174,7 +174,7 @@ abstract class Variant private[variant](
   }
 
   def computeMove(orig: Pos, dest: Pos, sit: Situation, capture: Option[Pos] = Option.empty): Move =
-    Move(orig, dest, sit, boardAfter(sit, orig, dest), capture = capture, autoEndTurn = isAutoEndTurn(orig, dest, sit, capture))
+    Move(sit.player, orig, dest, sit, boardAfter(sit, orig, dest), capture = capture, autoEndTurn = isAutoEndTurn(orig, dest, sit, capture))
 
   def isAutoEndTurn(orig: Pos, dest: Pos, sit: Situation, capture: Option[Pos]): Boolean = true
 

@@ -70,7 +70,7 @@ object Replay {
     val after = before.situation.board.variant.boardAfter(before.situation, orig, dest)
 
     Move(
-      piece = before.situation.board.pieces(orig),
+      before.situation.player,
       orig = orig,
       dest = dest,
       situationBefore = before.situation,

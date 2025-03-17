@@ -1,7 +1,6 @@
 package strategygames.abalone
 
 import strategygames.Player
-import strategygames.abalone.format.Uci
 import strategygames.abalone.variant.Variant
 
 case class Board(

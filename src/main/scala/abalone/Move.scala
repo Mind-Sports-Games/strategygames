@@ -1,9 +1,10 @@
 package strategygames.abalone
 
-import strategygames.MoveMetrics
+import strategygames.{MoveMetrics, Player}
 import strategygames.abalone.format.Uci
 
 case class Move(
+                 player: Player,
                  orig: Pos, dest: Pos,
                  situationBefore: Situation,
                  after: Board,
