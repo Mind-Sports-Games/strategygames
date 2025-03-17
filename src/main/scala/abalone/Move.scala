@@ -56,5 +56,5 @@ case class Move(
 
   override def toUci = Uci.Move(orig, dest)
 
-  override def toString = s"${toUci.uci}"
+  override def toString = s"${player.number} ${toUci.uci}"
 }
