@@ -7,12 +7,10 @@ case class History(
                     lastTurn: List[Uci] = List.empty,
                     currentTurn: List[Uci] = List.empty,
                     positionHashes: PositionHash = Array.empty,
-                    score: Score = Score(0, 0),
+                    score: Score = Score(),
                     halfMoveClock: Int = 0
-                   ) {
-
-  lazy val lastAction: Option[Uci] =
-    if (currentTurn.nonEmpty) currentTurn.reverse.headOption else lastTurn.reverse.headOption
+                  ) {
+  lazy val lastAction: Option[Uci] = recentTurn.reverse.headOption
 
   lazy val recentTurn: List[Uci] = if (currentTurn.nonEmpty) currentTurn else lastTurn
 
@@ -21,8 +19,8 @@ case class History(
 
   private def isRepetition(times: Int) =
     positionHashes.length > (times - 1) * 4 * Hash.size && {
-      // compare only hashes for positions with the same side to move
-      val positions = positionHashes.sliding(Hash.size, 2 * Hash.size).toList
+      //TODO Grand Abalone: we should only take hashes when the same player start their turn
+      val positions = positionHashes.sliding(Hash.size, 2 * Hash.size).toList// compare only hashes for positions with the same side to move
       positions.headOption match {
         case Some(Array(x, y, z)) =>
           (positions count {
