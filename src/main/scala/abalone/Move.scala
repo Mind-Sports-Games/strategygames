@@ -45,7 +45,7 @@ case class Move(
       }
   }
 
-  override def situationAfter = Situation(finalizeAfter, if (autoEndTurn) !situationBefore.player else situationBefore.player) //TODO Grand Abalone
+  override def situationAfter = Situation(finalizeAfter, if (autoEndTurn) !situationBefore.player else situationBefore.player)
 
   def applyVariantEffect: Move = before.variant addVariantEffect this
 
