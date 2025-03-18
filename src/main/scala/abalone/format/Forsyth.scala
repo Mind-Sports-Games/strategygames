@@ -17,10 +17,7 @@ object Forsyth {
         board = Board(
           pieces = fen.pieces(variant.boardType),
           history = History(
-            moves = if (pp) getPlayerFromStr(fen.value.split(' ')(3)) match {
-              case Some(prevPlayer) => List((prevPlayer, Option.empty))
-              case None => List.empty
-            } else List.empty,
+            prevPlayer = if (pp) getPlayerFromStr(fen.value.split(' ')(3)) else None,
             score = Score(fen.player1Score, fen.player2Score),
             halfMoveClock = fen.halfMovesSinceLastCapture(variant).getOrElse(0)
           ),
@@ -73,8 +70,7 @@ object Forsyth {
     val boardFen = getFen_board(game.situation.board)
     val scoreStr = game.situation.board.history.score.fenStr
     val prevPlayer = if (FEN.hasPrevPlayer(game.situation.board.variant)) {
-      if (game.situation.board.history.moves.isEmpty) " 0"
-      else game.situation.board.history.moves.last._1.fold(" b", " w")
+      game.situation.board.history.prevPlayer.fold(" 0")(p => p.fold(" b", " w"))
     } else ""
     val player = game.situation.player.fold('b', 'w')
     val halfMoves = game.situation.board.history.halfMoveClock

@@ -6,7 +6,8 @@ import strategygames.abalone.format.Uci
 case class History(
                     lastTurn: List[Uci] = List.empty,
                     currentTurn: List[Uci] = List.empty,
-                    moves: List[(Player, Option[Move])] = List.empty,
+                    prevPlayer: Option[Player] = None,// Contained in lastMove, but we may want to know the previous player without knowing the previous move
+                    prevMove: Option[Move] = None,
                     positionHashes: PositionHash = Array.empty,
                     score: Score = Score(),
                     halfMoveClock: Int = 0
@@ -21,7 +22,7 @@ case class History(
   private def isRepetition(times: Int) =
     positionHashes.length > (times - 1) * 4 * Hash.size && {
       //TODO Grand Abalone: we should only take hashes when the same player start their turn
-      val positions = positionHashes.sliding(Hash.size, 2 * Hash.size).toList// compare only hashes for positions with the same side to move
+      val positions = positionHashes.sliding(Hash.size, 2 * Hash.size).toList // compare only hashes for positions with the same side to move
       positions.headOption match {
         case Some(Array(x, y, z)) =>
           (positions count {

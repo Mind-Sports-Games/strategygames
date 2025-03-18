@@ -1,7 +1,7 @@
 package strategygames.abalone
 
-import strategygames.{MoveMetrics, Player}
 import strategygames.abalone.format.Uci
+import strategygames.{MoveMetrics, Player}
 
 case class Move(
                  player: Player,
@@ -19,8 +19,9 @@ case class Move(
       h.copy(
         lastTurn = if (autoEndTurn) h.currentTurn :+ toUci else h.lastTurn,
         currentTurn = if (autoEndTurn) List() else h.currentTurn :+ toUci,
-        moves = h.moves :+ (situationBefore.player, Option(this)),
-        score = if (captures) h.score.add(situationBefore.player) else h.score, // This assumes the player cannot eject their own pieces
+        prevPlayer = Option(player),
+        prevMove = Option(this),
+        score = if (captures) h.score.add(player) else h.score, // This assumes the player cannot eject their own pieces
         halfMoveClock = if (captures) 0 else h.halfMoveClock + 1
       )
     }
