@@ -1,7 +1,7 @@
 package strategygames.abalone.format
 
 import strategygames.Player
-import strategygames.abalone.variant.{GrandAbalone, Variant}
+import strategygames.abalone.variant.Variant
 import strategygames.abalone.{BoardType, P1, P2, Piece, PieceMap, Role}
 
 final case class FEN(value: String) extends AnyVal {
