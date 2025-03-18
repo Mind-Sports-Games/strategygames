@@ -156,7 +156,7 @@ object Pos {
 
 object Piotr {
   /** https://en.wikipedia.org/wiki/List_of_Unicode_characters#Latin_script, from the latin-1 script. */
-  private val piotrs: Array[Char] = Array(
+  val piotrs: Array[Char] = Array(
     'a',
     'b',
     'c',

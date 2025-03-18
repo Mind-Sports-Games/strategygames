@@ -1,12 +1,12 @@
 package strategygames.abalone
 
 final class Hash(size: Int) {
-  def apply(situation: Situation): PositionHash = {
-    val l = Hash.get(situation, Hash.polyglotTable)
+  def apply(sit: Situation): PositionHash = {
+    val l = Hash.get(sit, Hash.polyglotTable)
     if (size <= 8) {
       Array.tabulate(size)(i => (l >>> ((7 - i) * 8)).toByte)
     } else {
-      val m = Hash.get(situation, Hash.randomTable)
+      val m = Hash.get(sit, Hash.randomTable)
       Array.tabulate(size)(i =>
         if (i < 8) (l >>> ((7 - i) * 8)).toByte
         else (m >>> ((15 - i) * 8)).toByte
@@ -33,24 +33,22 @@ object Hash {
   private val polyglotTable = new ZobristConstants(0)
   private lazy val randomTable = new ZobristConstants(16)
 
-  private def actorIndex(actor: Actor) = 80 * actor.piece.player.fold(1, 0) + actor.pos.hashCode
+  private def actorIndex(actor: Actor) = Piotr.piotrs.size * actor.piece.player.fold(1, 0) + actor.pos.hashCode
 
-  def get(situation: Situation, table: ZobristConstants): Long = {
-    val board = situation.board
-    val hturn = situation.player.fold(table.p1TurnMask, 0L)
+  def get(sit: Situation, table: ZobristConstants): Long = {
+    val phturn =
+      if (sit.board.variant.hasPrevPlayer) sit.board.history.prevPlayer.fold(0L)(_.fold(table.p1TurnMask, 0L))
+      else 0L
+    val hturn = sit.player.fold(table.p1TurnMask, 0L)
 
-    val hactors = board.actors.values.view
-      .map {
-        table.actorMasks compose actorIndex _
-      }
-      .fold(hturn)(_ ^ _)
-
-    hactors
+    sit.board.actors.values.view
+      .map(table.actorMasks compose actorIndex _)
+      .fold(phturn ^ hturn)(_ ^ _)
   }
 
   private val h = new Hash(size)
 
-  def apply(situation: Situation): PositionHash = h.apply(situation)
+  def apply(sit: Situation): PositionHash = h.apply(sit)
 
   def debug(hashes: PositionHash) = hashes.map(_.toInt).sum.toString
 }

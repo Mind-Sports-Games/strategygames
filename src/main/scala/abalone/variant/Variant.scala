@@ -167,7 +167,7 @@ abstract class Variant private[variant](
 
         dests
       }
-        .map(b => computeMove(a, b, sit)) //TODO Grand Abalone autoEndTurn
+        .map(b => computeMove(a, b, sit))
         .toList
       )
     }
@@ -297,6 +297,15 @@ abstract class Variant private[variant](
   def valid(@nowarn board: Board, @nowarn strict: Boolean): Boolean = true
 
   def isIrreversible(move: Move): Boolean = move.capture.nonEmpty
+
+  /** Indicates whether the previous player should be remembered to asses a situation. */
+  def hasPrevPlayer: Boolean = false
+
+  def turnCountFromFen(fenTurnCount: Int, player: Player) =
+    fenTurnCount * 2 - player.fold(2, 1)
+
+  def pliesFromFen(fenTurnCount: Int, player: Player, currentTurnPlies: Int = 0) =
+    turnCountFromFen(fenTurnCount, player) + currentTurnPlies
 
   def defaultRole: Role = Role.defaultRole
 

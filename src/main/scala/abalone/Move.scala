@@ -34,15 +34,15 @@ case class Move(
         capture.flatMap(before.getPiece)
       )
       .updateHistory { h =>
-        lazy val positionHashesOfSituationBefore =
-          if (h.positionHashes.isEmpty) Hash(situationBefore)
+        val prevPositionHashes =
+          if (board.variant.isIrreversible(this)) Array.empty: PositionHash
+          else if (h.positionHashes.isEmpty) Hash(situationBefore)
           else h.positionHashes
-        val resetsPositionHashes = board.variant.isIrreversible(this)
-        val basePositionHashes =
-          if (resetsPositionHashes) Array.empty: PositionHash
-          else positionHashesOfSituationBefore
 
-        h.copy(positionHashes = Hash(Situation(after, !situationBefore.player)) ++ basePositionHashes) //TODO Grand Abalone
+        h.copy(positionHashes =
+          if (autoEndTurn) Hash(Situation(after, player)) ++ prevPositionHashes
+          else prevPositionHashes
+        )
       }
   }
 

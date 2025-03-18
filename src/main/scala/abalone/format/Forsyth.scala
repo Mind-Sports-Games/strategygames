@@ -1,17 +1,17 @@
 package strategygames.abalone.format
 
 import strategygames.abalone._
-import strategygames.abalone.variant.{Abalone, GrandAbalone, Variant}
+import strategygames.abalone.variant.{Abalone, Variant}
 import strategygames.{Player, Score}
 
-/** Transform a game to standard Forsyth Edwards Notation
+/** Transforms a game to standard Forsyth-Edwards notation
   * http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
   */
 object Forsyth {
-  val initial = FEN("SS1ss/SSSsss/1SS1ss1/8/9/8/1ss1SS1/sssSSS/ss1SS 0 0 b 0 1") //TODO should NOT be here (I suppose)
+  val initial = Abalone.initialFen//TODO?
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
-    val pp = FEN.hasPrevPlayer(variant)
+    val pp = variant.hasPrevPlayer
     Option(
       Situation(
         board = Board(
@@ -38,13 +38,13 @@ object Forsyth {
   def <<(fen: FEN): Option[Situation] = <<@(Variant.default, fen)
 
   case class SituationPlus(sit: Situation, fullTurnCount: Int) {
-    def turnCount = sit.board.variant match {
-      case Abalone => fullTurnCount * 2 - sit.player.fold(2, 1)
-      case GrandAbalone => fullTurnCount * 2 - sit.player.fold(2, 1)//TODO Grand Abalone
-    }
+    def turnCount = sit.board.variant.turnCountFromFen(fullTurnCount, sit.player)
 
-    // when we get a multiaction variant we should set this
-    def plies = turnCount//TODO Grand Abalone
+    def plies = sit.board.variant.pliesFromFen(
+      fullTurnCount,
+      sit.player,
+      sit.board.history.currentTurn.size
+    )
   }
 
   def <<<@(variant: Variant, fen: FEN): Option[SituationPlus] =
@@ -69,8 +69,8 @@ object Forsyth {
   def >>(game: Game): FEN = {
     val boardFen = getFen_board(game.situation.board)
     val scoreStr = game.situation.board.history.score.fenStr
-    val prevPlayer = if (FEN.hasPrevPlayer(game.situation.board.variant)) {
-      game.situation.board.history.prevPlayer.fold(" 0")(p => p.fold(" b", " w"))
+    val prevPlayer = if (game.situation.board.variant.hasPrevPlayer) {
+      game.situation.board.history.prevPlayer.fold(" *")(p => p.fold(" b", " w"))
     } else ""
     val player = game.situation.player.fold('b', 'w')
     val halfMoves = game.situation.board.history.halfMoveClock
