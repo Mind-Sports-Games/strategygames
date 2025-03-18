@@ -34,11 +34,9 @@ object BoardType {
 
 /** A Hexagon of side n fits in a square of side 2n - 1 */
 sealed abstract class HexBoardType(val side: Int) extends BoardType(width = 2 * side - 1, height = 2 * side - 1) {
-  val centre = new Pos(side - 1, side - 1)
-
   override val key = s"hex-${side}"
 
-  override def isCell(x: Int, y: Int) = norm.dist(centre, x, y) < side
+  override def isCell(x: Int, y: Int) = norm.dist(side - 1, side - 1, x, y) < side
 }
 
 case object Hex5 extends HexBoardType(5)

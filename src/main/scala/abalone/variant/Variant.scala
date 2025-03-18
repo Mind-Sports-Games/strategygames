@@ -62,7 +62,7 @@ abstract class Variant private[variant](
       .groupBy(_._1)
       .map { case (k, v) => k -> v.map(_._2).flatten }
 
-  private def validMoves_line(sit: Situation): Map[Pos, List[Move]] = {
+  def validMoves_line(sit: Situation): Map[Pos, List[Move]] = {
     sit.board.pieces.filter(t => isUsable(sit, t._2)).map { case (a, _) =>
       (a, boardType.norm.getNeigh(a).map { case (vect, b) =>
         var dest = Option.empty[Pos]
@@ -121,7 +121,7 @@ abstract class Variant private[variant](
     }
   }
 
-  private def validMoves_jump(sit: Situation): Map[Pos, List[Move]] = {
+  def validMoves_jump(sit: Situation): Map[Pos, List[Move]] = {
     sit.board.pieces.filter(t => isUsable(sit, t._2)).map { case (a, _) =>
       (a, boardType.norm.getNeigh(a).flatMap { case (vect, b) =>
         var dests = List[Pos]()

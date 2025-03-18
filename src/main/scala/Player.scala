@@ -11,7 +11,7 @@ sealed trait Player {
   val classicName: String
   val number: Int
 
-  override val hashCode = number
+  override def hashCode = number
 
   val p1 = this == Player.P1
   val p2 = this == Player.P2
