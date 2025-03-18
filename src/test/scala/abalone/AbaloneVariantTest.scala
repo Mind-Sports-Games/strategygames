@@ -22,16 +22,16 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
    *  P2: E4, H5
    */
   "custom basic position" should {
-    val fen       = format.FEN("5/6/7/8/4SSSs1/4s3/7/6/5 0 0 b 0 0")
-    val board     = Board(fen.pieces, History(score = Score(0, 0)), variant.Abalone)
-    val situation = Situation(board, P1)
-    val movesOf1  = board.variant.validMovesOf1(situation)
-    val movesOf23 = board.variant.validMovesOf2And3(situation)
-    val game      = Game(
-      board.variant
-    ) // @TODO : check why it does not set the piecemap correctly. See a few lines below we have to use board.pieces instead.
+    val fen        = format.FEN("5/6/7/4s3/4SSSs1/8/4s3/7/6/5 0 0 b 0 0")
+    val board      = Board(fen.pieces(variant.Abalone.boardType), History(), variant.Abalone)
+    val situation  = Situation(board, P1)
+    val validMoves = board.variant.validMoves(situation)
+    val moves      = board.variant.validMoves(situation).flatMap(_._2)
+    val movesOf1   = moves.filter(m => board.variant.boardType.norm(m.dest - m.orig) == 1)
+    val movesOf23  = moves.filter(m => board.variant.boardType.norm(m.dest - m.orig) > 1)
+    val game       = Game(board.variant) // @TODO : check why it does not set the piecemap correctly. See a few lines below we have to use board.pieces instead.
     val validMoves  = game.board.variant.validMoves(situation)
-    val game2       = game(validMoves(Pos.G5)(6))   // 3 marbles upLeft: g5e6
+    val game2       = game(validMoves(new Pos(6, 4))(6))   // 3 marbles upLeft: g5e6
     val validMoves2 = game2.board.variant.validMoves(game2.situation)
     val game3       = game2(validMoves2(Pos.H5)(5)) // 1 marble downLeft h5g4
     val validMoves3 = game3.board.variant.validMoves(game3.situation)
