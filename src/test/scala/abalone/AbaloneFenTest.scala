@@ -7,12 +7,10 @@ import strategygames.{ Score, Status }
 class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
   "initial default FEN (Belgian Daisy start position)" should {
     val fen       = variant.Abalone.initialFen
-    val pieces    = fen.pieces
+    val pieces    = fen.pieces(variant.Abalone.boardType)
     val board     = Board(
       pieces,
-      History(
-        score = Score(0, 0)
-      ),
+      History(),
       variant.Abalone
     )
     val situation = Situation(board, P1)
@@ -33,71 +31,74 @@ class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
     }
 
     "set both moves counters to expected initial value" in {
-      fen.fullMove.get must_== 1
-      fen.halfMovesSinceLastCapture.get must_== 0
+      fen.fullMove(variant.Abalone).get must_== 1
+      fen.halfMovesSinceLastCapture(variant.Abalone).get must_== 0
     }
 
     "draw a daisy of 7 marbles side by side on bottom for each player, then applies central symmetry on e5 to draw the ones on the top" in {
-      pieces.get(Pos.A1) must_== Some(Piece(P1, Stone))
-      pieces.get(Pos.B1) must_== Some(Piece(P1, Stone))
-      pieces.get(Pos.D1) must_== Some(Piece(P2, Stone))
-      pieces.get(Pos.E1) must_== Some(Piece(P2, Stone))
+      pieces.get(new Pos(0, 0)) must_== Some(Piece(P1, Stone))
+      pieces.get(new Pos(1, 0)) must_== Some(Piece(P1, Stone))
+      pieces.get(new Pos(3, 0)) must_== Some(Piece(P2, Stone))
+      pieces.get(new Pos(4, 0)) must_== Some(Piece(P2, Stone))
 
-      pieces.get(Pos.A2) must_== Some(Piece(P1, Stone))
-      pieces.get(Pos.B2) must_== Some(Piece(P1, Stone))
-      pieces.get(Pos.C2) must_== Some(Piece(P1, Stone))
-      pieces.get(Pos.D2) must_== Some(Piece(P2, Stone))
-      pieces.get(Pos.E2) must_== Some(Piece(P2, Stone))
-      pieces.get(Pos.F2) must_== Some(Piece(P2, Stone))
+      pieces.get(new Pos(0, 1)) must_== Some(Piece(P1, Stone))
+      pieces.get(new Pos(1, 1)) must_== Some(Piece(P1, Stone))
+      pieces.get(new Pos(2, 1)) must_== Some(Piece(P1, Stone))
+      pieces.get(new Pos(3, 1)) must_== Some(Piece(P2, Stone))
+      pieces.get(new Pos(4, 1)) must_== Some(Piece(P2, Stone))
+      pieces.get(new Pos(5, 1)) must_== Some(Piece(P2, Stone))
 
-      pieces.get(Pos.B3) must_== Some(Piece(P1, Stone))
-      pieces.get(Pos.C3) must_== Some(Piece(P1, Stone))
-      pieces.get(Pos.E3) must_== Some(Piece(P2, Stone))
-      pieces.get(Pos.F3) must_== Some(Piece(P2, Stone))
+      pieces.get(new Pos(1, 2)) must_== Some(Piece(P1, Stone))
+      pieces.get(new Pos(2, 2)) must_== Some(Piece(P1, Stone))
+      pieces.get(new Pos(4, 2)) must_== Some(Piece(P2, Stone))
+      pieces.get(new Pos(5, 2)) must_== Some(Piece(P2, Stone))
+(1, 1)
+      pieces.get(new Pos(3, 6)) must_== Some(Piece(P2, Stone))
+      pieces.get(new Pos(4, 6)) must_== Some(Piece(P2, Stone))
+      pieces.get(new Pos(6, 6)) must_== Some(Piece(P1, Stone))
+      pieces.get(new Pos(7, 6)) must_== Some(Piece(P1, Stone))
 
-      pieces.get(Pos.D7) must_== Some(Piece(P2, Stone))
-      pieces.get(Pos.E7) must_== Some(Piece(P2, Stone))
-      pieces.get(Pos.G7) must_== Some(Piece(P1, Stone))
-      pieces.get(Pos.H7) must_== Some(Piece(P1, Stone))
+      pieces.get(new Pos(3, 7)) must_== Some(Piece(P2, Stone))
+      pieces.get(new Pos(4, 7)) must_== Some(Piece(P2, Stone))
+      pieces.get(new Pos(5, 7)) must_== Some(Piece(P2, Stone))
+      pieces.get(new Pos(6, 7)) must_== Some(Piece(P1, Stone))
+      pieces.get(new Pos(7, 7)) must_== Some(Piece(P1, Stone))
+      pieces.get(new Pos(8, 7)) must_== Some(Piece(P1, Stone))
 
-      pieces.get(Pos.D8) must_== Some(Piece(P2, Stone))
-      pieces.get(Pos.E8) must_== Some(Piece(P2, Stone))
-      pieces.get(Pos.F8) must_== Some(Piece(P2, Stone))
-      pieces.get(Pos.G8) must_== Some(Piece(P1, Stone))
-      pieces.get(Pos.H8) must_== Some(Piece(P1, Stone))
-      pieces.get(Pos.I8) must_== Some(Piece(P1, Stone))
-
-      pieces.get(Pos.E9) must_== Some(Piece(P2, Stone))
-      pieces.get(Pos.F9) must_== Some(Piece(P2, Stone))
-      pieces.get(Pos.H9) must_== Some(Piece(P1, Stone))
-      pieces.get(Pos.I9) must_== Some(Piece(P1, Stone))
+      pieces.get(new Pos(4, 8)) must_== Some(Piece(P2, Stone))
+      pieces.get(new Pos(5, 8)) must_== Some(Piece(P2, Stone))
+      pieces.get(new Pos(7, 8)) must_== Some(Piece(P1, Stone))
+      pieces.get(new Pos(8, 8)) must_== Some(Piece(P1, Stone))
     }
 
     // @TODO: ensure other types of moves are generated correctly when validMoves does work entirely
     "see 14 marbles able to move as 1" in {
-      board.variant.validMovesOf1(situation).size must_== 14
+      board.variant.validMoves(situation)
+        .filter(_._2.find(m => board.variant.boardType.norm(m.dest - m.orig) == 1).isDefined)
+        .size must_== 14
     }
     // @TODO: ensure other types of moves are generated correctly when validMoves does work entirely
     "see 20 different moves of 1 marble" in {
-      board.variant.validMovesOf1(situation).foldLeft(0)(_ + _._2.size) must_== 20
+      board.variant.validMoves(situation)
+        .flatMap(_._2)
+        .filter(m => board.variant.boardType.norm(m.dest - m.orig) == 1)
+        .size must_== 20
     }
   }
 
-  "Snakes start position" should {
-    val snakesFen = new format.FEN("SSSSS/S5/S6/S1sssss1/1S5s1/1SSSSS1s/6s/5s/sssss 0 0 b 0 0")
-    val pieces    = snakesFen.pieces
-    val board     = Board(
+  "Snakes variant start position" should {
+    val snakesVariantFen = new format.FEN("sssss/5s/6s/1SSSSS1s/1S5s1/S1sssss1/S6/S5/SSSSS 0 0 b 0 0")
+    val pieces           = snakesVariantFen.pieces(variant.Abalone.boardType)
+    val board            = Board(
       pieces,
-      History(
-        score = Score(0, 0)
-      ),
+      History(),
       variant.Abalone
     )
-    val situation = Situation(board, P1)
+    val situation        = Situation(board, P1)
 
     "have Black starting the game" in {
-      snakesFen.player must_== Some(P1)
-      snakesFen.value.split(' ').lift(3) must_== Some("b")
+      snakesVariantFen.player must_== Some(P1)
+      snakesVariantFen.value.split(' ').lift(3) must_== Some("b")
     }
 
     "have a total of 14 marbles per player" in {
@@ -105,14 +106,14 @@ class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
       pieces.filter(p => p._2.player == P2).size must_== 14
     }
 
-    "has an even number of valid moves, as the position is symmetrical" in {
+    "have an even number of valid moves, as the position is symmetrical" in {
       board.variant.validMoves(situation).foldLeft(0)(_ + _._2.size) % 2 must_== 0
     }
   }
 
   "Atomouche start position" should {
-    val atomoucheFen = new format.FEN("Ss3/s2SsS/2S4/S1s4s/s2S1s2S/S4S1s/4s2/sSs2S/3Ss 0 0 b 0 0")
-    val pieces       = atomoucheFen.pieces
+    val atomoucheFen = new format.FEN("3Ss/sSs2S/4s2/S4S1s/s2S1s2S/S1s4s/2S4/s2SsS/Ss3 0 0 b 0 0")
+    val pieces       = atomoucheFen.pieces(variant.Abalone.boardType)
 
     "have Black starting the game" in {
       atomoucheFen.player must_== Some(P1)
@@ -125,42 +126,40 @@ class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
     }
 
     "have each marble placed at the expected position" in {
-      pieces.get(Pos.D1) must_== Some(Piece(P1, Stone))
-      pieces.get(Pos.B2) must_== Some(Piece(P1, Stone))
-      pieces.get(Pos.F2) must_== Some(Piece(P1, Stone))
-      pieces.get(Pos.A4) must_== Some(Piece(P1, Stone))
-      pieces.get(Pos.F4) must_== Some(Piece(P1, Stone))
-      pieces.get(Pos.D5) must_== Some(Piece(P1, Stone))
-      pieces.get(Pos.I5) must_== Some(Piece(P1, Stone))
-      pieces.get(Pos.B6) must_== Some(Piece(P1, Stone))
-      pieces.get(Pos.E7) must_== Some(Piece(P1, Stone))
-      pieces.get(Pos.G8) must_== Some(Piece(P1, Stone))
-      pieces.get(Pos.I8) must_== Some(Piece(P1, Stone))
-      pieces.get(Pos.E9) must_== Some(Piece(P1, Stone))
+      pieces.get(new Pos(3, 0)) must_== Some(Piece(P1, Stone))
+      pieces.get(new Pos(1, 1)) must_== Some(Piece(P1, Stone))
+      pieces.get(new Pos(5, 1)) must_== Some(Piece(P1, Stone))
+      pieces.get(new Pos(0, 3)) must_== Some(Piece(P1, Stone))
+      pieces.get(new Pos(5, 3)) must_== Some(Piece(P1, Stone))
+      pieces.get(new Pos(3, 4)) must_== Some(Piece(P1, Stone))
+      pieces.get(new Pos(8, 4)) must_== Some(Piece(P1, Stone))
+      pieces.get(new Pos(1, 5)) must_== Some(Piece(P1, Stone))
+      pieces.get(new Pos(4, 6)) must_== Some(Piece(P1, Stone))
+      pieces.get(new Pos(6, 7)) must_== Some(Piece(P1, Stone))
+      pieces.get(new Pos(8, 7)) must_== Some(Piece(P1, Stone))
+      pieces.get(new Pos(4, 8)) must_== Some(Piece(P1, Stone))
 
-      pieces.get(Pos.E1) must_== Some(Piece(P2, Stone))
-      pieces.get(Pos.A2) must_== Some(Piece(P2, Stone))
-      pieces.get(Pos.C2) must_== Some(Piece(P2, Stone))
-      pieces.get(Pos.E3) must_== Some(Piece(P2, Stone))
-      pieces.get(Pos.H4) must_== Some(Piece(P2, Stone))
-      pieces.get(Pos.A5) must_== Some(Piece(P2, Stone))
-      pieces.get(Pos.F5) must_== Some(Piece(P2, Stone))
-      pieces.get(Pos.D6) must_== Some(Piece(P2, Stone))
-      pieces.get(Pos.I6) must_== Some(Piece(P2, Stone))
-      pieces.get(Pos.D8) must_== Some(Piece(P2, Stone))
-      pieces.get(Pos.H8) must_== Some(Piece(P2, Stone))
-      pieces.get(Pos.F9) must_== Some(Piece(P2, Stone))
+      pieces.get(new Pos(4, 0)) must_== Some(Piece(P2, Stone))
+      pieces.get(new Pos(0, 1)) must_== Some(Piece(P2, Stone))
+      pieces.get(new Pos(2, 1)) must_== Some(Piece(P2, Stone))
+      pieces.get(new Pos(4, 2)) must_== Some(Piece(P2, Stone))
+      pieces.get(new Pos(7, 3)) must_== Some(Piece(P2, Stone))
+      pieces.get(new Pos(0, 4)) must_== Some(Piece(P2, Stone))
+      pieces.get(new Pos(5, 4)) must_== Some(Piece(P2, Stone))
+      pieces.get(new Pos(3, 5)) must_== Some(Piece(P2, Stone))
+      pieces.get(new Pos(8, 5)) must_== Some(Piece(P2, Stone))
+      pieces.get(new Pos(3, 7)) must_== Some(Piece(P2, Stone))
+      pieces.get(new Pos(7, 7)) must_== Some(Piece(P2, Stone))
+      pieces.get(new Pos(5, 8)) must_== Some(Piece(P2, Stone))
     }
   }
 
-  "Fun little game situation \"5/6/2S4/2SSSS2/2ssSs3/1sssSSS1/2S4/1ssS2/3s1 5 3 b 11 42\"" should {
-    val puzzleFen = new format.FEN("5/6/2S4/2SSSS2/2ssSs3/1sssSSS1/2S4/1ssS2/3s1 5 3 b 11 42")
-    val pieces    = puzzleFen.pieces
+  "Fun little game situation \"3s1/1ssS2/2S4/1sssSSS1/2ssSs3/2SSSS2/2S4/6/5 5 3 b 11 42\"" should {
+    val puzzleFen = new format.FEN("3s1/1ssS2/2S4/1sssSSS1/2ssSs3/2SSSS2/2S4/6/5 5 3 b 11 42")
+    val pieces    = puzzleFen.pieces(variant.Abalone.boardType)
     val board     = Board(
       pieces,
-      History(
-        score = Score(5, 3)
-      ),
+      History(score = Score(5, 3)),
       variant.Abalone
     )
     val situation = Situation(board, P1)
@@ -182,11 +181,11 @@ class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
     }
 
     "11 plies were played since last time a marble was pushed out" in {
-      puzzleFen.halfMovesSinceLastCapture must_== Some(11)
+      puzzleFen.halfMovesSinceLastCapture(variant.Abalone) must_== Some(11)
     }
 
     "42 moves were played in total" in {
-      puzzleFen.fullMove must_== Some(42)
+      puzzleFen.fullMove(variant.Abalone) must_== Some(42)
     }
 
     "board should be valid and have no winner" in {
@@ -197,24 +196,22 @@ class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
   }
 
   /*
-   * * * * *
-   * * S S S *
-   * * * * s s s
-   * * * * S S s s
+       * * * * *
+      * * S S S *
+     * * * * s s s
+    * * * * S S s s
    * * * S * S s s *
-   * * s s * * * *
+    * * s s * * * *
       S * * * * * *
-   * * * * * *
-   * * * * *
+      * * * * * *
+       * * * * *
    */
-  "Game just finished having FEN \"5/2sss1/4SSS/4ssSS/3s1sSS1/2SS4/s6/6/5 6 5 w 0 58\"" should {
-    val fen       = format.FEN("5/2sss1/4SSS/4ssSS/3s1sSS1/2SS4/s6/6/5 6 5 w 0 58")
-    val pieces    = fen.pieces
+  "Game just finished having FEN \"5/6/s6/2SS4/3s1sSS1/4ssSS/4SSS/2sss1/5 6 5 w 0 58\"" should {
+   val fen       = format.FEN("5/6/s6/2SS4/3s1sSS1/4ssSS/4SSS/2sss1/5 6 5 w 0 58")
+    val pieces    = fen.pieces(variant.Abalone.boardType)
     val board     = Board(
       pieces,
-      History(
-        score = Score(6, 5)
-      ),
+      History(score = Score(6, 5)),
       variant.Abalone
     )
     val situation = Situation(board, P2)
@@ -231,11 +228,16 @@ class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
 
     // @TODO: ensure other types of moves are generated correctly when validMoves does work entirely
     "see 8 marbles able to move as 1" in {
-      board.variant.validMovesOf1(situation).size must_== 8
+      board.variant.validMoves(situation)
+        .filter(_._2.find(m => board.variant.boardType.norm(m.dest - m.orig) == 1).isDefined)
+        .size must_== 8
     }
     // @TODO: ensure other types of moves are generated correctly when validMoves does work entirely
     "see 25 different moves of 1 marble" in {
-      board.variant.validMovesOf1(situation).foldLeft(0)(_ + _._2.size) must_== 25
+      board.variant.validMoves(situation)
+        .flatMap(_._2)
+        .filter(m => board.variant.boardType.norm(m.dest - m.orig) == 1)
+        .size must_== 25
     }
 
     "but is ended and P1 is the winner" in {
@@ -249,17 +251,15 @@ class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
 
   "Game having a player unable to move" should {
     val board     = Board(
-      format.FEN("PPPPP/PPPPPp/5Pp/6Pp/7Pp/7P/7/6/5 5 5 w 0 42").pieces,
-      History(
-        score = Score(5, 5)
-      ),
+      format.FEN("5/6/7/7S/7SS/6SS/5SS/SSSSSS/SSSSS 5 5 w 0 42").pieces(variant.Abalone.boardType),
+      History(score = Score(5, 5)),
       variant.Abalone
     )
     val situation = Situation(board, P2)
 
     // @TODO: ensure other types of moves are generated correctly when validMoves does work entirely
     "see no potential valid move for that player" in {
-      board.variant.validMovesOf1(situation).size must_== 0
+      board.variant.validMoves(situation).size must_== 0
     }
 
     "end in a draw" in {

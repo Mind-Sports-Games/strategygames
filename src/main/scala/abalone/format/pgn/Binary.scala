@@ -39,9 +39,9 @@ object Binary {
     // ----
     // 1 freebit (0)
     // 7 pos (dest)
-    def moveUci(b1: Int, b2: Int): String = s"${cellFromInt(b1)}${cellFromInt(b2)}"
+    def moveUci(b1: Int, b2: Int): String = s"${posFromInt(b1)}${posFromInt(b2)}"
 
-    def cellFromInt(b: Int): String = Pos.fromIndex(right(b, 7)).toString()
+    def posFromInt(b: Int): String = Pos.fromIndex(right(b, 7)).toString()
 
     private def right(i: Int, x: Int): Int = i & lengthMasks(x)
 

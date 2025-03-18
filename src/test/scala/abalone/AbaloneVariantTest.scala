@@ -9,17 +9,17 @@ import variant.Abalone
 
 class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
   /*
-            _ _ _ _ _
-           _ _ _ _ _ _
-          _ _ _ _ _ _ _
-         _ _ _ _ _ _ _ _
-        _ _ _ _ 0 0 0 * _
-         _ _ _ _ * _ _ _
-          _ _ _ _ _ _ _
-           _ _ _ _ _ _
-            _ _ _ _ _
-        P1: E5, F5, G5.
-        P2. E4, H5
+   *      _ _ _ _ _
+   *     _ _ _ _ _ _
+   *    _ _ _ _ _ _ _
+   *   _ _ _ _ _ _ _ _
+   *  _ _ _ _ 0 0 0 * _
+   *   _ _ _ _ * _ _ _
+   *    _ _ _ _ _ _ _
+   *     _ _ _ _ _ _
+   *      _ _ _ _ _
+   *  P1: E5, F5, G5
+   *  P2: E4, H5
    */
   "custom basic position" should {
     val fen       = format.FEN("5/6/7/8/4SSSs1/4s3/7/6/5 0 0 b 0 0")
@@ -102,15 +102,15 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
   }
 
   /*
-            0 0 _ * *
-           0 0 0 * * *
-          _ 0 0 _ * * _
-         _ _ _ _ _ _ _ _
-        _ _ _ _ _ _ _ _ _
-         _ _ _ _ _ _ _ _
-          _ * * _ 0 0 _
-   * * * 0 0 0
-   * * _ 0 0
+   *     0 0 _ * *
+   *    0 0 0 * * *
+   *   _ 0 0 _ * * _
+   *  _ _ _ _ _ _ _ _
+   * _ _ _ _ _ _ _ _ _
+   *  _ _ _ _ _ _ _ _
+   *   _ * * _ 0 0 _
+   *    * * * 0 0 0
+   *     * * _ 0 0
    */
   "\"Belgian Daisy\" start position" should {
     val fen       = variant.Abalone.initialFen
@@ -331,15 +331,15 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
   }
 
   /*
-            _ _ _ _ _
-           _ _ _ _ _ _
-          _ _ _ _ _ _ _
-         _ _ _ _ _ _ _ _
-        _ _ _ _ _ 0 0 0 *
-         _ _ _ _ _ _ _ _
-          _ _ _ _ _ _ _
-           _ _ _ _ _ _
-            _ _ _ _ _
+   *      _ _ _ _ _
+   *     _ _ _ _ _ _
+   *    _ _ _ _ _ _ _
+   *   _ _ _ _ _ _ _ _
+   *  _ _ _ _ _ 0 0 0 *
+   *   _ _ _ _ _ _ _ _
+   *    _ _ _ _ _ _ _
+   *     _ _ _ _ _ _
+   *      _ _ _ _ _
    */
   "pushing out the only marble of P2 with a score of 0" should {
     val fenEndedGame = format.FEN("5/6/7/8/5SSSs/8/7/6/5 0 0 b 0 0")
@@ -364,15 +364,15 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
   }
 
   /*
-            _ _ _ _ _
-           _ _ _ _ _ _
-          _ _ _ _ _ _ _
-         _ _ _ _ _ _ _ _
-        _ _ _ _ _ 0 0 0 *   5 - 0
-         _ _ _ _ _ _ _ _
-          _ _ _ _ _ _ _
-           _ _ _ _ _ _
-            _ _ _ _ _
+   *     _ _ _ _ _
+   *    _ _ _ _ _ _
+   *   _ _ _ _ _ _ _
+   *  _ _ _ _ _ _ _ _
+   * _ _ _ _ _ 0 0 0 *   5 - 0
+   *  _ _ _ _ _ _ _ _
+   *   _ _ _ _ _ _ _
+   *    _ _ _ _ _ _
+   *     _ _ _ _ _
    */
   "pushing out the only marble of P2 with a score of 5" should {
     val fenEndedGame = format.FEN("5/6/7/8/5SSSs/8/7/6/5 5 0 b 0 0")
@@ -397,15 +397,15 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
   }
 
   /*
-            _ _ _ * *
-           _ _ _ 0 * *
-          _ _ _ _ 0 0 _
-         _ _ _ _ _ _ 0 _
-        _ _ _ _ 0 0 0 * *
-         _ _ _ _ _ _ _ _
-          _ _ _ _ _ _ _
-           _ _ _ _ _ _
-   * _ _ _ _
+   *      _ _ _ * *
+   *     _ _ _ 0 * *
+   *    _ _ _ _ 0 0 _
+   *   _ _ _ _ _ _ 0 _
+   *  _ _ _ _ 0 0 0 * *
+   *   _ _ _ _ _ _ _ _
+   *    _ _ _ _ _ _ _
+   *     _ _ _ _ _ _
+   *      _ _ _ _
    */
   "P1 pushing out 6 marbles consecutively" should {
     val fenEndedGame = format.FEN("3ss/3Sss/4SS1/6S1/4SSSss/8/7/6/s4 0 0 b 0 0")
@@ -482,15 +482,15 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
   }
 
   /*
-            _ _ _ * *
-           _ _ _ 0 * *
-          _ _ _ _ 0 0 _
-         _ _ _ _ _ _ 0 _
-        _ _ _ _ 0 0 0 * *
-         _ _ _ _ _ _ _ _
-          _ _ _ _ _ _ _
-           _ _ _ _ _ _
-   * _ _ _ _
+   *      _ _ _ * *
+   *     _ _ _ 0 * *
+   *    _ _ _ _ 0 0 _
+   *   _ _ _ _ _ _ 0 _
+   *  _ _ _ _ 0 0 0 * *
+   *   _ _ _ _ _ _ _ _
+   *    _ _ _ _ _ _ _
+   *     _ _ _ _ _ _
+   *      _ _ _ _ _
    */
   "P2 and P1 moving left right left right several times" should {
     val fenEndedGame = format.FEN("3ss/3Sss/4SS1/6S1/4SSSss/8/7/6/s4 0 0 b 0 0")
@@ -549,15 +549,15 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
   }
 
   /*
-            _ _ _ * *
-           _ _ _ 0 * *
-          _ _ _ _ 0 0 _
-         _ _ _ _ _ _ 0 _
-        _ _ _ _ 0 0 0 * *
-         _ _ _ _ _ _ _ _
-          _ _ _ _ _ _ _
-           _ _ _ _ _ _
-   * _ _ _ _
+   *      _ _ _ * *
+   *     _ _ _ 0 * *
+   *    _ _ _ _ 0 0 _
+   *   _ _ _ _ _ _ 0 _
+   *  _ _ _ _ 0 0 0 * *
+   *   _ _ _ _ _ _ _ _
+   *    _ _ _ _ _ _ _
+   *     _ _ _ _ _ _
+   *      _ _ _ _ _
    */
   "P2 and P1 moving left right left right then something else but then come back to the same position again" should {
     val fenEndedGame = format.FEN("3ss/3Sss/4SS1/6S1/4SSSss/8/7/6/s4 0 0 b 0 0")
@@ -612,15 +612,15 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
   }
 
   /*
-            _ _ _ * *
-           _ _ _ 0 * *
-          _ _ _ _ 0 0 _
-         _ _ _ _ _ _ 0 _
-        _ _ _ _ 0 0 0 * *
-         _ _ _ _ _ _ _ _
-          _ _ _ _ _ _ _
-           _ _ _ _ _ _
-   * _ _ _ _
+   *      _ _ _ * *
+   *     _ _ _ 0 * *
+   *    _ _ _ _ 0 0 _
+   *   _ _ _ _ _ _ 0 _
+   *  _ _ _ _ 0 0 0 * *
+   *   _ _ _ _ _ _ _ _
+   *    _ _ _ _ _ _ _
+   *     _ _ _ _ _ _
+   *     _ _ _ _ _
    */
   "P2 and P1 moving left right left right then something else but then come back to the same position again, and then do a 3fold repetition" should {
     val fenEndedGame = format.FEN("3ss/3Sss/4SS1/6S1/4SSSss/8/7/6/s4 0 0 b 0 0")
@@ -681,7 +681,6 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
 }
 
 class AbaloneVariantTestIsometry extends strategygames.chess.ChessTest {
-
   val abaloneGameActionStrs = Vector(
     Vector("a1d4"),
     Vector("e9e6"),
@@ -720,5 +719,4 @@ class AbaloneVariantTestIsometry extends strategygames.chess.ChessTest {
       fen1 must_== fen2
     })
   }
-
 }

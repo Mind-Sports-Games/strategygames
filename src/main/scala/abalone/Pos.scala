@@ -351,11 +351,11 @@ object Piotr {
   ) ++ (260 to 328).map(_.toChar) ++ (330 to 431).map(_.toChar) // NOTE: 329 is deprecated
 
   val posToIndex: Map[Pos, Int] = Range(0, piotrs.size).map(i => (indexToPos(i), i)).toMap
-  val indexToPiotr: Map[Int, Char] = Range(0, piotrs.size).map(i => (i, piotrs(i))).toMap // <=> lookup
+  val indexToPiotr: Map[Int, Char] = Range(0, piotrs.size).map(i => (i, piotrs(i))).toMap
   val posToPiotr: Map[Pos, Char] = posToIndex.keys.map(a => (a, indexToPiotr(posToIndex(a)))).toMap
 
   val piotrToIndex: Map[Char, Int] = indexToPiotr.keys.map(i => (indexToPiotr(i), i)).toMap
-  val piotrToPos: Map[Char, Pos] = posToPiotr.keys.map(a => (posToPiotr(a), a)).toMap // <=> allPiotrs
+  val piotrToPos: Map[Char, Pos] = posToPiotr.keys.map(a => (posToPiotr(a), a)).toMap
 
   def indexToPos(i: Int): Pos = {
     var j = i
