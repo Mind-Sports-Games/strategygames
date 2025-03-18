@@ -52,7 +52,7 @@ class AbaloneFenTest extends AbaloneTest with ValidatedMatchers {
       pieces.get(new Pos(2, 2)) must_== Some(Piece(P1, Stone))
       pieces.get(new Pos(4, 2)) must_== Some(Piece(P2, Stone))
       pieces.get(new Pos(5, 2)) must_== Some(Piece(P2, Stone))
-(1, 1)
+
       pieces.get(new Pos(3, 6)) must_== Some(Piece(P2, Stone))
       pieces.get(new Pos(4, 6)) must_== Some(Piece(P2, Stone))
       pieces.get(new Pos(6, 6)) must_== Some(Piece(P1, Stone))
