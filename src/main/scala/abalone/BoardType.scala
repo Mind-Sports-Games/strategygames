@@ -10,6 +10,8 @@ sealed abstract class BoardType(
   val key = s"${width}x${height}"
   //val validPos: List[Pos] = Pos.all
 
+  final val posNb: Int = width*height
+
   final val cellList: List[Pos] = Range(0, height)
     .flatMap(y => Range(0, width)
       .filter(x => isCell(x, y))

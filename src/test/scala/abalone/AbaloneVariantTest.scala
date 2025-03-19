@@ -11,19 +11,17 @@ import variant.Abalone
 class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
   /*
    *      · · · · ·
-   *     · 2 · · · ·
-   *    · · 1 · · · ·
-   *   · · · 1 · · · ·
-   *  · · · 2 1 · · · ·
+   *     · · · · · ·
+   *    · · · · · · ·
    *   · · · · · · · ·
+   *  · · · · 1 1 1 2 ·
+   *   · · · · 2 · · ·
    *    · · · · · · ·
    *     · · · · · ·
    *      · · · · ·
-   *  P1: E5, F5, G5
-   *  P2: E4, H5
    */
   "custom basic position" should {
-    val fen        = format.FEN("5/6/7/4s3/4SSSs1/8/4s3/7/6/5 0 0 b 0 0")
+    val fen        = format.FEN("5/6/7/4s3/4SSSs1/8/7/6/5 0 0 b 0 0")
     val board      = Board(fen.pieces(Abalone.boardType), History(), Abalone)
     val situation  = Situation(board, P1)
     val validMoves = board.variant.validMoves(situation)
@@ -31,27 +29,21 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     val movesOf1   = moves.filter(m => board.variant.boardType.norm(m.dest - m.orig) == 1)
     val movesOf23  = moves.filter(m => board.variant.boardType.norm(m.dest - m.orig) > 1)
     val game       = Game(board.variant) // @TODO : check why it does not set the piecemap correctly. See a few lines below we have to use board.pieces instead.
-    val game2       = game(validMoves(new Pos(4, 6)).find(m => m.dest == new Pos(5, 4)).get)// g5e6
+    val game2       = game(validMoves(new Pos(6, 4)).find(m => m.dest == new Pos(4, 5)).get)// e7f5
     val validMoves2 = game2.board.variant.validMoves(game2.situation)
-    val game3       = game2(validMoves2(new Pos(4, 7)).find(m => m.dest == new Pos(3, 6)).get)// h5g4
-    //val validMoves3 = game3.board.variant.validMoves(game3.situation)
-    val game4       = game3(validMoves2(new Pos(5, 4)).find(m => m.dest == new Pos(4, 6)).get)// e6g5
-    //val validMoves4 = game4.board.variant.validMoves(game4.situation)
-    val game5       = game4(validMoves2(new Pos(3, 6)).find(m => m.dest == new Pos(4, 7)).get)// g4h5
-    //val validMoves5 = game5.board.variant.validMoves(game5.situation)
-    val game6       = game5(validMoves2(new Pos(4, 5)).find(m => m.dest == new Pos(3, 6)).get)// f5g4
+    val game3       = game2(validMoves2(new Pos(7, 4)).find(m => m.dest == new Pos(6, 3)).get)// e8d7
+    val validMoves3 = game3.board.variant.validMoves(game3.situation)
+    val game4       = game3(validMoves3(new Pos(4, 5)).find(m => m.dest == new Pos(6, 4)).get)// f5e7
+    val validMoves4 = game4.board.variant.validMoves(game4.situation)
+    val game5       = game4(validMoves4(new Pos(6, 3)).find(m => m.dest == new Pos(7, 4)).get)// d7e8
+    val validMoves5 = game5.board.variant.validMoves(game5.situation)
+    val game6       = game5(validMoves5(new Pos(5, 4)).find(m => m.dest == new Pos(6, 3)).get)// e6d7
     val validMoves6 = game6.board.variant.validMoves(game6.situation)
 
-    "compute the correct number of moves of 1 marble" in {
-      movesOf1.size must_== 11
-    }
-
-    "compute the correct number of moves of 2 and 3 marbles" in {
-      movesOf23.size must_== (1 + 1 + 5) + (1 + 1 + 2)
-    }
-
-    "not have an intersection between moves of 1 marble and other moves" in {
+    "compute the correct number of moves" in {
       moves.size must_== movesOf1.size + movesOf23.size
+      movesOf1.size must_== 11
+      movesOf23.size must_== (1 + 1 + 5) + (1 + 1 + 2)
     }
 
     "compute the right set of moves of 2 and 3 marbles" in {

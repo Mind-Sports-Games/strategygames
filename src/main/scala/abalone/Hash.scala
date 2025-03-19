@@ -33,7 +33,7 @@ object Hash {
   private val polyglotTable = new ZobristConstants(0)
   private lazy val randomTable = new ZobristConstants(16)
 
-  private def actorIndex(actor: Actor) = Piotr.piotrs.size * actor.piece.player.fold(1, 0) + actor.pos.hashCode
+  def actorIndex(sit: Situation, actor: Actor) = sit.board.variant.boardType.posNb * actor.piece.player.fold(1, 0) + actor.pos.index//actor.pos.hashCode
 
   def get(sit: Situation, table: ZobristConstants): Long = {
     val phturn =
@@ -42,7 +42,7 @@ object Hash {
     val hturn = sit.player.fold(table.p1TurnMask, 0L)
 
     sit.board.actors.values.view
-      .map(table.actorMasks compose actorIndex _)
+      .map(a => table.actorMasks(actorIndex(sit, a)))
       .fold(phturn ^ hturn)(_ ^ _)
   }
 

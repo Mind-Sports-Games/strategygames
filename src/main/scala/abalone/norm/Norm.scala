@@ -31,8 +31,8 @@ abstract class Norm(val radius: Int, is3: Boolean = false) {
 
   //
   // Neighbourhood
-  val neighVectors: Set[Pos] = (0 to radius)
-    .flatMap(y => (0 to radius)
+  val neighVectors: Set[Pos] = (-radius to radius)
+    .flatMap(y => (-radius to radius)
       .filter(x => this (x, y) == 1)
       .map(x => new Pos(x, y))
     )

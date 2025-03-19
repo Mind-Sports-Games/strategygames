@@ -3,7 +3,7 @@ package strategygames.abalone
 import scala.annotation.nowarn
 import scala.util.matching.Regex
 
-class Pos(var x: Int, var y: Int) extends AnyRef {
+case class Pos(var x: Int, var y: Int) extends AnyRef {
   def +(a: Pos): Pos = Pos.copy(this).add(a)
 
   def add(a: Pos): Pos = add(a.x, a.y)
@@ -350,12 +350,12 @@ object Piotr {
     '\u0103'
   ) ++ (260 to 328).map(_.toChar) ++ (330 to 431).map(_.toChar) // NOTE: 329 is deprecated
 
-  val posToIndex: Map[Pos, Int] = Range(0, piotrs.size).map(i => (indexToPos(i), i)).toMap
-  val indexToPiotr: Map[Int, Char] = Range(0, piotrs.size).map(i => (i, piotrs(i))).toMap
-  val posToPiotr: Map[Pos, Char] = posToIndex.keys.map(a => (a, indexToPiotr(posToIndex(a)))).toMap
+  def posToIndex: Map[Pos, Int] = Range(0, piotrs.size).map(i => (indexToPos(i), i)).toMap
+  def indexToPiotr: Map[Int, Char] = Range(0, piotrs.size).map(i => (i, piotrs(i))).toMap
+  def posToPiotr: Map[Pos, Char] = posToIndex.keys.map(a => (a, indexToPiotr(posToIndex(a)))).toMap
 
-  val piotrToIndex: Map[Char, Int] = indexToPiotr.keys.map(i => (indexToPiotr(i), i)).toMap
-  val piotrToPos: Map[Char, Pos] = posToPiotr.keys.map(a => (posToPiotr(a), a)).toMap
+  def piotrToIndex: Map[Char, Int] = indexToPiotr.keys.map(i => (indexToPiotr(i), i)).toMap
+  def piotrToPos: Map[Char, Pos] = posToPiotr.keys.map(a => (posToPiotr(a), a)).toMap
 
   def indexToPos(i: Int): Pos = {
     var j = i
