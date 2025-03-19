@@ -174,7 +174,7 @@ object Replay {
       case Nil => valid(Nil)
       case san :: rest =>
         san(StratSituation.wrap(sit)).map(abaloneMove) flatMap { move =>
-          val after = Situation(move.finalizeAfter, !sit.player)
+          val after = Situation(move.finalizeAfter, !sit.player) //TODO Alex
           recursiveSituations(after, rest) map {
             after :: _
           }
@@ -189,7 +189,7 @@ object Replay {
       case Nil => valid(Nil)
       case uci :: rest =>
         uci(sit) andThen { move =>
-          val after = Situation(move.finalizeAfter, !sit.player)
+          val after = Situation(move.finalizeAfter, !sit.player) //TODO Alex
           recursiveSituationsFromUci(after, rest) map {
             after :: _
           }
@@ -215,13 +215,13 @@ object Replay {
   def boards(
               actionStrs: ActionStrs,
               initialFen: Option[FEN],
-              variant: strategygames.abalone.variant.Variant
+              variant: Variant
             ): Validated[String, List[Board]] = situations(actionStrs, initialFen, variant) map (_ map (_.board))
 
   def situations(
                   actionStrs: ActionStrs,
                   initialFen: Option[FEN],
-                  variant: strategygames.abalone.variant.Variant
+                  variant: Variant
                 ): Validated[String, List[Situation]] = {
     val sit = initialFenToSituation(initialFen, variant)
     // seemingly this isn't used
@@ -235,13 +235,13 @@ object Replay {
   def boardsFromUci(
                      ucis: List[Uci],
                      initialFen: Option[FEN],
-                     variant: strategygames.abalone.variant.Variant
+                     variant: Variant
                    ): Validated[String, List[Board]] = situationsFromUci(ucis, initialFen, variant) map (_ map (_.board))
 
   def situationsFromUci(
                          ucis: List[Uci],
                          initialFen: Option[FEN],
-                         variant: strategygames.abalone.variant.Variant
+                         variant: Variant
                        ): Validated[String, List[Situation]] = {
     val sit = initialFenToSituation(initialFen, variant)
     recursiveSituationsFromUci(sit, ucis) map {
@@ -266,7 +266,7 @@ object Replay {
   def gameFromUciStrings(
                           uciStrings: List[String],
                           initialFen: Option[FEN],
-                          variant: strategygames.abalone.variant.Variant
+                          variant: Variant
                         ): Validated[String, Game] = {
     val init = makeGame(variant, initialFen)
     val ucis = uciStrings.flatMap(Uci.apply(_))
@@ -277,20 +277,19 @@ object Replay {
   def apply(
              ucis: List[Uci],
              initialFen: Option[FEN],
-             variant: strategygames.abalone.variant.Variant
+             variant: Variant
            ): Validated[String, Replay] =
     recursiveReplayFromUci(Replay(makeGame(variant, initialFen)), ucis)
 
   def plyAtFen(
                 actionStrs: ActionStrs,
                 initialFen: Option[FEN],
-                variant: strategygames.abalone.variant.Variant,
+                variant: Variant,
                 atFen: FEN
               ): Validated[String, Int] =
     if (Forsyth.<<@(variant, atFen).isEmpty) invalid(s"Invalid FEN $atFen")
     else {
-
-      // we don't want to compare the full move number, to match transpositions
+      // We don't want to compare the full move number, to match transpositions
       def truncateFen(fen: FEN) = fen.value.split(' ').take(4) mkString " "
 
       val atFenTruncated = truncateFen(atFen)
@@ -302,7 +301,7 @@ object Replay {
           case Nil => invalid(s"Can't find $atFenTruncated, reached ply $ply, turn $turn")
           case san :: rest =>
             san(StratSituation.wrap(sit)).map(abaloneMove) flatMap { move =>
-              val after = move.situationAfter
+              val after = move.situationAfter //TODO Alex
               val newPlies = ply + 1
               val newTurnCount = turn + (if (sit.player != after.player) 1 else 0)
               val fen = Forsyth >> Game(after, plies = newPlies, turnCount = newTurnCount)

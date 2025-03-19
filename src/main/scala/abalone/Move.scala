@@ -14,7 +14,7 @@ case class Move(
                ) extends Action(situationBefore, after, metrics) {
   def withHistory(h: History) = copy(after = after withHistory h)
 
-  override def finalizeAfter: Board = {
+  override def finalizeAfter: Board = {//TODO Alex
     val board = after.updateHistory { h =>
       h.copy(
         lastTurn = if (autoEndTurn) h.currentTurn :+ toUci else h.lastTurn,
@@ -40,13 +40,13 @@ case class Move(
           else h.positionHashes
 
         h.copy(positionHashes =
-          if (autoEndTurn) Hash(Situation(after, player)) ++ prevPositionHashes
+          if (autoEndTurn) Hash(board.situationOf(player)) ++ prevPositionHashes//FIXME wrong, the player should be the next one
           else prevPositionHashes
         )
       }
   }
 
-  override def situationAfter = Situation(finalizeAfter, if (autoEndTurn) !situationBefore.player else situationBefore.player)
+  override def situationAfter = Situation(finalizeAfter, if (autoEndTurn) !situationBefore.player else situationBefore.player)//TODO Alex
 
   def applyVariantEffect: Move = before.variant addVariantEffect this
 

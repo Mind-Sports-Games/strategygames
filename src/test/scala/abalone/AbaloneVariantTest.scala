@@ -1,7 +1,7 @@
 package strategygames.abalone
 
 import org.specs2.matcher.ValidatedMatchers
-import strategygames.Score
+import strategygames.{Score, Status}
 //import strategygames.{ Score, Status }
 //import strategygames.format.{ FEN => StratFen, Forsyth => StratForsyth, Uci => StratUci }
 //import strategygames.variant.{ Variant => StratVariant }
@@ -31,7 +31,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     val moves = board.variant.validMoves(situation).flatMap(_._2)
     val movesOf1 = moves.filter(of1(board))
     val movesOf23 = moves.filter(of23(board))
-    val game = Game(board.variant) // @TODO : check why it does not set the piecemap correctly. See a few lines below we have to use board.pieces instead.
+    val game = new Game(situation)
     val game2 = game(validMoves(new Pos(6, 4)).find(m => m.dest == new Pos(4, 5)).get) // e7f5
     /*
      *      · · · · ·
@@ -394,7 +394,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     "produce no move from a marble or a group or marbles that are stuck" in {
       validMoves.get(new Pos(2, 0)).get should beEmpty
       validMoves.get(new Pos(3, 0)).get should beEmpty
-      validMoves.get(new Pos(4, 0)).get should beEmpty// (oooxo)
+      validMoves.get(new Pos(4, 0)).get should beEmpty // (oooxo)
     }
 
     "not move more than 3 marbles" in {
@@ -420,226 +420,344 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     }
   }
 
+  /*
+   *     · · · · ·
+   *    · · · · · ·
+   *   · · · · · · ·
+   *  · · · · · · · ·
+   * · · · · · 1 1 1 2
+   *  · · · · · · · ·
+   *   · · · · · · ·
+   *    · · · · · ·
+   *     · · · · ·
+   */
+  "pushing out the only marble of P2 with a score of 0" should {
+    val fenEndedGame = format.FEN("5/6/7/8/5SSSs/8/7/6/5 0 0 b 0 0")
+    val board = Board(fenEndedGame.pieces(Abalone.boardType), History(), Abalone)
+    val situation = Situation(board, P1)
+    val game = new Game(situation)
+    val validMoves = game.board.variant.validMoves(situation)
+    val game2 = game(validMoves(new Pos(5, 4)).find(m => m.dest == new Pos(8, 4)).get) // e6e9
+
+    "increment the score of P1" in {
+      board.history.score must_== Score()
+      game2.situation.board.history.score must_== Score(p1 = 1)
+    }
+
+    "trigger a stalemate" in {
+      game2.situation.end must_== true
+      game2.situation.stalemate must_== true
+      game2.situation.playable(true) must_== false
+      game2.situation.status must_== Some(Status.Stalemate)
+      game2.situation.winner must_== None
+    }
+  }
+
+  /*
+   *     · · · · ·
+   *    · · · · · ·
+   *   · · · · · · ·
+   *  · · · · · · · ·
+   * · · · · · 1 1 1 2
+   *  · · · · · · · ·
+   *   · · · · · · ·
+   *    · · · · · ·
+   *     · · · · ·
+   */
+  "pushing out the only marble of P2 with a score of 5" should {
+    val fenEndedGame = format.FEN("5/6/7/8/5SSSs/8/7/6/5 5 0 b 0 0")
+    val board = Board(fenEndedGame.pieces(Abalone.boardType), History(score = Score(p1 = 5)), Abalone)
+    val situation = Situation(board, P1)
+    val game = new Game(situation)
+    val validMoves = game.board.variant.validMoves(situation)
+    val game2 = game(validMoves(new Pos(5, 4)).find(m => m.dest == new Pos(8, 4)).get) // e6e9
+
+    "increment the score of P1" in {
+      board.history.score must_== Score(p1 = 5) // game.situation.board.history.score is Score(0,0)
+      game2.situation.board.history.score must_== Score(p1 = 6)
+    }
+
+    "trigger a win condition defined by the variant, even though it detects the stalemate" in {
+      game2.situation.end must_== true
+      game2.situation.stalemate must_== true
+      game2.situation.playable(true) must_== false
+      game2.situation.status must_== Some(Status.VariantEnd)
+      game2.situation.winner must_== Some(P1)
+    }
+  }
+
+  /*
+   *      · · · 2 2
+   *     · · · 1 2 2
+   *    · · · · 1 1 ·
+   *   · · · · · · 1 ·
+   *  · · · · 1 1 1 2 2
+   *   · · · · · · · ·
+   *    · · · · · · ·
+   *     · · · · · ·
+   *      2 · · ·
+   */
+  "P1 pushing out 6 marbles consecutively" should {
+    val fenEndedGame = format.FEN("s4/6/7/8/4SSSss/6S1/4SS1/3Sss/3ss 0 0 b 0 0")
+    val board = Board(fenEndedGame.pieces(Abalone.boardType), History(), Abalone)
+    val situation = Situation(board, P1)
+    val game = new Game(situation)
+    val validMoves = game.board.variant.validMoves(situation)
+    val game2 = game(validMoves(new Pos(4, 4)).find(m => m.dest == new Pos(8, 4)).get) // e5e9
+    /*
+     *      · · · 2 2
+     *     · · · 1 2 2
+     *    · · · · 1 1 ·
+     *   · · · · · · 1 ·
+     *  · · · · - 1 1 1 2
+     *   · · · · · · · ·
+     *    · · · · · · ·
+     *     · · · · · ·
+     *      2 · · ·
+     */
+    val validMoves2 = game2.board.variant.validMoves(game2.situation)
+    println(validMoves2(new Pos(0, 0)).find(m => m.dest == new Pos(0, 1)).toString) //FIXME
+    val game3 = game2(validMoves2(new Pos(0, 0)).find(m => m.dest == new Pos(0, 1)).get) // a1b1
+    /*
+     *      · · · 2 2
+     *     · · · 1 2 2
+     *    · · · · 1 1 ·
+     *   · · · · · · 1 ·
+     *  · · · · · 1 1 1 2
+     *   · · · · · · · ·
+     *    · · · · · · ·
+     *     2 · · · · ·
+     *      - · · ·
+     */
+    val validMoves3 = game3.board.variant.validMoves(game3.situation)
+    val game4 = game3(validMoves3(new Pos(5, 4)).find(m => m.dest == new Pos(8, 4)).get) // e6e9
+    /*
+     *      · · · 2 2
+     *     · · · 1 2 2
+     *    · · · · 1 1 ·
+     *   · · · · · · 1 ·
+     *  · · · · · - 1 1 1
+     *   · · · · · · · ·
+     *    · · · · · · ·
+     *     2 · · · · ·
+     *      · · · ·
+     */
+    val validMoves4 = game4.board.variant.validMoves(game4.situation)
+    val game5 = game4(validMoves4(new Pos(0, 1)).find(m => m.dest == new Pos(0, 0)).get) // b1a1
+    /*
+     *      · · · 2 2
+     *     · · · 1 2 2
+     *    · · · · 1 1 ·
+     *   · · · · · · 1 ·
+     *  · · · · · · 1 1 1
+     *   · · · · · · · ·
+     *    · · · · · · ·
+     *     - · · · · ·
+     *      2 · · ·
+     */
+    val validMoves5 = game5.board.variant.validMoves(game5.situation)
+    val game6 = game5(validMoves5(new Pos(7, 4)).find(m => m.dest == new Pos(7, 8)).get) // e8i8
+    /*
+     *      · · · 2 2
+     *     · · · 1 1 2
+     *    · · · · 1 1 ·
+     *   · · · · · · 1 ·
+     *  · · · · · · 1 - 1
+     *   · · · · · · · ·
+     *    · · · · · · ·
+     *     · · · · · ·
+     *      2 · · ·
+     */
+    val validMoves6 = game6.board.variant.validMoves(game6.situation)
+    val game7 = game6(validMoves6(new Pos(0, 0)).find(m => m.dest == new Pos(0, 1)).get) // a1b1
+    /*
+     *      · · · 2 2
+     *     · · · 1 1 2
+     *    · · · · 1 1 ·
+     *   · · · · · · 1 ·
+     *  · · · · · · 1 · 1
+     *   · · · · · · · ·
+     *    · · · · · · ·
+     *     2 · · · · ·
+     *      - · · ·
+     */
+    val validMoves7 = game7.board.variant.validMoves(game7.situation)
+    val game8 = game7(validMoves7(new Pos(7, 5)).find(m => m.dest == new Pos(7, 8)).get) // f8i8
+    /*
+     *      · · · 1 2
+     *     · · · 1 1 2
+     *    · · · · 1 1 ·
+     *   · · · · · · - ·
+     *  · · · · · · 1 · 1
+     *   · · · · · · · ·
+     *    · · · · · · ·
+     *     2 · · · · ·
+     *      · · · ·
+     */
+    val validMoves8 = game8.board.variant.validMoves(game8.situation)
+    val game9 = game8(validMoves8(new Pos(0, 1)).find(m => m.dest == new Pos(0, 0)).get) // b1a1
+    /*
+     *      · · · 1 2
+     *     · · · 1 1 2
+     *    · · · · 1 1 ·
+     *   · · · · · · · ·
+     *  · · · · · · 1 · 1
+     *   · · · · · · · ·
+     *    · · · · · · ·
+     *     - · · · · ·
+     *      2 · · ·
+     */
+    val validMoves9 = game9.board.variant.validMoves(game9.situation)
+    val game10 = game9(validMoves9(new Pos(6, 7)).find(m => m.dest == new Pos(8, 7)).get) // h7h9
+    /*
+     *      · · · 1 2
+     *     · · · - 1 1
+     *    · · · · 1 1 ·
+     *   · · · · · · · ·
+     *  · · · · · · 1 · 1
+     *   · · · · · · · ·
+     *    · · · · · · ·
+     *     · · · · · ·
+     *      2 · · ·
+     */
+    val validMoves10 = game10.board.variant.validMoves(game10.situation)
+    val game11 = game10(validMoves10(new Pos(0, 0)).find(m => m.dest == new Pos(0, 1)).get) // a1b1
+    /*
+     *      · · · 1 2
+     *     · · · · 1 1
+     *    · · · · 1 1 ·
+     *   · · · · · · · ·
+     *  · · · · · · 1 · 1
+     *   · · · · · · · ·
+     *    · · · · · · ·
+     *     2 · · · · ·
+     *      - · · ·
+     */
+    val validMoves11 = game11.board.variant.validMoves(game11.situation)
+    val game12 = game11(validMoves11(new Pos(6, 6)).find(m => m.dest == new Pos(8, 8)).get) // g7i9
+    /*
+     *      · · · 1 1
+     *     · · · · 1 1
+     *    · · · · - 1 ·
+     *   · · · · · · · ·
+     *  · · · · · · 1 · 1
+     *   · · · · · · · ·
+     *    · · · · · · ·
+     *     2 · · · · ·
+     *      · · · ·
+     */
+
+    "should enter a non reversible state only when pushing out" in {
+      game8.board.variant.isIrreversible(game9.situation.board.history.prevMove.get) must_== false
+      game9.board.variant.isIrreversible(game10.situation.board.history.prevMove.get) must_== true
+      game10.board.variant.isIrreversible(game11.situation.board.history.prevMove.get) must_== false
+    }
+
+    "increment the score of P1 each time he plays a move" in {
+      board.history.score must_== Score()
+      game2.situation.board.history.score must_== Score(p1 = 1)
+      game4.situation.board.history.score must_== Score(p1 = 2)
+      game6.situation.board.history.score must_== Score(p1 = 3)
+      game8.situation.board.history.score must_== Score(p1 = 4)
+      game10.situation.board.history.score must_== Score(p1 = 5)
+      game12.situation.board.history.score must_== Score(p1 = 6)
+    }
+
+    "reset the halfMovesSinceLastCapture after P1 push out" in {
+      game2.situation.board.history.halfMoveClock must_== 0
+      game3.situation.board.history.halfMoveClock must_== 1
+      game4.situation.board.history.halfMoveClock must_== 0
+      game5.situation.board.history.halfMoveClock must_== 1
+      game6.situation.board.history.halfMoveClock must_== 0
+      game8.situation.board.history.halfMoveClock must_== 0
+      game10.situation.board.history.halfMoveClock must_== 0
+      game12.situation.board.history.halfMoveClock must_== 0
+    }
+
+    "reduce the number of marbles on the board after P1 push out" in {
+      board.pieces.size must_== 7 + 7
+      game2.situation.board.pieces.size must_== 7 + 6
+      game4.situation.board.pieces.size must_== 7 + 5
+      game6.situation.board.pieces.size must_== 7 + 4
+      game8.situation.board.pieces.size must_== 7 + 3
+      game10.situation.board.pieces.size must_== 7 + 2
+      game12.situation.board.pieces.size must_== 7 + 1
+    }
+
+    "trigger a win condition defined by the variant, and no stalemate is detected" in {
+      game12.situation.end must_== true
+      game12.situation.stalemate must_== false
+      game12.situation.playable(true) must_== false
+      game12.situation.status must_== Some(Status.VariantEnd)
+      game12.situation.winner must_== Some(P1)
+    }
+  }
+
+  /*
+   *      · · · 2 2
+   *     · · · 1 2 2
+   *    · · · · 1 1 ·
+   *   · · · · · · 1 ·
+   *  · · · · 1 1 1 2 2
+   *   · · · · · · · ·
+   *    · · · · · · ·
+   *     · · · · · ·
+   *      2 · · · ·
+   */
+  "P2 and P1 moving left right left right several times" should {
+    val fenEndedGame = format.FEN("s4/6/7/8/4SSSss/6S1/4SS1/3Sss/3ss 0 0 b 0 0")
+    val board = Board(fenEndedGame.pieces(Abalone.boardType), History(), Abalone)
+    val situation = Situation(board, P1)
+    val game = new Game(situation)
+    val validMoves = game.board.variant.validMoves(situation)
+    val game2 = game(validMoves(new Pos(4, 4)).find(m => m.dest == new Pos(3, 4)).get) // e5e4
+    val validMoves2 = game2.board.variant.validMoves(game2.situation)
+    val game3 = game2(validMoves2(new Pos(0, 0)).find(m => m.dest == new Pos(1, 0)).get) // a1a2
+    val validMoves3 = game3.board.variant.validMoves(game3.situation)
+    val game4 = game3(validMoves3(new Pos(3, 4)).find(m => m.dest == new Pos(4, 4)).get) // e4e5
+    val validMoves4 = game4.board.variant.validMoves(game4.situation)
+    val game5 = game4(validMoves4(new Pos(1, 0)).find(m => m.dest == new Pos(0, 0)).get) // a2a1
+    val validMoves5 = game5.board.variant.validMoves(game5.situation)
+    val game6 = game5(validMoves5(new Pos(4, 4)).find(m => m.dest == new Pos(3, 4)).get) // e5e4
+    val validMoves6 = game6.board.variant.validMoves(game6.situation)
+    val game7 = game6(validMoves6(new Pos(0, 0)).find(m => m.dest == new Pos(1, 0)).get) // a1a2
+    val validMoves7 = game7.board.variant.validMoves(game7.situation)
+    val game8 = game7(validMoves7(new Pos(3, 4)).find(m => m.dest == new Pos(4, 4)).get) // e4e5
+    val validMoves8 = game8.board.variant.validMoves(game8.situation)
+    val game9 = game8(validMoves8(new Pos(1, 0)).find(m => m.dest == new Pos(0, 0)).get) // a2a1 <- DRAW !
+    val validMoves9 = game9.board.variant.validMoves(game9.situation)
+    val game10 = game9(validMoves9(new Pos(4, 4)).find(m => m.dest == new Pos(3, 4)).get) // e5e4 <- trying to play a neutral move
+
+    "trigger a draw by repetition after seeing the same situation for the 3rd time, and no stalemate is detected" in {
+      game8.situation.end must_== false
+      game8.situation.playable(true) must_== true
+
+      game9.situation.end must_== true
+      game9.situation.stalemate must_== false
+      game9.situation.playable(true) must_== false
+      game9.situation.status must_== Some(Status.Draw)
+      game9.situation.winner must_== None
+    }
+
+    "keep incrementing halfMovesSinceLastCapture after each player move" in {
+      game2.situation.board.history.halfMoveClock must_== 1
+      game3.situation.board.history.halfMoveClock must_== 2
+      game4.situation.board.history.halfMoveClock must_== 3
+      game5.situation.board.history.halfMoveClock must_== 4
+      game6.situation.board.history.halfMoveClock must_== 5
+      game8.situation.board.history.halfMoveClock must_== 7
+      game10.situation.board.history.halfMoveClock must_== 9
+    }
+
+    "keep being a draw even if in some weird case a neutral move could be played after" in {
+      game10.situation.end must_== true
+      game10.situation.playable(true) must_== false
+      game10.situation.status must_== Some(Status.Draw)
+      game10.situation.winner must_== None
+    }
+  }
+
   //TODO
-  //
-  //  /*
-  //   *      _ _ _ _ _
-  //   *     _ _ _ _ _ _
-  //   *    _ _ _ _ _ _ _
-  //   *   _ _ _ _ _ _ _ _
-  //   *  _ _ _ _ _ 0 0 0 *
-  //   *   _ _ _ _ _ _ _ _
-  //   *    _ _ _ _ _ _ _
-  //   *     _ _ _ _ _ _
-  //   *      _ _ _ _ _
-  //   */
-  //  "pushing out the only marble of P2 with a score of 0" should {
-  //    val fenEndedGame = format.FEN("5/6/7/8/5SSSs/8/7/6/5 0 0 b 0 0")
-  //    val board        = Board(fenEndedGame.pieces, History(score = Score(0, 0)), Abalone)
-  //    val situation    = Situation(board, P1)
-  //    val game         = Game.apply(board.variant)
-  //    val validMoves   = game.board.variant.validMoves(situation)
-  //    val game2        = game.apply(validMoves(Pos.F5)(5))
-  //
-  //    "increment the score of P1" in {
-  //      board.history.score must_== Score(0, 0)
-  //      game2.situation.board.history.score must_== Score(1, 0)
-  //    }
-  //
-  //    "trigger a stalemate" in {
-  //      game2.situation.end must_== true
-  //      game2.situation.stalemate must_== true
-  //      game2.situation.playable(true) must_== false
-  //      game2.situation.status must_== Some(Status.Stalemate)
-  //      game2.situation.winner must_== None
-  //    }
-  //  }
-  //
-  //  /*
-  //   *     _ _ _ _ _
-  //   *    _ _ _ _ _ _
-  //   *   _ _ _ _ _ _ _
-  //   *  _ _ _ _ _ _ _ _
-  //   * _ _ _ _ _ 0 0 0 *   5 - 0
-  //   *  _ _ _ _ _ _ _ _
-  //   *   _ _ _ _ _ _ _
-  //   *    _ _ _ _ _ _
-  //   *     _ _ _ _ _
-  //   */
-  //  "pushing out the only marble of P2 with a score of 5" should {
-  //    val fenEndedGame = format.FEN("5/6/7/8/5SSSs/8/7/6/5 5 0 b 0 0")
-  //    val board        = Board(fenEndedGame.pieces, History(score = Score(5, 0)), Abalone)
-  //    val situation    = Situation(board, P1)
-  //    val game         = Game.apply(board.variant)
-  //    val validMoves   = game.board.variant.validMoves(situation)
-  //    val game2        = game.apply(validMoves(Pos.F5)(5))
-  //
-  //    "increment the score of P1" in {
-  //      board.history.score must_== Score(5, 0) // game.situation.board.history.score is Score(0,0)
-  //      game2.situation.board.history.score must_== Score(6, 0)
-  //    }
-  //
-  //    "trigger a win condition defined by the variant, even though it detects the stalemate" in {
-  //      game2.situation.end must_== true
-  //      game2.situation.stalemate must_== true
-  //      game2.situation.playable(true) must_== false
-  //      game2.situation.status must_== Some(Status.VariantEnd)
-  //      game2.situation.winner must_== Some(P1)
-  //    }
-  //  }
-  //
-  //  /*
-  //   *      _ _ _ * *
-  //   *     _ _ _ 0 * *
-  //   *    _ _ _ _ 0 0 _
-  //   *   _ _ _ _ _ _ 0 _
-  //   *  _ _ _ _ 0 0 0 * *
-  //   *   _ _ _ _ _ _ _ _
-  //   *    _ _ _ _ _ _ _
-  //   *     _ _ _ _ _ _
-  //   *      _ _ _ _
-  //   */
-  //  "P1 pushing out 6 marbles consecutively" should {
-  //    val fenEndedGame = format.FEN("3ss/3Sss/4SS1/6S1/4SSSss/8/7/6/s4 0 0 b 0 0")
-  //    val board        = Board(fenEndedGame.pieces, History(score = Score(0, 0)), Abalone)
-  //    val situation    = Situation(board, P1)
-  //    val game         = Game.apply(board.variant)
-  //    val validMoves   = game.board.variant.validMoves(situation)
-  //    val game2        = game.apply(validMoves(Pos.E5)(5))     // e5h5
-  //    val validMoves2  = game2.board.variant.validMoves(game2.situation)
-  //    val game3        = game2.apply(validMoves2(Pos.A1)(0))   // a1a2
-  //    val validMoves3  = game3.board.variant.validMoves(game3.situation)
-  //    val game4        = game3.apply(validMoves3(Pos.F5)(5))   // f5i5
-  //    val validMoves4  = game4.board.variant.validMoves(game4.situation)
-  //    val game5        = game4.apply(validMoves4(Pos.A2)(3))   // a2a1
-  //    val validMoves5  = game5.board.variant.validMoves(game5.situation)
-  //    val game6        = game5.apply(validMoves5(Pos.H5)(5))   // h5h8
-  //    val validMoves6  = game6.board.variant.validMoves(game6.situation)
-  //    val game7        = game6.apply(validMoves6(Pos.A1)(0))   // a1a2
-  //    val validMoves7  = game7.board.variant.validMoves(game7.situation)
-  //    val game8        = game7.apply(validMoves7(Pos.H6)(4))   // h6h9
-  //    val validMoves8  = game8.board.variant.validMoves(game8.situation)
-  //    val game9        = game8.apply(validMoves8(Pos.A2)(3))   // a2a1
-  //    val validMoves9  = game9.board.variant.validMoves(game9.situation)
-  //    val game10       = game9.apply(validMoves9(Pos.G8)(3))   // g8i8
-  //    val validMoves10 = game10.board.variant.validMoves(game10.situation)
-  //    val game11       = game10.apply(validMoves10(Pos.A1)(0)) // a1a2
-  //    val validMoves11 = game11.board.variant.validMoves(game11.situation)
-  //    val game12       = game11.apply(validMoves11(Pos.G7)(4)) // g7i9
-  //
-  //    "should enter a non reversible state only when pushing out" in {
-  //      game8.board.variant.isIrreversible(validMoves8(Pos.A2)(3)) must_== false
-  //      game9.board.variant.isIrreversible(validMoves9(Pos.G8)(3)) must_== true
-  //      game10.board.variant.isIrreversible(validMoves10(Pos.A1)(0)) must_== false
-  //    }
-  //
-  //    "increment the score of P1 each time he plays a move" in {
-  //      board.history.score must_== Score(0, 0)
-  //      game2.situation.board.history.score must_== Score(1, 0)
-  //      game4.situation.board.history.score must_== Score(2, 0)
-  //      game6.situation.board.history.score must_== Score(3, 0)
-  //      game8.situation.board.history.score must_== Score(4, 0)
-  //      game10.situation.board.history.score must_== Score(5, 0)
-  //      game12.situation.board.history.score must_== Score(6, 0)
-  //    }
-  //
-  //    "reset the halMovesSinceLastCapture after P1 push out" in {
-  //      game2.situation.board.history.halfMoveClock must_== 0
-  //      game3.situation.board.history.halfMoveClock must_== 1
-  //      game4.situation.board.history.halfMoveClock must_== 0
-  //      game5.situation.board.history.halfMoveClock must_== 1
-  //      game6.situation.board.history.halfMoveClock must_== 0
-  //      game8.situation.board.history.halfMoveClock must_== 0
-  //      game10.situation.board.history.halfMoveClock must_== 0
-  //      game12.situation.board.history.halfMoveClock must_== 0
-  //    }
-  //
-  //    "reduce the number of marbles on the board after P1 push out" in {
-  //      board.pieces.size must_== 7 + 7
-  //      game2.situation.board.pieces.size must_== 7 + 6
-  //      game4.situation.board.pieces.size must_== 7 + 5
-  //      game6.situation.board.pieces.size must_== 7 + 4
-  //      game8.situation.board.pieces.size must_== 7 + 3
-  //      game10.situation.board.pieces.size must_== 7 + 2
-  //      game12.situation.board.pieces.size must_== 7 + 1
-  //    }
-  //
-  //    "trigger a win condition defined by the variant, and no stalemate is detected" in {
-  //      game12.situation.end must_== true
-  //      game12.situation.stalemate must_== false
-  //      game12.situation.playable(true) must_== false
-  //      game12.situation.status must_== Some(Status.VariantEnd)
-  //      game12.situation.winner must_== Some(P1)
-  //    }
-  //  }
-  //
-  //  /*
-  //   *      _ _ _ * *
-  //   *     _ _ _ 0 * *
-  //   *    _ _ _ _ 0 0 _
-  //   *   _ _ _ _ _ _ 0 _
-  //   *  _ _ _ _ 0 0 0 * *
-  //   *   _ _ _ _ _ _ _ _
-  //   *    _ _ _ _ _ _ _
-  //   *     _ _ _ _ _ _
-  //   *      _ _ _ _ _
-  //   */
-  //  "P2 and P1 moving left right left right several times" should {
-  //    val fenEndedGame = format.FEN("3ss/3Sss/4SS1/6S1/4SSSss/8/7/6/s4 0 0 b 0 0")
-  //    val board        = Board(fenEndedGame.pieces, History(score = Score(0, 0)), Abalone)
-  //    val situation    = Situation(board, P1)
-  //    val game         = Game.apply(board.variant)
-  //    val validMoves   = game.board.variant.validMoves(situation)
-  //    val game2        =
-  //      game.apply(validMoves(Pos.E5)(0)) // <- e5d5 0 is left in case there is a square on the left side
-  //    val validMoves2 = game2.board.variant.validMoves(game2.situation)
-  //    val game3       = game2.apply(validMoves2(Pos.A1)(2)) // -> a1b1
-  //    val validMoves3 = game3.board.variant.validMoves(game3.situation)
-  //    val game4       =
-  //      game3.apply(validMoves3(Pos.D5)(3)) // -> d5e5 3 is right in case we can move left, upLeft, upRight
-  //    val validMoves4 = game4.board.variant.validMoves(game4.situation)
-  //    val game5       = game4.apply(validMoves4(Pos.B1)(0)) // <- b1a1
-  //    val validMoves5 = game5.board.variant.validMoves(game5.situation)
-  //    val game6       = game5.apply(validMoves5(Pos.E5)(0)) // <- e5d5
-  //    val validMoves6 = game6.board.variant.validMoves(game6.situation)
-  //    val game7       = game6.apply(validMoves6(Pos.A1)(2)) // -> a1b1
-  //    val validMoves7 = game7.board.variant.validMoves(game7.situation)
-  //    val game8       = game7.apply(validMoves7(Pos.D5)(3)) // -> d5e5
-  //    val validMoves8 = game8.board.variant.validMoves(game8.situation)
-  //    val game9       = game8.apply(validMoves8(Pos.B1)(0)) // <-  // DRAW !
-  //    val validMoves9 = game9.board.variant.validMoves(game9.situation)
-  //    val game10      = game9.apply(validMoves9(Pos.E5)(0)) // <- trying to play a neutral move
-  //
-  //    "trigger a draw by repetition after seing the same situation for the 3rd time, and no stalemate is detected" in {
-  //      // <situation> 1. e5d5, ..a1b1, 2. d5e5, ..b1a1, <situation> 3. e5d5, ..a1b1, 4. d5e5, ..b1a1 <situation>
-  //      game8.situation.end must_== false
-  //      game8.situation.playable(true) must_== true
-  //
-  //      game9.situation.end must_== true
-  //      game9.situation.stalemate must_== false
-  //      game9.situation.playable(true) must_== false
-  //      game9.situation.status must_== Some(Status.Draw)
-  //      game9.situation.winner must_== None
-  //    }
-  //
-  //    "keep incrementing halMovesSinceLastCapture after each player move" in {
-  //      game2.situation.board.history.halfMoveClock must_== 1
-  //      game3.situation.board.history.halfMoveClock must_== 2
-  //      game4.situation.board.history.halfMoveClock must_== 3
-  //      game5.situation.board.history.halfMoveClock must_== 4
-  //      game6.situation.board.history.halfMoveClock must_== 5
-  //      game8.situation.board.history.halfMoveClock must_== 7
-  //      game10.situation.board.history.halfMoveClock must_== 9
-  //    }
-  //
-  //    "keep being a draw even if in some weird case a neutral move could be played after" in {
-  //      game10.situation.end must_== true
-  //      game10.situation.playable(true) must_== false
-  //      game10.situation.status must_== Some(Status.Draw)
-  //      game10.situation.winner must_== None
-  //    }
-  //  }
-  //
   //  /*
   //   *      _ _ _ * *
   //   *     _ _ _ 0 * *
@@ -655,7 +773,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
   //    val fenEndedGame = format.FEN("3ss/3Sss/4SS1/6S1/4SSSss/8/7/6/s4 0 0 b 0 0")
   //    val board        = Board(fenEndedGame.pieces, History(score = Score(0, 0)), Abalone)
   //    val situation    = Situation(board, P1)
-  //    val game         = Game.apply(board.variant)
+  //    val game         = pply(board.variant)
   //    val validMoves   = game.board.variant.validMoves(situation)
   //    val game2        =
   //      game.apply(validMoves(Pos.E5)(0)) // <- e5d5 0 is left in case there is a square on the left side
@@ -718,7 +836,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
   //    val fenEndedGame = format.FEN("3ss/3Sss/4SS1/6S1/4SSSss/8/7/6/s4 0 0 b 0 0")
   //    val board        = Board(fenEndedGame.pieces, History(score = Score(0, 0)), Abalone)
   //    val situation    = Situation(board, P1)
-  //    val game         = Game.apply(board.variant)
+  //    val game         = new Game(situation)
   //    val validMoves   = game.board.variant.validMoves(situation)
   //    val game2        =
   //      game.apply(validMoves(Pos.E5)(0)) // <- e5d5 0 is left in case there is a square on the left side

@@ -12,9 +12,9 @@ abstract class Action(
                      ) {
   def before: Board = situationBefore.board
 
-  def situationAfter: Situation
+  def situationAfter: Situation//TODO Alex?
 
-  def finalizeAfter: Board = after
+  def finalizeAfter: Board = after//TODO Alex?
 
   def withMetrics(m: MoveMetrics): Action
 

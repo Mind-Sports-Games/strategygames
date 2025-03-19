@@ -185,36 +185,7 @@ abstract class Variant private[variant](
     sit.board.copy(pieces = piecesAfterAction(sit.board.pieces, orig, dest))
   }
 
-  /*
-    How to move pieces based on orig, dest :
-      A. Find "globalDir" direction between orig and dest (in case of a sideMove this will always be "upY" or "downX")
-      B. Determine the type of move
-      C. play the move
-        - side move :
-          Based on the <globalDir> computed in A, determine correct combination of <lineDir> and <sideDir> (the direction that is to be applied to each marble)
-            allowing to land on <dest>.
-            Example:
-               _ A B _ _
-              _ x _ x C _
-             _ _ x x _ D _
-            _ _ _ Y x x _ _
-          Y can do a side move to A B C D (if the "x" of some of the other axis are missing)
-          origToDestDir: "upRight"
-          3 potentialSideMoveDirsFromDirs : "upLeft", "upRight", "right"
-            A: lineDir: upLeft, sideDir: upRight
-            B: lineDir: upRight, sideDir: upLeft
-            C: lineDir: upRight, sideDir: right
-            D: lineDir: right, sideDir: upRight
-
-        - else:
-          - push :
-            - dest contains a marble
-              - move dest marble to the next available square (or off the board)
-              - do the line move
-          - line move :
-            - move from orig to dest
-   */
-  private def piecesAfterAction(pieces: PieceMap, orig: Pos, dest: Pos): PieceMap = {
+  protected def piecesAfterAction(pieces: PieceMap, orig: Pos, dest: Pos): PieceMap = {
     var res = pieces - orig
 
     var vector = dest - orig

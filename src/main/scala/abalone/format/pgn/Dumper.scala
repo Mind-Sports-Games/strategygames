@@ -15,6 +15,6 @@ object Dumper {
     apply(
       data.situationBefore,
       data,
-      data.finalizeAfter situationOf !data.player
+      data.finalizeAfter situationOf !data.player//TODO Alex?
     )
 }
