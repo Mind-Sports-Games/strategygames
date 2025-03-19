@@ -14,39 +14,9 @@ case class Move(
                ) extends Action(situationBefore, after, metrics) {
   def withHistory(h: History) = copy(after = after withHistory h)
 
-  override def finalizeAfter: Board = {//TODO Alex
-    val board = after.updateHistory { h =>
-      h.copy(
-        lastTurn = if (autoEndTurn) h.currentTurn :+ toUci else h.lastTurn,
-        currentTurn = if (autoEndTurn) List() else h.currentTurn :+ toUci,
-        prevPlayer = Option(player),
-        prevMove = Option(this),
-        score = if (captures) h.score.add(player) else h.score, // This assumes the player cannot eject their own pieces
-        halfMoveClock = if (captures) 0 else h.halfMoveClock + 1
-      )
-    }
+  override def finalizeAfter: Board = after.variant.finalizeBoardAfter(this)
 
-    // Update position hashes last, only after updating the board.
-    board.variant
-      .finalizeBoard(
-        board,
-        toUci,
-        capture.flatMap(before.getPiece)
-      )
-      .updateHistory { h =>
-        val prevPositionHashes =
-          if (board.variant.isIrreversible(this)) Array.empty: PositionHash
-          else if (h.positionHashes.isEmpty) Hash(situationBefore)
-          else h.positionHashes
-
-        h.copy(positionHashes =
-          if (autoEndTurn) Hash(board.situationOf(player)) ++ prevPositionHashes//FIXME wrong, the player should be the next one
-          else prevPositionHashes
-        )
-      }
-  }
-
-  override def situationAfter = Situation(finalizeAfter, if (autoEndTurn) !situationBefore.player else situationBefore.player)//TODO Alex
+  override def situationAfter = Situation(finalizeAfter, if (autoEndTurn) !player else player)
 
   def applyVariantEffect: Move = before.variant addVariantEffect this
 

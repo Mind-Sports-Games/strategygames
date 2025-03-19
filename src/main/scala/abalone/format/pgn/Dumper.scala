@@ -11,10 +11,11 @@ object Dumper {
            ): String =
     data.toUci.uci
 
-  def apply(data: Move): String =
+  def apply(data: Move): String = {
     apply(
       data.situationBefore,
       data,
-      data.finalizeAfter situationOf !data.player//TODO Alex?
+      data.situationAfter
     )
+  }
 }

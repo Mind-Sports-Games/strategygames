@@ -3,7 +3,7 @@ package strategygames.abalone.variant
 import cats.data.Validated
 import cats.syntax.option._
 import strategygames.abalone._
-import strategygames.abalone.format.{FEN, Uci}
+import strategygames.abalone.format.FEN
 import strategygames.{GameFamily, Player}
 
 import scala.annotation.nowarn
@@ -182,10 +182,10 @@ abstract class Variant private[variant](
 
   // Move pieces on the board. Other bits (including score) are handled by Move.finalizeAfter()
   def boardAfter(sit: Situation, orig: Pos, dest: Pos): Board = {
-    sit.board.copy(pieces = piecesAfterAction(sit.board.pieces, orig, dest))
+    sit.board.copy(pieces = boardAfter_pieces(sit.board.pieces, orig, dest))
   }
 
-  protected def piecesAfterAction(pieces: PieceMap, orig: Pos, dest: Pos): PieceMap = {
+  protected def boardAfter_pieces(pieces: PieceMap, orig: Pos, dest: Pos): PieceMap = {
     var res = pieces - orig
 
     var vector = dest - orig
@@ -225,6 +225,41 @@ abstract class Variant private[variant](
     res
   }
 
+  //  /** Once a move has been decided upon amongst the available legal ones, the board is finalized. */
+  //  @nowarn def finalizeBoard(board: Board, uci: Uci, captured: Option[Piece]): Board = board
+
+  final def finalizeBoardAfter(move: Move): Board = {
+    // Update position hashes last, only after updating the board.
+    finalizeBoardAfter_hash(finalizeBoardAfter_core(finalizeBoardAfter_hist(move), move), move)
+  }
+
+  protected def finalizeBoardAfter_hist(move: Move): Board =
+    move.after.updateHistory { h =>
+      h.copy(
+        lastTurn = if (move.autoEndTurn) h.currentTurn :+ move.toUci else h.lastTurn,
+        currentTurn = if (move.autoEndTurn) List() else h.currentTurn :+ move.toUci,
+        prevPlayer = Option(move.player),
+        prevMove = Option(move),
+        score = if (move.captures) h.score.add(move.player) else h.score,
+        halfMoveClock = if (move.captures) 0 else h.halfMoveClock + 1
+      )
+    }
+
+  @nowarn protected def finalizeBoardAfter_core(board: Board, move: Move): Board = board
+
+  protected def finalizeBoardAfter_hash(board: Board, move: Move): Board =
+    board.updateHistory { h =>
+      val prevPositionHashes =
+        if (isIrreversible(move)) Array.empty: PositionHash
+        else if (h.positionHashes.isEmpty) Hash(move.situationBefore)
+        else h.positionHashes
+
+      h.copy(positionHashes =
+        if (move.autoEndTurn) Hash(move.after.situationOf(!move.player)) ++ prevPositionHashes
+        else prevPositionHashes
+      )
+    }
+
   def move(sit: Situation, from: Pos, to: Pos): Validated[String, Move] = {
     // Find the move in the variant specific list of valid moves !
     sit.moves.get(from).flatMap(_.find(m => m.dest == to)) toValid
@@ -258,12 +293,6 @@ abstract class Variant private[variant](
   def hasMoveEffects = false
 
   def addVariantEffect(move: Move): Move = move
-
-  /** Once a move has been decided upon from the available legal moves, the board is finalized. */
-  //  @nowarn def finalizeBoard(board: Board, uci: Uci, captured: Option[Piece]): Board = board
-
-  /** Once a move has been decided upon amongst the available legal ones, the board is finalized. */
-  @nowarn def finalizeBoard(board: Board, uci: Uci, captured: Option[Piece]): Board = board
 
   def valid(@nowarn board: Board, @nowarn strict: Boolean): Boolean = true
 

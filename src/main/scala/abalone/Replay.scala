@@ -174,7 +174,7 @@ object Replay {
       case Nil => valid(Nil)
       case san :: rest =>
         san(StratSituation.wrap(sit)).map(abaloneMove) flatMap { move =>
-          val after = Situation(move.finalizeAfter, !sit.player) //TODO Alex
+          val after = move.situationAfter
           recursiveSituations(after, rest) map {
             after :: _
           }
@@ -189,7 +189,7 @@ object Replay {
       case Nil => valid(Nil)
       case uci :: rest =>
         uci(sit) andThen { move =>
-          val after = Situation(move.finalizeAfter, !sit.player) //TODO Alex
+          val after = move.situationAfter
           recursiveSituationsFromUci(after, rest) map {
             after :: _
           }
@@ -301,7 +301,7 @@ object Replay {
           case Nil => invalid(s"Can't find $atFenTruncated, reached ply $ply, turn $turn")
           case san :: rest =>
             san(StratSituation.wrap(sit)).map(abaloneMove) flatMap { move =>
-              val after = move.situationAfter //TODO Alex
+              val after = move.situationAfter
               val newPlies = ply + 1
               val newTurnCount = turn + (if (sit.player != after.player) 1 else 0)
               val fen = Forsyth >> Game(after, plies = newPlies, turnCount = newTurnCount)
