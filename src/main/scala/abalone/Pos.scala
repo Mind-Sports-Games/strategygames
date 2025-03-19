@@ -58,6 +58,8 @@ case class Pos(var x: Int, var y: Int) extends AnyRef {
 
   def piotrStr: String = piotr.toString
 
+  def equals(x: Int, y: Int): Boolean = this.x == x && this.y == y
+
   override def toString = "(" + x + ", " + y + ")"
 
   //
@@ -351,10 +353,13 @@ object Piotr {
   ) ++ (260 to 328).map(_.toChar) ++ (330 to 431).map(_.toChar) // NOTE: 329 is deprecated
 
   def posToIndex: Map[Pos, Int] = Range(0, piotrs.size).map(i => (indexToPos(i), i)).toMap
+
   def indexToPiotr: Map[Int, Char] = Range(0, piotrs.size).map(i => (i, piotrs(i))).toMap
+
   def posToPiotr: Map[Pos, Char] = posToIndex.keys.map(a => (a, indexToPiotr(posToIndex(a)))).toMap
 
   def piotrToIndex: Map[Char, Int] = indexToPiotr.keys.map(i => (indexToPiotr(i), i)).toMap
+
   def piotrToPos: Map[Char, Pos] = posToPiotr.keys.map(a => (posToPiotr(a), a)).toMap
 
   def indexToPos(i: Int): Pos = {
