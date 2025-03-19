@@ -12,6 +12,30 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
 
   def of23(board: Board): Move => Boolean = m => board.variant.boardType.norm(m.dest - m.orig) > 1
 
+  def valid(game: Game): Map[Pos, List[Move]] = valid(game.situation)
+
+  def valid(sit: Situation): Map[Pos, List[Move]] = sit.board.variant.validMoves(sit)
+
+  def valid_line(sit: Situation): Map[Pos, List[Move]] = sit.board.variant.validMoves_line(sit)
+
+  def valid_jump(sit: Situation): Map[Pos, List[Move]] = sit.board.variant.validMoves_jump(sit)
+
+
+  def next(game: Game, fx: Int, fy: Int, tx: Int, ty: Int): Game =
+    next(game, valid(game), fx, fy, tx, ty)
+
+  def next(game: Game, validMoves: Map[Pos, List[Move]], fx: Int, fy: Int, tx: Int, ty: Int): Game =
+    next(game, validMoves, new Pos(fx, fy), new Pos(tx, ty))
+
+  def next(game: Game, validMoves: Map[Pos, List[Move]], orig: Pos, dest: Pos): Game =
+    game(validMoves(orig).find(m => m.dest == dest).get)
+
+  def ukeys(validMoves: Map[Pos, List[Move]], fx: Int, fy: Int): Iterable[String] = ukeys(validMoves, new Pos(fx, fy))
+
+  def ukeys(validMoves: Map[Pos, List[Move]], orig: Pos): Iterable[String] = ukeys(validMoves.get(orig).get)
+
+  def ukeys(moves: Iterable[Move]): Iterable[String] = moves.map(_.toUci.keys)
+
   /*
    *      · · · · ·
    *     · · · · · ·
@@ -26,13 +50,12 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
   "custom basic position" should {
     val fen = format.FEN("5/6/7/4s3/4SSSs1/8/7/6/5 0 0 b 0 0")
     val board = Board(fen.pieces(Abalone.boardType), History(), Abalone)
-    val situation = Situation(board, P1)
-    val validMoves = board.variant.validMoves(situation)
-    val moves = board.variant.validMoves(situation).flatMap(_._2)
+    val game = new Game(Situation(board, P1))
+    val validMoves = valid(game)
+    val moves = validMoves.flatMap(_._2)
     val movesOf1 = moves.filter(of1(board))
     val movesOf23 = moves.filter(of23(board))
-    val game = new Game(situation)
-    val game2 = game(validMoves(new Pos(6, 4)).find(m => m.dest == new Pos(4, 5)).get) // e7f5
+    val game2 = next(game, validMoves, 6, 4, 4, 5) // e7f5
     /*
      *      · · · · ·
      *     · · · · · ·
@@ -44,8 +67,8 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
      *     · · · · · ·
      *      · · · · ·
      */
-    val validMoves2 = game2.board.variant.validMoves(game2.situation)
-    val game3 = game2(validMoves2(new Pos(7, 4)).find(m => m.dest == new Pos(6, 3)).get) // e8d7
+    val validMoves2 = valid(game2)
+    val game3 = next(game2, validMoves2, 7, 4, 6, 3) // e8d7
     /*
      *      · · · · ·
      *     · · · · · ·
@@ -57,8 +80,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
      *     · · · · · ·
      *      · · · · ·
      */
-    val validMoves3 = game3.board.variant.validMoves(game3.situation)
-    val game4 = game3(validMoves3(new Pos(4, 5)).find(m => m.dest == new Pos(6, 4)).get) // f5e7
+    val game4 = next(game3, 4, 5, 6, 4) // f5e7
     /*
      *      · · · · ·
      *     · · · · · ·
@@ -70,8 +92,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
      *     · · · · · ·
      *      · · · · ·
      */
-    val validMoves4 = game4.board.variant.validMoves(game4.situation)
-    val game5 = game4(validMoves4(new Pos(6, 3)).find(m => m.dest == new Pos(7, 4)).get) // d7e8
+    val game5 = next(game4, 6, 3, 7, 4) // d7e8
     /*
      *      · · · · ·
      *     · · · · · ·
@@ -83,8 +104,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
      *     · · · · · ·
      *      · · · · ·
      */
-    val validMoves5 = game5.board.variant.validMoves(game5.situation)
-    val game6 = game5(validMoves5(new Pos(5, 4)).find(m => m.dest == new Pos(6, 3)).get) // e6d7
+    val game6 = next(game5, 5, 4, 6, 3) // e6d7
     /*
      *      · · · · ·
      *     · · · · · ·
@@ -96,7 +116,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
      *     · · · · · ·
      *      · · · · ·
      */
-    val validMoves6 = game6.board.variant.validMoves(game6.situation)
+    val validMoves6 = valid(game6)
 
     "compute the correct number of moves" in {
       moves.size must_== movesOf1.size + movesOf23.size
@@ -105,17 +125,17 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     }
 
     "compute the right set of moves using 2 or 3 marbles" in {
-      movesOf23.map(_.toUci.keys) should contain("e5e9")
-      movesOf23.map(_.toUci.keys) should contain("e5f8")
-      movesOf23.map(_.toUci.keys) should contain("e5f7")
-      movesOf23.map(_.toUci.keys) should contain("e7e4")
-      movesOf23.map(_.toUci.keys) should contain("e7f5")
-      movesOf23.map(_.toUci.keys) should contain("e7f6")
-      movesOf23.map(_.toUci.keys) should contain("e6e4")
-      movesOf23.map(_.toUci.keys) should contain("e6e9")
-      movesOf23.map(_.toUci.keys) should contain("e6d7")
-      movesOf23.map(_.toUci.keys) should contain("e6f8")
-      movesOf23.map(_.toUci.keys) should contain("e6f5")
+      ukeys(movesOf23) should contain("e5e9")
+      ukeys(movesOf23) should contain("e5f8")
+      ukeys(movesOf23) should contain("e5f7")
+      ukeys(movesOf23) should contain("e7e4")
+      ukeys(movesOf23) should contain("e7f5")
+      ukeys(movesOf23) should contain("e7f6")
+      ukeys(movesOf23) should contain("e6e4")
+      ukeys(movesOf23) should contain("e6e9")
+      ukeys(movesOf23) should contain("e6d7")
+      ukeys(movesOf23) should contain("e6f8")
+      ukeys(movesOf23) should contain("e6f5")
     }
 
     "side moves of 3 do move 3 marbles" in {
@@ -130,9 +150,9 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
       pieces2.contains("d5") must_== true
       pieces2.contains("e8") must_== true
 
-      validMoves2(new Pos(4, 3)).map(_.toUci.keys) should contain("d5e5")
-      validMoves2(new Pos(4, 3)).map(_.toUci.keys) should contain("d5e6")
-      validMoves2(new Pos(7, 4)).map(_.toUci.keys) should contain("e8e7")
+      ukeys(validMoves2, 4, 3) should contain("d5e5")
+      ukeys(validMoves2, 4, 3) should contain("d5e6")
+      ukeys(validMoves2, 7, 4) should contain("e8e7")
 
       board.pieces must_== game5.situation.board.pieces
       game5.situation.board.pieces.size must_== 5
@@ -149,10 +169,10 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
       pieces6.contains("e7") must_== false
       pieces6.contains("e8") must_== true
 
-      validMoves6(new Pos(4, 3)).map(_.toUci.keys) should not contain "d5d8"
-      validMoves6(new Pos(4, 3)).map(_.toUci.keys) should not contain "d5e5"
-      validMoves6(new Pos(4, 3)).map(_.toUci.keys) should contain("d5e6")
-      validMoves6(new Pos(7, 4)).map(_.toUci.keys) should contain("e8e7")
+      ukeys(validMoves6, 4, 3) should not contain "d5d8"
+      ukeys(validMoves6, 4, 3) should not contain "d5e5"
+      ukeys(validMoves6, 4, 3) should contain("d5e6")
+      ukeys(validMoves6, 7, 4) should contain("e8e7")
     }
   }
 
@@ -171,10 +191,10 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     val fen = Abalone.initialFen
     val board = Board(fen.pieces(Abalone.boardType), History(), Abalone)
     val situation = Situation(board, P1)
-    val validMoves = board.variant.validMoves(situation)
+    val validMoves = valid(situation)
     val moves = validMoves.flatMap(_._2)
-    val lineMoves = board.variant.validMoves_line(situation).flatMap(_._2)
-    val jumpMoves = board.variant.validMoves_jump(situation).flatMap(_._2)
+    val lineMoves = valid_line(situation).flatMap(_._2)
+    val jumpMoves = valid_jump(situation).flatMap(_._2)
     val movesOf1 = moves.filter(of1(board))
     val movesOf23 = moves.filter(of23(board))
 
@@ -201,10 +221,9 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     val fen = format.FEN("sssss/5s/6s/1SSSSS1s/1S5s1/S1sssss1/S6/S5/SSSSS 0 0 b 0 0")
     val board = Board(fen.pieces(Abalone.boardType), History(), Abalone)
     val situation = Situation(board, P1)
-    val validMoves = board.variant.validMoves(situation)
-    val moves = validMoves.flatMap(_._2)
-    val lineMoves = board.variant.validMoves_line(situation).flatMap(_._2)
-    val jumpMoves = board.variant.validMoves_jump(situation).flatMap(_._2)
+    val moves = valid(situation).flatMap(_._2)
+    val lineMoves = valid_line(situation).flatMap(_._2)
+    val jumpMoves = valid_jump(situation).flatMap(_._2)
     val movesOf1 = moves.filter(of1(board))
     val movesOf23 = moves.filter(of23(board))
 
@@ -223,10 +242,9 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     val fen = format.FEN("s1s1s/1sSSs1/1sSsSs1/3ss3/9/3SS3/1SsSsS1/1SssS1/S1S1S 0 0 b 0 0")
     val board = Board(fen.pieces(Abalone.boardType), History(), Abalone)
     val situation = Situation(board, P1)
-    val validMoves = board.variant.validMoves(situation)
-    val moves = validMoves.flatMap(_._2)
-    val lineMoves = board.variant.validMoves_line(situation).flatMap(_._2)
-    val jumpMoves = board.variant.validMoves_jump(situation).flatMap(_._2)
+    val moves = valid(situation).flatMap(_._2)
+    val lineMoves = valid_line(situation).flatMap(_._2)
+    val jumpMoves = valid_jump(situation).flatMap(_._2)
     val movesOf1 = moves.filter(of1(board))
     val movesOf23 = moves.filter(of23(board))
 
@@ -245,10 +263,10 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     val fen = format.FEN("5/S4s/SS3ss/SSS1ssss/3S1S3/ssss1SSS/ss3SS/s4S/5 0 0 b 0 0")
     val board = Board(fen.pieces(Abalone.boardType), History(), Abalone)
     val situation = Situation(board, P1)
-    val validMoves = board.variant.validMoves(situation)
+    val validMoves = valid(situation)
     val moves = validMoves.flatMap(_._2)
-    val lineMoves = board.variant.validMoves_line(situation).flatMap(_._2)
-    val jumpMoves = board.variant.validMoves_jump(situation).flatMap(_._2)
+    val lineMoves = valid_line(situation).flatMap(_._2)
+    val jumpMoves = valid_jump(situation).flatMap(_._2)
     val movesOf1 = moves.filter(of1(board))
     val movesOf23 = moves.filter(of23(board))
 
@@ -265,10 +283,10 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     "find the moves pushing marbles" in {
       val of23: Move => Boolean = m => board.variant.boardType.norm(m.dest - m.orig) > 1
 
-      validMoves.get(new Pos(1, 2)).get.filter(of23).map(_.toUci.keys) should contain("c2g6")
-      validMoves.get(new Pos(2, 3)).get.filter(of23).map(_.toUci.keys) should contain("d3g6")
-      validMoves.get(new Pos(7, 6)).get.filter(of23).map(_.toUci.keys) should contain("g8c4")
-      validMoves.get(new Pos(6, 5)).get.filter(of23).map(_.toUci.keys) should contain("f7c4")
+      ukeys(validMoves.get(new Pos(1, 2)).get.filter(of23)) should contain("c2g6")
+      ukeys(validMoves.get(new Pos(2, 3)).get.filter(of23)) should contain("d3g6")
+      ukeys(validMoves.get(new Pos(7, 6)).get.filter(of23)) should contain("g8c4")
+      ukeys(validMoves.get(new Pos(6, 5)).get.filter(of23)) should contain("f7c4")
     }
   }
 
@@ -287,10 +305,10 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     val fen = format.FEN("1s3/2sSss/3s2S/ssSS2S1/4SSS2/8/7/3Ss1/2s1s 5 5 b 0 0")
     val board = Board(fen.pieces(Abalone.boardType), History(score = Score(5, 5)), Abalone)
     val situation = Situation(board, P1)
-    val validMoves = board.variant.validMoves(situation)
+    val validMoves = valid(situation)
     val moves = validMoves.flatMap(_._2)
-    val lineMoves = board.variant.validMoves_line(situation).flatMap(_._2)
-    val jumpMoves = board.variant.validMoves_jump(situation).flatMap(_._2)
+    val lineMoves = valid_line(situation).flatMap(_._2)
+    val jumpMoves = valid_jump(situation).flatMap(_._2)
     val movesOf1 = moves.filter(of1(board))
     val movesOf23 = moves.filter(of23(board))
 
@@ -339,10 +357,10 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     val fen = format.FEN("SSSSs/ssss2/1s5/2S5/3S5/3S4/1SSssss/2sSSS/SSS2 5 5 b 0 0")
     val board = Board(fen.pieces(Abalone.boardType), History(), Abalone)
     val situation = Situation(board, P1)
-    val validMoves = board.variant.validMoves(situation)
+    val validMoves = valid(situation)
+    val lineMoves = valid_line(situation).flatMap(_._2)
+    val jumpMoves = valid_jump(situation).flatMap(_._2)
     val moves = validMoves.flatMap(_._2)
-    val lineMoves = board.variant.validMoves_line(situation).flatMap(_._2)
-    val jumpMoves = board.variant.validMoves_jump(situation).flatMap(_._2)
     val movesOf1 = moves.filter(of1(board))
     val movesOf23 = moves.filter(of23(board))
 
@@ -363,9 +381,9 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     }
 
     "find and compute all moves that push off (3 vs 2, 3 vs 1, 2 vs 1)" in {
-      validMoves.get(new Pos(1, 0)).get.map(_.toUci.keys) should contain("a2a5")
-      validMoves.get(new Pos(2, 0)).get.map(_.toUci.keys) should contain("a3a5")
-      validMoves.get(new Pos(4, 5)).get.map(_.toUci.keys) should contain("f5b1")
+      ukeys(validMoves, 1, 0) should contain("a2a5")
+      ukeys(validMoves, 2, 0) should contain("a3a5")
+      ukeys(validMoves, 4, 5) should contain("f5b1")
     }
   }
 
@@ -383,8 +401,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
   "special position to test some edge cases" should {
     val fen = format.FEN("SsSSS/Ssssss/S3S2/s3S3/s3S4/S2S4/S1s4/Ss4/s4 5 5 b 0 0")
     val board = Board(fen.pieces(Abalone.boardType), History(), Abalone)
-    val situation = Situation(board, P1)
-    val validMoves = board.variant.validMoves(situation)
+    val validMoves = valid(Situation(board, P1))
 
     "not generate a push when a marble of the same colour blocks it (oooxo)" in {
       validMoves.get(new Pos(4, 4)).get.map(_.toUci.keys) should not contain "e5a5"
@@ -392,31 +409,31 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     }
 
     "produce no move from a marble or a group or marbles that are stuck" in {
-      validMoves.get(new Pos(2, 0)).get should beEmpty
-      validMoves.get(new Pos(3, 0)).get should beEmpty
-      validMoves.get(new Pos(4, 0)).get should beEmpty // (oooxo)
+      ukeys(validMoves, 2, 0) should beEmpty
+      ukeys(validMoves, 3, 0) should beEmpty
+      ukeys(validMoves, 4, 0) should beEmpty // (oooxo)
     }
 
     "not move more than 3 marbles" in {
-      validMoves.get(new Pos(4, 2)).get.size must_== 7
-      validMoves.get(new Pos(4, 2)).get.map(_.toUci.keys) should not contain "c5i5"
-      validMoves.get(new Pos(4, 2)).get.map(_.toUci.keys) should not contain "c5g6"
-      validMoves.get(new Pos(4, 2)).get.map(_.toUci.keys) should not contain "c5f4"
+      ukeys(validMoves, 4, 2).size must_== 7
+      ukeys(validMoves, 4, 2) should not contain "c5i5"
+      ukeys(validMoves, 4, 2) should not contain "c5g6"
+      ukeys(validMoves, 4, 2) should not contain "c5f4"
     }
 
     "find and compute all moves that push off (3 vs 2, 3 vs 1, 2 vs 1)" in {
-      validMoves.get(new Pos(3, 7)).get.map(_.toUci.keys) should contain("h4e1")
-      validMoves.get(new Pos(2, 6)).get.map(_.toUci.keys) should contain("g3e1")
-      validMoves.get(new Pos(2, 6)).get.map(_.toUci.keys) should contain("g3i5")
-      validMoves.get(new Pos(1, 5)).get.map(_.toUci.keys) should contain("f2i5")
+      ukeys(validMoves, 3, 7) should contain("h4e1")
+      ukeys(validMoves, 2, 6) should contain("g3e1")
+      ukeys(validMoves, 2, 6) should contain("g3i5")
+      ukeys(validMoves, 1, 5) should contain("f2i5")
 
-      validMoves.get(new Pos(0, 0)).get.map(_.toUci.keys) should contain("a1e1")
-      validMoves.get(new Pos(0, 0)).get.map(_.toUci.keys) should not contain "a1a5"
+      ukeys(validMoves, 0, 0) should contain("a1e1")
+      ukeys(validMoves, 0, 0) should not contain "a1a5"
     }
 
     "not create a move in case of n vs n push" in {
-      validMoves.get(new Pos(0, 1)).get.map(_.toUci.keys) should not contain "b1e1"
-      validMoves.get(new Pos(4, 3)).get.map(_.toUci.keys) should not contain "d5i5"
+      ukeys(validMoves, 0, 1) should not contain "b1e1"
+      ukeys(validMoves, 4, 3) should not contain "d5i5"
     }
   }
 
@@ -434,10 +451,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
   "pushing out the only marble of P2 with a score of 0" should {
     val fenEndedGame = format.FEN("5/6/7/8/5SSSs/8/7/6/5 0 0 b 0 0")
     val board = Board(fenEndedGame.pieces(Abalone.boardType), History(), Abalone)
-    val situation = Situation(board, P1)
-    val game = new Game(situation)
-    val validMoves = game.board.variant.validMoves(situation)
-    val game2 = game(validMoves(new Pos(5, 4)).find(m => m.dest == new Pos(8, 4)).get) // e6e9
+    val game2 = next(new Game(Situation(board, P1)), 5, 4, 8, 4) // e6e9
 
     "increment the score of P1" in {
       board.history.score must_== Score()
@@ -467,10 +481,8 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
   "pushing out the only marble of P2 with a score of 5" should {
     val fenEndedGame = format.FEN("5/6/7/8/5SSSs/8/7/6/5 5 0 b 0 0")
     val board = Board(fenEndedGame.pieces(Abalone.boardType), History(score = Score(p1 = 5)), Abalone)
-    val situation = Situation(board, P1)
-    val game = new Game(situation)
-    val validMoves = game.board.variant.validMoves(situation)
-    val game2 = game(validMoves(new Pos(5, 4)).find(m => m.dest == new Pos(8, 4)).get) // e6e9
+    val game = new Game(Situation(board, P1))
+    val game2 = next(game, 5, 4, 8, 4) // e6e9
 
     "increment the score of P1" in {
       board.history.score must_== Score(p1 = 5) // game.situation.board.history.score is Score(0,0)
@@ -500,10 +512,8 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
   "P1 pushing out 6 marbles consecutively" should {
     val fenEndedGame = format.FEN("s4/6/7/8/4SSSss/6S1/4SS1/3Sss/3ss 0 0 b 0 0")
     val board = Board(fenEndedGame.pieces(Abalone.boardType), History(), Abalone)
-    val situation = Situation(board, P1)
-    val game = new Game(situation)
-    val validMoves = game.board.variant.validMoves(situation)
-    val game2 = game(validMoves(new Pos(4, 4)).find(m => m.dest == new Pos(8, 4)).get) // e5e9
+    val game = new Game(Situation(board, P1))
+    val game2 = next(game, 4, 4, 8, 4) // e5e9
     /*
      *      · · · 2 2
      *     · · · 1 2 2
@@ -515,9 +525,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
      *     · · · · · ·
      *      2 · · ·
      */
-    val validMoves2 = game2.board.variant.validMoves(game2.situation)
-    println(validMoves2(new Pos(0, 0)).find(m => m.dest == new Pos(0, 1)).toString) //FIXME
-    val game3 = game2(validMoves2(new Pos(0, 0)).find(m => m.dest == new Pos(0, 1)).get) // a1b1
+    val game3 = next(game2, 0, 0, 0, 1) // a1b1
     /*
      *      · · · 2 2
      *     · · · 1 2 2
@@ -529,8 +537,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
      *     2 · · · · ·
      *      - · · ·
      */
-    val validMoves3 = game3.board.variant.validMoves(game3.situation)
-    val game4 = game3(validMoves3(new Pos(5, 4)).find(m => m.dest == new Pos(8, 4)).get) // e6e9
+    val game4 = next(game3, 5, 4, 8, 4) // e6e9
     /*
      *      · · · 2 2
      *     · · · 1 2 2
@@ -542,8 +549,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
      *     2 · · · · ·
      *      · · · ·
      */
-    val validMoves4 = game4.board.variant.validMoves(game4.situation)
-    val game5 = game4(validMoves4(new Pos(0, 1)).find(m => m.dest == new Pos(0, 0)).get) // b1a1
+    val game5 = next(game4, 0, 1, 0, 0) // b1a1
     /*
      *      · · · 2 2
      *     · · · 1 2 2
@@ -555,8 +561,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
      *     - · · · · ·
      *      2 · · ·
      */
-    val validMoves5 = game5.board.variant.validMoves(game5.situation)
-    val game6 = game5(validMoves5(new Pos(7, 4)).find(m => m.dest == new Pos(7, 8)).get) // e8i8
+    val game6 = next(game5, 7, 4, 7, 8) // e8i8
     /*
      *      · · · 2 2
      *     · · · 1 1 2
@@ -568,8 +573,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
      *     · · · · · ·
      *      2 · · ·
      */
-    val validMoves6 = game6.board.variant.validMoves(game6.situation)
-    val game7 = game6(validMoves6(new Pos(0, 0)).find(m => m.dest == new Pos(0, 1)).get) // a1b1
+    val game7 = next(game6, 0, 0, 0, 1) // a1b1
     /*
      *      · · · 2 2
      *     · · · 1 1 2
@@ -581,8 +585,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
      *     2 · · · · ·
      *      - · · ·
      */
-    val validMoves7 = game7.board.variant.validMoves(game7.situation)
-    val game8 = game7(validMoves7(new Pos(7, 5)).find(m => m.dest == new Pos(7, 8)).get) // f8i8
+    val game8 = next(game7, 7, 5, 7, 8) // f8i8
     /*
      *      · · · 1 2
      *     · · · 1 1 2
@@ -594,8 +597,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
      *     2 · · · · ·
      *      · · · ·
      */
-    val validMoves8 = game8.board.variant.validMoves(game8.situation)
-    val game9 = game8(validMoves8(new Pos(0, 1)).find(m => m.dest == new Pos(0, 0)).get) // b1a1
+    val game9 = next(game8, 0, 1, 0, 0) // b1a1
     /*
      *      · · · 1 2
      *     · · · 1 1 2
@@ -607,8 +609,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
      *     - · · · · ·
      *      2 · · ·
      */
-    val validMoves9 = game9.board.variant.validMoves(game9.situation)
-    val game10 = game9(validMoves9(new Pos(6, 7)).find(m => m.dest == new Pos(8, 7)).get) // h7h9
+    val game10 = next(game9, 6, 7, 8, 7) // h7h9
     /*
      *      · · · 1 2
      *     · · · - 1 1
@@ -620,8 +621,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
      *     · · · · · ·
      *      2 · · ·
      */
-    val validMoves10 = game10.board.variant.validMoves(game10.situation)
-    val game11 = game10(validMoves10(new Pos(0, 0)).find(m => m.dest == new Pos(0, 1)).get) // a1b1
+    val game11 = next(game10, 0, 0, 0, 1) // a1b1
     /*
      *      · · · 1 2
      *     · · · · 1 1
@@ -633,8 +633,7 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
      *     2 · · · · ·
      *      - · · ·
      */
-    val validMoves11 = game11.board.variant.validMoves(game11.situation)
-    val game12 = game11(validMoves11(new Pos(6, 6)).find(m => m.dest == new Pos(8, 8)).get) // g7i9
+    val game12 = next(game11, 6, 6, 8, 8) // g7i9
     /*
      *      · · · 1 1
      *     · · · · 1 1
@@ -707,26 +706,16 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
   "P2 and P1 moving left right left right several times" should {
     val fenEndedGame = format.FEN("s4/6/7/8/4SSSss/6S1/4SS1/3Sss/3ss 0 0 b 0 0")
     val board = Board(fenEndedGame.pieces(Abalone.boardType), History(), Abalone)
-    val situation = Situation(board, P1)
-    val game = new Game(situation)
-    val validMoves = game.board.variant.validMoves(situation)
-    val game2 = game(validMoves(new Pos(4, 4)).find(m => m.dest == new Pos(3, 4)).get) // e5e4
-    val validMoves2 = game2.board.variant.validMoves(game2.situation)
-    val game3 = game2(validMoves2(new Pos(0, 0)).find(m => m.dest == new Pos(1, 0)).get) // a1a2
-    val validMoves3 = game3.board.variant.validMoves(game3.situation)
-    val game4 = game3(validMoves3(new Pos(3, 4)).find(m => m.dest == new Pos(4, 4)).get) // e4e5
-    val validMoves4 = game4.board.variant.validMoves(game4.situation)
-    val game5 = game4(validMoves4(new Pos(1, 0)).find(m => m.dest == new Pos(0, 0)).get) // a2a1
-    val validMoves5 = game5.board.variant.validMoves(game5.situation)
-    val game6 = game5(validMoves5(new Pos(4, 4)).find(m => m.dest == new Pos(3, 4)).get) // e5e4
-    val validMoves6 = game6.board.variant.validMoves(game6.situation)
-    val game7 = game6(validMoves6(new Pos(0, 0)).find(m => m.dest == new Pos(1, 0)).get) // a1a2
-    val validMoves7 = game7.board.variant.validMoves(game7.situation)
-    val game8 = game7(validMoves7(new Pos(3, 4)).find(m => m.dest == new Pos(4, 4)).get) // e4e5
-    val validMoves8 = game8.board.variant.validMoves(game8.situation)
-    val game9 = game8(validMoves8(new Pos(1, 0)).find(m => m.dest == new Pos(0, 0)).get) // a2a1 <- DRAW !
-    val validMoves9 = game9.board.variant.validMoves(game9.situation)
-    val game10 = game9(validMoves9(new Pos(4, 4)).find(m => m.dest == new Pos(3, 4)).get) // e5e4 <- trying to play a neutral move
+    val game = new Game(Situation(board, P1))
+    val game2 = next(game, 4, 4, 3, 4) // e5e4
+    val game3 = next(game2, 0, 0, 1, 0) // a1a2
+    val game4 = next(game3, 3, 4, 4, 4) // e4e5
+    val game5 = next(game4, 1, 0, 0, 0) // a2a1
+    val game6 = next(game5, 4, 4, 3, 4) // e5e4
+    val game7 = next(game6, 0, 0, 1, 0) // a1a2
+    val game8 = next(game7, 3, 4, 4, 4) // e4e5
+    val game9 = next(game8, 1, 0, 0, 0) // a2a1 <- DRAW !
+    val game10 = next(game9, 4, 4, 3, 4) // e5e4 <- trying to play a neutral move
 
     "trigger a draw by repetition after seeing the same situation for the 3rd time, and no stalemate is detected" in {
       game8.situation.end must_== false
