@@ -369,53 +369,56 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     }
   }
 
-//  "special position to test some edge cases" should {
-//    val fen = format.FEN("s4/Ss4/S1s4/S2S4/s3S4/s3S3/S3S2/Ssssss/SsSSS 5 5 b 0 0")
-//    val board = Board(fen.pieces, History(score = Score(0, 0)), Abalone)
-//    val situation = Situation(board, P1)
-//    val validMoves = board.variant.validMoves(situation);
-//
-//    "not generate a push when a same color marble prevents it (oooxo)" in {
-//      validMoves.get(Pos.E5).get.map(x => x.toString) should not contain "p1-Stone e5e2"
-//      validMoves.get(Pos.E5).get.map(x => x.toString) should not contain "p1-Stone e5e1"
-//    }
-//
-//    "produce no move from a marble or a group or marbles that are stuck" in {
-//      validMoves.get(Pos.C1).get should beEmpty
-//      validMoves.get(Pos.D1).get should beEmpty
-//      validMoves.get(Pos.E1).get should beEmpty // (oooxo)
-//    }
-//
-//    "not move more than 3 marbles" in {
-//      validMoves.get(Pos.E3).get.map(x => x.toString) should not contain "p1-Stone e3e7"
-//      validMoves.get(Pos.E3).get.map(x => x.toString) should not contain "p1-Stone e3e8"
-//      validMoves.get(Pos.E3).get.map(x => x.toString) should not contain "p1-Stone e3e9"
-//      validMoves.get(Pos.E3).get.map(x => x.toString) should not contain "p1-Stone e3d6"
-//      validMoves.get(Pos.E3).get.map(x => x.toString) should not contain "p1-Stone e3f7"
-//      validMoves.get(Pos.E3).get.size must_== 7
-//    }
-//
-//    "find and compute all moves that push off (3v2, 3v1, 2v1)" in {
-//      validMoves.get(Pos.D8).get.map(x => x.toString) should contain("p1-Stone d8a5")
-//      validMoves.get(Pos.C7).get.map(x => x.toString) should contain("p1-Stone c7a5")
-//      validMoves.get(Pos.C7).get.map(x => x.toString) should contain("p1-Stone c7e9")
-//      validMoves.get(Pos.B6).get.map(x => x.toString) should contain("p1-Stone b6e9")
-//
-//      validMoves.get(Pos.A1).get.map(x => x.toString) should contain("p1-Stone a1a4")
-//      validMoves.get(Pos.A1).get.map(x => x.toString) should not contain "p1-Stone a1a5"
-//    }
-//
-//    "not create a move in case of 2v2 push" in {
-//      validMoves.get(Pos.A2).get.map(x => x.toString) should not contain "p1-Stone a2a4"
-//      validMoves.get(Pos.A2).get.map(x => x.toString) should not contain "p1-Stone a2a5"
-//    }
-//
-//    "not create a move in case of 3v3 push" in {
-//      validMoves.get(Pos.E4).get.map(x => x.toString) should not contain "p1-Stone e4e7"
-//      validMoves.get(Pos.E4).get.map(x => x.toString) should not contain "p1-Stone e4e8"
-//      validMoves.get(Pos.E4).get.map(x => x.toString) should not contain "p1-Stone e4e9"
-//    }
-//  }
+  /*
+   *     2 · · · ·
+   *    1 2 · · · ·
+   *   1 · 2 · · · ·
+   *  1 · · 1 · · · ·
+   * 2 · · · 1 · · · ·
+   *  2 · · · 1 · · ·
+   *   1 · · · 1 · ·
+   *    1 2 2 2 2 2
+   *     1 2 1 1 1
+   */
+  "special position to test some edge cases" should {
+    val fen = format.FEN("SsSSS/Ssssss/S3S2/s3S3/s3S4/S2S4/S1s4/Ss4/s4 5 5 b 0 0")
+    val board = Board(fen.pieces(Abalone.boardType), History(), Abalone)
+    val situation = Situation(board, P1)
+    val validMoves = board.variant.validMoves(situation)
+
+    "not generate a push when a marble of the same colour blocks it (oooxo)" in {
+      validMoves.get(new Pos(4, 4)).get.map(_.toUci.keys) should not contain "e5a5"
+      validMoves.get(new Pos(4, 0)).get.map(_.toUci.keys) should not contain "a5a1"
+    }
+
+    "produce no move from a marble or a group or marbles that are stuck" in {
+      validMoves.get(new Pos(2, 0)).get should beEmpty
+      validMoves.get(new Pos(3, 0)).get should beEmpty
+      validMoves.get(new Pos(4, 0)).get should beEmpty// (oooxo)
+    }
+
+    "not move more than 3 marbles" in {
+      validMoves.get(new Pos(4, 2)).get.size must_== 7
+      validMoves.get(new Pos(4, 2)).get.map(_.toUci.keys) should not contain "c5i5"
+      validMoves.get(new Pos(4, 2)).get.map(_.toUci.keys) should not contain "c5g6"
+      validMoves.get(new Pos(4, 2)).get.map(_.toUci.keys) should not contain "c5f4"
+    }
+
+    "find and compute all moves that push off (3 vs 2, 3 vs 1, 2 vs 1)" in {
+      validMoves.get(new Pos(3, 7)).get.map(_.toUci.keys) should contain("h4e1")
+      validMoves.get(new Pos(2, 6)).get.map(_.toUci.keys) should contain("g3e1")
+      validMoves.get(new Pos(2, 6)).get.map(_.toUci.keys) should contain("g3i5")
+      validMoves.get(new Pos(1, 5)).get.map(_.toUci.keys) should contain("f2i5")
+
+      validMoves.get(new Pos(0, 0)).get.map(_.toUci.keys) should contain("a1e1")
+      validMoves.get(new Pos(0, 0)).get.map(_.toUci.keys) should not contain "a1a5"
+    }
+
+    "not create a move in case of n vs n push" in {
+      validMoves.get(new Pos(0, 1)).get.map(_.toUci.keys) should not contain "b1e1"
+      validMoves.get(new Pos(4, 3)).get.map(_.toUci.keys) should not contain "d5i5"
+    }
+  }
 
   //TODO
   //
