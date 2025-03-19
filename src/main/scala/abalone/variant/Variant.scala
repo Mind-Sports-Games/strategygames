@@ -79,10 +79,10 @@ abstract class Variant private[variant](
           if (hasProperty) {
             u += 1
             max = maxUsable.isDefined && u > maxUsable.get
-          }
 
-          c += vect
-          cp = sit.board.getPiece(c)
+            c += vect
+            cp = sit.board.getPiece(c)
+          }
         }
 
         if (!max) {
@@ -94,10 +94,10 @@ abstract class Variant private[variant](
             if (hasProperty) {
               p += 1
               max = p >= u
-            }
 
-            c += vect
-            cp = sit.board.getPiece(c)
+              c += vect
+              cp = sit.board.getPiece(c)
+            }
           }
 
           if (!max && cp.isEmpty) { // is cp.isDefined, there is an immovable piece that blocks the line
