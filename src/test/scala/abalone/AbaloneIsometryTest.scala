@@ -988,130 +988,112 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest with IAbaloneTes
 //    })
 //  }
 //
+//TODO corrected, but does not seem to terminate
 //  "MSO 2022 final game - Francesco SALERNO vs Vincent FROCHOT" in {
 //    _testEveryMoveLoadFenIsometry(lib, StratFen(lib, variant.Abalone.initialFen.value), stratVariant)(
 //      List(
 //        "a1d4",
-//        "e9e6",
-//        "b1d3",
-//        "f3e4",
-//        "c2e4",
-//        "e8e5",
-//        "b2e5",
-//        "f9f7",
-//        "g7h6",
-//        "f7d5", // opening
-//        "b3e3",
-//        "d8e8",
-//        "c3f6",
-//        "e7c6",
-//        "e3e6",
-//        "f8f7",
-//        "g6g5",
-//        "f2e3",
-//        "d4f4",
-//        "f3d3", // 02
-//        "h6e3",
-//        "d2d4",
-//        "f4d4",
-//        "f5g6",
-//        "g5f5",
-//        "d6b5",
-//        "f5d3",
-//        "e8d6",
-//        "f6d6",
-//        "b5e5", // 03
-//        "c3e5",
-//        "c6b5",
-//        "e6e7",
-//        "c1c3",
-//        "e7c5",
+//        "i5f5",
+//        "a2c4",
+//        "c6d5",
+//        "b3e6",
+//        "h5e5",
+//        "b2f6",
+//        "i6g6",
+//        "g7f8",
+//        "g6e4", // opening
 //        "c2c5",
-//        "e3f4",
-//        "b5e5",
-//        "c6e6",
-//        "b4d6", // 04
-//        "e4g6",
-//        "c5e7",
-//        "h9h7",
-//        "e7h7",
-//        "f8e7",
-//        "e5h8",
-//        "e7e5",
-//        "c3c5",
-//        "e6e4",
-//        "h8e5", // 05
-//        "c3e3",
-//        "c5f5",
-//        "e3e5",
-//        "h6h8",
-//        "e4e6",
-//        "h8e5",
-//        "i7h6",
-//        "d5g5",
-//        "i5i6",
-//        "g7d4", // 06
-//        "e6d5",
-//        "g4g6",
-//        "i8h8",
-//        "f5h5",
-//        "a2c2",
-//        "d6e6",
-//        "b2d2",
-//        "e6h6",
-//        "c2e4",
-//        "h7f5", // 07
-//        "c3e3",
-//        "d7g7",
-//        "d2g5",
-//        "e5h8",
-//        "i9i8",
-//        "f7f4",
+//        "h4h5",
+//        "c3g7",
+//        "g5f3",
+//        "c5g5",
+//        "h6g6",
+//        "f7e7",
+//        "b6c5",
+//        "d4d7",
+//        "c6c3", // 02
+//        "f8a3",
+//        "b4d4",
+//        "d6d3",
+//        "e6f7",
+//        "e7e6",
+//        "f4e2",
+//        "e6b3",
+//        "h5f4",
+//        "f6f3",
+//        "e2e6", // 03
+//        "c3f6",
 //        "f3e2",
-//        "f6i6",
-//        "g8f7",
-//        "i7i5", // 08
-//        "e2e5",
-//        "g7g8",
-//        "i8i9",
-//        "f5h7",
-//        "d3f5",
-//        "g8i8"
+//        "f5g5",
+//        "a3c3",
+//        "g5d2",
+//        "b3f3",
+//        "c5d6",
+//        "e2e7",
+//        "f3f5",
+//        "d2g5", // 04
+//        "d5g8",
+//        "e3h6",
+//        "i8f8",
+//        "g5g9",
+//        "h6g5",
+//        "e5i9",// e5xi9
+//        "g5e5",
+//        "c3e3",
+//        "f5d5",
+//        "h8c3", // 05
+//        "c3c5",
+//        "e3e8",
+//        "c5f5",
+//        "f8h8",
+//        "d5g5",
+//        "h8c3",
+//        "g9f8",
+//        "e4e9",
+//        "e9f9",
+//        "g7b2", // 06
+//        "f5e4",
+//        "d7g7",
+//        "h9h8",
+//        "e6e9",
+//        "b1b3",
+//        "f4f5",
+//        "b2b4",
+//        "f5f9",// f5xf9
+//        "b3d5",
+//        "g8e6", // 07
+//        "c3c5",
+//        "g4g8",
+//        "b4g9",
+//        "e5i9",// e5xi9
+//        "i9h9",
+//        "g6c6",
+//        "c6b5",
+//        "f6f9",// f6xf9
+//        "h7g6",
+//        "g9e9",// g9xe9 // 08
+//        "b5e5",
+//        "g7h7",
+//        "h9i9",
+//        "e6h9",
+//        "c4e6",
+//        "h7h9"// h7xh9
 //      ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
 //    ) must beValid.like(gameData => {
 //      val fen1 = StratForsyth.>>(lib, gameData.game)
 //      val fen2 = StratForsyth.>>(lib, gameData.fenGame)
 //      fen1 must_== fen2
-//      // fen1.value must_== "3ss/S1Ssss/1SS4/3SSss1/3SsS3/3ssS2/1sss3/s2SSS/3SS 0 0 b 10 6" // opening
+//      fen1.value must_== "3ss/6/4S2/2ssSs2/3SSSSss/5sss/2sS1s1/4ss/4S 0 6 b 0 44"
 //      /*
-//            _ _ _ 0 0
-//       * _ * 0 0 0
-//          _ * * _ _ _ _
-//         _ _ _ * * 0 0 _
-//        _ _ _ * 0 * _ _ _
-//         _ _ _ 0 0 * _ _
-//          _ 0 0 0 _ _ _
-//           0 _ _ * * *
-//            _ _ _ * *
-//       */
-//      // fen1.value must_== "3ss/1S1sss/2SSS2/1SSss1s1/3SsSs2/4ssS1/2sSS2/s2S2/3SS 0 0 b 20 11" // 02
-//      // fen1.value must_== "3ss/3sss/1S1SS2/1Sss1S2/2SSSs3/2Sss1S1/2sss2/s1S3/2SSS 0 0 b 30 16" // 03
-//      // fen1.value must_== "3ss/3sss/1SsSS2/2SsSS2/2SSSss2/2SsssS1/2Ss3/s5/3SS 0 0 b 40 21" // 04
-//      // fen1.value must_== "4s/3s1s/1S1SSSs/2S1SsS1/2SSSss2/2SsssS1/2ss3/s5/3SS 0 1 b 4 26" // 05
-//      // fen1.value must_== "4s/3s1s/1SSS1S1/2SsSsss/4SSSs1/2SS1sS1/2ss3/ss4/3SS 0 1 b 14 31" // 06
-//      // fen1.value must_== "4s/3ss1/1SSSs2/4SSSs/3sSSSSs/2SSss2/2ss3/3s2/3SS 0 2 b 2 36" // 07
-//      // fen1.value must_== "5/4Ss/2SsSs1/5SSS/3s1SsSS/2SSsS2/3ss2/4s1/3SS 0 5 b 0 41" // 08
-//      fen1.value must_== "4S/4ss/2sS1s1/5sss/3SSSSss/2ssSs2/4S2/6/3ss 0 6 b 0 44"
-//      /*
-//            _ _ _ _ 0   0 0 0
-//           _ _ _ _ * *   0 0
-//          _ _ * 0 _ * _   0
-//         _ _ _ _ _ * * *
-//        _ _ _ 0 0 0 0 * *
-//         _ _ * * 0 * _ _
-//          _ _ _ _ 0 _ _   _
-//           _ _ _ _ _ _   _ _
-//            _ _ _ * *   _ _ _
+//       *     · · · · 1   1 1 1
+//       *    · · · · 2 2   1 1
+//       *   · · 2 1 · 2 ·   1
+//       *  · · · · · 2 2 2
+//       * · · · 1 1 1 1 2 2
+//       *  · · 2 2 1 2 · ·
+//       *   · · · · 1 · ·   ·
+//       *    · · · · · ·   · ·
+//       *     · · · 2 2   · · ·
 //       */
 //    })
 //  }
