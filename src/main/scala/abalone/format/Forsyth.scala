@@ -96,7 +96,7 @@ object Forsyth {
     }
 
     board.variant.boardType.cellList.foreach(a => {
-      if (prev.isDefined & prev.get.y != a.y) {
+      if (prev.isDefined && prev.get.y != a.y) {
         writeEmptyNb()
         res.append("/")
       }

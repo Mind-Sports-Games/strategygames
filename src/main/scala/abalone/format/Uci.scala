@@ -55,7 +55,7 @@ object Uci {
         dest <- Pos.fromKey(destS)
       } yield Move(orig, dest)
 
-    val moveR = s"^${Pos.re}${Pos.re}".r
+    val moveR = s"^(${Pos.re})(${Pos.re})".r
   }
 
   case class WithSan(uci: Uci, san: String)

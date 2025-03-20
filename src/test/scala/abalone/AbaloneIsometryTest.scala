@@ -1,67 +1,78 @@
 package strategygames.abalone
 
-import strategygames.format.{ FEN => StratFen, Forsyth => StratForsyth, Uci => StratUci }
-import strategygames.variant.{ Variant => StratVariant }
+import strategygames.abalone.format.Uci
+import strategygames.format.{FEN => StratFen, Forsyth => StratForsyth, Uci => StratUci}
+import strategygames.variant.{Variant => StratVariant}
 
 class AbaloneIsometryTest extends strategygames.chess.ChessTest {
   val gameFamily   = variant.Abalone.gameFamily
   val lib          = gameFamily.gameLogic
   val stratVariant = StratVariant(lib, variant.Abalone.key).get
 
+  /*
+   *      · · · · ·
+   *     · · · · · ·
+   *    · · · · · · ·
+   *   · · · · · · 1 ·
+   *  · · · · · · 1 1 ·
+   *   · · · · · · · ·
+   *    · · · · · · ·
+   *     · · · · · ·
+   *      · · · · ·
+   */
   "downRight side move of 2 marbles moving right" in {
-    /*
-            _ _ _ _ _
-           _ _ _ _ _ _
-          _ _ _ _ _ _ _
-         _ _ _ _ _ _ s _
-        _ _ _ _ _ _ s s _
-         _ _ _ _ _ _ _ _
-          _ _ _ _ _ _ _
-           _ _ _ _ _ _
-            _ _ _ _ _
-     */
+    val fixme0 = StratUci(lib, gameFamily, "e8f9")
+    val fixme = Uci.Move.moveR.matches("e8f9")
+    val fixme1 = Uci.Move("e8f9")
+    val fixme2 = Uci.Move.moveR.unapplySeq("e8f9")
+
+    println(fixme0)
+    println(fixme)
+    println(fixme1)
+    println(fixme2)
+
     _testEveryMoveLoadFenIsometry(
       lib,
-      StratFen(lib, format.FEN("5/6/7/6S1/6SS1/8/7/6/5 0 0 b 0 0").value),
+      StratFen(lib, format.FEN("5/6/7/8/6SS1/6S1/7/6/5 0 0 b 0 0").value),
       stratVariant
     )(
       List(
-        "h6i5"
+        "e8f9"
       ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
     ) must beValid.like(gameData => {
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
       fen1 must_== fen2
-      fen1.value must_== "5/6/7/7S/6S1S/8/7/6/5 0 0 w 1 1"
+      fen1.value must_== "5/6/7/8/6S1S/7S/7/6/5 0 0 w 1 1"
       /*
-            _ _ _ _ _
-           _ _ _ _ _ _
-          _ _ _ _ _ _ _
-         _ _ _ _ _ _ _ s
-        _ _ _ _ _ _ s _ s
-         _ _ _ _ _ _ _ _
-          _ _ _ _ _ _ _
-           _ _ _ _ _ _
-            _ _ _ _ _
+       *      · · · · ·
+       *     · · · · · ·
+       *    · · · · · · ·
+       *   · · · · · · - 1
+       *  · · · · · · 1 - 1
+       *   · · · · · · · ·
+       *    · · · · · · ·
+       *     · · · · · ·
+       *      · · · · ·
        */
     })
   }
 
+  /*
+   *      · · · · ·
+   *     · · · · · ·
+   *    · · · · · · ·
+   *   · · · · · · 1 ·
+   *  · · · · · 1 1 · ·
+   *   · · · · · · · ·
+   *    · · · · · · ·
+   *     · · · · · ·
+   *      · · · · ·
+   */
   "upLeft side move of 2 marbles moving upLeft" in {
-    /*
-            _ _ _ _ _
-           _ _ _ _ _ _
-          _ _ _ _ _ _ _
-         _ _ _ _ _ _ s _
-        _ _ _ _ _ s s _ _
-         _ _ _ _ _ _ _ _
-          _ _ _ _ _ _ _
-           _ _ _ _ _ _
-            _ _ _ _ _
-     */
     _testEveryMoveLoadFenIsometry(
       lib,
-      StratFen(lib, format.FEN("5/6/7/6S1/5SS2/8/7/6/5 0 0 b 0 0").value),
+      StratFen(lib, format.FEN("5/6/7/8/5SS2/6S1/7/6/5 0 0 b 0 0").value),
       stratVariant
     )(
       List(
@@ -71,36 +82,36 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
       fen1 must_== fen2
-      fen1.value must_== "5/6/7/4SSS1/9/8/7/6/5 0 0 w 1 1"
+      fen1.value must_== "5/6/7/8/9/4SSS1/7/6/5 0 0 w 1 1"
       /*
-            _ _ _ _ _
-           _ _ _ _ _ _
-          _ _ _ _ _ _ _
-         _ _ _ _ s s s _
-        _ _ _ _ _ _ _ _ _
-         _ _ _ _ _ _ _ _
-          _ _ _ _ _ _ _
-           _ _ _ _ _ _
-            _ _ _ _ _
+       *      · · · · ·
+       *     · · · · · ·
+       *    · · · · · · ·
+       *   · · · · 1 1 1 ·
+       *  · · · · · - - · ·
+       *   · · · · · · · ·
+       *    · · · · · · ·
+       *     · · · · · ·
+       *      · · · · ·
        */
     })
   }
 
+  /*
+   *      · · · · ·
+   *     · · · · · ·
+   *    2 2 · · · · ·
+   *   1 1 1 · · · · ·
+   *  · · · · · · · · ·
+   *   · · · · · · · ·
+   *    · · · · · · ·
+   *     · · · · · ·
+   *      · · · · ·
+   */
   "a few downRight side moves for both players" in {
-    /*
-            _ _ _ _ _
-           _ _ _ _ _ _
-          S S _ _ _ _ _
-         s s s _ _ _ _ _
-        _ _ _ _ _ _ _ _ _
-         _ _ _ _ _ _ _ _
-          _ _ _ _ _ _ _
-           _ _ _ _ _ _
-            _ _ _ _ _
-     */
     _testEveryMoveLoadFenIsometry(
       lib,
-      StratFen(lib, format.FEN("5/6/ss5/SSS5/9/8/7/6/5 0 0 b 0 0").value),
+      StratFen(lib, format.FEN("5/6/7/8/9/SSS5/ss5/6/5 0 0 b 0 0").value),
       stratVariant
     )(
       List(
