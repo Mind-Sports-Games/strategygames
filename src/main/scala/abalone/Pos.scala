@@ -158,6 +158,7 @@ object Pos {
 
 object Piotr {
   /** https://en.wikipedia.org/wiki/List_of_Unicode_characters#Latin_script, from the latin-1 script. */
+  //@formatter:off
   val piotrs: Array[Char] = Array(
     'a',
     'b',
@@ -351,6 +352,7 @@ object Piotr {
     '\u0102',
     '\u0103'
   ) ++ (260 to 328).map(_.toChar) ++ (330 to 431).map(_.toChar) // NOTE: 329 is deprecated
+  // @formatter:on
 
   def posToIndex: Map[Pos, Int] = Range(0, piotrs.size).map(i => (indexToPos(i), i)).toMap
 
@@ -362,7 +364,7 @@ object Piotr {
 
   def piotrToPos: Map[Char, Pos] = posToPiotr.keys.map(a => (posToPiotr(a), a)).toMap
 
-  def indexToPos(i: Int): Pos = {// Notice the 'return's are necessary here
+  def indexToPos(i: Int): Pos = { // Notice the 'return's are necessary here
     var j = i
     if (j < 64) return new Pos(j % 8, j / 8) // A1-H1, ..., A8-H8
 

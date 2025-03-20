@@ -1,8 +1,8 @@
 package strategygames.abalone.format
 
 import cats.data.Validated
-import strategygames.abalone.{Action, Move, Replay}
 import strategygames.abalone.variant.Variant
+import strategygames.abalone.{Action, Move, Replay}
 import strategygames.{ActionStrs, Player}
 
 import scala.annotation.nowarn

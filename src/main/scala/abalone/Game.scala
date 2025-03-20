@@ -6,18 +6,19 @@ import strategygames.abalone.variant.Variant
 import strategygames.{ClockBase, MoveMetrics, Player, VActionStrs}
 
 case class Game(
-                 situation: Situation,
-                 actionStrs: VActionStrs = Vector(),
-                 clock: Option[ClockBase] = None,
-                 plies: Int = 0,
-                 turnCount: Int = 0,
-                 startedAtPly: Int = 0,
-                 startedAtTurn: Int = 0
-               ) {
+    situation: Situation,
+    actionStrs: VActionStrs = Vector(),
+    clock: Option[ClockBase] = None,
+    plies: Int = 0,
+    turnCount: Int = 0,
+    startedAtPly: Int = 0,
+    startedAtTurn: Int = 0
+) {
   def apply(
-             orig: Pos, dest: Pos,
-             metrics: MoveMetrics = MoveMetrics()
-           ): Validated[String, (Game, Move)] =
+      orig: Pos,
+      dest: Pos,
+      metrics: MoveMetrics = MoveMetrics()
+  ): Validated[String, (Game, Move)] =
     situation.move(orig, dest).map(_ withMetrics metrics) map { move =>
       apply(move) -> move
     }
@@ -43,10 +44,11 @@ case class Game(
   }) map { case (g, a) => g -> a }
 
   private def applyClock(metrics: MoveMetrics, gameActive: Boolean, switchClock: Boolean) =
-    clock.map { c => {
-      val newC = c.step(metrics, gameActive, switchClock)
-      if (turnCount - startedAtTurn == 1 && switchClock) newC.start else newC
-    }
+    clock.map { c =>
+      {
+        val newC = c.step(metrics, gameActive, switchClock)
+        if (turnCount - startedAtTurn == 1 && switchClock) newC.start else newC
+      }
     }
 
   private def applyActionStr(actionStr: String): VActionStrs =
@@ -77,7 +79,7 @@ object Game {
 
   def apply(variantOption: Option[Variant], fen: Option[FEN]): Game = {
     val variant = variantOption | Variant.default
-    val g = apply(variant)
+    val g       = apply(variant)
     fen
       .flatMap {
         Forsyth.<<<@(variant, _)

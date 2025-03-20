@@ -3,13 +3,14 @@ package variant
 
 import strategygames.abalone.format.FEN
 
-case object Abalone extends Variant(
-  id = 1,
-  key = "abalone",
-  name = "Abalone",
-  standardInitialPosition = true,
-  boardType = Hex5
-) {
+case object Abalone
+    extends Variant(
+      id = 1,
+      key = "abalone",
+      name = "Abalone",
+      standardInitialPosition = true,
+      boardType = Hex5
+    ) {
   override def perfIcon: Char = '\ue927'
 
   override def perfId: Int = 700

@@ -29,9 +29,9 @@ object Binary {
     def intPlies(bs: List[Int], pliesToGo: Int): List[String] =
       bs match {
         case _ if pliesToGo <= 0 => Nil
-        case Nil => Nil
-        case b1 :: b2 :: rest => moveUci(b1, b2) :: intPlies(rest, pliesToGo - 1)
-        case x => !!(x map showByte mkString ",")
+        case Nil                 => Nil
+        case b1 :: b2 :: rest    => moveUci(b1, b2) :: intPlies(rest, pliesToGo - 1)
+        case x                   => !!(x map showByte mkString ",")
       }
 
     // 1 freebit (0)
@@ -45,7 +45,8 @@ object Binary {
 
     private def right(i: Int, x: Int): Int = i & lengthMasks(x)
 
-    private val lengthMasks = Map(1 -> 0x01, 2 -> 0x03, 3 -> 0x07, 4 -> 0x0f, 5 -> 0x1f, 6 -> 0x3f, 7 -> 0x7f, 8 -> 0xff)
+    private val lengthMasks =
+      Map(1 -> 0x01, 2 -> 0x03, 3 -> 0x07, 4 -> 0x0f, 5 -> 0x1f, 6 -> 0x3f, 7 -> 0x7f, 8 -> 0xff)
 
     private def !!(msg: String) = throw new Exception("Binary reader failed: " + msg)
   }
@@ -53,7 +54,7 @@ object Binary {
   private object Writer {
     def ply(str: String): List[Byte] = (str match {
       case Uci.Move.moveR(src, dst) => moveUci(src, dst)
-      case _ => sys.error(s"Invalid move to write: $str")
+      case _                        => sys.error(s"Invalid move to write: $str")
     }).map(_.toByte)
 
     def plies(strs: Iterable[String]): Array[Byte] =

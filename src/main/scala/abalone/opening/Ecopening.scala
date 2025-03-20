@@ -6,14 +6,14 @@ import strategygames.abalone._
 import strategygames.abalone.format.Forsyth
 
 final class Ecopening(
-                       val eco: Ecopening.ECO,
-                       val variantGrouping: String,
-                       val family: Ecopening.FamilyName,
-                       val name: String,
-                       val moves: String,
-                       val fen: Ecopening.FEN,
-                       val lastMoveUci: String
-                     ) extends Ordered[Ecopening] {
+    val eco: Ecopening.ECO,
+    val variantGrouping: String,
+    val family: Ecopening.FamilyName,
+    val name: String,
+    val moves: String,
+    val fen: Ecopening.FEN,
+    val lastMoveUci: String
+) extends Ordered[Ecopening] {
   lazy val moveList = moves.split(' ').toList
 
   def firstMove = moveList.headOption

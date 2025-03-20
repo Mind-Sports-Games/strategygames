@@ -1,12 +1,11 @@
 package strategygames
 
-import strategygames.variant.Variant
 import cats.data.Validated
 import cats.implicits._
 import strategygames.format.Uci
+import strategygames.variant.Variant
 
 sealed abstract class Situation(val board: Board, val player: Player) {
-
   val moves: Map[Pos, List[Move]]
 
   val destinations: Map[Pos, List[Pos]]
@@ -1282,12 +1281,13 @@ object Situation {
   }
 
   final case class Abalone(s: abalone.Situation)
-    extends Situation(
-      Board.Abalone(s.board),
-      s.player
-    ) {
-    override lazy val moves: Map[Pos, List[Move]] = s.moves.map { case (p: abalone.Pos, l: List[abalone.Move]) =>
-      (Pos.Abalone(p), l.map(Move.Abalone))
+      extends Situation(
+        Board.Abalone(s.board),
+        s.player
+      ) {
+    override lazy val moves: Map[Pos, List[Move]] = s.moves.map {
+      case (p: abalone.Pos, l: List[abalone.Move]) =>
+        (Pos.Abalone(p), l.map(Move.Abalone))
     }
 
     override def takebackable = true
@@ -1388,14 +1388,16 @@ object Situation {
     override def pointValue(player: Option[Player]): Option[Int] = None
 
     override def move(
-              from: Pos, to: Pos,
-              promotion: Option[PromotableRole] = None,
-              finalSquare: Boolean = false,
-              forbiddenUci: Option[List[String]] = None,
-              captures: Option[List[Pos]] = None,
-              partialCaptures: Boolean = false
-            ): Validated[String, Move] = (from, to) match {
-      case (Pos.Abalone(from), Pos.Abalone(to)) => s.move(from, to).toEither.map(m => Move.Abalone(m)).toValidated
+        from: Pos,
+        to: Pos,
+        promotion: Option[PromotableRole] = None,
+        finalSquare: Boolean = false,
+        forbiddenUci: Option[List[String]] = None,
+        captures: Option[List[Pos]] = None,
+        partialCaptures: Boolean = false
+    ): Validated[String, Move] = (from, to) match {
+      case (Pos.Abalone(from), Pos.Abalone(to)) =>
+        s.move(from, to).toEither.map(m => Move.Abalone(m)).toValidated
       case _                                    => sys.error("Not passed Abalone objects")
     }
 
@@ -1413,7 +1415,7 @@ object Situation {
 
     override def copy(board: Board): Situation = Abalone(board match {
       case Board.Abalone(board) => s.copy(board)
-      case _                    => sys.error("Can't copy a abalone situation with a non-abalone board")
+      case _                    => sys.error("Can't copy an abalone situation with a non-abalone board")
     })
 
     override def gameLogic: GameLogic = GameLogic.Abalone()
@@ -1620,5 +1622,4 @@ object Situation {
   def wrap(s: backgammon.Situation)   = Backgammon(s)
   def wrap(s: abalone.Situation)      = Abalone(s)
   def wrap(s: dameo.Situation)        = Dameo(s)
-
 }

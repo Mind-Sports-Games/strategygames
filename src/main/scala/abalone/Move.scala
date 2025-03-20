@@ -4,14 +4,15 @@ import strategygames.abalone.format.Uci
 import strategygames.{MoveMetrics, Player}
 
 case class Move(
-                 player: Player,
-                 orig: Pos, dest: Pos,
-                 situationBefore: Situation,
-                 after: Board,
-                 autoEndTurn: Boolean,
-                 capture: Option[Pos] = None,
-                 metrics: MoveMetrics = MoveMetrics()
-               ) extends Action(situationBefore, after, metrics) {
+    player: Player,
+    orig: Pos,
+    dest: Pos,
+    situationBefore: Situation,
+    after: Board,
+    autoEndTurn: Boolean,
+    capture: Option[Pos] = None,
+    metrics: MoveMetrics = MoveMetrics()
+) extends Action(situationBefore, after, metrics) {
   def withHistory(h: History) = copy(after = after withHistory h)
 
   override def finalizeAfter: Board = after.variant.finalizeBoardAfter(this)

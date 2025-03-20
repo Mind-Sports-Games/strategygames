@@ -33,10 +33,10 @@ object Reader {
     makeReplay(makeGame(parsed.tags), op(parsed.sans))
 
   def replayResultFromActionStrs(
-                                  actionStrs: ActionStrs,
-                                  op: ActionStrs => ActionStrs,
-                                  tags: Tags
-                                ): Validated[String, Result] =
+      actionStrs: ActionStrs,
+      op: ActionStrs => ActionStrs,
+      tags: Tags
+  ): Validated[String, Result] =
     Validated.valid(makeReplayWithActionStrs(makeGame(tags), op(actionStrs)))
 
   // remove invisible byte order mark
@@ -49,28 +49,31 @@ object Reader {
           err => Result.Incomplete(replay, err),
           action => Result.Complete(replay addAction StratAction.toAbalone(action))
         )
-      case (r: Result.Incomplete, _) => r
+      case (r: Result.Incomplete, _)      => r
     }
 
   private def makeReplayWithActionStrs(game: Game, actionStrs: ActionStrs): Result =
     Replay.actionStrsWithEndTurn(actionStrs).foldLeft[Result](Result.Complete(Replay(game))) {
-      case (Result.Complete(replay), (actionStr, endTurn)) => actionStr match {
-        case Uci.Move.moveR(orig, dest) => (Pos.fromKey(orig), Pos.fromKey(dest)) match {
-          case (Some(orig), Some(dest)) => Result.Complete(
-            replay.addAction(
-              Replay.replayMove(
-                replay.state,
-                orig,
-                dest,
-                endTurn
-              )
-            )
-          )
-          case _ => Result.Incomplete(replay, s"Error making replay with move: ${actionStr}")
+      case (Result.Complete(replay), (actionStr, endTurn)) =>
+        actionStr match {
+          case Uci.Move.moveR(orig, dest) =>
+            (Pos.fromKey(orig), Pos.fromKey(dest)) match {
+              case (Some(orig), Some(dest)) =>
+                Result.Complete(
+                  replay.addAction(
+                    Replay.replayMove(
+                      replay.state,
+                      orig,
+                      dest,
+                      endTurn
+                    )
+                  )
+                )
+              case _                        => Result.Incomplete(replay, s"Error making replay with move: ${actionStr}")
+            }
+          case _                          => Result.Incomplete(replay, s"Error making replay with uci move: ${actionStr}")
         }
-        case _ => Result.Incomplete(replay, s"Error making replay with uci move: ${actionStr}")
-      }
-      case (r: Result.Incomplete, _) => r
+      case (r: Result.Incomplete, _)                       => r
     }
 
   private def makeGame(tags: Tags) = {
@@ -82,9 +85,9 @@ object Reader {
       startedAtPly = g.plies,
       startedAtTurn = g.turnCount,
       clock = tags.clockConfig.flatMap {
-        case fc: Clock.Config => Some(Clock.apply(fc))
+        case fc: Clock.Config        => Some(Clock.apply(fc))
         case bc: ByoyomiClock.Config => Some(ByoyomiClock.apply(bc))
-        case _ => None
+        case _                       => None
       }
     )
   }

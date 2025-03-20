@@ -20,7 +20,7 @@ sealed trait Role {
 sealed trait PromotableRole extends Role
 
 case object Stone extends Role {
-  val forsyth = 's'
+  val forsyth   = 's'
   val binaryInt = 1
 }
 
@@ -86,7 +86,7 @@ object Role {
   def pgnMoveToRole(gf: GameFamily, c: Char): Role =
     allByPgn(gf).get(c) match {
       case Some(r) => r
-      case None => sys.error(s"Could not find Role from pgnMove: $c (gf: $gf)")
+      case None    => sys.error(s"Could not find Role from pgnMove: $c (gf: $gf)")
     }
 
   // unused by lila
@@ -95,7 +95,7 @@ object Role {
       .get(
         s.headOption match {
           case Some(c) => c
-          case None => sys.error(s"Could not find Role from java symbol: $s")
+          case None    => sys.error(s"Could not find Role from java symbol: $s")
         }
       )
       .get
@@ -103,14 +103,14 @@ object Role {
   // Unused by lila
   def javaSymbolToInt(s: String): Int =
     s.headOption match {
-      case Some(c) if c.toInt >= 65 && c.toInt <= 90 => c.toInt - 64
+      case Some(c) if c.toInt >= 65 && c.toInt <= 90  => c.toInt - 64
       case Some(c) if c.toInt >= 97 && c.toInt <= 122 => c.toInt - 70
-      case _ => sys.error(s"Could not get Int from java symbol: $s")
+      case _                                          => sys.error(s"Could not get Int from java symbol: $s")
     }
 
   def valueOf(r: Role): Option[Int] = r.valueOf
 
-  val roleR = s"([${allByForsyth.keys.mkString("")}])"
+  val roleR  = s"([${allByForsyth.keys.mkString("")}])"
   val roleRr = s"([${allByForsyth.keys.map(k => s"${k.toLower}${k.toUpper}").mkString("")}]?)"
   val rolePR = s"([${allByForsyth.keys.map(k => s"${k.toLower}${k.toUpper}").mkString("")}]|\\+?)"
 }

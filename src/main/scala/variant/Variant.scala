@@ -1,10 +1,10 @@
 package strategygames.variant
 
 import cats.syntax.option._
-import scala.annotation.nowarn
-
 import strategygames._
 import strategygames.format.FEN
+
+import scala.annotation.nowarn
 
 // Correctness depends on singletons for each variant ID
 abstract class Variant(
@@ -16,7 +16,6 @@ abstract class Variant(
     val gameType: Option[Int] = None
     // not handling draughts.boardSize... (yet)
 ) {
-
   def toChess: chess.variant.Variant
   def toDraughts: draughts.variant.Variant
   def toFairySF: fairysf.variant.Variant
@@ -112,11 +111,9 @@ abstract class Variant(
 
   def playerNames: Map[Player, String]
   def playerColors: Map[Player, String]
-
 }
 
 object Variant {
-
   case class Chess(v: chess.variant.Variant)
       extends Variant(
         id = v.id,
@@ -125,7 +122,6 @@ object Variant {
         name = v.name,
         standardInitialPosition = v.standardInitialPosition
       ) {
-
     def toChess: chess.variant.Variant = v
     def toDraughts                     = sys.error("Can't convert chess to draughts")
     def toFairySF                      = sys.error("Can't convert chess to fairysf")
@@ -242,7 +238,6 @@ object Variant {
         standardInitialPosition = v.standardInitialPosition,
         gameType = Option(v.gameType)
       ) {
-
     def toChess        = sys.error("Can't convert draughts to chess")
     def toDraughts     = v
     def toFairySF      = sys.error("Can't convert draughts to fairysf")
@@ -358,7 +353,6 @@ object Variant {
         name = v.name,
         standardInitialPosition = v.standardInitialPosition
       ) {
-
     def toChess        = sys.error("Can't convert fairysf to chess")
     def toDraughts     = sys.error("Can't convert fairysf to draughts")
     def toFairySF      = v
@@ -473,7 +467,6 @@ object Variant {
         name = v.name,
         standardInitialPosition = v.standardInitialPosition
       ) {
-
     def toChess        = sys.error("Can't convert samurai to chess")
     def toDraughts     = sys.error("Can't convert samurai to draughts")
     def toFairySF      = sys.error("Can't convert samurai to fairysf")
@@ -585,7 +578,6 @@ object Variant {
         name = v.name,
         standardInitialPosition = v.standardInitialPosition
       ) {
-
     def toChess        = sys.error("Can't convert togyzkumalak to chess")
     def toDraughts     = sys.error("Can't convert togyzkumalak to draughts")
     def toFairySF      = sys.error("Can't convert togyzkumalak to fairysf")
@@ -697,7 +689,6 @@ object Variant {
         name = v.name,
         standardInitialPosition = v.standardInitialPosition
       ) {
-
     def toChess        = sys.error("Can't convert go to chess")
     def toDraughts     = sys.error("Can't convert go to draughts")
     def toFairySF      = sys.error("Can't convert go to fairysf")
@@ -810,7 +801,6 @@ object Variant {
         name = v.name,
         standardInitialPosition = v.standardInitialPosition
       ) {
-
     def toChess        = sys.error("Can't convert backgammon to chess")
     def toDraughts     = sys.error("Can't convert backgammon to draughts")
     def toFairySF      = sys.error("Can't convert backgammon to fairysf")
@@ -1030,7 +1020,6 @@ object Variant {
         name = v.name,
         standardInitialPosition = v.standardInitialPosition
       ) {
-
     def toChess        = sys.error("Can't convert dameo to chess")
     def toDraughts     = sys.error("Can't convert dameo to draughts")
     def toFairySF      = sys.error("Can't convert dameo to fairysf")
@@ -1253,5 +1242,4 @@ object Variant {
   def wrap(v: backgammon.variant.Variant)   = Backgammon(v)
   def wrap(v: abalone.variant.Variant)      = Abalone(v)
   def wrap(v: dameo.variant.Variant)        = Dameo(v)
-
 }

@@ -8,7 +8,7 @@ import strategygames.{Player, Score}
   * http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
   */
 object Forsyth {
-  val initial = Abalone.initialFen//TODO?
+  val initial = Abalone.initialFen // TODO?
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
     val pp = variant.hasPrevPlayer
@@ -32,7 +32,7 @@ object Forsyth {
     player match {
       case "b" => Option(P1)
       case "w" => Option(P2)
-      case _ => if (allowNone) None else sys.error("Invalid player in fen")
+      case _   => if (allowNone) None else sys.error("Invalid player in fen")
     }
 
   def <<(fen: FEN): Option[Situation] = <<@(Variant.default, fen)
@@ -67,14 +67,14 @@ object Forsyth {
     }
 
   def >>(game: Game): FEN = {
-    val boardFen = getFen_board(game.situation.board)
-    val scoreStr = game.situation.board.history.score.fenStr
+    val boardFen   = getFen_board(game.situation.board)
+    val scoreStr   = game.situation.board.history.score.fenStr
     val prevPlayer = if (game.situation.board.variant.hasPrevPlayer) {
       game.situation.board.history.prevPlayer.fold(" *")(p => p.fold(" b", " w"))
     } else ""
-    val player = game.situation.player.fold('b', 'w')
-    val halfMoves = game.situation.board.history.halfMoveClock
-    val fullMoves = game.fullTurnCount
+    val player     = game.situation.player.fold('b', 'w')
+    val halfMoves  = game.situation.board.history.halfMoveClock
+    val fullMoves  = game.fullTurnCount
     FEN(s"$boardFen $scoreStr$prevPlayer $player $halfMoves $fullMoves")
   }
 
@@ -88,7 +88,7 @@ object Forsyth {
     val res = new StringBuilder(board.variant.boardType.cellList.size)
 
     var prev: Option[Pos] = Option.empty
-    var emptyNb = 0
+    var emptyNb           = 0
 
     def writeEmptyNb() = if (emptyNb > 0) {
       res.append(s"$emptyNb")
@@ -102,10 +102,13 @@ object Forsyth {
       }
 
       board.getPiece(a) match {
-        case None => emptyNb += 1
+        case None        => emptyNb += 1
         case Some(piece) =>
           writeEmptyNb()
-          res.append(if (piece.player == P1) piece.forsyth.toString.toUpperCase() else piece.forsyth.toString.toLowerCase())
+          res.append(
+            if (piece.player == P1) piece.forsyth.toString.toUpperCase()
+            else piece.forsyth.toString.toLowerCase()
+          )
       }
 
       prev = Option(a);

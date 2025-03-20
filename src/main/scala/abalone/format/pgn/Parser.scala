@@ -1,18 +1,15 @@
 package strategygames.abalone
 package format.pgn
 
-import scala.annotation.nowarn
-
-import strategygames.abalone.variant.Variant
-
-import strategygames.format.pgn.{ Glyphs, InitialPosition, ParsedPgn, Sans, Tag }
-
-import scala.util.parsing.combinator._
 import cats.data.Validated
+import strategygames.abalone.variant.Variant
+import strategygames.format.pgn._
+
+import scala.annotation.nowarn
+import scala.util.parsing.combinator._
 
 // http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm
 object Parser {
-
   case class StrMove(
       san: String,
       glyphs: Glyphs,
@@ -35,7 +32,6 @@ object Parser {
   }
 
   object MovesParser extends RegexParsers with Logging {
-
     override val whiteSpace = """(\s|\t|\r?\n)+""".r
 
     def apply(@nowarn pgn: String): Validated[String, (InitialPosition, List[StrMove], Option[Tag])] =
@@ -45,7 +41,5 @@ object Parser {
 
     val moveRegex =
       """(?:(?:0\-0(?:\-0|)[\+\#]?)|[PQKRBNOoa-h@][QKRBNa-h1-8xOo\-=\+\#\@]{1,6})[\?!□]{0,2}""".r
-
   }
-
 }

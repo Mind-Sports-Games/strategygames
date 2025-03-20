@@ -1,7 +1,6 @@
 package strategygames
 
 sealed trait Player {
-
   final def fold[A](a: => A, b: => A): A = if (p1) a else b
 
   def unary_! : Player
@@ -18,7 +17,6 @@ sealed trait Player {
 }
 
 object Player {
-
   // TODO: this is duplicated three times now.
   // TODO
   case class Map[A](p1: A, p2: A) {
@@ -117,5 +115,4 @@ object Player {
       case "0-2" => Option(P2) // draughts
       case _     => None
     }
-
 }

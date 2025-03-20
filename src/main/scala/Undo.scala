@@ -45,7 +45,7 @@ object Undo {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak undo from a backgammon undo")
     def toGo           = sys.error("Can't make a go undo from a backgammon undo")
     def toBackgammon   = u
-    def toAbalone      = sys.error("Can't make a abalone undo from a backgammon undo")
+    def toAbalone      = sys.error("Can't make an abalone undo from a backgammon undo")
     def toDameo        = sys.error("Can't make a dameo undo from a backgammon undo")
 
   }

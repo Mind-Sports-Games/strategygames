@@ -14,8 +14,8 @@ object UciCharPair {
     }
 
   private[format] object implementation {
-    val charShift = 35 // Start at Char(35) == '#'
-    val voidChar = 33.toChar // '!'. We skipped Char(34) == '"'.
+    val charShift = 35        // Start at Char(35) == '#'
+    val voidChar  = 33.toChar // '!'. We skipped Char(34) == '"'.
 
     val pos2charMap: Map[Pos, Char] = Piotr.posToPiotr.keys
       .map { pos =>

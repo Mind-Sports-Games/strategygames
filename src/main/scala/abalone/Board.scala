@@ -4,10 +4,10 @@ import strategygames.Player
 import strategygames.abalone.variant.Variant
 
 case class Board(
-                  pieces: PieceMap,
-                  history: History,
-                  variant: Variant
-                ) {
+    pieces: PieceMap,
+    history: History,
+    variant: Variant
+) {
   def piecesOf(player: Player): PieceMap = pieces.filter(_._2.is(player))
 
   def isPiece(a: Pos): Boolean = pieces.contains(a)

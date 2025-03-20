@@ -38,9 +38,9 @@ object Uci {
             Pos.fromKey(dest)
           ) match {
             case (Some(orig), Some(dest)) => Move(orig = orig, dest = dest).some
-            case _ => None
+            case _                        => None
           }
-        case _ => None
+        case _                 => None
       }
 
     def piotr(move: String) =

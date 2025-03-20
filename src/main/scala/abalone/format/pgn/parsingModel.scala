@@ -8,19 +8,19 @@ import strategygames.{Move => StratMove}
 import scala.annotation.nowarn
 
 case class Std(
-                dest: Pos,
-                role: Role,
-                capture: Boolean = false,
-                file: Option[Int] = None,
-                rank: Option[Int] = None,
-                promotion: Option[PromotableRole] = None,
-                metas: Metas = Metas.empty
-              ) extends San {
+    dest: Pos,
+    role: Role,
+    capture: Boolean = false,
+    file: Option[Int] = None,
+    rank: Option[Int] = None,
+    promotion: Option[PromotableRole] = None,
+    metas: Metas = Metas.empty
+) extends San {
   def apply(
-             situation: strategygames.Situation,
-             iteratedCapts: Boolean = false,
-             forbiddenUci: Option[List[String]] = None
-           ) = move(situation.toAbalone).map(StratMove.wrap)
+      situation: strategygames.Situation,
+      iteratedCapts: Boolean = false,
+      forbiddenUci: Option[List[String]] = None
+  ) = move(situation.toAbalone).map(StratMove.wrap)
 
   override def withSuffixes(s: Suffixes) =
     copy(

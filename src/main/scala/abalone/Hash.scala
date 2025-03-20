@@ -30,16 +30,17 @@ object Hash {
   object ZobristConstants {}
 
   // The following masks are compatible with the Polyglot opening book format.
-  private val polyglotTable = new ZobristConstants(0)
+  private val polyglotTable    = new ZobristConstants(0)
   private lazy val randomTable = new ZobristConstants(16)
 
-  def actorIndex(sit: Situation, actor: Actor) = sit.board.variant.boardType.posNb * actor.piece.player.fold(1, 0) + actor.pos.index//actor.pos.hashCode
+  def actorIndex(sit: Situation, actor: Actor) =
+    sit.board.variant.boardType.posNb * actor.piece.player.fold(1, 0) + actor.pos.index // actor.pos.hashCode
 
   def get(sit: Situation, table: ZobristConstants): Long = {
     val phturn =
       if (sit.board.variant.hasPrevPlayer) sit.board.history.prevPlayer.fold(0L)(_.fold(table.p1TurnMask, 0L))
       else 0L
-    val hturn = sit.player.fold(table.p1TurnMask, 0L)
+    val hturn  = sit.player.fold(table.p1TurnMask, 0L)
 
     sit.board.actors.values.view
       .map(a => table.actorMasks(actorIndex(sit, a)))
@@ -53,7 +54,9 @@ object Hash {
   def debug(hashes: PositionHash) = hashes.map(_.toInt).sum.toString
 }
 
-/** We need 2n masks, where n is the number of Pos contained in the smallest rectangle including the board of any variant (here n = 11²). */
+/** We need 2n masks, where n is the number of Pos contained in the smallest rectangle including the board of
+  * any variant (here n = 11²).
+  */
 private object ZobristTables {
   val actorMasks = Array(
     "9d39247e33776d4152b375aa7c0d7bac",

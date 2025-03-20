@@ -16,13 +16,13 @@ final case class FEN(value: String) extends AnyVal {
     }
     .flatMap {
       case c if c.isDigit => Array.fill(c.asDigit)('1')
-      case c => Array(c)
+      case c              => Array(c)
     }
     .zip(boardType.cellList)
     .flatMap {
       case (piece, pos) if piece == Role.defaultRole.forsythUpper => Some((pos, Piece(P1, Role.defaultRole)))
-      case (piece, pos) if piece == Role.defaultRole.forsyth => Some((pos, Piece(P2, Role.defaultRole)))
-      case _ => None
+      case (piece, pos) if piece == Role.defaultRole.forsyth      => Some((pos, Piece(P2, Role.defaultRole)))
+      case _                                                      => None
     }
     .toMap
 
@@ -32,7 +32,9 @@ final case class FEN(value: String) extends AnyVal {
 
   def player: Option[Player] = value.split(' ').lift(3).flatMap(_.headOption).flatMap(Player.apply).map(!_)
 
-  def halfMovesSinceLastCapture(variant: Variant): Option[Int] = intFromFen(if (variant.hasPrevPlayer) 5 else 4)
+  def halfMovesSinceLastCapture(variant: Variant): Option[Int] = intFromFen(
+    if (variant.hasPrevPlayer) 5 else 4
+  )
 
   def fullMove(variant: Variant): Option[Int] = intFromFen(if (variant.hasPrevPlayer) 6 else 5)
 
