@@ -114,6 +114,8 @@ object Forsyth {
       prev = Option(a);
     })
 
+    writeEmptyNb()
+
     res.toString
   }
 

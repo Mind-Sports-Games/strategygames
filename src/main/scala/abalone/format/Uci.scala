@@ -32,10 +32,10 @@ object Uci {
   object Move {
     def apply(move: String): Option[Move] =
       move match {
-        case moveR(orig, dest) =>
+        case moveR(orig0, orig1, dest0, dest1) =>
           (
-            Pos.fromKey(orig),
-            Pos.fromKey(dest)
+            Pos.fromKey(orig0 + orig1),
+            Pos.fromKey(dest0 + dest1)
           ) match {
             case (Some(orig), Some(dest)) => Move(orig = orig, dest = dest).some
             case _                        => None
@@ -55,7 +55,7 @@ object Uci {
         dest <- Pos.fromKey(destS)
       } yield Move(orig, dest)
 
-    val moveR = s"^(${Pos.re})(${Pos.re})".r
+    val moveR = s"^${Pos.re}${Pos.re}".r
   }
 
   case class WithSan(uci: Uci, san: String)

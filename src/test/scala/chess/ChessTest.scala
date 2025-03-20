@@ -189,8 +189,8 @@ trait ChessTest extends Specification with ValidatedMatchers {
     fromSquares2 must_== fromSquares3
     fromSquares2.foreach(from => {
       g1.situation
-        .moves(from)
-        .zip(g2.situation.moves(from))
+        .moves(from).sortBy(_.toString)
+        .zip(g2.situation.moves(from).sortBy(_.toString))
         .foreach(moves => {
           moves._1.orig must_== moves._2.orig
           moves._1.dest must_== moves._2.dest

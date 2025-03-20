@@ -131,7 +131,7 @@ object Pos {
       val _x = rex.findFirstMatchIn(key.substring(_y.get.end))
 
       if (_x.isDefined) {
-        val x = _x.get.matched.toInt
+        val x = _x.get.matched.toInt - 1
 
         var sy = _y.get.matched
         val neg = if (sy.startsWith("-")) {
@@ -140,10 +140,10 @@ object Pos {
         } else false
 
         if (sy.length == 1) {
-          var y = if ("0".equals(sy)) -1 else sy.charAt(0).toInt
+          var y = if ("0".equals(sy)) -1 else sy.charAt(0) - 'a'
           if (neg) y = -y - 1
 
-          Option(new Pos(x, y))
+          return Option(new Pos(x, y))
         }
       }
     }
