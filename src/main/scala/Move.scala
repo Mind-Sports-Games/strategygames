@@ -405,7 +405,6 @@ object Move {
         false,
         m.metrics
       ) {
-    d
     def situationAfter: Situation                          = Situation.Dameo(m.situationAfter)
     def finalizeAfter(finalSquare: Boolean = false): Board = m.finalizeAfter
 
