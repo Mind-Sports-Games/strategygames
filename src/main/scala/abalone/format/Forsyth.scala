@@ -11,29 +11,21 @@ object Forsyth {
   val initial = Abalone.initialFen // TODO?
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
-    val pp = variant.hasPrevPlayer
     Option(
       Situation(
         board = Board(
           pieces = fen.pieces(variant.boardType),
           history = History(
-            prevPlayer = if (pp) getPlayerFromStr(fen.value.split(' ')(3)) else None,
+            prevPlayer = fen.prevPlayer(variant),
             score = Score(fen.player1Score, fen.player2Score),
             halfMoveClock = fen.halfMovesSinceLastCapture(variant).getOrElse(0)
           ),
           variant = variant
         ),
-        player = getPlayerFromStr(fen.value.split(' ')(if (pp) 4 else 3)).get
+        player = fen.player.getOrElse(sys.error("Invalid player in fen"))
       )
     )
   }
-
-  private def getPlayerFromStr(player: String, allowNone: Boolean = false): Option[Player] =
-    player match {
-      case "b" => Option(P1)
-      case "w" => Option(P2)
-      case _   => if (allowNone) None else sys.error("Invalid player in fen")
-    }
 
   def <<(fen: FEN): Option[Situation] = <<@(Variant.default, fen)
 
