@@ -156,6 +156,8 @@ object Pos {
   def fromIndex(i: Int): Pos = Piotr.indexToPos(i)
 
   def piotr(c: Char): Option[Pos] = Piotr.piotrToPos.get(c)
+
+  lazy val all: List[Pos] = Piotr.posToIndex.keys.toList
 }
 
 object Piotr {

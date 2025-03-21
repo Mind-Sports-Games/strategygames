@@ -121,7 +121,7 @@ object Pos {
 
     override def gameLogic: GameLogic = GameLogic.Abalone()
 
-    override lazy val all: List[Pos] = abalone.Piotr.posToIndex.keys.map(Abalone).toList
+    override lazy val all: List[Pos] = abalone.Pos.all.map(Abalone)
   }
 
   final case class Dameo(p: dameo.Pos) extends Pos {
