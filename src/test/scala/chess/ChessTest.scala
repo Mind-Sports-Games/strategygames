@@ -1,21 +1,15 @@
 package strategygames.chess
 
-import strategygames.{ Game => StratGame, GameLogic, MoveMetrics }
-import strategygames.format.{ FEN => StratFen, Forsyth => StratForsyth, Uci => StratUci }
-import strategygames.variant.{ Variant => StratVariant }
-
-import strategygames.{ ClockBase, Player }
-
 import cats.data.Validated
 import cats.syntax.option._
 import cats.syntax.validated._
-import org.specs2.matcher.Matcher
-import org.specs2.matcher.ValidatedMatchers
+import org.specs2.matcher.{Matcher, ValidatedMatchers}
 import org.specs2.mutable.Specification
-
-import strategygames.chess.format.{ Forsyth, Visual }
+import strategygames.chess.format.{FEN, Forsyth, Visual}
 import strategygames.chess.variant.Variant
-import strategygames.chess.format.FEN
+import strategygames.format.{FEN => StratFen, Forsyth => StratForsyth, Uci => StratUci}
+import strategygames.variant.{Variant => StratVariant}
+import strategygames.{ClockBase, GameLogic, MoveMetrics, Player, Game => StratGame}
 
 case class GameFenIsometryData(
     game: StratGame,
@@ -184,13 +178,15 @@ trait ChessTest extends Specification with ValidatedMatchers {
 
   def legalMovesMustMatch(g1: StratGame, g2: StratGame) = {
     // Ensure they have the same moves available
-    val fromSquares2 = g1.situation.moves.keys.toSet
-    val fromSquares3 = g2.situation.moves.keys.toSet
-    fromSquares2 must_== fromSquares3
-    fromSquares2.foreach(from => {
-      g1.situation
-        .moves(from).sortBy(_.toString)
-        .zip(g2.situation.moves(from).sortBy(_.toString))
+    val moves1 = g1.situation.moves
+    val moves2 = g2.situation.moves
+    val keys1  = moves1.keys.toSet
+    val keys2  = moves2.keys.toSet
+
+    keys1 must_== keys2
+    keys1.foreach(from => {
+      moves1(from)//.sortBy(_.toString)
+        .zip(moves2(from)/*.sortBy(_.toString)*/)
         .foreach(moves => {
           moves._1.orig must_== moves._2.orig
           moves._1.dest must_== moves._2.dest

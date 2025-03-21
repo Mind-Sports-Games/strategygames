@@ -57,128 +57,145 @@ abstract class Variant private[variant] (
 
   def startPlayer: Player = P1
 
-  def validMoves(sit: Situation): Map[Pos, List[Move]] =
+  def validMoves(sit: Situation): Map[Pos, List[Move]]   =
     (validMoves_line(sit).toList ++ validMoves_jump(sit).toList)
       .groupBy(_._1)
       .map { case (k, v) => k -> v.map(_._2).flatten }
+  def validMoves(sit: Situation, a: Pos): List[Move]     = {
+    val ap = sit.board.getPiece(a)
+    if (ap.isEmpty || !isUsable(sit, ap.get)) return List()
+
+    validMovesCore(sit, a)
+  }
+  def validMovesCore(sit: Situation, a: Pos): List[Move] =
+    validMoves_lineCore(sit, a) ++ validMoves_jumpCore(sit, a)
 
   def validMoves_line(sit: Situation): Map[Pos, List[Move]] = {
-    sit.board.pieces.filter(t => isUsable(sit, t._2)).map { case (a, _) =>
-      (
-        a,
-        boardType.norm
-          .getNeigh(a)
-          .map { case (vect, b) =>
-            var dest = Option.empty[Pos]
-            var out  = false
+    sit.board.pieces.filter(t => isUsable(sit, t._2)).map { case (a, _) => (a, validMoves_lineCore(sit, a)) }
+  }
+  def validMoves_line(sit: Situation, a: Pos): List[Move]   = {
 
-            var c           = Pos.copy(b)
-            var cp          = sit.board.getPiece(c)
-            var hasProperty = true
-            var u           = 1
-            var max         = false
-            while (hasProperty && !max && cp.isDefined) {
-              hasProperty = isUsable(sit, cp.get)
+    val ap = sit.board.getPiece(a)
+    if (ap.isEmpty || !isUsable(sit, ap.get)) return List()
 
-              if (hasProperty) {
-                u += 1
-                max = maxUsable.isDefined && u > maxUsable.get
+    validMoves_lineCore(sit, a)
+  }
+  def validMoves_lineCore(sit: Situation, a: Pos): List[Move] = {
+    boardType.norm
+      .getNeigh(a)
+      .map { case (vect, b) =>
+        var dest = Option.empty[Pos]
+        var out  = false
+
+        var c           = Pos.copy(b)
+        var cp          = sit.board.getPiece(c)
+        var hasProperty = true
+        var u           = 1
+        var max         = false
+        while (hasProperty && !max && cp.isDefined) {
+          hasProperty = isUsable(sit, cp.get)
+
+          if (hasProperty) {
+            u += 1
+            max = maxUsable.isDefined && u > maxUsable.get
+
+            c += vect
+            cp = sit.board.getPiece(c)
+          }
+        }
+
+        if (!max) {
+          var p = 0
+          hasProperty = true
+          while (hasProperty && !max && cp.isDefined) {
+            hasProperty = isPushable(sit, cp.get)
+
+            if (hasProperty) {
+              p += 1
+              max = p >= u
+
+              c += vect
+              cp = sit.board.getPiece(c)
+            }
+          }
+
+          if (!max && cp.isEmpty) { // is cp.isDefined, there is an immovable piece that blocks the line
+            out = !boardType.isCell(c)
+
+            if (out) {
+              c -= vect
+              if (isEjectable(sit, sit.board.getPiece(c).get)) dest = Option(c)
+            } else {
+              dest = Option(c)
+            }
+          }
+        }
+
+        (dest, out)
+      }
+      .filter(_._1.isDefined)
+      .map(b => computeMove(a, b._1.get, sit, capture = if (b._2) b._1 else None))
+      .toList
+  }
+
+  def validMoves_jump(sit: Situation): Map[Pos, List[Move]]   = {
+    sit.board.pieces.filter(t => isUsable(sit, t._2)).map { case (a, _) => (a, validMoves_jumpCore(sit, a)) }
+  }
+  def validMoves_jump(sit: Situation, a: Pos): List[Move]     = {
+    val ap = sit.board.getPiece(a)
+    if (ap.isEmpty || !isUsable(sit, ap.get)) return List()
+
+    validMoves_jumpCore(sit, a)
+  }
+  def validMoves_jumpCore(sit: Situation, a: Pos): List[Move] = {
+    boardType.norm
+      .getNeigh(a)
+      .flatMap { case (vect, b) =>
+        var dests = List[Pos]()
+
+        val pvect = boardType.norm.getPrev(vect)
+        val nvect = boardType.norm.getNext(vect)
+
+        var pj = canJumpTo(sit, a + pvect)
+        var nj = canJumpTo(sit, a + nvect)
+
+        if (pj || nj) {
+          var c   = Pos.copy(b)
+          var u   = 1
+          var max = false
+          var cp  = sit.board.getPiece(c)
+          while (!max && (pj || nj) && cp.isDefined) {
+            if (isUsable(sit, cp.get)) {
+              u += 1 // When u = 1, the only possible moves are already accounted for as in-line
+              max = maxUsable.isDefined && u > maxUsable.get
+
+              if (!max) {
+                if (pj) {
+                  val d = c + pvect
+
+                  if (canJumpTo(sit, d)) dests :+= d
+                  else pj = false
+                }
+                if (nj) {
+                  val d = c + nvect
+
+                  if (canJumpTo(sit, d)) dests :+= d
+                  else nj = false
+                }
 
                 c += vect
                 cp = sit.board.getPiece(c)
               }
+            } else {
+              max = true
             }
-
-            if (!max) {
-              var p = 0
-              hasProperty = true
-              while (hasProperty && !max && cp.isDefined) {
-                hasProperty = isPushable(sit, cp.get)
-
-                if (hasProperty) {
-                  p += 1
-                  max = p >= u
-
-                  c += vect
-                  cp = sit.board.getPiece(c)
-                }
-              }
-
-              if (!max && cp.isEmpty) { // is cp.isDefined, there is an immovable piece that blocks the line
-                out = !boardType.isCell(c)
-
-                if (out) {
-                  c -= vect
-                  if (isEjectable(sit, sit.board.getPiece(c).get)) dest = Option(c)
-                } else {
-                  dest = Option(c)
-                }
-              }
-            }
-
-            (dest, out)
           }
-          .filter(_._1.isDefined)
-          .map(b => computeMove(a, b._1.get, sit, capture = if (b._2) b._1 else None))
-          .toList
-      )
-    }
-  }
+        }
 
-  def validMoves_jump(sit: Situation): Map[Pos, List[Move]] = {
-    sit.board.pieces.filter(t => isUsable(sit, t._2)).map { case (a, _) =>
-      (
-        a,
-        boardType.norm
-          .getNeigh(a)
-          .flatMap { case (vect, b) =>
-            var dests = List[Pos]()
-
-            val pvect = boardType.norm.getPrev(vect)
-            val nvect = boardType.norm.getNext(vect)
-
-            var pj = canJumpTo(sit, a + pvect)
-            var nj = canJumpTo(sit, a + nvect)
-
-            if (pj || nj) {
-              var c   = Pos.copy(b)
-              var u   = 1
-              var max = false
-              var cp  = sit.board.getPiece(c)
-              while (!max && (pj || nj) && cp.isDefined) {
-                if (isUsable(sit, cp.get)) {
-                  u += 1 // When u = 1, the only possible moves are already accounted for as in-line
-                  max = maxUsable.isDefined && u > maxUsable.get
-
-                  if (!max) {
-                    if (pj) {
-                      val d = c + pvect
-
-                      if (canJumpTo(sit, d)) dests :+= d
-                      else pj = false
-                    }
-                    if (nj) {
-                      val d = c + nvect
-
-                      if (canJumpTo(sit, d)) dests :+= d
-                      else nj = false
-                    }
-
-                    c += vect
-                    cp = sit.board.getPiece(c)
-                  }
-                } else {
-                  max = true
-                }
-              }
-            }
-
-            dests
-          }
-          .map(b => computeMove(a, b, sit))
-          .toList
-      )
-    }
+        dests
+      }
+      .map(b => computeMove(a, b, sit))
+      .toList
   }
 
   def computeMove(orig: Pos, dest: Pos, sit: Situation, capture: Option[Pos] = Option.empty): Move =
