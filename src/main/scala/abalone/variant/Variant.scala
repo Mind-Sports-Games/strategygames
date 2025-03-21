@@ -298,7 +298,7 @@ abstract class Variant private[variant] (
   def move(sit: Situation, from: Pos, to: Pos): Validated[String, Move] = {
     // Find the move in the variant specific list of valid moves !
     sit.moves.get(from).flatMap(_.find(m => m.dest == to)) toValid
-      s"Not a valid move: $from$to. Allowed moves: ${sit.moves}"
+      s"Not a valid move: $from$to [${from.key}${to.key}]. Allowed moves: ${sit.moves}"
   }
 
   /** If a player runs out of move, the match is a draw. */

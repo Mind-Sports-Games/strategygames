@@ -69,13 +69,13 @@ object Forsyth {
   def >>(game: Game): FEN = {
     val boardFen   = getFen_board(game.situation.board)
     val scoreStr   = game.situation.board.history.score.fenStr
+    val player     = game.situation.player.fold('b', 'w')
     val prevPlayer = if (game.situation.board.variant.hasPrevPlayer) {
       game.situation.board.history.prevPlayer.fold(" *")(p => p.fold(" b", " w"))
     } else ""
-    val player     = game.situation.player.fold('b', 'w')
     val halfMoves  = game.situation.board.history.halfMoveClock
     val fullMoves  = game.fullTurnCount
-    FEN(s"$boardFen $scoreStr$prevPlayer $player $halfMoves $fullMoves")
+    FEN(s"$boardFen $scoreStr $player$prevPlayer $halfMoves $fullMoves")
   }
 
   def exportBoard(board: Board): String = {

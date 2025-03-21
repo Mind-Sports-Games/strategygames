@@ -1,7 +1,7 @@
 package strategygames.format
 
-import strategygames.{ GameLogic, Player }
 import strategygames.variant.Variant
+import strategygames.{GameLogic, Player}
 
 sealed abstract class FEN(val value: String) {
 
@@ -242,30 +242,30 @@ object FEN {
   }
 
   final case class Abalone(f: strategygames.abalone.format.FEN) extends FEN(f.value) {
-    def toChess        = sys.error("Can't convert abalone to chess")
-    def toDraughts     = sys.error("Can't convert abalone to draughts")
-    def toFairySF      = sys.error("Can't convert abalone to fairysf")
-    def toSamurai      = sys.error("Can't convert abalone to samurai")
-    def toTogyzkumalak = sys.error("Can't convert abalone to togyzkumalak")
-    def toGo           = sys.error("Can't convert abalone to go")
-    def toBackgammon   = sys.error("Can't convert abalone to backgammon")
-    def toAbalone      = f
-    def toDameo        = sys.error("Can't convert abalone to dameo")
+    override def toChess        = sys.error("Can't convert abalone to chess")
+    override def toDraughts     = sys.error("Can't convert abalone to draughts")
+    override def toFairySF      = sys.error("Can't convert abalone to fairysf")
+    override def toSamurai      = sys.error("Can't convert abalone to samurai")
+    override def toTogyzkumalak = sys.error("Can't convert abalone to togyzkumalak")
+    override def toGo           = sys.error("Can't convert abalone to go")
+    override def toBackgammon   = sys.error("Can't convert abalone to backgammon")
+    override def toAbalone      = f
+    override def toDameo        = sys.error("Can't convert abalone to dameo")
 
-    def gameLogic = GameLogic.Abalone()
+    override def gameLogic = GameLogic.Abalone()
 
-    def fullMove: Option[Int] = sys.error("There is no fullMove in abalone")
+    override def fullMove: Option[Int] = sys.error("There is no fullMove in abalone")
 
-    def player: Option[Player] = f.player
+    override def player: Option[Player] = f.player
 
-    def ply: Option[Int] = sys.error("There is no ply in abalone")
+    override def ply: Option[Int] = sys.error("There is no ply in abalone")
 
-    def initial: Boolean = f.initial
+    override def initial: Boolean = f.initial
 
-    def chessFen: Option[strategygames.chess.format.FEN] = None
+    override def chessFen: Option[strategygames.chess.format.FEN] = None
 
-    def player1Score = f.player1Score
-    def player2Score = f.player2Score
+    override def player1Score = f.player1Score
+    override def player2Score = f.player2Score
   }
 
   final case class Dameo(f: strategygames.dameo.format.FEN) extends FEN(f.value) {

@@ -54,6 +54,8 @@ case class Pos(var x: Int, var y: Int) extends AnyRef {
 
   def index: Int = Piotr.posToIndex(this)
 
+  def hashIndex: Int = Piotr.posToHashIndex(this)
+
   def piotr: Char = Piotr.posToPiotr(this)
 
   def piotrStr: String = piotr.toString
@@ -356,6 +358,8 @@ object Piotr {
 
   def posToIndex: Map[Pos, Int] = Range(0, piotrs.size).map(i => (indexToPos(i), i)).toMap
 
+  def posToHashIndex: Map[Pos, Int] = Range(0, piotrs.size).map(i => (hashIndexToPos(i), i)).toMap
+
   def indexToPiotr: Map[Int, Char] = Range(0, piotrs.size).map(i => (i, piotrs(i))).toMap
 
   def posToPiotr: Map[Pos, Char] = posToIndex.keys.map(a => (a, indexToPiotr(posToIndex(a)))).toMap
@@ -381,8 +385,13 @@ object Piotr {
     if (j < 190) return new Pos(j % 19, 10 + j / 19) // A11-S11, ..., A19-S19
 
     // k² <= i < (k + 1)² => (0, k)...(k, k)...(k, 0) (note: from here, 19² <= i)
+    hashIndexToPos(i)
+  }
+
+  def hashIndexToPos(i: Int): Pos = {
+    // k² <= i < (k + 1)² => (0, k)...(k, k)...(k, 0) (note: from here, 19² <= i)
     val k = math.floor(math.sqrt(i)).toInt
-    j = i - k * k
+    val j = i - k * k
     if (j < k) return new Pos(j, k)
     new Pos(k, 2 * k - j)
   }

@@ -1,73 +1,18 @@
 package strategygames.abalone
 
-import org.specs2.matcher.MatchResult
-import strategygames.abalone.format.{FEN, Forsyth, Uci}
-import strategygames.abalone.variant.{Abalone, Variant}
-import strategygames.{Player, Score}
+import strategygames.abalone.variant.Abalone
 
 class AbaloneIsometryTest extends AbaloneTest {
-  val debug: Boolean = false
-
-  def checkFinalFen(
-      variant: Variant,
-      ucis: List[String],
-      finalFen: String
-  ): MatchResult[Any] =
-    checkFinalFenCore(variant, ucis, variant.initialFen, finalFen)
-
-  def checkFinalFen(
-      variant: Variant,
-      ucis: List[String],
-      initialFen: String,
-      finalFen: String
-  ): MatchResult[Any] =
-    checkFinalFenCore(variant, ucis, FEN(initialFen), finalFen)
-
-  def checkFinalFenCore(
-      variant: Variant,
-      ucis: List[String],
-      initialFen: FEN,
-      finalFen: String
-  ): MatchResult[Any] = {
-    var game = new Game(
-      Situation(
-        board = Board(
-          initialFen.pieces(variant.boardType),
-          History(
-            prevPlayer = initialFen.prevPlayer(variant),
-            score = Score(initialFen.player1Score, initialFen.player2Score),
-            halfMoveClock = initialFen.halfMovesSinceLastCapture(variant).getOrElse(0)
-          ),
-          variant
-        ),
-        player = initialFen.player.getOrElse(Player.P1)
-      )
-    )
-
-    var i = game.plies
-    ucis
-      .map(uci => Uci.Move.fromStrings(uci.substring(0, 2), uci.substring(2)).get)
-      .foreach(m => {
-        game = next(game, m.orig, m.dest)
-        if (debug) {
-          i += 1
-          println(i.toString + " -> " + Forsyth.>>(game).toString)
-        }
-      })
-
-    Forsyth.>>(game).value must_== finalFen
-  }
-
   /*
-   *     2 2 · 1 1   · · ·         2 · · 1 1   1 · ·
-   *    2 2 2 1 1 1   · ·         · 2 2 · · ·   · ·
-   *   · 2 2 · 1 1 ·   ·         · · 2 2 1 1 ·   ·
-   *  · · · · · · · ·           · 2 2 1 1 2 2 ·
-   * · · · · · · · · ·     ->  · · · 1 1 1 2 2 ·
-   *  · · · · · · · ·           · · 1 1 1 2 · 2
-   *   · 1 1 · 2 2 ·   ·         · 1 1 · · · ·   ·
-   *    1 1 1 2 2 2   · ·         · · · · · ·   · ·
-   *     1 1 · 2 2   · · ·         · · · 2 ·   2 · ·
+   *     o o · ● ●   · · ·         o · · ● ●   ● · ·
+   *    o o o ● ● ●   · ·         · o o · · ·   · ·
+   *   · o o · ● ● ·   ·         · · o o ● ● ·   ·
+   *  · · · · · · · ·           · o o ● ● o o ·
+   * · · · · · · · · ·     ->  · · · ● ● ● o o ·
+   *  · · · · · · · ·           · · ● ● ● o · o
+   *   · ● ● · o o ·   ·         · ● ● · · · ·   ·
+   *    ● ● ● o o o   · ·         · · · · · ·   · ·
+   *     ● ● · o o   · · ·         · · · o ·   o · ·
    */
   "MSO 2024 final game - Francesco SALERNO vs Kyungmin KANG" in {
     checkFinalFen(
@@ -126,15 +71,15 @@ class AbaloneIsometryTest extends AbaloneTest {
   }
 
   /*
-   *     2 2 · 1 1   · · ·         · · · · ·   1 1 1
-   *    2 2 2 1 1 1   · ·         · · 1 · 1 ·   1 1
-   *   · 2 2 · 1 1 ·   ·         · · 2 · 2 2 ·   1
-   *  · · · · · · · ·           · · · · · 2 · ·
-   * · · · · · · · · ·     ->  · 2 1 · · 1 2 · ·
-   *  · · · · · · · ·           · · · 1 1 1 · ·
-   *   · 1 1 · 2 2 ·   ·         · · 2 · 2 · ·   ·
-   *    1 1 1 2 2 2   · ·         · 1 2 2 2 ·   · ·
-   *     1 1 · 2 2   · · ·         · 2 · 2 ·   2 · ·
+   *     o o · ● ●   · · ·         · · · · ·   ● ● ●
+   *    o o o ● ● ●   · ·         · · ● · ● ·   ● ●
+   *   · o o · ● ● ·   ·         · · o · o o ·   ●
+   *  · · · · · · · ·           · · · · · o · ·
+   * · · · · · · · · ·     ->  · o ● · · ● o · ·
+   *  · · · · · · · ·           · · · ● ● ● · ·
+   *   · ● ● · o o ·   ·         · · o · o · ·   ·
+   *    ● ● ● o o o   · ·         · ● o o o ·   · ·
+   *     ● ● · o o   · · ·         · o · o ·   o · ·
    */
   "MSO 2023 final game - Jiyun LIM vs Vincent FROCHOT" in {
     checkFinalFen(
@@ -246,15 +191,15 @@ class AbaloneIsometryTest extends AbaloneTest {
   }
 
   /*
-   *     2 2 · 1 1   · · ·         · · · · 1   1 1 1
-   *    2 2 2 1 1 1   · ·         · · · · 2 2   1 1
-   *   · 2 2 · 1 1 ·   ·         · · 2 1 · 2 ·   1
-   *  · · · · · · · ·           · · · · · 2 2 2
-   * · · · · · · · · ·     ->  · · · 1 1 1 1 2 2
-   *  · · · · · · · ·           · · 2 2 1 2 · ·
-   *   · 1 1 · 2 2 ·   ·         · · · · 1 · ·   ·
-   *    1 1 1 2 2 2   · ·         · · · · · ·   · ·
-   *     1 1 · 2 2   · · ·         · · · 2 2   · · ·
+   *     o o · ● ●   · · ·         · · · · ●   ● ● ●
+   *    o o o ● ● ●   · ·         · · · · o o   ● ●
+   *   · o o · ● ● ·   ·         · · o ● · o ·   ●
+   *  · · · · · · · ·           · · · · · o o o
+   * · · · · · · · · ·     ->  · · · ● ● ● ● o o
+   *  · · · · · · · ·           · · o o ● o · ·
+   *   · ● ● · o o ·   ·         · · · · ● · ·   ·
+   *    ● ● ● o o o   · ·         · · · · · ·   · ·
+   *     ● ● · o o   · · ·         · · · o o   · · ·
    */
   "MSO 2022 final game - Francesco SALERNO vs Vincent FROCHOT" in {
     checkFinalFen(

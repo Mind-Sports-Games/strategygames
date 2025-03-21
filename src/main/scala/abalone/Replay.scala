@@ -127,10 +127,10 @@ object Replay {
 
     val gameWithActions: List[(Game, Move)] =
       combineActionStrsWithEndTurn(actionStrs, startPlayer, activePlayer).toList.map {
-        case (Uci.Move.moveR(orig, dest), endTurn) =>
+        case (Uci.Move.moveR(orig0, orig1, dest0, dest1), endTurn) =>
           replayMoveFromUci(
-            Pos.fromKey(orig),
-            Pos.fromKey(dest),
+            Pos.fromKey(orig0 + orig1),
+            Pos.fromKey(dest0 + dest1),
             endTurn
           )
         case (action: String, _)                   =>

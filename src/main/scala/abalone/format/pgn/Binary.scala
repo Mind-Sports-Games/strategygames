@@ -53,8 +53,8 @@ object Binary {
 
   private object Writer {
     def ply(str: String): List[Byte] = (str match {
-      case Uci.Move.moveR(src, dst) => moveUci(src, dst)
-      case _                        => sys.error(s"Invalid move to write: $str")
+      case Uci.Move.moveR(orig0, orig1, dest0, dest1) => moveUci(orig0 + orig1, dest0 + dest1)
+      case _                                          => sys.error(s"Invalid move to write: $str")
     }).map(_.toByte)
 
     def plies(strs: Iterable[String]): Array[Byte] =
