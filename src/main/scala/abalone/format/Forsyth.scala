@@ -72,7 +72,7 @@ object Forsyth {
 
   def exportBoard(board: Board): String = {
     val boardFen = getFen_board(board)
-    val scoreStr = board.history.score.fenStr
+    val scoreStr = getFen_score(board)
     s"${boardFen} ${scoreStr}"
   }
 
@@ -111,7 +111,7 @@ object Forsyth {
     res.toString
   }
 
-  def boardAndPlayer(sit: Situation): String = boardAndPlayer(sit.board, sit.player)
+  def getFen_score(board: Board): String = board.history.score.fenStr
 
   def boardAndPlayer(board: Board, nextPlayer: Player): String = s"${exportBoard(board)} ${nextPlayer.letter}"
 }

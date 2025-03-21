@@ -20,7 +20,7 @@ class AbaloneReplayTest extends AbaloneTest {
         Vector("b1b3"),
         Vector("b6b1"),
         Vector("i8g6"),
-        Vector("b5b1"),//b5xb1
+        Vector("b5b1"), // b5xb1
         Vector("b1c2"),
         Vector("g5b5"),
         Vector("h9f7"),
