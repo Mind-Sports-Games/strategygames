@@ -30,7 +30,23 @@ final case class FEN(value: String) extends AnyVal {
 
   def player2Score: Int = intFromFen(2).getOrElse(0)
 
-  def player: Option[Player] = value.split(' ').lift(3).flatMap(_.headOption).flatMap(Player.apply).map(!_)
+  def prevPlayer(variant: Variant): Option[Player] = {
+    if (!variant.hasPrevPlayer) return None
+
+    value
+      .split(' ')
+      .lift(4)
+      .flatMap(_.headOption)
+      .flatMap(Player.apply)
+      .map(!_)
+  }
+
+  def player: Option[Player] = value
+    .split(' ')
+    .lift(3)
+    .flatMap(_.headOption)
+    .flatMap(Player.apply)
+    .map(!_)
 
   def halfMovesSinceLastCapture(variant: Variant): Option[Int] = intFromFen(
     if (variant.hasPrevPlayer) 5 else 4

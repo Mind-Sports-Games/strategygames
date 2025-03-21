@@ -30,3 +30,18 @@ case class Move(
 
   override def toString = s"${player.number} ${toUci.uci}"
 }
+
+case class LightMove(
+    player: Player,
+    orig: Pos,
+    dest: Pos,
+    autoEndTurn: Boolean,
+    capture: Option[Pos] = None
+) {
+  def toUci             = Uci.Move(orig, dest)
+  override def toString = s"${player.number} ${toUci.uci}"
+}
+object LightMove {
+  def fromMove(move: Move): LightMove =
+    new LightMove(move.player, move.orig, move.dest, move.autoEndTurn, move.capture)
+}

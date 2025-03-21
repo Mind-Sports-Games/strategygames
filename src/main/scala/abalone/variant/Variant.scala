@@ -274,7 +274,7 @@ abstract class Variant private[variant] (
         lastTurn = if (move.autoEndTurn) h.currentTurn :+ move.toUci else h.lastTurn,
         currentTurn = if (move.autoEndTurn) List() else h.currentTurn :+ move.toUci,
         prevPlayer = Option(move.player),
-        prevMove = Option(move),
+        prevMove = Option(LightMove.fromMove(move)),
         score = if (move.captures) h.score.add(move.player) else h.score,
         halfMoveClock = if (move.captures) 0 else h.halfMoveClock + 1
       )
@@ -331,7 +331,8 @@ abstract class Variant private[variant] (
 
   def valid(@nowarn board: Board, @nowarn strict: Boolean): Boolean = true
 
-  def isIrreversible(move: Move): Boolean = move.capture.nonEmpty
+  def isIrreversible(move: Move): Boolean      = move.capture.nonEmpty
+  def isIrreversible(move: LightMove): Boolean = move.capture.nonEmpty
 
   /** Indicates whether the previous player should be remembered to asses a situation. */
   def hasPrevPlayer: Boolean = false

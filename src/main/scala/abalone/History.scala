@@ -6,9 +6,9 @@ import strategygames.{Player, Score}
 case class History(
     lastTurn: List[Uci] = List.empty,
     currentTurn: List[Uci] = List.empty,
-    prevPlayer: Option[Player] =
-      None, // Contained in lastMove, but we may want to know the previous player without knowing the previous move
-    prevMove: Option[Move] = None,
+    // Contained in lastMove, but we may want to know the previous player without knowing the previous move
+    prevPlayer: Option[Player] = None,
+    prevMove: Option[LightMove] = None,// Remark: putting the actual move here slows down everything past a few turns, because of the previous and next situations contained within the move
     positionHashes: PositionHash = Array.empty,
     score: Score = Score(),
     halfMoveClock: Int = 0
