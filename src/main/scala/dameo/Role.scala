@@ -19,7 +19,6 @@ sealed trait Role {
 
 sealed trait PromotableRole extends Role
 
-//TODO Dameo - check forsyth is what we want. Depends on FEN format
 case object King extends PromotableRole {
   val forsyth   = 'k'
   val binaryInt = 1
@@ -46,7 +45,7 @@ case object GhostKing extends Role {
 
 object Role {
 
-  val all: List[Role]                     = List(King, Man)
+  val all: List[Role]                     = List(King, Man, GhostKing, GhostMan)
   val allPromotable: List[PromotableRole] = List(King)
 
   def defaultRole: Role = Man

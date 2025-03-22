@@ -20,8 +20,5 @@ case object Dameo
 
   override def baseVariant: Boolean = true
 
-  // TODO Dameo set this
-  override def initialFen = format.FEN("")
-
   // TODO Dameo can write the variant/Variant.scala method code in here (using override)
 }

@@ -1,31 +1,65 @@
 package strategygames.dameo.format
 
 import strategygames.Player
-import strategygames.dameo.PieceMap
+import strategygames.dameo.{ Piece, PieceMap, Pos, Role }
+/*
 
-//TODO Dameo, work out the FEN structure for a Dameo game.
-//What do other platforms use?
-//Is there a standard for Dameo?
-//Are we able to use something similar to Draughts FENs (look in there)
-//Or do we want to invent our own, and have it more similar to chess?
-//Either way any FEN parsing wants to be done here. Look at other game logic FEN files
+Dameo FEN:
+[colour to move]:W[white piece coords]:B[black piece coords]:Halfmoveclock:Fullmoves
+
+coords for men are a1,b1,c1
+other roles (kings, ghostman, ghostking) are added to the coord with a period, e.g. a1.k,b1.g,b2.p
+I assume ghosts need to be part of the FEN since we want to treat (partial) moves with ghosts in them
+as proper moves w.r.t. the frontend.
+
+*/
+
 final case class FEN(value: String) extends AnyVal {
 
   override def toString = value
 
+  def splitted: Array[String] = value.split(':')
+
   def player: Option[Player] =
-    value.split(':').lift(0) flatMap (_.headOption) flatMap Player.apply
+    splitted.lift(0) flatMap (_.headOption) flatMap Player.apply
 
   def initial = value == Forsyth.initial.value
 
-  // TODO Dameo set
-  def pieces: PieceMap = Map.empty
+  def player1: Player = Player.apply(splitted(1).head).get
+  def pieceStr1: String = splitted(1).tail
+  def pieces1: Array[(Pos, Piece)] = pieceStr1
+    .split(',')
+    .map(parsePiece(player1))
+
+  def player2: Player = Player.apply(splitted(2).head).get
+  def pieceStr2: String = splitted(2).tail
+  def pieces2: Array[(Pos, Piece)] = pieceStr2
+    .split(',')
+    .map(parsePiece(player2))
+
+  def pieces: PieceMap = (pieces1 ++ pieces2).toMap
+
+  def halfMoveClock: Option[Int] = intFromFen(3)
+  def fullMove: Option[Int] = intFromFen(4)
+
+  private def parsePiece(player: Player)(pStr: String): (Pos, Piece) = {
+    def pStrA: Array[String] = pStr.split('.')
+    def role: Role = pStrA.lift(1) match {
+      case Some(roleStr) => Role.forsyth(roleStr.head).get
+      case _             => Role.defaultRole
+    }
+    (Pos.allKeys(pStrA(0)), Piece(player, role))
+  }
+
+  private def intFromFen(index: Int): Option[Int] =
+    value.split(':').lift(index).flatMap(_.tail.toIntOption)
 }
 
 object FEN {
 
   def clean(source: String): FEN = FEN(source.replace("_", " ").trim)
 
+  def halfMoveIndex: Int = 3
   def fullMoveIndex: Int = 4
 
 }
