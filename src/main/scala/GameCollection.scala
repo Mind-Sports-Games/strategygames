@@ -406,7 +406,7 @@ object GameFamily {
         "cross"
       )
     def pieceSetDefault   = "classic_stone"
-    def boardThemes       = List("light-wood", "dark-wood")
+    def boardThemes       = List("light-wood", "dark-wood", "yellow-wood")
     def boardThemeDefault = "light-wood"
     def playerNames       = Map(P1 -> "Black", P2 -> "White")
     def playerColors      = Map(P1 -> "black", P2 -> "white")
