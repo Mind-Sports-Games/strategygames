@@ -3,7 +3,6 @@ package strategygames.dameo
 import org.specs2.matcher.ValidatedMatchers
 
 import strategygames.dameo.format.FEN
-// import strategygames.{ Status }
 
 class DameoFenTest extends DameoTest with ValidatedMatchers {
   "starting position FEN" should {

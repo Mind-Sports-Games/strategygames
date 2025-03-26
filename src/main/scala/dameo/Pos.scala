@@ -314,6 +314,6 @@ object Pos {
     }
     .to(Map)
 
-  val posR = "([a-j][1-9]|[a-j]10)"
+  val posR = "[a-j][1-9]|[a-j]10"
 
 }

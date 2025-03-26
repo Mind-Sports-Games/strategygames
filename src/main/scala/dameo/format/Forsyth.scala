@@ -49,10 +49,8 @@ object Forsyth {
 
   case class SituationPlus(situation: Situation, fullTurnCount: Int) {
     def turnCount = fullTurnCount * 2 - (if (situation.player.p1) 2 else 1)
-    // when we convert draughts to multiaction we should consider setting this
-    // we may be able to deprecate this at that point as actions.flatten.size should count plies
+    // TODO Dameo will be a multiaction variant so something should be done with this
     def plies     = turnCount
-
   }
 
   def <<<@(variant: Variant, fen: FEN): Option[SituationPlus] =

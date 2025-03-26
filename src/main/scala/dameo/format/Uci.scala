@@ -27,16 +27,22 @@ object Uci {
       promotion: Option[PromotableRole] = None,
       capture: Option[Pos] = None
   ) extends Uci {
+    /* A man only promotes when he *ends* his turn on the back rank, however since
+    Dameo uses multi-action turns there could be partial turns that end on the back
+    rank, yet don't cause a promotion, because they don't end the full turn. So it is
+    probably easiest to encode promotion explicitly here.
+    Also, we encode the position of the captured stone explicitly, to make it easy to
+    get back the captured stone from a long leap capture by a king.
+    */
 
     def keys     = orig.key + dest.key
-    // TODO Dameo set these properly
-    def uci      = orig.key + (if (capture.isEmpty) "" else "x") + dest.key
-    def shortUci = orig.key + (if (capture.isEmpty) "" else "x") + dest.key
+    def promotionString = promotion.fold("")(_.forsyth.toString)
+    def uci      = orig.key + capture.fold("")(c => "x" + c.key) + dest.key + promotionString
+    def shortUci = uci
 
     def keysPiotr = orig.piotrStr + dest.piotrStr
-    def piotr     = keysPiotr + promotionString
+    def piotr     = keysPiotr + capture.fold("")(c => "x" + c.piotr) + promotion.fold("")(r => "p" + r.forsyth)
 
-    def promotionString = promotion.fold("")(_.forsyth.toString)
 
     def origDest = Some(orig -> dest)
 
@@ -49,34 +55,42 @@ object Uci {
 
     def apply(move: String): Option[Move] = {
       move match {
-        case moveR(orig, capture, dest) =>
+        case moveR(orig, capture, dest, promotion) =>
           (
             Pos.fromKey(orig),
             Pos.fromKey(dest),
-            capture.length == 1
+            capture,
+            promotion == "k"
           ) match {
-            case (Some(orig), Some(dest), capture) =>
+            case (Some(orig), Some(dest), capture, promotion) =>
               Some(
                 Move(
                   orig = orig,
                   dest = dest,
-                  // TODO Dameo set this
-                  promotion = None,
-                  capture = if (capture) Pos.capturePos(orig, dest) else None
+                  promotion = if (promotion) Some(King) else None,
+                  capture = if (capture == "") None else Pos.fromKey(capture.tail)
                 )
               )
-            case _                                 => None
+            case _ => None
           }
-        case _                          => None
+        case _ => None
       }
     }
 
-    // TODO Dameo use capture and promotion properly
-    def piotr(move: String) = for {
-      orig    <- move.headOption.flatMap(Pos.piotr)
-      dest    <- move.lift(1).flatMap(Pos.piotr)
-      capture <- move.lift(2).nonEmpty.some
-    } yield Move(orig, dest, None, (if (capture) Pos.capturePos(orig, dest) else None))
+    val piotrR = "(.)(.)((?:x.)?)((?:pk)?)".r
+
+    def piotr(move: String): Option[Move] = {
+      move match {
+        case piotrR(orig, dest, capture, promotion) =>
+          Some(Move(
+            Pos.piotr(orig.head).get,
+            Pos.piotr(dest.head).get,
+            capture = if (capture == "") None else Pos.piotr(capture(1)),
+            promotion = if (promotion == "") None else Some(King)
+          ))
+        case _ => None
+      }
+    }
 
     // TODO Dameo use capture and promotion properly
     def fromStrings(origS: String, destS: String, promS: Option[String]) = for {
@@ -85,8 +99,7 @@ object Uci {
       promotion = Role promotable promS
     } yield Move(orig, dest, promotion, None)
 
-    // TODO Dameo write the regex for each move. Do we need to add in promotion?
-    val moveR = s"^${Pos.posR}([x]?)${Pos.posR}".r
+    val moveR = s"^(${Pos.posR})((?:x${Pos.posR})?)(${Pos.posR})([k]?)".r
 
   }
 
