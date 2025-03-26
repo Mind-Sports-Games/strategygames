@@ -3,8 +3,6 @@ package format
 
 import cats.implicits._
 
-import scala.util.Try
-
 import scala.annotation.nowarn
 
 import strategygames.Player
@@ -28,9 +26,6 @@ object Forsyth {
     FEN(
       "W:Wa1,b1,b2,c1,c2,c3,d1,d2,d3,e1,e2,e3,f1,f2,f3,g1,g2,h1:Ba8,b7,b8,c6,c7,c8,d6,d7,d8,e6,e7,e8,f6,f7,f8,g7,g8,h8:H0:F1"
     )
-
-  private def parseIntOption(str: String): Option[Int] =
-    Try(Integer.parseInt(str)).toOption
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
     /* Convert a FEN + Variant into a Situation */
@@ -110,24 +105,4 @@ object Forsyth {
 
   def boardAndPlayer(board: Board, turnPlayer: Player): String =
     s"${turnPlayer.letter.toUpper}:${exportBoard(board)}"
-
-  @nowarn def compressedBoard(board: Board): String = ""
-
-  def exportScanPosition(sit: Option[Situation]): String = sit.fold("")(_ => "")
-
-  def shorten(fen: FEN): FEN = {
-    val fen2 = if (fen.value.endsWith(":+0+0")) fen.value.dropRight(5) else fen.value
-    if (fen2.endsWith(":H0:F1")) FEN(fen2.dropRight(6)) else FEN(fen2)
-  }
-
-  def getFullMove(fen: FEN): Option[Int] =
-    fen.value.split(':') filter (s => s.length > 1 && s.charAt(0) == 'F') lift 0 flatMap parseIntOption
-
-  def getPlayer(fen: FEN): Option[Player] = fen.value lift 0 flatMap Player.apply
-
-  def getPly(fen: FEN): Option[Int] =
-    getFullMove(fen) map { fullMove =>
-      fullMove * 2 - (if (getPlayer(fen).exists(_.p1)) 2 else 1)
-    }
-
 }
