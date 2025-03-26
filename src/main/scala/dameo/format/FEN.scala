@@ -39,8 +39,8 @@ final case class FEN(value: String) extends AnyVal {
 
   def pieces: PieceMap = (pieces1 ++ pieces2).toMap
 
-  def halfMoveClock: Option[Int] = intFromFen(3)
-  def fullMove: Option[Int] = intFromFen(4)
+  def halfMoveClock: Option[Int] = intFromFen(FEN.halfMoveIndex)
+  def fullMove: Option[Int] = intFromFen(FEN.fullMoveIndex)
 
   private def parsePiece(player: Player)(pStr: String): (Pos, Piece) = {
     def pStrA: Array[String] = pStr.split('.')
@@ -56,8 +56,6 @@ final case class FEN(value: String) extends AnyVal {
 }
 
 object FEN {
-
-  def clean(source: String): FEN = FEN(source.replace("_", " ").trim)
 
   def halfMoveIndex: Int = 3
   def fullMoveIndex: Int = 4

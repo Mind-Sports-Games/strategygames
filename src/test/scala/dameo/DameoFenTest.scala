@@ -100,5 +100,78 @@ class DameoFenTest extends DameoTest with ValidatedMatchers {
       pieces.get(Pos.A8) must_== Some(Piece(P2, GhostMan))
       pieces.get(Pos.E8) must_== Some(Piece(P2, GhostKing))
     }
+/*
+
+    "any man can make the first move" in {
+      board.variant.validMovesOf1(situation).size must_== 14
+    }
+
+    "corner piece has 2 starting moves" in {
+      board.variant.validMovesOf1(situation).foldLeft(0)(_ + _._2.size) must_== 2
+    }
+
+    "side piece has 3 starting moves" in {
+      board.variant.validMovesOf1(situation).foldLeft(0)(_ + _._2.size) must_== 3
+    }
+
+    "vanguard piece has 3 starting moves" in {
+      board.variant.validMovesOf1(situation).foldLeft(0)(_ + _._2.size) must_== 3
+    }
+*/
   }
+
+/*
+  "Game just finished having FEN \"5/2sss1/4SSS/4ssSS/3s1sSS1/2SS4/s6/6/5 6 5 w 0 58\"" should {
+    val fen       = format.FEN("5/2sss1/4SSS/4ssSS/3s1sSS1/2SS4/s6/6/5 6 5 w 0 58")
+    val pieces    = fen.pieces
+    val board     = Board(
+      pieces,
+      History(),
+      variant.Dameo
+    )
+    val situation = Situation(board, P2)
+
+
+    // @TODO: ensure other types of moves are generated correctly when validMoves does work entirely
+    "see 8 marbles able to move as 1" in {
+      board.variant.validMovesOf1(situation).size must_== 8
+    }
+    // @TODO: ensure other types of moves are generated correctly when validMoves does work entirely
+    "see 25 different moves of 1 marble" in {
+      board.variant.validMovesOf1(situation).foldLeft(0)(_ + _._2.size) must_== 25
+    }
+
+    "but is ended and P1 is the winner" in {
+      situation.end must_== true
+      situation.playable(true) must_== false
+      situation.staleMate must_== false
+      situation.winner must_== Some(P1)
+      situation.status must_== Some(Status.VariantEnd)
+    }
+  }
+
+  "Game having a player unable to move" should {
+    val board     = Board(
+      format.FEN("PPPPP/PPPPPp/5Pp/6Pp/7Pp/7P/7/6/5 5 5 w 0 42").pieces,
+      History(
+        score = Score(5, 5)
+      ),
+      variant.Dameo
+    )
+    val situation = Situation(board, P2)
+
+    // @TODO: ensure other types of moves are generated correctly when validMoves does work entirely
+    "see no potential valid move for that player" in {
+      board.variant.validMovesOf1(situation).size must_== 0
+    }
+
+    "end in a draw" in {
+      situation.end must_== true
+      situation.playable(true) must_== false
+      situation.staleMate must_== true
+      situation.winner must_== None
+      situation.status must_== Some(Status.Stalemate)
+    }
+  }
+*/
 }
