@@ -25,13 +25,11 @@ case object GrandAbalone
   /** The sequence of the number of actions per turn is 12* (P1 plays one move, then, starting with P2, both
     * players have two actions per turn).
     */
-  override def pliesFromFen(fenTurnCount: Int, player: Player, currentTurnPlies: Int): Int = {
-    (fenTurnCount match {
-      case t if t < 1 => 0
-      case 1          => 3
-      case t          => 3 + 4 * (t - 2)
-    }) + player.fold(0, 2) + currentTurnPlies
-  }
+  override def turnCountFromFen(fenTurnCount: Int, player: Player): Int =
+    fenTurnCount match {
+      case t if t < 2 => player.fold(0, 1)
+      case t          => 3 + 4 * (t - 2) + player.fold(0, 2)
+    }
 
   /** The sequence of the number of actions per turn is 12* (P1 plays one move, then, starting with P2, both
     * players have two actions per turn).

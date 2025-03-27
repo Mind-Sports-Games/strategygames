@@ -340,7 +340,7 @@ abstract class Variant private[variant] (
   def turnCountFromFen(fenTurnCount: Int, player: Player) =
     fenTurnCount * 2 - player.fold(2, 1)
 
-  def pliesFromFen(fenTurnCount: Int, player: Player, currentTurnPlies: Int = 0) =
+  final def pliesFromFen(fenTurnCount: Int, player: Player, currentTurnPlies: Int = 0) =
     turnCountFromFen(fenTurnCount, player) + currentTurnPlies
 
   def defaultRole: Role = Role.defaultRole
