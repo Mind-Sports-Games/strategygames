@@ -7,7 +7,7 @@ import strategygames.abalone.format.FEN
 case object GrandAbalone
     extends Variant(
       id = 2,
-      key = "grand_abalone",
+      key = "grandabalone",
       name = "Grand Abalone",
       standardInitialPosition = true,
       boardType = Hex6
@@ -34,8 +34,8 @@ case object GrandAbalone
   /** The sequence of the number of actions per turn is 12* (P1 plays one move, then, starting with P2, both
     * players have two actions per turn).
     */
-  override def isAutoEndTurn(orig: Pos, dest: Pos, sit: Situation, capture: Option[Pos]): Boolean =
-    sit.board.history.prevPlayer.fold(true)(p => p == sit.player)
+  override def isAutoEndTurn(orig: Pos, dest: Pos, situation: Situation, capture: Option[Pos]): Boolean =
+    situation.board.history.prevPlayer.fold(true)(p => p == situation.player)
 
   /** Belgian daisy. */
   override def initialFen: FEN =

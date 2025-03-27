@@ -30,6 +30,6 @@ case class Std(
 
   def withMetas(m: Metas) = copy(metas = m)
 
-  def move(@nowarn sit: Situation): Validated[String, strategygames.abalone.Move] =
+  def move(@nowarn situation: Situation): Validated[String, strategygames.abalone.Move] =
     Validated.invalid("Not implemented move") // TODO: ???
 }

@@ -87,8 +87,8 @@ object Game {
       .fold(g) { parsed =>
         g.copy(
           situation = Situation(
-            board = parsed.sit.board withVariant g.board.variant,
-            player = parsed.sit.player
+            board = parsed.situation.board withVariant g.board.variant,
+            player = parsed.situation.player
           ),
           plies = parsed.plies,
           turnCount = parsed.turnCount

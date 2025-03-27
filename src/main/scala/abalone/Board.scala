@@ -12,7 +12,7 @@ case class Board(
 
   def isPiece(a: Pos): Boolean = pieces.contains(a)
 
-  def getPiece(a: Pos): Option[Piece] = pieces.get(a)
+  def apply(a: Pos): Option[Piece] = pieces.get(a)
 
   def withHistory(h: History): Board = copy(history = h)
 

@@ -29,13 +29,13 @@ object Forsyth {
 
   def <<(fen: FEN): Option[Situation] = <<@(Variant.default, fen)
 
-  case class SituationPlus(sit: Situation, fullTurnCount: Int) {
-    def turnCount = sit.board.variant.turnCountFromFen(fullTurnCount, sit.player)
+  case class SituationPlus(situation: Situation, fullTurnCount: Int) {
+    def turnCount = situation.board.variant.turnCountFromFen(fullTurnCount, situation.player)
 
-    def plies = sit.board.variant.pliesFromFen(
+    def plies = situation.board.variant.pliesFromFen(
       fullTurnCount,
-      sit.player,
-      sit.board.history.currentTurn.size
+      situation.player,
+      situation.board.history.currentTurn.size
     )
   }
 
@@ -93,7 +93,7 @@ object Forsyth {
         res.append("/")
       }
 
-      board.getPiece(a) match {
+      board.apply(a) match {
         case None        => emptyNb += 1
         case Some(piece) =>
           writeEmptyNb()

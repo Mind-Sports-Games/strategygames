@@ -62,7 +62,7 @@ abstract class Variant private[variant] (
       .groupBy(_._1)
       .map { case (k, v) => k -> v.map(_._2).flatten }
   def validMoves(sit: Situation, a: Pos): List[Move]     = {
-    val ap = sit.board.getPiece(a)
+    val ap = sit.board.apply(a)
     if (ap.isEmpty || !isUsable(sit, ap.get)) return List()
 
     validMovesCore(sit, a)
@@ -75,7 +75,7 @@ abstract class Variant private[variant] (
   }
   def validMoves_line(sit: Situation, a: Pos): List[Move]   = {
 
-    val ap = sit.board.getPiece(a)
+    val ap = sit.board.apply(a)
     if (ap.isEmpty || !isUsable(sit, ap.get)) return List()
 
     validMoves_lineCore(sit, a)
@@ -88,7 +88,7 @@ abstract class Variant private[variant] (
         var out  = false
 
         var c           = Pos.copy(b)
-        var cp          = sit.board.getPiece(c)
+        var cp          = sit.board.apply(c)
         var hasProperty = true
         var u           = 1
         var max         = false
@@ -100,7 +100,7 @@ abstract class Variant private[variant] (
             max = maxUsable.isDefined && u > maxUsable.get
 
             c += vect
-            cp = sit.board.getPiece(c)
+            cp = sit.board.apply(c)
           }
         }
 
@@ -115,7 +115,7 @@ abstract class Variant private[variant] (
               max = p >= u
 
               c += vect
-              cp = sit.board.getPiece(c)
+              cp = sit.board.apply(c)
             }
           }
 
@@ -124,7 +124,7 @@ abstract class Variant private[variant] (
 
             if (out) {
               c -= vect
-              if (isEjectable(sit, sit.board.getPiece(c).get)) dest = Option(c)
+              if (isEjectable(sit, sit.board.apply(c).get)) dest = Option(c)
             } else {
               dest = Option(c)
             }
@@ -142,7 +142,7 @@ abstract class Variant private[variant] (
     sit.board.pieces.filter(t => isUsable(sit, t._2)).map { case (a, _) => (a, validMoves_jumpCore(sit, a)) }
   }
   def validMoves_jump(sit: Situation, a: Pos): List[Move]     = {
-    val ap = sit.board.getPiece(a)
+    val ap = sit.board.apply(a)
     if (ap.isEmpty || !isUsable(sit, ap.get)) return List()
 
     validMoves_jumpCore(sit, a)
@@ -163,7 +163,7 @@ abstract class Variant private[variant] (
           var c   = Pos.copy(b)
           var u   = 1
           var max = false
-          var cp  = sit.board.getPiece(c)
+          var cp  = sit.board.apply(c)
           while (!max && (pj || nj) && cp.isDefined) {
             if (isUsable(sit, cp.get)) {
               u += 1 // When u = 1, the only possible moves are already accounted for as in-line
@@ -184,7 +184,7 @@ abstract class Variant private[variant] (
                 }
 
                 c += vect
-                cp = sit.board.getPiece(c)
+                cp = sit.board.apply(c)
               }
             } else {
               max = true

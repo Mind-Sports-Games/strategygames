@@ -11,7 +11,7 @@ sealed trait Uci {
 
   def origDest: (Pos, Pos)
 
-  def apply(sit: Situation): Validated[String, strategygames.abalone.Move]
+  def apply(situation: Situation): Validated[String, strategygames.abalone.Move]
 }
 
 object Uci {
@@ -26,7 +26,7 @@ object Uci {
 
     override def origDest = orig -> dest
 
-    override def apply(sit: Situation) = sit.move(orig, dest)
+    override def apply(situation: Situation) = situation.move(orig, dest)
   }
 
   object Move {
