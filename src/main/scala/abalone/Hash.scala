@@ -37,7 +37,7 @@ object Hash {
     * index is < posNb.
     */
   def actorIndex(sit: Situation, actor: Actor) =
-    sit.board.variant.boardType.posNb * actor.piece.player.fold(0, 1) + actor.pos.hashIndex
+    sit.board.variant.boardType.posNb * actor.piece.player.fold(1, 0) + actor.pos.hashIndex
 
   def get(sit: Situation, table: ZobristConstants): Long = {
     val phturn =

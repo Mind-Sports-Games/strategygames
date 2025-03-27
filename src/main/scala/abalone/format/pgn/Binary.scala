@@ -34,14 +34,10 @@ object Binary {
         case x                   => !!(x map showByte mkString ",")
       }
 
-    // 1 freebit (0)
-    // 7 pos (from)
-    // ----
-    // 1 freebit (0)
-    // 7 pos (dest)
     def moveUci(b1: Int, b2: Int): String = s"${posFromInt(b1)}${posFromInt(b2)}"
 
-    def posFromInt(b: Int): String = Pos.fromIndex(right(b, 7)).toString()
+    // The maximal value of the index can go beyond 120 because of the strange order chosen in Piotr, so... 8 bits necessary for orig & dest
+    def posFromInt(b: Int): String = Pos.fromIndex(right(b, 8)).toString()
 
     private def right(i: Int, x: Int): Int = i & lengthMasks(x)
 

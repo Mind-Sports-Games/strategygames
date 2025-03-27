@@ -7,11 +7,11 @@ import strategygames.abalone.variant.Variant
 import strategygames.{Player, Status}
 
 case class Situation(board: Board, player: Player) {
-  def stalemate: Boolean = board.variant.specialDraw(this)
+  def staleMate: Boolean = board.variant.specialDraw(this)// Not 'stalemate' for consistency
 
   def autoDraw: Boolean = board.autoDraw
 
-  def end: Boolean = stalemate || autoDraw || variantEnd
+  def end: Boolean = staleMate || autoDraw || variantEnd
 
   def winner: Option[Player] = board.variant.winner(this)
 
@@ -37,7 +37,7 @@ case class Situation(board: Board, player: Player) {
 
   lazy val status: Option[Status] =
     if (variantEnd) Status.VariantEnd.some
-    else if (stalemate) Status.Stalemate.some
+    else if (staleMate) Status.Stalemate.some
     else if (autoDraw) Status.Draw.some
     else none
 

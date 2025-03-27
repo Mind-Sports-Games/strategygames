@@ -318,9 +318,6 @@ abstract class Variant private[variant] (
 
   def specialDraw(sit: Situation) = sit.moves.size == 0
 
-  // TODO Abalone Set
-  //  def materialImbalance(@nowarn board: Board): Int = 0
-
   def materialImbalance(@nowarn board: Board): Int = 0
 
   // Some variants have an extra effect on the board on a move. For example, in Atomic, some

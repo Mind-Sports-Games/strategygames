@@ -76,7 +76,6 @@ object Replay {
       after = after,
       autoEndTurn = endTurn,
       capture = if (before.situation.board.pieces.size != after.pieces.size) Some(dest) else None
-      // capture = if (before.situation.board.variant.boardType.isCell(dest) None else Some(dest)// Also valid
     )
   }
 
@@ -133,7 +132,7 @@ object Replay {
             Pos.fromKey(dest0 + dest1),
             endTurn
           )
-        case (action: String, _)                   =>
+        case (action: String, _)                                   =>
           sys.error(s"Invalid move for replay: $action")
       }
 

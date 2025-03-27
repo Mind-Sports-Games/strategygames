@@ -3,51 +3,35 @@ package strategygames.abalone
 import scala.annotation.nowarn
 import scala.util.matching.Regex
 
-case class Pos(var x: Int, var y: Int) extends AnyRef {
-  def +(a: Pos): Pos = Pos.copy(this).add(a)
+case class Pos(val x: Int, val y: Int) extends AnyRef {
+  def +(a: Pos): Pos = add(a.x, a.y)
 
-  def add(a: Pos): Pos = add(a.x, a.y)
+  def add(x: Int, y: Int): Pos = Pos(this.x + x, this.y + y)
 
-  def add(x: Int, y: Int): Pos = {
-    this.x += x
-    this.y += y
-    this
-  }
-
-  def -(a: Pos): Pos = Pos.copy(this).sub(a)
-
-  def sub(a: Pos): Pos = sub(a.x, a.y)
+  def -(a: Pos): Pos = sub(a.x, a.y)
 
   def sub(a: Int, b: Int): Pos = add(-a, -b)
 
-  def *(a: Int): Pos = Pos.copy(this).mult(a)
+  def *(a: Int): Pos = mult(a)
 
-  def *(a: Int, b: Int): Pos = Pos.copy(this).mult(a, b)
+  def *(a: Int, b: Int): Pos = mult(a, b)
 
   def mult(a: Int): Pos = mult(a, a)
 
-  def mult(a: Int, b: Int): Pos = {
-    x *= a
-    y *= b
-    this
-  }
+  def mult(a: Int, b: Int): Pos = Pos(a * x, b * y)
 
-  def /(a: Int): Pos = Pos.copy(this).div(a)
+  def /(a: Int): Pos = div(a)
 
-  def /(a: Int, b: Int): Pos = Pos.copy(this).div(a, b)
+  def /(a: Int, b: Int): Pos = div(a, b)
 
   def div(a: Int): Pos = div(a, a)
 
-  def div(a: Int, b: Int): Pos = {
-    x /= a
-    y /= b
-    this
-  }
+  def div(a: Int, b: Int): Pos = Pos(x / a, y / b)
 
   //
   //
   def key: String = (y match {
-    case _ if (y >= 0) => ('a' + y).toChar.toString
+    case _ if y >= 0 => ('a' + y).toChar.toString
     case -1 => "0"
     case _ => "-" + ('a' - y - 2).toChar.toString
   }) + (x + 1).toString
@@ -370,7 +354,7 @@ object Piotr {
 
   def piotrToPos: Map[Char, Pos] = posToPiotr.keys.map(a => (posToPiotr(a), a)).toMap
 
-  def indexToPos(i: Int): Pos = { // Notice the 'return's are necessary here
+  def indexToPos(i: Int): Pos = {
     var j = i
     if (j < 64) return new Pos(j % 8, j / 8) // A1-H1, ..., A8-H8
 
@@ -386,12 +370,12 @@ object Piotr {
     j -= 90
     if (j < 190) return new Pos(j % 19, 10 + j / 19) // A11-S11, ..., A19-S19
 
-    // k² <= i < (k + 1)² => (0, k)...(k, k)...(k, 0) (note: from here, 19² <= i)
+    // Note: from here, 19² <= i
     hashIndexToPos(i)
   }
 
   def hashIndexToPos(i: Int): Pos = {
-    // k² <= i < (k + 1)² => (0, k)...(k, k)...(k, 0) (note: from here, 19² <= i)
+    // k² <= i < (k + 1)² => (0, k)...(k, k)...(k, 0)
     val k = math.floor(math.sqrt(i)).toInt
     val j = i - k * k
     if (j < k) return new Pos(j, k)
