@@ -64,7 +64,7 @@ abstract class Norm(val radius: Int, is3: Boolean = false) {
   final def getRotatedKeepNorm(
       a: Pos,
       deg: Double,
-      rot: (Pos, Double) => (Double, Double) = (b, d) => getRotated(b, d)
+      rot: (Pos, Double) => (Double, Double) = getRotated
   ): Pos = {
     var p = rot(a, deg)
 
