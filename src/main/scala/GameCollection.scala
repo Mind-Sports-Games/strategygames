@@ -308,7 +308,7 @@ object GameFamily {
         "stone_flipello",
         "disc_flipello"
       )
-    def pieceSetDefault   = "fabirovsky_flipello"
+    def pieceSetDefault   = "disc_flipello"
     def boardThemes       = List("green", "green-marble", "wood")
     def boardThemeDefault = "green"
     def playerNames       = Map(P1 -> "Black", P2 -> "White")
