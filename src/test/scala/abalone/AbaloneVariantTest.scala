@@ -616,9 +616,9 @@ class AbaloneVariantTest extends AbaloneTest {
      */
 
     "should enter a non reversible state only when pushing out" in {
-      game8.board.variant.isIrreversible(game9.situation.board.history.prevMove.get) must_== false
-      game9.board.variant.isIrreversible(game10.situation.board.history.prevMove.get) must_== true
-      game10.board.variant.isIrreversible(game11.situation.board.history.prevMove.get) must_== false
+      game8.board.variant.isIrreversible(game8.situation, game9.situation.board.history.lastAction.get) must_== false
+      game9.board.variant.isIrreversible(game9.situation, game10.situation.board.history.lastAction.get) must_== true
+      game10.board.variant.isIrreversible(game10.situation, game11.situation.board.history.lastAction.get) must_== false
     }
 
     "increment the score of P1 each time he plays a move" in {

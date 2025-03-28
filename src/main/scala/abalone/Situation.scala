@@ -9,7 +9,7 @@ import strategygames.{Player, Status}
 case class Situation(board: Board, player: Player) {
   def staleMate: Boolean = board.variant.specialDraw(this)// Not 'stalemate' for consistency
 
-  def autoDraw: Boolean = board.autoDraw
+  def autoDraw: Boolean = board.variant.repetition(this)
 
   def end: Boolean = staleMate || autoDraw || variantEnd
 

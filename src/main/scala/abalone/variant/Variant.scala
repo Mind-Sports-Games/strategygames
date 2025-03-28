@@ -1,9 +1,9 @@
 package strategygames.abalone.variant
 
 import cats.data.Validated
-import cats.syntax.option._
+import cats.implicits.catsSyntaxOption
 import strategygames.abalone._
-import strategygames.abalone.format.FEN
+import strategygames.abalone.format.{FEN, Uci}
 import strategygames.{GameFamily, Player}
 
 import scala.annotation.nowarn
@@ -206,10 +206,25 @@ abstract class Variant private[variant] (
       sit,
       boardAfter(sit, orig, dest),
       capture = capture,
-      autoEndTurn = isAutoEndTurn(orig, dest, sit, capture)
+      autoEndTurn = isAutoEndTurn(sit, orig, dest)
     )
 
-  def isAutoEndTurn(orig: Pos, dest: Pos, sit: Situation, capture: Option[Pos]): Boolean = true
+  def getCapture(sit: Situation, @nowarn orig: Pos, dest: Pos): Option[Pos] =
+    if (sit.board.isPiece(dest)) Some(dest) else None
+
+  def isAutoEndTurn(sit: Situation, orig: Pos, dest: Pos): Boolean = true
+
+  def repetition(sit: Situation): Boolean = {
+    if (!repetitionEnabled) return false
+
+    val la = sit.board.history.lastAction
+
+    la.isDefined && isAutoEndTurn(
+      sit,
+      la.get.origDest._1,
+      la.get.origDest._2
+    ) && sit.board.history.threefoldRepetition
+  }
 
   private def canJumpTo(sit: Situation, a: Pos): Boolean = !sit.board.isPiece(a) && boardType.isCell(a)
 
@@ -274,7 +289,6 @@ abstract class Variant private[variant] (
         lastTurn = if (move.autoEndTurn) h.currentTurn :+ move.toUci else h.lastTurn,
         currentTurn = if (move.autoEndTurn) List() else h.currentTurn :+ move.toUci,
         prevPlayer = Option(move.player),
-        prevMove = Option(LightMove.fromMove(move)),
         score = if (move.captures) h.score.add(move.player) else h.score,
         halfMoveClock = if (move.captures) 0 else h.halfMoveClock + 1
       )
@@ -328,8 +342,9 @@ abstract class Variant private[variant] (
 
   def valid(@nowarn board: Board, @nowarn strict: Boolean): Boolean = true
 
-  def isIrreversible(move: Move): Boolean      = move.capture.nonEmpty
-  def isIrreversible(move: LightMove): Boolean = move.capture.nonEmpty
+  def isIrreversible(move: Move): Boolean                = move.capture.isDefined
+  def isIrreversible(sit: Situation, move: Uci): Boolean =
+    getCapture(sit, move.origDest._1, move.origDest._2).isDefined
 
   /** Indicates whether the previous player should be remembered to asses a situation. */
   def hasPrevPlayer: Boolean = false
