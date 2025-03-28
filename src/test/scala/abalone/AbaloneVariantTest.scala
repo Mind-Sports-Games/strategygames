@@ -19,7 +19,7 @@ class AbaloneVariantTest extends AbaloneTest {
    */
   "custom basic position" should {
     val fen         = format.FEN("5/6/7/4s3/4SSSs1/8/7/6/5 0 0 b 0 0")
-    val board       = Board(fen.pieces(Abalone.boardType), History(), Abalone)
+    val board       = Board(fen.pieces(Abalone), History(), Abalone)
     val game        = new Game(Situation(board, P1))
     val validMoves  = valid(game)
     val moves       = validMoves.flatMap(_._2)
@@ -159,7 +159,7 @@ class AbaloneVariantTest extends AbaloneTest {
    */
   "\"Belgian daisy\" start position" should {
     val fen        = Abalone.initialFen
-    val board      = Board(fen.pieces(Abalone.boardType), History(), Abalone)
+    val board      = Board(fen.pieces(Abalone), History(), Abalone)
     val situation  = Situation(board, P1)
     val validMoves = valid(situation)
     val moves      = validMoves.flatMap(_._2)
@@ -189,7 +189,7 @@ class AbaloneVariantTest extends AbaloneTest {
 
   "\"Snakes variant\" start position" should {
     val fen       = format.FEN("sssss/5s/6s/1SSSSS1s/1S5s1/S1sssss1/S6/S5/SSSSS 0 0 b 0 0")
-    val board     = Board(fen.pieces(Abalone.boardType), History(), Abalone)
+    val board     = Board(fen.pieces(Abalone), History(), Abalone)
     val situation = Situation(board, P1)
     val moves     = valid(situation).flatMap(_._2)
     val lineMoves = valid_line(situation).flatMap(_._2)
@@ -210,7 +210,7 @@ class AbaloneVariantTest extends AbaloneTest {
 
   "\"Alien\" start position" should {
     val fen       = format.FEN("s1s1s/1sSSs1/1sSsSs1/3ss3/9/3SS3/1SsSsS1/1SssS1/S1S1S 0 0 b 0 0")
-    val board     = Board(fen.pieces(Abalone.boardType), History(), Abalone)
+    val board     = Board(fen.pieces(Abalone), History(), Abalone)
     val situation = Situation(board, P1)
     val moves     = valid(situation).flatMap(_._2)
     val lineMoves = valid_line(situation).flatMap(_._2)
@@ -231,7 +231,7 @@ class AbaloneVariantTest extends AbaloneTest {
 
   "\"Domination\" start position" should {
     val fen        = format.FEN("5/S4s/SS3ss/SSS1ssss/3S1S3/ssss1SSS/ss3SS/s4S/5 0 0 b 0 0")
-    val board      = Board(fen.pieces(Abalone.boardType), History(), Abalone)
+    val board      = Board(fen.pieces(Abalone), History(), Abalone)
     val situation  = Situation(board, P1)
     val validMoves = valid(situation)
     val moves      = validMoves.flatMap(_._2)
@@ -273,7 +273,7 @@ class AbaloneVariantTest extends AbaloneTest {
    */
   "custom start position with a total of 29 marbles" should {
     val fen        = format.FEN("1s3/2sSss/3s2S/ssSS2S1/4SSS2/8/7/3Ss1/2s1s 5 5 b 0 0")
-    val board      = Board(fen.pieces(Abalone.boardType), History(score = Score(5, 5)), Abalone)
+    val board      = Board(fen.pieces(Abalone), History(score = Score(5, 5)), Abalone)
     val situation  = Situation(board, P1)
     val validMoves = valid(situation)
     val moves      = validMoves.flatMap(_._2)
@@ -324,7 +324,7 @@ class AbaloneVariantTest extends AbaloneTest {
    */
   "custom start position" should {
     val fen        = format.FEN("SSSSs/ssss2/1s5/2S5/3S5/3S4/1SSssss/2sSSS/SSS2 5 5 b 0 0")
-    val board      = Board(fen.pieces(Abalone.boardType), History(), Abalone)
+    val board      = Board(fen.pieces(Abalone), History(), Abalone)
     val situation  = Situation(board, P1)
     val validMoves = valid(situation)
     val lineMoves  = valid_line(situation).flatMap(_._2)
@@ -369,7 +369,7 @@ class AbaloneVariantTest extends AbaloneTest {
    */
   "special position to test some edge cases" should {
     val fen        = format.FEN("SsSSS/Ssssss/S3S2/s3S3/s3S4/S2S4/S1s4/Ss4/s4 5 5 b 0 0")
-    val board      = Board(fen.pieces(Abalone.boardType), History(), Abalone)
+    val board      = Board(fen.pieces(Abalone), History(), Abalone)
     val validMoves = valid(Situation(board, P1))
 
     "not generate a push when a marble of the same colour blocks it (oooxo)" in {
@@ -419,7 +419,7 @@ class AbaloneVariantTest extends AbaloneTest {
    */
   "pushing out the only marble of P2 with a score of 0" should {
     val fenEndedGame = format.FEN("5/6/7/8/5SSSs/8/7/6/5 0 0 b 0 0")
-    val board        = Board(fenEndedGame.pieces(Abalone.boardType), History(), Abalone)
+    val board        = Board(fenEndedGame.pieces(Abalone), History(), Abalone)
     val game2        = next(new Game(Situation(board, P1)), 5, 4, 8, 4) // e6e9
 
     "increment the score of P1" in {
@@ -449,7 +449,7 @@ class AbaloneVariantTest extends AbaloneTest {
    */
   "pushing out the only marble of P2 with a score of 5" should {
     val fenEndedGame = format.FEN("5/6/7/8/5SSSs/8/7/6/5 5 0 b 0 0")
-    val board        = Board(fenEndedGame.pieces(Abalone.boardType), History(score = Score(p1 = 5)), Abalone)
+    val board        = Board(fenEndedGame.pieces(Abalone), History(score = Score(p1 = 5)), Abalone)
     val game         = new Game(Situation(board, P1))
     val game2        = next(game, 5, 4, 8, 4) // e6e9
 
@@ -480,7 +480,7 @@ class AbaloneVariantTest extends AbaloneTest {
    */
   "P1 pushing out 6 marbles consecutively" should {
     val fenEndedGame = format.FEN("s4/6/7/8/4SSSss/6S1/4SS1/3Sss/3ss 0 0 b 0 0")
-    val board        = Board(fenEndedGame.pieces(Abalone.boardType), History(), Abalone)
+    val board        = Board(fenEndedGame.pieces(Abalone), History(), Abalone)
     val game         = new Game(Situation(board, P1))
     val game2        = next(game, 4, 4, 8, 4)   // e5e9
     /*
@@ -616,9 +616,12 @@ class AbaloneVariantTest extends AbaloneTest {
      */
 
     "should enter a non reversible state only when pushing out" in {
-      game8.board.variant.isIrreversible(game8.situation, game9.situation.board.history.lastAction.get) must_== false
-      game9.board.variant.isIrreversible(game9.situation, game10.situation.board.history.lastAction.get) must_== true
-      game10.board.variant.isIrreversible(game10.situation, game11.situation.board.history.lastAction.get) must_== false
+      game8.board.variant
+        .isIrreversible(game8.situation, game9.situation.board.history.lastAction.get) must_== false
+      game9.board.variant
+        .isIrreversible(game9.situation, game10.situation.board.history.lastAction.get) must_== true
+      game10.board.variant
+        .isIrreversible(game10.situation, game11.situation.board.history.lastAction.get) must_== false
     }
 
     "increment the score of P1 each time he plays a move" in {
@@ -674,7 +677,7 @@ class AbaloneVariantTest extends AbaloneTest {
    */
   "P2 and P1 moving left right right left" should {
     val fenEndedGame = format.FEN("s4/6/7/8/4SSSss/6S1/4SS1/3Sss/3ss 0 0 b 0 0")
-    val board        = Board(fenEndedGame.pieces(Abalone.boardType), History(), Abalone)
+    val board        = Board(fenEndedGame.pieces(Abalone), History(), Abalone)
 
     val game  = new Game(Situation(board, P1))
     val game2 = next(game, 4, 4, 3, 4)  // e5e4 left

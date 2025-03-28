@@ -6,7 +6,7 @@ import strategygames.{Score, Status}
 class AbaloneFenTest extends AbaloneTest {
   "initial default FEN (Belgian daisy start position)" should {
     val fen        = Abalone.initialFen
-    val pieces     = fen.pieces(Abalone.boardType)
+    val pieces     = fen.pieces(Abalone)
     val board      = Board(pieces, History(), Abalone)
     val situation  = Situation(board, P1)
     def validMoves = valid(situation)
@@ -79,7 +79,7 @@ class AbaloneFenTest extends AbaloneTest {
 
   "Snakes variant start position" should {
     val snakesVariantFen = new format.FEN("sssss/5s/6s/1SSSSS1s/1S5s1/S1sssss1/S6/S5/SSSSS 0 0 b 0 0")
-    val pieces           = snakesVariantFen.pieces(Abalone.boardType)
+    val pieces           = snakesVariantFen.pieces(Abalone)
     val board            = Board(pieces, History(), Abalone)
     val situation        = Situation(board, P1)
 
@@ -100,7 +100,7 @@ class AbaloneFenTest extends AbaloneTest {
 
   "L'Atomouche start position" should {
     val atomoucheFen = new format.FEN("3Ss/sSs2S/4s2/S4S1s/s2S1s2S/S1s4s/2S4/s2SsS/Ss3 0 0 b 0 0")
-    val pieces       = atomoucheFen.pieces(Abalone.boardType)
+    val pieces       = atomoucheFen.pieces(Abalone)
 
     "have Black starting the game" in {
       atomoucheFen.player must_== Some(P1)
@@ -143,7 +143,7 @@ class AbaloneFenTest extends AbaloneTest {
 
   "Fun little game situation \"3s1/1ssS2/2S4/1sssSSS1/2ssSs3/2SSSS2/2S4/6/5 5 3 b 11 42\"" should {
     val puzzleFen = new format.FEN("3s1/1ssS2/2S4/1sssSSS1/2ssSs3/2SSSS2/2S4/6/5 5 3 b 11 42")
-    val pieces    = puzzleFen.pieces(Abalone.boardType)
+    val pieces    = puzzleFen.pieces(Abalone)
     val board     = Board(pieces, History(score = Score(5, 3)), Abalone)
     val situation = Situation(board, P1)
 
@@ -191,7 +191,7 @@ class AbaloneFenTest extends AbaloneTest {
    */
   "Game just finished having FEN \"5/6/s6/2SS4/3s1sSS1/4ssSS/4SSS/2sss1/5 6 5 w 0 58\"" should {
     val fen        = format.FEN("5/6/s6/2SS4/3s1sSS1/4ssSS/4SSS/2sss1/5 6 5 w 0 58")
-    val pieces     = fen.pieces(Abalone.boardType)
+    val pieces     = fen.pieces(Abalone)
     val board      = Board(pieces, History(score = Score(6, 5)), Abalone)
     val situation  = Situation(board, P2)
     val validMoves = valid(situation)
@@ -226,7 +226,7 @@ class AbaloneFenTest extends AbaloneTest {
 
   "Game having a player unable to move" should {
     val board     = Board(
-      format.FEN("5/6/7/7S/7SS/6SS/5SS/SSSSSS/SSSSS 5 5 w 0 42").pieces(Abalone.boardType),
+      format.FEN("5/6/7/7S/7SS/6SS/5SS/SSSSSS/SSSSS 5 5 w 0 42").pieces(Abalone),
       History(score = Score(5, 5)),
       Abalone
     )

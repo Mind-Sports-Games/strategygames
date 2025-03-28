@@ -14,7 +14,7 @@ object Forsyth {
     Option(
       Situation(
         board = Board(
-          pieces = fen.pieces(variant.boardType),
+          pieces = fen.pieces(variant),
           history = History(
             prevPlayer = fen.prevPlayer(variant),
             score = Score(fen.player1Score, fen.player2Score),

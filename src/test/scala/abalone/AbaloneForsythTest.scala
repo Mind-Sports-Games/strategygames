@@ -10,7 +10,7 @@ class AbaloneForsythTest extends AbaloneTest {
     val sitFromFen     = Forsyth.<<(fenFromVariant)
 
     "create the situation of Belgian Daisy" in {
-      val board = Board(fenFromVariant.pieces(Abalone.boardType), History(), Abalone)
+      val board = Board(fenFromVariant.pieces(Abalone), History(), Abalone)
       sitFromFen.get.board.pieces must_== board.pieces
       sitFromFen.get.player must_== P1
     }
@@ -19,7 +19,7 @@ class AbaloneForsythTest extends AbaloneTest {
   "fen encoding from board after 3 plies" should {
     val fenFromVariant = Abalone.initialFen
     val sitFromFen     = (Forsyth << fenFromVariant).get
-    val board          = Board(fenFromVariant.pieces(Abalone.boardType), History(), Abalone)
+    val board          = Board(fenFromVariant.pieces(Abalone), History(), Abalone)
     val stratGame      = StratGame.apply(StratGameLogic(7), StratVariant.Variant.default(StratGameLogic(7)))
     val game           = Game(sitFromFen)
     val game2          = next(game, 0, 0, 3, 3)

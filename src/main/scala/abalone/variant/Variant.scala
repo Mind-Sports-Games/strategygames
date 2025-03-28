@@ -53,7 +53,7 @@ abstract class Variant private[variant] (
   // pieces, scoreP1, scoreP2, turn, halfMovesSinceLastCapture (triggering condition could be when == 100 && total moves > 50 ? => draw), total moves
   def initialFen: FEN
 
-  def pieces: PieceMap = initialFen.pieces(boardType)
+  def pieces: PieceMap = initialFen.pieces(this)
 
   def startPlayer: Player = P1
 

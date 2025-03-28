@@ -2,13 +2,13 @@ package strategygames.abalone.format
 
 import strategygames.Player
 import strategygames.abalone.variant.Variant
-import strategygames.abalone.{BoardType, P1, P2, Piece, PieceMap, Role}
+import strategygames.abalone.{P1, P2, Piece, PieceMap, Role}
 
 final case class FEN(value: String) extends AnyVal {
   override def toString = value
 
   // Notice cells are described from bottom left to top right in the FEN
-  def pieces(boardType: BoardType): PieceMap = value
+  def pieces(variant: Variant): PieceMap = value
     .split(' ')(0)
     .split('/')
     .flatMap {
@@ -18,7 +18,7 @@ final case class FEN(value: String) extends AnyVal {
       case c if c.isDigit => Array.fill(c.asDigit)('1')
       case c              => Array(c)
     }
-    .zip(boardType.cellList)
+    .zip(variant.boardType.cellList)
     .flatMap {
       case (piece, pos) if piece == Role.defaultRole.forsythUpper => Some((pos, Piece(P1, Role.defaultRole)))
       case (piece, pos) if piece == Role.defaultRole.forsyth      => Some((pos, Piece(P2, Role.defaultRole)))

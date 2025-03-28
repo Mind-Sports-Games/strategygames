@@ -50,7 +50,7 @@ class AbaloneTest extends Specification with IAbaloneTest {
     var game = new Game(
       Situation(
         board = Board(
-          initialFen.pieces(variant.boardType),
+          initialFen.pieces(variant),
           History(
             prevPlayer = initialFen.prevPlayer(variant),
             score = Score(initialFen.player1Score, initialFen.player2Score),

@@ -18,7 +18,7 @@ class GrandAbaloneVariantTest extends AbaloneTest {
    */
   "\"Belgian daisy\" start position" should {
     val fen        = GrandAbalone.initialFen
-    val board      = Board(fen.pieces(GrandAbalone.boardType), History(), GrandAbalone)
+    val board      = Board(fen.pieces(GrandAbalone), History(), GrandAbalone)
     val situation  = Situation(board, P1)
     val moves      = valid(situation).flatMap(_._2)
     val lineMoves  = valid_line(situation).flatMap(_._2)
