@@ -255,7 +255,7 @@ abstract class Variant private[variant] (
         else boardType.norm.getPrev(vvector)
 
       (0 to n).foreach(i => {
-        val from = orig + vvector * i
+        val from = orig + (vvector * i)
         val to   = from + vector
 
         if (i > 0) res = res - from
@@ -265,7 +265,7 @@ abstract class Variant private[variant] (
       vector /= n
       n -= 1
       (0 to n).foreach(i => {
-        val from = orig + vector * i
+        val from = orig + (vector * i)
         val to   = from + vector
 
         if (i < n || boardType.isCell(to)) res += (to -> pieces(from))
