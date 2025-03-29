@@ -3,7 +3,7 @@ package strategygames.abalone
 import scala.annotation.nowarn
 import scala.util.matching.Regex
 
-case class Pos(val x: Int, val y: Int) extends AnyRef {
+case class Pos(x: Int, y: Int) extends AnyRef {
   def +(a: Pos): Pos = add(a.x, a.y)
 
   def add(x: Int, y: Int): Pos = Pos(this.x + x, this.y + y)
@@ -71,8 +71,6 @@ case class Pos(val x: Int, val y: Int) extends AnyRef {
 
 object Pos {
   private val sr3 = math.sqrt(3)
-
-  def copy(a: Pos): Pos = new Pos(a.x, a.y)
 
   def fromPoint(x: (Double, Double)): Pos = fromPoint(x._1, x._2)
 

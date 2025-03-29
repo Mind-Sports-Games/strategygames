@@ -93,7 +93,7 @@ object Forsyth {
         res.append("/")
       }
 
-      board.apply(a) match {
+      board(a) match {
         case None        => emptyNb += 1
         case Some(piece) =>
           writeEmptyNb()

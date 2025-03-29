@@ -40,7 +40,7 @@ object Visual {
     }
 
     board.variant.boardType.cellSet
-      .map(a => markedCells.get(a).getOrElse(board.apply(a).fold(' ')(_ forsyth)))
+      .map(a => markedCells.get(a).getOrElse(board(a).fold(' ')(_ forsyth)))
       .mkString
   }
     .map(char => """\s*$""".r.replaceFirstIn(char.toString, ""))
