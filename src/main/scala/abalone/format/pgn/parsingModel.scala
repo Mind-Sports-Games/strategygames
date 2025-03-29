@@ -1,12 +1,11 @@
 package strategygames.abalone
 package format.pgn
 
-import scala.annotation.nowarn
-
 import cats.data.Validated
+import strategygames.format.pgn.{Metas, San, Suffixes}
+import strategygames.{Move => StratMove}
 
-import strategygames.{ Move => StratMove }
-import strategygames.format.pgn.{ Metas, San, Suffixes }
+import scala.annotation.nowarn
 
 case class Std(
     dest: Pos,
@@ -17,7 +16,6 @@ case class Std(
     promotion: Option[PromotableRole] = None,
     metas: Metas = Metas.empty
 ) extends San {
-
   def apply(
       situation: strategygames.Situation,
       iteratedCapts: Boolean = false,
@@ -34,5 +32,4 @@ case class Std(
 
   def move(@nowarn situation: Situation): Validated[String, strategygames.abalone.Move] =
     Validated.invalid("Not implemented move") // TODO: ???
-
 }

@@ -1,6 +1,6 @@
 package strategygames
 
-import variant.Variant
+import strategygames.variant.Variant
 
 sealed abstract class Board(
     val pieces: PieceMap,
@@ -10,7 +10,6 @@ sealed abstract class Board(
     val unusedDice: List[Int] = List.empty,
     val cubeData: Option[CubeData] = None
 ) {
-
   def apply(at: Pos): Option[Piece] = (pieces get at).map(_._1)
 
   def hasPiece(p: Piece) = pieces.values.map(_._1) exists (p ==)
@@ -25,7 +24,7 @@ sealed abstract class Board(
 
   def materialImbalance: Int
 
-  override def toString: String
+  def toString: String
 
   // TODO: there is probably a better way to generalize this.
   def copy(history: History, variant: Variant): Board
@@ -52,7 +51,6 @@ object Board {
         Variant.Chess(b.variant),
         b.pocketData.map(PocketData.Chess)
       ) {
-
     def withHistory(h: History): Board = h match {
       case History.Chess(h) => Chess(b.withHistory(h))
       case _                => sys.error("Not passed Chess objects")
@@ -83,9 +81,8 @@ object Board {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak board from a chess board")
     def toGo           = sys.error("Can't make a go board from a chess board")
     def toBackgammon   = sys.error("Can't make a backgammon board from a chess board")
-    def toAbalone      = sys.error("Can't make a abalone board from a chess board")
+    def toAbalone      = sys.error("Can't make an abalone board from a chess board")
     def toDameo        = sys.error("Can't make a dameo board from a chess board")
-
   }
 
   case class Draughts(b: draughts.Board)
@@ -94,7 +91,6 @@ object Board {
         History.Draughts(b.history),
         Variant.Draughts(b.variant)
       ) {
-
     def withHistory(h: History): Board = h match {
       case History.Draughts(h) => Draughts(b.withHistory(h))
       case _                   => sys.error("Not passed Draughts objects")
@@ -125,9 +121,8 @@ object Board {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak board from a draughts board")
     def toGo           = sys.error("Can't make a go board from a draughts board")
     def toBackgammon   = sys.error("Can't make a backgammon board from a draughts board")
-    def toAbalone      = sys.error("Can't make a abalone board from a draughts board")
+    def toAbalone      = sys.error("Can't make an abalone board from a draughts board")
     def toDameo        = sys.error("Can't make a dameo board from a draughts board")
-
   }
 
   case class FairySF(b: fairysf.Board)
@@ -137,7 +132,6 @@ object Board {
         Variant.FairySF(b.variant),
         b.pocketData.map(PocketData.FairySF)
       ) {
-
     def withHistory(h: History): Board = h match {
       case History.FairySF(h) => FairySF(b.withHistory(h))
       case _                  => sys.error("Not passed FairySF objects")
@@ -168,9 +162,8 @@ object Board {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak board from a fairysf board")
     def toGo           = sys.error("Can't make a go board from a fairysf board")
     def toBackgammon   = sys.error("Can't make a backgammon board from a fairysf board")
-    def toAbalone      = sys.error("Can't make a abalone board from a fairysf board")
+    def toAbalone      = sys.error("Can't make an abalone board from a fairysf board")
     def toDameo        = sys.error("Can't make a dameo board from a fairysf board")
-
   }
 
   case class Samurai(b: samurai.Board)
@@ -179,7 +172,6 @@ object Board {
         History.Samurai(b.history),
         Variant.Samurai(b.variant)
       ) {
-
     def withHistory(h: History): Board = h match {
       case History.Samurai(h) => Samurai(b.withHistory(h))
       case _                  => sys.error("Not passed samurai objects")
@@ -210,9 +202,8 @@ object Board {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak board from a samurai board")
     def toGo           = sys.error("Can't make a go board from a samurai board")
     def toBackgammon   = sys.error("Can't make a backgammon board from a samurai board")
-    def toAbalone      = sys.error("Can't make a abalone board from a samurai board")
+    def toAbalone      = sys.error("Can't make an abalone board from a samurai board")
     def toDameo        = sys.error("Can't make a dameo board from a samurai board")
-
   }
 
   case class Togyzkumalak(b: togyzkumalak.Board)
@@ -223,7 +214,6 @@ object Board {
         History.Togyzkumalak(b.history),
         Variant.Togyzkumalak(b.variant)
       ) {
-
     def withHistory(h: History): Board = h match {
       case History.Togyzkumalak(h) => Togyzkumalak(b.withHistory(h))
       case _                       => sys.error("Not passed togyzkumalak objects")
@@ -254,9 +244,8 @@ object Board {
     def toTogyzkumalak = b
     def toGo           = sys.error("Can't make a go board from a togyzkumalak board")
     def toBackgammon   = sys.error("Can't make a backgammon board from a togyzkumalak board")
-    def toAbalone      = sys.error("Can't make a abalone board from a togyzkumalak board")
+    def toAbalone      = sys.error("Can't make an abalone board from a togyzkumalak board")
     def toDameo        = sys.error("Can't make a dameo board from a togyzkumalak board")
-
   }
 
   case class Go(b: go.Board)
@@ -266,7 +255,6 @@ object Board {
         Variant.Go(b.variant),
         b.pocketData.map(PocketData.Go)
       ) {
-
     def withHistory(h: History): Board = h match {
       case History.Go(h) => Go(b.withHistory(h))
       case _             => sys.error("Not passed go objects")
@@ -297,9 +285,8 @@ object Board {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak board from a go board")
     def toGo           = b
     def toBackgammon   = sys.error("Can't make a backgammon board from a go board")
-    def toAbalone      = sys.error("Can't make a abalone board from a go board")
+    def toAbalone      = sys.error("Can't make an abalone board from a go board")
     def toDameo        = sys.error("Can't make a dameo board from a go board")
-
   }
 
   case class Backgammon(b: backgammon.Board)
@@ -313,7 +300,6 @@ object Board {
         b.unusedDice,
         b.cubeData.map(CubeData.Backgammon)
       ) {
-
     def withHistory(h: History): Board = h match {
       case History.Backgammon(h) => Backgammon(b.withHistory(h))
       case _                     => sys.error("Not passed backgammon objects")
@@ -344,9 +330,8 @@ object Board {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak board from a backgammon board")
     def toGo           = sys.error("Can't make a go board from a backgammon board")
     def toBackgammon   = b
-    def toAbalone      = sys.error("Can't make a abalone board from a backgammon board")
+    def toAbalone      = sys.error("Can't make an abalone board from a backgammon board")
     def toDameo        = sys.error("Can't make a dameo board from a backgammon board")
-
   }
 
   case class Abalone(b: abalone.Board)
@@ -355,40 +340,38 @@ object Board {
         History.Abalone(b.history),
         Variant.Abalone(b.variant)
       ) {
-
-    def withHistory(h: History): Board = h match {
+    override def withHistory(h: History): Board = h match {
       case History.Abalone(h) => Abalone(b.withHistory(h))
       case _                  => sys.error("Not passed abalone objects")
     }
 
-    def usedDice: List[Int] = List.empty
+    override def usedDice: List[Int] = List.empty
 
-    def situationOf(player: Player): Situation = Situation.Abalone(b.situationOf(player))
+    override def situationOf(player: Player): Situation = Situation.Abalone(b.situationOf(player))
 
-    def materialImbalance: Int = b.materialImbalance
+    override def materialImbalance: Int = b.materialImbalance
 
     override def toString: String = b.toString
 
-    def copy(history: History, variant: Variant): Board = (history, variant) match {
+    override def copy(history: History, variant: Variant): Board = (history, variant) match {
       case (History.Abalone(history), Variant.Abalone(variant)) =>
         Abalone(b.copy(history = history, variant = variant))
-      case _                                                    => sys.error("Unable to copy a abalone board with non-abalone arguments")
+      case _                                                    => sys.error("Unable to copy an abalone board with non-abalone arguments")
     }
-    def copy(history: History): Board                   = history match {
+    override def copy(history: History): Board                   = history match {
       case History.Abalone(history) => Abalone(b.copy(history = history))
-      case _                        => sys.error("Unable to copy a abalone board with non-abalone arguments")
+      case _                        => sys.error("Unable to copy an abalone board with non-abalone arguments")
     }
 
-    def toFairySF      = sys.error("Can't make a fairysf board from a abalone board")
-    def toChess        = sys.error("Can't make a chess board from a abalone board")
-    def toDraughts     = sys.error("Can't make a draughts board from a abalone board")
-    def toSamurai      = sys.error("Can't make a samurai board from a abalone board")
-    def toTogyzkumalak = sys.error("Can't make a togyzkumalak board from a abalone board")
-    def toGo           = sys.error("Can't make a go board from a abalone board")
-    def toBackgammon   = sys.error("Can't make a backgammon board from a abalone board")
-    def toAbalone      = b
-    def toDameo        = sys.error("Can't make a dameo board from a abalone board")
-
+    override def toFairySF      = sys.error("Can't make a fairysf board from an abalone board")
+    override def toChess        = sys.error("Can't make a chess board from an abalone board")
+    override def toDraughts     = sys.error("Can't make a draughts board from an abalone board")
+    override def toSamurai      = sys.error("Can't make a samurai board from an abalone board")
+    override def toTogyzkumalak = sys.error("Can't make a togyzkumalak board from an abalone board")
+    override def toGo           = sys.error("Can't make a go board from an abalone board")
+    override def toBackgammon   = sys.error("Can't make a backgammon board from an abalone board")
+    override def toAbalone      = b
+    override def toDameo        = sys.error("Can't make a dameo board from an abalone board")
   }
 
   case class Dameo(b: dameo.Board)
@@ -397,7 +380,6 @@ object Board {
         History.Dameo(b.history),
         Variant.Dameo(b.variant)
       ) {
-
     def withHistory(h: History): Board = h match {
       case History.Dameo(h) => Dameo(b.withHistory(h))
       case _                => sys.error("Not passed dameo objects")
@@ -428,9 +410,8 @@ object Board {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak board from a dameo board")
     def toGo           = sys.error("Can't make a go board from a dameo board")
     def toBackgammon   = sys.error("Can't make a backgammon board from a dameo board")
-    def toAbalone      = sys.error("Can't make a abalone board from a dameo board")
+    def toAbalone      = sys.error("Can't make an abalone board from a dameo board")
     def toDameo        = b
-
   }
 
   def apply(lib: GameLogic, pieces: Iterable[(Pos, (Piece, Int))], variant: Variant): Board =
@@ -553,5 +534,4 @@ object Board {
     case (GameLogic.Dameo(), Variant.Dameo(variant))               => Dameo(dameo.Board.init(variant))
     case _                                                         => sys.error("Mismatched gamelogic types 28")
   }
-
 }

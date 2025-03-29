@@ -1,7 +1,7 @@
 package strategygames.abalone
-import strategygames.abalone.format.Uci
+
 import strategygames.MoveMetrics
-import strategygames.Player
+import strategygames.abalone.format.Uci
 
 import scala.annotation.nowarn
 
@@ -10,14 +10,13 @@ abstract class Action(
     after: Board,
     @nowarn metrics: MoveMetrics = MoveMetrics()
 ) {
-  def before = situationBefore.board
+  def before: Board = situationBefore.board
 
   def situationAfter: Situation
+
   def finalizeAfter: Board = after
 
-  def player: Player
-
   def withMetrics(m: MoveMetrics): Action
-  def toUci: Uci
 
+  def toUci: Uci
 }

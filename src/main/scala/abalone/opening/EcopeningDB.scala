@@ -13,6 +13,7 @@ object EcopeningDB {
     case (_, opening) => opening.fen -> opening
   }
 
+  //TODO Alex reverse FEN
   lazy val allByEco: Map[ECO, Ecopening] = Map(
 "A00" -> new Ecopening("A00", "abalone", "Abalone Belgian Daisy Start Pos", "Abalone Belgian Daisy Start Pos", "", "ss1SS/sssSSS/1ss1SS1/8/9/8/1SS1ss1/SSSsss/SS1ss", ""),
 "A01" -> new Ecopening("A01", "abalone", "Abalone Scorpio opening", "Abalone Scorpio opening", "a1d4", "ss1SS/sssSSS/1ss1SS1/8/9/3S4/1SS1ss1/SSSsss/1S1ss", "a1d4"),
