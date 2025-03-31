@@ -385,7 +385,7 @@ object Role {
     case GameLogic.Go()           => sys.error("allPromotableByName not implemented for go")
     case GameLogic.Backgammon()   => sys.error("allPromotableByName not implemented for backgammon")
     case GameLogic.Abalone()      => sys.error("allPromotableByName not implemented for abalone")
-    case GameLogic.Dameo()     =>
+    case GameLogic.Dameo()        =>
       dameo.Role.allPromotableByName.map { case (n, r) => (n, DameoPromotableRole(r)) }
   }
 

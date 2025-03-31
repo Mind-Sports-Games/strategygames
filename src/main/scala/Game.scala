@@ -90,7 +90,7 @@ abstract class Game(
           promotion = None,
           metrics
         )
-      case Uci.DameoMove(uci)                         =>
+      case Uci.DameoMove(uci)                           =>
         apply(
           Pos.Dameo(uci.orig),
           Pos.Dameo(uci.dest),
@@ -1451,13 +1451,13 @@ object Game {
           .toEither
           .map(t => (Dameo(t._1), Move.Dameo(t._2)))
           .toValidated
-      case _                                      => sys.error("Not passed Dameo objects")
+      case _                                  => sys.error("Not passed Dameo objects")
     }
 
     def apply(action: Action): Game =
       action match {
         case (Move.Dameo(move)) => Dameo(g.apply(move))
-        case _                    => sys.error("Not passed Dameo objects")
+        case _                  => sys.error("Not passed Dameo objects")
       }
 
     def drop(
@@ -1539,12 +1539,12 @@ object Game {
     def copy(situation: Situation, plies: Int, turnCount: Int): Game = situation match {
       case Situation.Dameo(situation) =>
         Dameo(g.copy(situation = situation, plies = plies, turnCount = turnCount))
-      case _                            =>
+      case _                          =>
         sys.error("Unable to copy dameo game with non-dameo arguments")
     }
     def copy(situation: Situation): Game                             = situation match {
       case Situation.Dameo(situation) => Dameo(g.copy(situation = situation))
-      case _                            => sys.error("Unable to copy dameo game with non-dameo arguments")
+      case _                          => sys.error("Unable to copy dameo game with non-dameo arguments")
     }
 
     def hasJustSwitchedTurns: Boolean = g.hasJustSwitchedTurns
@@ -1638,7 +1638,7 @@ object Game {
       Backgammon(backgammon.Game.apply(variant.map(_.toBackgammon), fen.map(_.toBackgammon)))
     case GameLogic.Abalone()      =>
       Abalone(abalone.Game.apply(variant.map(_.toAbalone), fen.map(_.toAbalone)))
-    case GameLogic.Dameo()      =>
+    case GameLogic.Dameo()        =>
       Dameo(dameo.Game.apply(variant.map(_.toDameo), fen.map(_.toDameo)))
     case _                        => sys.error("Mismatched gamelogic types 36")
   }
