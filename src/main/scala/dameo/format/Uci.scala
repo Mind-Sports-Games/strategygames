@@ -77,8 +77,6 @@ object Uci {
       }
     }
 
-    val piotrR = "(.)(.)((?:x.)?)((?:pk)?)".r
-
     def piotr(move: String): Option[Move] = {
       move match {
         case piotrR(orig, dest, capture, promotion) =>
@@ -93,6 +91,10 @@ object Uci {
     }
 
     // TODO Dameo use capture and promotion properly
+    /* Don't know how to deal with this: captured stones are not available here,
+    and neither is the board state that would allow us to deduce them (in the case of a
+    long jump by a king). This function is only used in lila-ws ClientOut.scala -> parseOldMove,
+    so maybe it can be deprecated/left unimplemented as long the normal Uci.Move.apply works properly? */
     def fromStrings(origS: String, destS: String, promS: Option[String]) = for {
       orig     <- Pos.fromKey(origS)
       dest     <- Pos.fromKey(destS)
@@ -100,7 +102,7 @@ object Uci {
     } yield Move(orig, dest, promotion, None)
 
     val moveR = s"^(${Pos.posR})((?:x${Pos.posR})?)(${Pos.posR})([k]?)".r
-
+    val piotrR = "(.)(.)((?:x.)?)((?:pk)?)".r
   }
 
   case class WithSan(uci: Uci.Move, san: String)

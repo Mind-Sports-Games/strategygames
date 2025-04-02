@@ -13,6 +13,8 @@ case class Board(
   def apply(at: Pos): Option[Piece] = pieces get at
   def apply(file: File, rank: Rank) = pieces get Pos(file, rank)
 
+  def boardSize = variant.boardSize
+
   lazy val actors: Map[Pos, Actor] = pieces map { case (pos, piece) =>
     (pos, Actor(piece, pos, this))
   }
@@ -26,6 +28,16 @@ case class Board(
 
   lazy val posMap: Map[Piece, Iterable[Pos]] = pieces.groupMap(_._2)(_._1)
 
+  def withinBounds(pos: Pos): Boolean = {
+    val x = pos.file.index
+    val y = pos.rank.index
+    x >= 0 && x < boardSize.width && y >= 0 && y < boardSize.height
+  }
+
+  def empty(pos: Pos): Boolean = {
+    !pieces.contains(pos)
+  }
+
   def withHistory(h: History): Board       = copy(history = h)
   def updateHistory(f: History => History) = copy(history = f(history))
 
@@ -36,6 +48,13 @@ case class Board(
   def situationOf(player: Player) = Situation(this, player)
 
   lazy val ghosts = pieces.values.count(_.isGhost)
+
+  def move(orig: Pos, dest: Pos): Option[Board] =
+    if (pieces.contains(dest)) None
+    else
+      pieces.get(orig).map { piece =>
+        copy(pieces = pieces - orig + (dest -> piece))
+      }
 
   def autoDraw: Boolean =
     ghosts == 0 && variant.maxDrawingMoves(this).fold(false)(m => history.halfMoveClock >= m)

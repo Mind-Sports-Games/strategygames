@@ -19,7 +19,35 @@ final case class Actor(
 
   def getCaptures(finalSquare: Boolean) = if (finalSquare) capturesFinal else captures
 
-  private def noncaptureMoves(): List[Move] = List()
+  private def noncaptureMoves(): List[Move] = {
+    def dy: Int = if (player == P1) 1 else -1
+    def dxs: List[Int] = List(-1, 0, 1)
+
+    def posits: List[Pos] = dxs.flatMap(dx => linearStep(Some(pos), dx, dy)).filter(
+      board.withinBounds).filter(board.empty)
+
+    def moves: List[Move] = posits.flatMap(dest => Some(
+      Move(
+        piece=piece,
+        orig=pos,
+        dest=dest,
+        situationBefore=Situation(board, piece.player),
+        after=board.move(pos, dest).get,
+        autoEndTurn=true, //TODO wat do?
+      ))
+    )
+    return moves
+  }
+
+  def linearStep(stepPos: Option[Pos], dx: Int, dy: Int): Option[Pos] = {
+    /* Step through a line of own pieces in this direction */
+    def nextPos: Option[Pos] = stepPos.flatMap(_.step(dx, dy))
+    if (nextPos.flatMap(board.pieces.get(_)) == Some(piece)) {
+      linearStep(nextPos, dx, dy)
+    } else {
+      nextPos
+    }
+  }
 
   @nowarn private def captureMoves(finalSquare: Boolean): List[Move] = List()
 
@@ -32,24 +60,5 @@ final case class Actor(
   @nowarn private def shortRangeMoves(dirs: Directions, checkPromotion: Boolean): List[Move] = List()
 
   @nowarn private def longRangeMoves(dirs: Directions): List[Move] = List()
-
-  def move(
-      dest: Pos,
-      after: Board,
-      /* Set this to upgrade to multiaction */
-      autoEndTurn: Boolean,
-      /* Single capture or none */
-      capture: Option[Pos],
-      promotion: Option[PromotableRole] = None
-  ) = Move(
-    piece = piece,
-    orig = pos,
-    dest = dest,
-    situationBefore = Situation(board, piece.player),
-    after = after,
-    autoEndTurn = autoEndTurn,
-    capture = capture,
-    promotion = promotion
-  )
 
 }

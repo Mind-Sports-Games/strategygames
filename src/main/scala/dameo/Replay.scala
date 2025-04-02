@@ -88,14 +88,14 @@ object Replay {
     var state  = init
     var errors = ""
 
-    def replayMoveFromUci(orig: Option[Pos], dest: Option[Pos], capture: Boolean): (Game, Move) =
+    def replayMoveFromUci(orig: Option[Pos], dest: Option[Pos], capture: Option[Pos]): (Game, Move) =
       (orig, dest) match {
         case (Some(orig), Some(dest)) => {
           val move = replayMove(
             state,
             orig,
             dest,
-            if (capture) Pos.capturePos(orig, dest) else None,
+            capture,
             true
           )
           state = state(move)
@@ -115,7 +115,7 @@ object Replay {
           replayMoveFromUci(
             Pos.fromKey(orig),
             Pos.fromKey(dest),
-            capture.length == 1
+            Pos.fromKey(capture)
           )
         case (action: String)                    =>
           sys.error(s"Invalid action for replay: $action")
