@@ -23,8 +23,18 @@ final case class Actor(
     def dy: Int = if (player == P1) 1 else -1
     def dxs: List[Int] = List(-1, 0, 1)
 
-    def posits: List[Pos] = dxs.flatMap(dx => linearStep(Some(pos), dx, dy)).filter(
-      board.withinBounds).filter(board.empty)
+    def posits: List[Pos] = piece.role match {
+      case Man => dxs.flatMap(dx => linearStep(Some(pos), dx, dy))
+        .filter(board.withinBounds).filter(board.empty)
+      case King => dxs.flatMap(
+        dx => dxs.flatMap(
+          dy => if (dx == 0 && dy == 0) None else
+          LazyList.iterate(Some(pos): Option[Pos])(_.flatMap(_.step(dx, dy))).drop(1)
+          .takeWhile(p => !p.isEmpty && board.withinBounds(p.get) && board.empty(p.get))
+        )
+      ).flatten
+      case _ => List.empty
+    }
 
     def moves: List[Move] = posits.flatMap(dest => Some(
       Move(

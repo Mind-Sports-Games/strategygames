@@ -89,22 +89,44 @@ class DameoActorTest extends DameoTest with ValidatedMatchers {
       actors2.find(_.pos == Pos.E8).get.noncaptures.length must_== 0
     }
   }
-}
-/*
 
   "king without captures" should {
     "move in all directions" in {
+      val board = Board(FEN("W:Wc3.k:Be7.k:H0:F1").pieces, variant.Dameo)
+      val actors1 = Situation(board, P1).actors
+      val actors2 = Situation(board, P2).actors
+      val king1 = actors1.find(_.pos == Pos.C3).get
+      val king2 = actors2.find(_.pos == Pos.E7).get
 
+      king1.noncaptures.length must_== 7 + 7 + 4 + 7
+      king2.noncaptures.length must_== 7 + 7 + 4 + 5
     }
 
-    "have n moves" in {
+    "have long range moves blocked by other pieces" in {
+      val board = Board(FEN("W:Wa1.k,b2,d1:Ba8.k,e8.k,c6:H0:F1").pieces, variant.Dameo)
+      val actors1 = Situation(board, P1).actors
+      val actors2 = Situation(board, P2).actors
+      val king1 = actors1.find(_.pos == Pos.A1).get
+      val king2 = actors2.find(_.pos == Pos.A8).get
 
+      king1.noncaptures.length must_== 6 + 0 + 2
+      king2.noncaptures.length must_== 6 + 3 + 1
     }
 
     "not partake in linear movement" in {
+      val board = Board(FEN("W:Wb1.k,b2,b3:Ba8.k,b7,c6:H0:F1").pieces, variant.Dameo)
+      val actors1 = Situation(board, P1).actors
+      val actors2 = Situation(board, P2).actors
+      val king1 = actors1.find(_.pos == Pos.B1).get
+      val king2 = actors2.find(_.pos == Pos.A8).get
 
+      king1.noncaptures.length must_== 14
+      king2.noncaptures.length must_== 14
     }
   }
+}
+/*
+
 
   "man with captures" should {
     "have no non-capture moves" in {
