@@ -29,14 +29,34 @@ final case class Actor(
       case King => dxs.flatMap(
         dx => dxs.flatMap(
           dy => if (dx == 0 && dy == 0) None else
-          LazyList.iterate(Some(pos): Option[Pos])(_.flatMap(_.step(dx, dy))).drop(1)
+          LazyList.iterate(Option(pos))(_.flatMap(_.step(dx, dy))).drop(1)
           .takeWhile(p => !p.isEmpty && board.withinBounds(p.get) && board.empty(p.get))
         )
       ).flatten
-      case _ => List.empty
+      case _ => List()
     }
 
-    def moves: List[Move] = posits.flatMap(dest => Some(
+    posits.flatMap(dest => Some(
+      Move(
+        piece=piece,
+        orig=pos,
+        dest=dest,
+        situationBefore=Situation(board, piece.player),
+        after=board.move(pos, dest).get,
+        autoEndTurn=true,
+      ))
+    )
+  }
+
+  private def captureMoves(@nowarn finalSquare: Boolean): List[Move] = {
+    def dxys: List[(Int, Int)] = List((-1, 0), (1, 0), (0, -1), (0, 1))
+
+    def capAndDest: List[(Pos, Pos)] = piece.role match {
+      case Man => dxys.flatMap({case (dx, dy) => captureStep(Some(pos), dx, dy)})
+      case _ => List()
+    }
+
+    capAndDest.map({case (cap, dest) =>
       Move(
         piece=piece,
         orig=pos,
@@ -44,9 +64,9 @@ final case class Actor(
         situationBefore=Situation(board, piece.player),
         after=board.move(pos, dest).get,
         autoEndTurn=true, //TODO wat do?
-      ))
+        capture=Some(cap)
+      )}
     )
-    return moves
   }
 
   def linearStep(stepPos: Option[Pos], dx: Int, dy: Int): Option[Pos] = {
@@ -59,7 +79,13 @@ final case class Actor(
     }
   }
 
-  @nowarn private def captureMoves(finalSquare: Boolean): List[Move] = List()
+  def captureStep(stepPos: Option[Pos], dx: Int, dy: Int): Option[(Pos, Pos)] = {
+    def capPos: Option[Pos] = stepPos.flatMap(_.step(dx, dy))
+      .filter(board.pieces.get(_).map(_.player) == Some(!player))
+    def destPos: Option[Pos] = capPos.flatMap(_.step(dx, dy))
+      .filter(board.empty(_)).filter(board.withinBounds(_))
+    for (a <- capPos; b <- destPos) yield (a, b)
+  }
 
   def player: Player         = piece.player
   def is(c: Player): Boolean = c == piece.player

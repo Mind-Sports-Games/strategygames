@@ -15,6 +15,7 @@ case class Move(
     metrics: MoveMetrics = MoveMetrics()
 ) extends Action(situationBefore, after, metrics) {
 
+  // TODO Dameo check how it works in fairysf with autoEndTurn
   def situationAfter =
     Situation(finalizeAfter, situationBefore.player)
 

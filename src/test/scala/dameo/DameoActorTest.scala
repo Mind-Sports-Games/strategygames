@@ -124,23 +124,61 @@ class DameoActorTest extends DameoTest with ValidatedMatchers {
       king2.noncaptures.length must_== 14
     }
   }
+
+  "man with captures" should {
+    "capture in all orthogonal directions" in {
+      val board = Board(FEN("W:Wd4:Bc4,d3.k,d5,e4:H0:F1").pieces, variant.Dameo)
+      val man = Situation(board, P1).actors.find(_.pos == Pos.D4).get
+      man.captures.length must_== 4
+    }
+
+    "capture correctly near the edges" in {
+      val board = Board(FEN("W:Wa2,f8,g7,h8:Ba1,a3,b2,g8:H0:F1").pieces, variant.Dameo)
+      val man1 = Situation(board, P1).actors.find(_.pos == Pos.A2).get
+      val man2 = Situation(board, P2).actors.find(_.pos == Pos.G8).get
+      man1.captures.length must_== 2
+      man2.captures.length must_== 2
+    }
+
+    "generate a move capturing the right pieces" in {
+      val board = Board(FEN("W:Wb2:Bc2,d6:H0:F1").pieces, variant.Dameo)
+      val man = Situation(board, P1).actors.find(_.pos == Pos.B2).get
+
+      man.captures(0).capture must_== Some(Pos.C2)
+    }
+
+    "capture is blocked by pieces behind captured piece" in {
+      val board = Board(FEN("W:Wb2,b4:Bb3,c2,d2:H0:F1").pieces, variant.Dameo)
+      val man = Situation(board, P1).actors.find(_.pos == Pos.B2).get
+      man.captures.length must_== 0
+    }
+
+    // "have only the maximal capture sequence" in {
+    //   val board = Board(FEN("W:Wc4:Bc5,d4,e3:H0:F1").pieces, variant.Dameo)
+    //   val man = Situation(board, P1).actors.find(_.pos == Pos.C4).get
+    //   man.captures.length must_== 1
+    //   man.captures(0).capture must_== Some(Pos.D4)
+    // }
+
+    // "have 2 equally long capture sequences" in {
+
+    // }
+
+    // "switch players when no more captures are possible" in {}
+
+    // "don't switch players when more captures are possible" in {}
+
+    // "leave ghosts when capture sequence is incomplete" in {}
+
+    // "don't allow capture over ghosts" in {}
+
+    // "remove ghosts after full capture sequence" in {}
+
+  }
 }
 /*
 
 
-  "man with captures" should {
-    "have no non-capture moves" in {
-
-    }
-
-    "have only the maximal capture sequence" in {
-
-    }
-
-    "have 2 equally long capture sequences" in {
-
-    }
-  }
 
   "man with captures" should {
     "have no non-capture moves" in {
