@@ -178,9 +178,19 @@ class DameoActorTest extends DameoTest with ValidatedMatchers {
       )
     }
 
-    // "switch players when no more captures are possible" in {}
+    "switch players when no more captures are possible" in {
+      val board = Board(FEN("W:Wc4:Bc5:H0:F1").pieces, variant.Dameo)
+      val man = Situation(board, P1).actors.find(_.pos == Pos.C4).get
+      val move = man.captures(0)
+      move.autoEndTurn must_== true
+    }
 
-    // "don't switch players when more captures are possible" in {}
+    "don't switch players when more captures are possible" in {
+      val board = Board(FEN("W:Wc4:Bc5,d6:H0:F1").pieces, variant.Dameo)
+      val man = Situation(board, P1).actors.find(_.pos == Pos.C4).get
+      val move = man.captures(0)
+      move.autoEndTurn must_== false
+    }
 
     // "leave ghosts when capture sequence is incomplete" in {}
 

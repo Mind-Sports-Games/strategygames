@@ -50,20 +50,24 @@ final case class Actor(
 
   private def captureMoves(@nowarn finalSquare: Boolean): List[Move] = {
 
-    def capAndDest: List[(Pos, Pos)] = piece.role match {
+    /* List of (capture pos, destination pos) pairs together with the length
+    of the full capture chain */
+    def capInfo: (List[(Pos, Pos)], Int) = piece.role match {
       case Man => {
         def chains: List[List[(Pos, Pos)]] = allCaptureChains()
         chains match {
-          case List() => List()
+          case List() => (List(), 0)
           case chains => {
             def byLength: Map[Int, List[List[(Pos, Pos)]]] = chains.groupBy(_.length)
             def maxLen: Int = byLength.keys.max
-            byLength(maxLen).map(_(0))
+            (byLength(maxLen).map(_(0)), maxLen)
           }
         }
       }
-      case _ => List()
+      case _ => (List(), 0)
     }
+
+    val (capAndDest, capLen) = capInfo
 
     capAndDest.map({case (cap, dest) =>
       Move(
@@ -72,7 +76,7 @@ final case class Actor(
         dest=dest,
         situationBefore=Situation(board, piece.player),
         after=board.move(pos, dest).get,
-        autoEndTurn=true, //TODO wat do?
+        autoEndTurn=capLen==1,
         capture=Some(cap)
       )}
     )
