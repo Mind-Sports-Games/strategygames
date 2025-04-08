@@ -49,10 +49,19 @@ final case class Actor(
   }
 
   private def captureMoves(@nowarn finalSquare: Boolean): List[Move] = {
-    def dxys: List[(Int, Int)] = List((-1, 0), (1, 0), (0, -1), (0, 1))
 
     def capAndDest: List[(Pos, Pos)] = piece.role match {
-      case Man => dxys.flatMap({case (dx, dy) => captureStep(Some(pos), dx, dy)})
+      case Man => {
+        def chains: List[List[(Pos, Pos)]] = allCaptureChains()
+        chains match {
+          case List() => List()
+          case chains => {
+            def byLength: Map[Int, List[List[(Pos, Pos)]]] = chains.groupBy(_.length)
+            def maxLen: Int = byLength.keys.max
+            byLength(maxLen).map(_(0))
+          }
+        }
+      }
       case _ => List()
     }
 
@@ -79,11 +88,31 @@ final case class Actor(
     }
   }
 
-  def captureStep(stepPos: Option[Pos], dx: Int, dy: Int): Option[(Pos, Pos)] = {
+  def allCaptureChains(curPos: Pos = pos, curBoard: Board = board,
+    thisChain: List[(Pos, Pos)] = List()): List[List[(Pos, Pos)]] = {
+    def nextSteps: List[(Pos, Pos)] = allCaptureSteps(curBoard, curPos)
+    if (nextSteps.isEmpty) {
+      return if (thisChain.isEmpty) List() else List(thisChain)
+    } else {
+      return nextSteps.map({case (cap, dest) => allCaptureChains(dest,
+        Board(
+          curBoard.pieces - curPos - cap + (cap -> Piece(!player, GhostMan)),
+          board.history, board.variant),
+        thisChain :+ (cap, dest))}).flatten
+    }
+  }
+
+  def allCaptureSteps(curBoard: Board, curPos: Pos): List[(Pos, Pos)] = {
+    def dxys: List[(Int, Int)] = List((-1, 0), (1, 0), (0, -1), (0, 1))
+    dxys.flatMap({case (dx, dy) => captureStep(curBoard, Some(curPos), dx, dy)})
+  }
+
+  def captureStep(curBoard: Board, stepPos: Option[Pos], dx: Int, dy: Int): Option[(Pos, Pos)] = {
     def capPos: Option[Pos] = stepPos.flatMap(_.step(dx, dy))
-      .filter(board.pieces.get(_).map(_.player) == Some(!player))
+      .filter(curBoard.pieces.get(_).map(_.player) == Some(!player))
+      .filter(curBoard.pieces.get(_).map(_.isGhost) != Some(true))
     def destPos: Option[Pos] = capPos.flatMap(_.step(dx, dy))
-      .filter(board.empty(_)).filter(board.withinBounds(_))
+      .filter(curBoard.empty(_)).filter(curBoard.withinBounds(_))
     for (a <- capPos; b <- destPos) yield (a, b)
   }
 

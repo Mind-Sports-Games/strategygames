@@ -153,16 +153,30 @@ class DameoActorTest extends DameoTest with ValidatedMatchers {
       man.captures.length must_== 0
     }
 
-    // "have only the maximal capture sequence" in {
-    //   val board = Board(FEN("W:Wc4:Bc5,d4,e3:H0:F1").pieces, variant.Dameo)
-    //   val man = Situation(board, P1).actors.find(_.pos == Pos.C4).get
-    //   man.captures.length must_== 1
-    //   man.captures(0).capture must_== Some(Pos.D4)
-    // }
+    "have only the maximal capture sequence" in {
+      val board = Board(FEN("W:Wc4:Bc5,d4,e3:H0:F1").pieces, variant.Dameo)
+      val man = Situation(board, P1).actors.find(_.pos == Pos.C4).get
+      man.captures.length must_== 1
+      man.captures(0).capture must_== Some(Pos.D4)
+    }
 
-    // "have 2 equally long capture sequences" in {
+    "find all capture chains" in {
+      val board = Board(FEN("W:Wc4:Bc5,d4,e3:H0:F1").pieces, variant.Dameo)
+      val man = Situation(board, P1).actors.find(_.pos == Pos.C4).get
+      man.allCaptureChains(Pos.C4).toSet must_== Set(
+        List((Pos.C5, Pos.C6)),
+        List((Pos.D4, Pos.E4), (Pos.E3, Pos.E2))
+      )
+    }
 
-    // }
+    "have 2 equally long capture sequences" in {
+      val board = Board(FEN("W:Wc4:Bc5,d4,d6,e5:H0:F1").pieces, variant.Dameo)
+      val man = Situation(board, P1).actors.find(_.pos == Pos.C4).get
+      man.captures.toSet.map((move: Move) => (move.dest, move.capture)) must_== Set(
+        (Pos.C6, Some(Pos.C5)),
+        (Pos.E4, Some(Pos.D4))
+      )
+    }
 
     // "switch players when no more captures are possible" in {}
 
@@ -180,7 +194,7 @@ class DameoActorTest extends DameoTest with ValidatedMatchers {
 
 
 
-  "man with captures" should {
+  "king with captures" should {
     "have no non-capture moves" in {
 
     }
