@@ -163,7 +163,7 @@ class DameoActorTest extends DameoTest with ValidatedMatchers {
     "find all capture chains" in {
       val board = Board(FEN("W:Wc4:Bc5,d4,e3:H0:F1").pieces, variant.Dameo)
       val man = Situation(board, P1).actors.find(_.pos == Pos.C4).get
-      man.allCaptureChains(Pos.C4).toSet must_== Set(
+      man.allCaptureChains().toSet must_== Set(
         List((Pos.C5, Pos.C6)),
         List((Pos.D4, Pos.E4), (Pos.E3, Pos.E2))
       )
@@ -192,31 +192,157 @@ class DameoActorTest extends DameoTest with ValidatedMatchers {
       move.autoEndTurn must_== false
     }
 
+    "don't allow capture over ghosts" in {
+      val board = Board(FEN("W:Wc4:Bc5.g,d4,d6,e5.g:H0:F1").pieces, variant.Dameo)
+      val man = Situation(board, P1).actors.find(_.pos == Pos.C4).get
+      man.captures.length must_== 1
+    }
+
+    /* These last two should probably be somewhere else i.e. in the tests
+    for the move application, not move generation */
     // "leave ghosts when capture sequence is incomplete" in {}
-
-    // "don't allow capture over ghosts" in {}
-
     // "remove ghosts after full capture sequence" in {}
-
   }
-}
-/*
-
-
 
   "king with captures" should {
-    "have no non-capture moves" in {
+    /* Very similar tests as for 'man with captures' but with a king piece */
 
+    "capture in all orthogonal directions" in {
+      val board = Board(FEN("W:Wd4.k:Bc4,d3.k,d5,e4:H0:F1").pieces, variant.Dameo)
+      val man = Situation(board, P1).actors.find(_.pos == Pos.D4).get
+      man.captures.length must_== 10
+    }
+
+    "capture correctly near the edges" in {
+      val board = Board(FEN("W:Wa2.k,f8,g7,h8:Ba1,a3,b2,g8.k:H0:F1").pieces, variant.Dameo)
+      val man1 = Situation(board, P1).actors.find(_.pos == Pos.A2).get
+      val man2 = Situation(board, P2).actors.find(_.pos == Pos.G8).get
+      man1.captures.length must_== 11
+      man2.captures.length must_== 11
+    }
+
+    "generate a move capturing the right pieces" in {
+      val board = Board(FEN("W:Wb2.k:Bc2,d6:H0:F1").pieces, variant.Dameo)
+      val man = Situation(board, P1).actors.find(_.pos == Pos.B2).get
+
+      man.captures.map(_.capture).toSet must_== Set(Some(Pos.C2))
+    }
+
+    "capture is blocked by pieces behind captured piece" in {
+      val board = Board(FEN("W:Wb2.k,b4:Bb3,c2,d2:H0:F1").pieces, variant.Dameo)
+      val man = Situation(board, P1).actors.find(_.pos == Pos.B2).get
+      man.captures.length must_== 0
     }
 
     "have only the maximal capture sequence" in {
+      val board = Board(FEN("W:Wc4.k:Bc5,d4,e3:H0:F1").pieces, variant.Dameo)
+      val man = Situation(board, P1).actors.find(_.pos == Pos.C4).get
+      man.captures.length must_== 2
+      man.captures.map(_.capture).toSet must_== Set(Some(Pos.D4))
+    }
 
+    "find all capture chains" in {
+      val board = Board(FEN("W:Wc4.k:Bc5,d4,e3:H0:F1").pieces, variant.Dameo)
+      val man = Situation(board, P1).actors.find(_.pos == Pos.C4).get
+      man.allCaptureChains(true).toSet must_== Set(
+        List((Pos.C5, Pos.C6)),
+        List((Pos.C5, Pos.C7)),
+        List((Pos.C5, Pos.C8)),
+        List((Pos.D4, Pos.F4)),
+        List((Pos.D4, Pos.G4)),
+        List((Pos.D4, Pos.H4)),
+        List((Pos.D4, Pos.E4), (Pos.E3, Pos.E2)),
+        List((Pos.D4, Pos.E4), (Pos.E3, Pos.E1)),
+      )
     }
 
     "have 2 equally long capture sequences" in {
+      val board = Board(FEN("W:Wc4.k:Bc5,d4,d6,e5:H0:F1").pieces, variant.Dameo)
+      val man = Situation(board, P1).actors.find(_.pos == Pos.C4).get
+      man.captures.toSet.map((move: Move) => (move.dest, move.capture)) must_== Set(
+        (Pos.C6, Some(Pos.C5)),
+        (Pos.E4, Some(Pos.D4))
+      )
+    }
 
+    "switch players when no more captures are possible" in {
+      val board = Board(FEN("W:Wc4.k:Bc5:H0:F1").pieces, variant.Dameo)
+      val man = Situation(board, P1).actors.find(_.pos == Pos.C4).get
+      man.captures.map(_.autoEndTurn).toSet must_== Set(true)
+    }
+
+    "don't switch players when more captures are possible" in {
+      val board = Board(FEN("W:Wc4.k:Bc5,d6:H0:F1").pieces, variant.Dameo)
+      val man = Situation(board, P1).actors.find(_.pos == Pos.C4).get
+      val move = man.captures(0)
+      move.autoEndTurn must_== false
+    }
+
+    "don't allow capture over ghosts" in {
+      val board = Board(FEN("W:Wc4.k:Bc5.g,d4,d6,e5.g,f4.g:H0:F1").pieces, variant.Dameo)
+      val man = Situation(board, P1).actors.find(_.pos == Pos.C4).get
+      man.captures.length must_== 1
+    }
+
+    /* Below tests are specific for kings, roughly same as above but changed to use
+    the long jump. */
+
+    "long capture in all orthogonal directions" in {
+      val board = Board(FEN("W:Wd4.k:Bb4,d2.k,d6,g4:H0:F1").pieces, variant.Dameo)
+      val man = Situation(board, P1).actors.find(_.pos == Pos.D4).get
+      man.captures.length must_== 5
+    }
+
+    "long capture correctly near the edges" in {
+      val board = Board(FEN("W:Wa2.k,f8,g3,h8:Ba1,a4,f2,g8.k:H0:F1").pieces, variant.Dameo)
+      val man1 = Situation(board, P1).actors.find(_.pos == Pos.A2).get
+      val man2 = Situation(board, P2).actors.find(_.pos == Pos.G8).get
+      man1.captures.length must_== 6
+      man2.captures.length must_== 7
+    }
+
+    "generate a move long capturing the right pieces" in {
+      val board = Board(FEN("W:Wb2.k:Bd2,e6:H0:F1").pieces, variant.Dameo)
+      val man = Situation(board, P1).actors.find(_.pos == Pos.B2).get
+
+      man.captures.map(_.capture).toSet must_== Set(Some(Pos.D2))
+    }
+
+    "long capture is blocked by pieces behind captured piece" in {
+      val board = Board(FEN("W:Wb2.k,b5:Bb4,e2,f2:H0:F1").pieces, variant.Dameo)
+      val man = Situation(board, P1).actors.find(_.pos == Pos.B2).get
+      man.captures.length must_== 0
+    }
+
+    "have only the maximal (long) capture sequence" in {
+      val board = Board(FEN("W:Wc4.k:Bc6,e4,f3:H0:F1").pieces, variant.Dameo)
+      val man = Situation(board, P1).actors.find(_.pos == Pos.C4).get
+      man.captures.length must_== 2
+      man.captures.map(_.capture).toSet must_== Set(Some(Pos.E4))
+    }
+
+    "coup turc" in {
+      val board = Board(FEN("W:Wc6.k:Bc4,d2,d3,e4,h3:H0:F1").pieces, variant.Dameo)
+      val man = Situation(board, P1).actors.find(_.pos == Pos.C6).get
+      man.captures.length must_== 1
+      man.captures(0).dest must_== Pos.C2
+      man.captures(0).capture must_== Some(Pos.C4)
+    }
+
+    "have 2 equally long (long) capture sequences" in {
+      val board = Board(FEN("W:Wc4.k:Bc6,e4,e7,g5:H0:F1").pieces, variant.Dameo)
+      val man = Situation(board, P1).actors.find(_.pos == Pos.C4).get
+      man.captures.toSet.map((move: Move) => (move.dest, move.capture)) must_== Set(
+        (Pos.C7, Some(Pos.C6)),
+        (Pos.G4, Some(Pos.E4))
+      )
+    }
+
+    "don't allow long capture over ghosts" in {
+      val board = Board(FEN("W:Wc3.k:Bc5.g,d3,d6,e5.g,g3.g:H0:F1").pieces, variant.Dameo)
+      val man = Situation(board, P1).actors.find(_.pos == Pos.C3).get
+      man.captures.length must_== 2
     }
   }
 
 }
-*/

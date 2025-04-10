@@ -29,7 +29,7 @@ final case class Actor(
       case King => dxs.flatMap(
         dx => dxs.flatMap(
           dy => if (dx == 0 && dy == 0) None else
-          LazyList.iterate(Option(pos))(_.flatMap(_.step(dx, dy))).drop(1)
+          LazyList.iterate(Option(pos))(_.flatMap(_.step(dx, dy))).tail
           .takeWhile(p => !p.isEmpty && board.withinBounds(p.get) && board.empty(p.get))
         )
       ).flatten
@@ -53,8 +53,14 @@ final case class Actor(
     /* List of (capture pos, destination pos) pairs together with the length
     of the full capture chain */
     def capInfo: (List[(Pos, Pos)], Int) = piece.role match {
-      case Man => {
-        def chains: List[List[(Pos, Pos)]] = allCaptureChains()
+      case role @ (Man | King) => {
+        def chains: List[List[(Pos, Pos)]] = role match {
+          case Man =>
+            allCaptureChains()
+          case King =>
+            allCaptureChains(true)
+          case _ => List()
+        }
         chains match {
           case List() => (List(), 0)
           case chains => {
@@ -92,13 +98,18 @@ final case class Actor(
     }
   }
 
-  def allCaptureChains(curPos: Pos = pos, curBoard: Board = board,
+  def allCaptureChains(king: Boolean = false,
+    curPos: Pos = pos, curBoard: Board = board,
     thisChain: List[(Pos, Pos)] = List()): List[List[(Pos, Pos)]] = {
-    def nextSteps: List[(Pos, Pos)] = allCaptureSteps(curBoard, curPos)
+    def nextSteps: List[(Pos, Pos)] = if (king) {
+      allKingCaptureSteps(curBoard, curPos)
+    } else {
+      allCaptureSteps(curBoard, curPos)
+    }
     if (nextSteps.isEmpty) {
       return if (thisChain.isEmpty) List() else List(thisChain)
     } else {
-      return nextSteps.map({case (cap, dest) => allCaptureChains(dest,
+      return nextSteps.map({case (cap, dest) => allCaptureChains(king, dest,
         Board(
           curBoard.pieces - curPos - cap + (cap -> Piece(!player, GhostMan)),
           board.history, board.variant),
@@ -118,6 +129,29 @@ final case class Actor(
     def destPos: Option[Pos] = capPos.flatMap(_.step(dx, dy))
       .filter(curBoard.empty(_)).filter(curBoard.withinBounds(_))
     for (a <- capPos; b <- destPos) yield (a, b)
+  }
+
+  def allKingCaptureSteps(curBoard: Board, curPos: Pos): List[(Pos, Pos)] = {
+    def dxys: List[(Int, Int)] = List((-1, 0), (1, 0), (0, -1), (0, 1))
+    dxys.flatMap({case (dx, dy) => kingCaptureSteps(curBoard, curPos, dx, dy)})
+  }
+
+  def kingCaptureSteps(curBoard: Board, stepPos: Pos, dx: Int, dy: Int): List[(Pos, Pos)] = {
+    def findCapPos(curPos: Option[Pos]): Option[Pos] = {
+      if (curPos.isEmpty || !curBoard.withinBounds(curPos.get)
+        || curBoard.pieces.get(curPos.get).map(_.player) == Some(player)
+        || curBoard.pieces.get(curPos.get).map(_.isGhost) == Some(true)) {
+        None
+      } else if (curBoard.empty(curPos.get)) {
+        findCapPos(curPos.flatMap(_.step(dx, dy)))
+      } else {
+        curPos
+      }
+    }
+    def capPos: Option[Pos] = findCapPos(stepPos.step(dx, dy))
+    def destPos: List[Pos] = LazyList.iterate(capPos)(_.flatMap(_.step(dx, dy))).tail
+      .takeWhile(p => !p.isEmpty && curBoard.withinBounds(p.get) && curBoard.empty(p.get)).toList.flatten
+    destPos.map((capPos.get, _))
   }
 
   def player: Player         = piece.player
