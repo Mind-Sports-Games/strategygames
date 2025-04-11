@@ -18,7 +18,7 @@ object Forsyth {
           history = History(
             prevPlayer = fen.prevPlayer(variant),
             score = Score(fen.player1Score, fen.player2Score),
-            halfMoveClock = fen.halfMovesSinceLastCapture(variant).getOrElse(0)
+            halfMoveClock = fen.halfMovesSinceLastCapture.getOrElse(0)
           ),
           variant = variant
         ),

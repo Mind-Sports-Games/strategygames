@@ -35,7 +35,7 @@ final case class FEN(value: String) extends AnyVal {
 
     value
       .split(' ')
-      .lift(4)
+      .lift(6)
       .flatMap(_.headOption)
       .flatMap(Player.apply)
       .map(!_)
@@ -48,14 +48,12 @@ final case class FEN(value: String) extends AnyVal {
     .flatMap(Player.apply)
     .map(!_)
 
-  def halfMovesSinceLastCapture(variant: Variant): Option[Int] = intFromFen(
-    if (variant.hasPrevPlayer) 5 else 4
-  )
+  def halfMovesSinceLastCapture: Option[Int] = intFromFen(4)
 
-  def fullMove(variant: Variant): Option[Int] = intFromFen(if (variant.hasPrevPlayer) 6 else 5)
+  def fullMove: Option[Int] = intFromFen(5)
 
-  def ply(variant: Variant): Option[Int] =
-    fullMove(variant) map { fm =>
+  def ply: Option[Int] =
+    fullMove map { fm =>
       fm * 2 - (if (player.exists(_.p1)) 2 else 1)
     }
 

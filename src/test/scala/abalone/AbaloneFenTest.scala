@@ -27,8 +27,8 @@ class AbaloneFenTest extends AbaloneTest {
     }
 
     "set both moves counters to expected initial value" in {
-      fen.fullMove(Abalone).get must_== 1
-      fen.halfMovesSinceLastCapture(Abalone).get must_== 0
+      fen.fullMove.get must_== 1
+      fen.halfMovesSinceLastCapture.get must_== 0
     }
 
     "draw a daisy of 7 marbles side by side on bottom for each player, then applies central symmetry on e5 to draw the ones on the top" in {
@@ -164,11 +164,11 @@ class AbaloneFenTest extends AbaloneTest {
     }
 
     "11 plies were played since last time a marble was pushed out" in {
-      puzzleFen.halfMovesSinceLastCapture(Abalone) must_== Some(11)
+      puzzleFen.halfMovesSinceLastCapture must_== Some(11)
     }
 
     "42 moves were played in total" in {
-      puzzleFen.fullMove(Abalone) must_== Some(42)
+      puzzleFen.fullMove must_== Some(42)
     }
 
     "board should be valid and have no winner" in {

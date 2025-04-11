@@ -54,7 +54,7 @@ class AbaloneTest extends Specification with IAbaloneTest {
           History(
             prevPlayer = initialFen.prevPlayer(variant),
             score = Score(initialFen.player1Score, initialFen.player2Score),
-            halfMoveClock = initialFen.halfMovesSinceLastCapture(variant).getOrElse(0)
+            halfMoveClock = initialFen.halfMovesSinceLastCapture.getOrElse(0)
           ),
           variant
         ),
