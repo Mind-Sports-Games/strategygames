@@ -74,7 +74,9 @@ class DameoFenTest extends DameoTest with ValidatedMatchers {
       pieces.get(Pos.E6) must_== Some(Piece(P2, Man))
       pieces.get(Pos.F6) must_== Some(Piece(P2, Man))
     }
+  }
 
+  "FEN" should {
     "parse kings correctly" in {
       val rolesFen = FEN("W:Wa5,a7.k,c3,c4.k:Ba8.k,e8.k,f6:H0:F1")
       val pieces   = rolesFen.pieces
@@ -98,6 +100,13 @@ class DameoFenTest extends DameoTest with ValidatedMatchers {
 
       pieces.get(Pos.A8) must_== Some(Piece(P2, GhostMan))
       pieces.get(Pos.E8) must_== Some(Piece(P2, GhostKing))
+    }
+
+    "parse empty boards" in {
+      FEN("W:Wa5:Ba8:H0:F1").pieces must_== Map(Pos.A5 -> Piece(P1, Man), Pos.A8 -> Piece(P2, Man))
+      FEN("W:Wa5:B:H0:F1").pieces must_== Map(Pos.A5 -> Piece(P1, Man))
+      FEN("W:W:Ba8:H0:F1").pieces must_== Map(Pos.A8 -> Piece(P2, Man))
+      FEN("W:W:B:H0:F1").pieces must_== Map()
     }
 /*
 

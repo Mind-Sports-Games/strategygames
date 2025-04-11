@@ -28,13 +28,13 @@ final case class FEN(value: String) extends AnyVal {
   def player1: Player = Player.apply(splitted(1).head).get
   def pieceStr1: String = splitted(1).tail
   def pieces1: Array[(Pos, Piece)] = pieceStr1
-    .split(',')
+    .split(',').filter(_!="")
     .map(parsePiece(player1))
 
   def player2: Player = Player.apply(splitted(2).head).get
   def pieceStr2: String = splitted(2).tail
   def pieces2: Array[(Pos, Piece)] = pieceStr2
-    .split(',')
+    .split(',').filter(_!="")
     .map(parsePiece(player2))
 
   def pieces: PieceMap = (pieces1 ++ pieces2).toMap

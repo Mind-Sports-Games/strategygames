@@ -88,6 +88,50 @@ class DameoActorTest extends DameoTest with ValidatedMatchers {
       actors1.find(_.pos == Pos.B1).get.noncaptures.length must_== 0
       actors2.find(_.pos == Pos.E8).get.noncaptures.length must_== 0
     }
+
+    "have the correct boardAfter P1" in {
+      val board = Board(FEN("W:Wd2:B:H0:F1").pieces, variant.Dameo)
+      val moves = Situation(board, P1).actors.find(_.pos == Pos.D2).get.noncaptures
+      moves.length must_== 3
+      moves.map(_.after.pieces).toSet must_== Set(
+        FEN("W:Wc3:B:H0:F1").pieces,
+        FEN("W:Wd3:B:H0:F1").pieces,
+        FEN("W:We3:B:H0:F1").pieces
+      )
+    }
+
+    "have the correct boardAfter P2" in {
+      val board = Board(FEN("W:W:Bd4:H0:F1").pieces, variant.Dameo)
+      val moves = Situation(board, P2).actors.find(_.pos == Pos.D4).get.noncaptures
+      moves.length must_== 3
+      moves.map(_.after.pieces).toSet must_== Set(
+        FEN("W:W:Bc3:H0:F1").pieces,
+        FEN("W:W:Bd3:H0:F1").pieces,
+        FEN("W:W:Be3:H0:F1").pieces
+      )
+    }
+
+    "have the correct situationAfter P1 promotion" in {
+      val board = Board(FEN("W:Wd7:B:H0:F1").pieces, variant.Dameo)
+      val moves = Situation(board, P1).actors.find(_.pos == Pos.D7).get.noncaptures
+      moves.length must_== 3
+      moves.map(_.situationAfter.board.pieces).toSet must_== Set(
+        FEN("W:Wc8.k:B:H0:F1").pieces,
+        FEN("W:Wd8.k:B:H0:F1").pieces,
+        FEN("W:We8.k:B:H0:F1").pieces
+      )
+    }
+
+    "have the correct situationAfter P2 promotion" in {
+      val board = Board(FEN("W:W:Bd2:H0:F1").pieces, variant.Dameo)
+      val moves = Situation(board, P2).actors.find(_.pos == Pos.D2).get.noncaptures
+      moves.length must_== 3
+      moves.map(_.situationAfter.board.pieces).toSet must_== Set(
+        FEN("W:W:Bc1.k:H0:F1").pieces,
+        FEN("W:W:Bd1.k:H0:F1").pieces,
+        FEN("W:W:Be1.k:H0:F1").pieces
+      )
+    }
   }
 
   "king without captures" should {
@@ -183,6 +227,7 @@ class DameoActorTest extends DameoTest with ValidatedMatchers {
       val man = Situation(board, P1).actors.find(_.pos == Pos.C4).get
       val move = man.captures(0)
       move.autoEndTurn must_== true
+      move.situationAfter.player == P2
     }
 
     "don't switch players when more captures are possible" in {
@@ -190,6 +235,7 @@ class DameoActorTest extends DameoTest with ValidatedMatchers {
       val man = Situation(board, P1).actors.find(_.pos == Pos.C4).get
       val move = man.captures(0)
       move.autoEndTurn must_== false
+      move.situationAfter.player == P1
     }
 
     "don't allow capture over ghosts" in {
@@ -198,10 +244,41 @@ class DameoActorTest extends DameoTest with ValidatedMatchers {
       man.captures.length must_== 1
     }
 
-    /* These last two should probably be somewhere else i.e. in the tests
-    for the move application, not move generation */
-    // "leave ghosts when capture sequence is incomplete" in {}
-    // "remove ghosts after full capture sequence" in {}
+    "remove captured piece" in {
+      val board = Board(FEN("W:Wc5:Bc6:H0:F1").pieces, variant.Dameo)
+      val man = Situation(board, P1).actors.find(_.pos == Pos.C5).get
+      man.captures.length must_== 1
+      val move = man.captures(0)
+      move.autoEndTurn must_== true
+      move.situationAfter.player == P2
+      move.situationAfter.board.pieces must_== FEN("W:Wc7:B:H0:F1").pieces
+    }
+
+    "leave ghosts after partial capture" in {
+      val board = Board(FEN("W:Wc5:Bc6,d7:H0:F1").pieces, variant.Dameo)
+      val man = Situation(board, P1).actors.find(_.pos == Pos.C5).get
+      man.captures.length must_== 1
+      val move = man.captures(0)
+      move.autoEndTurn must_== false
+      move.situationAfter.player == P1
+      move.situationAfter.board.pieces must_== FEN("W:Wc7:Bc6.g,d7:H0:F1").pieces
+    }    
+
+    "remove all ghosts after full capture" in {
+      val board = Board(FEN("W:Wc5:Bc2.g,c4.p,c6:H0:F1").pieces, variant.Dameo)
+      val man = Situation(board, P1).actors.find(_.pos == Pos.C5).get
+      man.captures.length must_== 1
+      val move = man.captures(0)
+      move.autoEndTurn must_== true
+      move.situationAfter.player == P2
+      move.situationAfter.board.pieces must_== FEN("W:Wc7:B:H0:F1").pieces
+    }
+
+    // "promote white piece that ends on back row" in {}
+    // "promote black piece that ends on back row" in {}
+    // "don't promote white piece that captures through back row" in {}
+    // "don't promote black piece that captures through back row" in {}
+
   }
 
   "king with captures" should {
@@ -345,4 +422,12 @@ class DameoActorTest extends DameoTest with ValidatedMatchers {
     }
   }
 
+  // "move.situationAfter" should {
+    // board
+    // board history
+    // situationafter
+    // endturn i.e. situation.player
+  //   "leave ghosts when capture sequence is incomplete" in {}
+  //   "remove ghosts after full capture sequence" in {}
+  // }
 }

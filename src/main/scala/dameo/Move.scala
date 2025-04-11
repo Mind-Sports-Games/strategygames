@@ -15,15 +15,25 @@ case class Move(
     metrics: MoveMetrics = MoveMetrics()
 ) extends Action(situationBefore, after, metrics) {
 
-  // TODO Dameo check how it works in fairysf with autoEndTurn
   def situationAfter =
-    Situation(finalizeAfter, situationBefore.player)
+    Situation(
+      finalizeAfter,
+      if (autoEndTurn) !piece.player else piece.player
+    )
 
   // TODO Dameo - might need to edit this, look at how draughts gamelogic does this (ghosts)
-  def finalizeAfter: Board = after updateHistory { h =>
-    h.copy(
-      currentTurn = h.currentTurn :+ toUci
-    )
+  def finalizeAfter: Board = {
+    val newBoard = after.copy(pieces = after.pieces ++ capture.map(
+      (_ -> after.pieces(capture.get).copy(role=after.pieces(capture.get).ghostRole))))
+    .updateHistory({h =>
+      h.copy(
+        currentTurn = h.currentTurn :+ toUci
+      )})
+    if (autoEndTurn) {
+      newBoard.copy(pieces = newBoard.pieces.filter({case (_,v) => !v.isGhost}))
+    } else {
+      newBoard
+    }
   }
 
   def lazySituationAfter =
