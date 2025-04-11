@@ -62,11 +62,11 @@ object Forsyth {
     val boardFen   = getFen_board(game.situation.board)
     val scoreStr   = game.situation.board.history.score.fenStr
     val player     = game.situation.player.fold('b', 'w')
+    val halfMoves  = game.situation.board.history.halfMoveClock
+    val fullMoves  = game.fullTurnCount
     val prevPlayer = if (game.situation.board.variant.hasPrevPlayer) {
       game.situation.board.history.prevPlayer.fold(" *")(p => p.fold(" b", " w"))
     } else ""
-    val halfMoves  = game.situation.board.history.halfMoveClock
-    val fullMoves  = game.fullTurnCount
     FEN(s"$boardFen $scoreStr $player $halfMoves $fullMoves$prevPlayer")
   }
 
