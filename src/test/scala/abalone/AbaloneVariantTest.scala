@@ -18,7 +18,7 @@ class AbaloneVariantTest extends AbaloneTest {
    *      · · · · ·
    */
   "custom basic position" should {
-    val fen         = format.FEN("5/6/7/4s3/4SSSs1/8/7/6/5 0 0 b 0 0")
+    val fen         = format.FEN("5/6/7/8/4SSSs1/4s3/7/6/5 0 0 b 0 0")
     val board       = Board(fen.pieces(Abalone), History(), Abalone)
     val game        = new Game(Situation(board, P1))
     val validMoves  = valid(game)
@@ -187,8 +187,19 @@ class AbaloneVariantTest extends AbaloneTest {
     }
   }
 
+  /*
+   *     ● ● ● ● ●
+   *    ● · · · · ·
+   *   ● · · · · · ·
+   *  ● · o o o o o ·
+   * · ● · · · · · o ·
+   *  · ● ● ● ● ● · o
+   *   · · · · · · o
+   *    · · · · · o
+   *     o o o o o
+   */
   "\"Snakes variant\" start position" should {
-    val fen       = format.FEN("sssss/5s/6s/1SSSSS1s/1S5s1/S1sssss1/S6/S5/SSSSS 0 0 b 0 0")
+    val fen       = format.FEN("SSSSS/S5/S6/S1sssss1/1S5s1/1SSSSS1s/6s/5s/sssss 0 0 b 0 0")
     val board     = Board(fen.pieces(Abalone), History(), Abalone)
     val situation = Situation(board, P1)
     val moves     = valid(situation).flatMap(_._2)
@@ -208,8 +219,19 @@ class AbaloneVariantTest extends AbaloneTest {
     }
   }
 
+  /*
+   *     ● · ● · ●
+   *    · ● o o ● ·
+   *   · ● o ● o ● ·
+   *  · · · ● ● · · ·
+   * · · · · · · · · ·
+   *  · · · o o · · ·
+   *   · o ● o ● o ·
+   *    · o ● ● o ·
+   *     o · o · o
+   */
   "\"Alien\" start position" should {
-    val fen       = format.FEN("s1s1s/1sSSs1/1sSsSs1/3ss3/9/3SS3/1SsSsS1/1SssS1/S1S1S 0 0 b 0 0")
+    val fen       = format.FEN("S1S1S/1SssS1/1SsSsS1/3SS3/9/3ss3/1sSsSs1/1sSSs1/s1s1s 0 0 b 0 0")
     val board     = Board(fen.pieces(Abalone), History(), Abalone)
     val situation = Situation(board, P1)
     val moves     = valid(situation).flatMap(_._2)
@@ -229,8 +251,19 @@ class AbaloneVariantTest extends AbaloneTest {
     }
   }
 
+  /*
+   *     · · · · ·
+   *    o · · · · ●
+   *   o o · · · ● ●
+   *  o o o o · ● ● ●
+   * · · · ● · ● · · ·
+   *  ● ● ● · o o o o
+   *   ● ● · · · o օ
+   *    ● · · · · օ
+   *     · · · · ·
+   */
   "\"Domination\" start position" should {
-    val fen        = format.FEN("5/S4s/SS3ss/SSS1ssss/3S1S3/ssss1SSS/ss3SS/s4S/5 0 0 b 0 0")
+    val fen        = format.FEN("5/s4S/ss3SS/ssss1SSS/3S1S3/SSS1ssss/SS3ss/S4s/5 0 0 b 0 0")
     val board      = Board(fen.pieces(Abalone), History(), Abalone)
     val situation  = Situation(board, P1)
     val validMoves = valid(situation)
@@ -272,7 +305,7 @@ class AbaloneVariantTest extends AbaloneTest {
    *     · o · · ·
    */
   "custom start position with a total of 29 marbles" should {
-    val fen        = format.FEN("1s3/2sSss/3s2S/ssSS2S1/4SSS2/8/7/3Ss1/2s1s 5 5 b 0 0")
+    val fen        = format.FEN("2s1s/3Ss1/7/8/4SSS2/ssSS2S1/3s2S/2sSss/1s3 5 5 b 0 0")
     val board      = Board(fen.pieces(Abalone), History(score = Score(5, 5)), Abalone)
     val situation  = Situation(board, P1)
     val validMoves = valid(situation)
@@ -323,7 +356,7 @@ class AbaloneVariantTest extends AbaloneTest {
    *     ● ● ● ● o
    */
   "custom start position" should {
-    val fen        = format.FEN("SSSSs/ssss2/1s5/2S5/3S5/3S4/1SSssss/2sSSS/SSS2 5 5 b 0 0")
+    val fen        = format.FEN("SSS2/2sSSS/1SSssss/3S4/3S5/2S5/1s5/ssss2/SSSSs 5 5 b 0 0")
     val board      = Board(fen.pieces(Abalone), History(), Abalone)
     val situation  = Situation(board, P1)
     val validMoves = valid(situation)
@@ -368,7 +401,7 @@ class AbaloneVariantTest extends AbaloneTest {
    *     ● o ● ● ●
    */
   "special position to test some edge cases" should {
-    val fen        = format.FEN("SsSSS/Ssssss/S3S2/s3S3/s3S4/S2S4/S1s4/Ss4/s4 5 5 b 0 0")
+    val fen        = format.FEN("s4/Ss4/S1s4/S2S4/s3S4/s3S3/S3S2/Ssssss/SsSSS 5 5 b 0 0")
     val board      = Board(fen.pieces(Abalone), History(), Abalone)
     val validMoves = valid(Situation(board, P1))
 
@@ -479,7 +512,7 @@ class AbaloneVariantTest extends AbaloneTest {
    *      o · · ·
    */
   "P1 pushing out 6 marbles consecutively" should {
-    val fenEndedGame = format.FEN("s4/6/7/8/4SSSss/6S1/4SS1/3Sss/3ss 0 0 b 0 0")
+    val fenEndedGame = format.FEN("3ss/3Sss/4SS1/6S1/4SSSss/8/7/6/s4 0 0 b 0 0")
     val board        = Board(fenEndedGame.pieces(Abalone), History(), Abalone)
     val game         = new Game(Situation(board, P1))
     val game2        = next(game, 4, 4, 8, 4)   // e5e9
@@ -676,7 +709,7 @@ class AbaloneVariantTest extends AbaloneTest {
    *      o · · · ·
    */
   "P2 and P1 moving left right right left" should {
-    val fenEndedGame = format.FEN("s4/6/7/8/4SSSss/6S1/4SS1/3Sss/3ss 0 0 b 0 0")
+    val fenEndedGame = format.FEN("3ss/3Sss/4SS1/6S1/4SSSss/8/7/6/s4 0 0 b 0 0")
     val board        = Board(fenEndedGame.pieces(Abalone), History(), Abalone)
 
     val game  = new Game(Situation(board, P1))

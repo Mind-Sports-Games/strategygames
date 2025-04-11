@@ -66,7 +66,7 @@ class AbaloneIsometryTest extends AbaloneTest {
         "h6g5",
         "f7f2"  // p2 resigns
       ),
-      "3s1/6/5s1/3sss2/2SSSSSs1/ssSSS1S1/1ssSSSs/4s1/s3S 1 1 w 14 24"
+      "s3S/4s1/1ssSSSs/ssSSS1S1/2SSSSSs1/3sss2/5s1/6/3s1 1 1 w 14 24"
     )
   }
 
@@ -186,7 +186,7 @@ class AbaloneIsometryTest extends AbaloneTest {
         "a3a4",
         "c6a4"  // c6xa4
       ),
-      "1s1s1/1Ssss1/2s1s2/3SSS2/1sS2Ss2/5s2/2s1ss1/2S1S1/5 1 6 b 0 51"
+      "5/2S1S1/2s1ss1/5s2/1sS2Ss2/3SSS2/2s1s2/1Ssss1/1s1s1 1 6 b 0 51"
     )
   }
 
@@ -292,7 +292,7 @@ class AbaloneIsometryTest extends AbaloneTest {
         "c4e6",
         "h7h9"  // h7xh9
       ),
-      "3ss/6/4S2/2ssSs2/3SSSSss/5sss/2sS1s1/4ss/4S 0 6 b 0 44"
+      "4S/4ss/2sS1s1/5sss/3SSSSss/2ssSs2/4S2/6/3ss 0 6 b 0 44"
     )
   }
 }

@@ -142,7 +142,7 @@ class GrandAbaloneIsometryTest extends AbaloneTest {
         "c2c6",
         "c3c8"   // Unfinished
       ),
-      "5s/6s/3SSSss/2s1sS3/s1S2s1S2/3s1Ssss2/4ssSs2/4s1Ss1/1S1sSSS1/1SSS3/1Ss3 2 4 w b 8 31"
+      "1Ss3/1SSS3/1S1sSSS1/4s1Ss1/4ssSs2/3s1Ssss2/s1S2s1S2/2s1sS3/3SSSss/6s/5s 2 4 w b 8 31"
     )
   }
 }

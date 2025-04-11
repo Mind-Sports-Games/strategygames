@@ -18,5 +18,5 @@ case object Abalone
   override def baseVariant: Boolean = true
 
   /** Belgian daisy. */
-  override def initialFen: FEN = FEN("SS1ss/SSSsss/1SS1ss1/8/9/8/1ss1SS1/sssSSS/ss1SS 0 0 b 0 1")
+  override def initialFen: FEN = FEN("ss1SS/sssSSS/1ss1SS1/8/9/8/1SS1ss1/SSSsss/SS1ss 0 0 b 0 1")
 }
