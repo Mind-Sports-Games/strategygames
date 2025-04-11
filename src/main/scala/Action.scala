@@ -113,7 +113,7 @@ object Action {
 
   def toAbalone(action: Action): abalone.Move = action match {
     case Move.Abalone(m) => m
-    case _               => sys.error("Expecting a abalone action e.g. move")
+    case _               => sys.error("Expecting an abalone action e.g. move")
   }
 
   def toDameo(action: Action): dameo.Move = action match {

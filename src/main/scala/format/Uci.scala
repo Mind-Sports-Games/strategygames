@@ -99,7 +99,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a chess UCI")
     def toGo           = sys.error("Can't make a go UCI from a chess UCI")
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a chess UCI")
-    def toAbalone      = sys.error("Can't make a abalone UCI from a chess UCI")
+    def toAbalone      = sys.error("Can't make an abalone UCI from a chess UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a chess UCI")
   }
 
@@ -126,7 +126,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a draughts UCI")
     def toGo           = sys.error("Can't make a go UCI from a draughts UCI")
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a draughts UCI")
-    def toAbalone      = sys.error("Can't make a abalone UCI from a draughts UCI")
+    def toAbalone      = sys.error("Can't make an abalone UCI from a draughts UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a draughts UCI")
   }
 
@@ -149,7 +149,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a fairy UCI")
     def toGo           = sys.error("Can't make a go UCI from a fairy UCI")
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a fairysf UCI")
-    def toAbalone      = sys.error("Can't make a abalone UCI from a fairysf UCI")
+    def toAbalone      = sys.error("Can't make an abalone UCI from a fairysf UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a fairysf UCI")
   }
 
@@ -171,7 +171,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a samurai UCI")
     def toGo           = sys.error("Can't make a go UCI from a samurai UCI")
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a samurai UCI")
-    def toAbalone      = sys.error("Can't make a abalone UCI from a samurai UCI")
+    def toAbalone      = sys.error("Can't make an abalone UCI from a samurai UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a samurai UCI")
   }
 
@@ -193,7 +193,7 @@ object Uci {
     def toTogyzkumalak = m
     def toGo           = sys.error("Can't make a go UCI from a togyzkumalak UCI")
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a togyzkumalak UCI")
-    def toAbalone      = sys.error("Can't make a abalone UCI from a togyzkumalak UCI")
+    def toAbalone      = sys.error("Can't make an abalone UCI from a togyzkumalak UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a togyzkumalak UCI")
   }
 
@@ -219,7 +219,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a backgammon UCI")
     def toGo           = sys.error("Can't make a go UCI from a backgammon UCI")
     def toBackgammon   = m
-    def toAbalone      = sys.error("Can't make a abalone UCI from a backgammon UCI")
+    def toAbalone      = sys.error("Can't make an abalone UCI from a backgammon UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a backgammon UCI")
   }
 
@@ -229,20 +229,20 @@ object Uci {
         Pos.Abalone(m.dest)
       )
       with Abalone {
-    def gameLogic      = GameLogic.Abalone()
-    def uci            = m.uci
-    def shortUci       = m.uci
-    def fishnetUci     = m.uci
-    val unwrap         = m
-    def toChess        = sys.error("Can't make a chess UCI from a abalone UCI")
-    def toDraughts     = sys.error("Can't make a draughts UCI from a abalone UCI")
-    def toFairySF      = sys.error("Can't make a fairysf UCI from a abalone UCI")
-    def toSamurai      = sys.error("Can't make a samurai UCI from a abalone UCI")
-    def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a abalone UCI")
-    def toGo           = sys.error("Can't make a go UCI from a abalone UCI")
-    def toBackgammon   = sys.error("Can't make a backgammon UCI from a abalone UCI")
-    def toAbalone      = m
-    def toDameo        = sys.error("Can't make a dameo UCI from a abalone UCI")
+    override def gameLogic      = GameLogic.Abalone()
+    override def uci            = m.uci
+    override def shortUci       = m.uci
+    override def fishnetUci     = m.uci
+    override val unwrap         = m
+    override def toChess        = sys.error("Can't make a chess UCI from an abalone UCI")
+    override def toDraughts     = sys.error("Can't make a draughts UCI from an abalone UCI")
+    override def toFairySF      = sys.error("Can't make a fairysf UCI from an abalone UCI")
+    override def toSamurai      = sys.error("Can't make a samurai UCI from an abalone UCI")
+    override def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from an abalone UCI")
+    override def toGo           = sys.error("Can't make a go UCI from an abalone UCI")
+    override def toBackgammon   = sys.error("Can't make a backgammon UCI from an abalone UCI")
+    override def toAbalone      = m
+    override def toDameo        = sys.error("Can't make a dameo UCI from an abalone UCI")
   }
 
   final case class DameoMove(m: dameo.format.Uci.Move)
@@ -268,7 +268,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a dameo UCI")
     def toGo           = sys.error("Can't make a go UCI from a dameo UCI")
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a dameo UCI")
-    def toAbalone      = sys.error("Can't make a abalone UCI from a dameo UCI")
+    def toAbalone      = sys.error("Can't make an abalone UCI from a dameo UCI")
     def toDameo        = m
   }
 
@@ -299,7 +299,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a chess UCI")
     def toGo           = sys.error("Can't make a go UCI from a chess UCI")
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a chess UCI")
-    def toAbalone      = sys.error("Can't make a abalone UCI from a chess UCI")
+    def toAbalone      = sys.error("Can't make an abalone UCI from a chess UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a chess UCI")
   }
 
@@ -322,7 +322,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a fairysf UCI")
     def toGo           = sys.error("Can't make a go UCI from a fairysf UCI")
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a fairysf UCI")
-    def toAbalone      = sys.error("Can't make a abalone UCI from a fairysf UCI")
+    def toAbalone      = sys.error("Can't make an abalone UCI from a fairysf UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a fairysf UCI")
   }
 
@@ -345,7 +345,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a go UCI")
     def toGo           = d
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a go UCI")
-    def toAbalone      = sys.error("Can't make a abalone UCI from a go UCI")
+    def toAbalone      = sys.error("Can't make an abalone UCI from a go UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a go UCI")
   }
 
@@ -372,7 +372,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a backgammon UCI")
     def toGo           = sys.error("Can't make a go UCI from a backgammon UCI")
     def toBackgammon   = d
-    def toAbalone      = sys.error("Can't make a abalone UCI from a backgammon UCI")
+    def toAbalone      = sys.error("Can't make an abalone UCI from a backgammon UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a backgammon UCI")
   }
 
@@ -400,7 +400,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a backgammon UCI")
     def toGo           = sys.error("Can't make a go UCI from a backgammon UCI")
     def toBackgammon   = l
-    def toAbalone      = sys.error("Can't make a abalone UCI from a backgammon UCI")
+    def toAbalone      = sys.error("Can't make an abalone UCI from a backgammon UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a backgammon UCI")
   }
 
@@ -424,7 +424,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a go UCI")
     def toGo           = p
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a go UCI")
-    def toAbalone      = sys.error("Can't make a abalone UCI from a go UCI")
+    def toAbalone      = sys.error("Can't make an abalone UCI from a go UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a go UCI")
   }
 
@@ -454,7 +454,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a go UCI")
     def toGo           = ss
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a go UCI")
-    def toAbalone      = sys.error("Can't make a abalone UCI from a go UCI")
+    def toAbalone      = sys.error("Can't make an abalone UCI from a go UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a go UCI")
   }
 
@@ -484,7 +484,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a chess UCI")
     def toGo           = sys.error("Can't make a go UCI from a chess UCI")
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a chess UCI")
-    def toAbalone      = sys.error("Can't make a abalone UCI from a chess UCI")
+    def toAbalone      = sys.error("Can't make an abalone UCI from a chess UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a chess UCI")
   }
 
@@ -508,7 +508,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a backgammon UCI")
     def toGo           = sys.error("Can't make a go UCI from a backgammon UCI")
     def toBackgammon   = dr
-    def toAbalone      = sys.error("Can't make a abalone UCI from a backgammon UCI")
+    def toAbalone      = sys.error("Can't make an abalone UCI from a backgammon UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a backgammon UCI")
   }
 
@@ -532,7 +532,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a chess UCI")
     def toGo           = sys.error("Can't make a go UCI from a chess UCI")
     def toBackgammon   = sys.error("Can't make a backgammon UCI from a chess UCI")
-    def toAbalone      = sys.error("Can't make a abalone UCI from a chess UCI")
+    def toAbalone      = sys.error("Can't make an abalone UCI from a chess UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a chess UCI")
   }
 
@@ -552,7 +552,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a backgammon UCI")
     def toGo           = sys.error("Can't make a go UCI from a backgammon UCI")
     def toBackgammon   = dr
-    def toAbalone      = sys.error("Can't make a abalone UCI from a backgammon UCI")
+    def toAbalone      = sys.error("Can't make an abalone UCI from a backgammon UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a backgammon UCI")
   }
 
@@ -576,7 +576,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a backgammon UCI")
     def toGo           = sys.error("Can't make a go UCI from a backgammon UCI")
     def toBackgammon   = u
-    def toAbalone      = sys.error("Can't make a abalone UCI from a backgammon UCI")
+    def toAbalone      = sys.error("Can't make an abalone UCI from a backgammon UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a backgammon UCI")
   }
 
@@ -600,7 +600,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a backgammon UCI")
     def toGo           = sys.error("Can't make a go UCI from a backgammon UCI")
     def toBackgammon   = et
-    def toAbalone      = sys.error("Can't make a abalone UCI from a backgammon UCI")
+    def toAbalone      = sys.error("Can't make an abalone UCI from a backgammon UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a backgammon UCI")
   }
 
@@ -630,7 +630,7 @@ object Uci {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a backgammon UCI")
     def toGo           = sys.error("Can't make a go UCI from a backgammon UCI")
     def toBackgammon   = ca
-    def toAbalone      = sys.error("Can't make a abalone UCI from a backgammon UCI")
+    def toAbalone      = sys.error("Can't make an abalone UCI from a backgammon UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a backgammon UCI")
   }
 

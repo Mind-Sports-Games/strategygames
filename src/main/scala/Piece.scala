@@ -1,7 +1,6 @@
 package strategygames
 
 sealed abstract class Piece(val player: Player, val role: Role) {
-
   def is(c: Player)    = c == player
   def is(r: Role)      = r == role
   def isNot(c: Player) = c != player
@@ -12,11 +11,9 @@ sealed abstract class Piece(val player: Player, val role: Role) {
   def forsyth: Char
 
   override def toString = s"$player-$role".toLowerCase
-
 }
 
 object Piece {
-
   final case class Chess(p: chess.Piece)
       extends Piece(
         p.player,
@@ -24,7 +21,6 @@ object Piece {
       ) {
 
     def forsyth: Char = p.forsyth
-
   }
 
   final case class Draughts(p: draughts.Piece)
@@ -34,7 +30,6 @@ object Piece {
       ) {
 
     def forsyth: Char = p.forsyth
-
   }
 
   final case class FairySF(p: fairysf.Piece)
@@ -44,7 +39,6 @@ object Piece {
       ) {
 
     def forsyth: Char = p.forsyth
-
   }
 
   final case class Samurai(p: samurai.Piece)
@@ -54,7 +48,6 @@ object Piece {
       ) {
 
     def forsyth: Char = p.forsyth
-
   }
 
   final case class Togyzkumalak(p: togyzkumalak.Piece)
@@ -64,7 +57,6 @@ object Piece {
       ) {
 
     def forsyth: Char = p.forsyth
-
   }
 
   final case class Go(p: go.Piece)
@@ -74,7 +66,6 @@ object Piece {
       ) {
 
     def forsyth: Char = p.forsyth
-
   }
 
   final case class Backgammon(p: backgammon.Piece)
@@ -84,7 +75,6 @@ object Piece {
       ) {
 
     def forsyth: Char = p.forsyth
-
   }
 
   final case class Abalone(p: abalone.Piece)
@@ -94,7 +84,6 @@ object Piece {
       ) {
 
     def forsyth: Char = p.forsyth
-
   }
 
   final case class Dameo(p: dameo.Piece)
@@ -104,7 +93,6 @@ object Piece {
       ) {
 
     def forsyth: Char = p.forsyth
-
   }
 
   def apply(lib: GameLogic, player: Player, role: Role): Piece = (lib, role) match {
@@ -184,5 +172,4 @@ object Piece {
       Some((Pos.Chess(pos), (Piece.Chess(piece), 1)))
     case _            => None
   }
-
 }

@@ -1,25 +1,24 @@
 package strategygames.abalone.format
 
 import strategygames.Player
-import strategygames.abalone.{ P1, P2, Piece, PieceMap, Pos, Role }
+import strategygames.abalone.variant.Variant
+import strategygames.abalone.{P1, P2, Piece, PieceMap, Role}
 
 final case class FEN(value: String) extends AnyVal {
-  // squares are described from topLeft to bottomRight in the FEN
-
   override def toString = value
 
-  def pieces: PieceMap = value
+  // Notice cells are described from bottom left to top right in the FEN
+  def pieces(variant: Variant): PieceMap = value
     .split(' ')(0)
     .split('/')
-    .reverse
     .flatMap {
       _.toCharArray
     }
     .flatMap {
-      case square if square.isDigit => { Array.fill(square.asDigit)('1') }
-      case square                   => Array(square)
+      case c if c.isDigit => Array.fill(c.asDigit)('1')
+      case c              => Array(c)
     }
-    .zip(Pos.all)
+    .zip(variant.boardType.cellList)
     .flatMap {
       case (piece, pos) if piece == Role.defaultRole.forsythUpper => Some((pos, Piece(P1, Role.defaultRole)))
       case (piece, pos) if piece == Role.defaultRole.forsyth      => Some((pos, Piece(P2, Role.defaultRole)))
@@ -31,7 +30,23 @@ final case class FEN(value: String) extends AnyVal {
 
   def player2Score: Int = intFromFen(2).getOrElse(0)
 
-  def player: Option[Player] = value.split(' ').lift(3).flatMap(_.headOption).flatMap(Player.apply).map(!_)
+  def prevPlayer(variant: Variant): Option[Player] = {
+    if (!variant.hasPrevPlayer) return None
+
+    value
+      .split(' ')
+      .lift(6)
+      .flatMap(_.headOption)
+      .flatMap(Player.apply)
+      .map(!_)
+  }
+
+  def player: Option[Player] = value
+    .split(' ')
+    .lift(3)
+    .flatMap(_.headOption)
+    .flatMap(Player.apply)
+    .map(!_)
 
   def halfMovesSinceLastCapture: Option[Int] = intFromFen(4)
 
@@ -49,6 +64,5 @@ final case class FEN(value: String) extends AnyVal {
 }
 
 object FEN {
-
   def clean(source: String): FEN = FEN(source.replace("_", " ").trim)
 }

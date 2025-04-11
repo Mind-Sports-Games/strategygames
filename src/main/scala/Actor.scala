@@ -5,16 +5,13 @@ sealed abstract class Actor(
     val pos: Pos,
     val board: Board
 ) {
-
   def player: Player         = piece.player
   def is(c: Player): Boolean = c == piece.player
   def is(r: Role): Boolean   = r == piece.role
   def is(p: Piece): Boolean  = p == piece
-
 }
 
 object Actor {
-
   final case class Chess(a: chess.Actor)
       extends Actor(
         Piece.Chess(a.piece),
@@ -77,5 +74,4 @@ object Actor {
         Pos.Dameo(a.pos),
         Board.Dameo(a.board)
       ) {}
-
 }
