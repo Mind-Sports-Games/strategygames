@@ -117,7 +117,7 @@ object Pos {
 
     override def piotr: Char = p.piotr
 
-    override lazy val toInt: Int = (p.x << 3) + p.y
+    override lazy val toInt: Int = (p.x << 4) + p.y
 
     override def gameLogic: GameLogic = GameLogic.Abalone()
 
