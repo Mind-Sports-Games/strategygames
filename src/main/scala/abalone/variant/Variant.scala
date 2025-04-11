@@ -57,29 +57,29 @@ abstract class Variant private[variant] (
 
   def startPlayer: Player = P1
 
-  def validMoves(sit: Situation): Map[Pos, List[Move]]   =
-    (validMoves_line(sit).toList ++ validMoves_jump(sit).toList)
+  def validMoves(situation: Situation): Map[Pos, List[Move]]   =
+    (validMoves_line(situation).toList ++ validMoves_jump(situation).toList)
       .groupBy(_._1)
       .map { case (k, v) => k -> v.map(_._2).flatten }
-  def validMoves(sit: Situation, a: Pos): List[Move]     = {
-    val ap = sit.board(a)
-    if (ap.isEmpty || !isUsable(sit, ap.get)) return List()
+  def validMoves(situation: Situation, a: Pos): List[Move]     = {
+    val ap = situation.board(a)
+    if (ap.isEmpty || !isUsable(situation, ap.get)) return List()
 
-    validMovesCore(sit, a)
+    validMovesCore(situation, a)
   }
-  def validMovesCore(sit: Situation, a: Pos): List[Move] =
-    validMoves_lineCore(sit, a) ++ validMoves_jumpCore(sit, a)
+  def validMovesCore(situation: Situation, a: Pos): List[Move] =
+    validMoves_lineCore(situation, a) ++ validMoves_jumpCore(situation, a)
 
-  def validMoves_line(sit: Situation): Map[Pos, List[Move]]   = {
-    sit.board.pieces.filter(t => isUsable(sit, t._2)).map { case (a, _) => (a, validMoves_lineCore(sit, a)) }
+  def validMoves_line(situation: Situation): Map[Pos, List[Move]]   = {
+    situation.board.pieces.filter(t => isUsable(situation, t._2)).map { case (a, _) => (a, validMoves_lineCore(situation, a)) }
   }
-  def validMoves_line(sit: Situation, a: Pos): List[Move]     = {
-    val ap = sit.board(a)
-    if (ap.isEmpty || !isUsable(sit, ap.get)) return List()
+  def validMoves_line(situation: Situation, a: Pos): List[Move]     = {
+    val ap = situation.board(a)
+    if (ap.isEmpty || !isUsable(situation, ap.get)) return List()
 
-    validMoves_lineCore(sit, a)
+    validMoves_lineCore(situation, a)
   }
-  def validMoves_lineCore(sit: Situation, a: Pos): List[Move] = {
+  def validMoves_lineCore(situation: Situation, a: Pos): List[Move] = {
     boardType.norm
       .getNeigh(a)
       .map { case (vect, b) =>
@@ -87,19 +87,19 @@ abstract class Variant private[variant] (
         var out  = false
 
         var c           = b
-        var cp          = sit.board(c)
+        var cp          = situation.board(c)
         var hasProperty = true
         var u           = 1
         var max         = false
         while (hasProperty && !max && cp.isDefined) {
-          hasProperty = isUsable(sit, cp.get)
+          hasProperty = isUsable(situation, cp.get)
 
           if (hasProperty) {
             u += 1
             max = maxUsable.isDefined && u > maxUsable.get
 
             c += vect
-            cp = sit.board(c)
+            cp = situation.board(c)
           }
         }
 
@@ -107,14 +107,14 @@ abstract class Variant private[variant] (
           var p = 0
           hasProperty = true
           while (hasProperty && !max && cp.isDefined) {
-            hasProperty = isPushable(sit, cp.get)
+            hasProperty = isPushable(situation, cp.get)
 
             if (hasProperty) {
               p += 1
               max = p >= u
 
               c += vect
-              cp = sit.board(c)
+              cp = situation.board(c)
             }
           }
 
@@ -123,7 +123,7 @@ abstract class Variant private[variant] (
 
             if (out) {
               c -= vect
-              if (isEjectable(sit, sit.board(c).get)) dest = Option(c)
+              if (isEjectable(situation, situation.board(c).get)) dest = Option(c)
             } else {
               dest = Option(c)
             }
@@ -133,20 +133,20 @@ abstract class Variant private[variant] (
         (dest, out)
       }
       .filter(_._1.isDefined)
-      .map(b => computeMove(a, b._1.get, sit, capture = if (b._2) b._1 else None))
+      .map(b => computeMove(a, b._1.get, situation, capture = if (b._2) b._1 else None))
       .toList
   }
 
-  def validMoves_jump(sit: Situation): Map[Pos, List[Move]]   = {
-    sit.board.pieces.filter(t => isUsable(sit, t._2)).map { case (a, _) => (a, validMoves_jumpCore(sit, a)) }
+  def validMoves_jump(situation: Situation): Map[Pos, List[Move]]   = {
+    situation.board.pieces.filter(t => isUsable(situation, t._2)).map { case (a, _) => (a, validMoves_jumpCore(situation, a)) }
   }
-  def validMoves_jump(sit: Situation, a: Pos): List[Move]     = {
-    val ap = sit.board(a)
-    if (ap.isEmpty || !isUsable(sit, ap.get)) return List()
+  def validMoves_jump(situation: Situation, a: Pos): List[Move]     = {
+    val ap = situation.board(a)
+    if (ap.isEmpty || !isUsable(situation, ap.get)) return List()
 
-    validMoves_jumpCore(sit, a)
+    validMoves_jumpCore(situation, a)
   }
-  def validMoves_jumpCore(sit: Situation, a: Pos): List[Move] = {
+  def validMoves_jumpCore(situation: Situation, a: Pos): List[Move] = {
     boardType.norm
       .getNeigh(a)
       .flatMap { case (vect, b) =>
@@ -155,16 +155,16 @@ abstract class Variant private[variant] (
         val pvect = boardType.norm.getPrev(vect)
         val nvect = boardType.norm.getNext(vect)
 
-        var pj = canJumpTo(sit, a + pvect)
-        var nj = canJumpTo(sit, a + nvect)
+        var pj = canJumpTo(situation, a + pvect)
+        var nj = canJumpTo(situation, a + nvect)
 
         if (pj || nj) {
           var c   = b
           var u   = 1
           var max = false
-          var cp  = sit.board(c)
+          var cp  = situation.board(c)
           while (!max && (pj || nj) && cp.isDefined) {
-            if (isUsable(sit, cp.get)) {
+            if (isUsable(situation, cp.get)) {
               u += 1 // When u = 1, the only possible moves are already accounted for as in-line
               max = maxUsable.isDefined && u > maxUsable.get
 
@@ -172,18 +172,18 @@ abstract class Variant private[variant] (
                 if (pj) {
                   val d = c + pvect
 
-                  if (canJumpTo(sit, d)) dests :+= d
+                  if (canJumpTo(situation, d)) dests :+= d
                   else pj = false
                 }
                 if (nj) {
                   val d = c + nvect
 
-                  if (canJumpTo(sit, d)) dests :+= d
+                  if (canJumpTo(situation, d)) dests :+= d
                   else nj = false
                 }
 
                 c += vect
-                cp = sit.board(c)
+                cp = situation.board(c)
               }
             } else {
               max = true
@@ -193,43 +193,43 @@ abstract class Variant private[variant] (
 
         dests
       }
-      .map(b => computeMove(a, b, sit))
+      .map(b => computeMove(a, b, situation))
       .toList
   }
 
-  def computeMove(orig: Pos, dest: Pos, sit: Situation, capture: Option[Pos] = Option.empty): Move =
+  def computeMove(orig: Pos, dest: Pos, situation: Situation, capture: Option[Pos] = Option.empty): Move =
     Move(
-      sit.player,
+      situation.player,
       orig,
       dest,
-      sit,
-      boardAfter(sit, orig, dest),
+      situation,
+      boardAfter(situation, orig, dest),
       capture = capture,
-      autoEndTurn = isAutoEndTurn(sit, orig, dest)
+      autoEndTurn = isAutoEndTurn(situation, orig, dest)
     )
 
-  def getCapture(sit: Situation, @nowarn orig: Pos, dest: Pos): Option[Pos] =
-    if (sit.board.isPiece(dest)) Some(dest) else None
+  def getCapture(situation: Situation, @nowarn orig: Pos, dest: Pos): Option[Pos] =
+    if (situation.board.isPiece(dest)) Some(dest) else None
 
-  def isAutoEndTurn(sit: Situation, orig: Pos, dest: Pos): Boolean = true
+  def isAutoEndTurn(situation: Situation, orig: Pos, dest: Pos): Boolean = true
 
-  def repetition(sit: Situation): Boolean = {
+  def repetition(situation: Situation): Boolean = {
     if (!repetitionEnabled) return false
 
-    val la = sit.board.history.lastAction
+    val la = situation.board.history.lastAction
 
     la.isDefined && isAutoEndTurn(
-      sit,
+      situation,
       la.get.origDest._1,
       la.get.origDest._2
-    ) && sit.board.history.threefoldRepetition
+    ) && situation.board.history.threefoldRepetition
   }
 
-  private def canJumpTo(sit: Situation, a: Pos): Boolean = !sit.board.isPiece(a) && boardType.isCell(a)
+  private def canJumpTo(situation: Situation, a: Pos): Boolean = !situation.board.isPiece(a) && boardType.isCell(a)
 
   // Move pieces on the board. Other bits (including score) are handled by Move.finalizeAfter()
-  def boardAfter(sit: Situation, orig: Pos, dest: Pos): Board = {
-    sit.board.copy(pieces = boardAfter_pieces(sit.board.pieces, orig, dest))
+  def boardAfter(situation: Situation, orig: Pos, dest: Pos): Board = {
+    situation.board.copy(pieces = boardAfter_pieces(situation.board.pieces, orig, dest))
   }
 
   protected def boardAfter_pieces(pieces: PieceMap, orig: Pos, dest: Pos): PieceMap = {
@@ -308,10 +308,10 @@ abstract class Variant private[variant] (
       )
     }
 
-  def move(sit: Situation, from: Pos, to: Pos): Validated[String, Move] = {
+  def move(situation: Situation, from: Pos, to: Pos): Validated[String, Move] = {
     // Find the move in the variant specific list of valid moves !
-    sit.moves.get(from).flatMap(_.find(m => m.dest == to)) toValid
-      s"Not a valid move: $from$to [${from.key}${to.key}]. Allowed moves: ${sit.moves}"
+    situation.moves.get(from).flatMap(_.find(m => m.dest == to)) toValid
+      s"Not a valid move: $from$to [${from.key}${to.key}]. Allowed moves: ${situation.moves}"
   }
 
   /** If a player runs out of move, the match is a draw. */
@@ -321,15 +321,15 @@ abstract class Variant private[variant] (
 
   def winningScore = 6
 
-  def winner(sit: Situation): Option[Player] = {
-    if (sit.board.history.score.p1 >= winningScore) Some(P1)
-    else if (sit.board.history.score.p2 >= winningScore) Some(P2)
+  def winner(situation: Situation): Option[Player] = {
+    if (situation.board.history.score.p1 >= winningScore) Some(P1)
+    else if (situation.board.history.score.p2 >= winningScore) Some(P2)
     else None
   }
 
-  def specialEnd(sit: Situation) = winner(sit).isDefined
+  def specialEnd(situation: Situation) = winner(situation).isDefined
 
-  def specialDraw(sit: Situation) = sit.moves.size == 0
+  def specialDraw(situation: Situation) = situation.moves.size == 0
 
   def materialImbalance(@nowarn board: Board): Int = 0
 
@@ -342,8 +342,8 @@ abstract class Variant private[variant] (
   def valid(@nowarn board: Board, @nowarn strict: Boolean): Boolean = true
 
   def isIrreversible(move: Move): Boolean                = move.capture.isDefined
-  def isIrreversible(sit: Situation, move: Uci): Boolean =
-    getCapture(sit, move.origDest._1, move.origDest._2).isDefined
+  def isIrreversible(situation: Situation, move: Uci): Boolean =
+    getCapture(situation, move.origDest._1, move.origDest._2).isDefined
 
   /** Indicates whether the previous player should be remembered to asses a situation. */
   def hasPrevPlayer: Boolean = false
@@ -364,12 +364,12 @@ abstract class Variant private[variant] (
 
   override def hashCode: Int = id
 
-  protected def isUsable(sit: Situation, piece: Piece): Boolean = piece.is(sit.player)
+  protected def isUsable(situation: Situation, piece: Piece): Boolean = piece.is(situation.player)
 
-  protected def isPushable(sit: Situation, piece: Piece): Boolean = isEjectable(sit, piece)
+  protected def isPushable(situation: Situation, piece: Piece): Boolean = isEjectable(situation, piece)
 
-  protected def isEjectable(sit: Situation, piece: Piece): Boolean =
-    piece.isNot(sit.player) && Player.all.find(p => piece.is(p)).isDefined
+  protected def isEjectable(situation: Situation, piece: Piece): Boolean =
+    piece.isNot(situation.player) && Player.all.find(p => piece.is(p)).isDefined
 
   val roles: List[Role] = Role.all
 
@@ -394,7 +394,7 @@ object Variant {
 
   def exists(id: Int): Boolean = byId contains id
 
-  val openingSensibleVariants: Set[Variant] = Set(Abalone, GrandAbalone)
+  val openingSensibleVariants: Set[Variant] = Set(Abalone)//, GrandAbalone)
 
   val divisionSensibleVariants: Set[Variant] = Set()
 

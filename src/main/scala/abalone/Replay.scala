@@ -172,11 +172,11 @@ object Replay {
     )
   }
 
-  private def recursiveSituations(sit: Situation, sans: List[San]): Validated[String, List[Situation]] =
+  private def recursiveSituations(situation: Situation, sans: List[San]): Validated[String, List[Situation]] =
     sans match {
       case Nil         => valid(Nil)
       case san :: rest =>
-        san(StratSituation.wrap(sit)).map(abaloneMove) flatMap { move =>
+        san(StratSituation.wrap(situation)).map(abaloneMove) flatMap { move =>
           val after = move.situationAfter
           recursiveSituations(after, rest) map {
             after :: _
@@ -185,13 +185,13 @@ object Replay {
     }
 
   private def recursiveSituationsFromUci(
-      sit: Situation,
+      situation: Situation,
       ucis: List[Uci]
   ): Validated[String, List[Situation]] =
     ucis match {
       case Nil         => valid(Nil)
       case uci :: rest =>
-        uci(sit) andThen { move =>
+        uci(situation) andThen { move =>
           val after = move.situationAfter
           recursiveSituationsFromUci(after, rest) map {
             after :: _
@@ -299,14 +299,14 @@ object Replay {
 
       def compareFen(fen: FEN) = truncateFen(fen) == atFenTruncated
 
-      def recursivePlyAtFen(sit: Situation, sans: List[San], ply: Int, turn: Int): Validated[String, Int] =
+      def recursivePlyAtFen(situation: Situation, sans: List[San], ply: Int, turn: Int): Validated[String, Int] =
         sans match {
           case Nil         => invalid(s"Can't find $atFenTruncated, reached ply $ply, turn $turn")
           case san :: rest =>
-            san(StratSituation.wrap(sit)).map(abaloneMove) flatMap { move =>
+            san(StratSituation.wrap(situation)).map(abaloneMove) flatMap { move =>
               val after        = move.situationAfter
               val newPlies     = ply + 1
-              val newTurnCount = turn + (if (sit.player != after.player) 1 else 0)
+              val newTurnCount = turn + (if (situation.player != after.player) 1 else 0)
               val fen          = Forsyth >> Game(after, plies = newPlies, turnCount = newTurnCount)
               if (compareFen(fen)) Validated.valid(ply)
               else recursivePlyAtFen(after, rest, newPlies, newTurnCount)

@@ -9,7 +9,7 @@ case object GrandAbalone
       id = 2,
       key = "grandabalone",
       name = "Grand Abalone",
-      standardInitialPosition = true,
+      standardInitialPosition = false,
       boardType = Hex6
     ) {
   override def perfIcon: Char = '\ue927'
@@ -34,8 +34,8 @@ case object GrandAbalone
   /** The sequence of the number of actions per turn is 12* (P1 plays one move, then, starting with P2, both
     * players have two actions per turn).
     */
-  override def isAutoEndTurn(sit: Situation, orig: Pos, dest: Pos): Boolean =
-    sit.board.history.prevPlayer.fold(true)(p => p == sit.player)
+  override def isAutoEndTurn(situation: Situation, orig: Pos, dest: Pos): Boolean =
+    situation.board.history.prevPlayer.fold(true)(p => p == situation.player)
 
   /** Belgian daisy. */
   override def initialFen: FEN =

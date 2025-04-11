@@ -50,7 +50,7 @@ object Forsyth {
 
   def <<<(fen: FEN): Option[SituationPlus] = <<<@(Variant.default, fen)
 
-  def >>(sit: Situation): FEN = >>(SituationPlus(sit, 1))
+  def >>(situation: Situation): FEN = >>(SituationPlus(situation, 1))
 
   def >>(parsed: SituationPlus): FEN =
     parsed match {

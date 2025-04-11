@@ -1,12 +1,12 @@
 package strategygames.abalone
 
 final class Hash(size: Int) {
-  def apply(sit: Situation): PositionHash = {
-    val l = Hash.get(sit, Hash.polyglotTable)
+  def apply(situation: Situation): PositionHash = {
+    val l = Hash.get(situation, Hash.polyglotTable)
     if (size <= 8) {
       Array.tabulate(size)(i => (l >>> ((7 - i) * 8)).toByte)
     } else {
-      val m = Hash.get(sit, Hash.randomTable)
+      val m = Hash.get(situation, Hash.randomTable)
       Array.tabulate(size)(i =>
         if (i < 8) (l >>> ((7 - i) * 8)).toByte
         else (m >>> ((15 - i) * 8)).toByte
@@ -36,23 +36,23 @@ object Hash {
   /** Remark: we use pos.hashIndex instead of pos.index or pos.hashCode to make sure the maximal value of this
     * index is < posNb.
     */
-  def actorIndex(sit: Situation, actor: Actor) =
-    sit.board.variant.boardType.posNb * actor.piece.player.fold(1, 0) + actor.pos.hashIndex
+  def actorIndex(situation: Situation, actor: Actor) =
+    situation.board.variant.boardType.posNb * actor.piece.player.fold(1, 0) + actor.pos.hashIndex
 
-  def get(sit: Situation, table: ZobristConstants): Long = {
+  def get(situation: Situation, table: ZobristConstants): Long = {
     val phturn =
-      if (sit.board.variant.hasPrevPlayer) sit.board.history.prevPlayer.fold(0L)(_.fold(table.p1TurnMask, 0L))
+      if (situation.board.variant.hasPrevPlayer) situation.board.history.prevPlayer.fold(0L)(_.fold(table.p1TurnMask, 0L))
       else 0L
-    val hturn  = sit.player.fold(table.p1TurnMask, 0L)
+    val hturn  = situation.player.fold(table.p1TurnMask, 0L)
 
-    sit.board.actors.values.view
-      .map(a => table.actorMasks(actorIndex(sit, a)))
+    situation.board.actors.values.view
+      .map(a => table.actorMasks(actorIndex(situation, a)))
       .fold(phturn ^ hturn)(_ ^ _)
   }
 
   private val h = new Hash(size)
 
-  def apply(sit: Situation): PositionHash = h.apply(sit)
+  def apply(situation: Situation): PositionHash = h.apply(situation)
 
   def debug(hashes: PositionHash) = hashes.map(_.toInt).sum.toString
 }

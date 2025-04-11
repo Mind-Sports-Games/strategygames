@@ -25,7 +25,7 @@ sealed abstract class BoardType(
   // Cell
   final def isCell(a: Pos): Boolean = isCell(a.x, a.y)
 
-  def isCell(x: Int, y: Int): Boolean = 0 <= x & x < width & 0 <= y & y < height
+  def isCell(x: Int, y: Int): Boolean = 0 <= x && x < width && 0 <= y && y < height
 
   //
   //
