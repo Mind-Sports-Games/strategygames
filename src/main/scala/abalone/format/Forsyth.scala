@@ -67,7 +67,7 @@ object Forsyth {
     } else ""
     val halfMoves  = game.situation.board.history.halfMoveClock
     val fullMoves  = game.fullTurnCount
-    FEN(s"$boardFen $scoreStr $player$prevPlayer $halfMoves $fullMoves")
+    FEN(s"$boardFen $scoreStr $player $halfMoves $fullMoves$prevPlayer")
   }
 
   def exportBoard(board: Board): String = {
