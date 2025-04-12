@@ -23,12 +23,15 @@ case class Move(
 
   // TODO Dameo - might need to edit this, look at how draughts gamelogic does this (ghosts)
   def finalizeAfter: Board = {
-    val newBoard = after.copy(pieces = after.pieces ++ capture.map(
+    var newBoard = after.copy(pieces = after.pieces ++ capture.map(
       (_ -> after.pieces(capture.get).copy(role=after.pieces(capture.get).ghostRole))))
     .updateHistory({h =>
       h.copy(
         currentTurn = h.currentTurn :+ toUci
       )})
+    if (promotion.nonEmpty) {
+      newBoard = newBoard.copy(pieces = newBoard.pieces + (dest -> Piece(piece.player, promotion.get)))
+    }
     if (autoEndTurn) {
       newBoard.copy(pieces = newBoard.pieces.filter({case (_,v) => !v.isGhost}))
     } else {

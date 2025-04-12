@@ -274,10 +274,49 @@ class DameoActorTest extends DameoTest with ValidatedMatchers {
       move.situationAfter.board.pieces must_== FEN("W:Wc7:B:H0:F1").pieces
     }
 
-    // "promote white piece that ends on back row" in {}
-    // "promote black piece that ends on back row" in {}
-    // "don't promote white piece that captures through back row" in {}
-    // "don't promote black piece that captures through back row" in {}
+    "promote P1 piece that ends on back row" in {
+      val board = Board(FEN("W:Wd6:Bd7:H0:F1").pieces, variant.Dameo)
+      val moves = Situation(board, P1).actors.find(_.pos == Pos.D6).get.captures
+      moves.length must_== 1
+      moves(0).situationAfter.board.pieces must_== FEN("W:Wd8.k:B:H0:F1").pieces
+    }
+
+    "promote P2 piece that ends on back row" in {
+      val board = Board(FEN("W:Wd2:Bd3:H0:F1").pieces, variant.Dameo)
+      val moves = Situation(board, P2).actors.find(_.pos == Pos.D3).get.captures
+      moves.length must_== 1
+      moves(0).situationAfter.board.pieces must_== FEN("W:W:Bd1.k:H0:F1").pieces
+    }
+
+    "don't promote P1 piece that captures through back row" in {
+      val board = Board(FEN("W:Wd6:Bb7,c8,d7:H0:F1").pieces, variant.Dameo)
+      val moves = Situation(board, P1).actors.find(_.pos == Pos.D6).get.captures
+      moves.length must_== 1
+      moves(0).situationAfter.board.pieces must_== FEN("W:Wd8:Bb7,c8,d7.g:H0:F1").pieces
+
+      val moves2 = moves(0).situationAfter.actors.find(_.pos == Pos.D8).get.captures
+      moves2.length must_== 1
+      moves2(0).situationAfter.board.pieces must_== FEN("W:Wb8:Bb7,c8.g,d7.g:H0:F1").pieces
+
+      val moves3 = moves2(0).situationAfter.actors.find(_.pos == Pos.B8).get.captures
+      moves3.length must_== 1
+      moves3(0).situationAfter.board.pieces must_== FEN("W:Wb6:B:H0:F1").pieces
+    }
+
+    "don't promote P2 piece that captures through back row" in {
+      val board = Board(FEN("W:Wb2,c1,d2:Bd3:H0:F1").pieces, variant.Dameo)
+      val moves = Situation(board, P2).actors.find(_.pos == Pos.D3).get.captures
+      moves.length must_== 1
+      moves(0).situationAfter.board.pieces must_== FEN("W:Wb2,c1,d2.g:Bd1:H0:F1").pieces
+
+      val moves2 = moves(0).situationAfter.actors.find(_.pos == Pos.D1).get.captures
+      moves2.length must_== 1
+      moves2(0).situationAfter.board.pieces must_== FEN("W:Wb2,c1.g,d2.g:Bb1:H0:F1").pieces
+
+      val moves3 = moves2(0).situationAfter.actors.find(_.pos == Pos.B1).get.captures
+      moves3.length must_== 1
+      moves3(0).situationAfter.board.pieces must_== FEN("W:W:Bb3:H0:F1").pieces
+    }
 
   }
 
@@ -421,13 +460,4 @@ class DameoActorTest extends DameoTest with ValidatedMatchers {
       man.captures.length must_== 2
     }
   }
-
-  // "move.situationAfter" should {
-    // board
-    // board history
-    // situationafter
-    // endturn i.e. situation.player
-  //   "leave ghosts when capture sequence is incomplete" in {}
-  //   "remove ghosts after full capture sequence" in {}
-  // }
 }

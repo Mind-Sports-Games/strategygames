@@ -34,6 +34,13 @@ case class Board(
     x >= 0 && x < boardSize.width && y >= 0 && y < boardSize.height
   }
 
+  def backrow(pos: Pos, player: Player) = {
+    player match {
+      case P1 => pos.rank.index == boardSize.height - 1
+      case P2 => pos.rank.index == 0
+    }
+  }
+
   def empty(pos: Pos): Boolean = {
     !pieces.contains(pos)
   }
