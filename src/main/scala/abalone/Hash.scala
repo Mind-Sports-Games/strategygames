@@ -41,7 +41,7 @@ object Hash {
 
   def get(situation: Situation, table: ZobristConstants): Long = {
     val phturn =
-      if (situation.board.variant.hasPrevPlayer) situation.board.history.prevPlayer.fold(0L)(_.fold(table.p1TurnMask, 0L))
+      if (situation.board.variant.hasPrevPlayer) situation.board.variant.prevPlayer(situation).fold(0L)(_.fold(table.p1TurnMask, 0L))
       else 0L
     val hturn  = situation.player.fold(table.p1TurnMask, 0L)
 

@@ -71,7 +71,9 @@ abstract class Variant private[variant] (
     validMoves_lineCore(situation, a) ++ validMoves_jumpCore(situation, a)
 
   def validMoves_line(situation: Situation): Map[Pos, List[Move]]   = {
-    situation.board.pieces.filter(t => isUsable(situation, t._2)).map { case (a, _) => (a, validMoves_lineCore(situation, a)) }
+    situation.board.pieces.filter(t => isUsable(situation, t._2)).map { case (a, _) =>
+      (a, validMoves_lineCore(situation, a))
+    }
   }
   def validMoves_line(situation: Situation, a: Pos): List[Move]     = {
     val ap = situation.board(a)
@@ -138,7 +140,9 @@ abstract class Variant private[variant] (
   }
 
   def validMoves_jump(situation: Situation): Map[Pos, List[Move]]   = {
-    situation.board.pieces.filter(t => isUsable(situation, t._2)).map { case (a, _) => (a, validMoves_jumpCore(situation, a)) }
+    situation.board.pieces.filter(t => isUsable(situation, t._2)).map { case (a, _) =>
+      (a, validMoves_jumpCore(situation, a))
+    }
   }
   def validMoves_jump(situation: Situation, a: Pos): List[Move]     = {
     val ap = situation.board(a)
@@ -225,7 +229,8 @@ abstract class Variant private[variant] (
     ) && situation.board.history.threefoldRepetition
   }
 
-  private def canJumpTo(situation: Situation, a: Pos): Boolean = !situation.board.isPiece(a) && boardType.isCell(a)
+  private def canJumpTo(situation: Situation, a: Pos): Boolean =
+    !situation.board.isPiece(a) && boardType.isCell(a)
 
   // Move pieces on the board. Other bits (including score) are handled by Move.finalizeAfter()
   def boardAfter(situation: Situation, orig: Pos, dest: Pos): Board = {
@@ -287,7 +292,6 @@ abstract class Variant private[variant] (
       h.copy(
         lastTurn = if (move.autoEndTurn) h.currentTurn :+ move.toUci else h.lastTurn,
         currentTurn = if (move.autoEndTurn) List() else h.currentTurn :+ move.toUci,
-        prevPlayer = Option(move.player),
         score = if (move.captures) h.score.add(move.player) else h.score,
         halfMoveClock = if (move.captures) 0 else h.halfMoveClock + 1
       )
@@ -341,12 +345,17 @@ abstract class Variant private[variant] (
 
   def valid(@nowarn board: Board, @nowarn strict: Boolean): Boolean = true
 
-  def isIrreversible(move: Move): Boolean                = move.capture.isDefined
+  def isIrreversible(move: Move): Boolean                      = move.capture.isDefined
   def isIrreversible(situation: Situation, move: Uci): Boolean =
     getCapture(situation, move.origDest._1, move.origDest._2).isDefined
 
   /** Indicates whether the previous player should be remembered to asses a situation. */
   def hasPrevPlayer: Boolean = false
+
+  def prevPlayer(situation: Situation): Option[Player] =
+    if (situation.board.history.currentTurn.isEmpty) {
+      if (situation.board.history.lastTurn.isEmpty) None else Some(!situation.player)
+    } else Some(situation.player)
 
   def turnCountFromFen(fenTurnCount: Int, player: Player) =
     fenTurnCount * 2 - player.fold(2, 1)
@@ -394,7 +403,7 @@ object Variant {
 
   def exists(id: Int): Boolean = byId contains id
 
-  val openingSensibleVariants: Set[Variant] = Set(Abalone)//, GrandAbalone)
+  val openingSensibleVariants: Set[Variant] = Set(Abalone) // , GrandAbalone)
 
   val divisionSensibleVariants: Set[Variant] = Set()
 

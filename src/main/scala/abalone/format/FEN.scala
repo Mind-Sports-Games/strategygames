@@ -30,17 +30,6 @@ final case class FEN(value: String) extends AnyVal {
 
   def player2Score: Int = intFromFen(2).getOrElse(0)
 
-  def prevPlayer(variant: Variant): Option[Player] = {
-    if (!variant.hasPrevPlayer) return None
-
-    value
-      .split(' ')
-      .lift(6)
-      .flatMap(_.headOption)
-      .flatMap(Player.apply)
-      .map(!_)
-  }
-
   def player: Option[Player] = value
     .split(' ')
     .lift(3)
@@ -51,6 +40,23 @@ final case class FEN(value: String) extends AnyVal {
   def halfMovesSinceLastCapture: Option[Int] = intFromFen(4)
 
   def fullMove: Option[Int] = intFromFen(5)
+
+  def currentTurn(variant: Variant): Option[Uci]      = turn(variant, 6)
+  def lastTurn(variant: Variant): Option[Uci]         = turn(variant, 7)
+  def turn(variant: Variant, index: Int): Option[Uci] = {
+    if (!variant.hasPrevPlayer) return None
+
+    value
+      .split(' ')
+      .lift(index)
+      .flatMap(uci =>
+        uci match {
+          case Uci.Move.moveR(orig0, orig1, dest0, dest1) =>
+            Uci.Move.fromStrings(orig0 + orig1, dest0 + dest1)
+          case _                                          => None
+        }
+      )
+  }
 
   def ply: Option[Int] =
     fullMove map { fm =>

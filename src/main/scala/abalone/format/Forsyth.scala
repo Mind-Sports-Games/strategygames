@@ -10,13 +10,14 @@ import strategygames.{Player, Score}
 object Forsyth {
   val initial = Abalone.initialFen // TODO?
 
-  def <<@(variant: Variant, fen: FEN): Option[Situation] = {
+  def <<@(variant: Variant, fen: FEN): Option[Situation] =
     Option(
       Situation(
         board = Board(
           pieces = fen.pieces(variant),
           history = History(
-            prevPlayer = fen.prevPlayer(variant),
+            lastTurn = fen.lastTurn(variant).fold(List[Uci]())(List(_)),
+            currentTurn = fen.currentTurn(variant).fold(List[Uci]())(List(_)),
             score = Score(fen.player1Score, fen.player2Score),
             halfMoveClock = fen.halfMovesSinceLastCapture.getOrElse(0)
           ),
@@ -25,7 +26,6 @@ object Forsyth {
         player = fen.player.getOrElse(sys.error("Invalid player in fen"))
       )
     )
-  }
 
   def <<(fen: FEN): Option[Situation] = <<@(Variant.default, fen)
 
@@ -59,15 +59,18 @@ object Forsyth {
     }
 
   def >>(game: Game): FEN = {
-    val boardFen   = getFen_board(game.situation.board)
-    val scoreStr   = game.situation.board.history.score.fenStr
-    val player     = game.situation.player.fold('b', 'w')
-    val halfMoves  = game.situation.board.history.halfMoveClock
-    val fullMoves  = game.fullTurnCount
-    val prevPlayer = if (game.situation.board.variant.hasPrevPlayer) {
-      game.situation.board.history.prevPlayer.fold(" *")(p => p.fold(" b", " w"))
+    val boardFen  = getFen_board(game.situation.board)
+    val scoreStr  = game.situation.board.history.score.fenStr
+    val player    = game.situation.player.fold('b', 'w')
+    val halfMoves = game.situation.board.history.halfMoveClock
+    val fullMoves = game.fullTurnCount
+    val prev      = if (game.situation.board.variant.hasPrevPlayer) {
+      val lastTurn    = game.situation.board.history.lastTurn.reverse.headOption
+      val currentTurn = game.situation.board.history.currentTurn.reverse.headOption
+
+      " " + currentTurn.fold("-")(_.uci) + " " + lastTurn.fold("-")(_.uci)
     } else ""
-    FEN(s"$boardFen $scoreStr $player $halfMoves $fullMoves$prevPlayer")
+    FEN(s"$boardFen $scoreStr $player $halfMoves $fullMoves$prev")
   }
 
   def exportBoard(board: Board): String = {

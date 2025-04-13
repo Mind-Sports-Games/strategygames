@@ -3,9 +3,9 @@ package strategygames.abalone
 import cats.data.Validated
 import org.specs2.matcher.MatchResult
 import org.specs2.mutable.Specification
+import strategygames.abalone.format.Forsyth.<<@
 import strategygames.abalone.format.{FEN, Forsyth, Uci}
 import strategygames.abalone.variant.Variant
-import strategygames.{Player, Score}
 
 class AbaloneTest extends Specification with IAbaloneTest {
   val debug: Boolean = false
@@ -47,20 +47,7 @@ class AbaloneTest extends Specification with IAbaloneTest {
       initialFen: FEN,
       finalFen: String
   ): MatchResult[Any] = {
-    var game = new Game(
-      Situation(
-        board = Board(
-          initialFen.pieces(variant),
-          History(
-            prevPlayer = initialFen.prevPlayer(variant),
-            score = Score(initialFen.player1Score, initialFen.player2Score),
-            halfMoveClock = initialFen.halfMovesSinceLastCapture.getOrElse(0)
-          ),
-          variant
-        ),
-        player = initialFen.player.getOrElse(Player.P1)
-      )
-    )
+    var game = new Game(<<@(variant, initialFen).get)
 
     var i = game.plies
     ucis
