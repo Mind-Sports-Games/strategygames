@@ -102,6 +102,14 @@ class DameoFenTest extends DameoTest with ValidatedMatchers {
       pieces.get(Pos.E8) must_== Some(Piece(P2, GhostKing))
     }
 
+    "parse active pieces correctly" in {
+      // There will be only one active piece at a time
+      FEN("W:Wa5,c4.a:Ba8.g,e8.p,f6:H0:F1").pieces.get(Pos.C4) must_== Some(Piece(P1, ActiveMan))
+      FEN("W:Wa5,c4:Ba8.a,e8.p,f6:H0:F1").pieces.get(Pos.A8) must_== Some(Piece(P2, ActiveMan))
+      FEN("W:Wa5,c4.b:Ba8.g,e8.p,f6:H0:F1").pieces.get(Pos.C4) must_== Some(Piece(P1, ActiveKing))
+      FEN("W:Wa5,c4:Ba8.b,e8.p,f6:H0:F1").pieces.get(Pos.A8) must_== Some(Piece(P2, ActiveKing)) 
+    }
+
     "parse empty boards" in {
       FEN("W:Wa5:Ba8:H0:F1").pieces must_== Map(Pos.A5 -> Piece(P1, Man), Pos.A8 -> Piece(P2, Man))
       FEN("W:Wa5:B:H0:F1").pieces must_== Map(Pos.A5 -> Piece(P1, Man))

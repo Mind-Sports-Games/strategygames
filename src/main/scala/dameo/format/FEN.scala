@@ -8,9 +8,9 @@ Dameo FEN:
 [colour to move]:W[white piece coords]:B[black piece coords]:Halfmoveclock:Fullmoves
 
 coords for men are a1,b1,c1
-other roles (kings, ghostman, ghostking) are added to the coord with a period, e.g. a1.k,b1.g,b2.p
-I assume ghosts need to be part of the FEN since we want to treat (partial) moves with ghosts in them
-as proper moves w.r.t. the frontend.
+other roles (kings, ghostman, ghostking, activeman, activeking) are added to the coord with a period,
+e.g. a1.k,b1.g,b2.p I assume ghosts need to be part of the FEN since we want to treat (partial)
+moves with ghosts in them as proper moves w.r.t. the frontend.
 
 */
 

@@ -254,17 +254,17 @@ class DameoActorTest extends DameoTest with ValidatedMatchers {
       move.situationAfter.board.pieces must_== FEN("W:Wc7:B:H0:F1").pieces
     }
 
-    "leave ghosts after partial capture" in {
+    "leave ghosts and make capturing piece active after partial capture" in {
       val board = Board(FEN("W:Wc5:Bc6,d7:H0:F1").pieces, variant.Dameo)
       val man = Situation(board, P1).actors.find(_.pos == Pos.C5).get
       man.captures.length must_== 1
       val move = man.captures(0)
       move.autoEndTurn must_== false
       move.situationAfter.player == P1
-      move.situationAfter.board.pieces must_== FEN("W:Wc7:Bc6.g,d7:H0:F1").pieces
+      move.situationAfter.board.pieces must_== FEN("W:Wc7.a:Bc6.g,d7:H0:F1").pieces
     }    
 
-    "remove all ghosts after full capture" in {
+    "remove all ghosts and return capturing piece to normal after full capture" in {
       val board = Board(FEN("W:Wc5:Bc2.g,c4.p,c6:H0:F1").pieces, variant.Dameo)
       val man = Situation(board, P1).actors.find(_.pos == Pos.C5).get
       man.captures.length must_== 1
@@ -292,11 +292,11 @@ class DameoActorTest extends DameoTest with ValidatedMatchers {
       val board = Board(FEN("W:Wd6:Bb7,c8,d7:H0:F1").pieces, variant.Dameo)
       val moves = Situation(board, P1).actors.find(_.pos == Pos.D6).get.captures
       moves.length must_== 1
-      moves(0).situationAfter.board.pieces must_== FEN("W:Wd8:Bb7,c8,d7.g:H0:F1").pieces
+      moves(0).situationAfter.board.pieces must_== FEN("W:Wd8.a:Bb7,c8,d7.g:H0:F1").pieces
 
       val moves2 = moves(0).situationAfter.actors.find(_.pos == Pos.D8).get.captures
       moves2.length must_== 1
-      moves2(0).situationAfter.board.pieces must_== FEN("W:Wb8:Bb7,c8.g,d7.g:H0:F1").pieces
+      moves2(0).situationAfter.board.pieces must_== FEN("W:Wb8.a:Bb7,c8.g,d7.g:H0:F1").pieces
 
       val moves3 = moves2(0).situationAfter.actors.find(_.pos == Pos.B8).get.captures
       moves3.length must_== 1
@@ -307,11 +307,11 @@ class DameoActorTest extends DameoTest with ValidatedMatchers {
       val board = Board(FEN("W:Wb2,c1,d2:Bd3:H0:F1").pieces, variant.Dameo)
       val moves = Situation(board, P2).actors.find(_.pos == Pos.D3).get.captures
       moves.length must_== 1
-      moves(0).situationAfter.board.pieces must_== FEN("W:Wb2,c1,d2.g:Bd1:H0:F1").pieces
+      moves(0).situationAfter.board.pieces must_== FEN("W:Wb2,c1,d2.g:Bd1.a:H0:F1").pieces
 
       val moves2 = moves(0).situationAfter.actors.find(_.pos == Pos.D1).get.captures
       moves2.length must_== 1
-      moves2(0).situationAfter.board.pieces must_== FEN("W:Wb2,c1.g,d2.g:Bb1:H0:F1").pieces
+      moves2(0).situationAfter.board.pieces must_== FEN("W:Wb2,c1.g,d2.g:Bb1.a:H0:F1").pieces
 
       val moves3 = moves2(0).situationAfter.actors.find(_.pos == Pos.B1).get.captures
       moves3.length must_== 1
@@ -353,7 +353,7 @@ class DameoActorTest extends DameoTest with ValidatedMatchers {
     "have only the maximal capture sequence" in {
       val board = Board(FEN("W:Wc4.k:Bc5,d4,e3:H0:F1").pieces, variant.Dameo)
       val man = Situation(board, P1).actors.find(_.pos == Pos.C4).get
-      man.captures.length must_== 2
+      man.captures.length must_== 1
       man.captures.map(_.capture).toSet must_== Set(Some(Pos.D4))
     }
 
@@ -433,7 +433,7 @@ class DameoActorTest extends DameoTest with ValidatedMatchers {
     "have only the maximal (long) capture sequence" in {
       val board = Board(FEN("W:Wc4.k:Bc6,e4,f3:H0:F1").pieces, variant.Dameo)
       val man = Situation(board, P1).actors.find(_.pos == Pos.C4).get
-      man.captures.length must_== 2
+      man.captures.length must_== 1
       man.captures.map(_.capture).toSet must_== Set(Some(Pos.E4))
     }
 
@@ -458,6 +458,40 @@ class DameoActorTest extends DameoTest with ValidatedMatchers {
       val board = Board(FEN("W:Wc3.k:Bc5.g,d3,d6,e5.g,g3.g:H0:F1").pieces, variant.Dameo)
       val man = Situation(board, P1).actors.find(_.pos == Pos.C3).get
       man.captures.length must_== 2
+    }
+
+    "leave ghosts and make capturing king active after partial capture" in {
+      val board = Board(FEN("W:Wc5.k:Bc7,d8:H0:F1").pieces, variant.Dameo)
+      val king = Situation(board, P1).actors.find(_.pos == Pos.C5).get
+      king.captures.length must_== 1
+      val move = king.captures(0)
+      move.autoEndTurn must_== false
+      move.situationAfter.player == P1
+      move.situationAfter.board.pieces must_== FEN("W:Wc8.b:Bc7.g,d8:H0:F1").pieces
+    }    
+
+    "remove all ghosts and return capturing king to normal after full capture" in {
+      val board = Board(FEN("W:Wc8.b:Bc7.g,d8,f8,g8:H0:F1").pieces, variant.Dameo)
+      val man = Situation(board, P1).actors.find(_.pos == Pos.C8).get
+      man.captures.length must_== 1
+      val move = man.captures(0)
+      move.autoEndTurn must_== true
+      move.situationAfter.player == P2
+      move.situationAfter.board.pieces must_== FEN("W:We8.k:Bf8,g8:H0:F1").pieces
+    }
+  }
+
+  "active pieces" should {
+    "active man has captures" in {
+      val board = Board(FEN("W:Wd4.a:Bc4,d3.k,d5,e4:H0:F1").pieces, variant.Dameo)
+      val man = Situation(board, P1).actors.find(_.pos == Pos.D4).get
+      man.captures.length must_== 4
+    }
+
+    "active king has captures" in {
+      val board = Board(FEN("W:Wd4.b:Bb4,d2.k,d6,g4:H0:F1").pieces, variant.Dameo)
+      val man = Situation(board, P1).actors.find(_.pos == Pos.D4).get
+      man.captures.length must_== 5
     }
   }
 }

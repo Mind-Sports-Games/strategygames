@@ -15,20 +15,7 @@ case class Situation(board: Board, player: Player) {
 
   lazy val moves: Map[Pos, List[Move]] = board.variant.validMoves(this)
 
-  private val movesList: List[Move] = moves.values.flatten.toList
-
   lazy val destinations: Map[Pos, List[Pos]] = moves.view.mapValues { _ map (_.dest) }.to(Map)
-
-  def actions: List[Action] = movesList
-
-  def canMove: Boolean = moves.nonEmpty
-
-  def canCapture: Boolean = actions
-    .map {
-      case m: Move => m.capture.nonEmpty
-      case _       => false
-    }
-    .contains(true)
 
   def history = board.history
 

@@ -15,7 +15,8 @@ import variant.{ Dameo, Variant }
 
 /** Transform a game to draughts Forsyth Edwards Notation
   * https://en.wikipedia.org/wiki/Portable_Draughts_Notation Additions: Piece role g/p = Ghost man or king of
-  * that player, has been captured but not removed because the forced capture sequence is not finished yet
+  * that player, has been captured but not removed because the forced capture sequence is not finished yet.
+  * Piece role a/b = Active Man or King, the piece performing the forced capture sequence in progress.
   * ":Hx" = Halfmove clock: This is the number of halfmoves since a forced draw material combination appears.
   * This is used to determine if a draw can be claimed. ":Fx" = Fullmove number: The number of the full move.
   * It starts at 1, and is incremented after P2's move.

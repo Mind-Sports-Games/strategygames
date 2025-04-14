@@ -15,8 +15,11 @@ case class Board(
 
   def boardSize = variant.boardSize
 
-  lazy val actors: Map[Pos, Actor] = pieces map { case (pos, piece) =>
-    (pos, Actor(piece, pos, this))
+  lazy val actors: Map[Pos, Actor] = {
+    val active = pieces.filter({case (_, piece) => piece.isActive})
+    (if (active.isEmpty) pieces else active).map { case (pos, piece) =>
+      (pos, Actor(piece, pos, this))
+    }
   }
 
   lazy val actorsOf: Player.Map[Seq[Actor]] = {

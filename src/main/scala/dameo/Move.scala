@@ -21,7 +21,6 @@ case class Move(
       if (autoEndTurn) !piece.player else piece.player
     )
 
-  // TODO Dameo - might need to edit this, look at how draughts gamelogic does this (ghosts)
   def finalizeAfter: Board = {
     var newBoard = after.copy(pieces = after.pieces ++ capture.map(
       (_ -> after.pieces(capture.get).copy(role=after.pieces(capture.get).ghostRole))))
@@ -33,19 +32,11 @@ case class Move(
       newBoard = newBoard.copy(pieces = newBoard.pieces + (dest -> Piece(piece.player, promotion.get)))
     }
     if (autoEndTurn) {
-      newBoard.copy(pieces = newBoard.pieces.filter({case (_,v) => !v.isGhost}))
+      newBoard.copy(pieces = newBoard.pieces.filter({case (_,v) => !v.isGhost}) +
+        (dest -> newBoard.pieces(dest).copy(role = newBoard.pieces(dest).unactiveRole)) )
     } else {
-      newBoard
+      newBoard.copy(pieces = newBoard.pieces + (dest -> Piece(piece.player, piece.activeRole)))
     }
-  }
-
-  def lazySituationAfter =
-    Situation(lazyFinalizeAfter, situationBefore.player)
-
-  def lazyFinalizeAfter: Board = after updateHistory { h =>
-    h.copy(
-      currentTurn = h.currentTurn :+ toUci
-    )
   }
 
   def captures = capture.isDefined

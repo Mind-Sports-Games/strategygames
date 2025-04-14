@@ -4,9 +4,6 @@ import strategygames.Player
 
 import scala.annotation.nowarn
 
-// TODO Dameo - move generation probably wants to go in here
-// You can change the functions here to whatever works best
-// but I've stubbed out what the draughts gamelogic has
 final case class Actor(
     piece: Piece,
     pos: Pos,
@@ -14,10 +11,9 @@ final case class Actor(
 ) {
 
   lazy val noncaptures: List[Move]   = noncaptureMoves()
-  lazy val captures: List[Move]      = captureMoves(false)
-  lazy val capturesFinal: List[Move] = captureMoves(true)
-
-  def getCaptures(finalSquare: Boolean) = if (finalSquare) capturesFinal else captures
+  lazy val captures: List[Move]      = capturesWithLineval._1
+  lazy val capturesWithLineval: (List[Move], Int) = captureMoves()
+  def getCaptures() = captures
 
   private def noncaptureMoves(): List[Move] = {
     def dy: Int = if (player == P1) 1 else -1
@@ -49,16 +45,16 @@ final case class Actor(
     )
   }
 
-  private def captureMoves(@nowarn finalSquare: Boolean): List[Move] = {
+  private def captureMoves(): (List[Move], Int) = {
 
     /* List of (capture pos, destination pos) pairs together with the length
     of the full capture chain */
     def capInfo: (List[(Pos, Pos)], Int) = piece.role match {
-      case role @ (Man | King) => {
+      case role @ (Man | King | ActiveMan | ActiveKing) => {
         def chains: List[List[(Pos, Pos)]] = role match {
-          case Man =>
+          case Man | ActiveMan =>
             allCaptureChains()
-          case King =>
+          case King | ActiveKing =>
             allCaptureChains(true)
           case _ => List()
         }
@@ -67,7 +63,7 @@ final case class Actor(
           case chains => {
             def byLength: Map[Int, List[List[(Pos, Pos)]]] = chains.groupBy(_.length)
             def maxLen: Int = byLength.keys.max
-            (byLength(maxLen).map(_(0)), maxLen)
+            (byLength(maxLen).map(_(0)).distinct, maxLen)
           }
         }
       }
@@ -76,7 +72,7 @@ final case class Actor(
 
     val (capAndDest, capLen) = capInfo
 
-    capAndDest.map({case (cap, dest) =>
+    (capAndDest.map({case (cap, dest) =>
       Move(
         piece=piece,
         orig=pos,
@@ -87,7 +83,7 @@ final case class Actor(
         capture=Some(cap),
         promotion=Option.when(capLen == 1 && board.backrow(dest, piece.player))(King)
       )}
-    )
+    ), capLen)
   }
 
   def linearStep(stepPos: Option[Pos], dx: Int, dy: Int): Option[Pos] = {

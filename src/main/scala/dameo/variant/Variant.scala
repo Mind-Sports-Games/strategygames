@@ -48,30 +48,28 @@ abstract class Variant private[variant] (
   def startPlayer: Player = P1
 
   // TODO Dameo implement this, possibly using Actor move generation
-  def validMoves(@nowarn situation: Situation): Map[Pos, List[Move]] = {
-    // var bestLineValue = 0
-    // var captureMap    = Map[Pos, List[Move]]()
-    // for (actor <- situation.actors) {
-    //   val capts = if (finalSquare) actor.capturesFinal else actor.captures
-    //   if (capts.nonEmpty) {
-    //     val lineValue = capts.head.taken.fold(0)(_.length)
-    //     if (lineValue > bestLineValue) {
-    //       bestLineValue = lineValue
-    //       captureMap = Map(actor.pos -> capts)
-    //     } else if (lineValue == bestLineValue)
-    //       captureMap = captureMap + (actor.pos -> capts)
-    //   }
-    // }
+  def validMoves(situation: Situation): Map[Pos, List[Move]] = {
+    var bestLineValue = 0
+    var captureMap    = Map[Pos, List[Move]]()
+    for (actor <- situation.actors) {
+      val (capts, lineValue) = actor.capturesWithLineval
+      if (capts.nonEmpty) {
+        if (lineValue > bestLineValue) {
+          bestLineValue = lineValue
+          captureMap = Map(actor.pos -> capts)
+        } else if (lineValue == bestLineValue)
+          captureMap = captureMap + (actor.pos -> capts)
+      }
+    }
 
-    // if (captureMap.nonEmpty) captureMap
-    // else
-    //   situation.actors
-    //     .collect {
-    //       case actor if actor.noncaptures.nonEmpty =>
-    //         actor.pos -> actor.noncaptures
-    //     }
-    //     .to(Map)
-    Map.empty
+    if (captureMap.nonEmpty) captureMap
+    else
+      situation.actors
+        .collect {
+          case actor if actor.noncaptures.nonEmpty =>
+            actor.pos -> actor.noncaptures
+        }
+        .to(Map)
   }
 
   def move(

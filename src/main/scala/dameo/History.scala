@@ -13,7 +13,8 @@ case class History(
     // not sure Dameo needs this? Might be only needed for Frisian?
     kingMoves: KingMoves = KingMoves(),
     // this is tracking fullMove for Dameo
-    halfMoveClock: Int = 0
+    halfMoveClock: Int = 0,
+    activeCapturer: Option[Pos] = None
 ) {
 
   lazy val lastAction: Option[Uci] =

@@ -43,9 +43,21 @@ case object GhostKing extends Role {
   val valueOf   = Some(0)
 }
 
+case object ActiveMan extends Role {
+  val forsyth   = 'a'
+  val binaryInt = 5
+  val valueOf   = Some(0)
+}
+
+case object ActiveKing extends Role {
+  val forsyth   = 'b'
+  val binaryInt = 6
+  val valueOf   = Some(0)
+}
+
 object Role {
 
-  val all: List[Role]                     = List(King, Man, GhostKing, GhostMan)
+  val all: List[Role]                     = List(King, Man, GhostKing, GhostMan, ActiveMan, ActiveKing)
   val allPromotable: List[PromotableRole] = List(King)
 
   def defaultRole: Role = Man
