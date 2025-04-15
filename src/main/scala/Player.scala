@@ -1,7 +1,6 @@
 package strategygames
 
 sealed trait Player {
-
   final def fold[A](a: => A, b: => A): A = if (p1) a else b
 
   def unary_! : Player
@@ -9,13 +8,15 @@ sealed trait Player {
   val letter: Char
   val name: String
   val classicName: String
+  val number: Int
+
+  override def hashCode = number
 
   val p1 = this == Player.P1
   val p2 = this == Player.P2
 }
 
 object Player {
-
   // TODO: this is duplicated three times now.
   // TODO
   case class Map[A](p1: A, p2: A) {
@@ -44,27 +45,23 @@ object Player {
   }
 
   case object P1 extends Player {
-
-    lazy val unary_! = P2
+    override lazy val unary_! = P2
 
     // retain old color lettering
-    val letter      = 'w'
-    val name        = "p1"
-    val classicName = "white"
-
-    override val hashCode = 1
+    override val letter      = 'w'
+    override val name        = "p1"
+    override val classicName = "white"
+    override val number      = 1
   }
 
   case object P2 extends Player {
-
-    val unary_! = P1
+    override val unary_! = P1
 
     // retain old color lettering
-    val letter      = 'b'
-    val name        = "p2"
-    val classicName = "black"
-
-    override val hashCode = 2
+    override val letter      = 'b'
+    override val name        = "p2"
+    override val classicName = "black"
+    override val number      = 2
   }
 
   def fromTurnCount(turn: Int) = fromP1((turn & 1) == 0)
@@ -118,5 +115,4 @@ object Player {
       case "0-2" => Option(P2) // draughts
       case _     => None
     }
-
 }

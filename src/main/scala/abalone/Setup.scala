@@ -1,6 +1,7 @@
 package strategygames.abalone
 
-object Setup {
+import strategygames.abalone.variant.Variant
 
-  def apply(variant: strategygames.abalone.variant.Variant) = Game(variant)
+object Setup {
+  def apply(variant: Variant) = Game(variant)
 }

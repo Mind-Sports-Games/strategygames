@@ -2,12 +2,10 @@ package strategygames
 
 import cats.data.Validated
 import cats.implicits._
-
-import variant.Variant
-import format.{ FEN, Uci }
+import strategygames.format.{FEN, Uci}
+import strategygames.variant.Variant
 
 sealed abstract class Replay(val setup: Game, val actions: List[Action], val state: Game) {
-
   lazy val chronoPlies = actions.reverse
 
   // https://stackoverflow.com/questions/53016370/how-to-convert-a-list-to-list-of-lists-by-group-the-elements-when-an-element-rep
@@ -29,12 +27,10 @@ sealed abstract class Replay(val setup: Game, val actions: List[Action], val sta
 
   // TODO: If we had a case class this would be automatic.
   def copy(state: Game): Replay
-
 }
 
 //lots of methods not wrapped, due to differences of Traversable/Iterable, and FEN/String
 object Replay {
-
   final case class Chess(r: chess.Replay)
       extends Replay(
         Game.Chess(r.setup),
@@ -148,7 +144,7 @@ object Replay {
       ) {
     def copy(state: Game): Replay = state match {
       case Game.Abalone(state) => Replay.wrap(r.copy(state = state))
-      case _                   => sys.error("Unable to copy a abalone replay with a non-abalone state")
+      case _                   => sys.error("Unable to copy an abalone replay with a non-abalone state")
     }
   }
 

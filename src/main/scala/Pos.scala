@@ -8,7 +8,6 @@ package strategygames
 //------------------------------------------------------------------------------
 
 sealed abstract class Pos {
-
   val key: String
 
   def piotr: Char
@@ -22,13 +21,10 @@ sealed abstract class Pos {
   override def toString = key
 
   def all: List[Pos]
-
 }
 
 object Pos {
-
   final case class Chess(p: chess.Pos) extends Pos {
-
     val key: String = p.key
 
     def piotr: Char = p.piotr
@@ -38,11 +34,9 @@ object Pos {
     def gameLogic: GameLogic = GameLogic.Chess()
 
     lazy val all: List[Pos] = chess.Pos.all.map(Chess)
-
   }
 
   final case class Draughts(p: draughts.Pos) extends Pos {
-
     val key: String = p.key
 
     def piotr: Char = p.piotr
@@ -55,11 +49,9 @@ object Pos {
     // TODO: this only handl 8x8 boards. we should include 10x10 as well.
     //       Not sure if we need a separate type, probably?
     lazy val all: List[Pos] = draughts.Pos64.all.map(Draughts)
-
   }
 
   final case class FairySF(p: fairysf.Pos) extends Pos {
-
     val key: String = p.key
 
     def piotr: Char = p.piotr
@@ -70,11 +62,9 @@ object Pos {
     def gameLogic: GameLogic = GameLogic.FairySF()
 
     lazy val all: List[Pos] = chess.Pos.all.map(Chess)
-
   }
 
   final case class Samurai(p: samurai.Pos) extends Pos {
-
     val key: String = p.key
 
     def piotr: Char = p.piotr
@@ -84,11 +74,9 @@ object Pos {
     def gameLogic: GameLogic = GameLogic.Samurai()
 
     lazy val all: List[Pos] = samurai.Pos.all.map(Samurai)
-
   }
 
   final case class Togyzkumalak(p: togyzkumalak.Pos) extends Pos {
-
     val key: String = p.key
 
     def piotr: Char = p.piotr
@@ -98,11 +86,9 @@ object Pos {
     def gameLogic: GameLogic = GameLogic.Togyzkumalak()
 
     lazy val all: List[Pos] = togyzkumalak.Pos.all.map(Togyzkumalak)
-
   }
 
   final case class Go(p: go.Pos) extends Pos {
-
     val key: String = p.key
 
     def piotr: Char = p.piotr
@@ -112,11 +98,9 @@ object Pos {
     def gameLogic: GameLogic = GameLogic.Go()
 
     lazy val all: List[Pos] = go.Pos.all.map(Go)
-
   }
 
   final case class Backgammon(p: backgammon.Pos) extends Pos {
-
     val key: String = p.key
 
     def piotr: Char = p.piotr
@@ -126,25 +110,21 @@ object Pos {
     def gameLogic: GameLogic = GameLogic.Backgammon()
 
     lazy val all: List[Pos] = backgammon.Pos.all.map(Backgammon)
-
   }
 
   final case class Abalone(p: abalone.Pos) extends Pos {
+    override val key: String = p.key
 
-    val key: String = p.key
+    override def piotr: Char = p.piotr
 
-    def piotr: Char = p.piotr
+    override lazy val toInt: Int = (p.x << 4) + p.y
 
-    lazy val toInt: Int = (p.file.index << 3) + p.rank.index
+    override def gameLogic: GameLogic = GameLogic.Abalone()
 
-    def gameLogic: GameLogic = GameLogic.Abalone()
-
-    lazy val all: List[Pos] = abalone.Pos.all.map(Abalone)
-
+    override lazy val all: List[Pos] = abalone.Pos.all.map(Abalone)
   }
 
   final case class Dameo(p: dameo.Pos) extends Pos {
-
     val key: String = p.key
 
     def piotr: Char = p.piotr
@@ -154,7 +134,6 @@ object Pos {
     def gameLogic: GameLogic = GameLogic.Dameo()
 
     lazy val all: List[Pos] = dameo.Pos.all.map(Dameo)
-
   }
 
   // need to equivalate this method for draughts probably

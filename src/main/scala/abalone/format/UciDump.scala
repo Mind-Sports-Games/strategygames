@@ -1,14 +1,13 @@
 package strategygames.abalone.format
 
-import scala.annotation.nowarn
 import cats.data.Validated
-
 import strategygames.abalone.variant.Variant
-import strategygames.abalone.{ Action, Move, Replay }
-import strategygames.{ ActionStrs, Player }
+import strategygames.abalone.{Action, Move, Replay}
+import strategygames.{ActionStrs, Player}
+
+import scala.annotation.nowarn
 
 object UciDump {
-
   // a2a4, b8c6
   def apply(replay: Replay): ActionStrs =
     replay.chronoActions.map(_.map(action(replay.setup.board.variant)))
@@ -33,5 +32,4 @@ object UciDump {
   def action(@nowarn variant: Variant)(a: Action): String = a match {
     case m: Move => m.toUci.uci
   }
-
 }
