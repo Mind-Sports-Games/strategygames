@@ -167,6 +167,14 @@ class DameoActorTest extends DameoTest with ValidatedMatchers {
       king1.noncaptures.length must_== 14
       king2.noncaptures.length must_== 14
     }
+
+    "not promote since it's already a king" in {
+      val board = Board(FEN("W:Wa8.k:Bb3:H0:F1").pieces, variant.Dameo)
+      val actors = Situation(board, P1).actors
+      val king = actors.find(_.pos == Pos.A8).get
+      val move = king.noncaptures.find(_.dest == Pos.C8).get
+      move.promotion must_== None
+    }
   }
 
   "man with captures" should {
@@ -478,6 +486,14 @@ class DameoActorTest extends DameoTest with ValidatedMatchers {
       move.autoEndTurn must_== true
       move.situationAfter.player == P2
       move.situationAfter.board.pieces must_== FEN("W:We8.k:Bf8,g8:H0:F1").pieces
+    }
+
+    "not promote since it's already a king" in {
+      val board = Board(FEN("W:Wa8.k:Bb8:H0:F1").pieces, variant.Dameo)
+      val actors = Situation(board, P1).actors
+      val king = actors.find(_.pos == Pos.A8).get
+      val move = king.captures.find(_.dest == Pos.C8).get
+      move.promotion must_== None
     }
   }
 

@@ -40,7 +40,7 @@ final case class Actor(
         situationBefore=Situation(board, piece.player),
         after=board.move(pos, dest).get,
         autoEndTurn=true,
-        promotion=Option.when(board.backrow(dest, piece.player))(King)
+        promotion=Option.when(piece.role == Man && board.backrow(dest, piece.player))(King)
       ))
     )
   }
@@ -81,7 +81,7 @@ final case class Actor(
         after=board.move(pos, dest).get,
         autoEndTurn=capLen==1,
         capture=Some(cap),
-        promotion=Option.when(capLen == 1 && board.backrow(dest, piece.player))(King)
+        promotion=Option.when(capLen == 1 && (piece.role == Man || piece.role == ActiveMan) && board.backrow(dest, piece.player))(King)
       )}
     ), capLen)
   }
