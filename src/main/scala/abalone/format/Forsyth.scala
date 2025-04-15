@@ -68,7 +68,8 @@ object Forsyth {
       val lastTurn    = game.situation.board.history.lastTurn.reverse.headOption
       val currentTurn = game.situation.board.history.currentTurn.reverse.headOption
 
-      " " + currentTurn.fold("-")(_.uci) + " " + lastTurn.fold("-")(_.uci)
+      if (currentTurn.isEmpty && lastTurn.isEmpty) ""
+      else " " + currentTurn.fold("-")(_.uci) + lastTurn.fold("")(" " + _.uci)
     } else ""
     FEN(s"$boardFen $scoreStr $player $halfMoves $fullMoves$prev")
   }
