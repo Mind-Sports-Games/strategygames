@@ -16,7 +16,7 @@ case class Board(
   def boardSize = variant.boardSize
 
   lazy val actors: Map[Pos, Actor] = {
-    val active = pieces.filter({case (_, piece) => piece.isActive})
+    val active = pieces.filter { case (_, piece) => piece.isActive }
     (if (active.isEmpty) pieces else active).map { case (pos, piece) =>
       (pos, Actor(piece, pos, this))
     }
@@ -71,8 +71,8 @@ case class Board(
       }
 
   def autoDraw: Boolean =
-    (variant.maxDrawingMoves(this).fold(false)(m => history.halfMoveClock >= m)) || 
-    (history.threefoldRepetition && variant.repetitionEnabled)
+    (variant.maxDrawingMoves(this).fold(false)(m => history.halfMoveClock >= m)) ||
+      (history.threefoldRepetition && variant.repetitionEnabled)
 
   def valid(strict: Boolean) = variant.valid(this, strict)
 

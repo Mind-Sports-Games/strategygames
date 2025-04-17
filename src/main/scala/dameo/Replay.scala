@@ -66,7 +66,14 @@ object Replay {
     case _                  => sys.error(s"Invalid dameo action $action")
   }
 
-  def replayMove(before: Game, orig: Pos, dest: Pos, capture: Option[Pos], promotion: Boolean, endTurn: Boolean): Move =
+  def replayMove(
+      before: Game,
+      orig: Pos,
+      dest: Pos,
+      capture: Option[Pos],
+      promotion: Boolean,
+      endTurn: Boolean
+  ): Move =
     Move(
       piece = before.situation.board.pieces(orig),
       orig = orig,
@@ -87,7 +94,13 @@ object Replay {
     var state  = init
     var errors = ""
 
-    def replayMoveFromUci(orig: Option[Pos], dest: Option[Pos], capture: Option[Pos], promotion: Boolean, endTurn: Boolean): (Game, Move) =
+    def replayMoveFromUci(
+        orig: Option[Pos],
+        dest: Option[Pos],
+        capture: Option[Pos],
+        promotion: Boolean,
+        endTurn: Boolean
+    ): (Game, Move) =
       (orig, dest) match {
         case (Some(orig), Some(dest)) => {
           val move = replayMove(
@@ -109,20 +122,27 @@ object Replay {
       }
 
     val gameWithActions: List[(Game, Move)] =
-      actionStrs.map({ turnStrs => turnStrs.zipWithIndex.map( {case (uci, i) => {
-        uci match {
-          case Uci.Move.moveR(orig, capture, dest, promotion) =>
-            replayMoveFromUci(
-              Pos.fromKey(orig),
-              Pos.fromKey(dest),
-              if (capture == "") None else Pos.fromKey(capture.tail),
-              promotion == "k",
-              endTurn = i + 1 == turnStrs.length
-            )
-          case (action: String)                    =>
-            sys.error(s"Invalid action for replay: $action")
-        }}})
-      }).toList.flatten
+      actionStrs
+        .map { turnStrs =>
+          turnStrs.zipWithIndex.map {
+            case (uci, i) => {
+              uci match {
+                case Uci.Move.moveR(orig, capture, dest, promotion) =>
+                  replayMoveFromUci(
+                    Pos.fromKey(orig),
+                    Pos.fromKey(dest),
+                    if (capture == "") None else Pos.fromKey(capture.tail),
+                    promotion == "k",
+                    endTurn = i + 1 == turnStrs.length
+                  )
+                case (action: String)                               =>
+                  sys.error(s"Invalid action for replay: $action")
+              }
+            }
+          }
+        }
+        .toList
+        .flatten
 
     (init, gameWithActions, errors match { case "" => None; case _ => errors.some })
   }

@@ -17,12 +17,12 @@ class DameoForsythTest extends DameoTest with ValidatedMatchers {
     }
 
     "export the starting Situation correctly" in {
-      Forsyth.>>(situationFromFen.get).value must_==variant.Dameo.initialFen.value
+      Forsyth.>>(situationFromFen.get).value must_== variant.Dameo.initialFen.value
     }
   }
 
   "situationPlusFromFen" should {
-    val fenFromVariant   = variant.Dameo.initialFen
+    val fenFromVariant       = variant.Dameo.initialFen
     val situationPlusFromFen = Forsyth.<<<(fenFromVariant)
 
     "create the starting setup as SituationPlus" in {
@@ -47,7 +47,7 @@ class DameoForsythTest extends DameoTest with ValidatedMatchers {
 
     "export the Situation correctly" in {
       val situation = Forsyth.<<(fen)
-      Forsyth.>>(situation.get).value must_==fen.value
+      Forsyth.>>(situation.get).value must_== fen.value
     }
   }
 }

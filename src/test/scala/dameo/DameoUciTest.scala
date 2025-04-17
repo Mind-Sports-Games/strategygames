@@ -16,20 +16,22 @@ class DameoUciTest extends DameoTest with ValidatedMatchers {
       Uci.Move.apply("a1d4") must_== Some(Uci.Move(Pos.A1, Pos.D4))
     }
     "capture move" in {
-      Uci.Move(Pos.D4, Pos.F6, capture=Some(Pos.E5)).uci must_== "d4xe5f6"
-      Uci.Move.apply("d4xe5f6") must_== Some(Uci.Move(Pos.D4, Pos.F6, capture=Some(Pos.E5)))
+      Uci.Move(Pos.D4, Pos.F6, capture = Some(Pos.E5)).uci must_== "d4xe5f6"
+      Uci.Move.apply("d4xe5f6") must_== Some(Uci.Move(Pos.D4, Pos.F6, capture = Some(Pos.E5)))
     }
     "king long leap capture move" in {
-      Uci.Move(Pos.D1, Pos.D6, capture=Some(Pos.D4)).uci must_== "d1xd4d6"
-      Uci.Move.apply("d1xd4d6") must_== Some(Uci.Move(Pos.D1, Pos.D6, capture=Some(Pos.D4)))
+      Uci.Move(Pos.D1, Pos.D6, capture = Some(Pos.D4)).uci must_== "d1xd4d6"
+      Uci.Move.apply("d1xd4d6") must_== Some(Uci.Move(Pos.D1, Pos.D6, capture = Some(Pos.D4)))
     }
     "promotion move" in {
-      Uci.Move(Pos.E6, Pos.E8, promotion=Some(King)).uci must_== "e6e8k"
-      Uci.Move.apply("e6e8k") must_== Some(Uci.Move(Pos.E6, Pos.E8, promotion=Some(King)))
+      Uci.Move(Pos.E6, Pos.E8, promotion = Some(King)).uci must_== "e6e8k"
+      Uci.Move.apply("e6e8k") must_== Some(Uci.Move(Pos.E6, Pos.E8, promotion = Some(King)))
     }
     "promotion and capture move" in {
-      Uci.Move(Pos.E6, Pos.E8, capture=Some(Pos.E7), promotion=Some(King)).uci must_== "e6xe7e8k"
-      Uci.Move.apply("e6xe7e8k") must_== Some(Uci.Move(Pos.E6, Pos.E8, capture=Some(Pos.E7), promotion=Some(King)))
+      Uci.Move(Pos.E6, Pos.E8, capture = Some(Pos.E7), promotion = Some(King)).uci must_== "e6xe7e8k"
+      Uci.Move.apply("e6xe7e8k") must_== Some(
+        Uci.Move(Pos.E6, Pos.E8, capture = Some(Pos.E7), promotion = Some(King))
+      )
     }
   }
 

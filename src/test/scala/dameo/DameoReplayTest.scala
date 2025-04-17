@@ -13,7 +13,7 @@ class DameoReplayTest extends DameoTest with ValidatedMatchers {
         Vector("d8b6"),
         Vector("e1e4"),
         Vector("d6d5"),
-        Vector("d4xd5d6","d6xd7d8k"),
+        Vector("d4xd5d6", "d6xd7d8k"),
         Vector("b8a7"),
         Vector("d8xc8b8"),
         Vector("a8xb8c8"),
@@ -61,7 +61,7 @@ class DameoReplayTest extends DameoTest with ValidatedMatchers {
         Vector("e8xe7e6"),
         Vector("f3xf4f5"),
         Vector("e6d5"),
-        Vector("d4xd5d6"),
+        Vector("d4xd5d6")
       )
       playActionStrs(vectorActionStrs.flatten.toList) must beValid.like { g =>
         val replay = Replay

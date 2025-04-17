@@ -124,7 +124,7 @@ class DameoFenTest extends DameoTest with ValidatedMatchers {
       FEN("W:Wa5,c4.a:Ba8.g,e8.p,f6:H0:F1").pieces.get(Pos.C4) must_== Some(Piece(P1, ActiveMan))
       FEN("W:Wa5,c4:Ba8.a,e8.p,f6:H0:F1").pieces.get(Pos.A8) must_== Some(Piece(P2, ActiveMan))
       FEN("W:Wa5,c4.b:Ba8.g,e8.p,f6:H0:F1").pieces.get(Pos.C4) must_== Some(Piece(P1, ActiveKing))
-      FEN("W:Wa5,c4:Ba8.b,e8.p,f6:H0:F1").pieces.get(Pos.A8) must_== Some(Piece(P2, ActiveKing)) 
+      FEN("W:Wa5,c4:Ba8.b,e8.p,f6:H0:F1").pieces.get(Pos.A8) must_== Some(Piece(P2, ActiveKing))
     }
 
     "parse empty boards" in {

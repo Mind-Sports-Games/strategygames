@@ -12,7 +12,7 @@ other roles (kings, ghostman, ghostking, activeman, activeking) are added to the
 e.g. a1.k,b1.g,b2.p I assume ghosts need to be part of the FEN since we want to treat (partial)
 moves with ghosts in them as proper moves w.r.t. the frontend.
 
-*/
+ */
 
 final case class FEN(value: String) extends AnyVal {
 
@@ -25,26 +25,28 @@ final case class FEN(value: String) extends AnyVal {
 
   def initial = value == Forsyth.initial.value
 
-  def player1: Player = Player.apply(splitted(1).head).get
-  def pieceStr1: String = splitted(1).tail
+  def player1: Player              = Player.apply(splitted(1).head).get
+  def pieceStr1: String            = splitted(1).tail
   def pieces1: Array[(Pos, Piece)] = pieceStr1
-    .split(',').filter(_!="")
+    .split(',')
+    .filter(_ != "")
     .map(parsePiece(player1))
 
-  def player2: Player = Player.apply(splitted(2).head).get
-  def pieceStr2: String = splitted(2).tail
+  def player2: Player              = Player.apply(splitted(2).head).get
+  def pieceStr2: String            = splitted(2).tail
   def pieces2: Array[(Pos, Piece)] = pieceStr2
-    .split(',').filter(_!="")
+    .split(',')
+    .filter(_ != "")
     .map(parsePiece(player2))
 
   def pieces: PieceMap = (pieces1 ++ pieces2).toMap
 
   def halfMoveClock: Option[Int] = intFromFen(FEN.halfMoveIndex)
-  def fullMove: Option[Int] = intFromFen(FEN.fullMoveIndex)
+  def fullMove: Option[Int]      = intFromFen(FEN.fullMoveIndex)
 
   private def parsePiece(player: Player)(pStr: String): (Pos, Piece) = {
     def pStrA: Array[String] = pStr.split('.')
-    def role: Role = pStrA.lift(1) match {
+    def role: Role           = pStrA.lift(1) match {
       case Some(roleStr) => Role.forsyth(roleStr.head).get
       case _             => Role.defaultRole
     }

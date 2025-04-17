@@ -12,10 +12,10 @@ import variant.{ Dameo, Variant }
 /** Transform a game to draughts Forsyth Edwards Notation
   * https://en.wikipedia.org/wiki/Portable_Draughts_Notation Additions: Piece role g/p = Ghost man or king of
   * that player, has been captured but not removed because the forced capture sequence is not finished yet.
-  * Piece role a/b = Active Man or King, the piece performing the forced capture sequence in progress.
-  * ":Hx" = Halfmove clock: This is the number of halfmoves since a forced draw material combination appears.
-  * This is used to determine if a draw can be claimed. ":Fx" = Fullmove number: The number of the full move.
-  * It starts at 1, and is incremented after P2's move.
+  * Piece role a/b = Active Man or King, the piece performing the forced capture sequence in progress. ":Hx" =
+  * Halfmove clock: This is the number of halfmoves since a forced draw material combination appears. This is
+  * used to determine if a draw can be claimed. ":Fx" = Fullmove number: The number of the full move. It
+  * starts at 1, and is incremented after P2's move.
   */
 object Forsyth {
 
@@ -30,13 +30,13 @@ object Forsyth {
       Situation(
         Board(
           pieces = fen.pieces,
-          history = History(halfMoveClock=fen.halfMoveClock.getOrElse(0)),
+          history = History(halfMoveClock = fen.halfMoveClock.getOrElse(0)),
           variant = variant
         ),
         fen.player.get
       ).withHistory(
         History(
-          halfMoveClock=fen.halfMoveClock.getOrElse(0)
+          halfMoveClock = fen.halfMoveClock.getOrElse(0)
         )
       )
     )
@@ -51,7 +51,7 @@ object Forsyth {
   }
 
   def <<<@(variant: Variant, fen: FEN): Option[SituationPlus] =
-  /* Convert a FEN + Variant into a SituationPlus */
+    /* Convert a FEN + Variant into a SituationPlus */
     <<@(variant, fen) map { sit =>
       val fullMoveNumber = fen.fullMove
       SituationPlus(
@@ -78,21 +78,28 @@ object Forsyth {
 
   def >>(game: Game): FEN = {
     val player = game.situation.player.fold('W', 'B')
-    val board = exportBoard(game.situation.board)
-    val H = game.situation.board.history.halfMoveClock
-    val F = game.fullTurnCount
+    val board  = exportBoard(game.situation.board)
+    val H      = game.situation.board.history.halfMoveClock
+    val F      = game.fullTurnCount
     FEN(s"${player}:${board}:H${H}:F${F}")
   }
 
   @nowarn def exportBoard(board: Board): String = {
-    val pieces = board.pieces.groupBy({
-      case (_, piece) => piece.player}).transform(
-        (_, playerPcs) => playerPcs.map(
-          {case (pos, pc) =>
-            pos.key + (if (pc.role == Man) "" else "." + pc.role.forsyth)}
-        ).toList.sorted.mkString(","))
-      s"W${pieces(P1)}:B${pieces(P2)}"
-    }
+    val pieces = board.pieces
+      .groupBy { case (_, piece) =>
+        piece.player
+      }
+      .transform((_, playerPcs) =>
+        playerPcs
+          .map { case (pos, pc) =>
+            pos.key + (if (pc.role == Man) "" else "." + pc.role.forsyth)
+          }
+          .toList
+          .sorted
+          .mkString(",")
+      )
+    s"W${pieces(P1)}:B${pieces(P2)}"
+  }
 
   def boardAndPlayer(situation: Situation): String =
     boardAndPlayer(situation.board, situation.player)
