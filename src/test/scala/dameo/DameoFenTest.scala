@@ -3,17 +3,18 @@ package strategygames.dameo
 import org.specs2.matcher.ValidatedMatchers
 
 import strategygames.dameo.format.FEN
+import strategygames.Status
 
 class DameoFenTest extends DameoTest with ValidatedMatchers {
   "starting position FEN" should {
     val fen       = variant.Dameo.initialFen
     val pieces    = fen.pieces
-    // val board     = Board(
-    //   pieces,
-    //   History(),
-    //   variant.Dameo
-    // )
-    // val situation = Situation(board, P1)
+    val board     = Board(
+      pieces,
+      History(),
+      variant.Dameo
+    )
+    val situation = Situation(board, P1)
 
     "have White starting the game" in {
       fen.player must_== Some(P1)
@@ -74,6 +75,22 @@ class DameoFenTest extends DameoTest with ValidatedMatchers {
       pieces.get(Pos.E6) must_== Some(Piece(P2, Man))
       pieces.get(Pos.F6) must_== Some(Piece(P2, Man))
     }
+
+    "any man can make the first move" in {
+      board.variant.validMoves(situation).size must_== 18
+    }
+
+    "corner piece has 2 starting moves" in {
+      board.variant.validMoves(situation)(Pos.A1).size must_== 2
+    }
+
+    "side piece has 3 starting moves" in {
+      board.variant.validMoves(situation)(Pos.B2).size must_== 3
+    }
+
+    "vanguard piece has 3 starting moves" in {
+      board.variant.validMoves(situation)(Pos.E3).size must_== 3
+    }
   }
 
   "FEN" should {
@@ -116,29 +133,10 @@ class DameoFenTest extends DameoTest with ValidatedMatchers {
       FEN("W:W:Ba8:H0:F1").pieces must_== Map(Pos.A8 -> Piece(P2, Man))
       FEN("W:W:B:H0:F1").pieces must_== Map()
     }
-/*
-
-    "any man can make the first move" in {
-      board.variant.validMovesOf1(situation).size must_== 14
-    }
-
-    "corner piece has 2 starting moves" in {
-      board.variant.validMovesOf1(situation).foldLeft(0)(_ + _._2.size) must_== 2
-    }
-
-    "side piece has 3 starting moves" in {
-      board.variant.validMovesOf1(situation).foldLeft(0)(_ + _._2.size) must_== 3
-    }
-
-    "vanguard piece has 3 starting moves" in {
-      board.variant.validMovesOf1(situation).foldLeft(0)(_ + _._2.size) must_== 3
-    }
-*/
   }
 
-/*
-  "Game just finished having FEN \"5/2sss1/4SSS/4ssSS/3s1sSS1/2SS4/s6/6/5 6 5 w 0 58\"" should {
-    val fen       = format.FEN("5/2sss1/4SSS/4ssSS/3s1sSS1/2SS4/s6/6/5 6 5 w 0 58")
+  "Game just finished having" should {
+    val fen       = FEN("W:Wb4.k:B:H0:F1")
     val pieces    = fen.pieces
     val board     = Board(
       pieces,
@@ -147,47 +145,28 @@ class DameoFenTest extends DameoTest with ValidatedMatchers {
     )
     val situation = Situation(board, P2)
 
-
-    // @TODO: ensure other types of moves are generated correctly when validMoves does work entirely
-    "see 8 marbles able to move as 1" in {
-      board.variant.validMovesOf1(situation).size must_== 8
-    }
-    // @TODO: ensure other types of moves are generated correctly when validMoves does work entirely
-    "see 25 different moves of 1 marble" in {
-      board.variant.validMovesOf1(situation).foldLeft(0)(_ + _._2.size) must_== 25
-    }
-
-    "but is ended and P1 is the winner" in {
+    "have ended and P1 is the winner" in {
       situation.end must_== true
       situation.playable(true) must_== false
-      situation.staleMate must_== false
-      situation.winner must_== Some(P1)
       situation.status must_== Some(Status.VariantEnd)
+      situation.winner must_== Some(P1)
     }
   }
 
   "Game having a player unable to move" should {
     val board     = Board(
-      format.FEN("PPPPP/PPPPPp/5Pp/6Pp/7Pp/7P/7/6/5 5 5 w 0 42").pieces,
+      format.FEN("W:Wa1,a3,a4,b1,c5:Ba2:H0:F1").pieces,
       History(
-        score = Score(5, 5)
       ),
       variant.Dameo
     )
     val situation = Situation(board, P2)
 
-    // @TODO: ensure other types of moves are generated correctly when validMoves does work entirely
-    "see no potential valid move for that player" in {
-      board.variant.validMovesOf1(situation).size must_== 0
-    }
-
-    "end in a draw" in {
+    "have ended and P1 is the winner" in {
       situation.end must_== true
       situation.playable(true) must_== false
-      situation.staleMate must_== true
-      situation.winner must_== None
-      situation.status must_== Some(Status.Stalemate)
+      situation.status must_== Some(Status.VariantEnd)
+      situation.winner must_== Some(P1)
     }
   }
-*/
 }
