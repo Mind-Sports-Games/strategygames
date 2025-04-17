@@ -94,7 +94,9 @@ object Uci {
     /* Don't know how to deal with this: captured stones are not available here,
     and neither is the board state that would allow us to deduce them (in the case of a
     long jump by a king). This function is only used in lila-ws ClientOut.scala -> parseOldMove,
-    so maybe it can be deprecated/left unimplemented as long the normal Uci.Move.apply works properly? */
+    so maybe it can be deprecated/left unimplemented as long the normal Uci.Move.apply works properly?
+    Alternatively we could remove capture from the Uci entirely and figure out the captured stone at
+    the moment when a move is applied - that feels very clunky to me though. */
     def fromStrings(origS: String, destS: String, promS: Option[String]) = for {
       orig     <- Pos.fromKey(origS)
       dest     <- Pos.fromKey(destS)

@@ -9,10 +9,6 @@ import strategygames.Player
 
 import variant.{ Dameo, Variant }
 
-//TODO Dameo Need to rewrite a lot of this
-//Most of this has been copied out of Draughts gamelogic
-//To demonstrate what goes on here, see also FEN.scala
-
 /** Transform a game to draughts Forsyth Edwards Notation
   * https://en.wikipedia.org/wiki/Portable_Draughts_Notation Additions: Piece role g/p = Ghost man or king of
   * that player, has been captured but not removed because the forced capture sequence is not finished yet.
@@ -34,12 +30,13 @@ object Forsyth {
       Situation(
         Board(
           pieces = fen.pieces,
-          history = History(),
+          history = History(halfMoveClock=fen.halfMoveClock.getOrElse(0)),
           variant = variant
         ),
         fen.player.get
       ).withHistory(
         History(
+          halfMoveClock=fen.halfMoveClock.getOrElse(0)
         )
       )
     )
@@ -50,17 +47,15 @@ object Forsyth {
 
   case class SituationPlus(situation: Situation, fullTurnCount: Int) {
     def turnCount = fullTurnCount * 2 - (if (situation.player.p1) 2 else 1)
-    // TODO Dameo will be a multiaction variant so something should be done with this
-    def plies     = turnCount
+    def plies     = situation.history.currentTurn.length
   }
 
   def <<<@(variant: Variant, fen: FEN): Option[SituationPlus] =
   /* Convert a FEN + Variant into a SituationPlus */
     <<@(variant, fen) map { sit =>
       val fullMoveNumber = fen.fullMove
-      val halfMoveClock  = fen.halfMoveClock
       SituationPlus(
-        halfMoveClock.map(sit.history.setHalfMoveClock).fold(sit)(sit.withHistory),
+        sit,
         fullMoveNumber | 1
       )
     }

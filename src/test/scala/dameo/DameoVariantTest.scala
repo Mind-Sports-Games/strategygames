@@ -3,7 +3,7 @@ package strategygames.dameo
 import org.specs2.matcher.ValidatedMatchers
 import strategygames.dameo.format.FEN
 
-// import variant.Dameo
+import strategygames.Status
 
 class DameoVariantTest extends DameoTest with ValidatedMatchers {
   "variant" should {
@@ -80,7 +80,6 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
       val situation2 = Situation(board, P2)
 
       val moves1 = board.variant.validMoves(situation1)
-      println(moves1)
       moves1.size must_== 2
       moves1(Pos.D4).size must_== 2
       moves1(Pos.C5).size must_== 1
@@ -111,6 +110,84 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
 
       finalsit.player must_== P2
       finalsit.board.pieces must_== FEN("B:Wc7,e1,g1:Be2,e4,e6,g2,g4,g6:H0:F1").pieces
+    }
+
+    "Trigger game end and P1 win" in {
+        val board = Board(FEN("W:Wc4,e4,g4:Bc5:H0:F1").pieces, variant.Dameo)
+        val situation = Situation(board, P1)
+        val moves = board.variant.validMoves(situation)
+        moves.size must_== 1
+        val situation2 = moves(Pos.C4)(0).situationAfter
+        situation2.end must_== true
+        situation2.playable(true) must_== false
+        situation2.status must_== Some(Status.VariantEnd)
+        situation2.winner must_== Some(P1)
+    }
+
+    "Trigger game end and P2 win" in {
+        val board = Board(FEN("W:Wc4:Bc5,e5,g5:H0:F1").pieces, variant.Dameo)
+        val situation = Situation(board, P2)
+        val moves = board.variant.validMoves(situation)
+        moves.size must_== 1
+        val situation2 = moves(Pos.C5)(0).situationAfter
+        situation2.end must_== true
+        situation2.playable(true) must_== false
+        situation2.status must_== Some(Status.VariantEnd)
+        situation2.winner must_== Some(P2)
+    }
+
+    "Win by blocking" in {
+        val board = Board(FEN("W:Wa1,a3,a4,b1,c5:Ba2:H0:F1").pieces, variant.Dameo)
+        val situation = Situation(board, P1)
+        val moves = board.variant.validMoves(situation)
+        val situation2 = moves(Pos.C5)(0).situationAfter
+        situation2.end must_== true
+        situation2.playable(true) must_== false
+        situation2.status must_== Some(Status.VariantEnd)
+        situation2.winner must_== Some(P1)
+    }
+
+    "Trigger draw in king vs king endgame" in {
+      // Each player gets 2 more turns
+      val board = Board(FEN("W:Wb3.k:Be8.k:H0:F1").pieces, variant.Dameo)
+      val situation = Situation(board, P1)
+      val situation1a = board.variant.validMoves(situation)(Pos.B3).find(_.dest==Pos.B5).get.situationAfter
+      val situation1b = board.variant.validMoves(situation1a)(Pos.E8).find(_.dest==Pos.H8).get.situationAfter
+      val situation2a = board.variant.validMoves(situation1b)(Pos.B5).find(_.dest==Pos.D5).get.situationAfter
+      val situation2b = board.variant.validMoves(situation2a)(Pos.H8).find(_.dest==Pos.H3).get.situationAfter
+
+      situation2a.end must_== false
+
+      situation2b.end must_== true
+      situation2b.playable(true) must_== false
+      situation2b.status must_== Some(Status.Draw)
+      situation2b.winner must_== None
+
+      format.Forsyth.>>(situation1a).halfMoveClock must_== Some(1)
+      format.Forsyth.>>(situation1b).halfMoveClock must_== Some(2)
+      format.Forsyth.>>(situation2a).halfMoveClock must_== Some(3)
+      format.Forsyth.>>(situation2b).halfMoveClock must_== Some(4)
+    }
+
+    "Trigger draw by threefold repetition" in {
+      val board = Board(FEN("W:Wb4.k,b5.k:Be7.k,f8:H0:F1").pieces, variant.Dameo)
+      val situation = Situation(board, P1)
+      val situation0a = board.variant.validMoves(situation)(Pos.B4).find(_.dest==Pos.B3).get.situationAfter
+      val situation0b = board.variant.validMoves(situation0a)(Pos.E7).find(_.dest==Pos.E8).get.situationAfter
+      val situation1a = board.variant.validMoves(situation0b)(Pos.B3).find(_.dest==Pos.B4).get.situationAfter
+      val situation1b = board.variant.validMoves(situation1a)(Pos.E8).find(_.dest==Pos.E7).get.situationAfter
+      val situation2a = board.variant.validMoves(situation1b)(Pos.B4).find(_.dest==Pos.B3).get.situationAfter
+      val situation2b = board.variant.validMoves(situation2a)(Pos.E7).find(_.dest==Pos.E8).get.situationAfter
+      val situation3a = board.variant.validMoves(situation2b)(Pos.B3).find(_.dest==Pos.B4).get.situationAfter
+      val situation3b = board.variant.validMoves(situation3a)(Pos.E8).find(_.dest==Pos.E7).get.situationAfter
+      val situation4a = board.variant.validMoves(situation3b)(Pos.B4).find(_.dest==Pos.B3).get.situationAfter
+
+      situation3b.end must_== false
+
+      situation4a.end must_== true
+      situation4a.playable(true) must_== false
+      situation4a.status must_== Some(Status.Draw)
+      situation4a.winner must_== None
     }
   }
 }

@@ -44,6 +44,10 @@ case class Board(
     }
   }
 
+  def kingVsKing(): Boolean = {
+    pieces.size == 2 && pieces.values.filter(_.role == King).size == 2
+  }
+
   def empty(pos: Pos): Boolean = {
     !pieces.contains(pos)
   }
@@ -67,7 +71,8 @@ case class Board(
       }
 
   def autoDraw: Boolean =
-    ghosts == 0 && variant.maxDrawingMoves(this).fold(false)(m => history.halfMoveClock >= m)
+    (variant.maxDrawingMoves(this).fold(false)(m => history.halfMoveClock >= m)) || 
+    (history.threefoldRepetition && variant.repetitionEnabled)
 
   def valid(strict: Boolean) = variant.valid(this, strict)
 

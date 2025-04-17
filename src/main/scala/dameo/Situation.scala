@@ -21,7 +21,7 @@ case class Situation(board: Board, player: Player) {
 
   def autoDraw: Boolean = board.autoDraw
 
-  def variantEnd = board.variant.specialEnd(this)
+  def variantEnd = board.variant.variantEnd(this)
 
   def end: Boolean = variantEnd || autoDraw
 

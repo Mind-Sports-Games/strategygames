@@ -67,7 +67,6 @@ object Replay {
   }
 
   def replayMove(before: Game, orig: Pos, dest: Pos, capture: Option[Pos], promotion: Boolean, endTurn: Boolean): Move =
-    // TODO Dameo set this. Probably need to pass through promotion as well?
     Move(
       piece = before.situation.board.pieces(orig),
       orig = orig,

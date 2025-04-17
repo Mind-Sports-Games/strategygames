@@ -19,6 +19,4 @@ case object Dameo
   def perfId: Int    = 800
 
   override def baseVariant: Boolean = true
-
-  // TODO Dameo can write the variant/Variant.scala method code in here (using override)
 }

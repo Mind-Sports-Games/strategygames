@@ -24,19 +24,21 @@ case class Move(
   def finalizeAfter: Board = {
     var newBoard = after.copy(pieces = after.pieces ++ capture.map(
       (_ -> after.pieces(capture.get).copy(role=after.pieces(capture.get).ghostRole))))
-    .updateHistory({h =>
-      h.copy(
-        currentTurn = h.currentTurn :+ toUci
-      )})
     if (promotion.nonEmpty) {
       newBoard = newBoard.copy(pieces = newBoard.pieces + (dest -> Piece(piece.player, promotion.get)))
     }
-    if (autoEndTurn) {
+    newBoard = if (autoEndTurn) {
       newBoard.copy(pieces = newBoard.pieces.filter({case (_,v) => !v.isGhost}) +
         (dest -> newBoard.pieces(dest).copy(role = newBoard.pieces(dest).unactiveRole)) )
     } else {
       newBoard.copy(pieces = newBoard.pieces + (dest -> Piece(piece.player, piece.activeRole)))
     }
+    newBoard.updateHistory({h =>
+      h.copy(
+        currentTurn = h.currentTurn :+ toUci,
+        halfMoveClock = h.halfMoveClock + (if (autoEndTurn && newBoard.kingVsKing()) 1 else 0),
+        positionHashes = if (autoEndTurn) newBoard.variant.updatePositionHashes(newBoard, this, h.positionHashes) else h.positionHashes
+      )})
   }
 
   def captures = capture.isDefined

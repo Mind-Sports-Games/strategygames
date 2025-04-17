@@ -47,7 +47,6 @@ abstract class Variant private[variant] (
 
   def startPlayer: Player = P1
 
-  // TODO Dameo implement this, possibly using Actor move generation
   def validMoves(situation: Situation): Map[Pos, List[Move]] = {
     var bestLineValue = 0
     var captureMap    = Map[Pos, List[Move]]()
@@ -88,21 +87,18 @@ abstract class Variant private[variant] (
 
   def addVariantEffect(move: Move): Move = move
 
-  // TODO Dameo set this if relevant
-  def maxDrawingMoves(@nowarn board: Board): Option[Int] = None
+  def maxDrawingMoves(@nowarn board: Board): Option[Int] = Some(4) // 1 king vs. 1 king
 
-  // TODO Dameo set this
-  def variantEnd(@nowarn situation: Situation) = false
+  def variantEnd(situation: Situation) = situation.moves.isEmpty
 
   def specialEnd(@nowarn situation: Situation)  = false
   def specialDraw(@nowarn situation: Situation) = false
 
-  // TODO Dameo set this
-  def winner(@nowarn situation: Situation): Option[Player] = None
+  def winner(situation: Situation): Option[Player] =
+    Option.when(situation.variantEnd)(!situation.player)
 
   def materialImbalance(@nowarn board: Board): Int = 0
 
-  // TODO Dameo if there are sensible things to check put them here
   def valid(@nowarn board: Board, @nowarn strict: Boolean): Boolean = false
 
   val roles: List[Role] = Role.all
@@ -122,6 +118,16 @@ abstract class Variant private[variant] (
   def defaultRole: Role = Role.defaultRole
 
   def gameFamily: GameFamily
+
+  def updatePositionHashes(
+      board: Board,
+      move: Move,
+      hash: PositionHash
+  ): PositionHash = {
+    val newHash = Hash(Situation(board, !move.piece.player))
+    newHash ++ hash
+  }
+
 }
 
 object Variant {
@@ -151,5 +157,4 @@ object Variant {
   val openingSensibleVariants: Set[Variant] = Set(strategygames.dameo.variant.Dameo)
 
   val divisionSensibleVariants: Set[Variant] = Set()
-
 }
