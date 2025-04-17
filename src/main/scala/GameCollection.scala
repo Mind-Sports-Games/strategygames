@@ -300,8 +300,15 @@ object GameFamily {
     def variants          = Variant.all(GameLogic.FairySF()).filter(_.gameFamily == this)
     def displayPiece      = "bP"
     def pieceSetThemes    =
-      List("fabirovsky_flipello", "check_yb_flipello", "classic_flipello", "marble_bw_flipello")
-    def pieceSetDefault   = "fabirovsky_flipello"
+      List(
+        "fabirovsky_flipello",
+        "check_yb_flipello",
+        "classic_flipello",
+        "marble_bw_flipello",
+        "stone_flipello",
+        "disc_flipello"
+      )
+    def pieceSetDefault   = "disc_flipello"
     def boardThemes       = List("green", "green-marble", "wood")
     def boardThemeDefault = "green"
     def playerNames       = Map(P1 -> "Black", P2 -> "White")
@@ -406,7 +413,7 @@ object GameFamily {
         "cross"
       )
     def pieceSetDefault   = "classic_stone"
-    def boardThemes       = List("light-wood", "dark-wood")
+    def boardThemes       = List("light-wood", "dark-wood", "yellow-wood")
     def boardThemeDefault = "light-wood"
     def playerNames       = Map(P1 -> "Black", P2 -> "White")
     def playerColors      = Map(P1 -> "black", P2 -> "white")

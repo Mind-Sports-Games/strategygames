@@ -38,7 +38,7 @@ object Forsyth {
         backgammon.format.Forsyth.<<@(variant, fen).map(Situation.Backgammon)
       case (GameLogic.Abalone(), Variant.Abalone(variant), FEN.Abalone(fen))                =>
         abalone.format.Forsyth.<<@(variant, fen).map(Situation.Abalone)
-      case (GameLogic.Dameo(), Variant.Dameo(variant), FEN.Dameo(fen))                =>
+      case (GameLogic.Dameo(), Variant.Dameo(variant), FEN.Dameo(fen))                      =>
         dameo.format.Forsyth.<<@(variant, fen).map(Situation.Dameo)
       case _                                                                                => sys.error("Mismatched gamelogic types 14")
     }
@@ -141,7 +141,7 @@ object Forsyth {
       abalone.format.Forsyth
         .<<<(fen)
         .map(sp => SituationPlus(Situation.Abalone(sp.situation), sp.fullTurnCount))
-    case (GameLogic.Dameo(), FEN.Dameo(fen))           =>
+    case (GameLogic.Dameo(), FEN.Dameo(fen))               =>
       dameo.format.Forsyth
         .<<<(fen)
         .map(sp => SituationPlus(Situation.Dameo(sp.situation), sp.fullTurnCount))
@@ -199,7 +199,7 @@ object Forsyth {
           abalone.format.Forsyth.SituationPlus(situation, parsed.fullTurnCount)
         )
       )
-    case (GameLogic.Dameo(), Situation.Dameo(situation))           =>
+    case (GameLogic.Dameo(), Situation.Dameo(situation))               =>
       FEN.Dameo(
         dameo.format.Forsyth.>>(
           dameo.format.Forsyth.SituationPlus(situation, parsed.fullTurnCount)

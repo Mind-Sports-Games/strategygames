@@ -15,9 +15,21 @@ case class Piece(player: Player, role: Role) {
 
   def isGhost = role == GhostMan || role == GhostKing
 
+  def isActive = role == ActiveMan || role == ActiveKing
+
   def ghostRole =
     if (role == Man) GhostMan
     else if (role == King) GhostKing
+    else role
+
+  def activeRole =
+    if (role == Man) ActiveMan
+    else if (role == King) ActiveKing
+    else role
+
+  def unactiveRole =
+    if (role == ActiveMan) Man
+    else if (role == ActiveKing) King
     else role
 
   override def toString = s"${player.toString.toLowerCase}-$role"

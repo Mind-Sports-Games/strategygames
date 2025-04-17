@@ -1086,7 +1086,7 @@ object Variant {
 
     def checkmate(situation: Situation): Boolean = situation match {
       case Situation.Dameo(_) => false
-      case _                    => sys.error("Not passed Dameo objects")
+      case _                  => sys.error("Not passed Dameo objects")
     }
 
     // stalemate not referenced in dameo
@@ -1096,12 +1096,12 @@ object Variant {
 
     def winner(situation: Situation): Option[Player] = situation match {
       case Situation.Dameo(situation) => v.winner(situation)
-      case _                            => sys.error("Not passed Dameo objects")
+      case _                          => sys.error("Not passed Dameo objects")
     }
 
     @nowarn def specialEnd(situation: Situation): Boolean = situation match {
       case Situation.Dameo(situation) => v.specialEnd(situation)
-      case _                            => sys.error("Not passed Dameo objects")
+      case _                          => sys.error("Not passed Dameo objects")
     }
 
     @nowarn def specialDraw(situation: Situation): Boolean = situation match {
@@ -1113,18 +1113,18 @@ object Variant {
 
     def addVariantEffect(move: Move): Move            = move match {
       case Move.Dameo(move) => Move.Dameo(v.addVariantEffect(move))
-      case _                  => sys.error("Not passed Dameo objects")
+      case _                => sys.error("Not passed Dameo objects")
     }
     def valid(board: Board, strict: Boolean): Boolean = board match {
       case Board.Dameo(board) => v.valid(board, strict)
-      case _                    => sys.error("Not passed Dameo objects")
+      case _                  => sys.error("Not passed Dameo objects")
     }
 
     val roles: List[Role] = v.roles.map(Role.DameoRole)
 
     override def equals(that: Any): Boolean = that match {
       case Dameo(v2) => v2.equals(v)
-      case _           => false
+      case _         => false
     }
 
     def chessVariant: chess.variant.Variant = sys.error("Unimplemented for Dameo")
@@ -1143,8 +1143,8 @@ object Variant {
       togyzkumalak.variant.Variant.all.map(Togyzkumalak) :::
       go.variant.Variant.all.map(Go) :::
       backgammon.variant.Variant.all.map(Backgammon) :::
-      abalone.variant.Variant.all.map(Abalone)// :::
-      //dameo.variant.Variant.all.map(Dameo)
+      abalone.variant.Variant.all.map(Abalone) // :::
+  // dameo.variant.Variant.all.map(Dameo)
 
   def byId = all map { v => (v.id, v) } toMap
 

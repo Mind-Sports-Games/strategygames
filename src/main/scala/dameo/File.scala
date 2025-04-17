@@ -25,7 +25,7 @@ object File {
 
   def fromChar(ch: Char): Option[File] = apply(ch.toInt - 97)
 
-  //leave as 10 files for now, this could be useful later
+  // leave as 10 files for now, this could be useful later
   val A = new File(0)
   val B = new File(1)
   val C = new File(2)

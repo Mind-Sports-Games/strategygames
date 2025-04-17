@@ -39,7 +39,7 @@ case class Std(
           m.dest == dest && (!iteratedCapts || m.situationAfter.ghosts == 0)
         } match {
           case None if capture && iteratedCapts =>
-            a.capturesFinal.find { m =>
+            a.captures.find { m =>
               m.dest == dest &&
               captures.fold(true)(m.capture.contains) &&
               !forbiddenUci.fold(false)(_.contains(m.toUci.uci)) &&

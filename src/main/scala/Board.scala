@@ -400,7 +400,7 @@ object Board {
 
     def withHistory(h: History): Board = h match {
       case History.Dameo(h) => Dameo(b.withHistory(h))
-      case _                  => sys.error("Not passed dameo objects")
+      case _                => sys.error("Not passed dameo objects")
     }
 
     def usedDice: List[Int] = List.empty
@@ -414,11 +414,11 @@ object Board {
     def copy(history: History, variant: Variant): Board = (history, variant) match {
       case (History.Dameo(history), Variant.Dameo(variant)) =>
         Dameo(b.copy(history = history, variant = variant))
-      case _                                                    => sys.error("Unable to copy a dameo board with non-dameo arguments")
+      case _                                                => sys.error("Unable to copy a dameo board with non-dameo arguments")
     }
     def copy(history: History): Board                   = history match {
       case History.Dameo(history) => Dameo(b.copy(history = history))
-      case _                        => sys.error("Unable to copy a dameo board with non-dameo arguments")
+      case _                      => sys.error("Unable to copy a dameo board with non-dameo arguments")
     }
 
     def toFairySF      = sys.error("Can't make a fairysf board from a dameo board")
@@ -517,7 +517,7 @@ object Board {
             variant
           )
         )
-      case (GameLogic.Dameo(), Variant.Dameo(variant))           =>
+      case (GameLogic.Dameo(), Variant.Dameo(variant))               =>
         Dameo(
           dameo.Board.apply(
             pieces.flatMap {

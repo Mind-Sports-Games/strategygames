@@ -642,9 +642,9 @@ class BackgammonFenTest extends BackgammonTest with ValidatedMatchers {
   }
 
   "Fen with an rejected cube offer" should {
-    val fenStr = "5S,3,3s,1,5s,4,2S/5s,3,3S,1,5S,4,2s[] - - w 0 0 1bx 1"
-    val fen    = FEN(fenStr)
-    val board  = Board(
+    val fenStr    = "5S,3,3s,1,5s,4,2S/5s,3,3S,1,5S,4,2s[] - - w 0 0 1bx 1"
+    val fen       = FEN(fenStr)
+    val board     = Board(
       fen.pieces,
       History(),
       variant.Backgammon,

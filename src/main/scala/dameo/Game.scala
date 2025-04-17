@@ -40,8 +40,8 @@ case class Game(
 
   def apply(uci: Uci.Move): Validated[String, (Game, Move)] = apply(uci.orig, uci.dest)
   def apply(uci: Uci): Validated[String, (Game, Action)]    = (uci match {
-    case u: Uci.Move       => apply(u)
-    case u                 => sys.error(s"Cannot apply uci $u")
+    case u: Uci.Move => apply(u)
+    case u           => sys.error(s"Cannot apply uci $u")
   }) map { case (g, a) => g -> a }
 
   private def applyClock(metrics: MoveMetrics, gameActive: Boolean, switchClock: Boolean) =

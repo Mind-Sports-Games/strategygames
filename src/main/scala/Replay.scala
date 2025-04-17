@@ -309,7 +309,7 @@ object Replay {
             message
           )
       }
-    case (GameLogic.Dameo(), FEN.Dameo(initialFen), Variant.Dameo(variant))                =>
+    case (GameLogic.Dameo(), FEN.Dameo(initialFen), Variant.Dameo(variant))                      =>
       dameo.Replay.gameWithUciWhileValid(
         actionStrs,
         initialFen,
@@ -389,7 +389,7 @@ object Replay {
         .toEither
         .map(s => s.map(Situation.Abalone))
         .toValidated
-    case (GameLogic.Dameo(), Variant.Dameo(variant))           =>
+    case (GameLogic.Dameo(), Variant.Dameo(variant))               =>
       dameo.Replay
         .situations(actionStrs, initialFen.map(_.toDameo), variant)
         .toEither
@@ -530,7 +530,7 @@ object Replay {
         .toEither
         .map(b => b.map(Board.Abalone))
         .toValidated
-    case (GameLogic.Dameo(), Variant.Dameo(variant))           =>
+    case (GameLogic.Dameo(), Variant.Dameo(variant))               =>
       dameo.Replay
         .boardsFromUci(dameoUcis(ucis), initialFen.map(_.toDameo), variant)
         .toEither
@@ -647,7 +647,7 @@ object Replay {
       abalone.Replay
         .gameFromUciStrings(ucis.flatten.toList, initialFen.map(_.toAbalone), variant)
         .map(Game.Abalone)
-    case (GameLogic.Dameo(), Variant.Dameo(variant))           =>
+    case (GameLogic.Dameo(), Variant.Dameo(variant))               =>
       dameo.Replay
         .gameFromUciStrings(ucis.flatten.toList, initialFen.map(_.toDameo), variant)
         .map(Game.Dameo)
@@ -709,7 +709,7 @@ object Replay {
         .toEither
         .map(r => Replay.Abalone(r))
         .toValidated
-    case (GameLogic.Dameo(), Variant.Dameo(variant))           =>
+    case (GameLogic.Dameo(), Variant.Dameo(variant))               =>
       dameo.Replay
         .apply(dameoUcis(ucis), initialFen.map(_.toDameo), variant)
         .toEither
@@ -741,7 +741,7 @@ object Replay {
       backgammon.Replay.plyAtFen(actionStrs, initialFen.map(_.toBackgammon), variant, atFen)
     case (GameLogic.Abalone(), Variant.Abalone(variant), FEN.Abalone(atFen))                =>
       abalone.Replay.plyAtFen(actionStrs, initialFen.map(_.toAbalone), variant, atFen)
-    case (GameLogic.Dameo(), Variant.Dameo(variant), FEN.Dameo(atFen))                =>
+    case (GameLogic.Dameo(), Variant.Dameo(variant), FEN.Dameo(atFen))                      =>
       dameo.Replay.plyAtFen(actionStrs, initialFen.map(_.toDameo), variant, atFen)
     case _                                                                                  => sys.error("Mismatched gamelogic types 10")
   }
