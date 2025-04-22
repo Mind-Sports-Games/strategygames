@@ -38,35 +38,13 @@ final case class FEN(value: String) extends AnyVal {
     .map(!_)
 
   def halfMovesSinceLastCapture: Option[Int] = intFromFen(4)
-
-  def fullMove: Option[Int] = intFromFen(5)
-
-  def currentTurn(variant: Variant): Option[Uci]      = turn(variant, 6)
-  def lastTurn(variant: Variant): Option[Uci]         = turn(variant, 7)
-  def turn(variant: Variant, index: Int): Option[Uci] = {
-    if (!variant.hasPrevPlayer) return None
-
-    value
-      .split(' ')
-      .lift(index)
-      .flatMap(uci =>
-        uci match {
-          case Uci.Move.moveR(orig0, orig1, dest0, dest1) =>
-            Uci.Move.fromStrings(orig0 + orig1, dest0 + dest1)
-          case _                                          => None
-        }
-      )
-  }
-
-  def ply: Option[Int] =
-    fullMove map { fm =>
-      fm * 2 - (if (player.exists(_.p1)) 2 else 1)
-    }
-
-  def initial = value == Forsyth.initial.value
+  def fullMove: Option[Int]                  = intFromFen(5)
+  def pliesRemainingThisTurn: Option[Int]    = intFromFen(6)
 
   private def intFromFen(index: Int): Option[Int] =
     value.split(' ').lift(index).flatMap(_.toIntOption)
+
+  def initial = value == Forsyth.initial.value
 }
 
 object FEN {

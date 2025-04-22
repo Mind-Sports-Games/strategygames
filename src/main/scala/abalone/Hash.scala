@@ -40,9 +40,10 @@ object Hash {
     situation.board.variant.boardType.posNb * actor.piece.player.fold(1, 0) + actor.pos.hashIndex
 
   def get(situation: Situation, table: ZobristConstants): Long = {
-    val phturn =
-      if (situation.board.variant.hasPrevPlayer) situation.board.variant.prevPlayer(situation).fold(0L)(_.fold(table.p1TurnMask, 0L))
-      else 0L
+    val phturn = situation.board.history.pliesRemainingThisTurn match {
+      case Some(p) if p > 1 => table.p1TurnMask
+      case _ => 0L
+    }
     val hturn  = situation.player.fold(table.p1TurnMask, 0L)
 
     situation.board.actors.values.view

@@ -6,6 +6,7 @@ import strategygames.abalone.format.Uci
 case class History(
     lastTurn: List[Uci] = List.empty,
     currentTurn: List[Uci] = List.empty,
+    var pliesRemainingThisTurn: Option[Int] = None,
     positionHashes: PositionHash = Array.empty,
     score: Score = Score(),
     halfMoveClock: Int = 0

@@ -16,10 +16,9 @@ object Forsyth {
         board = Board(
           pieces = fen.pieces(variant),
           history = History(
-            lastTurn = fen.lastTurn(variant).fold(List[Uci]())(List(_)),
-            currentTurn = fen.currentTurn(variant).fold(List[Uci]())(List(_)),
             score = Score(fen.player1Score, fen.player2Score),
-            halfMoveClock = fen.halfMovesSinceLastCapture.getOrElse(0)
+            halfMoveClock = fen.halfMovesSinceLastCapture.getOrElse(0),
+            pliesRemainingThisTurn = fen.pliesRemainingThisTurn
           ),
           variant = variant
         ),
@@ -59,19 +58,16 @@ object Forsyth {
     }
 
   def >>(game: Game): FEN = {
-    val boardFen  = getFen_board(game.situation.board)
-    val scoreStr  = game.situation.board.history.score.fenStr
-    val player    = game.situation.player.fold('b', 'w')
-    val halfMoves = game.situation.board.history.halfMoveClock
-    val fullMoves = game.fullTurnCount
-    val prev      = if (game.situation.board.variant.hasPrevPlayer) {
-      val lastTurn    = game.situation.board.history.lastTurn.reverse.headOption
-      val currentTurn = game.situation.board.history.currentTurn.reverse.headOption
-
-      if (currentTurn.isEmpty && lastTurn.isEmpty) ""
-      else " " + currentTurn.fold("-")(_.uci) + lastTurn.fold("")(" " + _.uci)
-    } else ""
-    FEN(s"$boardFen $scoreStr $player $halfMoves $fullMoves$prev")
+    val boardFen               = getFen_board(game.situation.board)
+    val scoreStr               = game.situation.board.history.score.fenStr
+    val player                 = game.situation.player.fold('b', 'w')
+    val halfMoves              = game.situation.board.history.halfMoveClock
+    val fullMoves              = game.fullTurnCount
+    val pliesRemainingThisTurn =
+      if (game.situation.board.variant.hasPrevPlayer)
+        game.situation.board.history.pliesRemainingThisTurn.fold("")(p => " " + p.toString)
+      else ""
+    FEN(s"$boardFen $scoreStr $player $halfMoves $fullMoves$pliesRemainingThisTurn")
   }
 
   def exportBoard(board: Board): String = {

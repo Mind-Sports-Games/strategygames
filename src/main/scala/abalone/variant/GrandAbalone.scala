@@ -35,9 +35,15 @@ case object GrandAbalone
     * players have two actions per turn).
     */
   override def isAutoEndTurn(situation: Situation, orig: Pos, dest: Pos): Boolean =
-    !situation.board.history.currentTurn.isEmpty || situation.board.history.lastTurn.isEmpty
+    situation.board.history.pliesRemainingThisTurn.fold(true)(_ < 2)
+
+  override def finalizeBoardAfter_hist(move: Move): Board = {
+    val res = super.finalizeBoardAfter_hist(move)
+    res.history.pliesRemainingThisTurn = Option(if (move.autoEndTurn) 2 else 1)
+    res
+  }
 
   /** Belgian daisy. */
   override def initialFen: FEN =
-    format.FEN("SS2ss/SSS1sss/1SS2ss1/9/ss6SS/sss5SSS/ss6SS/9/1SS2ss1/SSS1sss/SS2ss 0 0 b 0 1")
+    format.FEN("SS2ss/SSS1sss/1SS2ss1/9/ss6SS/sss5SSS/ss6SS/9/1SS2ss1/SSS1sss/SS2ss 0 0 b 0 1 1")
 }

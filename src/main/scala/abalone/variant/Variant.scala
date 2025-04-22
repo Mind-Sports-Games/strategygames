@@ -349,7 +349,9 @@ abstract class Variant private[variant] (
   def isIrreversible(situation: Situation, move: Uci): Boolean =
     getCapture(situation, move.origDest._1, move.origDest._2).isDefined
 
-  /** Indicates whether the previous player should be remembered to asses a situation. */
+  /** Indicates whether the previous player (or anything equivalent, such as the plies remaining for the turn)
+    * should be remembered to assess a situation.
+    */
   def hasPrevPlayer: Boolean = false
 
   def prevPlayer(situation: Situation): Option[Player] =
