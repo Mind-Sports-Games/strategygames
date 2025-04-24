@@ -1,48 +1,41 @@
 package strategygames.abalone.format
 
-import cats.implicits._
-
-import strategygames.{ Player, Score }
 import strategygames.abalone._
-import strategygames.abalone.variant.Variant
+import strategygames.abalone.variant.{Abalone, Variant}
+import strategygames.{Player, Score}
 
-/** Transform a game to standard Forsyth Edwards Notation
+/** Transforms a game to standard Forsyth-Edwards notation
   * http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
   */
 object Forsyth {
+  val initial = Abalone.initialFen // TODO?
 
-  val initial = FEN("ss1SS/sssSSS/1ss1SS1/8/9/8/1SS1ss1/SSSsss/SS1ss 0 0 b 0 1")
-
-  def <<@(variant: Variant, fen: FEN): Option[Situation] = {
-    Some(
+  def <<@(variant: Variant, fen: FEN): Option[Situation] =
+    Option(
       Situation(
-        Board(
-          pieces = fen.pieces,
-          history = History(),
+        board = Board(
+          pieces = fen.pieces(variant),
+          history = History(
+            score = Score(fen.player1Score, fen.player2Score),
+            halfMoveClock = fen.halfMovesSinceLastCapture.getOrElse(0),
+            pliesRemainingThisTurn = fen.pliesRemainingThisTurn
+          ),
           variant = variant
         ),
-        fen.value.split(' ')(3) match {
-          case "b" => P1
-          case "w" => P2
-          case _   => sys.error("Invalid player in fen")
-        }
-      ).withHistory(
-        History(
-          score = Score(fen.player1Score, fen.player2Score),
-          halfMoveClock = fen.halfMovesSinceLastCapture.getOrElse(0)
-        )
+        player = fen.player.getOrElse(sys.error("Invalid player in fen"))
       )
     )
-  }
 
   def <<(fen: FEN): Option[Situation] = <<@(Variant.default, fen)
 
   case class SituationPlus(situation: Situation, fullTurnCount: Int) {
+    def turnCount = situation.board.variant.turnCountFromFen(fullTurnCount, situation.player)
 
-    def turnCount = fullTurnCount * 2 - situation.player.fold(2, 1)
-    // when we get a multiaction variant we should set this
-    def plies     = turnCount
-
+    def plies = situation.board.variant.pliesFromFen(
+      fullTurnCount,
+      situation.player,
+      situation.board.history.currentTurn.size
+    )
   }
 
   def <<<@(variant: Variant, fen: FEN): Option[SituationPlus] =
@@ -60,55 +53,65 @@ object Forsyth {
 
   def >>(parsed: SituationPlus): FEN =
     parsed match {
-      case SituationPlus(situation, _) =>
-        >>(Game(situation, plies = parsed.plies, turnCount = parsed.turnCount))
+      case SituationPlus(sit, _) =>
+        >>(Game(sit, plies = parsed.plies, turnCount = parsed.turnCount))
     }
 
   def >>(game: Game): FEN = {
-    val boardFen  = boardPart(game.situation.board)
-    val scoreStr  = game.situation.board.history.score.fenStr
-    val player    = game.situation.player.fold('b', 'w')
-    val halfMoves = game.situation.board.history.halfMoveClock
-    val fullMoves = game.fullTurnCount
-    FEN(s"${boardFen} ${scoreStr} ${player} ${halfMoves} ${fullMoves}")
+    val boardFen               = getFen_board(game.situation.board)
+    val scoreStr               = game.situation.board.history.score.fenStr
+    val player                 = game.situation.player.fold('b', 'w')
+    val halfMoves              = game.situation.board.history.halfMoveClock
+    val fullMoves              = game.fullTurnCount
+    val pliesRemainingThisTurn =
+      if (game.situation.board.variant.hasPrevPlayer)
+        game.situation.board.history.pliesRemainingThisTurn.fold("")(p => " " + p.toString)
+      else ""
+    FEN(s"$boardFen $scoreStr $player $halfMoves $fullMoves$pliesRemainingThisTurn")
   }
 
   def exportBoard(board: Board): String = {
-    val boardFen = boardPart(board)
-    val scoreStr = board.history.score.fenStr
+    val boardFen = getFen_board(board)
+    val scoreStr = getFen_score(board)
     s"${boardFen} ${scoreStr}"
   }
 
-  // return the FEN
-  def boardPart(board: Board): String = {
-    val fen   = new scala.collection.mutable.StringBuilder(70)
-    var empty = 0
-    for (y <- Rank.allReversed) {
-      empty = 0
-      for (x <- File.all) {
-        board(x, y) match {
-          case None        => if (Pos(x, y).isDefined) empty = empty + 1
-          case Some(piece) =>
-            if (empty > 0) {
-              fen.append(empty)
-              empty = 0
-            }
-            if (piece.player == Player.P1)
-              fen.append(piece.forsyth.toString.toUpperCase())
-            else
-              fen.append(piece.forsyth.toString.toLowerCase())
-        }
-      }
-      if (empty > 0) fen.append(s"${empty},")
-      fen.append('/')
+  def getFen_board(board: Board): String = {
+    val res = new StringBuilder(board.variant.boardType.cellList.size)
+
+    var prev: Option[Pos] = Option.empty
+    var emptyNb           = 0
+
+    def writeEmptyNb() = if (emptyNb > 0) {
+      res.append(s"$emptyNb")
+      emptyNb = 0
     }
-    fen.toString.replace(",/", "/").dropRight(1)
+
+    board.variant.boardType.cellList.foreach(a => {
+      if (prev.isDefined && prev.get.y != a.y) {
+        writeEmptyNb()
+        res.append("/")
+      }
+
+      board(a) match {
+        case None        => emptyNb += 1
+        case Some(piece) =>
+          writeEmptyNb()
+          res.append(
+            if (piece.player == P1) piece.forsyth.toString.toUpperCase()
+            else piece.forsyth.toString.toLowerCase()
+          )
+      }
+
+      prev = Option(a);
+    })
+
+    writeEmptyNb()
+
+    res.toString
   }
 
-  def boardAndPlayer(situation: Situation): String =
-    boardAndPlayer(situation.board, situation.player)
+  def getFen_score(board: Board): String = board.history.score.fenStr
 
-  def boardAndPlayer(board: Board, turnPlayer: Player): String =
-    s"${exportBoard(board)} ${turnPlayer.letter}"
-
+  def boardAndPlayer(board: Board, nextPlayer: Player): String = s"${exportBoard(board)} ${nextPlayer.letter}"
 }

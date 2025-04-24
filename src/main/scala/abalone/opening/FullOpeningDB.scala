@@ -1,12 +1,11 @@
 package strategygames.abalone.opening
 
+import strategygames.ActionStrs
+import strategygames.abalone.format.FEN
+
 import scala.annotation.nowarn
 
-import strategygames.abalone.format.FEN
-import strategygames.ActionStrs
-
 object FullOpeningDB {
-
   // private val SEARCH_MAX_TURNS = 40
 
   def findByFen(@nowarn fen: FEN): Option[FullOpening] = None // TODO: ???

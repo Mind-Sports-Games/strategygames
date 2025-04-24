@@ -1,7 +1,6 @@
 package strategygames
 
 final class Hash(size: Int) {
-
   def apply(lib: GameLogic, situation: Situation): PositionHash = {
     val l = Hash.get(lib, situation, Hash.polyglotTable(lib))
     if (size <= 8) {
@@ -17,7 +16,6 @@ final class Hash(size: Int) {
 }
 
 object Hash {
-
   val size = 3
 
   sealed abstract class ZobristConstants {
@@ -141,5 +139,4 @@ object Hash {
   def apply(lib: GameLogic, situation: Situation): PositionHash = h.apply(lib, situation)
 
   def debug(hashes: PositionHash) = hashes.map(_.toInt).sum.toString
-
 }

@@ -1,7 +1,6 @@
 package strategygames.abalone
 
 final class Hash(size: Int) {
-
   def apply(situation: Situation): PositionHash = {
     val l = Hash.get(situation, Hash.polyglotTable)
     if (size <= 8) {
@@ -17,38 +16,39 @@ final class Hash(size: Int) {
 }
 
 object Hash {
-
   val size = 3
 
   class ZobristConstants(start: Int) {
     def hexToLong(s: String): Long =
       (java.lang.Long.parseLong(s.substring(start, start + 8), 16) << 32) |
         java.lang.Long.parseLong(s.substring(start + 8, start + 16), 16)
-    val p1TurnMask                 = hexToLong(ZobristTables.p1TurnMask)
-    val actorMasks                 = ZobristTables.actorMasks.map(hexToLong)
+
+    val p1TurnMask = hexToLong(ZobristTables.p1TurnMask)
+    val actorMasks = ZobristTables.actorMasks.map(hexToLong)
   }
 
   object ZobristConstants {}
 
-  // The following masks are compatible with the Polyglot
-  // opening book format.
+  // The following masks are compatible with the Polyglot opening book format.
   private val polyglotTable    = new ZobristConstants(0)
   private lazy val randomTable = new ZobristConstants(16)
 
-  private def actorIndex(actor: Actor) = 80 * actor.piece.player.fold(1, 0) + actor.pos.hashCode
+  /** Remark: we use pos.hashIndex instead of pos.index or pos.hashCode to make sure the maximal value of this
+    * index is < posNb.
+    */
+  def actorIndex(situation: Situation, actor: Actor) =
+    situation.board.variant.boardType.posNb * actor.piece.player.fold(1, 0) + actor.pos.hashIndex
 
   def get(situation: Situation, table: ZobristConstants): Long = {
+    val phturn = situation.board.history.pliesRemainingThisTurn match {
+      case Some(p) if p > 1 => table.p1TurnMask
+      case _ => 0L
+    }
+    val hturn  = situation.player.fold(table.p1TurnMask, 0L)
 
-    val board = situation.board
-    val hturn = situation.player.fold(table.p1TurnMask, 0L)
-
-    val hactors = board.actors.values.view
-      .map {
-        table.actorMasks compose actorIndex _
-      }
-      .fold(hturn)(_ ^ _)
-
-    hactors
+    situation.board.actors.values.view
+      .map(a => table.actorMasks(actorIndex(situation, a)))
+      .fold(phturn ^ hturn)(_ ^ _)
   }
 
   private val h = new Hash(size)
@@ -56,10 +56,11 @@ object Hash {
   def apply(situation: Situation): PositionHash = h.apply(situation)
 
   def debug(hashes: PositionHash) = hashes.map(_.toInt).sum.toString
-
 }
 
-// Although an Abalone board has 61 squares, our Pos index goes up to 81 so we need 2*81 masks.
+/** We need 2n masks, where n is the number of Pos contained in the smallest rectangle including the board of
+  * any variant (here n = 11²).
+  */
 private object ZobristTables {
   val actorMasks = Array(
     "9d39247e33776d4152b375aa7c0d7bac",
@@ -223,9 +224,88 @@ private object ZobristTables {
     "480412bab7f5be2a34507a3503935243",
     "aef3af4a563dfe43ec504bd0c7ae79a1",
     "19afe59ae451497f0bc761ea4004d2ae",
-    "52593803dff1e8403a0748078a78fd4d"
+    "52593803dff1e8403a0748078a78fd4d",
+    "f4f076e65f2ce6f0c5f36bde8caa93fe",
+    "11379625747d5af35b2299dc44080278",
+    "bce5d2248682c1153f99cbeb6ec653fa",
+    "9da4243de836994f48ebcfc004b524ca",
+    "066f70b33fe09017d2278829cd344d05",
+    "4dc4de189b671a1c5fe637e58fc1c0f3",
+    "51039ab7712457c30a4b136f25a65a32",
+    "c07a3f80c31fb4b44119314b520d04d9",
+    "b46ee9c5e64a6e7c5354a8b08947cc8e",
+    "b3819a42abe61c876001d6a94517300b",
+    "21a007933a522a2014597a074f133855",
+    "2df16f761598aa4fdc9a6baf92ffde03",
+    "763c4a1371b368fdc5cbc5270de986b0",
+    "f793c46702e086a095c72d49bd7560be",
+    "d7288e012aeb8d3112b437e4c286737a",
+    "de336a2a4bc1c44baa7c6f89f1442c5d",
+    "0bf692b38d079f231a3ebbf317bfc4d8",
+    "2c604a7a177326b34ad3c9fa863a5aa3",
+    "4850e73e03eb6064c7c94147de663b5b",
+    "cfc447f1e53c8e1b840e7fe4b35d4a4b",
+    "b05ca3f564268d998921109126e23341",
+    "9ae182c8bc9474e8a18a4f12c127de17",
+    "a4fc4bd4fc5558ca471973e4dc6efb4b",
+    "e755178d58fc4e76c723867b98d07330",
+    "69b97db1a4c03dfef5fcc6de350950d1",
+    "f9b5b7c4acc67c96b90913e02bde576a",
+    "fc6a82d64b8655fb5554c92f272b73c5",
+    "9c684cb6c4d244173738a3f0fdf5d9c6",
+    "8ec97d2917456ed03771f25e5e278ee3",
+    "6703df9d2924e97ea9d58a812b10906e",
+    "c547f57e42a7444e2814f2a19d8670eb",
+    "78e37644e7cad29e5ced6d617e9d6b4d",
+    "fe9a44e9362f05fa69be27bdc682e06a",
+    "08bd35cc38336615945e3cd54c7a41f4",
+    "9315e5eb3a129acefac825c29c4e52fc",
+    "94061b871e04df7595c380633671f3c0",
+    "df1d9f9d784ba010b1f0f11b309f849f",
+    "3bba57b68871b59d36b7ac17862bc4ac",
+    "d2b7adeeded1f73f8b89835b5e731ac5",
+    "f7a255d83bc373f8122138b676fc6561",
+    "d7f4f2448c0ceb81ce3107b858b368ea",
+    "d95be88cd210ffa7aa14dd3733de4203",
+    "336f52f8ff4728e7ec4ea6805a8dad1e",
+    "a74049dac312ac71ce5cd5938049dcf0",
+    "a2f61bb6e437fdb521156227c06a4b0b",
+    "4f2a5cb07f6a35b3da13d541802c4d5e",
+    "87d380bda5bf7859fbf03d5c9f783bb2",
+    "16b9f7e06c453a21e512fa9fd5c68b8a",
+    "7ba2484c8a0fd54e30bd781b22277dcd",
+    "f3a678cad9a2e38c56625e22aef316ec",
+    "39b0bf7dde437ba2ed75251a71024db6",
+    "fcaf55c1bf8a4424b468dc45b39cde2f",
+    "18fcf680573fa59468b33836bea9a0a0",
+    "4c0563b89f495ac33187565f03cc0d85",
+    "40e087931a00930d9bbc591ddc43447f",
+    "8cffa9412eb642c1c53a29458191d2db",
+    "68ca39053261169f6bc263803d691ec8",
+    "7a1ee967d27579e204cca68628858bac",
+    "9d1d60e5076f5b6fa20a13cffa4679d1",
+    "3810e399b6f65ba285725a1e096e1abf",
+    "32095b6d4ab5f9b1bc986393043f78d5",
+    "35cab62109dd038a0fa47125507ccb12",
+    "a90b24499fcfafb1c2c27b60c8b2ce36",
+    "77a225a07cc2c6bd217520a809c97da6",
+    "513e5e634c70e331552ad48c96617c16",
+    "4361c0ca3f692f12758c0637401144ae",
+    "d941aca44b20a45bf1ae50d591aeb10f",
+    "528f7c8602c5807b0c127280b89240a3",
+    "52ab92beb9613989a9a8cd5ddd7737b0",
+    "9d1dfa2efc557f738506683f3e28c050",
+    "722ff175f572c3488105b0573483941f",
+    "1d1260a51107fe97d00bcf6974e8788c",
+    "7a249a57ec0c9ba23311a2a4e61fc638",
+    "04208fe9e8f7f2d65b31cba035ff4f50",
+    "5a110c6058b920a09ef049141a01e743",
+    "0cd9a497658a56983355b7a63e03cf20",
+    "56fd23c8f9715a4c78bf716c2f94ffcf",
+    "284c847b9d887aae232304d6a359676e",
+    "04feabfbbdb619cbffeebdd04f15816e",
+    "742e1e651c60ba83594fdc90c434a4fd"
   )
 
   val p1TurnMask = "f8d626aaaf2785093815e537b6222c85"
-
 }

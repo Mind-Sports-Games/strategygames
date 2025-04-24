@@ -1,191 +1,134 @@
 package strategygames.abalone
 
 import org.specs2.matcher.ValidatedMatchers
+import strategygames.abalone.variant.Abalone
 
 class AbalonePosTest extends AbaloneTest with ValidatedMatchers {
   "grid coordinates" should {
     "describe 61 positions" in {
-      Pos.all.size must_== 61
+      Abalone.boardType.cellList.size must_== 61
     }
 
-    "be shaped as an hexagon when accessed in 1D" in {
-      Pos.isInHexagon(-1) must_== false
+    "be shaped as a hexagon" in {
+      // First row
+      Abalone.boardType.isCell(new Pos(0, 0)) must_== true
+      Abalone.boardType.isCell(new Pos(1, 0)) must_== true
+      Abalone.boardType.isCell(new Pos(2, 0)) must_== true
+      Abalone.boardType.isCell(new Pos(3, 0)) must_== true
+      Abalone.boardType.isCell(new Pos(4, 0)) must_== true
+      Abalone.boardType.isCell(new Pos(5, 0)) must_== false
+      Abalone.boardType.isCell(new Pos(6, 0)) must_== false
+      Abalone.boardType.isCell(new Pos(7, 0)) must_== false
+      Abalone.boardType.isCell(new Pos(8, 0)) must_== false
 
-      Pos.isInHexagon(0) must_== true
-      Pos.isInHexagon(1) must_== true
-      Pos.isInHexagon(4) must_== true
-      Pos.isInHexagon(5) must_== false
-      Pos.isInHexagon(6) must_== false
-      Pos.isInHexagon(7) must_== false
-      Pos.isInHexagon(8) must_== false
+      Abalone.boardType.isCell(new Pos(0, 1)) must_== true
+      Abalone.boardType.isCell(new Pos(1, 1)) must_== true
+      Abalone.boardType.isCell(new Pos(2, 1)) must_== true
+      Abalone.boardType.isCell(new Pos(3, 1)) must_== true
+      Abalone.boardType.isCell(new Pos(4, 1)) must_== true
+      Abalone.boardType.isCell(new Pos(5, 1)) must_== true
+      Abalone.boardType.isCell(new Pos(6, 1)) must_== false
+      Abalone.boardType.isCell(new Pos(7, 1)) must_== false
+      Abalone.boardType.isCell(new Pos(8, 1)) must_== false
 
-      Pos.isInHexagon(9) must_== true
-      Pos.isInHexagon(14) must_== true
-      Pos.isInHexagon(15) must_== false
-      Pos.isInHexagon(16) must_== false
-      Pos.isInHexagon(17) must_== false
+      Abalone.boardType.isCell(new Pos(0, 2)) must_== true
+      Abalone.boardType.isCell(new Pos(1, 2)) must_== true
+      Abalone.boardType.isCell(new Pos(2, 2)) must_== true
+      Abalone.boardType.isCell(new Pos(3, 2)) must_== true
+      Abalone.boardType.isCell(new Pos(4, 2)) must_== true
+      Abalone.boardType.isCell(new Pos(5, 2)) must_== true
+      Abalone.boardType.isCell(new Pos(6, 2)) must_== true
+      Abalone.boardType.isCell(new Pos(7, 2)) must_== false
+      Abalone.boardType.isCell(new Pos(8, 2)) must_== false
 
-      Pos.isInHexagon(18) must_== true
-      Pos.isInHexagon(25) must_== false
-      Pos.isInHexagon(26) must_== false
+      Abalone.boardType.isCell(new Pos(0, 3)) must_== true
+      Abalone.boardType.isCell(new Pos(1, 3)) must_== true
+      Abalone.boardType.isCell(new Pos(2, 3)) must_== true
+      Abalone.boardType.isCell(new Pos(3, 3)) must_== true
+      Abalone.boardType.isCell(new Pos(4, 3)) must_== true
+      Abalone.boardType.isCell(new Pos(5, 3)) must_== true
+      Abalone.boardType.isCell(new Pos(6, 3)) must_== true
+      Abalone.boardType.isCell(new Pos(7, 3)) must_== true
+      Abalone.boardType.isCell(new Pos(8, 3)) must_== false
 
-      Pos.isInHexagon(35) must_== false
-      Pos.isInHexagon(36) must_== true
-      Pos.isInHexagon(44) must_== true
+      Abalone.boardType.isCell(new Pos(0, 4)) must_== true
+      Abalone.boardType.isCell(new Pos(1, 4)) must_== true
+      Abalone.boardType.isCell(new Pos(2, 4)) must_== true
+      Abalone.boardType.isCell(new Pos(3, 4)) must_== true
+      Abalone.boardType.isCell(new Pos(4, 4)) must_== true
+      Abalone.boardType.isCell(new Pos(5, 4)) must_== true
+      Abalone.boardType.isCell(new Pos(6, 4)) must_== true
+      Abalone.boardType.isCell(new Pos(7, 4)) must_== true
+      Abalone.boardType.isCell(new Pos(8, 4)) must_== true
 
-      Pos.isInHexagon(45) must_== false
-      Pos.isInHexagon(53) must_== true
+      Abalone.boardType.isCell(new Pos(0, 5)) must_== false
+      Abalone.boardType.isCell(new Pos(1, 5)) must_== true
+      Abalone.boardType.isCell(new Pos(2, 5)) must_== true
+      Abalone.boardType.isCell(new Pos(3, 5)) must_== true
+      Abalone.boardType.isCell(new Pos(4, 5)) must_== true
+      Abalone.boardType.isCell(new Pos(5, 5)) must_== true
+      Abalone.boardType.isCell(new Pos(6, 5)) must_== true
+      Abalone.boardType.isCell(new Pos(7, 5)) must_== true
+      Abalone.boardType.isCell(new Pos(8, 5)) must_== true
 
-      Pos.isInHexagon(54) must_== false
-      Pos.isInHexagon(55) must_== false
-      Pos.isInHexagon(60) must_== true
+      Abalone.boardType.isCell(new Pos(0, 6)) must_== false
+      Abalone.boardType.isCell(new Pos(1, 6)) must_== false
+      Abalone.boardType.isCell(new Pos(2, 6)) must_== true
+      Abalone.boardType.isCell(new Pos(3, 6)) must_== true
+      Abalone.boardType.isCell(new Pos(4, 6)) must_== true
+      Abalone.boardType.isCell(new Pos(5, 6)) must_== true
+      Abalone.boardType.isCell(new Pos(6, 6)) must_== true
+      Abalone.boardType.isCell(new Pos(7, 6)) must_== true
+      Abalone.boardType.isCell(new Pos(8, 6)) must_== true
 
-      Pos.isInHexagon(63) must_== false
-      Pos.isInHexagon(54) must_== false
-      Pos.isInHexagon(65) must_== false
-      Pos.isInHexagon(71) must_== true
+      Abalone.boardType.isCell(new Pos(0, 7)) must_== false
+      Abalone.boardType.isCell(new Pos(1, 7)) must_== false
+      Abalone.boardType.isCell(new Pos(2, 7)) must_== false
+      Abalone.boardType.isCell(new Pos(3, 7)) must_== true
+      Abalone.boardType.isCell(new Pos(4, 7)) must_== true
+      Abalone.boardType.isCell(new Pos(5, 7)) must_== true
+      Abalone.boardType.isCell(new Pos(6, 7)) must_== true
+      Abalone.boardType.isCell(new Pos(7, 7)) must_== true
+      Abalone.boardType.isCell(new Pos(8, 7)) must_== true
 
-      Pos.isInHexagon(72) must_== false
-      Pos.isInHexagon(73) must_== false
-      Pos.isInHexagon(74) must_== false
-      Pos.isInHexagon(75) must_== false
-      Pos.isInHexagon(80) must_== true
-
-      Pos.isInHexagon(81) must_== false
-      Pos.isInHexagon(88) must_== false
-
-      Pos.isInHexagon(9001) must_== false
+      // Last row
+      Abalone.boardType.isCell(new Pos(0, 8)) must_== false
+      Abalone.boardType.isCell(new Pos(1, 8)) must_== false
+      Abalone.boardType.isCell(new Pos(2, 8)) must_== false
+      Abalone.boardType.isCell(new Pos(3, 8)) must_== false
+      Abalone.boardType.isCell(new Pos(4, 8)) must_== true
+      Abalone.boardType.isCell(new Pos(5, 8)) must_== true
+      Abalone.boardType.isCell(new Pos(6, 8)) must_== true
+      Abalone.boardType.isCell(new Pos(7, 8)) must_== true
+      Abalone.boardType.isCell(new Pos(8, 8)) must_== true
     }
 
-    "be shaped as an hexagon when accessed in 2D" in {
-      // testing first row
-      Pos(File(0).get, Rank(0).get) must_!= None
-      Pos(File(1).get, Rank(0).get) must_!= None
-      Pos(File(2).get, Rank(0).get) must_!= None
-      Pos(File(3).get, Rank(0).get) must_!= None
-      Pos(File(4).get, Rank(0).get) must_!= None
-      Pos(File(5).get, Rank(0).get) must_== None
-      Pos(File(6).get, Rank(0).get) must_== None
-      Pos(File(7).get, Rank(0).get) must_== None
-      Pos(File(8).get, Rank(0).get) must_== None
+    "compute its index based on a shape of square (sort of...) when accessed in 2D" in {
+      new Pos(0, 0) must_== Pos.fromIndex(0)
+      new Pos(0, 1) must_== Pos.fromIndex(8)
 
-      // testing last row
-      Pos(File(0).get, Rank(8).get) must_== None
-      Pos(File(1).get, Rank(8).get) must_== None
-      Pos(File(2).get, Rank(8).get) must_== None
-      Pos(File(3).get, Rank(8).get) must_== None
-      Pos(File(4).get, Rank(8).get) must_!= None
-      Pos(File(5).get, Rank(8).get) must_!= None
-      Pos(File(6).get, Rank(8).get) must_!= None
-      Pos(File(7).get, Rank(8).get) must_!= None
-      Pos(File(8).get, Rank(8).get) must_!= None
-    }
+      new Pos(1, 1) must_== Pos.fromIndex(9)
 
-    "compute its index based on a shape of square when accessed in 2D" in {
-      Pos(File(0).get, Rank(0).get) must_== Pos(0)
-      Pos(File(8).get, Rank(0).get) must_== Pos(8)
-
-      Pos(File(0).get, Rank(1).get) must_== Pos(9)
-
-      Pos(File(8).get, Rank(8).get) must_== Pos(80)
-    }
-  }
-
-  "general navigation system (from E5)" should {
-    "increment letter only when moving to the right" in {
-      Pos.E5.right must_== Some(Pos.F5)
-    }
-    "decrement letter only when moving to the left" in {
-      Pos.E5.left must_== Some(Pos.D5)
-    }
-    "increment number and letter when moving upRight" in {
-      Pos.E5.upRight must_== Some(Pos.F6)
-    }
-    "increment number only when moving upLeft" in {
-      Pos.E5.upLeft must_== Some(Pos.E6)
-    }
-    "decrement number and letter when moving downLeft" in {
-      Pos.E5.downLeft must_== Some(Pos.D4)
-    }
-    "decrement number only when moving downRight" in {
-      Pos.E5.downRight must_== Some(Pos.E4)
-    }
-  }
-
-  "directions from A1" should {
-    "prevent moving outside the grid (left and down)" in {
-      Pos.A1.left must_== None
-      Pos.A1.downLeft == None
-      Pos.A1.downRight == None
-    }
-
-    "allow moving inside the grid (right and up)" in {
-      Pos.A1.right must_== Some(Pos.B1)
-      Pos.A1.upLeft must_== Some(Pos.A2)
-      Pos.A1.upRight must_== Some(Pos.B2)
-      Pos.A1.directionString(Pos.A2) must_== DiagonalDirectionString.UpLeft
-      Pos.A1.directionString(Pos.B2) must_== DiagonalDirectionString.UpRight
-      Pos.A1.directionString(Pos.B1) must_== DirectionString.Right
+      new Pos(6, 9) must_== Pos.fromIndex(80)
     }
   }
 
-  "directions from I9" should {
-    "prevent moving outside the grid (right and up)" in {
-      Pos.I9.right must_== None
-      Pos.I9.upLeft must_== None
-      Pos.I9.upRight must_== None
-    }
-
-    "allow moving inside the grid (left and down)" in {
-      Pos.I9.left must_== Some(Pos.H9)
-      Pos.I9.downLeft must_== Some(Pos.H8)
-      Pos.I9.downRight must_== Some(Pos.I8)
-      Pos.I9.directionString(Pos.I8) must_== DiagonalDirectionString.DownRight
-      Pos.I9.directionString(Pos.H9) must_== DirectionString.Left
-      Pos.I9.directionString(Pos.H8) must_== DiagonalDirectionString.DownLeft
-    }
-  }
-
-  "directions from C7" should {
-    "prevent moving outside the grid (upLeft and left)" in {
-      Pos.C7.left must_== None
-      Pos.C7.upLeft must_== None
-    }
-
-    "allow moving inside the grid (right, upRight and down)" in {
-      Pos.C7.downLeft must_== Some(Pos.B6)
-      Pos.C7.right must_== Some(Pos.D7)
-      Pos.C7.downRight must_== Some(Pos.C6)
-      Pos.C7.upRight must_== Some(Pos.D8)
-    }
-  }
-
-  "directions from G7" should {
-    "allow moving everywhere inside the grid" in {
-      Pos.G7.downLeft must_== Some(Pos.F6)
-      Pos.G7.right must_== Some(Pos.H7)
-      Pos.G7.downRight must_== Some(Pos.G6)
-      Pos.G7.upRight must_== Some(Pos.H8)
-      Pos.G7.left must_== Some(Pos.F7)
-      Pos.G7.upLeft must_== Some(Pos.G8)
-    }
-  }
-
-// 9 -              &  \' (  )  *
-// 8 -            7  8  9  !  ?  ¥
-// 7 -          Y  Z  0  1  2  3  £
-// 6 -        P  Q  R  S  T  U  V  ¡
-// 5 -      G  H  I  J  K  L  M  N  }
-// 4 -       y  z  A  B  C  D  E  F
-// 3 -        q  r  s  t  u  v  w
-// 2 -         i  j  k  l  m  n
-// 1 -          a  b  c  d  e
-//               \  \  \  \  \  \  \  \  \
-//                A  B  C  D  E  F  G  H  I
+  /*
+   * 8 -              i5 i6 i7 i8 i9
+   * 7 -            h4 h5 h6 h7 h8 h9
+   * 6 -          g3 g4 g5 g6 g7 g8 g9
+   * 5 -        f2 f3 f4 f5 f6 f7 f8 f9
+   * 4 -      e1 e2 e3 e4 e5 e6 e7 e8 e9
+   * 3 -       d1 d2 d3 d4 d5 d6 d7 d8
+   * 2 -        c1 c2 c3 c4 c5 c6 c7
+   * 1 -         b1 b2 b3 b4 b5 b6
+   * 0 -          a1 a2 a3 a4 a5
+   *               \  \  \  \  \  \  \  \  \
+   * y/x            0  1  2  3  4  5  6  7  8
+   */
   "official notation" should {
-    "swap file and rank indexes" in {
-      Pos.G6.officialNotationKey must_== "f7"
+    "be written yx with y as a lowercase letter and x as a number" in {
+      new Pos(6, 5).key must_== "f7"
     }
   }
-
 }

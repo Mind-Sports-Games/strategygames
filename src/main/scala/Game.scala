@@ -2,9 +2,8 @@ package strategygames
 
 import cats.data.Validated
 import cats.implicits._
-
+import strategygames.format.{FEN, Uci}
 import strategygames.variant.Variant
-import strategygames.format.{ FEN, Uci }
 
 abstract class Game(
     val situation: Situation,
@@ -381,7 +380,7 @@ object Game {
     def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a chess game into a togyzkumalak game")
     def toGo: go.Game                     = sys.error("Can't turn a chess game into a go game")
     def toBackgammon: backgammon.Game     = sys.error("Can't turn a chess game into a backgammon game")
-    def toAbalone: abalone.Game           = sys.error("Can't turn a chess game into a abalone game")
+    def toAbalone: abalone.Game           = sys.error("Can't turn a chess game into an abalone game")
     def toDameo: dameo.Game               = sys.error("Can't turn a chess game into a dameo game")
 
   }
@@ -548,7 +547,7 @@ object Game {
     def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a draughts game into a togyzkumalak game")
     def toGo: go.Game                     = sys.error("Can't turn a draughts game into a go game")
     def toBackgammon: backgammon.Game     = sys.error("Can't turn a draughts game into a backgammon game")
-    def toAbalone: abalone.Game           = sys.error("Can't turn a draughts game into a abalone game")
+    def toAbalone: abalone.Game           = sys.error("Can't turn a draughts game into an abalone game")
     def toDameo: dameo.Game               = sys.error("Can't turn a draughts game into a dameo game")
 
   }
@@ -699,7 +698,7 @@ object Game {
     def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a fairysf game into a togyzkumalak game")
     def toGo: go.Game                     = sys.error("Can't turn a fairysf game into a go game")
     def toBackgammon: backgammon.Game     = sys.error("Can't turn a fairysf game into a backgammon game")
-    def toAbalone: abalone.Game           = sys.error("Can't turn a fairysf game into a abalone game")
+    def toAbalone: abalone.Game           = sys.error("Can't turn a fairysf game into an abalone game")
     def toDameo: dameo.Game               = sys.error("Can't turn a fairysf game into a dameo game")
 
   }
@@ -835,7 +834,7 @@ object Game {
     def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a samurai game into a togyzkumalak game")
     def toGo: go.Game                     = sys.error("Can't turn a samurai game into a go game")
     def toBackgammon: backgammon.Game     = sys.error("Can't turn a samurai game into a backgammon game")
-    def toAbalone: abalone.Game           = sys.error("Can't turn a samurai game into a abalone game")
+    def toAbalone: abalone.Game           = sys.error("Can't turn a samurai game into an abalone game")
     def toDameo: dameo.Game               = sys.error("Can't turn a samurai game into a dameo game")
 
   }
@@ -972,7 +971,7 @@ object Game {
     def toTogyzkumalak: togyzkumalak.Game = g
     def toGo: go.Game                     = sys.error("Can't turn a togyzkumalak game into a go game")
     def toBackgammon: backgammon.Game     = sys.error("Can't turn a togyzkumalak game into a backgammon game")
-    def toAbalone: abalone.Game           = sys.error("Can't turn a togyzkumalak game into a abalone game")
+    def toAbalone: abalone.Game           = sys.error("Can't turn a togyzkumalak game into an abalone game")
     def toDameo: dameo.Game               = sys.error("Can't turn a togyzkumalak game into a dameo game")
 
   }
@@ -1118,7 +1117,7 @@ object Game {
     def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a go game into a togyzkumalak game")
     def toGo: go.Game                     = g
     def toBackgammon: backgammon.Game     = sys.error("Can't turn a go game into a backgammon game")
-    def toAbalone: abalone.Game           = sys.error("Can't turn a go game into a abalone game")
+    def toAbalone: abalone.Game           = sys.error("Can't turn a go game into an abalone game")
     def toDameo: dameo.Game               = sys.error("Can't turn a go game into a dameo game")
 
   }
@@ -1284,7 +1283,7 @@ object Game {
     def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a backgammon game into a togyzkumalak game")
     def toGo: go.Game                     = sys.error("Can't turn a backgammon game into a go game")
     def toBackgammon: backgammon.Game     = g
-    def toAbalone: abalone.Game           = sys.error("Can't turn a backgammon game into a abalone game")
+    def toAbalone: abalone.Game           = sys.error("Can't turn a backgammon game into an abalone game")
     def toDameo: dameo.Game               = sys.error("Can't turn a backgammon game into a dameo game")
 
   }
@@ -1299,8 +1298,7 @@ object Game {
         g.startedAtPly,
         g.startedAtTurn
       ) {
-
-    def apply(
+    override def apply(
         orig: Pos,
         dest: Pos,
         promotion: Option[PromotableRole] = None,
@@ -1317,62 +1315,62 @@ object Game {
       case _                                      => sys.error("Not passed Abalone objects")
     }
 
-    def apply(action: Action): Game =
+    override def apply(action: Action): Game =
       action match {
         case (Move.Abalone(move)) => Abalone(g.apply(move))
         case _                    => sys.error("Not passed Abalone objects")
       }
 
-    def drop(
+    override def drop(
         role: Role,
         pos: Pos,
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, Drop)] = sys.error("Can't drop in Abalone")
 
-    def lift(
+    override def lift(
         pos: Pos,
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, Lift)] =
       sys.error("Can't lift in abalone")
 
-    def pass(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Pass)] =
+    override def pass(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Pass)] =
       sys.error("Can't pass in Abalone")
 
-    def selectSquares(
+    override def selectSquares(
         squares: List[Pos],
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, SelectSquares)] =
       sys.error("Can't selectSquares in Abalone")
 
-    def diceRoll(
+    override def diceRoll(
         dice: List[Int],
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, DiceRoll)] =
       sys.error("Can't diceroll in Abalone")
 
-    def undo(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Undo)] =
+    override def undo(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Undo)] =
       sys.error("Can't undo in abalone") // @TODO: might want to be able to undo, actually
 
-    def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)] =
+    override def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)] =
       sys.error("Can't endTurn in abalone")
 
-    def cubeAction(
+    override def cubeAction(
         interaction: CubeInteraction,
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, CubeAction)] =
       sys.error("Can't cubeaction in abalone")
 
-    def randomizeDiceRoll: Option[DiceRoll] = None
+    override def randomizeDiceRoll: Option[DiceRoll] = None
 
-    def randomizeAndApplyDiceRoll(
+    override def randomizeAndApplyDiceRoll(
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, DiceRoll)] =
       sys.error("Can't apply diceroll in abalone")
 
-    def copy(clock: Option[ClockBase]): Game =
+    override def copy(clock: Option[ClockBase]): Game =
       Abalone(g.copy(clock = clock))
 
-    def copy(plies: Int, turnCount: Int, startedAtPly: Int, startedAtTurn: Int): Game =
+    override def copy(plies: Int, turnCount: Int, startedAtPly: Int, startedAtTurn: Int): Game =
       Abalone(
         g.copy(
           plies = plies,
@@ -1382,7 +1380,7 @@ object Game {
         )
       )
 
-    def copy(
+    override def copy(
         clock: Option[ClockBase],
         plies: Int,
         turnCount: Int,
@@ -1399,31 +1397,33 @@ object Game {
         )
       )
 
-    def copy(situation: Situation, plies: Int, turnCount: Int): Game = situation match {
+    override def copy(situation: Situation, plies: Int, turnCount: Int): Game = situation match {
       case Situation.Abalone(situation) =>
         Abalone(g.copy(situation = situation, plies = plies, turnCount = turnCount))
       case _                            =>
         sys.error("Unable to copy abalone game with non-abalone arguments")
     }
-    def copy(situation: Situation): Game                             = situation match {
+    override def copy(situation: Situation): Game                             = situation match {
       case Situation.Abalone(situation) => Abalone(g.copy(situation = situation))
       case _                            => sys.error("Unable to copy abalone game with non-abalone arguments")
     }
 
-    def hasJustSwitchedTurns: Boolean = g.hasJustSwitchedTurns
+    override def hasJustSwitchedTurns: Boolean = g.hasJustSwitchedTurns
 
-    def withTurnsAndPlies(p: Int, t: Int): Game = Abalone(g.withTurnsAndPlies(p, t))
+    override def withTurnsAndPlies(p: Int, t: Int): Game = Abalone(g.withTurnsAndPlies(p, t))
 
-    def toFairySF: fairysf.Game           = sys.error("Can't turn a abalone game into a fairysf game")
-    def toChess: chess.Game               = sys.error("Can't turn a abalone game into a chess game")
-    def toDraughts: draughts.DraughtsGame = sys.error("Can't turn a abalone game into a draughts game")
-    def toSamurai: samurai.Game           = sys.error("Can't turn a abalone game into a samurai game")
-    def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a abalone game into a togyzkumalak game")
-    def toGo: go.Game                     = sys.error("Can't turn a abalone game into a go game")
-    def toBackgammon: backgammon.Game     = sys.error("Can't turn a abalone game into a backgammon game")
-    def toAbalone: abalone.Game           = g
-    def toDameo: dameo.Game               = sys.error("Can't turn a abalone game into a dameo game")
-
+    override def toFairySF: fairysf.Game           = sys.error("Can't turn an abalone game into a fairysf game")
+    override def toChess: chess.Game               = sys.error("Can't turn an abalone game into a chess game")
+    override def toDraughts: draughts.DraughtsGame =
+      sys.error("Can't turn an abalone game into a draughts game")
+    override def toSamurai: samurai.Game           = sys.error("Can't turn an abalone game into a samurai game")
+    override def toTogyzkumalak: togyzkumalak.Game =
+      sys.error("Can't turn an abalone game into a togyzkumalak game")
+    override def toGo: go.Game                     = sys.error("Can't turn an abalone game into a go game")
+    override def toBackgammon: backgammon.Game     =
+      sys.error("Can't turn an abalone game into a backgammon game")
+    override def toAbalone: abalone.Game           = g
+    override def toDameo: dameo.Game               = sys.error("Can't turn an abalone game into a dameo game")
   }
 
   final case class Dameo(g: dameo.Game)
@@ -1558,7 +1558,7 @@ object Game {
     def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a dameo game into a togyzkumalak game")
     def toGo: go.Game                     = sys.error("Can't turn a dameo game into a go game")
     def toBackgammon: backgammon.Game     = sys.error("Can't turn a dameo game into a backgammon game")
-    def toAbalone: abalone.Game           = sys.error("Can't turn a dameo game into a abalone game")
+    def toAbalone: abalone.Game           = sys.error("Can't turn a dameo game into an abalone game")
     def toDameo: dameo.Game               = g
 
   }

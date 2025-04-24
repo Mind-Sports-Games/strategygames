@@ -1,9 +1,7 @@
 package strategygames
 
-import strategygames.MoveMetrics
-
-import strategygames.format.Uci
 import cats.syntax.option._
+import strategygames.format.Uci
 
 sealed abstract class Move(
     val piece: Piece,
@@ -19,7 +17,6 @@ sealed abstract class Move(
     val enpassant: Boolean = false,
     val metrics: MoveMetrics = MoveMetrics()
 ) extends Action(situationBefore) {
-
   def situationAfter: Situation
   def finalizeAfter(finalSquare: Boolean = false): Board
 
@@ -47,11 +44,9 @@ sealed abstract class Move(
   def toBackgammon: backgammon.Move
   def toAbalone: abalone.Move
   def toDameo: dameo.Move
-
 }
 
 object Move {
-
   final case class Chess(m: chess.Move)
       extends Move(
         Piece.Chess(m.piece),
@@ -77,7 +72,6 @@ object Move {
         m.enpassant,
         m.metrics
       ) {
-
     def situationAfter: Situation                           = Situation.Chess(m.situationAfter)
     def finalizeAfter(_finalSquare: Boolean = false): Board = m.finalizeAfter
 
@@ -103,9 +97,8 @@ object Move {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak move from a chess move")
     def toGo           = sys.error("Can't make a go move from a chess move")
     def toBackgammon   = sys.error("Can't make a backgammon move from a chess move")
-    def toAbalone      = sys.error("Can't make a abalone move from a chess move")
+    def toAbalone      = sys.error("Can't make an abalone move from a chess move")
     def toDameo        = sys.error("Can't make a dameo move from a chess move")
-
   }
 
   final case class Draughts(m: draughts.Move)
@@ -132,7 +125,6 @@ object Move {
         false,
         m.metrics
       ) {
-
     def situationAfter: Situation                          = Situation.Draughts(m.situationAfter)
     def finalizeAfter(finalSquare: Boolean = false): Board = m.finalizeAfter(finalSquare)
 
@@ -157,9 +149,8 @@ object Move {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak move from a draughts move")
     def toGo           = sys.error("Can't make a go move from a draughts move")
     def toBackgammon   = sys.error("Can't make a backgammon move from a draughts move")
-    def toAbalone      = sys.error("Can't make a abalone move from a draughts move")
+    def toAbalone      = sys.error("Can't make an abalone move from a draughts move")
     def toDameo        = sys.error("Can't make a dameo move from a draughts move")
-
   }
 
   final case class FairySF(m: fairysf.Move)
@@ -187,7 +178,6 @@ object Move {
         m.enpassant,
         m.metrics
       ) {
-
     def situationAfter: Situation                          = Situation.FairySF(m.situationAfter)
     def finalizeAfter(finalSquare: Boolean = false): Board = m.finalizeAfter
 
@@ -212,9 +202,8 @@ object Move {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak move from a fairysf move")
     def toGo           = sys.error("Can't make a go move from a fairysf move")
     def toBackgammon   = sys.error("Can't make a backgammon move from a fairysf move")
-    def toAbalone      = sys.error("Can't make a abalone move from a fairysf move")
+    def toAbalone      = sys.error("Can't make an abalone move from a fairysf move")
     def toDameo        = sys.error("Can't make a dameo move from a fairysf move")
-
   }
 
   final case class Samurai(m: samurai.Move)
@@ -235,7 +224,6 @@ object Move {
         false,
         m.metrics
       ) {
-
     def situationAfter: Situation                          = Situation.Samurai(m.situationAfter)
     def finalizeAfter(finalSquare: Boolean = false): Board = m.finalizeAfter
 
@@ -260,9 +248,8 @@ object Move {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak move from a samurai move")
     def toGo           = sys.error("Can't make a go move from a samurai move")
     def toBackgammon   = sys.error("Can't make a backgammon move from a samurai move")
-    def toAbalone      = sys.error("Can't make a abalone move from a samurai move")
+    def toAbalone      = sys.error("Can't make an abalone move from a samurai move")
     def toDameo        = sys.error("Can't make a dameo move from a samurai move")
-
   }
 
   final case class Togyzkumalak(m: togyzkumalak.Move)
@@ -283,7 +270,6 @@ object Move {
         false,
         m.metrics
       ) {
-
     def situationAfter: Situation                          = Situation.Togyzkumalak(m.situationAfter)
     def finalizeAfter(finalSquare: Boolean = false): Board = m.finalizeAfter
 
@@ -308,9 +294,8 @@ object Move {
     def toTogyzkumalak = m
     def toGo           = sys.error("Can't make a go move from a togyzkumalak move")
     def toBackgammon   = sys.error("Can't make a backgammon move from a togyzkumalak move")
-    def toAbalone      = sys.error("Can't make a abalone move from a togyzkumalak move")
+    def toAbalone      = sys.error("Can't make an abalone move from a togyzkumalak move")
     def toDameo        = sys.error("Can't make a dameo move from a togyzkumalak move")
-
   }
 
   final case class Backgammon(m: backgammon.Move)
@@ -328,7 +313,6 @@ object Move {
         false,
         m.metrics
       ) {
-
     def situationAfter: Situation                          = Situation.Backgammon(m.situationAfter)
     def finalizeAfter(finalSquare: Boolean = false): Board = m.finalizeAfter
 
@@ -353,14 +337,13 @@ object Move {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak move from a backgammon move")
     def toGo           = sys.error("Can't make a go move from a backgammon move")
     def toBackgammon   = m
-    def toAbalone      = sys.error("Can't make a abalone move from a backgammon move")
+    def toAbalone      = sys.error("Can't make an abalone move from a backgammon move")
     def toDameo        = sys.error("Can't make a dameo move from a backgammon move")
-
   }
 
   final case class Abalone(m: abalone.Move)
       extends Move(
-        Piece.Abalone(m.piece),
+        Piece.Abalone(m.situationBefore.board(m.orig).get),
         Pos.Abalone(m.orig),
         Pos.Abalone(m.dest),
         Situation.Abalone(m.situationBefore),
@@ -373,13 +356,12 @@ object Move {
         false,
         m.metrics
       ) {
+    override def situationAfter: Situation = Situation.Abalone(m.situationAfter)
+    override def finalizeAfter(finalSquare: Boolean = false): Board = m.finalizeAfter
 
-    def situationAfter: Situation                          = Situation.Abalone(m.situationAfter)
-    def finalizeAfter(finalSquare: Boolean = false): Board = m.finalizeAfter
+    override def toUci: Uci.Move = Uci.AbaloneMove(m.toUci)
 
-    def toUci: Uci.Move = Uci.AbaloneMove(m.toUci)
-
-    def toShortUci: Uci.Move =
+    override def toShortUci: Uci.Move =
       Uci.Move(
         GameLogic.Abalone(),
         orig,
@@ -388,19 +370,18 @@ object Move {
         if (capture.isDefined) capture.get.takeRight(1).some else None
       )
 
-    def first: Move = this
+    override def first: Move = this
 
-    val unwrap         = m
-    def toFairySF      = sys.error("Can't make a fairysf move from a abalone move")
-    def toChess        = sys.error("Can't make a chess move from a abalone move")
-    def toDraughts     = sys.error("Can't make a draughts move from a abalone move")
-    def toSamurai      = sys.error("Can't make a samurai move from a abalone move")
-    def toTogyzkumalak = sys.error("Can't make a togyzkumalak move from a abalone move")
-    def toGo           = sys.error("Can't make a go move from a abalone move")
-    def toBackgammon   = sys.error("Can't make a backgammon move from a abalone move")
-    def toAbalone      = m
-    def toDameo        = sys.error("Can't make a dameo move from a abalone move")
-
+    val unwrap                  = m
+    override def toFairySF      = sys.error("Can't make a fairysf move from an abalone move")
+    override def toChess        = sys.error("Can't make a chess move from an abalone move")
+    override def toDraughts     = sys.error("Can't make a draughts move from an abalone move")
+    override def toSamurai      = sys.error("Can't make a samurai move from an abalone move")
+    override def toTogyzkumalak = sys.error("Can't make a togyzkumalak move from an abalone move")
+    override def toGo           = sys.error("Can't make a go move from an abalone move")
+    override def toBackgammon   = sys.error("Can't make a backgammon move from an abalone move")
+    override def toAbalone      = m
+    override def toDameo        = sys.error("Can't make a dameo move from an abalone move")
   }
 
   final case class Dameo(m: dameo.Move)
@@ -424,7 +405,6 @@ object Move {
         false,
         m.metrics
       ) {
-
     def situationAfter: Situation                          = Situation.Dameo(m.situationAfter)
     def finalizeAfter(finalSquare: Boolean = false): Board = m.finalizeAfter
 
@@ -449,9 +429,8 @@ object Move {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak move from a dameo move")
     def toGo           = sys.error("Can't make a go move from a dameo move")
     def toBackgammon   = sys.error("Can't make a backgammon move from a dameo move")
-    def toAbalone      = sys.error("Can't make a abalone move from a dameo move")
+    def toAbalone      = sys.error("Can't make an abalone move from a dameo move")
     def toDameo        = m
-
   }
 
   def wrap(m: chess.Move): Move        = Move.Chess(m)
@@ -462,5 +441,4 @@ object Move {
   def wrap(m: backgammon.Move): Move   = Move.Backgammon(m)
   def wrap(m: abalone.Move): Move      = Move.Abalone(m)
   def wrap(m: dameo.Move): Move        = Move.Dameo(m)
-
 }

@@ -1,37 +1,34 @@
 package strategygames.abalone
 
-import org.specs2.matcher.ValidatedMatchers
-
 import strategygames.Player
 import strategygames.abalone.variant.Abalone
 
-class AbaloneReplayTest extends AbaloneTest with ValidatedMatchers {
-
+class AbaloneReplayTest extends AbaloneTest {
   "Abalone replay" should {
     "match play through of game" in {
       val vectorActionStrs = Vector(
         Vector("a1d4"),
-        Vector("e9e6"),
-        Vector("b1d3"),
-        Vector("e1e4"),
-        Vector("c2e4"),
-        Vector("d8d6"),
-        Vector("b3e3"),
-        Vector("g3f4"),
+        Vector("i5f5"),
+        Vector("a2c4"),
+        Vector("a5d5"),
+        Vector("b3e6"),
+        Vector("h4f4"),
+        Vector("c2c7"),
+        Vector("c7d6"),
         Vector("i9f6"),
-        Vector("e8e5"),
-        Vector("a2c2"),
-        Vector("f2c2"),
-        Vector("h9f7"),
-        Vector("e2b2"),
-        Vector("a2b3"),
-        Vector("e7e4"),
+        Vector("h5e5"),
+        Vector("b1b3"),
+        Vector("b6b1"),
         Vector("i8g6"),
-        Vector("e6e3"),
-        Vector("b3e3"),
-        Vector("d7e6"),
-        Vector("h8h6"),
-        Vector("g4d4")
+        Vector("b5b1"), // b5xb1
+        Vector("b1c2"),
+        Vector("g5b5"),
+        Vector("h9f7"),
+        Vector("f5a5"),
+        Vector("c2c6"),
+        Vector("g4f5"),
+        Vector("h8f8"),
+        Vector("d7d3")
       )
       playActionStrs(vectorActionStrs.flatten.toList) must beValid.like { g =>
         val replay = Replay
@@ -58,7 +55,5 @@ class AbaloneReplayTest extends AbaloneTest with ValidatedMatchers {
         g.situation.board.variant must_== replay.situation.board.variant
       }
     }
-
   }
-
 }

@@ -1,9 +1,9 @@
 package strategygames.abalone
-import strategygames.{ ClockBase, MoveMetrics, Player, VActionStrs }
 
 import cats.data.Validated
-
-import strategygames.abalone.format.{ FEN, Uci }
+import strategygames.abalone.format.{FEN, Forsyth, Uci}
+import strategygames.abalone.variant.Variant
+import strategygames.{ClockBase, MoveMetrics, Player, VActionStrs}
 
 case class Game(
     situation: Situation,
@@ -75,15 +75,14 @@ case class Game(
 }
 
 object Game {
-  def apply(variant: strategygames.abalone.variant.Variant): Game =
-    new Game(Situation(Board init variant, P1))
+  def apply(variant: Variant): Game = new Game(Situation(Board init variant, P1))
 
-  def apply(variantOption: Option[strategygames.abalone.variant.Variant], fen: Option[FEN]): Game = {
-    val variant = variantOption | strategygames.abalone.variant.Variant.default
+  def apply(variantOption: Option[Variant], fen: Option[FEN]): Game = {
+    val variant = variantOption | Variant.default
     val g       = apply(variant)
     fen
       .flatMap {
-        format.Forsyth.<<<@(variant, _)
+        Forsyth.<<<@(variant, _)
       }
       .fold(g) { parsed =>
         g.copy(

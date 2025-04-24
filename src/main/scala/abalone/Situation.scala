@@ -1,27 +1,21 @@
 package strategygames.abalone
 
-import strategygames.{ Player, Status }
-
 import cats.data.Validated
 import cats.implicits._
-
 import strategygames.abalone.format.Uci
+import strategygames.abalone.variant.Variant
+import strategygames.{Player, Status}
 
 case class Situation(board: Board, player: Player) {
+  def staleMate: Boolean = board.variant.specialDraw(this)// Not 'stalemate' for consistency
 
-  def history = board.history
-
-  def checkMate: Boolean = false
-
-  def staleMate: Boolean = board.variant.specialDraw(this)
-
-  def autoDraw: Boolean = board.autoDraw
+  def autoDraw: Boolean = board.variant.repetition(this)
 
   def end: Boolean = staleMate || autoDraw || variantEnd
 
   def winner: Option[Player] = board.variant.winner(this)
 
-  def playable(strict: Boolean): Boolean = (board.valid(strict)) && !end
+  def playable(strict: Boolean): Boolean = board.valid(strict) && !end
 
   def opponentHasInsufficientMaterial: Boolean = false
 
@@ -33,7 +27,7 @@ case class Situation(board: Board, player: Player) {
 
   def withHistory(history: History) = copy(board = board.withHistory(history))
 
-  def withVariant(variant: strategygames.abalone.variant.Variant) = copy(board = board.withVariant(variant))
+  def withVariant(variant: Variant) = copy(board = board.withVariant(variant))
 
   def unary_! = copy(player = !player)
 
@@ -51,7 +45,5 @@ case class Situation(board: Board, player: Player) {
 }
 
 object Situation {
-
-  def apply(variant: strategygames.abalone.variant.Variant): Situation =
-    Situation(Board init variant, variant.startPlayer)
+  def apply(variant: Variant): Situation = Situation(Board init variant, variant.startPlayer)
 }
