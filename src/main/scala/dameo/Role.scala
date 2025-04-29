@@ -45,14 +45,14 @@ case object GhostKing extends Role {
 
 case object ActiveMan extends Role {
   val forsyth   = 'a'
-  val binaryInt = 5
-  val valueOf   = Some(0)
+  val binaryInt = 6
+  val valueOf   = Some(1)
 }
 
 case object ActiveKing extends Role {
   val forsyth   = 'b'
-  val binaryInt = 6
-  val valueOf   = Some(0)
+  val binaryInt = 5
+  val valueOf   = Some(2)
 }
 
 object Role {
