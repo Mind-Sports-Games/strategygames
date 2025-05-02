@@ -35,7 +35,7 @@ class DameoForsythTest extends DameoTest with ValidatedMatchers {
   }
 
   "fen with ghosts and kings" should {
-    val fen = FEN("W:Wa5.k,b2.k,c4:Ba8.g,e8.p,f6,f7.k:H0:F1")
+    val fen = FEN("W:WKa5,Kb2,c4:BGa8,Pe8,f6,Kf7:H0:F1")
 
     "count the ghosts" in {
       Forsyth.countGhosts(fen) must_== 2

@@ -92,10 +92,10 @@ object Forsyth {
       .transform((_, playerPcs) =>
         playerPcs
           .map { case (pos, pc) =>
-            pos.key + (if (pc.role == Man) "" else "." + pc.role.forsyth)
+            (if (pc.role == Man) "" else pc.role.forsyth) + pos.key
           }
           .toList
-          .sorted
+          .sortBy(s => if (s.head.isUpper) s.tail else s)
           .mkString(",")
       )
     s"W${pieces(P1)}:B${pieces(P2)}"

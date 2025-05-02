@@ -20,37 +20,37 @@ sealed trait Role {
 sealed trait PromotableRole extends Role
 
 case object King extends PromotableRole {
-  val forsyth   = 'k'
+  val forsyth   = 'K'
   val binaryInt = 1
   val valueOf   = Some(2)
 }
 
 case object Man extends Role {
-  val forsyth   = 'm'
+  val forsyth   = 'M'
   val binaryInt = 2
   val valueOf   = Some(1)
 }
 
 case object GhostMan extends Role {
-  val forsyth   = 'g'
+  val forsyth   = 'G'
   val binaryInt = 4
   val valueOf   = Some(0)
 }
 
 case object GhostKing extends Role {
-  val forsyth   = 'p'
+  val forsyth   = 'P'
   val binaryInt = 3
   val valueOf   = Some(0)
 }
 
 case object ActiveMan extends Role {
-  val forsyth   = 'a'
+  val forsyth   = 'A'
   val binaryInt = 6
   val valueOf   = Some(1)
 }
 
 case object ActiveKing extends Role {
-  val forsyth   = 'b'
+  val forsyth   = 'B'
   val binaryInt = 5
   val valueOf   = Some(2)
 }

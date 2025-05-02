@@ -95,7 +95,7 @@ class DameoFenTest extends DameoTest with ValidatedMatchers {
 
   "FEN" should {
     "parse kings correctly" in {
-      val rolesFen = FEN("W:Wa5,a7.k,c3,c4.k:Ba8.k,e8.k,f6:H0:F1")
+      val rolesFen = FEN("W:Wa5,Ka7,c3,Kc4:BKa8,Ke8,f6:H0:F1")
       val pieces   = rolesFen.pieces
       pieces.get(Pos.A5) must_== Some(Piece(P1, Man))
       pieces.get(Pos.C3) must_== Some(Piece(P1, Man))
@@ -109,7 +109,7 @@ class DameoFenTest extends DameoTest with ValidatedMatchers {
 
     "parse ghosts correctly" in {
       // If it's white's move then there can be only black ghosts
-      val rolesFen = FEN("W:Wa5,c4:Ba8.g,e8.p,f6:H0:F1")
+      val rolesFen = FEN("W:Wa5,c4:BGa8,Pe8,f6:H0:F1")
       val pieces   = rolesFen.pieces
       pieces.get(Pos.A5) must_== Some(Piece(P1, Man))
       pieces.get(Pos.C4) must_== Some(Piece(P1, Man))
@@ -121,10 +121,10 @@ class DameoFenTest extends DameoTest with ValidatedMatchers {
 
     "parse active pieces correctly" in {
       // There will be only one active piece at a time
-      FEN("W:Wa5,c4.a:Ba8.g,e8.p,f6:H0:F1").pieces.get(Pos.C4) must_== Some(Piece(P1, ActiveMan))
-      FEN("W:Wa5,c4:Ba8.a,e8.p,f6:H0:F1").pieces.get(Pos.A8) must_== Some(Piece(P2, ActiveMan))
-      FEN("W:Wa5,c4.b:Ba8.g,e8.p,f6:H0:F1").pieces.get(Pos.C4) must_== Some(Piece(P1, ActiveKing))
-      FEN("W:Wa5,c4:Ba8.b,e8.p,f6:H0:F1").pieces.get(Pos.A8) must_== Some(Piece(P2, ActiveKing))
+      FEN("W:Wa5,Ac4:BGa8,Pe8,f6:H0:F1").pieces.get(Pos.C4) must_== Some(Piece(P1, ActiveMan))
+      FEN("W:Wa5,c4:BAa8,Pe8,f6:H0:F1").pieces.get(Pos.A8) must_== Some(Piece(P2, ActiveMan))
+      FEN("W:Wa5,Bc4:BGa8,Pe8,f6:H0:F1").pieces.get(Pos.C4) must_== Some(Piece(P1, ActiveKing))
+      FEN("W:Wa5,c4:BBa8,Pe8,f6:H0:F1").pieces.get(Pos.A8) must_== Some(Piece(P2, ActiveKing))
     }
 
     "parse empty boards" in {
@@ -136,7 +136,7 @@ class DameoFenTest extends DameoTest with ValidatedMatchers {
   }
 
   "Game just finished having" should {
-    val fen       = FEN("W:Wb4.k:B:H0:F1")
+    val fen       = FEN("W:WKb4:B:H0:F1")
     val pieces    = fen.pieces
     val board     = Board(
       pieces,

@@ -8,8 +8,8 @@ Dameo FEN:
 [colour to move]:W[white piece coords]:B[black piece coords]:Halfmoveclock:Fullmoves
 
 coords for men are a1,b1,c1
-other roles (kings, ghostman, ghostking, activeman, activeking) are added to the coord with a period,
-e.g. a1.k,b1.g,b2.p I assume ghosts need to be part of the FEN since we want to treat (partial)
+other roles (kings, ghostman, ghostking, activeman, activeking) are prepended to the coord using
+a capital letter, e.g. Ka1,Gb1,Pb2. Ghosts are part of the FEN since we want to treat (partial)
 moves with ghosts in them as proper moves w.r.t. the frontend.
 
  */
@@ -45,12 +45,9 @@ final case class FEN(value: String) extends AnyVal {
   def fullMove: Option[Int]      = intFromFen(FEN.fullMoveIndex)
 
   private def parsePiece(player: Player)(pStr: String): (Pos, Piece) = {
-    def pStrA: Array[String] = pStr.split('.')
-    def role: Role           = pStrA.lift(1) match {
-      case Some(roleStr) => Role.forsyth(roleStr.head).get
-      case _             => Role.defaultRole
-    }
-    (Pos.allKeys(pStrA(0)), Piece(player, role))
+    def role: Role = if (pStr.head.isUpper) Role.forsyth(pStr.head).get else Role.defaultRole
+    def posStr: String = if (pStr.head.isUpper) pStr.tail else pStr;
+    (Pos.allKeys(posStr), Piece(player, role))
   }
 
   private def intFromFen(index: Int): Option[Int] =
