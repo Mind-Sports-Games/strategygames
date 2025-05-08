@@ -45,7 +45,7 @@ final case class FEN(value: String) extends AnyVal {
   def fullMove: Option[Int]      = intFromFen(FEN.fullMoveIndex)
 
   private def parsePiece(player: Player)(pStr: String): (Pos, Piece) = {
-    def role: Role = if (pStr.head.isUpper) Role.forsyth(pStr.head).get else Role.defaultRole
+    def role: Role     = if (pStr.head.isUpper) Role.forsyth(pStr.head).get else Role.defaultRole
     def posStr: String = if (pStr.head.isUpper) pStr.tail else pStr;
     (Pos.allKeys(posStr), Piece(player, role))
   }

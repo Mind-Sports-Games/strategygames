@@ -59,7 +59,7 @@ case class Move(
 
   def withMetrics(m: MoveMetrics) = copy(metrics = m)
 
-  def toUci = Uci.Move(orig, dest, promotion, capture)
+  def toUci = Uci.Move(orig, dest, promotion)
 
   override def toString = s"$piece ${toUci.uci}"
 }

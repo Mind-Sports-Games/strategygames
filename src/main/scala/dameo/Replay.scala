@@ -70,12 +70,34 @@ object Replay {
       before: Game,
       orig: Pos,
       dest: Pos,
-      capture: Option[Pos],
       promotion: Boolean,
       endTurn: Boolean
-  ): Move =
+  ): Move = {
+    def piece: Piece = before.situation.board.pieces(orig)
+
+    def capturePos(pos: Pos, dx: Int, dy: Int): Pos = {
+      def stepPos: Pos = pos.step(dx, dy).get
+      if (stepPos == dest || !before.situation.board.pieces.get(stepPos).isEmpty) {
+        stepPos
+      } else {
+        capturePos(stepPos, dx, dy)
+      }
+    }
+
+    def capture: Option[Pos] =
+      if (orig.onSameLine(dest)) {
+        def dx: Int     = (dest.file.index - orig.file.index).sign
+        def dy: Int     = (dest.rank.index - orig.rank.index).sign
+        def capPos: Pos = capturePos(orig, dx, dy)
+        if (before.situation.board.pieces.get(capPos).map(_.player) == Some(!piece.player)) {
+          Some(capPos)
+        } else {
+          None
+        }
+      } else { None }
+
     Move(
-      piece = before.situation.board.pieces(orig),
+      piece = piece,
       orig = orig,
       dest = dest,
       situationBefore = before.situation,
@@ -84,6 +106,7 @@ object Replay {
       capture = capture,
       promotion = if (promotion) Some(King) else None
     )
+  }
 
   private def gameWithActionWhileValid(
       actionStrs: ActionStrs,
@@ -97,7 +120,6 @@ object Replay {
     def replayMoveFromUci(
         orig: Option[Pos],
         dest: Option[Pos],
-        capture: Option[Pos],
         promotion: Boolean,
         endTurn: Boolean
     ): (Game, Move) =
@@ -107,7 +129,6 @@ object Replay {
             state,
             orig,
             dest,
-            capture,
             promotion,
             endTurn
           )
@@ -127,15 +148,14 @@ object Replay {
           turnStrs.zipWithIndex.map {
             case (uci, i) => {
               uci match {
-                case Uci.Move.moveR(orig, capture, dest, promotion) =>
+                case Uci.Move.moveR(orig, dest, promotion) =>
                   replayMoveFromUci(
                     Pos.fromKey(orig),
                     Pos.fromKey(dest),
-                    if (capture == "") None else Pos.fromKey(capture.tail),
-                    promotion == "k",
+                    promotion == "K",
                     endTurn = i + 1 == turnStrs.length
                   )
-                case (action: String)                               =>
+                case (action: String)                      =>
                   sys.error(s"Invalid action for replay: $action")
               }
             }

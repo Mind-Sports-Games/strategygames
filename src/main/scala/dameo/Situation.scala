@@ -40,13 +40,12 @@ case class Situation(board: Board, player: Player) {
   def move(
       from: Pos,
       to: Pos,
-      promotion: Option[PromotableRole] = None,
-      capture: Option[Pos] = None
+      promotion: Option[PromotableRole] = None
   ): Validated[String, Move] =
-    board.variant.move(this, from, to, promotion, capture)
+    board.variant.move(this, from, to, promotion)
 
   def move(uci: Uci.Move): Validated[String, Move] =
-    board.variant.move(this, uci.orig, uci.dest, uci.promotion, uci.capture)
+    board.variant.move(this, uci.orig, uci.dest, uci.promotion)
 
   def withHistory(history: History) =
     copy(

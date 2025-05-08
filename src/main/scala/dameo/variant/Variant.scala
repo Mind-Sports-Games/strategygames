@@ -77,12 +77,11 @@ abstract class Variant private[variant] (
       situation: Situation,
       from: Pos,
       to: Pos,
-      promotion: Option[PromotableRole],
-      capture: Option[Pos]
+      promotion: Option[PromotableRole]
   ): Validated[String, Move] = {
     // Find the move in the variant specific list of valid moves
     situation.moves get from flatMap (_.find(m => m.dest == to)) toValid
-      s"Not a valid move: ${from}${to}${promotion}${capture}. Allowed moves: ${situation.moves}"
+      s"Not a valid move: ${from}${to}${promotion}. Allowed moves: ${situation.moves}"
   }
 
   def hasMoveEffects = false
