@@ -256,7 +256,7 @@ object History {
           score = score
         )
       )
-    case GameLogic.Dameo()      =>
+    case GameLogic.Dameo()        =>
       Dameo(
         dameo.History(
           lastTurn = lastTurn.map(lm => lm.toDameo),
