@@ -25,19 +25,27 @@ final case class FEN(value: String) extends AnyVal {
 
   def initial = value == Forsyth.initial.value
 
-  def player1: Player              = Player.apply(splitted(1).head).get
-  def pieceStr1: String            = splitted(1).tail
-  def pieces1: Array[(Pos, Piece)] = pieceStr1
-    .split(',')
-    .filter(_ != "")
-    .map(parsePiece(player1))
+  def player1: Option[Player]      = splitted.lift(1).flatMap(_.headOption.flatMap(Player.apply))
+  def pieceStr1: String            = splitted.lift(1).map(_.drop(1)).getOrElse("")
+  def pieces1: Array[(Pos, Piece)] = player1
+    .map(p =>
+      pieceStr1
+        .split(',')
+        .filter(_ != "")
+        .map(parsePiece(p))
+    )
+    .getOrElse(Array())
 
-  def player2: Player              = Player.apply(splitted(2).head).get
-  def pieceStr2: String            = splitted(2).tail
-  def pieces2: Array[(Pos, Piece)] = pieceStr2
-    .split(',')
-    .filter(_ != "")
-    .map(parsePiece(player2))
+  def player2: Option[Player]      = splitted.lift(2).flatMap(_.headOption.flatMap(Player.apply))
+  def pieceStr2: String            = splitted.lift(2).map(_.drop(1)).getOrElse("")
+  def pieces2: Array[(Pos, Piece)] = player2
+    .map(p =>
+      pieceStr2
+        .split(',')
+        .filter(_ != "")
+        .map(parsePiece(p))
+    )
+    .getOrElse(Array())
 
   def pieces: PieceMap = (pieces1 ++ pieces2).toMap
 

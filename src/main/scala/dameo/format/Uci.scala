@@ -71,15 +71,23 @@ object Uci {
 
     def piotr(move: String): Option[Move] = {
       move match {
-        case piotrR(orig, dest, promotion) =>
-          Some(
-            Move(
-              Pos.piotr(orig.head).get,
-              Pos.piotr(dest.head).get,
-              promotion = if (promotion == "") None else Some(King)
-            )
-          )
-        case _                             => None
+        case piotrR(piotrOrig, piotrDest, promotion) =>
+          (
+            piotrOrig.headOption.flatMap(Pos.piotr),
+            piotrDest.headOption.flatMap(Pos.piotr),
+            promotion
+          ) match {
+            case (Some(orig), Some(dest), promotion) =>
+              Some(
+                Move(
+                  orig,
+                  dest,
+                  promotion = if (promotion == "") None else Some(King)
+                )
+              )
+            case _                                   => None
+          }
+        case _                                       => None
       }
     }
 
@@ -89,7 +97,7 @@ object Uci {
       promotion = Role promotable promS
     } yield Move(orig, dest, promotion)
 
-    val moveR  = s"^(${Pos.posR})(${Pos.posR})([K]?)".r
+    val moveR  = s"^${Pos.posR}${Pos.posR}([K]?)".r
     val piotrR = "(.)(.)((?:pK)?)".r
   }
 

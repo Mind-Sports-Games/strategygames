@@ -70,6 +70,7 @@ object Replay {
       before: Game,
       orig: Pos,
       dest: Pos,
+      boardAfter: Board,
       promotion: Boolean,
       endTurn: Boolean
   ): Move = {
@@ -101,7 +102,7 @@ object Replay {
       orig = orig,
       dest = dest,
       situationBefore = before.situation,
-      after = before.situation.board.move(orig, dest).get,
+      after = boardAfter,
       autoEndTurn = endTurn,
       capture = capture,
       promotion = if (promotion) Some(King) else None
@@ -125,15 +126,25 @@ object Replay {
     ): (Game, Move) =
       (orig, dest) match {
         case (Some(orig), Some(dest)) => {
-          val move = replayMove(
-            state,
-            orig,
-            dest,
-            promotion,
-            endTurn
-          )
-          state = state(move)
-          (state, move)
+          state.situation.board.move(orig, dest) match {
+            case Some(boardAfter) => {
+              val move = replayMove(
+                state,
+                orig,
+                dest,
+                boardAfter,
+                promotion,
+                endTurn
+              )
+              state = state(move)
+              (state, move)
+            }
+            case _                => {
+              val uciMove = s"${orig}${dest}"
+              errors += uciMove + ","
+              sys.error(s"Invalid move for replay: ${uciMove}")
+            }
+          }
         }
         case (orig, dest)             => {
           val uciMove = s"${orig}${dest}"
@@ -143,26 +154,23 @@ object Replay {
       }
 
     val gameWithActions: List[(Game, Move)] =
-      actionStrs
-        .map { turnStrs =>
-          turnStrs.zipWithIndex.map {
-            case (uci, i) => {
-              uci match {
-                case Uci.Move.moveR(orig, dest, promotion) =>
-                  replayMoveFromUci(
-                    Pos.fromKey(orig),
-                    Pos.fromKey(dest),
-                    promotion == "K",
-                    endTurn = i + 1 == turnStrs.length
-                  )
-                case (action: String)                      =>
-                  sys.error(s"Invalid action for replay: $action")
-              }
+      actionStrs.flatMap { turnStrs =>
+        turnStrs.zipWithIndex.map {
+          case (uci, i) => {
+            uci match {
+              case Uci.Move.moveR(orig, dest, promotion) =>
+                replayMoveFromUci(
+                  Pos.fromKey(orig),
+                  Pos.fromKey(dest),
+                  promotion == "K",
+                  endTurn = i + 1 == turnStrs.length
+                )
+              case (action: String)                      =>
+                sys.error(s"Invalid action for replay: $action")
             }
           }
         }
-        .toList
-        .flatten
+      }.toList
 
     (init, gameWithActions, errors match { case "" => None; case _ => errors.some })
   }

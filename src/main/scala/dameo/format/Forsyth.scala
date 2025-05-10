@@ -26,19 +26,20 @@ object Forsyth {
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
     /* Convert a FEN + Variant into a Situation */
-    Some(
+    fen.player.map(
       Situation(
         Board(
           pieces = fen.pieces,
           history = History(halfMoveClock = fen.halfMoveClock.getOrElse(0)),
           variant = variant
         ),
-        fen.player.get
-      ).withHistory(
-        History(
-          halfMoveClock = fen.halfMoveClock.getOrElse(0)
-        )
+        _
       )
+        .withHistory(
+          History(
+            halfMoveClock = fen.halfMoveClock.getOrElse(0)
+          )
+        )
     )
   }
 
@@ -95,7 +96,11 @@ object Forsyth {
             (if (pc.role == Man) "" else pc.role.forsyth) + pos.key
           }
           .toList
-          .sortBy(s => if (s.head.isUpper) s.tail else s)
+          .sortBy(pcStr =>
+            (
+              pcStr.headOption.map(p => if (p.isUpper) pcStr.drop(1) else pcStr)
+            ).getOrElse("")
+          )
           .mkString(",")
       )
     s"W${pieces(P1)}:B${pieces(P2)}"

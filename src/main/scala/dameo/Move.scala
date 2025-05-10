@@ -23,9 +23,7 @@ case class Move(
 
   def finalizeAfter: Board = {
     var newBoard = after.copy(pieces =
-      after.pieces ++ capture.map(
-        (_ -> after.pieces(capture.get).copy(role = after.pieces(capture.get).ghostRole))
-      )
+      after.pieces ++ capture.map(cap => (cap -> after.pieces(cap).copy(role = after.pieces(cap).ghostRole)))
     )
     if (promotion.nonEmpty) {
       newBoard = newBoard.copy(pieces = newBoard.pieces + (dest -> Piece(piece.player, promotion.get)))
