@@ -34,23 +34,30 @@ final case class Actor(
                 LazyList
                   .iterate(Option(pos))(_.flatMap(_.step(dx, dy)))
                   .tail
-                  .takeWhile(p => !p.isEmpty && board.withinBounds(p.get) && board.empty(p.get))
+                  .takeWhile {
+                    case Some(p) if board.withinBounds(p) && board.empty(p) => true
+                    case _                                                  => false
+                  }
             )
           )
           .flatten
       case _    => List()
     }
 
-    posits.map(dest =>
-      Move(
-        piece = piece,
-        orig = pos,
-        dest = dest,
-        situationBefore = Situation(board, piece.player),
-        after = board.move(pos, dest).get,
-        autoEndTurn = true,
-        promotion = Option.when(piece.role == Man && board.backrow(dest, piece.player))(King)
-      )
+    posits.flatMap(dest =>
+      board
+        .move(pos, dest)
+        .map(after =>
+          Move(
+            piece = piece,
+            orig = pos,
+            dest = dest,
+            situationBefore = Situation(board, piece.player),
+            after = after,
+            autoEndTurn = true,
+            promotion = Option.when(piece.role == Man && board.backrow(dest, piece.player))(King)
+          )
+        )
     )
   }
 
@@ -82,19 +89,24 @@ final case class Actor(
     val (capAndDest, capLen) = capInfo
 
     (
-      capAndDest.map { case (cap, dest) =>
-        Move(
-          piece = piece,
-          orig = pos,
-          dest = dest,
-          situationBefore = Situation(board, piece.player),
-          after = board.move(pos, dest).get,
-          autoEndTurn = capLen == 1,
-          capture = Some(cap),
-          promotion = Option.when(
-            capLen == 1 && (piece.role == Man || piece.role == ActiveMan) && board.backrow(dest, piece.player)
-          )(King)
-        )
+      capAndDest.flatMap { case (cap, dest) =>
+        board
+          .move(pos, dest)
+          .map(after =>
+            Move(
+              piece = piece,
+              orig = pos,
+              dest = dest,
+              situationBefore = Situation(board, piece.player),
+              after = after,
+              autoEndTurn = capLen == 1,
+              capture = Some(cap),
+              promotion = Option.when(
+                capLen == 1 && (piece.role == Man || piece.role == ActiveMan) && board
+                  .backrow(dest, piece.player)
+              )(King)
+            )
+          )
       },
       capLen
     )
@@ -163,16 +175,15 @@ final case class Actor(
 
   def kingCaptureSteps(curBoard: Board, stepPos: Pos, dx: Int, dy: Int): List[(Pos, Pos)] = {
     def findCapPos(curPos: Option[Pos]): Option[Pos] = {
-      if (
-        curPos.isEmpty || !curBoard.withinBounds(curPos.get)
-        || curBoard.pieces.get(curPos.get).map(_.player) == Some(player)
-        || curBoard.pieces.get(curPos.get).map(_.isGhost) == Some(true)
-      ) {
-        None
-      } else if (curBoard.empty(curPos.get)) {
-        findCapPos(curPos.flatMap(_.step(dx, dy)))
-      } else {
-        curPos
+      curPos match {
+        case None                         => None
+        case Some(p)
+            if !curBoard.withinBounds(p) ||
+              curBoard.pieces.get(p).map(_.player) == Some(player) ||
+              curBoard.pieces.get(p).map(_.isGhost) == Some(true) =>
+          None
+        case Some(p) if curBoard.empty(p) => findCapPos(p.step(dx, dy))
+        case _                            => curPos
       }
     }
 

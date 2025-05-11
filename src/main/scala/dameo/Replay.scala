@@ -76,25 +76,29 @@ object Replay {
   ): Move = {
     def piece: Piece = before.situation.board.pieces(orig)
 
-    def capturePos(pos: Pos, dx: Int, dy: Int): Pos = {
-      def stepPos: Pos = pos.step(dx, dy).get
-      if (stepPos == dest || !before.situation.board.pieces.get(stepPos).isEmpty) {
-        stepPos
-      } else {
-        capturePos(stepPos, dx, dy)
-      }
+    def capturePos(pos: Pos, dx: Int, dy: Int): Option[Pos] = {
+      pos
+        .step(dx, dy)
+        .flatMap(stepPos =>
+          if (stepPos == dest || !before.situation.board.pieces.get(stepPos).isEmpty) {
+            Some(stepPos)
+          } else {
+            capturePos(stepPos, dx, dy)
+          }
+        )
     }
 
     def capture: Option[Pos] =
       if (orig.onSameLine(dest)) {
-        def dx: Int     = (dest.file.index - orig.file.index).sign
-        def dy: Int     = (dest.rank.index - orig.rank.index).sign
-        def capPos: Pos = capturePos(orig, dx, dy)
-        if (before.situation.board.pieces.get(capPos).map(_.player) == Some(!piece.player)) {
-          Some(capPos)
-        } else {
-          None
-        }
+        def dx: Int = (dest.file.index - orig.file.index).sign
+        def dy: Int = (dest.rank.index - orig.rank.index).sign
+        capturePos(orig, dx, dy).flatMap(capPos =>
+          if (before.situation.board.pieces.get(capPos).map(_.player) == Some(!piece.player)) {
+            Some(capPos)
+          } else {
+            None
+          }
+        )
       } else { None }
 
     Move(

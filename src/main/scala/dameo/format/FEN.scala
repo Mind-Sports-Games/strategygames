@@ -31,8 +31,7 @@ final case class FEN(value: String) extends AnyVal {
     .map(p =>
       pieceStr1
         .split(',')
-        .filter(_ != "")
-        .map(parsePiece(p))
+        .flatMap(parsePiece(p))
     )
     .getOrElse(Array())
 
@@ -42,8 +41,7 @@ final case class FEN(value: String) extends AnyVal {
     .map(p =>
       pieceStr2
         .split(',')
-        .filter(_ != "")
-        .map(parsePiece(p))
+        .flatMap(parsePiece(p))
     )
     .getOrElse(Array())
 
@@ -52,10 +50,12 @@ final case class FEN(value: String) extends AnyVal {
   def halfMoveClock: Option[Int] = intFromFen(FEN.halfMoveIndex)
   def fullMove: Option[Int]      = intFromFen(FEN.fullMoveIndex)
 
-  private def parsePiece(player: Player)(pStr: String): (Pos, Piece) = {
-    def role: Role     = if (pStr.head.isUpper) Role.forsyth(pStr.head).get else Role.defaultRole
-    def posStr: String = if (pStr.head.isUpper) pStr.tail else pStr;
-    (Pos.allKeys(posStr), Piece(player, role))
+  private def parsePiece(player: Player)(pStr: String): Option[(Pos, Piece)] = {
+    pStr match {
+      case ""                    => None
+      case ht if ht.head.isUpper => Some((Pos.allKeys(ht.tail), Piece(player, Role.forsyth(ht.head).get)))
+      case posStr                => Some((Pos.allKeys(posStr), Piece(player, Role.defaultRole)))
+    }
   }
 
   private def intFromFen(index: Int): Option[Int] =
