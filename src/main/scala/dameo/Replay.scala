@@ -66,18 +66,52 @@ object Replay {
     case _                  => sys.error(s"Invalid dameo action $action")
   }
 
-  def replayMove(before: Game, orig: Pos, dest: Pos, capture: Option[Pos], endTurn: Boolean): Move =
-    // TODO Dameo set this. Probably need to pass through promotion as well?
+  def replayMove(
+      before: Game,
+      orig: Pos,
+      dest: Pos,
+      boardAfter: Board,
+      promotion: Boolean,
+      endTurn: Boolean
+  ): Move = {
+    def piece: Piece = before.situation.board.pieces(orig)
+
+    def capturePos(pos: Pos, dx: Int, dy: Int): Option[Pos] = {
+      pos
+        .step(dx, dy)
+        .flatMap(stepPos =>
+          if (stepPos == dest || !before.situation.board.pieces.get(stepPos).isEmpty) {
+            Some(stepPos)
+          } else {
+            capturePos(stepPos, dx, dy)
+          }
+        )
+    }
+
+    def capture: Option[Pos] =
+      if (orig.onSameLine(dest)) {
+        def dx: Int = (dest.file.index - orig.file.index).sign
+        def dy: Int = (dest.rank.index - orig.rank.index).sign
+        capturePos(orig, dx, dy).flatMap(capPos =>
+          if (before.situation.board.pieces.get(capPos).map(_.player) == Some(!piece.player)) {
+            Some(capPos)
+          } else {
+            None
+          }
+        )
+      } else { None }
+
     Move(
-      piece = before.situation.board.pieces(orig),
+      piece = piece,
       orig = orig,
       dest = dest,
       situationBefore = before.situation,
-      after = before.situation.board.copy(),
+      after = boardAfter,
       autoEndTurn = endTurn,
       capture = capture,
-      promotion = None
+      promotion = if (promotion) Some(King) else None
     )
+  }
 
   private def gameWithActionWhileValid(
       actionStrs: ActionStrs,
@@ -88,18 +122,33 @@ object Replay {
     var state  = init
     var errors = ""
 
-    def replayMoveFromUci(orig: Option[Pos], dest: Option[Pos], capture: Boolean): (Game, Move) =
+    def replayMoveFromUci(
+        orig: Option[Pos],
+        dest: Option[Pos],
+        promotion: Boolean,
+        endTurn: Boolean
+    ): (Game, Move) =
       (orig, dest) match {
         case (Some(orig), Some(dest)) => {
-          val move = replayMove(
-            state,
-            orig,
-            dest,
-            if (capture) Pos.capturePos(orig, dest) else None,
-            true
-          )
-          state = state(move)
-          (state, move)
+          state.situation.board.move(orig, dest) match {
+            case Some(boardAfter) => {
+              val move = replayMove(
+                state,
+                orig,
+                dest,
+                boardAfter,
+                promotion,
+                endTurn
+              )
+              state = state(move)
+              (state, move)
+            }
+            case _                => {
+              val uciMove = s"${orig}${dest}"
+              errors += uciMove + ","
+              sys.error(s"Invalid move for replay: ${uciMove}")
+            }
+          }
         }
         case (orig, dest)             => {
           val uciMove = s"${orig}${dest}"
@@ -109,17 +158,23 @@ object Replay {
       }
 
     val gameWithActions: List[(Game, Move)] =
-      // TODO check that using flatten works for Dameo
-      actionStrs.flatten.toList.map {
-        case Uci.Move.moveR(orig, capture, dest) =>
-          replayMoveFromUci(
-            Pos.fromKey(orig),
-            Pos.fromKey(dest),
-            capture.length == 1
-          )
-        case (action: String)                    =>
-          sys.error(s"Invalid action for replay: $action")
-      }
+      actionStrs.flatMap { turnStrs =>
+        turnStrs.zipWithIndex.map {
+          case (uci, i) => {
+            uci match {
+              case Uci.Move.moveR(orig, dest, promotion) =>
+                replayMoveFromUci(
+                  Pos.fromKey(orig),
+                  Pos.fromKey(dest),
+                  promotion == "K",
+                  endTurn = i + 1 == turnStrs.length
+                )
+              case (action: String)                      =>
+                sys.error(s"Invalid action for replay: $action")
+            }
+          }
+        }
+      }.toList
 
     (init, gameWithActions, errors match { case "" => None; case _ => errors.some })
   }

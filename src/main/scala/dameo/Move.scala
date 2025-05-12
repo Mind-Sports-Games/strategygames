@@ -16,22 +16,37 @@ case class Move(
 ) extends Action(situationBefore, after, metrics) {
 
   def situationAfter =
-    Situation(finalizeAfter, situationBefore.player)
-
-  // TODO Dameo - might need to edit this, look at how draughts gamelogic does this (ghosts)
-  def finalizeAfter: Board = after updateHistory { h =>
-    h.copy(
-      currentTurn = h.currentTurn :+ toUci
+    Situation(
+      finalizeAfter,
+      if (autoEndTurn) !piece.player else piece.player
     )
-  }
 
-  def lazySituationAfter =
-    Situation(lazyFinalizeAfter, situationBefore.player)
-
-  def lazyFinalizeAfter: Board = after updateHistory { h =>
-    h.copy(
-      currentTurn = h.currentTurn :+ toUci
+  def finalizeAfter: Board = {
+    var newBoard = after.copy(pieces =
+      after.pieces ++ capture.map(cap => (cap -> after.pieces(cap).copy(role = after.pieces(cap).ghostRole)))
     )
+    if (promotion.nonEmpty) {
+      newBoard = newBoard.copy(pieces = newBoard.pieces + (dest -> Piece(piece.player, promotion.get)))
+    }
+    newBoard = if (autoEndTurn) {
+      newBoard.copy(pieces =
+        newBoard.pieces.filter { case (_, v) =>
+          !v.isGhost
+        } +
+          (dest -> newBoard.pieces(dest).copy(role = newBoard.pieces(dest).unactiveRole))
+      )
+    } else {
+      newBoard.copy(pieces = newBoard.pieces + (dest -> Piece(piece.player, piece.activeRole)))
+    }
+    newBoard.updateHistory { h =>
+      h.copy(
+        currentTurn = h.currentTurn :+ toUci,
+        halfMoveClock = h.halfMoveClock + (if (autoEndTurn && newBoard.kingVsKing()) 1 else 0),
+        positionHashes =
+          if (autoEndTurn) newBoard.variant.updatePositionHashes(newBoard, this, h.positionHashes)
+          else h.positionHashes
+      )
+    }
   }
 
   def captures = capture.isDefined
@@ -42,7 +57,7 @@ case class Move(
 
   def withMetrics(m: MoveMetrics) = copy(metrics = m)
 
-  def toUci = Uci.Move(orig, dest, promotion, capture)
+  def toUci = Uci.Move(orig, dest, promotion)
 
   override def toString = s"$piece ${toUci.uci}"
 }
