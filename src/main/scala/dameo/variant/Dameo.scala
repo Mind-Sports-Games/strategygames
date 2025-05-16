@@ -16,7 +16,7 @@ case object Dameo
 
   def gameFamily: GameFamily = GameFamily.Dameo()
 
-  def perfIcon: Char = ''
+  def perfIcon: Char = ''
   def perfId: Int    = 800
 
   override def baseVariant: Boolean = true

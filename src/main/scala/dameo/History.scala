@@ -5,7 +5,6 @@ import format.Uci
 case class History(
     lastTurn: List[Uci] = List.empty,
     currentTurn: List[Uci] = List.empty,
-    forcedTurn: Boolean = false,
     positionHashes: PositionHash = Array.empty,
     halfMoveClock: Int = 0
 ) {
