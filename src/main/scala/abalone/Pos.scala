@@ -125,7 +125,7 @@ object Pos {
 
         if (sy.length == 1) {
           var y = if ("0".equals(sy)) -1 else sy.charAt(0) - 'a'
-          if (neg) y = -y - 1
+          if (neg) y = -y - 2
 
           return Option(new Pos(x, y))
         }

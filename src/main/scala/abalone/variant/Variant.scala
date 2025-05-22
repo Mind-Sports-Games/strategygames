@@ -120,7 +120,7 @@ abstract class Variant private[variant] (
             }
           }
 
-          if (!max && cp.isEmpty) { // is cp.isDefined, there is an immovable piece that blocks the line
+          if (!max && cp.isEmpty) { // If cp.isDefined, there is an immovable piece that blocks the line
             out = !boardType.isCell(c)
 
             if (out) {
