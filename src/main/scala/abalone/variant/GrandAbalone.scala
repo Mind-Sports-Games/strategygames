@@ -37,11 +37,12 @@ case object GrandAbalone
   override def isAutoEndTurn(situation: Situation, orig: Pos, dest: Pos): Boolean =
     situation.board.history.pliesRemainingThisTurn.fold(true)(_ < 2)
 
-  override def finalizeBoardAfter_hist(move: Move): Board = {
-    val res = super.finalizeBoardAfter_hist(move)
-    res.history.pliesRemainingThisTurn = Option(if (move.autoEndTurn) 2 else 1)
-    res
-  }
+  override def finalizeBoardAfter_hist(move: Move): Board =
+    super.finalizeBoardAfter_hist(move).updateHistory { h =>
+      h.copy(
+        pliesRemainingThisTurn = Option(if (move.autoEndTurn) 2 else 1)
+      )
+    }
 
   /** Belgian daisy. */
   override def initialFen: FEN =

@@ -215,7 +215,7 @@ abstract class Variant private[variant] (
   def getCapture(situation: Situation, @nowarn orig: Pos, dest: Pos): Option[Pos] =
     if (situation.board.isPiece(dest)) Some(dest) else None
 
-  def isAutoEndTurn(situation: Situation, orig: Pos, dest: Pos): Boolean = true
+  def isAutoEndTurn(@nowarn situation: Situation, @nowarn orig: Pos, @nowarn dest: Pos): Boolean = true
 
   def repetition(situation: Situation): Boolean = {
     if (!repetitionEnabled) return false
