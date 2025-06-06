@@ -498,7 +498,7 @@ object GameFamily {
     def variants          = Variant.all(GameLogic.Dameo())
     def displayPiece      = "wK"
     def pieceSetThemes    = List("wide_crown_dameo", "fabirovsky_dameo", "check_yb_dameo")
-    def pieceSetDefault   = "wide_crown"
+    def pieceSetDefault   = "wide_crown_dameo"
     def boardThemes       = List(
       "blue",
       "blue2",
