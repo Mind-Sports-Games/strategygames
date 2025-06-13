@@ -6,7 +6,10 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
+    env:
+      JAVA_OPTS: "-Xmx20g"
+      SBT_OPTS: "-Dsbt.ci=true"
     steps:
       - name: Check if organization member
         id: check_org_member
@@ -29,12 +32,19 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
+          cache: sbt
+
+      - name: Setup sbt
+        uses: sbt/setup-sbt@v1
 
       - name: Test
-        run: sbt test 
+        run: sbt test
 
   compile:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
+    env:
+      JAVA_OPTS: "-Xmx20g"
+      SBT_OPTS: "-Dsbt.ci=true"
     steps:
       - name: Check if organization member
         id: check_org_member
@@ -57,12 +67,18 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
+          cache: sbt
+
+      - name: Setup sbt
+        uses: sbt/setup-sbt@v1
 
       - name: compile
-        run: sbt compile 
+        run: sbt compile
 
   format:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
+    env:
+      SBT_OPTS: "-Dsbt.ci=true"
     steps:
       - name: Check if organization member
         id: check_org_member
@@ -85,6 +101,10 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
+          cache: sbt
+
+      - name: Setup sbt
+        uses: sbt/setup-sbt@v1
 
       - name: Check Formatting
         run: sbt scalafmt
