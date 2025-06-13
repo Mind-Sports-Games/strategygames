@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup sbt
-        run: sbt/setup-sbt@v1
+        uses: sbt/setup-sbt@v1
       - uses: scalacenter/sbt-dependency-submission@v3
         with:
           working-directory: './'
