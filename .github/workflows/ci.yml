@@ -30,8 +30,11 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      - name: Install sbt
+        run: sudo apt-get update && sudo apt-get install -y sbt
+
       - name: Test
-        run: sbt test 
+        run: sbt test
 
   compile:
     runs-on: ubuntu-24.04
@@ -58,8 +61,11 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      - name: Install sbt
+        run: sudo apt-get update && sudo apt-get install -y sbt
+
       - name: compile
-        run: sbt compile 
+        run: sbt compile
 
   format:
     runs-on: ubuntu-24.04
@@ -85,6 +91,9 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
+
+      - name: Install sbt
+        run: sudo apt-get update && sudo apt-get install -y sbt
 
       - name: Check Formatting
         run: sbt scalafmt

@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+      - name: Install sbt
+        run: sudo apt-get update && sudo apt-get install -y sbt
       - uses: scalacenter/sbt-dependency-submission@v3
         with:
           working-directory: './'
