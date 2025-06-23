@@ -67,7 +67,7 @@ case object ScrambledEggs
     board.piecesOf(player).keySet.filter(surroundingPositions(pos)).to(Queue)
 
   private def firstPiece(player: Player, board: Board): Option[Pos] =
-    Option(board.piecesOf(player).keySet.head)
+    board.piecesOf(player).keySet.headOption
 
   private def numOfPieces(player: Player, board: Board): Int =
     board.piecesOf(player).size
