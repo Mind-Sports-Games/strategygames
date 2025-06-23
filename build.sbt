@@ -2,7 +2,7 @@ name := "strategygames"
 
 organization := "org.playstrategy"
 
-version := "10.2.1-pstrat181"
+version := "10.2.1-pstrat182"
 
 scalaVersion := "2.13.10"
 
@@ -75,5 +75,7 @@ scalacOptions ++= Seq(
   "-Xmaxerrs",
   "12"
 )
+
+Compile / packageDoc / publishArtifact := false
 
 publishTo := Option(Resolver.file("file", new File(sys.props.getOrElse("publishTo", ""))))

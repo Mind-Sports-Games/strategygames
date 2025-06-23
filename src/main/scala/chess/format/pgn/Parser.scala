@@ -20,7 +20,7 @@ import strategygames.{ Role => ChessRole }
 import scala.util.parsing.combinator._
 import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
-import cats.implicits._
+import cats.syntax.traverse._
 import scala.util.matching.Regex
 
 // http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm
