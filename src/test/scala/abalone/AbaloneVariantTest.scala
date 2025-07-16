@@ -435,6 +435,13 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     val validMoves11 = game11.board.variant.validMoves(game11.situation)
     val game12       = game11.apply(validMoves11(Pos.G7)(4)) // g7i9
 
+    "should be a valid board at beginning and end" in {
+      game.board.valid(true) must_== true
+      game2.board.valid(true) must_== true
+      game11.board.valid(true) must_== true
+      game12.board.valid(true) must_== true
+    }
+
     "should enter a non reversible state only when pushing out" in {
       game8.board.variant.isIrreversible(validMoves8(Pos.A2)(3)) must_== false
       game9.board.variant.isIrreversible(validMoves9(Pos.G8)(3)) must_== true

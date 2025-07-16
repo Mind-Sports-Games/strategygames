@@ -47,6 +47,10 @@ abstract class Variant private[variant] (
 
   def pieces: PieceMap = initialFen.pieces
 
+  def initialStoneCount: Int = 162
+
+  private def targetScore: Int = initialStoneCount / 2
+
   def startPlayer: Player = P1
 
   def usesTuzdik: Boolean = true
@@ -177,11 +181,20 @@ abstract class Variant private[variant] (
 
   def stalemateIsDraw = false
 
-  def winner(situation: Situation): Option[Player]
+  def winner(situation: Situation): Option[Player] =
+    if (specialEnd(situation) && !specialDraw(situation)) {
+      if (situation.board.history.score.p1 > situation.board.history.score.p2)
+        Player.fromName("p1")
+      else Player.fromName("p2")
+    } else None
 
-  @nowarn def specialEnd(situation: Situation) = false
+  def specialEnd(situation: Situation) =
+    (situation.board.history.score.p1 > targetScore) ||
+      (situation.board.history.score.p2 > targetScore) ||
+      (situation.moves.size == 0)
 
-  @nowarn def specialDraw(situation: Situation) = false
+  def specialDraw(situation: Situation) =
+    situation.board.history.score.p1 == situation.board.history.score.p2
 
   def materialImbalance(board: Board): Int =
     board.pieces.values.foldLeft(0) { case (acc, (Piece(player, _), count)) =>
@@ -199,8 +212,10 @@ abstract class Variant private[variant] (
   @nowarn def finalizeBoard(board: Board, uci: format.Uci, captured: Option[Piece]): Board =
     board
 
-  // TODO: implement
-  def valid(@nowarn board: Board, @nowarn strict: Boolean): Boolean = true
+  def valid(@nowarn board: Board, @nowarn strict: Boolean): Boolean =
+    board.stoneCount + board.history.score.p1 + board.history.score.p2 == initialStoneCount &&
+      board.playerTuzdikCount(Player.P1) <= (if (usesTuzdik) 1 else 0) &&
+      board.playerTuzdikCount(Player.P2) <= (if (usesTuzdik) 1 else 0)
 
   val roles: List[Role] = Role.all
 
@@ -218,7 +233,7 @@ abstract class Variant private[variant] (
 
   def defaultRole: Role = Role.defaultRole
 
-  def gameFamily: GameFamily
+  def gameFamily: GameFamily = GameFamily.Togyzkumalak()
 }
 
 object Variant {
