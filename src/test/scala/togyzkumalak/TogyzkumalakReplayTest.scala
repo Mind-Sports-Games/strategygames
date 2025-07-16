@@ -61,6 +61,7 @@ class TogyzkumalakReplayTest extends TogyzkumalakTest with ValidatedMatchers {
         g.situation.board.pieces must_== replay.situation.board.pieces
         g.situation.board.history.score must_== replay.situation.board.history.score
         g.situation.board.variant must_== replay.situation.board.variant
+        g.situation.board.valid(true) must_== true
       }
     }
 
@@ -164,6 +165,7 @@ class TogyzkumalakReplayTest extends TogyzkumalakTest with ValidatedMatchers {
         g.situation.board.pieces must_== replay.situation.board.pieces
         g.situation.board.history.score must_== replay.situation.board.history.score
         g.situation.board.variant must_== replay.situation.board.variant
+        g.situation.board.valid(true) must_== true
       }
     }
   }

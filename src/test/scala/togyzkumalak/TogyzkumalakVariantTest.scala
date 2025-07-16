@@ -16,6 +16,7 @@ class TogyzkumalakVariantTest extends TogyzkumalakTest with ValidatedMatchers {
     val moves = variant.Togyzkumalak.validMoves(situation)
     "be valid" in {
       moves.size must_== 9
+      board.valid(true) must_== true
     }
   }
 
@@ -26,6 +27,7 @@ class TogyzkumalakVariantTest extends TogyzkumalakTest with ValidatedMatchers {
         g.situation.moves.size must_== 8
         g.situation.board.history.score must_== Score(10, 0)
         g.situation.end must_== false
+        g.situation.board.valid(true) must_== true
       }
     }
     "valid situation after first two moves" in {
@@ -33,6 +35,7 @@ class TogyzkumalakVariantTest extends TogyzkumalakTest with ValidatedMatchers {
         g.situation.player must_== Player.P1
         g.situation.moves.size must_== 8
         g.situation.board.history.score must_== Score(10, 10)
+        g.situation.board.valid(true) must_== true
       }
     }
   }
@@ -47,6 +50,7 @@ class TogyzkumalakVariantTest extends TogyzkumalakTest with ValidatedMatchers {
         }.size must_== 0
         g.situation.board.pieces(Pos.E1) must_== ((Piece(Player.P1, Stone), 2))
         g.situation.board.history.score must_== Score(22, 12)
+        g.situation.board.valid(true) must_== true
       }
     }
     "tuzdik created when landing on space with 2 stones" in {
@@ -57,12 +61,14 @@ class TogyzkumalakVariantTest extends TogyzkumalakTest with ValidatedMatchers {
             case (_, (p, _)) if p.role == Tuzdik => true; case _ => false
           } must_== Map(Pos.E1 -> ((Piece(Player.P2, Tuzdik), 1)))
         g.situation.board.history.score must_== Score(22, 15)
+        g.situation.board.valid(true) must_== true
       }
     }
     "second tuzdik not created when landing on second space with 2 stones" in {
       playActionStrs(actionStrs ++ List("c1d2")) must beValid.like { g =>
         g.situation.player must_== Player.P2
         g.situation.board.pieces(Pos.I1) must_== ((Piece(Player.P1, Stone), 2))
+        g.situation.board.valid(true) must_== true
       }
       playActionStrs(actionStrs ++ List("c1d2", "c2i1")) must beValid.like { g =>
         g.situation.player must_== Player.P1
@@ -70,6 +76,7 @@ class TogyzkumalakVariantTest extends TogyzkumalakTest with ValidatedMatchers {
           .filter {
             case (_, (p, _)) if p.role == Tuzdik => true; case _ => false
           } must_== Map(Pos.E1 -> ((Piece(Player.P2, Tuzdik), 1)))
+        g.situation.board.valid(true) must_== true
       }
     }
     val actionStrs2 = List(
@@ -110,6 +117,7 @@ class TogyzkumalakVariantTest extends TogyzkumalakTest with ValidatedMatchers {
             case (_, (p, _)) if p.role == Tuzdik => true; case _ => false
           } must_== Map(Pos.E1 -> ((Piece(Player.P2, Tuzdik), 1)))
         g.situation.board.pieces(Pos.H2) must_== ((Piece(Player.P2, Stone), 2))
+        g.situation.board.valid(true) must_== true
       }
       playActionStrs(actionStrs2) must beValid.like { g =>
         g.situation.player must_== Player.P1
@@ -118,6 +126,7 @@ class TogyzkumalakVariantTest extends TogyzkumalakTest with ValidatedMatchers {
             case (_, (p, _)) if p.role == Tuzdik => true; case _ => false
           } must_== Map(Pos.E1 -> ((Piece(Player.P2, Tuzdik), 1)))
         g.situation.board.pieces(Pos.H2) must_== ((Piece(Player.P2, Stone), 3))
+        g.situation.board.valid(true) must_== true
       }
     }
   }
@@ -206,6 +215,7 @@ class TogyzkumalakVariantTest extends TogyzkumalakTest with ValidatedMatchers {
         g.situation.end must_== true
         g.situation.winner must_== Some(Player.P1)
         g.situation.board.history.score must_== Score(82, 43)
+        g.situation.board.valid(true) must_== true
       }
     }
   }
