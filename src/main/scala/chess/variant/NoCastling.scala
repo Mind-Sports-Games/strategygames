@@ -19,4 +19,6 @@ case object NoCastling
   val pieces: Map[Pos, Piece] = Variant.symmetricRank(backRank)
 
   override def baseVariant: Boolean = true
+
+  override def valid(board: Board, strict: Boolean) = super.valid(board, strict) && board.castles == Castles.none
 }

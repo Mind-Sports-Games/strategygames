@@ -31,6 +31,15 @@ case class Board(
         .sum
     )
   }.toMap
+  lazy val playerTuzdikCount: Map[Player, Int] = Player.all.map { p =>
+    (
+      p,
+      pieces
+        .filter { case (_, (piece, _)) => piece.role == Tuzdik && piece.player == p }
+        .map { case (_, (_, count)) => count }
+        .sum
+    )
+  }.toMap
 
   lazy val posMap: Map[(Piece, Int), Iterable[Pos]] = pieces.groupMap(_._2)(_._1)
 

@@ -322,16 +322,15 @@ abstract class Variant private[variant] (
   // if a player runs out of move, the match is a draw
   def stalemateIsDraw = true
 
-  // @TODO: might want to use this winner method in specialEnd method below ? code is duplicated...
+  def winningScore = 6
+
   def winner(situation: Situation): Option[Player] = {
-    if (situation.board.history.score.p1 == 6) Some(P1)
-    else if (situation.board.history.score.p2 == 6) Some(P2)
+    if (situation.board.history.score.p1 >= winningScore) Some(P1)
+    else if (situation.board.history.score.p2 >= winningScore) Some(P2)
     else None
   }
 
-  def specialEnd(situation: Situation) =
-    (situation.board.history.score.p1 == 6) ||
-      (situation.board.history.score.p2 == 6)
+  def specialEnd(situation: Situation) = winner(situation).isDefined
 
   def specialDraw(situation: Situation) = situation.moves.size == 0
 
@@ -348,7 +347,9 @@ abstract class Variant private[variant] (
     */
   @nowarn def finalizeBoard(board: Board, uci: format.Uci, captured: Option[Piece]): Board = board
 
-  def valid(@nowarn board: Board, @nowarn strict: Boolean): Boolean = true
+  def valid(board: Board, @nowarn strict: Boolean): Boolean =
+    board.piecesOf(P1).size >= winningScore - board.history.score.p2 &&
+    board.piecesOf(P2).size >= winningScore - board.history.score.p1
 
   def isIrreversible(move: Move): Boolean = move.capture.nonEmpty
 

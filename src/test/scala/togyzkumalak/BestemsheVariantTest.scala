@@ -15,6 +15,7 @@ class BestemsheVariantTest extends TogyzkumalakTest with ValidatedMatchers {
     val moves = Bestemshe.validMoves(situation)
     "be valid" in {
       moves.size must_== 5
+      board.valid(true) must_== true
     }
   }
 
@@ -25,6 +26,7 @@ class BestemsheVariantTest extends TogyzkumalakTest with ValidatedMatchers {
         g.situation.moves.size must_== 4
         g.situation.board.history.score must_== Score(6, 0)
         g.situation.end must_== false
+        g.situation.board.valid(true) must_== true
       }
     }
     "valid situation after first two moves" in {
@@ -32,6 +34,7 @@ class BestemsheVariantTest extends TogyzkumalakTest with ValidatedMatchers {
         g.situation.player must_== Player.P1
         g.situation.moves.size must_== 4
         g.situation.board.history.score must_== Score(6, 6)
+        g.situation.board.valid(true) must_== true
       }
     }
   }
@@ -47,6 +50,7 @@ class BestemsheVariantTest extends TogyzkumalakTest with ValidatedMatchers {
         }.size must_== 0
         g.situation.board.pieces(Pos.C2) must_== ((Piece(Player.P2, Stone), 3))
         g.situation.board.history.score must_== Score(16, 16)
+        g.situation.board.valid(true) must_== true
       }
     }
   }
@@ -72,6 +76,7 @@ class BestemsheVariantTest extends TogyzkumalakTest with ValidatedMatchers {
         g.situation.end must_== true
         g.situation.winner must_== Some(Player.P1)
         g.situation.board.history.score must_== Score(26, 12)
+        g.situation.board.valid(true) must_== true
       }
     }
   }

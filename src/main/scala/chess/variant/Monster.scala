@@ -171,9 +171,7 @@ case object Monster
     validSide(board, strict)(P2) && {
       val roles = board.rolesOf(P1)
       roles.count(_ == King) == 1 &&
-      (!strict || roles.count(_ == Pawn) <= 4) &&
-      !pawnsOnPromotionRank(board, P1) &&
-      board.piecesOf(P1).size <= 5
+      !pawnsOnPromotionRank(board, P1)
     }
 
   override def pliesFromFen(fenTurnCount: Int, player: Player, currentTurnPlies: Int = 0) =
