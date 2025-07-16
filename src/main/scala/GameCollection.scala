@@ -102,6 +102,7 @@ sealed abstract class GameFamily {
   def boardThemeDefault: String
   def playerNames: Map[Player, String]
   def playerColors: Map[Player, String]
+  def playerFENChars: Map[Player, Char]
 
   override def toString = s"GameFamily($name)"
 }
@@ -172,6 +173,7 @@ object GameFamily {
     def boardThemeDefault = "maple"
     def playerNames       = Map(P1 -> "White", P2 -> "Black")
     def playerColors      = Map(P1 -> "white", P2 -> "black")
+    def playerFENChars    = Map(P1 -> 'w', P2 -> 'b')
   }
 
   final case class Draughts() extends GameFamily {
@@ -207,6 +209,7 @@ object GameFamily {
     def boardThemeDefault = "blue3"
     def playerNames       = Map(P1 -> "White", P2 -> "Black")
     def playerColors      = Map(P1 -> "white", P2 -> "black")
+    def playerFENChars    = Map(P1 -> 'w', P2 -> 'b')
   }
 
   final case class LinesOfAction() extends GameFamily {
@@ -251,6 +254,7 @@ object GameFamily {
     def boardThemeDefault = "marble"
     def playerNames       = Map(P1 -> "Black", P2 -> "White")
     def playerColors      = Map(P1 -> "black", P2 -> "white")
+    def playerFENChars    = Map(P1 -> 'w', P2 -> 'b')
   }
 
   final case class Shogi() extends GameFamily {
@@ -269,6 +273,7 @@ object GameFamily {
     def boardThemeDefault = "wood"
     def playerNames       = Map(P1 -> "Sente", P2 -> "Gote")
     def playerColors      = Map(P1 -> "black", P2 -> "white")
+    def playerFENChars    = Map(P1 -> 'w', P2 -> 'b')
   }
 
   final case class Xiangqi() extends GameFamily {
@@ -287,6 +292,7 @@ object GameFamily {
     def boardThemeDefault = "green"
     def playerNames       = Map(P1 -> "Red", P2 -> "Black")
     def playerColors      = Map(P1 -> "white", P2 -> "black")
+    def playerFENChars    = Map(P1 -> 'w', P2 -> 'b')
   }
 
   final case class Flipello() extends GameFamily {
@@ -313,6 +319,7 @@ object GameFamily {
     def boardThemeDefault = "green"
     def playerNames       = Map(P1 -> "Black", P2 -> "White")
     def playerColors      = Map(P1 -> "black", P2 -> "white")
+    def playerFENChars    = Map(P1 -> 'w', P2 -> 'b')
   }
 
   final case class Amazons() extends GameFamily {
@@ -348,6 +355,7 @@ object GameFamily {
     def boardThemeDefault = "leather"
     def playerNames       = Map(P1 -> "White", P2 -> "Black")
     def playerColors      = Map(P1 -> "white", P2 -> "black")
+    def playerFENChars    = Map(P1 -> 'w', P2 -> 'b')
   }
 
   final case class Oware() extends GameFamily {
@@ -374,6 +382,7 @@ object GameFamily {
     def boardThemeDefault = "light-wood"
     def playerNames       = Map(P1 -> "South", P2 -> "North")
     def playerColors      = Map(P1 -> "white", P2 -> "black")
+    def playerFENChars    = Map(P1 -> 'S', P2 -> 'N')
   }
 
   final case class Togyzkumalak() extends GameFamily {
@@ -395,6 +404,7 @@ object GameFamily {
     def boardThemeDefault = "blue"
     def playerNames       = Map(P1 -> "Bastaushi", P2 -> "Kostaushi")
     def playerColors      = Map(P1 -> "white", P2 -> "black")
+    def playerFENChars    = Map(P1 -> 'S', P2 -> 'N')
   }
 
   final case class Go() extends GameFamily {
@@ -417,6 +427,7 @@ object GameFamily {
     def boardThemeDefault = "light-wood"
     def playerNames       = Map(P1 -> "Black", P2 -> "White")
     def playerColors      = Map(P1 -> "black", P2 -> "white")
+    def playerFENChars    = Map(P1 -> 'b', P2 -> 'w')
   }
 
   final case class Backgammon() extends GameFamily {
@@ -435,6 +446,7 @@ object GameFamily {
     def boardThemeDefault = "classic"
     def playerNames       = Map(P1 -> "White", P2 -> "Black")
     def playerColors      = Map(P1 -> "white", P2 -> "black")
+    def playerFENChars    = Map(P1 -> 'w', P2 -> 'b')
   }
 
   final case class BreakthroughTroyka() extends GameFamily {
@@ -456,6 +468,7 @@ object GameFamily {
     def boardThemeDefault = "purple-diag"
     def playerNames       = Map(P1 -> "White", P2 -> "Black")
     def playerColors      = Map(P1 -> "white", P2 -> "black")
+    def playerFENChars    = Map(P1 -> 'w', P2 -> 'b')
   }
 
   final case class Abalone() extends GameFamily {
@@ -484,6 +497,7 @@ object GameFamily {
     def boardThemeDefault = "classic"
     def playerNames       = Map(P1 -> "Black", P2 -> "White")
     def playerColors      = Map(P1 -> "black", P2 -> "white")
+    def playerFENChars    = Map(P1 -> 'b', P2 -> 'w')
   }
 
   final case class Dameo() extends GameFamily {
@@ -519,6 +533,7 @@ object GameFamily {
     def boardThemeDefault = "blue3"
     def playerNames       = Map(P1 -> "White", P2 -> "Black")
     def playerColors      = Map(P1 -> "white", P2 -> "black")
+    def playerFENChars    = Map(P1 -> 'w', P2 -> 'b')
   }
 
   def all: List[GameFamily] = List(
