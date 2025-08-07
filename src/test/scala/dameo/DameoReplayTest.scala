@@ -88,15 +88,11 @@ class DameoReplayTest extends DameoTest with ValidatedMatchers {
 
     "multi-move capture turn" should {
       /* Test for a problematic situation encountered during front-end implementation.
-      After moves:
+      After these moves:
         d3d4
         d6d5
         d4d6
-      the current turn should be W, and the turnCount should be 2. However in the bugged
-      situation they were resp. B and 3.
-      In the problematic situation, Forsyth.>> is called from StepBuilder.scala in the lila repo.
-      Forsyth.>> is called from a list returned by Replay.gameWithUciWhileValid, though, so
-      that is where the error may be.
+      the current turn should be W, and the turnCount should be 2.
       */
       val vectorActionStrs = Vector(
         Vector("d3d4"),
