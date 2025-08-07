@@ -22,12 +22,12 @@ final case class Actor(
     def dxs: List[Int] = List(-1, 0, 1)
 
     def posits: List[Pos] = piece.role match {
-      case Man  =>
+      case Man | ActiveMan =>
         dxs
           .flatMap(dx => linearStep(Some(pos), dx, dy))
           .filter(board.withinBounds)
           .filter(board.empty)
-      case King =>
+      case King | ActiveKing =>
         dxs
           .flatMap(dx =>
             dxs.flatMap(dy =>
