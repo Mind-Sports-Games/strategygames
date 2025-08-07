@@ -14,6 +14,8 @@ final case class Actor(
   lazy val captures: List[Move]                   = capturesWithLineval._1
   lazy val capturesWithLineval: (List[Move], Int) = captureMoves()
   def getCaptures()                               = captures
+  lazy val captureLength: Int                     = capturesWithLineval._2
+
 
   private def noncaptureMoves(): List[Move] = {
     def dy: Int        = if (player == P1) 1 else -1

@@ -37,6 +37,16 @@ case class Situation(board: Board, player: Player) {
     else if (autoDraw) Some(Status.Draw)
     else None
 
+  lazy val allMovesCaptureLength: Int =
+    actors.foldLeft(0) { case (max, actor) =>
+      Math.max(actor.captureLength, max)
+    }
+
+  def captureLengthFrom(pos: Pos): Option[Int] =
+    actorAt(pos).map(_.captureLength)
+
+  def actorAt(pos: Pos): Option[Actor] = board.actorAt(pos)
+
   def move(
       from: Pos,
       to: Pos,

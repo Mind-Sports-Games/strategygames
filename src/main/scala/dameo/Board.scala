@@ -52,6 +52,8 @@ case class Board(
     !pieces.contains(pos)
   }
 
+  def actorAt(at: Pos): Option[Actor] = actors get at
+
   def withHistory(h: History): Board       = copy(history = h)
   def updateHistory(f: History => History) = copy(history = f(history))
 
