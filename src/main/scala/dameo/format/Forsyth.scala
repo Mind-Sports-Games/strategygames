@@ -103,7 +103,7 @@ object Forsyth {
           )
           .mkString(",")
       )
-    s"W${pieces(P1)}:B${pieces(P2)}"
+    s"W${pieces.getOrElse(P1, "")}:B${pieces.getOrElse(P2, "")}"
   }
 
   def boardAndPlayer(situation: Situation): String =
