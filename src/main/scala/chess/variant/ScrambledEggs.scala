@@ -109,7 +109,6 @@ case object ScrambledEggs
   override def specialEnd(situation: Situation) =
     winForPlayer(P2, situation.board) ^ winForPlayer(P1, situation.board)
 
-  // this probably isnt done very nicely, is it correct to return None for a draw?
   override def winner(situation: Situation): Option[Player] = {
     val p2Win = winForPlayer(P2, situation.board)
     val p1Win = winForPlayer(P1, situation.board)
@@ -119,6 +118,8 @@ case object ScrambledEggs
       Option(P1)
     } else None
   }
+
+  override def staleMate(situation: Situation): Boolean = !situation.variantEnd && situation.moves.isEmpty
 
   override def specialDraw(situation: Situation) =
     winForPlayer(P2, situation.board) && winForPlayer(P1, situation.board)

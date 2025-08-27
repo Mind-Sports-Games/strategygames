@@ -27,6 +27,16 @@ class LinesOfActionVariantTest extends ChessTest {
       }
     }
 
+    "StaleMate for P1" in {
+      val position = FEN("6lL/6ll/8/8/8/8/ll6/Ll6 w - - 0 1")
+      val game     = fenToGame(position, LinesOfAction)
+      game must beValid.like {
+        case game => {
+          game.situation.board.variant.staleMate(game.situation) must beTrue
+        }
+      }
+    }
+
     "Game in progress" in {
       val position = FEN("1llllll1/L6L/L6L/L6L/L6L/L6L/L6L/1llllll1 b - - 0 1")
       val game     = fenToGame(position, LinesOfAction)
