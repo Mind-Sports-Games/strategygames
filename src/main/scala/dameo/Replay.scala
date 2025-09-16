@@ -66,53 +66,6 @@ object Replay {
     case _                  => sys.error(s"Invalid dameo action $action")
   }
 
-  def replayMove(
-      before: Game,
-      orig: Pos,
-      dest: Pos,
-      boardAfter: Board,
-      promotion: Boolean,
-      endTurn: Boolean
-  ): Move = {
-    def piece: Piece = before.situation.board.pieces(orig)
-
-    def capturePos(pos: Pos, dx: Int, dy: Int): Option[Pos] = {
-      pos
-        .step(dx, dy)
-        .flatMap(stepPos =>
-          if (stepPos == dest || !before.situation.board.pieces.get(stepPos).isEmpty) {
-            Some(stepPos)
-          } else {
-            capturePos(stepPos, dx, dy)
-          }
-        )
-    }
-
-    def capture: Option[Pos] =
-      if (orig.onSameLine(dest)) {
-        def dx: Int = (dest.file.index - orig.file.index).sign
-        def dy: Int = (dest.rank.index - orig.rank.index).sign
-        capturePos(orig, dx, dy).flatMap(capPos =>
-          if (before.situation.board.pieces.get(capPos).map(_.player) == Some(!piece.player)) {
-            Some(capPos)
-          } else {
-            None
-          }
-        )
-      } else { None }
-
-    Move(
-      piece = piece,
-      orig = orig,
-      dest = dest,
-      situationBefore = before.situation,
-      after = boardAfter,
-      autoEndTurn = endTurn,
-      capture = capture,
-      promotion = if (promotion) Some(King) else None
-    )
-  }
-
   private def gameWithActionWhileValid(
       actionStrs: ActionStrs,
       initialFen: FEN,
@@ -124,24 +77,25 @@ object Replay {
 
     def replayMoveFromUci(
         orig: Option[Pos],
-        dest: Option[Pos],
-        promotion: Boolean,
-        endTurn: Boolean
+        dest: Option[Pos]
     ): (Game, Move) =
       (orig, dest) match {
         case (Some(orig), Some(dest)) => {
           state.situation.board.move(orig, dest) match {
-            case Some(boardAfter) => {
-              val move = replayMove(
-                state,
-                orig,
-                dest,
-                boardAfter,
-                promotion,
-                endTurn
-              )
-              state = state(move)
-              (state, move)
+            case Some(_) => {
+              val actor = state.situation.board.actors(orig)
+              val actorMoves = actor.captures ++ actor.noncaptures
+              actorMoves.find(_.dest == dest) match {
+                case Some(move) => {
+                  state = state(move)
+                  (state, move)
+                }
+                case _          => {
+                  val uciMove = s"${orig}${dest}"
+                  errors += uciMove + ","
+                  sys.error(s"Invalid move for replay: ${uciMove}")
+                }
+              }
             }
             case _                => {
               val uciMove = s"${orig}${dest}"
@@ -159,15 +113,13 @@ object Replay {
 
     val gameWithActions: List[(Game, Move)] =
       actionStrs.flatMap { turnStrs =>
-        turnStrs.zipWithIndex.map {
-          case (uci, i) => {
+        turnStrs.map {
+          case uci => {
             uci match {
-              case Uci.Move.moveR(orig, dest, promotion) =>
+              case Uci.Move.moveR(orig, dest, _) =>
                 replayMoveFromUci(
                   Pos.fromKey(orig),
-                  Pos.fromKey(dest),
-                  promotion == "K",
-                  endTurn = i + 1 == turnStrs.length
+                  Pos.fromKey(dest)
                 )
               case (action: String)                      =>
                 sys.error(s"Invalid action for replay: $action")

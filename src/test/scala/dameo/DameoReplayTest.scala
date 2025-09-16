@@ -86,6 +86,40 @@ class DameoReplayTest extends DameoTest with ValidatedMatchers {
       }
     }
 
+    "multi-move capture turn" should {
+      /* Test for a problematic situation encountered during front-end implementation.
+      After these moves:
+        d3d4
+        d6d5
+        d4d6
+      the current turn should be W, and the turnCount should be 2.
+      */
+      val vectorActionStrs = Vector(
+        Vector("d3d4"),
+        Vector("d6d5"),
+        Vector("d4d6")
+      )
+      playActionStrs(vectorActionStrs.flatten.toList) must beValid.like { g =>
+        val replay = Replay
+          .gameWithUciWhileValid(
+            vectorActionStrs,
+            Dameo.initialFen,
+            Dameo
+          )
+          ._2
+          .reverse
+          .head
+          ._1
+        g.plies must_== replay.plies
+        g.turnCount must_== replay.turnCount
+        g.startedAtPly must_== replay.startedAtPly
+        g.startedAtTurn must_== replay.startedAtTurn
+        g.actionStrs must_== replay.actionStrs
+        g.situation.board.pieces must_== replay.situation.board.pieces
+        g.situation.board.history.lastTurn must_== replay.situation.board.history.lastTurn
+        g.situation.board.history.currentTurn must_== replay.situation.board.history.currentTurn
+        g.situation.board.variant must_== replay.situation.board.variant
+      }
+    }
   }
-
 }
