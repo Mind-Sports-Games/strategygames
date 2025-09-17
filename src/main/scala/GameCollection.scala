@@ -601,7 +601,7 @@ object GameGroup {
     def id       = 1
     def name     = "Draughts"
     def key      = "draughts"
-    def variants = Variant.all(GameLogic.Draughts())
+    def variants = Variant.all(GameLogic.Draughts()) ::: Variant.all(GameLogic.Dameo())
     def medley   = true
 
   }
@@ -694,14 +694,6 @@ object GameGroup {
     def medley   = true
   }
 
-  final case class Dameo() extends GameGroup {
-    def id       = 13
-    def name     = "Dameo"
-    def key      = "dameo"
-    def variants = Variant.all(GameLogic.Dameo()).filter(_.gameFamily.name == this.name)
-    def medley   = true
-  }
-
   def all: List[GameGroup] =
     List(
       Chess(),
@@ -716,8 +708,7 @@ object GameGroup {
       Go(),
       Backgammon(),
       BreakthroughTroyka(),
-      Abalone(),
-      Dameo()
+      Abalone()
     )
 
   def medley: List[GameGroup] = all.filter(_.medley)
@@ -736,7 +727,6 @@ object GameGroup {
     case 10 => Backgammon()
     case 11 => BreakthroughTroyka()
     case 12 => Abalone()
-    case 13 => Dameo()
     case _  => Chess()
   }
 }
