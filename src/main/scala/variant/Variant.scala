@@ -1138,13 +1138,13 @@ object Variant {
   def all: List[Variant] =
     chess.variant.Variant.all.map(Chess) :::
       draughts.variant.Variant.all.map(Draughts) :::
+      dameo.variant.Variant.all.map(Dameo) :::
       fairysf.variant.Variant.all.map(FairySF) :::
       samurai.variant.Variant.all.map(Samurai) :::
       togyzkumalak.variant.Variant.all.map(Togyzkumalak) :::
       go.variant.Variant.all.map(Go) :::
       backgammon.variant.Variant.all.map(Backgammon) :::
-      abalone.variant.Variant.all.map(Abalone) :::
-      dameo.variant.Variant.all.map(Dameo)
+      abalone.variant.Variant.all.map(Abalone)
 
   def byId = all map { v => (v.id, v) } toMap
 
