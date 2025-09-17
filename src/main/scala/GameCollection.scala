@@ -67,8 +67,9 @@ object GameLogic {
       Togyzkumalak(),
       Go(),
       Backgammon(),
-      Abalone()
-    ) // , Dameo())
+      Abalone(),
+      Dameo()
+    )
 
   // TODO: I'm sure there is a better scala way of doing this
   def apply(id: Int): GameLogic = id match {
@@ -510,8 +511,8 @@ object GameFamily {
     def defaultVariant    = Variant.Dameo(strategygames.dameo.variant.Dameo)
     def variants          = Variant.all(GameLogic.Dameo())
     def displayPiece      = "wK"
-    def pieceSetThemes    = List("wide_crown", "fabirovsky", "check_yb")
-    def pieceSetDefault   = "wide_crown"
+    def pieceSetThemes    = List("wide_crown_dameo", "fabirovsky_dameo", "check_yb_dameo")
+    def pieceSetDefault   = "wide_crown_dameo"
     def boardThemes       = List(
       "blue",
       "blue2",
@@ -549,8 +550,8 @@ object GameFamily {
     Go(),
     Backgammon(),
     BreakthroughTroyka(),
-    Abalone() // ,
-    // Dameo()
+    Abalone(),
+    Dameo()
   )
 
   // TODO: I'm sure there is a better scala way of doing this
@@ -715,8 +716,8 @@ object GameGroup {
       Go(),
       Backgammon(),
       BreakthroughTroyka(),
-      Abalone() // ,
-      // Dameo()
+      Abalone(),
+      Dameo()
     )
 
   def medley: List[GameGroup] = all.filter(_.medley)

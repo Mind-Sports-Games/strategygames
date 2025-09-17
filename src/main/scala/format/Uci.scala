@@ -249,11 +249,7 @@ object Uci {
       extends Move(
         Pos.Dameo(m.orig),
         Pos.Dameo(m.dest),
-        m.promotion.map(Role.DameoPromotableRole),
-        m.capture match {
-          case Some(capture) => Some(List(Pos.Dameo(capture)))
-          case None          => None
-        }
+        m.promotion.map(Role.DameoPromotableRole)
       )
       with Dameo {
     def gameLogic      = GameLogic.Dameo()
@@ -713,12 +709,6 @@ object Uci {
         case None           => None
       }
 
-    private def dameoCaptures(captures: Option[List[Pos]]): Option[dameo.Pos] =
-      captures.flatMap(_.headOption match {
-        case Some(Pos.Dameo(c)) => Some(c)
-        case _                  => None
-      })
-
     def apply(
         lib: GameLogic,
         orig: Pos,
@@ -788,8 +778,7 @@ object Uci {
             dameo.format.Uci.Move.apply(
               orig,
               dest,
-              promotion.map(_.toDameo),
-              dameoCaptures(capture)
+              promotion.map(_.toDameo)
             )
           )
         case _                                                                          => sys.error("Mismatched gamelogic types 23")
@@ -1113,7 +1102,7 @@ object Uci {
       case (GameLogic.Abalone(), strategygames.Move.Abalone(move))           =>
         AbaloneMove(abalone.format.Uci(move))
       case (GameLogic.Dameo(), strategygames.Move.Dameo(move))               =>
-        DameoMove(dameo.format.Uci(move, withCaptures))
+        DameoMove(dameo.format.Uci(move))
       case _                                                                 => sys.error("Mismatched gamelogic types 25")
     }
 

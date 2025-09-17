@@ -1,31 +1,70 @@
 package strategygames.dameo.format
 
 import strategygames.Player
-import strategygames.dameo.PieceMap
+import strategygames.dameo.{ Piece, PieceMap, Pos, Role }
+/*
 
-//TODO Dameo, work out the FEN structure for a Dameo game.
-//What do other platforms use?
-//Is there a standard for Dameo?
-//Are we able to use something similar to Draughts FENs (look in there)
-//Or do we want to invent our own, and have it more similar to chess?
-//Either way any FEN parsing wants to be done here. Look at other game logic FEN files
+Dameo FEN:
+[colour to move]:W[white piece coords]:B[black piece coords]:Halfmoveclock:Fullmoves
+
+coords for men are a1,b1,c1
+other roles (kings, ghostman, ghostking, activeman, activeking) are prepended to the coord using
+a capital letter, e.g. Ka1,Gb1,Pb2. Ghosts are part of the FEN since we want to treat (partial)
+moves with ghosts in them as proper moves w.r.t. the frontend.
+
+ */
+
 final case class FEN(value: String) extends AnyVal {
 
   override def toString = value
 
+  def splitted: Array[String] = value.split(':')
+
   def player: Option[Player] =
-    value.split(':').lift(0) flatMap (_.headOption) flatMap Player.apply
+    splitted.lift(0) flatMap (_.headOption) flatMap Player.apply
 
   def initial = value == Forsyth.initial.value
 
-  // TODO Dameo set
-  def pieces: PieceMap = Map.empty
+  def player1: Option[Player]      = splitted.lift(1).flatMap(_.headOption.flatMap(Player.apply))
+  def pieceStr1: String            = splitted.lift(1).map(_.drop(1)).getOrElse("")
+  def pieces1: Array[(Pos, Piece)] = player1
+    .map(p =>
+      pieceStr1
+        .split(',')
+        .flatMap(parsePiece(p))
+    )
+    .getOrElse(Array())
+
+  def player2: Option[Player]      = splitted.lift(2).flatMap(_.headOption.flatMap(Player.apply))
+  def pieceStr2: String            = splitted.lift(2).map(_.drop(1)).getOrElse("")
+  def pieces2: Array[(Pos, Piece)] = player2
+    .map(p =>
+      pieceStr2
+        .split(',')
+        .flatMap(parsePiece(p))
+    )
+    .getOrElse(Array())
+
+  def pieces: PieceMap = (pieces1 ++ pieces2).toMap
+
+  def halfMoveClock: Option[Int] = intFromFen(FEN.halfMoveIndex)
+  def fullMove: Option[Int]      = intFromFen(FEN.fullMoveIndex)
+
+  private def parsePiece(player: Player)(pStr: String): Option[(Pos, Piece)] = {
+    pStr match {
+      case ""                    => None
+      case ht if ht.head.isUpper => Some((Pos.allKeys(ht.tail), Piece(player, Role.forsyth(ht.head).get)))
+      case posStr                => Some((Pos.allKeys(posStr), Piece(player, Role.defaultRole)))
+    }
+  }
+
+  private def intFromFen(index: Int): Option[Int] =
+    value.split(':').lift(index).flatMap(_.tail.toIntOption)
 }
 
 object FEN {
 
-  def clean(source: String): FEN = FEN(source.replace("_", " ").trim)
-
+  def halfMoveIndex: Int = 3
   def fullMoveIndex: Int = 4
 
 }
