@@ -340,17 +340,17 @@ object Piotr {
   ) ++ (260 to 328).map(_.toChar) ++ (330 to 431).map(_.toChar) // NOTE: 329 is deprecated
   // @formatter:on
 
-  def posToIndex: Map[Pos, Int] = Range(0, piotrs.size).map(i => (indexToPos(i), i)).toMap
+  val posToIndex: Map[Pos, Int] = Range(0, piotrs.size).map(i => (indexToPos(i), i)).toMap
 
-  def posToHashIndex: Map[Pos, Int] = Range(0, piotrs.size).map(i => (hashIndexToPos(i), i)).toMap
+  val posToHashIndex: Map[Pos, Int] = Range(0, piotrs.size).map(i => (hashIndexToPos(i), i)).toMap
 
-  def indexToPiotr: Map[Int, Char] = Range(0, piotrs.size).map(i => (i, piotrs(i))).toMap
+  val indexToPiotr: Map[Int, Char] = Range(0, piotrs.size).map(i => (i, piotrs(i))).toMap
 
-  def posToPiotr: Map[Pos, Char] = posToIndex.keys.map(a => (a, indexToPiotr(posToIndex(a)))).toMap
+  val posToPiotr: Map[Pos, Char] = posToIndex.keys.map(a => (a, indexToPiotr(posToIndex(a)))).toMap
 
-  def piotrToIndex: Map[Char, Int] = indexToPiotr.keys.map(i => (indexToPiotr(i), i)).toMap
+  val piotrToIndex: Map[Char, Int] = indexToPiotr.keys.map(i => (indexToPiotr(i), i)).toMap
 
-  def piotrToPos: Map[Char, Pos] = posToPiotr.keys.map(a => (posToPiotr(a), a)).toMap
+  val piotrToPos: Map[Char, Pos] = posToPiotr.keys.map(a => (posToPiotr(a), a)).toMap
 
   def indexToPos(i: Int): Pos = {
     var j = i
