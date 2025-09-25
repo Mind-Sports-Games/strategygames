@@ -44,6 +44,8 @@ case class Pos(x: Int, y: Int) extends AnyRef {
 
   def piotrStr: String = piotr.toString
 
+  def ==(a: Pos): Boolean = equals(a.x, a.y)
+
   def equals(x: Int, y: Int): Boolean = this.x == x && this.y == y
 
   override def toString = "(" + x + ", " + y + ")"
@@ -352,31 +354,14 @@ object Piotr {
 
   val piotrToPos: Map[Char, Pos] = posToPiotr.keys.map(a => (posToPiotr(a), a)).toMap
 
-  def indexToPos(i: Int): Pos = {
-    var j = i
-    if (j < 64) return new Pos(j % 8, j / 8) // A1-H1, ..., A8-H8
-
-    j -= 64
-    if (j < 20) return new Pos(j % 10, 8 + j / 10) // A9-J9, A10-J10
-
-    j -= 20
-    if (j < 16) return new Pos(8 + j % 2, j / 2) // I1, J1, ... I8, J8
-
-    j -= 16
-    if (j < 90) return new Pos(10 + j % 9, j / 9) // K1-S1, ..., K10-S10
-
-    j -= 90
-    if (j < 190) return new Pos(j % 19, 10 + j / 19) // A11-S11, ..., A19-S19
-
-    // Note: from here, 19² <= i
-    hashIndexToPos(i)
-  }
+  /** Compatible with the old indices used to record early games. */
+  def indexToPos(i: Int): Pos = if (i < 81) new Pos(i % 9, i / 9) else hashIndexToPos(i)
 
   def hashIndexToPos(i: Int): Pos = {
     // k² <= i < (k + 1)² => (0, k)...(k, k)...(k, 0)
     val k = math.floor(math.sqrt(i)).toInt
     val j = i - k * k
-    if (j < k) return new Pos(j, k)
-    new Pos(k, 2 * k - j)
+
+    if (j < k) new Pos(j, k) else new Pos(k, 2 * k - j)
   }
 }
