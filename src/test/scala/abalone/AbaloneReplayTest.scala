@@ -1,6 +1,5 @@
 package strategygames.abalone
 
-import strategygames.Player
 import strategygames.abalone.variant.Abalone
 
 class AbaloneReplayTest extends AbaloneTest {
@@ -34,8 +33,6 @@ class AbaloneReplayTest extends AbaloneTest {
         val replay = Replay
           .gameWithUciWhileValid(
             vectorActionStrs,
-            Player.P1,
-            Player.P1,
             Abalone.initialFen,
             Abalone
           )

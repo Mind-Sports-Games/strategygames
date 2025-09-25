@@ -293,8 +293,6 @@ object Replay {
     case (GameLogic.Abalone(), FEN.Abalone(initialFen), Variant.Abalone(variant))                =>
       abalone.Replay.gameWithUciWhileValid(
         actionStrs,
-        startPlayer,
-        activePlayer,
         initialFen,
         variant
       ) match {

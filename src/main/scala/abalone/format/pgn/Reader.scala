@@ -52,29 +52,21 @@ object Reader {
       case (r: Result.Incomplete, _)      => r
     }
 
-  private def makeReplayWithActionStrs(game: Game, actionStrs: ActionStrs): Result =
-    Replay.actionStrsWithEndTurn(actionStrs).foldLeft[Result](Result.Complete(Replay(game))) {
-      case (Result.Complete(replay), (actionStr, endTurn)) =>
+  private def makeReplayWithActionStrs(game: Game, actionStrs: ActionStrs): Result = {
+    actionStrs.flatten.foldLeft[Result](Result.Complete(Replay(game))) {
+      case (Result.Complete(replay), actionStr) =>
         actionStr match {
           case Uci.Move.moveR(orig0, orig1, dest0, dest1) =>
             (Pos.fromKey(orig0 + orig1), Pos.fromKey(dest0 + dest1)) match {
               case (Some(orig), Some(dest)) =>
-                Result.Complete(
-                  replay.addAction(
-                    Replay.replayMove(
-                      replay.state,
-                      orig,
-                      dest,
-                      endTurn
-                    )
-                  )
-                )
+                Result.Complete(replay.addAction(Replay.replayMove(replay.state, orig, dest)))
               case _                        => Result.Incomplete(replay, s"Error making replay with move: ${actionStr}")
             }
           case _                                          => Result.Incomplete(replay, s"Error making replay with uci move: ${actionStr}")
         }
-      case (r: Result.Incomplete, _)                       => r
+      case (r: Result.Incomplete, _)            => r
     }
+  }
 
   private def makeGame(tags: Tags) = {
     val g = Game(

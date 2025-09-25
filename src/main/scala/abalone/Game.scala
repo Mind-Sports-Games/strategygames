@@ -3,7 +3,7 @@ package strategygames.abalone
 import cats.data.Validated
 import strategygames.abalone.format.{FEN, Forsyth, Uci}
 import strategygames.abalone.variant.Variant
-import strategygames.{ClockBase, MoveMetrics, Player, VActionStrs}
+import strategygames.{ClockBase, MoveMetrics, VActionStrs}
 
 case class Game(
     situation: Situation,
@@ -31,7 +31,7 @@ case class Game(
       situation = newSituation,
       plies = plies + 1,
       turnCount = turnCount + (if (switchPlayer) 1 else 0),
-      actionStrs = applyActionStr(move.toUci.uci),
+      actionStrs = applyActionStr(move.toUci.uci, move.autoEndTurn),
       clock = applyClock(move.metrics, newSituation.status.isEmpty, switchPlayer)
     )
   }
@@ -51,14 +51,11 @@ case class Game(
       }
     }
 
-  private def applyActionStr(actionStr: String): VActionStrs =
-    if (hasJustSwitchedTurns || actionStrs.size == 0)
+  private def applyActionStr(actionStr: String, endTurn: Boolean): VActionStrs =
+    if (endTurn || actionStrs.size == 0)
       actionStrs :+ Vector(actionStr)
     else
       actionStrs.updated(actionStrs.size - 1, actionStrs(actionStrs.size - 1) :+ actionStr)
-
-  def hasJustSwitchedTurns: Boolean =
-    player == Player.fromTurnCount(actionStrs.size + startedAtTurn)
 
   def player = situation.player
 

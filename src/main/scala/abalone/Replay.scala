@@ -7,7 +7,7 @@ import strategygames.abalone.format.pgn.{Parser, Reader}
 import strategygames.abalone.format.{FEN, Forsyth, Uci}
 import strategygames.abalone.variant.Variant
 import strategygames.format.pgn.San
-import strategygames.{ActionStrs, Player, Action => StratAction, Move => StratMove, Situation => StratSituation}
+import strategygames.{ActionStrs, Action => StratAction, Move => StratMove, Situation => StratSituation}
 
 case class Replay(setup: Game, actions: List[Move], state: Game) {
   lazy val chronoPlies = actions.reverse
@@ -36,14 +36,12 @@ object Replay {
 
   def apply(
       actionStrs: ActionStrs,
-      startPlayer: Player,
-      activePlayer: Player,
       initialFen: Option[FEN],
       variant: Variant
   ): Validated[String, Reader.Result] = {
     val fen                            = initialFen.getOrElse(variant.initialFen)
     val (init, gameWithActions, error) =
-      gameWithActionWhileValid(actionStrs, startPlayer, activePlayer, fen, variant)
+      gameWithActionWhileValid(actionStrs, fen, variant)
     val game                           =
       gameWithActions.reverse.lastOption.map(_._1).getOrElse(init)
 
@@ -65,7 +63,7 @@ object Replay {
     case _                    => sys.error("Invalid abalone move")
   }
 
-  def replayMove(before: Game, orig: Pos, dest: Pos, endTurn: Boolean): Move = {
+  def replayMove(before: Game, orig: Pos, dest: Pos): Move = {
     val after = before.situation.board.variant.boardAfter(before.situation, orig, dest)
 
     Move(
@@ -74,31 +72,13 @@ object Replay {
       dest = dest,
       situationBefore = before.situation,
       after = after,
-      autoEndTurn = endTurn,
+      autoEndTurn = before.situation.board.variant.isAutoEndTurn(before.situation, orig, dest),
       capture = if (before.situation.board.pieces.size != after.pieces.size) Some(dest) else None
     )
   }
 
-  def actionStrsWithEndTurn(actionStrs: ActionStrs): Seq[(String, Boolean)] =
-    actionStrs.zipWithIndex.map { case (a, i) =>
-      a.zipWithIndex.map { case (a1, i1) => (a1, i1 == a.size - 1 && i != actionStrs.size - 1) }
-    }.flatten
-
-  private def combineActionStrsWithEndTurn(
-      actionStrs: ActionStrs,
-      startPlayer: Player,
-      activePlayer: Player
-  ): Seq[(String, Boolean)] =
-    actionStrsWithEndTurn(
-      if (Player.fromTurnCount(actionStrs.size + startPlayer.fold(0, 1)) == activePlayer)
-        actionStrs :+ Vector()
-      else actionStrs
-    )
-
   private def gameWithActionWhileValid(
       actionStrs: ActionStrs,
-      startPlayer: Player,
-      activePlayer: Player,
       initialFen: FEN,
       variant: Variant
   ): (Game, List[(Game, Move)], Option[String]) = {
@@ -108,12 +88,11 @@ object Replay {
 
     def replayMoveFromUci(
         orig: Option[Pos],
-        dest: Option[Pos],
-        endTurn: Boolean
+        dest: Option[Pos]
     ): (Game, Move) =
       (orig, dest) match {
         case (Some(orig), Some(dest)) => {
-          val move = replayMove(state, orig, dest, endTurn)
+          val move = replayMove(state, orig, dest)
           state = state(move)
           (state, move)
         }
@@ -124,17 +103,21 @@ object Replay {
         }
       }
 
-    val gameWithActions: List[(Game, Move)] =
-      combineActionStrsWithEndTurn(actionStrs, startPlayer, activePlayer).toList.map {
-        case (Uci.Move.moveR(orig0, orig1, dest0, dest1), endTurn) =>
-          replayMoveFromUci(
-            Pos.fromKey(orig0 + orig1),
-            Pos.fromKey(dest0 + dest1),
-            endTurn
-          )
-        case (action: String, _)                                   =>
-          sys.error(s"Invalid move for replay: $action")
-      }
+    val gameWithActions: List[(Game, Move)] = {
+      actionStrs
+        .flatMap(ucis =>
+          ucis.map {
+            case Uci.Move.moveR(orig0, orig1, dest0, dest1) =>
+              replayMoveFromUci(
+                Pos.fromKey(orig0 + orig1),
+                Pos.fromKey(dest0 + dest1)
+              )
+            case uci                                        =>
+              sys.error(s"Invalid move for replay: $uci")
+          }
+        )
+        .toList
+    }
 
     (
       init,
@@ -148,15 +131,11 @@ object Replay {
 
   def gameWithUciWhileValid(
       actionStrs: ActionStrs,
-      startPlayer: Player,
-      activePlayer: Player,
       initialFen: FEN,
       variant: Variant
   ): (Game, List[(Game, Uci.WithSan)], Option[String]) = {
     val (game, gameWithActions, error) = gameWithActionWhileValid(
       actionStrs,
-      startPlayer,
-      activePlayer,
       initialFen,
       variant
     )
@@ -299,7 +278,12 @@ object Replay {
 
       def compareFen(fen: FEN) = truncateFen(fen) == atFenTruncated
 
-      def recursivePlyAtFen(situation: Situation, sans: List[San], ply: Int, turn: Int): Validated[String, Int] =
+      def recursivePlyAtFen(
+          situation: Situation,
+          sans: List[San],
+          ply: Int,
+          turn: Int
+      ): Validated[String, Int] =
         sans match {
           case Nil         => invalid(s"Can't find $atFenTruncated, reached ply $ply, turn $turn")
           case san :: rest =>

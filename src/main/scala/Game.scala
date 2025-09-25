@@ -1408,7 +1408,8 @@ object Game {
       case _                            => sys.error("Unable to copy abalone game with non-abalone arguments")
     }
 
-    override def hasJustSwitchedTurns: Boolean = g.hasJustSwitchedTurns
+    /** Wrong, therefore I hope not actually used. */
+    override def hasJustSwitchedTurns: Boolean = true
 
     override def withTurnsAndPlies(p: Int, t: Int): Game = Abalone(g.withTurnsAndPlies(p, t))
 

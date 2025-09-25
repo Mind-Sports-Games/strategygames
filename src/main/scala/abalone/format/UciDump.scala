@@ -1,9 +1,9 @@
 package strategygames.abalone.format
 
 import cats.data.Validated
+import strategygames.ActionStrs
 import strategygames.abalone.variant.Variant
 import strategygames.abalone.{Action, Move, Replay}
-import strategygames.{ActionStrs, Player}
 
 import scala.annotation.nowarn
 
@@ -23,8 +23,6 @@ object UciDump {
         actionStrs = actionStrs,
         // we can default to this because in UciDump we are only looking to validate
         // the current actionStrs, not work out future actionStrs
-        startPlayer = Player.P1,
-        activePlayer = Player.fromTurnCount(actionStrs.size),
         initialFen = initialFen,
         variant = variant
       ) andThen (_.valid) map apply
