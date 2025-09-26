@@ -268,12 +268,27 @@ abstract class Variant private[variant] (
     } else { // Line
       vector /= n
       n -= 1
+
+      var fori = true
+      var i    = 0
+      while (fori) {
+        val from = orig + (vector * i)
+        val to   = from + vector
+
+        if (pieces.contains(from) && (i < n || boardType.isCell(to))) {
+          res += (to -> pieces(from))
+          i += 1
+        } else fori = false
+      }
+
+      /* 'Correct' version, assuming the in-line moves are always correct, which is not the case in the replay of the games recorded prior to the advent of Grand Abalone, which are written in Nacre notation
       (0 to n).foreach(i => {
         val from = orig + (vector * i)
         val to   = from + vector
 
         if (i < n || boardType.isCell(to)) res += (to -> pieces(from))
       })
+       */
     }
 
     res
