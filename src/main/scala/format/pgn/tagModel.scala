@@ -56,10 +56,16 @@ case class Tags(value: List[Tag]) extends AnyVal {
 
   def fairysfVariant: Option[strategygames.fairysf.variant.Variant] =
     apply(_.Variant).map(_.toLowerCase).flatMap {
-      case "othello" | "reversi"                                               => strategygames.fairysf.variant.Flipello.some
-      case "grandothello" | "grand othello" | "grandreversi" | "grand reversi" =>
+      case "othello" | "reversi"                                                                             =>
+        strategygames.fairysf.variant.Flipello.some
+      case "grandothello" | "grand othello" | "grandreversi" | "grand reversi"                               =>
         strategygames.fairysf.variant.Flipello10.some
-      case name                                                                => strategygames.fairysf.variant.Variant byName name
+      case "antiothello" | "anti othello" | "anti-othello" | "antireversi" | "anti reversi" | "anti-reversi" =>
+        strategygames.fairysf.variant.AntiFlipello.some
+      case "octagonothello" | "octagon othello" | "octagonreversi" | "octagon reversi"                       =>
+        strategygames.fairysf.variant.OctagonFlipello.some
+      case name                                                                                              =>
+        strategygames.fairysf.variant.Variant byName name
     }
 
   def samuraiVariant: Option[strategygames.samurai.variant.Variant] =
