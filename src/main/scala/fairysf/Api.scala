@@ -74,13 +74,7 @@ object Api {
       if (movesList.isEmpty) this
       else new FairyPosition(position.makeMoves(movesList))
 
-    lazy val fen: FEN                                  = FEN(
-      variant.key match {
-        case "amazons"         => fromFairySFAmazonArrowsFen(position.getFEN())
-        //case "octagonflipello" => fromFairySFOctagonFlipelloFen(position.getFEN())
-        case _                 => position.getFEN()
-      }
-    )
+    lazy val fen: FEN                                  = FEN(position.getFEN().replace("*", "p"))
     lazy val givesCheck: Boolean                       = position.givesCheck()
     lazy val isImmediateGameEnd: (Boolean, GameResult) = {
       val im = position.isImmediateGameEnd()
@@ -167,64 +161,12 @@ object Api {
   private def fromFairySFAmazonArrowsFen(fen: String): String =
     fen.replace("*", "P")
 
-  //private def replaceAndSumXs(input: String): String = {
-  //  if (!input.contains("x")) input
-  //  else {
-  //    val groupPattern = "([x\\d]+)|([^x\\d]+)".r
-  //    groupPattern.findAllIn(input).map {
-  //      case group if group.exists(c => c == 'x' || c.isDigit) =>
-  //        (group.count(_ == 'x') + group.filter(_.isDigit).map(_.asDigit).sum).toString
-  //      case other => other
-  //    }.mkString
-  //  }
-  //}
-
-  //private def toFairySFImmobileSquaresFen(fen: String): String =
-  //  fen.split('[')
-  //    .zipWithIndex
-  //    .map{ case (f, i) => if (i == 0) f.split('/').map(replaceAndSumXs).mkString("/") else f }
-  //    .mkString("[")
-
-  //private def numberToXPrefixedAndSuffixed(s: String, i: Int): String = {
-  //  val startNum = "^([0-9]+)(.*)".r
-  //  val endNum = "(.*?)([0-9]+)$".r
-
-  //  val afterStart = s match {
-  //    case startNum(num, rest) =>
-  //      val n = num.toInt - i
-  //      (if (n == 0) "x"*i else "x"*i + n.toString) + rest
-  //    case _ => s
-  //  }
-
-  //  afterStart match {
-  //    case endNum(mid, num) if afterStart != num =>
-  //      val n = num.toInt - i
-  //      mid + (if (n == 0) "x"*i else n.toString + "x"*i)
-  //    case _ => afterStart
-  //  }
-  //}
-
-  //private def fromFairySFOctagonFlipelloFen(fen: String): String =
-  //  fen.split('[')
-  //    .zipWithIndex
-  //    .map{ case (f, i) =>
-  //      if (i == 0) f.split('/').zipWithIndex.map{ case (r, i) =>
-  //        if (i == 0 || i == 9) numberToXPrefixedAndSuffixed(r, 2)
-  //        else if (i == 1 || i == 8) numberToXPrefixedAndSuffixed(r, 1)
-  //        else r
-  //      }.mkString("/")
-  //      else f
-  //    }
-  //    .mkString("[")
-
   def toFairySFFen(variantName: String, fen: String): String =
     if (variantName == "amazons") toFairySFAmazonArrowsFen(removePockets(fen))
-    //else if (variantName == "octagonflipello") toFairySFImmobileSquaresFen(fen)
     else fen
 
   def fromFairySFFen(variantName: String, fen: String): String =
     if (variantName == "amazons") fromFairySFAmazonArrowsFen(addAmazonPockets(fen))
-    //else if (variantName == "octagonflipello") fromFairySFOctagonFlipelloFen(fen)
     else fen
 
   def positionFromVariantNameAndFEN(variantName: String, fen: String): Position =
@@ -402,6 +344,7 @@ nFoldRule = 4
 [ps-minixiangqi:minixiangqi]
 nFoldRule = 4
   """
+//Octagon Flipello attempts:
 //dropRegionWhite = c1 d1 e1 f1 g1 h1 b2 c2 d2 e2 f2 g2 h2 i2 *3 *4 *5 *6 *7 *8 b9 c9 d9 e9 f9 g9 h9 i9 c10 d10 e10 f10 g10 h10
 //dropRegionBlack = c1 d1 e1 f1 g1 h1 b2 c2 d2 e2 f2 g2 h2 i2 *3 *4 *5 *6 *7 *8 b9 c9 d9 e9 f9 g9 h9 i9 c10 d10 e10 f10 g10 h10
 //dropRegionWhite = a3 b3 c3 d3 e3 f3 g3 h3 i3 j3 a4 b4 c4 d4 e4 f4 g4 h4 i4 j4 a5 b5 c5 d5 g5 h5 i5 j5 a6 b6 c6 d6 g6 h6 i6 j6 a7 b7 c7 d7 e7 f7 g7 h7 i7 j7 a8 b8 c8 d8 e8 f8 g8 h8 i8 j8 b2 c1 c2 d1 d2 e1 e2 f1 f2 g1 g2 h1 h2 i2 b9 c9 c10 d9 d10 e9 e10 f9 f10 g9 g10 h9 h10 i9
