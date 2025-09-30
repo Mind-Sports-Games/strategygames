@@ -30,7 +30,6 @@ case object OctagonFlipello
   // cache this rather than checking with the API everytime
   override def initialFen =
     format.FEN(
-      //"xx6xx/x8x/10/10/4pP4/4Pp4/10/10/x8x/xx6xx[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp] w 0 1"
       "10/10/10/10/4pP4/4Pp4/10/10/10/10[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp] w 0 1"
     )
 
@@ -38,7 +37,7 @@ case object OctagonFlipello
     List(Pos.A1, Pos.A2, Pos.A9, Pos.A10, Pos.B1, Pos.B10, Pos.I1, Pos.I10, Pos.J1, Pos.J2, Pos.J9, Pos.J10)
 
   override def specialEnd(situation: Situation) = {
-    (situation.board.piecesOnBoardCount == (boardSize.width * boardSize.height) - (3*4)) ||
+    (situation.board.piecesOnBoardCount == (boardSize.width * boardSize.height) - invalidSquares.size) ||
     (situation.board.apiPosition.legalMoves.size == 0) ||
     pendingDoublePass(situation)
   }

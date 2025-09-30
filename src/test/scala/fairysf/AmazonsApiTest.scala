@@ -164,7 +164,7 @@ class AmazonsApiTest extends FairySFTest {
       )
 
       position2.gameEnd must_== false
-      position2.fen.toString() must_== "10/10/10/q3qq3q/PPPPPPPPPP/PPPPPPPPPP/Q3QQ3Q/10/10/10 w - - 20 11"
+      position2.fen.toString() must_== "10/10/10/q3qq3q/pppppppppp/pppppppppp/Q3QQ3Q/10/10/10 w - - 20 11"
     }
 
   }
