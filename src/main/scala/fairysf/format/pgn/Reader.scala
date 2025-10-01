@@ -102,7 +102,7 @@ object Reader {
                         orig,
                         dest,
                         promotion,
-                        replay.state.board.apiPosition.makeMoves(List(m)),
+                        replay.state.board.variant.generateNextApiPosition(replay.state.situation, m),
                         replay.state.board.uciMoves :+ m
                       )
                     else
@@ -130,7 +130,7 @@ object Reader {
                       replay.state,
                       role,
                       dest,
-                      replay.state.board.apiPosition.makeMoves(List(uci)),
+                      replay.state.board.variant.generateNextApiPosition(replay.state.situation, m),
                       replay.state.board.uciMoves :+ uci
                     )
                   }

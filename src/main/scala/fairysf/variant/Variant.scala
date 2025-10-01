@@ -60,6 +60,16 @@ abstract class Variant private[variant] (
 
   val kingPiece: Option[Role] = None
 
+  protected def recreateApiPositionFromMoves: Boolean = true
+
+  def generateNextApiPosition(situation: Situation, uciMove: String): Api.Position =
+    if (recreateApiPositionFromMoves) situation.board.apiPosition.makeMoves(List(uciMove))
+    else Api.positionFromMoves(
+      situation.board.variant.fishnetKey,
+      Forsyth.>>(situation).value,
+      Some(List(uciMove))
+    )
+
   // looks like this is only to allow King to be a valid promotion piece
   // in just atomic, so can leave as true for now
   def isValidPromotion(@nowarn promotion: Option[PromotableRole]): Boolean = true
@@ -81,7 +91,7 @@ abstract class Variant private[variant] (
       .map {
         case (Some(orig), Some(dest), promotion) => {
           val uciMove     = s"${orig.key}${dest.key}${promotion}"
-          val newPosition = situation.board.apiPosition.makeMoves(List(uciMove))
+          val newPosition = generateNextApiPosition(situation, uciMove)
           (
             orig,
             Move(
@@ -131,7 +141,7 @@ abstract class Variant private[variant] (
       .map {
         case (Some(role), Some(dest)) => {
           val uciMove     = s"${role.forsyth}@${dest.key}"
-          val newPosition = situation.board.apiPosition.makeMoves(List(uciMove))
+          val newPosition = generateNextApiPosition(situation, uciMove)
           Drop(
             piece = Piece(situation.player, role),
             pos = dest,

@@ -2,6 +2,7 @@ package strategygames.fairysf
 package variant
 
 import strategygames.{ GameFamily, P1, P2, Player }
+import strategygames.fairysf.format.Forsyth
 
 case object OctagonFlipello
     extends Variant(
@@ -26,6 +27,8 @@ case object OctagonFlipello
 
   override def hasAnalysisBoard: Boolean = true
   override def hasFishnet: Boolean       = false
+
+  override protected def recreateApiPositionFromMoves: Boolean = false
 
   // cache this rather than checking with the API everytime
   override def initialFen =
@@ -58,6 +61,26 @@ case object OctagonFlipello
   override def winner(situation: Situation): Option[Player] =
     (specialEnd(situation) && !specialDraw(situation)) option
       situation.board.playerPiecesOnBoardCount.maxBy(_._2)._1
+
+  // Hack to handle a pass when API would say there are moves
+  override def validMoves(situation: Situation): Map[Pos, List[Move]] =
+    if (validDrops(situation).size == 0 && super.validMoves(situation).size == 0)
+      Map(Pos.J9 -> List(Move(
+        piece = Piece(situation.player, FlipCounter),
+        orig = Pos.J9,
+        dest = Pos.J9,
+        situationBefore = situation,
+        after = situation.board.copy(
+          uciMoves = situation.board.uciMoves :+ "j9j9",
+          position = Some(Api.positionFromMoves(fishnetKey, Forsyth.>>(situation).flipPlayer.value))
+        ),
+        autoEndTurn = true,
+        capture = None,
+        promotion = None,
+        castle = None,
+        enpassant = false
+      )))
+    else super.validMoves(situation)
 
   // Couldn't restrict in fairy api so restrict moves here
   override def validDrops(situation: Situation): List[Drop] =

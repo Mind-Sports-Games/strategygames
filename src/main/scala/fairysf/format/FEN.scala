@@ -20,6 +20,13 @@ final case class FEN(value: String) extends AnyVal {
     }
 
   def initial = value == Forsyth.initial.value
+
+  def flipPlayer: FEN = copy(
+    value = value
+      .replace(" w ", " z ")
+      .replace(" b ", " w ")
+      .replace(" z ", " b ")
+  )
 }
 
 object FEN {

@@ -175,7 +175,8 @@ object Replay {
     var errors   = ""
     var uciMoves = init.situation.board.uciMoves
 
-    def getApiPosition(uciMove: String) = state.board.apiPosition.makeMoves(List(uciMove))
+    def getApiPosition(uciMove: String) =
+      state.board.variant.generateNextApiPosition(state.situation, uciMove)
 
     def replayMoveFromUci(orig: Option[Pos], dest: Option[Pos], promotion: String): (Game, Action) =
       (orig, dest) match {
