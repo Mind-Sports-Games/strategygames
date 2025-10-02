@@ -86,4 +86,7 @@ case object OctagonFlipello
   override def validDrops(situation: Situation): List[Drop] =
     super.validDrops(situation).filterNot(p => invalidSquares.contains(p.pos))
 
+  override def valid(board: Board, strict: Boolean): Boolean =
+    super.valid(board, strict) && board.pieces.keys.toSet.intersect(invalidSquares.toSet).size == 0
+
 }
