@@ -27,6 +27,8 @@ final case class FEN(value: String) extends AnyVal {
       .replace(" b ", " w ")
       .replace(" z ", " b ")
   )
+
+  def boardStr: String = value.takeWhile(_ != ' ')
 }
 
 object FEN {

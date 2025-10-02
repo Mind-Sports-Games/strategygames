@@ -23,6 +23,14 @@ case class Situation(board: Board, player: Player) {
 
   def canOnlyDrop: Boolean = canDrop && moves.isEmpty
 
+  //hack to help Octagon Othello
+  //private def safeApiPosition =
+  //  if (board.variant.recreateApiPositionFromMoves) board.apiPosition
+  //  else board.position match {
+  //    case Some(position) => position
+  //    case None           => Api.positionFromVariantNameAndFEN(board.variant.fishnetKey, Forsyth.>>(this).value)
+  //  }
+
   lazy val check: Boolean = board.apiPosition.givesCheck
 
   def checkSquare: Option[Pos] =

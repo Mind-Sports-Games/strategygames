@@ -2,7 +2,7 @@ package strategygames.fairysf
 package variant
 
 import strategygames.{ GameFamily, P1, P2, Player }
-import strategygames.fairysf.format.Forsyth
+import strategygames.fairysf.format.FEN
 
 case object OctagonFlipello
     extends Variant(
@@ -28,13 +28,37 @@ case object OctagonFlipello
   override def hasAnalysisBoard: Boolean = true
   override def hasFishnet: Boolean       = false
 
-  override protected def recreateApiPositionFromMoves: Boolean = false
+  override def recreateApiPositionFromMoves: Boolean = false
 
   // cache this rather than checking with the API everytime
   override def initialFen =
     format.FEN(
       "10/10/10/10/4pP4/4Pp4/10/10/10/10[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp] w 0 1"
     )
+
+  //have to be able to generate our own FEN rather than rely on API.
+  //Wont necessarily get player colour right when doing fromPosition
+  override def exportBoardFen(board: Board): FEN = {
+    val fen   = new scala.collection.mutable.StringBuilder(100)
+    var empty = 0
+    for (y <- Rank.allReversed) {
+      empty = 0
+      for (x <- File.all) {
+        board(x, y) match {
+          case None        => empty = empty + 1
+          case Some(piece) =>
+            if (empty == 0) fen append piece.forsyth.toString
+            else {
+              fen append (empty.toString + piece.forsyth)
+              empty = 0
+            }
+        }
+      }
+      if (empty > 0) fen append empty
+      if (y > Rank.First) fen append '/'
+    }
+    FEN(s"""${fen.toString}[${"P"*80}${"p"*80}] ${Player.fromTurnCount(board.uciMoves.size).letter} 0 ${board.uciMoves.size+1}""")
+  }
 
   private val invalidSquares: List[Pos] =
     List(Pos.A1, Pos.A2, Pos.A9, Pos.A10, Pos.B1, Pos.B10, Pos.I1, Pos.I10, Pos.J1, Pos.J2, Pos.J9, Pos.J10)
@@ -72,7 +96,11 @@ case object OctagonFlipello
         situationBefore = situation,
         after = situation.board.copy(
           uciMoves = situation.board.uciMoves :+ "j9j9",
-          position = Some(Api.positionFromMoves(fishnetKey, Forsyth.>>(situation).flipPlayer.value))
+          position = Some(Api.positionFromVariantNameAndFEN(
+            fishnetKey,
+            situation.board.apiPosition.fen.flipPlayer.value
+            //Forsyth.>>(situation).flipPlayer.value
+          ))
         ),
         autoEndTurn = true,
         capture = None,
