@@ -109,8 +109,12 @@ trait FairySFTest extends Specification with ValidatedMatchers {
       vg.flatMap { g => g.apply(action).map(_._1) }
     }
 
-  def playActionStrs(actionStrs: List[String], game: Option[Game] = None): Validated[String, Game] = {
-    val g = game.getOrElse(Game.apply(variant.Variant.default))
+  def playActionStrs(
+    actionStrs: List[String],
+    game: Option[Game] = None,
+    variant: Option[Variant] = None
+  ): Validated[String, Game] = {
+    val g = game.getOrElse(Game.apply(variant.getOrElse(Variant.default)))
     playUciList(
       g,
       Uci.readList(g.situation.board.variant.gameFamily, actionStrs.mkString(" ")).getOrElse(List())
