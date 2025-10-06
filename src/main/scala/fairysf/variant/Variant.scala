@@ -54,11 +54,34 @@ abstract class Variant private[variant] (
 
   def exportBoardFen(board: Board): FEN = board.apiPosition.fen
 
+  //def exportSituationFen(situation: Situation): FEN =
+  //  if (recreateApiPositionFromMoves) board.apiPosition.fen
+  //  else board.apiPosition match {
+  //    case Some(position) => position.fen
+  //    case None =>
+  //  board.apiPosition.fen
+
   def startPlayer: Player = P1
 
   val switchPlayerAfterMove: Boolean = true
 
   val kingPiece: Option[Role] = None
+
+  def recreateApiPositionFromMoves: Boolean = true
+
+  def generateNextApiPosition(situation: Situation, uciMove: String): Api.Position =
+    if (recreateApiPositionFromMoves) situation.board.apiPosition.makeMoves(List(uciMove))
+    //hack to skip over Octagon Othello designated skip in replay
+    else if (uciMove == "j9j9")
+      //Api.positionFromVariantNameAndFEN(fishnetKey, Forsyth.>>(situation).flipPlayer.value)
+      Api.positionFromVariantNameAndFEN(fishnetKey, situation.board.apiPosition.fen.flipPlayer.value)
+    else
+      Api.positionFromMoves(
+      situation.board.variant.fishnetKey,
+      situation.board.apiPosition.fen.value,
+      //Forsyth.>>(situation).value,
+      Some(List(uciMove))
+    )
 
   // looks like this is only to allow King to be a valid promotion piece
   // in just atomic, so can leave as true for now
@@ -81,7 +104,7 @@ abstract class Variant private[variant] (
       .map {
         case (Some(orig), Some(dest), promotion) => {
           val uciMove     = s"${orig.key}${dest.key}${promotion}"
-          val newPosition = situation.board.apiPosition.makeMoves(List(uciMove))
+          val newPosition = generateNextApiPosition(situation, uciMove)
           (
             orig,
             Move(
@@ -131,7 +154,7 @@ abstract class Variant private[variant] (
       .map {
         case (Some(role), Some(dest)) => {
           val uciMove     = s"${role.forsyth}@${dest.key}"
-          val newPosition = situation.board.apiPosition.makeMoves(List(uciMove))
+          val newPosition = generateNextApiPosition(situation, uciMove)
           Drop(
             piece = Piece(situation.player, role),
             pos = dest,

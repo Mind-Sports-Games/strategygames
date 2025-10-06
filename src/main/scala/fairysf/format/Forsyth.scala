@@ -130,9 +130,11 @@ object Forsyth {
 
   def >>(game: Game): FEN = exportBoardFen(game.situation.board)
 
-  def exportBoard(board: Board): String = exportBoardFen(board).value
+  def exportBoard(board: Board): String = exportBoardFen(board).boardStr
 
   def exportBoardFen(board: Board): FEN = board.variant.exportBoardFen(board)
+
+  //def exportSituationFen(situation: Situation): FEN = board.variant.exportSituationFen(situation)
 
   def boardAndPlayer(situation: Situation): String =
     boardAndPlayer(situation.board, situation.player)

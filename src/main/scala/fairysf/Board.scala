@@ -50,8 +50,11 @@ case class Board(
   def materialImbalance: Int = variant.materialImbalance(this)
 
   lazy val apiPosition = position match {
-    case Some(position) => position
-    case None           => Api.positionFromVariantAndMoves(variant, uciMoves)
+    case Some(position)                               => position
+    case None if variant.recreateApiPositionFromMoves =>
+      Api.positionFromVariantAndMoves(variant, uciMoves)
+    case None                                         =>
+      Api.positionFromVariantNameAndFEN(variant.fishnetKey, variant.exportBoardFen(this).value)
   }
 
   override def toString = s"$variant Position after ${history.recentTurnUciString}"

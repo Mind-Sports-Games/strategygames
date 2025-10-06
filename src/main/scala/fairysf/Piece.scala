@@ -11,7 +11,7 @@ case class Piece(player: Player, role: Role) {
 
   def oneOf(rs: Set[Role]) = rs(role)
 
-  def forsyth: Char     = if (player == P1) role.forsythUpper else role.forsyth
+  def forsyth: Char     = if (player == P1) role.forsythUpper else role.forsyth.toLower
   override def toString = s"$player-$role".toLowerCase
 }
 
