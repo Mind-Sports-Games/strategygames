@@ -19,6 +19,15 @@ final case class FEN(value: String) extends AnyVal {
       fm * 2 - (if (player.exists(_.p1)) 2 else 1)
     }
 
+  def boardPart(height: Option[Int] = None): String = {
+    val noSGPockets = value.takeWhile(' ' !=).takeWhile('[' !=)
+    height match {
+      //handle fairySFFen where pocket pieces are after a final '/'
+      case Some(height) if !value.contains('[') => noSGPockets.split("/", height+1).init.mkString("/")
+      case _                                    => noSGPockets
+    }
+  }
+
   def initial = value == Forsyth.initial.value
 }
 
