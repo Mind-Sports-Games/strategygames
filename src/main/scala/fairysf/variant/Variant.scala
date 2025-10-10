@@ -258,6 +258,26 @@ abstract class Variant private[variant] (
 
   def isUnmovedPawn(player: Player, pos: Pos) = pos.rank == player.fold(Rank.Second, Rank.Seventh)
 
+  def <<@(
+    fen: FEN,
+    pieceMap: Option[PieceMap] = None,
+    history: Option[History] = None
+  ): Option[Situation] = {
+    val apiPosition = Api.positionFromVariantNameAndFEN(fishnetKey, fen.value)
+    fen.player.map{ player =>
+      Situation(
+        Board(
+          pieces = pieceMap.getOrElse(apiPosition.pieceMap),
+          history = history.getOrElse(History()),
+          variant = this,
+          pocketData = apiPosition.pocketData,
+          position = apiPosition.some
+        ),
+        player
+      )
+    }
+  }
+
   override def toString = s"Variant($name)"
 
   override def equals(that: Any): Boolean = this eq that.asInstanceOf[AnyRef]

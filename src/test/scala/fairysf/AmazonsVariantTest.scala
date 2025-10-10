@@ -156,6 +156,18 @@ class AmazonsVariantTest extends FairySFTest {
       val afterPly4Fen = Forsyth.>>(gamePly4)
       afterPly4Fen.value.toLowerCase() must not contain "½d10f10"
     }
+
+    "Ensure we can load a board editor fen with pocket pieces after a / with a half move that has same orig+dest" in {
+      val fen = FEN("3q2q3/10/10/q8q/10/10/Q8Q/10/10/3Q2Q3/PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppp w - - 0 1 ½a4a4")
+      val sitplus = Forsyth.<<<@(Amazons, fen)
+      sitplus.map(_.situation) must beSome.like {
+        case sit => {
+          sit.dropsAsDrops.size must_== 20
+        }
+      }
+
+    }
+
   }
 
 }
