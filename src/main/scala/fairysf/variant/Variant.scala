@@ -264,7 +264,7 @@ abstract class Variant private[variant] (
     history: Option[History] = None
   ): Option[Situation] = {
     val apiPosition = Api.positionFromVariantNameAndFEN(fishnetKey, fen.value)
-    Some(
+    fen.player.map{ player =>
       Situation(
         Board(
           pieces = pieceMap.getOrElse(apiPosition.pieceMap),
@@ -273,13 +273,9 @@ abstract class Variant private[variant] (
           pocketData = apiPosition.pocketData,
           position = apiPosition.some
         ),
-        fen.value.split(' ')(1) match {
-          case "w" => P1
-          case "b" => P2
-          case _   => sys.error("Invalid player in fen")
-        }
+        player
       )
-    )
+    }
   }
 
   override def toString = s"Variant($name)"

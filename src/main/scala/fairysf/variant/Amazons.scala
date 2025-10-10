@@ -107,50 +107,47 @@ case object Amazons
   ): Option[Situation] = {
     if (fen.value.contains("½")) {
       val fenPieceMap      = makePieceMapFromBoardFen(fen.boardPart(Some(boardSize.height)))
-      val halfMove         = fen.value.dropWhile('½' !=).drop(1)
-      val uciMove          = Uci.Move.apply(gameFamily, halfMove) match {
-        case Some(u) => u
-        case None    => sys.error(s"Invalid ½ move: ${halfMove}")
-      }
-      val validatedUciMove = if (uciMove.orig == uciMove.dest) {
-        val activePlayer = fenPieceMap.get(uciMove.orig) match {
-          case Some(piece) => piece.player
-          case None        => sys.error(s"No piece found for ½ move: ${halfMove}")
+      Uci.Move.apply(gameFamily, fen.value.dropWhile('½' !=).drop(1)).flatMap{ uciMove =>
+        val validatedUciMove = if (uciMove.orig == uciMove.dest) {
+          fenPieceMap.get(uciMove.orig).flatMap { piece =>
+            val apiPosition = Api.positionFromVariantNameAndFEN(fishnetKey, fen.value.takeWhile('½' !=))
+            Situation(
+              Board(
+                pieces = fenPieceMap,
+                history = History(),
+                variant = this,
+                pocketData = apiPosition.pocketData,
+                position = apiPosition.some
+              ),
+              piece.player
+            ).moves.get(uciMove.orig) match {
+              //select random move to this position as a fake move to allow us to create a fairy position
+              case Some(moves) if moves.length > 0 => Some(moves.head.toUci.invert)
+              case _                               => None
+            }
+          }
+        } else Some(uciMove)
+        validatedUciMove.flatMap{ validUciMove =>
+          val previousBoardFen = exportBoardFen(
+            Board(
+              // unapply ½ move
+              pieces = fenPieceMap.get(validUciMove.dest) match {
+                case Some(piece) => fenPieceMap + ((validUciMove.orig, piece)) - validUciMove.dest
+                case None        => fenPieceMap
+              },
+              variant = this
+            )
+          )
+          super.<<@(
+            FEN(
+              (previousBoardFen.value.split(' ').headOption.toList ++ fen.value.split(' ').drop(1))
+                .mkString(" ")
+            ),
+            Some(fenPieceMap),
+            Some(History(currentTurn = List(validUciMove)))
+          )
         }
-        val apiPosition = Api.positionFromVariantNameAndFEN(fishnetKey, fen.value.takeWhile('½' !=))
-        (Situation(
-          Board(
-            pieces = fenPieceMap,
-            history = History(),
-            variant = this,
-            pocketData = apiPosition.pocketData,
-            position = apiPosition.some
-          ),
-          activePlayer
-        ).moves.get(uciMove.orig) match {
-          //select random move to this position as a fake move to allow us to create a fairy position
-          case Some(moves) if moves.length > 0 => moves.head
-          case _                               => sys.error(s"Impossible ½ move: ${halfMove}")
-        }).toUci.invert
-      } else uciMove
-      val previousBoardFen = exportBoardFen(
-        Board(
-          // unapply ½ move
-          pieces = fenPieceMap.get(validatedUciMove.dest) match {
-            case Some(piece) => fenPieceMap + ((validatedUciMove.orig, piece)) - validatedUciMove.dest
-            case None        => fenPieceMap
-          },
-          variant = this
-        )
-      )
-      super.<<@(
-        FEN(
-          (previousBoardFen.value.split(' ').headOption.toList ++ fen.value.split(' ').drop(1))
-            .mkString(" ")
-        ),
-        Some(fenPieceMap),
-        Some(History(currentTurn = List(validatedUciMove)))
-      )
+      }
     } else super.<<@(fen, pieceMap, history)
   }
 
