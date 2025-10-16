@@ -145,4 +145,15 @@ class GrandAbaloneIsometryTest extends AbaloneTest {
       "1Ss3/1SSS3/1S1sSSS1/4s1Ss1/4ssSs2/3s1Ssss2/s1S2s1S2/2s1sS3/3SSSss/6s/5s 2 4 w 8 31 2"
     )
   }
+
+  "2025-10-07 Vincent Frochot vs Alex Borello" in {
+    checkFinalFen(
+      GrandAbalone,
+      List(
+        "j7i4"
+      ),
+      "3Ss1/SSSS3/3ss3/3ssS3/2SsS5/4Ss5/1sSssS4/ssssSSSS1/2SSS1S1/4SS1/3ss1 5 0 b 2 2 2",
+      "3Ss1/3S3/SSSss3/3ssS3/2SsS5/4Ss5/1sSssS4/ssssSSSS1/2SSS1S1/4SS1/3ss1 5 0 b 3 1 1"
+    )
+  }
 }

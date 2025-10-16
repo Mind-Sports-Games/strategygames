@@ -142,11 +142,11 @@ class AbalonePosTest extends AbaloneTest with ValidatedMatchers {
 
     "compute its index based on a shape of square (sort of...) when accessed in 2D" in {
       new Pos(0, 0) must_== Pos.fromIndex(0)
-      new Pos(0, 1) must_== Pos.fromIndex(8)
+      new Pos(0, 1) must_== Pos.fromIndex(9)
 
-      new Pos(1, 1) must_== Pos.fromIndex(9)
+      new Pos(1, 1) must_== Pos.fromIndex(10)
 
-      new Pos(6, 9) must_== Pos.fromIndex(80)
+      new Pos(6, 9) must_== Pos.fromIndex(87)
     }
   }
 

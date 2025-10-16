@@ -36,8 +36,8 @@ object Binary {
 
     def moveUci(b1: Int, b2: Int): String = s"${posKeyFromInt(b1)}${posKeyFromInt(b2)}"
 
-    // The maximal value of the index can go beyond 120 because of the strange order chosen in Piotr, so... 8 bits necessary for orig & dest
-    def posKeyFromInt(b: Int): String = Pos.fromIndex(right(b, 8)).key
+    // The maximal value of the index (cf. Piotr) is 120 < 2^7 (for Grand Abalone): hence 7 bits are enough for a Pos
+    def posKeyFromInt(b: Int): String = Pos.fromIndex(right(b, 7)).key
 
     private def right(i: Int, x: Int): Int = i & lengthMasks(x)
 

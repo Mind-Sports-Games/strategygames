@@ -52,5 +52,35 @@ class AbaloneReplayTest extends AbaloneTest {
         g.situation.board.variant must_== replay.situation.board.variant
       }
     }
+
+    "match play through another game" in {
+      val vectorActionStrs = Vector(
+        Vector("a2a3"),
+        Vector("c5a3"),//c5xa3
+        Vector("a1d4")
+      )
+      playActionStrs(vectorActionStrs.flatten.toList) must beValid.like { g =>
+        val replay = Replay
+          .gameWithUciWhileValid(
+            vectorActionStrs,
+            Abalone.initialFen,
+            Abalone
+          )
+          ._2
+          .reverse
+          .head
+          ._1
+        g.plies must_== replay.plies
+        g.turnCount must_== replay.turnCount
+        g.startedAtPly must_== replay.startedAtPly
+        g.startedAtTurn must_== replay.startedAtTurn
+        g.actionStrs must_== replay.actionStrs
+        g.situation.board.pieces must_== replay.situation.board.pieces
+        g.situation.board.history.lastTurn must_== replay.situation.board.history.lastTurn
+        g.situation.board.history.currentTurn must_== replay.situation.board.history.currentTurn
+        g.situation.board.history.score must_== replay.situation.board.history.score
+        g.situation.board.variant must_== replay.situation.board.variant
+      }
+    }
   }
 }
