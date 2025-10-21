@@ -122,12 +122,11 @@ object Parser {
       }
     }
 
-    import MoveParser.{ fieldR, suffR }
-    val moveRegex = s"""($fieldR)[\\-x:]($fieldR)([x:]($fieldR))*$suffR""".r
+    import MoveParser.moveR
 
     def strMove: Parser[StrMove] = as("move") {
       ((number | commentary) *) ~>
-        (moveRegex ~ nagGlyphs ~ rep(commentary) ~ nagGlyphs ~ rep(variation)) <~
+        (moveR ~ nagGlyphs ~ rep(commentary) ~ nagGlyphs ~ rep(variation)) <~
         (moveExtras *) ^^ { case san ~ glyphs ~ comments ~ glyphs2 ~ variations =>
           StrMove(san.trim(), glyphs merge glyphs2, cleanComments(comments), variations)
         }
@@ -174,20 +173,15 @@ object Parser {
 
   object MoveParser extends RegexParsers with Logging {
 
-    val fieldR                 = """50|[1-4][0-9]|0?[1-9]|[a-h][1-8]"""
-    val suffR                  = """[\?!□⨀]{0,2}"""
-    private val SimpleMoveR    = s"""^($fieldR)(-|x|:)($fieldR)($suffR)$$""".r
-    private val RepeatCaptureR = s"""^($fieldR)[x:]((?:$fieldR)(?:[x:](?:$fieldR))+)($suffR)$$""".r
+    val moveR = s"^${Pos.posR}${Pos.posR}([K]?)".r
 
     def apply(str: String, variant: Variant): Validated[String, San] = str match {
-      case SimpleMoveR(src, sep, dst, suff) =>
-        stdIfValid(variant, List(src, dst), sep != "-", suff)
-      case RepeatCaptureR(src, rest, suff)  =>
-        stdIfValid(variant, src :: rest.split("x|:").toList, true, suff);
+      case moveR(src, dst, prom) =>
+        stdIfValid(variant, List(src, dst), prom)
       case _                                => invalid(s"Cannot parse move: $str")
     }
 
-    @nowarn private def stdIfValid(variant: Variant, fields: List[String], capture: Boolean, suff: String) = {
+    @nowarn private def stdIfValid(variant: Variant, fields: List[String], promotion: String) = {
       invalid(s"stdIfValid not implemented for dameo")
     }
 

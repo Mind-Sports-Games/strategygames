@@ -3,6 +3,7 @@ package format.pdn
 
 import scala.util.Try
 import strategygames.ActionStrs
+import strategygames.dameo.format.Uci
 
 object Binary {
 
@@ -14,16 +15,12 @@ object Binary {
   def readActionStrs(bs: List[Byte])          = Try(Reader actionStrs bs)
   def readActionStrs(bs: List[Byte], nb: Int) = Try(Reader.actionStrs(bs, nb))
 
-  private object MoveType {
-    val IsMove    = 0
-    val IsCapture = 1
-    val Delimiter = 3
+  private object ActionType {
+    val Move = 0
   }
 
-  private object Delimiter {
-    val str = ""
-    val int = 255
-  }
+  private val headerBits = 1
+  private val tailBits = 8 - headerBits
 
   private object Reader {
 
@@ -31,90 +28,65 @@ object Binary {
     private val maxPlies = 1000
 
     def actionStrs(bs: List[Byte]): ActionStrs          = actionStrs(bs, maxPlies)
-    def actionStrs(bs: List[Byte], nb: Int): ActionStrs = toActionStrs(intPlies(bs map toInt, nb, "x00"))
+    def actionStrs(bs: List[Byte], nb: Int): ActionStrs = toActionStrs(intPlies(bs map toInt, nb))
 
     def toActionStrs(plies: List[String]): ActionStrs =
-      if (plies.contains(Delimiter.str)) unflatten(plies)
-      else plies.map(List(_))
+      plies.foldLeft(List.empty[List[String]]) { (acc, ply) =>
+        if (acc.isEmpty) List(List(ply))
+        else {
+          val lastTurn = acc.last
+          (lastTurn.last, ply) match {
+            case (Uci.Move.moveR(_, lastDst, _), Uci.Move.moveR(nextSrc, _, _)) if lastDst == nextSrc =>
+              acc.init :+ (lastTurn :+ ply)
+            case _ =>
+              acc :+ List(ply)
+          }
+        }
+      }
 
-    def unflatten(plies: List[String]): List[List[String]] =
-      if (plies.size == 0) List()
-      else plies.takeWhile(_ != Delimiter.str) :: unflatten(plies.dropWhile(_ != Delimiter.str).drop(1))
-
-    private def intPlies(bs: List[Int], pliesToGo: Int, lastUci: String): List[String] = bs match {
-      case _ if pliesToGo < 0                                     => Nil
-      case Nil                                                    => Nil
-      case b1 :: rest if moveType(b1) == MoveType.Delimiter       =>
-        Delimiter.str :: intPlies(rest, pliesToGo, "x00")
-      case b1 :: b2 :: rest if moveType(b1) == MoveType.IsMove    =>
-        if (pliesToGo == 0)
-          Nil
-        else
-          moveUci(b1, b2) :: intPlies(rest, pliesToGo - 1, "x00")
-      case b1 :: b2 :: rest if moveType(b1) == MoveType.IsCapture =>
-        val newUci = captureUci(b1, b2)
-        if (lastUci.endsWith("x" + newUci.substring(0, newUci.indexOf('x'))))
-          newUci :: intPlies(rest, pliesToGo, newUci)
-        else if (pliesToGo == 0)
-          Nil
-        else
-          newUci :: intPlies(rest, pliesToGo - 1, newUci)
-      case x                                                      => !!(x map showByte mkString ",")
+    private def intPlies(bs: List[Int], pliesToGo: Int): List[String] = bs match {
+      case _ if pliesToGo < 0                                   => Nil
+      case Nil                                                  => Nil
+      case b1 :: b2 :: rest if headerInt(b1) == ActionType.Move =>
+        if (pliesToGo == 0) Nil
+        else moveUci(b1, b2) :: intPlies(rest, pliesToGo - 1)
+      case x                                                    => !!(x map showByte mkString ",")
     }
 
-    // 255 => 11111111 => marker for end of turn. This makes movetype == 3 => Delimiter
-
-    // 2 movetype
-    // 6 srcPos
+    // 1 movetype
+    // 7 srcPos
     // ----
-    // 2 NOTHING
-    // 6 dstPos
-    def moveUci(b1: Int, b2: Int): String    = s"${right(b1, 6)}-${right(b2, 6)}"
-    def captureUci(b1: Int, b2: Int): String = s"${right(b1, 6)}x${right(b2, 6)}"
+    // 1 promotion
+    // 7 dstPos
+    def moveUci(b1: Int, b2: Int): String    = s"${posFromInt(b1)}${posFromInt(b2)}${promotionFromInt(b2)}"
 
-    private def moveType(i: Int) = i >> 6
+    def posFromInt(b: Int): String = Pos(right(b, tailBits)).get.toString()
+    def promotionFromInt(b: Int): String = if (headerInt(b) == 0) "" else "K"
+
+    private def headerInt(i: Int) = i >> tailBits
 
     private def right(i: Int, x: Int): Int = i & lengthMasks(x)
     private val lengthMasks                =
       Map(1 -> 0x01, 2 -> 0x03, 3 -> 0x07, 4 -> 0x0f, 5 -> 0x1f, 6 -> 0x3f, 7 -> 0x7f, 8 -> 0xff)
     private def !!(msg: String)            = throw new Exception("Binary reader failed: " + msg)
 
-    // private def cut(i: Int, from: Int, to: Int): Int = right(i, from) >> to
-    // private def bitAt(i: Int, p: Int): Boolean = cut(i, p, p - 1) != 0
-
   }
 
   private object Writer {
 
     def ply(str: String): List[Byte] = (str match {
-      case Delimiter.str         => List(Delimiter.int)
-      case MoveUciR(src, dst)    => moveUci(src, dst)
-      case CaptureUciR(src, dst) => captureUci(src, dst)
-      case _                     =>
-        // TODO: log?
-        // dameoLog("ERROR: Binary").info(s"Cannot encode $str")
-        Nil
+      case Uci.Move.moveR(src, dst, prom) => moveUci(src, dst, prom)
+      case _                              => sys.error(s"Invalid move to write: ${str}")
     }) map (_.toByte)
 
     def plies(strs: Iterable[String]): Array[Byte] = strs.flatMap(ply).to(Array)
 
-    def actionStrs(strs: ActionStrs): Array[Byte] =
-      if (strs.size == 0 || strs.map(_.size).max == 1) plies(strs.flatten)
-      else plies(strs.toList.map(_.toList :+ "").flatten)
+    def actionStrs(strs: ActionStrs): Array[Byte] = strs.flatten.flatMap(ply).to(Array)
 
-    def moveUci(src: String, dst: String) = List(
-      (MoveType.IsMove << 6) + src.toInt,
-      dst.toInt
+    def moveUci(src: String, dst: String, promotion: String) = List(
+      (ActionType.Move << tailBits) + Pos.fromKey(src).get.index,
+      ((if (promotion.size > 0) 1 else 0) << tailBits) + Pos.fromKey(dst).get.index
     )
-
-    def captureUci(src: String, dst: String) = List(
-      (MoveType.IsCapture << 6) + src.toInt,
-      dst.toInt
-    )
-
-    val fieldR      = "(\\d+)"
-    val MoveUciR    = s"$fieldR-$fieldR$$".r
-    val CaptureUciR = s"${fieldR}x$fieldR$$".r
 
   }
 

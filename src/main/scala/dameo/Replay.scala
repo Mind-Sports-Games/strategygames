@@ -93,7 +93,7 @@ object Replay {
                 case _          => {
                   val uciMove = s"${orig}${dest}"
                   errors += uciMove + ","
-                  sys.error(s"Invalid move for replay: ${uciMove}")
+                  sys.error(s"Invalid actor move for replay: ${uciMove}")
                 }
               }
             }
@@ -107,7 +107,7 @@ object Replay {
         case (orig, dest)             => {
           val uciMove = s"${orig}${dest}"
           errors += uciMove + ","
-          sys.error(s"Invalid move for replay: ${uciMove}")
+          sys.error(s"Invalid uci move for replay: ${uciMove}")
         }
       }
 
