@@ -92,6 +92,9 @@ sealed abstract class Situation(val board: Board, val player: Player) {
   // only implemented for fairysf for Xiangqi
   lazy val perpetualPossible: Boolean = false
 
+  // to display message on game screen for both players
+  lazy val gameMessage: Option[String] = None
+
   def end: Boolean
 
   def winner: Option[Player]
@@ -987,6 +990,8 @@ object Situation {
 
     def isRepetition: Boolean                    = s.isRepetition
     override lazy val perpetualPossible: Boolean = false // not allowed to repeat ko
+
+    override lazy val gameMessage: Option[String] = s.gameMessage
 
     def end: Boolean = s.end
 

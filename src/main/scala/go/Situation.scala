@@ -68,6 +68,11 @@ case class Situation(board: Board, player: Player) {
     board.uciMoves.size > 1 && board.uciMoves
       .takeRight(2) == List("pass", "pass") && board.uciMoves.reverse.takeWhile(_ == "pass").length % 2 == 0
 
+  def isSubsequentPassWarning: Boolean =
+    board.uciMoves.size > 1 && board.uciMoves.takeRight(2) == List("pass", "pass")
+
+  lazy val gameMessage: Option[String] = isSubsequentPassWarning option "subsequentPassWarning"
+
   def withVariant(variant: strategygames.go.variant.Variant) =
     copy(
       board = board withVariant variant

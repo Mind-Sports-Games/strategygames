@@ -20,5 +20,6 @@ case object NoCastling
 
   override def baseVariant: Boolean = true
 
-  override def valid(board: Board, strict: Boolean) = super.valid(board, strict) && board.castles == Castles.none
+  override def valid(board: Board, strict: Boolean) =
+    super.valid(board, strict) && board.castles == Castles.none
 }

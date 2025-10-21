@@ -349,7 +349,7 @@ abstract class Variant private[variant] (
 
   def valid(board: Board, @nowarn strict: Boolean): Boolean =
     board.piecesOf(P1).size >= winningScore - board.history.score.p2 &&
-    board.piecesOf(P2).size >= winningScore - board.history.score.p1
+      board.piecesOf(P2).size >= winningScore - board.history.score.p1
 
   def isIrreversible(move: Move): Boolean = move.capture.nonEmpty
 
