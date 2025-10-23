@@ -1619,4 +1619,8 @@ object Situation {
 
 }
 
-final case class GameMessage(translationString: String)
+sealed abstract class GameMessage(val translationString: String)
+object GameMessage {
+  case object PerpetualWarning      extends GameMessage("perpetualWarning")
+  case object SubsequentPassWarning extends GameMessage("subsequentPassWarning")
+}

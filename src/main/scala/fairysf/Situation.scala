@@ -83,7 +83,7 @@ case class Situation(board: Board, player: Player) {
     board.variant.validMoves(this).values.flatMap(_.map(_.situationAfter.perpetual)).toList.contains(true) ||
       board.variant.validDrops(this).map(_.situationAfter.perpetual).contains(true)
 
-  lazy val gameMessage: Option[GameMessage] = perpetualPossible option GameMessage("perpetualWarning")
+  lazy val gameMessage: Option[GameMessage] = perpetualPossible option GameMessage.PerpetualWarning
 
   def move(from: Pos, to: Pos, promotion: Option[PromotableRole]): Validated[String, Move] =
     board.variant.move(this, from, to, promotion)
