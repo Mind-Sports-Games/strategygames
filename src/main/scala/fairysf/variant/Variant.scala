@@ -280,7 +280,7 @@ object Variant {
     Flipello,
     Flipello10,
     AntiFlipello,
-    //OctagonFlipello,
+    // OctagonFlipello,
     Amazons,
     BreakthroughTroyka,
     MiniBreakthroughTroyka
