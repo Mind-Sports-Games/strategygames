@@ -106,14 +106,27 @@ abstract class Variant private[variant] (
     val previousMoves = situation.board.uciMoves
     // TODO: if "pass" is always legal, then we should use the unchecked version of this method
     val newPosition   = situation.board.apiPosition.makeMovesWithPrevious(List(uciMove), previousMoves)
-    Pass(
-      situationBefore = situation,
-      after = situation.board.copy(
-        uciMoves = situation.board.uciMoves :+ uciMove,
-        position = newPosition.some
-      ),
-      autoEndTurn = true
-    )
+    if (situation.board.uciMoves.takeRight(3) == List("pass", "pass", "pass")) {
+      val finalPosition =
+        situation.board.apiPosition.makeMovesWithPrevious(List(uciMove, "ss:"), previousMoves)
+      return Pass(
+        situationBefore = situation,
+        after = situation.board.copy(
+          uciMoves = situation.board.uciMoves ++ List("pass", "ss:"),
+          position = finalPosition.some
+        ),
+        autoEndTurn = true
+      )
+    } else {
+      return Pass(
+        situationBefore = situation,
+        after = situation.board.copy(
+          uciMoves = situation.board.uciMoves :+ uciMove,
+          position = newPosition.some
+        ),
+        autoEndTurn = true
+      )
+    }
   }
 
   def createSelectSquares(situation: Situation, squares: List[Pos]): SelectSquares = {

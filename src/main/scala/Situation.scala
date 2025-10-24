@@ -89,8 +89,8 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def isRepetition: Boolean
 
-  // only implemented for fairysf for Xiangqi
-  lazy val perpetualPossible: Boolean = false
+  // to display message on game screen for both players
+  lazy val gameMessage: Option[GameMessage] = None
 
   def end: Boolean
 
@@ -528,7 +528,7 @@ object Situation {
 
     def isRepetition: Boolean = s.threefoldRepetition
 
-    override lazy val perpetualPossible: Boolean = s.perpetualPossible
+    override lazy val gameMessage: Option[GameMessage] = s.gameMessage
 
     def end: Boolean = s.end
 
@@ -685,8 +685,6 @@ object Situation {
 
     def isRepetition: Boolean = s.isRepetition
 
-    override lazy val perpetualPossible: Boolean = false
-
     def end: Boolean = s.end
 
     def winner: Option[Player] = s.winner
@@ -837,8 +835,6 @@ object Situation {
     def threefoldRepetition: Boolean = false
     def isRepetition: Boolean        = false
 
-    override lazy val perpetualPossible: Boolean = false
-
     def end: Boolean = s.end
 
     def winner: Option[Player] = s.winner
@@ -985,8 +981,9 @@ object Situation {
 
     def threefoldRepetition: Boolean = false
 
-    def isRepetition: Boolean                    = s.isRepetition
-    override lazy val perpetualPossible: Boolean = false // not allowed to repeat ko
+    def isRepetition: Boolean = s.isRepetition
+
+    override lazy val gameMessage: Option[GameMessage] = s.gameMessage
 
     def end: Boolean = s.end
 
@@ -1144,8 +1141,6 @@ object Situation {
 
     def threefoldRepetition: Boolean = false
     def isRepetition: Boolean        = false
-
-    override lazy val perpetualPossible: Boolean = false
 
     def end: Boolean = s.end
 
@@ -1310,8 +1305,6 @@ object Situation {
     def threefoldRepetition: Boolean = false
     def isRepetition: Boolean        = false
 
-    override lazy val perpetualPossible: Boolean = false
-
     def end: Boolean = s.end
 
     def winner: Option[Player] = s.winner
@@ -1460,8 +1453,6 @@ object Situation {
 
     def threefoldRepetition: Boolean = false
     def isRepetition: Boolean        = false
-
-    override lazy val perpetualPossible: Boolean = false
 
     def end: Boolean = s.end
 
@@ -1626,4 +1617,10 @@ object Situation {
   def wrap(s: abalone.Situation)      = Abalone(s)
   def wrap(s: dameo.Situation)        = Dameo(s)
 
+}
+
+sealed abstract class GameMessage(val translationString: String)
+object GameMessage {
+  case object PerpetualWarning      extends GameMessage("perpetualWarning")
+  case object SubsequentPassWarning extends GameMessage("subsequentPassWarning")
 }

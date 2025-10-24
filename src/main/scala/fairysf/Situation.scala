@@ -1,6 +1,6 @@
 package strategygames.fairysf
 
-import strategygames.{ Player, Status }
+import strategygames.{ GameMessage, Player, Status }
 
 import cats.data.Validated
 import cats.implicits._
@@ -82,6 +82,8 @@ case class Situation(board: Board, player: Player) {
   lazy val perpetualPossible: Boolean =
     board.variant.validMoves(this).values.flatMap(_.map(_.situationAfter.perpetual)).toList.contains(true) ||
       board.variant.validDrops(this).map(_.situationAfter.perpetual).contains(true)
+
+  lazy val gameMessage: Option[GameMessage] = perpetualPossible option GameMessage.PerpetualWarning
 
   def move(from: Pos, to: Pos, promotion: Option[PromotableRole]): Validated[String, Move] =
     board.variant.move(this, from, to, promotion)
