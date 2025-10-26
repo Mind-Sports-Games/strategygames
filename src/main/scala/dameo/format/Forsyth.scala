@@ -15,13 +15,14 @@ import variant.{ Dameo, Variant }
   * Piece role a/b = Active Man or King, the piece performing the forced capture sequence in progress. ":Hx" =
   * Halfmove clock: This is the number of halfmoves since a forced draw material combination appears. This is
   * used to determine if a draw can be claimed. ":Fx" = Fullmove number: The number of the full move. It
-  * starts at 1, and is incremented after P2's move.
+  * starts at 1, and is incremented after P2's move. ":Px" = Plies: it starts at 0 and is incremented with
+  * every action, thus it can be incremented more than once during a full (multi-action) move.
   */
 object Forsyth {
 
   val initial =
     FEN(
-      "W:Wa1,b1,b2,c1,c2,c3,d1,d2,d3,e1,e2,e3,f1,f2,f3,g1,g2,h1:Ba8,b7,b8,c6,c7,c8,d6,d7,d8,e6,e7,e8,f6,f7,f8,g7,g8,h8:H0:F1"
+      "W:Wa1,b1,b2,c1,c2,c3,d1,d2,d3,e1,e2,e3,f1,f2,f3,g1,g2,h1:Ba8,b7,b8,c6,c7,c8,d6,d7,d8,e6,e7,e8,f6,f7,f8,g7,g8,h8:H0:F1:P0"
     )
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
@@ -46,18 +47,19 @@ object Forsyth {
   /* Convert a FEN into a situation using the default variant */
   def <<(fen: FEN): Option[Situation] = <<@(Dameo, fen)
 
-  case class SituationPlus(situation: Situation, fullTurnCount: Int) {
+  case class SituationPlus(situation: Situation, fullTurnCount: Int, plies: Int) {
     def turnCount = fullTurnCount * 2 - (if (situation.player.p1) 2 else 1)
-    def plies     = situation.history.currentTurn.length
   }
 
   def <<<@(variant: Variant, fen: FEN): Option[SituationPlus] =
     /* Convert a FEN + Variant into a SituationPlus */
     <<@(variant, fen) map { sit =>
       val fullMoveNumber = fen.fullMove
+      val plies = fen.plies
       SituationPlus(
         sit,
-        fullMoveNumber | 1
+        fullMoveNumber | 1,
+        plies | 0
       )
     }
 
@@ -69,11 +71,11 @@ object Forsyth {
   def countKings(fen: FEN): Int =
     fen.pieces.values.count(x => x.role == King)
 
-  def >>(situation: Situation): FEN = >>(SituationPlus(situation, 1))
+  def >>(situation: Situation): FEN = >>(SituationPlus(situation, 1, 0))
 
   def >>(parsed: SituationPlus): FEN =
     parsed match {
-      case SituationPlus(situation, _) =>
+      case SituationPlus(situation, _, _) =>
         >>(Game(situation, plies = parsed.plies, turnCount = parsed.turnCount))
     }
 
@@ -82,7 +84,8 @@ object Forsyth {
     val board  = exportBoard(game.situation.board)
     val H      = game.situation.board.history.halfMoveClock
     val F      = game.fullTurnCount
-    FEN(s"${player}:${board}:H${H}:F${F}")
+    val P      = game.plies
+    FEN(s"${player}:${board}:H${H}:F${F}:P${P}")
   }
 
   @nowarn def exportBoard(board: Board): String = {

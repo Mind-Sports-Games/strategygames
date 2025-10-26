@@ -60,11 +60,18 @@ object Forsyth {
     case _                                                 => sys.error("Mismatched gamelogic types 15")
   }
 
-  case class SituationPlus(situation: Situation, fullTurnCount: Int) {
+  case class SituationPlus(situation: Situation, fullTurnCount: Int, plies: Int) {
 
     def turnCount = fullTurnCount * 2 - situation.player.fold(2, 1)
-    def plies     = turnCount
 
+  }
+
+  object SituationPlus {
+    /* Constructor for single-action-per-turn games, where 1 turn is 1 ply */
+    def apply(situation: Situation, fullTurnCount: Int): SituationPlus = {
+      val plies = fullTurnCount * 2 - situation.player.fold(2, 1)
+      new SituationPlus(situation, fullTurnCount, plies)
+    }
   }
 
   def <<<@(lib: GameLogic, variant: Variant, fen: FEN): Option[SituationPlus] =
@@ -104,7 +111,7 @@ object Forsyth {
       case (GameLogic.Dameo(), Variant.Dameo(variant), FEN.Dameo(fen))                      =>
         dameo.format.Forsyth
           .<<<@(variant, fen)
-          .map(sp => SituationPlus(Situation.Dameo(sp.situation), sp.fullTurnCount))
+          .map(sp => SituationPlus(Situation.Dameo(sp.situation), sp.fullTurnCount, sp.plies))
       case _                                                                                => sys.error("Mismatched gamelogic types 16")
     }
 
@@ -144,7 +151,7 @@ object Forsyth {
     case (GameLogic.Dameo(), FEN.Dameo(fen))               =>
       dameo.format.Forsyth
         .<<<(fen)
-        .map(sp => SituationPlus(Situation.Dameo(sp.situation), sp.fullTurnCount))
+        .map(sp => SituationPlus(Situation.Dameo(sp.situation), sp.fullTurnCount, sp.plies))
     case _                                                 => sys.error("Mismatched gamelogic types 17")
   }
 
@@ -202,7 +209,7 @@ object Forsyth {
     case (GameLogic.Dameo(), Situation.Dameo(situation))               =>
       FEN.Dameo(
         dameo.format.Forsyth.>>(
-          dameo.format.Forsyth.SituationPlus(situation, parsed.fullTurnCount)
+          dameo.format.Forsyth.SituationPlus(situation, parsed.fullTurnCount, parsed.plies)
         )
       )
     case _                                                             => sys.error("Mismatched gamelogic types 19")

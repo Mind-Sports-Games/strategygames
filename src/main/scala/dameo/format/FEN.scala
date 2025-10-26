@@ -5,7 +5,7 @@ import strategygames.dameo.{ Piece, PieceMap, Pos, Role }
 /*
 
 Dameo FEN:
-[colour to move]:W[white piece coords]:B[black piece coords]:Halfmoveclock:Fullmoves
+[colour to move]:W[white piece coords]:B[black piece coords]:Halfmoveclock:Fullmoves:Plies
 
 coords for men are a1,b1,c1
 other roles (kings, ghostman, ghostking, activeman, activeking) are prepended to the coord using
@@ -49,6 +49,7 @@ final case class FEN(value: String) extends AnyVal {
 
   def halfMoveClock: Option[Int] = intFromFen(FEN.halfMoveIndex)
   def fullMove: Option[Int]      = intFromFen(FEN.fullMoveIndex)
+  def plies: Option[Int]         = intFromFen(FEN.pliesIndex)
 
   private def parsePiece(player: Player)(pStr: String): Option[(Pos, Piece)] = {
     pStr match {
@@ -66,5 +67,6 @@ object FEN {
 
   def halfMoveIndex: Int = 3
   def fullMoveIndex: Int = 4
+  def pliesIndex: Int    = 5
 
 }
