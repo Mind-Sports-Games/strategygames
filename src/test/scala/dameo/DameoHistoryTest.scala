@@ -9,9 +9,9 @@ class DameoHistoryTest extends DameoTest with ValidatedMatchers {
 
   "history" should {
     "Populate lastTurn and currentTurn correctly" in {
-      val board = Board(variant.Dameo.initialFen.pieces, variant.Dameo)
+      val board     = Board(variant.Dameo.initialFen.pieces, variant.Dameo)
       val situation = Situation(board, P1)
-      var game = Game(situation)
+      var game      = Game(situation)
 
       /* Starting situation */
       game.board.history.lastTurn must_== List()
@@ -40,16 +40,15 @@ class DameoHistoryTest extends DameoTest with ValidatedMatchers {
       game = applyGameMove(game, Pos.G7, Pos.G5)
       game.board.history.lastTurn must_== List(Uci.Move(Pos.G7, Pos.G5))
       game.board.history.currentTurn must_== List()
-      
+
     }
   }
 
   def applyGameMove(game: Game, from: Pos, to: Pos): Game = {
-    val move: Move = (game.apply(from, to) match
-      {
-        case Valid((_, mv: Move)) => Some(mv)
-        case _ => None
-      }).get
-      game.apply(move)
+    val move: Move = (game.apply(from, to) match {
+      case Valid((_, mv: Move)) => Some(mv)
+      case _                    => None
+    }).get
+    game.apply(move)
   }
 }

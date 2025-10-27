@@ -58,7 +58,7 @@ case object ScrambledEggs
 
   override protected def validSide(board: Board, strict: Boolean)(player: Player) =
     board.actorsOf(player).filterNot(_.piece.role == LOAChecker).size == 0 &&
-    board.piecesOf(player).size > 0
+      board.piecesOf(player).size > 0
 
   // copied from Atomic
   private def surroundingPositions(pos: Pos): Set[Pos] =

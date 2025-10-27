@@ -52,9 +52,9 @@ class DameoForsythTest extends DameoTest with ValidatedMatchers {
 
   "fen from situationPlus" should {
     "have the correct clocks" in {
-      val board = Board(variant.Dameo.initialFen.pieces, variant.Dameo)
+      val board     = Board(variant.Dameo.initialFen.pieces, variant.Dameo)
       val situation = Situation(board, P1)
-      var game = Game(situation)
+      var game      = Game(situation)
 
       /* Starting situation */
       game.plies must_== 0
@@ -105,11 +105,10 @@ class DameoForsythTest extends DameoTest with ValidatedMatchers {
   }
 
   def applyGameMove(game: Game, from: Pos, to: Pos): Game = {
-    val move: Move = (game.apply(from, to) match
-      {
-        case Valid((_, mv: Move)) => Some(mv)
-        case _ => None
-      }).get
-      game.apply(move)
+    val move: Move = (game.apply(from, to) match {
+      case Valid((_, mv: Move)) => Some(mv)
+      case _                    => None
+    }).get
+    game.apply(move)
   }
 }

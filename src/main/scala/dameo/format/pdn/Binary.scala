@@ -20,7 +20,7 @@ object Binary {
   }
 
   private val headerBits = 1
-  private val tailBits = 8 - headerBits
+  private val tailBits   = 8 - headerBits
 
   private object Reader {
 
@@ -38,7 +38,7 @@ object Binary {
           (lastTurn.last, ply) match {
             case (Uci.Move.moveR(_, lastDst, _), Uci.Move.moveR(nextSrc, _, _)) if lastDst == nextSrc =>
               acc.init :+ (lastTurn :+ ply)
-            case _ =>
+            case _                                                                                    =>
               acc :+ List(ply)
           }
         }
@@ -58,9 +58,9 @@ object Binary {
     // ----
     // 1 promotion
     // 7 dstPos
-    def moveUci(b1: Int, b2: Int): String    = s"${posFromInt(b1)}${posFromInt(b2)}${promotionFromInt(b2)}"
+    def moveUci(b1: Int, b2: Int): String = s"${posFromInt(b1)}${posFromInt(b2)}${promotionFromInt(b2)}"
 
-    def posFromInt(b: Int): String = Pos(right(b, tailBits)).get.toString()
+    def posFromInt(b: Int): String       = Pos(right(b, tailBits)).get.toString()
     def promotionFromInt(b: Int): String = if (headerInt(b) == 0) "" else "K"
 
     private def headerInt(i: Int) = i >> tailBits

@@ -178,7 +178,7 @@ object Parser {
     def apply(str: String, variant: Variant): Validated[String, San] = str match {
       case moveR(src, dst, prom) =>
         stdIfValid(variant, List(src, dst), prom)
-      case _                                => invalid(s"Cannot parse move: $str")
+      case _                     => invalid(s"Cannot parse move: $str")
     }
 
     @nowarn private def stdIfValid(variant: Variant, fields: List[String], promotion: String) = {
