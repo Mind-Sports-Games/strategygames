@@ -39,6 +39,8 @@ object Uci {
     def promotionString        = lilaPromotionString
     def sgfPromotionString     = promotion.fold("")(_ => "+")
 
+    def invert = copy(orig = dest, dest = orig)
+
     def origDest = Some(orig -> dest)
 
     def apply(situation: Situation) = situation.move(orig, dest, promotion)
