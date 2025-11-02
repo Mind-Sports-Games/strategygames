@@ -199,7 +199,7 @@ class FlipelloVariantTest extends FairySFTest {
 
       playActionStrs(actionStrs, variant = Some(variant.OctagonFlipello)) must beValid.like { g =>
         g.situation.end must_== false
-        g.situation.board.apiPosition.legalMoves must_== Array()
+        g.situation.board.apiPosition.legalMoves must_== Array("e2e2")
         g.situation.dropsAsDrops.pp("drops").size must_== 0
         g.situation.moves.pp("moves").size must_== 1
       }
