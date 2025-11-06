@@ -141,4 +141,69 @@ class FlipelloVariantTest extends FairySFTest {
     }
 
   }
+  "Octagon Flipello variant" should {
+    "offers pass when no moves available" in {
+      //https://playstrategy.dev/VpVK65rI
+      val actionStrs = List(
+        "P@g5",
+        "P@g6",
+        "P@h7",
+        "P@h6",
+        "P@d7",
+        "P@d6",
+        "P@f7",
+        "P@f4",
+        "P@f3",
+        "P@e4",
+        "P@h4",
+        "P@h5",
+        "P@c6",
+        "P@e7",
+        "P@f8",
+        "P@g4",
+        "P@i4",
+        "P@j4",
+        "P@i6",
+        "P@j6",
+        "P@j7",
+        "P@j8",
+        "P@g3",
+        "P@e3",
+        "P@i5",
+        "P@j5",
+        "P@e2",
+        "P@e1",
+        "P@d1",
+        "P@c1",
+        "P@i3",
+        "P@j3",
+        "P@h3",
+        "P@i2",
+        "P@d5",
+        "P@i7",
+        "P@d3",
+        "P@g7",
+        "P@i8",
+        "P@i9",
+        "P@g8",
+        "P@h8",
+        "P@h9",
+        "P@f2",
+        "P@g1",
+        "P@f1",
+        "P@h2",
+        "P@h1",
+        "P@g2",
+        "P@h10"
+      )
+
+      playActionStrs(actionStrs, variant = Some(variant.OctagonFlipello)) must beValid.like { g =>
+        g.situation.end must_== false
+        g.situation.board.apiPosition.legalMoves must_== Array("e2e2")
+        g.situation.dropsAsDrops.pp("drops").size must_== 0
+        g.situation.moves.pp("moves").size must_== 1
+      }
+
+    }
+  }
 }
