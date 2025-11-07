@@ -19,7 +19,7 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
     }
 
     "Have both man and king moves" in {
-      val board      = Board(FEN("W:WKc2,d4:BKf7,g5:H0:F1:P0").pieces, variant.Dameo)
+      val board      = Board(FEN("W:WKc2,d4:BKf7,g5:H0:F1").pieces, variant.Dameo)
       val situation1 = Situation(board, P1)
       val situation2 = Situation(board, P2)
 
@@ -34,7 +34,7 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
     }
 
     "Have only capturing moves when available" in {
-      val board      = Board(FEN("W:Wd4,e1,f1,g1:Bd5,e8,f8,g8:H0:F1:P0").pieces, variant.Dameo)
+      val board      = Board(FEN("W:Wd4,e1,f1,g1:Bd5,e8,f8,g8:H0:F1").pieces, variant.Dameo)
       val situation1 = Situation(board, P1)
       val situation2 = Situation(board, P2)
 
@@ -47,7 +47,7 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
     }
 
     "Have only the maximal capturing sequence" in {
-      val board      = Board(FEN("W:Wc5,d2,d4,e1,f1,g1:Bc4,d5,d7,e8,f8,g8:H0:F1:P0").pieces, variant.Dameo)
+      val board      = Board(FEN("W:Wc5,d2,d4,e1,f1,g1:Bc4,d5,d7,e8,f8,g8:H0:F1").pieces, variant.Dameo)
       val situation1 = Situation(board, P1)
       val situation2 = Situation(board, P2)
 
@@ -60,7 +60,7 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
     }
 
     "Have multiple equally long capturing sequences" in {
-      val board      = Board(FEN("W:Wb6,c5,d2,d4,e1,f1,g1:Bb3,c4,d5,d7,e8,f8,g8:H0:F1:P0").pieces, variant.Dameo)
+      val board      = Board(FEN("W:Wb6,c5,d2,d4,e1,f1,g1:Bb3,c4,d5,d7,e8,f8,g8:H0:F1").pieces, variant.Dameo)
       val situation1 = Situation(board, P1)
       val situation2 = Situation(board, P2)
 
@@ -75,7 +75,7 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
     }
 
     "Have both man and king captures" in {
-      val board      = Board(FEN("W:Wb6,c5,d2,Kd4,e1,f1,g1:Bb3,c4,Kd5,d7,e8,f8,g8:H0:F1:P0").pieces, variant.Dameo)
+      val board      = Board(FEN("W:Wb6,c5,d2,Kd4,e1,f1,g1:Bb3,c4,Kd5,d7,e8,f8,g8:H0:F1").pieces, variant.Dameo)
       val situation1 = Situation(board, P1)
       val situation2 = Situation(board, P2)
 
@@ -90,7 +90,7 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
     }
 
     "Finish the capture sequence that was started" in {
-      val board     = Board(FEN("W:Wc1,e1,g1:Bc2,c4,c6,e2,e4,e6,g2,g4,g6:H0:F1:P0").pieces, variant.Dameo)
+      val board     = Board(FEN("W:Wc1,e1,g1:Bc2,c4,c6,e2,e4,e6,g2,g4,g6:H0:F1").pieces, variant.Dameo)
       val situation = Situation(board, P1)
 
       val moves1 = board.variant.validMoves(situation)
@@ -109,11 +109,11 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
       val finalsit = moves3(Pos.C5)(0).situationAfter
 
       finalsit.player must_== P2
-      finalsit.board.pieces must_== FEN("B:Wc7,e1,g1:Be2,e4,e6,g2,g4,g6:H0:F1:P0").pieces
+      finalsit.board.pieces must_== FEN("B:Wc7,e1,g1:Be2,e4,e6,g2,g4,g6:H0:F1").pieces
     }
 
     "Trigger game end and P1 win" in {
-      val board      = Board(FEN("W:Wc4,e4,g4:Bc5:H0:F1:P0").pieces, variant.Dameo)
+      val board      = Board(FEN("W:Wc4,e4,g4:Bc5:H0:F1").pieces, variant.Dameo)
       val situation  = Situation(board, P1)
       val moves      = board.variant.validMoves(situation)
       moves.size must_== 1
@@ -125,7 +125,7 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
     }
 
     "Trigger game end and P2 win" in {
-      val board      = Board(FEN("W:Wc4:Bc5,e5,g5:H0:F1:P0").pieces, variant.Dameo)
+      val board      = Board(FEN("W:Wc4:Bc5,e5,g5:H0:F1").pieces, variant.Dameo)
       val situation  = Situation(board, P2)
       val moves      = board.variant.validMoves(situation)
       moves.size must_== 1
@@ -137,7 +137,7 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
     }
 
     "Win by blocking" in {
-      val board      = Board(FEN("W:Wa1,a3,a4,b1,c5:Ba2:H0:F1:P0").pieces, variant.Dameo)
+      val board      = Board(FEN("W:Wa1,a3,a4,b1,c5:Ba2:H0:F1").pieces, variant.Dameo)
       val situation  = Situation(board, P1)
       val moves      = board.variant.validMoves(situation)
       val situation2 = moves(Pos.C5)(0).situationAfter
@@ -149,7 +149,7 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
 
     "Trigger draw in king vs king endgame" in {
       // Each player gets 2 more turns
-      val board       = Board(FEN("W:WKb3:BKe8:H0:F1:P0").pieces, variant.Dameo)
+      val board       = Board(FEN("W:WKb3:BKe8:H0:F1").pieces, variant.Dameo)
       val situation   = Situation(board, P1)
       val situation1a = board.variant.validMoves(situation)(Pos.B3).find(_.dest == Pos.B5).get.situationAfter
       val situation1b =
@@ -173,7 +173,7 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
     }
 
     "Trigger draw by threefold repetition" in {
-      val board       = Board(FEN("W:WKb4,Kb5:BKe7,f8:H0:F1:P0").pieces, variant.Dameo)
+      val board       = Board(FEN("W:WKb4,Kb5:BKe7,f8:H0:F1").pieces, variant.Dameo)
       val situation   = Situation(board, P1)
       val situation0a = board.variant.validMoves(situation)(Pos.B4).find(_.dest == Pos.B3).get.situationAfter
       val situation0b =

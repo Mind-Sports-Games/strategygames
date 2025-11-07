@@ -95,7 +95,7 @@ class DameoFenTest extends DameoTest with ValidatedMatchers {
 
   "FEN" should {
     "parse kings correctly" in {
-      val rolesFen = FEN("W:Wa5,Ka7,c3,Kc4:BKa8,Ke8,f6:H0:F1:P0")
+      val rolesFen = FEN("W:Wa5,Ka7,c3,Kc4:BKa8,Ke8,f6:H0:F1")
       val pieces   = rolesFen.pieces
       pieces.get(Pos.A5) must_== Some(Piece(P1, Man))
       pieces.get(Pos.C3) must_== Some(Piece(P1, Man))
@@ -109,7 +109,7 @@ class DameoFenTest extends DameoTest with ValidatedMatchers {
 
     "parse ghosts correctly" in {
       // If it's white's move then there can be only black ghosts
-      val rolesFen = FEN("W:Wa5,c4:BGa8,Pe8,f6:H0:F1:P0")
+      val rolesFen = FEN("W:Wa5,c4:BGa8,Pe8,f6:H0:F1")
       val pieces   = rolesFen.pieces
       pieces.get(Pos.A5) must_== Some(Piece(P1, Man))
       pieces.get(Pos.C4) must_== Some(Piece(P1, Man))
@@ -121,22 +121,22 @@ class DameoFenTest extends DameoTest with ValidatedMatchers {
 
     "parse active pieces correctly" in {
       // There will be only one active piece at a time
-      FEN("W:Wa5,Ac4:BGa8,Pe8,f6:H0:F1:P0").pieces.get(Pos.C4) must_== Some(Piece(P1, ActiveMan))
-      FEN("W:Wa5,c4:BAa8,Pe8,f6:H0:F1:P0").pieces.get(Pos.A8) must_== Some(Piece(P2, ActiveMan))
-      FEN("W:Wa5,Bc4:BGa8,Pe8,f6:H0:F1:P0").pieces.get(Pos.C4) must_== Some(Piece(P1, ActiveKing))
-      FEN("W:Wa5,c4:BBa8,Pe8,f6:H0:F1:P0").pieces.get(Pos.A8) must_== Some(Piece(P2, ActiveKing))
+      FEN("W:Wa5,Ac4:BGa8,Pe8,f6:H0:F1").pieces.get(Pos.C4) must_== Some(Piece(P1, ActiveMan))
+      FEN("W:Wa5,c4:BAa8,Pe8,f6:H0:F1").pieces.get(Pos.A8) must_== Some(Piece(P2, ActiveMan))
+      FEN("W:Wa5,Bc4:BGa8,Pe8,f6:H0:F1").pieces.get(Pos.C4) must_== Some(Piece(P1, ActiveKing))
+      FEN("W:Wa5,c4:BBa8,Pe8,f6:H0:F1").pieces.get(Pos.A8) must_== Some(Piece(P2, ActiveKing))
     }
 
     "parse empty boards" in {
-      FEN("W:Wa5:Ba8:H0:F1:P0").pieces must_== Map(Pos.A5 -> Piece(P1, Man), Pos.A8 -> Piece(P2, Man))
-      FEN("W:Wa5:B:H0:F1:P0").pieces must_== Map(Pos.A5 -> Piece(P1, Man))
-      FEN("W:W:Ba8:H0:F1:P0").pieces must_== Map(Pos.A8 -> Piece(P2, Man))
-      FEN("W:W:B:H0:F1:P0").pieces must_== Map()
+      FEN("W:Wa5:Ba8:H0:F1").pieces must_== Map(Pos.A5 -> Piece(P1, Man), Pos.A8 -> Piece(P2, Man))
+      FEN("W:Wa5:B:H0:F1").pieces must_== Map(Pos.A5 -> Piece(P1, Man))
+      FEN("W:W:Ba8:H0:F1").pieces must_== Map(Pos.A8 -> Piece(P2, Man))
+      FEN("W:W:B:H0:F1").pieces must_== Map()
     }
   }
 
   "Game just finished having" should {
-    val fen       = FEN("W:WKb4:B:H0:F1:P0")
+    val fen       = FEN("W:WKb4:B:H0:F1")
     val pieces    = fen.pieces
     val board     = Board(
       pieces,
@@ -155,7 +155,7 @@ class DameoFenTest extends DameoTest with ValidatedMatchers {
 
   "Game having a player unable to move" should {
     val board     = Board(
-      format.FEN("W:Wa1,a3,a4,b1,c5:Ba2:H0:F1:P0").pieces,
+      format.FEN("W:Wa1,a3,a4,b1,c5:Ba2:H0:F1").pieces,
       History(
       ),
       variant.Dameo

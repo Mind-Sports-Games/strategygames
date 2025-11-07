@@ -3,7 +3,6 @@ package strategygames.dameo
 import org.specs2.matcher.ValidatedMatchers
 
 import format.{ FEN, Forsyth }
-import cats.data.Validated.Valid
 
 class DameoForsythTest extends DameoTest with ValidatedMatchers {
 
@@ -30,11 +29,13 @@ class DameoForsythTest extends DameoTest with ValidatedMatchers {
       val board = Board(fenFromVariant.pieces, variant.Dameo)
       situationPlusFromFen.get.situation.board.pieces must_== board.pieces
       situationPlusFromFen.get.situation.player must_== P1
+
+      /* TODO check fullturncount, turncount and plies after some moves*/
     }
   }
 
   "fen with ghosts and kings" should {
-    val fen = FEN("W:WKa5,Kb2,c4:BGa8,Pe8,f6,Kf7:H0:F1:P0")
+    val fen = FEN("W:WKa5,Kb2,c4:BGa8,Pe8,f6,Kf7:H0:F1")
 
     "count the ghosts" in {
       Forsyth.countGhosts(fen) must_== 2
