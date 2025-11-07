@@ -424,4 +424,33 @@ class GoSituationTest extends Specification with ValidatedMatchers {
 
   }
 
+  "playing a game with pass doesn't trigger repetition" should {
+    val g9   = variant.Go9x9
+    val game = Game(g9)
+
+    val game_p1  = game.apply(g9.validDrops(game.situation).filter(_.pos.key == "i9").head)
+    val game_p2  = game_p1.apply(g9.validDrops(game_p1.situation).filter(_.pos.key == "i8").head)
+    val game_p3  = game_p2.apply(g9.validDrops(game_p2.situation).filter(_.pos.key == "h9").head)
+    val game_p4  = game_p3.apply(g9.validDrops(game_p3.situation).filter(_.pos.key == "h8").head)
+    val game_p5  = game_p4.apply(g9.validDrops(game_p4.situation).filter(_.pos.key == "g8").head)
+    val game_p6  = game_p5.apply(g9.validDrops(game_p5.situation).filter(_.pos.key == "i7").head)
+    val game_p7  = game_p6.apply(g9.validDrops(game_p6.situation).filter(_.pos.key == "f9").head)
+    val game_p8  = game_p7.apply(g9.validDrops(game_p7.situation).filter(_.pos.key == "g9").head)
+    val game_p9  = game_p8.apply(g9.validDrops(game_p8.situation).filter(_.pos.key == "h9").head)
+    val game_p10 = game_p9.apply(g9.validDrops(game_p9.situation).filter(_.pos.key == "i6").head)
+    val game_p11 = game_p10.apply(g9.validDrops(game_p10.situation).filter(_.pos.key == "i9").head)
+    val game_p12 = game_p11.apply(g9.validDrops(game_p11.situation).filter(_.pos.key == "g9").head)
+    val game_p13 = game_p12.apply(g9.validDrops(game_p12.situation).filter(_.pos.key == "h9").head)
+    val game_p14 = game_p13.apply(g9.validPass(game_p13.situation))
+
+    "situation should not end" in {
+      game_p14.situation.end must_== false
+    }
+
+    "situation should not be repetition yet" in {
+      game_p14.situation.isRepetition must_== false
+    }
+
+  }
+
 }
