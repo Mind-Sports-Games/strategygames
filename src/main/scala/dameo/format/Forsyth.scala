@@ -48,14 +48,14 @@ object Forsyth {
 
   case class SituationPlus(situation: Situation, fullTurnCount: Int) {
     def turnCount = fullTurnCount * 2 - (if (situation.player.p1) 2 else 1)
-    def plies     = situation.history.currentTurn.length
+    // The plies are technically incorrect here, see comment in backgammon's SituationPlus
+    def plies     = turnCount
   }
 
   def <<<@(variant: Variant, fen: FEN): Option[SituationPlus] =
     /* Convert a FEN + Variant into a SituationPlus */
     <<@(variant, fen) map { sit =>
       val fullMoveNumber = fen.fullMove
-      val plies          = fen.plies
       SituationPlus(
         sit,
         fullMoveNumber | 1

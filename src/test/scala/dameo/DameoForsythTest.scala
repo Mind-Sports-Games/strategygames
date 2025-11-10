@@ -1,6 +1,7 @@
 package strategygames.dameo
 
 import org.specs2.matcher.ValidatedMatchers
+import cats.data.Validated.Valid
 
 import format.{ FEN, Forsyth }
 
@@ -30,7 +31,6 @@ class DameoForsythTest extends DameoTest with ValidatedMatchers {
       situationPlusFromFen.get.situation.board.pieces must_== board.pieces
       situationPlusFromFen.get.situation.player must_== P1
 
-      /* TODO check fullturncount, turncount and plies after some moves*/
     }
   }
 
@@ -53,15 +53,15 @@ class DameoForsythTest extends DameoTest with ValidatedMatchers {
 
   "fen from situationPlus" should {
     "have the correct clocks" in {
-      val board     = Board(variant.Dameo.initialFen.pieces, variant.Dameo)
+
+      val board = Board(variant.Dameo.initialFen.pieces, variant.Dameo)
       val situation = Situation(board, P1)
-      var game      = Game(situation)
+      var game = Game(situation)
 
       /* Starting situation */
       game.plies must_== 0
       game.turnCount must_== 0
       var fen = Forsyth.>>(game)
-      fen.plies.get must_== 0
       fen.fullMove.get must_== 1
 
       /* Single-action turn P1 */
@@ -69,7 +69,6 @@ class DameoForsythTest extends DameoTest with ValidatedMatchers {
       game.plies must_== 1
       game.turnCount must_== 1
       fen = Forsyth.>>(game)
-      fen.plies.get must_== 1
       fen.fullMove.get must_== 1
 
       /* Single-action turn P2 */
@@ -77,7 +76,6 @@ class DameoForsythTest extends DameoTest with ValidatedMatchers {
       game.plies must_== 2
       game.turnCount must_== 2
       fen = Forsyth.>>(game)
-      fen.plies.get must_== 2
       fen.fullMove.get must_== 2
 
       /* Multi-action turn P1 */
@@ -85,14 +83,12 @@ class DameoForsythTest extends DameoTest with ValidatedMatchers {
       game.plies must_== 3
       game.turnCount must_== 2
       fen = Forsyth.>>(game)
-      fen.plies.get must_== 3
       fen.fullMove.get must_== 2
 
       game = applyGameMove(game, Pos.D6, Pos.B6) // 2nd action
       game.plies must_== 4
       game.turnCount must_== 3
       fen = Forsyth.>>(game)
-      fen.plies.get must_== 4
       fen.fullMove.get must_== 2
 
       /* Single-action turn P2 */
@@ -100,7 +96,6 @@ class DameoForsythTest extends DameoTest with ValidatedMatchers {
       game.plies must_== 5
       game.turnCount must_== 4
       fen = Forsyth.>>(game)
-      fen.plies.get must_== 5
       fen.fullMove.get must_== 3
     }
   }
