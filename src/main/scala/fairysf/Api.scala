@@ -333,6 +333,10 @@ startFen = 8/8/8/3pP3/3Pp3/8/8/8[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP
 extinctionValue = win
 [ps-octagonflipello:ps-flipello10]
 startFen = 10/10/10/10/4pP4/4Pp4/10/10/10/10[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp] w 0 1
+dropRegionWhite = c1 d1 e1 f1 g1 h1 b2 c2 d2 e2 f2 g2 h2 i2 *3 *4 *5 *6 *7 *8 b9 c9 d9 e9 f9 g9 h9 i9 c10 d10 e10 f10 g10 h10
+dropRegionBlack = c1 d1 e1 f1 g1 h1 b2 c2 d2 e2 f2 g2 h2 i2 *3 *4 *5 *6 *7 *8 b9 c9 d9 e9 f9 g9 h9 i9 c10 d10 e10 f10 g10 h10
+whiteDropRegion = c1 d1 e1 f1 g1 h1 b2 c2 d2 e2 f2 g2 h2 i2 *3 *4 *5 *6 *7 *8 b9 c9 d9 e9 f9 g9 h9 i9 c10 d10 e10 f10 g10 h10
+blackDropRegion = c1 d1 e1 f1 g1 h1 b2 c2 d2 e2 f2 g2 h2 i2 *3 *4 *5 *6 *7 *8 b9 c9 d9 e9 f9 g9 h9 i9 c10 d10 e10 f10 g10 h10
 [ps-minibreakthrough:breakthrough]
 maxFile = 5
 maxRank = 5
