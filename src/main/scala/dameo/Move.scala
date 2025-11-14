@@ -40,7 +40,8 @@ case class Move(
     }
     newBoard.updateHistory { h =>
       h.copy(
-        currentTurn = h.currentTurn :+ toUci,
+        lastTurn = if (autoEndTurn) h.currentTurn :+ toUci else h.lastTurn,
+        currentTurn = if (autoEndTurn) List() else h.currentTurn :+ toUci,
         halfMoveClock = h.halfMoveClock + (if (autoEndTurn && newBoard.kingVsKing()) 1 else 0),
         positionHashes =
           if (autoEndTurn) newBoard.variant.updatePositionHashes(newBoard, this, h.positionHashes)

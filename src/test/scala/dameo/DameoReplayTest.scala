@@ -93,7 +93,7 @@ class DameoReplayTest extends DameoTest with ValidatedMatchers {
         d6d5
         d4d6
       the current turn should be W, and the turnCount should be 2.
-      */
+       */
       val vectorActionStrs = Vector(
         Vector("d3d4"),
         Vector("d6d5"),

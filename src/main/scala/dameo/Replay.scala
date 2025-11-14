@@ -83,7 +83,7 @@ object Replay {
         case (Some(orig), Some(dest)) => {
           state.situation.board.move(orig, dest) match {
             case Some(_) => {
-              val actor = state.situation.board.actors(orig)
+              val actor      = state.situation.board.actors(orig)
               val actorMoves = actor.captures ++ actor.noncaptures
               actorMoves.find(_.dest == dest) match {
                 case Some(move) => {
@@ -97,7 +97,7 @@ object Replay {
                 }
               }
             }
-            case _                => {
+            case _       => {
               val uciMove = s"${orig}${dest}"
               errors += uciMove + ","
               sys.error(s"Invalid move for replay: ${uciMove}")
@@ -121,7 +121,7 @@ object Replay {
                   Pos.fromKey(orig),
                   Pos.fromKey(dest)
                 )
-              case (action: String)                      =>
+              case (action: String)              =>
                 sys.error(s"Invalid action for replay: $action")
             }
           }

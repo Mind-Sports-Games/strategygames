@@ -100,7 +100,7 @@ abstract class Variant private[variant] (
 
   def materialImbalance(@nowarn board: Board): Int = 0
 
-  def valid(@nowarn board: Board, @nowarn strict: Boolean): Boolean = false
+  def valid(@nowarn board: Board, @nowarn strict: Boolean): Boolean = true
 
   val roles: List[Role] = Role.all
 

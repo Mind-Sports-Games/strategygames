@@ -16,13 +16,12 @@ final case class Actor(
   def getCaptures()                               = captures
   lazy val captureLength: Int                     = capturesWithLineval._2
 
-
   private def noncaptureMoves(): List[Move] = {
     def dy: Int        = if (player == P1) 1 else -1
     def dxs: List[Int] = List(-1, 0, 1)
 
     def posits: List[Pos] = piece.role match {
-      case Man | ActiveMan =>
+      case Man | ActiveMan   =>
         dxs
           .flatMap(dx => linearStep(Some(pos), dx, dy))
           .filter(board.withinBounds)
@@ -43,7 +42,7 @@ final case class Actor(
             )
           )
           .flatten
-      case _    => List()
+      case _                 => List()
     }
 
     posits.flatMap(dest =>
