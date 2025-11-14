@@ -328,6 +328,15 @@ maxRank = 10
 maxFile = 10
 startFen = 10/10/10/10/4pP4/4Pp4/10/10/10/10[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp] w 0 1
 enclosingDropStart = e5 f5 e6 f6
+[ps-antiflipello:ps-flipello]
+startFen = 8/8/8/3pP3/3Pp3/8/8/8[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp] w 0 1
+extinctionValue = win
+[ps-octagonflipello:ps-flipello10]
+startFen = 10/10/10/10/4pP4/4Pp4/10/10/10/10[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp] w 0 1
+dropRegionWhite = c1 d1 e1 f1 g1 h1 b2 c2 d2 e2 f2 g2 h2 i2 *3 *4 *5 *6 *7 *8 b9 c9 d9 e9 f9 g9 h9 i9 c10 d10 e10 f10 g10 h10
+dropRegionBlack = c1 d1 e1 f1 g1 h1 b2 c2 d2 e2 f2 g2 h2 i2 *3 *4 *5 *6 *7 *8 b9 c9 d9 e9 f9 g9 h9 i9 c10 d10 e10 f10 g10 h10
+whiteDropRegion = c1 d1 e1 f1 g1 h1 b2 c2 d2 e2 f2 g2 h2 i2 *3 *4 *5 *6 *7 *8 b9 c9 d9 e9 f9 g9 h9 i9 c10 d10 e10 f10 g10 h10
+blackDropRegion = c1 d1 e1 f1 g1 h1 b2 c2 d2 e2 f2 g2 h2 i2 *3 *4 *5 *6 *7 *8 b9 c9 d9 e9 f9 g9 h9 i9 c10 d10 e10 f10 g10 h10
 [ps-minibreakthrough:breakthrough]
 maxFile = 5
 maxRank = 5
@@ -339,4 +348,9 @@ nFoldRule = 4
 [ps-minixiangqi:minixiangqi]
 nFoldRule = 4
   """
+//Octagon Flipello attempts:
+//dropRegionWhite = c1 d1 e1 f1 g1 h1 b2 c2 d2 e2 f2 g2 h2 i2 *3 *4 *5 *6 *7 *8 b9 c9 d9 e9 f9 g9 h9 i9 c10 d10 e10 f10 g10 h10
+//dropRegionBlack = c1 d1 e1 f1 g1 h1 b2 c2 d2 e2 f2 g2 h2 i2 *3 *4 *5 *6 *7 *8 b9 c9 d9 e9 f9 g9 h9 i9 c10 d10 e10 f10 g10 h10
+//dropRegionWhite = a3 b3 c3 d3 e3 f3 g3 h3 i3 j3 a4 b4 c4 d4 e4 f4 g4 h4 i4 j4 a5 b5 c5 d5 g5 h5 i5 j5 a6 b6 c6 d6 g6 h6 i6 j6 a7 b7 c7 d7 e7 f7 g7 h7 i7 j7 a8 b8 c8 d8 e8 f8 g8 h8 i8 j8 b2 c1 c2 d1 d2 e1 e2 f1 f2 g1 g2 h1 h2 i2 b9 c9 c10 d9 d10 e9 e10 f9 f10 g9 g10 h9 h10 i9
+//dropRegionBlack = a3 b3 c3 d3 e3 f3 g3 h3 i3 j3 a4 b4 c4 d4 e4 f4 g4 h4 i4 j4 a5 b5 c5 d5 g5 h5 i5 j5 a6 b6 c6 d6 g6 h6 i6 j6 a7 b7 c7 d7 e7 f7 g7 h7 i7 j7 a8 b8 c8 d8 e8 f8 g8 h8 i8 j8 b2 c1 c2 d1 d2 e1 e2 f1 f2 g1 g2 h1 h2 i2 b9 c9 c10 d9 d10 e9 e10 f9 f10 g9 g10 h9 h10 i9
 }

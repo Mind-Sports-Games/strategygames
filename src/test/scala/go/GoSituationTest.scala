@@ -260,25 +260,31 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     val pass_3      = variant.Go19x19.validPass(game_ply_9.situation)
     val game_ply_10 = game_ply_9.apply(pass_3)
 
-    val pass_4      = variant.Go19x19.validPass(game_ply_10.situation)
-    val game_ply_11 = game_ply_10.apply(pass_4)
+    val drops_ply_11 = variant.Go19x19.validDrops(game_ply_10.situation)
+    val game_ply_11  = game_ply_10.apply(drops_ply_11(1))
+
+    val pass_4      = variant.Go19x19.validPass(game_ply_11.situation)
+    val game_ply_12 = game_ply_11.apply(pass_4)
+
+    val pass_5      = variant.Go19x19.validPass(game_ply_12.situation)
+    val game_ply_13 = game_ply_12.apply(pass_5)
 
     val squares: List[Pos] = List(Pos.B1, Pos.D1)
-    val ss                 = variant.Go19x19.createSelectSquares(game_ply_11.situation, squares)
-    val game_ply_12        = game_ply_11.apply(ss)
+    val ss                 = variant.Go19x19.createSelectSquares(game_ply_13.situation, squares)
+    val game_ply_14        = game_ply_13.apply(ss)
 
     "not be gameEnd after just two passes (both cases)" in {
       game_ply_9.situation.end must_== false
       game_ply_9.situation.board.apiPosition.pieceMap.size must_== 7
       game_ply_9.situation.board.apiPosition.fen.value must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1SsSsSsS11[SSSSSSSSSSssssssssss] w - 40 105 0 0 75 0 5"
-      game_ply_11.situation.end must_== false
-      game_ply_11.situation.board.apiPosition.pieceMap.size must_== 7
+      game_ply_13.situation.end must_== false
+      game_ply_13.situation.board.apiPosition.pieceMap.size must_== 8
     }
 
     "be gameEnd after final ss action" in {
-      game_ply_12.situation.end must_== true
-      game_ply_12.situation.board.apiPosition.pieceMap.size must_== 5
-      game_ply_12.situation.board.apiPosition.fen.value must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/2s1sSsS11[SSSSSSSSSSssssssssss] w - 20 105 0 0 75 0 7"
+      game_ply_14.situation.end must_== true
+      game_ply_14.situation.board.apiPosition.pieceMap.size must_== 6
+      game_ply_14.situation.board.apiPosition.fen.value must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/2s1sSsSS10[SSSSSSSSSSssssssssss] w - 30 105 0 0 75 0 8"
     }
 
     "not have a ss action after single pass" in {
@@ -288,7 +294,7 @@ class GoSituationTest extends Specification with ValidatedMatchers {
 
     "have a ss action after double pass" in {
       game_ply_9.situation.canSelectSquares must_== true
-      game_ply_11.situation.canSelectSquares must_== true
+      game_ply_13.situation.canSelectSquares must_== true
     }
   }
 
@@ -369,6 +375,80 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     "number of drops for ply 16 should be 71 (ko not activated)" in {
       drops_ply_16.size must_== 71
       drops_ply_16.filter(_.pos.key == "e8").size must_== 1
+    }
+
+  }
+
+  "playing a game with 4 consequtive passes should force 0 dead stones and end game" should {
+    val g9   = variant.Go9x9
+    val game = Game(g9)
+
+    val game_p1 = game.apply(g9.validDrops(game.situation).filter(_.pos.key == "e5").head)
+    val game_p2 = game_p1.apply(g9.validPass(game_p1.situation))
+    val game_p3 = game_p2.apply(g9.validPass(game_p2.situation)) // disagree on dead stones here
+    val game_p4 = game_p3.apply(g9.validPass(game_p3.situation))
+    val game_p5 = game_p4.apply(g9.validPass(game_p4.situation))
+    // this will now force end of game with 0 dead stones.
+
+    "situation should give pass warning after two passes" in {
+      game_p3.situation.isSubsequentPassWarning must_== true
+      game_p4.situation.isSubsequentPassWarning must_== true
+      game_p5.situation.isSubsequentPassWarning must_== false // as ss: is last action
+    }
+
+    "end the game after 4 passes" in {
+      game_p5.situation.end must_== true
+    }
+
+  }
+
+  "playing a game with 4 passes split by playing a stone should not be end game" should {
+    val g9   = variant.Go9x9
+    val game = Game(g9)
+
+    val game_p1 = game.apply(g9.validDrops(game.situation).filter(_.pos.key == "e5").head)
+    val game_p2 = game_p1.apply(g9.validPass(game_p1.situation))
+    val game_p3 = game_p2.apply(g9.validPass(game_p2.situation)) // disagree on dead stones here
+    val game_p4 = game_p3.apply(g9.validDrops(game_p3.situation).filter(_.pos.key == "d5").head)
+    val game_p5 = game_p4.apply(g9.validPass(game_p4.situation))
+    val game_p6 = game_p5.apply(g9.validPass(game_p5.situation))
+
+    "situation should give pass warning after two passes" in {
+      game_p3.situation.isSubsequentPassWarning must_== true
+      game_p6.situation.isSubsequentPassWarning must_== true
+    }
+
+    "end the game after 4 passes" in {
+      game_p6.situation.end must_== false
+    }
+
+  }
+
+  "playing a game with pass doesn't trigger repetition" should {
+    val g9   = variant.Go9x9
+    val game = Game(g9)
+
+    val game_p1  = game.apply(g9.validDrops(game.situation).filter(_.pos.key == "i9").head)
+    val game_p2  = game_p1.apply(g9.validDrops(game_p1.situation).filter(_.pos.key == "i8").head)
+    val game_p3  = game_p2.apply(g9.validDrops(game_p2.situation).filter(_.pos.key == "h9").head)
+    val game_p4  = game_p3.apply(g9.validDrops(game_p3.situation).filter(_.pos.key == "h8").head)
+    val game_p5  = game_p4.apply(g9.validDrops(game_p4.situation).filter(_.pos.key == "g8").head)
+    val game_p6  = game_p5.apply(g9.validDrops(game_p5.situation).filter(_.pos.key == "i7").head)
+    val game_p7  = game_p6.apply(g9.validDrops(game_p6.situation).filter(_.pos.key == "f9").head)
+    val game_p8  = game_p7.apply(g9.validDrops(game_p7.situation).filter(_.pos.key == "g9").head)
+    val game_p9  = game_p8.apply(g9.validDrops(game_p8.situation).filter(_.pos.key == "h9").head)
+    val game_p10 = game_p9.apply(g9.validDrops(game_p9.situation).filter(_.pos.key == "i6").head)
+    val game_p11 = game_p10.apply(g9.validDrops(game_p10.situation).filter(_.pos.key == "i9").head)
+    val game_p12 = game_p11.apply(g9.validDrops(game_p11.situation).filter(_.pos.key == "g9").head)
+    val game_p13 = game_p12.apply(g9.validDrops(game_p12.situation).filter(_.pos.key == "h9").head)
+    val game_p14 = game_p13.apply(g9.validPass(game_p13.situation))
+
+    "situation should not end" in {
+      game_p14.situation.end must_== false
+    }
+
+    "situation should not be repetition yet" in {
+      game_p14.situation.isRepetition must_== false
     }
 
   }

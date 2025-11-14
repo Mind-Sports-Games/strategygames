@@ -1,6 +1,6 @@
 package strategygames.go
 
-import strategygames.{ Player, Status }
+import strategygames.{ GameMessage, Player, Status }
 
 import cats.data.Validated
 import cats.implicits._
@@ -67,6 +67,12 @@ case class Situation(board: Board, player: Player) {
   def canSelectSquares: Boolean =
     board.uciMoves.size > 1 && board.uciMoves
       .takeRight(2) == List("pass", "pass") && board.uciMoves.reverse.takeWhile(_ == "pass").length % 2 == 0
+
+  def isSubsequentPassWarning: Boolean =
+    board.uciMoves.size > 1 && board.uciMoves.takeRight(2) == List("pass", "pass")
+
+  lazy val gameMessage: Option[GameMessage] =
+    isSubsequentPassWarning option GameMessage.SubsequentPassWarning
 
   def withVariant(variant: strategygames.go.variant.Variant) =
     copy(

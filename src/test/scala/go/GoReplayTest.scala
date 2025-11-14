@@ -64,4 +64,90 @@ class GoReplayTest extends Specification with ValidatedMatchers {
       }
     }
   }
+
+  "go replay delay pass game" should {
+    "replay from uci moves" in {
+      Replay.situationsFromUci(
+        ucis = List(
+          Uci("s@g3"),
+          Uci("s@c7"),
+          Uci("s@f2"),
+          Uci("s@e5"),
+          Uci("s@e1"),
+          Uci("s@d4"),
+          Uci("s@h4"),
+          Uci("s@i1"),
+          Uci("s@i5"),
+          Uci("pass"),
+          Uci("pass"),
+          Uci("s@i8"),
+          Uci("pass"),
+          Uci("pass"),
+          Uci("ss:i1")
+        ).flatten,
+        initialFen = Some(FEN("""9/9/6S2/9/9/9/2S6/9/9[SSSSSSSSSSssssssssss] w - 810 65 0 0 65 0 1""")),
+        variant = variant.Go9x9
+      ) must beValid.like { situations =>
+        situations.map(s => (s.end, s.board.piecesOnBoardCount)) must_== List(
+          (false, 2),
+          (false, 3),
+          (false, 4),
+          (false, 5),
+          (false, 6),
+          (false, 7),
+          (false, 8),
+          (false, 9),
+          (false, 10),
+          (false, 11),
+          (false, 11),
+          (false, 11),
+          (false, 12),
+          (false, 12),
+          (false, 12),
+          (true, 12) // piece removed after?
+        )
+      }
+    }
+  }
+
+  "go replay 4 pass ending game" should {
+    "replay from uci moves" in {
+      Replay.situationsFromUci(
+        ucis = List(
+          Uci("s@g3"),
+          Uci("s@c7"),
+          Uci("s@f2"),
+          Uci("s@e5"),
+          Uci("s@e1"),
+          Uci("s@d4"),
+          Uci("s@h4"),
+          Uci("s@i1"),
+          Uci("s@i5"),
+          Uci("pass"),
+          Uci("pass"),
+          Uci("pass"),
+          Uci("pass")
+        ).flatten,
+        initialFen = Some(FEN("""9/9/6S2/9/9/9/2S6/9/9[SSSSSSSSSSssssssssss] w - 810 65 0 0 65 0 1""")),
+        variant = variant.Go9x9
+      ) must beValid.like { situations =>
+        situations.map(s => (s.end, s.board.piecesOnBoardCount)) must_== List(
+          (false, 2),
+          (false, 3),
+          (false, 4),
+          (false, 5),
+          (false, 6),
+          (false, 7),
+          (false, 8),
+          (false, 9),
+          (false, 10),
+          (false, 11),
+          (false, 11),
+          (false, 11),
+          (false, 11),
+          (true, 11)
+        )
+      }
+    }
+  }
 }

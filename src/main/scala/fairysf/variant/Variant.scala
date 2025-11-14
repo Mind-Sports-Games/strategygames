@@ -258,6 +258,26 @@ abstract class Variant private[variant] (
 
   def isUnmovedPawn(player: Player, pos: Pos) = pos.rank == player.fold(Rank.Second, Rank.Seventh)
 
+  def <<@(
+    fen: FEN,
+    pieceMap: Option[PieceMap] = None,
+    history: Option[History] = None
+  ): Option[Situation] = {
+    val apiPosition = Api.positionFromVariantNameAndFEN(fishnetKey, fen.value)
+    fen.player.map{ player =>
+      Situation(
+        Board(
+          pieces = pieceMap.getOrElse(apiPosition.pieceMap),
+          history = history.getOrElse(History()),
+          variant = this,
+          pocketData = apiPosition.pocketData,
+          position = apiPosition.some
+        ),
+        player
+      )
+    }
+  }
+
   override def toString = s"Variant($name)"
 
   override def equals(that: Any): Boolean = this eq that.asInstanceOf[AnyRef]
@@ -279,6 +299,8 @@ object Variant {
     MiniXiangqi,
     Flipello,
     Flipello10,
+    AntiFlipello,
+    OctagonFlipello,
     Amazons,
     BreakthroughTroyka,
     MiniBreakthroughTroyka
@@ -305,17 +327,7 @@ object Variant {
 
   def exists(id: Int): Boolean = byId contains id
 
-  val openingSensibleVariants: Set[Variant] = Set(
-    strategygames.fairysf.variant.Shogi,
-    strategygames.fairysf.variant.MiniShogi,
-    strategygames.fairysf.variant.Xiangqi,
-    strategygames.fairysf.variant.MiniXiangqi,
-    strategygames.fairysf.variant.Flipello,
-    strategygames.fairysf.variant.Flipello10,
-    strategygames.fairysf.variant.Amazons,
-    strategygames.fairysf.variant.BreakthroughTroyka,
-    strategygames.fairysf.variant.MiniBreakthroughTroyka
-  )
+  val openingSensibleVariants: Set[Variant] = Set()
 
   val divisionSensibleVariants: Set[Variant] = Set()
 
