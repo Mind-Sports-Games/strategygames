@@ -1068,7 +1068,7 @@ object Variant {
     def dropsVariant: Boolean      = false
     def onlyDropsVariant: Boolean  = false
     def hasDetachedPocket: Boolean = false
-    def hasGameScore: Boolean      = true
+    def hasGameScore: Boolean      = false
 
     def canOfferDraw: Boolean       = v.canOfferDraw
     def ignoreSubmitAction: Boolean = false
