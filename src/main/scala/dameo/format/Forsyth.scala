@@ -1,8 +1,6 @@
 package strategygames.dameo
 package format
 
-import cats.implicits._
-
 import scala.annotation.nowarn
 
 import strategygames.Player
