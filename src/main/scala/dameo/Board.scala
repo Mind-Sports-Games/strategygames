@@ -15,6 +15,7 @@ case class Board(
 
   def boardSize = variant.boardSize
 
+  //Not sure its correct for actors to be restricted by active piece?
   lazy val actors: Map[Pos, Actor] = {
     val active = pieces.filter { case (_, piece) => piece.isActive }
     (if (active.isEmpty) pieces else active).map { case (pos, piece) =>
