@@ -24,7 +24,7 @@ abstract class Variant private[variant] (
   def fenVariant: Boolean         = false
   def variableInitialFen: Boolean = false
 
-  def hasAnalysisBoard: Boolean = false
+  def hasAnalysisBoard: Boolean = true
   def hasFishnet: Boolean       = false
 
   def p1IsBetterVariant: Boolean = false
