@@ -29,13 +29,8 @@ final case class FEN(value: String) extends AnyVal {
   }
 
   def invertPlayer: Option[FEN] =
-    player.map { p =>
-      val parts = value.split(' ')
-      // Defensive: ensure there's a part to update
-      if (parts.length > 1) FEN(parts.updated(1, (!p).letter.toString).mkString(" "))
-      // should never get into else if player is Some
-      else FEN(value)
-    }
+    //This is safe because player function ensures there is a 1st element when doing split(' ')
+    player.map { p => FEN(value.split(' ').updated(1, (!p).letter.toString).mkString(" "))}
 
   def initial = value == Forsyth.initial.value
 }
