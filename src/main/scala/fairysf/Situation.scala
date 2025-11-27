@@ -55,7 +55,7 @@ case class Situation(board: Board, player: Player) {
 
   def winner: Option[Player] = board.variant.winner(this)
 
-  def playable(strict: Boolean): Boolean = board.valid(strict) && !end
+  def playable(strict: Boolean): Boolean = board.valid(strict) && !end && !(!this.check)
 
   lazy val status: Option[Status] =
     if (checkMate) Status.Mate.some
