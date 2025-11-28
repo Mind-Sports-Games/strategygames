@@ -12,7 +12,11 @@ final case class FEN(value: String) extends AnyVal {
 
   // this only works for Othello because the fen uses w to mean p1 and b to mean p2
   def player: Option[Player] =
-    value.split(' ').lift(1) flatMap (_.headOption) flatMap Player.apply
+    value.split(' ').lift(FEN.playerIndex) flatMap (_.headOption) flatMap Player.apply
+
+  def invertPlayer: Option[FEN] =
+    //This is safe because player function ensures there is an element at playerIndex when doing split(' ')
+    player.map { p => FEN(value.split(' ').updated(FEN.playerIndex, (!p).letter.toString).mkString(" "))}
 
   def ply: Option[Int] =
     fullMove map { fm =>
@@ -28,10 +32,6 @@ final case class FEN(value: String) extends AnyVal {
     }
   }
 
-  def invertPlayer: Option[FEN] =
-    //This is safe because player function ensures there is a 1st element when doing split(' ')
-    player.map { p => FEN(value.split(' ').updated(1, (!p).letter.toString).mkString(" "))}
-
   def initial = value == Forsyth.initial.value
 }
 
@@ -45,6 +45,8 @@ object FEN {
     case _                    =>
       fen
   }
+
+  def playerIndex: Int = 1
 
   def fullMoveIndex: Int = 5
 
