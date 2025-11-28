@@ -55,7 +55,7 @@ case class Situation(board: Board, player: Player) {
 
   def winner: Option[Player] = board.variant.winner(this)
 
-  def playable(strict: Boolean): Boolean = board.valid(strict) && !end && !(!this.check)
+  def playable(strict: Boolean): Boolean = board.valid(strict) && !end && !(!this).check
 
   lazy val status: Option[Status] =
     if (checkMate) Status.Mate.some
@@ -102,7 +102,19 @@ case class Situation(board: Board, player: Player) {
       board = board withVariant variant
     )
 
-  def unary_! = copy(player = !player)
+  //If we can't determine an inverse player the APIPosition is None and is then determined in
+  //Board.apiPosition which uses uciMoves not FEN - will need to update when we have FromPosition
+  def unary_! = copy(
+    board = board.copy(
+      position = board.variant.exportBoardFen(board).invertPlayer.map(f =>
+        Api.positionFromVariantNameAndFEN(
+          board.variant.fishnetKey,
+          f.value
+        )
+      )
+    ),
+    player = !player
+  )
 }
 
 object Situation {

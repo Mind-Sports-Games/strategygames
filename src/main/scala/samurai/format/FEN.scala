@@ -9,11 +9,15 @@ final case class FEN(value: String) extends AnyVal {
   // def fullMove: Option[Int] = value.split(' ').lift(5).flatMap(_.toIntOption)
 
   def player: Option[Player] =
-    value.split(' ').lift(3) flatMap (_.headOption) flatMap Player.apply
+    value.split(' ').lift(FEN.playerIndex) flatMap (_.headOption) flatMap Player.apply
 
   def player1Score: Int = intFromFen(1).getOrElse(0)
 
   def player2Score: Int = intFromFen(2).getOrElse(0)
+
+  def invertPlayer: Option[FEN] =
+    //This is safe because player function ensures there is an element at playerIndex when doing split(' ')
+    player.map { p => FEN(value.split(' ').updated(FEN.playerIndex, (!p).letter.toString).mkString(" "))}
 
   def fullMove: Option[Int] = intFromFen(FEN.fullMoveIndex)
 
@@ -62,6 +66,8 @@ final case class FEN(value: String) extends AnyVal {
 object FEN {
 
   def clean(source: String): FEN = FEN(source.replace("_", " ").trim)
+
+  def playerIndex: Int = 3
 
   def fullMoveIndex: Int = 4
 
