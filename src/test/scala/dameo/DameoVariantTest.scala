@@ -147,11 +147,40 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
       situation2.winner must_== Some(P1)
     }
 
-    "Trigger draw in king vs king endgame" in {
+    "Trigger draw in king vs king endgame, white to play" in {
       // Each player gets 2 more turns
-      val board       = Board(FEN("W:WKb3:BKe8:H0:F1").pieces, variant.Dameo)
+      val board       = Board(FEN("W:WKd3:Bc3,Ke8:H0:F1").pieces, variant.Dameo)
       val situation   = Situation(board, P1)
-      val situation1a = board.variant.validMoves(situation)(Pos.B3).find(_.dest == Pos.B5).get.situationAfter
+      val situation0  = board.variant.validMoves(situation)(Pos.D3).find(_.dest == Pos.B3).get.situationAfter
+      val situation1a =
+        board.variant.validMoves(situation0)(Pos.E8).find(_.dest == Pos.H8).get.situationAfter
+      val situation1b =
+        board.variant.validMoves(situation1a)(Pos.B3).find(_.dest == Pos.B5).get.situationAfter
+      val situation2a =
+        board.variant.validMoves(situation1b)(Pos.H8).find(_.dest == Pos.H3).get.situationAfter
+      val situation2b =
+        board.variant.validMoves(situation2a)(Pos.B5).find(_.dest == Pos.D5).get.situationAfter
+
+      situation2a.end must_== false
+
+      situation2b.end must_== true
+      situation2b.playable(true) must_== false
+      situation2b.status must_== Some(Status.Draw)
+      situation2b.winner must_== None
+
+      format.Forsyth.>>(situation1a).halfMoveClock must_== Some(1)
+      format.Forsyth.>>(situation1b).halfMoveClock must_== Some(2)
+      format.Forsyth.>>(situation2a).halfMoveClock must_== Some(3)
+      format.Forsyth.>>(situation2b).halfMoveClock must_== Some(4)
+    }
+
+    "Trigger draw in king vs king endgame, black to play" in {
+      // Each player gets 2 more turns
+      val board       = Board(FEN("B:WKb3,d8:BKc8:H0:F1").pieces, variant.Dameo)
+      val situation   = Situation(board, P2)
+      val situation0  = board.variant.validMoves(situation)(Pos.C8).find(_.dest == Pos.E8).get.situationAfter
+      val situation1a =
+        board.variant.validMoves(situation0)(Pos.B3).find(_.dest == Pos.B5).get.situationAfter
       val situation1b =
         board.variant.validMoves(situation1a)(Pos.E8).find(_.dest == Pos.H8).get.situationAfter
       val situation2a =
