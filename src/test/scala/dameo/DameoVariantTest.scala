@@ -168,10 +168,11 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
       situation2b.status must_== Some(Status.Draw)
       situation2b.winner must_== None
 
-      format.Forsyth.>>(situation1a).halfMoveClock must_== Some(1)
-      format.Forsyth.>>(situation1b).halfMoveClock must_== Some(2)
-      format.Forsyth.>>(situation2a).halfMoveClock must_== Some(3)
-      format.Forsyth.>>(situation2b).halfMoveClock must_== Some(4)
+      format.Forsyth.>>(situation0).halfMoveClock must_== Some(1)
+      format.Forsyth.>>(situation1a).halfMoveClock must_== Some(2)
+      format.Forsyth.>>(situation1b).halfMoveClock must_== Some(3)
+      format.Forsyth.>>(situation2a).halfMoveClock must_== Some(4)
+      format.Forsyth.>>(situation2b).halfMoveClock must_== Some(5)
     }
 
     "Trigger draw in king vs king endgame, black to play" in {
@@ -195,10 +196,11 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
       situation2b.status must_== Some(Status.Draw)
       situation2b.winner must_== None
 
-      format.Forsyth.>>(situation1a).halfMoveClock must_== Some(1)
-      format.Forsyth.>>(situation1b).halfMoveClock must_== Some(2)
-      format.Forsyth.>>(situation2a).halfMoveClock must_== Some(3)
-      format.Forsyth.>>(situation2b).halfMoveClock must_== Some(4)
+      format.Forsyth.>>(situation0).halfMoveClock must_== Some(1)
+      format.Forsyth.>>(situation1a).halfMoveClock must_== Some(2)
+      format.Forsyth.>>(situation1b).halfMoveClock must_== Some(3)
+      format.Forsyth.>>(situation2a).halfMoveClock must_== Some(4)
+      format.Forsyth.>>(situation2b).halfMoveClock must_== Some(5)
     }
 
     "Trigger draw by threefold repetition" in {
