@@ -66,6 +66,12 @@ object Replay {
     case _                  => sys.error(s"Invalid dameo action $action")
   }
 
+  def replayMove(before: Game, orig: Pos, dest: Pos): Option[Move] = {
+    val actor      = before.situation.board.actors(orig)
+    val actorMoves = actor.captures ++ actor.noncaptures
+    actorMoves.find(_.dest == dest)
+  }
+
   private def gameWithActionWhileValid(
       actionStrs: ActionStrs,
       initialFen: FEN,

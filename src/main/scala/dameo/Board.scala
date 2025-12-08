@@ -15,7 +15,7 @@ case class Board(
 
   def boardSize = variant.boardSize
 
-  //Not sure its correct for actors to be restricted by active piece?
+  // Not sure its correct for actors to be restricted by active piece?
   lazy val actors: Map[Pos, Actor] = {
     val active = pieces.filter { case (_, piece) => piece.isActive }
     (if (active.isEmpty) pieces else active).map { case (pos, piece) =>
@@ -74,7 +74,7 @@ case class Board(
       }
 
   def autoDraw: Boolean =
-    (variant.maxDrawingMoves(this).fold(false)(m => history.halfMoveClock >= m)) ||
+    (variant.maxDrawingMoves(this).fold(false)(m => history.halfMoveClock > m)) ||
       (history.threefoldRepetition && variant.repetitionEnabled)
 
   def valid(strict: Boolean) = variant.valid(this, strict)
