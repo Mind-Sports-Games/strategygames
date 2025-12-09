@@ -10,6 +10,8 @@ import strategygames.{
 }
 import strategygames.format.pgn.{ ParsedPgn => ParsedPdn, Sans, Tags }
 
+import strategygames.dameo.format.Uci
+
 import cats.data.Validated
 import scala.annotation.nowarn
 
@@ -31,13 +33,6 @@ object Reader {
   def full(pdn: String, tags: Tags = Tags.empty): Validated[String, Result] =
     fullWithSans(pdn, identity, tags, true)
 
-  def replayResult(
-      actionStrs: ActionStrs,
-      tags: Tags,
-      iteratedCapts: Boolean = false
-  ): Validated[String, Result] =
-    replayResultFromActionStrsUsingSan(actionStrs, identity, tags, iteratedCapts)
-
   def fullWithSans(
       pdn: String,
       op: Sans => Sans,
@@ -51,16 +46,12 @@ object Reader {
   def fullWithSans(parsed: ParsedPdn, op: Sans => Sans): Result =
     makeReplay(makeGame(parsed.tags), op(parsed.sans))
 
-  def replayResultFromActionStrsUsingSan(
+  def replayResultFromActionStrs(
       actionStrs: ActionStrs,
-      op: Sans => Sans,
-      tags: Tags,
-      @nowarn iteratedCapts: Boolean = false
+      op: ActionStrs => ActionStrs,
+      tags: Tags
   ): Validated[String, Result] =
-    // Its ok to flatten actionStrs as the game is built back up again from the Situation
-    Parser.sans(actionStrs.flatten, tags.dameoVariant | variant.Variant.default) map { sans =>
-      makeReplay(makeGame(tags), op(sans))
-    }
+    Validated.valid(makeReplayWithActionStrs(makeGame(tags), op(actionStrs)))
 
   // remove invisible byte order mark
   def cleanUserInput(str: String) = str.replace(s"\ufeff", "")
@@ -80,6 +71,33 @@ object Reader {
           action => Result.Complete(replay addAction StratAction.toDameo(action))
         )
       case (r: Result.Incomplete, _)      => r
+    }
+
+  private def makeReplayWithActionStrs(game: Game, actionStrs: ActionStrs): Result =
+    actionStrs.flatten.foldLeft[Result](Result.Complete(Replay(game))) {
+      case (Result.Complete(replay), actionStr) =>
+        actionStr match {
+          case Uci.Move.moveR(orig, dest, _) => {
+            (Pos.fromKey(orig), Pos.fromKey(dest)) match {
+              case (Some(orig), Some(dest)) => {
+                (Replay.replayMove(replay.state, orig, dest)) match {
+                  case (Some(move)) => {
+                    Result.Complete(
+                      replay.addAction(move)
+                    )
+                  }
+                  case _            =>
+                    Result.Incomplete(replay, s"Error making replay with move: ${actionStr}")
+                }
+              }
+              case _                        =>
+                Result.Incomplete(replay, s"Error making replay with move: ${actionStr}")
+            }
+          }
+          case _                             =>
+            Result.Incomplete(replay, s"Error making replay with uci action: ${actionStr}")
+        }
+      case (r: Result.Incomplete, _)            => r
     }
 
   private def makeGame(tags: Tags) = {

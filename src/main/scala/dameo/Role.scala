@@ -19,34 +19,45 @@ sealed trait Role {
 
 sealed trait PromotableRole extends Role
 
-//TODO Dameo - check forsyth is what we want. Depends on FEN format
 case object King extends PromotableRole {
-  val forsyth   = 'k'
+  val forsyth   = 'K'
   val binaryInt = 1
   val valueOf   = Some(2)
 }
 
 case object Man extends Role {
-  val forsyth   = 'm'
+  val forsyth   = 'M'
   val binaryInt = 2
   val valueOf   = Some(1)
 }
 
 case object GhostMan extends Role {
-  val forsyth   = 'g'
+  val forsyth   = 'G'
   val binaryInt = 4
   val valueOf   = Some(0)
 }
 
 case object GhostKing extends Role {
-  val forsyth   = 'p'
+  val forsyth   = 'P'
   val binaryInt = 3
   val valueOf   = Some(0)
 }
 
+case object ActiveMan extends Role {
+  val forsyth   = 'A'
+  val binaryInt = 6
+  val valueOf   = Some(1)
+}
+
+case object ActiveKing extends Role {
+  val forsyth   = 'B'
+  val binaryInt = 5
+  val valueOf   = Some(2)
+}
+
 object Role {
 
-  val all: List[Role]                     = List(King, Man)
+  val all: List[Role]                     = List(King, Man, GhostKing, GhostMan, ActiveMan, ActiveKing)
   val allPromotable: List[PromotableRole] = List(King)
 
   def defaultRole: Role = Man

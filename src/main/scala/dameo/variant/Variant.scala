@@ -22,9 +22,9 @@ abstract class Variant private[variant] (
 
   def baseVariant: Boolean        = false
   def fenVariant: Boolean         = false
-  def variableInitialFen: Boolean = true
+  def variableInitialFen: Boolean = false
 
-  def hasAnalysisBoard: Boolean = false
+  def hasAnalysisBoard: Boolean = true
   def hasFishnet: Boolean       = false
 
   def p1IsBetterVariant: Boolean = false
@@ -41,48 +41,66 @@ abstract class Variant private[variant] (
   def perfId: Int
   def perfIcon: Char
 
-  // TODO Dameo set this
-  def initialFen: FEN = FEN("")
+  def initialFen: FEN = FEN(
+    "W:Wa1,b1,b2,c1,c2,c3,d1,d2,d3,e1,e2,e3,f1,f2,f3,g1,g2,h1:Ba8,b7,b8,c6,c7,c8,d6,d7,d8,e6,e7,e8,f6,f7,f8,g7,g8,h8:H0:F1"
+  )
 
   def pieces: PieceMap = initialFen.pieces
 
   def startPlayer: Player = P1
 
-  // TODO Dameo implement this, possibly using Actor move generation
-  def validMoves(@nowarn situation: Situation): Map[Pos, List[Move]] = Map.empty
+  def validMoves(situation: Situation): Map[Pos, List[Move]] = {
+    var bestLineValue = 0
+    var captureMap    = Map[Pos, List[Move]]()
+    for (actor <- situation.actors) {
+      val (capts, lineValue) = actor.capturesWithLineval
+      if (capts.nonEmpty) {
+        if (lineValue > bestLineValue) {
+          bestLineValue = lineValue
+          captureMap = Map(actor.pos -> capts)
+        } else if (lineValue == bestLineValue)
+          captureMap = captureMap + (actor.pos -> capts)
+      }
+    }
+
+    if (captureMap.nonEmpty) captureMap
+    else
+      situation.actors
+        .collect {
+          case actor if actor.noncaptures.nonEmpty =>
+            actor.pos -> actor.noncaptures
+        }
+        .to(Map)
+  }
 
   def move(
       situation: Situation,
       from: Pos,
       to: Pos,
-      promotion: Option[PromotableRole],
-      capture: Option[Pos]
+      promotion: Option[PromotableRole]
   ): Validated[String, Move] = {
     // Find the move in the variant specific list of valid moves
     situation.moves get from flatMap (_.find(m => m.dest == to)) toValid
-      s"Not a valid move: ${from}${to}${promotion}${capture}. Allowed moves: ${situation.moves}"
+      s"Not a valid move: ${from}${to}${promotion}. Allowed moves: ${situation.moves}"
   }
 
   def hasMoveEffects = false
 
   def addVariantEffect(move: Move): Move = move
 
-  // TODO Dameo set this if relevant
-  def maxDrawingMoves(@nowarn board: Board): Option[Int] = None
+  def maxDrawingMoves(@nowarn board: Board): Option[Int] = Some(4) // 1 king vs. 1 king
 
-  // TODO Dameo set this
-  def variantEnd(@nowarn situation: Situation) = false
+  def variantEnd(situation: Situation) = situation.moves.isEmpty
 
   def specialEnd(@nowarn situation: Situation)  = false
   def specialDraw(@nowarn situation: Situation) = false
 
-  // TODO Dameo set this
-  def winner(@nowarn situation: Situation): Option[Player] = None
+  def winner(situation: Situation): Option[Player] =
+    Option.when(situation.variantEnd)(!situation.player)
 
   def materialImbalance(@nowarn board: Board): Int = 0
 
-  // TODO Dameo if there are sensible things to check put them here
-  def valid(@nowarn board: Board, @nowarn strict: Boolean): Boolean = false
+  def valid(@nowarn board: Board, @nowarn strict: Boolean): Boolean = true
 
   val roles: List[Role] = Role.all
 
@@ -101,6 +119,16 @@ abstract class Variant private[variant] (
   def defaultRole: Role = Role.defaultRole
 
   def gameFamily: GameFamily
+
+  def updatePositionHashes(
+      board: Board,
+      move: Move,
+      hash: PositionHash
+  ): PositionHash = {
+    val newHash = Hash(Situation(board, !move.piece.player))
+    newHash ++ hash
+  }
+
 }
 
 object Variant {
@@ -130,5 +158,4 @@ object Variant {
   val openingSensibleVariants: Set[Variant] = Set(strategygames.dameo.variant.Dameo)
 
   val divisionSensibleVariants: Set[Variant] = Set()
-
 }

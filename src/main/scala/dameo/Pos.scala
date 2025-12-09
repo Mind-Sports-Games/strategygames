@@ -2,8 +2,6 @@ package strategygames.dameo
 
 import scala.math.{ abs, max, min }
 
-import scala.annotation.nowarn
-
 // Matches with: https://github.com/Mind-Sports-Games/lila/blob/incoming-prs/ui/chess/src/piotr.ts
 object Piotr {
   val lookup: Map[Int, Char] = Map(
@@ -162,6 +160,9 @@ case class Pos private (index: Int) extends AnyVal {
 
   def key               = file.toString + rank.toString
   override def toString = key
+
+  def step(dx: Int, dy: Int): Option[Pos] =
+    Pos.at(file.index + dx, rank.index + dy)
 }
 
 object Pos {
@@ -191,10 +192,6 @@ object Pos {
       a <- piotr(piotrs.head)
       b <- piotr(piotrs(1))
     } yield s"${a.key}${b.key}"
-
-  // TODO Dameo - write this
-  // Works out the pos between the orig and dest that has been jumped over (i.e. where the capture took place
-  @nowarn def capturePos(orig: Pos, dest: Pos): Option[Pos] = None
 
   val A1  = new Pos(0)
   val B1  = new Pos(1)

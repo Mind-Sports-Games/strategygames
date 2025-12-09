@@ -15,26 +15,13 @@ case class Situation(board: Board, player: Player) {
 
   lazy val moves: Map[Pos, List[Move]] = board.variant.validMoves(this)
 
-  private val movesList: List[Move] = moves.values.flatten.toList
-
   lazy val destinations: Map[Pos, List[Pos]] = moves.view.mapValues { _ map (_.dest) }.to(Map)
-
-  def actions: List[Action] = movesList
-
-  def canMove: Boolean = moves.nonEmpty
-
-  def canCapture: Boolean = actions
-    .map {
-      case m: Move => m.capture.nonEmpty
-      case _       => false
-    }
-    .contains(true)
 
   def history = board.history
 
   def autoDraw: Boolean = board.autoDraw
 
-  def variantEnd = board.variant.specialEnd(this)
+  def variantEnd = board.variant.variantEnd(this)
 
   def end: Boolean = variantEnd || autoDraw
 
@@ -50,16 +37,25 @@ case class Situation(board: Board, player: Player) {
     else if (autoDraw) Some(Status.Draw)
     else None
 
+  lazy val allMovesCaptureLength: Int =
+    actors.foldLeft(0) { case (max, actor) =>
+      Math.max(actor.captureLength, max)
+    }
+
+  def captureLengthFrom(pos: Pos): Option[Int] =
+    actorAt(pos).map(_.captureLength)
+
+  def actorAt(pos: Pos): Option[Actor] = board.actorAt(pos)
+
   def move(
       from: Pos,
       to: Pos,
-      promotion: Option[PromotableRole] = None,
-      capture: Option[Pos] = None
+      promotion: Option[PromotableRole] = None
   ): Validated[String, Move] =
-    board.variant.move(this, from, to, promotion, capture)
+    board.variant.move(this, from, to, promotion)
 
   def move(uci: Uci.Move): Validated[String, Move] =
-    board.variant.move(this, uci.orig, uci.dest, uci.promotion, uci.capture)
+    board.variant.move(this, uci.orig, uci.dest, uci.promotion)
 
   def withHistory(history: History) =
     copy(

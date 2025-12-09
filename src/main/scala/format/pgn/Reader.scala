@@ -200,9 +200,7 @@ object Reader {
       case GameLogic.Abalone()      =>
         sys.error("Sans not implemented for abalone")
       case GameLogic.Dameo()        =>
-        DameoReader
-          .replayResultFromActionStrsUsingSan(actionStrs, op, tags)
-          .map(Result.wrap)
+        sys.error("Sans not implemented for dameo")
     }
 
   def replayResultFromActionStrs(
@@ -233,9 +231,7 @@ object Reader {
       case GameLogic.Abalone()      =>
         AbaloneReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
       case GameLogic.Dameo()        =>
-        sys.error(
-          "replayResultFromActionStrs not implemented for dameo. Use replayResultFromActionStrsUsingSan"
-        )
+        DameoReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
     }
 
 }

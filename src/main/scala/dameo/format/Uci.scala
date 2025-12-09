@@ -24,24 +24,24 @@ object Uci {
   case class Move(
       orig: Pos,
       dest: Pos,
-      promotion: Option[PromotableRole] = None,
-      capture: Option[Pos] = None
+      promotion: Option[PromotableRole] = None
   ) extends Uci {
+    /* Uci encodes the start and end position of a move and whether a promotion happened.
+    Whether this results in capture must be computed separately with reference to the board state.
+     */
 
-    def keys     = orig.key + dest.key
-    // TODO Dameo set these properly
-    def uci      = orig.key + (if (capture.isEmpty) "" else "x") + dest.key
-    def shortUci = orig.key + (if (capture.isEmpty) "" else "x") + dest.key
+    def keys            = orig.key + dest.key
+    def promotionString = promotion.fold("")(_.forsyth.toString)
+    def uci             = orig.key + dest.key + promotionString
+    def shortUci        = uci
 
     def keysPiotr = orig.piotrStr + dest.piotrStr
-    def piotr     = keysPiotr + promotionString
-
-    def promotionString = promotion.fold("")(_.forsyth.toString)
+    def piotr     = keysPiotr + promotion.fold("")(r => "p" + r.forsyth)
 
     def origDest = Some(orig -> dest)
 
     def apply(situation: Situation) =
-      situation.move(orig, dest, promotion, capture)
+      situation.move(orig, dest, promotion)
 
   }
 
@@ -49,51 +49,62 @@ object Uci {
 
     def apply(move: String): Option[Move] = {
       move match {
-        case moveR(orig, capture, dest) =>
+        case moveR(orig, dest, promotion) =>
           (
             Pos.fromKey(orig),
             Pos.fromKey(dest),
-            capture.length == 1
+            promotion == "K"
           ) match {
-            case (Some(orig), Some(dest), capture) =>
+            case (Some(orig), Some(dest), promotion) =>
               Some(
                 Move(
                   orig = orig,
                   dest = dest,
-                  // TODO Dameo set this
-                  promotion = None,
-                  capture = if (capture) Pos.capturePos(orig, dest) else None
+                  promotion = if (promotion) Some(King) else None
                 )
               )
-            case _                                 => None
+            case _                                   => None
           }
-        case _                          => None
+        case _                            => None
       }
     }
 
-    // TODO Dameo use capture and promotion properly
-    def piotr(move: String) = for {
-      orig    <- move.headOption.flatMap(Pos.piotr)
-      dest    <- move.lift(1).flatMap(Pos.piotr)
-      capture <- move.lift(2).nonEmpty.some
-    } yield Move(orig, dest, None, (if (capture) Pos.capturePos(orig, dest) else None))
+    def piotr(move: String): Option[Move] = {
+      move match {
+        case piotrR(piotrOrig, piotrDest, promotion) =>
+          (
+            piotrOrig.headOption.flatMap(Pos.piotr),
+            piotrDest.headOption.flatMap(Pos.piotr),
+            promotion
+          ) match {
+            case (Some(orig), Some(dest), promotion) =>
+              Some(
+                Move(
+                  orig,
+                  dest,
+                  promotion = if (promotion == "") None else Some(King)
+                )
+              )
+            case _                                   => None
+          }
+        case _                                       => None
+      }
+    }
 
-    // TODO Dameo use capture and promotion properly
     def fromStrings(origS: String, destS: String, promS: Option[String]) = for {
       orig     <- Pos.fromKey(origS)
       dest     <- Pos.fromKey(destS)
       promotion = Role promotable promS
-    } yield Move(orig, dest, promotion, None)
+    } yield Move(orig, dest, promotion)
 
-    // TODO Dameo write the regex for each move. Do we need to add in promotion?
-    val moveR = s"^${Pos.posR}([x]?)${Pos.posR}".r
-
+    val moveR  = s"^${Pos.posR}${Pos.posR}([K]?)".r
+    val piotrR = "(.)(.)((?:pK)?)".r
   }
 
   case class WithSan(uci: Uci.Move, san: String)
 
-  def apply(move: strategygames.dameo.Move, withCaptures: Boolean) =
-    Uci.Move(move.orig, move.dest, move.promotion, if (withCaptures) move.capture else none)
+  def apply(move: strategygames.dameo.Move) =
+    Uci.Move(move.orig, move.dest, move.promotion)
 
   def combine(uci1: Uci.Move, uci2: Uci.Move) =
     apply(uci1.uci + uci2.uci.drop(2)).getOrElse(Uci.Move(uci1.orig, uci2.dest))
