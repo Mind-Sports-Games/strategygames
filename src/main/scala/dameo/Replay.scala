@@ -66,18 +66,11 @@ object Replay {
     case _                  => sys.error(s"Invalid dameo action $action")
   }
 
-  def replayMove(before: Game, orig: Pos, dest: Pos, capture: Option[Pos], endTurn: Boolean): Move =
-    // TODO Dameo set this. Probably need to pass through promotion as well?
-    Move(
-      piece = before.situation.board.pieces(orig),
-      orig = orig,
-      dest = dest,
-      situationBefore = before.situation,
-      after = before.situation.board.copy(),
-      autoEndTurn = endTurn,
-      capture = capture,
-      promotion = None
-    )
+  def replayMove(before: Game, orig: Pos, dest: Pos): Option[Move] = {
+    val actor      = before.situation.board.actors(orig)
+    val actorMoves = actor.captures ++ actor.noncaptures
+    actorMoves.find(_.dest == dest)
+  }
 
   private def gameWithActionWhileValid(
       actionStrs: ActionStrs,
@@ -88,38 +81,58 @@ object Replay {
     var state  = init
     var errors = ""
 
-    def replayMoveFromUci(orig: Option[Pos], dest: Option[Pos], capture: Boolean): (Game, Move) =
+    def replayMoveFromUci(
+        orig: Option[Pos],
+        dest: Option[Pos]
+    ): (Game, Move) =
       (orig, dest) match {
         case (Some(orig), Some(dest)) => {
-          val move = replayMove(
-            state,
-            orig,
-            dest,
-            if (capture) Pos.capturePos(orig, dest) else None,
-            true
-          )
-          state = state(move)
-          (state, move)
+          state.situation.board.move(orig, dest) match {
+            case Some(_) => {
+              val actor      = state.situation.board.actors(orig)
+              val actorMoves = actor.captures ++ actor.noncaptures
+              actorMoves.find(_.dest == dest) match {
+                case Some(move) => {
+                  state = state(move)
+                  (state, move)
+                }
+                case _          => {
+                  val uciMove = s"${orig}${dest}"
+                  errors += uciMove + ","
+                  sys.error(s"Invalid actor move for replay: ${uciMove}")
+                }
+              }
+            }
+            case _       => {
+              val uciMove = s"${orig}${dest}"
+              errors += uciMove + ","
+              sys.error(s"Invalid move for replay: ${uciMove}")
+            }
+          }
         }
         case (orig, dest)             => {
           val uciMove = s"${orig}${dest}"
           errors += uciMove + ","
-          sys.error(s"Invalid move for replay: ${uciMove}")
+          sys.error(s"Invalid uci move for replay: ${uciMove}")
         }
       }
 
     val gameWithActions: List[(Game, Move)] =
-      // TODO check that using flatten works for Dameo
-      actionStrs.flatten.toList.map {
-        case Uci.Move.moveR(orig, capture, dest) =>
-          replayMoveFromUci(
-            Pos.fromKey(orig),
-            Pos.fromKey(dest),
-            capture.length == 1
-          )
-        case (action: String)                    =>
-          sys.error(s"Invalid action for replay: $action")
-      }
+      actionStrs.flatMap { turnStrs =>
+        turnStrs.map {
+          case uci => {
+            uci match {
+              case Uci.Move.moveR(orig, dest, _) =>
+                replayMoveFromUci(
+                  Pos.fromKey(orig),
+                  Pos.fromKey(dest)
+                )
+              case (action: String)              =>
+                sys.error(s"Invalid action for replay: $action")
+            }
+          }
+        }
+      }.toList
 
     (init, gameWithActions, errors match { case "" => None; case _ => errors.some })
   }
