@@ -17,6 +17,8 @@ trait ClockTimeGrace {
   def timeWillAdd(remaining: Centis, timeTaken: Centis): Centis
   def goBerserk: ClockTimeGrace
   val maxGrace: Centis
+  // What the initial time should be when baseLimit is 0
+  def zeroLimitInitTime: Centis
 }
 
 case class NoClockTimeGrace() extends ClockTimeGrace {
@@ -25,6 +27,7 @@ case class NoClockTimeGrace() extends ClockTimeGrace {
   def timeWillAdd(@nowarn remaining: Centis, timeTaken: Centis): Centis                       = Centis(0)
   val maxGrace: Centis                                                                        = Centis(0)
   def goBerserk: ClockTimeGrace                                                               = this
+  def zeroLimitInitTime: Centis                                                               = Centis(0)
 }
 // NOTE: if we need a list of these, we can make a ListClockTimeGrace
 
@@ -43,6 +46,7 @@ case class FischerIncrementGrace(val increment: Centis) extends ClockTimeGrace {
 
   def goBerserk: ClockTimeGrace = NoClockTimeGrace()
   val maxGrace: Centis          = increment
+  def zeroLimitInitTime: Centis = increment
 }
 
 // Bronstein increment timer with a delay. The minimum between the time used
@@ -60,6 +64,8 @@ case class SimpleDelayGrace(val delay: Centis) extends ClockTimeGrace {
 
   def goBerserk: ClockTimeGrace = NoClockTimeGrace()
   val maxGrace: Centis          = delay
+  // For 0 d/X: minimal buffer that grace should preserve
+  def zeroLimitInitTime: Centis = Centis(1)
 }
 
 // BronsteinDelay gives back up to the entire amount, but only if they didn't use
@@ -74,6 +80,8 @@ case class BronsteinDelayGrace(val delay: Centis) extends ClockTimeGrace {
 
   def goBerserk: ClockTimeGrace = NoClockTimeGrace()
   val maxGrace: Centis          = delay
+  // For 0 d+X: clock shows Xs (the delay) as initial time
+  def zeroLimitInitTime: Centis = delay
 }
 
 case class Timer(
@@ -112,7 +120,7 @@ case class Timer(
   def willAdd  = clockTimeGrace
     .timeWillAdd((baseLimit - elapsed).atMost(Centis(0)), clockTimeGrace.maxGrace)
   def initTime =
-    if (baseLimit.centis == 0) willAdd.atLeast(Centis(300))
+    if (baseLimit.centis == 0) clockTimeGrace.zeroLimitInitTime
     else baseLimit
 
   // The remaining is whatever they have left + whatever they'll get if they were at the end of the game and
