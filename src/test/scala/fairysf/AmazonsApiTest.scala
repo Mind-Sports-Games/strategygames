@@ -40,21 +40,19 @@ class AmazonsApiTest extends FairySFTest {
           "3q2q3/10/10/q8q/10/10/Q8Q/10/10/3Q2Q3[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppp] w - - 0 1"
         )
       val game     = fenToGame(position, Amazons)
-      game must beValid.like {
-        case game => {
-          game.situation.winner == None must beTrue
-        }
+      game.toOption must beSome.like { case game =>
+        game.situation.winner == None must beTrue
       }
     }
 
     "2176 move from start pos" in {
       val position = Api.positionFromVariant(variant.Amazons)
-      position.legalMoves.size must_== 2176
+      position.legalMoves.size === 2176
     }
 
     "have 32 pawn drops from starting d1d6 move" in {
       val position = Api.positionFromVariant(variant.Amazons)
-      position.legalMoves.filter(x => x.contains("d1d6")).size must_== 32
+      position.legalMoves.filter(x => x.contains("d1d6")).size === 32
     }
 
     "have opening move d1d6,d6g9" in {
@@ -80,19 +78,19 @@ class AmazonsApiTest extends FairySFTest {
     "P1 win in example game" in {
       val position  = Api.positionFromVariant(variant.Amazons)
       val position2 = position.makeMoves(amazonsGame)
-      position2.legalMoves.size must_== 0
-      position2.gameEnd must_== true
+      position2.legalMoves.size === 0
+      position2.gameEnd === true
     }
 
     "P2 win in example game" in {
       val position  = Api.positionFromVariant(variant.Amazons)
       val position2 = position.makeMoves(amazonsGame2)
       position2.legalMoves.size > 0
-      position2.gameEnd must_== false
+      position2.gameEnd === false
       val position3 = position2.makeMoves(List("a5a9,a9a5"))
-      position3.gameEnd must_== true
+      position3.gameEnd === true
       val position4 = position2.makeMoves(List("a5a9,a9a8"))
-      position4.gameEnd must_== false
+      position4.gameEnd === false
     }
 
     "Should detect game end from fen" in {
@@ -100,10 +98,8 @@ class AmazonsApiTest extends FairySFTest {
         "qp2pqqpqQ/QP2PQPPpP/10/10/10/10/10/10/10/6Q3[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppp] b - - 9 5"
       )
       val game     = fenToGame(position, Amazons)
-      game must beValid.like {
-        case game => {
-          game.situation.playable(false) must beFalse
-        }
+      game.toOption must beSome.like { case game =>
+        game.situation.playable(false) must beFalse
       }
     }
 
@@ -113,7 +109,7 @@ class AmazonsApiTest extends FairySFTest {
       )
       val position = Api.positionFromVariantNameAndFEN(variant.Amazons.key, fen.toString())
       // position.legalMoves.map(println(_))
-      position.legalMoves.size must_== 26
+      position.legalMoves.size === 26
     }
 
     "play moves in two amazon games" in {
@@ -163,8 +159,8 @@ class AmazonsApiTest extends FairySFTest {
         )
       )
 
-      position2.gameEnd must_== false
-      position2.fen.toString() must_== "10/10/10/q3qq3q/pppppppppp/pppppppppp/Q3QQ3Q/10/10/10 w - - 20 11"
+      position2.gameEnd === false
+      position2.fen.toString() === "10/10/10/q3qq3q/pppppppppp/pppppppppp/Q3QQ3Q/10/10/10 w - - 20 11"
     }
 
   }
@@ -174,15 +170,15 @@ class AmazonsApiTest extends FairySFTest {
       val initialFen =
         "3q2q3/10/10/q8q/10/10/Q8Q/10/10/3Q2Q3[pppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp] w - - 0 1"
       val fairyFen   = Api.toFairySFFen("amazons", initialFen)
-      fairyFen must_== "3q2q3/10/10/q8q/10/10/Q8Q/10/10/3Q2Q3 w - - 0 1"
-      Api.toFairySFFen("amazons", Api.fromFairySFFen("amazons", fairyFen)) must_== fairyFen
+      fairyFen === "3q2q3/10/10/q8q/10/10/Q8Q/10/10/3Q2Q3 w - - 0 1"
+      Api.toFairySFFen("amazons", Api.fromFairySFFen("amazons", fairyFen)) === fairyFen
 
     }
     "be valid" in {
       // NOTE: this test only makes sense at the API level, because we can convert it
       val name       = variant.Amazons.fishnetKey
       val initialFen = Api.toFairySFFen(name, variant.Amazons.initialFen.value)
-      FairyStockfish.validateFEN(name, initialFen) must_== true
+      FairyStockfish.validateFEN(name, initialFen) === true
     }
   }
   "Amazons UCI" should {
@@ -209,10 +205,10 @@ class AmazonsApiTest extends FairySFTest {
       Uci
         .readList(GameFamily.Amazons(), stratGamesMoves)
         .fold(
-          false must_== true
+          false === true
         )(uciMoveList => {
-          (uciMoveList.size > 0) must_== true
-          UciDump.toFishnetUci(variant.Amazons.gameFamily, uciMoveList) must_== fairySfMoves
+          (uciMoveList.size > 0) === true
+          UciDump.toFishnetUci(variant.Amazons.gameFamily, uciMoveList) === fairySfMoves
         })
     }
   }

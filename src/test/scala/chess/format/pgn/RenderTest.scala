@@ -80,7 +80,7 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
           )
         )
       )
-      pgn.toString must_== """[P1 "Kramnik,V"]
+      pgn.toString === """[P1 "Kramnik,V"]
 [P2 "Anand,V"]
 [ECO "D14"]
 
@@ -129,7 +129,7 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
           )
         )
       )
-      pgn.toString must_== """[P1 "tsinnema"]
+      pgn.toString === """[P1 "tsinnema"]
 [P2 "stockfish"]
 [TimeControl "300"]
 [ECO "A00e"]
@@ -165,7 +165,7 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
           )
         )
       )
-      pgn.toString must_== """1. d3?! Nc6 $10 2. Qd2 Nb4?? $18 $138 3. Qxb4 $7"""
+      pgn.toString === """1. d3?! Nc6 $10 2. Qd2 Nb4?? $18 $138 3. Qxb4 $7"""
     }
 
     "be correct with variations" in {
@@ -201,7 +201,7 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
           )
         )
       )
-      pgn.toString must_== """1. d4 (1. e4) 1... Nf6 (1... d5)"""
+      pgn.toString === """1. d4 (1. e4) 1... Nf6 (1... d5)"""
     }
     "handle Elon Musk-style baby names like [=0040.34h5a4] in tags" in {
       val pgn = Pgn(
@@ -246,7 +246,7 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
           )
         )
       )
-      pgn.toString must_== """[P1 "tsinnema"]
+      pgn.toString === """[P1 "tsinnema"]
 [P2 "[=0040.34h5a4]"]
 [TimeControl "300"]
 [ECO "A00e"]
@@ -262,7 +262,7 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
         ),
         fullTurns = List()
       )
-      pgn.toString must_== """[Result "0-1"]
+      pgn.toString === """[Result "0-1"]
 
 0-1"""
     }
@@ -274,7 +274,7 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
         tags = Tags.empty,
         fullTurns = List()
       )
-      pgn.toString must_== """"""
+      pgn.toString === """"""
     }
     "empty with initial comment" in {
       val pgn = Pgn(
@@ -282,7 +282,7 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
         fullTurns = List(),
         initial = Initial(List("Why hello there!"))
       )
-      pgn.toString must_== """{ Why hello there! }"""
+      pgn.toString === """{ Why hello there! }"""
     }
     "empty with initial comments" in {
       val pgn = Pgn(
@@ -295,7 +295,7 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
           )
         )
       )
-      pgn.toString must_== """{ Why hello there! } { The Exchange Slav, the sure way to play with zero losing chances so an ideal choice for game one }"""
+      pgn.toString === """{ Why hello there! } { The Exchange Slav, the sure way to play with zero losing chances so an ideal choice for game one }"""
     }
     "moves with initial comments" in {
       val pgn = Pgn(
@@ -336,7 +336,7 @@ opening theory } 10. Bxc6 (10. O-O Bxc3 11. Bxc6 Bxb2 12. Bxb7 Bxa1 13.
           )
         )
       )
-      pgn.toString must_== """{ Why hello there! } { The Exchange Slav, the sure way to play with zero losing chances so an ideal choice for game one }
+      pgn.toString === """{ Why hello there! } { The Exchange Slav, the sure way to play with zero losing chances so an ideal choice for game one }
 1. d4 (1. e4) 1... Nf6 (1... d5)"""
     }
   }

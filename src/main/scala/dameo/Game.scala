@@ -2,6 +2,7 @@ package strategygames.dameo
 import strategygames.{ ClockBase, MoveMetrics, Player, VActionStrs }
 
 import cats.data.Validated
+import scalalib.extensions.*
 
 import strategygames.dameo.format.{ FEN, Uci }
 import strategygames.dameo.variant.Variant
@@ -41,7 +42,7 @@ case class Game(
   def apply(uci: Uci.Move): Validated[String, (Game, Move)] = apply(uci.orig, uci.dest)
   def apply(uci: Uci): Validated[String, (Game, Action)]    = (uci match {
     case u: Uci.Move => apply(u)
-    case u           => sys.error(s"Cannot apply uci $u")
+    case null        => sys.error(s"Cannot apply uci (null)")
   }) map { case (g, a) => g -> a }
 
   private def applyClock(metrics: MoveMetrics, gameActive: Boolean, switchClock: Boolean) =

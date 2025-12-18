@@ -1,7 +1,7 @@
 package strategygames.abalone
 
 import strategygames.abalone.format.Uci
-import strategygames.{MoveMetrics, Player}
+import strategygames.{ MoveMetrics, Player }
 
 case class Move(
     player: Player,
@@ -28,5 +28,9 @@ case class Move(
 
   override def toUci = Uci.Move(orig, dest)
 
-  override def toString = s"${player.number} ${toUci.uci}"
+  override def toString                 = s"${player.number} ${toUci.uci}"
+  def withMetrics(m: MoveMetrics): Move = copy(metrics = m)
+
+  def toUci: Uci.Move = Uci.Move(orig, dest)
+
 }

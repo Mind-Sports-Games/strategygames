@@ -43,7 +43,7 @@ object Drop {
     def situationAfter: Situation = Situation.Chess(d.situationAfter)
     def finalizeAfter: Board      = d.finalizeAfter
 
-    def toUci: Uci.Drop = Uci.ChessDrop(d.toUci)
+    def toUci: Uci.Drop = Uci.ChessDrop((d.toUci: chess.format.Uci.Drop))
 
     val unwrap         = d
     def toChess        = d
@@ -71,7 +71,7 @@ object Drop {
     def situationAfter: Situation = Situation.FairySF(d.situationAfter)
     def finalizeAfter: Board      = d.finalizeAfter
 
-    def toUci: Uci.Drop = Uci.FairySFDrop(d.toUci)
+    def toUci: Uci.Drop = Uci.FairySFDrop((d.toUci: fairysf.format.Uci.Drop))
 
     val unwrap         = d
     def toChess        = sys.error("Can't make a chess drop from a fairysf drop")
@@ -99,7 +99,7 @@ object Drop {
     def situationAfter: Situation = Situation.Go(d.situationAfter)
     def finalizeAfter: Board      = d.finalizeAfter
 
-    def toUci: Uci.Drop = Uci.GoDrop(d.toUci)
+    def toUci: Uci.Drop = Uci.GoDrop((d.toUci: go.format.Uci.Drop))
 
     val unwrap         = d
     def toChess        = sys.error("Can't make a chess drop from a go drop")
@@ -127,7 +127,7 @@ object Drop {
     def situationAfter: Situation = Situation.Backgammon(d.situationAfter)
     def finalizeAfter: Board      = d.finalizeAfter
 
-    def toUci: Uci.Drop = Uci.BackgammonDrop(d.toUci)
+    def toUci: Uci.Drop = Uci.BackgammonDrop((d.toUci: backgammon.format.Uci.Drop))
 
     val unwrap         = d
     def toChess        = sys.error("Can't make a chess drop from a backgammon drop")

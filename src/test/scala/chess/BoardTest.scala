@@ -48,7 +48,7 @@ class BoardTest extends ChessTest {
     }
 
     "have pieces by default" in {
-      board.pieces must not beEmpty
+      board.pieces must not(beEmpty)
     }
 
     "have castling rights by default" in {
@@ -57,7 +57,7 @@ class BoardTest extends ChessTest {
 
     "allow a piece to be placed" in {
       board.place(Rook - P1, E3) must beSome.like { case b =>
-        b(E3) mustEqual Option(Rook - P1)
+        b(E3) must beEqualTo(Option(Rook - P1))
       }
     }
 
@@ -69,7 +69,7 @@ class BoardTest extends ChessTest {
 
     "allow a piece to move" in {
       board.move(E2, E4) must beSome.like { case b =>
-        b(E4) mustEqual Option(Pawn - P1)
+        b(E4) must beEqualTo(Option(Pawn - P1))
       }
     }
 
@@ -82,7 +82,7 @@ class BoardTest extends ChessTest {
     }
 
     "allow a pawn to be promoted to a queen" in {
-      makeEmptyBoard.place(Pawn.p2, A8) flatMap (_ promote A8) must beSome.like { case b =>
+      makeEmptyBoard.place(Pawn.p2, A8).flatMap(_ promote A8) must beSome.like { case b =>
         b(A8) must beSome(Queen.p2)
       }
     }
@@ -93,7 +93,7 @@ class BoardTest extends ChessTest {
         _.place(Pawn - P1, A3),
         _.move(A2, A4)
       ) must beSome.like { case b =>
-        b(A4) mustEqual Option(Pawn - P1)
+        b(A4) must beEqualTo(Option(Pawn - P1))
       }
     }
 
@@ -112,7 +112,7 @@ class BoardTest extends ChessTest {
         D1 -> (King - P1),
         E8 -> (King - P2),
         H4 -> (Queen - P2)
-      ).occupation must_== Player.Map(
+      ).occupation === Player.Map(
         p1 = Set(A2, A3, D1),
         p2 = Set(E8, H4)
       )
@@ -122,22 +122,24 @@ class BoardTest extends ChessTest {
       "right to end" in {
         val board: Board = """
 R   K  R"""
-        E1 >| (p => board.pieces contains p) must_== List(F1, G1, H1)
+        E1 >| ((p: Pos) => board.pieces contains p) === List(F1, G1, H1)
       }
       "right to next" in {
         val board: Board = """
 R   KB R"""
-        E1 >| (p => board.pieces contains p) must_== List(F1)
+        E1 >| ((p: Pos) => board.pieces contains p) === List(F1)
       }
       "left to end" in {
         val board: Board = """
 R   K  R"""
-        E1 |< (p => board.pieces contains p) must_== List(D1, C1, B1, A1)
+        val result = E1 |< ((p: Pos) => board.pieces contains p)
+        result === List(D1, C1, B1, A1)
       }
       "right to next" in {
         val board: Board = """
 R  BK  R"""
-        E1 |< (p => board.pieces contains p) must_== List(D1)
+        val result = E1 |< ((p: Pos) => board.pieces contains p)
+        result === List(D1)
       }
     }
 
@@ -148,7 +150,7 @@ R  BK  R"""
         D1 -> (King - P1),
         E7 -> (King - P2),
         H1 -> (Queen - P2)
-      ).fileOccupation(File.A) must_== Map(
+      ).fileOccupation(File.A) === Map(
         A2 -> (Pawn - P1),
         A3 -> (Pawn - P1)
       )
@@ -161,7 +163,7 @@ R  BK  R"""
         D1 -> (King - P1),
         E7 -> (King - P2),
         H1 -> (Queen - P2)
-      ).rankOccupation(Rank.First) must_== Map(
+      ).rankOccupation(Rank.First) === Map(
         D1 -> (King - P1),
         H1 -> (Queen - P2)
       )
@@ -174,7 +176,7 @@ R  BK  R"""
         D1 -> (King - P1),
         E7 -> (King - P2),
         H1 -> (Queen - P2)
-      ).diagAscOccupation(D6) must_== Map(
+      ).diagAscOccupation(D6) === Map(
         A3 -> (Pawn - P1),
         E7 -> (King - P2)
       )
@@ -187,7 +189,7 @@ R  BK  R"""
         C1 -> (King - P1),
         E7 -> (King - P2),
         H1 -> (Queen - P2)
-      ).diagDescOccupation(B2) must_== Map(
+      ).diagDescOccupation(B2) === Map(
         A3 -> (Pawn - P1),
         B2 -> (Pawn - P1),
         C1 -> (King - P1)

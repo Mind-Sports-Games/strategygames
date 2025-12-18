@@ -1,5 +1,7 @@
 package strategygames.fairysf
 
+import scalalib.extensions.*
+
 import strategygames.Player
 
 import variant.Variant

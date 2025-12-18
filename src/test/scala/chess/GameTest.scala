@@ -12,32 +12,32 @@ R   K""",
       P2
     )
     "can castle queenside" in {
-      game.board.history canCastle P1 on QueenSide must_== true
+      (game.board.history canCastle P1 on QueenSide) === true
     }
     "can still castle queenside" in {
-      game.playMoves(B2 -> A3) must beValid.like { case g =>
-        g.board.history canCastle P1 on QueenSide must_== true
+      game.playMoves(B2 -> A3).toOption must beSome.like { case g =>
+        (g.board.history canCastle P1 on QueenSide) === true
       }
     }
     "can not castle queenside anymore" in {
-      game.playMoves(B2 -> A1) must beValid.like { case g =>
-        g.board.history canCastle P1 on QueenSide must_== false
+      game.playMoves(B2 -> A1).toOption must beSome.like { case g =>
+        (g.board.history canCastle P1 on QueenSide) === false
       }
     }
   }
 
   "update half move clock" should {
     "start at 0" in {
-      Game(variant.Standard).halfMoveClock must_== 0
+      Game(variant.Standard).halfMoveClock === 0
     }
     "increment" in {
-      Game(variant.Standard)(G1, F3) must beValid.like { case (game, _) =>
-        game.halfMoveClock must_== 1
+      Game(variant.Standard)(G1, F3) .toOption must beSome.like { case (game, _) =>
+        game.halfMoveClock === 1
       }
     }
     "not increment" in {
-      Game(variant.Standard)(E2, E4) must beValid.like { case (game, _) =>
-        game.halfMoveClock must_== 0
+      Game(variant.Standard)(E2, E4) .toOption must beSome.like { case (game, _) =>
+        game.halfMoveClock === 0
       }
     }
   }

@@ -3,6 +3,7 @@ import strategygames.MoveMetrics
 
 import strategygames.chess.format.Uci
 import cats.syntax.option._
+import scalalib.extensions.*
 
 case class Move(
     piece: Piece,
@@ -95,9 +96,9 @@ case class Move(
 
   def withAfter(newBoard: Board) = copy(after = newBoard)
 
-  def withMetrics(m: MoveMetrics) = copy(metrics = m)
+  def withMetrics(m: MoveMetrics): Move = copy(metrics = m)
 
-  def toUci = Uci.Move(orig, dest, promotion)
+  def toUci: Uci.Move = Uci.Move(orig, dest, promotion)
 
   override def toString = s"$piece ${toUci.uci}"
 }

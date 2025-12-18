@@ -12,11 +12,11 @@ class ReplayTest extends ChessTest {
       val moves = """d4 d5 Nf4 Nf5 g4 g5 gxf5 exf5""".split(' ').toList
       Replay.gameWithUciWhileValid(moves.map(List(_)), fen, variant.FromPosition) must beLike {
         case (_, games, None)         =>
-          games.size must_== 8
+          games.size === 8
         case (init, games, Some(err)) =>
           println(err)
           println(init)
-          games.size must_== 8
+          games.size === 8
       }
     }
   }
@@ -27,8 +27,8 @@ class ReplayTest extends ChessTest {
         moves = List(Uci("e2e4"), Uci("e7e5"), Uci("e1e2")).flatten,
         initialFen = None,
         variant = variant.Standard
-      ) must beValid.like { situations =>
-        situations.map(Forsyth.>>) must_== List(
+      ) .toOption must beSome.like { case situations =>
+        situations.map(Forsyth.>>) === List(
           FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"),
           FEN("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1"),
           FEN("rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1"),

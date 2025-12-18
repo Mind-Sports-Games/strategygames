@@ -72,10 +72,10 @@ case class Move(
 
   def withAfter(newBoard: Board) = copy(after = newBoard)
 
-  def withMetrics(m: MoveMetrics) = copy(metrics = m)
+  def withMetrics(m: MoveMetrics): Move = copy(metrics = m)
 
-  def toUci      = Uci.Move(orig, dest, promotion, capture)
-  def toShortUci =
+  def toUci: Uci.Move = Uci.Move(orig, dest, promotion, capture)
+  def toShortUci: Uci.Move =
     Uci.Move(orig, dest, promotion, if (capture.isDefined) capture.get.takeRight(1).some else None)
 
   def toSan     = s"${orig.shortKey}${if (capture.nonEmpty) "x" else "-"}${dest.shortKey}"

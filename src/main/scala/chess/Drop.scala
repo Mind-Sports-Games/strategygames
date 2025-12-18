@@ -44,9 +44,9 @@ case class Drop(
 
   def withAfter(newBoard: Board) = copy(after = newBoard)
 
-  def withMetrics(m: MoveMetrics) = copy(metrics = m)
+  def withMetrics(m: MoveMetrics): Drop = copy(metrics = m)
 
-  def toUci = Uci.Drop(piece.role, pos)
+  def toUci: Uci.Drop = Uci.Drop(piece.role, pos)
 
   override def toString = toUci.uci
 }

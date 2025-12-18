@@ -1,9 +1,10 @@
 package strategygames.abalone
 
 import cats.data.Validated
-import strategygames.abalone.format.{FEN, Forsyth, Uci}
+import strategygames.abalone.format.{ FEN, Forsyth, Uci }
 import strategygames.abalone.variant.Variant
-import strategygames.{ClockBase, MoveMetrics, VActionStrs}
+import strategygames.{ ClockBase, MoveMetrics, VActionStrs }
+import scalalib.extensions.*
 
 case class Game(
     situation: Situation,
@@ -57,7 +58,7 @@ case class Game(
     else
       actionStrs.updated(actionStrs.size - 1, actionStrs(actionStrs.size - 1) :+ actionStr)
 
-  //TODO consider if this is still correct when we do from position for Grand Abalone
+  // TODO consider if this is still correct when we do from position for Grand Abalone
   def hasJustSwitchedTurns: Boolean = board.history.currentTurn.isEmpty
 
   def player = situation.player

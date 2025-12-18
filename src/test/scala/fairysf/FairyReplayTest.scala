@@ -61,8 +61,8 @@ class FairyReplayTest extends FairySFTest with ValidatedMatchers {
         Vector("P@j4"),
         Vector("d2d2")
       )
-      playActionStrs(vectorActionStrs.flatten.toList, Some(Game.apply(variant.Flipello10))) must beValid
-        .like { g =>
+      playActionStrs(vectorActionStrs.flatten[String].toList, Some(Game.apply(variant.Flipello10))).toOption must beSome
+        .like { case g =>
           val replay = Replay
             .gameWithUciWhileValid(
               vectorActionStrs,
@@ -73,14 +73,14 @@ class FairyReplayTest extends FairySFTest with ValidatedMatchers {
             .reverse
             .head
             ._1
-          g.plies must_== replay.plies
-          g.turnCount must_== replay.turnCount
-          g.startedAtPly must_== replay.startedAtPly
-          g.startedAtTurn must_== replay.startedAtTurn
-          g.actionStrs must_== replay.actionStrs
-          g.situation.board.pieces must_== replay.situation.board.pieces
-          g.situation.board.history.lastTurn must_== replay.situation.board.history.lastTurn
-          g.situation.board.variant must_== replay.situation.board.variant
+          g.plies === replay.plies
+          g.turnCount === replay.turnCount
+          g.startedAtPly === replay.startedAtPly
+          g.startedAtTurn === replay.startedAtTurn
+          g.actionStrs === replay.actionStrs
+          g.situation.board.pieces === replay.situation.board.pieces
+          g.situation.board.history.lastTurn === replay.situation.board.history.lastTurn
+          g.situation.board.variant === replay.situation.board.variant
         }
     }
 

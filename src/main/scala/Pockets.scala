@@ -59,14 +59,14 @@ object PocketData {
       extends PocketData(
         GameLogic.Chess(),
         p.pockets,
-        p.promoted.map(Pos.Chess)
+        p.promoted.map(Pos.Chess.apply)
       )
 
   case class FairySF(p: fairysf.PocketData)
       extends PocketData(
         GameLogic.FairySF(),
         p.pockets,
-        p.promoted.map(Pos.FairySF)
+        p.promoted.map(Pos.FairySF.apply)
       )
 
   case class Go(p: go.PocketData)

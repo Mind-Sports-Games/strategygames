@@ -71,7 +71,7 @@ class BreakthroughDraughtsTest extends Specification with ValidatedMatchers {
       val s = moves
         .foldLeft(Situation(variant.Breakthrough))((sit, uci) => move(sit, uci))
 
-      s.winner must_== Some(Player.P2)
+      s.winner === Some(Player.P2)
     }
   }
 

@@ -1,7 +1,6 @@
 package strategygames
-import ornicar.scalalib
 
-package object go extends scalalib.Common with scalalib.OrnicarOption with scalalib.OrnicarBoolean {
+package object go {
 
   val P1 = strategygames.Player.P1
   val P2 = strategygames.Player.P2

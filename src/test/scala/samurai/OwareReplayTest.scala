@@ -24,11 +24,11 @@ class OwareReplayTest extends Specification with ValidatedMatchers {
     }
 
     "forsyth method is same as using full steps" in {
-      getFen must_== calcInitialFen
+      getFen === calcInitialFen
     }
 
     "give intial fen as init step" in {
-      initialFen must_== calcInitialFen
+      initialFen === calcInitialFen
     }
   }
 }

@@ -14,32 +14,32 @@ class DameoHistoryTest extends DameoTest with ValidatedMatchers {
       var game      = Game(situation)
 
       /* Starting situation */
-      game.board.history.lastTurn must_== List()
-      game.board.history.currentTurn must_== List()
+      game.board.history.lastTurn === List()
+      game.board.history.currentTurn === List()
 
       /* Single-action move */
       game = applyGameMove(game, Pos.B1, Pos.E4)
-      game.board.history.lastTurn must_== List(Uci.Move(Pos.B1, Pos.E4))
-      game.board.history.currentTurn must_== List()
+      game.board.history.lastTurn === List(Uci.Move(Pos.B1, Pos.E4))
+      game.board.history.currentTurn === List()
 
       /* Single-action move */
       game = applyGameMove(game, Pos.E6, Pos.E5)
-      game.board.history.lastTurn must_== List(Uci.Move(Pos.E6, Pos.E5))
-      game.board.history.currentTurn must_== List()
+      game.board.history.lastTurn === List(Uci.Move(Pos.E6, Pos.E5))
+      game.board.history.currentTurn === List()
 
       /* Multi-action move */
       game = applyGameMove(game, Pos.E4, Pos.E6)
-      game.board.history.lastTurn must_== List(Uci.Move(Pos.E6, Pos.E5))
-      game.board.history.currentTurn must_== List(Uci.Move(Pos.E4, Pos.E6))
+      game.board.history.lastTurn === List(Uci.Move(Pos.E6, Pos.E5))
+      game.board.history.currentTurn === List(Uci.Move(Pos.E4, Pos.E6))
 
       game = applyGameMove(game, Pos.E6, Pos.G6)
-      game.board.history.lastTurn must_== List(Uci.Move(Pos.E4, Pos.E6), Uci.Move(Pos.E6, Pos.G6))
-      game.board.history.currentTurn must_== List()
+      game.board.history.lastTurn === List(Uci.Move(Pos.E4, Pos.E6), Uci.Move(Pos.E6, Pos.G6))
+      game.board.history.currentTurn === List()
 
       /* Single-action move */
       game = applyGameMove(game, Pos.G7, Pos.G5)
-      game.board.history.lastTurn must_== List(Uci.Move(Pos.G7, Pos.G5))
-      game.board.history.currentTurn must_== List()
+      game.board.history.lastTurn === List(Uci.Move(Pos.G7, Pos.G5))
+      game.board.history.currentTurn === List()
 
     }
   }

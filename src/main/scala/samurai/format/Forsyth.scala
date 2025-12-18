@@ -1,6 +1,7 @@
 package strategygames.samurai.format
 
 import cats.implicits._
+import scalalib.extensions.*
 
 import strategygames.Player
 import strategygames.samurai._

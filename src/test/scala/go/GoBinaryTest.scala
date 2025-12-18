@@ -14,35 +14,35 @@ class GoBinaryTest extends Specification with ValidatedMatchers {
     val s_s19 = writeMove("s@s19")
 
     "write single move s@b4" in {
-      s_b4 must_== "01000000,00111010"
+      s_b4 === "01000000,00111010"
     }
 
     "write single move s@a1" in {
-      s_a1 must_== "01000000,00000000"
+      s_a1 === "01000000,00000000"
     }
 
     "write single move s@s19" in {
-      s_s19 must_== "01000001,01101000"
+      s_s19 === "01000001,01101000"
     }
 
     val p = writeMove("pass")
     "write pass" in {
-      p must_== "00000000"
+      p === "00000000"
     }
 
     val ss = writeMove("ss:a4")
     "write selectedSquares a4" in {
-      ss must_== "10000000,00000001,10000000,00111001"
+      ss === "10000000,00000001,10000000,00111001"
     }
 
     val ss_empty = writeMove("ss:")
     "write selectedSquares empty" in {
-      ss_empty must_== "10000000,00000000"
+      ss_empty === "10000000,00000000"
     }
 
     val ss_3stones = writeMove("ss:a1,f11,r19")
     "write selectedSquares 3 dead stones" in {
-      ss_3stones must_== "10000000,00000011,10000000,00000000,10000000,11000011,10000001,01100111"
+      ss_3stones === "10000000,00000011,10000000,00000000,10000000,11000011,10000001,01100111"
     }
 
   }
@@ -52,14 +52,14 @@ class GoBinaryTest extends Specification with ValidatedMatchers {
     val moves            = readMoves(storedActionStrs)
 
     "read moves " in {
-      moves must_== List("s@b4", "pass", "s@a1", "s@s2").map(List(_))
+      moves === List("s@b4", "pass", "s@a1", "s@s2").map(List(_))
     }
 
     val storedActionStrs2 = "01000000,00111010,00000000,00000000,10000000,00000001,10000000,00111010"
     val moves2            = readMoves(storedActionStrs2)
 
     "read moves " in {
-      moves2 must_== List("s@b4", "pass", "pass", "ss:b4").map(List(_))
+      moves2 === List("s@b4", "pass", "pass", "ss:b4").map(List(_))
     }
 
     val storedActionStrs3 =
@@ -67,7 +67,7 @@ class GoBinaryTest extends Specification with ValidatedMatchers {
     val moves3            = readMoves(storedActionStrs3)
 
     "read moves " in {
-      moves3 must_== List("s@b4", "s@a1", "s@s2", "pass", "pass", "ss:b4,s2").map(List(_))
+      moves3 === List("s@b4", "s@a1", "s@s2", "pass", "pass", "ss:b4,s2").map(List(_))
     }
 
   }

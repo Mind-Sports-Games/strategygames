@@ -12,13 +12,13 @@ class BreakthroughTroykaFenTest extends Specification with ValidatedMatchers {
     val pieces = fen.toString()
 
     "be valid" in {
-      pieces must_== "pppppppp/pppppppp/8/8/8/8/PPPPPPPP/PPPPPPPP w - - 0 1"
+      pieces === "pppppppp/pppppppp/8/8/8/8/PPPPPPPP/PPPPPPPP w - - 0 1"
     }
     // @TODO: fairysf.format.Forysth.<<@ which converts a FEN into a Situation.
     // And then tests initialfen and a custom position
 
     "Starting player is white/p1" in {
-      fen.player must_== Some(Player.P1)
+      fen.player === Some(Player.P1)
     }
   }
 
@@ -27,11 +27,11 @@ class BreakthroughTroykaFenTest extends Specification with ValidatedMatchers {
     val pieces = fen.toString()
 
     "be valid" in {
-      pieces must_== "ppppp/ppppp/5/PPPPP/PPPPP w - - 0 1"
+      pieces === "ppppp/ppppp/5/PPPPP/PPPPP w - - 0 1"
     }
 
     "Starting player is white/p1" in {
-      fen.player must_== Some(Player.P1)
+      fen.player === Some(Player.P1)
     }
   }
 }

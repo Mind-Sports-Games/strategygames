@@ -3,10 +3,11 @@ package strategygames.chess.variant
 import cats.data.Validated
 import cats.syntax.option._
 import scala.annotation.nowarn
+import scalalib.extensions.*
 
 import strategygames.chess._
 import strategygames.chess.format.{ FEN, Uci }
-import strategygames.{ GameFamily, Player }
+import strategygames.{ GameFamily, Player, validated }
 
 // Correctness depends on singletons for each variant ID
 abstract class Variant private[variant] (
@@ -140,24 +141,15 @@ abstract class Variant private[variant] (
     def findMove(from: Pos, to: Pos) =
       situation.moves get from flatMap (_.find(_.dest == to))
 
-    for {
-      actor <- situation.board.actors get from toValid "No piece on " + from
-      _     <-
-        if (actor is situation.player) Validated.valid(actor)
-        else Validated.invalid("Not my piece on " + from)
-      m1    <- findMove(
-                 from,
-                 to
-               ) toValid "Piece on " + from + " cannot move to " + to
-      m2    <-
-        m1 withPromotion promotion toValid "Piece on " + from + " cannot promote to " + promotion
-      m3    <-
-        if (isValidPromotion(promotion)) Validated.valid(m2)
-        else
-          Validated.invalid(
-            "Cannot promote to " + promotion + " in this game mode"
-          )
-    } yield m3
+    validated {
+      for {
+        actor <- situation.board.actors.get(from).toRight("No piece on " + from)
+        _     <- Either.cond(actor is situation.player, actor, "Not my piece on " + from)
+        m1    <- findMove(from, to).toRight("Piece on " + from + " cannot move to " + to)
+        m2    <- (m1 withPromotion promotion).toRight("Piece on " + from + " cannot promote to " + promotion)
+        m3    <- Either.cond(isValidPromotion(promotion), m2, "Cannot promote to " + promotion + " in this game mode")
+      } yield m3
+    }
   }
 
   def drop(

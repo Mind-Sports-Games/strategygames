@@ -24,9 +24,9 @@ case class DiceRoll(
 
   def withHistory(h: History) = copy(after = after withHistory h)
 
-  def withMetrics(m: MoveMetrics) = copy(metrics = m)
+  def withMetrics(m: MoveMetrics): DiceRoll = copy(metrics = m)
 
-  def toUci = Uci.DiceRoll(dice)
+  def toUci: Uci.DiceRoll = Uci.DiceRoll(dice)
 
   override def toString = toUci.uci
 

@@ -34,7 +34,7 @@ object EndTurn {
     def situationAfter: Situation = Situation.Backgammon(et.situationAfter)
     def finalizeAfter: Board      = et.finalizeAfter
 
-    def toUci: Uci.EndTurn = Uci.BackgammonEndTurn(et.toUci)
+    def toUci: Uci.EndTurn = Uci.BackgammonEndTurn((et.toUci: backgammon.format.Uci.EndTurn))
 
     val unwrap = et
 

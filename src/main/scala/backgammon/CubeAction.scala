@@ -29,9 +29,9 @@ case class CubeAction(
 
   def lazySituationAfter = situationAfter
 
-  def withMetrics(m: MoveMetrics) = copy(metrics = m)
+  def withMetrics(m: MoveMetrics): CubeAction = copy(metrics = m)
 
-  def toUci = Uci.CubeAction(interaction)
+  def toUci: Uci.CubeAction = Uci.CubeAction(interaction)
 
   override def toString = toUci.uci
 

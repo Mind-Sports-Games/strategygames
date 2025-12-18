@@ -12,7 +12,7 @@ class AbaloneTest extends Specification with IAbaloneTest {
 
   def playUciList(game: Game, ucis: List[Uci]): Validated[String, Game] =
     ucis.foldLeft(Validated.valid(game): Validated[String, Game]) { (vg, action: Uci) =>
-      vg.flatMap { g => g.apply(action).map(_._1) }
+      vg.andThen { g => g.apply(action).map(_._1) }
     }
 
   def playActionStrs(

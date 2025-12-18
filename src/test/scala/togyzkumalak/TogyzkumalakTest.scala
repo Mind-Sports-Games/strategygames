@@ -12,8 +12,8 @@ class TogyzkumalakTest extends Specification with ValidatedMatchers {
   def playUciList(game: Game, ucis: List[Uci]): Validated[String, Game] =
     ucis.foldLeft(Validated.valid(game): Validated[String, Game]) { (vg, action) =>
       action match {
-        case action: Uci.Move => vg.flatMap { g => g.apply(action).map(_._1) }
-        case _                => sys.error("Invalid Uci type")
+        case action: Uci.Move => vg.andThen { g => g.apply(action).map(_._1) }
+        case null                => sys.error("Invalid Uci type")
       }
     }
 

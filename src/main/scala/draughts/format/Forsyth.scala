@@ -2,6 +2,7 @@ package strategygames.draughts
 package format
 
 import cats.implicits._
+import scalalib.extensions.*
 
 import strategygames.Player
 

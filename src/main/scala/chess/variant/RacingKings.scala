@@ -3,6 +3,7 @@ package strategygames.chess.variant
 import strategygames.chess._
 import strategygames.chess.format.FEN
 import strategygames.Player
+import scalalib.extensions.*
 
 case object RacingKings
     extends Variant(
