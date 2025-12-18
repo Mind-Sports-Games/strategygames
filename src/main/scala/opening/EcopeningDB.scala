@@ -33,15 +33,15 @@ object EcopeningDB {
     }
 
     def all(lib : GameLogic): List[Ecopening] = lib match {
-        case GameLogic.Chess() => strategygames.chess.opening.EcopeningDB.all.map(Ecopening.Chess)
-        case GameLogic.Draughts() => strategygames.draughts.opening.EcopeningDB.all.map(Ecopening.Draughts)
-        case GameLogic.FairySF() => strategygames.fairysf.opening.EcopeningDB.all.map(Ecopening.FairySF)
-        case GameLogic.Samurai() => strategygames.samurai.opening.EcopeningDB.all.map(Ecopening.Samurai)
-        case GameLogic.Togyzkumalak() => strategygames.togyzkumalak.opening.EcopeningDB.all.map(Ecopening.Togyzkumalak)
-        case GameLogic.Go() => strategygames.go.opening.EcopeningDB.all.map(Ecopening.Go)
-        case GameLogic.Backgammon() => strategygames.backgammon.opening.EcopeningDB.all.map(Ecopening.Backgammon)
-        case GameLogic.Abalone() => strategygames.abalone.opening.EcopeningDB.all.map(Ecopening.Abalone)
-        case GameLogic.Dameo() => strategygames.dameo.opening.EcopeningDB.all.map(Ecopening.Dameo)
+        case GameLogic.Chess() => strategygames.chess.opening.EcopeningDB.all.map(Ecopening.Chess.apply)
+        case GameLogic.Draughts() => strategygames.draughts.opening.EcopeningDB.all.map(Ecopening.Draughts.apply)
+        case GameLogic.FairySF() => strategygames.fairysf.opening.EcopeningDB.all.map(Ecopening.FairySF.apply)
+        case GameLogic.Samurai() => strategygames.samurai.opening.EcopeningDB.all.map(Ecopening.Samurai.apply)
+        case GameLogic.Togyzkumalak() => strategygames.togyzkumalak.opening.EcopeningDB.all.map(Ecopening.Togyzkumalak.apply)
+        case GameLogic.Go() => strategygames.go.opening.EcopeningDB.all.map(Ecopening.Go.apply)
+        case GameLogic.Backgammon() => strategygames.backgammon.opening.EcopeningDB.all.map(Ecopening.Backgammon.apply)
+        case GameLogic.Abalone() => strategygames.abalone.opening.EcopeningDB.all.map(Ecopening.Abalone.apply)
+        case GameLogic.Dameo() => strategygames.dameo.opening.EcopeningDB.all.map(Ecopening.Dameo.apply)
         case _ => sys.error("Mismatched gamelogic types ecopening db")
     }
 

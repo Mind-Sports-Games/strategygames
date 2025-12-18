@@ -218,7 +218,7 @@ object Variant {
       case _                  => sys.error("Not passed Chess objects")
     }
 
-    val roles: List[Role] = v.roles.map(Role.ChessRole)
+    val roles: List[Role] = v.roles.map(Role.ChessRole.apply)
 
     override def equals(that: Any): Boolean = that match {
       case Chess(v2) => v2.equals(v)
@@ -335,7 +335,7 @@ object Variant {
       case _                     => sys.error("Not passed Draughts objects")
     }
 
-    val roles: List[Role] = v.roles.map(Role.DraughtsRole)
+    val roles: List[Role] = v.roles.map(Role.DraughtsRole.apply)
 
     override def equals(that: Any): Boolean = that match {
       case Draughts(v2) => v2.equals(v)
@@ -450,7 +450,7 @@ object Variant {
       case _                    => sys.error("Not passed FairySF objects")
     }
 
-    val roles: List[Role] = v.roles.map(Role.FairySFRole)
+    val roles: List[Role] = v.roles.map(Role.FairySFRole.apply)
 
     override def equals(that: Any): Boolean = that match {
       case FairySF(v2) => v2.equals(v)
@@ -562,7 +562,7 @@ object Variant {
       case _                    => sys.error("Not passed Samurai objects")
     }
 
-    val roles: List[Role] = v.roles.map(Role.SamuraiRole)
+    val roles: List[Role] = v.roles.map(Role.SamuraiRole.apply)
 
     override def equals(that: Any): Boolean = that match {
       case Samurai(v2) => v2.equals(v)
@@ -674,7 +674,7 @@ object Variant {
       case _                         => sys.error("Not passed Togyzkumalak objects")
     }
 
-    val roles: List[Role] = v.roles.map(Role.TogyzkumalakRole)
+    val roles: List[Role] = v.roles.map(Role.TogyzkumalakRole.apply)
 
     override def equals(that: Any): Boolean = that match {
       case Togyzkumalak(v2) => v2.equals(v)
@@ -787,7 +787,7 @@ object Variant {
       case _               => sys.error("Not passed Go objects")
     }
 
-    val roles: List[Role] = v.roles.map(Role.GoRole)
+    val roles: List[Role] = v.roles.map(Role.GoRole.apply)
 
     override def equals(that: Any): Boolean = that match {
       case Go(v2) => v2.equals(v)
@@ -857,7 +857,7 @@ object Variant {
     def perfIcon: Char = v.perfIcon
 
     def initialFen: FEN        = FEN.Backgammon(v.initialFen)
-    def initialFens: List[FEN] = v.initialFens.map(FEN.Backgammon)
+    def initialFens: List[FEN] = v.initialFens.map(FEN.Backgammon.apply)
     def startPlayer: Player    = v.startPlayer
 
     def recalcStartPlayerForStats: Boolean = v.recalcStartPlayerForStats
@@ -897,7 +897,7 @@ object Variant {
       case _                       => sys.error("Not passed Backgammon objects")
     }
 
-    val roles: List[Role] = v.roles.map(Role.BackgammonRole)
+    val roles: List[Role] = v.roles.map(Role.BackgammonRole.apply)
 
     override def equals(that: Any): Boolean = that match {
       case Backgammon(v2) => v2.equals(v)
@@ -1008,7 +1008,7 @@ object Variant {
       case _                    => sys.error("Not passed Abalone objects")
     }
 
-    val roles: List[Role] = v.roles.map(Role.AbaloneRole)
+    val roles: List[Role] = v.roles.map(Role.AbaloneRole.apply)
 
     override def equals(that: Any): Boolean = that match {
       case Abalone(v2) => v2.equals(v)
@@ -1120,7 +1120,7 @@ object Variant {
       case _                  => sys.error("Not passed Dameo objects")
     }
 
-    val roles: List[Role] = v.roles.map(Role.DameoRole)
+    val roles: List[Role] = v.roles.map(Role.DameoRole.apply)
 
     override def equals(that: Any): Boolean = that match {
       case Dameo(v2) => v2.equals(v)
@@ -1136,30 +1136,30 @@ object Variant {
   }
 
   def all: List[Variant] =
-    chess.variant.Variant.all.map(Chess) :::
-      draughts.variant.Variant.all.map(Draughts) :::
-      dameo.variant.Variant.all.map(Dameo) :::
-      fairysf.variant.Variant.all.map(FairySF) :::
-      samurai.variant.Variant.all.map(Samurai) :::
-      togyzkumalak.variant.Variant.all.map(Togyzkumalak) :::
-      go.variant.Variant.all.map(Go) :::
-      backgammon.variant.Variant.all.map(Backgammon) :::
-      abalone.variant.Variant.all.map(Abalone)
+    chess.variant.Variant.all.map(Chess.apply) :::
+      draughts.variant.Variant.all.map(Draughts.apply) :::
+      dameo.variant.Variant.all.map(Dameo.apply) :::
+      fairysf.variant.Variant.all.map(FairySF.apply) :::
+      samurai.variant.Variant.all.map(Samurai.apply) :::
+      togyzkumalak.variant.Variant.all.map(Togyzkumalak.apply) :::
+      go.variant.Variant.all.map(Go.apply) :::
+      backgammon.variant.Variant.all.map(Backgammon.apply) :::
+      abalone.variant.Variant.all.map(Abalone.apply)
 
   def byId = all map { v => (v.id, v) } toMap
 
   def byKey = all map { v => (v.key, v) } toMap
 
   def all(lib: GameLogic): List[Variant] = lib match {
-    case GameLogic.Draughts()     => draughts.variant.Variant.all.map(Draughts)
-    case GameLogic.Chess()        => chess.variant.Variant.all.map(Chess)
-    case GameLogic.FairySF()      => fairysf.variant.Variant.all.map(FairySF)
-    case GameLogic.Samurai()      => samurai.variant.Variant.all.map(Samurai)
-    case GameLogic.Togyzkumalak() => togyzkumalak.variant.Variant.all.map(Togyzkumalak)
-    case GameLogic.Go()           => go.variant.Variant.all.map(Go)
-    case GameLogic.Backgammon()   => backgammon.variant.Variant.all.map(Backgammon)
-    case GameLogic.Abalone()      => abalone.variant.Variant.all.map(Abalone)
-    case GameLogic.Dameo()        => dameo.variant.Variant.all.map(Dameo)
+    case GameLogic.Draughts()     => draughts.variant.Variant.all.map(Draughts.apply)
+    case GameLogic.Chess()        => chess.variant.Variant.all.map(Chess.apply)
+    case GameLogic.FairySF()      => fairysf.variant.Variant.all.map(FairySF.apply)
+    case GameLogic.Samurai()      => samurai.variant.Variant.all.map(Samurai.apply)
+    case GameLogic.Togyzkumalak() => togyzkumalak.variant.Variant.all.map(Togyzkumalak.apply)
+    case GameLogic.Go()           => go.variant.Variant.all.map(Go.apply)
+    case GameLogic.Backgammon()   => backgammon.variant.Variant.all.map(Backgammon.apply)
+    case GameLogic.Abalone()      => abalone.variant.Variant.all.map(Abalone.apply)
+    case GameLogic.Dameo()        => dameo.variant.Variant.all.map(Dameo.apply)
   }
 
   def byId(lib: GameLogic) = all(lib) map { v =>
@@ -1195,27 +1195,29 @@ object Variant {
   def exists(lib: GameLogic, id: Int): Boolean = byId(lib) contains id
 
   def openingSensibleVariants(lib: GameLogic): Set[Variant] = lib match {
-    case GameLogic.Draughts()     => draughts.variant.Variant.openingSensibleVariants.map(Draughts)
-    case GameLogic.Chess()        => chess.variant.Variant.openingSensibleVariants.map(Chess)
-    case GameLogic.FairySF()      => fairysf.variant.Variant.openingSensibleVariants.map(FairySF)
-    case GameLogic.Samurai()      => samurai.variant.Variant.openingSensibleVariants.map(Samurai)
-    case GameLogic.Togyzkumalak() => togyzkumalak.variant.Variant.openingSensibleVariants.map(Togyzkumalak)
-    case GameLogic.Go()           => go.variant.Variant.openingSensibleVariants.map(Go)
-    case GameLogic.Backgammon()   => backgammon.variant.Variant.openingSensibleVariants.map(Backgammon)
-    case GameLogic.Abalone()      => abalone.variant.Variant.openingSensibleVariants.map(Abalone)
-    case GameLogic.Dameo()        => dameo.variant.Variant.openingSensibleVariants.map(Dameo)
+    case GameLogic.Draughts()     => draughts.variant.Variant.openingSensibleVariants.map(Draughts.apply)
+    case GameLogic.Chess()        => chess.variant.Variant.openingSensibleVariants.map(Chess.apply)
+    case GameLogic.FairySF()      => fairysf.variant.Variant.openingSensibleVariants.map(FairySF.apply)
+    case GameLogic.Samurai()      => samurai.variant.Variant.openingSensibleVariants.map(Samurai.apply)
+    case GameLogic.Togyzkumalak() =>
+      togyzkumalak.variant.Variant.openingSensibleVariants.map(Togyzkumalak.apply)
+    case GameLogic.Go()           => go.variant.Variant.openingSensibleVariants.map(Go.apply)
+    case GameLogic.Backgammon()   => backgammon.variant.Variant.openingSensibleVariants.map(Backgammon.apply)
+    case GameLogic.Abalone()      => abalone.variant.Variant.openingSensibleVariants.map(Abalone.apply)
+    case GameLogic.Dameo()        => dameo.variant.Variant.openingSensibleVariants.map(Dameo.apply)
   }
 
   def divisionSensibleVariants(lib: GameLogic): Set[Variant] = lib match {
-    case GameLogic.Draughts()     => draughts.variant.Variant.divisionSensibleVariants.map(Draughts)
-    case GameLogic.Chess()        => chess.variant.Variant.divisionSensibleVariants.map(Chess)
-    case GameLogic.FairySF()      => fairysf.variant.Variant.divisionSensibleVariants.map(FairySF)
-    case GameLogic.Samurai()      => samurai.variant.Variant.divisionSensibleVariants.map(Samurai)
-    case GameLogic.Togyzkumalak() => togyzkumalak.variant.Variant.divisionSensibleVariants.map(Togyzkumalak)
-    case GameLogic.Go()           => go.variant.Variant.divisionSensibleVariants.map(Go)
-    case GameLogic.Backgammon()   => backgammon.variant.Variant.divisionSensibleVariants.map(Backgammon)
-    case GameLogic.Abalone()      => abalone.variant.Variant.divisionSensibleVariants.map(Abalone)
-    case GameLogic.Dameo()        => dameo.variant.Variant.divisionSensibleVariants.map(Dameo)
+    case GameLogic.Draughts()     => draughts.variant.Variant.divisionSensibleVariants.map(Draughts.apply)
+    case GameLogic.Chess()        => chess.variant.Variant.divisionSensibleVariants.map(Chess.apply)
+    case GameLogic.FairySF()      => fairysf.variant.Variant.divisionSensibleVariants.map(FairySF.apply)
+    case GameLogic.Samurai()      => samurai.variant.Variant.divisionSensibleVariants.map(Samurai.apply)
+    case GameLogic.Togyzkumalak() =>
+      togyzkumalak.variant.Variant.divisionSensibleVariants.map(Togyzkumalak.apply)
+    case GameLogic.Go()           => go.variant.Variant.divisionSensibleVariants.map(Go.apply)
+    case GameLogic.Backgammon()   => backgammon.variant.Variant.divisionSensibleVariants.map(Backgammon.apply)
+    case GameLogic.Abalone()      => abalone.variant.Variant.divisionSensibleVariants.map(Abalone.apply)
+    case GameLogic.Dameo()        => dameo.variant.Variant.divisionSensibleVariants.map(Dameo.apply)
   }
 
   def libStandard(lib: GameLogic): Variant = lib match {

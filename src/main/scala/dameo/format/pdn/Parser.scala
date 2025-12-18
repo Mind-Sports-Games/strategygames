@@ -75,7 +75,7 @@ object Parser {
       flatActionStrs.map { StrMove(_, Glyphs.empty, Nil, Nil) }.to(List),
       variant
     )
-  def objMoves(strMoves: List[StrMove], variant: Variant): Validated[String, Sans]      =
+  private def objMoves(strMoves: List[StrMove], variant: Variant): Validated[String, Sans]      =
     strMoves.map { case StrMove(san, glyphs, comments, variations) =>
       (
         MoveParser(san, variant) map { m =>

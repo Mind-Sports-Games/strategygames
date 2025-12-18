@@ -26,7 +26,7 @@ case class Undo(
 
   def withMetrics(m: MoveMetrics) = copy(metrics = m)
 
-  def toUci = Uci.Undo()
+  def toUci: Uci.Undo = Uci.Undo()
 
   override def toString = toUci.uci
 

@@ -162,8 +162,8 @@ object Forsyth {
         board.withCrazyData(
           _.copy(
             pockets = Pockets(
-              p1 = Pocket(p1.map(_.role).map(strategygames.Role.ChessRole)),
-              p2 = Pocket(p2.map(_.role).map(strategygames.Role.ChessRole))
+              p1 = Pocket(p1.map(_.role).map(strategygames.Role.ChessRole.apply)),
+              p2 = Pocket(p2.map(_.role).map(strategygames.Role.ChessRole.apply))
             )
           )
         )

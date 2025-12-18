@@ -103,31 +103,31 @@ case class Tags(value: List[Tag]) extends AnyVal {
   //       come in via these tags and ensure that the order we look at them is appropriate
   //       what a mess this function is.
   def variant: Option[strategygames.variant.Variant] = chessVariant
-    .map(strategygames.variant.Variant.Chess)
+    .map(strategygames.variant.Variant.Chess.apply)
     .orElse(
       draughtsVariant
-        .map(strategygames.variant.Variant.Draughts)
+        .map(strategygames.variant.Variant.Draughts.apply)
         .orElse(
           fairysfVariant
-            .map(strategygames.variant.Variant.FairySF)
+            .map(strategygames.variant.Variant.FairySF.apply)
             .orElse(
               samuraiVariant
-                .map(strategygames.variant.Variant.Samurai)
+                .map(strategygames.variant.Variant.Samurai.apply)
                 .orElse(
                   togyzkumalakVariant
-                    .map(strategygames.variant.Variant.Togyzkumalak)
+                    .map(strategygames.variant.Variant.Togyzkumalak.apply)
                     .orElse(
                       goVariant
-                        .map(strategygames.variant.Variant.Go)
+                        .map(strategygames.variant.Variant.Go.apply)
                         .orElse(
                           backgammonVariant
-                            .map(strategygames.variant.Variant.Backgammon)
+                            .map(strategygames.variant.Variant.Backgammon.apply)
                             .orElse(
                               abaloneVariant
-                                .map(strategygames.variant.Variant.Abalone)
+                                .map(strategygames.variant.Variant.Abalone.apply)
                                 .orElse(
                                   dameoVariant
-                                    .map(strategygames.variant.Variant.Dameo)
+                                    .map(strategygames.variant.Variant.Dameo.apply)
                                 )
                             )
                         )
@@ -159,15 +159,15 @@ case class Tags(value: List[Tag]) extends AnyVal {
 
   def fen: Option[format.FEN] =
     variant match {
-      case Some(strategygames.variant.Variant.Draughts(_))     => draughtsFen.map(format.FEN.Draughts)
-      case Some(strategygames.variant.Variant.FairySF(_))      => fairysfFen.map(format.FEN.FairySF)
-      case Some(strategygames.variant.Variant.Samurai(_))      => samuraiFen.map(format.FEN.Samurai)
-      case Some(strategygames.variant.Variant.Togyzkumalak(_)) => togyzkumalakFen.map(format.FEN.Togyzkumalak)
-      case Some(strategygames.variant.Variant.Go(_))           => goFen.map(format.FEN.Go)
-      case Some(strategygames.variant.Variant.Backgammon(_))   => backgammonFen.map(format.FEN.Backgammon)
-      case Some(strategygames.variant.Variant.Abalone(_))      => abaloneFen.map(format.FEN.Abalone)
-      case Some(strategygames.variant.Variant.Dameo(_))        => dameoFen.map(format.FEN.Dameo)
-      case Some(strategygames.variant.Variant.Chess(_)) | None => chessFen.map(format.FEN.Chess)
+      case Some(strategygames.variant.Variant.Draughts(_))     => draughtsFen.map(format.FEN.Draughts.apply)
+      case Some(strategygames.variant.Variant.FairySF(_))      => fairysfFen.map(format.FEN.FairySF.apply)
+      case Some(strategygames.variant.Variant.Samurai(_))      => samuraiFen.map(format.FEN.Samurai.apply)
+      case Some(strategygames.variant.Variant.Togyzkumalak(_)) => togyzkumalakFen.map(format.FEN.Togyzkumalak.apply)
+      case Some(strategygames.variant.Variant.Go(_))           => goFen.map(format.FEN.Go.apply)
+      case Some(strategygames.variant.Variant.Backgammon(_))   => backgammonFen.map(format.FEN.Backgammon.apply)
+      case Some(strategygames.variant.Variant.Abalone(_))      => abaloneFen.map(format.FEN.Abalone.apply)
+      case Some(strategygames.variant.Variant.Dameo(_))        => dameoFen.map(format.FEN.Dameo.apply)
+      case Some(strategygames.variant.Variant.Chess(_)) | None => chessFen.map(format.FEN.Chess.apply)
       case Some(_)                                             => sys.error("invalid variant type for fen")
     }
 
