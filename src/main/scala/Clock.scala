@@ -58,7 +58,8 @@ case class SimpleDelayGrace(val delay: Centis) extends ClockTimeGrace {
   def timeWillAdd(remaining: Centis, timeTaken: Centis): Centis =
     ((remaining + timeTaken.atMost(delay)) > Centis(0)) ?? timeTaken.atMost(delay) // up to the delay
 
-  def goBerserk: ClockTimeGrace = NoClockTimeGrace()
+  //change made for SimpleDelay only (not Bronstein) - instead of removing all delay, just half it
+  def goBerserk: ClockTimeGrace = copy(delay = delay.halfCeilSeconds)
   val maxGrace: Centis          = delay
 }
 
@@ -567,14 +568,13 @@ object Clock {
     def show = toString
 
     def showBerserk =
-      if (berserkable) s"${secondsToString((initTime - berserkPenalty).roundSeconds)} d/0" else show
+      if (berserkable) s"${secondsToString((initTime - berserkPenalty).roundSeconds)} d/${delay.halfCeilSeconds.roundSeconds}"
+      else show
 
     override def toString = s"${limitString} d/${delaySeconds}"
 
-    def berserkPenalty =
-      if (limitSeconds < 40 * delaySeconds) Centis(0)
-      else
-        Centis(limitSeconds * (100 / 2))
+    //Unlike other clock types always set to 1/2, because we don't remove all of delay
+    def berserkPenalty = Centis(limitSeconds * (100 / 2))
 
     def initTime = {
       if (limitSeconds == 0) delay.atLeast(Centis(300))
@@ -845,9 +845,9 @@ case class ByoyomiClockPlayer(
 
   def refundPeriods(p: Int) = spendPeriods(-math.min(p, spentPeriods))
 
-  def byoyomi = if (berserk) Centis(0) else config.byoyomi
+  def byoyomi = if (berserk) config.byoyomi.halfCeilSeconds else config.byoyomi
 
-  def periodsTotal = if (berserk) 0 else config.periodsTotal
+  def periodsTotal = config.periodsTotal
 
   def goBerserk = copy(berserk = true)
 
@@ -912,7 +912,7 @@ object ByoyomiClock {
     def startsAtZero = limitSeconds == 0 && hasByoyomi
 
     def berserkPenalty =
-      if (limitSeconds < 60 * incrementSeconds || limitSeconds < 25 * byoyomiSeconds) Centis(0)
+      if (limitSeconds < 40 * incrementSeconds) Centis(0)
       else Centis(limitSeconds * (100 / 2))
 
     def initTime =
@@ -926,12 +926,17 @@ object ByoyomiClock {
 
     def periodsString: String = if (periodsTotal > 1) s"(${periodsTotal}x)" else ""
 
+    def berserkBaseString: String = s"${secondsToString((initTime - berserkPenalty).roundSeconds)}"
+
+    def berserkByoyomiSeconds: String = s"${Centis.ofSeconds(byoyomiSeconds).halfCeilSeconds.roundSeconds}"
+
     def show: String = if (hasByoyomi) s"${baseString}|${byoyomiSeconds}${periodsString}"
     else if (hasIncrement) baseString
     else s"${baseString}|0"
 
     def showBerserk: String =
-      if (berserkable) s"${secondsToString((initTime - berserkPenalty).roundSeconds)}|0" else show
+      if (berserkable) s"${berserkBaseString}|${berserkByoyomiSeconds}${periodsString}"
+      else show
 
     override def toString = s"${limitSeconds}.${incrementSeconds}.${byoyomiSeconds}.${periodsTotal}"
   }
