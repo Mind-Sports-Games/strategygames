@@ -34,12 +34,12 @@ case class NoClockTimeGrace() extends ClockTimeGrace {
 // Fischer increment timer with increment. Increment is always subtracted from
 // the elapsed time when time is used.
 // Thus, remaining time can appear to go up
-case class FischerIncrementGrace(val increment: Centis) extends ClockTimeGrace {
+case class FischerIncrementGrace(val increment: Centis, firstMove: Boolean = true) extends ClockTimeGrace {
   override def timeToAdd(remaining: Centis, timeTaken: Centis): Tuple2[ClockTimeGrace, Centis] =
-    (
-      this,
-      timeWillAdd(remaining, timeTaken)
-    ) // 0 if no time is left, else the increment
+    if (firstMove)
+      (copy(firstMove = false), Centis(0)) // No increment on first move
+    else
+      (this, timeWillAdd(remaining, timeTaken)) // 0 if no time is left, else the increment
 
   def timeWillAdd(remaining: Centis, timeTaken: Centis): Centis =
     (remaining > Centis(0)) ?? increment
