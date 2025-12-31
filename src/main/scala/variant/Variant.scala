@@ -2,6 +2,7 @@ package strategygames.variant
 
 import cats.syntax.option._
 import scala.annotation.nowarn
+import scalalib.extensions.*
 
 import strategygames._
 import strategygames.format.FEN

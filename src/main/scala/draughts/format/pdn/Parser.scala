@@ -8,6 +8,7 @@ import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 
+import strategygames.validated
 import strategygames.format.pgn.{
   Glyph,
   Glyphs,
@@ -46,18 +47,20 @@ object Parser {
       .replace("[/pdn]", "")
       .replace("‑", "-")
       .replace("–", "-")
-    for {
-      splitted    <- splitTagAndMoves(preprocessed)
-      tagStr       = splitted._1
-      moveStr      = splitted._2
-      preTags     <- TagParser(tagStr)
-      parsedMoves <- MovesParser(moveStr)
-      init         = parsedMoves._1
-      strMoves     = parsedMoves._2
-      resultOption = parsedMoves._3
-      tags         = resultOption.filterNot(_ => preTags.exists(_.Result)).fold(preTags)(t => preTags + t)
-      sans        <- objMoves(strMoves, tags.draughtsVariant.getOrElse(Variant.default))
-    } yield ParsedPdn(init, tags, sans)
+    validated {
+      for {
+        splitted    <- splitTagAndMoves(preprocessed).toEither
+        tagStr       = splitted._1
+        moveStr      = splitted._2
+        preTags     <- TagParser(tagStr).toEither
+        parsedMoves <- MovesParser(moveStr).toEither
+        init         = parsedMoves._1
+        strMoves     = parsedMoves._2
+        resultOption = parsedMoves._3
+        tags         = resultOption.filterNot(_ => preTags.exists(_.Result)).fold(preTags)(t => preTags + t)
+        sans        <- objMoves(strMoves, tags.draughtsVariant.getOrElse(Variant.default)).toEither
+      } yield ParsedPdn(init, tags, sans)
+    }
   } catch {
     case _: StackOverflowError =>
       println(pdn)
@@ -241,7 +244,7 @@ object Parser {
     }
 
     def fromFullPdn(pdn: String): Validated[String, Tags] =
-      splitTagAndMoves(pdn) flatMap { case (tags, _) =>
+      splitTagAndMoves(pdn) andThen { case (tags, _) =>
         apply(tags)
       }
 

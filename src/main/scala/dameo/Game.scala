@@ -2,6 +2,7 @@ package strategygames.dameo
 import strategygames.{ ClockBase, MoveMetrics, Player, VActionStrs }
 
 import cats.data.Validated
+import scalalib.extensions.*
 
 import strategygames.dameo.format.{ FEN, Uci }
 import strategygames.dameo.variant.Variant

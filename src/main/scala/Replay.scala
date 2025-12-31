@@ -345,55 +345,55 @@ object Replay {
       draughts.Replay
         .situations(actionStrs, initialFen.map(_.toDraughts), variant, finalSquare)
         .toEither
-        .map(s => s.map(Situation.Draughts))
+        .map(s => s.map(Situation.Draughts.apply))
         .toValidated
     case (GameLogic.Chess(), Variant.Chess(variant))               =>
       chess.Replay
         .situations(actionStrs, initialFen.map(_.toChess), variant)
         .toEither
-        .map(s => s.map(Situation.Chess))
+        .map(s => s.map(Situation.Chess.apply))
         .toValidated
     case (GameLogic.FairySF(), Variant.FairySF(variant))           =>
       fairysf.Replay
         .situations(actionStrs, initialFen.map(_.toFairySF), variant)
         .toEither
-        .map(s => s.map(Situation.FairySF))
+        .map(s => s.map(Situation.FairySF.apply))
         .toValidated
     case (GameLogic.Samurai(), Variant.Samurai(variant))           =>
       samurai.Replay
         .situations(actionStrs, initialFen.map(_.toSamurai), variant)
         .toEither
-        .map(s => s.map(Situation.Samurai))
+        .map(s => s.map(Situation.Samurai.apply))
         .toValidated
     case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant)) =>
       togyzkumalak.Replay
         .situations(actionStrs, initialFen.map(_.toTogyzkumalak), variant)
         .toEither
-        .map(s => s.map(Situation.Togyzkumalak))
+        .map(s => s.map(Situation.Togyzkumalak.apply))
         .toValidated
     case (GameLogic.Go(), Variant.Go(variant))                     =>
       go.Replay
         .situations(actionStrs, initialFen.map(_.toGo), variant)
         .toEither
-        .map(s => s.map(Situation.Go))
+        .map(s => s.map(Situation.Go.apply))
         .toValidated
     case (GameLogic.Backgammon(), Variant.Backgammon(variant))     =>
       backgammon.Replay
         .situations(actionStrs, initialFen.map(_.toBackgammon), variant)
         .toEither
-        .map(s => s.map(Situation.Backgammon))
+        .map(s => s.map(Situation.Backgammon.apply))
         .toValidated
     case (GameLogic.Abalone(), Variant.Abalone(variant))           =>
       abalone.Replay
         .situations(actionStrs, initialFen.map(_.toAbalone), variant)
         .toEither
-        .map(s => s.map(Situation.Abalone))
+        .map(s => s.map(Situation.Abalone.apply))
         .toValidated
     case (GameLogic.Dameo(), Variant.Dameo(variant))               =>
       dameo.Replay
         .situations(actionStrs, initialFen.map(_.toDameo), variant)
         .toEither
-        .map(s => s.map(Situation.Dameo))
+        .map(s => s.map(Situation.Dameo.apply))
         .toValidated
     case _                                                         => sys.error("Mismatched gamelogic types 8")
   }
@@ -486,55 +486,55 @@ object Replay {
           finalSquare
         )
         .toEither
-        .map(b => b.map(Board.Draughts))
+        .map(b => b.map(Board.Draughts.apply))
         .toValidated
     case (GameLogic.Chess(), Variant.Chess(variant))               =>
       chess.Replay
         .boardsFromUci(chessUcis(ucis), initialFen.map(_.toChess), variant)
         .toEither
-        .map(b => b.map(Board.Chess))
+        .map(b => b.map(Board.Chess.apply))
         .toValidated
     case (GameLogic.FairySF(), Variant.FairySF(variant))           =>
       fairysf.Replay
         .boardsFromUci(fairysfUcis(ucis), initialFen.map(_.toFairySF), variant)
         .toEither
-        .map(b => b.map(Board.FairySF))
+        .map(b => b.map(Board.FairySF.apply))
         .toValidated
     case (GameLogic.Samurai(), Variant.Samurai(variant))           =>
       samurai.Replay
         .boardsFromUci(samuraiUcis(ucis), initialFen.map(_.toSamurai), variant)
         .toEither
-        .map(b => b.map(Board.Samurai))
+        .map(b => b.map(Board.Samurai.apply))
         .toValidated
     case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant)) =>
       togyzkumalak.Replay
         .boardsFromUci(togyzkumalakUcis(ucis), initialFen.map(_.toTogyzkumalak), variant)
         .toEither
-        .map(b => b.map(Board.Togyzkumalak))
+        .map(b => b.map(Board.Togyzkumalak.apply))
         .toValidated
     case (GameLogic.Go(), Variant.Go(variant))                     =>
       go.Replay
         .boardsFromUci(goUcis(ucis), initialFen.map(_.toGo), variant)
         .toEither
-        .map(b => b.map(Board.Go))
+        .map(b => b.map(Board.Go.apply))
         .toValidated
     case (GameLogic.Backgammon(), Variant.Backgammon(variant))     =>
       backgammon.Replay
         .boardsFromUci(backgammonUcis(ucis), initialFen.map(_.toBackgammon), variant)
         .toEither
-        .map(b => b.map(Board.Backgammon))
+        .map(b => b.map(Board.Backgammon.apply))
         .toValidated
     case (GameLogic.Abalone(), Variant.Abalone(variant))           =>
       abalone.Replay
         .boardsFromUci(abaloneUcis(ucis), initialFen.map(_.toAbalone), variant)
         .toEither
-        .map(b => b.map(Board.Abalone))
+        .map(b => b.map(Board.Abalone.apply))
         .toValidated
     case (GameLogic.Dameo(), Variant.Dameo(variant))               =>
       dameo.Replay
         .boardsFromUci(dameoUcis(ucis), initialFen.map(_.toDameo), variant)
         .toEither
-        .map(b => b.map(Board.Dameo))
+        .map(b => b.map(Board.Dameo.apply))
         .toValidated
     case _                                                         => sys.error("Mismatched gamelogic types 8a")
   }
@@ -550,55 +550,55 @@ object Replay {
       draughts.Replay
         .situationsFromUci(draughtsUcis(ucis), initialFen.map(_.toDraughts), variant, finalSquare)
         .toEither
-        .map(s => s.map(Situation.Draughts))
+        .map(s => s.map(Situation.Draughts.apply))
         .toValidated
     case (GameLogic.Chess(), Variant.Chess(variant))               =>
       chess.Replay
         .situationsFromUci(chessUcis(ucis), initialFen.map(_.toChess), variant)
         .toEither
-        .map(s => s.map(Situation.Chess))
+        .map(s => s.map(Situation.Chess.apply))
         .toValidated
     case (GameLogic.FairySF(), Variant.FairySF(variant))           =>
       fairysf.Replay
         .situationsFromUci(fairysfUcis(ucis), initialFen.map(_.toFairySF), variant)
         .toEither
-        .map(s => s.map(Situation.FairySF))
+        .map(s => s.map(Situation.FairySF.apply))
         .toValidated
     case (GameLogic.Samurai(), Variant.Samurai(variant))           =>
       samurai.Replay
         .situationsFromUci(samuraiUcis(ucis), initialFen.map(_.toSamurai), variant)
         .toEither
-        .map(s => s.map(Situation.Samurai))
+        .map(s => s.map(Situation.Samurai.apply))
         .toValidated
     case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant)) =>
       togyzkumalak.Replay
         .situationsFromUci(togyzkumalakUcis(ucis), initialFen.map(_.toTogyzkumalak), variant)
         .toEither
-        .map(s => s.map(Situation.Togyzkumalak))
+        .map(s => s.map(Situation.Togyzkumalak.apply))
         .toValidated
     case (GameLogic.Go(), Variant.Go(variant))                     =>
       go.Replay
         .situationsFromUci(goUcis(ucis), initialFen.map(_.toGo), variant)
         .toEither
-        .map(s => s.map(Situation.Go))
+        .map(s => s.map(Situation.Go.apply))
         .toValidated
     case (GameLogic.Backgammon(), Variant.Backgammon(variant))     =>
       backgammon.Replay
         .situationsFromUci(backgammonUcis(ucis), initialFen.map(_.toBackgammon), variant)
         .toEither
-        .map(s => s.map(Situation.Backgammon))
+        .map(s => s.map(Situation.Backgammon.apply))
         .toValidated
     case (GameLogic.Abalone(), Variant.Abalone(variant))           =>
       abalone.Replay
         .situationsFromUci(abaloneUcis(ucis), initialFen.map(_.toAbalone), variant)
         .toEither
-        .map(s => s.map(Situation.Abalone))
+        .map(s => s.map(Situation.Abalone.apply))
         .toValidated
     case (GameLogic.Dameo(), Variant.Dameo(variant))               =>
       dameo.Replay
         .situationsFromUci(dameoUcis(ucis), initialFen.map(_.toDameo), variant)
         .toEither
-        .map(s => s.map(Situation.Dameo))
+        .map(s => s.map(Situation.Dameo.apply))
         .toValidated
     case _                                                         => sys.error("Mismatched gamelogic types 9")
   }
@@ -616,41 +616,41 @@ object Replay {
     case (GameLogic.Draughts(), Variant.Draughts(variant))         =>
       draughts.Replay
         .gameFromUciStrings(ucis.flatten.toList, initialFen.map(_.toDraughts), variant, finalSquare)
-        .map(Game.Draughts)
+        .map(Game.Draughts.apply)
     case (GameLogic.Chess(), Variant.Chess(variant))               =>
       chess.Replay
         .gameFromUciStrings(ucis.flatten.toList, initialFen.map(_.toChess), variant)
-        .map(Game.Chess)
+        .map(Game.Chess.apply)
     case (GameLogic.FairySF(), Variant.FairySF(variant))           =>
       fairysf.Replay
         .gameFromUciStrings(ucis.flatten.toList, initialFen.map(_.toFairySF), variant)
-        .map(Game.FairySF)
+        .map(Game.FairySF.apply)
     case (GameLogic.Samurai(), Variant.Samurai(variant))           =>
       samurai.Replay
         .gameFromUciStrings(ucis.flatten.toList, initialFen.map(_.toSamurai), variant)
-        .map(Game.Samurai)
+        .map(Game.Samurai.apply)
     case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant)) =>
       togyzkumalak.Replay
         .gameFromUciStrings(ucis.flatten.toList, initialFen.map(_.toTogyzkumalak), variant)
-        .map(Game.Togyzkumalak)
+        .map(Game.Togyzkumalak.apply)
     // Go doesnt convert ucis as it runs a different internal function that wants ActionStrs
     // due to optimisation issues
     case (GameLogic.Go(), Variant.Go(variant))                     =>
       go.Replay
         .gameFromUciStrings(ucis, activePlayer, initialFen.map(_.toGo), variant)
-        .map(Game.Go)
+        .map(Game.Go.apply)
     case (GameLogic.Backgammon(), Variant.Backgammon(variant))     =>
       backgammon.Replay
         .gameFromUciStrings(ucis.flatten.toList, initialFen.map(_.toBackgammon), variant)
-        .map(Game.Backgammon)
+        .map(Game.Backgammon.apply)
     case (GameLogic.Abalone(), Variant.Abalone(variant))           =>
       abalone.Replay
         .gameFromUciStrings(ucis.flatten.toList, initialFen.map(_.toAbalone), variant)
-        .map(Game.Abalone)
+        .map(Game.Abalone.apply)
     case (GameLogic.Dameo(), Variant.Dameo(variant))               =>
       dameo.Replay
         .gameFromUciStrings(ucis.flatten.toList, initialFen.map(_.toDameo), variant)
-        .map(Game.Dameo)
+        .map(Game.Dameo.apply)
     case _                                                         => sys.error("Mismatched gamelogic types for Replay 10")
   }
 

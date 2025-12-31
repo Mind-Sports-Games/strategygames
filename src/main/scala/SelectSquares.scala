@@ -38,7 +38,7 @@ object SelectSquares {
     def situationAfter: Situation = Situation.Go(ss.situationAfter)
     def finalizeAfter: Board      = ss.finalizeAfter
 
-    def toUci: Uci.SelectSquares = Uci.GoSelectSquares(ss.toUci)
+    def toUci: Uci.SelectSquares = Uci.GoSelectSquares((ss.toUci: go.format.Uci.SelectSquares))
 
     val unwrap = ss
 

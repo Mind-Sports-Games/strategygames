@@ -1,6 +1,7 @@
 package strategygames.go.format
 
 import cats.implicits._
+import scalalib.extensions.*
 
 import strategygames.Score
 import strategygames.Player

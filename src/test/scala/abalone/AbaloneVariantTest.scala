@@ -43,15 +43,15 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     val validMoves6 = game6.board.variant.validMoves(game6.situation)
 
     "compute the correct number of moves of 1 marble" in {
-      movesOf1.foldLeft(0)(_ + _._2.size) must_== 11
+      movesOf1.foldLeft(0)(_ + _._2.size) === 11
     }
 
     "compute the correct number of moves of 2 and 3 marbles" in {
-      movesOf23.foldLeft(0)(_ + _._2.size) must_== (1 + 1 + 5) + (1 + 1 + 2)
+      movesOf23.foldLeft(0)(_ + _._2.size) === (1 + 1 + 5) + (1 + 1 + 2)
     }
 
     "not have an intersection between moves of 1 marble and other moves" in {
-      board.variant.validMoves(situation).foldLeft(0)(_ + _._2.size) must_== movesOf1.foldLeft(0)(
+      board.variant.validMoves(situation).foldLeft(0)(_ + _._2.size) === movesOf1.foldLeft(0)(
         _ + _._2.size
       ) + movesOf23.foldLeft(0)(_ + _._2.size)
     }
@@ -73,29 +73,29 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     }
 
     "side moves of 3 do move 3 marbles" in {
-      game2.situation.board.pieces.contains(Pos.E6) must_== true
-      game2.situation.board.pieces.contains(Pos.F6) must_== true
-      game2.situation.board.pieces.contains(Pos.G6) must_== true
-      game2.situation.board.pieces.contains(Pos.E4) must_== true
-      game2.situation.board.pieces.contains(Pos.H5) must_== true
-      game2.situation.board.pieces.size must_== 5
+      game2.situation.board.pieces.contains(Pos.E6) === true
+      game2.situation.board.pieces.contains(Pos.F6) === true
+      game2.situation.board.pieces.contains(Pos.G6) === true
+      game2.situation.board.pieces.contains(Pos.E4) === true
+      game2.situation.board.pieces.contains(Pos.H5) === true
+      game2.situation.board.pieces.size === 5
       validMoves2(Pos.E4).map(x => x.toUci.toString) should contain("Move(e4,e5)")
       validMoves2(Pos.E4).map(x => x.toUci.toString) should contain("Move(e4,f5)")
       validMoves2(Pos.H5).map(x => x.toUci.toString) should contain("Move(h5,g5)")
 
-      board.pieces must_== game5.situation.board.pieces
-      game5.situation.board.pieces.size must_== 5
+      board.pieces === game5.situation.board.pieces
+      game5.situation.board.pieces.size === 5
     }
 
     "side moves of 2 do move 2 marbles" in {
-      game6.situation.board.pieces.contains(Pos.E5) must_== true
-      game6.situation.board.pieces.contains(Pos.F4) must_== true
-      game6.situation.board.pieces.contains(Pos.G4) must_== true
-      game6.situation.board.pieces.contains(Pos.E4) must_== true
-      game6.situation.board.pieces.contains(Pos.H5) must_== true
-      game6.situation.board.pieces.size must_== 5
-      validMoves6(Pos.E4).map(x => x.toUci.toString) should not contain "Move(e4,f4)"
-      validMoves6(Pos.E4).map(x => x.toUci.toString) should not contain "Move(e4,e5)"
+      game6.situation.board.pieces.contains(Pos.E5) === true
+      game6.situation.board.pieces.contains(Pos.F4) === true
+      game6.situation.board.pieces.contains(Pos.G4) === true
+      game6.situation.board.pieces.contains(Pos.E4) === true
+      game6.situation.board.pieces.contains(Pos.H5) === true
+      game6.situation.board.pieces.size === 5
+      validMoves6(Pos.E4).map(x => x.toUci.toString) should not(contain("Move(e4,f4)"))
+      validMoves6(Pos.E4).map(x => x.toUci.toString) should not(contain("Move(e4,e5)"))
       validMoves6(Pos.E4).map(x => x.toUci.toString) should contain("Move(e4,f5)")
       validMoves6(Pos.H5).map(x => x.toUci.toString) should contain("Move(h5,g5)")
     }
@@ -120,22 +120,22 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     val movesOf23 = board.variant.validMovesOf2And3(situation)
 
     "compute the correct number of moves of 1 marble" in {
-      movesOf1.foldLeft(0)(_ + _._2.size) must_== 20
+      movesOf1.foldLeft(0)(_ + _._2.size) === 20
     }
 
     "compute the correct number of moves of 2 and 3 marbles" in {
-      movesOf23.foldLeft(0)(_ + _._2.size) must_== 28 + 4
-      movesOf23.get(Pos.A1).get.size must_== 3
-      movesOf23.get(Pos.A2).get.size must_== 2
-      movesOf23.get(Pos.B1).get.size must_== 2
-      movesOf23.get(Pos.B2).get.size must_== 2
-      movesOf23.get(Pos.C2).get.size must_== 2
-      movesOf23.get(Pos.B3).get.size must_== 2
-      movesOf23.get(Pos.C3).get.size must_== 3
+      movesOf23.foldLeft(0)(_ + _._2.size) === 28 + 4
+      movesOf23.get(Pos.A1).get.size === 3
+      movesOf23.get(Pos.A2).get.size === 2
+      movesOf23.get(Pos.B1).get.size === 2
+      movesOf23.get(Pos.B2).get.size === 2
+      movesOf23.get(Pos.C2).get.size === 2
+      movesOf23.get(Pos.B3).get.size === 2
+      movesOf23.get(Pos.C3).get.size === 3
     }
 
     "not have an intersection between moves of 1 marble and other moves" in {
-      board.variant.validMoves(situation).foldLeft(0)(_ + _._2.size) must_== movesOf1.foldLeft(0)(
+      board.variant.validMoves(situation).foldLeft(0)(_ + _._2.size) === movesOf1.foldLeft(0)(
         _ + _._2.size
       ) + movesOf23.foldLeft(0)(_ + _._2.size)
     }
@@ -149,17 +149,17 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     val movesOf23 = board.variant.validMovesOf2And3(situation)
 
     "compute the correct number of moves of 1 marble" in {
-      movesOf1.foldLeft(0)(_ + _._2.size) must_== 40
+      movesOf1.foldLeft(0)(_ + _._2.size) === 40
     }
 
     "compute the correct number of moves of 2 and 3 marbles" in {
-      movesOf23.foldLeft(0)(_ + _._2.size) must_==
+      movesOf23.foldLeft(0)(_ + _._2.size) ===
         (2 + 5 + 4 + 4 + 4 + 2 + 3 + 2 + 1 + 2 + 1 + 2 + 2 + 1) +
           (0 + 4 + (2 + 2 + 3 + 2 + 2 + 2 + 2 + 1 + 1 + 1 + 1))
     }
 
     "not have an intersection between moves of 1 marble and other moves" in {
-      board.variant.validMoves(situation).foldLeft(0)(_ + _._2.size) must_== movesOf1.foldLeft(0)(
+      board.variant.validMoves(situation).foldLeft(0)(_ + _._2.size) === movesOf1.foldLeft(0)(
         _ + _._2.size
       ) + movesOf23.foldLeft(0)(_ + _._2.size)
     }
@@ -173,15 +173,15 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     val movesOf23 = board.variant.validMovesOf2And3(situation)
 
     "compute 28 moves of 1 marble" in {
-      movesOf1.foldLeft(0)(_ + _._2.size) must_== 4 + 6 + 2 * 8 + 2
+      movesOf1.foldLeft(0)(_ + _._2.size) === 4 + 6 + 2 * 8 + 2
     }
 
     "compute the correct number of moves of 2 and 3 marbles" in {
-      movesOf23.foldLeft(0)(_ + _._2.size) must_== 6 + (2 * 2 + 4 + 2) + 4
+      movesOf23.foldLeft(0)(_ + _._2.size) === 6 + (2 * 2 + 4 + 2) + 4
     }
 
     "not have an intersection between moves of 1 marble and other moves" in {
-      board.variant.validMoves(situation).foldLeft(0)(_ + _._2.size) must_== movesOf1.foldLeft(0)(
+      board.variant.validMoves(situation).foldLeft(0)(_ + _._2.size) === movesOf1.foldLeft(0)(
         _ + _._2.size
       ) + movesOf23.foldLeft(0)(_ + _._2.size)
     }
@@ -195,15 +195,15 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     val movesOf23 = board.variant.validMovesOf2And3(situation)
 
     "compute 28 moves of 1 marble" in {
-      movesOf1.foldLeft(0)(_ + _._2.size) must_== 14 * 2
+      movesOf1.foldLeft(0)(_ + _._2.size) === 14 * 2
     }
 
     "compute the correct number of moves of 2 and 3 marbles" in {
-      movesOf23.foldLeft(0)(_ + _._2.size) must_== 2 * (1 + 7 + 9) + 2 * (1 + 3 + 5)
+      movesOf23.foldLeft(0)(_ + _._2.size) === 2 * (1 + 7 + 9) + 2 * (1 + 3 + 5)
     }
 
     "not have an intersection between moves of 1 marble and other moves" in {
-      board.variant.validMoves(situation).foldLeft(0)(_ + _._2.size) must_== movesOf1.foldLeft(0)(
+      board.variant.validMoves(situation).foldLeft(0)(_ + _._2.size) === movesOf1.foldLeft(0)(
         _ + _._2.size
       ) + movesOf23.foldLeft(0)(_ + _._2.size)
     }
@@ -224,15 +224,15 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     val movesOf23 = board.variant.validMovesOf2And3(situation)
 
     "compute 32 moves of 1 marble" in {
-      movesOf1.foldLeft(0)(_ + _._2.size) must_== 3 + 4 + (4 + 3 + 4 + 4 + 4 + 4 + 2)
+      movesOf1.foldLeft(0)(_ + _._2.size) === 3 + 4 + (4 + 3 + 4 + 4 + 4 + 4 + 2)
     }
 
     "compute the correct number of moves of 2 and 3 marbles" in {
-      movesOf23.foldLeft(0)(_ + _._2.size) must_== (0 + 6 + 14) + (0 + 3 + 3)
+      movesOf23.foldLeft(0)(_ + _._2.size) === (0 + 6 + 14) + (0 + 3 + 3)
     }
 
     "not have an intersection between moves of 1 marble and other moves" in {
-      board.variant.validMoves(situation).foldLeft(0)(_ + _._2.size) must_== movesOf1.foldLeft(0)(
+      board.variant.validMoves(situation).foldLeft(0)(_ + _._2.size) === movesOf1.foldLeft(0)(
         _ + _._2.size
       ) + movesOf23.foldLeft(0)(_ + _._2.size)
     }
@@ -241,11 +241,11 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     val movesOf1P2  = board.variant.validMovesOf1(situationP2)
     val movesOf23P2 = board.variant.validMovesOf2And3(situationP2)
     "for P2 : compute 31 moves of 1 marble" in {
-      movesOf1P2.foldLeft(0)(_ + _._2.size) must_== 3 + 2 + 4 + 3 + 4 + 2 + 4 + 3 + 3 + 3
+      movesOf1P2.foldLeft(0)(_ + _._2.size) === 3 + 2 + 4 + 3 + 4 + 2 + 4 + 3 + 3 + 3
     }
 
     "for P2 : compute the correct number of moves of 2 and 3 marbles" in {
-      movesOf23P2.foldLeft(0)(_ + _._2.size) must_== (0 + 2 + (1 + 3 + 3 + 2)) + (0 + 1 + 1)
+      movesOf23P2.foldLeft(0)(_ + _._2.size) === (0 + 2 + (1 + 3 + 3 + 2)) + (0 + 1 + 1)
     }
   }
 
@@ -257,15 +257,15 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     val movesOf23 = board.variant.validMovesOf2And3(situation)
 
     "compute 32 moves of 1 marble" in {
-      movesOf1.foldLeft(0)(_ + _._2.size) must_== 2 + 1 + 1 + 1 + 2 + 1 + 5 + 2 + 3 + 4 + 4 + 1
+      movesOf1.foldLeft(0)(_ + _._2.size) === 2 + 1 + 1 + 1 + 2 + 1 + 5 + 2 + 3 + 4 + 4 + 1
     }
 
     "compute the correct number of moves of 2 and 3 marbles" in {
-      movesOf23.foldLeft(0)(_ + _._2.size) must_== (3 + 4 + (1 + 1 + 1 + 2 + 2 + 3 + 2)) + (3 + 1 + 3)
+      movesOf23.foldLeft(0)(_ + _._2.size) === (3 + 4 + (1 + 1 + 1 + 2 + 2 + 3 + 2)) + (3 + 1 + 3)
     }
 
     "not have an intersection between moves of 1 marble and other moves" in {
-      board.variant.validMoves(situation).foldLeft(0)(_ + _._2.size) must_== movesOf1.foldLeft(0)(
+      board.variant.validMoves(situation).foldLeft(0)(_ + _._2.size) === movesOf1.foldLeft(0)(
         _ + _._2.size
       ) + movesOf23.foldLeft(0)(_ + _._2.size)
     }
@@ -289,8 +289,8 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     val validMoves = board.variant.validMoves(situation);
 
     "not generate a push when a same color marble prevents it (oooxo)" in {
-      validMoves.get(Pos.E5).get.map(x => x.toString) should not contain "p1-Stone e5e2"
-      validMoves.get(Pos.E5).get.map(x => x.toString) should not contain "p1-Stone e5e1"
+      validMoves.get(Pos.E5).get.map(x => x.toString) should not(contain("p1-Stone e5e2"))
+      validMoves.get(Pos.E5).get.map(x => x.toString) should not(contain("p1-Stone e5e1"))
     }
 
     "produce no move from a marble or a group or marbles that are stuck" in {
@@ -300,12 +300,12 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     }
 
     "not move more than 3 marbles" in {
-      validMoves.get(Pos.E3).get.map(x => x.toString) should not contain "p1-Stone e3e7"
-      validMoves.get(Pos.E3).get.map(x => x.toString) should not contain "p1-Stone e3e8"
-      validMoves.get(Pos.E3).get.map(x => x.toString) should not contain "p1-Stone e3e9"
-      validMoves.get(Pos.E3).get.map(x => x.toString) should not contain "p1-Stone e3d6"
-      validMoves.get(Pos.E3).get.map(x => x.toString) should not contain "p1-Stone e3f7"
-      validMoves.get(Pos.E3).get.size must_== 7
+      validMoves.get(Pos.E3).get.map(x => x.toString) should not(contain("p1-Stone e3e7"))
+      validMoves.get(Pos.E3).get.map(x => x.toString) should not(contain("p1-Stone e3e8"))
+      validMoves.get(Pos.E3).get.map(x => x.toString) should not(contain("p1-Stone e3e9"))
+      validMoves.get(Pos.E3).get.map(x => x.toString) should not(contain("p1-Stone e3d6"))
+      validMoves.get(Pos.E3).get.map(x => x.toString) should not(contain("p1-Stone e3f7"))
+      validMoves.get(Pos.E3).get.size === 7
     }
 
     "find and compute all moves that push off (3v2, 3v1, 2v1)" in {
@@ -315,18 +315,18 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
       validMoves.get(Pos.B6).get.map(x => x.toString) should contain("p1-Stone b6e9")
 
       validMoves.get(Pos.A1).get.map(x => x.toString) should contain("p1-Stone a1a4")
-      validMoves.get(Pos.A1).get.map(x => x.toString) should not contain "p1-Stone a1a5"
+      validMoves.get(Pos.A1).get.map(x => x.toString) should not(contain("p1-Stone a1a5"))
     }
 
     "not create a move in case of 2v2 push" in {
-      validMoves.get(Pos.A2).get.map(x => x.toString) should not contain "p1-Stone a2a4"
-      validMoves.get(Pos.A2).get.map(x => x.toString) should not contain "p1-Stone a2a5"
+      validMoves.get(Pos.A2).get.map(x => x.toString) should not(contain("p1-Stone a2a4"))
+      validMoves.get(Pos.A2).get.map(x => x.toString) should not(contain("p1-Stone a2a5"))
     }
 
     "not create a move in case of 3v3 push" in {
-      validMoves.get(Pos.E4).get.map(x => x.toString) should not contain "p1-Stone e4e7"
-      validMoves.get(Pos.E4).get.map(x => x.toString) should not contain "p1-Stone e4e8"
-      validMoves.get(Pos.E4).get.map(x => x.toString) should not contain "p1-Stone e4e9"
+      validMoves.get(Pos.E4).get.map(x => x.toString) should not(contain("p1-Stone e4e7"))
+      validMoves.get(Pos.E4).get.map(x => x.toString) should not(contain("p1-Stone e4e8"))
+      validMoves.get(Pos.E4).get.map(x => x.toString) should not(contain("p1-Stone e4e9"))
     }
   }
 
@@ -350,16 +350,16 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     val game2        = game.apply(validMoves(Pos.F5)(5))
 
     "increment the score of P1" in {
-      board.history.score must_== Score(0, 0)
-      game2.situation.board.history.score must_== Score(1, 0)
+      board.history.score === Score(0, 0)
+      game2.situation.board.history.score === Score(1, 0)
     }
 
     "trigger a stalemate" in {
-      game2.situation.end must_== true
-      game2.situation.staleMate must_== true
-      game2.situation.playable(true) must_== false
-      game2.situation.status must_== Some(Status.Stalemate)
-      game2.situation.winner must_== None
+      game2.situation.end === true
+      game2.situation.staleMate === true
+      game2.situation.playable(true) === false
+      game2.situation.status === Some(Status.Stalemate)
+      game2.situation.winner === None
     }
   }
 
@@ -383,16 +383,16 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     val game2        = game.apply(validMoves(Pos.F5)(5))
 
     "increment the score of P1" in {
-      board.history.score must_== Score(5, 0) // game.situation.board.history.score is Score(0,0)
-      game2.situation.board.history.score must_== Score(6, 0)
+      board.history.score === Score(5, 0) // game.situation.board.history.score is Score(0,0)
+      game2.situation.board.history.score === Score(6, 0)
     }
 
     "trigger a win condition defined by the variant, even though it detects the stalemate" in {
-      game2.situation.end must_== true
-      game2.situation.staleMate must_== true
-      game2.situation.playable(true) must_== false
-      game2.situation.status must_== Some(Status.VariantEnd)
-      game2.situation.winner must_== Some(P1)
+      game2.situation.end === true
+      game2.situation.staleMate === true
+      game2.situation.playable(true) === false
+      game2.situation.status === Some(Status.VariantEnd)
+      game2.situation.winner === Some(P1)
     }
   }
 
@@ -436,55 +436,55 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     val game12       = game11.apply(validMoves11(Pos.G7)(4)) // g7i9
 
     "should be a valid board at beginning and end" in {
-      game.board.valid(true) must_== true
-      game2.board.valid(true) must_== true
-      game11.board.valid(true) must_== true
-      game12.board.valid(true) must_== true
+      game.board.valid(true) === true
+      game2.board.valid(true) === true
+      game11.board.valid(true) === true
+      game12.board.valid(true) === true
     }
 
     "should enter a non reversible state only when pushing out" in {
-      game8.board.variant.isIrreversible(validMoves8(Pos.A2)(3)) must_== false
-      game9.board.variant.isIrreversible(validMoves9(Pos.G8)(3)) must_== true
-      game10.board.variant.isIrreversible(validMoves10(Pos.A1)(0)) must_== false
+      game8.board.variant.isIrreversible(validMoves8(Pos.A2)(3)) === false
+      game9.board.variant.isIrreversible(validMoves9(Pos.G8)(3)) === true
+      game10.board.variant.isIrreversible(validMoves10(Pos.A1)(0)) === false
     }
 
     "increment the score of P1 each time he plays a move" in {
-      board.history.score must_== Score(0, 0)
-      game2.situation.board.history.score must_== Score(1, 0)
-      game4.situation.board.history.score must_== Score(2, 0)
-      game6.situation.board.history.score must_== Score(3, 0)
-      game8.situation.board.history.score must_== Score(4, 0)
-      game10.situation.board.history.score must_== Score(5, 0)
-      game12.situation.board.history.score must_== Score(6, 0)
+      board.history.score === Score(0, 0)
+      game2.situation.board.history.score === Score(1, 0)
+      game4.situation.board.history.score === Score(2, 0)
+      game6.situation.board.history.score === Score(3, 0)
+      game8.situation.board.history.score === Score(4, 0)
+      game10.situation.board.history.score === Score(5, 0)
+      game12.situation.board.history.score === Score(6, 0)
     }
 
     "reset the halMovesSinceLastCapture after P1 push out" in {
-      game2.situation.board.history.halfMoveClock must_== 0
-      game3.situation.board.history.halfMoveClock must_== 1
-      game4.situation.board.history.halfMoveClock must_== 0
-      game5.situation.board.history.halfMoveClock must_== 1
-      game6.situation.board.history.halfMoveClock must_== 0
-      game8.situation.board.history.halfMoveClock must_== 0
-      game10.situation.board.history.halfMoveClock must_== 0
-      game12.situation.board.history.halfMoveClock must_== 0
+      game2.situation.board.history.halfMoveClock === 0
+      game3.situation.board.history.halfMoveClock === 1
+      game4.situation.board.history.halfMoveClock === 0
+      game5.situation.board.history.halfMoveClock === 1
+      game6.situation.board.history.halfMoveClock === 0
+      game8.situation.board.history.halfMoveClock === 0
+      game10.situation.board.history.halfMoveClock === 0
+      game12.situation.board.history.halfMoveClock === 0
     }
 
     "reduce the number of marbles on the board after P1 push out" in {
-      board.pieces.size must_== 7 + 7
-      game2.situation.board.pieces.size must_== 7 + 6
-      game4.situation.board.pieces.size must_== 7 + 5
-      game6.situation.board.pieces.size must_== 7 + 4
-      game8.situation.board.pieces.size must_== 7 + 3
-      game10.situation.board.pieces.size must_== 7 + 2
-      game12.situation.board.pieces.size must_== 7 + 1
+      board.pieces.size === 7 + 7
+      game2.situation.board.pieces.size === 7 + 6
+      game4.situation.board.pieces.size === 7 + 5
+      game6.situation.board.pieces.size === 7 + 4
+      game8.situation.board.pieces.size === 7 + 3
+      game10.situation.board.pieces.size === 7 + 2
+      game12.situation.board.pieces.size === 7 + 1
     }
 
     "trigger a win condition defined by the variant, and no stalemate is detected" in {
-      game12.situation.end must_== true
-      game12.situation.staleMate must_== false
-      game12.situation.playable(true) must_== false
-      game12.situation.status must_== Some(Status.VariantEnd)
-      game12.situation.winner must_== Some(P1)
+      game12.situation.end === true
+      game12.situation.staleMate === false
+      game12.situation.playable(true) === false
+      game12.situation.status === Some(Status.VariantEnd)
+      game12.situation.winner === Some(P1)
     }
   }
 
@@ -527,31 +527,31 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
 
     "trigger a draw by repetition after seing the same situation for the 3rd time, and no stalemate is detected" in {
       // <situation> 1. e5d5, ..a1b1, 2. d5e5, ..b1a1, <situation> 3. e5d5, ..a1b1, 4. d5e5, ..b1a1 <situation>
-      game8.situation.end must_== false
-      game8.situation.playable(true) must_== true
+      game8.situation.end === false
+      game8.situation.playable(true) === true
 
-      game9.situation.end must_== true
-      game9.situation.staleMate must_== false
-      game9.situation.playable(true) must_== false
-      game9.situation.status must_== Some(Status.Draw)
-      game9.situation.winner must_== None
+      game9.situation.end === true
+      game9.situation.staleMate === false
+      game9.situation.playable(true) === false
+      game9.situation.status === Some(Status.Draw)
+      game9.situation.winner === None
     }
 
     "keep incrementing halMovesSinceLastCapture after each player move" in {
-      game2.situation.board.history.halfMoveClock must_== 1
-      game3.situation.board.history.halfMoveClock must_== 2
-      game4.situation.board.history.halfMoveClock must_== 3
-      game5.situation.board.history.halfMoveClock must_== 4
-      game6.situation.board.history.halfMoveClock must_== 5
-      game8.situation.board.history.halfMoveClock must_== 7
-      game10.situation.board.history.halfMoveClock must_== 9
+      game2.situation.board.history.halfMoveClock === 1
+      game3.situation.board.history.halfMoveClock === 2
+      game4.situation.board.history.halfMoveClock === 3
+      game5.situation.board.history.halfMoveClock === 4
+      game6.situation.board.history.halfMoveClock === 5
+      game8.situation.board.history.halfMoveClock === 7
+      game10.situation.board.history.halfMoveClock === 9
     }
 
     "keep being a draw even if in some weird case a neutral move could be played after" in {
-      game10.situation.end must_== true
-      game10.situation.playable(true) must_== false
-      game10.situation.status must_== Some(Status.Draw)
-      game10.situation.winner must_== None
+      game10.situation.end === true
+      game10.situation.playable(true) === false
+      game10.situation.status === Some(Status.Draw)
+      game10.situation.winner === None
     }
   }
 
@@ -601,20 +601,20 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     val game12       = game11.apply(validMoves11(Pos.D5)(3)) // -> d5e5
 
     "not trigger a draw anymore" in {
-      game10.situation.end must_== false
-      game10.situation.playable(true) must_== true
-      game10.situation.status must_== None
-      game10.situation.winner must_== None
+      game10.situation.end === false
+      game10.situation.playable(true) === true
+      game10.situation.status === None
+      game10.situation.winner === None
 
-      game11.situation.end must_== false
-      game11.situation.playable(true) must_== true
-      game11.situation.status must_== None
-      game11.situation.winner must_== None
+      game11.situation.end === false
+      game11.situation.playable(true) === true
+      game11.situation.status === None
+      game11.situation.winner === None
 
-      game12.situation.end must_== false
-      game12.situation.playable(true) must_== true
-      game12.situation.status must_== None
-      game12.situation.winner must_== None
+      game12.situation.end === false
+      game12.situation.playable(true) === true
+      game12.situation.status === None
+      game12.situation.winner === None
     }
   }
 
@@ -674,15 +674,15 @@ class AbaloneVariantTest extends AbaloneTest with ValidatedMatchers {
     val game17       = game16.apply(validMoves16(Pos.A1)(1)) // upRight to B2 : draw
 
     "trigger a draw only from AFTER the 3fold repetition sequence" in {
-      game16.situation.end must_== false
-      game16.situation.playable(true) must_== true
-      game16.situation.status must_== None
-      game16.situation.winner must_== None
+      game16.situation.end === false
+      game16.situation.playable(true) === true
+      game16.situation.status === None
+      game16.situation.winner === None
 
-      game17.situation.end must_== true
-      game17.situation.playable(true) must_== false
-      game17.situation.status must_== Some(Status.Draw)
-      game17.situation.winner must_== None
+      game17.situation.end === true
+      game17.situation.playable(true) === false
+      game17.situation.status === Some(Status.Draw)
+      game17.situation.winner === None
     }
   }
 }
@@ -720,12 +720,12 @@ class AbaloneVariantTestIsometry extends strategygames.chess.ChessTest {
     val stratVariant = StratVariant(lib, Abalone.key).get
 
     _testEveryMoveLoadFenIsometry(lib, StratFen(lib, Abalone.initialFen.value), stratVariant)(
-      abaloneGameActionStrs.flatten.toList.map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) must beValid.like(gameData => {
+      abaloneGameActionStrs.flatten[String].toList.map(uciStr => StratUci(lib, gameFamily, uciStr).get)
+    ) .toOption must beSome.like { case gameData =>
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
-      fen1 must_== fen2
-    })
+      fen1 === fen2
+    }
   }
 
 }

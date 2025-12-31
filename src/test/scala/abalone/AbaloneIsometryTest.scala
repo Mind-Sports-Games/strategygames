@@ -28,11 +28,11 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
       List(
         "h6i5"
       ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) must beValid.like(gameData => {
+    ) .toOption must beSome.like { case gameData =>
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
-      fen1 must_== fen2
-      fen1.value must_== "5/6/7/7S/6S1S/8/7/6/5 0 0 w 1 1"
+      fen1 === fen2
+      fen1.value === "5/6/7/7S/6S1S/8/7/6/5 0 0 w 1 1"
       /*
             _ _ _ _ _
            _ _ _ _ _ _
@@ -44,7 +44,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ _ _ _ _
             _ _ _ _ _
        */
-    })
+    }
   }
 
   "upLeft side move of 2 marbles moving upLeft" in {
@@ -67,11 +67,11 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
       List(
         "g5f6"
       ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) must beValid.like(gameData => {
+    ) .toOption must beSome.like { case gameData =>
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
-      fen1 must_== fen2
-      fen1.value must_== "5/6/7/4SSS1/9/8/7/6/5 0 0 w 1 1"
+      fen1 === fen2
+      fen1.value === "5/6/7/4SSS1/9/8/7/6/5 0 0 w 1 1"
       /*
             _ _ _ _ _
            _ _ _ _ _ _
@@ -83,7 +83,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ _ _ _ _
             _ _ _ _ _
        */
-    })
+    }
   }
 
   "a few downRight side moves for both players" in {
@@ -115,11 +115,11 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
         "b2d1",
         "c3d2"
       ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) must beValid.like(gameData => {
+    ) .toOption must beSome.like { case gameData =>
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
-      fen1 must_== fen2
-      fen1.value must_== "5/6/7/8/9/8/7/2ss2/1SSS1 0 0 b 10 6"
+      fen1 === fen2
+      fen1.value === "5/6/7/8/9/8/7/2ss2/1SSS1 0 0 b 10 6"
       /*
             _ _ _ _ _
            _ _ _ _ _ _
@@ -131,7 +131,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ S S _ _
             _ s s s _
        */
-    })
+    }
   }
 
   "downleft side move of 2 with 1 possible path" in {
@@ -154,11 +154,11 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
       List(
         "h6f5"
       ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) must beValid.like(gameData => {
+    ) .toOption must beSome.like { case gameData =>
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
-      fen1 must_== fen2
-      fen1.value must_== "5/6/7/5S2/5S1S1/8/7/6/5 0 0 w 1 1"
+      fen1 === fen2
+      fen1.value === "5/6/7/5S2/5S1S1/8/7/6/5 0 0 w 1 1"
       /*
             _ _ _ _ _
            _ _ _ _ _ _
@@ -170,7 +170,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ _ _ _ _
             _ _ _ _ _
        */
-    })
+    }
   }
 
   "downleft side move with 2 paths - case 1 - lineDir being left" in {
@@ -193,11 +193,11 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
       List(
         "h6f5"
       ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) must beValid.like(gameData => {
+    ) .toOption must beSome.like { case gameData =>
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
-      fen1 must_== fen2
-      fen1.value must_== "5/6/7/8/5SSS1/8/7/6/5 0 0 w 1 1"
+      fen1 === fen2
+      fen1.value === "5/6/7/8/5SSS1/8/7/6/5 0 0 w 1 1"
       /*
             _ _ _ _ _
            _ _ _ _ _ _
@@ -209,7 +209,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ _ _ _ _
             _ _ _ _ _
        */
-    })
+    }
   }
 
   "downleft side move with 2 paths - case 2 - lineDir being downRight" in {
@@ -232,11 +232,11 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
       List(
         "h6g4"
       ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) must beValid.like(gameData => {
+    ) .toOption must beSome.like { case gameData =>
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
-      fen1 must_== fen2
-      fen1.value must_== "5/6/7/5S2/6S2/6S1/7/6/5 0 0 w 1 1"
+      fen1 === fen2
+      fen1.value === "5/6/7/5S2/6S2/6S1/7/6/5 0 0 w 1 1"
       /*
             _ _ _ _ _
            _ _ _ _ _ _
@@ -248,7 +248,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ _ _ _ _
             _ _ _ _ _
        */
-    })
+    }
   }
 
   "downleft side move with 2 paths - case 1 - lineDir being downLeft and marbles moving left" in {
@@ -271,11 +271,11 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
       List(
         "g6d4"
       ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) must beValid.like(gameData => {
+    ) .toOption must beSome.like { case gameData =>
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
-      fen1 must_== fen2
-      fen1.value must_== "5/6/7/4S3/4S4/3S4/7/6/5 0 0 w 1 1"
+      fen1 === fen2
+      fen1.value === "5/6/7/4S3/4S4/3S4/7/6/5 0 0 w 1 1"
       /*
             _ _ _ _ _
            _ _ _ _ _ _
@@ -287,7 +287,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ _ _ _ _
             _ _ _ _ _
        */
-    })
+    }
   }
 
   "downleft side move with 2 paths - case 2 - lineDir being downLeft and marbles moving downRight" in {
@@ -310,11 +310,11 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
       List(
         "g6e3"
       ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) must beValid.like(gameData => {
+    ) .toOption must beSome.like { case gameData =>
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
-      fen1 must_== fen2
-      fen1.value must_== "5/6/7/8/6S2/5S2/4S2/6/5 0 0 w 1 1"
+      fen1 === fen2
+      fen1.value === "5/6/7/8/6S2/5S2/4S2/6/5 0 0 w 1 1"
       /*
             _ _ _ _ _
            _ _ _ _ _ _
@@ -326,7 +326,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ _ _ _ _
             _ _ _ _ _
        */
-    })
+    }
   }
 
   "upRight side move with 2 paths - case 1 - lineDir being upRight and marbles moving right" in {
@@ -349,11 +349,11 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
       List(
         "e4h6"
       ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) must beValid.like(gameData => {
+    ) .toOption must beSome.like { case gameData =>
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
-      fen1 must_== fen2
-      fen1.value must_== "5/6/7/6S1/6S2/5S2/7/6/5 0 0 w 1 1"
+      fen1 === fen2
+      fen1.value === "5/6/7/6S1/6S2/5S2/7/6/5 0 0 w 1 1"
       /*
             _ _ _ _ _
            _ _ _ _ _ _
@@ -365,7 +365,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ _ _ _ _
             _ _ _ _ _
        */
-    })
+    }
   }
 
   "upRight side move with 2 paths - case 2 - lineDir being upRight and marbles moving upLeft" in {
@@ -388,11 +388,11 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
       List(
         "e4g7"
       ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) must beValid.like(gameData => {
+    ) .toOption must beSome.like { case gameData =>
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
-      fen1 must_== fen2
-      fen1.value must_== "5/6/4S2/4S3/4S4/8/7/6/5 0 0 w 1 1"
+      fen1 === fen2
+      fen1.value === "5/6/4S2/4S3/4S4/8/7/6/5 0 0 w 1 1"
       /*
             _ _ _ _ _
            _ _ _ _ _ _
@@ -404,7 +404,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ _ _ _ _
             _ _ _ _ _
        */
-    })
+    }
   }
 
   "downLeft and upRight side moves with several paths" in {
@@ -432,13 +432,13 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
         "f6g9",
         "d3b2"
       ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) must beValid.like(gameData => {
+    ) .toOption must beSome.like { case gameData =>
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
-      fen1 must_== fen2
-      // fen1.value must_== "5/2s3/3ssss/8/9/8/2S4/2S3/2S2 0 0 b 2 2" // 1
-      // fen1.value must_== "5/2s3/3s3/4sss1/9/8/2SS3/3S2/5 0 0 b 4 3" // 2
-      fen1.value must_== "2S2/3S2/4S2/5SS1/9/8/7/1sss2/5 0 0 b 6 4"
+      fen1 === fen2
+      // fen1.value === "5/2s3/3ssss/8/9/8/2S4/2S3/2S2 0 0 b 2 2" // 1
+      // fen1.value === "5/2s3/3s3/4sss1/9/8/2SS3/3S2/5 0 0 b 4 3" // 2
+      fen1.value === "2S2/3S2/4S2/5SS1/9/8/7/1sss2/5 0 0 b 6 4"
       /*
             _ _ 1 _ _
            _ _ _ 1 _ _
@@ -450,7 +450,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ S S S _ _
             _ _ _ _ _
        */
-    })
+    }
   }
 
   "pushing 2v1 upRight to the edge then 3v1 left to another edge" in {
@@ -474,13 +474,13 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
         "f6h8",
         "i9f9"
       ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) must beValid.like(gameData => {
+    ) .toOption must beSome.like { case gameData =>
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
-      fen1 must_== fen2
-      fen1.value must_== "Ssss1/4S1/4S2/8/9/8/7/6/5 0 0 b 2 2"
+      fen1 === fen2
+      fen1.value === "Ssss1/4S1/4S2/8/9/8/7/6/5 0 0 b 2 2"
 
-    })
+    }
   }
 
   "pushing 3v2 to have a 3v3" in {
@@ -503,13 +503,13 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
       List(
         "g5d5"
       ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) must beValid.like(gameData => {
+    ) .toOption must beSome.like { case gameData =>
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
-      fen1 must_== fen2
-      fen1.value must_== "5/6/7/8/sssSSS3/8/7/6/5 0 0 w 1 1"
+      fen1 === fen2
+      fen1.value === "5/6/7/8/sssSSS3/8/7/6/5 0 0 w 1 1"
 
-    })
+    }
   }
 
   "pushing out 3v2, 3v1, 2v1" in {
@@ -534,13 +534,13 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
         "b1e1",
         "c5a5"
       ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) must beValid.like(gameData => {
+    ) .toOption must beSome.like { case gameData =>
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
-      fen1 must_== fen2
-      fen1.value must_== "5/6/7/8/SS1S5/8/7/6/s1sss 2 1 w 0 2"
+      fen1 === fen2
+      fen1.value === "5/6/7/8/SS1S5/8/7/6/s1sss 2 1 w 0 2"
 
-    })
+    }
   }
 
   "pushing 2v1 then 3v2" in {
@@ -564,13 +564,13 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
         "f5d5",
         "a5d5"
       ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) must beValid.like(gameData => {
+    ) .toOption must beSome.like { case gameData =>
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
-      fen1 must_== fen2
-      fen1.value must_== "5/6/7/8/1sssSS3/8/7/6/5 0 0 b 2 2"
+      fen1 === fen2
+      fen1.value === "5/6/7/8/1sssSS3/8/7/6/5 0 0 b 2 2"
 
-    })
+    }
   }
 
   "several pushing cases with some created on the fly from a more populated situation" in {
@@ -610,14 +610,14 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
         "h9g9",
         "g7g9"
       ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) must beValid.like(gameData => {
+    ) .toOption must beSome.like { case gameData =>
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
-      fen1 must_== fen2
-      // fen1.value must_== "3SS/3sSS/4ss1/s5sS/1s2sss1s/1s3SS1/1S3S1/1S1sS1/S1ss1 0 1 b 2 3" // 00
-      // fen1.value must_== "3SS/3sSS/4ss1/6sS/1s2sss1s/1s3SS1/1s3S1/1S1sS1/SSss1 0 1 w 3 3" // 01
-      // fen1.value must_== "3SS/3sSS/4ss1/6sS/1s2sss1s/1s3SS1/1sS2S1/1S1sS1/1Sss1 0 1 b 4 4" // 02
-      fen1.value must_== "2S2/3SS1/5S1/6Ss/8S/5ss1/1Ss2s1/1S1Ss1/1SS2 6 4 w 0 10"
+      fen1 === fen2
+      // fen1.value === "3SS/3sSS/4ss1/s5sS/1s2sss1s/1s3SS1/1S3S1/1S1sS1/S1ss1 0 1 b 2 3" // 00
+      // fen1.value === "3SS/3sSS/4ss1/6sS/1s2sss1s/1s3SS1/1s3S1/1S1sS1/SSss1 0 1 w 3 3" // 01
+      // fen1.value === "3SS/3sSS/4ss1/6sS/1s2sss1s/1s3SS1/1sS2S1/1S1sS1/1Sss1 0 1 b 4 4" // 02
+      fen1.value === "2S2/3SS1/5S1/6Ss/8S/5ss1/1Ss2s1/1S1Ss1/1SS2 6 4 w 0 10"
       /*
             _ _ 0 _ _   0 0 0
            _ _ _ 0 0 _   0 _
@@ -629,7 +629,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ 0 _ 0 * _   * *
             _ 0 0 _ _   * * *
        */
-    })
+    }
   }
 
   "playing a few side moves and a push out" in {
@@ -665,21 +665,21 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
         "b6c5",
         "f8g6"
       ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) must beValid.like(gameData => {
+    ) .toOption must beSome.like { case gameData =>
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
-      fen1 must_== fen2
-      // fen1.value must_== "s1s2/1s1s2/4s2/1sSSSss1/9/8/7/6/5 0 0 b 2 2" // 1
-      // fen1.value must_== "s1s2/1s1s2/4sss/1sSSS3/9/8/7/6/5 0 0 w 3 2" // 2
-      // fen1.value must_== "s1s2/1s1s2/2SSsss/1sS5/9/8/7/6/5 0 0 b 4 3" // 3
-      // fen1.value must_== "2s2/1s1s2/2sSsss/sSS5/9/8/7/6/5 0 0 b 6 4" // 4
-      // fen1.value must_== "2s2/s2s2/1s1Ssss/sSS5/9/8/7/6/5 0 0 w 7 4" // 5
-      // fen1.value must_== "2s2/s2s2/1s1Ssss/SS6/9/8/7/6/5 0 1 b 0 5" // 6
-      // fen1.value must_== "2s2/s2s2/1sS1s2/SS3ss1/9/8/7/6/5 0 1 b 2 6" // 7
-      // fen1.value must_== "5/s1s3/1sSs3/SS2sss1/9/8/7/6/5 0 1 w 3 6" // 7.5
-      // fen1.value must_== "5/s1s3/1s1s3/SSS1sss1/9/8/7/6/5 0 1 b 4 7" // 8
-      // fen1.value must_== "5/2s3/1s1s3/1SSssss1/3s5/8/7/6/5 0 1 b 4 3" // 9
-      fen1.value must_== "5/3S2/1S2S2/2SS1SS1/1sss5/8/7/6/5 0 1 w 9 9"
+      fen1 === fen2
+      // fen1.value === "s1s2/1s1s2/4s2/1sSSSss1/9/8/7/6/5 0 0 b 2 2" // 1
+      // fen1.value === "s1s2/1s1s2/4sss/1sSSS3/9/8/7/6/5 0 0 w 3 2" // 2
+      // fen1.value === "s1s2/1s1s2/2SSsss/1sS5/9/8/7/6/5 0 0 b 4 3" // 3
+      // fen1.value === "2s2/1s1s2/2sSsss/sSS5/9/8/7/6/5 0 0 b 6 4" // 4
+      // fen1.value === "2s2/s2s2/1s1Ssss/sSS5/9/8/7/6/5 0 0 w 7 4" // 5
+      // fen1.value === "2s2/s2s2/1s1Ssss/SS6/9/8/7/6/5 0 1 b 0 5" // 6
+      // fen1.value === "2s2/s2s2/1sS1s2/SS3ss1/9/8/7/6/5 0 1 b 2 6" // 7
+      // fen1.value === "5/s1s3/1sSs3/SS2sss1/9/8/7/6/5 0 1 w 3 6" // 7.5
+      // fen1.value === "5/s1s3/1s1s3/SSS1sss1/9/8/7/6/5 0 1 b 4 7" // 8
+      // fen1.value === "5/2s3/1s1s3/1SSssss1/3s5/8/7/6/5 0 1 b 4 3" // 9
+      fen1.value === "5/3S2/1S2S2/2SS1SS1/1sss5/8/7/6/5 0 1 w 9 9"
       /*
             _ _ _ _ _   1 _ _
            _ _ _ 1 _ _   _ _
@@ -691,7 +691,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ _ _ _ _   _ _
             _ _ _ _ _   _ _ _
        */
-    })
+    }
   }
 
   "playing a few common moves from Belgian Daisy start position..." in {
@@ -703,12 +703,12 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
         "e9h9",
         "g7g9"
       ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) must beValid.like(gameData => {
+    ) .toOption must beSome.like { case gameData =>
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
-      fen1 must_== fen2
-      fen1.value must_== "1sSsS/sssSSS/1s3S1/8/9/3S4/1SSSss1/SSSsss/3ss 1 1 w 0 3"
-    })
+      fen1 === fen2
+      fen1.value === "1sSsS/sssSSS/1s3S1/8/9/3S4/1SSSss1/SSSsss/3ss 1 1 w 0 3"
+    }
   }
 
   "pushing out 6 marbles consecutively from custom position" in {
@@ -741,11 +741,11 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
         "a1a2",
         "g7i9"
       ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) must beValid.like(gameData => {
+    ) .toOption must beSome.like { case gameData =>
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
-      fen1 must_== fen2
-      fen1.value must_== "3SS/4SS/5S1/8/6S1S/8/7/s5/5 6 0 w 0 6"
+      fen1 === fen2
+      fen1.value === "3SS/4SS/5S1/8/6S1S/8/7/s5/5 6 0 w 0 6"
       /*
             _ _ _ 0 0   _ _ _
            _ _ _ _ 0 0   _ _
@@ -757,7 +757,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
        * _ _ _ _ _   * *
             _ _ _ _ _   * * *
        */
-    })
+    }
   }
 
   "MSO 2024 final game - Francesco SALERNO vs Kyungmin KANG" in {
@@ -811,13 +811,13 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
         "f8e7",
         "g6d6"  // p2 resigns
       ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) must beValid.like(gameData => {
+    ) .toOption must beSome.like { case gameData =>
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
-      fen1 must_== fen2
-      // fen1.value must_== "3ss/SSSsss/1SSS3/3Sss2/4s4/3sSSS1/1sss3/s1sSSS/3S1 0 0 b 8 5" // 01
-      // fen1.value must_== "S2ss/1SS3/2SSs1s/1SSsss2/4ssSS1/3sS3/1sssSSS/s5/3S1 0 0 b 16 9" // 02
-      // fen1.value must_== "S2ss/1SS3/2SSss1/1SSssSS1/3sssSS1/2sssS1S/1ss4/6/3S1 0 0 b 24 13" // 03
+      fen1 === fen2
+      // fen1.value === "3ss/SSSsss/1SSS3/3Sss2/4s4/3sSSS1/1sss3/s1sSSS/3S1 0 0 b 8 5" // 01
+      // fen1.value === "S2ss/1SS3/2SSs1s/1SSsss2/4ssSS1/3sS3/1sssSSS/s5/3S1 0 0 b 16 9" // 02
+      // fen1.value === "S2ss/1SS3/2SSss1/1SSssSS1/3sssSS1/2sssS1S/1ss4/6/3S1 0 0 b 24 13" // 03
       /*
        * _ _ 0 0
            _ * * _ _ _
@@ -829,7 +829,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ _ _ _ _
             _ _ _ * _
        */
-      fen1.value must_== "s3S/4s1/1ssSSSs/ssSSS1S1/2SSSSSs1/3sss2/5s1/6/3s1 1 1 w 14 24"
+      fen1.value === "s3S/4s1/1ssSSSs/ssSSS1S1/2SSSSSs1/3sss2/5s1/6/3s1 1 1 w 14 24"
       /*
        * _ _ _ 0   0 _ _
            _ _ _ _ * _   _ _
@@ -841,7 +841,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ _ _ _ _   _ _
             _ _ _ * _   * _ _
        */
-    })
+    }
   }
 
   "MSO 2023 final game - Jiyun LIM vs Vincent FROCHOT" in {
@@ -948,11 +948,11 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
         "c1d1",
         "f3d1"  // 10
       ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) must beValid.like(gameData => {
+    ) .toOption must beSome.like { case gameData =>
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
-      fen1 must_== fen2
-      // fen1.value must_== "3s1/S1Ssss/1SSS3/3Ssss1/4SS3/3ssS2/1sssS2/ss1SS1/3SS 0 0 b 10 6"  // opening
+      fen1 === fen2
+      // fen1.value === "3s1/S1Ssss/1SSS3/3Ssss1/4SS3/3ssS2/1sssS2/ss1SS1/3SS 0 0 b 10 6"  // opening
       /*
             _ _ _ 0 _
        * _ * 0 0 0
@@ -964,15 +964,15 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            0 0 _ * * _
             _ _ _ * *
        */
-      // fen1.value must_== "3s1/2Ssss/1SSS3/2Ssss2/3SSSS2/3sSsS1/2sss1S/1ss1S1/3S1 0 0 b 20 11" // 02
-      // fen1.value must_== "3s1/3sss/2SS3/Ss1sSSS1/2sSsSs2/3SSsS1/2sSs1S/3ss1/3S1 0 0 b 30 16" // 03
-      // fen1.value must_== "3s1/2Ss2/1SSss2/1ssSSS2/1SsSsSs2/2S1SsS1/2s1s1S/3ss1/3S1 0 0 b 40 21" // 04
-      // fen1.value must_== "5/2Ss2/1SSs3/SS1Sss2/1SsSsSs2/2SsSS2/5ss/3ss1/2S2 1 2 b 0 26" // 05
-      // fen1.value must_== "5/4s1/1SSss2/1SSSsS2/1Ss1SSs2/3SssS1/2Sss2/4ss/2S2 1 2 b 10 31" // 06
-      // fen1.value must_== "2s2/3ssS/2SSSS1/2SSSss1/1Ss1SsSs1/3ss3/2S1s2/4s1/2S2 1 2 b 20 36" // 07
-      // fen1.value must_== "2s2/3Ss1/2S1SS1/3S1S2/1Ss1SS1s1/3sSss1/2S1sS1/3s1s/2S2 1 4 b 0 41" // 08
-      // fen1.value must_== "5/2s1s1/2S1SS1/4sS2/1Ss1SsS2/4Sss1/2sSS2/2sSS1/2Ss1 1 4 b 10 46" // 09
-      fen1.value must_== "5/2S1S1/2s1ss1/5s2/1sS2Ss2/3SSS2/2s1s2/1Ssss1/1s1s1 1 6 b 0 51" // 10
+      // fen1.value === "3s1/2Ssss/1SSS3/2Ssss2/3SSSS2/3sSsS1/2sss1S/1ss1S1/3S1 0 0 b 20 11" // 02
+      // fen1.value === "3s1/3sss/2SS3/Ss1sSSS1/2sSsSs2/3SSsS1/2sSs1S/3ss1/3S1 0 0 b 30 16" // 03
+      // fen1.value === "3s1/2Ss2/1SSss2/1ssSSS2/1SsSsSs2/2S1SsS1/2s1s1S/3ss1/3S1 0 0 b 40 21" // 04
+      // fen1.value === "5/2Ss2/1SSs3/SS1Sss2/1SsSsSs2/2SsSS2/5ss/3ss1/2S2 1 2 b 0 26" // 05
+      // fen1.value === "5/4s1/1SSss2/1SSSsS2/1Ss1SSs2/3SssS1/2Sss2/4ss/2S2 1 2 b 10 31" // 06
+      // fen1.value === "2s2/3ssS/2SSSS1/2SSSss1/1Ss1SsSs1/3ss3/2S1s2/4s1/2S2 1 2 b 20 36" // 07
+      // fen1.value === "2s2/3Ss1/2S1SS1/3S1S2/1Ss1SS1s1/3sSss1/2S1sS1/3s1s/2S2 1 4 b 0 41" // 08
+      // fen1.value === "5/2s1s1/2S1SS1/4sS2/1Ss1SsS2/4Sss1/2sSS2/2sSS1/2Ss1 1 4 b 10 46" // 09
+      fen1.value === "5/2S1S1/2s1ss1/5s2/1sS2Ss2/3SSS2/2s1s2/1Ssss1/1s1s1 1 6 b 0 51" // 10
       /*
             _ _ _ _ _   0 0 0
            _ _ 0 _ 0 _   0 0
@@ -984,7 +984,7 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ 0 * * * _   _ _
             _ * _ * _   * _ _
        */
-    })
+    }
   }
 
   "MSO 2022 final game - Francesco SALERNO vs Vincent FROCHOT" in {
@@ -1077,11 +1077,11 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
         "d3f5",
         "g8i8"
       ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) must beValid.like(gameData => {
+    ) .toOption must beSome.like { case gameData =>
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
-      fen1 must_== fen2
-      // fen1.value must_== "3ss/S1Ssss/1SS4/3SSss1/3SsS3/3ssS2/1sss3/s2SSS/3SS 0 0 b 10 6" // opening
+      fen1 === fen2
+      // fen1.value === "3ss/S1Ssss/1SS4/3SSss1/3SsS3/3ssS2/1sss3/s2SSS/3SS 0 0 b 10 6" // opening
       /*
             _ _ _ 0 0
        * _ * 0 0 0
@@ -1093,14 +1093,14 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            0 _ _ * * *
             _ _ _ * *
        */
-      // fen1.value must_== "3ss/1S1sss/2SSS2/1SSss1s1/3SsSs2/4ssS1/2sSS2/s2S2/3SS 0 0 b 20 11" // 02
-      // fen1.value must_== "3ss/3sss/1S1SS2/1Sss1S2/2SSSs3/2Sss1S1/2sss2/s1S3/2SSS 0 0 b 30 16" // 03
-      // fen1.value must_== "3ss/3sss/1SsSS2/2SsSS2/2SSSss2/2SsssS1/2Ss3/s5/3SS 0 0 b 40 21" // 04
-      // fen1.value must_== "4s/3s1s/1S1SSSs/2S1SsS1/2SSSss2/2SsssS1/2ss3/s5/3SS 0 1 b 4 26" // 05
-      // fen1.value must_== "4s/3s1s/1SSS1S1/2SsSsss/4SSSs1/2SS1sS1/2ss3/ss4/3SS 0 1 b 14 31" // 06
-      // fen1.value must_== "4s/3ss1/1SSSs2/4SSSs/3sSSSSs/2SSss2/2ss3/3s2/3SS 0 2 b 2 36" // 07
-      // fen1.value must_== "5/4Ss/2SsSs1/5SSS/3s1SsSS/2SSsS2/3ss2/4s1/3SS 0 5 b 0 41" // 08
-      fen1.value must_== "4S/4ss/2sS1s1/5sss/3SSSSss/2ssSs2/4S2/6/3ss 0 6 b 0 44"
+      // fen1.value === "3ss/1S1sss/2SSS2/1SSss1s1/3SsSs2/4ssS1/2sSS2/s2S2/3SS 0 0 b 20 11" // 02
+      // fen1.value === "3ss/3sss/1S1SS2/1Sss1S2/2SSSs3/2Sss1S1/2sss2/s1S3/2SSS 0 0 b 30 16" // 03
+      // fen1.value === "3ss/3sss/1SsSS2/2SsSS2/2SSSss2/2SsssS1/2Ss3/s5/3SS 0 0 b 40 21" // 04
+      // fen1.value === "4s/3s1s/1S1SSSs/2S1SsS1/2SSSss2/2SsssS1/2ss3/s5/3SS 0 1 b 4 26" // 05
+      // fen1.value === "4s/3s1s/1SSS1S1/2SsSsss/4SSSs1/2SS1sS1/2ss3/ss4/3SS 0 1 b 14 31" // 06
+      // fen1.value === "4s/3ss1/1SSSs2/4SSSs/3sSSSSs/2SSss2/2ss3/3s2/3SS 0 2 b 2 36" // 07
+      // fen1.value === "5/4Ss/2SsSs1/5SSS/3s1SsSS/2SSsS2/3ss2/4s1/3SS 0 5 b 0 41" // 08
+      fen1.value === "4S/4ss/2sS1s1/5sss/3SSSSss/2ssSs2/4S2/6/3ss 0 6 b 0 44"
       /*
             _ _ _ _ 0   0 0 0
            _ _ _ _ * *   0 0
@@ -1112,6 +1112,6 @@ class AbaloneIsometryTest extends strategygames.chess.ChessTest {
            _ _ _ _ _ _   _ _
             _ _ _ * *   _ _ _
        */
-    })
+    }
   }
 }

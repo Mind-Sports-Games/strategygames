@@ -1,9 +1,8 @@
 package strategygames
-import ornicar.scalalib
 
 import scala.util.Try
 
-package object draughts extends scalalib.Common with scalalib.OrnicarOption with scalalib.OrnicarBoolean {
+package object draughts {
 
   val P1 = strategygames.Player.P1
   val P2 = strategygames.Player.P2

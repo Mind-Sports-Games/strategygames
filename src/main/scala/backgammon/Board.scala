@@ -1,9 +1,9 @@
 package strategygames.backgammon
 
+import scalalib.extensions.*
+
 import strategygames.Player
-
 import format.Uci
-
 import variant.Variant
 
 case class Board(
@@ -13,7 +13,7 @@ case class Board(
     pocketData: Option[PocketData] = None,
     unusedDice: List[Int] = List.empty,
     cubeData: Option[CubeData] = None
-) extends strategygames.Board {
+) {
 
   def apply(at: Pos): Option[Piece] = (pieces get at).map(_._1)
   def apply(file: File, rank: Rank) = pieces get Pos(file, rank)

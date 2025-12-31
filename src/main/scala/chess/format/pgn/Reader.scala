@@ -5,6 +5,7 @@ import strategygames.{ ActionStrs, ByoyomiClock, Clock, Situation => StratSituat
 import strategygames.format.pgn.{ ParsedPgn, Sans, Tags }
 
 import cats.data.Validated
+import scalalib.extensions.*
 
 object Reader {
 

@@ -3,6 +3,7 @@ package strategygames.samurai.variant
 import cats.data.Validated
 import cats.syntax.option._
 import scala.annotation.nowarn
+import scalalib.extensions.*
 
 import strategygames.samurai._
 import strategygames.samurai.format.{ FEN, Forsyth }

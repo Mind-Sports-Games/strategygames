@@ -2,6 +2,7 @@ package strategygames.samurai
 import strategygames.{ ClockBase, MoveMetrics, Player, VActionStrs }
 
 import cats.data.Validated
+import scalalib.extensions.*
 
 import strategygames.samurai.format.{ FEN, Uci }
 

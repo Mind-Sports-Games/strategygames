@@ -4,6 +4,8 @@ import scala.annotation.nowarn
 import java.text.DecimalFormat
 import cats.syntax.option._
 import scala.util.chaining._
+import scalalib.extensions.*
+import Centis._
 
 // Abstract timer trait
 trait TimerTrait {
@@ -248,6 +250,7 @@ sealed trait ClockBase {
   def lagCompAvg: Centis
   def setRemainingTime(p: Player, t: Centis): ClockBase
   def isPaused: Boolean
+  def resetTimeStamper: ClockBase
 
   def currentClockFor(c: Player): ClockInfoBase
 
@@ -297,18 +300,18 @@ case class ClockPlayer(
 ) extends PlayerTimerBase {
   val elapsed = timer.elapsed
 
-  def recordLag(l: Centis) = copy(lag = lag.recordLag(l))
+  def recordLag(l: Centis): ClockPlayer = copy(lag = lag.recordLag(l))
 
   def applyClockGrace(t: Centis, isRunning: Boolean) =
     copy(timer = timer.applyClockGrace(t, isRunning), completedActionsOfTurnTime = Centis(0))
   def takeTime(t: Centis)        = copy(timer = timer.takeTime(t))
 
-  def setRemaining(t: Centis) = copy(timer = timer.setRemaining(t))
+  def setRemaining(t: Centis): ClockPlayer = copy(timer = timer.setRemaining(t))
 
   // Honestly going berserk should just change your clock completely and shouldn't be
   // at this level. That's lila/lichess decision, but fine.
   // Going berserk changes your timer
-  def goBerserk                        = copy(
+  def goBerserk: ClockPlayer = copy(
     berserk = true,
     timer = timer.goBerserk(config.berserkPenalty)
   )
@@ -720,6 +723,10 @@ case class ByoyomiClock(
 
   def withTimestamper(timestamper: Timestamper) = copy(timestamper = timestamper)
 
+  def resetTimeStamper = copy(
+    timestamp = timestamp.map(_ => now)
+  )
+
   private def updatePlayer(c: Player)(f: ByoyomiClockPlayer => ByoyomiClockPlayer) =
     copy(players = players.update(c, f))
 
@@ -795,7 +802,7 @@ case class ByoyomiClock(
           else
             updatePlayer(player) {
               _.takeTime(
-                moveTime - ((clockActive && switchClock) ?? Centis(
+                moveTime - ((clockActive && switchClock) so Centis(
                   competitor.graceSeconds * 100
                 ))
               )
@@ -838,7 +845,7 @@ case class ByoyomiClockPlayer(
     completedActionsOfTurnTime: Centis = Centis(0)
 ) extends PlayerTimerBase {
 
-  def recordLag(l: Centis) = copy(lag = lag.recordLag(l))
+  def recordLag(l: Centis): ByoyomiClockPlayer = copy(lag = lag.recordLag(l))
 
   def periodsLeft = math.max(periodsTotal - spentPeriods, 0)
 
@@ -847,19 +854,19 @@ case class ByoyomiClockPlayer(
 
   def giveTime(t: Centis): ByoyomiClockPlayer = takeTime(-t)
 
-  def setRemaining(t: Centis) = copy(elapsed = limit - t)
+  def setRemaining(t: Centis): ByoyomiClockPlayer = copy(elapsed = limit - t)
 
-  def setPeriods(p: Int) = copy(spentPeriods = p)
+  def setPeriods(p: Int): ByoyomiClockPlayer = copy(spentPeriods = p)
 
-  def spendPeriods(p: Int) = copy(spentPeriods = spentPeriods + p)
+  def spendPeriods(p: Int): ByoyomiClockPlayer = copy(spentPeriods = spentPeriods + p)
 
-  def refundPeriods(p: Int) = spendPeriods(-math.min(p, spentPeriods))
+  def refundPeriods(p: Int): ByoyomiClockPlayer = spendPeriods(-math.min(p, spentPeriods))
 
   def byoyomi = if (berserk) config.byoyomi.halfCeilSeconds else config.byoyomi
 
   def periodsTotal = config.periodsTotal
 
-  def goBerserk = copy(berserk = true)
+  def goBerserk: ByoyomiClockPlayer = copy(berserk = true)
 
   def remaining: Centis = limit - elapsed
 

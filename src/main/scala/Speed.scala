@@ -1,5 +1,7 @@
 package strategygames
 
+import scalalib.extensions.*
+
 sealed abstract class Speed(
     val id: Int,
     val key: String,

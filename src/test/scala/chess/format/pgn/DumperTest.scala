@@ -19,7 +19,7 @@ class DumperTest extends ChessTest {
           )
       }
       val move = game(Pos.F2, Pos.F4).toOption.get._2
-      Dumper(move) must_== "f4+"
+      Dumper(move) === "f4+"
     }
   }
 
@@ -82,15 +82,15 @@ class DumperTest extends ChessTest {
   "standard game" should {
     "move list" in {
       "Gioachine Greco" in {
-        gioachineGreco map (_.actionStrs.flatten) must beValid.like { case ms =>
-          ms must_== "d4 d5 c4 dxc4 e3 b5 a4 c6 axb5 cxb5 Qf3".split(' ').toList
+        gioachineGreco.map(_.actionStrs.flatten).toOption must beSome.like { case ms =>
+          ms must beEqualTo("d4 d5 c4 dxc4 e3 b5 a4 c6 axb5 cxb5 Qf3".split(' ').toList)
         }
       }
       "Peruvian Immortal" in {
-        peruvianImmortal map (_.actionStrs.flatten) must beValid.like { case ms =>
-          ms must_== "e4 d5 exd5 Qxd5 Nc3 Qa5 d4 c6 Nf3 Bg4 Bf4 e6 h3 Bxf3 Qxf3 Bb4 Be2 Nd7 a3 O-O-O axb4 Qxa1+ Kd2 Qxh1 Qxc6+ bxc6 Ba6#"
+        peruvianImmortal.map(_.actionStrs.flatten).toOption must beSome.like { case ms =>
+          ms must beEqualTo("e4 d5 exd5 Qxd5 Nc3 Qa5 d4 c6 Nf3 Bg4 Bf4 e6 h3 Bxf3 Qxf3 Bb4 Be2 Nd7 a3 O-O-O axb4 Qxa1+ Kd2 Qxh1 Qxc6+ bxc6 Ba6#"
             .split(' ')
-            .toList
+            .toList)
         }
       }
     }
@@ -98,10 +98,10 @@ class DumperTest extends ChessTest {
 
   "three check variant" should {
     "move list" in {
-      threeCheck map (_.actionStrs.flatten) must beValid.like { case ms =>
-        ms must_== "e4 c5 Bc4 Nc6 Bxf7+ Kxf7 Qh5+ g6 Qxg6#"
+      threeCheck.map(_.actionStrs.flatten).toOption must beSome.like { case ms =>
+        ms must beEqualTo("e4 c5 Bc4 Nc6 Bxf7+ Kxf7 Qh5+ g6 Qxg6#"
           .split(' ')
-          .toList
+          .toList)
       }
     }
   }
@@ -118,8 +118,8 @@ P    k
 PP   PPP
 KNBQ BNR
 """)
-      game.playMoves(A7 -> A8) map (_.actionStrs.flatten) must beValid.like { case ms =>
-        ms must_== List("a8=Q")
+      game.playMoves(A7 -> A8).map(_.actionStrs.flatten).toOption must beSome.like { case ms =>
+        ms must beEqualTo(List("a8=Q"))
       }
     }
     "with check" in {
@@ -133,8 +133,8 @@ P
 PP   PPP
 KNBQ BNR
 """)
-      game.playMoves(A7 -> A8) map (_.actionStrs.flatten) must beValid.like { case ms =>
-        ms must_== List("a8=Q+")
+      game.playMoves(A7 -> A8).map(_.actionStrs.flatten).toOption must beSome.like { case ms =>
+        ms must beEqualTo(List("a8=Q+"))
       }
     }
     "with checkmate" in {
@@ -148,24 +148,24 @@ P  ppp
 PP   PPP
 KNBQ BNR
 """)
-      game.playMoves(A7 -> A8) map (_.actionStrs.flatten) must beValid.like { case ms =>
-        ms must_== List("a8=Q#")
+      game.playMoves(A7 -> A8).map(_.actionStrs.flatten).toOption must beSome.like { case ms =>
+        ms must beEqualTo(List("a8=Q#"))
       }
     }
     "castle kingside" in {
       Game("""
 PP   PPP
 R   K  R
-""").playMoves(E1 -> G1) map (_.actionStrs.flatten) must beValid.like { case ms =>
-        ms must_== List("O-O")
+""").playMoves(E1 -> G1).map(_.actionStrs.flatten).toOption must beSome.like { case ms =>
+        ms must beEqualTo(List("O-O"))
       }
     }
     "castle queenside" in {
       Game("""
 PP   PPP
 R   K  R
-""").playMoves(E1 -> C1) map (_.actionStrs.flatten) must beValid.like { case ms =>
-        ms must_== List("O-O-O")
+""").playMoves(E1 -> C1).map(_.actionStrs.flatten).toOption must beSome.like { case ms =>
+        ms must beEqualTo(List("O-O-O"))
       }
     }
   }
@@ -182,8 +182,8 @@ k
 P   K  P
 R      R
 """)
-      game.playMoves(H1 -> B1) map (_.actionStrs.flatten) must beValid.like { case ms =>
-        ms must_== List("Rhb1")
+      game.playMoves(H1 -> B1).map(_.actionStrs.flatten).toOption must beSome.like { case ms =>
+        ms must beEqualTo(List("Rhb1"))
       }
     }
     "ambiguous rank only" in {
@@ -197,8 +197,8 @@ k
     K  P
  N
 """)
-      game.playMoves(B5 -> C3) map (_.actionStrs.flatten) must beValid.like { case ms =>
-        ms must_== List("N5c3")
+      game.playMoves(B5 -> C3).map(_.actionStrs.flatten).toOption must beSome.like { case ms =>
+        ms must beEqualTo(List("N5c3"))
       }
     }
     "ambiguous file and rank" in {
@@ -212,8 +212,8 @@ k
     K
 k
 """)
-      game.playMoves(C6 -> D5) map (_.actionStrs.flatten) must beValid.like { case ms =>
-        ms must_== List("Qc6d5")
+      game.playMoves(C6 -> D5).map(_.actionStrs.flatten).toOption must beSome.like { case ms =>
+        ms must beEqualTo(List("Qc6d5"))
       }
     }
     "unambiguous file" in {
@@ -227,8 +227,8 @@ k
 P      P
 R   K  R
 """)
-      game.playMoves(H1 -> F1) map (_.actionStrs.flatten) must beValid.like { case ms =>
-        ms must_== List("Rf1")
+      game.playMoves(H1 -> F1).map(_.actionStrs.flatten).toOption must beSome.like { case ms =>
+        ms must beEqualTo(List("Rf1"))
       }
     }
     "unambiguous rank" in {
@@ -242,8 +242,8 @@ k
 
 
 """)
-      game.playMoves(E4 -> E5) map (_.actionStrs.flatten) must beValid.like { case ms =>
-        ms must_== List("Re5")
+      game.playMoves(E4 -> E5).map(_.actionStrs.flatten).toOption must beSome.like { case ms =>
+        ms must beEqualTo(List("Re5"))
       }
     }
   }
@@ -258,8 +258,8 @@ NRK RQBB
 """,
           variant.Chess960
         )
-      ).playMoves(C1 -> B1) map (_.actionStrs.flatten) must beValid.like { case ms =>
-        ms must_== List("O-O-O")
+      ).playMoves(C1 -> B1).map(_.actionStrs.flatten).toOption must beSome.like { case ms =>
+        ms must beEqualTo(List("O-O-O"))
       }
     }
     "castle kingside as p1" in {
@@ -271,8 +271,8 @@ NRK R  B
 """,
           variant.Chess960
         )
-      ).playMoves(C1 -> E1) map (_.actionStrs.flatten) must beValid.like { case ms =>
-        ms must_== List("O-O")
+      ).playMoves(C1 -> E1).map(_.actionStrs.flatten).toOption must beSome.like { case ms =>
+        ms must beEqualTo(List("O-O"))
       }
     }
     "castle queenside as p2" in {
@@ -290,8 +290,8 @@ NRK RQBB
 """,
           variant.Chess960
         )
-      ).withPlayer(P2).playMoves(C8 -> B8) map (_.actionStrs.flatten) must beValid.like { case ms =>
-        ms must_== List("O-O-O")
+      ).withPlayer(P2).playMoves(C8 -> B8).map(_.actionStrs.flatten).toOption must beSome.like { case ms =>
+        ms must beEqualTo(List("O-O-O"))
       }
     }
     "castle kingside as p2" in {
@@ -309,8 +309,8 @@ NRK RQBB
 """,
           variant.Chess960
         )
-      ).withPlayer(P2).playMoves(C8 -> E8) map (_.actionStrs.flatten) must beValid.like { case ms =>
-        ms must_== List("O-O")
+      ).withPlayer(P2).playMoves(C8 -> E8).map(_.actionStrs.flatten).toOption must beSome.like { case ms =>
+        ms must beEqualTo(List("O-O"))
       }
     }
     "opening with castles" in {
@@ -336,8 +336,8 @@ NRKNRQBB
         C3 -> B5,
         C8 -> B8,
         C1 -> B1
-      ) map (_.actionStrs.flatten) must beValid.like { case ms =>
-        ms must_== "f4 Nc6 Nc3 g6 Nb5 O-O-O O-O-O".split(' ').toList
+      ).map(_.actionStrs.flatten).toOption must beSome.like { case ms =>
+        ms must beEqualTo("f4 Nc6 Nc3 g6 Nb5 O-O-O O-O-O".split(' ').toList)
       }
     }
     "tricky rook disambiguation" in {
@@ -345,19 +345,19 @@ NRKNRQBB
       val sit           = strategygames.chess.format.Forsyth.<<(fen).get
       val game1         = Game(sit.board, sit.player)
       val (game2, move) = game1(Pos.F2, Pos.F3).toOption.get
-      Dumper(game1.situation, move, game2.situation) must_== "Rf3"
+      Dumper(game1.situation, move, game2.situation) === "Rf3"
     }
   }
   "move comment" should {
     "simple" in {
-      PgnTurn("e4", List("Some comment")).toString must_== "e4 { Some comment }"
+      PgnTurn("e4", List("Some comment")).toString === "e4 { Some comment }"
     }
     "one line break" in {
       PgnTurn(
         "e4",
         List("""Some
 comment""")
-      ).toString must_== """e4 { Some
+      ).toString === """e4 { Some
 comment }"""
     }
     "two line breaks" in {
@@ -366,7 +366,7 @@ comment }"""
         List("""Some
 
 comment""")
-      ).toString must_== """e4 { Some
+      ).toString === """e4 { Some
 comment }"""
     }
     "three line breaks" in {
@@ -376,7 +376,7 @@ comment }"""
 
 
 comment""")
-      ).toString must_== """e4 { Some
+      ).toString === """e4 { Some
 comment }"""
     }
   }

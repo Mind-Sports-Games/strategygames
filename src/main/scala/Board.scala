@@ -50,7 +50,7 @@ object Board {
         b.pieces.map { case (pos, piece) => (Pos.Chess(pos), (Piece.Chess(piece), 1)) },
         History.Chess(b.history),
         Variant.Chess(b.variant),
-        b.pocketData.map(PocketData.Chess)
+        b.pocketData.map(PocketData.Chess.apply)
       ) {
 
     def withHistory(h: History): Board = h match {
@@ -135,7 +135,7 @@ object Board {
         b.pieces.map { case (pos, piece) => (Pos.FairySF(pos), (Piece.FairySF(piece), 1)) },
         History.FairySF(b.history),
         Variant.FairySF(b.variant),
-        b.pocketData.map(PocketData.FairySF)
+        b.pocketData.map(PocketData.FairySF.apply)
       ) {
 
     def withHistory(h: History): Board = h match {
@@ -264,7 +264,7 @@ object Board {
         b.pieces.map { case (pos, piece) => (Pos.Go(pos), (Piece.Go(piece), 1)) },
         History.Go(b.history),
         Variant.Go(b.variant),
-        b.pocketData.map(PocketData.Go)
+        b.pocketData.map(PocketData.Go.apply)
       ) {
 
     def withHistory(h: History): Board = h match {
@@ -309,9 +309,9 @@ object Board {
         },
         History.Backgammon(b.history),
         Variant.Backgammon(b.variant),
-        b.pocketData.map(PocketData.Backgammon),
+        b.pocketData.map(PocketData.Backgammon.apply),
         b.unusedDice,
-        b.cubeData.map(CubeData.Backgammon)
+        b.cubeData.map(CubeData.Backgammon.apply)
       ) {
 
     def withHistory(h: History): Board = h match {
@@ -530,15 +530,15 @@ object Board {
       case _                                                         => sys.error("Mismatched gamelogic types 27")
     }
 
-  implicit def chessBoard(b: chess.Board)               = Board.Chess(b)
-  implicit def draughtsBoard(b: draughts.Board)         = Board.Draughts(b)
-  implicit def fairysfBoard(b: fairysf.Board)           = Board.FairySF(b)
-  implicit def samuraiBoard(b: samurai.Board)           = Board.Samurai(b)
-  implicit def togyzkumalakBoard(b: togyzkumalak.Board) = Board.Togyzkumalak(b)
-  implicit def goBoard(b: go.Board)                     = Board.Go(b)
-  implicit def backgammonBoard(b: backgammon.Board)     = Board.Backgammon(b)
-  implicit def abaloneBoard(b: abalone.Board)           = Board.Abalone(b)
-  implicit def dameoBoard(b: dameo.Board)               = Board.Dameo(b)
+  implicit def chessBoard(b: chess.Board): Board               = Board.Chess(b)
+  implicit def draughtsBoard(b: draughts.Board): Board         = Board.Draughts(b)
+  implicit def fairysfBoard(b: fairysf.Board): Board           = Board.FairySF(b)
+  implicit def samuraiBoard(b: samurai.Board): Board           = Board.Samurai(b)
+  implicit def togyzkumalakBoard(b: togyzkumalak.Board): Board = Board.Togyzkumalak(b)
+  implicit def goBoard(b: go.Board): Board                     = Board.Go(b)
+  implicit def backgammonBoard(b: backgammon.Board): Board     = Board.Backgammon(b)
+  implicit def abaloneBoard(b: abalone.Board): Board           = Board.Abalone(b)
+  implicit def dameoBoard(b: dameo.Board): Board               = Board.Dameo(b)
 
   def init(lib: GameLogic, variant: Variant): Board = (lib, variant) match {
     case (GameLogic.Draughts(), Variant.Draughts(variant))         => Draughts(draughts.Board.init(variant))

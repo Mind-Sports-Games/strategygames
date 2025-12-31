@@ -25,9 +25,9 @@ case class SelectSquares(
 
   def player = situationBefore.player
 
-  def withMetrics(m: MoveMetrics) = copy(metrics = m)
+  def withMetrics(m: MoveMetrics): SelectSquares = copy(metrics = m)
 
-  def toUci = Uci.SelectSquares(squares)
+  def toUci: Uci.SelectSquares = Uci.SelectSquares(squares)
 
   override def toString = toUci.uci
 

@@ -24,9 +24,9 @@ case class Pass(
 
   def player = situationBefore.player
 
-  def withMetrics(m: MoveMetrics) = copy(metrics = m)
+  def withMetrics(m: MoveMetrics): Pass = copy(metrics = m)
 
-  def toUci = Uci.Pass()
+  def toUci: Uci.Pass = Uci.Pass()
 
   override def toString = toUci.uci
 

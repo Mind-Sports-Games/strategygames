@@ -63,7 +63,7 @@ final case class FEN(value: String) extends AnyVal {
     .toMap
 
   private def diceFromFen(diceStr: String): List[Int] =
-    if (diceStr == '-') List.empty
+    if (diceStr == "-") List.empty
     else diceStr.split('/').flatMap(_.toIntOption).toList
 
   def unusedDice: List[Int] = diceFromFen(value.split(' ')(1))

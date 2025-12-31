@@ -1,6 +1,7 @@
-package strategygames
+package strategygames.fairysf
 
-import strategygames.fairysf.Pos._
+import strategygames.{ ByoyomiClock, ClockBase, Centis, MoveMetrics, Player, Timestamp, Timestamper }
+import Pos._
 
 class ClockByoyomiTest extends ShogiTest {
   // TODO: test it with other games, not just shogi?
@@ -49,38 +50,38 @@ class ClockByoyomiTest extends ShogiTest {
     val clock = ByoyomiClock(5 * 60 * 1000, 0, 0, 0)
     val game  = makeGame.copy(clock = Some(clock.start))
     "new game" in {
-      game.clock map { _.player } must_== Some(Player.P1)
+      game.clock.map((c: ClockBase) => c.player) === Some(Player.P1)
     }
     "one move played" in {
-      game.playMoves((C3, C4, None)) must beValid.like { case g =>
-        g.clock map { _.player } must_== Some(Player.P2)
+      RichGame(game).playMoves((C3, C4, None)).toOption must beSome.like { case g =>
+        g.clock.map((c: ClockBase) => c.player) === Some(Player.P2)
       }
     }
   }
 
   "create a clock" should {
     "with time" in {
-      ByoyomiClock(60, 10, 0, 0).limitSeconds must_== 60
+      ByoyomiClock(60, 10, 0, 0).limitSeconds === 60
     }
     "with increment" in {
-      ByoyomiClock(60, 10, 0, 0).incrementSeconds must_== 10
+      ByoyomiClock(60, 10, 0, 0).incrementSeconds === 10
     }
     "with few time" in {
-      ByoyomiClock(0, 10, 0, 0).limitSeconds must_== 0
+      ByoyomiClock(0, 10, 0, 0).limitSeconds === 0
     }
     "with 30 seconds" in {
-      ByoyomiClock(30, 0, 0, 0).limitInMinutes must_== 0.5
+      ByoyomiClock(30, 0, 0, 0).limitInMinutes === 0.5
     }
     "with time and byo" in {
       val c = ByoyomiClock(30, 0, 10, 1)
-      c.limitInMinutes must_== 0.5
-      c.spentPeriodsOf(Player.P1) must_== 0
-      c.spentPeriodsOf(Player.P2) must_== 0
+      c.limitInMinutes === 0.5
+      c.spentPeriodsOf(Player.P1) === 0
+      c.spentPeriodsOf(Player.P2) === 0
     }
     "without limit, only byo" in {
       val c = ByoyomiClock(0, 0, 10, 1)
-      c.spentPeriodsOf(Player.P1) must_== 1
-      c.spentPeriodsOf(Player.P2) must_== 1
+      c.spentPeriodsOf(Player.P1) === 1
+      c.spentPeriodsOf(Player.P2) === 1
     }
   }
   "lag compensation" should {
@@ -88,8 +89,8 @@ class ClockByoyomiTest extends ShogiTest {
 
     def clockStep(clock: ClockBase, wait: Int, lags: Int*) = {
       (lags.foldLeft(clock) { (clk, lag) =>
-        advance(clk.step(), wait + lag) step durOf(lag)
-      } currentClockFor Player.P2).time.centis
+        advance(clk.step(), wait + lag).step(durOf(lag))
+      }).currentClockFor(Player.P2).time.centis
     }
 
     def clockStep60(w: Int, l: Int*)      = clockStep(fakeClock60, w, l: _*)
@@ -98,83 +99,83 @@ class ClockByoyomiTest extends ShogiTest {
 
     def clockStart(lag: Int) = {
       val clock = fakeClock60.step()
-      ((clock step durOf(lag)) currentClockFor Player.P1).time.centis
+      clock.step(durOf(lag)).currentClockFor(Player.P1).time.centis
     }
 
     "start" in {
       "no lag" in {
-        clockStart(0) must_== 60 * 100
+        clockStart(0) === 60 * 100
       }
       "small lag" in {
-        clockStart(20) must_== 60 * 100
+        clockStart(20) === 60 * 100
       }
       "big lag" in {
-        clockStart(500) must_== 60 * 100
+        clockStart(500) === 60 * 100
       }
     }
 
     "1 move" in {
       "premove, no lag" in {
-        clockStep600(0, 0) must_== 600 * 100
+        clockStep600(0, 0) === 600 * 100
       }
       "premove, small lag" in {
-        clockStep600(0, 20) must_== 600 * 100
+        clockStep600(0, 20) === 600 * 100
       }
       "premove, big lag" in {
-        clockStep600(0, 400) must_== 599 * 100
+        clockStep600(0, 400) === 599 * 100
       }
       "1s move, no lag" in {
-        clockStep600(100, 0) must_== 599 * 100
+        clockStep600(100, 0) === 599 * 100
       }
       "1s move, small lag" in {
-        clockStep600(100, 20) must_== 599 * 100
+        clockStep600(100, 20) === 599 * 100
       }
       "1s move, big lag" in {
-        clockStep600(100, 400) must_== 598 * 100
+        clockStep600(100, 400) === 598 * 100
       }
       "1s move, no lag with increment" in {
-        clockStep60Plus1(100, 0) must_== 60 * 100
+        clockStep60Plus1(100, 0) === 60 * 100
       }
       "2s move, no lag with increment" in {
-        clockStep60Plus1(200, 0) must_== 59 * 100
+        clockStep60Plus1(200, 0) === 59 * 100
       }
       "0s move, no lag with increment" in {
-        clockStep60Plus1(0, 0) must_== 61 * 100
+        clockStep60Plus1(0, 0) === 61 * 100
       }
     }
 
     "multiple premoves" in {
       "no lag" in {
-        clockStep600(0, 0, 0) must_== 600 * 100
+        clockStep600(0, 0, 0) === 600 * 100
       }
       "medium lag x2" in {
-        clockStep600(0, 300, 300) must_== 598 * 100
+        clockStep600(0, 300, 300) === 598 * 100
       }
       "no -> medium lag" in {
-        clockStep600(0, 0, 300) must_== 600 * 100
+        clockStep600(0, 0, 300) === 600 * 100
       }
       "no x8 -> big lag" in {
-        clockStep600(0, 0, 0, 0, 0, 0, 0, 0, 0, 800) must_== 599 * 100
+        clockStep600(0, 0, 0, 0, 0, 0, 0, 0, 0, 800) === 599 * 100
       }
 
       "no x5 -> big lag x2" in {
-        clockStep600(0, 0, 0, 0, 0, 0, 500, 600) must_== 597 * 100
+        clockStep600(0, 0, 0, 0, 0, 0, 500, 600) === 597 * 100
       }
 
       "no x5 -> big lag x3" in {
-        clockStep600(0, 0, 0, 0, 0, 0, 500, 500, 500) must_== 594 * 100
+        clockStep600(0, 0, 0, 0, 0, 0, 500, 500, 500) === 594 * 100
       }
     }
 
     "multiple premoves with fast clock" in {
       "no lag" in {
-        clockStep60(0, 0, 0) must_== 60 * 100
+        clockStep60(0, 0, 0) === 60 * 100
       }
       "no -> medium lag" in {
-        clockStep60(0, 0, 300) must_== 5940
+        clockStep60(0, 0, 300) === 5940
       }
       "no x4 -> big lag" in {
-        clockStep60(0, 0, 0, 0, 0, 700) must_== 5720
+        clockStep60(0, 0, 0, 0, 0, 700) === 5720
       }
     }
   }
@@ -184,8 +185,8 @@ class ClockByoyomiTest extends ShogiTest {
       val clock60 = advance(fakeClock60, 60 * 100)
       val cc      = clock60.currentClockFor(Player.P1)
 
-      cc.time.centis must_== 0
-      cc.periods must_== 0
+      cc.time.centis === 0
+      cc.periods === 0
       clock60.outOfTime(Player.P2, withGrace = true) must beFalse
       clock60.outOfTime(Player.P1, withGrace = true) must beFalse
       clock60.outOfTime(Player.P1, withGrace = false) must beTrue
@@ -194,8 +195,8 @@ class ClockByoyomiTest extends ShogiTest {
       val clock61 = advance(fakeClock60, 61 * 100)
       val cc      = clock61.currentClockFor(Player.P1)
 
-      cc.time.centis must_== 0
-      cc.periods must_== 0
+      cc.time.centis === 0
+      cc.periods === 0
       clock61.outOfTime(Player.P1, withGrace = true) must beFalse
 
       advance(fakeClock60, 63 * 100).outOfTime(Player.P1, withGrace = true) must beTrue
@@ -204,8 +205,8 @@ class ClockByoyomiTest extends ShogiTest {
       val clock10 = advance(fakeClockByo, 10 * 100)
       val cc      = clock10.currentClockFor(Player.P1)
 
-      cc.time.centis must_== 5 * 100
-      cc.periods must_== 0
+      cc.time.centis === 5 * 100
+      cc.periods === 0
       clock10.outOfTime(Player.P2, withGrace = false) must beFalse
       clock10.outOfTime(Player.P1, withGrace = false) must beFalse
     }
@@ -213,39 +214,39 @@ class ClockByoyomiTest extends ShogiTest {
       val clock17 = advance(fakeClockByo, 19 * 100)
       val cc      = clock17.currentClockFor(Player.P1)
 
-      cc.time.centis must_== 1 * 100
-      cc.periods must_== 1
+      cc.time.centis === 1 * 100
+      cc.periods === 1
       clock17.outOfTime(Player.P1, withGrace = false) must beFalse
     }
     "entering byoyomi, not having byo time" in {
       val clock20 = advance(fakeClockByo, 20 * 100)
       val cc      = clock20.currentClockFor(Player.P1)
 
-      cc.time.centis must_== 0
-      cc.periods must_== 1
+      cc.time.centis === 0
+      cc.periods === 1
       clock20.outOfTime(Player.P1, withGrace = false) must beTrue
     }
     "10s stall for zero clock with byo" in {
       val clock10 = advance(fakeClockZero, 10 * 100)
       val cc      = clock10.currentClockFor(Player.P1)
 
-      cc.time.centis must_== 0
-      cc.periods must_== 1
+      cc.time.centis === 0
+      cc.periods === 1
       clock10.outOfTime(Player.P1, withGrace = true) must beFalse
       clock10.outOfTime(Player.P1, withGrace = false) must beTrue
     }
     "11s stall for zero clock with byo" in {
       val clock11 = advance(fakeClockZero, 11 * 100)
 
-      clock11.currentClockFor(Player.P1).time.centis must_== 0
+      clock11.currentClockFor(Player.P1).time.centis === 0
       clock11.outOfTime(Player.P1, withGrace = true) must beFalse
     }
     "spanning over multiple periods" in {
       val clockPers = advance(fakeClockPeriods, 32 * 100)
       val cc        = clockPers.currentClockFor(Player.P1)
 
-      cc.time.centis must_== 8 * 100
-      cc.periods must_== 3
+      cc.time.centis === 8 * 100
+      cc.periods === 3
       clockPers.outOfTime(Player.P1, withGrace = false) must beFalse
     }
 
@@ -256,38 +257,38 @@ class ClockByoyomiTest extends ShogiTest {
 
   "kif config" in {
     "everything" in {
-      ByoyomiClock.readKifConfig("10分|20秒(1)+0秒") must_== Some(ByoyomiClock.Config(600, 0, 20, 1))
+      ByoyomiClock.readKifConfig("10分|20秒(1)+0秒") === Some(ByoyomiClock.Config(600, 0, 20, 1))
     }
     "without inc" in {
-      ByoyomiClock.readKifConfig("10分|20秒(1)") must_== Some(ByoyomiClock.Config(600, 0, 20, 1))
+      ByoyomiClock.readKifConfig("10分|20秒(1)") === Some(ByoyomiClock.Config(600, 0, 20, 1))
     }
     "without per" in {
-      ByoyomiClock.readKifConfig("10分|20秒+10秒") must_== Some(ByoyomiClock.Config(600, 10, 20, 1))
+      ByoyomiClock.readKifConfig("10分|20秒+10秒") === Some(ByoyomiClock.Config(600, 10, 20, 1))
     }
     "without per and inc" in {
-      ByoyomiClock.readKifConfig("10分|20秒") must_== Some(ByoyomiClock.Config(600, 0, 20, 1))
+      ByoyomiClock.readKifConfig("10分|20秒") === Some(ByoyomiClock.Config(600, 0, 20, 1))
     }
     "without per and inc" in {
-      ByoyomiClock.readKifConfig("10分+20秒") must_== Some(ByoyomiClock.Config(600, 0, 20, 1))
+      ByoyomiClock.readKifConfig("10分+20秒") === Some(ByoyomiClock.Config(600, 0, 20, 1))
     }
     "mix of mins and secs" in {
-      ByoyomiClock.readKifConfig("10分20秒") must_== Some(ByoyomiClock.Config(620, 0, 0, 1))
+      ByoyomiClock.readKifConfig("10分20秒") === Some(ByoyomiClock.Config(620, 0, 0, 1))
     }
     "hours" in {
-      ByoyomiClock.readKifConfig("1時間+20秒") must_== Some(ByoyomiClock.Config(3600, 0, 20, 1))
+      ByoyomiClock.readKifConfig("1時間+20秒") === Some(ByoyomiClock.Config(3600, 0, 20, 1))
     }
     "mix of hours mins and secs" in {
-      ByoyomiClock.readKifConfig("1時間10分20秒+20秒") must_== Some(ByoyomiClock.Config(4220, 0, 20, 1))
+      ByoyomiClock.readKifConfig("1時間10分20秒+20秒") === Some(ByoyomiClock.Config(4220, 0, 20, 1))
     }
   }
 
   "show" in {
-    ByoyomiClock.Config(600, 0, 20, 1).show must_== "10|20"
-    ByoyomiClock.Config(300, 0, 20, 2).show must_== "5|20(2x)"
-    ByoyomiClock.Config(300, 10, 20, 2).show must_== "5+10|20(2x)"
-    ByoyomiClock.Config(60, 10, 0, 1).show must_== "1+10"
-    ByoyomiClock.Config(0, 10, 0, 1).show must_== "0+10"
-    ByoyomiClock.Config(0, 0, 10, 1).show must_== "0|10"
-    ByoyomiClock.Config(600, 0, 0, 1).show must_== "10|0"
+    ByoyomiClock.Config(600, 0, 20, 1).show === "10|20"
+    ByoyomiClock.Config(300, 0, 20, 2).show === "5|20(2x)"
+    ByoyomiClock.Config(300, 10, 20, 2).show === "5+10|20(2x)"
+    ByoyomiClock.Config(60, 10, 0, 1).show === "1+10"
+    ByoyomiClock.Config(0, 10, 0, 1).show === "0+10"
+    ByoyomiClock.Config(0, 0, 10, 1).show === "0|10"
+    ByoyomiClock.Config(600, 0, 0, 1).show === "10|0"
   }
 }

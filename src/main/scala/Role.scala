@@ -237,21 +237,21 @@ object Role {
 
   // lila
   def all(lib: GameLogic): List[Role] = lib match {
-    case GameLogic.Draughts()     => draughts.Role.all.map(DraughtsRole)
-    case GameLogic.Chess()        => chess.Role.all.map(ChessRole)
-    case GameLogic.FairySF()      => fairysf.Role.all.map(FairySFRole)
-    case GameLogic.Samurai()      => samurai.Role.all.map(SamuraiRole)
-    case GameLogic.Togyzkumalak() => togyzkumalak.Role.all.map(TogyzkumalakRole)
-    case GameLogic.Go()           => go.Role.all.map(GoRole)
-    case GameLogic.Backgammon()   => backgammon.Role.all.map(BackgammonRole)
-    case GameLogic.Abalone()      => abalone.Role.all.map(AbaloneRole)
-    case GameLogic.Dameo()        => dameo.Role.all.map(DameoRole)
+    case GameLogic.Draughts()     => draughts.Role.all.map(DraughtsRole.apply)
+    case GameLogic.Chess()        => chess.Role.all.map(ChessRole.apply)
+    case GameLogic.FairySF()      => fairysf.Role.all.map(FairySFRole.apply)
+    case GameLogic.Samurai()      => samurai.Role.all.map(SamuraiRole.apply)
+    case GameLogic.Togyzkumalak() => togyzkumalak.Role.all.map(TogyzkumalakRole.apply)
+    case GameLogic.Go()           => go.Role.all.map(GoRole.apply)
+    case GameLogic.Backgammon()   => backgammon.Role.all.map(BackgammonRole.apply)
+    case GameLogic.Abalone()      => abalone.Role.all.map(AbaloneRole.apply)
+    case GameLogic.Dameo()        => dameo.Role.all.map(DameoRole.apply)
   }
 
   def allPromotable(lib: GameLogic): List[PromotableRole] = lib match {
-    case GameLogic.Draughts()     => draughts.Role.allPromotable.map(DraughtsPromotableRole)
-    case GameLogic.Chess()        => chess.Role.allPromotable.map(ChessPromotableRole)
-    case GameLogic.FairySF()      => fairysf.Role.allPromotable.map(FairySFPromotableRole)
+    case GameLogic.Draughts()     => draughts.Role.allPromotable.map(DraughtsPromotableRole.apply)
+    case GameLogic.Chess()        => chess.Role.allPromotable.map(ChessPromotableRole.apply)
+    case GameLogic.FairySF()      => fairysf.Role.allPromotable.map(FairySFPromotableRole.apply)
     case GameLogic.Samurai()      => sys.error("allPromotable not implemented for samurai")
     case GameLogic.Togyzkumalak() => sys.error("allPromotable not implemented for togyzkumalak")
     case GameLogic.Go()           => sys.error("allPromotable not implemented for go")
@@ -498,61 +498,61 @@ object Role {
   }
 
   def forsyth(lib: GameLogic, c: Char): Option[Role] = lib match {
-    case GameLogic.Draughts()     => draughts.Role.forsyth(c).map(DraughtsRole)
-    case GameLogic.Chess()        => chess.Role.forsyth(c).map(ChessRole)
-    case GameLogic.FairySF()      => fairysf.Role.forsyth(c).map(FairySFRole)
-    case GameLogic.Samurai()      => samurai.Role.forsyth(c).map(SamuraiRole)
-    case GameLogic.Togyzkumalak() => togyzkumalak.Role.forsyth(c).map(TogyzkumalakRole)
-    case GameLogic.Go()           => go.Role.forsyth(c).map(GoRole)
-    case GameLogic.Backgammon()   => backgammon.Role.forsyth(c).map(BackgammonRole)
-    case GameLogic.Abalone()      => abalone.Role.forsyth(c).map(AbaloneRole)
-    case GameLogic.Dameo()        => dameo.Role.forsyth(c).map(DameoRole)
+    case GameLogic.Draughts()     => draughts.Role.forsyth(c).map(DraughtsRole.apply)
+    case GameLogic.Chess()        => chess.Role.forsyth(c).map(ChessRole.apply)
+    case GameLogic.FairySF()      => fairysf.Role.forsyth(c).map(FairySFRole.apply)
+    case GameLogic.Samurai()      => samurai.Role.forsyth(c).map(SamuraiRole.apply)
+    case GameLogic.Togyzkumalak() => togyzkumalak.Role.forsyth(c).map(TogyzkumalakRole.apply)
+    case GameLogic.Go()           => go.Role.forsyth(c).map(GoRole.apply)
+    case GameLogic.Backgammon()   => backgammon.Role.forsyth(c).map(BackgammonRole.apply)
+    case GameLogic.Abalone()      => abalone.Role.forsyth(c).map(AbaloneRole.apply)
+    case GameLogic.Dameo()        => dameo.Role.forsyth(c).map(DameoRole.apply)
   }
 
   def promotable(lib: GameLogic, gf: GameFamily, c: Char): Option[PromotableRole] = lib match {
-    case GameLogic.Draughts()     => draughts.Role.promotable(c).map(DraughtsPromotableRole)
-    case GameLogic.Chess()        => chess.Role.promotable(c).map(ChessPromotableRole)
-    case GameLogic.FairySF()      => fairysf.Role.promotable(gf, c).map(FairySFPromotableRole)
+    case GameLogic.Draughts()     => draughts.Role.promotable(c).map(DraughtsPromotableRole.apply)
+    case GameLogic.Chess()        => chess.Role.promotable(c).map(ChessPromotableRole.apply)
+    case GameLogic.FairySF()      => fairysf.Role.promotable(gf, c).map(FairySFPromotableRole.apply)
     case GameLogic.Samurai()      => sys.error("promotable not implemented for samurai")
     case GameLogic.Togyzkumalak() => sys.error("promotable not implemented for togyzkumalak")
     case GameLogic.Go()           => sys.error("promotable not implemented for go")
     case GameLogic.Backgammon()   => sys.error("promotable not implemented for backgammon")
     case GameLogic.Abalone()      => sys.error("promotable not implemented for abalone")
-    case GameLogic.Dameo()        => dameo.Role.promotable(c).map(DameoPromotableRole)
+    case GameLogic.Dameo()        => dameo.Role.promotable(c).map(DameoPromotableRole.apply)
   }
 
   def promotable(lib: GameLogic, gf: GameFamily, name: String): Option[PromotableRole] = lib match {
-    case GameLogic.Draughts()     => draughts.Role.promotable(name).map(DraughtsPromotableRole)
-    case GameLogic.Chess()        => chess.Role.promotable(name).map(ChessPromotableRole)
-    case GameLogic.FairySF()      => fairysf.Role.promotable(gf, name).map(FairySFPromotableRole)
+    case GameLogic.Draughts()     => draughts.Role.promotable(name).map(DraughtsPromotableRole.apply)
+    case GameLogic.Chess()        => chess.Role.promotable(name).map(ChessPromotableRole.apply)
+    case GameLogic.FairySF()      => fairysf.Role.promotable(gf, name).map(FairySFPromotableRole.apply)
     case GameLogic.Samurai()      => sys.error("promotable not implemented for samurai")
     case GameLogic.Togyzkumalak() => sys.error("promotable not implemented for togyzkumalak")
     case GameLogic.Go()           => sys.error("promotable not implemented for go")
     case GameLogic.Backgammon()   => sys.error("promotable not implemented for backgammon")
     case GameLogic.Abalone()      => sys.error("promotable not implemented for abalone")
-    case GameLogic.Dameo()        => dameo.Role.promotable(name).map(DameoPromotableRole)
+    case GameLogic.Dameo()        => dameo.Role.promotable(name).map(DameoPromotableRole.apply)
   }
 
   def promotable(lib: GameLogic, gf: GameFamily, name: Option[String]): Option[PromotableRole] = lib match {
-    case GameLogic.Draughts()     => draughts.Role.promotable(name).map(DraughtsPromotableRole)
-    case GameLogic.Chess()        => chess.Role.promotable(name).map(ChessPromotableRole)
-    case GameLogic.FairySF()      => fairysf.Role.promotable(gf, name).map(FairySFPromotableRole)
+    case GameLogic.Draughts()     => draughts.Role.promotable(name).map(DraughtsPromotableRole.apply)
+    case GameLogic.Chess()        => chess.Role.promotable(name).map(ChessPromotableRole.apply)
+    case GameLogic.FairySF()      => fairysf.Role.promotable(gf, name).map(FairySFPromotableRole.apply)
     case GameLogic.Samurai()      => sys.error("promotable not implemented for samurai")
     case GameLogic.Togyzkumalak() => sys.error("promotable not implemented for togyzkumalak")
     case GameLogic.Go()           => sys.error("promotable not implemented for go")
     case GameLogic.Backgammon()   => sys.error("promotable not implemented for backgammon")
     case GameLogic.Abalone()      => sys.error("promotable not implemented for abalone")
-    case GameLogic.Dameo()        => dameo.Role.promotable(name).map(DameoPromotableRole)
+    case GameLogic.Dameo()        => dameo.Role.promotable(name).map(DameoPromotableRole.apply)
   }
 
   def storable(lib: GameLogic): List[Role] = lib match {
     case GameLogic.Draughts()     => List()
-    case GameLogic.Chess()        => chess.Role.storable.map(ChessRole)
-    case GameLogic.FairySF()      => fairysf.Role.storable.map(FairySFRole)
+    case GameLogic.Chess()        => chess.Role.storable.map(ChessRole.apply)
+    case GameLogic.FairySF()      => fairysf.Role.storable.map(FairySFRole.apply)
     case GameLogic.Samurai()      => List()
     case GameLogic.Togyzkumalak() => List()
     case GameLogic.Go()           => List()
-    case GameLogic.Backgammon()   => backgammon.Role.storable.map(BackgammonRole)
+    case GameLogic.Backgammon()   => backgammon.Role.storable.map(BackgammonRole.apply)
     case GameLogic.Abalone()      => List()
     case GameLogic.Dameo()        => List()
   }

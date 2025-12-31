@@ -143,15 +143,15 @@ object History {
         halfMoveClock = h.halfMoveClock
       )
 
-  implicit def chessHistory(h: chess.History)               = Chess(h)
-  implicit def draughtsHistory(h: draughts.DraughtsHistory) = Draughts(h)
-  implicit def fairysfHistory(h: fairysf.History)           = FairySF(h)
-  implicit def samuraiHistory(h: samurai.History)           = Samurai(h)
-  implicit def togyzkumalakHistory(h: togyzkumalak.History) = Togyzkumalak(h)
-  implicit def goHistory(h: go.History)                     = Go(h)
-  implicit def backgammonHistory(h: backgammon.History)     = Backgammon(h)
-  implicit def abaloneHistory(h: abalone.History)           = Abalone(h)
-  implicit def dameoHistory(h: dameo.History)               = Dameo(h)
+  implicit def chessHistory(h: chess.History): History               = Chess(h)
+  implicit def draughtsHistory(h: draughts.DraughtsHistory): History = Draughts(h)
+  implicit def fairysfHistory(h: fairysf.History): History           = FairySF(h)
+  implicit def samuraiHistory(h: samurai.History): History           = Samurai(h)
+  implicit def togyzkumalakHistory(h: togyzkumalak.History): History = Togyzkumalak(h)
+  implicit def goHistory(h: go.History): History                     = Go(h)
+  implicit def backgammonHistory(h: backgammon.History): History     = Backgammon(h)
+  implicit def abaloneHistory(h: abalone.History): History           = Abalone(h)
+  implicit def dameoHistory(h: dameo.History): History               = Dameo(h)
 
   // lila
   def apply(

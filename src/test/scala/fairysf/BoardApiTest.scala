@@ -11,57 +11,57 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
       Api.validateFEN(
         variant.Shogi.fishnetKey,
         variant.Shogi.initialFen.value
-      ) must_== true
+      ) === true
     }
     "return confirm sufficient material for both sides" in {
-      position.insufficientMaterial must_== ((false, false))
+      position.insufficientMaterial === ((false, false))
     }
     "have legal moves" in {
-      position.legalMoves.size must_!= 0L
+      position.legalMoves.size !== 0
     }
     "have 40 pieces" in {
-      position.pieceMap.size must_== 40
+      position.pieceMap.size === 40
     }
     "not be game end" in {
-      position.gameEnd must_== false
+      position.gameEnd === false
     }
     "not be optional game end" in {
-      position.optionalGameEnd must_== false
+      position.optionalGameEnd === false
     }
   }
 
   "Xiangqi initial fen" should {
     val position = Api.positionFromVariant(variant.Xiangqi)
     "equal expected initialfen" in {
-      variant.Xiangqi.initialFen.value must_== "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1"
+      variant.Xiangqi.initialFen.value === "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1"
     }
     "be valid" in {
       Api.validateFEN(
         variant.Xiangqi.fishnetKey,
         variant.Xiangqi.initialFen.value
-      ) must_== true
+      ) === true
     }
     "return confirm sufficient material for both sides" in {
-      position.insufficientMaterial must_== ((false, false))
+      position.insufficientMaterial === ((false, false))
     }
     "have legal moves" in {
-      position.legalMoves.size must_!= 0L
+      position.legalMoves.size !== 0
     }
     "have 32 pieces" in {
-      position.pieceMap.size must_== 32
+      position.pieceMap.size === 32
     }
     "have 32 pieces again" in {
-      position.pieceMap.size must_== 32
+      position.pieceMap.size === 32
     }
     "not be game end" in {
-      position.gameEnd must_== false
+      position.gameEnd === false
     }
     "not be optional game end" in {
-      position.optionalGameEnd must_== false
+      position.optionalGameEnd === false
     }
     "e1e2 opening provide valid piece map" in {
       val newPosition = position.makeMoves(List("e1e2"))
-      newPosition.pieceMap.size must_== 32
+      newPosition.pieceMap.size === 32
     }
   }
 
@@ -71,13 +71,13 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
       val newPosition = position.makeMoves(
         List("h2i2", "b8a8", "i2h2", "a8b8", "h2i2", "b8a8", "i2h2", "a8b8", "h2i2", "b8a8", "i2h2", "a8b8")
       )
-      newPosition.optionalGameEnd must_== true
+      newPosition.optionalGameEnd === true
     }
     "not be game end" in {
       val newPosition = position.makeMoves(
         List("h2i2", "b8a8", "i2h2", "a8b8", "h2i2", "b8a8", "i2h2", "a8b8", "h2i2", "b8a8", "i2h2", "a8b8")
       )
-      newPosition.gameEnd must_== false
+      newPosition.gameEnd === false
     }
   }
 
@@ -96,7 +96,7 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
       val newPosition10 = newPosition9.makeMoves(List("b8a8"))
       val newPosition11 = newPosition10.makeMoves(List("i2h2"))
       val newPosition12 = newPosition11.makeMoves(List("a8b8"))
-      newPosition12.optionalGameEnd must_== true
+      newPosition12.optionalGameEnd === true
     }
   }
 
@@ -106,16 +106,16 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
       "l2g1g1nl/5sk2/3p1p1p1/p3p1p1p/1n2n4/P4PP1P/1P1sPK1P1/5sR1+r/L4+p1N1[GPSBBglpp] w - - 4 38"
     val position     = Api.positionFromVariantNameAndFEN(variant.Shogi.key, checkmateFen)
     "be game end" in {
-      position.gameEnd must_== true
+      position.gameEnd === true
     }
     "be checkmate" in {
-      position.gameResult must_== GameResult.Checkmate()
+      position.gameResult === GameResult.Checkmate()
     }
     "have no legal moves" in {
-      position.legalMoves.size must_== 0L
+      position.legalMoves.size === 0
     }
     "have pieces in hand" in {
-      position.piecesInHand.size must_== 9L
+      position.piecesInHand.size === 9
     }
   }
 
@@ -127,16 +127,16 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
       val newPosition = positionStart.makeMoves(
         List("h3h4", "e9f8", "h4h5", "f8g8", "h5h6", "b8f8", "h6h7+")
       )
-      newPosition.fen.value must_== foolsFEN
+      newPosition.fen.value === foolsFEN
     }
     "be game end" in {
-      position.gameEnd must_== true
+      position.gameEnd === true
     }
     "be checkmate" in {
-      position.gameResult must_== GameResult.Checkmate()
+      position.gameResult === GameResult.Checkmate()
     }
     "have no legal moves" in {
-      position.legalMoves.size must_== 0L
+      position.legalMoves.size === 0
     }
   }
 
@@ -144,13 +144,13 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
     val stalemateFEN = "8l/8k/9/8P/9/2P6/PP1PPPP2/1B5R1/LNSGKGSNL[] b - - 0 2"
     val position     = Api.positionFromVariantNameAndFEN(variant.Shogi.key, stalemateFEN)
     "have no legal moves" in {
-      position.legalMoves.size must_== 0L
+      position.legalMoves.size === 0
     }
     "be game end" in {
-      position.gameEnd must_== true
+      position.gameEnd === true
     }
     "be stalemate" in {
-      position.gameResult must_== GameResult.Stalemate()
+      position.gameResult === GameResult.Stalemate()
     }
   }
 
@@ -158,7 +158,7 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
     val insufficientMaterialFEN = "8k/9/9/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL[LNSGGSNLBRPPPPPPPPP] b - - 0 2"
     val position                = Api.positionFromVariantNameAndFEN(variant.Shogi.key, insufficientMaterialFEN)
     "never have insufficient material" in {
-      position.insufficientMaterial must_== ((false, false))
+      position.insufficientMaterial === ((false, false))
     }
   }
 
@@ -185,7 +185,7 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
       )
     )
     "should produce non optional game end" in {
-      position2.gameEnd must_== true
+      position2.gameEnd === true
     }
   }
 
@@ -196,7 +196,7 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
       List("P@f4", "P@d3", "P@c4", "P@f5", "P@e6", "P@f3", "P@g4", "P@e3", "P@e2")
     )
     "should produce no legal moves" in {
-      position2.legalMoves.size must_== 0L
+      position2.legalMoves.size === 0
     }
   }
 
@@ -253,11 +253,11 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
       )
     )
     "should produce no drops in legal moves" in {
-      position2.legalMoves.filterNot(_.startsWith("P@")).size must_!= 0L
+      position2.legalMoves.filterNot(_.startsWith("P@")).size !== 0
     }
     val position3 = position2.makeMoves(List("d1d1"))
     "should produce legal moves after pass" in {
-      position3.legalMoves.size must_!= 0L
+      position3.legalMoves.size !== 0
     }
   }
 
@@ -268,10 +268,10 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
 
     // why is fairy saying 146 moves?
     "should have 2176 legal moves" in {
-      position.legalMoves.size must_== 2176L
+      position.legalMoves.size === 2176
     }
     "have 8 pieces" in {
-      position.pieceMap.size must_== 8
+      position.pieceMap.size === 8
     }
   }
 }

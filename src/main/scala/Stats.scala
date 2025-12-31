@@ -1,5 +1,7 @@
 package strategygames
 
+import scalalib.extensions.*
+
 // Welford's numerically stable online variance.
 //
 sealed trait Stats {

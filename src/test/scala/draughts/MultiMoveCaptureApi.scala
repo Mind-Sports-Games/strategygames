@@ -141,7 +141,7 @@ class MultiMoveCaptureApi extends Specification with ValidatedMatchers {
         .take(45)
         .foldLeft(Situation(variant.Standard))((sit, uci) => move(sit, uci))
 
-      s.validMoves.size must_== 1
+      s.validMoves.size === 1
     }
   }
 

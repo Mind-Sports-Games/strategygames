@@ -24,7 +24,7 @@ class TagTest extends Specification with ValidatedMatchers {
           Tag(Tag.BR, "2862"),
           Tag(Tag.EV, "Titled Arena 5")
         )
-      ).sorted.value.map(_.name) must_== List(
+      ).sorted.value.map(_.name) === List(
         Tag.FF,
         Tag.GM,
         Tag.CA,

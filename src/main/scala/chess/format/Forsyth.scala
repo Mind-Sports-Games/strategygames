@@ -1,6 +1,8 @@
 package strategygames.chess.format
 
 import cats.implicits._
+import scalalib.extensions.*
+
 import strategygames.{ Player, Pocket, Pockets }
 import strategygames.chess._
 import strategygames.chess.variant.{ Standard, Variant }
@@ -244,7 +246,7 @@ object Forsyth {
       case _                            => ""
     }
 
-  implicit private val posOrdering = Ordering.by[Pos, File](_.file)
+  implicit private val posOrdering: Ordering[Pos] = Ordering.by[Pos, File](_.file)
 
   private[chess] def exportCastles(board: Board): String = {
 

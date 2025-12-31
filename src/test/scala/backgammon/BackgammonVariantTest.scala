@@ -6,6 +6,7 @@ import strategygames.{ Player, Score, Status }
 import strategygames.format.{ FEN => StratFen, Forsyth => StratForsyth, Uci => StratUci }
 import strategygames.variant.{ Variant => StratVariant }
 import variant.Backgammon
+import BackgammonTestUtils.movesToUciSet
 
 class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
 
@@ -14,20 +15,20 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
     val game = Game.makeGame(variant.Backgammon, Some(Player.P1))
 
     "be valid game after first dice roll" in {
-      game.diceRoll(List(3, 4)) must beValid.like { g =>
-        g._1.situation.moves.values.flatten.size must_== 8
-        g._1.situation.player must_== Player.P1
+      game.diceRoll(List(3, 4)).toOption must beSome.like { case (g, _) =>
+        g.situation.moves.values.flatten.size === 8
+        g.situation.player === Player.P1
       }
 
-      game.diceRoll(List(4, 3)) must beValid.like { g =>
-        g._1.situation.moves.values.flatten.size must_== 8
+      game.diceRoll(List(4, 3)).toOption must beSome.like { case (g, _) =>
+        g.situation.moves.values.flatten.size === 8
         // now P1 after changing how start player works
-        g._1.situation.player must_== Player.P1
+        g.situation.player === Player.P1
       }
 
-      game.diceRoll(List(1, 5)) must beValid.like { g =>
-        g._1.situation.moves.values.flatten.size must_== 5
-        g._1.situation.moves.values.flatten.map(_.toUci.uci).toSet must_== Set(
+      game.diceRoll(List(1, 5)).toOption must beSome.like { case (g, _) =>
+        g.situation.moves.values.flatten.size === 5
+        movesToUciSet(g.situation.moves.values.flatten) === Set(
           "l2k2",
           "a2e1",
           "e1f1",
@@ -42,9 +43,9 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "1/5",
         "l2k2"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
-        g.situation.moves.values.flatten.size must_== 3
-        g.situation.moves.values.flatten.map(_.toUci.uci).toSet must_== Set(
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
+        g.situation.moves.values.flatten.size === 3
+        movesToUciSet(g.situation.moves.values.flatten) === Set(
           "k2f2",
           "a2e1",
           "e1j1"
@@ -58,22 +59,20 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "l2k2",
         "undo"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
         val gamePreUndo = forceValidGameToGame(playActionStrs(actionStrs.dropRight(2)))
-        g.actionStrs must_== gamePreUndo.actionStrs
-        g.plies must_== gamePreUndo.plies
-        g.turnCount must_== gamePreUndo.turnCount
-        g.situation.player must_== gamePreUndo.situation.player
-        g.situation.board.pieces must_== gamePreUndo.board.pieces
-        g.situation.board.pocketData must_== gamePreUndo.board.pocketData
-        g.situation.board.unusedDice.sorted must_== gamePreUndo.board.unusedDice.sorted
-        g.situation.board.history.lastTurn must_== gamePreUndo.board.history.lastTurn
-        g.situation.board.history.currentTurn must_== gamePreUndo.board.history.currentTurn
-        g.situation.board.history.score must_== gamePreUndo.board.history.score
-        g.situation.board.history.halfMoveClock must_== gamePreUndo.board.history.halfMoveClock
-        g.situation.moves.values.flatten
-          .map(_.toUci.uci)
-          .toSet must_== gamePreUndo.situation.moves.values.flatten.map(_.toUci.uci).toSet
+        g.actionStrs === gamePreUndo.actionStrs
+        g.plies === gamePreUndo.plies
+        g.turnCount === gamePreUndo.turnCount
+        g.situation.player === gamePreUndo.situation.player
+        g.situation.board.pieces === gamePreUndo.board.pieces
+        g.situation.board.pocketData === gamePreUndo.board.pocketData
+        g.situation.board.unusedDice.sorted === gamePreUndo.board.unusedDice.sorted
+        g.situation.board.history.lastTurn === gamePreUndo.board.history.lastTurn
+        g.situation.board.history.currentTurn === gamePreUndo.board.history.currentTurn
+        g.situation.board.history.score === gamePreUndo.board.history.score
+        g.situation.board.history.halfMoveClock === gamePreUndo.board.history.halfMoveClock
+        movesToUciSet(g.situation.moves.values.flatten) === movesToUciSet(gamePreUndo.situation.moves.values.flatten)
       }
     }
 
@@ -83,12 +82,12 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "l2k2",
         "e1j1"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
-        g.situation.moves.values.flatten.size must_== 0
-        g.situation.canEndTurn must_== true
-        g.situation.board.pipCount(Player.P1) must_== 161
-        g.situation.board.pipCount(Player.P2) must_== 167
-        g.situation.board.history.currentTurn.map(_.uci) must_== actionStrs
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
+        g.situation.moves.values.flatten.size === 0
+        g.situation.canEndTurn === true
+        g.situation.board.pipCount(Player.P1) === 161
+        g.situation.board.pipCount(Player.P2) === 167
+        g.situation.board.history.currentTurn.map(_.uci) === actionStrs
       }
     }
 
@@ -99,22 +98,20 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "e1j1",
         "undo"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
         val gamePreUndo = forceValidGameToGame(playActionStrs(actionStrs.dropRight(2)))
-        g.actionStrs must_== gamePreUndo.actionStrs
-        g.plies must_== gamePreUndo.plies
-        g.turnCount must_== gamePreUndo.turnCount
-        g.situation.player must_== gamePreUndo.situation.player
-        g.situation.board.pieces must_== gamePreUndo.board.pieces
-        g.situation.board.pocketData must_== gamePreUndo.board.pocketData
-        g.situation.board.unusedDice.sorted must_== gamePreUndo.board.unusedDice.sorted
-        g.situation.board.history.lastTurn must_== gamePreUndo.board.history.lastTurn
-        g.situation.board.history.currentTurn must_== gamePreUndo.board.history.currentTurn
-        g.situation.board.history.score must_== gamePreUndo.board.history.score
-        g.situation.board.history.halfMoveClock must_== gamePreUndo.board.history.halfMoveClock
-        g.situation.moves.values.flatten
-          .map(_.toUci.uci)
-          .toSet must_== gamePreUndo.situation.moves.values.flatten.map(_.toUci.uci).toSet
+        g.actionStrs === gamePreUndo.actionStrs
+        g.plies === gamePreUndo.plies
+        g.turnCount === gamePreUndo.turnCount
+        g.situation.player === gamePreUndo.situation.player
+        g.situation.board.pieces === gamePreUndo.board.pieces
+        g.situation.board.pocketData === gamePreUndo.board.pocketData
+        g.situation.board.unusedDice.sorted === gamePreUndo.board.unusedDice.sorted
+        g.situation.board.history.lastTurn === gamePreUndo.board.history.lastTurn
+        g.situation.board.history.currentTurn === gamePreUndo.board.history.currentTurn
+        g.situation.board.history.score === gamePreUndo.board.history.score
+        g.situation.board.history.halfMoveClock === gamePreUndo.board.history.halfMoveClock
+        movesToUciSet(g.situation.moves.values.flatten) === movesToUciSet(gamePreUndo.situation.moves.values.flatten)
       }
     }
 
@@ -126,22 +123,20 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "undo",
         "undo"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
         val gamePreUndo = forceValidGameToGame(playActionStrs(actionStrs.dropRight(4)))
-        g.actionStrs must_== gamePreUndo.actionStrs
-        g.plies must_== gamePreUndo.plies
-        g.turnCount must_== gamePreUndo.turnCount
-        g.situation.player must_== gamePreUndo.situation.player
-        g.situation.board.pieces must_== gamePreUndo.board.pieces
-        g.situation.board.pocketData must_== gamePreUndo.board.pocketData
-        g.situation.board.unusedDice.sorted must_== gamePreUndo.board.unusedDice.sorted
-        g.situation.board.history.lastTurn must_== gamePreUndo.board.history.lastTurn
-        g.situation.board.history.currentTurn must_== gamePreUndo.board.history.currentTurn
-        g.situation.board.history.score must_== gamePreUndo.board.history.score
-        g.situation.board.history.halfMoveClock must_== gamePreUndo.board.history.halfMoveClock
-        g.situation.moves.values.flatten
-          .map(_.toUci.uci)
-          .toSet must_== gamePreUndo.situation.moves.values.flatten.map(_.toUci.uci).toSet
+        g.actionStrs === gamePreUndo.actionStrs
+        g.plies === gamePreUndo.plies
+        g.turnCount === gamePreUndo.turnCount
+        g.situation.player === gamePreUndo.situation.player
+        g.situation.board.pieces === gamePreUndo.board.pieces
+        g.situation.board.pocketData === gamePreUndo.board.pocketData
+        g.situation.board.unusedDice.sorted === gamePreUndo.board.unusedDice.sorted
+        g.situation.board.history.lastTurn === gamePreUndo.board.history.lastTurn
+        g.situation.board.history.currentTurn === gamePreUndo.board.history.currentTurn
+        g.situation.board.history.score === gamePreUndo.board.history.score
+        g.situation.board.history.halfMoveClock === gamePreUndo.board.history.halfMoveClock
+        movesToUciSet(g.situation.moves.values.flatten) === movesToUciSet(gamePreUndo.situation.moves.values.flatten)
       }
     }
 
@@ -152,9 +147,9 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "e1j1",
         "endturn"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
-        g.situation.player must_== Player.P2
-        g.situation.board.history.lastTurn.map(_.uci) must_== actionStrs
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
+        g.situation.player === Player.P2
+        g.situation.board.history.lastTurn.map(_.uci) === actionStrs
       }
     }
 
@@ -166,8 +161,8 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn",
         "2/4"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
-        g.situation.moves.values.flatten.map(_.toUci.uci).toSet must_== Set(
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
+        movesToUciSet(g.situation.moves.values.flatten) === Set(
           "l1j1x",
           "l1h1",
           "a1b2",
@@ -177,7 +172,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
           "g2i2",
           "g2k2x"
         )
-        g.situation.canCapture must_== true
+        g.situation.canCapture === true
       }
     }
 
@@ -190,16 +185,16 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "2/4",
         "l1j1"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
-        g.situation.moves.values.flatten.map(_.toUci.uci).toSet must_== Set(
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
+        movesToUciSet(g.situation.moves.values.flatten) === Set(
           "l1h1",
           "j1f1",
           "a1d2",
           "e2i2",
           "g2k2x"
         )
-        g.situation.board.pieceCountOnBar(Player.P1) must_== 1
-        g.situation.board.history.currentTurn.map(_.uci) must_== List("2/4", "l1j1x")
+        g.situation.board.pieceCountOnBar(Player.P1) === 1
+        g.situation.board.history.currentTurn.map(_.uci) === List("2/4", "l1j1x")
       }
     }
 
@@ -213,22 +208,20 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "l1j1",
         "undo"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
         val gamePreUndo = forceValidGameToGame(playActionStrs(actionStrs.dropRight(2)))
-        g.actionStrs must_== gamePreUndo.actionStrs
-        g.plies must_== gamePreUndo.plies
-        g.turnCount must_== gamePreUndo.turnCount
-        g.situation.player must_== gamePreUndo.situation.player
-        g.situation.board.pieces must_== gamePreUndo.board.pieces
-        g.situation.board.pocketData must_== gamePreUndo.board.pocketData
-        g.situation.board.unusedDice.sorted must_== gamePreUndo.board.unusedDice.sorted
-        g.situation.board.history.lastTurn must_== gamePreUndo.board.history.lastTurn
-        g.situation.board.history.currentTurn must_== gamePreUndo.board.history.currentTurn
-        g.situation.board.history.score must_== gamePreUndo.board.history.score
-        g.situation.board.history.halfMoveClock must_== gamePreUndo.board.history.halfMoveClock
-        g.situation.moves.values.flatten
-          .map(_.toUci.uci)
-          .toSet must_== gamePreUndo.situation.moves.values.flatten.map(_.toUci.uci).toSet
+        g.actionStrs === gamePreUndo.actionStrs
+        g.plies === gamePreUndo.plies
+        g.turnCount === gamePreUndo.turnCount
+        g.situation.player === gamePreUndo.situation.player
+        g.situation.board.pieces === gamePreUndo.board.pieces
+        g.situation.board.pocketData === gamePreUndo.board.pocketData
+        g.situation.board.unusedDice.sorted === gamePreUndo.board.unusedDice.sorted
+        g.situation.board.history.lastTurn === gamePreUndo.board.history.lastTurn
+        g.situation.board.history.currentTurn === gamePreUndo.board.history.currentTurn
+        g.situation.board.history.score === gamePreUndo.board.history.score
+        g.situation.board.history.halfMoveClock === gamePreUndo.board.history.halfMoveClock
+        movesToUciSet(g.situation.moves.values.flatten) === movesToUciSet(gamePreUndo.situation.moves.values.flatten)
       }
     }
 
@@ -243,9 +236,9 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "g2k2",
         "endturn"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
-        g.situation.board.pieceCountOnBar(Player.P1) must_== 2
-        g.situation.canOnlyRollDice must_== true
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
+        g.situation.board.pieceCountOnBar(Player.P1) === 2
+        g.situation.canOnlyRollDice === true
       }
     }
 
@@ -260,25 +253,23 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "g2k2",
         "undo"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
         val gamePreUndo = forceValidGameToGame(playActionStrs(actionStrs.dropRight(2)))
-        g.actionStrs must_== gamePreUndo.actionStrs
-        g.plies must_== gamePreUndo.plies
-        g.turnCount must_== gamePreUndo.turnCount
-        g.situation.player must_== gamePreUndo.situation.player
-        g.situation.board.pieces must_== gamePreUndo.board.pieces
-        g.situation.board.pocketData must_== gamePreUndo.board.pocketData
-        g.situation.board.unusedDice.sorted must_== gamePreUndo.board.unusedDice.sorted
-        g.situation.board.history.lastTurn must_== gamePreUndo.board.history.lastTurn
-        g.situation.board.history.currentTurn must_== gamePreUndo.board.history.currentTurn
-        g.situation.board.history.score must_== gamePreUndo.board.history.score
-        g.situation.board.history.halfMoveClock must_== gamePreUndo.board.history.halfMoveClock
-        g.situation.board.pieceCountOnBar(Player.P1) must_== gamePreUndo.situation.board.pieceCountOnBar(
+        g.actionStrs === gamePreUndo.actionStrs
+        g.plies === gamePreUndo.plies
+        g.turnCount === gamePreUndo.turnCount
+        g.situation.player === gamePreUndo.situation.player
+        g.situation.board.pieces === gamePreUndo.board.pieces
+        g.situation.board.pocketData === gamePreUndo.board.pocketData
+        g.situation.board.unusedDice.sorted === gamePreUndo.board.unusedDice.sorted
+        g.situation.board.history.lastTurn === gamePreUndo.board.history.lastTurn
+        g.situation.board.history.currentTurn === gamePreUndo.board.history.currentTurn
+        g.situation.board.history.score === gamePreUndo.board.history.score
+        g.situation.board.history.halfMoveClock === gamePreUndo.board.history.halfMoveClock
+        g.situation.board.pieceCountOnBar(Player.P1) === gamePreUndo.situation.board.pieceCountOnBar(
           Player.P1
         )
-        g.situation.moves.values.flatten
-          .map(_.toUci.uci)
-          .toSet must_== gamePreUndo.situation.moves.values.flatten.map(_.toUci.uci).toSet
+        movesToUciSet(g.situation.moves.values.flatten) === movesToUciSet(gamePreUndo.situation.moves.values.flatten)
       }
     }
 
@@ -294,22 +285,20 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "undo",
         "undo"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
         val gamePreUndo = forceValidGameToGame(playActionStrs(actionStrs.dropRight(4)))
-        g.actionStrs must_== gamePreUndo.actionStrs
-        g.plies must_== gamePreUndo.plies
-        g.turnCount must_== gamePreUndo.turnCount
-        g.situation.player must_== gamePreUndo.situation.player
-        g.situation.board.pieces must_== gamePreUndo.board.pieces
-        g.situation.board.pocketData must_== gamePreUndo.board.pocketData
-        g.situation.board.unusedDice.sorted must_== gamePreUndo.board.unusedDice.sorted
-        g.situation.board.history.lastTurn must_== gamePreUndo.board.history.lastTurn
-        g.situation.board.history.currentTurn must_== gamePreUndo.board.history.currentTurn
-        g.situation.board.history.score must_== gamePreUndo.board.history.score
-        g.situation.board.history.halfMoveClock must_== gamePreUndo.board.history.halfMoveClock
-        g.situation.moves.values.flatten
-          .map(_.toUci.uci)
-          .toSet must_== gamePreUndo.situation.moves.values.flatten.map(_.toUci.uci).toSet
+        g.actionStrs === gamePreUndo.actionStrs
+        g.plies === gamePreUndo.plies
+        g.turnCount === gamePreUndo.turnCount
+        g.situation.player === gamePreUndo.situation.player
+        g.situation.board.pieces === gamePreUndo.board.pieces
+        g.situation.board.pocketData === gamePreUndo.board.pocketData
+        g.situation.board.unusedDice.sorted === gamePreUndo.board.unusedDice.sorted
+        g.situation.board.history.lastTurn === gamePreUndo.board.history.lastTurn
+        g.situation.board.history.currentTurn === gamePreUndo.board.history.currentTurn
+        g.situation.board.history.score === gamePreUndo.board.history.score
+        g.situation.board.history.halfMoveClock === gamePreUndo.board.history.halfMoveClock
+        movesToUciSet(g.situation.moves.values.flatten) === movesToUciSet(gamePreUndo.situation.moves.values.flatten)
       }
     }
   }
@@ -339,20 +328,20 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn",
         "6/2"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
-        g.situation.canMove must_== false
-        g.situation.canLift must_== false
-        g.situation.canDrop must_== false
-        g.situation.canEndTurn must_== true
-        g.situation.canOnlyEndTurn must_== true
-        g.situation.board.furthestFromEnd(Player.P1) must_== 20
-        g.situation.board.furthestFromEnd(Player.P2) must_== 20
-        g.situation.forcedAction.nonEmpty must_== true
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
+        g.situation.canMove === false
+        g.situation.canLift === false
+        g.situation.canDrop === false
+        g.situation.canEndTurn === true
+        g.situation.canOnlyEndTurn === true
+        g.situation.board.furthestFromEnd(Player.P1) === 20
+        g.situation.board.furthestFromEnd(Player.P2) === 20
+        g.situation.forcedAction.nonEmpty === true
       }
-      playActionStrs(actionStrs ++ List("endturn")) must beValid.like { g =>
-        g.situation.board.unusedDice.isEmpty must_== true
-        g.situation.board.usedDice.isEmpty must_== true
-        g.situation.canOnlyRollDice must_== true
+      playActionStrs(actionStrs ++ List("endturn")).toOption must beSome.like { case g: Game =>
+        g.situation.board.unusedDice.isEmpty === true
+        g.situation.board.usedDice.isEmpty === true
+        g.situation.canOnlyRollDice === true
       }
     }
 
@@ -400,10 +389,10 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "s@j2",
         "endturn"
       )
-      playActionStrs(actionStrs, None, None, Player.P2) must beValid.like { g =>
-        g.situation.board.unusedDice.isEmpty must_== true
-        g.situation.board.usedDice.isEmpty must_== true
-        g.situation.canOnlyRollDice must_== true
+      playActionStrs(actionStrs, None, None, Player.P2).toOption must beSome.like { case g: Game =>
+        g.situation.board.unusedDice.isEmpty === true
+        g.situation.board.usedDice.isEmpty === true
+        g.situation.canOnlyRollDice === true
       }
     }
   }
@@ -422,10 +411,10 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn",
         "6/6"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
-        g.situation.canMove must_== false
-        g.situation.canDrop must_== false
-        g.situation.canOnlyEndTurn must_== true
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
+        g.situation.canMove === false
+        g.situation.canDrop === false
+        g.situation.canOnlyEndTurn === true
       }
     }
 
@@ -441,10 +430,10 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn",
         "2/1"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
-        g.situation.canMove must_== false
-        g.situation.canDrop must_== true
-        g.situation.canOnlyEndTurn must_== false
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
+        g.situation.canMove === false
+        g.situation.canDrop === true
+        g.situation.canOnlyEndTurn === false
       }
     }
 
@@ -461,13 +450,13 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "2/1",
         "s@k2"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
-        g.situation.board.pieceCountOnBar(Player.P1) must_== 1
-        g.situation.board.pieceCountOnBar(Player.P2) must_== 1
-        g.situation.board.pipCount(Player.P1) must_== 183
-        g.situation.canMove must_== false
-        g.situation.dropsAsDrops.map(_.toUci.uci) must_== List("s@l2")
-        g.situation.board.history.currentTurn.map(_.uci) must_== List("2/1", "s@k2x")
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
+        g.situation.board.pieceCountOnBar(Player.P1) === 1
+        g.situation.board.pieceCountOnBar(Player.P2) === 1
+        g.situation.board.pipCount(Player.P1) === 183
+        g.situation.canMove === false
+        dropsToUciList(g.situation.dropsAsDrops) === List("s@l2")
+        g.situation.board.history.currentTurn.map(_.uci) === List("2/1", "s@k2x")
       }
     }
 
@@ -485,25 +474,23 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "s@k2",
         "undo"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
         val gamePreUndo = forceValidGameToGame(playActionStrs(actionStrs.dropRight(2)))
-        g.actionStrs must_== gamePreUndo.actionStrs
-        g.plies must_== gamePreUndo.plies
-        g.turnCount must_== gamePreUndo.turnCount
-        g.situation.player must_== gamePreUndo.situation.player
-        g.situation.board.pieces must_== gamePreUndo.board.pieces
-        g.situation.board.pocketData must_== gamePreUndo.board.pocketData
-        g.situation.board.unusedDice.sorted must_== gamePreUndo.board.unusedDice.sorted
-        g.situation.board.history.lastTurn must_== gamePreUndo.board.history.lastTurn
-        g.situation.board.history.currentTurn must_== gamePreUndo.board.history.currentTurn
-        g.situation.board.history.score must_== gamePreUndo.board.history.score
-        g.situation.board.history.halfMoveClock must_== gamePreUndo.board.history.halfMoveClock
-        g.situation.dropsAsDrops
-          .map(_.toUci.uci)
-          .toSet must_== gamePreUndo.situation.dropsAsDrops.map(_.toUci.uci).toSet
-        g.situation.canMove must_== gamePreUndo.situation.canMove
-        g.situation.canDrop must_== gamePreUndo.situation.canDrop
-        g.situation.canOnlyEndTurn must_== gamePreUndo.situation.canOnlyEndTurn
+        g.actionStrs === gamePreUndo.actionStrs
+        g.plies === gamePreUndo.plies
+        g.turnCount === gamePreUndo.turnCount
+        g.situation.player === gamePreUndo.situation.player
+        g.situation.board.pieces === gamePreUndo.board.pieces
+        g.situation.board.pocketData === gamePreUndo.board.pocketData
+        g.situation.board.unusedDice.sorted === gamePreUndo.board.unusedDice.sorted
+        g.situation.board.history.lastTurn === gamePreUndo.board.history.lastTurn
+        g.situation.board.history.currentTurn === gamePreUndo.board.history.currentTurn
+        g.situation.board.history.score === gamePreUndo.board.history.score
+        g.situation.board.history.halfMoveClock === gamePreUndo.board.history.halfMoveClock
+        dropsToUciSet(g.situation.dropsAsDrops) === dropsToUciSet(gamePreUndo.situation.dropsAsDrops)
+        g.situation.canMove === gamePreUndo.situation.canMove
+        g.situation.canDrop === gamePreUndo.situation.canDrop
+        g.situation.canOnlyEndTurn === gamePreUndo.situation.canOnlyEndTurn
       }
     }
 
@@ -522,9 +509,9 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "s@l2",
         "endturn"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
-        g.situation.board.pieceCountOnBar(Player.P1) must_== 0
-        g.situation.board.pieceCountOnBar(Player.P2) must_== 1
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
+        g.situation.board.pieceCountOnBar(Player.P1) === 0
+        g.situation.board.pieceCountOnBar(Player.P2) === 1
       }
     }
 
@@ -543,30 +530,28 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "s@l2",
         "undo"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
         val gamePreUndo = forceValidGameToGame(playActionStrs(actionStrs.dropRight(2)))
-        g.actionStrs must_== gamePreUndo.actionStrs
-        g.plies must_== gamePreUndo.plies
-        g.turnCount must_== gamePreUndo.turnCount
-        g.situation.player must_== gamePreUndo.situation.player
-        g.situation.board.pieces must_== gamePreUndo.board.pieces
-        g.situation.board.pocketData must_== gamePreUndo.board.pocketData
-        g.situation.board.unusedDice.sorted must_== gamePreUndo.board.unusedDice.sorted
-        g.situation.board.history.lastTurn must_== gamePreUndo.board.history.lastTurn
-        g.situation.board.history.currentTurn must_== gamePreUndo.board.history.currentTurn
-        g.situation.board.history.score must_== gamePreUndo.board.history.score
-        g.situation.board.history.halfMoveClock must_== gamePreUndo.board.history.halfMoveClock
-        g.situation.dropsAsDrops
-          .map(_.toUci.uci)
-          .toSet must_== gamePreUndo.situation.dropsAsDrops.map(_.toUci.uci).toSet
-        g.situation.board.pieceCountOnBar(Player.P1) must_== gamePreUndo.situation.board.pieceCountOnBar(
+        g.actionStrs === gamePreUndo.actionStrs
+        g.plies === gamePreUndo.plies
+        g.turnCount === gamePreUndo.turnCount
+        g.situation.player === gamePreUndo.situation.player
+        g.situation.board.pieces === gamePreUndo.board.pieces
+        g.situation.board.pocketData === gamePreUndo.board.pocketData
+        g.situation.board.unusedDice.sorted === gamePreUndo.board.unusedDice.sorted
+        g.situation.board.history.lastTurn === gamePreUndo.board.history.lastTurn
+        g.situation.board.history.currentTurn === gamePreUndo.board.history.currentTurn
+        g.situation.board.history.score === gamePreUndo.board.history.score
+        g.situation.board.history.halfMoveClock === gamePreUndo.board.history.halfMoveClock
+        dropsToUciSet(g.situation.dropsAsDrops) === dropsToUciSet(gamePreUndo.situation.dropsAsDrops)
+        g.situation.board.pieceCountOnBar(Player.P1) === gamePreUndo.situation.board.pieceCountOnBar(
           Player.P1
         )
-        g.situation.board.pieceCountOnBar(Player.P2) must_== gamePreUndo.situation.board.pieceCountOnBar(
+        g.situation.board.pieceCountOnBar(Player.P2) === gamePreUndo.situation.board.pieceCountOnBar(
           Player.P2
         )
-        g.situation.board.pipCount(Player.P1) must_== gamePreUndo.situation.board.pipCount(Player.P1)
-        g.situation.canMove must_== gamePreUndo.situation.canMove
+        g.situation.board.pipCount(Player.P1) === gamePreUndo.situation.board.pipCount(Player.P1)
+        g.situation.canMove === gamePreUndo.situation.canMove
       }
     }
 
@@ -586,25 +571,23 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "undo",
         "undo"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
         val gamePreUndo = forceValidGameToGame(playActionStrs(actionStrs.dropRight(4)))
-        g.actionStrs must_== gamePreUndo.actionStrs
-        g.plies must_== gamePreUndo.plies
-        g.turnCount must_== gamePreUndo.turnCount
-        g.situation.player must_== gamePreUndo.situation.player
-        g.situation.board.pieces must_== gamePreUndo.board.pieces
-        g.situation.board.pocketData must_== gamePreUndo.board.pocketData
-        g.situation.board.unusedDice.sorted must_== gamePreUndo.board.unusedDice.sorted
-        g.situation.board.history.lastTurn must_== gamePreUndo.board.history.lastTurn
-        g.situation.board.history.currentTurn must_== gamePreUndo.board.history.currentTurn
-        g.situation.board.history.score must_== gamePreUndo.board.history.score
-        g.situation.board.history.halfMoveClock must_== gamePreUndo.board.history.halfMoveClock
-        g.situation.dropsAsDrops
-          .map(_.toUci.uci)
-          .toSet must_== gamePreUndo.situation.dropsAsDrops.map(_.toUci.uci).toSet
-        g.situation.canMove must_== gamePreUndo.situation.canMove
-        g.situation.canDrop must_== gamePreUndo.situation.canDrop
-        g.situation.canOnlyEndTurn must_== gamePreUndo.situation.canOnlyEndTurn
+        g.actionStrs === gamePreUndo.actionStrs
+        g.plies === gamePreUndo.plies
+        g.turnCount === gamePreUndo.turnCount
+        g.situation.player === gamePreUndo.situation.player
+        g.situation.board.pieces === gamePreUndo.board.pieces
+        g.situation.board.pocketData === gamePreUndo.board.pocketData
+        g.situation.board.unusedDice.sorted === gamePreUndo.board.unusedDice.sorted
+        g.situation.board.history.lastTurn === gamePreUndo.board.history.lastTurn
+        g.situation.board.history.currentTurn === gamePreUndo.board.history.currentTurn
+        g.situation.board.history.score === gamePreUndo.board.history.score
+        g.situation.board.history.halfMoveClock === gamePreUndo.board.history.halfMoveClock
+        dropsToUciSet(g.situation.dropsAsDrops) === dropsToUciSet(gamePreUndo.situation.dropsAsDrops)
+        g.situation.canMove === gamePreUndo.situation.canMove
+        g.situation.canDrop === gamePreUndo.situation.canDrop
+        g.situation.canOnlyEndTurn === gamePreUndo.situation.canOnlyEndTurn
       }
     }
 
@@ -624,9 +607,9 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn",
         "6/5"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
-        g.situation.board.pieceCountOnBar(Player.P2) must_== 1
-        g.situation.dropsAsDrops.map(_.toUci.uci) must_== List("s@h1")
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
+        g.situation.board.pieceCountOnBar(Player.P2) === 1
+        dropsToUciList(g.situation.dropsAsDrops) === List("s@h1")
       }
     }
 
@@ -647,11 +630,11 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "6/5",
         "s@h1"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
-        g.situation.board.pieceCountOnBar(Player.P2) must_== 0
-        g.situation.canDrop must_== false
-        g.situation.canMove must_== true
-        g.situation.moves.values.flatten.map(_.toUci.uci).toSet must_== Set(
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
+        g.situation.board.pieceCountOnBar(Player.P2) === 0
+        g.situation.canDrop === false
+        g.situation.canMove === true
+        movesToUciSet(g.situation.moves.values.flatten) === Set(
           "l1f1",
           "j1d1",
           "h1b1",
@@ -807,88 +790,88 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
       "5/4"
     )
     "be valid game that generates valid lifts" in {
-      playActionStrs(actionStrs) must beValid.like { g =>
-        g.situation.board.piecesCanLift(Player.P1) must_== true
-        g.situation.board.playerPiecesOnBoardOrInPocket(Player.P1) must_== 11
-        g.situation.board.history.score must_== Score(4, 0)
-        g.situation.lifts.map(_.toUci.uci).toSet must_== Set("^j1")
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
+        g.situation.board.piecesCanLift(Player.P1) === true
+        g.situation.board.playerPiecesOnBoardOrInPocket(Player.P1) === 11
+        g.situation.board.history.score === Score(4, 0)
+        liftsToUciSet(g.situation.lifts) === Set("^j1")
       }
     }
 
     "be valid game that can handle a variety of lift scenarios" in {
-      playActionStrs(actionStrs ::: List("^j1", "^k1")) must beValid.like { g =>
-        g.situation.board.piecesCanLift(Player.P1) must_== true
-        g.situation.board.playerPiecesOnBoardOrInPocket(Player.P1) must_== 9
-        g.situation.board.history.score must_== Score(6, 0)
-        g.situation.board.history.currentTurn.map(_.uci) must_== List("5/4", "^j1", "^k1")
+      playActionStrs(actionStrs ::: List("^j1", "^k1")).toOption must beSome.like { case g: Game =>
+        g.situation.board.piecesCanLift(Player.P1) === true
+        g.situation.board.playerPiecesOnBoardOrInPocket(Player.P1) === 9
+        g.situation.board.history.score === Score(6, 0)
+        g.situation.board.history.currentTurn.map(_.uci) === List("5/4", "^j1", "^k1")
       }
     }
 
     "be unchanged after undoing a lift action" in {
-      playActionStrs(actionStrs ::: List("^j1", "undo")) must beValid.like { g =>
+      playActionStrs(actionStrs ::: List("^j1", "undo")).toOption must beSome.like { case g: Game =>
         val gamePreUndo = forceValidGameToGame(playActionStrs(actionStrs))
-        g.actionStrs must_== gamePreUndo.actionStrs
-        g.plies must_== gamePreUndo.plies
-        g.turnCount must_== gamePreUndo.turnCount
-        g.situation.player must_== gamePreUndo.situation.player
-        g.situation.board.pieces must_== gamePreUndo.board.pieces
-        g.situation.board.pocketData must_== gamePreUndo.board.pocketData
-        g.situation.board.unusedDice.sorted must_== gamePreUndo.board.unusedDice.sorted
-        g.situation.board.history.lastTurn must_== gamePreUndo.board.history.lastTurn
-        g.situation.board.history.currentTurn must_== gamePreUndo.board.history.currentTurn
-        g.situation.board.history.score must_== gamePreUndo.board.history.score
-        g.situation.board.history.halfMoveClock must_== gamePreUndo.board.history.halfMoveClock
-        g.situation.lifts.map(_.toUci.uci).toSet must_== gamePreUndo.situation.lifts.map(_.toUci.uci).toSet
-        g.situation.board.piecesCanLift(Player.P1) must_== gamePreUndo.situation.board.piecesCanLift(
+        g.actionStrs === gamePreUndo.actionStrs
+        g.plies === gamePreUndo.plies
+        g.turnCount === gamePreUndo.turnCount
+        g.situation.player === gamePreUndo.situation.player
+        g.situation.board.pieces === gamePreUndo.board.pieces
+        g.situation.board.pocketData === gamePreUndo.board.pocketData
+        g.situation.board.unusedDice.sorted === gamePreUndo.board.unusedDice.sorted
+        g.situation.board.history.lastTurn === gamePreUndo.board.history.lastTurn
+        g.situation.board.history.currentTurn === gamePreUndo.board.history.currentTurn
+        g.situation.board.history.score === gamePreUndo.board.history.score
+        g.situation.board.history.halfMoveClock === gamePreUndo.board.history.halfMoveClock
+        liftsToUciSet(g.situation.lifts) === liftsToUciSet(gamePreUndo.situation.lifts)
+        g.situation.board.piecesCanLift(Player.P1) === gamePreUndo.situation.board.piecesCanLift(
           Player.P1
         )
-        g.situation.board.playerPiecesOnBoardOrInPocket(Player.P1) must_== gamePreUndo.situation.board
+        g.situation.board.playerPiecesOnBoardOrInPocket(Player.P1) === gamePreUndo.situation.board
           .playerPiecesOnBoardOrInPocket(Player.P1)
       }
     }
 
     "be unchanged after undoing second lift action" in {
-      playActionStrs(actionStrs ::: List("^j1", "^k1", "undo")) must beValid.like { g =>
+      playActionStrs(actionStrs ::: List("^j1", "^k1", "undo")).toOption must beSome.like { case g: Game =>
         val gamePreUndo = forceValidGameToGame(playActionStrs(actionStrs ::: List("^j1")))
-        g.actionStrs must_== gamePreUndo.actionStrs
-        g.plies must_== gamePreUndo.plies
-        g.turnCount must_== gamePreUndo.turnCount
-        g.situation.player must_== gamePreUndo.situation.player
-        g.situation.board.pieces must_== gamePreUndo.board.pieces
-        g.situation.board.pocketData must_== gamePreUndo.board.pocketData
-        g.situation.board.unusedDice.sorted must_== gamePreUndo.board.unusedDice.sorted
-        g.situation.board.history.lastTurn must_== gamePreUndo.board.history.lastTurn
-        g.situation.board.history.currentTurn must_== gamePreUndo.board.history.currentTurn
-        g.situation.board.history.score must_== gamePreUndo.board.history.score
-        g.situation.board.history.halfMoveClock must_== gamePreUndo.board.history.halfMoveClock
-        g.situation.lifts.map(_.toUci.uci).toSet must_== gamePreUndo.situation.lifts.map(_.toUci.uci).toSet
-        g.situation.board.piecesCanLift(Player.P1) must_== gamePreUndo.situation.board.piecesCanLift(
+        g.actionStrs === gamePreUndo.actionStrs
+        g.plies === gamePreUndo.plies
+        g.turnCount === gamePreUndo.turnCount
+        g.situation.player === gamePreUndo.situation.player
+        g.situation.board.pieces === gamePreUndo.board.pieces
+        g.situation.board.pocketData === gamePreUndo.board.pocketData
+        g.situation.board.unusedDice.sorted === gamePreUndo.board.unusedDice.sorted
+        g.situation.board.history.lastTurn === gamePreUndo.board.history.lastTurn
+        g.situation.board.history.currentTurn === gamePreUndo.board.history.currentTurn
+        g.situation.board.history.score === gamePreUndo.board.history.score
+        g.situation.board.history.halfMoveClock === gamePreUndo.board.history.halfMoveClock
+        liftsToUciSet(g.situation.lifts) === liftsToUciSet(gamePreUndo.situation.lifts)
+        g.situation.board.piecesCanLift(Player.P1) === gamePreUndo.situation.board.piecesCanLift(
           Player.P1
         )
-        g.situation.board.playerPiecesOnBoardOrInPocket(Player.P1) must_== gamePreUndo.situation.board
+        g.situation.board.playerPiecesOnBoardOrInPocket(Player.P1) === gamePreUndo.situation.board
           .playerPiecesOnBoardOrInPocket(Player.P1)
       }
     }
 
     "be unchanged after undoing two lift actions" in {
-      playActionStrs(actionStrs ::: List("^j1", "^k1", "undo", "undo")) must beValid.like { g =>
+      playActionStrs(actionStrs ::: List("^j1", "^k1", "undo", "undo")).toOption must beSome.like { case g: Game =>
         val gamePreUndo = forceValidGameToGame(playActionStrs(actionStrs))
-        g.actionStrs must_== gamePreUndo.actionStrs
-        g.plies must_== gamePreUndo.plies
-        g.turnCount must_== gamePreUndo.turnCount
-        g.situation.player must_== gamePreUndo.situation.player
-        g.situation.board.pieces must_== gamePreUndo.board.pieces
-        g.situation.board.pocketData must_== gamePreUndo.board.pocketData
-        g.situation.board.unusedDice.sorted must_== gamePreUndo.board.unusedDice.sorted
-        g.situation.board.history.lastTurn must_== gamePreUndo.board.history.lastTurn
-        g.situation.board.history.currentTurn must_== gamePreUndo.board.history.currentTurn
-        g.situation.board.history.score must_== gamePreUndo.board.history.score
-        g.situation.board.history.halfMoveClock must_== gamePreUndo.board.history.halfMoveClock
-        g.situation.lifts.map(_.toUci.uci).toSet must_== gamePreUndo.situation.lifts.map(_.toUci.uci).toSet
-        g.situation.board.piecesCanLift(Player.P1) must_== gamePreUndo.situation.board.piecesCanLift(
+        g.actionStrs === gamePreUndo.actionStrs
+        g.plies === gamePreUndo.plies
+        g.turnCount === gamePreUndo.turnCount
+        g.situation.player === gamePreUndo.situation.player
+        g.situation.board.pieces === gamePreUndo.board.pieces
+        g.situation.board.pocketData === gamePreUndo.board.pocketData
+        g.situation.board.unusedDice.sorted === gamePreUndo.board.unusedDice.sorted
+        g.situation.board.history.lastTurn === gamePreUndo.board.history.lastTurn
+        g.situation.board.history.currentTurn === gamePreUndo.board.history.currentTurn
+        g.situation.board.history.score === gamePreUndo.board.history.score
+        g.situation.board.history.halfMoveClock === gamePreUndo.board.history.halfMoveClock
+        liftsToUciSet(g.situation.lifts) === liftsToUciSet(gamePreUndo.situation.lifts)
+        g.situation.board.piecesCanLift(Player.P1) === gamePreUndo.situation.board.piecesCanLift(
           Player.P1
         )
-        g.situation.board.playerPiecesOnBoardOrInPocket(Player.P1) must_== gamePreUndo.situation.board
+        g.situation.board.playerPiecesOnBoardOrInPocket(Player.P1) === gamePreUndo.situation.board
           .playerPiecesOnBoardOrInPocket(Player.P1)
       }
     }
@@ -1059,9 +1042,9 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn",
         "3/2"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
-        g.situation.canMove must_== true
-        g.situation.actions.map(_.toUci.uci) must_== List("b2b1")
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
+        g.situation.canMove === true
+        g.situation.actions.toList.map(_.toUci.uci) === List("b2b1")
       }
     }
   }
@@ -1097,9 +1080,9 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn",
         "6/4"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
         // cant use 4 on piece that is on e1 (e1i1)
-        g.situation.moves.values.flatten.map(_.toUci.uci).toSet must_== Set(
+        movesToUciSet(g.situation.moves.values.flatten) === Set(
           "l2h2",
           "e1k1",
           "f1j1",
@@ -1259,10 +1242,10 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn",
         "4/2"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
         // forced to use 4 and not 2
-        g.situation.dropsAsDrops.size must_== 1
-        g.situation.dropsAsDrops.map(_.toUci.uci).toSet must_== Set("s@i1")
+        g.situation.dropsAsDrops.size === 1
+        g.situation.dropsAsDrops.toList.map(_.toUci.uci).toSet === Set("s@i1")
       }
     }
 
@@ -1563,8 +1546,8 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn",
         "6/3"
       )
-      playActionStrs(actionStrs, None, Some(variant.Nackgammon), Player.P2) must beValid.like { g =>
-        g.situation.moves.values.flatten.map(_.toUci.uci).toSet must_== Set("e2b1")
+      playActionStrs(actionStrs, None, Some(variant.Nackgammon), Player.P2).toOption must beSome.like { case g: Game =>
+        movesToUciSet(g.situation.moves.values.flatten) === Set("e2b1")
       }
     }
 
@@ -1715,9 +1698,9 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn",
         "2/5"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
-        g.situation.moves.values.flatten.map(_.toUci.uci).toSet must_== Set("g2i2")
-        g.situation.lifts.isEmpty must_== true
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
+        movesToUciSet(g.situation.moves.values.flatten) === Set("g2i2")
+        g.situation.lifts.isEmpty === true
       }
     }
   }
@@ -1908,12 +1891,12 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "4/1",
         "^l1"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
-        g.situation.board.history.score must_== Score(15, 0)
-        g.situation.end must_== true
-        g.situation.board.pieceInOpponentsHome(Player.P2) must_== false
-        g.situation.winner must_== Some(Player.P1)
-        g.situation.status must_== Some(Status.GammonWin)
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
+        g.situation.board.history.score === Score(15, 0)
+        g.situation.end === true
+        g.situation.board.pieceInOpponentsHome(Player.P2) === false
+        g.situation.winner === Some(Player.P1)
+        g.situation.status === Some(Status.GammonWin)
       }
     }
 
@@ -2274,25 +2257,25 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "5/3",
         "^j1"
       )
-      playActionStrs(actionStrs.dropRight(1), None, None, Player.P2) must beValid.like { g =>
-        g.situation.board.history.score must_== Score(14, 12)
-        g.situation.end must_== false
-        g.situation.winner must_== None
-        g.situation.status must_== None
-        g.situation.board.racePosition must_== true
-        g.situation.board.pipCount(Player.P1) must_== 3
-        g.situation.maxTurnsFromEnd(Player.P1) must_== Some(1)
-        g.situation.minTurnsFromEnd(Player.P1) must_== Some(1)
-        g.situation.board.pipCount(Player.P2) must_== 3
-        g.situation.maxTurnsFromEnd(Player.P2) must_== Some(2)
-        g.situation.minTurnsFromEnd(Player.P2) must_== Some(1)
+      playActionStrs(actionStrs.dropRight(1), None, None, Player.P2).toOption must beSome.like { case g: Game =>
+        g.situation.board.history.score === Score(14, 12)
+        g.situation.end === false
+        g.situation.winner === None
+        g.situation.status === None
+        g.situation.board.racePosition === true
+        g.situation.board.pipCount(Player.P1) === 3
+        g.situation.maxTurnsFromEnd(Player.P1) === Some(1)
+        g.situation.minTurnsFromEnd(Player.P1) === Some(1)
+        g.situation.board.pipCount(Player.P2) === 3
+        g.situation.maxTurnsFromEnd(Player.P2) === Some(2)
+        g.situation.minTurnsFromEnd(Player.P2) === Some(1)
       }
-      playActionStrs(actionStrs, None, None, Player.P2) must beValid.like { g =>
-        g.situation.board.history.score must_== Score(15, 12)
-        g.situation.end must_== true
-        g.situation.winner must_== Some(Player.P1)
-        g.situation.status must_== Some(Status.SingleWin)
-        g.situation.board.pipCount(Player.P1) must_== 0
+      playActionStrs(actionStrs, None, None, Player.P2).toOption must beSome.like { case g: Game =>
+        g.situation.board.history.score === Score(15, 12)
+        g.situation.end === true
+        g.situation.winner === Some(Player.P1)
+        g.situation.status === Some(Status.SingleWin)
+        g.situation.board.pipCount(Player.P1) === 0
       }
     }
 
@@ -2584,18 +2567,18 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "^k2",
         "^k2"
       )
-      playActionStrs(actionStrs.dropRight(1), None, None, Player.P2) must beValid.like { g =>
-        g.situation.board.history.score must_== Score(0, 14)
-        g.situation.end must_== false
-        g.situation.winner must_== None
-        g.situation.status must_== None
+      playActionStrs(actionStrs.dropRight(1), None, None, Player.P2).toOption must beSome.like { case g: Game =>
+        g.situation.board.history.score === Score(0, 14)
+        g.situation.end === false
+        g.situation.winner === None
+        g.situation.status === None
       }
-      playActionStrs(actionStrs, None, None, Player.P2) must beValid.like { g =>
-        g.situation.board.history.score must_== Score(0, 15)
-        g.situation.end must_== true
-        g.situation.winner must_== Some(Player.P2)
-        g.situation.status must_== Some(Status.BackgammonWin)
-        g.situation.board.pieceInOpponentsHome(Player.P1) must_== true
+      playActionStrs(actionStrs, None, None, Player.P2).toOption must beSome.like { case g: Game =>
+        g.situation.board.history.score === Score(0, 15)
+        g.situation.end === true
+        g.situation.winner === Some(Player.P2)
+        g.situation.status === Some(Status.BackgammonWin)
+        g.situation.board.pieceInOpponentsHome(Player.P1) === true
       }
     }
   }
@@ -2613,11 +2596,11 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn",
         "2/3"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
-        g.situation.board.pieceCountOnBar(Player.P1) must_== 2
-        g.situation.canOnlyDrop must_== true
-        g.situation.dropsAsDrops.size must_== 2
-        g.situation.forcedAction.nonEmpty must_== true
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
+        g.situation.board.pieceCountOnBar(Player.P1) === 2
+        g.situation.canOnlyDrop === true
+        g.situation.dropsAsDrops.size === 2
+        g.situation.forcedAction.nonEmpty === true
       }
     }
 
@@ -2634,11 +2617,11 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "2/3",
         "s@k2"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
-        g.situation.board.pieceCountOnBar(Player.P1) must_== 1
-        g.situation.canOnlyDrop must_== true
-        g.situation.dropsAsDrops.size must_== 1
-        g.situation.forcedAction.nonEmpty must_== true
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
+        g.situation.board.pieceCountOnBar(Player.P1) === 1
+        g.situation.canOnlyDrop === true
+        g.situation.dropsAsDrops.size === 1
+        g.situation.forcedAction.nonEmpty === true
       }
     }
 
@@ -3207,25 +3190,25 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn"
       )
       // 5/2 would not involve a capture if it were 5/2 or 2/5 so its a forcedPair
-      playActionStrs(actionStrs ++ List("5/2")) must beValid.like { g =>
-        g.situation.canMove must_== true
-        g.situation.canDrop must_== false
-        g.situation.canLift must_== false
-        g.situation.forcedAction.nonEmpty must_== true
+      playActionStrs(actionStrs ++ List("5/2")).toOption must beSome.like { case g: Game =>
+        g.situation.canMove === true
+        g.situation.canDrop === false
+        g.situation.canLift === false
+        g.situation.forcedAction.nonEmpty === true
       }
-      playActionStrs(actionStrs ++ List("5/2", "e1a2")) must beValid.like { g =>
-        g.situation.canMove must_== true
-        g.situation.canDrop must_== false
-        g.situation.canLift must_== false
-        g.situation.forcedAction.nonEmpty must_== true
-        g.situation.board.history.forcedTurn must_== true
+      playActionStrs(actionStrs ++ List("5/2", "e1a2")).toOption must beSome.like { case g: Game =>
+        g.situation.canMove === true
+        g.situation.canDrop === false
+        g.situation.canLift === false
+        g.situation.forcedAction.nonEmpty === true
+        g.situation.board.history.forcedTurn === true
       }
       // 6/1 would involve a capture if it were 6/1 but not if it were 1/6 so its not a forcedPair
-      playActionStrs(actionStrs ++ List("6/1")) must beValid.like { g =>
-        g.situation.canMove must_== true
-        g.situation.canDrop must_== false
-        g.situation.canLift must_== false
-        g.situation.forcedAction.isEmpty must_== true
+      playActionStrs(actionStrs ++ List("6/1")).toOption must beSome.like { case g: Game =>
+        g.situation.canMove === true
+        g.situation.canDrop === false
+        g.situation.canLift === false
+        g.situation.forcedAction.isEmpty === true
       }
     }
 
@@ -3304,12 +3287,12 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn",
         "5/5"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
-        g.situation.canMove must_== true
-        g.situation.canDrop must_== false
-        g.situation.canLift must_== false
-        g.situation.board.unusedDice.size must_== 4
-        g.situation.forcedAction.nonEmpty must_== true
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
+        g.situation.canMove === true
+        g.situation.canDrop === false
+        g.situation.canLift === false
+        g.situation.board.unusedDice.size === 4
+        g.situation.forcedAction.nonEmpty === true
       }
     }
 
@@ -3557,18 +3540,18 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn",
         "5/3"
       )
-      playActionStrs(actionStrs, None, None, Player.P2) must beValid.like { g =>
-        g.situation.canMove must_== true
-        g.situation.canDrop must_== false
-        g.situation.canLift must_== true
-        g.situation.forcedAction.nonEmpty must_== true
+      playActionStrs(actionStrs, None, None, Player.P2).toOption must beSome.like { case g: Game =>
+        g.situation.canMove === true
+        g.situation.canDrop === false
+        g.situation.canLift === true
+        g.situation.forcedAction.nonEmpty === true
       }
-      playActionStrs(actionStrs ++ List("^h2"), None, None, Player.P2) must beValid.like { g =>
-        g.situation.canMove must_== true
-        g.situation.canDrop must_== false
-        g.situation.canLift must_== true
-        g.situation.forcedAction.isEmpty must_== true
-        g.situation.board.history.forcedTurn must_== true
+      playActionStrs(actionStrs ++ List("^h2"), None, None, Player.P2).toOption must beSome.like { case g: Game =>
+        g.situation.canMove === true
+        g.situation.canDrop === false
+        g.situation.canLift === true
+        g.situation.forcedAction.isEmpty === true
+        g.situation.board.history.forcedTurn === true
       }
     }
 
@@ -3769,10 +3752,10 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn",
         "6/5"
       )
-      playActionStrs(actionStrs, None, None, Player.P2) must beValid.like { g =>
-        g.situation.canLift must_== true
-        g.situation.board.unusedDice.size must_== 2
-        g.situation.forcedAction.nonEmpty must_== true
+      playActionStrs(actionStrs, None, None, Player.P2).toOption must beSome.like { case g: Game =>
+        g.situation.canLift === true
+        g.situation.board.unusedDice.size === 2
+        g.situation.forcedAction.nonEmpty === true
       }
     }
 
@@ -3980,12 +3963,13 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn",
         "3/6"
       )
-      playActionStrs(actionStrs, None, None, Player.P2) must beValid.like { g =>
-        g.situation.forcedAction.map(_.toUci.uci) must_== Some("b2h2")
+      playActionStrs(actionStrs, None, None, Player.P2).toOption must beSome.like { case g: Game =>
+        val forcedUci = g.situation.forcedAction.map(_.toUci.uci)
+        forcedUci === Some("b2h2")
       }
       // Undoing, and playing a non forced action should not result in a forcedTurn
-      playActionStrs(actionStrs ++ List("g2j2", "b2h2"), None, None, Player.P2) must beValid.like { g =>
-        g.situation.board.history.forcedTurn must_== false
+      playActionStrs(actionStrs ++ List("g2j2", "b2h2"), None, None, Player.P2).toOption must beSome.like { case g: Game =>
+        g.situation.board.history.forcedTurn === false
       }
     }
 
@@ -4179,8 +4163,9 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn",
         "3/6"
       )
-      playActionStrs(actionStrs, None, None, Player.P2) must beValid.like { g =>
-        g.situation.forcedAction.map(_.toUci.uci) must_== Some("h2b2")
+      playActionStrs(actionStrs, None, None, Player.P2).toOption must beSome.like { case g: Game =>
+        val forcedUci = g.situation.forcedAction.map(_.toUci.uci)
+        forcedUci === Some("h2b2")
       }
     }
 
@@ -4395,8 +4380,8 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn",
         "3/2"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
-        g.situation.forcedAction.isEmpty must_== true
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
+        g.situation.forcedAction.isEmpty === true
       }
     }
 
@@ -4565,9 +4550,9 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn",
         "3/2"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
-        g.situation.canCapture must_== true
-        g.situation.forcedAction.isEmpty must_== true
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
+        g.situation.canCapture === true
+        g.situation.forcedAction.isEmpty === true
       }
     }
 
@@ -4732,19 +4717,19 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn",
         "3/2"
       )
-      playActionStrs(actionStrs) must beValid.like { g =>
-        g.situation.canMove must_== true
-        g.situation.forcedAction.nonEmpty must_== true
+      playActionStrs(actionStrs).toOption must beSome.like { case g: Game =>
+        g.situation.canMove === true
+        g.situation.forcedAction.nonEmpty === true
       }
-      playActionStrs(actionStrs ++ List("b2b1")) must beValid.like { g =>
-        g.situation.canMove must_== true
-        g.situation.forcedAction.nonEmpty must_== true
-        g.situation.board.history.forcedTurn must_== true
+      playActionStrs(actionStrs ++ List("b2b1")).toOption must beSome.like { case g: Game =>
+        g.situation.canMove === true
+        g.situation.forcedAction.nonEmpty === true
+        g.situation.board.history.forcedTurn === true
       }
-      playActionStrs(actionStrs ++ List("b2b1", "b1d1")) must beValid.like { g =>
-        g.situation.canOnlyEndTurn must_== true
-        g.situation.forcedAction.nonEmpty must_== true
-        g.situation.board.history.forcedTurn must_== true
+      playActionStrs(actionStrs ++ List("b2b1", "b1d1")).toOption must beSome.like { case g: Game =>
+        g.situation.canOnlyEndTurn === true
+        g.situation.forcedAction.nonEmpty === true
+        g.situation.board.history.forcedTurn === true
       }
     }
 
@@ -4980,9 +4965,9 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn",
         "4/3"
       )
-      playActionStrs(actionStrs, None, None, Player.P2) must beValid.like { g =>
-        g.situation.canMove must_== true
-        g.situation.forcedAction.isEmpty must_== true
+      playActionStrs(actionStrs, None, None, Player.P2).toOption must beSome.like { case g: Game =>
+        g.situation.canMove === true
+        g.situation.forcedAction.isEmpty === true
       }
     }
   }
@@ -4993,8 +4978,8 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "4/2",
         "l1h1"
       )
-      playActionStrs(actionStrs, None, Some(variant.Hyper), Player.P2) must beValid.like { g =>
-        g.situation.moves.values.flatten.map(_.toUci.uci).toSet must_== Set("h1f1", "j1h1", "k1i1")
+      playActionStrs(actionStrs, None, Some(variant.Hyper), Player.P2).toOption must beSome.like { case g: Game =>
+        movesToUciSet(g.situation.moves.values.flatten) === Set("h1f1", "j1h1", "k1i1")
       }
     }
 
@@ -5041,12 +5026,12 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "1/2",
         "^l2"
       )
-      playActionStrs(actionStrs, None, Some(variant.Hyper), Player.P2) must beValid.like { g =>
-        g.situation.board.history.score must_== Score(0, 3)
-        g.situation.end must_== true
-        g.situation.board.pieceInOpponentsHome(Player.P1) must_== true
-        g.situation.winner must_== Some(Player.P2)
-        g.situation.status must_== Some(Status.SingleWin) // not a backgammon due to no double of cube
+      playActionStrs(actionStrs, None, Some(variant.Hyper), Player.P2).toOption must beSome.like { case g: Game =>
+        g.situation.board.history.score === Score(0, 3)
+        g.situation.end === true
+        g.situation.board.pieceInOpponentsHome(Player.P1) === true
+        g.situation.winner === Some(Player.P2)
+        g.situation.status === Some(Status.SingleWin) // not a backgammon due to no double of cube
       }
     }
   }
@@ -5166,12 +5151,12 @@ class BackgammonVariantTestIsometry extends strategygames.chess.ChessTest {
     val stratVariant = StratVariant(lib, Backgammon.key).get
 
     _testEveryMoveLoadFenIsometry(lib, StratFen(lib, Backgammon.initialFen.value), stratVariant)(
-      bgGameP2StartsActionStrs.flatten.toList.map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) must beValid.like(gameData => {
+      bgGameP2StartsActionStrs.flatten[String].toList.map(uciStr => StratUci(lib, gameFamily, uciStr).get)
+    ).toOption must beSome.like { case gameData =>
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
-      fen1 must_== fen2
-    })
+      fen1 === fen2
+    }
   }
 
   "Test Every move can be loaded from fen P1 starts" in {
@@ -5180,11 +5165,11 @@ class BackgammonVariantTestIsometry extends strategygames.chess.ChessTest {
     val stratVariant = StratVariant(lib, Backgammon.key).get
 
     _testEveryMoveLoadFenIsometry(lib, StratFen(lib, Backgammon.initialFen.value), stratVariant)(
-      bgGameP1StartsActionStrs.flatten.toList.map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) must beValid.like(gameData => {
+      bgGameP1StartsActionStrs.flatten[String].toList.map(uciStr => StratUci(lib, gameFamily, uciStr).get)
+    ).toOption must beSome.like { case gameData =>
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
-      fen1 must_== fen2
-    })
+      fen1 === fen2
+    }
   }
 }

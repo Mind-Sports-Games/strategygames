@@ -1,5 +1,7 @@
 package strategygames
 
+import scalalib.extensions.*
+
 sealed abstract class Mode(val id: Int) {
 
   lazy val name = toString.toLowerCase

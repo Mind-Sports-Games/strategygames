@@ -28,9 +28,9 @@ case class EndTurn(
 
   def lazySituationAfter = situationAfter
 
-  def withMetrics(m: MoveMetrics) = copy(metrics = m)
+  def withMetrics(m: MoveMetrics): EndTurn = copy(metrics = m)
 
-  def toUci = Uci.EndTurn()
+  def toUci: Uci.EndTurn = Uci.EndTurn()
 
   override def toString = toUci.uci
 

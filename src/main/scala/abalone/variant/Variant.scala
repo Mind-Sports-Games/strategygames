@@ -3,6 +3,7 @@ package strategygames.abalone.variant
 import cats.data.Validated
 import cats.syntax.option._
 import scala.annotation.nowarn
+import scalalib.extensions.*
 
 import strategygames.{ GameFamily, Player }
 import strategygames.abalone._

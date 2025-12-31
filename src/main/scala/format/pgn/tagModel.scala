@@ -5,6 +5,7 @@ import strategygames.{ Clock, ClockConfig }
 import org.joda.time.DateTimeZone
 import org.joda.time.format.DateTimeFormat
 import cats.syntax.option._
+import scalalib.extensions.*
 
 case class Tag(name: TagType, value: String) {
 

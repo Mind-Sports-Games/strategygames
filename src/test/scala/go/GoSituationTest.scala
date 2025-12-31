@@ -17,10 +17,10 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     val drops = variant.Go19x19.validDrops(situation)
 
     "have no moves" in {
-      moves.size must_== 0
+      moves.size === 0
     }
     "all 361 drops" in {
-      drops.size must_== 361
+      drops.size === 361
     }
   }
 
@@ -28,7 +28,7 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     val game = Game(variant.Go19x19)
 
     "have no stones on the board" in {
-      game.situation.board.pieces.size must_== 0
+      game.situation.board.pieces.size === 0
     }
   }
 
@@ -40,10 +40,10 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     val fen   = game1.situation.board.apiPosition.fen
 
     "have differnt fen after drop" in {
-      variant.Go19x19.initialFen.engineFen must_!= fen.engineFen
+      variant.Go19x19.initialFen.engineFen !== fen.engineFen
     }
     "and have 1 stone on the board" in {
-      game1.situation.board.pieces.size must_== 1
+      game1.situation.board.pieces.size === 1
     }
   }
 
@@ -56,17 +56,17 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     val fen   = game1.situation.board.apiPosition.fen
 
     "have correct fen after drop b1" in {
-      "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1S17[SSSSSSSSSSssssssssss] w - 3610 75 0 0 75 0 1" must_== drop.after.apiPosition.fen.value
+      "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1S17[SSSSSSSSSSssssssssss] w - 3610 75 0 0 75 0 1" === drop.after.apiPosition.fen.value
     }
 
     val boardFen = format.Forsyth.boardAndPlayer(game1.situation)
     "have differnt fen after drop" in {
-      fen.value.split(' ').headOption must_== boardFen.split(' ').headOption
+      fen.value.split(' ').headOption === boardFen.split(' ').headOption
     }
     "and be equal to a specific fen" in {
       boardFen
         .split(' ')(0)
-        .split('[')(0) must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1S17"
+        .split('[')(0) === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1S17"
     }
   }
 
@@ -78,12 +78,12 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     val game = Game(Some(variant.Go9x9), Some(startingFen))
 
     "have the same situation piecemap from game creation and using forsyth" in {
-      game.situation.board.apiPosition.pieceMap must_== situation
+      game.situation.board.apiPosition.pieceMap === situation
         .map(_.board.apiPosition.pieceMap)
-        .getOrElse {}
+        .getOrElse(Map.empty)
     }
     "have the same situation fen from game creation and using forsyth" in {
-      game.situation.board.apiPosition.fen must_== situation
+      game.situation.board.apiPosition.fen === situation
         .map(_.board.apiPosition.fen)
         .getOrElse(FEN(""))
     }
@@ -93,10 +93,10 @@ class GoSituationTest extends Specification with ValidatedMatchers {
 
     val game1 = game.apply(drop)
     "have the correct starting fen after a move" in {
-      game1.situation.board.apiPosition.initialFen.value must_== "9/9/2S3S2/9/9/9/9/9/9[SSSSSSSSSSssssssssss] w - 810 40 0 0 40 0 1"
+      game1.situation.board.apiPosition.initialFen.value === "9/9/2S3S2/9/9/9/9/9/9[SSSSSSSSSSssssssssss] w - 810 40 0 0 40 0 1"
     }
     "and the correct current fen after a move" in {
-      game1.situation.board.apiPosition.fen.value must_== "9/9/2S3S2/9/9/9/9/9/s8[SSSSSSSSSSssssssssss] b - 20 50 0 0 40 0 2"
+      game1.situation.board.apiPosition.fen.value === "9/9/2S3S2/9/9/9/9/9/s8[SSSSSSSSSSssssssssss] b - 20 50 0 0 40 0 2"
     }
 
   }
@@ -107,7 +107,7 @@ class GoSituationTest extends Specification with ValidatedMatchers {
 
     val fen = strategygames.go.format.Forsyth.>>(game)
     "fen should match that of starting fen" in {
-      startingFen must_== fen
+      startingFen === fen
     }
   }
 
@@ -146,15 +146,15 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     val game_ply_10        = game_ply_9.apply(ss)
 
     "not be gameEnd after just two passes" in {
-      game_ply_9.situation.end must_== false
-      game_ply_9.situation.board.apiPosition.pieceMap.size must_== 7
-      game_ply_9.situation.board.apiPosition.fen.value must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1SsSsSsS11[SSSSSSSSSSssssssssss] w - 40 105 0 0 75 0 5"
+      game_ply_9.situation.end === false
+      game_ply_9.situation.board.apiPosition.pieceMap.size === 7
+      game_ply_9.situation.board.apiPosition.fen.value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1SsSsSsS11[SSSSSSSSSSssssssssss] w - 40 105 0 0 75 0 5"
     }
 
     "be gameEnd after final ss action" in {
-      game_ply_10.situation.end must_== true
-      game_ply_10.situation.board.apiPosition.pieceMap.size must_== 5
-      game_ply_10.situation.board.apiPosition.fen.value must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/2s1sSsS11[SSSSSSSSSSssssssssss] w - 20 105 0 0 75 0 6"
+      game_ply_10.situation.end === true
+      game_ply_10.situation.board.apiPosition.pieceMap.size === 5
+      game_ply_10.situation.board.apiPosition.fen.value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/2s1sSsS11[SSSSSSSSSSssssssssss] w - 20 105 0 0 75 0 6"
     }
 
   }
@@ -209,21 +209,21 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     val game_ply_15        = game_ply_14.apply(ss)
 
     "not be gameEnd after just two passes (both cases)" in {
-      game_ply_9.situation.end must_== false
-      game_ply_9.situation.board.apiPosition.pieceMap.size must_== 7
-      game_ply_9.situation.board.apiPosition.fen.value must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1SsSsSsS11[SSSSSSSSSSssssssssss] w - 40 105 0 0 75 0 5"
-      game_ply_14.situation.end must_== false
-      game_ply_14.situation.board.apiPosition.pieceMap.size must_== 10
+      game_ply_9.situation.end === false
+      game_ply_9.situation.board.apiPosition.pieceMap.size === 7
+      game_ply_9.situation.board.apiPosition.fen.value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1SsSsSsS11[SSSSSSSSSSssssssssss] w - 40 105 0 0 75 0 5"
+      game_ply_14.situation.end === false
+      game_ply_14.situation.board.apiPosition.pieceMap.size === 10
     }
 
     "be gameEnd after final ss action" in {
-      game_ply_15.situation.end must_== true
-      game_ply_15.situation.board.apiPosition.pieceMap.size must_== 8
-      game_ply_15.situation.board.apiPosition.fen.value must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/2s1sSsSsSs8[SSSSSSSSSSssssssssss] b - 30 125 0 0 75 0 8"
+      game_ply_15.situation.end === true
+      game_ply_15.situation.board.apiPosition.pieceMap.size === 8
+      game_ply_15.situation.board.apiPosition.fen.value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/2s1sSsSsSs8[SSSSSSSSSSssssssssss] b - 30 125 0 0 75 0 8"
     }
 
     "have no more drops after game end" in {
-      game_ply_15.situation.drops must_== None
+      game_ply_15.situation.drops === None
     }
   }
 
@@ -274,27 +274,27 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     val game_ply_14        = game_ply_13.apply(ss)
 
     "not be gameEnd after just two passes (both cases)" in {
-      game_ply_9.situation.end must_== false
-      game_ply_9.situation.board.apiPosition.pieceMap.size must_== 7
-      game_ply_9.situation.board.apiPosition.fen.value must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1SsSsSsS11[SSSSSSSSSSssssssssss] w - 40 105 0 0 75 0 5"
-      game_ply_13.situation.end must_== false
-      game_ply_13.situation.board.apiPosition.pieceMap.size must_== 8
+      game_ply_9.situation.end === false
+      game_ply_9.situation.board.apiPosition.pieceMap.size === 7
+      game_ply_9.situation.board.apiPosition.fen.value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1SsSsSsS11[SSSSSSSSSSssssssssss] w - 40 105 0 0 75 0 5"
+      game_ply_13.situation.end === false
+      game_ply_13.situation.board.apiPosition.pieceMap.size === 8
     }
 
     "be gameEnd after final ss action" in {
-      game_ply_14.situation.end must_== true
-      game_ply_14.situation.board.apiPosition.pieceMap.size must_== 6
-      game_ply_14.situation.board.apiPosition.fen.value must_== "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/2s1sSsSS10[SSSSSSSSSSssssssssss] w - 30 105 0 0 75 0 8"
+      game_ply_14.situation.end === true
+      game_ply_14.situation.board.apiPosition.pieceMap.size === 6
+      game_ply_14.situation.board.apiPosition.fen.value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/2s1sSsSS10[SSSSSSSSSSssssssssss] w - 30 105 0 0 75 0 8"
     }
 
     "not have a ss action after single pass" in {
-      game_ply_8.situation.canSelectSquares must_== false
-      game_ply_10.situation.canSelectSquares must_== false
+      game_ply_8.situation.canSelectSquares === false
+      game_ply_10.situation.canSelectSquares === false
     }
 
     "have a ss action after double pass" in {
-      game_ply_9.situation.canSelectSquares must_== true
-      game_ply_13.situation.canSelectSquares must_== true
+      game_ply_9.situation.canSelectSquares === true
+      game_ply_13.situation.canSelectSquares === true
     }
   }
 
@@ -322,13 +322,13 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     val drops_ply_9 = g9.validDrops(game_p8.situation)
 
     "number of drops for ply 8 should be 76 (ko activated)" in {
-      drops_ply_8.size must_== 76
+      drops_ply_8.size === 76
     }
 
     // should be able to play e4
     "number of drops for ply 9 should be 77 (no ko)" in {
-      drops_ply_9.size must_== 77
-      drops_ply_9.filter(_.pos.key == "e4").size must_== 1
+      drops_ply_9.size === 77
+      drops_ply_9.filter(_.pos.key == "e4").size === 1
     }
 
   }
@@ -373,8 +373,8 @@ class GoSituationTest extends Specification with ValidatedMatchers {
 
     // should be able to play e8
     "number of drops for ply 16 should be 71 (ko not activated)" in {
-      drops_ply_16.size must_== 71
-      drops_ply_16.filter(_.pos.key == "e8").size must_== 1
+      drops_ply_16.size === 71
+      drops_ply_16.filter(_.pos.key == "e8").size === 1
     }
 
   }
@@ -391,13 +391,13 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     // this will now force end of game with 0 dead stones.
 
     "situation should give pass warning after two passes" in {
-      game_p3.situation.isSubsequentPassWarning must_== true
-      game_p4.situation.isSubsequentPassWarning must_== true
-      game_p5.situation.isSubsequentPassWarning must_== false // as ss: is last action
+      game_p3.situation.isSubsequentPassWarning === true
+      game_p4.situation.isSubsequentPassWarning === true
+      game_p5.situation.isSubsequentPassWarning === false // as ss: is last action
     }
 
     "end the game after 4 passes" in {
-      game_p5.situation.end must_== true
+      game_p5.situation.end === true
     }
 
   }
@@ -414,12 +414,12 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     val game_p6 = game_p5.apply(g9.validPass(game_p5.situation))
 
     "situation should give pass warning after two passes" in {
-      game_p3.situation.isSubsequentPassWarning must_== true
-      game_p6.situation.isSubsequentPassWarning must_== true
+      game_p3.situation.isSubsequentPassWarning === true
+      game_p6.situation.isSubsequentPassWarning === true
     }
 
     "end the game after 4 passes" in {
-      game_p6.situation.end must_== false
+      game_p6.situation.end === false
     }
 
   }
@@ -444,11 +444,11 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     val game_p14 = game_p13.apply(g9.validPass(game_p13.situation))
 
     "situation should not end" in {
-      game_p14.situation.end must_== false
+      game_p14.situation.end === false
     }
 
     "situation should not be repetition yet" in {
-      game_p14.situation.isRepetition must_== false
+      game_p14.situation.isRepetition === false
     }
 
   }

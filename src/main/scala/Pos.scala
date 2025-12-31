@@ -37,7 +37,7 @@ object Pos {
 
     def gameLogic: GameLogic = GameLogic.Chess()
 
-    lazy val all: List[Pos] = chess.Pos.all.map(Chess)
+    lazy val all: List[Pos] = chess.Pos.all.map(Chess.apply)
 
   }
 
@@ -54,7 +54,7 @@ object Pos {
 
     // TODO: this only handl 8x8 boards. we should include 10x10 as well.
     //       Not sure if we need a separate type, probably?
-    lazy val all: List[Pos] = draughts.Pos64.all.map(Draughts)
+    lazy val all: List[Pos] = draughts.Pos64.all.map(Draughts.apply)
 
   }
 
@@ -69,7 +69,7 @@ object Pos {
 
     def gameLogic: GameLogic = GameLogic.FairySF()
 
-    lazy val all: List[Pos] = chess.Pos.all.map(Chess)
+    lazy val all: List[Pos] = chess.Pos.all.map(Chess.apply)
 
   }
 
@@ -83,7 +83,7 @@ object Pos {
 
     def gameLogic: GameLogic = GameLogic.Samurai()
 
-    lazy val all: List[Pos] = samurai.Pos.all.map(Samurai)
+    lazy val all: List[Pos] = samurai.Pos.all.map(Samurai.apply)
 
   }
 
@@ -97,7 +97,7 @@ object Pos {
 
     def gameLogic: GameLogic = GameLogic.Togyzkumalak()
 
-    lazy val all: List[Pos] = togyzkumalak.Pos.all.map(Togyzkumalak)
+    lazy val all: List[Pos] = togyzkumalak.Pos.all.map(Togyzkumalak.apply)
 
   }
 
@@ -111,7 +111,7 @@ object Pos {
 
     def gameLogic: GameLogic = GameLogic.Go()
 
-    lazy val all: List[Pos] = go.Pos.all.map(Go)
+    lazy val all: List[Pos] = go.Pos.all.map(Go.apply)
 
   }
 
@@ -125,7 +125,7 @@ object Pos {
 
     def gameLogic: GameLogic = GameLogic.Backgammon()
 
-    lazy val all: List[Pos] = backgammon.Pos.all.map(Backgammon)
+    lazy val all: List[Pos] = backgammon.Pos.all.map(Backgammon.apply)
 
   }
 
@@ -139,7 +139,7 @@ object Pos {
 
     def gameLogic: GameLogic = GameLogic.Abalone()
 
-    lazy val all: List[Pos] = abalone.Pos.all.map(Abalone)
+    lazy val all: List[Pos] = abalone.Pos.all.map(Abalone.apply)
 
   }
 
@@ -153,7 +153,7 @@ object Pos {
 
     def gameLogic: GameLogic = GameLogic.Dameo()
 
-    lazy val all: List[Pos] = dameo.Pos.all.map(Dameo)
+    lazy val all: List[Pos] = dameo.Pos.all.map(Dameo.apply)
 
   }
 
@@ -161,14 +161,14 @@ object Pos {
   // think we need to figure out a way to map into Draughts with a board size at this point
   def fromKey(lib: GameLogic, key: String): Option[Pos] = lib match {
     case GameLogic.Draughts()     => sys.error("Not implemented yet for draughts")
-    case GameLogic.Chess()        => chess.Pos.fromKey(key).map(Chess)
-    case GameLogic.FairySF()      => fairysf.Pos.fromKey(key).map(FairySF)
-    case GameLogic.Samurai()      => samurai.Pos.fromKey(key).map(Samurai)
-    case GameLogic.Togyzkumalak() => togyzkumalak.Pos.fromKey(key).map(Togyzkumalak)
-    case GameLogic.Go()           => go.Pos.fromKey(key).map(Go)
-    case GameLogic.Backgammon()   => backgammon.Pos.fromKey(key).map(Backgammon)
-    case GameLogic.Abalone()      => abalone.Pos.fromKey(key).map(Abalone)
-    case GameLogic.Dameo()        => dameo.Pos.fromKey(key).map(Dameo)
+    case GameLogic.Chess()        => chess.Pos.fromKey(key).map(Chess.apply)
+    case GameLogic.FairySF()      => fairysf.Pos.fromKey(key).map(FairySF.apply)
+    case GameLogic.Samurai()      => samurai.Pos.fromKey(key).map(Samurai.apply)
+    case GameLogic.Togyzkumalak() => togyzkumalak.Pos.fromKey(key).map(Togyzkumalak.apply)
+    case GameLogic.Go()           => go.Pos.fromKey(key).map(Go.apply)
+    case GameLogic.Backgammon()   => backgammon.Pos.fromKey(key).map(Backgammon.apply)
+    case GameLogic.Abalone()      => abalone.Pos.fromKey(key).map(Abalone.apply)
+    case GameLogic.Dameo()        => dameo.Pos.fromKey(key).map(Dameo.apply)
   }
 
   // def at(lib: GameLogic, x: Int, y: Int): Option[Pos] = lib match {

@@ -4,8 +4,8 @@ import strategygames.{ ClockBase, MoveMetrics, Player, VActionStrs }
 import cats.data.Validated
 
 import scala.annotation.nowarn
-
 import scala.util.Random
+import scalalib.extensions.*
 
 import strategygames.backgammon.format.{ FEN, Uci }
 import strategygames.backgammon.variant.Variant

@@ -59,9 +59,9 @@ case class Move(
 
   def player = piece.player
 
-  def withMetrics(m: MoveMetrics) = copy(metrics = m)
+  def withMetrics(m: MoveMetrics): Move = copy(metrics = m)
 
-  def toUci = Uci.Move(orig, dest)
+  def toUci: Uci.Move = Uci.Move(orig, dest)
 
   override def toString = s"$piece ${toUci.uci}"
 }

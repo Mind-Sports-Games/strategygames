@@ -105,7 +105,7 @@ class FrisianDraughtsTest extends Specification with ValidatedMatchers {
       val s = moves
         .foldLeft(Situation(variant.Frisian))((sit, uci) => move(sit, uci))
 
-      s.winner must_== Some(Player.P1)
+      s.winner === Some(Player.P1)
     }
   }
 
@@ -124,7 +124,7 @@ class FrisianDraughtsTest extends Specification with ValidatedMatchers {
         // "1122"
       ).foldLeft(Situation(variant.Frisian))((sit, uci) => move(sit, uci))
 
-      s.validMoves.size must_!= 0
+      s.validMoves.size !== 0
     }
   }
 

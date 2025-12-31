@@ -3,6 +3,7 @@ package strategygames.abalone
 import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
+import scalalib.extensions.*
 
 import strategygames.Player
 import strategygames.format.pgn.San
@@ -172,7 +173,7 @@ object Replay {
     sans match {
       case Nil         => valid(Nil)
       case san :: rest =>
-        san(StratSituation.wrap(sit)).map(abaloneMove) flatMap { move =>
+        san(StratSituation.wrap(sit)).map(abaloneMove) andThen { move =>
           val after = Situation(move.finalizeAfter, !sit.player)
           recursiveSituations(after, rest) map { after :: _ }
         }

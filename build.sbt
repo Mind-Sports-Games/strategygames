@@ -19,7 +19,7 @@ libraryDependencies ++= List(
   "org.playstrategy"        % "fairystockfish"           % fairystockfishVersion,
   "com.joansala.aalina"     % "aalina"                   % "2.1.0-pstrat2",
   "com.joansala"            % "go-engine"                % "1.0.0-pstrat1.12",
-  "com.github.ornicar"      % "scalalib"                 % "11.9.5",
+ "com.github.lichess-org.scalalib" %% "scalalib-core" % "11.9.5"
 )
 
 // Explicitly add in the linux-class path
@@ -45,26 +45,10 @@ scalacOptions ++= {
   "-language:higherKinds",
   "-language:implicitConversions",
   "-language:postfixOps",
-  "-Ymacro-annotations",
   // Warnings as errors!
   // "-Xfatal-warnings",
   // Linting options
   "-unchecked",
-  "-Xcheckinit",
-  "-Xlint:adapted-args",
-  "-Xlint:constant",
-  "-Xlint:delayedinit-select",
-  "-Xlint:deprecation",
-  "-Xlint:inaccessible",
-  "-Xlint:infer-any",
-  "-Xlint:missing-interpolator",
-  "-Xlint:nullary-unit",
-  "-Xlint:option-implicit",
-  "-Xlint:package-object-classes",
-  "-Xlint:poly-implicit-overload",
-  "-Xlint:private-shadow",
-  "-Xlint:stars-align",
-  "-Xlint:type-parameter-shadow",
   "-Wdead-code",
   "-Wextra-implicit",
   // "-Wnumeric-widen",
@@ -83,7 +67,23 @@ scalacOptions ++= {
         "-deprecation",
         "-Xfatal-warnings",
         "-Wunused:imports,privates,locals",
-        "-Wvalue-discard"
+        "-Wvalue-discard",
+        "-Ymacro-annotations",
+        "-Xcheckinit",
+        "-Xlint:adapted-args",
+        "-Xlint:constant",
+        "-Xlint:delayedinit-select",
+        "-Xlint:deprecation",
+        "-Xlint:inaccessible",
+        "-Xlint:infer-any",
+        "-Xlint:missing-interpolator",
+        "-Xlint:nullary-unit",
+        "-Xlint:option-implicit",
+        "-Xlint:package-object-classes",
+        "-Xlint:poly-implicit-overload",
+        "-Xlint:private-shadow",
+        "-Xlint:stars-align",
+        "-Xlint:type-parameter-shadow",
       )
     })
 }

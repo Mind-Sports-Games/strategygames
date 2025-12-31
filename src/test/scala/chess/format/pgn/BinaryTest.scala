@@ -16,104 +16,104 @@ class BinaryTest extends ChessTest {
 
   def compareStrAndBin(pgn: String) = {
     val bin = (Binary writeActionStrs pgn.split(' ').toList.map(List(_))).get.toList
-    ((Binary readActionStrs bin).get.flatten mkString " ") must_== pgn
+    ((Binary readActionStrs bin).get.flatten mkString " ") === pgn
     bin.size must be_<=(pgn.length)
   }
 
   "binary encoding" should {
     "util test" in {
-      showByte(parseBinary("00000101")) must_== "00000101"
-      showByte(parseBinary("10100000")) must_== "10100000"
+      showByte(parseBinary("00000101")) === "00000101"
+      showByte(parseBinary("10100000")) === "10100000"
     }
     "write single move" in {
       // "simple pawn" in {
-      //  writeMove("a1") must_== "00000000"
-      //  writeMove("a2") must_== "00000001"
-      //  writeMove("a3") must_== "00000010"
-      //  writeMove("h4") must_== "00111011"
+      //  writeMove("a1") === "00000000"
+      //  writeMove("a2") === "00000001"
+      //  writeMove("a3") === "00000010"
+      //  writeMove("h4") === "00111011"
       // }
       // "simple piece" in {
-      //  writeMove("Ka1") must_== "01000000,00100000"
-      //  writeMove("Qa2") must_== "01000001,01000000"
-      //  writeMove("Rh4") must_== "01111011,01100000"
+      //  writeMove("Ka1") === "01000000,00100000"
+      //  writeMove("Qa2") === "01000001,01000000"
+      //  writeMove("Rh4") === "01111011,01100000"
       // }
       // "simple piece with capture" in {
-      //  writeMove("Kxa1") must_== "01000000,00100100"
-      //  writeMove("Qxa2") must_== "01000001,01000100"
-      //  writeMove("Rxh4") must_== "01111011,01100100"
+      //  writeMove("Kxa1") === "01000000,00100100"
+      //  writeMove("Qxa2") === "01000001,01000100"
+      //  writeMove("Rxh4") === "01111011,01100100"
       // }
       // "simple piece with check" in {
-      //  writeMove("Ka1+") must_== "01000000,00101000"
-      //  writeMove("Qa2#") must_== "01000001,01010000"
-      //  writeMove("Rxh4+") must_== "01111011,01101100"
+      //  writeMove("Ka1+") === "01000000,00101000"
+      //  writeMove("Qa2#") === "01000001,01010000"
+      //  writeMove("Rxh4+") === "01111011,01101100"
       // }
       "pawn capture" in {
-        writeMove("bxa1") must_== "10000000,10000000"
-        writeMove("gxh4") must_== "10111011,01000000"
+        writeMove("bxa1") === "10000000,10000000"
+        writeMove("gxh4") === "10111011,01000000"
       }
       "pawn capture with check" in {
-        writeMove("bxa1+") must_== "10000000,10010000"
-        writeMove("gxh4#") must_== "10111011,01100000"
+        writeMove("bxa1+") === "10000000,10010000"
+        writeMove("gxh4#") === "10111011,01100000"
       }
       "pawn promotion" in {
-        writeMove("a1=Q") must_== "10000000,00000010"
-        writeMove("h8=B") must_== "10111111,00001000"
-        writeMove("h8=R") must_== "10111111,00000100"
+        writeMove("a1=Q") === "10000000,00000010"
+        writeMove("h8=B") === "10111111,00001000"
+        writeMove("h8=R") === "10111111,00000100"
       }
       "pawn promotion with check" in {
-        writeMove("a1=Q+") must_== "10000000,00010010"
-        writeMove("h8=B#") must_== "10111111,00101000"
+        writeMove("a1=Q+") === "10000000,00010010"
+        writeMove("h8=B#") === "10111111,00101000"
       }
       "pawn promotion with capture" in {
-        writeMove("bxa1=Q") must_== "10000000,10000010"
-        writeMove("gxh8=B") must_== "10111111,01001000"
+        writeMove("bxa1=Q") === "10000000,10000010"
+        writeMove("gxh8=B") === "10111111,01001000"
       }
       "pawn promotion with capture and check" in {
-        writeMove("bxa1=Q+") must_== "10000000,10010010"
-        writeMove("gxh8=B#") must_== "10111111,01101000"
+        writeMove("bxa1=Q+") === "10000000,10010010"
+        writeMove("gxh8=B#") === "10111111,01101000"
       }
       // "castling" in {
-      //  writeMove("O-O") must_== "01000000,11000000"
-      //  writeMove("O-O-O") must_== "01000000,11100000"
+      //  writeMove("O-O") === "01000000,11000000"
+      //  writeMove("O-O-O") === "01000000,11100000"
       // }
       // "castling with check" in {
-      //  writeMove("O-O+") must_== "01000000,11001000"
-      //  writeMove("O-O-O#") must_== "01000000,11110000"
+      //  writeMove("O-O+") === "01000000,11001000"
+      //  writeMove("O-O-O#") === "01000000,11110000"
       // }
       // "drop" in {
-      //  writeMove("N@a1") must_== "01000000,10000010"
+      //  writeMove("N@a1") === "01000000,10000010"
       // }
       // "drop with check" in {
-      //  writeMove("N@a1+") must_== "01000000,10001010"
+      //  writeMove("N@a1+") === "01000000,10001010"
       // }
       // "drop with checkmate" in {
-      //  writeMove("N@a1#") must_== "01000000,10010010"
+      //  writeMove("N@a1#") === "01000000,10010010"
       // }
       // "disambiguated by file" in {
-      //  writeMove("Kfa1") must_== "11000000,00100000,00000101"
+      //  writeMove("Kfa1") === "11000000,00100000,00000101"
       // }
       // "disambiguated by file on h8" in {
-      //  writeMove("Kfh8") must_== "11111111,00100000,00000101"
+      //  writeMove("Kfh8") === "11111111,00100000,00000101"
       // }
       // "disambiguated by rank" in {
-      //  writeMove("K8a1") must_== "11000000,00100000,01000111"
+      //  writeMove("K8a1") === "11000000,00100000,01000111"
       // }
       // "disambiguated fully" in {
-      //  writeMove("Kf4a1") must_== "11000000,00100000,10101011"
+      //  writeMove("Kf4a1") === "11000000,00100000,10101011"
       // }
       // "disambiguated fully with capture" in {
-      //  writeMove("Kf4xa1") must_== "11000000,00100100,10101011"
+      //  writeMove("Kf4xa1") === "11000000,00100100,10101011"
       // }
       // "disambiguated fully with check" in {
-      //  writeMove("Kf4a1+") must_== "11000000,00101000,10101011"
-      //  writeMove("Kf4a1#") must_== "11000000,00110000,10101011"
+      //  writeMove("Kf4a1+") === "11000000,00101000,10101011"
+      //  writeMove("Kf4a1#") === "11000000,00110000,10101011"
       // }
       // "disambiguated fully with capture and check" in {
-      //  writeMove("Kf4xa1+") must_== "11000000,00101100,10101011"
-      //  writeMove("Kf4xa1#") must_== "11000000,00110100,10101011"
+      //  writeMove("Kf4xa1+") === "11000000,00101100,10101011"
+      //  writeMove("Kf4xa1#") === "11000000,00110100,10101011"
       // }
       // "disambiguated by rank with capture and check" in {
-      //  writeMove("K8xa1+") must_== "11000000,00101100,01000111"
+      //  writeMove("K8xa1+") === "11000000,00101100,01000111"
       // }
     }
     "write many moves" in {
@@ -126,90 +126,90 @@ class BinaryTest extends ChessTest {
     }
     "read single move" in {
       "simple pawn" in {
-        readMove("00000011") must_== "a4"
-        readMove("00000001") must_== "a2"
-        readMove("00000010") must_== "a3"
-        readMove("00111011") must_== "h4"
+        readMove("00000011") === "a4"
+        readMove("00000001") === "a2"
+        readMove("00000010") === "a3"
+        readMove("00111011") === "h4"
       }
       // "simple piece" in {
-      //  readMove("01000000,00100000") must_== "Ka1"
-      //  readMove("01000001,01000000") must_== "Qa2"
-      //  readMove("01111011,01100000") must_== "Rh4"
+      //  readMove("01000000,00100000") === "Ka1"
+      //  readMove("01000001,01000000") === "Qa2"
+      //  readMove("01111011,01100000") === "Rh4"
       // }
       // "simple piece with capture" in {
-      //  readMove("01000000,00100100") must_== "Kxa1"
-      //  readMove("01000001,01000100") must_== "Qxa2"
-      //  readMove("01111011,01100100") must_== "Rxh4"
+      //  readMove("01000000,00100100") === "Kxa1"
+      //  readMove("01000001,01000100") === "Qxa2"
+      //  readMove("01111011,01100100") === "Rxh4"
       // }
       // "simple piece with check" in {
-      //  readMove("01000000,00101000") must_== "Ka1+"
-      //  readMove("01000001,01010000") must_== "Qa2#"
-      //  readMove("01111011,01101100") must_== "Rxh4+"
+      //  readMove("01000000,00101000") === "Ka1+"
+      //  readMove("01000001,01010000") === "Qa2#"
+      //  readMove("01111011,01101100") === "Rxh4+"
       // }
       "pawn capture" in {
-        readMove("10000000,10000000") must_== "bxa1"
-        readMove("10111011,01000000") must_== "gxh4"
+        readMove("10000000,10000000") === "bxa1"
+        readMove("10111011,01000000") === "gxh4"
       }
       "pawn capture with check" in {
-        readMove("10000000,10010000") must_== "bxa1+"
-        readMove("10111011,01100000") must_== "gxh4#"
+        readMove("10000000,10010000") === "bxa1+"
+        readMove("10111011,01100000") === "gxh4#"
       }
       "pawn promotion" in {
-        readMove("10000000,00000010") must_== "a1=Q"
-        readMove("10111111,00001000") must_== "h8=B"
-        readMove("10111111,00000100") must_== "h8=R"
+        readMove("10000000,00000010") === "a1=Q"
+        readMove("10111111,00001000") === "h8=B"
+        readMove("10111111,00000100") === "h8=R"
       }
       "pawn promotion with check" in {
-        readMove("10000000,00010010") must_== "a1=Q+"
-        readMove("10111111,00101000") must_== "h8=B#"
+        readMove("10000000,00010010") === "a1=Q+"
+        readMove("10111111,00101000") === "h8=B#"
       }
       "pawn promotion with capture" in {
-        readMove("10000000,10000010") must_== "bxa1=Q"
-        readMove("10111111,01001000") must_== "gxh8=B"
+        readMove("10000000,10000010") === "bxa1=Q"
+        readMove("10111111,01001000") === "gxh8=B"
       }
       "pawn promotion with capture and check" in {
-        readMove("10000000,10010010") must_== "bxa1=Q+"
-        readMove("10111111,01101000") must_== "gxh8=B#"
+        readMove("10000000,10010010") === "bxa1=Q+"
+        readMove("10111111,01101000") === "gxh8=B#"
       }
       // "castling" in {
-      //  readMove("01000000,11000000") must_== "O-O"
-      //  readMove("01000000,11100000") must_== "O-O-O"
+      //  readMove("01000000,11000000") === "O-O"
+      //  readMove("01000000,11100000") === "O-O-O"
       // }
       // "castling with check" in {
-      //  readMove("01000000,11001000") must_== "O-O+"
-      //  readMove("01000000,11110000") must_== "O-O-O#"
+      //  readMove("01000000,11001000") === "O-O+"
+      //  readMove("01000000,11110000") === "O-O-O#"
       // }
       // "drop" in {
-      //  readMove("01000000,10000010") must_== "N@a1"
+      //  readMove("01000000,10000010") === "N@a1"
       // }
       // "drop with check" in {
-      //  readMove("01000000,10001010") must_== "N@a1+"
+      //  readMove("01000000,10001010") === "N@a1+"
       // }
       // "drop with checkmate" in {
-      //  readMove("01000000,10010010") must_== "N@a1#"
+      //  readMove("01000000,10010010") === "N@a1#"
       // }
       // "disambiguated by file" in {
-      //  readMove("11000000,00100000,00000101") must_== "Kfa1"
+      //  readMove("11000000,00100000,00000101") === "Kfa1"
       // }
       // "disambiguated by rank" in {
-      //  readMove("11000000,00100000,01000111") must_== "K8a1"
+      //  readMove("11000000,00100000,01000111") === "K8a1"
       // }
       // "disambiguated fully" in {
-      //  readMove("11000000,00100000,10101011") must_== "Kf4a1"
+      //  readMove("11000000,00100000,10101011") === "Kf4a1"
       // }
       // "disambiguated fully with capture" in {
-      //  readMove("11000000,00100100,10101011") must_== "Kf4xa1"
+      //  readMove("11000000,00100100,10101011") === "Kf4xa1"
       // }
       // "disambiguated fully with check" in {
-      //  readMove("11000000,00101000,10101011") must_== "Kf4a1+"
-      //  readMove("11000000,00110000,10101011") must_== "Kf4a1#"
+      //  readMove("11000000,00101000,10101011") === "Kf4a1+"
+      //  readMove("11000000,00110000,10101011") === "Kf4a1#"
       // }
       // "disambiguated fully with capture and check" in {
-      //  readMove("11000000,00101100,10101011") must_== "Kf4xa1+"
-      //  readMove("11000000,00110100,10101011") must_== "Kf4xa1#"
+      //  readMove("11000000,00101100,10101011") === "Kf4xa1+"
+      //  readMove("11000000,00110100,10101011") === "Kf4xa1#"
       // }
       // "disambiguated by rank with capture and check" in {
-      //  readMove("11000000,00101100,01000111") must_== "K8xa1+"
+      //  readMove("11000000,00101100,01000111") === "K8xa1+"
       // }
     }
     "be isomorphic" in {
