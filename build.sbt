@@ -5,7 +5,6 @@ organization := "org.playstrategy"
 version := "10.2.1-pstrat202"
 
 scalaVersion := "3.7.4"
-crossScalaVersions ++= Seq("2.13.11")
 
 val fairystockfishVersion = "0.0.20"
 val scalalibVersion = "11.9.5"
@@ -19,7 +18,7 @@ libraryDependencies ++= List(
   "org.playstrategy"        % "fairystockfish"           % fairystockfishVersion,
   "com.joansala.aalina"     % "aalina"                   % "2.1.0-pstrat2",
   "com.joansala"            % "go-engine"                % "1.0.0-pstrat1.12",
- "com.github.lichess-org.scalalib" %% "scalalib-core" % "11.9.5"
+  "com.github.lichess-org.scalalib" %% "scalalib-core" % "11.9.5"
 )
 
 // Explicitly add in the linux-class path
@@ -36,8 +35,7 @@ resolvers ++= Seq(
   .map(_.toSeq)
   .getOrElse(Seq())
 
-scalacOptions ++= {
-  Seq(
+scalacOptions ++= Seq(
   "-encoding",
   "utf-8",
   "-explain",
@@ -49,36 +47,8 @@ scalacOptions ++= {
   "-Wunused:patvars",
   "-Wunused:implicits",
   "-Wunused:params",
-  ) ++ 
-    (CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((3, _)) => Seq(
-        "-unchecked",
-        "-source:3.0-migration"
-      )
-      case _ => Seq(
-        "-deprecation",
-        "-Xfatal-warnings",
-        "-Wunused:imports,privates,locals",
-        "-Wvalue-discard",
-        "-Ymacro-annotations",
-        "-Xcheckinit",
-        "-Xlint:adapted-args",
-        "-Xlint:constant",
-        "-Xlint:delayedinit-select",
-        "-Xlint:deprecation",
-        "-Xlint:inaccessible",
-        "-Xlint:infer-any",
-        "-Xlint:missing-interpolator",
-        "-Xlint:nullary-unit",
-        "-Xlint:option-implicit",
-        "-Xlint:package-object-classes",
-        "-Xlint:poly-implicit-overload",
-        "-Xlint:private-shadow",
-        "-Xlint:stars-align",
-        "-Xlint:type-parameter-shadow",
-      )
-    })
-}
+  "-source:3.0-migration"
+)
 
 Compile / packageDoc / publishArtifact := false
 
