@@ -16,7 +16,8 @@ class BinaryTest extends ChessTest {
 
   def compareStrAndBin(pgn: String) = {
     val bin = (Binary writeActionStrs pgn.split(' ').toList.map(List(_))).get.toList
-    ((Binary readActionStrs bin).get.flatten mkString " ") === pgn
+    val moveStrs: Seq[String] = (Binary readActionStrs bin).get.flatten
+    (moveStrs mkString " ") === pgn
     bin.size must be_<=(pgn.length)
   }
 
@@ -234,8 +235,10 @@ object BinaryTestUtils {
   def writeMove(m: String): String =
     (Binary writeMove m).get map showByte mkString ","
 
-  def readMove(m: String): String =
-    readActionStrs(m).flatten.head
+  def readMove(m: String): String = {
+    val strs: Seq[String] = readActionStrs(m).flatten
+    strs.head
+  }
 
   def readActionStrs(m: String): ActionStrs =
     (Binary readActionStrs m.split(',').toList.map(parseBinary)).get

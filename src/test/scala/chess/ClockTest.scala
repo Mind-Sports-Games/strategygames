@@ -28,17 +28,31 @@ class TimerTest extends ChessTest {
       val afterMove = fischerIncrement
         .takeTime(Centis(0), false)  // First move: no increment
         .takeTime(Centis(30 * 100))
-        .takeTime(Centis(31 * 100 - 1))
+        .takeTime(Centis(30 * 100 - 1))
       afterMove.remaining === Centis(101)
       afterMove.outOfTime === false
+
+      val afterMove2 = fischerIncrement
+        .takeTime(Centis(30 * 100))
+        .takeTime(Centis(1 * 100))
+        .takeTime(Centis(30 * 100 - 1))
+      afterMove2.remaining === Centis(101)
+      afterMove2.outOfTime === false
     }
     "but not when game is over" in {
       val afterMove = fischerIncrement
         .takeTime(Centis(0), false)  // First move: no increment
         .takeTime(Centis(30 * 100))
-        .takeTime(Centis(31 * 100))
+        .takeTime(Centis(30 * 100))
       afterMove.remaining === Centis(0 * 100)
       afterMove.outOfTime === true
+
+      val afterMove2 = fischerIncrement
+        .takeTime(Centis(30 * 100))
+        .takeTime(Centis(1 * 100))
+        .takeTime(Centis(30 * 100))
+      afterMove2.remaining === Centis(0 * 100)
+      afterMove2.outOfTime === true
     }
   }
 
@@ -204,17 +218,17 @@ class TimerTest extends ChessTest {
           .followedBy(Timer.byoyomi(Centis(5 * 100)))
       )
     "properly increment time when game is ongoing (no increment on first move)" in {
-      withByoyomi.remaining must_== Centis(60 * 100)
+      withByoyomi.remaining === Centis(60 * 100)
       val afterFirstMove = withByoyomi.takeTime(Centis(0), false)  // First move: no increment
-      afterFirstMove.remaining must_== Centis(60 * 100)
+      afterFirstMove.remaining === Centis(60 * 100)
       val afterSecondMove = afterFirstMove.takeTime(Centis(30 * 100))  // Second move: gets increment
-      afterSecondMove.remaining must_== Centis(31 * 100)
+      afterSecondMove.remaining === Centis(31 * 100)
     }
     "even when there is only 1 centisecond left" in {
       val afterMove = withByoyomi
         .takeTime(Centis(0), false)  // First move: no increment
         .takeTime(Centis(30 * 100))
-        .takeTime(Centis(31 * 100 - 1))
+        .takeTime(Centis(30 * 100 - 1))
       afterMove.remaining === Centis(101)
       afterMove.outOfTime === false
     }
@@ -222,7 +236,7 @@ class TimerTest extends ChessTest {
       val afterMove = withByoyomi
         .takeTime(Centis(0), false)  // First move: no increment
         .takeTime(Centis(30 * 100))
-        .takeTime(Centis(31 * 100))
+        .takeTime(Centis(30 * 100))
       afterMove.remaining === Centis(5 * 100)
       afterMove.outOfTime === false
     }
@@ -230,7 +244,7 @@ class TimerTest extends ChessTest {
       val afterMove = withByoyomi
         .takeTime(Centis(0), false)        // First move: no increment
         .takeTime(Centis(30 * 100)) // fine
-        .takeTime(Centis(31 * 100)) // period over
+        .takeTime(Centis(30 * 100)) // period over
         .takeTime(Centis(4 * 100))  // fine
         .takeTime(Centis(4 * 100))  // fine
         .takeTime(Centis(4 * 100))  // fine
@@ -243,7 +257,7 @@ class TimerTest extends ChessTest {
       val afterMove = withByoyomi
         .takeTime(Centis(0), false)        // First move: no increment
         .takeTime(Centis(30 * 100)) // fine
-        .takeTime(Centis(31 * 100)) // period over
+        .takeTime(Centis(30 * 100)) // period over
         .takeTime(Centis(4 * 100))  // fine
         .takeTime(Centis(4 * 100))  // fine
         .takeTime(Centis(4 * 100))  // fine
@@ -444,7 +458,7 @@ class ClockTest extends ChessTest {
       "multiple actions but end turn" in {
         val times    = List(seconds(1), seconds(1), seconds(2), seconds(4))
         val newClock = clock.useTimes(times).endTurn
-        newClock.remainingTime(P1) === seconds(53) // Adds increment AFTER we switch turns
+        newClock.remainingTime(P1) === seconds(52) // Adds increment AFTER we switch turns
         newClock.clock.player === P2               // Must have switched to P2's turn
       }
     }
@@ -655,16 +669,16 @@ class ClockTest extends ChessTest {
     "multiple premoves with fast clock" in {
       "no lag" in {
         clockStep60(0, 0, 0) === 60 * 100
-        clockStep60Plus1(0, 0) === 61 * 100
-        clockStep60Plus1(0, 0, 0) === 62 * 100
+        clockStep60Plus1(0, 0) === 60 * 100
+        clockStep60Plus1(0, 0, 0) === 61 * 100
       }
       "no -> medium lag" in {
         clockStep60(0, 0, 300) === 5940
-        clockStep60Plus1(0, 0, 300) === 6192
+        clockStep60Plus1(0, 0, 300) === 6092
       }
       "no x4 -> big lag" in {
         clockStep60(0, 0, 0, 0, 0, 700) === 5720
-        clockStep60Plus1(0, 0, 0, 0, 0, 700) === 6311
+        clockStep60Plus1(0, 0, 0, 0, 0, 700) === 6211
       }
     }
 
@@ -685,16 +699,16 @@ class ClockTest extends ChessTest {
 
       // With increment our clock can go up
       "60+1 3x 3s move" in {
-        clockStep60Plus1(300, 0, 0, 0) === 54 * 100
+        clockStep60Plus1(300, 0, 0, 0) === 53 * 100
       }
       "60+1 3x 2s move" in {
-        clockStep60Plus1(200, 0, 0, 0) === 57 * 100
+        clockStep60Plus1(200, 0, 0, 0) === 56 * 100
       }
       "60+1 3x 1s move" in {
-        clockStep60Plus1(100, 0, 0, 0) === 60 * 100
+        clockStep60Plus1(100, 0, 0, 0) === 59 * 100
       }
       "60+1 3x 0s move" in {
-        clockStep60Plus1(0, 0, 0, 0) === 63 * 100
+        clockStep60Plus1(0, 0, 0, 0) === 62 * 100
       }
 
       // With delay our clock doesn't go up, but doesn't go down
@@ -743,10 +757,10 @@ class ClockTest extends ChessTest {
     def clockStep(clock: ClockBase, wait: Int) =
       advanceTimeByCentis(clock, wait).step().step()
 
-    "1x30s move + 30s stall with increment" in {
+    "1x30s move + 29s stall with increment" in {
       val clockHalf = clockStep(fakeClock60Plus1, 30 * 100)
-      clockHalf.remainingTime(P1).centis === 31 * 100
-      val clock     = advanceTimeByCentis(clockHalf, 30 * 100)
+      clockHalf.remainingTime(P1).centis === 30 * 100
+      val clock     = advanceTimeByCentis(clockHalf, 29 * 100)
 
       clock.remainingTime(P1).centis === 1 * 100
       clock.outOfTime(P2, withGrace = true) must beFalse
