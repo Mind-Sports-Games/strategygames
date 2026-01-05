@@ -40,23 +40,15 @@ scalacOptions ++= {
   Seq(
   "-encoding",
   "utf-8",
-  "-explaintypes",
+  "-explain",
   "-feature",
   "-language:higherKinds",
   "-language:implicitConversions",
   "-language:postfixOps",
-  // Warnings as errors!
-  // "-Xfatal-warnings",
-  // Linting options
   "-unchecked",
-  "-Wdead-code",
-  "-Wextra-implicit",
-  // "-Wnumeric-widen",
   "-Wunused:patvars",
   "-Wunused:implicits",
   "-Wunused:params",
-  "-Xmaxerrs",
-  "12"
   ) ++ 
     (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((3, _)) => Seq(
