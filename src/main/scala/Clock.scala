@@ -17,6 +17,8 @@ trait ClockTimeGrace {
   def timeWillAdd(remaining: Centis, timeTaken: Centis): Centis
   def goBerserk: ClockTimeGrace
   val maxGrace: Centis
+  // What the initial time should be when baseLimit is 0
+  def zeroLimitInitTime: Centis
 }
 
 case class NoClockTimeGrace() extends ClockTimeGrace {
@@ -25,24 +27,26 @@ case class NoClockTimeGrace() extends ClockTimeGrace {
   def timeWillAdd(@nowarn remaining: Centis, timeTaken: Centis): Centis                       = Centis(0)
   val maxGrace: Centis                                                                        = Centis(0)
   def goBerserk: ClockTimeGrace                                                               = this
+  def zeroLimitInitTime: Centis                                                               = Centis(0)
 }
 // NOTE: if we need a list of these, we can make a ListClockTimeGrace
 
 // Fischer increment timer with increment. Increment is always subtracted from
 // the elapsed time when time is used.
 // Thus, remaining time can appear to go up
-case class FischerIncrementGrace(val increment: Centis) extends ClockTimeGrace {
+case class FischerIncrementGrace(val increment: Centis, firstMove: Boolean = true) extends ClockTimeGrace {
   override def timeToAdd(remaining: Centis, timeTaken: Centis): Tuple2[ClockTimeGrace, Centis] =
-    (
-      this,
-      timeWillAdd(remaining, timeTaken)
-    ) // 0 if no time is left, else the increment
+    if (firstMove)
+      (copy(firstMove = false), Centis(0)) // No increment on first move
+    else
+      (this, timeWillAdd(remaining, timeTaken)) // 0 if no time is left, else the increment
 
   def timeWillAdd(remaining: Centis, timeTaken: Centis): Centis =
     (remaining > Centis(0)) ?? increment
 
   def goBerserk: ClockTimeGrace = NoClockTimeGrace()
   val maxGrace: Centis          = increment
+  def zeroLimitInitTime: Centis = increment
 }
 
 // Bronstein increment timer with a delay. The minimum between the time used
@@ -58,8 +62,11 @@ case class SimpleDelayGrace(val delay: Centis) extends ClockTimeGrace {
   def timeWillAdd(remaining: Centis, timeTaken: Centis): Centis =
     ((remaining + timeTaken.atMost(delay)) > Centis(0)) ?? timeTaken.atMost(delay) // up to the delay
 
-  def goBerserk: ClockTimeGrace = NoClockTimeGrace()
+  //change made for SimpleDelay only (not Bronstein) - instead of removing all delay, just half it
+  def goBerserk: ClockTimeGrace = copy(delay = delay.halfCeilSeconds)
   val maxGrace: Centis          = delay
+  // For 0 d/X: minimal buffer that grace should preserve
+  def zeroLimitInitTime: Centis = Centis(1)
 }
 
 // BronsteinDelay gives back up to the entire amount, but only if they didn't use
@@ -74,6 +81,8 @@ case class BronsteinDelayGrace(val delay: Centis) extends ClockTimeGrace {
 
   def goBerserk: ClockTimeGrace = NoClockTimeGrace()
   val maxGrace: Centis          = delay
+  // For 0 d+X: clock shows Xs (the delay) as initial time
+  def zeroLimitInitTime: Centis = delay
 }
 
 case class Timer(
@@ -112,7 +121,7 @@ case class Timer(
   def willAdd  = clockTimeGrace
     .timeWillAdd((baseLimit - elapsed).atMost(Centis(0)), clockTimeGrace.maxGrace)
   def initTime =
-    if (baseLimit.centis == 0) willAdd.atLeast(Centis(300))
+    if (baseLimit.centis == 0) clockTimeGrace.zeroLimitInitTime
     else baseLimit
 
   // The remaining is whatever they have left + whatever they'll get if they were at the end of the game and
@@ -567,14 +576,13 @@ object Clock {
     def show = toString
 
     def showBerserk =
-      if (berserkable) s"${secondsToString((initTime - berserkPenalty).roundSeconds)} d/0" else show
+      if (berserkable) s"${secondsToString((initTime - berserkPenalty).roundSeconds)} d/${delay.halfCeilSeconds.roundSeconds}"
+      else show
 
     override def toString = s"${limitString} d/${delaySeconds}"
 
-    def berserkPenalty =
-      if (limitSeconds < 40 * delaySeconds) Centis(0)
-      else
-        Centis(limitSeconds * (100 / 2))
+    //Unlike other clock types always set to 1/2, because we don't remove all of delay
+    def berserkPenalty = Centis(limitSeconds * (100 / 2))
 
     def initTime = {
       if (limitSeconds == 0) delay.atLeast(Centis(300))
@@ -845,9 +853,9 @@ case class ByoyomiClockPlayer(
 
   def refundPeriods(p: Int) = spendPeriods(-math.min(p, spentPeriods))
 
-  def byoyomi = if (berserk) Centis(0) else config.byoyomi
+  def byoyomi = if (berserk) config.byoyomi.halfCeilSeconds else config.byoyomi
 
-  def periodsTotal = if (berserk) 0 else config.periodsTotal
+  def periodsTotal = config.periodsTotal
 
   def goBerserk = copy(berserk = true)
 
@@ -912,7 +920,7 @@ object ByoyomiClock {
     def startsAtZero = limitSeconds == 0 && hasByoyomi
 
     def berserkPenalty =
-      if (limitSeconds < 60 * incrementSeconds || limitSeconds < 25 * byoyomiSeconds) Centis(0)
+      if (limitSeconds < 40 * incrementSeconds) Centis(0)
       else Centis(limitSeconds * (100 / 2))
 
     def initTime =
@@ -926,12 +934,17 @@ object ByoyomiClock {
 
     def periodsString: String = if (periodsTotal > 1) s"(${periodsTotal}x)" else ""
 
+    def berserkBaseString: String = s"${secondsToString((initTime - berserkPenalty).roundSeconds)}"
+
+    def berserkByoyomiSeconds: String = s"${Centis.ofSeconds(byoyomiSeconds).halfCeilSeconds.roundSeconds}"
+
     def show: String = if (hasByoyomi) s"${baseString}|${byoyomiSeconds}${periodsString}"
     else if (hasIncrement) baseString
     else s"${baseString}|0"
 
     def showBerserk: String =
-      if (berserkable) s"${secondsToString((initTime - berserkPenalty).roundSeconds)}|0" else show
+      if (berserkable) s"${berserkBaseString}|${berserkByoyomiSeconds}${periodsString}"
+      else show
 
     override def toString = s"${limitSeconds}.${incrementSeconds}.${byoyomiSeconds}.${periodsTotal}"
   }
