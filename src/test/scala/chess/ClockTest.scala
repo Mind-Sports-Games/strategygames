@@ -6,7 +6,7 @@ import strategygames.chess.Pos._
 class TimerTest extends ChessTest {
   case class TimerTest(timer: Timer) {
     // Override to also apply grace everytime (not multiaction)
-    def takeTime(c: Centis) = copy(timer = timer.takeTime(c).applyClockGrace(c))
+    def takeTime(c: Centis, clockActive: Boolean = true) = copy(timer = timer.takeTime(c).applyClockGrace(c, clockActive))
     val remaining           = timer.remaining
     val outOfTime           = timer.outOfTime
   }
