@@ -187,7 +187,7 @@ object GameFamily {
     def defaultVariant    = Variant.Draughts(strategygames.draughts.variant.Standard)
     def variants          = Variant.all(GameLogic.Draughts())
     def displayPiece      = "wK"
-    def pieceSetThemes    = List("wide_crown", "fabirovsky", "check_yb")
+    def pieceSetThemes    = List("wide_crown", "fabirovsky", "check_yb", "plain")
     def pieceSetDefault   = "wide_crown"
     def boardThemes       = List(
       "blue",
@@ -511,7 +511,7 @@ object GameFamily {
     def defaultVariant    = Variant.Dameo(strategygames.dameo.variant.Dameo)
     def variants          = Variant.all(GameLogic.Dameo())
     def displayPiece      = "wK"
-    def pieceSetThemes    = List("wide_crown_dameo", "fabirovsky_dameo", "check_yb_dameo")
+    def pieceSetThemes    = List("wide_crown_dameo", "fabirovsky_dameo", "check_yb_dameo", "plain_dameo")
     def pieceSetDefault   = "wide_crown_dameo"
     def boardThemes       = List(
       "blue",
