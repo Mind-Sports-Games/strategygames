@@ -88,7 +88,7 @@ abstract class Variant private[variant] (
 
   def addVariantEffect(move: Move): Move = move
 
-  def maxDrawingMoves(@nowarn board: Board): Option[Int] = Some(4) // 1 king vs. 1 king
+  def maxDrawingMoves(@nowarn board: Board): Option[Int]
 
   def variantEnd(situation: Situation) = situation.moves.isEmpty
 
@@ -120,14 +120,7 @@ abstract class Variant private[variant] (
 
   def gameFamily: GameFamily
 
-  def updatePositionHashes(
-      board: Board,
-      move: Move,
-      hash: PositionHash
-  ): PositionHash = {
-    val newHash = Hash(Situation(board, !move.piece.player))
-    newHash ++ hash
-  }
+  def updatePositionHashes(board: Board, move: Move, hash: PositionHash): PositionHash
 
 }
 
