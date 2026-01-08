@@ -16,21 +16,18 @@ class ClockZeroInitialTimeTest extends ChessTest {
       .copy(timestamper = new Timestamper {
         val now = Timestamp(0)
       })
-      .start
 
   def makeFakeClockBronstein(config: Clock.BronsteinConfig) =
     Clock(config)
       .copy(timestamper = new Timestamper {
         val now = Timestamp(0)
       })
-      .start
 
   def makeFakeClockSimpleDelay(config: Clock.SimpleDelayConfig) =
     Clock(config)
       .copy(timestamper = new Timestamper {
         val now = Timestamp(0)
       })
-      .start
 
   // Simulates taking time and ending turn (single action per turn)
   def takeTimeAndEndTurn(clock: ClockBase, timeTaken: Centis): ClockBase = {
@@ -64,14 +61,16 @@ class ClockZeroInitialTimeTest extends ChessTest {
     "not count down on first move and not give increment (P2's first turn)" in {
       val clock   = makeFakeClock(config)
       val afterP1 = takeTimeAndEndTurn(clock, seconds(0))
-      val afterP2 = takeTimeAndEndTurn(afterP1, seconds(0))
+      // have to start the clock after P2
+      val afterP2 = takeTimeAndEndTurn(afterP1, seconds(0)).start
       afterP2.remainingTime(P2) must_== seconds(10)
     }
 
     "count down and give increment on second move" in {
       val clock     = makeFakeClock(config)
       val afterP1T1 = takeTimeAndEndTurn(clock, seconds(0))
-      val afterP2T1 = takeTimeAndEndTurn(afterP1T1, seconds(0))
+      // have to start the clock after P2T1
+      val afterP2T1 = takeTimeAndEndTurn(afterP1T1, seconds(0)).start
       val afterP1T2 = takeTimeAndEndTurn(afterP2T1, seconds(4))
       afterP1T2.remainingTime(P1) must_== seconds(16)
     }
@@ -103,14 +102,16 @@ class ClockZeroInitialTimeTest extends ChessTest {
     "not count down on first move (P2)" in {
       val clock   = makeFakeClockSimpleDelay(config)
       val afterP1 = takeTimeAndEndTurn(clock, seconds(0))
-      val afterP2 = takeTimeAndEndTurn(afterP1, seconds(0))
+      // have to start the clock after P2
+      val afterP2 = takeTimeAndEndTurn(afterP1, seconds(0)).start
       afterP2.remainingTime(P2) must_== expectedTime
     }
 
     "have full delay on second move within delay time" in {
       val clock     = makeFakeClockSimpleDelay(config)
       val afterP1T1 = takeTimeAndEndTurn(clock, seconds(0))
-      val afterP2T1 = takeTimeAndEndTurn(afterP1T1, seconds(0))
+      // have to start the clock after P2T1
+      val afterP2T1 = takeTimeAndEndTurn(afterP1T1, seconds(0)).start
       val afterP1T2 = takeTimeAndEndTurn(afterP2T1, seconds(6))
       afterP1T2.remainingTime(P1) must_== expectedTime
     }
@@ -118,7 +119,8 @@ class ClockZeroInitialTimeTest extends ChessTest {
     "lose time on second move when exceeding delay" in {
       val clock     = makeFakeClockSimpleDelay(config)
       val afterP1T1 = takeTimeAndEndTurn(clock, seconds(0))
-      val afterP2T1 = takeTimeAndEndTurn(afterP1T1, seconds(0))
+      // have to start the clock after P2T1
+      val afterP2T1 = takeTimeAndEndTurn(afterP1T1, seconds(0)).start
       val afterP1T2 = takeTimeAndEndTurn(afterP2T1, seconds(12))
       afterP1T2.outOfTime(P1, withGrace = false) must beTrue
     }
@@ -149,14 +151,16 @@ class ClockZeroInitialTimeTest extends ChessTest {
     "not count down on first move (P2)" in {
       val clock   = makeFakeClockBronstein(config)
       val afterP1 = takeTimeAndEndTurn(clock, seconds(0))
-      val afterP2 = takeTimeAndEndTurn(afterP1, seconds(0))
+      // have to start the clock after P2
+      val afterP2 = takeTimeAndEndTurn(afterP1, seconds(0)).start
       afterP2.remainingTime(P2) must_== seconds(10)
     }
 
     "give back time used on second move" in {
       val clock     = makeFakeClockBronstein(config)
       val afterP1T1 = takeTimeAndEndTurn(clock, seconds(0))
-      val afterP2T1 = takeTimeAndEndTurn(afterP1T1, seconds(0))
+      // have to start the clock after P2T1
+      val afterP2T1 = takeTimeAndEndTurn(afterP1T1, seconds(0)).start
       val afterP1T2 = takeTimeAndEndTurn(afterP2T1, seconds(6))
       afterP1T2.remainingTime(P1) must_== seconds(10)
     }
@@ -164,7 +168,8 @@ class ClockZeroInitialTimeTest extends ChessTest {
     "cap giveback at delay amount" in {
       val clock     = makeFakeClockBronstein(config)
       val afterP1T1 = takeTimeAndEndTurn(clock, seconds(0))
-      val afterP2T1 = takeTimeAndEndTurn(afterP1T1, seconds(0))
+      // have to start the clock after P2T1
+      val afterP2T1 = takeTimeAndEndTurn(afterP1T1, seconds(0)).start
       val afterP1T2 = takeTimeAndEndTurn(afterP2T1, seconds(8))
       afterP1T2.remainingTime(P1) must_== seconds(10)
     }
@@ -172,7 +177,8 @@ class ClockZeroInitialTimeTest extends ChessTest {
     "timeout on second move when using all time" in {
       val clock     = makeFakeClockBronstein(config)
       val afterP1T1 = takeTimeAndEndTurn(clock, seconds(0))
-      val afterP2T1 = takeTimeAndEndTurn(afterP1T1, seconds(0))
+      // have to start the clock after P2T1
+      val afterP2T1 = takeTimeAndEndTurn(afterP1T1, seconds(0)).start
       val afterP1T2 = takeTimeAndEndTurn(afterP2T1, seconds(10))
       afterP1T2.remainingTime(P1) must_== seconds(0)
       afterP1T2.outOfTime(P1, withGrace = false) must beTrue
