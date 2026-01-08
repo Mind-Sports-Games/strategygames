@@ -43,7 +43,7 @@ case class Move(
         lastTurn = if (autoEndTurn) h.currentTurn :+ toUci else h.lastTurn,
         currentTurn = if (autoEndTurn) List() else h.currentTurn :+ toUci,
         halfMoveClock =
-          if (((piece is Man) || captures || promotes) && !(autoEndTurn && newBoard.kingVsKing())) 0
+          if ((piece is Man) || captures || promotes) 0
           else h.halfMoveClock + 1,
         positionHashes =
           if (autoEndTurn) newBoard.variant.updatePositionHashes(newBoard, this, h.positionHashes)

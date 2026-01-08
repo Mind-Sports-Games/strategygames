@@ -88,9 +88,9 @@ abstract class Variant private[variant] (
 
   def addVariantEffect(move: Move): Move = move
 
-  def twentyFiveMoves(history: History): Boolean = history.halfMoveClock >= 50
+  def fourMoves(history: History): Boolean = history.halfMoveClock >= 4
 
-  def maxDrawingMoves(@nowarn board: Board): Option[Int]
+  def twentyFiveMovesEach(history: History): Boolean = history.halfMoveClock >= 50
 
   def variantEnd(situation: Situation) = situation.moves.isEmpty
 
