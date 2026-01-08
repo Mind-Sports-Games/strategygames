@@ -88,10 +88,6 @@ abstract class Variant private[variant] (
 
   def addVariantEffect(move: Move): Move = move
 
-  def fourMoves(history: History): Boolean = history.halfMoveClock >= 4
-
-  def twentyFiveMovesEach(history: History): Boolean = history.halfMoveClock >= 50
-
   def variantEnd(situation: Situation) = situation.moves.isEmpty
 
   def specialEnd(@nowarn situation: Situation)  = false
