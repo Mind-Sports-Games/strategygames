@@ -74,8 +74,9 @@ case class Board(
       }
 
   def autoDraw: Boolean =
-    (variant.maxDrawingMoves(this).fold(false)(m => history.halfMoveClock > m)) ||
-      (history.threefoldRepetition && variant.repetitionEnabled)
+    (variant.maxDrawingMoves(this).fold(false)(m => history.halfMoveClock > m)) || variant.twentyFiveMoves(
+      history
+    ) || (history.threefoldRepetition && variant.repetitionEnabled)
 
   def valid(strict: Boolean) = variant.valid(this, strict)
 

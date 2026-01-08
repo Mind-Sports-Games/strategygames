@@ -295,8 +295,8 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
         Vector("g8a8"),
         Vector("e2f2"), //130
         Vector("a8g8"),
-        Vector("f2c2"), 
-        // Vector("g8a8"), //drawing move?
+        //Vector("f2c2"), //drawing move?
+        // Vector("g8a8"),
         // Vector("c2g2"), //132
       )
 
@@ -304,16 +304,13 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
       for (actions <- vectorActionStrs) {
         val moveStr = actions.head
         val moveOpt = situation.board.variant.validMoves(situation).values.flatten.find(_.toUci.uci == moveStr)
-        // println(s"moveStr: $moveStr")
-        // println(s"validMoves: ${situation.board.variant.validMoves(situation).values.flatten.map(_.toUci.uci).toList}")
-        // println(s"moveOpt: $moveOpt")
         moveOpt must beSome
         situation = moveOpt.get.situationAfter
       }
       situation.end must_== false
 
       // One last move to trigger draw
-      val s1 = situation.board.variant.validMoves(situation).values.flatten.find(_.toUci.uci == "g8a8").get.situationAfter
+      val s1 = situation.board.variant.validMoves(situation).values.flatten.find(_.toUci.uci == "f2c2").get.situationAfter
 
       // Now check for draw
       s1.end must_== true
