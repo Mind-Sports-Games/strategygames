@@ -80,16 +80,19 @@ case class Situation(board: Board, player: Player) {
       board = board withVariant variant
     )
 
-  //If we can't determine an inverse player the APIPosition is None and is then determined in
-  //Board.apiPosition which uses uciMoves not FEN - will need to update when we have FromPosition
+  // If we can't determine an inverse player the APIPosition is None and is then determined in
+  // Board.apiPosition which uses uciMoves not FEN - will need to update when we have FromPosition
   def unary_! = copy(
     board = board.copy(
-      position = Forsyth.exportBoardFen(board).invertPlayer.map(f =>
-        Api.positionFromVariantNameAndFEN(
-          board.variant.key,
-          f.value
+      position = Forsyth
+        .exportBoardFen(board)
+        .invertPlayer
+        .map(f =>
+          Api.positionFromVariantNameAndFEN(
+            board.variant.key,
+            f.value
+          )
         )
-      )
     ),
     player = !player
   )
