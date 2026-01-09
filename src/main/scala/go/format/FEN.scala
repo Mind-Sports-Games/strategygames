@@ -9,14 +9,14 @@ final case class FEN(value: String) extends AnyVal {
 
   def board: String = removePockets(value.takeWhile(_ != ' '))
 
-  //Use inverseApply because black goes first in Go
+  // Use inverseApply because black goes first in Go
   def player: Option[Player] =
     value.split(' ').lift(FEN.playerIndex).flatMap(_.headOption).flatMap(Player.inverseApply)
 
   def invertPlayer: Option[FEN] =
-    //This is safe because player function ensures there is an element at playerIndex when doing split(' ')
-    //Dont flip player because of inverted colours
-    player.map { p => FEN(value.split(' ').updated(FEN.playerIndex, p.letter.toString).mkString(" "))}
+    // This is safe because player function ensures there is an element at playerIndex when doing split(' ')
+    // Dont flip player because of inverted colours
+    player.map { p => FEN(value.split(' ').updated(FEN.playerIndex, p.letter.toString).mkString(" ")) }
 
   def player1Score: Int = intFromFen(3).getOrElse(0)
 

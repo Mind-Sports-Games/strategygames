@@ -101,13 +101,13 @@ case object Amazons
   }
 
   override def <<@(
-    fen: FEN,
-    pieceMap: Option[PieceMap] = None,
-    history: Option[History] = None
+      fen: FEN,
+      pieceMap: Option[PieceMap] = None,
+      history: Option[History] = None
   ): Option[Situation] = {
     if (fen.value.contains("½")) {
-      val fenPieceMap      = makePieceMapFromBoardFen(fen.boardPart(Some(boardSize.height)))
-      Uci.Move.apply(gameFamily, fen.value.dropWhile('½' !=).drop(1)).flatMap{ uciMove =>
+      val fenPieceMap = makePieceMapFromBoardFen(fen.boardPart(Some(boardSize.height)))
+      Uci.Move.apply(gameFamily, fen.value.dropWhile('½' !=).drop(1)).flatMap { uciMove =>
         val validatedUciMove = if (uciMove.orig == uciMove.dest) {
           fenPieceMap.get(uciMove.orig).flatMap { piece =>
             val apiPosition = Api.positionFromVariantNameAndFEN(fishnetKey, fen.value.takeWhile('½' !=))
@@ -121,13 +121,13 @@ case object Amazons
               ),
               piece.player
             ).moves.get(uciMove.orig) match {
-              //select random move to this position as a fake move to allow us to create a fairy position
+              // select random move to this position as a fake move to allow us to create a fairy position
               case Some(moves) if moves.length > 0 => Some(moves.head.toUci.invert)
               case _                               => None
             }
           }
         } else Some(uciMove)
-        validatedUciMove.flatMap{ validUciMove =>
+        validatedUciMove.flatMap { validUciMove =>
           val previousBoardFen = exportBoardFen(
             Board(
               // unapply ½ move
