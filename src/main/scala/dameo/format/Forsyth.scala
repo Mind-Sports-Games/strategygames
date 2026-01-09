@@ -53,9 +53,10 @@ object Forsyth {
   def <<<@(variant: Variant, fen: FEN): Option[SituationPlus] =
     /* Convert a FEN + Variant into a SituationPlus */
     <<@(variant, fen) map { sit =>
+      val halfMoveClock  = fen.halfMoveClock.map(_ max 0 min 100)
       val fullMoveNumber = fen.fullMove
       SituationPlus(
-        sit,
+        halfMoveClock.map(sit.history.setHalfMoveClock).fold(sit)(sit.withHistory),
         fullMoveNumber | 1
       )
     }

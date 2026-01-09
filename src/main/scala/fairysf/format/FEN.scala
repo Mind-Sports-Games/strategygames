@@ -15,8 +15,8 @@ final case class FEN(value: String) extends AnyVal {
     value.split(' ').lift(FEN.playerIndex) flatMap (_.headOption) flatMap Player.apply
 
   def invertPlayer: Option[FEN] =
-    //This is safe because player function ensures there is an element at playerIndex when doing split(' ')
-    player.map { p => FEN(value.split(' ').updated(FEN.playerIndex, (!p).letter.toString).mkString(" "))}
+    // This is safe because player function ensures there is an element at playerIndex when doing split(' ')
+    player.map { p => FEN(value.split(' ').updated(FEN.playerIndex, (!p).letter.toString).mkString(" ")) }
 
   def ply: Option[Int] =
     fullMove map { fm =>
@@ -26,8 +26,8 @@ final case class FEN(value: String) extends AnyVal {
   def boardPart(height: Option[Int] = None): String = {
     val noSGPockets = value.takeWhile(' ' !=).takeWhile('[' !=)
     height match {
-      //handle fairySFFen where pocket pieces are after a final '/'
-      case Some(height) if !value.contains('[') => noSGPockets.split("/", height+1).init.mkString("/")
+      // handle fairySFFen where pocket pieces are after a final '/'
+      case Some(height) if !value.contains('[') => noSGPockets.split("/", height + 1).init.mkString("/")
       case _                                    => noSGPockets
     }
   }

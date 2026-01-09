@@ -39,9 +39,9 @@ case class Board(
 
   def materialImbalance: Int = variant.materialImbalance(this)
 
-  //This won't work if the Board has been generated FromPosition. Will need to generate from FEN
-  //However generating from FEN can't be done all the time as we would like uciMoves to help with repetition
-  //Future problem when we come to deal with FromPosition for samurai games
+  // This won't work if the Board has been generated FromPosition. Will need to generate from FEN
+  // However generating from FEN can't be done all the time as we would like uciMoves to help with repetition
+  // Future problem when we come to deal with FromPosition for samurai games
   lazy val apiPosition = position match {
     case Some(position) => position
     case None           => Api.positionFromVariantAndMoves(variant, uciMoves)

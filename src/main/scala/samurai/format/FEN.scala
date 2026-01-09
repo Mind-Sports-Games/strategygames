@@ -16,8 +16,8 @@ final case class FEN(value: String) extends AnyVal {
   def player2Score: Int = intFromFen(2).getOrElse(0)
 
   def invertPlayer: Option[FEN] =
-    //This is safe because player function ensures there is an element at playerIndex when doing split(' ')
-    player.map { p => FEN(value.split(' ').updated(FEN.playerIndex, (!p).letter.toString).mkString(" "))}
+    // This is safe because player function ensures there is an element at playerIndex when doing split(' ')
+    player.map { p => FEN(value.split(' ').updated(FEN.playerIndex, (!p).letter.toString).mkString(" ")) }
 
   def fullMove: Option[Int] = intFromFen(FEN.fullMoveIndex)
 

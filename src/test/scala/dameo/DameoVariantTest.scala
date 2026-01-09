@@ -168,11 +168,11 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
       situation2b.status must_== Some(Status.Draw)
       situation2b.winner must_== None
 
-      format.Forsyth.>>(situation0).halfMoveClock must_== Some(1)
-      format.Forsyth.>>(situation1a).halfMoveClock must_== Some(2)
-      format.Forsyth.>>(situation1b).halfMoveClock must_== Some(3)
-      format.Forsyth.>>(situation2a).halfMoveClock must_== Some(4)
-      format.Forsyth.>>(situation2b).halfMoveClock must_== Some(5)
+      format.Forsyth.>>(situation0).halfMoveClock must_== Some(0)
+      format.Forsyth.>>(situation1a).halfMoveClock must_== Some(1)
+      format.Forsyth.>>(situation1b).halfMoveClock must_== Some(2)
+      format.Forsyth.>>(situation2a).halfMoveClock must_== Some(3)
+      format.Forsyth.>>(situation2b).halfMoveClock must_== Some(4)
     }
 
     "Trigger draw in king vs king endgame, black to play" in {
@@ -196,11 +196,11 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
       situation2b.status must_== Some(Status.Draw)
       situation2b.winner must_== None
 
-      format.Forsyth.>>(situation0).halfMoveClock must_== Some(1)
-      format.Forsyth.>>(situation1a).halfMoveClock must_== Some(2)
-      format.Forsyth.>>(situation1b).halfMoveClock must_== Some(3)
-      format.Forsyth.>>(situation2a).halfMoveClock must_== Some(4)
-      format.Forsyth.>>(situation2b).halfMoveClock must_== Some(5)
+      format.Forsyth.>>(situation0).halfMoveClock must_== Some(0)
+      format.Forsyth.>>(situation1a).halfMoveClock must_== Some(1)
+      format.Forsyth.>>(situation1b).halfMoveClock must_== Some(2)
+      format.Forsyth.>>(situation2a).halfMoveClock must_== Some(3)
+      format.Forsyth.>>(situation2b).halfMoveClock must_== Some(4)
     }
 
     "Trigger draw by threefold repetition" in {
@@ -230,6 +230,93 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
       situation4a.playable(true) must_== false
       situation4a.status must_== Some(Status.Draw)
       situation4a.winner must_== None
+    }
+
+    "Trigger draw by 50 moves kings repetition" in {
+      //https://playstrategy.org/Ge85gdyL#209
+      val board       = Board(FEN("B:WKa1,Kg8,Kh8:BKb1,Kc1,Kd1,Ke1,Kf1,Kg1,g2,Kh1,Kh2:H0:F103").pieces, variant.Dameo)
+      var situation   = Situation(board, P2)
+      situation.end must_== false
+
+      val vectorActionStrs = Vector(
+        Vector("b1c2"),
+        Vector("g8a8"),
+        Vector("c2b1"),
+        Vector("a8g8"),
+        Vector("f1f2"),
+        Vector("g8a8"),
+        Vector("g2f1K"),//makes final king (106)
+        Vector("a8g8"),
+        Vector("f2c2"),
+        Vector("g8a8"),
+        Vector("c2f2"),
+        Vector("a8g8"),
+        Vector("f2c2"),
+        Vector("g8a8"),
+        Vector("h2d2"), //110
+        Vector("a8g8"),
+        Vector("d2f2"),
+        Vector("g8a8"),
+        Vector("c2d2"),
+        Vector("a8g8"),
+        Vector("d2c2"),
+        Vector("g8a8"),
+        Vector("f2e2"),
+        Vector("a8g8"),
+        Vector("e2g2"),
+        Vector("g8a8"),
+        Vector("g2h2"), //116
+        Vector("a8g8"),
+        Vector("c2e2"),
+        Vector("g8a8"),
+        Vector("e2g2"),
+        Vector("a8g8"),
+        Vector("g2e2"),
+        Vector("g8a8"),
+        Vector("e2d2"), //120
+        Vector("a8g8"),
+        Vector("h2f2"),
+        Vector("g8a8"),
+        Vector("d2b2"),
+        Vector("a8g8"),
+        Vector("b2e2"),
+        Vector("g8a8"),
+        Vector("f2h2"),
+        Vector("a8g8"),
+        Vector("e2d2"), //125
+        Vector("g8a8"),
+        Vector("h2g2"),
+        Vector("a8g8"),
+        Vector("d2c2"),
+        Vector("g8a8"),
+        Vector("g2e2"),
+        Vector("a8g8"),
+        Vector("c2b2"),
+        Vector("g8a8"),
+        Vector("e2f2"), //130
+        Vector("a8g8"),
+        //Vector("f2c2"), //drawing move?
+        // Vector("g8a8"),
+        // Vector("c2g2"), //132
+      )
+
+      // Play all moves in order
+      for (actions <- vectorActionStrs) {
+        val moveStr = actions.head
+        val moveOpt = situation.board.variant.validMoves(situation).values.flatten.find(_.toUci.uci == moveStr)
+        moveOpt must beSome
+        situation = moveOpt.get.situationAfter
+      }
+      situation.end must_== false
+
+      // One last move to trigger draw
+      val s1 = situation.board.variant.validMoves(situation).values.flatten.find(_.toUci.uci == "f2c2").get.situationAfter
+
+      // Now check for draw
+      s1.end must_== true
+      s1.playable(true) must_== false
+      s1.status must_== Some(Status.Draw)
+      s1.winner must_== None
     }
   }
 }

@@ -259,12 +259,12 @@ abstract class Variant private[variant] (
   def isUnmovedPawn(player: Player, pos: Pos) = pos.rank == player.fold(Rank.Second, Rank.Seventh)
 
   def <<@(
-    fen: FEN,
-    pieceMap: Option[PieceMap] = None,
-    history: Option[History] = None
+      fen: FEN,
+      pieceMap: Option[PieceMap] = None,
+      history: Option[History] = None
   ): Option[Situation] = {
     val apiPosition = Api.positionFromVariantNameAndFEN(fishnetKey, fen.value)
-    fen.player.map{ player =>
+    fen.player.map { player =>
       Situation(
         Board(
           pieces = pieceMap.getOrElse(apiPosition.pieceMap),
