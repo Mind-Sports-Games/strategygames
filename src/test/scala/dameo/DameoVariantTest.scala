@@ -5,6 +5,10 @@ import strategygames.dameo.format.FEN
 
 import strategygames.Status
 
+
+def findMove(situation: Situation, moveStr: String): Option[strategygames.dameo.Move] =
+  situation.board.variant.validMoves(situation).values.flatten.find(_.toUci.uci == moveStr)
+
 class DameoVariantTest extends DameoTest with ValidatedMatchers {
   "variant" should {
     "have 52 opening moves" in {
@@ -303,14 +307,14 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
       // Play all moves in order
       for (actions <- vectorActionStrs) {
         val moveStr = actions.head
-        val moveOpt = situation.board.variant.validMoves(situation).values.flatten.find(_.toUci.uci == moveStr)
+        val moveOpt = findMove(situation, moveStr)
         moveOpt must beSome
         situation = moveOpt.get.situationAfter
       }
       situation.end === false
 
       // One last move to trigger draw
-      val s1 = situation.board.variant.validMoves(situation).values.flatten.find(_.toUci.uci == "f2c2").get.situationAfter
+      val s1 = findMove(situation, "f2c2").get.situationAfter
 
       // Now check for draw
       s1.end === true

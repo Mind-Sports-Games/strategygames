@@ -147,7 +147,7 @@ abstract class Variant private[variant] (
         if (lineOfMarbles.size == 3) generateSideMoves(lineOfMarbles.dropRight(1), direction) else List(),
         possibleSideMoves.flatMap {
           case (orig, dest) => Some(createMove(orig, dest))
-          case _            => None
+          case null         => None
         }
       ).flatten
     }

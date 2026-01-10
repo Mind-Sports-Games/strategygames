@@ -1,16 +1,16 @@
 package strategygames
 
 sealed trait Role {
-  val gameLogic: GameLogic
-  val gameFamily: GameFamily
-  val forsyth: Char
+  lazy val gameLogic: GameLogic
+  lazy val gameFamily: GameFamily
+  lazy val forsyth: Char
   // draughts.Role.pdn will be referred to by pgn from this point
-  val pgn: Char
-  val name: String
-  val groundName: String
-  val binaryInt: Int
-  val hashInt: Int
-  val storable: Boolean
+  lazy val pgn: Char
+  lazy val name: String
+  lazy val groundName: String
+  lazy val binaryInt: Int
+  lazy val hashInt: Int
+  lazy val storable: Boolean
   def toString(): String
 }
 
@@ -31,15 +31,15 @@ sealed trait PromotableRole extends Role {
 object Role {
 
   final case class ChessRole(r: chess.Role) extends Role {
-    val gameLogic           = GameLogic.Chess()
-    val gameFamily          = r.gameFamily
-    val forsyth             = r.forsyth
-    val pgn                 = r.pgn
-    val binaryInt           = r.binaryInt
-    val hashInt             = r.hashInt
-    val name                = r.name
-    val groundName          = r.groundName
-    val storable            = r.storable
+    lazy val gameLogic           = GameLogic.Chess()
+    lazy val gameFamily          = r.gameFamily
+    lazy val forsyth             = r.forsyth
+    lazy val pgn                 = r.pgn
+    lazy val binaryInt           = r.binaryInt
+    lazy val hashInt             = r.hashInt
+    lazy val name                = r.name
+    lazy val groundName          = r.groundName
+    lazy val storable            = r.storable
     override def toString() = r.name
   }
 

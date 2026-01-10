@@ -30,7 +30,7 @@ object UciCharPair {
       case Uci.EndTurn()           => uciCharToCharPair(toChar(Pos.A1))
       // OfferDouble => L1, AcceptDouble => K1, RejectDouble => J1
       case Uci.CubeAction(ci)      => uciCharToCharPair(toChar(Pos(ci.index).getOrElse(Pos.D1)))
-      case _                       => sys.error(s"Not implemented UciCharPair for $uci")
+      case null                    => sys.error(s"Not implemented UciCharPair for $uci")
     }
 
   private def uciCharToCharPair(c: Char) = stratUciCharPair(c, c)

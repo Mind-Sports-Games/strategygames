@@ -9,9 +9,9 @@ import strategygames.format.Uci
 
 sealed abstract class Situation(val board: Board, val player: Player) {
 
-  val moves: Map[Pos, List[Move]]
+  lazy val moves: Map[Pos, List[Move]]
 
-  val destinations: Map[Pos, List[Pos]]
+  lazy val destinations: Map[Pos, List[Pos]]
 
   def drops: Option[List[Pos]]
 
@@ -73,7 +73,7 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def history = board.history
 
-  val check: Boolean
+  lazy val check: Boolean
 
   def checkSquare: Option[Pos]
 
@@ -1225,7 +1225,7 @@ object Situation {
       interaction match {
         case CubeInteraction.Backgammon(interaction) =>
           s.cubeAction(interaction).toEither.map(ca => CubeAction.Backgammon(ca)).toValidated
-        case _                                       => sys.error("Not passed Backgammon objects")
+        case null                                    => sys.error("Not passed Backgammon objects")
       }
 
     def playable(strict: Boolean): Boolean = s.playable(strict)

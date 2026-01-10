@@ -1219,7 +1219,7 @@ object Game {
           .toEither
           .map(t => (Backgammon(t._1), CubeAction.Backgammon(t._2)))
           .toValidated
-      case _                                       => sys.error("Not passed Backgammon objects")
+      case null                                    => sys.error("Not passed Backgammon objects")
     }
 
     def randomizeDiceRoll: Option[DiceRoll] = g.randomizeDiceRoll.map(DiceRoll.Backgammon.apply)
@@ -1640,7 +1640,7 @@ object Game {
       Abalone(abalone.Game.apply(variant.map(_.toAbalone), fen.map(_.toAbalone)))
     case GameLogic.Dameo()        =>
       Dameo(dameo.Game.apply(variant.map(_.toDameo), fen.map(_.toDameo)))
-    case _                        => sys.error("Mismatched gamelogic types 36")
+    case null                     => sys.error("Mismatched gamelogic types 36")
   }
 
   def wrap(g: chess.Game)            = Chess(g)

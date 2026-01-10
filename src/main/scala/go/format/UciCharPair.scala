@@ -16,7 +16,7 @@ object UciCharPair {
         )
       case Uci.Pass()           => stratUciCharPair(toChar(Pos.A1), toChar(Pos.A1))
       case Uci.SelectSquares(_) => stratUciCharPair(toChar(Pos.A1), toChar(Pos.A1))
-      case _                    => sys.error(s"Go does not have moves or promotable roles uci: ${uci}")
+      case null                 => sys.error(s"Go does not have moves or promotable roles uci: ${uci}")
     }
 
   private[format] object implementation {
