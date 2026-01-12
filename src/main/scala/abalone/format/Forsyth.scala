@@ -1,6 +1,7 @@
 package strategygames.abalone.format
 
 import cats.implicits._
+import scalalib.extensions.*
 
 import strategygames.{ Player, Score }
 import strategygames.abalone._

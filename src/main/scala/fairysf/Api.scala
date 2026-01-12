@@ -41,25 +41,25 @@ object Api {
     val variant: Variant
 
     def makeMoves(movesList: List[String]): Position
-    val fen: FEN
-    val givesCheck: Boolean
-    val isImmediateGameEnd: (Boolean, GameResult)
-    val immediateGameEnd: Boolean
-    val optionalGameEnd: Boolean
-    val insufficientMaterial: (Boolean, Boolean)
+    lazy val fen: FEN
+    lazy val givesCheck: Boolean
+    lazy val isImmediateGameEnd: (Boolean, GameResult)
+    lazy val immediateGameEnd: Boolean
+    lazy val optionalGameEnd: Boolean
+    lazy val insufficientMaterial: (Boolean, Boolean)
 
     def isDraw(ply: Int): Boolean
     def hasGameCycle(ply: Int): Boolean
-    val hasRepeated: Boolean
+    lazy val hasRepeated: Boolean
 
-    val pieceMap: PieceMap
-    val piecesInHand: Array[Piece]
-    val pocketData: Option[PocketData]
+    lazy val pieceMap: PieceMap
+    lazy val piecesInHand: Array[Piece]
+    lazy val pocketData: Option[PocketData]
 
-    val optionalGameEndResult: GameResult
-    val gameResult: GameResult
-    val gameEnd: Boolean
-    val legalMoves: Array[String]
+    lazy val optionalGameEndResult: GameResult
+    lazy val gameResult: GameResult
+    lazy val gameEnd: Boolean
+    lazy val legalMoves: Array[String]
   }
 
   private class FairyPosition(position: FairyStockfish.Position) extends Position {

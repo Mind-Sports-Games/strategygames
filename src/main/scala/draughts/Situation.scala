@@ -23,7 +23,7 @@ case class Situation(board: Board, player: Player) {
       ) {
         case (lastUci: Uci.Move) =>
           Map(lastUci.dest -> board.variant.validMovesFrom(this, lastUci.dest, finalSquare))
-        case _                   => board.variant.validMoves(this, finalSquare)
+        case null                => board.variant.validMoves(this, finalSquare)
       }
 
   lazy val validMoves: Map[Pos, List[Move]]      = validMovesVerified()

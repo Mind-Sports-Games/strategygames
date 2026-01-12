@@ -1,13 +1,14 @@
 package strategygames.draughts
 package variant
 
-import strategygames.{ GameFamily, Player }
+import strategygames.{ validated, GameFamily, Player }
 
 import format.FEN
 
 import cats.data.Validated
 import cats.implicits._
 import scala.annotation.{ nowarn, tailrec }
+import scalalib.extensions.*
 
 // Correctness depends on singletons for each variant ID
 abstract class Variant private[variant] (
@@ -56,7 +57,7 @@ abstract class Variant private[variant] (
   def isValidPromotion(promotion: Option[PromotableRole]) = promotion match {
     case None       => true
     case Some(King) => true
-    case _          => false
+    case null       => false
   }
 
   def getCaptureValue(@nowarn board: Board, taken: List[Pos])   = taken.length
@@ -132,17 +133,19 @@ abstract class Variant private[variant] (
       } else exactMatch
     }
 
-    for {
-      actor <- situation.board.actors get from toValid "No piece on " + from
-      _     <-
-        if (actor is situation.player) Validated.valid(actor)
-        else Validated.invalid("Not my piece on " + from)
-      m1    <- findMove(from, to) toValid "Piece on " + from + " cannot move to " + to
-      m2    <- m1 withPromotion promotion toValid "Piece on " + from + " cannot promote to " + promotion
-      m3    <-
-        if (isValidPromotion(promotion)) Validated.valid(m2)
-        else Validated.invalid("Cannot promote to " + promotion + " in this game mode")
-    } yield m3
+    validated {
+      for {
+        actor <- situation.board.actors.get(from).toRight("No piece on " + from)
+        _     <- Either.cond(actor is situation.player, actor, "Not my piece on " + from)
+        m1    <- findMove(from, to).toRight("Piece on " + from + " cannot move to " + to)
+        m2    <- (m1 withPromotion promotion).toRight("Piece on " + from + " cannot promote to " + promotion)
+        m3    <- Either.cond(
+                   isValidPromotion(promotion),
+                   m2,
+                   "Cannot promote to " + promotion + " in this game mode"
+                 )
+      } yield m3
+    }
 
   }
 

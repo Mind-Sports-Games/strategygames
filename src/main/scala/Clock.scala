@@ -4,6 +4,8 @@ import scala.annotation.nowarn
 import java.text.DecimalFormat
 import cats.syntax.option._
 import scala.util.chaining._
+import scalalib.extensions.*
+import Centis._
 
 // Abstract timer trait
 trait TimerTrait {
@@ -40,7 +42,7 @@ case class FischerIncrementGrace(val increment: Centis) extends ClockTimeGrace {
 
   def timeWillAdd(remaining: Centis, timeTaken: Centis, isRunning: Boolean): Centis =
     // 0 if no time is left or clock isn't running (e.g. first moves in game), else the increment
-    (remaining > Centis(0) && isRunning) ?? increment
+    (remaining > Centis(0) && isRunning) so increment
 
   def goBerserk: ClockTimeGrace = NoClockTimeGrace()
   val maxGrace: Centis          = increment
@@ -59,7 +61,7 @@ case class SimpleDelayGrace(val delay: Centis) extends ClockTimeGrace {
   //       can chain together to keep you at zero, even though you should have lost.
   //       timeTaken will be 0 if !isRunning so we don't need to check this.
   def timeWillAdd(remaining: Centis, timeTaken: Centis, isRunning: Boolean): Centis =
-    ((remaining + timeTaken.atMost(delay)) > Centis(0)) ?? timeTaken.atMost(delay) // up to the delay
+    ((remaining + timeTaken.atMost(delay)) > Centis(0)) so timeTaken.atMost(delay) // up to the delay
 
   //change made for SimpleDelay only (not Bronstein) - instead of removing all delay, just half it
   def goBerserk: ClockTimeGrace = copy(delay = delay.halfCeilSeconds)
@@ -79,7 +81,7 @@ case class BronsteinDelayGrace(val delay: Centis) extends ClockTimeGrace {
 
   def timeWillAdd(remaining: Centis, timeTaken: Centis, isRunning: Boolean): Centis =
     // 0 if no time is left or clock isn't running (e.g. first moves in game), else the increment
-    (remaining > Centis(0) && isRunning) ?? timeTaken.atMost(delay)
+    (remaining > Centis(0) && isRunning) so timeTaken.atMost(delay)
 
   def goBerserk: ClockTimeGrace = NoClockTimeGrace()
   val maxGrace: Centis          = delay
@@ -179,7 +181,7 @@ sealed trait ClockConfig {
   def toClock: ClockBase
   // TODO: startsAtZero is an abstraction leak.
   def startsAtZero: Boolean
-  val timer: Timer
+  lazy val timer: Timer
 }
 
 sealed trait ClockInfoBase {
@@ -248,6 +250,7 @@ sealed trait ClockBase {
   def lagCompAvg: Centis
   def setRemainingTime(p: Player, t: Centis): ClockBase
   def isPaused: Boolean
+  def resetTimeStamper: ClockBase
 
   def currentClockFor(c: Player): ClockInfoBase
 
@@ -297,18 +300,18 @@ case class ClockPlayer(
 ) extends PlayerTimerBase {
   val elapsed = timer.elapsed
 
-  def recordLag(l: Centis) = copy(lag = lag.recordLag(l))
+  def recordLag(l: Centis): ClockPlayer = copy(lag = lag.recordLag(l))
 
   def applyClockGrace(t: Centis, isRunning: Boolean) =
     copy(timer = timer.applyClockGrace(t, isRunning), completedActionsOfTurnTime = Centis(0))
-  def takeTime(t: Centis)        = copy(timer = timer.takeTime(t))
+  def takeTime(t: Centis): ClockPlayer        = copy(timer = timer.takeTime(t))
 
-  def setRemaining(t: Centis) = copy(timer = timer.setRemaining(t))
+  def setRemaining(t: Centis): ClockPlayer = copy(timer = timer.setRemaining(t))
 
   // Honestly going berserk should just change your clock completely and shouldn't be
   // at this level. That's lila/lichess decision, but fine.
   // Going berserk changes your timer
-  def goBerserk                        = copy(
+  def goBerserk: ClockPlayer = copy(
     berserk = true,
     timer = timer.goBerserk(config.berserkPenalty)
   )
@@ -382,7 +385,7 @@ case class Clock(
   def updatePlayer(c: Player)(f: ClockPlayer => ClockPlayer) =
     copy(players = players.update(c, f))
 
-  def goBerserk(c: Player) = updatePlayer(c) { _.goBerserk }
+  def goBerserk(c: Player): Clock = updatePlayer(c) { _.goBerserk }
 
   def setRemainingTime(c: Player, centis: Centis) =
     updatePlayer(c) {
@@ -720,10 +723,14 @@ case class ByoyomiClock(
 
   def withTimestamper(timestamper: Timestamper) = copy(timestamper = timestamper)
 
+  def resetTimeStamper = copy(
+    timestamp = timestamp.map(_ => now)
+  )
+
   private def updatePlayer(c: Player)(f: ByoyomiClockPlayer => ByoyomiClockPlayer) =
     copy(players = players.update(c, f))
 
-  def goBerserk(c: Player) = updatePlayer(c) { _.goBerserk }
+  def goBerserk(c: Player): ByoyomiClock = updatePlayer(c) { _.goBerserk }
 
   def setRemainingTime(c: Player, centis: Centis) =
     updatePlayer(c) {
@@ -795,7 +802,7 @@ case class ByoyomiClock(
           else
             updatePlayer(player) {
               _.takeTime(
-                moveTime - ((clockActive && switchClock) ?? Centis(
+                moveTime - ((clockActive && switchClock) so Centis(
                   competitor.graceSeconds * 100
                 ))
               )
@@ -838,7 +845,7 @@ case class ByoyomiClockPlayer(
     completedActionsOfTurnTime: Centis = Centis(0)
 ) extends PlayerTimerBase {
 
-  def recordLag(l: Centis) = copy(lag = lag.recordLag(l))
+  def recordLag(l: Centis): ByoyomiClockPlayer = copy(lag = lag.recordLag(l))
 
   def periodsLeft = math.max(periodsTotal - spentPeriods, 0)
 
@@ -847,19 +854,19 @@ case class ByoyomiClockPlayer(
 
   def giveTime(t: Centis): ByoyomiClockPlayer = takeTime(-t)
 
-  def setRemaining(t: Centis) = copy(elapsed = limit - t)
+  def setRemaining(t: Centis): ByoyomiClockPlayer = copy(elapsed = limit - t)
 
-  def setPeriods(p: Int) = copy(spentPeriods = p)
+  def setPeriods(p: Int): ByoyomiClockPlayer = copy(spentPeriods = p)
 
-  def spendPeriods(p: Int) = copy(spentPeriods = spentPeriods + p)
+  def spendPeriods(p: Int): ByoyomiClockPlayer = copy(spentPeriods = spentPeriods + p)
 
-  def refundPeriods(p: Int) = spendPeriods(-math.min(p, spentPeriods))
+  def refundPeriods(p: Int): ByoyomiClockPlayer = spendPeriods(-math.min(p, spentPeriods))
 
   def byoyomi = if (berserk) config.byoyomi.halfCeilSeconds else config.byoyomi
 
   def periodsTotal = config.periodsTotal
 
-  def goBerserk = copy(berserk = true)
+  def goBerserk: ByoyomiClockPlayer = copy(berserk = true)
 
   def remaining: Centis = limit - elapsed
 

@@ -36,7 +36,7 @@ object Pass {
     def situationAfter: Situation = Situation.Go(p.situationAfter)
     def finalizeAfter: Board      = p.finalizeAfter
 
-    def toUci: Uci.Pass = Uci.GoPass(p.toUci)
+    def toUci: Uci.Pass = Uci.GoPass((p.toUci: go.format.Uci.Pass))
 
     val unwrap = p
 

@@ -4,20 +4,21 @@ organization := "org.playstrategy"
 
 version := "10.2.1-pstrat202"
 
-scalaVersion := "2.13.10"
+scalaVersion := "3.7.4"
 
 val fairystockfishVersion = "0.0.20"
+val scalalibVersion = "11.9.5"
 
 libraryDependencies ++= List(
-  "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
-  "org.specs2"             %% "specs2-core"              % "4.10.0" % Test,
-  "org.specs2"             %% "specs2-cats"              % "4.10.0" % Test,
-  "com.github.ornicar"     %% "scalalib"                 % "7.0.2",
+  "org.scala-lang.modules" %% "scala-parser-combinators" % "2.4.0",
+  "org.specs2"             %% "specs2-core"              % "5.7.0" % Test,
+  "org.specs2"             %% "specs2-cats"              % "4.23.0" % Test,
   "joda-time"               % "joda-time"                % "2.10.10",
-  "org.typelevel"          %% "cats-core"                % "2.2.0",
+  "org.typelevel"          %% "cats-core"                % "2.13.0",
   "org.playstrategy"        % "fairystockfish"           % fairystockfishVersion,
   "com.joansala.aalina"     % "aalina"                   % "2.1.0-pstrat2",
-  "com.joansala"            % "go-engine"                % "1.0.0-pstrat1.12"
+  "com.joansala"            % "go-engine"                % "1.0.0-pstrat1.12",
+  "com.github.lichess-org.scalalib" %% "scalalib-core" % "11.9.5"
 )
 
 // Explicitly add in the linux-class path
@@ -26,7 +27,8 @@ libraryDependencies += "org.playstrategy" % "fairystockfish" % fairystockfishVer
 classpathTypes ++= Set("linux-x86_64")
 
 resolvers ++= Seq(
-  "lila-maven" at "https://raw.githubusercontent.com/Mind-Sports-Games/lila-maven/master"
+  "lila-maven".at("https://raw.githubusercontent.com/Mind-Sports-Games/lila-maven/master"),
+  "jitpack".at("https://jitpack.io")
 ) ++ sys.env
   .get("LILA_MAVEN_RESOLVERS")
   .map(_.split(",").zipWithIndex.map { case (x, i) => s"local-maven-$i" at x })
@@ -34,46 +36,18 @@ resolvers ++= Seq(
   .getOrElse(Seq())
 
 scalacOptions ++= Seq(
-  "-Xfatal-warnings",
   "-encoding",
   "utf-8",
-  "-explaintypes",
+  "-explain",
   "-feature",
   "-language:higherKinds",
   "-language:implicitConversions",
   "-language:postfixOps",
-  "-Ymacro-annotations",
-  // Warnings as errors!
-  // "-Xfatal-warnings",
-  // Linting options
   "-unchecked",
-  "-Xcheckinit",
-  "-Xlint:adapted-args",
-  "-Xlint:constant",
-  "-Xlint:delayedinit-select",
-  "-Xlint:deprecation",
-  "-Xlint:inaccessible",
-  "-Xlint:infer-any",
-  "-Xlint:missing-interpolator",
-  "-Xlint:nullary-unit",
-  "-Xlint:option-implicit",
-  "-Xlint:package-object-classes",
-  "-Xlint:poly-implicit-overload",
-  "-Xlint:private-shadow",
-  "-Xlint:stars-align",
-  "-Xlint:type-parameter-shadow",
-  "-Wdead-code",
-  "-Wextra-implicit",
-  // "-Wnumeric-widen",
-  "-Wunused:imports",
-  "-Wunused:locals",
   "-Wunused:patvars",
-  "-Wunused:privates",
   "-Wunused:implicits",
   "-Wunused:params",
-  "-Wvalue-discard",
-  "-Xmaxerrs",
-  "12"
+  "-source:3.0-migration"
 )
 
 Compile / packageDoc / publishArtifact := false

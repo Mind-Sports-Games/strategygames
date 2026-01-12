@@ -29,11 +29,11 @@ class Go9x9VariantTestIsometry extends strategygames.chess.ChessTest {
         "pass",
         "ss:i1"
       ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) must beValid.like(gameData => {
+    ) .toOption must beSome.like { case gameData =>
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
-      fen1 must_== fen2
-    })
+      fen1 === fen2
+    }
   }
 
   "Test Every move can be loaded from fen" in {
@@ -80,10 +80,10 @@ class Go9x9VariantTestIsometry extends strategygames.chess.ChessTest {
         "s@c2",
         "s@g3"
       ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) must beValid.like(gameData => {
+    ) .toOption must beSome.like { case gameData =>
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
-      fen1 must_== fen2
-    })
+      fen1 === fen2
+    }
   }
 }

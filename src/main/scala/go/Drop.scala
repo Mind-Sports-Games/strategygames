@@ -4,10 +4,12 @@ import strategygames.MoveMetrics
 import strategygames.go.format.Uci
 
 trait NextBoard {
-  val boardAfter: Board
+  lazy val boardAfter: Board
 }
 
-case class ExplicitBoardAfter(boardAfter: Board)    extends NextBoard
+case class ExplicitBoardAfter(_boardAfter: Board)    extends NextBoard {
+  lazy val boardAfter = _boardAfter
+}
 case class LazyBoardAfter(boardAfterF: () => Board) extends NextBoard {
   lazy val boardAfter = boardAfterF()
 }
@@ -37,9 +39,9 @@ case class Drop(
 
   def player = piece.player
 
-  def withMetrics(m: MoveMetrics) = copy(metrics = m)
+  def withMetrics(m: MoveMetrics): Drop = copy(metrics = m)
 
-  def toUci = Uci.Drop(piece.role, pos)
+  def toUci: Uci.Drop = Uci.Drop(piece.role, pos)
 
   override def toString = toUci.uci
 

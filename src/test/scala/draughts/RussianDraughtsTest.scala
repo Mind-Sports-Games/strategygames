@@ -134,7 +134,7 @@ class RussianDraughtsTest extends Specification with ValidatedMatchers {
       val s = moves
         .foldLeft(russian)((sit, uci) => move(sit, uci))
 
-      s.winner must_== Some(Player.P1)
+      s.winner === Some(Player.P1)
     }
   }
 
@@ -144,14 +144,14 @@ class RussianDraughtsTest extends Specification with ValidatedMatchers {
         .take(29)
         .foldLeft(russian)((sit, uci) => move(sit, uci))
 
-      s.validMoves.contains(Pos64.posAt(moves(29).take(2).toInt).getOrElse(Pos64(1, 1))) must_== true
+      s.validMoves.contains(Pos64.posAt(moves(29).take(2).toInt).getOrElse(Pos64(1, 1))) === true
     }
     "be invalid in brazillian due to capture choice" in {
       val s = moves
         .take(29)
         .foldLeft(brazilian)((sit, uci) => move(sit, uci))
 
-      s.validMoves.contains(Pos64.posAt(moves(29).take(2).toInt).getOrElse(Pos64(1, 1))) must_== false
+      s.validMoves.contains(Pos64.posAt(moves(29).take(2).toInt).getOrElse(Pos64(1, 1))) === false
     }
     "be invalid when playing a non possible move " in {
       moves
@@ -176,7 +176,7 @@ class RussianDraughtsTest extends Specification with ValidatedMatchers {
 
       val gameAfterMoves = x._2.last._1
 
-      gameAfterMoves.situation.winner must_== Some(Player.P1)
+      gameAfterMoves.situation.winner === Some(Player.P1)
 
     }
     // TODO: add this test back in

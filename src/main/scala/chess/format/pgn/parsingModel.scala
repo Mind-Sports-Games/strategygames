@@ -4,7 +4,7 @@ package format.pgn
 import cats.data.Validated
 import cats.syntax.option._
 
-import strategygames.{ Drop => StratDrop, Move => StratMove }
+import strategygames.{ validated, Drop => StratDrop, Move => StratMove }
 import strategygames.format.pgn.{ Metas, San, Suffixes }
 
 //This is only for Moves, not including Castles
@@ -86,10 +86,11 @@ case class Castle(
 
   def withMetas(m: Metas) = copy(metas = m)
 
-  def move(situation: Situation): Validated[String, strategygames.chess.Move] =
+  def move(situation: Situation): Validated[String, strategygames.chess.Move] = validated {
     for {
-      kingPos <- situation.board kingPosOf situation.player toValid "No king found"
-      actor   <- situation.board actorAt kingPos toValid "No actor found"
-      move    <- actor.castleOn(side).headOption toValid "Cannot castle / variant is " + situation.board.variant
+      kingPos <- (situation.board kingPosOf situation.player).toRight("No king found")
+      actor   <- (situation.board actorAt kingPos).toRight("No actor found")
+      move    <- actor.castleOn(side).headOption.toRight("Cannot castle / variant is " + situation.board.variant)
     } yield move
+  }
 }

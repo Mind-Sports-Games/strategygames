@@ -3,6 +3,7 @@ package strategygames.chess
 import strategygames.Player
 
 import format.Uci
+import scalalib.extensions.*
 
 import variant.Variant
 

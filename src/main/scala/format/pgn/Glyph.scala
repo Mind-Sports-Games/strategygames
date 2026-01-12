@@ -1,5 +1,6 @@
 package strategygames
 package format.pgn
+import scalalib.extensions.*
 
 case class Glyph(id: Int, symbol: String, name: String) {
 

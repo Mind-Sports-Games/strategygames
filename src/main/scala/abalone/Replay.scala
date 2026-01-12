@@ -3,6 +3,7 @@ package strategygames.abalone
 import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
+import scalalib.extensions.*
 
 import strategygames.Player
 import strategygames.format.pgn.San
@@ -172,7 +173,7 @@ object Replay {
     sans match {
       case Nil         => valid(Nil)
       case san :: rest =>
-        san(StratSituation.wrap(sit)).map(abaloneMove) flatMap { move =>
+        san(StratSituation.wrap(sit)).map(abaloneMove) andThen { move =>
           val after = Situation(move.finalizeAfter, !sit.player)
           recursiveSituations(after, rest) map { after :: _ }
         }
@@ -288,7 +289,7 @@ object Replay {
         sans match {
           case Nil         => invalid(s"Can't find $atFenTruncated, reached ply $ply, turn $turn")
           case san :: rest =>
-            san(StratSituation.wrap(sit)).map(abaloneMove) flatMap { move =>
+            san(StratSituation.wrap(sit)).map(abaloneMove) andThen { move =>
               val after        = move.situationAfter
               val newPlies     = ply + 1
               val newTurnCount = turn + (if (sit.player != after.player) 1 else 0)

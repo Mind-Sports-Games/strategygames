@@ -9,46 +9,46 @@ class TogyzkumalakFenTest extends Specification with ValidatedMatchers {
   "MancalastoneArray from initial fen" should {
     val fen = variant.Togyzkumalak.initialFen
     "be valid" in {
-      fen.mancalaStoneArray must_== Array.fill(18)(9)
+      fen.mancalaStoneArray === Array.fill(18)(9)
     }
   }
 
   "MancalastoneArray from Bestemshe initial fen" should {
     val fen = variant.Bestemshe.initialFen
     "be valid" in {
-      fen.mancalaStoneArray must_== Array.fill(10)(5)
+      fen.mancalaStoneArray === Array.fill(10)(5)
     }
   }
 
   "Initial fen scores, no tuzdiks and starting player" should {
     val fen = variant.Togyzkumalak.initialFen
     "player 1 score be 0" in {
-      fen.player1Score must_== 0
+      fen.player1Score === 0
     }
     "player 2 score be 0" in {
-      fen.player2Score must_== 0
+      fen.player2Score === 0
     }
     "Tuzdik pits must be empty" in {
-      fen.tuzdikPits must_== Map(Player.P1 -> None, Player.P2 -> None)
+      fen.tuzdikPits === Map(Player.P1 -> None, Player.P2 -> None)
     }
     "Starting player is South" in {
-      fen.player must_== Some(Player.P1)
+      fen.player === Some(Player.P1)
     }
   }
 
   "Initial Bestemshe fen scores, no tuzdiks and starting player" should {
     val fen = variant.Bestemshe.initialFen
     "player 1 score be 0" in {
-      fen.player1Score must_== 0
+      fen.player1Score === 0
     }
     "player 2 score be 0" in {
-      fen.player2Score must_== 0
+      fen.player2Score === 0
     }
     "Tuzdik pits must be empty" in {
-      fen.tuzdikPits must_== Map(Player.P1 -> None, Player.P2 -> None)
+      fen.tuzdikPits === Map(Player.P1 -> None, Player.P2 -> None)
     }
     "Starting player is South" in {
-      fen.player must_== Some(Player.P1)
+      fen.player === Some(Player.P1)
     }
   }
 
@@ -56,16 +56,16 @@ class TogyzkumalakFenTest extends Specification with ValidatedMatchers {
   s"fen $fen1" should {
     val fen = strategygames.togyzkumalak.format.FEN(fen1)
     "player 1 score be 10" in {
-      fen.player1Score must_== 10
+      fen.player1Score === 10
     }
     "player 2 score be 0" in {
-      fen.player2Score must_== 0
+      fen.player2Score === 0
     }
     "Player turn is North" in {
-      fen.player must_== Some(Player.P2)
+      fen.player === Some(Player.P2)
     }
     "Stone Array is valid" in {
-      fen.mancalaStoneArray must_== Array(9, 9, 9, 9, 9, 1, 10, 10, 10, 10, 10, 10, 10, 0, 9, 9, 9, 9)
+      fen.mancalaStoneArray === Array(9, 9, 9, 9, 9, 1, 10, 10, 10, 10, 10, 10, 10, 0, 9, 9, 9, 9)
     }
   }
 
@@ -73,16 +73,16 @@ class TogyzkumalakFenTest extends Specification with ValidatedMatchers {
   s"fen $fen2" should {
     val fen = strategygames.togyzkumalak.format.FEN(fen2)
     "player 1 score be 10" in {
-      fen.player1Score must_== 10
+      fen.player1Score === 10
     }
     "player 2 score be 10" in {
-      fen.player2Score must_== 10
+      fen.player2Score === 10
     }
     "Player turn is North" in {
-      fen.player must_== Some(Player.P1)
+      fen.player === Some(Player.P1)
     }
     "Stone Array is valid" in {
-      fen.mancalaStoneArray must_== Array(10, 10, 10, 10, 0, 1, 10, 10, 10, 10, 10, 10, 10, 0, 1, 10, 10, 10)
+      fen.mancalaStoneArray === Array(10, 10, 10, 10, 0, 1, 10, 10, 10, 10, 10, 10, 10, 0, 1, 10, 10, 10)
     }
   }
 
@@ -90,17 +90,17 @@ class TogyzkumalakFenTest extends Specification with ValidatedMatchers {
   s"fen $fen3" should {
     val fen = strategygames.togyzkumalak.format.FEN(fen3)
     "player 1 score be 22" in {
-      fen.player1Score must_== 22
+      fen.player1Score === 22
     }
     "player 2 score be 15" in {
-      fen.player2Score must_== 15
+      fen.player2Score === 15
     }
     "Stone Array is valid" in {
-      fen.mancalaStoneArray must_== Array(12, 2, 13, 13, -1, 3, 12, 12, 1, 12, 12, 0, 1, 2, 3, 12, 2, 13)
+      fen.mancalaStoneArray === Array(12, 2, 13, 13, -1, 3, 12, 12, 1, 12, 12, 0, 1, 2, 3, 12, 2, 13)
     }
     "Tuzdik pits must be" in {
-      fen.tuzdikPits(Player.P1) must_== Some(4)
-      fen.tuzdikPits(Player.P2).isEmpty must_== true
+      fen.tuzdikPits(Player.P1) === Some(4)
+      fen.tuzdikPits(Player.P2).isEmpty === true
     }
   }
 
@@ -108,17 +108,17 @@ class TogyzkumalakFenTest extends Specification with ValidatedMatchers {
   s"fen $fen4" should {
     val fen = strategygames.togyzkumalak.format.FEN(fen4)
     "player 1 score be 57" in {
-      fen.player1Score must_== 57
+      fen.player1Score === 57
     }
     "player 2 score be 29" in {
-      fen.player2Score must_== 29
+      fen.player2Score === 29
     }
     "Stone Array is valid" in {
-      fen.mancalaStoneArray must_== Array(2, 6, 19, -1, 1, 3, 1, 3, 3, 3, 4, 2, 4, 6, -1, 7, 1, 11)
+      fen.mancalaStoneArray === Array(2, 6, 19, -1, 1, 3, 1, 3, 3, 3, 4, 2, 4, 6, -1, 7, 1, 11)
     }
     "Tuzdik pits must be" in {
-      fen.tuzdikPits(Player.P1) must_== Some(3)
-      fen.tuzdikPits(Player.P2) must_== Some(5)
+      fen.tuzdikPits(Player.P1) === Some(3)
+      fen.tuzdikPits(Player.P2) === Some(5)
     }
   }
 
@@ -126,10 +126,10 @@ class TogyzkumalakFenTest extends Specification with ValidatedMatchers {
   s"fen $fen5" should {
     val fen = strategygames.togyzkumalak.format.FEN(fen5)
     "player 1 score be 82" in {
-      fen.player1Score must_== 82
+      fen.player1Score === 82
     }
     "player 2 score be 43" in {
-      fen.player2Score must_== 43
+      fen.player2Score === 43
     }
   }
 
@@ -137,16 +137,16 @@ class TogyzkumalakFenTest extends Specification with ValidatedMatchers {
   s"fen $bfen1" should {
     val fen = strategygames.togyzkumalak.format.FEN(bfen1)
     "player 1 score be 10" in {
-      fen.player1Score must_== 6
+      fen.player1Score === 6
     }
     "player 2 score be 0" in {
-      fen.player2Score must_== 0
+      fen.player2Score === 0
     }
     "Player turn is North" in {
-      fen.player must_== Some(Player.P2)
+      fen.player === Some(Player.P2)
     }
     "Stone Array is valid" in {
-      fen.mancalaStoneArray must_== Array(5, 5, 5, 1, 6, 6, 6, 0, 5, 5)
+      fen.mancalaStoneArray === Array(5, 5, 5, 1, 6, 6, 6, 0, 5, 5)
     }
   }
 

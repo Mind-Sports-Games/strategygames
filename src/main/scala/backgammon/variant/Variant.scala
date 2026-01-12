@@ -2,6 +2,7 @@ package strategygames.backgammon.variant
 
 import cats.data.Validated
 import cats.syntax.option._
+import scalalib.extensions.*
 
 import strategygames.backgammon._
 import strategygames.backgammon.format.{ FEN, Uci }

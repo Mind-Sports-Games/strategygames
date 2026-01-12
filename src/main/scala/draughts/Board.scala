@@ -2,6 +2,7 @@ package strategygames.draughts
 
 import strategygames.Player
 import variant.Variant
+import scalalib.extensions.*
 
 case class Board(
     pieces: PieceMap,

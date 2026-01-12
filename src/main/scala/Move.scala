@@ -81,7 +81,7 @@ object Move {
     def situationAfter: Situation                           = Situation.Chess(m.situationAfter)
     def finalizeAfter(_finalSquare: Boolean = false): Board = m.finalizeAfter
 
-    def toUci: Uci.Move = Uci.ChessMove(m.toUci)
+    def toUci: Uci.Move = Uci.ChessMove((m.toUci: chess.format.Uci.Move))
 
     // only used by draughts
     def toShortUci: Uci.Move =
@@ -117,7 +117,7 @@ object Move {
         Board.Draughts(m.after),
         m.autoEndTurn,
         m.capture match {
-          case Some(capture) => Some(capture.map(Pos.Draughts))
+          case Some(capture) => Some(capture.map(Pos.Draughts.apply))
           case None          => None
         },
         m.promotion match {
@@ -125,7 +125,7 @@ object Move {
           case None            => None
         },
         m.taken match {
-          case Some(taken) => Some(taken.map(Pos.Draughts))
+          case Some(taken) => Some(taken.map(Pos.Draughts.apply))
           case None        => None
         },
         None,
@@ -136,7 +136,7 @@ object Move {
     def situationAfter: Situation                          = Situation.Draughts(m.situationAfter)
     def finalizeAfter(finalSquare: Boolean = false): Board = m.finalizeAfter(finalSquare)
 
-    def toUci: Uci.Move = Uci.DraughtsMove(m.toUci)
+    def toUci: Uci.Move = Uci.DraughtsMove((m.toUci: draughts.format.Uci.Move))
 
     def toShortUci: Uci.Move =
       Uci.Move(
@@ -191,7 +191,7 @@ object Move {
     def situationAfter: Situation                          = Situation.FairySF(m.situationAfter)
     def finalizeAfter(finalSquare: Boolean = false): Board = m.finalizeAfter
 
-    def toUci: Uci.Move = Uci.FairySFMove(m.toUci)
+    def toUci: Uci.Move = Uci.FairySFMove((m.toUci: fairysf.format.Uci.Move))
 
     def toShortUci: Uci.Move =
       Uci.Move(
@@ -239,7 +239,7 @@ object Move {
     def situationAfter: Situation                          = Situation.Samurai(m.situationAfter)
     def finalizeAfter(finalSquare: Boolean = false): Board = m.finalizeAfter
 
-    def toUci: Uci.Move = Uci.SamuraiMove(m.toUci)
+    def toUci: Uci.Move = Uci.SamuraiMove((m.toUci: samurai.format.Uci.Move))
 
     def toShortUci: Uci.Move =
       Uci.Move(
@@ -287,7 +287,7 @@ object Move {
     def situationAfter: Situation                          = Situation.Togyzkumalak(m.situationAfter)
     def finalizeAfter(finalSquare: Boolean = false): Board = m.finalizeAfter
 
-    def toUci: Uci.Move = Uci.TogyzkumalakMove(m.toUci)
+    def toUci: Uci.Move = Uci.TogyzkumalakMove((m.toUci: togyzkumalak.format.Uci.Move))
 
     def toShortUci: Uci.Move =
       Uci.Move(
@@ -332,7 +332,7 @@ object Move {
     def situationAfter: Situation                          = Situation.Backgammon(m.situationAfter)
     def finalizeAfter(finalSquare: Boolean = false): Board = m.finalizeAfter
 
-    def toUci: Uci.Move = Uci.BackgammonMove(m.toUci)
+    def toUci: Uci.Move = Uci.BackgammonMove((m.toUci: backgammon.format.Uci.Move))
 
     def toShortUci: Uci.Move =
       Uci.Move(
@@ -377,7 +377,7 @@ object Move {
     def situationAfter: Situation                          = Situation.Abalone(m.situationAfter)
     def finalizeAfter(finalSquare: Boolean = false): Board = m.finalizeAfter
 
-    def toUci: Uci.Move = Uci.AbaloneMove(m.toUci)
+    def toUci: Uci.Move = Uci.AbaloneMove((m.toUci: abalone.format.Uci.Move))
 
     def toShortUci: Uci.Move =
       Uci.Move(
@@ -428,7 +428,7 @@ object Move {
     def situationAfter: Situation                          = Situation.Dameo(m.situationAfter)
     def finalizeAfter(finalSquare: Boolean = false): Board = m.finalizeAfter
 
-    def toUci: Uci.Move = Uci.DameoMove(m.toUci)
+    def toUci: Uci.Move = Uci.DameoMove((m.toUci: dameo.format.Uci.Move))
 
     def toShortUci: Uci.Move =
       Uci.Move(

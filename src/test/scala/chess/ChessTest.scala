@@ -37,23 +37,22 @@ trait ChessTest extends Specification with ValidatedMatchers {
 
   implicit def stringToBoard(str: String): Board = Visual << str
 
-  implicit def stringToBoardBuilder(str: String) =
-    new {
+  class BoardBuilder(str: String) {
+    def chess960: Board = makeBoard(str, strategygames.chess.variant.Chess960)
+    def kingOfTheHill: Board = makeBoard(str, strategygames.chess.variant.KingOfTheHill)
+    def threeCheck: Board = makeBoard(str, strategygames.chess.variant.ThreeCheck)
+    def fiveCheck: Board = makeBoard(str, strategygames.chess.variant.FiveCheck)
+  }
 
-      def chess960: Board = makeBoard(str, strategygames.chess.variant.Chess960)
+  implicit def stringToBoardBuilder(str: String): BoardBuilder = new BoardBuilder(str)
 
-      def kingOfTheHill: Board = makeBoard(str, strategygames.chess.variant.KingOfTheHill)
+  class SituationBuilder(str: String) {
+    def as(player: Player): Situation = Situation(Visual << str, player)
+    def forPlayer(player: Player): Situation = Situation(Visual << str, player)
+  }
 
-      def threeCheck: Board = makeBoard(str, strategygames.chess.variant.ThreeCheck)
-
-      def fiveCheck: Board = makeBoard(str, strategygames.chess.variant.FiveCheck)
-    }
-
-  implicit def stringToSituationBuilder(str: String) =
-    new {
-
-      def as(player: Player): Situation = Situation(Visual << str, player)
-    }
+  implicit def stringToSituationBuilder(str: String): SituationBuilder =
+    new SituationBuilder(str)
 
   case class RichActor(actor: Actor) {
     def threatens(to: Pos): Boolean =
@@ -65,10 +64,11 @@ trait ChessTest extends Specification with ValidatedMatchers {
       }
   }
 
-  implicit def richActor(actor: Actor) = RichActor(actor)
+  implicit def richActor(actor: Actor): RichActor = RichActor(actor)
 
   case class RichGame(game: Game) {
-    def as(player: Player): Game = game.withPlayer(player)
+    def as(player: Player): Game         = game.withPlayer(player)
+    def withPlayer(player: Player): Game = game.withPlayer(player)
 
     def playMoves(moves: (Pos, Pos)*): Validated[String, Game] = playMoveList(moves)
 
@@ -80,7 +80,7 @@ trait ChessTest extends Specification with ValidatedMatchers {
         // because possible moves are asked for player highlight
         // before the move is played (on initial situation)
         // vg foreach { _.situation.destinations }
-        val ng = vg flatMap { g =>
+        val ng = vg andThen { g =>
           g(move._1, move._2) map (_._1)
         }
         ng
@@ -99,7 +99,7 @@ trait ChessTest extends Specification with ValidatedMatchers {
     def withClock(c: ClockBase) = game.copy(clock = Option(c))
   }
 
-  implicit def richGame(game: Game) = RichGame(game)
+  implicit def richGame(game: Game): RichGame = RichGame(game)
 
   def fenToGame(positionString: FEN, variant: Variant) = {
     val situation = Forsyth.<<<@(variant, positionString)
@@ -126,30 +126,30 @@ trait ChessTest extends Specification with ValidatedMatchers {
 
   def bePoss(poss: Pos*): Matcher[Option[Iterable[Pos]]] =
     beSome.like { case p =>
-      sortPoss(p.toList) must_== sortPoss(poss.toList)
+      sortPoss(p.toList) === sortPoss(poss.toList)
     }
 
   def makeGame: Game = Game(makeBoard, P1)
 
   def bePoss(board: Board, visual: String): Matcher[Option[Iterable[Pos]]] =
     beSome.like { case p =>
-      Visual.addNewLines(Visual.>>|(board, Map(p -> 'x'))) must_== visual
+      Visual.addNewLines(Visual.>>|(board, Map(p -> 'x'))) === visual
     }
 
   def beBoard(visual: String): Matcher[Validated[String, Board]] =
-    beValid.like { case b =>
-      b.visual must_== (Visual << visual).visual
-    }
+    beSome.like { case b: Board =>
+      b.visual === (Visual << visual).visual
+    } ^^ { (v: Validated[String, Board]) => v.toOption }
 
   def beSituation(visual: String): Matcher[Validated[String, Situation]] =
-    beValid.like { case s =>
-      s.board.visual must_== (Visual << visual).visual
-    }
+    beSome.like { case s: Situation =>
+      s.board.visual === (Visual << visual).visual
+    } ^^ { (v: Validated[String, Situation]) => v.toOption }
 
   def beGame(visual: String): Matcher[Validated[String, Game]] =
-    beValid.like { case g =>
-      g.board.visual must_== (Visual << visual).visual
-    }
+    beSome.like { case g: Game =>
+      g.board.visual === (Visual << visual).visual
+    } ^^ { (v: Validated[String, Game]) => v.toOption }
 
   def sortPoss(poss: Seq[Pos]): Seq[Pos] = poss sortBy (_.toString)
 
@@ -176,35 +176,35 @@ trait ChessTest extends Specification with ValidatedMatchers {
   def fensMustMatch(lib: GameLogic, g1: StratGame, g2: StratGame)                     = {
     val fen1 = StratForsyth.>>(lib, g1)
     val fen2 = StratForsyth.>>(lib, g2)
-    fen1.toString must_== fen2.toString
+    fen1.toString === fen2.toString
   }
 
   def playerTurnMustMatch(g1: StratGame, g2: StratGame) =
-    g1.situation.player must_== g2.situation.player
+    g1.situation.player === g2.situation.player
 
   def legalMovesMustMatch(g1: StratGame, g2: StratGame) = {
     // Ensure they have the same moves available
     val fromSquares2 = g1.situation.moves.keys.toSet
     val fromSquares3 = g2.situation.moves.keys.toSet
-    fromSquares2 must_== fromSquares3
+    fromSquares2 === fromSquares3
     fromSquares2.foreach(from => {
       g1.situation
         .moves(from)
         .zip(g2.situation.moves(from))
         .foreach(moves => {
-          moves._1.orig must_== moves._2.orig
-          moves._1.dest must_== moves._2.dest
-          moves._1.piece must_== moves._2.piece
+          moves._1.orig === moves._2.orig
+          moves._1.dest === moves._2.dest
+          moves._1.piece === moves._2.piece
         })
     })
   }
 
   def situationStateIsEqual(g1: StratGame, g2: StratGame) = {
-    g1.situation.canDrop must_== g2.situation.canDrop
-    g1.situation.canOnlyDrop must_== g2.situation.canOnlyDrop
-    g1.situation.canLift must_== g2.situation.canLift
-    g1.situation.canOnlyLift must_== g2.situation.canOnlyLift
-    g1.situation.canRollDice must_== g2.situation.canRollDice
+    g1.situation.canDrop === g2.situation.canDrop
+    g1.situation.canOnlyDrop === g2.situation.canOnlyDrop
+    g1.situation.canLift === g2.situation.canLift
+    g1.situation.canOnlyLift === g2.situation.canOnlyLift
+    g1.situation.canRollDice === g2.situation.canRollDice
   }
 
   def gamesAreEqual(lib: GameLogic, g1: StratGame, g2: StratGame) = {
@@ -216,7 +216,7 @@ trait ChessTest extends Specification with ValidatedMatchers {
   }
 
   def turnsAreEqual(g1: StratGame, gameData: GameFenIsometryData) =
-    gameData.turnCount must_== g1.turnCount
+    gameData.turnCount === g1.turnCount
 
   def _testEveryMoveLoadFenIsometry(
       lib: GameLogic,
@@ -225,30 +225,33 @@ trait ChessTest extends Specification with ValidatedMatchers {
       basePlies: Int = 0,
       baseTurnCount: Int = 0
   )(moves: List[StratUci]) = {
-    stratFenToGame(lib, initialFen, v).flatMap(game => {
+    stratFenToGame(lib, initialFen, v).andThen(game => {
       val gameData = GameFenIsometryData(game, game, basePlies, baseTurnCount).valid
       moves.foldLeft[Validated[String, GameFenIsometryData]](gameData) {
         case (vGame, uci) => {
-          vGame.flatMap(gameData => {
-            for {
-              newBaseGame <- gameData.game.applyUci(uci, MoveMetrics()).map(_._1)
-              newFenGame  <- gameData.fenGame.applyUci(uci, MoveMetrics()).map(_._1)
-              fen1         = StratForsyth.>>(lib, newBaseGame)
-              newFenGame2 <- stratFenToGame(lib, fen1, v)
-            } yield {
-              val newGameData = gameData.nextPly(newBaseGame, newFenGame)
-              turnsAreEqual(newBaseGame, newGameData)
-              turnsAreEqual(newFenGame, newGameData)
-              turnsAreEqual(newFenGame2, newGameData)
-              gamesAreEqual(lib, newBaseGame, newFenGame)
-              gamesAreEqual(lib, newBaseGame, newFenGame2)
-              gamesAreEqual(lib, newFenGame, newFenGame2)
-              newGameData
+          vGame.andThen(gameData => {
+            gameData.game.applyUci(uci, MoveMetrics()).map(_._1).andThen { newBaseGame =>
+              gameData.fenGame.applyUci(uci, MoveMetrics()).map(_._1).andThen { newFenGame =>
+                val fen1 = StratForsyth.>>(lib, newBaseGame)
+                stratFenToGame(lib, fen1, v).map { newFenGame2 =>
+                  val newGameData = gameData.nextPly(newBaseGame, newFenGame)
+                  turnsAreEqual(newBaseGame, newGameData)
+                  turnsAreEqual(newFenGame, newGameData)
+                  turnsAreEqual(newFenGame2, newGameData)
+                  gamesAreEqual(lib, newBaseGame, newFenGame)
+                  gamesAreEqual(lib, newBaseGame, newFenGame2)
+                  gamesAreEqual(lib, newFenGame, newFenGame2)
+                  newGameData
+                }
+              }
             }
           })
         }
       }
     })
   }
+
+  // Helper to get moves list - avoids specs2 implicit conversion to ValueCheck
+  def getMovesList(moves: Iterable[Move]): List[Move] = moves.toList
 
 }

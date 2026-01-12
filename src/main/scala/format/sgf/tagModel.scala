@@ -1,6 +1,7 @@
 package strategygames
 package format.sgf
 import strategygames.ClockConfig
+import scalalib.extensions.*
 
 import org.joda.time.DateTimeZone
 import org.joda.time.format.DateTimeFormat

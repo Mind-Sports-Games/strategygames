@@ -145,8 +145,8 @@ class PortugueseDraughtsTest extends Specification with ValidatedMatchers {
         .take(26)
         .foldLeft(Situation(variant.Portuguese))((sit, uci) => move(sit, uci))
 
-      s.validMoves.size must_== 1
-      s.validMoves.keys must_== Set(Pos64(4, 4))
+      s.validMoves.size === 1
+      s.validMoves.keys === Set(Pos64(4, 4))
     }
   }
 
@@ -157,7 +157,7 @@ class PortugueseDraughtsTest extends Specification with ValidatedMatchers {
         .foldLeft(Situation(variant.Portuguese))((sit, uci) => move(sit, uci))
       println(s.validMoves)
 
-      s.validMoves.size must_== 7
+      s.validMoves.size === 7
     }
   }
 
@@ -166,7 +166,7 @@ class PortugueseDraughtsTest extends Specification with ValidatedMatchers {
       val s = testGameChoiceCapture
         .foldLeft(Situation(variant.Portuguese))((sit, uci) => move(sit, uci))
 
-      s.winner must_== Some(Player.P1)
+      s.winner === Some(Player.P1)
     }
   }
 
@@ -175,7 +175,7 @@ class PortugueseDraughtsTest extends Specification with ValidatedMatchers {
       val s = testGame2BlackWin
         .foldLeft(Situation(variant.Portuguese))((sit, uci) => move(sit, uci))
 
-      s.winner must_== Some(Player.P2)
+      s.winner === Some(Player.P2)
     }
   }
 

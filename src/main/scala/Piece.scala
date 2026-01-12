@@ -122,15 +122,15 @@ object Piece {
   }
 
   def fromChar(lib: GameLogic, gf: GameFamily, c: Char): Option[Piece] = lib match {
-    case (GameLogic.Draughts())     => draughts.Piece.fromChar(c).map(Draughts)
-    case (GameLogic.Chess())        => chess.Piece.fromChar(c).map(Chess)
-    case (GameLogic.FairySF())      => fairysf.Piece.fromChar(gf, c).map(FairySF)
+    case (GameLogic.Draughts())     => draughts.Piece.fromChar(c).map(Draughts.apply)
+    case (GameLogic.Chess())        => chess.Piece.fromChar(c).map(Chess.apply)
+    case (GameLogic.FairySF())      => fairysf.Piece.fromChar(gf, c).map(FairySF.apply)
     case (GameLogic.Samurai())      => sys.error("cannot get piece from Char for samurai anymore")
     case (GameLogic.Togyzkumalak()) => sys.error("cannot get piece from Char for togyzkumalak anymore")
     case (GameLogic.Go())           => sys.error("cannot get piece from Char for go anymore")
     case (GameLogic.Backgammon())   => sys.error("cannot get piece from Char for backgammon anymore")
     case (GameLogic.Abalone())      => sys.error("cannot get piece from Char for abalone anymore")
-    case (GameLogic.Dameo())        => dameo.Piece.fromChar(c).map(Dameo)
+    case (GameLogic.Dameo())        => dameo.Piece.fromChar(c).map(Dameo.apply)
   }
 
   def chessPieceMap(pieceMap: PieceMap): chess.PieceMap = pieceMap.flatMap {
@@ -182,7 +182,7 @@ object Piece {
   def pieceMapForChess(pieces: strategygames.chess.PieceMap): PieceMap = pieces.flatMap {
     case (pos, piece) =>
       Some((Pos.Chess(pos), (Piece.Chess(piece), 1)))
-    case _            => None
+    case null         => None
   }
 
 }

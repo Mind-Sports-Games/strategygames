@@ -23,14 +23,14 @@ class AbaloneDirectionsTest extends AbaloneTest with ValidatedMatchers {
       val B = Pos.B3
       val C = Pos.C2
       val D = Pos.D2
-      Pos.E5.directionString(A) must_== DiagonalDirectionString.DownLeft
-      Pos.E5.directionString(B) must_== DiagonalDirectionString.DownLeft
-      Pos.E5.directionString(C) must_== DiagonalDirectionString.DownLeft
-      Pos.E5.directionString(D) must_== DiagonalDirectionString.DownLeft
-      a.downLeft.get.index must_== A.index
-      b.left.get.index must_== B.index
-      b.downRight.get.index must_== C.index
-      c.downLeft.get.index must_== D.index
+      Pos.E5.directionString(A) === DiagonalDirectionString.DownLeft
+      Pos.E5.directionString(B) === DiagonalDirectionString.DownLeft
+      Pos.E5.directionString(C) === DiagonalDirectionString.DownLeft
+      Pos.E5.directionString(D) === DiagonalDirectionString.DownLeft
+      a.downLeft.get.index === A.index
+      b.left.get.index === B.index
+      b.downRight.get.index === C.index
+      c.downLeft.get.index === D.index
     }
 
     "in case of downRight direction, generate up to 2 distinct directions to apply on marbles" in {
@@ -49,10 +49,10 @@ class AbaloneDirectionsTest extends AbaloneTest with ValidatedMatchers {
       val b = Pos.G5
       val A = Pos.F3
       val B = Pos.G4
-      Pos.E5.directionString(A) must_== DiagonalDirectionString.DownRight
-      Pos.E5.directionString(B) must_== DiagonalDirectionString.DownRight
-      a.right.get.index must_== A.index
-      b.downRight.get.index must_== B.index
+      Pos.E5.directionString(A) === DiagonalDirectionString.DownRight
+      Pos.E5.directionString(B) === DiagonalDirectionString.DownRight
+      a.right.get.index === A.index
+      b.downRight.get.index === B.index
     }
 
     "in case of upRight direction, generate up to 3 distinct directions to apply on marbles" in {
@@ -74,14 +74,14 @@ class AbaloneDirectionsTest extends AbaloneTest with ValidatedMatchers {
       val B = Pos.H7
       val C = Pos.G8
       val D = Pos.F8
-      Pos.E5.directionString(A) must_== DiagonalDirectionString.UpRight
-      Pos.E5.directionString(B) must_== DiagonalDirectionString.UpRight
-      Pos.E5.directionString(C) must_== DiagonalDirectionString.UpRight
-      Pos.E5.directionString(D) must_== DiagonalDirectionString.UpRight
-      a.upRight.get.index must_== A.index
-      b.right.get.index must_== B.index
-      b.upLeft.get.index must_== C.index
-      c.upRight.get.index must_== D.index
+      Pos.E5.directionString(A) === DiagonalDirectionString.UpRight
+      Pos.E5.directionString(B) === DiagonalDirectionString.UpRight
+      Pos.E5.directionString(C) === DiagonalDirectionString.UpRight
+      Pos.E5.directionString(D) === DiagonalDirectionString.UpRight
+      a.upRight.get.index === A.index
+      b.right.get.index === B.index
+      b.upLeft.get.index === C.index
+      c.upRight.get.index === D.index
     }
 
     "in case of upLeft direction, generate up to 2 distinct directions to apply on marbles" in {
@@ -100,10 +100,10 @@ class AbaloneDirectionsTest extends AbaloneTest with ValidatedMatchers {
       val b = Pos.E7
       val A = Pos.C6
       val B = Pos.D7
-      Pos.E5.directionString(A) must_== DiagonalDirectionString.UpLeft
-      Pos.E5.directionString(B) must_== DiagonalDirectionString.UpLeft
-      a.upLeft.get.index must_== A.index
-      b.left.get.index must_== B.index
+      Pos.E5.directionString(A) === DiagonalDirectionString.UpLeft
+      Pos.E5.directionString(B) === DiagonalDirectionString.UpLeft
+      a.upLeft.get.index === A.index
+      b.left.get.index === B.index
     }
   }
 }

@@ -73,7 +73,6 @@ final case class Actor(
             allCaptureChains()
           case King | ActiveKing =>
             allCaptureChains(true)
-          case _                 => List()
         }
         chains match {
           case List() => (List(), 0)

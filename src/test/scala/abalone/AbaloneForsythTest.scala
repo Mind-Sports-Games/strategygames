@@ -20,8 +20,8 @@ class AbaloneForsythTest extends AbaloneTest with ValidatedMatchers {
 
     "create the situation of Belgian Daisy" in {
       val board = Board(fenFromVariant.pieces, History(score = Score(0, 0)), variant.Abalone)
-      situationFromFen.get.board.pieces must_== board.pieces
-      situationFromFen.get.player must_== P1
+      situationFromFen.get.board.pieces === board.pieces
+      situationFromFen.get.player === P1
     }
   }
 
@@ -40,20 +40,20 @@ class AbaloneForsythTest extends AbaloneTest with ValidatedMatchers {
     game4.board.variant.validMoves(game4.situation)
 
     "boardPart() describes the updated piecemap" in {
-      Forsyth.boardPart(board) must_== "ss1SS/sssSSS/1ss1SS1/8/9/8/1SS1ss1/SSSsss/SS1ss"
-      Forsyth.boardPart(situationFromFen.board) must_== "ss1SS/sssSSS/1ss1SS1/8/9/8/1SS1ss1/SSSsss/SS1ss"
-      Forsyth.boardPart(game.situation.board) must_== "ss1SS/sssSSS/1ss1SS1/8/9/8/1SS1ss1/SSSsss/SS1ss"
-      Forsyth.boardPart(game4.board) must_== "1s1SS/sssSSS/1ss1SS1/3s4/4S4/3S4/1SS1ss1/S1Ssss/1S1ss"
+      Forsyth.boardPart(board) === "ss1SS/sssSSS/1ss1SS1/8/9/8/1SS1ss1/SSSsss/SS1ss"
+      Forsyth.boardPart(situationFromFen.board) === "ss1SS/sssSSS/1ss1SS1/8/9/8/1SS1ss1/SSSsss/SS1ss"
+      Forsyth.boardPart(game.situation.board) === "ss1SS/sssSSS/1ss1SS1/8/9/8/1SS1ss1/SSSsss/SS1ss"
+      Forsyth.boardPart(game4.board) === "1s1SS/sssSSS/1ss1SS1/3s4/4S4/3S4/1SS1ss1/S1Ssss/1S1ss"
     }
 
     "Forsyth.>> from Abalone namespace describes correctly the board, score, player and number of ply" in {
-      Forsyth.>>(game4) must_== FEN("1s1SS/sssSSS/1ss1SS1/3s4/4S4/3S4/1SS1ss1/S1Ssss/1S1ss 0 0 w 3 2")
-      Forsyth.>>(situationFromFen) must_== FEN("ss1SS/sssSSS/1ss1SS1/8/9/8/1SS1ss1/SSSsss/SS1ss 0 0 b 0 1")
-      Forsyth.>>(game) must_== FEN("ss1SS/sssSSS/1ss1SS1/8/9/8/1SS1ss1/SSSsss/SS1ss 0 0 b 0 1")
+      Forsyth.>>(game4) === FEN("1s1SS/sssSSS/1ss1SS1/3s4/4S4/3S4/1SS1ss1/S1Ssss/1S1ss 0 0 w 3 2")
+      Forsyth.>>(situationFromFen) === FEN("ss1SS/sssSSS/1ss1SS1/8/9/8/1SS1ss1/SSSsss/SS1ss 0 0 b 0 1")
+      Forsyth.>>(game) === FEN("ss1SS/sssSSS/1ss1SS1/8/9/8/1SS1ss1/SSSsss/SS1ss 0 0 b 0 1")
     }
 
     "Forsyth.>>(StratGameLogic, StratGame) forwards to the expected one implemented in Abalone namespace" in {
-      (StratFormat.Forsyth.>>(StratGameLogic(7), stratGame)).value must_== FEN(
+      (StratFormat.Forsyth.>>(StratGameLogic(7), stratGame)).value === FEN(
         "ss1SS/sssSSS/1ss1SS1/8/9/8/1SS1ss1/SSSsss/SS1ss 0 0 b 0 1"
       ).value
     }

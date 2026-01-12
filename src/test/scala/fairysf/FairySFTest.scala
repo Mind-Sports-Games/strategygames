@@ -20,7 +20,7 @@ trait FairySFTest extends Specification with ValidatedMatchers {
 
   //  }
 
-  implicit def stringToSituationBuilder(str: String) =
+  implicit def stringToSituationBuilder(str: String): { def as(player: Player): Situation } =
     new {
 
       def as(player: Player): Situation = Situation(Visual << str, player)
@@ -50,7 +50,7 @@ trait FairySFTest extends Specification with ValidatedMatchers {
         // because possible moves are asked for player highlight
         // before the move is played (on initial situation)
         // vg foreach { _.situation.destinations }
-        val ng = vg flatMap { g =>
+        val ng = vg andThen { g =>
           g(move._1, move._2) map (_._1)
         }
         ng
@@ -69,7 +69,7 @@ trait FairySFTest extends Specification with ValidatedMatchers {
     def withClock(c: ClockBase) = game.copy(clock = Option(c))
   }
 
-  implicit def richGame(game: Game) = RichGame(game)
+  implicit def richGame(game: Game): RichGame = RichGame(game)
 
   // this isnt how we initialise games for fairy and so isn't a good test
   // It doesn't work all the time either
@@ -94,19 +94,19 @@ trait FairySFTest extends Specification with ValidatedMatchers {
 
   def bePoss(poss: Pos*): Matcher[Option[Iterable[Pos]]] =
     beSome.like { case p =>
-      sortPoss(p.toList) must_== sortPoss(poss.toList)
+      sortPoss(p.toList) === sortPoss(poss.toList)
     }
 
   def bePoss(board: Board, visual: String): Matcher[Option[Iterable[Pos]]] =
     beSome.like { case p =>
-      Visual.addNewLines(Visual.>>|(board, Map(p -> 'x'))) must_== visual
+      Visual.addNewLines(Visual.>>|(board, Map(p -> 'x'))) === visual
     }
 
   def sortPoss(poss: Seq[Pos]): Seq[Pos] = poss sortBy (_.toString)
 
   def playUciList(game: Game, ucis: List[Uci]): Validated[String, Game] =
     ucis.foldLeft(Validated.valid(game): Validated[String, Game]) { (vg, action) =>
-      vg.flatMap { g => g.apply(action).map(_._1) }
+      vg.andThen { g => g.apply(action).map(_._1) }
     }
 
   def playActionStrs(

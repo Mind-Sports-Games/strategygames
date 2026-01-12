@@ -14,7 +14,7 @@ class ForsythPerfTest extends ChessTest {
   //     val iterations = 10
   //   def runOne = Forsyth.exportBoard(initialBoard)
   //   def run { for (i <- 1 to nb) runOne }
-  //     runOne must_== Forsyth.initial.takeWhile(' '!=)
+  //     runOne === Forsyth.initial.takeWhile(' '!=)
   //     if (nb * iterations > 1) {
   //       println("warming up")
   //       run

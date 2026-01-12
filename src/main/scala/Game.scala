@@ -42,14 +42,14 @@ abstract class Game(
         apply(
           Pos.Chess(uci.orig),
           Pos.Chess(uci.dest),
-          uci.promotion.map(Role.ChessPromotableRole),
+          uci.promotion.map(Role.ChessPromotableRole.apply),
           metrics
         )
       case Uci.DraughtsMove(uci)                        =>
         apply(
           Pos.Draughts(uci.orig),
           Pos.Draughts(uci.dest),
-          uci.promotion.map(Role.DraughtsPromotableRole),
+          uci.promotion.map(Role.DraughtsPromotableRole.apply),
           metrics,
           finalSquare,
           captures,
@@ -59,7 +59,7 @@ abstract class Game(
         apply(
           Pos.FairySF(uci.orig),
           Pos.FairySF(uci.dest),
-          uci.promotion.map(Role.FairySFPromotableRole),
+          uci.promotion.map(Role.FairySFPromotableRole.apply),
           metrics
         )
       case Uci.SamuraiMove(uci)                         =>
@@ -1219,10 +1219,10 @@ object Game {
           .toEither
           .map(t => (Backgammon(t._1), CubeAction.Backgammon(t._2)))
           .toValidated
-      case _                                       => sys.error("Not passed Backgammon objects")
+      case null                                    => sys.error("Not passed Backgammon objects")
     }
 
-    def randomizeDiceRoll: Option[DiceRoll] = g.randomizeDiceRoll.map(DiceRoll.Backgammon)
+    def randomizeDiceRoll: Option[DiceRoll] = g.randomizeDiceRoll.map(DiceRoll.Backgammon.apply)
 
     def randomizeAndApplyDiceRoll(
         metrics: MoveMetrics = MoveMetrics()
@@ -1640,7 +1640,7 @@ object Game {
       Abalone(abalone.Game.apply(variant.map(_.toAbalone), fen.map(_.toAbalone)))
     case GameLogic.Dameo()        =>
       Dameo(dameo.Game.apply(variant.map(_.toDameo), fen.map(_.toDameo)))
-    case _                        => sys.error("Mismatched gamelogic types 36")
+    case null                     => sys.error("Mismatched gamelogic types 36")
   }
 
   def wrap(g: chess.Game)            = Chess(g)

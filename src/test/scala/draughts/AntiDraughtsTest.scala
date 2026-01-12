@@ -105,7 +105,7 @@ class AntiDraughtsTest extends Specification with ValidatedMatchers {
       val s = moves
         .foldLeft(Situation(variant.Antidraughts))((sit, uci) => move(sit, uci))
 
-      s.winner must_== Some(Player.P1)
+      s.winner === Some(Player.P1)
     }
   }
 
@@ -114,7 +114,7 @@ class AntiDraughtsTest extends Specification with ValidatedMatchers {
       val s = moves
         .foldLeft(Situation(variant.Standard))((sit, uci) => move(sit, uci))
 
-      s.winner must_== Some(Player.P2)
+      s.winner === Some(Player.P2)
     }
   }
 
