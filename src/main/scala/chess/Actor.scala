@@ -20,58 +20,62 @@ final case class Actor(
 
   /** The moves without taking defending the king into account */
   def trustedMoves(withCastle: Boolean): List[Move] = {
-    val moves = piece.role match {
+    val moves: List[Move] = piece.role match {
       case Pawn =>
-        pawnDir(pos) map { next =>
-          val fwd                                            = Option(next) filterNot board.pieces.contains
-          def capture(horizontal: Direction): Option[Move]   = {
-            for {
-              p <- horizontal(next)
-              if board.pieces.get(p).exists { _.player != player }
-              b <- board.taking(pos, p)
-            } yield move(p, b, Option(p))
-          } flatMap maybePromote
-          def enpassant(horizontal: Direction): Option[Move] =
-            if (board.history.currentTurn.nonEmpty) None
-            else
-              for {
-                victimPos <- horizontal(pos).filter(_ => pos.rank == Rank.passablePawnRank(player))
-                _         <- board(victimPos).filter(v => v == Piece(!player, Pawn))
-                targetPos <- horizontal(next)
-                _         <- pawnDir(victimPos) flatMap pawnDir filter { vf =>
-                               history.lastTurn
-                                 .map {
-                                   case Uci.Move(orig, dest, _) =>
-                                     orig == vf && dest == victimPos
-                                   case _                       => false
-                                 }
-                                 .contains(true)
-                             }
-                b         <- board.taking(pos, targetPos, Option(victimPos))
-              } yield move(targetPos, b, Option(victimPos), enpassant = true)
-          def forward(p: Pos): Option[Move]                  =
-            board.move(pos, p) map { move(p, _) } flatMap maybePromote
-          def maybePromote(m: Move): Option[Move]            =
-            if (m.dest.rank == Rank.promotablePawnRank(m.player))
-              (m.after promote m.dest) map { b2 =>
-                m.copy(after = b2, promotion = Option(Queen))
-              }
-            else Option(m)
+        pawnDir(pos)
+          .map { next =>
+            val fwd                                          = Option(next) filterNot board.pieces.contains
+            def capture(horizontal: Direction): List[Move]   = {
+              (for {
+                p <- horizontal(next)
+                if board.pieces.get(p).exists { _.player != player }
+                b <- board.taking(pos, p)
+              } yield move(p, b, Option(p))).toList.flatMap(maybePromote)
+            }
+            def enpassant(horizontal: Direction): List[Move] =
+              if (board.history.currentTurn.nonEmpty) Nil
+              else
+                (for {
+                  victimPos <- horizontal(pos).filter(_ => pos.rank == Rank.passablePawnRank(player))
+                  _         <- board(victimPos).filter(v => v == Piece(!player, Pawn))
+                  targetPos <- horizontal(next)
+                  _         <- pawnDir(victimPos) flatMap pawnDir filter { vf =>
+                                 history.lastTurn
+                                   .map {
+                                     case Uci.Move(orig, dest, _) =>
+                                       orig == vf && dest == victimPos
+                                     case _                       => false
+                                   }
+                                   .contains(true)
+                               }
+                  b         <- board.taking(pos, targetPos, Option(victimPos))
+                } yield move(targetPos, b, Option(victimPos), enpassant = true)).toList.flatMap(maybePromote)
+            def forward(p: Pos): List[Move]                  =
+              board.move(pos, p).toList.flatMap(mv => maybePromote(move(p, mv)))
+            def maybePromote(m: Move): List[Move]            =
+              if (m.dest.rank == Rank.promotablePawnRank(m.player))
+                board.variant.promotableRoles.flatMap { role =>
+                  (m.after promote m.dest) map { b2 =>
+                    m.copy(after = b2, promotion = Option(role))
+                  }
+                }
+              else List(m)
 
-          List(
-            fwd flatMap forward,
-            for {
-              p  <- fwd.filter(_ => board.variant.isUnmovedPawn(player, pos))
-              p2 <- pawnDir(p)
-              if !(board.pieces contains p2)
-              b  <- board.move(pos, p2)
-            } yield move(p2, b),
-            capture(_.left),
-            capture(_.right),
-            enpassant(_.left),
-            enpassant(_.right)
-          ).flatten
-        } getOrElse Nil
+            List(
+              fwd.map(forward).getOrElse(Nil),
+              for {
+                p  <- fwd.filter(_ => board.variant.isUnmovedPawn(player, pos))
+                p2 <- pawnDir(p)
+                if !(board.pieces contains p2)
+                b  <- board.move(pos, p2)
+              } yield move(p2, b),
+              capture(_.left),
+              capture(_.right),
+              enpassant(_.left),
+              enpassant(_.right)
+            ).flatten
+          }
+          .getOrElse(Nil)
 
       case Bishop => longRange(Bishop.dirs)
 
