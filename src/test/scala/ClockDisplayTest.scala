@@ -31,7 +31,7 @@ class ClockDisplayTest extends Specification with ValidatedMatchers {
     Clock.BronsteinConfig(0, 5).showBerserk must_== Clock.BronsteinConfig(0, 5).show
   }
 
-  "Delay show" in {
+  "Simple Delay show" in {
     Clock.SimpleDelayConfig(60, 2).show must_== "1 d/2"
     Clock.SimpleDelayConfig(120, 12).show must_== "2 d/12"
     Clock.SimpleDelayConfig(240, 4).show must_== "4 d/4"
@@ -39,11 +39,11 @@ class ClockDisplayTest extends Specification with ValidatedMatchers {
     Clock.SimpleDelayConfig(0, 10).show must_== "0 d/10"
   }
 
-  "Delay showBerserk" in {
-    Clock.SimpleDelayConfig(60, 2).showBerserk must_== "1 d/0"
-    Clock.SimpleDelayConfig(120, 12).showBerserk must_== "2 d/0"
-    Clock.SimpleDelayConfig(240, 4).showBerserk must_== "2 d/0"
-    Clock.SimpleDelayConfig(30, 4).showBerserk must_== "½ d/0"
+  "Simple Delay showBerserk" in {
+    Clock.SimpleDelayConfig(60, 2).showBerserk must_== "½ d/1"
+    Clock.SimpleDelayConfig(120, 12).showBerserk must_== "1 d/6"
+    Clock.SimpleDelayConfig(240, 4).showBerserk must_== "2 d/2"
+    Clock.SimpleDelayConfig(30, 4).showBerserk must_== "¼ d/2"
     Clock.SimpleDelayConfig(0, 10).showBerserk must_== Clock.SimpleDelayConfig(0, 10).show
   }
 
@@ -58,9 +58,9 @@ class ClockDisplayTest extends Specification with ValidatedMatchers {
   }
 
   "Byoyomi showBerserk" in {
-    ByoyomiClock.Config(600, 0, 20, 1).showBerserk must_== "5|0"
-    ByoyomiClock.Config(300, 0, 20, 2).showBerserk must_== "5|0"
-    ByoyomiClock.Config(300, 10, 20, 2).showBerserk must_== "5|0"
+    ByoyomiClock.Config(600, 0, 20, 1).showBerserk must_== "5|10"
+    ByoyomiClock.Config(300, 0, 20, 2).showBerserk must_== "2.5|10(2x)"
+    ByoyomiClock.Config(300, 10, 20, 2).showBerserk must_== "5|10(2x)"
     ByoyomiClock.Config(60, 10, 0, 1).showBerserk must_== "1|0"
     ByoyomiClock.Config(0, 10, 0, 1).showBerserk must_== ByoyomiClock.Config(0, 10, 0, 1).show
     ByoyomiClock.Config(0, 0, 10, 1).showBerserk must_== ByoyomiClock.Config(0, 0, 10, 1).show
