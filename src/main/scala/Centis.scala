@@ -36,6 +36,10 @@ final case class Centis(centis: Int) extends AnyVal with Ordered[Centis] {
   def atLeast(o: Centis) = Centis(Math.max(centis, o.centis))
 
   def nonNeg = Centis(Math.max(centis, 0))
+
+  //For Berserk rules. Return a new Centis that is a whole Second value
+  //which is equal to half the original value rounded up to the nearest second
+  def halfCeilSeconds = Centis.ofSeconds(Centis(centis / 2).roundSeconds)
 }
 
 object Centis {
