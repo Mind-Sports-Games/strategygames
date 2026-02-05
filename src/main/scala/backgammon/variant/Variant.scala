@@ -544,13 +544,15 @@ abstract class Variant private[variant] (
         .some
     else None
 
-  def cubeRejected(situation: Situation) =
-    situation.board.cubeData.map(_.rejected) == Some(true)
+  def cubeRejected(board: Board) =
+    board.cubeData.map(_.rejected) == Some(true)
 
-  def specialEnd(situation: Situation) =
-    (situation.board.history.score.p1 == numStartingPiecesPerPlayer) ||
-      (situation.board.history.score.p2 == numStartingPiecesPerPlayer) ||
-      (cubeRejected(situation))
+  def endFromBoard(board: Board) =
+    (board.history.score.p1 == numStartingPiecesPerPlayer) ||
+      (board.history.score.p2 == numStartingPiecesPerPlayer) ||
+      (cubeRejected(board))
+
+  def specialEnd(situation: Situation) = endFromBoard(situation.board)
 
   def gammonPosition(situation: Situation, player: Player) =
     situation.board.history.score(player) == 0 &&
@@ -602,7 +604,7 @@ abstract class Variant private[variant] (
     else _.RuleOfGin
 
   def winner(situation: Situation): Option[Player] =
-    if (cubeRejected(situation)) situation.board.cubeData.fold(None: Option[Player])(_.owner)
+    if (cubeRejected(situation.board)) situation.board.cubeData.fold(None: Option[Player])(_.owner)
     else if (specialEnd(situation)) {
       if (situation.board.history.score.p1 > situation.board.history.score.p2)
         Player.fromName("p1")

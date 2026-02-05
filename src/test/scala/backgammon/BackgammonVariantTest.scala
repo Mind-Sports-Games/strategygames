@@ -2290,6 +2290,8 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
       playActionStrs(actionStrs, None, None, Player.P2) must beValid.like { g =>
         g.situation.board.history.score must_== Score(15, 12)
         g.situation.end must_== true
+        g.situation.board.unusedDice.isEmpty must_== true
+        g.situation.board.usedDice.isEmpty must_== true
         g.situation.winner must_== Some(Player.P1)
         g.situation.status must_== Some(Status.SingleWin)
         g.situation.board.pipCount(Player.P1) must_== 0
