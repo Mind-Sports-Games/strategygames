@@ -27,7 +27,7 @@ class PerftTest extends ChessTest {
     }
     "gentest-2309" in {
       val game = Game(Option(Chess960), Option(FEN("7k/8/1p2p2n/Pp2P2p/7P/Q1p1P3/3NK3/4N2B b - -")))
-      perft(game, 3) must be equalTo 4760
+      perft(game, 3) must be equalTo 5876
     }
     "gentest-2698" in {
       val game = Game(Option(Chess960), Option(FEN("8/8/4R3/1k6/8/5n2/Kb6/8 w - -")))
@@ -43,7 +43,7 @@ class PerftTest extends ChessTest {
     }
     "gentest-3523" in {
       val game = Game(Option(Chess960), Option(FEN("1n1K4/3bB3/2k5/2p5/8/8/3p4/8 w - -")))
-      perft(game, 3) must be equalTo 933
+      perft(game, 3) must be equalTo 1593
     }
     "gentest-4253" in {
       val game = Game(Option(Chess960), Option(FEN("2Bk4/2N4N/1Q6/P2pb1P1/1R5p/2r1p2P/4K1R1/8 b - -")))
@@ -61,7 +61,7 @@ class PerftTest extends ChessTest {
     "gentest-5569" in {
       val game =
         Game(Option(Chess960), Option(FEN("r3k1n1/p2p2p1/1p4N1/2r2pq1/2b2PPp/b1p5/P3PB1P/RQ1K1B1R b q -")))
-      perft(game, 3) must be equalTo 54944
+      perft(game, 3) must be equalTo 54992
     }
     "gentest-6195" in {
       val game =
@@ -114,7 +114,7 @@ class PerftTest extends ChessTest {
           Option(Chess960),
           Option(FEN("r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ - 0 1"))
         )
-      perft(game, 3) must be equalTo 9467
+      perft(game, 3) must be equalTo 14975
     }
     // https://github.com/ornicar/lila/issues/4625
     "h-side rook blocks a-side castling" in {
