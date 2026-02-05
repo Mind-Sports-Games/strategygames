@@ -113,39 +113,46 @@ case class Situation(board: Board, player: Player) {
     else false
 
   // If orig is in all paths of validTurns then we know that a piece on that pos has to
-  // play at some point during the turn. We need to check the dice is forced for that piece
-  // either now or next turn. If so there will only be one forced action this turn.
+  // play at some point during the turn. First we need to check that we don't unlock new
+  // actions later in the turn, in this context this can only be if we become able to perform
+  // lifts after the next action. If not, then we need to check the dice is forced for that
+  // piece either now or next turn. If so there will only be one forced action this turn.
   // The forced action is the action which outright gives the most paths (a tie for most
   // paths means that the dice isn't forced, although the piece has to move)
   // This assumes that some of the other forced action checks have been done first,
   // and that there is not a capture possible in any of the current available actions
-  private lazy val forcedSingle: Option[Action] = // None
-    commonSetElements(validTurns.map(_.flatMap {
-      case m: Move => Some((m.orig, 0))
-      case l: Lift => Some((l.pos, 1))
-      case _       => None
-    }.toSet)).headOption.map(_._1).flatMap { pos =>
-      {
-        val nextActionWithPathCount = validTurns
-          .flatMap(_.headOption)
-          .filter {
-            case m: Move => m.orig == pos
-            case l: Lift => l.pos == pos
-            case _       => false
-          }
-          .groupBy(identity)
-          .toList
-          .map(a => (a._1, a._2.size))
-          .sortBy(-_._2)
-        if (
-          nextActionWithPathCount.filter { awp =>
-            awp._2 > 1 && Some(awp._2) == nextActionWithPathCount.headOption.map(_._2)
-          }.size == 1
-        )
-          nextActionWithPathCount.headOption.map(_._1)
-        else None
+  private lazy val forcedSingle: Option[Action] =
+    if (!canLift && validTurns.map(_.map {
+      case _: Lift => 1
+      case _ => 0
+    }.sum).sum > 0) None
+    else
+      commonSetElements(validTurns.map(_.flatMap {
+        case m: Move => Some((m.orig, 0))
+        case l: Lift => Some((l.pos, 1))
+        case _       => None
+      }.toSet)).headOption.map(_._1).flatMap { pos =>
+        {
+          val nextActionWithPathCount = validTurns
+            .flatMap(_.headOption)
+            .filter {
+              case m: Move => m.orig == pos
+              case l: Lift => l.pos == pos
+              case _       => false
+            }
+            .groupBy(identity)
+            .toList
+            .map(a => (a._1, a._2.size))
+            .sortBy(-_._2)
+          if (
+            nextActionWithPathCount.filter { awp =>
+              awp._2 > 1 && Some(awp._2) == nextActionWithPathCount.headOption.map(_._2)
+            }.size == 1
+          )
+            nextActionWithPathCount.headOption.map(_._1)
+          else None
+        }
       }
-    }
 
   private def uciWithDice(a: Action) = a match {
     case l: Lift => s"{${l.diceUsed}${l.toUci.uci}"
