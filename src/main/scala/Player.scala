@@ -10,8 +10,8 @@ sealed trait Player {
   val name: String
   val classicName: String
 
-  val p1 = this == Player.P1
-  val p2 = this == Player.P2
+  def p1 = this == Player.P1
+  def p2 = this == Player.P2
 }
 
 object Player {
@@ -45,7 +45,7 @@ object Player {
 
   case object P1 extends Player {
 
-    lazy val unary_! = P2
+    def unary_! = P2
 
     // retain old color lettering
     val letter      = 'w'
@@ -57,7 +57,7 @@ object Player {
 
   case object P2 extends Player {
 
-    val unary_! = P1
+    def unary_! = P1
 
     // retain old color lettering
     val letter      = 'b'
