@@ -76,30 +76,24 @@ abstract class Variant private[variant] (
 
   def validMoves(@nowarn situation: Situation) = None // just remove this?
 
-  def validDrops(situation: Situation): List[Drop] = {
-
-    val drops = situation.board.apiPosition.legalDrops
-      .map { dest =>
-        (
-          dest,
-          Api.moveToPos(dest, situation.board.variant)
-        )
-      }
-      .map {
-        case (_, Some(dest)) => {
-          Drop(
-            piece = Piece(situation.player, Role.defaultRole),
-            pos = dest,
-            situationBefore = situation,
-            nextBoard = LazyBoardAfter(() => situation.board.afterDrop(situation.player, dest)),
-            autoEndTurn = true
+  def validDrops(situation: Situation): List[Drop] =
+    situation.board.apiPosition.legalDrops
+      .map(dest => (dest, Api.moveToPos(dest, situation.board.variant)))
+      .flatMap {
+        case (_, Some(dest)) =>
+          val nextBoard = situation.board.afterDrop(situation.player, dest)
+          Option.unless(nextBoard.apiPosition.isRepetition)(
+            Drop(
+              piece = Piece(situation.player, Role.defaultRole),
+              pos = dest,
+              situationBefore = situation,
+              nextBoard = LazyBoardAfter(() => nextBoard),
+              autoEndTurn = true
+            )
           )
-        }
         case (destInt, dest) => sys.error(s"Invalid pos from int: ${destInt}, ${dest}")
       }
       .toList
-    drops
-  }
 
   def validPass(situation: Situation): Pass = {
     val uciMove       = "pass"

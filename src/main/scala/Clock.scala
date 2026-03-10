@@ -22,7 +22,11 @@ trait ClockTimeGrace {
 }
 
 case class NoClockTimeGrace() extends ClockTimeGrace {
-  def timeToAdd(@nowarn remaining: Centis, timeTaken: Centis, isRunning: Boolean): Tuple2[ClockTimeGrace, Centis] =
+  def timeToAdd(
+      @nowarn remaining: Centis,
+      timeTaken: Centis,
+      isRunning: Boolean
+  ): Tuple2[ClockTimeGrace, Centis] =
     (this, timeWillAdd(remaining, timeTaken, isRunning))
   def timeWillAdd(@nowarn remaining: Centis, timeTaken: Centis, isRunning: Boolean): Centis = Centis(0)
   val maxGrace: Centis                                                                      = Centis(0)
@@ -35,7 +39,11 @@ case class NoClockTimeGrace() extends ClockTimeGrace {
 // the elapsed time when time is used.
 // Thus, remaining time can appear to go up
 case class FischerIncrementGrace(val increment: Centis) extends ClockTimeGrace {
-  override def timeToAdd(remaining: Centis, timeTaken: Centis, isRunning: Boolean): Tuple2[ClockTimeGrace, Centis] =
+  override def timeToAdd(
+      remaining: Centis,
+      timeTaken: Centis,
+      isRunning: Boolean
+  ): Tuple2[ClockTimeGrace, Centis] =
     (this, timeWillAdd(remaining, timeTaken, isRunning))
 
   def timeWillAdd(remaining: Centis, timeTaken: Centis, isRunning: Boolean): Centis =
@@ -51,7 +59,11 @@ case class FischerIncrementGrace(val increment: Centis) extends ClockTimeGrace {
 // and the delay is subracted back to the elapsed time when time is used.
 // Thus, using time will never seem to make the clock gain time.
 case class SimpleDelayGrace(val delay: Centis) extends ClockTimeGrace {
-  override def timeToAdd(remaining: Centis, timeTaken: Centis, isRunning: Boolean): Tuple2[ClockTimeGrace, Centis] =
+  override def timeToAdd(
+      remaining: Centis,
+      timeTaken: Centis,
+      isRunning: Boolean
+  ): Tuple2[ClockTimeGrace, Centis] =
     (this, timeWillAdd(remaining, timeTaken, isRunning)) // up to the delay
 
   // NOTE: This is organized the way it is so that if you take more time than you were allowed, you don't actually get
@@ -61,7 +73,7 @@ case class SimpleDelayGrace(val delay: Centis) extends ClockTimeGrace {
   def timeWillAdd(remaining: Centis, timeTaken: Centis, isRunning: Boolean): Centis =
     ((remaining + timeTaken.atMost(delay)) > Centis(0)) ?? timeTaken.atMost(delay) // up to the delay
 
-  //change made for SimpleDelay only (not Bronstein) - instead of removing all delay, just half it
+  // change made for SimpleDelay only (not Bronstein) - instead of removing all delay, just half it
   def goBerserk: ClockTimeGrace = copy(delay = delay.halfCeilSeconds)
   val maxGrace: Centis          = delay
   // For 0 d/X: minimal buffer that grace should preserve
@@ -74,7 +86,11 @@ case class SimpleDelayGrace(val delay: Centis) extends ClockTimeGrace {
 // Another way of considering Bronstein is that the conditions on when to add grace
 // match Fischer but the amount of grace added matches SimpleDelay.
 case class BronsteinDelayGrace(val delay: Centis) extends ClockTimeGrace {
-  override def timeToAdd(remaining: Centis, timeTaken: Centis, isRunning: Boolean): Tuple2[ClockTimeGrace, Centis] =
+  override def timeToAdd(
+      remaining: Centis,
+      timeTaken: Centis,
+      isRunning: Boolean
+  ): Tuple2[ClockTimeGrace, Centis] =
     (this, timeWillAdd(remaining, timeTaken, isRunning))
 
   def timeWillAdd(remaining: Centis, timeTaken: Centis, isRunning: Boolean): Centis =
@@ -96,11 +112,12 @@ case class Timer(
 
   def applyClockGrace(timeTaken: Centis, isRunning: Boolean): Timer =
     // TODO: make this work like the book
-    clockTimeGrace.timeToAdd(this.remaining, timeTaken, isRunning).pipe { case (newClockTimeGrace, postMoveGraceTime) =>
-      copy(
-        elapsed = elapsed - postMoveGraceTime,
-        clockTimeGrace = newClockTimeGrace
-      ).nextIfDone
+    clockTimeGrace.timeToAdd(this.remaining, timeTaken, isRunning).pipe {
+      case (newClockTimeGrace, postMoveGraceTime) =>
+        copy(
+          elapsed = elapsed - postMoveGraceTime,
+          clockTimeGrace = newClockTimeGrace
+        ).nextIfDone
     }
   private def applyTimeTaken(timeTaken: Centis): Timer =
     copy(elapsed = elapsed + timeTaken)
@@ -301,7 +318,7 @@ case class ClockPlayer(
 
   def applyClockGrace(t: Centis, isRunning: Boolean) =
     copy(timer = timer.applyClockGrace(t, isRunning), completedActionsOfTurnTime = Centis(0))
-  def takeTime(t: Centis)        = copy(timer = timer.takeTime(t))
+  def takeTime(t: Centis)                            = copy(timer = timer.takeTime(t))
 
   def setRemaining(t: Centis) = copy(timer = timer.setRemaining(t))
 
@@ -578,12 +595,13 @@ object Clock {
     def show = toString
 
     def showBerserk =
-      if (berserkable) s"${secondsToString((initTime - berserkPenalty).roundSeconds)} d/${delay.halfCeilSeconds.roundSeconds}"
+      if (berserkable)
+        s"${secondsToString((initTime - berserkPenalty).roundSeconds)} d/${delay.halfCeilSeconds.roundSeconds}"
       else show
 
     override def toString = s"${limitString} d/${delaySeconds}"
 
-    //Unlike other clock types always set to 1/2, because we don't remove all of delay
+    // Unlike other clock types always set to 1/2, because we don't remove all of delay
     def berserkPenalty = Centis(limitSeconds * (100 / 2))
 
     def initTime = {

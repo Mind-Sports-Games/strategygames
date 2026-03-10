@@ -36,7 +36,8 @@ class Go9x9VariantTestIsometry extends strategygames.chess.ChessTest {
     })
   }
 
-  "Test Every move can be loaded from fen" in {
+  // Updated 27/02/2026 Superko Rule: s@g3 repeats a previous position, so the move is invalid
+  "Test go repetition move is invalid" in {
     val gameFamily   = Go9x9.gameFamily
     val lib          = gameFamily.gameLogic
     val stratVariant = StratVariant(lib, Go9x9.key).get
@@ -80,10 +81,6 @@ class Go9x9VariantTestIsometry extends strategygames.chess.ChessTest {
         "s@c2",
         "s@g3"
       ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) must beValid.like(gameData => {
-      val fen1 = StratForsyth.>>(lib, gameData.game)
-      val fen2 = StratForsyth.>>(lib, gameData.fenGame)
-      fen1 must_== fen2
-    })
+    ) must beInvalid
   }
 }
