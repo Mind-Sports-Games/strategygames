@@ -359,21 +359,21 @@ class GoSituationTest extends Specification with ValidatedMatchers {
 
     val game_p11 = game_p10.apply(g9.validDrops(game_p10.situation).filter(_.pos.key == "f6").head)
 
-    val game_p12 = game_p11.apply(g9.validPass(game_p11.situation))
+    val game_p12 = game_p11.apply(g9.validDrops(game_p11.situation).filter(_.pos.key == "h1").head)
 
     val game_p13 = game_p12.apply(g9.validDrops(game_p12.situation).filter(_.pos.key == "e8").head)
 
     val game_p14 = game_p13.apply(g9.validDrops(game_p13.situation).filter(_.pos.key == "e6").head)
 
-    val game_p15 = game_p14.apply(g9.validPass(game_p14.situation))
+    val game_p15 = game_p14.apply(g9.validDrops(game_p14.situation).filter(_.pos.key == "g1").head)
 
     val game_p16 = game_p15.apply(g9.validDrops(game_p15.situation).filter(_.pos.key == "e7").head)
 
     val drops_ply_16 = g9.validDrops(game_p16.situation)
 
     // should be able to play e8
-    "number of drops for ply 16 should be 71 (ko not activated)" in {
-      drops_ply_16.size must_== 71
+    "number of drops for ply 16 should be 69 (ko not activated)" in {
+      drops_ply_16.size must_== 69
       drops_ply_16.filter(_.pos.key == "e8").size must_== 1
     }
 
@@ -451,6 +451,25 @@ class GoSituationTest extends Specification with ValidatedMatchers {
       game_p14.situation.isRepetition must_== false
     }
 
+  }
+
+  "Test repetition drops are not valid" in {
+    val g9   = variant.Go9x9
+    var game = Game(g9)
+
+    val moves = List("c6", "c5", "c7", "d6", "e6", "e5", "e7", "d4", "d8", "e4", "pass", "d7", "d5" )
+
+    for (moveKey <- moves) {
+      if (moveKey == "pass")
+        game = game.apply(g9.validPass(game.situation))
+      else
+        game = game.apply(g9.validDrops(game.situation).filter(_.pos.key == moveKey).head)
+    }
+
+    val repetitionDrop = "d6"
+    "situation should not have repetitionDrop as a valid drop" in {
+      g9.validDrops(game.situation).map(_.pos.key).contains(repetitionDrop) must_== false
+    }
   }
 
 }

@@ -122,10 +122,14 @@ case class Situation(board: Board, player: Player) {
   // This assumes that some of the other forced action checks have been done first,
   // and that there is not a capture possible in any of the current available actions
   private lazy val forcedSingle: Option[Action] =
-    if (!canLift && validTurns.map(_.map {
-      case _: Lift => 1
-      case _ => 0
-    }.sum).sum > 0) None
+    if (
+      !canLift && validTurns
+        .map(_.map {
+          case _: Lift => 1
+          case _       => 0
+        }.sum)
+        .sum > 0
+    ) None
     else
       commonSetElements(validTurns.map(_.flatMap {
         case m: Move => Some((m.orig, 0))
