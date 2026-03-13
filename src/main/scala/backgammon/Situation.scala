@@ -99,9 +99,10 @@ case class Situation(board: Board, player: Player) {
   private def commonSetElements[A](sets: List[Set[A]]): Set[A] =
     sets.fold(sets.headOption.getOrElse(Set())) { (a, b) => a intersect b }
 
-  // forcedPair should not be true if the order matters (i.e. 3/2 captures, but 2/3 doesn't)
+  // forcedPair is looking for a common position which arrives at the end of the turn
+  // should not be true if the order matters (i.e. 3/2 captures, but 2/3 doesn't)
   private lazy val forcedPair: Boolean =
-    if (actions.length == 2 && board.unusedDice.toSet.size == 2)
+    if (board.unusedDice.toSet.size == 2)
       actions
         .flatMap { a =>
           a.lazySituationAfter.actions.map { a2 =>
@@ -121,38 +122,54 @@ case class Situation(board: Board, player: Player) {
   // paths means that the dice isn't forced, although the piece has to move)
   // This assumes that some of the other forced action checks have been done first,
   // and that there is not a capture possible in any of the current available actions
-  private lazy val forcedSingle: Option[Action] =
-    if (!canLift && validTurns.map(_.map {
+  private lazy val forcedSingle: Option[Action] = {
+    val liftsUnlockedLater = !canLift && validTurns.map(_.map {
       case _: Lift => 1
       case _ => 0
-    }.sum).sum > 0) None
-    else
-      commonSetElements(validTurns.map(_.flatMap {
-        case m: Move => Some((m.orig, 0))
-        case l: Lift => Some((l.pos, 1))
-        case _       => None
-      }.toSet)).headOption.map(_._1).flatMap { pos =>
-        {
-          val nextActionWithPathCount = validTurns
-            .flatMap(_.headOption)
-            .filter {
-              case m: Move => m.orig == pos
-              case l: Lift => l.pos == pos
-              case _       => false
-            }
-            .groupBy(identity)
-            .toList
-            .map(a => (a._1, a._2.size))
-            .sortBy(-_._2)
-          if (
-            nextActionWithPathCount.filter { awp =>
-              awp._2 > 1 && Some(awp._2) == nextActionWithPathCount.headOption.map(_._2)
-            }.size == 1
-          )
-            nextActionWithPathCount.headOption.map(_._1)
-          else None
+    }.sum).sum > 0
+    commonSetElements(validTurns.map(_.flatMap {
+      case m: Move => Some((m.orig, 0))
+      case l: Lift => Some((l.pos, 1))
+      case _       => None
+    }.toSet)).headOption.map(_._1).flatMap { pos =>
+      val nextActionWithPathCount = validTurns
+        .flatMap(_.headOption)
+        .filter {
+          case m: Move => m.orig == pos
+          case l: Lift => l.pos == pos
+          case _       => false
         }
+        .groupBy(identity)
+        .toList
+        .map(a => (a._1, a._2.size))
+        .sortBy(-_._2)
+      val topAction = nextActionWithPathCount.headOption
+      val isUniqueBestAction = nextActionWithPathCount.filter { awp =>
+        awp._2 > 1 && Some(awp._2) == topAction.map(_._2)
+      }.size == 1
+      if (!isUniqueBestAction) None
+      else if (!liftsUnlockedLater) topAction.map(_._1)
+      // All current actions are from the forced piece so the first action is unambiguous
+      else if (actions.forall {
+        case m: Move => m.orig == pos
+        case l: Lift => l.pos == pos
+        case _       => true
+      }) topAction.map(_._1)
+      else {
+        // A die is committed to the forced piece if every alternative action's only
+        // continuation is a lift of that action's destination (the same physical piece).
+        // If all alternatives are committed this way, the top action is still forced.
+        val alternatives = nextActionWithPathCount.tail
+        val dieCommitted = alternatives.forall {
+          case (alt: Move, _) =>
+            val afterAlt = alt.lazySituationAfter
+            afterAlt.lifts.nonEmpty && afterAlt.lifts.forall(_.pos == alt.dest)
+          case _ => true
+        }
+        if (dieCommitted) topAction.map(_._1) else None
       }
+    }
+  }
 
   private def uciWithDice(a: Action) = a match {
     case l: Lift => s"{${l.diceUsed}${l.toUci.uci}"
