@@ -36,12 +36,12 @@ case class Lift(
   }
 
   // This version should work but it breaks forcedAction
-  //def lazyFinalizeAfter: Board = afterWithScoreAndDice updateHistory { h =>
+  // def lazyFinalizeAfter: Board = afterWithScoreAndDice updateHistory { h =>
   //  h.copy(
   //    lastTurn = if (endTurn) h.currentTurn :+ toUci else h.lastTurn,
   //    currentTurn = if (endTurn) List() else h.currentTurn :+ toUci
   //  )
-  //}
+  // }
 
   // If we end the game we end the turn
   private lazy val endTurn = after.variant.endFromBoard(afterWithScore)
