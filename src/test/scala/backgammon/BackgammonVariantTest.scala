@@ -3315,7 +3315,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
       }
     }
 
-    // forced single lift (pieces on 5,3,2 points, roll of 5/3)
+    // forced single lift (multiple pieces on each of 5,3,2 points, roll of 5/3)
     "have forced actions when lifting with no options" in {
       val actionStrs = List(
         "3/1",
@@ -3563,6 +3563,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         g.situation.canMove must_== true
         g.situation.canDrop must_== false
         g.situation.canLift must_== true
+        g.situation.board.pieces.nonEmpty must_== true
         g.situation.forcedAction.nonEmpty must_== true
       }
       playActionStrs(actionStrs ++ List("^h2"), None, None, Player.P2) must beValid.like { g =>
@@ -3571,6 +3572,113 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         g.situation.canLift must_== true
         g.situation.forcedAction.isEmpty must_== true
         g.situation.board.history.forcedTurn must_== true
+      }
+    }
+
+    // forced turn (pieces on 4,1 points (i1, l1). roll of 3/1. forced to end in a position with just a piece on the 1 point (l1), so using both dice on the piece on the 4 point (i1) can be considered forced)
+    "have forced actions when moving enables same lift" in {
+      val actionStrs = List(
+        "6/2",
+        "j1d1",
+        "l1j1",
+        "endturn",
+        "6/6",
+        "l2f2",
+        "k2e2",
+        "j2d2",
+        "f2a1",
+        "endturn",
+        "6/1",
+        "j1d1",
+        "k1j1",
+        "endturn",
+        "6/6",
+        "e2b1",
+        "d2c1",
+        "a1g1",
+        "c1i1",
+        "endturn",
+        "6/4",
+        "j1d1",
+        "d1a2",
+        "endturn",
+        "3/3",
+        "b1e1",
+        "e1h1",
+        "g1j1",
+        "^j1",
+        "endturn",
+        "5/4",
+        "d1a2",
+        "d1b2",
+        "endturn",
+        "3/1",
+        "h1k1",
+        "k1l1",
+        "endturn",
+        "2/1",
+        "a2c2",
+        "b2c2",
+        "endturn",
+        "3/1",
+      )
+      playActionStrs(actionStrs, None, Some(variant.Hyper), Player.P2) must beValid.like { g =>
+        g.situation.forcedAction.nonEmpty must_== true
+      }
+      playActionStrs(actionStrs ++ List("i1l1"), None, Some(variant.Hyper), Player.P2) must beValid.like { g =>
+        g.situation.forcedAction.nonEmpty must_== true
+        g.situation.board.history.forcedTurn must_== true
+      }
+    }
+
+    // here
+    // no forced actions when single pieces on 5,3,2 points (h1, j1, k1). roll of 5/3. forced to have a piece move from 5 point but could end with 2 pieces on 2 point or 1
+    "have forced actions when moving enables same lift" in {
+      val actionStrs = List(
+        "6/2",
+        "j1d1",
+        "l1j1",
+        "endturn",
+        "6/6",
+        "l2f2",
+        "k2e2",
+        "j2d2",
+        "f2a1",
+        "endturn",
+        "6/1",
+        "j1d1",
+        "k1j1",
+        "endturn",
+        "6/6",
+        "e2b1",
+        "d2c1",
+        "a1g1",
+        "c1i1",
+        "endturn",
+        "6/4",
+        "j1d1",
+        "d1a2",
+        "endturn",
+        "6/2",
+        "b1h1",
+        "i1k1",
+        "endturn",
+        "5/4",
+        "d1a2",
+        "d1b2",
+        "endturn",
+        "2/1",
+        "g1i1",
+        "i1j1",
+        "endturn",
+        "2/1",
+        "a2c2",
+        "b2c2",
+        "endturn",
+        "5/3",
+      )
+      playActionStrs(actionStrs, None, Some(variant.Hyper), Player.P2) must beValid.like { g =>
+        g.situation.forcedAction.isEmpty must_== true
       }
     }
 
@@ -4904,6 +5012,150 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
       playActionStrs(actionStrs) must beValid.like { g =>
         g.situation.canCapture must_== true
         g.situation.forcedAction.isEmpty must_== true
+      }
+    }
+
+    // https://playstrategy.org/TnXCJSVi
+    "have forced action for one move dice to enable lifts for later in the turn" in {
+      val actionStrs = List(
+        "5/2",
+        "l1g1",
+        "g1e1",
+        "endturn",
+        "5/6",
+        "l2f2",
+        "j2e2",
+        "endturn",
+        "3/1",
+        "k1h1",
+        "h1g1",
+        "endturn",
+        "6/5",
+        "k2e2",
+        "e2a1",
+        "endturn",
+        "6/5",
+        "e1a2",
+        "g1a1x",
+        "endturn",
+        "3/3",
+        "s@j2",
+        "f2c2",
+        "c2a1x",
+        "j2g2",
+        "endturn",
+        "3/6",
+        "s@g1",
+        "a2d2",
+        "endturn",
+        "4/2",
+        "g2c2",
+        "c2a2",
+        "endturn",
+        "5/5",
+        "j1e1",
+        "g1b1",
+        "b1d2",
+        "d2i2",
+        "endturn",
+        "5/6",
+        "a2e1x",
+        "e2b1",
+        "endturn",
+        "4/4",
+        "s@i1",
+        "i1e1x",
+        "d2h2",
+        "e1a1x",
+        "endturn",
+        "4/4",
+        "s@i2x",
+        "s@i2",
+        "i2e2",
+        "i2e2",
+        "endturn",
+        "5/3",
+        "s@h1",
+        "a1c2",
+        "endturn",
+        "5/5",
+        "e2a1",
+        "e2a1",
+        "a1f1",
+        "f1k1",
+        "endturn",
+        "5/4",
+        "c2h2",
+        "h2l2",
+        "endturn",
+        "6/5",
+        "a1g1",
+        "g1l1",
+        "endturn",
+        "1/5",
+        "h2i2",
+        "h1c1",
+        "endturn",
+        "2/6"
+      )
+      playActionStrs(actionStrs, None, Some(variant.Hyper), Player.P2) must beValid.like { g =>
+        g.situation.forcedAction.nonEmpty must_== true
+      }
+    }
+
+    // https://playstrategy.org/fwtUnRS9
+    "have forced action for one move dice that will then have option of lifts or moves later in the turn" in {
+      val actionStrs = List(
+        "2/3",
+        "j1g1",
+        "l1j1",
+        "endturn",
+        "5/3",
+        "l2g2",
+        "k2h2",
+        "endturn",
+        "3/1",
+        "j1i1",
+        "g1d1",
+        "endturn",
+        "6/6",
+        "h2b2",
+        "b2e1",
+        "e1k1x",
+        "j2d2",
+        "endturn",
+        "3/4",
+        "s@i1",
+        "d1a1",
+        "endturn",
+        "2/5",
+        "d2b1",
+        "g2e2",
+        "endturn",
+        "6/5",
+        "i1d1",
+        "d1c2",
+        "endturn",
+        "3/4",
+        "e2a2",
+        "a2c1",
+        "endturn",
+        "4/5",
+        "c2g2",
+        "i1d1",
+        "endturn",
+        "3/6",
+        "c1i1",
+        "b1e1",
+        "endturn",
+        "2/4",
+        "g2i2",
+        "a1d2",
+        "endturn",
+        "5/3"
+      )
+      playActionStrs(actionStrs, None, Some(variant.Hyper), Player.P2) must beValid.like { g =>
+        g.situation.forcedAction.nonEmpty must_== true
       }
     }
 
