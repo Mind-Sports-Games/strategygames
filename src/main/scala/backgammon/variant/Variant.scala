@@ -441,7 +441,11 @@ abstract class Variant private[variant] (
     else None
 
   def validCubeActions(situation: Situation): List[CubeAction] =
-    if (situation.board.history.hasRolledDiceThisTurn || !situation.board.history.firstDiceRollHappened)
+    if (
+      situation.board.history.hasRolledDiceThisTurn ||
+      !situation.board.history.firstDiceRollHappened ||
+      situation.board.variant.endFromBoard(situation.board)
+    )
       List.empty
     else
       situation.board.cubeData match {
