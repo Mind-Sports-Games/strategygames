@@ -43,7 +43,7 @@ object Forsyth {
       SituationPlus(
         // not doing half move clock history like we do in chess
         sit,
-        fen.value.split(' ').last.toIntOption.map(_ max 1 min 500) | 1
+        fen.fullMove.map(_ max 1 min 500) | 1
       )
     }
 
