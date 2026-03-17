@@ -141,11 +141,13 @@ object Replay {
     )
     (
       game,
-      gameWithActions.map { v =>
-        {
-          val (state, action) = v
-          (state, Uci.WithSan(action.toUci, "NOSAN"))
+      gameWithActions.map { case (state, action) =>
+        val uci = action.toUci
+        val san = action.capture match {
+          case Some(_) => action.orig.key + "x" + action.dest.key
+          case None    => uci.uci
         }
+        (state, Uci.WithSan(uci, san))
       },
       error
     )
