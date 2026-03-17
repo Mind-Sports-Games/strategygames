@@ -19,7 +19,7 @@ object UciCharPair {
 
     val pos2charMap: Map[Pos, Char] = Piotr.posToIndex.keys
       .map { pos =>
-        pos -> (pos.hashCode + charShift).toChar
+        pos -> (pos.hashIndex + charShift).toChar
       }
       .to(Map)
 
