@@ -11,13 +11,7 @@ final case class FEN(value: String) extends AnyVal {
   def pieces(variant: Variant): PieceMap = value
     .split(' ')(0)
     .split('/')
-    .flatMap {
-      _.toCharArray
-    }
-    .flatMap {
-      case c if c.isDigit => Array.fill(c.asDigit)('1')
-      case c              => Array(c)
-    }
+    .flatMap(FEN.decodeFenRow)
     .zip(variant.boardType.cellList)
     .flatMap {
       case (piece, pos) if piece == Role.defaultRole.forsythUpper => Some((pos, Piece(P1, Role.defaultRole)))
@@ -49,4 +43,13 @@ final case class FEN(value: String) extends AnyVal {
 
 object FEN {
   def clean(source: String): FEN = FEN(source.replace("_", " ").trim)
+
+  private[format] def decodeFenRow(row: String): Array[Char] =
+    "[0-9]+|[^0-9]".r
+      .findAllIn(row)
+      .flatMap {
+        case s if s.head.isDigit => Array.fill(s.toInt)('1')
+        case s                   => s.toCharArray
+      }
+      .toArray
 }
