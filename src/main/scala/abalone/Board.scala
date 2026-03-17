@@ -39,7 +39,9 @@ object Board {
   def apply(pieces: Iterable[(Pos, Piece)], variant: Variant): Board =
     Board(pieces.toMap, History(), variant)
 
-  def init(variant: Variant): Board = Board(variant.pieces, variant)
+  def init(variant: Variant): Board =
+    format.Forsyth.<<@(variant, variant.initialFen)
+      .fold(Board(variant.pieces, variant))(_.board)
 
   // def empty(variant: Variant): Board = Board(Nil, variant)
 }
