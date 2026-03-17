@@ -12,7 +12,7 @@ case object GrandAbalone
       standardInitialPosition = false,
       boardType = Hex6
     ) {
-  override def perfIcon: Char = '\ue927'
+  override def perfIcon: Char = '\ue92C'
 
   override def perfId: Int = 701
 
