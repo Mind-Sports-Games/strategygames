@@ -1,52 +1,43 @@
 package strategygames.abalone.format
-import strategygames.abalone._
 
 import cats.data.Validated
 import cats.implicits._
+import strategygames.abalone.{Pos, Situation}
 
 sealed trait Uci {
-
   def uci: String
+
   def piotr: String
 
   def origDest: (Pos, Pos)
 
-  def apply(situation: Situation): Validated[String, Move]
+  def apply(situation: Situation): Validated[String, strategygames.abalone.Move]
 }
 
 object Uci {
+  case class Move(orig: Pos, dest: Pos) extends Uci {
+    def keys: String = orig.key + dest.key
 
-  case class Move(
-      orig: Pos,
-      dest: Pos
-  ) extends Uci {
-
-    def keys = orig.key + dest.key
-    def uci  = keys
+    override def uci = keys
 
     def keysPiotr = orig.piotrStr + dest.piotrStr
-    def piotr     = keysPiotr
 
-    def origDest = orig -> dest
+    override def piotr = keysPiotr
 
-    def apply(situation: Situation) = situation.move(orig, dest)
+    override def origDest = orig -> dest
+
+    override def apply(situation: Situation) = situation.move(orig, dest)
   }
 
   object Move {
-
     def apply(move: String): Option[Move] =
       move match {
-        case moveR(orig, dest) =>
+        case moveR(orig0, orig1, dest0, dest1) =>
           (
-            Pos.fromKey(orig),
-            Pos.fromKey(dest)
+            Pos.fromKey(orig0 + orig1),
+            Pos.fromKey(dest0 + dest1)
           ) match {
-            case (Some(orig), Some(dest)) => {
-              Move(
-                orig = orig,
-                dest = dest
-              ).some
-            }
+            case (Some(orig), Some(dest)) => Move(orig = orig, dest = dest).some
             case _                        => None
           }
         case _                 => None
@@ -64,7 +55,7 @@ object Uci {
         dest <- Pos.fromKey(destS)
       } yield Move(orig, dest)
 
-    val moveR = s"^${Pos.posR}${Pos.posR}".r
+    val moveR = s"^${Pos.re}${Pos.re}".r
   }
 
   case class WithSan(uci: Uci, san: String)

@@ -1,6 +1,6 @@
 package strategygames.abalone
 
-import strategygames.{ GameFamily, P1, P2, Player }
+import strategygames.{GameFamily, Player}
 
 sealed trait Role {
   val forsyth: Char
@@ -22,53 +22,57 @@ sealed trait PromotableRole extends Role
 case object Stone extends Role {
   val forsyth   = 's'
   val binaryInt = 1
-
-  val dirs: Directions = List(_.right, _.left, _.upLeft, _.upRight, _.downLeft, _.downRight)
 }
 
 object Role {
-
-  val all: List[Role] =
-    List(
-      Stone
-    )
+  val all: List[Role] = List(Stone)
 
   def defaultRole: Role = Stone
 
   def allByGameFamily(gf: GameFamily): List[Role] =
     all.filter(r => r.gameFamily == gf)
 
-  val allByForsyth: Map[Char, Role]                      = all map { r =>
+  val allByForsyth: Map[Char, Role] = all map { r =>
     (r.forsyth, r)
   } toMap
-  def allByForsyth(gf: GameFamily): Map[Char, Role]      = allByGameFamily(gf) map { r =>
+
+  def allByForsyth(gf: GameFamily): Map[Char, Role] = allByGameFamily(gf) map { r =>
     (r.forsyth, r)
   } toMap
-  val allByPgn: Map[Char, Role]                          = all map { r =>
+
+  val allByPgn: Map[Char, Role] = all map { r =>
     (r.pgn, r)
   } toMap
-  def allByPgn(gf: GameFamily): Map[Char, Role]          = allByGameFamily(gf) map { r =>
+
+  def allByPgn(gf: GameFamily): Map[Char, Role] = allByGameFamily(gf) map { r =>
     (r.pgn, r)
   } toMap
-  val allByName: Map[String, Role]                       = all map { r =>
+
+  val allByName: Map[String, Role] = all map { r =>
     (r.name, r)
   } toMap
-  def allByName(gf: GameFamily): Map[String, Role]       = allByGameFamily(gf) map { r =>
+
+  def allByName(gf: GameFamily): Map[String, Role] = allByGameFamily(gf) map { r =>
     (r.name, r)
   } toMap
-  val allByGroundName: Map[String, Role]                 = all map { r =>
+
+  val allByGroundName: Map[String, Role] = all map { r =>
     (r.groundName, r)
   } toMap
+
   def allByGroundName(gf: GameFamily): Map[String, Role] = allByGameFamily(gf) map { r =>
     (r.groundName, r)
   } toMap
-  val allByBinaryInt: Map[Int, Role]                     = all map { r =>
+
+  val allByBinaryInt: Map[Int, Role] = all map { r =>
     (r.binaryInt, r)
   } toMap
-  def allByBinaryInt(gf: GameFamily): Map[Int, Role]     = allByGameFamily(gf) map { r =>
+
+  def allByBinaryInt(gf: GameFamily): Map[Int, Role] = allByGameFamily(gf) map { r =>
     (r.binaryInt, r)
   } toMap
-  val allByHashInt: Map[Int, Role]                       = all map { r =>
+
+  val allByHashInt: Map[Int, Role] = all map { r =>
     (r.hashInt, r)
   } toMap
 
@@ -96,7 +100,7 @@ object Role {
       )
       .get
 
-  // unused by lila
+  // Unused by lila
   def javaSymbolToInt(s: String): Int =
     s.headOption match {
       case Some(c) if c.toInt >= 65 && c.toInt <= 90  => c.toInt - 64
@@ -109,5 +113,4 @@ object Role {
   val roleR  = s"([${allByForsyth.keys.mkString("")}])"
   val roleRr = s"([${allByForsyth.keys.map(k => s"${k.toLower}${k.toUpper}").mkString("")}]?)"
   val rolePR = s"([${allByForsyth.keys.map(k => s"${k.toLower}${k.toUpper}").mkString("")}]|\\+?)"
-
 }

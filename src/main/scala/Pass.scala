@@ -8,7 +8,6 @@ sealed abstract class Pass(
     val autoEndTurn: Boolean,
     val metrics: MoveMetrics = MoveMetrics()
 ) extends Action(situationBefore) {
-
   def situationAfter: Situation
 
   def finalizeAfter: Board
@@ -24,7 +23,6 @@ sealed abstract class Pass(
 }
 
 object Pass {
-
   final case class Go(p: go.Pass)
       extends Pass(
         Situation.Go(p.situationBefore),
@@ -47,11 +45,9 @@ object Pass {
     def toTogyzkumalak = sys.error("Can't make a togyzkumalak pass from a go pass")
     def toGo           = p
     def toBackgammon   = sys.error("Can't make a backgammon pass from a go pass")
-    def toAbalone      = sys.error("Can't make a abalone pass from a go pass")
+    def toAbalone      = sys.error("Can't make an abalone pass from a go pass")
     def toDameo        = sys.error("Can't make a dameo pass from a go pass")
-
   }
 
   def wrap(p: go.Pass): Pass = Pass.Go(p)
-
 }
