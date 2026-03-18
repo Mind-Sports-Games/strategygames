@@ -1302,8 +1302,6 @@ object Situation {
     override def threefoldRepetition: Boolean = false
     override def isRepetition: Boolean        = false
 
-    override lazy val perpetualPossible: Boolean = false
-
     override def end: Boolean = s.end
 
     override def winner: Option[Player] = s.winner
