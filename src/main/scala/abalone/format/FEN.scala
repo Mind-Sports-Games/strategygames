@@ -44,7 +44,7 @@ final case class FEN(value: String) extends AnyVal {
 object FEN {
   def clean(source: String): FEN = FEN(source.replace("_", " ").trim)
 
-  private[format] def decodeFenRow(row: String): Array[Char] =
+  private def decodeFenRow(row: String): Array[Char] =
     "[0-9]+|[^0-9]".r
       .findAllIn(row)
       .flatMap {

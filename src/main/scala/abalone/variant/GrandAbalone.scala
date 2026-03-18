@@ -22,9 +22,8 @@ case object GrandAbalone
 
   override def hasPrevPlayer: Boolean = true
 
-  /** The sequence of the number of actions per turn is 12* (P1 plays one move, then, starting with P2, both
-    * players have two actions per turn). Since plies and turnCount diverge (2 plies per turn vs 1
-    * player-switch per turn), pliesFromFen must be overridden: plies = max(0, 2*turnCount - 1).
+  /** Grand Abalone has 2 plies per turn (vs 1 player-switch), so plies and
+    * turnCount diverge. Overrides base implementation accordingly.
     */
   override def pliesFromFen(fenTurnCount: Int, player: Player, currentTurnPlies: Int = 0): Int =
     math.max(0, 2 * turnCountFromFen(fenTurnCount, player) - 1) + currentTurnPlies
