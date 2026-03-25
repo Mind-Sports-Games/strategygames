@@ -1,19 +1,18 @@
-package abalone.format
+package strategygames.abalone.format
 
 import strategygames.Player
 import strategygames.abalone._
 import strategygames.abalone.variant.Variant
 
 object Visual {
-  def <<(source: String): Board = {
+  def <<(source: String, v: Variant = Variant.default): Board = {
     val lines    = augmentString(source).linesIterator.to(List)
+    val height   = v.boardType.height
     val filtered = lines.size match {
-      case 8          => lines
-      case n if n > 8 => lines.slice(1, 9)
-      case n          => (List.fill(8 - n)("")) ::: lines
+      case n if n == height => lines
+      case n if n > height  => lines.slice(1, height + 1)
+      case n                => (List.fill(height - n)("")) ::: lines
     }
-
-    val v = Variant.default // FIXME?
 
     Board(
       pieces = (for {
@@ -39,12 +38,18 @@ object Visual {
       marks ++ cells.toList.map(a => (a, char))
     }
 
-    board.variant.boardType.cellSet
-      .map(a => markedCells.get(a).getOrElse(board(a).fold(' ')(_ forsyth)))
-      .mkString
+    board.variant.boardType.cellList
+      .groupBy(_.y)
+      .toList
+      .sortBy { case (y, _) => -y }
+      .map { case (_, cells) =>
+        cells
+          .map(a => markedCells.get(a).getOrElse(board(a).fold(' ')(_ forsyth)))
+          .mkString
+          .replaceAll("""\s+$""", "")
+      }
+      .mkString("\n")
   }
-    .map(char => """\s*$""".r.replaceFirstIn(char.toString, ""))
-    .mkString("\n")
 
   def addNewLines(str: String) = "\n" + str + "\n"
 }
