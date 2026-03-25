@@ -428,7 +428,7 @@ object Variant {
 
   def exists(id: Int): Boolean = byId contains id
 
-  val openingSensibleVariants: Set[Variant] = Set(Abalone) // , GrandAbalone)
+  val openingSensibleVariants: Set[Variant] = Set(Abalone, GrandAbalone)
 
   val divisionSensibleVariants: Set[Variant] = Set()
 

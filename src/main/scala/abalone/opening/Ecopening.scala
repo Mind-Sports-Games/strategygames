@@ -52,11 +52,14 @@ object Ecopening {
       })
     }
 
-  def fromGame(actionStrs: ActionStrs): Option[Ecopening] = Replay
+  def fromGame(
+      actionStrs: ActionStrs,
+      v: variant.Variant = variant.Variant.default
+  ): Option[Ecopening] = Replay
     .boards(
       actionStrs = actionStrs take EcopeningDB.MAX_TURNS,
       initialFen = None,
-      variant = variant.Variant.default
+      variant = v
     )
     .toOption flatMap matchChronoBoards
 
