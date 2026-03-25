@@ -7,7 +7,7 @@ import strategygames.abalone.{P1, P2, Piece, PieceMap, Role}
 final case class FEN(value: String) extends AnyVal {
   override def toString = value
 
-  // Notice cells are described from bottom left to top right in the FEN
+  // FEN rows are top-to-bottom, left-to-right within each row
   def pieces(variant: Variant): PieceMap = value
     .split(' ')(0)
     .split('/')
