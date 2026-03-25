@@ -333,8 +333,8 @@ abstract class Variant private[variant] (
       s"Not a valid move: $from$to [${from.key}${to.key}]. Allowed moves: ${situation.moves}"
   }
 
-  /** If a player runs out of move, the match is a draw. */
-  def stalemateIsDraw = true
+  /** If a player runs out of moves, they lose. */
+  def stalemateIsDraw = false
 
   def maxUsable: Option[Int] = Option(3)
 
@@ -342,14 +342,15 @@ abstract class Variant private[variant] (
   def winningScore = 6
 
   def winner(situation: Situation): Option[Player] = {
-    if (situation.board.history.score.p1 >= winningScore) Some(P1)
+    if (situation.moves.values.forall(_.isEmpty)) Some(!situation.player)
+    else if (situation.board.history.score.p1 >= winningScore) Some(P1)
     else if (situation.board.history.score.p2 >= winningScore) Some(P2)
     else None
   }
 
   def specialEnd(situation: Situation) = winner(situation).isDefined
 
-  def specialDraw(situation: Situation) = situation.moves.size == 0
+  def specialDraw(situation: Situation) = false
 
   def materialImbalance(@nowarn board: Board): Int = 0
 
