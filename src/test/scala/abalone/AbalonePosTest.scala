@@ -5,39 +5,12 @@ import strategygames.abalone.variant.Abalone
 
 class AbalonePosTest extends AbaloneTest with ValidatedMatchers {
   "Piotr mappings" should {
-    "be as fast as it is for chess" in {
-      var T = java.time.Instant.now()
+    "cover all Abalone positions" in {
+      Pos.all.size must_== 61
+    }
 
-      var t = java.time.Instant.now()
-      println("chess   -> " + t.toString)
-      Range(0, 64).foreach(i => strategygames.chess.Pos.all.map(_.piotr)(i))
-      t = java.time.Instant.now()
-      println("        -> " + t.toString)
-
-      t = java.time.Instant.now()
-      println("\ncprint  -> " + t.toString)
-      Range(0, 64).foreach(i => print(" " + strategygames.chess.Pos.all.map(_.piotr)(i).toString))
-      println()
-      t = java.time.Instant.now()
-      println("        -> " + t.toString)
-
-      t = java.time.Instant.now()
-      println("\nAbalone -> " + t.toString)
-      Range(0, 64).foreach(i => strategygames.abalone.Pos.all.map(_.piotr)(i))
-      t = java.time.Instant.now()
-      println("        -> " + t.toString)
-
-      t = java.time.Instant.now()
-      println("\nAprint  -> " + t.toString)
-      Range(0, 64).foreach(i => print(" " + strategygames.abalone.Pos.all.map(_.piotr)(i).toString))
-      println()
-      t = java.time.Instant.now()
-      println("        -> " + t.toString)
-
-      T = java.time.Instant.now()
-      println("\nsum     -> " + T.toString)
-
-      true must_== true
+    "roundtrip pos -> piotr -> pos for all positions" in {
+      Pos.all.forall(p => Pos.piotr(p.piotr).contains(p)) must_== true
     }
   }
 
