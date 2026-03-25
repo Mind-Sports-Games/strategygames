@@ -5,8 +5,8 @@ import strategygames.abalone.variant.Abalone
 
 class AbalonePosTest extends AbaloneTest with ValidatedMatchers {
   "Piotr mappings" should {
-    "cover all Abalone positions" in {
-      Pos.all.size must_== 61
+    "cover all Piotr-encodable positions (full table, all board types)" in {
+      Pos.all.size must_== 361
     }
 
     "roundtrip pos -> piotr -> pos for all positions" in {

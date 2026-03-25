@@ -237,12 +237,12 @@ class AbaloneFenTest extends AbaloneTest {
       valid(situation).size must_== 0
     }
 
-    "end in a draw" in {
+    "end in a loss for the player unable to move" in {
       situation.end must_== true
       situation.playable(true) must_== false
-      situation.staleMate must_== true
-      situation.winner must_== None
-      situation.status must_== Some(Status.Stalemate)
+      situation.staleMate must_== false
+      situation.winner must_== Some(P1)
+      situation.status must_== Some(Status.VariantEnd)
     }
   }
 

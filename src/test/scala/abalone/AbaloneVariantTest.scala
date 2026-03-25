@@ -460,12 +460,12 @@ class AbaloneVariantTest extends AbaloneTest {
       game2.situation.board.history.score must_== Score(p1 = 1)
     }
 
-    "trigger a stalemate" in {
+    "trigger a loss for P2 (no marbles left to move)" in {
       game2.situation.end must_== true
-      game2.situation.staleMate must_== true
+      game2.situation.staleMate must_== false
       game2.situation.playable(true) must_== false
-      game2.situation.status must_== Some(Status.Stalemate)
-      game2.situation.winner must_== None
+      game2.situation.status must_== Some(Status.VariantEnd)
+      game2.situation.winner must_== Some(P1)
     }
   }
 
@@ -491,9 +491,9 @@ class AbaloneVariantTest extends AbaloneTest {
       game2.situation.board.history.score must_== Score(p1 = 6)
     }
 
-    "trigger a win condition defined by the variant, even though it detects the stalemate" in {
+    "trigger a win condition defined by the variant (score 6, P2 has no marbles)" in {
       game2.situation.end must_== true
-      game2.situation.staleMate must_== true
+      game2.situation.staleMate must_== false
       game2.situation.playable(true) must_== false
       game2.situation.status must_== Some(Status.VariantEnd)
       game2.situation.winner must_== Some(P1)
