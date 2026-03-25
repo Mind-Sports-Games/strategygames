@@ -25,7 +25,7 @@ abstract class Norm(val radius: Int, is3: Boolean = false) {
 
   final def dist(a: (Double, Double), x: Double, y: Double): Double = dist(a._1, a._2, x, y)
 
-  final def dist(x: Double, y: Double, a: (Double, Double)): Double = dist(x, y, a._2, a._2)
+  final def dist(x: Double, y: Double, a: (Double, Double)): Double = dist(x, y, a._1, a._2)
 
   final def dist(x: Double, y: Double, z: Double, t: Double): Double = this(z - x, t - y)
 
