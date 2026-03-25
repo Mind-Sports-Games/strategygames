@@ -31,6 +31,14 @@ case object GrandAbalone
   override def isAutoEndTurn(situation: Situation, orig: Pos, dest: Pos): Boolean =
     situation.board.history.pliesRemainingThisTurn.fold(true)(_ < 2)
 
+  /** Check repetition only at complete turn boundaries (after ply 2). */
+  override def repetition(situation: Situation): Boolean = {
+    if (!repetitionEnabled) return false
+    situation.board.history.lastAction.isDefined &&
+    situation.board.history.pliesRemainingThisTurn.contains(2) &&
+    situation.board.history.threefoldRepetition
+  }
+
   override def finalizeBoardAfter_hist(move: Move): Board =
     super.finalizeBoardAfter_hist(move).updateHistory { h =>
       h.copy(
