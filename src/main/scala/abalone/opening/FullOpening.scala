@@ -5,7 +5,6 @@ final class FullOpening(
     val name: String,
     val fen: String
 ) {
-
   def ecoName = s"$eco $name"
 
   override def toString = ecoName
@@ -14,6 +13,5 @@ final class FullOpening(
 }
 
 object FullOpening {
-
   case class AtPly(opening: FullOpening, ply: Int)
 }
