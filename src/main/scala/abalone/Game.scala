@@ -57,6 +57,9 @@ case class Game(
     else
       actionStrs.updated(actionStrs.size - 1, actionStrs(actionStrs.size - 1) :+ actionStr)
 
+  //TODO consider if this is still correct when we do from position for Grand Abalone
+  def hasJustSwitchedTurns: Boolean = board.history.currentTurn.isEmpty
+
   def player = situation.player
 
   def board = situation.board
