@@ -1,23 +1,21 @@
 package strategygames.abalone
 package format.pgn
-import strategygames.{ Action => StratAction, ActionStrs, ByoyomiClock, Clock, Situation => StratSituation }
-
-import strategygames.format.pgn.{ ParsedPgn, Sans, Tags }
-
-import strategygames.abalone.format.Uci
 
 import cats.data.Validated
+import strategygames.abalone.format.Uci
+import strategygames.format.pgn.{ParsedPgn, Sans, Tags}
+import strategygames.{ActionStrs, ByoyomiClock, Clock, Action => StratAction, Situation => StratSituation}
 
 object Reader {
-
   sealed trait Result {
     def valid: Validated[String, Replay]
   }
 
   object Result {
-    case class Complete(replay: Replay)                    extends Result {
+    case class Complete(replay: Replay) extends Result {
       def valid = Validated.valid(replay)
     }
+
     case class Incomplete(replay: Replay, failure: String) extends Result {
       def valid = Validated.invalid(failure)
     }
@@ -54,32 +52,21 @@ object Reader {
       case (r: Result.Incomplete, _)      => r
     }
 
-  private def makeReplayWithActionStrs(game: Game, actionStrs: ActionStrs): Result =
-    Replay.actionStrsWithEndTurn(actionStrs).foldLeft[Result](Result.Complete(Replay(game))) {
-      case (Result.Complete(replay), (actionStr, endTurn)) =>
+  private def makeReplayWithActionStrs(game: Game, actionStrs: ActionStrs): Result = {
+    actionStrs.flatten.foldLeft[Result](Result.Complete(Replay(game))) {
+      case (Result.Complete(replay), actionStr) =>
         actionStr match {
-          case Uci.Move.moveR(orig, dest) => {
-            (Pos.fromKey(orig), Pos.fromKey(dest)) match {
+          case Uci.Move.moveR(orig0, orig1, dest0, dest1) =>
+            (Pos.fromKey(orig0 + orig1), Pos.fromKey(dest0 + dest1)) match {
               case (Some(orig), Some(dest)) =>
-                Result.Complete(
-                  replay.addAction(
-                    Replay.replayMove(
-                      replay.state,
-                      orig,
-                      dest,
-                      endTurn
-                    )
-                  )
-                )
-              case _                        =>
-                Result.Incomplete(replay, s"Error making replay with move: ${actionStr}")
+                Result.Complete(replay.addAction(Replay.replayMove(replay.state, orig, dest)))
+              case _                        => Result.Incomplete(replay, s"Error making replay with move: ${actionStr}")
             }
-          }
-          case _                          =>
-            Result.Incomplete(replay, s"Error making replay with uci move: ${actionStr}")
+          case _                                          => Result.Incomplete(replay, s"Error making replay with uci move: ${actionStr}")
         }
-      case (r: Result.Incomplete, _)                       => r
+      case (r: Result.Incomplete, _)            => r
     }
+  }
 
   private def makeGame(tags: Tags) = {
     val g = Game(

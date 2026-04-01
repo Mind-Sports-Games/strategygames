@@ -1,16 +1,19 @@
 package strategygames.abalone.format
-import strategygames.abalone._
+
 import strategygames.Player
+import strategygames.abalone._
+import strategygames.abalone.variant.Variant
 
 object Visual {
-
-  def <<(source: String): Board = {
+  def <<(source: String, v: Variant = Variant.default): Board = {
     val lines    = augmentString(source).linesIterator.to(List)
+    val height   = v.boardType.height
     val filtered = lines.size match {
-      case 8          => lines
-      case n if n > 8 => lines.slice(1, 9)
-      case n          => (List.fill(8 - n)("")) ::: lines
+      case n if n == height => lines
+      case n if n > height  => lines.slice(1, height + 1)
+      case n                => (List.fill(height - n)("")) ::: lines
     }
+
     Board(
       pieces = (for {
         (l, y) <- (filtered zipWithIndex)
@@ -19,32 +22,34 @@ object Visual {
         // but then the whole file will need changing! only used for tests
         // role   <- Role forsyth c.toLower
       } yield {
-        Pos.at(x, 7 - y) map { pos =>
-          pos -> (Piece(Player.fromP1(c isUpper), Stone))
+        val a = new Pos(x, 7 - y)
+        (if (v.boardType.isCell(a)) Option(a) else None) map { pos =>
+          pos -> Piece(Player.fromP1(c isUpper), Stone)
         }
       }) flatten,
-      variant = strategygames.abalone.variant.Variant.default
+      variant = v
     )
   }
 
   def >>(board: Board): String = >>|(board, Map.empty)
 
   def >>|(board: Board, marks: Map[Iterable[Pos], Char]): String = {
-    val markedPoss: Map[Pos, Char] = marks.foldLeft(Map[Pos, Char]()) { case (marks, (poss, char)) =>
-      marks ++ (poss.toList map { pos =>
-        (pos, char)
-      })
+    val markedCells: Map[Pos, Char] = marks.foldLeft(Map[Pos, Char]()) { case (marks, (cells, char)) =>
+      marks ++ cells.toList.map(a => (a, char))
     }
-    for (y <- Rank.allReversed) yield {
-      for (x <- File.all) yield {
-        val pos = Pos(x, y)
-        pos match {
-          case Some(pos) => markedPoss.get(pos) getOrElse board(pos).fold(' ')(_ forsyth)
-          case None      => None
-        }
+
+    board.variant.boardType.cellList
+      .groupBy(_.y)
+      .toList
+      .sortBy { case (y, _) => -y }
+      .map { case (_, cells) =>
+        cells
+          .map(a => markedCells.get(a).getOrElse(board(a).fold(' ')(_ forsyth)))
+          .mkString
+          .replaceAll("""\s+$""", "")
       }
-    } mkString
-  } map { """\s*$""".r.replaceFirstIn(_, "") } mkString "\n"
+      .mkString("\n")
+  }
 
   def addNewLines(str: String) = "\n" + str + "\n"
 }
