@@ -170,6 +170,5 @@ object Piece {
   def pieceMapForChess(pieces: strategygames.chess.PieceMap): PieceMap = pieces.flatMap {
     case (pos, piece) =>
       Some((Pos.Chess(pos), (Piece.Chess(piece), 1)))
-    case null         => None
   }
 }

@@ -29,7 +29,7 @@ object EcopeningDB {
       strategygames.abalone.opening.EcopeningDB.allByEco.map { case (a, b) => a -> Ecopening.Abalone(b) }
     case GameLogic.Dameo()        =>
       strategygames.dameo.opening.EcopeningDB.allByEco.map { case (a, b) => a -> Ecopening.Dameo(b) }
-    case null                     => sys.error("Mismatched gamelogic types ecopening db")
+    case _                        => sys.error("Mismatched gamelogic types ecopening db")
   }
 
   def allByFen(lib: GameLogic): Map[FEN, Ecopening] = lib match {
@@ -55,7 +55,7 @@ object EcopeningDB {
       strategygames.abalone.opening.EcopeningDB.allByFen.map { case (a, b) => a -> Ecopening.Abalone(b) }
     case GameLogic.Dameo()        =>
       strategygames.dameo.opening.EcopeningDB.allByFen.map { case (a, b) => a -> Ecopening.Dameo(b) }
-    case null                     => sys.error("Mismatched gamelogic types ecopening db")
+    case _                        => sys.error("Mismatched gamelogic types ecopening db")
   }
 
   def all(lib: GameLogic): List[Ecopening] = lib match {
@@ -70,7 +70,7 @@ object EcopeningDB {
       strategygames.backgammon.opening.EcopeningDB.all.map(Ecopening.Backgammon.apply)
     case GameLogic.Abalone()      => strategygames.abalone.opening.EcopeningDB.all.map(Ecopening.Abalone.apply)
     case GameLogic.Dameo()        => strategygames.dameo.opening.EcopeningDB.all.map(Ecopening.Dameo.apply)
-    case null                     => sys.error("Mismatched gamelogic types ecopening db")
+    case _                        => sys.error("Mismatched gamelogic types ecopening db")
   }
 
 }

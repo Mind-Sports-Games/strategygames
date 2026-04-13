@@ -265,7 +265,7 @@ object History {
           halfMoveClock = halfMoveClock
         )
       )
-    case null                     => sys.error("Mismatched gamelogic types 1")
+    case _                        => sys.error("Mismatched gamelogic types 1")
   }
 
 }

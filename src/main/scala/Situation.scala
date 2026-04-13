@@ -1222,7 +1222,7 @@ object Situation {
       interaction match {
         case CubeInteraction.Backgammon(interaction) =>
           s.cubeAction(interaction).toEither.map(ca => CubeAction.Backgammon(ca)).toValidated
-        case null                                    => sys.error("Not passed Backgammon objects")
+        case _                                       => sys.error("Not passed Backgammon objects")
       }
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
