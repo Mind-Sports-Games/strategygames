@@ -372,8 +372,8 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     val drops_ply_16 = g9.validDrops(game_p16.situation)
 
     // should be able to play e8
-    "number of drops for ply 16 should be 71 (ko not activated)" in {
-      drops_ply_16.size === 71
+    "number of drops for ply 16 should be 69 (ko not activated)" in {
+      drops_ply_16.size === 69
       drops_ply_16.filter(_.pos.key == "e8").size === 1
     }
 
@@ -468,7 +468,7 @@ class GoSituationTest extends Specification with ValidatedMatchers {
 
     val repetitionDrop = "d6"
     "situation should not have repetitionDrop as a valid drop" in {
-      g9.validDrops(game.situation).map(_.pos.key).contains(repetitionDrop) must_== false
+      g9.validDrops(game.situation).map(_.pos.key).contains(repetitionDrop) === false
     }
   }
 

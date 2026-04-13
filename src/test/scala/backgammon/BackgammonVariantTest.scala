@@ -3650,14 +3650,14 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn",
         "3/1"
       )
-      playActionStrs(actionStrs, None, Some(variant.Hyper), Player.P2) must beValid.like { g =>
+      playActionStrs(actionStrs, None, Some(variant.Hyper), Player.P2) .toOption must beSome.like { case g: Game =>
         g.situation.forcedAction.nonEmpty === true
       }
-      playActionStrs(actionStrs ++ List("i1l1"), None, Some(variant.Hyper), Player.P2) must beValid.like {
-        g =>
+      playActionStrs(actionStrs ++ List("i1l1"), None, Some(variant.Hyper), Player.P2).toOption must beSome
+        .like { case g: Game =>
           g.situation.forcedAction.nonEmpty === true
           g.situation.board.history.forcedTurn === true
-      }
+        }
     }
 
     // here
@@ -3706,7 +3706,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn",
         "5/3"
       )
-      playActionStrs(actionStrs, None, Some(variant.Hyper), Player.P2) must beValid.like { g =>
+      playActionStrs(actionStrs, None, Some(variant.Hyper), Player.P2) .toOption must beSome.like { case g: Game =>
         g.situation.forcedAction.isEmpty === true
       }
     }
@@ -4525,7 +4525,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
       // This is a forcedSingle because the 6 has to be used on a piece starting the
       // turn on h2. h2b2 is forced, even if the player wanted to do h2e2 e2b1, this is
       // equivalent to h2b2 b2b1
-      playActionStrs(actionStrs, None, None, Player.P2) must beValid.like { g =>
+      playActionStrs(actionStrs, None, None, Player.P2) .toOption must beSome.like { case g: Game =>
         g.situation.forcedAction.isEmpty === true
       }
     }
@@ -4873,7 +4873,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn",
         "6/2"
       )
-      playActionStrs(actionStrs, None, Some(variant.Hyper), Player.P2) must beValid.like { g =>
+      playActionStrs(actionStrs, None, Some(variant.Hyper), Player.P2) .toOption must beSome.like { case g: Game =>
         g.situation.forcedAction.isEmpty === true
       }
     }
@@ -5083,7 +5083,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "3/6"
       )
       // 0 1 0 0 0 0 | 5 2 0 3 4 0
-      playActionStrs(actionStrs, None, None, Player.P2) must beValid.like { g =>
+      playActionStrs(actionStrs, None, None, Player.P2) .toOption must beSome.like { case g: Game =>
         g.situation.forcedAction.map(_.toUci.uci).isEmpty === true
       }
     }
@@ -5342,7 +5342,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn",
         "2/6"
       )
-      playActionStrs(actionStrs, None, Some(variant.Hyper), Player.P2) must beValid.like { g =>
+      playActionStrs(actionStrs, None, Some(variant.Hyper), Player.P2) .toOption must beSome.like { case g: Game =>
         g.situation.forcedAction.nonEmpty === true
       }
     }
@@ -5398,7 +5398,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         "endturn",
         "5/3"
       )
-      playActionStrs(actionStrs, None, Some(variant.Hyper), Player.P2) must beValid.like { g =>
+      playActionStrs(actionStrs, None, Some(variant.Hyper), Player.P2) .toOption must beSome.like { case g: Game =>
         g.situation.forcedAction.nonEmpty === true
       }
     }
@@ -6114,12 +6114,12 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         // "f2a1",
         // "f2a1",
       )
-      playActionStrs(actionStrs, None, Some(variant.Nackgammon), Player.P2) must beValid.like { g =>
+      playActionStrs(actionStrs, None, Some(variant.Nackgammon), Player.P2) .toOption must beSome.like { case g: Game =>
         g.situation.canMove === true
         g.situation.forcedAction.nonEmpty === true
       }
-      playActionStrs(actionStrs ++ List("l2f2"), None, Some(variant.Nackgammon), Player.P2) must beValid
-        .like { g =>
+      playActionStrs(actionStrs ++ List("l2f2"), None, Some(variant.Nackgammon), Player.P2).toOption must beSome
+        .like { case g: Game =>
           g.situation.canMove === true
           g.situation.forcedAction.isEmpty === true
         }

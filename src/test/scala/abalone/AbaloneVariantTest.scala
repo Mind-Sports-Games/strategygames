@@ -139,8 +139,8 @@ class AbaloneVariantTest extends AbaloneTest {
       pieces6.contains("e7") === false
       pieces6.contains("e8") === true
 
-      ukeys(validMoves6, 4, 3) should not contain "d5d8"
-      ukeys(validMoves6, 4, 3) should not contain "d5e5"
+      ukeys(validMoves6, 4, 3) should(not(contain("d5d8")))
+      ukeys(validMoves6, 4, 3) should(not(contain("d5e5")))
       ukeys(validMoves6, 4, 3) should contain("d5e6")
       ukeys(validMoves6, 7, 4) should contain("e8e7")
     }
@@ -406,8 +406,8 @@ class AbaloneVariantTest extends AbaloneTest {
     val validMoves = valid(Situation(board, P1))
 
     "not generate a push when a marble of the same colour blocks it (oooxo)" in {
-      validMoves.get(new Pos(4, 4)).get.map(_.toUci.keys) should not contain "e5a5"
-      validMoves.get(new Pos(4, 0)).get.map(_.toUci.keys) should not contain "a5a1"
+      validMoves.get(new Pos(4, 4)).get.map(_.toUci.keys) should(not(contain("e5a5")))
+      validMoves.get(new Pos(4, 0)).get.map(_.toUci.keys) should(not(contain("a5a1")))
     }
 
     "produce no move from a marble or a group or marbles that are stuck" in {
@@ -418,9 +418,9 @@ class AbaloneVariantTest extends AbaloneTest {
 
     "not move more than 3 marbles" in {
       ukeys(validMoves, 4, 2).size === 7
-      ukeys(validMoves, 4, 2) should not contain "c5i5"
-      ukeys(validMoves, 4, 2) should not contain "c5g6"
-      ukeys(validMoves, 4, 2) should not contain "c5f4"
+      ukeys(validMoves, 4, 2) should(not(contain("c5i5")))
+      ukeys(validMoves, 4, 2) should(not(contain("c5g6")))
+      ukeys(validMoves, 4, 2) should(not(contain("c5f4")))
     }
 
     "find and compute all moves that push off (3 vs 2, 3 vs 1, 2 vs 1)" in {
@@ -430,12 +430,12 @@ class AbaloneVariantTest extends AbaloneTest {
       ukeys(validMoves, 1, 5) should contain("f2i5")
 
       ukeys(validMoves, 0, 0) should contain("a1e1")
-      ukeys(validMoves, 0, 0) should not contain "a1a5"
+      ukeys(validMoves, 0, 0) should(not(contain("a1a5")))
     }
 
     "not create a move in case of n vs n push" in {
-      ukeys(validMoves, 0, 1) should not contain "b1e1"
-      ukeys(validMoves, 4, 3) should not contain "d5i5"
+      ukeys(validMoves, 0, 1) should(not(contain("b1e1")))
+      ukeys(validMoves, 4, 3) should(not(contain("d5i5")))
     }
   }
 
@@ -819,13 +819,14 @@ class AbaloneVariantTest extends AbaloneTest {
       val lib          = gameFamily.gameLogic
       val stratVariant = StratVariant(lib, Abalone.key).get
 
+      val uciStrs: List[String] = abaloneGameActionStrs.iterator.flatMap(_.iterator).toList
       _testEveryMoveLoadFenIsometry(lib, StratFen(lib, Abalone.initialFen.value), stratVariant)(
-        abaloneGameActionStrs.flatten.toList.map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-      ) must beValid.like(gameData => {
+        uciStrs.map(uciStr => StratUci(lib, gameFamily, uciStr).get)
+      ).toOption must beSome.like { case gameData =>
         val fen1 = StratForsyth.>>(lib, gameData.game)
         val fen2 = StratForsyth.>>(lib, gameData.fenGame)
         fen1 === fen2
-      })
+      }
     }
   }
 }

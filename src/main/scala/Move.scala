@@ -361,8 +361,6 @@ object Move {
 
     override def toUci: Uci.Move = Uci.AbaloneMove(m.toUci)
 
-    def toUci: Uci.Move = Uci.AbaloneMove((m.toUci: abalone.format.Uci.Move))
-
     override def toShortUci: Uci.Move =
       Uci.Move(
         GameLogic.Abalone(),

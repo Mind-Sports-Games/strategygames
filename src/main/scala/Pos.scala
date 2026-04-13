@@ -120,7 +120,6 @@ object Pos {
     override lazy val toInt: Int = (p.x << 4) + p.y
 
     override def gameLogic: GameLogic = GameLogic.Abalone()
-    lazy val toInt: Int               = (p.file.index << 3) + p.rank.index
     override lazy val all: List[Pos]  = abalone.Pos.all.map(Abalone.apply)
   }
 
