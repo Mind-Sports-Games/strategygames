@@ -57,7 +57,6 @@ abstract class Variant private[variant] (
   def isValidPromotion(promotion: Option[PromotableRole]) = promotion match {
     case None       => true
     case Some(King) => true
-    case _          => false
   }
 
   def getCaptureValue(@nowarn board: Board, taken: List[Pos])   = taken.length

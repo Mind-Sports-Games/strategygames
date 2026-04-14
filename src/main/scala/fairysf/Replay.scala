@@ -259,7 +259,7 @@ object Replay {
         val fairyUcis       = Parser.flatActionStrsToFairyUciMoves(actionStrs.flatten)
         val firstFairyUci   = fairyUcis.headOption.toList
         val pairedFairyUcis = if (fairyUcis == firstFairyUci) List() else fairyUcis.sliding(2)
-        (firstFairyUci.map(parseFairyUci)) ::: pairedFairyUcis.flatMap {
+        (firstFairyUci.map(parseFairyUci)) ::: pairedFairyUcis.iterator.flatMap {
           case List(prev, fairyUci) =>
             Some(parseFairyUciWithPrevious(fairyUci, Some(prev)))
           case _                    => None
