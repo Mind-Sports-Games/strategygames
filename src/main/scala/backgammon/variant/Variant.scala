@@ -356,7 +356,10 @@ abstract class Variant private[variant] (
     )
       diceCombinations(2).toList
         .filter { dr =>
-          situation.board.history.firstDiceRollHappened || dr.toSet.size == 2
+          situation.board.history.firstDiceRollHappened ||
+          situation.board.history.halfMoveClock > 1 ||
+          (situation.board.history.halfMoveClock == 1 && situation.player == P2) ||
+          dr.toSet.size == 2
         }
         .map { dice =>
           DiceRoll(
