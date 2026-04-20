@@ -110,6 +110,10 @@ final case class FEN(value: String) extends AnyVal {
     value.split(' ').updated(6, "0").mkString(" ")
   )
 
+  def withoutCube: FEN = FEN(
+    (value.split(' ').dropRight(2) ++ value.split(' ').takeRight(1)).mkString(" ")
+  )
+
   def initial = value == Forsyth.initial.value
 
 }

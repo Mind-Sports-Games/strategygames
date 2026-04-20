@@ -4,7 +4,7 @@ import cats.data.Validated
 import cats.syntax.option._
 
 import strategygames.backgammon._
-import strategygames.backgammon.format.{ FEN, Uci }
+import strategygames.backgammon.format.{ FEN, Forsyth, Uci }
 import strategygames.{ GameFamily, Player, Score, Status }
 
 import scala.util.Random
@@ -341,6 +341,9 @@ abstract class Variant private[variant] (
         .flatten
     else List.empty
 
+  private def isInitialPosition(situation: Situation): Boolean =
+    initialFens.map(_.withoutCube).contains(Forsyth.>>(situation).withoutCube)
+
   private def diceCombinations(diceCount: Int, diceMax: Int = 6): Iterator[List[Int]] =
     List
       .fill(diceCount)((1 to diceMax).toList)
@@ -356,7 +359,8 @@ abstract class Variant private[variant] (
     )
       diceCombinations(2).toList
         .filter { dr =>
-          situation.board.history.firstDiceRollHappened || dr.toSet.size == 2
+          !isInitialPosition(situation) ||
+          dr.toSet.size == 2
         }
         .map { dice =>
           DiceRoll(
@@ -443,7 +447,7 @@ abstract class Variant private[variant] (
   def validCubeActions(situation: Situation): List[CubeAction] =
     if (
       situation.board.history.hasRolledDiceThisTurn ||
-      !situation.board.history.firstDiceRollHappened ||
+      isInitialPosition(situation) ||
       situation.board.variant.endFromBoard(situation.board)
     )
       List.empty
