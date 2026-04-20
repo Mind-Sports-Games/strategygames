@@ -139,7 +139,6 @@ class BackgammonSituationTest extends Specification with ValidatedMatchers {
       g3.situation.board.piecesCanLift(Player.P2) must_== false
       g3.situation.board.racePosition must_== false
       g3.situation.board.history.hasRolledDiceThisTurn must_== true
-      g3.situation.board.history.firstDiceRollHappened must_== false
     }
     val g4       = g3.endTurn() match {
       case Valid((g, _)) => g
@@ -169,7 +168,6 @@ class BackgammonSituationTest extends Specification with ValidatedMatchers {
       g4.situation.board.piecesCanLift(Player.P2) must_== false
       g4.situation.board.racePosition must_== false
       g4.situation.board.history.hasRolledDiceThisTurn must_== false
-      g4.situation.board.history.firstDiceRollHappened must_== true
       g4.situation.player must_!= g3.situation.player
     }
     val ca1      = g4.situation.cubeActions.head
@@ -199,7 +197,6 @@ class BackgammonSituationTest extends Specification with ValidatedMatchers {
       g5.situation.board.piecesCanLift(Player.P2) must_== false
       g5.situation.board.racePosition must_== false
       g5.situation.board.history.hasRolledDiceThisTurn must_== false
-      g5.situation.board.history.firstDiceRollHappened must_== true
       g5.situation.player must_!= g4.situation.player
     }
     val ca2      = g5.situation.cubeActions.filter(_.interaction.name == "reject").head
@@ -218,7 +215,6 @@ class BackgammonSituationTest extends Specification with ValidatedMatchers {
       g6.situation.board.piecesCanLift(Player.P2) must_== false
       g6.situation.board.racePosition must_== false
       g6.situation.board.history.hasRolledDiceThisTurn must_== false
-      g6.situation.board.history.firstDiceRollHappened must_== true
     }
 
   }

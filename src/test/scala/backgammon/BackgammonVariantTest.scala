@@ -13,6 +13,10 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
 
     val game = Game.makeGame(variant.Backgammon, Some(Player.P1))
 
+    "not allow doubles in first roll" in {
+      game.situation.diceRolls.size must_== 30
+    }
+
     "be valid game after first dice roll" in {
       game.diceRoll(List(3, 4)) must beValid.like { g =>
         g._1.situation.moves.values.flatten.size must_== 8
@@ -155,6 +159,7 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
       playActionStrs(actionStrs) must beValid.like { g =>
         g.situation.player must_== Player.P2
         g.situation.board.history.lastTurn.map(_.uci) must_== actionStrs
+        g.situation.diceRolls.size must_== 36
       }
     }
 
@@ -310,6 +315,29 @@ class BackgammonVariantTest extends BackgammonTest with ValidatedMatchers {
         g.situation.moves.values.flatten
           .map(_.toUci.uci)
           .toSet must_== gamePreUndo.situation.moves.values.flatten.map(_.toUci.uci).toSet
+      }
+    }
+  }
+
+  "Backgammon Variant can initialise with P2 as starting player" should {
+
+    val game = Game.makeGame(variant.Backgammon, Some(Player.P2))
+
+    "not allow doubles in first roll" in {
+      game.situation.diceRolls.size must_== 30
+    }
+
+    "be valid game after first turn" in {
+      val actionStrs = List(
+        "1/5",
+        "l1k1",
+        "e2j2",
+        "endturn"
+      )
+      playActionStrs(actionStrs, Some(game)) must beValid.like { g =>
+        g.situation.player must_== Player.P1
+        g.situation.board.history.lastTurn.map(_.uci) must_== actionStrs
+        g.situation.diceRolls.size must_== 36
       }
     }
   }
