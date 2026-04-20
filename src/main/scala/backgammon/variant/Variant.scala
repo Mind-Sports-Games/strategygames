@@ -342,7 +342,7 @@ abstract class Variant private[variant] (
     else List.empty
 
   private def isInitialPosition(situation: Situation): Boolean =
-    initialFens.contains(Forsyth.>>(situation))
+    initialFens.map(_.withoutCube).contains(Forsyth.>>(situation).withoutCube)
 
   private def diceCombinations(diceCount: Int, diceMax: Int = 6): Iterator[List[Int]] =
     List
@@ -447,7 +447,7 @@ abstract class Variant private[variant] (
   def validCubeActions(situation: Situation): List[CubeAction] =
     if (
       situation.board.history.hasRolledDiceThisTurn ||
-      !isInitialPosition(situation) ||
+      isInitialPosition(situation) ||
       situation.board.variant.endFromBoard(situation.board)
     )
       List.empty
