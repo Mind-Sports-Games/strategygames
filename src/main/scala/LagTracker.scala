@@ -1,5 +1,7 @@
 package strategygames
 
+import scalalib.extensions.*
+
 final case class LagTracker(
     quotaGain: Centis,
     quota: Centis,

@@ -10,7 +10,7 @@ class FairySFTestInit extends Specification with ValidatedMatchers {
   "fairystockfish" should {
     "be inititalized" in {
       FairyStockfish.init()
-      true must_== true
+      true === true
     }
   }
 

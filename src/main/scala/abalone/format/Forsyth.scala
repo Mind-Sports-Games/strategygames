@@ -1,8 +1,11 @@
 package strategygames.abalone.format
 
+import cats.implicits._
+import scalalib.extensions.*
+
 import strategygames.abalone._
-import strategygames.abalone.variant.{Abalone, Variant}
-import strategygames.{Player, Score}
+import strategygames.abalone.variant.{ Abalone, Variant }
+import strategygames.{ Player, Score }
 
 /** Transforms a game to standard Forsyth-Edwards notation
   * http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation

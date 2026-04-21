@@ -28,11 +28,11 @@ case class DiceRoll(
 
   def player = situationBefore.player
 
-  def withMetrics(m: MoveMetrics) = copy(metrics = m)
+  def withMetrics(m: MoveMetrics): DiceRoll = copy(metrics = m)
 
   // lazy val rollDice
 
-  def toUci = Uci.DiceRoll(dice)
+  def toUci: Uci.DiceRoll = Uci.DiceRoll(dice)
 
   override def toString = toUci.uci
 }

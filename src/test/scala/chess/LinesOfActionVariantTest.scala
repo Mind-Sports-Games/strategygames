@@ -10,7 +10,7 @@ class LinesOfActionVariantTest extends ChessTest {
     "P2 win from position" in {
       val position = FEN("1llllll1/L6L/L6L/L6L/L6L/L6L/L6L/8 b - - 0 1")
       val game     = fenToGame(position, LinesOfAction)
-      game must beValid.like {
+      game .toOption must beSome.like {
         case game => {
           game.situation.winner == Option(P2) must beTrue
         }
@@ -20,7 +20,7 @@ class LinesOfActionVariantTest extends ChessTest {
     "Both colours win" in {
       val position = FEN("1llllll1/L7/L7/L7/L7/L7/L7/8 b - - 0 1")
       val game     = fenToGame(position, LinesOfAction)
-      game must beValid.like {
+      game .toOption must beSome.like {
         case game => {
           game.situation.board.variant.specialDraw(game.situation) must beTrue
         }
@@ -30,7 +30,7 @@ class LinesOfActionVariantTest extends ChessTest {
     "StaleMate for P1" in {
       val position = FEN("6lL/6ll/8/8/8/8/ll6/Ll6 w - - 0 1")
       val game     = fenToGame(position, LinesOfAction)
-      game must beValid.like {
+      game .toOption must beSome.like {
         case game => {
           game.situation.board.variant.staleMate(game.situation) must beTrue
         }
@@ -40,7 +40,7 @@ class LinesOfActionVariantTest extends ChessTest {
     "Game in progress" in {
       val position = FEN("1llllll1/L6L/L6L/L6L/L6L/L6L/L6L/1llllll1 b - - 0 1")
       val game     = fenToGame(position, LinesOfAction)
-      game must beValid.like {
+      game .toOption must beSome.like {
         case game => {
           game.situation.board.variant.specialEnd(game.situation) must beFalse
         }

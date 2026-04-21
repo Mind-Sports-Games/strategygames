@@ -138,8 +138,8 @@ class EnglishDraughtsTest extends Specification with ValidatedMatchers {
       val s = testKingMoves
         .foldLeft(Situation(variant.English))((sit, uci) => move(sit, uci))
 
-      s.validMoves.size must_== 1
-      s.validMoves(s.validMoves.keys.head).size must_== 4
+      s.validMoves.size === 1
+      s.validMoves(s.validMoves.keys.head).size === 4
     }
   }
 
@@ -153,8 +153,8 @@ class EnglishDraughtsTest extends Specification with ValidatedMatchers {
           )
         )((sit, uci) => move(sit, uci))
 
-      s.checkMate must_== true
-      s.winner must_== Some(Player.P1)
+      s.checkMate === true
+      s.winner === Some(Player.P1)
     }
   }
 
@@ -163,7 +163,7 @@ class EnglishDraughtsTest extends Specification with ValidatedMatchers {
       val s = multiCaptureMoves
         .foldLeft(Situation(variant.English))((sit, uci) => move(sit, uci))
 
-      s.validMoves.size must_== 6
+      s.validMoves.size === 6
     }
   }
 }

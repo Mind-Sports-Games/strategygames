@@ -6,120 +6,120 @@ import strategygames.abalone.variant.Abalone
 class AbalonePosTest extends AbaloneTest with ValidatedMatchers {
   "Piotr mappings" should {
     "cover all Piotr-encodable positions (full table, all board types)" in {
-      Pos.all.size must_== 361
+      Pos.all.size === 361
     }
 
     "roundtrip pos -> piotr -> pos for all positions" in {
-      Pos.all.forall(p => Pos.piotr(p.piotr).contains(p)) must_== true
+      Pos.all.forall(p => Pos.piotr(p.piotr).contains(p)) === true
     }
   }
 
   "grid coordinates" should {
     "describe 61 positions" in {
-      Abalone.boardType.cellList.size must_== 61
+      Abalone.boardType.cellList.size === 61
     }
 
     "be shaped as a hexagon" in {
       // First row
-      Abalone.boardType.isCell(new Pos(0, 0)) must_== true
-      Abalone.boardType.isCell(new Pos(1, 0)) must_== true
-      Abalone.boardType.isCell(new Pos(2, 0)) must_== true
-      Abalone.boardType.isCell(new Pos(3, 0)) must_== true
-      Abalone.boardType.isCell(new Pos(4, 0)) must_== true
-      Abalone.boardType.isCell(new Pos(5, 0)) must_== false
-      Abalone.boardType.isCell(new Pos(6, 0)) must_== false
-      Abalone.boardType.isCell(new Pos(7, 0)) must_== false
-      Abalone.boardType.isCell(new Pos(8, 0)) must_== false
+      Abalone.boardType.isCell(new Pos(0, 0)) === true
+      Abalone.boardType.isCell(new Pos(1, 0)) === true
+      Abalone.boardType.isCell(new Pos(2, 0)) === true
+      Abalone.boardType.isCell(new Pos(3, 0)) === true
+      Abalone.boardType.isCell(new Pos(4, 0)) === true
+      Abalone.boardType.isCell(new Pos(5, 0)) === false
+      Abalone.boardType.isCell(new Pos(6, 0)) === false
+      Abalone.boardType.isCell(new Pos(7, 0)) === false
+      Abalone.boardType.isCell(new Pos(8, 0)) === false
 
-      Abalone.boardType.isCell(new Pos(0, 1)) must_== true
-      Abalone.boardType.isCell(new Pos(1, 1)) must_== true
-      Abalone.boardType.isCell(new Pos(2, 1)) must_== true
-      Abalone.boardType.isCell(new Pos(3, 1)) must_== true
-      Abalone.boardType.isCell(new Pos(4, 1)) must_== true
-      Abalone.boardType.isCell(new Pos(5, 1)) must_== true
-      Abalone.boardType.isCell(new Pos(6, 1)) must_== false
-      Abalone.boardType.isCell(new Pos(7, 1)) must_== false
-      Abalone.boardType.isCell(new Pos(8, 1)) must_== false
+      Abalone.boardType.isCell(new Pos(0, 1)) === true
+      Abalone.boardType.isCell(new Pos(1, 1)) === true
+      Abalone.boardType.isCell(new Pos(2, 1)) === true
+      Abalone.boardType.isCell(new Pos(3, 1)) === true
+      Abalone.boardType.isCell(new Pos(4, 1)) === true
+      Abalone.boardType.isCell(new Pos(5, 1)) === true
+      Abalone.boardType.isCell(new Pos(6, 1)) === false
+      Abalone.boardType.isCell(new Pos(7, 1)) === false
+      Abalone.boardType.isCell(new Pos(8, 1)) === false
 
-      Abalone.boardType.isCell(new Pos(0, 2)) must_== true
-      Abalone.boardType.isCell(new Pos(1, 2)) must_== true
-      Abalone.boardType.isCell(new Pos(2, 2)) must_== true
-      Abalone.boardType.isCell(new Pos(3, 2)) must_== true
-      Abalone.boardType.isCell(new Pos(4, 2)) must_== true
-      Abalone.boardType.isCell(new Pos(5, 2)) must_== true
-      Abalone.boardType.isCell(new Pos(6, 2)) must_== true
-      Abalone.boardType.isCell(new Pos(7, 2)) must_== false
-      Abalone.boardType.isCell(new Pos(8, 2)) must_== false
+      Abalone.boardType.isCell(new Pos(0, 2)) === true
+      Abalone.boardType.isCell(new Pos(1, 2)) === true
+      Abalone.boardType.isCell(new Pos(2, 2)) === true
+      Abalone.boardType.isCell(new Pos(3, 2)) === true
+      Abalone.boardType.isCell(new Pos(4, 2)) === true
+      Abalone.boardType.isCell(new Pos(5, 2)) === true
+      Abalone.boardType.isCell(new Pos(6, 2)) === true
+      Abalone.boardType.isCell(new Pos(7, 2)) === false
+      Abalone.boardType.isCell(new Pos(8, 2)) === false
 
-      Abalone.boardType.isCell(new Pos(0, 3)) must_== true
-      Abalone.boardType.isCell(new Pos(1, 3)) must_== true
-      Abalone.boardType.isCell(new Pos(2, 3)) must_== true
-      Abalone.boardType.isCell(new Pos(3, 3)) must_== true
-      Abalone.boardType.isCell(new Pos(4, 3)) must_== true
-      Abalone.boardType.isCell(new Pos(5, 3)) must_== true
-      Abalone.boardType.isCell(new Pos(6, 3)) must_== true
-      Abalone.boardType.isCell(new Pos(7, 3)) must_== true
-      Abalone.boardType.isCell(new Pos(8, 3)) must_== false
+      Abalone.boardType.isCell(new Pos(0, 3)) === true
+      Abalone.boardType.isCell(new Pos(1, 3)) === true
+      Abalone.boardType.isCell(new Pos(2, 3)) === true
+      Abalone.boardType.isCell(new Pos(3, 3)) === true
+      Abalone.boardType.isCell(new Pos(4, 3)) === true
+      Abalone.boardType.isCell(new Pos(5, 3)) === true
+      Abalone.boardType.isCell(new Pos(6, 3)) === true
+      Abalone.boardType.isCell(new Pos(7, 3)) === true
+      Abalone.boardType.isCell(new Pos(8, 3)) === false
 
-      Abalone.boardType.isCell(new Pos(0, 4)) must_== true
-      Abalone.boardType.isCell(new Pos(1, 4)) must_== true
-      Abalone.boardType.isCell(new Pos(2, 4)) must_== true
-      Abalone.boardType.isCell(new Pos(3, 4)) must_== true
-      Abalone.boardType.isCell(new Pos(4, 4)) must_== true
-      Abalone.boardType.isCell(new Pos(5, 4)) must_== true
-      Abalone.boardType.isCell(new Pos(6, 4)) must_== true
-      Abalone.boardType.isCell(new Pos(7, 4)) must_== true
-      Abalone.boardType.isCell(new Pos(8, 4)) must_== true
+      Abalone.boardType.isCell(new Pos(0, 4)) === true
+      Abalone.boardType.isCell(new Pos(1, 4)) === true
+      Abalone.boardType.isCell(new Pos(2, 4)) === true
+      Abalone.boardType.isCell(new Pos(3, 4)) === true
+      Abalone.boardType.isCell(new Pos(4, 4)) === true
+      Abalone.boardType.isCell(new Pos(5, 4)) === true
+      Abalone.boardType.isCell(new Pos(6, 4)) === true
+      Abalone.boardType.isCell(new Pos(7, 4)) === true
+      Abalone.boardType.isCell(new Pos(8, 4)) === true
 
-      Abalone.boardType.isCell(new Pos(0, 5)) must_== false
-      Abalone.boardType.isCell(new Pos(1, 5)) must_== true
-      Abalone.boardType.isCell(new Pos(2, 5)) must_== true
-      Abalone.boardType.isCell(new Pos(3, 5)) must_== true
-      Abalone.boardType.isCell(new Pos(4, 5)) must_== true
-      Abalone.boardType.isCell(new Pos(5, 5)) must_== true
-      Abalone.boardType.isCell(new Pos(6, 5)) must_== true
-      Abalone.boardType.isCell(new Pos(7, 5)) must_== true
-      Abalone.boardType.isCell(new Pos(8, 5)) must_== true
+      Abalone.boardType.isCell(new Pos(0, 5)) === false
+      Abalone.boardType.isCell(new Pos(1, 5)) === true
+      Abalone.boardType.isCell(new Pos(2, 5)) === true
+      Abalone.boardType.isCell(new Pos(3, 5)) === true
+      Abalone.boardType.isCell(new Pos(4, 5)) === true
+      Abalone.boardType.isCell(new Pos(5, 5)) === true
+      Abalone.boardType.isCell(new Pos(6, 5)) === true
+      Abalone.boardType.isCell(new Pos(7, 5)) === true
+      Abalone.boardType.isCell(new Pos(8, 5)) === true
 
-      Abalone.boardType.isCell(new Pos(0, 6)) must_== false
-      Abalone.boardType.isCell(new Pos(1, 6)) must_== false
-      Abalone.boardType.isCell(new Pos(2, 6)) must_== true
-      Abalone.boardType.isCell(new Pos(3, 6)) must_== true
-      Abalone.boardType.isCell(new Pos(4, 6)) must_== true
-      Abalone.boardType.isCell(new Pos(5, 6)) must_== true
-      Abalone.boardType.isCell(new Pos(6, 6)) must_== true
-      Abalone.boardType.isCell(new Pos(7, 6)) must_== true
-      Abalone.boardType.isCell(new Pos(8, 6)) must_== true
+      Abalone.boardType.isCell(new Pos(0, 6)) === false
+      Abalone.boardType.isCell(new Pos(1, 6)) === false
+      Abalone.boardType.isCell(new Pos(2, 6)) === true
+      Abalone.boardType.isCell(new Pos(3, 6)) === true
+      Abalone.boardType.isCell(new Pos(4, 6)) === true
+      Abalone.boardType.isCell(new Pos(5, 6)) === true
+      Abalone.boardType.isCell(new Pos(6, 6)) === true
+      Abalone.boardType.isCell(new Pos(7, 6)) === true
+      Abalone.boardType.isCell(new Pos(8, 6)) === true
 
-      Abalone.boardType.isCell(new Pos(0, 7)) must_== false
-      Abalone.boardType.isCell(new Pos(1, 7)) must_== false
-      Abalone.boardType.isCell(new Pos(2, 7)) must_== false
-      Abalone.boardType.isCell(new Pos(3, 7)) must_== true
-      Abalone.boardType.isCell(new Pos(4, 7)) must_== true
-      Abalone.boardType.isCell(new Pos(5, 7)) must_== true
-      Abalone.boardType.isCell(new Pos(6, 7)) must_== true
-      Abalone.boardType.isCell(new Pos(7, 7)) must_== true
-      Abalone.boardType.isCell(new Pos(8, 7)) must_== true
+      Abalone.boardType.isCell(new Pos(0, 7)) === false
+      Abalone.boardType.isCell(new Pos(1, 7)) === false
+      Abalone.boardType.isCell(new Pos(2, 7)) === false
+      Abalone.boardType.isCell(new Pos(3, 7)) === true
+      Abalone.boardType.isCell(new Pos(4, 7)) === true
+      Abalone.boardType.isCell(new Pos(5, 7)) === true
+      Abalone.boardType.isCell(new Pos(6, 7)) === true
+      Abalone.boardType.isCell(new Pos(7, 7)) === true
+      Abalone.boardType.isCell(new Pos(8, 7)) === true
 
       // Last row
-      Abalone.boardType.isCell(new Pos(0, 8)) must_== false
-      Abalone.boardType.isCell(new Pos(1, 8)) must_== false
-      Abalone.boardType.isCell(new Pos(2, 8)) must_== false
-      Abalone.boardType.isCell(new Pos(3, 8)) must_== false
-      Abalone.boardType.isCell(new Pos(4, 8)) must_== true
-      Abalone.boardType.isCell(new Pos(5, 8)) must_== true
-      Abalone.boardType.isCell(new Pos(6, 8)) must_== true
-      Abalone.boardType.isCell(new Pos(7, 8)) must_== true
-      Abalone.boardType.isCell(new Pos(8, 8)) must_== true
+      Abalone.boardType.isCell(new Pos(0, 8)) === false
+      Abalone.boardType.isCell(new Pos(1, 8)) === false
+      Abalone.boardType.isCell(new Pos(2, 8)) === false
+      Abalone.boardType.isCell(new Pos(3, 8)) === false
+      Abalone.boardType.isCell(new Pos(4, 8)) === true
+      Abalone.boardType.isCell(new Pos(5, 8)) === true
+      Abalone.boardType.isCell(new Pos(6, 8)) === true
+      Abalone.boardType.isCell(new Pos(7, 8)) === true
+      Abalone.boardType.isCell(new Pos(8, 8)) === true
     }
 
     "compute its index based on a shape of square (sort of...) when accessed in 2D" in {
-      new Pos(0, 0) must_== Pos.fromIndex(0)
-      new Pos(0, 1) must_== Pos.fromIndex(9)
+      new Pos(0, 0) === Pos.fromIndex(0)
+      new Pos(0, 1) === Pos.fromIndex(9)
 
-      new Pos(1, 1) must_== Pos.fromIndex(10)
+      new Pos(1, 1) === Pos.fromIndex(10)
 
-      new Pos(6, 9) must_== Pos.fromIndex(87)
+      new Pos(6, 9) === Pos.fromIndex(87)
     }
   }
 
@@ -138,7 +138,7 @@ class AbalonePosTest extends AbaloneTest with ValidatedMatchers {
    */
   "official notation" should {
     "be written yx with y as a lowercase letter and x as a number" in {
-      new Pos(6, 5).key must_== "f7"
+      new Pos(6, 5).key === "f7"
     }
   }
 }

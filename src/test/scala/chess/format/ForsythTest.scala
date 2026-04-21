@@ -17,41 +17,41 @@ class ForsythTest extends ChessTest {
       "game opening" in {
         val moves = List(E2 -> E4, C7 -> C5, G1 -> F3, G8 -> H6, A2 -> A3)
         "new game" in {
-          f >> makeGame must_== FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+          f >> makeGame === FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
         }
         "new game board only" in {
-          f exportBoard makeBoard must_== "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
+          (f exportBoard makeBoard) === "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
         }
         "one move" in {
-          makeGame.playMoveList(moves take 1) must beValid.like { g =>
-            f >> g must_== FEN("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1")
+          makeGame.playMoveList(moves take 1) .toOption must beSome.like { case g =>
+            f >> g === FEN("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1")
           }
         }
         "2 moves" in {
-          makeGame.playMoveList(moves take 2) must beValid.like { g =>
-            f >> g must_== FEN("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2")
+          makeGame.playMoveList(moves take 2) .toOption must beSome.like { case g =>
+            f >> g === FEN("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2")
           }
         }
         "3 moves" in {
-          makeGame.playMoveList(moves take 3) must beValid.like { g =>
-            f >> g must_== FEN("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2")
+          makeGame.playMoveList(moves take 3) .toOption must beSome.like { case g =>
+            f >> g === FEN("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2")
           }
         }
         "4 moves" in {
-          makeGame.playMoveList(moves take 4) must beValid.like { g =>
-            f >> g must_== FEN("rnbqkb1r/pp1ppppp/7n/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3")
+          makeGame.playMoveList(moves take 4) .toOption must beSome.like { case g =>
+            f >> g === FEN("rnbqkb1r/pp1ppppp/7n/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3")
           }
         }
         "5 moves" in {
-          makeGame.playMoveList(moves take 5) must beValid.like { g =>
-            f >> g must_== FEN("rnbqkb1r/pp1ppppp/7n/2p5/4P3/P4N2/1PPP1PPP/RNBQKB1R b KQkq - 0 3")
+          makeGame.playMoveList(moves take 5) .toOption must beSome.like { case g =>
+            f >> g === FEN("rnbqkb1r/pp1ppppp/7n/2p5/4P3/P4N2/1PPP1PPP/RNBQKB1R b KQkq - 0 3")
           }
         }
       }
 
       "completely legal en-passant" in {
-        makeGame.playMoves(A2 -> A4, G8 -> F6, A4 -> A5, B7 -> B5) must beValid.like { g =>
-          f >> g must_== FEN("rnbqkb1r/p1pppppp/5n2/Pp6/8/8/1PPPPPPP/RNBQKBNR w KQkq b6 0 3")
+        makeGame.playMoves(A2 -> A4, G8 -> F6, A4 -> A5, B7 -> B5) .toOption must beSome.like { case g =>
+          f >> g === FEN("rnbqkb1r/p1pppppp/5n2/Pp6/8/8/1PPPPPPP/RNBQKBNR w KQkq b6 0 3")
         }
       }
 
@@ -74,14 +74,14 @@ class ForsythTest extends ChessTest {
         )
 
         "inner rook" in {
-          makeGame.playMoveList(moves dropRight 2) must beValid.like { g =>
-            f >> g must_== FEN("rrbqkbn1/p1ppppp1/n7/1p5p/1P5P/N7/P1PPPPP1/RRBQKBN1 w Qq - 6 7")
+          makeGame.playMoveList(moves dropRight 2) .toOption must beSome.like { case g =>
+            f >> g === FEN("rrbqkbn1/p1ppppp1/n7/1p5p/1P5P/N7/P1PPPPP1/RRBQKBN1 w Qq - 6 7")
           }
         }
 
         "inner rook removed" in {
-          makeGame.playMoveList(moves) must beValid.like { g =>
-            f >> g must_== FEN("r1bqkbn1/p1ppppp1/nr6/1p5p/1P5P/NR6/P1PPPPP1/R1BQKBN1 w Qq - 8 8")
+          makeGame.playMoveList(moves) .toOption must beSome.like { case g =>
+            f >> g === FEN("r1bqkbn1/p1ppppp1/nr6/1p5p/1P5P/NR6/P1PPPPP1/R1BQKBN1 w Qq - 8 8")
           }
         }
       }
@@ -89,9 +89,9 @@ class ForsythTest extends ChessTest {
     "import" in {
       val moves                                      = List(E2 -> E4, C7 -> C5, G1 -> F3, G8 -> H6, A2 -> A3)
       def compare(ms: List[(Pos, Pos)], fen: String) =
-        makeGame.playMoveList(ms) must beValid.like { g =>
-          (f << FEN(fen)) must beSome.like { situation =>
-            situation.board.visual must_== g.situation.board.visual
+        makeGame.playMoveList(ms) .toOption must beSome.like { case g =>
+          (f << FEN(fen)) must beSome.like { case situation =>
+            situation.board.visual === g.situation.board.visual
           }
         }
       "new game" in {
@@ -145,50 +145,50 @@ class ForsythTest extends ChessTest {
     "chess960" in {
       f.<<@(Chess960, FEN("rnbqkb1r/pp1ppppp/7n/2p5/4P3/P4N2/1PPP1PPP/RNBQKB1R b KQkq - 0 3")) must beSome
         .like { s =>
-          s.board.variant must_== Chess960
+          s.board.variant === Chess960
         }
     }
     "crazyhouse" in {
       f.<<<@(Crazyhouse, FEN("rnbqkb1r/pp1ppppp/7n/2p5/4P3/P4N2/1PPP1PPP/RNBQKB1R b KQkq - 0 3")) must beSome
         .like { s =>
-          s.situation.board.variant must_== Crazyhouse
+          s.situation.board.variant === Crazyhouse
         }
     }
   }
   "export to situation plus" should {
     "with turns" in {
       "starting" in {
-        f <<< FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") must beSome.like { s =>
-          s.turnCount must_== 0
-          s.plies must_== 0
+        f <<< FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") must beSome.like { case s =>
+          s.turnCount === 0
+          s.plies === 0
         }
       }
       "p1 to play" in {
         f <<< FEN("r2q1rk1/ppp2pp1/1bnpbn1p/4p3/4P3/1BNPBN1P/PPPQ1PP1/R3K2R w KQ - 7 10") must beSome.like {
           s =>
-            s.turnCount must_== 18
-            s.plies must_== 18
+            s.turnCount === 18
+            s.plies === 18
         }
       }
       "p2 to play" in {
-        f <<< FEN("r1q2rk1/ppp2ppp/3p1n2/8/2PNp3/P1PnP3/2QP1PPP/R1B2K1R b - - 3 12") must beSome.like { s =>
-          s.turnCount must_== 23
-          s.plies must_== 23
+        f <<< FEN("r1q2rk1/ppp2ppp/3p1n2/8/2PNp3/P1PnP3/2QP1PPP/R1B2K1R b - - 3 12") must beSome.like { case s =>
+          s.turnCount === 23
+          s.plies === 23
         }
       }
       "last move (for en passant)" in {
-        f <<< FEN("2b2rk1/3p2pp/2pNp3/4PpN1/qp1P3P/4P1K1/6P1/1Q6 w - f6 0 36") must beSome.like { s =>
-          s.situation.board.history.lastTurn must_== List(Uci.Move(Pos.F7, Pos.F5))
+        f <<< FEN("2b2rk1/3p2pp/2pNp3/4PpN1/qp1P3P/4P1K1/6P1/1Q6 w - f6 0 36") must beSome.like { case s =>
+          s.situation.board.history.lastTurn === List(Uci.Move(Pos.F7, Pos.F5))
         }
       }
       "last move (for en passant in Pretrov's defense)" in {
-        f <<< FEN("rnbqkb1r/ppp2ppp/8/3pP3/3Qn3/5N2/PPP2PPP/RNB1KB1R w KQkq d6 0 6") must beSome.like { s =>
-          s.situation.board.history.lastTurn must_== List(Uci.Move(Pos.D7, Pos.D5))
+        f <<< FEN("rnbqkb1r/ppp2ppp/8/3pP3/3Qn3/5N2/PPP2PPP/RNB1KB1R w KQkq d6 0 6") must beSome.like { case s =>
+          s.situation.board.history.lastTurn === List(Uci.Move(Pos.D7, Pos.D5))
         }
       }
       "last move (for en passant with p2 to move)" in {
-        f <<< FEN("4k3/8/8/8/4pP2/8/2K5/8 b - f3 0 1") must beSome.like { s =>
-          s.situation.board.history.lastTurn must_== List(Uci.Move(Pos.F2, Pos.F4))
+        f <<< FEN("4k3/8/8/8/4pP2/8/2K5/8 b - f3 0 1") must beSome.like { case s =>
+          s.situation.board.history.lastTurn === List(Uci.Move(Pos.F2, Pos.F4))
         }
       }
     }
@@ -268,14 +268,14 @@ class ForsythTest extends ChessTest {
       fixCastles(fen) must beSome(fix)
     }
     "castling fixer regression" should {
-      f <<< FEN("rk6/p1r3p1/P3B1K1/1p2B3/8/8/8/8 w - - 0 1") must beSome.like { s =>
+      f <<< FEN("rk6/p1r3p1/P3B1K1/1p2B3/8/8/8/8 w - - 0 1") must beSome.like { case s =>
         s.situation.board.history.castles.isEmpty
       }
-      f <<< FEN("rk6/p1r3p1/P3B1K1/1p2B3/8/8/8/8 w - - 0 1") map f.>> must beSome.like { s =>
-        s must_== FEN("rk6/p1r3p1/P3B1K1/1p2B3/8/8/8/8 w - - 0 1")
+      f <<< FEN("rk6/p1r3p1/P3B1K1/1p2B3/8/8/8/8 w - - 0 1") map f.>> must beSome.like { case s =>
+        s === FEN("rk6/p1r3p1/P3B1K1/1p2B3/8/8/8/8 w - - 0 1")
       }
-      f << FEN("rk6/p1r3p1/P3B1K1/1p2B3/8/8/8/8 w - - 0 1") must beSome.like { s =>
-        s.board.history.castles must_== Castles.none
+      f << FEN("rk6/p1r3p1/P3B1K1/1p2B3/8/8/8/8 w - - 0 1") must beSome.like { case s =>
+        s.board.history.castles === Castles.none
       }
     }
     "castling not allowed in variant" in {
@@ -286,22 +286,22 @@ class ForsythTest extends ChessTest {
   }
   "ignore impossible en passant squares" should {
     "with queen instead of pawn" in {
-      f <<< FEN("8/4k3/8/6K1/1pp5/2q5/1P6/8 w - c3 0 1") must beSome.like { s =>
+      f <<< FEN("8/4k3/8/6K1/1pp5/2q5/1P6/8 w - c3 0 1") must beSome.like { case s =>
         s.situation.board.history.lastTurn isEmpty
       }
     }
     "with no pawn" in {
-      f <<< FEN("8/8/8/5k2/5p2/8/5K2/8 b - g3 0 1") must beSome.like { s =>
+      f <<< FEN("8/8/8/5k2/5p2/8/5K2/8 b - g3 0 1") must beSome.like { case s =>
         s.situation.board.history.lastTurn isEmpty
       }
     }
     "with non empty en passant squares" should {
-      f <<< FEN("8/8/8/5k2/5pP1/8/6K1/8 b - g3 0 1") must beSome.like { s =>
+      f <<< FEN("8/8/8/5k2/5pP1/8/6K1/8 b - g3 0 1") must beSome.like { case s =>
         s.situation.board.history.lastTurn isEmpty
       }
     }
     "with wrong side to move" should {
-      f <<< FEN("8/8/8/5k2/5pP1/8/1K6/8 w - g3 0 1") must beSome.like { s =>
+      f <<< FEN("8/8/8/5k2/5pP1/8/1K6/8 w - g3 0 1") must beSome.like { case s =>
         s.situation.board.history.lastTurn isEmpty
       }
     }
@@ -309,17 +309,17 @@ class ForsythTest extends ChessTest {
   "crazyhouse" should {
     "read" in {
       "nope" in {
-        f <<< FEN("2b2rk1/3p2pp/2pNp3/4PpN1/qp1P3P/4P1K1/6P1/1Q6 w - f6 0 36") must beSome.like { s =>
+        f <<< FEN("2b2rk1/3p2pp/2pNp3/4PpN1/qp1P3P/4P1K1/6P1/1Q6 w - f6 0 36") must beSome.like { case s =>
           s.situation.board.pocketData must beNone
         }
       }
       "pockets are not confused as pieces" in {
-        f <<< FEN("2b2rk1/3p2pp/2pNp3/4PpN1/qp1P3P/4P1K1/6P1/1Q6/pPP w - f6 0 36") must beSome.like { s =>
-          f exportBoard s.situation.board must_== "2b2rk1/3p2pp/2pNp3/4PpN1/qp1P3P/4P1K1/6P1/1Q6"
+        f <<< FEN("2b2rk1/3p2pp/2pNp3/4PpN1/qp1P3P/4P1K1/6P1/1Q6/pPP w - f6 0 36") must beSome.like { case s =>
+          (f exportBoard s.situation.board) === "2b2rk1/3p2pp/2pNp3/4PpN1/qp1P3P/4P1K1/6P1/1Q6"
         }
       }
       "pockets" in {
-        f <<< FEN("2b2rk1/3p2pp/2pNp3/4PpN1/qp1P3P/4P1K1/6P1/1Q6/pPP w - f6 0 36") must beSome.like { s =>
+        f <<< FEN("2b2rk1/3p2pp/2pNp3/4PpN1/qp1P3P/4P1K1/6P1/1Q6/pPP w - f6 0 36") must beSome.like { case s =>
           s.situation.board.pocketData must beSome.like {
             case PocketData(
                   Pockets(
@@ -348,7 +348,7 @@ class ForsythTest extends ChessTest {
         }
       }
       "promoted none" in {
-        f <<< FEN("2b2rk1/3p2pp/2pNp3/4PpN1/qp1P3P/4P1K1/6P1/1Q6/pPP w - f6 0 36") must beSome.like { s =>
+        f <<< FEN("2b2rk1/3p2pp/2pNp3/4PpN1/qp1P3P/4P1K1/6P1/1Q6/pPP w - f6 0 36") must beSome.like { case s =>
           s.situation.board.pocketData must beSome.like { case PocketData(_, promoted) =>
             promoted must beEmpty
           }
@@ -358,7 +358,7 @@ class ForsythTest extends ChessTest {
         f <<< FEN("Q~R~b~2rk1/3p2pp/2pNp3/4PpN1/qp1P3P/4P1K1/6P1/1Q4q~R~/pPP w - f6 0 36") must beSome.like {
           s =>
             s.situation.board.pocketData must beSome.like { case PocketData(_, promoted) =>
-              promoted must_== Set(A8, B8, C8, G1, H1)
+              promoted === Set(A8, B8, C8, G1, H1)
             }
         }
       }
@@ -366,7 +366,7 @@ class ForsythTest extends ChessTest {
         f << FEN("rnb1k2Q~/pp5p/2pp1p2/8/8/P1N2P2/P1PP1K1P/R1BQ1BNR/RPNBQPp b q - 21 11") must beSome.like {
           s =>
             s.board.pocketData must beSome.like { case PocketData(_, promoted) =>
-              promoted must_== Set(H8)
+              promoted === Set(H8)
             }
         }
       }
@@ -374,7 +374,7 @@ class ForsythTest extends ChessTest {
         f << FEN("r2q1b1r/p2k1Ppp/2p2p2/4p3/P2nP2n/3P1PRP/1PPB1K1q~/RN1Q1B2/Npb w - - 40 21") must beSome
           .like { s =>
             s.board.pocketData must beSome.like { case PocketData(_, promoted) =>
-              promoted must_== Set(H2)
+              promoted === Set(H2)
             }
           }
       }
@@ -385,14 +385,14 @@ class ForsythTest extends ChessTest {
     "write" in {
       "no checks" in {
         val moves = List(E2 -> E4, C7 -> C5, G1 -> F3, G8 -> H6, A2 -> A3)
-        Game(ThreeCheck).playMoveList(moves take 5) must beValid.like { g =>
-          f >> g must_== FEN("rnbqkb1r/pp1ppppp/7n/2p5/4P3/P4N2/1PPP1PPP/RNBQKB1R b KQkq - 0 3 +0+0")
+        Game(ThreeCheck).playMoveList(moves take 5) .toOption must beSome.like { case g =>
+          f >> g === FEN("rnbqkb1r/pp1ppppp/7n/2p5/4P3/P4N2/1PPP1PPP/RNBQKB1R b KQkq - 0 3 +0+0")
         }
       }
       "checks" in {
         val moves = List(E2 -> E4, E7 -> E5, F1 -> C4, G8 -> F6, B1 -> C3, F6 -> E4, C4 -> F7)
-        Game(ThreeCheck).playMoveList(moves) must beValid.like { g =>
-          f >> g must_== FEN("rnbqkb1r/pppp1Bpp/8/4p3/4n3/2N5/PPPP1PPP/R1BQK1NR b KQkq - 0 4 +1+0")
+        Game(ThreeCheck).playMoveList(moves) .toOption must beSome.like { case g =>
+          f >> g === FEN("rnbqkb1r/pppp1Bpp/8/4p3/4n3/2N5/PPPP1PPP/R1BQK1NR b KQkq - 0 4 +1+0")
         }
       }
     }
@@ -400,35 +400,35 @@ class ForsythTest extends ChessTest {
       "no checks" in {
         f.<<<@(ThreeCheck, FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3")) must beSome
           .like { s =>
-            s.situation.board.history.checkCount.p1 must_== 0
-            s.situation.board.history.checkCount.p2 must_== 0
+            s.situation.board.history.checkCount.p1 === 0
+            s.situation.board.history.checkCount.p2 === 0
           }
       }
       "explicitely no checks" in {
         f.<<<@(
           ThreeCheck,
           FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3 +0+0")
-        ) must beSome.like { s =>
-          s.situation.board.history.checkCount.p1 must_== 0
-          s.situation.board.history.checkCount.p2 must_== 0
+        ) must beSome.like { case s =>
+          s.situation.board.history.checkCount.p1 === 0
+          s.situation.board.history.checkCount.p2 === 0
         }
       }
       "checks" in {
         f.<<<@(
           ThreeCheck,
           FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3 +1+2")
-        ) must beSome.like { s =>
-          s.situation.board.history.checkCount.p1 must_== 2
-          s.situation.board.history.checkCount.p2 must_== 1
+        ) must beSome.like { case s =>
+          s.situation.board.history.checkCount.p1 === 2
+          s.situation.board.history.checkCount.p2 === 1
         }
       }
       "winboard checks" in {
         f.<<<@(
           ThreeCheck,
           FEN("r1bqkbnr/pppp1Qpp/2n5/4p3/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 2+3 0 3")
-        ) must beSome.like { s =>
-          s.situation.board.history.checkCount.p1 must_== 0
-          s.situation.board.history.checkCount.p2 must_== 1
+        ) must beSome.like { case s =>
+          s.situation.board.history.checkCount.p1 === 0
+          s.situation.board.history.checkCount.p2 === 1
         }
       }
     }
@@ -438,14 +438,14 @@ class ForsythTest extends ChessTest {
     "write" in {
       "no checks" in {
         val moves = List(E2 -> E4, C7 -> C5, G1 -> F3, G8 -> H6, A2 -> A3)
-        Game(FiveCheck).playMoveList(moves take 5) must beValid.like { g =>
-          f >> g must_== FEN("rnbqkb1r/pp1ppppp/7n/2p5/4P3/P4N2/1PPP1PPP/RNBQKB1R b KQkq - 0 3 +0+0")
+        Game(FiveCheck).playMoveList(moves take 5) .toOption must beSome.like { case g =>
+          f >> g === FEN("rnbqkb1r/pp1ppppp/7n/2p5/4P3/P4N2/1PPP1PPP/RNBQKB1R b KQkq - 0 3 +0+0")
         }
       }
       "checks" in {
         val moves = List(E2 -> E4, E7 -> E5, F1 -> C4, G8 -> F6, B1 -> C3, F6 -> E4, C4 -> F7)
-        Game(FiveCheck).playMoveList(moves) must beValid.like { g =>
-          f >> g must_== FEN("rnbqkb1r/pppp1Bpp/8/4p3/4n3/2N5/PPPP1PPP/R1BQK1NR b KQkq - 0 4 +1+0")
+        Game(FiveCheck).playMoveList(moves) .toOption must beSome.like { case g =>
+          f >> g === FEN("rnbqkb1r/pppp1Bpp/8/4p3/4n3/2N5/PPPP1PPP/R1BQK1NR b KQkq - 0 4 +1+0")
         }
       }
     }
@@ -453,35 +453,35 @@ class ForsythTest extends ChessTest {
       "no checks" in {
         f.<<<@(FiveCheck, FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3")) must beSome
           .like { s =>
-            s.situation.board.history.checkCount.p1 must_== 0
-            s.situation.board.history.checkCount.p2 must_== 0
+            s.situation.board.history.checkCount.p1 === 0
+            s.situation.board.history.checkCount.p2 === 0
           }
       }
       "explicitely no checks" in {
         f.<<<@(
           FiveCheck,
           FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3 +0+0")
-        ) must beSome.like { s =>
-          s.situation.board.history.checkCount.p1 must_== 0
-          s.situation.board.history.checkCount.p2 must_== 0
+        ) must beSome.like { case s =>
+          s.situation.board.history.checkCount.p1 === 0
+          s.situation.board.history.checkCount.p2 === 0
         }
       }
       "checks" in {
         f.<<<@(
           FiveCheck,
           FEN("rnb1kbnr/pppp1ppp/8/4p3/4PP1q/8/PPPPK1PP/RNBQ1BNR b kq - 2 3 +1+2")
-        ) must beSome.like { s =>
-          s.situation.board.history.checkCount.p1 must_== 2
-          s.situation.board.history.checkCount.p2 must_== 1
+        ) must beSome.like { case s =>
+          s.situation.board.history.checkCount.p1 === 2
+          s.situation.board.history.checkCount.p2 === 1
         }
       }
       "winboard checks" in {
         f.<<<@(
           FiveCheck,
           FEN("r1bqkbnr/pppp1Qpp/2n5/4p3/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 4+5 0 3")
-        ) must beSome.like { s =>
-          s.situation.board.history.checkCount.p1 must_== 0
-          s.situation.board.history.checkCount.p2 must_== 1
+        ) must beSome.like { case s =>
+          s.situation.board.history.checkCount.p1 === 0
+          s.situation.board.history.checkCount.p2 === 1
         }
       }
     }
@@ -489,27 +489,27 @@ class ForsythTest extends ChessTest {
   "x-fen" should {
     "wikipedia example" in {
       val canonical = FEN("rn2k1r1/ppp1pp1p/3p2p1/5bn1/P7/2N2B2/1PPPPP2/2BNK1RR w Gkq - 4 11")
-      f <<< canonical must beSome.like { s =>
-        s.situation.board.unmovedRooks must_== UnmovedRooks(Set(A8, G8, G1))
-        f >> s must_== canonical
+      f <<< canonical must beSome.like { case s =>
+        s.situation.board.unmovedRooks === UnmovedRooks(Set(A8, G8, G1))
+        f >> s === canonical
       }
     }
     "shredder fen of chess960 pos 284" in {
-      f <<< FEN("rkbqrbnn/pppppppp/8/8/8/8/PPPPPPPP/RKBQRBNN w EAea - 0 1") must beSome.like { s =>
-        s.situation.board.unmovedRooks must_== UnmovedRooks(Set(E1, E8, A1, A8))
-        f >> s must_== FEN("rkbqrbnn/pppppppp/8/8/8/8/PPPPPPPP/RKBQRBNN w KQkq - 0 1")
+      f <<< FEN("rkbqrbnn/pppppppp/8/8/8/8/PPPPPPPP/RKBQRBNN w EAea - 0 1") must beSome.like { case s =>
+        s.situation.board.unmovedRooks === UnmovedRooks(Set(E1, E8, A1, A8))
+        f >> s === FEN("rkbqrbnn/pppppppp/8/8/8/8/PPPPPPPP/RKBQRBNN w KQkq - 0 1")
       }
     }
     "wikipedia example" in {
       val canonical = FEN("rn2k1r1/ppp1pp1p/3p2p1/5bn1/P7/2N2B2/1PPPPP2/2BNK1RR w Gkq - 4 11")
-      f <<< canonical must beSome.like { s =>
-        s.situation.board.unmovedRooks must_== UnmovedRooks(Set(A8, G8, G1))
-        f >> s must_== canonical
+      f <<< canonical must beSome.like { case s =>
+        s.situation.board.unmovedRooks === UnmovedRooks(Set(A8, G8, G1))
+        f >> s === canonical
       }
     }
     "invalid castling rights" in {
       val board = Board.empty(Standard)
-      f exportCastles board must_== "-"
+      (f exportCastles board) === "-"
     }
   }
 }

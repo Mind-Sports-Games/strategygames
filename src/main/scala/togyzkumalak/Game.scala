@@ -2,6 +2,7 @@ package strategygames.togyzkumalak
 import strategygames.{ ClockBase, MoveMetrics, Player, VActionStrs }
 
 import cats.data.Validated
+import scalalib.extensions.*
 
 import strategygames.togyzkumalak.format.{ FEN, Uci }
 

@@ -34,15 +34,15 @@ object Api {
     def toBoard: String
     def owareDiagram: String
 
-    val fen: FEN
-    val pieceMap: PieceMap
+    lazy val fen: FEN
+    lazy val pieceMap: PieceMap
 
-    val gameResult: GameResult
-    val gameEnd: Boolean
-    val gameOutcome: Int
-    val isRepetition: Boolean
+    lazy val gameResult: GameResult
+    lazy val gameEnd: Boolean
+    lazy val gameOutcome: Int
+    lazy val isRepetition: Boolean
     val legalMoves: Array[Int]
-    val playerTurn: Int // 1 for South -1 for North
+    lazy val playerTurn: Int // 1 for South -1 for North
     def fenString: String
   }
 
@@ -190,7 +190,7 @@ object Api {
       moves.toArray
     }
 
-    val playerTurn: Int = position.turn()
+    lazy val playerTurn: Int = position.turn()
 
     val initialFen: FEN = fromFen.fold(Api.initialFen)(f => f)
 

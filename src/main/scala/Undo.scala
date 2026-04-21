@@ -32,7 +32,7 @@ object Undo {
       ) {
 
     def situationAfter: Situation = Situation.Backgammon(u.situationAfter)
-    def finalizeAfter: Board      = u.finalizeAfter
+    def finalizeAfter: Board      = Board.Backgammon(u.finalizeAfter)
 
     def toUci: Uci.Undo = Uci.BackgammonUndo(u.toUci)
 

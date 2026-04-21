@@ -1,6 +1,7 @@
 package strategygames.draughts
 
 import scala.annotation.nowarn
+import scalalib.extensions.*
 import strategygames.{ ClockBase, MoveMetrics, Player, VActionStrs }
 import strategygames.draughts.format.FEN
 

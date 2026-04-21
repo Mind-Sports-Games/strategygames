@@ -6,9 +6,9 @@ import strategygames.format.Uci
 import strategygames.variant.Variant
 
 sealed abstract class Situation(val board: Board, val player: Player) {
-  val moves: Map[Pos, List[Move]]
+  lazy val moves: Map[Pos, List[Move]]
 
-  val destinations: Map[Pos, List[Pos]]
+  lazy val destinations: Map[Pos, List[Pos]]
 
   def drops: Option[List[Pos]]
 
@@ -70,7 +70,7 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def history = board.history
 
-  val check: Boolean
+  lazy val check: Boolean
 
   def checkSquare: Option[Pos]
 
@@ -160,7 +160,7 @@ object Situation {
       ) {
 
     lazy val moves: Map[Pos, List[Move]] = s.moves.map { case (p: chess.Pos, l: List[chess.Move]) =>
-      (Pos.Chess(p), l.map(Move.Chess))
+      (Pos.Chess(p), l.map(Move.Chess.apply))
     }
 
     def takebackable = true
@@ -169,7 +169,7 @@ object Situation {
 
     lazy val check: Boolean = s.check
 
-    def checkSquare = s.checkSquare.map(Pos.Chess)
+    def checkSquare = s.checkSquare.map(Pos.Chess.apply)
 
     def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
 
@@ -186,14 +186,14 @@ object Situation {
     def winner: Option[Player] = s.winner
 
     lazy val destinations: Map[Pos, List[Pos]] = s.destinations.map {
-      case (p: chess.Pos, l: List[chess.Pos]) => (Pos.Chess(p), l.map(Pos.Chess))
+      case (p: chess.Pos, l: List[chess.Pos]) => (Pos.Chess(p), l.map(Pos.Chess.apply))
     }
 
-    def drops: Option[List[Pos]] = s.drops.map(_.map(Pos.Chess))
+    def drops: Option[List[Pos]] = s.drops.map(_.map(Pos.Chess.apply))
 
     def dropsByRole: Option[Map[Role, List[Pos]]] =
       s.dropsByRole.map(_.map { case (r: chess.Role, p: List[chess.Pos]) =>
-        (Role.ChessRole(r), p.map(Pos.Chess))
+        (Role.ChessRole(r), p.map(Pos.Chess.apply))
       })
 
     // this is really inefficient but harder to otherwise generate for chess
@@ -327,7 +327,7 @@ object Situation {
       ) {
 
     lazy val moves: Map[Pos, List[Move]] = s.validMoves.map {
-      case (p: draughts.Pos, l: List[draughts.Move]) => (Pos.Draughts(p), l.map(Move.Draughts))
+      case (p: draughts.Pos, l: List[draughts.Move]) => (Pos.Draughts(p), l.map(Move.Draughts.apply))
     }
 
     def takebackable = true
@@ -504,7 +504,7 @@ object Situation {
       ) {
 
     lazy val moves: Map[Pos, List[Move]] = s.moves.map { case (p: fairysf.Pos, l: List[fairysf.Move]) =>
-      (Pos.FairySF(p), l.map(Move.FairySF))
+      (Pos.FairySF(p), l.map(Move.FairySF.apply))
     }
 
     def takebackable = true
@@ -513,7 +513,7 @@ object Situation {
 
     lazy val check: Boolean = s.check
 
-    def checkSquare = s.checkSquare.map(Pos.FairySF)
+    def checkSquare = s.checkSquare.map(Pos.FairySF.apply)
 
     def opponentHasInsufficientMaterial: Boolean = s.opponentHasInsufficientMaterial
 
@@ -532,16 +532,16 @@ object Situation {
     def winner: Option[Player] = s.winner
 
     lazy val destinations: Map[Pos, List[Pos]] = s.destinations.map {
-      case (p: fairysf.Pos, l: List[fairysf.Pos]) => (Pos.FairySF(p), l.map(Pos.FairySF))
+      case (p: fairysf.Pos, l: List[fairysf.Pos]) => (Pos.FairySF(p), l.map(Pos.FairySF.apply))
     }
 
-    def drops: Option[List[Pos]] = s.drops.map(_.map(Pos.FairySF))
+    def drops: Option[List[Pos]] = s.drops.map(_.map(Pos.FairySF.apply))
 
     def dropsByRole: Option[Map[Role, List[Pos]]] = s.dropsByRole.map(_.map {
-      case (r: fairysf.Role, p: List[fairysf.Pos]) => (Role.FairySFRole(r), p.map(Pos.FairySF))
+      case (r: fairysf.Role, p: List[fairysf.Pos]) => (Role.FairySFRole(r), p.map(Pos.FairySF.apply))
     })
 
-    def dropsAsDrops: List[Drop] = s.dropsAsDrops.map(Drop.FairySF)
+    def dropsAsDrops: List[Drop] = s.dropsAsDrops.map(Drop.FairySF.apply)
 
     def lifts: List[Lift] = List.empty
 
@@ -661,7 +661,7 @@ object Situation {
       ) {
 
     lazy val moves: Map[Pos, List[Move]] = s.moves.map { case (p: samurai.Pos, l: List[samurai.Move]) =>
-      (Pos.Samurai(p), l.map(Move.Samurai))
+      (Pos.Samurai(p), l.map(Move.Samurai.apply))
     }
 
     def takebackable = true
@@ -687,7 +687,7 @@ object Situation {
     def winner: Option[Player] = s.winner
 
     lazy val destinations: Map[Pos, List[Pos]] = s.destinations.map {
-      case (p: samurai.Pos, l: List[samurai.Pos]) => (Pos.Samurai(p), l.map(Pos.Samurai))
+      case (p: samurai.Pos, l: List[samurai.Pos]) => (Pos.Samurai(p), l.map(Pos.Samurai.apply))
     }
 
     def drops: Option[List[Pos]] = None
@@ -812,7 +812,7 @@ object Situation {
 
     lazy val moves: Map[Pos, List[Move]] = s.moves.map {
       case (p: togyzkumalak.Pos, l: List[togyzkumalak.Move]) =>
-        (Pos.Togyzkumalak(p), l.map(Move.Togyzkumalak))
+        (Pos.Togyzkumalak(p), l.map(Move.Togyzkumalak.apply))
     }
 
     def takebackable = true
@@ -837,7 +837,8 @@ object Situation {
     def winner: Option[Player] = s.winner
 
     lazy val destinations: Map[Pos, List[Pos]] = s.destinations.map {
-      case (p: togyzkumalak.Pos, l: List[togyzkumalak.Pos]) => (Pos.Togyzkumalak(p), l.map(Pos.Togyzkumalak))
+      case (p: togyzkumalak.Pos, l: List[togyzkumalak.Pos]) =>
+        (Pos.Togyzkumalak(p), l.map(Pos.Togyzkumalak.apply))
     }
 
     def drops: Option[List[Pos]] = None
@@ -988,13 +989,13 @@ object Situation {
 
     lazy val destinations: Map[Pos, List[Pos]] = Map.empty[Pos, List[Pos]]
 
-    def drops: Option[List[Pos]] = s.drops.map(_.map(Pos.Go))
+    def drops: Option[List[Pos]] = s.drops.map(_.map(Pos.Go.apply))
 
     def dropsByRole: Option[Map[Role, List[Pos]]] = s.dropsByRole.map(_.map {
-      case (r: go.Role, p: List[go.Pos]) => (Role.GoRole(r), p.map(Pos.Go))
+      case (r: go.Role, p: List[go.Pos]) => (Role.GoRole(r), p.map(Pos.Go.apply))
     })
 
-    def dropsAsDrops: List[Drop] = s.dropsAsDrops.map(Drop.Go)
+    def dropsAsDrops: List[Drop] = s.dropsAsDrops.map(Drop.Go.apply)
 
     def lifts: List[Lift] = List.empty
 
@@ -1119,7 +1120,7 @@ object Situation {
 
     lazy val moves: Map[Pos, List[Move]] =
       s.moves.map { case (p: backgammon.Pos, l: List[backgammon.Move]) =>
-        (Pos.Backgammon(p), l.map(Move.Backgammon))
+        (Pos.Backgammon(p), l.map(Move.Backgammon.apply))
       }
 
     def takebackable = false
@@ -1144,30 +1145,31 @@ object Situation {
     def winner: Option[Player] = s.winner
 
     lazy val destinations: Map[Pos, List[Pos]] = s.destinations.map {
-      case (p: backgammon.Pos, l: List[backgammon.Pos]) => (Pos.Backgammon(p), l.map(Pos.Backgammon))
+      case (p: backgammon.Pos, l: List[backgammon.Pos]) => (Pos.Backgammon(p), l.map(Pos.Backgammon.apply))
     }
 
-    def drops: Option[List[Pos]] = s.drops.map(_.map(Pos.Backgammon))
+    def drops: Option[List[Pos]] = s.drops.map(_.map(Pos.Backgammon.apply))
 
-    def dropsByRole: Option[Map[Role, List[Pos]]] = s.dropsByRole.map(_.map {
-      case (r: backgammon.Role, p: List[backgammon.Pos]) => (Role.BackgammonRole(r), p.map(Pos.Backgammon))
-    })
+    def dropsByRole: Option[Map[Role, List[Pos]]] =
+      s.dropsByRole.map(_.map { case (r: backgammon.Role, p: List[backgammon.Pos]) =>
+        (Role.BackgammonRole(r), p.map(Pos.Backgammon.apply))
+      })
 
-    def dropsAsDrops: List[Drop] = s.dropsAsDrops.map(Drop.Backgammon)
+    def dropsAsDrops: List[Drop] = s.dropsAsDrops.map(Drop.Backgammon.apply)
 
-    def lifts: List[Lift] = s.lifts.map(Lift.Backgammon)
+    def lifts: List[Lift] = s.lifts.map(Lift.Backgammon.apply)
 
     def passes: List[Pass] = List.empty
 
     def selectSquaresAction: List[SelectSquares] = List.empty
 
-    def diceRolls: List[DiceRoll] = s.diceRolls.map(DiceRoll.Backgammon)
+    def diceRolls: List[DiceRoll] = s.diceRolls.map(DiceRoll.Backgammon.apply)
 
-    def undos: List[Undo] = s.undos.map(Undo.Backgammon)
+    def undos: List[Undo] = s.undos.map(Undo.Backgammon.apply)
 
-    def endTurns: List[EndTurn] = s.endTurns.map(EndTurn.Backgammon)
+    def endTurns: List[EndTurn] = s.endTurns.map(EndTurn.Backgammon.apply)
 
-    def cubeActions: List[CubeAction] = s.cubeActions.map(CubeAction.Backgammon)
+    def cubeActions: List[CubeAction] = s.cubeActions.map(CubeAction.Backgammon.apply)
 
     def canDrop: Boolean = s.canDrop
 
@@ -1220,7 +1222,6 @@ object Situation {
       interaction match {
         case CubeInteraction.Backgammon(interaction) =>
           s.cubeAction(interaction).toEither.map(ca => CubeAction.Backgammon(ca)).toValidated
-        case _                                       => sys.error("Not passed Backgammon objects")
       }
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
@@ -1280,9 +1281,8 @@ object Situation {
         Board.Abalone(s.board),
         s.player
       ) {
-    override lazy val moves: Map[Pos, List[Move]] = s.moves.map {
-      case (p: abalone.Pos, l: List[abalone.Move]) =>
-        (Pos.Abalone(p), l.map(Move.Abalone))
+    lazy val moves: Map[Pos, List[Move]] = s.moves.map { case (p: abalone.Pos, l: List[abalone.Move]) =>
+      (Pos.Abalone(p), l.map(Move.Abalone.apply))
     }
 
     override def takebackable = true
@@ -1306,8 +1306,8 @@ object Situation {
 
     override def winner: Option[Player] = s.winner
 
-    override lazy val destinations: Map[Pos, List[Pos]] = s.destinations.map {
-      case (p: abalone.Pos, l: List[abalone.Pos]) => (Pos.Abalone(p), l.map(Pos.Abalone))
+    lazy val destinations: Map[Pos, List[Pos]] = s.destinations.map {
+      case (p: abalone.Pos, l: List[abalone.Pos]) => (Pos.Abalone(p), l.map(Pos.Abalone.apply))
     }
 
     override def drops: Option[List[Pos]] = None
@@ -1431,7 +1431,7 @@ object Situation {
       ) {
 
     lazy val moves: Map[Pos, List[Move]] = s.moves.map { case (p: dameo.Pos, l: List[dameo.Move]) =>
-      (Pos.Dameo(p), l.map(Move.Dameo))
+      (Pos.Dameo(p), l.map(Move.Dameo.apply))
     }
 
     def takebackable = true
@@ -1456,7 +1456,7 @@ object Situation {
     def winner: Option[Player] = s.winner
 
     lazy val destinations: Map[Pos, List[Pos]] = s.destinations.map {
-      case (p: dameo.Pos, l: List[dameo.Pos]) => (Pos.Dameo(p), l.map(Pos.Dameo))
+      case (p: dameo.Pos, l: List[dameo.Pos]) => (Pos.Dameo(p), l.map(Pos.Dameo.apply))
     }
 
     def drops: Option[List[Pos]] = None

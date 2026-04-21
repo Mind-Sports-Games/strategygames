@@ -4,6 +4,7 @@ import strategygames.{ GameMessage, Player, Status }
 
 import cats.data.Validated
 import cats.implicits._
+import scalalib.extensions.*
 
 import strategygames.fairysf.format.Uci
 

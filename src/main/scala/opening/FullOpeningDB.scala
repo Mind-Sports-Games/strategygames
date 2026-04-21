@@ -10,55 +10,55 @@ object FullOpeningDB {
       strategygames.draughts.opening.FullOpeningDB
         .findByFen(fen.value)
         .map(
-          FullOpening.Draughts
+          FullOpening.Draughts.apply
         )
     case (GameLogic.Chess(), FEN.Chess(fen))               =>
       strategygames.chess.opening.FullOpeningDB
         .findByFen(fen)
         .map(
-          FullOpening.Chess
+          FullOpening.Chess.apply
         )
     case (GameLogic.FairySF(), FEN.FairySF(fen))           =>
       strategygames.fairysf.opening.FullOpeningDB
         .findByFen(fen)
         .map(
-          FullOpening.FairySF
+          FullOpening.FairySF.apply
         )
     case (GameLogic.Samurai(), FEN.Samurai(fen))           =>
       strategygames.samurai.opening.FullOpeningDB
         .findByFen(fen)
         .map(
-          FullOpening.Samurai
+          FullOpening.Samurai.apply
         )
     case (GameLogic.Togyzkumalak(), FEN.Togyzkumalak(fen)) =>
       strategygames.togyzkumalak.opening.FullOpeningDB
         .findByFen(fen)
         .map(
-          FullOpening.Togyzkumalak
+          FullOpening.Togyzkumalak.apply
         )
     case (GameLogic.Go(), FEN.Go(fen))                     =>
       strategygames.go.opening.FullOpeningDB
         .findByFen(fen)
         .map(
-          FullOpening.Go
+          FullOpening.Go.apply
         )
     case (GameLogic.Backgammon(), FEN.Backgammon(fen))     =>
       strategygames.backgammon.opening.FullOpeningDB
         .findByFen(fen)
         .map(
-          FullOpening.Backgammon
+          FullOpening.Backgammon.apply
         )
     case (GameLogic.Abalone(), FEN.Abalone(fen))           =>
       strategygames.abalone.opening.FullOpeningDB
         .findByFen(fen)
         .map(
-          FullOpening.Abalone
+          FullOpening.Abalone.apply
         )
     case (GameLogic.Dameo(), FEN.Dameo(fen))               =>
       strategygames.dameo.opening.FullOpeningDB
         .findByFen(fen)
         .map(
-          FullOpening.Dameo
+          FullOpening.Dameo.apply
         )
     case _                                                 => sys.error("Mismatched gamelogic types full opening db")
   }
@@ -182,55 +182,55 @@ object FullOpeningDB {
         .searchInFens(
           draughtsFENs(fens).toList
         )
-        .map(FullOpening.Draughts)
+        .map(FullOpening.Draughts.apply)
     case GameLogic.Chess()        =>
       strategygames.chess.opening.FullOpeningDB
         .searchInFens(
           chessFENs(fens)
         )
-        .map(FullOpening.Chess)
+        .map(FullOpening.Chess.apply)
     case GameLogic.FairySF()      =>
       strategygames.fairysf.opening.FullOpeningDB
         .searchInFens(
           fairysfFENs(fens)
         )
-        .map(FullOpening.FairySF)
+        .map(FullOpening.FairySF.apply)
     case GameLogic.Samurai()      =>
       strategygames.samurai.opening.FullOpeningDB
         .searchInFens(
           samuraiFENs(fens)
         )
-        .map(FullOpening.Samurai)
+        .map(FullOpening.Samurai.apply)
     case GameLogic.Togyzkumalak() =>
       strategygames.togyzkumalak.opening.FullOpeningDB
         .searchInFens(
           togyzkumalakFENs(fens)
         )
-        .map(FullOpening.Togyzkumalak)
+        .map(FullOpening.Togyzkumalak.apply)
     case GameLogic.Go()           =>
       strategygames.go.opening.FullOpeningDB
         .searchInFens(
           goFENs(fens)
         )
-        .map(FullOpening.Go)
+        .map(FullOpening.Go.apply)
     case GameLogic.Backgammon()   =>
       strategygames.backgammon.opening.FullOpeningDB
         .searchInFens(
           backgammonFENs(fens)
         )
-        .map(FullOpening.Backgammon)
+        .map(FullOpening.Backgammon.apply)
     case GameLogic.Abalone()      =>
       strategygames.abalone.opening.FullOpeningDB
         .searchInFens(
           abaloneFENs(fens)
         )
-        .map(FullOpening.Abalone)
+        .map(FullOpening.Abalone.apply)
     case GameLogic.Dameo()        =>
       strategygames.dameo.opening.FullOpeningDB
         .searchInFens(
           dameoFENs(fens)
         )
-        .map(FullOpening.Dameo)
+        .map(FullOpening.Dameo.apply)
   }
 
 }

@@ -24,9 +24,9 @@ case class Undo(
 
   def lazySituationAfter = situationAfter
 
-  def withMetrics(m: MoveMetrics) = copy(metrics = m)
+  def withMetrics(m: MoveMetrics): Undo = copy(metrics = m)
 
-  def toUci = Uci.Undo()
+  def toUci: Uci.Undo = Uci.Undo()
 
   override def toString = toUci.uci
 

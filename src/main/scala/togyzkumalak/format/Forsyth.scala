@@ -1,6 +1,7 @@
 package strategygames.togyzkumalak.format
 
 import cats.implicits._
+import scalalib.extensions.*
 
 import strategygames.{ Player, Score }
 import strategygames.togyzkumalak._

@@ -2,6 +2,8 @@ package strategygames.chess
 package format.pgn
 
 import strategygames.chess.variant.Variant
+import strategygames.validated
+import scalalib.extensions.*
 
 import strategygames.format.pgn.{
   Glyph,
@@ -46,18 +48,20 @@ object Parser {
         .replace("‑", "-")
         .replace("–", "-")
         .replace("e.p.", "") // silly en-passant notation
-      for {
-        splitted      <- splitTagAndActions(preprocessed)
-        tagStr         = splitted._1
-        actionStr      = splitted._2
-        preTags       <- TagParser(tagStr)
-        parsedActions <- ActionsParser(actionStr)
-        init           = parsedActions._1
-        strActions     = parsedActions._2
-        resultOption   = parsedActions._3
-        tags           = resultOption.filterNot(_ => preTags.exists(_.Result)).foldLeft(preTags)(_ + _)
-        sans          <- objSans(strActions, tags.chessVariant | Variant.default)
-      } yield ParsedPgn(init, tags, sans)
+      validated {
+        for {
+          splitted      <- splitTagAndActions(preprocessed).toEither
+          tagStr         = splitted._1
+          actionStr      = splitted._2
+          preTags       <- TagParser(tagStr).toEither
+          parsedActions <- ActionsParser(actionStr).toEither
+          init           = parsedActions._1
+          strActions     = parsedActions._2
+          resultOption   = parsedActions._3
+          tags           = resultOption.filterNot(_ => preTags.exists(_.Result)).foldLeft(preTags)(_ + _)
+          sans          <- objSans(strActions, tags.chessVariant | Variant.default).toEither
+        } yield ParsedPgn(init, tags, sans)
+      }
     } catch {
       case _: StackOverflowError =>
         sys error "### StackOverflowError ### in PGN parser"
@@ -319,7 +323,7 @@ object Parser {
 
     def suffixes: Parser[Suffixes] =
       opt(promotion) ~ checkmate ~ check ~ glyphs ^^ { case p ~ cm ~ c ~ g =>
-        Suffixes(c, cm, p.map(ChessRole.wrap), g)
+        Suffixes(c, cm, p.map((r: PromotableRole) => ChessRole.wrap(r)), g)
       }
 
     def glyphs: Parser[Glyphs] =
@@ -373,7 +377,7 @@ object Parser {
       }
 
     def fromFullPgn(pgn: String): Validated[String, Tags] =
-      splitTagAndActions(pgn) flatMap { case (tags, _) =>
+      splitTagAndActions(pgn) andThen { case (tags, _) =>
         apply(tags)
       }
 

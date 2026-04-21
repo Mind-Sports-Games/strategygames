@@ -5,6 +5,7 @@ import strategygames.go.format.Forsyth
 
 import cats.data.Validated
 import cats.implicits._
+import scalalib.extensions.*
 
 case class Situation(board: Board, player: Player) {
 

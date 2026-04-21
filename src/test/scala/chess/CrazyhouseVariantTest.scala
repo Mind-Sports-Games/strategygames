@@ -2,7 +2,7 @@ package strategygames.chess
 
 import cats.syntax.option._
 
-import strategygames.{ Pocket, Pockets, Role }
+import strategygames.{ Pocket, Pockets, Role => StratRole }
 import strategygames.chess.format.FEN
 import strategygames.chess.variant.Crazyhouse
 
@@ -37,8 +37,8 @@ class CrazyhouseVariantTest extends ChessTest {
         b.withCrazyData(
           PocketData(
             pockets = Pockets(
-              Pocket(Role.ChessRole(Queen) :: Nil),
-              Pocket((Rook :: Pawn :: Pawn :: Nil).map(Role.ChessRole))
+              Pocket(StratRole.ChessRole(Queen) :: Nil),
+              Pocket((Rook :: Pawn :: Pawn :: Nil).map(StratRole.ChessRole.apply))
             ),
             promoted = Set.empty
           )
@@ -52,7 +52,7 @@ class CrazyhouseVariantTest extends ChessTest {
       import Pos._
       "tons of pointless moves but shouldn't apply 50-moves" in {
         val moves = List.fill(30)(List(B1 -> C3, B8 -> C6, C3 -> B1, C6 -> B8))
-        Game(Crazyhouse).playMoves(moves.flatten: _*) must beValid.like { case g =>
+        Game(Crazyhouse).playMoves(moves.flatten: _*).toOption must beSome.like { case g =>
           g.board.variant.fiftyMoves(g.board.history) must beFalse
           g.board.autoDraw must beTrue // fivefold repetition
         }
@@ -157,7 +157,7 @@ class CrazyhouseVariantTest extends ChessTest {
           F2 -> G2,
           H6 -> G6
         )
-        Game(Crazyhouse).playMoves(moves: _*) must beValid.like { case g =>
+        Game(Crazyhouse).playMoves(moves: _*).toOption must beSome.like { case g =>
           g.board.history.threefoldRepetition must beTrue
         }
       }
@@ -255,7 +255,7 @@ class CrazyhouseVariantTest extends ChessTest {
           G2 -> F2,
           G6 -> H6
         )
-        Game(Crazyhouse).playMoves(moves: _*) must beValid.like { case g =>
+        Game(Crazyhouse).playMoves(moves: _*).toOption must beSome.like { case g =>
           g.board.history.threefoldRepetition must beFalse
         }
       }
@@ -294,7 +294,7 @@ class CrazyhouseVariantTest extends ChessTest {
           FEN("r2q1b1r/p2k1Ppp/2p2p2/4p3/P2nP2n/3P1PRP/1PPB1K1q~/RN1Q1B2/Npb w - - 40 21").some
         )
         .situation
-        .destinations must_== Map(
+        .destinations === Map(
         F2 -> List(E3, E1),
         G3 -> List(G2),
         F1 -> List(G2)
@@ -328,7 +328,7 @@ class CrazyhouseVariantTest extends ChessTest {
         ).map(Vector(_)),
         initialFen = None,
         variant = Crazyhouse
-      ) must beValid
+      ).isValid === true
     }
   }
 }

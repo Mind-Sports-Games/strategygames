@@ -9,28 +9,28 @@ class HistoryTest extends ChessTest {
         history.copy(positionHashes = hash ++ history.positionHashes)
       }
     "empty history" in {
-      History().threefoldRepetition must_== false
+      History().threefoldRepetition === false
     }
     "not 3 same elements" in {
       val history = makeHistory(List(1, 2, 3, 4, 5, 2, 5, 6, 23, 55))
-      history.threefoldRepetition must_== false
+      history.threefoldRepetition === false
     }
     "not 3 elements same to the last one" in {
       val history = makeHistory(List(1, 2, 3, 4, 5, 2, 5, 6, 23, 2, 55))
-      history.threefoldRepetition must_== false
+      history.threefoldRepetition === false
     }
     "positive" in {
       val history = makeHistory(List(1, 2, 3, 4, 5, 2, 5, 6, 23, 2))
-      history.threefoldRepetition must_== true
+      history.threefoldRepetition === true
     }
   }
 
   "set half move clock" should {
     "set 0" in {
-      History().setHalfMoveClock(0).halfMoveClock must_== 0
+      History().setHalfMoveClock(0).halfMoveClock === 0
     }
     "set 5" in {
-      History().setHalfMoveClock(5).halfMoveClock must_== 5
+      History().setHalfMoveClock(5).halfMoveClock === 5
     }
   }
 }

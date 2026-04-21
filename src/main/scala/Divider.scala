@@ -1,5 +1,7 @@
 package strategygames
 
+import scalalib.extensions.*
+
 case class Division(middle: Option[Int], end: Option[Int], plies: Int) {
 
   def openingSize: Int        = middle | plies

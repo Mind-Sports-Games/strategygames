@@ -1,13 +1,11 @@
-package strategygames
+package strategygames.fairysf
 
 import cats.data.Validated
 import org.specs2.matcher.ValidatedMatchers
 import org.specs2.mutable.Specification
 
-//import scala.annotation.nowarn
-
+import strategygames.{ ClockBase, Player }
 import strategygames.fairysf.variant._
-import strategygames.fairysf.{ Board, Game, Pos, PromotableRole, Situation }
 
 trait ShogiTest extends Specification with ValidatedMatchers {
 
@@ -23,7 +21,7 @@ trait ShogiTest extends Specification with ValidatedMatchers {
           vg.foreach { g =>
             val _ = g.situation.destinations
           }
-          val ng = vg.flatMap { g =>
+          val ng = vg.andThen { g =>
             g(orig, dest, prom)
           }
           ng.map(t => t._1)
@@ -38,16 +36,10 @@ trait ShogiTest extends Specification with ValidatedMatchers {
     ): Validated[String, Game] =
       game.apply(orig, dest, promotion).map(t => t._1)
 
-    // def playDrop(
-    // role: Role,
-    // dest: Pos
-    // ): Validated[String, Game] =
-    // game.applyDrop(Uci.Drop(role, dest))
-
     def withClock(c: ClockBase) = game.copy(clock = Some(c))
   }
 
-  implicit def richGame(game: Game) = RichGame(game)
+  implicit def richGame(game: Game): RichGame = RichGame(game)
 
   def makeSituation: Situation = Situation(Shogi)
 

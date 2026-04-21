@@ -23,28 +23,28 @@ class StatsTest extends Specification {
 
   def beLike(comp: Stats) =
     (s: Stats) => {
-      s.samples must_== comp.samples
+      s.samples === comp.samples
       s.mean must beApprox(comp.mean)
       (s.variance, comp.variance) match {
         case (Some(sv), Some(cv)) => sv must beApprox(cv)
-        case (sv, cv)             => sv must_== cv
+        case (sv, cv)             => sv === cv
       }
     }
 
   "empty stats" should {
     "have good defaults" in {
-      Stats.empty.variance must_== None
-      Stats.empty.mean must_== 0f
-      Stats.empty.samples must_== 0
+      Stats.empty.variance === None
+      Stats.empty.mean === 0f
+      Stats.empty.samples === 0
     }
 
     "convert to StatHolder" in {
       Stats(5) must beLike(StatHolder(0, 0f, 0f).record(5))
 
       "with good stats" in {
-        Stats(5).samples must_== 1
-        Stats(5).variance must_== None
-        Stats(5).mean must_== 5f
+        Stats(5).samples === 1
+        Stats(5).variance === None
+        Stats(5).mean === 5f
       }
     }
 
@@ -60,11 +60,11 @@ class StatsTest extends Specification {
     "match actuals" in {
       statsN.mean must beApprox(realMean(data))
       statsN.variance.get must beApprox(realVar(data))
-      statsN.samples must_== 400
+      statsN.samples === 400
     }
     "match concat" in {
-      statsN must_== (Stats.empty + statsN)
-      statsN must_== (statsN + Stats.empty)
+      statsN === (Stats.empty + statsN)
+      statsN === (statsN + Stats.empty)
       statsN must beLike(Stats(data take 1) + Stats(data drop 1))
       statsN must beLike(Stats(data take 100) + Stats(data drop 100))
       statsN must beLike(Stats(data take 200) + Stats(data drop 200))

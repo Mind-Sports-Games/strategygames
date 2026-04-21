@@ -39,7 +39,7 @@ object DiceRoll {
     def situationAfter: Situation = Situation.Chess(dr.situationAfter)
     def finalizeAfter: Board      = dr.finalizeAfter
 
-    def toUci: Uci.DiceRoll = Uci.ChessDiceRoll(dr.toUci)
+    def toUci: Uci.DiceRoll = Uci.ChessDiceRoll((dr.toUci: chess.format.Uci.DiceRoll))
 
     val unwrap = dr
 
@@ -67,7 +67,7 @@ object DiceRoll {
     def situationAfter: Situation = Situation.Backgammon(dr.situationAfter)
     def finalizeAfter: Board      = dr.finalizeAfter
 
-    def toUci: Uci.DiceRoll = Uci.BackgammonDiceRoll(dr.toUci)
+    def toUci: Uci.DiceRoll = Uci.BackgammonDiceRoll((dr.toUci: backgammon.format.Uci.DiceRoll))
 
     val unwrap = dr
 

@@ -85,7 +85,7 @@ class FlipelloVariantTest extends FairySFTest {
       val position =
         FEN("8/8/8/3pP3/3Pp3/8/8/8[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppp] w 0 1")
       val game     = fenToGame(position, variant.Flipello)
-      game must beValid.like {
+      game .toOption must beSome.like {
         case game => {
           game.situation.winner == None must beTrue
         }
@@ -97,8 +97,8 @@ class FlipelloVariantTest extends FairySFTest {
       val position2 = position.makeMoves(flipelloGameEndsEarly.dropRight(5))
       // just before P2 move (which engine says to pass incorrectly)
 
-      position2.legalMoves.size must_== 5
-      position2.gameEnd must_== false
+      position2.legalMoves.size === 5
+      position2.gameEnd === false
     }
 
     "P2 win from move list" in {
@@ -106,10 +106,10 @@ class FlipelloVariantTest extends FairySFTest {
       val position2 = position.makeMoves(flipelloGameEndsEarly.dropRight(2))
       val game      = fenToGame(position2.fen, variant.Flipello)
 
-      game must beValid.like {
+      game .toOption must beSome.like {
         case game => {
           game.situation.end must beTrue
-          game.situation.winner must_== Some(Player.P2)
+          game.situation.winner === Some(Player.P2)
         }
       }
     }
@@ -119,10 +119,10 @@ class FlipelloVariantTest extends FairySFTest {
       val position2 = position.makeMoves(flipelloGameEndsEarly.dropRight(2))
       val game      = fenToGame(position2.fen, variant.AntiFlipello)
 
-      game must beValid.like {
+      game .toOption must beSome.like {
         case game => {
           game.situation.end must beTrue
-          game.situation.winner must_== Some(Player.P1)
+          game.situation.winner === Some(Player.P1)
         }
       }
     }
@@ -132,12 +132,9 @@ class FlipelloVariantTest extends FairySFTest {
         "3P4/3P3P/3PPPPP/1PPPPPPP/3PPPPP/1p1PPPPP/2pp1P2/1ppp4[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp] b - - 0 15"
       )
       val game     = fenToGame(position, variant.Flipello)
-      game must beValid
-        .like {
-          case game => {
-            game.situation.end must beTrue
-          }
-        }
+      game.toOption must beSome.like { case game =>
+        game.situation.end must beTrue
+      }
     }
 
   }
@@ -197,11 +194,11 @@ class FlipelloVariantTest extends FairySFTest {
         "P@h10"
       )
 
-      playActionStrs(actionStrs, variant = Some(variant.OctagonFlipello)) must beValid.like { g =>
-        g.situation.end must_== false
-        g.situation.board.apiPosition.legalMoves must_== Array("e2e2")
-        g.situation.dropsAsDrops.pp("drops").size must_== 0
-        g.situation.moves.pp("moves").size must_== 1
+      playActionStrs(actionStrs, variant = Some(variant.OctagonFlipello)) .toOption must beSome.like { case g =>
+        g.situation.end === false
+        g.situation.board.apiPosition.legalMoves === Array("e2e2")
+        g.situation.dropsAsDrops.pp("drops").size === 0
+        g.situation.moves.pp("moves").size === 1
       }
 
     }

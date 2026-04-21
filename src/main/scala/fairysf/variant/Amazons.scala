@@ -68,7 +68,7 @@ case object Amazons
         s"${boardPart(board)}${fullPockets}",
         board.apiPosition.fen.value.split(" ").drop(1).mkString(" "),
         board.history.currentTurn.headOption.map(u => s"½${u.uci}").getOrElse("")
-      ).mkString(" ").strip
+      ).mkString(" ").trim
     )
 
   private def makePieceMapFromBoardFen(boardFEN: String): PieceMap = {
