@@ -1,5 +1,6 @@
 package strategygames.samurai
 
+import com.joansala.game.oware.OwareGame
 import org.specs2.matcher.ValidatedMatchers
 import org.specs2.mutable.Specification
 
@@ -37,5 +38,32 @@ class OwareLongGameTest extends Specification with ValidatedMatchers {
       newGame.legalMoves.size > 0 must_== true
     }
 
+  }
+
+  "A game replayed with more than 602 previous moves (capacity boundary)" should {
+    "not throw ArrayIndexOutOfBoundsException when replaying 603 moves via makeMovesWithPrevious" in {
+      // Use a large-capacity engine to generate 603 valid sequential moves
+      // without hitting the default 602 limit in the test harness itself.
+      val gen       = new OwareGame(700)
+      val generated = new scala.collection.mutable.ListBuffer[Int]()
+      while (generated.length < 603 && gen.legalMoves.length > 0) {
+        val m = gen.legalMoves.last
+        gen.makeMove(m)
+        generated += m
+      }
+
+      // Guard: if the Oware game ended before 603 moves with this move-selection
+      // strategy, the test setup needs a different approach.
+      generated.length must_== 603
+
+      val uciMoves = generated.toList.map(Api.moveToUci)
+
+      // makeMovesWithPrevious creates a fresh OwareGame() (capacity 602) and
+      // replays all 603 moves via makeMoves().
+      // Before fix: throws AIOOBE on the 603rd makeMove call.
+      // After fix: ensureCapacity expands the arrays before the loop.
+      val result = Api.position.makeMovesWithPrevious(List(), uciMoves)
+      result.fenString.nonEmpty must_== true
+    }
   }
 }

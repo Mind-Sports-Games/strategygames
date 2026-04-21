@@ -136,6 +136,7 @@ object Api {
     def makeMoves(movesList: List[String]): Position             = makeMovesImpl(movesList, true)
 
     def makeMovesImpl(movesList: List[String], checkLegal: Boolean = true): Position = {
+      position.ensureCapacity(position.length() + movesList.length * 2)
       movesList.map { move =>
         {
           val engineMove: Int   = uciToMove(move, variant)
