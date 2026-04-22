@@ -77,7 +77,7 @@ object Api {
     }
 
     def makeMoves(movesList: List[Int]): Position = {
-      position.ensureCapacity(position.length() + movesList.length)
+      position.ensureCapacity(movesList.length)
       movesList.map { move =>
         if (position.legalMoves.contains(move)) position.makeMove(move)
         else

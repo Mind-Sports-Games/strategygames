@@ -31,4 +31,52 @@ class GoLongGameTest extends Specification with ValidatedMatchers {
       result.fenString.nonEmpty must_== true
     }
   }
+
+  "A Go 19x19 game with all 361 positions played (P1 from index 0, P2 from last index)" should {
+    "still have legal moves available after filling the board" in {
+      // 19x19 board: 361 positions, indices 0–360.
+      // P1 plays indices 0..180 (181 moves), P2 plays indices 360..181 (180 moves).
+      // Interleave: P1(0), P2(360), P1(1), P2(359), ..., P1(179), P2(182), P1(180).
+      // Together they cover every index exactly once. Captures may occur at territory
+      // boundaries but pass is always legal in Go unless the game has ended.
+      val boardPositions = 19 * 19                                            // 361
+      val half           = boardPositions / 2                                 // 180
+      val p1Indices      = (0 to half).toList                                 // 0..180 (181 elements)
+      val p2Indices      = ((boardPositions - 1) to (half + 1) by -1).toList // 360..181 (180 elements)
+
+      val allMoves = p1Indices
+        .zip(p2Indices)
+        .flatMap { case (a, b) =>
+          List(Api.moveToUci(a, variant.Go19x19), Api.moveToUci(b, variant.Go19x19))
+        } :+ Api.moveToUci(half, variant.Go19x19) // remaining P1 move at index 180
+
+      val result = Api.position(variant.Go19x19).makeMovesNoLegalCheck(allMoves)
+      result.legalActions.nonEmpty must_== true
+    }
+  }
+
+  "A Go 19x19 game played to 602 total moves (P1 first legal drop, P2 last legal drop)" should {
+    "still have legal moves available at 602 total moves" in {
+      // Build 602 moves iteratively: after each move, re-query legalDrops for the next pick.
+      // P1 always plays legalDrops(0) (lowest index), P2 always plays legalDrops.last
+      // (highest index). legalDrops excludes pass, so no pass-skip logic is needed for P2.
+      var position  = Api.position(variant.Go19x19)
+      var moveCount = 0
+
+      while (moveCount < 602) {
+        val drops = position.legalDrops
+        position  = position.makeMovesNoLegalCheck(List(Api.moveToUci(drops(0), variant.Go19x19)))
+        moveCount += 1
+
+        if (moveCount < 602) {
+          val drops2 = position.legalDrops
+          position   = position.makeMovesNoLegalCheck(List(Api.moveToUci(drops2.last, variant.Go19x19)))
+          moveCount += 1
+        }
+      }
+
+      moveCount must_== 602
+      position.legalActions.nonEmpty must_== true
+    }
+  }
 }
