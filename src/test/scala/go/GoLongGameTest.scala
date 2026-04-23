@@ -55,27 +55,52 @@ class GoLongGameTest extends Specification with ValidatedMatchers {
     }
   }
 
-  "A Go 19x19 game played to 602 total moves (P1 first legal drop, P2 last legal drop)" should {
-    "still have legal moves available at 602 total moves" in {
-      // Build 602 moves iteratively: after each move, re-query legalDrops for the next pick.
+  "A Go 19x19 deep-copied position with 602 moves (simulating validDrops afterDrop path)" should {
+    "not throw ArrayIndexOutOfBoundsException when making one more move on the deep copy" in {
+      // This reproduces the live error path:
+      //   validDrops -> afterDrop -> makeMovesWithPosUnchecked(List(oneMove), apiPosition.deepCopy)
+      //   -> makeMovesNoLegalCheck(List(oneMove)) -> makeMovesImpl
+      //
+      // GoGame.index starts at -1 and increments by 1 per makeMove call, so after 602 calls
+      // index = 601 (arrays 0..601 used, length 602). The 603rd call writes to index 602 -> AIOOBE.
+      //
+      // Before fix: ensureCapacity(1) is a no-op (1 <= 602), the deep copy already has 602
+      //   states pushed, so the next makeMove call writes to array index 602 -> AIOOBE.
+      // After fix: ensureCapacity(goDepth + 1) = ensureCapacity(603) > 602, arrays expand first.
+      var position = Api.position(variant.Go19x19)
+      (0 until 602).foreach { _ =>
+        val drops = position.legalDrops
+        position = position.makeMovesNoLegalCheck(List(Api.moveToUci(drops(0), variant.Go19x19)))
+      }
+      val deepCopy  = position.deepCopy
+      val oneMore   = Api.moveToUci(position.legalDrops(0), variant.Go19x19)
+      val result    = deepCopy.makeMovesNoLegalCheck(List(oneMore))
+      result.fenString.nonEmpty must_== true
+    }
+  }
+
+  "A Go 19x19 game played to 610 total moves (P1 first legal drop, P2 last legal drop)" should {
+    "still have legal moves available at 610 total moves" in {
+      // Build 610 moves iteratively: after each move, re-query legalDrops for the next pick.
       // P1 always plays legalDrops(0) (lowest index), P2 always plays legalDrops.last
       // (highest index). legalDrops excludes pass, so no pass-skip logic is needed for P2.
+      val moves = 610 // was failing at 602 so play more to confirm no off-by-one errors
       var position  = Api.position(variant.Go19x19)
       var moveCount = 0
 
-      while (moveCount < 602) {
+      while (moveCount < moves) {
         val drops = position.legalDrops
         position  = position.makeMovesNoLegalCheck(List(Api.moveToUci(drops(0), variant.Go19x19)))
         moveCount += 1
 
-        if (moveCount < 602) {
+        if (moveCount < moves) {
           val drops2 = position.legalDrops
           position   = position.makeMovesNoLegalCheck(List(Api.moveToUci(drops2.last, variant.Go19x19)))
           moveCount += 1
         }
       }
 
-      moveCount must_== 602
+      moveCount must_== moves
       position.legalActions.nonEmpty must_== true
     }
   }

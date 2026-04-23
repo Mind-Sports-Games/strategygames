@@ -136,7 +136,8 @@ object Api {
     def makeMoves(movesList: List[String]): Position             = makeMovesImpl(movesList, true)
 
     def makeMovesImpl(movesList: List[String], checkLegal: Boolean = true): Position = {
-      position.ensureCapacity(movesList.length + movesList.count(_.take(3) == "ss:"))
+      // ensureCapacity takes an absolute target: include existing ply as a proxy for GoGame depth.
+      position.ensureCapacity(ply + movesList.length + movesList.count(_.take(3) == "ss:"))
       movesList.map { move =>
         {
           val engineMove: Int   = uciToMove(move, variant)
