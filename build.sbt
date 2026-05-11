@@ -2,7 +2,10 @@ name := "strategygames"
 
 organization := "org.playstrategy"
 
-version := "10.2.1-pstrat211"
+// lichess fork version 10.2.1
+// scala3
+// PlayStrategy version number at the end
+version := "10.2.1-s3-ps1"
 
 scalaVersion := "3.7.4"
 
