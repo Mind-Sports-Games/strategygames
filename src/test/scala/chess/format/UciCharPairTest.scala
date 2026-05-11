@@ -21,26 +21,26 @@ class UciCharPairTest extends ChessTest {
     val allPairs = allMoves.map(conv)
 
     "regular moves" in {
-      conv(Move(A1, B1)) must_== "#$"
-      conv(Move(A1, A2)) must_== "#+"
-      conv(Move(H7, H8)) must_== "Zb"
+      conv(Move(A1, B1)) === "#$"
+      conv(Move(A1, A2)) === "#+"
+      conv(Move(H7, H8)) === "Zb"
     }
     "unicity" in {
-      allPairs.distinct.size must_== allMoves.size
+      allPairs.distinct.size === allMoves.size
     }
     "no void char" in {
-      allPairs.count(_ contains UciCharPair.implementation.voidChar) must_== 0
+      allPairs.count(_ contains UciCharPair.implementation.voidChar) === 0
     }
     "promotions" in {
-      conv(Move(B7, B8, Option(Queen))) must_== "Td"
-      conv(Move(B7, C8, Option(Queen))) must_== "Te"
-      conv(Move(B7, C8, Option(Knight))) must_== "T}"
+      conv(Move(B7, B8, Option(Queen))) === "Td"
+      conv(Move(B7, C8, Option(Queen))) === "Te"
+      conv(Move(B7, C8, Option(Knight))) === "T}"
     }
     "drops" in {
-      conv(Drop(Pawn, A1)).head must_== '#'
-      conv(Drop(Pawn, A1)).tail.head.toInt must_== 143
-      conv(Drop(Queen, H8)).head must_== 'b'
-      conv(Drop(Queen, H8)).tail.head.toInt must_== 139
+      conv(Drop(Pawn, A1)).head === '#'
+      conv(Drop(Pawn, A1)).tail.head.toInt === 143
+      conv(Drop(Queen, H8)).head === 'b'
+      conv(Drop(Queen, H8)).tail.head.toInt === 139
     }
   }
 }

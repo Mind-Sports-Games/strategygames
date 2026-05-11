@@ -9,75 +9,71 @@ class AutodrawTest extends ChessTest {
   "detect automatic draw" should {
     "by lack of pieces" in {
       "empty" in {
-        makeEmptyBoard.autoDraw must_== true
+        makeEmptyBoard.autoDraw === true
       }
       "new" in {
-        makeBoard.autoDraw must_== false
+        makeBoard.autoDraw === false
       }
       "opened" in {
-        makeGame.playMoves(E2 -> E4, C7 -> C5, C2 -> C3, D7 -> D5, E4 -> D5) map { g =>
-          g.board.autoDraw
-        } must beValid(false)
+        makeGame.playMoves(E2 -> E4, C7 -> C5, C2 -> C3, D7 -> D5, E4 -> D5).map(_.board.autoDraw).toOption must beSome(false)
       }
       "two kings" in {
         """
       k
-K      """.autoDraw must_== true
+K      """.autoDraw === true
       }
       "one pawn" in {
         """
   P   k
-K      """.autoDraw must_== false
+K      """.autoDraw === false
       }
       "one bishop" in {
         """
       k
-K     B""".autoDraw must_== true
+K     B""".autoDraw === true
       }
       "one knight" in {
         """
       k
-K     N""".autoDraw must_== true
+K     N""".autoDraw === true
       }
       "one bishop and one knight of different players" in {
         """
       k
-K n   B""".autoDraw must_== false
+K n   B""".autoDraw === false
       }
       "one bishop and one knight of same player" in {
         """
   B   k
-K N    """.autoDraw must_== false
+K N    """.autoDraw === false
       }
       "one bishop and one rook of different players" in {
         """
       k
-K r   B""".autoDraw must_== false
+K r   B""".autoDraw === false
       }
       "two bishops and one bishop of same players" in {
         """
       k
-K B b B""".autoDraw must_== true
+K B b B""".autoDraw === true
       }
       "one bishop and one bishop of different players" in {
         """
       k
-K   bB""".autoDraw must_== false
+K   bB""".autoDraw === false
       }
     }
     "by fifty moves" in {
       "new" in {
-        makeBoard.autoDraw must_== false
+        makeBoard.autoDraw === false
       }
       "opened" in {
-        makeGame.playMoves(E2 -> E4, C7 -> C5, C2 -> C3, D7 -> D5, E4 -> D5) map { g =>
-          g.board.autoDraw
-        } must beValid(false)
+        makeGame.playMoves(E2 -> E4, C7 -> C5, C2 -> C3, D7 -> D5, E4 -> D5).map(_.board.autoDraw).toOption must beSome(false)
       }
       "tons of pointless moves" in {
         val moves = List.fill(30)(List(B1 -> C3, B8 -> C6, C3 -> B1, C6 -> B8))
-        makeGame.playMoves(moves.flatten: _*) must beValid.like { case g =>
-          g.board.autoDraw must_== true
+        makeGame.playMoves(moves.flatten: _*).toOption must beSome.like { case g =>
+          g.board.autoDraw === true
         }
       }
     }
@@ -182,7 +178,7 @@ K   bB""".autoDraw must_== false
           F2 -> G2,
           H6 -> G6
         )
-        makeGame.playMoves(moves: _*) must beValid.like { case g =>
+        makeGame.playMoves(moves: _*).toOption must beSome.like { case g =>
           g.board.history.threefoldRepetition must beTrue
         }
       }
@@ -280,21 +276,21 @@ K   bB""".autoDraw must_== false
           G2 -> F2,
           G6 -> H6
         )
-        makeGame.playMoves(moves: _*) must beValid.like { case g =>
+        makeGame.playMoves(moves: _*).toOption must beSome.like { case g =>
           g.board.history.threefoldRepetition must beFalse
         }
       }
       "3fold on initial position" in {
-        val moves = List.fill(2)(List(G1 -> F3, B8 -> C6, F3 -> G1, C6 -> B8)).flatten
-        makeGame.playMoves(moves: _*) must beValid.like { case g =>
+        val moves: List[(Pos, Pos)] = List.fill(2)(List(G1 -> F3, B8 -> C6, F3 -> G1, C6 -> B8)).flatten
+        makeGame.playMoves(moves: _*).toOption must beSome.like { case g =>
           g.board.history.threefoldRepetition must beTrue
         }
       }
       "pawn move then minimalist 3fold" in {
-        val moves = List(E2 -> E4, E7 -> E5) ::: List
-          .fill(2)(List(G1 -> F3, B8 -> C6, F3 -> G1, C6 -> B8))
-          .flatten
-        makeGame.playMoves(moves: _*) must beValid.like { case g =>
+        val baseMoves: List[(Pos, Pos)] = List((E2, E4), (E7, E5))
+        val repeatMoves: List[(Pos, Pos)] = List.fill(2)(List((G1, F3), (B8, C6), (F3, G1), (C6, B8))).flatten
+        val moves: List[(Pos, Pos)] = baseMoves ::: repeatMoves
+        makeGame.playMoves(moves: _*).toOption must beSome.like { case g =>
           g.board.history.threefoldRepetition must beTrue
         }
       }
@@ -386,12 +382,12 @@ K   bB""".autoDraw must_== false
         H6 -> H7
       )
       "from prod should be fivefold" in {
-        makeGame.playMoves(moves: _*) must beValid.like { case g =>
+        makeGame.playMoves(moves: _*).toOption must beSome.like { case g =>
           g.situation.autoDraw must beTrue
         }
       }
       "from prod should not be fivefold" in {
-        makeGame.playMoves(moves.dropRight(1): _*) must beValid.like { case g =>
+        makeGame.playMoves(moves.dropRight(1): _*).toOption must beSome.like { case g =>
           g.situation.autoDraw must beFalse
         }
       }
@@ -400,7 +396,7 @@ K   bB""".autoDraw must_== false
   "do not detect insufficient material" should {
     "on two knights" in {
       val position = FEN("1n2k1n1/8/8/8/8/8/8/4K3 w - - 0 1")
-      fenToGame(position, Standard) must beValid.like { case game =>
+      fenToGame(position, Standard).toOption must beSome.like { case game =>
         game.situation.autoDraw must beFalse
         game.situation.end must beFalse
         game.situation.opponentHasInsufficientMaterial must beFalse
@@ -409,11 +405,11 @@ K   bB""".autoDraw must_== false
     "on knight versus pawn" in {
       val position = FEN("7K/5k2/7P/6n1/8/8/8/8 b - - 0 40")
       val game     = fenToGame(position, Standard)
-      val newGame  = game flatMap (_.playMove(
+      val newGame  = game.andThen((g: Game) => g.playMove(
         Pos.F7,
         Pos.F8
       ))
-      newGame must beValid.like { case game =>
+      newGame.toOption must beSome.like { case game =>
         game.situation.autoDraw must beFalse
         game.situation.end must beFalse
         game.situation.opponentHasInsufficientMaterial must beFalse
@@ -422,11 +418,11 @@ K   bB""".autoDraw must_== false
     "on bishops versus pawn" in {
       val position = FEN("1b1b3K/8/5k1P/8/8/8/8/8 b - - 0 40")
       val game     = fenToGame(position, Standard)
-      val newGame  = game flatMap (_.playMove(
+      val newGame  = game.andThen((g: Game) => g.playMove(
         Pos.B8,
         Pos.E5
       ))
-      newGame must beValid.like { case game =>
+      newGame.toOption must beSome.like { case game =>
         game.situation.autoDraw must beFalse
         game.situation.end must beFalse
         game.situation.opponentHasInsufficientMaterial must beFalse
@@ -435,11 +431,11 @@ K   bB""".autoDraw must_== false
     "on bishops versus queen" in {
       val position = FEN("b2b3K/8/5k1Q/8/8/8/8/8 b - -")
       val game     = fenToGame(position, Standard)
-      val newGame  = game flatMap (_.playMove(
+      val newGame  = game.andThen((g: Game) => g.playMove(
         Pos.F6,
         Pos.E5
       ))
-      newGame must beValid.like { case game =>
+      newGame.toOption must beSome.like { case game =>
         game.situation.autoDraw must beFalse
         game.situation.end must beFalse
         game.situation.opponentHasInsufficientMaterial must beFalse
@@ -448,11 +444,11 @@ K   bB""".autoDraw must_== false
     "on bishops versus queen" in {
       val position = FEN("1b1b3K/8/5k1Q/8/8/8/8/8 b - -")
       val game     = fenToGame(position, Standard)
-      val newGame  = game flatMap (_.playMove(
+      val newGame  = game.andThen((g: Game) => g.playMove(
         Pos.F6,
         Pos.E5
       ))
-      newGame must beValid.like { case game =>
+      newGame.toOption must beSome.like { case game =>
         game.situation.autoDraw must beFalse
         game.situation.end must beFalse
         game.situation.opponentHasInsufficientMaterial must beTrue
@@ -461,11 +457,11 @@ K   bB""".autoDraw must_== false
     "on knight versus pawns" in {
       val position = FEN("8/8/5N2/8/6p1/8/5K1p/7k w - - 0 37")
       val game     = fenToGame(position, Standard)
-      val newGame  = game flatMap (_.playMove(
+      val newGame  = game.andThen((g: Game) => g.playMove(
         Pos.F6,
         Pos.E4
       ))
-      newGame must beValid.like { case game =>
+      newGame.toOption must beSome.like { case game =>
         game.situation.autoDraw must beFalse
         game.situation.end must beFalse
         game.situation.opponentHasInsufficientMaterial must beFalse
@@ -474,11 +470,11 @@ K   bB""".autoDraw must_== false
     "on knight versus pieces" in {
       val position = FEN("8/8/8/4N3/4k1p1/6K1/8/3b4 w - - 5 59")
       val game     = fenToGame(position, Standard)
-      val newGame  = game flatMap (_.playMove(
+      val newGame  = game.andThen((g: Game) => g.playMove(
         Pos.E5,
         Pos.F7
       ))
-      newGame must beValid.like { case game =>
+      newGame.toOption must beSome.like { case game =>
         game.situation.autoDraw must beFalse
         game.situation.end must beFalse
         game.situation.opponentHasInsufficientMaterial must beFalse
@@ -487,11 +483,11 @@ K   bB""".autoDraw must_== false
     "on opposite bishops with queen" in {
       val position = FEN("8/8/3Q4/2bK4/B7/8/8/k7 b - - 0 67")
       val game     = fenToGame(position, Standard)
-      val newGame  = game flatMap (_.playMove(
+      val newGame  = game.andThen((g: Game) => g.playMove(
         Pos.A1,
         Pos.B2
       ))
-      newGame must beValid.like { case game =>
+      newGame.toOption must beSome.like { case game =>
         game.situation.autoDraw must beFalse
         game.situation.end must beFalse
         game.situation.opponentHasInsufficientMaterial must beFalse
@@ -500,7 +496,7 @@ K   bB""".autoDraw must_== false
     "on same-player bishops on both sides" in {
       val position = FEN("5K2/8/8/1B6/8/k7/6b1/8 w - - 0 39")
       val game     = fenToGame(position, Standard)
-      game must beValid.like { case game =>
+      game.toOption must beSome.like { case game =>
         game.situation.autoDraw must beTrue
         game.situation.end must beTrue
         game.situation.opponentHasInsufficientMaterial must beTrue

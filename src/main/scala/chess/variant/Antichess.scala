@@ -115,7 +115,6 @@ case object Antichess
     promotion match {
       case None                                        => true
       case Some(Queen | Rook | Knight | Bishop | King) => true
-      case _                                           => false
     }
 
   override val roles = List(Rook, Knight, King, Bishop, Queen, Pawn)

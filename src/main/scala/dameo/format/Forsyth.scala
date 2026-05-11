@@ -2,6 +2,7 @@ package strategygames.dameo
 package format
 
 import scala.annotation.nowarn
+import scalalib.extensions.*
 
 import strategygames.Player
 
@@ -93,7 +94,7 @@ object Forsyth {
       .transform((_, playerPcs) =>
         playerPcs
           .map { case (pos, pc) =>
-            (if (pc.role == Man) "" else pc.role.forsyth) + pos.key
+            (if (pc.role == Man) "" else pc.role.forsyth.toString) + pos.key
           }
           .toList
           .sortBy(pcStr =>

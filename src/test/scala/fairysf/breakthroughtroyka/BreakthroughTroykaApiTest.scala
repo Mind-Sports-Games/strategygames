@@ -9,10 +9,10 @@ class BreakthroughTroykaApiTest extends FairySFTest {
     val position = Api.positionFromVariant(BreakthroughTroyka)
 
     "have 32 pieces" in {
-      position.pieceMap.size must_== 32
+      position.pieceMap.size === 32
     }
     "should have 22 legal moves" in {
-      position.legalMoves.size must_== 22L
+      position.legalMoves.size === 22
     }
   }
 
@@ -32,16 +32,16 @@ class BreakthroughTroykaApiTest extends FairySFTest {
     )
 
     "produce no legal move" in {
-      position2.legalMoves.size must_== 0L
+      position2.legalMoves.size === 0
     }
 
     "should produce game end" in {
-      position2.gameEnd must_== true
-      position2.immediateGameEnd must_== true
+      position2.gameEnd === true
+      position2.immediateGameEnd === true
     }
 
     "should be stalemate for api" in {
-      position2.gameResult must_== GameResult.Stalemate() // because this is not Chess
+      position2.gameResult === GameResult.Stalemate() // because this is not Chess
     }
   }
 
@@ -61,16 +61,16 @@ class BreakthroughTroykaApiTest extends FairySFTest {
     )
 
     "produce no legal move" in {
-      position2.legalMoves.size must_== 0L
+      position2.legalMoves.size === 0
     }
 
     "should produce game end" in {
-      position2.gameEnd must_== true
-      position2.immediateGameEnd must_== true
+      position2.gameEnd === true
+      position2.immediateGameEnd === true
     }
 
     "should be stalemate for api" in {
-      position2.gameResult must_== GameResult.Stalemate() // because this is not Chess (resultFromInt)
+      position2.gameResult === GameResult.Stalemate() // because this is not Chess (resultFromInt)
     }
   }
 
@@ -87,16 +87,16 @@ class BreakthroughTroykaApiTest extends FairySFTest {
     )
 
     "produce no legal move" in {
-      position2.legalMoves.size must_== 0L
+      position2.legalMoves.size === 0
     }
 
     "should produce game end" in {
-      position2.gameEnd must_== true
-      position2.immediateGameEnd must_== true
+      position2.gameEnd === true
+      position2.immediateGameEnd === true
     }
 
     "should be stalemate for api" in {
-      position2.gameResult must_== GameResult.Stalemate() // because this is not Chess (resultFromInt)
+      position2.gameResult === GameResult.Stalemate() // because this is not Chess (resultFromInt)
     }
   }
 
@@ -113,16 +113,16 @@ class BreakthroughTroykaApiTest extends FairySFTest {
     )
 
     "produce no legal move" in {
-      position2.legalMoves.size must_== 0L
+      position2.legalMoves.size === 0
     }
 
     "should produce game end" in {
-      position2.gameEnd must_== true
-      position2.immediateGameEnd must_== true
+      position2.gameEnd === true
+      position2.immediateGameEnd === true
     }
 
     "should be stalemate for api" in {
-      position2.gameResult must_== GameResult.Stalemate() // because this is not Chess (resultFromInt)
+      position2.gameResult === GameResult.Stalemate() // because this is not Chess (resultFromInt)
     }
   }
 }

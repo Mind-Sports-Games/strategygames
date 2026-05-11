@@ -63,7 +63,7 @@ class DameoReplayTest extends DameoTest with ValidatedMatchers {
         Vector("e6d5"),
         Vector("d4d6")
       )
-      playActionStrs(vectorActionStrs.flatten.toList) must beValid.like { g =>
+      playActionStrs(vectorActionStrs.flatten[String].toList) .toOption must beSome.like { case g =>
         val replay = Replay
           .gameWithUciWhileValid(
             vectorActionStrs,
@@ -74,15 +74,15 @@ class DameoReplayTest extends DameoTest with ValidatedMatchers {
           .reverse
           .head
           ._1
-        g.plies must_== replay.plies
-        g.turnCount must_== replay.turnCount
-        g.startedAtPly must_== replay.startedAtPly
-        g.startedAtTurn must_== replay.startedAtTurn
-        g.actionStrs must_== replay.actionStrs
-        g.situation.board.pieces must_== replay.situation.board.pieces
-        g.situation.board.history.lastTurn must_== replay.situation.board.history.lastTurn
-        g.situation.board.history.currentTurn must_== replay.situation.board.history.currentTurn
-        g.situation.board.variant must_== replay.situation.board.variant
+        g.plies === replay.plies
+        g.turnCount === replay.turnCount
+        g.startedAtPly === replay.startedAtPly
+        g.startedAtTurn === replay.startedAtTurn
+        g.actionStrs === replay.actionStrs
+        g.situation.board.pieces === replay.situation.board.pieces
+        g.situation.board.history.lastTurn === replay.situation.board.history.lastTurn
+        g.situation.board.history.currentTurn === replay.situation.board.history.currentTurn
+        g.situation.board.variant === replay.situation.board.variant
       }
     }
 
@@ -99,7 +99,7 @@ class DameoReplayTest extends DameoTest with ValidatedMatchers {
         Vector("d6d5"),
         Vector("d4d6")
       )
-      playActionStrs(vectorActionStrs.flatten.toList) must beValid.like { g =>
+      playActionStrs(vectorActionStrs.flatten[String].toList) .toOption must beSome.like { case g =>
         val replay = Replay
           .gameWithUciWhileValid(
             vectorActionStrs,
@@ -110,15 +110,15 @@ class DameoReplayTest extends DameoTest with ValidatedMatchers {
           .reverse
           .head
           ._1
-        g.plies must_== replay.plies
-        g.turnCount must_== replay.turnCount
-        g.startedAtPly must_== replay.startedAtPly
-        g.startedAtTurn must_== replay.startedAtTurn
-        g.actionStrs must_== replay.actionStrs
-        g.situation.board.pieces must_== replay.situation.board.pieces
-        g.situation.board.history.lastTurn must_== replay.situation.board.history.lastTurn
-        g.situation.board.history.currentTurn must_== replay.situation.board.history.currentTurn
-        g.situation.board.variant must_== replay.situation.board.variant
+        g.plies === replay.plies
+        g.turnCount === replay.turnCount
+        g.startedAtPly === replay.startedAtPly
+        g.startedAtTurn === replay.startedAtTurn
+        g.actionStrs === replay.actionStrs
+        g.situation.board.pieces === replay.situation.board.pieces
+        g.situation.board.history.lastTurn === replay.situation.board.history.lastTurn
+        g.situation.board.history.currentTurn === replay.situation.board.history.currentTurn
+        g.situation.board.variant === replay.situation.board.variant
       }
     }
   }

@@ -2,6 +2,7 @@ package strategygames.chess
 package format.pgn
 
 import scala.util.Try
+import scalalib.extensions.*
 import strategygames.ActionStrs
 
 object Binary {

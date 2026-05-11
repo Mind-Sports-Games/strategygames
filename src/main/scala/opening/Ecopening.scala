@@ -14,8 +14,8 @@ abstract class Ecopening(
 
   def compare(other: Ecopening): Int
   def possibleContinuation(other: Ecopening): Boolean
-  val size: Int
-  val moveList: List[String]
+  lazy val size: Int
+  lazy val moveList: List[String]
 
   override def toString: String
 }

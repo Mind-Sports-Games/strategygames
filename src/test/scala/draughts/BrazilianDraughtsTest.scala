@@ -112,7 +112,7 @@ class BrazilianDraughtsTest extends Specification with ValidatedMatchers {
       val s = moves
         .foldLeft(Situation(variant.Brazilian))((sit, uci) => move(sit, uci))
 
-      s.winner must_== Some(Player.P1)
+      s.winner === Some(Player.P1)
     }
   }
 
@@ -121,7 +121,7 @@ class BrazilianDraughtsTest extends Specification with ValidatedMatchers {
       val s = midMultiCaptureMoves
         .foldLeft(Situation(variant.Brazilian))((sit, uci) => move(sit, uci))
 
-      s.validMoves.size must_!= 0
+      s.validMoves.size !== 0
     }
   }
 

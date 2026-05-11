@@ -3,6 +3,7 @@ package strategygames.fairysf.variant
 import cats.data.Validated
 import cats.syntax.option._
 import scala.annotation.nowarn
+import scalalib.extensions.*
 
 import strategygames.fairysf._
 import strategygames.fairysf.format.{ FEN, Forsyth, Uci }

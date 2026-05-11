@@ -1,13 +1,17 @@
 package strategygames.abalone
 
 import cats.data.Validated
-import cats.data.Validated.{invalid, valid}
-import cats.implicits.catsSyntaxOptionId
-import strategygames.abalone.format.pgn.{Parser, Reader}
-import strategygames.abalone.format.{FEN, Forsyth, Uci}
+import cats.data.Validated.{ invalid, valid }
+import cats.implicits._
+import scalalib.extensions.*
+
+import strategygames.abalone.format.pgn.{ Parser, Reader }
+import strategygames.abalone.format.{ FEN, Forsyth, Uci }
 import strategygames.abalone.variant.Variant
+import strategygames.Player
+
 import strategygames.format.pgn.San
-import strategygames.{ActionStrs, Action => StratAction, Move => StratMove, Situation => StratSituation}
+import strategygames.{ Action => StratAction, ActionStrs, Move => StratMove, Situation => StratSituation }
 
 case class Replay(setup: Game, actions: List[Move], state: Game) {
   lazy val chronoPlies = actions.reverse
@@ -157,7 +161,7 @@ object Replay {
     sans match {
       case Nil         => valid(Nil)
       case san :: rest =>
-        san(StratSituation.wrap(situation)).map(abaloneMove) flatMap { move =>
+        san(StratSituation.wrap(situation)).map(abaloneMove) andThen { move =>
           val after = move.situationAfter
           recursiveSituations(after, rest) map {
             after :: _
@@ -289,7 +293,7 @@ object Replay {
         sans match {
           case Nil         => invalid(s"Can't find $atFenTruncated, reached ply $ply, turn $turn")
           case san :: rest =>
-            san(StratSituation.wrap(situation)).map(abaloneMove) flatMap { move =>
+            san(StratSituation.wrap(situation)).map(abaloneMove) andThen { move =>
               val after        = move.situationAfter
               val newPlies     = ply + 1
               val newTurnCount = turn + (if (situation.player != after.player) 1 else 0)

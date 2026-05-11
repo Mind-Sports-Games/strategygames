@@ -38,7 +38,7 @@ object Lift {
     def situationAfter: Situation = Situation.Backgammon(l.situationAfter)
     def finalizeAfter: Board      = l.finalizeAfter
 
-    def toUci: Uci.Lift = Uci.BackgammonLift(l.toUci)
+    def toUci: Uci.Lift = Uci.BackgammonLift((l.toUci: backgammon.format.Uci.Lift))
 
     val unwrap         = l
     def toChess        = sys.error("Can't make a chess lift from a backgammon lift")

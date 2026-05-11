@@ -17,11 +17,11 @@ class GoReplayTest extends Specification with ValidatedMatchers {
         """s@g3 s@c7 s@f2 s@e5 s@e1 s@d4 s@h4 s@i1 s@i5 pass pass ss:i1""".split(' ').toList.map(List(_))
       Replay.gameWithUciWhileValid(moves, Player.P2, Player.P2, fen, variant.Go9x9) must beLike {
         case (_, games, None)         =>
-          games.size must_== 12
+          games.size === 12
         case (init, games, Some(err)) =>
           println(err)
           println(init)
-          games.size must_== 12
+          games.size === 12
       }
     }
   }
@@ -45,8 +45,8 @@ class GoReplayTest extends Specification with ValidatedMatchers {
         ).flatten,
         initialFen = Some(FEN("""9/9/6S2/9/9/9/2S6/9/9[SSSSSSSSSSssssssssss] w - 810 65 0 0 65 0 1""")),
         variant = variant.Go9x9
-      ) must beValid.like { situations =>
-        situations.map(Forsyth.>>) must_== List(
+      ) .toOption must beSome.like { case situations =>
+        situations.map(Forsyth.>>) === List(
           FEN("9/9/6S2/9/9/9/2S6/9/9[SSSSSSSSSSssssssssss] w - 810 65 0 0 65 0 1"),
           FEN("9/9/6S2/9/9/9/2S3s2/9/9[SSSSSSSSSSssssssssss] b - 20 75 0 0 65 0 2"),
           FEN("9/9/2S3S2/9/9/9/2S3s2/9/9[SSSSSSSSSSssssssssss] w - 30 75 0 0 65 0 2"),
@@ -87,8 +87,8 @@ class GoReplayTest extends Specification with ValidatedMatchers {
         ).flatten,
         initialFen = Some(FEN("""9/9/6S2/9/9/9/2S6/9/9[SSSSSSSSSSssssssssss] w - 810 65 0 0 65 0 1""")),
         variant = variant.Go9x9
-      ) must beValid.like { situations =>
-        situations.map(s => (s.end, s.board.piecesOnBoardCount)) must_== List(
+      ) .toOption must beSome.like { case situations =>
+        situations.map(s => (s.end, s.board.piecesOnBoardCount)) === List(
           (false, 2),
           (false, 3),
           (false, 4),
@@ -130,8 +130,8 @@ class GoReplayTest extends Specification with ValidatedMatchers {
         ).flatten,
         initialFen = Some(FEN("""9/9/6S2/9/9/9/2S6/9/9[SSSSSSSSSSssssssssss] w - 810 65 0 0 65 0 1""")),
         variant = variant.Go9x9
-      ) must beValid.like { situations =>
-        situations.map(s => (s.end, s.board.piecesOnBoardCount)) must_== List(
+      ) .toOption must beSome.like { case situations =>
+        situations.map(s => (s.end, s.board.piecesOnBoardCount)) === List(
           (false, 2),
           (false, 3),
           (false, 4),

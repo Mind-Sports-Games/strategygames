@@ -3,6 +3,7 @@ package strategygames.go.variant
 import cats.data.Validated
 import cats.syntax.option._
 import scala.annotation.nowarn
+import scalalib.extensions.*
 
 import strategygames.go._
 import strategygames.go.format.{ FEN, Forsyth }

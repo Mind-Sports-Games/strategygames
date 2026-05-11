@@ -4,6 +4,7 @@ import strategygames.Player
 import strategygames.Score
 
 import variant.Variant
+import scalalib.extensions.*
 
 case class Board(
     pieces: PieceMap,

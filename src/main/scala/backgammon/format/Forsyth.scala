@@ -2,6 +2,7 @@ package strategygames.backgammon.format
 
 import cats.implicits._
 import scala.math.log
+import scalalib.extensions.*
 
 import strategygames.{ Player, Score }
 import strategygames.backgammon._

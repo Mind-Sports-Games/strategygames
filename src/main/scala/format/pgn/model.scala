@@ -3,6 +3,7 @@ package format
 package pgn
 
 import cats.implicits._
+import scalalib.extensions.*
 
 case class Pgn(
     tags: Tags,

@@ -11,23 +11,23 @@ class MonsterVariantTest extends ChessTest {
     "Black be in check two moves away" in {
       import Pos._
       val game        = fenToGame(Monster.initialFen, Monster)
-      val successGame = game flatMap (_.playMoves(
+      val successGame = game.andThen((g: Game) => g.playMoves(
         E2 -> E4,
         E4 -> E5,
         F7 -> F6,
         E1 -> E2,
         E5 -> F6
       ))
-      successGame must beValid.like { case game =>
+      successGame .toOption must beSome.like { case game =>
         // normally 21 moves are available to due to the kingSafety in Monster its only 4
-        game.situation.moves.values.flatten.size must_== 4
+        game.situation.moves.values.flatten.size === 4
       }
     }
 
     "White have to work towards getting out of check if it requires two moves" in {
       import Pos._
       val game        = fenToGame(Monster.initialFen, Monster)
-      val successGame = game flatMap (_.playMoves(
+      val successGame = game.andThen((g: Game) => g.playMoves(
         F2 -> F4,
         E1 -> F1,
         G7 -> G5,
@@ -41,16 +41,16 @@ class MonsterVariantTest extends ChessTest {
         E2 -> E3,
         H8 -> H7
       ))
-      successGame must beValid.like { case game =>
+      successGame .toOption must beSome.like { case game =>
         // without kingSafety checks 8 moves are available
-        game.situation.moves.values.flatten.size must_== 2
+        game.situation.moves.values.flatten.size === 2
       }
     }
 
     "Black has to escape check rather than deliver checkmate" in {
       import Pos._
       val game        = fenToGame(Monster.initialFen, Monster)
-      val successGame = game flatMap (
+      val successGame = game andThen (
         _.playMoves(
           F2 -> F4,
           E1 -> F1,
@@ -86,18 +86,18 @@ class MonsterVariantTest extends ChessTest {
           D5 -> D6
         )
       )
-      successGame must beValid.like { case game =>
-        game.situation.board.checkP1 must_== false
-        game.situation.board.checkP2 must_== true
+      successGame .toOption must beSome.like { case game =>
+        game.situation.board.checkP1 === false
+        game.situation.board.checkP2 === true
         // without disabling black checks, 9 moves are available
-        game.situation.moves.values.flatten.size must_== 2
+        game.situation.moves.values.flatten.size === 2
       }
     }
 
     "Must include multiple enpassant moves for Black" in {
       import Pos._
       val game        = fenToGame(Monster.initialFen, Monster)
-      val successGame = game flatMap (_.playMoves(
+      val successGame = game.andThen((g: Game) => g.playMoves(
         F2 -> F4,
         E1 -> F1,
         D7 -> D5,
@@ -107,15 +107,15 @@ class MonsterVariantTest extends ChessTest {
         C2 -> C4,
         E2 -> E4
       ))
-      successGame must beValid.like { case game =>
-        game.situation.moves.values.flatten.size must_== 28
+      successGame .toOption must beSome.like { case game =>
+        game.situation.moves.values.flatten.size === 28
       }
     }
 
     "Must only allow enpassant on Whites first move in turn" in {
       import Pos._
       val game        = fenToGame(Monster.initialFen, Monster)
-      val successGame = game flatMap (_.playMoves(
+      val successGame = game.andThen((g: Game) => g.playMoves(
         F2 -> F4,
         E1 -> F1,
         D7 -> D5,
@@ -127,15 +127,15 @@ class MonsterVariantTest extends ChessTest {
         G7 -> G5,
         F2 -> G2
       ))
-      successGame must beValid.like { case game =>
-        game.situation.moves.values.flatten.size must_== 12
+      successGame .toOption must beSome.like { case game =>
+        game.situation.moves.values.flatten.size === 12
       }
     }
 
     "Must not allow pawn move that sets up an enpassant checkmate" in {
       import Pos._
       val game        = fenToGame(Monster.initialFen, Monster)
-      val successGame = game flatMap (_.playMoves(
+      val successGame = game.andThen((g: Game) => g.playMoves(
         E2 -> E4,
         E4 -> E5,
         E7 -> E6,
@@ -145,15 +145,15 @@ class MonsterVariantTest extends ChessTest {
         E3 -> E2,
         E2 -> E3
       ))
-      successGame must beValid.like { case game =>
-        game.situation.moves.values.flatten.size must_== 15
+      successGame .toOption must beSome.like { case game =>
+        game.situation.moves.values.flatten.size === 15
       }
     }
 
     "Must be checkmate with possible Queen or Knight promotion" in {
       import Pos._
       val game        = fenToGame(Monster.initialFen, Monster)
-      val successGame = game flatMap (_.playMoves(
+      val successGame = game.andThen((g: Game) => g.playMoves(
         D2 -> D4,
         E2 -> E4,
         A7 -> A5,
@@ -170,15 +170,15 @@ class MonsterVariantTest extends ChessTest {
         E6 -> F7
         // E8 -> E7
       ))
-      successGame must beValid.like { case game =>
-        game.situation.checkMate must_== true
+      successGame .toOption must beSome.like { case game =>
+        game.situation.checkMate === true
       }
     }
 
     "Must be checkmate with White King two moves from capturing Black's King (and not stalemate)" in {
       import Pos._
       val game        = fenToGame(Monster.initialFen, Monster)
-      val successGame = game flatMap (_.playMoves(
+      val successGame = game.andThen((g: Game) => g.playMoves(
         E2 -> E4,
         E1 -> E2,
         F7 -> F5,
@@ -194,16 +194,16 @@ class MonsterVariantTest extends ChessTest {
         F4 -> G5,
         E5 -> F6
       ))
-      successGame must beValid.like { case game =>
-        game.situation.checkMate must_== true
-        game.situation.staleMate must_== false
+      successGame .toOption must beSome.like { case game =>
+        game.situation.checkMate === true
+        game.situation.staleMate === false
       }
     }
 
     "Black can't castle when in check" in {
       import Pos._
       val game        = fenToGame(Monster.initialFen, Monster)
-      val successGame = game flatMap (_.playMoves(
+      val successGame = game.andThen((g: Game) => g.playMoves(
         F2 -> F4,
         F4 -> F5,
         G7 -> G6,
@@ -219,15 +219,15 @@ class MonsterVariantTest extends ChessTest {
         F5 -> G6,
         D3 -> E3
       ))
-      successGame must beValid.like { case game =>
-        game.situation.moves.values.flatten.size must_== 3
+      successGame .toOption must beSome.like { case game =>
+        game.situation.moves.values.flatten.size === 3
       }
     }
 
     "Black can't castle through in check" in {
       import Pos._
       val game        = fenToGame(Monster.initialFen, Monster)
-      val successGame = game flatMap (_.playMoves(
+      val successGame = game.andThen((g: Game) => g.playMoves(
         F2 -> F4,
         F4 -> F5,
         G7 -> G6,
@@ -246,15 +246,15 @@ class MonsterVariantTest extends ChessTest {
         E4 -> E5,
         E5 -> F6
       ))
-      successGame must beValid.like { case game =>
-        game.situation.moves.values.flatten.size must_== 26
+      successGame .toOption must beSome.like { case game =>
+        game.situation.moves.values.flatten.size === 26
       }
     }
 
     "Black Stalemate" in {
       import Pos._
       val game        = fenToGame(Monster.initialFen, Monster)
-      val successGame = game flatMap (
+      val successGame = game andThen (
         _.playMoves(
           E2 -> E4,
           E1 -> E2,
@@ -299,9 +299,9 @@ class MonsterVariantTest extends ChessTest {
           D6 -> D5
         )
       )
-      successGame must beValid.like { case game =>
-        game.situation.checkMate must_== false
-        game.situation.staleMate must_== true
+      successGame .toOption must beSome.like { case game =>
+        game.situation.checkMate === false
+        game.situation.staleMate === true
       }
     }
 
@@ -354,11 +354,11 @@ class MonsterVariantTest extends ChessTest {
           "f6f7",
           "d6d5"
         ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-      ) must beValid.like(gameData => {
+      ) .toOption must beSome.like { case gameData =>
         val fen1 = StratForsyth.>>(lib, gameData.game)
         val fen2 = StratForsyth.>>(lib, gameData.fenGame)
-        fen1 must_== fen2
-      })
+        fen1 === fen2
+      }
     }
 
   }

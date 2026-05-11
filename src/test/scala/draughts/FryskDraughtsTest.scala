@@ -80,7 +80,7 @@ class FryskDraughtsTest extends Specification with ValidatedMatchers {
       val s = moves
         .foldLeft(Situation(variant.Frysk))((sit, uci) => move(sit, uci))
 
-      s.winner must_== Some(Player.P2)
+      s.winner === Some(Player.P2)
     }
   }
 

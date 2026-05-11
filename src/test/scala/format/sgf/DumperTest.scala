@@ -30,7 +30,7 @@ class DumperTest extends Specification with ValidatedMatchers {
     "have an sgf output" in {
       val output                 = ";B[bs]"
       val actionStrs: ActionStrs = Vector(Vector("s@b1"))
-      Dumper.apply(Go19x19, actionStrs) must_== output
+      Dumper.apply(Go19x19, actionStrs) === output
     }
   }
 
@@ -38,7 +38,7 @@ class DumperTest extends Specification with ValidatedMatchers {
     "have an sgf output" in {
       val output                 = ";B[bs]\n;W[cr]\n;B[dq]\n;W[ep]"
       val actionStrs: ActionStrs = Vector(Vector("s@b1"), Vector("s@c2"), Vector("s@d3"), Vector("s@e4"))
-      Dumper.apply(Go19x19, actionStrs) must_== output
+      Dumper.apply(Go19x19, actionStrs) === output
     }
   }
 
@@ -52,7 +52,7 @@ class DumperTest extends Specification with ValidatedMatchers {
       )
       val output                 = ";B[dp]\n;B[pd]\n;B[pp]\n;W[bs]\n;B[cr]\n;W[dq]\n;B[ep]"
       val actionStrs: ActionStrs = Vector(Vector("s@b1"), Vector("s@c2"), Vector("s@d3"), Vector("s@e4"))
-      Dumper.apply(Go19x19, actionStrs, initialFen) must_== output
+      Dumper.apply(Go19x19, actionStrs, initialFen) === output
     }
   }
 
@@ -66,7 +66,7 @@ class DumperTest extends Specification with ValidatedMatchers {
       )
       val output                 = ";B[dd]\n;B[dg]\n;B[dj]\n;B[gg]\n;B[jd]\n;B[jg]\n;B[jj]\n;W[bm]\n;B[cl]\n;W[dk]\n;B[ej]"
       val actionStrs: ActionStrs = Vector(Vector("s@b1"), Vector("s@c2"), Vector("s@d3"), Vector("s@e4"))
-      Dumper.apply(Go13x13, actionStrs, initialFen) must_== output
+      Dumper.apply(Go13x13, actionStrs, initialFen) === output
     }
   }
 
@@ -80,7 +80,7 @@ class DumperTest extends Specification with ValidatedMatchers {
       )
       val output                 = ";B[bm]\n;W[cl]\n;B[dk]\n;W[ej]"
       val actionStrs: ActionStrs = Vector(Vector("s@b1"), Vector("s@c2"), Vector("s@d3"), Vector("s@e4"))
-      Dumper.apply(Go13x13, actionStrs, initialFen) must_== output
+      Dumper.apply(Go13x13, actionStrs, initialFen) === output
     }
   }
 
@@ -88,7 +88,7 @@ class DumperTest extends Specification with ValidatedMatchers {
     "have an sgf output" in {
       val output                 = ";B[bi]\n;W[ch]\n;B[dg]\n;W[ef]"
       val actionStrs: ActionStrs = Vector(Vector("s@b1"), Vector("s@c2"), Vector("s@d3"), Vector("s@e4"))
-      Dumper.apply(Go9x9, actionStrs) must_== output
+      Dumper.apply(Go9x9, actionStrs) === output
     }
   }
 
@@ -96,7 +96,7 @@ class DumperTest extends Specification with ValidatedMatchers {
     "have an sgf output" in {
       val output                 = ";B[bi]\n;W[ch]\n;B[]\n;W[dc]"
       val actionStrs: ActionStrs = Vector(Vector("s@b1"), Vector("s@c2"), Vector("pass"), Vector("s@d7"))
-      Dumper.apply(Go9x9, actionStrs) must_== output
+      Dumper.apply(Go9x9, actionStrs) === output
     }
   }
 
@@ -107,7 +107,7 @@ class DumperTest extends Specification with ValidatedMatchers {
       val output                 = ";B[cc]\n;B[ce]\n;B[cg]\n;B[gc]\n;B[ge]\n;B[gg]"
       val actionStrs: ActionStrs = Vector()
 
-      Dumper.apply(Go9x9, actionStrs, initialFen) must_== output
+      Dumper.apply(Go9x9, actionStrs, initialFen) === output
     }
   }
 
@@ -117,7 +117,7 @@ class DumperTest extends Specification with ValidatedMatchers {
         Some(FEN(Go9x9, "9/9/2S3S2/9/2S3S2/9/2S3S2/9/9[SSSSSSSSSSssssssssss] w - 0 865 0 0 55 0 1"))
       val output                 = ";B[cc]\n;B[ce]\n;B[cg]\n;B[gc]\n;B[ge]\n;B[gg]\n;W[bi]\n;B[ch]\n;W[]\n;B[dc]"
       val actionStrs: ActionStrs = Vector(Vector("s@b1"), Vector("s@c2"), Vector("pass"), Vector("s@d7"))
-      Dumper.apply(Go9x9, actionStrs, initialFen) must_== output
+      Dumper.apply(Go9x9, actionStrs, initialFen) === output
     }
   }
 
@@ -126,7 +126,7 @@ class DumperTest extends Specification with ValidatedMatchers {
     "have an sgf output" in {
       val output                 = ";W[yx]"
       val actionStrs: ActionStrs = Vector(Vector("s@l2"))
-      Dumper.apply(Backgammon, actionStrs) must_== output
+      Dumper.apply(Backgammon, actionStrs) === output
     }
   }
 
@@ -134,7 +134,7 @@ class DumperTest extends Specification with ValidatedMatchers {
     "have an sgf output" in {
       val output                 = ";W[ez]"
       val actionStrs: ActionStrs = Vector(Vector("^h1"))
-      Dumper.apply(Backgammon, actionStrs) must_== output
+      Dumper.apply(Backgammon, actionStrs) === output
     }
   }
 
@@ -142,7 +142,7 @@ class DumperTest extends Specification with ValidatedMatchers {
     "have an sgf output" in {
       val output                 = ";W[mg]"
       val actionStrs: ActionStrs = Vector(Vector("a2f1"))
-      Dumper.apply(Backgammon, actionStrs) must_== output
+      Dumper.apply(Backgammon, actionStrs) === output
     }
   }
 
@@ -150,7 +150,7 @@ class DumperTest extends Specification with ValidatedMatchers {
     "have an sgf output" in {
       val output                 = ";W[31]"
       val actionStrs: ActionStrs = Vector(Vector("1/3"))
-      Dumper.apply(Backgammon, actionStrs) must_== output
+      Dumper.apply(Backgammon, actionStrs) === output
     }
   }
 
@@ -159,7 +159,7 @@ class DumperTest extends Specification with ValidatedMatchers {
       val output                 = ";W[31hefe]\n;B[66]"
       val actionStrs: ActionStrs =
         Vector(Vector("1/3", "e1h1", "g1h1", "endTurn"), Vector("6/6"))
-      Dumper.apply(Backgammon, actionStrs) must_== output
+      Dumper.apply(Backgammon, actionStrs) === output
     }
   }
 
@@ -168,7 +168,7 @@ class DumperTest extends Specification with ValidatedMatchers {
       val output                 = ";W[]\n;B[44aeaelplp]\n;W[43]"
       val actionStrs: ActionStrs =
         Vector(Vector("endTurn"), Vector("4/4", "l1h1", "l1h1", "a1d2", "a1d2", "endTurn"), Vector("3/4"))
-      Dumper.apply(Backgammon, actionStrs) must_== output
+      Dumper.apply(Backgammon, actionStrs) === output
     }
   }
 
@@ -176,7 +176,7 @@ class DumperTest extends Specification with ValidatedMatchers {
     "have an sgf output" in {
       val output                 = ";B[dc]"
       val actionStrs: ActionStrs = Vector(Vector("P@d6"))
-      Dumper.apply(Othello, actionStrs) must_== output
+      Dumper.apply(Othello, actionStrs) === output
     }
   }
 
@@ -246,7 +246,7 @@ class DumperTest extends Specification with ValidatedMatchers {
         Vector("d2d2"),
         Vector("P@d1")
       )
-      Dumper.apply(Othello, actionStrs) must_== output
+      Dumper.apply(Othello, actionStrs) === output
     }
   }
 
@@ -255,7 +255,7 @@ class DumperTest extends Specification with ValidatedMatchers {
     "have an sgf output" in {
       val output                 = ";W[djdegb]"
       val actionStrs: ActionStrs = Vector(Vector("d1d6", "P@g9"))
-      Dumper.apply(Amazons, actionStrs) must_== output
+      Dumper.apply(Amazons, actionStrs) === output
     }
   }
 
@@ -263,7 +263,7 @@ class DumperTest extends Specification with ValidatedMatchers {
     "have an sgf output" in {
       val output                 = ";W[djdegb]\n;B[gabfjf]\n;W[jgjj]"
       val actionStrs: ActionStrs = Vector(Vector("d1d6", "P@g9"), Vector("g10b5", "P@j5"), Vector("j4j1"))
-      Dumper.apply(Amazons, actionStrs) must_== output
+      Dumper.apply(Amazons, actionStrs) === output
     }
   }
 
@@ -271,7 +271,7 @@ class DumperTest extends Specification with ValidatedMatchers {
     "have an sgf output" in {
       val output                 = ";W[hheh]\n;B[bacc]\n;W[hjgh]"
       val actionStrs: ActionStrs = Vector(Vector("h3e3"), Vector("b10c8"), Vector("h1g3"))
-      Dumper.apply(Xiangqi, actionStrs) must_== output
+      Dumper.apply(Xiangqi, actionStrs) === output
     }
   }
 
@@ -280,7 +280,7 @@ class DumperTest extends Specification with ValidatedMatchers {
       val output                 = ";W[efee]\n;B[fafc]\n;W[eeed]\n;B[fcdc]\n;W[eddd]"
       val actionStrs: ActionStrs =
         Vector(Vector("e2e3"), Vector("f7f5"), Vector("e3e4"), Vector("f5d5"), Vector("e4d4"))
-      Dumper.apply(MiniXiangqi, actionStrs) must_== output
+      Dumper.apply(MiniXiangqi, actionStrs) === output
     }
   }
 
@@ -298,7 +298,7 @@ class DumperTest extends Specification with ValidatedMatchers {
           Vector("B@h4"),
           Vector("e5b2")
         )
-      Dumper.apply(Shogi, actionStrs) must_== output
+      Dumper.apply(Shogi, actionStrs) === output
     }
   }
 
@@ -320,7 +320,7 @@ class DumperTest extends Specification with ValidatedMatchers {
           Vector("b8f8"),
           Vector("h6h7+")
         )
-      Dumper.apply(Shogi, actionStrs) must_== output
+      Dumper.apply(Shogi, actionStrs) === output
     }
   }
 
@@ -340,7 +340,7 @@ class DumperTest extends Specification with ValidatedMatchers {
           Vector("d2d1P"),
           Vector("e1d1")
         )
-      Dumper.apply(MiniShogi, actionStrs) must_== output
+      Dumper.apply(MiniShogi, actionStrs) === output
     }
   }
 
@@ -349,7 +349,7 @@ class DumperTest extends Specification with ValidatedMatchers {
   //     val output                 = ";B[dhbf]\n;W[afcd]\n;B[cacd]\n;W[hdfb]\n;B[gagc]"
   //     val actionStrs: ActionStrs =
   //       Vector(Vector("d1b3"), Vector("a3c5"), Vector("c8c5"), Vector("h5f7"), Vector("g8g6"))
-  //     Dumper.apply(LOA, actionStrs) must_== output
+  //     Dumper.apply(LOA, actionStrs) === output
   //   }
   // }
 
@@ -368,7 +368,7 @@ class DumperTest extends Specification with ValidatedMatchers {
   //         Vector("a6f6"),
   //         Vector("f1f5")
   //       )
-  //     Dumper.apply(ScrambledEggs, actionStrs) must_== output
+  //     Dumper.apply(ScrambledEggs, actionStrs) === output
   //   }
   // }
 

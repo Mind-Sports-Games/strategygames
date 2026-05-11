@@ -3,6 +3,7 @@ package strategygames.fairysf
 import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
+import scalalib.extensions.*
 
 import strategygames.format.pgn.San
 import strategygames.fairysf.format.pgn.{ Parser, Reader }
@@ -258,7 +259,7 @@ object Replay {
         val fairyUcis       = Parser.flatActionStrsToFairyUciMoves(actionStrs.flatten)
         val firstFairyUci   = fairyUcis.headOption.toList
         val pairedFairyUcis = if (fairyUcis == firstFairyUci) List() else fairyUcis.sliding(2)
-        (firstFairyUci.map(parseFairyUci)) ::: pairedFairyUcis.flatMap {
+        (firstFairyUci.map(parseFairyUci)) ::: pairedFairyUcis.iterator.flatMap {
           case List(prev, fairyUci) =>
             Some(parseFairyUciWithPrevious(fairyUci, Some(prev)))
           case _                    => None
@@ -297,7 +298,7 @@ object Replay {
     sans match {
       case Nil         => valid(Nil)
       case san :: rest =>
-        san(StratSituation.wrap(sit)).map(fairysfAction) flatMap { action =>
+        san(StratSituation.wrap(sit)).map(fairysfAction) andThen { action =>
           val after = Situation(action.finalizeAfter, !sit.player)
           recursiveSituations(after, rest) map { after :: _ }
         }
@@ -413,7 +414,7 @@ object Replay {
         sans match {
           case Nil         => invalid(s"Can't find $atFenTruncated, reached ply $ply, turn $turn")
           case san :: rest =>
-            san(StratSituation.wrap(sit)).map(fairysfAction) flatMap { action =>
+            san(StratSituation.wrap(sit)).map(fairysfAction) andThen { action =>
               val after        = action.situationAfter
               val newPlies     = ply + 1
               val newTurnCount = turn + (if (sit.player != after.player) 1 else 0)

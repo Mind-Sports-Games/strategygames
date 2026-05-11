@@ -9,21 +9,21 @@ class VisualTest extends ChessTest {
 
   "The visual board formatter" should {
     "export new board" in {
-      f.addNewLines(f >> makeBoard) must_== newBoardFormat
+      f.addNewLines(f >> makeBoard) === newBoardFormat
     }
     // "import new board" in {
-    //   f << newBoardFormat must_== makeBoard
+    //   f << newBoardFormat === makeBoard
     // }
     "import and export is non destructive" in {
       forall(examples) { example =>
-        f.addNewLines(f >> (f << example)) must_== example
+        f.addNewLines(f >> (f << example)) === example
       }
     }
     // "import partial board representation" in {
     //   f << """
     // P n
     // PPPP   P
-    // RNBQK  R""" must_== (f << """
+    // RNBQK  R""" === (f << """
 
     // P n
     // PPPP   P
@@ -42,7 +42,7 @@ PPPPPPPP
  NBQKBNR
 """
       val markedBoard = f >>| (board, Map(Set(B3, D3, B5, D5, A6, E6, F7, G8) -> 'x'))
-      f addNewLines markedBoard must_== """
+      (f addNewLines markedBoard) === """
 k B   x
      x
 x   x
