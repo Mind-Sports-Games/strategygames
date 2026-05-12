@@ -1,10 +1,13 @@
 package strategygames.abalone.variant
 
 import cats.data.Validated
-import cats.implicits.catsSyntaxOption
+import cats.syntax.option._
+import scala.annotation.nowarn
+import scalalib.extensions.*
+
 import strategygames.abalone._
-import strategygames.abalone.format.{FEN, Uci}
-import strategygames.{GameFamily, Player}
+import strategygames.abalone.format.{ FEN, Uci }
+import strategygames.{ GameFamily, Player }
 
 import scala.annotation.nowarn
 
@@ -337,7 +340,6 @@ abstract class Variant private[variant] (
   def stalemateIsDraw = false
 
   def maxUsable: Option[Int] = Option(3)
-
 
   def winningScore = 6
 

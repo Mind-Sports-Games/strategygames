@@ -12,6 +12,7 @@ import strategygames.format.pgn.{ ParsedPgn => ParsedPdn, San, Sans, Tags }
 
 import cats.data.Validated
 import cats.implicits._
+import scalalib.extensions.*
 
 object Reader {
 

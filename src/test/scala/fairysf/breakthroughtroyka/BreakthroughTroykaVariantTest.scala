@@ -6,13 +6,13 @@ class BreakthroughTroykaVariantTest extends FairySFTest {
 
     "not have winner from start position" in {
       val game = Game.apply(variant.BreakthroughTroyka)
-      game.situation.board.apiPosition.gameEnd must_== false
+      game.situation.board.apiPosition.gameEnd === false
 
       val game2 = game.playMoves();
 
-      game2 must beValid.like { case g =>
-        g.situation.board.apiPosition.gameEnd must_== false
-        g.situation.winner must_== None
+      game2 .toOption must beSome.like { case g =>
+        g.situation.board.apiPosition.gameEnd === false
+        g.situation.winner === None
       }
     }
 
@@ -28,9 +28,9 @@ class BreakthroughTroykaVariantTest extends FairySFTest {
           (Pos.A7, Pos.A8)
         // @formatter:on
       )
-      game3 must beValid.like { case g =>
-        g.situation.board.apiPosition.gameEnd must_== true
-        g.situation.winner must beSome.like(winner => winner must_== P1)
+      game3 .toOption must beSome.like { case g =>
+        g.situation.board.apiPosition.gameEnd === true
+        g.situation.winner must beSome.like(winner => winner === P1)
       }
     }
 
@@ -46,9 +46,9 @@ class BreakthroughTroykaVariantTest extends FairySFTest {
           (Pos.E1, Pos.D2), (Pos.F2, Pos.G1)
         // @formatter:on
       )
-      game3 must beValid.like { case g =>
-        g.situation.board.apiPosition.gameEnd must_== true
-        g.situation.winner must beSome.like(winner => winner must_== P2)
+      game3 .toOption must beSome.like { case g =>
+        g.situation.board.apiPosition.gameEnd === true
+        g.situation.winner must beSome.like(winner => winner === P2)
       }
     }
 
@@ -87,9 +87,9 @@ class BreakthroughTroykaVariantTest extends FairySFTest {
           (Pos.F6, Pos.G7), (Pos.H8, Pos.G7),
         // @formatter:on
       )
-      game3 must beValid.like { case g =>
-        g.situation.board.apiPosition.gameEnd must_== true
-        g.situation.winner must beSome.like(winner => winner must_== P2)
+      game3 .toOption must beSome.like { case g =>
+        g.situation.board.apiPosition.gameEnd === true
+        g.situation.winner must beSome.like(winner => winner === P2)
       }
     }
   }

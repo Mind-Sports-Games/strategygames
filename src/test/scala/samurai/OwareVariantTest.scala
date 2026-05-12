@@ -18,7 +18,7 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
     val moves = variant.Oware.validMoves(situation)
     // val m = situation.moves
     "be valid" in {
-      moves.size must_== 6
+      moves.size === 6
     }
   }
 
@@ -32,7 +32,7 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
       case None       => ""
     }
     "c1 goes to f2" in {
-      uci must_== "c1f2"
+      uci === "c1f2"
     }
   }
 
@@ -40,7 +40,7 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
     val pos      = Pos(6)
     val expected = Pos.at(5, 1)
     "be backwards, Pos(6) is f2" in {
-      pos must_== expected
+      pos === expected
     }
   }
 
@@ -49,22 +49,22 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
     val position = Api.positionFromFen(fen)
     val newGame  = position.makeMoves(List(5))
     "have an initial valid fen" in {
-      Api.validateFEN(fen) must_== true
+      Api.validateFEN(fen) === true
     }
     "is allowed the grandslam move" in {
-      position.legalMoves.contains(5) must_== true
+      position.legalMoves.contains(5) === true
     }
     "current pos is ongoing" in {
-      position.gameEnd must_== false
+      position.gameEnd === false
     }
     "but does not capture pieces once moved" in {
-      newGame.gameEnd must_== false
+      newGame.gameEnd === false
     }
     "hence new new fen is valid" in {
-      Api.validateFEN(newGame.fen.value) must_== true
+      Api.validateFEN(newGame.fen.value) === true
     }
     "and equal to 3,3S,2S,3S/1S,3,2S,1 20 17 N 50" in {
-      newGame.fen.value must_== "3,3S,2S,3S/1S,3,2S,1 20 17 N 50"
+      newGame.fen.value === "3,3S,2S,3S/1S,3,2S,1 20 17 N 50"
     }
   }
 
@@ -73,22 +73,22 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
     val position = Api.positionFromFen(fen)
     val newGame  = position.makeMoves(List(9))
     "have an initial valid fen" in {
-      Api.validateFEN(fen) must_== true
+      Api.validateFEN(fen) === true
     }
     "is allowed the grandslam move" in {
-      position.legalMoves.contains(9) must_== true
+      position.legalMoves.contains(9) === true
     }
     "current pos is ongoing" in {
-      position.gameEnd must_== false
+      position.gameEnd === false
     }
     "but does not capture pieces once moved" in {
-      newGame.gameEnd must_== false
+      newGame.gameEnd === false
     }
     "hence new new fen is valid" in {
-      Api.validateFEN(newGame.fen.value) must_== true
+      Api.validateFEN(newGame.fen.value) === true
     }
     "and equal to 2S,1S,3,3S/3S,2S,2S,3S,3S,3S 13 13 S 51" in {
-      newGame.fen.value must_== "2S,1S,3,3S/3S,2S,2S,3S,3S,3S 13 13 S 51"
+      newGame.fen.value === "2S,1S,3,3S/3S,2S,2S,3S,3S,3S 13 13 S 51"
     }
   }
 
@@ -97,22 +97,22 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
     val position = Api.positionFromFen(fen)
     val newGame  = position.makeMoves(List(5))
     "have an initial valid fen" in {
-      Api.validateFEN(fen) must_== true
+      Api.validateFEN(fen) === true
     }
     "is allowed the grandslam move" in {
-      position.legalMoves.contains(5) must_== true
+      position.legalMoves.contains(5) === true
     }
     "current pos is ongoing" in {
-      position.gameEnd must_== false
+      position.gameEnd === false
     }
     "but does not capture pieces once moved" in {
-      newGame.gameEnd must_== false
+      newGame.gameEnd === false
     }
     "hence new new fen is valid" in {
-      Api.validateFEN(newGame.fen.value) must_== true
+      Api.validateFEN(newGame.fen.value) === true
     }
     "and equal to 5,2S/1S,5 22 23 N 50" in {
-      newGame.fen.value must_== "5,2S/1S,5 22 23 N 50"
+      newGame.fen.value === "5,2S/1S,5 22 23 N 50"
     }
   }
 
@@ -121,19 +121,19 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
     val position = Api.positionFromFen(fen)
     val newGame  = position.makeMoves(List(5, 11, 0, 6, 1, 7, 2, 8, 3, 9, 4, 10))
     "have an initial valid fen" in {
-      Api.validateFEN(fen) must_== true
+      Api.validateFEN(fen) === true
     }
     "have legal moves..." in {
-      position.legalMoves.contains(5) must_== true
+      position.legalMoves.contains(5) === true
     }
     "after cycle moves board fens are the same" in {
-      newGame.fen.value.split(" ")(0) must_== fen.split(" ")(0)
+      newGame.fen.value.split(" ")(0) === fen.split(" ")(0)
     }
     "Ending cycle changes final fen scores" in {
-      newGame.fen.value must_== fen.split(" ")(0) + " 24 24 S 56"
+      newGame.fen.value === fen.split(" ")(0) + " 24 24 S 56"
     }
     "and result in a draw" in {
-      newGame.gameResult must_== GameResult.Draw()
+      newGame.gameResult === GameResult.Draw()
     }
   }
 
@@ -142,19 +142,19 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
     val position = Api.positionFromFen(fen)
     val newGame  = position.makeMoves(List(5, 11, 0, 6, 1, 7, 2, 8, 3, 9, 4))
     "have an initial valid fen" in {
-      Api.validateFEN(fen) must_== true
+      Api.validateFEN(fen) === true
     }
     "have legal moves..." in {
-      position.legalMoves.contains(5) must_== true
+      position.legalMoves.contains(5) === true
     }
     "currently be ongoing game" in {
-      position.gameResult must_== GameResult.Ongoing()
+      position.gameResult === GameResult.Ongoing()
     }
     "after 1 move from cycle moves fens are not the same" in {
-      newGame.fen.value must_!= fen
+      newGame.fen.value !== fen
     }
     "and not yet result in a draw" in {
-      newGame.gameResult must_== GameResult.Ongoing()
+      newGame.gameResult === GameResult.Ongoing()
     }
   }
 
@@ -163,28 +163,28 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
     val position = Api.positionFromFen(fen)
     val newGame  = position.makeMoves(List(5, 11, 0, 6, 1, 7, 2, 8, 3, 9, 4, 10))
     "have an initial valid fen" in {
-      Api.validateFEN(fen) must_== true
+      Api.validateFEN(fen) === true
     }
     "have legal moves..." in {
-      position.legalMoves.contains(5) must_== true
+      position.legalMoves.contains(5) === true
     }
     "detected end game cycle" in {
-      position.gameResult must_== GameResult.VariantEnd()
+      position.gameResult === GameResult.VariantEnd()
     }
     "and made North winner" in {
-      position.gameOutcome must_== -1000
+      position.gameOutcome === -1000
     }
     "api allows more moves - cycle moves board fens are the same" in {
-      newGame.fen.value.split(" ")(0) must_== fen.split(" ")(0)
+      newGame.fen.value.split(" ")(0) === fen.split(" ")(0)
     }
     "Ending cycle changes final fen scores" in {
-      newGame.fen.value must_== fen.split(" ")(0) + " 23 25 S 56"
+      newGame.fen.value === fen.split(" ")(0) + " 23 25 S 56"
     }
     "and result in also game end" in {
-      newGame.gameResult must_== GameResult.VariantEnd()
+      newGame.gameResult === GameResult.VariantEnd()
     }
     "and still a win for North" in {
-      newGame.gameOutcome must_== -1000
+      newGame.gameOutcome === -1000
     }
   }
 
@@ -284,10 +284,10 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
     val moves           = uciMoves.dropRight(2).map(x => (Api.uciToMove(x)))
     val newGame         = initialPosition.makeMovesWithPrevious(moves, List[String]())
     "currently be ongoing game" in {
-      newGame.gameResult must_== GameResult.Ongoing()
+      newGame.gameResult === GameResult.Ongoing()
     }
     "game score is 0 as not ended" in {
-      newGame.gameOutcome must_== 0
+      newGame.gameOutcome === 0
     }
   }
 
@@ -388,22 +388,22 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
     val newGame         = initialPosition.makeMovesWithPrevious(moves, List[String]())
     val cycleGame       = newGame.makeMovesWithPrevious(List(5, 6), uciMoves.dropRight(2))
     "currently be ongoing game" in {
-      newGame.gameResult must_== GameResult.Ongoing()
+      newGame.gameResult === GameResult.Ongoing()
     }
     "game score is 0 as not ended" in {
-      newGame.gameOutcome must_== 0
+      newGame.gameOutcome === 0
     }
     "and result in a draw" in {
-      cycleGame.gameResult must_== GameResult.VariantEnd()
+      cycleGame.gameResult === GameResult.VariantEnd()
     }
     "game score is win for North -1000" in {
-      cycleGame.gameOutcome must_== -1000
+      cycleGame.gameOutcome === -1000
     }
     "and game has ended" in {
-      cycleGame.gameEnd must_== true
+      cycleGame.gameEnd === true
     }
     "but still legal moves for some reason" in {
-      cycleGame.legalMoves must_== Array(0)
+      cycleGame.legalMoves === Array(0)
     }
   }
 
@@ -506,34 +506,34 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
     val newGame         = initialPosition.makeMovesWithPrevious(moves, List[String]())
     val cycleGame       = newGame.makeMovesWithPrevious(List(11), uciMoves.dropRight(1))
     "currently be ongoing game" in {
-      newGame.gameResult must_== GameResult.Ongoing()
+      newGame.gameResult === GameResult.Ongoing()
     }
     "game score is 0 as not ended" in {
-      newGame.gameOutcome must_== 0
+      newGame.gameOutcome === 0
     }
     "after cycle move, result in a variant end" in {
-      cycleGame.gameResult must_== GameResult.VariantEnd()
+      cycleGame.gameResult === GameResult.VariantEnd()
     }
     "game score is win for South 1000" in {
-      cycleGame.gameOutcome must_== 1000
+      cycleGame.gameOutcome === 1000
     }
     "and game has ended" in {
-      cycleGame.gameEnd must_== false
+      cycleGame.gameEnd === false
     }
     "but still legal moves for some reason" in {
-      cycleGame.legalMoves must_== Array(5)
+      cycleGame.legalMoves === Array(5)
     }
 
     val finalMove = cycleGame.makeMovesWithPrevious(List(5), uciMoves)
 
     "after final move, result in a draw" in {
-      finalMove.gameResult must_== GameResult.Draw()
+      finalMove.gameResult === GameResult.Draw()
     }
     "game score is draw" in {
-      finalMove.gameOutcome must_== 0
+      finalMove.gameOutcome === 0
     }
     "and game has ended" in {
-      finalMove.gameEnd must_== true
+      finalMove.gameEnd === true
     }
   }
 
@@ -699,27 +699,27 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
 
     // move before cycle
     "Only 2 legal moves left" in {
-      newGame.legalMoves.size must_== 2
+      newGame.legalMoves.size === 2
     }
     "and game has not ended" in {
-      newGame.gameEnd must_== false
+      newGame.gameEnd === false
     }
     "and game is not yet repepition" in {
-      newGame.isRepetition must_== false
+      newGame.isRepetition === false
     }
 
     // move of cycle - ending the game
     "after cycle move, result in a draw" in {
-      cycleEndGame.gameResult must_== GameResult.VariantEnd()
+      cycleEndGame.gameResult === GameResult.VariantEnd()
     }
     "game score is P2 win" in {
-      cycleEndGame.gameOutcome must_== -1000
+      cycleEndGame.gameOutcome === -1000
     }
     "and game has ended" in {
-      cycleEndGame.gameEnd must_== true
+      cycleEndGame.gameEnd === true
     }
     "and game is repepition" in {
-      cycleEndGame.isRepetition must_== true
+      cycleEndGame.isRepetition === true
     }
   }
 
@@ -741,12 +741,12 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
 
     val newGame = doMoves(game, uciMoves.dropRight(1))
     "not end after all but one moves" in {
-      newGame.situation.end must_== false
+      newGame.situation.end === false
     }
 
     val finalGame = doMoves(game, uciMoves)
     "end after all moves" in {
-      finalGame.situation.end must_== true
+      finalGame.situation.end === true
     }
 
   }
@@ -911,32 +911,32 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
     val newGame         = initialPosition.makeMovesWithPrevious(moves, List[String]())
     val cycleEndGame    = newGame.makeMovesWithPrevious(List(11), uciMoves.dropRight(1))
     "game is ongoing" in {
-      newGame.gameResult must_== GameResult.Ongoing()
+      newGame.gameResult === GameResult.Ongoing()
     }
     "game score is 0 as not ended" in {
-      newGame.gameOutcome must_== 0
+      newGame.gameOutcome === 0
     }
     "Only 1 legal move left" in {
-      newGame.legalMoves.size must_== 1
+      newGame.legalMoves.size === 1
     }
     "and game has not ended" in {
-      newGame.gameEnd must_== false
+      newGame.gameEnd === false
     }
     "and game is not repepition" in {
-      newGame.isRepetition must_== false
+      newGame.isRepetition === false
     }
 
     "after cycle move, result in a variant end" in {
-      cycleEndGame.gameResult must_== GameResult.VariantEnd()
+      cycleEndGame.gameResult === GameResult.VariantEnd()
     }
     "game score is win for South 1000" in {
-      cycleEndGame.gameOutcome must_== 1000
+      cycleEndGame.gameOutcome === 1000
     }
     "and game has ended" in {
-      cycleEndGame.gameEnd must_== true
+      cycleEndGame.gameEnd === true
     }
     "and game is repepition" in {
-      cycleEndGame.isRepetition must_== true
+      cycleEndGame.isRepetition === true
     }
   }
 
@@ -958,12 +958,12 @@ class OwareVariantTest extends Specification with ValidatedMatchers {
 
     val newGame = doMoves(game, uciMoves.dropRight(1))
     "not end after all but one moves" in {
-      newGame.situation.end must_== false
+      newGame.situation.end === false
     }
 
     val finalGame = doMoves(game, uciMoves)
     "end after all moves" in {
-      finalGame.situation.end must_== true
+      finalGame.situation.end === true
     }
 
   }
@@ -1067,10 +1067,10 @@ class OwareVariantTestIsometry extends strategygames.chess.ChessTest {
         "f1e2",
         "f2d2" // TODO doesn't like final move for some reason?
       ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) must beValid.like(gameData => {
+    ) .toOption must beSome.like { case gameData =>
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
-      fen1 must_== fen2
-    })
+      fen1 === fen2
+    }
   }
 }

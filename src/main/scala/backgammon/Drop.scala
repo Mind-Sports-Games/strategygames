@@ -38,9 +38,9 @@ case class Drop(
 
   def diceUsed = (Pos.barIndex(player) - pos.index).abs
 
-  def withMetrics(m: MoveMetrics) = copy(metrics = m)
+  def withMetrics(m: MoveMetrics): Drop = copy(metrics = m)
 
-  def toUci = Uci.Drop(piece.role, pos, captureList)
+  def toUci: Uci.Drop = Uci.Drop(piece.role, pos, captureList)
 
   override def toString = toUci.uci
 

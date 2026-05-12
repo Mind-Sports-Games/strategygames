@@ -21,14 +21,14 @@ sealed abstract class Pos(val fieldNumber: Int) {
 sealed abstract class PosMotion(field: Int) extends Pos(field) {
   val x: Int
   val y: Int
-  val moveDownLeft: Option[PosMotion]
-  val moveDownRight: Option[PosMotion]
-  val moveUpLeft: Option[PosMotion]
-  val moveUpRight: Option[PosMotion]
-  val moveDown: Option[PosMotion]
-  val moveUp: Option[PosMotion]
-  val moveLeft: Option[PosMotion]
-  val moveRight: Option[PosMotion]
+  lazy val moveDownLeft: Option[PosMotion]
+  lazy val moveDownRight: Option[PosMotion]
+  lazy val moveUpLeft: Option[PosMotion]
+  lazy val moveUpRight: Option[PosMotion]
+  lazy val moveDown: Option[PosMotion]
+  lazy val moveUp: Option[PosMotion]
+  lazy val moveLeft: Option[PosMotion]
+  lazy val moveRight: Option[PosMotion]
 }
 
 sealed case class Pos100 private (x: Int, y: Int) extends PosMotion(5 * (y - 1) + x) {

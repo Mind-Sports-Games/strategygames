@@ -3,6 +3,7 @@ package strategygames.chess
 import strategygames.{ Division, Player }
 
 import cats.syntax.option.none
+import scalalib.extensions.*
 
 object Divider {
 

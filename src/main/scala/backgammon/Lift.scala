@@ -60,9 +60,9 @@ case class Lift(
 
   def diceUsed = situationBefore.board.unusedDice.diff(after.unusedDice).head
 
-  def withMetrics(m: MoveMetrics) = copy(metrics = m)
+  def withMetrics(m: MoveMetrics): Lift = copy(metrics = m)
 
-  def toUci = Uci.Lift(pos)
+  def toUci: Uci.Lift = Uci.Lift(pos)
 
   override def toString = toUci.uci
 

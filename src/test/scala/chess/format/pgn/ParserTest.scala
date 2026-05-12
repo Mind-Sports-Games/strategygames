@@ -17,16 +17,16 @@ class ParserTest extends ChessTest {
 
   "promotion check" should {
     "as a queen" in {
-      parser("b8=Q ") must beValid.like { case a =>
+      parser("b8=Q ") .toOption must beSome.like { case a =>
         a.sans.value.headOption must beSome.like { case san: Std =>
-          san.promotion must_== Option(Queen)
+          san.promotion === Option(Queen)
         }
       }
     }
     "as a rook" in {
-      parser("b8=R ") must beValid.like { case a =>
+      parser("b8=R ") .toOption must beSome.like { case a =>
         a.sans.value.headOption must beSome.like { case san: Std =>
-          san.promotion must_== Option(Rook)
+          san.promotion === Option(Rook)
         }
       }
     }
@@ -34,43 +34,43 @@ class ParserTest extends ChessTest {
 
   "result" in {
     "no tag but inline result" in {
-      parser(noTagButResult) must beValid.like { case parsed =>
-        parsed.tags("Result") must_== Option("1-0")
+      parser(noTagButResult) .toOption must beSome.like { case parsed =>
+        parsed.tags("Result") === Option("1-0")
       }
     }
     "in tags" in {
-      parser(p1ResignsInTags) must beValid.like { case parsed =>
-        parsed.tags("Result") must_== Option("0-1")
+      parser(p1ResignsInTags) .toOption must beSome.like { case parsed =>
+        parsed.tags("Result") === Option("0-1")
       }
     }
     "in moves" in {
-      parser(p1ResignsInMoves) must beValid.like { case parsed =>
-        parsed.tags("Result") must_== Option("0-1")
+      parser(p1ResignsInMoves) .toOption must beSome.like { case parsed =>
+        parsed.tags("Result") === Option("0-1")
       }
     }
     "in tags and moves" in {
-      parser(p1ResignsInTagsAndMoves) must beValid.like { case parsed =>
-        parsed.tags("Result") must_== Option("0-1")
+      parser(p1ResignsInTagsAndMoves) .toOption must beSome.like { case parsed =>
+        parsed.tags("Result") === Option("0-1")
       }
     }
   }
 
   "glyphs" in {
-    parseMove("e4") must beValid.like { case a =>
-      a must_== Std(Pos.E4, Pawn)
+    parseMove("e4") .toOption must beSome.like { case a =>
+      a === Std(Pos.E4, Pawn)
     }
-    parseMove("e4!") must beValid.like { case a: Std =>
+    parseMove("e4!") .toOption must beSome.like { case a: Std =>
       a.dest === Pos.E4
       a.role === Pawn
       a.metas.glyphs === Glyphs(Glyph.MoveAssessment.good.some, None, Nil)
     }
-    parseMove("Ne7g6+?!") must beValid.like { case a: Std =>
+    parseMove("Ne7g6+?!") .toOption must beSome.like { case a: Std =>
       a.dest === Pos.G6
       a.role === Knight
       a.metas.glyphs === Glyphs(Glyph.MoveAssessment.dubious.some, None, Nil)
     }
-    parser("Ne7g6+!") must beValid
-    parseMove("P@e4?!") must beValid.like { case a: Drop =>
+    parser("Ne7g6+!").isValid === true
+    parseMove("P@e4?!") .toOption must beSome.like { case a: Drop =>
       a.pos === Pos.E4
       a.role === Pawn
       a.metas.glyphs === Glyphs(Glyph.MoveAssessment.dubious.some, None, Nil)
@@ -78,31 +78,31 @@ class ParserTest extends ChessTest {
   }
 
   "nags" in {
-    parser(withNag) must beValid
+    parser(withNag).isValid === true
 
-    parser("Ne7g6+! $13") must beValid.like { case ParsedPgn(_, _, Sans(List(san))) =>
-      san.metas.glyphs.move must_== Option(Glyph.MoveAssessment.good)
-      san.metas.glyphs.position must_== Option(Glyph.PositionAssessment.unclear)
+    parser("Ne7g6+! $13") .toOption must beSome.like { case ParsedPgn(_, _, Sans(List(san))) =>
+      san.metas.glyphs.move === Option(Glyph.MoveAssessment.good)
+      san.metas.glyphs.position === Option(Glyph.PositionAssessment.unclear)
     }
   }
 
   "non-nags" in {
-    parser(withGlyphAnnotations) must beValid
+    parser(withGlyphAnnotations).isValid === true
 
-    parser("Bxd3?? ∞") must beValid.like { case ParsedPgn(_, _, Sans(List(san))) =>
-      san.metas.glyphs.move must_== Option(Glyph.MoveAssessment.blunder)
-      san.metas.glyphs.position must_== Option(Glyph.PositionAssessment.unclear)
+    parser("Bxd3?? ∞") .toOption must beSome.like { case ParsedPgn(_, _, Sans(List(san))) =>
+      san.metas.glyphs.move === Option(Glyph.MoveAssessment.blunder)
+      san.metas.glyphs.position === Option(Glyph.PositionAssessment.unclear)
     }
   }
 
   "comments" in {
-    parser("Ne7g6+! {such a neat comment}") must beValid.like { case ParsedPgn(_, _, Sans(List(san))) =>
-      san.metas.comments must_== List("such a neat comment")
+    parser("Ne7g6+! {such a neat comment}") .toOption must beSome.like { case ParsedPgn(_, _, Sans(List(san))) =>
+      san.metas.comments === List("such a neat comment")
     }
   }
 
   "variations" in {
-    parser("Ne7g6+! {such a neat comment} (e4 Ng6)") must beValid.like {
+    parser("Ne7g6+! {such a neat comment} (e4 Ng6)") .toOption must beSome.like {
       case ParsedPgn(_, _, Sans(List(san))) =>
         san.metas.variations.headOption must beSome.like { case variation =>
           variation.value must haveSize(2)
@@ -111,7 +111,7 @@ class ParserTest extends ChessTest {
   }
 
   "first move variation" in {
-    parser("1. e4 (1. d4)") must beValid.like { case ParsedPgn(_, _, Sans(List(san))) =>
+    parser("1. e4 (1. d4)") .toOption must beSome.like { case ParsedPgn(_, _, Sans(List(san))) =>
       san.metas.variations.headOption must beSome.like { case variation =>
         variation.value must haveSize(1)
       }
@@ -121,8 +121,8 @@ class ParserTest extends ChessTest {
   raws foreach { sans =>
     val size = sans.split(' ').length
     "sans only size: " + size in {
-      parser(sans) must beValid.like { case a =>
-        a.sans.value.size must_== size
+      parser(sans) .toOption must beSome.like { case a =>
+        a.sans.value.size === size
       }
     }
   }
@@ -130,35 +130,35 @@ class ParserTest extends ChessTest {
   (shortCastles ++ longCastles ++ annotatedCastles) foreach { sans =>
     val size = sans.split(' ').length
     "sans only size: " + size in {
-      parser(sans) must beValid.like { case a =>
-        a.sans.value.size must_== size
+      parser(sans) .toOption must beSome.like { case a =>
+        a.sans.value.size === size
       }
     }
   }
 
   "disambiguated" in {
-    parser(disambiguated) must beValid.like { case a =>
-      a.sans.value.size must_== 3
+    parser(disambiguated) .toOption must beSome.like { case a =>
+      a.sans.value.size === 3
     }
   }
 
   List(fromProd1, fromProd2, castleCheck1, castleCheck2) foreach { sans =>
     val size = sans.split(' ').length
     "sans only from prod size: " + size in {
-      parser(sans) must beValid.like { case a =>
-        a.sans.value.size must_== size
+      parser(sans) .toOption must beSome.like { case a =>
+        a.sans.value.size === size
       }
     }
   }
 
   "variations" in {
-    parser(variations) must beValid.like { case a =>
-      a.sans.value.size must_== 20
+    parser(variations) .toOption must beSome.like { case a =>
+      a.sans.value.size === 20
     }
   }
 
   "inline tags" in {
-    parser(inlineTags) must beValid.like { case a =>
+    parser(inlineTags) .toOption must beSome.like { case a =>
       a.tags.value must contain { (tag: Tag) =>
         tag.name == Tag.P1 && tag.value == "Blazquez, Denis"
       }
@@ -166,7 +166,7 @@ class ParserTest extends ChessTest {
   }
 
   "tag with nested quotes" in {
-    parser("""[P2 "Schwarzenegger, Arnold \"The Terminator\""]""") must beValid.like { case a =>
+    parser("""[P2 "Schwarzenegger, Arnold \"The Terminator\""]""") .toOption must beSome.like { case a =>
       a.tags.value must contain { (tag: Tag) =>
         tag.name == Tag.P2 && tag.value == """Schwarzenegger, Arnold "The Terminator""""
       }
@@ -174,7 +174,7 @@ class ParserTest extends ChessTest {
   }
 
   "tag with inner brackets" in {
-    parser("""[P2 "[=0040.34h5a4]"]""") must beValid.like { case a =>
+    parser("""[P2 "[=0040.34h5a4]"]""") .toOption must beSome.like { case a =>
       a.tags.value must contain { (tag: Tag) =>
         tag.name == Tag.P2 && tag.value == "[=0040.34h5a4]"
       }
@@ -182,162 +182,162 @@ class ParserTest extends ChessTest {
   }
 
   "game from wikipedia" in {
-    parser(fromWikipedia) must beValid.like { case a =>
-      a.sans.value.size must_== 85
+    parser(fromWikipedia) .toOption must beSome.like { case a =>
+      a.sans.value.size === 85
     }
   }
 
   "game from crafty" in {
-    parser(fromCrafty) must beValid.like { case a =>
-      a.sans.value.size must_== 68
+    parser(fromCrafty) .toOption must beSome.like { case a =>
+      a.sans.value.size === 68
     }
   }
 
   "inline comments" in {
-    parser(inlineComments) must beValid.like { case a =>
-      a.sans.value.size must_== 85
+    parser(inlineComments) .toOption must beSome.like { case a =>
+      a.sans.value.size === 85
     }
   }
 
   "comments and variations" in {
-    parser(commentsAndVariations) must beValid.like { case a =>
-      a.sans.value.size must_== 103
+    parser(commentsAndVariations) .toOption must beSome.like { case a =>
+      a.sans.value.size === 103
     }
   }
 
   "comments and lines by smartchess" in {
-    parser(bySmartChess) must beValid.like { case a =>
-      a.sans.value.size must_== 65
+    parser(bySmartChess) .toOption must beSome.like { case a =>
+      a.sans.value.size === 65
     }
   }
 
   "complete 960" in {
-    parser(complete960) must beValid.like { case a =>
-      a.sans.value.size must_== 42
+    parser(complete960) .toOption must beSome.like { case a =>
+      a.sans.value.size === 42
     }
   }
 
   "TCEC" in {
-    parser(fromTcec) must beValid.like { case a =>
-      a.sans.value.size must_== 142
+    parser(fromTcec) .toOption must beSome.like { case a =>
+      a.sans.value.size === 142
     }
   }
 
   "TCEC with engine output" in {
-    parser(fromTcecWithEngineOutput) must beValid.like { case a =>
-      a.sans.value.size must_== 165
+    parser(fromTcecWithEngineOutput) .toOption must beSome.like { case a =>
+      a.sans.value.size === 165
     }
   }
 
   "chesskids iphone" in {
-    parser(chesskids) must beValid.like { case a =>
-      a.sans.value.size must_== 135
+    parser(chesskids) .toOption must beSome.like { case a =>
+      a.sans.value.size === 135
     }
   }
 
   "handwritten" in {
-    parser(handwritten) must beValid.like { case a =>
-      a.sans.value.size must_== 139
+    parser(handwritten) .toOption must beSome.like { case a =>
+      a.sans.value.size === 139
     }
   }
 
   "chess by post" in {
-    parser(chessByPost) must beValid.like { case a =>
-      a.sans.value.size must_== 100
+    parser(chessByPost) .toOption must beSome.like { case a =>
+      a.sans.value.size === 100
     }
   }
 
   "Android device" in {
-    parser(android) must beValid.like { case a =>
-      a.sans.value.size must_== 69
+    parser(android) .toOption must beSome.like { case a =>
+      a.sans.value.size === 69
     }
   }
 
   "weird dashes" in {
-    parser(weirdDashes) must beValid.like { case a =>
-      a.sans.value.size must_== 74
+    parser(weirdDashes) .toOption must beSome.like { case a =>
+      a.sans.value.size === 74
     }
   }
 
   "lichobile" in {
-    parser(lichobile) must beValid.like { case a =>
-      a.sans.value.size must_== 68
+    parser(lichobile) .toOption must beSome.like { case a =>
+      a.sans.value.size === 68
     }
   }
 
   "overflow" in {
-    parser(overflow) must beValid.like { case a =>
-      a.sans.value.size must_== 67
+    parser(overflow) .toOption must beSome.like { case a =>
+      a.sans.value.size === 67
     }
   }
   "overflow 2" in {
-    parser(stackOverflow) must beValid.like { case a =>
-      a.sans.value.size must_== 8
+    parser(stackOverflow) .toOption must beSome.like { case a =>
+      a.sans.value.size === 8
     }
   }
   "overflow 3" in {
-    parser(overflow3) must beValid.like { case a =>
-      a.sans.value.size must_== 343
+    parser(overflow3) .toOption must beSome.like { case a =>
+      a.sans.value.size === 343
     }
   }
   "overflow 3: tags" in {
-    ChessParser.TagParser.fromFullPgn(overflow3) must beValid.like { case tags =>
-      tags.value.size must_== 9
+    ChessParser.TagParser.fromFullPgn(overflow3) .toOption must beSome.like { case tags =>
+      tags.value.size === 9
     }
   }
   "chessbase arrows" in {
-    parser(chessbaseArrows) must beValid.like { case a =>
-      a.initialPosition.comments must_== List(
+    parser(chessbaseArrows) .toOption must beSome.like { case a =>
+      a.initialPosition.comments === List(
         "[%csl Gb4,Yd5,Rf6][%cal Ge2e4,Ye2d4,Re2g4]"
       )
     }
   }
   "chessbase weird" in {
-    parser(chessbaseWeird) must beValid.like { case a =>
-      a.sans.value.size must_== 115
+    parser(chessbaseWeird) .toOption must beSome.like { case a =>
+      a.sans.value.size === 115
     }
   }
   "crazyhouse from prod" in {
-    parser(crazyhouseFromProd) must beValid.like { case a =>
-      a.sans.value.size must_== 49
+    parser(crazyhouseFromProd) .toOption must beSome.like { case a =>
+      a.sans.value.size === 49
     }
   }
   "crazyhouse from chess.com" in {
-    parser(chessComCrazyhouse) must beValid.like { case a =>
-      a.sans.value.size must_== 42
+    parser(chessComCrazyhouse) .toOption must beSome.like { case a =>
+      a.sans.value.size === 42
     }
   }
   "en passant e.p. notation" in {
-    parser(enpassantEP) must beValid.like { case a =>
-      a.sans.value.size must_== 36
+    parser(enpassantEP) .toOption must beSome.like { case a =>
+      a.sans.value.size === 36
     }
-    parser(enpassantEP2) must beValid.like { case a =>
-      a.sans.value.size must_== 36
+    parser(enpassantEP2) .toOption must beSome.like { case a =>
+      a.sans.value.size === 36
     }
   }
 
   "year" in {
     "full date" in {
-      parser(recentChessCom) must beValid.like { case parsed =>
-        parsed.tags.year must_== Option(2016)
+      parser(recentChessCom) .toOption must beSome.like { case parsed =>
+        parsed.tags.year === Option(2016)
       }
     }
     "only year" in {
-      parser(explorerPartialDate) must beValid.like { case parsed =>
-        parsed.tags.year must_== Option(1978)
+      parser(explorerPartialDate) .toOption must beSome.like { case parsed =>
+        parsed.tags.year === Option(1978)
       }
     }
   }
 
   "weird variant names" in {
-    parser(stLouisFischerandom) must beValid.like { case parsed =>
-      parsed.tags.variant must_== Option(
+    parser(stLouisFischerandom) .toOption must beSome.like { case parsed =>
+      parsed.tags.variant === Option(
         strategygames.variant.Variant.wrap(strategygames.chess.variant.Chess960)
       )
     }
   }
 
   "example from chessgames.com with weird comments" in {
-    parser(chessgamesWeirdComments) must beValid
+    parser(chessgamesWeirdComments).isValid === true
   }
 }

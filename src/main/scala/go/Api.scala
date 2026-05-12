@@ -31,7 +31,7 @@ object GameResult {
 object Api {
 
   abstract class Position {
-    val variant: Variant
+    lazy val variant: Variant
 
     // todo rename moves to actions to be consistent
     def makeMoves(movesList: List[String]): Position
@@ -52,22 +52,22 @@ object Api {
     def setBoard(goBoard: GoBoard): Unit
     def deepCopy: Position
 
-    val turn: String
-    val initialFen: FEN
-    val fen: FEN
-    val pieceMap: PieceMap
-    val pocketData: Option[PocketData]
+    lazy val turn: String
+    lazy val initialFen: FEN
+    lazy val fen: FEN
+    lazy val pieceMap: PieceMap
+    lazy val pocketData: Option[PocketData]
 
-    val gameResult: GameResult
-    val gameEnd: Boolean
-    val gameOutcome: Int
-    val isRepetition: Boolean
-    val gameScore: Int
-    val p1Score: Double
-    val p2Score: Double
-    val legalDrops: Array[Int]
-    val legalActions: Array[Int]
-    val playerTurn: Int // 1 for South (P1/black) -1 for North (P2/white)
+    lazy val gameResult: GameResult
+    lazy val gameEnd: Boolean
+    lazy val gameOutcome: Int
+    lazy val isRepetition: Boolean
+    lazy val gameScore: Int
+    lazy val p1Score: Double
+    lazy val p2Score: Double
+    lazy val legalDrops: Array[Int]
+    lazy val legalActions: Array[Int]
+    lazy val playerTurn: Int // 1 for South (P1/black) -1 for North (P2/white)
     def fenString: String
   }
 
@@ -178,7 +178,7 @@ object Api {
 
     def goDiagram: String = position.toBoard.toDiagram
 
-    val turn =
+    lazy val turn =
       if (position.turn() == 1) "b"
       else "w" // cant trust engine fen - not sure why but it always returns 'b'
 

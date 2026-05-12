@@ -5,6 +5,10 @@ import strategygames.dameo.format.FEN
 
 import strategygames.Status
 
+
+def findMove(situation: Situation, moveStr: String): Option[strategygames.dameo.Move] =
+  situation.board.variant.validMoves(situation).values.flatten.find(_.toUci.uci == moveStr)
+
 class DameoVariantTest extends DameoTest with ValidatedMatchers {
   "variant" should {
     "have 52 opening moves" in {
@@ -13,9 +17,9 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
       val situation2 = Situation(board, P2)
 
       val moves1 = board.variant.validMoves(situation1)
-      moves1.values.flatten.size must_== 52
+      moves1.values.flatten.size === 52
       val moves2 = board.variant.validMoves(situation2)
-      moves2.values.flatten.size must_== 52
+      moves2.values.flatten.size === 52
     }
 
     "Have both man and king moves" in {
@@ -24,13 +28,13 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
       val situation2 = Situation(board, P2)
 
       val moves1 = board.variant.validMoves(situation1)
-      moves1.size must_== 2
-      moves1(Pos.D4).size must_== 3
-      moves1(Pos.C2).size must_== 23
+      moves1.size === 2
+      moves1(Pos.D4).size === 3
+      moves1(Pos.C2).size === 23
       val moves2 = board.variant.validMoves(situation2)
-      moves2.size must_== 2
-      moves2(Pos.F7).size must_== 23
-      moves2(Pos.G5).size must_== 3
+      moves2.size === 2
+      moves2(Pos.F7).size === 23
+      moves2(Pos.G5).size === 3
     }
 
     "Have only capturing moves when available" in {
@@ -39,11 +43,11 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
       val situation2 = Situation(board, P2)
 
       val moves1 = board.variant.validMoves(situation1)
-      moves1.size must_== 1
-      moves1(Pos.D4).size must_== 1
+      moves1.size === 1
+      moves1(Pos.D4).size === 1
       val moves2 = board.variant.validMoves(situation2)
-      moves2.size must_== 1
-      moves2(Pos.D5).size must_== 1
+      moves2.size === 1
+      moves2(Pos.D5).size === 1
     }
 
     "Have only the maximal capturing sequence" in {
@@ -52,11 +56,11 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
       val situation2 = Situation(board, P2)
 
       val moves1 = board.variant.validMoves(situation1)
-      moves1.size must_== 1
-      moves1(Pos.D4).size must_== 1
+      moves1.size === 1
+      moves1(Pos.D4).size === 1
       val moves2 = board.variant.validMoves(situation2)
-      moves2.size must_== 1
-      moves2(Pos.D5).size must_== 1
+      moves2.size === 1
+      moves2(Pos.D5).size === 1
     }
 
     "Have multiple equally long capturing sequences" in {
@@ -65,13 +69,13 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
       val situation2 = Situation(board, P2)
 
       val moves1 = board.variant.validMoves(situation1)
-      moves1.size must_== 2
-      moves1(Pos.D4).size must_== 2
-      moves1(Pos.C5).size must_== 1
+      moves1.size === 2
+      moves1(Pos.D4).size === 2
+      moves1(Pos.C5).size === 1
       val moves2 = board.variant.validMoves(situation2)
-      moves2.size must_== 2
-      moves2(Pos.D5).size must_== 2
-      moves2(Pos.C4).size must_== 1
+      moves2.size === 2
+      moves2(Pos.D5).size === 2
+      moves2(Pos.C4).size === 1
     }
 
     "Have both man and king captures" in {
@@ -80,13 +84,13 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
       val situation2 = Situation(board, P2)
 
       val moves1 = board.variant.validMoves(situation1)
-      moves1.size must_== 2
-      moves1(Pos.D4).size must_== 2
-      moves1(Pos.C5).size must_== 1
+      moves1.size === 2
+      moves1(Pos.D4).size === 2
+      moves1(Pos.C5).size === 1
       val moves2 = board.variant.validMoves(situation2)
-      moves2.size must_== 2
-      moves2(Pos.D5).size must_== 2
-      moves2(Pos.C4).size must_== 1
+      moves2.size === 2
+      moves2(Pos.D5).size === 2
+      moves2(Pos.C4).size === 1
     }
 
     "Finish the capture sequence that was started" in {
@@ -94,46 +98,46 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
       val situation = Situation(board, P1)
 
       val moves1 = board.variant.validMoves(situation)
-      moves1.size must_== 3
+      moves1.size === 3
 
       val situation2 = moves1(Pos.C1)(0).situationAfter
       val moves2     = board.variant.validMoves(situation2)
-      moves2.keys must_== Set(Pos.C3)
-      moves2.size must_== 1
+      moves2.keys === Set(Pos.C3)
+      moves2.size === 1
 
       val situation3 = moves2(Pos.C3)(0).situationAfter
       val moves3     = board.variant.validMoves(situation3)
-      moves3.keys must_== Set(Pos.C5)
-      moves3.size must_== 1
+      moves3.keys === Set(Pos.C5)
+      moves3.size === 1
 
       val finalsit = moves3(Pos.C5)(0).situationAfter
 
-      finalsit.player must_== P2
-      finalsit.board.pieces must_== FEN("B:Wc7,e1,g1:Be2,e4,e6,g2,g4,g6:H0:F1").pieces
+      finalsit.player === P2
+      finalsit.board.pieces === FEN("B:Wc7,e1,g1:Be2,e4,e6,g2,g4,g6:H0:F1").pieces
     }
 
     "Trigger game end and P1 win" in {
       val board      = Board(FEN("W:Wc4,e4,g4:Bc5:H0:F1").pieces, variant.Dameo)
       val situation  = Situation(board, P1)
       val moves      = board.variant.validMoves(situation)
-      moves.size must_== 1
+      moves.size === 1
       val situation2 = moves(Pos.C4)(0).situationAfter
-      situation2.end must_== true
-      situation2.playable(true) must_== false
-      situation2.status must_== Some(Status.VariantEnd)
-      situation2.winner must_== Some(P1)
+      situation2.end === true
+      situation2.playable(true) === false
+      situation2.status === Some(Status.VariantEnd)
+      situation2.winner === Some(P1)
     }
 
     "Trigger game end and P2 win" in {
       val board      = Board(FEN("W:Wc4:Bc5,e5,g5:H0:F1").pieces, variant.Dameo)
       val situation  = Situation(board, P2)
       val moves      = board.variant.validMoves(situation)
-      moves.size must_== 1
+      moves.size === 1
       val situation2 = moves(Pos.C5)(0).situationAfter
-      situation2.end must_== true
-      situation2.playable(true) must_== false
-      situation2.status must_== Some(Status.VariantEnd)
-      situation2.winner must_== Some(P2)
+      situation2.end === true
+      situation2.playable(true) === false
+      situation2.status === Some(Status.VariantEnd)
+      situation2.winner === Some(P2)
     }
 
     "Win by blocking" in {
@@ -141,10 +145,10 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
       val situation  = Situation(board, P1)
       val moves      = board.variant.validMoves(situation)
       val situation2 = moves(Pos.C5)(0).situationAfter
-      situation2.end must_== true
-      situation2.playable(true) must_== false
-      situation2.status must_== Some(Status.VariantEnd)
-      situation2.winner must_== Some(P1)
+      situation2.end === true
+      situation2.playable(true) === false
+      situation2.status === Some(Status.VariantEnd)
+      situation2.winner === Some(P1)
     }
 
     "Trigger draw in king vs king endgame, white to play" in {
@@ -161,46 +165,46 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
       val situation2b =
         board.variant.validMoves(situation2a)(Pos.B5).find(_.dest == Pos.D5).get.situationAfter
 
-      situation2a.end must_== false
+      situation2a.end === false
 
-      situation2b.end must_== true
-      situation2b.playable(true) must_== false
-      situation2b.status must_== Some(Status.Draw)
-      situation2b.winner must_== None
+      situation2b.end === true
+      situation2b.playable(true) === false
+      situation2b.status === Some(Status.Draw)
+      situation2b.winner === None
 
-      format.Forsyth.>>(situation0).halfMoveClock must_== Some(0)
-      format.Forsyth.>>(situation1a).halfMoveClock must_== Some(1)
-      format.Forsyth.>>(situation1b).halfMoveClock must_== Some(2)
-      format.Forsyth.>>(situation2a).halfMoveClock must_== Some(3)
-      format.Forsyth.>>(situation2b).halfMoveClock must_== Some(4)
-    }
+    format.Forsyth.>>(situation0).halfMoveClock === Some(0)
+    format.Forsyth.>>(situation1a).halfMoveClock === Some(1)
+    format.Forsyth.>>(situation1b).halfMoveClock === Some(2)
+    format.Forsyth.>>(situation2a).halfMoveClock === Some(3)
+    format.Forsyth.>>(situation2b).halfMoveClock === Some(4)
+  }
 
-    "Trigger draw in king vs king endgame, black to play" in {
-      // Each player gets 2 more turns
-      val board       = Board(FEN("B:WKb3,d8:BKc8:H0:F1").pieces, variant.Dameo)
-      val situation   = Situation(board, P2)
-      val situation0  = board.variant.validMoves(situation)(Pos.C8).find(_.dest == Pos.E8).get.situationAfter
-      val situation1a =
-        board.variant.validMoves(situation0)(Pos.B3).find(_.dest == Pos.B5).get.situationAfter
-      val situation1b =
-        board.variant.validMoves(situation1a)(Pos.E8).find(_.dest == Pos.H8).get.situationAfter
-      val situation2a =
-        board.variant.validMoves(situation1b)(Pos.B5).find(_.dest == Pos.D5).get.situationAfter
-      val situation2b =
-        board.variant.validMoves(situation2a)(Pos.H8).find(_.dest == Pos.H3).get.situationAfter
+  "Trigger draw in king vs king endgame, black to play" in {
+    // Each player gets 2 more turns
+    val board       = Board(FEN("B:WKb3,d8:BKc8:H0:F1").pieces, variant.Dameo)
+    val situation   = Situation(board, P2)
+    val situation0  = board.variant.validMoves(situation)(Pos.C8).find(_.dest == Pos.E8).get.situationAfter
+    val situation1a =
+      board.variant.validMoves(situation0)(Pos.B3).find(_.dest == Pos.B5).get.situationAfter
+    val situation1b =
+      board.variant.validMoves(situation1a)(Pos.E8).find(_.dest == Pos.H8).get.situationAfter
+    val situation2a =
+      board.variant.validMoves(situation1b)(Pos.B5).find(_.dest == Pos.D5).get.situationAfter
+    val situation2b =
+      board.variant.validMoves(situation2a)(Pos.H8).find(_.dest == Pos.H3).get.situationAfter
 
-      situation2a.end must_== false
+    situation2a.end === false
 
-      situation2b.end must_== true
-      situation2b.playable(true) must_== false
-      situation2b.status must_== Some(Status.Draw)
-      situation2b.winner must_== None
+    situation2b.end === true
+    situation2b.playable(true) === false
+    situation2b.status === Some(Status.Draw)
+    situation2b.winner === None
 
-      format.Forsyth.>>(situation0).halfMoveClock must_== Some(0)
-      format.Forsyth.>>(situation1a).halfMoveClock must_== Some(1)
-      format.Forsyth.>>(situation1b).halfMoveClock must_== Some(2)
-      format.Forsyth.>>(situation2a).halfMoveClock must_== Some(3)
-      format.Forsyth.>>(situation2b).halfMoveClock must_== Some(4)
+      format.Forsyth.>>(situation0).halfMoveClock === Some(0)
+      format.Forsyth.>>(situation1a).halfMoveClock === Some(1)
+      format.Forsyth.>>(situation1b).halfMoveClock === Some(2)
+      format.Forsyth.>>(situation2a).halfMoveClock === Some(3)
+      format.Forsyth.>>(situation2b).halfMoveClock === Some(4)
     }
 
     "Trigger draw by threefold repetition" in {
@@ -224,19 +228,19 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
       val situation4a =
         board.variant.validMoves(situation3b)(Pos.B4).find(_.dest == Pos.B3).get.situationAfter
 
-      situation3b.end must_== false
+      situation3b.end === false
 
-      situation4a.end must_== true
-      situation4a.playable(true) must_== false
-      situation4a.status must_== Some(Status.Draw)
-      situation4a.winner must_== None
+      situation4a.end === true
+      situation4a.playable(true) === false
+      situation4a.status === Some(Status.Draw)
+      situation4a.winner === None
     }
 
     "Trigger draw by 50 moves kings repetition" in {
       //https://playstrategy.org/Ge85gdyL#209
       val board       = Board(FEN("B:WKa1,Kg8,Kh8:BKb1,Kc1,Kd1,Ke1,Kf1,Kg1,g2,Kh1,Kh2:H0:F103").pieces, variant.Dameo)
       var situation   = Situation(board, P2)
-      situation.end must_== false
+      situation.end === false
 
       val vectorActionStrs = Vector(
         Vector("b1c2"),
@@ -303,20 +307,20 @@ class DameoVariantTest extends DameoTest with ValidatedMatchers {
       // Play all moves in order
       for (actions <- vectorActionStrs) {
         val moveStr = actions.head
-        val moveOpt = situation.board.variant.validMoves(situation).values.flatten.find(_.toUci.uci == moveStr)
+        val moveOpt = findMove(situation, moveStr)
         moveOpt must beSome
         situation = moveOpt.get.situationAfter
       }
-      situation.end must_== false
+      situation.end === false
 
       // One last move to trigger draw
-      val s1 = situation.board.variant.validMoves(situation).values.flatten.find(_.toUci.uci == "f2c2").get.situationAfter
+      val s1 = findMove(situation, "f2c2").get.situationAfter
 
       // Now check for draw
-      s1.end must_== true
-      s1.playable(true) must_== false
-      s1.status must_== Some(Status.Draw)
-      s1.winner must_== None
+      s1.end === true
+      s1.playable(true) === false
+      s1.status === Some(Status.Draw)
+      s1.winner === None
     }
   }
 }

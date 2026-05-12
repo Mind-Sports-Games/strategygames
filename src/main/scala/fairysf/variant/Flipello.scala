@@ -2,6 +2,7 @@ package strategygames.fairysf
 package variant
 
 import strategygames.{ GameFamily, P1, P2, Player }
+import scalalib.extensions.*
 
 case object Flipello
     extends Variant(

@@ -107,7 +107,7 @@ class BackgammonReplayTest extends BackgammonTest with ValidatedMatchers {
         Vector("3/6", "^l2", "^l2", "endturn"),
         Vector("3/1", "^j1")
       )
-      playActionStrs(vectorActionStrs.flatten.toList) must beValid.like { g =>
+      playActionStrs(vectorActionStrs.flatten[String].toList) .toOption must beSome.like { case g: Game =>
         val replay = Replay
           .gameWithUciWhileValid(
             vectorActionStrs,
@@ -118,19 +118,19 @@ class BackgammonReplayTest extends BackgammonTest with ValidatedMatchers {
           .reverse
           .head
           ._1
-        g.plies must_== replay.plies
-        g.turnCount must_== replay.turnCount
-        g.startedAtPly must_== replay.startedAtPly
-        g.startedAtTurn must_== replay.startedAtTurn
+        g.plies === replay.plies
+        g.turnCount === replay.turnCount
+        g.startedAtPly === replay.startedAtPly
+        g.startedAtTurn === replay.startedAtTurn
         // replay actionStrs muddles up lift dice when it is irrelevant
-        // g.actionStrs must_== replay.actionStrs
-        g.situation.board.pieces must_== replay.situation.board.pieces
-        // g.situation.board.history.lastTurn must_== replay.situation.board.history.lastTurn
-        g.situation.board.history.currentTurn must_== replay.situation.board.history.currentTurn
-        g.situation.board.history.score must_== replay.situation.board.history.score
-        g.situation.board.variant must_== replay.situation.board.variant
-        g.situation.board.pocketData must_== replay.situation.board.pocketData
-        g.situation.board.unusedDice must_== replay.situation.board.unusedDice
+        // g.actionStrs === replay.actionStrs
+        g.situation.board.pieces === replay.situation.board.pieces
+        // g.situation.board.history.lastTurn === replay.situation.board.history.lastTurn
+        g.situation.board.history.currentTurn === replay.situation.board.history.currentTurn
+        g.situation.board.history.score === replay.situation.board.history.score
+        g.situation.board.variant === replay.situation.board.variant
+        g.situation.board.pocketData === replay.situation.board.pocketData
+        g.situation.board.unusedDice === replay.situation.board.unusedDice
       }
     }
 

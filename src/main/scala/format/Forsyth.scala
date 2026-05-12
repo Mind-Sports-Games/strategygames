@@ -23,40 +23,43 @@ object Forsyth {
   def <<@(lib: GameLogic, variant: Variant, fen: FEN): Option[Situation] =
     (lib, variant, fen) match {
       case (GameLogic.Draughts(), Variant.Draughts(variant), FEN.Draughts(fen))             =>
-        draughts.format.Forsyth.<<@(variant, fen).map(Situation.Draughts)
+        draughts.format.Forsyth.<<@(variant, fen).map(Situation.Draughts.apply)
       case (GameLogic.Chess(), Variant.Chess(variant), FEN.Chess(fen))                      =>
-        chess.format.Forsyth.<<@(variant, fen).map(Situation.Chess)
+        chess.format.Forsyth.<<@(variant, fen).map(Situation.Chess.apply)
       case (GameLogic.FairySF(), Variant.FairySF(variant), FEN.FairySF(fen))                =>
-        fairysf.format.Forsyth.<<@(variant, fen).map(Situation.FairySF)
+        fairysf.format.Forsyth.<<@(variant, fen).map(Situation.FairySF.apply)
       case (GameLogic.Samurai(), Variant.Samurai(variant), FEN.Samurai(fen))                =>
-        samurai.format.Forsyth.<<@(variant, fen).map(Situation.Samurai)
+        samurai.format.Forsyth.<<@(variant, fen).map(Situation.Samurai.apply)
       case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant), FEN.Togyzkumalak(fen)) =>
-        togyzkumalak.format.Forsyth.<<@(variant, fen).map(Situation.Togyzkumalak)
+        togyzkumalak.format.Forsyth.<<@(variant, fen).map(Situation.Togyzkumalak.apply)
       case (GameLogic.Go(), Variant.Go(variant), FEN.Go(fen))                               =>
-        go.format.Forsyth.<<@(variant, fen).map(Situation.Go)
+        go.format.Forsyth.<<@(variant, fen).map(Situation.Go.apply)
       case (GameLogic.Backgammon(), Variant.Backgammon(variant), FEN.Backgammon(fen))       =>
-        backgammon.format.Forsyth.<<@(variant, fen).map(Situation.Backgammon)
+        backgammon.format.Forsyth.<<@(variant, fen).map(Situation.Backgammon.apply)
       case (GameLogic.Abalone(), Variant.Abalone(variant), FEN.Abalone(fen))                =>
-        abalone.format.Forsyth.<<@(variant, fen).map(Situation.Abalone)
+        abalone.format.Forsyth.<<@(variant, fen).map(Situation.Abalone.apply)
       case (GameLogic.Dameo(), Variant.Dameo(variant), FEN.Dameo(fen))                      =>
-        dameo.format.Forsyth.<<@(variant, fen).map(Situation.Dameo)
+        dameo.format.Forsyth.<<@(variant, fen).map(Situation.Dameo.apply)
       case _                                                                                => sys.error("Mismatched gamelogic types 14")
     }
 
   def <<(lib: GameLogic, fen: FEN): Option[Situation] = (lib, fen) match {
-    case (GameLogic.Draughts(), FEN.Draughts(fen))         => draughts.format.Forsyth.<<(fen).map(Situation.Draughts)
-    case (GameLogic.Chess(), FEN.Chess(fen))               => chess.format.Forsyth.<<(fen).map(Situation.Chess)
-    case (GameLogic.FairySF(), FEN.FairySF(fen))           => fairysf.format.Forsyth.<<(fen).map(Situation.FairySF)
-    case (GameLogic.Samurai(), FEN.Samurai(fen))           => samurai.format.Forsyth.<<(fen).map(Situation.Samurai)
+    case (GameLogic.Draughts(), FEN.Draughts(fen))         =>
+      draughts.format.Forsyth.<<(fen).map(Situation.Draughts.apply)
+    case (GameLogic.Chess(), FEN.Chess(fen))               => chess.format.Forsyth.<<(fen).map(Situation.Chess.apply)
+    case (GameLogic.FairySF(), FEN.FairySF(fen))           =>
+      fairysf.format.Forsyth.<<(fen).map(Situation.FairySF.apply)
+    case (GameLogic.Samurai(), FEN.Samurai(fen))           =>
+      samurai.format.Forsyth.<<(fen).map(Situation.Samurai.apply)
     case (GameLogic.Togyzkumalak(), FEN.Togyzkumalak(fen)) =>
-      togyzkumalak.format.Forsyth.<<(fen).map(Situation.Togyzkumalak)
-    case (GameLogic.Go(), FEN.Go(fen))                     => go.format.Forsyth.<<(fen).map(Situation.Go)
+      togyzkumalak.format.Forsyth.<<(fen).map(Situation.Togyzkumalak.apply)
+    case (GameLogic.Go(), FEN.Go(fen))                     => go.format.Forsyth.<<(fen).map(Situation.Go.apply)
     case (GameLogic.Backgammon(), FEN.Backgammon(fen))     =>
-      backgammon.format.Forsyth.<<(fen).map(Situation.Backgammon)
+      backgammon.format.Forsyth.<<(fen).map(Situation.Backgammon.apply)
     case (GameLogic.Abalone(), FEN.Abalone(fen))           =>
-      abalone.format.Forsyth.<<(fen).map(Situation.Abalone)
+      abalone.format.Forsyth.<<(fen).map(Situation.Abalone.apply)
     case (GameLogic.Dameo(), FEN.Dameo(fen))               =>
-      dameo.format.Forsyth.<<(fen).map(Situation.Dameo)
+      dameo.format.Forsyth.<<(fen).map(Situation.Dameo.apply)
     case _                                                 => sys.error("Mismatched gamelogic types 15")
   }
 

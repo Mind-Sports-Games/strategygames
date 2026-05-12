@@ -34,7 +34,7 @@ class OwareLongGameTest extends Specification with ValidatedMatchers {
     println(newGame.toBoard)
 
     "not fail after capacity reached 127th individual move and therefore have legal moves" in {
-      newGame.legalMoves.size > 0 must_== true
+      newGame.legalMoves.size > 0 === true
     }
 
   }

@@ -8,22 +8,22 @@ class OwareApiTest extends Specification with ValidatedMatchers {
   "Oware initial fen" should {
     val fen = variant.Oware.initialFen.value
     "be valid" in {
-      Api.validateFEN(fen) must_== true
+      Api.validateFEN(fen) === true
     }
   }
 
   "Oware invalid fen" should {
     val fen  = "18S,18S,18S,18S,18S,18S/18S,18S,18S,18S,18S,18S 5 10 S 50"
     "false due to too many pieces" in {
-      Api.validateFEN(fen) must_== false
+      Api.validateFEN(fen) === false
     }
     val fen2 = "2S,4,1S/1S,1S,3,1S 21 21 N 50"
     "true due to allowing >1 for multiple empty spaces" in {
-      Api.validateFEN(fen2) must_== true
+      Api.validateFEN(fen2) === true
     }
     val fen3 = "3,5S,5S,5S/4,18S,18S,2 0 6 N 50"
     "false due to more space than width" in {
-      Api.validateFEN(fen3) must_== false
+      Api.validateFEN(fen3) === false
     }
   }
 
@@ -31,14 +31,14 @@ class OwareApiTest extends Specification with ValidatedMatchers {
     val game    = Api.position
     val newGame = game.makeMoves(List(0, 8, 2))
     "5 legal moves" in {
-      newGame.legalMoves.size must_== 5
+      newGame.legalMoves.size === 5
     }
   }
 
   "Oware Move to Uci " should {
     val moves = List[Int](0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)
     "possible moves convert to uci (0->a1 etc)" in {
-      moves.map(m => Api.moveToUci(m)) must_== List(
+      moves.map(m => Api.moveToUci(m)) === List(
         "a1",
         "b1",
         "c1",
@@ -58,7 +58,7 @@ class OwareApiTest extends Specification with ValidatedMatchers {
   "Oware Uci to Move " should {
     val uci = List[String]("a1", "b1", "c1", "d1", "e1", "f1", "a2", "b2", "c2", "d2", "e2", "f2")
     "possible moves convert from uci (a1->0 etc)" in {
-      uci.map(m => Api.uciToMove(m)) must_== List[Int](0, 1, 2, 3, 4, 5, 11, 10, 9, 8, 7, 6)
+      uci.map(m => Api.uciToMove(m)) === List[Int](0, 1, 2, 3, 4, 5, 11, 10, 9, 8, 7, 6)
     }
   }
 
@@ -67,10 +67,10 @@ class OwareApiTest extends Specification with ValidatedMatchers {
     val pieceMap: PieceMap = game.pieceMap
     val countAtA1: Int     = pieceMap.get(Pos.A1).map(_._2).getOrElse(0)
     "12 starting pieces " in {
-      pieceMap.size must_== 12
+      pieceMap.size === 12
     }
     "Four Stones in pos 0" in {
-      countAtA1 must_== 4
+      countAtA1 === 4
     }
   }
 
@@ -84,16 +84,16 @@ class OwareApiTest extends Specification with ValidatedMatchers {
     val countAtD1: Int = pieceMap.get(Pos.D1).map(_._2).getOrElse(0)
     val countAtE1: Int = pieceMap.get(Pos.E1).map(_._2).getOrElse(0)
     "Six Stones at pos B1" in {
-      countAtB1 must_== 6
+      countAtB1 === 6
     }
     "Zero Stones at pos D1" in {
-      countAtD1 must_== 0
+      countAtD1 === 0
     }
     "Zero Stones at pos E1" in {
-      countAtE1 must_== 0
+      countAtE1 === 0
     }
     "10 pieces can move" in {
-      pieceMap.size must_== 10
+      pieceMap.size === 10
     }
   }
 
@@ -105,13 +105,13 @@ class OwareApiTest extends Specification with ValidatedMatchers {
     val pieceMap: PieceMap = position.pieceMap
     val countAtC1: Int     = pieceMap.get(Pos.C1).map(_._2).getOrElse(0)
     "fen after a few moves" in {
-      fen.value must_== "5S,7S,7S,8S,1S,2S/1S,6S,5S,2,6S 0 0 N 3"
+      fen.value === "5S,7S,7S,8S,1S,2S/1S,6S,5S,2,6S 0 0 N 3"
     }
     "10 current pieces " in {
-      pieceMap.size must_== 10
+      pieceMap.size === 10
     }
     "fiveStone in pos 2/c1" in {
-      countAtC1 must_== 5
+      countAtC1 === 5
     }
   }
 
@@ -121,10 +121,10 @@ class OwareApiTest extends Specification with ValidatedMatchers {
     val fen        = newGame.fen
     val owareBoard = Api.owareBoardFromFen(fen.value)
     "fen is 5S,5S,6S,6S,1S,5S/1,5S,5S,5S,1,5S 0 0 N 3" in {
-      fen.value must_== "5S,5S,6S,6S,1S,5S/1,5S,5S,5S,1,5S 0 0 N 2"
+      fen.value === "5S,5S,6S,6S,1S,5S/1,5S,5S,5S,1,5S 0 0 N 2"
     }
     "oware board is " in {
-      owareBoard.position must_== Array(0, 5, 5, 5, 0, 5, 5, 1, 6, 6, 5, 5, 0, 0)
+      owareBoard.position === Array(0, 5, 5, 5, 0, 5, 5, 1, 6, 6, 5, 5, 0, 0)
     }
   }
 
@@ -133,14 +133,14 @@ class OwareApiTest extends Specification with ValidatedMatchers {
     val pos      = Api.positionFromVariantAndMoves(variant.Oware, uciMoves)
     val fen      = pos.fen
     "fen is 5S,5S,6S,6S,1S,5S/1,5S,5S,5S,1,5S 0 0 N 3" in {
-      fen.value must_== "5S,5S,6S,6S,1S,5S/1,5S,5S,5S,1,5S 0 0 N 2"
+      fen.value === "5S,5S,6S,6S,1S,5S/1,5S,5S,5S,1,5S 0 0 N 2"
     }
     "legal moves are 6,7,8,9,10,11" in {
-      pos.legalMoves must_== Array(7, 11, 10, 9, 8,
+      pos.legalMoves === Array(7, 11, 10, 9, 8,
         6) // interesting order i guess we should not case about this.....?
     }
     "6 legal moves" in {
-      pos.legalMoves.size must_== 6
+      pos.legalMoves.size === 6
     }
 
   }
@@ -149,7 +149,7 @@ class OwareApiTest extends Specification with ValidatedMatchers {
     val fen = "2S,4,1S/1S,1S,3,1S 21 21 N 50"
     val pos = Api.positionFromVariantNameAndFEN("oware", fen)
     "fen from new pos" in {
-      pos.fen.value must_== fen
+      pos.fen.value === fen
     }
   }
 
@@ -157,14 +157,14 @@ class OwareApiTest extends Specification with ValidatedMatchers {
     val fen      = "2S,4,1S/1S,1S,3,1S 21 21 N 50"
     val pieceMap = Api.pieceMapFromFen("oware", fen)
     "6 pieces" in {
-      pieceMap.size must_== 5
+      pieceMap.size === 5
     }
     "possible moves a1, b1, f1, a2, f2" in {
-      pieceMap.keys.toList.contains(Pos.A1) must_== true
-      pieceMap.keys.toList.contains(Pos.A2) must_== true
-      pieceMap.keys.toList.contains(Pos.B1) must_== true
-      pieceMap.keys.toList.contains(Pos.F1) must_== true
-      pieceMap.keys.toList.contains(Pos.F2) must_== true
+      pieceMap.keys.toList.contains(Pos.A1) === true
+      pieceMap.keys.toList.contains(Pos.A2) === true
+      pieceMap.keys.toList.contains(Pos.B1) === true
+      pieceMap.keys.toList.contains(Pos.F1) === true
+      pieceMap.keys.toList.contains(Pos.F2) === true
     }
   }
 
@@ -172,7 +172,7 @@ class OwareApiTest extends Specification with ValidatedMatchers {
     val fen      = "2S,4,1S/1S,1S,3,1S 21 21 N 50"
     val position = Api.positionFromFen(fen)
     "is still ongoing during game" in {
-      position.gameResult must_== GameResult.Ongoing()
+      position.gameResult === GameResult.Ongoing()
     }
   }
 
@@ -180,7 +180,7 @@ class OwareApiTest extends Specification with ValidatedMatchers {
     val fen      = "2S,4,1S/1S,1S,3,1S 25 17 N 50"
     val position = Api.positionFromFen(fen)
     "is variantEnd if player has score above 24" in {
-      position.gameResult must_== GameResult.VariantEnd()
+      position.gameResult === GameResult.VariantEnd()
     }
   }
 
@@ -188,7 +188,7 @@ class OwareApiTest extends Specification with ValidatedMatchers {
     val fen      = "6/6 24 24 S 50"
     val position = Api.positionFromFen(fen)
     "be a draw with same score and no pieces" in {
-      position.gameResult must_== GameResult.Draw()
+      position.gameResult === GameResult.Draw()
     }
   }
 
@@ -196,10 +196,10 @@ class OwareApiTest extends Specification with ValidatedMatchers {
     val fen      = "1,1S,1S,1S,1S,2S/6 22 20 S 50"
     val position = Api.positionFromFen(fen)
     "end game when no legal moves" in {
-      position.gameResult must_== GameResult.VariantEnd()
+      position.gameResult === GameResult.VariantEnd()
     }
     "player with more total stones wins" in {
-      position.gameOutcome must_== -1000
+      position.gameOutcome === -1000
     }
   }
 
@@ -207,10 +207,10 @@ class OwareApiTest extends Specification with ValidatedMatchers {
     val fen      = "1,1S,1S,1S,1S,2S/6 20 22 S 50"
     val position = Api.positionFromFen(fen)
     "end game when no legal moves" in {
-      position.gameResult must_== GameResult.VariantEnd()
+      position.gameResult === GameResult.VariantEnd()
     }
     "player with more total stones wins" in {
-      position.gameOutcome must_== -1000
+      position.gameOutcome === -1000
     }
   }
 
@@ -221,7 +221,7 @@ class OwareApiTest extends Specification with ValidatedMatchers {
       3, 6, 0, 7, 1, 10, 4, 7, 3, 6, 1, 11, 2, 8, 4, 7, 5, 7, 3, 8, 4, 9, 5)
     position.makeMoves(moves)
     "end in draw after given moves" in {
-      position.gameResult must_== GameResult.Draw()
+      position.gameResult === GameResult.Draw()
     }
   }
 
@@ -232,7 +232,7 @@ class OwareApiTest extends Specification with ValidatedMatchers {
       3, 6, 0, 7, 1, 10, 4, 7, 3, 6, 1, 11, 2, 8, 4, 7, 5, 7, 3, 8, 4, 9, 5)
     position.makeMoves(moves)
     "end in draw after given moves" in {
-      position.gameResult must_== GameResult.Draw()
+      position.gameResult === GameResult.Draw()
     }
   }
 
@@ -247,7 +247,7 @@ class OwareApiTest extends Specification with ValidatedMatchers {
       7, 2, 6, 4, 9, 3, 10, 1, 8, 4, 7, 2, 10, 3, 9)
     position.makeMoves(moves)
     "end in draw after cycle spilts stones" in {
-      position.gameResult must_== GameResult.Draw()
+      position.gameResult === GameResult.Draw()
     }
   }
 

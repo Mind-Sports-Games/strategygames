@@ -4,6 +4,7 @@ import scala.annotation.nowarn
 // TODO: I think the scala compiler is wrong about the finalSquare variables being unused.
 //       but I can't quite work it out, so I left them and used nowarn
 
+import scalalib.extensions.*
 import cats.data.Validated
 import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
@@ -73,7 +74,7 @@ object Replay {
   //  sans match {
   //    case Nil         => valid(Nil)
   //    case san :: rest =>
-  //      san(StratSituation.wrap(game.situation)) flatMap { move =>
+  //      san(StratSituation.wrap(game.situation)) andThen { move =>
   //        val newGame = StratGame.wrap(game)(move).toDraughts
   //        recursiveGames(newGame, rest) map { newGame :: _ }
   //      }
@@ -118,7 +119,7 @@ object Replay {
                 case _                     => sys.error("Invalid draughts move")
               }
               val newGame = g(move)
-              val uci     = move.toUci
+              val uci: Uci.Move = move.toUci
               if (
                 iteratedCapts && move.capture.fold(false)(_.length > 1) && move.situationBefore
                   .ambiguitiesMove(move) > ambs.length + 1
@@ -281,7 +282,7 @@ object Replay {
     sans match {
       case Nil         => valid(Nil)
       case san :: rest =>
-        san(StratSituation.wrap(sit), finalSquare).map(draughtsMove) flatMap { move =>
+        san(StratSituation.wrap(sit), finalSquare).map(draughtsMove) andThen { move =>
           val after = Situation.withPlayerAfter(move.afterWithLastMove(finalSquare), sit.player)
           recursiveUcis(after, rest, finalSquare) map { move.toUci :: _ }
         }
@@ -295,7 +296,7 @@ object Replay {
     sans match {
       case Nil         => valid(Nil)
       case san :: rest =>
-        san(StratSituation.wrap(sit), finalSquare).map(draughtsMove) flatMap { move =>
+        san(StratSituation.wrap(sit), finalSquare).map(draughtsMove) andThen { move =>
           val after = Situation.withPlayerAfter(move.afterWithLastMove(finalSquare), sit.player)
           recursiveSituations(after, rest, finalSquare) map { after :: _ }
         }
@@ -430,7 +431,7 @@ object Replay {
         sans match {
           case Nil         => invalid(s"Can't find $atFenTruncated, reached ply $ply, turn $turn")
           case san :: rest =>
-            san(StratSituation.wrap(sit)).map(draughtsMove) flatMap { move =>
+            san(StratSituation.wrap(sit)).map(draughtsMove) andThen { move =>
               val after        = move.situationAfter
               val newPlies     = ply + 1
               val newTurnCount = turn + (if (sit.player != after.player) 1 else 0)

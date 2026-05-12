@@ -20,10 +20,8 @@ case class Situation(board: Board, player: Player) {
       //              Maybe we should check it later?
       board.history.lastMove.fold(
         board.variant.validMoves(this, finalSquare)
-      ) {
-        case (lastUci: Uci.Move) =>
-          Map(lastUci.dest -> board.variant.validMovesFrom(this, lastUci.dest, finalSquare))
-        case _                   => board.variant.validMoves(this, finalSquare)
+      ) { case (lastUci: Uci.Move) =>
+        Map(lastUci.dest -> board.variant.validMovesFrom(this, lastUci.dest, finalSquare))
       }
 
   lazy val validMoves: Map[Pos, List[Move]]      = validMovesVerified()

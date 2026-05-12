@@ -2,6 +2,7 @@ package strategygames.chess
 import strategygames.{ ClockBase, MoveMetrics, Player, VActionStrs }
 
 import cats.data.Validated
+import scalalib.extensions.*
 
 import strategygames.chess.format.FEN
 import strategygames.chess.format.{ pgn, Uci }
@@ -21,7 +22,7 @@ case class Game(
       promotion: Option[PromotableRole] = None,
       metrics: MoveMetrics = MoveMetrics()
   ): Validated[String, (Game, Move)] =
-    situation.move(orig, dest, promotion).map(_.normalizeCastle withMetrics metrics) map { move =>
+    situation.move(orig, dest, promotion).map(_.normalizeCastle.withMetrics(metrics)) map { move =>
       apply(move) -> move
     }
 
