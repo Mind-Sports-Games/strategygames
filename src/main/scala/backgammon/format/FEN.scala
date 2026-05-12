@@ -63,7 +63,7 @@ final case class FEN(value: String) extends AnyVal {
     .toMap
 
   private def diceFromFen(diceStr: String): List[Int] =
-    if (diceStr == '-') List.empty
+    if (diceStr == "-") List.empty
     else diceStr.split('/').flatMap(_.toIntOption).toList
 
   def unusedDice: List[Int] = diceFromFen(value.split(' ')(1))
@@ -108,6 +108,10 @@ final case class FEN(value: String) extends AnyVal {
 
   def initialiseCube: FEN = FEN(
     value.split(' ').updated(6, "0").mkString(" ")
+  )
+
+  def withoutCube: FEN = FEN(
+    (value.split(' ').dropRight(2) ++ value.split(' ').takeRight(1)).mkString(" ")
   )
 
   def initial = value == Forsyth.initial.value

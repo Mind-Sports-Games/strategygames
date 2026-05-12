@@ -38,7 +38,7 @@ object CubeAction {
     def situationAfter: Situation = Situation.Backgammon(c.situationAfter)
     def finalizeAfter: Board      = c.finalizeAfter
 
-    def toUci: Uci.CubeAction = Uci.BackgammonCubeAction(c.toUci)
+    def toUci: Uci.CubeAction = Uci.BackgammonCubeAction((c.toUci: backgammon.format.Uci.CubeAction))
 
     val unwrap = c
 

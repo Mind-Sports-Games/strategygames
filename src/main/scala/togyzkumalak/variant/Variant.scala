@@ -3,6 +3,7 @@ package strategygames.togyzkumalak.variant
 import cats.data.Validated
 import cats.syntax.option._
 import scala.annotation.nowarn
+import scalalib.extensions.*
 
 import strategygames.togyzkumalak._
 import strategygames.togyzkumalak.format.FEN

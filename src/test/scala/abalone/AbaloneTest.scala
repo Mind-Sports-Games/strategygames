@@ -1,7 +1,7 @@
 package strategygames.abalone
 
 import cats.data.Validated
-import org.specs2.matcher.MatchResult
+import org.specs2.execute.Result
 import org.specs2.mutable.Specification
 import strategygames.abalone.format.Forsyth.<<@
 import strategygames.abalone.format.{FEN, Forsyth, Uci}
@@ -12,7 +12,7 @@ class AbaloneTest extends Specification with IAbaloneTest {
 
   def playUciList(game: Game, ucis: List[Uci]): Validated[String, Game] =
     ucis.foldLeft(Validated.valid(game): Validated[String, Game]) { (vg, action: Uci) =>
-      vg.flatMap { g => g.apply(action).map(_._1) }
+      vg.andThen { g => g.apply(action).map(_._1) }
     }
 
   def playActionStrs(
@@ -29,7 +29,7 @@ class AbaloneTest extends Specification with IAbaloneTest {
       variant: Variant,
       ucis: List[String],
       finalFen: String
-  ): MatchResult[Any] = {
+  ): Result = {
     checkFinalFenCore(variant, ucis, variant.initialFen, finalFen)
   }
 
@@ -38,7 +38,7 @@ class AbaloneTest extends Specification with IAbaloneTest {
       ucis: List[String],
       initialFen: String,
       finalFen: String
-  ): MatchResult[Any] =
+  ): Result =
     checkFinalFenCore(variant, ucis, FEN(initialFen), finalFen)
 
   def checkFinalFenCore(
@@ -46,7 +46,7 @@ class AbaloneTest extends Specification with IAbaloneTest {
       ucis: List[String],
       initialFen: FEN,
       finalFen: String
-  ): MatchResult[Any] = {
+  ): Result = {
     var game = new Game(<<@(variant, initialFen).get)
 
     var i = game.plies
@@ -67,6 +67,6 @@ class AbaloneTest extends Specification with IAbaloneTest {
         }
       })
 
-    Forsyth.>>(game).value must_== finalFen
+    Forsyth.>>(game).value === finalFen
   }
 }

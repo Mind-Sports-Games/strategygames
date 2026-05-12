@@ -28,7 +28,6 @@ object Sgf {
                 uci.orig.sgf(variant.boardSize.height) + uci.dest
                   .sgf(variant.boardSize.height) + uci.sgfPromotionString
               )
-            case _                                     => None
           }
         )
         .toList

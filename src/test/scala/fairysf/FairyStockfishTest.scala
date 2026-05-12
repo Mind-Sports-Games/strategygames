@@ -14,7 +14,7 @@ class FairyStockfishTest extends Specification with ValidatedMatchers {
     "be expected string" in {
       format.FEN(
         "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL[] w - - 0 1"
-      ) must_== variant.Shogi.initialFen
+      ) === variant.Shogi.initialFen
     }
   }
 
@@ -23,7 +23,7 @@ class FairyStockfishTest extends Specification with ValidatedMatchers {
       FairyStockfish.validateFEN(
         variant.Shogi.fishnetKey,
         variant.Shogi.initialFen.value
-      ) must_== true
+      ) === true
     }
   }
 
@@ -32,7 +32,7 @@ class FairyStockfishTest extends Specification with ValidatedMatchers {
       FairyStockfish.validateFEN(
         variant.Shogi.fishnetKey,
         "lnsgkgsnl/1r5b1/ppppppppp/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL[] w - - 0 1"
-      ) must_== false
+      ) === false
     }
   }
 
@@ -41,7 +41,7 @@ class FairyStockfishTest extends Specification with ValidatedMatchers {
       FairyStockfish.validateFEN(
         variant.Shogi.fishnetKey,
         "I'm a Shogi FEN! (not)"
-      ) must_== false
+      ) === false
     }
   }
 
@@ -49,7 +49,7 @@ class FairyStockfishTest extends Specification with ValidatedMatchers {
     "be expected string" in {
       format.FEN(
         "3q2q3/10/10/q8q/10/10/Q8Q/10/10/3Q2Q3[PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPpppppppppppppppppppppppppppppppppppppppppppppp] w - - 0 1"
-      ) must_== variant.Amazons.initialFen
+      ) === variant.Amazons.initialFen
     }
   }
 

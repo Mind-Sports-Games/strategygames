@@ -2,6 +2,7 @@ package strategygames.fairysf
 import strategygames.{ ClockBase, MoveMetrics, Player, VActionStrs }
 
 import cats.data.Validated
+import scalalib.extensions.*
 
 import strategygames.fairysf.format.{ FEN, Uci }
 

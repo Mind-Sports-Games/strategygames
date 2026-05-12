@@ -7,6 +7,7 @@ import strategygames.format.pgn.{ Glyphs, Tag, Tags }
 
 import scala._
 import cats.implicits._
+import scalalib.extensions.*
 
 case class Pdn(
     tags: Tags,
