@@ -1,9 +1,9 @@
 package strategygames.backgammon
 
+import scalalib.extensions.*
+
 import strategygames.Player
-
 import format.Uci
-
 import variant.Variant
 
 case class Board(

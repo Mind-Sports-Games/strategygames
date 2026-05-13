@@ -2,6 +2,7 @@ package strategygames.dameo.variant
 
 import cats.data.Validated
 import cats.syntax.option._
+import scalalib.extensions.*
 
 import strategygames.dameo._
 import strategygames.dameo.format.FEN

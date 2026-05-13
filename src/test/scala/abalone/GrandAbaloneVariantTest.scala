@@ -27,13 +27,13 @@ class GrandAbaloneVariantTest extends AbaloneTest {
     val movesOfGt1 = moves.filter(ofGt1(board))
 
     "compute the correct number of moves" in {
-      moves.size must_== 93
+      moves.size === 93
 
-      lineMoves.size must_== 75
-      jumpMoves.size must_== 18
+      lineMoves.size === 75
+      jumpMoves.size === 18
 
-      movesOf1.size must_== 33
-      movesOfGt1.size must_== 60
+      movesOf1.size === 33
+      movesOfGt1.size === 60
     }
   }
 }

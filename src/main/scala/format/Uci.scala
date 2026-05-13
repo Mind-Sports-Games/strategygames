@@ -84,7 +84,7 @@ object Uci {
       extends Move(
         Pos.Chess(m.orig),
         Pos.Chess(m.dest),
-        m.promotion.map(Role.ChessPromotableRole)
+        m.promotion.map(Role.ChessPromotableRole.apply)
       )
       with Chess {
     def gameLogic      = GameLogic.Chess()
@@ -107,9 +107,9 @@ object Uci {
       extends Move(
         Pos.Draughts(m.orig),
         Pos.Draughts(m.dest),
-        m.promotion.map(Role.DraughtsPromotableRole),
+        m.promotion.map(Role.DraughtsPromotableRole.apply),
         m.capture match {
-          case Some(capture) => Some(capture.map(Pos.Draughts))
+          case Some(capture) => Some(capture.map(Pos.Draughts.apply))
           case None          => None
         }
       )
@@ -134,7 +134,7 @@ object Uci {
       extends Move(
         Pos.FairySF(m.orig),
         Pos.FairySF(m.dest),
-        m.promotion.map(Role.FairySFPromotableRole)
+        m.promotion.map(Role.FairySFPromotableRole.apply)
       )
       with FairySF {
     def gameLogic      = GameLogic.FairySF()
@@ -202,7 +202,7 @@ object Uci {
         Pos.Backgammon(m.orig),
         Pos.Backgammon(m.dest),
         capture = m.capture match {
-          case Some(capture) => Some(capture.map(Pos.Backgammon))
+          case Some(capture) => Some(capture.map(Pos.Backgammon.apply))
           case None          => None
         }
       )
@@ -249,7 +249,7 @@ object Uci {
       extends Move(
         Pos.Dameo(m.orig),
         Pos.Dameo(m.dest),
-        m.promotion.map(Role.DameoPromotableRole)
+        m.promotion.map(Role.DameoPromotableRole.apply)
       )
       with Dameo {
     def gameLogic      = GameLogic.Dameo()
@@ -350,7 +350,7 @@ object Uci {
         Role.BackgammonRole(d.role),
         Pos.Backgammon(d.pos),
         d.capture match {
-          case Some(capture) => Some(capture.map(Pos.Backgammon))
+          case Some(capture) => Some(capture.map(Pos.Backgammon.apply))
           case None          => None
         }
       )
@@ -785,26 +785,26 @@ object Uci {
       }
 
     def apply(lib: GameLogic, gf: GameFamily, move: String): Option[Move] = lib match {
-      case GameLogic.Draughts()     => draughts.format.Uci.Move(move).map(DraughtsMove)
-      case GameLogic.Chess()        => chess.format.Uci.Move(move).map(ChessMove)
-      case GameLogic.FairySF()      => fairysf.format.Uci.Move(gf, move).map(FairySFMove)
-      case GameLogic.Samurai()      => samurai.format.Uci.Move(move).map(SamuraiMove)
-      case GameLogic.Togyzkumalak() => togyzkumalak.format.Uci.Move(move).map(TogyzkumalakMove)
-      case GameLogic.Backgammon()   => backgammon.format.Uci.Move(move).map(BackgammonMove)
-      case GameLogic.Abalone()      => abalone.format.Uci.Move(move).map(AbaloneMove)
-      case GameLogic.Dameo()        => dameo.format.Uci.Move(move).map(DameoMove)
+      case GameLogic.Draughts()     => draughts.format.Uci.Move(move).map(DraughtsMove.apply)
+      case GameLogic.Chess()        => chess.format.Uci.Move(move).map(ChessMove.apply)
+      case GameLogic.FairySF()      => fairysf.format.Uci.Move(gf, move).map(FairySFMove.apply)
+      case GameLogic.Samurai()      => samurai.format.Uci.Move(move).map(SamuraiMove.apply)
+      case GameLogic.Togyzkumalak() => togyzkumalak.format.Uci.Move(move).map(TogyzkumalakMove.apply)
+      case GameLogic.Backgammon()   => backgammon.format.Uci.Move(move).map(BackgammonMove.apply)
+      case GameLogic.Abalone()      => abalone.format.Uci.Move(move).map(AbaloneMove.apply)
+      case GameLogic.Dameo()        => dameo.format.Uci.Move(move).map(DameoMove.apply)
       case _                        => sys.error("Invalid lib gf and move combo for Uci")
     }
 
     def piotr(lib: GameLogic, gf: GameFamily, move: String): Option[Move] = lib match {
-      case GameLogic.Draughts()     => draughts.format.Uci.Move.piotr(move).map(DraughtsMove)
-      case GameLogic.Chess()        => chess.format.Uci.Move.piotr(move).map(ChessMove)
-      case GameLogic.FairySF()      => fairysf.format.Uci.Move.piotr(gf, move).map(FairySFMove)
-      case GameLogic.Samurai()      => samurai.format.Uci.Move.piotr(move).map(SamuraiMove)
-      case GameLogic.Togyzkumalak() => togyzkumalak.format.Uci.Move.piotr(move).map(TogyzkumalakMove)
-      case GameLogic.Backgammon()   => backgammon.format.Uci.Move.piotr(move).map(BackgammonMove)
-      case GameLogic.Abalone()      => abalone.format.Uci.Move.piotr(move).map(AbaloneMove)
-      case GameLogic.Dameo()        => dameo.format.Uci.Move.piotr(move).map(DameoMove)
+      case GameLogic.Draughts()     => draughts.format.Uci.Move.piotr(move).map(DraughtsMove.apply)
+      case GameLogic.Chess()        => chess.format.Uci.Move.piotr(move).map(ChessMove.apply)
+      case GameLogic.FairySF()      => fairysf.format.Uci.Move.piotr(gf, move).map(FairySFMove.apply)
+      case GameLogic.Samurai()      => samurai.format.Uci.Move.piotr(move).map(SamuraiMove.apply)
+      case GameLogic.Togyzkumalak() => togyzkumalak.format.Uci.Move.piotr(move).map(TogyzkumalakMove.apply)
+      case GameLogic.Backgammon()   => backgammon.format.Uci.Move.piotr(move).map(BackgammonMove.apply)
+      case GameLogic.Abalone()      => abalone.format.Uci.Move.piotr(move).map(AbaloneMove.apply)
+      case GameLogic.Dameo()        => dameo.format.Uci.Move.piotr(move).map(DameoMove.apply)
       case _                        => sys.error("Invalid lib gf and move combo for piotr")
     }
 
@@ -815,18 +815,18 @@ object Uci {
         destS: String,
         promS: Option[String]
     ): Option[Move] = lib match {
-      case GameLogic.Draughts()     => draughts.format.Uci.Move.fromStrings(origS, destS, promS).map(DraughtsMove)
-      case GameLogic.Chess()        => chess.format.Uci.Move.fromStrings(origS, destS, promS).map(ChessMove)
+      case GameLogic.Draughts()     => draughts.format.Uci.Move.fromStrings(origS, destS, promS).map(DraughtsMove.apply)
+      case GameLogic.Chess()        => chess.format.Uci.Move.fromStrings(origS, destS, promS).map(ChessMove.apply)
       case GameLogic.FairySF()      =>
-        fairysf.format.Uci.Move.fromStrings(gf, origS, destS, promS).map(FairySFMove)
+        fairysf.format.Uci.Move.fromStrings(gf, origS, destS, promS).map(FairySFMove.apply)
       case GameLogic.Samurai()      =>
-        samurai.format.Uci.Move.fromStrings(gf, origS, destS, promS).map(SamuraiMove)
+        samurai.format.Uci.Move.fromStrings(gf, origS, destS, promS).map(SamuraiMove.apply)
       case GameLogic.Togyzkumalak() =>
-        togyzkumalak.format.Uci.Move.fromStrings(gf, origS, destS, promS).map(TogyzkumalakMove)
+        togyzkumalak.format.Uci.Move.fromStrings(gf, origS, destS, promS).map(TogyzkumalakMove.apply)
       case GameLogic.Go()           => None
-      case GameLogic.Backgammon()   => backgammon.format.Uci.Move.fromStrings(origS, destS).map(BackgammonMove)
-      case GameLogic.Abalone()      => abalone.format.Uci.Move.fromStrings(origS, destS).map(AbaloneMove)
-      case GameLogic.Dameo()        => dameo.format.Uci.Move.fromStrings(origS, destS, promS).map(DameoMove)
+      case GameLogic.Backgammon()   => backgammon.format.Uci.Move.fromStrings(origS, destS).map(BackgammonMove.apply)
+      case GameLogic.Abalone()      => abalone.format.Uci.Move.fromStrings(origS, destS).map(AbaloneMove.apply)
+      case GameLogic.Dameo()        => dameo.format.Uci.Move.fromStrings(origS, destS, promS).map(DameoMove.apply)
     }
   }
 
@@ -840,13 +840,13 @@ object Uci {
         case GameLogic.Abalone()      => None
         case GameLogic.Dameo()        => None
         case GameLogic.Chess()        =>
-          chess.format.Uci.Drop.fromStrings(roleS, posS).map(ChessDrop)
+          chess.format.Uci.Drop.fromStrings(roleS, posS).map(ChessDrop.apply)
         case GameLogic.FairySF()      =>
-          fairysf.format.Uci.Drop.fromStrings(gf, roleS, posS).map(FairySFDrop)
+          fairysf.format.Uci.Drop.fromStrings(gf, roleS, posS).map(FairySFDrop.apply)
         case GameLogic.Go()           =>
-          go.format.Uci.Drop.fromStrings(roleS, posS).map(GoDrop)
+          go.format.Uci.Drop.fromStrings(roleS, posS).map(GoDrop.apply)
         case GameLogic.Backgammon()   =>
-          backgammon.format.Uci.Drop.fromStrings(roleS, posS).map(BackgammonDrop)
+          backgammon.format.Uci.Drop.fromStrings(roleS, posS).map(BackgammonDrop.apply)
       }
   }
 
@@ -865,7 +865,7 @@ object Uci {
         case GameLogic.Togyzkumalak() => None
         case GameLogic.Go()           => None
         case GameLogic.Backgammon()   =>
-          backgammon.format.Uci.Lift.fromStrings(posS).map(BackgammonLift)
+          backgammon.format.Uci.Lift.fromStrings(posS).map(BackgammonLift.apply)
         case GameLogic.Abalone()      => None
         case GameLogic.Dameo()        => None
       }
@@ -997,7 +997,7 @@ object Uci {
         case GameLogic.FairySF()      => None
         case GameLogic.Go()           => None
         case GameLogic.Backgammon()   =>
-          backgammon.format.Uci.CubeAction.fromStrings(interaction).map(BackgammonCubeAction)
+          backgammon.format.Uci.CubeAction.fromStrings(interaction).map(BackgammonCubeAction.apply)
         case GameLogic.Abalone()      => None
         case GameLogic.Dameo()        => None
       }

@@ -5,7 +5,7 @@ import cats.data.Validated
 import strategygames.chess._
 import strategygames.chess.format.Uci
 import strategygames.chess.format.FEN
-import strategygames.Player
+import strategygames.{ Player, validated }
 
 case object Crazyhouse
     extends Variant(
@@ -37,18 +37,14 @@ case object Crazyhouse
 
   private def canDropPawnOn(pos: Pos) = pos.rank != Rank.First && pos.rank != Rank.Eighth
 
-  override def drop(situation: Situation, role: Role, pos: Pos): Validated[String, Drop] =
+  override def drop(situation: Situation, role: Role, pos: Pos): Validated[String, Drop] = validated {
+    val piece = Piece(situation.player, role)
     for {
-      d1     <- situation.board.pocketData toValid "Board has no crazyhouse data"
-      _      <-
-        if (role != Pawn || canDropPawnOn(pos)) Validated.valid(d1)
-        else Validated.invalid(s"Can't drop $role on $pos")
-      piece   = Piece(situation.player, role)
-      d2     <- d1.drop(piece) toValid s"No $piece to drop on $pos"
-      board1 <- situation.board.place(piece, pos) toValid s"Can't drop $role on $pos, it's occupied"
-      _      <-
-        if (!board1.check(situation.player)) Validated.valid(board1)
-        else Validated.invalid(s"Dropping $role on $pos doesn't uncheck the king")
+      d1     <- situation.board.pocketData.toRight("Board has no crazyhouse data")
+      _      <- Either.cond(role != Pawn || canDropPawnOn(pos), d1, s"Can't drop $role on $pos")
+      d2     <- d1.drop(piece).toRight(s"No $piece to drop on $pos")
+      board1 <- situation.board.place(piece, pos).toRight(s"Can't drop $role on $pos, it's occupied")
+      _      <- Either.cond(!board1.check(situation.player), board1, s"Dropping $role on $pos doesn't uncheck the king")
     } yield Drop(
       piece = piece,
       pos = pos,
@@ -56,6 +52,7 @@ case object Crazyhouse
       after = board1 withCrazyData d2,
       autoEndTurn = true
     )
+  }
 
   override def fiftyMoves(history: History): Boolean = false
 

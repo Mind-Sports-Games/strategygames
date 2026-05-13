@@ -40,7 +40,7 @@ class TogyzkumalakReplayTest extends TogyzkumalakTest with ValidatedMatchers {
         Vector("h1i2"),
         Vector("i2h2")
       )
-      playActionStrs(vectorActionStrs.flatten.toList) must beValid.like { g =>
+      playActionStrs(vectorActionStrs.flatten[String].toList) .toOption must beSome.like { case g =>
         val replay = Replay
           .gameWithUciWhileValid(
             vectorActionStrs,
@@ -53,15 +53,15 @@ class TogyzkumalakReplayTest extends TogyzkumalakTest with ValidatedMatchers {
           .reverse
           .head
           ._1
-        g.plies must_== replay.plies
-        g.turnCount must_== replay.turnCount
-        g.startedAtPly must_== replay.startedAtPly
-        g.startedAtTurn must_== replay.startedAtTurn
-        g.actionStrs must_== replay.actionStrs
-        g.situation.board.pieces must_== replay.situation.board.pieces
-        g.situation.board.history.score must_== replay.situation.board.history.score
-        g.situation.board.variant must_== replay.situation.board.variant
-        g.situation.board.valid(true) must_== true
+        g.plies === replay.plies
+        g.turnCount === replay.turnCount
+        g.startedAtPly === replay.startedAtPly
+        g.startedAtTurn === replay.startedAtTurn
+        g.actionStrs === replay.actionStrs
+        g.situation.board.pieces === replay.situation.board.pieces
+        g.situation.board.history.score === replay.situation.board.history.score
+        g.situation.board.variant === replay.situation.board.variant
+        g.situation.board.valid(true) === true
       }
     }
 
@@ -144,7 +144,7 @@ class TogyzkumalakReplayTest extends TogyzkumalakTest with ValidatedMatchers {
         Vector("i2h2"),
         Vector("i1d2")
       )
-      playActionStrs(vectorActionStrs.flatten.toList) must beValid.like { g =>
+      playActionStrs(vectorActionStrs.flatten[String].toList) .toOption must beSome.like { case g =>
         val replay = Replay
           .gameWithUciWhileValid(
             vectorActionStrs,
@@ -157,15 +157,15 @@ class TogyzkumalakReplayTest extends TogyzkumalakTest with ValidatedMatchers {
           .reverse
           .head
           ._1
-        g.plies must_== replay.plies
-        g.turnCount must_== replay.turnCount
-        g.startedAtPly must_== replay.startedAtPly
-        g.startedAtTurn must_== replay.startedAtTurn
-        g.actionStrs must_== replay.actionStrs
-        g.situation.board.pieces must_== replay.situation.board.pieces
-        g.situation.board.history.score must_== replay.situation.board.history.score
-        g.situation.board.variant must_== replay.situation.board.variant
-        g.situation.board.valid(true) must_== true
+        g.plies === replay.plies
+        g.turnCount === replay.turnCount
+        g.startedAtPly === replay.startedAtPly
+        g.startedAtTurn === replay.startedAtTurn
+        g.actionStrs === replay.actionStrs
+        g.situation.board.pieces === replay.situation.board.pieces
+        g.situation.board.history.score === replay.situation.board.history.score
+        g.situation.board.variant === replay.situation.board.variant
+        g.situation.board.valid(true) === true
       }
     }
   }

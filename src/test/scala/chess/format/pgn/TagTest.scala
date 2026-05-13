@@ -24,7 +24,7 @@ class TagTest extends ChessTest {
           Tag(Tag.P2RatingDiff, "-7"),
           Tag(Tag.Event, "Titled Arena 5")
         )
-      ).sorted.value.map(_.name) must_== List(
+      ).sorted.value.map(_.name) === List(
         Tag.Event,
         Tag.Site,
         Tag.Date,

@@ -1,5 +1,7 @@
 package strategygames.fairysf
 
+import scalalib.extensions.*
+
 sealed trait Side {
 
   def castledKingFile: File

@@ -2,6 +2,7 @@ package strategygames.backgammon.format
 
 import cats.implicits._
 import scala.math.log
+import scalalib.extensions.*
 
 import strategygames.{ Player, Score }
 import strategygames.backgammon._
@@ -61,7 +62,7 @@ object Forsyth {
       SituationPlus(
         // not doing half move clock history like we do in chess
         sit,
-        fen.value.split(' ').last.toIntOption.map(_ max 1 min 500) | 1
+        fen.value.split(' ').last.toIntOption.map(_ max 1 min 1000) | 1
       )
     }
 

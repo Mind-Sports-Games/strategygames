@@ -58,9 +58,9 @@ g4 {[%emt 0.200]} 34. Rxg4 {[%emt 0.172]} 0-1"""
       val startingPosition = Game(Antichess)
       val afterFirstMove   = startingPosition.playMove(Pos.E2, Pos.E4, None)
 
-      afterFirstMove must beValid.like { newGame =>
+      afterFirstMove.toOption must beSome.like { case newGame =>
         val fen = Forsyth >> newGame
-        fen mustEqual FEN("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b - - 0 1")
+        fen must beEqualTo(FEN("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b - - 0 1"))
       }
     }
 
@@ -68,16 +68,16 @@ g4 {[%emt 0.200]} 34. Rxg4 {[%emt 0.172]} 0-1"""
       val game             = Game(Antichess)
       val gameAfterOpening = game.playMoves((Pos.E2, Pos.E4), (Pos.F7, Pos.F5))
 
-      val invalidGame = gameAfterOpening flatMap (_.playMove(Pos.H2, Pos.H4))
+      val invalidGame = gameAfterOpening.andThen((g: Game) => g.playMove(Pos.H2, Pos.H4))
 
-      invalidGame must beInvalid("Piece on h2 cannot move to h4")
+      invalidGame.isInvalid must beTrue
     }
 
     "A situation in antichess should only present the capturing moves if the player can capture" in {
       val game             = Game(Antichess)
       val gameAfterOpening = game.playMoves((Pos.E2, Pos.E4), (Pos.F7, Pos.F5))
 
-      gameAfterOpening must beValid.like { case newGame =>
+      gameAfterOpening.toOption must beSome.like { case newGame =>
         newGame.situation.moves.size must beEqualTo(1)
         newGame.situation.moves.values.find(_.exists(_.captures == false)) must beNone
       }
@@ -86,7 +86,7 @@ g4 {[%emt 0.200]} 34. Rxg4 {[%emt 0.172]} 0-1"""
 
     "Allow a capturing move to be made" in {
       val game = Game(Antichess).playMoves((Pos.E2, Pos.E4), (Pos.F7, Pos.F5), (Pos.E4, Pos.F5))
-      game must beValid
+      game.isValid === true
     }
 
     "Not permit a player to castle" in {
@@ -99,9 +99,9 @@ g4 {[%emt 0.200]} 34. Rxg4 {[%emt 0.172]} 0-1"""
         (Pos.G1, Pos.H3)
       )
 
-      val possibleDestinations = game flatMap (_.board.destsFrom(Pos.E1).toValid("king has no destinations"))
+      val possibleDestinations = game.andThen((g: Game) => g.board.destsFrom(Pos.E1).toValid("king has no destinations"))
 
-      possibleDestinations must beValid.like { case dests =>
+      possibleDestinations.toOption must beSome.like { case dests =>
         // G1 (to castle) should not be a valid destination
         dests must beEqualTo(List(Pos.F1))
       }
@@ -115,7 +115,7 @@ g4 {[%emt 0.200]} 34. Rxg4 {[%emt 0.172]} 0-1"""
         Pos.D1 -> Pos.H5
       )
 
-      game must beValid.like { case newGame =>
+      game.toOption must beSome.like { case newGame =>
         newGame.situation.check must beFalse
       }
     }
@@ -129,7 +129,7 @@ g4 {[%emt 0.200]} 34. Rxg4 {[%emt 0.172]} 0-1"""
         Pos.H5 -> Pos.E8
       )
 
-      game must beValid.like { case newGame =>
+      game.toOption must beSome.like { case newGame =>
         newGame.board.kingPosOf(Player.p2) must beNone
       }
     }
@@ -142,7 +142,7 @@ g4 {[%emt 0.200]} 34. Rxg4 {[%emt 0.172]} 0-1"""
         Pos.D8 -> Pos.H4
       )
 
-      game must beValid.like { case newGame =>
+      game.toOption must beSome.like { case newGame =>
         newGame.situation.checkMate must beFalse
       }
     }
@@ -151,10 +151,10 @@ g4 {[%emt 0.200]} 34. Rxg4 {[%emt 0.172]} 0-1"""
       val position     = FEN("8/5P2/8/2b5/8/8/4B3/8 w - -")
       val originalGame = fenToGame(position, Antichess)
 
-      val newGame = originalGame flatMap (_.apply(Pos.F7, Pos.F8, Option(King))) map (_._1)
+      val newGame = originalGame.andThen((g: Game) => g.apply(Pos.F7, Pos.F8, Option(King))) map (_._1)
 
-      newGame must beValid.like { case gameWithPromotion =>
-        gameWithPromotion.board(Pos.F8).mustEqual(Option(King - P1))
+      newGame.toOption must beSome.like { case gameWithPromotion =>
+        gameWithPromotion.board(Pos.F8) must beEqualTo(Option(King - P1))
       }
 
     }
@@ -163,9 +163,9 @@ g4 {[%emt 0.200]} 34. Rxg4 {[%emt 0.172]} 0-1"""
       val position     = FEN("8/2b5/8/8/8/6Q1/4B3/8 b - -")
       val originalGame = fenToGame(position, Antichess)
 
-      val newGame = originalGame flatMap (_.apply(Pos.C7, Pos.G3, None)) map (_._1)
+      val newGame = originalGame.andThen((g: Game) => g.apply(Pos.C7, Pos.G3, None)) map (_._1)
 
-      newGame must beValid.like { case drawnGame =>
+      newGame.toOption must beSome.like { case drawnGame =>
         drawnGame.situation.end must beTrue
         drawnGame.situation.autoDraw must beTrue
         drawnGame.situation.winner must beNone
@@ -179,9 +179,9 @@ g4 {[%emt 0.200]} 34. Rxg4 {[%emt 0.172]} 0-1"""
       val position     = FEN("8/6P1/8/8/1b6/8/8/5B2 w - -")
       val originalGame = fenToGame(position, Antichess)
 
-      val newGame = originalGame flatMap (_.apply(Pos.G7, Pos.G8, Bishop.some)) map (_._1)
+      val newGame = originalGame.andThen((g: Game) => g.apply(Pos.G7, Pos.G8, Bishop.some)) map (_._1)
 
-      newGame must beValid.like { case drawnGame =>
+      newGame.toOption must beSome.like { case drawnGame =>
         drawnGame.situation.end must beTrue
         drawnGame.situation.autoDraw must beTrue
         drawnGame.situation.winner must beNone
@@ -196,9 +196,9 @@ g4 {[%emt 0.200]} 34. Rxg4 {[%emt 0.172]} 0-1"""
       val position     = FEN("7b/8/1p6/8/8/8/5B2/8 w - -")
       val originalGame = fenToGame(position, Antichess)
 
-      val newGame = originalGame flatMap (_.apply(Pos.F2, Pos.B6, None)) map (_._1)
+      val newGame = originalGame.andThen((g: Game) => g.apply(Pos.F2, Pos.B6, None)) map (_._1)
 
-      newGame must beValid.like { case nonDrawnGame =>
+      newGame.toOption must beSome.like { case nonDrawnGame =>
         nonDrawnGame.situation.end must beFalse
         nonDrawnGame.situation.autoDraw must beFalse
         nonDrawnGame.situation.winner must beNone
@@ -209,9 +209,9 @@ g4 {[%emt 0.200]} 34. Rxg4 {[%emt 0.172]} 0-1"""
       val position     = FEN("8/6p1/4B1P1/4p3/4P3/8/2p5/8 b - - 1 28")
       val originalGame = fenToGame(position, Antichess)
 
-      val newGame = originalGame flatMap (_.apply(Pos.C2, Pos.C1, Option(Bishop))) map (_._1)
+      val newGame = originalGame.andThen((g: Game) => g.apply(Pos.C2, Pos.C1, Option(Bishop))) map (_._1)
 
-      newGame must beValid.like { case drawnGame =>
+      newGame.toOption must beSome.like { case drawnGame =>
         drawnGame.situation.end must beTrue
         drawnGame.situation.autoDraw must beTrue
         drawnGame.situation.status must beSome.like { case status =>
@@ -224,9 +224,9 @@ g4 {[%emt 0.200]} 34. Rxg4 {[%emt 0.172]} 0-1"""
       val position     = FEN("8/6p1/1B4P1/4p3/4P3/8/3p4/8 b - -")
       val originalGame = fenToGame(position, Antichess)
 
-      val newGame = originalGame flatMap (_.apply(Pos.D2, Pos.D1, Option(Bishop))) map (_._1)
+      val newGame = originalGame.andThen((g: Game) => g.apply(Pos.D2, Pos.D1, Option(Bishop))) map (_._1)
 
-      newGame must beValid.like { case nonDrawnGame =>
+      newGame.toOption must beSome.like { case nonDrawnGame =>
         nonDrawnGame.situation.end must beFalse
         nonDrawnGame.situation.autoDraw must beFalse
         nonDrawnGame.situation.status must beNone
@@ -237,9 +237,9 @@ g4 {[%emt 0.200]} 34. Rxg4 {[%emt 0.172]} 0-1"""
       val position     = FEN("5b2/1P4p1/4B1P1/4p3/4P3/8/8/8 w - -")
       val originalGame = fenToGame(position, Antichess)
 
-      val newGame = originalGame flatMap (_.apply(Pos.B7, Pos.B8, Bishop.some)) map (_._1)
+      val newGame = originalGame.andThen((g: Game) => g.apply(Pos.B7, Pos.B8, Bishop.some)) map (_._1)
 
-      newGame must beValid.like { case nonDrawnGame =>
+      newGame.toOption must beSome.like { case nonDrawnGame =>
         nonDrawnGame.situation.end must beFalse
         nonDrawnGame.situation.autoDraw must beFalse
         nonDrawnGame.situation.status must beNone
@@ -251,9 +251,9 @@ g4 {[%emt 0.200]} 34. Rxg4 {[%emt 0.172]} 0-1"""
       val position     = FEN("8/8/4BbP1/4p3/4P3/8/8/8 b - -")
       val originalGame = fenToGame(position, Antichess)
 
-      val newGame = originalGame flatMap (_.playMoves(Pos.F6 -> Pos.G7))
+      val newGame = originalGame.andThen((g: Game) => g.playMoves(Pos.F6 -> Pos.G7))
 
-      newGame must beValid.like { case nonDrawnGame =>
+      newGame.toOption must beSome.like { case nonDrawnGame =>
         nonDrawnGame.situation.end must beFalse
         nonDrawnGame.situation.autoDraw must beFalse
         nonDrawnGame.situation.status must beNone
@@ -264,7 +264,7 @@ g4 {[%emt 0.200]} 34. Rxg4 {[%emt 0.172]} 0-1"""
       val position  = FEN("4K3/8/1b6/8/8/8/5B2/3k4 b - -")
       val maybeGame = fenToGame(position, Antichess)
 
-      maybeGame must beValid.like { case game =>
+      maybeGame.toOption must beSome.like { case game =>
         game.situation.end must beFalse
       }
     }
@@ -272,12 +272,12 @@ g4 {[%emt 0.200]} 34. Rxg4 {[%emt 0.172]} 0-1"""
     "Be drawn on a three move repetition" in {
       val game = Game(Antichess)
 
-      val moves         = List((Pos.G1, Pos.F3), (Pos.G8, Pos.F6), (Pos.F3, Pos.G1), (Pos.F6, Pos.G8))
-      val repeatedMoves = List.fill(3)(moves).flatten
+      val moves: List[(Pos, Pos)] = List((Pos.G1, Pos.F3), (Pos.G8, Pos.F6), (Pos.F3, Pos.G1), (Pos.F6, Pos.G8))
+      val repeatedMoves: List[(Pos, Pos)] = List.fill(3)(moves).flatten
 
       val drawnGame = game.playMoveList(repeatedMoves)
 
-      drawnGame must beValid.like { case g =>
+      drawnGame.toOption must beSome.like { case g =>
         g.situation.threefoldRepetition must beTrue
       }
 
@@ -286,13 +286,13 @@ g4 {[%emt 0.200]} 34. Rxg4 {[%emt 0.172]} 0-1"""
     "Successfully play through a full game until one player loses all their pieces" in {
       val game = Reader.full(fullGame)
 
-      game must beValid.like { case Reader.Result.Complete(replay) =>
-        val game = replay.state
+      game.toOption must beSome.like { case Reader.Result.Complete(replay) =>
+        val gameState = replay.state
 
-        game.situation.end must beTrue
+        gameState.situation.end must beTrue
 
         // In antichess, the player who has just lost all their pieces is the winner
-        game.situation.winner must beSome.like { case player =>
+        gameState.situation.winner must beSome.like { case player =>
           player == P2;
         }
       }
@@ -302,11 +302,11 @@ g4 {[%emt 0.200]} 34. Rxg4 {[%emt 0.172]} 0-1"""
       val position  = FEN("8/p7/8/P7/8/8/8/8 w - -")
       val maybeGame = fenToGame(position, Antichess)
 
-      val drawnGame = maybeGame flatMap (_.playMoves((Pos.A5, Pos.A6)))
+      val drawnGame = maybeGame.andThen((g: Game) => g.playMoves((Pos.A5, Pos.A6)))
 
-      drawnGame must beValid.like { case game =>
-        game.situation.end must beTrue
-        game.situation.winner must beSome.like { case player =>
+      drawnGame.toOption must beSome.like { case gameState =>
+        gameState.situation.end must beTrue
+        gameState.situation.winner must beSome.like { case player =>
           player == P2;
         }
       }
@@ -316,15 +316,15 @@ g4 {[%emt 0.200]} 34. Rxg4 {[%emt 0.172]} 0-1"""
       val fen       = FEN("2Q5/8/p7/8/8/8/6PR/8 w - -")
       val maybeGame = fenToGame(fen, Antichess)
 
-      val drawnGame = maybeGame flatMap (_.playMoves((Pos.C8, Pos.A6)))
+      val drawnGame = maybeGame.andThen((g: Game) => g.playMoves((Pos.C8, Pos.A6)))
 
-      drawnGame must beValid.like { case game =>
-        game.situation.end must beTrue
-        game.situation.status must beSome.like { case state =>
+      drawnGame.toOption must beSome.like { case gameState =>
+        gameState.situation.end must beTrue
+        gameState.situation.status must beSome.like { case state =>
           state == Status.VariantEnd
 
         }
-        game.situation.winner must beSome.like { case player =>
+        gameState.situation.winner must beSome.like { case player =>
           player == P2;
         }
       }

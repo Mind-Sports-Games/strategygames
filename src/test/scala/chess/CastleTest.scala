@@ -1,5 +1,6 @@
 package strategygames.chess
 
+import cats.data.Validated
 import scala.language.reflectiveCalls
 import strategygames.chess.Pos._
 import strategygames.chess.variant.FromPosition
@@ -178,10 +179,10 @@ PPPPPPPP
 R    RK """)
       }
       "cannot castle queenside anymore" in {
-        g2.toOption flatMap (_.board destsFrom G1) must bePoss(H1)
+        g2.toOption.flatMap (_.board destsFrom G1) must bePoss(H1)
       }
       "cannot castle kingside anymore even if the position looks good" in {
-        g2.toOption flatMap (_.board.seq(
+        g2.toOption.flatMap (_.board.seq(
           _ move (F1, H1),
           _ move (G1, E1)
         )) flatMap (_ destsFrom E1) must bePoss(D1, F1)
@@ -195,10 +196,10 @@ PPPPPPPP
   KR   R""")
       }
       "cannot castle kingside anymore" in {
-        g2.toOption flatMap (_.board destsFrom C1) must bePoss(B1)
+        g2.toOption.flatMap (_.board destsFrom C1) must bePoss(B1)
       }
       "cannot castle queenside anymore even if the position looks good" in {
-        g2.toOption flatMap (_.board.seq(
+        g2.toOption.flatMap (_.board.seq(
           _ move (D1, A1),
           _ move (C1, E1)
         )) flatMap (_ destsFrom E1) must bePoss(D1, F1)
@@ -206,47 +207,47 @@ PPPPPPPP
     }
     "if king moves" in {
       "to the right" in {
-        val g2 = game.playMove(E1, F1) map (_ as P1)
+        val g2: Validated[String, Game] = game.playMove(E1, F1).map(_.withPlayer(P1))
         "cannot castle anymore" in {
-          g2.toOption flatMap (_.board destsFrom F1) must bePoss(E1, G1)
+          g2.toOption.flatMap(_.board destsFrom F1) must bePoss(E1, G1)
         }
         "neither if the king comes back" in {
-          val g3 = g2 flatMap (_.playMove(F1, E1)) map (_ as P1)
-          g3.toOption flatMap (_.board destsFrom E1) must bePoss(D1, F1)
+          val g3: Validated[String, Game] = g2.andThen((g: Game) => g.playMove(F1, E1)).map(_.withPlayer(P1))
+          g3.toOption.flatMap(_.board destsFrom E1) must bePoss(D1, F1)
         }
       }
       "to the left" in {
-        val g2 = game.playMove(E1, D1) map (_ as P1)
+        val g2: Validated[String, Game] = game.playMove(E1, D1).map(_.withPlayer(P1))
         "cannot castle anymore" in {
-          g2.toOption flatMap (_.board destsFrom D1) must bePoss(C1, E1)
+          g2.toOption.flatMap(_.board destsFrom D1) must bePoss(C1, E1)
         }
         "neither if the king comes back" in {
-          val g3 = g2 flatMap (_.playMove(D1, E1)) map (_ as P1)
-          g3.toOption flatMap (_.board destsFrom E1) must bePoss(D1, F1)
+          val g3: Validated[String, Game] = g2.andThen((g: Game) => g.playMove(D1, E1)).map(_.withPlayer(P1))
+          g3.toOption.flatMap(_.board destsFrom E1) must bePoss(D1, F1)
         }
       }
     }
     "if kingside rook moves" in {
-      val g2 = game.playMove(H1, G1) map (_ as P1)
+      val g2: Validated[String, Game] = game.playMove(H1, G1).map(_.withPlayer(P1))
       "can only castle queenside" in {
-        g2.toOption flatMap (_.board destsFrom E1) must bePoss(C1, D1, F1, A1)
+        g2.toOption.flatMap(_.board destsFrom E1) must bePoss(C1, D1, F1, A1)
       }
       "if queenside rook moves" in {
-        val g3 = g2 flatMap (_.playMove(A1, B1))
+        val g3: Validated[String, Game] = g2.andThen((g: Game) => g.playMove(A1, B1))
         "can not castle at all" in {
-          g3.toOption flatMap (_.board destsFrom E1) must bePoss(D1, F1)
+          g3.toOption.flatMap(_.board destsFrom E1) must bePoss(D1, F1)
         }
       }
     }
     "if queenside rook moves" in {
-      val g2 = game.playMove(A1, B1) map (_ as P1)
+      val g2: Validated[String, Game] = game.playMove(A1, B1).map(_.withPlayer(P1))
       "can only castle kingside" in {
-        g2.toOption flatMap (_.board destsFrom E1) must bePoss(D1, F1, G1, H1)
+        g2.toOption.flatMap(_.board destsFrom E1) must bePoss(D1, F1, G1, H1)
       }
       "if kingside rook moves" in {
-        val g3 = g2 flatMap (_.playMove(H1, G1))
+        val g3: Validated[String, Game] = g2.andThen((g: Game) => g.playMove(H1, G1))
         "can not castle at all" in {
-          g3.toOption flatMap (_.board destsFrom E1) must bePoss(D1, F1)
+          g3.toOption.flatMap(_.board destsFrom E1) must bePoss(D1, F1)
         }
       }
     }

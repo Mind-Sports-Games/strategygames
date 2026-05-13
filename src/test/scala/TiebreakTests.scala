@@ -215,54 +215,54 @@ class TiebreakTests extends Specification with ValidatedMatchers {
   val draughts         = new TournamentEY1k6otN();
   val tourney          = new Tiebreak(draughts);
   "derarzt results" should {
-    tourney.score(draughts.derarzt) must_== 14
-    tourney.lilaSonnenbornBerger(draughts.derarzt) must_== 52
-    tourney.fideBuchholz(draughts.derarzt) must_== 47
+    tourney.score(draughts.derarzt) === 14
+    tourney.lilaSonnenbornBerger(draughts.derarzt) === 52
+    tourney.fideBuchholz(draughts.derarzt) === 47
   }
   "ayala results" should {
-    tourney.score(draughts.ayala) must_== 12
-    tourney.lilaSonnenbornBerger(draughts.ayala) must_== 34
-    tourney.fideBuchholz(draughts.ayala) must_== 55
+    tourney.score(draughts.ayala) === 12
+    tourney.lilaSonnenbornBerger(draughts.ayala) === 34
+    tourney.fideBuchholz(draughts.ayala) === 55
   }
   "rapha results" should {
-    tourney.score(draughts.rapha) must_== 10
-    tourney.lilaSonnenbornBerger(draughts.rapha) must_== 30
-    tourney.fideBuchholz(draughts.rapha) must_== 51
+    tourney.score(draughts.rapha) === 10
+    tourney.lilaSonnenbornBerger(draughts.rapha) === 30
+    tourney.fideBuchholz(draughts.rapha) === 51
   }
   "irina results" should {
-    tourney.score(draughts.irina) must_== 8
-    tourney.lilaSonnenbornBerger(draughts.irina) must_== 22
-    tourney.fideBuchholz(draughts.irina) must_== 53
+    tourney.score(draughts.irina) === 8
+    tourney.lilaSonnenbornBerger(draughts.irina) === 22
+    tourney.fideBuchholz(draughts.irina) === 53
   }
   "berserker results" should {
-    tourney.score(draughts.berserk) must_== 6
-    tourney.lilaSonnenbornBerger(draughts.berserk) must_== 10
-    tourney.fideBuchholz(draughts.berserk) must_== 56
+    tourney.score(draughts.berserk) === 6
+    tourney.lilaSonnenbornBerger(draughts.berserk) === 10
+    tourney.fideBuchholz(draughts.berserk) === 56
   }
   "megamau results" should {
-    tourney.score(draughts.mega) must_== 6
-    tourney.lilaSonnenbornBerger(draughts.mega) must_== 8
-    tourney.fideBuchholz(draughts.mega) must_== 54
+    tourney.score(draughts.mega) === 6
+    tourney.lilaSonnenbornBerger(draughts.mega) === 8
+    tourney.fideBuchholz(draughts.mega) === 54
   }
   "statmatt results" should {
-    tourney.score(draughts.matt) must_== 6
-    tourney.lilaSonnenbornBerger(draughts.matt) must_== 8
-    tourney.fideBuchholz(draughts.matt) must_== 47
+    tourney.score(draughts.matt) === 6
+    tourney.lilaSonnenbornBerger(draughts.matt) === 8
+    tourney.fideBuchholz(draughts.matt) === 47
   }
   "mankalacz results" should {
-    tourney.score(draughts.manka) must_== 4
-    tourney.lilaSonnenbornBerger(draughts.manka) must_== 4
-    tourney.fideBuchholz(draughts.manka) must_== 43
+    tourney.score(draughts.manka) === 4
+    tourney.lilaSonnenbornBerger(draughts.manka) === 4
+    tourney.fideBuchholz(draughts.manka) === 43
   }
   "funwithflags results" should {
-    tourney.score(draughts.fun) must_== 4
-    tourney.lilaSonnenbornBerger(draughts.fun) must_== 0
-    tourney.fideBuchholz(draughts.fun) must_== 44
+    tourney.score(draughts.fun) === 4
+    tourney.lilaSonnenbornBerger(draughts.fun) === 0
+    tourney.fideBuchholz(draughts.fun) === 44
   }
   "egormmaksymov341 results" should {
-    tourney.score(draughts.egor) must_== 0
-    tourney.lilaSonnenbornBerger(draughts.egor) must_== 0
-    tourney.fideBuchholz(draughts.egor) must_== 0
+    tourney.score(draughts.egor) === 0
+    tourney.lilaSonnenbornBerger(draughts.egor) === 0
+    tourney.fideBuchholz(draughts.egor) === 0
   }
   val flipello1        = new TournamentUW8K3BjW();
   val flipello1Tourney = new Tiebreak(flipello1);
@@ -284,39 +284,39 @@ class TiebreakTests extends Specification with ValidatedMatchers {
   //                       => 1 from draw
   // --------------------------------------------------------------------------
   "james_test results" should {
-    flipello1Tourney.score(flipello1.james_test) must_== 9.0
+    flipello1Tourney.score(flipello1.james_test) === 9.0
     // played:    lakin2 + statmatt2 + jheps + lakin + statmatt
     // gh points: 3      + 7         + 6     + 3     + 2 = 21 points
-    flipello1Tourney.fideBuchholz(flipello1.james_test) must_== 21
+    flipello1Tourney.fideBuchholz(flipello1.james_test) === 21
   }
   "jheps results" should {
-    flipello1Tourney.score(flipello1.jheps) must_== 6.0
+    flipello1Tourney.score(flipello1.jheps) === 6.0
     // played:   lakin + statmatt + james_test + bye + absent
     // bh points: 3     + 7        + 6          + 3   + 0 = 19 points
-    flipello1Tourney.fideBuchholz(flipello1.jheps) must_== 19
+    flipello1Tourney.fideBuchholz(flipello1.jheps) === 19
   }
   "statmatt2 results" should {
-    flipello1Tourney.score(flipello1.statmatt2) must_== 6.0
+    flipello1Tourney.score(flipello1.statmatt2) === 6.0
     // played:   absent + james_test + lakin2 + stamatt + lakin
     // bh points: 0     + 9          + 3      + 2       + 3 = 17 points
-    flipello1Tourney.fideBuchholz(flipello1.statmatt2) must_== 17
+    flipello1Tourney.fideBuchholz(flipello1.statmatt2) === 17
   }
   "lakin results" should {
-    flipello1Tourney.score(flipello1.lakin) must_== 4.0
+    flipello1Tourney.score(flipello1.lakin) === 4.0
     // played:   jheps + bye + statmatt + james_test + statmatt2
     // bh points: 6    + 3   + 2        + 9          + 7 = 27 points
-    flipello1Tourney.fideBuchholz(flipello1.lakin) must_== 27
+    flipello1Tourney.fideBuchholz(flipello1.lakin) === 27
   }
   "statmatt results" should {
-    flipello1Tourney.score(flipello1.statmatt) must_== 3.0
+    flipello1Tourney.score(flipello1.statmatt) === 3.0
     // played:   bye + jheps + lakin + statmatt2 + james_test
     // bh points: 4  + 6     + 3     + 7         + 9 = 29 points
-    flipello1Tourney.fideBuchholz(flipello1.statmatt) must_== 29
+    flipello1Tourney.fideBuchholz(flipello1.statmatt) === 29
   }
   "lakin2 results" should {
-    flipello1Tourney.score(flipello1.lakin2) must_== 0.0
+    flipello1Tourney.score(flipello1.lakin2) === 0.0
     // played:   james_test + absent + statmatt2 + absent + absent
     // bh points: 9         + 0      + 7         + 0      + 0 = 16 points
-    flipello1Tourney.fideBuchholz(flipello1.lakin2) must_== 16
+    flipello1Tourney.fideBuchholz(flipello1.lakin2) === 16
   }
 }
