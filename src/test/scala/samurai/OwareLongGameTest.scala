@@ -64,7 +64,7 @@ class OwareLongGameTest extends Specification with ValidatedMatchers {
         gen.makeMove(m)
         generated += m
       }
-      generated.length must_== 603
+      generated.length === 603
 
       val uciMoves = generated.toList.map(Api.moveToUci)
 
@@ -73,7 +73,7 @@ class OwareLongGameTest extends Specification with ValidatedMatchers {
       // Without fix: AIOOBE at the 603rd OwareGame.makeMove call (index 602, length 602).
       // After fix:   ensureCapacity(0 + 603) expands the arrays before the loop.
       val result = Api.position.makeMovesWithPrevious(List(), uciMoves)
-      result.fenString.nonEmpty must_== true
+      result.fenString.nonEmpty === true
     }
   }
 }

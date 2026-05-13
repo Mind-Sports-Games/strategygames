@@ -28,7 +28,7 @@ class GoLongGameTest extends Specification with ValidatedMatchers {
       // Before fix: AIOOBE at 603rd makeMove call (GoGame.pushState index 602, array length 602).
       // After fix: ensureCapacity(0 + 452 * 2) = ensureCapacity(904) expands arrays first.
       val result = Api.position(variant.Go19x19).makeMovesNoLegalCheck(allMoves)
-      result.fenString.nonEmpty must_== true
+      result.fenString.nonEmpty === true
     }
   }
 
@@ -51,7 +51,7 @@ class GoLongGameTest extends Specification with ValidatedMatchers {
         } :+ Api.moveToUci(half, variant.Go19x19) // remaining P1 move at index 180
 
       val result = Api.position(variant.Go19x19).makeMovesNoLegalCheck(allMoves)
-      result.legalActions.nonEmpty must_== true
+      result.legalActions.nonEmpty === true
     }
   }
 
@@ -75,7 +75,7 @@ class GoLongGameTest extends Specification with ValidatedMatchers {
       val deepCopy  = position.deepCopy
       val oneMore   = Api.moveToUci(position.legalDrops(0), variant.Go19x19)
       val result    = deepCopy.makeMovesNoLegalCheck(List(oneMore))
-      result.fenString.nonEmpty must_== true
+      result.fenString.nonEmpty === true
     }
   }
 
@@ -100,8 +100,8 @@ class GoLongGameTest extends Specification with ValidatedMatchers {
         }
       }
 
-      moveCount must_== moves
-      position.legalActions.nonEmpty must_== true
+      moveCount === moves
+      position.legalActions.nonEmpty === true
     }
   }
 }
