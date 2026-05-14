@@ -53,8 +53,12 @@ final case class FEN(value: String) extends AnyVal {
   private def parsePiece(player: Player)(pStr: String): Option[(Pos, Piece)] = {
     pStr match {
       case ""                    => None
-      case ht if ht.head.isUpper => Some((Pos.allKeys(ht.tail), Piece(player, Role.forsyth(ht.head).get)))
-      case posStr                => Some((Pos.allKeys(posStr), Piece(player, Role.defaultRole)))
+      case ht if ht.head.isUpper =>
+        for {
+          pos  <- Pos.allKeys.get(ht.tail)
+          role <- Role.forsyth(ht.head)
+        } yield (pos, Piece(player, role))
+      case posStr => Pos.allKeys.get(posStr).map(pos => (pos, Piece(player, Role.defaultRole)))
     }
   }
 
