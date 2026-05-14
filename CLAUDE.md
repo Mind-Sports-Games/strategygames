@@ -1,20 +1,16 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This is **strategygames**, a Scala 3 multi-game 2 player rules engine library for [playstrategy.org](https://playstrategy.org). It's a fork of [scalachess](https://github.com/lichess-org/scalachess) (forked ~May 2021, significantly diverged) extended to support multiple game types (Chess, Draughts, Go, Backgammon, and more).
 
 ## Build Commands
 
 ```bash
-sbt compile              # Compile the project
-sbt test                 # Run all tests
-sbt "testOnly **.TestNameTest"  # Run a single test
-sbt scalafmtAll          # Format all code
+sbt compile                             # Compile the project
+sbt test                                # Run all tests
+sbt "testOnly **.TestNameTest"          # Run a single test
+sbt scalafmtAll                         # Format all code
 sbt clean coverage test coverageReport  # Tests with coverage
 ```
-
-## Architecture
-
-This is **strategygames**, a Scala 2.13 game rules engine library for [playstrategy.org](https://playstrategy.org). It's a fork of [scalachess](https://github.com/lichess-org/scalachess) extended to support multiple game types.
 
 ### Core Design Pattern
 
@@ -26,25 +22,27 @@ strategygames.Variant     → wraps chess.variant.Variant, go.variant.Variant, e
 strategygames.Pos         → wraps chess.Pos, go.Pos, etc.
 ```
 
+A key difference from scalachess is how strategygames allows games which have multiple actions in a turn (e.g. Monster Chess, Amazons, Backgammon).
+
 ### Supported Game Logics
 
 Each game has its own package under `src/main/scala/`:
-- `chess/` - Standard chess and variants (Crazyhouse, Atomic, etc.)
-- `draughts/` - International draughts variants
-- `fairysf/` - Shogi, Xiangqi, Mini variants (uses fairystockfish engine)
-- `samurai/` - Oware (mancala)
-- `togyzkumalak/` - Togyz Kumalak (mancala variant)
-- `go/` - Go (9x9, 13x13, 19x19)
-- `backgammon/` - Backgammon (has dice, undo, endTurn actions)
-- `abalone/` - Abalone
-- `dameo/` - Dameo (draughts variant)
+- `chess/` - Standard chess and variants (Crazyhouse, Atomic, etc.) Also contains Lines of Action.
+- `draughts/` - Draughts variants, forked from lidraughts, but new variants added.
+- `fairysf/` - Shogi, Xiangqi, Othello, and more. Uses fairystockfish engine to provide actions.
+- `samurai/` - Oware (mancala). Uses JoanSala's engine 'aalina' to provide actions.
+- `togyzkumalak/` - Togyzkumalak (mancala variant)
+- `go/` - Go. Uses JoanSala's go engine to provide actions.
+- `backgammon/` - Backgammon (has dice, undo, endTurn, and doubling cube actions)
+- `abalone/` - Abalone. Hexagonal Board.
+- `dameo/` - Dameo (draughts variant). Uses multiaction properly unlike draughts game logic
 
 ### Package Structure (per game)
 
 Each game package follows a consistent structure:
 - `Game.scala` - Game state and action application
-- `Board.scala` - Board representation
 - `Situation.scala` - Current game situation (board + player to move + derived state)
+- `Board.scala` - Board representation
 - `variant/` - Game variants
 - `format/` - FEN, PGN/PDN parsing and rendering
 - `opening/` - Opening book data (if applicable)
@@ -53,7 +51,7 @@ Each game package follows a consistent structure:
 
 - `GameLogic` - Enum identifying which game engine to use
 - `Action` - Union type for Move, Drop, Pass, DiceRoll, EndTurn, etc.
-- `VActionStrs = Vector[Vector[String]]` - Multi-action turn history
+- `VActionStrs = Vector[Vector[String]]` - Multi-action turn history.
 - `Player` - P1 (first player) or P2 (second player), not "white/black"
 
 ### Adding New Games
@@ -77,6 +75,6 @@ PGN TimeControl tag uses seconds: `[TimeControl "600+2"]` → `10+2` display.
 
 ## Code Style
 
-- Uses scalafmt 3.4.3 with `align.preset = most`
+- Uses scalafmt with `align.preset = most`
 - Functional, immutable design - no side effects
 - Max line length: 110 characters
