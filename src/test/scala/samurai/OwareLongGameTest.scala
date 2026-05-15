@@ -1,5 +1,6 @@
 package strategygames.samurai
 
+import com.joansala.game.oware.OwareGame
 import org.specs2.matcher.ValidatedMatchers
 import org.specs2.mutable.Specification
 
@@ -37,5 +38,42 @@ class OwareLongGameTest extends Specification with ValidatedMatchers {
       newGame.legalMoves.size > 0 === true
     }
 
+  }
+
+  // Reproduces the live production error (lila, Apr 2026):
+  //   java.lang.ArrayIndexOutOfBoundsException: null
+  // "null" is the JVM fast-throw AIOOBE (no index in message on older JVMs).
+  // Newer JVMs show the index: "Index 602 out of bounds for length 602".
+  //
+  // Production path:
+  //   lila analysis request
+  //   -> Api.position.makeMovesWithPrevious(newMoves, previousMoves)
+  //   -> new OwareGame()           ← default capacity = 602
+  //   -> makeMoves(603 items)      ← no ensureCapacity guard
+  //   -> OwareGame.makeMove × 603  ← writes to index 602 in a length-602 array
+  //
+  // Fix: ensureCapacity(ply + movesList.length) before the makeMove loop.
+  "A game replayed with more than 602 previous moves (live AIOOBE:null scenario)" should {
+    "not throw ArrayIndexOutOfBoundsException when replaying 603 moves via makeMovesWithPrevious" in {
+      // legalMoves.last (highest-index pit) keeps seeds circulating through the board
+      // and avoids the rapid drain that ends games when always picking pit 0.
+      val gen       = new OwareGame(700)
+      val generated = new scala.collection.mutable.ListBuffer[Int]()
+      while (generated.length < 603 && gen.legalMoves.length > 0) {
+        val m = gen.legalMoves.last
+        gen.makeMove(m)
+        generated += m
+      }
+      generated.length === 603
+
+      val uciMoves = generated.toList.map(Api.moveToUci)
+
+      // makeMovesWithPrevious creates a fresh OwareGame() (capacity 602) and
+      // calls makeMoves() with all 603 moves via the internal makeMoves path.
+      // Without fix: AIOOBE at the 603rd OwareGame.makeMove call (index 602, length 602).
+      // After fix:   ensureCapacity(0 + 603) expands the arrays before the loop.
+      val result = Api.position.makeMovesWithPrevious(List(), uciMoves)
+      result.fenString.nonEmpty === true
+    }
   }
 }
