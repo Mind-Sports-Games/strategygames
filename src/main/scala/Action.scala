@@ -8,6 +8,7 @@ abstract class Action(
   def situationAfter: Situation
   // def finalizeAfter: Board //this can be added once draughts has been refactored (removing the input finalSquare)
   def before = situationBefore.board
+  def endsTurn = situationBefore.player != situationAfter.player
 
   def player: Player
   def toUci: Uci
@@ -53,11 +54,13 @@ object Action {
   }
 
   def wrap(action: backgammon.Action): Action = action match {
-    case m: backgammon.Move      => Move.Backgammon(m)
-    case d: backgammon.Drop      => Drop.Backgammon(d)
-    case l: backgammon.Lift      => Lift.Backgammon(l)
-    case dr: backgammon.DiceRoll => DiceRoll.Backgammon(dr)
-    case et: backgammon.EndTurn  => EndTurn.Backgammon(et)
+    case m: backgammon.Move        => Move.Backgammon(m)
+    case d: backgammon.Drop        => Drop.Backgammon(d)
+    case l: backgammon.Lift        => Lift.Backgammon(l)
+    case dr: backgammon.DiceRoll   => DiceRoll.Backgammon(dr)
+    case et: backgammon.EndTurn    => EndTurn.Backgammon(et)
+    case u: backgammon.Undo        => Undo.Backgammon(u)
+    case ca: backgammon.CubeAction => CubeAction.Backgammon(ca)
   }
 
   def wrap(action: abalone.Action): Action = action match {
