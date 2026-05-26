@@ -1,0 +1,8 @@
+# .graphifyignore
+project/
+target/
+
+# only index src/, ignore everything else
+*
+!src/
+!src/**

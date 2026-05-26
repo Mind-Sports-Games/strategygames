@@ -24,3 +24,6 @@ src/test/.bsp
 .vscode/
 /*.log
 /.claude
+
+#graphify
+graphify-out
