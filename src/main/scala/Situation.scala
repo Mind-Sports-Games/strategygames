@@ -42,6 +42,17 @@ sealed abstract class Situation(val board: Board, val player: Player) {
       // important to keep non progressive actions at the end
       undos
 
+  //Put this here as it's useful for several game logic's to reuse when calculating validTurns
+  protected def nextTurn(actions: List[Action]): List[List[Action]] =
+    actions match {
+      case Nil                  => Nil
+      case h :: t if h.endsTurn => List(List(h)) ::: nextTurn(t)
+      case h :: t               =>
+        nextTurn(t) ::: nextTurn(h.situationAfter.actions).map(c => h :: c)
+    }
+
+  lazy val validTurns: List[List[Action]]
+
   def canDrop: Boolean
 
   def canOnlyDrop: Boolean
@@ -223,6 +234,8 @@ object Situation {
 
     def cubeActions: List[CubeAction] = List.empty
 
+    lazy val validTurns: List[List[Action]] = nextTurn(actions)
+
     def canDrop: Boolean = s.canDrop
 
     def canOnlyDrop: Boolean = s.canOnlyDrop
@@ -361,6 +374,8 @@ object Situation {
     def endTurns: List[EndTurn] = List.empty
 
     def cubeActions: List[CubeAction] = List.empty
+
+    lazy val validTurns: List[List[Action]] = List(actions)
 
     def canDrop: Boolean = false
 
@@ -557,6 +572,8 @@ object Situation {
 
     def cubeActions: List[CubeAction] = List.empty
 
+    lazy val validTurns: List[List[Action]] = nextTurn(actions)
+
     def canDrop: Boolean = s.canDrop
 
     def canOnlyDrop: Boolean = s.canOnlyDrop
@@ -710,6 +727,8 @@ object Situation {
 
     def cubeActions: List[CubeAction] = List.empty
 
+    lazy val validTurns: List[List[Action]] = List(actions)
+
     def canDrop: Boolean = false
 
     def canOnlyDrop: Boolean = false
@@ -860,6 +879,8 @@ object Situation {
     def endTurns: List[EndTurn] = List.empty
 
     def cubeActions: List[CubeAction] = List.empty
+
+    lazy val validTurns: List[List[Action]] = List(actions)
 
     def canDrop: Boolean = false
 
@@ -1012,6 +1033,8 @@ object Situation {
     def endTurns: List[EndTurn] = List.empty
 
     def cubeActions: List[CubeAction] = List.empty
+
+    lazy val validTurns: List[List[Action]] = List(actions)
 
     def canDrop: Boolean = s.canDrop
 
@@ -1171,6 +1194,8 @@ object Situation {
 
     def cubeActions: List[CubeAction] = s.cubeActions.map(CubeAction.Backgammon.apply)
 
+    lazy val validTurns: List[List[Action]] = s.validTurns.map(_.map(Action.wrap))
+
     def canDrop: Boolean = s.canDrop
 
     def canOnlyDrop: Boolean = s.canOnlyDrop
@@ -1276,6 +1301,7 @@ object Situation {
     def toDameo        = sys.error("Can't make dameo situation from backgammon situation")
   }
 
+  //why are all of these overrides?
   final case class Abalone(s: abalone.Situation)
       extends Situation(
         Board.Abalone(s.board),
@@ -1329,6 +1355,8 @@ object Situation {
     override def endTurns: List[EndTurn] = List.empty
 
     override def cubeActions: List[CubeAction] = List.empty
+
+    lazy val validTurns: List[List[Action]] = nextTurn(actions)
 
     override def canDrop: Boolean = false
 
@@ -1478,6 +1506,8 @@ object Situation {
     def endTurns: List[EndTurn] = List.empty
 
     def cubeActions: List[CubeAction] = List.empty
+
+    lazy val validTurns: List[List[Action]] = nextTurn(actions)
 
     def canDrop: Boolean = false
 
