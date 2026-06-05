@@ -11,6 +11,8 @@ abstract class Action(
     @nowarn metrics: MoveMetrics = MoveMetrics()
 ) {
 
+  def forced = situationBefore.forcedAction.nonEmpty
+
   def before = situationBefore.board
 
   def situationAfter: Situation

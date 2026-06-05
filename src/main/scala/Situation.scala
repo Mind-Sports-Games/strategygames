@@ -79,6 +79,8 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def forcedAction: Option[Action]
 
+  def forcedTurnAction: Option[Action]
+
   def history = board.history
 
   lazy val check: Boolean
@@ -177,6 +179,8 @@ object Situation {
     def takebackable = true
 
     def forcedAction: Option[Action] = None
+
+    def forcedTurnAction: Option[Action] = None
 
     lazy val check: Boolean = s.check
 
@@ -346,6 +350,8 @@ object Situation {
     def takebackable = true
 
     def forcedAction: Option[Action] = None
+
+    def forcedTurnAction: Option[Action] = None
 
     lazy val check: Boolean = false
 
@@ -526,6 +532,8 @@ object Situation {
 
     def forcedAction: Option[Action] = None
 
+    def forcedTurnAction: Option[Action] = None
+
     lazy val check: Boolean = s.check
 
     def checkSquare = s.checkSquare.map(Pos.FairySF.apply)
@@ -685,6 +693,8 @@ object Situation {
 
     def forcedAction: Option[Action] = None
 
+    def forcedTurnAction: Option[Action] = None
+
     lazy val check: Boolean = false
 
     def checkSquare = None
@@ -838,6 +848,8 @@ object Situation {
 
     def forcedAction: Option[Action] = None
 
+    def forcedTurnAction: Option[Action] = None
+
     lazy val check: Boolean = false
 
     def checkSquare = None
@@ -987,6 +999,8 @@ object Situation {
     def takebackable = s.takebackable
 
     def forcedAction: Option[Action] = None
+
+    def forcedTurnAction: Option[Action] = None
 
     lazy val check: Boolean = false
 
@@ -1149,6 +1163,8 @@ object Situation {
     def takebackable = false
 
     def forcedAction: Option[Action] = s.forcedAction.map(Action.wrap)
+
+    def forcedTurnAction: Option[Action] = s.forcedTurnAction.map(Action.wrap)
 
     lazy val check: Boolean = false
 
@@ -1315,6 +1331,8 @@ object Situation {
 
     override def forcedAction: Option[Action] = None
 
+    override def forcedTurnAction: Option[Action] = None
+
     override lazy val check: Boolean = false
 
     override def checkSquare = None
@@ -1465,6 +1483,8 @@ object Situation {
     def takebackable = true
 
     def forcedAction: Option[Action] = None
+
+    def forcedTurnAction: Option[Action] = None
 
     lazy val check: Boolean = false
 

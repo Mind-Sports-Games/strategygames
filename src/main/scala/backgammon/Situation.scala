@@ -189,6 +189,17 @@ case class Situation(board: Board, player: Player) {
     else if (canTouchPieces && forcedInTurn.nonEmpty) forcedInTurn
     else None
 
+  lazy val forcedTurnAction: Option[Action] =
+    forcedAction match {
+      case Some(_: Drop) => forcedAction
+      case Some(_: Lift) => forcedAction
+      case _ if (forcedRemainingTurn && (history.forcedTurn || board.usedDice.isEmpty)) => forcedAction
+      case _ => None
+    }
+
+  lazy val forcedRemainingTurn: Boolean =
+    !validTurns.map{ t => !t.map(_.forced).contains(false)}.contains(false)
+
   def history = board.history
 
   def end: Boolean = board.variant.specialEnd(this)
