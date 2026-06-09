@@ -190,12 +190,8 @@ case class Situation(board: Board, player: Player) {
     else None
 
   lazy val forcedTurnAction: Option[Action] =
-    forcedAction match {
-      case Some(_: Drop) => forcedAction
-      case Some(_: Lift) => forcedAction
-      case _ if (forcedRemainingTurn && (history.forcedTurn || board.usedDice.isEmpty)) => forcedAction
-      case _ => None
-    }
+    if (forcedRemainingTurn && (history.forcedTurn || board.usedDice.isEmpty)) forcedAction
+    else None
 
   lazy val forcedRemainingTurn: Boolean =
     !validTurns.map{ t => !t.map(_.forced).contains(false)}.contains(false)
