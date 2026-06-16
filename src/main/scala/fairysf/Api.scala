@@ -199,13 +199,13 @@ object Api {
 
   private def pieceFromFSPiece(piece: FairyStockfish.Piece, gf: GameFamily): Piece =
     Piece(
-      Player.all(piece.color()),
+      Player.fromP1(piece.color() == 0),
       if (piece.promoted) Role.promotionMap(Role.sfPieceToRole((piece.id(), gf.id)))
       else Role.sfPieceToRole((piece.id(), gf.id))
     )
 
   def vectorOfPiecesToPieceArray(pieces: FairyStockfish.VectorOfPieces, gf: GameFamily): Array[Piece] =
-    pieces.get().map(pieceFromFSPiece(_, gf))
+    Array.tabulate(pieces.size().toInt)(i => pieceFromFSPiece(pieces.get(i.toLong), gf))
 
   private def convertPieceMap(
       fsPieceMap: FairyStockfish.PieceMap,

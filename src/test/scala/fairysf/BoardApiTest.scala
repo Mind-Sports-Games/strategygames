@@ -154,6 +154,29 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
     }
   }
 
+  // Regression test for a GC-related IndexOutOfBoundsException in vectorOfPiecesToPieceArray.
+  // The old code called pieces.get().map(...), which allowed the JVM to finalize the native
+  // VectorOfPieces between get() and the iteration, turning piece.color() into garbage and
+  // causing Player.all(347307856) to throw. The fix uses Array.tabulate (keeping `pieces` alive
+  // as a GC root) and Player.fromP1(piece.color() == 0) (no List.apply on a raw native int).
+  "Shogi piecesInHand player assignment" should {
+    // FEN with 9 pieces in hand: [GPSBBglpp]
+    //   P1 (uppercase): G, P, S, B, B = 5 pieces
+    //   P2 (lowercase): g, l, p, p    = 4 pieces
+    val fenWithPiecesInHand =
+      "l2g1g1nl/5sk2/3p1p1p1/p3p1p1p/1n2n4/P4PP1P/1P1sPK1P1/5sR1+r/L4+p1N1[GPSBBglpp] w - - 4 38"
+    "correctly assign P1 and P2 ownership to pieces in hand" in {
+      val position = Api.positionFromVariantNameAndFEN(variant.Shogi.key, fenWithPiecesInHand)
+      // Encourage the GC to run before the lazy piecesInHand is evaluated, increasing the
+      // likelihood that the pre-fix race between pieces.get() and GC finalization triggers.
+      System.gc()
+      System.runFinalization()
+      val inHand = position.piecesInHand
+      inHand.count(_.player == P1) === 5 and
+      inHand.count(_.player == P2) === 4
+    }
+  }
+
   "Shogi king only" should {
     val insufficientMaterialFEN = "8k/9/9/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL[LNSGGSNLBRPPPPPPPPP] b - - 0 2"
     val position                = Api.positionFromVariantNameAndFEN(variant.Shogi.key, insufficientMaterialFEN)
