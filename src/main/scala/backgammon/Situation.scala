@@ -41,6 +41,10 @@ case class Situation(board: Board, player: Player) {
     actions match {
       case Nil                                => Nil
       case h :: _ if h.toUci.uci == "endturn" => List(Nil)
+      // NOTE: a game-ending bear-off flips Lift.playerAfter to the opponent, so
+      // recursing into situationAfter would append a phantom opponent action
+      // with the die the win left unused. It's a leaf, like the endturn case.
+      case h :: t if h.lazySituationAfter.end => nextTurn(t) ::: List(List(h))
       case h :: t                             =>
         nextTurn(t) ::: nextTurn(h.lazySituationAfter.actions).map(c => h :: c)
     }
