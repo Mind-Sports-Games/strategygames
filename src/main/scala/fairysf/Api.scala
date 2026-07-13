@@ -195,7 +195,7 @@ object Api {
   }
 
   implicit def intoArray(vos: FairyStockfish.VectorOfStrings): Array[String] =
-    vos.get().map(_.getString())
+    Array.tabulate(vos.size().toInt)(i => vos.get(i.toLong).getString())
 
   private def pieceFromFSPiece(piece: FairyStockfish.Piece, gf: GameFamily): Piece =
     Piece(
@@ -229,7 +229,11 @@ object Api {
         pieceMap(Pos.fromFairy(firstWall.first()).get) = wall
         firstWall = firstWall.increment()
       }
+      // Keep fsWallMap reachable for the JIT until the loop dereferencing its iterators is done.
+      java.lang.ref.Reference.reachabilityFence(fsWallMap)
     })
+    // Keep fsPieceMap reachable for the JIT until the loop dereferencing its iterators is done.
+    java.lang.ref.Reference.reachabilityFence(fsPieceMap)
     pieceMap.toMap
   }
 
