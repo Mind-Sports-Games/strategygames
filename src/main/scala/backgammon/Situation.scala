@@ -41,6 +41,7 @@ case class Situation(board: Board, player: Player) {
     actions match {
       case Nil                                => Nil
       case h :: _ if h.toUci.uci == "endturn" => List(Nil)
+      case h :: _ if h.lazySituationAfter.end => List(List(h))
       case h :: t                             =>
         nextTurn(t) ::: nextTurn(h.lazySituationAfter.actions).map(c => h :: c)
     }
