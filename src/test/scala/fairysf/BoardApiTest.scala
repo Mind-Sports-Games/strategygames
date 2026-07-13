@@ -177,6 +177,28 @@ class FairyStockfishBoardApiTest extends Specification with ValidatedMatchers {
     }
   }
 
+  // Regression test for the same class of premature-GC bug as above, but in convertPieceMap,
+  // which backs pieceMap and is the actual code path seen crashing in production Othello
+  // (Flipello) games. fsPieceMap is only referenced textually via begin()/end(); the rest of the
+  // loop runs entirely off its iterator. Without the Reference.reachabilityFence call in
+  // convertPieceMap, escape analysis could let the GC free the underlying native map mid-loop,
+  // corrupting the Pos.fromFairy/pieceFromFSPiece reads the same way piece.color()/piece.id()
+  // were corrupted for piecesInHand.
+  "Flipello pieceMap after some moves" should {
+    // Reversi/Othello never removes pieces from the board, it only flips ownership, so the
+    // piece count on the board is always (4 starting pieces) + (number of drop moves made).
+    val dropMoves = List("P@f4", "P@d3", "P@c4", "P@f5", "P@e6", "P@f3", "P@g4", "P@e3", "P@e2")
+    val position  = Api.positionFromVariant(variant.Flipello)
+    val position2 = position.makeMoves(dropMoves)
+    "correctly read every piece on the board" in {
+      // Encourage the GC to run before the lazy pieceMap is evaluated, increasing the
+      // likelihood that the pre-fix race between begin()/end() and GC finalization triggers.
+      System.gc()
+      System.runFinalization()
+      position2.pieceMap.size === (4 + dropMoves.size)
+    }
+  }
+
   "Shogi king only" should {
     val insufficientMaterialFEN = "8k/9/9/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL[LNSGGSNLBRPPPPPPPPP] b - - 0 2"
     val position                = Api.positionFromVariantNameAndFEN(variant.Shogi.key, insufficientMaterialFEN)
