@@ -22,7 +22,7 @@ case class Undo(
     )
   }
 
-  def lazySituationAfter = situationAfter
+  lazy val lazySituationAfter = situationAfter
 
   def withMetrics(m: MoveMetrics): Undo = copy(metrics = m)
 

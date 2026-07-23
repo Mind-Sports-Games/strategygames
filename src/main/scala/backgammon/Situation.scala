@@ -13,7 +13,7 @@ case class Situation(board: Board, player: Player) {
 
   lazy val moves: Map[Pos, List[Move]] = board.variant.validMoves(this)
 
-  private val movesList: List[Move] = moves.values.flatten.toList
+  private lazy val movesList: List[Move] = moves.values.flatten.toList
 
   lazy val destinations: Map[Pos, List[Pos]] = moves.view.mapValues { _ map (_.dest) }.to(Map)
 
@@ -21,20 +21,20 @@ case class Situation(board: Board, player: Player) {
 
   def dropsByRole: Option[Map[Role, List[Pos]]] = board.variant.possibleDropsByRole(this)
 
-  def dropsAsDrops: List[Drop] = board.variant.validDrops(this)
+  lazy val dropsAsDrops: List[Drop] = board.variant.validDrops(this)
 
-  def lifts: List[Lift] = board.variant.validLifts(this)
+  lazy val lifts: List[Lift] = board.variant.validLifts(this)
 
-  def diceRolls: List[DiceRoll] = board.variant.validDiceRolls(this)
+  lazy val diceRolls: List[DiceRoll] = board.variant.validDiceRolls(this)
 
   def undos: List[Undo] = undo.toList
 
-  def endTurns: List[EndTurn] = endTurn.toList
+  lazy val endTurns: List[EndTurn] = endTurn.toList
 
-  def cubeActions: List[CubeAction] = board.variant.validCubeActions(this)
+  lazy val cubeActions: List[CubeAction] = board.variant.validCubeActions(this)
 
   // don't include undos as it is not a progressive action
-  def actions: List[Action] =
+  lazy val actions: List[Action] =
     movesList ::: dropsAsDrops ::: lifts ::: diceRolls ::: endTurns ::: cubeActions
 
   private def nextTurn(actions: List[Action]): List[List[Action]] =
@@ -90,12 +90,11 @@ case class Situation(board: Board, player: Player) {
   def canUseDice: Boolean = board.unusedDice.nonEmpty && (canMove || canDrop || canLift)
 
   def canCapture: Boolean = actions
-    .map {
+    .exists {
       case m: Move => m.capture.nonEmpty
       case d: Drop => d.capture.nonEmpty
       case _       => false
     }
-    .contains(true)
 
   private def commonSetElements[A](sets: List[Set[A]]): Set[A] =
     sets.fold(sets.headOption.getOrElse(Set())) { (a, b) => a intersect b }
@@ -191,11 +190,11 @@ case class Situation(board: Board, player: Player) {
     else None
 
   lazy val forcedTurnAction: Option[Action] =
-    if (forcedRemainingTurn && (history.forcedTurn || board.usedDice.isEmpty)) forcedAction
+    if ((history.forcedTurn || board.usedDice.isEmpty) && forcedRemainingTurn) forcedAction
     else None
 
   lazy val forcedRemainingTurn: Boolean =
-    !validTurns.map{ t => !t.map(_.forced).contains(false)}.contains(false)
+    validTurns.forall(_.forall(_.forced))
 
   def history = board.history
 

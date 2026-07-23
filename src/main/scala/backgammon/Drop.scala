@@ -25,7 +25,7 @@ case class Drop(
     )
   }
 
-  def lazySituationAfter =
+  lazy val lazySituationAfter =
     Situation(lazyFinalizeAfter, situationBefore.player)
 
   def lazyFinalizeAfter: Board = after updateHistory { h =>

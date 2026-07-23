@@ -26,7 +26,7 @@ case class EndTurn(
     )
   }
 
-  def lazySituationAfter = situationAfter
+  lazy val lazySituationAfter = situationAfter
 
   def withMetrics(m: MoveMetrics): EndTurn = copy(metrics = m)
 
