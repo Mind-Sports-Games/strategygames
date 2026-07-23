@@ -11,11 +11,17 @@ import org.specs2.mutable.Specification
   * instead of once, and this test's threshold will start failing well before the numbers get bad
   * enough to matter in production.
   *
-  * Unlike the other *PerfTest suites in this repo (which run full games and take much longer),
-  * this one only builds a handful of positions and runs in about a second, so it stays in the
-  * normal `sbt test` run rather than being opted out with args(skipAll = true).
+  * This is opted out of normal `sbt test` runs the same way the other *PerfTest suites in this
+  * repo are - wall-clock thresholds are too flaky across machines (confirmed: this failed on
+  * GitHub CI's runners despite passing comfortably locally). Gated on a system property rather
+  * than specs2's own `-- skipAll false` CLI override, which doesn't reliably negate an in-code
+  * args(skipAll = true) in this specs2 version. Run it explicitly:
+  *
+  *   sbt -Dbackgammon.perf=true "testOnly strategygames.backgammon.BackgammonForcedTurnPerfTest"
   */
 class BackgammonForcedTurnPerfTest extends Specification {
+
+  args(skipAll = sys.props.get("backgammon.perf").isEmpty)
 
   // doubles create the deepest turn trees (up to 4 sequential actions), so they're the
   // worst case for validTurns' recursive enumeration
