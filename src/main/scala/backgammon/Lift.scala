@@ -26,7 +26,7 @@ case class Lift(
     )
   }
 
-  def lazySituationAfter =
+  lazy val lazySituationAfter =
     Situation(lazyFinalizeAfter, playerAfter)
 
   def lazyFinalizeAfter: Board = afterWithScore updateHistory { h =>
