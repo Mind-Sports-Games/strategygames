@@ -11,6 +11,12 @@ import org.specs2.mutable.Specification
   * instead of once, and this test's threshold will start failing well before the numbers get bad
   * enough to matter in production.
   *
+  * nextTurn also memoizes its recursion on the resulting board position (pieces/pocketData/
+  * unusedDice/player), since different orderings of the same dice frequently transpose to an
+  * identical position. If that transposition cache regresses (e.g. keyed on something that
+  * differs per path, like the full Situation/Board including history), duplicate subtrees get
+  * walked again from scratch and this test's threshold catches that too.
+  *
   * This is opted out of normal `sbt test` runs the same way the other *PerfTest suites in this
   * repo are - wall-clock thresholds are too flaky across machines (confirmed: this failed on
   * GitHub CI's runners despite passing comfortably locally). Gated on a system property rather
@@ -57,13 +63,17 @@ class BackgammonForcedTurnPerfTest extends Specification {
   val timedIterations   = 500
 
   // Ceiling tuned against measured before/after numbers, not guessed:
-  //   post-fix (lazySituationAfter/Situation.actions as lazy val): 0.6-4.0ms avg/call
-  //   pre-fix  (same fields as plain def):                         1.6-9.2ms avg/call
-  // The doubles that matter most (2-2/3-3/4-4, highest validTurns.size/branching) separate
-  // cleanly: post-fix tops out at ~4.0ms, pre-fix bottoms out at ~7.2ms for those three. 6ms
-  // sits with ~35% margin below the pre-fix floor and ~50% margin above the post-fix ceiling,
-  // so normal machine-to-machine noise shouldn't flip the result either way.
-  val maxAvgMicrosPerCall = 6000L
+  //   memoized (nextTurn transposition cache on top of the lazy vals): 0.25-1.4ms avg/call
+  //   lazy-val fix only (no transposition cache):                      0.6-4.0ms avg/call
+  //   pre-fix (same fields as plain def):                              1.6-9.2ms avg/call
+  // The doubles that matter most (2-2/3-3/4-4, highest validTurns.size/branching, so the most
+  // transposing move orders) separate cleanly: memoized tops out at ~1.4ms, lazy-val-only
+  // bottoms out at ~7.2ms for those three. 6ms would only catch a regression all the way back
+  // to the pre-fix numbers, so it's tightened to 2.5ms - still ~1.8x margin above the memoized
+  // ceiling, but low enough to fail if the transposition cache regresses back to a plain
+  // re-walk (lazy-val-only floor is ~7.2ms for these three), so normal machine-to-machine
+  // noise shouldn't flip the result either way.
+  val maxAvgMicrosPerCall = 2500L
 
   def timeMicros[A](f: => A): (A, Long) = {
     val start  = System.nanoTime
