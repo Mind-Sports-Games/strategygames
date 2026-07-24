@@ -15,6 +15,13 @@ object GameToUciStrings {
   ): Validated[String, String] = lib match {
     case GameLogic.Go() | GameLogic.Samurai() | GameLogic.Togyzkumalak() | GameLogic.Abalone() =>
       Validated.valid(join(actionStrs))
+    case GameLogic.Backgammon()                                                                 =>
+      variant match {
+        case Variant.Backgammon(v) =>
+          strategygames.backgammon.format.GameToUciStrings(actionStrs, initialFen.map(_.toBackgammon), v)
+        case _                     =>
+          UciDump(lib, actionStrs, initialFen, variant).map(join)
+      }
     case _                                                                                      =>
       UciDump(lib, actionStrs, initialFen, variant).map(join)
   }
