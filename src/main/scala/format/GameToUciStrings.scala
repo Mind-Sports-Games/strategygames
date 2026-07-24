@@ -12,17 +12,16 @@ object GameToUciStrings {
       actionStrs: ActionStrs,
       initialFen: Option[FEN],
       variant: Variant
-  ): Validated[String, String] = lib match {
-    case GameLogic.Go() | GameLogic.Samurai() | GameLogic.Togyzkumalak() | GameLogic.Abalone() =>
+  ): Validated[String, String] = variant match {
+    case Variant.Backgammon(v)                                                             =>
+      strategygames.backgammon.format.GameToUciStrings(actionStrs, initialFen.map(_.toBackgammon), v)
+    case Variant.Chess(v) if v == strategygames.chess.variant.Standard                     =>
+      strategygames.chess.format.GameToUciStrings(actionStrs, initialFen.map(_.toChess), v)
+    case Variant.Go(_) | Variant.Samurai(_) | Variant.Togyzkumalak(_)                       =>
       Validated.valid(join(actionStrs))
-    case GameLogic.Backgammon()                                                                 =>
-      variant match {
-        case Variant.Backgammon(v) =>
-          strategygames.backgammon.format.GameToUciStrings(actionStrs, initialFen.map(_.toBackgammon), v)
-        case _                     =>
-          UciDump(lib, actionStrs, initialFen, variant).map(join)
-      }
-    case _                                                                                      =>
+    case Variant.Abalone(v) if v != strategygames.abalone.variant.GrandAbalone              =>
+      Validated.valid(join(actionStrs))
+    case _                                                                                  =>
       UciDump(lib, actionStrs, initialFen, variant).map(join)
   }
 
