@@ -17,7 +17,7 @@ object GameToUciStrings {
       strategygames.backgammon.format.GameToUciStrings(actionStrs, initialFen.map(_.toBackgammon), v)
     case Variant.Chess(v) if v == strategygames.chess.variant.Standard                     =>
       strategygames.chess.format.GameToUciStrings(actionStrs, initialFen.map(_.toChess), v)
-    case Variant.Go(_) | Variant.Samurai(_) | Variant.Togyzkumalak(_)                       =>
+    case Variant.Go(_) | Variant.Samurai(_) | Variant.Togyzkumalak(_) | Variant.FairySF(_)  =>
       Validated.valid(join(actionStrs))
     case Variant.Abalone(v) if v != strategygames.abalone.variant.GrandAbalone              =>
       Validated.valid(join(actionStrs))
