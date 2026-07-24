@@ -19,16 +19,21 @@ object CorpusGenerator {
 
   val seed: Long = 20240724L
 
-  final case class Family(key: String, lib: GameLogic)
+  final case class Family(key: String, lib: GameLogic, variant: Variant)
+
+  private def standardFamily(key: String, lib: GameLogic): Family = Family(key, lib, Variant.libStandard(lib))
 
   val families: List[Family] = List(
-    Family("chess", GameLogic.Chess()),
-    Family("go", GameLogic.Go()),
-    Family("backgammon", GameLogic.Backgammon()),
-    Family("togyzkumalak", GameLogic.Togyzkumalak()),
-    Family("samurai", GameLogic.Samurai()),
-    Family("abalone", GameLogic.Abalone()),
-    Family("fairysf", GameLogic.FairySF())
+    standardFamily("chess", GameLogic.Chess()),
+    standardFamily("go", GameLogic.Go()),
+    standardFamily("backgammon", GameLogic.Backgammon()),
+    standardFamily("togyzkumalak", GameLogic.Togyzkumalak()),
+    standardFamily("samurai", GameLogic.Samurai()),
+    standardFamily("abalone", GameLogic.Abalone()),
+    standardFamily("fairysf", GameLogic.FairySF()),
+    standardFamily("draughts", GameLogic.Draughts()),
+    standardFamily("dameo", GameLogic.Dameo()),
+    Family("loa", GameLogic.Chess(), Variant.Chess(strategygames.chess.variant.LinesOfAction))
   )
 
   final case class Size(key: String, maxPlies: Int)
@@ -120,7 +125,7 @@ object CorpusGenerator {
   }
 
   def fixtureFor(family: Family, size: Size): (CorpusFixture, StopReason) =
-    build(family.key, family.lib, Variant.libStandard(family.lib), size.maxPlies)
+    build(family.key, family.lib, family.variant, size.maxPlies)
 
   def main(args: Array[String]): Unit = {
     val checkMode = args.headOption.contains("check")

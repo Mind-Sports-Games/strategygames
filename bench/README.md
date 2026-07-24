@@ -12,13 +12,15 @@ project and enables `JmhPlugin`. Nothing here is part of the published
 call `strategygames.format.UciDump` over a game's `actionStrs` + initial FEN,
 then join the result into the single `moves` string
 (`uciMoves.map(_.mkString(",")).mkString(" ")`), handing the String to a JMH
-`Blackhole`. It is parametrized by `family` (backgammon, go, chess,
-togyzkumalak) and `size` (short, medium, long), loading one on-disk corpus
-fixture per combination in `@Setup`.
+`Blackhole`. It is parametrized by `family` (backgammon, go, chess, togyzkumalak,
+fairysf, samurai, abalone, draughts, dameo, loa) and `size` (short, medium, long),
+loading one on-disk corpus fixture per combination in `@Setup`.
 
-The class is structured so the future `GameToUciStrings` "new" path drops in as a
-second `@Benchmark` method over the same `@Setup` fields — a single JMH run then
-emits old-vs-new side by side across every fixture.
+It carries two `@Benchmark` methods over the same `@Setup` fields —
+`oldGameStateMoves` (`UciDump` + join) and `newGameStateMoves` (`GameToUciStrings`)
+— so a single JMH run emits old-vs-new side by side across every fixture. See
+`../../lila/docs/uci-perf/SUMMARY.md` for the full old-vs-new results and which
+families are fast-pathed vs delegated.
 
 ## Corpus fixtures
 
@@ -48,12 +50,20 @@ distinction.
 
 ## Tests
 
-`sbt "bench/test"` runs `CorpusFixtureSpec`, which validates the fixture codec
-against the committed corpus files only — it loads each of the 12 fixtures,
-round-trips it through `parse`/`render`, and asserts the two corrupt-input
-rejections. It plays no games, so it finishes in seconds. The committed fixture
-files are the memoization: game generation happens once, offline, when you run
-the generator below — never on every test run.
+`sbt "bench/test"` runs several specs. `CorpusFixtureSpec` validates the fixture
+codec against the committed corpus files only — it loads each default fixture
+(one per family × size), round-trips it through `parse`/`render`, and asserts the
+two corrupt-input rejections; it plays no games, so it finishes in seconds. The
+differential specs (`GameToUciStringsDifferentialSpec`, `…BackgammonSpec`,
+`…ChessSpec`) assert `GameToUciStrings` is byte-identical to `UciDump` over every
+default and non-default-variant fixture. The committed fixture files are the
+memoization: game generation happens once, offline, when you run the generator
+below — never on every test run.
+
+Non-default variants are covered by extra `<family>-<variant>-long` fixtures (all
+backgammon, go, togyzkumalak, abalone, and fairysf variants), so a variant that
+would break its family's fast path is caught differentially — as GrandAbalone was
+(multi-action grouping), which is routed to the delegate.
 
 ## Regenerate the corpus
 

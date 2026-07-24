@@ -17,7 +17,9 @@ import strategygames.variant.Variant
 @Fork(1)
 class UciDumpBenchmark {
 
-  @Param(Array("backgammon", "go", "chess", "togyzkumalak", "fairysf"))
+  @Param(
+    Array("backgammon", "go", "chess", "togyzkumalak", "fairysf", "samurai", "abalone", "draughts", "dameo", "loa")
+  )
   var family: String = ""
 
   @Param(Array("short", "medium", "long"))
