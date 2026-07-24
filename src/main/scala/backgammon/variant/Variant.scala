@@ -165,13 +165,13 @@ abstract class Variant private[variant] (
   }
 
   private def actionsContinueTurnOrEnd(actionsWithLookAhead: Iterable[(Action, Boolean)]): Boolean =
-    actionsWithLookAhead.map(_._2).toSet.contains(true)
+    actionsWithLookAhead.exists(_._2)
 
   private def actionCanContinueTurnOrEnd(action: Action): Boolean =
-    action.lazySituationAfter.canMove ||
+    action.lazySituationAfter.end ||
+      action.lazySituationAfter.canMove ||
       action.lazySituationAfter.canLift ||
-      action.lazySituationAfter.canDrop ||
-      action.lazySituationAfter.end
+      action.lazySituationAfter.canDrop
 
   private def generateMoves(situation: Situation) =
     situation.board

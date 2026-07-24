@@ -20,7 +20,7 @@ case class DiceRoll(
     )
   }
 
-  def lazySituationAfter = situationAfter
+  lazy val lazySituationAfter = situationAfter
 
   def withHistory(h: History) = copy(after = after withHistory h)
 

@@ -27,7 +27,7 @@ case class CubeAction(
     )
   }
 
-  def lazySituationAfter = situationAfter
+  lazy val lazySituationAfter = situationAfter
 
   def withMetrics(m: MoveMetrics): CubeAction = copy(metrics = m)
 
