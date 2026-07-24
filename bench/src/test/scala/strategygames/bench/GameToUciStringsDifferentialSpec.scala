@@ -29,6 +29,16 @@ class GameToUciStringsDifferentialSpec extends Specification {
       checks.reduce(_ and _)
     }
 
+    "match UciDump joined output for every non-default variant fixture" in {
+      val diverging = CorpusGenerator.variantFixtures.filterNot { vf =>
+        val fx         = CorpusFixture.load(vf.key, "long")
+        val viaUciDump = UciDump(fx.lib, fx.actionStrs, fx.initialFen, fx.variant).map(joined)
+        val viaNew     = GameToUciStrings(fx.lib, fx.actionStrs, fx.initialFen, fx.variant)
+        viaNew == viaUciDump
+      }.map(_.key)
+      diverging must beEqualTo(List.empty[String])
+    }
+
     "prove identity families' stored actionStrs equal UciDump output" in {
       val checks = for {
         family <- CorpusGenerator.families.filter(f => identityLibs.contains(f.lib))
