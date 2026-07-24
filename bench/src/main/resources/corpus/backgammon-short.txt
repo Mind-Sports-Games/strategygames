@@ -1,0 +1,8 @@
+family=backgammon
+gameLogic=6
+variant=backgammon
+initialFen=5S,3,3s,1,5s,4,2S/5s,3,3S,1,5S,4,2s[] - - w 0 0 - 1
+turns=3
+5/6,a2e1,a2f1,endturn
+2/2,a1b2,l1j1,e2g2,g2i2,endturn
+6/3,l2i2x

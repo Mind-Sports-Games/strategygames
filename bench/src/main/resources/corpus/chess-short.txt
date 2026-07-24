@@ -1,0 +1,17 @@
+family=chess
+gameLogic=0
+variant=standard
+initialFen=rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+turns=12
+g3
+Nh6
+c4
+Ng4
+h3
+g6
+a3
+Rg8
+hxg4
+Rg7
+Nc3
+a5
