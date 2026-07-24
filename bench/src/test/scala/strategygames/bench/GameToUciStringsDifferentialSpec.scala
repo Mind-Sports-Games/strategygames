@@ -9,7 +9,7 @@ import strategygames.format.{ GameToUciStrings, UciDump }
 class GameToUciStringsDifferentialSpec extends Specification {
 
   private val identityLibs: Set[GameLogic] =
-    Set(GameLogic.Go(), GameLogic.Samurai(), GameLogic.Togyzkumalak(), GameLogic.Abalone())
+    Set(GameLogic.Go(), GameLogic.Samurai(), GameLogic.Togyzkumalak(), GameLogic.Abalone(), GameLogic.FairySF())
 
   private def joined(actionStrs: ActionStrs): String =
     actionStrs.map(_.mkString(",")).mkString(" ")

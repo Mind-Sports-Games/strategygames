@@ -1,0 +1,17 @@
+family=fairysf
+gameLogic=2
+variant=shogi
+initialFen=lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL[] w - - 0 1
+turns=12
+c1c2
+g7g6
+h2f2
+h8c3
+e1e2
+b8h8
+b2c1
+c3g7B
+e3e4
+h7h6
+b3b4
+h8f8

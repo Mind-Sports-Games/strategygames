@@ -27,7 +27,8 @@ object CorpusGenerator {
     Family("backgammon", GameLogic.Backgammon()),
     Family("togyzkumalak", GameLogic.Togyzkumalak()),
     Family("samurai", GameLogic.Samurai()),
-    Family("abalone", GameLogic.Abalone())
+    Family("abalone", GameLogic.Abalone()),
+    Family("fairysf", GameLogic.FairySF())
   )
 
   final case class Size(key: String, maxPlies: Int)
@@ -66,8 +67,22 @@ object CorpusGenerator {
       GameLogic.Abalone(),
       Variant.Abalone(strategygames.abalone.variant.GrandAbalone),
       120
-    )
+    ),
+    fairysfVariant("amazons", strategygames.fairysf.variant.Amazons),
+    fairysfVariant("antiflipello", strategygames.fairysf.variant.AntiFlipello),
+    fairysfVariant("breakthroughtroyka", strategygames.fairysf.variant.BreakthroughTroyka),
+    fairysfVariant("flipello", strategygames.fairysf.variant.Flipello),
+    fairysfVariant("flipello10", strategygames.fairysf.variant.Flipello10),
+    fairysfVariant("minibreakthroughtroyka", strategygames.fairysf.variant.MiniBreakthroughTroyka),
+    fairysfVariant("minishogi", strategygames.fairysf.variant.MiniShogi),
+    fairysfVariant("minixiangqi", strategygames.fairysf.variant.MiniXiangqi),
+    fairysfVariant("octagonflipello", strategygames.fairysf.variant.OctagonFlipello),
+    fairysfVariant("shogi", strategygames.fairysf.variant.Shogi),
+    fairysfVariant("xiangqi", strategygames.fairysf.variant.Xiangqi)
   )
+
+  private def fairysfVariant(name: String, variant: strategygames.fairysf.variant.Variant): VariantFixture =
+    VariantFixture(s"fairysf-$name", GameLogic.FairySF(), Variant.FairySF(variant), 120)
 
   val defaultOutputDir = "bench/src/main/resources/corpus"
 
