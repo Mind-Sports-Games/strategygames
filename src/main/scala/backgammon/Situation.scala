@@ -37,14 +37,33 @@ case class Situation(board: Board, player: Player) {
   lazy val actions: List[Action] =
     movesList ::: dropsAsDrops ::: lifts ::: diceRolls ::: endTurns ::: cubeActions
 
-  private def nextTurn(actions: List[Action]): List[List[Action]] =
-    actions match {
-      case Nil                                => Nil
-      case h :: _ if h.toUci.uci == "endturn" => List(Nil)
-      case h :: _ if h.lazySituationAfter.end => List(List(h))
-      case h :: t                             =>
-        nextTurn(t) ::: nextTurn(h.lazySituationAfter.actions).map(c => h :: c)
-    }
+  private def nextTurn(actions: List[Action]): List[List[Action]] = {
+    case class PositionKey(
+        pieces: PieceMap,
+        pocketData: Option[PocketData],
+        unusedDice: List[Int],
+        player: Player
+    )
+    def key(s: Situation): PositionKey =
+      PositionKey(s.board.pieces, s.board.pocketData, s.board.unusedDice, s.player)
+
+    val memo = scala.collection.mutable.HashMap.empty[PositionKey, List[List[Action]]]
+
+    // unusedDice strictly shrinks by one with every action, so a position can never recur
+    // within its own subtree - getOrElseUpdate's recursive call is therefore always safe.
+    def go(actions: List[Action]): List[List[Action]] =
+      actions match {
+        case Nil                                => Nil
+        case h :: _ if h.toUci.uci == "endturn" => List(Nil)
+        case h :: _ if h.lazySituationAfter.end => List(List(h))
+        case h :: t                             =>
+          val after         = h.lazySituationAfter
+          val continuations = memo.getOrElseUpdate(key(after), go(after.actions))
+          go(t) ::: continuations.map(c => h :: c)
+      }
+
+    go(actions)
+  }
 
   lazy val validTurns: List[List[Action]] = nextTurn(actions)
 
