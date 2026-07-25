@@ -8,7 +8,7 @@ import org.openjdk.jmh.annotations.*
 import org.openjdk.jmh.infra.Blackhole
 
 import strategygames.go.Api
-import strategygames.go.engine.{ GoFen, GoGame }
+import strategygames.go.engine.{ BulkReplay, GoFen, GoGame }
 import strategygames.go.format.FEN
 import strategygames.go.variant.{ Variant => GoVariant }
 
@@ -34,6 +34,8 @@ class GoLayerInput {
     initialFenValue = startFen.value
     ucis = corpus.actionStrs.flatten.toList
     if (ucis.exists(_.startsWith("ss:"))) sys.error(s"unexpected ss action in ${size} corpus")
+    // NOTE: `Api.uciToMove` maps `ss:` onto the pass move and folds anything else onto a board point, so it
+    // is faithful only for drops and passes — which is what the guard above leaves in the corpus.
     engineMoves = ucis.map(Api.uciToMove(_, variant)).toArray
     engineStart = GoFen.parse(initialFenValue) match {
       case Right(game) => game
@@ -136,6 +138,10 @@ class GoLayerBenchmark {
   }
 
   @Benchmark
+  def bulkEngineReplay(input: GoLayerInput, bh: Blackhole): Unit =
+    bh.consume(BulkReplay.replay(input.engineStart.state, input.engineMoves).positionHash)
+
+  @Benchmark
   def seamBatchReplay(input: GoLayerInput, bh: Blackhole): Unit =
     bh.consume(
       Api
@@ -167,8 +173,20 @@ class GoLayerBenchmark {
   }
 
   @Benchmark
+  def seamPerPlyPositionsReplay(input: GoLayerInput, bh: Blackhole): Unit = {
+    val positions =
+      Api.positionsFromVariantStartingFenAndMoves(input.variant, FEN(input.initialFenValue), input.ucis)
+    bh.consume(positions.size)
+    bh.consume(positions.last.turn)
+  }
+
+  @Benchmark
   def prodReplay(input: GoLayerInput, bh: Blackhole): Unit =
     bh.consume(GoCorpusGame.replay(input.corpus, input.variant, input.corpus.actionStrs).plies)
+
+  @Benchmark
+  def prodReplayPerPly(input: GoLayerInput, bh: Blackhole): Unit =
+    bh.consume(GoCorpusGame.replayPerPly(input.corpus, input.variant, input.corpus.actionStrs).plies)
 
   @Benchmark
   def areaScoreMidGame(state: GoFreshMidGameState, bh: Blackhole): Unit =

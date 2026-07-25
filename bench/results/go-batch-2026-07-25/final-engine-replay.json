@@ -1,0 +1,328 @@
+[
+    {
+        "jmhVersion" : "1.37",
+        "benchmark" : "strategygames.bench.GoLayerBenchmark.bulkEngineReplay",
+        "mode" : "avgt",
+        "threads" : 1,
+        "forks" : 1,
+        "jvm" : "/nix/store/84yacbdsnjk9qvhzxj7964rwh3qvvah8-openjdk-25.0.2+10/lib/openjdk/bin/java",
+        "jvmArgs" : [
+        ],
+        "jdkVersion" : "25.0.2",
+        "vmName" : "OpenJDK 64-Bit Server VM",
+        "vmVersion" : "25.0.2+10",
+        "warmupIterations" : 3,
+        "warmupTime" : "2 s",
+        "warmupBatchSize" : 1,
+        "measurementIterations" : 5,
+        "measurementTime" : "2 s",
+        "measurementBatchSize" : 1,
+        "params" : {
+            "size" : "go9x9"
+        },
+        "primaryMetric" : {
+            "score" : 20.504422592104994,
+            "scoreError" : 2.2106283134415783,
+            "scoreConfidence" : [
+                18.293794278663416,
+                22.715050905546573
+            ],
+            "scorePercentiles" : {
+                "0.0" : 19.736198592966808,
+                "50.0" : 20.54462131265407,
+                "90.0" : 21.174406770689984,
+                "95.0" : 21.174406770689984,
+                "99.0" : 21.174406770689984,
+                "99.9" : 21.174406770689984,
+                "99.99" : 21.174406770689984,
+                "99.999" : 21.174406770689984,
+                "99.9999" : 21.174406770689984,
+                "100.0" : 21.174406770689984
+            },
+            "scoreUnit" : "us/op",
+            "rawData" : [
+                [
+                    19.736198592966808,
+                    20.161970021672296,
+                    20.904916262541807,
+                    21.174406770689984,
+                    20.54462131265407
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+        }
+    },
+    {
+        "jmhVersion" : "1.37",
+        "benchmark" : "strategygames.bench.GoLayerBenchmark.bulkEngineReplay",
+        "mode" : "avgt",
+        "threads" : 1,
+        "forks" : 1,
+        "jvm" : "/nix/store/84yacbdsnjk9qvhzxj7964rwh3qvvah8-openjdk-25.0.2+10/lib/openjdk/bin/java",
+        "jvmArgs" : [
+        ],
+        "jdkVersion" : "25.0.2",
+        "vmName" : "OpenJDK 64-Bit Server VM",
+        "vmVersion" : "25.0.2+10",
+        "warmupIterations" : 3,
+        "warmupTime" : "2 s",
+        "warmupBatchSize" : 1,
+        "measurementIterations" : 5,
+        "measurementTime" : "2 s",
+        "measurementBatchSize" : 1,
+        "params" : {
+            "size" : "go13x13"
+        },
+        "primaryMetric" : {
+            "score" : 38.66106907983807,
+            "scoreError" : 4.341386469556026,
+            "scoreConfidence" : [
+                34.319682610282044,
+                43.0024555493941
+            ],
+            "scorePercentiles" : {
+                "0.0" : 37.67439987945226,
+                "50.0" : 38.306322423104916,
+                "90.0" : 40.30194839710653,
+                "95.0" : 40.30194839710653,
+                "99.0" : 40.30194839710653,
+                "99.9" : 40.30194839710653,
+                "99.99" : 40.30194839710653,
+                "99.999" : 40.30194839710653,
+                "99.9999" : 40.30194839710653,
+                "100.0" : 40.30194839710653
+            },
+            "scoreUnit" : "us/op",
+            "rawData" : [
+                [
+                    37.67439987945226,
+                    39.30122246674395,
+                    40.30194839710653,
+                    37.72145223278268,
+                    38.306322423104916
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+        }
+    },
+    {
+        "jmhVersion" : "1.37",
+        "benchmark" : "strategygames.bench.GoLayerBenchmark.bulkEngineReplay",
+        "mode" : "avgt",
+        "threads" : 1,
+        "forks" : 1,
+        "jvm" : "/nix/store/84yacbdsnjk9qvhzxj7964rwh3qvvah8-openjdk-25.0.2+10/lib/openjdk/bin/java",
+        "jvmArgs" : [
+        ],
+        "jdkVersion" : "25.0.2",
+        "vmName" : "OpenJDK 64-Bit Server VM",
+        "vmVersion" : "25.0.2+10",
+        "warmupIterations" : 3,
+        "warmupTime" : "2 s",
+        "warmupBatchSize" : 1,
+        "measurementIterations" : 5,
+        "measurementTime" : "2 s",
+        "measurementBatchSize" : 1,
+        "params" : {
+            "size" : "go19x19"
+        },
+        "primaryMetric" : {
+            "score" : 92.83708394180523,
+            "scoreError" : 5.15891984140082,
+            "scoreConfidence" : [
+                87.67816410040442,
+                97.99600378320605
+            ],
+            "scorePercentiles" : {
+                "0.0" : 91.33544726027397,
+                "50.0" : 93.34725712819078,
+                "90.0" : 94.19943008524467,
+                "95.0" : 94.19943008524467,
+                "99.0" : 94.19943008524467,
+                "99.9" : 94.19943008524467,
+                "99.99" : 94.19943008524467,
+                "99.999" : 94.19943008524467,
+                "99.9999" : 94.19943008524467,
+                "100.0" : 94.19943008524467
+            },
+            "scoreUnit" : "us/op",
+            "rawData" : [
+                [
+                    91.33544726027397,
+                    93.82207448754632,
+                    94.19943008524467,
+                    93.34725712819078,
+                    91.4812107477704
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+        }
+    },
+    {
+        "jmhVersion" : "1.37",
+        "benchmark" : "strategygames.bench.GoLayerBenchmark.engineReplay",
+        "mode" : "avgt",
+        "threads" : 1,
+        "forks" : 1,
+        "jvm" : "/nix/store/84yacbdsnjk9qvhzxj7964rwh3qvvah8-openjdk-25.0.2+10/lib/openjdk/bin/java",
+        "jvmArgs" : [
+        ],
+        "jdkVersion" : "25.0.2",
+        "vmName" : "OpenJDK 64-Bit Server VM",
+        "vmVersion" : "25.0.2+10",
+        "warmupIterations" : 3,
+        "warmupTime" : "2 s",
+        "warmupBatchSize" : 1,
+        "measurementIterations" : 5,
+        "measurementTime" : "2 s",
+        "measurementBatchSize" : 1,
+        "params" : {
+            "size" : "go9x9"
+        },
+        "primaryMetric" : {
+            "score" : 39.177106984367995,
+            "scoreError" : 4.114011814755694,
+            "scoreConfidence" : [
+                35.0630951696123,
+                43.29111879912369
+            ],
+            "scorePercentiles" : {
+                "0.0" : 38.37804299775514,
+                "50.0" : 38.419084072836235,
+                "90.0" : 40.47747860930101,
+                "95.0" : 40.47747860930101,
+                "99.0" : 40.47747860930101,
+                "99.9" : 40.47747860930101,
+                "99.99" : 40.47747860930101,
+                "99.999" : 40.47747860930101,
+                "99.9999" : 40.47747860930101,
+                "100.0" : 40.47747860930101
+            },
+            "scoreUnit" : "us/op",
+            "rawData" : [
+                [
+                    40.47747860930101,
+                    38.40300723816838,
+                    38.37804299775514,
+                    38.419084072836235,
+                    40.207922003779196
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+        }
+    },
+    {
+        "jmhVersion" : "1.37",
+        "benchmark" : "strategygames.bench.GoLayerBenchmark.engineReplay",
+        "mode" : "avgt",
+        "threads" : 1,
+        "forks" : 1,
+        "jvm" : "/nix/store/84yacbdsnjk9qvhzxj7964rwh3qvvah8-openjdk-25.0.2+10/lib/openjdk/bin/java",
+        "jvmArgs" : [
+        ],
+        "jdkVersion" : "25.0.2",
+        "vmName" : "OpenJDK 64-Bit Server VM",
+        "vmVersion" : "25.0.2+10",
+        "warmupIterations" : 3,
+        "warmupTime" : "2 s",
+        "warmupBatchSize" : 1,
+        "measurementIterations" : 5,
+        "measurementTime" : "2 s",
+        "measurementBatchSize" : 1,
+        "params" : {
+            "size" : "go13x13"
+        },
+        "primaryMetric" : {
+            "score" : 109.15422080364206,
+            "scoreError" : 11.571709353824788,
+            "scoreConfidence" : [
+                97.58251144981728,
+                120.72593015746685
+            ],
+            "scorePercentiles" : {
+                "0.0" : 106.82080315086782,
+                "50.0" : 107.35198701159295,
+                "90.0" : 113.41223707189839,
+                "95.0" : 113.41223707189839,
+                "99.0" : 113.41223707189839,
+                "99.9" : 113.41223707189839,
+                "99.99" : 113.41223707189839,
+                "99.999" : 113.41223707189839,
+                "99.9999" : 113.41223707189839,
+                "100.0" : 113.41223707189839
+            },
+            "scoreUnit" : "us/op",
+            "rawData" : [
+                [
+                    111.24853136818687,
+                    106.93754541566426,
+                    106.82080315086782,
+                    107.35198701159295,
+                    113.41223707189839
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+        }
+    },
+    {
+        "jmhVersion" : "1.37",
+        "benchmark" : "strategygames.bench.GoLayerBenchmark.engineReplay",
+        "mode" : "avgt",
+        "threads" : 1,
+        "forks" : 1,
+        "jvm" : "/nix/store/84yacbdsnjk9qvhzxj7964rwh3qvvah8-openjdk-25.0.2+10/lib/openjdk/bin/java",
+        "jvmArgs" : [
+        ],
+        "jdkVersion" : "25.0.2",
+        "vmName" : "OpenJDK 64-Bit Server VM",
+        "vmVersion" : "25.0.2+10",
+        "warmupIterations" : 3,
+        "warmupTime" : "2 s",
+        "warmupBatchSize" : 1,
+        "measurementIterations" : 5,
+        "measurementTime" : "2 s",
+        "measurementBatchSize" : 1,
+        "params" : {
+            "size" : "go19x19"
+        },
+        "primaryMetric" : {
+            "score" : 393.78454312006227,
+            "scoreError" : 37.3882854410668,
+            "scoreConfidence" : [
+                356.3962576789955,
+                431.17282856112905
+            ],
+            "scorePercentiles" : {
+                "0.0" : 387.5729215268359,
+                "50.0" : 390.2775786188061,
+                "90.0" : 411.02920587630985,
+                "95.0" : 411.02920587630985,
+                "99.0" : 411.02920587630985,
+                "99.9" : 411.02920587630985,
+                "99.99" : 411.02920587630985,
+                "99.999" : 411.02920587630985,
+                "99.9999" : 411.02920587630985,
+                "100.0" : 411.02920587630985
+            },
+            "scoreUnit" : "us/op",
+            "rawData" : [
+                [
+                    411.02920587630985,
+                    390.2775786188061,
+                    387.5729215268359,
+                    389.5094242601246,
+                    390.53358531823505
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+        }
+    }
+]
+
+

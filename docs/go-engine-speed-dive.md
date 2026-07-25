@@ -58,9 +58,12 @@ fold completes (interior mutability per [ADR 0005](adr/0005-immutable-api-interi
 Hit the a-priori floor estimate exactly (104 ns/ply @19). Two lessons: clone-traffic removal scales
 with board area, so the win grows with size; and **the bench corpora never exercise the positional-
 superko probe** — the differential spec stayed green with the probe disabled across all 723 corpus
-prefixes. A constructed ko cycle (capture, two passes, forbidden recapture) now provides the
-red-green case in `GoBulkReplayDifferentialSpec`. Corpus-only differential coverage is not
-sufficient for superko; any future engine work must keep that constructed case.
+prefixes. A constructed ko cycle (capture, two passes, forbidden recapture) provides the red-green
+case; as landed it lives in `BulkReplayTest` and is the sole probe guard, since the prefix
+differential stays green with the probe neutered — the scratch still records the hashes and the
+materialized `legalMoves` stay right. Corpus-only differential coverage is not sufficient for
+superko; any future engine work must keep that constructed case and must never collapse it into the
+differential.
 
 **E3** — unpadded bitboards, bulk movegen (`empty`, one dilation pass, per-word emit), scalar rules
 only for capture candidates and eye-shaped points; hashes bit-identical to production. Bulk
@@ -113,7 +116,7 @@ untouched.
 3. **E3 bitboards** — a real ~2x engine multiplier with exact parity, but its 20x-movegen future
    requires fusing per-chain liberty bitmaps into E2's mutable scratch state. Recommend as a later
    separate effort, or fold into the batch-API work if movegen throughput ever matters (it is not
-   on the replay critical path once E4+E2 land).
+   on the replay critical path once E4+E2 land). Parked; see below.
 
 E5 is not worth landing for speed; keep `SuperkoHistory` only if E2's table wants to share the
 implementation.
@@ -139,3 +142,127 @@ implementation.
   21.9 µs, areaScore 4.3 µs, legalDrops 4.2 µs, FEN render 7.8 µs, FEN parse 5.9 µs.
 - **Combined projection**, E4 wrapper + E2 engine: ~170 µs @19x19 ≈ 570x joansala; ~63 µs @9x9
   ≈ 117x — every size clears 100x, none of it requiring bitboards.
+
+## Productionized (post-landing addendum)
+
+Everything above reports prototype numbers from throwaway worktrees. This section reports the
+**landed API** measured on 2026-07-25: E1 + the batch-replay seam (`Api.positionFromVariantStartingFenAndMoves`
+as `Replay.gameFromUciStrings`'s default) + the `validDrops` laziness fix, at branch HEAD `ba81f8ce`
+plus this section's bench additions.
+
+Machine/protocol: JDK 25.0.2 (devenv, OpenJDK 64-Bit Server VM), 32 cores, load average 5.6–7.5
+throughout (not an idle box — the wide 99.9% error bars below are dominated by that, not by variance
+in the code). JMH `-wi 3 -w 2s -i 5 -r 2s -f 1 -to 60s`, `avgt`, µs/op ± 99.9% CI. Corpora:
+go9x9 120 turns, go13x13 200, go19x19 400, go9x9superko 23 (`ss:`-terminated). Raw JSON in
+`bench/results/go-batch-2026-07-25/`: `final-wrapper-replay.json`, `final-seam-replay.json`,
+`final-seam-piecemap.json`, `final-engine-replay.json`, `final-superko-replay.json`,
+`final-movegen-consumer.json`, `final-wrapper-replay-gc.json`.
+
+### (a) Full-game `Game`-producing replay — the headline
+
+`final-wrapper-replay.json`. `prodReplay` = `Replay.gameFromUciStrings` (batch default);
+`prodReplayPerPly` = `Replay.gameFromUciStringsPerPly` (the retained old path, same run).
+
+| µs/op                   | go9x9              | go13x13            | go19x19              |
+| ----------------------- | ------------------ | ------------------ | -------------------- |
+| batch default           | **72.701 ± 23.525** | **122.036 ± 5.862** | **277.589 ± 51.364** |
+| per-ply (retained path) | 331.937 ± 79.274   | 648.235 ± 75.051   | 2127.302 ± 622.382   |
+| joansala baseline       | 7395               | 24313              | 96385                |
+| **batch vs joansala**   | **102x**           | **199x**           | **347x**             |
+| per-ply vs joansala     | 22x                | 38x                | 45x                  |
+| batch vs per-ply        | 4.6x               | 5.3x               | 7.7x                 |
+
+The `ss:`-terminated corpus, where the batch path pays two folds and two pieceMap scans
+(`final-superko-replay.json`, `GoEngineBenchmark` at `size=go9x9superko`, no joansala denominator):
+
+| µs/op        | go9x9superko (23 turns) |
+| ------------ | ----------------------- |
+| batch        | 43.226 ± 4.775          |
+| per-ply      | 52.816 ± 17.947         |
+| batch vs per-ply | 1.2x                |
+
+This row is a one-shot: it was taken by temporarily extending `GoReplayInput`'s `@Param` with
+`go9x9superko` and adding a per-ply twin to `GoEngineBenchmark`. Both were removed again in the
+review fixups — the committed `@Param` lists stay as order 06 decided, and `prodReplayPerPly` in
+`GoLayerBenchmark` is the single committed home for the per-ply comparison. Reproducing this row
+means re-extending the param list by hand.
+
+### (b) Seam level — batch, per-ply positions, per-ply
+
+`final-seam-replay.json` + `final-seam-piecemap.json`. All four consume only `.turn`/`.size`
+except `seamPerPlyPieceMapReplay`, which forces a pieceMap every ply.
+
+| µs/op                       | go9x9            | go13x13           | go19x19           |
+| --------------------------- | ---------------- | ----------------- | ----------------- |
+| `seamBatchReplay`           | 32.045 ± 5.590   | 61.433 ± 9.527    | 132.594 ± 25.270  |
+| `seamPerPlyPositionsReplay` | 55.270 ± 3.697   | 142.665 ± 54.509  | 486.454 ± 48.913  |
+| `seamPerPlyReplay`          | 70.372 ± 14.964  | 155.640 ± 53.521  | 477.733 ± 44.249  |
+| `seamPerPlyPieceMapReplay`  | 105.081 ± 9.624  | 200.868 ± 12.355  | 584.538 ± 66.138  |
+| positions vs per-ply        | 1.27x            | 1.09x             | 0.98x             |
+| positions vs per-ply+pieceMap | 1.90x          | 1.41x             | 1.20x             |
+
+The per-ply positions entry publishes every intermediate `Position`, so it must keep the immutable
+per-ply `GoGame.play` fold; it only removes per-ply string planning and FEN re-parse. That win
+shrinks with board area and is gone by 19x19 — its value there is the unforced pieceMap (1.20x),
+not the fold.
+
+### (c) Engine fold
+
+`final-engine-replay.json`. `bulkEngineReplay` = `BulkReplay.replay` (mutate-and-freeze scratch);
+`engineReplay` = the immutable `GoGame.play` loop.
+
+| µs/op               | go9x9          | go13x13         | go19x19         |
+| ------------------- | -------------- | --------------- | --------------- |
+| `bulkEngineReplay`  | 20.504 ± 2.211 | 38.661 ± 4.341  | 92.837 ± 5.159  |
+| `engineReplay`      | 39.177 ± 4.114 | 109.154 ± 11.572 | 393.785 ± 37.388 |
+| bulk vs immutable   | 1.9x           | 2.8x            | 4.2x            |
+| ns/ply, bulk        | 171            | 193             | 232             |
+
+Not comparable to E2's 104 ns/ply @19: the landed `BulkReplay.replay` includes the terminal
+`fromStoneOwners` + `withReplayHistory` materialization that E2 measured as a separate benchmark,
+and this box is loaded where E2's was quiet.
+
+### (d) Movegen consumer surface
+
+`final-movegen-consumer.json`, mid-game situation. The replica is what `validDrops` used to do
+(apply every candidate drop eagerly); prod now defers `afterDrop` into a `LazyBoardAfter` thunk.
+
+| µs/op                                  | go9x9          | go13x13         | go19x19          |
+| -------------------------------------- | -------------- | --------------- | ---------------- |
+| `eagerlyAppliedValidDropsReplicaMidGame` | 39.135 ± 2.562 | 202.166 ± 27.420 | 794.011 ± 106.099 |
+| `prodValidDropsMidGame`                | 1.935 ± 0.750  | 5.926 ± 1.454   | 13.921 ± 3.802   |
+| `prodDropsByRoleMidGame`               | 2.791 ± 0.721  | 7.840 ± 1.407   | 17.865 ± 3.943   |
+| validDrops vs replica                  | 20x            | 34x             | 57x              |
+| dropsByRole vs replica                 | 14x            | 26x             | 44x              |
+
+### (e) Allocation, headline rows
+
+`final-wrapper-replay-gc.json` (`-prof gc`, same protocol; its timings — 71.163 / 125.549 / 285.211
+batch, 314.524 / 690.637 / 2024.866 per-ply — corroborate (a)).
+
+| B/op                    | go9x9       | go13x13     | go19x19     |
+| ----------------------- | ----------- | ----------- | ----------- |
+| batch default           | 174,249     | 282,548     | 566,081     |
+| per-ply (retained path) | 1,086,081   | 2,549,019   | 8,573,746   |
+| reduction               | 6.2x        | 9.0x        | 15.2x       |
+
+### Verdict
+
+Sanity gate passed with room: 19x19 batch full-game replay is **277.6 µs**, better than E4's 594 µs
+prototype and inside the 170–250 µs projection's order of magnitude. The prototype paid `Replay`'s
+own per-ply planner; production hoists parsing into the seam, so the wrapper does one index walk and
+one materialization. Production replay now clears 100x joansala at every board size (102x / 199x /
+347x) and the engine fold, not the wrapper, is the remaining floor: at 19x19 the fold is 92.8 µs of
+the 277.6 µs path (33%).
+
+### E3 stays parked
+
+E3's bitboard core does not land. Under copy-per-move it is worth 2.2x on movegen @19x19 — real, but
+the tier it was chased for (20x-class movegen) needs incrementally maintained per-chain liberty
+bitmaps, and maintaining those across a copy-per-move state blows the clone budget
+[ADR 0005](adr/0005-immutable-api-interior-mutability.md) sets. They belong fused into the mutable
+scratch state, which is a different engine, not a faster one. Revisit if go movegen throughput ever
+appears on a production critical path; replay is not that path now that batch replay has landed, and
+the movegen consumers that exist are wrapper-dominated. The measured tiers a movegen-bound consumer
+could then cash, and the order to take them in, are recorded in
+[ADR 0018](adr/0018-engine-movegen-options-parked.md).

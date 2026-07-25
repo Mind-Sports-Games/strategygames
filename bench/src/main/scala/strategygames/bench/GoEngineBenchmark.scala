@@ -69,9 +69,28 @@ object GoCorpusGame {
   }
 
   def replay(corpus: GoCorpusGame, variant: GoVariant, turns: ActionStrs): Game =
-    Replay.gameFromUciStrings(turns, corpus.activePlayerAfter(turns.size), corpus.initialFen, variant) match {
+    replayedOrFail(
+      Replay.gameFromUciStrings(turns, corpus.activePlayerAfter(turns.size), corpus.initialFen, variant),
+      "batch",
+      variant
+    )
+
+  def replayPerPly(corpus: GoCorpusGame, variant: GoVariant, turns: ActionStrs): Game =
+    replayedOrFail(
+      Replay
+        .gameFromUciStringsPerPly(turns, corpus.activePlayerAfter(turns.size), corpus.initialFen, variant),
+      "per-ply",
+      variant
+    )
+
+  private def replayedOrFail(
+      replayed: Validated[String, Game],
+      pathName: String,
+      variant: GoVariant
+  ): Game =
+    replayed match {
       case Validated.Valid(game)    => game
-      case Validated.Invalid(error) => sys.error(s"go replay failed for ${variant.key}: ${error}")
+      case Validated.Invalid(error) => sys.error(s"go ${pathName} replay failed for ${variant.key}: ${error}")
     }
 }
 
