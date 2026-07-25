@@ -1,6 +1,9 @@
 # 0001 — Ship the pure-Scala Go engine as parallel variants (ids 5/6/7)
 
-**Status:** Accepted (2026-07-24)
+**Status:** Accepted (2026-07-24). Amended (2026-07-25, 0015): the parallel run is ending —
+"existing variants keep the joansala engine untouched" held only for the proving phase.
+0015 flips ids 1/2/4 onto the scala engine; ids 5/6/7 are renamed `go9x9Joansala`/
+`go13x13Joansala`/`go19x19Joansala` as a transitional oracle and then deleted with joansala.
 
 ## Context
 

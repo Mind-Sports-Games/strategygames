@@ -1,6 +1,9 @@
 # 0007 — Rules-correct Go over bug-for-bug joansala parity
 
-**Status:** Accepted (2026-07-24)
+**Status:** Accepted (2026-07-24). Amended (2026-07-25, 0015): "migrating games between the
+families is out of scope" is settled — there is no migration. 0015 flips ids 1/2/4 onto the
+scala engine, so every divergence recorded under this ADR now applies to the canonical
+variants and their stored games.
 
 ## Context
 

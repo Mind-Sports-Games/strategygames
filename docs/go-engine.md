@@ -79,10 +79,15 @@ touches, and nothing here should be pre-refactored before that day:
   `Variant.usesScalaEngine` and its two dispatch sites collapse.
 - `go/format/FEN.scala`: the `engineFen` double-digit shim (joansala's reader cannot take
   multi-digit runs) and the `variant` size inference, which can then name scala variants.
-- Variant identity: whether the old ids 1/2/4 flip to the scala engine (a retroactive rules
-  change for stored games — every [ADR 0007](adr/0007-rules-correct-over-joansala-parity.md)
-  divergence applies) or die and migrate app-side. Recorded, undecided, in
-  [ADR 0015](adr/0015-variant-identity-when-joansala-retires.md).
+- Variant identity: decided in
+  [ADR 0015](adr/0015-variant-identity-when-joansala-retires.md) — the old ids 1/2/4 flip
+  to the scala engine (a retroactive rules change for stored games — every
+  [ADR 0007](adr/0007-rules-correct-over-joansala-parity.md) divergence applies), with
+  joansala parked transitionally as `go9x9Joansala`/`go13x13Joansala`/`go19x19Joansala`
+  (ids 5/6/7) as the differential oracle until the removal commit. The flip also closes the
+  ko-field round-trip loss: `GoFen.render` emits the real ko coordinate when a simple ko is
+  active (see the 0015 amendment to
+  [ADR 0010](adr/0010-fen-fields-that-do-not-round-trip.md)).
 - Top-level defaults: `strategygames.variant.Variant`'s two `GameLogic.Go()` defaults and
   `GameCollection`'s `defaultVariant`, all currently `Go19x19`.
 - Tests: the differential and oracle suites lose their oracle and die or re-point; the

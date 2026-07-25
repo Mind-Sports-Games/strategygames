@@ -1,7 +1,12 @@
 # 0010 — Two FEN fields deliberately do not round-trip: the ko point and handicap scores
 
 **Status:** Accepted (2026-07-24). Amended (2026-07-25): a parsed ko point is now enforced
-by `GoState.isLegal`.
+by `GoState.isLegal`. Amended (2026-07-25, 0015): the joansala validator whose literal-`-`
+regex forced the ko field to `-` dies with the engine, so `GoFen.render` now emits the real
+ko coordinate when a simple ko is active (`-` otherwise) and the `GoFen`-based `validateFEN`
+accepts it, using `go.Pos`'s a–s alphabet including `i`; the "always writes `-`" decision
+below is superseded for the post-flip engine. Stored FENs always carried `-`, so parsing old
+data is unaffected.
 
 ## Context
 

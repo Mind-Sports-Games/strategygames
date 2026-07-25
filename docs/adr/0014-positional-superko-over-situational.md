@@ -1,6 +1,9 @@
 # 0014 — Positional superko (PSK), not situational superko (SSK)
 
-**Status:** Accepted (2026-07-24)
+**Status:** Accepted (2026-07-24). Amended (2026-07-25, 0015): the "future migration of the
+old variants" exposure below is now accepted fact — 0015 flips ids 1/2/4 onto the scala
+engine, so a stored joansala game containing an opposite-player board repeat will no longer
+replay on the canonical variants.
 
 ## Context
 
