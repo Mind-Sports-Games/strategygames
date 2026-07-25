@@ -2,16 +2,18 @@ package strategygames.go
 
 import strategygames.format.{ FEN => StratFen, Forsyth => StratForsyth, Uci => StratUci }
 import strategygames.variant.{ Variant => StratVariant }
-import variant.Go9x9
+import variant.Go9x9Joansala
 
+// JOANSALA ORACLE: pinned to the parked go9x9Joansala variant; deleted with the engine in Phase C.
+// The canonical-variant twin lives in GoScalaVariantIsometryTest.
 class Go9x9VariantTestIsometry extends strategygames.chess.ChessTest {
   "Test Every move can be loaded from fen" in {
-    val gameFamily   = Go9x9.gameFamily
+    val gameFamily   = Go9x9Joansala.gameFamily
     val lib          = gameFamily.gameLogic
-    val stratVariant = StratVariant(lib, Go9x9.key).get
+    val stratVariant = StratVariant(lib, Go9x9Joansala.key).get
 
     // captures small full game with deadstones
-    _testEveryMoveLoadFenIsometry(lib, StratFen(lib, Go9x9.initialFen.value), stratVariant)(
+    _testEveryMoveLoadFenIsometry(lib, StratFen(lib, Go9x9Joansala.initialFen.value), stratVariant)(
       List(
         "s@g3",
         "s@c7",
@@ -29,7 +31,7 @@ class Go9x9VariantTestIsometry extends strategygames.chess.ChessTest {
         "pass",
         "ss:i1"
       ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) .toOption must beSome.like { case gameData =>
+    ).toOption must beSome.like { case gameData =>
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
       fen1 === fen2
@@ -38,12 +40,12 @@ class Go9x9VariantTestIsometry extends strategygames.chess.ChessTest {
 
   // Updated 27/02/2026 Superko Rule: s@g3 repeats a previous position, so the move is invalid
   "Test go repetition move is invalid" in {
-    val gameFamily   = Go9x9.gameFamily
+    val gameFamily   = Go9x9Joansala.gameFamily
     val lib          = gameFamily.gameLogic
-    val stratVariant = StratVariant(lib, Go9x9.key).get
+    val stratVariant = StratVariant(lib, Go9x9Joansala.key).get
 
     // go with 3 kos
-    _testEveryMoveLoadFenIsometry(lib, StratFen(lib, Go9x9.initialFen.value), stratVariant)(
+    _testEveryMoveLoadFenIsometry(lib, StratFen(lib, Go9x9Joansala.initialFen.value), stratVariant)(
       List(
         "s@b8",
         "s@b7",

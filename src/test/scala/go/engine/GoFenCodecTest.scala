@@ -91,6 +91,14 @@ class GoFenCodecTest extends Specification {
         "9/9/9/9/9/9/9/9/1s7[SSSSSSSSSSssssssssss] w - 0 865 3 1 55 1 4"
       reparsed(fen) === fen
     }
+    "emit a live simple ko coordinate and round trip it" in {
+      val fen  = renderAfter(19, nineteenByNineKomi, List("c1", "c4", "b2", "b3", "d2", "d3", "c3", "c2"))
+      val game = GoFen.parse(fen).toOption
+      (fen.split(' ')(2) === "c3") and
+        (game.map(_.state.simpleKoMove) === Some(Some(engineMove(19, "c3")))) and
+        (game.map(_.state.isLegal(engineMove(19, "c3"))) === Some(false)) and
+        (reparsed(fen) === fen)
+    }
     "read the legacy nine field form and emit the ten field form" in {
       reparsed("9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 1") === Go9x9.initialFen.value
     }

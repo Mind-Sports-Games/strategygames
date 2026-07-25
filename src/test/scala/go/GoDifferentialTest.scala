@@ -9,19 +9,27 @@ import org.specs2.mutable.Specification
 
 import strategygames.{ Player, Status }
 import strategygames.go.format.{ FEN, Forsyth, Uci }
-import strategygames.go.variant.{ Go13x13, Go13x13Scala, Go19x19, Go19x19Scala, Go9x9, Go9x9Scala, Variant }
+import strategygames.go.variant.{
+  Go13x13,
+  Go13x13Joansala,
+  Go19x19,
+  Go19x19Joansala,
+  Go9x9,
+  Go9x9Joansala,
+  Variant
+}
 
 class GoDifferentialTest extends Specification {
 
   private case class ReplayCase(
       label: String,
-      joansalaVariant: Variant,
+      scalaVariant: Variant,
       initialFen: Option[FEN],
       actions: List[String],
       compareWrapperDrops: Boolean = false,
       superkoActionsByPly: Map[Int, List[Int]] = Map.empty
   ) {
-    def scalaVariant: Variant = scalaTwinOf(joansalaVariant)
+    def joansalaVariant: Variant = joansalaTwinOf(scalaVariant)
   }
 
   private case class PositionFacts(
@@ -35,14 +43,22 @@ class GoDifferentialTest extends Specification {
       winner: Option[Player]
   )
 
-  private val scalaTwinOf: Map[Variant, Variant] =
-    Map(Go9x9 -> Go9x9Scala, Go13x13 -> Go13x13Scala, Go19x19 -> Go19x19Scala)
+  private val joansalaTwinOf: Map[Variant, Variant] =
+    Map(Go9x9 -> Go9x9Joansala, Go13x13 -> Go13x13Joansala, Go19x19 -> Go19x19Joansala)
+
+  // NOTE: the ko field is the one place the two emitters legitimately differ — the scala engine
+  // writes the live simple-ko coordinate, joansala only ever writes `-` (ADR 0010, as amended) —
+  // so it is normalised out of the comparison here and pinned by its own example below.
+  private def withKoFieldNormalised(fen: String): String = {
+    val fields = fen.split(' ')
+    if (fields.length > 2) fields.updated(2, "-").mkString(" ") else fen
+  }
 
   private def factsOf(game: Game, withWrapperDrops: Boolean): PositionFacts = {
     val position = game.situation.board.apiPosition
     val ended    = game.situation.end
     PositionFacts(
-      wrapperFen = Forsyth.>>(game).value,
+      wrapperFen = withKoFieldNormalised(Forsyth.>>(game).value),
       wrapperDrops =
         if (withWrapperDrops) game.situation.drops.fold(List.empty[String])(_.map(_.key).sorted)
         else Nil,
@@ -135,8 +151,7 @@ class GoDifferentialTest extends Specification {
 
   private def nextSeed(seed: Long): Long = seed * 6364136223846793005L + 1442695040888963407L
 
-  private def generatedCase(joansalaVariant: Variant, seed: Long, dropCount: Int): ReplayCase = {
-    val scalaVariant              = scalaTwinOf(joansalaVariant)
+  private def generatedCase(scalaVariant: Variant, seed: Long, dropCount: Int): ReplayCase = {
     val (drops, finalPosition, _) =
       (1 to dropCount).foldLeft((List.empty[String], Api.positionFromVariant(scalaVariant), seed)) {
         case ((played, position, state), _) =>
@@ -151,8 +166,8 @@ class GoDifferentialTest extends Specification {
       .sorted
       .take(2)
     ReplayCase(
-      s"generated-${joansalaVariant.key}-${seed}[${dropCount}]",
-      joansalaVariant,
+      s"generated-${scalaVariant.key}-${seed}[${dropCount}]",
+      scalaVariant,
       None,
       drops ++ List("pass", "pass", s"ss:${deadStones.mkString(",")}")
     )
@@ -265,8 +280,8 @@ class GoDifferentialTest extends Specification {
 
   "the empty board" should {
     "score its single stoneless region to white in joansala and to nobody in the scala engine" in {
-      val joansala = List(Go9x9, Go13x13, Go19x19).map(Api.positionFromVariant)
-      val scala    = List(Go9x9Scala, Go13x13Scala, Go19x19Scala).map(Api.positionFromVariant)
+      val joansala = List(Go9x9Joansala, Go13x13Joansala, Go19x19Joansala).map(Api.positionFromVariant)
+      val scala    = List(Go9x9, Go13x13, Go19x19).map(Api.positionFromVariant)
       (joansala.map(p => (p.p1Score, p.p2Score)) === List((0.0, 86.5), (0.0, 176.5), (0.0, 368.5))) and
         (scala.map(p => (p.p1Score, p.p2Score)) === List((0.0, 5.5), (0.0, 7.5), (0.0, 7.5))) and
         (scala.map(_.fen) === List(Go9x9.initialFen, Go13x13.initialFen, Go19x19.initialFen)) and
@@ -276,8 +291,8 @@ class GoDifferentialTest extends Specification {
 
   "the raw engine fen" should {
     val played   = scriptedNineByNine ++ List("pass", "pass")
-    val joansala = Api.positionFromVariantAndMoves(Go9x9, played)
-    val scala    = Api.positionFromVariantAndMoves(Go9x9Scala, played)
+    val joansala = Api.positionFromVariantAndMoves(Go9x9Joansala, played)
+    val scala    = Api.positionFromVariantAndMoves(Go9x9, played)
 
     "hardcode captures in joansala and report them in the scala engine" in {
       (rawFenFields(joansala).slice(5, 7).toList === List("0", "0")) and
@@ -289,31 +304,32 @@ class GoDifferentialTest extends Specification {
     }
 
     "still produce identical wrapper fens, which overwrite both fields" in {
-      val joansalaGame = playAll(Game(Go9x9), played)
-      val scalaGame    = playAll(Game(Go9x9Scala), played)
+      val joansalaGame = playAll(Game(Go9x9Joansala), played)
+      val scalaGame    = playAll(Game(Go9x9), played)
       (Forsyth.>>(joansalaGame) === Forsyth.>>(scalaGame)) and
         (Forsyth.>>(scalaGame).value.split(' ').slice(5, 7).toList === List("0", "1")) and
         (Forsyth.>>(scalaGame).value.split(' ')(8) === "2")
     }
 
-    "omit the ko point in both engines, because validateFEN only accepts a dash there" in {
-      val joansalaKo = Api.positionFromVariantAndMoves(Go19x19, koPointNineteen)
-      val scalaKo    = Api.positionFromVariantAndMoves(Go19x19Scala, koPointNineteen)
+    "omit the ko point in joansala and state the forbidden coordinate in the scala engine" in {
+      val joansalaKo = Api.positionFromVariantAndMoves(Go19x19Joansala, koPointNineteen)
+      val scalaKo    = Api.positionFromVariantAndMoves(Go19x19, koPointNineteen)
       (joansalaKo.legalDrops.contains(40) === false) and
         (scalaKo.legalDrops.contains(40) === false) and
         (rawFenFields(joansalaKo)(2) === "-") and
-        (rawFenFields(scalaKo)(2) === "-") and
-        (Api.validateFEN(joansalaKo.fenString) === true) and
-        (Api.validateFEN(scalaKo.fenString) === true)
+        (rawFenFields(scalaKo)(2) === "c3") and
+        (Forsyth.>>(playAll(Game(Go19x19), koPointNineteen)).value.split(' ')(2) === "c3") and
+        (Api.validateFEN(Go19x19Joansala, joansalaKo.fenString) === true) and
+        (Api.validateFEN(Go19x19, scalaKo.fenString) === true)
     }
   }
 
   "a handicap fen" should {
     "lose its score fields to a rescore in both engines alike" in {
-      val joansalaFen = Go9x9.fenFromSetupConfig(4, 55)
-      val scalaFen    = Go9x9Scala.fenFromSetupConfig(4, 55)
-      val joansala    = Api.positionFromVariantNameAndFEN(Go9x9.key, joansalaFen.value)
-      val scala       = Api.positionFromVariantNameAndFEN(Go9x9Scala.key, scalaFen.value)
+      val joansalaFen = Go9x9Joansala.fenFromSetupConfig(4, 55)
+      val scalaFen    = Go9x9.fenFromSetupConfig(4, 55)
+      val joansala    = Api.positionFromVariantNameAndFEN(Go9x9Joansala.key, joansalaFen.value)
+      val scala       = Api.positionFromVariantNameAndFEN(Go9x9.key, scalaFen.value)
       (joansalaFen === scalaFen) and
         (joansalaFen.value.split(' ').slice(3, 5).toList === List("40", "55")) and
         (joansala.fen === scala.fen) and
@@ -322,8 +338,8 @@ class GoDifferentialTest extends Specification {
   }
 
   "a superko position" should {
-    val joansala = Api.positionFromVariantAndMoves(Go9x9, superkoNineByNine)
-    val scala    = Api.positionFromVariantAndMoves(Go9x9Scala, superkoNineByNine)
+    val joansala = Api.positionFromVariantAndMoves(Go9x9Joansala, superkoNineByNine)
+    val scala    = Api.positionFromVariantAndMoves(Go9x9, superkoNineByNine)
     val repeat   = Api.uciToMove("s@d6", Go9x9)
 
     "be reported by joansala only after the move, and forbidden up front by the scala engine" in {
@@ -334,8 +350,8 @@ class GoDifferentialTest extends Specification {
     }
 
     "leave the wrapper with the same drops either way" in {
-      val joansalaGame = playAll(Game(Go9x9), superkoNineByNine)
-      val scalaGame    = playAll(Game(Go9x9Scala), superkoNineByNine)
+      val joansalaGame = playAll(Game(Go9x9Joansala), superkoNineByNine)
+      val scalaGame    = playAll(Game(Go9x9), superkoNineByNine)
       (joansalaGame.situation.drops.map(_.map(_.key).sorted)
         === scalaGame.situation.drops.map(_.map(_.key).sorted)) and
         (joansalaGame.situation.drops.map(_.map(_.key).contains("d6")) === Some(false))
@@ -343,8 +359,8 @@ class GoDifferentialTest extends Specification {
   }
 
   "a board recreated with the opposite player to move" should {
-    val joansala = playAll(Game(Go9x9), oppositeParityRepeatNineByNine)
-    val scala    = playAll(Game(Go9x9Scala), oppositeParityRepeatNineByNine)
+    val joansala = playAll(Game(Go9x9Joansala), oppositeParityRepeatNineByNine)
+    val scala    = playAll(Game(Go9x9), oppositeParityRepeatNineByNine)
 
     "stay playable in joansala and be forbidden by the positional superko of the scala engine" in {
       (joansala.situation.board.apiPosition.legalDrops.contains(oppositeParityRepeatDrop) === true) and
@@ -355,7 +371,7 @@ class GoDifferentialTest extends Specification {
 
     "repeat, in joansala, the board of four plies earlier under the other player" in {
       val repeated = playAll(joansala, List("s@e7"))
-      val earlier  = playAll(Game(Go9x9), oppositeParityRepeatNineByNine.take(11))
+      val earlier  = playAll(Game(Go9x9Joansala), oppositeParityRepeatNineByNine.take(11))
       (boardFieldOf(repeated) === boardFieldOf(earlier)) and
         (repeated.situation.player === P1) and
         (earlier.situation.player === P2) and
@@ -366,15 +382,15 @@ class GoDifferentialTest extends Specification {
   "an illegal action fed past the legality check" should {
     "be replayed blindly by joansala and rejected by the scala engine" in {
       val occupied = List("s@e5", "s@e5")
-      (Api.positionFromVariant(Go9x9).makeMovesNoLegalCheck(occupied).pieceMap.size === 1) and
-        (Api.positionFromVariant(Go9x9Scala).makeMovesNoLegalCheck(occupied) must throwAn[Exception])
+      (Api.positionFromVariant(Go9x9Joansala).makeMovesNoLegalCheck(occupied).pieceMap.size === 1) and
+        (Api.positionFromVariant(Go9x9).makeMovesNoLegalCheck(occupied) must throwAn[Exception])
     }
   }
 
   "a finished game" should {
     val played   = scriptedNineByNine ++ List("pass", "pass", "ss:i1")
-    val joansala = playAll(Game(Go9x9), played)
-    val scala    = playAll(Game(Go9x9Scala), played)
+    val joansala = playAll(Game(Go9x9Joansala), played)
+    val scala    = playAll(Game(Go9x9), played)
 
     "keep listing raw engine actions in joansala and list none in the scala engine" in {
       (joansala.situation.end === true) and

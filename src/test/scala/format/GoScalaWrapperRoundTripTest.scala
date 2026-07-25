@@ -3,13 +3,13 @@ package strategygames.format
 import org.specs2.mutable.Specification
 
 import strategygames.{ ActionStrs, GameLogic }
-import strategygames.go.variant.Go9x9Scala
+import strategygames.go.variant.Go9x9
 import strategygames.variant.Variant
 
 private object GoScalaWrapperRoundTripFixture {
 
   val lib: GameLogic   = GameLogic.Go()
-  val variant: Variant = Variant.Go(Go9x9Scala)
+  val variant: Variant = Variant.Go(Go9x9)
   val gameFamily       = variant.gameFamily
 
   val actionStrs: ActionStrs = Vector(

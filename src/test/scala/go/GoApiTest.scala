@@ -8,22 +8,19 @@ class GoApiTest extends Specification with ValidatedMatchers {
   "Go initial fen" should {
     val fen = variant.Go19x19.initialFen.value
     "be valid" in {
-      Api.validateFEN(fen) === true
+      Api.validateFEN(variant.Go19x19, fen) === true
     }
-    // println(fen.matches(Api.fenRegex))
 
     val fen2 =
       "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1SSss14[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 0 1"
     "true due to allowing >1 for multiple empty spaces" in {
-      Api.validateFEN(fen2) === true
+      Api.validateFEN(variant.Go19x19, fen2) === true
     }
-    // println(fen2.matches(Api.fenRegex))
 
     val fen4 =
       "19/19/19/19/19/19/19/19/19/19/19/19/SsSsSsSsSsSsSsSsSsSs/19/19/19/19/19/19[SSSSSSSSSSssssssssss] w - 0 75 0 0 75 0 1"
-    // println(fen4.matches(Api.fenRegex))
     "false due to more stone in row than width" in {
-      Api.validateFEN(fen4) === false
+      Api.validateFEN(variant.Go19x19, fen4) === false
     }
 
     val game = Api.position(variant.Go19x19)
@@ -143,6 +140,8 @@ class GoApiTest extends Specification with ValidatedMatchers {
     }
   }
 
+  // JOANSALA ORACLE: exercises Api.positionFromFen/goBoardFromFen, which always answer the parked
+  // joansala engine; deleted with it in Phase C.
   "Piece map of Go game" should {
     val game                     = Api.position(variant.Go19x19)
     val newGame                  = game.makeMoves(List(0, 6, 3, 7, 4).map(Api.moveToUci(_, variant.Go19x19)))
@@ -208,17 +207,17 @@ class GoApiTest extends Specification with ValidatedMatchers {
     }
   }
 
-  // todo need different example?
-  // "go game with a ko point" should {
-  //   val game    = Api.position(variant.Go19x19)
-  //   val newGame = game.makeMoves(List(2, 59, 20, 39, 22, 41, 40, 21).map(Api.moveToUci(_, variant.Go19x19)))
-  //   val fen     = newGame.fenString
-  //   // println(newGame.toBoard)
-  //   // println(fen)
-  //   "show up in fen" in {
-  //     fen.split(" ").lift(2) === Some(40)
-  //   }
-  // }
+  "go game with a ko point" should {
+    val koGame = Api.position(variant.Go19x19)
+    val withKo =
+      koGame.makeMoves(List(2, 59, 20, 39, 22, 41, 40, 21).map(Api.moveToUci(_, variant.Go19x19)))
+    "show up in the fen as the forbidden coordinate" in {
+      withKo.fenString.split(" ").lift(2) === Some("c3")
+    }
+    "still validate as a fen" in {
+      Api.validateFEN(variant.Go19x19, withKo.fenString) === true
+    }
+  }
 
   "go game with a ko point" should {
     val game    = Api.position(variant.Go19x19)
@@ -241,15 +240,21 @@ class GoApiTest extends Specification with ValidatedMatchers {
     val game    = Api.position(variant.Go9x9)
     val newGame =
       game.makeMoves(
-        List(40, 49, 48, 58, 57, 76, 67, 68, 59, 66, 50, 81, 67, 49, 81, 58).map(
+        List(40, 49, 48, 58, 57, 76, 67, 68, 59, 66, 50, 81, 67, 49, 81).map(
           Api.moveToUci(_, variant.Go9x9)
         )
       )
-    "allow move in former ko point" in {
-      newGame.legalDrops.contains(67) === true
+    "accept the multi stone recapture during the replay" in {
+      newGame.pieceMap.size must be_>(0)
+    }
+    "forbid the pass mediated repeat up front under positional superko (ADR 0014)" in {
+      (newGame.legalDrops.contains(58) === false) and
+        (newGame.makeMoves(List(Api.moveToUci(58, variant.Go9x9))) must throwAn[Exception])
     }
   }
 
+  // JOANSALA ORACLE: exercises Api.positionFromFen/goBoardFromFen, which always answer the parked
+  // joansala engine; deleted with it in Phase C.
   "goBoardFromFen" should {
     val game    = Api.position(variant.Go19x19)
     val newGame = game.makeMoves(List(0, 7, 4, 1).map(Api.moveToUci(_, variant.Go19x19)))
@@ -309,6 +314,8 @@ class GoApiTest extends Specification with ValidatedMatchers {
     }
   }
 
+  // JOANSALA ORACLE: exercises Api.positionFromFen/goBoardFromFen, which always answer the parked
+  // joansala engine; deleted with it in Phase C.
   "game result " should {
     val fen      =
       "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S3s14[SSSSSSSSSSssssssssss] b - 10 85 0 0 75 0 2"
@@ -423,13 +430,15 @@ class GoApiTest extends Specification with ValidatedMatchers {
     val fen9  = variant.Go9x9.initialFen.value
     val fen13 = variant.Go13x13.initialFen.value
     "be valid for 9x9" in {
-      Api.validateFEN(fen9) === true
+      Api.validateFEN(variant.Go9x9, fen9) === true
     }
     "be valid for 13x13" in {
-      Api.validateFEN(fen13) === true
+      Api.validateFEN(variant.Go13x13, fen13) === true
     }
   }
 
+  // JOANSALA ORACLE: exercises Api.positionFromFen/goBoardFromFen, which always answer the parked
+  // joansala engine; deleted with it in Phase C.
   "Piece map of 9x9 Go game" should {
     val game                     = Api.position(variant.Go9x9)
     val newGame                  = game.makeMoves(List(0, 16, 30, 59, 4).map(Api.moveToUci(_, variant.Go9x9)))
@@ -452,6 +461,8 @@ class GoApiTest extends Specification with ValidatedMatchers {
     }
   }
 
+  // JOANSALA ORACLE: exercises Api.positionFromFen/goBoardFromFen, which always answer the parked
+  // joansala engine; deleted with it in Phase C.
   "Api.positonFromFen for 13x13" should {
     val game           = Api.position(variant.Go13x13)
     val newGame        = game.makeMoves(List(4, 16, 30, 59, 140).map(Api.moveToUci(_, variant.Go13x13)))
@@ -568,7 +579,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
     }
   }
 
-  "repetition game with 3 kos" should {
+  "a third ko capture recreating an earlier position" should {
     val game  = Api.position(variant.Go9x9)
     val moves = List(
       "s@b8",
@@ -608,9 +619,11 @@ class GoApiTest extends Specification with ValidatedMatchers {
       "s@g3"
     )
 
-    val newGame1 = game.makeMoves(moves)
-    "be a variant end" in {
-      newGame1.gameResult === GameResult.VariantEnd()
+    val newGame1 = game.makeMoves(moves.init)
+    "be forbidden up front instead of ending as a repetition (ADR 0011)" in {
+      (newGame1.gameResult === GameResult.Ongoing()) and
+        (newGame1.legalDrops.contains(Api.uciToMove("s@g3", variant.Go9x9)) === false) and
+        (newGame1.makeMoves(List("s@g3")) must throwAn[Exception])
     }
   }
 

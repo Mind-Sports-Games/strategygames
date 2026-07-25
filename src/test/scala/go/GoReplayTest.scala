@@ -12,7 +12,7 @@ class GoReplayTest extends Specification with ValidatedMatchers {
 
   "go replay " should {
     "replay from position " in {
-      val fen   = FEN("""9/9/6S2/9/9/9/2S6/9/9[SSSSSSSSSSssssssssss] w - 810 65 65 0 1""")
+      val fen   = FEN("""9/9/6S2/9/9/9/2S6/9/9[SSSSSSSSSSssssssssss] w - 810 65 0 0 65 0 1""")
       val moves =
         """s@g3 s@c7 s@f2 s@e5 s@e1 s@d4 s@h4 s@i1 s@i5 pass pass ss:i1""".split(' ').toList.map(List(_))
       Replay.gameWithUciWhileValid(moves, Player.P2, Player.P2, fen, variant.Go9x9) must beLike {
@@ -28,24 +28,26 @@ class GoReplayTest extends Specification with ValidatedMatchers {
 
   "go replay 2" should {
     "replay from uci moves" in {
-      Replay.situationsFromUci(
-        ucis = List(
-          Uci("s@g3"),
-          Uci("s@c7"),
-          Uci("s@f2"),
-          Uci("s@e5"),
-          Uci("s@e1"),
-          Uci("s@d4"),
-          Uci("s@h4"),
-          Uci("s@i1"),
-          Uci("s@i5"),
-          Uci("pass"),
-          Uci("pass"),
-          Uci("ss:i1")
-        ).flatten,
-        initialFen = Some(FEN("""9/9/6S2/9/9/9/2S6/9/9[SSSSSSSSSSssssssssss] w - 810 65 0 0 65 0 1""")),
-        variant = variant.Go9x9
-      ) .toOption must beSome.like { case situations =>
+      Replay
+        .situationsFromUci(
+          ucis = List(
+            Uci("s@g3"),
+            Uci("s@c7"),
+            Uci("s@f2"),
+            Uci("s@e5"),
+            Uci("s@e1"),
+            Uci("s@d4"),
+            Uci("s@h4"),
+            Uci("s@i1"),
+            Uci("s@i5"),
+            Uci("pass"),
+            Uci("pass"),
+            Uci("ss:i1")
+          ).flatten,
+          initialFen = Some(FEN("""9/9/6S2/9/9/9/2S6/9/9[SSSSSSSSSSssssssssss] w - 810 65 0 0 65 0 1""")),
+          variant = variant.Go9x9
+        )
+        .toOption must beSome.like { case situations =>
         situations.map(Forsyth.>>) === List(
           FEN("9/9/6S2/9/9/9/2S6/9/9[SSSSSSSSSSssssssssss] w - 810 65 0 0 65 0 1"),
           FEN("9/9/6S2/9/9/9/2S3s2/9/9[SSSSSSSSSSssssssssss] b - 20 75 0 0 65 0 2"),
@@ -67,27 +69,29 @@ class GoReplayTest extends Specification with ValidatedMatchers {
 
   "go replay delay pass game" should {
     "replay from uci moves" in {
-      Replay.situationsFromUci(
-        ucis = List(
-          Uci("s@g3"),
-          Uci("s@c7"),
-          Uci("s@f2"),
-          Uci("s@e5"),
-          Uci("s@e1"),
-          Uci("s@d4"),
-          Uci("s@h4"),
-          Uci("s@i1"),
-          Uci("s@i5"),
-          Uci("pass"),
-          Uci("pass"),
-          Uci("s@i8"),
-          Uci("pass"),
-          Uci("pass"),
-          Uci("ss:i1")
-        ).flatten,
-        initialFen = Some(FEN("""9/9/6S2/9/9/9/2S6/9/9[SSSSSSSSSSssssssssss] w - 810 65 0 0 65 0 1""")),
-        variant = variant.Go9x9
-      ) .toOption must beSome.like { case situations =>
+      Replay
+        .situationsFromUci(
+          ucis = List(
+            Uci("s@g3"),
+            Uci("s@c7"),
+            Uci("s@f2"),
+            Uci("s@e5"),
+            Uci("s@e1"),
+            Uci("s@d4"),
+            Uci("s@h4"),
+            Uci("s@i1"),
+            Uci("s@i5"),
+            Uci("pass"),
+            Uci("pass"),
+            Uci("s@i8"),
+            Uci("pass"),
+            Uci("pass"),
+            Uci("ss:i1")
+          ).flatten,
+          initialFen = Some(FEN("""9/9/6S2/9/9/9/2S6/9/9[SSSSSSSSSSssssssssss] w - 810 65 0 0 65 0 1""")),
+          variant = variant.Go9x9
+        )
+        .toOption must beSome.like { case situations =>
         situations.map(s => (s.end, s.board.piecesOnBoardCount)) === List(
           (false, 2),
           (false, 3),
@@ -112,25 +116,27 @@ class GoReplayTest extends Specification with ValidatedMatchers {
 
   "go replay 4 pass ending game" should {
     "replay from uci moves" in {
-      Replay.situationsFromUci(
-        ucis = List(
-          Uci("s@g3"),
-          Uci("s@c7"),
-          Uci("s@f2"),
-          Uci("s@e5"),
-          Uci("s@e1"),
-          Uci("s@d4"),
-          Uci("s@h4"),
-          Uci("s@i1"),
-          Uci("s@i5"),
-          Uci("pass"),
-          Uci("pass"),
-          Uci("pass"),
-          Uci("pass")
-        ).flatten,
-        initialFen = Some(FEN("""9/9/6S2/9/9/9/2S6/9/9[SSSSSSSSSSssssssssss] w - 810 65 0 0 65 0 1""")),
-        variant = variant.Go9x9
-      ) .toOption must beSome.like { case situations =>
+      Replay
+        .situationsFromUci(
+          ucis = List(
+            Uci("s@g3"),
+            Uci("s@c7"),
+            Uci("s@f2"),
+            Uci("s@e5"),
+            Uci("s@e1"),
+            Uci("s@d4"),
+            Uci("s@h4"),
+            Uci("s@i1"),
+            Uci("s@i5"),
+            Uci("pass"),
+            Uci("pass"),
+            Uci("pass"),
+            Uci("pass")
+          ).flatten,
+          initialFen = Some(FEN("""9/9/6S2/9/9/9/2S6/9/9[SSSSSSSSSSssssssssss] w - 810 65 0 0 65 0 1""")),
+          variant = variant.Go9x9
+        )
+        .toOption must beSome.like { case situations =>
         situations.map(s => (s.end, s.board.piecesOnBoardCount)) === List(
           (false, 2),
           (false, 3),

@@ -2,16 +2,16 @@ package strategygames.go
 
 import strategygames.format.{ FEN => StratFen, Forsyth => StratForsyth, Uci => StratUci }
 import strategygames.variant.{ Variant => StratVariant }
-import variant.Go9x9Scala
+import variant.Go9x9
 
 class GoScalaVariantIsometryTest extends strategygames.chess.ChessTest {
 
   "Test Every move of a scala go game can be loaded from fen" in {
-    val gameFamily   = Go9x9Scala.gameFamily
+    val gameFamily   = Go9x9.gameFamily
     val lib          = gameFamily.gameLogic
-    val stratVariant = StratVariant(lib, Go9x9Scala.key).get
+    val stratVariant = StratVariant(lib, Go9x9.key).get
 
-    _testEveryMoveLoadFenIsometry(lib, StratFen(lib, Go9x9Scala.initialFen.value), stratVariant)(
+    _testEveryMoveLoadFenIsometry(lib, StratFen(lib, Go9x9.initialFen.value), stratVariant)(
       List(
         "s@g3",
         "s@c7",
@@ -37,15 +37,15 @@ class GoScalaVariantIsometryTest extends strategygames.chess.ChessTest {
   }
 
   "Test a scala go superko move is invalid" in {
-    val gameFamily   = Go9x9Scala.gameFamily
+    val gameFamily   = Go9x9.gameFamily
     val lib          = gameFamily.gameLogic
-    val stratVariant = StratVariant(lib, Go9x9Scala.key).get
+    val stratVariant = StratVariant(lib, Go9x9.key).get
 
     def replaying(ucis: List[String]) =
       strategygames.Replay(
         lib,
         ucis.flatMap(StratUci(lib, gameFamily, _)),
-        Some(StratFen(lib, Go9x9Scala.initialFen.value)),
+        Some(StratFen(lib, Go9x9.initialFen.value)),
         stratVariant
       )
 

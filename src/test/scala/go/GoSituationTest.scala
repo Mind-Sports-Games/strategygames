@@ -148,13 +148,13 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     "not be gameEnd after just two passes" in {
       game_ply_9.situation.end === false
       game_ply_9.situation.board.apiPosition.pieceMap.size === 7
-      game_ply_9.situation.board.apiPosition.fen.value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1SsSsSsS11[SSSSSSSSSSssssssssss] w - 40 105 0 0 75 0 5"
+      game_ply_9.situation.board.apiPosition.fen.value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1SsSsSsS11[SSSSSSSSSSssssssssss] w - 40 105 0 0 75 2 5"
     }
 
     "be gameEnd after final ss action" in {
       game_ply_10.situation.end === true
       game_ply_10.situation.board.apiPosition.pieceMap.size === 5
-      game_ply_10.situation.board.apiPosition.fen.value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/2s1sSsS11[SSSSSSSSSSssssssssss] w - 20 105 0 0 75 0 6"
+      game_ply_10.situation.board.apiPosition.fen.value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/2s1sSsS11[SSSSSSSSSSssssssssss] w - 20 105 0 0 75 3 6"
     }
 
   }
@@ -211,7 +211,7 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     "not be gameEnd after just two passes (both cases)" in {
       game_ply_9.situation.end === false
       game_ply_9.situation.board.apiPosition.pieceMap.size === 7
-      game_ply_9.situation.board.apiPosition.fen.value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1SsSsSsS11[SSSSSSSSSSssssssssss] w - 40 105 0 0 75 0 5"
+      game_ply_9.situation.board.apiPosition.fen.value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1SsSsSsS11[SSSSSSSSSSssssssssss] w - 40 105 0 0 75 2 5"
       game_ply_14.situation.end === false
       game_ply_14.situation.board.apiPosition.pieceMap.size === 10
     }
@@ -219,7 +219,7 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     "be gameEnd after final ss action" in {
       game_ply_15.situation.end === true
       game_ply_15.situation.board.apiPosition.pieceMap.size === 8
-      game_ply_15.situation.board.apiPosition.fen.value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/2s1sSsSsSs8[SSSSSSSSSSssssssssss] b - 30 125 0 0 75 0 8"
+      game_ply_15.situation.board.apiPosition.fen.value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/2s1sSsSsSs8[SSSSSSSSSSssssssssss] b - 30 125 0 0 75 3 8"
     }
 
     "have no more drops after game end" in {
@@ -276,7 +276,7 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     "not be gameEnd after just two passes (both cases)" in {
       game_ply_9.situation.end === false
       game_ply_9.situation.board.apiPosition.pieceMap.size === 7
-      game_ply_9.situation.board.apiPosition.fen.value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1SsSsSsS11[SSSSSSSSSSssssssssss] w - 40 105 0 0 75 0 5"
+      game_ply_9.situation.board.apiPosition.fen.value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1SsSsSsS11[SSSSSSSSSSssssssssss] w - 40 105 0 0 75 2 5"
       game_ply_13.situation.end === false
       game_ply_13.situation.board.apiPosition.pieceMap.size === 8
     }
@@ -284,7 +284,7 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     "be gameEnd after final ss action" in {
       game_ply_14.situation.end === true
       game_ply_14.situation.board.apiPosition.pieceMap.size === 6
-      game_ply_14.situation.board.apiPosition.fen.value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/2s1sSsSS10[SSSSSSSSSSssssssssss] w - 30 105 0 0 75 0 8"
+      game_ply_14.situation.board.apiPosition.fen.value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/2s1sSsSS10[SSSSSSSSSSssssssssss] w - 30 105 0 0 75 3 8"
     }
 
     "not have a ss action after single pass" in {
@@ -424,7 +424,7 @@ class GoSituationTest extends Specification with ValidatedMatchers {
 
   }
 
-  "playing a game with pass doesn't trigger repetition" should {
+  "a returning capture recreating an earlier board across a pass parity flip" should {
     val g9   = variant.Go9x9
     val game = Game(g9)
 
@@ -440,15 +440,15 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     val game_p10 = game_p9.apply(g9.validDrops(game_p9.situation).filter(_.pos.key == "i6").head)
     val game_p11 = game_p10.apply(g9.validDrops(game_p10.situation).filter(_.pos.key == "i9").head)
     val game_p12 = game_p11.apply(g9.validDrops(game_p11.situation).filter(_.pos.key == "g9").head)
-    val game_p13 = game_p12.apply(g9.validDrops(game_p12.situation).filter(_.pos.key == "h9").head)
-    val game_p14 = game_p13.apply(g9.validPass(game_p13.situation))
+    val game_p13 = game_p12.apply(g9.validPass(game_p12.situation))
 
-    "situation should not end" in {
-      game_p14.situation.end === false
+    "be forbidden up front under positional superko (ADR 0014)" in {
+      g9.validDrops(game_p12.situation).map(_.pos.key).contains("h9") === false
     }
 
-    "situation should not be repetition yet" in {
-      game_p14.situation.isRepetition === false
+    "leave the game ongoing and free of repetition after a pass instead" in {
+      game_p13.situation.end === false
+      game_p13.situation.isRepetition === false
     }
 
   }
@@ -457,7 +457,7 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     val g9   = variant.Go9x9
     var game = Game(g9)
 
-    val moves = List("c6", "c5", "c7", "d6", "e6", "e5", "e7", "d4", "d8", "e4", "pass", "d7", "d5" )
+    val moves = List("c6", "c5", "c7", "d6", "e6", "e5", "e7", "d4", "d8", "e4", "pass", "d7", "d5")
 
     for (moveKey <- moves) {
       if (moveKey == "pass")

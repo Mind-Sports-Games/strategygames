@@ -4,7 +4,15 @@ import org.specs2.mutable.Specification
 
 import strategygames.{ GameFamily, GameLogic, Player, Status }
 import strategygames.go.format.{ FEN, Forsyth, Uci }
-import strategygames.go.variant.{ Go13x13, Go13x13Scala, Go19x19, Go19x19Scala, Go9x9, Go9x9Scala, Variant }
+import strategygames.go.variant.{
+  Go13x13,
+  Go13x13Joansala,
+  Go19x19,
+  Go19x19Joansala,
+  Go9x9,
+  Go9x9Joansala,
+  Variant
+}
 
 class GoScalaVariantTest extends Specification {
 
@@ -31,82 +39,82 @@ class GoScalaVariantTest extends Specification {
     "s@d6"
   )
 
-  "the scala go variants" should {
-    "be registered alongside the joansala ones" in {
+  "the canonical go variants" should {
+    "be registered alongside the parked joansala ones" in {
       (Variant.all.size === 6) and
-        (Variant.byKey.get("go9x9Scala") === Some(Go9x9Scala)) and
-        (Variant.byKey.get("go13x13Scala") === Some(Go13x13Scala)) and
-        (Variant.byKey.get("go19x19Scala") === Some(Go19x19Scala)) and
-        (Variant.byId.get(5) === Some(Go9x9Scala)) and
-        (Variant.byId.get(6) === Some(Go13x13Scala)) and
-        (Variant.byId.get(7) === Some(Go19x19Scala)) and
+        (Variant.byKey.get("go9x9Joansala") === Some(Go9x9Joansala)) and
+        (Variant.byKey.get("go13x13Joansala") === Some(Go13x13Joansala)) and
+        (Variant.byKey.get("go19x19Joansala") === Some(Go19x19Joansala)) and
+        (Variant.byId.get(5) === Some(Go9x9Joansala)) and
+        (Variant.byId.get(6) === Some(Go13x13Joansala)) and
+        (Variant.byId.get(7) === Some(Go19x19Joansala)) and
         (Variant.all.map(_.id).distinct.size === 6) and
         (Variant.all.map(v => v.key -> v.perfId).toMap === Map(
-          "go9x9"        -> 500,
-          "go13x13"      -> 501,
-          "go19x19"      -> 502,
-          "go9x9Scala"   -> 503,
-          "go13x13Scala" -> 504,
-          "go19x19Scala" -> 505
+          "go9x9"           -> 500,
+          "go13x13"         -> 501,
+          "go19x19"         -> 502,
+          "go9x9Joansala"   -> 503,
+          "go13x13Joansala" -> 504,
+          "go19x19Joansala" -> 505
         ))
     }
 
-    "keep the joansala variants as the default and the opening sensible ones" in {
+    "stay the default and the opening sensible ones" in {
       (Variant.default === Go19x19) and
         (Variant.openingSensibleVariants === Set(Go9x9, Go13x13, Go19x19))
     }
 
     "be reachable from the strategygames wrapper" in {
       val wrapped = strategygames.variant.Variant.all(GameLogic.Go())
-      (wrapped.filter(_.key.endsWith("Scala")).map(_.key)
-        === List("go19x19Scala", "go13x13Scala", "go9x9Scala")) and
+      (wrapped.filter(_.key.endsWith("Joansala")).map(_.key)
+        === List("go19x19Joansala", "go13x13Joansala", "go9x9Joansala")) and
         (GameFamily.Go().variants.size === 6) and
-        (strategygames.variant.Variant(GameLogic.Go(), "go19x19Scala").map(_.toGo)
-          === Some(Go19x19Scala))
+        (strategygames.variant.Variant(GameLogic.Go(), "go19x19Joansala").map(_.toGo)
+          === Some(Go19x19Joansala))
     }
 
-    "run on the pure scala engine, unlike the joansala ones" in {
-      (Api.positionFromVariant(Go9x9Scala).isInstanceOf[ScalaPosition] === true) and
-        (Api.positionFromVariant(Go13x13Scala).isInstanceOf[ScalaPosition] === true) and
-        (Api.positionFromVariant(Go19x19Scala).isInstanceOf[ScalaPosition] === true) and
-        (Api.positionFromVariant(Go19x19).isInstanceOf[ScalaPosition] === false) and
+    "run on the pure scala engine, unlike the parked joansala ones" in {
+      (Api.positionFromVariant(Go9x9).isInstanceOf[ScalaPosition] === true) and
+        (Api.positionFromVariant(Go13x13).isInstanceOf[ScalaPosition] === true) and
+        (Api.positionFromVariant(Go19x19).isInstanceOf[ScalaPosition] === true) and
+        (Api.positionFromVariant(Go19x19Joansala).isInstanceOf[ScalaPosition] === false) and
         (Api
-          .positionFromVariantNameAndFEN("go9x9Scala", Go9x9Scala.initialFen.value)
+          .positionFromVariantNameAndFEN("go9x9", Go9x9.initialFen.value)
           .isInstanceOf[ScalaPosition] === true) and
         (Forsyth
-          .<<@(Go13x13Scala, Go13x13Scala.initialFen)
+          .<<@(Go13x13, Go13x13.initialFen)
           .map(_.board.apiPosition.isInstanceOf[ScalaPosition]) === Some(true))
     }
 
-    "share the setup of the joansala variant of the same size" in {
-      (Go9x9Scala.initialFen === Go9x9.initialFen) and
-        (Go13x13Scala.initialFen === Go13x13.initialFen) and
-        (Go19x19Scala.initialFen === Go19x19.initialFen) and
-        (Go9x9Scala.komi === 5.5) and
-        (Go13x13Scala.komi === 7.5) and
-        (Go19x19Scala.komi === 7.5) and
-        (Go9x9Scala.boardFenFromHandicap(9) === Go9x9.boardFenFromHandicap(9)) and
-        (Go13x13Scala.boardFenFromHandicap(9) === Go13x13.boardFenFromHandicap(9)) and
-        (Go19x19Scala.boardFenFromHandicap(9) === Go19x19.boardFenFromHandicap(9)) and
-        (Go9x9Scala.fenFromSetupConfig(4, 55) === Go9x9.fenFromSetupConfig(4, 55))
+    "share the setup of the parked joansala variant of the same size" in {
+      (Go9x9Joansala.initialFen === Go9x9.initialFen) and
+        (Go13x13Joansala.initialFen === Go13x13.initialFen) and
+        (Go19x19Joansala.initialFen === Go19x19.initialFen) and
+        (Go9x9Joansala.komi === 5.5) and
+        (Go13x13Joansala.komi === 7.5) and
+        (Go19x19Joansala.komi === 7.5) and
+        (Go9x9Joansala.boardFenFromHandicap(9) === Go9x9.boardFenFromHandicap(9)) and
+        (Go13x13Joansala.boardFenFromHandicap(9) === Go13x13.boardFenFromHandicap(9)) and
+        (Go19x19Joansala.boardFenFromHandicap(9) === Go19x19.boardFenFromHandicap(9)) and
+        (Go9x9Joansala.fenFromSetupConfig(4, 55) === Go9x9.fenFromSetupConfig(4, 55))
     }
   }
 
   "an initial scala go position" should {
     "emit the initial fen of its variant" in {
-      List(Go9x9Scala, Go13x13Scala, Go19x19Scala).map(v => Api.positionFromVariant(v).fen)
-        === List(Go9x9Scala.initialFen, Go13x13Scala.initialFen, Go19x19Scala.initialFen)
+      List(Go9x9, Go13x13, Go19x19).map(v => Api.positionFromVariant(v).fen)
+        === List(Go9x9.initialFen, Go13x13.initialFen, Go19x19.initialFen)
     }
 
     "offer every point as a drop, plus a pass" in {
-      List(Go9x9Scala, Go13x13Scala, Go19x19Scala).map { v =>
+      List(Go9x9, Go13x13, Go19x19).map { v =>
         val position = Api.positionFromVariant(v)
         (position.legalDrops.size, position.legalActions.size, position.pieceMap.size)
       } === List((81, 82, 0), (169, 170, 0), (361, 362, 0))
     }
 
     "not have ended" in {
-      val position = Api.positionFromVariant(Go9x9Scala)
+      val position = Api.positionFromVariant(Go9x9)
       (position.gameEnd === false) and
         (position.isRepetition === false) and
         (position.gameResult === GameResult.Ongoing()) and
@@ -115,8 +123,8 @@ class GoScalaVariantTest extends Specification {
     }
   }
 
-  "a scripted go9x9Scala game" should {
-    val passed = playing(Game(Go9x9Scala), scriptedNineByNine ++ List("pass", "pass"))
+  "a scripted go9x9 game" should {
+    val passed = playing(Game(Go9x9), scriptedNineByNine ++ List("pass", "pass"))
     val ended  = playing(passed, List("ss:i1"))
 
     "capture the black stone at d5 when white closes it in" in {
@@ -153,7 +161,7 @@ class GoScalaVariantTest extends Specification {
 
     "export a board fen that reloads into the same position" in {
       val exported = Forsyth.>>(ended)
-      val reloaded = Forsyth.<<@(Go9x9Scala, exported)
+      val reloaded = Forsyth.<<@(Go9x9, exported)
       (exported.value
         === "9/9/2s6/3s5/2s1s3S/3s3S1/6S2/5S3/4S4[SSSSSSSSSSssssssssss] w - 150 115 0 1 55 3 8") and
         (reloaded.map(_.board.apiPosition.fen) === Some(exported)) and
@@ -166,12 +174,12 @@ class GoScalaVariantTest extends Specification {
     val awaitingSelection = scriptedNineByNine ++ List("pass", "pass")
 
     def selecting(uci: String) =
-      Api.positionFromVariantAndMoves(Go9x9Scala, awaitingSelection ++ List(uci))
+      Api.positionFromVariantAndMoves(Go9x9, awaitingSelection ++ List(uci))
 
     "be ignored in a dead stone selection, as the joansala engine ignores it" in {
       val liftingNothing = selecting("ss:")
       val liftingN4      = selecting("ss:n4")
-      (Api.uciToMove("s@n4", Go9x9Scala) === Api.uciToMove("s@e5", Go9x9Scala)) and
+      (Api.uciToMove("s@n4", Go9x9) === Api.uciToMove("s@e5", Go9x9)) and
         (liftingN4.pieceMap.get(Pos.E5) === Some(Piece(P2, Stone))) and
         (liftingN4.fen === liftingNothing.fen)
     }
@@ -182,28 +190,28 @@ class GoScalaVariantTest extends Specification {
     }
 
     "be refused outright as a drop, rather than played somewhere else" in {
-      Api.positionFromVariantAndMoves(Go9x9Scala, List("s@n4")) must throwAn[Exception]
+      Api.positionFromVariantAndMoves(Go9x9, List("s@n4")) must throwAn[Exception]
     }
   }
 
   "an action that is neither a pass, a selection, nor a placement" should {
     "be refused rather than aliased onto a point of the board" in {
-      Api.positionFromVariantAndMoves(Go9x9Scala, List("garbage")) must throwAn[Exception]
+      Api.positionFromVariantAndMoves(Go9x9, List("garbage")) must throwAn[Exception]
     }
   }
 
   "a dead stone key that is not a coordinate at all" should {
     "be refused rather than dropped in silence" in {
       Api.positionFromVariantAndMoves(
-        Go9x9Scala,
+        Go9x9,
         scriptedNineByNine ++ List("pass", "pass", "ss:zz")
       ) must throwAn[Exception]
     }
   }
 
-  "a go9x9Scala game from a handicap position" should {
-    val handicapFen = Go9x9Scala.fenFromSetupConfig(4, 55)
-    val game        = Game(Some(Go9x9Scala), Some(handicapFen))
+  "a go9x9 game from a handicap position" should {
+    val handicapFen = Go9x9.fenFromSetupConfig(4, 55)
+    val game        = Game(Some(Go9x9), Some(handicapFen))
 
     "place the handicap stones and let p2 start" in {
       (handicapFen.value === "9/9/2S3S2/9/9/9/2S3S2/9/9[SSSSSSSSSSssssssssss] w - 40 55 0 0 55 0 1") and
@@ -226,23 +234,23 @@ class GoScalaVariantTest extends Specification {
     }
   }
 
-  "the scala engine and the joansala engine" should {
+  "the scala engine and the parked joansala engine" should {
     "agree on the fen of a drop only go13x13 game" in {
       val moves = List("s@d4", "s@k10", "s@k4", "s@d10")
-      playing(Game(Go13x13Scala), moves).situation.board.apiPosition.fen
-        === playing(Game(Go13x13), moves).situation.board.apiPosition.fen
+      playing(Game(Go13x13), moves).situation.board.apiPosition.fen
+        === playing(Game(Go13x13Joansala), moves).situation.board.apiPosition.fen
     }
 
     "agree on the fen of a drop only go19x19 game" in {
       val moves = List("s@d4", "s@q16", "s@q4", "s@d16")
-      playing(Game(Go19x19Scala), moves).situation.board.apiPosition.fen
-        === playing(Game(Go19x19), moves).situation.board.apiPosition.fen
+      playing(Game(Go19x19), moves).situation.board.apiPosition.fen
+        === playing(Game(Go19x19Joansala), moves).situation.board.apiPosition.fen
     }
   }
 
-  "a scripted go19x19Scala game" should {
+  "a scripted go19x19 game" should {
     val moves  = List("s@a19", "s@s19", "s@a18", "s@s1", "pass", "pass")
-    val passed = playing(Game(Go19x19Scala), moves)
+    val passed = playing(Game(Go19x19), moves)
     val ended  = playing(passed, List("ss:"))
 
     "read and play two digit ranks" in {
@@ -263,11 +271,12 @@ class GoScalaVariantTest extends Specification {
     val fen       = FEN(
       "9/9/2s6/3s5/2s1s3S/3s3S1/6S2/5S3/4S3s[SSSSSSSSSSssssssssss] b - 50 125 0 1 55 0 8"
     )
-    val situation = Forsyth.<<@(Go9x9Scala, fen)
+    val situation = Forsyth.<<@(Go9x9, fen)
 
-    "keep its own variant rather than inferring it from the board size" in {
-      (situation.map(_.board.variant) === Some(Go9x9Scala)) and
-        (fen.variant === Go9x9)
+    "keep its own variant, which size inference now also names" in {
+      (situation.map(_.board.variant) === Some(Go9x9)) and
+        (fen.variant === Go9x9) and
+        (Forsyth.<<@(Go9x9Joansala, fen).map(_.board.variant) === Some(Go9x9Joansala))
     }
 
     "round trip through forsyth" in {
@@ -275,10 +284,10 @@ class GoScalaVariantTest extends Specification {
     }
   }
 
-  "a replayed go9x9Scala game" should {
+  "a replayed go9x9 game" should {
     def replaying(ucis: List[String]) =
       Replay
-        .situationsFromUci(ucis.flatMap(Uci(_)), Some(Go9x9Scala.initialFen), Go9x9Scala)
+        .situationsFromUci(ucis.flatMap(Uci(_)), Some(Go9x9.initialFen), Go9x9)
         .toOption
 
     "reach the position the played game reached" in {
@@ -287,7 +296,7 @@ class GoScalaVariantTest extends Specification {
       (replayed.map(_.size) === Some(actions.size + 1)) and
         (replayed.map(_.last.end) === Some(true)) and
         (replayed.map(_.last.board.apiPosition.fen)
-          === Some(playing(Game(Go9x9Scala), actions).situation.board.apiPosition.fen))
+          === Some(playing(Game(Go9x9), actions).situation.board.apiPosition.fen))
     }
 
     "end on a fourth pass without any dead stone selection" in {
