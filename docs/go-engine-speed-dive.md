@@ -1,5 +1,7 @@
 # The go speed dive
 
+Headline tables: [docs/go-speed-results.md](go-speed-results.md).
+
 Can the pure-Scala go engine's production surface reach 10x / 20x / 30x / 100x the retired joansala
 engine? Five experiments on branch `lakin/go-speed-dive` (base b3cd2803) answered it per workload.
 Reference denominators are the joansala JMH baselines: replay 7395 / 24313 / 96385 µs, legalDrops
