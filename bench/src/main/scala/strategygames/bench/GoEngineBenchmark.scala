@@ -24,6 +24,7 @@ object GoBoardSize {
 
   val all: List[GoBoardSize] = List(
     GoBoardSize("go9x9", "go-go9x9", Go9x9),
+    GoBoardSize("go9x9superko", "go-go9x9-superko", Go9x9),
     GoBoardSize("go13x13", "go-go13x13", Go13x13),
     GoBoardSize("go19x19", "go", Go19x19)
   )

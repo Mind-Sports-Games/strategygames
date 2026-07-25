@@ -28,7 +28,7 @@ final class GoState private (
     val capturesByWhite: Int,
     val simpleKoMove: Option[Int],
     val positionHash: Long,
-    private val occurredPositionHashes: Set[Long],
+    private[engine] val occurredPositionHashes: Set[Long],
     val consecutivePasses: Int,
     val capturedMovesOnLastPlacement: List[Int]
 ) {
@@ -65,6 +65,33 @@ final class GoState private (
     })
 
   private def forbiddenKoPoint: Int = simpleKoMove.getOrElse(NoPoint)
+
+  private[engine] def withReplayHistory(
+      hashes: Set[Long],
+      lastPlacementCaptures: List[Int]
+  ): GoState = {
+    require(
+      hashes.contains(positionHash),
+      s"replay history must contain this position's hash $positionHash"
+    )
+    new GoState(
+      size,
+      zobristTable,
+      board,
+      chainIds,
+      nextStoneInChain,
+      chainStoneCounts,
+      chainPseudoLiberties,
+      playerTurn,
+      capturesByBlack,
+      capturesByWhite,
+      simpleKoMove,
+      positionHash,
+      hashes,
+      consecutivePasses,
+      lastPlacementCaptures
+    )
+  }
 
   /** The position with the given stones lifted, as agreed dead at the end of the game. Rebuilt from stone
     * owners, so the superko history restarts from the resulting position — acceptable because no further
