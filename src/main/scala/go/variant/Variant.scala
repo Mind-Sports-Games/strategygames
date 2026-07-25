@@ -80,17 +80,14 @@ abstract class Variant private[variant] (
   def validDrops(situation: Situation): List[Drop] =
     situation.board.apiPosition.legalDrops
       .map(dest => (dest, Api.moveToPos(dest, situation.board.variant)))
-      .flatMap {
+      .map {
         case (_, Some(dest)) =>
-          val nextBoard = situation.board.afterDrop(situation.player, dest)
-          Option.unless(nextBoard.apiPosition.isRepetition)(
-            Drop(
-              piece = Piece(situation.player, Role.defaultRole),
-              pos = dest,
-              situationBefore = situation,
-              nextBoard = LazyBoardAfter(() => nextBoard),
-              autoEndTurn = true
-            )
+          Drop(
+            piece = Piece(situation.player, Role.defaultRole),
+            pos = dest,
+            situationBefore = situation,
+            nextBoard = LazyBoardAfter(() => situation.board.afterDrop(situation.player, dest)),
+            autoEndTurn = true
           )
         case (destInt, dest) => sys.error(s"Invalid pos from int: ${destInt}, ${dest}")
       }
