@@ -138,10 +138,10 @@ class GoValidDropsLazinessTest extends Specification {
       val oracle   = eagerlyAppliedValidDrops(situation)
 
       s"offer the same drops as an eagerly applied reference on ${description}" in {
-        produced.map(_.pos) === oracle.map(_.pos)
-        produced.map(_.piece) === oracle.map(_.piece)
-        produced.map(_.autoEndTurn) === oracle.map(_.autoEndTurn)
-        produced.size === situation.board.apiPosition.legalDrops.length
+        (produced.map(_.pos) === oracle.map(_.pos)) and
+          (produced.map(_.piece) === oracle.map(_.piece)) and
+          (produced.map(_.autoEndTurn) === oracle.map(_.autoEndTurn)) and
+          (produced.size === situation.board.apiPosition.legalDrops.length)
       }
 
       s"reach the same board after a forced drop as the reference on ${description}" in {
@@ -154,19 +154,18 @@ class GoValidDropsLazinessTest extends Specification {
       val (counting, situation) = countingSituationOf(midGame19x19)
       val drops                 = situation.board.variant.validDrops(situation)
 
-      drops.size must be_>(300)
-      counting.enginePlacementsApplied === 0
+      (drops.size === situation.board.apiPosition.legalDrops.length) and
+        (counting.enginePlacementsApplied === 0)
     }
 
     "apply one placement to the engine for each drop that is forced" in {
       val (counting, situation) = countingSituationOf(midGame19x19)
       val drops                 = situation.board.variant.validDrops(situation)
 
-      drops.head.after.pieces.size === situation.board.pieces.size + 1
-      counting.enginePlacementsApplied === 1
-
-      drops(1).after.pieces.size === situation.board.pieces.size + 1
-      counting.enginePlacementsApplied === 2
+      (drops.head.after.pieces.size === situation.board.pieces.size + 1) and
+        (counting.enginePlacementsApplied === 1) and
+        (drops(1).after.pieces.size === situation.board.pieces.size + 1) and
+        (counting.enginePlacementsApplied === 2)
     }
 
     "count one engine placement per legal point when applied eagerly" in {

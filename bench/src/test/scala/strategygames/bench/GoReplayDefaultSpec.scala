@@ -39,6 +39,7 @@ class GoReplayDefaultSpec extends Specification {
 
   private def fieldsOf(game: Game): List[(String, Any)] = List(
     "fen"           -> (Forsyth >> game).value,
+    "engineFen"     -> game.situation.board.apiPosition.fen.value,
     "pieces"        -> game.situation.board.pieces,
     "player"        -> game.situation.player,
     "status"        -> game.situation.status,
@@ -101,6 +102,11 @@ class GoReplayDefaultSpec extends Specification {
       "an explicit variant initial fen",
       turnPerAction(opening ++ List("s@e5", "s@g7", "pass", "pass", "ss:e5")),
       Some(Go9x9.initialFen)
+    ),
+    (
+      "a resume whose game has never seen a drop",
+      turnPerAction(List("pass")),
+      Some(resumedFen(List("pass")))
     )
   )
 
@@ -121,7 +127,7 @@ class GoReplayDefaultSpec extends Specification {
 
     val resumptions = for {
       passes <- List(List("pass"), List("pass", "pass"))
-      action <- List("pass", "ss:a1")
+      action <- List("pass", "ss:a1", "s@e5")
     } yield (s"resume after ${passes.size} pass then ${action}", resumedFen(opening ++ passes), action)
 
     "agree with the per ply path on every field" in {
@@ -163,6 +169,21 @@ class GoReplayDefaultSpec extends Specification {
     "refuse a further action on both paths" in {
       (fast(turnPerAction(List("pass")), Player.P2, Some(settled), Go9x9) must throwAn[Exception]) and
         (perPly(turnPerAction(List("pass")), Player.P2, Some(settled), Go9x9) must throwAn[Exception])
+    }
+  }
+
+  "a drop token naming no role, played in the middle of a game" should {
+
+    val malformedDrops = List("x@e5", "@@e5", "1@e5")
+
+    "be refused by the batch path exactly as the per ply path refuses it" in {
+      malformedDrops
+        .map { token =>
+          val actionStrs = turnPerAction(List("s@a1", token, "s@c3", "s@g7"))
+          (fast(actionStrs, Player.P1, None, Go9x9) must throwAn[Exception]) and
+            (perPly(actionStrs, Player.P1, None, Go9x9) must throwAn[Exception])
+        }
+        .reduce(_ and _)
     }
   }
 

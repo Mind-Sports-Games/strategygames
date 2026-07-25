@@ -464,7 +464,7 @@ private[engine] object ScratchGoState {
 final private[engine] class LongPositionHashSet(initialCapacity: Int) {
 
   private var table   =
-    new Array[Long](java.lang.Integer.highestOneBit(math.max(initialCapacity - 1, 15)) << 1)
+    new Array[Long](java.lang.Integer.highestOneBit(math.max(initialCapacity - 1, 15)) << 2)
   private var mask    = table.length - 1
   private var used    = 0
   private var hasZero = false

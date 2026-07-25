@@ -33,8 +33,10 @@ class GoBatchEntryTest extends Specification {
     val resumptions = List(
       (List("pass"), "pass"),
       (List("pass"), "ss:"),
+      (List("pass"), "s@e5"),
       (List("pass", "pass"), "pass"),
-      (List("pass", "pass"), "ss:")
+      (List("pass", "pass"), "ss:"),
+      (List("pass", "pass"), "s@e5")
     )
 
     "reach the fen the same game played straight through reaches" in {
@@ -59,7 +61,8 @@ class GoBatchEntryTest extends Specification {
       val resumedAtOnePass = resumedAfter(opening ++ List("pass"))
       (resumedAtOnePass.fenPassCount must beEqualTo(1)) and
         (batch(resumedAtOnePass, List("pass")).fen.fenPassCount must beEqualTo(2)) and
-        (batch(resumedAtOnePass, List("ss:")).fen.fenPassCount must beEqualTo(3))
+        (batch(resumedAtOnePass, List("ss:")).fen.fenPassCount must beEqualTo(3)) and
+        (batch(resumedAtOnePass, List("s@e5")).fen.fenPassCount must beEqualTo(0))
     }
   }
 
@@ -127,8 +130,8 @@ class GoBatchEntryTest extends Specification {
 
     val script = opening ++ List("s@c3", "pass", "S@d4", "pass", "pass", "ss:c3")
 
-    val built    = positions(start, script)
-    val expected = (0 to script.size).map(played => perPly(start, script.take(played))).toList
+    def built    = positions(start, script)
+    def expected = (0 to script.size).map(played => perPly(start, script.take(played))).toList
 
     "give one position per ply, the starting position first" in {
       (built.size must beEqualTo(script.size + 1)) and
@@ -141,6 +144,16 @@ class GoBatchEntryTest extends Specification {
 
     "agree with the per ply path on every stone map" in {
       built.map(_.pieceMap).toList must beEqualTo(expected.map(_.pieceMap))
+    }
+
+    "name the ply of an illegal move and the action itself" in {
+      messageOf(positions(start, List("S@a1", "s@a1"))) must
+        startWith(s"Illegal action s@a1 at ply 1 for ${variant.key}: legal actions ")
+    }
+
+    "name the ply of an unreadable action" in {
+      messageOf(positions(start, List("S@a1", "garbage"))) must
+        beEqualTo(s"Unreadable action garbage at ply 1 for ${variant.key}")
     }
   }
 }

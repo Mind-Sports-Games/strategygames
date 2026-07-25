@@ -96,7 +96,7 @@ case class Game(
   }) map { case (g, a) => g -> a }
 
   private def applyActionStr(actionStr: String): VActionStrs = {
-    if (hasJustSwitchedTurns || actionStrs.size == 0)
+    if (Game.opensNewTurnGroup(player, actionStrs.size, startedAtTurn))
       actionStrs :+ Vector(actionStr)
     else
       actionStrs.updated(actionStrs.size - 1, actionStrs(actionStrs.size - 1) :+ actionStr)
@@ -135,6 +135,10 @@ case class Game(
 }
 
 object Game {
+
+  private[go] def opensNewTurnGroup(player: Player, turnGroups: Int, startedAtTurn: Int): Boolean =
+    turnGroups == 0 || player == Player.fromTurnCount(turnGroups + startedAtTurn)
+
   def apply(variant: strategygames.go.variant.Variant): Game =
     new Game(Situation(Board init variant, P1))
 

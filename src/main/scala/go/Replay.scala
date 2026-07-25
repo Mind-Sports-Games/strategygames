@@ -157,7 +157,10 @@ object Replay {
             scoring = () => apiPosition.fenScore,
             captures = before.situation.history.captures.add(
               before.situation.player,
-              before.situation.board.apiPosition.pieceMap.size - apiPosition.pieceMap.size + 1
+              settlementCaptureCount(
+                before.situation.board.apiPosition.pieceMap.size,
+                apiPosition.pieceMap.size
+              )
             ),
             halfMoveClock = before.situation.history.halfMoveClock + before.situation.player.fold(0, 1)
           )
@@ -384,7 +387,7 @@ object Replay {
   ): Validated[String, Game] = {
     val fen  = initialFen.getOrElse(variant.initialFen)
     val init = makeGame(variant, fen.some)
-    if (uciStrings.isEmpty) valid(init)
+    if (uciStrings.forall(_.isEmpty)) valid(init)
     else
       valid(
         gameFromBatchedActions(
@@ -417,7 +420,7 @@ object Replay {
     var currentTurn   = List.empty[String]
 
     framed.foreach { case (actionStr, endTurn) =>
-      if (startedTurns == 0 || player == Player.fromTurnCount(startedTurns + init.turnCount)) {
+      if (Game.opensNewTurnGroup(player, startedTurns, init.turnCount)) {
         if (startedTurns > 0) turns += openTurn.result()
         openTurn = Vector.newBuilder[String]
         startedTurns += 1
@@ -443,7 +446,7 @@ object Replay {
         scoring =
           if (flat.exists(_ != passActionStr)) () => finalPosition.fenScore
           else History.unscored,
-        captures = capturesAfter(framed, flat, finalPosition, player, initialFen, variant)
+        captures = capturesAfter(framed, finalPosition, player, initialFen, variant)
       ),
       variant = variant,
       pocketData = finalPosition.pocketData,
@@ -463,7 +466,6 @@ object Replay {
 
   private def capturesAfter(
       framed: Seq[(String, Boolean)],
-      flat: List[String],
       finalPosition: Api.Position,
       playerAfter: Player,
       initialFen: FEN,
@@ -471,17 +473,23 @@ object Replay {
   ): Score = {
     val fenCaptures = Score(finalPosition.fen.player1Captures, finalPosition.fen.player2Captures)
     framed.lastOption.filter(action => isSelectSquares(action._1)).fold(fenCaptures) { case (_, endTurn) =>
-      val beforeSettlement =
-        Api.positionFromVariantStartingFenAndMoves(variant, initialFen, flat.dropRight(1))
+      val beforeSettlement = Api.positionFromVariantStartingFenAndMoves(
+        variant,
+        initialFen,
+        framed.dropRight(1).iterator.map(_._1).toList
+      )
       fenCaptures.add(
         if (endTurn) !playerAfter else playerAfter,
-        beforeSettlement.pieceMap.size - finalPosition.pieceMap.size + 1
+        settlementCaptureCount(beforeSettlement.pieceMap.size, finalPosition.pieceMap.size)
       )
     }
   }
 
+  private def settlementCaptureCount(stonesBefore: Int, stonesAfter: Int): Int =
+    stonesBefore - stonesAfter + 1
+
   private def isSelectSquares(actionStr: String): Boolean =
-    Uci.SelectSquares.selectSquaresR.matches(actionStr)
+    ScalaPosition.isSelectSquares(actionStr)
 
   private def uciOf(actionStr: String): Uci =
     Uci(actionStr).getOrElse(sys.error(s"Invalid actionStr for replay: ${actionStr}"))

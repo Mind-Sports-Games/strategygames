@@ -230,7 +230,13 @@ private[go] object ScalaPosition {
 
     var index = 0
     while (index < plan.engineMoves.length) {
-      advanceTo(game.play(plan.engineMoves(index)), actions(index))
+      val move = plan.engineMoves(index)
+      if (!game.state.isLegal(move))
+        sys.error(
+          s"Illegal action ${actions(index)} at ply ${index} for ${variant.key}: " +
+            s"legal actions ${game.state.legalMoves.mkString(", ")}"
+        )
+      advanceTo(game.play(move), actions(index))
       index += 1
     }
     plan.trailingDeadStones.foreach(deadStones =>
@@ -266,9 +272,10 @@ private[go] object ScalaPosition {
       )
     catch {
       case illegal: BulkReplay.IllegalMoveAt =>
-        sys.error(
+        throw new RuntimeException(
           s"Illegal action ${actions(illegal.index)} at ply ${illegal.index} for ${variant.key}: " +
-            s"legal actions ${illegal.legalMoves.mkString(", ")}"
+            s"legal actions ${illegal.legalMoves.mkString(", ")}",
+          illegal
         )
     }
 
@@ -299,9 +306,10 @@ private[go] object ScalaPosition {
       )
     else sys.error(s"Unreadable action ${uci} at ply ${ply} for ${variant.key}")
 
-  private def isSelectSquares(uci: String): Boolean = uci.take(3) == DeadStonePrefix
+  private[go] def isSelectSquares(uci: String): Boolean = uci.take(3) == DeadStonePrefix
 
-  private def isSinglePlacement(uci: String): Boolean = uci.length > 2 && uci.charAt(1) == '@'
+  private def isSinglePlacement(uci: String): Boolean =
+    uci.length > 2 && uci.charAt(1) == '@' && Role.allByForsyth.contains(uci.charAt(0).toLower)
 
   /** `Api.uciToMove` folds anything that is not `pass` onto a point of the board, so a drop whose key names
     * no square of this variant — or a token of some other shape entirely — would silently be played somewhere

@@ -110,7 +110,7 @@ object Api {
   }
 
   def uciToMove(uciMove: String, variant: Variant): Int = {
-    if (uciMove == "pass" || uciMove.take(3) == "ss:") passMove(variant)
+    if (uciMove == "pass" || ScalaPosition.isSelectSquares(uciMove)) passMove(variant)
     else {
       val gameSize: Int = variant.boardSize.height
       val dest          = uciMove.drop(2)
