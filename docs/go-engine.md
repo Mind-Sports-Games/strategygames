@@ -12,6 +12,13 @@ consume it and none of them knows which engine answers
 ([ADR 0002](adr/0002-engine-seam-at-api-position.md)). `Api.position` and
 `Api.positionFromVariantNameAndFEN` dispatch on `Variant.usesScalaEngine`.
 
+A go FEN names only its board size, never its engine, so anything that rebuilds a position from a
+FEN alone lands on the joansala variant of that size and silently changes the ruleset underneath a
+scala game. The variant must be carried alongside the FEN: `go.format.FEN.variant` and
+`Api.positionFromFen` can only ever answer joansala, and `Api.positionFromStartingFenAndMoves` is
+deprecated for that reason. Downstream applications should be audited for their own callers of the
+variant-less forms before scala variants go live.
+
 | | |
 |---|---|
 | `go/ScalaPosition.scala` | the seam's pure-Scala implementation — UCI strings in, `PieceMap`/FEN/legal actions out |

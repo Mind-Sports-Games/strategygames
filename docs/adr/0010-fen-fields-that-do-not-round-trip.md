@@ -46,9 +46,14 @@ engine preserves the setup values.
 ## Consequences
 
 - The simple-ko square survives only inside engine state (`GoState.simpleKoMove`), never
-  across a FEN boundary. A position reconstructed from FEN alone loses it, exactly as on
-  joansala — one more instance of the FEN-cannot-express-history consequence recorded in
-  0006 for superko history.
+  across a FEN boundary. A position reconstructed from a FEN this engine emitted loses it,
+  exactly as on joansala — one more instance of the FEN-cannot-express-history consequence
+  recorded in 0006 for superko history.
+- A FEN that *does* carry a coordinate there is honoured: `GoState.isLegal` refuses the
+  point it names. Superko makes that redundant in a played-out game, but a state rebuilt
+  from a FEN starts with an empty position history, so the ko field is the only recapture
+  protection such a position has — enforcing it is 0007's correctness-first rule applied to
+  the one field the emitter cannot write.
 - Handicap setup FENs must not be used as round-trip fixtures; the differential corpus
   compares post-load FENs, which agree.
 - Not observable through the contract: both engines emit the same `-` and the same
