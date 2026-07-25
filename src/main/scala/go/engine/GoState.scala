@@ -66,6 +66,10 @@ final class GoState private (
 
   private def forbiddenKoPoint: Int = simpleKoMove.getOrElse(NoPoint)
 
+  /** This position carrying a replay's history: `hashes` must be exactly the positions this state has passed
+    * through, this one included, and `lastPlacementCaptures` the stones the last placement lifted. The
+    * `require` only checks membership; the rest is the caller's obligation.
+    */
   private[engine] def withReplayHistory(
       hashes: Set[Long],
       lastPlacementCaptures: List[Int]

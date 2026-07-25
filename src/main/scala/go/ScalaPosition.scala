@@ -45,7 +45,9 @@ final private[go] class ScalaPosition(
 
   // NOTE: the engine state is immutable; these vars exist because `Position.setKomi` returns Unit
   // and because `pieceMap` releases its parent below. Precondition: set the komi before reading
-  // `fen`, `fenScore` or `gameResult`, which cache the komi they were first read with.
+  // `fen`, `fenScore` or `gameResult`, which cache the komi they were first read with, or forcing a
+  // `Drop` generated from this position — its board is built when the thunk is forced, not when the
+  // drop is generated.
   def setKomi(komi: Double): Unit = currentGame = currentGame.withKomi(komi)
 
   def deepCopy: Position =
@@ -308,6 +310,10 @@ private[go] object ScalaPosition {
 
   private[go] def isSelectSquares(uci: String): Boolean = uci.take(3) == DeadStonePrefix
 
+  /** The planner's drop recognizer, in place of `Uci.Drop.dropR`: a role char, `@`, then a key [[dropPoint]]
+    * resolves against this variant's board. Wider than the regex in one respect only — the role char is read
+    * case-insensitively, so `S@a1` is a drop here where the regex rejects it.
+    */
   private def isSinglePlacement(uci: String): Boolean =
     uci.length > 2 && uci.charAt(1) == '@' && Role.allByForsyth.contains(uci.charAt(0).toLower)
 
@@ -328,7 +334,8 @@ private[go] object ScalaPosition {
 
   /** A key naming a square the board does not have is ignored: dead stone selection comes from a client, and
     * a square with no stone on it lifts nothing either way. A key that is not a coordinate at all is a caller
-    * bug and says so.
+    * bug and says so. Deliberately unlike a drop, whose off-board key is an error ([[engineMoveOf]],
+    * [[plannedEngineMove]]): a drop names where to play, a dead stone names a stone that may not be there.
     */
   private def deadStonePoints(uci: String, variant: Variant): List[Int] =
     uci.drop(3).split(",").toList.filter(_.nonEmpty).flatMap { key =>

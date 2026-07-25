@@ -51,8 +51,8 @@ rescore would report at least `(0, komiTenths)` plus any stones on a resumed boa
 
 Related, out of scope here: the interactive `ss:` path (`createSelectSquares` +
 `SelectSquares.finalizeAfter`) refreshes neither `scoring` nor `captures` nor `pieces`,
-while the replay `ss:` path refreshes all three (with the spurious captures `+1` that
-order 13 documents). After an `ss:` that removes stones the score genuinely changes, and
+while the replay `ss:` path refreshes all three (with the spurious captures `+1` recorded at
+`Replay.settlementCaptureCount`). After an `ss:` that removes stones the score genuinely changes, and
 only the replay path records it in `History`; the FEN stays correct on both paths because
 its score fields are position-derived.
 

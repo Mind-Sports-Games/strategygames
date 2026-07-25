@@ -87,7 +87,8 @@ contract both must satisfy.
   may replay it.
 - What the batch-path orders must enforce: the batch entry point receives only the real
   actions, never the seeds; and the per-ply/batch equivalence tests must include resumed
-  FENs with `passCount` 1 and 2 followed by a pass and an `ss:`, asserting both paths
-  agree on `Game.plies`/`turnCount`, the full rendered wrapper FEN (turn, passCount,
-  full-move), `canSelectSquares`, and the raw engine FEN. The corpora alone cannot catch a
-  regression here — they all start at `passCount` 0.
+  FENs with `passCount` 1 and 2 followed by a pass, by a drop, and by an `ss:`, asserting
+  both paths agree on `Game.plies`/`turnCount`, the full rendered wrapper FEN (turn,
+  passCount, full-move), `canSelectSquares`, and the raw engine FEN — the drop case pinned
+  absolutely at `fenPassCount == 0`, since a placement resets a seeded pass count. The
+  corpora alone cannot catch a regression here — they all start at `passCount` 0.

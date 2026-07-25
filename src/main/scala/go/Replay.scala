@@ -387,6 +387,8 @@ object Replay {
   ): Validated[String, Game] = {
     val fen  = initialFen.getOrElse(variant.initialFen)
     val init = makeGame(variant, fen.some)
+    // NOTE: an action list that flattens to nothing yields the initial game, where
+    // `gameFromUciStringsPerPly` throws NoSuchElementException on the same input. A deviation, not parity.
     if (uciStrings.forall(_.isEmpty)) valid(init)
     else
       valid(
@@ -485,6 +487,9 @@ object Replay {
     }
   }
 
+  // NOTE: the +1 counts one stone more than an `ss:` lifts. Preserved rather than fixed: it predates the
+  // batch path, the `History.captures` of every settled game already stored downstream was written with it,
+  // and both replay paths must agree field for field.
   private def settlementCaptureCount(stonesBefore: Int, stonesAfter: Int): Int =
     stonesBefore - stonesAfter + 1
 
@@ -494,6 +499,9 @@ object Replay {
   private def uciOf(actionStr: String): Uci =
     Uci(actionStr).getOrElse(sys.error(s"Invalid actionStr for replay: ${actionStr}"))
 
+  /** The action-at-a-time replay, retained as the differential oracle for [[gameFromUciStrings]] above: it
+    * must stay implemented independently of the batch path, or the specs comparing the two prove nothing.
+    */
   def gameFromUciStringsPerPly(
       uciStrings: ActionStrs,
       activePlayer: Player,

@@ -1,5 +1,14 @@
 package strategygames.go.engine
 
+/** Replays a whole move sequence on one mutable scratch board and publishes a single [[GoState]] at the end.
+  * The scratch never escapes, so [[GoState]]'s copy-per-move contract still holds for every state a caller
+  * can reach (ADR 0005).
+  *
+  * `ScratchGoState` below re-implements [[GoState]]'s rules — legality, capture, chain merge, simple ko and
+  * the superko probe — in place. The duplication is deliberate and the two must move in lockstep: a rules fix
+  * lands on both sides, or `BulkReplayTest` and `GoBulkReplayDifferentialSpec`, which fold the same moves
+  * through each and compare every field of the result, go red.
+  */
 object BulkReplay {
 
   final class IllegalMoveAt(
@@ -25,6 +34,10 @@ object BulkReplay {
       scratch.play(move)
       index += 1
     }
+    // NOTE: the frozen state has to carry the whole hash history the fold walked — `fromStoneOwners` seeds
+    // only the final position's own hash, and a truncated history readmits superko recreations the per-ply
+    // path forbids. `ScratchGoState.of` seeds the other end from the caller's history, which is also what
+    // makes `replay(replay(s, a), b)` equal `replay(s, a ++ b)`.
     GoState
       .fromStoneOwners(
         scratch.size,
@@ -461,6 +474,12 @@ private[engine] object ScratchGoState {
   }
 }
 
+/** Open-addressed `Long` set for the fold's superko history — no boxing and no node per ply — sized from the
+  * planned move count so that a fold never rehashes.
+  *
+  * `0L` marks a free slot, and the empty board hashes to `0L` (no stones, nothing XORed in), so that one
+  * value lives in `hasZero` rather than in the table.
+  */
 final private[engine] class LongPositionHashSet(initialCapacity: Int) {
 
   private var table   =
