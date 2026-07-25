@@ -2,7 +2,7 @@ package strategygames.go.engine
 
 /** Replays a whole move sequence on one mutable scratch board and publishes a single [[GoState]] at the end.
   * The scratch never escapes, so [[GoState]]'s copy-per-move contract still holds for every state a caller
-  * can reach (ADR 0005).
+  * can reach (ADR 0001).
   *
   * `ScratchGoState` below re-implements [[GoState]]'s rules — legality, capture, chain merge, simple ko and
   * the superko probe — in place. The duplication is deliberate and the two must move in lockstep: a rules fix

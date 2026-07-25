@@ -48,7 +48,8 @@ the game itself. Full working notes, target tables, and raw JMH JSON live in the
 | E5  | superko `Set[Long]` → primitive table + allocation shapes: 1.3–2x on the engine core                          | **REFUTED**                 | 1.12x / 1.01x / **1.07x**; superko-deleted control proves the whole subsystem is worth ≤1.23x / 1.07x / 1.11x — there is no 1.3x in the JVM shapes                                     |
 
 **E1** — the three changes: `specialEnd` reads `apiPosition.gameEnd` (the `legalActions.size == 0`
-clause is provably redundant post-[ADR 0013](adr/0013-no-actions-after-end-no-unchecked-replay.md));
+clause is provably redundant — a finished game lists no legal actions, see the divergence table in
+[docs/go-engine.md](go-engine.md));
 `go.History` carries `scoring: () => Score` so a replay runs one flood fill instead of 400; the pass
 path plays one action on the position in hand instead of re-replaying the prefix. Lesson: the score
 deferral paid ~3.7 ms @19 where the 4.31 µs × 400 microbenchmark predicted ~1.7 ms — the flood
@@ -56,7 +57,7 @@ fill's per-ply allocation (two scratch arrays) made GC pressure, not just scan t
 
 **E2** — `replayAll(start, moves): FrozenGoPosition`: the exact `GoState` algorithm mutating one
 private copy of the arrays, superko in an open-addressed `Array[Long]`, nothing published until the
-fold completes (interior mutability per [ADR 0005](adr/0005-immutable-api-interior-mutability.md)).
+fold completes (interior mutability per [ADR 0001](adr/0001-pure-scala-go-engine.md)).
 Hit the a-priori floor estimate exactly (104 ns/ply @19). Two lessons: clone-traffic removal scales
 with board area, so the win grows with size; and **the bench corpora never exercise the positional-
 superko probe** — the differential spec stayed green with the probe disabled across all 723 corpus
@@ -105,7 +106,7 @@ untouched.
    landing. `Api.Position.legalActions` loses its last production caller — retiring it is a
    separate decision.
 2. **E4 + E2 as one batch-replay seam API** — the 100x-class path. Give the seam
-   ([ADR 0002](adr/0002-engine-seam-at-api-position.md)) a batch entry point that folds int moves
+   (`Api.Position`, [docs/go-engine.md](go-engine.md)) a batch entry point that folds int moves
    and publishes one final `Position` (E2's shape); wrapper assembly stays in `Replay`, so no
    second engine-aware file. Prerequisite: resolve the **fenPassCount inconsistency** — when a
    resumed FEN carries `fenPassCount` 1..3, `Forsyth.<<@` seeds synthetic pass entries which the
@@ -127,7 +128,7 @@ implementation.
 
 - **Engine replay floor, immutable contract:** ~1.16 µs/ply @19x19 (465 µs/400 plies). The five
   array clones per placement (7.6 KB @19) are ~96% of engine allocation and half the fast-path
-  profile. This is the price of [ADR 0005](adr/0005-immutable-api-interior-mutability.md)'s
+  profile. This is the price of [ADR 0001](adr/0001-pure-scala-go-engine.md)'s
   copy-per-move, and no JVM micro-work moves it (E5: 1.07x, ceiling-proven).
 - **Engine replay floor, mutate-and-freeze:** **104 ns/ply @19x19** measured (E2), matching the
   a-priori estimate of 100–200 ns for legality-checked replay with positional superko. Allocation
@@ -155,14 +156,15 @@ plus this section's bench additions.
 Machine/protocol: JDK 25.0.2 (devenv, OpenJDK 64-Bit Server VM), 32 cores, load average 5.6–7.5
 throughout (not an idle box — the wide 99.9% error bars below are dominated by that, not by variance
 in the code). JMH `-wi 3 -w 2s -i 5 -r 2s -f 1 -to 60s`, `avgt`, µs/op ± 99.9% CI. Corpora:
-go9x9 120 turns, go13x13 200, go19x19 400, go9x9superko 23 (`ss:`-terminated). Raw JSON in
-`bench/results/go-batch-2026-07-25/`: `final-wrapper-replay.json`, `final-seam-replay.json`,
-`final-seam-piecemap.json`, `final-engine-replay.json`, `final-superko-replay.json`,
-`final-movegen-consumer.json`, `final-wrapper-replay-gc.json`.
+go9x9 120 turns, go13x13 200, go19x19 400, go9x9superko 23 (`ss:`-terminated). The tables below and
+this protocol line are the record of the run: the raw JMH JSON artifacts were session-local and are
+not committed — every row is reproducible from the committed benchmarks (`GoLayerBenchmark`,
+`GoEngineBenchmark`, `GoMovegenConsumerBenchmark` in `bench/`) with the invocation above, plus
+`-prof gc` for the allocation rows.
 
 ### (a) Full-game `Game`-producing replay — the headline
 
-`final-wrapper-replay.json`. `prodReplay` = `Replay.gameFromUciStrings` (batch default);
+`GoLayerBenchmark`: `prodReplay` = `Replay.gameFromUciStrings` (batch default);
 `prodReplayPerPly` = `Replay.gameFromUciStringsPerPly` (the retained old path, same run).
 
 | µs/op                   | go9x9              | go13x13            | go19x19              |
@@ -175,7 +177,7 @@ go9x9 120 turns, go13x13 200, go19x19 400, go9x9superko 23 (`ss:`-terminated). R
 | batch vs per-ply        | 4.6x               | 5.3x               | 7.7x                 |
 
 The `ss:`-terminated corpus, where the batch path pays two folds and two pieceMap scans
-(`final-superko-replay.json`, `GoEngineBenchmark` at `size=go9x9superko`, no joansala denominator):
+(`GoEngineBenchmark` at `size=go9x9superko`, no joansala denominator):
 
 | µs/op        | go9x9superko (23 turns) |
 | ------------ | ----------------------- |
@@ -191,7 +193,7 @@ means re-extending the param list by hand.
 
 ### (b) Seam level — batch, per-ply positions, per-ply
 
-`final-seam-replay.json` + `final-seam-piecemap.json`. All four consume only `.turn`/`.size`
+`GoLayerBenchmark` seam workloads. All four consume only `.turn`/`.size`
 except `seamPerPlyPieceMapReplay`, which forces a pieceMap every ply.
 
 | µs/op                       | go9x9            | go13x13           | go19x19           |
@@ -210,7 +212,7 @@ not the fold.
 
 ### (c) Engine fold
 
-`final-engine-replay.json`. `bulkEngineReplay` = `BulkReplay.replay` (mutate-and-freeze scratch);
+`GoLayerBenchmark`: `bulkEngineReplay` = `BulkReplay.replay` (mutate-and-freeze scratch);
 `engineReplay` = the immutable `GoGame.play` loop.
 
 | µs/op               | go9x9          | go13x13         | go19x19         |
@@ -226,7 +228,7 @@ and this box is loaded where E2's was quiet.
 
 ### (d) Movegen consumer surface
 
-`final-movegen-consumer.json`, mid-game situation. The replica is what `validDrops` used to do
+`GoMovegenConsumerBenchmark`, mid-game situation. The replica is what `validDrops` used to do
 (apply every candidate drop eagerly); prod now defers `afterDrop` into a `LazyBoardAfter` thunk.
 
 | µs/op                                  | go9x9          | go13x13         | go19x19          |
@@ -239,8 +241,8 @@ and this box is loaded where E2's was quiet.
 
 ### (e) Allocation, headline rows
 
-`final-wrapper-replay-gc.json` (`-prof gc`, same protocol; its timings — 71.163 / 125.549 / 285.211
-batch, 314.524 / 690.637 / 2024.866 per-ply — corroborate (a)).
+The (a) workloads rerun under `-prof gc`, same protocol; that run's timings — 71.163 / 125.549 /
+285.211 batch, 314.524 / 690.637 / 2024.866 per-ply — corroborate (a).
 
 | B/op                    | go9x9       | go13x13     | go19x19     |
 | ----------------------- | ----------- | ----------- | ----------- |
@@ -262,9 +264,9 @@ the 277.6 µs path (33%).
 E3's bitboard core does not land. Under copy-per-move it is worth 2.2x on movegen @19x19 — real, but
 the tier it was chased for (20x-class movegen) needs incrementally maintained per-chain liberty
 bitmaps, and maintaining those across a copy-per-move state blows the clone budget
-[ADR 0005](adr/0005-immutable-api-interior-mutability.md) sets. They belong fused into the mutable
+[ADR 0001](adr/0001-pure-scala-go-engine.md) sets. They belong fused into the mutable
 scratch state, which is a different engine, not a faster one. Revisit if go movegen throughput ever
 appears on a production critical path; replay is not that path now that batch replay has landed, and
 the movegen consumers that exist are wrapper-dominated. The measured tiers a movegen-bound consumer
 could then cash, and the order to take them in, are recorded in
-[ADR 0018](adr/0018-engine-movegen-options-parked.md).
+[ADR 0002](adr/0002-go-batch-replay.md) ("Parked: engine-level movegen options").

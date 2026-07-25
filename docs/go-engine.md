@@ -64,17 +64,17 @@ string planning and FEN re-parse, forcing no pieceMap.
 Two decisions bind both paths. A game resumed from a FEN counts only the actions it is handed: the
 FEN's own fields are the sole authority for everything before the resume point, and the synthetic
 pass entries `Forsyth.<<@` seeds onto `board.uciMoves` are wrapper bookkeeping that never reaches
-the engine and is never a ply ([ADR 0016](adr/0016-fenpasscount-seeds-and-ply-count.md)). Pass plies
+the engine and is never a ply ([ADR 0002](adr/0002-go-batch-replay.md)). Pass plies
 do not rescore `history.score` — correct by construction rather than a preserved bug, because a pass
 shares its predecessor's board array and area scoring reads only that array
-([ADR 0017](adr/0017-history-score-on-pass-plies.md)).
+([ADR 0002](adr/0002-go-batch-replay.md)).
 
 Four behaviours look like bugs and are kept deliberately; the reason sits at each code site:
 
 | | where |
 |---|---|
 | An `ss:` records one capture more than the stones it lifts | `Replay.settlementCaptureCount`, both replay paths |
-| The interactive `ss:` refreshes neither `scoring` nor `captures` nor `pieces`; the replay `ss:` refreshes all three | `SelectSquares.finalizeAfter` vs `Replay.replaySelectSquares` ([ADR 0017](adr/0017-history-score-on-pass-plies.md)) |
+| The interactive `ss:` refreshes neither `scoring` nor `captures` nor `pieces`; the replay `ss:` refreshes all three | `SelectSquares.finalizeAfter` vs `Replay.replaySelectSquares` ([ADR 0002](adr/0002-go-batch-replay.md)) |
 | An off-board `ss:` key is ignored, where an off-board drop key is an error | `ScalaPosition.deadStonePoints` |
 | An action list that flattens to nothing replays to the initial game, where the per-ply path throws | `Replay.gameFromUciStrings` |
 
