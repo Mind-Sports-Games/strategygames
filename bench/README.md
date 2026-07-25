@@ -115,6 +115,51 @@ Restrict parameters (e.g. a quick check):
 sbt "bench/Jmh/run -i 1 -wi 1 -f 1 -r 1s -w 1s -p family=backgammon,go -p size=short,long .*UciDumpBenchmark.*"
 ```
 
+## Go engine benchmarks (joansala vs pure Scala)
+
+`GoEngineBenchmark` compares the joansala-backed go variants (`go9x9`, `go13x13`,
+`go19x19`) against their pure-Scala counterparts (`go9x9Scala`, `go13x13Scala`,
+`go19x19Scala`) over the committed `go-go9x9-long`, `go-go13x13-long` and
+`go-long` corpus fixtures — the same action strings feed both engines, so the
+`engine` parameter is the only variable.
+
+Three workloads, each a production call path:
+
+| Benchmark | Call path | Fixture level |
+|---|---|---|
+| `replay` | `go.Replay.gameFromUciStrings` over the whole fixture | `Level.Trial` |
+| `applyDrop` | `go.Board.afterDrop` on a mid-game board | `Level.Trial` |
+| `legalDrops` | `Api.Position.legalDrops` on a mid-game position | `Level.Invocation` |
+
+`legalDrops` needs `Level.Invocation`: `legalDrops`, `legalActions` and the pure
+engine's `GoState.legalMoves` are all cached, so each invocation gets a position
+freshly parsed from the same mid-game FEN. JMH excludes fixture time from the
+reported score.
+
+Quick go-only run (roughly two minutes, wide error bars — use for a smoke check):
+
+```
+sbt "bench/Jmh/run -wi 3 -i 3 -f 1 -to 60s strategygames.bench.GoEngineBenchmark"
+```
+
+Checkpoint baseline (roughly five minutes, error bars under 20%):
+
+```
+sbt "bench/Jmh/run -wi 3 -w 2s -i 5 -r 2s -f 1 -to 60s \
+  -rf json -rff go-jmh.json strategygames.bench.GoEngineBenchmark"
+```
+
+Filter to one workload, one size, or one engine with the regex and `-p`:
+
+```
+sbt "bench/Jmh/run -wi 3 -w 2s -i 5 -r 2s -f 1 -to 60s \
+  -p size=go19x19 GoEngineBenchmark.legalDrops"
+```
+
+Never run `bench/Jmh/run` without iteration and fork limits: the default settings
+(5 forks × 5 warmup × 5 measurement over every benchmark in the project) take
+hours.
+
 ## Allocation profiling
 
 Add the GC profiler to report bytes allocated per operation:
