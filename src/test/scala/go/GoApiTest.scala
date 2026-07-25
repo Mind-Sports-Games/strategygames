@@ -227,7 +227,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
     "accept the multi stone recapture during the replay" in {
       newGame.pieceMap.size must be_>(0)
     }
-    "forbid the pass mediated repeat up front under positional superko (ADR 0014)" in {
+    "forbid the pass mediated repeat up front under positional superko (ADR 0001)" in {
       (newGame.legalDrops.contains(58) === false) and
         (newGame.makeMoves(List(Api.moveToUci(58, variant.Go9x9))) must throwAn[Exception])
     }
@@ -544,7 +544,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
     )
 
     val newGame1 = game.makeMoves(moves.init)
-    "be forbidden up front instead of ending as a repetition (ADR 0011)" in {
+    "be forbidden up front instead of ending as a repetition (ADR 0001)" in {
       (newGame1.gameResult === GameResult.Ongoing()) and
         (newGame1.legalDrops.contains(Api.uciToMove("s@g3", variant.Go9x9)) === false) and
         (newGame1.makeMoves(List("s@g3")) must throwAn[Exception])

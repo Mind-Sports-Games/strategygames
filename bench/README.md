@@ -121,7 +121,7 @@ sbt "bench/Jmh/run -i 1 -wi 1 -f 1 -r 1s -w 1s -p family=backgammon,go -p size=s
 `go13x13`, `go19x19`) over the committed `go-go9x9-long`, `go-go13x13-long` and
 `go-long` corpus fixtures. It reports absolute timings per board size; compare
 against the recorded baselines from earlier runs to detect regressions. (Until
-the joansala engine's removal — see ADR 0015 — it also carried an `engine`
+the joansala engine's removal — see `docs/go-engine.md`, "Retiring joansala" — it also carried an `engine`
 parameter comparing the two engines.)
 
 Three workloads, each a production call path:

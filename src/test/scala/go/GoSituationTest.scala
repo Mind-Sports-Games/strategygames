@@ -442,7 +442,7 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     val game_p12 = game_p11.apply(g9.validDrops(game_p11.situation).filter(_.pos.key == "g9").head)
     val game_p13 = game_p12.apply(g9.validPass(game_p12.situation))
 
-    "be forbidden up front under positional superko (ADR 0014)" in {
+    "be forbidden up front under positional superko (ADR 0001)" in {
       g9.validDrops(game_p12.situation).map(_.pos.key).contains("h9") === false
     }
 

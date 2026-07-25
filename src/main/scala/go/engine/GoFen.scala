@@ -129,7 +129,8 @@ object GoFen {
     if (pocketStart >= 0) field.substring(0, pocketStart) else field
   }
 
-  // NOTE: runs are multi-digit, so `19` is a full empty 19x19 row and not 1 + 9 (ADR 0012). A row
+  // NOTE: runs are multi-digit, so `19` is a full empty 19x19 row and not 1 + 9 (see
+  // docs/go-engine.md, "Where it differed from joansala"). A row
   // that does not measure exactly `size` is rejected.
   private def readRow(row: String, size: Int, rank: Int, owners: Array[Int]): Option[GoFenError] = {
     var file                        = 0
@@ -165,7 +166,8 @@ object GoFen {
 
   // NOTE: a state rebuilt from a FEN has no position history for superko to consult, so this field
   // is its only recapture protection — `render` writes the live simple-ko coordinate and this
-  // parser hands it back to `GoState.isLegal` (ADR 0010, as amended).
+  // parser hands it back to `GoState.isLegal` (see docs/go-engine.md, "Where it differed from
+  // joansala").
   private def parseKoPoint(field: String, size: Int): Either[GoFenError, Option[Int]] =
     if (field == NoKoPoint) Right(None)
     else {

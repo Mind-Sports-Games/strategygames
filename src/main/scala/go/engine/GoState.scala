@@ -388,7 +388,7 @@ final class GoState private (
     absorbFriendlyNeighbor(south)
     absorbFriendlyNeighbor(north)
 
-    // NOTE: only load-bearing after a FEN rebuild — see the parseKoPoint NOTE in GoFen (ADR 0010).
+    // NOTE: only load-bearing after a FEN rebuild — see the parseKoPoint NOTE in GoFen.
     val koMove =
       if (capturedStones == 1 && newCounts(root) == 1 && newLibs(root) == 1)
         Some(capturedMoves.head)
