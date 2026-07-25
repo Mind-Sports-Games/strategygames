@@ -12,51 +12,30 @@ import cats.data.Validated
 import strategygames.{ ActionStrs, Player }
 import strategygames.go.{ Api, Board, Game, Pos, Replay }
 import strategygames.go.format.FEN
-import strategygames.go.variant.{
-  Go13x13,
-  Go13x13Joansala,
-  Go19x19,
-  Go19x19Joansala,
-  Go9x9,
-  Go9x9Joansala,
-  Variant => GoVariant
-}
+import strategygames.go.variant.{ Go13x13, Go19x19, Go9x9, Variant => GoVariant }
 
 final case class GoBoardSize(
     key: String,
     corpusFamily: String,
-    joansalaVariant: GoVariant,
-    scalaVariant: GoVariant
+    variant: GoVariant
 )
 
 object GoBoardSize {
 
   val all: List[GoBoardSize] = List(
-    GoBoardSize("go9x9", "go-go9x9", Go9x9Joansala, Go9x9),
-    GoBoardSize("go13x13", "go-go13x13", Go13x13Joansala, Go13x13),
-    GoBoardSize("go19x19", "go", Go19x19Joansala, Go19x19)
+    GoBoardSize("go9x9", "go-go9x9", Go9x9),
+    GoBoardSize("go13x13", "go-go13x13", Go13x13),
+    GoBoardSize("go19x19", "go", Go19x19)
   )
 
   def named(key: String): GoBoardSize =
     all.find(_.key == key).getOrElse(sys.error(s"unknown go board size: ${key}"))
 }
 
-object GoEngine {
-
-  val Joansala  = "joansala"
-  val PureScala = "scala"
-
-  def variantFor(engine: String, size: GoBoardSize): GoVariant = engine match {
-    case Joansala  => size.joansalaVariant
-    case PureScala => size.scalaVariant
-    case unknown   => sys.error(s"unknown go engine: ${unknown}")
-  }
-}
-
 final case class GoCorpusGame(size: GoBoardSize, initialFen: Option[FEN], actionStrs: ActionStrs) {
 
   private def startPlayer: Player =
-    initialFen.getOrElse(size.joansalaVariant.initialFen).player.getOrElse(Player.P1)
+    initialFen.getOrElse(size.variant.initialFen).player.getOrElse(Player.P1)
 
   def activePlayerAfter(turns: Int): Player =
     Player.fromTurnCount(turns + startPlayer.fold(0, 1))
@@ -101,16 +80,13 @@ class GoReplayInput {
   @Param(Array("go9x9", "go13x13", "go19x19"))
   var size: String = ""
 
-  @Param(Array("joansala", "scala"))
-  var engine: String = ""
-
   var corpus: GoCorpusGame = uninitialized
   var variant: GoVariant   = uninitialized
 
   @Setup(Level.Trial)
   def setup(): Unit = {
     corpus = GoCorpusGame.load(size)
-    variant = GoEngine.variantFor(engine, corpus.size)
+    variant = corpus.size.variant
   }
 
   def replayWholeGame(): Game = GoCorpusGame.replay(corpus, variant, corpus.actionStrs)
@@ -122,9 +98,6 @@ class GoMidGameBoard {
   @Param(Array("go9x9", "go13x13", "go19x19"))
   var size: String = ""
 
-  @Param(Array("joansala", "scala"))
-  var engine: String = ""
-
   var board: Board   = uninitialized
   var player: Player = Player.P1
   var dropPos: Pos   = uninitialized
@@ -132,7 +105,7 @@ class GoMidGameBoard {
   @Setup(Level.Trial)
   def setup(): Unit = {
     val corpus    = GoCorpusGame.load(size)
-    val variant   = GoEngine.variantFor(engine, corpus.size)
+    val variant   = corpus.size.variant
     val situation = GoCorpusGame.replay(corpus, variant, corpus.turnsBeforeMidGameDrop).situation
     board = situation.board
     player = situation.player
@@ -149,9 +122,6 @@ class GoMidGamePosition {
   @Param(Array("go9x9", "go13x13", "go19x19"))
   var size: String = ""
 
-  @Param(Array("joansala", "scala"))
-  var engine: String = ""
-
   var variantKey: String     = ""
   var fen: String            = ""
   var position: Api.Position = uninitialized
@@ -159,7 +129,7 @@ class GoMidGamePosition {
   @Setup(Level.Trial)
   def setupCorpus(): Unit = {
     val corpus  = GoCorpusGame.load(size)
-    val variant = GoEngine.variantFor(engine, corpus.size)
+    val variant = corpus.size.variant
     variantKey = variant.key
     fen = GoCorpusGame
       .replay(corpus, variant, corpus.turnsBeforeMidGameDrop)

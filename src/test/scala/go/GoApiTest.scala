@@ -140,26 +140,6 @@ class GoApiTest extends Specification with ValidatedMatchers {
     }
   }
 
-  // JOANSALA ORACLE: exercises Api.positionFromFen/goBoardFromFen, which always answer the parked
-  // joansala engine; deleted with it in Phase C.
-  "Piece map of Go game" should {
-    val game                     = Api.position(variant.Go19x19)
-    val newGame                  = game.makeMoves(List(0, 6, 3, 7, 4).map(Api.moveToUci(_, variant.Go19x19)))
-    val position                 = Api.positionFromFen(newGame.fen.value)
-    val fen                      = newGame.fen
-    val pieceMap: PieceMap       = position.pieceMap
-    val pieceAtD1: Option[Piece] = pieceMap.get(Pos.D1)
-    "fen after a few moves" in {
-      fen.value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S2SS1ss11[SSSSSSSSSSssssssssss] w - 30 95 0 0 75 0 3"
-    }
-    "P1 Stone at pos D1" in {
-      pieceAtD1 === Some(Piece(P1, Stone))
-    }
-    "5 current pieces " in {
-      pieceMap.size === 5
-    }
-  }
-
   "fen after 1 moves of Go game" should {
     val game     = Api.position(variant.Go19x19)
     val newGame1 = game.makeMoves(List(0).map(Api.moveToUci(_, variant.Go19x19)))
@@ -253,21 +233,6 @@ class GoApiTest extends Specification with ValidatedMatchers {
     }
   }
 
-  // JOANSALA ORACLE: exercises Api.positionFromFen/goBoardFromFen, which always answer the parked
-  // joansala engine; deleted with it in Phase C.
-  "goBoardFromFen" should {
-    val game    = Api.position(variant.Go19x19)
-    val newGame = game.makeMoves(List(0, 7, 4, 1).map(Api.moveToUci(_, variant.Go19x19)))
-    val fen     = newGame.fen
-    val goBoard = Api.goBoardFromFen(fen)
-    "fen is 19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/Ss2S2s11[SSSSSSSSSSssssssssss] b - 20 95 0 0 75 0 3" in {
-      fen.value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/Ss2S2s11[SSSSSSSSSSssssssssss] b - 20 95 0 0 75 0 3"
-    }
-    "go board diagram matches the fen " in {
-      goBoard.toDiagram === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/XO2X2O11 b -"
-    }
-  }
-
   "positionFromVariantAndMoves" should {
     val uciMoves = List("S@a1", "S@e1") // 0,4
     val pos      = Api.positionFromVariantAndMoves(variant.Go19x19, uciMoves)
@@ -314,46 +279,31 @@ class GoApiTest extends Specification with ValidatedMatchers {
     }
   }
 
-  // JOANSALA ORACLE: exercises Api.positionFromFen/goBoardFromFen, which always answer the parked
-  // joansala engine; deleted with it in Phase C.
-  "game result " should {
-    val fen      =
-      "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S3s14[SSSSSSSSSSssssssssss] b - 10 85 0 0 75 0 2"
-    val position = Api.positionFromFen(fen)
-    "is still ongoing during game" in {
-      position.gameEnd === false
-      position.gameOutcome === -1000
-      position.p1Score === 1.0
-      position.p2Score === 8.5
-      position.gameResult === GameResult.Ongoing()
-    }
-  }
-
   "game result" should {
     val fen      =
       "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S3s14[SSSSSSSSSSssssssssss] b - 10 85 0 0 75 0 2"
-    val position = Api.positionFromFen(fen)
-    position.makeMoves(List("pass", "pass", "ss:"))
+    val position = Api.positionFromVariantNameAndFEN(variant.Go19x19.key, fen)
+    val newGame  = position.makeMoves(List("pass", "pass", "ss:"))
     "is not a draw if both players pass early due to komi" in {
-      position.gameResult !== GameResult.Draw()
+      newGame.gameResult !== GameResult.Draw()
     }
   }
 
   "game result" should {
     val fen      =
       "SSSSSS13/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/S3s14[SSSSSSSSSSssssssssss] b - 70 70 0 0 60 0 2"
-    val position = Api.positionFromFen(fen)
-    position.makeMoves(List("pass", "pass", "ss:"))
+    val position = Api.positionFromVariantNameAndFEN(variant.Go19x19.key, fen)
+    val newGame  = position.makeMoves(List("pass", "pass", "ss:"))
     "is a draw if both players pass in given position" in {
-      position.gameResult === GameResult.Draw()
-      position.gameOutcome === 0
+      newGame.gameResult === GameResult.Draw()
+      newGame.gameOutcome === 0
     }
   }
 
   "game result" should {
     val fen      =
       "sssssssssssssssssss/sssssssssssssssssss/19/19/19/19/19/19/19/19/19/19/19/19/19/SSSSSSSSSSSSSSSSSSS/19/SSSSSSSSSSSSSSSSSSS/19[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 0 39"
-    val position = Api.positionFromFen(fen)
+    val position = Api.positionFromVariantNameAndFEN(variant.Go19x19.key, fen)
     val newGame  = position.makeMoves(List("pass", "pass", "ss:"))
     "be a win for player 1 as more territory " in {
       newGame.gameResult === GameResult.VariantEnd()
@@ -365,7 +315,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
   "game result" should {
     val fen      =
       "19/sssssssssssssssssss/19/sssssssssssssssssss/19/19/19/19/19/19/19/19/19/19/19/19/19/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 0 39"
-    val position = Api.positionFromFen(fen)
+    val position = Api.positionFromVariantNameAndFEN(variant.Go19x19.key, fen)
     val newGame  = position.makeMoves(List("pass", "pass", "ss:"))
     "be a win for player 2 as more territory " in {
       newGame.gameResult === GameResult.VariantEnd()
@@ -377,7 +327,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
   "game result" should {
     val fen      =
       "2SSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/S1S1S1S1S1S1S1S1S1S/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/S1S1S1S1S1S1S1S1S1S[SSSSSSSSSSssssssssss] w - 3610 75 0 0 75 0 239"
-    val position = Api.positionFromFen(fen)
+    val position = Api.positionFromVariantNameAndFEN(variant.Go19x19.key, fen)
     "be a winning for p1 but ongoing as moves can be played " in {
       position.gameEnd === false
       position.gameOutcome === 1000
@@ -392,7 +342,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
   "game result" should {
     val fen      =
       "s1s1s1s1s1s1s1s1s1s/sssssssssssssssssss/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/S1S1S1S1S1S1S1S1S1S/SSSSSSSSSSSSSSSSSSS/S1S1S1S1S1S1S1S1S1S/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/19[SSSSSSSSSSssssssssss] w - 0 75 0 0 75 0 239"
-    val position = Api.positionFromFen(fen)
+    val position = Api.positionFromVariantNameAndFEN(variant.Go19x19.key, fen)
     "be a win as for p1 but ongoing as moves can be played " in {
       position.gameEnd === false
       position.gameOutcome === 1000
@@ -407,7 +357,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
   "game result" should {
     val fen      =
       "s1s1s1s1s1s1s1s1s1s/sssssssssssssssssss/1SSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/S1S1S1S1S1S1S1S1S1S/SSSSSSSSSSSSSSSSSSS/S1S1S1S1S1S1S1S1S1S/SSSSSSSSSSSSSSSSSSS/SSSSSSSSSSSSSSSSSSS/19[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 0 239"
-    val position = Api.positionFromFen(fen)
+    val position = Api.positionFromVariantNameAndFEN(variant.Go19x19.key, fen)
     "not count neutral spaces in scoring " in {
       position.gameEnd === false
       position.gameOutcome === 1000
@@ -437,48 +387,22 @@ class GoApiTest extends Specification with ValidatedMatchers {
     }
   }
 
-  // JOANSALA ORACLE: exercises Api.positionFromFen/goBoardFromFen, which always answer the parked
-  // joansala engine; deleted with it in Phase C.
-  "Piece map of 9x9 Go game" should {
-    val game                     = Api.position(variant.Go9x9)
-    val newGame                  = game.makeMoves(List(0, 16, 30, 59, 4).map(Api.moveToUci(_, variant.Go9x9)))
-    val position                 = Api.positionFromFen(newGame.fen.value)
-    val fen                      = newGame.fen
-    val pieceMap: PieceMap       = position.pieceMap
-    val pieceAtE1: Option[Piece] = pieceMap.get(Pos.E1)
-    val pieceAtF7: Option[Piece] = pieceMap.get(Pos.F7) // 59
-    "fen after a few moves" in {
-      fen.value === "9/9/5s3/9/9/3S5/9/7s1/S3S4[SSSSSSSSSSssssssssss] w - 30 95 0 0 75 0 3"
-    }
-    "P1 Stone at pos E1" in {
-      pieceAtE1 === Some(Piece(P1, Stone))
-    }
-    "P2 Stone at pos F7" in {
-      pieceAtF7 === Some(Piece(P2, Stone))
-    }
-    "5 current pieces " in {
-      pieceMap.size === 5
-    }
-  }
-
-  // JOANSALA ORACLE: exercises Api.positionFromFen/goBoardFromFen, which always answer the parked
-  // joansala engine; deleted with it in Phase C.
-  "Api.positonFromFen for 13x13" should {
+  "Api.positionFromVariantNameAndFEN for 13x13" should {
     val game           = Api.position(variant.Go13x13)
     val newGame        = game.makeMoves(List(4, 16, 30, 59, 140).map(Api.moveToUci(_, variant.Go13x13)))
     val fen            = newGame.fen
-    val createPosition = Api.positionFromFen(newGame.fen.value)
+    val createPosition = Api.positionFromVariantNameAndFEN(variant.Go13x13.key, newGame.fen.value)
     val createdFen     = createPosition.fen
     "have a matching fen to original game" in {
       fen === createdFen
     }
   }
 
-  "Api.positonFromFen for 19x19" should {
+  "Api.positionFromVariantNameAndFEN for 19x19" should {
     val game           = Api.position(variant.Go19x19)
     val newGame        = game.makeMoves(List(4, 16, 30, 59, 140).map(Api.moveToUci(_, variant.Go19x19)))
     val fen            = newGame.fen
-    val createPosition = Api.positionFromFen(newGame.fen.value)
+    val createPosition = Api.positionFromVariantNameAndFEN(variant.Go19x19.key, newGame.fen.value)
     val createdFen     = createPosition.fen
 
     "have a matching fen to original game" in {
@@ -486,11 +410,11 @@ class GoApiTest extends Specification with ValidatedMatchers {
     }
   }
 
-  "Api.positonFromFen for 9x9" should {
+  "Api.positionFromVariantNameAndFEN for 9x9" should {
     val game           = Api.position(variant.Go9x9)
     val newGame        = game.makeMoves(List(4, 16, 30, 59, 70).map(Api.moveToUci(_, variant.Go9x9)))
     val fen            = newGame.fen
-    val createPosition = Api.positionFromFen(newGame.fen.value)
+    val createPosition = Api.positionFromVariantNameAndFEN(variant.Go9x9.key, newGame.fen.value)
     val createdFen     = createPosition.fen
     "have a matching fen to original game" in {
       fen === createdFen
@@ -502,7 +426,7 @@ class GoApiTest extends Specification with ValidatedMatchers {
     val newGame                           = game.makeMoves(List(4, 16, 30, 59, 140).map(Api.moveToUci(_, variant.Go13x13)))
     val fen                               = newGame.fen
     val pieceMap                          = newGame.pieceMap
-    val createPosition                    = Api.positionFromFen(newGame.fen.value)
+    val createPosition                    = Api.positionFromVariantNameAndFEN(variant.Go13x13.key, newGame.fen.value)
     val pieceMapFromPositionApi: PieceMap = createPosition.pieceMap
 
     val pieceAtE1: Option[Piece]  = pieceMap.get(Pos.E1)  // 4

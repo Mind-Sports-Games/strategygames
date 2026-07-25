@@ -6,12 +6,8 @@ import strategygames.go.engine.{ GoFen, GoGame, GoState }
 import strategygames.go.format.FEN
 import strategygames.go.variant.Variant
 
-/** The pure-Scala engine behind [[strategygames.go.Api.Position]], the seam every go consumer — Board,
-  * Situation, Game, Forsyth, Replay — already speaks. See `docs/go-engine.md`.
-  *
-  * The variant is passed in rather than inferred from the FEN: board size alone identifies the canonical
-  * variant of that size, so a position on a parked `…Joansala` variant that lost its variant would silently
-  * route onto this engine.
+/** The engine behind [[strategygames.go.Api.Position]], the seam every go consumer — Board, Situation, Game,
+  * Forsyth, Replay — already speaks. See `docs/go-engine.md`.
   */
 final private[go] class ScalaPosition(
     game: GoGame,
@@ -147,7 +143,7 @@ final private[go] class ScalaPosition(
   private def inheritanceFor(playedUcis: List[String]): ScalaPosition.ParentStones =
     ScalaPosition.ParentStones(() => pieceMap, currentGame.state, playedUcis)
 
-  // NOTE: the first branch takes deepCopy where GoPosition.initPos reloads from the fen — deliberate,
+  // NOTE: the first branch takes deepCopy rather than reloading from the fen — deliberate,
   // because the copy keeps the superko hash history a FEN reload cannot carry.
   private def positionBefore(previousMoves: List[String]): Position =
     if (previousMoves.isEmpty && variant.initialFen.value != fen.value) deepCopy
@@ -186,9 +182,9 @@ final private[go] class ScalaPosition(
       Api.uciToMove(uci, variant)
     } else sys.error(s"Unreadable action ${uci} for ${variant.key}")
 
-  /** A key naming a square the board does not have is ignored, as the joansala engine ignores it: dead stone
-    * selection comes from a client, and a square with no stone on it lifts nothing either way. A key that is
-    * not a coordinate at all is a caller bug and says so.
+  /** A key naming a square the board does not have is ignored: dead stone selection comes from a client, and
+    * a square with no stone on it lifts nothing either way. A key that is not a coordinate at all is a caller
+    * bug and says so.
     */
   private def deadStoneMoves(uci: String): List[Int] =
     uci.drop(3).split(",").toList.filter(_.nonEmpty).flatMap { key =>

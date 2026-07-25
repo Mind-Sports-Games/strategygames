@@ -1,30 +1,28 @@
 # The pure-Scala Go engine
 
-Go runs on two engines. The variants `go9x9`, `go13x13` and `go19x19` delegate to the external
-joansala engine; `go9x9Scala`, `go13x13Scala` and `go19x19Scala` run the pure-Scala engine in
-`src/main/scala/go/engine/`. Both families are live so each can serve as the other's oracle in
-benchmarks and differential tests ([ADR 0001](adr/0001-parallel-scala-go-variants.md)).
+Go runs on the pure-Scala engine in `src/main/scala/go/engine/`: the variants `go9x9`, `go13x13`
+and `go19x19` (ids 1, 2, 4) all build their positions from it. It replaced the external joansala
+engine, which was developed against it as an oracle and then removed
+([ADR 0001](adr/0001-parallel-scala-go-variants.md),
+[ADR 0015](adr/0015-variant-identity-when-joansala-retires.md)).
 
 ## Layout
 
 `strategygames.go.Api.Position` is the single seam: Board, Situation, Game, Forsyth and Replay all
-consume it and none of them knows which engine answers
-([ADR 0002](adr/0002-engine-seam-at-api-position.md)). `Api.position` and
-`Api.positionFromVariantNameAndFEN` dispatch on `Variant.usesScalaEngine`.
+consume it and none of them knows the engine behind it
+([ADR 0002](adr/0002-engine-seam-at-api-position.md)).
 
-A go FEN names only its board size, never its engine, so anything that rebuilds a position from a
-FEN alone lands on the joansala variant of that size and silently changes the ruleset underneath a
-scala game. The variant must be carried alongside the FEN: `go.format.FEN.variant` and
-`Api.positionFromFen` can only ever answer joansala, and `Api.positionFromStartingFenAndMoves` is
-deprecated for that reason. Downstream applications should be audited for their own callers of the
-variant-less forms before scala variants go live.
+A go FEN names only its board size, so `go.format.FEN.variant` infers the canonical variant of that
+size — unambiguous now that each size has exactly one variant. A caller already holding a variant
+should pass it (`Api.positionFromVariantNameAndFEN`, `Api.positionFromVariantStartingFenAndMoves`)
+rather than infer it back from the FEN.
 
 | | |
 |---|---|
-| `go/ScalaPosition.scala` | the seam's pure-Scala implementation — UCI strings in, `PieceMap`/FEN/legal actions out |
+| `go/ScalaPosition.scala` | the seam's implementation — UCI strings in, `PieceMap`/FEN/legal actions out |
 | `go/engine/GoState.scala` | a position: board, chains, side to move, position-hash history, and the rules |
 | `go/engine/GoGame.scala` | a state plus komi, ply count, and whether dead stones have been agreed |
-| `go/engine/GoFen.scala` | the FEN dialect, shared byte for byte with the joansala variants |
+| `go/engine/GoFen.scala` | the FEN dialect |
 | `go/engine/Zobrist.scala` | the per-size stone hash tables |
 
 Below the seam the board is a flat `(N+2)²` byte array with a sentinel border, chains are union-find
@@ -48,59 +46,42 @@ alphabet tops out at 19 files, which is the ceiling for any new size. (Do not de
 `Zobrist` match from `supportedSizes`: the two objects would then initialize through each
 other for zero gain.)
 
-## Where it differs from joansala
+## Where it differed from joansala
 
-Where the two engines disagree the rules win, and each difference is recorded rather than smoothed
-over ([ADR 0007](adr/0007-rules-correct-over-joansala-parity.md)). The differential suite treats
-this table as its allowlist: any other mismatch is a bug.
+Where the two engines disagreed the rules won, and each difference was recorded rather than
+smoothed over ([ADR 0007](adr/0007-rules-correct-over-joansala-parity.md)). Stored games played
+under the retired engine may exhibit any of these on replay — this table is the checklist for a
+downstream stored-game audit ([ADR 0015](adr/0015-variant-identity-when-joansala-retires.md)).
 
-| | joansala | pure Scala | |
+| | joansala (retired) | pure Scala | |
 |---|---|---|---|
 | Empty region bordered by no colour | all white's | nobody's | [0008](adr/0008-empty-region-scores-for-nobody.md) |
 | Raw FEN captures and pass count | hardcoded `0` | the real counts | [0009](adr/0009-raw-fen-reports-real-captures-and-passes.md) |
-| Ko point and handicap scores in FEN | do not round-trip | reproduced, and a ko coordinate is accepted on parse and enforced | [0010](adr/0010-fen-fields-that-do-not-round-trip.md) |
-| A move repeating a position | offered, then ends the game as a repetition | refused, so `isRepetition` is permanently false | [0011](adr/0011-superko-forbidden-up-front-isrepetition-false.md) |
-| Board row with a run of ten or more | reader splits the digits and truncates overruns | multi-digit runs round-trip, overruns are rejected | [0012](adr/0012-board-rows-multi-digit-runs-reject-overruns.md) |
-| A finished game | still lists legal actions | lists none | [0013](adr/0013-no-actions-after-end-no-unchecked-replay.md) |
-| `makeMovesNoLegalCheck` | replays an illegal move blindly | still rejects it | [0013](adr/0013-no-actions-after-end-no-unchecked-replay.md) |
+| Ko point and handicap scores in FEN | did not round-trip | reproduced, and a ko coordinate is accepted on parse and enforced | [0010](adr/0010-fen-fields-that-do-not-round-trip.md) |
+| A move repeating a position | offered, then ended the game as a repetition | refused, so `isRepetition` is permanently false | [0011](adr/0011-superko-forbidden-up-front-isrepetition-false.md) |
+| Board row with a run of ten or more | reader split the digits and truncated overruns | multi-digit runs round-trip, overruns are rejected | [0012](adr/0012-board-rows-multi-digit-runs-reject-overruns.md) |
+| A finished game | still listed legal actions | lists none | [0013](adr/0013-no-actions-after-end-no-unchecked-replay.md) |
+| `makeMovesNoLegalCheck` | replayed an illegal move blindly | still rejects it | [0013](adr/0013-no-actions-after-end-no-unchecked-replay.md) |
 | Superko rule | none enforced | positional, not situational | [0014](adr/0014-positional-superko-over-situational.md) |
 
-## Retiring joansala
+The ko field of an emitted FEN carries the live simple-ko coordinate (`-` otherwise); joansala only
+ever wrote `-`, so stored FENs never carry a coordinate and parse unchanged
+([ADR 0010](adr/0010-fen-fields-that-do-not-round-trip.md), as amended by 0015).
 
-The joansala engine exists to be deleted once the scala engine has earned trust. Delete-day
-touches, and nothing here should be pre-refactored before that day:
+## Retiring joansala (historical)
 
-- `build.sbt`: the `com.joansala` `go-engine` dependency. The `aalina` dependency stays —
-  samurai (oware) uses it.
-- `go/Api.scala`: the `GoPosition` class, `goBoardFromFen`, `positionFromFen`, the
-  deprecated `positionFromStartingFenAndMoves`, and `validateFEN` — which must be rewritten
-  against `GoFen.parse`, because `Variant.valid` routes every go variant through it and it
-  is the one remaining place a scala-variant code path executes joansala code. With it gone,
-  `Variant.usesScalaEngine` and its two dispatch sites collapse.
-- `go/format/FEN.scala`: the `engineFen` double-digit shim (joansala's reader cannot take
-  multi-digit runs) and the `variant` size inference, which can then name scala variants.
-- Variant identity: decided in
-  [ADR 0015](adr/0015-variant-identity-when-joansala-retires.md) — the old ids 1/2/4 flip
-  to the scala engine (a retroactive rules change for stored games — every
-  [ADR 0007](adr/0007-rules-correct-over-joansala-parity.md) divergence applies), with
-  joansala parked transitionally as `go9x9Joansala`/`go13x13Joansala`/`go19x19Joansala`
-  (ids 5/6/7) as the differential oracle until the removal commit. The flip also closes the
-  ko-field round-trip loss: `GoFen.render` emits the real ko coordinate when a simple ko is
-  active (see the 0015 amendment to
-  [ADR 0010](adr/0010-fen-fields-that-do-not-round-trip.md)).
-- Top-level defaults: `strategygames.variant.Variant`'s two `GameLogic.Go()` defaults and
-  `GameCollection`'s `defaultVariant`, all currently `Go19x19`.
-- Tests: the differential and oracle suites lose their oracle and die or re-point; the
-  joansala-variant wrapper tests re-point at whatever ADR 0015 decides.
-- Bench: `GoBoardSize`'s engine parameters and the corpus fixture headers say
-  `variant=go9x9` etc.; `CorpusFixture` errors on unknown keys, so the fixtures are
-  rewritten or regenerated. `GoDifferentialTest`'s corpus-directory walk goes with them.
+Executed 2026-07-25, per [ADR 0015](adr/0015-variant-identity-when-joansala-retires.md): the
+`com.joansala % go-engine` dependency, the joansala-backed `Api` paths, the transitional
+`go9x9Joansala`/`go13x13Joansala`/`go19x19Joansala` variants (ids 5/6/7) and the differential
+suite were deleted in a single commit. Any downstream sighting of those ids — or perfIds
+503/504/505 — is a bug. The divergence record lives in ADRs 0007–0014; the differential
+baselines and allowlist live in git history.
 
 ## Benchmarks
 
-`GoEngineBenchmark` (JMH) times replay, drop application and legal-move generation on both engines
-over the same corpus fixtures; `GoSmokeTiming` answers the same question in wall-clock seconds when
-a JMH run is too slow to be worth it. Both live in `bench/`, which documents how to run them:
+`GoEngineBenchmark` (JMH) times replay, drop application and legal-move generation over the
+committed corpus fixtures; `GoSmokeTiming` answers the same question in wall-clock seconds when a
+JMH run is too slow to be worth it. Both live in `bench/`, which documents how to run them:
 
 ```
 sbt "bench/Jmh/run -wi 3 -i 3 -f 1 -to 60s strategygames.bench.GoEngineBenchmark"

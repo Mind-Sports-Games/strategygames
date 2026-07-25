@@ -21,6 +21,4 @@ case object Go19x19
 
   override def baseVariant: Boolean = true
 
-  override def usesScalaEngine: Boolean = true
-
 }

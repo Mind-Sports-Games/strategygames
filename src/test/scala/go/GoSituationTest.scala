@@ -40,7 +40,7 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     val fen   = game1.situation.board.apiPosition.fen
 
     "have differnt fen after drop" in {
-      variant.Go19x19.initialFen.engineFen !== fen.engineFen
+      variant.Go19x19.initialFen.value !== fen.value
     }
     "and have 1 stone on the board" in {
       game1.situation.board.pieces.size === 1

@@ -12,8 +12,7 @@ object GoFenError {
   final case class NonNumericField(name: String, field: String)              extends GoFenError
 }
 
-/** The go FEN dialect, shared with the parked joansala-backed variants except for the ko field, which the
-  * joansala emitter leaves as `-` while this one writes the live simple-ko coordinate:
+/** The go FEN dialect. The ko field is `-` or the live simple-ko coordinate:
   *
   * {{{
   * board[pocket] turn ko p1Score p2Score p1Captures p2Captures komi passCount fullMove
@@ -130,9 +129,8 @@ object GoFen {
     if (pocketStart >= 0) field.substring(0, pocketStart) else field
   }
 
-  // NOTE: runs are multi-digit, so `19` is a full empty 19x19 row and not 1 + 9. joansala's reader
-  // takes each digit as its own run and silently drops whatever overruns the row; a row that does
-  // not measure exactly `size` is rejected here instead.
+  // NOTE: runs are multi-digit, so `19` is a full empty 19x19 row and not 1 + 9 (ADR 0012). A row
+  // that does not measure exactly `size` is rejected.
   private def readRow(row: String, size: Int, rank: Int, owners: Array[Int]): Option[GoFenError] = {
     var file                        = 0
     var emptyRun                    = 0

@@ -11,9 +11,9 @@ import strategygames.go.Api
 import strategygames.go.variant.{ Variant => GoVariant }
 import strategygames.go.{ Replay => GoReplay }
 
-/** A wall-clock check of the two go engines against each other, for when a JMH run costs more time than the
-  * question is worth. Median of a few rounds per workload, both engines over the same corpus fixtures; it
-  * prints a table and appends a row per workload and size to a CSV.
+/** A wall-clock check of the go engine, for when a JMH run costs more time than the question is worth. Median
+  * of a few rounds per workload over the corpus fixtures; it prints a table and appends a row per workload
+  * and size to a CSV.
   *
   * Numbers from here are indicative, not a benchmark result — `GoEngineBenchmark` is the measure of record.
   */
@@ -26,10 +26,6 @@ object GoSmokeTiming {
   private val sampleRangeEnd   = 0.80
 
   private val defaultOutputPath = "bench/target/go-smoke-results.csv"
-
-  private case class Timing(oldNs: Long, newNs: Long) {
-    def speedup: Double = oldNs.toDouble / newNs.toDouble
-  }
 
   def main(args: Array[String]): Unit = {
     val outputPath = sys.props.get("smoke.output").orElse(args.headOption).getOrElse(defaultOutputPath)
@@ -73,12 +69,9 @@ object GoSmokeTiming {
     median(samples.drop(warmupRounds).toIndexedSeq)
   }
 
-  private def measureReplay(corpus: GoCorpusGame): Timing = {
+  private def measureReplay(corpus: GoCorpusGame): Long = {
     val activePlayer = corpus.activePlayerAfter(corpus.actionStrs.size)
-    Timing(
-      oldNs = timeReplay(corpus, corpus.size.joansalaVariant, activePlayer),
-      newNs = timeReplay(corpus, corpus.size.scalaVariant, activePlayer)
-    )
+    timeReplay(corpus, corpus.size.variant, activePlayer)
   }
 
   private def sampleIndices(totalMoves: Int, count: Int): Vector[Int] = {
@@ -111,31 +104,26 @@ object GoSmokeTiming {
     median(samples.drop(warmupRounds).toIndexedSeq)
   }
 
-  private def measureMovegen(corpus: GoCorpusGame): Timing = {
+  private def measureMovegen(corpus: GoCorpusGame): Long = {
     val moves    = corpus.actionStrs.flatten.toVector
     val indices  = sampleIndices(moves.size, samplesPerSize)
     val prefixes = indices.map(i => moves.take(i).toList)
 
-    val oldSamples = prefixes.map(prefix => timeLegalDropsAt(corpus, corpus.size.joansalaVariant, prefix))
-    val newSamples = prefixes.map(prefix => timeLegalDropsAt(corpus, corpus.size.scalaVariant, prefix))
-
-    Timing(oldNs = median(oldSamples), newNs = median(newSamples))
+    median(prefixes.map(prefix => timeLegalDropsAt(corpus, corpus.size.variant, prefix)))
   }
 
-  private def printTable(title: String, rows: List[(String, Timing)]): Unit = {
+  private def printTable(title: String, rows: List[(String, Long)]): Unit = {
     println(s"\n=== ${title} ===")
-    println(f"${"size"}%-12s ${"old ns/op"}%14s ${"new ns/op"}%14s ${"speedup"}%10s")
-    rows.foreach { case (label, timing) =>
-      println(
-        f"${label}%-12s ${timing.oldNs}%14d ${timing.newNs}%14d ${timing.speedup}%9.2fx"
-      )
+    println(f"${"size"}%-12s ${"ns/op"}%14s")
+    rows.foreach { case (label, ns) =>
+      println(f"${label}%-12s ${ns}%14d")
     }
   }
 
   private def appendCsv(
       outputPath: String,
-      replayTimings: List[(String, Timing)],
-      movegenTimings: List[(String, Timing)]
+      replayTimings: List[(String, Long)],
+      movegenTimings: List[(String, Long)]
   ): Unit = {
     val path      = Paths.get(outputPath)
     Option(path.getParent).foreach(Files.createDirectories(_))
@@ -149,19 +137,16 @@ object GoSmokeTiming {
       StandardOpenOption.APPEND
     )
     try {
-      val timestamp                                                       = Instant.now().toString
-      def writeRow(fields: String): Unit                                  = {
+      val timestamp                                                     = Instant.now().toString
+      def writeRow(fields: String): Unit                                = {
         writer.write(fields)
         writer.newLine()
       }
-      def writeRows(workload: String, rows: List[(String, Timing)]): Unit =
-        rows.foreach { case (label, timing) =>
-          writeRow(
-            s"${timestamp},${workload},${label},${timing.oldNs},${timing.newNs}," +
-              s"${"%.4f".format(timing.speedup)}"
-          )
+      def writeRows(workload: String, rows: List[(String, Long)]): Unit =
+        rows.foreach { case (label, ns) =>
+          writeRow(s"${timestamp},${workload},${label},${ns}")
         }
-      if (isNewFile) writeRow("timestamp,workload,size,old_ns_per_op,new_ns_per_op,speedup")
+      if (isNewFile) writeRow("timestamp,workload,size,ns_per_op")
       writeRows("replay", replayTimings)
       writeRows("movegen", movegenTimings)
     } finally writer.close()

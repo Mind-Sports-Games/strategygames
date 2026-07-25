@@ -41,13 +41,6 @@ abstract class Variant private[variant] (
 
   def repetitionEnabled: Boolean = false
 
-  /** Which engine `Api` builds a position with: the pure-Scala one (`docs/go-engine.md`) for the canonical
-    * variants, the joansala one for the parked `…Joansala` variants that survive only as a benchmark and
-    * differential oracle until the engine is deleted. The two follow different rules in places, so this is
-    * part of a variant's identity and not a switch to flip on an existing one.
-    */
-  def usesScalaEngine: Boolean = false
-
   def perfId: Int
   def perfIcon: Char
 
@@ -251,10 +244,7 @@ object Variant {
   lazy val all: List[Variant] = List(
     Go19x19,
     Go13x13,
-    Go9x9,
-    Go19x19Joansala,
-    Go13x13Joansala,
-    Go9x9Joansala
+    Go9x9
   )
   val byId                    = all map { v =>
     (v.id, v)

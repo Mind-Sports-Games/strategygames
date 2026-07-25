@@ -43,21 +43,6 @@ final case class FEN(value: String) extends AnyVal {
 
   def handicap: Option[Int] = if (fullMove == Some(1)) Some(board.count(_ == 'S')) else None
 
-  def engineFen: String =
-    s"""${board
-        .replace("S", "X")
-        .replace("s", "O")
-        .replace("19", "199") // goengine cant handle double digits
-        .replace("18", "189")
-        .replace("17", "179")
-        .replace("16", "169")
-        .replace("15", "159")
-        .replace("14", "149")
-        .replace("13", "139")
-        .replace("12", "129")
-        .replace("11", "119")
-        .replace("10", "109")} ${value.split(' ').drop(1).take(2).mkString(" ")}"""
-
   private def removePockets(fen: String): String = {
     val start = fen.indexOf("[", 0)
     val end   = fen.indexOf("]", start)
@@ -68,10 +53,6 @@ final case class FEN(value: String) extends AnyVal {
 
   def gameSize: Int = value.split(' ').lift(0).map(_.split('/').length).getOrElse(0)
 
-  // NOTE: board size is all a go fen says about its variant, so inference always lands on the
-  // canonical scala-engine variant of that size and can never name a parked `…Joansala` one —
-  // which is correct: those exist only as a benchmark oracle and are reached by explicit key.
-  // A caller holding a variant already must use that one rather than infer it back from the fen.
   def variant: Variant = gameSize match {
     case 9  => strategygames.go.variant.Go9x9
     case 13 => strategygames.go.variant.Go13x13

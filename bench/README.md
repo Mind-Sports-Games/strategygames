@@ -115,15 +115,14 @@ Restrict parameters (e.g. a quick check):
 sbt "bench/Jmh/run -i 1 -wi 1 -f 1 -r 1s -w 1s -p family=backgammon,go -p size=short,long .*UciDumpBenchmark.*"
 ```
 
-## Go engine benchmarks (joansala vs pure Scala)
+## Go engine benchmarks
 
-`GoEngineBenchmark` compares the parked joansala-backed go variants
-(`go9x9Joansala`, `go13x13Joansala`, `go19x19Joansala`) against the canonical
-pure-Scala ones (`go9x9`, `go13x13`, `go19x19`) over the committed
-`go-go9x9-long`, `go-go13x13-long` and `go-long` corpus fixtures — the same
-action strings feed both engines, so the `engine` parameter is the only
-variable. The fixture headers name the canonical keys; the harness derives both
-variants from the board size.
+`GoEngineBenchmark` times the go engine on the canonical variants (`go9x9`,
+`go13x13`, `go19x19`) over the committed `go-go9x9-long`, `go-go13x13-long` and
+`go-long` corpus fixtures. It reports absolute timings per board size; compare
+against the recorded baselines from earlier runs to detect regressions. (Until
+the joansala engine's removal — see ADR 0015 — it also carried an `engine`
+parameter comparing the two engines.)
 
 Three workloads, each a production call path:
 
@@ -151,7 +150,7 @@ sbt "bench/Jmh/run -wi 3 -w 2s -i 5 -r 2s -f 1 -to 60s \
   -rf json -rff go-jmh.json strategygames.bench.GoEngineBenchmark"
 ```
 
-Filter to one workload, one size, or one engine with the regex and `-p`:
+Filter to one workload or one size with the regex and `-p`:
 
 ```
 sbt "bench/Jmh/run -wi 3 -w 2s -i 5 -r 2s -f 1 -to 60s \
@@ -162,10 +161,10 @@ Never run `bench/Jmh/run` without iteration and fork limits: the default setting
 (5 forks × 5 warmup × 5 measurement over every benchmark in the project) take
 hours.
 
-`GoSmokeTiming` answers the same old-vs-new question without JMH: median wall-clock
-over a few rounds of full-game replay and `legalDrops`, printed as a table and
-appended to a CSV. It finishes in seconds, so it suits a quick check between
-edits; `GoEngineBenchmark` remains the measure of record.
+`GoSmokeTiming` answers the same question without JMH: median wall-clock over a
+few rounds of full-game replay and `legalDrops`, printed as a table of absolute
+ns/op and appended to a CSV. It finishes in seconds, so it suits a quick check
+between edits; `GoEngineBenchmark` remains the measure of record.
 
 ```
 sbt "bench/runMain strategygames.bench.GoSmokeTiming /path/to/results.csv"
