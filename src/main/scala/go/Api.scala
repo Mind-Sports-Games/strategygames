@@ -210,15 +210,7 @@ object Api {
       pieces
     }
 
-    lazy val pocketData =
-      Some(
-        PocketData(
-          Pockets(
-            Pocket(List(strategygames.Role.GoRole(Stone), strategygames.Role.GoRole(Stone))),
-            Pocket(List(strategygames.Role.GoRole(Stone), strategygames.Role.GoRole(Stone)))
-          )
-        )
-      )
+    lazy val pocketData = stonePocketData
 
     lazy val passMove: Int = gameSize * gameSize
 
@@ -257,17 +249,25 @@ object Api {
 
   }
 
-  def position(variant: Variant, komi: Double = 7.5): Position = {
-    val g = new GoGame(variant.boardSize.height)
-    g.setKomiScore(komi)
-    new GoPosition(position = g, komi = komi)
-  }
+  private[go] val stonePocketData: Option[PocketData] =
+    Some(
+      PocketData(
+        Pockets(
+          Pocket(List(strategygames.Role.GoRole(Stone), strategygames.Role.GoRole(Stone))),
+          Pocket(List(strategygames.Role.GoRole(Stone), strategygames.Role.GoRole(Stone)))
+        )
+      )
+    )
 
-  def positionFromVariant(variant: Variant): Position =
-    variant.key match {
-      case "go9x9" | "go13x13" | "go19x19" => position(variant, variant.komi)
-      case _                               => sys.error(s"incorrect variant supplied ${variant}")
+  def position(variant: Variant, komi: Double = 7.5): Position =
+    if (variant.usesScalaEngine) ScalaPosition.initial(variant, komi)
+    else {
+      val g = new GoGame(variant.boardSize.height)
+      g.setKomiScore(komi)
+      new GoPosition(position = g, komi = komi)
     }
+
+  def positionFromVariant(variant: Variant): Position = position(variant, variant.komi)
 
   def positionFromFen(fenString: String): Position = {
     val positionFen = FEN(fenString)
@@ -279,19 +279,20 @@ object Api {
   }
 
   def positionFromVariantNameAndFEN(variantKey: String, fenString: String): Position = {
-    val positionFen   = FEN(fenString)
-    val gameSize: Int = (variantKey, positionFen.gameSize) match {
-      case ("go9x9", 9)    => 9
-      case ("go13x13", 13) => 13
-      case ("go19x19", 19) => 19
-      case _               => sys.error(s"incorrect variant name (${variantKey}) and/or fen (${positionFen})")
-    }
-    val game          = new GoGame(gameSize)
-    game.setBoard(goBoardFromFen(positionFen))
-    game.setKomiScore(positionFen.komi)
+    val positionFen = FEN(fenString)
+    val variant     = Variant(variantKey)
+      .filter(_.boardSize.height == positionFen.gameSize)
+      .getOrElse(sys.error(s"incorrect variant name (${variantKey}) and/or fen (${positionFen})"))
 
-    val ply = positionFen.ply.getOrElse(1)
-    new GoPosition(game, ply, Some(positionFen), positionFen.komi)
+    if (variant.usesScalaEngine) ScalaPosition.fromFen(variant, positionFen)
+    else {
+      val game = new GoGame(variant.boardSize.height)
+      game.setBoard(goBoardFromFen(positionFen))
+      game.setKomiScore(positionFen.komi)
+
+      val ply = positionFen.ply.getOrElse(1)
+      new GoPosition(game, ply, Some(positionFen), positionFen.komi)
+    }
   }
 
   private[go] def goBoardFromFen(fen: FEN): GoBoard = {
@@ -305,6 +306,13 @@ object Api {
 
   def positionFromStartingFenAndMoves(startingFen: FEN, uciMoves: List[String]): Position =
     positionFromFen(startingFen.value).makeMoves(uciMoves)
+
+  def positionFromVariantStartingFenAndMoves(
+      variant: Variant,
+      startingFen: FEN,
+      uciMoves: List[String]
+  ): Position =
+    positionFromVariantNameAndFEN(variant.key, startingFen.value).makeMoves(uciMoves)
 
   def passMove(variant: Variant): Int = {
     val gameSize: Int = variant.boardSize.height
@@ -343,12 +351,10 @@ object Api {
     Pos.fromKey(s"${file}${rank}")
   }
 
-  def initialFen(variantKey: String): FEN = variantKey match {
-    case "go9x9"   => variant.Go9x9.initialFen
-    case "go13x13" => variant.Go13x13.initialFen
-    case "go19x19" => variant.Go19x19.initialFen
-    case _         => sys.error(s"not given a go variant name: ${variantKey}")
-  }
+  def initialFen(variantKey: String): FEN =
+    Variant(variantKey)
+      .map(_.initialFen)
+      .getOrElse(sys.error(s"not given a go variant name: ${variantKey}"))
 
   private val fenRegex                        =
     "([0-9Ss]?){1,19}(/([0-9Ss]?){1,19}){8,18}\\[[Ss]+\\] [w|b] - [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-3] [0-9]+"

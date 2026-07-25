@@ -4,11 +4,11 @@ package variant
 import strategygames.go._
 import strategygames.GameFamily
 
-case object Go19x19
+case object Go19x19Scala
     extends Variant(
-      id = 4,
-      key = "go19x19",
-      name = "Go 19x19",
+      id = 7,
+      key = "go19x19Scala",
+      name = "Go 19x19 Scala",
       standardInitialPosition = false,
       boardSize = Board.Dim19x19
     )
@@ -17,8 +17,8 @@ case object Go19x19
   def gameFamily: GameFamily = GameFamily.Go()
 
   def perfIcon: Char = ''
-  def perfId: Int    = 502
+  def perfId: Int    = 505
 
-  override def baseVariant: Boolean = true
+  override def usesScalaEngine: Boolean = true
 
 }

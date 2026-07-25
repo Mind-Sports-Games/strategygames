@@ -41,6 +41,8 @@ abstract class Variant private[variant] (
 
   def repetitionEnabled: Boolean = false
 
+  def usesScalaEngine: Boolean = false
+
   def perfId: Int
   def perfIcon: Char
 
@@ -184,11 +186,20 @@ abstract class Variant private[variant] (
 
   def stalemateIsDraw = false
 
-  def winner(situation: Situation): Option[Player]
+  def winner(situation: Situation): Option[Player] =
+    if (specialEnd(situation) && !specialDraw(situation)) {
+      if (situation.board.apiPosition.fen.player1Score > situation.board.apiPosition.fen.player2Score)
+        Player.fromName("p1")
+      else Player.fromName("p2")
+    } else None
 
-  @nowarn def specialEnd(situation: Situation) = false
+  def specialEnd(situation: Situation) =
+    (situation.board.apiPosition.legalActions.size == 0) ||
+      (situation.board.apiPosition.gameEnd)
 
-  @nowarn def specialDraw(situation: Situation) = false
+  def specialDraw(situation: Situation) =
+    (situation.board.apiPosition.fen.player1Score == situation.board.apiPosition.fen.player2Score) ||
+      situation.board.apiPosition.isRepetition
 
   def materialImbalance(board: Board): Int =
     board.pieces.values.foldLeft(0) { case (acc, Piece(player, role)) =>
@@ -235,7 +246,10 @@ object Variant {
   lazy val all: List[Variant] = List(
     Go19x19,
     Go13x13,
-    Go9x9
+    Go9x9,
+    Go19x19Scala,
+    Go13x13Scala,
+    Go9x9Scala
   )
   val byId                    = all map { v =>
     (v.id, v)
