@@ -186,6 +186,12 @@ class GoScalaVariantTest extends Specification {
     }
   }
 
+  "an action that is neither a pass, a selection, nor a placement" should {
+    "be refused rather than aliased onto a point of the board" in {
+      Api.positionFromVariantAndMoves(Go9x9Scala, List("garbage")) must throwAn[Exception]
+    }
+  }
+
   "a dead stone key that is not a coordinate at all" should {
     "be refused rather than dropped in silence" in {
       Api.positionFromVariantAndMoves(

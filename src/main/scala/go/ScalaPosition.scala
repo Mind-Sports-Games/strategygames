@@ -147,6 +147,8 @@ final private[go] class ScalaPosition(
   private def inheritanceFor(playedUcis: List[String]): ScalaPosition.ParentStones =
     ScalaPosition.ParentStones(() => pieceMap, currentGame.state, playedUcis)
 
+  // NOTE: the first branch takes deepCopy where GoPosition.initPos reloads from the fen — deliberate,
+  // because the copy keeps the superko hash history a FEN reload cannot carry.
   private def positionBefore(previousMoves: List[String]): Position =
     if (previousMoves.isEmpty && variant.initialFen.value != fen.value) deepCopy
     else if (variant.initialFen.value != initialFen.value) ScalaPosition.fromFen(variant, initialFen)
@@ -172,14 +174,17 @@ final private[go] class ScalaPosition(
 
   private def isSelectSquares(uci: String): Boolean = uci.take(3) == "ss:"
 
-  /** `Api.uciToMove` folds an unreadable or off-board coordinate onto a real point of the board, so a drop
-    * whose key names no square of this variant would silently be played somewhere else.
+  /** `Api.uciToMove` folds anything that is not `pass` onto a point of the board, so a drop whose key names
+    * no square of this variant — or a token of some other shape entirely — would silently be played somewhere
+    * else. Only `pass` and an on-board placement get through to it.
     */
-  private def engineMoveOf(uci: String): Int = {
-    if (isSinglePlacement(uci) && !Pos.fromKey(uci.drop(2)).exists(isOnBoard))
-      sys.error(s"Drop ${uci} names no square of ${variant.key}")
-    Api.uciToMove(uci, variant)
-  }
+  private def engineMoveOf(uci: String): Int =
+    if (uci == "pass") Api.uciToMove(uci, variant)
+    else if (isSinglePlacement(uci)) {
+      if (!Pos.fromKey(uci.drop(2)).exists(isOnBoard))
+        sys.error(s"Drop ${uci} names no square of ${variant.key}")
+      Api.uciToMove(uci, variant)
+    } else sys.error(s"Unreadable action ${uci} for ${variant.key}")
 
   /** A key naming a square the board does not have is ignored, as the joansala engine ignores it: dead stone
     * selection comes from a client, and a square with no stone on it lifts nothing either way. A key that is
