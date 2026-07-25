@@ -5,13 +5,13 @@ engine? Five experiments on branch `lakin/go-speed-dive` (base b3cd2803) answere
 Reference denominators are the joansala JMH baselines: replay 7395 / 24313 / 96385 µs, legalDrops
 4.21 / 11.56 / 26.77 µs, applyDrop 17.84 / 30.06 / 60.88 µs (9x9 / 13x13 / 19x19).
 
-| target | full-game replay (production path) | movegen (legalDrops) | apply (drop) |
-|---|---|---|---|
-| 10x | **DEMONSTRATED** — E1 alone: 18x / 32x / 41x, byte-identical output | **DEMONSTRATED** at 13/19 — E3 bitboard: 12.1x / 12.3x (9x9: 7.7x, fixed costs dominate 81 points) | at hand — production is already 9.1–10.5x |
-| 20x | **DEMONSTRATED** — E1 at 13/19; E4 everywhere | not reached (E3 measured 12.3x); **IMPLAUSIBLE under the immutable contract** — see below | **PROJECTED ~29x** — E1's score deferral: 6.4 µs @19 = 1.2 engine + 4.3 forced areaScore + 0.9 wrapper → ~2.1 µs |
-| 30x | **DEMONSTRATED** — E4: 80x / 118x / 162x | as above; plausible only fused with E2's mutable state (unmeasured) | **PROJECTED ~46x** — E1 arithmetic + E3 engine apply (422 ns @19 + ~0.9 µs wrapper) |
-| 100x | **DEMONSTRATED at 13/19** — E4: 118x / 162x. **PROJECTED at 9x9**: E4 wrapper (92.2 − 41.9 µs) + E2 bulk engine (~13 µs) ≈ 63 µs ≈ 117x | **IMPLAUSIBLE** — no identified path; exact-superko candidate discovery is the floor | not meaningful per-call at the seam; the 100x class is batch replay (E4+E2), where E3's engine apply is 144x cross-layer |
-| beyond | **PROJECTED ~570x @19** — E4's measured ~120 µs wrapper floor + E2's 52.6 µs materialized bulk engine ≈ 170 µs | — | — |
+| target | full-game replay (production path)                                                                                                      | movegen (legalDrops)                                                                               | apply (drop)                                                                                                             |
+| ------ | --------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| 10x    | **DEMONSTRATED** — E1 alone: 18x / 32x / 41x, byte-identical output                                                                     | **DEMONSTRATED** at 13/19 — E3 bitboard: 12.1x / 12.3x (9x9: 7.7x, fixed costs dominate 81 points) | at hand — production is already 9.1–10.5x                                                                                |
+| 20x    | **DEMONSTRATED** — E1 at 13/19; E4 everywhere                                                                                           | not reached (E3 measured 12.3x); **IMPLAUSIBLE under the immutable contract** — see below          | **PROJECTED ~29x** — E1's score deferral: 6.4 µs @19 = 1.2 engine + 4.3 forced areaScore + 0.9 wrapper → ~2.1 µs         |
+| 30x    | **DEMONSTRATED** — E4: 80x / 118x / 162x                                                                                                | as above; plausible only fused with E2's mutable state (unmeasured)                                | **PROJECTED ~46x** — E1 arithmetic + E3 engine apply (422 ns @19 + ~0.9 µs wrapper)                                      |
+| 100x   | **DEMONSTRATED at 13/19** — E4: 118x / 162x. **PROJECTED at 9x9**: E4 wrapper (92.2 − 41.9 µs) + E2 bulk engine (~13 µs) ≈ 63 µs ≈ 117x | **IMPLAUSIBLE** — no identified path; exact-superko candidate discovery is the floor               | not meaningful per-call at the seam; the 100x class is batch replay (E4+E2), where E3's engine apply is 144x cross-layer |
+| beyond | **PROJECTED ~570x @19** — E4's measured ~120 µs wrapper floor + E2's 52.6 µs materialized bulk engine ≈ 170 µs                          | —                                                                                                  | —                                                                                                                        |
 
 DEMONSTRATED means measured on this machine with same-run ratios and an equivalence suite green.
 PROJECTED means arithmetic over measured components, stated inline. IMPLAUSIBLE means a measured
@@ -22,13 +22,13 @@ floor argument, not a hunch.
 Profiling (GoLayerBenchmark + async-profiler, 19x19, 400 plies) showed the engine core is **~5% of
 production replay**. The wrapper forced work the engine never asked for:
 
-| production replay cost, 19x19 | share | cause |
-|---|---|---|
-| forced movegen per ply | ~25% | `Game.apply` → `status` → `Variant.specialEnd` probed `legalActions.size` |
-| forced areaScore per ply | ~18% | `Board.afterDrop` forced `fenScore` — a full flood fill nobody read until game end |
-| pass-path full re-replays | ~20% | every pass re-parsed the FEN and replayed the whole prefix through the seam |
-| wrapper residual | ~30% | two independent O(n²) `List :+` chains, copies, uci regex, per-ply `Role.allByForsyth` map builds |
-| engine core (`GoState`) | ~6% | of which the five per-move array clones are 15% of total |
+| production replay cost, 19x19 | share | cause                                                                                             |
+| ----------------------------- | ----- | ------------------------------------------------------------------------------------------------- |
+| forced movegen per ply        | ~25%  | `Game.apply` → `status` → `Variant.specialEnd` probed `legalActions.size`                         |
+| forced areaScore per ply      | ~18%  | `Board.afterDrop` forced `fenScore` — a full flood fill nobody read until game end                |
+| pass-path full re-replays     | ~20%  | every pass re-parsed the FEN and replayed the whole prefix through the seam                       |
+| wrapper residual              | ~30%  | two independent O(n²) `List :+` chains, copies, uci regex, per-ply `Role.allByForsyth` map builds |
+| engine core (`GoState`)       | ~6%   | of which the five per-move array clones are 15% of total                                          |
 
 Layer decomposition, whole-game replay 19x19: engine fold 465 µs → seam batch 492 → seam per-ply
 630 → production 8575 µs. The corpus pass indices meant production did 3.7–4.7x the engine work of
@@ -37,13 +37,13 @@ the game itself. Full working notes, target tables, and raw JMH JSON live in the
 
 ## The experiments
 
-| # | hypothesis | verdict | headline (9x9 / 13x13 / 19x19) |
-|---|---|---|---|
-| E1 | kill forced per-ply movegen/areaScore + pass re-replay: ~2–4x on replay, no engine change | **CONFIRMED**, exceeded | prod replay 2.5x / 3.5x / 3.4x → **18x / 32x / 41x vs joansala**, byte-identical, full suite green; 5 files, +21/−12 |
-| E2 | batch-replay seam: one mutable scratch state, publish the final position → engine floor | **CONFIRMED**, above range | **86 / 115 / 104 ns/ply** (4.6x / 6.6x / 11.8x over the immutable fold); allocation 12x / 28x / 69x down — per-ply marginal ~0 B |
-| E3 | bitboard core beats the byte-array + clone engine 5–10x per move | **PARTIAL** | movegen 1.4x / 2.0x / **2.2x** vs current (= 12.3x vs joansala @19), apply 2.17x (422 ns @19), engine replay 1.83x — exact parity, but the 20x tier is unreachable under copy-per-move |
-| E4 | int-move replay entry (no uci strings, regex, Pos, pieceMap until the end) removes the remaining wrapper cost | **CONFIRMED** beyond target | full-`Game` replay **594 µs @19 = 162x** (80x / 118x / 162x); per-ply-positions variant 193x; engine is now 69% of the path |
-| E5 | superko `Set[Long]` → primitive table + allocation shapes: 1.3–2x on the engine core | **REFUTED** | 1.12x / 1.01x / **1.07x**; superko-deleted control proves the whole subsystem is worth ≤1.23x / 1.07x / 1.11x — there is no 1.3x in the JVM shapes |
+| #   | hypothesis                                                                                                    | verdict                     | headline (9x9 / 13x13 / 19x19)                                                                                                                                                         |
+| --- | ------------------------------------------------------------------------------------------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| E1  | kill forced per-ply movegen/areaScore + pass re-replay: ~2–4x on replay, no engine change                     | **CONFIRMED**, exceeded     | prod replay 2.5x / 3.5x / 3.4x → **18x / 32x / 41x vs joansala**, byte-identical, full suite green; 5 files, +21/−12                                                                   |
+| E2  | batch-replay seam: one mutable scratch state, publish the final position → engine floor                       | **CONFIRMED**, above range  | **86 / 115 / 104 ns/ply** (4.6x / 6.6x / 11.8x over the immutable fold); allocation 12x / 28x / 69x down — per-ply marginal ~0 B                                                       |
+| E3  | bitboard core beats the byte-array + clone engine 5–10x per move                                              | **PARTIAL**                 | movegen 1.4x / 2.0x / **2.2x** vs current (= 12.3x vs joansala @19), apply 2.17x (422 ns @19), engine replay 1.83x — exact parity, but the 20x tier is unreachable under copy-per-move |
+| E4  | int-move replay entry (no uci strings, regex, Pos, pieceMap until the end) removes the remaining wrapper cost | **CONFIRMED** beyond target | full-`Game` replay **594 µs @19 = 162x** (80x / 118x / 162x); per-ply-positions variant 193x; engine is now 69% of the path                                                            |
+| E5  | superko `Set[Long]` → primitive table + allocation shapes: 1.3–2x on the engine core                          | **REFUTED**                 | 1.12x / 1.01x / **1.07x**; superko-deleted control proves the whole subsystem is worth ≤1.23x / 1.07x / 1.11x — there is no 1.3x in the JVM shapes                                     |
 
 **E1** — the three changes: `specialEnd` reads `apiPosition.gameEnd` (the `legalActions.size == 0`
 clause is provably redundant post-[ADR 0013](adr/0013-no-actions-after-end-no-unchecked-replay.md));
