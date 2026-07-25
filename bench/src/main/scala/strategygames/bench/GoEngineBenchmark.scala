@@ -137,7 +137,9 @@ class GoMidGameBoard {
     board = situation.board
     player = situation.player
     dropPos = corpus.midGameDropPos
-    board.apiPosition.pieceMap
+    // The drop under test inherits its stone map from this one, so force it here rather than
+    // charging the first invocation for a full board scan.
+    val _         = board.apiPosition.pieceMap
   }
 }
 
