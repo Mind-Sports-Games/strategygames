@@ -59,21 +59,22 @@ final private[go] class ScalaPosition(
 
   private def stonesInheritedFrom(parent: ScalaPosition.ParentStones): Option[PieceMap] =
     parent.playedUcis match {
-      case Nil                                                                     => Some(parent.stones())
-      case "pass" :: Nil                                                           => Some(parent.stones())
-      case uci :: Nil if isSinglePlacementWithoutCaptures(uci, parent.stateBefore) =>
+      case Nil                                  => Some(parent.stones())
+      case "pass" :: Nil                        => Some(parent.stones())
+      case uci :: Nil if isSinglePlacement(uci) =>
         Pos.fromKey(uci.drop(2)).map { pos =>
-          parent.stones().updated(pos, Piece(moverOf(parent.stateBefore), Stone))
+          val state           = currentGame.state
+          val withoutCaptured =
+            state.capturedMovesOnLastPlacement.foldLeft(parent.stones()) { (stones, capturedMove) =>
+              stones - ScalaPosition.posAtGridIndex(gridIndexOfMove(capturedMove, state.size))
+            }
+          withoutCaptured.updated(pos, Piece(moverOf(parent.stateBefore), Stone))
         }
-      case _                                                                       => None
+      case _                                    => None
     }
 
-  private def isSinglePlacementWithoutCaptures(uci: String, stateBefore: GoState): Boolean =
-    uci.length > 2 && uci.charAt(1) == '@' && {
-      val stateAfter = currentGame.state
-      stateAfter.capturesByBlack == stateBefore.capturesByBlack &&
-      stateAfter.capturesByWhite == stateBefore.capturesByWhite
-    }
+  private def isSinglePlacement(uci: String): Boolean =
+    uci.length > 2 && uci.charAt(1) == '@'
 
   private def moverOf(stateBefore: GoState) =
     if (stateBefore.playerTurn == GoState.BlackPlayer) P1 else P2
@@ -88,13 +89,16 @@ final private[go] class ScalaPosition(
     while (point < state.passMove) {
       val owner = state.stoneOwnerAt(point)
       if (owner != GoState.NoOwner) {
-        val pos = ScalaPosition.posAtGridIndex(File.count * (point / size) + point % size)
+        val pos = ScalaPosition.posAtGridIndex(gridIndexOfMove(point, size))
         stones += pos -> (if (owner == GoState.BlackPlayer) blackStone else whiteStone)
       }
       point += 1
     }
     stones.result()
   }
+
+  private def gridIndexOfMove(move: Int, size: Int): Int =
+    File.count * (move / size) + move % size
 
   lazy val pocketData: Option[PocketData] = Api.stonePocketData
 
@@ -110,8 +114,7 @@ final private[go] class ScalaPosition(
     if (gameEnd) Array.empty else currentGame.state.legalMoves
 
   lazy val legalDrops: Array[Int] =
-    if (legalActions.isEmpty) legalActions
-    else java.util.Arrays.copyOf(legalActions, legalActions.length - 1)
+    if (gameEnd) Array.empty else currentGame.state.legalDropsShared
 
   def fenString: String = GoFen.render(currentGame)
 

@@ -15,7 +15,8 @@ final class GoState private (
     val positionHash: Long,
     val positionHashHistory: Vector[Long],
     private val occurredPositionHashes: Set[Long],
-    val consecutivePasses: Int
+    val consecutivePasses: Int,
+    val capturedMovesOnLastPlacement: List[Int]
 ) {
 
   import GoState._
@@ -37,7 +38,10 @@ final class GoState private (
   }
 
   def isLegal(move: Int): Boolean =
-    move == passMove || (move >= 0 && move < passMove && isLegalPlacement(paddedIndexOfMove(move)))
+    move == passMove || (move >= 0 && move < passMove && {
+      val padded = paddedIndexOfMove(move)
+      board(padded) == Empty && isLegalEmptyPoint(padded, stoneToPlace, enemyStone)
+    })
 
   def withoutStones(removedMoves: Set[Int]): GoState =
     GoState.fromStoneOwners(
@@ -100,7 +104,14 @@ final class GoState private (
     AreaScore(blackArea, whiteArea)
   }
 
-  def legalMoves: Array[Int] = computedLegalMoves.clone()
+  def legalMoves: Array[Int] = {
+    val drops    = computedLegalDrops
+    val withPass = java.util.Arrays.copyOf(drops, drops.length + 1)
+    withPass(drops.length) = passMove
+    withPass
+  }
+
+  private[go] def legalDropsShared: Array[Int] = computedLegalDrops
 
   def apply(move: Int): GoState =
     if (!isLegal(move))
@@ -108,19 +119,30 @@ final class GoState private (
     else if (move == passMove) afterPass
     else afterPlacement(move)
 
-  private lazy val computedLegalMoves: Array[Int] = {
-    val collected = new Array[Int](passMove + 1)
+  private lazy val computedLegalDrops: Array[Int] = {
+    val friendly  = stoneToPlace
+    val enemy     = enemyStone
+    val boardArr  = board
+    val collected = new Array[Int](passMove)
     var count     = 0
     var move      = 0
-    while (move < passMove) {
-      if (isLegalPlacement(paddedIndexOfMove(move))) {
-        collected(count) = move
-        count += 1
+    var padded    = stride + 1
+    var row       = 0
+    while (row < size) {
+      var column = 0
+      while (column < size) {
+        if (boardArr(padded) == Empty && isLegalEmptyPoint(padded, friendly, enemy)) {
+          collected(count) = move
+          count += 1
+        }
+        move += 1
+        padded += 1
+        column += 1
       }
-      move += 1
+      padded += 2
+      row += 1
     }
-    collected(count) = passMove
-    java.util.Arrays.copyOf(collected, count + 1)
+    java.util.Arrays.copyOf(collected, count)
   }
 
   private def paddedIndexOfMove(move: Int): Int   = (move / size + 1) * stride + move     % size + 1
@@ -142,19 +164,48 @@ final class GoState private (
     removed
   }
 
-  private def isLegalPlacement(placed: Int): Boolean =
-    board(placed) == Empty && {
-      val friendly = stoneToPlace
-      val enemy    = enemyStone
-      val west     = placed - 1
-      val east     = placed + 1
-      val south    = placed - stride
-      val north    = placed + stride
+  private def isLegalEmptyPoint(placed: Int, friendly: Byte, enemy: Byte): Boolean = {
+    val west  = placed - 1
+    val east  = placed + 1
+    val south = placed - stride
+    val north = placed + stride
 
-      val enemyRootWest  = if (board(west) == enemy) chainIds(west) else NoChain
-      val enemyRootEast  = if (board(east) == enemy) chainIds(east) else NoChain
-      val enemyRootSouth = if (board(south) == enemy) chainIds(south) else NoChain
-      val enemyRootNorth = if (board(north) == enemy) chainIds(north) else NoChain
+    val westStone  = board(west)
+    val eastStone  = board(east)
+    val southStone = board(south)
+    val northStone = board(north)
+
+    val neighborStoneMask =
+      (1 << westStone) | (1 << eastStone) | (1 << southStone) | (1 << northStone)
+
+    val hasEmptyNeighbor = (neighborStoneMask & (1 << Empty)) != 0
+    val touchesEnemy     = (neighborStoneMask & (1 << enemy)) != 0
+
+    def anyFriendlyChainSurvives: Boolean = {
+      val friendRootWest  = if (westStone == friendly) chainIds(west) else NoChain
+      val friendRootEast  = if (eastStone == friendly) chainIds(east) else NoChain
+      val friendRootSouth = if (southStone == friendly) chainIds(south) else NoChain
+      val friendRootNorth = if (northStone == friendly) chainIds(north) else NoChain
+
+      def friendAdjacencies(root: Int): Int =
+        (if (friendRootWest == root) 1 else 0) +
+          (if (friendRootEast == root) 1 else 0) +
+          (if (friendRootSouth == root) 1 else 0) +
+          (if (friendRootNorth == root) 1 else 0)
+
+      def chainSurvives(root: Int): Boolean =
+        root != NoChain && chainPseudoLiberties(root) > friendAdjacencies(root)
+
+      chainSurvives(friendRootWest) || chainSurvives(friendRootEast) ||
+      chainSurvives(friendRootSouth) || chainSurvives(friendRootNorth)
+    }
+
+    if (!touchesEnemy) hasEmptyNeighbor || anyFriendlyChainSurvives
+    else {
+      val enemyRootWest  = if (westStone == enemy) chainIds(west) else NoChain
+      val enemyRootEast  = if (eastStone == enemy) chainIds(east) else NoChain
+      val enemyRootSouth = if (southStone == enemy) chainIds(south) else NoChain
+      val enemyRootNorth = if (northStone == enemy) chainIds(north) else NoChain
 
       def enemyAdjacencies(root: Int): Int =
         (if (enemyRootWest == root) 1 else 0) +
@@ -163,7 +214,8 @@ final class GoState private (
           (if (enemyRootNorth == root) 1 else 0)
 
       def capturesChain(root: Int): Boolean =
-        root != NoChain && chainPseudoLiberties(root) == enemyAdjacencies(root)
+        root != NoChain && chainPseudoLiberties(root) <= 4 &&
+          chainPseudoLiberties(root) == enemyAdjacencies(root)
 
       val capturesWest  = capturesChain(enemyRootWest)
       val capturesEast  = enemyRootEast != enemyRootWest && capturesChain(enemyRootEast)
@@ -180,29 +232,9 @@ final class GoState private (
         if (capturesSouth) predictedHash ^= chainRemovalHash(enemyRootSouth, enemy)
         if (capturesNorth) predictedHash ^= chainRemovalHash(enemyRootNorth, enemy)
         !occurredPositionHashes.contains(predictedHash)
-      } else {
-        val hasEmptyNeighbor =
-          board(west) == Empty || board(east) == Empty || board(south) == Empty || board(north) == Empty
-        hasEmptyNeighbor || {
-          val friendRootWest  = if (board(west) == friendly) chainIds(west) else NoChain
-          val friendRootEast  = if (board(east) == friendly) chainIds(east) else NoChain
-          val friendRootSouth = if (board(south) == friendly) chainIds(south) else NoChain
-          val friendRootNorth = if (board(north) == friendly) chainIds(north) else NoChain
-
-          def friendAdjacencies(root: Int): Int =
-            (if (friendRootWest == root) 1 else 0) +
-              (if (friendRootEast == root) 1 else 0) +
-              (if (friendRootSouth == root) 1 else 0) +
-              (if (friendRootNorth == root) 1 else 0)
-
-          def chainSurvives(root: Int): Boolean =
-            root != NoChain && chainPseudoLiberties(root) > friendAdjacencies(root)
-
-          chainSurvives(friendRootWest) || chainSurvives(friendRootEast) ||
-          chainSurvives(friendRootSouth) || chainSurvives(friendRootNorth)
-        }
-      }
+      } else hasEmptyNeighbor || anyFriendlyChainSurvives
     }
+  }
 
   private def afterPass: GoState =
     new GoState(
@@ -220,7 +252,8 @@ final class GoState private (
       positionHash,
       positionHashHistory,
       occurredPositionHashes,
-      consecutivePasses + 1
+      consecutivePasses + 1,
+      Nil
     )
 
   private def afterPlacement(move: Int): GoState = {
@@ -259,8 +292,8 @@ final class GoState private (
     removeLibertyOfNeighborChain(south)
     removeLibertyOfNeighborChain(north)
 
-    var capturedStones = 0
-    var lastCaptured   = NoChain
+    var capturedStones           = 0
+    var capturedMoves: List[Int] = Nil
 
     def creditLibertiesAround(cleared: Int): Unit = {
       def creditNeighbor(neighbor: Int): Unit =
@@ -278,7 +311,7 @@ final class GoState private (
         newBoard(clearing) = Empty
         newHash ^= stoneHash(clearing, enemy)
         capturedStones += 1
-        lastCaptured = clearing
+        capturedMoves = moveOfPaddedIndex(clearing) :: capturedMoves
         clearing = newNext(clearing)
         clearing != root
       }) ()
@@ -315,7 +348,7 @@ final class GoState private (
 
     val koMove =
       if (capturedStones == 1 && newCounts(root) == 1 && newLibs(root) == 1)
-        Some(moveOfPaddedIndex(lastCaptured))
+        Some(capturedMoves.head)
       else None
 
     new GoState(
@@ -333,7 +366,8 @@ final class GoState private (
       newHash,
       positionHashHistory :+ newHash,
       occurredPositionHashes + newHash,
-      0
+      0,
+      capturedMoves
     )
   }
 }
@@ -442,7 +476,8 @@ object GoState {
       hash,
       Vector(hash),
       Set(hash),
-      consecutivePasses
+      consecutivePasses,
+      Nil
     )
   }
 
