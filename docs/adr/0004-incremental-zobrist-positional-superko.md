@@ -15,9 +15,8 @@ generation.
 - **Hashing:** precomputed `Long` Zobrist tables indexed by (point × color), XORed
   incrementally on every stone placement and removal. The current position hash is always
   available in O(1).
-- **History:** each state keeps the hash history of prior positions (`Vector[Long]` for
-  order, `Set[Long]` for membership). **Positional superko** = candidate move's resulting
-  hash already in the set.
+- **History:** each state keeps the set of prior position hashes (`Set[Long]`).
+  **Positional superko** = candidate move's resulting hash already in the set.
 - **Cheap candidate hashes:** only capturing moves can recreate an earlier position, so the
   superko check runs only for them, and the resulting hash is computed by XORing the placed
   stone and the removed stones — no board mutation or copy needed for the test.
@@ -40,4 +39,4 @@ generation.
 - Forbidding the move up front is a behavioral divergence from the old engine's
   repetition-ends-game model; recorded separately per 0007, one ADR per divergence.
 - Hash history becomes part of engine state and must survive the copy-on-apply discipline
-  of 0005 (persistent `Vector`/`Set` make this free).
+  of 0005 (a persistent `Set` makes this free).

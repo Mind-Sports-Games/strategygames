@@ -169,8 +169,8 @@ edits; `GoEngineBenchmark` remains the measure of record.
 sbt "bench/runMain strategygames.bench.GoSmokeTiming /path/to/results.csv"
 ```
 
-The output path can also come from `-Dsmoke.output`; without either it falls back
-to a hardcoded scratch path.
+The output path can also come from `-Dsmoke.output` (which wins over the argument);
+without either it defaults to `bench/target/go-smoke-results.csv`.
 
 ## Allocation profiling
 

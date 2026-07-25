@@ -36,6 +36,18 @@ copies the arrays and mutates only the copy, so a published state is never writt
 stones are settled through the existing `ss:` action, and the FEN format is unchanged
 ([ADR 0006](adr/0006-area-scoring-ss-flow-fen-compat.md)).
 
+Errors follow one rule per layer: `GoFen` answers outside text with `Either[GoFenError, _]`;
+below the seam `GoState` and `Zobrist` fail on caller bugs with `require` /
+`IllegalArgumentException`; at and above the `Api.Position` seam failures are `sys.error`.
+
+Adding a board size touches, outside `variant/`: `GoState.supportedSizes`, the
+`Zobrist.tableForSize` match and its per-size tables, and `Api.fenRegex` (its row-count
+range `{8,18}` also rejects sizes below 9) — plus the usual `Go*Setup` trait with fresh
+`id`/`perfId` values ([ADR 0001](adr/0001-parallel-scala-go-variants.md)). The `Pos`/`File`
+alphabet tops out at 19 files, which is the ceiling for any new size. (Do not derive the
+`Zobrist` match from `supportedSizes`: the two objects would then initialize through each
+other for zero gain.)
+
 ## Where it differs from joansala
 
 Where the two engines disagree the rules win, and each difference is recorded rather than smoothed
@@ -46,12 +58,38 @@ this table as its allowlist: any other mismatch is a bug.
 |---|---|---|---|
 | Empty region bordered by no colour | all white's | nobody's | [0008](adr/0008-empty-region-scores-for-nobody.md) |
 | Raw FEN captures and pass count | hardcoded `0` | the real counts | [0009](adr/0009-raw-fen-reports-real-captures-and-passes.md) |
-| Ko point and handicap scores in FEN | do not round-trip | reproduced, and a ko coordinate is accepted on parse | [0010](adr/0010-fen-fields-that-do-not-round-trip.md) |
+| Ko point and handicap scores in FEN | do not round-trip | reproduced, and a ko coordinate is accepted on parse and enforced | [0010](adr/0010-fen-fields-that-do-not-round-trip.md) |
 | A move repeating a position | offered, then ends the game as a repetition | refused, so `isRepetition` is permanently false | [0011](adr/0011-superko-forbidden-up-front-isrepetition-false.md) |
 | Board row with a run of ten or more | reader splits the digits and truncates overruns | multi-digit runs round-trip, overruns are rejected | [0012](adr/0012-board-rows-multi-digit-runs-reject-overruns.md) |
 | A finished game | still lists legal actions | lists none | [0013](adr/0013-no-actions-after-end-no-unchecked-replay.md) |
 | `makeMovesNoLegalCheck` | replays an illegal move blindly | still rejects it | [0013](adr/0013-no-actions-after-end-no-unchecked-replay.md) |
 | Superko rule | none enforced | positional, not situational | [0014](adr/0014-positional-superko-over-situational.md) |
+
+## Retiring joansala
+
+The joansala engine exists to be deleted once the scala engine has earned trust. Delete-day
+touches, and nothing here should be pre-refactored before that day:
+
+- `build.sbt`: the `com.joansala` `go-engine` dependency. The `aalina` dependency stays —
+  samurai (oware) uses it.
+- `go/Api.scala`: the `GoPosition` class, `goBoardFromFen`, `positionFromFen`, the
+  deprecated `positionFromStartingFenAndMoves`, and `validateFEN` — which must be rewritten
+  against `GoFen.parse`, because `Variant.valid` routes every go variant through it and it
+  is the one remaining place a scala-variant code path executes joansala code. With it gone,
+  `Variant.usesScalaEngine` and its two dispatch sites collapse.
+- `go/format/FEN.scala`: the `engineFen` double-digit shim (joansala's reader cannot take
+  multi-digit runs) and the `variant` size inference, which can then name scala variants.
+- Variant identity: whether the old ids 1/2/4 flip to the scala engine (a retroactive rules
+  change for stored games — every [ADR 0007](adr/0007-rules-correct-over-joansala-parity.md)
+  divergence applies) or die and migrate app-side. Recorded, undecided, in
+  [ADR 0015](adr/0015-variant-identity-when-joansala-retires.md).
+- Top-level defaults: `strategygames.variant.Variant`'s two `GameLogic.Go()` defaults and
+  `GameCollection`'s `defaultVariant`, all currently `Go19x19`.
+- Tests: the differential and oracle suites lose their oracle and die or re-point; the
+  joansala-variant wrapper tests re-point at whatever ADR 0015 decides.
+- Bench: `GoBoardSize`'s engine parameters and the corpus fixture headers say
+  `variant=go9x9` etc.; `CorpusFixture` errors on unknown keys, so the fixtures are
+  rewritten or regenerated. `GoDifferentialTest`'s corpus-directory walk goes with them.
 
 ## Benchmarks
 

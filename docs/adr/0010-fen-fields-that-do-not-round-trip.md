@@ -1,6 +1,7 @@
 # 0010 — Two FEN fields deliberately do not round-trip: the ko point and handicap scores
 
-**Status:** Accepted (2026-07-24)
+**Status:** Accepted (2026-07-24). Amended (2026-07-25): a parsed ko point is now enforced
+by `GoState.isLegal`.
 
 ## Context
 

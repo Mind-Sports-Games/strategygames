@@ -160,7 +160,9 @@ object GoFen {
   }
 
   // NOTE: `render` always writes `-` here, because `Api.validateFEN`'s regex only accepts that
-  // literal. Parsing a real coordinate anyway costs nothing and leaves the door open.
+  // literal. Parsing a real coordinate anyway is load-bearing, not speculative: a state rebuilt
+  // from a FEN has no position history for superko to consult, so this field is its only
+  // recapture protection (ADR 0010).
   private def parseKoPoint(field: String, size: Int): Either[GoFenError, Option[Int]] =
     if (field == KoPointOmittedByValidator) Right(None)
     else {

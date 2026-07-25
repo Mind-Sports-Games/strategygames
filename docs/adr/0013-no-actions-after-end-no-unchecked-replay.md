@@ -15,7 +15,7 @@ below the wrapper contract; both were probed directly on `Api.Position`.
 | `apiPosition.legalActions.size` | `71` | `0` |
 
 joansala keeps listing drops and the pass after `hasEnded()` is true. (An earlier
-known-divergence note claimed joansala also returned none; the probe in WO-11 disproved it.)
+known-divergence note claimed joansala also returned none; a later probe disproved it.)
 
 **Unchecked replay.** Probe:
 `Api.positionFromVariant(v).makeMovesNoLegalCheck(List("s@e5", "s@e5"))`.
@@ -43,6 +43,8 @@ still rejects an illegal move, with an `IllegalArgumentException`.
 
 ## Consequences
 
+- The finished-game refusal lives on the legal path (`afterLegalUci`); the unchecked path
+  still validates each move against the rules but does not re-check `ended`.
 - Neither divergence is contract-visible. `go.variant.Variant.possibleDrops` returns `None`
   once `situation.end`, so both wrappers offer no drops on a finished game; and nothing in
   the repo feeds `makeMovesNoLegalCheck` an illegal action.

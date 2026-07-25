@@ -388,9 +388,7 @@ final class GoState private (
     absorbFriendlyNeighbor(south)
     absorbFriendlyNeighbor(north)
 
-    // NOTE: within a played-out game superko already forbids everything the simple ko point would,
-    // so this earns its keep only through field 3 of the FEN format: a state rebuilt from a FEN has
-    // no history for superko to consult, and `isLegal` falls back on this.
+    // NOTE: only load-bearing after a FEN rebuild — see the parseKoPoint NOTE in GoFen (ADR 0010).
     val koMove =
       if (capturedStones == 1 && newCounts(root) == 1 && newLibs(root) == 1)
         Some(capturedMoves.head)
@@ -422,6 +420,8 @@ object GoState {
   val WhitePlayer = -1
   val NoOwner     = 0
 
+  // NOTE: a new size must also touch Api.fenRegex (row-count range {8,18}) and FEN.variant's size
+  // inference — the other two places outside variant/ that know the board-size catalog.
   val supportedSizes: Set[Int] = Set(9, 13, 19)
 
   private val Empty: Byte  = 0
