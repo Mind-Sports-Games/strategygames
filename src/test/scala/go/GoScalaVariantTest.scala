@@ -1,0 +1,254 @@
+package strategygames.go
+
+import org.specs2.mutable.Specification
+
+import strategygames.{ GameFamily, GameLogic, Player, Status }
+import strategygames.go.format.{ FEN, Forsyth, Uci }
+import strategygames.go.variant.{ Go13x13, Go13x13Scala, Go19x19, Go19x19Scala, Go9x9, Go9x9Scala, Variant }
+
+class GoScalaVariantTest extends Specification {
+
+  private def playing(game: Game, ucis: List[String]): Game =
+    ucis.foldLeft(game) { (played, uci) =>
+      Uci(uci)
+        .map(played.apply(_).map { case (next, _) => next })
+        .getOrElse(sys.error(s"unreadable uci: ${uci}"))
+        .valueOr(error => sys.error(s"cannot play ${uci}: ${error}"))
+    }
+
+  private val scriptedNineByNine = List(
+    "s@g3",
+    "s@c7",
+    "s@f2",
+    "s@e5",
+    "s@e1",
+    "s@d4",
+    "s@h4",
+    "s@i1",
+    "s@i5",
+    "s@c5",
+    "s@d5",
+    "s@d6"
+  )
+
+  "the scala go variants" should {
+    "be registered alongside the joansala ones" in {
+      (Variant.all.size === 6) and
+        (Variant.byKey.get("go9x9Scala") === Some(Go9x9Scala)) and
+        (Variant.byKey.get("go13x13Scala") === Some(Go13x13Scala)) and
+        (Variant.byKey.get("go19x19Scala") === Some(Go19x19Scala)) and
+        (Variant.byId.get(5) === Some(Go9x9Scala)) and
+        (Variant.byId.get(6) === Some(Go13x13Scala)) and
+        (Variant.byId.get(7) === Some(Go19x19Scala)) and
+        (Variant.all.map(_.id).distinct.size === 6) and
+        (Variant.all.map(_.perfId) === List(502, 501, 500, 505, 504, 503))
+    }
+
+    "keep the joansala variants as the default and the opening sensible ones" in {
+      (Variant.default === Go19x19) and
+        (Variant.openingSensibleVariants === Set(Go9x9, Go13x13, Go19x19))
+    }
+
+    "be reachable from the strategygames wrapper" in {
+      val wrapped = strategygames.variant.Variant.all(GameLogic.Go())
+      (wrapped.filter(_.key.endsWith("Scala")).map(_.key)
+        === List("go19x19Scala", "go13x13Scala", "go9x9Scala")) and
+        (GameFamily.Go().variants.size === 6) and
+        (strategygames.variant.Variant(GameLogic.Go(), "go19x19Scala").map(_.toGo)
+          === Some(Go19x19Scala))
+    }
+
+    "run on the pure scala engine, unlike the joansala ones" in {
+      (Api.positionFromVariant(Go9x9Scala).isInstanceOf[ScalaPosition] === true) and
+        (Api.positionFromVariant(Go13x13Scala).isInstanceOf[ScalaPosition] === true) and
+        (Api.positionFromVariant(Go19x19Scala).isInstanceOf[ScalaPosition] === true) and
+        (Api.positionFromVariant(Go19x19).isInstanceOf[ScalaPosition] === false) and
+        (Api
+          .positionFromVariantNameAndFEN("go9x9Scala", Go9x9Scala.initialFen.value)
+          .isInstanceOf[ScalaPosition] === true) and
+        (Forsyth
+          .<<@(Go13x13Scala, Go13x13Scala.initialFen)
+          .map(_.board.apiPosition.isInstanceOf[ScalaPosition]) === Some(true))
+    }
+
+    "share the setup of the joansala variant of the same size" in {
+      (Go9x9Scala.initialFen === Go9x9.initialFen) and
+        (Go13x13Scala.initialFen === Go13x13.initialFen) and
+        (Go19x19Scala.initialFen === Go19x19.initialFen) and
+        (Go9x9Scala.komi === 5.5) and
+        (Go13x13Scala.komi === 7.5) and
+        (Go19x19Scala.komi === 7.5) and
+        (Go9x9Scala.boardFenFromHandicap(9) === Go9x9.boardFenFromHandicap(9)) and
+        (Go13x13Scala.boardFenFromHandicap(9) === Go13x13.boardFenFromHandicap(9)) and
+        (Go19x19Scala.boardFenFromHandicap(9) === Go19x19.boardFenFromHandicap(9)) and
+        (Go9x9Scala.fenFromSetupConfig(4, 55) === Go9x9.fenFromSetupConfig(4, 55))
+    }
+  }
+
+  "an initial scala go position" should {
+    "emit the initial fen of its variant" in {
+      List(Go9x9Scala, Go13x13Scala, Go19x19Scala).map(v => Api.positionFromVariant(v).fen)
+        === List(Go9x9Scala.initialFen, Go13x13Scala.initialFen, Go19x19Scala.initialFen)
+    }
+
+    "offer every point as a drop, plus a pass" in {
+      List(Go9x9Scala, Go13x13Scala, Go19x19Scala).map { v =>
+        val position = Api.positionFromVariant(v)
+        (position.legalDrops.size, position.legalActions.size, position.pieceMap.size)
+      } === List((81, 82, 0), (169, 170, 0), (361, 362, 0))
+    }
+
+    "not have ended" in {
+      val position = Api.positionFromVariant(Go9x9Scala)
+      (position.gameEnd === false) and
+        (position.isRepetition === false) and
+        (position.gameResult === GameResult.Ongoing()) and
+        (position.turn === "b") and
+        (position.playerTurn === 1)
+    }
+  }
+
+  "a scripted go9x9Scala game" should {
+    val passed = playing(Game(Go9x9Scala), scriptedNineByNine ++ List("pass", "pass"))
+    val ended  = playing(passed, List("ss:i1"))
+
+    "capture the black stone at d5 when white closes it in" in {
+      (passed.situation.board.apiPosition.pieceMap.size === 11) and
+        (passed.situation.board.apiPosition.pieceMap.get(Pos.D5) === None) and
+        (passed.situation.board.apiPosition.pieceMap.get(Pos.D6) === Some(Piece(P2, Stone)))
+    }
+
+    "await dead stone selection after two passes" in {
+      (passed.situation.canSelectSquares === true) and
+        (passed.situation.end === false) and
+        (passed.situation.board.apiPosition.gameEnd === false) and
+        (passed.situation.board.apiPosition.fen.value
+          === "9/9/2s6/3s5/2s1s3S/3s3S1/6S2/5S3/4S3s[SSSSSSSSSSssssssssss] b - 50 125 0 1 55 2 8")
+    }
+
+    "end as a variant end once the dead stone is removed" in {
+      (ended.situation.end === true) and
+        (ended.situation.status === Some(Status.VariantEnd)) and
+        (ended.situation.winner === Some(Player.P1)) and
+        (ended.situation.board.apiPosition.pieceMap.size === 10) and
+        (ended.situation.board.apiPosition.p1Score === 15.0) and
+        (ended.situation.board.apiPosition.p2Score === 11.5) and
+        (ended.situation.board.apiPosition.gameOutcome === 1000) and
+        (ended.situation.board.apiPosition.gameResult === GameResult.VariantEnd()) and
+        (ended.situation.board.apiPosition.fen.value
+          === "9/9/2s6/3s5/2s1s3S/3s3S1/6S2/5S3/4S4[SSSSSSSSSSssssssssss] b - 150 115 0 1 55 3 8")
+    }
+
+    "offer no further actions once ended" in {
+      (ended.situation.drops === None) and
+        (ended.situation.board.apiPosition.legalActions.size === 0)
+    }
+
+    "export a board fen that reloads into the same position" in {
+      val exported = Forsyth.>>(ended)
+      val reloaded = Forsyth.<<@(Go9x9Scala, exported)
+      (exported.value
+        === "9/9/2s6/3s5/2s1s3S/3s3S1/6S2/5S3/4S4[SSSSSSSSSSssssssssss] w - 150 115 0 1 55 3 8") and
+        (reloaded.map(_.board.apiPosition.fen) === Some(exported)) and
+        (reloaded.map(_.end) === Some(true)) and
+        (reloaded.map(_.winner) === Some(Some(Player.P1)))
+    }
+  }
+
+  "a go9x9Scala game from a handicap position" should {
+    val handicapFen = Go9x9Scala.fenFromSetupConfig(4, 55)
+    val game        = Game(Some(Go9x9Scala), Some(handicapFen))
+
+    "place the handicap stones and let p2 start" in {
+      (handicapFen.value === "9/9/2S3S2/9/9/9/2S3S2/9/9[SSSSSSSSSSssssssssss] w - 40 55 0 0 55 0 1") and
+        (handicapFen.handicap === Some(4)) and
+        (game.situation.player === Player.P2) and
+        (game.situation.board.apiPosition.pieceMap.size === 4) and
+        (game.situation.board.apiPosition.turn === "w")
+    }
+
+    "score the whole board to the handicapped player" in {
+      game.situation.board.apiPosition.fen.value
+        === "9/9/2S3S2/9/9/9/2S3S2/9/9[SSSSSSSSSSssssssssss] w - 810 55 0 0 55 0 1"
+    }
+
+    "keep the handicap fen as the starting fen after a drop" in {
+      val played = playing(game, List("s@a1"))
+      (played.situation.board.apiPosition.initialFen === handicapFen) and
+        (played.situation.board.apiPosition.fen.value
+          === "9/9/2S3S2/9/9/9/2S3S2/9/s8[SSSSSSSSSSssssssssss] b - 40 65 0 0 55 0 2")
+    }
+  }
+
+  "the scala engine and the joansala engine" should {
+    "agree on the fen of a drop only go13x13 game" in {
+      val moves = List("s@d4", "s@k10", "s@k4", "s@d10")
+      playing(Game(Go13x13Scala), moves).situation.board.apiPosition.fen
+        === playing(Game(Go13x13), moves).situation.board.apiPosition.fen
+    }
+
+    "agree on the fen of a drop only go19x19 game" in {
+      val moves = List("s@d4", "s@q16", "s@q4", "s@d16")
+      playing(Game(Go19x19Scala), moves).situation.board.apiPosition.fen
+        === playing(Game(Go19x19), moves).situation.board.apiPosition.fen
+    }
+  }
+
+  "a scripted go19x19Scala game" should {
+    val moves  = List("s@a19", "s@s19", "s@a18", "s@s1", "pass", "pass")
+    val passed = playing(Game(Go19x19Scala), moves)
+    val ended  = playing(passed, List("ss:"))
+
+    "read and play two digit ranks" in {
+      (passed.situation.board.apiPosition.pieceMap.get(Pos.A19) === Some(Piece(P1, Stone))) and
+        (passed.situation.board.apiPosition.pieceMap.get(Pos.S19) === Some(Piece(P2, Stone))) and
+        (passed.situation.canSelectSquares === true)
+    }
+
+    "end with a select squares that removes nothing" in {
+      (ended.situation.end === true) and
+        (ended.situation.board.apiPosition.pieceMap.size === 4) and
+        (ended.situation.board.apiPosition.fen.value.split(' ').last === "4") and
+        (ended.situation.winner === Some(Player.P2))
+    }
+  }
+
+  "a scala go position loaded from a mid game fen" should {
+    val fen       = FEN(
+      "9/9/2s6/3s5/2s1s3S/3s3S1/6S2/5S3/4S3s[SSSSSSSSSSssssssssss] b - 50 125 0 1 55 0 8"
+    )
+    val situation = Forsyth.<<@(Go9x9Scala, fen)
+
+    "keep its own variant rather than inferring it from the board size" in {
+      (situation.map(_.board.variant) === Some(Go9x9Scala)) and
+        (fen.variant === Go9x9)
+    }
+
+    "round trip through forsyth" in {
+      situation.map(s => Forsyth.>>(s).value) === Some(fen.value)
+    }
+  }
+
+  "a replayed go9x9Scala game" should {
+    def replaying(ucis: List[String]) =
+      Replay
+        .situationsFromUci(ucis.flatMap(Uci(_)), Some(Go9x9Scala.initialFen), Go9x9Scala)
+        .toOption
+
+    "reach the position the played game reached" in {
+      val actions  = scriptedNineByNine ++ List("pass", "pass", "ss:i1")
+      val replayed = replaying(actions)
+      (replayed.map(_.size) === Some(actions.size + 1)) and
+        (replayed.map(_.last.end) === Some(true)) and
+        (replayed.map(_.last.board.apiPosition.fen)
+          === Some(playing(Game(Go9x9Scala), actions).situation.board.apiPosition.fen))
+    }
+
+    "end on a fourth pass without any dead stone selection" in {
+      val replayed = replaying(scriptedNineByNine ++ List("pass", "pass", "pass", "pass"))
+      (replayed.map(_.last.end) === Some(true)) and
+        (replayed.map(_.last.board.apiPosition.pieceMap.size) === Some(11))
+    }
+  }
+
+}
