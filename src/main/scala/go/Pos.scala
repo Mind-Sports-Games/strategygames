@@ -426,10 +426,10 @@ case class Pos private (index: Int) extends AnyVal {
 
 object Pos {
   def apply(index: Int): Option[Pos] =
-    if (0 <= index && index < File.all.size * Rank.all.size) Some(new Pos(index))
+    if (0 <= index && index < File.count * Rank.count) Some(new Pos(index))
     else None
 
-  def apply(file: File, rank: Rank): Pos = new Pos(File.all.size * rank.index + file.index)
+  def apply(file: File, rank: Rank): Pos = new Pos(File.count * rank.index + file.index)
 
   def at(x: Int, y: Int): Option[Pos] =
     File(x) zip Rank(y) map { case (file, rank) =>

@@ -15,10 +15,10 @@ case class Rank private (val index: Int) extends AnyVal with Ordered[Rank] {
 
 object Rank {
   def apply(index: Int): Option[Rank] =
-    if (0 <= index && index < all.size) Some(new Rank(index))
+    if (0 <= index && index < count) Some(new Rank(index))
     else None
 
-  @inline def of(pos: Pos): Rank = new Rank(pos.index / File.all.size)
+  @inline def of(pos: Pos): Rank = new Rank(pos.index / File.count)
 
   def fromChar(ch: Char): Option[Rank] = apply(if (ch.toInt == 48) 9 else ch.toInt - 49)
 
@@ -64,5 +64,7 @@ object Rank {
     Nineteenth
   )
   val allReversed: List[Rank] = all.reverse
+
+  val count: Int = all.size
 
 }

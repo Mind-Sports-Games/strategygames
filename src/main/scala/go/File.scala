@@ -17,10 +17,10 @@ case class File private (val index: Int) extends AnyVal with Ordered[File] {
 
 object File {
   def apply(index: Int): Option[File] =
-    if (0 <= index && index < all.size) Some(new File(index))
+    if (0 <= index && index < count) Some(new File(index))
     else None
 
-  @inline def of(pos: Pos): File = new File(pos.index % all.size)
+  @inline def of(pos: Pos): File = new File(pos.index % count)
 
   def fromChar(ch: Char): Option[File] = apply(ch.toInt - 97)
 
@@ -45,4 +45,6 @@ object File {
   val S = new File(18)
 
   val all = List(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S)
+
+  val count: Int = all.size
 }
