@@ -89,7 +89,17 @@ object CorpusGenerator {
   private def fairysfVariant(name: String, variant: strategygames.fairysf.variant.Variant): VariantFixture =
     VariantFixture(s"fairysf-$name", GameLogic.FairySF(), Variant.FairySF(variant), 120)
 
-  val defaultOutputDir = "bench/src/main/resources/corpus"
+  @tailrec
+  private def buildRootAt(dir: Path): Path =
+    if (Files.isRegularFile(dir.resolve("build.sbt"))) dir
+    else
+      Option(dir.getParent) match {
+        case Some(parent) => buildRootAt(parent)
+        case None         => sys.error(s"no build.sbt at or above ${sys.props("user.dir")}")
+      }
+
+  lazy val defaultOutputDir: Path =
+    buildRootAt(Paths.get(sys.props("user.dir")).toAbsolutePath).resolve("bench/src/main/resources/corpus")
 
   final case class Entry(key: String, size: String, lib: GameLogic, variant: Variant, maxPlies: Int) {
     def resourceName: String = CorpusFixture.resourceName(key, size)
@@ -103,7 +113,7 @@ object CorpusGenerator {
       variantFixtures.map(vf => Entry(vf.key, "long", vf.lib, vf.variant, vf.maxPlies))
 
   def generateIfAbsent(key: String, size: String): Path = synchronized {
-    val file = Paths.get(defaultOutputDir).resolve(CorpusFixture.resourceName(key, size))
+    val file = defaultOutputDir.resolve(CorpusFixture.resourceName(key, size))
     if (!Files.exists(file)) {
       val entry        = entries
         .find(e => e.key == key && e.size == size)
@@ -153,7 +163,7 @@ object CorpusGenerator {
 
   def main(args: Array[String]): Unit = {
     val checkMode = args.headOption.contains("check")
-    val outDir    = Paths.get(if (args.nonEmpty && !checkMode) args(0) else defaultOutputDir)
+    val outDir    = if (args.nonEmpty && !checkMode) Paths.get(args(0)) else defaultOutputDir
     if (!checkMode) Files.createDirectories(outDir)
     val statuses  = entries.map { entry =>
       val (fixture, stopReason) = build(entry.key, entry.lib, entry.variant, entry.maxPlies)
