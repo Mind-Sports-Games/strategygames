@@ -24,8 +24,10 @@ families are fast-pathed vs delegated.
 
 ## Corpus fixtures
 
-`src/main/resources/corpus/<family>-<size>.txt`. Each fixture is a small text
-file:
+`src/main/resources/corpus/<family>-<size>.txt`. The fixtures are **not committed**
+— that directory is gitignored, and any fixture a test or benchmark asks for is
+generated on first use and reused from then on (see "Regenerate the corpus" for
+the seed and the determinism guarantee). Each fixture is a small text file:
 
 ```
 family=<family key>
@@ -51,14 +53,18 @@ distinction.
 ## Tests
 
 `sbt "bench/test"` runs several specs. `CorpusFixtureSpec` validates the fixture
-codec against the committed corpus files only — it loads each default fixture
-(one per family × size), round-trips it through `parse`/`render`, and asserts the
-two corrupt-input rejections; it plays no games, so it finishes in seconds. The
+codec — it loads each default fixture (one per family × size), round-trips it
+through `parse`/`render`, and asserts the two corrupt-input rejections. The
 differential specs (`GameToUciStringsDifferentialSpec`, `…BackgammonSpec`,
 `…ChessSpec`) assert `GameToUciStrings` is byte-identical to `UciDump` over every
-default and non-default-variant fixture. The committed fixture files are the
-memoization: game generation happens once, offline, when you run the generator
-below — never on every test run.
+default and non-default-variant fixture.
+
+The on-disk fixture files are the memoization: the first run on a fresh checkout
+plays every game it needs and writes the files (~50s, one `corpus: generated …`
+line per fixture), and every run after that reuses them (~4s, no generation).
+`CorpusFixture.load` is the only entry point that reads a fixture, and it is what
+generates the missing one — so deleting a fixture file is all it takes to force
+that one to be replayed.
 
 Non-default variants are covered by extra `<family>-<variant>-long` fixtures (all
 backgammon, go, togyzkumalak, abalone, and fairysf variants), so a variant that
@@ -69,9 +75,9 @@ would break its family's fast path is caught differentially — as GrandAbalone 
 
 The generator plays random legal games through strategygames with a fixed seed
 (`20240724L`) and writes the fixtures. Regeneration with the same seed is
-byte-identical, so this is the expensive step (it replays go area-scoring and
-backgammon forced-turn games) and is deliberately kept out of the default test
-suite.
+byte-identical, which is what makes generate-on-first-use safe: every checkout
+produces the same corpus. Running it explicitly rewrites all fixtures in one go,
+including any the test suite has not asked for yet:
 
 ```
 sbt "bench/runMain strategygames.bench.CorpusGenerator"
@@ -84,13 +90,14 @@ hit the ply cap, `NoCandidates` = no applyable action), whether `UciDump` accept
 the fixture, and a determinism status versus the file already on disk
 (`BYTE_IDENTICAL`, `CHANGED`, or `NEW`).
 
-To verify the committed fixtures are still reproducible without overwriting them:
+To verify the fixtures on disk are still reproducible without overwriting them:
 
 ```
 sbt "bench/runMain strategygames.bench.CorpusGenerator check"
 ```
 
-`check` mode writes nothing, reports the per-fixture status, prints
+`check` mode writes nothing, reports the per-fixture status (a fixture not yet
+generated on this machine reports `NEW`, which counts as drift), prints
 `DETERMINISM: ALL_BYTE_IDENTICAL` or `DETERMINISM: CHANGES_DETECTED`, and exits
 non-zero on any drift.
 

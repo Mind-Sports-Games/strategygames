@@ -27,3 +27,6 @@ src/test/.bsp
 
 #graphify
 graphify-out
+
+# generated bench corpus fixtures
+bench/src/main/resources/corpus/

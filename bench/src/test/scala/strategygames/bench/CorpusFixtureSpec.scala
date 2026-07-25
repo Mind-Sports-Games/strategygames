@@ -4,9 +4,9 @@ import org.specs2.mutable.Specification
 
 class CorpusFixtureSpec extends Specification {
 
-  "committed corpus fixtures" should {
+  "generated corpus fixtures" should {
 
-    "load, parse and round-trip render for every committed fixture" in {
+    "load, parse and round-trip render for every default fixture" in {
       val checks = for {
         family <- CorpusGenerator.families
         size   <- CorpusGenerator.sizes

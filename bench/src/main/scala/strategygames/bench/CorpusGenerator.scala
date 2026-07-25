@@ -1,7 +1,7 @@
 package strategygames.bench
 
 import java.nio.charset.StandardCharsets
-import java.nio.file.{ Files, Paths }
+import java.nio.file.{ Files, Path, Paths, StandardCopyOption }
 
 import scala.annotation.tailrec
 import scala.util.{ Failure, Random, Success, Try }
@@ -91,6 +91,33 @@ object CorpusGenerator {
 
   val defaultOutputDir = "bench/src/main/resources/corpus"
 
+  final case class Entry(key: String, size: String, lib: GameLogic, variant: Variant, maxPlies: Int) {
+    def resourceName: String = CorpusFixture.resourceName(key, size)
+  }
+
+  val entries: List[Entry] =
+    (for {
+      family <- families
+      size   <- sizes
+    } yield Entry(family.key, size.key, family.lib, family.variant, size.maxPlies)) ++
+      variantFixtures.map(vf => Entry(vf.key, "long", vf.lib, vf.variant, vf.maxPlies))
+
+  def generateIfAbsent(key: String, size: String): Path = synchronized {
+    val file = Paths.get(defaultOutputDir).resolve(CorpusFixture.resourceName(key, size))
+    if (!Files.exists(file)) {
+      val entry        = entries
+        .find(e => e.key == key && e.size == size)
+        .getOrElse(sys.error(s"no corpus entry for $key-$size"))
+      val (fixture, _) = build(entry.key, entry.lib, entry.variant, entry.maxPlies)
+      Files.createDirectories(file.getParent)
+      val partial      = Files.createTempFile(file.getParent, s"${file.getFileName}.", ".partial")
+      Files.write(partial, CorpusFixture.render(fixture).getBytes(StandardCharsets.UTF_8))
+      Files.move(partial, file, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
+      println(s"corpus: generated $file")
+    }
+    file
+  }
+
   def play(lib: GameLogic, variant: Variant, initialFen: FEN, maxPlies: Int, rng: Random): PlayResult = {
     @tailrec
     def advance(game: Game, candidates: List[Action]): Option[Game] =
@@ -124,22 +151,13 @@ object CorpusGenerator {
     (CorpusFixture(key, lib, variant, Some(initialFen), result.game.actionStrs), result.stopReason)
   }
 
-  def fixtureFor(family: Family, size: Size): (CorpusFixture, StopReason) =
-    build(family.key, family.lib, family.variant, size.maxPlies)
-
   def main(args: Array[String]): Unit = {
     val checkMode = args.headOption.contains("check")
     val outDir    = Paths.get(if (args.nonEmpty && !checkMode) args(0) else defaultOutputDir)
     if (!checkMode) Files.createDirectories(outDir)
-    val defaults = for {
-      family <- families
-      size   <- sizes
-    } yield (fixtureFor(family, size), CorpusFixture.resourceName(family.key, size.key))
-    val variants = variantFixtures.map(vf =>
-      (build(vf.key, vf.lib, vf.variant, vf.maxPlies), CorpusFixture.resourceName(vf.key, "long"))
-    )
-    val statuses = (defaults ++ variants).map { case ((fixture, stopReason), name) =>
-      emit(fixture, stopReason, name, outDir, checkMode)
+    val statuses  = entries.map { entry =>
+      val (fixture, stopReason) = build(entry.key, entry.lib, entry.variant, entry.maxPlies)
+      emit(fixture, stopReason, entry.resourceName, outDir, checkMode)
     }
     if (checkMode) {
       val drifted = statuses.exists(_ != "BYTE_IDENTICAL")
@@ -162,8 +180,8 @@ object CorpusGenerator {
       else if (new String(Files.readAllBytes(file), StandardCharsets.UTF_8) == rendered) "BYTE_IDENTICAL"
       else "CHANGED"
     if (!checkMode) Files.write(file, rendered.getBytes(StandardCharsets.UTF_8))
-    val plies = fixture.actionStrs.map(_.size).sum
-    val valid = UciDump(fixture.lib, fixture.actionStrs, fixture.initialFen, fixture.variant).isValid
+    val plies    = fixture.actionStrs.map(_.size).sum
+    val valid    = UciDump(fixture.lib, fixture.actionStrs, fixture.initialFen, fixture.variant).isValid
     println(
       s"${name.stripSuffix(".txt")}: turns=${fixture.actionStrs.size} plies=$plies stop=$stopReason uciDumpValid=$valid $status -> $file"
     )
