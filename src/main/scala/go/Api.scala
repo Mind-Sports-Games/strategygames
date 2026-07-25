@@ -46,10 +46,7 @@ object Api {
         posWithPrevious: Position
     ): Position
 
-    def toBoard: String
-    def goDiagram: String
     def setKomi(komi: Double): Unit
-    def setBoard(goBoard: GoBoard): Unit
     def deepCopy: Position
 
     lazy val turn: String
@@ -169,16 +166,11 @@ object Api {
       return new GoPosition(position, ply + movesList.size, fromFen, komi)
     }
 
-    // helper
-    def toBoard: String = position.toBoard.toString
-
-    def setBoard(goBoard: GoBoard): Unit = position.setBoard(goBoard)
-
     def deepCopy: Position = new GoPosition(position.deepCopy(), ply, fromFen, komi)
 
     def setKomi(k: Double): Unit = position.setKomiScore(k)
 
-    def goDiagram: String = position.toBoard.toDiagram
+    private def goDiagram: String = position.toBoard.toDiagram
 
     lazy val turn =
       if (position.turn() == 1) "b"
@@ -302,7 +294,7 @@ object Api {
     new GoPosition(game, ply, Some(positionFen), positionFen.komi)
   }
 
-  def goBoardFromFen(fen: FEN): GoBoard = {
+  private[go] def goBoardFromFen(fen: FEN): GoBoard = {
     val b  = new GoBoard(fen.gameSize)
     val b2 = b.toBoard(fen.engineFen)
     b2
