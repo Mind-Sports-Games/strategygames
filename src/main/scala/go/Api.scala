@@ -58,11 +58,11 @@ object Api {
     lazy val fenScore: Score
     lazy val gameResult: GameResult
     lazy val gameEnd: Boolean
-    lazy val gameOutcome: Int
+    def gameOutcome: Int
     lazy val isRepetition: Boolean
-    lazy val gameScore: Int
-    lazy val p1Score: Double
-    lazy val p2Score: Double
+    def gameScore: Int
+    def p1Score: Double
+    def p2Score: Double
     lazy val legalDrops: Array[Int]
     lazy val legalActions: Array[Int]
     lazy val playerTurn: Int // 1 for South (P1/black) -1 for North (P2/white)
@@ -272,6 +272,8 @@ object Api {
 
   def positionFromVariant(variant: Variant): Position = position(variant, variant.komi)
 
+  // NOTE: a go fen carries no variant, so this can only ever build a joansala position. Safe here
+  // because every caller is inside GoPosition, which is already on that engine.
   def positionFromFen(fenString: String): Position = {
     val positionFen = FEN(fenString)
     val game        = new GoGame(positionFen.gameSize)
@@ -307,6 +309,11 @@ object Api {
   def positionFromVariantAndMoves(variant: Variant, uciMoves: List[String]): Position =
     positionFromVariant(variant).makeMoves(uciMoves)
 
+  @deprecated(
+    "a go fen does not name its variant, so this always builds a joansala position and silently " +
+      "switches the ruleset of a scala one; use positionFromVariantStartingFenAndMoves",
+    "10.2.1-s3-ps8-uci4"
+  )
   def positionFromStartingFenAndMoves(startingFen: FEN, uciMoves: List[String]): Position =
     positionFromFen(startingFen.value).makeMoves(uciMoves)
 

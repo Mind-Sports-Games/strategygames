@@ -48,7 +48,8 @@ final private[go] class ScalaPosition(
   }
 
   // NOTE: the engine state is immutable; these vars exist because `Position.setKomi` returns Unit
-  // and because `pieceMap` releases its parent below.
+  // and because `pieceMap` releases its parent below. Precondition: set the komi before reading
+  // `fen`, `fenScore` or `gameResult`, which cache the komi they were first read with.
   def setKomi(komi: Double): Unit = currentGame = currentGame.withKomi(komi)
 
   def deepCopy: Position =
@@ -65,7 +66,8 @@ final private[go] class ScalaPosition(
     *
     * Dropping the parent reference once the map is memoized is what keeps a replay from pinning every
     * position it ever passed through: a chain of a thousand positions would otherwise hold a thousand live
-    * ancestors.
+    * ancestors. Until this is forced, though, that chain is exactly what the position holds — around 9KB of
+    * engine state per unforced ancestor, released one recursive step at a time when it finally is.
     */
   lazy val pieceMap: PieceMap = {
     val stones = parentStonesUntilForced.flatMap(stonesInheritedFrom).getOrElse(stonesByFullScan)
@@ -120,19 +122,22 @@ final private[go] class ScalaPosition(
 
   lazy val gameResult: GameResult = GameResult.resultFromInt(gameOutcome, gameEnd, isRepetition)
   lazy val gameEnd: Boolean       = currentGame.ended
-  lazy val gameOutcome: Int       = currentGame.gameOutcome
   // NOTE: not a stub. Superko is refused at move generation, so no repeating position is reachable
   // and this engine can never observe one.
   lazy val isRepetition: Boolean  = false
-  lazy val gameScore: Int         = currentGame.gameScore
-  lazy val p1Score: Double        = currentGame.p1Score
-  lazy val p2Score: Double        = currentGame.p2Score
+
+  // NOTE: derived rather than cached, so that a `setKomi` after construction cannot leave a stale
+  // score behind. The area score they all read is itself cached on the immutable state.
+  def gameOutcome: Int = currentGame.gameOutcome
+  def gameScore: Int   = currentGame.gameScore
+  def p1Score: Double  = currentGame.p1Score
+  def p2Score: Double  = currentGame.p2Score
 
   lazy val legalActions: Array[Int] =
     if (gameEnd) Array.empty else currentGame.state.legalMoves
 
   lazy val legalDrops: Array[Int] =
-    if (gameEnd) Array.empty else currentGame.state.legalDropsShared
+    if (gameEnd) Array.empty else currentGame.state.legalDrops
 
   def fenString: String = GoFen.render(currentGame)
 
@@ -148,23 +153,52 @@ final private[go] class ScalaPosition(
     else ScalaPosition.initial(variant, currentGame.komi)
 
   private def afterLegalUci(played: GoGame, uci: String): GoGame = {
-    if (!isSelectSquares(uci) && !played.state.isLegal(Api.uciToMove(uci, variant)))
-      sys.error(
-        s"Illegal action ${uci} for ${variant.key}: legal actions ${played.state.legalMoves.mkString(", ")}"
-      )
-    afterUci(played, uci)
+    if (played.ended)
+      sys.error(s"Action ${uci} offered to a finished ${variant.key} game")
+    if (isSelectSquares(uci)) played.selectDeadStones(deadStoneMoves(uci))
+    else {
+      val move = engineMoveOf(uci)
+      if (!played.state.isLegal(move))
+        sys.error(
+          s"Illegal action ${uci} for ${variant.key}: legal actions ${played.state.legalMoves.mkString(", ")}"
+        )
+      played.play(move)
+    }
   }
 
   private def afterUci(played: GoGame, uci: String): GoGame =
     if (isSelectSquares(uci)) played.selectDeadStones(deadStoneMoves(uci))
-    else played.play(Api.uciToMove(uci, variant))
+    else played.play(engineMoveOf(uci))
 
   private def isSelectSquares(uci: String): Boolean = uci.take(3) == "ss:"
 
-  private def deadStoneMoves(uci: String): List[Int] =
-    uci.drop(3).split(",").toList.flatMap(Pos.fromKey(_)).map(pointOf)
+  /** `Api.uciToMove` folds an unreadable or off-board coordinate onto a real point of the board, so a drop
+    * whose key names no square of this variant would silently be played somewhere else.
+    */
+  private def engineMoveOf(uci: String): Int = {
+    if (isSinglePlacement(uci) && !Pos.fromKey(uci.drop(2)).exists(isOnBoard))
+      sys.error(s"Drop ${uci} names no square of ${variant.key}")
+    Api.uciToMove(uci, variant)
+  }
 
-  private def pointOf(pos: Pos): Int = variant.boardSize.height * pos.rank.index + pos.file.index
+  /** A key naming a square the board does not have is ignored, as the joansala engine ignores it: dead stone
+    * selection comes from a client, and a square with no stone on it lifts nothing either way. A key that is
+    * not a coordinate at all is a caller bug and says so.
+    */
+  private def deadStoneMoves(uci: String): List[Int] =
+    uci.drop(3).split(",").toList.filter(_.nonEmpty).flatMap { key =>
+      Pos.fromKey(key) match {
+        case Some(pos) => Option.when(isOnBoard(pos))(pointOf(pos))
+        case None      => sys.error(s"Unreadable dead stone ${key} in ${uci}")
+      }
+    }
+
+  private def isOnBoard(pos: Pos): Boolean =
+    pos.file.index < variant.boardSize.width && pos.rank.index < size
+
+  private def pointOf(pos: Pos): Int = size * pos.rank.index + pos.file.index
+
+  private def size: Int = variant.boardSize.height
 
 }
 

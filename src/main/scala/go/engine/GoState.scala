@@ -28,7 +28,6 @@ final class GoState private (
     val capturesByWhite: Int,
     val simpleKoMove: Option[Int],
     val positionHash: Long,
-    val positionHashHistory: Vector[Long],
     private val occurredPositionHashes: Set[Long],
     val consecutivePasses: Int,
     val capturedMovesOnLastPlacement: List[Int]
@@ -52,14 +51,20 @@ final class GoState private (
     }
   }
 
-  /** A pass is always legal. A placement is legal on an empty point that neither leaves its own chain without
-    * liberties nor recreates a position already in this state's history.
+  /** A pass is always legal. A placement is legal on an empty point that is not the simple ko point and that
+    * neither leaves its own chain without liberties nor recreates a position already in this state's history.
+    *
+    * The simple ko point is redundant while the history is complete — superko forbids the recapture anyway —
+    * but a state rebuilt from a FEN starts with an empty history, so the ko point read from the FEN is the
+    * only thing left protecting it.
     */
   def isLegal(move: Int): Boolean =
-    move == passMove || (move >= 0 && move < passMove && {
+    move == passMove || (move >= 0 && move < passMove && move != forbiddenKoPoint && {
       val padded = paddedIndexOfMove(move)
       board(padded) == Empty && isLegalEmptyPoint(padded, stoneToPlace, enemyStone)
     })
+
+  private def forbiddenKoPoint: Int = simpleKoMove.getOrElse(NoPoint)
 
   /** The position with the given stones lifted, as agreed dead at the end of the game. Rebuilt from stone
     * owners, so the superko history restarts from the resulting position — acceptable because no further
@@ -136,9 +141,7 @@ final class GoState private (
     withPass
   }
 
-  // NOTE: hands out the cached array itself rather than a copy, so callers must treat it as
-  // read-only; `legalMoves` above is the copying caller.
-  private[go] def legalDropsShared: Array[Int] = computedLegalDrops
+  def legalDrops: Array[Int] = computedLegalDrops.clone()
 
   /** The position after playing `move`.
     *
@@ -155,6 +158,7 @@ final class GoState private (
     val friendly  = stoneToPlace
     val enemy     = enemyStone
     val boardArr  = board
+    val koPoint   = forbiddenKoPoint
     val collected = new Array[Int](passMove)
     var count     = 0
     var move      = 0
@@ -163,7 +167,7 @@ final class GoState private (
     while (row < size) {
       var column = 0
       while (column < size) {
-        if (boardArr(padded) == Empty && isLegalEmptyPoint(padded, friendly, enemy)) {
+        if (move != koPoint && boardArr(padded) == Empty && isLegalEmptyPoint(padded, friendly, enemy)) {
           collected(count) = move
           count += 1
         }
@@ -289,7 +293,6 @@ final class GoState private (
       capturesByWhite,
       None,
       positionHash,
-      positionHashHistory,
       occurredPositionHashes,
       consecutivePasses + 1,
       Nil
@@ -385,8 +388,9 @@ final class GoState private (
     absorbFriendlyNeighbor(south)
     absorbFriendlyNeighbor(north)
 
-    // NOTE: the simple ko point is tracked only because field 3 of the FEN format asks for it.
-    // Legality never consults it — superko already forbids everything simple ko would.
+    // NOTE: within a played-out game superko already forbids everything the simple ko point would,
+    // so this earns its keep only through field 3 of the FEN format: a state rebuilt from a FEN has
+    // no history for superko to consult, and `isLegal` falls back on this.
     val koMove =
       if (capturedStones == 1 && newCounts(root) == 1 && newLibs(root) == 1)
         Some(capturedMoves.head)
@@ -405,7 +409,6 @@ final class GoState private (
       if (friendly == White) capturesByWhite + capturedStones else capturesByWhite,
       koMove,
       newHash,
-      positionHashHistory :+ newHash,
       occurredPositionHashes + newHash,
       0,
       capturedMoves
@@ -426,6 +429,7 @@ object GoState {
   private val White: Byte  = 2
   private val Border: Byte = 3
   private val NoChain      = -1
+  private val NoPoint      = -1
 
   def initial(size: Int): GoState =
     fromStoneOwners(size, _ => NoOwner, BlackPlayer, 0, 0, None, 0)
@@ -521,7 +525,6 @@ object GoState {
       capturesByWhite,
       simpleKoMove,
       hash,
-      Vector(hash),
       Set(hash),
       consecutivePasses,
       Nil

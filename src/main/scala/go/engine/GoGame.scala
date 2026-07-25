@@ -53,9 +53,7 @@ final case class GoGame(
     else GoGame.Drawn
 
   def winningPlayer: Option[Int] =
-    if (gameScore > 0) Some(GoState.BlackPlayer)
-    else if (gameScore < 0) Some(GoState.WhitePlayer)
-    else None
+    Option.unless(gameOutcome == GoGame.Drawn)(Integer.signum(gameOutcome))
 
   def fullMoveNumber: Int = plyCount / 2 + 1
 
