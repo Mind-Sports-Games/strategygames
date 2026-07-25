@@ -41,7 +41,14 @@ class GoScalaVariantTest extends Specification {
         (Variant.byId.get(6) === Some(Go13x13Scala)) and
         (Variant.byId.get(7) === Some(Go19x19Scala)) and
         (Variant.all.map(_.id).distinct.size === 6) and
-        (Variant.all.map(_.perfId) === List(502, 501, 500, 505, 504, 503))
+        (Variant.all.map(v => v.key -> v.perfId).toMap === Map(
+          "go9x9"        -> 500,
+          "go13x13"      -> 501,
+          "go19x19"      -> 502,
+          "go9x9Scala"   -> 503,
+          "go13x13Scala" -> 504,
+          "go19x19Scala" -> 505
+        ))
     }
 
     "keep the joansala variants as the default and the opening sensible ones" in {
@@ -152,6 +159,39 @@ class GoScalaVariantTest extends Specification {
         (reloaded.map(_.board.apiPosition.fen) === Some(exported)) and
         (reloaded.map(_.end) === Some(true)) and
         (reloaded.map(_.winner) === Some(Some(Player.P1)))
+    }
+  }
+
+  "a key naming a square the board does not have" should {
+    val awaitingSelection = scriptedNineByNine ++ List("pass", "pass")
+
+    def selecting(uci: String) =
+      Api.positionFromVariantAndMoves(Go9x9Scala, awaitingSelection ++ List(uci))
+
+    "be ignored in a dead stone selection, as the joansala engine ignores it" in {
+      val liftingNothing = selecting("ss:")
+      val liftingN4      = selecting("ss:n4")
+      (Api.uciToMove("s@n4", Go9x9Scala) === Api.uciToMove("s@e5", Go9x9Scala)) and
+        (liftingN4.pieceMap.get(Pos.E5) === Some(Piece(P2, Stone))) and
+        (liftingN4.fen === liftingNothing.fen)
+    }
+
+    "not stop the on board keys beside it from being lifted" in {
+      (selecting("ss:i1,n4").fen === selecting("ss:i1").fen) and
+        (selecting("ss:i1,n4").pieceMap.get(Pos.I1) === None)
+    }
+
+    "be refused outright as a drop, rather than played somewhere else" in {
+      Api.positionFromVariantAndMoves(Go9x9Scala, List("s@n4")) must throwAn[Exception]
+    }
+  }
+
+  "a dead stone key that is not a coordinate at all" should {
+    "be refused rather than dropped in silence" in {
+      Api.positionFromVariantAndMoves(
+        Go9x9Scala,
+        scriptedNineByNine ++ List("pass", "pass", "ss:zz")
+      ) must throwAn[Exception]
     }
   }
 

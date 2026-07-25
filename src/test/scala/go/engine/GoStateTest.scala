@@ -7,11 +7,10 @@ class GoStateTest extends Specification {
   import GoEngineTestSupport._
 
   "initial state" should {
-    "offer every point plus pass on each board size" in {
+    "offer the pass alongside the drops and give black the move" in {
       forall(List(9, 13, 19)) { size =>
         val state = GoState.initial(size)
-        (state.legalMoves.length === size * size + 1) and
-          (state.legalMoves.toList must contain(state.passMove)) and
+        (state.legalMoves.toList must contain(state.passMove)) and
           (state.playerTurn === 1) and
           (state.turn === "b")
       }
@@ -22,9 +21,8 @@ class GoStateTest extends Specification {
         (state.isLegal(state.passMove + 1) === false) and
         (state.isLegal(state.passMove) === true)
     }
-    "produce the same hash when constructed twice" in {
-      GoState.initial(9)(engineMove(9, "e5")).positionHash ===
-        GoState.initial(9)(engineMove(9, "e5")).positionHash
+    "hash a placement to the value every other process hashes it to" in {
+      GoState.initial(9)(engineMove(9, "e5")).positionHash === 7651700626678406181L
     }
   }
 

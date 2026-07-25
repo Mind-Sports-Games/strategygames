@@ -11,6 +11,9 @@ class GoGameTest extends Specification {
       played.play(if (key == "pass") played.state.passMove else engineMove(played.state.size, key))
     }
 
+  private def parsedGame(fen: String): GoGame =
+    GoFen.parse(fen).fold(error => sys.error(s"unparsable go fen: $error"), identity)
+
   private val nineByNine = GoGame.initial(9, 5.5)
 
   "a fresh game" should {
@@ -44,11 +47,8 @@ class GoGameTest extends Specification {
   }
 
   "selecting dead stones" should {
-    val passed   = GoFen
-      .parse(
-        "4S4/4S4/4S4/4S4/4S1s2/4S4/4S4/4S4/4S4[SSSSSSSSSSssssssssss] b - 450 65 0 0 55 2 1"
-      )
-      .getOrElse(nineByNine)
+    val passed   =
+      parsedGame("4S4/4S4/4S4/4S4/4S1s2/4S4/4S4/4S4/4S4[SSSSSSSSSSssssssssss] b - 450 65 0 0 55 2 1")
     val resolved = passed.selectDeadStones(List(engineMove(9, "g5")))
     "end the game" in {
       (resolved.ended === true) and (resolved.fenPassCount === 3)
@@ -75,16 +75,16 @@ class GoGameTest extends Specification {
   "equal area with no komi" should {
     val fen  =
       "3S1s3/3S1s3/3S1s3/3S1s3/3S1s3/3S1s3/3S1s3/3S1s3/3S1s3[SSSSSSSSSSssssssssss] b - 360 360 0 0 0 0 1"
-    val game = GoFen.parse(fen).toOption
+    val game = parsedGame(fen)
     "be a draw" in {
-      (game.map(_.p1FenScore) === Some(360)) and
-        (game.map(_.p2FenScore) === Some(360)) and
-        (game.map(_.gameScore) === Some(0)) and
-        (game.map(_.gameOutcome) === Some(0)) and
-        (game.flatMap(_.winningPlayer) === None)
+      (game.p1FenScore === 360) and
+        (game.p2FenScore === 360) and
+        (game.gameScore === 0) and
+        (game.gameOutcome === 0) and
+        (game.winningPlayer === None)
     }
     "emit the fen it was parsed from" in {
-      game.map(GoFen.render) === Some(fen)
+      GoFen.render(game) === fen
     }
   }
 

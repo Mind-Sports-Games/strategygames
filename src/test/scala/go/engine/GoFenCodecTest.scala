@@ -95,36 +95,55 @@ class GoFenCodecTest extends Specification {
       reparsed("9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 1") === Go9x9.initialFen.value
     }
     "reject a fen with the wrong number of fields" in {
-      GoFen.parse("badfen").isLeft === true
+      GoFen.parse("badfen") must beLeft(GoFenError.UnexpectedFieldCount(1, "badfen"))
     }
     "reject an unsupported board size" in {
-      GoFen
-        .parse("10/10/10/10/10/10/10/10/10/10[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 0 1")
-        .isLeft === true
+      val fen = "10/10/10/10/10/10/10/10/10/10[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 0 1"
+      GoFen.parse(fen) must beLeft(GoFenError.UnsupportedBoardSize(10, fen))
     }
     "reject a row that does not fill the board" in {
-      GoFen.parse("9/9/9/9/9/9/9/9/8[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 0 1").isLeft === true
+      GoFen.parse("9/9/9/9/9/9/9/9/8[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 0 1") must beLeft(
+        GoFenError.MalformedBoardRow("8", 9, 8)
+      )
     }
     "reject a row that overflows the board" in {
-      GoFen.parse("9/9/9/9/9/9/9/9/9S[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 0 1").isLeft === true
+      GoFen.parse("9/9/9/9/9/9/9/9/9S[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 0 1") must beLeft(
+        GoFenError.MalformedBoardRow("9S", 9, 10)
+      )
     }
     "reject an unknown stone symbol" in {
-      GoFen.parse("9/9/9/9/9/9/9/9/8X[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 0 1").isLeft === true
+      GoFen.parse("9/9/9/9/9/9/9/9/8X[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 0 1") must beLeft(
+        GoFenError.UnknownStoneSymbol('X', "8X")
+      )
     }
     "reject an unknown turn symbol" in {
-      GoFen.parse("9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] x - 0 55 0 0 55 0 1").isLeft === true
+      GoFen.parse("9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] x - 0 55 0 0 55 0 1") must beLeft(
+        GoFenError.UnknownTurnSymbol("x")
+      )
     }
     "reject a non numeric komi" in {
-      GoFen.parse("9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b - 0 55 0 0 komi 0 1").isLeft === true
+      GoFen.parse("9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b - 0 55 0 0 komi 0 1") must beLeft(
+        GoFenError.NonNumericField("komi", "komi")
+      )
     }
-    "reject a ko point outside the board" in {
-      GoFen.parse("9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b z9 0 55 0 0 55 0 1").isLeft === true
+    "reject a ko point whose file is off the board" in {
+      GoFen.parse("9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b z9 0 55 0 0 55 0 1") must beLeft(
+        GoFenError.MalformedKoPoint("z9")
+      )
     }
-    "accept a ko point inside the board" in {
-      GoFen
+    "reject a ko point whose rank is off the board" in {
+      GoFen.parse("9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b a10 0 55 0 0 55 0 1") must beLeft(
+        GoFenError.MalformedKoPoint("a10")
+      )
+    }
+    "accept a ko point inside the board and forbid the recapture it names" in {
+      val state = GoFen
         .parse("9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b c3 0 55 0 0 55 0 1")
-        .toOption
-        .flatMap(_.state.simpleKoMove) === Some(engineMove(9, "c3"))
+        .fold(error => sys.error(s"unparsable go fen: $error"), _.state)
+      (state.simpleKoMove === Some(engineMove(9, "c3"))) and
+        (state.isLegal(engineMove(9, "c3")) === false) and
+        (state.legalMoves.toList must not(contain(engineMove(9, "c3")))) and
+        (state.legalMoves.length === 81)
     }
   }
 

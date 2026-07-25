@@ -112,7 +112,9 @@ class GoDifferentialTest extends Specification {
       .find(Files.isDirectory(_))
       .getOrElse(sys.error("cannot locate bench/src/main/resources/corpus from the working directory"))
 
-  private def corpusCase(fileName: String, plyLimit: Int = Int.MaxValue): ReplayCase = {
+  // NOTE: read by hand rather than through `strategygames.bench.CorpusFixture`, which owns this
+  // format but lives in a module the test sources cannot see.
+  private def corpusCase(fileName: String): ReplayCase = {
     val lines      = Files
       .readString(corpusDirectory.resolve(fileName), StandardCharsets.UTF_8)
       .linesIterator
@@ -124,7 +126,6 @@ class GoDifferentialTest extends Specification {
     val actions    = lines
       .slice(5, 5 + turns)
       .flatMap(_.split(",", -1).toVector.filter(_.nonEmpty))
-      .take(plyLimit)
       .toList
     ReplayCase(s"${fileName}[${actions.size}]", variant, initialFen, actions)
   }
@@ -186,6 +187,13 @@ class GoDifferentialTest extends Specification {
 
   private val oppositeParityRepeatDrop = Api.uciToMove("s@e7", Go9x9)
 
+  private val captureFromFourStoneHandicap =
+    List("s@b3", "s@a1", "s@d3", "s@a2", "s@c2", "s@a3", "s@c4")
+
+  // `n4` is a square of the 19x19 alphabet, not of this board, and its engine point is the one e5
+  // occupies here: both engines must ignore it rather than lift the stone it folds onto.
+  private val deadStonesWithOffBoardKey = "ss:i1,n4"
+
   private val replayCases: List[ReplayCase] = List(
     corpusCase("go-short.txt"),
     corpusCase("go-medium.txt"),
@@ -214,6 +222,20 @@ class GoDifferentialTest extends Specification {
       superkoNineByNine,
       compareWrapperDrops = true,
       superkoActionsByPly = Map(13 -> List(Api.uciToMove("s@d6", Go9x9)))
+    ),
+    ReplayCase(
+      "handicap-9x9-capture",
+      Go9x9,
+      Some(Go9x9.fenFromSetupConfig(4, 55)),
+      captureFromFourStoneHandicap ++ List("pass", "pass", "ss:g7"),
+      compareWrapperDrops = true
+    ),
+    ReplayCase(
+      "off-board-dead-stone-9x9",
+      Go9x9,
+      None,
+      scriptedNineByNine ++ List("pass", "pass", deadStonesWithOffBoardKey),
+      compareWrapperDrops = true
     ),
     ReplayCase(
       "four-passes-9x9",

@@ -41,7 +41,15 @@ class Go9x9ScalaVariantTestIsometry extends strategygames.chess.ChessTest {
     val lib          = gameFamily.gameLogic
     val stratVariant = StratVariant(lib, Go9x9Scala.key).get
 
-    _testEveryMoveLoadFenIsometry(lib, StratFen(lib, Go9x9Scala.initialFen.value), stratVariant)(
+    def replaying(ucis: List[String]) =
+      strategygames.Replay(
+        lib,
+        ucis.flatMap(StratUci(lib, gameFamily, _)),
+        Some(StratFen(lib, Go9x9Scala.initialFen.value)),
+        stratVariant
+      )
+
+    val tripleKo =
       List(
         "s@b8",
         "s@b7",
@@ -78,7 +86,8 @@ class Go9x9ScalaVariantTestIsometry extends strategygames.chess.ChessTest {
         "s@c7",
         "s@c2",
         "s@g3"
-      ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ).isInvalid === true
+      )
+
+    (replaying(tripleKo.init).isValid === true) and (replaying(tripleKo).isInvalid === true)
   }
 }

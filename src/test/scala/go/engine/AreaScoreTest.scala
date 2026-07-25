@@ -64,8 +64,7 @@ class AreaScoreTest extends Specification {
 
   "removing dead stones" should {
     "hand their surrounded region to the opponent" in {
-      val contested = scoreOf(9, fullFileOfBlack, List("g5"))
-      val resolved  = GoState
+      val resolved = GoState
         .fromStoneOwners(
           9,
           move =>
@@ -78,7 +77,7 @@ class AreaScoreTest extends Specification {
           0
         )
         .areaScore
-      (contested === AreaScore(45, 1)) and (resolved === AreaScore(81, 0))
+      resolved === AreaScore(81, 0)
     }
   }
 

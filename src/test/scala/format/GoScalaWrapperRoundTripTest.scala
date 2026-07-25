@@ -39,7 +39,8 @@ private object GoScalaWrapperRoundTripFixture {
 
   val fastPathResult: Option[String] = GameToUciStrings(lib, actionStrs, None, variant).toOption
 
-  val expectedJoin: String = actionStrs.map(_.mkString(",")).mkString(" ")
+  val expectedJoin: String =
+    "s@g3 s@c7 s@f2 s@e5 s@e1 s@d4 s@h4 s@i1 s@i5 s@c5 s@d5 s@d6 pass pass ss:i1"
 }
 
 class GoScalaWrapperRoundTripTest extends Specification {
@@ -49,8 +50,10 @@ class GoScalaWrapperRoundTripTest extends Specification {
   "the top-level wrapper for a new pure-scala go variant" should {
 
     "build a game from actionStrs via strategygames.Replay" in {
-      ucis.map(_.size) must beSome(actionStrs.flatten.size)
-      replay must beSome
+      (ucis.map(_.size) must beSome(actionStrs.flatten.size)) and
+        (replay.map(r => Forsyth.>>(lib, r.state).value) must beSome(
+          "9/9/2s6/3s5/2s1s3S/3s3S1/6S2/5S3/4S4[SSSSSSSSSSssssssssss] w - 150 115 0 1 55 3 8"
+        ))
     }
 
     "round trip the actionStrs through UciDump" in {
