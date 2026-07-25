@@ -5,7 +5,7 @@ import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 import scalalib.extensions.*
 
-import strategygames.Player
+import strategygames.{ Player, Score }
 import strategygames.format.pgn.San
 import strategygames.go.format.pgn.{ Parser, Reader }
 import strategygames.go.format.{ FEN, Forsyth, Uci }
@@ -55,6 +55,8 @@ case class Replay(setup: Game, actions: List[Action], state: Game) {
 }
 
 object Replay {
+
+  private val passActionStr = Uci.Pass().uci
 
   def apply(game: Game) = new Replay(game, Nil, game)
 
@@ -375,6 +377,116 @@ object Replay {
 
   // this is a fast implementation which we can use because 'uci' is the only format we use
   def gameFromUciStrings(
+      uciStrings: ActionStrs,
+      activePlayer: Player,
+      initialFen: Option[FEN],
+      variant: strategygames.go.variant.Variant
+  ): Validated[String, Game] = {
+    val fen  = initialFen.getOrElse(variant.initialFen)
+    val init = makeGame(variant, fen.some)
+    if (uciStrings.isEmpty) valid(init)
+    else
+      valid(
+        gameFromBatchedActions(
+          init,
+          combineActionStrsWithEndTurn(uciStrings, fen.player.getOrElse(Player.P1), activePlayer),
+          fen,
+          variant
+        )
+      )
+  }
+
+  private def gameFromBatchedActions(
+      init: Game,
+      framed: Seq[(String, Boolean)],
+      initialFen: FEN,
+      variant: strategygames.go.variant.Variant
+  ): Game = {
+    val flat          = framed.iterator.map(_._1).toList
+    val finalPosition = Api.positionFromVariantStartingFenAndMoves(variant, initialFen, flat)
+
+    val turns    = Vector.newBuilder[Vector[String]]
+    var openTurn = Vector.newBuilder[String]
+
+    var startedTurns  = 0
+    var player        = init.situation.player
+    var plies         = init.plies
+    var turnCount     = init.turnCount
+    var halfMoveClock = init.situation.history.halfMoveClock
+    var lastTurn      = List.empty[String]
+    var currentTurn   = List.empty[String]
+
+    framed.foreach { case (actionStr, endTurn) =>
+      if (startedTurns == 0 || player == Player.fromTurnCount(startedTurns + init.turnCount)) {
+        if (startedTurns > 0) turns += openTurn.result()
+        openTurn = Vector.newBuilder[String]
+        startedTurns += 1
+      }
+      openTurn += actionStr
+      plies += 1
+      halfMoveClock += player.fold(0, 1)
+      if (endTurn) {
+        lastTurn = currentTurn :+ actionStr
+        currentTurn = List.empty
+        turnCount += 1
+        player = !player
+      } else currentTurn = currentTurn :+ actionStr
+    }
+    if (startedTurns > 0) turns += openTurn.result()
+
+    val board = Board(
+      pieces = finalPosition.pieceMap,
+      history = History(
+        lastTurn = lastTurn.map(uciOf),
+        currentTurn = currentTurn.map(uciOf),
+        halfMoveClock = halfMoveClock,
+        scoring =
+          if (flat.exists(_ != passActionStr)) () => finalPosition.fenScore
+          else History.unscored,
+        captures = capturesAfter(framed, flat, finalPosition, player, initialFen, variant)
+      ),
+      variant = variant,
+      pocketData = finalPosition.pocketData,
+      uciMoves = init.situation.board.uciMoves ++ flat,
+      position = finalPosition.some
+    )
+
+    Game(
+      situation = Situation(board, player),
+      actionStrs = turns.result(),
+      plies = plies,
+      turnCount = turnCount,
+      startedAtPly = init.plies,
+      startedAtTurn = init.turnCount
+    )
+  }
+
+  private def capturesAfter(
+      framed: Seq[(String, Boolean)],
+      flat: List[String],
+      finalPosition: Api.Position,
+      playerAfter: Player,
+      initialFen: FEN,
+      variant: strategygames.go.variant.Variant
+  ): Score = {
+    val fenCaptures = Score(finalPosition.fen.player1Captures, finalPosition.fen.player2Captures)
+    framed.lastOption.filter(action => isSelectSquares(action._1)).fold(fenCaptures) { case (_, endTurn) =>
+      val beforeSettlement =
+        Api.positionFromVariantStartingFenAndMoves(variant, initialFen, flat.dropRight(1))
+      fenCaptures.add(
+        if (endTurn) !playerAfter else playerAfter,
+        beforeSettlement.pieceMap.size - finalPosition.pieceMap.size + 1
+      )
+    }
+  }
+
+  private def isSelectSquares(actionStr: String): Boolean =
+    Uci.SelectSquares.selectSquaresR.matches(actionStr)
+
+  private def uciOf(actionStr: String): Uci =
+    Uci(actionStr).getOrElse(sys.error(s"Invalid actionStr for replay: ${actionStr}"))
+
+  def gameFromUciStringsPerPly(
       uciStrings: ActionStrs,
       activePlayer: Player,
       initialFen: Option[FEN],
