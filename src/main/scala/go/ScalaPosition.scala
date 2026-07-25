@@ -6,6 +6,13 @@ import strategygames.go.engine.{ GoFen, GoGame, GoState }
 import strategygames.go.format.FEN
 import strategygames.go.variant.Variant
 
+/** The pure-Scala engine behind [[strategygames.go.Api.Position]], the seam every go consumer — Board,
+  * Situation, Game, Forsyth, Replay — already speaks. See `docs/go-engine.md`.
+  *
+  * The variant is passed in rather than inferred from the FEN: board size alone identifies the
+  * joansala-backed variant of that size, so a position that lost its variant would route back to the other
+  * engine.
+  */
 final private[go] class ScalaPosition(
     game: GoGame,
     positionVariant: Variant,
@@ -40,6 +47,8 @@ final private[go] class ScalaPosition(
     position
   }
 
+  // NOTE: the engine state is immutable; these vars exist because `Position.setKomi` returns Unit
+  // and because `pieceMap` releases its parent below.
   def setKomi(komi: Double): Unit = currentGame = currentGame.withKomi(komi)
 
   def deepCopy: Position =
@@ -51,6 +60,13 @@ final private[go] class ScalaPosition(
   lazy val fen: FEN        = FEN(fenString)
   lazy val fenScore: Score = Score(currentGame.p1FenScore, currentGame.p2FenScore)
 
+  /** Stones by square. One placement usually changes a handful of entries, so a position built from another
+    * derives its map from the parent's instead of walking the board.
+    *
+    * Dropping the parent reference once the map is memoized is what keeps a replay from pinning every
+    * position it ever passed through: a chain of a thousand positions would otherwise hold a thousand live
+    * ancestors.
+    */
   lazy val pieceMap: PieceMap = {
     val stones = parentStonesUntilForced.flatMap(stonesInheritedFrom).getOrElse(stonesByFullScan)
     parentStonesUntilForced = None
@@ -105,6 +121,8 @@ final private[go] class ScalaPosition(
   lazy val gameResult: GameResult = GameResult.resultFromInt(gameOutcome, gameEnd, isRepetition)
   lazy val gameEnd: Boolean       = currentGame.ended
   lazy val gameOutcome: Int       = currentGame.gameOutcome
+  // NOTE: not a stub. Superko is refused at move generation, so no repeating position is reachable
+  // and this engine can never observe one.
   lazy val isRepetition: Boolean  = false
   lazy val gameScore: Int         = currentGame.gameScore
   lazy val p1Score: Double        = currentGame.p1Score

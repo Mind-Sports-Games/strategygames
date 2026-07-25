@@ -12,6 +12,15 @@ object GoFenError {
   final case class NonNumericField(name: String, field: String)              extends GoFenError
 }
 
+/** The go FEN dialect, shared byte for byte with the joansala-backed variants:
+  *
+  * {{{
+  * board[pocket] turn ko p1Score p2Score p1Captures p2Captures komi passCount fullMove
+  * }}}
+  *
+  * Board rows run from the top rank down, `S` a black stone, `s` a white one, a number a run of empty points.
+  * Scores and komi are in tenths of a point. The nine-field form, which predates `passCount`, still parses.
+  */
 object GoFen {
 
   private val Pocket                    = "[SSSSSSSSSSssssssssss]"
@@ -26,6 +35,9 @@ object GoFen {
       s"${game.komiTenths} ${game.fenPassCount} ${game.fullMoveNumber}"
   }
 
+  /** Reads a position back. Scores are recomputed from the board, so fields 4 and 5 are checked for shape and
+    * then discarded — a handicap FEN states them before the position has been scored.
+    */
   def parse(fen: String): Either[GoFenError, GoGame] = {
     val fields = fen.trim.split(' ')
     if (fields.length != FieldsWithPassCount && fields.length != FieldsWithoutPassCount)
@@ -112,6 +124,9 @@ object GoFen {
     if (pocketStart >= 0) field.substring(0, pocketStart) else field
   }
 
+  // NOTE: runs are multi-digit, so `19` is a full empty 19x19 row and not 1 + 9. joansala's reader
+  // takes each digit as its own run and silently drops whatever overruns the row; a row that does
+  // not measure exactly `size` is rejected here instead.
   private def readRow(row: String, size: Int, rank: Int, owners: Array[Int]): Option[GoFenError] = {
     var file                        = 0
     var emptyRun                    = 0
@@ -144,6 +159,8 @@ object GoFen {
     case _   => Left(GoFenError.UnknownTurnSymbol(field))
   }
 
+  // NOTE: `render` always writes `-` here, because `Api.validateFEN`'s regex only accepts that
+  // literal. Parsing a real coordinate anyway costs nothing and leaves the door open.
   private def parseKoPoint(field: String, size: Int): Either[GoFenError, Option[Int]] =
     if (field == KoPointOmittedByValidator) Right(None)
     else {

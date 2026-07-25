@@ -1,5 +1,20 @@
 package strategygames.go.engine
 
+/** An immutable Go position: stones, chains, side to move, and the position history superko is judged
+  * against.
+  *
+  * Points use the engine move encoding shared with `Api.uciToMove`: file `f` (0-based, a = 0) on rank `r`
+  * (1-based) is `size * (r - 1) + f`, and `passMove` (`size * size`) is the pass. `playerTurn` is
+  * [[GoState.BlackPlayer]] (1) or [[GoState.WhitePlayer]] (-1).
+  *
+  * A pass records no position hash, so a repeat separated by an odd number of passes still collides: this is
+  * positional superko, not situational. Architecture and the decisions behind it: `docs/go-engine.md`.
+  *
+  * @param chainPseudoLiberties
+  *   per chain root, each empty neighbour counted once per adjacent stone of the chain, so a liberty shared
+  *   by k stones counts k times. The count is therefore not the liberty count, but it is zero exactly when
+  *   the liberty count is zero — the only question capture asks.
+  */
 final class GoState private (
     val size: Int,
     private val zobristTable: Array[Long],
@@ -37,12 +52,19 @@ final class GoState private (
     }
   }
 
+  /** A pass is always legal. A placement is legal on an empty point that neither leaves its own chain without
+    * liberties nor recreates a position already in this state's history.
+    */
   def isLegal(move: Int): Boolean =
     move == passMove || (move >= 0 && move < passMove && {
       val padded = paddedIndexOfMove(move)
       board(padded) == Empty && isLegalEmptyPoint(padded, stoneToPlace, enemyStone)
     })
 
+  /** The position with the given stones lifted, as agreed dead at the end of the game. Rebuilt from stone
+    * owners, so the superko history restarts from the resulting position — acceptable because no further
+    * placements follow dead stone selection.
+    */
   def withoutStones(removedMoves: Set[Int]): GoState =
     GoState.fromStoneOwners(
       size,
@@ -54,6 +76,9 @@ final class GoState private (
       consecutivePasses
     )
 
+  /** Chinese area score: stones plus the empty regions bordered by exactly one colour. A region bordered by
+    * no colour at all — only the empty board — counts for nobody. Komi is not included.
+    */
   lazy val areaScore: AreaScore = {
     val paddedLength = stride * stride
     val visited      = new Array[Boolean](paddedLength)
@@ -111,8 +136,15 @@ final class GoState private (
     withPass
   }
 
+  // NOTE: hands out the cached array itself rather than a copy, so callers must treat it as
+  // read-only; `legalMoves` above is the copying caller.
   private[go] def legalDropsShared: Array[Int] = computedLegalDrops
 
+  /** The position after playing `move`.
+    *
+    * @throws IllegalArgumentException
+    *   if the move is not [[isLegal]]. Nothing in the engine applies a move unchecked.
+    */
   def apply(move: Int): GoState =
     if (!isLegal(move))
       throw new IllegalArgumentException(s"Illegal go move $move for player $turn on ${size}x${size}")
@@ -151,6 +183,7 @@ final class GoState private (
   private def stoneToPlace: Byte = if (playerTurn == BlackPlayer) Black else White
   private def enemyStone: Byte   = if (playerTurn == BlackPlayer) White else Black
 
+  // NOTE: the low table bit is the colour, which relies on Black and White being 1 and 2.
   private def stoneHash(padded: Int, stone: Byte): Long = zobristTable((padded << 1) | (stone - 1))
 
   private def chainRemovalHash(root: Int, stone: Byte): Long = {
@@ -213,6 +246,9 @@ final class GoState private (
           (if (enemyRootSouth == root) 1 else 0) +
           (if (enemyRootNorth == root) 1 else 0)
 
+      // NOTE: placing on `placed` costs the chain one pseudo-liberty per adjacency to it, so the
+      // chain dies exactly when every pseudo-liberty it has is one of those adjacencies. The `<= 4`
+      // test is only a cheap reject for chains that plainly have liberties elsewhere.
       def capturesChain(root: Int): Boolean =
         root != NoChain && chainPseudoLiberties(root) <= 4 &&
           chainPseudoLiberties(root) == enemyAdjacencies(root)
@@ -225,6 +261,9 @@ final class GoState private (
         enemyRootNorth != enemyRootWest && enemyRootNorth != enemyRootEast &&
           enemyRootNorth != enemyRootSouth && capturesChain(enemyRootNorth)
 
+      // NOTE: only a capture can shrink the board back to an earlier arrangement, so superko is
+      // tested here and nowhere else. The resulting hash is predicted by XORing the placed stone
+      // and the doomed chains out of the current one — no board copy, no mutation.
       if (capturesWest || capturesEast || capturesSouth || capturesNorth) {
         var predictedHash = positionHash ^ stoneHash(placed, friendly)
         if (capturesWest) predictedHash ^= chainRemovalHash(enemyRootWest, enemy)
@@ -346,6 +385,8 @@ final class GoState private (
     absorbFriendlyNeighbor(south)
     absorbFriendlyNeighbor(north)
 
+    // NOTE: the simple ko point is tracked only because field 3 of the FEN format asks for it.
+    // Legality never consults it — superko already forbids everything simple ko would.
     val koMove =
       if (capturedStones == 1 && newCounts(root) == 1 && newLibs(root) == 1)
         Some(capturedMoves.head)
@@ -389,6 +430,10 @@ object GoState {
   def initial(size: Int): GoState =
     fromStoneOwners(size, _ => NoOwner, BlackPlayer, 0, 0, None, 0)
 
+  /** Rebuilds chains and the position hash from a bare arrangement of stones, as read from a FEN. A board
+    * carries no record of the positions that preceded it, so the superko history begins empty apart from this
+    * position; replays that need it feed the whole action sequence instead.
+    */
   def fromStoneOwners(
       size: Int,
       stoneOwnerAtMove: Int => Int,
@@ -444,6 +489,8 @@ object GoState {
       padded += 1
     }
 
+    // Only the west and south neighbours are joined: scanning every point in order visits each
+    // adjacent pair from exactly one of its two ends.
     padded = 0
     while (padded < paddedLength) {
       if (board(padded) == Black || board(padded) == White) {
@@ -495,6 +542,9 @@ object GoState {
       ()
     }
 
+  // NOTE: relabels the smaller chain onto the larger and splices the two circular stone lists, so
+  // `chainIds` always holds the exact root of a stone's chain and no find-with-compression is
+  // needed anywhere. Returns the surviving root.
   private def mergeChainRoots(
       chainIds: Array[Int],
       nextStone: Array[Int],

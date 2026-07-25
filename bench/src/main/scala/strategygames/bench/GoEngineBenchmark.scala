@@ -168,6 +168,8 @@ class GoMidGamePosition {
       .value
   }
 
+  // Per invocation, not per trial: `legalDrops` is cached on the position, so a reused one would
+  // time a field access. JMH keeps this setup out of the reported score.
   @Setup(Level.Invocation)
   def freshPosition(): Unit =
     position = Api.positionFromVariantNameAndFEN(variantKey, fen)

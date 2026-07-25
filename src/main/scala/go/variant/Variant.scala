@@ -41,6 +41,10 @@ abstract class Variant private[variant] (
 
   def repetitionEnabled: Boolean = false
 
+  /** Which engine `Api` builds a position with: the joansala one by default, the pure-Scala one
+    * (`docs/go-engine.md`) for the `…Scala` variants. The two follow different rules in places, so this is
+    * part of a variant's identity and not a switch to flip on an existing one.
+    */
   def usesScalaEngine: Boolean = false
 
   def perfId: Int

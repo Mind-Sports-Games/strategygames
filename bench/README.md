@@ -160,6 +160,18 @@ Never run `bench/Jmh/run` without iteration and fork limits: the default setting
 (5 forks × 5 warmup × 5 measurement over every benchmark in the project) take
 hours.
 
+`GoSmokeTiming` answers the same old-vs-new question without JMH: median wall-clock
+over a few rounds of full-game replay and `legalDrops`, printed as a table and
+appended to a CSV. It finishes in seconds, so it suits a quick check between
+edits; `GoEngineBenchmark` remains the measure of record.
+
+```
+sbt "bench/runMain strategygames.bench.GoSmokeTiming /path/to/results.csv"
+```
+
+The output path can also come from `-Dsmoke.output`; without either it falls back
+to a hardcoded scratch path.
+
 ## Allocation profiling
 
 Add the GC profiler to report bytes allocated per operation:

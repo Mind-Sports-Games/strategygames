@@ -1,5 +1,12 @@
 package strategygames.go.engine
 
+/** Per board size, the random `Long` a stone contributes to a position hash, indexed by padded point and
+  * colour as `(point << 1) | colour`.
+  *
+  * The values come from SplitMix64 seeded by the board size rather than from an RNG, so a table is identical
+  * in every JVM and every run — position hashes are comparable across processes, and a fixture that pins one
+  * stays pinned.
+  */
 object Zobrist {
 
   private val GoldenGamma = 0x9e3779b97f4a7c15L

@@ -21,6 +21,12 @@ import strategygames.go.variant.{
 }
 import strategygames.go.{ Replay => GoReplay }
 
+/** A wall-clock check of the two go engines against each other, for when a JMH run costs more time than the
+  * question is worth. Median of a few rounds per workload, both engines over the same corpus fixtures; it
+  * prints a table and appends a row per workload and size to a CSV.
+  *
+  * Numbers from here are indicative, not a benchmark result — `GoEngineBenchmark` is the measure of record.
+  */
 object GoSmokeTiming {
 
   private val warmupRounds     = 2
@@ -134,6 +140,8 @@ object GoSmokeTiming {
   private def timeLegalDropsAt(fixture: SizeFixture, variant: GoVariant, prefix: List[String]): Long = {
     var checksum = 0
     val samples  = Array.fill(warmupRounds + timedRounds) {
+      // A fresh position per round: `legalDrops` is cached, so a second read of one measures a
+      // field access. Building it stays outside the timed window.
       val position = buildPosition(fixture, variant, prefix)
       val t0       = System.nanoTime()
       checksum += position.legalDrops.length
