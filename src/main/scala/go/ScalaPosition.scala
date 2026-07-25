@@ -2,7 +2,7 @@ package strategygames.go
 
 import strategygames.Score
 import strategygames.go.Api.Position
-import strategygames.go.engine.{ GoFen, GoGame, GoState }
+import strategygames.go.engine.{ BulkReplay, GoFen, GoGame, GoState }
 import strategygames.go.format.FEN
 import strategygames.go.variant.Variant
 
@@ -87,8 +87,7 @@ final private[go] class ScalaPosition(
       case _                                    => None
     }
 
-  private def isSinglePlacement(uci: String): Boolean =
-    uci.length > 2 && uci.charAt(1) == '@'
+  private def isSinglePlacement(uci: String): Boolean = ScalaPosition.isSinglePlacement(uci)
 
   private def moverOf(stateBefore: GoState) =
     if (stateBefore.playerTurn == GoState.BlackPlayer) P1 else P2
@@ -168,38 +167,11 @@ final private[go] class ScalaPosition(
     if (isSelectSquares(uci)) played.selectDeadStones(deadStoneMoves(uci))
     else played.play(engineMoveOf(uci))
 
-  private def isSelectSquares(uci: String): Boolean = uci.take(3) == "ss:"
+  private def isSelectSquares(uci: String): Boolean = ScalaPosition.isSelectSquares(uci)
 
-  /** `Api.uciToMove` folds anything that is not `pass` onto a point of the board, so a drop whose key names
-    * no square of this variant — or a token of some other shape entirely — would silently be played somewhere
-    * else. Only `pass` and an on-board placement get through to it.
-    */
-  private def engineMoveOf(uci: String): Int =
-    if (uci == "pass") Api.uciToMove(uci, variant)
-    else if (isSinglePlacement(uci)) {
-      if (!Pos.fromKey(uci.drop(2)).exists(isOnBoard))
-        sys.error(s"Drop ${uci} names no square of ${variant.key}")
-      Api.uciToMove(uci, variant)
-    } else sys.error(s"Unreadable action ${uci} for ${variant.key}")
+  private def engineMoveOf(uci: String): Int = ScalaPosition.engineMoveOf(uci, variant)
 
-  /** A key naming a square the board does not have is ignored: dead stone selection comes from a client, and
-    * a square with no stone on it lifts nothing either way. A key that is not a coordinate at all is a caller
-    * bug and says so.
-    */
-  private def deadStoneMoves(uci: String): List[Int] =
-    uci.drop(3).split(",").toList.filter(_.nonEmpty).flatMap { key =>
-      Pos.fromKey(key) match {
-        case Some(pos) => Option.when(isOnBoard(pos))(pointOf(pos))
-        case None      => sys.error(s"Unreadable dead stone ${key} in ${uci}")
-      }
-    }
-
-  private def isOnBoard(pos: Pos): Boolean =
-    pos.file.index < variant.boardSize.width && pos.rank.index < size
-
-  private def pointOf(pos: Pos): Int = size * pos.rank.index + pos.file.index
-
-  private def size: Int = variant.boardSize.height
+  private def deadStoneMoves(uci: String): List[Int] = ScalaPosition.deadStonePoints(uci, variant)
 
 }
 
@@ -211,14 +183,168 @@ private[go] object ScalaPosition {
       playedUcis: List[String]
   )
 
+  final private class SeamPlan(
+      val engineMoves: Array[Int],
+      val trailingDeadStones: Option[List[Int]]
+  )
+
+  private val PassAction      = "pass"
+  private val DeadStonePrefix = "ss:"
+
   private val posAtGridIndex: Array[Pos] = Pos.all.toArray
 
   def initial(variant: Variant, komi: Double): Position =
     new ScalaPosition(GoGame.initial(variant.boardSize.height, komi), variant, None)
 
   def fromFen(variant: Variant, fen: FEN): Position =
+    new ScalaPosition(parsedGame(variant, fen), variant, Some(fen))
+
+  private[go] def batchFromFen(variant: Variant, startingFen: FEN, ucis: List[String]): Position =
+    batchFrom(resumedGame(variant, startingFen), variant, Some(startingFen), ucis)
+
+  private[go] def batchFromInitial(variant: Variant, ucis: List[String]): Position =
+    batchFrom(GoGame.initial(variant.boardSize.height, variant.komi), variant, None, ucis)
+
+  private[go] def positionsFromFen(
+      variant: Variant,
+      startingFen: FEN,
+      ucis: List[String]
+  ): Vector[Position] = {
+    val start     = resumedGame(variant, startingFen)
+    val actions   = ucis.toArray
+    val plan      = planOf(variant, actions, start.ended)
+    val positions = Vector.newBuilder[Position]
+    positions.sizeHint(actions.length + 1)
+
+    var game               = start
+    var position: Position = new ScalaPosition(start, variant, Some(startingFen))
+    positions += position
+
+    def advanceTo(played: GoGame, uci: String): Unit = {
+      val parent    = position
+      val inherited = ParentStones(() => parent.pieceMap, game.state, List(uci))
+      game = played
+      position = new ScalaPosition(played, variant, Some(startingFen), Some(inherited))
+      positions += position
+    }
+
+    var index = 0
+    while (index < plan.engineMoves.length) {
+      advanceTo(game.play(plan.engineMoves(index)), actions(index))
+      index += 1
+    }
+    plan.trailingDeadStones.foreach(deadStones =>
+      advanceTo(game.selectDeadStones(deadStones), actions(index))
+    )
+    positions.result()
+  }
+
+  private def batchFrom(
+      start: GoGame,
+      variant: Variant,
+      startingFen: Option[FEN],
+      ucis: List[String]
+  ): Position = {
+    val actions = ucis.toArray
+    val plan    = planOf(variant, actions, start.ended)
+    val folded  = foldedThrough(variant, start, actions, plan)
+    new ScalaPosition(plan.trailingDeadStones.fold(folded)(folded.selectDeadStones), variant, startingFen)
+  }
+
+  private def foldedThrough(
+      variant: Variant,
+      start: GoGame,
+      actions: Array[String],
+      plan: SeamPlan
+  ): GoGame =
+    try
+      GoGame(
+        BulkReplay.replay(start.state, plan.engineMoves),
+        start.komi,
+        start.plyCount + plan.engineMoves.length,
+        start.deadStonesSelected
+      )
+    catch {
+      case illegal: BulkReplay.IllegalMoveAt =>
+        sys.error(
+          s"Illegal action ${actions(illegal.index)} at ply ${illegal.index} for ${variant.key}: " +
+            s"legal actions ${illegal.legalMoves.mkString(", ")}"
+        )
+    }
+
+  private def planOf(variant: Variant, actions: Array[String], startEnded: Boolean): SeamPlan = {
+    val engineMoves     = new Array[Int](actions.length)
+    var engineMoveCount = 0
+    var deadStones      = Option.empty[List[Int]]
+    var ply             = 0
+    while (ply < actions.length) {
+      val uci = actions(ply)
+      if (startEnded || deadStones.isDefined)
+        sys.error(s"Action ${uci} at ply ${ply} offered to a finished ${variant.key} game")
+      if (isSelectSquares(uci)) deadStones = Some(deadStonePoints(uci, variant))
+      else {
+        engineMoves(engineMoveCount) = plannedEngineMove(uci, variant, ply)
+        engineMoveCount += 1
+      }
+      ply += 1
+    }
+    new SeamPlan(java.util.Arrays.copyOf(engineMoves, engineMoveCount), deadStones)
+  }
+
+  private def plannedEngineMove(uci: String, variant: Variant, ply: Int): Int =
+    if (uci == PassAction) Api.passMove(variant)
+    else if (isSinglePlacement(uci))
+      dropPoint(uci, variant).getOrElse(
+        sys.error(s"Drop ${uci} at ply ${ply} names no square of ${variant.key}")
+      )
+    else sys.error(s"Unreadable action ${uci} at ply ${ply} for ${variant.key}")
+
+  private def isSelectSquares(uci: String): Boolean = uci.take(3) == DeadStonePrefix
+
+  private def isSinglePlacement(uci: String): Boolean = uci.length > 2 && uci.charAt(1) == '@'
+
+  /** `Api.uciToMove` folds anything that is not `pass` onto a point of the board, so a drop whose key names
+    * no square of this variant — or a token of some other shape entirely — would silently be played somewhere
+    * else. Only `pass` and an on-board placement get through to it.
+    */
+  private def engineMoveOf(uci: String, variant: Variant): Int =
+    if (uci == PassAction) Api.uciToMove(uci, variant)
+    else if (isSinglePlacement(uci)) {
+      if (dropPoint(uci, variant).isEmpty)
+        sys.error(s"Drop ${uci} names no square of ${variant.key}")
+      Api.uciToMove(uci, variant)
+    } else sys.error(s"Unreadable action ${uci} for ${variant.key}")
+
+  private def dropPoint(uci: String, variant: Variant): Option[Int] =
+    Pos.fromKey(uci.drop(2)).filter(isOnBoard(_, variant)).map(pointOf(_, variant))
+
+  /** A key naming a square the board does not have is ignored: dead stone selection comes from a client, and
+    * a square with no stone on it lifts nothing either way. A key that is not a coordinate at all is a caller
+    * bug and says so.
+    */
+  private def deadStonePoints(uci: String, variant: Variant): List[Int] =
+    uci.drop(3).split(",").toList.filter(_.nonEmpty).flatMap { key =>
+      Pos.fromKey(key) match {
+        case Some(pos) => Option.when(isOnBoard(pos, variant))(pointOf(pos, variant))
+        case None      => sys.error(s"Unreadable dead stone ${key} in ${uci}")
+      }
+    }
+
+  private def isOnBoard(pos: Pos, variant: Variant): Boolean =
+    pos.file.index < variant.boardSize.width && pos.rank.index < variant.boardSize.height
+
+  private def pointOf(pos: Pos, variant: Variant): Int =
+    variant.boardSize.height * pos.rank.index + pos.file.index
+
+  private def resumedGame(variant: Variant, startingFen: FEN): GoGame = {
+    if (variant.boardSize.height != startingFen.gameSize)
+      sys.error(s"incorrect variant name (${variant.key}) and/or fen (${startingFen})")
+    parsedGame(variant, startingFen)
+  }
+
+  private def parsedGame(variant: Variant, fen: FEN): GoGame =
     GoFen.parse(fen.value) match {
-      case Right(game) => new ScalaPosition(game, variant, Some(fen))
+      case Right(game) => game
       case Left(error) => sys.error(s"Invalid ${variant.key} fen (${error}): ${fen.value}")
     }
 

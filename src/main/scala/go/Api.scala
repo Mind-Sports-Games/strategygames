@@ -88,14 +88,21 @@ object Api {
   }
 
   def positionFromVariantAndMoves(variant: Variant, uciMoves: List[String]): Position =
-    positionFromVariant(variant).makeMoves(uciMoves)
+    ScalaPosition.batchFromInitial(variant, uciMoves)
 
   def positionFromVariantStartingFenAndMoves(
       variant: Variant,
       startingFen: FEN,
       uciMoves: List[String]
   ): Position =
-    positionFromVariantNameAndFEN(variant.key, startingFen.value).makeMoves(uciMoves)
+    ScalaPosition.batchFromFen(variant, startingFen, uciMoves)
+
+  def positionsFromVariantStartingFenAndMoves(
+      variant: Variant,
+      startingFen: FEN,
+      uciMoves: List[String]
+  ): Vector[Position] =
+    ScalaPosition.positionsFromFen(variant, startingFen, uciMoves)
 
   def passMove(variant: Variant): Int = {
     val gameSize: Int = variant.boardSize.height
