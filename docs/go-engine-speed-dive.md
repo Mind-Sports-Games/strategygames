@@ -1,0 +1,141 @@
+# The go speed dive
+
+Can the pure-Scala go engine's production surface reach 10x / 20x / 30x / 100x the retired joansala
+engine? Five experiments on branch `lakin/go-speed-dive` (base b3cd2803) answered it per workload.
+Reference denominators are the joansala JMH baselines: replay 7395 / 24313 / 96385 µs, legalDrops
+4.21 / 11.56 / 26.77 µs, applyDrop 17.84 / 30.06 / 60.88 µs (9x9 / 13x13 / 19x19).
+
+| target | full-game replay (production path) | movegen (legalDrops) | apply (drop) |
+|---|---|---|---|
+| 10x | **DEMONSTRATED** — E1 alone: 18x / 32x / 41x, byte-identical output | **DEMONSTRATED** at 13/19 — E3 bitboard: 12.1x / 12.3x (9x9: 7.7x, fixed costs dominate 81 points) | at hand — production is already 9.1–10.5x |
+| 20x | **DEMONSTRATED** — E1 at 13/19; E4 everywhere | not reached (E3 measured 12.3x); **IMPLAUSIBLE under the immutable contract** — see below | **PROJECTED ~29x** — E1's score deferral: 6.4 µs @19 = 1.2 engine + 4.3 forced areaScore + 0.9 wrapper → ~2.1 µs |
+| 30x | **DEMONSTRATED** — E4: 80x / 118x / 162x | as above; plausible only fused with E2's mutable state (unmeasured) | **PROJECTED ~46x** — E1 arithmetic + E3 engine apply (422 ns @19 + ~0.9 µs wrapper) |
+| 100x | **DEMONSTRATED at 13/19** — E4: 118x / 162x. **PROJECTED at 9x9**: E4 wrapper (92.2 − 41.9 µs) + E2 bulk engine (~13 µs) ≈ 63 µs ≈ 117x | **IMPLAUSIBLE** — no identified path; exact-superko candidate discovery is the floor | not meaningful per-call at the seam; the 100x class is batch replay (E4+E2), where E3's engine apply is 144x cross-layer |
+| beyond | **PROJECTED ~570x @19** — E4's measured ~120 µs wrapper floor + E2's 52.6 µs materialized bulk engine ≈ 170 µs | — | — |
+
+DEMONSTRATED means measured on this machine with same-run ratios and an equivalence suite green.
+PROJECTED means arithmetic over measured components, stated inline. IMPLAUSIBLE means a measured
+floor argument, not a hunch.
+
+## Where production replay time went
+
+Profiling (GoLayerBenchmark + async-profiler, 19x19, 400 plies) showed the engine core is **~5% of
+production replay**. The wrapper forced work the engine never asked for:
+
+| production replay cost, 19x19 | share | cause |
+|---|---|---|
+| forced movegen per ply | ~25% | `Game.apply` → `status` → `Variant.specialEnd` probed `legalActions.size` |
+| forced areaScore per ply | ~18% | `Board.afterDrop` forced `fenScore` — a full flood fill nobody read until game end |
+| pass-path full re-replays | ~20% | every pass re-parsed the FEN and replayed the whole prefix through the seam |
+| wrapper residual | ~30% | two independent O(n²) `List :+` chains, copies, uci regex, per-ply `Role.allByForsyth` map builds |
+| engine core (`GoState`) | ~6% | of which the five per-move array clones are 15% of total |
+
+Layer decomposition, whole-game replay 19x19: engine fold 465 µs → seam batch 492 → seam per-ply
+630 → production 8575 µs. The corpus pass indices meant production did 3.7–4.7x the engine work of
+the game itself. Full working notes, target tables, and raw JMH JSON live in the session scratchpad
+(`speeddive/NOTES-analysis.md` and `speeddive/results/`).
+
+## The experiments
+
+| # | hypothesis | verdict | headline (9x9 / 13x13 / 19x19) |
+|---|---|---|---|
+| E1 | kill forced per-ply movegen/areaScore + pass re-replay: ~2–4x on replay, no engine change | **CONFIRMED**, exceeded | prod replay 2.5x / 3.5x / 3.4x → **18x / 32x / 41x vs joansala**, byte-identical, full suite green; 5 files, +21/−12 |
+| E2 | batch-replay seam: one mutable scratch state, publish the final position → engine floor | **CONFIRMED**, above range | **86 / 115 / 104 ns/ply** (4.6x / 6.6x / 11.8x over the immutable fold); allocation 12x / 28x / 69x down — per-ply marginal ~0 B |
+| E3 | bitboard core beats the byte-array + clone engine 5–10x per move | **PARTIAL** | movegen 1.4x / 2.0x / **2.2x** vs current (= 12.3x vs joansala @19), apply 2.17x (422 ns @19), engine replay 1.83x — exact parity, but the 20x tier is unreachable under copy-per-move |
+| E4 | int-move replay entry (no uci strings, regex, Pos, pieceMap until the end) removes the remaining wrapper cost | **CONFIRMED** beyond target | full-`Game` replay **594 µs @19 = 162x** (80x / 118x / 162x); per-ply-positions variant 193x; engine is now 69% of the path |
+| E5 | superko `Set[Long]` → primitive table + allocation shapes: 1.3–2x on the engine core | **REFUTED** | 1.12x / 1.01x / **1.07x**; superko-deleted control proves the whole subsystem is worth ≤1.23x / 1.07x / 1.11x — there is no 1.3x in the JVM shapes |
+
+**E1** — the three changes: `specialEnd` reads `apiPosition.gameEnd` (the `legalActions.size == 0`
+clause is provably redundant post-[ADR 0013](adr/0013-no-actions-after-end-no-unchecked-replay.md));
+`go.History` carries `scoring: () => Score` so a replay runs one flood fill instead of 400; the pass
+path plays one action on the position in hand instead of re-replaying the prefix. Lesson: the score
+deferral paid ~3.7 ms @19 where the 4.31 µs × 400 microbenchmark predicted ~1.7 ms — the flood
+fill's per-ply allocation (two scratch arrays) made GC pressure, not just scan time.
+
+**E2** — `replayAll(start, moves): FrozenGoPosition`: the exact `GoState` algorithm mutating one
+private copy of the arrays, superko in an open-addressed `Array[Long]`, nothing published until the
+fold completes (interior mutability per [ADR 0005](adr/0005-immutable-api-interior-mutability.md)).
+Hit the a-priori floor estimate exactly (104 ns/ply @19). Two lessons: clone-traffic removal scales
+with board area, so the win grows with size; and **the bench corpora never exercise the positional-
+superko probe** — the differential spec stayed green with the probe disabled across all 723 corpus
+prefixes. A constructed ko cycle (capture, two passes, forbidden recapture) now provides the
+red-green case in `GoBulkReplayDifferentialSpec`. Corpus-only differential coverage is not
+sufficient for superko; any future engine work must keep that constructed case.
+
+**E3** — unpadded bitboards, bulk movegen (`empty`, one dilation pass, per-word emit), scalar rules
+only for capture candidates and eye-shaped points; hashes bit-identical to production. Bulk
+legality works — the residual is **exact-superko capture-candidate discovery**: matching production
+means knowing per movegen call which points capture, i.e. the sole liberty of every enemy atari
+chain, and that scan dominates once per-point work is gone. The unlock (incrementally maintained
+per-chain liberty bitmaps) blows the clone budget of an immutable state — it belongs with E2's
+mutable scratch, not with copy-per-move.
+
+**E4** — a pre-pass plans int moves (shape check instead of regex, `Role.allByForsyth` hoisted —
+production rebuilds that Map every ply), the fold runs on `GoGame`, and `Board`/`Situation`/`Game`
+plus pieceMap/score/FEN materialize once at the end. Equivalence field-by-field against
+`Replay.gameFromUciStrings` on all corpora plus hand-written pass/`ss:`/mid-game-FEN cases, both
+turn framings. Two production quirks were reproduced, not fixed (score not updated on a pass;
+`ss:` captures off by +1). Lesson: the uci path was worth ~140 µs @19, not the ~2.3% the flamegraph
+suggested — profiles under-attribute costs that are smeared across allocation and map-building.
+
+**E5** — the negative result, ceiling-proven: deleting superko outright (unshippable) bounds every
+possible superko fix at 1.11x @19, and the shipped bundle captures most of that. Three durable
+lessons: a flat copy-on-write superko table is a **regression** (0.74x @19) under copy-per-move —
+mutate-and-freeze (E2) is the only home for it; in an immutable structure the amortized rebuild
+must be a memcpy, not a rehash (rehashing per fold cancelled the entire win); and `scala.runtime.*Ref`
+cells in bytecode are not evidence of runtime allocation — escape analysis scalarised all of them
+(bytecode-verified 31 → 0 refs, measured effect nil). By-product worth keeping: a clean immutable
+`SuperkoHistory` primitive-table implementation.
+
+## Productionization order
+
+Patches were built in isolated worktrees off b3cd2803 and live in the session scratchpad
+(`speeddive/results/E1.patch` … `E5.patch`) — session-scoped storage, so land or copy them before
+the session's scratchpad is discarded. Nothing was committed; production code on the branch is
+untouched.
+
+1. **E1 wrapper fixes** — smallest (+21/−12), byte-identical output, ~40x replay on its own.
+   Risk: `go.History`'s constructor shape changes (`score: Score` → `scoring: () => Score`);
+   nothing in this repo constructs it positionally, but downstream (lila) needs a grep before
+   landing. `Api.Position.legalActions` loses its last production caller — retiring it is a
+   separate decision.
+2. **E4 + E2 as one batch-replay seam API** — the 100x-class path. Give the seam
+   ([ADR 0002](adr/0002-engine-seam-at-api-position.md)) a batch entry point that folds int moves
+   and publishes one final `Position` (E2's shape); wrapper assembly stays in `Replay`, so no
+   second engine-aware file. Prerequisite: resolve the **fenPassCount inconsistency** — when a
+   resumed FEN carries `fenPassCount` 1..3, `Forsyth.<<@` seeds synthetic pass entries which the
+   production pass path re-replays, inflating `GoGame.plyCount` (and the FEN full-move field)
+   relative to the drop path, and double-counting `consecutivePasses` (unobservable only because
+   every reader clamps it). The fast path plays exactly the actions given; production must agree
+   with itself before either can be called the reference. Also carry E2's constructed-superko test
+   and E4's hand-written pass/`ss:` cases — the corpora alone catch neither superko probes nor
+   halfMoveClock inversions.
+3. **E3 bitboards** — a real ~2x engine multiplier with exact parity, but its 20x-movegen future
+   requires fusing per-chain liberty bitmaps into E2's mutable scratch state. Recommend as a later
+   separate effort, or fold into the batch-API work if movegen throughput ever matters (it is not
+   on the replay critical path once E4+E2 land).
+
+E5 is not worth landing for speed; keep `SuperkoHistory` only if E2's table wants to share the
+implementation.
+
+## What we now know about the floor
+
+- **Engine replay floor, immutable contract:** ~1.16 µs/ply @19x19 (465 µs/400 plies). The five
+  array clones per placement (7.6 KB @19) are ~96% of engine allocation and half the fast-path
+  profile. This is the price of [ADR 0005](adr/0005-immutable-api-interior-mutability.md)'s
+  copy-per-move, and no JVM micro-work moves it (E5: 1.07x, ceiling-proven).
+- **Engine replay floor, mutate-and-freeze:** **104 ns/ply @19x19** measured (E2), matching the
+  a-priori estimate of 100–200 ns for legality-checked replay with positional superko. Allocation
+  is per-game fixed cost (~46 KB @19), ~0 B/ply marginal.
+- **Exact positional superko costs almost nothing on replay** — deleting it entirely is worth at
+  most 1.11x @19 on the immutable engine (E5 control) — **but it is the movegen floor**: exact
+  parity requires per-call knowledge of which points capture, and without incremental per-chain
+  liberty tracking that discovery scan caps bitboard movegen at ~2.2x over current (E3).
+- **Wrapper floor for a full `Game`-producing replay:** ~120 µs @19x19 above the engine (E4), not
+  the ~30 µs E2's projection assumed. The remaining levers (each ~35 µs @19): an index walk
+  replacing `actionStrsWithEndTurn`'s tuple churn, builders for the `actionStrs` Vector, and
+  making `Board.pieces` lazy so the one-shot pieceMap scan is only paid when read.
+- **Single-shot costs @19x19** for budgeting a materialize-once wrapper: pieceMap full scan
+  21.9 µs, areaScore 4.3 µs, legalDrops 4.2 µs, FEN render 7.8 µs, FEN parse 5.9 µs.
+- **Combined projection**, E4 wrapper + E2 engine: ~170 µs @19x19 ≈ 570x joansala; ~63 µs @9x9
+  ≈ 117x — every size clears 100x, none of it requiring bitboards.
