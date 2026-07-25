@@ -197,7 +197,7 @@ object Replay {
     var errors   = ""
 
     def getApiPosition(uciMoves: List[String]) =
-      Api.positionFromStartingFenAndMoves(initialFen, uciMoves)
+      Api.positionFromVariantStartingFenAndMoves(variant, initialFen, uciMoves)
 
     def replayDropFromUci(
         role: Option[Role],
@@ -313,7 +313,7 @@ object Replay {
       initialFen: Option[FEN],
       variant: strategygames.go.variant.Variant
   ): Situation = {
-    initialFen.flatMap(Forsyth.<<) | Situation(variant)
+    initialFen.flatMap(Forsyth.<<@(variant, _)) | Situation(variant)
   } withVariant variant
 
   def boards(
