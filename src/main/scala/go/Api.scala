@@ -6,7 +6,7 @@ import scala.collection.mutable.ArrayBuffer
 
 import cats.implicits._
 
-import strategygames.{ Pocket, Pockets }
+import strategygames.{ Pocket, Pockets, Score }
 import strategygames.go.format.FEN
 import strategygames.go.Pos
 import strategygames.go.variant.Variant
@@ -55,6 +55,7 @@ object Api {
     lazy val pieceMap: PieceMap
     lazy val pocketData: Option[PocketData]
 
+    lazy val fenScore: Score
     lazy val gameResult: GameResult
     lazy val gameEnd: Boolean
     lazy val gameOutcome: Int
@@ -192,6 +193,8 @@ object Api {
     def toPosition = position.toBoard().position()
 
     lazy val fen: FEN = FEN(fenString)
+
+    lazy val fenScore: Score = Score((p1Score * 10).toInt, (p2Score * 10).toInt)
 
     lazy val pieceMap: PieceMap = {
       val goBoard   = position.toBoard()

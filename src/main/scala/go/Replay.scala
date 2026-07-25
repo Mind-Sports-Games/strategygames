@@ -5,7 +5,7 @@ import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 import scalalib.extensions.*
 
-import strategygames.{ Player, Score }
+import strategygames.Player
 import strategygames.format.pgn.San
 import strategygames.go.format.pgn.{ Parser, Reader }
 import strategygames.go.format.{ FEN, Forsyth, Uci }
@@ -152,10 +152,7 @@ object Replay {
         .withHistory(
           before.situation.history.copy(
             // lastTurn handled in Action.finalizeAfter
-            score = Score(
-              apiPosition.fen.player1Score,
-              apiPosition.fen.player2Score
-            ),
+            score = apiPosition.fenScore,
             captures = before.situation.history.captures.add(
               before.situation.player,
               before.situation.board.apiPosition.pieceMap.size - apiPosition.pieceMap.size + 1

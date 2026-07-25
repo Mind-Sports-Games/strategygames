@@ -1,7 +1,6 @@
 package strategygames.go
 
 import strategygames.Player
-import strategygames.Score
 
 import variant.Variant
 import scalalib.extensions.*
@@ -73,10 +72,7 @@ case class Board(
       .withHistory(
         history.copy(
           // lastTurn handled in action.finalizeAfter
-          score = Score(
-            newPosition.fen.player1Score, // TODO: generating the scores is slow
-            newPosition.fen.player2Score  //        especially when we have to generate a FEN to get it
-          ),
+          score = newPosition.fenScore,
           captures = history.captures.add(
             player,
             oldPieceMapSize - newPosition.pieceMap.size + 1

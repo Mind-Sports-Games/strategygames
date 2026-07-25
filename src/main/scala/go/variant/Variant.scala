@@ -188,7 +188,7 @@ abstract class Variant private[variant] (
 
   def winner(situation: Situation): Option[Player] =
     if (specialEnd(situation) && !specialDraw(situation)) {
-      if (situation.board.apiPosition.fen.player1Score > situation.board.apiPosition.fen.player2Score)
+      if (situation.board.apiPosition.fenScore.p1 > situation.board.apiPosition.fenScore.p2)
         Player.fromName("p1")
       else Player.fromName("p2")
     } else None
@@ -198,7 +198,7 @@ abstract class Variant private[variant] (
       (situation.board.apiPosition.gameEnd)
 
   def specialDraw(situation: Situation) =
-    (situation.board.apiPosition.fen.player1Score == situation.board.apiPosition.fen.player2Score) ||
+    (situation.board.apiPosition.fenScore.p1 == situation.board.apiPosition.fenScore.p2) ||
       situation.board.apiPosition.isRepetition
 
   def materialImbalance(board: Board): Int =
