@@ -4,7 +4,7 @@ import strategygames.format.{ FEN => StratFen, Forsyth => StratForsyth, Uci => S
 import strategygames.variant.{ Variant => StratVariant }
 import variant.Go9x9Scala
 
-class Go9x9ScalaVariantTestIsometry extends strategygames.chess.ChessTest {
+class GoScalaVariantIsometryTest extends strategygames.chess.ChessTest {
 
   "Test Every move of a scala go game can be loaded from fen" in {
     val gameFamily   = Go9x9Scala.gameFamily

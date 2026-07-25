@@ -25,11 +25,11 @@ class EngineMoveEncodingTest extends Specification {
       }
     }
     "round-trip every 19x19 key through Pos including a19 and s19" in {
-      Pos.fromKey("a19") must beSome
-      Pos.fromKey("s19") must beSome
-      forall(boardKeys(19)) { key =>
-        Api.moveToPos(engineMove(19, key), Go19x19) === Pos.fromKey(key)
-      }
+      (Pos.fromKey("a19") must beSome) and
+        (Pos.fromKey("s19") must beSome) and
+        forall(boardKeys(19)) { key =>
+          Api.moveToPos(engineMove(19, key), Go19x19) === Pos.fromKey(key)
+        }
     }
   }
 }

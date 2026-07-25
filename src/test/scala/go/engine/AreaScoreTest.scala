@@ -64,20 +64,22 @@ class AreaScoreTest extends Specification {
 
   "removing dead stones" should {
     "hand their surrounded region to the opponent" in {
-      val resolved = GoState
-        .fromStoneOwners(
-          9,
-          move =>
-            if (fullFileOfBlack.map(engineMove(9, _)).contains(move)) GoState.BlackPlayer
-            else GoState.NoOwner,
-          GoState.BlackPlayer,
-          0,
-          0,
-          None,
-          0
-        )
-        .areaScore
-      resolved === AreaScore(81, 0)
+      val wall      = fullFileOfBlack.map(engineMove(9, _)).toSet
+      val deadStone = engineMove(9, "g5")
+      val withDead  = GoState.fromStoneOwners(
+        9,
+        move =>
+          if (wall.contains(move)) GoState.BlackPlayer
+          else if (move == deadStone) GoState.WhitePlayer
+          else GoState.NoOwner,
+        GoState.BlackPlayer,
+        0,
+        0,
+        None,
+        0
+      )
+      (withDead.areaScore === AreaScore(45, 1)) and
+        (withDead.withoutStones(Set(deadStone)).areaScore === AreaScore(81, 0))
     }
   }
 

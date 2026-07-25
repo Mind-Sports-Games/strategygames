@@ -87,9 +87,9 @@ class GoStateTest extends Specification {
     }
     "allow the recapture after an exchange elsewhere" in {
       val state      = playAll(9, koSequence ++ List("a1", "c9"))
-      state.isLegal(engineMove(9, "f5")) === true
       val recaptured = state(engineMove(9, "f5"))
-      (recaptured.simpleKoMove === Some(engineMove(9, "e5"))) and
+      (state.isLegal(engineMove(9, "f5")) === true) and
+        (recaptured.simpleKoMove === Some(engineMove(9, "e5"))) and
         (recaptured.capturesByWhite === 1) and
         (recaptured.isLegal(engineMove(9, "e5")) === false)
     }
