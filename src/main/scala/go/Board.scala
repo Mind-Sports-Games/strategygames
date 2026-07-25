@@ -72,7 +72,7 @@ case class Board(
       .withHistory(
         history.copy(
           // lastTurn handled in action.finalizeAfter
-          score = newPosition.fenScore,
+          scoring = () => newPosition.fenScore,
           captures = history.captures.add(
             player,
             oldPieceMapSize - newPosition.pieceMap.size + 1

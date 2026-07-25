@@ -152,7 +152,7 @@ object Replay {
         .withHistory(
           before.situation.history.copy(
             // lastTurn handled in Action.finalizeAfter
-            score = apiPosition.fenScore,
+            scoring = () => apiPosition.fenScore,
             captures = before.situation.history.captures.add(
               before.situation.player,
               before.situation.board.apiPosition.pieceMap.size - apiPosition.pieceMap.size + 1
@@ -193,8 +193,8 @@ object Replay {
     var uciMoves = init.situation.board.uciMoves
     var errors   = ""
 
-    def getApiPosition(uciMoves: List[String]) =
-      Api.positionFromVariantStartingFenAndMoves(variant, initialFen, uciMoves)
+    def positionAfterAction(uciAction: String) =
+      state.situation.board.apiPosition.makeMoves(List(uciAction))
 
     def replayDropFromUci(
         role: Option[Role],
@@ -217,15 +217,18 @@ object Replay {
       }
 
     def replayPassFromUci(endTurn: Boolean): (Game, Action) = {
+      val passed = positionAfterAction("pass")
       uciMoves = uciMoves :+ "pass"
-      val pass = replayPass(state, endTurn, getApiPosition(uciMoves), uciMoves)
+      val pass   = replayPass(state, endTurn, passed, uciMoves)
       state = state.applyPass(pass)
       (state, pass)
     }
 
     def replaySelectSquaresFromUci(squares: List[Pos], endTurn: Boolean): (Game, Action) = {
-      uciMoves = uciMoves :+ s"ss:${squares.mkString(",")}"
-      val selectSquares = replaySelectSquares(state, squares, endTurn, getApiPosition(uciMoves), uciMoves)
+      val uciSelectSquares = s"ss:${squares.mkString(",")}"
+      val selected         = positionAfterAction(uciSelectSquares)
+      uciMoves = uciMoves :+ uciSelectSquares
+      val selectSquares    = replaySelectSquares(state, squares, endTurn, selected, uciMoves)
       state = state.applySelectSquares(selectSquares)
       (state, selectSquares)
     }

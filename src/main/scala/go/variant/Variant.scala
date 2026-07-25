@@ -191,9 +191,7 @@ abstract class Variant private[variant] (
       else Player.fromName("p2")
     } else None
 
-  def specialEnd(situation: Situation) =
-    (situation.board.apiPosition.legalActions.size == 0) ||
-      (situation.board.apiPosition.gameEnd)
+  def specialEnd(situation: Situation) = situation.board.apiPosition.gameEnd
 
   def specialDraw(situation: Situation) =
     (situation.board.apiPosition.fenScore.p1 == situation.board.apiPosition.fenScore.p2) ||

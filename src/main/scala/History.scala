@@ -230,7 +230,7 @@ object History {
           currentTurn = currentTurn.map(lm => lm.toGo),
           positionHashes = positionHashes,
           halfMoveClock = halfMoveClock,
-          score = score,
+          scoring = () => score,
           captures = captures
         )
       )
