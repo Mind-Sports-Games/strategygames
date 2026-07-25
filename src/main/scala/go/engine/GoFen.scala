@@ -12,7 +12,8 @@ object GoFenError {
   final case class NonNumericField(name: String, field: String)              extends GoFenError
 }
 
-/** The go FEN dialect, shared byte for byte with the joansala-backed variants:
+/** The go FEN dialect, shared with the parked joansala-backed variants except for the ko field, which the
+  * joansala emitter leaves as `-` while this one writes the live simple-ko coordinate:
   *
   * {{{
   * board[pocket] turn ko p1Score p2Score p1Captures p2Captures komi passCount fullMove
@@ -23,17 +24,22 @@ object GoFenError {
   */
 object GoFen {
 
-  private val Pocket                    = "[SSSSSSSSSSssssssssss]"
-  private val KoPointOmittedByValidator = "-"
-  private val FieldsWithPassCount       = 10
-  private val FieldsWithoutPassCount    = 9
+  private val Pocket                 = "[SSSSSSSSSSssssssssss]"
+  private val NoKoPoint              = "-"
+  private val FieldsWithPassCount    = 10
+  private val FieldsWithoutPassCount = 9
 
   def render(game: GoGame): String = {
     val state = game.state
-    s"${renderBoard(state)}$Pocket ${state.turn} $KoPointOmittedByValidator " +
+    s"${renderBoard(state)}$Pocket ${state.turn} ${renderKoPoint(state)} " +
       s"${game.p1FenScore} ${game.p2FenScore} ${state.capturesByBlack} ${state.capturesByWhite} " +
       s"${game.komiTenths} ${game.fenPassCount} ${game.fullMoveNumber}"
   }
+
+  private def renderKoPoint(state: GoState): String =
+    state.simpleKoMove.fold(NoKoPoint) { move =>
+      s"${('a' + move % state.size).toChar}${move / state.size + 1}"
+    }
 
   /** Reads a position back. Scores are recomputed from the board, so fields 4 and 5 are checked for shape and
     * then discarded — a handicap FEN states them before the position has been scored.
@@ -159,12 +165,11 @@ object GoFen {
     case _   => Left(GoFenError.UnknownTurnSymbol(field))
   }
 
-  // NOTE: `render` always writes `-` here, because `Api.validateFEN`'s regex only accepts that
-  // literal. Parsing a real coordinate anyway is load-bearing, not speculative: a state rebuilt
-  // from a FEN has no position history for superko to consult, so this field is its only
-  // recapture protection (ADR 0010).
+  // NOTE: a state rebuilt from a FEN has no position history for superko to consult, so this field
+  // is its only recapture protection — `render` writes the live simple-ko coordinate and this
+  // parser hands it back to `GoState.isLegal` (ADR 0010, as amended).
   private def parseKoPoint(field: String, size: Int): Either[GoFenError, Option[Int]] =
-    if (field == KoPointOmittedByValidator) Right(None)
+    if (field == NoKoPoint) Right(None)
     else {
       val file = field.headOption.map(_ - 'a').getOrElse(-1)
       val rank = field.drop(1).toIntOption.getOrElse(0)

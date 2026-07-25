@@ -41,8 +41,9 @@ abstract class Variant private[variant] (
 
   def repetitionEnabled: Boolean = false
 
-  /** Which engine `Api` builds a position with: the joansala one by default, the pure-Scala one
-    * (`docs/go-engine.md`) for the `…Scala` variants. The two follow different rules in places, so this is
+  /** Which engine `Api` builds a position with: the pure-Scala one (`docs/go-engine.md`) for the canonical
+    * variants, the joansala one for the parked `…Joansala` variants that survive only as a benchmark and
+    * differential oracle until the engine is deleted. The two follow different rules in places, so this is
     * part of a variant's identity and not a switch to flip on an existing one.
     */
   def usesScalaEngine: Boolean = false
@@ -224,7 +225,7 @@ abstract class Variant private[variant] (
     board
 
   def valid(board: Board, @nowarn strict: Boolean): Boolean =
-    Api.validateFEN(Forsyth.exportBoard(board))
+    Api.validateFEN(board.variant, Forsyth.exportBoard(board))
 
   val roles: List[Role] = Role.all
 
@@ -251,9 +252,9 @@ object Variant {
     Go19x19,
     Go13x13,
     Go9x9,
-    Go19x19Scala,
-    Go13x13Scala,
-    Go9x9Scala
+    Go19x19Joansala,
+    Go13x13Joansala,
+    Go9x9Joansala
   )
   val byId                    = all map { v =>
     (v.id, v)

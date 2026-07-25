@@ -78,9 +78,9 @@ object Api {
 
     lazy val gameSize: Int    = position.toBoard().gameSize()
     lazy val variant: Variant = gameSize match {
-      case 9  => strategygames.go.variant.Go9x9
-      case 13 => strategygames.go.variant.Go13x13
-      case 19 => strategygames.go.variant.Go19x19
+      case 9  => strategygames.go.variant.Go9x9Joansala
+      case 13 => strategygames.go.variant.Go13x13Joansala
+      case 19 => strategygames.go.variant.Go19x19Joansala
       case _  => sys.error("Incorrect game size from position")
     }
 
@@ -272,10 +272,11 @@ object Api {
 
   def positionFromVariant(variant: Variant): Position = position(variant, variant.komi)
 
-  // NOTE: a go fen carries no variant, so this can only ever build a joansala position. GoPosition's
+  // NOTE: a go fen carries no variant, so this always builds a joansala position — since the flip
+  // that is the parked `…Joansala` variant of the fen's size, never a canonical one. GoPosition's
   // own calls are safe because that engine is already chosen; the method is public, though, and the
-  // deprecated positionFromStartingFenAndMoves below still routes through it, so a scala-variant fen
-  // handed to either lands on the wrong engine.
+  // deprecated positionFromStartingFenAndMoves below still routes through it, so a canonical-variant
+  // fen handed to either lands on the retired engine. Deleted with joansala in Phase C.
   def positionFromFen(fenString: String): Position = {
     val positionFen = FEN(fenString)
     val game        = new GoGame(positionFen.gameSize)
@@ -368,14 +369,30 @@ object Api {
       .map(_.initialFen)
       .getOrElse(sys.error(s"not given a go variant name: ${variantKey}"))
 
-  // NOTE: Variant.valid routes every go variant through here, which makes this the one remaining
-  // place a scala-variant code path executes joansala code, and fenRegex a duplicate of the
-  // FEN-shape knowledge GoFen owns. Delete-day rewrite target: dispatch on usesScalaEngine to
-  // GoFen.parse — see "Retiring joansala" in docs/go-engine.md.
-  private val fenRegex                        =
+  // NOTE: the ko field differs by engine: the scala emitter writes a live simple-ko coordinate
+  // (ADR 0010, as amended), the joansala one only ever writes `-`. The joansala regex, path and
+  // GoBoard round-trip go with the engine in Phase C, leaving the scala branch as the only one.
+  private val joansalaFenRegex =
     "([0-9Ss]?){1,19}(/([0-9Ss]?){1,19}){8,18}\\[[Ss]+\\] [w|b] - [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-3] [0-9]+"
-  def validateFEN(fenString: String): Boolean =
-    Try(goBoardFromFen(FEN(fenString))).isSuccess && fenString.matches(fenRegex)
+  private val scalaFenRegex    =
+    "([0-9Ss]?){1,19}(/([0-9Ss]?){1,19}){8,18}\\[[Ss]+\\] [w|b] (-|[a-s][1-9][0-9]?) [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-3] [0-9]+"
+
+  def validateFEN(variant: Variant, fenString: String): Boolean =
+    if (variant.usesScalaEngine) validateScalaEngineFEN(fenString)
+    else validateJoansalaFEN(fenString)
+
+  @deprecated(
+    "a go fen does not name its variant; this validates against the canonical scala-engine dialect — " +
+      "use validateFEN(variant, fenString)",
+    "10.2.1-s3-ps8-uci5"
+  )
+  def validateFEN(fenString: String): Boolean = validateScalaEngineFEN(fenString)
+
+  private def validateScalaEngineFEN(fenString: String): Boolean =
+    fenString.matches(scalaFenRegex) && strategygames.go.engine.GoFen.parse(fenString).isRight
+
+  private def validateJoansalaFEN(fenString: String): Boolean =
+    Try(goBoardFromFen(FEN(fenString))).isSuccess && fenString.matches(joansalaFenRegex)
 
   def pieceMapFromFen(variantKey: String, fenString: String): PieceMap = {
     positionFromVariantNameAndFEN(variantKey, fenString).pieceMap

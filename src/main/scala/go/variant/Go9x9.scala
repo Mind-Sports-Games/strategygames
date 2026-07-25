@@ -19,4 +19,6 @@ case object Go9x9
   def perfIcon: Char = ''
   def perfId: Int    = 500
 
+  override def usesScalaEngine: Boolean = true
+
 }

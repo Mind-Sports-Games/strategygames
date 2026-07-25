@@ -117,11 +117,13 @@ sbt "bench/Jmh/run -i 1 -wi 1 -f 1 -r 1s -w 1s -p family=backgammon,go -p size=s
 
 ## Go engine benchmarks (joansala vs pure Scala)
 
-`GoEngineBenchmark` compares the joansala-backed go variants (`go9x9`, `go13x13`,
-`go19x19`) against their pure-Scala counterparts (`go9x9Scala`, `go13x13Scala`,
-`go19x19Scala`) over the committed `go-go9x9-long`, `go-go13x13-long` and
-`go-long` corpus fixtures — the same action strings feed both engines, so the
-`engine` parameter is the only variable.
+`GoEngineBenchmark` compares the parked joansala-backed go variants
+(`go9x9Joansala`, `go13x13Joansala`, `go19x19Joansala`) against the canonical
+pure-Scala ones (`go9x9`, `go13x13`, `go19x19`) over the committed
+`go-go9x9-long`, `go-go13x13-long` and `go-long` corpus fixtures — the same
+action strings feed both engines, so the `engine` parameter is the only
+variable. The fixture headers name the canonical keys; the harness derives both
+variants from the board size.
 
 Three workloads, each a production call path:
 

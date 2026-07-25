@@ -420,7 +420,7 @@ object GoState {
   val WhitePlayer = -1
   val NoOwner     = 0
 
-  // NOTE: a new size must also touch Api.fenRegex (row-count range {8,18}) and FEN.variant's size
+  // NOTE: a new size must also touch Api's fen regexes (row-count range {8,18}) and FEN.variant's size
   // inference — the other two places outside variant/ that know the board-size catalog.
   val supportedSizes: Set[Int] = Set(9, 13, 19)
 

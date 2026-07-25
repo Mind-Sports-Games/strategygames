@@ -68,7 +68,9 @@ final case class FEN(value: String) extends AnyVal {
 
   def gameSize: Int = value.split(' ').lift(0).map(_.split('/').length).getOrElse(0)
 
-  // NOTE: board size is all a go fen says about its variant, so this can never name a scala one.
+  // NOTE: board size is all a go fen says about its variant, so inference always lands on the
+  // canonical scala-engine variant of that size and can never name a parked `…Joansala` one —
+  // which is correct: those exist only as a benchmark oracle and are reached by explicit key.
   // A caller holding a variant already must use that one rather than infer it back from the fen.
   def variant: Variant = gameSize match {
     case 9  => strategygames.go.variant.Go9x9

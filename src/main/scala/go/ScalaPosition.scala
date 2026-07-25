@@ -9,9 +9,9 @@ import strategygames.go.variant.Variant
 /** The pure-Scala engine behind [[strategygames.go.Api.Position]], the seam every go consumer — Board,
   * Situation, Game, Forsyth, Replay — already speaks. See `docs/go-engine.md`.
   *
-  * The variant is passed in rather than inferred from the FEN: board size alone identifies the
-  * joansala-backed variant of that size, so a position that lost its variant would route back to the other
-  * engine.
+  * The variant is passed in rather than inferred from the FEN: board size alone identifies the canonical
+  * variant of that size, so a position on a parked `…Joansala` variant that lost its variant would silently
+  * route onto this engine.
   */
 final private[go] class ScalaPosition(
     game: GoGame,

@@ -14,11 +14,11 @@ import strategygames.go.{ Api, Board, Game, Pos, Replay }
 import strategygames.go.format.FEN
 import strategygames.go.variant.{
   Go13x13,
-  Go13x13Scala,
+  Go13x13Joansala,
   Go19x19,
-  Go19x19Scala,
+  Go19x19Joansala,
   Go9x9,
-  Go9x9Scala,
+  Go9x9Joansala,
   Variant => GoVariant
 }
 
@@ -32,9 +32,9 @@ final case class GoBoardSize(
 object GoBoardSize {
 
   val all: List[GoBoardSize] = List(
-    GoBoardSize("go9x9", "go-go9x9", Go9x9, Go9x9Scala),
-    GoBoardSize("go13x13", "go-go13x13", Go13x13, Go13x13Scala),
-    GoBoardSize("go19x19", "go", Go19x19, Go19x19Scala)
+    GoBoardSize("go9x9", "go-go9x9", Go9x9Joansala, Go9x9),
+    GoBoardSize("go13x13", "go-go13x13", Go13x13Joansala, Go13x13),
+    GoBoardSize("go19x19", "go", Go19x19Joansala, Go19x19)
   )
 
   def named(key: String): GoBoardSize =
