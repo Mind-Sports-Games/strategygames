@@ -1,7 +1,7 @@
 // lichess fork version 10.2.1
 // scala3
 // PlayStrategy version number at the end
-val strategygamesVersion = "10.2.1-s3-ps8-uci4"
+val strategygamesVersion = "10.2.1-s3-ps8-uci5"
 
 val fairystockfishVersion = "0.0.20"
 val scalalibVersion       = "11.9.5"
