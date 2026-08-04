@@ -3,7 +3,7 @@ package strategygames.format
 import cats.data.Validated
 
 import strategygames.variant.Variant
-import strategygames.{ ActionStrs, GameLogic }
+import strategygames.{ ActionStrs, GameFamily, GameLogic }
 
 object GameToUciStrings {
 
@@ -13,13 +13,15 @@ object GameToUciStrings {
       initialFen: Option[FEN],
       variant: Variant
   ): Validated[String, String] = variant match {
-    case Variant.Backgammon(v)                                                             =>
+    case Variant.Backgammon(v)                                                 =>
       strategygames.backgammon.format.GameToUciStrings(actionStrs, initialFen.map(_.toBackgammon), v)
-    case Variant.Go(_) | Variant.Samurai(_) | Variant.Togyzkumalak(_) | Variant.FairySF(_)  =>
+    case Variant.FairySF(v) if v.gameFamily != GameFamily.Shogi()              => // promotions
       Validated.valid(join(actionStrs))
-    case Variant.Abalone(v) if v != strategygames.abalone.variant.GrandAbalone              =>
+    case Variant.Go(_) | Variant.Samurai(_) | Variant.Togyzkumalak(_)          =>
       Validated.valid(join(actionStrs))
-    case _                                                                                  =>
+    case Variant.Abalone(v) if v != strategygames.abalone.variant.GrandAbalone =>
+      Validated.valid(join(actionStrs))
+    case _                                                                     =>
       UciDump(lib, actionStrs, initialFen, variant).map(join)
   }
 
