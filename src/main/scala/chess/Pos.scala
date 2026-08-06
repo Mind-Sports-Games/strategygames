@@ -152,6 +152,7 @@ object Pos {
 
   // if adding new Pos check for use of Pos.all
   val all: List[Pos] = (0 to 63).map(new Pos(_)).toList
+  val allSize: Int   = all.size
 
   val p1Backrank = (A1 <-> H1).toList
   val p2Backrank = (A8 <-> H8).toList

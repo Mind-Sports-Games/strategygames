@@ -82,7 +82,7 @@ case class Pos private (index: Int) extends AnyVal {
 
   def sgf = (97 + index).toChar.toString()
 
-  def last: Boolean = (index + 1) % File.all.size == 0
+  def last: Boolean = (index + 1) % File.allSize == 0
 
   def liftDistance(player: Player): Int = (Pos.barIndex(!player) - index).abs
 
@@ -94,18 +94,18 @@ case class Pos private (index: Int) extends AnyVal {
 object Pos {
 
   def apply(index: Int): Option[Pos] =
-    if (0 <= index && index < File.all.size * Rank.all.size) Some(new Pos(index))
+    if (0 <= index && index < File.allSize * Rank.allSize) Some(new Pos(index))
     else None
 
-  def apply(file: File, rank: Rank): Pos = new Pos(file.index + File.all.size * rank.index)
+  def apply(file: File, rank: Rank): Pos = new Pos(file.index + File.allSize * rank.index)
 
   def at(x: Int, y: Int): Option[Pos] =
-    if (0 <= x && x < File.all.size && 0 <= y && y < Rank.all.size)
-      Some(new Pos(x + (File.all.size - x) * y))
+    if (0 <= x && x < File.allSize && 0 <= y && y < Rank.allSize)
+      Some(new Pos(x + (File.allSize - x) * y))
     else None
 
   def opposite(index: Int): Option[Pos] =
-    apply(if (index < File.all.size) index + File.all.size else index - File.all.size)
+    apply(if (index < File.allSize) index + File.allSize else index - File.allSize)
 
   def fromKey(key: String): Option[Pos] = allKeys get key
 
@@ -151,7 +151,8 @@ object Pos {
   val L2 = new Pos(23)
 
   // if adding new Pos check for use of Pos.all
-  val all: List[Pos] = (0 to (File.all.size * Rank.all.size) - 1).map(new Pos(_)).toList
+  val all: List[Pos] = (0 to (File.allSize * Rank.allSize) - 1).map(new Pos(_)).toList
+  val allSize: Int   = all.size
 
   val allKeys: Map[String, Pos] = all
     .map { pos =>
