@@ -816,7 +816,12 @@ object Pos {
 
   // if adding new Pos check for use of Pos.all
   val all: List[Pos] = (0 to (File.allSize * Rank.allSize) - 1).map(new Pos(_)).toList
-  val allSize: Int   = all.size
+
+  // Use this rather than all.size in hot paths. List has no cached length, so all.size is O(n).
+  // all.size was used in Hash.actorIndex, which runs once per stone per position hash.
+  // all.size costs 257us to hash a full board, versus ~3us with this cached val.
+  // See also bench/GoHashBenchmark.scala
+  val allSize: Int = all.size
 
   val allKeys: Map[String, Pos] = all
     .map { pos =>
