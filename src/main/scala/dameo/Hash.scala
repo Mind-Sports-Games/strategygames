@@ -38,7 +38,7 @@ object Hash {
     piece.role.hashInt * 2 + piece.player.fold(1, 0)
 
   private def actorIndex(actor: Actor) =
-    Pos.all.size * pieceIndex(actor.piece) + actor.pos.hashCode
+    Pos.allSize * pieceIndex(actor.piece) + actor.pos.hashCode
 
   def get(situation: Situation, table: ZobristConstants): Long = {
 

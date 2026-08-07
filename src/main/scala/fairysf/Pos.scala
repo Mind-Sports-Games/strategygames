@@ -166,21 +166,21 @@ case class Pos private (index: Int) extends AnyVal {
 
 object Pos {
   def apply(index: Int): Option[Pos] =
-    if (0 <= index && index < File.all.size * Rank.all.size) Some(new Pos(index))
+    if (0 <= index && index < File.allSize * Rank.allSize) Some(new Pos(index))
     else None
 
   def apply(file: File, rank: Rank): Pos =
     if (file == File.J) {
-      new Pos(File.formerAll.size * Rank.all.size + rank.index)
+      new Pos(File.formerAllSize * Rank.allSize + rank.index)
     } else {
-      new Pos(file.index + File.formerAll.size * rank.index)
+      new Pos(file.index + File.formerAllSize * rank.index)
     }
 
   def at(x: Int, y: Int): Option[Pos] =
-    if (0 <= x && x < File.formerAll.size && 0 <= y && y < Rank.all.size) {
-      Some(new Pos(x + File.formerAll.size * y))
-    } else if (x == (File.all.size - 1) && 0 <= y && y < Rank.all.size) {
-      Some(new Pos(y + File.formerAll.size * Rank.all.size))
+    if (0 <= x && x < File.formerAllSize && 0 <= y && y < Rank.allSize) {
+      Some(new Pos(x + File.formerAllSize * y))
+    } else if (x == (File.allSize - 1) && 0 <= y && y < Rank.allSize) {
+      Some(new Pos(y + File.formerAllSize * Rank.allSize))
     } else None
 
   def fromKey(key: String): Option[Pos] = allKeys get key
@@ -305,7 +305,8 @@ object Pos {
   // current pos limit in db is 128, if adding more perhaps use a different method (map of index to file, rank)
 
   // if adding new Pos check for use of Pos.all
-  val all: List[Pos] = (0 to (File.all.size * Rank.all.size) - 1).map(new Pos(_)).toList
+  val all: List[Pos] = (0 to (File.allSize * Rank.allSize) - 1).map(new Pos(_)).toList
+  val allSize: Int   = all.size
 
   val allKeys: Map[String, Pos] = all
     .map { pos =>

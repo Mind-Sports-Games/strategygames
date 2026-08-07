@@ -6,7 +6,7 @@ case class File private (val index: Int) extends AnyVal with Ordered[File] {
   @inline override def compare(that: File) = this - that
 
   def offset(delta: Int): Option[File] =
-    if (-File.all.size < delta && delta < File.all.size) File(index + delta)
+    if (-File.allSize < delta && delta < File.allSize) File(index + delta)
     else None
 
   @inline def char: Char = (97 + index).toChar
@@ -20,12 +20,12 @@ case class File private (val index: Int) extends AnyVal with Ordered[File] {
 object File {
 
   def apply(index: Int): Option[File] =
-    if (0 <= index && index < all.size) Some(new File(index))
+    if (0 <= index && index < allSize) Some(new File(index))
     else None
 
   @inline def of(pos: Pos): File = {
-    val rank: Int = if (pos.index >= all.size) 1 else 0
-    new File(if (rank == 0) all.size - 1 - pos.index else pos.index - all.size)
+    val rank: Int = if (pos.index >= allSize) 1 else 0
+    new File(if (rank == 0) allSize - 1 - pos.index else pos.index - allSize)
   }
 
   def fromChar(ch: Char): Option[File] = apply(ch.toInt - 97)
@@ -45,5 +45,6 @@ object File {
 
   val all                     = List(A, B, C, D, E, F, G, H, I, J, K, L)
   val allReversed: List[File] = all.reverse
+  val allSize: Int            = all.size
 
 }

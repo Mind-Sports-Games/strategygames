@@ -5,7 +5,7 @@ case class Rank private (val index: Int) extends AnyVal with Ordered[Rank] {
   @inline override def compare(that: Rank) = this - that
 
   def offset(delta: Int): Option[Rank] =
-    if (-Rank.all.size < delta && delta < Rank.all.size) Rank(index + delta)
+    if (-Rank.allSize < delta && delta < Rank.allSize) Rank(index + delta)
     else None
 
   @inline def char: Char           = if (index < 9) (49 + index).toChar else 48.toChar // 0
@@ -15,14 +15,14 @@ case class Rank private (val index: Int) extends AnyVal with Ordered[Rank] {
 
 object Rank {
   def apply(index: Int): Option[Rank] =
-    if (0 <= index && index < all.size) Some(new Rank(index))
+    if (0 <= index && index < allSize) Some(new Rank(index))
     else None
 
   @inline def of(pos: Pos): Rank = {
-    if (pos.index < File.formerAll.size * Rank.all.size) {
-      new Rank(pos.index / File.formerAll.size)
+    if (pos.index < File.formerAllSize * Rank.allSize) {
+      new Rank(pos.index / File.formerAllSize)
     } else {
-      new Rank(pos.index - File.formerAll.size * Rank.all.size)
+      new Rank(pos.index - File.formerAllSize * Rank.allSize)
     }
   }
 
@@ -41,5 +41,6 @@ object Rank {
 
   val all                     = List(First, Second, Third, Fourth, Fifth, Sixth, Seventh, Eighth, Ninth, Tenth)
   val allReversed: List[Rank] = all.reverse
+  val allSize: Int            = all.size
 
 }
