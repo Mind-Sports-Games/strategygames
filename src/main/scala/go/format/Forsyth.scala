@@ -45,7 +45,7 @@ object Forsyth {
             case _ => List()
           },
           position = apiPosition.some
-        ),
+        ).withHistoryStartingHere,
         fen.value.split(' ')(1) match {
           case "b" => P1
           case "w" => P2

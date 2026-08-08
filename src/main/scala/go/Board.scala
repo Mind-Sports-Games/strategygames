@@ -50,9 +50,14 @@ case class Board(
 
   def passed: Board = copy(ko = None, consecutivePasses = consecutivePasses + 1)
 
-  def settled: Board = copy(ko = None, consecutivePasses = 0, deadStonesSelected = true)
+  def settled: Board =
+    copy(ko = None, consecutivePasses = 0, deadStonesSelected = true).withHistoryStartingHere
 
   def stonePlaced: Board = copy(consecutivePasses = 0)
+
+  def positionHash: Long = Hash.positionHash(this)
+
+  def withHistoryStartingHere: Board = updateHistory(_.startingAtPosition(positionHash))
 
   def withKoOf(p: Api.Position): Board = copy(ko = p.fen.ko)
 
@@ -71,30 +76,40 @@ case class Board(
   }
 
   def afterDrop(player: Player, dest: Pos): Board = {
-    val oldPieceMapSize = apiPosition.pieceMap.size
-    val uciMove         =
+    val stonesBefore = apiPosition.pieceMap
+    val uciMove      =
       s"${Role.defaultRole.forsyth}@${dest.key}"
-    val newPosition     = apiPosition.makeMovesWithPosUnchecked(List(uciMove), apiPosition.deepCopy)
+    val newPosition  = apiPosition.makeMovesWithPosUnchecked(List(uciMove), apiPosition.deepCopy)
+    val stonesAfter  = newPosition.pieceMap
     copy(
-      pieces = newPosition.pieceMap,
+      pieces = stonesAfter,
       uciMoves = uciMoves :+ uciMove,
       pocketData = newPosition.pocketData,
       position = Some(newPosition)
     ).stonePlaced
       .withKoOf(newPosition)
       .withHistory(
-        history.copy(
-          // lastTurn handled in action.finalizeAfter
-          score = newPosition.fenScore,
-          captures = history.captures.add(
-            player,
-            oldPieceMapSize - newPosition.pieceMap.size + 1
-          ),
-          halfMoveClock = history.halfMoveClock + player.fold(0, 1)
-        )
+        history
+          .copy(
+            // lastTurn handled in action.finalizeAfter
+            score = newPosition.fenScore,
+            captures = history.captures.add(
+              player,
+              stonesBefore.size - stonesAfter.size + 1
+            ),
+            halfMoveClock = history.halfMoveClock + player.fold(0, 1)
+          )
+          .afterPosition(
+            hashAfterPlacing(Piece(player, Role.defaultRole), dest, stonesBefore -- stonesAfter.keys)
+          )
       )
 
   }
+
+  private def hashAfterPlacing(stone: Piece, at: Pos, captured: PieceMap): Long =
+    captured.foldLeft(history.currentPosition.getOrElse(positionHash) ^ Hash.mask(stone, at)) {
+      case (hash, (pos, piece)) => hash ^ Hash.mask(piece, pos)
+    }
 
   override def toString = s"$variant Position after ${history.recentTurnUciString}"
 }
@@ -102,7 +117,13 @@ case class Board(
 object Board {
 
   def apply(pieces: Iterable[(Pos, Piece)], variant: Variant): Board =
-    Board(pieces.toMap, History(), variant, variantPocketData(variant), variant.komi)
+    Board(
+      pieces.toMap,
+      History(),
+      variant,
+      variantPocketData(variant),
+      variant.komi
+    ).withHistoryStartingHere
 
   def init(variant: Variant): Board = Board(variant.pieces, variant)
 

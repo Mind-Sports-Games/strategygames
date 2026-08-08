@@ -152,7 +152,6 @@ object Replay {
           pocketData = apiPosition.pocketData,
           position = apiPosition.some
         )
-        .settled
         .withHistory(
           before.situation.history.copy(
             // lastTurn handled in Action.finalizeAfter
@@ -166,7 +165,8 @@ object Replay {
             ),
             halfMoveClock = before.situation.history.halfMoveClock + before.situation.player.fold(0, 1)
           )
-        ),
+        )
+        .settled,
       autoEndTurn = endTurn
     )
   }

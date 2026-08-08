@@ -21,4 +21,18 @@ case class History(
   lazy val recentTurnUciString: Option[String] =
     if (recentTurn.nonEmpty) Some(recentTurn.map(_.uci).mkString(",")) else None
 
+  def positionCount: Int = positionHashes.length / Hash.size
+
+  def positionAt(index: Int): Long = Hash.hashAt(positionHashes, index)
+
+  def currentPosition: Option[Long] = if (positionCount > 0) Some(positionAt(0)) else None
+
+  def hasOccurred(hash: Long): Boolean = (0 until positionCount).exists(positionAt(_) == hash)
+
+  def afterPosition(hash: Long): History =
+    copy(positionHashes = Hash.bytesOf(hash) ++ positionHashes)
+
+  def startingAtPosition(hash: Long): History =
+    copy(positionHashes = Hash.bytesOf(hash))
+
 }
