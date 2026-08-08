@@ -6,6 +6,25 @@ project and enables `JmhPlugin`. Nothing here is part of the published
 `org.playstrategy %% strategygames` artifact — `sbt publishLocal` publishes only
 `strategygames`.
 
+## Nothing compiles this project for you
+
+`root` does not `.aggregate(bench)`, so `sbt compile`, `sbt test` and every other
+root task ignore it entirely. A rename or signature change in `src/main/scala`
+can leave every benchmark here uncompilable and the whole build still green.
+
+This has already happened. `7c69c51d` renamed `Forsyth.exportBoardFen` to
+`exportBoard` and changed its return type from `FEN` to `String`;
+`GoRulesBenchmark` kept calling the old name in two places, and no go benchmark
+could be run at all until `8904ce51` followed the rename. Nothing reported it in
+between.
+
+Compile this project explicitly after touching anything it calls, and before
+planning any measurement on it:
+
+```
+sbt bench/Test/compile
+```
+
 ## What it measures
 
 `UciDumpBenchmark` reproduces lila's hot path in `BotJsonView.gameState`:
@@ -136,7 +155,7 @@ fixture loading the benchmarks share.
 | `dropsByRoleMidGame` | `Situation.dropsByRole` | `Level.Trial` |
 | `areaScoreMidGame` | `Board.areaScore` | `Level.Invocation` |
 | `fenParseMidGame` | `Forsyth.<<@` | `Level.Trial` |
-| `fenRenderMidGame` | `Forsyth.exportBoardFen` | `Level.Invocation` |
+| `fenRenderMidGame` | `Forsyth.exportBoard` | `Level.Invocation` |
 
 The two `Level.Invocation` workloads read `Board`'s derived `lazy val`s —
 `areaScore` and, under it, `playerPiecesOnBoardCount` — so a `Level.Trial` board

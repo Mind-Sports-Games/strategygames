@@ -130,23 +130,27 @@ crossing to joansala or to the deleted seam is cross-machine and indicative, bec
 references are deleted code and no same-run denominator can be produced again.
 
 **Against joansala, on the path lila runs.** lila replays go through the wrapper, so the wrapper
-rows are the ones that describe production: at 19x19, about **21x faster if the consumer never reads
-a score and 2.8x if it reads one every ply**. Which of the two is live is not known here and cannot
-be settled from this repo — it depends on whether lila touches a history field per ply, and the same
-library code costs 7.5x more if it does. Go is a scoring game whose score is usually on screen, so
+rows are the ones that describe production: at 19x19, **30.1x faster if the consumer never reads a
+score and 2.9x if it reads one every ply**. Which of the two is live is not known here and cannot be
+settled from this repo — it depends on whether lila touches a history field per ply, and the same
+library code costs 10.3x more if it does. Go is a scoring game whose score is usually on screen, so
 the pessimistic number may be the real one.
 
-Both figures are ahead of the tables and are arithmetic rather than a measurement:
-`a3dc35a2`'s post-fix 19x19 numbers (4630.5 and 34773.7 µs) over the same joansala baseline the
-tables use, which is a different machine again. `docs/go-speed-results.md` still records 11.3x and
-2.4x because its run predates `a3dc35a2`, which deferred the wrapper's `PieceMap` and took 3.7 ms off
-both wrapper rows. **The tables have not been re-run.**
+Both figures are ahead of the tables and are arithmetic rather than a measurement: `879d0977`'s
+measured post-fix 19x19 numbers (3205.6 ± 25.3 and 32947.3 ± 335.8 µs) over the same joansala
+baseline the tables use, which is a different machine again. `docs/go-speed-results.md` still records
+11.3x and 2.4x in its own table because that run predates `879d0977`, which deferred the wrapper's
+`PieceMap` and took 5.1 ms off `wrapperReplay` and 5.5 ms off `wrapperReplayReadingEveryScore` at
+19x19. **The tables have not been re-run**; the post-fix pair comes from a separate paired run whose
+baselines reproduce them within a few percent.
 
 **Against joansala, on the go package alone**, full-game replay through `go.Replay` is 9.3x / 16.4x
 / 29.7x faster, and a single placement — `Variant.boardAfter` — is 42x faster at 19x19. That
-measures the rules, not the site, and `a3dc35a2` did not touch it — the change is one line in
-`strategygames/Board.scala`. Quoting 29.7x as go's speed-up still leaves out a wrapper that
-`a3dc35a2` narrowed rather than removed.
+measures the rules, not the site, and `879d0977` did not touch it — the change is three lines in
+`strategygames/Board.scala`. The two figures have since converged: on the score-unread path the
+wrapper reaches 30.1x against the go package's 29.7x, so quoting either now says the same thing.
+Quoting 29.7x still leaves out the score-reading consumer, which is where the remaining wrapper cost
+lives.
 
 **Against the seam this branch deleted**, replay at 19x19 is 11.7x slower than its batch path and
 1.5x slower than its per-ply path. The batch path folded a whole game on one mutable scratch state
@@ -167,18 +171,24 @@ One wrapper cost the tables name has since been paid off, and it is the reason t
 above are ahead of them. **`strategygames.Board` took its `pieces` as a strict constructor argument**,
 so every `Board.Go(b)` rebuilt the whole go piece map into wrapper `Pos` and `Piece` whether or not
 anything read it, once per ply on the wrapper replay path — ~27% of named samples in `wrapperReplay`
-at 19x19, with per-ply overhead scaling with board area (3.4 / 6.3 / 13.1 µs). `a3dc35a2` takes it by
-name into a `lazy val`, the shape `1d658123` had already used for the wrapped history on the same
-class, and removes 3.7 ms from a 19x19 wrapper replay — 1.79x on the row that reads no score. All
+at 19x19, with per-ply overhead scaling with board area (3.4 / 6.3 / 13.1 µs). `879d0977` takes it by
+name into a `lazy val`, the shape `5ed78cb1` had already used for the wrapped history on the same
+class, and removes 5.1 ms from a 19x19 wrapper replay — 2.59x on the row that reads no score. All
 nine logics gained it; `Board` is a `sealed abstract class` rather than a `case class`, so the
 by-name parameter cost no subclass anything.
+
+That closes the wrapper penalty on the score-unread path entirely rather than narrowing it. At 19x19
+`wrapperReplay` measures 3205.6 ± 25.3 µs against the go package's own `replay` at 3243.2 ± 156.3 —
+the same work, within noise, one wrapper `Game` per ply and all. The ~5.25 ms the tables charged to
+the wrapper was this single map rebuild.
 
 What is left is the cost the design knowingly accepted. The first is on the wrapper path, and it
 leads because that is the path lila runs:
 
 - **`strategygames.History.Go` takes the score as a strict parameter**, so reading *any* history
-  field on a ply forces that ply's flood fill — 7.5x at 19x19 on a consumer that reads a score every
-  ply, once the `pieces` cost is out of the way. Closing it needs either a by-name parameter (costing
+  field on a ply forces that ply's flood fill — 10.3x at 19x19 on a consumer that reads a score every
+  ply, once the `pieces` cost is out of the way, and with that cost gone it is the only thing
+  separating the two wrapper rows. Closing it needs either a by-name parameter (costing
   `History.Go` its `case class`, making go the only non-case-class of nine) or a board-carrying
   `History.Go` (which lila's `History.apply` factory cannot construct). `Board` had the first option
   cheaply because it is not a `case class`; `History.Go` does not. Both are larger than this branch
@@ -193,7 +203,13 @@ leads because that is the path lila runs:
 
 Nothing else measured here was acted on. A follow-up branch takes the numbers as its input, and
 `History.Go`'s strict score is what it should take first — it is the last item standing between a
-wrapper consumer and the 7.5x.
+wrapper consumer and the 10.3x, and the only wrapper item left at all.
+
+That branch will live in `bench`, which no root task compiles: `sbt test` at the root does not
+aggregate it, so a rename in `src/main/scala` can leave every benchmark uncompilable with nothing
+red. `7c69c51d` did exactly that, and no go benchmark could run until `8904ce51`. Compile `bench`
+explicitly before believing a measurement is available to take; `bench/README.md` carries the
+verification steps.
 
 ## The four preserved quirks
 
