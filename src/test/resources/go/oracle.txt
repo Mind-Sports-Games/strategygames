@@ -1,6 +1,6 @@
 G|upstream-0|go19x19||1|0
 A|s@p16 s@d16 s@q4 s@d3 s@k3 s@c5 s@f17 s@d14 s@j16 s@q14 s@r15 s@n16 s@o14 s@p17 s@q17 s@o17 s@q18 s@l16 s@k17 s@l17 s@p11 s@h16 s@h17 s@g16 s@g17 s@i16 s@i17 s@j15 s@d18 s@d9 s@c11 s@d12 s@d11 s@e11 s@b13 s@c9 s@c15 s@c14 s@b14 s@c16 s@d15 s@e15 s@b15 s@e17 s@f16 s@e16 s@e18 s@c12 s@b12 s@b16 s@b10 s@b9 s@e12 s@f12 s@d13 s@e13 s@c13 s@i3 s@e14 s@f14 s@e10 s@f10 s@e12 s@d12 s@e9 s@d10 s@f9 s@g10 s@h8 s@g8 s@g7 s@g9 s@f7 s@f8 s@j5 s@o4 s@m3 s@p6 s@o5 s@p5 s@p4 s@n5 s@o3 s@o6 s@p8 s@p3 s@o2 s@q3 s@r4 s@r3 s@r6 s@r7 s@r8 s@q7 s@s7 s@q8 s@r9 s@q9 s@q10 s@p9 s@g3 s@s2 s@e7 s@e8 s@e2 s@o13 s@r11 s@r5 s@s4 s@q6 s@s6 s@q5 s@s5 s@s8 s@s9 s@s3 s@s8 s@r1 s@p13 s@p14 s@o12 s@q16 s@q15 s@p15 s@r16 s@n13 s@q13 s@o15 s@d2 s@c3 s@p2 s@q2 s@n12 s@i5 s@j6 s@g5 s@f5 s@f3 s@f4 s@e3 s@f2 s@j4 s@k4 s@g4 s@h2 s@i2 s@j3 s@h3 s@g2 s@c2 s@j2 s@i1 s@g6 s@d1 s@i6 s@h4 s@i4 s@d14 s@a11 s@j4 s@n9 s@n8 s@i4 s@s11 s@s12 s@j4 s@m8 s@n7 s@i4 s@j18 s@h5 s@j17 s@i18 s@i19 s@h19 s@j19 s@k16 s@k18 s@g18 s@m13 s@m6 s@m7 s@l6 s@m9 s@l8 s@n10 s@l10 s@l9 s@k9 s@m10 s@o10 s@o9 s@l11 s@m12 s@k13 s@k14 s@m11 s@k8 s@l7 s@k10 s@j9 s@n11 s@o11 s@n9
-P|19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 0 1|286644746|361|195455450|0|0|0|0|0|||
+P|19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 0 1|286644746|361|195455450|0|75|0|0|0|||
 P|19/19/19/15S3/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] w - 3610 75 0 0 75 0 1|341858257|360|-551296221|3610|75|0|0|0|||
 P|19/19/19/3s11S3/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 10 85 0 0 75 0 2|1434007937|359|-423161376|10|85|0|0|0|||
 P|19/19/19/3s11S3/19/19/19/19/19/19/19/19/19/19/19/16S2/19/19/19[SSSSSSSSSSssssssssss] w - 20 85 0 0 75 0 2|1494927463|358|1771598183|20|85|0|0|0|||
@@ -207,7 +207,7 @@ P|7Sss9/3SS1S1Sss5S2/4sSSSSsSs2ssS2/1ssssSsssSSs1s1S1S1/1SSSs4s4ssSS1/1S1s1s4s3S
 P|7Sss9/3SS1S1Sss5S2/4sSSSSsSs2ssS2/1ssssSsssSSs1s1S1S1/1SSSs4s4ssSS1/1S1s1s4s3Sss2/1SSSs5S1sssSS2/1S1s1s6sSS3S/S1SSs6SSsSS1Ss/1S1s1ss3sSssS1S2/1sss2s2SSssssssSS/4sssS2sSSs1SsSS/4SSS4Sss2ssS/6S1SS1SS1sssSS/2s2SsS1S3s1sssS/5SssS1S3sSSSS/2ssssSssSS1S1Sssss/2sSSSSSsS4SSs1s/3s4s8s1[SSSSSSSSSSssssssssss] b - 970 1075 10 10 75 0 103|945961541|172|635360881|970|1075|10|10|0|||
 G|upstream-1|go19x19||1|0
 A|s@p16 s@d4 s@q4 s@d17 s@o3 s@q14 s@n17 s@r16 s@q13 s@p13 s@q12 s@p14 s@q17 s@p11 s@r14 s@r15 s@q10 s@q11 s@r11 s@p10 s@q9 s@r10 s@r12 s@r9 s@p12 s@o12 s@s13 s@q8 s@o13 s@n12 s@o14 s@o15 s@p15 s@q15 s@n14 s@s11 s@r17 s@s10 s@s12 s@m14 s@n15 s@s14 s@s15 s@s16 s@e4 s@e3 s@d3 s@c4 s@s17 s@s14 s@f3 s@e2 s@s15 s@p3 s@q16 s@p4 s@o4 s@p5 s@p2 s@q2 s@o2 s@q3 s@k3 s@l4 s@l3 s@c15 s@f4 s@f2 s@g2 s@d2 s@n6 s@o7 s@c10 s@c12 s@c7 s@h17 s@j17 s@h3 s@g3 s@h5 s@e6 s@h2 s@h1 s@j5 s@i2 s@j16 s@k17 s@d10 s@d9 s@d11 s@e9 s@b10 s@n7 s@j8 s@c17 s@d16 s@f17 s@e18 s@h16 s@g17 s@g16 s@f18 s@i17 s@j14 s@o8 s@p9 s@l8 s@j10 s@p7 s@o6 s@k9 s@j9 s@p8 s@q7 s@n10 s@g11 s@i18 s@f16 s@i16 s@c9 s@c8 s@b9 s@p6 s@q6 s@o5 s@g9 s@b5 s@b4 s@f15 s@e17 s@g13 s@l11 s@i13 s@j13 s@i12 s@l15 s@d13 s@c13 s@g7 s@h7 s@g6 s@h8 s@h6 s@i6 s@i4 s@j4 s@j3 s@h4 s@i3 s@i5 s@k4 s@k5 s@l5 s@l6 s@m5 s@l7 s@l16 s@e15 s@f14 s@e13 s@a4 s@a3 s@a6 s@a5 s@m13 s@l13 s@a4 s@b2 s@m12 s@m11 s@n13 s@j11 s@q1 s@r1 s@p1 s@r2 s@h18 s@m9 s@m8 s@n9 s@o9 s@o10 s@f9 s@g8 s@f8 s@i14 s@h14 s@h12 s@h13 s@i11 s@g12 s@h11 s@e14 s@d14 s@k15 s@j15 s@k16 s@j12 s@d5 s@c5 s@c6 s@g18 s@k8 s@k7 s@b8 s@a5 s@b6 s@f12 s@f13 s@e12 s@f10 s@l12 s@m15 s@l14 s@g10 s@h10 s@g19 s@f19 s@h19 s@k10 s@l9 s@m10 s@a9 s@a10 s@a8 s@g5 s@f5 s@f1 s@g1 s@i15 s@h15 s@k14 s@f11 s@e11 s@a4 s@j7
-P|19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 0 1|286644746|361|195455450|0|0|0|0|0|||
+P|19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 0 1|286644746|361|195455450|0|75|0|0|0|||
 P|19/19/19/15S3/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] w - 3610 75 0 0 75 0 1|341858257|360|-551296221|3610|75|0|0|0|||
 P|19/19/19/15S3/19/19/19/19/19/19/19/19/19/19/19/3s15/19/19/19[SSSSSSSSSSssssssssss] b - 10 85 0 0 75 0 2|313343873|359|-852352643|10|85|0|0|0|||
 P|19/19/19/15S3/19/19/19/19/19/19/19/19/19/19/19/3s12S2/19/19/19[SSSSSSSSSSssssssssss] w - 20 85 0 0 75 0 2|-1721414041|358|1582288618|20|85|0|0|0|||
@@ -446,7 +446,7 @@ P|5sSS11/4sssSS10/2Sss1ssSSS2S2SSS/3s1sSSSsSS3SS2/2s1sS1SssSsSSsS2S/3sSS1SsssssS
 P|5sSS11/4sssSS10/2Sss1ssSSS2S2SSS/3s1sSSSsSS3SS2/2s1sS1SssSsSSsS2S/3sSS1SsssssSS2S1/2sSsSSSSs1sSSS1S1S/2s1ssSsSs1sSssSSSS/3ssSssss1ss2ssSs/ssSs1SSs1ss1sSss1ss/SssSSSs2sSSssSs1s1/SSS2Sss1sSSS1SSs2/2S3Ss1sss1S1Ss2/SSS1S1SSs2s1S1Ss2/1SsS1SsssssSS1Ss3/SsssSS1sSsSs2SsS2/s2SsSSsSSSS2Sss2/1s1sssSsS5SSss1/5sSS7SSs1[SSSSSSSSSSssssssssss] b - 1360 1275 13 6 75 0 119|1176427298|140|1566081903|1360|1275|13|6|0|||
 G|upstream-2|go19x19||1|0
 A|s@p16 s@d4 s@c16 s@p4 s@c6 s@f3 s@d10 s@f17 s@q6 s@c17 s@n3 s@p6 s@e17 s@e16 s@d17 s@d16 s@c18 s@b17 s@b18 s@b16 s@c15 s@f18 s@d18 s@b15 s@c14 s@b14 s@c13 s@a18 s@a17 s@a16 s@f16 s@e15 s@f15 s@e14 s@f14 s@e13 s@b13 s@e18 s@p5 s@o5 s@q5 s@o3 s@n4 s@o4 s@k3 s@q4 s@p7 s@o6 s@q9 s@i3 s@b4 s@f13 s@n17 s@r15 s@r16 s@q15 s@q16 s@q11 s@q13 s@o11 s@p12 s@p11 s@o13 s@o9 s@o8 s@n8 s@p9 s@o7 s@o10 s@p8 s@g3 s@g2 s@e3 s@f4 s@d3 s@e4 s@c4 s@n10 s@i5 s@e2 s@d2 s@j4 s@e1 s@f2 s@j2 s@k4 s@l4 s@l5 s@m4 s@d9 s@c9 s@c8 s@d8 s@e9 s@e10 s@d7 s@e8 s@f9 s@c7 s@b8 s@b9 s@f7 s@e7 s@e6 s@d6 s@f8 s@d7 s@f10 s@r10 s@r11 s@q8 s@q7 s@r7 s@r5 s@p7 s@o8 s@r6 s@r4 s@s11 s@r12
-P|19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 0 1|286644746|361|195455450|0|0|0|0|0|||
+P|19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 0 1|286644746|361|195455450|0|75|0|0|0|||
 P|19/19/19/15S3/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] w - 3610 75 0 0 75 0 1|341858257|360|-551296221|3610|75|0|0|0|||
 P|19/19/19/15S3/19/19/19/19/19/19/19/19/19/19/19/3s15/19/19/19[SSSSSSSSSSssssssssss] b - 10 85 0 0 75 0 2|313343873|359|-852352643|10|85|0|0|0|||
 P|19/19/19/2S12S3/19/19/19/19/19/19/19/19/19/19/19/3s15/19/19/19[SSSSSSSSSSssssssssss] w - 20 85 0 0 75 0 2|1628081801|358|1322803737|20|85|0|0|0|||
@@ -569,7 +569,7 @@ P|19/sSSSss13/1ssSSs7S5/ssSssS9SSS1/1sS1sS10ss1/1sS1sS13/1SS1ss8S1S2/15S3/14ssss
 P|19/sSSSss13/1ssSSs7S5/ssSssS9SSS1/1sS1sS10ss1/1sS1sS13/1SS1ss8S1S2/15S1s1/14ssssS/3SSs7sS2S1/1SSsss8sSS2/1ssSSs7sssS2/2SSSs8sS1S1/2SSs9ssSS1/8S2s2sSSs1/1SSsss3ssSSSssss1/3SSsS1s1S2Ss4/3Ssss2S9/4S14[SSSSSSSSSSssssssssss] b - 580 665 2 3 75 0 61|668274075|245|491406507|580|665|2|3|0|||
 G|upstream-3|go19x19||1|0
 A|s@p16 s@d16 s@q4 s@d3 s@o3 s@q14 s@q11 s@n16 s@q15 s@p14 s@o15 s@q17 s@p17 s@r15 s@q16 s@r16 s@r17 s@n14 s@r13 s@r14 s@o14 s@o13 s@n15 s@q18 s@r18 s@p18 s@o18 s@m15 s@o16 s@p15 s@o17 s@n18 s@n17 s@m17 s@o19 s@m16 s@m18 s@p11 s@n13 s@m14 s@p13 s@o12 s@q13 s@q10 s@r11 s@l18 s@c14 s@m19 s@q19 s@f16 s@c17 s@c16 s@b16 s@b15 s@b18 s@a16 s@b17 s@c15 s@f18 s@g18 s@e18 s@g17 s@d5 s@d8 s@g4 s@f5 s@e4 s@f4 s@e3 s@f3 s@f2 s@d2 s@e2 s@g3 s@c3 s@d6 s@c6 s@c5 s@b5 s@d4 s@c4 s@e5 s@c5 s@g2 s@c2 s@i10 s@c9 s@c8 s@b8 s@d10 s@c10 s@c11 s@k10 s@l9 s@n10 s@m11 s@p10 s@o10 s@p9 s@o9 s@o8 s@p8 s@q9 s@n9 s@b11 s@d9 s@c12 s@d11 s@e15 s@e16 s@b13 s@e13 s@k4 s@q8 s@r9 s@o7 s@l7 s@k7 s@n8 s@m8 s@n7 s@m7 s@n6 s@m6 s@m5 s@n5 s@o6 s@o5 s@p6 s@p5 s@q6 s@l5 s@m4 s@l4 s@l3 s@m3 s@n4 s@k3 s@l2 s@n3 s@o4 s@k2 s@n2 s@l1 s@m2 s@k5 s@d7 s@e7 s@e6 s@f6 s@e14 s@d13 s@d14 s@f14 s@f15 s@g15 s@c7 s@c13 s@b14 s@d12 s@b12 s@f1 s@d1 s@n19 s@p19 s@d17 s@d18 s@f19 s@p12 s@o11 s@e19 s@g19 s@a17 s@a15 s@m1 s@k1 s@a14 s@g16 s@e1 s@g1 s@d6
-P|19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 0 1|286644746|361|195455450|0|0|0|0|0|||
+P|19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 0 1|286644746|361|195455450|0|75|0|0|0|||
 P|19/19/19/15S3/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] w - 3610 75 0 0 75 0 1|341858257|360|-551296221|3610|75|0|0|0|||
 P|19/19/19/3s11S3/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 10 85 0 0 75 0 2|1434007937|359|-423161376|10|85|0|0|0|||
 P|19/19/19/3s11S3/19/19/19/19/19/19/19/19/19/19/19/16S2/19/19/19[SSSSSSSSSSssssssssss] w - 20 85 0 0 75 0 2|1494927463|358|1771598183|20|85|0|0|0|||
@@ -753,7 +753,7 @@ P|4Sss5ssSSS2/1S1SSSs4s1sS2S1/SSSs2s5sSSS1S1/sSsssss5ssSSSs1/sss1SSs5sSSsSs1/SSS
 P|4Sss5ssSSS2/1S1SSSs4s1sS2S1/SSSs2s5sSSS1S1/sSsssss5ssSSSs1/sss1SSs5sSSsSs1/SSSSSs6ssSsss1/1Ssss8SsSSS1/1SSs10sS3/1Sss8s1ssSS1/2Ss4s1S2SsSs2/2Ss7s1ssSSS1/1Sss8sSSss2/2SSs5sSsSs4/2SSSs6sSSSS2/1SSSss4ssSsss3/2S1SsS3SsSSS1S2/2S1Sss3sS2S4/2S1SSs3sSSS5/3SSss3ssS6[SSSSSSSSSSssssssssss] w - 1260 885 10 1 75 0 91|-1444966574|191|956585195|1260|885|10|1|0|||
 G|upstream-4|go19x19||1|0
 A|s@p16 s@d16 s@q4 s@d3 s@c5 s@c9 s@e4 s@e3 s@f4 s@f3 s@g4 s@h3 s@c11 s@e9 s@c14 s@c15 s@d14 s@f16 s@e11 s@c7 s@e7 s@g9 s@g11 s@c3 s@i5 s@i3 s@c17 s@b14 s@e18 s@b13 s@b16 s@c12 s@d12 s@b11 s@b15 s@d17 s@d18 s@c18 s@d15 s@c16 s@e16 s@b17 s@e17 s@c17 s@j16 s@i15 s@j15 s@i13 s@j14 s@g13 s@f15 s@g15 s@g16 s@h16 s@f17 s@j13 s@k13 s@j11 s@k12 s@i10 s@h11 s@i11 s@h17 s@g6 s@h6 s@g7 s@g5 s@j6 s@j5 s@k5 s@k4 s@l5 s@j7 s@k7 s@h7 s@h8 s@i8 s@j8 s@i6 s@i7 s@g3 s@g2 s@j7 s@e13 s@k6 s@d13 s@l6 s@q14 s@q16 s@q11 s@p14 s@p13 s@o13 s@o14 s@p15 s@p12 s@n14 s@l4 s@j3 s@l3 s@i2 s@h2 s@k2 s@o3 s@p3 s@o5 s@q6 s@p2 s@q2 s@p4 s@q3 s@n2 s@f8 s@f9 s@g8 s@o12 s@n13 s@q8 s@h9 s@h10 s@p5 s@o4 s@r14 s@r13 s@q15 s@b5 s@c19 s@b19 s@d8 s@d9 s@b6 s@b7 s@b4 s@d5 s@c6 s@d6 s@a5 s@d7 s@b3 s@b2 s@a3 s@q1 s@r1 s@p1 s@r3 s@q13 s@f14 s@f13 s@d19 s@a18 s@r7 s@r8 s@o6 s@l2 s@r15 s@q7 s@r6 s@i1 s@j2 s@n8 s@m11 s@n11 s@m10 s@n12 s@m12 s@p7 s@p6 s@k8 s@n9 s@o9 s@m8 s@n10 s@m9 s@n7 s@j9 s@k9 s@k10 s@i9 s@j10 s@h8 s@i7 s@e8 s@h9 s@k11 s@l10 s@h8 s@o7 s@o8 s@h9 s@m6 s@m7 s@h8 s@s8 s@s9 s@h9 s@l7 s@j6 s@h8 s@s7 s@r10 s@h9 s@f6 s@n6 s@m5 s@a2 s@b1 s@h8 s@i14 s@f7 s@e6 s@c13 s@b12 s@g14 s@e14 s@e15 s@i16 s@i17 s@h14 s@j12 s@i12 s@n5 s@n4 s@g10 s@g12 s@h12 s@f11 s@l11 s@h13 s@s13 s@s12 s@s14 s@a7 s@l1 s@m1 s@k1 s@d4 s@l8 s@h1 s@l9 s@h15 s@h4 s@i4 s@j4 s@f2 s@h5 s@a6 s@c4 s@c2
-P|19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 0 1|286644746|361|195455450|0|0|0|0|0|||
+P|19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 0 1|286644746|361|195455450|0|75|0|0|0|||
 P|19/19/19/15S3/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] w - 3610 75 0 0 75 0 1|341858257|360|-551296221|3610|75|0|0|0|||
 P|19/19/19/3s11S3/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 10 85 0 0 75 0 2|1434007937|359|-423161376|10|85|0|0|0|||
 P|19/19/19/3s11S3/19/19/19/19/19/19/19/19/19/19/19/16S2/19/19/19[SSSSSSSSSSssssssssss] w - 20 85 0 0 75 0 2|1494927463|358|1771598183|20|85|0|0|0|||
@@ -1004,7 +1004,7 @@ P|1sSS15/s1sSS14/1sssSS1SS10/1SssS1SssS5SS2/1SsSSSsssS5SSS1/1sSSsSSssS3SsSsSS/1s
 P|1sSS15/s1sSS14/1sssSS1SS10/1SssS1SssS5SS2/1SsSSSsssS5SSS1/1sSSsSSssS3SsSsSS/1sSsssssssS2SSsssS/1ssS2sSsSS1Ssss2s/1sS1SsSSsssSSs2s2/6SssSSSSs3s1/2sssssSsS1SSSs3s/3SsSSSS2SSss1ssS/ssssSSsSSS2SsSssSS/sSSssssSSSSSsSSSSS1/S1Ss2SSSSsssSsS3/1SSsSSSSsSSs1sssS2/SSssssSssS1s2sSSS1/Sss2sssSSSs1s1sS2/1s5ss1SSs2ssS1[SSSSSSSSSSssssssssss] b - 1360 1475 14 6 75 0 125|-1472921973|131|-504741835|1360|1475|14|6|0|||
 G|upstream-5|go19x19||1|0
 A|s@p16 s@p4 s@d17 s@d4 s@c15 s@n17 s@q14 s@p18 s@q7 s@n3 s@l17 s@l16 s@k16 s@m16 s@p10 s@k17 s@j17 s@k18 s@j16 s@l18 s@c6 s@f3 s@d10 s@e14 s@e15 s@d14 s@d15 s@f14 s@c13 s@f15 s@g17 s@f17 s@f18 s@g16 s@h17 s@e12 s@c11 s@f10 s@b4 s@q5 s@g4 s@g3 s@i4 s@h5 s@h4 s@d6 s@c5 s@d5 s@c3 s@d3 s@d8 s@k3 s@h7 s@i2 s@h10 s@c14 s@b14 s@h16 s@e17 s@h11 s@i11 s@i10 s@h9 s@h12 s@j10 s@j5 s@i5 s@j6 s@i9 s@i6 s@h6 s@f6 s@f5 s@j4 s@i13 s@b13 s@b12 s@d13 s@a13 s@h14 s@o7 s@q12 s@p12 s@p11 s@q11 s@o11 s@r12 s@o8 s@q10 s@n7 s@p5 s@p7 s@q4 s@q6 s@p3 s@o4 s@r4 s@r5 s@o3 s@n2 s@p6 s@o6 s@s5 s@o5 s@r2 s@q3 s@q2 s@p2 s@r3 s@o2 s@r7 s@c4 s@b2 s@c2 s@b3 s@g8 s@f8 s@d7 s@c7 s@f7 s@i7 s@q17 s@g11 s@e8 s@e9 s@f9 s@h13 s@g12 s@g13 s@i12 s@f12 s@j12 s@f11 s@e11 s@j13 s@k12 s@e10 s@g10 s@f13 s@l10 s@l11 s@k13 s@k14 s@l14 s@k15 s@m11 s@l9 s@m10 s@k8 s@j7 s@k10 s@j8 s@l12 s@l13 s@m12 s@o10 s@n12 s@k11 s@l15 s@n13 s@o12 s@n14
-P|19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 0 1|286644746|361|195455450|0|0|0|0|0|||
+P|19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 0 1|286644746|361|195455450|0|75|0|0|0|||
 P|19/19/19/15S3/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] w - 3610 75 0 0 75 0 1|341858257|360|-551296221|3610|75|0|0|0|||
 P|19/19/19/15S3/19/19/19/19/19/19/19/19/19/19/19/15s3/19/19/19[SSSSSSSSSSssssssssss] b - 10 85 0 0 75 0 2|-1368050175|359|1363276355|10|85|0|0|0|||
 P|19/19/3S15/15S3/19/19/19/19/19/19/19/19/19/19/19/15s3/19/19/19[SSSSSSSSSSssssssssss] w - 20 85 0 0 75 0 2|2099870639|358|-336803483|20|85|0|0|0|||
@@ -1169,7 +1169,7 @@ P|19/5S4ss3s3/3SSsSS1SsS1s2s2/6ss1SSss2S3/2SSSs4SS7/1Sssss1s2Ss4S2/S1Ss1SSSSSss1
 P|19/5S4ss3s3/3SSsSS1SsS1s2s2/6ss1SSss2S3/2SSSs4SS7/1Sssss1s2Ss1s2S2/S1Ss1SSSSSss1s5/1S2sSsssssSSSSSsS1/2S1sSSsS1sSs1ssS2/3SSssS1SSss1sSS2/4Ss1SS2S7/3Ss1s2sS3s4/2Ss1s1SSs3s1sSS1/2Ss1s1Sss4s1s2/2Ss1S1sSs4s1ssS/1Sss2SSSs4ssSS1/1SSs1ss3s2sSS1S1/1Ss5s4sssSS1/19[SSSSSSSSSSssssssssss] b - 800 895 3 4 75 0 82|1631708963|204|-779158399|800|895|3|4|0|||
 G|upstream-6|go19x19||1|0
 A|s@q16 s@d16 s@p3 s@d4 s@f17 s@c14 s@k17 s@p5 s@q5 s@p4 s@q4 s@o3 s@q6 s@p2 s@q3 s@n4 s@i3 s@k3 s@f3 s@e3 s@f4 s@d6 s@p14 s@h17 s@c9 s@c11 s@c3 s@e2 s@c5 s@d5 s@b6 s@b8 s@c7 s@c6 s@b5 s@c8 s@d7 s@b7 s@d8 s@b9 s@c2 s@f6 s@k4 s@j3 s@j4 s@l3 s@i4 s@i7 s@k7 s@j9 s@l4 s@m3 s@g7 s@g6 s@h6 s@f7 s@h7 s@g9 s@d15 s@c15 s@d17 s@e16 s@e17 s@c17 s@f16 s@h15 s@c18 s@b18 s@b17 s@c16 s@b19 s@f15 s@h9 s@h10 s@g8 s@f8 s@g10 s@f9 s@i10 s@h11 s@i9 s@i12 s@p6 s@j10 s@j8 s@h5 s@i6 s@q12 s@q10 s@o12 s@n14 s@o10 s@k15 s@q17 s@p17 s@p18 s@q18 s@r17 s@r18 s@r16 s@p16 s@r14 s@o18 s@q9 s@r9 s@p9 s@r10 s@m13 s@g16 s@j16 s@g15 s@k16 s@f14 s@l17 s@p11 s@p12 s@o11 s@n11 s@n10 s@m11 s@m10 s@l11 s@l18 s@k18 s@m17 s@l16 s@m8 s@m16 s@m18 s@r8 s@r7 s@h14 s@e13 s@n17 s@n18 s@l9 s@n7 s@q11 s@p10 s@r11 s@d12 s@c12 s@e10 s@f10 s@e11 s@s10 s@o9 s@s9 s@o10 s@f12 s@e12 s@q8 s@h16 s@i16 s@m14 s@l14 s@i11 s@g14 s@e15 s@j11 s@g11 s@h12 s@f11 s@g2 s@h2 s@b2 s@b3 s@g3 s@g4 s@e1 s@b1 s@i2 s@f2 s@f1 s@j2 s@h3 s@i1 s@h4 s@n2
-P|19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 0 1|286644746|361|195455450|0|0|0|0|0|||
+P|19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 0 1|286644746|361|195455450|0|75|0|0|0|||
 P|19/19/19/16S2/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] w - 3610 75 0 0 75 0 1|870394769|360|-258586832|3610|75|0|0|0|||
 P|19/19/19/3s12S2/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 10 85 0 0 75 0 2|849083713|359|-130451987|10|85|0|0|0|||
 P|19/19/19/3s12S2/19/19/19/19/19/19/19/19/19/19/19/19/15S3/19/19[SSSSSSSSSSssssssssss] w - 20 85 0 0 75 0 2|487835951|358|448652582|20|85|0|0|0|||
@@ -1351,7 +1351,7 @@ P|1S17/1sS7sSSSSsSS1/1SsSSS1s2SsSs1Sss1/2sssSSSsssss2SSs1/2sSS1Ss2S8/2s2Sss3sSS1
 P|1S17/1sS7sSSSSsSS1/1SsSSS1s2SsSs1Sss1/2sssSSSsssss2SSs1/2sSS1Ss2S8/2s2Sss3sSS1S1s1/4S7s6/2sSSs1ss5sss2/2s1SSSsSs1sssSSss1/4SsSsSs2SSSSSSs/1sS2ssSSs1s2SssSs/1ssS1sS2S2S3ss1/1sSS1sSSs1S2S3S1/1Sss1ssSS6SS2/1SSs3s7sS2/3s1SSsSSSS1s1sS2/1SS1sSssSssss1sSS2/1sS1sSsS1S3S1s3/1S2ss2S10[SSSSSSSSSSssssssssss] w - 920 935 3 0 75 0 90|-1396385855|183|1587429393|920|935|3|0|0|||
 G|upstream-7|go19x19||1|0
 A|s@q16 s@d16 s@p3 s@d4 s@o17 s@p5 s@q5 s@q6 s@q4 s@r16 s@r15 s@q15 s@p15 s@q14 s@r14 s@q13 s@r13 s@q12 s@q10 s@p16 s@q17 s@p17 s@q18 s@o16 s@o15 s@n16 s@n15 s@m16 s@m15 s@l16 s@o11 s@o12 s@n12 s@p10 s@p11 s@q11 s@p9 s@r10 s@o10 s@q8 s@r6 s@r7 s@p6 s@q7 s@o6 s@r9 s@r12 s@r11 s@r5 s@n13 s@m13 s@m12 s@n11 s@o13 s@l13 s@l15 s@l14 s@o7 s@p7 s@p8 s@o8 s@n7 s@o5 s@n8 s@o9 s@l12 s@l10 s@k12 s@j14 s@j13 s@k14 s@j16 s@i15 s@h17 s@g15 s@k8 s@j10 s@s8 s@i12 s@m10 s@m11 s@n5 s@n4 s@m4 s@o4 s@m5 s@j4 s@h3 s@i5 s@j9 s@i10 s@k10 s@k11 s@l9 s@k9 s@i9 s@k10 s@i7 s@k7 s@l8 s@h9 s@j7 s@h8 s@h7 s@g5 s@f3 s@e5 s@f7 s@e7 s@e8 s@d7 s@f6 s@f5 s@d8 s@d5 s@c4 s@f8 s@c8 s@e3 s@e4 s@f4 s@g3 s@c5 s@b4 s@l3 s@m3 s@m2 s@k3 s@k2 s@j3 s@k4 s@l4 s@l2 s@i4 s@h4 s@i3 s@j5 s@f9 s@g8 s@h6 s@h5 s@k6
-P|19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 0 1|286644746|361|195455450|0|0|0|0|0|||
+P|19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 0 1|286644746|361|195455450|0|75|0|0|0|||
 P|19/19/19/16S2/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] w - 3610 75 0 0 75 0 1|870394769|360|-258586832|3610|75|0|0|0|||
 P|19/19/19/3s12S2/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 10 85 0 0 75 0 2|849083713|359|-130451987|10|85|0|0|0|||
 P|19/19/19/3s12S2/19/19/19/19/19/19/19/19/19/19/19/19/15S3/19/19[SSSSSSSSSSssssssssss] w - 20 85 0 0 75 0 2|487835951|358|448652582|20|85|0|0|0|||
@@ -1496,7 +1496,7 @@ P|19/16S2/7s6SsS2/3s5s1sssssSs1/6S1S2sSSSSsS1/9SSS4sS1/9s1SSss1sS1/8S1sssSs1sS1/
 P|19/16S2/7s6SsS2/3s5s1sssssSs1/6S1S2sSSSSsS1/9SSS4sS1/9s1SSss1sS1/8S1sssSs1sS1/10S1SSSSss1/8SSSSs1S1Ss1/5s1SssSs2SS1s1/2sssSSS2ss1sSss1s/3SSs1sssS2ssSss1/5s1s2s3SSsS1/2SSSSSSSS2ssSsSS1/1ssssS1SsSSssSS1S2/4SssssssSs2S3/10SSS6/19[SSSSSSSSSSssssssssss] b - 720 775 2 0 75 0 72|-1797926974|220|1418197747|720|775|2|0|0|||
 G|walk-go9x9-00|go9x9||0|0
 A|s@g4 s@b6 s@a2 s@a6 s@h6 s@h5 s@g1 s@b3 s@f6 s@g2 s@i6 s@h4 s@c8 s@h8 s@g6 s@b5 s@f1 s@i2 s@a9 s@f2 s@b9 s@e7 s@a4 s@h1 s@d3 s@e8 s@e1 s@e9 s@f4 s@b1 s@a1 s@c6 s@a8 s@h3 s@e5 s@d5 s@f7 s@d7 s@f5 s@e4 s@d9 s@c7 s@i5 s@e6 s@c1 s@g3 s@b8 s@h7 s@c3 s@c4 s@h9 s@f8 s@i9 s@g5 s@e3 s@g8 s@d4 s@d6 s@i7 s@c2 s@a3 s@d2 s@g9 s@a7 s@c9 s@d8 s@e4 s@i1 s@a5 s@i8 s@i4 s@e2 s@g7 s@h2 s@i3 s@b7 s@d9 s@a8 s@b4 s@f9 s@b8 s@c5 s@a9 s@d1 s@e1 s@c9 s@h9 s@c8 s@b2 s@i9 s@c1 s@g9 s@g1 s@b9 s@b3 s@b8 s@b1 s@h9 pass pass ss:
-P||-781389749|81|-1619164048|0|0|0|0|0|||
+P||-781389749|81|-1619164048|0|55|0|0|0|||
 P||1265647235|80|781571149|810|55|0|0|0|||
 P||-1023032592|79|-1202790373|10|65|0|0|0|||
 P||169229386|78|1620669944|20|65|0|0|0|||
@@ -1600,7 +1600,7 @@ P||-740832499|0|0|310|535|3|18|0|||
 P||-2018861802|0|0|310|535|4|18|1|p2||
 G|walk-go9x9-01|go9x9||0|0
 A|s@e1 s@h6 s@b7 s@c7 s@g7 s@i5 s@f4 s@b6 s@g5 s@d1 s@a9 s@e8 s@f2 s@f1 s@c2 s@i7 s@e5 s@d8 s@h4 s@d4 s@c5 s@f7 s@d7 s@g3 s@d9 s@e9 s@f5 s@e3 s@f6 s@i3 s@a1 s@g9 s@g1 s@i1 s@h9 s@g8 s@b8 s@i6 s@a7 s@g4 s@i2 s@c9 s@a4 s@b4 s@e6 s@c4 s@g2 s@i8 s@h7 s@h5 s@i4 s@c8 s@d2 s@h8 s@a8 s@c3 s@e4 s@d3 s@f9 s@h2 s@g6 s@a5 s@e7 s@e2 s@f1 s@d9 s@b3 s@f8 s@b5 s@i9 s@b1 s@d5 s@a3 s@i2 s@b9 s@h9 s@c6 s@b2 s@h1 s@a2 s@h3 s@h2 s@a6 s@d6 s@a4 s@f3 s@b3 s@g5 s@f4 s@d7 s@f5 s@i1 s@g6 s@e1 s@g1 s@g7 s@i2 s@a3 s@b6 s@e4 s@b3 s@f9 s@a2 s@f1 s@e7 s@h7 s@c1 s@f2 s@e6 s@f6 s@a5 s@i3 s@h3 s@a3 s@a8 s@c6 s@g2 s@e5 s@e6 s@h4 pass pass ss:
-P||-781389749|81|-1619164048|0|0|0|0|0|||
+P||-781389749|81|-1619164048|0|55|0|0|0|||
 P||499240067|80|-1741321492|810|55|0|0|0|||
 P||-7139728|79|826014086|10|65|0|0|0|||
 P||1454856094|78|-1627934503|20|65|0|0|0|||
@@ -1726,7 +1726,7 @@ P||1025726985|13|1021574260|120|615|10|49|0|||
 P||483116252|0|0|120|615|11|49|1|p2||
 G|walk-go9x9-02|go9x9||0|0
 A|s@h2 s@c2 s@c6 s@i7 s@g6 s@d1 s@e1 s@b8 s@a8 s@d6 s@i2 s@c9 s@c8 s@f2 s@h5 s@h1 s@h6 s@e9 s@f6 s@g7 s@i4 s@f1 s@d4 s@d7 s@g5 s@g1 s@h4 s@a9 s@a3 s@b7 s@i8 s@g9 s@f7 s@b9 s@d2 s@f9 s@a6 s@i9 s@i1 s@a7 s@g8 s@e3 s@a1 s@c3 s@d3 s@e8 s@h7 s@g2 s@e2 s@a8 s@b4 s@i3 s@b1 s@e4 s@c7 s@g4 s@b2 s@g3 s@c5 s@h3 s@f8 s@f4 s@b5 s@d5 s@b3 s@e6 s@d8 s@h8 s@c4 s@a4 s@c1 s@i8 s@a2 s@b6 s@d1 s@e7 s@h2 s@f5 s@i2 s@e5 s@i6 s@c2 s@i5 s@f3 s@d9 s@b9 s@b6 s@a9 s@a7 s@b7 s@a8 s@g7 s@h7 s@h9 s@b8 s@i6 s@h4 s@f6 s@f8 s@f7 s@g6 s@i1 s@h2 s@g8 s@a5 s@h6 s@c3 s@i4 s@a4 s@i5 s@c2 s@h7 s@b7 s@c9 s@d8 s@a3 s@a6 s@c5 s@c1 s@e1 pass pass ss:
-P||-781389749|81|-1619164048|0|0|0|0|0|||
+P||-781389749|81|-1619164048|0|55|0|0|0|||
 P||-820851901|80|1170001730|810|55|0|0|0|||
 P||-1265954704|79|-1211124955|10|65|0|0|0|||
 P||164548958|78|1126609250|20|65|0|0|0|||
@@ -1852,7 +1852,7 @@ P||-1355979016|28|-2132983504|60|515|15|54|0|||
 P||1660958977|0|0|60|515|16|54|1|p2||
 G|walk-go9x9-03|go9x9||0|0
 A|s@d8 s@d1 s@a1 s@a9 s@f8 s@d3 s@d7 s@g2 s@f3 s@f1 s@e7 s@h7 s@b6 s@g1 s@e6 s@c1 s@c9 s@i1 s@d5 s@h8 s@a5 s@g8 s@e5 s@f4 s@b4 s@i7 s@e3 s@b9 s@d6 s@c8 s@f5 s@b8 s@d2 s@a2 s@b7 s@e9 s@c3 s@i6 s@g3 s@d4 s@c5 s@e1 s@a8 s@i8 s@a4 s@h1 s@e8 s@f6 s@i3 s@a6 s@h9 s@c4 s@b1 s@h2 s@h3 s@h6 s@h5 s@h4 s@a3 s@b2 s@i5 s@b1 s@c2 s@f2 s@a7 s@b3 s@g7 s@e4 s@b5 s@f7 s@g9 s@e2 s@f9 s@c6 s@g4 s@g6 s@i4 s@g7 s@h4 s@g5 s@a6 s@i2 s@c2 s@a1 s@d9 s@h3 s@i4 s@h4 s@e9 s@c3 s@i3 s@e3 s@f3 s@g3 s@h5 s@d2 s@c7 s@c2 s@b9 s@b8 s@a9 s@i9 s@c6 s@g4 s@c8 s@i5 s@i3 s@i4 pass pass ss:
-P||-781389749|81|-1619164048|0|0|0|0|0|||
+P||-781389749|81|-1619164048|0|55|0|0|0|||
 P||-1872228029|80|500003938|810|55|0|0|0|||
 P||744448560|79|2097558447|10|65|0|0|0|||
 P||1640204646|78|-1031056789|20|65|0|0|0|||
@@ -1966,7 +1966,7 @@ P||-2061597241|0|0|330|535|9|22|0|||
 P||-1882347885|0|0|330|535|10|22|1|p2||
 G|walk-go9x9-04|go9x9||0|0
 A|s@a5 s@a9 s@d4 s@c4 s@f7 s@a7 s@i5 s@g9 s@e1 s@g3 s@h7 s@d8 s@i4 s@i9 s@h4 s@c7 s@d1 s@g8 s@b8 s@f3 s@d9 s@h9 s@b7 s@a4 s@b6 s@f9 s@d6 s@h6 s@e4 s@b4 s@g4 s@a8 s@g5 s@i7 s@h5 s@g2 s@a6 s@a3 s@a1 s@d5 s@i3 s@e9 s@b5 s@i2 s@h3 s@g1 s@i6 s@c2 s@d3 s@e7 s@i1 s@b2 s@b3 s@h1 s@c8 s@c3 s@d7 s@i1 s@h8 s@f5 s@d2 s@f4 s@b1 s@g6 s@a2 s@c6 s@c5 s@c7 s@f8 s@i8 s@f1 s@b9 s@e5 s@f2 s@e8 s@e6 s@d5 s@f6 s@e3 s@g7 s@h8 s@e2 s@c1 s@d8 s@f7 s@h7 s@c6 s@f8 s@e8 s@f7 s@b3 s@h8 s@c7 s@a3 s@b4 s@c2 s@h2 s@i2 s@f9 s@h6 s@f7 s@f8 s@g2 s@g3 s@f4 s@h7 s@e7 s@c4 s@e6 s@i1 s@h9 s@b2 s@g9 s@i9 s@c9 s@g1 s@b9 s@g6 s@a9 s@f2 pass pass ss:
-P||-781389749|81|-1619164048|0|0|0|0|0|||
+P||-781389749|81|-1619164048|0|55|0|0|0|||
 P||-866543869|80|989521260|810|55|0|0|0|||
 P||-1133136840|79|-581065424|10|65|0|0|0|||
 P||438142566|78|1011956834|20|65|0|0|0|||
@@ -2092,7 +2092,7 @@ P||-651083446|16|1775380260|550|195|46|9|0|||
 P||439820469|0|0|550|195|47|9|1|p1||
 G|walk-go9x9-05|go9x9||0|0
 A|s@h5 s@e4 s@e5 s@b3 s@i2 s@h6 s@g5 s@c7 s@i9 s@h1 s@c1 s@a2 s@i8 s@d8 s@g9 s@d6 s@b4 s@h9 s@d4 s@i5 s@g7 s@d5 s@f8 s@d2 s@b8 s@f9 s@e8 s@h7 s@g6 s@f4 s@g3 s@b2 s@d3 s@f6 s@c9 s@b7 s@i7 s@c2 s@f2 s@c6 s@b6 s@f7 s@b9 s@g1 s@a6 s@e1 s@a7 s@a8 s@i4 s@b1 s@b5 s@d1 s@i3 s@e9 s@g8 s@h4 s@a9 s@d7 s@c5 s@c1 s@a4 s@i6 s@a5 s@a3 s@f1 s@e3 s@a8 s@c3 s@g2 s@i1 s@c4 s@e2 s@e7 s@h3 s@e6 s@c8 s@h8 s@i6 s@i5 s@h2 s@d9 s@f9 s@d6 s@h6 s@f5 s@f6 s@c8 s@f3 s@c6 s@g4 s@e9 s@d8 s@c7 s@f1 s@f9 s@f2 s@h7 s@i6 s@b7 s@a1 s@h6 s@g3 s@i6 pass pass ss:
-P||-781389749|81|-1619164048|0|0|0|0|0|||
+P||-781389749|81|-1619164048|0|55|0|0|0|||
 P||1222116803|80|1340465667|810|55|0|0|0|||
 P||656535408|79|655490150|10|65|0|0|0|||
 P||1977019486|78|-1257460156|20|65|0|0|0|||
@@ -2201,7 +2201,7 @@ P||-1885391004|0|0|490|355|22|5|0|||
 P||-2136412937|0|0|490|355|22|6|1|p1||
 G|walk-go9x9-06|go9x9||0|0
 A|s@d4 s@e3 s@d1 s@g3 s@b2 s@f7 s@c6 s@a6 s@e5 s@a8 s@c1 s@b6 s@b1 s@e8 s@d7 s@i8 s@d5 s@b4 s@b5 s@a5 s@i4 s@a3 s@c2 s@f5 s@h3 s@f6 s@e7 s@g7 s@b8 s@c8 s@g4 s@h1 s@e1 s@h8 s@h2 s@g6 s@c7 s@f4 s@c9 s@c4 s@b9 s@h9 s@f2 s@e6 s@f8 s@h6 s@c5 s@i2 s@h4 s@h7 s@a2 s@b7 s@d6 s@a9 s@d2 s@h5 s@e2 s@g8 s@f3 s@b3 s@g2 s@i7 s@a7 s@c3 s@e4 s@d9 s@g5 s@f9 s@a8 s@i5 s@d3 s@f1 s@e3 s@g9 s@i3 s@f8 s@g1 s@d8 s@i1 s@i6 s@i2 s@a9 s@f1 s@b9 s@a4 s@c4 s@g3 s@a3 s@h1 s@b4 s@a7 s@b8 s@a1 s@c9 s@c3 s@a4 pass pass ss:
-P||-781389749|81|-1619164048|0|0|0|0|0|||
+P||-781389749|81|-1619164048|0|55|0|0|0|||
 P||1851884355|80|-1995463390|810|55|0|0|0|||
 P||1722219888|79|-549426406|10|65|0|0|0|||
 P||-1318597602|78|-1038108947|20|65|0|0|0|||
@@ -2303,7 +2303,7 @@ P||-1158619496|0|0|410|435|12|7|0|||
 P||-67715581|0|0|410|435|13|7|1|p2||
 G|walk-go9x9-07|go9x9||0|0
 A|s@d8 s@a7 s@e6 s@b9 s@a4 s@h9 s@f7 s@a1 s@d1 s@i1 s@d6 s@g5 s@e9 s@a2 s@i8 s@b7 s@a9 s@c8 s@g4 s@h2 s@g6 s@i6 s@c6 s@b6 s@a5 s@b2 s@g3 s@f8 s@f4 s@c3 s@c9 s@g8 s@e5 s@h7 s@c4 s@d9 s@b3 s@g9 s@d4 s@e3 s@d7 s@d3 s@d2 s@d5 s@c9 s@g1 s@f1 s@i4 s@e4 s@b1 s@g7 s@e2 s@f3 s@i7 s@i9 s@i5 s@c2 s@c1 s@a3 s@a8 s@c5 s@h3 s@h4 s@f6 s@g2 s@b2 s@h6 s@h8 s@i9 s@i3 s@b4 s@a1 s@h5 s@e7 s@d5 s@i8 s@f2 s@b1 s@a2 s@b8 s@b5 s@a9 s@a6 s@f9 s@h1 s@d9 s@c1 s@i2 s@b1 s@i9 s@c9 s@g1 s@f5 s@d9 s@b2 s@h1 s@g5 s@c9 s@e8 s@g1 s@i2 s@h1 s@i5 s@i1 s@e7 s@f9 s@i9 s@i3 s@f6 s@f8 s@i6 s@i4 s@i8 s@g9 s@h3 s@g8 s@i7 s@h8 s@i3 s@h7 pass pass ss:
-P||-781389749|81|-1619164048|0|0|0|0|0|||
+P||-781389749|81|-1619164048|0|55|0|0|0|||
 P||-1872228029|80|500003938|810|55|0|0|0|||
 P||-804521408|79|641025350|10|65|0|0|0|||
 P||1118263214|78|-1364491657|20|65|0|0|0|||
@@ -2429,7 +2429,7 @@ P||2015475462|6|-304474808|540|285|37|8|0|||
 P||-1188587919|0|0|540|285|38|8|1|p1||
 G|walk-go9x9-08|go9x9||0|0
 A|s@b1 s@e4 s@e8 s@i8 s@f1 s@h7 s@a9 s@f2 s@e3 s@g8 s@f7 s@a8 s@c9 s@h5 s@e2 s@a3 s@f9 s@b5 s@c1 s@a7 s@g7 s@g2 s@g4 s@e1 s@d2 s@d5 s@b8 s@a4 s@c3 s@b6 s@e9 s@a2 s@d6 s@h1 s@f8 s@d4 s@c6 s@i1 s@c4 s@i4 s@e5 s@h8 s@a5 s@b7 s@b2 s@f3 s@a1 s@g1 s@c8 s@h9 s@g3 s@h4 s@i2 s@i6 s@d7 s@i3 s@d3 s@g9 s@e7 s@f4 s@h6 s@c7 s@d8 s@g5 s@g6 s@c5 s@b9 s@h3 s@c2 s@h2 s@d9 s@e6 s@g4 s@i2 s@b4 s@f5 s@b3 s@i7 s@a6 s@f6 s@b8 s@f8 s@c9 s@d9 s@d1 s@a9 s@f9 s@e5 s@b9 s@d6 s@e7 s@i5 s@f1 s@a4 s@d8 s@e1 s@a3 s@a2 s@d7 s@g6 s@e2 s@c2 s@d1 s@a1 s@a5 s@c4 s@c3 s@c8 s@d2 s@e8 s@e3 s@a6 s@g7 s@f7 s@c1 s@e7 s@d8 s@e9 s@f1 s@a3 pass pass ss:
-P||-781389749|81|-1619164048|0|0|0|0|0|||
+P||-781389749|81|-1619164048|0|55|0|0|0|||
 P||-1925865149|80|1257478243|810|55|0|0|0|||
 P||1610525680|79|1973736474|10|65|0|0|0|||
 P||262458974|78|-543832957|20|65|0|0|0|||
@@ -2555,7 +2555,7 @@ P||1955316664|9|-700861232|100|695|5|51|0|||
 P||677287361|0|0|100|695|6|51|1|p2||
 G|walk-go9x9-09|go9x9||0|0
 A|s@a6 s@c5 s@a7 s@h6 s@c1 s@b3 s@e3 s@f1 s@b8 s@i1 s@e4 s@f3 s@f2 s@i7 s@a9 s@g2 s@g8 s@b6 s@f8 s@d2 s@f9 s@c9 s@b7 s@a3 s@b1 s@e6 s@c8 s@f7 s@a5 s@d4 s@a4 s@g7 s@h2 s@d1 s@g9 s@d7 s@e1 s@f5 s@d9 s@i5 s@e8 s@g1 s@i8 s@g3 s@h3 s@b5 s@h1 s@h4 s@a2 s@g4 s@i3 s@g6 s@a1 s@e5 s@e9 s@d5 s@c2 s@f4 s@c3 s@c7 s@h9 s@f6 s@g5 s@d3 s@h8 s@h7 s@i9 s@e2 s@i4 s@h5 s@b9 s@e3 s@d6 s@e4 s@c9 s@c4 s@e7 s@e1 s@d8 s@f2 s@b4 s@i6 s@b2 s@a3 s@b3 s@i2 s@h3 s@i3 s@a8 s@g5 s@c6 s@h1 s@d7 s@h2 s@c7 s@a3 s@e9 s@c1 s@c7 s@f8 s@c9 s@a4 s@e8 s@d7 s@a8 s@h9 s@a9 s@d9 s@d8 s@c8 s@d6 s@b8 s@b3 s@g9 s@b7 s@a1 s@i9 s@g8 s@c2 s@c3 pass pass ss:
-P||-781389749|81|-1619164048|0|0|0|0|0|||
+P||-781389749|81|-1619164048|0|55|0|0|0|||
 P||1093788695|80|543983949|810|55|0|0|0|||
 P||703076252|79|-589499377|10|65|0|0|0|||
 P||-177594070|78|539132749|20|65|0|0|0|||
@@ -2681,7 +2681,7 @@ P||-1090243256|14|1233048024|130|605|7|48|0|||
 P||1926694737|0|0|130|605|8|48|1|p2||
 G|walk-go9x9-10|go9x9||0|0
 A|s@a9 s@f2 s@f5 s@g5 s@i4 s@b2 s@d1 s@f6 s@b7 s@h9 s@i6 s@i5 s@h5 s@h3 s@a4 s@f1 s@d3 s@h7 s@b3 s@d4 s@f7 s@d6 s@b5 s@d5 s@h8 s@a3 s@i9 s@g1 s@i3 s@g2 s@e1 s@f4 s@d2 s@d7 s@g9 s@i1 s@g4 s@c4 s@c7 s@g3 s@e3 s@e2 s@b8 s@h2 s@d8 s@i8 s@a2 s@g8 s@c5 s@h9 s@e4 s@e7 s@a1 s@e5 s@f9 s@e8 s@g7 s@i7 s@h6 s@f3 s@e9 s@a6 s@c6 s@g6 s@b9 s@c8 s@d9 s@c1 s@a5 s@c2 s@c3 s@h1 s@i5 s@i9 s@h8 s@b6 s@c9 s@h9 s@f8 s@i9 s@a7 s@i2 s@i7 s@b6 s@a3 s@f5 s@b1 s@h4 s@h7 s@c2 s@i8 s@c1 s@g8 s@b4 s@i9 s@g4 s@h9 pass pass ss:
-P||-781389749|81|-1619164048|0|0|0|0|0|||
+P||-781389749|81|-1619164048|0|55|0|0|0|||
 P||1020661075|80|-1306327892|810|55|0|0|0|||
 P||1408664864|79|-1236925018|10|65|0|0|0|||
 P||-1836496306|78|832900845|20|65|0|0|0|||
@@ -2784,7 +2784,7 @@ P||-219911854|0|0|470|375|17|4|0|||
 P||-2046166839|0|0|470|375|17|5|1|p1||
 G|walk-go9x9-11|go9x9||0|0
 A|s@e5 s@i9 s@d4 s@d9 s@e9 s@b9 s@e3 s@a7 s@i3 s@f8 s@f4 s@b7 s@g8 s@f2 s@a9 s@h7 s@f7 s@e2 s@e8 s@i2 s@g4 s@d1 s@a4 s@i5 s@f1 s@d3 s@i8 s@h4 s@d6 s@f6 s@h2 s@h5 s@e1 s@c2 s@c4 s@g5 s@i7 s@b2 s@g7 s@a6 s@b4 s@g9 s@i6 s@b6 s@f9 s@b1 s@f5 s@e6 s@a5 s@g2 s@f8 s@c3 s@c7 s@d5 s@c6 s@a2 s@a8 s@h6 s@a3 s@c8 s@e7 s@b5 s@e4 s@d7 s@h8 s@c9 s@c5 s@f3 s@d8 s@h1 s@g6 s@e6 s@b8 s@c1 s@g3 s@b9 s@h3 s@b5 s@c8 s@b7 s@f6 s@d9 s@d7 s@a6 s@b6 s@b3 s@i1 s@a1 s@e6 s@g1 s@c9 s@f1 s@b5 s@i2 s@a7 s@d2 s@d9 s@i1 s@i4 s@h7 s@b7 s@g5 s@a6 s@h5 s@h4 s@h6 s@h9 pass pass ss:
-P||-781389749|81|-1619164048|0|0|0|0|0|||
+P||-781389749|81|-1619164048|0|55|0|0|0|||
 P||1955273347|80|-431707604|810|55|0|0|0|||
 P||1312388362|79|1504543216|10|65|0|0|0|||
 P||1240750776|78|-523595742|20|65|0|0|0|||
@@ -2897,7 +2897,7 @@ P||-1933574197|0|0|550|305|29|3|0|||
 P||664875376|0|0|550|305|29|4|1|p1||
 G|walk-go9x9-12|go9x9||0|0
 A|s@b7 s@c1 s@a6 s@i8 s@d3 s@g3 s@f5 s@h1 s@e7 s@d6 s@f9 s@f3 s@g5 s@c3 s@d5 s@c8 s@c7 s@e3 s@f4 s@i1 s@b1 s@h5 s@d9 s@f8 s@g1 s@g6 s@c6 s@e1 s@g4 s@h3 s@e6 s@d7 s@i3 s@i7 s@b3 s@e9 s@e8 s@f7 s@a2 s@a9 s@b2 s@h9 s@b4 s@c5 s@i6 s@a7 s@a4 s@h6 s@b8 s@g7 s@f1 s@i4 s@a3 s@c2 s@h8 s@h4 s@g2 s@b9 s@e2 s@f2 s@b5 s@e5 s@h2 s@d8 s@c9 s@i2 s@b6 s@f6 s@e4 s@h7 s@g8 s@c8 s@f1 s@d7 s@e9 s@i3 s@e5 s@d4 s@d2 s@d1 s@a5 s@c4 s@a8 s@h2 s@a9 s@d6 s@e2 s@g9 s@g8 s@h8 s@g2 s@g1 s@b9 s@i9 s@a7 s@i5 s@d2 s@d3 s@d8 s@f1 s@d6 s@i6 s@d2 s@g2 s@d7 s@e2 s@c8 s@a1 s@e4 s@c9 s@d5 s@d8 s@g4 s@f4 s@f9 s@b1 s@b6 s@a6 s@e5 s@b5 pass pass ss:
-P||-781389749|81|-1619164048|0|0|0|0|0|||
+P||-781389749|81|-1619164048|0|55|0|0|0|||
 P||1509504579|80|1341731203|810|55|0|0|0|||
 P||-1637369616|79|2028402777|10|65|0|0|0|||
 P||-419519678|78|-2025969930|20|65|0|0|0|||
@@ -3023,7 +3023,7 @@ P||2134113257|25|-1643327333|60|625|12|54|0|||
 P||856083954|0|0|60|625|13|54|1|p2||
 G|walk-go9x9-13|go9x9||0|0
 A|s@g9 s@i3 s@c8 s@c3 s@i1 s@e6 s@f8 s@b5 s@i2 s@c1 s@a4 s@f6 s@b9 s@h1 s@a9 s@c7 s@b7 s@c9 s@c5 s@g2 s@d5 s@g6 s@a8 s@b6 s@h3 s@g7 s@e9 s@g4 s@a3 s@e5 s@d1 s@b3 s@e2 s@b2 s@i9 s@a1 s@g5 s@h5 s@c6 s@a2 s@d4 s@c2 s@c4 s@d7 s@f1 s@h6 s@f2 s@e8 s@e3 s@f5 s@i5 s@i6 s@f4 s@e7 s@h2 s@h8 s@a7 s@d2 s@f3 s@h7 s@a6 s@g5 s@d9 s@i4 s@a5 s@f7 s@g8 s@b1 s@b8 s@h4 s@g1 s@e1 s@c9 s@d1 s@i7 s@g3 s@d3 s@d6 s@h9 s@i8 s@h1 s@d8 s@b4 s@a1 s@f9 s@i5 s@b5 s@b1 s@d1 s@c2 s@e4 s@b3 s@e1 s@c1 s@b2 s@a2 s@c3 s@b2 s@b6 s@d2 s@f2 s@d3 s@b9 s@f3 s@a4 s@g1 s@f4 s@f9 s@b6 s@b7 s@e1 s@f8 s@a6 s@a8 s@a3 s@a9 s@h2 s@i1 s@c4 s@c6 pass pass ss:
-P||-781389749|81|-1619164048|0|0|0|0|0|||
+P||-781389749|81|-1619164048|0|55|0|0|0|||
 P||1046097923|80|1673283532|810|55|0|0|0|||
 P||-2010762886|79|2008599920|10|65|0|0|0|||
 P||-919099808|78|-1042295411|20|65|0|0|0|||
@@ -3149,7 +3149,7 @@ P||375560703|25|1470497229|100|555|15|50|0|||
 P||-167050030|0|0|100|555|16|50|1|p2||
 G|walk-go9x9-14|go9x9||0|0
 A|s@e4 s@c1 s@b9 s@d1 s@i3 s@b6 s@g2 s@d9 s@f4 s@c8 s@f8 s@d8 s@h1 s@a7 s@i9 s@i4 s@b4 s@h5 s@h4 s@d6 s@g4 s@b5 s@c2 s@d2 s@f1 s@i1 s@d5 s@f7 s@c9 s@b3 s@c4 s@a9 s@b1 s@a6 s@f9 s@e2 s@i7 s@c5 s@c3 s@a5 s@h8 s@c7 s@h6 s@f2 s@g6 s@h2 s@a2 s@a3 s@f5 s@f6 s@e7 s@h7 s@b8 s@c6 s@g8 s@d3 s@g5 s@e5 s@b7 s@e8 s@e3 s@d7 s@g3 s@f3 s@i5 s@g7 s@g9 s@d4 s@e6 s@f7 s@b2 s@a4 s@i8 s@g1 s@h9 s@a1 s@f6 s@i2 s@a8 s@c3 s@h5 s@b1 s@e9 s@e1 s@c2 s@h1 s@h7 s@b4 s@i4 s@d5 s@b2 s@c4 s@g7 s@h3 s@i6 s@f1 s@a2 s@c1 s@d5 s@a7 s@i2 s@c4 s@a9 s@a1 s@a5 s@h2 s@f3 s@c3 s@a3 s@c7 s@c6 s@g1 s@b5 s@e1 s@f2 s@i1 s@h1 s@e2 s@b4 s@b3 pass pass ss:
-P||-781389749|81|-1619164048|0|0|0|0|0|||
+P||-781389749|81|-1619164048|0|55|0|0|0|||
 P||-1206839549|80|1959799597|810|55|0|0|0|||
 P||55308336|79|-1689997167|10|65|0|0|0|||
 P||1888440926|78|1085163588|20|65|0|0|0|||
@@ -3275,7 +3275,7 @@ P||1033910305|20|-1362294368|540|165|49|10|0|||
 P||-1092930625|0|0|540|165|50|10|1|p1||
 G|walk-go9x9-15|go9x9||0|0
 A|s@i1 s@h5 s@b7 s@e1 s@e7 s@a5 s@h3 s@e3 s@g2 s@c1 s@d7 s@f4 s@c5 s@d5 s@i9 s@g5 s@f3 s@e2 s@a7 s@h8 s@g8 s@b8 s@c4 s@g9 s@b1 s@h2 s@h7 s@d3 s@i7 s@i4 s@b9 s@e6 s@c9 s@a6 s@c8 s@b5 s@b2 s@e4 s@h9 s@f2 s@g6 s@h6 s@c6 s@b4 s@a4 s@g1 s@f9 s@i3 s@b3 s@e9 s@f8 s@f6 s@c2 s@e5 s@i2 s@a8 s@d6 s@i6 s@g7 s@a1 s@h1 s@h4 s@a3 s@c3 s@d9 s@g4 s@c7 s@d1 s@e8 s@i5 s@i8 s@h2 s@d4 s@i1 s@b6 s@i2 s@d2 s@f1 s@e9 s@b5 s@a6 s@h1 s@f7 s@g3 s@a5 s@h3 s@h8 s@f3 s@b4 s@g2 s@b5 pass pass ss:
-P||-781389749|81|-1619164048|0|0|0|0|0|||
+P||-781389749|81|-1619164048|0|55|0|0|0|||
 P||-1351457655|80|420319148|810|55|0|0|0|||
 P||260961890|79|-854764807|10|65|0|0|0|||
 P||1481102344|78|986253900|20|65|0|0|0|||
@@ -3372,7 +3372,7 @@ P||1883480256|0|0|420|425|9|6|0|||
 P||-530102299|0|0|420|425|9|7|1|p2||
 G|walk-go9x9-16|go9x9||0|0
 A|s@g5 s@f5 s@e7 s@g7 s@a5 s@b1 s@i1 s@f3 s@i4 s@c7 s@e2 s@h2 s@e9 s@i2 s@b4 s@c2 s@d9 s@g4 s@a2 s@h3 s@d8 s@a8 s@b2 s@e1 s@e6 s@i7 s@b3 s@g3 s@h5 s@a9 s@i3 s@f7 s@i8 s@b6 s@g2 s@c1 s@c6 s@i5 s@h6 s@d2 s@c5 s@b7 s@f2 s@i9 s@a4 s@e5 s@h8 s@d6 s@a1 s@f8 s@f1 s@g8 s@a6 s@i6 s@g9 s@c3 s@b9 s@b8 s@h7 s@h4 s@d3 s@g1 s@f9 s@a7 s@c8 s@f6 s@e4 s@d7 s@i7 s@i5 s@d5 s@c9 s@a3 s@g6 s@i4 s@h1 s@f4 s@i1 s@d1 s@b5 s@e1 s@d4 s@e8 s@f6 s@f8 s@g8 s@e5 s@e3 s@c4 s@g2 s@h9 s@d1 s@d3 s@f7 s@g7 s@f2 s@e1 s@d4 s@b9 s@a9 s@i6 s@b7 s@d3 s@c7 s@d7 s@b5 s@f1 s@a8 s@i9 s@g6 s@b6 s@i3 s@b5 s@a7 s@g8 s@e2 s@i5 s@d4 s@f5 s@f7 pass pass ss:
-P||-781389749|81|-1619164048|0|0|0|0|0|||
+P||-781389749|81|-1619164048|0|55|0|0|0|||
 P||-1396809213|80|1389648012|810|55|0|0|0|||
 P||-2009935884|79|1048905081|10|65|0|0|0|||
 P||-835966758|78|1828832213|20|65|0|0|0|||
@@ -3498,7 +3498,7 @@ P||-1702885940|8|-1213184851|470|365|32|15|0|||
 P||2049470623|0|0|470|365|33|15|1|p1||
 G|walk-go9x9-17|go9x9||0|0
 A|s@c6 s@i2 s@a9 s@c3 s@h3 s@i5 s@d6 s@i6 s@d7 s@a3 s@i3 s@e8 s@h7 s@g3 s@e5 s@g6 s@a6 s@d5 s@c7 s@h5 s@a5 s@c9 s@h6 s@e7 s@e1 s@b6 s@i1 s@f6 s@i7 s@a8 s@f2 s@f4 s@e6 s@f3 s@f9 s@f5 s@h2 s@b1 s@h4 s@g2 s@e2 s@c1 s@b4 s@g9 s@b3 s@e9 s@h9 s@g5 s@f7 s@d1 s@c2 s@d4 s@d3 s@b9 s@g1 s@b8 s@h1 s@i4 s@e3 s@c8 s@a1 s@a9 s@g7 s@i9 s@a7 s@b2 s@g4 s@c4 s@g8 s@c5 s@f8 s@h8 s@d8 s@d2 s@d9 s@e8 s@f1 s@e4 s@b5 s@e7 s@b7 s@a8 s@b6 s@b9 s@i8 s@c8 s@b8 s@c9 s@h8 s@c2 s@a9 s@c8 s@c9 s@i2 s@i3 s@g1 s@f1 s@e2 s@c8 s@e3 s@h4 s@h2 s@i1 s@f2 s@h3 s@g4 s@a4 s@i3 s@b9 s@h4 s@i9 s@e1 s@a2 s@d3 s@e9 s@e8 s@a3 s@h1 s@a8 s@i1 pass pass ss:
-P||-781389749|81|-1619164048|0|0|0|0|0|||
+P||-781389749|81|-1619164048|0|55|0|0|0|||
 P||34788995|80|841747053|810|55|0|0|0|||
 P||402055438|79|-457811920|10|65|0|0|0|||
 P||-4976188|78|1084208492|20|65|0|0|0|||
@@ -3624,7 +3624,7 @@ P||-1552539659|2|94959660|400|455|22|21|0|||
 P||-2095150392|0|0|400|455|23|21|1|p2||
 G|walk-go9x9-18|go9x9||0|0
 A|s@g6 s@f5 s@a8 s@d7 s@g2 s@e3 s@d3 s@e5 s@i7 s@b1 s@c5 s@h8 s@f7 s@g1 s@a5 s@f6 s@b5 s@i6 s@g9 s@h4 s@c2 s@h1 s@c7 s@i9 s@a9 s@g7 s@b3 s@h5 s@a4 s@i4 s@a2 s@i8 s@a1 s@e7 s@d9 s@d4 s@e8 s@c8 s@e6 s@d2 s@b4 s@h9 s@e2 s@e1 s@h6 s@d8 s@g5 s@c3 s@i5 s@f3 s@f4 s@b9 s@g8 s@a7 s@h2 s@f2 s@e9 s@d1 s@f9 s@e2 s@g4 s@c1 s@i2 s@c4 s@h7 s@h8 s@i8 s@c6 s@g7 s@a6 s@i6 s@b7 s@f8 s@i1 s@h9 s@d5 s@f1 s@b6 s@h3 s@d6 s@g1 s@c7 s@g3 s@c9 s@i3 s@i1 s@b2 s@h4 s@i4 s@d3 s@i9 s@b8 s@h8 s@a9 s@h1 s@a8 s@i1 s@e6 s@e4 s@a9 s@a8 s@f6 s@b8 s@c7 s@b6 s@d8 s@d4 s@c8 s@d7 s@e2 s@a6 s@e7 s@e5 s@f2 s@e6 s@a7 s@f5 s@c3 s@e1 s@b7 pass pass ss:
-P||-781389749|81|-1619164048|0|0|0|0|0|||
+P||-781389749|81|-1619164048|0|55|0|0|0|||
 P||-216947325|80|-730639187|810|55|0|0|0|||
 P||2026451056|79|-1071382118|10|65|0|0|0|||
 P||1718181666|78|-1611913065|20|65|0|0|0|||
@@ -3750,7 +3750,7 @@ P||1471713288|17|-2122186761|570|155|50|6|0|||
 P||-1732350093|0|0|570|155|51|6|1|p1||
 G|walk-go9x9-19|go9x9||0|0
 A|s@g6 s@d8 s@h1 s@a5 s@c9 s@c6 s@h5 s@c7 s@h4 s@a6 s@i2 s@e6 s@h6 s@f2 s@b8 s@c4 s@b5 s@i5 s@f1 s@i4 s@a7 s@g1 s@a1 s@h9 s@c3 s@i9 s@d2 s@d3 s@g4 s@i7 s@d1 s@c1 s@i3 s@f8 s@b3 s@f3 s@g3 s@a3 s@h3 s@g7 s@e9 s@h7 s@e4 s@i8 s@h2 s@e2 s@e7 s@d4 s@d9 s@a9 s@d7 s@b4 s@h8 s@e3 s@g5 s@f9 s@b7 s@d6 s@b2 s@f4 s@i6 s@f5 s@a8 s@e5 s@c2 s@a2 s@c8 s@g9 s@c5 s@g2 s@e8 s@b6 s@b1 s@f6 s@b9 s@g8 s@a4 s@e4 s@c1 s@i4 s@e1 s@a2 s@i1 s@a3 s@b1 s@c2 s@d1 s@a1 s@d8 s@b3 s@f7 s@b2 s@f1 s@d5 s@i5 s@d2 s@b5 s@a9 s@f7 s@b8 s@c1 s@c3 s@d9 s@c5 s@b7 s@e7 s@e9 s@c9 s@d8 s@e8 s@a8 s@d7 s@b9 s@a4 s@a7 s@i4 s@g3 s@c8 s@g5 s@e1 pass pass ss:
-P||-781389749|81|-1619164048|0|0|0|0|0|||
+P||-781389749|81|-1619164048|0|55|0|0|0|||
 P||-216947325|80|-730639187|810|55|0|0|0|||
 P||-497595024|79|588298747|10|65|0|0|0|||
 P||-596595426|78|-1854728296|20|65|0|0|0|||
@@ -3876,7 +3876,7 @@ P||271680616|19|-834383648|70|665|9|54|0|||
 P||-1721166084|0|0|70|665|10|54|1|p2||
 G|walk-go13x13-00|go13x13||0|0
 A|s@d7 s@f1 s@a6 s@d8 s@b10 s@g1 s@j4 s@e4 s@e7 s@j10 s@d2 s@a2 s@g11 s@l1 s@i1 s@b2 s@h8 s@b7 s@d13 s@c2 s@l13 s@m2 s@e5 s@g3 s@k6 s@a13 s@e3 s@c12 s@k9 s@h1 s@i10 s@k12 s@j2 s@j5 s@l4 s@e9 s@d4 s@i8 s@c5 s@h2 s@b12 s@l6 s@i2 s@g10 s@g5 s@m12 s@c3 s@j9 s@i5 s@c13 s@j3 s@a5 s@i12 s@m4 s@j8 s@j7 s@j6 s@i7 s@e13 s@b11 s@e8 s@d9 s@h11 s@c9 s@i13 s@h10 s@e10 s@b1 s@m3 s@f13 s@h9 s@l3 s@a10 s@c8 s@c4 s@b8 s@g8 s@h5 s@j1 s@b4 s@j12 s@f11 s@l8 s@j13 s@b6 s@m8 s@b9 s@b13 s@g9 s@m1 s@c6 s@k7 s@f5 s@j11 s@m10 s@g12 s@g13 s@k10 s@e11 s@a12 s@i4 s@i11 s@f3 s@l7 s@l9 s@a1 s@m6 s@f12 s@d10 s@b5 s@k4 s@h7 s@f2 s@f8 s@a7 s@m11 s@k5 s@f10 s@d5 s@g7 s@e2 s@i6 s@h3 s@h13 s@f9 s@m13 s@b3 s@a8 s@f6 s@g13 s@d12 s@k1 s@h6 s@l10 s@f4 s@d1 s@g4 s@c10 s@e4 s@m3 s@l11 s@l12 s@c11 s@e12 s@k8 s@d11 s@e13 s@a11 s@a3 s@k13 s@i3 s@c11 s@j5 s@e1 s@f7 s@b12 s@i9 s@m5 s@a4 s@d13 s@c1 s@k2 s@l5 s@b5 s@d10 s@d6 s@e11 s@l13 s@g6 s@b2 s@k11 s@m7 s@l10 s@c2 s@k10 s@k12 s@d3 s@m13 s@l13 s@l12 s@h4 s@k3 s@j9 s@a5 s@f8 s@e10 s@g2 s@c7 s@h12 s@b1 s@h5 s@k13 s@j11 s@e11 s@h2 s@l13 s@a1 s@m9 s@j10 s@m12 pass pass ss:
-P||-2039735516|169|1835615452|0|0|0|0|0|||
+P||-2039735516|169|1835615452|0|75|0|0|0|||
 P||1532244350|168|1908758303|1690|75|0|0|0|||
 P||1089821071|167|-96653520|10|85|0|0|0|||
 P||-129475437|166|-37882271|20|85|0|0|0|||
@@ -4082,7 +4082,7 @@ P||1994704487|13|1052347082|910|795|33|16|0|||
 P||-1941326348|0|0|910|795|34|16|1|p1||
 G|walk-go13x13-01|go13x13||0|0
 A|s@d6 s@e11 s@c9 s@i10 s@b4 s@b7 s@i13 s@m12 s@g12 s@h4 s@k12 s@h13 s@k8 s@h3 s@f3 s@j11 s@b3 s@k13 s@g3 s@l7 s@k2 s@i3 s@g6 s@f5 s@m4 s@a2 s@c13 s@f8 s@j1 s@d13 s@h11 s@k7 s@d5 s@l2 s@l12 s@i2 s@f4 s@a11 s@j5 s@e8 s@b5 s@l5 s@l4 s@d1 s@b11 s@l11 s@g5 s@h10 s@g9 s@j13 s@b6 s@f10 s@m2 s@c10 s@f12 s@a3 s@c3 s@i6 s@c8 s@k11 s@a8 s@d2 s@h5 s@g8 s@i4 s@e2 s@d10 s@h2 s@h9 s@m7 s@k10 s@e1 s@e5 s@g2 s@d3 s@c12 s@a5 s@l6 s@f13 s@e7 s@a13 s@j2 s@f6 s@k1 s@f11 s@e9 s@i7 s@i12 s@g11 s@m5 s@e10 s@i13 s@l13 s@j10 s@c2 s@d9 s@k6 s@j7 s@d7 s@b10 s@j9 s@g1 s@a12 s@j4 s@c6 s@h1 s@f1 s@a6 s@a10 s@i8 s@a11 s@i1 s@d11 s@a1 s@l9 s@i5 s@d4 s@i4 s@l1 s@m11 s@c7 s@m8 s@j1 s@m6 s@j6 s@g4 s@c1 s@a4 s@a9 s@h8 s@e12 s@a7 s@l3 s@c4 s@f7 s@b13 s@k5 s@m13 s@d12 s@i9 s@f2 s@m10 s@b1 s@c13 s@f9 s@e6 s@d8 s@k4 s@k1 s@c11 s@k3 s@j5 s@k6 s@b12 s@m3 s@g13 s@k5 s@e13 s@m9 s@j12 s@j3 s@b8 s@m1 s@h7 s@l13 s@e3 s@e11 s@l10 s@i11 s@k12 s@j8 s@g10 s@f9 s@l8 s@c5 s@h12 s@b9 s@g9 s@b8 s@l2 s@m4 s@f13 s@m2 s@m1 s@h11 s@e12 s@e4 s@i7 s@d1 s@e1 s@i11 s@a6 s@a7 s@e11 s@g11 s@f12 s@l1 s@m3 s@k2 s@m1 pass pass ss:
-P||-2039735516|169|1835615452|0|0|0|0|0|||
+P||-2039735516|169|1835615452|0|75|0|0|0|||
 P||-1132027502|168|1195112510|1690|75|0|0|0|||
 P||-1604612829|167|-1533907547|10|85|0|0|0|||
 P||1448870443|166|-356460547|20|85|0|0|0|||
@@ -4288,7 +4288,7 @@ P||-1240204737|22|276135160|630|975|17|42|0|||
 P||-881268276|0|0|630|975|18|42|1|p2||
 G|walk-go13x13-02|go13x13||0|0
 A|s@f8 s@k13 s@f2 s@i5 s@m8 s@g6 s@g2 s@i12 s@k9 s@d9 s@i7 s@k8 s@a3 s@j5 s@e1 s@j2 s@l2 s@m9 s@b9 s@g7 s@h3 s@c11 s@l1 s@e11 s@d8 s@f10 s@h4 s@j3 s@j10 s@k1 s@i3 s@k4 s@a6 s@l4 s@j11 s@d4 s@g13 s@m1 s@c7 s@i1 s@e4 s@d5 s@m5 s@m3 s@a5 s@e13 s@h8 s@d6 s@g5 s@g1 s@f7 s@k11 s@i2 s@j7 s@l12 s@f6 s@i13 s@d11 s@a1 s@g11 s@l3 s@a8 s@h2 s@m6 s@a12 s@b3 s@g3 s@k3 s@j12 s@j13 s@k2 s@c9 s@i8 s@k10 s@l5 s@f3 s@f4 s@b8 s@i10 s@i9 s@g4 s@l11 s@b4 s@f12 s@h10 s@d12 s@c2 s@b7 s@a13 s@c13 s@g8 s@c3 s@e3 s@d1 s@b12 s@l8 s@m7 s@h7 s@b10 s@d3 s@j1 s@h6 s@f13 s@a9 s@l6 s@h9 s@c6 s@f5 s@i11 s@k12 s@l9 s@i6 s@f1 s@k5 s@c4 s@l7 s@a7 s@a11 s@e2 s@m10 s@j6 s@d2 s@m12 s@g10 s@b13 s@c1 s@a2 s@e8 s@b5 s@f11 s@a10 s@g9 s@m2 s@j8 s@m6 s@h13 s@k7 s@m11 s@e9 s@f9 s@b11 s@h12 s@f3 s@j9 s@i4 s@c8 s@k6 s@e7 s@h8 s@k1 s@f8 s@i7 s@d7 s@e6 s@e10 s@j1 s@b1 s@b6 s@h1 s@h11 s@c5 s@i8 s@g8 s@j4 s@l13 s@i11 s@c12 s@j10 s@j12 s@b2 s@g1 s@m13 s@l12 s@m12 s@a11 s@c10 s@b13 s@g12 s@h5 s@j11 s@a11 s@d13 s@a13 s@b10 s@f13 s@l13 s@h10 s@b11 s@a10 s@l12 s@b12 s@d10 s@e10 s@j12 s@m4 s@e5 s@g2 s@e2 s@f1 s@h5 pass pass ss:
-P||-2039735516|169|1835615452|0|0|0|0|0|||
+P||-2039735516|169|1835615452|0|75|0|0|0|||
 P||-1712082542|168|-165404730|1690|75|0|0|0|||
 P||224137928|167|1011228773|10|85|0|0|0|||
 P||-38922947|166|2014353307|20|85|0|0|0|||
@@ -4494,7 +4494,7 @@ P||31474283|21|-556185575|490|1045|7|55|0|||
 P||390410744|0|0|490|1045|8|55|1|p2||
 G|walk-go13x13-03|go13x13||0|0
 A|s@m4 s@d3 s@c8 s@e9 s@f12 s@f8 s@j12 s@i13 s@k6 s@l5 s@e2 s@j9 s@k4 s@b7 s@l13 s@b6 s@d5 s@a4 s@h8 s@g13 s@h1 s@b8 s@h5 s@b5 s@m11 s@l10 s@m6 s@k10 s@e6 s@h12 s@e8 s@k1 s@k5 s@a10 s@k13 s@l6 s@i8 s@g9 s@g1 s@f10 s@d1 s@j3 s@h10 s@m13 s@d11 s@f3 s@j4 s@g12 s@e3 s@k11 s@l9 s@k9 s@g3 s@k12 s@l8 s@l4 s@k2 s@k7 s@j1 s@i11 s@b4 s@i7 s@a6 s@h11 s@i2 s@d12 s@g6 s@j7 s@a9 s@m10 s@l2 s@c6 s@h7 s@d13 s@b12 s@k3 s@d4 s@d7 s@j13 s@j10 s@h9 s@a8 s@m8 s@i12 s@j8 s@c3 s@g11 s@c1 s@h6 s@e1 s@f5 s@c5 s@i5 s@e4 s@l7 s@h13 s@c7 s@l12 s@m12 s@c11 s@f6 s@m3 s@l3 s@c2 s@m9 s@g8 s@i4 s@g5 s@j2 s@e5 s@g2 s@e10 s@i1 s@d10 s@m1 s@g7 s@l11 s@f4 s@i3 s@m13 s@e12 s@h3 s@m11 s@a12 s@k8 s@f11 s@f1 s@a2 s@k3 s@d2 s@j3 s@b3 s@a1 s@c12 s@h4 s@c9 s@c13 s@b1 s@e1 s@i10 s@l1 s@g4 s@m5 s@l11 s@l6 s@g10 s@d8 s@l5 s@e7 s@d6 s@m2 s@c10 s@b9 s@b10 s@h2 s@a11 s@a5 s@b2 s@j6 s@e11 s@k1 s@f7 s@i6 s@a1 s@a13 s@j7 s@h3 s@b13 s@m7 s@f13 s@i9 s@d9 s@k7 s@e13 s@b9 s@a9 s@i7 s@b9 s@f12 s@j11 s@f2 s@g11 s@g4 s@f3 s@e5 s@j13 s@j7 s@m12 s@c4 s@e12 s@e4 s@a13 s@g5 s@c13 s@j5 s@m11 s@k13 s@a7 s@f4 s@l13 pass pass ss:
-P||-2039735516|169|1835615452|0|0|0|0|0|||
+P||-2039735516|169|1835615452|0|75|0|0|0|||
 P||1974026475|168|-1303815299|1690|75|0|0|0|||
 P||-1079881854|167|225556698|10|85|0|0|0|||
 P||-1995610486|166|1591579779|20|85|0|0|0|||
@@ -4700,7 +4700,7 @@ P||-1578313960|6|-411921020|800|945|21|22|0|||
 P||-1219377499|0|0|800|945|22|22|1|p2||
 G|walk-go13x13-04|go13x13||0|0
 A|s@g12 s@d11 s@f3 s@i5 s@l9 s@a8 s@h12 s@c9 s@m9 s@i2 s@j13 s@i12 s@j5 s@e6 s@c6 s@i11 s@d3 s@j4 s@a4 s@k7 s@f10 s@b13 s@j12 s@f11 s@b8 s@k9 s@g9 s@j1 s@b10 s@d9 s@g10 s@l3 s@m2 s@i10 s@c13 s@e9 s@d12 s@f2 s@j3 s@b5 s@h11 s@l2 s@f1 s@l6 s@b11 s@d8 s@k12 s@i8 s@b4 s@c4 s@e7 s@c5 s@c2 s@g7 s@m10 s@a9 s@d13 s@l12 s@i7 s@k13 s@e1 s@j9 s@c10 s@e3 s@i6 s@a7 s@f4 s@m11 s@l7 s@j6 s@g5 s@m3 s@l10 s@h7 s@c7 s@m13 s@d10 s@h5 s@e4 s@a13 s@c8 s@f8 s@e12 s@k11 s@a11 s@b1 s@m7 s@m5 s@k4 s@h3 s@f6 s@h6 s@j8 s@e8 s@m1 s@d5 s@a10 s@e5 s@d6 s@k8 s@i4 s@m12 s@l4 s@c1 s@a2 s@g4 s@i1 s@d4 s@l1 s@b7 s@f12 s@j11 s@a3 s@h9 s@m8 s@c12 s@a12 s@f7 s@e13 s@b2 s@c3 s@k10 s@i3 s@b6 s@h8 s@j2 s@k5 s@l11 s@k1 s@h13 s@g1 s@l5 s@e2 s@e11 s@b12 s@b13 s@e10 s@g13 s@k3 s@i13 s@g6 s@j7 s@g2 s@f5 s@d1 s@l13 s@g8 s@b9 s@a6 s@g3 s@c11 s@i9 s@k12 s@j12 s@g6 s@a5 s@i7 s@h1 s@g11 s@k12 s@m6 s@m4 s@f2 s@h4 s@f6 s@h10 s@b3 s@l8 s@h2 s@j8 s@d2 s@k2 s@k6 s@j13 s@e3 s@e11 s@a1 s@d7 s@l9 s@l7 s@b1 s@m6 s@c12 s@j10 s@m2 s@i6 s@m1 s@k1 s@m7 s@f9 s@b8 s@i7 s@c8 s@d11 s@f13 s@l1 s@m2 s@m8 s@m10 s@l10 pass pass ss:
-P||-2039735516|169|1835615452|0|0|0|0|0|||
+P||-2039735516|169|1835615452|0|75|0|0|0|||
 P||2090178130|168|967872448|1690|75|0|0|0|||
 P||116109115|167|-542216424|10|85|0|0|0|||
 P||1813619990|166|-1994163949|20|85|0|0|0|||
@@ -4906,7 +4906,7 @@ P||192128785|8|-802476482|690|995|12|34|0|||
 P||551065246|0|0|690|995|13|34|1|p2||
 G|walk-go13x13-05|go13x13||0|0
 A|s@h11 s@k13 s@d3 s@i7 s@b7 s@i9 s@g6 s@a12 s@m8 s@g12 s@g5 s@b10 s@a7 s@i8 s@f3 s@j9 s@e13 s@b8 s@k12 s@e2 s@j10 s@k9 s@i5 s@h7 s@l8 s@j13 s@k1 s@g13 s@i3 s@b12 s@l10 s@d4 s@l12 s@m7 s@a5 s@f6 s@l4 s@b3 s@f4 s@c12 s@j1 s@c2 s@l13 s@j7 s@e7 s@i4 s@k2 s@l2 s@h8 s@f8 s@h2 s@g11 s@d11 s@d12 s@b6 s@e4 s@c13 s@b2 s@f9 s@d7 s@i10 s@k10 s@c1 s@d6 s@b11 s@f13 s@j6 s@m9 s@j8 s@e11 s@m3 s@e10 s@d13 s@e6 s@d10 s@a11 s@h3 s@f7 s@c5 s@i11 s@k8 s@c11 s@k6 s@c8 s@i6 s@j3 s@j11 s@j12 s@i13 s@k4 s@a8 s@m10 s@a10 s@l6 s@i1 s@g9 s@l1 s@g1 s@l9 s@h12 s@k7 s@b4 s@d1 s@m1 s@h4 s@c3 s@e3 s@k11 s@h9 s@h5 s@l11 s@f1 s@g8 s@b13 s@m2 s@a9 s@b5 s@a2 s@f5 s@m5 s@e5 s@l5 s@c10 s@g7 s@e8 s@a1 s@c6 s@f12 s@e1 s@d5 s@i12 s@f2 s@l3 s@j12 s@m1 s@d8 s@b1 s@c9 s@j4 s@k3 s@h6 s@d9 s@m4 s@b9 s@g4 s@a3 s@f10 s@j13 s@m13 s@j5 s@h13 s@e9 s@j2 s@a13 s@k5 s@g3 s@g10 s@e12 s@g9 s@d11 s@h1 s@k3 s@c7 s@a4 s@d2 s@l7 s@e13 s@m12 s@f11 s@a10 s@g2 s@f2 s@c10 s@k4 s@g3 s@c4 s@d13 s@i11 s@m11 s@i12 s@e7 s@h13 s@l2 s@e2 s@i4 s@d10 s@k13 s@f1 s@m12 s@b11 s@m9 s@e8 s@g1 s@h10 s@f2 s@j11 s@f10 s@f9 s@m6 s@h9 pass pass ss:
-P||-2039735516|169|1835615452|0|0|0|0|0|||
+P||-2039735516|169|1835615452|0|75|0|0|0|||
 P||-1856917122|168|-1464724808|1690|75|0|0|0|||
 P||1305550260|167|848780375|10|85|0|0|0|||
 P||-1987830467|166|-2087233318|20|85|0|0|0|||
@@ -5112,7 +5112,7 @@ P||1833465579|19|551393154|850|845|29|27|0|||
 P||325906189|0|0|850|845|30|27|1|p1||
 G|walk-go13x13-06|go13x13||0|0
 A|s@j5 s@g9 s@i2 s@d1 s@k2 s@i5 s@h5 s@m8 s@m4 s@f9 s@k9 s@l6 s@f13 s@k13 s@c13 s@h7 s@e3 s@l9 s@k5 s@g5 s@k12 s@f2 s@a4 s@f10 s@a1 s@j8 s@k6 s@e7 s@j11 s@a3 s@d6 s@a6 s@e8 s@h11 s@i11 s@a9 s@i9 s@m11 s@e11 s@g11 s@d12 s@h1 s@m6 s@m5 s@m12 s@l4 s@e10 s@a8 s@j1 s@i6 s@m2 s@l11 s@i3 s@i8 s@l2 s@g3 s@c8 s@b5 s@l8 s@g12 s@b10 s@b3 s@i10 s@c1 s@b1 s@f5 s@a10 s@j3 s@i13 s@i4 s@d9 s@d13 s@j12 s@h10 s@c10 s@a7 s@g6 s@h2 s@c11 s@d3 s@g7 s@d10 s@k8 s@e6 s@h8 s@d5 s@k7 s@d8 s@l7 s@b8 s@d2 s@i12 s@a11 s@m9 s@d11 s@c2 s@k10 s@f3 s@i7 s@j13 s@m3 s@f1 s@h4 s@m7 s@d4 s@e4 s@b13 s@h12 s@j6 s@g8 s@k4 s@c4 s@c12 s@j7 s@k1 s@a2 s@h3 s@j10 s@j9 s@e13 s@c9 s@a12 s@f8 s@f7 s@d10 s@g1 s@e1 s@d4 s@f12 s@l3 s@j2 s@b6 s@b11 s@c6 s@d7 s@f11 s@j4 s@h13 s@m13 s@l10 s@j10 s@b9 s@g13 s@k3 s@f6 s@l13 s@b12 s@b7 s@h6 s@g4 s@l12 s@b4 s@k11 s@m10 s@c7 s@f4 s@m1 s@c5 s@e5 s@e6 s@i1 s@e12 s@l1 s@f7 s@l5 s@j2 s@m3 s@h3 s@k2 s@b2 s@i1 s@c3 s@i3 s@l2 s@g13 s@m4 s@i7 s@m1 s@j1 s@f13 s@h4 s@b1 s@j7 s@i13 s@j8 s@e7 s@i2 s@g2 s@h6 s@h5 s@k1 s@f6 s@i8 s@g13 s@e9 s@e2 s@g7 s@g6 s@h9 s@e3 pass pass ss:
-P||-2039735516|169|1835615452|0|0|0|0|0|||
+P||-2039735516|169|1835615452|0|75|0|0|0|||
 P||2035057534|168|52193975|1690|75|0|0|0|||
 P||1463881999|167|-1941119905|10|85|0|0|0|||
 P||-1902691562|166|-1946995298|20|85|0|0|0|||
@@ -5318,7 +5318,7 @@ P||1287048512|3|-359267048|670|1055|10|35|0|||
 P||-286373097|0|0|670|1055|11|35|1|p2||
 G|walk-go13x13-07|go13x13||0|0
 A|s@f7 s@b10 s@a7 s@c2 s@i1 s@f9 s@f11 s@h7 s@a12 s@k13 s@k9 s@h9 s@h10 s@i9 s@a8 s@d3 s@m5 s@j13 s@l1 s@b12 s@i13 s@g4 s@h4 s@g12 s@c7 s@h3 s@d10 s@d4 s@i3 s@h2 s@j12 s@c8 s@j3 s@m2 s@b2 s@i8 s@l6 s@m12 s@d12 s@a10 s@d7 s@h13 s@a3 s@k3 s@c11 s@j9 s@e12 s@c13 s@h5 s@l10 s@k12 s@g9 s@m6 s@c3 s@d2 s@i2 s@i5 s@f2 s@c12 s@m13 s@e6 s@f1 s@f4 s@b1 s@b8 s@g6 s@h8 s@e9 s@l4 s@a4 s@j5 s@l3 s@m10 s@a9 s@c9 s@f8 s@e3 s@f12 s@c5 s@e5 s@e8 s@a2 s@l12 s@d1 s@a1 s@j10 s@k4 s@e4 s@m1 s@f3 s@j4 s@b11 s@e7 s@e1 s@k5 s@b9 s@j7 s@j1 s@b5 s@b4 s@g7 s@b3 s@k10 s@k1 s@d6 s@l8 s@a5 s@a6 s@m3 s@h6 s@i12 s@f13 s@h1 s@m8 s@i11 s@g2 s@i6 s@d9 s@d8 s@b7 s@i10 s@e13 s@j8 s@g3 s@i7 s@g1 s@c6 s@h1 s@g8 s@k11 s@a11 s@d13 s@g10 s@k6 s@k2 s@f5 s@k7 s@i1 s@c10 s@l11 s@i4 s@l7 s@j11 s@m7 s@b13 s@d11 s@h11 s@m9 s@b11 s@e2 s@j6 s@f6 s@b9 s@l9 s@e10 s@f4 s@g5 s@a10 s@k8 s@l13 s@l2 s@b10 s@h12 s@c4 s@c1 s@g13 s@b12 s@b1 s@m4 s@e3 s@m2 s@j2 s@l5 s@k3 s@a9 s@d2 s@a10 s@a2 s@k6 s@d5 s@f10 s@i8 s@j10 s@b2 s@d9 s@f9 s@e9 s@m11 s@b10 s@c1 s@c8 s@a1 s@g9 s@h9 s@g11 s@g12 s@f12 s@j9 s@b6 s@f13 pass pass ss:
-P||-2039735516|169|1835615452|0|0|0|0|0|||
+P||-2039735516|169|1835615452|0|75|0|0|0|||
 P||854669822|168|1995151815|1690|75|0|0|0|||
 P||-1977087688|167|-285990862|10|85|0|0|0|||
 P||-1571720874|166|1663597186|20|85|0|0|0|||
@@ -5524,7 +5524,7 @@ P||1184613016|14|1684554446|930|745|35|10|0|||
 P||1543549477|0|0|930|745|36|10|1|p1||
 G|walk-go13x13-08|go13x13||0|0
 A|s@j1 s@i7 s@l6 s@e5 s@l4 s@g13 s@e1 s@f3 s@l5 s@i10 s@b7 s@f10 s@l1 s@a8 s@b3 s@a12 s@h8 s@c11 s@b12 s@d5 s@c7 s@k13 s@b5 s@i1 s@b13 s@m12 s@m13 s@j10 s@h9 s@j11 s@i9 s@c8 s@l3 s@k9 s@f9 s@l7 s@m11 s@a2 s@d13 s@a5 s@a9 s@j12 s@f4 s@j6 s@c10 s@f11 s@h5 s@b2 s@a1 s@a10 s@m1 s@e11 s@h11 s@d6 s@h3 s@k11 s@i6 s@i12 s@i5 s@e4 s@f1 s@m5 s@j4 s@h4 s@m8 s@i13 s@c12 s@b6 s@b1 s@m3 s@g3 s@a4 s@m10 s@d4 s@j2 s@f5 s@a6 s@c4 s@k2 s@d11 s@m6 s@l12 s@d12 s@l13 s@k5 s@m2 s@k4 s@h10 s@d8 s@f8 s@a13 s@g7 s@e10 s@m4 s@i3 s@c6 s@b8 s@d3 s@g10 s@c5 s@d1 s@f12 s@e12 s@k7 s@k8 s@k10 s@m9 s@m7 s@j8 s@h7 s@f2 s@g4 s@a11 s@j5 s@l10 s@e6 s@b4 s@e9 s@g11 s@f4 s@e3 s@h2 s@g6 s@c3 s@i2 s@i4 s@a12 s@d7 s@g9 s@l8 s@b9 s@b11 s@k6 s@e8 s@k1 s@m13 s@i11 s@j3 s@g5 s@h6 s@e7 s@l9 s@c13 s@c1 s@c2 s@f7 s@d10 s@j13 s@a3 s@g8 s@k3 s@a4 s@g1 s@g2 s@i8 s@f13 s@e2 s@g12 s@b1 s@l11 s@m10 s@k12 s@d9 s@l10 s@j3 s@j9 s@a1 s@e7 s@b10 s@h12 s@c1 s@m9 s@l2 s@j7 s@i11 s@m8 s@m2 s@m3 s@g10 s@d2 s@h1 s@b2 s@g2 s@h13 s@a5 s@h11 s@k8 s@h8 s@h9 s@m5 s@h2 s@f9 s@j8 s@i11 s@c9 s@g11 s@a4 s@i9 s@i1 s@i8 pass pass ss:
-P||-2039735516|169|1835615452|0|0|0|0|0|||
+P||-2039735516|169|1835615452|0|75|0|0|0|||
 P||-2035018626|168|-1742058557|1690|75|0|0|0|||
 P||1444534543|167|-380910413|10|85|0|0|0|||
 P||-756690307|166|174475111|20|85|0|0|0|||
@@ -5730,7 +5730,7 @@ P||142513020|8|157592701|770|925|17|25|0|||
 P||501449481|0|0|770|925|18|25|1|p2||
 G|walk-go13x13-09|go13x13||0|0
 A|s@i4 s@k13 s@d6 s@e12 s@k2 s@e2 s@g3 s@a2 s@i9 s@l4 s@b13 s@j13 s@f9 s@c6 s@h8 s@l10 s@e5 s@d12 s@h5 s@k9 s@h12 s@j1 s@f12 s@i7 s@e11 s@c2 s@g10 s@i6 s@e10 s@b5 s@f11 s@k8 s@e8 s@l12 s@l13 s@d11 s@l1 s@j3 s@i1 s@k4 s@j8 s@a10 s@j10 s@d7 s@h9 s@k1 s@h4 s@a4 s@g9 s@l3 s@k11 s@l5 s@g8 s@c12 s@c4 s@b11 s@g5 s@b3 s@c1 s@f4 s@f1 s@e4 s@g13 s@f2 s@f10 s@j12 s@f13 s@g6 s@g1 s@b1 s@i12 s@h11 s@a8 s@a3 s@d1 s@h6 s@h13 s@m12 s@m5 s@b7 s@d9 s@e6 s@f5 s@m11 s@b9 s@h7 s@l11 s@l8 s@e7 s@k3 s@e13 s@b6 s@i11 s@g12 s@j6 s@c11 s@a11 s@i5 s@i2 s@c13 s@m4 s@k5 s@d5 s@d4 s@c10 s@f6 s@d13 s@k12 s@g2 s@j2 s@b4 s@l2 s@b8 s@a13 s@a7 s@l6 s@m1 s@b12 s@e9 s@k7 s@d2 s@m3 s@f3 s@m6 s@m7 s@m10 s@c8 s@m2 s@c9 s@g4 s@m9 s@j11 s@i8 s@b2 s@j5 s@d10 s@j9 s@b10 s@l1 s@j4 s@j7 s@m8 s@a5 s@k6 s@f7 s@m5 s@a9 s@a6 s@f8 s@e1 s@i3 s@m13 s@g7 s@b13 s@i13 s@c3 s@i6 s@h10 s@i10 s@c7 s@k10 s@a5 s@h6 s@h3 s@g6 s@m4 s@e3 s@h2 s@i7 s@l13 s@e1 s@k2 s@c5 s@e6 s@h1 s@a12 s@h3 s@l7 s@h2 s@f2 s@i5 s@m7 s@a11 s@d12 s@e2 s@a10 s@a13 s@d8 s@c13 s@d10 s@b13 s@l9 s@e12 s@c12 s@b12 s@m9 s@h7 s@c11 s@g11 s@h11 pass pass ss:
-P||-2039735516|169|1835615452|0|0|0|0|0|||
+P||-2039735516|169|1835615452|0|75|0|0|0|||
 P||-1551901742|168|-219841715|1690|75|0|0|0|||
 P||-1804743416|167|-1432856724|10|85|0|0|0|||
 P||1337211133|166|2107231818|20|85|0|0|0|||
@@ -5936,7 +5936,7 @@ P||650316059|10|1698802911|920|775|31|11|0|||
 P||1009252520|0|0|920|775|32|11|1|p1||
 G|walk-go13x13-10|go13x13||0|0
 A|s@j4 s@i7 s@k13 s@j3 s@b5 s@e10 s@a2 s@i3 s@k9 s@l11 s@h8 s@d6 s@m12 s@j1 s@d5 s@m9 s@h6 s@b11 s@g11 s@e9 s@b7 s@f7 s@j10 s@b3 s@f3 s@e4 s@l5 s@h10 s@f13 s@k2 s@b9 s@i8 s@e2 s@f1 s@g7 s@c10 s@g1 s@m5 s@k1 s@g3 s@m1 s@i11 s@c11 s@h7 s@d7 s@a13 s@a8 s@i4 s@g13 s@l7 s@a1 s@g9 s@j12 s@i1 s@i13 s@h13 s@m4 s@f6 s@a3 s@l9 s@k10 s@f12 s@g6 s@c12 s@c5 s@m7 s@h12 s@l8 s@h13 s@c1 s@a9 s@c7 s@j2 s@f10 s@b13 s@g5 s@d4 s@d1 s@g4 s@j6 s@l10 s@e13 s@e1 s@g2 s@g8 s@k6 s@j8 s@k5 s@i10 s@d2 s@e7 s@h1 s@c6 s@d12 s@m3 s@l6 s@d10 s@c8 s@a12 s@j11 s@i5 s@l2 s@k8 s@h11 s@i9 s@e8 s@a13 s@a6 s@m10 s@c13 s@c9 s@l4 s@f11 s@f9 s@i12 s@e3 s@c3 s@a11 s@h9 s@k12 s@f2 s@l5 s@j5 s@l3 s@b8 s@g1 s@i2 s@g12 s@m2 s@l12 s@b1 s@e6 s@b2 s@d3 s@a4 s@m11 s@e12 s@k11 s@m13 s@h3 s@i6 s@c2 s@a10 s@f4 s@j13 s@k7 s@f2 s@f8 s@h4 s@e2 s@k3 s@c4 s@f12 s@b10 s@h5 s@c3 s@d13 s@m8 s@b12 s@l13 s@a7 s@m12 s@a11 s@j7 s@a5 s@g10 s@f5 s@m6 s@d8 s@f3 s@c10 s@b11 s@j9 s@m13 s@e13 s@c7 s@d9 s@b4 s@c8 s@h2 s@g12 s@e1 s@i2 s@j2 s@c7 s@d11 s@b10 s@k4 s@e5 s@k3 s@b11 s@f2 s@b6 s@i2 s@a6 s@l1 s@e11 s@k1 s@d12 s@f8 pass pass ss:
-P||-2039735516|169|1835615452|0|0|0|0|0|||
+P||-2039735516|169|1835615452|0|75|0|0|0|||
 P||-1614835822|168|1929462870|1690|75|0|0|0|||
 P||-1741616861|167|-1004356282|10|85|0|0|0|||
 P||1038984657|166|-2127594011|20|85|0|0|0|||
@@ -6142,7 +6142,7 @@ P||-1271539800|31|36126838|850|685|43|19|0|||
 P||-912603339|0|0|850|685|44|19|1|p1||
 G|walk-go13x13-11|go13x13||0|0
 A|s@i13 s@b13 s@h1 s@g11 s@e11 s@k11 s@b11 s@f12 s@c3 s@f3 s@e1 s@e10 s@i8 s@i6 s@h6 s@b1 s@a8 s@l4 s@l8 s@d5 s@m2 s@f5 s@i5 s@a12 s@g1 s@f9 s@j12 s@b6 s@j3 s@a2 s@j1 s@d10 s@h3 s@g2 s@j6 s@e4 s@i7 s@k13 s@h4 s@a11 s@i6 s@e12 s@h10 s@g9 s@k1 s@a6 s@k3 s@b12 s@f4 s@h5 s@h11 s@j9 s@a9 s@g8 s@e5 s@i2 s@j5 s@m7 s@f11 s@h9 s@b7 s@k7 s@f10 s@h7 s@j11 s@f6 s@d13 s@k10 s@i12 s@d6 s@e6 s@l6 s@c8 s@i4 s@l9 s@l13 s@d9 s@j2 s@j13 s@m12 s@h12 s@g13 s@f8 s@b9 s@m5 s@g4 s@l2 s@b2 s@c13 s@l10 s@c4 s@i11 s@b4 s@k6 s@l1 s@e13 s@h8 s@g5 s@m3 s@d7 s@j7 s@k9 s@d2 s@c5 s@c6 s@f2 s@f7 s@m11 s@m10 s@a3 s@e2 s@l3 s@b10 s@c10 s@d8 s@a13 s@c7 s@i10 s@b8 s@l7 s@d3 s@a5 s@g7 s@d1 s@c2 s@k2 s@d11 s@e3 s@g12 s@l11 s@a7 s@j4 s@a4 s@b5 s@m9 s@k12 s@j8 s@d12 s@m4 s@c1 s@j10 s@g6 s@c12 s@e7 s@c9 s@h2 s@g10 s@c11 s@e8 s@i9 s@d13 s@m8 s@k8 s@e5 s@m1 s@k4 s@f1 s@i3 s@c13 s@d4 s@e9 s@k5 s@c12 s@h7 s@l5 s@i1 s@j7 s@f13 s@m10 s@c10 s@h6 s@j8 s@l9 s@g3 s@a10 s@a11 s@i5 s@b3 s@c11 s@i6 s@c4 s@e1 s@j5 s@k8 s@j3 s@f4 s@i7 s@b12 s@b4 s@a13 s@c3 s@h4 s@g11 s@m13 s@b9 s@d10 s@e10 s@k3 s@d2 s@a12 pass pass ss:
-P||-2039735516|169|1835615452|0|0|0|0|0|||
+P||-2039735516|169|1835615452|0|75|0|0|0|||
 P||-1704727234|168|-1901423299|1690|75|0|0|0|||
 P||-394105668|167|-1105249515|10|85|0|0|0|||
 P||2130065589|166|576014900|20|85|0|0|0|||
@@ -6348,7 +6348,7 @@ P||1936164603|16|1695463060|630|1015|15|39|0|||
 P||362742994|0|0|630|1015|16|39|1|p2||
 G|walk-go13x13-12|go13x13||0|0
 A|s@l7 s@h12 s@a6 s@f1 s@j13 s@f12 s@g4 s@d2 s@h10 s@m7 s@g10 s@c8 s@e11 s@b2 s@i5 s@b5 s@k11 s@b4 s@j8 s@m5 s@h9 s@g1 s@f2 s@d6 s@m13 s@h11 s@h8 s@c3 s@g5 s@j3 s@f13 s@b8 s@j2 s@c12 s@c13 s@j10 s@c5 s@j9 s@m3 s@f9 s@b12 s@g9 s@b7 s@k10 s@k6 s@l6 s@a11 s@e2 s@e1 s@b11 s@m4 s@k8 s@a9 s@d7 s@a3 s@d4 s@k7 s@i1 s@f8 s@e3 s@i12 s@l5 s@k4 s@f10 s@h1 s@k2 s@b1 s@i13 s@d1 s@h4 s@d9 s@b9 s@e8 s@d8 s@j4 s@e9 s@h7 s@k12 s@i4 s@l9 s@j11 s@g11 s@d5 s@a10 s@j1 s@c4 s@i8 s@l13 s@k5 s@a2 s@a12 s@a4 s@e10 s@g13 s@m10 s@b6 s@i9 s@f3 s@h3 s@j6 s@f7 s@e5 s@d13 s@c2 s@j7 s@h5 s@c11 s@e7 s@l8 s@m2 s@b13 s@k1 s@a13 s@l11 s@i7 s@i11 s@g6 s@e13 s@d10 s@f13 s@a8 s@i2 s@h2 s@m6 s@d12 s@l3 s@h13 s@m9 s@c6 s@f11 s@m11 s@i10 s@c10 s@c1 s@j1 s@c7 s@i13 s@m8 s@k9 s@l4 s@l10 s@c6 s@l12 s@j2 s@g8 s@c9 s@m1 s@m12 s@l1 s@e1 s@l11 s@a5 s@k3 s@j1 s@j5 s@g3 s@k8 s@d5 s@k13 s@l2 s@c12 s@c5 s@h6 s@j12 s@k11 s@i12 s@h5 s@j11 s@b10 s@e6 s@b11 s@h13 s@g2 s@d1 s@j13 s@m3 s@f6 s@m13 s@a10 s@l10 s@i13 s@m10 s@m1 s@k13 s@i6 s@m4 s@m11 s@l12 s@d11 s@g12 s@g7 s@j13 s@f5 s@l11 s@a7 s@i3 s@e4 s@l1 s@f4 s@b3 pass pass ss:
-P||-2039735516|169|1835615452|0|0|0|0|0|||
+P||-2039735516|169|1835615452|0|75|0|0|0|||
 P||-1076641543|168|-464635457|1690|75|0|0|0|||
 P||2106112208|167|180852578|10|85|0|0|0|||
 P||780463600|166|459843089|20|85|0|0|0|||
@@ -6554,7 +6554,7 @@ P||828967898|2|97640940|700|1045|9|32|0|||
 P||1867273468|0|0|700|1045|10|32|1|p2||
 G|walk-go13x13-13|go13x13||0|0
 A|s@c13 s@f9 s@g9 s@l3 s@e13 s@h3 s@c5 s@e11 s@k9 s@a2 s@f10 s@b10 s@m7 s@f5 s@m4 s@d8 s@i3 s@f12 s@f4 s@b1 s@b3 s@k6 s@c3 s@i13 s@i8 s@h6 s@k2 s@k13 s@k3 s@h8 s@m12 s@e1 s@h7 s@j13 s@l5 s@c4 s@m2 s@c7 s@b2 s@j7 s@d11 s@a9 s@a8 s@j6 s@c10 s@g5 s@b7 s@i2 s@i12 s@h13 s@l9 s@j1 s@l2 s@m9 s@e10 s@m3 s@d7 s@l11 s@g3 s@h9 s@l12 s@a10 s@b9 s@c8 s@g8 s@h1 s@f1 s@a13 s@h4 s@i6 s@a12 s@j5 s@f3 s@h2 s@j8 s@g10 s@b8 s@c6 s@j10 s@c12 s@d5 s@g13 s@l7 s@b6 s@e9 s@d2 s@m13 s@l10 s@f13 s@k7 s@c2 s@f8 s@m5 s@m6 s@f7 s@k1 s@d1 s@b13 s@e5 s@k12 s@d4 s@j2 s@j9 s@i1 s@l8 s@b4 s@e12 s@i11 s@m11 s@l6 s@h5 s@e6 s@f11 s@g7 s@g8 s@g9 s@e2 s@f2 s@l4 s@l1 s@i4 s@a6 s@d9 s@m10 s@j4 s@l3 s@a5 s@a1 s@b12 s@j3 s@e8 s@d13 s@e7 s@k5 s@c9 s@g4 s@c11 s@k4 s@m3 s@g8 s@k11 s@j12 s@b13 s@a4 s@m8 s@e3 s@e1 s@b11 s@g12 s@l13 s@k10 s@g1 s@e4 s@h11 s@d3 s@g11 s@j11 s@m1 s@g2 s@m13 s@e3 s@h12 s@m12 s@k8 s@l3 s@j3 s@f12 s@l12 s@i5 s@b5 s@d12 s@i9 s@f6 s@g1 s@d6 s@i7 s@i1 s@i12 s@i10 s@a7 s@d10 s@h1 s@i2 s@h7 s@f2 s@a5 s@d2 s@m11 s@c1 s@g6 s@h2 s@m1 s@e11 s@j2 s@j1 s@l1 s@a3 s@j2 s@a2 s@m12 pass pass ss:
-P||-2039735516|169|1835615452|0|0|0|0|0|||
+P||-2039735516|169|1835615452|0|75|0|0|0|||
 P||625455191|168|-1083551357|1690|75|0|0|0|||
 P||337156502|167|-1263141152|10|85|0|0|0|||
 P||104759228|166|1720497840|20|85|0|0|0|||
@@ -6760,7 +6760,7 @@ P||-1525222803|25|209897382|1100|625|45|11|0|||
 P||1196322884|0|0|1100|625|46|11|1|p1||
 G|walk-go13x13-14|go13x13||0|0
 A|s@g9 s@f1 s@g13 s@h9 s@m2 s@b1 s@m7 s@b9 s@g2 s@l11 s@b11 s@k10 s@c13 s@l2 s@d1 s@a10 s@d3 s@i1 s@d5 s@m11 s@e12 s@i8 s@f7 s@k4 s@f5 s@m5 s@d6 s@j3 s@a8 s@e9 s@g1 s@a4 s@e3 s@f2 s@b12 s@m13 s@m12 s@m4 s@g6 s@c11 s@b2 s@c8 s@b3 s@k9 s@l5 s@h12 s@d4 s@i4 s@a12 s@j13 s@f12 s@h1 s@g10 s@b10 s@i7 s@a6 s@k5 s@l1 s@f3 s@l4 s@b7 s@d8 s@j8 s@i5 s@h5 s@m3 s@c6 s@d12 s@d10 s@d7 s@l10 s@j6 s@f9 s@h6 s@j9 s@f13 s@k1 s@i13 s@j12 s@e8 s@l8 s@e10 s@e1 s@g12 s@e13 s@a9 s@k6 s@c7 s@a5 s@c2 s@h4 s@h13 s@k7 s@j7 s@b6 s@f4 s@k13 s@d2 s@m10 s@i6 s@h7 s@l7 s@k11 s@e4 s@d13 s@e2 s@e11 s@i3 s@g7 s@b13 s@h3 s@d11 s@l9 s@i10 s@f13 s@i2 s@a1 s@a2 s@k8 s@g3 s@b5 s@l6 s@c12 s@k3 s@c9 s@c1 s@g4 s@m8 s@b4 s@c5 s@e1 s@k12 s@e7 s@l3 s@f6 s@i12 s@l12 s@g8 s@g3 s@e5 s@g5 s@a3 s@h2 s@m11 s@a11 s@i9 s@e6 s@c4 s@g11 s@c10 s@j5 s@f10 s@j2 s@e5 s@m9 s@f8 s@a1 s@f11 s@k12 s@a4 s@a7 s@d9 s@h11 s@h10 s@e4 s@j11 s@i11 s@a2 s@f4 s@d1 s@e5 s@m1 s@h8 s@h12 s@m6 s@e1 s@i12 s@h13 s@m8 s@a1 s@j1 s@g12 s@a6 s@m2 s@a3 s@j4 s@j13 s@k2 s@i13 s@l7 s@j2 s@h13 s@g12 s@c9 s@k1 s@d10 s@a4 s@j1 s@a13 s@j2 pass pass ss:
-P||-2039735516|169|1835615452|0|0|0|0|0|||
+P||-2039735516|169|1835615452|0|75|0|0|0|||
 P||997684670|168|1239650868|1690|75|0|0|0|||
 P||1765313871|167|1323313117|10|85|0|0|0|||
 P||1165366018|166|280163610|20|85|0|0|0|||
@@ -6966,7 +6966,7 @@ P||901451644|9|-1170323334|880|815|27|13|0|||
 P||1260388105|0|0|880|815|28|13|1|p1||
 G|walk-go13x13-15|go13x13||0|0
 A|s@a5 s@b10 s@i3 s@h5 s@h1 s@a4 s@k8 s@g3 s@m9 s@k13 s@k9 s@k12 s@i10 s@c11 s@f5 s@h2 s@j5 s@k5 s@d9 s@m1 s@g6 s@l8 s@j9 s@l2 s@e9 s@b5 s@c10 s@e5 s@g5 s@l9 s@b7 s@d10 s@d3 s@c2 s@c12 s@g10 s@a12 s@j8 s@d2 s@c9 s@l10 s@g9 s@f6 s@j13 s@m12 s@l6 s@g7 s@l3 s@c4 s@i11 s@m4 s@b3 s@i1 s@k2 s@h4 s@d7 s@e1 s@f13 s@i7 s@b11 s@i13 s@l5 s@i6 s@j2 s@e3 s@a8 s@a2 s@h7 s@h3 s@m7 s@k6 s@e12 s@e13 s@e7 s@c13 s@i5 s@g11 s@c3 s@b1 s@g8 s@i8 s@f4 s@a9 s@f10 s@d1 s@b9 s@m13 s@g12 s@m2 s@f11 s@m8 s@a6 s@h10 s@k7 s@l4 s@b4 s@d6 s@c8 s@a3 s@f3 s@b6 s@h6 s@j1 s@l7 s@c5 s@h8 s@a7 s@l1 s@l11 s@h12 s@g1 s@e11 s@l13 s@e8 s@e6 s@m6 s@d5 s@d4 s@b13 s@f7 s@m11 s@c10 s@m5 s@h13 s@k10 s@b8 s@k11 s@l12 s@c1 s@j4 s@j3 s@h11 s@a1 s@i4 s@j12 s@e10 s@d11 s@k13 s@i2 s@m3 s@k12 s@e2 s@c7 s@a10 s@i9 s@f2 s@a13 s@f12 s@g4 s@d13 s@l12 s@c6 s@j11 s@a9 s@m10 s@i12 s@j7 s@j6 s@j13 s@m2 s@b12 s@a7 s@e4 s@b6 s@k1 s@d12 s@e5 s@g11 s@j8 s@k6 s@f9 s@k3 s@f1 s@d11 s@j10 s@j5 s@d4 s@b2 s@b7 s@g13 s@h9 s@k4 s@g2 s@f8 s@e2 s@f4 s@m5 s@f3 s@m4 s@d8 s@f2 s@a5 s@g3 s@e9 s@f3 s@f9 s@h2 s@f4 s@d4 s@a11 pass pass ss:
-P||-2039735516|169|1835615452|0|0|0|0|0|||
+P||-2039735516|169|1835615452|0|75|0|0|0|||
 P||1352458851|168|-50058004|1690|75|0|0|0|||
 P||-1963161891|167|443355809|10|85|0|0|0|||
 P||514891380|166|-1949309177|20|85|0|0|0|||
@@ -7172,7 +7172,7 @@ P||-1179703914|46|-301388165|350|995|16|66|0|||
 P||-820767453|0|0|350|995|17|66|1|p2||
 G|walk-go13x13-16|go13x13||0|0
 A|s@b3 s@h4 s@d9 s@g6 s@l8 s@i11 s@e12 s@e11 s@a13 s@f10 s@b11 s@b10 s@i1 s@k11 s@i4 s@b12 s@d8 s@f9 s@h11 s@l2 s@j13 s@f2 s@c12 s@a11 s@f8 s@j9 s@f5 s@f13 s@m11 s@d12 s@d4 s@m1 s@l12 s@e4 s@j5 s@e5 s@c13 s@e7 s@f11 s@k13 s@b1 s@b6 s@i7 s@e1 s@e10 s@d7 s@i3 s@b5 s@f7 s@b7 s@f1 s@k3 s@g5 s@d3 s@c3 s@b2 s@i6 s@j12 s@l11 s@j1 s@g13 s@h12 s@k1 s@c8 s@h9 s@g7 s@m13 s@i8 s@g10 s@a12 s@k5 s@k8 s@a2 s@l13 s@c4 s@b4 s@f12 s@i2 s@i12 s@k10 s@c1 s@c11 s@l4 s@g1 s@m6 s@l7 s@g3 s@c2 s@e3 s@c10 s@h7 s@j4 s@i9 s@i10 s@m8 s@d13 s@m5 s@c9 s@a5 s@h5 s@c7 s@d6 s@f4 s@h8 s@e9 s@a8 s@a1 s@m12 s@b8 s@l5 s@b9 s@h6 s@m9 s@l1 s@e8 s@l3 s@g9 s@c6 s@a4 s@f3 s@k9 s@g2 s@j11 s@j8 s@i13 s@j3 s@m7 s@l9 s@g8 s@m4 s@f9 s@j10 s@m10 s@g4 s@d5 s@d11 s@l6 s@d2 s@j7 s@k12 s@f10 s@h10 s@m13 s@k7 s@k2 s@e6 s@a6 s@l10 s@k4 s@c5 s@k6 s@d10 s@d1 s@m2 s@j6 s@e2 s@e13 s@e3 s@a10 s@h13 s@g11 s@h1 s@i5 s@k9 s@l5 s@h3 s@a7 s@j11 s@i12 s@g3 s@i13 s@m12 s@l4 s@i6 s@l5 s@j5 s@j7 s@i3 s@i5 s@k5 s@m11 s@m10 s@l8 s@i7 s@k6 s@l12 s@g12 s@j2 s@m7 s@i4 s@m9 s@h7 s@k1 s@m8 s@a9 s@k2 s@a3 s@f1 s@f6 s@m9 pass pass ss:
-P||-2039735516|169|1835615452|0|0|0|0|0|||
+P||-2039735516|169|1835615452|0|75|0|0|0|||
 P||1145877749|168|1323499447|1690|75|0|0|0|||
 P||2082355660|167|1352229747|10|85|0|0|0|||
 P||-1496190899|166|-944256058|20|85|0|0|0|||
@@ -7378,7 +7378,7 @@ P||332131567|9|-1763926153|600|1085|8|44|0|||
 P||691068028|0|0|600|1085|9|44|1|p2||
 G|walk-go13x13-17|go13x13||0|0
 A|s@b4 s@e11 s@e4 s@m2 s@l11 s@j8 s@a12 s@l4 s@f12 s@a2 s@b10 s@l12 s@d12 s@m7 s@c11 s@d4 s@f13 s@b8 s@l10 s@a6 s@a4 s@m6 s@g5 s@c9 s@f8 s@a5 s@g8 s@i11 s@b2 s@k13 s@h2 s@e6 s@b6 s@m5 s@d11 s@j3 s@k7 s@j10 s@a10 s@l9 s@k2 s@f5 s@e7 s@h5 s@e10 s@c8 s@d8 s@g3 s@c1 s@g1 s@e3 s@f6 s@l3 s@b1 s@e13 s@k9 s@g6 s@c10 s@g4 s@i1 s@j11 s@b5 s@e12 s@j13 s@h6 s@l8 s@i5 s@m13 s@k10 s@j9 s@b13 s@j2 s@h1 s@a1 s@b11 s@b7 s@d1 s@c6 s@l7 s@k5 s@d13 s@k1 s@i6 s@d10 s@j6 s@h11 s@a8 s@h10 s@f3 s@m9 s@m11 s@g10 s@g2 s@h4 s@k4 s@k12 s@a3 s@k6 s@f10 s@k11 s@f1 s@c13 s@i8 s@d3 s@a11 s@i2 s@g7 s@l1 s@g12 s@h9 s@c3 s@e8 s@j7 s@c7 s@m4 s@m12 s@i3 s@h3 s@i10 s@i4 s@i9 s@e1 s@f7 s@d9 s@d6 s@j4 s@g1 s@l13 s@k8 s@i7 s@d5 s@f9 s@b3 s@a9 s@h7 s@f4 s@g11 s@b9 s@f2 s@b1 s@h13 s@d2 s@l5 s@i13 s@l2 s@j5 s@c12 s@l6 s@l4 s@g9 s@f11 s@i12 s@e2 s@c2 s@e11 s@k3 s@i7 s@b6 s@e9 s@j12 s@c13 s@i3 s@a13 s@a1 s@h8 s@m10 s@e8 s@m8 s@d7 s@j11 s@l10 s@k10 s@h12 s@c4 s@b12 s@m3 s@c5 s@m4 s@k2 s@j1 s@d4 s@c2 s@k4 s@l4 s@a7 s@c7 s@d2 s@k4 s@b9 s@m11 s@d9 s@l11 s@b6 s@l10 s@a6 s@l5 s@l2 s@c6 s@b5 s@d10 pass pass ss:
-P||-2039735516|169|1835615452|0|0|0|0|0|||
+P||-2039735516|169|1835615452|0|75|0|0|0|||
 P||-1458708171|168|-726758218|1690|75|0|0|0|||
 P||-1542060296|167|-441319907|10|85|0|0|0|||
 P||974225033|166|1373307260|20|85|0|0|0|||
@@ -7584,7 +7584,7 @@ P||2041858231|14|-1222152627|910|775|31|16|0|||
 P||-1894172604|0|0|910|775|32|16|1|p1||
 G|walk-go13x13-18|go13x13||0|0
 A|s@d6 s@g9 s@i5 s@h5 s@h1 s@c5 s@e1 s@g11 s@f7 s@g1 s@h10 s@l12 s@a11 s@k13 s@g12 s@f4 s@m6 s@g3 s@l13 s@l6 s@g7 s@d8 s@j5 s@i11 s@c13 s@c4 s@e9 s@h6 s@c8 s@d2 s@f8 s@h12 s@d5 s@e2 s@m4 s@m11 s@b6 s@f12 s@e5 s@c3 s@a8 s@h4 s@c6 s@j6 s@g4 s@b1 s@b7 s@e13 s@f11 s@c7 s@m7 s@k2 s@k12 s@a2 s@b12 s@c11 s@m9 s@h7 s@b13 s@b8 s@c1 s@a7 s@g10 s@i13 s@b4 s@e12 s@f3 s@h13 s@i10 s@j8 s@d12 s@i2 s@f13 s@a10 s@d9 s@j2 s@i12 s@j12 s@k5 s@e8 s@l4 s@g2 s@c9 s@b2 s@a13 s@d7 s@j11 s@f2 s@m12 s@m3 s@e4 s@k9 s@i4 s@e7 s@b11 s@i6 s@d10 s@a4 s@e6 s@f6 s@c2 s@d7 s@b9 s@i9 s@g8 s@i8 s@l9 s@f5 s@l2 s@b10 s@j7 s@i7 s@k3 s@b3 s@k1 s@k7 s@l5 s@e11 s@m2 s@l8 s@j4 s@a5 s@k11 s@c10 s@a6 s@d13 s@g6 s@h8 s@h3 s@e10 s@d4 s@a9 s@a12 s@d1 s@g5 s@k10 s@l3 s@l1 s@h11 s@j9 s@j13 s@f1 s@b8 s@b5 s@i12 s@f4 s@m10 s@m8 s@i3 s@j10 s@e8 s@j7 s@j3 s@f10 s@e3 s@c2 s@j12 s@h2 s@i1 s@f9 s@m1 s@a1 s@i11 s@l7 s@d8 s@e1 s@k4 s@f6 s@c7 s@m5 s@g13 s@d11 s@i13 s@d3 s@m7 s@c1 s@k6 s@k8 s@h12 s@m6 s@h13 s@m13 s@j1 s@g11 s@l10 s@m7 s@l1 s@a3 s@m12 s@f11 s@k13 s@h9 s@c12 s@d13 s@h8 s@i7 s@j10 s@e11 s@j8 s@e10 pass pass ss:
-P||-2039735516|169|1835615452|0|0|0|0|0|||
+P||-2039735516|169|1835615452|0|75|0|0|0|||
 P||-1132027502|168|1195112510|1690|75|0|0|0|||
 P||-1261198301|167|1064462866|10|85|0|0|0|||
 P||-367812242|166|-1988077354|20|85|0|0|0|||
@@ -7790,7 +7790,7 @@ P||-990375101|43|-1166632274|920|455|63|11|0|||
 P||-631438640|0|0|920|455|64|11|1|p1||
 G|walk-go13x13-19|go13x13||0|0
 A|s@l13 s@j13 s@l11 s@c13 s@k10 s@f5 s@a11 s@m4 s@i3 s@d3 s@b1 s@h10 s@f2 s@l9 s@e9 s@h7 s@c5 s@m10 s@k11 s@c1 s@e8 s@i7 s@d11 s@c11 s@h13 s@d12 s@g10 s@d4 s@j4 s@c3 s@g8 s@e7 s@m7 s@d5 s@i13 s@j3 s@f1 s@b9 s@h5 s@i10 s@h8 s@l3 s@i9 s@b12 s@a13 s@e4 s@l4 s@g2 s@b7 s@a9 s@k6 s@c4 s@i2 s@d2 s@k8 s@i1 s@h1 s@m9 s@h2 s@g4 s@j6 s@g11 s@a7 s@g9 s@d8 s@i8 s@f7 s@c10 s@i4 s@d6 s@j2 s@m13 s@h12 s@f13 s@b4 s@e2 s@l2 s@d7 s@l6 s@b13 s@m2 s@j5 s@h6 s@m6 s@j12 s@j7 s@e5 s@g12 s@m11 s@l5 s@a3 s@f9 s@d9 s@k3 s@f3 s@h3 s@j11 s@a8 s@a5 s@c6 s@a2 s@m3 s@k9 s@b2 s@i6 s@d1 s@a1 s@b6 s@j9 s@k2 s@b10 s@m5 s@b8 s@c8 s@j10 s@e12 s@k7 s@g7 s@c7 s@g6 s@b11 s@a10 s@g13 s@j1 s@k1 s@m8 s@d10 s@i12 s@l10 s@e11 s@f11 s@c12 s@h11 s@k5 s@b5 s@f6 s@c9 s@a10 s@f10 s@i5 s@l1 s@f12 s@e13 s@j1 s@h9 s@i11 s@k4 s@l7 s@j3 s@l3 s@e3 s@a9 s@f4 s@c2 s@l8 s@b3 s@m8 s@k3 s@i13 s@k13 s@c8 s@i5 s@a8 s@g13 s@h4 s@a6 s@i1 s@h13 s@k2 s@a4 s@m5 s@g1 s@a12 s@a3 s@j1 s@b1 s@f8 s@a5 s@m6 s@b5 s@h12 s@m12 s@g3 s@l5 s@a1 s@m9 s@l7 s@g2 s@k12 s@m3 s@g1 s@g9 s@e10 s@j5 s@g2 s@b9 s@g5 s@e6 s@a12 s@b10 pass pass ss:
-P||-2039735516|169|1835615452|0|0|0|0|0|||
+P||-2039735516|169|1835615452|0|75|0|0|0|||
 P||1251282937|168|1679140862|1690|75|0|0|0|||
 P||-1523836036|167|-1449198370|10|85|0|0|0|||
 P||-66236118|166|-819285698|20|85|0|0|0|||
@@ -7996,7 +7996,7 @@ P||1237526960|15|1871411853|830|795|32|20|0|||
 P||1596463421|0|0|830|795|33|20|1|p1||
 G|walk-go19x19-00|go19x19||0|0
 A|s@i7 s@m7 s@n4 s@m4 s@f9 s@a8 s@a14 s@p7 s@k1 s@o17 s@a4 s@c14 s@s3 s@f17 s@p15 s@b2 s@h7 s@q19 s@k14 s@d17 s@p17 s@f3 s@c19 s@k2 s@f7 s@h19 s@b5 s@p13 s@k8 s@i15 s@a10 s@s13 s@k5 s@h12 s@j17 s@j15 s@d15 s@j13 s@d4 s@p11 s@s11 s@b8 s@k10 s@g12 s@d18 s@j9 s@l9 s@k16 s@r5 s@n2 s@q13 s@q11 s@i2 s@i18 s@d16 s@q15 s@e18 s@c11 s@c4 s@f6 s@e10 s@c12 s@f2 s@n6 s@e7 s@q5 s@g19 s@o10 s@l18 s@p14 s@f11 s@j19 s@g14 s@a17 s@c17 s@n12 s@b16 s@b4 s@a15 s@c6 s@i12 s@f10 s@g13 s@m1 s@j8 s@m2 s@g17 s@l5 s@c7 s@i3 s@s7 s@c16 s@d14 s@p6 s@h16 s@s12 s@k12 s@g6 s@g1 s@l1 s@p12 s@d12 s@i10 s@p1 s@l13 s@i9 s@j3 s@d6 s@o16 s@m13 s@r1 s@r7 s@n3 s@e19 s@s17 s@q9 s@j10 s@p19 s@e14 s@c18 s@s16 s@o2 s@d10 s@d9 s@b14 s@k4 s@j1 s@l2 s@o5 s@e4 s@b12 s@o15 s@n17 s@r17 s@s10 s@o18 s@h18 s@b19 s@m8 s@o8 s@r14 s@a16 s@s15 s@d1 s@b3 s@e6 s@p5 s@s6 s@m5 s@n11 s@c10 s@k11 s@c15 s@a1 s@l3 s@g5 s@q17 s@d5 s@b11 s@r2 s@j14 s@e17 s@e5 s@e1 s@f5 s@q7 s@b4 s@k3 s@j7 s@k6 s@k17 s@a3 s@g9 s@a19 s@p10 s@g10 s@g7 s@o9 s@e2 s@b17 s@l14 s@i5 s@e13 s@j18 s@o6 s@n13 s@l19 s@f16 s@p18 s@l17 s@m19 s@m15 s@r16 s@l10 s@p4 s@a7 s@o1 s@d19 s@r4 s@k19 s@e3 s@r3 s@i6 s@h8 s@m3 s@s9 s@h5 s@n8 s@b6 s@q3 s@r6 s@l12 s@c2 s@r12 s@b15 s@h14 s@a11 s@c8 s@s14 s@h13 s@k9 s@r13 s@s1 s@m9 s@i17 s@m12 s@f12 s@i11 s@i1 s@h11 s@n10 s@r15 s@g4 s@p2 s@q2 s@i19 s@n7 s@q12 s@c13 s@l11 s@b1 s@l8 s@g3 s@a13 s@s2 s@h1 s@o19 s@r9 s@i14 s@m18 s@c1 s@e9 s@g16 s@m11 s@d2 s@j4 s@d11 s@f18 s@g2 s@i4 s@d18 s@o3 s@r10 s@c5 s@p9 s@c16 s@q14 s@l7 s@i8 s@d8 s@h4 s@k7 s@f4 s@h15 s@i13 s@j6 s@g18 s@e8 s@m16 s@m8 s@s4 s@f14 s@a6 s@n1 s@f8 s@d3 s@h6 s@h3 s@o7 s@g15 s@s8 s@j11 s@o12 s@q4 s@r8 s@j5 s@b7 s@n18 s@c9 s@c19 s@l15 s@l6 s@a18 s@s19 s@q10 s@l4 s@h2 s@n16 s@q8 s@b18 s@k15 s@n15 s@k13 s@m10 s@m17 s@j16 s@q6 s@q1 s@s9 s@p16 s@e11 s@p15 s@h9 s@n19 s@a9 s@m14 s@f19 s@o13 s@j12 s@p3 s@f15 s@k18 s@f1 s@g11 s@d13 s@o16 s@h17 s@l18 s@e1 s@o4 s@j13 s@a18 s@j2 s@s18 s@p8 s@i9 s@s5 s@n5 s@r18 s@m19 s@d7 s@i16 s@f13 s@a12 s@q16 s@r7 s@g18 s@h18 s@f14 s@m3 s@k17 s@g16 s@r9 s@q2 s@c17 s@l3 s@g19 s@h17 s@p6 s@p7 s@d6 s@o14 s@e4 s@g5 s@a2 s@o11 s@b13 s@r11 s@i17 s@e6 s@d1 s@n3 s@f6 s@h10 s@o12 s@m6 s@h1 s@d5 s@q7 s@j17 s@r17 s@m5 s@c5 s@b10 s@c16 s@h16 s@e15 s@n14 s@b9 s@d9 pass pass ss:
-P||286644746|361|195455450|0|0|0|0|0|||
+P||286644746|361|195455450|0|75|0|0|0|||
 P||1210046659|360|-1779809188|3610|75|0|0|0|||
 P||183982614|359|-198832718|10|85|0|0|0|||
 P||-750375812|358|-1577173728|20|85|0|0|0|||
@@ -8402,7 +8402,7 @@ P||-215990320|33|243089468|1810|1665|48|35|0|||
 P||-1562969955|0|0|1810|1665|49|35|1|p1||
 G|walk-go19x19-01|go19x19||0|0
 A|s@o10 s@b16 s@n15 s@q13 s@o19 s@j12 s@c19 s@d14 s@h7 s@g6 s@l17 s@b9 s@b5 s@s5 s@m9 s@n3 s@m11 s@q7 s@a12 s@d18 s@b19 s@h12 s@j7 s@j8 s@k7 s@j17 s@h19 s@f18 s@o8 s@p5 s@c6 s@a2 s@k11 s@i3 s@f2 s@l6 s@e16 s@q4 s@s6 s@e12 s@r11 s@h18 s@e5 s@b10 s@q17 s@r1 s@n5 s@j6 s@h10 s@n2 s@n17 s@l1 s@j11 s@e11 s@a13 s@h11 s@c9 s@g16 s@n7 s@m2 s@r14 s@o9 s@m8 s@g12 s@j9 s@l9 s@f12 s@e19 s@p19 s@g13 s@n18 s@n10 s@i5 s@b12 s@a6 s@c11 s@d1 s@e17 s@g5 s@g11 s@q5 s@r2 s@o5 s@r13 s@e9 s@c14 s@j3 s@q11 s@h15 s@q6 s@q14 s@d6 s@q2 s@e10 s@m17 s@a4 s@p15 s@o13 s@b8 s@n13 s@m7 s@b1 s@q12 s@b11 s@r8 s@h8 s@j10 s@j16 s@n4 s@n6 s@a16 s@a15 s@r6 s@a10 s@a14 s@l10 s@l12 s@q1 s@i15 s@k3 s@i18 s@f13 s@g9 s@o6 s@e15 s@q19 s@o11 s@l16 s@f3 s@d19 s@k5 s@b4 s@b6 s@j19 s@m5 s@c2 s@g17 s@p17 s@c16 s@p16 s@p10 s@s1 s@k9 s@p14 s@f11 s@l7 s@d15 s@s9 s@n16 s@n19 s@g4 s@s14 s@g10 s@h1 s@i9 s@p9 s@q15 s@c5 s@h16 s@s4 s@m18 s@k10 s@i13 s@l13 s@i8 s@h13 s@i12 s@o7 s@l4 s@s3 s@e13 s@p13 s@s10 s@m13 s@f9 s@r5 s@p8 s@e1 s@c17 s@d4 s@c4 s@o14 s@r19 s@o16 s@f8 s@g2 s@n11 s@r12 s@m16 s@k17 s@l14 s@f16 s@b17 s@d8 s@c3 s@e6 s@m10 s@d17 s@i2 s@e2 s@b13 s@o18 s@f5 s@r10 s@f7 s@g8 s@p4 s@b14 s@q8 s@e14 s@g14 s@l19 s@p12 s@h5 s@e4 s@o2 s@m12 s@p18 s@o17 s@j13 s@s7 s@h4 s@s13 s@f17 s@q18 s@c1 s@j4 s@i11 s@f19 s@o4 s@q3 s@l2 s@g15 s@i17 s@d9 s@h17 s@p1 s@c12 s@f1 s@o12 s@k6 s@a3 s@k18 s@g18 s@f6 s@l11 s@s17 s@o19 s@k19 s@j5 s@r17 s@p7 s@r16 s@c10 s@k14 s@p19 s@n12 s@j2 s@o3 s@i7 s@a18 s@d3 s@n8 s@m3 s@h6 s@i14 s@i10 s@g17 s@s15 s@q10 s@k12 s@j1 s@p2 s@i12 s@s11 s@n14 s@q16 s@h2 s@a9 s@s8 s@s12 s@i16 s@l18 s@d11 s@i6 s@i4 s@g19 s@n9 s@e3 s@e18 s@l5 s@d13 s@l3 s@g3 s@i7 s@s19 s@d16 s@b18 s@l8 s@m15 s@k8 s@l10 s@l9 s@a8 s@k16 s@d7 s@d5 s@q9 s@l11 s@n1 s@j6 s@o15 s@p11 s@b7 s@m6 s@p6 s@r3 s@d12 s@f15 s@h9 s@s18 s@m4 s@j18 s@l15 s@e7 s@f10 s@r9 s@h3 s@d2 s@h14 s@f4 s@f12 s@c7 s@a1 s@j14 s@o9 s@g7 s@q9 s@a19 s@a11 s@d10 s@c8 s@n9 s@a5 s@k1 s@m14 s@k4 s@c13 s@q11 s@f14 s@k10 s@e2 s@s19 s@b2 s@k15 s@j15 s@a17 s@a14 s@c18 s@k2 s@j15 s@c15 s@e17 s@m1 s@h9 s@m19 s@a13 s@j17 s@g6 s@h18 s@b13 s@i13 s@d4 s@g16 s@n10 s@f16 s@l6 s@i1 s@f17 s@k17 s@k13 s@o14 s@j5 s@m19 s@g18 s@e18 s@q13 s@b15 s@j8 s@r13 s@p19 s@i2 s@o4 s@p14 s@g17 s@m13 s@e19 s@a12 s@n13 s@l13 pass pass ss:
-P||286644746|361|195455450|0|0|0|0|0|||
+P||286644746|361|195455450|0|75|0|0|0|||
 P||-212405487|360|-845066696|3610|75|0|0|0|||
 P||682774277|359|1533573363|10|85|0|0|0|||
 P||574696819|358|1869735961|20|85|0|0|0|||
@@ -8808,7 +8808,7 @@ P||-324920689|58|209645673|1980|1325|84|19|0|||
 P||-1671900324|0|0|1980|1325|85|19|1|p1||
 G|walk-go19x19-02|go19x19||0|0
 A|s@p18 s@n1 s@a2 s@o14 s@h10 s@m6 s@o7 s@d17 s@l10 s@g7 s@m8 s@k2 s@k10 s@k12 s@p7 s@r9 s@n9 s@i19 s@l19 s@b16 s@m7 s@p9 s@o6 s@l16 s@m11 s@s3 s@s17 s@i4 s@q12 s@k13 s@k4 s@q19 s@p8 s@o10 s@o8 s@j18 s@s11 s@s1 s@l4 s@b7 s@g16 s@i17 s@r8 s@q11 s@k17 s@n5 s@r2 s@o11 s@j16 s@c10 s@l11 s@c9 s@s18 s@p16 s@k8 s@l7 s@h6 s@e3 s@h15 s@h12 s@r13 s@k19 s@e13 s@q5 s@h9 s@q7 s@b12 s@q14 s@g10 s@c6 s@c12 s@m17 s@k5 s@s10 s@e19 s@f13 s@n16 s@e11 s@j7 s@m5 s@n4 s@p5 s@g11 s@r17 s@o19 s@p4 s@o12 s@l12 s@a12 s@f3 s@g18 s@f2 s@m12 s@s4 s@r10 s@k7 s@o16 s@d6 s@g15 s@c14 s@e7 s@a5 s@n12 s@e14 s@m1 s@r6 s@a1 s@p15 s@s6 s@r16 s@j15 s@o17 s@q17 s@a8 s@n14 s@e15 s@c4 s@f9 s@o3 s@s13 s@e5 s@h7 s@c19 s@e12 s@d9 s@g9 s@f6 s@g1 s@n7 s@b3 s@b17 s@g13 s@g17 s@e10 s@o1 s@g5 s@b10 s@q4 s@j2 s@h13 s@o5 s@g4 s@g12 s@f1 s@f12 s@p14 s@r7 s@e2 s@f17 s@c1 s@k1 s@j5 s@c11 s@s8 s@s7 s@c15 s@d15 s@q10 s@l1 s@d12 s@a4 s@n18 s@d10 s@g14 s@d3 s@r15 s@m3 s@s2 s@i15 s@c8 s@l9 s@d19 s@l3 s@r19 s@b1 s@n19 s@h19 s@f5 s@r14 s@q1 s@d1 s@j1 s@r18 s@i7 s@b4 s@i14 s@k11 s@m9 s@h8 s@h17 s@b19 s@j14 s@m2 s@n2 s@i6 s@c17 s@q3 s@c13 s@l15 s@e16 s@o2 s@q2 s@k14 s@i18 s@p2 s@k15 s@a19 s@e6 s@n6 s@e8 s@e1 s@n11 s@b2 s@b18 s@i12 s@a16 s@b5 s@s14 s@d8 s@l13 s@g19 s@l14 s@f19 s@m13 s@q13 s@g2 s@j3 s@p11 s@f4 s@d7 s@m15 s@d11 s@f14 s@r12 s@p19 s@j8 s@a14 s@f8 s@r5 s@k3 s@c18 s@q9 s@i1 s@i3 s@h18 s@s19 s@p3 s@b14 s@k18 s@g3 s@p13 s@h14 s@f15 s@p10 s@g8 s@i5 s@g6 s@i8 s@s15 s@h16 s@q6 s@p1 s@f7 s@b8 s@p12 s@q15 s@o18 s@a15 s@j4 s@r3 s@j11 s@j12 s@d4 s@k9 s@b11 s@e17 s@n15 s@p17 s@n13 s@d5 s@e4 s@i11 s@a13 s@a17 s@h4 s@d2 s@j9 s@i9 s@q16 s@k16 s@d1 s@m14 s@n3 s@h11 s@c16 s@a10 s@k9 s@d14 s@s12 s@l5 s@d18 s@h5 s@l2 s@k14 s@m10 s@q8 s@m4 s@j6 s@j19 s@i6 s@o9 s@l6 s@q18 s@n1 s@l18 s@f6 s@i13 s@h1 s@s9 s@j10 s@i10 s@o15 s@r19 s@b9 s@s10 s@e1 s@h3 s@r1 s@a7 s@j13 s@h6 s@s16 s@b13 s@m16 s@s8 s@f10 s@k2 s@a6 s@n17 s@b15 s@e18 s@e7 s@j17 s@n10 s@k19 s@k6 s@i13 s@b6 s@r4 s@c2 s@s5 s@s13 s@q19 s@f11 s@j1 s@p6 s@i16 s@a18 s@r11 s@q9 s@m18 s@j18 s@d19 s@h17 s@i18 s@q8 s@o11 s@d13 s@i17 s@d16 s@i19 s@l8 s@n10 s@f7 s@r12 s@e13 s@q7 s@c5 s@o10 s@h2 s@o4 s@p11 s@j18 s@q4 s@m9 s@s19 s@r2 s@j10 s@h16 s@o13 s@i2 s@r9 s@p10 s@s2 s@o19 s@e9 s@p18 s@c16 s@n8 s@i10 pass pass ss:
-P||286644746|361|195455450|0|0|0|0|0|||
+P||286644746|361|195455450|0|75|0|0|0|||
 P||1692721873|360|1890771301|3610|75|0|0|0|||
 P||-466423671|359|-1846434410|10|85|0|0|0|||
 P||1777720479|358|1018250211|20|85|0|0|0|||
@@ -9214,7 +9214,7 @@ P||65699365|50|-1480100941|1600|1735|54|45|0|||
 P||-1281280270|0|0|1600|1735|55|45|1|p2||
 G|walk-go19x19-03|go19x19||0|0
 A|s@n14 s@i19 s@c4 s@o2 s@c17 s@n1 s@s2 s@b4 s@g8 s@p16 s@o6 s@q2 s@q12 s@d19 s@f9 s@k19 s@b19 s@k17 s@r5 s@s19 s@n4 s@a7 s@n18 s@i12 s@f2 s@s5 s@q7 s@g11 s@f4 s@l15 s@s12 s@k7 s@s10 s@h17 s@c13 s@b10 s@r19 s@n6 s@r8 s@q5 s@r14 s@m12 s@f8 s@g5 s@p19 s@i11 s@g4 s@d2 s@r12 s@i14 s@h10 s@f12 s@a4 s@m15 s@m1 s@n5 s@q16 s@i13 s@d13 s@q13 s@i8 s@n9 s@l13 s@c2 s@g14 s@h2 s@h19 s@k6 s@l18 s@m2 s@s6 s@b9 s@n10 s@b18 s@m18 s@b1 s@p7 s@g19 s@h1 s@o18 s@e18 s@f13 s@s13 s@n16 s@s16 s@f11 s@c14 s@f16 s@e16 s@l14 s@s7 s@j11 s@m9 s@a12 s@a5 s@o13 s@f3 s@b7 s@o11 s@k2 s@s18 s@b13 s@i5 s@r15 s@e6 s@b6 s@c12 s@n19 s@a18 s@a2 s@l9 s@j10 s@h15 s@c7 s@r18 s@e7 s@f5 s@h9 s@a17 s@a9 s@r17 s@j1 s@s8 s@e2 s@j3 s@a15 s@k12 s@r9 s@e5 s@p14 s@e13 s@o9 s@f14 s@j6 s@a14 s@o4 s@n17 s@n11 s@e14 s@q15 s@n2 s@q1 s@o14 s@e12 s@o10 s@m6 s@a10 s@j8 s@e10 s@p15 s@j4 s@i2 s@r11 s@o7 s@e8 s@l11 s@k15 s@g3 s@i6 s@k8 s@j7 s@j16 s@q11 s@p4 s@n12 s@g10 s@h13 s@l1 s@q6 s@g6 s@j13 s@r7 s@j9 s@h3 s@j2 s@o8 s@h12 s@g17 s@c16 s@q14 s@n13 s@l5 s@n7 s@q17 s@c18 s@g9 s@d4 s@h7 s@b15 s@p18 s@a19 s@l2 s@s3 s@j19 s@m13 s@p6 s@s11 s@d14 s@f19 s@m10 s@m19 s@k5 s@b14 s@l6 s@p5 s@b5 s@g13 s@i18 s@q19 s@o19 s@a6 s@d18 s@i7 s@g15 s@r4 s@p2 s@s17 s@d9 s@f7 s@c11 s@c3 s@i1 s@b8 s@r13 s@e19 s@g18 s@s14 s@i17 s@p8 s@i16 s@k11 s@k18 s@k9 s@q3 s@k10 s@f15 s@p11 s@s9 s@q4 s@p10 s@m7 s@k1 s@i4 s@j17 s@p9 s@h5 s@a3 s@m8 s@m17 s@q8 s@f18 s@l3 s@r2 s@d5 s@c19 s@p3 s@d10 s@d16 s@n3 s@o1 s@m14 s@r6 s@k14 s@g1 s@a13 s@s15 s@k13 s@j5 s@b3 s@h1 s@o5 s@r1 s@d7 s@e15 s@j15 s@s1 s@g12 s@m11 s@d3 s@d12 s@b17 s@i10 s@e1 s@h4 s@n8 s@l7 s@q9 s@f6 s@m4 s@i3 s@f10 s@f1 s@d1 s@c10 s@h8 s@p1 s@d6 s@m3 s@e4 s@p17 s@e3 s@o17 s@e11 s@l17 s@b2 s@h6 s@a8 s@g2 s@c5 s@a11 s@l19 s@m1 s@o15 s@m5 s@b11 s@k4 s@l16 s@i15 s@j14 s@h14 s@a1 s@m16 s@q5 s@o16 s@e9 s@p13 s@h11 s@a16 s@h16 s@m17 s@q10 s@l19 s@c1 s@b12 s@c6 s@f17 s@o12 s@n18 s@d8 s@r8 s@l4 s@c8 s@p10 s@o7 s@m19 s@c15 s@c9 s@h18 s@m18 s@n9 s@r16 s@l18 s@j12 s@r3 s@i9 s@b11 s@m18 s@l10 s@p6 s@o9 s@b8 s@n17 s@q18 s@j18 s@p12 s@c2 s@d2 s@n15 s@d9 s@d15 s@b18 s@d17 s@b1 s@o3 s@l4 s@e17 s@d11 s@s8 s@g7 s@k3 s@l12 s@f11 s@n4 s@n11 s@s7 s@a8 s@s4 s@e18 s@e19 s@b16 s@d12 s@a17 s@n3 s@f18 s@b17 s@m12 s@m4 s@b18 s@e2 s@a10 pass pass ss:
-P||286644746|361|195455450|0|0|0|0|0|||
+P||286644746|361|195455450|0|75|0|0|0|||
 P||-1583200943|360|1710488415|3610|75|0|0|0|||
 P||-302565517|359|1785716730|10|85|0|0|0|||
 P||924385787|358|1088187001|20|85|0|0|0|||
@@ -9620,7 +9620,7 @@ P||2056495768|28|1015973600|1640|1775|33|41|0|||
 P||709516133|0|0|1640|1775|34|41|1|p2||
 G|walk-go19x19-04|go19x19||0|0
 A|s@l15 s@s2 s@e9 s@o2 s@a18 s@q9 s@b15 s@g10 s@p19 s@s8 s@a1 s@k17 s@d5 s@k16 s@j4 s@j10 s@j1 s@e2 s@d11 s@h15 s@e14 s@b9 s@r12 s@m7 s@q3 s@j8 s@o15 s@h7 s@s11 s@k15 s@a9 s@b11 s@r18 s@g1 s@j2 s@q1 s@b2 s@c17 s@h5 s@a7 s@r2 s@b8 s@a4 s@f19 s@l10 s@r4 s@i1 s@e19 s@i13 s@q10 s@n6 s@c7 s@o13 s@d10 s@q14 s@d4 s@o17 s@i16 s@o11 s@h2 s@g5 s@d9 s@l19 s@n19 s@q7 s@m4 s@d1 s@b19 s@b17 s@p14 s@b7 s@l8 s@i11 s@e17 s@e13 s@f1 s@a2 s@p2 s@i6 s@h4 s@p12 s@n17 s@i12 s@l13 s@h17 s@s16 s@n16 s@f4 s@s14 s@r15 s@b4 s@l14 s@d17 s@o14 s@o6 s@e18 s@g14 s@q2 s@j6 s@s4 s@s13 s@r1 s@g8 s@a8 s@i9 s@a5 s@m9 s@o8 s@o19 s@h10 s@m16 s@m8 s@l16 s@s6 s@l4 s@s1 s@k9 s@p1 s@h19 s@s15 s@g7 s@i10 s@d19 s@b1 s@r17 s@l9 s@h9 s@f15 s@a17 s@n1 s@b3 s@q15 s@q13 s@r6 s@q6 s@s19 s@f5 s@j3 s@c19 s@f6 s@l2 s@a13 s@c16 s@o12 s@l1 s@f9 s@k2 s@h14 s@f3 s@j5 s@q19 s@e8 s@i8 s@q12 s@q16 s@n14 s@r13 s@g4 s@k4 s@m12 s@p8 s@k10 s@h12 s@d12 s@g12 s@d15 s@f14 s@h8 s@q11 s@a10 s@i18 s@q18 s@f7 s@e1 s@a19 s@b14 s@i5 s@j14 s@d13 s@m3 s@j17 s@m2 s@g11 s@s7 s@j16 s@c13 s@d18 s@m10 s@a15 s@l12 s@f12 s@i7 s@r14 s@s18 s@f11 s@c14 s@l5 s@c11 s@p6 s@c5 s@o4 s@c12 s@m14 s@o1 s@k5 s@e15 s@f8 s@n12 s@r8 s@g18 s@m15 s@p9 s@m11 s@o7 s@o18 s@j9 s@l18 s@p7 s@a12 s@m18 s@c3 s@j13 s@q4 s@p5 s@c6 s@r19 s@i15 s@m17 s@k12 s@g19 s@k19 s@q5 s@l7 s@l3 s@m6 s@k7 s@a3 s@i14 s@p17 s@i17 s@g3 s@a14 s@k18 s@g9 s@p10 s@m5 s@j5 s@o5 s@j15 s@a16 s@q17 s@m19 s@d7 s@h11 s@n7 s@o9 s@o3 s@j12 s@r16 s@c2 s@h13 s@n13 s@h1 s@d16 s@i2 s@n10 s@e10 s@k14 s@s17 s@r11 s@b18 s@a11 s@n15 s@e3 s@p16 s@s5 s@c18 s@f13 s@s3 s@p3 s@p13 s@n5 s@m1 s@n18 s@j7 s@p4 s@n3 s@d8 s@g17 s@h6 s@j18 s@s18 s@c15 s@e12 s@k13 s@l17 s@c10 s@h3 s@b13 s@f17 s@k6 s@g15 s@c9 s@c8 s@b16 s@l6 s@r19 s@q8 s@i8 s@j11 s@r9 s@e5 s@e11 s@n2 s@f16 s@r7 s@q12 s@d2 s@p15 s@k3 s@p18 s@r10 s@i9 s@q15 s@m13 s@r5 s@s9 s@r15 s@b5 s@n4 s@f2 s@l7 s@n11 s@i4 s@b19 s@a9 s@d6 s@o4 s@c17 s@d14 s@g6 s@h18 s@f10 s@j19 s@g13 s@e7 s@f5 s@l5 s@l11 s@a6 s@h16 s@f7 s@s15 s@f18 s@g6 s@j6 s@g16 s@s10 s@s12 s@n9 s@k4 s@j4 s@i5 s@q15 s@i6 s@k5 s@o10 s@e4 s@s16 s@b12 s@g8 s@a16 s@c19 s@p8 s@q18 s@b19 s@b17 s@h9 s@c18 s@k11 s@b16 s@d18 s@a17 s@r3 s@s9 s@i19 s@a18 s@a15 s@i8 s@b10 s@g7 s@c15 s@q4 s@r8 s@b6 s@f13 s@e9 s@e13 s@f12 s@a12 pass pass ss:
-P||286644746|361|195455450|0|0|0|0|0|||
+P||286644746|361|195455450|0|75|0|0|0|||
 P||-612351591|360|-1945687234|3610|75|0|0|0|||
 P||-481475525|359|-1604200843|10|85|0|0|0|||
 P||1758437055|358|-1270064085|20|85|0|0|0|||
@@ -10026,7 +10026,7 @@ P||-101624781|47|509694914|1230|2035|18|82|0|||
 P||-1448604416|0|0|1230|2035|19|82|1|p2||
 G|walk-go19x19-05|go19x19||0|0
 A|s@p3 s@d18 s@h16 s@b12 s@s5 s@g5 s@p4 s@j12 s@n2 s@i13 s@l1 s@n18 s@o19 s@d17 s@f10 s@o14 s@r1 s@f12 s@h9 s@m11 s@r9 s@h13 s@s6 s@q9 s@p14 s@n16 s@p13 s@f16 s@b18 s@j14 s@b3 s@k13 s@d15 s@d3 s@l15 s@i4 s@f11 s@g7 s@c10 s@o15 s@a14 s@l10 s@j17 s@m9 s@i15 s@k16 s@d8 s@q10 s@p6 s@p11 s@j5 s@b5 s@a7 s@n15 s@q11 s@o13 s@r15 s@c5 s@p17 s@i9 s@r11 s@k8 s@d4 s@j19 s@c3 s@o1 s@k9 s@d13 s@h10 s@n12 s@e10 s@f17 s@n6 s@l11 s@b16 s@k4 s@b8 s@c19 s@a3 s@q19 s@r8 s@l9 s@d9 s@k7 s@e12 s@f19 s@l16 s@l3 s@m18 s@c11 s@g8 s@h11 s@g4 s@h3 s@q8 s@c7 s@a17 s@f7 s@n7 s@m8 s@a2 s@c14 s@a19 s@k5 s@o2 s@c8 s@p2 s@j16 s@d16 s@h17 s@g13 s@o16 s@n4 s@r16 s@s13 s@g10 s@h14 s@m14 s@m10 s@c13 s@b4 s@m7 s@e1 s@n5 s@e9 s@e11 s@e16 s@p8 s@p16 s@i7 s@m17 s@m16 s@l4 s@l7 s@k18 s@c1 s@o6 s@j15 s@r18 s@n9 s@f6 s@e14 s@p1 s@s10 s@e8 s@b9 s@q16 s@c4 s@n1 s@s11 s@f13 s@p15 s@q5 s@b1 s@o8 s@b11 s@e6 s@k19 s@n11 s@k2 s@o4 s@h4 s@b7 s@n8 s@m3 s@a5 s@g17 s@g1 s@d10 s@g19 s@k1 s@b13 s@h19 s@h5 s@r10 s@k14 s@q18 s@m19 s@k10 s@p12 s@n10 s@f3 s@a15 s@s19 s@p10 s@r5 s@b14 s@f4 s@s16 s@i3 s@e13 s@e15 s@g6 s@j2 s@d2 s@j6 s@r4 s@c16 s@c12 s@a10 s@g12 s@s18 s@m15 s@i5 s@c18 s@a8 s@i2 s@k15 s@q13 s@l6 s@i1 s@i17 s@l17 s@s7 s@j11 s@m2 s@f2 s@n3 s@o18 s@j9 s@b6 s@r19 s@l13 s@m13 s@j1 s@f15 s@i14 s@o9 s@c17 s@i16 s@h18 s@s17 s@m4 s@i12 s@a11 s@g3 s@g9 s@c2 s@q15 s@g4 s@o7 s@d11 s@n13 s@r12 s@g18 s@s4 s@q3 s@j13 s@e18 s@o17 s@e19 s@h1 s@g14 s@s14 s@i19 s@q7 s@p18 s@j10 s@r14 s@f5 s@l2 s@f14 s@i10 s@n14 s@h2 s@m5 s@a12 s@d19 s@d12 s@d1 s@h12 s@o12 s@r6 s@d7 s@b2 s@e2 s@i8 s@c9 s@b15 s@r13 s@r17 s@e17 s@q4 s@s1 s@f1 s@b19 s@s3 s@j8 s@f8 s@a6 s@r16 s@o11 s@e3 s@h6 s@k17 s@o5 s@m1 s@d5 s@i11 s@l5 s@s2 s@j18 s@b17 s@k3 s@k11 s@l12 s@n19 s@i18 s@d14 s@e4 s@c6 s@i6 s@g15 s@l19 s@n17 s@h7 s@o1 s@q1 s@m6 s@q6 s@g2 s@l8 s@b10 s@a4 s@f12 s@d6 s@a16 s@r3 s@f9 s@a18 s@k12 s@p5 s@e7 s@c6 s@s15 s@h8 s@s12 s@m12 s@b8 s@l14 s@s8 s@n13 s@s14 s@a13 s@g1 s@q12 s@m2 s@b6 s@q17 s@l13 s@j4 s@a9 s@a7 s@f18 s@n18 s@a1 s@g16 s@e19 s@q2 s@a3 s@h15 s@q14 s@c3 s@r7 s@b4 s@p7 s@o10 s@e18 s@p6 s@a12 s@q1 s@b2 s@o7 s@s9 s@h1 s@l18 s@s1 s@k6 s@p13 s@e3 s@p14 s@r10 s@q11 s@n6 s@e5 s@r8 s@a19 s@f15 s@q13 s@e17 s@n7 s@b7 s@f14 s@s8 s@a18 s@i8 s@r2 s@d2 s@g19 s@b3 pass pass ss:
-P||286644746|361|195455450|0|0|0|0|0|||
+P||286644746|361|195455450|0|75|0|0|0|||
 P||280794265|360|-1887472659|3610|75|0|0|0|||
 P||-915076279|359|629681870|10|85|0|0|0|||
 P||-1096341209|358|-845611091|20|85|0|0|0|||
@@ -10432,7 +10432,7 @@ P||-1869347430|23|1901732317|1600|1865|32|44|0|||
 P||1078640231|0|0|1600|1865|33|44|1|p2||
 G|walk-go19x19-06|go19x19||0|0
 A|s@b3 s@s13 s@b5 s@f18 s@p5 s@g14 s@h10 s@g7 s@k11 s@k12 s@e5 s@d8 s@f16 s@e10 s@g3 s@r12 s@l19 s@o4 s@c6 s@r8 s@h1 s@q14 s@l8 s@j4 s@h9 s@n7 s@i7 s@l9 s@n2 s@k8 s@q10 s@q13 s@o1 s@j6 s@c14 s@q11 s@a1 s@s18 s@d12 s@h2 s@o3 s@e6 s@a17 s@p2 s@k14 s@n16 s@g18 s@l3 s@r9 s@r3 s@e16 s@r4 s@c8 s@d18 s@g12 s@n14 s@o6 s@m10 s@m16 s@r11 s@p17 s@s5 s@r1 s@p6 s@g2 s@g1 s@k3 s@f3 s@e14 s@h6 s@n17 s@l4 s@f13 s@p4 s@a6 s@b13 s@n15 s@m5 s@b18 s@p7 s@e17 s@j2 s@c18 s@m13 s@j10 s@d19 s@s14 s@b15 s@g11 s@b16 s@k2 s@a19 s@h18 s@f14 s@a10 s@l2 s@k17 s@j7 s@l13 s@c5 s@d5 s@f5 s@r7 s@g5 s@n1 s@o2 s@c3 s@s7 s@q2 s@l15 s@s8 s@n11 s@d1 s@s9 s@m17 s@l6 s@a18 s@q16 s@k19 s@b7 s@e3 s@j9 s@h4 s@c16 s@s16 s@e2 s@n18 s@o13 s@m14 s@o12 s@l11 s@s15 s@i9 s@e7 s@m19 s@g9 s@j15 s@r2 s@b10 s@l1 s@g15 s@p18 s@q19 s@p19 s@k18 s@a5 s@l7 s@i10 s@n12 s@s19 s@r17 s@d2 s@s17 s@r19 s@k6 s@j19 s@d4 s@h17 s@s12 s@l12 s@p8 s@d7 s@i18 s@r15 s@d17 s@j16 s@b2 s@q18 s@c1 s@a4 s@f7 s@k4 s@q4 s@n8 s@g13 s@e18 s@d6 s@m1 s@f15 s@k7 s@d13 s@a11 s@r10 s@o19 s@a15 s@n10 s@g16 s@s1 s@a3 s@n3 s@m4 s@l16 s@r14 s@c13 s@o14 s@q17 s@k9 s@o11 s@q5 s@s2 s@n5 s@g8 s@p12 s@s8 s@h15 s@r5 s@o8 s@h5 s@m7 s@i16 s@r16 s@i2 s@p11 s@e19 s@c15 s@e11 s@g4 s@l10 s@r6 s@p10 s@e12 s@p15 s@d15 s@e9 s@j12 s@p1 s@o17 s@m15 s@e4 s@s4 s@s10 s@b11 s@c12 s@s6 s@j8 s@i4 s@g19 s@g6 s@l18 s@o18 s@g10 s@f9 s@q3 s@j17 s@n4 s@d3 s@p13 s@f2 s@a14 s@q12 s@h11 s@n13 s@s11 s@m6 s@c4 s@o7 s@i17 s@i1 s@f8 s@i8 s@i19 s@a7 s@a2 s@p14 s@j5 s@c17 s@f12 s@b19 s@j18 s@i15 s@i6 s@m3 s@o15 s@a9 s@d10 s@k15 s@i12 s@m2 s@h8 s@f4 s@h13 s@i13 s@j19 s@b9 s@j3 s@l14 s@o1 s@f19 s@a12 s@i5 s@r13 s@f11 s@b8 s@q9 s@i11 s@f10 s@h7 s@m9 s@l5 s@q7 s@h12 s@h3 s@k10 s@c19 s@n6 s@a8 s@p12 s@c11 s@o9 s@d11 s@g4 s@o16 s@c9 s@s3 s@o5 s@i3 s@k1 s@h4 s@g2 s@m14 s@b12 s@k16 s@m6 s@b14 s@e15 s@c10 s@j11 s@h16 s@n9 s@b10 s@o14 s@b6 s@j13 s@f6 s@e1 s@d16 s@e13 s@j14 s@q8 s@r8 s@l17 s@m12 s@q6 s@d9 s@g17 s@k8 s@o10 s@s5 s@k13 s@b4 s@p11 s@s7 s@h14 s@n2 s@m18 s@k5 s@k7 s@m8 s@s6 s@s4 s@a6 s@q19 s@i14 s@j15 s@j7 s@o15 s@j6 s@r2 s@h19 s@a10 s@m5 s@h1 s@a4 s@s3 s@p3 s@c2 s@m11 s@d10 s@b4 s@a5 s@r4 s@f14 s@r5 s@c7 s@i10 s@n19 s@g14 s@b17 s@s9 s@b8 s@b1 s@p9 s@o8 s@j1 s@i13 s@n1 s@k1 s@s8 s@n9 s@s2 pass pass ss:
-P||286644746|361|195455450|0|0|0|0|0|||
+P||286644746|361|195455450|0|75|0|0|0|||
 P||361513365|360|-230566399|3610|75|0|0|0|||
 P||-176676443|359|1150485080|10|85|0|0|0|||
 P||1467893903|358|1777046641|20|85|0|0|0|||
@@ -10838,7 +10838,7 @@ P||-1870163924|28|-1275886640|1710|1785|37|39|0|||
 P||1077823737|0|0|1710|1785|38|39|1|p2||
 G|walk-go19x19-07|go19x19||0|0
 A|s@h12 s@o17 s@e18 s@h5 s@g1 s@l18 s@j11 s@s8 s@f5 s@f1 s@r11 s@b1 s@k2 s@h13 s@o5 s@d6 s@c10 s@a12 s@r7 s@g11 s@h11 s@l5 s@s5 s@r9 s@a10 s@j12 s@b13 s@k1 s@s7 s@g12 s@q6 s@g8 s@r8 s@p7 s@i6 s@n18 s@s16 s@l2 s@r17 s@a2 s@c16 s@a5 s@g18 s@d14 s@m5 s@c1 s@l17 s@f7 s@g17 s@p3 s@j5 s@n13 s@o1 s@o4 s@a16 s@g19 s@c9 s@i19 s@q18 s@d9 s@h17 s@e3 s@r14 s@a13 s@d16 s@c11 s@k6 s@h1 s@o12 s@n7 s@f17 s@r13 s@i11 s@k3 s@f19 s@k8 s@d12 s@b12 s@q10 s@f13 s@g7 s@p15 s@g3 s@a7 s@k4 s@e13 s@n19 s@c8 s@c4 s@k17 s@e10 s@e8 s@g2 s@o19 s@f18 s@s15 s@k9 s@e15 s@g10 s@l14 s@m7 s@i4 s@b18 s@d19 s@h10 s@l1 s@d1 s@g9 s@o6 s@p11 s@e1 s@i14 s@r6 s@a18 s@o13 s@p16 s@p13 s@n15 s@p19 s@p2 s@p5 s@g14 s@b4 s@b14 s@g4 s@g13 s@i17 s@g5 s@o11 s@c15 s@b2 s@f3 s@p8 s@l19 s@n11 s@g16 s@e6 s@l6 s@r1 s@o14 s@m19 s@b9 s@d10 s@f10 s@g6 s@c14 s@m11 s@o10 s@h6 s@c12 s@f9 s@p4 s@m3 s@n9 s@c17 s@k13 s@i7 s@s4 s@a8 s@h15 s@k19 s@m17 s@c3 s@m1 s@h16 s@s9 s@n2 s@c5 s@i18 s@f11 s@k16 s@d7 s@n17 s@q17 s@i16 s@c19 s@c2 s@s13 s@f12 s@s19 s@j7 s@l7 s@q12 s@c18 s@s11 s@i2 s@c6 s@i9 s@b16 s@r18 s@m16 s@k11 s@a9 s@o9 s@n5 s@m8 s@d2 s@r5 s@a14 s@n1 s@l13 s@p1 s@s10 s@s6 s@j16 s@s14 s@g15 s@q9 s@j13 s@s2 s@b3 s@q2 s@j10 s@r10 s@o15 s@p12 s@j6 s@h7 s@l8 s@r2 s@l3 s@o2 s@o8 s@p10 s@h3 s@l16 s@j9 s@s3 s@s12 s@h9 s@p18 s@i10 s@e5 s@a15 s@q8 s@l17 s@s18 s@i1 s@m15 s@m2 s@d18 s@s5 s@a17 s@m14 s@p9 s@j18 s@b8 s@h2 s@o18 s@j4 s@d13 s@j8 s@n6 s@c7 s@l15 s@k5 s@n8 s@e9 s@j14 s@n4 s@e17 s@b19 s@e2 s@j15 s@n10 s@p17 s@f16 s@q7 s@b7 s@q15 s@l9 s@m6 s@l11 s@s9 s@l10 s@e7 s@q3 s@e4 s@h18 s@h4 s@b10 s@q19 s@i3 s@j17 s@q16 s@q13 s@o16 s@s17 s@b5 s@e11 s@r12 s@c13 s@k14 s@a11 s@f6 s@k10 s@i8 s@r16 s@d4 s@n12 s@k15 s@m10 s@e19 s@e12 s@q5 s@m4 s@b9 s@o7 s@p6 s@j1 s@m12 s@q14 s@f15 s@q16 s@b11 s@s18 s@b6 s@r17 s@a6 s@p14 s@d17 s@a14 s@f4 s@a4 s@a7 s@d8 s@r4 s@d15 s@h19 s@m13 s@k18 s@f12 s@j2 s@f8 s@m18 s@n16 s@f2 s@e16 s@r10 s@q9 s@o16 s@f9 s@d3 s@k12 s@g16 s@m7 s@j19 s@d11 s@j3 s@i13 s@s1 s@d5 s@e14 s@b17 s@a3 s@a19 s@r9 s@l18 s@q11 s@a4 s@j17 s@o3 s@b15 s@r3 s@f3 s@m17 s@i15 s@o15 s@g19 s@h14 s@l12 s@d13 s@a1 s@n18 s@e4 s@l4 s@h8 s@n14 s@i12 s@k10 s@l17 s@r19 s@n17 s@b1 s@n3 s@k13 s@q4 s@a2 s@m9 s@k7 s@o10 s@n9 s@a5 s@p10 s@o9 s@b13 s@c1 s@d12 s@b18 s@c18 pass pass ss:
-P||286644746|361|195455450|0|0|0|0|0|||
+P||286644746|361|195455450|0|75|0|0|0|||
 P||165004937|360|-76032361|3610|75|0|0|0|||
 P||2003887233|359|2145895022|10|85|0|0|0|||
 P||-1181129019|358|-1820949554|20|85|0|0|0|||
@@ -11244,7 +11244,7 @@ P||1430844670|33|-2096993330|1970|1555|56|20|0|||
 P||83865035|0|0|1970|1555|57|20|1|p1||
 G|walk-go19x19-08|go19x19||0|0
 A|s@h4 s@n4 s@b5 s@i5 s@o4 s@k17 s@b1 s@c14 s@d19 s@q3 s@j1 s@s6 s@p13 s@g13 s@r15 s@a6 s@k12 s@e14 s@c5 s@k7 s@d6 s@f12 s@m3 s@r16 s@m19 s@s14 s@r4 s@i12 s@q12 s@o11 s@n1 s@f14 s@k16 s@c7 s@s1 s@p4 s@f16 s@o6 s@s16 s@o17 s@a19 s@h19 s@h2 s@g2 s@l10 s@i17 s@j8 s@o2 s@i13 s@h16 s@c15 s@e2 s@h12 s@g4 s@m18 s@p10 s@r14 s@k8 s@n8 s@q6 s@s13 s@a9 s@h13 s@l12 s@d14 s@k10 s@n7 s@l9 s@q4 s@k19 s@r10 s@j9 s@d12 s@o14 s@h6 s@c19 s@m9 s@a11 s@g16 s@f9 s@c6 s@n17 s@j19 s@c11 s@i15 s@r8 s@a3 s@r7 s@o9 s@l4 s@f19 s@o16 s@c12 s@l17 s@d16 s@m5 s@q16 s@r13 s@b16 s@s7 s@e9 s@a10 s@l18 s@q10 s@r3 s@e15 s@r6 s@g14 s@m2 s@s3 s@a17 s@o12 s@a14 s@s12 s@j11 s@f15 s@a1 s@p18 s@j15 s@b2 s@c9 s@p12 s@b4 s@b7 s@g10 s@h3 s@a2 s@o10 s@e10 s@e8 s@l16 s@l5 s@e7 s@b19 s@k3 s@g3 s@q1 s@c17 s@g8 s@c8 s@n13 s@m17 s@p16 s@b18 s@a4 s@f5 s@e19 s@r5 s@m7 s@k9 s@j3 s@l15 s@q19 s@s19 s@p5 s@i16 s@i7 s@p1 s@l2 s@m13 s@p19 s@i9 s@k2 s@p9 s@m1 s@b9 s@e5 s@p15 s@o13 s@m15 s@o3 s@a13 s@g19 s@m14 s@g9 s@q11 s@m12 s@l11 s@i3 s@i8 s@g15 s@i14 s@n16 s@k5 s@d2 s@l14 s@k4 s@i19 s@d8 s@d18 s@d4 s@f4 s@l1 s@p8 s@s18 s@b10 s@b8 s@m11 s@j4 s@b15 s@n11 s@i18 s@b14 s@j14 s@e1 s@s11 s@d17 s@s4 s@o8 s@m16 s@q14 s@p6 s@j17 s@n5 s@o19 s@a5 s@d15 s@g18 s@h7 s@e13 s@h11 s@h8 s@n6 s@q5 s@k6 s@q9 s@f1 s@a16 s@i1 s@c3 s@r11 s@c10 s@e3 s@e4 s@g6 s@d7 s@k11 s@p2 s@j16 s@j6 s@i6 s@g12 s@r9 s@r12 s@s9 s@c4 s@l19 s@g17 s@q2 s@j5 s@b17 s@s13 s@l13 s@n10 s@m6 s@b12 s@f10 s@r17 s@j18 s@i10 s@g7 s@s15 s@j10 s@o5 s@q15 s@c18 s@k14 s@h10 s@f17 s@b3 s@d3 s@j2 s@f6 s@o15 s@r18 s@d1 s@n12 s@c13 s@g1 s@f11 s@o18 s@n18 s@n2 s@b11 s@f3 s@p3 s@n19 s@d9 s@j13 s@j12 s@n9 s@e18 s@k1 s@d13 s@q18 s@b6 s@n14 s@l3 s@p7 s@c16 s@c1 s@e17 s@h5 s@m8 s@a7 s@p5 s@o1 s@e16 s@n3 s@b13 s@d10 s@d14 s@q17 s@f2 s@e12 s@j7 s@l7 s@s8 s@g5 s@k18 s@g2 s@d17 s@e11 s@k15 s@h14 s@c9 s@i4 s@h18 s@r19 s@c15 s@p14 s@d8 s@h3 s@k13 s@m4 s@p11 s@e6 s@r2 s@g4 s@m10 s@d15 s@s10 s@g3 s@f5 s@e2 s@f18 s@s17 s@n15 s@q7 s@a18 s@o7 s@s5 s@g19 s@h9 s@r9 s@r11 s@l8 s@b16 s@s2 s@i14 s@q4 s@a12 s@h1 s@a17 s@h15 s@i11 s@q8 s@f19 s@r17 s@j11 s@g11 s@l13 s@q13 s@p17 s@r10 s@f7 s@d5 s@g19 s@f2 s@j8 s@d11 s@r3 s@m8 s@d16 s@d19 s@h17 s@d1 s@r4 s@e4 s@r1 s@c2 s@j14 s@k12 s@j10 s@q2 s@c4 s@b3 s@d15 s@c3 s@r6 pass pass ss:
-P||286644746|361|195455450|0|0|0|0|0|||
+P||286644746|361|195455450|0|75|0|0|0|||
 P||-429669751|360|-1193283812|3610|75|0|0|0|||
 P||-1248717074|359|-1946426378|10|85|0|0|0|||
 P||-863027112|358|-519863875|20|85|0|0|0|||
@@ -11650,7 +11650,7 @@ P||-1087287330|10|2111919523|1630|1955|21|41|0|||
 P||1860700331|0|0|1630|1955|22|41|1|p2||
 G|walk-go19x19-09|go19x19||0|0
 A|s@b14 s@h14 s@s10 s@h5 s@h12 s@b1 s@s13 s@p9 s@n16 s@g1 s@d18 s@n8 s@f11 s@i5 s@p6 s@f9 s@p15 s@c6 s@p16 s@o11 s@i13 s@g11 s@l12 s@k12 s@q6 s@c14 s@c16 s@n18 s@b4 s@e5 s@i1 s@f13 s@k4 s@r12 s@i8 s@g18 s@s5 s@r4 s@d16 s@g5 s@l5 s@c3 s@a17 s@m18 s@i12 s@a16 s@h9 s@n9 s@m5 s@k17 s@o17 s@k7 s@d2 s@k14 s@o16 s@k9 s@r6 s@i14 s@r1 s@s6 s@n2 s@q10 s@n10 s@a15 s@l1 s@h1 s@i9 s@n13 s@c1 s@g8 s@g19 s@a14 s@j8 s@i18 s@f4 s@j5 s@e13 s@g2 s@r11 s@b7 s@b5 s@g17 s@b13 s@f6 s@o1 s@k1 s@p19 s@s3 s@d7 s@c15 s@e12 s@b12 s@k8 s@p17 s@g9 s@b6 s@h18 s@q7 s@q9 s@l2 s@q19 s@o19 s@b2 s@h11 s@h2 s@b18 s@g16 s@n7 s@s17 s@q4 s@d17 s@j7 s@g6 s@p13 s@a3 s@g4 s@j3 s@p18 s@i10 s@k10 s@m2 s@n6 s@c8 s@o3 s@b16 s@f18 s@o9 s@d5 s@j18 s@n4 s@q16 s@r17 s@i4 s@f5 s@r7 s@j19 s@m16 s@m1 s@j11 s@c19 s@g3 s@q15 s@o2 s@g12 s@b9 s@l9 s@f16 s@i2 s@q18 s@p4 s@o12 s@r5 s@c18 s@s19 s@q8 s@s18 s@d9 s@q5 s@g15 s@k2 s@k15 s@k13 s@k5 s@c17 s@c7 s@f14 s@a1 s@e3 s@n15 s@o4 s@e18 s@f2 s@m3 s@p11 s@f12 s@a10 s@q12 s@n1 s@m7 s@s1 s@d8 s@k16 s@r2 s@e4 s@d4 s@o7 s@e2 s@l4 s@j4 s@d3 s@q17 s@r3 s@o5 s@f3 s@j16 s@r15 s@o18 s@e16 s@e14 s@l16 s@f19 s@p14 s@f7 s@p17 s@h10 s@o10 s@l17 s@j1 s@r9 s@i7 s@e19 s@g13 s@j15 s@e8 s@i11 s@o14 s@h17 s@i19 s@m6 s@s2 s@q13 s@p7 s@j13 s@j9 s@r19 s@c2 s@l11 s@h8 s@c5 s@h6 s@s7 s@a19 s@c13 s@m19 s@n11 s@p3 s@s11 s@i17 s@q2 s@b19 s@p5 s@d6 s@e7 s@s8 s@m11 s@d12 s@f17 s@n19 s@b11 s@l6 s@m10 s@j17 s@q3 s@a9 s@h13 s@f18 s@l1 s@j14 s@l7 s@j6 s@k18 s@h15 s@g14 s@l13 s@q14 s@c12 s@a5 s@b17 s@a7 s@b15 s@h3 s@m8 s@e17 s@h16 s@k6 s@n5 s@b8 s@r8 s@k19 s@m14 s@i15 s@l10 s@s15 s@a11 s@i3 s@a6 s@h4 s@q1 s@s9 s@d14 s@l3 s@q11 s@f15 s@k11 s@d1 s@n17 s@r10 s@p8 s@l18 s@j12 s@k3 s@p2 s@r1 s@s14 s@h19 s@s16 s@c11 s@b10 s@a2 s@r18 s@c10 s@b3 s@f1 s@r13 s@q2 s@p12 s@a13 s@a12 s@s12 s@i1 s@n14 s@g18 s@o13 s@l19 s@l14 s@l8 s@j2 s@h7 s@m1 s@o6 s@c4 s@r8 s@e10 s@j10 s@a4 s@e1 s@m9 s@d11 s@s4 s@m17 s@d10 s@m15 s@l6 s@s8 s@s9 s@n12 s@d13 s@i6 s@g17 s@m13 s@g7 s@s17 s@f1 s@o8 s@e11 s@r2 s@o12 s@o15 s@c9 s@j18 s@g10 s@s15 s@p1 s@k19 s@g12 s@s13 s@r11 s@o9 s@q9 s@k18 s@n3 s@f14 s@r9 s@m4 s@q8 s@r1 s@g13 s@h11 s@p18 s@a18 s@s11 s@a17 s@e9 s@b1 s@a5 s@s12 s@b2 s@a2 s@r16 s@r8 s@l17 s@c5 s@d4 s@q3 s@f18 s@p17 s@f13 s@o13 s@b4 s@o12 pass pass ss:
-P||286644746|361|195455450|0|0|0|0|0|||
+P||286644746|361|195455450|0|75|0|0|0|||
 P||-1561170091|360|-1934265005|3610|75|0|0|0|||
 P||1465065281|359|78453458|10|85|0|0|0|||
 P||-1391950991|358|-1424774100|20|85|0|0|0|||
@@ -12056,7 +12056,7 @@ P||-1426814008|37|-858635798|1440|2045|25|61|0|||
 P||1521173653|0|0|1440|2045|26|61|1|p2||
 G|walk-go19x19-10|go19x19||0|0
 A|s@h8 s@b5 s@b14 s@o17 s@m1 s@h18 s@i19 s@e14 s@d2 s@b9 s@c15 s@h6 s@d14 s@h9 s@m7 s@n15 s@m11 s@o1 s@o14 s@f5 s@l10 s@k18 s@e18 s@f1 s@b12 s@n6 s@s7 s@p15 s@m12 s@m4 s@r9 s@o15 s@k3 s@h12 s@n8 s@c6 s@l7 s@r13 s@f16 s@c14 s@s4 s@j17 s@c12 s@j12 s@q15 s@o6 s@f12 s@m3 s@o12 s@d3 s@h14 s@a7 s@f15 s@s2 s@h5 s@k9 s@e7 s@g9 s@m2 s@o18 s@a5 s@m15 s@d6 s@o5 s@r15 s@g15 s@p11 s@l12 s@b8 s@c13 s@j16 s@q19 s@g2 s@k6 s@j10 s@e10 s@b16 s@p14 s@b4 s@o11 s@k2 s@g18 s@i2 s@m16 s@o9 s@f18 s@g14 s@a3 s@h10 s@h2 s@q11 s@k16 s@s17 s@n12 s@a17 s@o10 s@e3 s@r18 s@b11 s@c17 s@l17 s@g19 s@s11 s@l3 s@f2 s@r16 s@i10 s@d11 s@g1 s@e5 s@a16 s@n19 s@i12 s@h4 s@c7 s@a4 s@m8 s@g10 s@r6 s@i16 s@c3 s@d5 s@p9 s@o3 s@d7 s@d17 s@r8 s@e13 s@j3 s@s5 s@i6 s@c18 s@j9 s@s13 s@l2 s@n18 s@o19 s@d19 s@f7 s@j4 s@s18 s@j19 s@s9 s@m6 s@r17 s@l4 s@s3 s@b6 s@g11 s@b15 s@k4 s@e2 s@i3 s@j7 s@n4 s@r11 s@f19 s@b18 s@n10 s@e11 s@d12 s@r12 s@d18 s@n1 s@s10 s@g6 s@r19 s@q13 s@n14 s@i7 s@i13 s@g5 s@f13 s@i17 s@j8 s@q7 s@f6 s@f11 s@l14 s@g7 s@n16 s@q5 s@h3 s@n3 s@n17 s@c11 s@n2 s@f14 s@q4 s@q9 s@o8 s@s12 s@p5 s@j14 s@q2 s@p3 s@a13 s@a12 s@d13 s@g16 s@r1 s@k14 s@i18 s@m18 s@p8 s@n11 s@k1 s@l11 s@l19 s@e8 s@q3 s@a2 s@g3 s@a11 s@i8 s@l13 s@b7 s@e19 s@d16 s@j5 s@h15 s@i11 s@k10 s@l6 s@e9 s@c8 s@j11 s@b2 s@j18 s@f9 s@e15 s@h1 s@o16 s@r2 s@f17 s@s14 s@c10 s@g12 s@c9 s@n13 s@o13 s@d8 s@c1 s@h16 s@a1 s@l16 s@m14 s@a8 s@r7 s@m13 s@d15 s@g13 s@q17 s@m17 s@k11 s@c4 s@j15 s@f8 s@q6 s@a15 s@s6 s@q12 s@i5 s@m19 s@k15 s@j2 s@q16 s@a19 s@s16 s@l18 s@k13 s@r14 s@s1 s@c5 s@l1 s@p16 s@i14 s@c19 s@p10 s@h17 s@j6 s@q18 s@i4 s@b17 s@m9 s@p18 s@n16 s@s19 s@b10 s@f4 s@j1 s@f3 s@q8 s@q14 s@p7 s@r19 s@d4 s@e6 s@k19 s@h19 s@k7 s@l9 s@i9 s@s15 s@e16 s@d1 s@i1 s@b8 s@q7 s@r3 s@o4 s@h1 s@r10 s@c7 s@b13 s@g8 s@f6 s@p1 s@d9 s@j19 s@j13 s@d6 s@n17 s@k8 s@a18 s@h7 s@c13 s@r5 s@j2 s@f19 s@b1 s@e12 s@g17 s@k14 s@f13 s@m5 s@m10 s@i18 s@r16 s@b19 s@o2 s@c2 s@f7 s@k5 s@s8 s@p2 s@c16 s@e1 s@k12 s@n7 s@n13 s@f10 s@l8 s@k19 s@p4 s@e17 s@d3 s@h13 s@q10 s@l12 s@i15 s@p19 s@p12 s@o19 s@o10 s@o11 s@h11 s@r4 s@f12 s@j18 s@c1 s@e1 s@k8 s@a6 s@k9 s@n11 s@q9 s@g13 s@g4 s@d7 s@s3 s@f1 s@j14 s@e7 s@p6 s@b1 s@k14 s@e2 s@h13 s@f6 s@p13 s@p17 s@a10 s@a9 s@l11 s@s17 s@g12 s@l15 s@c14 s@o16 pass pass ss:
-P||286644746|361|195455450|0|0|0|0|0|||
+P||286644746|361|195455450|0|75|0|0|0|||
 P||-654949239|360|-1513935268|3610|75|0|0|0|||
 P||1333782397|359|-1491802315|10|85|0|0|0|||
 P||504296231|358|894189934|20|85|0|0|0|||
@@ -12462,7 +12462,7 @@ P||-41289153|33|-1001071604|1670|1875|39|42|0|||
 P||1040202657|0|0|1670|1875|40|42|1|p2||
 G|walk-go19x19-11|go19x19||0|0
 A|s@l11 s@f1 s@e16 s@e12 s@b15 s@b4 s@l12 s@d18 s@q9 s@c15 s@c1 s@m7 s@i18 s@i5 s@q6 s@n9 s@o19 s@j3 s@l1 s@a3 s@n1 s@q11 s@s9 s@m15 s@b5 s@i9 s@c9 s@h9 s@s17 s@s18 s@m5 s@n13 s@n7 s@r1 s@d10 s@e11 s@m11 s@j11 s@b18 s@c17 s@d8 s@h1 s@p4 s@c5 s@a2 s@j18 s@m12 s@k1 s@o16 s@c14 s@a12 s@o11 s@d14 s@p1 s@j4 s@e4 s@c2 s@i1 s@q19 s@s12 s@g7 s@k11 s@p10 s@d2 s@l7 s@g2 s@a17 s@i12 s@r8 s@q14 s@s10 s@f6 s@e7 s@g18 s@k6 s@m18 s@a1 s@r16 s@n14 s@h5 s@p3 s@c8 s@b10 s@k5 s@h4 s@q3 s@m4 s@o17 s@k17 s@b17 s@r18 s@r3 s@k13 s@l13 s@b16 s@l15 s@f15 s@q2 s@q10 s@f2 s@m14 s@n3 s@j15 s@k18 s@h2 s@p15 s@o4 s@h18 s@a18 s@k15 s@j2 s@q5 s@r10 s@r12 s@o9 s@c3 s@o6 s@l19 s@q13 s@r2 s@a9 s@j19 s@i4 s@k8 s@m1 s@s8 s@g12 s@h14 s@o15 s@g16 s@n8 s@r14 s@g10 s@o13 s@d13 s@p7 s@p11 s@g11 s@e1 s@m8 s@m3 s@k7 s@i7 s@f8 s@d11 s@i10 s@s7 s@d1 s@e3 s@f7 s@e8 s@g3 s@a10 s@i14 s@m19 s@n18 s@e6 s@c10 s@b1 s@g8 s@l17 s@q18 s@s5 s@a4 s@n16 s@l18 s@g6 s@d17 s@s3 s@i17 s@p13 s@j1 s@p2 s@l2 s@q7 s@o18 s@i8 s@n15 s@b13 s@f10 s@b2 s@l6 s@r19 s@i3 s@a6 s@i15 s@r7 s@n5 s@j13 s@r11 s@h6 s@f17 s@o3 s@c7 s@a11 s@d6 s@s13 s@e14 s@h7 s@r17 s@n2 s@l9 s@h3 s@l14 s@n6 s@a15 s@h10 s@j14 s@d7 s@n4 s@o2 s@a16 s@o14 s@o1 s@p17 s@a14 s@q8 s@a13 s@b6 s@q16 s@b8 s@k10 s@n17 s@h8 s@i19 s@j10 s@l3 s@b7 s@o12 s@o7 s@k4 s@f16 s@p19 s@r4 s@h15 s@i6 s@e17 s@i11 s@e15 s@j17 s@q1 s@g5 s@e19 s@p18 s@b19 s@l8 s@c13 s@p12 s@l4 s@q15 s@f9 s@f13 s@r6 s@n19 s@s11 s@c12 s@e2 s@m6 s@c16 s@s14 s@o8 s@g15 s@r9 s@c11 s@c19 s@j8 s@g4 s@q17 s@i2 s@c4 s@d9 s@p1 s@e10 s@m9 s@j9 s@d5 s@h12 s@n10 s@m17 s@p16 s@s15 s@o1 s@f4 s@q4 s@b9 s@h17 s@n11 s@p6 s@f19 s@h19 s@i18 s@r15 s@b11 s@r13 s@e18 s@p17 s@l16 s@g17 s@e9 s@j7 s@q1 s@k14 s@s1 s@m13 s@d4 s@d15 s@g14 s@s4 s@j12 s@m16 s@o1 s@f3 s@s8 s@j16 s@d12 s@g19 s@d3 s@e13 s@b12 s@h7 s@k2 s@q12 s@h13 s@e5 s@h6 s@f14 s@k3 s@a5 s@h16 s@k12 s@i7 s@k9 s@k16 s@p1 s@s6 s@b3 s@a7 s@c12 s@c6 s@q1 s@g7 s@r5 s@b14 s@g9 s@a19 s@l10 s@c8 s@i8 s@c18 s@m10 s@o5 s@c11 s@b7 s@s16 s@d2 s@f12 s@a13 s@p9 s@c7 s@s19 s@j5 s@r19 s@i13 s@j3 s@c10 s@s2 s@l5 s@f18 s@i3 s@d1 s@p5 s@i16 s@h11 s@d16 s@p19 s@a14 s@a1 s@a15 s@d3 s@q19 s@f11 s@c1 s@n5 s@h15 s@n3 s@d19 s@g1 s@f15 s@p8 s@i1 s@e19 s@p6 s@o7 s@d2 s@e15 s@s3 s@c2 s@s17 s@f19 s@c11 pass pass ss:
-P||286644746|361|195455450|0|0|0|0|0|||
+P||286644746|361|195455450|0|75|0|0|0|||
 P||850712473|360|1891720378|3610|75|0|0|0|||
 P||-2105283051|359|963400379|10|85|0|0|0|||
 P||-963767335|358|305634713|20|85|0|0|0|||
@@ -12868,7 +12868,7 @@ P||1415121189|29|-1160372539|1600|1825|36|47|0|||
 P||68141554|0|0|1600|1825|37|47|1|p2||
 G|walk-go19x19-12|go19x19||0|0
 A|s@i4 s@n1 s@r2 s@h8 s@n2 s@e8 s@d15 s@i15 s@f9 s@f14 s@m8 s@b2 s@l11 s@m19 s@d1 s@g13 s@h18 s@k4 s@n12 s@n11 s@d8 s@o10 s@n14 s@a5 s@p4 s@k18 s@g11 s@a7 s@a12 s@s11 s@q12 s@a8 s@g5 s@g9 s@o14 s@b15 s@o16 s@g14 s@q10 s@s7 s@j16 s@p15 s@r15 s@g15 s@j10 s@i16 s@d14 s@i8 s@f17 s@h11 s@k11 s@d19 s@i12 s@j8 s@o15 s@i9 s@s9 s@a9 s@j9 s@q19 s@j1 s@f3 s@b4 s@r17 s@r8 s@s10 s@l1 s@h16 s@d11 s@b8 s@q1 s@b17 s@r1 s@m10 s@k3 s@n6 s@h13 s@c15 s@p1 s@m6 s@f7 s@q18 s@q13 s@s18 s@o8 s@d16 s@m9 s@e2 s@d2 s@g19 s@r14 s@s13 s@h14 s@b1 s@k7 s@b13 s@q16 s@e3 s@o1 s@l17 s@m17 s@p14 s@k10 s@p19 s@k5 s@e14 s@l5 s@o19 s@n10 s@p10 s@j6 s@c8 s@o6 s@g8 s@c5 s@e7 s@j14 s@a6 s@e5 s@p16 s@r4 s@s16 s@f4 s@j12 s@g4 s@d12 s@i5 s@c19 s@l19 s@n13 s@n4 s@r9 s@a11 s@d18 s@r13 s@e9 s@h4 s@h5 s@p3 s@i13 s@b14 s@e16 s@p5 s@r11 s@d13 s@d6 s@r19 s@i6 s@f18 s@i17 s@l7 s@r7 s@l4 s@c10 s@i3 s@a14 s@p9 s@f5 s@d4 s@s2 s@o9 s@o17 s@a16 s@n17 s@m1 s@b16 s@p2 s@i11 s@a13 s@l12 s@k15 s@l6 s@g1 s@o11 s@m4 s@c9 s@q15 s@g12 s@m15 s@r16 s@g16 s@b3 s@f13 s@n16 s@e1 s@r18 s@m13 s@s5 s@i1 s@b11 s@m11 s@a4 s@q5 s@b5 s@n18 s@o5 s@s15 s@m3 s@c2 s@d7 s@a18 s@a15 s@e17 s@o2 s@n3 s@f19 s@l9 s@k1 s@k2 s@l15 s@a3 s@s6 s@m2 s@p11 s@f10 s@e19 s@l3 s@p8 s@o12 s@h1 s@r10 s@e4 s@q17 s@e11 s@j3 s@n8 s@b19 s@f2 s@q6 s@k8 s@e6 s@g6 s@e15 s@d5 s@f12 s@c3 s@j11 s@i7 s@e13 s@m18 s@e10 s@c14 s@j5 s@s3 s@h2 s@p17 s@n5 s@r6 s@b12 s@q9 s@e12 s@m12 s@k16 s@a17 s@l13 s@c17 s@m7 s@l18 s@r5 s@h7 s@a19 s@f15 s@i10 s@o7 s@s1 s@p18 s@l2 s@c6 s@g3 s@b10 s@k19 s@b14 s@a2 s@d3 s@c18 s@o4 s@i2 s@n15 s@f1 s@d9 s@k6 s@c7 s@m3 s@q8 s@p6 s@q2 s@h3 s@j13 s@k14 s@n7 s@j19 s@h12 s@o3 s@f6 s@e18 s@a10 s@l16 s@q3 s@q4 s@i18 s@g17 s@k17 s@n9 s@m5 s@s4 s@c13 s@c12 s@c16 s@h9 s@q11 s@k1 s@b9 s@j2 s@r12 s@r3 s@i14 s@b7 s@p7 s@o4 s@g10 s@g7 s@k12 s@q14 s@m14 s@m16 s@g18 s@p12 s@i12 s@l14 s@p13 s@o13 s@s3 s@j4 s@c4 s@o2 s@c5 s@s14 s@q7 s@q10 s@d4 s@n13 s@b4 s@i19 s@q2 s@f16 s@b6 s@l8 s@k9 s@s12 s@r10 s@k4 s@j7 s@h1 s@h10 s@c1 s@h9 s@n1 s@h17 s@h6 s@d8 s@e5 s@s13 s@j15 s@j18 s@c11 s@f8 s@l10 s@k13 s@n19 s@a1 s@d10 s@s17 s@a2 s@j17 s@s12 s@g7 s@o5 s@g2 s@s2 s@d17 s@l15 s@e18 s@f16 s@s19 s@s13 s@h15 s@m10 s@f17 s@g16 s@e6 s@h14 s@e17 s@s3 s@q10 s@f11 s@b7 s@s8 s@s6 s@q8 s@r19 pass pass ss:
-P||286644746|361|195455450|0|0|0|0|0|||
+P||286644746|361|195455450|0|75|0|0|0|||
 P||1241285735|360|991045501|3610|75|0|0|0|||
 P||-917859809|359|-570651960|10|85|0|0|0|||
 P||-729627579|358|-977853422|20|85|0|0|0|||
@@ -13274,7 +13274,7 @@ P||-1534044063|34|1827355554|1880|1595|52|30|0|||
 P||1413943598|0|0|1880|1595|53|30|1|p1||
 G|walk-go19x19-13|go19x19||0|0
 A|s@m5 s@h14 s@h4 s@j14 s@f16 s@o8 s@i3 s@d4 s@b16 s@s9 s@b14 s@n7 s@c9 s@j8 s@r3 s@j13 s@n3 s@n13 s@e12 s@p16 s@a1 s@k1 s@n16 s@l1 s@e4 s@q15 s@d15 s@k6 s@k3 s@o12 s@b9 s@f5 s@s4 s@m3 s@r2 s@h3 s@l19 s@g16 s@e17 s@g11 s@l18 s@e7 s@o19 s@k9 s@b17 s@c17 s@k10 s@e1 s@o17 s@o9 s@f3 s@g9 s@k11 s@a12 s@i14 s@f7 s@q3 s@h15 s@k16 s@a2 s@i12 s@h2 s@q17 s@m6 s@r13 s@o5 s@j9 s@q9 s@f8 s@c13 s@p6 s@d14 s@d9 s@p7 s@c7 s@n1 s@h1 s@f2 s@n12 s@a19 s@l17 s@i1 s@c11 s@e8 s@k4 s@f4 s@m1 s@g15 s@m15 s@a4 s@e19 s@o7 s@h8 s@j5 s@h9 s@j15 s@n5 s@r5 s@i10 s@k8 s@s6 s@b4 s@p19 s@q18 s@b13 s@k13 s@b11 s@s16 s@s2 s@s19 s@l6 s@p1 s@m4 s@r19 s@l14 s@d1 s@p2 s@p11 s@q4 s@j16 s@o11 s@a6 s@a17 s@g5 s@g7 s@j7 s@g19 s@i11 s@j18 s@j4 s@e5 s@m10 s@b12 s@k5 s@q7 s@e18 s@d5 s@s17 s@o6 s@a5 s@f1 s@k2 s@i17 s@d11 s@a15 s@i2 s@c5 s@p15 s@q19 s@s10 s@a3 s@n19 s@p9 s@l5 s@b6 s@p5 s@j12 s@a13 s@l4 s@f17 s@o4 s@k17 s@h11 s@h12 s@m7 s@g3 s@o18 s@e10 s@i8 s@k15 s@f12 s@i13 s@p18 s@p8 s@m12 s@h5 s@c12 s@p10 s@i5 s@s1 s@c18 s@f15 s@p12 s@f6 s@b10 s@b18 s@i6 s@q11 s@h6 s@m9 s@f11 s@r16 s@r14 s@m19 s@h13 s@e9 s@c14 s@r15 s@j1 s@g1 s@h19 s@f13 s@l3 s@d10 s@o14 s@r9 s@g10 s@c3 s@f14 s@r10 s@m2 s@d12 s@a16 s@b19 s@m3 s@o10 s@s13 s@g6 s@f9 s@r7 s@j10 s@l7 s@e2 s@a8 s@q12 s@s5 s@c2 s@l9 s@r17 s@f10 s@r4 s@o13 s@h16 s@f18 s@o15 s@k18 s@e3 s@d7 s@p4 s@o1 s@l10 s@i15 s@a14 s@s14 s@e6 s@d2 s@a9 s@l15 s@n18 s@l16 s@m17 s@q8 s@q5 s@c16 s@n4 s@p3 s@q6 s@l2 s@r12 s@j17 s@c4 s@p14 s@b1 s@d19 s@s7 s@o2 s@q13 s@o3 s@h17 s@k14 s@s12 s@r18 s@g17 s@b7 s@l13 s@r6 s@i4 s@i18 s@j19 s@q2 s@s8 s@a7 s@e11 s@l8 s@c6 s@c19 s@p13 s@q16 s@i16 s@k16 s@g4 s@b8 s@j3 s@a11 s@n15 s@h10 s@d16 s@l6 s@e16 s@g18 s@j2 s@k2 s@d18 s@h11 s@m16 s@r11 s@s11 s@j11 s@c10 s@q14 s@b2 s@q1 s@l11 s@s12 s@e15 s@b15 s@l2 s@h7 s@q13 s@b5 s@d6 s@j6 s@l12 s@f19 s@n11 s@r1 s@n6 s@e14 s@o5 s@g8 s@r13 s@o16 s@n9 s@c8 s@c15 s@n14 s@i9 s@a18 s@k12 s@i14 s@m8 s@i19 s@f9 s@m11 s@r8 s@s11 s@p17 s@m14 s@e19 s@k7 s@p12 s@e13 s@n8 s@d3 s@s18 s@e6 s@c5 s@h18 s@l1 s@k19 s@b19 s@b3 s@a2 s@e2 s@b6 s@c19 s@d17 s@g13 s@e4 s@p2 s@i7 s@f8 s@b18 s@a18 s@d5 s@j19 s@r12 s@h13 s@n10 s@d8 s@j5 s@d19 s@h17 s@s19 s@a10 s@s5 s@c6 s@c16 s@k5 s@g17 s@a11 s@r5 s@s13 s@d6 s@p13 s@l6 s@l9 s@a13 s@l8 s@h16 pass pass ss:
-P||286644746|361|195455450|0|0|0|0|0|||
+P||286644746|361|195455450|0|75|0|0|0|||
 P||-1967239975|360|-1227793068|3610|75|0|0|0|||
 P||490091265|359|-493808459|10|85|0|0|0|||
 P||-697206561|358|1555241873|20|85|0|0|0|||
@@ -13680,7 +13680,7 @@ P||-1277452803|44|-1726348407|1600|1745|47|48|0|||
 P||1670534858|0|0|1600|1745|48|48|1|p2||
 G|walk-go19x19-14|go19x19||0|0
 A|s@c10 s@d7 s@p10 s@e6 s@r19 s@i16 s@b14 s@n19 s@n15 s@s8 s@n11 s@e8 s@s3 s@n13 s@a19 s@g7 s@r5 s@i18 s@m5 s@h14 s@g9 s@o17 s@s18 s@q10 s@o13 s@l1 s@f12 s@e19 s@c18 s@k19 s@d17 s@e4 s@g18 s@p4 s@r4 s@l4 s@d8 s@o5 s@k9 s@k6 s@q14 s@k10 s@n4 s@i9 s@i15 s@n12 s@q8 s@k14 s@q17 s@d4 s@b7 s@s1 s@i8 s@k1 s@a10 s@l2 s@b16 s@j9 s@c8 s@a16 s@i12 s@r8 s@r1 s@n17 s@a18 s@k4 s@m14 s@i6 s@r18 s@c7 s@q18 s@g16 s@s14 s@g12 s@k2 s@m4 s@k13 s@d6 s@e16 s@h6 s@q3 s@f4 s@e17 s@c14 s@n2 s@l10 s@o3 s@q7 s@b10 s@o16 s@s6 s@m9 s@b1 s@s2 s@h8 s@g5 s@j6 s@k17 s@q12 s@f18 s@f15 s@i7 s@a1 s@d1 s@b5 s@j16 s@i10 s@c17 s@f13 s@g11 s@b12 s@f14 s@a6 s@r11 s@s7 s@o19 s@p9 s@n1 s@l6 s@q2 s@l3 s@k5 s@f10 s@o8 s@e18 s@n18 s@r12 s@k8 s@c12 s@d14 s@e9 s@l9 s@s13 s@n7 s@f17 s@f6 s@k7 s@c19 s@d18 s@p1 s@m19 s@m7 s@a9 s@c15 s@g17 s@h9 s@m18 s@i19 s@s9 s@h10 s@d9 s@l5 s@p7 s@o10 s@o1 s@h18 s@m15 s@c5 s@r6 s@i2 s@i5 s@j10 s@c1 s@d5 s@a4 s@q19 s@p17 s@e12 s@e2 s@q9 s@p12 s@e11 s@l18 s@p8 s@g3 s@p6 s@s15 s@e13 s@j19 s@j12 s@o6 s@g2 s@o18 s@k12 s@k3 s@m8 s@q11 s@p11 s@h13 s@j14 s@r17 s@b9 s@o12 s@o15 s@m11 s@r3 s@f8 s@l7 s@a15 s@e5 s@e1 s@a8 s@b6 s@n9 s@o11 s@f7 s@m2 s@p3 s@o4 s@f19 s@g4 s@q8 s@m17 s@h1 s@f9 s@m6 s@d10 s@h4 s@s10 s@q1 s@c3 s@h2 s@n14 s@j15 s@f3 s@a17 s@p19 s@p2 s@e3 s@l15 s@g10 s@e7 s@j13 s@h5 s@b15 s@i13 s@h11 s@h17 s@b2 s@m10 s@b4 s@d13 s@b13 s@d15 s@r9 s@m16 s@a14 s@j2 s@p14 s@q13 s@q4 s@r7 s@b3 s@a3 s@n6 s@k15 s@s4 s@h7 s@d19 s@e14 s@f1 s@a11 s@s5 s@d11 s@n16 s@m12 s@b18 s@c4 s@k16 s@c11 s@p13 s@q6 s@i3 s@p15 s@r15 s@m3 s@g13 s@a13 s@c13 s@d3 s@n3 s@p18 s@i4 s@p16 s@a2 s@g15 s@r14 s@q16 s@g14 s@h16 s@c6 s@g8 s@c2 s@l11 s@q19 s@j18 s@a12 s@n5 s@o14 s@q5 s@r16 s@j19 s@l13 s@q15 s@s12 s@h15 s@r5 s@r2 s@a5 s@i14 s@r6 s@s5 s@j4 s@o2 s@h19 s@f2 s@g1 s@f5 s@c16 s@o9 s@e15 s@p11 s@d2 s@l14 s@s6 s@h3 s@d12 s@b11 s@r4 s@l16 s@b8 s@s4 s@l12 s@m5 s@j1 s@h12 s@s16 s@n10 s@i17 s@m1 s@s11 s@o1 s@f11 s@o3 s@i11 s@d16 s@q3 s@k18 s@m13 s@p5 s@c9 s@k16 s@j5 s@l17 s@n2 s@s7 s@m12 s@n12 s@b19 s@j11 s@g12 s@o4 s@r10 s@o7 s@j8 s@s3 s@d1 s@g6 s@g19 s@k9 s@f19 s@l6 s@m2 s@k11 s@f16 s@i1 s@g11 s@o6 s@a13 s@r1 s@n13 s@j3 s@k2 s@l3 s@b9 s@b17 s@a13 s@a14 s@a3 s@b15 s@n4 s@b16 s@d12 s@a12 s@h12 s@c12 s@c13 s@p10 s@a7 s@q4 pass pass ss:
-P||286644746|361|195455450|0|0|0|0|0|||
+P||286644746|361|195455450|0|75|0|0|0|||
 P||-2103704141|360|631649092|3610|75|0|0|0|||
 P||1263040875|359|138586955|10|85|0|0|0|||
 P||-1831719663|358|576181838|20|85|0|0|0|||
@@ -14086,7 +14086,7 @@ P||-1646990810|18|1099982807|1540|2045|19|54|0|||
 P||-565499000|0|0|1540|2045|20|54|1|p2||
 G|walk-go19x19-15|go19x19||0|0
 A|s@j10 s@d7 s@o8 s@k15 s@s19 s@s6 s@c15 s@s9 s@c6 s@r9 s@o18 s@m2 s@i8 s@c2 s@e8 s@f5 s@c9 s@f1 s@h4 s@e17 s@b18 s@r14 s@h9 s@j16 s@f7 s@n16 s@j13 s@m11 s@q13 s@o14 s@b9 s@m10 s@p4 s@n9 s@a8 s@o10 s@f11 s@h17 s@o15 s@i4 s@g3 s@g1 s@d17 s@o3 s@o4 s@g7 s@m5 s@n5 s@m9 s@l15 s@h11 s@i6 s@e14 s@n18 s@r13 s@g5 s@d9 s@f6 s@p13 s@r15 s@a4 s@s2 s@d12 s@r8 s@q1 s@i16 s@q16 s@s17 s@m13 s@l4 s@p7 s@n6 s@a6 s@f3 s@m12 s@p9 s@n1 s@f13 s@k19 s@j1 s@b17 s@i17 s@r3 s@j5 s@p15 s@i15 s@q18 s@d4 s@f9 s@b16 s@s13 s@p5 s@e6 s@e5 s@p16 s@i19 s@j14 s@i11 s@p14 s@h8 s@c8 s@e2 s@h3 s@d1 s@o19 s@d11 s@n10 s@f17 s@l13 s@p2 s@n4 s@r19 s@d16 s@l18 s@i2 s@o5 s@r6 s@r12 s@r1 s@d14 s@k17 s@m16 s@c1 s@b15 s@m19 s@o2 s@g6 s@j19 s@d8 s@k11 s@n7 s@h7 s@g4 s@b7 s@s12 s@l6 s@j6 s@b4 s@n13 s@f19 s@k9 s@m18 s@c17 s@l9 s@k1 s@e16 s@l11 s@s1 s@e10 s@b3 s@h1 s@a9 s@a14 s@k13 s@o7 s@f10 s@a16 s@a19 s@i1 s@b1 s@q3 s@s18 s@o6 s@p1 s@a15 s@q12 s@s8 s@r16 s@k7 s@j7 s@m6 s@q2 s@d19 s@g8 s@d6 s@e7 s@c13 s@g2 s@s10 s@q4 s@l19 s@n19 s@j9 s@e13 s@o9 s@j17 s@s16 s@s15 s@e18 s@d15 s@i18 s@b13 s@a5 s@g10 s@l10 s@h10 s@n15 s@j11 s@a13 s@h5 s@j4 s@c3 s@f12 s@j2 s@i12 s@f2 s@d2 s@b11 s@m3 s@f18 s@m15 s@d10 s@p19 s@o11 s@o13 s@p18 s@j15 s@g17 s@h16 s@n2 s@c4 s@q9 s@o17 s@h12 s@g9 s@l16 s@c11 s@i9 s@n8 s@r5 s@h2 s@d13 s@i10 s@h19 s@n3 s@a3 s@a2 s@r17 s@j18 s@l3 s@k3 s@s3 s@p6 s@e3 s@a12 s@q8 s@p12 s@k12 s@g11 s@f10 s@q6 s@d3 s@q10 s@a7 s@a11 s@c14 s@c18 s@g18 s@p3 s@f8 s@i7 s@k6 s@g10 s@s16 s@e9 s@g12 s@s14 s@f7 s@s7 s@h13 s@k8 s@l7 s@j3 s@s4 s@p11 s@c16 s@k4 s@r18 s@h18 s@o1 s@n9 s@s5 s@m4 s@e4 s@e12 s@i13 s@r11 s@e19 s@r7 s@q15 s@n17 s@a17 s@m17 s@b2 s@a18 s@o16 s@p17 s@c5 s@r2 s@q17 s@j8 s@l1 s@f4 s@l8 s@h10 s@i3 s@c12 s@l2 s@e15 s@i14 s@b14 s@m14 s@b12 s@m1 s@l14 s@h6 s@i9 s@b19 s@k10 s@j6 s@p18 s@n12 s@g4 s@n11 s@c7 s@j12 s@b8 s@f16 s@g13 s@k2 s@b6 s@a10 s@b10 s@p8 s@h15 s@a10 s@i1 s@h4 s@b7 s@d18 s@q5 s@q14 s@g19 s@p5 s@f10 s@c10 s@h2 s@j19 s@b11 s@c15 s@b13 s@s19 s@f4 s@g15 s@e18 s@q7 s@g14 s@l17 s@l12 s@r10 s@g16 s@n1 s@n14 s@k16 s@r4 s@k5 s@a7 s@s3 s@i2 s@k4 s@d18 s@d2 s@f15 s@l5 s@n5 s@i19 s@h1 s@k14 s@h19 s@s4 s@i19 s@j13 s@p10 s@q9 s@b5 s@j4 s@s5 s@i12 s@s9 s@a1 s@m8 s@j14 s@f14 s@p8 s@r10 s@c4 s@q8 s@e1 s@k18 s@k1 pass pass ss:
-P||286644746|361|195455450|0|0|0|0|0|||
+P||286644746|361|195455450|0|75|0|0|0|||
 P||90229694|360|913945559|3610|75|0|0|0|||
 P||-837992586|359|94157810|10|85|0|0|0|||
 P||-1137181284|358|-1957908151|20|85|0|0|0|||
@@ -14492,7 +14492,7 @@ P||-1367991359|39|-1663079423|1910|1605|54|30|0|||
 P||1579996302|0|0|1910|1605|55|30|1|p1||
 G|walk-go19x19-16|go19x19||0|0
 A|s@p17 s@d18 s@i5 s@j16 s@d4 s@f4 s@e1 s@i3 s@o18 s@o5 s@h16 s@i14 s@i16 s@n14 s@a15 s@g12 s@b19 s@m6 s@i11 s@g3 s@i8 s@p2 s@h7 s@s1 s@s16 s@s5 s@g4 s@i15 s@p13 s@h15 s@q15 s@e3 s@f10 s@c3 s@n9 s@l6 s@c13 s@p14 s@e7 s@r14 s@g5 s@c8 s@s3 s@c4 s@j17 s@s12 s@j12 s@n18 s@a1 s@h5 s@s13 s@j7 s@o6 s@m18 s@g17 s@b4 s@h3 s@f3 s@r9 s@d2 s@r16 s@q19 s@b8 s@o2 s@e2 s@i7 s@g11 s@i13 s@o16 s@s7 s@r6 s@d12 s@a11 s@b9 s@k3 s@r10 s@c16 s@c1 s@i17 s@r18 s@s15 s@a6 s@e13 s@m7 s@i2 s@q16 s@a7 s@p12 s@l8 s@m13 s@e16 s@c7 s@k17 s@b10 s@b1 s@l12 s@l4 s@e9 s@l10 s@p6 s@c5 s@h9 s@r5 s@f19 s@k14 s@a10 s@d13 s@o10 s@m17 s@d8 s@m8 s@j8 s@n5 s@m4 s@l14 s@o12 s@h14 s@n7 s@d3 s@i4 s@b11 s@r3 s@l1 s@l9 s@a14 s@s9 s@s17 s@s14 s@j14 s@o7 s@n4 s@r2 s@f13 s@f5 s@r15 s@f15 s@b6 s@q13 s@b3 s@q12 s@d10 s@b5 s@d15 s@o8 s@e10 s@b16 s@n1 s@h1 s@o1 s@s6 s@d5 s@k16 s@m10 s@g6 s@g9 s@r12 s@h8 s@p16 s@j15 s@k7 s@b13 s@l5 s@p11 s@c10 s@a9 s@m5 s@i9 s@q7 s@c12 s@j6 s@d9 s@d11 s@c18 s@d16 s@o3 s@s8 s@n2 s@m15 s@k12 s@m3 s@j1 s@p3 s@k9 s@h13 s@e6 s@n19 s@l7 s@h11 s@g16 s@a12 s@e14 s@q2 s@k11 s@m1 s@l19 s@f17 s@n12 s@a13 s@m16 s@q4 s@j9 s@n15 s@n13 s@o11 s@i10 s@p15 s@p10 s@h17 s@q11 s@m19 s@k4 s@o9 s@m9 s@m12 s@o19 s@k5 s@h6 s@p7 s@f16 s@n6 s@p4 s@g13 s@q9 s@f7 s@j18 s@n16 s@s4 s@b17 s@l13 s@s11 s@r19 s@k19 s@d14 s@s18 s@r17 s@m14 s@c9 s@e18 s@o17 s@j4 s@h10 s@i12 s@c15 s@f11 s@q1 s@k10 s@n8 s@p8 s@k1 s@a17 s@b18 s@q3 s@p19 s@g14 s@g10 s@c19 s@c6 s@d7 s@l15 s@f2 s@e11 s@q5 s@b14 s@g19 s@h2 s@k18 s@o13 s@i1 s@h18 s@s2 s@e17 s@s19 s@a8 s@a18 s@m2 s@b7 s@e4 s@g1 s@r7 s@j5 s@i19 s@b15 s@k2 s@a8 s@e5 s@d17 s@e8 s@d19 s@d1 s@n10 s@a16 s@l3 s@k15 s@p5 s@h12 s@h19 s@j3 s@n3 s@a3 s@q10 s@j2 s@r13 s@l16 s@s10 s@q18 s@b8 s@p1 s@r11 s@g8 s@n11 s@l9 s@k16 s@a4 s@e15 s@f18 s@b2 s@g15 s@f9 s@l17 s@o15 s@r19 s@f12 s@a2 s@o14 s@q8 s@r4 s@f6 s@i6 s@m11 s@p9 s@h9 s@n17 s@l18 s@r1 s@q17 s@n12 s@a19 s@q6 s@q19 s@n13 s@c14 s@f14 s@e12 s@s4 s@q11 s@s18 s@g18 s@p10 s@m1 s@i5 s@q14 s@r8 s@r7 s@k6 s@h17 s@l2 s@i18 s@s19 s@j16 s@h4 s@c11 s@q8 s@f8 s@c2 s@e19 s@k8 s@l11 s@f19 s@j11 s@a9 s@o13 s@h14 s@k16 s@r6 s@f9 s@o6 s@f17 s@s13 s@d6 s@p13 s@q9 s@o4 s@d11 s@a5 s@a1 s@n5 s@j10 s@j13 s@a2 s@h11 s@d12 s@a4 s@g7 s@e19 s@c17 s@a3 s@a17 s@b16 s@e9 s@r9 pass pass ss:
-P||286644746|361|195455450|0|0|0|0|0|||
+P||286644746|361|195455450|0|75|0|0|0|||
 P||999729049|360|-1503128060|3610|75|0|0|0|||
 P||-105390519|359|517733123|10|85|0|0|0|||
 P||988266849|358|-1700935353|20|85|0|0|0|||
@@ -14898,7 +14898,7 @@ P||954914080|16|2132244344|1630|1935|27|41|0|||
 P||-392065555|0|0|1630|1935|28|41|1|p2||
 G|walk-go19x19-17|go19x19||0|0
 A|s@q18 s@f17 s@h1 s@o19 s@c12 s@m17 s@d13 s@i13 s@n5 s@j18 s@m2 s@q7 s@l12 s@d2 s@s2 s@a12 s@c9 s@c14 s@o14 s@e2 s@r17 s@c5 s@j12 s@h10 s@p12 s@i8 s@f2 s@q17 s@q10 s@m9 s@f4 s@h4 s@s11 s@f7 s@s9 s@r15 s@i15 s@b5 s@b15 s@h6 s@a13 s@n10 s@c8 s@q13 s@p11 s@d7 s@q6 s@g7 s@e7 s@f1 s@b6 s@m12 s@g8 s@a8 s@c1 s@d9 s@j14 s@h7 s@r12 s@q4 s@o10 s@d15 s@e9 s@l19 s@h13 s@d11 s@d12 s@m6 s@o7 s@m18 s@l14 s@r13 s@j2 s@i16 s@l15 s@g3 s@e8 s@a14 s@e12 s@k6 s@k16 s@j3 s@e13 s@l4 s@i14 s@h14 s@q12 s@q9 s@d5 s@k3 s@m19 s@n7 s@h8 s@l9 s@r16 s@j15 s@f3 s@p18 s@b2 s@f13 s@b3 s@q5 s@p14 s@s19 s@k12 s@l8 s@f12 s@c7 s@p15 s@k15 s@s18 s@g4 s@o18 s@j11 s@a10 s@p6 s@r19 s@o16 s@m4 s@o5 s@r3 s@h3 s@s14 s@l16 s@p4 s@q15 s@k7 s@c15 s@i11 s@c19 s@b13 s@k4 s@a19 s@g16 s@e16 s@n6 s@i3 s@l2 s@o8 s@d16 s@j8 s@c11 s@c16 s@l17 s@l7 s@g13 s@j19 s@k8 s@s15 s@r4 s@g17 s@m16 s@n1 s@c17 s@a3 s@p5 s@l11 s@h17 s@d14 s@h5 s@n14 s@f19 s@b10 s@h15 s@m13 s@e15 s@a9 s@j13 s@k5 s@p17 s@a5 s@p10 s@q3 s@d19 s@j17 s@b1 s@e11 s@e10 s@c2 s@k17 s@i10 s@k14 s@e3 s@n16 s@o9 s@q19 s@h11 s@r6 s@c3 s@m14 s@q16 s@b14 s@o3 s@l18 s@a15 s@p2 s@a6 s@d1 s@b19 s@a18 s@s8 s@e19 s@n4 s@i1 s@s13 s@i15 s@l5 s@f16 s@r7 s@b4 s@o11 s@n17 s@a11 s@e5 s@h19 s@p8 s@l6 s@s6 s@s3 s@m11 s@f15 s@s4 s@m15 s@l1 s@i7 s@g1 s@g2 s@r10 s@o2 s@p13 s@j6 s@j4 s@a1 s@n11 s@r11 s@g18 s@j5 s@p19 s@k1 s@q14 s@h9 s@n13 s@s19 s@p3 s@i4 s@g14 s@n18 s@i5 s@f9 s@d6 s@s16 s@m8 s@b8 s@b16 s@i2 s@b18 s@q11 s@b11 s@n12 s@a7 s@m10 s@r18 s@n9 s@d3 s@l10 s@g10 s@f10 s@i14 s@a4 s@c16 s@k13 s@k10 s@e6 s@q6 s@s7 s@i18 s@k18 s@m1 s@k2 s@m12 s@a17 s@h12 s@s5 s@g6 s@p1 s@i12 s@n3 s@i17 s@e18 s@o4 s@k11 s@f5 s@b1 s@p16 s@g12 s@f8 s@h18 s@r1 s@e4 s@d4 s@f18 s@c18 s@n11 s@m7 s@g19 s@r9 s@q18 s@b7 s@m11 s@n15 s@a2 s@s10 s@f14 s@g5 s@g17 s@h2 s@s17 s@d5 s@e17 s@c4 s@d17 s@e4 s@m14 s@n19 s@o1 s@d8 s@o13 s@a19 s@q8 s@m5 s@l13 s@q2 s@k6 s@s1 s@d10 s@j1 s@n13 s@f4 s@p7 s@r8 s@s9 s@c13 s@n10 s@j2 s@b9 s@i6 s@i9 s@i3 s@k1 s@i19 s@o15 s@s8 s@e10 s@j10 s@b17 s@k9 s@g15 s@b19 s@h16 s@g11 s@f17 s@b12 s@r14 s@m19 s@s7 s@r13 s@b13 s@j14 s@s12 s@j9 s@n8 s@r15 s@m12 s@f3 s@r18 s@c10 s@p13 s@h13 s@o6 s@r2 s@k8 s@h1 s@o12 s@a11 s@c9 s@q8 s@b8 s@m3 s@k10 s@f11 s@r3 s@r5 s@b9 s@q15 s@s2 s@j16 s@f6 s@j10 s@k9 s@s9 pass pass ss:
-P||286644746|361|195455450|0|0|0|0|0|||
+P||286644746|361|195455450|0|75|0|0|0|||
 P||1407706769|360|195997742|3610|75|0|0|0|||
 P||-1941648115|359|1547854222|10|85|0|0|0|||
 P||-1635133629|358|-183493285|20|85|0|0|0|||
@@ -15304,7 +15304,7 @@ P||-45593139|33|-1955543145|1660|1805|38|49|0|||
 P||-1392572774|0|0|1660|1805|39|49|1|p2||
 G|walk-go19x19-18|go19x19||0|0
 A|s@a10 s@q19 s@h2 s@e3 s@j8 s@a6 s@l4 s@c14 s@l17 s@k12 s@l7 s@q18 s@p11 s@n15 s@b2 s@n8 s@k9 s@i7 s@e12 s@s7 s@m10 s@p10 s@o9 s@n14 s@a14 s@i8 s@f7 s@c16 s@d5 s@g5 s@a19 s@s4 s@d12 s@e9 s@c10 s@f11 s@q5 s@q11 s@p18 s@b4 s@h7 s@s9 s@f18 s@n19 s@h15 s@s8 s@h10 s@p5 s@s6 s@k3 s@e2 s@c3 s@d11 s@g19 s@i11 s@r3 s@o6 s@e5 s@a15 s@m9 s@f15 s@j18 s@r4 s@p2 s@g16 s@a13 s@f2 s@s3 s@i6 s@h11 s@k4 s@n5 s@q13 s@f19 s@d2 s@d15 s@i1 s@b13 s@i12 s@j15 s@l11 s@n17 s@h14 s@f1 s@g7 s@p12 s@j4 s@f9 s@b7 s@j2 s@b5 s@m17 s@f17 s@m18 s@p1 s@p6 s@c11 s@g10 s@e18 s@r12 s@c4 s@l1 s@j17 s@k19 s@b19 s@m7 s@a5 s@n9 s@k7 s@e15 s@m15 s@s15 s@k15 s@r1 s@q8 s@m5 s@q15 s@d4 s@g3 s@r9 s@b11 s@b12 s@r18 s@n10 s@e14 s@p19 s@o3 s@p4 s@k11 s@n6 s@h17 s@l6 s@j13 s@o19 s@k16 s@h19 s@p15 s@o18 s@m16 s@o11 s@o7 s@e19 s@a3 s@k5 s@i17 s@g17 s@b18 s@i5 s@r13 s@s12 s@s19 s@p14 s@a2 s@s10 s@i16 s@k8 s@n2 s@q2 s@c7 s@c15 s@k18 s@o8 s@s18 s@g2 s@c12 s@i14 s@i18 s@i13 s@m8 s@h13 s@m13 s@g15 s@p13 s@n7 s@o1 s@o12 s@r5 s@q14 s@h8 s@d13 s@r6 s@d7 s@r10 s@b15 s@g13 s@e10 s@m19 s@q6 s@h1 s@j5 s@i9 s@o4 s@n4 s@q3 s@h4 s@h18 s@e6 s@p16 s@b16 s@f16 s@j14 s@k14 s@e17 s@d6 s@n3 s@o2 s@l19 s@l3 s@h12 s@f3 s@i10 s@l2 s@r17 s@l18 s@d19 s@n18 s@f14 s@o16 s@d10 s@j6 s@l5 s@r14 s@a9 s@l14 s@h9 s@g1 s@d18 s@b14 s@b9 s@f10 s@l9 s@c19 s@o13 s@a7 s@l16 s@n1 s@c1 s@l15 s@m14 s@e7 s@i2 s@k17 s@n13 s@i15 s@n12 s@a16 s@s16 s@r19 s@h6 s@q17 s@f6 s@k18 s@i4 s@e8 s@q16 s@l8 s@g4 s@l19 s@m2 s@o5 s@j7 s@p11 s@a15 s@m6 s@s1 s@f8 s@q9 s@k13 s@k10 s@m3 s@q12 s@h5 s@f12 s@s5 s@g12 s@p3 s@j10 s@j19 s@s14 s@k6 s@m4 s@g18 s@b17 s@f5 s@d9 s@a11 s@s17 s@b1 s@a18 s@c18 s@h3 s@o15 s@o14 s@k1 s@f13 s@e11 s@e13 s@i3 s@q4 s@g8 s@a17 s@o17 s@r16 s@b8 s@e1 s@r8 s@f1 s@k2 s@q7 s@n11 s@c8 s@a8 s@g2 s@o10 s@s11 s@f4 s@p8 s@d16 s@g14 s@d17 s@i8 s@c6 s@j11 s@c2 s@r2 s@e4 s@j16 s@p9 s@c13 s@b3 s@c9 s@h13 s@a4 s@d1 s@j1 s@m1 s@g6 s@a12 s@g11 s@c5 s@r7 s@r15 s@j3 s@m19 s@s18 s@l1 s@h11 s@m1 s@g1 s@s13 s@j15 s@c1 s@p15 s@g9 s@r11 s@c17 s@d8 s@a14 s@n1 s@r9 s@k3 s@p17 s@j12 s@m8 s@k2 s@m3 s@h16 s@q16 s@e16 s@l2 s@i13 s@s2 s@s10 s@s8 s@b10 s@s9 s@s16 s@i14 s@r16 s@m12 s@i19 s@m11 s@q1 s@s17 s@h18 s@p7 s@l3 s@s1 s@g19 s@d5 s@h19 s@q15 s@d14 s@l12 s@l13 s@p18 s@c14 s@s7 s@g15 s@n16 pass pass ss:
-P||286644746|361|195455450|0|0|0|0|0|||
+P||286644746|361|195455450|0|75|0|0|0|||
 P||-83614151|360|-2127848378|3610|75|0|0|0|||
 P||-1132122647|359|71450713|10|85|0|0|0|||
 P||326416583|358|101663139|20|85|0|0|0|||
@@ -15710,7 +15710,7 @@ P||-1347886973|44|-1216303647|2030|1555|59|28|0|||
 P||-266395163|0|0|2030|1555|60|28|1|p1||
 G|walk-go19x19-19|go19x19||0|0
 A|s@g4 s@s13 s@f17 s@d15 s@m11 s@k2 s@n7 s@r8 s@l5 s@o4 s@j15 s@p4 s@j19 s@n13 s@k15 s@o8 s@i15 s@q19 s@l15 s@j6 s@b11 s@d17 s@i1 s@q13 s@o1 s@q15 s@e6 s@l18 s@n17 s@k3 s@o11 s@l14 s@f19 s@q6 s@l16 s@r9 s@i5 s@i13 s@b19 s@d8 s@c5 s@q8 s@m7 s@i2 s@f7 s@i16 s@q2 s@f13 s@k16 s@l9 s@d5 s@i18 s@g2 s@a19 s@a2 s@a17 s@b5 s@g19 s@p13 s@i3 s@p6 s@p1 s@g13 s@l2 s@k18 s@i11 s@r18 s@n6 s@o19 s@b12 s@q11 s@d19 s@c17 s@j3 s@h7 s@m18 s@i12 s@o15 s@i17 s@l4 s@h10 s@g18 s@a13 s@m9 s@e5 s@r16 s@n15 s@m6 s@b6 s@f1 s@s6 s@b17 s@i4 s@m3 s@a9 s@p19 s@k13 s@s9 s@r10 s@a4 s@r3 s@i19 s@f15 s@c16 s@i14 s@c6 s@e1 s@c12 s@r13 s@s4 s@j5 s@p8 s@g1 s@s10 s@s3 s@b10 s@n11 s@e9 s@a10 s@s15 s@j4 s@r7 s@d4 s@p5 s@i6 s@h13 s@k1 s@n10 s@r11 s@n4 s@k7 s@l11 s@m14 s@g6 s@d10 s@k5 s@c9 s@q3 s@m4 s@r2 s@h15 s@b3 s@r12 s@d18 s@a6 s@f16 s@p10 s@j7 s@b8 s@q18 s@f3 s@o2 s@m19 s@b16 s@r5 s@c15 s@e15 s@g8 s@a5 s@h11 s@j11 s@i9 s@g9 s@d13 s@g16 s@b15 s@f8 s@e14 s@c13 s@c8 s@g17 s@s1 s@k10 s@s2 s@h9 s@f12 s@n18 s@j17 s@l1 s@o9 s@k6 s@m2 s@g12 s@k19 s@d6 s@q5 s@j2 s@m8 s@a1 s@k12 s@h2 s@a3 s@j1 s@o12 s@f11 s@o17 s@e12 s@f5 s@d3 s@s17 s@j8 s@p15 s@s8 s@s19 s@r6 s@i10 s@i8 s@d1 s@e16 s@s5 s@j12 s@p7 s@q14 s@l6 s@c3 s@c18 s@r1 s@d7 s@h4 s@o18 s@h19 s@k17 s@h1 s@j13 s@d11 s@l13 s@g10 s@r17 s@g11 s@h3 s@d16 s@h12 s@i7 s@o10 s@p17 s@g14 s@d9 s@j6 s@e10 s@o16 s@e2 s@n2 s@e19 s@q4 s@n5 s@n19 s@f2 s@f4 s@j16 s@h17 s@n14 s@l7 s@h8 s@p16 s@j14 s@g5 s@b1 s@s7 s@o14 s@r4 s@r6 s@s16 s@r14 s@s12 s@m17 s@b13 s@m13 s@f9 s@s6 s@e3 s@m5 s@o7 s@e13 s@p11 s@h6 s@k14 s@o3 s@a8 s@q16 s@k8 s@g3 s@j18 s@b2 s@c10 s@e7 s@n9 s@a12 s@m10 s@a14 s@q9 s@o19 s@s14 s@f10 s@p9 s@a11 s@n19 s@p3 s@c11 s@p12 s@h5 s@l12 s@k11 s@e18 s@o19 s@q1 s@n16 s@b4 s@m16 s@c1 s@b14 s@b3 s@k9 s@f14 s@l17 s@o5 s@s2 s@l10 s@q17 s@g15 s@m15 s@a15 s@n18 s@d14 s@p2 s@e14 s@s11 s@m17 s@k4 s@r2 s@a7 s@j10 s@n1 s@c14 s@l8 s@r19 s@c17 s@g7 s@c2 s@s1 s@f6 s@c4 s@f13 s@e11 s@h14 s@d12 s@s18 s@g8 s@r5 s@e4 s@k13 s@a16 s@o1 s@d2 s@f18 s@e8 s@b9 s@a18 s@s8 s@f6 s@h18 s@j9 s@h16 s@k12 s@n17 s@l11 s@a9 s@f1 s@o6 s@s6 s@c19 s@f16 s@o5 s@j13 s@f5 s@a19 s@a12 s@e9 s@a3 s@m4 s@a14 s@k11 s@b18 s@p14 s@a15 s@m12 s@n3 s@c2 s@g5 s@e3 s@a16 s@j7 s@o3 s@j6 s@h13 s@i11 s@s2 s@a19 s@b19 s@k14 s@m17 pass pass ss:
-P||286644746|361|195455450|0|0|0|0|0|||
+P||286644746|361|195455450|0|75|0|0|0|||
 P||-2100625237|360|607401841|3610|75|0|0|0|||
 P||1617407547|359|1112513480|10|85|0|0|0|||
 P||1999771421|358|1624794728|20|85|0|0|0|||
@@ -16116,7 +16116,7 @@ P||2139168373|43|-989937236|1600|1815|48|49|0|||
 P||792188738|0|0|1600|1815|49|49|1|p2||
 G|superko-corpus-9x9|go9x9||1|1
 A|s@b2 s@c2 s@a3 s@d3 s@b4 s@c4 s@c3 s@b3 pass pass s@g7 s@g3 s@h7 s@h3 s@g8 s@g4 s@h8 s@h4 s@f7 s@f3 pass pass ss:
-P|9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 0 1|-781389749|81|-1619164048|0|0|0|0|0||a1 a2 a3 a4 a5 a6 a7 a8 a9 b1 b2 b3 b4 b5 b6 b7 b8 b9 c1 c2 c3 c4 c5 c6 c7 c8 c9 d1 d2 d3 d4 d5 d6 d7 d8 d9 e1 e2 e3 e4 e5 e6 e7 e8 e9 f1 f2 f3 f4 f5 f6 f7 f8 f9 g1 g2 g3 g4 g5 g6 g7 g8 g9 h1 h2 h3 h4 h5 h6 h7 h8 h9 i1 i2 i3 i4 i5 i6 i7 i8 i9|
+P|9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 0 1|-781389749|81|-1619164048|0|55|0|0|0||a1 a2 a3 a4 a5 a6 a7 a8 a9 b1 b2 b3 b4 b5 b6 b7 b8 b9 c1 c2 c3 c4 c5 c6 c7 c8 c9 d1 d2 d3 d4 d5 d6 d7 d8 d9 e1 e2 e3 e4 e5 e6 e7 e8 e9 f1 f2 f3 f4 f5 f6 f7 f8 f9 g1 g2 g3 g4 g5 g6 g7 g8 g9 h1 h2 h3 h4 h5 h6 h7 h8 h9 i1 i2 i3 i4 i5 i6 i7 i8 i9|
 P|9/9/9/9/9/9/9/1S7/9[SSSSSSSSSSssssssssss] w - 810 55 0 0 55 0 1|-1833560893|80|-954937694|810|55|0|0|0|||b2
 P|9/9/9/9/9/9/9/1Ss6/9[SSSSSSSSSSssssssssss] b - 10 65 0 0 55 0 2|1966636520|79|513877179|10|65|0|0|0|||c2
 P|9/9/9/9/9/9/S8/1Ss6/9[SSSSSSSSSSssssssssss] w - 20 65 0 0 55 0 2|905231654|78|1784250135|20|65|0|0|0|||a3
@@ -16142,7 +16142,7 @@ P|9/6SS1/5SSS1/9/9/1Ss3ss1/Ss1s1sss1/1Ss6/9[SSSSSSSSSSssssssssss] b - 80 155 0 1
 P|9/6SS1/5SSS1/9/9/1Ss3ss1/Ss1s1sss1/1Ss6/9[SSSSSSSSSSssssssssss] w - 80 155 1 1 55 3 12|-1770325028|0|0|80|155|1|1|1|p2||a1 a2 a4 a5 a6 a7 a8 a9 b1 b5 b6 b7 b8 b9 c1 c3 c5 c6 c7 c8 c9 d1 d2 d4 d5 d6 d7 d8 d9 e1 e2 e3 e4 e5 e6 e7 e8 e9 f1 f2 f4 f5 f6 f8 f9 g1 g2 g5 g6 g9 h1 h2 h5 h6 h9 i1 i2 i3 i4 i5 i6 i7 i8 i9
 G|scripted-9x9-settled|go9x9||1|0
 A|s@g3 s@c7 s@f2 s@e5 s@e1 s@d4 s@h4 s@i1 s@i5 s@c5 s@d5 s@d6 pass pass ss:i1
-P|9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 0 1|-781389749|81|-1619164048|0|0|0|0|0|||
+P|9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 0 1|-781389749|81|-1619164048|0|55|0|0|0|||
 P|9/9/9/9/9/9/6S2/9/9[SSSSSSSSSSssssssssss] w - 810 55 0 0 55 0 1|-1913701629|80|1735800044|810|55|0|0|0|||
 P|9/9/2s6/9/9/9/6S2/9/9[SSSSSSSSSSssssssssss] b - 10 65 0 0 55 0 2|-60768464|79|-1434776720|10|65|0|0|0|||
 P|9/9/2s6/9/9/9/6S2/5S3/9[SSSSSSSSSSssssssssss] w - 20 65 0 0 55 0 2|-1429126434|78|1266887222|20|65|0|0|0|||
@@ -16160,7 +16160,7 @@ P|9/9/2s6/3s5/2s1s3S/3s3S1/6S2/5S3/4S3s[SSSSSSSSSSssssssssss] b - 50 125 0 1 55 
 P|9/9/2s6/3s5/2s1s3S/3s3S1/6S2/5S3/4S4[SSSSSSSSSSssssssssss] w - 150 115 2 1 55 3 8|-1045776054|0|0|150|115|2|1|1|p1||
 G|ko-point-19x19|go19x19||1|1
 A|s@c1 s@c4 s@b2 s@b3 s@d2 s@d3 s@c3 s@c2
-P|19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 0 1|286644746|361|195455450|0|0|0|0|0||a1 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a2 a3 a4 a5 a6 a7 a8 a9 b1 b10 b11 b12 b13 b14 b15 b16 b17 b18 b19 b2 b3 b4 b5 b6 b7 b8 b9 c1 c10 c11 c12 c13 c14 c15 c16 c17 c18 c19 c2 c3 c4 c5 c6 c7 c8 c9 d1 d10 d11 d12 d13 d14 d15 d16 d17 d18 d19 d2 d3 d4 d5 d6 d7 d8 d9 e1 e10 e11 e12 e13 e14 e15 e16 e17 e18 e19 e2 e3 e4 e5 e6 e7 e8 e9 f1 f10 f11 f12 f13 f14 f15 f16 f17 f18 f19 f2 f3 f4 f5 f6 f7 f8 f9 g1 g10 g11 g12 g13 g14 g15 g16 g17 g18 g19 g2 g3 g4 g5 g6 g7 g8 g9 h1 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 h2 h3 h4 h5 h6 h7 h8 h9 i1 i10 i11 i12 i13 i14 i15 i16 i17 i18 i19 i2 i3 i4 i5 i6 i7 i8 i9 j1 j10 j11 j12 j13 j14 j15 j16 j17 j18 j19 j2 j3 j4 j5 j6 j7 j8 j9 k1 k10 k11 k12 k13 k14 k15 k16 k17 k18 k19 k2 k3 k4 k5 k6 k7 k8 k9 l1 l10 l11 l12 l13 l14 l15 l16 l17 l18 l19 l2 l3 l4 l5 l6 l7 l8 l9 m1 m10 m11 m12 m13 m14 m15 m16 m17 m18 m19 m2 m3 m4 m5 m6 m7 m8 m9 n1 n10 n11 n12 n13 n14 n15 n16 n17 n18 n19 n2 n3 n4 n5 n6 n7 n8 n9 o1 o10 o11 o12 o13 o14 o15 o16 o17 o18 o19 o2 o3 o4 o5 o6 o7 o8 o9 p1 p10 p11 p12 p13 p14 p15 p16 p17 p18 p19 p2 p3 p4 p5 p6 p7 p8 p9 q1 q10 q11 q12 q13 q14 q15 q16 q17 q18 q19 q2 q3 q4 q5 q6 q7 q8 q9 r1 r10 r11 r12 r13 r14 r15 r16 r17 r18 r19 r2 r3 r4 r5 r6 r7 r8 r9 s1 s10 s11 s12 s13 s14 s15 s16 s17 s18 s19 s2 s3 s4 s5 s6 s7 s8 s9|
+P|19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 0 1|286644746|361|195455450|0|75|0|0|0||a1 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a2 a3 a4 a5 a6 a7 a8 a9 b1 b10 b11 b12 b13 b14 b15 b16 b17 b18 b19 b2 b3 b4 b5 b6 b7 b8 b9 c1 c10 c11 c12 c13 c14 c15 c16 c17 c18 c19 c2 c3 c4 c5 c6 c7 c8 c9 d1 d10 d11 d12 d13 d14 d15 d16 d17 d18 d19 d2 d3 d4 d5 d6 d7 d8 d9 e1 e10 e11 e12 e13 e14 e15 e16 e17 e18 e19 e2 e3 e4 e5 e6 e7 e8 e9 f1 f10 f11 f12 f13 f14 f15 f16 f17 f18 f19 f2 f3 f4 f5 f6 f7 f8 f9 g1 g10 g11 g12 g13 g14 g15 g16 g17 g18 g19 g2 g3 g4 g5 g6 g7 g8 g9 h1 h10 h11 h12 h13 h14 h15 h16 h17 h18 h19 h2 h3 h4 h5 h6 h7 h8 h9 i1 i10 i11 i12 i13 i14 i15 i16 i17 i18 i19 i2 i3 i4 i5 i6 i7 i8 i9 j1 j10 j11 j12 j13 j14 j15 j16 j17 j18 j19 j2 j3 j4 j5 j6 j7 j8 j9 k1 k10 k11 k12 k13 k14 k15 k16 k17 k18 k19 k2 k3 k4 k5 k6 k7 k8 k9 l1 l10 l11 l12 l13 l14 l15 l16 l17 l18 l19 l2 l3 l4 l5 l6 l7 l8 l9 m1 m10 m11 m12 m13 m14 m15 m16 m17 m18 m19 m2 m3 m4 m5 m6 m7 m8 m9 n1 n10 n11 n12 n13 n14 n15 n16 n17 n18 n19 n2 n3 n4 n5 n6 n7 n8 n9 o1 o10 o11 o12 o13 o14 o15 o16 o17 o18 o19 o2 o3 o4 o5 o6 o7 o8 o9 p1 p10 p11 p12 p13 p14 p15 p16 p17 p18 p19 p2 p3 p4 p5 p6 p7 p8 p9 q1 q10 q11 q12 q13 q14 q15 q16 q17 q18 q19 q2 q3 q4 q5 q6 q7 q8 q9 r1 r10 r11 r12 r13 r14 r15 r16 r17 r18 r19 r2 r3 r4 r5 r6 r7 r8 r9 s1 s10 s11 s12 s13 s14 s15 s16 s17 s18 s19 s2 s3 s4 s5 s6 s7 s8 s9|
 P|19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/2S16[SSSSSSSSSSssssssssss] w - 3610 75 0 0 75 0 1|-123132425|360|-1970695926|3610|75|0|0|0|||c1
 P|19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/2s16/19/19/2S16[SSSSSSSSSSssssssssss] b - 10 85 0 0 75 0 2|-1340258999|359|1731046441|10|85|0|0|0|||c4
 P|19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/2s16/19/1S17/2S16[SSSSSSSSSSssssssssss] w - 20 85 0 0 75 0 2|2053945715|358|1625689455|20|85|0|0|0|||b2
@@ -16171,7 +16171,7 @@ P|19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/2s16/1sSs15/1S1S15/2S16[SSSSSSSSS
 P|19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/2s16/1s1s15/1SsS15/2S16[SSSSSSSSSSssssssssss] b c3 30 125 0 1 75 0 5|-672874061|353|530719148|30|125|0|1|0|||c2
 G|triple-ko|go9x9||1|1
 A|s@b8 s@b7 s@c9 s@c6 s@d8 s@d7 s@f8 s@f7 s@g9 s@g6 s@h8 s@h7 s@b2 s@b3 s@c1 s@c4 s@d2 s@d3 s@f2 s@f3 s@g1 s@g4 s@h2 s@h3 s@c7 s@c2 s@g3 s@g8 s@g7 s@c8 s@c3 s@g2 s@c7 s@c2
-P|9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 0 1|-781389749|81|-1619164048|0|0|0|0|0||a1 a2 a3 a4 a5 a6 a7 a8 a9 b1 b2 b3 b4 b5 b6 b7 b8 b9 c1 c2 c3 c4 c5 c6 c7 c8 c9 d1 d2 d3 d4 d5 d6 d7 d8 d9 e1 e2 e3 e4 e5 e6 e7 e8 e9 f1 f2 f3 f4 f5 f6 f7 f8 f9 g1 g2 g3 g4 g5 g6 g7 g8 g9 h1 h2 h3 h4 h5 h6 h7 h8 h9 i1 i2 i3 i4 i5 i6 i7 i8 i9|
+P|9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 0 1|-781389749|81|-1619164048|0|55|0|0|0||a1 a2 a3 a4 a5 a6 a7 a8 a9 b1 b2 b3 b4 b5 b6 b7 b8 b9 c1 c2 c3 c4 c5 c6 c7 c8 c9 d1 d2 d3 d4 d5 d6 d7 d8 d9 e1 e2 e3 e4 e5 e6 e7 e8 e9 f1 f2 f3 f4 f5 f6 f7 f8 f9 g1 g2 g3 g4 g5 g6 g7 g8 g9 h1 h2 h3 h4 h5 h6 h7 h8 h9 i1 i2 i3 i4 i5 i6 i7 i8 i9|
 P|9/1S7/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] w - 810 55 0 0 55 0 1|1021864387|80|-1912944254|810|55|0|0|0|||b8
 P|9/1S7/1s7/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b - 10 65 0 0 55 0 2|-214799312|79|1437953359|10|65|0|0|0|||b7
 P|2S6/1S7/1s7/9/9/9/9/9/9[SSSSSSSSSSssssssssss] w - 20 65 0 0 55 0 2|1279546014|78|-720867699|20|65|0|0|0|||c9
@@ -16208,7 +16208,7 @@ P|2S3S2/1S1S1S1S1/1sSs1sSs1/2s3s2/9/2s3s2/1sSs1s1s1/1S1S1SsS1/2S3S2[SSSSSSSSSSss
 P|2S3S2/1S1S1S1S1/1sSs1sSs1/2s3s2/9/2s3s2/1s1s1s1s1/1SsS1SsS1/2S3S2[SSSSSSSSSSssssssssss] b c3 160 215 3 3 55 0 18|1605883769|51|1297278928|160|215|3|3|0||c8|c2 g3
 G|handicap-9x9-h1|go9x9|9/9/2S6/9/9/9/9/9/9[SSSSSSSSSSssssssssss] w - 10 55 0 0 55 0 1|1|0
 A|s@c3 s@a7 s@f5 s@g5 s@c4 s@g1 s@b4 s@f4 s@e3 s@g6
-P|9/9/2S6/9/9/9/9/9/9[SSSSSSSSSSssssssssss] w - 810 55 0 0 55 0 1|1159395843|80|-1350766740|0|0|0|0|0|||
+P|9/9/2S6/9/9/9/9/9/9[SSSSSSSSSSssssssssss] w - 810 55 0 0 55 0 1|1159395843|80|-1350766740|810|55|0|0|0|||
 P|9/9/2S6/9/9/9/2s6/9/9[SSSSSSSSSSssssssssss] b - 10 65 0 0 55 0 2|-144812496|79|1546067248|10|65|0|0|0|||
 P|9/9/S1S6/9/9/9/2s6/9/9[SSSSSSSSSSssssssssss] w - 20 65 0 0 55 0 2|616558710|78|520591052|20|65|0|0|0|||
 P|9/9/S1S6/9/5s3/9/2s6/9/9[SSSSSSSSSSssssssssss] b - 20 75 0 0 55 0 3|688721873|77|894664583|20|75|0|0|0|||
@@ -16221,7 +16221,7 @@ P|9/9/S1S6/9/5sS2/1ss2S3/2s1s4/9/6S2[SSSSSSSSSSssssssssss] b - 50 105 0 0 55 0 6
 P|9/9/S1S6/6S2/5sS2/1ss2S3/2s1s4/9/6S2[SSSSSSSSSSssssssssss] w - 60 105 0 0 55 0 6|-846105211|70|-1382639211|60|105|0|0|0|||
 G|handicap-9x9-h2|go9x9|9/9/6S2/9/9/9/2S6/9/9[SSSSSSSSSSssssssssss] w - 20 55 0 0 55 0 1|1|0
 A|s@h7 s@i9 s@h5 s@e3 s@c2 s@e5 s@f2 s@g8 s@e8 s@h9
-P|9/9/6S2/9/9/9/2S6/9/9[SSSSSSSSSSssssssssss] w - 810 55 0 0 55 0 1|898218175|79|-962076176|0|0|0|0|0|||
+P|9/9/6S2/9/9/9/2S6/9/9[SSSSSSSSSSssssssssss] w - 810 55 0 0 55 0 1|898218175|79|-962076176|810|55|0|0|0|||
 P|9/9/6Ss1/9/9/9/2S6/9/9[SSSSSSSSSSssssssssss] b - 20 65 0 0 55 0 2|915149585|78|-1278419741|20|65|0|0|0|||
 P|8S/9/6Ss1/9/9/9/2S6/9/9[SSSSSSSSSSssssssssss] w - 30 65 0 0 55 0 2|943488413|77|623780505|30|65|0|0|0|||
 P|8S/9/6Ss1/9/7s1/9/2S6/9/9[SSSSSSSSSSssssssssss] b - 30 75 0 0 55 0 3|-1157559432|76|-1437278356|30|75|0|0|0|||
@@ -16234,7 +16234,7 @@ P|8S/4s1S2/6Ss1/9/4S2s1/9/2S1S4/2s2s3/9[SSSSSSSSSSssssssssss] b - 60 105 0 0 55 
 P|7SS/4s1S2/6Ss1/9/4S2s1/9/2S1S4/2s2s3/9[SSSSSSSSSSssssssssss] w - 70 105 0 0 55 0 6|-359888238|69|-1964108882|70|105|0|0|0|||
 G|handicap-9x9-h3|go9x9|9/9/6S2/9/9/9/2S3S2/9/9[SSSSSSSSSSssssssssss] w - 30 55 0 0 55 0 1|1|0
 A|s@c7 s@b6 s@f3 s@c4 s@g1 s@g2 s@e8 s@e7 s@a4 s@a6
-P|9/9/6S2/9/9/9/2S3S2/9/9[SSSSSSSSSSssssssssss] w - 810 55 0 0 55 0 1|776632443|78|1882291692|0|0|0|0|0|||
+P|9/9/6S2/9/9/9/2S3S2/9/9[SSSSSSSSSSssssssssss] w - 810 55 0 0 55 0 1|776632443|78|1882291692|810|55|0|0|0|||
 P|9/9/2s3S2/9/9/9/2S3S2/9/9[SSSSSSSSSSssssssssss] b - 30 65 0 0 55 0 2|1945345142|77|1149656560|30|65|0|0|0|||
 P|9/9/2s3S2/1S7/9/9/2S3S2/9/9[SSSSSSSSSSssssssssss] w - 40 65 0 0 55 0 2|-2036048092|76|1733309026|40|65|0|0|0|||
 P|9/9/2s3S2/1S7/9/9/2S2sS2/9/9[SSSSSSSSSSssssssssss] b - 40 75 0 0 55 0 3|892479435|75|1725789969|40|75|0|0|0|||
@@ -16247,7 +16247,7 @@ P|9/4s4/2s1S1S2/1S7/9/s1S6/2S2sS2/6S2/6s2[SSSSSSSSSSssssssssss] b - 70 105 0 0 5
 P|9/4s4/2s1S1S2/SS7/9/s1S6/2S2sS2/6S2/6s2[SSSSSSSSSSssssssssss] w - 80 105 0 0 55 0 6|1526340729|68|1872764410|80|105|0|0|0|||
 G|handicap-9x9-h4|go9x9|9/9/2S3S2/9/9/9/2S3S2/9/9[SSSSSSSSSSssssssssss] w - 40 55 0 0 55 0 1|1|0
 A|s@a3 s@i3 s@b5 s@d8 s@g2 s@e7 s@i1 s@e9 s@h1 s@d5
-P|9/9/2S3S2/9/9/9/2S3S2/9/9[SSSSSSSSSSssssssssss] w - 810 55 0 0 55 0 1|1818130487|77|1149656560|0|0|0|0|0|||
+P|9/9/2S3S2/9/9/9/2S3S2/9/9[SSSSSSSSSSssssssssss] w - 810 55 0 0 55 0 1|1818130487|77|1149656560|810|55|0|0|0|||
 P|9/9/2S3S2/9/9/9/s1S3S2/9/9[SSSSSSSSSSssssssssss] b - 40 65 0 0 55 0 2|-1610288335|76|1857596748|40|65|0|0|0|||
 P|9/9/2S3S2/9/9/9/s1S3S1S/9/9[SSSSSSSSSSssssssssss] w - 50 65 0 0 55 0 2|-722179687|75|-2129504272|50|65|0|0|0|||
 P|9/9/2S3S2/9/1s7/9/s1S3S1S/9/9[SSSSSSSSSSssssssssss] b - 50 75 0 0 55 0 3|-88908812|74|1662140885|50|75|0|0|0|||
@@ -16260,7 +16260,7 @@ P|4S4/3S5/2S1S1S2/9/1s7/9/s1S3S1S/6s2/7ss[SSSSSSSSSSssssssssss] b - 80 105 0 0 5
 P|4S4/3S5/2S1S1S2/9/1s1S5/9/s1S3S1S/6s2/7ss[SSSSSSSSSSssssssssss] w - 90 105 0 0 55 0 6|1217348196|67|-1927921732|90|105|0|0|0|||
 G|handicap-9x9-h5|go9x9|9/9/2S3S2/9/4S4/9/2S3S2/9/9[SSSSSSSSSSssssssssss] w - 50 55 0 0 55 0 1|1|0
 A|s@d3 s@f8 s@i7 s@b2 s@b8 s@i3 s@c1 s@a2 s@g8 s@i1
-P|9/9/2S3S2/9/4S4/9/2S3S2/9/9[SSSSSSSSSSssssssssss] w - 810 55 0 0 55 0 1|-1154115213|76|-1167857876|0|0|0|0|0|||
+P|9/9/2S3S2/9/4S4/9/2S3S2/9/9[SSSSSSSSSSssssssssss] w - 810 55 0 0 55 0 1|-1154115213|76|-1167857876|810|55|0|0|0|||
 P|9/9/2S3S2/9/4S4/9/2Ss2S2/9/9[SSSSSSSSSSssssssssss] b - 50 65 0 0 55 0 2|-1962577110|75|529324377|50|65|0|0|0|||
 P|9/5S3/2S3S2/9/4S4/9/2Ss2S2/9/9[SSSSSSSSSSssssssssss] w - 60 65 0 0 55 0 2|1966143312|74|-2121551367|60|65|0|0|0|||
 P|9/5S3/2S3S1s/9/4S4/9/2Ss2S2/9/9[SSSSSSSSSSssssssssss] b - 60 75 0 0 55 0 3|-177095431|73|-1042822749|60|75|0|0|0|||
@@ -16273,7 +16273,7 @@ P|9/1s3Ss2/2S3S1s/9/4S4/9/2Ss2S1S/SS7/2s6[SSSSSSSSSSssssssssss] b - 90 105 0 0 5
 P|9/1s3Ss2/2S3S1s/9/4S4/9/2Ss2S1S/SS7/2s5S[SSSSSSSSSSssssssssss] w - 100 105 0 0 55 0 6|-651628978|66|-439106535|100|105|0|0|0|||
 G|handicap-9x9-h6|go9x9|9/9/2S3S2/9/2S3S2/9/2S3S2/9/9[SSSSSSSSSSssssssssss] w - 60 55 0 0 55 0 1|1|0
 A|s@i5 s@c4 s@e4 s@a4 s@g9 s@a5 s@c8 s@f1 s@f7 s@f5
-P|9/9/2S3S2/9/2S3S2/9/2S3S2/9/9[SSSSSSSSSSssssssssss] w - 810 55 0 0 55 0 1|864893871|75|1030379952|0|0|0|0|0|||
+P|9/9/2S3S2/9/2S3S2/9/2S3S2/9/9[SSSSSSSSSSssssssssss] w - 810 55 0 0 55 0 1|864893871|75|1030379952|810|55|0|0|0|||
 P|9/9/2S3S2/9/2S3S1s/9/2S3S2/9/9[SSSSSSSSSSssssssssss] b - 60 65 0 0 55 0 2|1765441129|74|1405993388|60|65|0|0|0|||
 P|9/9/2S3S2/9/2S3S1s/2S6/2S3S2/9/9[SSSSSSSSSSssssssssss] w - 70 65 0 0 55 0 2|103775959|73|1404782737|70|65|0|0|0|||
 P|9/9/2S3S2/9/2S3S1s/2S1s4/2S3S2/9/9[SSSSSSSSSSssssssssss] b - 70 75 0 0 55 0 3|1398320114|72|-132334356|70|75|0|0|0|||
@@ -16286,7 +16286,7 @@ P|6s2/2s6/2S2sS2/9/S1S3S1s/S1S1s4/2S3S2/9/5S3[SSSSSSSSSSssssssssss] b - 100 105 
 P|6s2/2s6/2S2sS2/9/S1S2SS1s/S1S1s4/2S3S2/9/5S3[SSSSSSSSSSssssssssss] w - 110 105 0 0 55 0 6|489060555|65|-1234233031|110|105|0|0|0|||
 G|handicap-9x9-h7|go9x9|9/9/2S3S2/9/2S1S1S2/9/2S3S2/9/9[SSSSSSSSSSssssssssss] w - 70 55 0 0 55 0 1|1|0
 A|s@a5 s@h4 s@g1 s@d6 s@g8 s@h3 s@c6 s@b1 s@d3 s@h9
-P|9/9/2S3S2/9/2S1S1S2/9/2S3S2/9/9[SSSSSSSSSSssssssssss] w - 810 55 0 0 55 0 1|-192594197|74|-224860756|0|0|0|0|0|||
+P|9/9/2S3S2/9/2S1S1S2/9/2S3S2/9/9[SSSSSSSSSSssssssssss] w - 810 55 0 0 55 0 1|-192594197|74|-224860756|810|55|0|0|0|||
 P|9/9/2S3S2/9/s1S1S1S2/9/2S3S2/9/9[SSSSSSSSSSssssssssss] b - 70 65 0 0 55 0 2|1502525042|73|1019567920|70|65|0|0|0|||
 P|9/9/2S3S2/9/s1S1S1S2/7S1/2S3S2/9/9[SSSSSSSSSSssssssssss] w - 80 65 0 0 55 0 2|-757335648|72|2022174754|80|65|0|0|0|||
 P|9/9/2S3S2/9/s1S1S1S2/7S1/2S3S2/9/6s2[SSSSSSSSSSssssssssss] b - 80 75 0 0 55 0 3|-356884677|71|-1552298042|80|75|0|0|0|||
@@ -16299,7 +16299,7 @@ P|9/6s2/2S3S2/2sS5/s1S1S1S2/7S1/2Ss2SS1/9/1S4s2[SSSSSSSSSSssssssssss] b - 110 10
 P|7S1/6s2/2S3S2/2sS5/s1S1S1S2/7S1/2Ss2SS1/9/1S4s2[SSSSSSSSSSssssssssss] w - 120 105 0 0 55 0 6|-1036461804|64|1509792494|120|105|0|0|0|||
 G|handicap-9x9-h8|go9x9|9/9/2S1S1S2/9/2S3S2/9/2S1S1S2/9/9[SSSSSSSSSSssssssssss] w - 80 55 0 0 55 0 1|1|0
 A|s@e9 s@h4 s@e4 s@g2 s@a8 s@e8 s@a4 s@b4 s@e1 s@i8
-P|9/9/2S1S1S2/9/2S3S2/9/2S1S1S2/9/9[SSSSSSSSSSssssssssss] w - 810 55 0 0 55 0 1|-1850432729|73|1061791728|0|0|0|0|0|||
+P|9/9/2S1S1S2/9/2S3S2/9/2S1S1S2/9/9[SSSSSSSSSSssssssssss] w - 810 55 0 0 55 0 1|-1850432729|73|1061791728|810|55|0|0|0|||
 P|4s4/9/2S1S1S2/9/2S3S2/9/2S1S1S2/9/9[SSSSSSSSSSssssssssss] b - 80 65 0 0 55 0 2|-1020221915|72|-1610999764|80|65|0|0|0|||
 P|4s4/9/2S1S1S2/9/2S3S2/7S1/2S1S1S2/9/9[SSSSSSSSSSssssssssss] w - 90 65 0 0 55 0 2|1681093715|71|-1895155546|90|65|0|0|0|||
 P|4s4/9/2S1S1S2/9/2S3S2/4s2S1/2S1S1S2/9/9[SSSSSSSSSSssssssssss] b - 90 75 0 0 55 0 3|-1679611410|70|-1022078685|90|75|0|0|0|||
@@ -16312,7 +16312,7 @@ P|4s4/s3S4/2S1S1S2/9/2S3S2/sS2s2S1/2S1S1S2/6S2/4s4[SSSSSSSSSSssssssssss] b - 120
 P|4s4/s3S3S/2S1S1S2/9/2S3S2/sS2s2S1/2S1S1S2/6S2/4s4[SSSSSSSSSSssssssssss] w - 130 105 0 0 55 0 6|-462662033|63|-390519902|130|105|0|0|0|||
 G|handicap-9x9-h9|go9x9|9/9/2S1S1S2/9/2S1S1S2/9/2S1S1S2/9/9[SSSSSSSSSSssssssssss] w - 90 55 0 0 55 0 1|1|0
 A|s@e4 s@b6 s@a6 s@d2 s@f3 s@b1 s@g8 s@b5 s@f9 s@d6
-P|9/9/2S1S1S2/9/2S1S1S2/9/2S1S1S2/9/9[SSSSSSSSSSssssssssss] w - 810 55 0 0 55 0 1|2033379427|72|1287681068|0|0|0|0|0|||
+P|9/9/2S1S1S2/9/2S1S1S2/9/2S1S1S2/9/9[SSSSSSSSSSssssssssss] w - 810 55 0 0 55 0 1|2033379427|72|1287681068|810|55|0|0|0|||
 P|9/9/2S1S1S2/9/2S1S1S2/4s4/2S1S1S2/9/9[SSSSSSSSSSssssssssss] b - 90 65 0 0 55 0 2|-1412671544|71|798502543|90|65|0|0|0|||
 P|9/9/2S1S1S2/1S7/2S1S1S2/4s4/2S1S1S2/9/9[SSSSSSSSSSssssssssss] w - 100 65 0 0 55 0 2|-859798249|70|-317416575|100|65|0|0|0|||
 P|9/9/2S1S1S2/sS7/2S1S1S2/4s4/2S1S1S2/9/9[SSSSSSSSSSssssssssss] b - 100 75 0 0 55 0 3|1140563654|69|-1658203388|100|75|0|0|0|||
@@ -16325,23 +16325,23 @@ P|5s3/6s2/2S1S1S2/sS7/1SS1S1S2/4s4/2S1SsS2/3S5/1S7[SSSSSSSSSSssssssssss] b - 130
 P|5s3/6s2/2S1S1S2/sS1S5/1SS1S1S2/4s4/2S1SsS2/3S5/1S7[SSSSSSSSSSssssssssss] w - 150 105 0 0 55 0 6|-1091909891|61|-129403962|150|105|0|0|0|||
 G|four-pass-no-ss|go9x9||1|0
 A|pass pass pass pass
-P|9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 0 1|-781389749|81|-1619164048|0|0|0|0|0|||
-P|9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] w - 0 55 0 0 55 1 1|-1335428895|81|-1619164048|0|0|0|0|0|||
-P|9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 2 2|-781387826|81|-1619164048|0|0|0|0|0|||
-P|9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] w - 0 55 0 0 55 2 2|-1335427933|81|-1619164048|0|0|0|0|0|||
-P|9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 3 3|-781386864|0|0|0|0|0|0|1|p2||
+P|9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 0 1|-781389749|81|-1619164048|0|55|0|0|0|||
+P|9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] w - 0 55 0 0 55 1 1|-1335428895|81|-1619164048|0|55|0|0|0|||
+P|9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 2 2|-781387826|81|-1619164048|0|55|0|0|0|||
+P|9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] w - 0 55 0 0 55 2 2|-1335427933|81|-1619164048|0|55|0|0|0|||
+P|9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 3 3|-781386864|0|0|0|55|0|0|1|p2||
 G|pass-drop-pass-settled|go9x9||1|0
 A|pass pass s@e5 pass pass ss:
-P|9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 0 1|-781389749|81|-1619164048|0|0|0|0|0|||
-P|9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] w - 0 55 0 0 55 1 1|-1335428895|81|-1619164048|0|0|0|0|0|||
-P|9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 2 2|-781387826|81|-1619164048|0|0|0|0|0|||
+P|9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 0 1|-781389749|81|-1619164048|0|55|0|0|0|||
+P|9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] w - 0 55 0 0 55 1 1|-1335428895|81|-1619164048|0|55|0|0|0|||
+P|9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 2 2|-781387826|81|-1619164048|0|55|0|0|0|||
 P|9/9/9/9/4S4/9/9/9/9[SSSSSSSSSSssssssssss] w - 810 55 0 0 55 0 2|1955273348|80|-431707604|810|55|0|0|0|||
 P|9/9/9/9/4S4/9/9/9/9[SSSSSSSSSSssssssssss] b - 810 55 0 0 55 1 3|1811872433|80|-431707604|810|55|0|0|0|||
 P|9/9/9/9/4S4/9/9/9/9[SSSSSSSSSSssssssssss] w - 810 55 0 0 55 2 3|1955275271|80|-431707604|810|55|0|0|0|||
 P|9/9/9/9/4S4/9/9/9/9[SSSSSSSSSSssssssssss] b - 810 55 0 1 55 3 41|-1473924226|0|0|810|55|0|1|1|p1||
 G|ss-off-board-key|go9x9||1|0
 A|s@g3 s@c7 s@f2 s@e5 s@e1 s@d4 s@h4 s@i1 s@i5 s@c5 s@d5 s@d6 pass pass ss:n4
-P|9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 0 1|-781389749|81|-1619164048|0|0|0|0|0|||
+P|9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 0 1|-781389749|81|-1619164048|0|55|0|0|0|||
 P|9/9/9/9/9/9/6S2/9/9[SSSSSSSSSSssssssssss] w - 810 55 0 0 55 0 1|-1913701629|80|1735800044|810|55|0|0|0|||
 P|9/9/2s6/9/9/9/6S2/9/9[SSSSSSSSSSssssssssss] b - 10 65 0 0 55 0 2|-60768464|79|-1434776720|10|65|0|0|0|||
 P|9/9/2s6/9/9/9/6S2/5S3/9[SSSSSSSSSSssssssssss] w - 20 65 0 0 55 0 2|-1429126434|78|1266887222|20|65|0|0|0|||
@@ -16359,7 +16359,7 @@ P|9/9/2s6/3s5/2s1s3S/3s3S1/6S2/5S3/4S3s[SSSSSSSSSSssssssssss] b - 50 125 0 1 55 
 P|9/9/2s6/3s5/2s1s3S/3s3S1/6S2/5S3/4S3s[SSSSSSSSSSssssssssss] w - 50 125 1 1 55 3 8|2082841245|0|0|50|125|1|1|1|p2||
 G|ss-names-nothing|go9x9||1|0
 A|s@g3 s@c7 s@f2 s@e5 s@e1 s@d4 s@h4 s@i1 s@i5 s@c5 s@d5 s@d6 pass pass ss:
-P|9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 0 1|-781389749|81|-1619164048|0|0|0|0|0|||
+P|9/9/9/9/9/9/9/9/9[SSSSSSSSSSssssssssss] b - 0 55 0 0 55 0 1|-781389749|81|-1619164048|0|55|0|0|0|||
 P|9/9/9/9/9/9/6S2/9/9[SSSSSSSSSSssssssssss] w - 810 55 0 0 55 0 1|-1913701629|80|1735800044|810|55|0|0|0|||
 P|9/9/2s6/9/9/9/6S2/9/9[SSSSSSSSSSssssssssss] b - 10 65 0 0 55 0 2|-60768464|79|-1434776720|10|65|0|0|0|||
 P|9/9/2s6/9/9/9/6S2/5S3/9[SSSSSSSSSSssssssssss] w - 20 65 0 0 55 0 2|-1429126434|78|1266887222|20|65|0|0|0|||
