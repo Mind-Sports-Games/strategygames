@@ -58,7 +58,7 @@ object Forsyth {
       player
     )
 
-  def <<(fen: FEN): Option[Situation] = <<@(fen.variant, fen)
+  def <<(fen: FEN): Option[Situation] = fen.variant.flatMap(<<@(_, fen))
 
   def validate(fen: FEN): Boolean =
     fen.value.matches(tenFieldShape) &&
@@ -111,7 +111,7 @@ object Forsyth {
       )
     }
 
-  def <<<(fen: FEN): Option[SituationPlus] = <<<@(fen.variant, fen)
+  def <<<(fen: FEN): Option[SituationPlus] = fen.variant.flatMap(<<<@(_, fen))
 
   def >>(situation: Situation): FEN = >>(SituationPlus(situation, 1))
 

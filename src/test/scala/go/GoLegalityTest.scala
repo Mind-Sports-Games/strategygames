@@ -158,9 +158,8 @@ class GoLegalityTest extends Specification with GoRulesTestSupport {
   }
 
   "a drop onto a point that already holds a stone" should {
-    "be refused as an illegal action by every replay loader, not only by the batch one" in {
-      (refusalOf(batchReplayed(ontoAnOccupiedPoint)) must startWith(refusedDrop)) and
-        (refusalOf(perPlyReplayed(ontoAnOccupiedPoint)) must startWith(refusedDrop)) and
+    "be refused as an illegal action by every replay loader" in {
+      (refusalOf(replayedFromUci(ontoAnOccupiedPoint)) must startWith(refusedDrop)) and
         (refusalOf(readFromActionStrs(ontoAnOccupiedPoint)) must startWith(refusedDrop))
     }
   }
@@ -174,11 +173,8 @@ class GoLegalityTest extends Specification with GoRulesTestSupport {
 
   private def turnPerAction(actions: List[String]) = actions.map(Vector(_)).toVector
 
-  private def batchReplayed(actions: List[String]) =
+  private def replayedFromUci(actions: List[String]) =
     Replay.gameFromUciStrings(turnPerAction(actions), Player.P1, None, Go9x9).toOption.get
-
-  private def perPlyReplayed(actions: List[String]) =
-    Replay.gameFromUciStringsPerPly(turnPerAction(actions), Player.P1, None, Go9x9).toOption.get
 
   private def readFromActionStrs(actions: List[String]) =
     format.pgn.Reader
@@ -187,7 +183,4 @@ class GoLegalityTest extends Specification with GoRulesTestSupport {
       .toOption
       .get
       .state
-      .situation
-      .board
-      .pieces
 }

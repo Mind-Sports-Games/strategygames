@@ -83,11 +83,11 @@ final case class FEN(value: String) extends AnyVal {
 
   def gameSize: Int = value.split(' ').lift(0).map(_.split('/').length).getOrElse(0)
 
-  def variant: Variant = gameSize match {
-    case 9  => strategygames.go.variant.Go9x9
-    case 13 => strategygames.go.variant.Go13x13
-    case 19 => strategygames.go.variant.Go19x19
-    case _  => sys.error(s"not given correct gameSize for go ${gameSize}")
+  def variant: Option[Variant] = gameSize match {
+    case 9  => Some(strategygames.go.variant.Go9x9)
+    case 13 => Some(strategygames.go.variant.Go13x13)
+    case 19 => Some(strategygames.go.variant.Go19x19)
+    case _  => None
   }
 
   private def intFromFen(index: Int): Option[Int] =

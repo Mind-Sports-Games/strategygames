@@ -88,17 +88,17 @@ class GoForsythTest extends Specification with GoRulesTestSupport {
     }
   }
 
-  "the invalid fen guard of plyAtFen" should {
-    val unreadable = nineByNine(rows = "9/9/9/9/9/9/9/9/9S")
-    "name a fen no situation can be read from" in
-      Replay.plyAtFen(Vector.empty, Some(Go9x9.initialFen), Go9x9, unreadable).swap.toOption ===
-      Some(s"Invalid FEN ${unreadable}")
-    "let a readable fen past it" in
-      Replay
-        .plyAtFen(Vector.empty, Some(Go9x9.initialFen), Go9x9, Go9x9.initialFen)
-        .swap
-        .toOption
-        .exists(_.startsWith("Invalid FEN")) === false
+  "a fen read without being told which variant to read it as" should {
+    val tenRanks = FEN(s"10/10/10/10/10/10/10/10/10/10${pocket} b - 0 55 0 0 55 0 1")
+    "take the variant its row count names" in {
+      (Forsyth.<<(Go13x13.initialFen).map(_.board.variant) === Some(Go13x13)) and
+        (Forsyth.<<<(Go19x19.initialFen).map(_.situation.board.variant) === Some(Go19x19))
+    }
+    "name no variant at all when its row count is no go board size" in
+      tenRanks.variant === None
+    "be refused, rather than throw, when its row count is no go board size" in {
+      (Forsyth.<<(tenRanks) === None) and (Forsyth.<<<(tenRanks) === None)
+    }
   }
 
   "a well formed go fen" should {

@@ -2,7 +2,9 @@ package strategygames.go
 
 import org.specs2.mutable.Specification
 
-import strategygames.Score
+import scala.util.Try
+
+import strategygames.{ Player, Score }
 import strategygames.go.format.Uci
 import strategygames.go.variant.Go9x9
 
@@ -49,6 +51,19 @@ class GoSuperkoTest extends Specification with GoRulesTestSupport {
   private def replaying(keys: List[String]) =
     Replay(keys.flatMap(key => Uci(s"s@${key}")), Some(Go9x9.initialFen), Go9x9)
 
+  private def replayingFromUciStrings(keys: List[String]) =
+    Replay
+      .gameFromUciStrings(
+        keys.map(key => Vector(s"s@${key}")).toVector,
+        Player.fromTurnCount(keys.size),
+        Some(Go9x9.initialFen),
+        Go9x9
+      )
+      .valueOr(error => sys.error(error))
+
+  private def refusalOf(replaying: => Any): String =
+    Try(replaying).failed.map(_.getMessage).getOrElse("nothing was refused")
+
   private val koShapeWithWhiteToPlay = List("b2", "c2", "a3", "d3", "b4", "c4", "c3")
 
   "the returning capture of a send two return one cycle" should {
@@ -70,6 +85,13 @@ class GoSuperkoTest extends Specification with GoRulesTestSupport {
     }
     "refuse the ply that repeats" in {
       replaying(tripleKo).isInvalid === true
+    }
+    "keep the position history the refusal is drawn from when rebuilt from its uci strings" in {
+      replayingFromUciStrings(tripleKo.init).situation.history.positionCount === tripleKo.init.size + 1
+    }
+    "be refused at the repeating ply when rebuilt from its uci strings too" in {
+      refusalOf(replayingFromUciStrings(tripleKo)) must
+        startWith(s"Illegal action s@${tripleKo.last} at ply ${tripleKo.size - 1}")
     }
   }
 

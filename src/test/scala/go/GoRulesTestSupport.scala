@@ -11,13 +11,13 @@ trait GoRulesTestSupport {
     playingOn(Game(variant), actions)
 
   protected def playingFrom(fen: FEN, actions: List[String]): Game =
-    playingOn(Game(Some(fen.variant), Some(fen)), actions)
+    playingOn(Game(fen.variant, Some(fen)), actions)
 
   protected def playingOn(game: Game, actions: List[String]): Game =
     actions.foldLeft(game)(afterAction)
 
   protected def situationFrom(fen: FEN): Situation =
-    Forsyth.<<@(fen.variant, fen).getOrElse(sys.error(s"unreadable go fen: ${fen.value}"))
+    Forsyth.<<(fen).getOrElse(sys.error(s"unreadable go fen: ${fen.value}"))
 
   protected def dropKeysOf(situation: Situation): List[String] =
     situation.board.variant.validDrops(situation).map(_.pos.key)

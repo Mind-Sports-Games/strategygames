@@ -185,10 +185,6 @@ class GoLayerBenchmark {
     bh.consume(GoCorpusGame.replay(input.corpus, input.variant, input.corpus.actionStrs).plies)
 
   @Benchmark
-  def prodReplayPerPly(input: GoLayerInput, bh: Blackhole): Unit =
-    bh.consume(GoCorpusGame.replayPerPly(input.corpus, input.variant, input.corpus.actionStrs).plies)
-
-  @Benchmark
   def areaScoreMidGame(state: GoFreshMidGameState, bh: Blackhole): Unit =
     bh.consume(state.game.state.areaScore.black)
 

@@ -62,8 +62,8 @@ class GoPositionHashTest extends Specification with GoRulesTestSupport {
     "restart the history from the settled position" in {
       playing(Go9x9, gameEndingInASettlement).situation.history.positionCount === 1
     }
-    "restart it too when the game is rebuilt action at a time from its uci" in {
-      replayedPerPly(Go9x9, gameEndingInASettlement).situation.history.positionCount === 1
+    "restart it too when the game is rebuilt from its uci" in {
+      replayedFromUci(Go9x9, gameEndingInASettlement).situation.history.positionCount === 1
     }
   }
 
@@ -97,11 +97,13 @@ class GoPositionHashTest extends Specification with GoRulesTestSupport {
     }
   }
 
-  "the batch replay path" should {
-    "record the same position history the per ply path records" in {
+  "the replay path" should {
+    "record the same position history the played game records" in {
       val actions = List("d4", "f4", "d6")
-      (batchReplayed(Go9x9, actions).situation.history.positionCount === actions.size + 1) and
-        (replayedPerPly(Go9x9, actions).situation.history.positionCount === actions.size + 1)
+      (replayedFromUci(Go9x9, actions).situation.history.positionCount === actions.size + 1) and
+        (playing(Go9x9, actions).situation.history.positionCount === actions.size + 1) and
+        (replayedFromUci(Go9x9, actions).situation.history.currentPosition ===
+          playing(Go9x9, actions).situation.history.currentPosition)
     }
   }
 
@@ -140,17 +142,7 @@ class GoPositionHashTest extends Specification with GoRulesTestSupport {
   private def variantOf(game: GoOracleGame): Variant =
     Variant(game.variantKey).getOrElse(sys.error(s"unknown go variant: ${game.variantKey}"))
 
-  private def replayedPerPly(variant: Variant, actions: List[String]): Game =
-    Replay
-      .gameFromUciStringsPerPly(
-        actions.map(action => Vector(uciStringOf(action))).toVector,
-        Player.fromTurnCount(actions.size),
-        None,
-        variant
-      )
-      .valueOr(error => sys.error(s"go replay of ${actions.mkString(" ")}: ${error}"))
-
-  private def batchReplayed(variant: Variant, actions: List[String]): Game =
+  private def replayedFromUci(variant: Variant, actions: List[String]): Game =
     Replay
       .gameFromUciStrings(
         actions.map(action => Vector(uciStringOf(action))).toVector,
@@ -158,7 +150,7 @@ class GoPositionHashTest extends Specification with GoRulesTestSupport {
         None,
         variant
       )
-      .valueOr(error => sys.error(s"go batch replay of ${actions.mkString(" ")}: ${error}"))
+      .valueOr(error => sys.error(s"go replay of ${actions.mkString(" ")}: ${error}"))
 
   private def uciStringOf(action: String): String =
     if (action == "pass" || action.startsWith("ss:")) action else s"${Role.defaultRole.forsyth}@${action}"

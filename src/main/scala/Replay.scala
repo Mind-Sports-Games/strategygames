@@ -2,7 +2,7 @@ package strategygames
 
 import cats.data.Validated
 import cats.implicits._
-import strategygames.format.{FEN, Uci}
+import strategygames.format.{ FEN, Uci }
 import strategygames.variant.Variant
 
 sealed abstract class Replay(val setup: Game, val actions: List[Action], val state: Game) {
@@ -729,8 +729,8 @@ object Replay {
       samurai.Replay.plyAtFen(actionStrs, initialFen.map(_.toSamurai), variant, atFen)
     case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant), FEN.Togyzkumalak(atFen)) =>
       togyzkumalak.Replay.plyAtFen(actionStrs, initialFen.map(_.toTogyzkumalak), variant, atFen)
-    case (GameLogic.Go(), Variant.Go(variant), FEN.Go(atFen))                               =>
-      go.Replay.plyAtFen(actionStrs, initialFen.map(_.toGo), variant, atFen)
+    case (GameLogic.Go(), Variant.Go(_), FEN.Go(_))                                         =>
+      Validated.invalid("plyAtFen is not implemented for go")
     case (GameLogic.Backgammon(), Variant.Backgammon(variant), FEN.Backgammon(atFen))       =>
       backgammon.Replay.plyAtFen(actionStrs, initialFen.map(_.toBackgammon), variant, atFen)
     case (GameLogic.Abalone(), Variant.Abalone(variant), FEN.Abalone(atFen))                =>

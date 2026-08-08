@@ -73,9 +73,8 @@ class GoBoardStateTest extends Specification {
         (Forsyth.exportBoardFen(resumed(passCount = 3)).fenPassCount === 3)
     }
 
-    "leave both replay paths refusing a further drop" in {
-      (perPlyDropOntoSettledFen.isFailure === true) and
-        (batchDropOntoSettledFen.isFailure === true)
+    "leave the replay refusing a further drop" in {
+      dropOntoSettledFenReplayed.isFailure === true
     }
   }
 
@@ -151,17 +150,7 @@ object GoBoardStateTest {
 
   private val playerAfterSettledFenDrop = Player.P2
 
-  lazy val perPlyDropOntoSettledFen: Try[Any] =
-    Try(
-      Replay.gameFromUciStringsPerPly(
-        dropOntoSettledFen,
-        playerAfterSettledFenDrop,
-        settledFen.some,
-        Go19x19
-      )
-    )
-
-  lazy val batchDropOntoSettledFen: Try[Any] =
+  lazy val dropOntoSettledFenReplayed: Try[Any] =
     Try(
       Replay.gameFromUciStrings(dropOntoSettledFen, playerAfterSettledFenDrop, settledFen.some, Go19x19)
     )
@@ -169,35 +158,35 @@ object GoBoardStateTest {
   lazy val disagreements: List[String] =
     GoOracle.load().flatMap { game =>
       val engine = enginePositionsOf(game)
-      batchDisagreements(game, engine) ++ perPlyDisagreements(game, engine)
+      prefixDisagreements(game, engine) ++ sweptDisagreements(game, engine)
     }
 
   private def enginePositionsOf(game: GoOracleGame): Vector[Api.Position] =
     Api.positionsFromVariantStartingFenAndMoves(variantOf(game), initialFenOf(game), game.actionStrs)
 
-  private def batchDisagreements(game: GoOracleGame, engine: Vector[Api.Position]): List[String] =
+  private def prefixDisagreements(game: GoOracleGame, engine: Vector[Api.Position]): List[String] =
     (0 to game.actionStrs.size).toList.flatMap { played =>
       val actions = game.actionStrs.take(played)
       boardDisagreements(
-        s"${game.name} batch ply ${played}",
-        replayedInOneBatch(game, actions).situation,
+        s"${game.name} prefix ply ${played}",
+        replayedFromUci(game, actions).situation,
         engine(played),
         actions
       )
     }
 
-  private def perPlyDisagreements(game: GoOracleGame, engine: Vector[Api.Position]): List[String] = {
-    val (init, perPly, _) = Replay.gameWithUciWhileValid(
+  private def sweptDisagreements(game: GoOracleGame, engine: Vector[Api.Position]): List[String] = {
+    val (init, swept, _) = Replay.gameWithUciWhileValid(
       game.actionStrs.map(Vector(_)).toVector,
       startPlayerOf(game),
       activePlayerAfter(game, game.actionStrs.size),
       initialFenOf(game),
       variantOf(game)
     )
-    boardDisagreements(s"${game.name} per ply 0", init.situation, engine(0), Nil) ++
-      perPly.map(_._1).zipWithIndex.flatMap { case (state, index) =>
+    boardDisagreements(s"${game.name} swept ply 0", init.situation, engine(0), Nil) ++
+      swept.map(_._1).zipWithIndex.flatMap { case (state, index) =>
         boardDisagreements(
-          s"${game.name} per ply ${index + 1}",
+          s"${game.name} swept ply ${index + 1}",
           state.situation,
           engine(index + 1),
           game.actionStrs.take(index + 1)
@@ -205,7 +194,7 @@ object GoBoardStateTest {
       }
   }
 
-  private def replayedInOneBatch(game: GoOracleGame, actions: List[String]): Game =
+  private def replayedFromUci(game: GoOracleGame, actions: List[String]): Game =
     Replay
       .gameFromUciStrings(
         actions.map(Vector(_)).toVector,

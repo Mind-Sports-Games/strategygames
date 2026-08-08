@@ -236,7 +236,7 @@ class GoScalaVariantTest extends Specification {
 
     "keep its own variant, which size inference also names" in {
       (situation.map(_.board.variant) === Some(Go9x9)) and
-        (fen.variant === Go9x9)
+        (fen.variant === Some(Go9x9))
     }
 
     "round trip through forsyth" in {
