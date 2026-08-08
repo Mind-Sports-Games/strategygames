@@ -240,7 +240,31 @@ handicap game has stones and a real area score from ply 0.
 
 ## The lila patch
 
-Two of these are source-breaking beyond the removal of `go.Api`.
+Three parts, in the order they matter: one thing lila has to start doing, the source-breaking
+changes, and a set of values that move without any compile error.
+
+### Required first: go games must now carry `positionHashes`
+
+Before this branch, nothing in go ever wrote `positionHashes` —
+`git grep positionHashes 237fbdf1 -- src/main/scala/go` returns the field declaration and nothing
+else. It is now the superko history, and go legality is read from it
+(`Variant.recreatesAnEarlierPosition` → `History.hasOccurred`).
+
+**If lila persists and restores go history through `History.apply(GameLogic.Go(), positionHashes =
+…)` and does not carry the array, every restored go game gets an empty superko history and the live
+game will permit placements that a straight-through replay refuses.** That is the same defect this
+branch spent a task closing inside `Replay`, relocated to the lila boundary where nothing in this
+repo can catch it. Go's `repetitionEnabled` is `false` and the field was always empty, so a lila
+persistence layer that quietly drops it is the likely status quo rather than an unlikely accident.
+Check it before anything else in this patch.
+
+Two consequences that follow from the same change:
+
+- **`go.Hash.size` is 8 bytes per entry, where `strategygames.Hash.size` is 3.** Go is the only
+  logic whose entries are that wide. `strategygames.History.toString` groups `positionHashes` by the
+  generic size (`History.scala:56`), so that debug rendering is now meaningless for go. Cosmetic, and
+  it is the only generic consumer in the repo.
+- A 400-ply 19x19 game carries about 3.2 KB of position history where it carried none.
 
 ### `go.Api` is gone
 
@@ -277,16 +301,39 @@ had no callers in this repo. Alongside it:
 - **`strategygames.History.Go` gains a second parameter**, `areaScore: Score`. Any
   `case History.Go(h) =>` becomes `case History.Go(h, _) =>`.
 - **`go.History.score` is gone.** Read it from the board, or from `strategygames.History.score`,
-  which is unchanged in type and meaning.
+  which is unchanged in type. Its *meaning* on the go path is not unchanged — see below.
 - `History.apply(lib, …)` is unchanged in signature and behaviour, including its `score` argument.
 - `strategygames.History.score` remains `val score: Score` on the parent, so no other logic's readers
   are affected.
 
-### Behaviour a lila upgrade absorbs
+### Values that move with no compile error
 
-The three changes above, plus: `Forsyth.<<@(variant, fen)` now returns `None` for a FEN it cannot
-read, where it previously returned `Some` unconditionally or threw on a bad turn field. Callers that
-matched on `Some` and never handled `None` will now see the empty case.
+These are the ones to grep for. Nothing here fails to build; the numbers simply differ.
+
+**`go.History.halfMoveClock` now counts plies, where it counted something close to completed turns.**
+Old (`237fbdf1:go/Board.scala`, `afterDrop`): `halfMoveClock + player.fold(0, 1)`, so it incremented
+on P2's drop only, and not at all for a played pass or settlement — the old `Variant.validPass` and
+`createSelectSquares` rebuilt the board with `board.copy(…)` and never touched history. New
+(`Variant.afterOnePly`): `+ 1` on every ply, and set from `fen.ply` on parse. The field roughly
+doubles. The change is forced — `Board.playerToMove`, `Forsyth.playerToMove` and
+`Forsyth.fullMovePart` all derive from it now that the engine is gone — and the *exported FEN* is
+unaffected. But `strategygames.History.halfMoveClock` is a pass-through field, so any lila code
+keyed on the raw value for a go game (a clock, a move counter, a stored-game migration) reads a
+different number for the same game, with no compile error and no test in this repo that could
+notice.
+
+**`strategygames.Board.Go.withHistory` and `.copy(history)` discard the score they are handed.**
+`case History.Go(h, _) => Go(b.withHistory(h))` (`Board.scala:253-281`) drops the second field on the
+floor, and `Board.Go(b).history.score` is unconditionally `b.areaScore`. Before, a score installed
+through `History.apply(GameLogic.Go(), score = …)` travelled inside `go.History.scoring` and survived
+`withHistory`. For go the derived value is the truthful one and that is the point of the change, but
+the consequence is that `strategygames.History.score` is now **unsettable** on the go path: a caller
+that restores a persisted score and reads it back gets the position's own area score instead, with
+no error. Nothing in this repo pins it.
+
+**`Forsyth.<<@(variant, fen)` now returns `None` for a FEN it cannot read**, where it previously
+returned `Some` unconditionally or threw on a bad turn field. Callers that matched on `Some` and
+never handled `None` will now see the empty case.
 
 ## Known limitations
 
