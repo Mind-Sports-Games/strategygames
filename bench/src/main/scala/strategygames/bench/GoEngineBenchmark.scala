@@ -10,8 +10,8 @@ import org.openjdk.jmh.infra.Blackhole
 import cats.data.Validated
 
 import strategygames.{ ActionStrs, Player }
-import strategygames.go.{ Api, Game, Pos, Replay, Situation }
-import strategygames.go.format.{ FEN, Forsyth }
+import strategygames.go.{ Game, Pos, Replay, Situation }
+import strategygames.go.format.FEN
 import strategygames.go.variant.{ Go13x13, Go19x19, Go9x9, Variant => GoVariant }
 
 final case class GoBoardSize(
@@ -112,35 +112,6 @@ class GoMidGameBoard {
 }
 
 @State(Scope.Thread)
-class GoMidGamePosition {
-
-  @Param(Array("go9x9", "go13x13", "go19x19"))
-  var size: String = ""
-
-  var variantKey: String     = ""
-  var fen: String            = ""
-  var position: Api.Position = uninitialized
-
-  @Setup(Level.Trial)
-  def setupCorpus(): Unit = {
-    val corpus  = GoCorpusGame.load(size)
-    val variant = corpus.size.variant
-    variantKey = variant.key
-    fen = Forsyth
-      .exportBoardFen(
-        GoCorpusGame.replay(corpus, variant, corpus.turnsBeforeMidGameDrop).situation.board
-      )
-      .value
-  }
-
-  // Per invocation, not per trial: `legalDrops` is cached on the position, so a reused one would
-  // time a field access. JMH keeps this setup out of the reported score.
-  @Setup(Level.Invocation)
-  def freshPosition(): Unit =
-    position = Api.positionFromVariantNameAndFEN(variantKey, fen)
-}
-
-@State(Scope.Thread)
 @BenchmarkMode(Array(Mode.AverageTime))
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
 @Warmup(iterations = 3, time = 1)
@@ -155,8 +126,4 @@ class GoEngineBenchmark {
   @Benchmark
   def applyDrop(input: GoMidGameBoard, bh: Blackhole): Unit =
     bh.consume(input.situation.board.variant.boardAfter(input.situation, input.dropPos))
-
-  @Benchmark
-  def legalDrops(input: GoMidGamePosition, bh: Blackhole): Unit =
-    bh.consume(input.position.legalDrops.length)
 }

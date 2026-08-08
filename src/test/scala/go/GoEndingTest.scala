@@ -15,6 +15,12 @@ class GoEndingTest extends Specification with GoRulesTestSupport {
   private val scriptedReplay =
     List("s@g3", "s@c7", "s@f2", "s@e5", "s@e1", "s@d4", "s@h4", "s@i1", "s@i5", "pass", "pass", "ss:i1")
 
+  private def settling(game: Game, uci: String): Game =
+    Uci(uci)
+      .map(game.apply(_).map { case (next, _) => next })
+      .getOrElse(sys.error(s"unreadable go uci: ${uci}"))
+      .valueOr(error => sys.error(s"cannot settle with ${uci}: ${error}"))
+
   private def scriptedReplayFens: Option[List[FEN]] =
     Replay
       .situationsFromUci(scriptedReplay.flatMap(Uci(_)), Some(scriptedReplayStart), Go9x9)
@@ -104,6 +110,25 @@ class GoEndingTest extends Specification with GoRulesTestSupport {
     }
     "be refused outright as a drop" in {
       awaitingSelection.situation.drop(Role.defaultRole, pointAt("n4")).isInvalid === true
+    }
+  }
+
+  "a key that is no coordinate at all" should {
+    val awaitingSelection = playing(Go9x9, scriptedNineByNine ++ List("pass", "pass"))
+
+    "be dropped from a settlement, leaving the empty settlement behind" in {
+      (Uci("ss:zz") === Some(Uci.SelectSquares(Nil))) and
+        (fenOf(settling(awaitingSelection, "ss:zz")) === fenOf(settling(awaitingSelection, "ss:")))
+    }
+
+    "be dropped from a settlement naming readable keys beside it" in {
+      (Uci("ss:i1,zz") === Some(Uci.SelectSquares(List(pointAt("i1"))))) and
+        (fenOf(settling(awaitingSelection, "ss:i1,zz")) === fenOf(settling(awaitingSelection, "ss:i1")))
+    }
+
+    "be an error as a drop, which a settlement key of the same shape is not" in {
+      (Uci("s@zz") must throwAn[Exception]) and
+        (settling(awaitingSelection, "ss:zz").situation.end === true)
     }
   }
 

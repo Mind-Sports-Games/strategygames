@@ -5,7 +5,7 @@ import java.nio.file.{ Files, Paths }
 
 import scala.annotation.tailrec
 
-import strategygames.go.{ Api, Game, Stone }
+import strategygames.go.{ Game, Stone }
 import strategygames.go.format.FEN
 import strategygames.go.variant.{ Go13x13, Go19x19, Go9x9, Variant }
 
@@ -90,14 +90,10 @@ object GoOracleGenerator {
     val rank = coordinate.drop(1).toInt
     require(file >= 0 && file < upstreamBoardSize, s"unknown upstream file in ${coordinate}")
     require(rank >= 1 && rank <= upstreamBoardSize, s"unknown upstream rank in ${coordinate}")
-    dropOf(upstreamBoardSize * (rank - 1) + file, Go19x19)
+    dropOf(s"${('a' + file).toChar}${rank}")
   }
 
-  private def dropOf(engineMove: Int, variant: Variant): String =
-    Api
-      .moveToPos(engineMove, variant)
-      .map(pos => s"${Stone.forsyth}@${pos.key}")
-      .getOrElse(sys.error(s"engine move ${engineMove} names no square of ${variant.key}"))
+  private def dropOf(key: String): String = s"${Stone.forsyth}@${key}"
 
   private def upstreamSuite: String = {
     val stream = Option(getClass.getResourceAsStream(upstreamResourcePath))
@@ -196,7 +192,7 @@ object GoOracleGenerator {
     "s@d6"
   )
 
-  private val koEngineMoves = List(2, 59, 20, 39, 22, 41, 40, 21)
+  private val koPointSequence = List("c1", "c4", "b2", "b3", "d2", "d3", "c3", "c2")
 
   private val tripleKo = List(
     "s@b8",
@@ -243,7 +239,7 @@ object GoOracleGenerator {
         None,
         scriptedNineByNine ++ List("pass", "pass", "ss:i1")
       ),
-      pinnedRuleWithDropKeys("ko-point-19x19", Go19x19, koEngineMoves.map(dropOf(_, Go19x19))),
+      pinnedRuleWithDropKeys("ko-point-19x19", Go19x19, koPointSequence.map(dropOf)),
       pinnedRuleWithDropKeys("triple-ko", Go9x9, tripleKo)
     ) ++ handicapGames ++ List(
       pinnedRule("four-pass-no-ss", Go9x9, None, List("pass", "pass", "pass", "pass")),

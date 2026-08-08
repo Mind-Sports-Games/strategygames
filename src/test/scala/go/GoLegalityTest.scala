@@ -7,7 +7,7 @@ import scala.util.Try
 import strategygames.{ Player, Score }
 import strategygames.format.pgn.{ Tag, Tags }
 import strategygames.go.format.FEN
-import strategygames.go.variant.{ Go19x19, Go9x9 }
+import strategygames.go.variant.{ Go13x13, Go19x19, Go9x9, Variant }
 
 class GoLegalityTest extends Specification with GoRulesTestSupport {
 
@@ -56,6 +56,14 @@ class GoLegalityTest extends Specification with GoRulesTestSupport {
     val afterKoCapture = playing(Go9x9, koSequence)
     "record the emptied point as the ko point" in {
       koPointOf(fenOf(afterKoCapture)) === "f5"
+    }
+    "record it, and withhold the recapture, on every board size the shape fits" in {
+      forall(List[Variant](Go9x9, Go13x13, Go19x19)) { variant =>
+        val onThisSize = playing(variant, koSequence)
+        (koPointOf(fenOf(onThisSize)) === "f5") and
+          (dropKeysOf(onThisSize.situation) must not(contain("f5"))) and
+          (onThisSize.situation.history.captures === Score(1, 0))
+      }
     }
     "withhold the immediate recapture" in {
       dropKeysOf(afterKoCapture.situation) must not(contain("f5"))
@@ -154,6 +162,17 @@ class GoLegalityTest extends Specification with GoRulesTestSupport {
     "leave 69 drops with the recapture among them" in {
       (dropKeysOf(beforeRecapture.situation).size === 69) and
         (dropKeysOf(beforeRecapture.situation) must contain("e8"))
+    }
+    "take both stones when the recapture is played, and credit both" in {
+      val afterRecapture = playingOn(beforeRecapture, List("e8"))
+      (stoneAt(afterRecapture, "e8") === Some(Piece(P1, Stone))) and
+        (stoneAt(afterRecapture, "e6") === None) and
+        (stoneAt(afterRecapture, "e7") === None) and
+        (afterRecapture.situation.history.captures ===
+          beforeRecapture.situation.history.captures.add(P1, 2))
+    }
+    "record no ko point, since more than one stone came off" in {
+      koPointOf(fenOf(playingOn(beforeRecapture, List("e8")))) === "-"
     }
   }
 

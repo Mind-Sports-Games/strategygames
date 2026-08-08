@@ -2,6 +2,8 @@ package strategygames.go.oracle
 
 import org.specs2.mutable.Specification
 
+import strategygames.go.format.Uci
+
 class GoOracleTest extends Specification {
 
   import GoOracleTest._
@@ -26,6 +28,11 @@ class GoOracleTest extends Specification {
         (games.count(_.recordsFen) === 25) and
         (games.count(_.recordsDropKeys) === 3) and
         (games.size === 85)
+    }
+
+    "hold the stone placements of record, alongside its passes and its settlements" in {
+      (games.flatMap(_.actionStrs).count(isPlacement) === placementsOfRecord) and
+        (games.flatMap(_.actionStrs).size === actionsOfRecord)
     }
 
     "spell out the fen of every game that pins a named rule, and of no walk" in {
@@ -63,7 +70,14 @@ object GoOracleTest {
 
   private val mismatchReportLimit = 25
 
+  val placementsOfRecord = 15919
+
+  val actionsOfRecord = 16122
+
   lazy val games: List[GoOracleGame] = GoOracle.load()
+
+  def isPlacement(actionStr: String): Boolean =
+    Uci(actionStr).exists(_.isInstanceOf[Uci.Drop])
 
   lazy val mismatches: List[String] = games.flatMap(mismatchesOf)
 

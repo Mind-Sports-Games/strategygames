@@ -1,33 +1,27 @@
 package strategygames.go
 
-import org.specs2.matcher.ValidatedMatchers
 import org.specs2.mutable.Specification
 
-class GoLongGameTest extends Specification with ValidatedMatchers {
+import strategygames.go.variant.Go19x19
 
-  "A Go 19x19 game played to 610 total moves (P1 first legal drop, P2 last legal drop)" should {
-    "still have legal moves available at 610 total moves" in {
-      // Build 610 moves iteratively: after each move, re-query legalDrops for the next pick.
-      // P1 always plays legalDrops(0) (lowest index), P2 always plays legalDrops.last
-      // (highest index). legalDrops excludes pass, so no pass-skip logic is needed for P2.
-      val moves     = 610 // was failing at 602 so play more to confirm no off-by-one errors
-      var position  = Api.position(variant.Go19x19)
-      var moveCount = 0
+class GoLongGameTest extends Specification {
 
-      while (moveCount < moves) {
-        val drops = position.legalDrops
-        position = position.makeMovesNoLegalCheck(List(Api.moveToUci(drops(0), variant.Go19x19)))
-        moveCount += 1
+  private val pliesPastTheLengthThatOnceRanOut = 610
 
-        if (moveCount < moves) {
-          val drops2 = position.legalDrops
-          position = position.makeMovesNoLegalCheck(List(Api.moveToUci(drops2.last, variant.Go19x19)))
-          moveCount += 1
-        }
-      }
+  private def playedToLength(plies: Int): Game =
+    (0 until plies).foldLeft(Game(Go19x19)) { (played, ply) =>
+      val drops = Go19x19.validDrops(played.situation)
+      if (drops.isEmpty) sys.error(s"no legal drop at ply ${ply}")
+      else played.apply(if (ply % 2 == 0) drops.head else drops.last)
+    }
 
-      moveCount === moves
-      position.legalActions.nonEmpty === true
+  "a 19x19 game whose players take the first and the last legal drop" should {
+
+    s"still be offering drops after ${pliesPastTheLengthThatOnceRanOut} plies" in {
+      val played = playedToLength(pliesPastTheLengthThatOnceRanOut)
+      (played.plies === pliesPastTheLengthThatOnceRanOut) and
+        (Go19x19.validDrops(played.situation) must not(beEmpty)) and
+        (played.situation.end === false)
     }
   }
 }

@@ -136,34 +136,42 @@ class GoForsythTest extends Specification with GoRulesTestSupport {
   }
 
   "the go fen validator" should {
-    "agree with the engine backed validator on every refusal" in
-      refusedFens.filter(fen => Forsyth.validate(fen) != Api.validateFEN(fen.value)) === Nil
-    "agree with the engine backed validator on every recorded oracle fen" in {
+    "accept every fen the oracle recorded a replay emitting" in {
       val recorded = GoOracle.load().filter(_.recordsFen).flatMap(_.plies.map(_.fen))
-      recorded.filter(fen => Forsyth.validate(FEN(fen)) != Api.validateFEN(fen)) === Nil
+      recorded.filterNot(fen => Forsyth.validate(FEN(fen))) === Nil
     }
   }
 
   "the stones a fen names" should {
-    "match the engine backed piece map for every variant's initial position" in
+    "be no stones at all for every variant's initial position" in
       forall(Variant.all)(variant =>
-        variant.initialFen.pieces === Api.pieceMapFromFen(variant.key, variant.initialFen.value)
+        Forsyth.<<@(variant, variant.initialFen).map(_.board.pieces) === Some(Map.empty[Pos, Piece])
       )
-    "match the engine backed piece map for every 9x9 handicap board" in
-      forall(handicapStarts)(fen => fen.pieces === Api.pieceMapFromFen("go9x9", fen.value))
-    "match the engine backed piece map for a mid game position with two digit ranks" in {
+    "be the star points a handicap fen lays out, named one by one" in {
+      val blackStone = Piece(P1, Stone)
+      (Forsyth.<<@(Go9x9, fourStoneHandicapStart).map(_.board.pieces) === Some(
+        Map(
+          pointAt("c3") -> blackStone,
+          pointAt("g3") -> blackStone,
+          pointAt("c7") -> blackStone,
+          pointAt("g7") -> blackStone
+        )
+      )) and
+        (Forsyth.<<@(Go9x9, handicapStart(1)).map(_.board.pieces) === Some(
+          Map(pointAt("c7") -> blackStone)
+        )) and
+        (Forsyth.<<@(Go9x9, handicapStart(9)).map(_.board.pieces.size) === Some(9))
+    }
+    "read a mid game position with two digit ranks the same way" in {
       val fen = FEN(
         s"S17s/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19${pocket} b - 10 85 0 0 75 0 2"
       )
-      fen.pieces === Api.pieceMapFromFen("go19x19", fen.value)
+      (Forsyth.<<@(Go19x19, fen).map(_.board.pieces) === Some(fen.pieces)) and
+        (fen.pieces.keys.toList.sortBy(_.index) === List(pointAt("a19"), pointAt("s19")))
     }
   }
 
   "the board rows written from a piece map" should {
-    "match the engine backed writer for every 9x9 handicap board" in
-      forall(handicapStarts)(fen =>
-        Forsyth.boardRows(Go9x9, fen.pieces) === Api.writeBoardFenFromPieceMap(fen.pieces, Go9x9)
-      )
     "reproduce the board field they were read from" in
       forall(handicapStarts)(fen => Forsyth.boardRows(Go9x9, fen.pieces) === fen.board)
     "carry no pocket, unlike the board part of a fen" in
@@ -176,11 +184,12 @@ class GoForsythTest extends Specification with GoRulesTestSupport {
       Forsyth
         .removeDeadStones(Go9x9, fourStoneHandicapStart, List(pointAt("c7"), pointAt("g3")))
         .value === s"9/9/6S2/9/9/9/2S6/9/9${pocket} w - 40 55 0 0 55 0 1"
-    "match the engine backed writer for every 9x9 handicap board" in
-      forall(handicapStarts)(fen =>
-        Forsyth.removeDeadStones(Go9x9, fen, List(pointAt("c7"), pointAt("g3"))).value ===
-          Api.removeDeadStones(List(pointAt("c7"), pointAt("g3")), fen.value, Go9x9)
-      )
+    "lift them from every 9x9 handicap board, touching nothing but the board field" in
+      forall(handicapStarts) { fen =>
+        val lifted = Forsyth.removeDeadStones(Go9x9, fen, List(pointAt("c7"), pointAt("g3")))
+        (lifted.pieces === fen.pieces -- List(pointAt("c7"), pointAt("g3"))) and
+          (lifted.value.split(' ').drop(1).toList === fen.value.split(' ').drop(1).toList)
+      }
     "leave the fen alone when nothing is named" in
       Forsyth.removeDeadStones(Go9x9, fourStoneHandicapStart, Nil) === fourStoneHandicapStart
   }
@@ -188,8 +197,6 @@ class GoForsythTest extends Specification with GoRulesTestSupport {
   "the initial fen of a go variant" should {
     "come from the variant itself" in
       forall(Variant.all)(variant => Variant(variant.key).map(_.initialFen) === Some(variant.initialFen))
-    "match the engine backed lookup by key" in
-      forall(Variant.all)(variant => variant.initialFen === Api.initialFen(variant.key))
   }
 
   "a replay started from a handicap fen" should {

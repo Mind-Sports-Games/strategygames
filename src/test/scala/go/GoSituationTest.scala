@@ -32,7 +32,7 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     }
   }
 
-  "valid apiPosition fen from situation with moves" should {
+  "valid position fen from situation with moves" should {
     val game  = Game(variant.Go19x19)
     val drops = variant.Go19x19.validDrops(game.situation)
 

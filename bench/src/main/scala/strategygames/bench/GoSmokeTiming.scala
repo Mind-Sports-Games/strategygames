@@ -7,7 +7,6 @@ import java.time.Instant
 import cats.data.Validated
 
 import strategygames.Player
-import strategygames.go.Api
 import strategygames.go.variant.{ Variant => GoVariant }
 import strategygames.go.{ Replay => GoReplay }
 
@@ -19,11 +18,8 @@ import strategygames.go.{ Replay => GoReplay }
   */
 object GoSmokeTiming {
 
-  private val warmupRounds     = 2
-  private val timedRounds      = 5
-  private val samplesPerSize   = 7
-  private val sampleRangeStart = 0.15
-  private val sampleRangeEnd   = 0.80
+  private val warmupRounds = 2
+  private val timedRounds  = 5
 
   private val defaultOutputPath = "bench/target/go-smoke-results.csv"
 
@@ -33,13 +29,11 @@ object GoSmokeTiming {
 
     val corpora = GoBoardSize.all.map(size => GoCorpusGame.load(size.key))
 
-    val replayTimings  = corpora.map(corpus => corpus.size.key -> measureReplay(corpus))
-    val movegenTimings = corpora.map(corpus => corpus.size.key -> measureMovegen(corpus))
+    val replayTimings = corpora.map(corpus => corpus.size.key -> measureReplay(corpus))
 
     printTable("full-game replay (go.Replay.gameFromUciStrings)", replayTimings)
-    printTable("legal-move generation (Api.Position.legalDrops)", movegenTimings)
 
-    appendCsv(outputPath, replayTimings, movegenTimings)
+    appendCsv(outputPath, replayTimings)
 
     val elapsedMs = (System.nanoTime() - startedAt) / 1000000L
     println(s"\nharness wall time: ${elapsedMs} ms")
@@ -74,44 +68,6 @@ object GoSmokeTiming {
     timeReplay(corpus, corpus.size.variant, activePlayer)
   }
 
-  private def sampleIndices(totalMoves: Int, count: Int): Vector[Int] = {
-    val lo = math.max(1, (totalMoves * sampleRangeStart).toInt)
-    val hi = math.max(lo + 1, (totalMoves * sampleRangeEnd).toInt)
-    if (hi <= lo) Vector(math.min(lo, totalMoves))
-    else {
-      val step = math.max(1, (hi - lo) / math.max(1, count - 1))
-      (0 until count).map(i => math.min(hi, lo + i * step)).distinct.toVector
-    }
-  }
-
-  private def buildPosition(corpus: GoCorpusGame, variant: GoVariant, prefix: List[String]): Api.Position =
-    corpus.initialFen match {
-      case Some(fen) => Api.positionFromVariantStartingFenAndMoves(variant, fen, prefix)
-      case None      => Api.positionFromVariantAndMoves(variant, prefix)
-    }
-
-  private def timeLegalDropsAt(corpus: GoCorpusGame, variant: GoVariant, prefix: List[String]): Long = {
-    var checksum = 0
-    val samples  = Array.fill(warmupRounds + timedRounds) {
-      // A fresh position per round: `legalDrops` is cached, so a second read of one measures a
-      // field access. Building it stays outside the timed window.
-      val position = buildPosition(corpus, variant, prefix)
-      val t0       = System.nanoTime()
-      checksum += position.legalDrops.length
-      System.nanoTime() - t0
-    }
-    if (checksum < 0) sys.error("unreachable: negative legalDrops count")
-    median(samples.drop(warmupRounds).toIndexedSeq)
-  }
-
-  private def measureMovegen(corpus: GoCorpusGame): Long = {
-    val moves    = corpus.actionStrs.flatten.toVector
-    val indices  = sampleIndices(moves.size, samplesPerSize)
-    val prefixes = indices.map(i => moves.take(i).toList)
-
-    median(prefixes.map(prefix => timeLegalDropsAt(corpus, corpus.size.variant, prefix)))
-  }
-
   private def printTable(title: String, rows: List[(String, Long)]): Unit = {
     println(s"\n=== ${title} ===")
     println(f"${"size"}%-12s ${"ns/op"}%14s")
@@ -120,11 +76,7 @@ object GoSmokeTiming {
     }
   }
 
-  private def appendCsv(
-      outputPath: String,
-      replayTimings: List[(String, Long)],
-      movegenTimings: List[(String, Long)]
-  ): Unit = {
+  private def appendCsv(outputPath: String, replayTimings: List[(String, Long)]): Unit = {
     val path      = Paths.get(outputPath)
     Option(path.getParent).foreach(Files.createDirectories(_))
     val isNewFile = !Files.exists(path)
@@ -148,7 +100,6 @@ object GoSmokeTiming {
         }
       if (isNewFile) writeRow("timestamp,workload,size,ns_per_op")
       writeRows("replay", replayTimings)
-      writeRows("movegen", movegenTimings)
     } finally writer.close()
   }
 }

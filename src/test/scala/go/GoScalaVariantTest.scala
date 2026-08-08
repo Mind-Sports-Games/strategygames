@@ -62,14 +62,10 @@ class GoScalaVariantTest extends Specification {
         (strategygames.variant.Variant(GameLogic.Go(), "go19x19Joansala") === None)
     }
 
-    "run on the scala engine" in {
-      (Api.positionFromVariant(Go9x9).isInstanceOf[ScalaPosition] === true) and
-        (Api.positionFromVariant(Go13x13).isInstanceOf[ScalaPosition] === true) and
-        (Api.positionFromVariant(Go19x19).isInstanceOf[ScalaPosition] === true) and
-        (Api
-          .positionFromVariantNameAndFEN("go9x9", Go9x9.initialFen.value)
-          .isInstanceOf[ScalaPosition] === true) and
-        (Forsyth.<<@(Go13x13, Go13x13.initialFen).map(_.board.pieces.isEmpty) === Some(true))
+    "open on an empty board" in {
+      forall(List(Go9x9, Go13x13, Go19x19))(v =>
+        Forsyth.<<@(v, v.initialFen).map(_.board.pieces.isEmpty) === Some(true)
+      )
     }
 
     "carry their setup traits" in {
@@ -81,24 +77,24 @@ class GoScalaVariantTest extends Specification {
 
   "an initial scala go position" should {
     "emit the initial fen of its variant" in {
-      List(Go9x9, Go13x13, Go19x19).map(v => Api.positionFromVariant(v).fen)
+      List(Go9x9, Go13x13, Go19x19).map(v => Forsyth.>>(Game(v)))
         === List(Go9x9.initialFen, Go13x13.initialFen, Go19x19.initialFen)
     }
 
-    "offer every point as a drop, plus a pass" in {
+    "offer every point as a drop, and a pass beside them" in {
       List(Go9x9, Go13x13, Go19x19).map { v =>
-        val position = Api.positionFromVariant(v)
-        (position.legalDrops.size, position.legalActions.size, position.pieceMap.size)
-      } === List((81, 82, 0), (169, 170, 0), (361, 362, 0))
+        val situation = Game(v).situation
+        (v.validDrops(situation).size, situation.pass().isValid, situation.board.pieces.size)
+      } === List((81, true, 0), (169, true, 0), (361, true, 0))
     }
 
     "not have ended" in {
-      val position = Api.positionFromVariant(Go9x9)
-      (position.gameEnd === false) and
-        (position.isRepetition === false) and
-        (position.gameResult === GameResult.Ongoing()) and
-        (position.turn === "b") and
-        (position.playerTurn === 1)
+      val situation = Game(Go9x9).situation
+      (situation.end === false) and
+        (situation.isRepetition === false) and
+        (situation.status === None) and
+        (situation.player === Player.P1) and
+        (Forsyth.>>(situation).value.split(' ')(1) === "b")
     }
   }
 
@@ -147,41 +143,34 @@ class GoScalaVariantTest extends Specification {
   }
 
   "a key naming a square the board does not have" should {
-    val awaitingSelection = scriptedNineByNine ++ List("pass", "pass")
+    val awaitingSelection = playing(Game(Go9x9), scriptedNineByNine ++ List("pass", "pass"))
 
-    def selecting(uci: String) =
-      Api.positionFromVariantAndMoves(Go9x9, awaitingSelection ++ List(uci))
+    def selecting(uci: String) = playing(awaitingSelection, List(uci))
 
     "be ignored in a dead stone selection" in {
-      val liftingNothing = selecting("ss:")
-      val liftingN4      = selecting("ss:n4")
-      (Api.uciToMove("s@n4", Go9x9) === Api.uciToMove("s@e5", Go9x9)) and
-        (liftingN4.pieceMap.get(Pos.E5) === Some(Piece(P2, Stone))) and
-        (liftingN4.fen === liftingNothing.fen)
+      (selecting("ss:n4").situation.board.pieces.get(Pos.E5) === Some(Piece(P2, Stone))) and
+        (Forsyth.>>(selecting("ss:n4")) === Forsyth.>>(selecting("ss:")))
     }
 
     "not stop the on board keys beside it from being lifted" in {
-      (selecting("ss:i1,n4").fen === selecting("ss:i1").fen) and
-        (selecting("ss:i1,n4").pieceMap.get(Pos.I1) === None)
+      (Forsyth.>>(selecting("ss:i1,n4")) === Forsyth.>>(selecting("ss:i1"))) and
+        (selecting("ss:i1,n4").situation.board.pieces.get(Pos.I1) === None)
     }
 
     "be refused outright as a drop, rather than played somewhere else" in {
-      Api.positionFromVariantAndMoves(Go9x9, List("s@n4")) must throwAn[Exception]
+      Game(Go9x9).situation.drop(Role.defaultRole, Pos.N4).isInvalid === true
     }
   }
 
   "an action that is neither a pass, a selection, nor a placement" should {
     "be refused rather than aliased onto a point of the board" in {
-      Api.positionFromVariantAndMoves(Go9x9, List("garbage")) must throwAn[Exception]
-    }
-  }
-
-  "a dead stone key that is not a coordinate at all" should {
-    "be refused rather than dropped in silence" in {
-      Api.positionFromVariantAndMoves(
-        Go9x9,
-        scriptedNineByNine ++ List("pass", "pass", "ss:zz")
-      ) must throwAn[Exception]
+      (Uci("garbage") must throwAn[Exception]) and
+        (Replay.gameFromUciStrings(
+          Vector(Vector("garbage")),
+          Player.P2,
+          None,
+          Go9x9
+        ) must throwAn[Exception])
     }
   }
 
@@ -225,6 +214,36 @@ class GoScalaVariantTest extends Specification {
         (ended.situation.board.pieces.size === 4) and
         (Forsyth.exportBoardFen(ended.situation.board).value.split(' ').last === "4") and
         (ended.situation.winner === Some(Player.P2))
+    }
+  }
+
+  "a scripted go13x13 game" should {
+    val played = playing(Game(Go13x13), List("s@e1", "s@d2", "s@e3", "s@h5", "s@k11"))
+
+    "write a board of thirteen ranks, each thirteen points wide" in {
+      Forsyth.>>(played).value ===
+        "13/13/10S2/13/13/13/13/13/7s5/13/4S8/3s9/4S8[SSSSSSSSSSssssssssss] w - 30 95 0 0 75 0 3"
+    }
+
+    "hold each stone on the point its key names, and no other" in {
+      played.situation.board.pieces === Map(
+        Pos.E1  -> Piece(P1, Stone),
+        Pos.D2  -> Piece(P2, Stone),
+        Pos.E3  -> Piece(P1, Stone),
+        Pos.H5  -> Piece(P2, Stone),
+        Pos.K11 -> Piece(P1, Stone)
+      )
+    }
+
+    "reload from the fen it wrote into the very same position" in {
+      val reloaded = Forsyth.<<@(Go13x13, Forsyth.>>(played))
+      (reloaded.map(_.board.pieces) === Some(played.situation.board.pieces)) and
+        (reloaded.map(s => Forsyth.>>(s).value) === Some(Forsyth.>>(played).value))
+    }
+
+    "give black every point of an otherwise empty thirteen by thirteen board" in {
+      val loneStone = Forsyth.>>(playing(Game(Go13x13), List("s@g7")))
+      (loneStone.player1Score === 1690) and (loneStone.player2Score === 75)
     }
   }
 

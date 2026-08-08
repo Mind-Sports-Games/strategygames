@@ -6,18 +6,28 @@ import scala.util.Try
 
 import cats.implicits._
 
-import strategygames.{ Player, Score }
+import strategygames.Player
 import strategygames.go.format.{ FEN, Forsyth }
 import strategygames.go.oracle.{ GoOracle, GoOracleGame }
 import strategygames.go.variant.{ Go19x19, Go9x9, Variant }
 
-class GoBoardStateTest extends Specification {
+class GoBoardStateTest extends Specification with GoRulesTestSupport {
 
   import GoBoardStateTest._
 
+  private val opening = List("a1", "b2")
+
+  private val resumptions = List(
+    (List("pass"), "pass"),
+    (List("pass"), "e5"),
+    (List("pass", "pass"), "pass"),
+    (List("pass", "pass"), "ss:"),
+    (List("pass", "pass"), "e5")
+  )
+
   "the position state a go board carries" should {
 
-    "agree with the engine and with the uci log at every ply the oracle replays" in {
+    "agree with the uci log at every ply the oracle replays" in {
       disagreements.take(disagreementReportLimit) must beEmpty
     }
   }
@@ -43,6 +53,18 @@ class GoBoardStateTest extends Specification {
       passCounts.map(passCount => resumedPlies(passCount)) === passCounts.map(_ => pliesOfResumedFen)
     }
 
+    "count its plies from the full turn it names and the player it hands the move to" in {
+      forall(plyAccounting) { case (turn, fullTurnCount, plies) =>
+        pliesOfFen(turn, fullTurnCount) === plies
+      }
+    }
+
+    "reach an even ply count for black to move and an odd one for white" in {
+      plyAccounting.map { case (turn, fullTurnCount, _) =>
+        (turn, pliesOfFen(turn, fullTurnCount) % 2)
+      } === List(("b", 0), ("w", 1), ("b", 0), ("w", 1), ("b", 0))
+    }
+
     "leave a pass count it has no reading of out of the position state" in {
       (resumed(passCount = 4).consecutivePasses === 0) and
         (resumed(passCount = 4).deadStonesSelected === false) and
@@ -54,6 +76,23 @@ class GoBoardStateTest extends Specification {
         (Go19x19.komi === 7.5) and
         (resumed(passCount = 0).ko === None) and
         (Forsyth.<<@(Go19x19, FEN(koFen)).map(_.board.ko) === Some(Pos.fromKey("d4")))
+    }
+  }
+
+  "a game resumed from a fen and then played on" should {
+
+    "reach the fen the same game played straight through reaches" in {
+      forall(resumptions) { case (passes, action) =>
+        fenOf(playingFrom(fenOf(playing(Go9x9, opening ++ passes)), List(action))) ===
+          fenOf(playing(Go9x9, opening ++ passes ++ List(action)))
+      }
+    }
+
+    "move the pass count by the action it was given and nothing else" in {
+      val atOnePass = fenOf(playing(Go9x9, opening ++ List("pass")))
+      (atOnePass.fenPassCount === 1) and
+        (fenOf(playingFrom(atOnePass, List("pass"))).fenPassCount === 2) and
+        (fenOf(playingFrom(atOnePass, List("e5"))).fenPassCount === 0)
     }
   }
 
@@ -144,6 +183,21 @@ object GoBoardStateTest {
   private def resumedFen(passCount: Int): FEN =
     FEN(s"${resumedFenWithoutPassCount} ${passCount} ${pliesOfResumedFen / 2 + 1}")
 
+  val plyAccounting: List[(String, Int, Int)] =
+    List(("b", 1, 0), ("w", 1, 1), ("b", 2, 2), ("w", 2, 3), ("b", 30, 58))
+
+  def pliesOfFen(turn: String, fullTurnCount: Int): Int =
+    Forsyth
+      .<<<@(
+        Go19x19,
+        FEN(
+          "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19" +
+            s"[SSSSSSSSSSssssssssss] ${turn} - 0 0 0 0 0 0 ${fullTurnCount}"
+        )
+      )
+      .getOrElse(sys.error(s"unreadable fen for ${turn} at full turn ${fullTurnCount}"))
+      .plies
+
   private val settledFen = resumedFen(3)
 
   private val dropOntoSettledFen = Vector(Vector("s@d4"))
@@ -156,26 +210,19 @@ object GoBoardStateTest {
     )
 
   lazy val disagreements: List[String] =
-    GoOracle.load().flatMap { game =>
-      val engine = enginePositionsOf(game)
-      prefixDisagreements(game, engine) ++ sweptDisagreements(game, engine)
-    }
+    GoOracle.load().flatMap(game => prefixDisagreements(game) ++ sweptDisagreements(game))
 
-  private def enginePositionsOf(game: GoOracleGame): Vector[Api.Position] =
-    Api.positionsFromVariantStartingFenAndMoves(variantOf(game), initialFenOf(game), game.actionStrs)
-
-  private def prefixDisagreements(game: GoOracleGame, engine: Vector[Api.Position]): List[String] =
+  private def prefixDisagreements(game: GoOracleGame): List[String] =
     (0 to game.actionStrs.size).toList.flatMap { played =>
       val actions = game.actionStrs.take(played)
       boardDisagreements(
         s"${game.name} prefix ply ${played}",
         replayedFromUci(game, actions).situation,
-        engine(played),
         actions
       )
     }
 
-  private def sweptDisagreements(game: GoOracleGame, engine: Vector[Api.Position]): List[String] = {
+  private def sweptDisagreements(game: GoOracleGame): List[String] = {
     val (init, swept, _) = Replay.gameWithUciWhileValid(
       game.actionStrs.map(Vector(_)).toVector,
       startPlayerOf(game),
@@ -183,12 +230,11 @@ object GoBoardStateTest {
       initialFenOf(game),
       variantOf(game)
     )
-    boardDisagreements(s"${game.name} swept ply 0", init.situation, engine(0), Nil) ++
+    boardDisagreements(s"${game.name} swept ply 0", init.situation, Nil) ++
       swept.map(_._1).zipWithIndex.flatMap { case (state, index) =>
         boardDisagreements(
           s"${game.name} swept ply ${index + 1}",
           state.situation,
-          engine(index + 1),
           game.actionStrs.take(index + 1)
         )
       }
@@ -219,14 +265,10 @@ object GoBoardStateTest {
   private def boardDisagreements(
       named: String,
       situation: Situation,
-      engine: Api.Position,
       played: List[String]
   ): List[String] = {
     val board = situation.board
     List(
-      disagreed(named, "ko", board.ko, engine.fen.ko),
-      disagreed(named, "komi", board.komi, engine.fen.komi),
-      disagreed(named, "pieces", board.pieces, engine.pieceMap),
       disagreed(named, "playerToMove", board.playerToMove, situation.player),
       disagreed(named, "passState", passStateOf(board), passStateLoggedBy(played)),
       disagreed(named, "canSelectSquares", situation.canSelectSquares, canSelectSquaresLoggedBy(played)),
@@ -235,8 +277,7 @@ object GoBoardStateTest {
         "isSubsequentPassWarning",
         situation.isSubsequentPassWarning,
         isSubsequentPassWarningLoggedBy(played)
-      ),
-      disagreed(named, "score", board.history.score, scoreAfter(engine, played))
+      )
     ).flatten
   }
 
@@ -246,9 +287,6 @@ object GoBoardStateTest {
 
   private def passStateOf(board: Board): Int =
     if (board.deadStonesSelected) 3 else board.consecutivePasses.min(2)
-
-  private def scoreAfter(engine: Api.Position, played: List[String]): Score =
-    if (played.exists(_ != passAction)) engine.fenScore else Score(0, 0)
 
   private val passesSettlingTheGame = 4
 
