@@ -89,7 +89,7 @@ site, and [the refactor write-up](go-refactor.md) states what fixing each one wo
 | | where |
 |---|---|
 | An `ss:` records one capture more than the stones it lifts | `Replay.settlementCaptureCount` |
-| A settlement records those captures when the game is loaded from its actions, and records none when it is played live | `Replay.withSettlementCaptures` vs `Variant.boardAfterSelectSquares` |
+| A settlement records those captures on the two loaders that fold action strings (`Replay.gameFromUciStrings`, `pgn.Reader`), and none on the two that replay a `Uci` list (`Replay.apply(List[Uci], …)`, `Replay.situationsFromUci`) or on a game played live | `Replay.withSettlementCaptures` vs `Variant.boardAfterSelectSquares` |
 | An off-board `ss:` key is ignored, where an off-board drop key is an error | `Replay.gameWithActionWhileValid` |
 | A game p2 settled renders its full-move number with a `1` concatenated on, not added | `Forsyth.fullMovePart` |
 

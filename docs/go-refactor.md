@@ -149,11 +149,23 @@ reason sits at the code site; here is what fixing each one would take.
 it needs is a decision about the `history.captures` of every settled go game already in the
 database.
 
-**2. A settlement records captures when the game is loaded, and none when it is played.**
-`Replay.withSettlementCaptures` adds the count; `Variant.boardAfterSelectSquares`, which the live
-path uses, does not. *Fix:* move the adjustment into `boardAfterSelectSquares` so both paths agree.
-Same blocker as quirk 1, and the same decision resolves both — this is the divergence, quirk 1 is
-its arithmetic.
+**2. A settlement records captures on the two loaders that fold action strings, and none anywhere
+else.** Not a played-versus-loaded split, which is how it was described until the whole-branch
+review measured it. Four entry points reach a settlement, in two groups:
+
+| entry point | `history.captures` after `s@a1 s@e5 pass pass ss:a1` on `Go9x9` |
+|---|---|
+| `Replay.gameFromUciStrings` | `Score(2,0)` — the one stone lifted, plus one |
+| `pgn.Reader.replayResultFromActionStrs` | `Score(2,0)` |
+| `Replay.apply(List[Uci], …)` | `Score(0,0)` |
+| `Replay.situationsFromUci` | `Score(0,0)` |
+
+The first two go through `Replay.withSettlementCaptures`, which adds the count. The last two hand
+each `Uci` to a `Situation` and so run the *played* path — `Variant.boardAfterSelectSquares`, which
+does not. A game played through the site records `Score(0,0)` too, so the split is by mechanism, not
+by played versus loaded. `GoSettlementCaptureTest` names all four. *Fix:* move the adjustment into
+`boardAfterSelectSquares` so every path agrees. Same blocker as quirk 1, and the same decision
+resolves both — this is the divergence, quirk 1 is its arithmetic.
 
 **3. An off-board `ss:` key is ignored, where an off-board drop key is an error.**
 The settlement branch of `Replay.gameWithActionWhileValid` uses `flatMap(Pos.fromKey)`, which drops

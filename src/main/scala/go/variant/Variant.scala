@@ -147,10 +147,10 @@ abstract class Variant private[variant] (
 
   /** Agreeing the dead stones: lift them, and the game is over.
     *
-    * The one rules implementation of a settlement, shared by the played and replayed paths — and it
-    * deliberately leaves `history.captures` alone, which is what the played path has always done.
-    * `Replay.addSettlement` adds the count on top for the paths that load a game from its actions. The two
-    * disagree, on purpose; the note there says why.
+    * The one rules implementation of a settlement, reached by every path — and it deliberately leaves
+    * `history.captures` alone, which is what the played path has always done. `Replay.addSettlement` adds the
+    * count on top for the two loaders that fold action strings, and for nothing else. Those two and the rest
+    * disagree, on purpose; the note there says which is which and why.
     *
     * `.settled` restarts the position history at this board, so superko forgets everything before the
     * settlement. Nothing follows a settlement, so nothing can observe it — but the ordering matters: settle

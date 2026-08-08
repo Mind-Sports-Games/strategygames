@@ -129,18 +129,24 @@ object Replay {
         )
       )
 
-  /** The settlement capture accounting that only a loaded game gets, and the played game does not.
+  /** The settlement capture accounting that a game rebuilt from its action strings gets, and no other path
+    * does.
     *
-    * A game played through the site records nothing in `history.captures` when the dead stones are agreed;
-    * the same game loaded back from its action list records the stones lifted, plus one. Both behaviours are
-    * older than this refactor and stored games were written under both, so the divergence is preserved rather
-    * than settled — collapsing it would silently restate the capture count of every finished go game in the
-    * database.
+    * It is not a played-versus-loaded split, which is how it was described for years. Four entry points reach
+    * a settlement, in two groups. `Replay.gameFromUciStrings` and `pgn.Reader.replayResultFromActionStrs`
+    * fold action strings, come through here, and record the stones lifted plus one. `Replay.apply(List[Uci],
+    * …)` and `Replay.situationsFromUci` hand each `Uci` to a `Situation`, which is the played path, and so
+    * record nothing at all — exactly as a game played through the site records nothing. Two loaders sit on
+    * each side. `GoSettlementCaptureTest` names all four.
     *
-    * It lives here, in the loader, because that is where it already lived. `Variant .boardAfterSelectSquares`
-    * is the one rules implementation and stays clean of it, which is why every loader has to route through
-    * this and `addSettlement` rather than call it themselves. Getting that wrong is not hypothetical: it is
-    * how `pgn.Reader` came to disagree with the other three loaders about the same game.
+    * Both behaviours are older than this refactor and stored games were written under both, so the divergence
+    * is preserved rather than settled — collapsing it would silently restate the capture count of every
+    * finished go game in the database.
+    *
+    * It lives here, in the loader, because that is where it already lived. `Variant.boardAfterSelectSquares`
+    * is the one rules implementation and stays clean of it, which is why an action-string loader has to route
+    * through this and `addSettlement` rather than call it itself. Getting that wrong is not hypothetical: it
+    * is how `pgn.Reader` came to disagree with the rest of `Replay` about the same game.
     */
   private def withSettlementCaptures(played: Game, selectSquares: SelectSquares): Game =
     played.copy(situation = withSettlementCaptures(played.situation, selectSquares))
