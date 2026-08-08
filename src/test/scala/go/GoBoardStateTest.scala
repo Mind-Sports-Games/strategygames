@@ -167,20 +167,26 @@ object GoBoardStateTest {
     )
 
   lazy val disagreements: List[String] =
-    GoOracle.load().flatMap(game => batchDisagreements(game) ++ perPlyDisagreements(game))
+    GoOracle.load().flatMap { game =>
+      val engine = enginePositionsOf(game)
+      batchDisagreements(game, engine) ++ perPlyDisagreements(game, engine)
+    }
 
-  private def batchDisagreements(game: GoOracleGame): List[String] =
+  private def enginePositionsOf(game: GoOracleGame): Vector[Api.Position] =
+    Api.positionsFromVariantStartingFenAndMoves(variantOf(game), initialFenOf(game), game.actionStrs)
+
+  private def batchDisagreements(game: GoOracleGame, engine: Vector[Api.Position]): List[String] =
     (0 to game.actionStrs.size).toList.flatMap { played =>
       val actions = game.actionStrs.take(played)
       boardDisagreements(
         s"${game.name} batch ply ${played}",
         replayedInOneBatch(game, actions).situation,
-        game,
+        engine(played),
         actions
       )
     }
 
-  private def perPlyDisagreements(game: GoOracleGame): List[String] = {
+  private def perPlyDisagreements(game: GoOracleGame, engine: Vector[Api.Position]): List[String] = {
     val (init, perPly, _) = Replay.gameWithUciWhileValid(
       game.actionStrs.map(Vector(_)).toVector,
       startPlayerOf(game),
@@ -188,12 +194,12 @@ object GoBoardStateTest {
       initialFenOf(game),
       variantOf(game)
     )
-    boardDisagreements(s"${game.name} per ply 0", init.situation, game, Nil) ++
+    boardDisagreements(s"${game.name} per ply 0", init.situation, engine(0), Nil) ++
       perPly.map(_._1).zipWithIndex.flatMap { case (state, index) =>
         boardDisagreements(
           s"${game.name} per ply ${index + 1}",
           state.situation,
-          game,
+          engine(index + 1),
           game.actionStrs.take(index + 1)
         )
       }
@@ -224,11 +230,10 @@ object GoBoardStateTest {
   private def boardDisagreements(
       named: String,
       situation: Situation,
-      game: GoOracleGame,
+      engine: Api.Position,
       played: List[String]
   ): List[String] = {
-    val engine = enginePositionAfter(game, played)
-    val board  = situation.board
+    val board = situation.board
     List(
       disagreed(named, "ko", board.ko, engine.fen.ko),
       disagreed(named, "komi", board.komi, engine.fen.komi),
@@ -245,9 +250,6 @@ object GoBoardStateTest {
       disagreed(named, "score", board.history.score, scoreAfter(engine, played))
     ).flatten
   }
-
-  private def enginePositionAfter(game: GoOracleGame, played: List[String]): Api.Position =
-    Api.positionFromVariantStartingFenAndMoves(variantOf(game), initialFenOf(game), played)
 
   private def disagreed[A](named: String, field: String, carried: A, stated: A): Option[String] =
     if (carried == stated) None
