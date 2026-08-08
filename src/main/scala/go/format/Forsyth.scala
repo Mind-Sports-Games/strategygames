@@ -127,7 +127,7 @@ object Forsyth {
   def exportBoard(board: Board): String = exportBoardFen(board).value
 
   def exportBoardFen(board: Board): FEN = {
-    val score = board.variant.areaScore(board)
+    val score = board.areaScore
     FEN(
       List(
         boardPart(board),

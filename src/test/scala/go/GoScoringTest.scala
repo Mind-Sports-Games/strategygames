@@ -166,6 +166,23 @@ class GoScoringTest extends Specification with GoRulesTestSupport {
     }
   }
 
+  "a game that has not placed a stone yet" should {
+    "still report the area score of the position it is in, komi included" in {
+      forall(komiTenthsByVariant) { case (variant, komiTenths) =>
+        wrapperScoreOf(playing(variant, List("pass", "pass"))) === Score(0, komiTenths)
+      }
+    }
+  }
+
+  "passing" should {
+    "leave the area score exactly where the last placement left it" in {
+      val placed = playing(Go9x9, List("e5"))
+      val passed = playingOn(placed, List("pass", "pass"))
+      (passed.situation.board.areaScore === placed.situation.board.areaScore) and
+        (wrapperScoreOf(passed) === wrapperScoreOf(placed))
+    }
+  }
+
   "a fresh recompute of the area score" should {
     "reach the score the fen and the history record, at every ply of every game in the go oracle" in {
       recomputeMismatches.take(mismatchReportLimit) must beEmpty
@@ -176,6 +193,9 @@ class GoScoringTest extends Specification with GoRulesTestSupport {
 object GoScoringTest {
 
   private val mismatchReportLimit = 25
+
+  private def wrapperScoreOf(game: Game): Score =
+    strategygames.Board.Go(game.situation.board).history.score
 
   lazy val recomputeMismatches: List[String] = GoOracle.load().flatMap(mismatchesOf)
 

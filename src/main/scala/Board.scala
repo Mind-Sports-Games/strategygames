@@ -251,13 +251,13 @@ object Board {
   case class Go(b: go.Board)
       extends Board(
         b.pieces.map { case (pos, piece) => (Pos.Go(pos), (Piece.Go(piece), 1)) },
-        History.Go(b.history),
+        History.Go(b.history, b.areaScore),
         Variant.Go(b.variant),
         b.pocketData.map(PocketData.Go.apply)
       ) {
     def withHistory(h: History): Board = h match {
-      case History.Go(h) => Go(b.withHistory(h))
-      case _             => sys.error("Not passed go objects")
+      case History.Go(h, _) => Go(b.withHistory(h))
+      case _                => sys.error("Not passed go objects")
     }
 
     def usedDice: List[Int] = List.empty
@@ -269,13 +269,13 @@ object Board {
     override def toString: String = b.toString
 
     def copy(history: History, variant: Variant): Board = (history, variant) match {
-      case (History.Go(history), Variant.Go(variant)) =>
+      case (History.Go(history, _), Variant.Go(variant)) =>
         Go(b.copy(history = history, variant = variant))
-      case _                                          => sys.error("Unable to copy a go board with non-go arguments")
+      case _                                             => sys.error("Unable to copy a go board with non-go arguments")
     }
     def copy(history: History): Board                   = history match {
-      case History.Go(history) => Go(b.copy(history = history))
-      case _                   => sys.error("Unable to copy a go board with non-go arguments")
+      case History.Go(history, _) => Go(b.copy(history = history))
+      case _                      => sys.error("Unable to copy a go board with non-go arguments")
     }
 
     def toFairySF      = sys.error("Can't make a fairysf board from a go board")

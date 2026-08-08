@@ -127,12 +127,11 @@ abstract class Variant private[variant] (
   def createSelectSquares(situation: Situation, squares: List[Pos]): SelectSquares =
     SelectSquares(squares = squares, situationBefore = situation, autoEndTurn = true)
 
-  def boardAfterSelectSquares(situation: Situation, squares: List[Pos]): Board = {
-    val stonesAfterLifting = situation.board.copy(pieces = situation.board.pieces -- squares)
-    stonesAfterLifting
-      .withHistory(afterOnePly(situation.history).copy(score = areaScore(stonesAfterLifting)))
+  def boardAfterSelectSquares(situation: Situation, squares: List[Pos]): Board =
+    situation.board
+      .copy(pieces = situation.board.pieces -- squares)
+      .withHistory(afterOnePly(situation.history))
       .settled
-  }
 
   // def move(
   //     situation: Situation,
@@ -186,14 +185,14 @@ abstract class Variant private[variant] (
   def stalemateIsDraw = false
 
   def winner(situation: Situation): Option[Player] =
-    Option.when(specialEnd(situation))(areaScore(situation.board)).flatMap { score =>
+    Option.when(specialEnd(situation))(situation.board.areaScore).flatMap { score =>
       Option.when(score.p1 != score.p2)(if (score.p1 > score.p2) P1 else P2)
     }
 
   def specialEnd(situation: Situation) = situation.board.deadStonesSelected
 
   def specialDraw(situation: Situation) = {
-    val score = areaScore(situation.board)
+    val score = situation.board.areaScore
     score.p1 == score.p2
   }
 
@@ -207,7 +206,6 @@ abstract class Variant private[variant] (
       .withHistory(
         situation.history
           .copy(
-            score = areaScore(stonesAfterPlacing),
             captures = situation.history.captures.add(situation.player, captured.size),
             halfMoveClock = situation.history.halfMoveClock + 1
           )

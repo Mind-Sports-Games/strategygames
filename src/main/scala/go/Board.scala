@@ -1,6 +1,6 @@
 package strategygames.go
 
-import strategygames.Player
+import strategygames.{ Player, Score }
 
 import variant.Variant
 import scalalib.extensions.*
@@ -29,6 +29,8 @@ case class Board(
   lazy val playerPiecesOnBoardCount: Map[Player, Int] = Player.all.map { p =>
     (p, pieces.collect { case (pos, piece) if piece.player == p => (pos, piece) }.size)
   }.toMap
+
+  lazy val areaScore: Score = variant.areaScore(this)
 
   def withHistory(h: History): Board       = copy(history = h)
   def updateHistory(f: History => History) = copy(history = f(history))

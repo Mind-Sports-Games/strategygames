@@ -9,7 +9,6 @@ case class History(
     currentTurn: List[Uci] = List.empty,
     positionHashes: PositionHash = Array.empty,
     halfMoveClock: Int = 0,
-    score: Score = Score(0, 0),
     captures: Score = Score(0, 0)
 ) {
 
