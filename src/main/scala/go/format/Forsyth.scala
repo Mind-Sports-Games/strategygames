@@ -42,7 +42,7 @@ object Forsyth {
         pieces = fen.pieces,
         history = History(
           captures = Score(fen.player1Captures, fen.player2Captures),
-          halfMoveClock = fen.ply.getOrElse(0).max(0)
+          halfMoveClock = fen.ply.getOrElse(sys.error(s"go fen states no move number: ${fen.value}")).max(0)
         ),
         variant = variant,
         pocketData = Some(PocketData.init),
