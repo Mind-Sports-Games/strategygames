@@ -5,7 +5,7 @@ import cats.data.Validated.{ invalid, valid }
 import cats.implicits._
 import scalalib.extensions.*
 
-import strategygames.{ Player, Score }
+import strategygames.Player
 import strategygames.format.pgn.San
 import strategygames.go.format.pgn.{ Parser, Reader }
 import strategygames.go.format.{ FEN, Forsyth, Uci }
@@ -52,11 +52,15 @@ case class Replay(setup: Game, actions: List[Action], state: Game) {
       )
   }
 
+  def addSettlement(selectSquares: SelectSquares): Replay =
+    copy(
+      actions = selectSquares :: actions,
+      state = Replay.withSettlementCaptures(state.applySelectSquares(selectSquares), selectSquares)
+    )
+
 }
 
 object Replay {
-
-  private val passActionStr = Uci.Pass().uci
 
   def apply(game: Game) = new Replay(game, Nil, game)
 
@@ -98,78 +102,42 @@ object Replay {
       role: Role,
       dest: Pos,
       endTurn: Boolean
-  ): Drop = {
-    val piece = Piece(before.situation.player, role)
-    Drop(
-      piece = piece,
-      pos = dest,
-      situationBefore = before.situation,
-      nextBoard = LazyBoardAfter(() => before.situation.board.afterDrop(before.situation.player, dest)),
-      autoEndTurn = endTurn
-    )
-  }
+  ): Drop = legalDrop(before.situation, role, dest, endTurn, before.plies)
 
-  def replayPass(
-      before: Game,
+  private def legalDrop(
+      before: Situation,
+      role: Role,
+      dest: Pos,
       endTurn: Boolean,
-      apiPosition: Api.Position,
-      uciMoves: List[String]
-  ): Pass = {
-    Pass(
-      situationBefore = before.situation,
-      after = before.situation.board
-        .copy(
-          pieces = apiPosition.pieceMap,
-          uciMoves = uciMoves,
-          pocketData = apiPosition.pocketData,
-          position = apiPosition.some
-        )
-        .passed
-        .withHistory(
-          before.situation.history.copy(
-            // lastTurn handled in Action.finalizeAfter
-            halfMoveClock = before.situation.history.halfMoveClock + 1
-          )
-        ),
-      autoEndTurn = endTurn
-    )
-  }
+      ply: Int
+  ): Drop =
+    before
+      .drop(role, dest)
+      .map(_.copy(autoEndTurn = endTurn))
+      .valueOr(error =>
+        sys.error(s"Illegal action ${role.forsyth}@${dest.key} at ply ${ply} for replay: ${error}")
+      )
 
-  def replaySelectSquares(
-      before: Game,
-      squares: List[Pos],
-      endTurn: Boolean,
-      apiPosition: Api.Position,
-      uciMoves: List[String]
-  ): SelectSquares = {
-    SelectSquares(
-      squares,
-      situationBefore = before.situation,
-      after = before.situation.board
-        .copy(
-          pieces = apiPosition.pieceMap,
-          uciMoves = uciMoves,
-          pocketData = apiPosition.pocketData,
-          position = apiPosition.some
-        )
-        .withHistory(
-          before.situation.history.copy(
-            // lastTurn handled in Action.finalizeAfter
-            score = apiPosition.fenScore,
-            captures = before.situation.history.captures.add(
-              before.situation.player,
-              settlementCaptureCount(
-                before.situation.board.apiPosition.pieceMap.size,
-                apiPosition.pieceMap.size
-              )
-            ),
-            halfMoveClock = before.situation.history.halfMoveClock + 1
+  def replayPass(before: Game, endTurn: Boolean): Pass =
+    Pass(situationBefore = before.situation, autoEndTurn = endTurn)
+
+  def replaySelectSquares(before: Game, squares: List[Pos], endTurn: Boolean): SelectSquares =
+    SelectSquares(squares, situationBefore = before.situation, autoEndTurn = endTurn)
+
+  private def withSettlementCaptures(played: Game, selectSquares: SelectSquares): Game =
+    played.copy(situation = withSettlementCaptures(played.situation, selectSquares))
+
+  private def withSettlementCaptures(played: Situation, selectSquares: SelectSquares): Situation =
+    played.copy(board =
+      played.board.updateHistory(history =>
+        history.copy(captures =
+          history.captures.add(
+            selectSquares.player,
+            settlementCaptureCount(selectSquares.before.pieces.size, selectSquares.after.pieces.size)
           )
         )
-        .settled,
-      autoEndTurn = endTurn
+      )
     )
-  }
 
   def actionStrsWithEndTurn(actionStrs: ActionStrs): Seq[(String, Boolean)] =
     actionStrs.zipWithIndex.map { case (a, i) =>
@@ -195,13 +163,9 @@ object Replay {
       variant: strategygames.go.variant.Variant
   ): (Game, List[(Game, Action)], Option[String]) = {
 
-    val init     = makeGame(variant, initialFen.some)
-    var state    = init
-    var uciMoves = init.situation.board.uciMoves
-    var errors   = ""
-
-    def positionAfterAction(uciAction: String) =
-      state.situation.board.apiPosition.makeMoves(List(uciAction))
+    val init   = makeGame(variant, initialFen.some)
+    var state  = init
+    var errors = ""
 
     def replayDropFromUci(
         role: Option[Role],
@@ -210,9 +174,7 @@ object Replay {
     ): (Game, Action) =
       (role, dest) match {
         case (Some(role), Some(dest)) => {
-          val uciDrop = s"${role.forsyth}@${dest.key}"
-          uciMoves = uciMoves :+ uciDrop
-          val drop    = replayDrop(state, role, dest, endTurn)
+          val drop = replayDrop(state, role, dest, endTurn)
           state = state.applyDrop(drop)
           (state, drop)
         }
@@ -224,24 +186,21 @@ object Replay {
       }
 
     def replayPassFromUci(endTurn: Boolean): (Game, Action) = {
-      val passed = positionAfterAction("pass")
-      uciMoves = uciMoves :+ "pass"
-      val pass   = replayPass(state, endTurn, passed, uciMoves)
+      val pass = replayPass(state, endTurn)
       state = state.applyPass(pass)
       (state, pass)
     }
 
     def replaySelectSquaresFromUci(squares: List[Pos], endTurn: Boolean): (Game, Action) = {
-      val uciSelectSquares = s"ss:${squares.mkString(",")}"
-      val selected         = positionAfterAction(uciSelectSquares)
-      uciMoves = uciMoves :+ uciSelectSquares
-      val selectSquares    = replaySelectSquares(state, squares, endTurn, selected, uciMoves)
-      state = state.applySelectSquares(selectSquares)
+      val selectSquares = replaySelectSquares(state, squares, endTurn)
+      state = withSettlementCaptures(state.applySelectSquares(selectSquares), selectSquares)
       (state, selectSquares)
     }
 
     val gameWithActions: List[(Game, Action)] =
       combineActionStrsWithEndTurn(actionStrs, startPlayer, activePlayer).toList.map {
+        case (actionStr, _) if state.situation.end           =>
+          sys.error(s"Action ${actionStr} offered to a finished ${variant.key} game")
         case (Uci.Drop.dropR(role, dest), endTurn)           =>
           replayDropFromUci(
             Role.allByForsyth(init.situation.board.variant.gameFamily).get(role(0)),
@@ -396,75 +355,35 @@ object Replay {
       valid(
         gameFromBatchedActions(
           init,
-          combineActionStrsWithEndTurn(uciStrings, fen.player.getOrElse(Player.P1), activePlayer),
-          fen,
-          variant
+          combineActionStrsWithEndTurn(uciStrings, fen.player.getOrElse(Player.P1), activePlayer)
         )
       )
   }
 
-  private def gameFromBatchedActions(
-      init: Game,
-      framed: Seq[(String, Boolean)],
-      initialFen: FEN,
-      variant: strategygames.go.variant.Variant
-  ): Game = {
-    val flat          = framed.iterator.map(_._1).toList
-    val finalPosition = Api.positionFromVariantStartingFenAndMoves(variant, initialFen, flat)
-
+  private def gameFromBatchedActions(init: Game, framed: Seq[(String, Boolean)]): Game = {
     val turns    = Vector.newBuilder[Vector[String]]
     var openTurn = Vector.newBuilder[String]
 
-    var startedTurns  = 0
-    var player        = init.situation.player
-    var plies         = init.plies
-    var turnCount     = init.turnCount
-    var halfMoveClock = init.situation.history.halfMoveClock
-    var lastTurn      = List.empty[String]
-    var currentTurn   = List.empty[String]
+    var startedTurns = 0
+    var situation    = init.situation
+    var plies        = init.plies
+    var turnCount    = init.turnCount
 
     framed.foreach { case (actionStr, endTurn) =>
-      if (Game.opensNewTurnGroup(player, startedTurns, init.turnCount)) {
+      if (Game.opensNewTurnGroup(situation.player, startedTurns, init.turnCount)) {
         if (startedTurns > 0) turns += openTurn.result()
         openTurn = Vector.newBuilder[String]
         startedTurns += 1
       }
       openTurn += actionStr
+      situation = situationAfterAction(situation, actionStr, endTurn, plies)
       plies += 1
-      halfMoveClock += 1
-      if (endTurn) {
-        lastTurn = currentTurn :+ actionStr
-        currentTurn = List.empty
-        turnCount += 1
-        player = !player
-      } else currentTurn = currentTurn :+ actionStr
+      if (endTurn) turnCount += 1
     }
     if (startedTurns > 0) turns += openTurn.result()
 
-    val positionState = positionStateAfter(init.situation.board, flat)
-
-    val board = Board(
-      pieces = finalPosition.pieceMap,
-      history = History(
-        lastTurn = lastTurn.map(uciOf),
-        currentTurn = currentTurn.map(uciOf),
-        halfMoveClock = halfMoveClock,
-        score =
-          if (flat.exists(_ != passActionStr)) finalPosition.fenScore
-          else Score(0, 0),
-        captures = capturesAfter(framed, finalPosition, player, initialFen, variant)
-      ),
-      variant = variant,
-      pocketData = finalPosition.pocketData,
-      komi = init.situation.board.komi,
-      consecutivePasses = positionState.consecutivePasses,
-      deadStonesSelected = positionState.deadStonesSelected,
-      uciMoves = init.situation.board.uciMoves ++ flat,
-      position = finalPosition.some
-    ).withKoOf(finalPosition)
-
     Game(
-      situation = Situation(board, player),
+      situation = situation,
       actionStrs = turns.result(),
       plies = plies,
       turnCount = turnCount,
@@ -473,45 +392,46 @@ object Replay {
     )
   }
 
-  private def capturesAfter(
-      framed: Seq[(String, Boolean)],
-      finalPosition: Api.Position,
-      playerAfter: Player,
-      initialFen: FEN,
-      variant: strategygames.go.variant.Variant
-  ): Score = {
-    val fenCaptures = Score(finalPosition.fen.player1Captures, finalPosition.fen.player2Captures)
-    framed.lastOption.filter(action => isSelectSquares(action._1)).fold(fenCaptures) { case (_, endTurn) =>
-      val beforeSettlement = Api.positionFromVariantStartingFenAndMoves(
-        variant,
-        initialFen,
-        framed.dropRight(1).iterator.map(_._1).toList
-      )
-      fenCaptures.add(
-        if (endTurn) !playerAfter else playerAfter,
-        settlementCaptureCount(beforeSettlement.pieceMap.size, finalPosition.pieceMap.size)
-      )
+  private def situationAfterAction(
+      before: Situation,
+      actionStr: String,
+      endTurn: Boolean,
+      ply: Int
+  ): Situation = {
+    if (before.end)
+      sys.error(s"Action ${actionStr} at ply ${ply} offered to a finished ${before.board.variant.key} game")
+    actionStr match {
+      case Uci.Drop.dropR(role, dest)                 =>
+        legalDropAt(before, role, dest, endTurn, ply).situationAfter
+      case Uci.Pass.passR()                           => Pass(before, endTurn).situationAfter
+      case Uci.SelectSquares.selectSquaresR(selected) =>
+        val selectSquares =
+          SelectSquares(selected.split(",").toList.flatMap(Pos.fromKey(_)), before, endTurn)
+        withSettlementCaptures(selectSquares.situationAfter, selectSquares)
+      case _                                          => sys.error(s"Invalid actionStr for replay: ${actionStr}")
     }
   }
+
+  private def legalDropAt(
+      before: Situation,
+      roleForsyth: String,
+      dest: String,
+      endTurn: Boolean,
+      ply: Int
+  ): Drop =
+    (
+      Role.allByForsyth(before.board.variant.gameFamily).get(roleForsyth(0)),
+      Pos.fromKey(dest)
+    ) match {
+      case (Some(role), Some(pos)) => legalDrop(before, role, pos, endTurn, ply)
+      case _                       => sys.error(s"Invalid drop for replay: ${roleForsyth}@${dest}")
+    }
 
   // NOTE: the +1 counts one stone more than an `ss:` lifts. Preserved rather than fixed: it predates the
   // batch path, the `History.captures` of every settled game already stored downstream was written with it,
   // and both replay paths must agree field for field.
   private def settlementCaptureCount(stonesBefore: Int, stonesAfter: Int): Int =
     stonesBefore - stonesAfter + 1
-
-  private def isSelectSquares(actionStr: String): Boolean =
-    ScalaPosition.isSelectSquares(actionStr)
-
-  private def positionStateAfter(before: Board, actionStrs: List[String]): Board =
-    actionStrs.foldLeft(before) { (board, actionStr) =>
-      if (isSelectSquares(actionStr)) board.settled
-      else if (actionStr == passActionStr) board.passed
-      else board.stonePlaced
-    }
-
-  private def uciOf(actionStr: String): Uci =
-    Uci(actionStr).getOrElse(sys.error(s"Invalid actionStr for replay: ${actionStr}"))
 
   /** The action-at-a-time replay, retained as the differential oracle for [[gameFromUciStrings]] above: it
     * must stay implemented independently of the batch path, or the specs comparing the two prove nothing.

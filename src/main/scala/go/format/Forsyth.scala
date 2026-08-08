@@ -24,15 +24,14 @@ object Forsyth {
     "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 0 1"
   )
 
-  def <<@(variant: Variant, fen: FEN): Option[Situation] = {
-    val apiPosition = Api.positionFromVariantNameAndFEN(variant.key, fen.value)
+  def <<@(variant: Variant, fen: FEN): Option[Situation] =
     Some(
       Situation(
         Board(
           pieces = fen.pieces,
           history = History(
             captures = Score(fen.player1Captures, fen.player2Captures),
-            halfMoveClock = fen.ply.getOrElse(0).max(0)
+            halfMoveClock = fen.ply.getOrElse(sys.error(s"go fen states no move number: ${fen.value}")).max(0)
           ),
           variant = variant,
           pocketData = Api.stonePocketData,
@@ -43,14 +42,7 @@ object Forsyth {
             case 2 => 2
             case _ => 0
           },
-          deadStonesSelected = fen.fenPassCount == settledPassCount,
-          uciMoves = fen.fenPassCount match {
-            case 1 => List("pass")
-            case 2 => List("pass", "pass")
-            case 3 => List("ss:")
-            case _ => List()
-          },
-          position = apiPosition.some
+          deadStonesSelected = fen.fenPassCount == settledPassCount
         ).withHistoryStartingHere,
         fen.value.split(' ')(1) match {
           case "b" => P1
@@ -59,7 +51,6 @@ object Forsyth {
         }
       )
     )
-  }
 
   def <<(fen: FEN): Option[Situation] = <<@(fen.variant, fen)
 
@@ -147,11 +138,11 @@ object Forsyth {
 
   private def fullMovePart(board: Board): String = {
     val fullMove                     = board.history.halfMoveClock / 2 + 1
-    val settledByThePlayerNowWaiting = board.history.lastTurn.headOption.exists {
+    val settledByP2                  = board.history.lastTurn.headOption.exists {
       case _: Uci.SelectSquares => playerToMove(board).p1
       case _                    => false
     }
-    if (settledByThePlayerNowWaiting) s"${fullMove}${digitAppendedBySettlement}"
+    if (settledByP2) s"${fullMove}${digitAppendedBySettlement}"
     else fullMove.toString
   }
 

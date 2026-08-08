@@ -10,8 +10,8 @@ import org.openjdk.jmh.infra.Blackhole
 import cats.data.Validated
 
 import strategygames.{ ActionStrs, Player }
-import strategygames.go.{ Api, Board, Game, Pos, Replay }
-import strategygames.go.format.FEN
+import strategygames.go.{ Api, Game, Pos, Replay, Situation }
+import strategygames.go.format.{ FEN, Forsyth }
 import strategygames.go.variant.{ Go13x13, Go19x19, Go9x9, Variant => GoVariant }
 
 final case class GoBoardSize(
@@ -118,21 +118,15 @@ class GoMidGameBoard {
   @Param(Array("go9x9", "go13x13", "go19x19"))
   var size: String = ""
 
-  var board: Board   = uninitialized
-  var player: Player = Player.P1
-  var dropPos: Pos   = uninitialized
+  var situation: Situation = uninitialized
+  var dropPos: Pos         = uninitialized
 
   @Setup(Level.Trial)
   def setup(): Unit = {
-    val corpus    = GoCorpusGame.load(size)
-    val variant   = corpus.size.variant
-    val situation = GoCorpusGame.replay(corpus, variant, corpus.turnsBeforeMidGameDrop).situation
-    board = situation.board
-    player = situation.player
+    val corpus  = GoCorpusGame.load(size)
+    val variant = corpus.size.variant
+    situation = GoCorpusGame.replay(corpus, variant, corpus.turnsBeforeMidGameDrop).situation
     dropPos = corpus.midGameDropPos
-    // The drop under test inherits its stone map from this one, so force it here rather than
-    // charging the first invocation for a full board scan.
-    val _         = board.apiPosition.pieceMap
   }
 }
 
@@ -151,12 +145,10 @@ class GoMidGamePosition {
     val corpus  = GoCorpusGame.load(size)
     val variant = corpus.size.variant
     variantKey = variant.key
-    fen = GoCorpusGame
-      .replay(corpus, variant, corpus.turnsBeforeMidGameDrop)
-      .situation
-      .board
-      .apiPosition
-      .fen
+    fen = Forsyth
+      .exportBoardFen(
+        GoCorpusGame.replay(corpus, variant, corpus.turnsBeforeMidGameDrop).situation.board
+      )
       .value
   }
 
@@ -181,7 +173,7 @@ class GoEngineBenchmark {
 
   @Benchmark
   def applyDrop(input: GoMidGameBoard, bh: Blackhole): Unit =
-    bh.consume(input.board.afterDrop(input.player, input.dropPos))
+    bh.consume(input.situation.board.variant.boardAfter(input.situation, input.dropPos))
 
   @Benchmark
   def legalDrops(input: GoMidGamePosition, bh: Blackhole): Unit =

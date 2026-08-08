@@ -77,23 +77,16 @@ object Reader {
           case Uci.Pass.passR()                     =>
             Result.Complete(
               replay.addAction(
-                Replay.replayPass(
-                  replay.state,
-                  endTurn,
-                  replay.state.board.apiPosition.makeMoves(List(actionStr)),
-                  replay.state.board.uciMoves :+ actionStr
-                )
+                Replay.replayPass(replay.state, endTurn)
               )
             )
           case Uci.SelectSquares.selectSquaresR(ss) =>
             Result.Complete(
-              replay.addAction(
+              replay.addSettlement(
                 Replay.replaySelectSquares(
                   replay.state,
                   ss.split(",").toList.flatMap(Pos.fromKey(_)),
-                  endTurn,
-                  replay.state.board.apiPosition.makeMoves(List(actionStr)),
-                  replay.state.board.uciMoves :+ actionStr
+                  endTurn
                 )
               )
             )

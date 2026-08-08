@@ -68,13 +68,14 @@ class GoBoardStateTest extends Specification {
         (Forsyth.exportBoardFen(settled.stonePlaced).fenPassCount === 3)
     }
 
-    "survive a drop replayed onto a fen that states it" in {
-      (droppedOntoSettledFen.deadStonesSelected === true) and
-        (Forsyth.exportBoardFen(droppedOntoSettledFen).fenPassCount === 3)
+    "be written back out by a fen that states it" in {
+      (resumed(passCount = 3).deadStonesSelected === true) and
+        (Forsyth.exportBoardFen(resumed(passCount = 3)).fenPassCount === 3)
     }
 
-    "leave the batch path refusing that drop rather than disagreeing about it" in {
-      batchDropOntoSettledFen.isFailure === true
+    "leave both replay paths refusing a further drop" in {
+      (perPlyDropOntoSettledFen.isFailure === true) and
+        (batchDropOntoSettledFen.isFailure === true)
     }
   }
 
@@ -150,12 +151,15 @@ object GoBoardStateTest {
 
   private val playerAfterSettledFenDrop = Player.P2
 
-  lazy val droppedOntoSettledFen: Board =
-    Replay
-      .gameFromUciStringsPerPly(dropOntoSettledFen, playerAfterSettledFenDrop, settledFen.some, Go19x19)
-      .valueOr(error => sys.error(s"per ply drop onto a settled fen: ${error}"))
-      .situation
-      .board
+  lazy val perPlyDropOntoSettledFen: Try[Any] =
+    Try(
+      Replay.gameFromUciStringsPerPly(
+        dropOntoSettledFen,
+        playerAfterSettledFenDrop,
+        settledFen.some,
+        Go19x19
+      )
+    )
 
   lazy val batchDropOntoSettledFen: Try[Any] =
     Try(
@@ -170,7 +174,8 @@ object GoBoardStateTest {
       val actions = game.actionStrs.take(played)
       boardDisagreements(
         s"${game.name} batch ply ${played}",
-        replayedInOneBatch(game, actions).situation.board,
+        replayedInOneBatch(game, actions).situation,
+        game,
         actions
       )
     }
@@ -183,11 +188,12 @@ object GoBoardStateTest {
       initialFenOf(game),
       variantOf(game)
     )
-    boardDisagreements(s"${game.name} per ply 0", init.situation.board, Nil) ++
+    boardDisagreements(s"${game.name} per ply 0", init.situation, game, Nil) ++
       perPly.map(_._1).zipWithIndex.flatMap { case (state, index) =>
         boardDisagreements(
           s"${game.name} per ply ${index + 1}",
-          state.situation.board,
+          state.situation,
+          game,
           game.actionStrs.take(index + 1)
         )
       }
@@ -215,23 +221,33 @@ object GoBoardStateTest {
   private def activePlayerAfter(game: GoOracleGame, turns: Int): Player =
     Player.fromTurnCount(turns + startPlayerOf(game).fold(0, 1))
 
-  private def boardDisagreements(named: String, board: Board, played: List[String]): List[String] = {
-    val engineFen = board.apiPosition.fen
-    val situation = board.situationOf(Player.P1)
+  private def boardDisagreements(
+      named: String,
+      situation: Situation,
+      game: GoOracleGame,
+      played: List[String]
+  ): List[String] = {
+    val engine = enginePositionAfter(game, played)
+    val board  = situation.board
     List(
-      disagreed(named, "ko", board.ko, engineFen.ko),
-      disagreed(named, "komi", board.komi, engineFen.komi),
-      disagreed(named, "passState", passStateOf(board), passStateLoggedBy(board)),
-      disagreed(named, "canSelectSquares", situation.canSelectSquares, canSelectSquaresLoggedBy(board)),
+      disagreed(named, "ko", board.ko, engine.fen.ko),
+      disagreed(named, "komi", board.komi, engine.fen.komi),
+      disagreed(named, "pieces", board.pieces, engine.pieceMap),
+      disagreed(named, "playerToMove", board.playerToMove, situation.player),
+      disagreed(named, "passState", passStateOf(board), passStateLoggedBy(played)),
+      disagreed(named, "canSelectSquares", situation.canSelectSquares, canSelectSquaresLoggedBy(played)),
       disagreed(
         named,
         "isSubsequentPassWarning",
         situation.isSubsequentPassWarning,
-        isSubsequentPassWarningLoggedBy(board)
+        isSubsequentPassWarningLoggedBy(played)
       ),
-      disagreed(named, "score", board.history.score, scoreAfter(board, played))
+      disagreed(named, "score", board.history.score, scoreAfter(engine, played))
     ).flatten
   }
+
+  private def enginePositionAfter(game: GoOracleGame, played: List[String]): Api.Position =
+    Api.positionFromVariantStartingFenAndMoves(variantOf(game), initialFenOf(game), played)
 
   private def disagreed[A](named: String, field: String, carried: A, stated: A): Option[String] =
     if (carried == stated) None
@@ -240,24 +256,23 @@ object GoBoardStateTest {
   private def passStateOf(board: Board): Int =
     if (board.deadStonesSelected) 3 else board.consecutivePasses.min(2)
 
-  private def scoreAfter(board: Board, played: List[String]): Score =
-    if (played.exists(_ != passAction)) board.apiPosition.fenScore else Score(0, 0)
+  private def scoreAfter(engine: Api.Position, played: List[String]): Score =
+    if (played.exists(_ != passAction)) engine.fenScore else Score(0, 0)
 
-  private def passStateLoggedBy(board: Board): Int =
-    board.uciMoves.reverse.headOption match {
-      case Some(uci) if uci.startsWith("ss:") => 3
-      case Some(uci) if uci == passAction     =>
-        board.uciMoves.reverse.drop(1).headOption match {
-          case Some(previous) if previous == passAction => 2
-          case _                                        => 1
-        }
-      case _                                  => 0
-    }
+  private val passesSettlingTheGame = 4
 
-  private def canSelectSquaresLoggedBy(board: Board): Boolean =
-    board.uciMoves.size > 1 && board.uciMoves.takeRight(2) == List(passAction, passAction) &&
-      board.uciMoves.reverse.takeWhile(_ == passAction).length % 2 == 0
+  private def trailingPasses(played: List[String]): Int =
+    played.reverse.takeWhile(_ == passAction).length
 
-  private def isSubsequentPassWarningLoggedBy(board: Board): Boolean =
-    board.uciMoves.size > 1 && board.uciMoves.takeRight(2) == List(passAction, passAction)
+  private def settledBy(played: List[String]): Boolean =
+    played.lastOption.exists(_.startsWith("ss:")) || trailingPasses(played) >= passesSettlingTheGame
+
+  private def passStateLoggedBy(played: List[String]): Int =
+    if (settledBy(played)) 3 else trailingPasses(played).min(2)
+
+  private def canSelectSquaresLoggedBy(played: List[String]): Boolean =
+    isSubsequentPassWarningLoggedBy(played) && trailingPasses(played) % 2 == 0
+
+  private def isSubsequentPassWarningLoggedBy(played: List[String]): Boolean =
+    !settledBy(played) && trailingPasses(played) >= 2
 }

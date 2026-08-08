@@ -13,9 +13,7 @@ case class Board(
     komi: Double,
     ko: Option[Pos] = None,
     consecutivePasses: Int = 0,
-    deadStonesSelected: Boolean = false,
-    uciMoves: List[String] = List(),
-    position: Option[Api.Position] = None
+    deadStonesSelected: Boolean = false
 ) {
 
   def apply(at: Pos): Option[Piece] = pieces get at
@@ -31,8 +29,6 @@ case class Board(
   lazy val playerPiecesOnBoardCount: Map[Player, Int] = Player.all.map { p =>
     (p, pieces.collect { case (pos, piece) if piece.player == p => (pos, piece) }.size)
   }.toMap
-
-  def withPosition(p: Option[Api.Position]): Board = copy(position = p)
 
   def withHistory(h: History): Board       = copy(history = h)
   def updateHistory(f: History => History) = copy(history = f(history))
@@ -61,57 +57,17 @@ case class Board(
 
   def withKo(point: Option[Pos]): Board = copy(ko = point)
 
-  def withKoOf(p: Api.Position): Board = withKo(p.fen.ko)
+  def playerToMove: Player = Player.fromTurnCount(history.halfMoveClock)
+
+  def withPlayerToMove(player: Player): Board =
+    if (playerToMove == player) this
+    else updateHistory(h => h.copy(halfMoveClock = h.halfMoveClock + player.fold(-1, 1)))
 
   def situationOf(player: Player) = Situation(this, player)
 
   def valid(strict: Boolean) = variant.valid(this, strict)
 
   def materialImbalance: Int = variant.materialImbalance(this)
-
-  // This won't work if the Board has been generated FromPosition. Will need to generate from FEN
-  // However generating from FEN can't be done all the time as we would like uciMoves to help with repetition
-  // Future problem when we come to deal with FromPosition for go games
-  lazy val apiPosition = position match {
-    case Some(position) => position
-    case None           => Api.positionFromVariantAndMoves(variant, uciMoves)
-  }
-
-  def afterDrop(player: Player, dest: Pos): Board = {
-    val stonesBefore = apiPosition.pieceMap
-    val uciMove      =
-      s"${Role.defaultRole.forsyth}@${dest.key}"
-    val newPosition  = apiPosition.makeMovesWithPosUnchecked(List(uciMove), apiPosition.deepCopy)
-    val stonesAfter  = newPosition.pieceMap
-    copy(
-      pieces = stonesAfter,
-      uciMoves = uciMoves :+ uciMove,
-      pocketData = newPosition.pocketData,
-      position = Some(newPosition)
-    ).stonePlaced
-      .withKoOf(newPosition)
-      .withHistory(
-        history
-          .copy(
-            // lastTurn handled in action.finalizeAfter
-            score = newPosition.fenScore,
-            captures = history.captures.add(
-              player,
-              stonesBefore.size - stonesAfter.size + 1
-            ),
-            halfMoveClock = history.halfMoveClock + 1
-          )
-          .afterPosition(
-            hashAfterPlacing(Piece(player, Role.defaultRole), dest, stonesBefore -- stonesAfter.keys)
-          )
-      )
-
-  }
-
-  private def hashAfterPlacing(stone: Piece, at: Pos, captured: PieceMap): Long =
-    captured.foldLeft(history.currentPosition.getOrElse(positionHash) ^ Hash.mask(stone, at)) {
-      case (hash, (pos, piece)) => hash ^ Hash.mask(piece, pos)
-    }
 
   override def toString = s"$variant Position after ${history.recentTurnUciString}"
 }

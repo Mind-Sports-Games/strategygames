@@ -1,7 +1,6 @@
 package strategygames.go
 
 import strategygames.{ GameMessage, Player, Status }
-import strategygames.go.format.Forsyth
 
 import cats.data.Validated
 import cats.implicits._
@@ -19,7 +18,7 @@ case class Situation(board: Board, player: Player) {
 
   def dropsAsDrops: List[Drop] = board.variant.validDrops(this)
 
-  def canDrop: Boolean = dropsAsDrops.nonEmpty
+  def canDrop: Boolean = board.variant.canDrop(this)
 
   def canOnlyDrop: Boolean = canDrop && !canSelectSquares
 
@@ -27,19 +26,11 @@ case class Situation(board: Board, player: Player) {
 
   def history = board.history
 
-  private lazy val gameEnd: Boolean = board.apiPosition.gameEnd
-
-  private lazy val gameResult: GameResult = board.apiPosition.gameResult
-
-  private lazy val result =
-    if (gameEnd) gameResult
-    else GameResult.Ongoing()
-
   // these dont exist in Oware. Normal ending tracked in VariantEnd
   def checkMate: Boolean = false
   def staleMate: Boolean = false
 
-  private def variantEnd = result == GameResult.VariantEnd() || board.variant.specialEnd(this)
+  private def variantEnd = board.variant.specialEnd(this)
 
   def end: Boolean = checkMate || staleMate || variantEnd
 
@@ -54,7 +45,7 @@ case class Situation(board: Board, player: Player) {
     else if (staleMate) Status.Stalemate.some
     else none
 
-  def isRepetition: Boolean = board.apiPosition.isRepetition
+  def isRepetition: Boolean = false
 
   def opponentHasInsufficientMaterial: Boolean = false
 
@@ -80,22 +71,7 @@ case class Situation(board: Board, player: Player) {
       board = board withVariant variant
     )
 
-  // If we can't determine an inverse player the APIPosition is None and is then determined in
-  // Board.apiPosition which uses uciMoves not FEN - will need to update when we have FromPosition
-  def unary_! = copy(
-    board = board.copy(
-      position = Forsyth
-        .exportBoardFen(board)
-        .invertPlayer
-        .map(f =>
-          Api.positionFromVariantNameAndFEN(
-            board.variant.key,
-            f.value
-          )
-        )
-    ),
-    player = !player
-  )
+  def unary_! = copy(board = board.withPlayerToMove(!player), player = !player)
 }
 
 object Situation {

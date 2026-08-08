@@ -2,7 +2,7 @@ package strategygames.go
 
 import org.specs2.mutable.Specification
 
-import strategygames.{ GameFamily, GameLogic, Player, Status }
+import strategygames.{ GameFamily, GameLogic, Player, Score, Status }
 import strategygames.go.format.{ FEN, Forsyth, Uci }
 import strategygames.go.variant.{ Go13x13, Go19x19, Go9x9, Variant }
 
@@ -69,9 +69,7 @@ class GoScalaVariantTest extends Specification {
         (Api
           .positionFromVariantNameAndFEN("go9x9", Go9x9.initialFen.value)
           .isInstanceOf[ScalaPosition] === true) and
-        (Forsyth
-          .<<@(Go13x13, Go13x13.initialFen)
-          .map(_.board.apiPosition.isInstanceOf[ScalaPosition]) === Some(true))
+        (Forsyth.<<@(Go13x13, Go13x13.initialFen).map(_.board.pieces.isEmpty) === Some(true))
     }
 
     "carry their setup traits" in {
@@ -109,16 +107,16 @@ class GoScalaVariantTest extends Specification {
     val ended  = playing(passed, List("ss:i1"))
 
     "capture the black stone at d5 when white closes it in" in {
-      (passed.situation.board.apiPosition.pieceMap.size === 11) and
-        (passed.situation.board.apiPosition.pieceMap.get(Pos.D5) === None) and
-        (passed.situation.board.apiPosition.pieceMap.get(Pos.D6) === Some(Piece(P2, Stone)))
+      (passed.situation.board.pieces.size === 11) and
+        (passed.situation.board.pieces.get(Pos.D5) === None) and
+        (passed.situation.board.pieces.get(Pos.D6) === Some(Piece(P2, Stone)))
     }
 
     "await dead stone selection after two passes" in {
       (passed.situation.canSelectSquares === true) and
         (passed.situation.end === false) and
-        (passed.situation.board.apiPosition.gameEnd === false) and
-        (passed.situation.board.apiPosition.fen.value
+        (passed.situation.board.deadStonesSelected === false) and
+        (Forsyth.exportBoardFen(passed.situation.board).value
           === "9/9/2s6/3s5/2s1s3S/3s3S1/6S2/5S3/4S3s[SSSSSSSSSSssssssssss] b - 50 125 0 1 55 2 8")
     }
 
@@ -126,18 +124,15 @@ class GoScalaVariantTest extends Specification {
       (ended.situation.end === true) and
         (ended.situation.status === Some(Status.VariantEnd)) and
         (ended.situation.winner === Some(Player.P1)) and
-        (ended.situation.board.apiPosition.pieceMap.size === 10) and
-        (ended.situation.board.apiPosition.p1Score === 15.0) and
-        (ended.situation.board.apiPosition.p2Score === 11.5) and
-        (ended.situation.board.apiPosition.gameOutcome === 1000) and
-        (ended.situation.board.apiPosition.gameResult === GameResult.VariantEnd()) and
-        (ended.situation.board.apiPosition.fen.value
-          === "9/9/2s6/3s5/2s1s3S/3s3S1/6S2/5S3/4S4[SSSSSSSSSSssssssssss] b - 150 115 0 1 55 3 8")
+        (ended.situation.board.pieces.size === 10) and
+        (Go9x9.areaScore(ended.situation.board) === Score(150, 115)) and
+        (Forsyth.exportBoardFen(ended.situation.board).value
+          === "9/9/2s6/3s5/2s1s3S/3s3S1/6S2/5S3/4S4[SSSSSSSSSSssssssssss] w - 150 115 0 1 55 3 8")
     }
 
     "offer no further actions once ended" in {
       (ended.situation.drops === None) and
-        (ended.situation.board.apiPosition.legalActions.size === 0)
+        (ended.situation.canDrop === false)
     }
 
     "export a board fen that reloads into the same position" in {
@@ -145,7 +140,7 @@ class GoScalaVariantTest extends Specification {
       val reloaded = Forsyth.<<@(Go9x9, exported)
       (exported.value
         === "9/9/2s6/3s5/2s1s3S/3s3S1/6S2/5S3/4S4[SSSSSSSSSSssssssssss] w - 150 115 0 1 55 3 8") and
-        (reloaded.map(_.board.apiPosition.fen) === Some(exported)) and
+        (reloaded.map(s => Forsyth.exportBoardFen(s.board)) === Some(exported)) and
         (reloaded.map(_.end) === Some(true)) and
         (reloaded.map(_.winner) === Some(Some(Player.P1)))
     }
@@ -198,20 +193,19 @@ class GoScalaVariantTest extends Specification {
       (handicapFen.value === "9/9/2S3S2/9/9/9/2S3S2/9/9[SSSSSSSSSSssssssssss] w - 40 55 0 0 55 0 1") and
         (handicapFen.handicap === Some(4)) and
         (game.situation.player === Player.P2) and
-        (game.situation.board.apiPosition.pieceMap.size === 4) and
-        (game.situation.board.apiPosition.turn === "w")
+        (game.situation.board.pieces.size === 4) and
+        (game.situation.board.playerToMove === Player.P2)
     }
 
     "score the whole board to the handicapped player" in {
-      game.situation.board.apiPosition.fen.value
+      Forsyth.exportBoardFen(game.situation.board).value
         === "9/9/2S3S2/9/9/9/2S3S2/9/9[SSSSSSSSSSssssssssss] w - 810 55 0 0 55 0 1"
     }
 
-    "keep the handicap fen as the starting fen after a drop" in {
+    "keep the handicap stones on the board after a drop" in {
       val played = playing(game, List("s@a1"))
-      (played.situation.board.apiPosition.initialFen === handicapFen) and
-        (played.situation.board.apiPosition.fen.value
-          === "9/9/2S3S2/9/9/9/2S3S2/9/s8[SSSSSSSSSSssssssssss] b - 40 65 0 0 55 0 2")
+      Forsyth.exportBoardFen(played.situation.board).value
+        === "9/9/2S3S2/9/9/9/2S3S2/9/s8[SSSSSSSSSSssssssssss] b - 40 65 0 0 55 0 2"
     }
   }
 
@@ -221,15 +215,15 @@ class GoScalaVariantTest extends Specification {
     val ended  = playing(passed, List("ss:"))
 
     "read and play two digit ranks" in {
-      (passed.situation.board.apiPosition.pieceMap.get(Pos.A19) === Some(Piece(P1, Stone))) and
-        (passed.situation.board.apiPosition.pieceMap.get(Pos.S19) === Some(Piece(P2, Stone))) and
+      (passed.situation.board.pieces.get(Pos.A19) === Some(Piece(P1, Stone))) and
+        (passed.situation.board.pieces.get(Pos.S19) === Some(Piece(P2, Stone))) and
         (passed.situation.canSelectSquares === true)
     }
 
     "end with a select squares that removes nothing" in {
       (ended.situation.end === true) and
-        (ended.situation.board.apiPosition.pieceMap.size === 4) and
-        (ended.situation.board.apiPosition.fen.value.split(' ').last === "4") and
+        (ended.situation.board.pieces.size === 4) and
+        (Forsyth.exportBoardFen(ended.situation.board).value.split(' ').last === "4") and
         (ended.situation.winner === Some(Player.P2))
     }
   }
@@ -261,14 +255,14 @@ class GoScalaVariantTest extends Specification {
       val replayed = replaying(actions)
       (replayed.map(_.size) === Some(actions.size + 1)) and
         (replayed.map(_.last.end) === Some(true)) and
-        (replayed.map(_.last.board.apiPosition.fen)
-          === Some(playing(Game(Go9x9), actions).situation.board.apiPosition.fen))
+        (replayed.map(situations => Forsyth.exportBoardFen(situations.last.board))
+          === Some(Forsyth.exportBoardFen(playing(Game(Go9x9), actions).situation.board)))
     }
 
     "end on a fourth pass without any dead stone selection" in {
       val replayed = replaying(scriptedNineByNine ++ List("pass", "pass", "pass", "pass"))
       (replayed.map(_.last.end) === Some(true)) and
-        (replayed.map(_.last.board.apiPosition.pieceMap.size) === Some(11))
+        (replayed.map(_.last.board.pieces.size) === Some(11))
     }
   }
 

@@ -7,7 +7,7 @@ import scala.compiletime.uninitialized
 import org.openjdk.jmh.annotations.*
 import org.openjdk.jmh.infra.Blackhole
 
-import strategygames.go.{ Api, Drop, LazyBoardAfter, Piece, Role, Situation }
+import strategygames.go.Situation
 
 @State(Scope.Thread)
 class GoMidGameSituation {
@@ -22,9 +22,6 @@ class GoMidGameSituation {
     val corpus  = GoCorpusGame.load(size)
     val variant = corpus.size.variant
     situation = GoCorpusGame.replay(corpus, variant, corpus.turnsBeforeMidGameDrop).situation
-    val position = situation.board.apiPosition
-    val _        = position.pieceMap
-    val _        = position.legalDrops
   }
 }
 
@@ -43,24 +40,4 @@ class GoMovegenConsumerBenchmark {
   @Benchmark
   def prodDropsByRoleMidGame(input: GoMidGameSituation, bh: Blackhole): Unit =
     bh.consume(input.situation.dropsByRole.map(_.size))
-
-  @Benchmark
-  def eagerlyAppliedValidDropsReplicaMidGame(input: GoMidGameSituation, bh: Blackhole): Unit = {
-    val situation = input.situation
-    val board     = situation.board
-    val player    = situation.player
-    val drops     = board.apiPosition.legalDrops.toList.flatMap { dest =>
-      Api.moveToPos(dest, board.variant).map { pos =>
-        val nextBoard = board.afterDrop(player, pos)
-        Drop(
-          piece = Piece(player, Role.defaultRole),
-          pos = pos,
-          situationBefore = situation,
-          nextBoard = LazyBoardAfter(() => nextBoard),
-          autoEndTurn = true
-        )
-      }
-    }
-    bh.consume(drops.size)
-  }
 }

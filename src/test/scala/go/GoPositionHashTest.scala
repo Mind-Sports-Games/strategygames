@@ -97,10 +97,10 @@ class GoPositionHashTest extends Specification with GoRulesTestSupport {
     }
   }
 
-  "the batch replay path, which never materialises the positions it skips over" should {
-    "record no position history at all, a gap this states rather than endorses" in {
+  "the batch replay path" should {
+    "record the same position history the per ply path records" in {
       val actions = List("d4", "f4", "d6")
-      (batchReplayed(Go9x9, actions).situation.history.positionCount === 0) and
+      (batchReplayed(Go9x9, actions).situation.history.positionCount === actions.size + 1) and
         (replayedPerPly(Go9x9, actions).situation.history.positionCount === actions.size + 1)
     }
   }

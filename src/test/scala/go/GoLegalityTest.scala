@@ -2,7 +2,10 @@ package strategygames.go
 
 import org.specs2.mutable.Specification
 
-import strategygames.Score
+import scala.util.Try
+
+import strategygames.{ Player, Score }
+import strategygames.format.pgn.{ Tag, Tags }
 import strategygames.go.format.FEN
 import strategygames.go.variant.{ Go19x19, Go9x9 }
 
@@ -153,4 +156,38 @@ class GoLegalityTest extends Specification with GoRulesTestSupport {
         (dropKeysOf(beforeRecapture.situation) must contain("e8"))
     }
   }
+
+  "a drop onto a point that already holds a stone" should {
+    "be refused as an illegal action by every replay loader, not only by the batch one" in {
+      (refusalOf(batchReplayed(ontoAnOccupiedPoint)) must startWith(refusedDrop)) and
+        (refusalOf(perPlyReplayed(ontoAnOccupiedPoint)) must startWith(refusedDrop)) and
+        (refusalOf(readFromActionStrs(ontoAnOccupiedPoint)) must startWith(refusedDrop))
+    }
+  }
+
+  private val ontoAnOccupiedPoint = List("s@e5", "s@e5")
+
+  private val refusedDrop = "Illegal action s@e5 at ply 1"
+
+  private def refusalOf(replaying: => Any): String =
+    Try(replaying).failed.map(_.getMessage).getOrElse("nothing was refused")
+
+  private def turnPerAction(actions: List[String]) = actions.map(Vector(_)).toVector
+
+  private def batchReplayed(actions: List[String]) =
+    Replay.gameFromUciStrings(turnPerAction(actions), Player.P1, None, Go9x9).toOption.get
+
+  private def perPlyReplayed(actions: List[String]) =
+    Replay.gameFromUciStringsPerPly(turnPerAction(actions), Player.P1, None, Go9x9).toOption.get
+
+  private def readFromActionStrs(actions: List[String]) =
+    format.pgn.Reader
+      .replayResultFromActionStrs(turnPerAction(actions), identity, Tags(List(Tag(_.Variant, Go9x9.name))))
+      .andThen(_.valid)
+      .toOption
+      .get
+      .state
+      .situation
+      .board
+      .pieces
 }

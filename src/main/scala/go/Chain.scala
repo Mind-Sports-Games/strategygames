@@ -29,12 +29,13 @@ object Chain {
   private def requireVacant(board: Board, point: Pos): Unit =
     require(!board.pieces.contains(point), s"a stone already stands on ${point.key}")
 
-  private def stonesOf(board: Board): Stones = Stones(board.pieces, board.variant.boardSize)
+  private def stonesOf(board: Board): Stones =
+    Stones(board.pieces, board.variant.boardSize, board.variant.defaultRole)
 
-  private case class Stones(pieces: PieceMap, boardSize: Board.BoardSize) {
+  private case class Stones(pieces: PieceMap, boardSize: Board.BoardSize, stoneRole: Role) {
 
     def withStone(player: Player, pos: Pos): Stones =
-      copy(pieces = pieces.updated(pos, Piece(player, Role.defaultRole)))
+      copy(pieces = pieces.updated(pos, Piece(player, stoneRole)))
 
     def without(removed: Set[Pos]): Stones = copy(pieces = pieces -- removed)
 

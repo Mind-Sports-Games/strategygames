@@ -2,7 +2,8 @@ package strategygames.go
 
 import org.specs2.mutable.Specification
 
-import strategygames.go.format.{ FEN, Uci }
+import strategygames.Score
+import strategygames.go.format.{ FEN, Forsyth, Uci }
 import strategygames.go.oracle.{ GoOracle, GoOracleGame }
 import strategygames.go.variant.Variant
 
@@ -55,11 +56,7 @@ class GoBoardAfterDifferentialTest extends Specification {
 
   private def comparisonAt(named: String, situation: Situation, action: String): List[List[String]] =
     placedPointOf(action).toList.map { pos =>
-      differences(
-        named,
-        situation.board.variant.boardAfter(situation, pos),
-        situation.board.afterDrop(situation.player, pos)
-      )
+      differences(named, situation.board.variant.boardAfter(situation, pos), enginePlacing(situation, pos))
     }
 
   private def placedPointOf(action: String): Option[Pos] = uciOf(action) match {
@@ -70,24 +67,33 @@ class GoBoardAfterDifferentialTest extends Specification {
   private def uciOf(action: String): Uci =
     Uci(action).getOrElse(sys.error(s"unreadable go uci: ${action}"))
 
-  private def differences(named: String, ruled: Board, engined: Board): List[String] =
+  private def enginePlacing(situation: Situation, pos: Pos): Api.Position =
+    Api.positionFromVariantStartingFenAndMoves(
+      situation.board.variant,
+      Forsyth.exportBoardFen(situation.board),
+      List(s"${situation.board.variant.defaultRole.forsyth}@${pos.key}")
+    )
+
+  private def differences(named: String, ruled: Board, engined: Api.Position): List[String] =
     List(
       differingPieces(named, ruled, engined),
-      difference(named, "ko", ruled.ko, engined.ko),
-      difference(named, "consecutivePasses", ruled.consecutivePasses, engined.consecutivePasses),
-      difference(named, "score", ruled.history.score, engined.history.score),
-      difference(named, "captures", ruled.history.captures, engined.history.captures),
-      difference(named, "halfMoveClock", ruled.history.halfMoveClock, engined.history.halfMoveClock),
-      difference(named, "positionCount", ruled.history.positionCount, engined.history.positionCount),
-      difference(named, "currentPosition", ruled.history.currentPosition, engined.history.currentPosition)
+      difference(named, "ko", ruled.ko, engined.fen.ko),
+      difference(named, "consecutivePasses", ruled.consecutivePasses, engined.fen.fenPassCount),
+      difference(named, "score", ruled.history.score, engined.fenScore),
+      difference(
+        named,
+        "captures",
+        ruled.history.captures,
+        Score(engined.fen.player1Captures, engined.fen.player2Captures)
+      )
     ).flatten
 
-  private def differingPieces(named: String, ruled: Board, engined: Board): Option[String] = {
-    val onlyRuled   = ruled.pieces.toSet -- engined.pieces.toSet
-    val onlyEngined = engined.pieces.toSet -- ruled.pieces.toSet
+  private def differingPieces(named: String, ruled: Board, engined: Api.Position): Option[String] = {
+    val onlyRuled   = ruled.pieces.toSet -- engined.pieceMap.toSet
+    val onlyEngined = engined.pieceMap.toSet -- ruled.pieces.toSet
     Option.when(onlyRuled.nonEmpty || onlyEngined.nonEmpty)(
       s"${named}: pieces only boardAfter has ${describedStones(onlyRuled)}, " +
-        s"only afterDrop has ${describedStones(onlyEngined)}"
+        s"only the engine has ${describedStones(onlyEngined)}"
     )
   }
 
@@ -95,5 +101,5 @@ class GoBoardAfterDifferentialTest extends Specification {
     stones.toList.map { case (pos, piece) => s"${pos.key}(${piece.player.name})" }.sorted.mkString(",")
 
   private def difference[A](named: String, field: String, ruled: A, engined: A): Option[String] =
-    Option.when(ruled != engined)(s"${named}: boardAfter ${field} ${ruled}, afterDrop ${engined}")
+    Option.when(ruled != engined)(s"${named}: boardAfter ${field} ${ruled}, engine ${engined}")
 }

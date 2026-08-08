@@ -39,7 +39,6 @@ class GoReplayDefaultSpec extends Specification {
 
   private def fieldsOf(game: Game): List[(String, Any)] = List(
     "fen"           -> (Forsyth >> game).value,
-    "engineFen"     -> game.situation.board.apiPosition.fen.value,
     "pieces"        -> game.situation.board.pieces,
     "player"        -> game.situation.player,
     "status"        -> game.situation.status,
@@ -50,7 +49,6 @@ class GoReplayDefaultSpec extends Specification {
     "startedAtPly"  -> game.startedAtPly,
     "startedAtTurn" -> game.startedAtTurn,
     "actionStrs"    -> game.actionStrs,
-    "uciMoves"      -> game.situation.board.uciMoves,
     "captures"      -> game.situation.history.captures,
     "score"         -> game.situation.history.score,
     "halfMoveClock" -> game.situation.history.halfMoveClock,
@@ -149,13 +147,13 @@ class GoReplayDefaultSpec extends Specification {
         .reduce(_ and _)
     }
 
-    "agree on the raw engine fen and on dead stone selection availability" in {
+    "agree on the exported fen and on dead stone selection availability" in {
       resumptions
         .map { case (_, fen, action) =>
           val actionStrs = turnPerAction(List(action))
           val batch      = fast(actionStrs, Player.P1, Some(fen), Go9x9)
           val oracle     = perPly(actionStrs, Player.P1, Some(fen), Go9x9)
-          (batch.situation.board.apiPosition.fen must beEqualTo(oracle.situation.board.apiPosition.fen)) and
+          ((Forsyth >> batch) must beEqualTo(Forsyth >> oracle)) and
             (batch.situation.canSelectSquares must beEqualTo(oracle.situation.canSelectSquares))
         }
         .reduce(_ and _)
@@ -194,8 +192,8 @@ class GoReplayDefaultSpec extends Specification {
       val batch      = fast(actionStrs, Player.P1, None, Go9x9)
       val oracle     = perPly(actionStrs, Player.P1, None, Go9x9)
       (batch.situation.history.score must beEqualTo(oracle.situation.history.score)) and
-        (batch.situation.history.score must beEqualTo(batch.situation.board.apiPosition.fenScore)) and
-        (oracle.situation.history.score must beEqualTo(oracle.situation.board.apiPosition.fenScore))
+        (batch.situation.history.score must beEqualTo(Go9x9.areaScore(batch.situation.board))) and
+        (oracle.situation.history.score must beEqualTo(Go9x9.areaScore(oracle.situation.board)))
     }
 
     "stay unscored on both paths when no drop was ever played" in {

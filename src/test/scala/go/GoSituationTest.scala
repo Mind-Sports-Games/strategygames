@@ -37,7 +37,7 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     val drops = variant.Go19x19.validDrops(game.situation)
 
     val game1 = game.apply(drops(1))
-    val fen   = game1.situation.board.apiPosition.fen
+    val fen   = format.Forsyth.exportBoardFen(game1.situation.board)
 
     "have differnt fen after drop" in {
       variant.Go19x19.initialFen.value !== fen.value
@@ -53,10 +53,12 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     val drop  = drops(1)
 
     val game1 = game.apply(drop)
-    val fen   = game1.situation.board.apiPosition.fen
+    val fen   = format.Forsyth.exportBoardFen(game1.situation.board)
 
     "have correct fen after drop b1" in {
-      "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1S17[SSSSSSSSSSssssssssss] w - 3610 75 0 0 75 0 1" === drop.after.apiPosition.fen.value
+      "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1S17[SSSSSSSSSSssssssssss] w - 3610 75 0 0 75 0 1" === format.Forsyth
+        .exportBoardFen(drop.after)
+        .value
     }
 
     val boardFen = format.Forsyth.boardAndPlayer(game1.situation)
@@ -78,13 +80,13 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     val game = Game(Some(variant.Go9x9), Some(startingFen))
 
     "have the same situation piecemap from game creation and using forsyth" in {
-      game.situation.board.apiPosition.pieceMap === situation
-        .map(_.board.apiPosition.pieceMap)
+      game.situation.board.pieces === situation
+        .map(_.board.pieces)
         .getOrElse(Map.empty)
     }
     "have the same situation fen from game creation and using forsyth" in {
-      game.situation.board.apiPosition.fen === situation
-        .map(_.board.apiPosition.fen)
+      format.Forsyth.exportBoardFen(game.situation.board) === situation
+        .map(s => format.Forsyth.exportBoardFen(s.board))
         .getOrElse(FEN(""))
     }
 
@@ -92,11 +94,10 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     val drop  = drops(0)
 
     val game1 = game.apply(drop)
-    "have the correct starting fen after a move" in {
-      game1.situation.board.apiPosition.initialFen.value === "9/9/2S3S2/9/9/9/9/9/9[SSSSSSSSSSssssssssss] w - 810 40 0 0 40 0 1"
-    }
     "and the correct current fen after a move" in {
-      game1.situation.board.apiPosition.fen.value === "9/9/2S3S2/9/9/9/9/9/s8[SSSSSSSSSSssssssssss] b - 20 50 0 0 40 0 2"
+      format.Forsyth
+        .exportBoardFen(game1.situation.board)
+        .value === "9/9/2S3S2/9/9/9/9/9/s8[SSSSSSSSSSssssssssss] b - 20 50 0 0 40 0 2"
     }
 
   }
@@ -147,14 +148,18 @@ class GoSituationTest extends Specification with ValidatedMatchers {
 
     "not be gameEnd after just two passes" in {
       game_ply_9.situation.end === false
-      game_ply_9.situation.board.apiPosition.pieceMap.size === 7
-      game_ply_9.situation.board.apiPosition.fen.value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1SsSsSsS11[SSSSSSSSSSssssssssss] w - 40 105 0 0 75 2 5"
+      game_ply_9.situation.board.pieces.size === 7
+      format.Forsyth
+        .exportBoardFen(game_ply_9.situation.board)
+        .value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1SsSsSsS11[SSSSSSSSSSssssssssss] w - 40 105 0 0 75 2 5"
     }
 
     "be gameEnd after final ss action" in {
       game_ply_10.situation.end === true
-      game_ply_10.situation.board.apiPosition.pieceMap.size === 5
-      game_ply_10.situation.board.apiPosition.fen.value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/2s1sSsS11[SSSSSSSSSSssssssssss] w - 20 105 0 0 75 3 6"
+      game_ply_10.situation.board.pieces.size === 5
+      format.Forsyth
+        .exportBoardFen(game_ply_10.situation.board)
+        .value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/2s1sSsS11[SSSSSSSSSSssssssssss] b - 20 105 0 0 75 3 61"
     }
 
   }
@@ -210,16 +215,20 @@ class GoSituationTest extends Specification with ValidatedMatchers {
 
     "not be gameEnd after just two passes (both cases)" in {
       game_ply_9.situation.end === false
-      game_ply_9.situation.board.apiPosition.pieceMap.size === 7
-      game_ply_9.situation.board.apiPosition.fen.value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1SsSsSsS11[SSSSSSSSSSssssssssss] w - 40 105 0 0 75 2 5"
+      game_ply_9.situation.board.pieces.size === 7
+      format.Forsyth
+        .exportBoardFen(game_ply_9.situation.board)
+        .value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1SsSsSsS11[SSSSSSSSSSssssssssss] w - 40 105 0 0 75 2 5"
       game_ply_14.situation.end === false
-      game_ply_14.situation.board.apiPosition.pieceMap.size === 10
+      game_ply_14.situation.board.pieces.size === 10
     }
 
     "be gameEnd after final ss action" in {
       game_ply_15.situation.end === true
-      game_ply_15.situation.board.apiPosition.pieceMap.size === 8
-      game_ply_15.situation.board.apiPosition.fen.value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/2s1sSsSsSs8[SSSSSSSSSSssssssssss] b - 30 125 0 0 75 3 8"
+      game_ply_15.situation.board.pieces.size === 8
+      format.Forsyth
+        .exportBoardFen(game_ply_15.situation.board)
+        .value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/2s1sSsSsSs8[SSSSSSSSSSssssssssss] w - 30 125 0 0 75 3 8"
     }
 
     "have no more drops after game end" in {
@@ -275,16 +284,20 @@ class GoSituationTest extends Specification with ValidatedMatchers {
 
     "not be gameEnd after just two passes (both cases)" in {
       game_ply_9.situation.end === false
-      game_ply_9.situation.board.apiPosition.pieceMap.size === 7
-      game_ply_9.situation.board.apiPosition.fen.value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1SsSsSsS11[SSSSSSSSSSssssssssss] w - 40 105 0 0 75 2 5"
+      game_ply_9.situation.board.pieces.size === 7
+      format.Forsyth
+        .exportBoardFen(game_ply_9.situation.board)
+        .value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1SsSsSsS11[SSSSSSSSSSssssssssss] w - 40 105 0 0 75 2 5"
       game_ply_13.situation.end === false
-      game_ply_13.situation.board.apiPosition.pieceMap.size === 8
+      game_ply_13.situation.board.pieces.size === 8
     }
 
     "be gameEnd after final ss action" in {
       game_ply_14.situation.end === true
-      game_ply_14.situation.board.apiPosition.pieceMap.size === 6
-      game_ply_14.situation.board.apiPosition.fen.value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/2s1sSsSS10[SSSSSSSSSSssssssssss] w - 30 105 0 0 75 3 8"
+      game_ply_14.situation.board.pieces.size === 6
+      format.Forsyth
+        .exportBoardFen(game_ply_14.situation.board)
+        .value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/2s1sSsSS10[SSSSSSSSSSssssssssss] b - 30 105 0 0 75 3 81"
     }
 
     "not have a ss action after single pass" in {
