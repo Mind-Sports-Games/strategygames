@@ -21,7 +21,7 @@ being looked for.
 | 1 | selecting dead stones | played (`Variant.createSelectSquares`) vs loaded (`Replay.replaySelectSquares`) | the played path never refreshed `board.pieces`, so the lifted stones were still on the board. Measured on a decided 19x19 position: `Score(450,65)` where the truth is `Score(810,55)` |
 | 2 | four passes ending the game | played vs loaded | the auto-settlement lived only in `Variant.validPass`, which the loader did not go through. Same four passes: played gave `end=true, winner=P2, 0 drops`; replayed gave `end=false, winner=None, 81 drops` |
 | 3 | an action offered after a settlement | batch replay vs per-ply replay | batch refused it, per-ply accepted it |
-| 4 | the settlement capture adjustment | `Replay`'s three loaders vs `pgn.Reader` | three loaders added it, the fourth did not — the same game got a different `history.captures` and a different exported FEN depending on how it was loaded |
+| 4 | the settlement capture adjustment | `Replay`'s three `gameWithActionWhileValid` entry points vs `pgn.Reader` | three added it, the fourth did not — the same game got a different `history.captures` and a different exported FEN depending on how it was loaded. The `Uci`-list loaders were never in this group and still are not: see preserved quirk 2 |
 
 Two more were *introduced* during the refactor and caught in review, and those are the tell. The
 first: `Forsyth.validate` and `Forsyth.<<@`, two gates built in the same task, disagreed about which
