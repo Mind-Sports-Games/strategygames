@@ -200,6 +200,37 @@ abstract class Variant private[variant] (
     (situation.board.apiPosition.fenScore.p1 == situation.board.apiPosition.fenScore.p2) ||
       situation.board.apiPosition.isRepetition
 
+  def boardAfter(situation: Situation, pos: Pos): Board = {
+    val stone    = Piece(situation.player, defaultRole)
+    val captured = Chain.capturedBy(situation.board, situation.player, pos)
+    val placed   = situation.board.copy(pieces = situation.board.pieces -- captured + (pos -> stone))
+    placed.stonePlaced
+      .withKo(koPointAfter(placed, pos, captured))
+      .withHistory(
+        situation.history
+          .copy(
+            score = areaScore(placed),
+            captures = situation.history.captures.add(situation.player, captured.size),
+            halfMoveClock = situation.history.halfMoveClock + situation.player.fold(0, 1)
+          )
+          .afterPosition(hashAfterPlacing(situation.board, stone, pos, captured))
+      )
+  }
+
+  private def koPointAfter(placed: Board, at: Pos, captured: Set[Pos]): Option[Pos] = {
+    val placedChain = Chain.at(placed, at)
+    Option.when(
+      captured.size == 1 && placedChain.size == 1 && Chain.liberties(placed, placedChain).size == 1
+    )(captured.head)
+  }
+
+  private def hashAfterPlacing(before: Board, stone: Piece, at: Pos, captured: Set[Pos]): Long =
+    captured.foldLeft(
+      before.history.currentPosition.getOrElse(before.positionHash) ^ Hash.mask(stone, at)
+    ) { (hash, pos) =>
+      hash ^ Hash.mask(before.pieces(pos), pos)
+    }
+
   def areaScore(board: Board): Score = {
     val enclosedArea = enclosedAreaByPlayer(board)
 

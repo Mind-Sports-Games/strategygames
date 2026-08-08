@@ -59,7 +59,9 @@ case class Board(
 
   def withHistoryStartingHere: Board = updateHistory(_.startingAtPosition(positionHash))
 
-  def withKoOf(p: Api.Position): Board = copy(ko = p.fen.ko)
+  def withKo(point: Option[Pos]): Board = copy(ko = point)
+
+  def withKoOf(p: Api.Position): Board = withKo(p.fen.ko)
 
   def situationOf(player: Player) = Situation(this, player)
 
