@@ -7,7 +7,7 @@ import scalalib.extensions.*
 
 import strategygames.go._
 import strategygames.go.format.{ FEN, Forsyth }
-import strategygames.{ GameFamily, Player }
+import strategygames.{ GameFamily, Player, Score }
 
 case class GoName(val name: String)
 
@@ -200,6 +200,47 @@ abstract class Variant private[variant] (
     (situation.board.apiPosition.fenScore.p1 == situation.board.apiPosition.fenScore.p2) ||
       situation.board.apiPosition.isRepetition
 
+  def areaScore(board: Board): Score = {
+    val enclosedArea = enclosedAreaByPlayer(board)
+
+    def areaOf(player: Player): Int =
+      board.playerPiecesOnBoardCount(player) + enclosedArea.getOrElse(player, 0)
+
+    def fenTenthsOf(player: Player): Int = areaOf(player) * Variant.fenTenthsPerPoint
+
+    Score(
+      fenTenthsOf(P1),
+      fenTenthsOf(P2) + Math.round(board.komi * Variant.fenTenthsPerPoint).toInt
+    )
+  }
+
+  private def enclosedAreaByPlayer(board: Board): Map[Player, Int] =
+    emptyRegionsOf(board)
+      .flatMap(region => soleBorderingPlayer(board, region).map((_, region.size)))
+      .groupMapReduce(_._1)(_._2)(_ + _)
+
+  private def emptyRegionsOf(board: Board): List[Set[Pos]] = {
+    val isEmpty = (pos: Pos) => !board.pieces.contains(pos)
+    board.variant.boardSize.validPos
+      .filter(isEmpty)
+      .foldLeft((List.empty[Set[Pos]], Set.empty[Pos])) { case ((regions, alreadyInARegion), point) =>
+        if (alreadyInARegion(point)) (regions, alreadyInARegion)
+        else {
+          val region = Chain.regionFrom(board, point)(isEmpty)
+          (region :: regions, alreadyInARegion ++ region)
+        }
+      }
+      ._1
+  }
+
+  private def soleBorderingPlayer(board: Board, region: Set[Pos]): Option[Player] = {
+    val bordering = region.flatMap(borderingPlayersAt(board, _))
+    Option.when(bordering.size == 1)(bordering.head)
+  }
+
+  private def borderingPlayersAt(board: Board, point: Pos): List[Player] =
+    board.variant.boardSize.neighbours(point.index).flatMap(board.pieces.get).map(_.player)
+
   def materialImbalance(board: Board): Int =
     board.pieces.values.foldLeft(0) { case (acc, Piece(player, role)) =>
       Role.valueOf(role).fold(acc) { value =>
@@ -241,6 +282,8 @@ abstract class Variant private[variant] (
 }
 
 object Variant {
+
+  private val fenTenthsPerPoint = 10
 
   lazy val all: List[Variant] = List(
     Go19x19,
