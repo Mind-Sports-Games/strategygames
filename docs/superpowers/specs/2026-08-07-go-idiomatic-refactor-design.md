@@ -79,7 +79,7 @@ case class Board(
     history: History,
     variant: Variant,
     pocketData: Option[PocketData] = None,
-    komi: Double = variant.komi,            // per game, from the FEN; the variant supplies the default
+    komi: Double,                           // per game, from the FEN; no default — see below
     ko: Option[Pos] = None,                 // simple ko point, FEN field 2
     consecutivePasses: Int = 0,             // 0..2, FEN field 8
     deadStonesSelected: Boolean = false     // FEN field 8 == 3
@@ -88,6 +88,12 @@ case class Board(
 
 Precedent: `backgammon.Board` carries `unusedDice` and `cubeData` the same way — FEN-serialised
 turn state that the wrapper layer never sees, threaded whole through go objects.
+
+`komi` deliberately has no default. The obvious `komi: Double = variant.komi` does not compile the
+way it reads: `strategygames.go.variant` is a package, so `variant` in that position resolves to
+the package rather than to the constructor parameter. A constant default would be worse than none,
+because it would silently give `Go9x9` 7.5 where its komi is 5.5. So the parameter is required and
+`Board.apply(pieces, variant)` passes `variant.komi` explicitly.
 
 `History` loses the thunk and gains nothing:
 
