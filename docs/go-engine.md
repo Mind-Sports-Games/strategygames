@@ -34,8 +34,8 @@ to move (`Situation.canSelectSquares`). Four consecutive passes end the game out
 stones where they lie.
 
 **Settlement.** The `ss:` action lifts the named stones and ends the game. It is sticky: no later
-action makes a settled game unsettled, and both the played and the loaded path refuse an action
-after one.
+action makes a settled game unsettled, and nothing accepts an action after one — not the played path
+and not any of the loaders. `GoPostSettlementTest` pins that on each of them.
 
 **Scoring.** Chinese area scoring — stones on the board plus empty regions a single colour
 surrounds, with komi to p2. A region both colours touch, or no colour touches, scores for nobody;
@@ -75,7 +75,7 @@ This table is the checklist for a downstream stored-game audit; every row still 
 | A move repeating a position | offered, then ended the game as a repetition | refused, so `isRepetition` is permanently false |
 | Board row with a run of ten or more | reader split the digits and truncated overruns | multi-digit runs round-trip, overruns are rejected |
 | A finished game | still listed legal actions | lists none |
-| An unchecked replay of an illegal move | replayed it blindly | rejected, now as `Validated.invalid` rather than a throw |
+| An unchecked replay of an illegal move | replayed it blindly | rejected — as `Validated.invalid` on the `Uci` loaders, as a `sys.error` on the action-string loaders |
 | Superko rule | none enforced | positional, not situational |
 
 The ko field of an emitted FEN carries the live simple-ko coordinate (`-` otherwise); joansala only
@@ -95,11 +95,23 @@ site, and [the refactor write-up](go-refactor.md) states what fixing each one wo
 
 ## Replaying a game
 
-One path. `Replay.gameWithActionWhileValid` folds the action strings into games one ply at a time,
-and `Replay.apply`, `gameFromUciStrings` and `gameWithUciWhileValid` all go through it. `pgn.Reader`
-keeps its own fold because it has to report a partial replay, but it builds every action through
-the same `Replay.replayDrop` / `replayPass` / `replaySelectSquares` helpers, so legality is decided
-in exactly one place: `Situation.drop` → `Variant.drop`.
+Two shapes, and which one a caller reaches for is visible in the result.
+
+**Folding action strings.** `Replay.gameWithActionWhileValid` folds them into games one ply at a
+time; `Replay.apply(actionStrs, …)`, `gameFromUciStrings` and `gameWithUciWhileValid` all go through
+it. `pgn.Reader` keeps its own fold because it has to report a partial replay, but it builds every
+action through the same `Replay.replayDrop` / `replayPass` / `replaySelectSquares` helpers. These are
+the loaders that carry the settlement capture adjustment.
+
+**Replaying a `Uci` list.** `Replay.apply(List[Uci], …)` and `Replay.situationsFromUci` hand each
+`Uci` to a `Situation` instead, which is the played path. They do not go through
+`gameWithActionWhileValid`, and they do not carry the settlement capture adjustment — see the quirk
+table above.
+
+Legality is decided in the same place either way: `replayDrop`, `replayPass` and
+`replaySelectSquares` route through `Situation.drop` / `pass` / `selectSquares` to `Variant`, which
+is what the `Uci` path does directly. What differs between the two shapes is how a refusal arrives —
+the action-string loaders throw, the `Uci` loaders answer `Validated.invalid`.
 
 A game resumed from a FEN counts only the actions it is handed: the FEN's own fields are the sole
 authority for everything before the resume point

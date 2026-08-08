@@ -23,17 +23,29 @@ being looked for.
 | 3 | an action offered after a settlement | batch replay vs per-ply replay | batch refused it, per-ply accepted it |
 | 4 | the settlement capture adjustment | `Replay`'s three loaders vs `pgn.Reader` | three loaders added it, the fourth did not — the same game got a different `history.captures` and a different exported FEN depending on how it was loaded |
 
-A fifth was *introduced* during the refactor and caught in review: `Forsyth.validate` and
-`Forsyth.<<@`, two gates built in the same task, disagreed about which turn-field strings a FEN may
-carry. That one is the tell. The shape is not carelessness; it is what happens when a behaviour has
-more than one home, and it recurs even in work whose explicit purpose is removing it.
+Two more were *introduced* during the refactor and caught in review, and those are the tell. The
+first: `Forsyth.validate` and `Forsyth.<<@`, two gates built in the same task, disagreed about which
+turn-field strings a FEN may carry. The second: the task that reinstated "an action offered after a
+settlement is illegal" put the guard on `Replay.gameWithActionWhileValid` and not on
+`pgn.Reader.makeReplayWithActionStrs`, so a pass or a second `ss:` after a settlement loaded fine on
+one loader and threw on the other — row 3 above, reopened by the fix for row 3, and caught only by
+the whole-branch review. The shape is not carelessness; it is what happens when a behaviour has more
+than one home, and it recurs even in work whose explicit purpose is removing it.
 
-All four are closed by there being nowhere left to diverge, rather than by four fixes. There is now
-one placement path (`Variant.boardAfter`), one settlement path
-(`Variant.boardAfterSelectSquares`), one legality decision (`Situation.drop` → `Variant.drop`), and
-one helper that pairs a recorded settlement with its capture accounting so a loader cannot take one
-without the other (`Replay.addSettlement`). A fifth instance would have to be written on purpose.
-That is the argument for the whole exercise, and it is worth more than any line count.
+The four are closed by there being nowhere left to diverge, rather than by four fixes. There is now
+one placement path (`Variant.boardAfter`), one settlement path (`Variant.boardAfterSelectSquares`),
+one legality decision per action kind — `Replay.replayDrop`, `replayPass` and `replaySelectSquares`
+all route through `Situation` to `Variant.drop` / `pass` / `selectSquares`, so no loader builds an
+action without asking whether it is legal — and one helper that pairs a recorded settlement with its
+capture accounting so an action-string loader cannot take one without the other
+(`Replay.addSettlement`).
+
+What the two introduced instances say about "a fifth would have to be written on purpose" is that it
+would not, and an earlier draft of this document claimed otherwise. Both were written by accident, in
+tasks whose subject was the defect itself. The structural claim worth making is the narrow one: the
+*rules* have one home each now, so a divergence has to be introduced above them, in a loader. That is
+the layer `GoPostSettlementTest` watches — every loader, every action kind, one refusal — because
+that is the layer where this kept happening.
 
 ## How it follows the house conventions
 
@@ -52,9 +64,20 @@ and `withKo` are the only writers of `ko`, `consecutivePasses` and `deadStonesSe
 assigns position state, so the fields cannot drift apart.
 
 **`Validated[String, A]` on the legality path.** `Variant.drop`, `pass` and `selectSquares` all
-return it, and every loader now reports a refusal rather than throwing. The engine's `GoFenError`
-taxonomy died with it by design; `Forsyth.validate` answers `Boolean` and `Forsyth.<<@` answers
-`Option`.
+return it, and every path that decides legality goes through one of the three. The engine's
+`GoFenError` taxonomy died with it by design; `Forsyth.validate` answers `Boolean` and `Forsyth.<<@`
+answers `Option`.
+
+**How a refusal reaches a caller, though, is not uniform, and an earlier draft of this document said
+it was.** The `Uci` loaders — `Replay.apply(List[Uci], …)` and `situationsFromUci` — hand back
+`Validated.invalid`. The action-string loaders throw: `Replay.replayDrop`, `replayPass` and
+`replaySelectSquares` each end in `.valueOr(error => sys.error(…))`, and
+`gameWithActionWhileValid` also `sys.error`s for an action offered to a finished game and for an
+unreadable drop, which is how a throw gets past `pgn.Reader`'s own `Result.Incomplete` channel. That
+is preserved behaviour, not something this branch introduced, and the suite reflects it — the
+loader tests wrap in `Try`. **A lila integrator calling `Replay.gameFromUciStrings`,
+`Replay.apply(actionStrs, …)`, `gameWithUciWhileValid` or `pgn.Reader` needs a `Try`, not a
+`fold`.**
 
 **Derived state as `lazy val`s.** `Board.areaScore` sits with `actors`, `posMap`,
 `piecesOnBoardCount` and `playerPiecesOnBoardCount`. `def` for overridable configuration — `komi`,
@@ -276,10 +299,16 @@ behaviour preservation. `Replay.plyAtFen` had the same problem and *was* deleted
 provably never worked *and* nothing depended on its result — the wrapper now answers
 `Validated.invalid` directly. The inconsistency is deliberate and wants its own decision.
 
-**`GoSituationTest`'s stacked assertions overstate their coverage.** Several examples assert
-multiple facts in sequence, where only the last failure is reported. Two reviewers flagged it
-independently. Pre-existing and out of scope here, but real: an example that appears to pin four
-things pins one loudly and three quietly.
+**Not a limitation, though it was recorded as one: stacked assertions.** Two reviewers flagged
+independently that examples asserting several facts one after another report only the last, so an
+example appearing to pin four things pins one. Both were wrong.
+`org.specs2.mutable.Specification` mixes
+in thrown expectations: an example whose first statement is `1 === 2` and whose last is `3 === 3`
+fails, and the reported failure is `1 != 2` at the *first* statement's line — measured on this
+project, this specs2 version. Every stacked assertion in `GoSituationTest`, `GoChainTest` and
+`GoBoardStateTest` is a real assertion. What is genuinely lost is only that a later failure is not
+reported in the same run as an earlier one. This entry is kept as a retraction rather than deleted,
+because the claim was raised twice and would otherwise be raised a third time.
 
 **The golden-oracle corpus is gone, and what is lost is breadth.** The 85-game, 16,207-ply fixture
 built in task 1 was migration scaffolding and was deleted with the engine it existed to verify
