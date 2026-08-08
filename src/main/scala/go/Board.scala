@@ -107,7 +107,7 @@ object Board {
       table
     }
 
-    private def onBoard(pos: Pos): Boolean = pos.file.index < width && pos.rank.index < height
+    def onBoard(pos: Pos): Boolean = pos.file.index < width && pos.rank.index < height
 
     private def cardinalNeighboursOf(pos: Pos): List[Pos] =
       List(

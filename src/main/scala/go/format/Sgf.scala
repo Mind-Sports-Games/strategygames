@@ -16,9 +16,7 @@ object Sgf {
     }.toList
 
   private def initialMoves(variant: Variant, initialFen: FEN): List[(Char, String)] =
-    strategygames.go.Api
-      .pieceMapFromFen(variant.key, initialFen.value)
-      .toList
+    initialFen.pieces.toList
       .map { case (pos, piece) =>
         (if (piece.player == Player.P1) 'B' else 'W', pos.sgf(variant.boardSize.height))
       }

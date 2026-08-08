@@ -19,40 +19,81 @@ object Forsyth {
   private val noKoPoint                 = "-"
   private val fenTenths                 = 10
   private val digitAppendedBySettlement = 1
+  private val firstCountedField         = 3
+  private val fieldCountsOfTheGrammar   = Set(9, 10)
+  private val decimalBase               = 10
+
+  private val playerByTurnSymbol = Map("b" -> P1, "w" -> P2)
+
+  private val tenFieldShape =
+    "([0-9Ss]?){1,19}(/([0-9Ss]?){1,19}){8,18}\\[[Ss]+\\] [w|b] (-|[a-s][1-9][0-9]?)" +
+      " [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-3] [0-9]+"
 
   val initial = FEN(
     "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 0 1"
   )
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] =
-    Some(
-      Situation(
-        Board(
-          pieces = fen.pieces,
-          history = History(
-            captures = Score(fen.player1Captures, fen.player2Captures),
-            halfMoveClock = fen.ply.getOrElse(sys.error(s"go fen states no move number: ${fen.value}")).max(0)
-          ),
-          variant = variant,
-          pocketData = Api.stonePocketData,
-          komi = fen.komi,
-          ko = fen.ko,
-          consecutivePasses = fen.fenPassCount match {
-            case 1 => 1
-            case 2 => 2
-            case _ => 0
-          },
-          deadStonesSelected = fen.fenPassCount == settledPassCount
-        ).withHistoryStartingHere,
-        fen.value.split(' ')(1) match {
-          case "b" => P1
-          case "w" => P2
-          case _   => sys.error("Invalid player in fen")
-        }
-      )
+    for {
+      player <- playerNamedByTurnField(fen)
+      if describes(variant.boardSize, fen)
+    } yield Situation(
+      Board(
+        pieces = fen.pieces,
+        history = History(
+          captures = Score(fen.player1Captures, fen.player2Captures),
+          halfMoveClock = fen.ply.getOrElse(0).max(0)
+        ),
+        variant = variant,
+        pocketData = Some(PocketData.init),
+        komi = fen.komi,
+        ko = fen.ko,
+        consecutivePasses = fen.fenPassCount match {
+          case 1 => 1
+          case 2 => 2
+          case _ => 0
+        },
+        deadStonesSelected = fen.fenPassCount == settledPassCount
+      ).withHistoryStartingHere,
+      player
     )
 
   def <<(fen: FEN): Option[Situation] = <<@(fen.variant, fen)
+
+  def validate(fen: FEN): Boolean =
+    fen.value.matches(tenFieldShape) &&
+      Board.BoardSize.all.exists(size => size.height == fen.gameSize && describes(size, fen))
+
+  private def describes(size: Board.BoardSize, fen: FEN): Boolean = {
+    val fields = fen.value.split(' ').toList
+    fen.gameSize == size.height &&
+    fieldCountsOfTheGrammar(fields.length) &&
+    fields.drop(firstCountedField).forall(_.toIntOption.isDefined) &&
+    playerNamedByTurnField(fen).isDefined &&
+    fen.board.split('/').forall(rowFills(size.width)) &&
+    koFieldNamesAPointOf(size, fields)
+  }
+
+  private def playerNamedByTurnField(fen: FEN): Option[Player] =
+    fen.value.split(' ').lift(FEN.playerIndex).flatMap(playerByTurnSymbol.get)
+
+  private def rowFills(width: Int)(row: String): Boolean = renderedWidthOf(row).contains(width)
+
+  private def renderedWidthOf(row: String): Option[Int] =
+    row
+      .foldLeft(Option((0, 0))) {
+        case (Some((stones, emptyRun)), symbol) if symbol.isDigit                             =>
+          Some((stones, emptyRun * decimalBase + symbol.asDigit))
+        case (Some((stones, emptyRun)), symbol) if Role.allByForsyth.contains(symbol.toLower) =>
+          Some((stones + emptyRun + 1, 0))
+        case _                                                                                => None
+      }
+      .map { case (stones, trailingEmpties) => stones + trailingEmpties }
+
+  private def koFieldNamesAPointOf(size: Board.BoardSize, fields: List[String]): Boolean =
+    fields.lift(FEN.koIndex).exists { field =>
+      field == noKoPoint || Pos.fromKey(field).exists(size.onBoard)
+    }
 
   case class SituationPlus(situation: Situation, fullTurnCount: Int) {
 
@@ -103,17 +144,25 @@ object Forsyth {
     )
   }
 
-  def boardPart(board: Board): String =
-    ranksTopDown(board).map(renderedRank(board, _)).mkString("", "/", pocket)
+  def boardPart(board: Board): String = s"${boardRows(board.variant, board.pieces)}${pocket}"
 
-  private def ranksTopDown(board: Board): List[Int] =
-    (board.variant.boardSize.height - 1 to 0 by -1).toList
+  def boardRows(variant: Variant, pieces: PieceMap): String =
+    ranksTopDown(variant).map(renderedRank(variant, pieces, _)).mkString("/")
 
-  private def renderedRank(board: Board, rankIndex: Int): String = {
+  def removeDeadStones(variant: Variant, fen: FEN, squares: List[Pos]): FEN = {
+    val rows          = boardRows(variant, fen.pieces -- squares.toSet)
+    val pocketOnwards = fen.value.indexOf('[')
+    FEN(if (pocketOnwards > 0) rows + fen.value.substring(pocketOnwards) else rows)
+  }
+
+  private def ranksTopDown(variant: Variant): List[Int] =
+    (variant.boardSize.height - 1 to 0 by -1).toList
+
+  private def renderedRank(variant: Variant, pieces: PieceMap, rankIndex: Int): String = {
     val (rendered, trailingEmpties) =
-      (0 until board.variant.boardSize.width).foldLeft((List.empty[String], 0)) {
+      (0 until variant.boardSize.width).foldLeft((List.empty[String], 0)) {
         case ((rendered, emptyRun), fileIndex) =>
-          Pos.at(fileIndex, rankIndex).flatMap(board.pieces.get) match {
+          Pos.at(fileIndex, rankIndex).flatMap(pieces.get) match {
             case Some(stone) => (symbolOf(stone) :: emptiesBefore(rendered, emptyRun), 0)
             case None        => (rendered, emptyRun + 1)
           }
@@ -137,8 +186,8 @@ object Forsyth {
     Player.fromTurnCount(board.history.halfMoveClock)
 
   private def fullMovePart(board: Board): String = {
-    val fullMove                     = board.history.halfMoveClock / 2 + 1
-    val settledByP2                  = board.history.lastTurn.headOption.exists {
+    val fullMove    = board.history.halfMoveClock / 2 + 1
+    val settledByP2 = board.history.lastTurn.headOption.exists {
       case _: Uci.SelectSquares => playerToMove(board).p1
       case _                    => false
     }

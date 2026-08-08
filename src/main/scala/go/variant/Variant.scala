@@ -6,7 +6,7 @@ import scala.annotation.nowarn
 import scalalib.extensions.*
 
 import strategygames.go._
-import strategygames.go.format.{ FEN, Forsyth }
+import strategygames.go.format.FEN
 import strategygames.{ GameFamily, Player, Score }
 
 case class GoName(val name: String)
@@ -289,7 +289,7 @@ abstract class Variant private[variant] (
     board
 
   def valid(board: Board, @nowarn strict: Boolean): Boolean =
-    Api.validateFEN(board.variant, Forsyth.exportBoard(board))
+    board.pieces.keys.forall(boardSize.onBoard)
 
   val roles: List[Role] = Role.all
 
