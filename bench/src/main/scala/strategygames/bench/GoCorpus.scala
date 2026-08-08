@@ -1,16 +1,9 @@
 package strategygames.bench
 
-import java.util.concurrent.TimeUnit
-
-import scala.compiletime.uninitialized
-
-import org.openjdk.jmh.annotations.*
-import org.openjdk.jmh.infra.Blackhole
-
 import cats.data.Validated
 
 import strategygames.{ ActionStrs, Player }
-import strategygames.go.{ Game, Pos, Replay, Situation }
+import strategygames.go.{ Game, Pos, Replay }
 import strategygames.go.format.FEN
 import strategygames.go.variant.{ Go13x13, Go19x19, Go9x9, Variant => GoVariant }
 
@@ -73,57 +66,4 @@ object GoCorpusGame {
       case Validated.Valid(game)    => game
       case Validated.Invalid(error) => sys.error(s"go replay failed for ${variant.key}: ${error}")
     }
-}
-
-@State(Scope.Thread)
-class GoReplayInput {
-
-  @Param(Array("go9x9", "go13x13", "go19x19"))
-  var size: String = ""
-
-  var corpus: GoCorpusGame = uninitialized
-  var variant: GoVariant   = uninitialized
-
-  @Setup(Level.Trial)
-  def setup(): Unit = {
-    corpus = GoCorpusGame.load(size)
-    variant = corpus.size.variant
-  }
-
-  def replayWholeGame(): Game = GoCorpusGame.replay(corpus, variant, corpus.actionStrs)
-}
-
-@State(Scope.Thread)
-class GoMidGameBoard {
-
-  @Param(Array("go9x9", "go13x13", "go19x19"))
-  var size: String = ""
-
-  var situation: Situation = uninitialized
-  var dropPos: Pos         = uninitialized
-
-  @Setup(Level.Trial)
-  def setup(): Unit = {
-    val corpus  = GoCorpusGame.load(size)
-    val variant = corpus.size.variant
-    situation = GoCorpusGame.replay(corpus, variant, corpus.turnsBeforeMidGameDrop).situation
-    dropPos = corpus.midGameDropPos
-  }
-}
-
-@State(Scope.Thread)
-@BenchmarkMode(Array(Mode.AverageTime))
-@OutputTimeUnit(TimeUnit.MICROSECONDS)
-@Warmup(iterations = 3, time = 1)
-@Measurement(iterations = 3, time = 1)
-@Fork(1)
-class GoEngineBenchmark {
-
-  @Benchmark
-  def replay(input: GoReplayInput, bh: Blackhole): Unit =
-    bh.consume(input.replayWholeGame().plies)
-
-  @Benchmark
-  def applyDrop(input: GoMidGameBoard, bh: Blackhole): Unit =
-    bh.consume(input.situation.board.variant.boardAfter(input.situation, input.dropPos))
 }

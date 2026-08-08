@@ -6,7 +6,8 @@ import java.time.Instant
 
 import cats.data.Validated
 
-import strategygames.Player
+import strategygames.{ ActionStrs, Player }
+import strategygames.go.Situation
 import strategygames.go.variant.{ Variant => GoVariant }
 import strategygames.go.{ Replay => GoReplay }
 
@@ -18,8 +19,11 @@ import strategygames.go.{ Replay => GoReplay }
   */
 object GoSmokeTiming {
 
-  private val warmupRounds = 2
-  private val timedRounds  = 5
+  private val warmupRounds     = 2
+  private val timedRounds      = 5
+  private val samplesPerSize   = 7
+  private val sampleRangeStart = 0.15
+  private val sampleRangeEnd   = 0.80
 
   private val defaultOutputPath = "bench/target/go-smoke-results.csv"
 
@@ -29,11 +33,13 @@ object GoSmokeTiming {
 
     val corpora = GoBoardSize.all.map(size => GoCorpusGame.load(size.key))
 
-    val replayTimings = corpora.map(corpus => corpus.size.key -> measureReplay(corpus))
+    val replayTimings  = corpora.map(corpus => corpus.size.key -> measureReplay(corpus))
+    val movegenTimings = corpora.map(corpus => corpus.size.key -> measureMovegen(corpus))
 
     printTable("full-game replay (go.Replay.gameFromUciStrings)", replayTimings)
+    printTable("legal-drop generation (go.Situation.dropsAsDrops)", movegenTimings)
 
-    appendCsv(outputPath, replayTimings)
+    appendCsv(outputPath, replayTimings, movegenTimings)
 
     val elapsedMs = (System.nanoTime() - startedAt) / 1000000L
     println(s"\nharness wall time: ${elapsedMs} ms")
@@ -68,6 +74,36 @@ object GoSmokeTiming {
     timeReplay(corpus, corpus.size.variant, activePlayer)
   }
 
+  private def sampleTurnCounts(totalTurns: Int, count: Int): Vector[Int] = {
+    val lo = math.max(1, (totalTurns * sampleRangeStart).toInt)
+    val hi = math.max(lo + 1, (totalTurns * sampleRangeEnd).toInt)
+    if (hi <= lo) Vector(math.min(lo, totalTurns))
+    else {
+      val step = math.max(1, (hi - lo) / math.max(1, count - 1))
+      (0 until count).map(i => math.min(hi, lo + i * step)).distinct.toVector
+    }
+  }
+
+  private def situationAfter(corpus: GoCorpusGame, variant: GoVariant, turns: ActionStrs): Situation =
+    GoCorpusGame.replay(corpus, variant, turns).situation
+
+  private def timeValidDropsAt(situation: Situation): Long = {
+    var checksum = 0
+    val samples  = Array.fill(warmupRounds + timedRounds) {
+      val t0 = System.nanoTime()
+      checksum += situation.dropsAsDrops.size
+      System.nanoTime() - t0
+    }
+    if (checksum < 0) sys.error("unreachable: negative valid drop count")
+    median(samples.drop(warmupRounds).toIndexedSeq)
+  }
+
+  private def measureMovegen(corpus: GoCorpusGame): Long = {
+    val situations = sampleTurnCounts(corpus.actionStrs.size, samplesPerSize)
+      .map(turnCount => situationAfter(corpus, corpus.size.variant, corpus.actionStrs.take(turnCount)))
+    median(situations.map(timeValidDropsAt))
+  }
+
   private def printTable(title: String, rows: List[(String, Long)]): Unit = {
     println(s"\n=== ${title} ===")
     println(f"${"size"}%-12s ${"ns/op"}%14s")
@@ -76,7 +112,11 @@ object GoSmokeTiming {
     }
   }
 
-  private def appendCsv(outputPath: String, replayTimings: List[(String, Long)]): Unit = {
+  private def appendCsv(
+      outputPath: String,
+      replayTimings: List[(String, Long)],
+      movegenTimings: List[(String, Long)]
+  ): Unit = {
     val path      = Paths.get(outputPath)
     Option(path.getParent).foreach(Files.createDirectories(_))
     val isNewFile = !Files.exists(path)
@@ -100,6 +140,7 @@ object GoSmokeTiming {
         }
       if (isNewFile) writeRow("timestamp,workload,size,ns_per_op")
       writeRows("replay", replayTimings)
+      writeRows("movegen", movegenTimings)
     } finally writer.close()
   }
 }
