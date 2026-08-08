@@ -4,12 +4,14 @@ import strategygames.variant.Variant
 
 sealed abstract class Board(
     val pieces: PieceMap,
-    val history: History,
+    wrappedHistory: => History,
     val variant: Variant,
     val pocketData: Option[PocketData] = None,
     val unusedDice: List[Int] = List.empty,
     val cubeData: Option[CubeData] = None
 ) {
+  lazy val history: History = wrappedHistory
+
   def apply(at: Pos): Option[Piece] = (pieces get at).map(_._1)
 
   def hasPiece(p: Piece) = pieces.values.map(_._1) exists (p ==)
