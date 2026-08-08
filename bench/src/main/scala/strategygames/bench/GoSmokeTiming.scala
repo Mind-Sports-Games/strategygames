@@ -11,11 +11,11 @@ import strategygames.go.Situation
 import strategygames.go.variant.{ Variant => GoVariant }
 import strategygames.go.{ Replay => GoReplay }
 
-/** A wall-clock check of the go engine, for when a JMH run costs more time than the question is worth. Median
+/** A wall-clock check of the go rules, for when a JMH run costs more time than the question is worth. Median
   * of a few rounds per workload over the corpus fixtures; it prints a table and appends a row per workload
   * and size to a CSV.
   *
-  * Numbers from here are indicative, not a benchmark result — `GoEngineBenchmark` is the measure of record.
+  * Numbers from here are indicative, not a benchmark result — `GoRulesBenchmark` is the measure of record.
   */
 object GoSmokeTiming {
 

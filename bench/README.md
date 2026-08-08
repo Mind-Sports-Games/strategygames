@@ -115,56 +115,102 @@ Restrict parameters (e.g. a quick check):
 sbt "bench/Jmh/run -i 1 -wi 1 -f 1 -r 1s -w 1s -p family=backgammon,go -p size=short,long .*UciDumpBenchmark.*"
 ```
 
-## Go engine benchmarks
+## Go benchmarks
 
-`GoEngineBenchmark` times the go engine on the canonical variants (`go9x9`,
-`go13x13`, `go19x19`) over the committed `go-go9x9-long`, `go-go13x13-long` and
-`go-long` corpus fixtures. It reports absolute timings per board size; compare
-against the recorded baselines from earlier runs to detect regressions. (Until
-the joansala engine's removal — see `docs/go-engine.md`, "Retiring joansala" — it also carried an `engine`
-parameter comparing the two engines.)
-
-Three workloads, each a production call path:
+`GoRulesBenchmark` times the go rules — `go/variant/Variant.scala`, `go/Chain.scala`
+and `go/Board.scala` — on the canonical variants (`go9x9`, `go13x13`, `go19x19`)
+over the `go-go9x9-long`, `go-go13x13-long` and `go-long` corpus fixtures, which
+are generated on first use like every other fixture here. It reports absolute
+timings per board size; the recorded baselines are in
+[docs/go-speed-results.md](../docs/go-speed-results.md). `GoCorpus.scala` holds the
+fixture loading the benchmarks share.
 
 | Benchmark | Call path | Fixture level |
 |---|---|---|
-| `replay` | `go.Replay.gameFromUciStrings` over the whole fixture | `Level.Trial` |
-| `applyDrop` | `go.Board.afterDrop` on a mid-game board | `Level.Trial` |
-| `legalDrops` | `Api.Position.legalDrops` on a mid-game position | `Level.Invocation` |
+| `replay` | `go.Replay.gameFromUciStrings` over the whole fixture, score never read | `Level.Trial` |
+| `replayReadingFinalScore` | the same, then one read of the final `Board.areaScore` | `Level.Trial` |
+| `wrapperReplay` | `strategygames.Replay.gameWithUciWhileValid`, one wrapper `Game` per ply, score never read | `Level.Trial` |
+| `wrapperReplayReadingEveryScore` | the same, reading `history.score` on every ply | `Level.Trial` |
+| `applyDrop` | `Variant.boardAfter` on a mid-game situation | `Level.Trial` |
+| `validDropsMidGame` | `Situation.dropsAsDrops` → `Variant.validDrops` | `Level.Trial` |
+| `dropsByRoleMidGame` | `Situation.dropsByRole` | `Level.Trial` |
+| `areaScoreMidGame` | `Board.areaScore` | `Level.Invocation` |
+| `fenParseMidGame` | `Forsyth.<<@` | `Level.Trial` |
+| `fenRenderMidGame` | `Forsyth.exportBoardFen` | `Level.Invocation` |
 
-`legalDrops` needs `Level.Invocation`: `legalDrops`, `legalActions` and the pure
-engine's `GoState.legalMoves` are all cached, so each invocation gets a position
-freshly parsed from the same mid-game FEN. JMH excludes fixture time from the
-reported score.
+The two `Level.Invocation` workloads read `Board`'s derived `lazy val`s —
+`areaScore` and, under it, `playerPiecesOnBoardCount` — so a `Level.Trial` board
+would memoise them after the first invocation and the benchmark would under-report.
+Each invocation gets a board freshly parsed from the same mid-game FEN, which is
+also what production sees: `boardAfter` builds a new `Board` every placement. JMH
+excludes fixture time from the reported score.
 
-Quick go-only run (roughly two minutes, wide error bars — use for a smoke check):
+The four replay workloads exist because the two paths no longer cost the same. The
+go-package path returns one `Game` and computes the area score only if something
+reads it; the wrapper path materialises one `strategygames.Game` per ply, and
+reading any history field on one of those forces that ply's score. Quote whichever
+matches the consumer you care about, and say which one it is.
+
+Quick go-only run (roughly four minutes, wide error bars — use for a smoke check):
 
 ```
-sbt "bench/Jmh/run -wi 3 -i 3 -f 1 -to 60s strategygames.bench.GoEngineBenchmark"
+sbt "bench/Jmh/run -wi 3 -i 3 -f 1 -to 60s strategygames.bench.GoRulesBenchmark"
 ```
 
-Checkpoint baseline (roughly five minutes, error bars under 20%):
+Checkpoint baseline (roughly twenty minutes, error bars under 2%):
 
 ```
-sbt "bench/Jmh/run -wi 3 -w 2s -i 5 -r 2s -f 1 -to 60s \
-  -rf json -rff go-jmh.json strategygames.bench.GoEngineBenchmark"
+sbt "bench/Jmh/run -wi 5 -w 2s -i 10 -r 2s -f 1 -to 120s \
+  -rf json -rff go-jmh.json strategygames.bench.GoRulesBenchmark"
 ```
 
 Filter to one workload or one size with the regex and `-p`:
 
 ```
-sbt "bench/Jmh/run -wi 3 -w 2s -i 5 -r 2s -f 1 -to 60s \
-  -p size=go19x19 GoEngineBenchmark.legalDrops"
+sbt "bench/Jmh/run -wi 5 -w 2s -i 10 -r 2s -f 1 -to 120s \
+  -p size=go19x19 GoRulesBenchmark.validDropsMidGame"
 ```
 
 Never run `bench/Jmh/run` without iteration and fork limits: the default settings
 (5 forks × 5 warmup × 5 measurement over every benchmark in the project) take
 hours.
 
+Run `bench/clean` first after renaming or deleting a benchmark or `@State` class.
+The generated JMH sources are not invalidated by the rename and the run fails with
+`ClassNotFoundException` before it measures anything.
+
+### Benchmark from a separate worktree, and check the run for completeness
+
+Two traps, both of which quietly produce a plausible table rather than an error.
+
+**A second sbt in the same working directory corrupts a JMH run.** JMH forks a JVM
+per configuration; a concurrent `sbt test` rewriting `target/` and `bench/target/`
+underneath it makes those forks fail. Give the run its own checkout:
+
+```
+git worktree add /tmp/bench-run HEAD
+cd /tmp/bench-run && sbt "bench/Jmh/run ..."
+git worktree remove --force /tmp/bench-run
+```
+
+**`sbt` exits 0 even when JMH dropped configurations.** When a fork fails the log
+carries `Could not find or load main class org.openjdk.jmh.runner.ForkedMain`, JMH
+omits those rows from both the console table and the `-rff` JSON, and the build
+still reports `[success]`. The console table is truncated by sbt's logger too, so
+it is not a reliable record either. Verify the run rather than trusting its exit
+code — count the results in the JSON and grep the log:
+
+```
+python3 -c "import json;print(len(json.load(open('bench/go-jmh.json'))))"   # expect benchmarks x sizes
+grep -c ForkedMain run.log                                                  # expect 0
+```
+
 `GoSmokeTiming` answers the same question without JMH: median wall-clock over a
-few rounds of full-game replay and `legalDrops`, printed as a table of absolute
-ns/op and appended to a CSV. It finishes in seconds, so it suits a quick check
-between edits; `GoEngineBenchmark` remains the measure of record.
+few rounds of full-game replay and legal-drop generation, printed as a table of
+absolute ns/op and appended to a CSV. It finishes in seconds, so it suits a quick
+check between edits; `GoRulesBenchmark` remains the measure of record. Its rounds
+are too few to reach steady state — expect it to read high, by up to 3x on the
+smaller boards.
 
 ```
 sbt "bench/runMain strategygames.bench.GoSmokeTiming /path/to/results.csv"

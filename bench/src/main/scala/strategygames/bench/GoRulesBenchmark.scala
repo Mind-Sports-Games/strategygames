@@ -7,6 +7,9 @@ import scala.compiletime.uninitialized
 import org.openjdk.jmh.annotations.*
 import org.openjdk.jmh.infra.Blackhole
 
+import strategygames.{ ActionStrs, Game => StratGame, GameLogic, Player, Replay => StratReplay }
+import strategygames.format.{ FEN => StratFEN, Uci => StratUci }
+import strategygames.variant.{ Variant => StratVariant }
 import strategygames.go.{ Board, Game, Pos, Situation }
 import strategygames.go.format.{ FEN, Forsyth }
 import strategygames.go.variant.{ Variant => GoVariant }
@@ -43,6 +46,42 @@ class GoReplayInput {
   }
 
   def replayWholeGame(): Game = GoCorpusGame.replay(corpus, variant, corpus.actionStrs)
+}
+
+@State(Scope.Thread)
+class GoWrapperReplayInput {
+
+  @Param(Array("go9x9", "go13x13", "go19x19"))
+  var size: String = ""
+
+  var actionStrs: ActionStrs = uninitialized
+  var startPlayer: Player    = uninitialized
+  var activePlayer: Player   = uninitialized
+  var initialFen: StratFEN   = uninitialized
+  var variant: StratVariant  = uninitialized
+
+  @Setup(Level.Trial)
+  def setup(): Unit = {
+    val corpus = GoCorpusGame.load(size)
+    val goFen  = corpus.initialFen.getOrElse(corpus.size.variant.initialFen)
+    actionStrs = corpus.actionStrs
+    startPlayer = goFen.player.getOrElse(Player.P1)
+    activePlayer = corpus.activePlayerAfter(corpus.actionStrs.size)
+    initialFen = StratFEN.Go(goFen)
+    variant = StratVariant.Go(corpus.size.variant)
+  }
+
+  def replayWholeGame(): List[(StratGame, StratUci.WithSan)] =
+    StratReplay
+      .gameWithUciWhileValid(
+        GameLogic.Go(),
+        actionStrs,
+        startPlayer,
+        activePlayer,
+        initialFen,
+        variant
+      )
+      ._2
 }
 
 @State(Scope.Thread)
@@ -114,6 +153,20 @@ class GoRulesBenchmark {
     bh.consume(input.replayWholeGame().plies)
 
   @Benchmark
+  def replayReadingFinalScore(input: GoReplayInput, bh: Blackhole): Unit =
+    bh.consume(input.replayWholeGame().situation.board.areaScore.p1)
+
+  @Benchmark
+  def wrapperReplay(input: GoWrapperReplayInput, bh: Blackhole): Unit =
+    bh.consume(input.replayWholeGame().size)
+
+  @Benchmark
+  def wrapperReplayReadingEveryScore(input: GoWrapperReplayInput, bh: Blackhole): Unit =
+    bh.consume(input.replayWholeGame().foldLeft(0) { case (total, (game, _)) =>
+      total + game.situation.board.history.score.p1
+    })
+
+  @Benchmark
   def applyDrop(input: GoMidGameSituation, bh: Blackhole): Unit =
     bh.consume(input.situation.board.variant.boardAfter(input.situation, input.dropPos))
 
@@ -127,7 +180,7 @@ class GoRulesBenchmark {
 
   @Benchmark
   def areaScoreMidGame(state: GoFreshMidGameBoard, bh: Blackhole): Unit =
-    bh.consume(state.variant.areaScore(state.board).p1)
+    bh.consume(state.board.areaScore.p1)
 
   @Benchmark
   def fenRenderMidGame(state: GoFreshMidGameBoard, bh: Blackhole): Unit =
