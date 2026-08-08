@@ -44,10 +44,24 @@ cost the same thing. Say which one you are quoting.
 
 | µs/op | go9x9 (120 plies) | go13x13 (200) | go19x19 (400) |
 | --- | --- | --- | --- |
-| `replay` — go package, score unread | **793.2 ± 6.0** | **1485.6 ± 10.4** | **3243.2 ± 156.3** |
+| `replay` — go package, score unread | 793.2 ± 6.0 | 1485.6 ± 10.4 | 3243.2 ± 156.3 |
 | `replayReadingFinalScore` — go package, score read once | 860.3 ± 21.7 | 1532.1 ± 8.6 | 3441.6 ± 37.6 |
-| `wrapperReplay` — wrapper, one `Game` per ply, score unread | 1205.7 ± 8.3 | 2750.2 ± 85.3 | 8494.6 ± 477.8 |
-| `wrapperReplayReadingEveryScore` — wrapper, score read every ply | 3326.3 ± 87.5 | 10135.1 ± 216.1 | 39874.5 ± 1560.1 |
+| **`wrapperReplay`** — wrapper, one `Game` per ply, score unread | **1205.7 ± 8.3** | **2750.2 ± 85.3** | **8494.6 ± 477.8** |
+| **`wrapperReplayReadingEveryScore`** — wrapper, score read every ply | **3326.3 ± 87.5** | **10135.1 ± 216.1** | **39874.5 ± 1560.1** |
+
+**lila runs go through the wrapper.** The two bold rows are therefore the production figures, and
+the two go-package rows measure the rules on their own. At 19x19 a real consumer sees **11.3x
+joansala if it never reads the score and 2.4x if it reads one every ply** — not the 29.7x the
+`replay` row shows. Quote a wrapper number when the question is what the site will feel, and a
+go-package number only when the question is what the rules cost. The gap between the pairs is the
+finding, not a footnote: at 19x19 the wrapper adds 5.25 ms to a 3.24 ms replay before anything reads
+a score, and 36.6 ms if something reads one every ply.
+
+**Which of the two wrapper numbers is live is not known here.** The spread is 4.7x on identical
+library code, decided entirely by whether the caller touches a history field per ply. Nothing in this
+repo can answer which lila does; the question has to go to the integration. Go is a scoring game and
+its score is normally on screen, so the pessimistic figure may well be the live one — that is a
+reason to find out, not an answer.
 
 - **`go.Replay.gameFromUciStrings`** returns one final `go.Game` and never scores unless something
   reads `Board.areaScore`. Reading it once at the end costs one flood fill: +67 / +47 / +198 µs.
@@ -63,10 +77,13 @@ cost the same thing. Say which one you are quoting.
 
 | ratio vs joansala | go9x9 | go13x13 | go19x19 |
 | --- | --- | --- | --- |
-| `replay` | **9.3x faster** | **16.4x faster** | **29.7x faster** |
+| `replay` | 9.3x faster | 16.4x faster | 29.7x faster |
 | `replayReadingFinalScore` | 8.6x faster | 15.9x faster | 28.0x faster |
-| `wrapperReplay` | 6.1x faster | 8.8x faster | 11.3x faster |
-| `wrapperReplayReadingEveryScore` | 2.2x faster | 2.4x faster | 2.4x faster |
+| **`wrapperReplay`** | **6.1x faster** | **8.8x faster** | **11.3x faster** |
+| **`wrapperReplayReadingEveryScore`** | **2.2x faster** | **2.4x faster** | **2.4x faster** |
+
+The bold pair is what production gets. Anyone quoting 29.7x as the speed-up go received is quoting
+the rules in isolation.
 
 ### Against the removed engine, and against this branch before the score moved
 
@@ -96,8 +113,8 @@ should look like once the one O(board area) term per ply is gone.
 before the change**, a 42x drop, and 42x faster than joansala's own 60.9 µs. It is now cheaper at
 19x19 than at 9x9 because the cost is the placed stone's chain walk, not the board.
 
-`validDropsMidGame` is the one workload the change did not touch — it never scored. It remains
-17–21x the seam's lazy list and 1.2–2.7x faster than the seam's eager one.
+`validDropsMidGame` is the one workload the change did not touch — it never scored. It costs 17–21x
+what the seam's lazy list cost, and 1.2–2.7x less than the seam's eager one.
 
 ## Allocation per full-game replay
 
@@ -145,6 +162,24 @@ That is one line: `strategygames.Board.Go` rebuilds the whole `PieceMap` as
 **strict** constructor argument, so every wrapper `Board` — one per ply — pays a full board scan.
 `1d658123` deferred the wrapped history this way; `pieces` is the same shape and was not deferred.
 ~27% of named wrapper samples sit under it.
+
+## What the follow-up branch should take first
+
+Both items are on the wrapper path, which is why they lead: that is the path lila runs. Neither was
+actionable before, because until the owner confirmed the path nobody knew which numbers described
+production.
+
+1. **`strategygames.Board.Go` rebuilds the whole `PieceMap` as a strict constructor argument.** One
+   full board scan per wrapper `Board`, one wrapper `Board` per ply; ~27% of named samples in
+   `wrapperReplay` at 19x19, and per-ply wrapper overhead that scales with board area (3.4 / 6.3 /
+   13.1 µs). This is the 5.25 ms.
+2. **`History.Go` holds the area score strictly**, so reading *any* history field on a wrapper board
+   forces that ply's flood fill — the 4.7x between the two wrapper rows.
+
+Both are the shape `1d658123` already fixed for the wrapped history: a strict constructor argument
+that a `lazy val` behind a by-name parameter would defer. `pieces` is the same shape and was not
+deferred; the score needs the by-name treatment or a board-carrying `History.Go`, and
+`docs/go-refactor.md` records what each costs.
 
 ## What this is not
 

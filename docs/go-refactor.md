@@ -59,9 +59,12 @@ the game's ending, `valid(board, strict)` is the cheap structural invariant, and
 in the same position with the same member order as its neighbours.
 
 **Named transitions on `Board`, after the backgammon precedent.** `passed`, `stonePlaced`, `settled`
-and `withKo` are the only writers of `ko`, `consecutivePasses` and `deadStonesSelected`, exactly as
-`backgammon.Board` owns `setDice`, `useDie` and `undoUseDie`. Nothing outside `go/Board.scala`
-assigns position state, so the fields cannot drift apart.
+and `withKo` are the only writers of `ko`, `consecutivePasses` and `deadStonesSelected` on the action
+path, exactly as `backgammon.Board` owns `setDice`, `useDie` and `undoUseDie`. No rule advances
+position state by any other route, so the fields cannot drift apart as a game is played. The one
+place outside `go/Board.scala` that sets them is `Forsyth.<<@`, which builds a fresh board from a
+FEN's own ko, pass-count and settlement fields — construction rather than transition, and the only
+way a resumed game gets a position state at all.
 
 **`Validated[String, A]` on the legality path.** `Variant.drop`, `pass` and `selectSquares` all
 return it, and every path that decides legality goes through one of the three. The engine's
@@ -126,14 +129,24 @@ acceptable rather than merely tolerated.
 crossing to joansala or to the deleted seam is cross-machine and indicative, because all three
 references are deleted code and no same-run denominator can be produced again.
 
-**Against joansala**, full-game replay through `go.Replay` is 9.3x / 16.4x / 29.7x faster
-(9x9 / 13x13 / 19x19), and a single placement — `Variant.boardAfter` — is 42x faster at 19x19.
+**Against joansala, on the path lila runs.** lila replays go through the wrapper, so the wrapper
+rows are the ones that describe production: **11.3x faster at 19x19 if the consumer never reads a
+score, 2.4x if it reads one every ply** (6.1x / 8.8x / 11.3x and 2.2x / 2.4x / 2.4x across
+9x9 / 13x13 / 19x19). Which of the two is live is not known here and cannot be settled from this
+repo: it depends on whether lila touches a history field per ply, and the same library code costs
+4.7x more if it does. Go is a scoring game whose score is usually on screen, so the pessimistic
+number may be the real one.
+
+**Against joansala, on the go package alone**, full-game replay through `go.Replay` is 9.3x / 16.4x
+/ 29.7x faster, and a single placement — `Variant.boardAfter` — is 42x faster at 19x19. That
+measures the rules, not the site. Quoting 29.7x as go's speed-up leaves out the wrapper, which at
+19x19 adds 5.25 ms to a 3.24 ms replay before anything reads a score.
 
 **Against the seam this branch deleted**, replay at 19x19 is 11.7x slower than its batch path and
 1.5x slower than its per-ply path. The batch path folded a whole game on one mutable scratch state
 and published once; an immutable design that materialises a `Board` per ply does not reach that, and
-was never going to. Legal-drop generation is the one workload untouched by any of this: 17–21x the
-seam's *lazy* list, and 1.2–2.7x faster than its *eager* one.
+was never going to. Legal-drop generation is the one workload untouched by any of this, and it goes
+both ways: it costs 17–21x what the seam's *lazy* list cost, and 1.2–2.7x less than its *eager* one.
 
 One design decision changed mid-branch on measurement, and it is the largest single number here. The
 area score was first a strict field on `History`, copying togyzkumalak's *shape* without its
@@ -144,23 +157,31 @@ and took `applyDrop` at 19x19 from 59.9 µs to 1.44 µs. Per ply, replay is now 
 nearly flat across board sizes, which is what it should look like once the one O(board area) term
 per ply is gone.
 
-What is left, with `areaScore` out of the profile, is the cost the design knowingly accepted:
+What is left, with `areaScore` out of the profile, is the cost the design knowingly accepted. The
+first two are on the wrapper path, and they lead because that is the path lila runs:
 
-- **`PieceMap = Map[Pos, Piece]` and `Set[Pos]`.** `Pos` is a case class, so every liberty test and
-  every region step is a boxed structural hash and an equality against an immutable `HashMap` or
-  `HashSet`. The deleted engine indexed a byte array by `Pos.index`. That representation difference
-  — not the flood fill's asymptotics — is the constant factor under chain walking, FEN parsing and
-  movegen alike, and it is the single named root cause in the profile.
+- **`strategygames.Board.Go` rebuilds the whole `PieceMap` as a strict constructor argument**
+  (`Board.scala:253-258`): `b.pieces.map { case (pos, piece) => (Pos.Go(pos), (Piece.Go(piece), 1)) }`
+  runs once per wrapper `Board`, and the wrapper replay path materialises one per ply. ~27% of named
+  samples in `wrapperReplay` at 19x19, with per-ply overhead scaling with board area — 3.4 / 6.3 /
+  13.1 µs. This is the 5.25 ms the wrapper adds at 19x19. The fix has a precedent in the tree: the
+  wrapped *history* was already made by-name into a `lazy val` on the same class, and `pieces` is the
+  same shape untouched.
+- **`strategygames.History.Go` takes the score as a strict parameter**, so reading *any* history
+  field on a ply forces that ply's flood fill — 2.8x / 3.7x / 4.7x on a consumer that reads a score
+  every ply. Closing it needs either a by-name parameter (costing `History.Go` its `case class`,
+  making go the only non-case-class of nine) or a board-carrying `History.Go` (which lila's
+  `History.apply` factory cannot construct). Both are larger than this branch sanctioned.
+- **`PieceMap = Map[Pos, Piece]` and `Set[Pos]`, in the go package.** `Pos` is a case class, so every
+  liberty test and every region step is a boxed structural hash and an equality against an immutable
+  `HashMap` or `HashSet`. The deleted engine indexed a byte array by `Pos.index`. That representation
+  difference — not the flood fill's asymptotics — is the constant factor under chain walking, FEN
+  parsing and movegen alike, and it is the single named root cause in the go-package profile.
 - **`History.hasOccurred`'s superko scan**, an O(plies) linear scan per ply, newly visible at ~4%. It
   was always there; `areaScore` dwarfed it.
-- **On the wrapper path only**, `strategygames.History.Go` takes the score as a strict parameter, so
-  reading *any* history field on a ply forces that ply's flood fill — 2.8x / 3.7x / 4.7x on a
-  consumer that reads a score every ply. Closing it needs either a by-name parameter (costing
-  `History.Go` its `case class`, making go the only non-case-class of nine) or a board-carrying
-  `History.Go` (which lila's `History.apply` factory cannot construct). Both are larger than this
-  branch sanctioned.
 
-Nothing else measured here was acted on. A follow-up branch takes the numbers as its input.
+Nothing else measured here was acted on. A follow-up branch takes the numbers as its input, and the
+two wrapper items above are the two it should take first.
 
 ## The four preserved quirks
 
@@ -172,9 +193,9 @@ reason sits at the code site; here is what fixing each one would take.
 it needs is a decision about the `history.captures` of every settled go game already in the
 database.
 
-**2. A settlement records captures on the two loaders that fold action strings, and none anywhere
-else.** Not a played-versus-loaded split, which is how it was described until the whole-branch
-review measured it. Four entry points reach a settlement, in two groups:
+**2. A settlement records captures on the loaders that fold action strings, and nowhere else.** Not
+a played-versus-loaded split, which is how it was described until the whole-branch review measured
+it. Four entry points can be measured directly:
 
 | entry point | `history.captures` after `s@a1 s@e5 pass pass ss:a1` on `Go9x9` |
 |---|---|
@@ -186,7 +207,15 @@ review measured it. Four entry points reach a settlement, in two groups:
 The first two go through `Replay.withSettlementCaptures`, which adds the count. The last two hand
 each `Uci` to a `Situation` and so run the *played* path — `Variant.boardAfterSelectSquares`, which
 does not. A game played through the site records `Score(0,0)` too, so the split is by mechanism, not
-by played versus loaded. `GoSettlementCaptureTest` names all four. *Fix:* move the adjustment into
+by played versus loaded.
+
+The action-string group has two more members than the table shows, and both add the count the same
+way, through `Replay.gameWithActionWhileValid`. `gameWithUciWhileValid` returns the adjusted game for
+every ply. `Replay.apply(actionStrs, …)` computes the adjustment and then throws it away, because its
+`.state` is the game after the *first* action rather than the last — see the known issue below —
+which is why neither is in the measured table: one has no single state to quote and the other quotes
+the wrong one. `GoSettlementCaptureTest` names the four that can be pinned. *Fix:* move the
+adjustment into
 `boardAfterSelectSquares` so every path agrees. Same blocker as quirk 1, and the same decision
 resolves both — this is the divergence, quirk 1 is its arithmetic.
 
@@ -277,7 +306,7 @@ Two consequences that follow from the same change:
 | `removeDeadStones(deadStones, fen: String, variant)` | `Forsyth.removeDeadStones(variant, fen: FEN, squares)` | argument order, and `FEN` rather than `String` in and out. Behaviour preserved exactly, including that every field after the board is carried through untouched |
 | `moveToUci`, `uciToMove`, `moveToPos`, `passMove` | **deleted, no replacement** | they encode the engine's integer point index and mean nothing without it. Use `Pos.fromKey` / `Pos.at` / `Uci` |
 | `Api.Position.initialFen` | `Replay.setup` | the starting FEN is a property of the game record, which lives in lila, not of the position. No other logic exposes a per-position initial FEN |
-| `Api.stonePocketData` | `PocketData.init` | identical value, already existed |
+| `Api.stonePocketData` | `PocketData.init` | listed for completeness, not for lila: it was `private[go]`, so no call site outside the package could exist. Same pockets, one wrapper less — it was `Some(PocketData.init)` |
 
 ### `FEN.variant` is `Option[Variant]`
 
@@ -306,18 +335,78 @@ had no callers in this repo. Alongside it:
 - `strategygames.History.score` remains `val score: Score` on the parent, so no other logic's readers
   are affected.
 
+### A go `Board` can no longer produce a whole `FEN`
+
+```scala
+go.format.Forsyth.exportBoardFen(board: Board): FEN   // removed
+go.Board.playerToMove: Player                          // removed
+go.Board.withPlayerToMove(player: Player): Board       // removed
+```
+
+The removal is the point rather than a side effect: `go.format.FEN`'s accessors index by full-FEN
+field positions, so a `FEN`-typed projection of a bare board would be a lie in the type. Build a
+`Game` and call `Forsyth.>>` for a FEN; take the player from the `Situation` that has one.
+`fairysf` and `samurai` keep their own `exportBoardFen` — only go's is gone. The runtime half of the
+same change is the first entry below, and it is the one that will not announce itself.
+
 ### Values that move with no compile error
 
 These are the ones to grep for. Nothing here fails to build; the numbers simply differ.
+
+**`Forsyth.exportBoard(GameLogic.Go(), board)` returns eight fields where it returned ten, and
+`Forsyth.boardAndPlayer(GameLogic.Go(), situation)` returns nine where it returned eleven.** This is
+the most dangerous item in the patch: a caller gets a shorter string at runtime and the compiler
+says nothing.
+
+What it returns now is the board part with its pocket literal, then the fields that belong to the
+board — ko point, both area scores, both capture counts, komi in tenths, pass count. Gone from it are
+the turn symbol, which used to sit between the board part and the ko point, and the trailing
+full-move number. `boardAndPlayer` still appends the player letter on the end, as it does for every
+logic.
+
+**Anything that wanted the whole FEN should call `Forsyth.>>(game)`**, which is unchanged and emits
+the same ten-field string byte for byte. A 478-line corpus — three initial positions, seven scripted
+games at every ply, nine handicap games, the eight upstream 19x19 games, each recorded as
+`>>(game)`, `>>(situation)`, `>>(!situation)` and a reload round trip — was dumped before and after
+the change and diffed identical. It was chosen to reach the three places the derivation moved: the
+turn field, the inversion `!situation`, and the settled full-move quirk.
+
+The result is **not a FEN**, and treating it as one fails quietly. `go.format.FEN`'s accessors index
+by full-FEN field positions, so on a board-only string every field after the board is read one
+position early — `player1Score` returns p2's score, `ko` reads a score field — and the two fields the
+string no longer carries return their defaults: `fenPassCount` answers `0` whatever the real pass run
+is, `fullMove` and `ply` answer `None`. Only `board`, `pieces` and `gameSize` still read correctly.
+`boardAndPlayer` was never a valid go FEN either, before or after: the letter it appends is
+`Player.letter`, which is `'w'` for P1, while a go FEN's turn field spells P1 as `"b"`.
+
+Why it changed: every other game logic already returns board-only state from `exportBoard` —
+`togyzkumalak` returns board plus score, `backgammon` board plus pockets plus dice — and go returning
+a whole FEN derived from a bare `Board` was the last shape inherited from the deleted `Api.Position`
+seam. It was also the only reason the two `Board` accessors above existed, and the only reason go's
+`Situation.unary_!` rewrote the board's ply counter instead of being `copy(player = !player)` as it
+is in all eight sibling logics. Removing the anomaly is what let all three go.
+
+One consequence sits behind that deletion: `>>` now takes the turn symbol from
+`game.situation.player`, where it used to derive it from `board.history.halfMoveClock`. Inside the
+library the two cannot disagree — every construction site was checked — but a caller that builds
+`strategygames.Situation(GameLogic.Go(), board, player)` with a mismatched pair now gets its own
+player exported rather than the board's. The new answer is the more honest one; the point is that the
+invariant is no longer enforced anywhere, and the one test that asserted it went with the member it
+read.
 
 **`go.History.halfMoveClock` now counts plies, where it counted something close to completed turns.**
 Old (`237fbdf1:go/Board.scala`, `afterDrop`): `halfMoveClock + player.fold(0, 1)`, so it incremented
 on P2's drop only, and not at all for a played pass or settlement — the old `Variant.validPass` and
 `createSelectSquares` rebuilt the board with `board.copy(…)` and never touched history. New
 (`Variant.afterOnePly`): `+ 1` on every ply, and set from `fen.ply` on parse. The field roughly
-doubles. The change is forced — `Board.playerToMove`, `Forsyth.playerToMove` and
-`Forsyth.fullMovePart` all derive from it now that the engine is gone — and the *exported FEN* is
-unaffected. But `strategygames.History.halfMoveClock` is a pass-through field, so any lila code
+doubles. The change is forced by what reads it: with the engine gone, `Forsyth.fullMovePart` computes
+the FEN's full-move number as `halfMoveClock / 2 + 1`, and that field has to keep the value it always
+had. Two further derivations existed when this was written and no longer do —
+`go.Board.playerToMove` and a private `Forsyth.playerToMove`, both
+`Player.fromTurnCount(halfMoveClock)`, which between them produced the FEN's turn field. `>>` takes
+the turn from `game.situation.player` now, and both went with `go.format.Forsyth.exportBoardFen`,
+which is the entry above. Either way the *exported FEN* is unaffected. But
+`strategygames.History.halfMoveClock` is a pass-through field, so any lila code
 keyed on the raw value for a go game (a clock, a move counter, a stored-game migration) reads a
 different number for the same game, with no compile error and no test in this repo that could
 notice.
@@ -345,6 +434,39 @@ implementing `Parser.sans` is feature work. Neither belongs in a refactor whose 
 behaviour preservation. `Replay.plyAtFen` had the same problem and *was* deleted, because it
 provably never worked *and* nothing depended on its result — the wrapper now answers
 `Validated.invalid` directly. The inconsistency is deliberate and wants its own decision.
+
+**`Ecopening.fromGame` can never resolve an opening for go**, for the same reason: it calls
+`Replay.boards`, so the `Parser.sans` stub refuses every input before a board is built. Pre-existing
+and not caused by this branch — verified against the tree before the change as well. The opening
+lookup itself works; `Ecopening.matchChronoBoards` keys on `Forsyth.exportBoard(board)` and
+`GoEcopeningTest` pins that a real played game resolves to the right ECO on all three sizes. Only the
+`fromGame` entry is dead, and it now has a test named for the truth, so whoever implements
+`Parser.sans` is told to come back and check the keys.
+
+**`Replay.apply(actionStrs, …).state` is the game after the *first* action, not the last.**
+`gameWithActions.reverse.lastOption` (`go/Replay.scala:81`) takes the last element of a reversed
+chronological list. Measured: on `s@a1 s@e5 pass pass ss:a1` it returns the captures as they stood
+after `s@a1`. The `actions` list and the `setup` are correct; only `state` is wrong, and only for a
+game of more than one action. Pre-existing and not go's — the identical expression appears in
+`backgammon`, `dameo`, `fairysf`, `abalone`, `samurai` and `togyzkumalak`, seven game logics in all.
+Out of scope for this branch and it wants its own ticket. Two things bound the blast radius, and
+neither makes it safe: `strategygames.Replay.apply` exposes only the `List[Uci]` form, which builds
+its state through `addAction` and is correct, and nothing in `src/main` calls the action-string form.
+A lila caller reaching a game logic's `Replay` directly is the exposure.
+
+**A class-initialisation deadlock in `abalone/BoardType.scala` can hang a test run indefinitely.**
+Observed once on this branch: a full suite run sat for 45 minutes with no output and no failure.
+Unrelated to go, pre-existing, and wants its own ticket. The cycle is in the bytecode:
+`HexBoardType.<init>` reads `BoardType$.MODULE$` to evaluate the defaulted `norm: Norm = N6`
+constructor parameter, which Scala hosts on the companion; `BoardType$`'s static initialiser
+evaluates `all = List(Hex5, Hex6)`, which reads `Hex5$.MODULE$` and `Hex6$.MODULE$`; and `Hex5$`'s
+static initialiser calls `HexBoardType.<init>`. A single thread does not hang on that, because the
+JVM's class-initialisation lock is re-entrant; two specs2 threads entering from opposite ends each
+hold the lock the other is waiting on, and there is no timeout. *Fix:* break the cycle — pass `norm`
+explicitly from `HexBoardType` so the constructor never touches the companion, or move `all` off the
+companion. Worth checking while fixing it, though it has not been observed: the same cycle entered
+from `Hex5$` first reaches `BoardType$`'s `all = List(Hex5, Hex6)` before `Hex5$.MODULE$` has been
+assigned.
 
 **A board standing at three consecutive passes does not survive a FEN round trip.**
 `Forsyth.passCount` caps the rendered pass count at 2 (`consecutivePasses min highestPassCount`) and

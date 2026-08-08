@@ -35,12 +35,17 @@ stones where they lie.
 
 **Settlement.** The `ss:` action lifts the named stones and ends the game. It is sticky: no later
 action makes a settled game unsettled, and nothing accepts an action after one — not the played path
-and not any of the loaders. `GoPostSettlementTest` pins that on each of them.
+and not any of the loaders. `GoPostSettlementTest` names all five loader entry points and offers each
+of them a pass, a second `ss:` and a drop. The played path needs no separate guard and has none: the
+refusal lives in `Variant.drop`, `pass` and `selectSquares`, which is what every loader routes
+through.
 
 **Scoring.** Chinese area scoring — stones on the board plus empty regions a single colour
 surrounds, with komi to p2. A region both colours touch, or no colour touches, scores for nobody;
 that rule covers seki without special handling. Scores are carried in tenths of a point, because
-komi is routinely a half point. Komi is per *game*, arriving in the FEN, not per variant.
+komi is routinely a half point. Komi is per *game* and arrives in the FEN: `Board.komi` is the
+authority and `Variant.komi` only says where a fresh board starts. The note on `Board.komi` says what
+goes wrong if the two are confused.
 
 ## Adding a board size
 
@@ -89,7 +94,7 @@ site, and [the refactor write-up](go-refactor.md) states what fixing each one wo
 | | where |
 |---|---|
 | An `ss:` records one capture more than the stones it lifts | `Replay.settlementCaptureCount` |
-| A settlement records those captures on the two loaders that fold action strings (`Replay.gameFromUciStrings`, `pgn.Reader`), and none on the two that replay a `Uci` list (`Replay.apply(List[Uci], …)`, `Replay.situationsFromUci`) or on a game played live | `Replay.withSettlementCaptures` vs `Variant.boardAfterSelectSquares` |
+| A settlement records those captures on every loader that folds action strings — the three through `Replay.gameWithActionWhileValid`, plus `pgn.Reader` — and on none of the two that replay a `Uci` list (`Replay.apply(List[Uci], …)`, `Replay.situationsFromUci`), nor on a game played live | `Replay.withSettlementCaptures` vs `Variant.boardAfterSelectSquares` |
 | An off-board `ss:` key is ignored, where an off-board drop key is an error | `Replay.gameWithActionWhileValid` |
 | A game p2 settled renders its full-move number with a `1` concatenated on, not added | `Forsyth.fullMovePart` |
 
@@ -124,6 +129,9 @@ refactor that found it; `situationsFromUci` is the working equivalent.
 ## Benchmarks
 
 `GoRulesBenchmark` (JMH) times replay, placement, legal-drop generation, area scoring and FEN
-parse/render across the three sizes; `GoSmokeTiming` answers the same questions in wall-clock
+parse/render across the three sizes. Replay is timed on both paths — `replay` /
+`replayReadingFinalScore` through the go package, `wrapperReplay` /
+`wrapperReplayReadingEveryScore` through `strategygames` — and the wrapper pair is the one that
+describes production, because that is the path lila runs. `GoSmokeTiming` answers the same questions in wall-clock
 seconds when a JMH run is too slow to be worth it. Both live in `bench/`, which documents how to run
 them. Results: [docs/go-speed-results.md](go-speed-results.md).
