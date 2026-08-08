@@ -19,8 +19,8 @@ object GoMidGame {
   def fenOf(sizeKey: String): (GoVariant, FEN) = {
     val corpus  = GoCorpusGame.load(sizeKey)
     val variant = corpus.size.variant
-    val board   = GoCorpusGame.replay(corpus, variant, corpus.turnsBeforeMidGameDrop).situation.board
-    (variant, Forsyth.exportBoardFen(board))
+    val game    = GoCorpusGame.replay(corpus, variant, corpus.turnsBeforeMidGameDrop)
+    (variant, Forsyth.>>(game))
   }
 
   def boardOf(variant: GoVariant, fen: FEN): Board =
@@ -184,7 +184,7 @@ class GoRulesBenchmark {
 
   @Benchmark
   def fenRenderMidGame(state: GoFreshMidGameBoard, bh: Blackhole): Unit =
-    bh.consume(Forsyth.exportBoardFen(state.board).value)
+    bh.consume(Forsyth.exportBoard(state.board))
 
   @Benchmark
   def fenParseMidGame(input: GoMidGameFen, bh: Blackhole): Unit =
