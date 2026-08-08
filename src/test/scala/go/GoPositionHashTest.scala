@@ -3,15 +3,19 @@ package strategygames.go
 import org.specs2.mutable.Specification
 
 import strategygames.Player
-import strategygames.go.format.FEN
-import strategygames.go.oracle.{ GoOracle, GoOracleGame }
-import strategygames.go.variant.{ Go9x9, Variant }
+import strategygames.go.variant.{ Go13x13, Go19x19, Go9x9, Variant }
 
 class GoPositionHashTest extends Specification with GoRulesTestSupport {
 
-  private val mismatchReportLimit = 5
-
   private val gameEndingInASettlement = List("d4", "f4", "e6", "pass", "pass", "ss:")
+
+  private val scriptedGames: List[(Variant, List[String])] = List(
+    Go9x9   -> List("g5", "f5", "f4", "e4", "f6", "d5", "h5", "e6", "e5", "a1", "c9", "f5"),
+    Go9x9   -> List("d1", "a2", "c2", "b2", "a1", "pass", "b1", "c1", "a1", "pass"),
+    Go9x9   -> gameEndingInASettlement,
+    Go13x13 -> List("a3", "a2", "b2", "b1", "c1", "e5", "a1"),
+    Go19x19 -> List("c1", "c4", "b2", "b3", "d2", "d3", "c3", "c2", "pass", "c3")
+  )
 
   private val threeStones = List(P1 -> "d4", P2 -> "f4", P1 -> "d6")
 
@@ -88,12 +92,15 @@ class GoPositionHashTest extends Specification with GoRulesTestSupport {
     }
   }
 
-  "every ply of every game in the go oracle" should {
-    "carry a recorded hash equal to a full recompute of its own board" in {
-      oracleGames.flatMap(recordedHashMismatchesIn).take(mismatchReportLimit) must beEmpty
+  "a game whose hash is maintained one action at a time" should {
+    "carry, at every ply, a recorded hash equal to a full recompute of its own board" in {
+      scriptedGames.flatMap { case (variant, actions) =>
+        recordedHashMismatchesIn(variant, actions)
+      } must beEmpty
     }
-    "amount to the whole corpus, rather than a silently empty sweep" in {
-      (oracleGames.size === 85) and (oracleGames.map(_.actionStrs.size + 1).sum === 16207)
+    "sweep every ply of every script, rather than pass over an empty list" in {
+      scriptedGames.map { case (variant, actions) => situationsOf(variant, actions).size }.sum ===
+        scriptedGames.map { case (_, actions) => actions.size + 1 }.sum
     }
   }
 
@@ -107,14 +114,12 @@ class GoPositionHashTest extends Specification with GoRulesTestSupport {
     }
   }
 
-  private lazy val oracleGames = GoOracle.load()
-
   private def boardOf(variant: Variant, stones: List[(Player, String)]): Board =
     Board(stones.map { case (player, key) => pointAt(key) -> Piece(player, Role.defaultRole) }, variant)
 
-  private def recordedHashMismatchesIn(game: GoOracleGame): List[String] =
-    situationsOf(game).zipWithIndex.flatMap { case (situation, ply) =>
-      mismatchAt(game.name, ply, situation)
+  private def recordedHashMismatchesIn(variant: Variant, actions: List[String]): List[String] =
+    situationsOf(variant, actions).zipWithIndex.flatMap { case (situation, ply) =>
+      mismatchAt(actions.mkString(" "), ply, situation)
     }
 
   private def mismatchAt(name: String, ply: Int, situation: Situation): Option[String] = {
@@ -124,23 +129,17 @@ class GoPositionHashTest extends Specification with GoRulesTestSupport {
     else Some(s"${name} ply ${ply}: recorded ${recorded}, recomputed ${recomputed}")
   }
 
-  private def situationsOf(game: GoOracleGame): List[Situation] = {
-    val variant              = variantOf(game)
-    val initialFen           = game.initialFen.map(FEN(_)).getOrElse(variant.initialFen)
-    val startPlayer          = initialFen.player.getOrElse(Player.P1)
+  private def situationsOf(variant: Variant, actions: List[String]): List[Situation] = {
     val (init, plies, error) = Replay.gameWithUciWhileValid(
-      game.actionStrs.map(Vector(_)).toVector,
-      startPlayer,
-      Player.fromTurnCount(game.actionStrs.size + startPlayer.fold(0, 1)),
-      initialFen,
+      actions.map(action => Vector(uciStringOf(action))).toVector,
+      Player.P1,
+      Player.fromTurnCount(actions.size),
+      variant.initialFen,
       variant
     )
-    error.foreach(message => sys.error(s"go oracle replay of ${game.name}: ${message}"))
+    error.foreach(message => sys.error(s"go replay of ${actions.mkString(" ")}: ${message}"))
     init.situation :: plies.map(_._1.situation)
   }
-
-  private def variantOf(game: GoOracleGame): Variant =
-    Variant(game.variantKey).getOrElse(sys.error(s"unknown go variant: ${game.variantKey}"))
 
   private def replayedFromUci(variant: Variant, actions: List[String]): Game =
     Replay

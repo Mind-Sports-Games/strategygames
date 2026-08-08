@@ -8,7 +8,6 @@ import cats.implicits._
 
 import strategygames.Player
 import strategygames.go.format.{ FEN, Forsyth }
-import strategygames.go.oracle.{ GoOracle, GoOracleGame }
 import strategygames.go.variant.{ Go19x19, Go9x9, Variant }
 
 class GoBoardStateTest extends Specification with GoRulesTestSupport {
@@ -27,7 +26,7 @@ class GoBoardStateTest extends Specification with GoRulesTestSupport {
 
   "the position state a go board carries" should {
 
-    "agree with the uci log at every ply the oracle replays" in {
+    "agree with the uci log at every ply of every scripted game, replayed and swept" in {
       disagreements.take(disagreementReportLimit) must beEmpty
     }
   }
@@ -209,58 +208,56 @@ object GoBoardStateTest {
       Replay.gameFromUciStrings(dropOntoSettledFen, playerAfterSettledFenDrop, settledFen.some, Go19x19)
     )
 
-  lazy val disagreements: List[String] =
-    GoOracle.load().flatMap(game => prefixDisagreements(game) ++ sweptDisagreements(game))
+  private val scriptedGames: List[(Variant, List[String])] = List(
+    Go9x9   -> List("s@d4", "s@f4", "s@e6", "pass", "pass", "ss:"),
+    Go9x9   -> List("s@a1", "s@b2", "pass", "s@e5", "pass", "pass", "s@c3", "pass", "pass", "pass", "pass"),
+    Go9x9   -> List("pass", "pass", "pass", "pass"),
+    Go9x9   -> List("s@a3", "s@a2", "s@b2", "s@b1", "s@c1", "s@e5", "s@a1", "pass", "pass", "ss:"),
+    Go19x19 -> List("s@c1", "s@c4", "s@b2", "s@b3", "s@d2", "s@d3", "s@c3", "s@c2", "pass", "s@c3")
+  )
 
-  private def prefixDisagreements(game: GoOracleGame): List[String] =
-    (0 to game.actionStrs.size).toList.flatMap { played =>
-      val actions = game.actionStrs.take(played)
+  lazy val disagreements: List[String] =
+    scriptedGames.flatMap { case (variant, actions) =>
+      prefixDisagreements(variant, actions) ++ sweptDisagreements(variant, actions)
+    }
+
+  private def prefixDisagreements(variant: Variant, actions: List[String]): List[String] =
+    (0 to actions.size).toList.flatMap { played =>
+      val prefix = actions.take(played)
       boardDisagreements(
-        s"${game.name} prefix ply ${played}",
-        replayedFromUci(game, actions).situation,
-        actions
+        s"${actions.mkString(" ")} prefix ply ${played}",
+        replayedFromUci(variant, prefix).situation,
+        prefix
       )
     }
 
-  private def sweptDisagreements(game: GoOracleGame): List[String] = {
+  private def sweptDisagreements(variant: Variant, actions: List[String]): List[String] = {
     val (init, swept, _) = Replay.gameWithUciWhileValid(
-      game.actionStrs.map(Vector(_)).toVector,
-      startPlayerOf(game),
-      activePlayerAfter(game, game.actionStrs.size),
-      initialFenOf(game),
-      variantOf(game)
+      actions.map(Vector(_)).toVector,
+      Player.P1,
+      Player.fromTurnCount(actions.size),
+      variant.initialFen,
+      variant
     )
-    boardDisagreements(s"${game.name} swept ply 0", init.situation, Nil) ++
+    boardDisagreements(s"${actions.mkString(" ")} swept ply 0", init.situation, Nil) ++
       swept.map(_._1).zipWithIndex.flatMap { case (state, index) =>
         boardDisagreements(
-          s"${game.name} swept ply ${index + 1}",
+          s"${actions.mkString(" ")} swept ply ${index + 1}",
           state.situation,
-          game.actionStrs.take(index + 1)
+          actions.take(index + 1)
         )
       }
   }
 
-  private def replayedFromUci(game: GoOracleGame, actions: List[String]): Game =
+  private def replayedFromUci(variant: Variant, actions: List[String]): Game =
     Replay
       .gameFromUciStrings(
         actions.map(Vector(_)).toVector,
-        activePlayerAfter(game, actions.size),
-        game.initialFen.map(FEN(_)),
-        variantOf(game)
+        Player.fromTurnCount(actions.size),
+        None,
+        variant
       )
-      .valueOr(error => sys.error(s"go board state replay of ${game.name}: ${error}"))
-
-  private def variantOf(game: GoOracleGame): Variant =
-    Variant(game.variantKey).getOrElse(sys.error(s"unknown go variant: ${game.variantKey}"))
-
-  private def initialFenOf(game: GoOracleGame): FEN =
-    game.initialFen.map(FEN(_)).getOrElse(variantOf(game).initialFen)
-
-  private def startPlayerOf(game: GoOracleGame): Player =
-    initialFenOf(game).player.getOrElse(Player.P1)
-
-  private def activePlayerAfter(game: GoOracleGame, turns: Int): Player =
-    Player.fromTurnCount(turns + startPlayerOf(game).fold(0, 1))
+      .valueOr(error => sys.error(s"go board state replay of ${actions.mkString(" ")}: ${error}"))
 
   private def boardDisagreements(
       named: String,

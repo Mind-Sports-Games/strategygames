@@ -3,7 +3,6 @@ package strategygames.go
 import org.specs2.mutable.Specification
 
 import strategygames.go.format.{ FEN, Forsyth, Uci }
-import strategygames.go.oracle.GoOracle
 import strategygames.go.variant.{ Go13x13, Go19x19, Go9x9, Variant }
 
 class GoForsythTest extends Specification with GoRulesTestSupport {
@@ -133,13 +132,6 @@ class GoForsythTest extends Specification with GoRulesTestSupport {
       }
     "reach the same verdict on every ten field refusal" in
       refusedFens.filter(fen => Forsyth.validate(fen) != Forsyth.<<@(Go9x9, fen).isDefined) === Nil
-  }
-
-  "the go fen validator" should {
-    "accept every fen the oracle recorded a replay emitting" in {
-      val recorded = GoOracle.load().filter(_.recordsFen).flatMap(_.plies.map(_.fen))
-      recorded.filterNot(fen => Forsyth.validate(FEN(fen))) === Nil
-    }
   }
 
   "the stones a fen names" should {

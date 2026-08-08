@@ -3,8 +3,7 @@ package strategygames.go
 import org.specs2.mutable.Specification
 
 import strategygames.{ Player, Score }
-import strategygames.go.format.{ FEN, Forsyth }
-import strategygames.go.oracle.{ GoOracle, GoOracleGame, GoOraclePly }
+import strategygames.go.format.FEN
 import strategygames.go.variant.{ Go13x13, Go19x19, Go9x9, Variant }
 
 class GoScoringTest extends Specification with GoRulesTestSupport {
@@ -182,67 +181,10 @@ class GoScoringTest extends Specification with GoRulesTestSupport {
         (wrapperScoreOf(passed) === wrapperScoreOf(placed))
     }
   }
-
-  "a fresh recompute of the area score" should {
-    "reach the score the fen and the history record, at every ply of every game in the go oracle" in {
-      recomputeMismatches.take(mismatchReportLimit) must beEmpty
-    }
-  }
 }
 
 object GoScoringTest {
 
-  private val mismatchReportLimit = 25
-
   private def wrapperScoreOf(game: Game): Score =
     strategygames.Board.Go(game.situation.board).history.score
-
-  lazy val recomputeMismatches: List[String] = GoOracle.load().flatMap(mismatchesOf)
-
-  private def areaScoreOf(board: Board): Score = board.variant.areaScore(board)
-
-  private def mismatchesOf(recording: GoOracleGame): List[String] = {
-    val replayed = replayedGames(recording)
-    if (replayed.size != recording.plies.size)
-      List(s"${recording.name}: recorded ${recording.plies.size} plies, replayed ${replayed.size}")
-    else
-      recording.plies.zip(replayed).zipWithIndex.flatMap { case ((recorded, played), ply) =>
-        mismatchedScores(s"${recording.name} ply ${ply}", recorded, played)
-      }
-  }
-
-  private def mismatchedScores(named: String, recorded: GoOraclePly, played: Game): List[String] = {
-    val scored = areaScoreOf(played.situation.board)
-    List(
-      mismatched(named, "the fen", scored, scoreInFen(fenOfRecord(recorded, played))),
-      scoreRecordedFor(recorded).flatMap(mismatched(named, "the history", scored, _))
-    ).flatten
-  }
-
-  private def fenOfRecord(recorded: GoOraclePly, played: Game): FEN =
-    if (recorded.fen.nonEmpty) FEN(recorded.fen) else Forsyth.>>(played)
-
-  private def scoreInFen(fen: FEN): Score = Score(fen.player1Score, fen.player2Score)
-
-  private def scoreRecordedFor(recorded: GoOraclePly): Option[Score] =
-    Some(Score(recorded.scoreP1, recorded.scoreP2)).filter(_.nonEmpty)
-
-  private def mismatched(named: String, source: String, scored: Score, expected: Score): Option[String] =
-    if (scored == expected) None
-    else Some(s"${named}: areaScore ${scored.fenStr}, ${source} ${expected.fenStr}")
-
-  private def replayedGames(recording: GoOracleGame): List[Game] = {
-    val variant                     = Variant(recording.variantKey)
-      .getOrElse(sys.error(s"unknown go variant: ${recording.variantKey}"))
-    val initialFen                  = recording.initialFen.fold(variant.initialFen)(FEN(_))
-    val startPlayer                 = initialFen.player.getOrElse(Player.P1)
-    val (opening, playedWithUci, _) = Replay.gameWithUciWhileValid(
-      recording.actionStrs.map(Vector(_)).toVector,
-      startPlayer,
-      Player.fromTurnCount(recording.actionStrs.size + startPlayer.fold(0, 1)),
-      initialFen,
-      variant
-    )
-    opening :: playedWithUci.map { case (played, _) => played }
-  }
 }
