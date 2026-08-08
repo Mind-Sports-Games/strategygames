@@ -45,7 +45,7 @@ class GoBoardStateTest extends Specification with GoRulesTestSupport {
     }
 
     "write that pass run back out unchanged" in {
-      passCounts.map(passCount => Forsyth.exportBoardFen(resumed(passCount)).fenPassCount) === passCounts
+      passCounts.map(passCount => passCountWrittenBy(resumed(passCount))) === passCounts
     }
 
     "count none of those passes as a ply" in {
@@ -67,7 +67,7 @@ class GoBoardStateTest extends Specification with GoRulesTestSupport {
     "leave a pass count it has no reading of out of the position state" in {
       (resumed(passCount = 4).consecutivePasses === 0) and
         (resumed(passCount = 4).deadStonesSelected === false) and
-        (Forsyth.exportBoardFen(resumed(passCount = 4)).fenPassCount === 0)
+        (passCountWrittenBy(resumed(passCount = 4)) === 0)
     }
 
     "take its komi and its ko point from the fen, not from the variant" in {
@@ -102,13 +102,13 @@ class GoBoardStateTest extends Specification with GoRulesTestSupport {
       (settled.deadStonesSelected === true) and
         (settled.passed.deadStonesSelected === true) and
         (settled.stonePlaced.deadStonesSelected === true) and
-        (Forsyth.exportBoardFen(settled.passed).fenPassCount === 3) and
-        (Forsyth.exportBoardFen(settled.stonePlaced).fenPassCount === 3)
+        (passCountWrittenBy(settled.passed) === 3) and
+        (passCountWrittenBy(settled.stonePlaced) === 3)
     }
 
     "be written back out by a fen that states it" in {
       (resumed(passCount = 3).deadStonesSelected === true) and
-        (Forsyth.exportBoardFen(resumed(passCount = 3)).fenPassCount === 3)
+        (passCountWrittenBy(resumed(passCount = 3)) === 3)
     }
 
     "leave the replay refusing a further drop" in {
@@ -172,6 +172,9 @@ object GoBoardStateTest {
       .<<@(Go19x19, resumedFen(passCount))
       .getOrElse(sys.error(s"unreadable resumed fen for pass count ${passCount}"))
       .board
+
+  def passCountWrittenBy(board: Board): Int =
+    Forsyth.exportBoard(board).split(' ').last.toInt
 
   def resumedPlies(passCount: Int): Int =
     Forsyth
@@ -266,7 +269,6 @@ object GoBoardStateTest {
   ): List[String] = {
     val board = situation.board
     List(
-      disagreed(named, "playerToMove", board.playerToMove, situation.player),
       disagreed(named, "passState", passStateOf(board), passStateLoggedBy(played)),
       disagreed(named, "canSelectSquares", situation.canSelectSquares, canSelectSquaresLoggedBy(played)),
       disagreed(

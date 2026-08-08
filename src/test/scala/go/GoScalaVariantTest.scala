@@ -112,7 +112,7 @@ class GoScalaVariantTest extends Specification {
       (passed.situation.canSelectSquares === true) and
         (passed.situation.end === false) and
         (passed.situation.board.deadStonesSelected === false) and
-        (Forsyth.exportBoardFen(passed.situation.board).value
+        (Forsyth.>>(passed).value
           === "9/9/2s6/3s5/2s1s3S/3s3S1/6S2/5S3/4S3s[SSSSSSSSSSssssssssss] b - 50 125 0 1 55 2 8")
     }
 
@@ -122,7 +122,7 @@ class GoScalaVariantTest extends Specification {
         (ended.situation.winner === Some(Player.P1)) and
         (ended.situation.board.pieces.size === 10) and
         (Go9x9.areaScore(ended.situation.board) === Score(150, 115)) and
-        (Forsyth.exportBoardFen(ended.situation.board).value
+        (Forsyth.>>(ended).value
           === "9/9/2s6/3s5/2s1s3S/3s3S1/6S2/5S3/4S4[SSSSSSSSSSssssssssss] w - 150 115 0 1 55 3 8")
     }
 
@@ -136,7 +136,7 @@ class GoScalaVariantTest extends Specification {
       val reloaded = Forsyth.<<@(Go9x9, exported)
       (exported.value
         === "9/9/2s6/3s5/2s1s3S/3s3S1/6S2/5S3/4S4[SSSSSSSSSSssssssssss] w - 150 115 0 1 55 3 8") and
-        (reloaded.map(s => Forsyth.exportBoardFen(s.board)) === Some(exported)) and
+        (reloaded.map(s => Forsyth.>>(s)) === Some(exported)) and
         (reloaded.map(_.end) === Some(true)) and
         (reloaded.map(_.winner) === Some(Some(Player.P1)))
     }
@@ -182,18 +182,17 @@ class GoScalaVariantTest extends Specification {
       (handicapFen.value === "9/9/2S3S2/9/9/9/2S3S2/9/9[SSSSSSSSSSssssssssss] w - 40 55 0 0 55 0 1") and
         (handicapFen.handicap === Some(4)) and
         (game.situation.player === Player.P2) and
-        (game.situation.board.pieces.size === 4) and
-        (game.situation.board.playerToMove === Player.P2)
+        (game.situation.board.pieces.size === 4)
     }
 
     "score the whole board to the handicapped player" in {
-      Forsyth.exportBoardFen(game.situation.board).value
+      Forsyth.>>(game).value
         === "9/9/2S3S2/9/9/9/2S3S2/9/9[SSSSSSSSSSssssssssss] w - 810 55 0 0 55 0 1"
     }
 
     "keep the handicap stones on the board after a drop" in {
       val played = playing(game, List("s@a1"))
-      Forsyth.exportBoardFen(played.situation.board).value
+      Forsyth.>>(played).value
         === "9/9/2S3S2/9/9/9/2S3S2/9/s8[SSSSSSSSSSssssssssss] b - 40 65 0 0 55 0 2"
     }
   }
@@ -212,7 +211,7 @@ class GoScalaVariantTest extends Specification {
     "end with a select squares that removes nothing" in {
       (ended.situation.end === true) and
         (ended.situation.board.pieces.size === 4) and
-        (Forsyth.exportBoardFen(ended.situation.board).value.split(' ').last === "4") and
+        (Forsyth.>>(ended).value.split(' ').last === "4") and
         (ended.situation.winner === Some(Player.P2))
     }
   }
@@ -274,8 +273,8 @@ class GoScalaVariantTest extends Specification {
       val replayed = replaying(actions)
       (replayed.map(_.size) === Some(actions.size + 1)) and
         (replayed.map(_.last.end) === Some(true)) and
-        (replayed.map(situations => Forsyth.exportBoardFen(situations.last.board))
-          === Some(Forsyth.exportBoardFen(playing(Game(Go9x9), actions).situation.board)))
+        (replayed.map(situations => Forsyth.>>(situations.last))
+          === Some(Forsyth.>>(playing(Game(Go9x9), actions))))
     }
 
     "end on a fourth pass without any dead stone selection" in {

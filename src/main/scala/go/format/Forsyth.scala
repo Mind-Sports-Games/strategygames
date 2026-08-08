@@ -121,26 +121,29 @@ object Forsyth {
         >>(Game(situation, plies = parsed.plies, turnCount = parsed.turnCount))
     }
 
-  def >>(game: Game): FEN = exportBoardFen(game.situation.board)
-
-  // TODO Should this just be returning the board part of the fen? Check what Chess does
-  def exportBoard(board: Board): String = exportBoardFen(board).value
-
-  def exportBoardFen(board: Board): FEN = {
-    val score = board.areaScore
+  def >>(game: Game): FEN = {
+    val board  = game.situation.board
+    val player = game.situation.player
     FEN(
-      List(
-        boardPart(board),
-        playerToMove(board).fold("b", "w"),
-        board.ko.fold(noKoPoint)(_.key),
-        score.p1.toString,
-        score.p2.toString,
-        board.history.captures.p1.toString,
-        board.history.captures.p2.toString,
-        komiTenths(board).toString,
-        passCount(board).toString,
-        fullMovePart(board)
-      ).mkString(" ")
+      (boardPart(board) ::
+        player.fold("b", "w") ::
+        positionPart(board) :::
+        List(fullMovePart(board, player))).mkString(" ")
+    )
+  }
+
+  def exportBoard(board: Board): String = (boardPart(board) :: positionPart(board)).mkString(" ")
+
+  private def positionPart(board: Board): List[String] = {
+    val score = board.areaScore
+    List(
+      board.ko.fold(noKoPoint)(_.key),
+      score.p1.toString,
+      score.p2.toString,
+      board.history.captures.p1.toString,
+      board.history.captures.p2.toString,
+      komiTenths(board).toString,
+      passCount(board).toString
     )
   }
 
@@ -182,19 +185,16 @@ object Forsyth {
     if (board.deadStonesSelected) settledPassCount
     else board.consecutivePasses min highestPassCount
 
-  private def playerToMove(board: Board): Player =
-    Player.fromTurnCount(board.history.halfMoveClock)
-
   // NOTE: when p2 settled the game, the full-move number gets a `1` *concatenated* onto it, not
   // added — full move 23 renders as "231". Almost certainly a `+` that should have been arithmetic,
   // but it has been emitting FENs for as long as go has been on the site and a settled game's field
   // 9 is stored that way, so it is preserved rather than fixed. Nothing reads it back for anything
   // that matters: a settled game is over. Fixing it means an arithmetic `+ 1` here and a decision
   // about what to do with the FENs already written.
-  private def fullMovePart(board: Board): String = {
+  private def fullMovePart(board: Board, playerToMove: Player): String = {
     val fullMove    = board.history.halfMoveClock / 2 + 1
     val settledByP2 = board.history.lastTurn.headOption.exists {
-      case _: Uci.SelectSquares => playerToMove(board).p1
+      case _: Uci.SelectSquares => playerToMove.p1
       case _                    => false
     }
     if (settledByP2) s"${fullMove}${digitAppendedBySettlement}"
@@ -204,7 +204,6 @@ object Forsyth {
   def boardAndPlayer(situation: Situation): String =
     boardAndPlayer(situation.board, situation.player)
 
-  // TODO review this, not sure this is correct as will return full fen appended with w/b
   def boardAndPlayer(board: Board, turnPlayer: Player): String =
     s"${exportBoard(board)} ${turnPlayer.letter}"
 }

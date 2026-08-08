@@ -82,12 +82,6 @@ case class Board(
 
   def withKo(point: Option[Pos]): Board = copy(ko = point)
 
-  def playerToMove: Player = Player.fromTurnCount(history.halfMoveClock)
-
-  def withPlayerToMove(player: Player): Board =
-    if (playerToMove == player) this
-    else updateHistory(h => h.copy(halfMoveClock = h.halfMoveClock + player.fold(-1, 1)))
-
   def situationOf(player: Player) = Situation(this, player)
 
   def valid(strict: Boolean) = variant.valid(this, strict)

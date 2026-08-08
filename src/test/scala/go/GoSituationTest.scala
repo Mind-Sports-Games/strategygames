@@ -37,7 +37,7 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     val drops = variant.Go19x19.validDrops(game.situation)
 
     val game1 = game.apply(drops(1))
-    val fen   = format.Forsyth.exportBoardFen(game1.situation.board)
+    val fen   = format.Forsyth.>>(game1)
 
     "have differnt fen after drop" in {
       variant.Go19x19.initialFen.value !== fen.value
@@ -53,12 +53,11 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     val drop  = drops(1)
 
     val game1 = game.apply(drop)
-    val fen   = format.Forsyth.exportBoardFen(game1.situation.board)
+    val fen   = format.Forsyth.>>(game1)
 
     "have correct fen after drop b1" in {
-      "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1S17[SSSSSSSSSSssssssssss] w - 3610 75 0 0 75 0 1" === format.Forsyth
-        .exportBoardFen(drop.after)
-        .value
+      "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1S17[SSSSSSSSSSssssssssss] - 3610 75 0 0 75 0" === format.Forsyth
+        .exportBoard(drop.after)
     }
 
     val boardFen = format.Forsyth.boardAndPlayer(game1.situation)
@@ -85,8 +84,8 @@ class GoSituationTest extends Specification with ValidatedMatchers {
         .getOrElse(Map.empty)
     }
     "have the same situation fen from game creation and using forsyth" in {
-      format.Forsyth.exportBoardFen(game.situation.board) === situation
-        .map(s => format.Forsyth.exportBoardFen(s.board))
+      format.Forsyth.>>(game) === situation
+        .map(s => format.Forsyth.>>(s))
         .getOrElse(FEN(""))
     }
 
@@ -96,7 +95,7 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     val game1 = game.apply(drop)
     "and the correct current fen after a move" in {
       format.Forsyth
-        .exportBoardFen(game1.situation.board)
+        .>>(game1)
         .value === "9/9/2S3S2/9/9/9/9/9/s8[SSSSSSSSSSssssssssss] b - 20 50 0 0 40 0 2"
     }
 
@@ -150,7 +149,7 @@ class GoSituationTest extends Specification with ValidatedMatchers {
       game_ply_9.situation.end === false
       game_ply_9.situation.board.pieces.size === 7
       format.Forsyth
-        .exportBoardFen(game_ply_9.situation.board)
+        .>>(game_ply_9)
         .value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1SsSsSsS11[SSSSSSSSSSssssssssss] w - 40 105 0 0 75 2 5"
     }
 
@@ -158,7 +157,7 @@ class GoSituationTest extends Specification with ValidatedMatchers {
       game_ply_10.situation.end === true
       game_ply_10.situation.board.pieces.size === 5
       format.Forsyth
-        .exportBoardFen(game_ply_10.situation.board)
+        .>>(game_ply_10)
         .value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/2s1sSsS11[SSSSSSSSSSssssssssss] b - 20 105 0 0 75 3 61"
     }
 
@@ -217,7 +216,7 @@ class GoSituationTest extends Specification with ValidatedMatchers {
       game_ply_9.situation.end === false
       game_ply_9.situation.board.pieces.size === 7
       format.Forsyth
-        .exportBoardFen(game_ply_9.situation.board)
+        .>>(game_ply_9)
         .value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1SsSsSsS11[SSSSSSSSSSssssssssss] w - 40 105 0 0 75 2 5"
       game_ply_14.situation.end === false
       game_ply_14.situation.board.pieces.size === 10
@@ -227,7 +226,7 @@ class GoSituationTest extends Specification with ValidatedMatchers {
       game_ply_15.situation.end === true
       game_ply_15.situation.board.pieces.size === 8
       format.Forsyth
-        .exportBoardFen(game_ply_15.situation.board)
+        .>>(game_ply_15)
         .value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/2s1sSsSsSs8[SSSSSSSSSSssssssssss] w - 30 125 0 0 75 3 8"
     }
 
@@ -286,7 +285,7 @@ class GoSituationTest extends Specification with ValidatedMatchers {
       game_ply_9.situation.end === false
       game_ply_9.situation.board.pieces.size === 7
       format.Forsyth
-        .exportBoardFen(game_ply_9.situation.board)
+        .>>(game_ply_9)
         .value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/1SsSsSsS11[SSSSSSSSSSssssssssss] w - 40 105 0 0 75 2 5"
       game_ply_13.situation.end === false
       game_ply_13.situation.board.pieces.size === 8
@@ -296,7 +295,7 @@ class GoSituationTest extends Specification with ValidatedMatchers {
       game_ply_14.situation.end === true
       game_ply_14.situation.board.pieces.size === 6
       format.Forsyth
-        .exportBoardFen(game_ply_14.situation.board)
+        .>>(game_ply_14)
         .value === "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/2s1sSsSS10[SSSSSSSSSSssssssssss] b - 30 105 0 0 75 3 81"
     }
 

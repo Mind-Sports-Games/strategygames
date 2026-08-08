@@ -71,7 +71,7 @@ case class Situation(board: Board, player: Player) {
       board = board withVariant variant
     )
 
-  def unary_! = copy(board = board.withPlayerToMove(!player), player = !player)
+  def unary_! = copy(player = !player)
 }
 
 object Situation {

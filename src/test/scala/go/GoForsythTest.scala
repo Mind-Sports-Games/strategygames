@@ -171,6 +171,22 @@ class GoForsythTest extends Specification with GoRulesTestSupport {
       s"${Forsyth.boardRows(Go13x13, Go13x13.initialFen.pieces)}${pocket}"
   }
 
+  "the board state a go board exports on its own" should {
+    "name no player and count no turn" in
+      Forsyth.exportBoard(Board.init(Go9x9)) === s"${emptyNineByNineRows}${pocket} - 0 55 0 0 55 0"
+    "be every field of the game's fen but the turn and the full move" in {
+      val fields = Forsyth.>>(playing(Go9x9, List("d4", "f4", "e6", "pass"))).value.split(' ').toList
+      Forsyth.exportBoard(playing(Go9x9, List("d4", "f4", "e6", "pass")).situation.board) ===
+        (fields.head :: fields.drop(2).init).mkString(" ")
+    }
+    "keep telling a settled board apart from an unsettled one" in {
+      val awaitingSelection = playing(Go9x9, List("d4", "f4", "e6", "pass", "pass"))
+      val settled           = playingOn(awaitingSelection, List("ss:"))
+      Forsyth.exportBoard(awaitingSelection.situation.board) !==
+        Forsyth.exportBoard(settled.situation.board)
+    }
+  }
+
   "removing dead stones" should {
     "lift the named stones and keep every other field of the fen" in
       Forsyth
