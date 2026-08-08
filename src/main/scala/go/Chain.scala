@@ -70,7 +70,7 @@ object Chain {
       pieces.get(pos).fold(Set.empty[Pos])(stone => regionFrom(pos, holdsStoneOf(stone.player)))
 
     def regionFrom(origin: Pos, extendsThrough: Pos => Boolean): Set[Pos] =
-      if (extendsThrough(origin)) grownFrom(List(origin), Set(origin), extendsThrough)
+      if (extendsThrough(origin)) grownFrom(List(origin), Nil, Set(origin), extendsThrough)
       else Set.empty
 
     def libertiesOf(group: Set[Pos]): Set[Pos] =
@@ -98,15 +98,20 @@ object Chain {
     @annotation.tailrec
     private def grownFrom(
         pending: List[Pos],
+        unclassified: List[Pos],
         reached: Set[Pos],
         extendsThrough: Pos => Boolean
     ): Set[Pos] =
-      pending match {
-        case Nil         => reached
-        case pos :: rest =>
-          val newlyReached =
-            neighboursOf(pos).filter(neighbour => !reached.contains(neighbour) && extendsThrough(neighbour))
-          grownFrom(newlyReached ::: rest, reached ++ newlyReached, extendsThrough)
+      unclassified match {
+        case neighbour :: restOfNeighbours =>
+          if (reached.contains(neighbour) || !extendsThrough(neighbour))
+            grownFrom(pending, restOfNeighbours, reached, extendsThrough)
+          else grownFrom(neighbour :: pending, restOfNeighbours, reached + neighbour, extendsThrough)
+        case Nil                           =>
+          pending match {
+            case Nil         => reached
+            case pos :: rest => grownFrom(rest, neighboursOf(pos), reached, extendsThrough)
+          }
       }
 
   }
