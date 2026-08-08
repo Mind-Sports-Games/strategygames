@@ -9,11 +9,9 @@ case class History(
     currentTurn: List[Uci] = List.empty,
     positionHashes: PositionHash = Array.empty,
     halfMoveClock: Int = 0,
-    scoring: () => Score = History.unscored,
+    score: Score = Score(0, 0),
     captures: Score = Score(0, 0)
 ) {
-
-  lazy val score: Score = scoring()
 
   lazy val lastAction: Option[Uci] =
     if (currentTurn.nonEmpty) currentTurn.reverse.headOption else lastTurn.reverse.headOption
@@ -22,11 +20,5 @@ case class History(
 
   lazy val recentTurnUciString: Option[String] =
     if (recentTurn.nonEmpty) Some(recentTurn.map(_.uci).mkString(",")) else None
-
-}
-
-object History {
-
-  val unscored: () => Score = () => Score(0, 0)
 
 }

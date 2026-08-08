@@ -10,6 +10,10 @@ case class Board(
     history: History,
     variant: Variant,
     pocketData: Option[PocketData] = None,
+    komi: Double,
+    ko: Option[Pos] = None,
+    consecutivePasses: Int = 0,
+    deadStonesSelected: Boolean = false,
     uciMoves: List[String] = List(),
     position: Option[Api.Position] = None
 ) {
@@ -44,6 +48,14 @@ case class Board(
 
   def ensurePocketData = withPocketData(pocketData | PocketData.init)
 
+  def passed: Board = copy(ko = None, consecutivePasses = consecutivePasses + 1)
+
+  def settled: Board = copy(ko = None, consecutivePasses = 0, deadStonesSelected = true)
+
+  def stonePlaced: Board = copy(consecutivePasses = 0)
+
+  def withKoOf(p: Api.Position): Board = copy(ko = p.fen.ko)
+
   def situationOf(player: Player) = Situation(this, player)
 
   def valid(strict: Boolean) = variant.valid(this, strict)
@@ -68,11 +80,12 @@ case class Board(
       uciMoves = uciMoves :+ uciMove,
       pocketData = newPosition.pocketData,
       position = Some(newPosition)
-    )
+    ).stonePlaced
+      .withKoOf(newPosition)
       .withHistory(
         history.copy(
           // lastTurn handled in action.finalizeAfter
-          scoring = () => newPosition.fenScore,
+          score = newPosition.fenScore,
           captures = history.captures.add(
             player,
             oldPieceMapSize - newPosition.pieceMap.size + 1
@@ -89,7 +102,7 @@ case class Board(
 object Board {
 
   def apply(pieces: Iterable[(Pos, Piece)], variant: Variant): Board =
-    Board(pieces.toMap, History(), variant, variantPocketData(variant))
+    Board(pieces.toMap, History(), variant, variantPocketData(variant), variant.komi)
 
   def init(variant: Variant): Board = Board(variant.pieces, variant)
 
@@ -107,7 +120,23 @@ object Board {
     val sizes = List(width, height)
 
     val validPos: List[Pos] =
-      Pos.all.filter(p => p.file.index < width && p.rank.index < height)
+      Pos.all.filter(onBoard)
+
+    val neighbours: Array[List[Pos]] = {
+      val table = Array.fill(Pos.all.size)(List.empty[Pos])
+      validPos.foreach(pos => table(pos.index) = cardinalNeighboursOf(pos))
+      table
+    }
+
+    private def onBoard(pos: Pos): Boolean = pos.file.index < width && pos.rank.index < height
+
+    private def cardinalNeighboursOf(pos: Pos): List[Pos] =
+      List(
+        Pos.at(pos.file.index - 1, pos.rank.index),
+        Pos.at(pos.file.index + 1, pos.rank.index),
+        Pos.at(pos.file.index, pos.rank.index - 1),
+        Pos.at(pos.file.index, pos.rank.index + 1)
+      ).flatten.filter(onBoard)
 
     override def toString = key
 

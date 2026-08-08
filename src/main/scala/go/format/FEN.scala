@@ -1,6 +1,7 @@
 package strategygames.go.format
 
 import strategygames.Player
+import strategygames.go.Pos
 import strategygames.go.variant.Variant
 
 final case class FEN(value: String) extends AnyVal {
@@ -17,6 +18,8 @@ final case class FEN(value: String) extends AnyVal {
     // This is safe because player function ensures there is an element at playerIndex when doing split(' ')
     // Dont flip player because of inverted colours
     player.map { p => FEN(value.split(' ').updated(FEN.playerIndex, p.letter.toString).mkString(" ")) }
+
+  def ko: Option[Pos] = value.split(' ').lift(FEN.koIndex).flatMap(Pos.fromKey)
 
   def player1Score: Int = intFromFen(3).getOrElse(0)
 
@@ -71,5 +74,7 @@ object FEN {
   def clean(source: String): FEN = FEN(source.replace("_", " ").trim)
 
   def playerIndex: Int = 1
+
+  def koIndex: Int = 2
 
 }

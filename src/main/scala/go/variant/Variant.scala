@@ -103,19 +103,23 @@ abstract class Variant private[variant] (
         situation.board.apiPosition.makeMovesWithPrevious(List(uciMove, "ss:"), previousMoves)
       return Pass(
         situationBefore = situation,
-        after = situation.board.copy(
-          uciMoves = situation.board.uciMoves ++ List("pass", "ss:"),
-          position = finalPosition.some
-        ),
+        after = situation.board
+          .copy(
+            uciMoves = situation.board.uciMoves ++ List("pass", "ss:"),
+            position = finalPosition.some
+          )
+          .settled,
         autoEndTurn = true
       )
     } else {
       return Pass(
         situationBefore = situation,
-        after = situation.board.copy(
-          uciMoves = situation.board.uciMoves :+ uciMove,
-          position = newPosition.some
-        ),
+        after = situation.board
+          .copy(
+            uciMoves = situation.board.uciMoves :+ uciMove,
+            position = newPosition.some
+          )
+          .passed,
         autoEndTurn = true
       )
     }
@@ -129,10 +133,12 @@ abstract class Variant private[variant] (
     SelectSquares(
       squares = squares,
       situationBefore = situation,
-      after = situation.board.copy(
-        uciMoves = situation.board.uciMoves :+ uciMove,
-        position = newPosition.some
-      ),
+      after = situation.board
+        .copy(
+          uciMoves = situation.board.uciMoves :+ uciMove,
+          position = newPosition.some
+        )
+        .settled,
       autoEndTurn = true
     )
   }

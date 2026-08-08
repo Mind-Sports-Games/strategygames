@@ -13,6 +13,10 @@ import strategygames.go.variant.Variant
   */
 object Forsyth {
 
+  private val settledPassCount  = 3
+  private val highestPassCount  = 2
+  private val passCountFenIndex = 8
+
   val initial = FEN(
     "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 0 1"
   )
@@ -26,6 +30,14 @@ object Forsyth {
           history = History(captures = Score(fen.player1Captures, fen.player2Captures)),
           variant = variant,
           pocketData = apiPosition.pocketData,
+          komi = fen.komi,
+          ko = fen.ko,
+          consecutivePasses = fen.fenPassCount match {
+            case 1 => 1
+            case 2 => 2
+            case _ => 0
+          },
+          deadStonesSelected = fen.fenPassCount == settledPassCount,
           uciMoves = fen.fenPassCount match {
             case 1 => List("pass")
             case 2 => List("pass", "pass")
@@ -94,17 +106,9 @@ object Forsyth {
         .updated(6, board.history.captures.p2.toString)
         // Update current consecutive Pass count. Use 3 to represent end of game
         .updated(
-          8,
-          (board.uciMoves.reverse.headOption match {
-            case Some(uci) if uci.startsWith("ss:") => 3
-            case Some(uci) if uci == "pass"         => {
-              board.uciMoves.reverse.drop(1).headOption match {
-                case Some(uci) if uci == "pass" => 2
-                case _                          => 1
-              }
-            }
-            case _                                  => 0
-          }).toString
+          passCountFenIndex,
+          (if (board.deadStonesSelected) settledPassCount
+           else board.consecutivePasses min highestPassCount).toString
         )
         // Update fullTurnCount if we have a last action of select squares that the API doesnt know about
         .updated(

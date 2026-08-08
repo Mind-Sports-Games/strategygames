@@ -67,11 +67,10 @@ case class Situation(board: Board, player: Player) {
     board.variant.selectSquares(this, squares)
 
   def canSelectSquares: Boolean =
-    board.uciMoves.size > 1 && board.uciMoves
-      .takeRight(2) == List("pass", "pass") && board.uciMoves.reverse.takeWhile(_ == "pass").length % 2 == 0
+    board.consecutivePasses >= 2 && board.consecutivePasses % 2 == 0
 
   def isSubsequentPassWarning: Boolean =
-    board.uciMoves.size > 1 && board.uciMoves.takeRight(2) == List("pass", "pass")
+    board.consecutivePasses >= 2
 
   lazy val gameMessage: Option[GameMessage] =
     isSubsequentPassWarning option GameMessage.SubsequentPassWarning

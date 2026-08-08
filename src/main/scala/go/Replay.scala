@@ -124,6 +124,7 @@ object Replay {
           pocketData = apiPosition.pocketData,
           position = apiPosition.some
         )
+        .passed
         .withHistory(
           before.situation.history.copy(
             // lastTurn handled in Action.finalizeAfter
@@ -151,10 +152,11 @@ object Replay {
           pocketData = apiPosition.pocketData,
           position = apiPosition.some
         )
+        .settled
         .withHistory(
           before.situation.history.copy(
             // lastTurn handled in Action.finalizeAfter
-            scoring = () => apiPosition.fenScore,
+            score = apiPosition.fenScore,
             captures = before.situation.history.captures.add(
               before.situation.player,
               settlementCaptureCount(
@@ -439,22 +441,27 @@ object Replay {
     }
     if (startedTurns > 0) turns += openTurn.result()
 
+    val positionState = positionStateAfter(init.situation.board, flat)
+
     val board = Board(
       pieces = finalPosition.pieceMap,
       history = History(
         lastTurn = lastTurn.map(uciOf),
         currentTurn = currentTurn.map(uciOf),
         halfMoveClock = halfMoveClock,
-        scoring =
-          if (flat.exists(_ != passActionStr)) () => finalPosition.fenScore
-          else History.unscored,
+        score =
+          if (flat.exists(_ != passActionStr)) finalPosition.fenScore
+          else Score(0, 0),
         captures = capturesAfter(framed, finalPosition, player, initialFen, variant)
       ),
       variant = variant,
       pocketData = finalPosition.pocketData,
+      komi = init.situation.board.komi,
+      consecutivePasses = positionState.consecutivePasses,
+      deadStonesSelected = positionState.deadStonesSelected,
       uciMoves = init.situation.board.uciMoves ++ flat,
       position = finalPosition.some
-    )
+    ).withKoOf(finalPosition)
 
     Game(
       situation = Situation(board, player),
@@ -495,6 +502,13 @@ object Replay {
 
   private def isSelectSquares(actionStr: String): Boolean =
     ScalaPosition.isSelectSquares(actionStr)
+
+  private def positionStateAfter(before: Board, actionStrs: List[String]): Board =
+    actionStrs.foldLeft(before) { (board, actionStr) =>
+      if (isSelectSquares(actionStr)) board.settled
+      else if (actionStr == passActionStr) board.passed
+      else board.stonePlaced
+    }
 
   private def uciOf(actionStr: String): Uci =
     Uci(actionStr).getOrElse(sys.error(s"Invalid actionStr for replay: ${actionStr}"))
