@@ -130,17 +130,23 @@ crossing to joansala or to the deleted seam is cross-machine and indicative, bec
 references are deleted code and no same-run denominator can be produced again.
 
 **Against joansala, on the path lila runs.** lila replays go through the wrapper, so the wrapper
-rows are the ones that describe production: **11.3x faster at 19x19 if the consumer never reads a
-score, 2.4x if it reads one every ply** (6.1x / 8.8x / 11.3x and 2.2x / 2.4x / 2.4x across
-9x9 / 13x13 / 19x19). Which of the two is live is not known here and cannot be settled from this
-repo: it depends on whether lila touches a history field per ply, and the same library code costs
-4.7x more if it does. Go is a scoring game whose score is usually on screen, so the pessimistic
-number may be the real one.
+rows are the ones that describe production: at 19x19, about **21x faster if the consumer never reads
+a score and 2.8x if it reads one every ply**. Which of the two is live is not known here and cannot
+be settled from this repo — it depends on whether lila touches a history field per ply, and the same
+library code costs 7.5x more if it does. Go is a scoring game whose score is usually on screen, so
+the pessimistic number may be the real one.
+
+Both figures are ahead of the tables and are arithmetic rather than a measurement:
+`a3dc35a2`'s post-fix 19x19 numbers (4630.5 and 34773.7 µs) over the same joansala baseline the
+tables use, which is a different machine again. `docs/go-speed-results.md` still records 11.3x and
+2.4x because its run predates `a3dc35a2`, which deferred the wrapper's `PieceMap` and took 3.7 ms off
+both wrapper rows. **The tables have not been re-run.**
 
 **Against joansala, on the go package alone**, full-game replay through `go.Replay` is 9.3x / 16.4x
 / 29.7x faster, and a single placement — `Variant.boardAfter` — is 42x faster at 19x19. That
-measures the rules, not the site. Quoting 29.7x as go's speed-up leaves out the wrapper, which at
-19x19 adds 5.25 ms to a 3.24 ms replay before anything reads a score.
+measures the rules, not the site, and `a3dc35a2` did not touch it — the change is one line in
+`strategygames/Board.scala`. Quoting 29.7x as go's speed-up still leaves out a wrapper that
+`a3dc35a2` narrowed rather than removed.
 
 **Against the seam this branch deleted**, replay at 19x19 is 11.7x slower than its batch path and
 1.5x slower than its per-ply path. The batch path folded a whole game on one mutable scratch state
@@ -157,21 +163,26 @@ and took `applyDrop` at 19x19 from 59.9 µs to 1.44 µs. Per ply, replay is now 
 nearly flat across board sizes, which is what it should look like once the one O(board area) term
 per ply is gone.
 
-What is left, with `areaScore` out of the profile, is the cost the design knowingly accepted. The
-first two are on the wrapper path, and they lead because that is the path lila runs:
+One wrapper cost the tables name has since been paid off, and it is the reason the production figures
+above are ahead of them. **`strategygames.Board` took its `pieces` as a strict constructor argument**,
+so every `Board.Go(b)` rebuilt the whole go piece map into wrapper `Pos` and `Piece` whether or not
+anything read it, once per ply on the wrapper replay path — ~27% of named samples in `wrapperReplay`
+at 19x19, with per-ply overhead scaling with board area (3.4 / 6.3 / 13.1 µs). `a3dc35a2` takes it by
+name into a `lazy val`, the shape `1d658123` had already used for the wrapped history on the same
+class, and removes 3.7 ms from a 19x19 wrapper replay — 1.79x on the row that reads no score. All
+nine logics gained it; `Board` is a `sealed abstract class` rather than a `case class`, so the
+by-name parameter cost no subclass anything.
 
-- **`strategygames.Board.Go` rebuilds the whole `PieceMap` as a strict constructor argument**
-  (`Board.scala:253-258`): `b.pieces.map { case (pos, piece) => (Pos.Go(pos), (Piece.Go(piece), 1)) }`
-  runs once per wrapper `Board`, and the wrapper replay path materialises one per ply. ~27% of named
-  samples in `wrapperReplay` at 19x19, with per-ply overhead scaling with board area — 3.4 / 6.3 /
-  13.1 µs. This is the 5.25 ms the wrapper adds at 19x19. The fix has a precedent in the tree: the
-  wrapped *history* was already made by-name into a `lazy val` on the same class, and `pieces` is the
-  same shape untouched.
+What is left is the cost the design knowingly accepted. The first is on the wrapper path, and it
+leads because that is the path lila runs:
+
 - **`strategygames.History.Go` takes the score as a strict parameter**, so reading *any* history
-  field on a ply forces that ply's flood fill — 2.8x / 3.7x / 4.7x on a consumer that reads a score
-  every ply. Closing it needs either a by-name parameter (costing `History.Go` its `case class`,
-  making go the only non-case-class of nine) or a board-carrying `History.Go` (which lila's
-  `History.apply` factory cannot construct). Both are larger than this branch sanctioned.
+  field on a ply forces that ply's flood fill — 7.5x at 19x19 on a consumer that reads a score every
+  ply, once the `pieces` cost is out of the way. Closing it needs either a by-name parameter (costing
+  `History.Go` its `case class`, making go the only non-case-class of nine) or a board-carrying
+  `History.Go` (which lila's `History.apply` factory cannot construct). `Board` had the first option
+  cheaply because it is not a `case class`; `History.Go` does not. Both are larger than this branch
+  sanctioned.
 - **`PieceMap = Map[Pos, Piece]` and `Set[Pos]`, in the go package.** `Pos` is a case class, so every
   liberty test and every region step is a boxed structural hash and an equality against an immutable
   `HashMap` or `HashSet`. The deleted engine indexed a byte array by `Pos.index`. That representation
@@ -180,8 +191,9 @@ first two are on the wrapper path, and they lead because that is the path lila r
 - **`History.hasOccurred`'s superko scan**, an O(plies) linear scan per ply, newly visible at ~4%. It
   was always there; `areaScore` dwarfed it.
 
-Nothing else measured here was acted on. A follow-up branch takes the numbers as its input, and the
-two wrapper items above are the two it should take first.
+Nothing else measured here was acted on. A follow-up branch takes the numbers as its input, and
+`History.Go`'s strict score is what it should take first — it is the last item standing between a
+wrapper consumer and the 7.5x.
 
 ## The four preserved quirks
 
