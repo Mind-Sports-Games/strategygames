@@ -94,6 +94,9 @@ abstract class Variant private[variant] (
     if (situation.end) List()
     else boardSize.validPos.filter(isPlayable(situation, _))
 
+  // the whole of go legality, in the order that answers cheapest first: the point is empty, it is
+  // not the ko point, the placement is not suicide, and it does not recreate a position this game
+  // has already held. `Chain` answers the middle two together — see `capturesUnlessSuicide`.
   private def isPlayable(situation: Situation, point: Pos): Boolean =
     !situation.board.pieces.contains(point) &&
       !situation.board.ko.contains(point) &&
@@ -101,6 +104,17 @@ abstract class Variant private[variant] (
         .capturesUnlessSuicide(situation.board, situation.player, point)
         .exists(captured => !recreatesAnEarlierPosition(situation, point, captured))
 
+  /** Positional superko: no placement may recreate a position the game has already held.
+    *
+    * `captured.nonEmpty` is not an optimisation, it is the rule's reachable domain. Adding a stone to the
+    * board and removing none strictly increases the stone count, and the count never falls except by capture,
+    * so a non-capturing placement cannot land on a position seen before. Probing it anyway would cost a
+    * full-board hash and a scan of the whole history for every empty point of every `validDrops` call, to
+    * answer no every time.
+    *
+    * Positional, not situational: whose turn it is does not enter the hash. `docs/go-engine.md` carries the
+    * rules contract, `docs/adr/0001-pure-scala-go-engine.md` why positional was chosen.
+    */
   private def recreatesAnEarlierPosition(
       situation: Situation,
       point: Pos,
@@ -118,6 +132,10 @@ abstract class Variant private[variant] (
       situation.board.withHistory(afterOnePly(situation.history)).settled
     else situation.board.passed.withHistory(afterOnePly(situation.history))
 
+  // four passes in a row end the game with the stones where they lie — nobody is going to select
+  // dead stones, so the position is taken as it stands. This lives on the board-transition path
+  // rather than in `validPass`, which is what makes a replayed game reach the same end a played one
+  // does; before this refactor only the played path knew about it.
   private def settlesByPassing(situation: Situation): Boolean =
     situation.board.consecutivePasses + 1 >= Variant.passesSettlingTheGame
 
@@ -127,6 +145,17 @@ abstract class Variant private[variant] (
   def createSelectSquares(situation: Situation, squares: List[Pos]): SelectSquares =
     SelectSquares(squares = squares, situationBefore = situation, autoEndTurn = true)
 
+  /** Agreeing the dead stones: lift them, and the game is over.
+    *
+    * The one rules implementation of a settlement, shared by the played and replayed paths — and it
+    * deliberately leaves `history.captures` alone, which is what the played path has always done.
+    * `Replay.addSettlement` adds the count on top for the paths that load a game from its actions. The two
+    * disagree, on purpose; the note there says why.
+    *
+    * `.settled` restarts the position history at this board, so superko forgets everything before the
+    * settlement. Nothing follows a settlement, so nothing can observe it — but the ordering matters: settle
+    * last, or `withHistory` overwrites the restart.
+    */
   def boardAfterSelectSquares(situation: Situation, squares: List[Pos]): Board =
     situation.board
       .copy(pieces = situation.board.pieces -- squares)
@@ -196,6 +225,15 @@ abstract class Variant private[variant] (
     score.p1 == score.p2
   }
 
+  /** Play `situation.player`'s stone onto `pos` and hand back the board that follows.
+    *
+    * The only place a stone is ever placed. `Drop.after` is this and nothing else, so every drop in the suite
+    * exercises it, and a rule that belongs on the placement path has nowhere else to hide.
+    *
+    * Assumes the placement is legal — `drop` and `validDrops` decide that, through `isPlayable`. Order
+    * matters within it: the captured stones come off before the ko point and the position hash are worked
+    * out, because both describe the board as it stands afterwards.
+    */
   def boardAfter(situation: Situation, pos: Pos): Board = {
     val stone              = Piece(situation.player, defaultRole)
     val captured           = Chain.capturedBy(situation.board, situation.player, pos)
@@ -213,6 +251,23 @@ abstract class Variant private[variant] (
       )
   }
 
+  /** The point an immediate recapture is forbidden on, if this placement created one.
+    *
+    * Simple ko is the shape where the two players could take and retake the same stone forever. All three
+    * conditions are needed to recognise it, and each one on its own admits a position where the recapture is
+    * perfectly legal:
+    *
+    *   - exactly one stone captured — capture two and the recapture cannot restore the position
+    *   - the placed stone stands alone — if it joined a chain, taking it back leaves that chain behind and
+    *     the board has moved on
+    *   - that lone stone has exactly one liberty — with two, the opponent taking it back does not return the
+    *     position either; this is the condition that separates ko from snapback
+    *
+    * The forbidden point is the one the captured stone stood on. Superko would refuse the same recapture in a
+    * game played through from the start, but not in one resumed from a FEN, whose position history begins at
+    * the resumed position and remembers nothing before it. The ko coordinate travels in the FEN and is
+    * enforced on its own, which is what makes a resume safe.
+    */
   private def koPointAfter(placed: Board, at: Pos, captured: Set[Pos]): Option[Pos] = {
     val placedChain = Chain.at(placed, at)
     Option.when(
@@ -220,6 +275,9 @@ abstract class Variant private[variant] (
     )(captured.head)
   }
 
+  // zobrist, so the hash after a placement is the hash before it XOR the masks of every stone that
+  // changed. The `getOrElse` is the one case the history has nothing to build on — the first action
+  // of a game resumed from a FEN — and pays a full-board recompute once.
   private def hashAfterPlacing(before: Board, stone: Piece, at: Pos, captured: Set[Pos]): Long =
     captured.foldLeft(
       before.history.currentPosition.getOrElse(before.positionHash) ^ Hash.mask(stone, at)
@@ -227,6 +285,14 @@ abstract class Variant private[variant] (
       hash ^ Hash.mask(before.pieces(pos), pos)
     }
 
+  /** Chinese area scoring: your stones on the board, plus the empty points only you surround.
+    *
+    * Reported in tenths of a point, because that is what the FEN's score fields carry and komi is routinely a
+    * half point. Komi goes to p2 and is added here rather than by the caller, so every reader of a score sees
+    * the same number.
+    *
+    * The rule is on the variant; the memo is `Board.areaScore`. Same split as `materialImbalance`.
+    */
   def areaScore(board: Board): Score = {
     val enclosedArea = enclosedAreaByPlayer(board)
 
@@ -260,6 +326,10 @@ abstract class Variant private[variant] (
       ._1
   }
 
+  // an empty region scores for a player only if that player is the only colour touching it. A
+  // region both colours touch is dame and scores for nobody, and so is a region no colour touches
+  // at all — an empty board is worth nothing to either player. There is no seki handling because
+  // area scoring does not need any: a shared-liberty region is dame by this rule already.
   private def soleBorderingPlayer(board: Board, region: Set[Pos]): Option[Player] = {
     val bordering = region.flatMap(borderingPlayersAt(board, _))
     Option.when(bordering.size == 1)(bordering.head)
@@ -286,6 +356,11 @@ abstract class Variant private[variant] (
   @nowarn def finalizeBoard(board: Board, uci: format.Uci, captured: Option[Piece]): Board =
     board
 
+  // the cheap structural invariant the wrapper leans on, asked directly. It used to export the
+  // board to a FEN and regex the result, which could not fail for a Board built in process — the
+  // export drops off-size stones on the way out, so the round trip only ever validated a string it
+  // had just sanitised. "no stone may hold more than one point" needs no check: PieceMap is keyed
+  // by Pos. `strict` draws no distinction here, as in every other go variant.
   def valid(board: Board, @nowarn strict: Boolean): Boolean =
     board.pieces.keys.forall(boardSize.onBoard)
 

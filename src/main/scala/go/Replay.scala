@@ -52,6 +52,9 @@ case class Replay(setup: Game, actions: List[Action], state: Game) {
       )
   }
 
+  // `addAction` for a settlement that arrived as a recorded action rather than as a live choice.
+  // The pairing is the point: the action and its capture adjustment go on together, so no loader
+  // can add one without the other. See `Replay.withSettlementCaptures`.
   def addSettlement(selectSquares: SelectSquares): Replay =
     copy(
       actions = selectSquares :: actions,
@@ -116,6 +119,19 @@ object Replay {
   def replaySelectSquares(before: Game, squares: List[Pos], endTurn: Boolean): SelectSquares =
     SelectSquares(squares, situationBefore = before.situation, autoEndTurn = endTurn)
 
+  /** The settlement capture accounting that only a loaded game gets, and the played game does not.
+    *
+    * A game played through the site records nothing in `history.captures` when the dead stones are agreed;
+    * the same game loaded back from its action list records the stones lifted, plus one. Both behaviours are
+    * older than this refactor and stored games were written under both, so the divergence is preserved rather
+    * than settled — collapsing it would silently restate the capture count of every finished go game in the
+    * database.
+    *
+    * It lives here, in the loader, because that is where it already lived. `Variant .boardAfterSelectSquares`
+    * is the one rules implementation and stays clean of it, which is why every loader has to route through
+    * this and `addSettlement` rather than call it themselves. Getting that wrong is not hypothetical: it is
+    * how `pgn.Reader` came to disagree with the other three loaders about the same game.
+    */
   private def withSettlementCaptures(played: Game, selectSquares: SelectSquares): Game =
     played.copy(situation = withSettlementCaptures(played.situation, selectSquares))
 
@@ -132,7 +148,8 @@ object Replay {
     )
 
   // NOTE: the +1 counts one stone more than an `ss:` lifts. Preserved rather than fixed: the
-  // `History.captures` of every settled game already stored downstream was written with it.
+  // `History.captures` of every settled game already stored downstream was written with it. The fix
+  // is deleting the `+ 1`; what it needs is a decision about the counts already in the database.
   private def settlementCaptureCount(stonesBefore: Int, stonesAfter: Int): Int =
     stonesBefore - stonesAfter + 1
 
@@ -205,6 +222,11 @@ object Replay {
             endTurn
           )
         case (Uci.Pass.passR(), endTurn)                     => replayPassFromUci(endTurn)
+        // NOTE: the `flatMap` drops a key this board size has no point for, where the drop branch
+        // above errors on one. Asymmetric, and preserved: a settlement naming a stone that is not
+        // there lifts nothing, which is harmless, and refusing it now would make games already
+        // stored with a stray key unloadable. Fixing it means a `traverse` here and a sweep of the
+        // stored records first.
         case (Uci.SelectSquares.selectSquaresR(ss), endTurn) =>
           replaySelectSquaresFromUci(ss.split(",").toList.flatMap(Pos.fromKey(_)), endTurn)
         case (actionStr: String, _)                          =>
@@ -291,7 +313,11 @@ object Replay {
       variant: strategygames.go.variant.Variant
   ): Validated[String, List[Situation]] = {
     val sit = initialFenToSituation(initialFen, variant)
-    // seemingly this isn't used
+    // TODO(go): dead for go, and `boards` above it with it. `Parser.sans` is a stub that answers
+    // "Not implemented iterable moves" for every go action string, so this never gets past its
+    // first line and `recursiveSituations` has never run. Pre-existing, and not a refactor's to
+    // decide: the callers are in the wrapper layer, so deleting these is an API change, and
+    // implementing `Parser.sans` is a feature. Use `situationsFromUci` in the meantime.
     Parser.sans(actionStrs.flatten, sit.board.variant) andThen { sans =>
       recursiveSituations(sit, sans.value) map { sit :: _ }
     }

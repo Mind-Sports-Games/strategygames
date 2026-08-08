@@ -1,5 +1,12 @@
 # The go speed dive
 
+> **Frozen, 2026-08-08. Every subject of this document has been deleted.** It measures the
+> `Api.Position` seam, the `go/engine/` package, the batch and per-ply replay paths and the joansala
+> baseline, none of which exist any more ([ADR 0003](adr/0003-go-rules-in-variant.md)). It is kept
+> for the joansala reference numbers, the measurement protocol, and the reasoning about what was and
+> was not reachable — not as a description of the code. Current measurements:
+> [docs/go-speed-results.md](go-speed-results.md).
+
 Headline tables: [docs/go-speed-results.md](go-speed-results.md).
 
 Can the pure-Scala go engine's production surface reach 10x / 20x / 30x / 100x the retired joansala

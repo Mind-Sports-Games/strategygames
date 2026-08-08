@@ -11,6 +11,10 @@ case class Drop(
     metrics: MoveMetrics = MoveMetrics()
 ) extends Action(situationBefore) {
 
+  // derived rather than passed in, because for go the board after a placement is fully determined
+  // by where it was played from and onto — there is nothing a caller could supply that this cannot
+  // work out. Lazy is what makes `validDrops` affordable: it builds a Drop per legal point, and a
+  // caller listing legal points for a client never forces a single after-board.
   lazy val after: Board = before.variant.boardAfter(situationBefore, pos)
 
   def situationAfter =

@@ -4,6 +4,14 @@ import strategygames.Score
 
 import format.Uci
 
+/** What a go position remembers about how it got here.
+  *
+  * `positionHashes` is the house field every game logic uses for repetition, doing double duty as go's
+  * positional-superko history: newest first, one entry per position the game has held. Go never truncates it
+  * — a stone placed is never taken back — except at a settlement, where `Board.settled` restarts it.
+  * `captures` is here because it is genuinely accumulated arithmetic; the area score is not, and lives on
+  * `Board` (see `Board.areaScore`).
+  */
 case class History(
     lastTurn: List[Uci] = List.empty,
     currentTurn: List[Uci] = List.empty,

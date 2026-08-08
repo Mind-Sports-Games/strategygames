@@ -1,6 +1,10 @@
 # 0001 — Replace the joansala Go engine with a pure-Scala engine
 
-**Status:** Accepted (2026-07-25)
+**Status:** Accepted (2026-07-25). **Structurally superseded** by
+[0003](0003-go-rules-in-variant.md) (2026-08-08) — the engine package, the `Api.Position` seam and
+the representation described under "Engine" below no longer exist. Everything else here stands: the
+rules decisions (positional superko, Chinese area scoring, rules-correct over parity), the FEN
+dialect, and the retired ids are all still binding.
 
 ## Context
 

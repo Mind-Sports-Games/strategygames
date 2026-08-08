@@ -1,7 +1,21 @@
 # 0002 — Batch replay at the `Api.Position` seam
 
-**Status:** Accepted (2026-07-25). The "Parked: engine-level movegen options" section is
-Proposed — recorded for a later decision, not accepted for implementation.
+**Status:** **Superseded** by [0003](0003-go-rules-in-variant.md) (2026-08-08). The seam it decided
+on, the batch path, the per-ply oracle and the engine below them are all deleted; go has one replay
+path. Three of its rulings outlived it and 0003 states which, how each fared, and the evidence that
+superseded the fourth:
+
+- *a game resumed from a FEN counts only the actions it is handed* — **carried forward unchanged**
+- *a pass cannot change the score* — **carried forward, and stronger**: it now holds structurally
+  rather than by scheduling discipline
+- *a drop-less game keeps `Score(0, 0)`* — **superseded on evidence.** It described an evaluation
+  schedule rather than a rule of go, and the tree already contradicted it: the exported FEN read the
+  position while `history.score` read zero at those same plies.
+- the parked movegen options below are **moot**: they are optimisations of an engine that no longer
+  exists.
+
+Originally accepted 2026-07-25. The "Parked: engine-level movegen options" section was Proposed —
+recorded for a later decision, never accepted for implementation.
 
 ## Context
 

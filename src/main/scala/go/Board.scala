@@ -10,6 +10,10 @@ case class Board(
     history: History,
     variant: Variant,
     pocketData: Option[PocketData] = None,
+    // per game, not per variant, and it arrives in the FEN — a handicap game sets it away from the
+    // variant default. It gets no default value for that reason: `variant.komi` is only where a
+    // fresh board starts, and scoring a board by its variant's komi instead of its own turns a
+    // drawn game into a win.
     komi: Double,
     ko: Option[Pos] = None,
     consecutivePasses: Int = 0,
@@ -30,6 +34,18 @@ case class Board(
     (p, pieces.collect { case (pos, piece) if piece.player == p => (pos, piece) }.size)
   }.toMap
 
+  /** The area score of this position, computed once per board and then remembered.
+    *
+    * Derived, not carried. `History.captures` is genuinely accumulated — a running total no single position
+    * can reconstruct — but the area score is a function of the stones and the komi, both of which are right
+    * here. Storing it on `History` meant computing a full-board flood fill on every placement whether or not
+    * anyone wanted the number, which by measurement was most of the cost of replaying a game. A `lazy val`
+    * next to the other derived state (`actors`, `posMap`, `playerPiecesOnBoardCount`) is what the house does
+    * with derived state and costs nothing until something asks.
+    *
+    * A consequence worth knowing: a position before any stone is placed now reports its real score — komi to
+    * p2 — rather than `Score(0, 0)`. That superseded a clause of ADR 0002; ADR 0003 says so.
+    */
   lazy val areaScore: Score = variant.areaScore(this)
 
   def withHistory(h: History): Board       = copy(history = h)
@@ -46,8 +62,15 @@ case class Board(
 
   def ensurePocketData = withPocketData(pocketData | PocketData.init)
 
+  // the three transitions a go action can make to position state. Every writer goes through one of
+  // them, so `ko`, `consecutivePasses` and `deadStonesSelected` are never assigned from outside
+  // this file and cannot drift apart. Backgammon's Board does the same with its own state.
   def passed: Board = copy(ko = None, consecutivePasses = consecutivePasses + 1)
 
+  // NOTE: sticky. `deadStonesSelected` says the dead stones have been agreed and the game is over,
+  // which no later action unsays — `passed` and `stonePlaced` carry it through. Nothing can follow
+  // a settlement today (both the played and the loaded path refuse), and this is why: a flag a
+  // later action could clear would let a finished game become unfinished again.
   def settled: Board =
     copy(ko = None, consecutivePasses = 0, deadStonesSelected = true).withHistoryStartingHere
 

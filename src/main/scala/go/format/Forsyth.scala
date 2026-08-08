@@ -185,6 +185,12 @@ object Forsyth {
   private def playerToMove(board: Board): Player =
     Player.fromTurnCount(board.history.halfMoveClock)
 
+  // NOTE: when p2 settled the game, the full-move number gets a `1` *concatenated* onto it, not
+  // added — full move 23 renders as "231". Almost certainly a `+` that should have been arithmetic,
+  // but it has been emitting FENs for as long as go has been on the site and a settled game's field
+  // 9 is stored that way, so it is preserved rather than fixed. Nothing reads it back for anything
+  // that matters: a settled game is over. Fixing it means an arithmetic `+ 1` here and a decision
+  // about what to do with the FENs already written.
   private def fullMovePart(board: Board): String = {
     val fullMove    = board.history.halfMoveClock / 2 + 1
     val settledByP2 = board.history.lastTurn.headOption.exists {
