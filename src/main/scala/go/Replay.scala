@@ -128,7 +128,7 @@ object Replay {
         .withHistory(
           before.situation.history.copy(
             // lastTurn handled in Action.finalizeAfter
-            halfMoveClock = before.situation.history.halfMoveClock + before.situation.player.fold(0, 1)
+            halfMoveClock = before.situation.history.halfMoveClock + 1
           )
         ),
       autoEndTurn = endTurn
@@ -163,7 +163,7 @@ object Replay {
                 apiPosition.pieceMap.size
               )
             ),
-            halfMoveClock = before.situation.history.halfMoveClock + before.situation.player.fold(0, 1)
+            halfMoveClock = before.situation.history.halfMoveClock + 1
           )
         )
         .settled,
@@ -431,7 +431,7 @@ object Replay {
       }
       openTurn += actionStr
       plies += 1
-      halfMoveClock += player.fold(0, 1)
+      halfMoveClock += 1
       if (endTurn) {
         lastTurn = currentTurn :+ actionStr
         currentTurn = List.empty

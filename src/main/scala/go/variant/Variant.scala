@@ -108,6 +108,7 @@ abstract class Variant private[variant] (
             uciMoves = situation.board.uciMoves ++ List("pass", "ss:"),
             position = finalPosition.some
           )
+          .withHistory(afterOnePly(situation.history))
           .settled,
         autoEndTurn = true
       )
@@ -119,11 +120,15 @@ abstract class Variant private[variant] (
             uciMoves = situation.board.uciMoves :+ uciMove,
             position = newPosition.some
           )
+          .withHistory(afterOnePly(situation.history))
           .passed,
         autoEndTurn = true
       )
     }
   }
+
+  private def afterOnePly(history: History): History =
+    history.copy(halfMoveClock = history.halfMoveClock + 1)
 
   def createSelectSquares(situation: Situation, squares: List[Pos]): SelectSquares = {
     val uciMove       = s"ss:${squares.mkString(",")}"
@@ -135,9 +140,11 @@ abstract class Variant private[variant] (
       situationBefore = situation,
       after = situation.board
         .copy(
+          pieces = situation.board.pieces -- squares,
           uciMoves = situation.board.uciMoves :+ uciMove,
           position = newPosition.some
         )
+        .withHistory(afterOnePly(situation.history))
         .settled,
       autoEndTurn = true
     )
@@ -211,7 +218,7 @@ abstract class Variant private[variant] (
           .copy(
             score = areaScore(placed),
             captures = situation.history.captures.add(situation.player, captured.size),
-            halfMoveClock = situation.history.halfMoveClock + situation.player.fold(0, 1)
+            halfMoveClock = situation.history.halfMoveClock + 1
           )
           .afterPosition(hashAfterPlacing(situation.board, stone, pos, captured))
       )

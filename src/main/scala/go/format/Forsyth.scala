@@ -13,9 +13,12 @@ import strategygames.go.variant.Variant
   */
 object Forsyth {
 
-  private val settledPassCount  = 3
-  private val highestPassCount  = 2
-  private val passCountFenIndex = 8
+  private val settledPassCount          = 3
+  private val highestPassCount          = 2
+  private val pocket                    = "[SSSSSSSSSSssssssssss]"
+  private val noKoPoint                 = "-"
+  private val fenTenths                 = 10
+  private val digitAppendedBySettlement = 1
 
   val initial = FEN(
     "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 0 1"
@@ -26,10 +29,13 @@ object Forsyth {
     Some(
       Situation(
         Board(
-          pieces = apiPosition.pieceMap,
-          history = History(captures = Score(fen.player1Captures, fen.player2Captures)),
+          pieces = fen.pieces,
+          history = History(
+            captures = Score(fen.player1Captures, fen.player2Captures),
+            halfMoveClock = fen.ply.getOrElse(0).max(0)
+          ),
           variant = variant,
-          pocketData = apiPosition.pocketData,
+          pocketData = Api.stonePocketData,
           komi = fen.komi,
           ko = fen.ko,
           consecutivePasses = fen.fenPassCount match {
@@ -88,39 +94,66 @@ object Forsyth {
   // TODO Should this just be returning the board part of the fen? Check what Chess does
   def exportBoard(board: Board): String = exportBoardFen(board).value
 
-  def exportBoardFen(board: Board): FEN =
+  def exportBoardFen(board: Board): FEN = {
+    val score = board.variant.areaScore(board)
     FEN(
-      board.apiPosition.fen.value
-        .split(" ")
-        // Update player if we have a last action of select squares that the API doesnt know about
-        .updated(
-          1,
-          board.history.lastTurn.headOption match {
-            case Some(_: Uci.SelectSquares) if board.apiPosition.turn == "w" => "b"
-            case Some(_: Uci.SelectSquares) if board.apiPosition.turn == "b" => "w"
-            case _                                                           => board.apiPosition.turn
-          }
-        )
-        // Update captures
-        .updated(5, board.history.captures.p1.toString)
-        .updated(6, board.history.captures.p2.toString)
-        // Update current consecutive Pass count. Use 3 to represent end of game
-        .updated(
-          passCountFenIndex,
-          (if (board.deadStonesSelected) settledPassCount
-           else board.consecutivePasses min highestPassCount).toString
-        )
-        // Update fullTurnCount if we have a last action of select squares that the API doesnt know about
-        .updated(
-          9,
-          board.history.lastTurn.headOption match {
-            case Some(_: Uci.SelectSquares) if board.apiPosition.turn == "w" =>
-              board.apiPosition.fen.value.split(" ")(9) + 1
-            case _                                                           => board.apiPosition.fen.value.split(" ")(9)
-          }
-        )
-        .mkString(" ")
+      List(
+        boardPart(board),
+        playerToMove(board).fold("b", "w"),
+        board.ko.fold(noKoPoint)(_.key),
+        score.p1.toString,
+        score.p2.toString,
+        board.history.captures.p1.toString,
+        board.history.captures.p2.toString,
+        komiTenths(board).toString,
+        passCount(board).toString,
+        fullMovePart(board)
+      ).mkString(" ")
     )
+  }
+
+  def boardPart(board: Board): String =
+    ranksTopDown(board).map(renderedRank(board, _)).mkString("", "/", pocket)
+
+  private def ranksTopDown(board: Board): List[Int] =
+    (board.variant.boardSize.height - 1 to 0 by -1).toList
+
+  private def renderedRank(board: Board, rankIndex: Int): String = {
+    val (rendered, trailingEmpties) =
+      (0 until board.variant.boardSize.width).foldLeft((List.empty[String], 0)) {
+        case ((rendered, emptyRun), fileIndex) =>
+          Pos.at(fileIndex, rankIndex).flatMap(board.pieces.get) match {
+            case Some(stone) => (symbolOf(stone) :: emptiesBefore(rendered, emptyRun), 0)
+            case None        => (rendered, emptyRun + 1)
+          }
+      }
+    emptiesBefore(rendered, trailingEmpties).reverse.mkString
+  }
+
+  private def emptiesBefore(rendered: List[String], emptyRun: Int): List[String] =
+    if (emptyRun > 0) emptyRun.toString :: rendered else rendered
+
+  private def symbolOf(stone: Piece): String =
+    stone.player.fold(stone.forsyth.toUpper, stone.forsyth).toString
+
+  private def komiTenths(board: Board): Int = Math.round(board.komi * fenTenths).toInt
+
+  private def passCount(board: Board): Int =
+    if (board.deadStonesSelected) settledPassCount
+    else board.consecutivePasses min highestPassCount
+
+  private def playerToMove(board: Board): Player =
+    Player.fromTurnCount(board.history.halfMoveClock)
+
+  private def fullMovePart(board: Board): String = {
+    val fullMove                     = board.history.halfMoveClock / 2 + 1
+    val settledByThePlayerNowWaiting = board.history.lastTurn.headOption.exists {
+      case _: Uci.SelectSquares => playerToMove(board).p1
+      case _                    => false
+    }
+    if (settledByThePlayerNowWaiting) s"${fullMove}${digitAppendedBySettlement}"
+    else fullMove.toString
+  }
 
   def boardAndPlayer(situation: Situation): String =
     boardAndPlayer(situation.board, situation.player)

@@ -99,7 +99,7 @@ case class Board(
               player,
               stonesBefore.size - stonesAfter.size + 1
             ),
-            halfMoveClock = history.halfMoveClock + player.fold(0, 1)
+            halfMoveClock = history.halfMoveClock + 1
           )
           .afterPosition(
             hashAfterPlacing(Piece(player, Role.defaultRole), dest, stonesBefore -- stonesAfter.keys)

@@ -108,7 +108,7 @@ class GoReplayTest extends Specification with ValidatedMatchers {
           (false, 12),
           (false, 12),
           (false, 12),
-          (true, 12) // piece removed after?
+          (true, 11)
         )
       }
     }
