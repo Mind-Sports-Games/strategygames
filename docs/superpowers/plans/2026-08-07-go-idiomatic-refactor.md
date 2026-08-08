@@ -22,7 +22,12 @@
 - **Overridable configuration is `def`, never `val`** — even for constants. `val`/`lazy val` is for non-overridable derived caches and object-level tables.
 - **Errors:** `Validated[String, A]` on the legality path, `Option` for absence, `sys.error` for genuinely impossible states. No `Either`, no exceptions in legality.
 - **Zero comments from the implementer.** `lw:implementer` writes no comments at all; naming and structure are the documentation. A separate `lw:documenter` pass adds every comment and doc afterwards.
-- **`scalafmt` must be clean.** Run `sbt scalafmtAll` before every commit.
+- **`scalafmt` must be clean for the files you touched — and only those.** This branch inherits
+  87 pre-existing files that fail `scalafmtCheckAll` (40 in `Compile`, 47 in `Test`), none of them
+  ours. **Never run `sbt scalafmtAll`**: it reformats all 87 and sweeps unrelated churn into your
+  diff. Format only what you touched, with `sbt "scalafmtOnly <path> [<path>...]"`, and verify with
+  `git status --short` that nothing outside your task changed before staging. Stage by explicit
+  path; never `git add -A` across `src/`.
 - **Behaviour-preserving.** The four quirks in the design doc's "Preserved quirks" section stay, each pinned by a test.
 - **Tree green after every task:** `sbt compile test` and, where the task touches `bench`, `sbt bench/test`.
 
