@@ -114,10 +114,20 @@ object Replay {
       )
 
   def replayPass(before: Game, endTurn: Boolean): Pass =
-    Pass(situationBefore = before.situation, autoEndTurn = endTurn)
+    before.situation
+      .pass()
+      .map(_.copy(autoEndTurn = endTurn))
+      .valueOr(error => sys.error(s"Illegal action pass at ply ${before.plies} for replay: ${error}"))
 
   def replaySelectSquares(before: Game, squares: List[Pos], endTurn: Boolean): SelectSquares =
-    SelectSquares(squares, situationBefore = before.situation, autoEndTurn = endTurn)
+    before.situation
+      .selectSquares(squares)
+      .map(_.copy(autoEndTurn = endTurn))
+      .valueOr(error =>
+        sys.error(
+          s"Illegal action ss:${squares.map(_.key).mkString(",")} at ply ${before.plies} for replay: ${error}"
+        )
+      )
 
   /** The settlement capture accounting that only a loaded game gets, and the played game does not.
     *
