@@ -84,8 +84,8 @@ lines removed.
 - **A `Score` field on `History`, kept strict.** Tried, and the first version of this refactor
   shipped it — it is the shape `togyzkumalak` uses. Rejected on measurement: togyzkumalak's score is
   accumulated captures and go's is a full-board flood fill, so copying the shape without the
-  reasoning cost a flood fill per placement whether or not anyone wanted the number. That is
-  roughly half to four-fifths of a full-game replay.
+  reasoning ran a flood fill on every placement whether or not anyone wanted the number. Deriving it
+  instead was worth 3.4x / 5.2x / 9.5x on replay and 2.9x / 5.0x / 8.4x on allocation.
 - **Situational superko.** Rejected in 0001 and still rejected; positional forbids a strict superset
   of cycles and pairs correctly with area scoring.
 
@@ -101,8 +101,10 @@ lines removed.
 - **Source-breaking for lila**, in two places beyond the deleted `Api` helpers:
   `FEN.variant` is `Option[Variant]`, and the `goHistory` implicit is gone. The full patch is in
   [docs/go-refactor.md](../go-refactor.md).
-- **Slower than the seam it replaced** — 37–111x on replay, 18–20x on movegen — and roughly 3x
-  faster than joansala. Tables in [docs/go-speed-results.md](../go-speed-results.md). Every number
-  is reported, none was traded for; a follow-up branch takes the measurements as its input.
+- **Faster than joansala, slower than the seam it replaced.** Full-game replay is 9.3x / 16.4x /
+  29.7x joansala and a single placement is 42x it, while replay at 19x19 is 11.7x the deleted batch
+  path and 1.5x the deleted per-ply one; legal-drop generation is 17–21x the seam's lazy list.
+  Tables in [docs/go-speed-results.md](../go-speed-results.md). Every number is reported, none was
+  traded for; a follow-up branch takes the measurements as its input.
 - The four preserved quirks stay preserved, each documented at its code site. They are behaviour
   stored games were written under, not decisions this ADR reopens.

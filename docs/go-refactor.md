@@ -99,36 +99,45 @@ acceptable rather than merely tolerated.
 
 ## What it costs
 
-[docs/go-speed-results.md](go-speed-results.md) holds the tables and is the record; this is the
-shape of them.
+[docs/go-speed-results.md](go-speed-results.md) holds the tables and is the record. Every ratio
+crossing to joansala or to the deleted seam is cross-machine and indicative, because all three
+references are deleted code and no same-run denominator can be produced again.
 
-Against the retired joansala engine, full-game replay is faster at every board size. Against the
-`Api.Position` seam this branch deleted, it is substantially slower — the seam's batch path folded a
-whole game on one mutable scratch state and published once, and nothing in an immutable
-`Map[Pos, Piece]` design gets near that. Movegen sits between the seam's lazy and eager behaviours:
-slower than the lazy one it replaced, faster than the eager one at every size.
+**Against joansala**, full-game replay through `go.Replay` is 9.3x / 16.4x / 29.7x faster
+(9x9 / 13x13 / 19x19), and a single placement — `Variant.boardAfter` — is 42x faster at 19x19.
 
-Two costs the design accepted deliberately turned out to be the two the measurements are dominated
-by, which is the expected outcome rather than a surprise:
+**Against the seam this branch deleted**, replay at 19x19 is 11.7x slower than its batch path and
+1.5x slower than its per-ply path. The batch path folded a whole game on one mutable scratch state
+and published once; an immutable design that materialises a `Board` per ply does not reach that, and
+was never going to. Legal-drop generation is the one workload untouched by any of this: 17–21x the
+seam's *lazy* list, and 1.2–2.7x faster than its *eager* one.
 
-- **`PieceMap = Map[Pos, Piece]`.** `Pos` is a case class, so every liberty test and every region
-  step is a boxed structural hash and an equality against an immutable `HashMap`. The deleted engine
-  indexed a byte array by `Pos.index`. That representation difference — not the flood fill's
-  asymptotics — is the constant factor under area scoring, FEN parsing and movegen alike. It is the
-  single named root cause in the profile.
-- **Per-candidate legality computed from the position** rather than from a maintained union-find
-  index. `validDrops` runs `capturesUnlessSuicide` for every empty intersection.
+One design decision changed mid-branch on measurement, and it is the largest single number here. The
+area score was first a strict field on `History`, copying togyzkumalak's *shape* without its
+*reasoning* — togyzkumalak's score is accumulated captures, go's is a full-board flood fill, so the
+copy ran a flood fill on every placement whether or not anyone wanted the number. Deriving it on
+`Board` instead was worth **3.4x / 5.2x / 9.5x** on replay and **2.9x / 5.0x / 8.4x** on allocation,
+and took `applyDrop` at 19x19 from 59.9 µs to 1.44 µs. Per ply, replay is now 6.6 / 7.4 / 8.1 µs —
+nearly flat across board sizes, which is what it should look like once the one O(board area) term
+per ply is gone.
 
-One measurement is worth stating on its own because it changed a design decision mid-branch. The
-area score was first implemented as a strict field on `History`, copying togyzkumalak's *shape*
-without its *reasoning* — togyzkumalak's score is accumulated captures, go's is a full-board flood
-fill, so the copy computed a flood fill per placement whether or not anyone wanted the number.
-Deriving it on `Board` instead, measured on a 204-ply 19x19 game through the wrapper's replay:
-**26.23 ms → 4.46 ms** for a consumer that does not read the score, and unchanged (25.02 → 23.01 ms)
-for one that reads every ply's. The "before" row is itself the proof of the defect — replay cost the
-same either way, because it scored 204 times regardless.
+What is left, with `areaScore` out of the profile, is the cost the design knowingly accepted:
 
-Nothing measured here was acted on beyond that. A follow-up branch takes the numbers as its input.
+- **`PieceMap = Map[Pos, Piece]` and `Set[Pos]`.** `Pos` is a case class, so every liberty test and
+  every region step is a boxed structural hash and an equality against an immutable `HashMap` or
+  `HashSet`. The deleted engine indexed a byte array by `Pos.index`. That representation difference
+  — not the flood fill's asymptotics — is the constant factor under chain walking, FEN parsing and
+  movegen alike, and it is the single named root cause in the profile.
+- **`History.hasOccurred`'s superko scan**, an O(plies) linear scan per ply, newly visible at ~4%. It
+  was always there; `areaScore` dwarfed it.
+- **On the wrapper path only**, `strategygames.History.Go` takes the score as a strict parameter, so
+  reading *any* history field on a ply forces that ply's flood fill — 2.8x / 3.7x / 4.7x on a
+  consumer that reads a score every ply. Closing it needs either a by-name parameter (costing
+  `History.Go` its `case class`, making go the only non-case-class of nine) or a board-carrying
+  `History.Go` (which lila's `History.apply` factory cannot construct). Both are larger than this
+  branch sanctioned.
+
+Nothing else measured here was acted on. A follow-up branch takes the numbers as its input.
 
 ## The four preserved quirks
 
