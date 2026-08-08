@@ -106,11 +106,16 @@ abstract class Variant private[variant] (
 
   /** Positional superko: no placement may recreate a position the game has already held.
     *
-    * `captured.nonEmpty` is not an optimisation, it is the rule's reachable domain. Adding a stone to the
-    * board and removing none strictly increases the stone count, and the count never falls except by capture,
-    * so a non-capturing placement cannot land on a position seen before. Probing it anyway would cost a
-    * full-board hash and a scan of the whole history for every empty point of every `validDrops` call, to
-    * answer no every time.
+    * `captured.nonEmpty` is the restriction the deleted engine carried, kept unchanged, so no placement this
+    * refuses or allows differs from what it did before. The reason to keep it is cost: probing a
+    * non-capturing placement means a full-board hash and a scan of the whole history for every empty point of
+    * every `validDrops` call.
+    *
+    * It is believed to lose nothing. A placement that captures nothing leaves every stone already on the
+    * board where it stands and adds one, so matching an earlier position would need the game to have unwound
+    * to a strict subset of that position first — and every step of an unwind is a capture, which leaves its
+    * own capturing stone behind. That is an argument and not a proof; nothing here rests on it, because the
+    * restriction is inherited rather than derived.
     *
     * Positional, not situational: whose turn it is does not enter the hash. `docs/go-engine.md` carries the
     * rules contract, `docs/adr/0001-pure-scala-go-engine.md` why positional was chosen.

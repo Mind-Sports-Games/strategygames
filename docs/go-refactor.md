@@ -346,6 +346,19 @@ behaviour preservation. `Replay.plyAtFen` had the same problem and *was* deleted
 provably never worked *and* nothing depended on its result — the wrapper now answers
 `Validated.invalid` directly. The inconsistency is deliberate and wants its own decision.
 
+**A board standing at three consecutive passes does not survive a FEN round trip.**
+`Forsyth.passCount` caps the rendered pass count at 2 (`consecutivePasses min highestPassCount`) and
+the parse maps 1→1, 2→2 and anything else→0, so three renders as 2 and reloads as 2. Measured, `Go9x9`,
+`pass pass pass`: the source board has `consecutivePasses = 3` and `canSelectSquares = false`; its
+own exported FEN reloads to `consecutivePasses = 2` and `canSelectSquares = true`, and the resumed
+game needs **two** further passes to settle where the source board needed one. Preserved — the old
+field-8 renderer capped at 2 as well and the old `<<@` seeded exactly two synthetic passes — so it is
+out of scope for a behaviour-preserving refactor, but the stakes went up: behaviour change 2 makes
+passing the only way a game ends without a settlement. *Fix:* render and parse the real count. What it
+needs is a decision about the FENs already written, which is the same blocker as the four quirks.
+`GoBoardStateTest.resumptions` stops at two passes; adding `(List("pass","pass","pass"), "pass")` to
+that list turns the asymmetry red.
+
 **Not a limitation, though it was recorded as one: stacked assertions.** Two reviewers flagged
 independently that examples asserting several facts one after another report only the last, so an
 example appearing to pin four things pins one. Both were wrong.
