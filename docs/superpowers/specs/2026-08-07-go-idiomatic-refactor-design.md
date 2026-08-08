@@ -18,6 +18,30 @@ plus game-specific state.
 Goal: make `go` look and behave like it was written by hand for strategygames, following the
 house patterns, while staying far faster than the joansala engine it replaced.
 
+## Two branches
+
+The work lands as two branches rather than one compromise.
+
+**`lakin/go-idiomatic-refactor` — as close as possible to the existing game logics, correct for
+Go.** Every choice is decided by "what would Togyzkumalak or Backgammon do here", and performance
+never breaks a tie. Strict `History.score`. No memo in `validDrops`. `PieceMap` end to end. This
+branch is the statement of what idiomatic Go in strategygames looks like, and it is the one to
+read when asking whether the code fits the house.
+
+**`lakin/go-idiomatic-perf` — branched from the first once it is green and measured, modified as
+little as possible to reach good performance.** Every deviation from the first branch must be
+justified by a benchmark number, must be the smallest change that moves it, and must be
+documented at the point of deviation. A deviation without a measurement behind it does not land.
+
+The pivot between them is the measurement step. The first branch measures and reports; it does not
+optimise. What the second branch changes is decided by what that measurement says, not by what
+this document guesses.
+
+**The first branch is the deliverable.** Merging depends on it and on nothing else. The second is
+a bonus, attempted only once the first is complete, reviewed and documented. No decision on the
+first branch may be shaded by what the second might want — if idiom and speed conflict there,
+idiom wins and the conflict becomes a note for the second branch.
+
 ## Non-goals
 
 - Changing the Go rules. Superko flavour, area scoring, FEN dialect and variant ids stay as
@@ -37,8 +61,9 @@ house patterns, while staying far faster than the joansala engine it replaced.
 5. `go/Replay.scala` has the same public shape as `togyzkumalak/Replay.scala` and
    `backgammon/Replay.scala` — no batch/per-ply duality.
 6. No `var` or mutable collection escapes a method body anywhere in `go`.
-7. Full-game replay stays at least 40x faster than the joansala baseline on every board size.
-8. `sbt test` and `sbt bench/test` green.
+7. `sbt test` and `sbt bench/test` green.
+8. Full-game replay is measured against the joansala baseline on every board size and the numbers
+   are recorded. This is a reporting criterion, not a gate: no idiom is traded to move it.
 
 ---
 
@@ -282,8 +307,9 @@ a resume counts only the actions given, and pass plies do not rescore `history.s
 
 ## Performance
 
-The bar is the joansala baseline in `docs/go-speed-results.md`: 7,395 / 24,313 / 96,385 µs per
-full-game replay at 9x9 / 13x13 / 19x19.
+On this branch performance is measured and reported, never traded for. The reference is the
+joansala baseline in `docs/go-speed-results.md`: 7,395 / 24,313 / 96,385 µs per full-game replay
+at 9x9 / 13x13 / 19x19.
 
 Expected cost changes, all measured rather than assumed:
 
@@ -299,9 +325,9 @@ The JMH suite is re-pointed at the new code: the seam and engine benchmarks go, 
 `prodValidDropsMidGame` and `applyDrop` stay and become the headline numbers, and
 `docs/go-speed-results.md` is regenerated against the same joansala baseline.
 
-If measurement shows the strict `history.score` dominates, the fallback is a documented
-`lazy val score` on `Board` plus a two-line change in `src/main/scala/History.scala`. Evidence
-decides; the strict field is the default because it is what every other logic does.
+Both of these are candidate deviations for the second branch, not for this one. If measurement
+shows the strict `history.score` dominates, the note goes in the write-up and the field stays
+strict here, because that is what every other logic does.
 
 ---
 

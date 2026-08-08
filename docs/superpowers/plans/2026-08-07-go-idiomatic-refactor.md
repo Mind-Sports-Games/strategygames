@@ -12,6 +12,10 @@
 
 ## Global Constraints
 
+- **This branch is the idiomatic one, and it is the deliverable.** Merging depends on it looking
+  and behaving like it was written by hand for strategygames. Where house idiom and performance
+  conflict, idiom wins and the conflict is written down as a candidate for the separate follow-up
+  performance branch. Never shade a decision here toward what that branch might want.
 - **No duplication.** There must be exactly one implementation of capture, legality, and scoring when the work is done. The retired engine had two (`GoState` and `BulkReplay.ScratchGoState`); that is the defect being removed, not a pattern to copy.
 - **Immutable and functional.** No `var`, `Array` mutation, or mutable collection may escape a method body. Method-local scratch mutation is house style where the algorithm is genuinely sequential (precedent: `abalone/variant/Variant.scala:87-298`, `backgammon/Situation.scala:40-66`, `togyzkumalak/format/Forsyth.scala:83-106`) and must carry a comment saying why it is safe.
 - **House style is Togyzkumalak, then Backgammon and Abalone.** Fixed vocabulary that must not be renamed: `boardAfter`, `validMoves`/`validDrops`, `canDrop`, `possibleDrops`, `winner`, `specialEnd`, `specialDraw`, `materialImbalance`, `valid`, `addVariantEffect`, `hasMoveEffects`, `finalizeAfter`, `situationAfter`, `situationBefore`, `withX`, `updateX`, `all`/`byId`/`byKey`/`default`/`orDefault`/`exists`.
@@ -661,9 +665,9 @@ sbt "bench/Jmh/run -wi 3 -w 2s -i 5 -r 2s -f 1 -to 120s -rf json -rff go-jmh.jso
 ```
 Record replay µs/game and `validDrops` µs/call for all three sizes.
 
-- [ ] **Step 3: Check the bar**
+- [ ] **Step 3: Report against the baseline — do not optimise**
 
-Full-game replay must be at least 40x the joansala baseline (7,395 / 24,313 / 96,385 µs for 9x9 / 13x13 / 19x19). If any size misses, profile before optimising and report the finding rather than guessing — the two known suspects are the strict `history.score` flood fill per drop and per-candidate legality in `validDrops`.
+Compare against the joansala baseline (7,395 / 24,313 / 96,385 µs for 9x9 / 13x13 / 19x19) and record the ratio. **This is a reporting step, not a gate.** This branch is the idiomatic one and merging depends on it being idiomatic, not fast; a disappointing number is a finding to write down, not a licence to deviate. If a number looks bad, profile far enough to name the cause and record it as a candidate for the follow-up performance branch. The two suspects already identified are the strict `history.score` flood fill per drop and per-candidate legality in `validDrops`. Change neither here.
 
 - [ ] **Step 4: Regenerate `docs/go-speed-results.md` against the joansala baseline, then commit**
 
