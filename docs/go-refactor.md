@@ -51,6 +51,13 @@ that is the layer where this kept happening.
 
 The point of the branch was to make go look like the other eight logics. Concretely:
 
+An independent reviewer read `src/main/scala/go/` file by file against `togyzkumalak`, `backgammon`,
+`abalone` and `dameo` and scored it: 21 matches, 5 justified deviations, 12 residue items.
+[docs/go-house-conformance.md](go-house-conformance.md) is that review, reproduced verbatim and
+annotated with what has landed since it was taken. One of the twelve residue items is closed — the
+one the reviewer named as most worth fixing, which is the `Forsyth.exportBoard` change described
+below. The other eleven are open and named.
+
 **The `Variant` vocabulary.** `boardAfter` is the placement path, named after
 `togyzkumalak.Variant.boardAfter` and `backgammon.Variant.boardAfter`. `canDrop`/`validDrops` pair
 the way `validMoves` and its predicate do elsewhere — `canDrop` short-circuits on the first legal
