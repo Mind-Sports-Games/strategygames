@@ -3,13 +3,17 @@ package strategygames
 import strategygames.variant.Variant
 
 sealed abstract class Board(
-    val pieces: PieceMap,
-    val history: History,
+    wrappedPieces: => PieceMap,
+    wrappedHistory: => History,
     val variant: Variant,
     val pocketData: Option[PocketData] = None,
     val unusedDice: List[Int] = List.empty,
     val cubeData: Option[CubeData] = None
 ) {
+  lazy val pieces: PieceMap = wrappedPieces
+
+  lazy val history: History = wrappedHistory
+
   def apply(at: Pos): Option[Piece] = (pieces get at).map(_._1)
 
   def hasPiece(p: Piece) = pieces.values.map(_._1) exists (p ==)
@@ -257,7 +261,7 @@ object Board {
       ) {
     def withHistory(h: History): Board = h match {
       case History.Go(h, _) => Go(b.withHistory(h))
-      case _             => sys.error("Not passed go objects")
+      case _                => sys.error("Not passed go objects")
     }
 
     def usedDice: List[Int] = List.empty
@@ -271,11 +275,11 @@ object Board {
     def copy(history: History, variant: Variant): Board = (history, variant) match {
       case (History.Go(history, _), Variant.Go(variant)) =>
         Go(b.copy(history = history, variant = variant))
-      case _                                          => sys.error("Unable to copy a go board with non-go arguments")
+      case _                                             => sys.error("Unable to copy a go board with non-go arguments")
     }
     def copy(history: History): Board                   = history match {
       case History.Go(history, _) => Go(b.copy(history = history))
-      case _                   => sys.error("Unable to copy a go board with non-go arguments")
+      case _                      => sys.error("Unable to copy a go board with non-go arguments")
     }
 
     def toFairySF      = sys.error("Can't make a fairysf board from a go board")
