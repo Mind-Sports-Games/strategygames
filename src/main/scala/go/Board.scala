@@ -12,7 +12,13 @@ case class Board(
     variant: Variant,
     pocketData: Option[PocketData] = None,
     uciMoves: List[String] = List(),
-    position: Option[Api.Position] = None
+    position: Option[Api.Position] = None,
+    // NOTE: komi belongs to the game rather than the variant. A handicap game carries its own in its
+    // fen, and scoring a finished game under the variant's value can award it to the wrong player.
+    komi: Double,
+    ko: Option[Pos] = None,
+    consecutivePasses: Int = 0,
+    deadStonesSelected: Boolean = false
 ) {
 
   def apply(at: Pos): Option[Piece] = pieces get at
@@ -29,6 +35,8 @@ case class Board(
     (p, pieces.collect { case (pos, piece) if piece.player == p => (pos, piece) }.size)
   }.toMap
 
+  lazy val areaScore: Score = variant.areaScore(this)
+
   def withPosition(p: Option[Api.Position]): Board = copy(position = p)
 
   def withHistory(h: History): Board       = copy(history = h)
@@ -44,6 +52,21 @@ case class Board(
     withPocketData(f(pocketData | PocketData.init))
 
   def ensurePocketData = withPocketData(pocketData | PocketData.init)
+
+  // NOTE: `passed`, `settled` and `stonePlaced` are the only writers of `ko`, `consecutivePasses`
+  // and `deadStonesSelected` on the action path, so they cannot drift apart as a game is played.
+  def passed: Board = copy(ko = None, consecutivePasses = consecutivePasses + 1)
+
+  def settled: Board =
+    copy(ko = None, consecutivePasses = 0, deadStonesSelected = true).withHistoryStartingHere
+
+  def stonePlaced: Board = copy(consecutivePasses = 0)
+
+  def positionHash: Long = Hash.positionHash(this)
+
+  def withHistoryStartingHere: Board = updateHistory(_.startingAtPosition(positionHash))
+
+  def withKo(point: Option[Pos]): Board = copy(ko = point)
 
   def situationOf(player: Player) = Situation(this, player)
 
@@ -93,7 +116,13 @@ case class Board(
 object Board {
 
   def apply(pieces: Iterable[(Pos, Piece)], variant: Variant): Board =
-    Board(pieces.toMap, History(), variant, variantPocketData(variant))
+    Board(
+      pieces = pieces.toMap,
+      history = History(),
+      variant = variant,
+      pocketData = variantPocketData(variant),
+      komi = variant.komi
+    ).withHistoryStartingHere
 
   def init(variant: Variant): Board = Board(variant.pieces, variant)
 
@@ -111,7 +140,22 @@ object Board {
     val sizes = List(width, height)
 
     val validPos: List[Pos] =
-      Pos.all.filter(p => p.file.index < width && p.rank.index < height)
+      Pos.all.filter(onBoard)
+
+    val neighbours: Array[List[Pos]] =
+      Array.tabulate(Pos.allSize)(index =>
+        Pos(index).filter(onBoard).fold(List.empty[Pos])(cardinalNeighboursOf)
+      )
+
+    def onBoard(pos: Pos): Boolean = pos.file.index < width && pos.rank.index < height
+
+    private def cardinalNeighboursOf(pos: Pos): List[Pos] =
+      List(
+        Pos.at(pos.file.index - 1, pos.rank.index),
+        Pos.at(pos.file.index + 1, pos.rank.index),
+        Pos.at(pos.file.index, pos.rank.index - 1),
+        Pos.at(pos.file.index, pos.rank.index + 1)
+      ).flatten.filter(onBoard)
 
     override def toString = key
 

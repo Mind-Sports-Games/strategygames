@@ -1,6 +1,7 @@
 package strategygames.go.format
 
 import strategygames.Player
+import strategygames.go.{ Piece, PieceMap, Pos, Role }
 import strategygames.go.variant.Variant
 
 final case class FEN(value: String) extends AnyVal {
@@ -8,6 +9,33 @@ final case class FEN(value: String) extends AnyVal {
   override def toString = value
 
   def board: String = removePockets(value.takeWhile(_ != ' '))
+
+  def pieces: PieceMap =
+    board
+      .split('/')
+      .toList
+      .zipWithIndex
+      .flatMap { case (row, rowsFromTop) => stonesOfRow(row, gameSize - 1 - rowsFromTop) }
+      .toMap
+
+  private def stonesOfRow(row: String, rankIndex: Int): List[(Pos, Piece)] =
+    row
+      .foldLeft((List.empty[(Pos, Piece)], 0, 0)) { case ((stones, fileIndex, emptyRun), symbol) =>
+        if (symbol.isDigit) (stones, fileIndex, emptyRun * 10 + symbol.asDigit)
+        else
+          (
+            stoneAt(fileIndex + emptyRun, rankIndex, symbol).toList ::: stones,
+            fileIndex + emptyRun + 1,
+            0
+          )
+      }
+      ._1
+
+  private def stoneAt(fileIndex: Int, rankIndex: Int, symbol: Char): Option[(Pos, Piece)] =
+    for {
+      pos  <- Pos.at(fileIndex, rankIndex)
+      role <- Role.allByForsyth.get(symbol.toLower)
+    } yield pos -> Piece(Player.fromP1(symbol.isUpper), role)
 
   // Use inverseApply because black goes first in Go
   def player: Option[Player] =
@@ -17,6 +45,8 @@ final case class FEN(value: String) extends AnyVal {
     // This is safe because player function ensures there is an element at playerIndex when doing split(' ')
     // Dont flip player because of inverted colours
     player.map { p => FEN(value.split(' ').updated(FEN.playerIndex, p.letter.toString).mkString(" ")) }
+
+  def ko: Option[Pos] = value.split(' ').lift(FEN.koIndex).flatMap(Pos.fromKey)
 
   def player1Score: Int = intFromFen(3).getOrElse(0)
 
@@ -86,5 +116,7 @@ object FEN {
   def clean(source: String): FEN = FEN(source.replace("_", " ").trim)
 
   def playerIndex: Int = 1
+
+  def koIndex: Int = 2
 
 }
