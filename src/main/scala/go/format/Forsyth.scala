@@ -32,7 +32,8 @@ object Forsyth {
             case 3 => List("ss:")
             case _ => List()
           },
-          position = apiPosition.some
+          position = apiPosition.some,
+          komi = fen.komi
         ),
         fen.value.split(' ')(1) match {
           case "b" => P1

@@ -18,7 +18,7 @@ final class Hash(size: Int) {
 
 object Hash {
 
-  val size = 3
+  val size = 8
 
   class ZobristConstants(start: Int) {
     def hexToLong(s: String): Long =
@@ -38,8 +38,23 @@ object Hash {
   private def pieceIndex(piece: Piece) =
     piece.role.hashInt * 2 + piece.player.fold(1, 0)
 
+  private def stoneIndex(piece: Piece, pos: Pos) =
+    Pos.allSize * pieceIndex(piece) + pos.hashCode
+
   private def actorIndex(actor: Actor) =
-    Pos.allSize * pieceIndex(actor.piece) + actor.pos.hashCode
+    stoneIndex(actor.piece, actor.pos)
+
+  def mask(piece: Piece, pos: Pos): Long =
+    polyglotTable.actorMasks(stoneIndex(piece, pos))
+
+  def positionHash(board: Board): Long =
+    board.pieces.foldLeft(0L) { case (hash, (pos, piece)) => hash ^ mask(piece, pos) }
+
+  def bytesOf(hash: Long): PositionHash =
+    Array.tabulate(size)(i => (hash >>> ((size - 1 - i) * 8)).toByte)
+
+  def hashAt(hashes: PositionHash, position: Int): Long =
+    (0 until size).foldLeft(0L)((hash, i) => (hash << 8) | (hashes(position * size + i) & 0xffL))
 
   def get(situation: Situation, table: ZobristConstants): Long = {
 
