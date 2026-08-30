@@ -11,8 +11,6 @@ case class Board(
     history: History,
     variant: Variant,
     pocketData: Option[PocketData] = None,
-    uciMoves: List[String] = List(),
-    position: Option[Api.Position] = None,
     // NOTE: komi belongs to the game rather than the variant. A handicap game carries its own in its
     // fen, and scoring a finished game under the variant's value can award it to the wrong player.
     komi: Double,
@@ -36,8 +34,6 @@ case class Board(
   }.toMap
 
   lazy val areaScore: Score = variant.areaScore(this)
-
-  def withPosition(p: Option[Api.Position]): Board = copy(position = p)
 
   def withHistory(h: History): Board       = copy(history = h)
   def updateHistory(f: History => History) = copy(history = f(history))
@@ -73,14 +69,6 @@ case class Board(
   def valid(strict: Boolean) = variant.valid(this, strict)
 
   def materialImbalance: Int = variant.materialImbalance(this)
-
-  // This won't work if the Board has been generated FromPosition. Will need to generate from FEN
-  // However generating from FEN can't be done all the time as we would like uciMoves to help with repetition
-  // Future problem when we come to deal with FromPosition for go games
-  lazy val apiPosition = position match {
-    case Some(position) => position
-    case None           => Api.positionFromVariantAndMoves(variant, uciMoves)
-  }
 
   override def toString = s"$variant Position after ${history.recentTurnUciString}"
 }
