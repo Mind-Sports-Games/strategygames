@@ -32,7 +32,8 @@ Each game has its own package under `src/main/scala/`:
 - `fairysf/` - Shogi, Xiangqi, Othello, and more. Uses fairystockfish engine to provide actions.
 - `samurai/` - Oware (mancala). Uses JoanSala's engine 'aalina' to provide actions.
 - `togyzkumalak/` - Togyzkumalak (mancala variant)
-- `go/` - Go. Uses JoanSala's go engine to provide actions.
+- `go/` - Go. `go9x9`/`go13x13`/`go19x19` share their rules, which live as concrete `def`s on
+  `go/variant/Variant.scala` with connectivity in `go/Chain.scala` (see `docs/go-engine.md`).
 - `backgammon/` - Backgammon (has dice, undo, endTurn, and doubling cube actions)
 - `abalone/` - Abalone. Hexagonal Board.
 - `dameo/` - Dameo (draughts variant). Uses multiaction properly unlike draughts game logic
