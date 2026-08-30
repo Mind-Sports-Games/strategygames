@@ -18,17 +18,28 @@ import strategygames.variant.Variant
 class UciDumpBenchmark {
 
   @Param(
-    Array("backgammon", "go", "chess", "togyzkumalak", "fairysf", "samurai", "abalone", "draughts", "dameo", "loa")
+    Array(
+      "backgammon",
+      "go",
+      "chess",
+      "togyzkumalak",
+      "fairysf",
+      "samurai",
+      "abalone",
+      "draughts",
+      "dameo",
+      "loa"
+    )
   )
   var family: String = ""
 
   @Param(Array("short", "medium", "long"))
   var size: String = ""
 
-  var lib: GameLogic            = GameLogic.Chess()
-  var variant: Variant          = Variant.libStandard(GameLogic.Chess())
-  var initialFen: Option[FEN]   = None
-  var actionStrs: ActionStrs    = Vector.empty
+  var lib: GameLogic          = GameLogic.Chess()
+  var variant: Variant        = Variant.libStandard(GameLogic.Chess())
+  var initialFen: Option[FEN] = None
+  var actionStrs: ActionStrs  = Vector.empty
 
   @Setup(Level.Trial)
   def setup(): Unit = {
@@ -49,7 +60,10 @@ class UciDumpBenchmark {
   @Benchmark
   def newGameStateMoves(bh: Blackhole): Unit = {
     val moves = GameToUciStrings(lib, actionStrs, initialFen, variant)
-      .fold(err => throw new IllegalStateException(s"GameToUciStrings invalid for $family-$size: $err"), identity)
+      .fold(
+        err => throw new IllegalStateException(s"GameToUciStrings invalid for $family-$size: $err"),
+        identity
+      )
     bh.consume(moves)
   }
 }
