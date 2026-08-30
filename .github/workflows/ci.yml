@@ -75,6 +75,11 @@ jobs:
       - name: compile
         run: sbt compile
 
+      # root does not aggregate bench, so `sbt compile` above does not reach it. Without this step a
+      # rename in src/main/scala can leave every benchmark uncompilable with the build still green.
+      - name: compile bench
+        run: sbt bench/Test/compile
+
   format:
     runs-on: ubuntu-24.04
     env:

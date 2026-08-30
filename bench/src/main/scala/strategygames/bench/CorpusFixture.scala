@@ -42,6 +42,8 @@ object CorpusFixture {
     val initialFen = if (fenValue.isEmpty) None else Some(FEN.apply(lib, fenValue))
     val turns      = valueOf(header(4)).toInt
     val body       = lines.slice(5, 5 + turns)
+    if (body.size != turns)
+      sys.error(s"corpus $family declares $turns turns but carries ${body.size}")
     val actionStrs =
       body.map(turn => if (turn.isEmpty) Vector.empty[String] else turn.split(",", -1).toVector)
     CorpusFixture(family, lib, variant, initialFen, actionStrs)

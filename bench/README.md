@@ -6,6 +6,30 @@ project and enables `JmhPlugin`. Nothing here is part of the published
 `org.playstrategy %% strategygames` artifact — `sbt publishLocal` publishes only
 `strategygames`.
 
+## No root task compiles this project
+
+`root` does not `.aggregate(bench)`, so `sbt compile`, `sbt test` and every other
+root task ignore it entirely. A rename or signature change in `src/main/scala`
+can leave every benchmark here uncompilable while the root build stays green.
+
+This has already happened. `7c69c51d` renamed `Forsyth.exportBoardFen` to
+`exportBoard` and changed its return type from `FEN` to `String`;
+`GoRulesBenchmark` kept calling the old name in two places, and no go benchmark
+could be run at all until `8904ce51` followed the rename. Nothing reported it in
+between.
+
+CI now catches that case: the `compile` job runs `sbt bench/Test/compile` as a
+second step, so a pull request that breaks the benchmarks fails. Run the same
+command locally after touching anything this project calls, and before planning
+any measurement on it:
+
+```
+sbt bench/Test/compile
+```
+
+CI compiles the benchmarks but does not run `bench/test`, which generates the
+corpus on a fresh checkout and costs about a minute before any spec executes.
+
 ## What it measures
 
 `UciDumpBenchmark` reproduces lila's hot path in `BotJsonView.gameState`:
@@ -114,6 +138,110 @@ Restrict parameters (e.g. a quick check):
 ```
 sbt "bench/Jmh/run -i 1 -wi 1 -f 1 -r 1s -w 1s -p family=backgammon,go -p size=short,long .*UciDumpBenchmark.*"
 ```
+
+## Go benchmarks
+
+`GoRulesBenchmark` times the go rules — `go/variant/Variant.scala`, `go/Chain.scala`
+and `go/Board.scala` — on the canonical variants (`go9x9`, `go13x13`, `go19x19`)
+over the `go-go9x9-long`, `go-go13x13-long` and `go-long` corpus fixtures, which
+are generated on first use like every other fixture here. It reports absolute
+timings per board size; the recorded baselines are in
+[docs/go-speed-results.md](../docs/go-speed-results.md). `GoCorpus.scala` holds the
+fixture loading the benchmarks share.
+
+| Benchmark | Call path | Fixture level |
+|---|---|---|
+| `replay` | `go.Replay.gameFromUciStrings` over the whole fixture, score never read | `Level.Trial` |
+| `replayReadingFinalScore` | the same, then one read of the final `Board.areaScore` | `Level.Trial` |
+| `wrapperReplay` | `strategygames.Replay.gameWithUciWhileValid`, one wrapper `Game` per ply, score never read | `Level.Trial` |
+| `wrapperReplayReadingEveryScore` | the same, reading `history.score` on every ply | `Level.Trial` |
+| `applyDrop` | `Variant.boardAfter` on a mid-game situation | `Level.Trial` |
+| `validDropsMidGame` | `Situation.dropsAsDrops` → `Variant.validDrops` | `Level.Trial` |
+| `dropsByRoleMidGame` | `Situation.dropsByRole` | `Level.Trial` |
+| `areaScoreMidGame` | `Board.areaScore` | `Level.Invocation` |
+| `fenParseMidGame` | `Forsyth.<<@` | `Level.Trial` |
+| `fenRenderMidGame` | `Forsyth.exportBoard` | `Level.Invocation` |
+
+The two `Level.Invocation` workloads read `Board`'s derived `lazy val`s —
+`areaScore` and, under it, `playerPiecesOnBoardCount` — so a `Level.Trial` board
+would memoise them after the first invocation and the benchmark would under-report.
+Each invocation gets a board freshly parsed from the same mid-game FEN, which is
+also what production sees: `boardAfter` builds a new `Board` every placement. JMH
+excludes fixture time from the reported score.
+
+The four replay workloads exist because the two paths no longer cost the same. The
+go-package path returns one `Game` and computes the area score only if something
+reads it; the wrapper path materialises one `strategygames.Game` per ply, and
+reading any history field on one of those forces that ply's score. Quote whichever
+matches the consumer you care about, and say which one it is.
+
+Quick go-only run (roughly four minutes, wide error bars — use for a smoke check):
+
+```
+sbt "bench/Jmh/run -wi 3 -i 3 -f 1 -to 60s strategygames.bench.GoRulesBenchmark"
+```
+
+Checkpoint baseline (roughly twenty minutes, error bars under 2%):
+
+```
+sbt "bench/Jmh/run -wi 5 -w 2s -i 10 -r 2s -f 1 -to 120s \
+  -rf json -rff go-jmh.json strategygames.bench.GoRulesBenchmark"
+```
+
+Filter to one workload or one size with the regex and `-p`:
+
+```
+sbt "bench/Jmh/run -wi 5 -w 2s -i 10 -r 2s -f 1 -to 120s \
+  -p size=go19x19 GoRulesBenchmark.validDropsMidGame"
+```
+
+Never run `bench/Jmh/run` without iteration and fork limits: the default settings
+(5 forks × 5 warmup × 5 measurement over every benchmark in the project) take
+hours.
+
+Run `bench/clean` first after renaming or deleting a benchmark or `@State` class.
+The generated JMH sources are not invalidated by the rename and the run fails with
+`ClassNotFoundException` before it measures anything.
+
+### Benchmark from a separate worktree, and check the run for completeness
+
+Two traps, both of which quietly produce a plausible table rather than an error.
+
+**A second sbt in the same working directory corrupts a JMH run.** JMH forks a JVM
+per configuration; a concurrent `sbt test` rewriting `target/` and `bench/target/`
+underneath it makes those forks fail. Give the run its own checkout:
+
+```
+git worktree add /tmp/bench-run HEAD
+cd /tmp/bench-run && sbt "bench/Jmh/run ..."
+git worktree remove --force /tmp/bench-run
+```
+
+**`sbt` exits 0 even when JMH dropped configurations.** When a fork fails the log
+carries `Could not find or load main class org.openjdk.jmh.runner.ForkedMain`, JMH
+omits those rows from both the console table and the `-rff` JSON, and the build
+still reports `[success]`. The console table is truncated by sbt's logger too, so
+it is not a reliable record either. Verify the run rather than trusting its exit
+code — count the results in the JSON and grep the log:
+
+```
+python3 -c "import json;print(len(json.load(open('bench/go-jmh.json'))))"   # expect benchmarks x sizes
+grep -c ForkedMain run.log                                                  # expect 0
+```
+
+`GoSmokeTiming` answers the same question without JMH: median wall-clock over a
+few rounds of full-game replay and legal-drop generation, printed as a table of
+absolute ns/op and appended to a CSV. It finishes in seconds, so it suits a quick
+check between edits; `GoRulesBenchmark` remains the measure of record. Its rounds
+are too few to reach steady state — expect it to read high, by up to 3x on the
+smaller boards.
+
+```
+sbt "bench/runMain strategygames.bench.GoSmokeTiming /path/to/results.csv"
+```
+
+The output path can also come from `-Dsmoke.output` (which wins over the argument);
+without either it defaults to `bench/target/go-smoke-results.csv`.
 
 ## Allocation profiling
 
