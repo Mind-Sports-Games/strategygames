@@ -126,10 +126,9 @@ object Replay {
         )
       )
 
-  // NOTE: only the loaders that fold action strings carry this adjustment. The `Uci`-list loaders and
-  // a game played live record nothing, which is a divergence stored games were written under.
-  // `docs/go-engine.md` lists which path does which. `Variant.boardAfterSelectSquares` stays clean of
-  // it, so an action-string loader has to route through `addSettlement` rather than call it itself.
+  // NOTE: only the loaders that fold action strings make this adjustment. Replaying a list of `Uci`
+  // leaves the capture count where it stands, as does a game played live, so one game can load with
+  // two different totals. Stored games were written under that split; `docs/go-engine.md` maps it.
   private def withSettlementCaptures(played: Game, selectSquares: SelectSquares): Game =
     played.copy(situation = withSettlementCaptures(played.situation, selectSquares))
 

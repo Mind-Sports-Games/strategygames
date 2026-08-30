@@ -131,21 +131,10 @@ object Forsyth {
     )
   }
 
-  /** The whole ten-field fen, from the board alone.
-    *
-    * Every other logic returns board-only state here and lets `>>(game)` splice in the player and the full
-    * move, and go's own house-conformance review named this signature as the last engine-era shape in the
-    * package. It is kept at ten fields anyway, because the string is a published wire format: lila hands it
-    * to `MoveGameEvent`, the `/tv/feed` stream and the user-games API, and readers index it by field —
-    * `stratops`' go variant reads fields 3 and 4 for the scores, lila's own `ui/stratutils` reads field 1 for
-    * the turn. Dropping two fields shifts every one of those by one, at runtime, with nothing red.
-    *
-    * The player comes from the board because that is all there is. `>>(game)` takes it from the `Game`, which
-    * is the honest source, and the two agree for every board this library builds.
-    *
-    * TODO(lila): narrow this to board-only state once those readers take the player and the full move from
-    * somewhere other than a fen field index.
-    */
+  // NOTE: this returns all ten fen fields, including the turn and the full move number, because two
+  // other codebases read the string by field position: `stratops` takes the scores from fields 3 and
+  // 4, and lila's `ui/stratutils` takes the turn from field 1. See `docs/go-refactor.md`.
+  // TODO(lila): narrow this to the board once those readers take the turn and full move elsewhere.
   def exportBoard(board: Board): String =
     (boardPart(board) ::
       playerToMove(board).fold("b", "w") ::
@@ -206,9 +195,10 @@ object Forsyth {
     if (board.deadStonesSelected) settledPassCount
     else board.consecutivePasses min highestPassCount
 
-  // NOTE: when p2 settled the game the full-move number gets a `1` concatenated on, not added — full
-  // move 23 renders as "231". Stored fens carry it. TODO(playstrategy): decide what to do with those
-  // fens, then make it arithmetic.
+  // NOTE: when p2 settles the game the full move number gets a `1` concatenated onto it rather than
+  // added, so full move 23 renders as "231". Every settled game already in the database was written
+  // that way and is read back the same way.
+  // TODO(playstrategy): make this arithmetic once there is a decision about those stored fens.
   private def fullMovePart(board: Board, playerToMove: Player): String = {
     val fullMove    = board.history.halfMoveClock / 2 + 1
     val settledByP2 = board.history.lastTurn.headOption.exists {
