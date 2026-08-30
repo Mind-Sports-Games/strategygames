@@ -63,37 +63,21 @@ object Reader {
             (Role.allByForsyth(replay.state.board.variant.gameFamily).get(role(0)), Pos.fromKey(dest)) match {
               case (Some(role), Some(dest)) =>
                 Result.Complete(
-                  replay.addAction(
-                    Replay.replayDrop(
-                      replay.state,
-                      role,
-                      dest,
-                      endTurn
-                    )
-                  )
+                  replay.addAction(Replay.replayDrop(replay.state, role, dest, endTurn))
                 )
               case _                        => Result.Incomplete(replay, s"Error making replay with drop: ${actionStr}")
             }
           case Uci.Pass.passR()                     =>
             Result.Complete(
-              replay.addAction(
-                Replay.replayPass(
-                  replay.state,
-                  endTurn,
-                  replay.state.board.apiPosition.makeMoves(List(actionStr)),
-                  replay.state.board.uciMoves :+ actionStr
-                )
-              )
+              replay.addAction(Replay.replayPass(replay.state, endTurn))
             )
           case Uci.SelectSquares.selectSquaresR(ss) =>
             Result.Complete(
-              replay.addAction(
+              replay.addSettlement(
                 Replay.replaySelectSquares(
                   replay.state,
                   ss.split(",").toList.flatMap(Pos.fromKey(_)),
-                  endTurn,
-                  replay.state.board.apiPosition.makeMoves(List(actionStr)),
-                  replay.state.board.uciMoves :+ actionStr
+                  endTurn
                 )
               )
             )

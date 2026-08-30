@@ -2,7 +2,7 @@ package strategygames
 
 import cats.data.Validated
 import cats.implicits._
-import strategygames.format.{FEN, Uci}
+import strategygames.format.{ FEN, Uci }
 import strategygames.variant.Variant
 
 sealed abstract class Replay(val setup: Game, val actions: List[Action], val state: Game) {

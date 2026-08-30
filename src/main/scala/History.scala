@@ -105,13 +105,13 @@ object History {
         score = h.score
       )
 
-  final case class Go(h: go.History)
+  final case class Go(h: go.History, areaScore: Score)
       extends History(
         lastTurn = h.lastTurn.map(Uci.wrap),
         currentTurn = h.currentTurn.map(Uci.wrap),
         positionHashes = h.positionHashes,
         halfMoveClock = h.halfMoveClock,
-        score = h.score,
+        score = areaScore,
         captures = h.captures
       )
 
@@ -148,7 +148,6 @@ object History {
   implicit def fairysfHistory(h: fairysf.History): History           = FairySF(h)
   implicit def samuraiHistory(h: samurai.History): History           = Samurai(h)
   implicit def togyzkumalakHistory(h: togyzkumalak.History): History = Togyzkumalak(h)
-  implicit def goHistory(h: go.History): History                     = Go(h)
   implicit def backgammonHistory(h: backgammon.History): History     = Backgammon(h)
   implicit def abaloneHistory(h: abalone.History): History           = Abalone(h)
   implicit def dameoHistory(h: dameo.History): History               = Dameo(h)
@@ -230,9 +229,9 @@ object History {
           currentTurn = currentTurn.map(lm => lm.toGo),
           positionHashes = positionHashes,
           halfMoveClock = halfMoveClock,
-          score = score,
           captures = captures
-        )
+        ),
+        score
       )
     case GameLogic.Backgammon()   =>
       Backgammon(
