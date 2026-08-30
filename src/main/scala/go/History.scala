@@ -11,6 +11,10 @@ case class History(
     currentTurn: List[Uci] = List.empty,
     positionHashes: PositionHash = Array.empty,
     halfMoveClock: Int = 0,
+    // NOTE: `Board.areaScore` derives the score from the stones, and that is what
+    // `strategygames.History.score` reports for a go game, so a caller that sets this field reads the
+    // position's own score back. It survives because `readGoGame` names it.
+    // TODO(lila): stop passing a score for go, and this field can be deleted along with `StoredPosition`.
     score: Score = Score(0, 0),
     captures: Score = Score(0, 0)
 ) {
