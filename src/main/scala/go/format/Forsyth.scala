@@ -13,37 +13,86 @@ import strategygames.go.variant.Variant
   */
 object Forsyth {
 
+  private val settledPassCount          = 3
+  private val highestPassCount          = 2
+  private val pocket                    = "[SSSSSSSSSSssssssssss]"
+  private val noKoPoint                 = "-"
+  private val fenTenths                 = 10
+  private val digitAppendedBySettlement = 1
+  private val firstCountedField         = 3
+  private val fieldCountsOfTheGrammar   = Set(9, 10)
+  private val decimalBase               = 10
+
+  private val playerByTurnSymbol = Map("b" -> P1, "w" -> P2)
+
+  private val tenFieldShape =
+    "([0-9Ss]?){1,19}(/([0-9Ss]?){1,19}){8,18}\\[[Ss]+\\] [w|b] (-|[a-s][1-9][0-9]?)" +
+      " [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-9]+ [0-3] [0-9]+"
+
   val initial = FEN(
     "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 0 1"
   )
 
-  def <<@(variant: Variant, fen: FEN): Option[Situation] = {
-    val apiPosition = Api.positionFromVariantNameAndFEN(variant.key, fen.value)
-    Some(
+  def <<@(variant: Variant, fen: FEN): Option[Situation] =
+    Option.when(describes(variant.boardSize, fen))(
       Situation(
         Board(
-          pieces = apiPosition.pieceMap,
-          history = History(captures = Score(fen.player1Captures, fen.player2Captures)),
+          pieces = fen.pieces,
+          history = History(
+            captures = Score(fen.player1Captures, fen.player2Captures),
+            halfMoveClock = fen.ply.getOrElse(sys.error(s"go fen states no move number: ${fen.value}")).max(0)
+          ),
           variant = variant,
-          pocketData = apiPosition.pocketData,
-          uciMoves = fen.fenPassCount match {
-            case 1 => List("pass")
-            case 2 => List("pass", "pass")
-            case 3 => List("ss:")
-            case _ => List()
+          pocketData = Some(PocketData.init),
+          komi = fen.komi,
+          ko = fen.ko,
+          consecutivePasses = fen.fenPassCount match {
+            case 1 => 1
+            case 2 => 2
+            case _ => 0
           },
-          position = apiPosition.some
-        ),
-        fen.value.split(' ')(1) match {
-          case "b" => P1
-          case "w" => P2
-          case _   => sys.error("Invalid player in fen")
-        }
+          deadStonesSelected = fen.fenPassCount == settledPassCount
+        ).withHistoryStartingHere,
+        playerNamedByTurnField(fen).getOrElse(sys.error("Invalid player in fen"))
       )
     )
-  }
 
   def <<(fen: FEN): Option[Situation] = <<@(fen.variant, fen)
+
+  def validate(fen: FEN): Boolean =
+    fen.value.matches(tenFieldShape) &&
+      Board.BoardSize.all.exists(size => size.height == fen.gameSize && describes(size, fen))
+
+  private def describes(size: Board.BoardSize, fen: FEN): Boolean = {
+    val fields = fen.value.split(' ').toList
+    fen.gameSize == size.height &&
+    fieldCountsOfTheGrammar(fields.length) &&
+    fields.drop(firstCountedField).forall(_.toIntOption.isDefined) &&
+    playerNamedByTurnField(fen).isDefined &&
+    fen.board.split('/').forall(rowFills(size.width)) &&
+    koFieldNamesAPointOf(size, fields)
+  }
+
+  private def playerNamedByTurnField(fen: FEN): Option[Player] =
+    fen.value.split(' ').lift(FEN.playerIndex).flatMap(playerByTurnSymbol.get)
+
+  private def rowFills(width: Int)(row: String): Boolean = renderedWidthOf(row).contains(width)
+
+  private def renderedWidthOf(row: String): Option[Int] =
+    row
+      .foldLeft(Option((0, 0))) {
+        case (Some((stones, emptyRun)), symbol) if symbol.isDigit                             =>
+          Some((stones, emptyRun * decimalBase + symbol.asDigit))
+        case (Some((stones, emptyRun)), symbol) if Role.allByForsyth.contains(symbol.toLower) =>
+          Some((stones + emptyRun + 1, 0))
+        case _                                                                                => None
+      }
+      .map { case (stones, trailingEmpties) => stones + trailingEmpties }
+
+  private def koFieldNamesAPointOf(size: Board.BoardSize, fields: List[String]): Boolean =
+    fields.lift(FEN.koIndex).exists { field =>
+      field == noKoPoint || Pos.fromKey(field).exists(size.onBoard)
+    }
 
   case class SituationPlus(situation: Situation, fullTurnCount: Int) {
 
@@ -71,57 +120,98 @@ object Forsyth {
         >>(Game(situation, plies = parsed.plies, turnCount = parsed.turnCount))
     }
 
-  def >>(game: Game): FEN = exportBoardFen(game.situation.board)
-
-  // TODO Should this just be returning the board part of the fen? Check what Chess does
-  def exportBoard(board: Board): String = exportBoardFen(board).value
-
-  def exportBoardFen(board: Board): FEN =
+  def >>(game: Game): FEN = {
+    val board  = game.situation.board
+    val player = game.situation.player
     FEN(
-      board.apiPosition.fen.value
-        .split(" ")
-        // Update player if we have a last action of select squares that the API doesnt know about
-        .updated(
-          1,
-          board.history.lastTurn.headOption match {
-            case Some(_: Uci.SelectSquares) if board.apiPosition.turn == "w" => "b"
-            case Some(_: Uci.SelectSquares) if board.apiPosition.turn == "b" => "w"
-            case _                                                           => board.apiPosition.turn
-          }
-        )
-        // Update captures
-        .updated(5, board.history.captures.p1.toString)
-        .updated(6, board.history.captures.p2.toString)
-        // Update current consecutive Pass count. Use 3 to represent end of game
-        .updated(
-          8,
-          (board.uciMoves.reverse.headOption match {
-            case Some(uci) if uci.startsWith("ss:") => 3
-            case Some(uci) if uci == "pass"         => {
-              board.uciMoves.reverse.drop(1).headOption match {
-                case Some(uci) if uci == "pass" => 2
-                case _                          => 1
-              }
-            }
-            case _                                  => 0
-          }).toString
-        )
-        // Update fullTurnCount if we have a last action of select squares that the API doesnt know about
-        .updated(
-          9,
-          board.history.lastTurn.headOption match {
-            case Some(_: Uci.SelectSquares) if board.apiPosition.turn == "w" =>
-              board.apiPosition.fen.value.split(" ")(9) + 1
-            case _                                                           => board.apiPosition.fen.value.split(" ")(9)
-          }
-        )
-        .mkString(" ")
+      (boardPart(board) ::
+        player.fold("b", "w") ::
+        positionPart(board) :::
+        List(fullMovePart(board, player))).mkString(" ")
     )
+  }
+
+  // NOTE: this returns all ten fen fields, including the turn and the full move number, because two
+  // other codebases read the string by field position: `stratops` takes the scores from fields 3 and
+  // 4, and lila's `ui/stratutils` takes the turn from field 1.
+  // TODO(lila): narrow this to the board once those readers take the turn and full move elsewhere.
+  def exportBoard(board: Board): String =
+    (boardPart(board) ::
+      playerToMove(board).fold("b", "w") ::
+      positionPart(board) :::
+      List(fullMovePart(board, playerToMove(board)))).mkString(" ")
+
+  private def playerToMove(board: Board): Player =
+    Player.fromTurnCount(board.history.halfMoveClock)
+
+  private def positionPart(board: Board): List[String] = {
+    val score = board.areaScore
+    List(
+      board.ko.fold(noKoPoint)(_.key),
+      score.p1.toString,
+      score.p2.toString,
+      board.history.captures.p1.toString,
+      board.history.captures.p2.toString,
+      komiTenths(board).toString,
+      passCount(board).toString
+    )
+  }
+
+  def boardPart(board: Board): String = s"${boardRows(board.variant, board.pieces)}${pocket}"
+
+  def boardRows(variant: Variant, pieces: PieceMap): String =
+    ranksTopDown(variant).map(renderedRank(variant, pieces, _)).mkString("/")
+
+  def removeDeadStones(variant: Variant, fen: FEN, squares: List[Pos]): FEN = {
+    val rows          = boardRows(variant, fen.pieces -- squares.toSet)
+    val pocketOnwards = fen.value.indexOf('[')
+    FEN(if (pocketOnwards > 0) rows + fen.value.substring(pocketOnwards) else rows)
+  }
+
+  private def ranksTopDown(variant: Variant): List[Int] =
+    (variant.boardSize.height - 1 to 0 by -1).toList
+
+  private def renderedRank(variant: Variant, pieces: PieceMap, rankIndex: Int): String = {
+    val (rendered, trailingEmpties) =
+      (0 until variant.boardSize.width).foldLeft((List.empty[String], 0)) {
+        case ((rendered, emptyRun), fileIndex) =>
+          Pos.at(fileIndex, rankIndex).flatMap(pieces.get) match {
+            case Some(stone) => (symbolOf(stone) :: emptiesBefore(rendered, emptyRun), 0)
+            case None        => (rendered, emptyRun + 1)
+          }
+      }
+    emptiesBefore(rendered, trailingEmpties).reverse.mkString
+  }
+
+  private def emptiesBefore(rendered: List[String], emptyRun: Int): List[String] =
+    if (emptyRun > 0) emptyRun.toString :: rendered else rendered
+
+  private def symbolOf(stone: Piece): String =
+    stone.player.fold(stone.forsyth.toUpper, stone.forsyth).toString
+
+  private def komiTenths(board: Board): Int = Math.round(board.komi * fenTenths).toInt
+
+  private def passCount(board: Board): Int =
+    if (board.deadStonesSelected) settledPassCount
+    else board.consecutivePasses min highestPassCount
+
+  // NOTE: when p2 settles the game the full move number gets a `1` concatenated onto it rather than
+  // added, so full move 23 renders as "231". Every settled game already in the database was written
+  // that way and is read back the same way.
+  // TODO(playstrategy): make this arithmetic once there is a decision about those stored fens.
+  private def fullMovePart(board: Board, playerToMove: Player): String = {
+    val fullMove    = board.history.halfMoveClock / 2 + 1
+    val settledByP2 = board.history.lastTurn.headOption.exists {
+      case _: Uci.SelectSquares => playerToMove.p1
+      case _                    => false
+    }
+    if (settledByP2) s"${fullMove}${digitAppendedBySettlement}"
+    else fullMove.toString
+  }
 
   def boardAndPlayer(situation: Situation): String =
     boardAndPlayer(situation.board, situation.player)
 
-  // TODO review this, not sure this is correct as will return full fen appended with w/b
   def boardAndPlayer(board: Board, turnPlayer: Player): String =
     s"${exportBoard(board)} ${turnPlayer.letter}"
 }

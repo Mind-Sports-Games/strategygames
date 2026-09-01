@@ -22,7 +22,6 @@ lazy val root = (project in file("."))
       "org.typelevel"                   %% "cats-core"                % "2.13.0",
       "org.playstrategy"                 % "fairystockfish"           % fairystockfishVersion,
       "com.joansala.aalina"              % "aalina"                   % "2.1.0-pstrat2",
-      "com.joansala"                     % "go-engine"                % "1.0.0-pstrat1.12",
       "com.github.lichess-org.scalalib" %% "scalalib-core"            % scalalibVersion
     ),
     libraryDependencies += "org.playstrategy" % "fairystockfish" % fairystockfishVersion artifacts fairystockfish,

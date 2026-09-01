@@ -1,8 +1,8 @@
 package strategygames.go
 
-import strategygames.Player
-import strategygames.Score
+import strategygames.{ Player, Score }
 
+import format.Uci
 import variant.Variant
 import scalalib.extensions.*
 
@@ -11,8 +11,15 @@ case class Board(
     history: History,
     variant: Variant,
     pocketData: Option[PocketData] = None,
-    uciMoves: List[String] = List(),
-    position: Option[Api.Position] = None
+    // NOTE: komi belongs to the game rather than the variant. A handicap game carries its own in its
+    // fen, and scoring a finished game under the variant's value can award it to the wrong player.
+    komi: Double,
+    ko: Option[Pos] = None,
+    consecutivePasses: Int = 0,
+    deadStonesSelected: Boolean = false,
+    // NOTE: the starting fen and move list lila restored this board from, kept so that lila can read
+    // the starting fen back. Play advances the fields above and leaves this as it was at the restore.
+    position: Option[StoredPosition] = None
 ) {
 
   def apply(at: Pos): Option[Piece] = pieces get at
@@ -29,7 +36,7 @@ case class Board(
     (p, pieces.collect { case (pos, piece) if piece.player == p => (pos, piece) }.size)
   }.toMap
 
-  def withPosition(p: Option[Api.Position]): Board = copy(position = p)
+  lazy val areaScore: Score = variant.areaScore(this)
 
   def withHistory(h: History): Board       = copy(history = h)
   def updateHistory(f: History => History) = copy(history = f(history))
@@ -45,47 +52,34 @@ case class Board(
 
   def ensurePocketData = withPocketData(pocketData | PocketData.init)
 
+  // NOTE: lila reads `board.toGo.apiPosition.initialFen` in `SgfDump` and `Rematcher`, which is what
+  // holds this name in place. A board that was never restored answers with the variant's own start.
+  // TODO(lila): read `position` instead, and this accessor can go.
+  def apiPosition: StoredPosition = position getOrElse StoredPosition(variant.initialFen, List())
+
+  def uciMoves: List[String] = position.fold(List.empty[String])(_.uciMoves)
+
+  def withPosition(p: Option[StoredPosition]): Board =
+    copy(position = p, komi = Board.restoredKomi(variant, p))
+
+  def passed: Board = copy(ko = None, consecutivePasses = consecutivePasses + 1)
+
+  def settled: Board =
+    copy(ko = None, consecutivePasses = 0, deadStonesSelected = true).withHistoryStartingHere
+
+  def stonePlaced: Board = copy(consecutivePasses = 0)
+
+  def positionHash: Long = Hash.positionHash(this)
+
+  def withHistoryStartingHere: Board = updateHistory(_.startingAtPosition(positionHash))
+
+  def withKo(point: Option[Pos]): Board = copy(ko = point)
+
   def situationOf(player: Player) = Situation(this, player)
 
   def valid(strict: Boolean) = variant.valid(this, strict)
 
   def materialImbalance: Int = variant.materialImbalance(this)
-
-  // This won't work if the Board has been generated FromPosition. Will need to generate from FEN
-  // However generating from FEN can't be done all the time as we would like uciMoves to help with repetition
-  // Future problem when we come to deal with FromPosition for go games
-  lazy val apiPosition = position match {
-    case Some(position) => position
-    case None           => Api.positionFromVariantAndMoves(variant, uciMoves)
-  }
-
-  def afterDrop(player: Player, dest: Pos): Board = {
-    val oldPieceMapSize = apiPosition.pieceMap.size
-    val uciMove         =
-      s"${Role.defaultRole.forsyth}@${dest.key}"
-    val newPosition     = apiPosition.makeMovesWithPosUnchecked(List(uciMove), apiPosition.deepCopy)
-    copy(
-      pieces = newPosition.pieceMap,
-      uciMoves = uciMoves :+ uciMove,
-      pocketData = newPosition.pocketData,
-      position = Some(newPosition)
-    )
-      .withHistory(
-        history.copy(
-          // lastTurn handled in action.finalizeAfter
-          score = Score(
-            newPosition.fen.player1Score, // TODO: generating the scores is slow
-            newPosition.fen.player2Score  //        especially when we have to generate a FEN to get it
-          ),
-          captures = history.captures.add(
-            player,
-            oldPieceMapSize - newPosition.pieceMap.size + 1
-          ),
-          halfMoveClock = history.halfMoveClock + player.fold(0, 1)
-        )
-      )
-
-  }
 
   override def toString = s"$variant Position after ${history.recentTurnUciString}"
 }
@@ -93,7 +87,38 @@ case class Board(
 object Board {
 
   def apply(pieces: Iterable[(Pos, Piece)], variant: Variant): Board =
-    Board(pieces.toMap, History(), variant, variantPocketData(variant))
+    Board(
+      pieces = pieces.toMap,
+      history = History(),
+      variant = variant,
+      pocketData = variantPocketData(variant),
+      komi = variant.komi
+    ).withHistoryStartingHere
+
+  // NOTE: lila stores a go game as a starting fen plus a list of uci moves, so this overload takes
+  // the parameters `readGoGame` supplies and works the position state out from the move list.
+  // TODO(lila): persist the position state, and this overload can be deleted along with `StoredPosition`.
+  def apply(
+      pieces: PieceMap,
+      history: History,
+      variant: Variant,
+      pocketData: Option[PocketData],
+      uciMoves: List[String],
+      position: Option[StoredPosition]
+  ): Board = {
+    val resumedFrom = position orElse Some(StoredPosition(variant.initialFen, uciMoves))
+    Board(
+      pieces = pieces,
+      history = history.copy(halfMoveClock = restoredPlyCount(uciMoves, position)),
+      variant = variant,
+      pocketData = pocketData,
+      komi = restoredKomi(variant, position),
+      ko = restoredKo(pieces, variant, uciMoves, position),
+      consecutivePasses = restoredPassCount(uciMoves),
+      deadStonesSelected = restoredSettlement(uciMoves),
+      position = resumedFrom.map(_.copy(uciMoves = uciMoves))
+    )
+  }
 
   def init(variant: Variant): Board = Board(variant.pieces, variant)
 
@@ -101,6 +126,62 @@ object Board {
 
   private def variantPocketData(variant: Variant) =
     (variant.dropsVariant) option PocketData.init
+
+  private[go] def restoredKomi(variant: Variant, position: Option[StoredPosition]): Double =
+    position.map(_.initialFen.komi) getOrElse variant.komi
+
+  // NOTE: lila derives `halfMoveClock` with a chess heuristic that answers 0 for every go game, so
+  // the count comes from the starting fen's ply plus the moves played since. `Forsyth` exports the
+  // full move number from it.
+  private[go] def restoredPlyCount(uciMoves: List[String], position: Option[StoredPosition]): Int =
+    position.flatMap(_.initialFen.ply).getOrElse(0).max(0) + uciMoves.size
+
+  // NOTE: four consecutive passes settle a game that is played or replayed, but the restore counts
+  // the run instead, so that games standing at four passes in lila's database stay playable.
+  private[go] def restoredPassCount(uciMoves: List[String]): Int =
+    if (restoredSettlement(uciMoves)) 0
+    else uciMoves.reverseIterator.takeWhile(Uci.Pass.passR.matches).size
+
+  private[go] def restoredSettlement(uciMoves: List[String]): Boolean =
+    uciMoves.lastOption.exists(Uci.SelectSquares.selectSquaresR.matches)
+
+  // NOTE: a ko point is a fact about the position before the last move, so establishing one takes a
+  // replay. Gating on the two conditions that read off the current stones keeps that replay rare.
+  private[go] def restoredKo(
+      pieces: PieceMap,
+      variant: Variant,
+      uciMoves: List[String],
+      position: Option[StoredPosition]
+  ): Option[Pos] =
+    lastPlacement(uciMoves)
+      .filter(koIsPossibleAt(pieces, variant, _))
+      .flatMap(_ => replayed(variant, uciMoves, position).flatMap(_.ko))
+
+  private def lastPlacement(uciMoves: List[String]): Option[Pos] =
+    uciMoves.lastOption.collect { case Uci.Drop.dropR(_, dest) => dest }.flatMap(Pos.fromKey)
+
+  private def koIsPossibleAt(pieces: PieceMap, variant: Variant, at: Pos): Boolean = {
+    val probe = Board(
+      pieces = pieces,
+      history = History(),
+      variant = variant,
+      pocketData = None,
+      komi = variant.komi
+    )
+    val chain = Chain.at(probe, at)
+    chain.size == 1 && Chain.liberties(probe, chain).size == 1
+  }
+
+  private def replayed(
+      variant: Variant,
+      uciMoves: List[String],
+      position: Option[StoredPosition]
+  ): Option[Board] =
+    Replay
+      .situationsFromUci(uciMoves.flatMap(Uci.apply), position.map(_.initialFen), variant)
+      .toOption
+      .flatMap(_.lastOption)
+      .map(_.board)
 
   sealed abstract class BoardSize(
       val width: Int,
@@ -111,7 +192,23 @@ object Board {
     val sizes = List(width, height)
 
     val validPos: List[Pos] =
-      Pos.all.filter(p => p.file.index < width && p.rank.index < height)
+      Pos.all.filter(onBoard)
+
+    val neighbours: Array[List[Pos]] = {
+      val table = Array.fill(Pos.allSize)(List.empty[Pos])
+      validPos.foreach(pos => table(pos.index) = cardinalNeighboursOf(pos))
+      table
+    }
+
+    def onBoard(pos: Pos): Boolean = pos.file.index < width && pos.rank.index < height
+
+    private def cardinalNeighboursOf(pos: Pos): List[Pos] =
+      List(
+        Pos.at(pos.file.index - 1, pos.rank.index),
+        Pos.at(pos.file.index + 1, pos.rank.index),
+        Pos.at(pos.file.index, pos.rank.index - 1),
+        Pos.at(pos.file.index, pos.rank.index + 1)
+      ).flatten.filter(onBoard)
 
     override def toString = key
 
