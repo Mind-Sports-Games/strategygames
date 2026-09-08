@@ -20,7 +20,9 @@ object Forsyth {
   private val fenTenths                 = 10
   private val digitAppendedBySettlement = 1
   private val firstCountedField         = 3
-  private val fieldCountsOfTheGrammar   = Set(9, 10)
+  private val leastFieldsRead           = 3
+  private val leastFullTurnCount        = 1
+  private val mostFullTurnCount         = 500
   private val decimalBase               = 10
 
   private val playerByTurnSymbol = Map("b" -> P1, "w" -> P2)
@@ -40,7 +42,7 @@ object Forsyth {
           pieces = fen.pieces,
           history = History(
             captures = Score(fen.player1Captures, fen.player2Captures),
-            halfMoveClock = fen.ply.getOrElse(sys.error(s"go fen states no move number: ${fen.value}")).max(0)
+            halfMoveClock = fen.ply.getOrElse(plyNamedBy(fen)).max(0)
           ),
           variant = variant,
           pocketData = Some(PocketData.init),
@@ -66,7 +68,7 @@ object Forsyth {
   private def describes(size: Board.BoardSize, fen: FEN): Boolean = {
     val fields = fen.value.split(' ').toList
     fen.gameSize == size.height &&
-    fieldCountsOfTheGrammar(fields.length) &&
+    fields.length >= leastFieldsRead &&
     fields.drop(firstCountedField).forall(_.toIntOption.isDefined) &&
     playerNamedByTurnField(fen).isDefined &&
     fen.board.split('/').forall(rowFills(size.width)) &&
@@ -94,6 +96,15 @@ object Forsyth {
       field == noKoPoint || Pos.fromKey(field).exists(size.onBoard)
     }
 
+  private def fullTurnCountNamedBy(fen: FEN): Int =
+    fen.value.split(' ').last.toIntOption match {
+      case Some(named) => named max leastFullTurnCount min mostFullTurnCount
+      case None        => leastFullTurnCount
+    }
+
+  private def plyNamedBy(fen: FEN): Int =
+    fullTurnCountNamedBy(fen) * 2 - playerNamedByTurnField(fen).fold(1)(_.fold(2, 1))
+
   case class SituationPlus(situation: Situation, fullTurnCount: Int) {
 
     def turnCount = fullTurnCount * 2 - situation.player.fold(2, 1)
@@ -103,12 +114,7 @@ object Forsyth {
   }
 
   def <<<@(variant: Variant, fen: FEN): Option[SituationPlus] =
-    <<@(variant, fen) map { sit =>
-      SituationPlus(
-        sit,
-        fen.value.split(' ').last.toIntOption.map(_ max 1 min 500) | 1
-      )
-    }
+    <<@(variant, fen) map { sit => SituationPlus(sit, fullTurnCountNamedBy(fen)) }
 
   def <<<(fen: FEN): Option[SituationPlus] = <<<@(fen.variant, fen)
 
