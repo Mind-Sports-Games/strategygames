@@ -6,18 +6,33 @@ import format.Uci
 
 // NOTE: go enforces positional superko, so `positionHashes` accumulates every position the game has
 // reached, and `hasOccurred` scans the whole run on every capturing placement.
-case class History(
-    lastTurn: List[Uci] = List.empty,
-    currentTurn: List[Uci] = List.empty,
-    positionHashes: PositionHash = Array.empty,
-    halfMoveClock: Int = 0,
-    // NOTE: `Board.areaScore` derives the score from the stones, and that is what
-    // `strategygames.History.score` reports for a go game, so a caller that sets this field reads the
-    // position's own score back. It survives because `readGoGame` names it.
-    // TODO(lila): stop passing a score for go, and this field can be deleted along with `StoredPosition`.
-    score: Score = Score(0, 0),
-    captures: Score = Score(0, 0)
+//
+// NOTE: `score` is the position's area score rather than an accumulated total, and it is what
+// `strategygames.History.Go` reports for a go game. `Board` re-points it at itself on every
+// transition that can move a stone (see `Board.rescored`), so it cannot go stale, and it is taken by
+// name so that the flood fill behind it runs only for a caller that reads the number. That by-name
+// parameter is the reason this is a plain class rather than a `case class` — a case class parameter
+// may not be by-name. `apply`, `copy` and every accessor keep the signatures the case class had.
+final class History(
+    val lastTurn: List[Uci] = List.empty,
+    val currentTurn: List[Uci] = List.empty,
+    val positionHashes: PositionHash = Array.empty,
+    val halfMoveClock: Int = 0,
+    scoreOfPosition: => Score = Score(0, 0),
+    val captures: Score = Score(0, 0)
 ) {
+
+  lazy val score: Score = scoreOfPosition
+
+  def copy(
+      lastTurn: List[Uci] = lastTurn,
+      currentTurn: List[Uci] = currentTurn,
+      positionHashes: PositionHash = positionHashes,
+      halfMoveClock: Int = halfMoveClock,
+      score: => Score = scoreOfPosition,
+      captures: Score = captures
+  ): History =
+    new History(lastTurn, currentTurn, positionHashes, halfMoveClock, score, captures)
 
   lazy val lastAction: Option[Uci] =
     if (currentTurn.nonEmpty) currentTurn.reverse.headOption else lastTurn.reverse.headOption
@@ -40,5 +55,37 @@ case class History(
 
   def startingAtPosition(hash: Long): History =
     copy(positionHashes = Hash.bytesOf(hash))
+
+  // NOTE: `score` is derived from the board, so it is not part of what makes two histories equal, and
+  // reading it here would run a flood fill per comparison. `positionHashes` compares by reference, as
+  // it did while this was a case class holding an array.
+  override def equals(that: Any): Boolean = that match {
+    case h: History =>
+      lastTurn == h.lastTurn &&
+      currentTurn == h.currentTurn &&
+      (positionHashes eq h.positionHashes) &&
+      halfMoveClock == h.halfMoveClock &&
+      captures == h.captures
+    case _          => false
+  }
+
+  override def hashCode: Int = (lastTurn, currentTurn, halfMoveClock, captures).hashCode
+
+  override def toString: String =
+    s"History(${lastTurn}, ${currentTurn}, ${halfMoveClock}, ${captures})"
+
+}
+
+object History {
+
+  def apply(
+      lastTurn: List[Uci] = List.empty,
+      currentTurn: List[Uci] = List.empty,
+      positionHashes: PositionHash = Array.empty,
+      halfMoveClock: Int = 0,
+      score: => Score = Score(0, 0),
+      captures: Score = Score(0, 0)
+  ): History =
+    new History(lastTurn, currentTurn, positionHashes, halfMoveClock, score, captures)
 
 }

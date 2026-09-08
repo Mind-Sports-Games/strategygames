@@ -38,8 +38,22 @@ case class Board(
 
   lazy val areaScore: Score = variant.areaScore(this)
 
-  def withHistory(h: History): Board       = copy(history = h)
-  def updateHistory(f: History => History) = copy(history = f(history))
+  // NOTE: `history.score` is the number `strategygames.History.Go` reports for a go game, and go's
+  // score is derived from the stones rather than accumulated, so a transition that can change the
+  // stones or the komi re-points that thunk at the board it produced. `History.score` is by name, so
+  // this costs a board and a history and never a flood fill; the fill runs once, memoised on
+  // `areaScore`, for a board someone actually scores.
+  //
+  // `passed`, `stonePlaced`, `settled` and `withKo` are not on this list because they keep every
+  // stone and the komi, so the thunk they inherit already answers with this position's score.
+  private def rescored: Board = {
+    lazy val next: Board = copy(history = history.copy(score = next.areaScore))
+    next
+  }
+
+  def withPieces(p: PieceMap): Board       = copy(pieces = p).rescored
+  def withHistory(h: History): Board       = copy(history = h).rescored
+  def updateHistory(f: History => History) = withHistory(f(history))
 
   def withVariant(v: Variant): Board =
     if (v.dropsVariant) copy(variant = v).ensurePocketData
@@ -60,7 +74,7 @@ case class Board(
   def uciMoves: List[String] = position.fold(List.empty[String])(_.uciMoves)
 
   def withPosition(p: Option[StoredPosition]): Board =
-    copy(position = p, komi = Board.restoredKomi(variant, p))
+    copy(position = p, komi = Board.restoredKomi(variant, p)).rescored
 
   def passed: Board = copy(ko = None, consecutivePasses = consecutivePasses + 1)
 
@@ -118,7 +132,7 @@ object Board {
       consecutivePasses = restoredPassCount(uciMoves),
       deadStonesSelected = restoredSettlement(uciMoves),
       position = resumedFrom.map(_.copy(uciMoves = uciMoves))
-    )
+    ).rescored
   }
 
   def init(variant: Variant): Board = Board(variant.pieces, variant)
