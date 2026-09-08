@@ -135,7 +135,7 @@ abstract class Variant private[variant] (
   // settlement records is added by the loaders that fold action strings, on top of what this returns.
   def boardAfterSelectSquares(situation: Situation, squares: List[Pos]): Board =
     situation.board
-      .copy(pieces = situation.board.pieces -- squares)
+      .withPieces(situation.board.pieces -- squares)
       .withHistory(afterOnePly(situation.history))
       .settled
 
@@ -206,7 +206,7 @@ abstract class Variant private[variant] (
     val stone              = Piece(situation.player, defaultRole)
     val captured           = Chain.capturedBy(situation.board, situation.player, pos)
     val stonesAfterPlacing =
-      situation.board.copy(pieces = situation.board.pieces -- captured + (pos -> stone))
+      situation.board.withPieces(situation.board.pieces -- captured + (pos -> stone))
     stonesAfterPlacing.stonePlaced
       .withKo(koPointAfter(stonesAfterPlacing, pos, captured))
       .withHistory(
