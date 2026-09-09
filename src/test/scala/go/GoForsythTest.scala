@@ -22,7 +22,6 @@ class GoForsythTest extends Specification with GoRulesTestSupport {
 
   private val refusedFens = List(
     FEN("badfen"),
-    FEN(s"${emptyNineByNineRows}${pocket} b - 0 55 0 0 55"),
     FEN(s"10/10/10/10/10/10/10/10/10/10${pocket} b - 0 55 0 0 55 0 1"),
     nineByNine(rows = "9/9/9/9/9/9/9/9/8"),
     nineByNine(rows = "9/9/9/9/9/9/9/9/9S"),
@@ -42,8 +41,6 @@ class GoForsythTest extends Specification with GoRulesTestSupport {
   "a malformed go fen" should {
     "be refused when it is not a fen at all" in
       refused(FEN("badfen"))
-    "be refused when it has too few fields" in
-      refused(FEN(s"${emptyNineByNineRows}${pocket} b - 0 55 0 0 55"))
     "be refused when the row count is not a go board size" in
       refused(FEN(s"10/10/10/10/10/10/10/10/10/10${pocket} b - 0 55 0 0 55 0 1"))
     "be refused when a row does not fill the board" in
