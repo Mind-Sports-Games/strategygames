@@ -131,8 +131,14 @@ abstract class Variant private[variant] (
   def createSelectSquares(situation: Situation, squares: List[Pos]): SelectSquares =
     SelectSquares(squares = squares, situationBefore = situation, autoEndTurn = true)
 
-  // NOTE: `.settled` restarts the position history, so it has to come last. The capture count a
-  // settlement records is added by the loaders that fold action strings, on top of what this returns.
+  // NOTE: `.settled` restarts the position history, so it has to come last.
+  //
+  // NOTE: a settlement records no captures, and this is the only place that decides so. Lifting stones
+  // both players have agreed are dead is not a capture, and nothing displays it as one: lila shows the
+  // area score from the ply a settlement becomes possible onwards, so the capture counter has already
+  // been replaced by the time one lands. The loaders that fold action strings used to add
+  // `lifted + 1` on top of this — the `+ 1` a placement needs and a settlement does not — while live
+  // play and uci replay added nothing, so a game loaded two ways carried two totals.
   def boardAfterSelectSquares(situation: Situation, squares: List[Pos]): Board =
     situation.board
       .withPieces(situation.board.pieces -- squares)

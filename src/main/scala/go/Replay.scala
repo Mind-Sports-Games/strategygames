@@ -52,12 +52,6 @@ case class Replay(setup: Game, actions: List[Action], state: Game) {
       )
   }
 
-  def addSettlement(selectSquares: SelectSquares): Replay =
-    copy(
-      actions = selectSquares :: actions,
-      state = Replay.withSettlementCaptures(state.applySelectSquares(selectSquares), selectSquares)
-    )
-
 }
 
 object Replay {
@@ -126,30 +120,6 @@ object Replay {
         )
       )
 
-  // NOTE: only the loaders that fold action strings make this adjustment. Replaying a list of `Uci`
-  // leaves the capture count where it stands, as does a game played live, so one game can load with
-  // two different totals, and stored games were written under that split.
-  private def withSettlementCaptures(played: Game, selectSquares: SelectSquares): Game =
-    played.copy(situation = withSettlementCaptures(played.situation, selectSquares))
-
-  private def withSettlementCaptures(played: Situation, selectSquares: SelectSquares): Situation =
-    played.copy(board =
-      played.board.updateHistory(history =>
-        history.copy(captures =
-          history.captures.add(
-            selectSquares.player,
-            settlementCaptureCount(selectSquares.before.pieces.size, selectSquares.after.pieces.size)
-          )
-        )
-      )
-    )
-
-  // NOTE: this counts one more than the number of stones a settlement lifts, and every settled game
-  // in the database has its captures recorded that way.
-  // TODO(playstrategy): remove the `+ 1` once those records have been dealt with.
-  private def settlementCaptureCount(stonesBefore: Int, stonesAfter: Int): Int =
-    stonesBefore - stonesAfter + 1
-
   def actionStrsWithEndTurn(actionStrs: ActionStrs): Seq[(String, Boolean)] =
     actionStrs.zipWithIndex.map { case (a, i) =>
       a.zipWithIndex.map { case (a1, i1) => (a1, i1 == a.size - 1 && i != actionStrs.size - 1) }
@@ -204,7 +174,7 @@ object Replay {
 
     def replaySelectSquaresFromUci(squares: List[Pos], endTurn: Boolean): (Game, Action) = {
       val selectSquares = replaySelectSquares(state, squares, endTurn)
-      state = withSettlementCaptures(state.applySelectSquares(selectSquares), selectSquares)
+      state = state.applySelectSquares(selectSquares)
       (state, selectSquares)
     }
 

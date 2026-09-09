@@ -11,47 +11,48 @@ class GoSettlementCaptureTest extends Specification with GoRulesTestSupport {
 
   import GoSettlementCaptureTest._
 
-  "a settlement that lifts one stone" should {
+  // every route a settled go game is reached by: played live, and the four loaders
+  private def everyPathThrough(actions: List[String]): List[(String, Score)] =
+    List(
+      "played live"         -> playing(Go9x9, actions).situation.history.captures,
+      "gameFromUciStrings"  -> capturesOf(gameFromUciStrings(actions)),
+      "the pgn reader"      -> capturesOf(readerFromActionStrs(actions)),
+      "a uci list replay"   -> capturesOf(replayFromUciList(actions)),
+      "uci list situations" -> capturesOfLast(situationsFromUciList(actions))
+    )
 
-    "count no captures at all when it is played" in {
-      playing(Go9x9, settlingScript).situation.history.captures === Score(0, 0)
-    }
-
-    "count one more capture than it lifts on the loaders that fold action strings" in {
-      (capturesOf(gameFromUciStrings(settlingScript)) === Score(liftedPlusOne, 0)) and
-        (capturesOf(readerFromActionStrs(settlingScript)) === Score(liftedPlusOne, 0))
-    }
-
-    "count nothing on the loaders that replay a uci list through the played path" in {
-      (capturesOf(replayFromUciList(settlingScript)) === Score(0, 0)) and
-        (capturesOfLast(situationsFromUciList(settlingScript)) === Score(0, 0))
-    }
-
-    "leave the played game and the two groups of loaders disagreeing, deliberately" in {
-      (playing(Go9x9, settlingScript).situation.history.captures === Score(0, 0)) and
-        (capturesOf(gameFromUciStrings(settlingScript)) === Score(liftedPlusOne, 0)) and
-        (capturesOf(replayFromUciList(settlingScript)) === Score(0, 0))
+  "a settlement that lifts a stone" should {
+    "record no captures, on every path a game reaches it by" in {
+      forall(everyPathThrough(settlingScript)) { case (path, captures) =>
+        captures aka s"captures via ${path}" must be_==(Score(0, 0))
+      }
     }
   }
 
   "a settlement that lifts nothing" should {
-
-    "still count one capture on the loaders that fold action strings" in {
-      (capturesOf(gameFromUciStrings(emptySettlingScript)) === Score(1, 0)) and
-        (capturesOf(readerFromActionStrs(emptySettlingScript)) === Score(1, 0))
+    "record no captures either" in {
+      forall(everyPathThrough(emptySettlingScript)) { case (path, captures) =>
+        captures aka s"captures via ${path}" must be_==(Score(0, 0))
+      }
     }
+  }
 
-    "count nothing on the loaders that replay a uci list" in {
-      (capturesOf(replayFromUciList(emptySettlingScript)) === Score(0, 0)) and
-        (capturesOfLast(situationsFromUciList(emptySettlingScript)) === Score(0, 0))
+  "the stones a drop took before the passes" should {
+    "survive the settlement, and read the same on every path" in {
+      forall(everyPathThrough(captureThenSettleScript)) { case (path, captures) =>
+        captures aka s"captures via ${path}" must be_==(Score(1, 0))
+      }
     }
   }
 }
 
 object GoSettlementCaptureTest {
 
-  val settlingScript              = List("a1", "e5", "pass", "pass", "ss:a1")
+  private val settlingScript      = List("a1", "e5", "pass", "pass", "ss:a1")
   private val emptySettlingScript = List("a1", "e5", "pass", "pass", "ss:")
+
+  // p1 takes the cornered stone on b1, then both players pass the game out and settle
+  private val captureThenSettleScript = List("a2", "a1", "b1", "pass", "pass", "ss:")
 
   private def asUci(action: String): String =
     if (action == "pass" || action.startsWith("ss:")) action else s"${Stone.forsyth}@${action}"
@@ -59,8 +60,6 @@ object GoSettlementCaptureTest {
   private def turnPerAction(actions: List[String]) = actions.map(action => Vector(asUci(action))).toVector
 
   private def uciList(actions: List[String]) = actions.flatMap(action => Uci(asUci(action)))
-
-  private val liftedPlusOne = 2
 
   private val goTags = Tags(List(Tag(_.Variant, Go9x9.name)))
 

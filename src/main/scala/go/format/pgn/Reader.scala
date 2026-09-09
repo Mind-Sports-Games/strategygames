@@ -73,7 +73,7 @@ object Reader {
             )
           case Uci.SelectSquares.selectSquaresR(ss) =>
             Result.Complete(
-              replay.addSettlement(
+              replay.addAction(
                 Replay.replaySelectSquares(
                   replay.state,
                   ss.split(",").toList.flatMap(Pos.fromKey(_)),
