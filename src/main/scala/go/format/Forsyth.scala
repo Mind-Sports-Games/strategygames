@@ -31,7 +31,8 @@ object Forsyth {
   )
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] =
-    Option.when(describes(variant.boardSize, fen))(
+    Option.when(describes(variant.boardSize, fen)) {
+      val player = playerNamedByTurnField(fen).getOrElse(sys.error("Invalid player in fen"))
       Situation(
         Board(
           pieces = fen.pieces,
@@ -50,10 +51,10 @@ object Forsyth {
           },
           deadStonesSelected = fen.fenPassCount == settledPassCount,
           position = Some(StoredPosition(fen, List()))
-        ).withHistoryStartingHere,
-        playerNamedByTurnField(fen).getOrElse(sys.error("Invalid player in fen"))
+        ).withHistoryStartingHere(player),
+        player
       )
-    )
+    }
 
   def <<(fen: FEN): Option[Situation] = <<@(fen.variant, fen)
 

@@ -22,32 +22,52 @@ class GoPositionHashTest extends Specification with GoRulesTestSupport {
   private val threeStonesHashOfRecord = 0x429d389bed64743cL
 
   "the empty board" should {
-    "hash to nothing, because only stones are hashed" in {
-      Hash.positionHash(Board.init(Go9x9)) === 0L
+    "hash to the turn mask of the player to move" in {
+      (Hash.positionHash(Board.init(Go9x9), P1) === Hash.turnMask(P1)) and
+        (Hash.positionHash(Board.init(Go9x9), P2) === Hash.turnMask(P2))
     }
-    "start its history at that one position" in {
+    "hash to a different value for each player to move" in {
+      Hash.positionHash(Board.init(Go9x9), P1) !== Hash.positionHash(Board.init(Go9x9), P2)
+    }
+    "start its history at the position its starting player moves from" in {
       (Board.init(Go9x9).history.positionCount === 1) and
-        (Board.init(Go9x9).history.currentPosition === Some(0L))
+        (Board.init(Go9x9).history.currentPosition === Some(Hash.positionHash(Board.init(Go9x9), P1)))
     }
   }
 
   "the zobrist table the position hash is drawn from" should {
-    "hash three stones to the value of record, which no change may move without rewriting every stored history" in {
-      Hash.positionHash(boardOf(Go9x9, threeStones)) === threeStonesHashOfRecord
+    "hash three stones with P2 to move to the recorded value" in {
+      Hash.positionHash(boardOf(Go9x9, threeStones), P2) === threeStonesHashOfRecord
+    }
+    "hash the same three stones with P1 to move to that value under the turn mask" in {
+      Hash.positionHash(boardOf(Go9x9, threeStones), P1) === (threeStonesHashOfRecord ^ Hash.turnMask(P1))
     }
     "hash a played game reaching those stones to the very same value" in {
-      Hash.positionHash(playing(Go9x9, List("d4", "f4", "d6")).board) === threeStonesHashOfRecord
+      Hash.positionHash(playing(Go9x9, List("d4", "f4", "d6")).board, P2) === threeStonesHashOfRecord
     }
   }
 
-  "two move orders reaching the same stones" should {
+  "two move orders reaching the same stones with the same player to move" should {
     val oneOrder   = playing(Go9x9, List("d4", "f4", "d6", "f6"))
     val otherOrder = playing(Go9x9, List("d6", "f6", "d4", "f4"))
     "recompute to the same hash" in {
-      Hash.positionHash(oneOrder.board) === Hash.positionHash(otherOrder.board)
+      oneOrder.situation.positionHash === otherOrder.situation.positionHash
     }
     "have recorded the same hash while they were played" in {
       oneOrder.situation.history.currentPosition === otherOrder.situation.history.currentPosition
+    }
+  }
+
+  "the same stones with the other player to move" should {
+    "hash to a different value" in {
+      val played = playing(Go9x9, List("d4", "f4", "d6"))
+      played.situation.positionHash !== Hash.positionHash(played.board, !played.situation.player)
+    }
+    "not be reported as having occurred" in {
+      val played = playing(Go9x9, List("d4", "f4", "d6"))
+      played.situation.history.hasOccurred(
+        Hash.positionHash(played.board, !played.situation.player)
+      ) === false
     }
   }
 
@@ -59,6 +79,9 @@ class GoPositionHashTest extends Specification with GoRulesTestSupport {
     }
     "record no position of its own" in {
       afterPass.situation.history.positionCount === beforePass.situation.history.positionCount
+    }
+    "still move the position identity on, because the player to move changed" in {
+      afterPass.situation.positionHash !== beforePass.situation.positionHash
     }
   }
 
@@ -75,7 +98,7 @@ class GoPositionHashTest extends Specification with GoRulesTestSupport {
     "start the history at the loaded position" in {
       val loaded = situationFrom(fenOf(playing(Go9x9, List("d4", "f4"))))
       (loaded.history.positionCount === 1) and
-        (loaded.history.currentPosition === Some(Hash.positionHash(loaded.board)))
+        (loaded.history.currentPosition === Some(loaded.positionHash))
     }
   }
 
@@ -87,13 +110,13 @@ class GoPositionHashTest extends Specification with GoRulesTestSupport {
     }
     "not be confused with a position the history has never held" in {
       playing(Go9x9, List("d4", "f4")).situation.history.hasOccurred(
-        Hash.positionHash(playing(Go9x9, List("d4", "f4", "d6")).board)
+        playing(Go9x9, List("d4", "f4", "d6")).situation.positionHash
       ) === false
     }
   }
 
   "a game whose hash is maintained one action at a time" should {
-    "carry, at every ply, a recorded hash equal to a full recompute of its own board" in {
+    "record, at every placing ply, a hash equal to a recompute of its board and player" in {
       scriptedGames.flatMap { case (variant, actions) =>
         recordedHashMismatchesIn(variant, actions)
       } must beEmpty
@@ -118,13 +141,13 @@ class GoPositionHashTest extends Specification with GoRulesTestSupport {
     Board(stones.map { case (player, key) => pointAt(key) -> Piece(player, Role.defaultRole) }, variant)
 
   private def recordedHashMismatchesIn(variant: Variant, actions: List[String]): List[String] =
-    situationsOf(variant, actions).zipWithIndex.flatMap { case (situation, ply) =>
-      mismatchAt(actions.mkString(" "), ply, situation)
-    }
+    situationsOf(variant, actions).zipWithIndex
+      .filter { case (situation, _) => situation.board.consecutivePasses == 0 }
+      .flatMap { case (situation, ply) => mismatchAt(actions.mkString(" "), ply, situation) }
 
   private def mismatchAt(name: String, ply: Int, situation: Situation): Option[String] = {
     val recorded   = situation.history.currentPosition
-    val recomputed = Hash.positionHash(situation.board)
+    val recomputed = situation.positionHash
     if (recorded == Some(recomputed)) None
     else Some(s"${name} ply ${ply}: recorded ${recorded}, recomputed ${recomputed}")
   }

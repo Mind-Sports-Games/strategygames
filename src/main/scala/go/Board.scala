@@ -78,14 +78,16 @@ case class Board(
 
   def passed: Board = copy(ko = None, consecutivePasses = consecutivePasses + 1)
 
-  def settled: Board =
-    copy(ko = None, consecutivePasses = 0, deadStonesSelected = true).withHistoryStartingHere
+  def settled(playerToMove: Player): Board =
+    copy(ko = None, consecutivePasses = 0, deadStonesSelected = true)
+      .withHistoryStartingHere(playerToMove)
 
   def stonePlaced: Board = copy(consecutivePasses = 0)
 
-  def positionHash: Long = Hash.positionHash(this)
+  def positionHash(playerToMove: Player): Long = Hash.positionHash(this, playerToMove)
 
-  def withHistoryStartingHere: Board = updateHistory(_.startingAtPosition(positionHash))
+  def withHistoryStartingHere(playerToMove: Player): Board =
+    updateHistory(_.startingAtPosition(positionHash(playerToMove)))
 
   def withKo(point: Option[Pos]): Board = copy(ko = point)
 
@@ -107,7 +109,7 @@ object Board {
       variant = variant,
       pocketData = variantPocketData(variant),
       komi = variant.komi
-    ).withHistoryStartingHere
+    ).withHistoryStartingHere(variant.startPlayer)
 
   // NOTE: lila stores a go game as a starting fen plus a list of uci moves, so this overload takes
   // the parameters `readGoGame` supplies and works the position state out from the move list.

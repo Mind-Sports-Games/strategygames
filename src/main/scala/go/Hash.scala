@@ -1,5 +1,7 @@
 package strategygames.go
 
+import strategygames.Player
+
 final class Hash(size: Int) {
 
   def apply(situation: Situation): PositionHash = {
@@ -47,8 +49,10 @@ object Hash {
   def mask(piece: Piece, pos: Pos): Long =
     polyglotTable.actorMasks(stoneIndex(piece, pos))
 
-  def positionHash(board: Board): Long =
-    board.pieces.foldLeft(0L) { case (hash, (pos, piece)) => hash ^ mask(piece, pos) }
+  def turnMask(player: Player): Long = player.fold(polyglotTable.p1TurnMask, 0L)
+
+  def positionHash(board: Board, player: Player): Long =
+    board.pieces.foldLeft(turnMask(player)) { case (hash, (pos, piece)) => hash ^ mask(piece, pos) }
 
   def bytesOf(hash: Long): PositionHash =
     Array.tabulate(size)(i => (hash >>> ((size - 1 - i) * 8)).toByte)

@@ -26,6 +26,8 @@ case class Situation(board: Board, player: Player) {
 
   def history = board.history
 
+  lazy val positionHash: Long = board.positionHash(player)
+
   // these dont exist in Oware. Normal ending tracked in VariantEnd
   def checkMate: Boolean = false
   def staleMate: Boolean = false

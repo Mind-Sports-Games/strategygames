@@ -96,7 +96,7 @@ class GoBoardStateTest extends Specification with GoRulesTestSupport {
   "a settlement recorded on a board" should {
 
     "survive whatever action follows it" in {
-      val settled = Board.init(Go19x19).settled
+      val settled = Board.init(Go19x19).settled(P2)
       (settled.deadStonesSelected === true) and
         (settled.passed.deadStonesSelected === true) and
         (settled.stonePlaced.deadStonesSelected === true) and

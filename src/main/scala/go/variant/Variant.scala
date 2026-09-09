@@ -101,15 +101,13 @@ abstract class Variant private[variant] (
         .capturesUnlessSuicide(situation.board, situation.player, point)
         .exists(captured => !recreatesAnEarlierPosition(situation, point, captured))
 
-  // NOTE: only a capturing placement can repeat a position, because every other placement leaves
-  // the board strictly fuller. Probing the rest would cost a hash and a history scan per empty point.
   private def recreatesAnEarlierPosition(
       situation: Situation,
       point: Pos,
       captured: Set[Pos]
   ): Boolean =
-    captured.nonEmpty && situation.history.hasOccurred(
-      hashAfterPlacing(situation.board, Piece(situation.player, defaultRole), point, captured)
+    situation.history.hasOccurred(
+      hashAfterPlacing(situation, Piece(situation.player, defaultRole), point, captured)
     )
 
   def validPass(situation: Situation): Pass =
@@ -117,7 +115,7 @@ abstract class Variant private[variant] (
 
   def boardAfterPass(situation: Situation): Board =
     if (settlesByPassing(situation))
-      situation.board.withHistory(afterOnePly(situation.history)).settled
+      situation.board.withHistory(afterOnePly(situation.history)).settled(!situation.player)
     else situation.board.passed.withHistory(afterOnePly(situation.history))
 
   // NOTE: four passes end the game on the board transition, which is the one step that both the
@@ -143,7 +141,7 @@ abstract class Variant private[variant] (
     situation.board
       .withPieces(situation.board.pieces -- squares)
       .withHistory(afterOnePly(situation.history))
-      .settled
+      .settled(!situation.player)
 
   // def move(
   //     situation: Situation,
@@ -221,7 +219,7 @@ abstract class Variant private[variant] (
             captures = situation.history.captures.add(situation.player, captured.size),
             halfMoveClock = situation.history.halfMoveClock + 1
           )
-          .afterPosition(hashAfterPlacing(situation.board, stone, pos, captured))
+          .afterPosition(hashAfterPlacing(situation, stone, pos, captured))
       )
   }
 
@@ -234,13 +232,18 @@ abstract class Variant private[variant] (
     )(captured.head)
   }
 
-  // NOTE: each position hash is derived from the one before it, so a game walks the whole board
-  // once. The fallback recomputes in full for the first action of a game resumed from a fen.
-  private def hashAfterPlacing(before: Board, stone: Piece, at: Pos, captured: Set[Pos]): Long =
+  private def hashAfterPlacing(
+      before: Situation,
+      stone: Piece,
+      at: Pos,
+      captured: Set[Pos]
+  ): Long =
     captured.foldLeft(
-      before.history.currentPosition.getOrElse(before.positionHash) ^ Hash.mask(stone, at)
+      before.positionHash ^
+        Hash.turnMask(before.player) ^ Hash.turnMask(!before.player) ^
+        Hash.mask(stone, at)
     ) { (hash, pos) =>
-      hash ^ Hash.mask(before.pieces(pos), pos)
+      hash ^ Hash.mask(before.board.pieces(pos), pos)
     }
 
   // NOTE: this Score is in tenths of a point rather than points, because the fen writes both scores

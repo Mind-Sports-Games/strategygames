@@ -436,7 +436,7 @@ class GoSituationTest extends Specification with ValidatedMatchers {
 
   }
 
-  "a returning capture recreating an earlier board across a pass parity flip" should {
+  "a returning capture recreating an earlier board with the other player to move" should {
     val g9   = variant.Go9x9
     val game = Game(g9)
 
@@ -454,8 +454,14 @@ class GoSituationTest extends Specification with ValidatedMatchers {
     val game_p12 = game_p11.apply(g9.validDrops(game_p11.situation).filter(_.pos.key == "g9").head)
     val game_p13 = game_p12.apply(g9.validPass(game_p12.situation))
 
-    "be forbidden up front under positional superko (ADR 0001)" in {
-      g9.validDrops(game_p12.situation).map(_.pos.key).contains("h9") === false
+    "be offered up front" in {
+      g9.validDrops(game_p12.situation).map(_.pos.key).contains("h9") === true
+    }
+
+    "reach the board of ply 10, with the other player to move" in {
+      val returned = game_p12.apply(g9.validDrops(game_p12.situation).filter(_.pos.key == "h9").head)
+      returned.board.pieces === game_p10.board.pieces
+      returned.situation.player === !game_p10.situation.player
     }
 
     "leave the game ongoing and free of repetition after a pass instead" in {

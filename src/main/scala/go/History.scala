@@ -4,8 +4,6 @@ import strategygames.Score
 
 import format.Uci
 
-// NOTE: go enforces positional superko, so `positionHashes` accumulates every position the game has
-// reached, and `hasOccurred` scans the whole run on every capturing placement.
 //
 // NOTE: `score` is the position's area score rather than an accumulated total, and it is what
 // `strategygames.History.Go` reports for a go game. `Board` re-points it at itself on every
