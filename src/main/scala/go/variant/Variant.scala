@@ -237,17 +237,21 @@ abstract class Variant private[variant] (
       hash ^ Hash.mask(before.pieces(pos), pos)
     }
 
+  // NOTE: this Score is in tenths of a point rather than points, because the fen writes both scores
+  // that way and `strategygames.History.score` passes the number straight through to lila. Every
+  // other game logic's `Score` is a plain count.
+  // TODO(lila): score in points here and scale at the fen boundary, once lila reads the unit it wants.
   def areaScore(board: Board): Score = {
     val enclosedArea = enclosedAreaByPlayer(board)
 
     def areaOf(player: Player): Int =
       board.playerPiecesOnBoardCount(player) + enclosedArea.getOrElse(player, 0)
 
-    def fenTenthsOf(player: Player): Int = areaOf(player) * Variant.fenTenthsPerPoint
+    def fenTenthsOf(player: Player): Int = areaOf(player) * 10
 
     Score(
       fenTenthsOf(P1),
-      fenTenthsOf(P2) + Math.round(board.komi * Variant.fenTenthsPerPoint).toInt
+      fenTenthsOf(P2) + Math.round(board.komi * 10).toInt
     )
   }
 
@@ -319,8 +323,6 @@ abstract class Variant private[variant] (
 }
 
 object Variant {
-
-  private val fenTenthsPerPoint = 10
 
   private val passesSettlingTheGame = 4
 

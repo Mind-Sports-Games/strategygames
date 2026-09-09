@@ -104,4 +104,7 @@ object FEN {
 
   def koIndex: Int = 2
 
+  // the board, the turn and the ko point are the only fields that are not numbers
+  def firstNumericIndex: Int = koIndex + 1
+
 }

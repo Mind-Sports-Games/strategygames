@@ -13,15 +13,13 @@ import strategygames.go.variant.Variant
   */
 object Forsyth {
 
-  private val settledPassCount          = 3
-  private val highestPassCount          = 2
-  private val pocket                    = "[SSSSSSSSSSssssssssss]"
-  private val noKoPoint                 = "-"
-  private val fenTenths                 = 10
-  private val digitAppendedBySettlement = 1
-  private val firstCountedField         = 3
-  private val fieldCountsOfTheGrammar   = Set(9, 10)
-  private val decimalBase               = 10
+  private val settledPassCount = 3
+  private val highestPassCount = 2
+  private val pocket           = "[SSSSSSSSSSssssssssss]"
+  private val noKoPoint        = "-"
+
+  // NOTE: go reads the ten field form and the legacy nine field one, which omits the pass count.
+  private val acceptedFieldCounts = Set(9, 10)
 
   private val playerByTurnSymbol = Map("b" -> P1, "w" -> P2)
 
@@ -66,8 +64,8 @@ object Forsyth {
   private def describes(size: Board.BoardSize, fen: FEN): Boolean = {
     val fields = fen.value.split(' ').toList
     fen.gameSize == size.height &&
-    fieldCountsOfTheGrammar(fields.length) &&
-    fields.drop(firstCountedField).forall(_.toIntOption.isDefined) &&
+    acceptedFieldCounts(fields.length) &&
+    fields.drop(FEN.firstNumericIndex).forall(_.toIntOption.isDefined) &&
     playerNamedByTurnField(fen).isDefined &&
     fen.board.split('/').forall(rowFills(size.width)) &&
     koFieldNamesAPointOf(size, fields)
@@ -82,7 +80,7 @@ object Forsyth {
     row
       .foldLeft(Option((0, 0))) {
         case (Some((stones, emptyRun)), symbol) if symbol.isDigit                             =>
-          Some((stones, emptyRun * decimalBase + symbol.asDigit))
+          Some((stones, emptyRun * 10 + symbol.asDigit))
         case (Some((stones, emptyRun)), symbol) if Role.allByForsyth.contains(symbol.toLower) =>
           Some((stones + emptyRun + 1, 0))
         case _                                                                                => None
@@ -189,7 +187,7 @@ object Forsyth {
   private def symbolOf(stone: Piece): String =
     stone.player.fold(stone.forsyth.toUpper, stone.forsyth).toString
 
-  private def komiTenths(board: Board): Int = Math.round(board.komi * fenTenths).toInt
+  private def komiTenths(board: Board): Int = Math.round(board.komi * 10).toInt
 
   private def passCount(board: Board): Int =
     if (board.deadStonesSelected) settledPassCount
@@ -205,7 +203,7 @@ object Forsyth {
       case _: Uci.SelectSquares => playerToMove.p1
       case _                    => false
     }
-    if (settledByP2) s"${fullMove}${digitAppendedBySettlement}"
+    if (settledByP2) s"${fullMove}1"
     else fullMove.toString
   }
 
