@@ -49,7 +49,8 @@ object Forsyth {
             case 2 => 2
             case _ => 0
           },
-          deadStonesSelected = fen.fenPassCount == settledPassCount
+          deadStonesSelected = fen.fenPassCount == settledPassCount,
+          position = Some(StoredPosition(fen, List()))
         ).withHistoryStartingHere,
         playerNamedByTurnField(fen).getOrElse(sys.error("Invalid player in fen"))
       )
