@@ -6,8 +6,8 @@ import scala.annotation.nowarn
 import scalalib.extensions.*
 
 import strategygames.go._
-import strategygames.go.format.{ FEN, Forsyth }
-import strategygames.{ GameFamily, Player }
+import strategygames.go.format.FEN
+import strategygames.{ GameFamily, Player, Score }
 
 case class GoName(val name: String)
 
@@ -67,7 +67,7 @@ abstract class Variant private[variant] (
     Some(s"Handicap (${handicap}), komi (${komi})".replace(".0", ""))
   }
 
-  def pieces: PieceMap = Api.pieceMapFromFen(key, initialFen.value)
+  def pieces: PieceMap = initialFen.pieces
 
   def startPlayer: Player = P1
 
@@ -77,68 +77,71 @@ abstract class Variant private[variant] (
 
   def validMoves(@nowarn situation: Situation) = None // just remove this?
 
+  def canDrop(situation: Situation): Boolean =
+    !situation.end && boardSize.validPos.exists(isPlayable(situation, _))
+
   def validDrops(situation: Situation): List[Drop] =
-    situation.board.apiPosition.legalDrops
-      .map(dest => (dest, Api.moveToPos(dest, situation.board.variant)))
-      .flatMap {
-        case (_, Some(dest)) =>
-          val nextBoard = situation.board.afterDrop(situation.player, dest)
-          Option.unless(nextBoard.apiPosition.isRepetition)(
-            Drop(
-              piece = Piece(situation.player, Role.defaultRole),
-              pos = dest,
-              situationBefore = situation,
-              nextBoard = LazyBoardAfter(() => nextBoard),
-              autoEndTurn = true
-            )
-          )
-        case (destInt, dest) => sys.error(s"Invalid pos from int: ${destInt}, ${dest}")
-      }
-      .toList
-
-  def validPass(situation: Situation): Pass = {
-    val uciMove       = "pass"
-    val previousMoves = situation.board.uciMoves
-    // TODO: if "pass" is always legal, then we should use the unchecked version of this method
-    val newPosition   = situation.board.apiPosition.makeMovesWithPrevious(List(uciMove), previousMoves)
-    if (situation.board.uciMoves.takeRight(3) == List("pass", "pass", "pass")) {
-      val finalPosition =
-        situation.board.apiPosition.makeMovesWithPrevious(List(uciMove, "ss:"), previousMoves)
-      return Pass(
+    playablePoints(situation).map(pos =>
+      Drop(
+        piece = Piece(situation.player, defaultRole),
+        pos = pos,
         situationBefore = situation,
-        after = situation.board.copy(
-          uciMoves = situation.board.uciMoves ++ List("pass", "ss:"),
-          position = finalPosition.some
-        ),
         autoEndTurn = true
       )
-    } else {
-      return Pass(
-        situationBefore = situation,
-        after = situation.board.copy(
-          uciMoves = situation.board.uciMoves :+ uciMove,
-          position = newPosition.some
-        ),
-        autoEndTurn = true
-      )
-    }
-  }
-
-  def createSelectSquares(situation: Situation, squares: List[Pos]): SelectSquares = {
-    val uciMove       = s"ss:${squares.mkString(",")}"
-    val previousMoves = situation.board.uciMoves
-    // TODO: if "ss:#" is always legal, then we should use the unchecked version of this method
-    val newPosition   = situation.board.apiPosition.makeMovesWithPrevious(List(uciMove), previousMoves)
-    SelectSquares(
-      squares = squares,
-      situationBefore = situation,
-      after = situation.board.copy(
-        uciMoves = situation.board.uciMoves :+ uciMove,
-        position = newPosition.some
-      ),
-      autoEndTurn = true
     )
-  }
+
+  private def playablePoints(situation: Situation): List[Pos] =
+    if (situation.end) List()
+    else boardSize.validPos.filter(isPlayable(situation, _))
+
+  private def isPlayable(situation: Situation, point: Pos): Boolean =
+    !situation.board.pieces.contains(point) &&
+      !situation.board.ko.contains(point) &&
+      Chain
+        .capturesUnlessSuicide(situation.board, situation.player, point)
+        .exists(captured => !recreatesAnEarlierPosition(situation, point, captured))
+
+  private def recreatesAnEarlierPosition(
+      situation: Situation,
+      point: Pos,
+      captured: Set[Pos]
+  ): Boolean =
+    situation.history.hasOccurred(
+      hashAfterPlacing(situation, Piece(situation.player, defaultRole), point, captured)
+    )
+
+  def validPass(situation: Situation): Pass =
+    Pass(situationBefore = situation, autoEndTurn = true)
+
+  def boardAfterPass(situation: Situation): Board =
+    if (settlesByPassing(situation))
+      situation.board.withHistory(afterOnePly(situation.history)).settled(!situation.player)
+    else situation.board.passed.withHistory(afterOnePly(situation.history))
+
+  // NOTE: four passes end the game on the board transition, which is the one step that both the
+  // played path and the replayed path take, so a game ends on the same ply either way.
+  private def settlesByPassing(situation: Situation): Boolean =
+    situation.board.consecutivePasses + 1 >= Variant.passesSettlingTheGame
+
+  private def afterOnePly(history: History): History =
+    history.copy(halfMoveClock = history.halfMoveClock + 1)
+
+  def createSelectSquares(situation: Situation, squares: List[Pos]): SelectSquares =
+    SelectSquares(squares = squares, situationBefore = situation, autoEndTurn = true)
+
+  // NOTE: `.settled` restarts the position history, so it has to come last.
+  //
+  // NOTE: a settlement records no captures, and this is the only place that decides so. Lifting stones
+  // both players have agreed are dead is not a capture, and nothing displays it as one: lila shows the
+  // area score from the ply a settlement becomes possible onwards, so the capture counter has already
+  // been replaced by the time one lands. The loaders that fold action strings used to add
+  // `lifted + 1` on top of this — the `+ 1` a placement needs and a settlement does not — while live
+  // play and uci replay added nothing, so a game loaded two ways carried two totals.
+  def boardAfterSelectSquares(situation: Situation, squares: List[Pos]): Board =
+    situation.board
+      .withPieces(situation.board.pieces -- squares)
+      .withHistory(afterOnePly(situation.history))
+      .settled(!situation.player)
 
   // def move(
   //     situation: Situation,
@@ -152,14 +155,21 @@ abstract class Variant private[variant] (
   // }
 
   def drop(situation: Situation, role: Role, pos: Pos): Validated[String, Drop] =
-    if (dropsVariant)
-      validDrops(situation).filter(d => d.piece.role == role && d.pos == pos).headOption match {
-        case Some(drop) => Validated.valid(drop)
-        case None       => Validated.invalid(s"$situation cannot perform the drop: $role on $pos")
-      }
-    else Validated.invalid(s"$this variant cannot drop $situation $role $pos")
+    if (!dropsVariant) Validated.invalid(s"$this variant cannot drop $situation $role $pos")
+    else if (role == defaultRole && !situation.end && isPlayable(situation, pos))
+      Validated.valid(
+        Drop(
+          piece = Piece(situation.player, role),
+          pos = pos,
+          situationBefore = situation,
+          autoEndTurn = true
+        )
+      )
+    else Validated.invalid(s"$situation cannot perform the drop: $role on $pos")
 
-  def pass(situation: Situation): Validated[String, Pass] = Validated.valid(validPass(situation))
+  def pass(situation: Situation): Validated[String, Pass] =
+    if (situation.end) Validated.invalid(s"$this variant cannot pass a finished $situation")
+    else Validated.valid(validPass(situation))
 
   def selectSquares(situation: Situation, squares: List[Pos]) =
     if (situation.canSelectSquares) {
@@ -184,11 +194,102 @@ abstract class Variant private[variant] (
 
   def stalemateIsDraw = false
 
-  def winner(situation: Situation): Option[Player]
+  def winner(situation: Situation): Option[Player] =
+    Option.when(specialEnd(situation))(situation.board.areaScore).flatMap { score =>
+      Option.when(score.p1 != score.p2)(if (score.p1 > score.p2) P1 else P2)
+    }
 
-  @nowarn def specialEnd(situation: Situation) = false
+  def specialEnd(situation: Situation) = situation.board.deadStonesSelected
 
-  @nowarn def specialDraw(situation: Situation) = false
+  def specialDraw(situation: Situation) = {
+    val score = situation.board.areaScore
+    score.p1 == score.p2
+  }
+
+  def boardAfter(situation: Situation, pos: Pos): Board = {
+    val stone              = Piece(situation.player, defaultRole)
+    val captured           = Chain.capturedBy(situation.board, situation.player, pos)
+    val stonesAfterPlacing =
+      situation.board.withPieces(situation.board.pieces -- captured + (pos -> stone))
+    stonesAfterPlacing.stonePlaced
+      .withKo(koPointAfter(stonesAfterPlacing, pos, captured))
+      .withHistory(
+        situation.history
+          .copy(
+            captures = situation.history.captures.add(situation.player, captured.size),
+            halfMoveClock = situation.history.halfMoveClock + 1
+          )
+          .afterPosition(hashAfterPlacing(situation, stone, pos, captured))
+      )
+  }
+
+  // NOTE: a game resumed from a fen has a position history that begins there, so simple ko is
+  // enforced in its own right and its coordinate travels in the fen.
+  private def koPointAfter(placed: Board, at: Pos, captured: Set[Pos]): Option[Pos] = {
+    val placedChain = Chain.at(placed, at)
+    Option.when(
+      captured.size == 1 && placedChain.size == 1 && Chain.liberties(placed, placedChain).size == 1
+    )(captured.head)
+  }
+
+  private def hashAfterPlacing(
+      before: Situation,
+      stone: Piece,
+      at: Pos,
+      captured: Set[Pos]
+  ): Long =
+    captured.foldLeft(
+      before.positionHash ^
+        Hash.turnMask(before.player) ^ Hash.turnMask(!before.player) ^
+        Hash.mask(stone, at)
+    ) { (hash, pos) =>
+      hash ^ Hash.mask(before.board.pieces(pos), pos)
+    }
+
+  // NOTE: this Score is in tenths of a point rather than points, because the fen writes both scores
+  // that way and `strategygames.History.score` passes the number straight through to lila. Every
+  // other game logic's `Score` is a plain count.
+  // TODO(lila): score in points here and scale at the fen boundary, once lila reads the unit it wants.
+  def areaScore(board: Board): Score = {
+    val enclosedArea = enclosedAreaByPlayer(board)
+
+    def areaOf(player: Player): Int =
+      board.playerPiecesOnBoardCount(player) + enclosedArea.getOrElse(player, 0)
+
+    def fenTenthsOf(player: Player): Int = areaOf(player) * 10
+
+    Score(
+      fenTenthsOf(P1),
+      fenTenthsOf(P2) + Math.round(board.komi * 10).toInt
+    )
+  }
+
+  private def enclosedAreaByPlayer(board: Board): Map[Player, Int] =
+    emptyRegionsOf(board)
+      .flatMap(region => soleBorderingPlayer(board, region).map((_, region.size)))
+      .groupMapReduce(_._1)(_._2)(_ + _)
+
+  private def emptyRegionsOf(board: Board): List[Set[Pos]] = {
+    val isEmpty = (pos: Pos) => !board.pieces.contains(pos)
+    board.variant.boardSize.validPos
+      .filter(isEmpty)
+      .foldLeft((List.empty[Set[Pos]], Set.empty[Pos])) { case ((regions, alreadyInARegion), point) =>
+        if (alreadyInARegion(point)) (regions, alreadyInARegion)
+        else {
+          val region = Chain.regionFrom(board, point)(isEmpty)
+          (region :: regions, alreadyInARegion ++ region)
+        }
+      }
+      ._1
+  }
+
+  private def soleBorderingPlayer(board: Board, region: Set[Pos]): Option[Player] = {
+    val bordering = region.flatMap(borderingPlayersAt(board, _))
+    Option.when(bordering.size == 1)(bordering.head)
+  }
+
+  private def borderingPlayersAt(board: Board, point: Pos): List[Player] =
+    board.variant.boardSize.neighbours(point.index).flatMap(board.pieces.get).map(_.player)
 
   def materialImbalance(board: Board): Int =
     board.pieces.values.foldLeft(0) { case (acc, Piece(player, role)) =>
@@ -209,7 +310,7 @@ abstract class Variant private[variant] (
     board
 
   def valid(board: Board, @nowarn strict: Boolean): Boolean =
-    Api.validateFEN(Forsyth.exportBoard(board))
+    board.pieces.keys.forall(boardSize.onBoard)
 
   val roles: List[Role] = Role.all
 
@@ -231,6 +332,8 @@ abstract class Variant private[variant] (
 }
 
 object Variant {
+
+  private val passesSettlingTheGame = 4
 
   lazy val all: List[Variant] = List(
     Go19x19,

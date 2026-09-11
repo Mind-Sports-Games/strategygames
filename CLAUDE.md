@@ -2,6 +2,25 @@
 
 This is **strategygames**, a Scala 3 multi-game 2 player rules engine library for [playstrategy.org](https://playstrategy.org). It's a fork of [scalachess](https://github.com/lichess-org/scalachess) (forked ~May 2021, significantly diverged) extended to support multiple game types (Chess, Draughts, Go, Backgammon, and more).
 
+## Documentation lives in `../docs`
+
+Prose that outlives a pull request lives in the [docs](https://github.com/Mind-Sports-Games/docs)
+repo, not here. **Read it before making design decisions, and write new documentation there** —
+ADRs, reference docs and plans all go to `../docs/strategygames/`, never into this repo. If `../docs`
+is not checked out, ask where it is rather than guessing or creating a local `docs/` directory.
+
+ADRs are named `YYYY-MM-DD-TICKET-slug.md` under `adr/`. A superseded record stays where it is and
+says so in its own status line, naming what replaced it.
+
+**ADRs are binding.** Before changing behaviour, check whether an ADR governs it — a decision
+recorded there outranks what a previous implementation did, and outranks an existing test assertion
+that contradicts it. `../docs/strategygames/adr/` currently records the Go rules decisions
+(positional superko, Chinese area scoring, rules-correct over bug-for-bug parity with the retired
+`com.joansala` engine), with the divergence table in `../docs/strategygames/go-engine.md`.
+
+Some branches are docs-stripped variants (e.g. `…-no-docs`). The absence of an ADR on the branch you
+are on does not mean the decision was never taken.
+
 ## Build Commands
 
 ```bash

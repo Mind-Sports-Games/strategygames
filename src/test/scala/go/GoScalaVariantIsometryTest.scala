@@ -4,13 +4,13 @@ import strategygames.format.{ FEN => StratFen, Forsyth => StratForsyth, Uci => S
 import strategygames.variant.{ Variant => StratVariant }
 import variant.Go9x9
 
-class Go9x9VariantTestIsometry extends strategygames.chess.ChessTest {
-  "Test Every move can be loaded from fen" in {
+class GoScalaVariantIsometryTest extends strategygames.chess.ChessTest {
+
+  "Test Every move of a scala go game can be loaded from fen" in {
     val gameFamily   = Go9x9.gameFamily
     val lib          = gameFamily.gameLogic
     val stratVariant = StratVariant(lib, Go9x9.key).get
 
-    // captures small full game with deadstones
     _testEveryMoveLoadFenIsometry(lib, StratFen(lib, Go9x9.initialFen.value), stratVariant)(
       List(
         "s@g3",
@@ -29,21 +29,27 @@ class Go9x9VariantTestIsometry extends strategygames.chess.ChessTest {
         "pass",
         "ss:i1"
       ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ) .toOption must beSome.like { case gameData =>
+    ).toOption must beSome.like { case gameData =>
       val fen1 = StratForsyth.>>(lib, gameData.game)
       val fen2 = StratForsyth.>>(lib, gameData.fenGame)
       fen1 === fen2
     }
   }
 
-  // Updated 27/02/2026 Superko Rule: s@g3 repeats a previous position, so the move is invalid
-  "Test go repetition move is invalid" in {
+  "Test a scala go superko move is invalid" in {
     val gameFamily   = Go9x9.gameFamily
     val lib          = gameFamily.gameLogic
     val stratVariant = StratVariant(lib, Go9x9.key).get
 
-    // go with 3 kos
-    _testEveryMoveLoadFenIsometry(lib, StratFen(lib, Go9x9.initialFen.value), stratVariant)(
+    def replaying(ucis: List[String]) =
+      strategygames.Replay(
+        lib,
+        ucis.flatMap(StratUci(lib, gameFamily, _)),
+        Some(StratFen(lib, Go9x9.initialFen.value)),
+        stratVariant
+      )
+
+    val tripleKo =
       List(
         "s@b8",
         "s@b7",
@@ -80,7 +86,8 @@ class Go9x9VariantTestIsometry extends strategygames.chess.ChessTest {
         "s@c7",
         "s@c2",
         "s@g3"
-      ).map(uciStr => StratUci(lib, gameFamily, uciStr).get)
-    ).isInvalid === true
+      )
+
+    (replaying(tripleKo.init).isValid === true) and (replaying(tripleKo).isInvalid === true)
   }
 }
