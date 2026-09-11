@@ -29,6 +29,8 @@ object EcopeningDB {
       strategygames.abalone.opening.EcopeningDB.allByEco.map { case (a, b) => a -> Ecopening.Abalone(b) }
     case GameLogic.Dameo()        =>
       strategygames.dameo.opening.EcopeningDB.allByEco.map { case (a, b) => a -> Ecopening.Dameo(b) }
+    // entropy has no opening book: every game starts from an empty board and a full bag
+    case GameLogic.Entropy()      => Map.empty
   }
 
   def allByFen(lib: GameLogic): Map[FEN, Ecopening] = lib match {
@@ -54,6 +56,7 @@ object EcopeningDB {
       strategygames.abalone.opening.EcopeningDB.allByFen.map { case (a, b) => a -> Ecopening.Abalone(b) }
     case GameLogic.Dameo()        =>
       strategygames.dameo.opening.EcopeningDB.allByFen.map { case (a, b) => a -> Ecopening.Dameo(b) }
+    case GameLogic.Entropy()      => Map.empty
   }
 
   def all(lib: GameLogic): List[Ecopening] = lib match {
@@ -68,6 +71,7 @@ object EcopeningDB {
       strategygames.backgammon.opening.EcopeningDB.all.map(Ecopening.Backgammon.apply)
     case GameLogic.Abalone()      => strategygames.abalone.opening.EcopeningDB.all.map(Ecopening.Abalone.apply)
     case GameLogic.Dameo()        => strategygames.dameo.opening.EcopeningDB.all.map(Ecopening.Dameo.apply)
+    case GameLogic.Entropy()      => List.empty
   }
 
 }

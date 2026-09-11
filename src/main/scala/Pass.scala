@@ -20,6 +20,7 @@ sealed abstract class Pass(
 
   // TODO: Yup, still not type safe. :D
   def toGo: go.Pass
+  def toEntropy: entropy.Pass
 }
 
 object Pass {
@@ -47,7 +48,38 @@ object Pass {
     def toBackgammon   = sys.error("Can't make a backgammon pass from a go pass")
     def toAbalone      = sys.error("Can't make an abalone pass from a go pass")
     def toDameo        = sys.error("Can't make a dameo pass from a go pass")
+    def toEntropy      = sys.error("Can't make an entropy pass from a go pass")
   }
 
   def wrap(p: go.Pass): Pass = Pass.Go(p)
+
+  final case class Entropy(p: entropy.Pass)
+      extends Pass(
+        Situation.Entropy(p.situationBefore),
+        Board.Entropy(p.after),
+        true,
+        p.metrics
+      ) {
+
+    def situationAfter: Situation = Situation.Entropy(p.situationAfter)
+    def finalizeAfter: Board      = p.finalizeAfter
+
+    def toUci: Uci.Pass = Uci.EntropyPass((p.toUci: entropy.format.Uci.Pass))
+
+    val unwrap = p
+
+    def toChess        = sys.error("Can't make a chess pass from an entropy pass")
+    def toDraughts     = sys.error("Can't make a draughts pass from an entropy pass")
+    def toFairySF      = sys.error("Can't make a fairysf pass from an entropy pass")
+    def toSamurai      = sys.error("Can't make a samurai pass from an entropy pass")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak pass from an entropy pass")
+    def toGo           = sys.error("Can't make a go pass from an entropy pass")
+    def toBackgammon   = sys.error("Can't make a backgammon pass from an entropy pass")
+    def toAbalone      = sys.error("Can't make a abalone pass from an entropy pass")
+    def toDameo        = sys.error("Can't make a dameo pass from an entropy pass")
+    def toEntropy      = p
+
+    override def toString = toUci.uci
+  }
+
 }

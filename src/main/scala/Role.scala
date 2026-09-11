@@ -31,15 +31,15 @@ sealed trait PromotableRole extends Role {
 object Role {
 
   final case class ChessRole(r: chess.Role) extends Role {
-    lazy val gameLogic           = GameLogic.Chess()
-    lazy val gameFamily          = r.gameFamily
-    lazy val forsyth             = r.forsyth
-    lazy val pgn                 = r.pgn
-    lazy val binaryInt           = r.binaryInt
-    lazy val hashInt             = r.hashInt
-    lazy val name                = r.name
-    lazy val groundName          = r.groundName
-    lazy val storable            = r.storable
+    lazy val gameLogic      = GameLogic.Chess()
+    lazy val gameFamily     = r.gameFamily
+    lazy val forsyth        = r.forsyth
+    lazy val pgn            = r.pgn
+    lazy val binaryInt      = r.binaryInt
+    lazy val hashInt        = r.hashInt
+    lazy val name           = r.name
+    lazy val groundName     = r.groundName
+    lazy val storable       = r.storable
     override def toString() = r.name
   }
 
@@ -147,6 +147,19 @@ object Role {
     override def toString() = r.name
   }
 
+  final case class EntropyRole(r: entropy.Role) extends Role {
+    lazy val gameLogic      = GameLogic.Entropy()
+    lazy val gameFamily     = r.gameFamily
+    lazy val forsyth        = r.forsyth
+    lazy val pgn            = r.pgn
+    lazy val binaryInt      = r.binaryInt
+    lazy val hashInt        = r.hashInt
+    lazy val name           = r.name
+    lazy val groundName     = r.groundName
+    lazy val storable       = r.storable
+    override def toString() = r.name
+  }
+
   final case class ChessPromotableRole(r: chess.PromotableRole) extends PromotableRole {
     lazy val gameLogic                              = GameLogic.Chess()
     lazy val gameFamily                             = r.gameFamily
@@ -246,6 +259,7 @@ object Role {
     case GameLogic.Backgammon()   => backgammon.Role.all.map(BackgammonRole.apply)
     case GameLogic.Abalone()      => abalone.Role.all.map(AbaloneRole.apply)
     case GameLogic.Dameo()        => dameo.Role.all.map(DameoRole.apply)
+    case GameLogic.Entropy()      => entropy.Role.all.map(EntropyRole.apply)
   }
 
   def allPromotable(lib: GameLogic): List[PromotableRole] = lib match {
@@ -258,6 +272,7 @@ object Role {
     case GameLogic.Backgammon()   => sys.error("allPromotable not implemented for backgammon")
     case GameLogic.Abalone()      => sys.error("allPromotable not implemented for abalone")
     case GameLogic.Dameo()        => sys.error("allPromotable not implemented for dameo")
+    case GameLogic.Entropy()      => sys.error("allPromotable not implemented for entropy")
   }
 
   def allByForsyth(lib: GameLogic): Map[Char, Role] = lib match {
@@ -271,6 +286,7 @@ object Role {
     case GameLogic.Backgammon()   => backgammon.Role.allByForsyth.map { case (f, r) => (f, BackgammonRole(r)) }
     case GameLogic.Abalone()      => abalone.Role.allByForsyth.map { case (f, r) => (f, AbaloneRole(r)) }
     case GameLogic.Dameo()        => dameo.Role.allByForsyth.map { case (f, r) => (f, DameoRole(r)) }
+    case GameLogic.Entropy()      => entropy.Role.allByForsyth.map { case (f, r) => (f, EntropyRole(r)) }
   }
 
   def allByForsyth(lib: GameLogic, gf: GameFamily): Map[Char, Role] = lib match {
@@ -287,6 +303,8 @@ object Role {
       abalone.Role.allByForsyth(gf).map { case (f, r) => (f, AbaloneRole(r)) }
     case GameLogic.Dameo()        =>
       dameo.Role.allByForsyth(gf).map { case (f, r) => (f, DameoRole(r)) }
+    case GameLogic.Entropy()      =>
+      entropy.Role.allByForsyth(gf).map { case (f, r) => (f, EntropyRole(r)) }
   }
 
   def allByPgn(lib: GameLogic): Map[Char, Role] = lib match {
@@ -300,6 +318,7 @@ object Role {
     case GameLogic.Backgammon()   => backgammon.Role.allByPgn.map { case (p, r) => (p, BackgammonRole(r)) }
     case GameLogic.Abalone()      => abalone.Role.allByPgn.map { case (p, r) => (p, AbaloneRole(r)) }
     case GameLogic.Dameo()        => dameo.Role.allByPdn.map { case (p, r) => (p, DameoRole(r)) }
+    case GameLogic.Entropy()      => entropy.Role.allByPgn.map { case (p, r) => (p, EntropyRole(r)) }
   }
 
   def allByPgn(lib: GameLogic, gf: GameFamily): Map[Char, Role] = lib match {
@@ -313,6 +332,7 @@ object Role {
     case GameLogic.Backgammon()   => backgammon.Role.allByPgn(gf).map { case (p, r) => (p, BackgammonRole(r)) }
     case GameLogic.Abalone()      => abalone.Role.allByPgn(gf).map { case (p, r) => (p, AbaloneRole(r)) }
     case GameLogic.Dameo()        => dameo.Role.allByPdn.map { case (p, r) => (p, DameoRole(r)) }
+    case GameLogic.Entropy()      => entropy.Role.allByPgn(gf).map { case (p, r) => (p, EntropyRole(r)) }
   }
 
   def allByName(lib: GameLogic): Map[String, Role] = lib match {
@@ -326,6 +346,7 @@ object Role {
     case GameLogic.Backgammon()   => backgammon.Role.allByName.map { case (n, r) => (n, BackgammonRole(r)) }
     case GameLogic.Abalone()      => abalone.Role.allByName.map { case (n, r) => (n, AbaloneRole(r)) }
     case GameLogic.Dameo()        => dameo.Role.allByName.map { case (n, r) => (n, DameoRole(r)) }
+    case GameLogic.Entropy()      => entropy.Role.allByName.map { case (n, r) => (n, EntropyRole(r)) }
   }
 
   def allByName(lib: GameLogic, gf: GameFamily): Map[String, Role] = lib match {
@@ -339,6 +360,7 @@ object Role {
     case GameLogic.Backgammon()   => backgammon.Role.allByName(gf).map { case (n, r) => (n, BackgammonRole(r)) }
     case GameLogic.Abalone()      => abalone.Role.allByName(gf).map { case (n, r) => (n, AbaloneRole(r)) }
     case GameLogic.Dameo()        => dameo.Role.allByName(gf).map { case (n, r) => (n, DameoRole(r)) }
+    case GameLogic.Entropy()      => entropy.Role.allByName(gf).map { case (n, r) => (n, EntropyRole(r)) }
   }
 
   def allByGroundName(lib: GameLogic): Map[String, Role] = lib match {
@@ -355,6 +377,8 @@ object Role {
       abalone.Role.allByGroundName.map { case (n, r) => (n, AbaloneRole(r)) }
     case GameLogic.Dameo()        =>
       dameo.Role.allByGroundName.map { case (n, r) => (n, DameoRole(r)) }
+    case GameLogic.Entropy()      =>
+      entropy.Role.allByGroundName.map { case (n, r) => (n, EntropyRole(r)) }
   }
 
   def allByGroundName(lib: GameLogic, gf: GameFamily): Map[String, Role] = lib match {
@@ -371,6 +395,8 @@ object Role {
       abalone.Role.allByGroundName(gf).map { case (n, r) => (n, AbaloneRole(r)) }
     case GameLogic.Dameo()        =>
       dameo.Role.allByGroundName(gf).map { case (n, r) => (n, DameoRole(r)) }
+    case GameLogic.Entropy()      =>
+      entropy.Role.allByGroundName(gf).map { case (n, r) => (n, EntropyRole(r)) }
   }
 
   def allPromotableByName(lib: GameLogic): Map[String, PromotableRole] = lib match {
@@ -387,6 +413,7 @@ object Role {
     case GameLogic.Abalone()      => sys.error("allPromotableByName not implemented for abalone")
     case GameLogic.Dameo()        =>
       dameo.Role.allPromotableByName.map { case (n, r) => (n, DameoPromotableRole(r)) }
+    case GameLogic.Entropy()      => sys.error("allPromotableByName not implemented for entropy")
   }
 
   def allPromotableByName(lib: GameLogic, gf: GameFamily): Map[String, PromotableRole] = lib match {
@@ -403,6 +430,7 @@ object Role {
     case GameLogic.Abalone()      => sys.error("allPromotableByName not implemented for abalone")
     case GameLogic.Dameo()        =>
       dameo.Role.allPromotableByName.map { case (n, r) => (n, DameoPromotableRole(r)) }
+    case GameLogic.Entropy()      => sys.error("allPromotableByName not implemented for entropy")
   }
 
   def allPromotableByGroundName(lib: GameLogic): Map[String, PromotableRole] = lib match {
@@ -418,6 +446,7 @@ object Role {
     case GameLogic.Abalone()      => sys.error("allPromotableByGroundName not implemented for abalone")
     case GameLogic.Dameo()        =>
       dameo.Role.allPromotableByGroundName.map { case (n, r) => (n, DameoPromotableRole(r)) }
+    case GameLogic.Entropy()      => sys.error("allPromotableByGroundName not implemented for entropy")
   }
 
   def allPromotableByGroundName(lib: GameLogic, gf: GameFamily): Map[String, PromotableRole] = lib match {
@@ -433,6 +462,7 @@ object Role {
     case GameLogic.Abalone()      => sys.error("allPromotableByGroundName not implemented for abalone")
     case GameLogic.Dameo()        =>
       dameo.Role.allPromotableByGroundName.map { case (n, r) => (n, DameoPromotableRole(r)) }
+    case GameLogic.Entropy()      => sys.error("allPromotableByGroundName not implemented for entropy")
   }
 
   def allPromotableByForsyth(lib: GameLogic): Map[Char, PromotableRole] = lib match {
@@ -449,6 +479,7 @@ object Role {
     case GameLogic.Abalone()      => sys.error("allPromotableByForsyth not implemented for abalone")
     case GameLogic.Dameo()        =>
       dameo.Role.allPromotableByForsyth.map { case (f, r) => (f, DameoPromotableRole(r)) }
+    case GameLogic.Entropy()      => sys.error("allPromotableByForsyth not implemented for entropy")
   }
 
   def allPromotableByForsyth(lib: GameLogic, gf: GameFamily): Map[Char, PromotableRole] = lib match {
@@ -465,6 +496,7 @@ object Role {
     case GameLogic.Abalone()      => sys.error("allPromotableByForsyth not implemented for abalone")
     case GameLogic.Dameo()        =>
       dameo.Role.allPromotableByForsyth.map { case (f, r) => (f, DameoPromotableRole(r)) }
+    case GameLogic.Entropy()      => sys.error("allPromotableByForsyth not implemented for entropy")
   }
 
   def allPromotableByPgn(lib: GameLogic): Map[Char, PromotableRole] = lib match {
@@ -480,6 +512,7 @@ object Role {
     case GameLogic.Abalone()      => sys.error("allPromotableByPgn not implemented for abalone")
     case GameLogic.Dameo()        =>
       dameo.Role.allPromotableByPdn.map { case (p, r) => (p, DameoPromotableRole(r)) }
+    case GameLogic.Entropy()      => sys.error("allPromotableByPgn not implemented for entropy")
   }
 
   def allPromotableByPgn(lib: GameLogic, gf: GameFamily): Map[Char, PromotableRole] = lib match {
@@ -495,6 +528,7 @@ object Role {
     case GameLogic.Abalone()      => sys.error("allPromotableByPgn not implemented for abalone")
     case GameLogic.Dameo()        =>
       dameo.Role.allPromotableByPdn.map { case (p, r) => (p, DameoPromotableRole(r)) }
+    case GameLogic.Entropy()      => sys.error("allPromotableByPgn not implemented for entropy")
   }
 
   def forsyth(lib: GameLogic, c: Char): Option[Role] = lib match {
@@ -507,6 +541,7 @@ object Role {
     case GameLogic.Backgammon()   => backgammon.Role.forsyth(c).map(BackgammonRole.apply)
     case GameLogic.Abalone()      => abalone.Role.forsyth(c).map(AbaloneRole.apply)
     case GameLogic.Dameo()        => dameo.Role.forsyth(c).map(DameoRole.apply)
+    case GameLogic.Entropy()      => entropy.Role.forsyth(c).map(EntropyRole.apply)
   }
 
   def promotable(lib: GameLogic, gf: GameFamily, c: Char): Option[PromotableRole] = lib match {
@@ -519,6 +554,7 @@ object Role {
     case GameLogic.Backgammon()   => sys.error("promotable not implemented for backgammon")
     case GameLogic.Abalone()      => sys.error("promotable not implemented for abalone")
     case GameLogic.Dameo()        => dameo.Role.promotable(c).map(DameoPromotableRole.apply)
+    case GameLogic.Entropy()      => None
   }
 
   def promotable(lib: GameLogic, gf: GameFamily, name: String): Option[PromotableRole] = lib match {
@@ -531,6 +567,7 @@ object Role {
     case GameLogic.Backgammon()   => sys.error("promotable not implemented for backgammon")
     case GameLogic.Abalone()      => sys.error("promotable not implemented for abalone")
     case GameLogic.Dameo()        => dameo.Role.promotable(name).map(DameoPromotableRole.apply)
+    case GameLogic.Entropy()      => None
   }
 
   def promotable(lib: GameLogic, gf: GameFamily, name: Option[String]): Option[PromotableRole] = lib match {
@@ -543,6 +580,7 @@ object Role {
     case GameLogic.Backgammon()   => sys.error("promotable not implemented for backgammon")
     case GameLogic.Abalone()      => sys.error("promotable not implemented for abalone")
     case GameLogic.Dameo()        => dameo.Role.promotable(name).map(DameoPromotableRole.apply)
+    case GameLogic.Entropy()      => None
   }
 
   def storable(lib: GameLogic): List[Role] = lib match {
@@ -555,6 +593,7 @@ object Role {
     case GameLogic.Backgammon()   => backgammon.Role.storable.map(BackgammonRole.apply)
     case GameLogic.Abalone()      => List()
     case GameLogic.Dameo()        => List()
+    case GameLogic.Entropy()      => entropy.Role.storable.map(EntropyRole.apply)
   }
 
   def pgnMoveToRole(lib: GameLogic, gf: GameFamily, c: Char): Role = lib match {
@@ -567,6 +606,7 @@ object Role {
     case GameLogic.Backgammon()   => BackgammonRole(backgammon.Role.pgnMoveToRole(gf, c))
     case GameLogic.Abalone()      => AbaloneRole(abalone.Role.pgnMoveToRole(gf, c))
     case GameLogic.Dameo()        => DameoRole(dameo.Role.pdnMoveToRole(c))
+    case GameLogic.Entropy()      => EntropyRole(entropy.Role.pgnMoveToRole(gf, c))
   }
 
   def javaSymbolToRole(lib: GameLogic, s: String): Role = lib match {
@@ -579,6 +619,7 @@ object Role {
     case GameLogic.Backgammon()   => BackgammonRole(backgammon.Role.javaSymbolToRole(s))
     case GameLogic.Abalone()      => AbaloneRole(abalone.Role.javaSymbolToRole(s))
     case GameLogic.Dameo()        => DameoRole(dameo.Role.javaSymbolToRole(s))
+    case GameLogic.Entropy()      => EntropyRole(entropy.Role.javaSymbolToRole(s))
   }
 
   def wrap(pr: chess.PromotableRole): PromotableRole    = ChessPromotableRole(pr)

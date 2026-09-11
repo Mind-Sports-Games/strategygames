@@ -2,7 +2,7 @@ package strategygames
 
 import cats.data.Validated
 import cats.implicits._
-import strategygames.format.{FEN, Uci}
+import strategygames.format.{ FEN, Uci }
 import strategygames.variant.Variant
 
 abstract class Game(
@@ -145,7 +145,26 @@ abstract class Game(
           CubeInteraction.Backgammon(uci.interaction),
           metrics
         )
-      case Uci.GoPass(_)                                => pass(metrics)
+      case Uci.EntropyMove(uci)                         =>
+        apply(
+          Pos.Entropy(uci.orig),
+          Pos.Entropy(uci.dest),
+          promotion = None,
+          metrics
+        )
+      case Uci.EntropyDrop(uci)                         =>
+        drop(
+          Role.EntropyRole(uci.role),
+          Pos.Entropy(uci.pos),
+          metrics
+        )
+      case Uci.EntropyDrawCounter(uci)                  =>
+        drawCounter(
+          Role.EntropyRole(uci.role),
+          metrics
+        )
+      case Uci.EntropyDoDrawCounter(_)                  => randomizeAndApplyDrawCounter(metrics)
+      case Uci.GoPass(_) | Uci.EntropyPass(_)           => pass(metrics)
       case Uci.ChessDoRoll(_) | Uci.BackgammonDoRoll(_) => randomizeAndApplyDiceRoll(metrics)
       case Uci.BackgammonUndo(_)                        => undo(metrics)
       case Uci.BackgammonEndTurn(_)                     => endTurn(metrics)
@@ -227,7 +246,21 @@ abstract class Game(
   def toGo: go.Game
   def toBackgammon: backgammon.Game
   def toAbalone: abalone.Game
+  def drawCounter(
+      role: Role,
+      metrics: MoveMetrics = MoveMetrics()
+  ): Validated[String, (Game, DrawCounter)] =
+    sys.error("Can't draw a counter in this game logic")
+
+  // the bag is blind, so a client asks for a draw without naming a colour and is
+  // told what came out; the counterpart of randomizeAndApplyDiceRoll
+  def randomizeAndApplyDrawCounter(
+      metrics: MoveMetrics = MoveMetrics()
+  ): Validated[String, (Game, DrawCounter)] =
+    sys.error("Can't draw a counter in this game logic")
+
   def toDameo: dameo.Game
+  def toEntropy: entropy.Game
 
 }
 
@@ -382,6 +415,7 @@ object Game {
     def toBackgammon: backgammon.Game     = sys.error("Can't turn a chess game into a backgammon game")
     def toAbalone: abalone.Game           = sys.error("Can't turn a chess game into an abalone game")
     def toDameo: dameo.Game               = sys.error("Can't turn a chess game into a dameo game")
+    def toEntropy: entropy.Game           = sys.error("Can't turn a chess game into an entropy game")
 
   }
 
@@ -549,6 +583,7 @@ object Game {
     def toBackgammon: backgammon.Game     = sys.error("Can't turn a draughts game into a backgammon game")
     def toAbalone: abalone.Game           = sys.error("Can't turn a draughts game into an abalone game")
     def toDameo: dameo.Game               = sys.error("Can't turn a draughts game into a dameo game")
+    def toEntropy: entropy.Game           = sys.error("Can't turn a draughts game into an entropy game")
 
   }
 
@@ -700,6 +735,7 @@ object Game {
     def toBackgammon: backgammon.Game     = sys.error("Can't turn a fairysf game into a backgammon game")
     def toAbalone: abalone.Game           = sys.error("Can't turn a fairysf game into an abalone game")
     def toDameo: dameo.Game               = sys.error("Can't turn a fairysf game into a dameo game")
+    def toEntropy: entropy.Game           = sys.error("Can't turn a fairysf game into an entropy game")
 
   }
 
@@ -836,6 +872,7 @@ object Game {
     def toBackgammon: backgammon.Game     = sys.error("Can't turn a samurai game into a backgammon game")
     def toAbalone: abalone.Game           = sys.error("Can't turn a samurai game into an abalone game")
     def toDameo: dameo.Game               = sys.error("Can't turn a samurai game into a dameo game")
+    def toEntropy: entropy.Game           = sys.error("Can't turn a samurai game into an entropy game")
 
   }
 
@@ -973,6 +1010,7 @@ object Game {
     def toBackgammon: backgammon.Game     = sys.error("Can't turn a togyzkumalak game into a backgammon game")
     def toAbalone: abalone.Game           = sys.error("Can't turn a togyzkumalak game into an abalone game")
     def toDameo: dameo.Game               = sys.error("Can't turn a togyzkumalak game into a dameo game")
+    def toEntropy: entropy.Game           = sys.error("Can't turn a togyzkumalak game into an entropy game")
 
   }
 
@@ -1119,6 +1157,7 @@ object Game {
     def toBackgammon: backgammon.Game     = sys.error("Can't turn a go game into a backgammon game")
     def toAbalone: abalone.Game           = sys.error("Can't turn a go game into an abalone game")
     def toDameo: dameo.Game               = sys.error("Can't turn a go game into a dameo game")
+    def toEntropy: entropy.Game           = sys.error("Can't turn a go game into an entropy game")
 
   }
 
@@ -1284,6 +1323,7 @@ object Game {
     def toBackgammon: backgammon.Game     = g
     def toAbalone: abalone.Game           = sys.error("Can't turn a backgammon game into an abalone game")
     def toDameo: dameo.Game               = sys.error("Can't turn a backgammon game into a dameo game")
+    def toEntropy: entropy.Game           = sys.error("Can't turn a backgammon game into an entropy game")
 
   }
 
@@ -1423,6 +1463,7 @@ object Game {
       sys.error("Can't turn an abalone game into a backgammon game")
     override def toAbalone: abalone.Game           = g
     override def toDameo: dameo.Game               = sys.error("Can't turn an abalone game into a dameo game")
+    override def toEntropy: entropy.Game           = sys.error("Can't turn an abalone game into an entropy game")
   }
 
   final case class Dameo(g: dameo.Game)
@@ -1559,6 +1600,186 @@ object Game {
     def toBackgammon: backgammon.Game     = sys.error("Can't turn a dameo game into a backgammon game")
     def toAbalone: abalone.Game           = sys.error("Can't turn a dameo game into an abalone game")
     def toDameo: dameo.Game               = g
+    def toEntropy: entropy.Game           = sys.error("Can't turn a dameo game into an entropy game")
+
+  }
+
+  final case class Entropy(g: entropy.Game)
+      extends Game(
+        Situation.Entropy(g.situation),
+        g.actionStrs,
+        g.clock,
+        g.plies,
+        g.turnCount,
+        g.startedAtPly,
+        g.startedAtTurn
+      ) {
+
+    def apply(
+        orig: Pos,
+        dest: Pos,
+        promotion: Option[PromotableRole] = None,
+        metrics: MoveMetrics = MoveMetrics(),
+        finalSquare: Boolean = false,
+        captures: Option[List[Pos]] = None,
+        partialCaptures: Boolean = false
+    ): Validated[String, (Game, Move)] = (orig, dest) match {
+      case (Pos.Entropy(orig), Pos.Entropy(dest)) =>
+        g.apply(orig, dest, metrics)
+          .toEither
+          .map(t => (Entropy(t._1), Move.Entropy(t._2)))
+          .toValidated
+      case _                                      => sys.error("Not passed Entropy objects")
+    }
+
+    def apply(action: Action): Game =
+      action match {
+        case (Move.Entropy(move))      => Entropy(g.apply(move))
+        case (Drop.Entropy(drop))      => Entropy(g.apply(drop))
+        case (Pass.Entropy(pass))      => Entropy(g.apply(pass))
+        case (DrawCounter.Entropy(dc)) => Entropy(g.apply(dc))
+        case _                         => sys.error("Not passed Entropy objects")
+      }
+
+    def drop(
+        role: Role,
+        pos: Pos,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, Drop)] = (role, pos) match {
+      case (Role.EntropyRole(role), Pos.Entropy(pos)) =>
+        g.situation
+          .drop(role, pos)
+          .map(_ withMetrics metrics)
+          .toEither
+          .map(d => (Entropy(g.apply(d)), Drop.Entropy(d)))
+          .toValidated
+      case _                                          => sys.error("Not passed Entropy objects")
+    }
+
+    def lift(
+        pos: Pos,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, Lift)] =
+      sys.error("Can't lift in entropy")
+
+    def pass(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Pass)] =
+      g.situation
+        .pass()
+        .map(_ withMetrics metrics)
+        .toEither
+        .map(p => (Entropy(g.apply(p)), Pass.Entropy(p)))
+        .toValidated
+
+    override def drawCounter(
+        role: Role,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, DrawCounter)] = role match {
+      case Role.EntropyRole(role) =>
+        g.situation
+          .drawCounter(role)
+          .map(_ withMetrics metrics)
+          .toEither
+          .map(dc => (Entropy(g.apply(dc)), DrawCounter.Entropy(dc)))
+          .toValidated
+      case _                      => sys.error("Not passed Entropy objects")
+    }
+
+    override def randomizeAndApplyDrawCounter(
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, DrawCounter)] =
+      g.situation.board.variant
+        .randomDraw(g.situation)
+        .map(_ withMetrics metrics)
+        .toEither
+        .map(dc => (Entropy(g.apply(dc)), DrawCounter.Entropy(dc)))
+        .toValidated
+
+    def selectSquares(
+        squares: List[Pos],
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, SelectSquares)] =
+      sys.error("Can't selectSquares in Entropy")
+
+    def diceRoll(
+        dice: List[Int],
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, DiceRoll)] =
+      sys.error("Can't diceroll in Entropy")
+
+    def undo(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Undo)] =
+      sys.error("Can't undo in entropy")
+
+    def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)] =
+      sys.error("Can't endTurn in entropy")
+
+    def cubeAction(
+        interaction: CubeInteraction,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, CubeAction)] =
+      sys.error("Can't cubeaction in entropy")
+
+    def randomizeDiceRoll: Option[DiceRoll] = None
+
+    def randomizeAndApplyDiceRoll(
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, DiceRoll)] =
+      sys.error("Can't apply diceroll in entropy")
+
+    def copy(clock: Option[ClockBase]): Game =
+      Entropy(g.copy(clock = clock))
+
+    def copy(plies: Int, turnCount: Int, startedAtPly: Int, startedAtTurn: Int): Game =
+      Entropy(
+        g.copy(
+          plies = plies,
+          turnCount = turnCount,
+          startedAtPly = startedAtPly,
+          startedAtTurn = startedAtTurn
+        )
+      )
+
+    def copy(
+        clock: Option[ClockBase],
+        plies: Int,
+        turnCount: Int,
+        startedAtPly: Int,
+        startedAtTurn: Int
+    ): Game =
+      Entropy(
+        g.copy(
+          clock = clock,
+          plies = plies,
+          turnCount = turnCount,
+          startedAtPly = startedAtPly,
+          startedAtTurn = startedAtTurn
+        )
+      )
+
+    def copy(situation: Situation, plies: Int, turnCount: Int): Game = situation match {
+      case Situation.Entropy(situation) =>
+        Entropy(g.copy(situation = situation, plies = plies, turnCount = turnCount))
+      case _                            =>
+        sys.error("Unable to copy entropy game with non-entropy arguments")
+    }
+    def copy(situation: Situation): Game                             = situation match {
+      case Situation.Entropy(situation) => Entropy(g.copy(situation = situation))
+      case _                            => sys.error("Unable to copy entropy game with non-entropy arguments")
+    }
+
+    def hasJustSwitchedTurns: Boolean = g.hasJustSwitchedTurns
+
+    def withTurnsAndPlies(p: Int, t: Int): Game = Entropy(g.withTurnsAndPlies(p, t))
+
+    def toFairySF: fairysf.Game           = sys.error("Can't turn an entropy game into a fairysf game")
+    def toChess: chess.Game               = sys.error("Can't turn an entropy game into a chess game")
+    def toDraughts: draughts.DraughtsGame = sys.error("Can't turn an entropy game into a draughts game")
+    def toSamurai: samurai.Game           = sys.error("Can't turn an entropy game into a samurai game")
+    def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn an entropy game into a togyzkumalak game")
+    def toGo: go.Game                     = sys.error("Can't turn an entropy game into a go game")
+    def toBackgammon: backgammon.Game     = sys.error("Can't turn an entropy game into a backgammon game")
+    def toAbalone: abalone.Game           = sys.error("Can't turn an entropy game into an abalone game")
+    def toDameo: dameo.Game               = sys.error("Can't turn an entropy game into a dameo game")
+    def toEntropy: entropy.Game           = g
 
   }
 
@@ -1594,6 +1815,10 @@ object Game {
       Abalone(abalone.Game(situation, actionStrs, clock, plies, turnCount, startedAtPly, startedAtTurn))
     case (GameLogic.Dameo(), Situation.Dameo(situation))               =>
       Dameo(dameo.Game(situation, actionStrs, clock, plies, turnCount, startedAtPly, startedAtTurn))
+    case (GameLogic.Entropy(), Situation.Entropy(situation))           =>
+      Entropy(
+        entropy.Game(situation, actionStrs, clock, plies, turnCount, startedAtPly, startedAtTurn)
+      )
     case _                                                             => sys.error("Mismatched gamelogic types 32")
   }
 
@@ -1616,6 +1841,8 @@ object Game {
       Abalone(abalone.Game.apply(variant))
     case (GameLogic.Dameo(), Variant.Dameo(variant))               =>
       Dameo(dameo.Game.apply(variant))
+    case (GameLogic.Entropy(), Variant.Entropy(variant))           =>
+      Entropy(entropy.Game.apply(variant))
     case _                                                         =>
       sys.error("Mismatched gamelogic types 33")
   }
@@ -1639,6 +1866,8 @@ object Game {
       Abalone(abalone.Game.apply(variant.map(_.toAbalone), fen.map(_.toAbalone)))
     case GameLogic.Dameo()        =>
       Dameo(dameo.Game.apply(variant.map(_.toDameo), fen.map(_.toDameo)))
+    case GameLogic.Entropy()      =>
+      Entropy(entropy.Game.apply(variant.map(_.toEntropy), fen.map(_.toEntropy)))
   }
 
   def wrap(g: chess.Game)            = Chess(g)

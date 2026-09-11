@@ -2,7 +2,7 @@ package strategygames
 
 import cats.data.Validated
 import cats.implicits._
-import strategygames.format.{FEN, Uci}
+import strategygames.format.{ FEN, Uci }
 import strategygames.variant.Variant
 
 sealed abstract class Replay(val setup: Game, val actions: List[Action], val state: Game) {
@@ -160,6 +160,18 @@ object Replay {
     }
   }
 
+  final case class Entropy(r: entropy.Replay)
+      extends Replay(
+        Game.Entropy(r.setup),
+        r.actions.map((a: entropy.Action) => Action.wrap(a)),
+        Game.Entropy(r.state)
+      ) {
+    def copy(state: Game): Replay = state match {
+      case Game.Entropy(state) => Replay.wrap(r.copy(state = state))
+      case _                   => sys.error("Unable to copy an entropy replay with a non-entropy state")
+    }
+  }
+
   def apply(lib: GameLogic, setup: Game, actions: List[Action], state: Game): Replay =
     (lib, setup, state) match {
       case (GameLogic.Draughts(), Game.Draughts(setup), Game.Draughts(state))             =>
@@ -180,6 +192,8 @@ object Replay {
         Abalone(abalone.Replay(setup, actions.map(Action.toAbalone), state))
       case (GameLogic.Dameo(), Game.Dameo(setup), Game.Dameo(state))                      =>
         Dameo(dameo.Replay(setup, actions.map(Action.toDameo), state))
+      case (GameLogic.Entropy(), Game.Entropy(setup), Game.Entropy(state))                =>
+        Entropy(entropy.Replay(setup, actions.map(Action.toEntropy), state))
       case _                                                                              => sys.error("Mismatched gamelogic types 5")
     }
 
@@ -316,6 +330,19 @@ object Replay {
             message
           )
       }
+    case (GameLogic.Entropy(), FEN.Entropy(initialFen), Variant.Entropy(variant))                =>
+      entropy.Replay.gameWithUciWhileValid(
+        actionStrs,
+        initialFen,
+        variant
+      ) match {
+        case (game, gameswithsan, message) =>
+          (
+            Game.Entropy(game),
+            gameswithsan.map { case (g, u) => (Game.Entropy(g), Uci.EntropyWithSan(u)) },
+            message
+          )
+      }
     case _                                                                                       => sys.error("Mismatched gamelogic types 7")
   }
 
@@ -388,6 +415,12 @@ object Replay {
         .situations(actionStrs, initialFen.map(_.toDameo), variant)
         .toEither
         .map(s => s.map(Situation.Dameo.apply))
+        .toValidated
+    case (GameLogic.Entropy(), Variant.Entropy(variant))           =>
+      entropy.Replay
+        .situations(actionStrs, initialFen.map(_.toEntropy), variant)
+        .toEither
+        .map(s => s.map(Situation.Entropy.apply))
         .toValidated
     case _                                                         => sys.error("Mismatched gamelogic types 8")
   }
@@ -464,6 +497,14 @@ object Replay {
       }
     )
 
+  private def entropyUcis(ucis: List[Uci]): List[entropy.format.Uci] =
+    ucis.flatMap(u =>
+      u match {
+        case u: Uci.Entropy => Some(u.unwrap)
+        case _              => None
+      }
+    )
+
   def boardsFromUci(
       lib: GameLogic,
       ucis: List[Uci],
@@ -530,6 +571,12 @@ object Replay {
         .toEither
         .map(b => b.map(Board.Dameo.apply))
         .toValidated
+    case (GameLogic.Entropy(), Variant.Entropy(variant))           =>
+      entropy.Replay
+        .boardsFromUci(entropyUcis(ucis), initialFen.map(_.toEntropy), variant)
+        .toEither
+        .map(b => b.map(Board.Entropy.apply))
+        .toValidated
     case _                                                         => sys.error("Mismatched gamelogic types 8a")
   }
 
@@ -594,6 +641,12 @@ object Replay {
         .toEither
         .map(s => s.map(Situation.Dameo.apply))
         .toValidated
+    case (GameLogic.Entropy(), Variant.Entropy(variant))           =>
+      entropy.Replay
+        .situationsFromUci(entropyUcis(ucis), initialFen.map(_.toEntropy), variant)
+        .toEither
+        .map(s => s.map(Situation.Entropy.apply))
+        .toValidated
     case _                                                         => sys.error("Mismatched gamelogic types 9")
   }
 
@@ -645,6 +698,10 @@ object Replay {
       dameo.Replay
         .gameFromUciStrings(ucis.flatten.toList, initialFen.map(_.toDameo), variant)
         .map(Game.Dameo.apply)
+    case (GameLogic.Entropy(), Variant.Entropy(variant))           =>
+      entropy.Replay
+        .gameFromUciStrings(ucis.flatten.toList, initialFen.map(_.toEntropy), variant)
+        .map(Game.Entropy.apply)
     case _                                                         => sys.error("Mismatched gamelogic types for Replay 10")
   }
 
@@ -709,6 +766,12 @@ object Replay {
         .toEither
         .map(r => Replay.Dameo(r))
         .toValidated
+    case (GameLogic.Entropy(), Variant.Entropy(variant))           =>
+      entropy.Replay
+        .apply(entropyUcis(ucis), initialFen.map(_.toEntropy), variant)
+        .toEither
+        .map(r => Replay.Entropy(r))
+        .toValidated
     case _                                                         => sys.error("Mismatched gamelogic types Replay 11")
   }
 
@@ -737,6 +800,8 @@ object Replay {
       abalone.Replay.plyAtFen(actionStrs, initialFen.map(_.toAbalone), variant, atFen)
     case (GameLogic.Dameo(), Variant.Dameo(variant), FEN.Dameo(atFen))                      =>
       dameo.Replay.plyAtFen(actionStrs, initialFen.map(_.toDameo), variant, atFen)
+    case (GameLogic.Entropy(), Variant.Entropy(variant), FEN.Entropy(atFen))                =>
+      entropy.Replay.plyAtFen(actionStrs, initialFen.map(_.toEntropy), variant, atFen)
     case _                                                                                  => sys.error("Mismatched gamelogic types 10")
   }
 
@@ -749,5 +814,6 @@ object Replay {
   def wrap(r: backgammon.Replay)   = Backgammon(r)
   def wrap(r: abalone.Replay)      = Abalone(r)
   def wrap(r: dameo.Replay)        = Dameo(r)
+  def wrap(r: entropy.Replay)      = Entropy(r)
 
 }

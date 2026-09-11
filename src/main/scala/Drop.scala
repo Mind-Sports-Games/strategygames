@@ -55,6 +55,7 @@ object Drop {
     def toBackgammon   = sys.error("Can't make a backgammon drop from a chess drop")
     def toAbalone      = sys.error("Can't make an abalone drop from a chess drop")
     def toDameo        = sys.error("Can't make a dameo drop from a chess drop")
+    def toEntropy      = sys.error("Can't make an entropy drop from a chess drop")
 
   }
 
@@ -83,6 +84,7 @@ object Drop {
     def toBackgammon   = sys.error("Can't make a backgammon drop from a fairysf drop")
     def toAbalone      = sys.error("Can't make an abalone drop from a fairysf drop")
     def toDameo        = sys.error("Can't make a dameo drop from a fairysf drop")
+    def toEntropy      = sys.error("Can't make an entropy drop from a fairysf drop")
 
   }
 
@@ -111,6 +113,7 @@ object Drop {
     def toBackgammon   = sys.error("Can't make a backgammon drop from a go drop")
     def toAbalone      = sys.error("Can't make an abalone drop from a go drop")
     def toDameo        = sys.error("Can't make a dameo drop from a go drop")
+    def toEntropy      = sys.error("Can't make an entropy drop from a go drop")
 
   }
 
@@ -139,6 +142,7 @@ object Drop {
     def toBackgammon   = d
     def toAbalone      = sys.error("Can't make an abalone drop from a backgammon drop")
     def toDameo        = sys.error("Can't make a dameo drop from a backgammon drop")
+    def toEntropy      = sys.error("Can't make an entropy drop from a backgammon drop")
 
   }
 
@@ -146,5 +150,36 @@ object Drop {
   def wrap(d: fairysf.Drop): Drop    = Drop.FairySF(d)
   def wrap(d: go.Drop): Drop         = Drop.Go(d)
   def wrap(d: backgammon.Drop): Drop = Drop.Backgammon(d)
+
+  final case class Entropy(d: entropy.Drop)
+      extends Drop(
+        Piece.Entropy(d.piece),
+        Pos.Entropy(d.pos),
+        Situation.Entropy(d.situationBefore),
+        Board.Entropy(d.after),
+        true,
+        d.metrics
+      ) {
+
+    def situationAfter: Situation = Situation.Entropy(d.situationAfter)
+    def finalizeAfter: Board      = d.finalizeAfter
+
+    def toUci: Uci.Drop = Uci.EntropyDrop((d.toUci: entropy.format.Uci.Drop))
+
+    val unwrap = d
+
+    def toChess        = sys.error("Can't make a chess drop from an entropy drop")
+    def toDraughts     = sys.error("Can't make a draughts drop from an entropy drop")
+    def toFairySF      = sys.error("Can't make a fairysf drop from an entropy drop")
+    def toSamurai      = sys.error("Can't make a samurai drop from an entropy drop")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak drop from an entropy drop")
+    def toGo           = sys.error("Can't make a go drop from an entropy drop")
+    def toBackgammon   = sys.error("Can't make a backgammon drop from an entropy drop")
+    def toAbalone      = sys.error("Can't make a abalone drop from an entropy drop")
+    def toDameo        = sys.error("Can't make a dameo drop from an entropy drop")
+    def toEntropy      = d
+
+    override def toString = toUci.uci
+  }
 
 }

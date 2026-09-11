@@ -83,12 +83,21 @@ object PocketData {
         Set.empty
       )
 
+  case class Entropy(p: entropy.PocketData)
+      extends PocketData(
+        GameLogic.Entropy(),
+        p.pockets,
+        Set.empty
+      )
+
   def init(lib: GameLogic): PocketData = lib match {
     case GameLogic.Chess()      => Chess(chess.PocketData.init)
     case GameLogic.FairySF()    => FairySF(fairysf.PocketData.init)
     case GameLogic.Go()         => Go(go.PocketData.init)
     case GameLogic.Backgammon() => Backgammon(backgammon.PocketData.init)
-    case _                      => sys.error("Unable to initialise pocket data for non chess/fairysf/go/backgammon lib")
+    case GameLogic.Entropy()    => Entropy(entropy.PocketData.init)
+    case _                      =>
+      sys.error("Unable to initialise pocket data for non chess/fairysf/go/backgammon/entropy lib")
   }
 
 }

@@ -7,7 +7,7 @@ abstract class Action(
 ) {
   def situationAfter: Situation
   // def finalizeAfter: Board //this can be added once draughts has been refactored (removing the input finalSquare)
-  def before = situationBefore.board
+  def before   = situationBefore.board
   def endsTurn = situationBefore.player != situationAfter.player
 
   def player: Player
@@ -22,6 +22,7 @@ abstract class Action(
   def toBackgammon: backgammon.Action
   def toAbalone: abalone.Action
   def toDameo: dameo.Action
+  def toEntropy: entropy.Action
 }
 
 object Action {
@@ -69,6 +70,13 @@ object Action {
 
   def wrap(action: dameo.Action): Action = action match {
     case m: dameo.Move => Move.Dameo(m)
+  }
+
+  def wrap(action: entropy.Action): Action = action match {
+    case m: entropy.Move         => Move.Entropy(m)
+    case d: entropy.Drop         => Drop.Entropy(d)
+    case p: entropy.Pass         => Pass.Entropy(p)
+    case dc: entropy.DrawCounter => DrawCounter.Entropy(dc)
   }
 
   def toChess(action: Action): chess.Action = action match {
@@ -122,6 +130,15 @@ object Action {
   def toDameo(action: Action): dameo.Move = action match {
     case Move.Dameo(m) => m
     case _             => sys.error("Expecting a dameo action e.g. move")
+  }
+
+  def toEntropy(action: Action): entropy.Action = action match {
+    case Move.Entropy(m)         => m
+    case Drop.Entropy(d)         => d
+    case Pass.Entropy(p)         => p
+    case DrawCounter.Entropy(dc) => dc
+    case _                       =>
+      sys.error("Expecting an entropy action e.g. move, drop, pass or drawCounter")
   }
 
 }

@@ -95,6 +95,15 @@ object Piece {
     def forsyth: Char = p.forsyth
   }
 
+  final case class Entropy(p: entropy.Piece)
+      extends Piece(
+        p.player,
+        Role.EntropyRole(p.role)
+      ) {
+
+    def forsyth: Char = p.forsyth
+  }
+
   def apply(lib: GameLogic, player: Player, role: Role): Piece = (lib, role) match {
     case (GameLogic.Draughts(), Role.DraughtsRole(role))         => Draughts(draughts.Piece(player, role))
     case (GameLogic.Chess(), Role.ChessRole(role))               => Chess(chess.Piece(player, role))
@@ -106,6 +115,7 @@ object Piece {
     case (GameLogic.Backgammon(), Role.BackgammonRole(role))     => Backgammon(backgammon.Piece(player, role))
     case (GameLogic.Abalone(), Role.AbaloneRole(role))           => Abalone(abalone.Piece(player, role))
     case (GameLogic.Dameo(), Role.DameoRole(role))               => Dameo(dameo.Piece(player, role))
+    case (GameLogic.Entropy(), Role.EntropyRole(role))           => Entropy(entropy.Piece(player, role))
     case _                                                       => sys.error("Mismatched gamelogic types 2")
   }
 
@@ -119,6 +129,7 @@ object Piece {
     case (GameLogic.Backgammon())   => sys.error("cannot get piece from Char for backgammon anymore")
     case (GameLogic.Abalone())      => sys.error("cannot get piece from Char for abalone anymore")
     case (GameLogic.Dameo())        => dameo.Piece.fromChar(c).map(Dameo.apply)
+    case (GameLogic.Entropy())      => entropy.Piece.fromChar(c).map(Entropy.apply)
   }
 
   def chessPieceMap(pieceMap: PieceMap): chess.PieceMap = pieceMap.flatMap {
@@ -167,8 +178,7 @@ object Piece {
     case _                                   => None
   }
 
-  def pieceMapForChess(pieces: strategygames.chess.PieceMap): PieceMap = pieces.flatMap {
-    case (pos, piece) =>
-      Some((Pos.Chess(pos), (Piece.Chess(piece), 1)))
+  def pieceMapForChess(pieces: strategygames.chess.PieceMap): PieceMap = pieces.flatMap { case (pos, piece) =>
+    Some((Pos.Chess(pos), (Piece.Chess(piece), 1)))
   }
 }

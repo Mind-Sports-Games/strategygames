@@ -24,6 +24,14 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def diceRolls: List[DiceRoll]
 
+  // only entropy draws counters from a bag
+  def drawCounters: List[DrawCounter] = List.empty
+
+  // The single action a player whose clock has flagged is restricted to, in a game that
+  // degrades play instead of ending on a flag. Distinct from forcedAction, which means the
+  // action is inevitable and so may be played on the player's behalf.
+  def flaggedAction: Option[Action] = None
+
   def undos: List[Undo]
 
   def endTurns: List[EndTurn]
@@ -37,12 +45,13 @@ sealed abstract class Situation(val board: Board, val player: Player) {
       passes :::
       selectSquaresAction :::
       diceRolls :::
+      drawCounters :::
       endTurns :::
       cubeActions :::
       // important to keep non progressive actions at the end
       undos
 
-  //Put this here as it's useful for several game logic's to reuse when calculating validTurns
+  // Put this here as it's useful for several game logic's to reuse when calculating validTurns
   protected def nextTurn(actions: List[Action]): List[List[Action]] =
     actions match {
       case Nil                  => Nil
@@ -138,6 +147,9 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def diceRoll(dice: List[Int]): Validated[String, DiceRoll]
 
+  def drawCounter(role: Role): Validated[String, DrawCounter] =
+    sys.error("Can't draw a counter in this game logic")
+
   def undo: Validated[String, Undo]
 
   def endTurn: Validated[String, EndTurn]
@@ -161,6 +173,7 @@ sealed abstract class Situation(val board: Board, val player: Player) {
   def toBackgammon: backgammon.Situation
   def toAbalone: abalone.Situation
   def toDameo: dameo.Situation
+  def toEntropy: entropy.Situation
 
 }
 
@@ -335,6 +348,7 @@ object Situation {
     def toBackgammon   = sys.error("Can't make backgammon situation from chess situation")
     def toAbalone      = sys.error("Can't make abalone situation from chess situation")
     def toDameo        = sys.error("Can't make dameo situation from chess situation")
+    def toEntropy      = sys.error("Can't make entropy situation from chess situation")
   }
 
   final case class Draughts(s: draughts.Situation)
@@ -515,6 +529,7 @@ object Situation {
     def toBackgammon   = sys.error("Can't make backgammon situation from draughts situation")
     def toAbalone      = sys.error("Can't make abalone situation from draughts situation")
     def toDameo        = sys.error("Can't make dameo situation from draughts situation")
+    def toEntropy      = sys.error("Can't make entropy situation from draughts situation")
 
   }
 
@@ -677,6 +692,7 @@ object Situation {
     def toBackgammon   = sys.error("Can't make backgammon situation from fairysf situation")
     def toAbalone      = sys.error("Can't make abalone situation from fairysf situation")
     def toDameo        = sys.error("Can't make dameo situation from fairysf situation")
+    def toEntropy      = sys.error("Can't make entropy situation from fairysf situation")
   }
 
   final case class Samurai(s: samurai.Situation)
@@ -831,6 +847,7 @@ object Situation {
     def toBackgammon   = sys.error("Can't make backgammon situation from samurai situation")
     def toAbalone      = sys.error("Can't make abalone situation from samurai situation")
     def toDameo        = sys.error("Can't make dameo situation from samurai situation")
+    def toEntropy      = sys.error("Can't make entropy situation from samurai situation")
   }
 
   final case class Togyzkumalak(s: togyzkumalak.Situation)
@@ -986,6 +1003,7 @@ object Situation {
     def toBackgammon   = sys.error("Can't make backgammon situation from togyzkumalak situation")
     def toAbalone      = sys.error("Can't make abalone situation from togyzkumalak situation")
     def toDameo        = sys.error("Can't make dameo situation from togyzkumalak situation")
+    def toEntropy      = sys.error("Can't make entropy situation from togyzkumalak situation")
   }
 
   final case class Go(s: go.Situation)
@@ -1147,6 +1165,7 @@ object Situation {
     def toBackgammon   = sys.error("Can't make backgammon situation from go situation")
     def toAbalone      = sys.error("Can't make abalone situation from go situation")
     def toDameo        = sys.error("Can't make dameo situation from go situation")
+    def toEntropy      = sys.error("Can't make entropy situation from go situation")
   }
 
   final case class Backgammon(s: backgammon.Situation)
@@ -1315,9 +1334,10 @@ object Situation {
     def toBackgammon   = s
     def toAbalone      = sys.error("Can't make abalone situation from backgammon situation")
     def toDameo        = sys.error("Can't make dameo situation from backgammon situation")
+    def toEntropy      = sys.error("Can't make entropy situation from backgammon situation")
   }
 
-  //why are all of these overrides?
+  // why are all of these overrides?
   final case class Abalone(s: abalone.Situation)
       extends Situation(
         Board.Abalone(s.board),
@@ -1468,6 +1488,7 @@ object Situation {
     override def toBackgammon   = sys.error("Can't make backgammon situation from abalone situation")
     override def toAbalone      = s
     override def toDameo        = sys.error("Can't make dameo situation from abalone situation")
+    override def toEntropy      = sys.error("Can't make entropy situation from abalone situation")
   }
 
   final case class Dameo(s: dameo.Situation)
@@ -1621,6 +1642,191 @@ object Situation {
     def toBackgammon   = sys.error("Can't make backgammon situation from dameo situation")
     def toAbalone      = sys.error("Can't make abalone situation from dameo situation")
     def toDameo        = s
+    def toEntropy      = sys.error("Can't make an entropy object from a dameo object")
+  }
+
+  final case class Entropy(s: entropy.Situation)
+      extends Situation(
+        Board.Entropy(s.board),
+        s.player
+      ) {
+
+    lazy val moves: Map[Pos, List[Move]] = s.moves.map { case (pos, moves) =>
+      (Pos.Entropy(pos), moves.map(Move.Entropy.apply))
+    }
+
+    def takebackable = true
+
+    // entropy never has an inevitable action: Chaos chooses a square, Order chooses a
+    // counter or passes, so nothing here may be played on a player's behalf
+    def forcedAction: Option[Action] = None
+
+    def forcedTurnAction: Option[Action] = None
+
+    override def flaggedAction: Option[Action] = s.flaggedAction.map(Action.wrap)
+
+    lazy val check: Boolean = false
+
+    def checkSquare = None
+
+    def opponentHasInsufficientMaterial: Boolean = false
+
+    def insufficientMaterialStatus: Status.type => Status = _.VariantEnd
+
+    // running out of time never ends a game of entropy; it only removes choice
+    def outOfTimeStatus: Status.type => Status = _.VariantEnd
+
+    def threefoldRepetition: Boolean = false
+
+    def isRepetition: Boolean = false
+
+    def end: Boolean = s.end
+
+    def winner: Option[Player] = s.winner
+
+    lazy val destinations: Map[Pos, List[Pos]] = s.destinations.map { case (pos, dests) =>
+      (Pos.Entropy(pos), dests.map(Pos.Entropy.apply))
+    }
+
+    def drops: Option[List[Pos]] = s.drops.map(_.map(Pos.Entropy.apply))
+
+    def dropsByRole: Option[Map[Role, List[Pos]]] = Some(
+      s.dropsAsDrops
+        .groupBy(_.piece.role)
+        .map { case (r, ds) => (Role.EntropyRole(r): Role, ds.map(d => Pos.Entropy(d.pos): Pos)) }
+    )
+
+    def dropsAsDrops: List[Drop] = s.dropsAsDrops.map(Drop.Entropy.apply)
+
+    def lifts: List[Lift] = List.empty
+
+    def passes: List[Pass] = pass.fold[List[Pass]](_ => List.empty, p => List(p))
+
+    def selectSquaresAction: List[SelectSquares] = List.empty
+
+    def diceRolls: List[DiceRoll] = List.empty
+
+    override def drawCounters: List[DrawCounter] =
+      if (s.canDraw)
+        s.board.variant
+          .randomDraw(s)
+          .fold[List[DrawCounter]](
+            _ => List.empty,
+            dc => List(DrawCounter.Entropy(dc))
+          )
+      else List.empty
+
+    def undos: List[Undo] = List.empty
+
+    def endTurns: List[EndTurn] = List.empty
+
+    def cubeActions: List[CubeAction] = List.empty
+
+    lazy val validTurns: List[List[Action]] = List(actions)
+
+    def canDrop: Boolean = s.isChaos && !s.mustDraw && !s.end
+
+    def canOnlyDrop: Boolean = canDrop
+
+    def canLift: Boolean = false
+
+    def canOnlyLift: Boolean = false
+
+    def canRollDice: Boolean = false
+
+    def canOnlyRollDice: Boolean = false
+
+    def canUndo: Boolean = false
+
+    def canEndTurn: Boolean = false
+
+    def canOnlyEndTurn: Boolean = false
+
+    def canCubeAction: Boolean = false
+
+    def canOnlyCubeAction: Boolean = false
+
+    def playable(strict: Boolean): Boolean = s.playable(strict)
+
+    val status: Option[Status] = s.status
+
+    def resignStatus(player: Player): Status.type => Status = _.Resign
+
+    def pointValue(player: Option[Player]): Option[Int] =
+      player.map(p => s.score(p))
+
+    def move(
+        from: Pos,
+        to: Pos,
+        promotion: Option[PromotableRole] = None,
+        finalSquare: Boolean = false,
+        forbiddenUci: Option[List[String]] = None,
+        captures: Option[List[Pos]] = None,
+        partialCaptures: Boolean = false
+    ): Validated[String, Move] = (from, to) match {
+      case (Pos.Entropy(from), Pos.Entropy(to)) =>
+        s.move(from, to).toEither.map(m => Move.Entropy(m)).toValidated
+      case _                                    => sys.error("Not passed Entropy objects")
+    }
+
+    def move(uci: Uci.Move): Validated[String, Move] = uci match {
+      case Uci.EntropyMove(uci) => s.move(uci).toEither.map(m => Move.Entropy(m)).toValidated
+      case _                    => sys.error("Not passed Entropy objects")
+    }
+
+    def drop(role: Role, pos: Pos): Validated[String, Drop] = (role, pos) match {
+      case (Role.EntropyRole(role), Pos.Entropy(pos)) =>
+        s.drop(role, pos).toEither.map(d => Drop.Entropy(d)).toValidated
+      case _                                          => sys.error("Not passed Entropy objects")
+    }
+
+    override def drawCounter(role: Role): Validated[String, DrawCounter] = role match {
+      case Role.EntropyRole(role) =>
+        s.drawCounter(role).toEither.map(dc => DrawCounter.Entropy(dc)).toValidated
+      case _                      => sys.error("Not passed Entropy objects")
+    }
+
+    def lift(pos: Pos): Validated[String, Lift] = sys.error("Can't do a Lift for entropy")
+
+    def pass: Validated[String, Pass] = s.pass().toEither.map(p => Pass.Entropy(p)).toValidated
+
+    def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
+      sys.error("Can't do a SelectSquares for entropy")
+
+    def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
+      sys.error("Can't do a DiceRoll for entropy")
+
+    def undo: Validated[String, Undo] = sys.error("Can't do Undo for entropy")
+
+    def endTurn: Validated[String, EndTurn] = sys.error("Can't do EndTurn for entropy")
+
+    def cubeAction(interaction: CubeInteraction): Validated[String, CubeAction] =
+      sys.error("Can't do a CubeAction for entropy")
+
+    def withVariant(variant: Variant): Situation = variant match {
+      case Variant.Entropy(variant) => Entropy(s.withVariant(variant))
+      case _                        => sys.error("Not passed Entropy objects")
+    }
+
+    def unary_! : Situation = Entropy(s.unary_!)
+
+    def copy(board: Board): Situation = Entropy(board match {
+      case Board.Entropy(board) => s.copy(board)
+      case _                    => sys.error("Can't copy an entropy situation with a non-entropy board")
+    })
+
+    def gameLogic: GameLogic = GameLogic.Entropy()
+
+    def toChess        = sys.error("Can't make chess situation from entropy situation")
+    def toDraughts     = sys.error("Can't make draughts situation from entropy situation")
+    def toFairySF      = sys.error("Can't make fairysf situation from entropy situation")
+    def toSamurai      = sys.error("Can't make samurai situation from entropy situation")
+    def toTogyzkumalak = sys.error("Can't make togyzkumalak situation from entropy situation")
+    def toGo           = sys.error("Can't make go situation from entropy situation")
+    def toBackgammon   = sys.error("Can't make backgammon situation from entropy situation")
+    def toAbalone      = sys.error("Can't make abalone situation from entropy situation")
+    def toDameo        = sys.error("Can't make dameo situation from entropy situation")
+    def toEntropy      = s
   }
 
   def apply(lib: GameLogic, board: Board, player: Player): Situation = (lib, board) match {
@@ -1634,6 +1840,7 @@ object Situation {
     case (GameLogic.Backgammon(), Board.Backgammon(board))     => Backgammon(backgammon.Situation(board, player))
     case (GameLogic.Abalone(), Board.Abalone(board))           => Abalone(abalone.Situation(board, player))
     case (GameLogic.Dameo(), Board.Dameo(board))               => Dameo(dameo.Situation(board, player))
+    case (GameLogic.Entropy(), Board.Entropy(board))           => Entropy(entropy.Situation(board, player))
     case _                                                     => sys.error("Mismatched gamelogic types 3")
   }
 
@@ -1651,6 +1858,8 @@ object Situation {
       Abalone(abalone.Situation.apply(variant))
     case (GameLogic.Dameo(), Variant.Dameo(variant))               =>
       Dameo(dameo.Situation.apply(variant))
+    case (GameLogic.Entropy(), Variant.Entropy(variant))           =>
+      Entropy(entropy.Situation.apply(variant))
     case _                                                         => sys.error("Mismatched gamelogic types 4")
   }
 

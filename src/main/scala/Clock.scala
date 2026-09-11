@@ -268,6 +268,7 @@ sealed trait ClockBase {
   def setRemainingTime(p: Player, t: Centis): ClockBase
   def isPaused: Boolean
   def resetTimeStamper: ClockBase
+  def resetToStart: ClockBase
 
   def currentClockFor(c: Player): ClockInfoBase
 
@@ -415,6 +416,21 @@ case class Clock(
     }
 
   def withTimestamper(timestamper: Timestamper) = copy(timestamper = timestamper)
+
+  // entropy restarts both clocks when the roles swap halfway through the game.
+  // Berserk carries over, so berserking in the first round is not refunded by the reset.
+  def resetToStart: ClockBase = {
+    val fresh = ClockPlayer.withConfig(config)
+    copy(
+      player = Player.P1,
+      players = Player.Map(
+        fresh.withBerserk(players(Player.P1).berserk),
+        fresh.withBerserk(players(Player.P2).berserk)
+      ),
+      timestamp = None,
+      paused = false
+    )
+  }
 
   def resetTimeStamper = copy(
     timestamp = timestamp.map(_ => now)
@@ -740,6 +756,18 @@ case class ByoyomiClock(
   def stop                         = stop()
 
   def withTimestamper(timestamper: Timestamper) = copy(timestamper = timestamper)
+
+  def resetToStart: ClockBase = {
+    val fresh                                      = ByoyomiClockPlayer.withConfig(config)
+    def keepBerserk(p: Player): ByoyomiClockPlayer =
+      if (players(p).berserk) fresh.goBerserk else fresh
+    copy(
+      player = Player.P1,
+      players = Player.Map(keepBerserk(Player.P1), keepBerserk(Player.P2)),
+      timestamp = None,
+      paused = false
+    )
+  }
 
   def resetTimeStamper = copy(
     timestamp = timestamp.map(_ => now)
