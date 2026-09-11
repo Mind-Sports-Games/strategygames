@@ -2,7 +2,7 @@ package strategygames.go
 package variant
 
 import strategygames.go._
-import strategygames.{ GameFamily, Player }
+import strategygames.GameFamily
 
 case object Go19x19
     extends Variant(
@@ -20,7 +20,6 @@ case object Go19x19
 
   override def baseVariant: Boolean = true
 
-  // cache this rather than checking with the API everytime
   override def initialFen =
     format.FEN(
       "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19[SSSSSSSSSSssssssssss] b - 0 75 0 0 75 0 1"
@@ -63,20 +62,5 @@ case object Go19x19
       case _           => "19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19"
     }
   }
-
-  override def specialEnd(situation: Situation) =
-    (situation.board.apiPosition.legalActions.size == 0) ||
-      (situation.board.apiPosition.gameEnd)
-
-  override def specialDraw(situation: Situation) =
-    (situation.board.apiPosition.fen.player1Score == situation.board.apiPosition.fen.player2Score) ||
-      situation.board.apiPosition.isRepetition
-
-  override def winner(situation: Situation): Option[Player] =
-    if (specialEnd(situation) && !specialDraw(situation)) {
-      if (situation.board.apiPosition.fen.player1Score > situation.board.apiPosition.fen.player2Score)
-        Player.fromName("p1")
-      else Player.fromName("p2")
-    } else None
 
 }
