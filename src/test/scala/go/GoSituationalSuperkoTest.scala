@@ -1,7 +1,5 @@
 package strategygames.go
 
-import java.nio.charset.StandardCharsets
-
 import org.specs2.mutable.Specification
 
 import scala.util.Try
@@ -52,8 +50,6 @@ class GoSituationalSuperkoTest extends Specification with GoRulesTestSupport {
       situationsFromUciList(actions).isInvalid
     )
   }
-
-  private val anyFurtherPoint = "a9"
 
   private val everyLoader = List.fill(5)(true)
   private val noLoader    = List.fill(5)(false)
@@ -120,6 +116,10 @@ class GoSituationalSuperkoTest extends Specification with GoRulesTestSupport {
 
     "be accepted by every loader as the last action of a record" in {
       refusalPerLoader(tripleKoReturningToTheSamePlayer) === noLoader
+    }
+
+    "end the record it closes" in {
+      gameFromUciStrings(dropsOf(tripleKoReturningToTheSamePlayer)).situation.end === true
     }
   }
 
@@ -205,6 +205,8 @@ object GoSituationalSuperkoTest {
     "g3"
   )
 
+  val anyFurtherPoint: String = "a1"
+
   val onAnOccupiedPoint: List[String] = List("e5", "e5")
 
   val asSuicide: List[String] = List("e5", "a2", "e6", "b1", "a1")
@@ -214,16 +216,9 @@ object GoSituationalSuperkoTest {
 
   def dropsOf(keys: List[String]): List[String] = keys.map(key => s"s@${key}")
 
-  private val resourcePath = "/go/yERmsWJF.moves"
+  private lazy val storedGame: StoredGoGame = StoredGoGames.named("yERmsWJF")
 
-  private lazy val storedLines: List[String] = {
-    val stream = Option(getClass.getResourceAsStream(resourcePath))
-      .getOrElse(sys.error(s"missing stored go game resource ${resourcePath}"))
-    try new String(stream.readAllBytes(), StandardCharsets.UTF_8).linesIterator.toList
-    finally stream.close()
-  }
+  lazy val storedFen: FEN = storedGame.initialFen
 
-  lazy val storedFen: FEN = FEN(storedLines.head)
-
-  lazy val storedActions: List[String] = storedLines(1).trim.split("\\s+").toList
+  lazy val storedActions: List[String] = storedGame.actions
 }
