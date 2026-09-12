@@ -58,24 +58,25 @@ object Reader {
   private def makeReplayWithActionStrs(game: Game, actionStrs: ActionStrs): Result =
     Replay.actionStrsWithEndTurn(actionStrs).foldLeft[Result](Result.Complete(Replay(game))) {
       case (Result.Complete(replay), (actionStr, endTurn)) =>
+        val state = replay.state.withRuleset(Ruleset.AsOriginallyPlayed)
         actionStr match {
           case Uci.Drop.dropR(role, dest)           =>
-            (Role.allByForsyth(replay.state.board.variant.gameFamily).get(role(0)), Pos.fromKey(dest)) match {
+            (Role.allByForsyth(state.board.variant.gameFamily).get(role(0)), Pos.fromKey(dest)) match {
               case (Some(role), Some(dest)) =>
                 Result.Complete(
-                  replay.addAction(Replay.replayDrop(replay.state, role, dest, endTurn))
+                  replay.addAction(Replay.replayDrop(state, role, dest, endTurn))
                 )
               case _                        => Result.Incomplete(replay, s"Error making replay with drop: ${actionStr}")
             }
           case Uci.Pass.passR()                     =>
             Result.Complete(
-              replay.addAction(Replay.replayPass(replay.state, endTurn))
+              replay.addAction(Replay.replayPass(state, endTurn))
             )
           case Uci.SelectSquares.selectSquaresR(ss) =>
             Result.Complete(
               replay.addAction(
                 Replay.replaySelectSquares(
-                  replay.state,
+                  state,
                   ss.split(",").toList.flatMap(Pos.fromKey(_)),
                   endTurn
                 )
@@ -83,7 +84,7 @@ object Reader {
             )
           case _                                    => Result.Incomplete(replay, s"Error making replay with uci: ${actionStr}")
         }
-      case (r: Result.Incomplete, _)                       => r
+      case (r: Result.Incomplete, _)                      => r
     }
 
   private def makeGame(tags: Tags) = {

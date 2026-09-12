@@ -68,6 +68,8 @@ case class Situation(board: Board, player: Player) {
   lazy val gameMessage: Option[GameMessage] =
     isSubsequentPassWarning option GameMessage.SubsequentPassWarning
 
+  private[go] def withRuleset(rules: Ruleset): Situation = copy(board = board.withRuleset(rules))
+
   def withVariant(variant: strategygames.go.variant.Variant) =
     copy(
       board = board withVariant variant

@@ -99,7 +99,15 @@ abstract class Variant private[variant] (
       !situation.board.ko.contains(point) &&
       Chain
         .capturesUnlessSuicide(situation.board, situation.player, point)
-        .exists(captured => !recreatesAnEarlierPosition(situation, point, captured))
+        .exists(captured => !forbiddenAsARepeat(situation, point, captured))
+
+  private def forbiddenAsARepeat(situation: Situation, point: Pos, captured: Set[Pos]): Boolean =
+    situation.board.ruleset.forbidsRecreatingAnEarlierPosition &&
+      recreatesAnEarlierPosition(situation, point, captured)
+
+  private def settlesAsARepeat(situation: Situation, point: Pos, captured: Set[Pos]): Boolean =
+    situation.board.ruleset.settlesOnRecreatingAnEarlierPosition &&
+      recreatesAnEarlierPosition(situation, point, captured)
 
   private def recreatesAnEarlierPosition(
       situation: Situation,
@@ -115,13 +123,15 @@ abstract class Variant private[variant] (
 
   def boardAfterPass(situation: Situation): Board =
     if (settlesByPassing(situation))
-      situation.board.withHistory(afterOnePly(situation.history)).settled(!situation.player)
-    else situation.board.passed.withHistory(afterOnePly(situation.history))
+      situation.board
+        .withHistory(afterOnePly(situation.history))
+        .settled(!situation.player)
+        .withCurrentRuleset
+    else situation.board.passed.withHistory(afterOnePly(situation.history)).withCurrentRuleset
 
-  // NOTE: four passes end the game on the board transition, which is the one step that both the
-  // played path and the replayed path take, so a game ends on the same ply either way.
   private def settlesByPassing(situation: Situation): Boolean =
-    situation.board.consecutivePasses + 1 >= Variant.passesSettlingTheGame
+    situation.board.ruleset.settlesOnAFourthConsecutivePass &&
+      situation.board.consecutivePasses + 1 >= Variant.passesSettlingTheGame
 
   private def afterOnePly(history: History): History =
     history.copy(halfMoveClock = history.halfMoveClock + 1)
@@ -142,6 +152,7 @@ abstract class Variant private[variant] (
       .withPieces(situation.board.pieces -- squares)
       .withHistory(afterOnePly(situation.history))
       .settled(!situation.player)
+      .withCurrentRuleset
 
   // def move(
   //     situation: Situation,
@@ -211,7 +222,7 @@ abstract class Variant private[variant] (
     val captured           = Chain.capturedBy(situation.board, situation.player, pos)
     val stonesAfterPlacing =
       situation.board.withPieces(situation.board.pieces -- captured + (pos -> stone))
-    stonesAfterPlacing.stonePlaced
+    val placed             = stonesAfterPlacing.stonePlaced
       .withKo(koPointAfter(stonesAfterPlacing, pos, captured))
       .withHistory(
         situation.history
@@ -221,6 +232,8 @@ abstract class Variant private[variant] (
           )
           .afterPosition(hashAfterPlacing(situation, stone, pos, captured))
       )
+    if (settlesAsARepeat(situation, pos, captured)) placed.settled(!situation.player).withCurrentRuleset
+    else placed.withCurrentRuleset
   }
 
   // NOTE: a game resumed from a fen has a position history that begins there, so simple ko is
