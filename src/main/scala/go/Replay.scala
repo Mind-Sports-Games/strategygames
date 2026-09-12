@@ -65,10 +65,17 @@ object Replay {
       initialFen: Option[FEN],
       variant: strategygames.go.variant.Variant
   ): Validated[String, Reader.Result] = {
-    val fen                            = initialFen.getOrElse(variant.initialFen)
-    val (init, gameWithActions, error) =
-      gameWithActionWhileValid(actionStrs, startPlayer, activePlayer, fen, variant)
-    val game                           =
+    val fen                               = initialFen.getOrElse(variant.initialFen)
+    val (init, gameWithActions, error, _) =
+      gameWithActionWhileValid(
+        actionStrs,
+        startPlayer,
+        activePlayer,
+        fen,
+        variant,
+        overridingRefusals = false
+      )
+    val game                              =
       gameWithActions.reverse.lastOption.map(_._1).getOrElse(init)
 
     error match {
@@ -141,21 +148,48 @@ object Replay {
       startPlayer: Player,
       activePlayer: Player,
       initialFen: FEN,
-      variant: strategygames.go.variant.Variant
-  ): (Game, List[(Game, Action)], Option[String]) = {
+      variant: strategygames.go.variant.Variant,
+      overridingRefusals: Boolean
+  ): (Game, List[(Game, Action)], Option[String], List[ReplayTolerance]) = {
 
-    val init   = makeGame(variant, initialFen.some)
-    var state  = init
-    var errors = ""
+    val init       = makeGame(variant, initialFen.some)
+    var state      = init
+    var errors     = ""
+    var tolerances = List.empty[ReplayTolerance]
+
+    def tolerating[A](ply: Int, attempted: Validated[String, A], blindly: => A, strictly: => A): A =
+      attempted match {
+        case Validated.Valid(action)                          => action
+        case Validated.Invalid(refusal) if overridingRefusals =>
+          tolerances = ReplayTolerance(ply, refusal) :: tolerances
+          blindly
+        case _                                                => strictly
+      }
+
+    def blindDrop(role: Role, point: Pos, endTurn: Boolean): Drop = {
+      val situation = state.situation
+      Drop(
+        piece = Piece(situation.player, role),
+        pos = point,
+        situationBefore = situation.copy(board = situation.board.withPieces(situation.board.pieces - point)),
+        autoEndTurn = endTurn
+      )
+    }
 
     def replayDropFromUci(
         role: Option[Role],
         dest: Option[Pos],
-        endTurn: Boolean
+        endTurn: Boolean,
+        ply: Int
     ): (Game, Action) =
       (role, dest) match {
         case (Some(role), Some(dest)) => {
-          val drop = replayDrop(state, role, dest, endTurn)
+          val drop = tolerating(
+            ply,
+            state.situation.drop(role, dest).map(_.copy(autoEndTurn = endTurn)),
+            blindDrop(role, dest, endTurn),
+            replayDrop(state, role, dest, endTurn)
+          )
           state = state.applyDrop(drop)
           (state, drop)
         }
@@ -166,46 +200,64 @@ object Replay {
         }
       }
 
-    def replayPassFromUci(endTurn: Boolean): (Game, Action) = {
-      val pass = replayPass(state, endTurn)
+    def replayPassFromUci(endTurn: Boolean, ply: Int): (Game, Action) = {
+      val pass = tolerating(
+        ply,
+        state.situation.pass().map(_.copy(autoEndTurn = endTurn)),
+        variant.validPass(state.situation).copy(autoEndTurn = endTurn),
+        replayPass(state, endTurn)
+      )
       state = state.applyPass(pass)
       (state, pass)
     }
 
-    def replaySelectSquaresFromUci(squares: List[Pos], endTurn: Boolean): (Game, Action) = {
-      val selectSquares = replaySelectSquares(state, squares, endTurn)
+    def replaySelectSquaresFromUci(squares: List[Pos], endTurn: Boolean, ply: Int): (Game, Action) = {
+      val selectSquares = tolerating(
+        ply,
+        state.situation.selectSquares(squares).map(_.copy(autoEndTurn = endTurn)),
+        variant.createSelectSquares(state.situation, squares).copy(autoEndTurn = endTurn),
+        replaySelectSquares(state, squares, endTurn)
+      )
       state = state.applySelectSquares(selectSquares)
       (state, selectSquares)
     }
 
-    def replayOne(actionStr: String, endTurn: Boolean): (Game, Action) = {
+    def replayOne(actionStr: String, endTurn: Boolean, ply: Int): (Game, Action) = {
       state = state.withRuleset(Ruleset.AsOriginallyPlayed)
       actionStr match {
-        case _ if state.situation.end             =>
+        case _ if state.situation.end && !overridingRefusals =>
           sys.error(s"Action ${actionStr} offered to a finished ${variant.key} game")
-        case Uci.Drop.dropR(role, dest)           =>
+        case Uci.Drop.dropR(role, dest)                      =>
           replayDropFromUci(
             Role.allByForsyth(init.situation.board.variant.gameFamily).get(role(0)),
             Pos.fromKey(dest),
-            endTurn
+            endTurn,
+            ply
           )
-        case Uci.Pass.passR()                     => replayPassFromUci(endTurn)
+        case Uci.Pass.passR()                                => replayPassFromUci(endTurn, ply)
         // NOTE: a key naming no point on this board size is dropped here, where the drop branch above
         // refuses the whole action on the same input. Stored games carry stray keys and still load.
         // TODO(playstrategy): make this a `traverse` once those records have been swept.
-        case Uci.SelectSquares.selectSquaresR(ss) =>
-          replaySelectSquaresFromUci(ss.split(",").toList.flatMap(Pos.fromKey(_)), endTurn)
-        case _                                    =>
+        case Uci.SelectSquares.selectSquaresR(ss)            =>
+          replaySelectSquaresFromUci(ss.split(",").toList.flatMap(Pos.fromKey(_)), endTurn, ply)
+        case _                                               =>
           sys.error(s"Invalid actionStr for replay: $actionStr")
       }
     }
 
+    val record = combineActionStrsWithEndTurn(actionStrs, startPlayer, activePlayer).toList
+
     val gameWithActions: List[(Game, Action)] =
-      combineActionStrsWithEndTurn(actionStrs, startPlayer, activePlayer).toList.map {
-        case (actionStr, endTurn) => replayOne(actionStr, endTurn)
+      record.zipWithIndex.map { case ((actionStr, endTurn), ply) =>
+        replayOne(actionStr, endTurn, ply)
       }
 
-    (init, gameWithActions, errors match { case "" => None; case _ => errors.some })
+    (
+      init,
+      gameWithActions,
+      errors match { case "" => None; case _ => errors.some },
+      tolerances.reverse
+    )
   }
 
   def gameWithUciWhileValid(
@@ -215,12 +267,13 @@ object Replay {
       initialFen: FEN,
       variant: strategygames.go.variant.Variant
   ): (Game, List[(Game, Uci.WithSan)], Option[String]) = {
-    val (game, gameWithActions, error) = gameWithActionWhileValid(
+    val (game, gameWithActions, error, _) = gameWithActionWhileValid(
       actionStrs,
       startPlayer,
       activePlayer,
       initialFen,
-      variant
+      variant,
+      overridingRefusals = false
     )
     (
       game,
@@ -308,13 +361,40 @@ object Replay {
       activePlayer: Player,
       initialFen: Option[FEN],
       variant: strategygames.go.variant.Variant
-  ): Validated[String, Game] = {
-    val fen                            = initialFen.getOrElse(variant.initialFen)
-    val (init, gameWithActions, error) =
-      gameWithActionWhileValid(uciStrings, fen.player.getOrElse(Player.P1), activePlayer, fen, variant)
+  ): Validated[String, Game] =
+    replayedGame(uciStrings, activePlayer, initialFen, variant, overridingRefusals = false).map(_.game)
+
+  def toleratedGameFromUciStrings(
+      uciStrings: ActionStrs,
+      activePlayer: Player,
+      initialFen: Option[FEN],
+      variant: strategygames.go.variant.Variant
+  ): Validated[String, ToleratedGame] =
+    replayedGame(uciStrings, activePlayer, initialFen, variant, overridingRefusals = true)
+
+  private def replayedGame(
+      uciStrings: ActionStrs,
+      activePlayer: Player,
+      initialFen: Option[FEN],
+      variant: strategygames.go.variant.Variant,
+      overridingRefusals: Boolean
+  ): Validated[String, ToleratedGame] = {
+    val fen                                        = initialFen.getOrElse(variant.initialFen)
+    val (init, gameWithActions, error, tolerances) =
+      gameWithActionWhileValid(
+        uciStrings,
+        fen.player.getOrElse(Player.P1),
+        activePlayer,
+        fen,
+        variant,
+        overridingRefusals
+      )
 
     error match {
-      case None      => Validated.valid(gameWithActions.lastOption.map(_._1).getOrElse(init))
+      case None      =>
+        Validated.valid(
+          ToleratedGame(gameWithActions.lastOption.map(_._1).getOrElse(init), tolerances)
+        )
       case Some(msg) => Validated.invalid(msg)
     }
   }

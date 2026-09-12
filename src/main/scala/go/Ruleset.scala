@@ -20,3 +20,7 @@ object Ruleset {
     val settlesOnRecreatingAnEarlierPosition = true
   }
 }
+
+case class ReplayTolerance(ply: Int, refusal: String)
+
+case class ToleratedGame(game: Game, tolerances: List[ReplayTolerance])
