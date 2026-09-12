@@ -64,6 +64,8 @@ class GoSuperkoTest extends Specification with GoRulesTestSupport {
   private def refusalOf(replaying: => Any): String =
     Try(replaying).failed.map(_.getMessage).getOrElse("nothing was refused")
 
+  private val anyFurtherPoint = "a9"
+
   private val koShapeWithWhiteToPlay = List("b2", "c2", "a3", "d3", "b4", "c4", "c3")
 
   private val upToTheSilentRepeat =
@@ -88,15 +90,15 @@ class GoSuperkoTest extends Specification with GoRulesTestSupport {
     "replay while the repeating capture is still one ply away" in {
       replaying(tripleKo.init).isValid === true
     }
-    "refuse the ply that repeats" in {
-      replaying(tripleKo).isInvalid === true
+    "refuse the ply that repeats when the record continues past it" in {
+      replaying(tripleKo :+ anyFurtherPoint).isInvalid === true
     }
     "keep the position history the refusal is drawn from when rebuilt from its uci strings" in {
       replayingFromUciStrings(tripleKo.init).situation.history.positionCount === tripleKo.init.size + 1
     }
-    "be refused at the repeating ply when rebuilt from its uci strings too" in {
-      refusalOf(replayingFromUciStrings(tripleKo)) must
-        startWith(s"Illegal action s@${tripleKo.last} at ply ${tripleKo.size - 1}")
+    "be refused after the repeating ply when rebuilt from its uci strings too" in {
+      refusalOf(replayingFromUciStrings(tripleKo :+ anyFurtherPoint)) must
+        startWith(s"Action s@${anyFurtherPoint} offered to a finished")
     }
   }
 

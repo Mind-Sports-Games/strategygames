@@ -178,23 +178,26 @@ object Replay {
       (state, selectSquares)
     }
 
-    def replayOne(actionStr: String, endTurn: Boolean): (Game, Action) = actionStr match {
-      case _ if state.situation.end             =>
-        sys.error(s"Action ${actionStr} offered to a finished ${variant.key} game")
-      case Uci.Drop.dropR(role, dest)           =>
-        replayDropFromUci(
-          Role.allByForsyth(init.situation.board.variant.gameFamily).get(role(0)),
-          Pos.fromKey(dest),
-          endTurn
-        )
-      case Uci.Pass.passR()                     => replayPassFromUci(endTurn)
-      // NOTE: a key naming no point on this board size is dropped here, where the drop branch above
-      // refuses the whole action on the same input. Stored games carry stray keys and still load.
-      // TODO(playstrategy): make this a `traverse` once those records have been swept.
-      case Uci.SelectSquares.selectSquaresR(ss) =>
-        replaySelectSquaresFromUci(ss.split(",").toList.flatMap(Pos.fromKey(_)), endTurn)
-      case _                                    =>
-        sys.error(s"Invalid actionStr for replay: $actionStr")
+    def replayOne(actionStr: String, endTurn: Boolean): (Game, Action) = {
+      state = state.withRuleset(Ruleset.AsOriginallyPlayed)
+      actionStr match {
+        case _ if state.situation.end             =>
+          sys.error(s"Action ${actionStr} offered to a finished ${variant.key} game")
+        case Uci.Drop.dropR(role, dest)           =>
+          replayDropFromUci(
+            Role.allByForsyth(init.situation.board.variant.gameFamily).get(role(0)),
+            Pos.fromKey(dest),
+            endTurn
+          )
+        case Uci.Pass.passR()                     => replayPassFromUci(endTurn)
+        // NOTE: a key naming no point on this board size is dropped here, where the drop branch above
+        // refuses the whole action on the same input. Stored games carry stray keys and still load.
+        // TODO(playstrategy): make this a `traverse` once those records have been swept.
+        case Uci.SelectSquares.selectSquaresR(ss) =>
+          replaySelectSquaresFromUci(ss.split(",").toList.flatMap(Pos.fromKey(_)), endTurn)
+        case _                                    =>
+          sys.error(s"Invalid actionStr for replay: $actionStr")
+      }
     }
 
     val gameWithActions: List[(Game, Action)] =
@@ -248,7 +251,7 @@ object Replay {
     ucis match {
       case Nil         => valid(Nil)
       case uci :: rest =>
-        uci(sit) andThen { action =>
+        uci(sit.withRuleset(Ruleset.AsOriginallyPlayed)) andThen { action =>
           val after = Situation(action.finalizeAfter, !sit.player)
           recursiveSituationsFromUci(after, rest) map { after :: _ }
         }
@@ -258,7 +261,7 @@ object Replay {
     ucis match {
       case Nil         => valid(replay)
       case uci :: rest =>
-        uci(replay.state.situation) andThen { action =>
+        uci(replay.state.situation.withRuleset(Ruleset.AsOriginallyPlayed)) andThen { action =>
           recursiveReplayFromUci(replay.addAction(action), rest)
         }
     }

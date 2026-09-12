@@ -17,6 +17,7 @@ case class Board(
     ko: Option[Pos] = None,
     consecutivePasses: Int = 0,
     deadStonesSelected: Boolean = false,
+    ruleset: Ruleset = Ruleset.AsCurrentlyPlayed,
     // NOTE: the starting fen and move list lila restored this board from, kept so that lila can read
     // the starting fen back. Play advances the fields above and leaves this as it was at the restore.
     position: Option[StoredPosition] = None
@@ -44,8 +45,8 @@ case class Board(
   // this costs a board and a history and never a flood fill; the fill runs once, memoised on
   // `areaScore`, for a board someone actually scores.
   //
-  // `passed`, `stonePlaced`, `settled` and `withKo` are not on this list because they keep every
-  // stone and the komi, so the thunk they inherit already answers with this position's score.
+  // `passed`, `stonePlaced`, `settled`, `withKo` and `withRuleset` are not on this list because they keep
+  // every stone and the komi, so the thunk they inherit already answers with this position's score.
   private def rescored: Board = {
     lazy val next: Board = copy(history = history.copy(score = next.areaScore))
     next
@@ -90,6 +91,10 @@ case class Board(
     updateHistory(_.startingAtPosition(positionHash(playerToMove)))
 
   def withKo(point: Option[Pos]): Board = copy(ko = point)
+
+  private[go] def withRuleset(rules: Ruleset): Board = copy(ruleset = rules)
+
+  private[go] def withCurrentRuleset: Board = withRuleset(Ruleset.AsCurrentlyPlayed)
 
   def situationOf(player: Player) = Situation(this, player)
 

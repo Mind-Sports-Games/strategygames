@@ -2,6 +2,7 @@ package strategygames.go
 
 import org.specs2.mutable.Specification
 
+import strategygames.Player
 import strategygames.go.format.{ FEN, Forsyth, Uci }
 import strategygames.go.variant.Go9x9
 
@@ -20,6 +21,16 @@ class GoEndingTest extends Specification with GoRulesTestSupport {
       .map(game.apply(_).map { case (next, _) => next })
       .getOrElse(sys.error(s"unreadable go uci: ${uci}"))
       .valueOr(error => sys.error(s"cannot settle with ${uci}: ${error}"))
+
+  private def replayingRecord(actions: List[String]): Game =
+    Replay
+      .gameFromUciStrings(
+        actions.map(Vector(_)).toVector,
+        Player.fromTurnCount(actions.size),
+        None,
+        Go9x9
+      )
+      .valueOr(error => sys.error(error))
 
   private def scriptedReplayFens: Option[List[FEN]] =
     Replay
@@ -96,6 +107,29 @@ class GoEndingTest extends Specification with GoRulesTestSupport {
       (playing(Go9x9, fourPasses.take(3)).situation.isSubsequentPassWarning === true) and
         (playing(Go9x9, fourPasses.take(4)).situation.isSubsequentPassWarning === true) and
         (playing(Go9x9, fourPasses).situation.isSubsequentPassWarning === false)
+    }
+  }
+
+  "a stored record carrying on past a fourth pass" should {
+    val fourPasses = "s@e5" :: List.fill(4)("pass")
+    "replay a placement recorded after the fourth pass" in {
+      val replayed = replayingRecord(fourPasses :+ "s@d4")
+      (replayed.plies === 6) and (replayed.situation.end === false)
+    }
+    "replay a settlement recorded after the fourth pass" in {
+      val replayed = replayingRecord(fourPasses :+ "ss:")
+      (replayed.plies === 6) and (replayed.situation.end === true)
+    }
+    "replay a placement recorded after a run of eight passes" in {
+      val replayed = replayingRecord(("s@e5" :: List.fill(8)("pass")) :+ "s@d4")
+      (replayed.plies === 10) and (replayed.situation.end === false)
+    }
+    "not end where the record stops on the fourth pass" in {
+      replayingRecord(fourPasses).situation.end === false
+    }
+    "leave the fourth pass ending the game once the record runs out" in {
+      val played = playingOn(replayingRecord(fourPasses :+ "s@d4"), List("pass", "pass", "pass", "pass"))
+      played.situation.end === true
     }
   }
 

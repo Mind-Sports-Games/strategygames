@@ -88,6 +88,9 @@ class GoScalaVariantIsometryTest extends strategygames.chess.ChessTest {
         "s@g3"
       )
 
-    (replaying(tripleKo.init).isValid === true) and (replaying(tripleKo).isInvalid === true)
+    val anyFurtherPoint = "s@a9"
+
+    (replaying(tripleKo.init).isValid === true) and
+      (replaying(tripleKo :+ anyFurtherPoint).isInvalid === true)
   }
 }

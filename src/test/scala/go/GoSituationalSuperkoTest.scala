@@ -53,6 +53,8 @@ class GoSituationalSuperkoTest extends Specification with GoRulesTestSupport {
     )
   }
 
+  private val anyFurtherPoint = "a9"
+
   private val everyLoader = List.fill(5)(true)
   private val noLoader    = List.fill(5)(false)
 
@@ -112,8 +114,12 @@ class GoSituationalSuperkoTest extends Specification with GoRulesTestSupport {
         .isInvalid === true
     }
 
-    "be refused by every loader that replays a stored game" in {
-      refusalPerLoader(tripleKoReturningToTheSamePlayer) === everyLoader
+    "be refused by every loader when the record continues past it" in {
+      refusalPerLoader(tripleKoReturningToTheSamePlayer :+ anyFurtherPoint) === everyLoader
+    }
+
+    "be accepted by every loader as the last action of a record" in {
+      refusalPerLoader(tripleKoReturningToTheSamePlayer) === noLoader
     }
   }
 
