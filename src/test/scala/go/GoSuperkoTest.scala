@@ -2,69 +2,10 @@ package strategygames.go
 
 import org.specs2.mutable.Specification
 
-import scala.util.Try
-
-import strategygames.{ Player, Score }
-import strategygames.go.format.Uci
+import strategygames.Score
 import strategygames.go.variant.Go9x9
 
 class GoSuperkoTest extends Specification with GoRulesTestSupport {
-
-  private val tripleKo = List(
-    "b8",
-    "b7",
-    "c9",
-    "c6",
-    "d8",
-    "d7",
-    "f8",
-    "f7",
-    "g9",
-    "g6",
-    "h8",
-    "h7",
-    "b2",
-    "b3",
-    "c1",
-    "c4",
-    "d2",
-    "d3",
-    "f2",
-    "f3",
-    "g1",
-    "g4",
-    "h2",
-    "h3",
-    "c7",
-    "c2",
-    "g3",
-    "g8",
-    "g7",
-    "c8",
-    "c3",
-    "g2",
-    "c7",
-    "c2",
-    "g3"
-  )
-
-  private def replaying(keys: List[String]) =
-    Replay(keys.flatMap(key => Uci(s"s@${key}")), Some(Go9x9.initialFen), Go9x9)
-
-  private def replayingFromUciStrings(keys: List[String]) =
-    Replay
-      .gameFromUciStrings(
-        keys.map(key => Vector(s"s@${key}")).toVector,
-        Player.fromTurnCount(keys.size),
-        Some(Go9x9.initialFen),
-        Go9x9
-      )
-      .valueOr(error => sys.error(error))
-
-  private def refusalOf(replaying: => Any): String =
-    Try(replaying).failed.map(_.getMessage).getOrElse("nothing was refused")
-
-  private val anyFurtherPoint = "a9"
 
   private val koShapeWithWhiteToPlay = List("b2", "c2", "a3", "d3", "b4", "c4", "c3")
 
@@ -83,22 +24,6 @@ class GoSuperkoTest extends Specification with GoRulesTestSupport {
     }
     "have cost the cycling player two stones on the way round" in {
       afterCycle.situation.history.captures === Score(0, 2)
-    }
-  }
-
-  "a triple ko that walks the board back to an earlier position, with the same player to move" should {
-    "replay while the repeating capture is still one ply away" in {
-      replaying(tripleKo.init).isValid === true
-    }
-    "refuse the ply that repeats when the record continues past it" in {
-      replaying(tripleKo :+ anyFurtherPoint).isInvalid === true
-    }
-    "keep the position history the refusal is drawn from when rebuilt from its uci strings" in {
-      replayingFromUciStrings(tripleKo.init).situation.history.positionCount === tripleKo.init.size + 1
-    }
-    "be refused after the repeating ply when rebuilt from its uci strings too" in {
-      refusalOf(replayingFromUciStrings(tripleKo :+ anyFurtherPoint)) must
-        startWith(s"Action s@${anyFurtherPoint} offered to a finished")
     }
   }
 

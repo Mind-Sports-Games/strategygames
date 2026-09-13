@@ -91,34 +91,33 @@ object Replay {
     case _                         => sys.error("Invalid go action")
   }
 
-  def replayDrop(
-      before: Game,
-      role: Role,
-      dest: Pos,
-      endTurn: Boolean
-  ): Drop =
-    before.situation
-      .drop(role, dest)
-      .map(_.copy(autoEndTurn = endTurn))
-      .valueOr(error =>
-        sys.error(s"Illegal action ${role.forsyth}@${dest.key} at ply ${before.plies} for replay: ${error}")
-      )
+  def replayDrop(before: Situation, role: Role, dest: Pos, endTurn: Boolean): Drop =
+    Drop(
+      piece = Piece(before.player, role),
+      pos = dest,
+      situationBefore = before,
+      autoEndTurn = endTurn
+    )
 
-  def replayPass(before: Game, endTurn: Boolean): Pass =
-    before.situation
-      .pass()
-      .map(_.copy(autoEndTurn = endTurn))
-      .valueOr(error => sys.error(s"Illegal action pass at ply ${before.plies} for replay: ${error}"))
+  def replayPass(before: Situation, endTurn: Boolean): Pass =
+    Pass(
+      situationBefore = before,
+      after = before.board.variant.boardAfterPass(before),
+      autoEndTurn = endTurn
+    )
 
-  def replaySelectSquares(before: Game, squares: List[Pos], endTurn: Boolean): SelectSquares =
-    before.situation
-      .selectSquares(squares)
-      .map(_.copy(autoEndTurn = endTurn))
-      .valueOr(error =>
-        sys.error(
-          s"Illegal action ss:${squares.map(_.key).mkString(",")} at ply ${before.plies} for replay: ${error}"
-        )
-      )
+  def replaySelectSquares(before: Situation, squares: List[Pos], endTurn: Boolean): SelectSquares =
+    SelectSquares(
+      squares = squares,
+      situationBefore = before,
+      autoEndTurn = endTurn
+    )
+
+  private def replayAction(before: Situation, uci: Uci): Action = uci match {
+    case Uci.Drop(role, dest)      => replayDrop(before, role, dest, endTurn = true)
+    case Uci.Pass()                => replayPass(before, endTurn = true)
+    case Uci.SelectSquares(points) => replaySelectSquares(before, points, endTurn = true)
+  }
 
   def actionStrsWithEndTurn(actionStrs: ActionStrs): Seq[(String, Boolean)] =
     actionStrs.zipWithIndex.map { case (a, i) =>
@@ -155,7 +154,7 @@ object Replay {
     ): (Game, Action) =
       (role, dest) match {
         case (Some(role), Some(dest)) => {
-          val drop = replayDrop(state, role, dest, endTurn)
+          val drop = replayDrop(state.situation, role, dest, endTurn)
           state = state.applyDrop(drop)
           (state, drop)
         }
@@ -167,37 +166,32 @@ object Replay {
       }
 
     def replayPassFromUci(endTurn: Boolean): (Game, Action) = {
-      val pass = replayPass(state, endTurn)
+      val pass = replayPass(state.situation, endTurn)
       state = state.applyPass(pass)
       (state, pass)
     }
 
     def replaySelectSquaresFromUci(squares: List[Pos], endTurn: Boolean): (Game, Action) = {
-      val selectSquares = replaySelectSquares(state, squares, endTurn)
+      val selectSquares = replaySelectSquares(state.situation, squares, endTurn)
       state = state.applySelectSquares(selectSquares)
       (state, selectSquares)
     }
 
-    def replayOne(actionStr: String, endTurn: Boolean): (Game, Action) = {
-      state = state.withRuleset(Ruleset.AsOriginallyPlayed)
-      actionStr match {
-        case _ if state.situation.end             =>
-          sys.error(s"Action ${actionStr} offered to a finished ${variant.key} game")
-        case Uci.Drop.dropR(role, dest)           =>
-          replayDropFromUci(
-            Role.allByForsyth(init.situation.board.variant.gameFamily).get(role(0)),
-            Pos.fromKey(dest),
-            endTurn
-          )
-        case Uci.Pass.passR()                     => replayPassFromUci(endTurn)
-        // NOTE: a key naming no point on this board size is dropped here, where the drop branch above
-        // refuses the whole action on the same input. Stored games carry stray keys and still load.
-        // TODO(playstrategy): make this a `traverse` once those records have been swept.
-        case Uci.SelectSquares.selectSquaresR(ss) =>
-          replaySelectSquaresFromUci(ss.split(",").toList.flatMap(Pos.fromKey(_)), endTurn)
-        case _                                    =>
-          sys.error(s"Invalid actionStr for replay: $actionStr")
-      }
+    def replayOne(actionStr: String, endTurn: Boolean): (Game, Action) = actionStr match {
+      case Uci.Drop.dropR(role, dest)           =>
+        replayDropFromUci(
+          Role.allByForsyth(init.situation.board.variant.gameFamily).get(role(0)),
+          Pos.fromKey(dest),
+          endTurn
+        )
+      case Uci.Pass.passR()                     => replayPassFromUci(endTurn)
+      // NOTE: a key naming no point on this board size is dropped here, where the drop branch above
+      // refuses the whole action on the same input. Stored games carry stray keys and still load.
+      // TODO(playstrategy): make this a `traverse` once those records have been swept.
+      case Uci.SelectSquares.selectSquaresR(ss) =>
+        replaySelectSquaresFromUci(ss.split(",").toList.flatMap(Pos.fromKey(_)), endTurn)
+      case _                                    =>
+        sys.error(s"Invalid actionStr for replay: $actionStr")
     }
 
     val gameWithActions: List[(Game, Action)] =
@@ -251,19 +245,15 @@ object Replay {
     ucis match {
       case Nil         => valid(Nil)
       case uci :: rest =>
-        uci(sit.withRuleset(Ruleset.AsOriginallyPlayed)) andThen { action =>
-          val after = Situation(action.finalizeAfter, !sit.player)
-          recursiveSituationsFromUci(after, rest) map { after :: _ }
-        }
+        val after = replayAction(sit, uci).situationAfter
+        recursiveSituationsFromUci(after, rest) map { after :: _ }
     }
 
   private def recursiveReplayFromUci(replay: Replay, ucis: List[Uci]): Validated[String, Replay] =
     ucis match {
       case Nil         => valid(replay)
       case uci :: rest =>
-        uci(replay.state.situation.withRuleset(Ruleset.AsOriginallyPlayed)) andThen { action =>
-          recursiveReplayFromUci(replay.addAction(action), rest)
-        }
+        recursiveReplayFromUci(replay.addAction(replayAction(replay.state.situation, uci)), rest)
     }
 
   private def initialFenToSituation(

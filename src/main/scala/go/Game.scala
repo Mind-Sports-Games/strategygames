@@ -86,8 +86,6 @@ case class Game(
 
   def applySelectSquares(ss: SelectSquares): Game = apply(ss)
 
-  private[go] def withRuleset(rules: Ruleset): Game = copy(situation = situation.withRuleset(rules))
-
   def apply(uci: Uci.Drop): Validated[String, (Game, Drop)]                   = drop(uci.role, uci.pos)
   def apply(@nowarn uci: Uci.Pass): Validated[String, (Game, Pass)]           = pass()
   def apply(uci: Uci.SelectSquares): Validated[String, (Game, SelectSquares)] = selectSquares(uci.squares)
