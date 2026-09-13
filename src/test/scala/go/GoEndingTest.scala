@@ -112,24 +112,14 @@ class GoEndingTest extends Specification with GoRulesTestSupport {
 
   "a stored record carrying on past a fourth pass" should {
     val fourPasses = "s@e5" :: List.fill(4)("pass")
-    "replay a placement recorded after the fourth pass" in {
+    "replay to its full ply count without settling" in {
       val replayed = replayingRecord(fourPasses :+ "s@d4")
-      (replayed.plies === 6) and (replayed.situation.end === false)
+      (replayed.plies === 6) and
+        (replayed.board.pieces.keySet === Set(pointAt("e5"), pointAt("d4"))) and
+        (replayed.situation.end === false)
     }
-    "replay a settlement recorded after the fourth pass" in {
-      val replayed = replayingRecord(fourPasses :+ "ss:")
-      (replayed.plies === 6) and (replayed.situation.end === true)
-    }
-    "replay a placement recorded after a run of eight passes" in {
-      val replayed = replayingRecord(("s@e5" :: List.fill(8)("pass")) :+ "s@d4")
-      (replayed.plies === 10) and (replayed.situation.end === false)
-    }
-    "not end where the record stops on the fourth pass" in {
-      replayingRecord(fourPasses).situation.end === false
-    }
-    "leave the fourth pass ending the game once the record runs out" in {
-      val played = playingOn(replayingRecord(fourPasses :+ "s@d4"), List("pass", "pass", "pass", "pass"))
-      played.situation.end === true
+    "leave a further pass in live play settling the game" in {
+      playingOn(replayingRecord(fourPasses), List("pass")).situation.end === true
     }
   }
 

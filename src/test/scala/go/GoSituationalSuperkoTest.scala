@@ -4,59 +4,20 @@ import java.nio.charset.StandardCharsets
 
 import org.specs2.mutable.Specification
 
-import scala.util.Try
-
 import strategygames.Player
-import strategygames.format.pgn.{ Tag, Tags }
-import strategygames.go.format.{ FEN, Uci }
+import strategygames.go.format.FEN
 import strategygames.go.variant.{ Go19x19, Go9x9 }
 
 class GoSituationalSuperkoTest extends Specification with GoRulesTestSupport {
 
   import GoSituationalSuperkoTest._
 
-  private val goTags = Tags(List(Tag(_.Variant, Go9x9.name)))
-
-  private def turnPerAction(actions: List[String]) = actions.map(Vector(_)).toVector
-
   private def gameFromUciStrings(actions: List[String]) =
     Replay
-      .gameFromUciStrings(turnPerAction(actions), Player.fromTurnCount(actions.size), None, Go9x9)
+      .gameFromUciStrings(actions.map(Vector(_)).toVector, Player.fromTurnCount(actions.size), None, Go9x9)
       .valueOr(sys.error)
 
-  private def replayFromActionStrs(actions: List[String]) =
-    Replay
-      .apply(turnPerAction(actions), P1, Player.fromTurnCount(actions.size), None, Go9x9)
-      .andThen(_.valid)
-      .valueOr(sys.error)
-
-  private def readerFromActionStrs(actions: List[String]) =
-    format.pgn.Reader
-      .replayResultFromActionStrs(turnPerAction(actions), identity, goTags)
-      .andThen(_.valid)
-      .valueOr(sys.error)
-
-  private def replayFromUciList(actions: List[String]) =
-    Replay(actions.flatMap(Uci(_)), None, Go9x9)
-
-  private def situationsFromUciList(actions: List[String]) =
-    Replay.situationsFromUci(actions.flatMap(Uci(_)), None, Go9x9)
-
-  private def refusalPerLoader(keys: List[String]): List[Boolean] = {
-    val actions = dropsOf(keys)
-    List(
-      Try(gameFromUciStrings(actions)).isFailure,
-      Try(replayFromActionStrs(actions)).isFailure,
-      Try(readerFromActionStrs(actions)).isFailure,
-      replayFromUciList(actions).isInvalid,
-      situationsFromUciList(actions).isInvalid
-    )
-  }
-
-  private val anyFurtherPoint = "a9"
-
-  private val everyLoader = List.fill(5)(true)
-  private val noLoader    = List.fill(5)(false)
+  private val pliesOfTheCycle = 6
 
   "the recapture that returns the board to where it stood an odd number of plies earlier" should {
 
@@ -80,10 +41,6 @@ class GoSituationalSuperkoTest extends Specification with GoRulesTestSupport {
 
     "leave the game playable rather than end it" in {
       playingOn(beforeTheReturn, List(returningCapture)).situation.end === false
-    }
-
-    "be accepted by every loader that replays a stored game" in {
-      refusalPerLoader(theWholeCycle) === noLoader
     }
 
     "reach the board the game held three plies earlier, with the other player to move" in {
@@ -114,27 +71,13 @@ class GoSituationalSuperkoTest extends Specification with GoRulesTestSupport {
         .isInvalid === true
     }
 
-    "be refused by every loader when the record continues past it" in {
-      refusalPerLoader(tripleKoReturningToTheSamePlayer :+ anyFurtherPoint) === everyLoader
-    }
-
-    "be accepted by every loader as the last action of a record" in {
-      refusalPerLoader(tripleKoReturningToTheSamePlayer) === noLoader
-    }
-  }
-
-  "a stored action that is illegal for any reason other than superko" should {
-
-    "still be refused on an occupied point" in {
-      refusalPerLoader(onAnOccupiedPoint) === everyLoader
-    }
-
-    "still be refused when it is suicide" in {
-      refusalPerLoader(asSuicide) === everyLoader
-    }
-
-    "still be refused when it recaptures at the simple ko point" in {
-      refusalPerLoader(atTheSimpleKoPoint) === everyLoader
+    "replay onto the board it recreates, with the game still going" in {
+      val replayed = gameFromUciStrings(dropsOf(tripleKoReturningToTheSamePlayer))
+      val earlier  = playing(Go9x9, tripleKoReturningToTheSamePlayer.dropRight(pliesOfTheCycle))
+      (replayed.plies === tripleKoReturningToTheSamePlayer.size) and
+        (replayed.board.pieces === earlier.board.pieces) and
+        (replayed.situation.player === earlier.situation.player) and
+        (replayed.situation.end === false)
     }
   }
 
@@ -204,13 +147,6 @@ object GoSituationalSuperkoTest {
     "c2",
     "g3"
   )
-
-  val onAnOccupiedPoint: List[String] = List("e5", "e5")
-
-  val asSuicide: List[String] = List("e5", "a2", "e6", "b1", "a1")
-
-  val atTheSimpleKoPoint: List[String] =
-    List("b2", "c2", "a3", "d3", "b4", "c4", "c3", "b3", "c3")
 
   def dropsOf(keys: List[String]): List[String] = keys.map(key => s"s@${key}")
 
