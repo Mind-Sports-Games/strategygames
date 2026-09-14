@@ -3,6 +3,7 @@ package strategygames.go
 import cats.data.Validated
 import cats.data.Validated.valid
 import cats.implicits._
+import scala.util.Try
 import scalalib.extensions.*
 
 import strategygames.Player
@@ -119,6 +120,44 @@ object Replay {
     case Uci.SelectSquares(points) => replaySelectSquares(before, points, endTurn = true)
   }
 
+  // NOTE: nothing here adjudicates the record against the rules — the record is what was played. Only
+  // an action string this file cannot read at all stops a replay.
+  private def actionOf(
+      before: Situation,
+      actionStr: String,
+      endTurn: Boolean
+  ): Validated[String, Action] =
+    actionStr match {
+      case Uci.Drop.dropR(role, dest)           =>
+        (Role.allByForsyth(before.board.variant.gameFamily).get(role(0)), Pos.fromKey(dest)) match {
+          case (Some(role), Some(dest)) => valid(replayDrop(before, role, dest, endTurn))
+          case _                        => Validated.invalid(s"Invalid drop for replay: ${actionStr}")
+        }
+      case Uci.Pass.passR()                     => valid(replayPass(before, endTurn))
+      // NOTE: a key naming no point on this board size is dropped here, where the drop branch above
+      // refuses the whole action on the same input. Stored games carry stray keys and still load.
+      // TODO(playstrategy): make this a `traverse` once those records have been swept.
+      case Uci.SelectSquares.selectSquaresR(ss) =>
+        valid(replaySelectSquares(before, ss.split(",").toList.flatMap(Pos.fromKey(_)), endTurn))
+      case _                                    =>
+        Validated.invalid(s"Invalid actionStr for replay: ${actionStr}")
+    }
+
+  // NOTE: the board an action computes is a `lazy val`, so a record naming a placement the rules
+  // cannot construct at all — a stone on a point that already holds one — raises from here rather
+  // than returning. Catching it is what keeps such a record to a truncated game and a reported
+  // reason, which is the contract `StepBuilder` reads and the one chess and draughts keep.
+  private def applied(state: Game, action: Action): Validated[String, Game] =
+    Validated
+      .fromTry(Try(action match {
+        case d: Drop           => state.applyDrop(d)
+        case p: Pass           => state.applyPass(p)
+        case ss: SelectSquares => state.applySelectSquares(ss)
+      }))
+      .leftMap(raised =>
+        s"Unplayable action ${action.toUci.uci} at ply ${state.plies} for replay: ${raised.getMessage}"
+      )
+
   def actionStrsWithEndTurn(actionStrs: ActionStrs): Seq[(String, Boolean)] =
     actionStrs.zipWithIndex.map { case (a, i) =>
       a.zipWithIndex.map { case (a1, i1) => (a1, i1 == a.size - 1 && i != actionStrs.size - 1) }
@@ -135,6 +174,11 @@ object Replay {
       else actionStrs
     )
 
+  // NOTE: this replays while the record stays readable and then stops, handing back the plies it built
+  // and the reason it stopped — the shape `chess.Replay.mk` and `draughts.Replay.mk` use. Nothing here
+  // raises: `strategygames.Replay.gameWithUciWhileValid` returns the triple to lila's `StepBuilder`,
+  // which logs the reason and renders the plies, so an unreadable action costs a game its tail rather
+  // than costing it the whole load.
   private def gameWithActionWhileValid(
       actionStrs: ActionStrs,
       startPlayer: Player,
@@ -143,63 +187,27 @@ object Replay {
       variant: strategygames.go.variant.Variant
   ): (Game, List[(Game, Action)], Option[String]) = {
 
-    val init   = makeGame(variant, initialFen.some)
-    var state  = init
-    var errors = ""
+    val init = makeGame(variant, initialFen.some)
 
-    def replayDropFromUci(
-        role: Option[Role],
-        dest: Option[Pos],
-        endTurn: Boolean
-    ): (Game, Action) =
-      (role, dest) match {
-        case (Some(role), Some(dest)) => {
-          val drop = replayDrop(state.situation, role, dest, endTurn)
-          state = state.applyDrop(drop)
-          (state, drop)
-        }
-        case (role, dest)             => {
-          val uciDrop = s"${role}@${dest}"
-          errors += uciDrop + ","
-          sys.error(s"Invalid drop for replay: ${uciDrop}")
-        }
+    def mk(state: Game, rest: List[(String, Boolean)]): (List[(Game, Action)], Option[String]) =
+      rest match {
+        case (actionStr, endTurn) :: tail =>
+          actionOf(state.situation, actionStr, endTurn)
+            .andThen(action => applied(state, action).map((_, action)))
+            .fold(
+              error => (Nil, error.some),
+              { case (next, action) =>
+                mk(next, tail) match {
+                  case (plies, message) => ((next, action) :: plies, message)
+                }
+              }
+            )
+        case Nil                          => (Nil, None)
       }
 
-    def replayPassFromUci(endTurn: Boolean): (Game, Action) = {
-      val pass = replayPass(state.situation, endTurn)
-      state = state.applyPass(pass)
-      (state, pass)
+    mk(init, combineActionStrsWithEndTurn(actionStrs, startPlayer, activePlayer).toList) match {
+      case (gameWithActions, error) => (init, gameWithActions, error)
     }
-
-    def replaySelectSquaresFromUci(squares: List[Pos], endTurn: Boolean): (Game, Action) = {
-      val selectSquares = replaySelectSquares(state.situation, squares, endTurn)
-      state = state.applySelectSquares(selectSquares)
-      (state, selectSquares)
-    }
-
-    def replayOne(actionStr: String, endTurn: Boolean): (Game, Action) = actionStr match {
-      case Uci.Drop.dropR(role, dest)           =>
-        replayDropFromUci(
-          Role.allByForsyth(init.situation.board.variant.gameFamily).get(role(0)),
-          Pos.fromKey(dest),
-          endTurn
-        )
-      case Uci.Pass.passR()                     => replayPassFromUci(endTurn)
-      // NOTE: a key naming no point on this board size is dropped here, where the drop branch above
-      // refuses the whole action on the same input. Stored games carry stray keys and still load.
-      // TODO(playstrategy): make this a `traverse` once those records have been swept.
-      case Uci.SelectSquares.selectSquaresR(ss) =>
-        replaySelectSquaresFromUci(ss.split(",").toList.flatMap(Pos.fromKey(_)), endTurn)
-      case _                                    =>
-        sys.error(s"Invalid actionStr for replay: $actionStr")
-    }
-
-    val gameWithActions: List[(Game, Action)] =
-      combineActionStrsWithEndTurn(actionStrs, startPlayer, activePlayer).toList.map {
-        case (actionStr, endTurn) => replayOne(actionStr, endTurn)
-      }
-
-    (init, gameWithActions, errors match { case "" => None; case _ => errors.some })
   }
 
   def gameWithUciWhileValid(
