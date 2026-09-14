@@ -5,6 +5,9 @@ import org.specs2.mutable.Specification
 import strategygames.Score
 import strategygames.go.variant.Go9x9
 
+// NOTE: the cases here do not turn on which player returns with the stones — a cycle that never
+// returns, a repeat that takes no stone, a ko point that has lapsed, and what a fen round trip keeps.
+// `GoSituationalSuperkoTest` owns the player-to-move axis and the returning capture that rides on it.
 class GoSuperkoTest extends Specification with GoRulesTestSupport {
 
   private val koShapeWithWhiteToPlay = List("b2", "c2", "a3", "d3", "b4", "c4", "c3")
@@ -24,32 +27,6 @@ class GoSuperkoTest extends Specification with GoRulesTestSupport {
     }
     "have cost the cycling player two stones on the way round" in {
       afterCycle.situation.history.captures === Score(0, 2)
-    }
-  }
-
-  "a capture that recreates the board of three plies earlier, with the other player to move" should {
-    val beforeReturn  = playing(
-      Go9x9,
-      List("i9", "i8", "h9", "h8", "g8", "i7", "f9", "g9", "h9", "i6", "i9", "g9")
-    )
-    val threePliesAgo = playing(
-      Go9x9,
-      List("i9", "i8", "h9", "h8", "g8", "i7", "f9", "g9", "h9", "i6")
-    )
-    "stand on a board with no ko point" in {
-      koPointOf(fenOf(beforeReturn)) === "-"
-    }
-    "be offered" in {
-      dropKeysOf(beforeReturn.situation) must contain("h9")
-    }
-    "reach exactly that board, with the other player to move" in {
-      val returned = playingOn(beforeReturn, List("h9"))
-      (returned.board.pieces === threePliesAgo.board.pieces) and
-        (returned.situation.player === !threePliesAgo.situation.player)
-    }
-    "leave the game ongoing and free of repetition when a pass is played instead" in {
-      val afterPass = playingOn(beforeReturn, List("pass"))
-      (afterPass.situation.end === false) and (afterPass.situation.isRepetition === false)
     }
   }
 

@@ -121,6 +121,29 @@ class GoEndingTest extends Specification with GoRulesTestSupport {
     "leave a further pass in live play settling the game" in {
       playingOn(replayingRecord(fourPasses), List("pass")).situation.end === true
     }
+    // NOTE: a settlement is not part of what replay and live play differ over — only the fourth pass
+    // is. `Variant.boardAfterSelectSquares` settles whichever path reaches it, so a recorded `ss:`
+    // ends a replayed game exactly as a played one.
+    "end the game on a settlement it records, which a fourth pass does not" in {
+      replayingRecord(fourPasses :+ "ss:").situation.end === true
+    }
+  }
+
+  // NOTE: no rule permits these, and replay does not refuse them — it does not ask the rules about a
+  // record. What is pinned is that reading one costs the game nothing: it replays to its full length
+  // and reports no error, where an unreadable record truncates instead (`GoUnreadableRecordTest`).
+  "a stored record carrying on past its own settlement" should {
+    val settled = List("s@e5", "pass", "pass", "ss:")
+    "replay a placement recorded after it" in {
+      val replayed = replayingRecord(settled :+ "s@d4")
+      (replayed.plies === 5) and (replayed.board.pieces.keySet === Set(pointAt("e5"), pointAt("d4")))
+    }
+    "replay a second settlement recorded after it" in {
+      replayingRecord(settled :+ "ss:").plies === 5
+    }
+    "replay a pass recorded after it" in {
+      replayingRecord(settled :+ "pass").plies === 5
+    }
   }
 
   "a key naming a square the board does not have" should {

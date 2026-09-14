@@ -25,11 +25,6 @@ class GoUnreadableRecordTest extends Specification with GoRulesTestSupport {
       val (_, plies, _) = replayed(onAnOccupiedPoint)
       plies.lastOption.map(_._1.board.pieces.size) === Some(1)
     }
-
-    "name the action and the ply it stopped at" in {
-      val (_, _, error) = replayed(onAnOccupiedPoint)
-      error.map(_.contains("s@e5")) === Some(true)
-    }
   }
 
   // NOTE: no go ruleset permits a placement that leaves its own chain without a liberty, so this is

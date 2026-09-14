@@ -8,6 +8,11 @@ import strategygames.Player
 import strategygames.go.format.FEN
 import strategygames.go.variant.{ Go19x19, Go9x9 }
 
+// NOTE: this file owns the axis the rule turns on — whether the player to move returns with the
+// stones. `Hash.positionHash` mixes in `Hash.turnMask`, so a board reached again with the other
+// player to move is a position the history has not held and is offered, while one reached with the
+// same player to move is refused. `GoSuperkoTest` holds the cases that do not turn on that: a cycle
+// that never returns, a repeat that takes no stone, a lapsed ko point, and the fen round trip.
 class GoSituationalSuperkoTest extends Specification with GoRulesTestSupport {
 
   import GoSituationalSuperkoTest._
@@ -41,6 +46,11 @@ class GoSituationalSuperkoTest extends Specification with GoRulesTestSupport {
 
     "leave the game playable rather than end it" in {
       playingOn(beforeTheReturn, List(returningCapture)).situation.end === false
+    }
+
+    "leave the game ongoing and claim no repetition when a pass is played instead" in {
+      val afterPass = playingOn(beforeTheReturn, List("pass"))
+      (afterPass.situation.end === false) and (afterPass.situation.isRepetition === false)
     }
 
     "reach the board the game held three plies earlier, with the other player to move" in {
