@@ -3,7 +3,6 @@ package strategygames.go
 import cats.data.Validated
 import cats.data.Validated.valid
 import cats.implicits._
-import scala.util.Try
 import scalalib.extensions.*
 
 import strategygames.Player
@@ -130,8 +129,17 @@ object Replay {
     actionStr match {
       case Uci.Drop.dropR(role, dest)           =>
         (Role.allByForsyth(before.board.variant.gameFamily).get(role(0)), Pos.fromKey(dest)) match {
-          case (Some(role), Some(dest)) => valid(replayDrop(before, role, dest, endTurn))
-          case _                        => Validated.invalid(s"Invalid drop for replay: ${actionStr}")
+          // NOTE: the vacancy test is a precondition rather than a rule. `Variant.boardAfter` reaches
+          // `Chain.capturedBy`, which asserts it through `Chain.requireVacant`, and that assertion is
+          // the one thing on this path that raises. Testing it here is what keeps a record naming an
+          // occupied point to a truncated game and a reported reason. Nothing else is asked: the ko
+          // point, superko and a finished game are rules, and rules have changed under stored records.
+          case (Some(role), Some(dest)) if !before.board.pieces.contains(dest) =>
+            valid(replayDrop(before, role, dest, endTurn))
+          case (Some(_), Some(_))                                              =>
+            Validated.invalid(s"Unplayable drop ${actionStr} for replay: a stone already stands there")
+          case _                                                               =>
+            Validated.invalid(s"Invalid drop for replay: ${actionStr}")
         }
       case Uci.Pass.passR()                     => valid(replayPass(before, endTurn))
       // NOTE: a key naming no point on this board size is dropped here, where the drop branch above
@@ -143,20 +151,14 @@ object Replay {
         Validated.invalid(s"Invalid actionStr for replay: ${actionStr}")
     }
 
-  // NOTE: the board an action computes is a `lazy val`, so a record naming a placement the rules
-  // cannot construct at all — a stone on a point that already holds one — raises from here rather
-  // than returning. Catching it is what keeps such a record to a truncated game and a reported
-  // reason, which is the contract `StepBuilder` reads and the one chess and draughts keep.
-  private def applied(state: Game, action: Action): Validated[String, Game] =
-    Validated
-      .fromTry(Try(action match {
-        case d: Drop           => state.applyDrop(d)
-        case p: Pass           => state.applyPass(p)
-        case ss: SelectSquares => state.applySelectSquares(ss)
-      }))
-      .leftMap(raised =>
-        s"Unplayable action ${action.toUci.uci} at ply ${state.plies} for replay: ${raised.getMessage}"
-      )
+  // NOTE: `Drop.after` and `SelectSquares.after` are `lazy val`s over the variant's `boardAfter*`,
+  // which compute a board rather than judging one, so the board is built from here rather than at
+  // construction. The vacancy test in `actionOf` has already refused the one input that would raise.
+  private def applied(state: Game, action: Action): Game = action match {
+    case d: Drop           => state.applyDrop(d)
+    case p: Pass           => state.applyPass(p)
+    case ss: SelectSquares => state.applySelectSquares(ss)
+  }
 
   def actionStrsWithEndTurn(actionStrs: ActionStrs): Seq[(String, Boolean)] =
     actionStrs.zipWithIndex.map { case (a, i) =>
@@ -192,16 +194,15 @@ object Replay {
     def mk(state: Game, rest: List[(String, Boolean)]): (List[(Game, Action)], Option[String]) =
       rest match {
         case (actionStr, endTurn) :: tail =>
-          actionOf(state.situation, actionStr, endTurn)
-            .andThen(action => applied(state, action).map((_, action)))
-            .fold(
-              error => (Nil, error.some),
-              { case (next, action) =>
-                mk(next, tail) match {
-                  case (plies, message) => ((next, action) :: plies, message)
-                }
+          actionOf(state.situation, actionStr, endTurn).fold(
+            error => (Nil, error.some),
+            action => {
+              val next = applied(state, action)
+              mk(next, tail) match {
+                case (plies, message) => ((next, action) :: plies, message)
               }
-            )
+            }
+          )
         case Nil                          => (Nil, None)
       }
 

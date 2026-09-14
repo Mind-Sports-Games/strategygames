@@ -33,13 +33,13 @@ class GoUnreadableRecordTest extends Specification with GoRulesTestSupport {
   }
 
   // NOTE: no go ruleset permits a placement that leaves its own chain without a liberty, so this is
-  // not a record written under older rules — it is a record that cannot have been played. Replay
-  // takes it as written, because `Variant.boardAfter` computes a board rather than judging one, and
-  // the result is a position go cannot hold. Pinned because it is a known gap, not a decision.
-  // TODO(playstrategy): refuse a suicide in `boardAfter` and this becomes a truncated replay too.
+  // not a record written under older rules either — but unlike an occupied point it does not raise,
+  // so replay takes it as written and the result is a position go cannot hold. Pinned as it stands
+  // rather than as it should be: refusing it would mean asking a rules question of a record, which is
+  // what `Replay` no longer does. It is here so the day that reasoning changes, something notices.
   "a record naming a suicide" should {
 
-    "replay as written rather than stopping" in {
+    "replay as written rather than stopping, since nothing on this path raises" in {
       val (_, _, error) = replayed(asSuicide)
       error === None
     }
