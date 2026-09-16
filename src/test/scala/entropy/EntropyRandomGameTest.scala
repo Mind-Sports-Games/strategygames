@@ -19,7 +19,7 @@ class EntropyRandomGameTest extends EntropyTest {
     val s = g.situation
     if (s.mustDraw) {
       // a blind draw: uniform over what is left in the bag, so common colours come up more
-      val bag: List[Role]  = s.board.variant.bag(s.board)
+      val bag: List[Role]  = s.board.variant.bag(s.board.readyForRound)
       val role: Role       = pick[Role](rng, bag)
       g.apply(s.drawCounter(role).getOrElse(sys.error(s"refused a legal draw of ${role}")))
     } else if (s.isChaos) {
@@ -35,7 +35,7 @@ class EntropyRandomGameTest extends EntropyTest {
     }
   }
 
-  // each round is 49 draws, 49 drops and at most 49 Order turns, so two rounds fit easily
+  // each round is 49 draws, 49 drops and 48 Order turns, so two rounds fit easily
   private def playRandom(seed: Int, limit: Int = 1000): Option[Game] = {
     val rng = new Random(seed)
     Iterator

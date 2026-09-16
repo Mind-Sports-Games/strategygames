@@ -30,7 +30,7 @@ class EntropyRoundSwapTest extends EntropyTest {
   }
 
   "the board" should {
-    "be full at the moment a round closes" in {
+    "close as its last empty square is filled" in {
       // step until the round number changes, then look at the board just before
       val start = Game.apply(variant.Entropy)
       val games = Iterator
@@ -43,12 +43,60 @@ class EntropyRoundSwapTest extends EntropyTest {
       }
 
       beforeSwap must beSome[(Game, Game)].like { case (before, after) =>
-        before.situation.board.isFull must beTrue
-        // the next round starts from nothing
-        after.situation.board.pieces must beEmpty
+        // one square left, which the closing drop fills
+        before.situation.board.emptyPositions.size === 1
+        // the finished board stays up, so the position shows what the round was scored on
+        after.situation.board.isFull must beTrue
         after.situation.board.chaosPlayer === P2
         after.situation.board.orderPlayer === P1
       }
+    }
+
+    "be cleared by the next round's first draw, which still draws from a full bag" in {
+      val start = Game.apply(variant.Entropy)
+      val games = Iterator
+        .iterate(start)(g => g.situation.flaggedAction.fold(g)(a => applyAction(g, a)))
+        .take(400)
+        .toList
+
+      val firstDrawOfRoundTwo = games.zip(games.tail).find { case (a, b) =>
+        a.situation.board.round == 2 && a.situation.board.isFull && !b.situation.board.isFull
+      }
+
+      firstDrawOfRoundTwo must beSome[(Game, Game)].like { case (before, after) =>
+        before.situation.mustDraw must beTrue
+        after.situation.board.pieces must beEmpty
+        after.situation.board.counterInPocket(P2) must beSome[Role]
+        after.situation.board.variant.bag(after.situation.board).size === 48
+        after.turnCount === before.turnCount
+      }
+    }
+
+    "close on the drop that fills it, handing the turn to the next round's Chaos" in {
+      val start = Game.apply(variant.Entropy)
+      val games = Iterator
+        .iterate(start)(g => g.situation.flaggedAction.fold(g)(a => applyAction(g, a)))
+        .take(400)
+        .toList
+
+      val swap = games.zip(games.tail).find { case (a, b) =>
+        a.situation.board.round == 1 && b.situation.board.round == 2
+      }
+
+      swap must beSome[(Game, Game)].like { case (before, after) =>
+        before.situation.isChaos must beTrue
+        after.situation.player === P2
+        after.situation.isChaos must beTrue
+        after.situation.mustDraw must beTrue
+        after.turnCount === 97
+      }
+    }
+
+    "never offer Order a turn on a full board" in {
+      val finished = playForced(Game.apply(variant.Entropy))
+      val strs     = finished.actionStrs.toList.flatMap(v => v)
+      strs.filter((a: String) => a == "pass").size === 96
+      finished.turnCount === 194
     }
 
     "bank the first round's score to the player who was Order for it" in {

@@ -24,7 +24,6 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def diceRolls: List[DiceRoll]
 
-  // only entropy draws counters from a bag
   def drawCounters: List[DrawCounter] = List.empty
 
   // The single action a player whose clock has flagged is restricted to, in a game that
@@ -51,7 +50,6 @@ sealed abstract class Situation(val board: Board, val player: Player) {
       // important to keep non progressive actions at the end
       undos
 
-  // Put this here as it's useful for several game logic's to reuse when calculating validTurns
   protected def nextTurn(actions: List[Action]): List[List[Action]] =
     actions match {
       case Nil                  => Nil
@@ -1657,8 +1655,6 @@ object Situation {
 
     def takebackable = true
 
-    // entropy never has an inevitable action: Chaos chooses a square, Order chooses a
-    // counter or passes, so nothing here may be played on a player's behalf
     def forcedAction: Option[Action] = None
 
     def forcedTurnAction: Option[Action] = None

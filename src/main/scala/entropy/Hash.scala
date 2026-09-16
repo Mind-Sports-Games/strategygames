@@ -20,9 +20,7 @@ object Hash {
 
   val size = 3
 
-  // Entropy has no opening book, so unlike the older game logics these masks need only be
-  // stable between runs, not compatible with the Polyglot format. Generating them from a
-  // fixed seed keeps that stability without a thousand lines of hex literals.
+  // Generating them from a fixed seed without a thousand lines of hex literals.
   class ZobristConstants(start: Int) {
     private val random = new scala.util.Random(0x9e3779b9L + start.toLong)
 

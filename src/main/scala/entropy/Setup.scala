@@ -1,3 +1,6 @@
 package strategygames.entropy
 
-case class Setup(board: Board, player: strategygames.Player)
+object Setup {
+
+  def apply(variant: strategygames.entropy.variant.Variant) = Game(variant)
+}

@@ -208,6 +208,17 @@ abstract class Game(
 
   def randomizeAndApplyDiceRoll(metrics: MoveMetrics): Validated[String, (Game, DiceRoll)]
 
+  def drawCounter(
+      role: Role,
+      metrics: MoveMetrics = MoveMetrics()
+  ): Validated[String, (Game, DrawCounter)] =
+    sys.error("Can't draw a counter in this game logic")
+
+  def randomizeAndApplyDrawCounter(
+      metrics: MoveMetrics = MoveMetrics()
+  ): Validated[String, (Game, DrawCounter)] =
+    sys.error("Can't draw a counter in this game logic")
+
   // Because I"m unsure how to properly write a single, generic copy
   // type signature, we're getting individual ones for how we use it.
   // TODO: figure out if we can properly make this generic
@@ -246,19 +257,6 @@ abstract class Game(
   def toGo: go.Game
   def toBackgammon: backgammon.Game
   def toAbalone: abalone.Game
-  def drawCounter(
-      role: Role,
-      metrics: MoveMetrics = MoveMetrics()
-  ): Validated[String, (Game, DrawCounter)] =
-    sys.error("Can't draw a counter in this game logic")
-
-  // the bag is blind, so a client asks for a draw without naming a colour and is
-  // told what came out; the counterpart of randomizeAndApplyDiceRoll
-  def randomizeAndApplyDrawCounter(
-      metrics: MoveMetrics = MoveMetrics()
-  ): Validated[String, (Game, DrawCounter)] =
-    sys.error("Can't draw a counter in this game logic")
-
   def toDameo: dameo.Game
   def toEntropy: entropy.Game
 

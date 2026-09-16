@@ -26,7 +26,7 @@ abstract class Variant private[variant] (
   def fenVariant: Boolean         = false
   def variableInitialFen: Boolean = false
 
-  def hasAnalysisBoard: Boolean = false
+  def hasAnalysisBoard: Boolean = true
   def hasFishnet: Boolean       = false
 
   def p1IsBetterVariant: Boolean = false
@@ -125,23 +125,25 @@ abstract class Variant private[variant] (
             .toValid(s"Could not place ${role} on ${pos}")
       }
 
-  def drawCounter(situation: Situation, role: Role): Validated[String, DrawCounter] =
+  def drawCounter(situation: Situation, role: Role): Validated[String, DrawCounter] = {
+    val board = situation.board.readyForRound
     if (!situation.isChaos) Validated.invalid("Only Chaos draws from the bag")
     else if (!situation.mustDraw) Validated.invalid("A counter has already been drawn this turn")
-    else if (!bag(situation.board).contains(role)) Validated.invalid(s"No ${role} left in the bag")
+    else if (!bag(board).contains(role)) Validated.invalid(s"No ${role} left in the bag")
     else
       Validated.valid(
         DrawCounter(
           role,
           situation,
-          situation.board.withPocketData(_.store(Piece(situation.player, role)))
+          board.withPocketData(_.store(Piece(situation.player, role)))
         )
       )
+  }
 
   // the counter that comes out is blind; which square it lands on is Chaos's decision
   def randomDraw(situation: Situation): Validated[String, DrawCounter] =
     Random
-      .shuffle(bag(situation.board))
+      .shuffle(bag(situation.board.readyForRound))
       .headOption
       .toValid("The bag is empty")
       .andThen(drawCounter(situation, _))

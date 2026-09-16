@@ -550,7 +550,7 @@ object GameFamily {
     def key               = GameLogic.Entropy().name.toLowerCase()
     def gameLogic         = GameLogic.Entropy()
     def hasFishnet        = false
-    def hasAnalysisBoard  = false
+    def hasAnalysisBoard  = true
     def defaultVariant    = Variant.Entropy(strategygames.entropy.variant.Entropy)
     def variants          = Variant.all(GameLogic.Entropy())
     def displayPiece      = "R"
@@ -727,9 +727,7 @@ object GameGroup {
     def name     = "Entropy"
     def key      = "entropy"
     def variants = Variant.all(GameLogic.Entropy()).filter(_.gameFamily.name == this.name)
-    // a full game is two rounds of forty-nine placements, a very different commitment
-    // from the rest of the medley rotation
-    def medley   = false
+    def medley   = true
   }
 
   def all: List[GameGroup] =

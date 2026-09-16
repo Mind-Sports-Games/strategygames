@@ -12,7 +12,6 @@ case class DrawCounter(
 
   def player = situationBefore.player
 
-  // drawing reveals the counter into Chaos's pocket; placing it is the rest of the same turn
   def situationAfter = Situation(finalizeAfter, player)
 
   def finalizeAfter: Board = after updateHistory { h =>

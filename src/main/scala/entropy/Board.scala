@@ -57,13 +57,16 @@ case class Board(
     }
   }
 
-  // a round closes once Order has taken its turn on a full board, which is the position
-  // worth the most; the last round keeps its board rather than clearing it
+  // a round closes on the drop that fills the board, so the turn passes straight to the
+  // next round's Chaos. The full board stays in place, so the position after that drop
+  // shows what the round was scored on; the next round's first draw clears it.
   def endRoundIfComplete(actingPlayer: Player): Board =
-    if (isFull && actingPlayer == orderPlayer)
-      (if (round >= 2) this else clearForNextRound)
-        .updateHistory(h => h.copy(round = h.round + 1))
+    if (isFull && actingPlayer == chaosPlayer) updateHistory(h => h.copy(round = h.round + 1))
     else this
+
+  // a full board can only be a finished round's, still standing until the next round starts
+  def readyForRound: Board =
+    if (isFull && round <= variant.rounds) clearForNextRound else this
 
   def afterTurnBy(actingPlayer: Player): Board =
     withScoreUpdated.endRoundIfComplete(actingPlayer)

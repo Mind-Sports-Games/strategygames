@@ -37,12 +37,17 @@ case class Game(
     val newSituation = action.situationAfter
     val switchPlayer = situation.player != newSituation.player
 
+    val roundChanged = situation.board.round != newSituation.board.round
+    val gameActive   = newSituation.status.isEmpty
+
     copy(
       situation = newSituation,
       plies = plies + 1,
       turnCount = turnCount + (if (switchPlayer) 1 else 0),
       actionStrs = applyActionStr(action.toUci.uci),
-      clock = applyClock(metrics, newSituation.status.isEmpty, switchPlayer)
+      clock = applyClock(metrics, gameActive, switchPlayer).map { c =>
+        if (roundChanged && gameActive) c.resetToStart(newSituation.player).start else c
+      }
     )
   }
 
