@@ -2,6 +2,7 @@ package strategygames.entropy
 import strategygames.{ ClockBase, MoveMetrics, Player, VActionStrs }
 
 import cats.data.Validated
+import scala.annotation.nowarn
 
 import strategygames.entropy.format.{ FEN, Uci }
 import strategygames.entropy.variant.Variant
@@ -57,7 +58,7 @@ case class Game(
   def apply(uci: Uci.Drop): Validated[String, (Game, Drop)] =
     situation.drop(uci.role, uci.pos).map { drop => apply(drop) -> drop }
 
-  def apply(uci: Uci.Pass): Validated[String, (Game, Pass)] =
+  def apply(@nowarn uci: Uci.Pass): Validated[String, (Game, Pass)] =
     situation.pass().map { pass => apply(pass) -> pass }
 
   def apply(uci: Uci.DrawCounter): Validated[String, (Game, DrawCounter)] =
