@@ -6,10 +6,11 @@ import strategygames.go.format.Uci
 case class SelectSquares(
     squares: List[Pos],
     situationBefore: Situation,
-    after: Board,
     autoEndTurn: Boolean,
     metrics: MoveMetrics = MoveMetrics()
 ) extends Action(situationBefore) {
+
+  lazy val after: Board = before.variant.boardAfterSelectSquares(situationBefore, squares)
 
   def situationAfter =
     Situation(finalizeAfter, if (autoEndTurn) !situationBefore.player else situationBefore.player)

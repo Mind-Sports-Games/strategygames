@@ -251,6 +251,39 @@ class MonsterVariantTest extends ChessTest {
       }
     }
 
+    "Black can't castle out of check from a two move king threat" in {
+      import Pos._
+      val game        = fenToGame(Monster.initialFen, Monster)
+      val successGame = game.andThen((g: Game) => g.playMoves(
+        E2 -> E4,
+        E1 -> E2,
+        E7 -> E5,
+        E2 -> E3,
+        F2 -> F4,
+        F8 -> C5,
+        E3 -> D4,
+        D4 -> C5,
+        D7 -> D6,
+        C5 -> D5,
+        D2 -> D3,
+        G8 -> H6,
+        D5 -> E5,
+        E5 -> D5,
+        C8 -> D7,
+        D5 -> D6,
+        D6 -> D5,
+        C7 -> C5,
+        C2 -> C3,
+        D5 -> D6
+      ))
+      successGame .toOption must beSome.like { case game =>
+        val ucis = game.situation.moves.toList.flatMap { case (_, ms) => ms.map(m => m.toUci.uci) }
+        // black is in check from a two move king threat (Kxd7 then Kxe8),
+        // so castling out of it (e8g8/e8h8) is not a legal escape
+        (ucis must beEmpty) and (game.situation.checkMate === true)
+      }
+    }
+
     "Black Stalemate" in {
       import Pos._
       val game        = fenToGame(Monster.initialFen, Monster)

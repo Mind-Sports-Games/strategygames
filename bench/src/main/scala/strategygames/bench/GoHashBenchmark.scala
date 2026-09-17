@@ -39,7 +39,7 @@ class GoHashBenchmark {
       .zipWithIndex
       .map { case (p, i) => p -> Piece(if (i % 2 == 0) Player.P1 else Player.P2, Stone) }
       .toMap
-    situation = Situation(Board(pieces, History(), variant), Player.P1)
+    situation = Situation(Board(pieces, History(), variant, komi = variant.komi), Player.P1)
     situation.board.actors // force the lazy val outside the measured region
     table = new Hash.ZobristConstants(0)
   }

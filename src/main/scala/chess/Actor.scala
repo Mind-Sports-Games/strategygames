@@ -151,12 +151,12 @@ final case class Actor(
       mustNotBeAttacked = kingPath.filter(
                             _ != newKingPos || kingPos == newKingPos
                           )
-      if !mustNotBeAttacked.exists(p => board.variant.kingThreatened(b1, !player, p))
+      if !mustNotBeAttacked.exists(p => board.variant.kingThreatened(b1, !player, p, validatingCheck = true))
       // Test the final king position seperately, after the rook has been moved.
       b2               <- b1 take rookPos
       b3               <- b2.place(Piece(player, King), newKingPos)
       b4               <- b3.place(Piece(player, Rook), newRookPos)
-      if !board.variant.kingThreatened(b4, !player, newKingPos)
+      if !board.variant.kingThreatened(b4, !player, newKingPos, validatingCheck = true)
       b5                = b4 updateHistory (_ withoutCastles player)
       castle            = Option((kingPos -> newKingPos, rookPos -> newRookPos))
     } yield {

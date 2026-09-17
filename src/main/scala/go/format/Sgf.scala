@@ -16,13 +16,16 @@ object Sgf {
     }.toList
 
   private def initialMoves(variant: Variant, initialFen: FEN): List[(Char, String)] =
-    strategygames.go.Api
-      .pieceMapFromFen(variant.key, initialFen.value)
-      .toList
-      .map { case (pos, piece) =>
-        (if (piece.player == Player.P1) 'B' else 'W', pos.sgf(variant.boardSize.height))
-      }
-      .sortBy(_._2)
+    if (initialFen.gameSize != variant.boardSize.height)
+      sys.error(
+        s"cannot render a ${initialFen.gameSize} row go fen as sgf on ${variant.boardSize.key}: ${initialFen.value}"
+      )
+    else
+      initialFen.pieces.toList
+        .map { case (pos, piece) =>
+          (if (piece.player == Player.P1) 'B' else 'W', pos.sgf(variant.boardSize.height))
+        }
+        .sortBy(_._2)
 
   private def indexToPlayer(index: Int, isHandicapGame: Boolean): Char =
     if ((index % 2 == 0 && !isHandicapGame) || (index % 2 == 1 && isHandicapGame)) 'B' else 'W'
