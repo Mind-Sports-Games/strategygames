@@ -2,69 +2,13 @@ package strategygames.go
 
 import org.specs2.mutable.Specification
 
-import scala.util.Try
-
-import strategygames.{ Player, Score }
-import strategygames.go.format.Uci
+import strategygames.Score
 import strategygames.go.variant.Go9x9
 
+// NOTE: the cases here do not turn on which player returns with the stones — a cycle that never
+// returns, a repeat that takes no stone, a ko point that has lapsed, and what a fen round trip keeps.
+// `GoSituationalSuperkoTest` owns the player-to-move axis and the returning capture that rides on it.
 class GoSuperkoTest extends Specification with GoRulesTestSupport {
-
-  private val tripleKo = List(
-    "b8",
-    "b7",
-    "c9",
-    "c6",
-    "d8",
-    "d7",
-    "f8",
-    "f7",
-    "g9",
-    "g6",
-    "h8",
-    "h7",
-    "b2",
-    "b3",
-    "c1",
-    "c4",
-    "d2",
-    "d3",
-    "f2",
-    "f3",
-    "g1",
-    "g4",
-    "h2",
-    "h3",
-    "c7",
-    "c2",
-    "g3",
-    "g8",
-    "g7",
-    "c8",
-    "c3",
-    "g2",
-    "c7",
-    "c2",
-    "g3"
-  )
-
-  private def replaying(keys: List[String]) =
-    Replay(keys.flatMap(key => Uci(s"s@${key}")), Some(Go9x9.initialFen), Go9x9)
-
-  private def replayingFromUciStrings(keys: List[String]) =
-    Replay
-      .gameFromUciStrings(
-        keys.map(key => Vector(s"s@${key}")).toVector,
-        Player.fromTurnCount(keys.size),
-        Some(Go9x9.initialFen),
-        Go9x9
-      )
-      .valueOr(error => sys.error(error))
-
-  private def refusalOf(replaying: => Any): String =
-    Try(replaying).failed.map(_.getMessage).getOrElse("nothing was refused")
-
-  private val anyFurtherPoint = "a9"
 
   private val koShapeWithWhiteToPlay = List("b2", "c2", "a3", "d3", "b4", "c4", "c3")
 
@@ -83,48 +27,6 @@ class GoSuperkoTest extends Specification with GoRulesTestSupport {
     }
     "have cost the cycling player two stones on the way round" in {
       afterCycle.situation.history.captures === Score(0, 2)
-    }
-  }
-
-  "a triple ko that walks the board back to an earlier position, with the same player to move" should {
-    "replay while the repeating capture is still one ply away" in {
-      replaying(tripleKo.init).isValid === true
-    }
-    "refuse the ply that repeats when the record continues past it" in {
-      replaying(tripleKo :+ anyFurtherPoint).isInvalid === true
-    }
-    "keep the position history the refusal is drawn from when rebuilt from its uci strings" in {
-      replayingFromUciStrings(tripleKo.init).situation.history.positionCount === tripleKo.init.size + 1
-    }
-    "be refused after the repeating ply when rebuilt from its uci strings too" in {
-      refusalOf(replayingFromUciStrings(tripleKo :+ anyFurtherPoint)) must
-        startWith(s"Action s@${anyFurtherPoint} offered to a finished")
-    }
-  }
-
-  "a capture that recreates the board of three plies earlier, with the other player to move" should {
-    val beforeReturn  = playing(
-      Go9x9,
-      List("i9", "i8", "h9", "h8", "g8", "i7", "f9", "g9", "h9", "i6", "i9", "g9")
-    )
-    val threePliesAgo = playing(
-      Go9x9,
-      List("i9", "i8", "h9", "h8", "g8", "i7", "f9", "g9", "h9", "i6")
-    )
-    "stand on a board with no ko point" in {
-      koPointOf(fenOf(beforeReturn)) === "-"
-    }
-    "be offered" in {
-      dropKeysOf(beforeReturn.situation) must contain("h9")
-    }
-    "reach exactly that board, with the other player to move" in {
-      val returned = playingOn(beforeReturn, List("h9"))
-      (returned.board.pieces === threePliesAgo.board.pieces) and
-        (returned.situation.player === !threePliesAgo.situation.player)
-    }
-    "leave the game ongoing and free of repetition when a pass is played instead" in {
-      val afterPass = playingOn(beforeReturn, List("pass"))
-      (afterPass.situation.end === false) and (afterPass.situation.isRepetition === false)
     }
   }
 

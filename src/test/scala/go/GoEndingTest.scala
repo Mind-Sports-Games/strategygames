@@ -112,24 +112,37 @@ class GoEndingTest extends Specification with GoRulesTestSupport {
 
   "a stored record carrying on past a fourth pass" should {
     val fourPasses = "s@e5" :: List.fill(4)("pass")
-    "replay a placement recorded after the fourth pass" in {
+    "replay to its full ply count without settling" in {
       val replayed = replayingRecord(fourPasses :+ "s@d4")
-      (replayed.plies === 6) and (replayed.situation.end === false)
+      (replayed.plies === 6) and
+        (replayed.board.pieces.keySet === Set(pointAt("e5"), pointAt("d4"))) and
+        (replayed.situation.end === false)
     }
-    "replay a settlement recorded after the fourth pass" in {
-      val replayed = replayingRecord(fourPasses :+ "ss:")
-      (replayed.plies === 6) and (replayed.situation.end === true)
+    "leave a further pass in live play settling the game" in {
+      playingOn(replayingRecord(fourPasses), List("pass")).situation.end === true
     }
-    "replay a placement recorded after a run of eight passes" in {
-      val replayed = replayingRecord(("s@e5" :: List.fill(8)("pass")) :+ "s@d4")
-      (replayed.plies === 10) and (replayed.situation.end === false)
+    // NOTE: a settlement is not part of what replay and live play differ over — only the fourth pass
+    // is. `Variant.boardAfterSelectSquares` settles whichever path reaches it, so a recorded `ss:`
+    // ends a replayed game exactly as a played one.
+    "end the game on a settlement it records, which a fourth pass does not" in {
+      replayingRecord(fourPasses :+ "ss:").situation.end === true
     }
-    "not end where the record stops on the fourth pass" in {
-      replayingRecord(fourPasses).situation.end === false
+  }
+
+  // NOTE: no rule permits these, and replay does not refuse them — it does not ask the rules about a
+  // record. What is pinned is that reading one costs the game nothing: it replays to its full length
+  // and reports no error, where an unreadable record truncates instead (`GoUnreadableRecordTest`).
+  "a stored record carrying on past its own settlement" should {
+    val settled = List("s@e5", "pass", "pass", "ss:")
+    "replay a placement recorded after it" in {
+      val replayed = replayingRecord(settled :+ "s@d4")
+      (replayed.plies === 5) and (replayed.board.pieces.keySet === Set(pointAt("e5"), pointAt("d4")))
     }
-    "leave the fourth pass ending the game once the record runs out" in {
-      val played = playingOn(replayingRecord(fourPasses :+ "s@d4"), List("pass", "pass", "pass", "pass"))
-      played.situation.end === true
+    "replay a second settlement recorded after it" in {
+      replayingRecord(settled :+ "ss:").plies === 5
+    }
+    "replay a pass recorded after it" in {
+      replayingRecord(settled :+ "pass").plies === 5
     }
   }
 
