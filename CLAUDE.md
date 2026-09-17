@@ -15,8 +15,10 @@ says so in its own status line, naming what replaced it.
 **ADRs are binding.** Before changing behaviour, check whether an ADR governs it — a decision
 recorded there outranks what a previous implementation did, and outranks an existing test assertion
 that contradicts it. `../docs/strategygames/adr/` currently records the Go rules decisions
-(positional superko, Chinese area scoring, rules-correct over bug-for-bug parity with the retired
-`com.joansala` engine), with the divergence table in `../docs/strategygames/go-engine.md`.
+(situational superko, Chinese area scoring, replay reads a record rather than adjudicating it,
+rules-correct over bug-for-bug parity with the retired `com.joansala` engine), with the divergence
+table in `../docs/strategygames/go-engine.md`. Read the newest ADR on a subject, not the first:
+several supersede earlier ones in part, and each says so in its own status line.
 
 Some branches are docs-stripped variants (e.g. `…-no-docs`). The absence of an ADR on the branch you
 are on does not mean the decision was never taken.
@@ -51,7 +53,8 @@ Each game has its own package under `src/main/scala/`:
 - `fairysf/` - Shogi, Xiangqi, Othello, and more. Uses fairystockfish engine to provide actions.
 - `samurai/` - Oware (mancala). Uses JoanSala's engine 'aalina' to provide actions.
 - `togyzkumalak/` - Togyzkumalak (mancala variant)
-- `go/` - Go. Uses JoanSala's go engine to provide actions.
+- `go/` - Go. Pure Scala; the rules are concrete `def`s on `go/variant/Variant.scala` with
+  connectivity in `go/Chain.scala`. The `com.joansala` go engine was removed.
 - `backgammon/` - Backgammon (has dice, undo, endTurn, and doubling cube actions)
 - `abalone/` - Abalone. Hexagonal Board.
 - `dameo/` - Dameo (draughts variant). Uses multiaction properly unlike draughts game logic

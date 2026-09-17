@@ -91,34 +91,74 @@ object Replay {
     case _                         => sys.error("Invalid go action")
   }
 
-  def replayDrop(
-      before: Game,
-      role: Role,
-      dest: Pos,
+  def replayDrop(before: Situation, role: Role, dest: Pos, endTurn: Boolean): Drop =
+    Drop(
+      piece = Piece(before.player, role),
+      pos = dest,
+      situationBefore = before,
+      autoEndTurn = endTurn
+    )
+
+  def replayPass(before: Situation, endTurn: Boolean): Pass =
+    Pass(
+      situationBefore = before,
+      after = before.board.variant.boardAfterPass(before),
+      autoEndTurn = endTurn
+    )
+
+  def replaySelectSquares(before: Situation, squares: List[Pos], endTurn: Boolean): SelectSquares =
+    SelectSquares(
+      squares = squares,
+      situationBefore = before,
+      autoEndTurn = endTurn
+    )
+
+  private def replayAction(before: Situation, uci: Uci): Action = uci match {
+    case Uci.Drop(role, dest)      => replayDrop(before, role, dest, endTurn = true)
+    case Uci.Pass()                => replayPass(before, endTurn = true)
+    case Uci.SelectSquares(points) => replaySelectSquares(before, points, endTurn = true)
+  }
+
+  // NOTE: nothing here adjudicates the record against the rules — the record is what was played. Only
+  // an action string this file cannot read at all stops a replay.
+  private def actionOf(
+      before: Situation,
+      actionStr: String,
       endTurn: Boolean
-  ): Drop =
-    before.situation
-      .drop(role, dest)
-      .map(_.copy(autoEndTurn = endTurn))
-      .valueOr(error =>
-        sys.error(s"Illegal action ${role.forsyth}@${dest.key} at ply ${before.plies} for replay: ${error}")
-      )
+  ): Validated[String, Action] =
+    actionStr match {
+      case Uci.Drop.dropR(role, dest)           =>
+        (Role.allByForsyth(before.board.variant.gameFamily).get(role(0)), Pos.fromKey(dest)) match {
+          // NOTE: the vacancy test is a precondition rather than a rule. `Variant.boardAfter` reaches
+          // `Chain.capturedBy`, which asserts it through `Chain.requireVacant`, and that assertion is
+          // the one thing on this path that raises. Testing it here is what keeps a record naming an
+          // occupied point to a truncated game and a reported reason. Nothing else is asked: the ko
+          // point, superko and a finished game are rules, and rules have changed under stored records.
+          case (Some(role), Some(dest)) if !before.board.pieces.contains(dest) =>
+            valid(replayDrop(before, role, dest, endTurn))
+          case (Some(_), Some(_))                                              =>
+            Validated.invalid(s"Unplayable drop ${actionStr} for replay: a stone already stands there")
+          case _                                                               =>
+            Validated.invalid(s"Invalid drop for replay: ${actionStr}")
+        }
+      case Uci.Pass.passR()                     => valid(replayPass(before, endTurn))
+      // NOTE: a key naming no point on this board size is dropped here, where the drop branch above
+      // refuses the whole action on the same input. Stored games carry stray keys and still load.
+      // TODO(playstrategy): make this a `traverse` once those records have been swept.
+      case Uci.SelectSquares.selectSquaresR(ss) =>
+        valid(replaySelectSquares(before, ss.split(",").toList.flatMap(Pos.fromKey(_)), endTurn))
+      case _                                    =>
+        Validated.invalid(s"Invalid actionStr for replay: ${actionStr}")
+    }
 
-  def replayPass(before: Game, endTurn: Boolean): Pass =
-    before.situation
-      .pass()
-      .map(_.copy(autoEndTurn = endTurn))
-      .valueOr(error => sys.error(s"Illegal action pass at ply ${before.plies} for replay: ${error}"))
-
-  def replaySelectSquares(before: Game, squares: List[Pos], endTurn: Boolean): SelectSquares =
-    before.situation
-      .selectSquares(squares)
-      .map(_.copy(autoEndTurn = endTurn))
-      .valueOr(error =>
-        sys.error(
-          s"Illegal action ss:${squares.map(_.key).mkString(",")} at ply ${before.plies} for replay: ${error}"
-        )
-      )
+  // NOTE: `Drop.after` and `SelectSquares.after` are `lazy val`s over the variant's `boardAfter*`,
+  // which compute a board rather than judging one, so the board is built from here rather than at
+  // construction. The vacancy test in `actionOf` has already refused the one input that would raise.
+  private def applied(state: Game, action: Action): Game = action match {
+    case d: Drop           => state.applyDrop(d)
+    case p: Pass           => state.applyPass(p)
+    case ss: SelectSquares => state.applySelectSquares(ss)
+  }
 
   def actionStrsWithEndTurn(actionStrs: ActionStrs): Seq[(String, Boolean)] =
     actionStrs.zipWithIndex.map { case (a, i) =>
@@ -136,6 +176,11 @@ object Replay {
       else actionStrs
     )
 
+  // NOTE: this replays while the record stays readable and then stops, handing back the plies it built
+  // and the reason it stopped — the shape `chess.Replay.mk` and `draughts.Replay.mk` use. Nothing here
+  // raises: `strategygames.Replay.gameWithUciWhileValid` returns the triple to lila's `StepBuilder`,
+  // which logs the reason and renders the plies, so an unreadable action costs a game its tail rather
+  // than costing it the whole load.
   private def gameWithActionWhileValid(
       actionStrs: ActionStrs,
       startPlayer: Player,
@@ -144,65 +189,26 @@ object Replay {
       variant: strategygames.go.variant.Variant
   ): (Game, List[(Game, Action)], Option[String]) = {
 
-    val init   = makeGame(variant, initialFen.some)
-    var state  = init
-    var errors = ""
+    val init = makeGame(variant, initialFen.some)
 
-    def replayDropFromUci(
-        role: Option[Role],
-        dest: Option[Pos],
-        endTurn: Boolean
-    ): (Game, Action) =
-      (role, dest) match {
-        case (Some(role), Some(dest)) => {
-          val drop = replayDrop(state, role, dest, endTurn)
-          state = state.applyDrop(drop)
-          (state, drop)
-        }
-        case (role, dest)             => {
-          val uciDrop = s"${role}@${dest}"
-          errors += uciDrop + ","
-          sys.error(s"Invalid drop for replay: ${uciDrop}")
-        }
+    def mk(state: Game, rest: List[(String, Boolean)]): (List[(Game, Action)], Option[String]) =
+      rest match {
+        case (actionStr, endTurn) :: tail =>
+          actionOf(state.situation, actionStr, endTurn).fold(
+            error => (Nil, error.some),
+            action => {
+              val next = applied(state, action)
+              mk(next, tail) match {
+                case (plies, message) => ((next, action) :: plies, message)
+              }
+            }
+          )
+        case Nil                          => (Nil, None)
       }
 
-    def replayPassFromUci(endTurn: Boolean): (Game, Action) = {
-      val pass = replayPass(state, endTurn)
-      state = state.applyPass(pass)
-      (state, pass)
+    mk(init, combineActionStrsWithEndTurn(actionStrs, startPlayer, activePlayer).toList) match {
+      case (gameWithActions, error) => (init, gameWithActions, error)
     }
-
-    def replaySelectSquaresFromUci(squares: List[Pos], endTurn: Boolean): (Game, Action) = {
-      val selectSquares = replaySelectSquares(state, squares, endTurn)
-      state = state.applySelectSquares(selectSquares)
-      (state, selectSquares)
-    }
-
-    def replayOne(actionStr: String, endTurn: Boolean): (Game, Action) = actionStr match {
-      case _ if state.situation.end             =>
-        sys.error(s"Action ${actionStr} offered to a finished ${variant.key} game")
-      case Uci.Drop.dropR(role, dest)           =>
-        replayDropFromUci(
-          Role.allByForsyth(init.situation.board.variant.gameFamily).get(role(0)),
-          Pos.fromKey(dest),
-          endTurn
-        )
-      case Uci.Pass.passR()                     => replayPassFromUci(endTurn)
-      // NOTE: a key naming no point on this board size is dropped here, where the drop branch above
-      // refuses the whole action on the same input. Stored games carry stray keys and still load.
-      // TODO(playstrategy): make this a `traverse` once those records have been swept.
-      case Uci.SelectSquares.selectSquaresR(ss) =>
-        replaySelectSquaresFromUci(ss.split(",").toList.flatMap(Pos.fromKey(_)), endTurn)
-      case _                                    =>
-        sys.error(s"Invalid actionStr for replay: $actionStr")
-    }
-
-    val gameWithActions: List[(Game, Action)] =
-      combineActionStrsWithEndTurn(actionStrs, startPlayer, activePlayer).toList.map {
-        case (actionStr, endTurn) => replayOne(actionStr, endTurn)
-      }
-
-    (init, gameWithActions, errors match { case "" => None; case _ => errors.some })
   }
 
   def gameWithUciWhileValid(
@@ -248,19 +254,15 @@ object Replay {
     ucis match {
       case Nil         => valid(Nil)
       case uci :: rest =>
-        uci(sit) andThen { action =>
-          val after = Situation(action.finalizeAfter, !sit.player)
-          recursiveSituationsFromUci(after, rest) map { after :: _ }
-        }
+        val after = replayAction(sit, uci).situationAfter
+        recursiveSituationsFromUci(after, rest) map { after :: _ }
     }
 
   private def recursiveReplayFromUci(replay: Replay, ucis: List[Uci]): Validated[String, Replay] =
     ucis match {
       case Nil         => valid(replay)
       case uci :: rest =>
-        uci(replay.state.situation) andThen { action =>
-          recursiveReplayFromUci(replay.addAction(action), rest)
-        }
+        recursiveReplayFromUci(replay.addAction(replayAction(replay.state.situation, uci)), rest)
     }
 
   private def initialFenToSituation(

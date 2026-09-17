@@ -276,13 +276,11 @@ object GoBoardStateTest {
   private def passStateOf(board: Board): Int =
     if (board.deadStonesSelected) 3 else board.consecutivePasses.min(2)
 
-  private val passesSettlingTheGame = 4
-
   private def trailingPasses(played: List[String]): Int =
     played.reverse.takeWhile(_ == passAction).length
 
   private def settledBy(played: List[String]): Boolean =
-    played.lastOption.exists(_.startsWith("ss:")) || trailingPasses(played) >= passesSettlingTheGame
+    played.lastOption.exists(_.startsWith("ss:"))
 
   private def passStateLoggedBy(played: List[String]): Int =
     if (settledBy(played)) 3 else trailingPasses(played).min(2)

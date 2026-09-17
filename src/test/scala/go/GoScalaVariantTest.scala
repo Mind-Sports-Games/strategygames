@@ -271,9 +271,9 @@ class GoScalaVariantTest extends Specification {
           === Some(Forsyth.>>(playing(Game(Go9x9), actions))))
     }
 
-    "end on a fourth pass without any dead stone selection" in {
+    "not end on a fourth pass without any dead stone selection" in {
       val replayed = replaying(scriptedNineByNine ++ List("pass", "pass", "pass", "pass"))
-      (replayed.map(_.last.end) === Some(true)) and
+      (replayed.map(_.last.end) === Some(false)) and
         (replayed.map(_.last.board.pieces.size) === Some(11))
     }
   }

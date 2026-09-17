@@ -111,15 +111,20 @@ abstract class Variant private[variant] (
     )
 
   def validPass(situation: Situation): Pass =
-    Pass(situationBefore = situation, autoEndTurn = true)
+    Pass(
+      situationBefore = situation,
+      after =
+        if (settlesByPassing(situation)) boardAfterPassingOut(situation)
+        else boardAfterPass(situation),
+      autoEndTurn = true
+    )
 
   def boardAfterPass(situation: Situation): Board =
-    if (settlesByPassing(situation))
-      situation.board.withHistory(afterOnePly(situation.history)).settled(!situation.player)
-    else situation.board.passed.withHistory(afterOnePly(situation.history))
+    situation.board.passed.withHistory(afterOnePly(situation.history))
 
-  // NOTE: four passes end the game on the board transition, which is the one step that both the
-  // played path and the replayed path take, so a game ends on the same ply either way.
+  private def boardAfterPassingOut(situation: Situation): Board =
+    situation.board.withHistory(afterOnePly(situation.history)).settled(!situation.player)
+
   private def settlesByPassing(situation: Situation): Boolean =
     situation.board.consecutivePasses + 1 >= Variant.passesSettlingTheGame
 

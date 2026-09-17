@@ -63,19 +63,19 @@ object Reader {
             (Role.allByForsyth(replay.state.board.variant.gameFamily).get(role(0)), Pos.fromKey(dest)) match {
               case (Some(role), Some(dest)) =>
                 Result.Complete(
-                  replay.addAction(Replay.replayDrop(replay.state, role, dest, endTurn))
+                  replay.addAction(Replay.replayDrop(replay.state.situation, role, dest, endTurn))
                 )
               case _                        => Result.Incomplete(replay, s"Error making replay with drop: ${actionStr}")
             }
           case Uci.Pass.passR()                     =>
             Result.Complete(
-              replay.addAction(Replay.replayPass(replay.state, endTurn))
+              replay.addAction(Replay.replayPass(replay.state.situation, endTurn))
             )
           case Uci.SelectSquares.selectSquaresR(ss) =>
             Result.Complete(
               replay.addAction(
                 Replay.replaySelectSquares(
-                  replay.state,
+                  replay.state.situation,
                   ss.split(",").toList.flatMap(Pos.fromKey(_)),
                   endTurn
                 )

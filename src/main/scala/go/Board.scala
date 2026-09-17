@@ -152,8 +152,8 @@ object Board {
   private[go] def restoredPlyCount(uciMoves: List[String], position: Option[StoredPosition]): Int =
     position.flatMap(_.initialFen.ply).getOrElse(0).max(0) + uciMoves.size
 
-  // NOTE: four consecutive passes settle a game that is played or replayed, but the restore counts
-  // the run instead, so that games standing at four passes in lila's database stay playable.
+  // NOTE: four consecutive passes settle a game that is played, but the restore counts the run
+  // instead, so that games standing at four passes in lila's database stay playable.
   private[go] def restoredPassCount(uciMoves: List[String]): Int =
     if (restoredSettlement(uciMoves)) 0
     else uciMoves.reverseIterator.takeWhile(Uci.Pass.passR.matches).size
