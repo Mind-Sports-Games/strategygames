@@ -60,6 +60,8 @@ object FullOpeningDB {
         .map(
           FullOpening.Dameo.apply
         )
+    // entropy has no opening book
+    case (GameLogic.Entropy(), _)                          => None
     case _                                                 => sys.error("Mismatched gamelogic types full opening db")
   }
 
@@ -102,6 +104,8 @@ object FullOpeningDB {
         strategygames.dameo.opening.FullOpeningDB
           .search(actionStrs)
           .map(fo => FullOpening.AtPly(FullOpening.Dameo(fo.opening), fo.ply))
+      // entropy has no opening book
+      case GameLogic.Entropy()      => None
     }
 
   private def draughtsFENs(fens: Vector[FEN]): Vector[strategygames.draughts.format.FEN] =
@@ -231,6 +235,7 @@ object FullOpeningDB {
           dameoFENs(fens)
         )
         .map(FullOpening.Dameo.apply)
+    case GameLogic.Entropy()      => None
   }
 
 }

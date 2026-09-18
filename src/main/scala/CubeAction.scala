@@ -51,6 +51,7 @@ object CubeAction {
     def toBackgammon   = c
     def toAbalone      = sys.error("Can't make an abalone cubeaction from a backgammon cubeaction")
     def toDameo        = sys.error("Can't make a dameo cubeaction from a backgammon cubeaction")
+    def toEntropy      = sys.error("Can't make an entropy cubeaction from a backgammon cubeaction")
 
   }
 
@@ -85,6 +86,7 @@ object CubeInteraction {
     def toBackgammon   = c
     def toAbalone      = sys.error("Can't make an abalone cubeinteraction from a backgammon cubeinteraction")
     def toDameo        = sys.error("Can't make a dameo cubeinteraction from a backgammon cubeinteraction")
+    def toEntropy      = sys.error("Can't make an entropy cubeinteraction from a backgammon cubeinteraction")
 
   }
 

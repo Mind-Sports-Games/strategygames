@@ -11,6 +11,7 @@ import strategygames.go.format.pgn.{ Reader => GoReader }
 import strategygames.backgammon.format.pgn.{ Reader => BackgammonReader }
 import strategygames.abalone.format.pgn.{ Reader => AbaloneReader }
 import strategygames.dameo.format.pdn.{ Reader => DameoReader }
+import strategygames.entropy.format.pgn.{ Reader => EntropyReader }
 
 import cats.data.Validated
 
@@ -103,6 +104,15 @@ object Reader {
       def valid          = Validated.invalid(failure)
       def evenIncomplete = Replay.Dameo(replay)
     }
+    case class EntropyComplete(replay: entropy.Replay)                              extends Result {
+      private def r      = Replay.Entropy(replay)
+      def valid          = Validated.valid(r)
+      def evenIncomplete = r
+    }
+    case class EntropyIncomplete(replay: entropy.Replay, failure: String)           extends Result {
+      def valid          = Validated.invalid(failure)
+      def evenIncomplete = Replay.Entropy(replay)
+    }
 
     def wrap(result: ChessReader.Result) = result match {
       case ChessReader.Result.Complete(replay)            => Result.ChessComplete(replay)
@@ -151,6 +161,11 @@ object Reader {
       case DameoReader.Result.Incomplete(replay, failure) => Result.DameoIncomplete(replay, failure)
     }
 
+    def wrap(result: EntropyReader.Result) = result match {
+      case EntropyReader.Result.Complete(replay)            => Result.EntropyComplete(replay)
+      case EntropyReader.Result.Incomplete(replay, failure) => Result.EntropyIncomplete(replay, failure)
+    }
+
   }
 
   def fullWithSans(
@@ -170,6 +185,8 @@ object Reader {
       case GameLogic.Backgammon()   => BackgammonReader.fullWithSans(pgn, op, tags).map(Result.wrap)
       case GameLogic.Abalone()      => AbaloneReader.fullWithSans(pgn, op, tags).map(Result.wrap)
       case GameLogic.Dameo()        => DameoReader.fullWithSans(pgn, op, tags, iteratedCapts).map(Result.wrap)
+      case GameLogic.Entropy()      =>
+        sys.error("PGN parsing not implemented for entropy. Use replayResultFromActionStrs")
     }
 
   // TODO Merge the following two functions by refactoring Sans and integrating to other libs
@@ -201,6 +218,8 @@ object Reader {
         sys.error("Sans not implemented for abalone")
       case GameLogic.Dameo()        =>
         sys.error("Sans not implemented for dameo")
+      case GameLogic.Entropy()      =>
+        sys.error("Sans not implemented for entropy")
     }
 
   def replayResultFromActionStrs(
@@ -232,6 +251,8 @@ object Reader {
         AbaloneReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
       case GameLogic.Dameo()        =>
         DameoReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
+      case GameLogic.Entropy()      =>
+        EntropyReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
     }
 
 }

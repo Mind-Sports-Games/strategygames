@@ -47,6 +47,7 @@ object EndTurn {
     def toBackgammon   = et
     def toAbalone      = sys.error("Can't make an abalone endturn from a backgammon endturn")
     def toDameo        = sys.error("Can't make a dameo endturn from a backgammon endturn")
+    def toEntropy      = sys.error("Can't make an entropy endturn from a backgammon endturn")
 
   }
 
