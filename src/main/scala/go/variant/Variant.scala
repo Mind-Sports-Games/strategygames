@@ -95,7 +95,7 @@ abstract class Variant private[variant] (
     else boardSize.validPos.filter(isPlayable(situation, _))
 
   private def isPlayable(situation: Situation, point: Pos): Boolean =
-    !situation.board.pieces.contains(point) &&
+    situation.board.stoneGrid(point.index) == Board.emptyPoint &&
       !situation.board.ko.contains(point) &&
       Chain
         .capturesUnlessSuicide(situation.board, situation.player, point)
