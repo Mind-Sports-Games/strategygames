@@ -165,8 +165,28 @@ object Forsyth {
 
   def boardPart(board: Board): String = s"${boardRows(board.variant, board.pieces)}${pocket}"
 
-  def boardRows(variant: Variant, pieces: PieceMap): String =
-    ranksTopDown(variant).map(renderedRank(variant, pieces, _)).mkString("/")
+  def boardRows(variant: Variant, pieces: PieceMap): String = {
+    val rows = new java.lang.StringBuilder
+    var rank = variant.boardSize.height - 1
+    while (rank >= 0) {
+      var emptyRun = 0
+      var file     = 0
+      while (file < variant.boardSize.width) {
+        Pos.at(file, rank).flatMap(pieces.get) match {
+          case Some(stone) =>
+            if (emptyRun > 0) rows.append(emptyRun)
+            rows.append(symbolOf(stone))
+            emptyRun = 0
+          case None        => emptyRun += 1
+        }
+        file += 1
+      }
+      if (emptyRun > 0) rows.append(emptyRun)
+      if (rank > 0) rows.append('/')
+      rank -= 1
+    }
+    rows.toString
+  }
 
   def removeDeadStones(variant: Variant, fen: FEN, squares: List[Pos]): FEN = {
     val rows          = boardRows(variant, fen.pieces -- squares.toSet)
@@ -174,26 +194,8 @@ object Forsyth {
     FEN(if (pocketOnwards > 0) rows + fen.value.substring(pocketOnwards) else rows)
   }
 
-  private def ranksTopDown(variant: Variant): List[Int] =
-    (variant.boardSize.height - 1 to 0 by -1).toList
-
-  private def renderedRank(variant: Variant, pieces: PieceMap, rankIndex: Int): String = {
-    val (rendered, trailingEmpties) =
-      (0 until variant.boardSize.width).foldLeft((List.empty[String], 0)) {
-        case ((rendered, emptyRun), fileIndex) =>
-          Pos.at(fileIndex, rankIndex).flatMap(pieces.get) match {
-            case Some(stone) => (symbolOf(stone) :: emptiesBefore(rendered, emptyRun), 0)
-            case None        => (rendered, emptyRun + 1)
-          }
-      }
-    emptiesBefore(rendered, trailingEmpties).reverse.mkString
-  }
-
-  private def emptiesBefore(rendered: List[String], emptyRun: Int): List[String] =
-    if (emptyRun > 0) emptyRun.toString :: rendered else rendered
-
-  private def symbolOf(stone: Piece): String =
-    stone.player.fold(stone.forsyth.toUpper, stone.forsyth).toString
+  private def symbolOf(stone: Piece): Char =
+    stone.player.fold(stone.forsyth.toUpper, stone.forsyth)
 
   private def komiTenths(board: Board): Int = Math.round(board.komi * 10).toInt
 
