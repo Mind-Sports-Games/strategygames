@@ -21,20 +21,34 @@ object Chain {
 
   def capturedBy(board: Board, player: Player, emptyPoint: Pos): Set[Pos] = {
     requireVacant(board, emptyPoint)
-    new Walk(board).capturedBy(player, emptyPoint.index)
+    if (touches(board, emptyPoint, Board.stoneCode(!player)))
+      new Walk(board).capturedBy(player, emptyPoint.index)
+    else Set.empty
   }
 
   // NOTE: capture and suicide are one question, because the captured stones come off the board
   // before the new stone's liberties are counted and are often what gives it a liberty at all.
   def capturesUnlessSuicide(board: Board, player: Player, emptyPoint: Pos): Option[Set[Pos]] = {
     requireVacant(board, emptyPoint)
-    val walk     = new Walk(board)
-    val captured = walk.capturedBy(player, emptyPoint.index)
-    Option.when(captured.nonEmpty || walk.placementHasLiberty(player, emptyPoint.index))(captured)
+    if (touches(board, emptyPoint, Board.emptyPoint) && !touches(board, emptyPoint, Board.stoneCode(!player)))
+      Some(Set.empty)
+    else {
+      val walk     = new Walk(board)
+      val captured = walk.capturedBy(player, emptyPoint.index)
+      Option.when(captured.nonEmpty || walk.placementHasLiberty(player, emptyPoint.index))(captured)
+    }
+  }
+
+  private def touches(board: Board, point: Pos, stone: Byte): Boolean = {
+    val stones = board.stoneGrid
+    val around = board.variant.boardSize.neighbourIndices(point.index)
+    var n      = 0
+    while (n < around.length && stones(around(n)) != stone) n += 1
+    n < around.length
   }
 
   private def requireVacant(board: Board, point: Pos): Unit =
-    require(!board.pieces.contains(point), s"a stone already stands on ${point.key}")
+    require(board.stoneGrid(point.index) == Board.emptyPoint, s"a stone already stands on ${point.key}")
 
   private def stonesOf(board: Board): Stones =
     Stones(board.pieces, board.variant.boardSize)
