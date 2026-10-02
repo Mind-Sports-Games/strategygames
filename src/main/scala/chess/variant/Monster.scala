@@ -105,39 +105,37 @@ case object Monster
   ): Boolean = {
     player match {
       case P1 if board.history.currentTurn.isEmpty => {
-        super.kingThreatened(board, player, to, filter) || Situation(
-          (if (validatingCheck)
-             // when validating check, we have to wipe history's lastTurn because we are
-             // now looking a turn ahead and so lastTurn is technically two turns ago,
-             // with an unspecified turn as the lastTurn from p2 and now we need to see
-             // if p2 king is threatened from capture in one move after the first move
-             // of p1's next turn
-             board.updateHistory { h => h.copy(lastTurn = List.empty) }
-           else board),
-          P1
-        ).moves.values.flatten
-          .map(nextMove =>
-            super.kingThreatened(nextMove.after, player, to, _ => true) ||
-              (if (nextMove.promotion.nonEmpty)
-                 super.kingThreatened(
-                   nextMove.after.copy(
-                     pieces = nextMove.after.pieces + (nextMove.dest -> Piece(
-                       nextMove.player,
-                       Knight
-                     ))
-                   ),
-                   player,
-                   to,
-                   _ => true
-                 )
-               else false)
-          )
-          .toList
-          .contains(true)
+        super.kingThreatened(board, player, to, filter) || {
+          // when validating check, we have to wipe history's lastTurn because we are
+          // now looking a turn ahead and so lastTurn is technically two turns ago,
+          // with an unspecified turn as the lastTurn from p2 and now we need to see
+          // if p2 king is threatened from capture in one move after the first move
+          // of p1's next turn
+          val firstMoveBoard =
+            if (validatingCheck) board.updateHistory { h => h.copy(lastTurn = List.empty) }
+            else board
+          Situation(firstMoveBoard, P1).actors.exists { actor =>
+            actor.trustedMoves(allowsCastling).exists { nextMove =>
+              threatenedAfter(nextMove, player, to) && actor.keepsKingSafe(nextMove)
+            }
+          }
+        }
       }
       case _                                       => super.kingThreatened(board, player, to, filter)
     }
   }
+
+  private def threatenedAfter(nextMove: Move, player: Player, to: Pos): Boolean =
+    super.kingThreatened(nextMove.after, player, to, _ => true) ||
+      (nextMove.promotion.nonEmpty &&
+        super.kingThreatened(
+          nextMove.after.copy(
+            pieces = nextMove.after.pieces + (nextMove.dest -> Piece(nextMove.player, Knight))
+          ),
+          player,
+          to,
+          _ => true
+        ))
 
   // For Monster we report squares which might be enpassantable
   // But we stop before actual move generation as that causes an infinite loop
