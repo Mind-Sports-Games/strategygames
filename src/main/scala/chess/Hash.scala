@@ -45,8 +45,8 @@ object Hash {
   private def pieceIndex(piece: Piece) =
     piece.role.hashInt * 2 + piece.player.fold(1, 0)
 
-  private def actorIndex(actor: Actor) =
-    Pos.allSize * pieceIndex(actor.piece) + actor.pos.hashCode
+  private def actorIndex(pos: Pos, piece: Piece) =
+    Pos.allSize * pieceIndex(piece) + pos.hashCode
 
   def get(situation: Situation, table: ZobristConstants): Long = {
 
@@ -61,11 +61,9 @@ object Hash {
     val board = situation.board
     val hturn = situation.player.fold(table.p1TurnMask, 0L)
 
-    val hactors = board.actors.values.view
-      .map {
-        table.actorMasks compose actorIndex _
-      }
-      .fold(hturn)(_ ^ _)
+    val hactors = board.pieces.foldLeft(hturn) { case (h, (pos, piece)) =>
+      h ^ table.actorMasks(actorIndex(pos, piece))
+    }
 
     val hcastling =
       if (board.variant.allowsCastling)
