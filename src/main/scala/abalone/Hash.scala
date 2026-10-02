@@ -45,10 +45,11 @@ object Hash {
       case _ => 0L
     }
     val hturn  = situation.player.fold(table.p1TurnMask, 0L)
+    val posNb  = situation.board.variant.boardType.posNb
 
-    situation.board.actors.values.view
-      .map(a => table.actorMasks(actorIndex(situation, a)))
-      .fold(phturn ^ hturn)(_ ^ _)
+    situation.board.pieces.foldLeft(phturn ^ hturn) { case (hash, (pos, piece)) =>
+      hash ^ table.actorMasks(posNb * piece.player.fold(1, 0) + pos.hashIndex)
+    }
   }
 
   private val h = new Hash(size)
