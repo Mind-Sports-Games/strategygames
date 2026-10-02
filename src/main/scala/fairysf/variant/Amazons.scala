@@ -191,6 +191,18 @@ case object Amazons
       .sorted
       .map(squareAt)
 
+  private def hasLegalMove(situation: Situation): Boolean =
+    situation.board.history.lastAction match {
+      case Some(_: Uci.Move) => true
+      case _                 =>
+        val occupied = occupancy(situation.board)
+        queensToMove(situation).exists(queen =>
+          queenDirections.exists { case (dx, dy) =>
+            isEmptySquare(occupied, queen.file.index + dx, queen.rank.index + dy)
+          }
+        )
+    }
+
   override def validMoves(situation: Situation): Map[Pos, List[Move]] =
     situation.board.history.lastAction match {
       case Some(_: Uci.Move) => Map.empty
@@ -248,8 +260,13 @@ case object Amazons
   override def valid(board: Board, strict: Boolean): Boolean =
     Api.validateFEN(fishnetKey, board.apiPosition.fen.value)
 
+  override def gameEnd(situation: Situation): Boolean =
+    !hasLegalMove(situation) && situation.board.apiPosition.gameEnd
+
+  override def isInsufficientMaterial(board: Board): Boolean = false
+
   override def staleMate(situation: Situation): Boolean     = false
-  override def specialEnd(situation: Situation): Boolean    = situation.board.apiPosition.legalMoveCount == 0
+  override def specialEnd(situation: Situation): Boolean    = !hasLegalMove(situation)
   override def winner(situation: Situation): Option[Player] =
     if (specialEnd(situation)) Option(!situation.player)
     else None
