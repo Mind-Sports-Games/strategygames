@@ -119,7 +119,7 @@ case object ScrambledEggs
     } else None
   }
 
-  override def staleMate(situation: Situation): Boolean = !situation.variantEnd && situation.moves.isEmpty
+  override def staleMate(situation: Situation): Boolean = !situation.variantEnd && !situation.hasMoves
 
   override def specialDraw(situation: Situation) =
     winForPlayer(P2, situation.board) && winForPlayer(P1, situation.board)
