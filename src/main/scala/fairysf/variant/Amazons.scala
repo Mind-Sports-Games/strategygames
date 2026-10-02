@@ -249,7 +249,7 @@ case object Amazons
             after = situation.board.copy(
               pieces = situation.board.pieces + ((dest, piece)),
               uciMoves = situation.board.uciMoves :+ uciMove,
-              position = situation.board.apiPosition.makeMoves(List(uciMove)).some
+              position = situation.board.apiPosition.makeMovesWhenNeeded(List(uciMove)).some
             ),
             autoEndTurn = true
           )

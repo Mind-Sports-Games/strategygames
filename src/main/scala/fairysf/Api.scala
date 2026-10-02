@@ -41,6 +41,11 @@ object Api {
     val variant: Variant
 
     def makeMoves(movesList: List[String]): Position
+
+    def makeMovesWhenNeeded(movesList: List[String]): Position =
+      if (movesList.isEmpty) this
+      else new PositionAfterMoves(this, movesList)
+
     lazy val fen: FEN
     lazy val givesCheck: Boolean
     lazy val isImmediateGameEnd: (Boolean, GameResult)
@@ -61,6 +66,41 @@ object Api {
     lazy val gameEnd: Boolean
     lazy val legalMoves: Array[String]
     lazy val legalMoveCount: Int
+  }
+
+  private class PositionAfterMoves(private var before: Position, movesList: List[String]) extends Position {
+    val variant = before.variant
+
+    private lazy val after: Position = {
+      val position = before.makeMoves(movesList)
+      before = null
+      position
+    }
+
+    def makeMoves(movesList: List[String]): Position =
+      if (movesList.isEmpty) this
+      else after.makeMoves(movesList)
+
+    lazy val fen: FEN                                  = after.fen
+    lazy val givesCheck: Boolean                       = after.givesCheck
+    lazy val isImmediateGameEnd: (Boolean, GameResult) = after.isImmediateGameEnd
+    lazy val immediateGameEnd: Boolean                 = after.immediateGameEnd
+    lazy val optionalGameEnd: Boolean                  = after.optionalGameEnd
+    lazy val insufficientMaterial: (Boolean, Boolean)  = after.insufficientMaterial
+
+    def isDraw(ply: Int): Boolean       = after.isDraw(ply)
+    def hasGameCycle(ply: Int): Boolean = after.hasGameCycle(ply)
+    lazy val hasRepeated: Boolean       = after.hasRepeated
+
+    lazy val pieceMap: PieceMap             = after.pieceMap
+    lazy val piecesInHand: Array[Piece]     = after.piecesInHand
+    lazy val pocketData: Option[PocketData] = after.pocketData
+
+    lazy val optionalGameEndResult: GameResult = after.optionalGameEndResult
+    lazy val gameResult: GameResult            = after.gameResult
+    lazy val gameEnd: Boolean                  = after.gameEnd
+    lazy val legalMoves: Array[String]         = after.legalMoves
+    lazy val legalMoveCount: Int               = after.legalMoveCount
   }
 
   private class FairyPosition(position: FairyStockfish.Position) extends Position {
