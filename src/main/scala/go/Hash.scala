@@ -54,8 +54,16 @@ object Hash {
   def bytesOf(hash: Long): PositionHash =
     Array.tabulate(size)(i => (hash >>> ((size - 1 - i) * 8)).toByte)
 
-  def hashAt(hashes: PositionHash, position: Int): Long =
-    (0 until size).foldLeft(0L)((hash, i) => (hash << 8) | (hashes(position * size + i) & 0xffL))
+  def hashAt(hashes: PositionHash, position: Int): Long = {
+    val end  = (position + 1) * size
+    var i    = position * size
+    var hash = 0L
+    while (i < end) {
+      hash = (hash << 8) | (hashes(i) & 0xffL)
+      i += 1
+    }
+    hash
+  }
 
   def get(situation: Situation, table: ZobristConstants): Long = {
 
