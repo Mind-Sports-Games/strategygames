@@ -17,8 +17,8 @@ case class Board(
   def apply(at: Pos): Option[Piece] = pieces get at
   def apply(file: File, rank: Rank) = pieces get Pos(file, rank)
 
-  lazy val actors: Map[Pos, Actor] = pieces map { case (pos, piece) =>
-    (pos, Actor(piece, pos, this))
+  lazy val actors: Map[Pos, Actor] = pieces transform { (pos, piece) =>
+    Actor(piece, pos, this)
   }
 
   lazy val actorsOf: Player.Map[Seq[Actor]] = {
