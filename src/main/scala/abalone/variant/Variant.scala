@@ -336,11 +336,18 @@ abstract class Variant private[variant] (
   def winningScore = 6
 
   def winner(situation: Situation): Option[Player] = {
-    if (situation.moves.values.forall(_.isEmpty)) Some(!situation.player)
+    if (!hasMoves(situation)) Some(!situation.player)
     else if (situation.board.history.score.p1 >= winningScore) Some(P1)
     else if (situation.board.history.score.p2 >= winningScore) Some(P2)
     else None
   }
+
+  private def hasMoves(situation: Situation): Boolean =
+    situation.board.pieces.exists { case (a, piece) =>
+      isUsable(situation, piece) && boardType.norm.neighVectorList.exists(vect =>
+        canJumpTo(situation, a + vect)
+      )
+    } || situation.moves.values.exists(_.nonEmpty)
 
   def specialEnd(situation: Situation) = winner(situation).isDefined
 
