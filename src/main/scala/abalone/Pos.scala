@@ -38,7 +38,10 @@ case class Pos(x: Int, y: Int) extends AnyRef {
 
   def index: Int = Piotr.posToIndex(this)
 
-  def hashIndex: Int = Piotr.posToHashIndex(this)
+  def hashIndex: Int = {
+    val i = if (x < y) y * y + x else x * x + 2 * x - y
+    if (x >= 0 && y >= 0 && i < Piotr.piotrs.length) i else Piotr.posToHashIndex(this)
+  }
 
   def piotr: Char = Piotr.posToPiotr(this)
 
