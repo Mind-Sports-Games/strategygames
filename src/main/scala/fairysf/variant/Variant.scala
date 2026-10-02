@@ -214,6 +214,8 @@ abstract class Variant private[variant] (
       }
     }
 
+  def gameEnd(situation: Situation): Boolean = situation.board.apiPosition.gameEnd
+
   /** Returns true if neither player can win. The game should end immediately.
     */
   def isInsufficientMaterial(board: Board) =
