@@ -163,7 +163,10 @@ case class Board(
       this
     ) || history.fivefoldRepetition
 
-  def situationOf(player: Player) = Situation(this, player)
+  def situationOf(player: Player): Situation = player.fold(situationP1, situationP2)
+
+  private lazy val situationP1 = Situation(this, P1)
+  private lazy val situationP2 = Situation(this, P2)
 
   def visual = format.Visual >> this
 
