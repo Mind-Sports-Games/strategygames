@@ -30,18 +30,16 @@ case class Pos(x: Int, y: Int) extends AnyRef {
 
   //
   //
-  def key: String = (y match {
-    case _ if y >= 0 => ('a' + y).toChar.toString
-    case -1 => "0"
-    case _ => "-" + ('a' - y - 2).toChar.toString
-  }) + (x + 1).toString
+  def key: String =
+    if (hasTableIndex) Pos.keysByHashIndex(tableIndex) else Pos.keyOf(x, y)
 
   def index: Int = Piotr.posToIndex(this)
 
-  def hashIndex: Int = {
-    val i = if (x < y) y * y + x else x * x + 2 * x - y
-    if (x >= 0 && y >= 0 && i < Piotr.piotrs.length) i else Piotr.posToHashIndex(this)
-  }
+  def hashIndex: Int = if (hasTableIndex) tableIndex else Piotr.posToHashIndex(this)
+
+  private def tableIndex: Int = if (x < y) y * y + x else x * x + 2 * x - y
+
+  private def hasTableIndex: Boolean = x >= 0 && y >= 0 && tableIndex < Piotr.piotrs.length
 
   def piotr: Char = Piotr.posToPiotr(this)
 
@@ -75,6 +73,17 @@ case class Pos(x: Int, y: Int) extends AnyRef {
 }
 
 object Pos {
+  private def keyOf(x: Int, y: Int): String = (y match {
+    case _ if y >= 0 => ('a' + y).toChar.toString
+    case -1 => "0"
+    case _ => "-" + ('a' - y - 2).toChar.toString
+  }) + (x + 1).toString
+
+  private val keysByHashIndex: Array[String] = Array.tabulate(Piotr.piotrs.length) { i =>
+    val a = Piotr.hashIndexToPos(i)
+    keyOf(a.x, a.y)
+  }
+
   private val sr3 = math.sqrt(3)
 
   def fromPoint(x: (Double, Double)): Pos = fromPoint(x._1, x._2)
