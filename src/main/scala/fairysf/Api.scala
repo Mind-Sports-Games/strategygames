@@ -147,12 +147,8 @@ object Api {
       if (variant.dropsVariant)
         PocketData(
           Pockets(
-            Pocket(
-              piecesInHand.filter(_.player == P1).toList.map(p => strategygames.Role.FairySFRole(p.role))
-            ),
-            Pocket(
-              piecesInHand.filter(_.player == P2).toList.map(p => strategygames.Role.FairySFRole(p.role))
-            )
+            Pocket(rolesInHandFromFairyFen(rawFen, variant, P1)),
+            Pocket(rolesInHandFromFairyFen(rawFen, variant, P2))
           ),
           // Can make an empty Set of Pos because we dont have to track promoted pieces
           // FairySF takes care of this for us
@@ -306,6 +302,23 @@ object Api {
       i += 1
     }
     pieceMap.toMap
+  }
+
+  private def rolesInHandFromFairyFen(
+      fairyFen: String,
+      variant: Variant,
+      player: Player
+  ): List[strategygames.Role] = {
+    val start = fairyFen.indexOf('[')
+    val end   = if (start < 0) -1 else fairyFen.indexOf(']', start)
+    if (end < 0) Nil
+    else
+      fairyFen
+        .substring(start + 1, end)
+        .toList
+        .filter(c => c.isLetter && c.isUpper == (player == P1))
+        .reverse
+        .map(c => strategygames.Role.FairySFRole(rolesByForsyth(variant.gameFamily)(c.toUpper)))
   }
 
   private def wallPiece(gf: GameFamily): Option[Piece] = gf match {
