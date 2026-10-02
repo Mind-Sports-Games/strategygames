@@ -217,7 +217,7 @@ abstract class Variant private[variant] (
     val stonesAfterPlacing =
       situation.board.withPieces(situation.board.pieces -- captured + (pos -> stone))
     stonesAfterPlacing.stonePlaced
-      .withKo(koPointAfter(stonesAfterPlacing, pos, captured))
+      .withKo(koPointAfter(situation, pos, captured))
       .withHistory(
         situation.history
           .copy(
@@ -230,11 +230,13 @@ abstract class Variant private[variant] (
 
   // NOTE: a game resumed from a fen has a position history that begins there, so simple ko is
   // enforced in its own right and its coordinate travels in the fen.
-  private def koPointAfter(placed: Board, at: Pos, captured: Set[Pos]): Option[Pos] = {
-    val placedChain = Chain.at(placed, at)
-    Option.when(
-      captured.size == 1 && placedChain.size == 1 && Chain.liberties(placed, placedChain).size == 1
-    )(captured.head)
+  private def koPointAfter(before: Situation, at: Pos, captured: Set[Pos]): Option[Pos] =
+    Option.when(captured.size == 1 && surroundedByOpponent(before, at))(captured.head)
+
+  private def surroundedByOpponent(before: Situation, at: Pos): Boolean = {
+    val stones   = before.board.stoneGrid
+    val opponent = Board.stoneCode(!before.player)
+    before.board.variant.boardSize.neighbourIndices(at.index).forall(stones(_) == opponent)
   }
 
   private def hashAfterPlacing(
