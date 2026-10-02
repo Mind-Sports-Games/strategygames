@@ -42,7 +42,7 @@ sealed abstract class BoardType(
 }
 
 object BoardType {
-  val all: List[BoardType] = List(Hex5, Hex6)
+  lazy val all: List[BoardType] = List(Hex5, Hex6)
 }
 
 /** A Hexagon of side n fits in a square of side 2n - 1 */
