@@ -22,7 +22,7 @@ case class Move(
   def playerAfter = if (autoEndTurn) !piece.player else piece.player
 
   def situationAfter =
-    Situation(finalizeAfter, playerAfter)
+    finalizeAfter situationOf playerAfter
 
   def withHistory(h: History) = copy(after = after withHistory h)
 
