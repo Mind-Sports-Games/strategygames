@@ -135,13 +135,8 @@ case class Board(
         val bkReady                                                     = bkPos.fold(false)(_.rank == Rank.Eighth)
         def rookReady(player: Player, kPos: Option[Pos], left: Boolean) =
           kPos.fold(false) { kp =>
-            actorsOf(player) exists { a =>
-              a.piece.is(
-                Rook
-              ) && a.pos ?- kp && (left ^ (a.pos ?> kp)) && history.unmovedRooks
-                .pos(
-                  a.pos
-                )
+            history.unmovedRooks.pos exists { pos =>
+              pos ?- kp && (left ^ (pos ?> kp)) && apply(pos).contains(Piece(player, Rook))
             }
           }
         Castles(
