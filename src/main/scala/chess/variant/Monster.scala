@@ -114,7 +114,7 @@ case object Monster
           val firstMoveBoard =
             if (validatingCheck) board.updateHistory { h => h.copy(lastTurn = List.empty) }
             else board
-          Situation(firstMoveBoard, P1).actors.exists { actor =>
+          firstMoveBoard.situationOf(P1).actors.exists { actor =>
             actor.trustedMoves(allowsCastling).exists { nextMove =>
               threatenedAfter(nextMove, player, to) && actor.keepsKingSafe(nextMove)
             }
