@@ -228,8 +228,6 @@ object Board {
       table
     }
 
-    private[go] val validIndices: Array[Int] = validPos.map(_.index).toArray
-
     private[go] val neighbourIndices: Array[Array[Int]] = neighbours.map(_.map(_.index).toArray)
 
     def onBoard(pos: Pos): Boolean = pos.file.index < width && pos.rank.index < height

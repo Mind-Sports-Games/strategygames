@@ -258,66 +258,95 @@ abstract class Variant private[variant] (
   // other game logic's `Score` is a plain count.
   // TODO(lila): score in points here and scale at the fen boundary, once lila reads the unit it wants.
   def areaScore(board: Board): Score = {
-    val stones   = board.stoneGrid
-    var p1Area   = 0
-    var p2Area   = 0
-    var i        = 0
-    while (i < stones.length) {
-      if (stones(i) == Board.p1Stone) p1Area += 1
-      else if (stones(i) == Board.p2Stone) p2Area += 1
-      i += 1
+    val width    = board.variant.boardSize.width
+    val height   = board.variant.boardSize.height
+    val p1Rows   = new Array[Int](height)
+    val p2Rows   = new Array[Int](height)
+    var p1Stones = 0
+    var p2Stones = 0
+    board.pieces.foreachEntry { (pos, piece) =>
+      val onBoard = pos.file.index < width && pos.rank.index < height
+      if (piece.player == P1) {
+        p1Stones += 1
+        if (onBoard) p1Rows(pos.rank.index) |= 1 << pos.file.index
+      } else {
+        p2Stones += 1
+        if (onBoard) p2Rows(pos.rank.index) |= 1 << pos.file.index
+      }
     }
-    val enclosed = enclosedAreaByPlayer(board)
+    val enclosed = enclosedAreaByPlayer(width, p1Rows, p2Rows)
 
     Score(
-      (p1Area + enclosed.p1) * 10,
-      (p2Area + enclosed.p2) * 10 + Math.round(board.komi * 10).toInt
+      (p1Stones + enclosed.p1) * 10,
+      (p2Stones + enclosed.p2) * 10 + Math.round(board.komi * 10).toInt
     )
   }
 
-  private def enclosedAreaByPlayer(board: Board): Score = {
-    val stones     = board.stoneGrid
-    val boardSize  = board.variant.boardSize
-    val neighbours = boardSize.neighbourIndices
-    val points     = boardSize.validIndices
-    val reached    = new Array[Boolean](Pos.allSize)
-    val pending    = new Array[Int](Pos.allSize)
+  private def enclosedAreaByPlayer(width: Int, p1Rows: Array[Int], p2Rows: Array[Int]): Score = {
+    val height     = p1Rows.length
+    val wholeRow   = (1 << width) - 1
+    val maxRuns    = height * ((width + 1) / 2)
+    val parent     = new Array[Int](maxRuns)
+    val runSize    = new Array[Int](maxRuns)
+    val bordering  = new Array[Int](maxRuns)
+    val runPoints  = new Array[Int](maxRuns)
+    var runs       = 0
+    var rowBelow   = 0
+    var rowBelowTo = 0
+    var rank       = 0
+    while (rank < height) {
+      val p1Around  = rowsTouching(p1Rows, rank)
+      val p2Around  = rowsTouching(p2Rows, rank)
+      var empty     = wholeRow & ~(p1Rows(rank) | p2Rows(rank))
+      val rowStarts = runs
+      while (empty != 0) {
+        val run   = empty & ~(empty + (empty & -empty))
+        empty &= ~run
+        val sides = ((run << 1) | (run >>> 1)) & wholeRow
+        val id    = runs
+        runs += 1
+        parent(id) = id
+        runSize(id) = Integer.bitCount(run)
+        bordering(id) = (if (((p1Rows(rank) & sides) | (p1Around & run)) != 0) Board.p1Stone else 0) |
+          (if (((p2Rows(rank) & sides) | (p2Around & run)) != 0) Board.p2Stone else 0)
+        runPoints(id) = run
+        var below = rowBelow
+        while (below < rowBelowTo) {
+          if ((runPoints(below) & run) != 0) {
+            val kept   = rootOf(parent, below)
+            val merged = rootOf(parent, id)
+            if (kept != merged) {
+              parent(merged) = kept
+              runSize(kept) += runSize(merged)
+              bordering(kept) |= bordering(merged)
+            }
+          }
+          below += 1
+        }
+      }
+      rowBelow = rowStarts
+      rowBelowTo = runs
+      rank += 1
+    }
     var p1Area     = 0
     var p2Area     = 0
-    var i          = 0
-    while (i < points.length) {
-      val origin = points(i)
-      if (stones(origin) == Board.emptyPoint && !reached(origin)) {
-        reached(origin) = true
-        pending(0) = origin
-        var pendingCount = 1
-        var regionSize   = 0
-        var bordering    = 0
-        while (pendingCount > 0) {
-          pendingCount -= 1
-          val point  = pending(pendingCount)
-          regionSize += 1
-          val around = neighbours(point)
-          var n      = 0
-          while (n < around.length) {
-            val neighbour = around(n)
-            val stone     = stones(neighbour)
-            if (stone != Board.emptyPoint) bordering |= stone
-            else if (!reached(neighbour)) {
-              reached(neighbour) = true
-              pending(pendingCount) = neighbour
-              pendingCount += 1
-            }
-            n += 1
-          }
-        }
-        if (bordering == Board.p1Stone) p1Area += regionSize
-        else if (bordering == Board.p2Stone) p2Area += regionSize
+    var id         = 0
+    while (id < runs) {
+      if (parent(id) == id) {
+        if (bordering(id) == Board.p1Stone) p1Area += runSize(id)
+        else if (bordering(id) == Board.p2Stone) p2Area += runSize(id)
       }
-      i += 1
+      id += 1
     }
     Score(p1Area, p2Area)
   }
+
+  private def rowsTouching(rows: Array[Int], rank: Int): Int =
+    (if (rank > 0) rows(rank - 1) else 0) | (if (rank + 1 < rows.length) rows(rank + 1) else 0)
+
+  @annotation.tailrec
+  private def rootOf(parent: Array[Int], run: Int): Int =
+    if (parent(run) == run) run else rootOf(parent, parent(run))
 
   def materialImbalance(board: Board): Int =
     board.pieces.values.foldLeft(0) { case (acc, Piece(player, role)) =>
