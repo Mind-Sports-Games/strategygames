@@ -160,7 +160,7 @@ case class Pos private (index: Int) extends AnyVal {
 
   def sgf(numRanks: Int) = file.sgfChar.toString + rank.sgfChar(numRanks).toString
 
-  def key               = file.toString + rank.toString
+  def key               = Pos.keysByIndex(index)
   override def toString = key
 }
 
@@ -307,6 +307,8 @@ object Pos {
   // if adding new Pos check for use of Pos.all
   val all: List[Pos] = (0 to (File.allSize * Rank.allSize) - 1).map(new Pos(_)).toList
   val allSize: Int   = all.size
+
+  private val keysByIndex: Array[String] = all.map(pos => pos.file.toString + pos.rank.toString).toArray
 
   val allKeys: Map[String, Pos] = all
     .map { pos =>
