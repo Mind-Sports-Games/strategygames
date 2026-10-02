@@ -102,7 +102,7 @@ case object Crazyhouse
           possibleDrops(situation).fold {
             // calc drops not in check
             val emptySpaces: List[Pos] =
-              Pos.all.filterNot(p => situation.board.pieces.map(_._1).toList.contains(p))
+              Pos.all.filterNot(situation.board.pieces.contains)
             accountForPawnDrops(roles, emptySpaces).some
           } { squares =>
             if (squares.nonEmpty) accountForPawnDrops(roles, squares).some
