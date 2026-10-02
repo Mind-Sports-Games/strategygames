@@ -256,45 +256,66 @@ abstract class Variant private[variant] (
   // other game logic's `Score` is a plain count.
   // TODO(lila): score in points here and scale at the fen boundary, once lila reads the unit it wants.
   def areaScore(board: Board): Score = {
-    val enclosedArea = enclosedAreaByPlayer(board)
-
-    def areaOf(player: Player): Int =
-      board.playerPiecesOnBoardCount(player) + enclosedArea.getOrElse(player, 0)
-
-    def fenTenthsOf(player: Player): Int = areaOf(player) * 10
+    val stones   = board.stoneGrid
+    var p1Area   = 0
+    var p2Area   = 0
+    var i        = 0
+    while (i < stones.length) {
+      if (stones(i) == Board.p1Stone) p1Area += 1
+      else if (stones(i) == Board.p2Stone) p2Area += 1
+      i += 1
+    }
+    val enclosed = enclosedAreaByPlayer(board)
 
     Score(
-      fenTenthsOf(P1),
-      fenTenthsOf(P2) + Math.round(board.komi * 10).toInt
+      (p1Area + enclosed.p1) * 10,
+      (p2Area + enclosed.p2) * 10 + Math.round(board.komi * 10).toInt
     )
   }
 
-  private def enclosedAreaByPlayer(board: Board): Map[Player, Int] =
-    emptyRegionsOf(board)
-      .flatMap(region => soleBorderingPlayer(board, region).map((_, region.size)))
-      .groupMapReduce(_._1)(_._2)(_ + _)
-
-  private def emptyRegionsOf(board: Board): List[Set[Pos]] = {
-    val isEmpty = (pos: Pos) => !board.pieces.contains(pos)
-    board.variant.boardSize.validPos
-      .filter(isEmpty)
-      .foldLeft((List.empty[Set[Pos]], Set.empty[Pos])) { case ((regions, alreadyInARegion), point) =>
-        if (alreadyInARegion(point)) (regions, alreadyInARegion)
-        else {
-          val region = Chain.regionFrom(board, point)(isEmpty)
-          (region :: regions, alreadyInARegion ++ region)
+  private def enclosedAreaByPlayer(board: Board): Score = {
+    val stones     = board.stoneGrid
+    val boardSize  = board.variant.boardSize
+    val neighbours = boardSize.neighbourIndices
+    val points     = boardSize.validIndices
+    val reached    = new Array[Boolean](Pos.allSize)
+    val pending    = new Array[Int](Pos.allSize)
+    var p1Area     = 0
+    var p2Area     = 0
+    var i          = 0
+    while (i < points.length) {
+      val origin = points(i)
+      if (stones(origin) == Board.emptyPoint && !reached(origin)) {
+        reached(origin) = true
+        pending(0) = origin
+        var pendingCount = 1
+        var regionSize   = 0
+        var bordering    = 0
+        while (pendingCount > 0) {
+          pendingCount -= 1
+          val point  = pending(pendingCount)
+          regionSize += 1
+          val around = neighbours(point)
+          var n      = 0
+          while (n < around.length) {
+            val neighbour = around(n)
+            val stone     = stones(neighbour)
+            if (stone != Board.emptyPoint) bordering |= stone
+            else if (!reached(neighbour)) {
+              reached(neighbour) = true
+              pending(pendingCount) = neighbour
+              pendingCount += 1
+            }
+            n += 1
+          }
         }
+        if (bordering == Board.p1Stone) p1Area += regionSize
+        else if (bordering == Board.p2Stone) p2Area += regionSize
       }
-      ._1
+      i += 1
+    }
+    Score(p1Area, p2Area)
   }
-
-  private def soleBorderingPlayer(board: Board, region: Set[Pos]): Option[Player] = {
-    val bordering = region.flatMap(borderingPlayersAt(board, _))
-    Option.when(bordering.size == 1)(bordering.head)
-  }
-
-  private def borderingPlayersAt(board: Board, point: Pos): List[Player] =
-    board.variant.boardSize.neighbours(point.index).flatMap(board.pieces.get).map(_.player)
 
   def materialImbalance(board: Board): Int =
     board.pieces.values.foldLeft(0) { case (acc, Piece(player, role)) =>
