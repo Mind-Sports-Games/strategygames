@@ -107,7 +107,7 @@ case class Situation(board: Board, player: Player) {
     if (enPassantSquares.nonEmpty) Some(enPassantSquares.map(_.toString).mkString(","))
     else None
 
-  def lastActionOfTurn: Boolean = board.variant.lastActionOfTurn(this)
+  lazy val lastActionOfTurn: Boolean = board.variant.lastActionOfTurn(this)
 
   def unary_! = copy(player = !player)
 }
