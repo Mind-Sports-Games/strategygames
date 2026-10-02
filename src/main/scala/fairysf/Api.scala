@@ -103,17 +103,17 @@ object Api {
     lazy val legalMoveCount: Int               = after.legalMoveCount
   }
 
-  private class FairyPosition(position: FairyStockfish.Position) extends Position {
+  private class FairyPosition(position: FairyStockfish.Position, val variant: Variant) extends Position {
     // TODO: yes, this is an abuse of scala. We could get an
     //       exception here, but I'm not sure how to work around that
     //       at the moment
     // NOTE: this means we can't use this API to test chess related things
     //       only the variants we support
-    val variant = Variant.byFishnetKey(position.variant())
+    def this(position: FairyStockfish.Position) = this(position, Variant.byFishnetKey(position.variant()))
 
     def makeMoves(movesList: List[String]): Position =
       if (movesList.isEmpty) this
-      else new FairyPosition(position.makeMoves(movesList))
+      else new FairyPosition(position.makeMoves(movesList), variant)
 
     private lazy val rawFen: String                    = position.getFEN()
     lazy val fen: FEN                                  = FEN(rawFen.replace("*", "p"))
