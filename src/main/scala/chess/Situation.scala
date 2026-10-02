@@ -13,6 +13,8 @@ case class Situation(board: Board, player: Player) {
 
   lazy val moves: Map[Pos, List[Move]] = board.variant.validMoves(this)
 
+  lazy val hasMoves: Boolean = board.variant.hasValidMoves(this)
+
   lazy val playerCanCapture: Boolean = moves exists (_._2 exists (_.captures))
 
   lazy val destinations: Map[Pos, List[Pos]] = moves.view.mapValues { _ map (_.dest) }.to(Map)

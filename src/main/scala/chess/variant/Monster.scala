@@ -82,7 +82,7 @@ case object Monster
       case P1 if lastActionOfTurn(m.situationBefore) =>
         oneMoveKingSafety(m, filter, kingPos)
       case P1                                        =>
-        m.situationAfter.moves.values.flatten.size > 0 || m.situationAfter.board.checkP2
+        m.situationAfter.hasMoves || m.situationAfter.board.checkP2
       case P2                                        =>
         super.kingSafety(m, filter, kingPos)
       // oneMoveKingSafety(
@@ -163,7 +163,7 @@ case object Monster
   override def checkmate(situation: Situation) =
     situation.check && !situation.board.check(
       !situation.player
-    ) && situation.moves.isEmpty
+    ) && !situation.hasMoves
 
   override def valid(board: Board, strict: Boolean) =
     validSide(board, strict)(P2) && {
