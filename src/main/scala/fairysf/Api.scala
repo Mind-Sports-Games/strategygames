@@ -113,7 +113,11 @@ object Api {
 
     def makeMoves(movesList: List[String]): Position =
       if (movesList.isEmpty) this
-      else new FairyPosition(position.makeMoves(movesList), variant)
+      else {
+        val moves = intoVector(movesList)
+        try new FairyPosition(position.makeMoves(moves), variant)
+        finally moves.deallocate()
+      }
 
     private lazy val rawFen: String                    = position.getFEN()
     lazy val fen: FEN                                  = FEN(rawFen.replace("*", "p"))
@@ -170,7 +174,11 @@ object Api {
       gameResult != GameResult.Ongoing() ||
         insufficientMaterial == ((true, true))
 
-    lazy val legalMoves: Array[String] = position.getLegalMoves()
+    lazy val legalMoves: Array[String] = {
+      val moves = position.getLegalMoves()
+      try intoArray(moves)
+      finally moves.deallocate()
+    }
 
     lazy val legalMoveCount: Int = {
       val moves = position.getLegalMoves()
@@ -242,7 +250,11 @@ object Api {
   }
 
   implicit def intoArray(vos: FairyStockfish.VectorOfStrings): Array[String] =
-    Array.tabulate(vos.size().toInt)(i => vos.get(i.toLong).getString())
+    Array.tabulate(vos.size().toInt) { i =>
+      val entry = vos.get(i.toLong)
+      try entry.getString()
+      finally entry.deallocate()
+    }
 
   private def pieceFromFSPiece(piece: FairyStockfish.Piece, gf: GameFamily): Piece =
     Piece(
