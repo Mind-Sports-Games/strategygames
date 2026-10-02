@@ -115,7 +115,8 @@ object Api {
       if (movesList.isEmpty) this
       else new FairyPosition(position.makeMoves(movesList))
 
-    lazy val fen: FEN                                  = FEN(position.getFEN().replace("*", "p"))
+    private lazy val rawFen: String                    = position.getFEN()
+    lazy val fen: FEN                                  = FEN(rawFen.replace("*", "p"))
     lazy val givesCheck: Boolean                       = position.givesCheck()
     lazy val isImmediateGameEnd: (Boolean, GameResult) = {
       val im = position.isImmediateGameEnd()
@@ -133,8 +134,7 @@ object Api {
     def hasGameCycle(ply: Int): Boolean = position.hasGameCycle(ply)
     lazy val hasRepeated: Boolean       = position.hasRepeated()
 
-    lazy val pieceMap: PieceMap =
-      convertPieceMap(position.piecesOnBoard(), position.wallsOnBoard(), variant.gameFamily)
+    lazy val pieceMap: PieceMap = pieceMapFromFairyFen(rawFen, variant)
 
     lazy val piecesInHand: Array[Piece] =
       vectorOfPiecesToPieceArray(position.piecesInHand(), variant.gameFamily)
@@ -254,33 +254,45 @@ object Api {
   def vectorOfPiecesToPieceArray(pieces: FairyStockfish.VectorOfPieces, gf: GameFamily): Array[Piece] =
     Array.tabulate(pieces.size().toInt)(i => pieceFromFSPiece(pieces.get(i.toLong), gf))
 
-  private def convertPieceMap(
-      fsPieceMap: FairyStockfish.PieceMap,
-      fsWallMap: FairyStockfish.WallMap,
-      gf: GameFamily
-  ): PieceMap = {
-    var first    = fsPieceMap.begin()
-    val end      = fsPieceMap.end()
+  private lazy val rolesByForsyth: Map[GameFamily, Map[Char, Role]] =
+    Variant.all.map(v => (v.gameFamily, Role.allByForsyth(v.gameFamily))).toMap
+
+  private def pieceMapFromFairyFen(fairyFen: String, variant: Variant): PieceMap = {
+    val gf       = variant.gameFamily
+    val roles    = rolesByForsyth(gf)
+    val wall     = wallPiece(gf)
     val pieceMap = scala.collection.mutable.Map[Pos, Piece]()
-    while (!first.equals(end)) {
-      pieceMap(
-        Pos.fromFairy(first.first()).get
-      ) = pieceFromFSPiece(first.second(), gf)
-      first = first.increment()
-    }
-    // Add in the walls if this game family has them.
-    wallPiece(gf).map(wall => {
-      var firstWall = fsWallMap.begin()
-      val endWall   = fsWallMap.end()
-      while (!firstWall.equals(endWall)) {
-        pieceMap(Pos.fromFairy(firstWall.first()).get) = wall
-        firstWall = firstWall.increment()
+    var file     = 0
+    var rank     = variant.boardSize.height - 1
+    var empty    = 0
+    var promoted = false
+    var i        = 0
+    while (i < fairyFen.length && fairyFen(i) != ' ' && fairyFen(i) != '[') {
+      val c = fairyFen(i)
+      if (c.isDigit) empty = empty * 10 + (c - '0')
+      else {
+        file += empty
+        empty = 0
+        c match {
+          case '/' =>
+            rank -= 1
+            file = 0
+          case '+' => promoted = true
+          case '*' =>
+            wall.foreach(piece => pieceMap(Pos.at(file, rank).get) = piece)
+            file += 1
+          case _   =>
+            val role = roles(c.toUpper)
+            pieceMap(Pos.at(file, rank).get) = Piece(
+              Player.fromP1(c.isUpper),
+              if (promoted) Role.promotionMap(role) else role
+            )
+            promoted = false
+            file += 1
+        }
       }
-      // Keep fsWallMap reachable for the JIT until the loop dereferencing its iterators is done.
-      java.lang.ref.Reference.reachabilityFence(fsWallMap)
-    })
-    // Keep fsPieceMap reachable for the JIT until the loop dereferencing its iterators is done.
-    java.lang.ref.Reference.reachabilityFence(fsPieceMap)
+      i += 1
+    }
     pieceMap.toMap
   }
 
