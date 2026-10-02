@@ -431,6 +431,8 @@ object Pos {
 
   def apply(file: File, rank: Rank): Pos = new Pos(File.allSize * rank.index + file.index)
 
+  private[go] def atIndex(index: Int): Pos = new Pos(index)
+
   def at(x: Int, y: Int): Option[Pos] =
     if (0 <= x && x < File.allSize && 0 <= y && y < Rank.allSize) allSome(File.allSize * y + x)
     else None
