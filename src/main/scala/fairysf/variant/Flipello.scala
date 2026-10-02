@@ -35,7 +35,7 @@ case object Flipello
 
   override def specialEnd(situation: Situation) = {
     (situation.board.piecesOnBoardCount == boardSize.width * boardSize.height) ||
-    (situation.board.apiPosition.legalMoves.size == 0) ||
+    (situation.board.apiPosition.legalMoveCount == 0) ||
     pendingDoublePass(situation)
   }
 

@@ -60,6 +60,7 @@ object Api {
     lazy val gameResult: GameResult
     lazy val gameEnd: Boolean
     lazy val legalMoves: Array[String]
+    lazy val legalMoveCount: Int
   }
 
   private class FairyPosition(position: FairyStockfish.Position) extends Position {
@@ -121,7 +122,7 @@ object Api {
       else GameResult.Ongoing()
 
     lazy val gameResult: GameResult =
-      if (legalMoves.size == 0)
+      if (legalMoveCount == 0)
         GameResult.resultFromInt(position.gameResult, givesCheck)
       else optionalGameEndResult
 
@@ -130,6 +131,12 @@ object Api {
         insufficientMaterial == ((true, true))
 
     lazy val legalMoves: Array[String] = position.getLegalMoves()
+
+    lazy val legalMoveCount: Int = {
+      val moves = position.getLegalMoves()
+      try moves.size().toInt
+      finally moves.deallocate()
+    }
   }
 
   def positionFromVariant(variant: Variant): Position =
