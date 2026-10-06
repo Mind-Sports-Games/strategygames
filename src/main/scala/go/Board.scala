@@ -36,6 +36,12 @@ case class Board(
     (p, pieces.collect { case (pos, piece) if piece.player == p => (pos, piece) }.size)
   }.toMap
 
+  private[go] lazy val stoneGrid: Array[Byte] = {
+    val grid = new Array[Byte](Pos.allSize)
+    pieces.foreach { case (pos, piece) => grid(pos.index) = Board.stoneCode(piece.player) }
+    grid
+  }
+
   lazy val areaScore: Score = variant.areaScore(this)
 
   // NOTE: `history.score` is the number `strategygames.History.Go` reports for a go game, and go's
@@ -138,6 +144,12 @@ object Board {
 
   def init(variant: Variant): Board = Board(variant.pieces, variant)
 
+  private[go] val emptyPoint: Byte = 0
+  private[go] val p1Stone: Byte    = 1
+  private[go] val p2Stone: Byte    = 2
+
+  private[go] def stoneCode(player: Player): Byte = player.fold(p1Stone, p2Stone)
+
   // def empty(variant: Variant): Board = Board(Nil, variant)
 
   private def variantPocketData(variant: Variant) =
@@ -215,6 +227,8 @@ object Board {
       validPos.foreach(pos => table(pos.index) = cardinalNeighboursOf(pos))
       table
     }
+
+    private[go] val neighbourIndices: Array[Array[Int]] = neighbours.map(_.map(_.index).toArray)
 
     def onBoard(pos: Pos): Boolean = pos.file.index < width && pos.rank.index < height
 

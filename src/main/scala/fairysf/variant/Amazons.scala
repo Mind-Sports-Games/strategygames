@@ -151,45 +151,84 @@ case object Amazons
     } else super.<<@(fen, pieceMap, history)
   }
 
+  private val queenDirections: List[(Int, Int)] =
+    List((0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1), (-1, 0), (-1, 1))
+
+  private def squareIndex(pos: Pos): Int = pos.rank.index * boardSize.width + pos.file.index
+
+  private def squareAt(index: Int): Pos =
+    Pos.at(index % boardSize.width, index / boardSize.width).get
+
+  private def occupancy(board: Board): Array[Boolean] = {
+    val occupied = new Array[Boolean](boardSize.width * boardSize.height)
+    board.pieces.keysIterator.foreach(pos => occupied(squareIndex(pos)) = true)
+    occupied
+  }
+
+  private def isEmptySquare(occupied: Array[Boolean], x: Int, y: Int): Boolean =
+    0 <= x && x < boardSize.width && 0 <= y && y < boardSize.height && !occupied(y * boardSize.width + x)
+
+  private def queenReach(occupied: Array[Boolean], from: Pos): Array[Pos] = {
+    val reached = Array.newBuilder[Int]
+    queenDirections.foreach { case (dx, dy) =>
+      var x = from.file.index + dx
+      var y = from.rank.index + dy
+      while (isEmptySquare(occupied, x, y)) {
+        reached += y * boardSize.width + x
+        x += dx
+        y += dy
+      }
+    }
+    reached.result().sorted.map(squareAt)
+  }
+
+  private def queensToMove(situation: Situation): Array[Pos] =
+    situation.board.pieces
+      .collect {
+        case (pos, Piece(player, AmazonQueen)) if player == situation.player => squareIndex(pos)
+      }
+      .toArray
+      .sorted
+      .map(squareAt)
+
+  private def hasLegalMove(situation: Situation): Boolean =
+    situation.board.history.lastAction match {
+      case Some(_: Uci.Move) => true
+      case _                 =>
+        val occupied = occupancy(situation.board)
+        queensToMove(situation).exists(queen =>
+          queenDirections.exists { case (dx, dy) =>
+            isEmptySquare(occupied, queen.file.index + dx, queen.rank.index + dy)
+          }
+        )
+    }
+
   override def validMoves(situation: Situation): Map[Pos, List[Move]] =
     situation.board.history.lastAction match {
       case Some(_: Uci.Move) => Map.empty
       case _                 =>
-        situation.board.apiPosition.legalMoves
-          .map(_.split(",").headOption)
-          .map {
-            case Some(Uci.Move.moveR(orig, dest, promotion)) =>
-              (
-                Pos.fromKey(orig),
-                Pos.fromKey(dest),
-                promotion
+        val occupied = occupancy(situation.board)
+        queensToMove(situation)
+          .flatMap(orig => queenReach(occupied, orig).map(dest => (orig, dest)))
+          .map { case (orig, dest) =>
+            val piece = situation.board.pieces(orig)
+            (
+              orig,
+              Move(
+                piece = piece,
+                orig = orig,
+                dest = dest,
+                situationBefore = situation,
+                after = situation.board.copy(
+                  pieces = situation.board.pieces - orig + ((dest, piece))
+                ),
+                autoEndTurn = false, // always false for Amazons as we follow a Move with a Drop
+                capture = None,
+                promotion = None,
+                castle = None,
+                enpassant = false
               )
-            case Some(x)                                     => sys.error(s"Ilegal move for Amazons: ${x}")
-            case _                                           => sys.error(s"Illegal unknown move for Amazons.")
-          }
-          .distinct
-          .map {
-            case (Some(orig), Some(dest), _) => {
-              val piece = situation.board.pieces(orig)
-              (
-                orig,
-                Move(
-                  piece = piece,
-                  orig = orig,
-                  dest = dest,
-                  situationBefore = situation,
-                  after = situation.board.copy(
-                    pieces = situation.board.pieces - orig + ((dest, piece))
-                  ),
-                  autoEndTurn = false, // always false for Amazons as we follow a Move with a Drop
-                  capture = None,
-                  promotion = None,
-                  castle = None,
-                  enpassant = false
-                )
-              )
-            }
-            case (orig, dest, prom)          => sys.error(s"Invalid position from uci: ${orig}${dest}${prom}")
+            )
           }
           .groupBy(_._1)
           .map { case (k, v) => (k, v.toList.map(_._2)) }
@@ -200,42 +239,34 @@ case object Amazons
   override def validDrops(situation: Situation): List[Drop] =
     situation.board.history.lastAction match {
       case Some(lastMove: Uci.Move) =>
-        situation.board.apiPosition.legalMoves
-          .filter(_.startsWith(s"${lastMove.uci},"))
-          .map(_.split(",").reverse.headOption)
-          .flatMap {
-            case Some(Uci.Move.moveR(_, dest, _)) => Some(Pos.fromKey(dest))
-            case _                                => None
-          }
-          .map {
-            case Some(dest) => {
-              // val uciDrop     = s"${defaultDropRole.forsyth}@${dest.key}"
-              val uciMove     = s"${lastMove.uci},${lastMove.dest.key}${dest.key}"
-              val newPosition = situation.board.apiPosition.makeMoves(List(uciMove))
-              val piece       = Piece(situation.player, defaultDropRole)
-              Drop(
-                piece = piece,
-                pos = dest,
-                situationBefore = situation,
-                after = situation.board.copy(
-                  pieces = situation.board.pieces + ((dest, piece)),
-                  uciMoves = situation.board.uciMoves :+ uciMove,
-                  position = newPosition.some
-                ),
-                autoEndTurn = true
-              )
-            }
-            case dest       => sys.error(s"Invalid position from uci: ${defaultDropRole}@${dest}")
-          }
-          .toList
+        queenReach(occupancy(situation.board), lastMove.dest).map { dest =>
+          val uciMove = s"${lastMove.uci},${lastMove.dest.key}${dest.key}"
+          val piece   = Piece(situation.player, defaultDropRole)
+          Drop(
+            piece = piece,
+            pos = dest,
+            situationBefore = situation,
+            after = situation.board.copy(
+              pieces = situation.board.pieces + ((dest, piece)),
+              uciMoves = situation.board.uciMoves :+ uciMove,
+              position = situation.board.apiPosition.makeMovesWhenNeeded(List(uciMove)).some
+            ),
+            autoEndTurn = true
+          )
+        }.toList
       case _                        => List()
     }
 
   override def valid(board: Board, strict: Boolean): Boolean =
     Api.validateFEN(fishnetKey, board.apiPosition.fen.value)
 
+  override def gameEnd(situation: Situation): Boolean =
+    !hasLegalMove(situation) && situation.board.apiPosition.gameEnd
+
+  override def isInsufficientMaterial(board: Board): Boolean = false
+
   override def staleMate(situation: Situation): Boolean     = false
-  override def specialEnd(situation: Situation): Boolean    = situation.board.apiPosition.legalMoves.isEmpty
+  override def specialEnd(situation: Situation): Boolean    = !hasLegalMove(situation)
   override def winner(situation: Situation): Option[Player] =
     if (specialEnd(situation)) Option(!situation.player)
     else None

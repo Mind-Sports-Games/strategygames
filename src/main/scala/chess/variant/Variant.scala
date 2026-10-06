@@ -78,6 +78,11 @@ abstract class Variant private[variant] (
       }
       .to(Map)
 
+  def hasValidMoves(situation: Situation): Boolean =
+    situation.actors.exists { actor =>
+      actor.trustedMoves(allowsCastling).exists(actor.keepsKingSafe)
+    }
+
   // Optimised for performance
   def pieceThreatened(
       board: Board,
@@ -167,10 +172,10 @@ abstract class Variant private[variant] (
 
   @nowarn def validDiceRolls(situation: Situation): List[DiceRoll] = List.empty
 
-  def staleMate(situation: Situation): Boolean = !situation.check && situation.moves.isEmpty
+  def staleMate(situation: Situation): Boolean = !situation.check && !situation.hasMoves
 
   def checkmate(situation: Situation) =
-    situation.check && situation.moves.isEmpty
+    situation.check && !situation.hasMoves
 
   def stalemateIsDraw = true
 

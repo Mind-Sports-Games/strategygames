@@ -95,7 +95,7 @@ abstract class Variant private[variant] (
     else boardSize.validPos.filter(isPlayable(situation, _))
 
   private def isPlayable(situation: Situation, point: Pos): Boolean =
-    !situation.board.pieces.contains(point) &&
+    situation.board.stoneGrid(point.index) == Board.emptyPoint &&
       !situation.board.ko.contains(point) &&
       Chain
         .capturesUnlessSuicide(situation.board, situation.player, point)
@@ -217,7 +217,7 @@ abstract class Variant private[variant] (
     val stonesAfterPlacing =
       situation.board.withPieces(situation.board.pieces -- captured + (pos -> stone))
     stonesAfterPlacing.stonePlaced
-      .withKo(koPointAfter(stonesAfterPlacing, pos, captured))
+      .withKo(koPointAfter(situation, pos, captured))
       .withHistory(
         situation.history
           .copy(
@@ -230,11 +230,13 @@ abstract class Variant private[variant] (
 
   // NOTE: a game resumed from a fen has a position history that begins there, so simple ko is
   // enforced in its own right and its coordinate travels in the fen.
-  private def koPointAfter(placed: Board, at: Pos, captured: Set[Pos]): Option[Pos] = {
-    val placedChain = Chain.at(placed, at)
-    Option.when(
-      captured.size == 1 && placedChain.size == 1 && Chain.liberties(placed, placedChain).size == 1
-    )(captured.head)
+  private def koPointAfter(before: Situation, at: Pos, captured: Set[Pos]): Option[Pos] =
+    Option.when(captured.size == 1 && surroundedByOpponent(before, at))(captured.head)
+
+  private def surroundedByOpponent(before: Situation, at: Pos): Boolean = {
+    val stones   = before.board.stoneGrid
+    val opponent = Board.stoneCode(!before.player)
+    before.board.variant.boardSize.neighbourIndices(at.index).forall(stones(_) == opponent)
   }
 
   private def hashAfterPlacing(
@@ -256,45 +258,95 @@ abstract class Variant private[variant] (
   // other game logic's `Score` is a plain count.
   // TODO(lila): score in points here and scale at the fen boundary, once lila reads the unit it wants.
   def areaScore(board: Board): Score = {
-    val enclosedArea = enclosedAreaByPlayer(board)
-
-    def areaOf(player: Player): Int =
-      board.playerPiecesOnBoardCount(player) + enclosedArea.getOrElse(player, 0)
-
-    def fenTenthsOf(player: Player): Int = areaOf(player) * 10
+    val width    = board.variant.boardSize.width
+    val height   = board.variant.boardSize.height
+    val p1Rows   = new Array[Int](height)
+    val p2Rows   = new Array[Int](height)
+    var p1Stones = 0
+    var p2Stones = 0
+    board.pieces.foreachEntry { (pos, piece) =>
+      val onBoard = pos.file.index < width && pos.rank.index < height
+      if (piece.player == P1) {
+        p1Stones += 1
+        if (onBoard) p1Rows(pos.rank.index) |= 1 << pos.file.index
+      } else {
+        p2Stones += 1
+        if (onBoard) p2Rows(pos.rank.index) |= 1 << pos.file.index
+      }
+    }
+    val enclosed = enclosedAreaByPlayer(width, p1Rows, p2Rows)
 
     Score(
-      fenTenthsOf(P1),
-      fenTenthsOf(P2) + Math.round(board.komi * 10).toInt
+      (p1Stones + enclosed.p1) * 10,
+      (p2Stones + enclosed.p2) * 10 + Math.round(board.komi * 10).toInt
     )
   }
 
-  private def enclosedAreaByPlayer(board: Board): Map[Player, Int] =
-    emptyRegionsOf(board)
-      .flatMap(region => soleBorderingPlayer(board, region).map((_, region.size)))
-      .groupMapReduce(_._1)(_._2)(_ + _)
-
-  private def emptyRegionsOf(board: Board): List[Set[Pos]] = {
-    val isEmpty = (pos: Pos) => !board.pieces.contains(pos)
-    board.variant.boardSize.validPos
-      .filter(isEmpty)
-      .foldLeft((List.empty[Set[Pos]], Set.empty[Pos])) { case ((regions, alreadyInARegion), point) =>
-        if (alreadyInARegion(point)) (regions, alreadyInARegion)
-        else {
-          val region = Chain.regionFrom(board, point)(isEmpty)
-          (region :: regions, alreadyInARegion ++ region)
+  private def enclosedAreaByPlayer(width: Int, p1Rows: Array[Int], p2Rows: Array[Int]): Score = {
+    val height     = p1Rows.length
+    val wholeRow   = (1 << width) - 1
+    val maxRuns    = height * ((width + 1) / 2)
+    val parent     = new Array[Int](maxRuns)
+    val runSize    = new Array[Int](maxRuns)
+    val bordering  = new Array[Int](maxRuns)
+    val runPoints  = new Array[Int](maxRuns)
+    var runs       = 0
+    var rowBelow   = 0
+    var rowBelowTo = 0
+    var rank       = 0
+    while (rank < height) {
+      val p1Around  = rowsTouching(p1Rows, rank)
+      val p2Around  = rowsTouching(p2Rows, rank)
+      var empty     = wholeRow & ~(p1Rows(rank) | p2Rows(rank))
+      val rowStarts = runs
+      while (empty != 0) {
+        val run   = empty & ~(empty + (empty & -empty))
+        empty &= ~run
+        val sides = ((run << 1) | (run >>> 1)) & wholeRow
+        val id    = runs
+        runs += 1
+        parent(id) = id
+        runSize(id) = Integer.bitCount(run)
+        bordering(id) = (if (((p1Rows(rank) & sides) | (p1Around & run)) != 0) Board.p1Stone else 0) |
+          (if (((p2Rows(rank) & sides) | (p2Around & run)) != 0) Board.p2Stone else 0)
+        runPoints(id) = run
+        var below = rowBelow
+        while (below < rowBelowTo) {
+          if ((runPoints(below) & run) != 0) {
+            val kept   = rootOf(parent, below)
+            val merged = rootOf(parent, id)
+            if (kept != merged) {
+              parent(merged) = kept
+              runSize(kept) += runSize(merged)
+              bordering(kept) |= bordering(merged)
+            }
+          }
+          below += 1
         }
       }
-      ._1
+      rowBelow = rowStarts
+      rowBelowTo = runs
+      rank += 1
+    }
+    var p1Area     = 0
+    var p2Area     = 0
+    var id         = 0
+    while (id < runs) {
+      if (parent(id) == id) {
+        if (bordering(id) == Board.p1Stone) p1Area += runSize(id)
+        else if (bordering(id) == Board.p2Stone) p2Area += runSize(id)
+      }
+      id += 1
+    }
+    Score(p1Area, p2Area)
   }
 
-  private def soleBorderingPlayer(board: Board, region: Set[Pos]): Option[Player] = {
-    val bordering = region.flatMap(borderingPlayersAt(board, _))
-    Option.when(bordering.size == 1)(bordering.head)
-  }
+  private def rowsTouching(rows: Array[Int], rank: Int): Int =
+    (if (rank > 0) rows(rank - 1) else 0) | (if (rank + 1 < rows.length) rows(rank + 1) else 0)
 
-  private def borderingPlayersAt(board: Board, point: Pos): List[Player] =
-    board.variant.boardSize.neighbours(point.index).flatMap(board.pieces.get).map(_.player)
+  @annotation.tailrec
+  private def rootOf(parent: Array[Int], run: Int): Int =
+    if (parent(run) == run) run else rootOf(parent, parent(run))
 
   def materialImbalance(board: Board): Int =
     board.pieces.values.foldLeft(0) { case (acc, Piece(player, role)) =>

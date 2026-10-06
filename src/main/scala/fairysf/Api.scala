@@ -41,6 +41,11 @@ object Api {
     val variant: Variant
 
     def makeMoves(movesList: List[String]): Position
+
+    def makeMovesWhenNeeded(movesList: List[String]): Position =
+      if (movesList.isEmpty) this
+      else new PositionAfterMoves(this, movesList)
+
     lazy val fen: FEN
     lazy val givesCheck: Boolean
     lazy val isImmediateGameEnd: (Boolean, GameResult)
@@ -60,21 +65,62 @@ object Api {
     lazy val gameResult: GameResult
     lazy val gameEnd: Boolean
     lazy val legalMoves: Array[String]
+    lazy val legalMoveCount: Int
   }
 
-  private class FairyPosition(position: FairyStockfish.Position) extends Position {
+  private class PositionAfterMoves(private var before: Position, movesList: List[String]) extends Position {
+    val variant = before.variant
+
+    private lazy val after: Position = {
+      val position = before.makeMoves(movesList)
+      before = null
+      position
+    }
+
+    def makeMoves(movesList: List[String]): Position =
+      if (movesList.isEmpty) this
+      else after.makeMoves(movesList)
+
+    lazy val fen: FEN                                  = after.fen
+    lazy val givesCheck: Boolean                       = after.givesCheck
+    lazy val isImmediateGameEnd: (Boolean, GameResult) = after.isImmediateGameEnd
+    lazy val immediateGameEnd: Boolean                 = after.immediateGameEnd
+    lazy val optionalGameEnd: Boolean                  = after.optionalGameEnd
+    lazy val insufficientMaterial: (Boolean, Boolean)  = after.insufficientMaterial
+
+    def isDraw(ply: Int): Boolean       = after.isDraw(ply)
+    def hasGameCycle(ply: Int): Boolean = after.hasGameCycle(ply)
+    lazy val hasRepeated: Boolean       = after.hasRepeated
+
+    lazy val pieceMap: PieceMap             = after.pieceMap
+    lazy val piecesInHand: Array[Piece]     = after.piecesInHand
+    lazy val pocketData: Option[PocketData] = after.pocketData
+
+    lazy val optionalGameEndResult: GameResult = after.optionalGameEndResult
+    lazy val gameResult: GameResult            = after.gameResult
+    lazy val gameEnd: Boolean                  = after.gameEnd
+    lazy val legalMoves: Array[String]         = after.legalMoves
+    lazy val legalMoveCount: Int               = after.legalMoveCount
+  }
+
+  private class FairyPosition(position: FairyStockfish.Position, val variant: Variant) extends Position {
     // TODO: yes, this is an abuse of scala. We could get an
     //       exception here, but I'm not sure how to work around that
     //       at the moment
     // NOTE: this means we can't use this API to test chess related things
     //       only the variants we support
-    val variant = Variant.byFishnetKey(position.variant())
+    def this(position: FairyStockfish.Position) = this(position, Variant.byFishnetKey(position.variant()))
 
     def makeMoves(movesList: List[String]): Position =
       if (movesList.isEmpty) this
-      else new FairyPosition(position.makeMoves(movesList))
+      else {
+        val moves = intoVector(movesList)
+        try new FairyPosition(position.makeMoves(moves), variant)
+        finally moves.deallocate()
+      }
 
-    lazy val fen: FEN                                  = FEN(position.getFEN().replace("*", "p"))
+    private lazy val rawFen: String                    = position.getFEN()
+    lazy val fen: FEN                                  = FEN(rawFen.replace("*", "p"))
     lazy val givesCheck: Boolean                       = position.givesCheck()
     lazy val isImmediateGameEnd: (Boolean, GameResult) = {
       val im = position.isImmediateGameEnd()
@@ -92,8 +138,7 @@ object Api {
     def hasGameCycle(ply: Int): Boolean = position.hasGameCycle(ply)
     lazy val hasRepeated: Boolean       = position.hasRepeated()
 
-    lazy val pieceMap: PieceMap =
-      convertPieceMap(position.piecesOnBoard(), position.wallsOnBoard(), variant.gameFamily)
+    lazy val pieceMap: PieceMap = pieceMapFromFairyFen(rawFen, variant)
 
     lazy val piecesInHand: Array[Piece] =
       vectorOfPiecesToPieceArray(position.piecesInHand(), variant.gameFamily)
@@ -102,12 +147,8 @@ object Api {
       if (variant.dropsVariant)
         PocketData(
           Pockets(
-            Pocket(
-              piecesInHand.filter(_.player == P1).toList.map(p => strategygames.Role.FairySFRole(p.role))
-            ),
-            Pocket(
-              piecesInHand.filter(_.player == P2).toList.map(p => strategygames.Role.FairySFRole(p.role))
-            )
+            Pocket(rolesInHandFromFairyFen(rawFen, variant, P1)),
+            Pocket(rolesInHandFromFairyFen(rawFen, variant, P2))
           ),
           // Can make an empty Set of Pos because we dont have to track promoted pieces
           // FairySF takes care of this for us
@@ -121,7 +162,7 @@ object Api {
       else GameResult.Ongoing()
 
     lazy val gameResult: GameResult =
-      if (legalMoves.size == 0)
+      if (legalMoveCount == 0)
         GameResult.resultFromInt(position.gameResult, givesCheck)
       else optionalGameEndResult
 
@@ -129,7 +170,17 @@ object Api {
       gameResult != GameResult.Ongoing() ||
         insufficientMaterial == ((true, true))
 
-    lazy val legalMoves: Array[String] = position.getLegalMoves()
+    lazy val legalMoves: Array[String] = {
+      val moves = position.getLegalMoves()
+      try intoArray(moves)
+      finally moves.deallocate()
+    }
+
+    lazy val legalMoveCount: Int = {
+      val moves = position.getLegalMoves()
+      try moves.size().toInt
+      finally moves.deallocate()
+    }
   }
 
   def positionFromVariant(variant: Variant): Position =
@@ -195,7 +246,11 @@ object Api {
   }
 
   implicit def intoArray(vos: FairyStockfish.VectorOfStrings): Array[String] =
-    Array.tabulate(vos.size().toInt)(i => vos.get(i.toLong).getString())
+    Array.tabulate(vos.size().toInt) { i =>
+      val entry = vos.get(i.toLong)
+      try entry.getString()
+      finally entry.deallocate()
+    }
 
   private def pieceFromFSPiece(piece: FairyStockfish.Piece, gf: GameFamily): Piece =
     Piece(
@@ -207,34 +262,63 @@ object Api {
   def vectorOfPiecesToPieceArray(pieces: FairyStockfish.VectorOfPieces, gf: GameFamily): Array[Piece] =
     Array.tabulate(pieces.size().toInt)(i => pieceFromFSPiece(pieces.get(i.toLong), gf))
 
-  private def convertPieceMap(
-      fsPieceMap: FairyStockfish.PieceMap,
-      fsWallMap: FairyStockfish.WallMap,
-      gf: GameFamily
-  ): PieceMap = {
-    var first    = fsPieceMap.begin()
-    val end      = fsPieceMap.end()
+  private lazy val rolesByForsyth: Map[GameFamily, Map[Char, Role]] =
+    Variant.all.map(v => (v.gameFamily, Role.allByForsyth(v.gameFamily))).toMap
+
+  private def pieceMapFromFairyFen(fairyFen: String, variant: Variant): PieceMap = {
+    val gf       = variant.gameFamily
+    val roles    = rolesByForsyth(gf)
+    val wall     = wallPiece(gf)
     val pieceMap = scala.collection.mutable.Map[Pos, Piece]()
-    while (!first.equals(end)) {
-      pieceMap(
-        Pos.fromFairy(first.first()).get
-      ) = pieceFromFSPiece(first.second(), gf)
-      first = first.increment()
-    }
-    // Add in the walls if this game family has them.
-    wallPiece(gf).map(wall => {
-      var firstWall = fsWallMap.begin()
-      val endWall   = fsWallMap.end()
-      while (!firstWall.equals(endWall)) {
-        pieceMap(Pos.fromFairy(firstWall.first()).get) = wall
-        firstWall = firstWall.increment()
+    var file     = 0
+    var rank     = variant.boardSize.height - 1
+    var empty    = 0
+    var promoted = false
+    var i        = 0
+    while (i < fairyFen.length && fairyFen(i) != ' ' && fairyFen(i) != '[') {
+      val c = fairyFen(i)
+      if (c.isDigit) empty = empty * 10 + (c - '0')
+      else {
+        file += empty
+        empty = 0
+        c match {
+          case '/' =>
+            rank -= 1
+            file = 0
+          case '+' => promoted = true
+          case '*' =>
+            wall.foreach(piece => pieceMap(Pos.at(file, rank).get) = piece)
+            file += 1
+          case _   =>
+            val role = roles(c.toUpper)
+            pieceMap(Pos.at(file, rank).get) = Piece(
+              Player.fromP1(c.isUpper),
+              if (promoted) Role.promotionMap(role) else role
+            )
+            promoted = false
+            file += 1
+        }
       }
-      // Keep fsWallMap reachable for the JIT until the loop dereferencing its iterators is done.
-      java.lang.ref.Reference.reachabilityFence(fsWallMap)
-    })
-    // Keep fsPieceMap reachable for the JIT until the loop dereferencing its iterators is done.
-    java.lang.ref.Reference.reachabilityFence(fsPieceMap)
+      i += 1
+    }
     pieceMap.toMap
+  }
+
+  private def rolesInHandFromFairyFen(
+      fairyFen: String,
+      variant: Variant,
+      player: Player
+  ): List[strategygames.Role] = {
+    val start = fairyFen.indexOf('[')
+    val end   = if (start < 0) -1 else fairyFen.indexOf(']', start)
+    if (end < 0) Nil
+    else
+      fairyFen
+        .substring(start + 1, end)
+        .toList
+        .filter(c => c.isLetter && c.isUpper == (player == P1))
+        .reverse
+        .map(c => strategygames.Role.FairySFRole(rolesByForsyth(variant.gameFamily)(c.toUpper)))
   }
 
   private def wallPiece(gf: GameFamily): Option[Piece] = gf match {

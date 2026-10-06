@@ -17,8 +17,8 @@ case class Board(
   def apply(at: Pos): Option[Piece] = pieces get at
   def apply(file: File, rank: Rank) = pieces get Pos(file, rank)
 
-  lazy val actors: Map[Pos, Actor] = pieces map { case (pos, piece) =>
-    (pos, Actor(piece, pos, this))
+  lazy val actors: Map[Pos, Actor] = pieces transform { (pos, piece) =>
+    Actor(piece, pos, this)
   }
 
   lazy val actorsOf: Player.Map[Seq[Actor]] = {
@@ -135,13 +135,8 @@ case class Board(
         val bkReady                                                     = bkPos.fold(false)(_.rank == Rank.Eighth)
         def rookReady(player: Player, kPos: Option[Pos], left: Boolean) =
           kPos.fold(false) { kp =>
-            actorsOf(player) exists { a =>
-              a.piece.is(
-                Rook
-              ) && a.pos ?- kp && (left ^ (a.pos ?> kp)) && history.unmovedRooks
-                .pos(
-                  a.pos
-                )
+            history.unmovedRooks.pos exists { pos =>
+              pos ?- kp && (left ^ (pos ?> kp)) && apply(pos).contains(Piece(player, Rook))
             }
           }
         Castles(
@@ -163,7 +158,10 @@ case class Board(
       this
     ) || history.fivefoldRepetition
 
-  def situationOf(player: Player) = Situation(this, player)
+  def situationOf(player: Player): Situation = player.fold(situationP1, situationP2)
+
+  private lazy val situationP1 = Situation(this, P1)
+  private lazy val situationP2 = Situation(this, P2)
 
   def visual = format.Visual >> this
 
