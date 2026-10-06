@@ -15,7 +15,7 @@ case object Entropy
 
   def gameFamily: GameFamily = GameFamily.Entropy()
 
-  def perfIcon: Char = '\uE935'
+  def perfIcon: Char = '\uE938'
   def perfId: Int    = 900
 
   override def baseVariant: Boolean = true
