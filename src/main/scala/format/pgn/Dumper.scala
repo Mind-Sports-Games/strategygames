@@ -3,6 +3,7 @@ package format.pgn
 
 import strategygames.{
   Action => StratAction,
+  DrawCounter => StratDrawCounter,
   Drop => StratDrop,
   Move => StratMove,
   Pass => StratPass,
@@ -30,6 +31,8 @@ object Dumper {
       abalone.format.pgn.Dumper(data)
     case (GameLogic.Dameo(), StratMove.Dameo(data))               =>
       dameo.format.pdn.Dumper(data)
+    case (GameLogic.Entropy(), StratMove.Entropy(data))           =>
+      entropy.format.pgn.Dumper(data)
     case _                                                        =>
       sys.error("Mismatched gamelogic types 31")
   }
@@ -38,12 +41,14 @@ object Dumper {
     case (GameLogic.Chess(), StratDrop.Chess(data))     => chess.format.pgn.Dumper(data)
     case (GameLogic.FairySF(), StratDrop.FairySF(data)) => fairysf.format.pgn.Dumper(data)
     case (GameLogic.Go(), StratDrop.Go(data))           => go.format.pgn.Dumper(data)
+    case (GameLogic.Entropy(), StratDrop.Entropy(data)) => entropy.format.pgn.Dumper(data)
     case _                                              => sys.error("Drops can only be applied to chess/fairysf/go")
   }
 
   def apply(lib: GameLogic, data: StratPass): String = (lib, data) match {
-    case (GameLogic.Go(), StratPass.Go(data)) => go.format.pgn.Dumper(data)
-    case _                                    => sys.error("Pass can only be applied to go")
+    case (GameLogic.Go(), StratPass.Go(data))           => go.format.pgn.Dumper(data)
+    case (GameLogic.Entropy(), StratPass.Entropy(data)) => entropy.format.pgn.Dumper(data)
+    case _                                              => sys.error("Pass can only be applied to go/entropy")
   }
 
   def apply(lib: GameLogic, data: StratSelectSquares): String = (lib, data) match {
@@ -51,11 +56,18 @@ object Dumper {
     case _                                             => sys.error("SelectSquares can only be applied to go")
   }
 
+  def apply(lib: GameLogic, data: StratDrawCounter): String = (lib, data) match {
+    case (GameLogic.Entropy(), StratDrawCounter.Entropy(data)) => entropy.format.pgn.Dumper(data)
+    case _                                                     =>
+      sys.error("DrawCounter can only be applied to entropy")
+  }
+
   def apply(lib: GameLogic, data: StratAction): String = data match {
     case m: StratMove           => apply(lib, m)
     case d: StratDrop           => apply(lib, d)
     case p: StratPass           => apply(lib, p)
     case ss: StratSelectSquares => apply(lib, ss)
+    case dc: StratDrawCounter   => apply(lib, dc)
     case _                      => sys.error("unknown action to apply to a game")
   }
 
