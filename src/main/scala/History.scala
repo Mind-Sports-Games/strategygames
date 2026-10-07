@@ -143,6 +143,15 @@ object History {
         halfMoveClock = h.halfMoveClock
       )
 
+  final case class Entropy(h: entropy.History)
+      extends History(
+        lastTurn = h.lastTurn.map(Uci.wrap),
+        currentTurn = h.currentTurn.map(Uci.wrap),
+        positionHashes = h.positionHashes,
+        halfMoveClock = h.halfMoveClock,
+        score = h.score
+      )
+
   implicit def chessHistory(h: chess.History): History               = Chess(h)
   implicit def draughtsHistory(h: draughts.DraughtsHistory): History = Draughts(h)
   implicit def fairysfHistory(h: fairysf.History): History           = FairySF(h)
@@ -152,6 +161,7 @@ object History {
   implicit def backgammonHistory(h: backgammon.History): History     = Backgammon(h)
   implicit def abaloneHistory(h: abalone.History): History           = Abalone(h)
   implicit def dameoHistory(h: dameo.History): History               = Dameo(h)
+  implicit def entropyHistory(h: entropy.History): History           = Entropy(h)
 
   // lila
   def apply(
@@ -262,6 +272,16 @@ object History {
           lastTurn = lastTurn.map(lm => lm.toDameo),
           currentTurn = currentTurn.map(lm => lm.toDameo),
           positionHashes = positionHashes,
+          halfMoveClock = halfMoveClock
+        )
+      )
+    case GameLogic.Entropy()      =>
+      Entropy(
+        entropy.History(
+          lastTurn = lastTurn.map(lm => lm.toEntropy),
+          currentTurn = currentTurn.map(lm => lm.toEntropy),
+          positionHashes = positionHashes,
+          score = score,
           halfMoveClock = halfMoveClock
         )
       )

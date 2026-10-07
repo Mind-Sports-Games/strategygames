@@ -21,6 +21,8 @@ object UciCharPair {
       strategygames.backgammon.format.UciCharPair(uci.unwrap)
     case (GameLogic.Abalone(), uci: Uci.Abalone)           => strategygames.abalone.format.UciCharPair(uci.unwrap)
     case (GameLogic.Dameo(), uci: Uci.Dameo)               => strategygames.dameo.format.UciCharPair(uci.unwrap)
+    case (GameLogic.Entropy(), uci: Uci.Entropy)           =>
+      strategygames.entropy.format.UciCharPair(uci.unwrap)
     case _                                                 => sys.error("Mismatched gamelogic and UciCharPair")
   }
 

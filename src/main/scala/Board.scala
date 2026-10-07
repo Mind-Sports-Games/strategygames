@@ -40,6 +40,7 @@ sealed abstract class Board(
   def toBackgammon: backgammon.Board
   def toAbalone: abalone.Board
   def toDameo: dameo.Board
+  def toEntropy: entropy.Board
 }
 
 object Board {
@@ -83,6 +84,7 @@ object Board {
     def toBackgammon   = sys.error("Can't make a backgammon board from a chess board")
     def toAbalone      = sys.error("Can't make an abalone board from a chess board")
     def toDameo        = sys.error("Can't make a dameo board from a chess board")
+    def toEntropy      = sys.error("Can't make an entropy board from a chess board")
   }
 
   case class Draughts(b: draughts.Board)
@@ -123,6 +125,7 @@ object Board {
     def toBackgammon   = sys.error("Can't make a backgammon board from a draughts board")
     def toAbalone      = sys.error("Can't make an abalone board from a draughts board")
     def toDameo        = sys.error("Can't make a dameo board from a draughts board")
+    def toEntropy      = sys.error("Can't make an entropy board from a draughts board")
   }
 
   case class FairySF(b: fairysf.Board)
@@ -164,6 +167,7 @@ object Board {
     def toBackgammon   = sys.error("Can't make a backgammon board from a fairysf board")
     def toAbalone      = sys.error("Can't make an abalone board from a fairysf board")
     def toDameo        = sys.error("Can't make a dameo board from a fairysf board")
+    def toEntropy      = sys.error("Can't make an entropy board from a fairysf board")
   }
 
   case class Samurai(b: samurai.Board)
@@ -204,6 +208,7 @@ object Board {
     def toBackgammon   = sys.error("Can't make a backgammon board from a samurai board")
     def toAbalone      = sys.error("Can't make an abalone board from a samurai board")
     def toDameo        = sys.error("Can't make a dameo board from a samurai board")
+    def toEntropy      = sys.error("Can't make an entropy board from a samurai board")
   }
 
   case class Togyzkumalak(b: togyzkumalak.Board)
@@ -246,6 +251,7 @@ object Board {
     def toBackgammon   = sys.error("Can't make a backgammon board from a togyzkumalak board")
     def toAbalone      = sys.error("Can't make an abalone board from a togyzkumalak board")
     def toDameo        = sys.error("Can't make a dameo board from a togyzkumalak board")
+    def toEntropy      = sys.error("Can't make an entropy board from a togyzkumalak board")
   }
 
   case class Go(b: go.Board)
@@ -287,6 +293,7 @@ object Board {
     def toBackgammon   = sys.error("Can't make a backgammon board from a go board")
     def toAbalone      = sys.error("Can't make an abalone board from a go board")
     def toDameo        = sys.error("Can't make a dameo board from a go board")
+    def toEntropy      = sys.error("Can't make an entropy board from a go board")
   }
 
   case class Backgammon(b: backgammon.Board)
@@ -332,6 +339,7 @@ object Board {
     def toBackgammon   = b
     def toAbalone      = sys.error("Can't make an abalone board from a backgammon board")
     def toDameo        = sys.error("Can't make a dameo board from a backgammon board")
+    def toEntropy      = sys.error("Can't make an entropy board from a backgammon board")
   }
 
   case class Abalone(b: abalone.Board)
@@ -372,6 +380,7 @@ object Board {
     override def toBackgammon   = sys.error("Can't make a backgammon board from an abalone board")
     override def toAbalone      = b
     override def toDameo        = sys.error("Can't make a dameo board from an abalone board")
+    override def toEntropy      = sys.error("Can't make an entropy board from an abalone board")
   }
 
   case class Dameo(b: dameo.Board)
@@ -412,6 +421,50 @@ object Board {
     def toBackgammon   = sys.error("Can't make a backgammon board from a dameo board")
     def toAbalone      = sys.error("Can't make an abalone board from a dameo board")
     def toDameo        = b
+    def toEntropy      = sys.error("Can't make an entropy board from a dameo board")
+  }
+
+  case class Entropy(b: entropy.Board)
+      extends Board(
+        b.pieces.map { case (pos, piece) => (Pos.Entropy(pos), (Piece.Entropy(piece), 1)) },
+        History.Entropy(b.history),
+        Variant.Entropy(b.variant),
+        b.pocketData.map(PocketData.Entropy.apply)
+      ) {
+    def withHistory(h: History): Board = h match {
+      case History.Entropy(h) => Entropy(b.withHistory(h))
+      case _                  => sys.error("Not passed entropy objects")
+    }
+
+    def usedDice: List[Int] = List.empty
+
+    def situationOf(player: Player): Situation = Situation.Entropy(b.situationOf(player))
+
+    def materialImbalance: Int = b.materialImbalance
+
+    override def toString: String = b.toString
+
+    def copy(history: History, variant: Variant): Board = (history, variant) match {
+      case (History.Entropy(history), Variant.Entropy(variant)) =>
+        Entropy(b.copy(history = history, variant = variant))
+      case _                                                    =>
+        sys.error("Unable to copy an entropy board with non-entropy arguments")
+    }
+    def copy(history: History): Board                   = history match {
+      case History.Entropy(history) => Entropy(b.copy(history = history))
+      case _                        => sys.error("Unable to copy an entropy board with non-entropy arguments")
+    }
+
+    def toChess        = sys.error("Can't make a chess board from an entropy board")
+    def toDraughts     = sys.error("Can't make a draughts board from an entropy board")
+    def toFairySF      = sys.error("Can't make a fairysf board from an entropy board")
+    def toSamurai      = sys.error("Can't make a samurai board from an entropy board")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak board from an entropy board")
+    def toGo           = sys.error("Can't make a go board from an entropy board")
+    def toBackgammon   = sys.error("Can't make a backgammon board from an entropy board")
+    def toAbalone      = sys.error("Can't make an abalone board from an entropy board")
+    def toDameo        = sys.error("Can't make a dameo board from an entropy board")
+    def toEntropy      = b
   }
 
   def apply(lib: GameLogic, pieces: Iterable[(Pos, (Piece, Int))], variant: Variant): Board =
@@ -498,6 +551,16 @@ object Board {
             variant
           )
         )
+      case (GameLogic.Entropy(), Variant.Entropy(variant))           =>
+        Entropy(
+          entropy.Board.apply(
+            pieces.flatMap {
+              case (Pos.Entropy(pos), (Piece.Entropy(piece), _)) => Some((pos, piece))
+              case _                                             => None
+            },
+            variant
+          )
+        )
       case (GameLogic.Dameo(), Variant.Dameo(variant))               =>
         Dameo(
           dameo.Board.apply(
@@ -520,6 +583,7 @@ object Board {
   implicit def backgammonBoard(b: backgammon.Board): Board     = Board.Backgammon(b)
   implicit def abaloneBoard(b: abalone.Board): Board           = Board.Abalone(b)
   implicit def dameoBoard(b: dameo.Board): Board               = Board.Dameo(b)
+  implicit def entropyBoard(b: entropy.Board): Board           = Board.Entropy(b)
 
   def init(lib: GameLogic, variant: Variant): Board = (lib, variant) match {
     case (GameLogic.Draughts(), Variant.Draughts(variant))         => Draughts(draughts.Board.init(variant))
@@ -532,6 +596,7 @@ object Board {
     case (GameLogic.Backgammon(), Variant.Backgammon(variant))     => Backgammon(backgammon.Board.init(variant))
     case (GameLogic.Abalone(), Variant.Abalone(variant))           => Abalone(abalone.Board.init(variant))
     case (GameLogic.Dameo(), Variant.Dameo(variant))               => Dameo(dameo.Board.init(variant))
+    case (GameLogic.Entropy(), Variant.Entropy(variant))           => Entropy(entropy.Board.init(variant))
     case _                                                         => sys.error("Mismatched gamelogic types 28")
   }
 }
