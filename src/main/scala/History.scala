@@ -152,6 +152,14 @@ object History {
         score = h.score
       )
 
+  final case class FiveInARow(h: fiveinarow.History)
+      extends History(
+        lastTurn = h.lastTurn.map(Uci.wrap),
+        currentTurn = h.currentTurn.map(Uci.wrap),
+        positionHashes = h.positionHashes,
+        halfMoveClock = h.halfMoveClock
+      )
+
   implicit def chessHistory(h: chess.History): History               = Chess(h)
   implicit def draughtsHistory(h: draughts.DraughtsHistory): History = Draughts(h)
   implicit def fairysfHistory(h: fairysf.History): History           = FairySF(h)
@@ -162,6 +170,7 @@ object History {
   implicit def abaloneHistory(h: abalone.History): History           = Abalone(h)
   implicit def dameoHistory(h: dameo.History): History               = Dameo(h)
   implicit def entropyHistory(h: entropy.History): History           = Entropy(h)
+  implicit def fiveinarowHistory(h: fiveinarow.History): History     = FiveInARow(h)
 
   // lila
   def apply(
@@ -282,6 +291,15 @@ object History {
           currentTurn = currentTurn.map(lm => lm.toEntropy),
           positionHashes = positionHashes,
           score = score,
+          halfMoveClock = halfMoveClock
+        )
+      )
+    case GameLogic.FiveInARow()   =>
+      FiveInARow(
+        fiveinarow.History(
+          lastTurn = lastTurn.map(lm => lm.toFiveInARow),
+          currentTurn = currentTurn.map(lm => lm.toFiveInARow),
+          positionHashes = positionHashes,
           halfMoveClock = halfMoveClock
         )
       )

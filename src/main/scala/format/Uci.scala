@@ -28,6 +28,7 @@ sealed trait Uci {
   def toAbalone: abalone.format.Uci
   def toDameo: dameo.format.Uci
   def toEntropy: entropy.format.Uci
+  def toFiveInARow: fiveinarow.format.Uci
 
 }
 
@@ -59,6 +60,9 @@ object Uci {
   }
   sealed trait Entropy      {
     def unwrap: entropy.format.Uci
+  }
+  sealed trait FiveInARow   {
+    def unwrap: fiveinarow.format.Uci
   }
   sealed trait Dameo        {
     def unwrap: dameo.format.Uci
@@ -106,6 +110,7 @@ object Uci {
     def toAbalone      = sys.error("Can't make an abalone UCI from a chess UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a chess UCI")
     def toEntropy      = sys.error("Can't make an entropy UCI from a chess UCI")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow UCI from a chess UCI")
   }
 
   final case class DraughtsMove(m: draughts.format.Uci.Move)
@@ -134,6 +139,7 @@ object Uci {
     def toAbalone      = sys.error("Can't make an abalone UCI from a draughts UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a draughts UCI")
     def toEntropy      = sys.error("Can't make an entropy UCI from a draughts UCI")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow UCI from a draughts UCI")
   }
 
   final case class FairySFMove(m: fairysf.format.Uci.Move)
@@ -158,6 +164,7 @@ object Uci {
     def toAbalone      = sys.error("Can't make an abalone UCI from a fairysf UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a fairysf UCI")
     def toEntropy      = sys.error("Can't make an entropy UCI from a fairysf UCI")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow UCI from a fairysf UCI")
   }
 
   final case class SamuraiMove(m: samurai.format.Uci.Move)
@@ -181,6 +188,7 @@ object Uci {
     def toAbalone      = sys.error("Can't make an abalone UCI from a samurai UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a samurai UCI")
     def toEntropy      = sys.error("Can't make an entropy UCI from a samurai UCI")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow UCI from a samurai UCI")
   }
 
   final case class TogyzkumalakMove(m: togyzkumalak.format.Uci.Move)
@@ -204,6 +212,7 @@ object Uci {
     def toAbalone      = sys.error("Can't make an abalone UCI from a togyzkumalak UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a togyzkumalak UCI")
     def toEntropy      = sys.error("Can't make an entropy UCI from a togyzkumalak UCI")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow UCI from a togyzkumalak UCI")
   }
 
   final case class BackgammonMove(m: backgammon.format.Uci.Move)
@@ -231,6 +240,7 @@ object Uci {
     def toAbalone      = sys.error("Can't make an abalone UCI from a backgammon UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a backgammon UCI")
     def toEntropy      = sys.error("Can't make an entropy UCI from a backgammon UCI")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow UCI from a backgammon UCI")
   }
 
   final case class AbaloneMove(m: abalone.format.Uci.Move)
@@ -254,6 +264,7 @@ object Uci {
     override def toAbalone      = m
     override def toDameo        = sys.error("Can't make a dameo UCI from an abalone UCI")
     override def toEntropy      = sys.error("Can't make an entropy UCI from an abalone UCI")
+    override def toFiveInARow   = sys.error("Can't make a fiveinarow UCI from an abalone UCI")
   }
 
   final case class DameoMove(m: dameo.format.Uci.Move)
@@ -278,6 +289,7 @@ object Uci {
     def toAbalone      = sys.error("Can't make an abalone UCI from a dameo UCI")
     def toDameo        = m
     def toEntropy      = sys.error("Can't make an entropy object from a dameo object")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow object from a dameo object")
   }
 
   sealed abstract class Drop(
@@ -310,6 +322,7 @@ object Uci {
     def toAbalone      = sys.error("Can't make an abalone UCI from a chess UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a chess UCI")
     def toEntropy      = sys.error("Can't make an entropy UCI from a chess UCI")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow UCI from a chess UCI")
   }
 
   final case class FairySFDrop(d: fairysf.format.Uci.Drop)
@@ -334,6 +347,7 @@ object Uci {
     def toAbalone      = sys.error("Can't make an abalone UCI from a fairysf UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a fairysf UCI")
     def toEntropy      = sys.error("Can't make an entropy UCI from a fairysf UCI")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow UCI from a fairysf UCI")
   }
 
   final case class GoDrop(d: go.format.Uci.Drop)
@@ -358,6 +372,7 @@ object Uci {
     def toAbalone      = sys.error("Can't make an abalone UCI from a go UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a go UCI")
     def toEntropy      = sys.error("Can't make an entropy UCI from a go UCI")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow UCI from a go UCI")
   }
 
   final case class BackgammonDrop(d: backgammon.format.Uci.Drop)
@@ -386,6 +401,7 @@ object Uci {
     def toAbalone      = sys.error("Can't make an abalone UCI from a backgammon UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a backgammon UCI")
     def toEntropy      = sys.error("Can't make an entropy UCI from a backgammon UCI")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow UCI from a backgammon UCI")
   }
 
   sealed abstract class Lift(
@@ -415,6 +431,7 @@ object Uci {
     def toAbalone      = sys.error("Can't make an abalone UCI from a backgammon UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a backgammon UCI")
     def toEntropy      = sys.error("Can't make an entropy UCI from a backgammon UCI")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow UCI from a backgammon UCI")
   }
 
   sealed abstract class Pass() extends Uci {
@@ -440,6 +457,7 @@ object Uci {
     def toAbalone      = sys.error("Can't make an abalone UCI from a go UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a go UCI")
     def toEntropy      = sys.error("Can't make an entropy UCI from a go UCI")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow UCI from a go UCI")
   }
 
   sealed abstract class SelectSquares(
@@ -471,6 +489,7 @@ object Uci {
     def toAbalone      = sys.error("Can't make an abalone UCI from a go UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a go UCI")
     def toEntropy      = sys.error("Can't make an entropy UCI from a go UCI")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow UCI from a go UCI")
   }
 
   sealed abstract class DiceRoll(
@@ -502,6 +521,7 @@ object Uci {
     def toAbalone      = sys.error("Can't make an abalone UCI from a chess UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a chess UCI")
     def toEntropy      = sys.error("Can't make an entropy UCI from a chess UCI")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow UCI from a chess UCI")
   }
 
   final case class BackgammonDiceRoll(dr: backgammon.format.Uci.DiceRoll)
@@ -527,6 +547,7 @@ object Uci {
     def toAbalone      = sys.error("Can't make an abalone UCI from a backgammon UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a backgammon UCI")
     def toEntropy      = sys.error("Can't make an entropy UCI from a backgammon UCI")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow UCI from a backgammon UCI")
   }
 
   sealed abstract class DoRoll() extends Uci {
@@ -552,6 +573,7 @@ object Uci {
     def toAbalone      = sys.error("Can't make an abalone UCI from a chess UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a chess UCI")
     def toEntropy      = sys.error("Can't make an entropy UCI from a chess UCI")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow UCI from a chess UCI")
   }
 
   final case class BackgammonDoRoll(dr: backgammon.format.Uci.DoRoll) extends DoRoll() with Backgammon {
@@ -573,6 +595,7 @@ object Uci {
     def toAbalone      = sys.error("Can't make an abalone UCI from a backgammon UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a backgammon UCI")
     def toEntropy      = sys.error("Can't make an entropy UCI from a backgammon UCI")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow UCI from a backgammon UCI")
   }
 
   sealed abstract class Undo() extends Uci {
@@ -598,6 +621,7 @@ object Uci {
     def toAbalone      = sys.error("Can't make an abalone UCI from a backgammon UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a backgammon UCI")
     def toEntropy      = sys.error("Can't make an entropy UCI from a backgammon UCI")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow UCI from a backgammon UCI")
   }
 
   sealed abstract class EndTurn() extends Uci {
@@ -623,6 +647,7 @@ object Uci {
     def toAbalone      = sys.error("Can't make an abalone UCI from a backgammon UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a backgammon UCI")
     def toEntropy      = sys.error("Can't make an entropy UCI from a backgammon UCI")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow UCI from a backgammon UCI")
   }
 
   sealed abstract class CubeAction(
@@ -654,6 +679,7 @@ object Uci {
     def toAbalone      = sys.error("Can't make an abalone UCI from a backgammon UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from a backgammon UCI")
     def toEntropy      = sys.error("Can't make an entropy UCI from a backgammon UCI")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow UCI from a backgammon UCI")
   }
 
   final case class EntropyMove(m: entropy.format.Uci.Move)
@@ -678,6 +704,7 @@ object Uci {
     def toAbalone      = sys.error("Can't make a abalone UCI from an entropy UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from an entropy UCI")
     def toEntropy      = m
+    def toFiveInARow   = sys.error("Can't make a fiveinarow object from an entropy object")
   }
 
   final case class EntropyDrop(d: entropy.format.Uci.Drop)
@@ -702,6 +729,32 @@ object Uci {
     def toAbalone      = sys.error("Can't make a abalone UCI from an entropy UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from an entropy UCI")
     def toEntropy      = d
+    def toFiveInARow   = sys.error("Can't make a fiveinarow object from an entropy object")
+  }
+
+  final case class FiveInARowDrop(d: fiveinarow.format.Uci.Drop)
+      extends Drop(
+        Role.FiveInARowRole(d.role),
+        Pos.FiveInARow(d.pos)
+      )
+      with FiveInARow {
+    def gameLogic      = GameLogic.FiveInARow()
+    def uci            = d.uci
+    def shortUci       = d.uci
+    def fishnetUci     = d.fishnetUci
+    def piotr          = d.piotr
+    val unwrap         = d
+    def toChess        = sys.error("Can't make a chess UCI from a fiveinarow UCI")
+    def toDraughts     = sys.error("Can't make a draughts UCI from a fiveinarow UCI")
+    def toFairySF      = sys.error("Can't make a fairysf UCI from a fiveinarow UCI")
+    def toSamurai      = sys.error("Can't make a samurai UCI from a fiveinarow UCI")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a fiveinarow UCI")
+    def toGo           = sys.error("Can't make a go UCI from a fiveinarow UCI")
+    def toBackgammon   = sys.error("Can't make a backgammon UCI from a fiveinarow UCI")
+    def toAbalone      = sys.error("Can't make a abalone UCI from a fiveinarow UCI")
+    def toDameo        = sys.error("Can't make a dameo UCI from a fiveinarow UCI")
+    def toFiveInARow   = d
+    def toEntropy      = sys.error("Can't make an entropy object from a fiveinarow object")
   }
 
   final case class EntropyPass(p: entropy.format.Uci.Pass) extends Pass() with Entropy {
@@ -723,6 +776,7 @@ object Uci {
     def toAbalone      = sys.error("Can't make a abalone UCI from an entropy UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from an entropy UCI")
     def toEntropy      = p
+    def toFiveInARow   = sys.error("Can't make a fiveinarow object from an entropy object")
   }
 
   // the counter drawn from the bag; the entropy analogue of a dice roll
@@ -749,6 +803,7 @@ object Uci {
     def toAbalone      = sys.error("Can't make a abalone UCI from an entropy UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from an entropy UCI")
     def toEntropy      = dc
+    def toFiveInARow   = sys.error("Can't make a fiveinarow object from an entropy object")
   }
 
   // "I must draw, but the bag has not been opened yet". The request, not the result -
@@ -778,6 +833,7 @@ object Uci {
     def toAbalone      = sys.error("Can't make a abalone UCI from an entropy UCI")
     def toDameo        = sys.error("Can't make a dameo UCI from an entropy UCI")
     def toEntropy      = dc
+    def toFiveInARow   = sys.error("Can't make a fiveinarow object from an entropy object")
   }
 
   def wrap(uci: entropy.format.Uci): Uci = uci match {
@@ -786,6 +842,64 @@ object Uci {
     case p: entropy.format.Uci.Pass           => EntropyPass(p)
     case dc: entropy.format.Uci.DrawCounter   => EntropyDrawCounter(dc)
     case dc: entropy.format.Uci.DoDrawCounter => EntropyDoDrawCounter(dc)
+  }
+
+  sealed abstract class Swap() extends Uci {
+    def origDest: Option[(Pos, Pos)] = None
+  }
+
+  final case class FiveInARowSwap(s: fiveinarow.format.Uci.Swap) extends Swap() with FiveInARow {
+    def gameLogic  = GameLogic.FiveInARow()
+    def uci        = s.uci
+    def shortUci   = s.uci
+    def fishnetUci = s.uci
+    def piotr      = s.piotr
+
+    val unwrap = s
+
+    def toChess        = sys.error("Can't make a chess UCI from a fiveinarow UCI")
+    def toDraughts     = sys.error("Can't make a draughts UCI from a fiveinarow UCI")
+    def toFairySF      = sys.error("Can't make a fairysf UCI from a fiveinarow UCI")
+    def toSamurai      = sys.error("Can't make a samurai UCI from a fiveinarow UCI")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a fiveinarow UCI")
+    def toGo           = sys.error("Can't make a go UCI from a fiveinarow UCI")
+    def toBackgammon   = sys.error("Can't make a backgammon UCI from a fiveinarow UCI")
+    def toAbalone      = sys.error("Can't make an abalone UCI from a fiveinarow UCI")
+    def toDameo        = sys.error("Can't make a dameo UCI from a fiveinarow UCI")
+    def toEntropy      = sys.error("Can't make an entropy UCI from a fiveinarow UCI")
+    def toFiveInARow   = s
+  }
+
+  sealed abstract class Swap2() extends Uci {
+    def origDest: Option[(Pos, Pos)] = None
+  }
+
+  final case class FiveInARowSwap2(s: fiveinarow.format.Uci.Swap2) extends Swap2() with FiveInARow {
+    def gameLogic  = GameLogic.FiveInARow()
+    def uci        = s.uci
+    def shortUci   = s.uci
+    def fishnetUci = s.uci
+    def piotr      = s.piotr
+
+    val unwrap = s
+
+    def toChess        = sys.error("Can't make a chess UCI from a fiveinarow UCI")
+    def toDraughts     = sys.error("Can't make a draughts UCI from a fiveinarow UCI")
+    def toFairySF      = sys.error("Can't make a fairysf UCI from a fiveinarow UCI")
+    def toSamurai      = sys.error("Can't make a samurai UCI from a fiveinarow UCI")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a fiveinarow UCI")
+    def toGo           = sys.error("Can't make a go UCI from a fiveinarow UCI")
+    def toBackgammon   = sys.error("Can't make a backgammon UCI from a fiveinarow UCI")
+    def toAbalone      = sys.error("Can't make an abalone UCI from a fiveinarow UCI")
+    def toDameo        = sys.error("Can't make a dameo UCI from a fiveinarow UCI")
+    def toEntropy      = sys.error("Can't make an entropy UCI from a fiveinarow UCI")
+    def toFiveInARow   = s
+  }
+
+  def wrap(uci: fiveinarow.format.Uci): Uci = uci match {
+    case d: fiveinarow.format.Uci.Drop  => FiveInARowDrop(d)
+    case s: fiveinarow.format.Uci.Swap  => FiveInARowSwap(s)
+    case s: fiveinarow.format.Uci.Swap2 => FiveInARowSwap2(s)
   }
 
   def wrap(uci: chess.format.Uci): Uci = uci match {
@@ -941,6 +1055,8 @@ object Uci {
           )
         case (GameLogic.Entropy(), Pos.Entropy(orig), Pos.Entropy(dest))                =>
           EntropyMove(entropy.format.Uci.Move(orig, dest))
+        case (GameLogic.FiveInARow(), Pos.FiveInARow(_), Pos.FiveInARow(_))             =>
+          sys.error("Stones are never moved in fiveinarow")
         case _                                                                          => sys.error("Mismatched gamelogic types 23")
       }
 
@@ -954,6 +1070,7 @@ object Uci {
       case GameLogic.Abalone()      => abalone.format.Uci.Move(move).map(AbaloneMove.apply)
       case GameLogic.Dameo()        => dameo.format.Uci.Move(move).map(DameoMove.apply)
       case GameLogic.Entropy()      => entropy.format.Uci.Move(move).map(EntropyMove.apply)
+      case GameLogic.FiveInARow()   => None
       case _                        => sys.error("Invalid lib gf and move combo for Uci")
     }
 
@@ -967,6 +1084,7 @@ object Uci {
       case GameLogic.Abalone()      => abalone.format.Uci.Move.piotr(move).map(AbaloneMove.apply)
       case GameLogic.Dameo()        => dameo.format.Uci.Move.piotr(move).map(DameoMove.apply)
       case GameLogic.Entropy()      => entropy.format.Uci.Move.piotr(move).map(EntropyMove.apply)
+      case GameLogic.FiveInARow()   => None
       case _                        => sys.error("Invalid lib gf and move combo for piotr")
     }
 
@@ -993,6 +1111,7 @@ object Uci {
       case GameLogic.Dameo()        => dameo.format.Uci.Move.fromStrings(origS, destS, promS).map(DameoMove.apply)
       case GameLogic.Entropy()      =>
         entropy.format.Uci.Move.fromStrings(origS, destS).map(EntropyMove.apply)
+      case GameLogic.FiveInARow()   => None
     }
   }
 
@@ -1015,6 +1134,8 @@ object Uci {
           backgammon.format.Uci.Drop.fromStrings(roleS, posS).map(BackgammonDrop.apply)
         case GameLogic.Entropy()      =>
           entropy.format.Uci.Drop.fromStrings(roleS, posS).map(EntropyDrop.apply)
+        case GameLogic.FiveInARow()   =>
+          fiveinarow.format.Uci.Drop.fromStrings(roleS, posS).map(FiveInARowDrop.apply)
       }
   }
 
@@ -1037,6 +1158,7 @@ object Uci {
         case GameLogic.Abalone()      => None
         case GameLogic.Dameo()        => None
         case GameLogic.Entropy()      => None
+        case GameLogic.FiveInARow()   => None
       }
   }
 
@@ -1054,6 +1176,7 @@ object Uci {
         case GameLogic.FairySF()      => None
         case GameLogic.Go()           => GoPass(go.format.Uci.Pass()).some
         case GameLogic.Entropy()      => EntropyPass(entropy.format.Uci.Pass()).some
+        case GameLogic.FiveInARow()   => None
       }
 
   }
@@ -1083,7 +1206,8 @@ object Uci {
               )
           ).some
 
-        case GameLogic.Entropy() => None
+        case GameLogic.Entropy()    => None
+        case GameLogic.FiveInARow() => None
       }
 
   }
@@ -1103,6 +1227,7 @@ object Uci {
         case GameLogic.Abalone()      => None
         case GameLogic.Dameo()        => None
         case GameLogic.Entropy()      => None
+        case GameLogic.FiveInARow()   => None
       }
 
   }
@@ -1121,6 +1246,7 @@ object Uci {
         case GameLogic.Abalone()      => None
         case GameLogic.Dameo()        => None
         case GameLogic.Entropy()      => None
+        case GameLogic.FiveInARow()   => None
       }
 
   }
@@ -1139,6 +1265,7 @@ object Uci {
         case GameLogic.Abalone()      => None
         case GameLogic.Dameo()        => None
         case GameLogic.Entropy()      => None
+        case GameLogic.FiveInARow()   => None
       }
 
   }
@@ -1157,6 +1284,7 @@ object Uci {
         case GameLogic.Abalone()      => None
         case GameLogic.Dameo()        => None
         case GameLogic.Entropy()      => None
+        case GameLogic.FiveInARow()   => None
       }
 
   }
@@ -1176,6 +1304,7 @@ object Uci {
         case GameLogic.Abalone()      => None
         case GameLogic.Dameo()        => None
         case GameLogic.Entropy()      => None
+        case GameLogic.FiveInARow()   => None
       }
 
   }
@@ -1195,6 +1324,7 @@ object Uci {
         case GameLogic.Dameo()        => None
         case GameLogic.Entropy()      =>
           entropy.format.Uci.DrawCounter.fromStrings(counter).map(EntropyDrawCounter.apply)
+        case GameLogic.FiveInARow()   => None
       }
 
   }
@@ -1213,6 +1343,7 @@ object Uci {
         case GameLogic.Abalone()      => None
         case GameLogic.Dameo()        => None
         case GameLogic.Entropy()      => EntropyDoDrawCounter(entropy.format.Uci.DoDrawCounter()).some
+        case GameLogic.FiveInARow()   => None
       }
 
   }
@@ -1279,6 +1410,12 @@ object Uci {
         w.san
       )
 
+  final case class FiveInARowWithSan(w: fiveinarow.format.Uci.WithSan)
+      extends WithSan(
+        wrap(w.uci),
+        w.san
+      )
+
   object WithSan {
 
     def apply(lib: GameLogic, uci: Uci, san: String): WithSan = (lib, uci) match {
@@ -1301,6 +1438,8 @@ object Uci {
         Uci.DameoWithSan(dameo.format.Uci.WithSan(uci, san))
       case (GameLogic.Entropy(), u: Uci.Entropy)           =>
         Uci.EntropyWithSan(entropy.format.Uci.WithSan(u.unwrap, san))
+      case (GameLogic.FiveInARow(), u: Uci.FiveInARow)     =>
+        Uci.FiveInARowWithSan(fiveinarow.format.Uci.WithSan(u.unwrap, san))
       case _                                               => sys.error("Mismatched gamelogic types 24")
     }
 
@@ -1343,6 +1482,8 @@ object Uci {
     case (GameLogic.Dameo(), _)                                        => sys.error("Drop not implemented for abalone")
     case (GameLogic.Entropy(), strategygames.Drop.Entropy(drop))       =>
       EntropyDrop(entropy.format.Uci(drop))
+    case (GameLogic.FiveInARow(), strategygames.Drop.FiveInARow(drop)) =>
+      FiveInARowDrop(fiveinarow.format.Uci(drop))
     case _                                                             => sys.error(s"Drop not implemented for ${lib}")
   }
 
@@ -1358,6 +1499,7 @@ object Uci {
     case (GameLogic.Abalone(), _)                                      => sys.error("Lift not implemented for abalone")
     case (GameLogic.Dameo(), _)                                        => sys.error("Lift not implemented for abalone")
     case (GameLogic.Entropy(), _)                                      => sys.error("Lift not implemented for entropy")
+    case (GameLogic.FiveInARow(), _)                                   => sys.error("Lift not implemented for fiveinarow")
     case _                                                             => sys.error(s"Lift not implemented for ${lib}")
   }
 
@@ -1372,6 +1514,7 @@ object Uci {
     case (GameLogic.Abalone(), _)                                => sys.error("Pass not implemented for abalone")
     case (GameLogic.Dameo(), _)                                  => sys.error("Pass not implemented for dameo")
     case (GameLogic.Entropy(), strategygames.Pass.Entropy(pass)) => EntropyPass(entropy.format.Uci(pass))
+    case (GameLogic.FiveInARow(), _)                             => sys.error("Pass not implemented for fiveinarow")
     case _                                                       => sys.error(s"Pass not implemented for ${lib}")
   }
 
@@ -1387,6 +1530,7 @@ object Uci {
     case (GameLogic.Abalone(), _)                                        => sys.error("SelectSquares not implemented for abalone")
     case (GameLogic.Dameo(), _)                                          => sys.error("SelectSquares not implemented for dameo")
     case (GameLogic.Entropy(), _)                                        => sys.error("SelectSquares not implemented for entropy")
+    case (GameLogic.FiveInARow(), _)                                     => sys.error("SelectSquares not implemented for fiveinarow")
   }
 
   def apply(lib: GameLogic, diceRoll: strategygames.DiceRoll) = (lib, diceRoll) match {
@@ -1402,31 +1546,34 @@ object Uci {
     case (GameLogic.Abalone(), _)                                              => sys.error("DiceRoll not implemented for abalone")
     case (GameLogic.Dameo(), _)                                                => sys.error("DiceRoll not implemented for dameo")
     case (GameLogic.Entropy(), _)                                              => sys.error("DiceRoll not implemented for entropy")
+    case (GameLogic.FiveInARow(), _)                                           => sys.error("DiceRoll not implemented for fiveinarow")
     case _                                                                     => sys.error(s"DiceRoll not implemented for ${lib}")
   }
 
   def apply(lib: GameLogic, drawCounter: strategygames.DrawCounter) = (lib, drawCounter) match {
-    case (GameLogic.Draughts(), _)                                              =>
+    case (GameLogic.Draughts(), _)                                             =>
       sys.error("DrawCounter not implemented for Draughts")
-    case (GameLogic.Chess(), _)                                                 =>
+    case (GameLogic.Chess(), _)                                                =>
       sys.error("DrawCounter not implemented for Chess")
-    case (GameLogic.FairySF(), _)                                               =>
+    case (GameLogic.FairySF(), _)                                              =>
       sys.error("DrawCounter not implemented for fairysf")
-    case (GameLogic.Samurai(), _)                                               =>
+    case (GameLogic.Samurai(), _)                                              =>
       sys.error("DrawCounter not implemented for samurai")
-    case (GameLogic.Togyzkumalak(), _)                                          =>
+    case (GameLogic.Togyzkumalak(), _)                                         =>
       sys.error("DrawCounter not implemented for togyzkumalak")
-    case (GameLogic.Go(), _)                                                    =>
+    case (GameLogic.Go(), _)                                                   =>
       sys.error("DrawCounter not implemented for go")
-    case (GameLogic.Backgammon(), _)                                            =>
+    case (GameLogic.Backgammon(), _)                                           =>
       sys.error("DrawCounter not implemented for backgammon")
-    case (GameLogic.Abalone(), _)                                               =>
+    case (GameLogic.Abalone(), _)                                              =>
       sys.error("DrawCounter not implemented for abalone")
-    case (GameLogic.Dameo(), _)                                                 =>
+    case (GameLogic.Dameo(), _)                                                =>
       sys.error("DrawCounter not implemented for dameo")
-    case (GameLogic.Entropy(), strategygames.DrawCounter.Entropy(drawCounter))  =>
+    case (GameLogic.Entropy(), strategygames.DrawCounter.Entropy(drawCounter)) =>
       EntropyDrawCounter(entropy.format.Uci(drawCounter))
-    case _                                                                      =>
+    case (GameLogic.FiveInARow(), _)                                           =>
+      sys.error("DrawCounter not implemented for fiveinarow")
+    case _                                                                     =>
       sys.error(s"DrawCounter not implemented for ${lib}")
   }
 
@@ -1442,6 +1589,7 @@ object Uci {
     case (GameLogic.Abalone(), _)                                            => sys.error("EndTurn not implemented for abalone")
     case (GameLogic.Dameo(), _)                                              => sys.error("EndTurn not implemented for dameo")
     case (GameLogic.Entropy(), _)                                            => sys.error("EndTurn not implemented for entropy")
+    case (GameLogic.FiveInARow(), _)                                         => sys.error("EndTurn not implemented for fiveinarow")
   }
 
   def apply(lib: GameLogic, cubeAction: strategygames.CubeAction) = (lib, cubeAction) match {
@@ -1456,6 +1604,7 @@ object Uci {
     case (GameLogic.Abalone(), _)                                                  => sys.error("CubeAction not implemented for abalone")
     case (GameLogic.Dameo(), _)                                                    => sys.error("CubeAction not implemented for dameo")
     case (GameLogic.Entropy(), _)                                                  => sys.error("CubeAction not implemented for entropy")
+    case (GameLogic.FiveInARow(), _)                                               => sys.error("CubeAction not implemented for fiveinarow")
     case _                                                                         => sys.error(s"CubeAction not implemented for ${lib}")
   }
 
@@ -1470,6 +1619,7 @@ object Uci {
     case GameLogic.Abalone()      => abalone.format.Uci(action).map(wrap)
     case GameLogic.Dameo()        => dameo.format.Uci(action).map(wrap)
     case GameLogic.Entropy()      => entropy.format.Uci(action).map(wrap)
+    case GameLogic.FiveInARow()   => fiveinarow.format.Uci(action).map(wrap)
   }
 
   def apply(v: Variant, action: String): Option[Uci] =
@@ -1486,6 +1636,7 @@ object Uci {
     case GameLogic.Abalone()      => abalone.format.Uci.piotr(action).map(wrap)
     case GameLogic.Dameo()        => dameo.format.Uci.piotr(action).map(wrap)
     case GameLogic.Entropy()      => entropy.format.Uci.piotr(action).map(wrap)
+    case GameLogic.FiveInARow()   => fiveinarow.format.Uci.piotr(action).map(wrap)
   }
 
   def readList(lib: GameLogic, gf: GameFamily, actions: String): Option[List[Uci]] = lib match {
@@ -1499,6 +1650,7 @@ object Uci {
     case GameLogic.Abalone()      => abalone.format.Uci.readList(actions).map(_.map(wrap))
     case GameLogic.Dameo()        => dameo.format.Uci.readList(actions).map(_.map(wrap))
     case GameLogic.Entropy()      => entropy.format.Uci.readList(actions).map(_.map(wrap))
+    case GameLogic.FiveInARow()   => fiveinarow.format.Uci.readList(actions).map(_.map(wrap))
   }
 
   def writeList(actions: List[Uci]): String =

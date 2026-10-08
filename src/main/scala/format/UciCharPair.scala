@@ -23,6 +23,8 @@ object UciCharPair {
     case (GameLogic.Dameo(), uci: Uci.Dameo)               => strategygames.dameo.format.UciCharPair(uci.unwrap)
     case (GameLogic.Entropy(), uci: Uci.Entropy)           =>
       strategygames.entropy.format.UciCharPair(uci.unwrap)
+    case (GameLogic.FiveInARow(), uci: Uci.FiveInARow)     =>
+      strategygames.fiveinarow.format.UciCharPair(uci.unwrap)
     case _                                                 => sys.error("Mismatched gamelogic and UciCharPair")
   }
 

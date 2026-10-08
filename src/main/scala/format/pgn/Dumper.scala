@@ -7,7 +7,9 @@ import strategygames.{
   Drop => StratDrop,
   Move => StratMove,
   Pass => StratPass,
-  SelectSquares => StratSelectSquares
+  SelectSquares => StratSelectSquares,
+  Swap => StratSwap,
+  Swap2 => StratSwap2
 }
 
 object Dumper {
@@ -38,11 +40,12 @@ object Dumper {
   }
 
   def apply(lib: GameLogic, data: StratDrop): String = (lib, data) match {
-    case (GameLogic.Chess(), StratDrop.Chess(data))     => chess.format.pgn.Dumper(data)
-    case (GameLogic.FairySF(), StratDrop.FairySF(data)) => fairysf.format.pgn.Dumper(data)
-    case (GameLogic.Go(), StratDrop.Go(data))           => go.format.pgn.Dumper(data)
-    case (GameLogic.Entropy(), StratDrop.Entropy(data)) => entropy.format.pgn.Dumper(data)
-    case _                                              => sys.error("Drops can only be applied to chess/fairysf/go")
+    case (GameLogic.Chess(), StratDrop.Chess(data))           => chess.format.pgn.Dumper(data)
+    case (GameLogic.FairySF(), StratDrop.FairySF(data))       => fairysf.format.pgn.Dumper(data)
+    case (GameLogic.Go(), StratDrop.Go(data))                 => go.format.pgn.Dumper(data)
+    case (GameLogic.Entropy(), StratDrop.Entropy(data))       => entropy.format.pgn.Dumper(data)
+    case (GameLogic.FiveInARow(), StratDrop.FiveInARow(data)) => fiveinarow.format.pgn.Dumper(data)
+    case _                                                    => sys.error("Drops can only be applied to chess/fairysf/go")
   }
 
   def apply(lib: GameLogic, data: StratPass): String = (lib, data) match {
@@ -62,12 +65,24 @@ object Dumper {
       sys.error("DrawCounter can only be applied to entropy")
   }
 
+  def apply(lib: GameLogic, data: StratSwap): String = (lib, data) match {
+    case (GameLogic.FiveInARow(), StratSwap.FiveInARow(data)) => fiveinarow.format.pgn.Dumper(data)
+    case _                                                    => sys.error("Swap can only be applied to fiveinarow")
+  }
+
+  def apply(lib: GameLogic, data: StratSwap2): String = (lib, data) match {
+    case (GameLogic.FiveInARow(), StratSwap2.FiveInARow(data)) => fiveinarow.format.pgn.Dumper(data)
+    case _                                                     => sys.error("Swap2 can only be applied to fiveinarow")
+  }
+
   def apply(lib: GameLogic, data: StratAction): String = data match {
     case m: StratMove           => apply(lib, m)
     case d: StratDrop           => apply(lib, d)
     case p: StratPass           => apply(lib, p)
     case ss: StratSelectSquares => apply(lib, ss)
     case dc: StratDrawCounter   => apply(lib, dc)
+    case s: StratSwap           => apply(lib, s)
+    case s2: StratSwap2         => apply(lib, s2)
     case _                      => sys.error("unknown action to apply to a game")
   }
 

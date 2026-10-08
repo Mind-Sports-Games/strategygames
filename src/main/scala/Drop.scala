@@ -56,6 +56,7 @@ object Drop {
     def toAbalone      = sys.error("Can't make an abalone drop from a chess drop")
     def toDameo        = sys.error("Can't make a dameo drop from a chess drop")
     def toEntropy      = sys.error("Can't make an entropy drop from a chess drop")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow drop from a chess drop")
 
   }
 
@@ -85,6 +86,7 @@ object Drop {
     def toAbalone      = sys.error("Can't make an abalone drop from a fairysf drop")
     def toDameo        = sys.error("Can't make a dameo drop from a fairysf drop")
     def toEntropy      = sys.error("Can't make an entropy drop from a fairysf drop")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow drop from a fairysf drop")
 
   }
 
@@ -114,6 +116,7 @@ object Drop {
     def toAbalone      = sys.error("Can't make an abalone drop from a go drop")
     def toDameo        = sys.error("Can't make a dameo drop from a go drop")
     def toEntropy      = sys.error("Can't make an entropy drop from a go drop")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow drop from a go drop")
 
   }
 
@@ -143,6 +146,7 @@ object Drop {
     def toAbalone      = sys.error("Can't make an abalone drop from a backgammon drop")
     def toDameo        = sys.error("Can't make a dameo drop from a backgammon drop")
     def toEntropy      = sys.error("Can't make an entropy drop from a backgammon drop")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow drop from a backgammon drop")
 
   }
 
@@ -178,6 +182,39 @@ object Drop {
     def toAbalone      = sys.error("Can't make a abalone drop from an entropy drop")
     def toDameo        = sys.error("Can't make a dameo drop from an entropy drop")
     def toEntropy      = d
+    def toFiveInARow   = sys.error("Can't make a fiveinarow object from an entropy object")
+
+    override def toString = toUci.uci
+  }
+
+  final case class FiveInARow(d: fiveinarow.Drop)
+      extends Drop(
+        Piece.FiveInARow(d.piece),
+        Pos.FiveInARow(d.pos),
+        Situation.FiveInARow(d.situationBefore),
+        Board.FiveInARow(d.after),
+        d.autoEndTurn,
+        d.metrics
+      ) {
+
+    def situationAfter: Situation = Situation.FiveInARow(d.situationAfter)
+    def finalizeAfter: Board      = d.finalizeAfter
+
+    def toUci: Uci.Drop = Uci.FiveInARowDrop((d.toUci: fiveinarow.format.Uci.Drop))
+
+    val unwrap = d
+
+    def toChess        = sys.error("Can't make a chess drop from a fiveinarow drop")
+    def toDraughts     = sys.error("Can't make a draughts drop from a fiveinarow drop")
+    def toFairySF      = sys.error("Can't make a fairysf drop from a fiveinarow drop")
+    def toSamurai      = sys.error("Can't make a samurai drop from a fiveinarow drop")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak drop from a fiveinarow drop")
+    def toGo           = sys.error("Can't make a go drop from a fiveinarow drop")
+    def toBackgammon   = sys.error("Can't make a backgammon drop from a fiveinarow drop")
+    def toAbalone      = sys.error("Can't make a abalone drop from a fiveinarow drop")
+    def toDameo        = sys.error("Can't make a dameo drop from a fiveinarow drop")
+    def toFiveInARow   = d
+    def toEntropy      = sys.error("Can't make an entropy object from a fiveinarow object")
 
     override def toString = toUci.uci
   }

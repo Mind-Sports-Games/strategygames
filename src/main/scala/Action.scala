@@ -23,6 +23,7 @@ abstract class Action(
   def toAbalone: abalone.Action
   def toDameo: dameo.Action
   def toEntropy: entropy.Action
+  def toFiveInARow: fiveinarow.Action
 }
 
 object Action {
@@ -77,6 +78,12 @@ object Action {
     case d: entropy.Drop         => Drop.Entropy(d)
     case p: entropy.Pass         => Pass.Entropy(p)
     case dc: entropy.DrawCounter => DrawCounter.Entropy(dc)
+  }
+
+  def wrap(action: fiveinarow.Action): Action = action match {
+    case d: fiveinarow.Drop   => Drop.FiveInARow(d)
+    case s: fiveinarow.Swap   => Swap.FiveInARow(s)
+    case s2: fiveinarow.Swap2 => Swap2.FiveInARow(s2)
   }
 
   def toChess(action: Action): chess.Action = action match {
@@ -139,6 +146,13 @@ object Action {
     case DrawCounter.Entropy(dc) => dc
     case _                       =>
       sys.error("Expecting an entropy action e.g. move, drop, pass or drawCounter")
+  }
+
+  def toFiveInARow(action: Action): fiveinarow.Action = action match {
+    case Drop.FiveInARow(d)   => d
+    case Swap.FiveInARow(s)   => s
+    case Swap2.FiveInARow(s2) => s2
+    case _                    => sys.error("Expecting a fiveinarow action e.g. drop, swap or swap2")
   }
 
 }

@@ -85,6 +85,12 @@ object Hash {
     val actorMasks: Array[Long]    = zc.actorMasks
   }
 
+  final case class FiveInARowZobristConstants(zc: fiveinarow.Hash.ZobristConstants) extends ZobristConstants {
+    def hexToLong(s: String): Long = zc.hexToLong(s)
+    val p1TurnMask: Long           = zc.p1TurnMask
+    val actorMasks: Array[Long]    = zc.actorMasks
+  }
+
   // The following masks are compatible with the Polyglot
   // opening book format.
   private def polyglotTable(lib: GameLogic): ZobristConstants = lib match {
@@ -98,6 +104,7 @@ object Hash {
     case GameLogic.Abalone()      => AbaloneZobristConstants(new abalone.Hash.ZobristConstants(0))
     case GameLogic.Dameo()        => DameoZobristConstants(new dameo.Hash.ZobristConstants(0))
     case GameLogic.Entropy()      => EntropyZobristConstants(new entropy.Hash.ZobristConstants(0))
+    case GameLogic.FiveInARow()   => FiveInARowZobristConstants(new fiveinarow.Hash.ZobristConstants(0))
   }
 
   private def randomTable(lib: GameLogic): ZobristConstants = lib match {
@@ -111,6 +118,7 @@ object Hash {
     case GameLogic.Abalone()      => AbaloneZobristConstants(new abalone.Hash.ZobristConstants(16))
     case GameLogic.Dameo()        => DameoZobristConstants(new dameo.Hash.ZobristConstants(16))
     case GameLogic.Entropy()      => EntropyZobristConstants(new entropy.Hash.ZobristConstants(16))
+    case GameLogic.FiveInARow()   => FiveInARowZobristConstants(new fiveinarow.Hash.ZobristConstants(16))
   }
 
   private def get(lib: GameLogic, situation: Situation, table: ZobristConstants): Long =
@@ -139,6 +147,8 @@ object Hash {
         dameo.Hash.get(situation, table)
       case (GameLogic.Entropy(), Situation.Entropy(situation), EntropyZobristConstants(table))          =>
         entropy.Hash.get(situation, table)
+      case (GameLogic.FiveInARow(), Situation.FiveInARow(situation), FiveInARowZobristConstants(table)) =>
+        fiveinarow.Hash.get(situation, table)
       case _                                                                                            => sys.error("Invalid lib, situation and table combination")
     }
 

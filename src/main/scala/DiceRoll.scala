@@ -53,6 +53,7 @@ object DiceRoll {
     def toAbalone      = sys.error("Can't make an abalone DiceRoll from a chess DiceRoll")
     def toDameo        = sys.error("Can't make a dameo DiceRoll from a chess DiceRoll")
     def toEntropy      = sys.error("Can't make an entropy DiceRoll from a chess DiceRoll")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow DiceRoll from a chess DiceRoll")
 
   }
 
@@ -82,6 +83,7 @@ object DiceRoll {
     def toAbalone      = sys.error("Can't make an abalone DiceRoll from a backgammon DiceRoll")
     def toDameo        = sys.error("Can't make a dameo DiceRoll from a backgammon DiceRoll")
     def toEntropy      = sys.error("Can't make an entropy DiceRoll from a backgammon DiceRoll")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow DiceRoll from a backgammon DiceRoll")
 
   }
 

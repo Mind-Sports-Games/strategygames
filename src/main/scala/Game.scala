@@ -164,6 +164,14 @@ abstract class Game(
           metrics
         )
       case Uci.EntropyDoDrawCounter(_)                  => randomizeAndApplyDrawCounter(metrics)
+      case Uci.FiveInARowDrop(uci)                      =>
+        drop(
+          Role.FiveInARowRole(uci.role),
+          Pos.FiveInARow(uci.pos),
+          metrics
+        )
+      case Uci.FiveInARowSwap(_)                        => swap(metrics)
+      case Uci.FiveInARowSwap2(_)                       => swap2(metrics)
       case Uci.GoPass(_) | Uci.EntropyPass(_)           => pass(metrics)
       case Uci.ChessDoRoll(_) | Uci.BackgammonDoRoll(_) => randomizeAndApplyDiceRoll(metrics)
       case Uci.BackgammonUndo(_)                        => undo(metrics)
@@ -219,6 +227,12 @@ abstract class Game(
   ): Validated[String, (Game, DrawCounter)] =
     sys.error("Can't draw a counter in this game logic")
 
+  def swap(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Swap)] =
+    sys.error("Can't swap in this game logic")
+
+  def swap2(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Swap2)] =
+    sys.error("Can't swap2 in this game logic")
+
   // Because I"m unsure how to properly write a single, generic copy
   // type signature, we're getting individual ones for how we use it.
   // TODO: figure out if we can properly make this generic
@@ -259,6 +273,7 @@ abstract class Game(
   def toAbalone: abalone.Game
   def toDameo: dameo.Game
   def toEntropy: entropy.Game
+  def toFiveInARow: fiveinarow.Game
 
 }
 
@@ -414,6 +429,7 @@ object Game {
     def toAbalone: abalone.Game           = sys.error("Can't turn a chess game into an abalone game")
     def toDameo: dameo.Game               = sys.error("Can't turn a chess game into a dameo game")
     def toEntropy: entropy.Game           = sys.error("Can't turn a chess game into an entropy game")
+    def toFiveInARow: fiveinarow.Game     = sys.error("Can't turn a chess game into a fiveinarow game")
 
   }
 
@@ -582,6 +598,7 @@ object Game {
     def toAbalone: abalone.Game           = sys.error("Can't turn a draughts game into an abalone game")
     def toDameo: dameo.Game               = sys.error("Can't turn a draughts game into a dameo game")
     def toEntropy: entropy.Game           = sys.error("Can't turn a draughts game into an entropy game")
+    def toFiveInARow: fiveinarow.Game     = sys.error("Can't turn a draughts game into a fiveinarow game")
 
   }
 
@@ -734,6 +751,7 @@ object Game {
     def toAbalone: abalone.Game           = sys.error("Can't turn a fairysf game into an abalone game")
     def toDameo: dameo.Game               = sys.error("Can't turn a fairysf game into a dameo game")
     def toEntropy: entropy.Game           = sys.error("Can't turn a fairysf game into an entropy game")
+    def toFiveInARow: fiveinarow.Game     = sys.error("Can't turn a fairysf game into a fiveinarow game")
 
   }
 
@@ -871,6 +889,7 @@ object Game {
     def toAbalone: abalone.Game           = sys.error("Can't turn a samurai game into an abalone game")
     def toDameo: dameo.Game               = sys.error("Can't turn a samurai game into a dameo game")
     def toEntropy: entropy.Game           = sys.error("Can't turn a samurai game into an entropy game")
+    def toFiveInARow: fiveinarow.Game     = sys.error("Can't turn a samurai game into a fiveinarow game")
 
   }
 
@@ -1009,6 +1028,7 @@ object Game {
     def toAbalone: abalone.Game           = sys.error("Can't turn a togyzkumalak game into an abalone game")
     def toDameo: dameo.Game               = sys.error("Can't turn a togyzkumalak game into a dameo game")
     def toEntropy: entropy.Game           = sys.error("Can't turn a togyzkumalak game into an entropy game")
+    def toFiveInARow: fiveinarow.Game     = sys.error("Can't turn a togyzkumalak game into a fiveinarow game")
 
   }
 
@@ -1156,6 +1176,7 @@ object Game {
     def toAbalone: abalone.Game           = sys.error("Can't turn a go game into an abalone game")
     def toDameo: dameo.Game               = sys.error("Can't turn a go game into a dameo game")
     def toEntropy: entropy.Game           = sys.error("Can't turn a go game into an entropy game")
+    def toFiveInARow: fiveinarow.Game     = sys.error("Can't turn a go game into a fiveinarow game")
 
   }
 
@@ -1322,6 +1343,7 @@ object Game {
     def toAbalone: abalone.Game           = sys.error("Can't turn a backgammon game into an abalone game")
     def toDameo: dameo.Game               = sys.error("Can't turn a backgammon game into a dameo game")
     def toEntropy: entropy.Game           = sys.error("Can't turn a backgammon game into an entropy game")
+    def toFiveInARow: fiveinarow.Game     = sys.error("Can't turn a backgammon game into a fiveinarow game")
 
   }
 
@@ -1462,6 +1484,8 @@ object Game {
     override def toAbalone: abalone.Game           = g
     override def toDameo: dameo.Game               = sys.error("Can't turn an abalone game into a dameo game")
     override def toEntropy: entropy.Game           = sys.error("Can't turn an abalone game into an entropy game")
+    override def toFiveInARow: fiveinarow.Game     =
+      sys.error("Can't turn an abalone game into a fiveinarow game")
   }
 
   final case class Dameo(g: dameo.Game)
@@ -1599,6 +1623,7 @@ object Game {
     def toAbalone: abalone.Game           = sys.error("Can't turn a dameo game into an abalone game")
     def toDameo: dameo.Game               = g
     def toEntropy: entropy.Game           = sys.error("Can't turn a dameo game into an entropy game")
+    def toFiveInARow: fiveinarow.Game     = sys.error("Can't turn a dameo game into a fiveinarow game")
 
   }
 
@@ -1778,6 +1803,166 @@ object Game {
     def toAbalone: abalone.Game           = sys.error("Can't turn an entropy game into an abalone game")
     def toDameo: dameo.Game               = sys.error("Can't turn an entropy game into a dameo game")
     def toEntropy: entropy.Game           = g
+    def toFiveInARow                      = sys.error("Can't make a fiveinarow object from an entropy object")
+
+  }
+
+  final case class FiveInARow(g: fiveinarow.Game)
+      extends Game(
+        Situation.FiveInARow(g.situation),
+        g.actionStrs,
+        g.clock,
+        g.plies,
+        g.turnCount,
+        g.startedAtPly,
+        g.startedAtTurn
+      ) {
+
+    def apply(
+        orig: Pos,
+        dest: Pos,
+        promotion: Option[PromotableRole] = None,
+        metrics: MoveMetrics = MoveMetrics(),
+        finalSquare: Boolean = false,
+        captures: Option[List[Pos]] = None,
+        partialCaptures: Boolean = false
+    ): Validated[String, (Game, Move)] = sys.error("Can't move a stone in fiveinarow")
+
+    def apply(action: Action): Game =
+      action match {
+        case (Drop.FiveInARow(drop))   => FiveInARow(g.apply(drop))
+        case (Swap.FiveInARow(swap))   => FiveInARow(g.apply(swap))
+        case (Swap2.FiveInARow(swap2)) => FiveInARow(g.apply(swap2))
+        case _                         => sys.error("Not passed FiveInARow objects")
+      }
+
+    def drop(
+        role: Role,
+        pos: Pos,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, Drop)] = (role, pos) match {
+      case (Role.FiveInARowRole(role), Pos.FiveInARow(pos)) =>
+        g.situation
+          .drop(role, pos)
+          .map(_ withMetrics metrics)
+          .toEither
+          .map(d => (FiveInARow(g.apply(d)), Drop.FiveInARow(d)))
+          .toValidated
+      case _                                                => sys.error("Not passed FiveInARow objects")
+    }
+
+    def lift(
+        pos: Pos,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, Lift)] =
+      sys.error("Can't lift in fiveinarow")
+
+    def pass(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Pass)] =
+      sys.error("Can't pass in fiveinarow")
+
+    override def swap(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Swap)] =
+      g.situation
+        .swap()
+        .map(_ withMetrics metrics)
+        .toEither
+        .map(s => (FiveInARow(g.apply(s)), Swap.FiveInARow(s)))
+        .toValidated
+
+    override def swap2(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Swap2)] =
+      g.situation
+        .swap2()
+        .map(_ withMetrics metrics)
+        .toEither
+        .map(s => (FiveInARow(g.apply(s)), Swap2.FiveInARow(s)))
+        .toValidated
+
+    def selectSquares(
+        squares: List[Pos],
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, SelectSquares)] =
+      sys.error("Can't selectSquares in FiveInARow")
+
+    def diceRoll(
+        dice: List[Int],
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, DiceRoll)] =
+      sys.error("Can't diceroll in FiveInARow")
+
+    def undo(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Undo)] =
+      sys.error("Can't undo in fiveinarow")
+
+    def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)] =
+      sys.error("Can't endTurn in fiveinarow")
+
+    def cubeAction(
+        interaction: CubeInteraction,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, CubeAction)] =
+      sys.error("Can't cubeaction in fiveinarow")
+
+    def randomizeDiceRoll: Option[DiceRoll] = None
+
+    def randomizeAndApplyDiceRoll(
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, DiceRoll)] =
+      sys.error("Can't apply diceroll in fiveinarow")
+
+    def copy(clock: Option[ClockBase]): Game =
+      FiveInARow(g.copy(clock = clock))
+
+    def copy(plies: Int, turnCount: Int, startedAtPly: Int, startedAtTurn: Int): Game =
+      FiveInARow(
+        g.copy(
+          plies = plies,
+          turnCount = turnCount,
+          startedAtPly = startedAtPly,
+          startedAtTurn = startedAtTurn
+        )
+      )
+
+    def copy(
+        clock: Option[ClockBase],
+        plies: Int,
+        turnCount: Int,
+        startedAtPly: Int,
+        startedAtTurn: Int
+    ): Game =
+      FiveInARow(
+        g.copy(
+          clock = clock,
+          plies = plies,
+          turnCount = turnCount,
+          startedAtPly = startedAtPly,
+          startedAtTurn = startedAtTurn
+        )
+      )
+
+    def copy(situation: Situation, plies: Int, turnCount: Int): Game = situation match {
+      case Situation.FiveInARow(situation) =>
+        FiveInARow(g.copy(situation = situation, plies = plies, turnCount = turnCount))
+      case _                               =>
+        sys.error("Unable to copy fiveinarow game with non-fiveinarow arguments")
+    }
+    def copy(situation: Situation): Game                             = situation match {
+      case Situation.FiveInARow(situation) => FiveInARow(g.copy(situation = situation))
+      case _                               => sys.error("Unable to copy fiveinarow game with non-fiveinarow arguments")
+    }
+
+    def hasJustSwitchedTurns: Boolean = g.hasJustSwitchedTurns
+
+    def withTurnsAndPlies(p: Int, t: Int): Game = FiveInARow(g.withTurnsAndPlies(p, t))
+
+    def toFairySF: fairysf.Game           = sys.error("Can't turn a fiveinarow game into a fairysf game")
+    def toChess: chess.Game               = sys.error("Can't turn a fiveinarow game into a chess game")
+    def toDraughts: draughts.DraughtsGame = sys.error("Can't turn a fiveinarow game into a draughts game")
+    def toSamurai: samurai.Game           = sys.error("Can't turn a fiveinarow game into a samurai game")
+    def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a fiveinarow game into a togyzkumalak game")
+    def toGo: go.Game                     = sys.error("Can't turn a fiveinarow game into a go game")
+    def toBackgammon: backgammon.Game     = sys.error("Can't turn a fiveinarow game into a backgammon game")
+    def toAbalone: abalone.Game           = sys.error("Can't turn a fiveinarow game into an abalone game")
+    def toDameo: dameo.Game               = sys.error("Can't turn a fiveinarow game into a dameo game")
+    def toFiveInARow: fiveinarow.Game     = g
+    def toEntropy                         = sys.error("Can't make an entropy object from a fiveinarow object")
 
   }
 
@@ -1817,6 +2002,10 @@ object Game {
       Entropy(
         entropy.Game(situation, actionStrs, clock, plies, turnCount, startedAtPly, startedAtTurn)
       )
+    case (GameLogic.FiveInARow(), Situation.FiveInARow(situation))     =>
+      FiveInARow(
+        fiveinarow.Game(situation, actionStrs, clock, plies, turnCount, startedAtPly, startedAtTurn)
+      )
     case _                                                             => sys.error("Mismatched gamelogic types 32")
   }
 
@@ -1841,6 +2030,8 @@ object Game {
       Dameo(dameo.Game.apply(variant))
     case (GameLogic.Entropy(), Variant.Entropy(variant))           =>
       Entropy(entropy.Game.apply(variant))
+    case (GameLogic.FiveInARow(), Variant.FiveInARow(variant))     =>
+      FiveInARow(fiveinarow.Game.apply(variant))
     case _                                                         =>
       sys.error("Mismatched gamelogic types 33")
   }
@@ -1866,6 +2057,8 @@ object Game {
       Dameo(dameo.Game.apply(variant.map(_.toDameo), fen.map(_.toDameo)))
     case GameLogic.Entropy()      =>
       Entropy(entropy.Game.apply(variant.map(_.toEntropy), fen.map(_.toEntropy)))
+    case GameLogic.FiveInARow()   =>
+      FiveInARow(fiveinarow.Game.apply(variant.map(_.toFiveInARow), fen.map(_.toFiveInARow)))
   }
 
   def wrap(g: chess.Game)            = Chess(g)

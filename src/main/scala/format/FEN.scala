@@ -15,6 +15,7 @@ sealed abstract class FEN(val value: String) {
   def toAbalone: strategygames.abalone.format.FEN
   def toDameo: strategygames.dameo.format.FEN
   def toEntropy: strategygames.entropy.format.FEN
+  def toFiveInARow: strategygames.fiveinarow.format.FEN
 
   override def toString = value
 
@@ -49,6 +50,7 @@ object FEN {
     def toAbalone      = sys.error("Can't convert chess to abalone")
     def toDameo        = sys.error("Can't convert chess to dameo")
     def toEntropy      = sys.error("Can't convert chess to dameo")
+    def toFiveInARow   = sys.error("Can't convert chess to dameo")
 
     def gameLogic = GameLogic.Chess()
 
@@ -79,6 +81,7 @@ object FEN {
     def toAbalone      = sys.error("Can't convert draughts to abalone")
     def toDameo        = sys.error("Can't convert draughts to dameo")
     def toEntropy      = sys.error("Can't convert draughts to dameo")
+    def toFiveInARow   = sys.error("Can't convert draughts to dameo")
 
     def gameLogic = GameLogic.Draughts()
 
@@ -111,6 +114,7 @@ object FEN {
     def toAbalone      = sys.error("Can't convert fairysf to abalone")
     def toDameo        = sys.error("Can't convert fairysf to dameo")
     def toEntropy      = sys.error("Can't convert fairysf to dameo")
+    def toFiveInARow   = sys.error("Can't convert fairysf to dameo")
 
     def gameLogic = GameLogic.FairySF()
 
@@ -141,6 +145,7 @@ object FEN {
     def toAbalone      = sys.error("Can't convert samurai to abalone")
     def toDameo        = sys.error("Can't convert samurai to dameo")
     def toEntropy      = sys.error("Can't convert samurai to dameo")
+    def toFiveInARow   = sys.error("Can't convert samurai to dameo")
 
     def gameLogic = GameLogic.Samurai()
 
@@ -171,6 +176,7 @@ object FEN {
     def toAbalone      = sys.error("Can't convert togyzkumalak to abalone")
     def toDameo        = sys.error("Can't convert togyzkumalak to dameo")
     def toEntropy      = sys.error("Can't convert togyzkumalak to dameo")
+    def toFiveInARow   = sys.error("Can't convert togyzkumalak to dameo")
 
     def gameLogic = GameLogic.Togyzkumalak()
 
@@ -201,6 +207,7 @@ object FEN {
     def toAbalone      = sys.error("Can't convert go to abalone")
     def toDameo        = sys.error("Can't convert go to dameo")
     def toEntropy      = sys.error("Can't convert go to dameo")
+    def toFiveInARow   = sys.error("Can't convert go to dameo")
 
     def gameLogic = GameLogic.Go()
 
@@ -231,6 +238,7 @@ object FEN {
     def toAbalone      = sys.error("Can't convert backgammon to abalone")
     def toDameo        = sys.error("Can't convert backgammon to dameo")
     def toEntropy      = sys.error("Can't convert backgammon to dameo")
+    def toFiveInARow   = sys.error("Can't convert backgammon to dameo")
 
     def gameLogic = GameLogic.Backgammon()
 
@@ -260,6 +268,7 @@ object FEN {
     override def toAbalone      = f
     override def toDameo        = sys.error("Can't convert abalone to dameo")
     override def toEntropy      = sys.error("Can't convert abalone to dameo")
+    override def toFiveInARow   = sys.error("Can't convert abalone to dameo")
 
     override def gameLogic = GameLogic.Abalone()
 
@@ -289,6 +298,7 @@ object FEN {
     def toAbalone      = sys.error("Can't convert dameo to abalone")
     def toDameo        = f
     def toEntropy      = sys.error("Can't make an entropy object from a dameo object")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow object from a dameo object")
 
     def gameLogic = GameLogic.Dameo()
 
@@ -319,6 +329,7 @@ object FEN {
     def toAbalone      = sys.error("Can't convert entropy to abalone")
     def toDameo        = sys.error("Can't convert entropy to dameo")
     def toEntropy      = f
+    def toFiveInARow   = sys.error("Can't make a fiveinarow object from an entropy object")
 
     def gameLogic = GameLogic.Entropy()
 
@@ -337,6 +348,37 @@ object FEN {
 
   }
 
+  final case class FiveInARow(f: strategygames.fiveinarow.format.FEN) extends FEN(f.value) {
+
+    def toChess        = sys.error("Can't convert fiveinarow to chess")
+    def toDraughts     = sys.error("Can't convert fiveinarow to draughts")
+    def toFairySF      = sys.error("Can't convert fiveinarow to fairysf")
+    def toSamurai      = sys.error("Can't convert fiveinarow to samurai")
+    def toTogyzkumalak = sys.error("Can't convert fiveinarow to togyzkumalak")
+    def toGo           = sys.error("Can't convert fiveinarow to go")
+    def toBackgammon   = sys.error("Can't convert fiveinarow to backgammon")
+    def toAbalone      = sys.error("Can't convert fiveinarow to abalone")
+    def toDameo        = sys.error("Can't convert fiveinarow to dameo")
+    def toFiveInARow   = f
+    def toEntropy      = sys.error("Can't make an entropy object from a fiveinarow object")
+
+    def gameLogic = GameLogic.FiveInARow()
+
+    def fullMove: Option[Int] = f.fullMove
+
+    def player: Option[Player] = f.player
+
+    def ply: Option[Int] = f.ply
+
+    def initial: Boolean = f.value == strategygames.fiveinarow.format.Forsyth.initial.value
+
+    def chessFen: Option[strategygames.chess.format.FEN] = None
+
+    def player1Score = 0
+    def player2Score = 0
+
+  }
+
   def wrap(fen: strategygames.chess.format.FEN)        = Chess(fen)
   def wrap(fen: strategygames.draughts.format.FEN)     = Draughts(fen)
   def wrap(fen: strategygames.fairysf.format.FEN)      = FairySF(fen)
@@ -347,6 +389,7 @@ object FEN {
   def wrap(fen: strategygames.abalone.format.FEN)      = Abalone(fen)
   def wrap(fen: strategygames.dameo.format.FEN)        = Dameo(fen)
   def wrap(fen: strategygames.entropy.format.FEN)      = Entropy(fen)
+  def wrap(fen: strategygames.fiveinarow.format.FEN)   = FiveInARow(fen)
 
   def apply(lib: GameLogic, value: String): FEN = lib match {
     case GameLogic.Draughts()     => FEN.Draughts(strategygames.draughts.format.FEN(value))
@@ -359,6 +402,7 @@ object FEN {
     case GameLogic.Abalone()      => FEN.Abalone(strategygames.abalone.format.FEN(value))
     case GameLogic.Dameo()        => FEN.Dameo(strategygames.dameo.format.FEN(value))
     case GameLogic.Entropy()      => FEN.Entropy(strategygames.entropy.format.FEN(value))
+    case GameLogic.FiveInARow()   => FEN.FiveInARow(strategygames.fiveinarow.format.FEN(value))
   }
 
   def apply(v: Variant, value: String): FEN = apply(v.gameLogic, value)
@@ -379,6 +423,8 @@ object FEN {
       Dameo(strategygames.dameo.format.FEN(source.replace("_", " ").trim))
     case GameLogic.Entropy()      =>
       Entropy(strategygames.entropy.format.FEN(source.replace("_", " ").trim))
+    case GameLogic.FiveInARow()   =>
+      FiveInARow(strategygames.fiveinarow.format.FEN(source.replace("_", " ").trim))
   }
 
   def fishnetFen(variant: Variant)(fen: FEN): FEN = variant match {

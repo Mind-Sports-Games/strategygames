@@ -26,6 +26,10 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def drawCounters: List[DrawCounter] = List.empty
 
+  def swaps: List[Swap] = List.empty
+
+  def swap2s: List[Swap2] = List.empty
+
   // The single action a player whose clock has flagged is restricted to, in a game that
   // degrades play instead of ending on a flag. Distinct from forcedAction, which means the
   // action is inevitable and so may be played on the player's behalf.
@@ -45,6 +49,8 @@ sealed abstract class Situation(val board: Board, val player: Player) {
       selectSquaresAction :::
       diceRolls :::
       drawCounters :::
+      swaps :::
+      swap2s :::
       endTurns :::
       cubeActions :::
       // important to keep non progressive actions at the end
@@ -148,6 +154,14 @@ sealed abstract class Situation(val board: Board, val player: Player) {
   def drawCounter(role: Role): Validated[String, DrawCounter] =
     sys.error("Can't draw a counter in this game logic")
 
+  def canSwap: Boolean = false
+
+  def canSwap2: Boolean = false
+
+  def swap: Validated[String, Swap] = sys.error("Can't swap in this game logic")
+
+  def swap2: Validated[String, Swap2] = sys.error("Can't swap2 in this game logic")
+
   def undo: Validated[String, Undo]
 
   def endTurn: Validated[String, EndTurn]
@@ -172,6 +186,7 @@ sealed abstract class Situation(val board: Board, val player: Player) {
   def toAbalone: abalone.Situation
   def toDameo: dameo.Situation
   def toEntropy: entropy.Situation
+  def toFiveInARow: fiveinarow.Situation
 
 }
 
@@ -347,6 +362,7 @@ object Situation {
     def toAbalone      = sys.error("Can't make abalone situation from chess situation")
     def toDameo        = sys.error("Can't make dameo situation from chess situation")
     def toEntropy      = sys.error("Can't make entropy situation from chess situation")
+    def toFiveInARow   = sys.error("Can't make fiveinarow situation from chess situation")
   }
 
   final case class Draughts(s: draughts.Situation)
@@ -528,6 +544,7 @@ object Situation {
     def toAbalone      = sys.error("Can't make abalone situation from draughts situation")
     def toDameo        = sys.error("Can't make dameo situation from draughts situation")
     def toEntropy      = sys.error("Can't make entropy situation from draughts situation")
+    def toFiveInARow   = sys.error("Can't make fiveinarow situation from draughts situation")
 
   }
 
@@ -691,6 +708,7 @@ object Situation {
     def toAbalone      = sys.error("Can't make abalone situation from fairysf situation")
     def toDameo        = sys.error("Can't make dameo situation from fairysf situation")
     def toEntropy      = sys.error("Can't make entropy situation from fairysf situation")
+    def toFiveInARow   = sys.error("Can't make fiveinarow situation from fairysf situation")
   }
 
   final case class Samurai(s: samurai.Situation)
@@ -846,6 +864,7 @@ object Situation {
     def toAbalone      = sys.error("Can't make abalone situation from samurai situation")
     def toDameo        = sys.error("Can't make dameo situation from samurai situation")
     def toEntropy      = sys.error("Can't make entropy situation from samurai situation")
+    def toFiveInARow   = sys.error("Can't make fiveinarow situation from samurai situation")
   }
 
   final case class Togyzkumalak(s: togyzkumalak.Situation)
@@ -1002,6 +1021,7 @@ object Situation {
     def toAbalone      = sys.error("Can't make abalone situation from togyzkumalak situation")
     def toDameo        = sys.error("Can't make dameo situation from togyzkumalak situation")
     def toEntropy      = sys.error("Can't make entropy situation from togyzkumalak situation")
+    def toFiveInARow   = sys.error("Can't make fiveinarow situation from togyzkumalak situation")
   }
 
   final case class Go(s: go.Situation)
@@ -1164,6 +1184,7 @@ object Situation {
     def toAbalone      = sys.error("Can't make abalone situation from go situation")
     def toDameo        = sys.error("Can't make dameo situation from go situation")
     def toEntropy      = sys.error("Can't make entropy situation from go situation")
+    def toFiveInARow   = sys.error("Can't make fiveinarow situation from go situation")
   }
 
   final case class Backgammon(s: backgammon.Situation)
@@ -1333,6 +1354,7 @@ object Situation {
     def toAbalone      = sys.error("Can't make abalone situation from backgammon situation")
     def toDameo        = sys.error("Can't make dameo situation from backgammon situation")
     def toEntropy      = sys.error("Can't make entropy situation from backgammon situation")
+    def toFiveInARow   = sys.error("Can't make fiveinarow situation from backgammon situation")
   }
 
   // why are all of these overrides?
@@ -1487,6 +1509,7 @@ object Situation {
     override def toAbalone      = s
     override def toDameo        = sys.error("Can't make dameo situation from abalone situation")
     override def toEntropy      = sys.error("Can't make entropy situation from abalone situation")
+    override def toFiveInARow   = sys.error("Can't make fiveinarow situation from abalone situation")
   }
 
   final case class Dameo(s: dameo.Situation)
@@ -1641,6 +1664,7 @@ object Situation {
     def toAbalone      = sys.error("Can't make abalone situation from dameo situation")
     def toDameo        = s
     def toEntropy      = sys.error("Can't make an entropy object from a dameo object")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow object from a dameo object")
   }
 
   final case class Entropy(s: entropy.Situation)
@@ -1823,6 +1847,173 @@ object Situation {
     def toAbalone      = sys.error("Can't make abalone situation from entropy situation")
     def toDameo        = sys.error("Can't make dameo situation from entropy situation")
     def toEntropy      = s
+    def toFiveInARow   = sys.error("Can't make a fiveinarow object from an entropy object")
+  }
+
+  final case class FiveInARow(s: fiveinarow.Situation)
+      extends Situation(
+        Board.FiveInARow(s.board),
+        s.player
+      ) {
+
+    lazy val moves: Map[Pos, List[Move]] = Map.empty
+
+    def takebackable = true
+
+    def forcedAction: Option[Action] = None
+
+    def forcedTurnAction: Option[Action] = None
+
+    lazy val check: Boolean = false
+
+    def checkSquare = None
+
+    def opponentHasInsufficientMaterial: Boolean = false
+
+    def insufficientMaterialStatus: Status.type => Status = _.Draw
+
+    def outOfTimeStatus: Status.type => Status = _.Outoftime
+
+    def threefoldRepetition: Boolean = false
+
+    def isRepetition: Boolean = false
+
+    def end: Boolean = s.end
+
+    def winner: Option[Player] = s.winner
+
+    lazy val destinations: Map[Pos, List[Pos]] = Map.empty
+
+    def drops: Option[List[Pos]] = s.drops.map(_.map(Pos.FiveInARow.apply))
+
+    def dropsByRole: Option[Map[Role, List[Pos]]] = Some(
+      s.dropsAsDrops
+        .groupBy(_.piece.role)
+        .map { case (r, ds) => (Role.FiveInARowRole(r): Role, ds.map(d => Pos.FiveInARow(d.pos): Pos)) }
+    )
+
+    def dropsAsDrops: List[Drop] = s.dropsAsDrops.map(Drop.FiveInARow.apply)
+
+    def lifts: List[Lift] = List.empty
+
+    def passes: List[Pass] = List.empty
+
+    def selectSquaresAction: List[SelectSquares] = List.empty
+
+    def diceRolls: List[DiceRoll] = List.empty
+
+    override def swaps: List[Swap] = swap.fold[List[Swap]](_ => List.empty, List(_))
+
+    override def swap2s: List[Swap2] = swap2.fold[List[Swap2]](_ => List.empty, List(_))
+
+    def undos: List[Undo] = List.empty
+
+    def endTurns: List[EndTurn] = List.empty
+
+    def cubeActions: List[CubeAction] = List.empty
+
+    lazy val validTurns: List[List[Action]] = List(actions)
+
+    def canDrop: Boolean = !s.end
+
+    def canOnlyDrop: Boolean = canDrop && !s.canSwap
+
+    def canLift: Boolean = false
+
+    def canOnlyLift: Boolean = false
+
+    def canRollDice: Boolean = false
+
+    def canOnlyRollDice: Boolean = false
+
+    def canUndo: Boolean = false
+
+    def canEndTurn: Boolean = false
+
+    def canOnlyEndTurn: Boolean = false
+
+    def canCubeAction: Boolean = false
+
+    def canOnlyCubeAction: Boolean = false
+
+    override def canSwap: Boolean = s.canSwap
+
+    override def canSwap2: Boolean = s.canSwap2
+
+    def playable(strict: Boolean): Boolean = s.playable(strict)
+
+    val status: Option[Status] = s.status
+
+    def resignStatus(player: Player): Status.type => Status = _.Resign
+
+    def pointValue(player: Option[Player]): Option[Int] = None
+
+    def move(
+        from: Pos,
+        to: Pos,
+        promotion: Option[PromotableRole] = None,
+        finalSquare: Boolean = false,
+        forbiddenUci: Option[List[String]] = None,
+        captures: Option[List[Pos]] = None,
+        partialCaptures: Boolean = false
+    ): Validated[String, Move] = sys.error("Can't move a stone in fiveinarow")
+
+    def move(uci: Uci.Move): Validated[String, Move] = sys.error("Can't move a stone in fiveinarow")
+
+    def drop(role: Role, pos: Pos): Validated[String, Drop] = (role, pos) match {
+      case (Role.FiveInARowRole(role), Pos.FiveInARow(pos)) =>
+        s.drop(role, pos).toEither.map(d => Drop.FiveInARow(d)).toValidated
+      case _                                                => sys.error("Not passed FiveInARow objects")
+    }
+
+    override def swap: Validated[String, Swap] =
+      s.swap().toEither.map(sw => Swap.FiveInARow(sw)).toValidated
+
+    override def swap2: Validated[String, Swap2] =
+      s.swap2().toEither.map(sw => Swap2.FiveInARow(sw)).toValidated
+
+    def lift(pos: Pos): Validated[String, Lift] = sys.error("Can't do a Lift for fiveinarow")
+
+    def pass: Validated[String, Pass] = sys.error("Can't do a Pass for fiveinarow")
+
+    def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
+      sys.error("Can't do a SelectSquares for fiveinarow")
+
+    def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
+      sys.error("Can't do a DiceRoll for fiveinarow")
+
+    def undo: Validated[String, Undo] = sys.error("Can't do Undo for fiveinarow")
+
+    def endTurn: Validated[String, EndTurn] = sys.error("Can't do EndTurn for fiveinarow")
+
+    def cubeAction(interaction: CubeInteraction): Validated[String, CubeAction] =
+      sys.error("Can't do a CubeAction for fiveinarow")
+
+    def withVariant(variant: Variant): Situation = variant match {
+      case Variant.FiveInARow(variant) => FiveInARow(s.withVariant(variant))
+      case _                           => sys.error("Not passed FiveInARow objects")
+    }
+
+    def unary_! : Situation = FiveInARow(s.unary_!)
+
+    def copy(board: Board): Situation = FiveInARow(board match {
+      case Board.FiveInARow(board) => s.copy(board)
+      case _                       => sys.error("Can't copy a fiveinarow situation with a non-fiveinarow board")
+    })
+
+    def gameLogic: GameLogic = GameLogic.FiveInARow()
+
+    def toChess        = sys.error("Can't make chess situation from fiveinarow situation")
+    def toDraughts     = sys.error("Can't make draughts situation from fiveinarow situation")
+    def toFairySF      = sys.error("Can't make fairysf situation from fiveinarow situation")
+    def toSamurai      = sys.error("Can't make samurai situation from fiveinarow situation")
+    def toTogyzkumalak = sys.error("Can't make togyzkumalak situation from fiveinarow situation")
+    def toGo           = sys.error("Can't make go situation from fiveinarow situation")
+    def toBackgammon   = sys.error("Can't make backgammon situation from fiveinarow situation")
+    def toAbalone      = sys.error("Can't make abalone situation from fiveinarow situation")
+    def toDameo        = sys.error("Can't make dameo situation from fiveinarow situation")
+    def toEntropy      = sys.error("Can't make entropy situation from fiveinarow situation")
+    def toFiveInARow   = s
   }
 
   def apply(lib: GameLogic, board: Board, player: Player): Situation = (lib, board) match {
@@ -1837,6 +2028,7 @@ object Situation {
     case (GameLogic.Abalone(), Board.Abalone(board))           => Abalone(abalone.Situation(board, player))
     case (GameLogic.Dameo(), Board.Dameo(board))               => Dameo(dameo.Situation(board, player))
     case (GameLogic.Entropy(), Board.Entropy(board))           => Entropy(entropy.Situation(board, player))
+    case (GameLogic.FiveInARow(), Board.FiveInARow(board))     => FiveInARow(fiveinarow.Situation(board, player))
     case _                                                     => sys.error("Mismatched gamelogic types 3")
   }
 
@@ -1856,6 +2048,8 @@ object Situation {
       Dameo(dameo.Situation.apply(variant))
     case (GameLogic.Entropy(), Variant.Entropy(variant))           =>
       Entropy(entropy.Situation.apply(variant))
+    case (GameLogic.FiveInARow(), Variant.FiveInARow(variant))     =>
+      FiveInARow(fiveinarow.Situation.apply(variant))
     case _                                                         => sys.error("Mismatched gamelogic types 4")
   }
 

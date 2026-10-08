@@ -147,6 +147,18 @@ object Pos {
     lazy val all: List[Pos] = entropy.Pos.all.map(Entropy.apply)
   }
 
+  final case class FiveInARow(p: fiveinarow.Pos) extends Pos {
+    val key: String = p.key
+
+    def piotr: Char = p.piotr
+
+    lazy val toInt: Int = (p.file.index << 4) + p.rank.index
+
+    def gameLogic: GameLogic = GameLogic.FiveInARow()
+
+    lazy val all: List[Pos] = fiveinarow.Pos.all.map(FiveInARow.apply)
+  }
+
   // need to equivalate this method for draughts probably
   // think we need to figure out a way to map into Draughts with a board size at this point
   def fromKey(lib: GameLogic, key: String): Option[Pos] = lib match {
@@ -160,6 +172,7 @@ object Pos {
     case GameLogic.Abalone()      => abalone.Pos.fromKey(key).map(Abalone.apply)
     case GameLogic.Dameo()        => dameo.Pos.fromKey(key).map(Dameo.apply)
     case GameLogic.Entropy()      => entropy.Pos.fromKey(key).map(Entropy.apply)
+    case GameLogic.FiveInARow()   => fiveinarow.Pos.fromKey(key).map(FiveInARow.apply)
   }
 
   // def at(lib: GameLogic, x: Int, y: Int): Option[Pos] = lib match {

@@ -49,6 +49,7 @@ object Pass {
     def toAbalone      = sys.error("Can't make an abalone pass from a go pass")
     def toDameo        = sys.error("Can't make a dameo pass from a go pass")
     def toEntropy      = sys.error("Can't make an entropy pass from a go pass")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow pass from a go pass")
   }
 
   def wrap(p: go.Pass): Pass = Pass.Go(p)
@@ -78,6 +79,7 @@ object Pass {
     def toAbalone      = sys.error("Can't make a abalone pass from an entropy pass")
     def toDameo        = sys.error("Can't make a dameo pass from an entropy pass")
     def toEntropy      = p
+    def toFiveInARow   = sys.error("Can't make a fiveinarow object from an entropy object")
 
     override def toString = toUci.uci
   }

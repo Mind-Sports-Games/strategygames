@@ -101,6 +101,7 @@ object Move {
     def toAbalone      = sys.error("Can't make an abalone move from a chess move")
     def toDameo        = sys.error("Can't make a dameo move from a chess move")
     def toEntropy      = sys.error("Can't make an entropy move from a chess move")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow move from a chess move")
   }
 
   final case class Draughts(m: draughts.Move)
@@ -154,6 +155,7 @@ object Move {
     def toAbalone      = sys.error("Can't make an abalone move from a draughts move")
     def toDameo        = sys.error("Can't make a dameo move from a draughts move")
     def toEntropy      = sys.error("Can't make an entropy move from a draughts move")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow move from a draughts move")
   }
 
   final case class FairySF(m: fairysf.Move)
@@ -208,6 +210,7 @@ object Move {
     def toAbalone      = sys.error("Can't make an abalone move from a fairysf move")
     def toDameo        = sys.error("Can't make a dameo move from a fairysf move")
     def toEntropy      = sys.error("Can't make an entropy move from a fairysf move")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow move from a fairysf move")
   }
 
   final case class Samurai(m: samurai.Move)
@@ -255,6 +258,7 @@ object Move {
     def toAbalone      = sys.error("Can't make an abalone move from a samurai move")
     def toDameo        = sys.error("Can't make a dameo move from a samurai move")
     def toEntropy      = sys.error("Can't make an entropy move from a samurai move")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow move from a samurai move")
   }
 
   final case class Togyzkumalak(m: togyzkumalak.Move)
@@ -302,6 +306,7 @@ object Move {
     def toAbalone      = sys.error("Can't make an abalone move from a togyzkumalak move")
     def toDameo        = sys.error("Can't make a dameo move from a togyzkumalak move")
     def toEntropy      = sys.error("Can't make an entropy move from a togyzkumalak move")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow move from a togyzkumalak move")
   }
 
   final case class Backgammon(m: backgammon.Move)
@@ -346,6 +351,7 @@ object Move {
     def toAbalone      = sys.error("Can't make an abalone move from a backgammon move")
     def toDameo        = sys.error("Can't make a dameo move from a backgammon move")
     def toEntropy      = sys.error("Can't make an entropy move from a backgammon move")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow move from a backgammon move")
   }
 
   final case class Abalone(m: abalone.Move)
@@ -390,6 +396,7 @@ object Move {
     override def toAbalone      = m
     override def toDameo        = sys.error("Can't make a dameo move from an abalone move")
     override def toEntropy      = sys.error("Can't make an entropy move from an abalone move")
+    override def toFiveInARow   = sys.error("Can't make a fiveinarow move from an abalone move")
   }
 
   final case class Dameo(m: dameo.Move)
@@ -440,6 +447,7 @@ object Move {
     def toAbalone      = sys.error("Can't make an abalone move from a dameo move")
     def toDameo        = m
     def toEntropy      = sys.error("Can't make an entropy object from a dameo object")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow object from a dameo object")
   }
 
   def wrap(m: chess.Move): Move        = Move.Chess(m)
@@ -496,6 +504,7 @@ object Move {
     def toAbalone      = sys.error("Can't make a abalone move from an entropy move")
     def toDameo        = sys.error("Can't make a dameo move from an entropy move")
     def toEntropy      = m
+    def toFiveInARow   = sys.error("Can't make a fiveinarow object from an entropy object")
 
     override def toString = toUci.uci
   }
