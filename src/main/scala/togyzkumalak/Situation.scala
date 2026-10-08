@@ -43,7 +43,7 @@ case class Situation(board: Board, player: Player) {
     .headOption
 
   def opponentHasInsufficientMaterial: Boolean =
-    if (player == P1) (board.history.score.p1 == 81) else (board.history.score.p2 == 81)
+    board.history.score(player) == board.variant.targetScore
 
   def move(from: Pos, to: Pos, promotion: Option[PromotableRole]): Validated[String, Move] =
     board.variant.move(this, from, to, promotion)

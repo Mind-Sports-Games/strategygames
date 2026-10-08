@@ -50,7 +50,7 @@ abstract class Variant private[variant] (
 
   def initialStoneCount: Int = 162
 
-  private def targetScore: Int = initialStoneCount / 2
+  def targetScore: Int = initialStoneCount / 2
 
   def startPlayer: Player = P1
 
