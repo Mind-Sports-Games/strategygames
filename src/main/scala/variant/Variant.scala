@@ -1378,7 +1378,8 @@ object Variant {
       go.variant.Variant.all.map(Go.apply) :::
       backgammon.variant.Variant.all.map(Backgammon.apply) :::
       abalone.variant.Variant.all.map(Abalone.apply) :::
-      entropy.variant.Variant.all.map(Entropy.apply)
+      entropy.variant.Variant.all.map(Entropy.apply) :::
+      fiveinarow.variant.Variant.all.map(FiveInARow.apply)
 
   def byId = all map { v => (v.id, v) } toMap
 
