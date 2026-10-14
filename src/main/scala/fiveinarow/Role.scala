@@ -14,18 +14,21 @@ sealed trait Role {
   lazy val valueOf: Option[Int]   = Option(1)
   lazy val gameFamily: GameFamily = GameFamily.FiveInARow()
   final def -(player: Player)     = Piece(player, this)
+  def opposite: Role
 }
 
 case object BlackStone extends Role {
   val forsyth   = 'B'
   val binaryInt = 1
   val hashInt   = 0
+  def opposite  = WhiteStone
 }
 
 case object WhiteStone extends Role {
   val forsyth   = 'W'
   val binaryInt = 2
   val hashInt   = 1
+  def opposite  = BlackStone
 }
 
 object Role {

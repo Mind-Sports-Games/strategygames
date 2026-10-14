@@ -20,7 +20,7 @@ object Rank {
 
   def fromString(s: String): Option[Rank] = s.toIntOption.flatMap(i => apply(i - 1))
 
-  val all: List[Rank]         = (0 until 15).map(new Rank(_)).toList
+  val all: List[Rank]         = (0 until 19).map(new Rank(_)).toList
   val allReversed: List[Rank] = all.reverse
   val allSize: Int            = all.size
 

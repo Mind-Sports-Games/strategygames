@@ -4,7 +4,7 @@ import org.specs2.mutable.Specification
 
 import strategygames.Player
 import strategygames.fiveinarow.format.{ Forsyth, Uci }
-import strategygames.fiveinarow.variant.Gomoku
+import strategygames.fiveinarow.variant.{ Gomoku, Variant }
 
 trait FiveInARowTestSupport { self: Specification =>
 
@@ -19,8 +19,10 @@ trait FiveInARowTestSupport { self: Specification =>
   def refused(game: Game, str: String): Boolean =
     Uci(str).exists(uci => game.apply(uci).isInvalid)
 
-  def boardOf(stones: (String, Role)*): Board = {
-    val empty = Board.init(Gomoku)
+  def boardOf(stones: (String, Role)*): Board = boardIn(Gomoku)(stones*)
+
+  def boardIn(variant: Variant)(stones: (String, Role)*): Board = {
+    val empty = Board.init(variant)
     stones
       .foldLeft(empty) { case (b, (key, role)) =>
         b.place(role, Pos.fromKey(key).get).getOrElse(sys.error(s"$key occupied"))

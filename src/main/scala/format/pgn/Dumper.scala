@@ -6,6 +6,7 @@ import strategygames.{
   DrawCounter => StratDrawCounter,
   Drop => StratDrop,
   Move => StratMove,
+  Offer10 => StratOffer10,
   Pass => StratPass,
   SelectSquares => StratSelectSquares,
   Swap => StratSwap,
@@ -55,8 +56,10 @@ object Dumper {
   }
 
   def apply(lib: GameLogic, data: StratSelectSquares): String = (lib, data) match {
-    case (GameLogic.Go(), StratSelectSquares.Go(data)) => go.format.pgn.Dumper(data)
-    case _                                             => sys.error("SelectSquares can only be applied to go")
+    case (GameLogic.Go(), StratSelectSquares.Go(data))                 => go.format.pgn.Dumper(data)
+    case (GameLogic.FiveInARow(), StratSelectSquares.FiveInARow(data)) => fiveinarow.format.pgn.Dumper(data)
+    case _                                                             =>
+      sys.error("SelectSquares can only be applied to go and fiveinarow")
   }
 
   def apply(lib: GameLogic, data: StratDrawCounter): String = (lib, data) match {
@@ -75,6 +78,11 @@ object Dumper {
     case _                                                     => sys.error("Swap2 can only be applied to fiveinarow")
   }
 
+  def apply(lib: GameLogic, data: StratOffer10): String = (lib, data) match {
+    case (GameLogic.FiveInARow(), StratOffer10.FiveInARow(data)) => fiveinarow.format.pgn.Dumper(data)
+    case _                                                       => sys.error("Offer10 can only be applied to fiveinarow")
+  }
+
   def apply(lib: GameLogic, data: StratAction): String = data match {
     case m: StratMove           => apply(lib, m)
     case d: StratDrop           => apply(lib, d)
@@ -83,6 +91,7 @@ object Dumper {
     case dc: StratDrawCounter   => apply(lib, dc)
     case s: StratSwap           => apply(lib, s)
     case s2: StratSwap2         => apply(lib, s2)
+    case o: StratOffer10        => apply(lib, o)
     case _                      => sys.error("unknown action to apply to a game")
   }
 

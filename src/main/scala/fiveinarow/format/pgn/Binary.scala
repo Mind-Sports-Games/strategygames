@@ -8,20 +8,27 @@ import scala.util.Try
 
 object Binary {
 
-  // writeMove only used in tests
-  def writeMove(m: String)             = Try(Writer.ply(m))
-  def writeMoves(ms: Iterable[String]) = Try(Writer.plies(ms))
+  def writeMove(m: String)             = Try(Writer.ply(m, continuesTurn = false))
+  def writeMoves(ms: Iterable[String]) = Try(Writer.plies(ms.map(List(_))))
 
-  def writeActionStrs(ms: ActionStrs) = Try(Writer.actionStrs(ms))
+  def writeActionStrs(ms: ActionStrs) = Try(Writer.plies(ms.map(_.toList)))
 
   def readActionStrs(bs: List[Byte])          = Try(Reader actionStrs bs)
   def readActionStrs(bs: List[Byte], nb: Int) = Try(Reader.actionStrs(bs, nb))
 
   private object ActionType {
+    val Other = 0
     val Drop  = 1
     val Swap  = 2
     val Swap2 = 3
   }
+
+  private object OtherType {
+    val Offer10       = 1
+    val SelectSquares = 2
+  }
+
+  private val continuesBit = 1 << 5
 
   private def right(i: Int, x: Int): Int = i & lengthMasks(x)
   private val lengthMasks                =
@@ -34,33 +41,41 @@ object Binary {
     def actionStrs(bs: List[Byte]): ActionStrs          = actionStrs(bs, maxPlies)
     def actionStrs(bs: List[Byte], nb: Int): ActionStrs = toActionStrs(intPlies(bs map toInt, nb))
 
-    // every game starts from an empty board, so the turns are the opening's three drops,
-    // a swap2 with the two drops that follow it, and single actions otherwise
-    def toActionStrs(plies: List[String]): ActionStrs = {
-      val (opening, rest)                             = plies.splitAt(3)
-      def turns(ps: List[String]): List[List[String]] = ps match {
-        case Nil                   => Nil
-        case (s @ "swap2") :: rest => (s :: rest.take(2)) :: turns(rest.drop(2))
-        case action :: rest        => List(action) :: turns(rest)
-      }
-      (if (opening.isEmpty) Nil else List(opening)) ::: turns(rest)
-    }
+    def toActionStrs(plies: List[(String, Boolean)]): ActionStrs =
+      plies
+        .foldLeft(Vector.empty[Vector[String]]) {
+          case (turns, (action, true)) if turns.nonEmpty => turns.init :+ (turns.last :+ action)
+          case (turns, (action, _))                      => turns :+ Vector(action)
+        }
+        .map(_.toList)
+        .toList
 
-    def intPlies(bs: List[Int], pliesToGo: Int): List[String] =
+    def intPlies(bs: List[Int], pliesToGo: Int): List[(String, Boolean)] =
       bs match {
-        case _ if pliesToGo <= 0                                    => Nil
-        case Nil                                                    => Nil
-        case (b1 :: b2 :: rest) if headerBit(b1) == ActionType.Drop =>
-          dropUci(b1, b2) :: intPlies(rest, pliesToGo - 1)
-        case (b1 :: rest) if headerBit(b1) == ActionType.Swap       =>
-          "swap" :: intPlies(rest, pliesToGo - 1)
-        case (b1 :: rest) if headerBit(b1) == ActionType.Swap2      =>
-          "swap2" :: intPlies(rest, pliesToGo - 1)
-        case x                                                      => !!(x map showByte mkString ",")
+        case _ if pliesToGo <= 0 => Nil
+        case Nil                 => Nil
+        case b1 :: rest          =>
+          val continues = (b1 & continuesBit) != 0
+          (headerBit(b1), rest) match {
+            case (ActionType.Drop, b2 :: more)                                             =>
+              (dropUci(b1, b2), continues) :: intPlies(more, pliesToGo - 1)
+            case (ActionType.Swap, more)                                                   =>
+              ("swap", continues) :: intPlies(more, pliesToGo - 1)
+            case (ActionType.Swap2, more)                                                  =>
+              ("swap2", continues) :: intPlies(more, pliesToGo - 1)
+            case (ActionType.Other, more) if right(b1, 2) == OtherType.Offer10             =>
+              ("offer10", continues) :: intPlies(more, pliesToGo - 1)
+            case (ActionType.Other, b2 :: more) if right(b1, 2) == OtherType.SelectSquares =>
+              (s"ss:${pos(b1, b2).key}", continues) :: intPlies(more, pliesToGo - 1)
+            case _                                                                         =>
+              !!(bs map showByte mkString ",")
+          }
       }
+
+    private def pos(b1: Int, b2: Int): Pos = Pos((right(b1 >> 2, 1) << 8) + b2).get
 
     def dropUci(b1: Int, b2: Int): String =
-      s"${Role.binaryInt(right(b1, 6)).get.pgn}@${Pos(b2).get.key}"
+      s"${Role.binaryInt(right(b1, 2)).get.pgn}@${pos(b1, b2).key}"
 
     private def headerBit(i: Int) = i >> 6
 
@@ -69,24 +84,30 @@ object Binary {
 
   private object Writer {
 
-    def ply(str: String): List[Byte] =
+    def ply(str: String, continuesTurn: Boolean): List[Byte] = {
+      val continues = if (continuesTurn) continuesBit else 0
       (str match {
-        case Uci.Drop.dropR(role, dst) => dropUci(role, dst)
-        case Uci.Swap.swapR()          => List(headerBit(ActionType.Swap))
-        case Uci.Swap2.swap2R()        => List(headerBit(ActionType.Swap2))
-        case _                         => sys.error(s"Invalid action to write: ${str}")
-      }) map (_.toByte)
+        case Uci.Drop.dropR(role, dst)                 =>
+          pointed(headerBit(ActionType.Drop) + Role.allByPgn(role.head).binaryInt, dst)
+        case Uci.Swap.swapR()                          => List(headerBit(ActionType.Swap))
+        case Uci.Swap2.swap2R()                        => List(headerBit(ActionType.Swap2))
+        case Uci.Offer10.offer10R()                    => List(headerBit(ActionType.Other) + OtherType.Offer10)
+        case Uci.SelectSquares.selectSquaresR(dst, _*) =>
+          pointed(headerBit(ActionType.Other) + OtherType.SelectSquares, dst)
+        case _                                         => sys.error(s"Invalid action to write: ${str}")
+      }) match {
+        case first :: rest => ((first + continues) :: rest).map(_.toByte)
+        case Nil           => Nil
+      }
+    }
 
-    def plies(strs: Iterable[String]): Array[Byte] =
-      strs.toList.flatMap(ply).to(Array)
+    def plies(turns: Iterable[List[String]]): Array[Byte] =
+      turns.toList.flatMap(_.zipWithIndex.flatMap { case (a, i) => ply(a, continuesTurn = i > 0) }).to(Array)
 
-    // safe to flatten: the reader regroups turns from the actions themselves
-    def actionStrs(strs: ActionStrs): Array[Byte] = plies(strs.flatten)
-
-    def dropUci(role: String, dst: String) = List(
-      headerBit(ActionType.Drop) + Role.allByPgn(role.head).binaryInt,
-      Pos.fromKey(dst).get.index
-    )
+    private def pointed(first: Int, dst: String): List[Int] = {
+      val index = Pos.fromKey(dst).get.index
+      List(first + ((index >> 8) << 2), right(index, 8))
+    }
 
     private def headerBit(i: Int) = i << 6
 

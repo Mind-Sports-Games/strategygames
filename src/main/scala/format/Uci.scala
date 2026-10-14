@@ -896,10 +896,64 @@ object Uci {
     def toFiveInARow   = s
   }
 
+  sealed abstract class Offer10() extends Uci {
+    def origDest: Option[(Pos, Pos)] = None
+  }
+
+  final case class FiveInARowOffer10(o: fiveinarow.format.Uci.Offer10) extends Offer10() with FiveInARow {
+    def gameLogic  = GameLogic.FiveInARow()
+    def uci        = o.uci
+    def shortUci   = o.uci
+    def fishnetUci = o.uci
+    def piotr      = o.piotr
+
+    val unwrap = o
+
+    def toChess        = sys.error("Can't make a chess UCI from a fiveinarow UCI")
+    def toDraughts     = sys.error("Can't make a draughts UCI from a fiveinarow UCI")
+    def toFairySF      = sys.error("Can't make a fairysf UCI from a fiveinarow UCI")
+    def toSamurai      = sys.error("Can't make a samurai UCI from a fiveinarow UCI")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a fiveinarow UCI")
+    def toGo           = sys.error("Can't make a go UCI from a fiveinarow UCI")
+    def toBackgammon   = sys.error("Can't make a backgammon UCI from a fiveinarow UCI")
+    def toAbalone      = sys.error("Can't make an abalone UCI from a fiveinarow UCI")
+    def toDameo        = sys.error("Can't make a dameo UCI from a fiveinarow UCI")
+    def toEntropy      = sys.error("Can't make an entropy UCI from a fiveinarow UCI")
+    def toFiveInARow   = o
+  }
+
+  final case class FiveInARowSelectSquares(ss: fiveinarow.format.Uci.SelectSquares)
+      extends SelectSquares(
+        ss.squares.map(Pos.FiveInARow(_))
+      )
+      with FiveInARow {
+    def gameLogic  = GameLogic.FiveInARow()
+    def uci        = ss.uci
+    def shortUci   = ss.uci
+    def fishnetUci = ss.uci
+    def piotr      = ss.piotr
+
+    val unwrap = ss
+
+    def toChess        = sys.error("Can't make a chess UCI from a fiveinarow UCI")
+    def toDraughts     = sys.error("Can't make a draughts UCI from a fiveinarow UCI")
+    def toFairySF      = sys.error("Can't make a fairysf UCI from a fiveinarow UCI")
+    def toSamurai      = sys.error("Can't make a samurai UCI from a fiveinarow UCI")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak UCI from a fiveinarow UCI")
+    def toGo           = sys.error("Can't make a go UCI from a fiveinarow UCI")
+    def toBackgammon   = sys.error("Can't make a backgammon UCI from a fiveinarow UCI")
+    def toAbalone      = sys.error("Can't make an abalone UCI from a fiveinarow UCI")
+    def toDameo        = sys.error("Can't make a dameo UCI from a fiveinarow UCI")
+    def toEntropy      = sys.error("Can't make an entropy UCI from a fiveinarow UCI")
+    def toFiveInARow   = ss
+  }
+
   def wrap(uci: fiveinarow.format.Uci): Uci = uci match {
-    case d: fiveinarow.format.Uci.Drop  => FiveInARowDrop(d)
-    case s: fiveinarow.format.Uci.Swap  => FiveInARowSwap(s)
-    case s: fiveinarow.format.Uci.Swap2 => FiveInARowSwap2(s)
+    case d: fiveinarow.format.Uci.Drop           => FiveInARowDrop(d)
+    case s: fiveinarow.format.Uci.Swap           => FiveInARowSwap(s)
+    case s: fiveinarow.format.Uci.Swap2          => FiveInARowSwap2(s)
+    case o: fiveinarow.format.Uci.Offer10        => FiveInARowOffer10(o)
+    case ss: fiveinarow.format.Uci.SelectSquares => FiveInARowSelectSquares(ss)
   }
 
   def wrap(uci: chess.format.Uci): Uci = uci match {
@@ -1207,7 +1261,13 @@ object Uci {
           ).some
 
         case GameLogic.Entropy()    => None
-        case GameLogic.FiveInARow() => None
+        case GameLogic.FiveInARow() =>
+          FiveInARowSelectSquares(
+            fiveinarow.format.Uci.SelectSquares(squares.map {
+              case Pos.FiveInARow(pos) => pos
+              case _                   => sys.error("Not passed FiveInARow pos objects")
+            })
+          ).some
       }
 
   }
@@ -1519,18 +1579,20 @@ object Uci {
   }
 
   def apply(lib: GameLogic, selectSquares: strategygames.SelectSquares) = (lib, selectSquares) match {
-    case (GameLogic.Draughts(), _)                                       => sys.error("SelectSquares not implemented for Draughts")
-    case (GameLogic.Chess(), _)                                          => sys.error("SelectSquares not implemented for Chess")
-    case (GameLogic.FairySF(), _)                                        => sys.error("SelectSquares not implemented for fairysf")
-    case (GameLogic.Samurai(), _)                                        => sys.error("SelectSquares not implemented for samurai")
-    case (GameLogic.Togyzkumalak(), _)                                   => sys.error("SelectSquares not implemented for togyzkumalak")
-    case (GameLogic.Go(), strategygames.SelectSquares.Go(selectSquares)) =>
+    case (GameLogic.Draughts(), _)                                                       => sys.error("SelectSquares not implemented for Draughts")
+    case (GameLogic.Chess(), _)                                                          => sys.error("SelectSquares not implemented for Chess")
+    case (GameLogic.FairySF(), _)                                                        => sys.error("SelectSquares not implemented for fairysf")
+    case (GameLogic.Samurai(), _)                                                        => sys.error("SelectSquares not implemented for samurai")
+    case (GameLogic.Togyzkumalak(), _)                                                   => sys.error("SelectSquares not implemented for togyzkumalak")
+    case (GameLogic.Go(), strategygames.SelectSquares.Go(selectSquares))                 =>
       GoSelectSquares(go.format.Uci(selectSquares))
-    case (GameLogic.Backgammon(), _)                                     => sys.error("SelectSquares not implemented for backgammon")
-    case (GameLogic.Abalone(), _)                                        => sys.error("SelectSquares not implemented for abalone")
-    case (GameLogic.Dameo(), _)                                          => sys.error("SelectSquares not implemented for dameo")
-    case (GameLogic.Entropy(), _)                                        => sys.error("SelectSquares not implemented for entropy")
-    case (GameLogic.FiveInARow(), _)                                     => sys.error("SelectSquares not implemented for fiveinarow")
+    case (GameLogic.Backgammon(), _)                                                     => sys.error("SelectSquares not implemented for backgammon")
+    case (GameLogic.Abalone(), _)                                                        => sys.error("SelectSquares not implemented for abalone")
+    case (GameLogic.Dameo(), _)                                                          => sys.error("SelectSquares not implemented for dameo")
+    case (GameLogic.Entropy(), _)                                                        => sys.error("SelectSquares not implemented for entropy")
+    case (GameLogic.FiveInARow(), strategygames.SelectSquares.FiveInARow(selectSquares)) =>
+      FiveInARowSelectSquares(selectSquares.toUci)
+    case _                                                                               => sys.error("Mismatched gamelogic types for SelectSquares")
   }
 
   def apply(lib: GameLogic, diceRoll: strategygames.DiceRoll) = (lib, diceRoll) match {

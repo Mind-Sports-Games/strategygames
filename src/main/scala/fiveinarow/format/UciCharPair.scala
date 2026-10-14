@@ -9,10 +9,13 @@ object UciCharPair {
 
   def apply(uci: Uci): stratUciCharPair =
     uci match {
-      case Uci.Drop(role, pos) =>
+      case Uci.Drop(role, pos)        =>
         stratUciCharPair(toChar(pos), dropRole2charMap.getOrElse(role, voidChar))
-      case Uci.Swap()          => stratUciCharPair(voidChar, swapChar)
-      case Uci.Swap2()         => stratUciCharPair(voidChar, swap2Char)
+      case Uci.Swap()                 => stratUciCharPair(voidChar, swapChar)
+      case Uci.Swap2()                => stratUciCharPair(voidChar, swap2Char)
+      case Uci.Offer10()              => stratUciCharPair(voidChar, offer10Char)
+      case Uci.SelectSquares(squares) =>
+        stratUciCharPair(squares.headOption.fold(voidChar)(toChar), selectChar)
     }
 
   private[format] object implementation {
@@ -35,8 +38,10 @@ object UciCharPair {
         }
         .to(Map)
 
-    val swapChar: Char  = (charShift + pos2charMap.size + Role.all.size).toChar
-    val swap2Char: Char = (swapChar + 1).toChar
+    val swapChar: Char    = (charShift + pos2charMap.size + Role.all.size).toChar
+    val swap2Char: Char   = (swapChar + 1).toChar
+    val offer10Char: Char = (swapChar + 2).toChar
+    val selectChar: Char  = (swapChar + 3).toChar
 
   }
 }

@@ -1,6 +1,6 @@
 package strategygames.fiveinarow
 
-import strategygames.Player
+import strategygames.{ Player, Score }
 
 import variant.Variant
 
@@ -19,7 +19,7 @@ case class Board(
 
   def empty(pos: Pos): Boolean = !pieces.contains(pos)
 
-  lazy val emptyPositions: List[Pos] = Pos.all.filterNot(pieces.contains)
+  lazy val emptyPositions: List[Pos] = boardSize.positions.filterNot(pieces.contains)
 
   lazy val isFull: Boolean = emptyPositions.isEmpty
 
@@ -29,25 +29,47 @@ case class Board(
 
   def openingStep: OpeningStep = history.openingStep
 
+  def score: Score = history.score
+
   def seatOf(role: Role): Player = if (role == BlackStone) blackSeat else !blackSeat
 
-  // black and white alternate from the first stone, so the counts alone say which colour comes next
-  lazy val nextColour: Role = if (count(BlackStone) == count(WhiteStone)) BlackStone else WhiteStone
+  def dropped(role: Role): Int = count(role) + score(seatOf(role.opposite))
 
-  // one seat drops both colours while the opening and the swap2 pair are being placed
+  lazy val droppedCount: Int = dropped(BlackStone) + dropped(WhiteStone)
+
+  // black and white alternate from the first stone, so the stones dropped of each say which comes next
+  lazy val nextColour: Role = if (dropped(BlackStone) == dropped(WhiteStone)) BlackStone else WhiteStone
+
+  def offered: List[Pos] = history.offered
+
   lazy val playerToMove: Player = openingStep match {
     case OpeningStep.Opening    => Player.P1
     case OpeningStep.Swap2Drops => Player.P2
+    case OpeningStep.Picking    => seatOf(nextColour.opposite)
     case _                      => seatOf(nextColour)
   }
 
+  lazy val centre: Pos = Pos.at(boardSize.width / 2, boardSize.height / 2).get
+
   def place(role: Role, at: Pos): Option[Board] =
-    if (pieces contains at) None
+    if (pieces.contains(at) || !boardSize.onBoard(at)) None
     else Some(copy(pieces = pieces + (at -> Piece(seatOf(role), role))))
 
-  // the stones keep their colour; each seat takes over the colour the other held
+  def offer(at: Pos): Board = updateHistory(h => h.copy(offered = (h.offered :+ at).sortBy(_.index)))
+
+  def keepOffered(at: Pos): Option[Board] =
+    if (!offered.contains(at)) None
+    else place(BlackStone, at).map(_.updateHistory(_.copy(offered = List.empty)))
+
+  def capture(by: Role, stones: List[Pos]): Board =
+    if (stones.isEmpty) this
+    else
+      copy(pieces = pieces -- stones)
+        .updateHistory(h => h.copy(score = h.score.add(seatOf(by), stones.size)))
+
+  // the stones and the captures keep their colour; each seat takes over the colour the other held
   def swapColours: Board = {
-    val swapped = history.copy(blackSeat = !blackSeat)
+    val swapped = history.copy(blackSeat = !blackSeat, score = Score(score.p2, score.p1))
     copy(
       pieces = pieces.view.mapValues(p => p.copy(player = !p.player)).to(Map),
       history = swapped
@@ -75,7 +97,8 @@ object Board {
   def apply(pieces: Iterable[(Pos, Piece)], variant: Variant): Board =
     Board(pieces.toMap, History(), variant)
 
-  def init(variant: Variant): Board = Board(variant.pieces, variant)
+  def init(variant: Variant): Board =
+    Board(variant.pieces, History(openingStep = variant.opening.initialStep), variant)
 
   sealed abstract class BoardSize(
       val width: Int,
@@ -85,18 +108,32 @@ object Board {
     val key   = s"${width}x${height}"
     val sizes = List(width, height)
 
+    def onBoard(pos: Pos): Boolean = pos.file.index < width && pos.rank.index < height
+
+    lazy val positions: List[Pos] = Pos.all.filter(onBoard)
+
+    lazy val files: List[File] = File.all.take(width)
+
+    lazy val ranks: List[Rank] = Rank.all.take(height)
+
     override def toString = key
 
   }
 
   object BoardSize {
-    val all: List[BoardSize] = List(Dim15x15)
+    val all: List[BoardSize] = List(Dim15x15, Dim19x19)
   }
 
   case object Dim15x15
       extends BoardSize(
         width = 15,
         height = 15
+      )
+
+  case object Dim19x19
+      extends BoardSize(
+        width = 19,
+        height = 19
       )
 
 }

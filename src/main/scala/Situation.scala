@@ -30,6 +30,8 @@ sealed abstract class Situation(val board: Board, val player: Player) {
 
   def swap2s: List[Swap2] = List.empty
 
+  def offer10s: List[Offer10] = List.empty
+
   // The single action a player whose clock has flagged is restricted to, in a game that
   // degrades play instead of ending on a flag. Distinct from forcedAction, which means the
   // action is inevitable and so may be played on the player's behalf.
@@ -51,6 +53,7 @@ sealed abstract class Situation(val board: Board, val player: Player) {
       drawCounters :::
       swaps :::
       swap2s :::
+      offer10s :::
       endTurns :::
       cubeActions :::
       // important to keep non progressive actions at the end
@@ -161,6 +164,10 @@ sealed abstract class Situation(val board: Board, val player: Player) {
   def swap: Validated[String, Swap] = sys.error("Can't swap in this game logic")
 
   def swap2: Validated[String, Swap2] = sys.error("Can't swap2 in this game logic")
+
+  def canOffer10: Boolean = false
+
+  def offer10: Validated[String, Offer10] = sys.error("Can't offer10 in this game logic")
 
   def undo: Validated[String, Undo]
 
@@ -1898,13 +1905,15 @@ object Situation {
 
     def passes: List[Pass] = List.empty
 
-    def selectSquaresAction: List[SelectSquares] = List.empty
+    def selectSquaresAction: List[SelectSquares] = s.selectSquaresActions.map(SelectSquares.FiveInARow.apply)
 
     def diceRolls: List[DiceRoll] = List.empty
 
     override def swaps: List[Swap] = swap.fold[List[Swap]](_ => List.empty, List(_))
 
     override def swap2s: List[Swap2] = swap2.fold[List[Swap2]](_ => List.empty, List(_))
+
+    override def offer10s: List[Offer10] = offer10.fold[List[Offer10]](_ => List.empty, List(_))
 
     def undos: List[Undo] = List.empty
 
@@ -1914,9 +1923,9 @@ object Situation {
 
     lazy val validTurns: List[List[Action]] = List(actions)
 
-    def canDrop: Boolean = !s.end
+    def canDrop: Boolean = s.drops.exists(_.nonEmpty)
 
-    def canOnlyDrop: Boolean = canDrop && !s.canSwap
+    def canOnlyDrop: Boolean = canDrop && !s.canSwap && !s.canOffer10
 
     def canLift: Boolean = false
 
@@ -1939,6 +1948,10 @@ object Situation {
     override def canSwap: Boolean = s.canSwap
 
     override def canSwap2: Boolean = s.canSwap2
+
+    override def canOffer10: Boolean = s.canOffer10
+
+    override lazy val gameMessage: Option[GameMessage] = s.gameMessage
 
     def playable(strict: Boolean): Boolean = s.playable(strict)
 
@@ -1972,12 +1985,20 @@ object Situation {
     override def swap2: Validated[String, Swap2] =
       s.swap2().toEither.map(sw => Swap2.FiveInARow(sw)).toValidated
 
+    override def offer10: Validated[String, Offer10] =
+      s.offer10().toEither.map(o => Offer10.FiveInARow(o)).toValidated
+
     def lift(pos: Pos): Validated[String, Lift] = sys.error("Can't do a Lift for fiveinarow")
 
     def pass: Validated[String, Pass] = sys.error("Can't do a Pass for fiveinarow")
 
     def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
-      sys.error("Can't do a SelectSquares for fiveinarow")
+      s.selectSquares(squares.map {
+        case Pos.FiveInARow(pos) => pos
+        case _                   => sys.error("Not passed FiveInARow objects")
+      }).toEither
+        .map(ss => SelectSquares.FiveInARow(ss))
+        .toValidated
 
     def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
       sys.error("Can't do a DiceRoll for fiveinarow")
@@ -2068,4 +2089,5 @@ sealed abstract class GameMessage(val translationString: String)
 object GameMessage {
   case object PerpetualWarning      extends GameMessage("perpetualWarning")
   case object SubsequentPassWarning extends GameMessage("subsequentPassWarning")
+  case object ForbiddenMoveWarning  extends GameMessage("forbiddenMoveWarning")
 }

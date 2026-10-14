@@ -152,7 +152,7 @@ object Pos {
 
     def piotr: Char = p.piotr
 
-    lazy val toInt: Int = (p.file.index << 4) + p.rank.index
+    lazy val toInt: Int = (p.file.index << 5) + p.rank.index
 
     def gameLogic: GameLogic = GameLogic.FiveInARow()
 

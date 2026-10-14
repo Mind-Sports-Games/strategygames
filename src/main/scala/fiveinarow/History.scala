@@ -1,6 +1,6 @@
 package strategygames.fiveinarow
 
-import strategygames.Player
+import strategygames.{ Player, Score }
 
 import format.Uci
 
@@ -10,6 +10,9 @@ case class History(
     positionHashes: PositionHash = Array.empty,
     blackSeat: Player = Player.P1,
     openingStep: OpeningStep = OpeningStep.Opening,
+    score: Score = Score(0, 0),
+    offered: List[Pos] = List.empty,
+    forbiddenDrop: Option[Pos] = None,
     halfMoveClock: Int = 0
 ) {
 

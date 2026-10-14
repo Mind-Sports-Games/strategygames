@@ -370,7 +370,7 @@ object FEN {
 
     def ply: Option[Int] = f.ply
 
-    def initial: Boolean = f.value == strategygames.fiveinarow.format.Forsyth.initial.value
+    def initial: Boolean = strategygames.fiveinarow.variant.Variant.all.exists(_.initialFen == f)
 
     def chessFen: Option[strategygames.chess.format.FEN] = None
 

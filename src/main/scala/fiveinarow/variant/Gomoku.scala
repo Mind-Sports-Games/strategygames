@@ -14,7 +14,7 @@ case object Gomoku
 
   def gameFamily: GameFamily = GameFamily.FiveInARow()
 
-  def perfIcon: Char = ''
+  def perfIcon: Char = ''
   def perfId: Int    = 1000
 
   override def baseVariant: Boolean = true

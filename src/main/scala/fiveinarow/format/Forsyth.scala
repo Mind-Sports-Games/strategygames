@@ -6,15 +6,23 @@ import strategygames.fiveinarow.variant.Variant
 
 object Forsyth {
 
-  val initial = FEN(s"${List.fill(Rank.allSize)(File.allSize.toString).mkString("/")} b 1 o 1")
+  def initial(variant: Variant): FEN = {
+    val size  = variant.boardSize
+    val board = List.fill(size.height)(size.width.toString).mkString("/")
+    val score = if (variant.hasGameScore) " 0 0" else ""
+    FEN(s"$board b 1 ${variant.opening.initialStep.fen}$score 1")
+  }
+
+  val initial: FEN = initial(Variant.default)
 
   def <<@(variant: Variant, fen: FEN): Option[Situation] = {
     val board = fen.board(variant)
-    if (fen.nextColour.exists(_ != board.nextColour)) None
+    if (!fen.boardSize.contains(variant.boardSize)) None
+    else if (fen.nextColour.exists(_ != board.nextColour)) None
     else Some(Situation(board, board.playerToMove))
   }
 
-  def <<(fen: FEN): Option[Situation] = <<@(Variant.default, fen)
+  def <<(fen: FEN): Option[Situation] = Variant.forFen(fen).flatMap(<<@(_, fen))
 
   case class SituationPlus(situation: Situation, fullTurnCount: Int) {
 
@@ -28,7 +36,8 @@ object Forsyth {
       SituationPlus(sit, fen.fullMove.map(_ max 1) getOrElse 1)
     }
 
-  def <<<(fen: FEN): Option[SituationPlus] = <<<@(Variant.default, fen)
+  def <<<(fen: FEN): Option[SituationPlus] =
+    Variant.forFen(fen).flatMap(<<<@(_, fen))
 
   def >>(situation: Situation): FEN = >>(SituationPlus(situation, 1))
 
@@ -40,18 +49,23 @@ object Forsyth {
     FEN(s"${boardPart(board)} ${stateFields(board)} ${game.fullTurnCount}")
   }
 
-  private def stateFields(board: Board): String =
-    s"${board.nextColour.forsyth.toLower} ${board.blackSeat.fold(1, 2)} ${board.openingStep.fen}"
+  private def stateFields(board: Board): String = {
+    val score = if (board.variant.hasGameScore) s" ${board.score.fenStr}" else ""
+    s"${board.nextColour.forsyth.toLower} ${board.blackSeat.fold(1, 2)} ${board.openingStep.fen}$score"
+  }
 
   def exportBoard(board: Board): String = boardPart(board)
 
   def boardPart(board: Board): String =
-    Rank.allReversed
+    board.boardSize.ranks.reverse
       .map { y =>
-        val (row, empty) = File.all.foldLeft(("", 0)) { case ((row, empty), x) =>
-          board(x, y) match {
-            case None        => (row, empty + 1)
-            case Some(piece) => (s"$row${if (empty > 0) empty else ""}${piece.forsyth}", 0)
+        val (row, empty) = board.boardSize.files.foldLeft(("", 0)) { case ((row, empty), x) =>
+          val point = Pos(x, y)
+          board(point)
+            .map(_.forsyth)
+            .orElse(Option.when(board.offered.contains(point))(FEN.offeredChar)) match {
+            case None    => (row, empty + 1)
+            case Some(c) => (s"$row${if (empty > 0) empty else ""}$c", 0)
           }
         }
         if (empty > 0) s"$row$empty" else row

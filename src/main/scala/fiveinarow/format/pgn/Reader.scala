@@ -5,6 +5,7 @@ import strategygames.ActionStrs
 import strategygames.format.pgn.Tags
 
 import cats.data.Validated
+import scalalib.extensions.*
 
 object Reader {
 
@@ -21,11 +22,16 @@ object Reader {
     }
   }
 
+  // the variant comes from the tags: a fen cannot always tell gomoku from renju, both played on 15x15
   def replayResultFromActionStrs(
       actionStrs: ActionStrs,
       op: ActionStrs => ActionStrs,
-      @annotation.nowarn tags: Tags
+      tags: Tags
   ): Validated[String, Result] =
-    Replay(op(actionStrs), None, strategygames.fiveinarow.variant.Variant.default)
+    Replay(
+      op(actionStrs),
+      tags.fiveInARowFen,
+      tags.fiveInARowVariant | strategygames.fiveinarow.variant.Variant.default
+    )
 
 }

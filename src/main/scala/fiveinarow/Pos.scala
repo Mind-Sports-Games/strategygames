@@ -44,6 +44,6 @@ object Pos {
 
   lazy val allPiotrs: Map[Char, Pos] = all.map(pos => pos.piotr -> pos).to(Map)
 
-  val posR = "([a-o](?:1[0-5]|[1-9]))"
+  val posR = "([a-s](?:1[0-9]|[1-9]))"
 
 }

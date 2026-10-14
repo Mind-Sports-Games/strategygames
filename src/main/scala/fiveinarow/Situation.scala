@@ -1,6 +1,6 @@
 package strategygames.fiveinarow
 
-import strategygames.{ Player, Status }
+import strategygames.{ GameMessage, Player, Status }
 
 import cats.data.Validated
 
@@ -22,11 +22,28 @@ case class Situation(board: Board, player: Player) {
 
   lazy val canSwap2: Boolean = board.variant.canSwap2(this)
 
+  lazy val canOffer10: Boolean = board.variant.canOffer10(this)
+
+  lazy val canSelectSquares: Boolean = board.variant.canSelectSquares(this)
+
+  lazy val selectSquaresActions: List[SelectSquares] = board.variant.selectSquaresActions(this)
+
+  // the empty points where black's drop would lose on the spot
+  lazy val forbiddenDrops: List[Pos] = board.variant.forbiddenDrops(this)
+
+  lazy val gameMessage: Option[GameMessage] =
+    Option.when(forbiddenDrops.nonEmpty)(GameMessage.ForbiddenMoveWarning)
+
   def drop(role: Role, pos: Pos): Validated[String, Drop] = board.variant.drop(this, role, pos)
 
   def swap(): Validated[String, Swap] = board.variant.swap(this)
 
   def swap2(): Validated[String, Swap2] = board.variant.swap2(this)
+
+  def offer10(): Validated[String, Offer10] = board.variant.offer10(this)
+
+  def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
+    board.variant.selectSquares(this, squares)
 
   lazy val variantEnd: Boolean = board.variant.specialEnd(this)
 

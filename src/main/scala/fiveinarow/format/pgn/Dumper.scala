@@ -9,4 +9,8 @@ object Dumper {
 
   def apply(data: strategygames.fiveinarow.Swap2): String = data.toUci.uci
 
+  def apply(data: strategygames.fiveinarow.Offer10): String = data.toUci.uci
+
+  def apply(data: strategygames.fiveinarow.SelectSquares): String = data.toUci.uci
+
 }

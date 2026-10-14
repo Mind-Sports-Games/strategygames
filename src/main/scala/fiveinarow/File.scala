@@ -24,6 +24,6 @@ object File {
 
   def fromChar(ch: Char): Option[File] = apply(ch.toInt - 97)
 
-  val all: List[File] = (0 until 15).map(new File(_)).toList
+  val all: List[File] = (0 until 19).map(new File(_)).toList
   val allSize: Int    = all.size
 }

@@ -23,6 +23,10 @@ case class Game(
 
   def apply(swap2: Swap2): Game = applyAction(swap2, swap2.metrics)
 
+  def apply(offer10: Offer10): Game = applyAction(offer10, offer10.metrics)
+
+  def apply(ss: SelectSquares): Game = applyAction(ss, ss.metrics)
+
   private def applyAction(action: Action, metrics: MoveMetrics): Game = {
     val newSituation = action.situationAfter
     val switchPlayer = situation.player != newSituation.player
@@ -45,10 +49,18 @@ case class Game(
   def apply(@annotation.nowarn uci: Uci.Swap2): Validated[String, (Game, Swap2)] =
     situation.swap2().map(swap2 => apply(swap2) -> swap2)
 
+  def apply(@annotation.nowarn uci: Uci.Offer10): Validated[String, (Game, Offer10)] =
+    situation.offer10().map(o => apply(o) -> o)
+
+  def apply(uci: Uci.SelectSquares): Validated[String, (Game, SelectSquares)] =
+    situation.selectSquares(uci.squares).map(ss => apply(ss) -> ss)
+
   def apply(uci: Uci): Validated[String, (Game, Action)] = (uci match {
-    case u: Uci.Drop  => apply(u)
-    case u: Uci.Swap  => apply(u)
-    case u: Uci.Swap2 => apply(u)
+    case u: Uci.Drop          => apply(u)
+    case u: Uci.Swap          => apply(u)
+    case u: Uci.Swap2         => apply(u)
+    case u: Uci.Offer10       => apply(u)
+    case u: Uci.SelectSquares => apply(u)
   }) map { case (g, a) => g -> a }
 
   private def applyClock(metrics: MoveMetrics, gameActive: Boolean, switchClock: Boolean) =

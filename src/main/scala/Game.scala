@@ -172,6 +172,9 @@ abstract class Game(
         )
       case Uci.FiveInARowSwap(_)                        => swap(metrics)
       case Uci.FiveInARowSwap2(_)                       => swap2(metrics)
+      case Uci.FiveInARowOffer10(_)                     => offer10(metrics)
+      case Uci.FiveInARowSelectSquares(uci)             =>
+        selectSquares(uci.squares.map(Pos.FiveInARow(_)), metrics)
       case Uci.GoPass(_) | Uci.EntropyPass(_)           => pass(metrics)
       case Uci.ChessDoRoll(_) | Uci.BackgammonDoRoll(_) => randomizeAndApplyDiceRoll(metrics)
       case Uci.BackgammonUndo(_)                        => undo(metrics)
@@ -232,6 +235,9 @@ abstract class Game(
 
   def swap2(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Swap2)] =
     sys.error("Can't swap2 in this game logic")
+
+  def offer10(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Offer10)] =
+    sys.error("Can't offer10 in this game logic")
 
   // Because I"m unsure how to properly write a single, generic copy
   // type signature, we're getting individual ones for how we use it.
@@ -1830,10 +1836,12 @@ object Game {
 
     def apply(action: Action): Game =
       action match {
-        case (Drop.FiveInARow(drop))   => FiveInARow(g.apply(drop))
-        case (Swap.FiveInARow(swap))   => FiveInARow(g.apply(swap))
-        case (Swap2.FiveInARow(swap2)) => FiveInARow(g.apply(swap2))
-        case _                         => sys.error("Not passed FiveInARow objects")
+        case (Drop.FiveInARow(drop))        => FiveInARow(g.apply(drop))
+        case (Swap.FiveInARow(swap))        => FiveInARow(g.apply(swap))
+        case (Swap2.FiveInARow(swap2))      => FiveInARow(g.apply(swap2))
+        case (Offer10.FiveInARow(o))        => FiveInARow(g.apply(o))
+        case (SelectSquares.FiveInARow(ss)) => FiveInARow(g.apply(ss))
+        case _                              => sys.error("Not passed FiveInARow objects")
       }
 
     def drop(
@@ -1876,11 +1884,27 @@ object Game {
         .map(s => (FiveInARow(g.apply(s)), Swap2.FiveInARow(s)))
         .toValidated
 
+    override def offer10(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Offer10)] =
+      g.situation
+        .offer10()
+        .map(_ withMetrics metrics)
+        .toEither
+        .map(o => (FiveInARow(g.apply(o)), Offer10.FiveInARow(o)))
+        .toValidated
+
     def selectSquares(
         squares: List[Pos],
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, SelectSquares)] =
-      sys.error("Can't selectSquares in FiveInARow")
+      g.situation
+        .selectSquares(squares.map {
+          case Pos.FiveInARow(pos) => pos
+          case _                   => sys.error("Not passed FiveInARow objects")
+        })
+        .map(_ withMetrics metrics)
+        .toEither
+        .map(ss => (FiveInARow(g.apply(ss)), SelectSquares.FiveInARow(ss)))
+        .toValidated
 
     def diceRoll(
         dice: List[Int],

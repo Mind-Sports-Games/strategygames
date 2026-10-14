@@ -157,6 +157,7 @@ object History {
         lastTurn = h.lastTurn.map(Uci.wrap),
         currentTurn = h.currentTurn.map(Uci.wrap),
         positionHashes = h.positionHashes,
+        score = h.score,
         halfMoveClock = h.halfMoveClock
       )
 
@@ -300,6 +301,7 @@ object History {
           lastTurn = lastTurn.map(lm => lm.toFiveInARow),
           currentTurn = currentTurn.map(lm => lm.toFiveInARow),
           positionHashes = positionHashes,
+          score = score,
           halfMoveClock = halfMoveClock
         )
       )

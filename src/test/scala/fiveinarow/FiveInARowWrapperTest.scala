@@ -36,7 +36,8 @@ class FiveInARowWrapperTest extends Specification {
       GameFamily(15) === gf
       GameGroup(14) === GameGroup.FiveInARow()
       gf.key === "fiveinarow"
-      GameGroup.FiveInARow().variants === List(stratVariant)
+      GameGroup.FiveInARow().variants ===
+        List(stratVariant, StratVariant.FiveInARow(variant.Pente), StratVariant.FiveInARow(variant.Renju))
     }
 
     "find gomoku by key and as the family default" in {

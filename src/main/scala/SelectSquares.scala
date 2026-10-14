@@ -56,6 +56,39 @@ object SelectSquares {
 
   }
 
+  final case class FiveInARow(ss: fiveinarow.SelectSquares)
+      extends SelectSquares(
+        ss.squares.map(Pos.FiveInARow(_)),
+        Situation.FiveInARow(ss.situationBefore),
+        Board.FiveInARow(ss.after),
+        ss.autoEndTurn,
+        ss.metrics
+      ) {
+
+    def situationAfter: Situation = Situation.FiveInARow(ss.situationAfter)
+    def finalizeAfter: Board      = ss.finalizeAfter
+
+    def toUci: Uci.SelectSquares = Uci.FiveInARowSelectSquares(ss.toUci)
+
+    val unwrap = ss
+
+    def toFairySF      = sys.error("Can't make a fairysf SelectSquares from a fiveinarow SelectSquares")
+    def toChess        = sys.error("Can't make a chess SelectSquares from a fiveinarow SelectSquares")
+    def toDraughts     = sys.error("Can't make a draughts SelectSquares from a fiveinarow SelectSquares")
+    def toSamurai      = sys.error("Can't make a samurai SelectSquares from a fiveinarow SelectSquares")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak SelectSquares from a fiveinarow SelectSquares")
+    def toGo           = sys.error("Can't make a go SelectSquares from a fiveinarow SelectSquares")
+    def toBackgammon   = sys.error("Can't make a backgammon SelectSquares from a fiveinarow SelectSquares")
+    def toAbalone      = sys.error("Can't make an abalone SelectSquares from a fiveinarow SelectSquares")
+    def toDameo        = sys.error("Can't make a dameo SelectSquares from a fiveinarow SelectSquares")
+    def toEntropy      = sys.error("Can't make an entropy SelectSquares from a fiveinarow SelectSquares")
+    def toFiveInARow   = ss
+
+    override def toString = toUci.uci
+  }
+
   def wrap(ss: go.SelectSquares): SelectSquares = SelectSquares.Go(ss)
+
+  def wrap(ss: fiveinarow.SelectSquares): SelectSquares = SelectSquares.FiveInARow(ss)
 
 }
