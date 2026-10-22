@@ -177,7 +177,7 @@ class PenteTest extends Specification with FiveInARowTestSupport {
       after.board.score === Score(10, 0)
       after.end must beTrue
       after.winner === Some(Player.P1)
-      after.status === Some(Status.VariantEnd)
+      after.status === Some(Status.TenCaptures)
       after.drops must beNone
     }
 
@@ -288,8 +288,10 @@ class PenteTest extends Specification with FiveInARowTestSupport {
 
     val games = (1 to 30).map(seed => played(20261012 + seed))
 
-    "always end on the variant end" in {
-      games.forall(_.situation.status.contains(Status.VariantEnd)) must beTrue
+    "always end on a line of five, ten captures or a full board" in {
+      games.forall(
+        _.situation.status.exists(Set(Status.LineOfFive, Status.TenCaptures, Status.Draw))
+      ) must beTrue
     }
 
     "make captures along the way" in {

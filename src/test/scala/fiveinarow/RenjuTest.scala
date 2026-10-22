@@ -284,7 +284,7 @@ class RenjuTest extends Specification with FiveInARowTestSupport {
       val after = dropOn(blackToMove("f8", "g8", "h6", "h7")(), "h8")
       after.end must beTrue
       after.winner === Some(Player.P2)
-      after.status === Some(Status.VariantEnd)
+      after.status === Some(Status.ForbiddenMove)
       after.board.history.forbiddenDrop.map(_.key) === Some("h8")
     }
 
@@ -423,8 +423,10 @@ class RenjuTest extends Specification with FiveInARowTestSupport {
 
     val games = (1 to 30).map(seed => played(20261013 + seed))
 
-    "always end on the variant end" in {
-      games.forall(_.situation.status.contains(Status.VariantEnd)) must beTrue
+    "always end on a line of five, a forbidden move or a full board" in {
+      games.forall(
+        _.situation.status.exists(Set(Status.LineOfFive, Status.ForbiddenMove, Status.Draw))
+      ) must beTrue
     }
 
     "include swaps and offer10s among them" in {

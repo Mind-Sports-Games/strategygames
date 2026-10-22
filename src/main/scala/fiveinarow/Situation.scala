@@ -55,9 +55,7 @@ case class Situation(board: Board, player: Player) {
 
   def opponentHasInsufficientMaterial: Boolean = false
 
-  lazy val status: Option[Status] =
-    if (variantEnd) Some(Status.VariantEnd)
-    else None
+  lazy val status: Option[Status] = board.variant.endStatus(this)
 
   def withHistory(history: History) =
     copy(board = board withHistory history)

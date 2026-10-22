@@ -14,7 +14,7 @@ class FiveInARowEndingTest extends Specification with FiveInARowTestSupport {
       val s = situationOf(boardOf(line("a1", "b1", "c1", "d1", "e1")(BlackStone)*))
       s.end must beTrue
       s.winner === Some(Player.P1)
-      s.status === Some(Status.VariantEnd)
+      s.status === Some(Status.LineOfFive)
     }
 
     "win along a column" in {
@@ -69,6 +69,7 @@ class FiveInARowEndingTest extends Specification with FiveInARowTestSupport {
       s.board.isFull must beTrue
       s.end must beTrue
       s.winner must beNone
+      s.status === Some(Status.Draw)
       s.board.variant.specialDraw(s) must beTrue
     }
   }

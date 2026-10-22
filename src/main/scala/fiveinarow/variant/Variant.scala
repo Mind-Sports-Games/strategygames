@@ -6,7 +6,7 @@ import scalalib.extensions.*
 
 import strategygames.fiveinarow._
 import strategygames.fiveinarow.format.FEN
-import strategygames.{ GameFamily, Player }
+import strategygames.{ GameFamily, Player, Status }
 
 import scala.annotation.nowarn
 
@@ -35,7 +35,7 @@ abstract class Variant private[variant] (
 
   def dropsVariant: Boolean = true
 
-  def canOfferDraw: Boolean = true
+  def canOfferDraw: Boolean = false
 
   def repetitionEnabled: Boolean = false
 
@@ -195,6 +195,15 @@ abstract class Variant private[variant] (
     colourWithLine(board).map(board.seatOf) orElse
       board.history.forbiddenDrop.map(_ => board.seatOf(WhiteStone)) orElse
       seatWithCaptures(board)
+  }
+
+  def endStatus(situation: Situation): Option[Status] = {
+    val board = situation.board
+    if (colourWithLine(board).isDefined) Some(Status.LineOfFive)
+    else if (board.history.forbiddenDrop.isDefined) Some(Status.ForbiddenMove)
+    else if (seatWithCaptures(board).isDefined) Some(Status.TenCaptures)
+    else if (board.isFull) Some(Status.Draw)
+    else None
   }
 
   def materialImbalance(@nowarn board: Board): Int = 0

@@ -43,7 +43,7 @@ class FiveInARowWrapperTest extends Specification {
     "find gomoku by key and as the family default" in {
       StratVariant(lib, "gomoku") === Some(stratVariant)
       gf.defaultVariant === stratVariant
-      stratVariant.canOfferDraw must beTrue
+      stratVariant.canOfferDraw must beFalse
       stratVariant.onlyDropsVariant must beTrue
     }
   }

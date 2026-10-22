@@ -39,8 +39,8 @@ class FiveInARowRandomGameTest extends Specification with FiveInARowTestSupport 
 
     val games = (1 to 40).map(seed => played(20261008 + seed))
 
-    "always end on the variant end" in {
-      games.forall(_.situation.status.contains(Status.VariantEnd)) must beTrue
+    "always end on a line of five or a full board" in {
+      games.forall(_.situation.status.exists(Set(Status.LineOfFive, Status.Draw))) must beTrue
     }
 
     "give the win to the seat holding the colour that made five" in {

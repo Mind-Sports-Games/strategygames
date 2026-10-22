@@ -74,7 +74,7 @@ class FiveInARowFullGameTest extends Specification with FiveInARowTestSupport {
 
     "end on the fifth stone, won by the seat holding black" in {
       finished.situation.end must beTrue
-      finished.situation.status === Some(Status.VariantEnd)
+      finished.situation.status === Some(Status.LineOfFive)
       finished.situation.board.variant.colourWithLine(finished.situation.board) === Some(BlackStone)
       finished.situation.winner === Some(Player.P2)
     }
