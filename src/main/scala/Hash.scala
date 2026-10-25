@@ -85,33 +85,54 @@ object Hash {
     val actorMasks: Array[Long]    = zc.actorMasks
   }
 
-  // The following masks are compatible with the Polyglot
-  // opening book format.
-  private def polyglotTable(lib: GameLogic): ZobristConstants = lib match {
-    case GameLogic.Draughts()     => DraughtsZobristConstants(new draughts.Hash.ZobristConstants(0))
-    case GameLogic.Chess()        => ChessZobristConstants(new chess.Hash.ZobristConstants(0))
-    case GameLogic.FairySF()      => FairySFZobristConstants(new fairysf.Hash.ZobristConstants(0))
-    case GameLogic.Samurai()      => SamuraiZobristConstants(new samurai.Hash.ZobristConstants(0))
-    case GameLogic.Togyzkumalak() => TogyzkumalakZobristConstants(new togyzkumalak.Hash.ZobristConstants(0))
-    case GameLogic.Go()           => GoZobristConstants(new go.Hash.ZobristConstants(0))
-    case GameLogic.Backgammon()   => BackgammonZobristConstants(new backgammon.Hash.ZobristConstants(0))
-    case GameLogic.Abalone()      => AbaloneZobristConstants(new abalone.Hash.ZobristConstants(0))
-    case GameLogic.Dameo()        => DameoZobristConstants(new dameo.Hash.ZobristConstants(0))
-    case GameLogic.Entropy()      => EntropyZobristConstants(new entropy.Hash.ZobristConstants(0))
+  final private class Tables(start: Int) {
+    lazy val draughtsTable: ZobristConstants     = DraughtsZobristConstants(
+      new draughts.Hash.ZobristConstants(start)
+    )
+    lazy val chessTable: ZobristConstants        = ChessZobristConstants(new chess.Hash.ZobristConstants(start))
+    lazy val fairysfTable: ZobristConstants      = FairySFZobristConstants(
+      new fairysf.Hash.ZobristConstants(start)
+    )
+    lazy val samuraiTable: ZobristConstants      = SamuraiZobristConstants(
+      new samurai.Hash.ZobristConstants(start)
+    )
+    lazy val togyzkumalakTable: ZobristConstants = TogyzkumalakZobristConstants(
+      new togyzkumalak.Hash.ZobristConstants(start)
+    )
+    lazy val goTable: ZobristConstants           = GoZobristConstants(new go.Hash.ZobristConstants(start))
+    lazy val backgammonTable: ZobristConstants   = BackgammonZobristConstants(
+      new backgammon.Hash.ZobristConstants(start)
+    )
+    lazy val abaloneTable: ZobristConstants      = AbaloneZobristConstants(
+      new abalone.Hash.ZobristConstants(start)
+    )
+    lazy val dameoTable: ZobristConstants        = DameoZobristConstants(new dameo.Hash.ZobristConstants(start))
+    lazy val entropyTable: ZobristConstants      = EntropyZobristConstants(
+      new entropy.Hash.ZobristConstants(start)
+    )
+
+    def apply(lib: GameLogic): ZobristConstants = lib match {
+      case GameLogic.Draughts()     => draughtsTable
+      case GameLogic.Chess()        => chessTable
+      case GameLogic.FairySF()      => fairysfTable
+      case GameLogic.Samurai()      => samuraiTable
+      case GameLogic.Togyzkumalak() => togyzkumalakTable
+      case GameLogic.Go()           => goTable
+      case GameLogic.Backgammon()   => backgammonTable
+      case GameLogic.Abalone()      => abaloneTable
+      case GameLogic.Dameo()        => dameoTable
+      case GameLogic.Entropy()      => entropyTable
+    }
   }
 
-  private def randomTable(lib: GameLogic): ZobristConstants = lib match {
-    case GameLogic.Draughts()     => DraughtsZobristConstants(new draughts.Hash.ZobristConstants(16))
-    case GameLogic.Chess()        => ChessZobristConstants(new chess.Hash.ZobristConstants(16))
-    case GameLogic.FairySF()      => FairySFZobristConstants(new fairysf.Hash.ZobristConstants(16))
-    case GameLogic.Samurai()      => SamuraiZobristConstants(new samurai.Hash.ZobristConstants(16))
-    case GameLogic.Togyzkumalak() => TogyzkumalakZobristConstants(new togyzkumalak.Hash.ZobristConstants(16))
-    case GameLogic.Go()           => GoZobristConstants(new go.Hash.ZobristConstants(16))
-    case GameLogic.Backgammon()   => BackgammonZobristConstants(new backgammon.Hash.ZobristConstants(16))
-    case GameLogic.Abalone()      => AbaloneZobristConstants(new abalone.Hash.ZobristConstants(16))
-    case GameLogic.Dameo()        => DameoZobristConstants(new dameo.Hash.ZobristConstants(16))
-    case GameLogic.Entropy()      => EntropyZobristConstants(new entropy.Hash.ZobristConstants(16))
-  }
+  // The following masks are compatible with the Polyglot
+  // opening book format.
+  private val polyglotTables = new Tables(0)
+  private val randomTables   = new Tables(16)
+
+  private def polyglotTable(lib: GameLogic): ZobristConstants = polyglotTables(lib)
+
+  private def randomTable(lib: GameLogic): ZobristConstants = randomTables(lib)
 
   private def get(lib: GameLogic, situation: Situation, table: ZobristConstants): Long =
     (lib, situation, table) match {
