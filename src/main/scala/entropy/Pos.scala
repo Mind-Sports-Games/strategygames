@@ -1,62 +1,8 @@
 package strategygames.entropy
 
-import scala.math.{ abs, max, min }
+import strategygames.Piotr
 
-// Matches with fairy piotr.ts keyed by square name on that shared 8-file table,
-// so a 7-file board skips the h-file characters
-object Piotr {
-  val lookup: Map[Int, Char] = Map(
-    Pos.A1.index -> 'a',
-    Pos.B1.index -> 'b',
-    Pos.C1.index -> 'c',
-    Pos.D1.index -> 'd',
-    Pos.E1.index -> 'e',
-    Pos.F1.index -> 'f',
-    Pos.G1.index -> 'g',
-    Pos.A2.index -> 'i',
-    Pos.B2.index -> 'j',
-    Pos.C2.index -> 'k',
-    Pos.D2.index -> 'l',
-    Pos.E2.index -> 'm',
-    Pos.F2.index -> 'n',
-    Pos.G2.index -> 'o',
-    Pos.A3.index -> 'q',
-    Pos.B3.index -> 'r',
-    Pos.C3.index -> 's',
-    Pos.D3.index -> 't',
-    Pos.E3.index -> 'u',
-    Pos.F3.index -> 'v',
-    Pos.G3.index -> 'w',
-    Pos.A4.index -> 'y',
-    Pos.B4.index -> 'z',
-    Pos.C4.index -> 'A',
-    Pos.D4.index -> 'B',
-    Pos.E4.index -> 'C',
-    Pos.F4.index -> 'D',
-    Pos.G4.index -> 'E',
-    Pos.A5.index -> 'G',
-    Pos.B5.index -> 'H',
-    Pos.C5.index -> 'I',
-    Pos.D5.index -> 'J',
-    Pos.E5.index -> 'K',
-    Pos.F5.index -> 'L',
-    Pos.G5.index -> 'M',
-    Pos.A6.index -> 'O',
-    Pos.B6.index -> 'P',
-    Pos.C6.index -> 'Q',
-    Pos.D6.index -> 'R',
-    Pos.E6.index -> 'S',
-    Pos.F6.index -> 'T',
-    Pos.G6.index -> 'U',
-    Pos.A7.index -> 'W',
-    Pos.B7.index -> 'X',
-    Pos.C7.index -> 'Y',
-    Pos.D7.index -> 'Z',
-    Pos.E7.index -> '0',
-    Pos.F7.index -> '1',
-    Pos.G7.index -> '2'
-  )
-}
+import scala.math.{ abs, max, min }
 
 case class Pos private (index: Int) extends AnyVal {
 
@@ -92,7 +38,7 @@ case class Pos private (index: Int) extends AnyVal {
   @inline def file = File of this
   @inline def rank = Rank of this
 
-  def piotr: Char = Piotr.lookup.get(index).getOrElse('?')
+  def piotr: Char = Pos.piotrs(index)
   def piotrStr    = piotr.toString
 
   def sgf(numRanks: Int) = file.sgfChar.toString + rank.sgfChar(numRanks).toString
@@ -184,7 +130,9 @@ object Pos {
 
   // in a1-to-g7 sweep order, which the forced drop of a flagged Chaos relies on
   val all: List[Pos] = (0 to (File.allSize * Rank.allSize) - 1).map(new Pos(_)).toList
-  val allSize: Int   = all.size
+
+  private lazy val piotrs: Array[Char] = all.map(pos => Piotr.lookup.getOrElse(pos.key, '?')).toArray
+  val allSize: Int                     = all.size
 
   val allKeys: Map[String, Pos] = all
     .map { pos =>

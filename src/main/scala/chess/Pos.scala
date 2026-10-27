@@ -1,5 +1,7 @@
 package strategygames.chess
 
+import strategygames.Piotr
+
 import scala.math.{ abs, max, min }
 
 case class Pos private (index: Int) extends AnyVal {
@@ -44,13 +46,8 @@ case class Pos private (index: Int) extends AnyVal {
   @inline def file = File of this
   @inline def rank = Rank of this
 
-  def piotr: Char =
-    if (index <= 25) (97 + index).toChar // a ...
-    else if (index <= 51) (39 + index).toChar // A ...
-    else if (index <= 61) (index - 4).toChar // 0 ...
-    else if (index == 62) '!'
-    else '?'
-  def piotrStr = piotr.toString
+  def piotr: Char = Pos.piotrs(index)
+  def piotrStr    = piotr.toString
 
   def sgf = file.sgfChar.toString + rank.sgfChar.toString
 
@@ -153,6 +150,8 @@ object Pos {
   // if adding new Pos check for use of Pos.all
   val all: List[Pos] = (0 to 63).map(new Pos(_)).toList
   val allSize: Int   = all.size
+
+  private lazy val piotrs: Array[Char] = all.map(pos => Piotr.lookup.getOrElse(pos.key, '?')).toArray
 
   val p1Backrank = (A1 <-> H1).toList
   val p2Backrank = (A8 <-> H8).toList

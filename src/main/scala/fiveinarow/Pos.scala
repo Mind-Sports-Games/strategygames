@@ -1,5 +1,7 @@
 package strategygames.fiveinarow
 
+import strategygames.Piotr
+
 case class Pos private (index: Int) extends AnyVal {
 
   @inline def file = File of this
@@ -8,7 +10,7 @@ case class Pos private (index: Int) extends AnyVal {
   def step(dx: Int, dy: Int): Option[Pos] =
     Pos.at(file.index + dx, rank.index + dy)
 
-  def piotr: Char = Pos.piotrLookup.getOrElse(index, '?')
+  def piotr: Char = Pos.piotrs(index)
   def piotrStr    = piotr.toString
 
   def key               = file.toString + rank.toString
@@ -38,9 +40,7 @@ object Pos {
 
   val allKeys: Map[String, Pos] = all.map(pos => pos.key -> pos).to(Map)
 
-  // lila decodes piotr with one table keyed by square name, which go's 19x19 board already covers
-  private lazy val piotrLookup: Map[Int, Char] =
-    all.flatMap(pos => strategygames.go.Pos.fromKey(pos.key).map(g => pos.index -> g.piotr)).to(Map)
+  private lazy val piotrs: Array[Char] = all.map(pos => Piotr.lookup.getOrElse(pos.key, '?')).toArray
 
   lazy val allPiotrs: Map[Char, Pos] = all.map(pos => pos.piotr -> pos).to(Map)
 
