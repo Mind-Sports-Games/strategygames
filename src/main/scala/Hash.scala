@@ -19,76 +19,64 @@ object Hash {
   val size = 3
 
   sealed abstract class ZobristConstants {
-    def hexToLong(s: String): Long
     val p1TurnMask: Long
     val actorMasks: Array[Long]
   }
 
   final case class ChessZobristConstants(zc: chess.Hash.ZobristConstants) extends ZobristConstants {
-    def hexToLong(s: String): Long = zc.hexToLong(s)
-    val p1TurnMask: Long           = zc.p1TurnMask
-    val actorMasks: Array[Long]    = zc.actorMasks
+    val p1TurnMask: Long        = zc.p1TurnMask
+    val actorMasks: Array[Long] = zc.actorMasks
   }
 
   final case class DraughtsZobristConstants(zc: draughts.Hash.ZobristConstants) extends ZobristConstants {
-    def hexToLong(s: String): Long = zc.hexToLong(s)
-    val p1TurnMask: Long           = zc.p1TurnMask
-    val actorMasks: Array[Long]    = zc.actorMasks
+    val p1TurnMask: Long        = zc.p1TurnMask
+    val actorMasks: Array[Long] = zc.actorMasks
   }
 
   final case class FairySFZobristConstants(zc: fairysf.Hash.ZobristConstants) extends ZobristConstants {
-    def hexToLong(s: String): Long = zc.hexToLong(s)
-    val p1TurnMask: Long           = zc.p1TurnMask
-    val actorMasks: Array[Long]    = zc.actorMasks
+    val p1TurnMask: Long        = zc.p1TurnMask
+    val actorMasks: Array[Long] = zc.actorMasks
   }
 
   final case class SamuraiZobristConstants(zc: samurai.Hash.ZobristConstants) extends ZobristConstants {
-    def hexToLong(s: String): Long = zc.hexToLong(s)
-    val p1TurnMask: Long           = zc.p1TurnMask
-    val actorMasks: Array[Long]    = zc.actorMasks
+    val p1TurnMask: Long        = zc.p1TurnMask
+    val actorMasks: Array[Long] = zc.actorMasks
   }
 
   final case class TogyzkumalakZobristConstants(zc: togyzkumalak.Hash.ZobristConstants)
       extends ZobristConstants {
-    def hexToLong(s: String): Long = zc.hexToLong(s)
-    val p1TurnMask: Long           = zc.p1TurnMask
-    val actorMasks: Array[Long]    = zc.actorMasks
+    val p1TurnMask: Long        = zc.p1TurnMask
+    val actorMasks: Array[Long] = zc.actorMasks
   }
 
   final case class GoZobristConstants(zc: go.Hash.ZobristConstants) extends ZobristConstants {
-    def hexToLong(s: String): Long = zc.hexToLong(s)
-    val p1TurnMask: Long           = zc.p1TurnMask
-    val actorMasks: Array[Long]    = zc.actorMasks
+    val p1TurnMask: Long        = zc.p1TurnMask
+    val actorMasks: Array[Long] = zc.actorMasks
   }
 
   final case class BackgammonZobristConstants(zc: backgammon.Hash.ZobristConstants) extends ZobristConstants {
-    def hexToLong(s: String): Long = zc.hexToLong(s)
-    val p1TurnMask: Long           = zc.p1TurnMask
-    val actorMasks: Array[Long]    = zc.actorMasks
+    val p1TurnMask: Long        = zc.p1TurnMask
+    val actorMasks: Array[Long] = zc.actorMasks
   }
 
   final case class AbaloneZobristConstants(zc: abalone.Hash.ZobristConstants) extends ZobristConstants {
-    def hexToLong(s: String): Long = zc.hexToLong(s)
-    val p1TurnMask: Long           = zc.p1TurnMask
-    val actorMasks: Array[Long]    = zc.actorMasks
+    val p1TurnMask: Long        = zc.p1TurnMask
+    val actorMasks: Array[Long] = zc.actorMasks
   }
 
   final case class DameoZobristConstants(zc: dameo.Hash.ZobristConstants) extends ZobristConstants {
-    def hexToLong(s: String): Long = zc.hexToLong(s)
-    val p1TurnMask: Long           = zc.p1TurnMask
-    val actorMasks: Array[Long]    = zc.actorMasks
+    val p1TurnMask: Long        = zc.p1TurnMask
+    val actorMasks: Array[Long] = zc.actorMasks
   }
 
   final case class EntropyZobristConstants(zc: entropy.Hash.ZobristConstants) extends ZobristConstants {
-    def hexToLong(s: String): Long = zc.hexToLong(s)
-    val p1TurnMask: Long           = zc.p1TurnMask
-    val actorMasks: Array[Long]    = zc.actorMasks
+    val p1TurnMask: Long        = zc.p1TurnMask
+    val actorMasks: Array[Long] = zc.actorMasks
   }
 
   final case class FiveInARowZobristConstants(zc: fiveinarow.Hash.ZobristConstants) extends ZobristConstants {
-    def hexToLong(s: String): Long = zc.hexToLong(s)
-    val p1TurnMask: Long           = zc.p1TurnMask
-    val actorMasks: Array[Long]    = zc.actorMasks
+    val p1TurnMask: Long        = zc.p1TurnMask
+    val actorMasks: Array[Long] = zc.actorMasks
   }
 
   // The following masks are compatible with the Polyglot

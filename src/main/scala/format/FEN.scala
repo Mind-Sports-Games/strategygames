@@ -49,8 +49,8 @@ object FEN {
     def toBackgammon   = sys.error("Can't convert chess to backgammon")
     def toAbalone      = sys.error("Can't convert chess to abalone")
     def toDameo        = sys.error("Can't convert chess to dameo")
-    def toEntropy      = sys.error("Can't convert chess to dameo")
-    def toFiveInARow   = sys.error("Can't convert chess to dameo")
+    def toEntropy      = sys.error("Can't convert chess to entropy")
+    def toFiveInARow   = sys.error("Can't convert chess to fiveinarow")
 
     def gameLogic = GameLogic.Chess()
 
@@ -80,8 +80,8 @@ object FEN {
     def toBackgammon   = sys.error("Can't convert draughts to backgammon")
     def toAbalone      = sys.error("Can't convert draughts to abalone")
     def toDameo        = sys.error("Can't convert draughts to dameo")
-    def toEntropy      = sys.error("Can't convert draughts to dameo")
-    def toFiveInARow   = sys.error("Can't convert draughts to dameo")
+    def toEntropy      = sys.error("Can't convert draughts to entropy")
+    def toFiveInARow   = sys.error("Can't convert draughts to fiveinarow")
 
     def gameLogic = GameLogic.Draughts()
 
@@ -113,8 +113,8 @@ object FEN {
     def toBackgammon   = sys.error("Can't convert fairysf to backgammon")
     def toAbalone      = sys.error("Can't convert fairysf to abalone")
     def toDameo        = sys.error("Can't convert fairysf to dameo")
-    def toEntropy      = sys.error("Can't convert fairysf to dameo")
-    def toFiveInARow   = sys.error("Can't convert fairysf to dameo")
+    def toEntropy      = sys.error("Can't convert fairysf to entropy")
+    def toFiveInARow   = sys.error("Can't convert fairysf to fiveinarow")
 
     def gameLogic = GameLogic.FairySF()
 
@@ -144,8 +144,8 @@ object FEN {
     def toBackgammon   = sys.error("Can't convert samurai to backgammon")
     def toAbalone      = sys.error("Can't convert samurai to abalone")
     def toDameo        = sys.error("Can't convert samurai to dameo")
-    def toEntropy      = sys.error("Can't convert samurai to dameo")
-    def toFiveInARow   = sys.error("Can't convert samurai to dameo")
+    def toEntropy      = sys.error("Can't convert samurai to entropy")
+    def toFiveInARow   = sys.error("Can't convert samurai to fiveinarow")
 
     def gameLogic = GameLogic.Samurai()
 
@@ -175,8 +175,8 @@ object FEN {
     def toBackgammon   = sys.error("Can't convert togyzkumalak to backgammon")
     def toAbalone      = sys.error("Can't convert togyzkumalak to abalone")
     def toDameo        = sys.error("Can't convert togyzkumalak to dameo")
-    def toEntropy      = sys.error("Can't convert togyzkumalak to dameo")
-    def toFiveInARow   = sys.error("Can't convert togyzkumalak to dameo")
+    def toEntropy      = sys.error("Can't convert togyzkumalak to entropy")
+    def toFiveInARow   = sys.error("Can't convert togyzkumalak to fiveinarow")
 
     def gameLogic = GameLogic.Togyzkumalak()
 
@@ -206,8 +206,8 @@ object FEN {
     def toBackgammon   = sys.error("Can't convert go to backgammon")
     def toAbalone      = sys.error("Can't convert go to abalone")
     def toDameo        = sys.error("Can't convert go to dameo")
-    def toEntropy      = sys.error("Can't convert go to dameo")
-    def toFiveInARow   = sys.error("Can't convert go to dameo")
+    def toEntropy      = sys.error("Can't convert go to entropy")
+    def toFiveInARow   = sys.error("Can't convert go to fiveinarow")
 
     def gameLogic = GameLogic.Go()
 
@@ -237,8 +237,8 @@ object FEN {
     def toBackgammon   = f
     def toAbalone      = sys.error("Can't convert backgammon to abalone")
     def toDameo        = sys.error("Can't convert backgammon to dameo")
-    def toEntropy      = sys.error("Can't convert backgammon to dameo")
-    def toFiveInARow   = sys.error("Can't convert backgammon to dameo")
+    def toEntropy      = sys.error("Can't convert backgammon to entropy")
+    def toFiveInARow   = sys.error("Can't convert backgammon to fiveinarow")
 
     def gameLogic = GameLogic.Backgammon()
 
@@ -267,8 +267,8 @@ object FEN {
     override def toBackgammon   = sys.error("Can't convert abalone to backgammon")
     override def toAbalone      = f
     override def toDameo        = sys.error("Can't convert abalone to dameo")
-    override def toEntropy      = sys.error("Can't convert abalone to dameo")
-    override def toFiveInARow   = sys.error("Can't convert abalone to dameo")
+    override def toEntropy      = sys.error("Can't convert abalone to entropy")
+    override def toFiveInARow   = sys.error("Can't convert abalone to fiveinarow")
 
     override def gameLogic = GameLogic.Abalone()
 
@@ -297,8 +297,8 @@ object FEN {
     def toBackgammon   = sys.error("Can't convert dameo to backgammon")
     def toAbalone      = sys.error("Can't convert dameo to abalone")
     def toDameo        = f
-    def toEntropy      = sys.error("Can't make an entropy object from a dameo object")
-    def toFiveInARow   = sys.error("Can't make a fiveinarow object from a dameo object")
+    def toEntropy      = sys.error("Can't convert dameo to entropy")
+    def toFiveInARow   = sys.error("Can't convert dameo to fiveinarow")
 
     def gameLogic = GameLogic.Dameo()
 
@@ -329,7 +329,7 @@ object FEN {
     def toAbalone      = sys.error("Can't convert entropy to abalone")
     def toDameo        = sys.error("Can't convert entropy to dameo")
     def toEntropy      = f
-    def toFiveInARow   = sys.error("Can't make a fiveinarow object from an entropy object")
+    def toFiveInARow   = sys.error("Can't convert entropy to fiveinarow")
 
     def gameLogic = GameLogic.Entropy()
 
@@ -360,7 +360,7 @@ object FEN {
     def toAbalone      = sys.error("Can't convert fiveinarow to abalone")
     def toDameo        = sys.error("Can't convert fiveinarow to dameo")
     def toFiveInARow   = f
-    def toEntropy      = sys.error("Can't make an entropy object from a fiveinarow object")
+    def toEntropy      = sys.error("Can't convert fiveinarow to entropy")
 
     def gameLogic = GameLogic.FiveInARow()
 

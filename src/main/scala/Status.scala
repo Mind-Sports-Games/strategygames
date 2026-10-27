@@ -41,7 +41,7 @@ object Status {
   case object ResignMatch         extends Status(51) // For multipoint matches (e.g. backgammon)
   case object LineOfFive          extends Status(52) // For Five in a Row
   case object TenCaptures         extends Status(53) // For Pente
-  case object ForbiddenMove       extends Status(54) // For Renju
+  case object ForbiddenAction     extends Status(54) // For Renju
   case object VariantEnd          extends Status(60) // the variant has a special ending
 
   val all = List(
@@ -72,7 +72,7 @@ object Status {
     ResignMatch,
     LineOfFive,
     TenCaptures,
-    ForbiddenMove,
+    ForbiddenAction,
     VariantEnd
   )
 
@@ -96,7 +96,7 @@ object Status {
     CubeDropped,
     LineOfFive,
     TenCaptures,
-    ForbiddenMove,
+    ForbiddenAction,
     Cheat,
     NoStart,
     VariantEnd

@@ -5,6 +5,25 @@ import scalalib.extensions.*
 import strategygames.{ Player, Score }
 import strategygames.fiveinarow.{ Board, File, History, OpeningStep, Piece, PieceMap, Pos, Rank, Role }
 import strategygames.fiveinarow.variant.Variant
+/*
+
+Five-in-a-row FEN:
+[board] [colour to drop next] [black's seat] [opening step] [p1Score p2Score] [fullmove]
+
+board         ranks from the top, separated by '/'. B is a black stone, W a white stone, b a stone
+              offered in renju's opening (held in history, not on the board), digits a run of empty points
+colour        b or w, the colour of the next stone dropped (not always the player to move)
+black's seat  1 or 2, which player holds the black stones (changes on a swap)
+opening step  a char from OpeningStep, - once the opening is over, z once black's forbidden action
+              has lost renju (there is no line of five to show it)
+score         only for variants with a game score (pente): stones captured by p1 then by p2
+
+Initial FENs:
+Gomoku  15/15/15/15/15/15/15/15/15/15/15/15/15/15/15 b 1 o 1
+Renju   15/15/15/15/15/15/15/15/15/15/15/15/15/15/15 b 1 p 1
+Pente   19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19/19 b 1 o 0 0 1
+
+ */
 
 final case class FEN(value: String) extends AnyVal {
 

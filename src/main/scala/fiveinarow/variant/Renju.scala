@@ -19,11 +19,11 @@ case object Renju
 
   override def opening: Opening = Opening.Taraguchi10
 
-  // black wins only with exactly five, and an overline is one of black's forbidden moves
+  // black wins only with exactly five, and an overline is one of black's forbidden actions
   override def winningLine(role: Role, length: Int): Boolean =
     if (role == BlackStone) length == 5 else length >= 5
 
-  override def forbiddenMoves: Boolean = true
+  override def forbiddenActions: Boolean = true
 
   override def canOfferDraw: Boolean = true
 

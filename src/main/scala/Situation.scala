@@ -2082,7 +2082,7 @@ object Situation {
 
 sealed abstract class GameMessage(val translationString: String)
 object GameMessage {
-  case object PerpetualWarning      extends GameMessage("perpetualWarning")
-  case object SubsequentPassWarning extends GameMessage("subsequentPassWarning")
-  case object ForbiddenMoveWarning  extends GameMessage("forbiddenMoveWarning")
+  case object PerpetualWarning       extends GameMessage("perpetualWarning")
+  case object SubsequentPassWarning  extends GameMessage("subsequentPassWarning")
+  case object ForbiddenActionWarning extends GameMessage("forbiddenActionWarning")
 }

@@ -136,8 +136,8 @@ object Variant {
     def toBackgammon                   = sys.error("Can't convert chess to backgammon")
     def toAbalone                      = sys.error("Can't convert chess to abalone")
     def toDameo                        = sys.error("Can't convert chess to dameo")
-    def toEntropy                      = sys.error("Can't convert chess to dameo")
-    def toFiveInARow                   = sys.error("Can't convert chess to dameo")
+    def toEntropy                      = sys.error("Can't convert chess to entropy")
+    def toFiveInARow                   = sys.error("Can't convert chess to fiveinarow")
 
     def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.Chess(pos), (Piece.Chess(piece), 1)) }
@@ -254,8 +254,8 @@ object Variant {
     def toBackgammon   = sys.error("Can't convert draughts to backgammon")
     def toAbalone      = sys.error("Can't convert draughts to abalone")
     def toDameo        = sys.error("Can't convert draughts to dameo")
-    def toEntropy      = sys.error("Can't convert draughts to dameo")
-    def toFiveInARow   = sys.error("Can't convert draughts to dameo")
+    def toEntropy      = sys.error("Can't convert draughts to entropy")
+    def toFiveInARow   = sys.error("Can't convert draughts to fiveinarow")
 
     def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.Draughts(pos), (Piece.Draughts(piece), 1)) }
@@ -371,8 +371,8 @@ object Variant {
     def toBackgammon   = sys.error("Can't convert fairysf to backgammon")
     def toAbalone      = sys.error("Can't convert fairysf to abalone")
     def toDameo        = sys.error("Can't convert fairysf to dameo")
-    def toEntropy      = sys.error("Can't convert fairysf to dameo")
-    def toFiveInARow   = sys.error("Can't convert fairysf to dameo")
+    def toEntropy      = sys.error("Can't convert fairysf to entropy")
+    def toFiveInARow   = sys.error("Can't convert fairysf to fiveinarow")
 
     def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.FairySF(pos), (Piece.FairySF(piece), 1)) }
@@ -487,8 +487,8 @@ object Variant {
     def toBackgammon   = sys.error("Can't convert samurai to backgammon")
     def toAbalone      = sys.error("Can't convert samurai to abalone")
     def toDameo        = sys.error("Can't convert samurai to dameo")
-    def toEntropy      = sys.error("Can't convert samurai to dameo")
-    def toFiveInARow   = sys.error("Can't convert samurai to dameo")
+    def toEntropy      = sys.error("Can't convert samurai to entropy")
+    def toFiveInARow   = sys.error("Can't convert samurai to fiveinarow")
 
     def pieces: PieceMap = v.pieces.map { case (pos, (piece, count)) =>
       (Pos.Samurai(pos), (Piece.Samurai(piece), count))
@@ -600,8 +600,8 @@ object Variant {
     def toBackgammon   = sys.error("Can't convert togyzkumalak to backgammon")
     def toAbalone      = sys.error("Can't convert togyzkumalak to abalone")
     def toDameo        = sys.error("Can't convert togyzkumalak to dameo")
-    def toEntropy      = sys.error("Can't convert togyzkumalak to dameo")
-    def toFiveInARow   = sys.error("Can't convert togyzkumalak to dameo")
+    def toEntropy      = sys.error("Can't convert togyzkumalak to entropy")
+    def toFiveInARow   = sys.error("Can't convert togyzkumalak to fiveinarow")
 
     def pieces: PieceMap = v.pieces.map { case (pos, (piece, count)) =>
       (Pos.Togyzkumalak(pos), (Piece.Togyzkumalak(piece), count))
@@ -713,8 +713,8 @@ object Variant {
     def toBackgammon   = sys.error("Can't convert go to backgammon")
     def toAbalone      = sys.error("Can't convert go to abalone")
     def toDameo        = sys.error("Can't convert go to dameo")
-    def toEntropy      = sys.error("Can't convert go to dameo")
-    def toFiveInARow   = sys.error("Can't convert go to dameo")
+    def toEntropy      = sys.error("Can't convert go to entropy")
+    def toFiveInARow   = sys.error("Can't convert go to fiveinarow")
 
     def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.Go(pos), (Piece.Go(piece), 1)) }
@@ -827,8 +827,8 @@ object Variant {
     def toBackgammon   = v
     def toAbalone      = sys.error("Can't convert backgammon to abalone")
     def toDameo        = sys.error("Can't convert backgammon to dameo")
-    def toEntropy      = sys.error("Can't convert backgammon to dameo")
-    def toFiveInARow   = sys.error("Can't convert backgammon to dameo")
+    def toEntropy      = sys.error("Can't convert backgammon to entropy")
+    def toFiveInARow   = sys.error("Can't convert backgammon to fiveinarow")
 
     def pieces: PieceMap = v.pieces.map { case (pos, (piece, count)) =>
       (Pos.Backgammon(pos), (Piece.Backgammon(piece), count))
@@ -938,8 +938,8 @@ object Variant {
     override def toBackgammon   = sys.error("Can't convert abalone to backgammon")
     override def toAbalone      = v
     override def toDameo        = sys.error("Can't convert abalone to dameo")
-    override def toEntropy      = sys.error("Can't convert abalone to dameo")
-    override def toFiveInARow   = sys.error("Can't convert abalone to dameo")
+    override def toEntropy      = sys.error("Can't convert abalone to entropy")
+    override def toFiveInARow   = sys.error("Can't convert abalone to fiveinarow")
 
     override def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.Abalone(pos), (Piece.Abalone(piece), 1)) }
@@ -1050,8 +1050,8 @@ object Variant {
     def toBackgammon   = sys.error("Can't convert dameo to backgammon")
     def toAbalone      = sys.error("Can't convert dameo to abalone")
     def toDameo        = v
-    def toEntropy      = sys.error("Can't make an entropy object from a dameo object")
-    def toFiveInARow   = sys.error("Can't make a fiveinarow object from a dameo object")
+    def toEntropy      = sys.error("Can't convert dameo to entropy")
+    def toFiveInARow   = sys.error("Can't convert dameo to fiveinarow")
 
     def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.Dameo(pos), (Piece.Dameo(piece), 1)) }
@@ -1164,7 +1164,7 @@ object Variant {
     def toAbalone      = sys.error("Can't convert entropy to abalone")
     def toDameo        = sys.error("Can't convert entropy to dameo")
     def toEntropy      = v
-    def toFiveInARow   = sys.error("Can't make a fiveinarow object from an entropy object")
+    def toFiveInARow   = sys.error("Can't convert entropy to fiveinarow")
 
     def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.Entropy(pos), (Piece.Entropy(piece), 1)) }
@@ -1277,7 +1277,7 @@ object Variant {
     def toAbalone      = sys.error("Can't convert fiveinarow to abalone")
     def toDameo        = sys.error("Can't convert fiveinarow to dameo")
     def toFiveInARow   = v
-    def toEntropy      = sys.error("Can't make an entropy object from a fiveinarow object")
+    def toEntropy      = sys.error("Can't convert fiveinarow to entropy")
 
     def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.FiveInARow(pos), (Piece.FiveInARow(piece), 1)) }

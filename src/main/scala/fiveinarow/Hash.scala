@@ -30,10 +30,6 @@ object Hash {
     val actorMasks: Array[Long] = Array.fill(Pos.allSize * Role.all.size)(random.nextLong())
 
     val stepMasks: Array[Long] = Array.fill(OpeningStep.all.size)(random.nextLong())
-
-    def hexToLong(s: String): Long =
-      (java.lang.Long.parseLong(s.substring(start, start + 8), 16) << 32) |
-        java.lang.Long.parseLong(s.substring(start + 8, start + 16), 16)
   }
 
   private val polyglotTable    = new ZobristConstants(0)

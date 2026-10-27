@@ -227,7 +227,7 @@ class RenjuTest extends Specification with FiveInARowTestSupport {
     }
   }
 
-  "a forbidden move" should {
+  "a forbidden action" should {
 
     "be a double three" in {
       forbidden(blackToMove("f8", "g8", "h6", "h7")(), "h8") must beTrue
@@ -285,8 +285,18 @@ class RenjuTest extends Specification with FiveInARowTestSupport {
       val after = dropOn(blackToMove("f8", "g8", "h6", "h7")(), "h8")
       after.end must beTrue
       after.winner === Some(Player.P2)
-      after.status === Some(Status.ForbiddenMove)
+      after.status === Some(Status.ForbiddenAction)
       after.board.history.forbiddenDrop.map(_.key) === Some("h8")
+    }
+
+    "be kept in the fen, which reads back as lost" in {
+      val fen  = Forsyth.>>(dropOn(blackToMove("f8", "g8", "h6", "h7")(), "h8"))
+      fen.value.split(' ')(3) === "z"
+      val read = Forsyth.<<(fen).get
+      read.board.variant === Renju
+      read.end must beTrue
+      read.winner === Some(Player.P2)
+      read.status === Some(Status.ForbiddenAction)
     }
 
     "go to whichever seat holds white" in {
@@ -302,13 +312,13 @@ class RenjuTest extends Specification with FiveInARowTestSupport {
     }
   }
 
-  "the forbidden move warning" should {
+  "the forbidden action warning" should {
 
     "list the points where black's drop would lose, and raise the game message" in {
       val s = situationOf(blackToMove("f8", "g8", "h6", "h7")())
       s.forbiddenDrops.map(_.key) must contain("h8")
-      s.gameMessage === Some(GameMessage.ForbiddenMoveWarning)
-      (StratSituation.FiveInARow(s): StratSituation).gameMessage === Some(GameMessage.ForbiddenMoveWarning)
+      s.gameMessage === Some(GameMessage.ForbiddenActionWarning)
+      (StratSituation.FiveInARow(s): StratSituation).gameMessage === Some(GameMessage.ForbiddenActionWarning)
     }
 
     "stay quiet with no forbidden point, on white's turn, and in gomoku" in {
@@ -419,9 +429,9 @@ class RenjuTest extends Specification with FiveInARowTestSupport {
 
     val games = (1 to 30).map(seed => played(20261013 + seed))
 
-    "always end on a line of five, a forbidden move or a full board" in {
+    "always end on a line of five, a forbidden action or a full board" in {
       games.forall(
-        _.situation.status.exists(Set(Status.LineOfFive, Status.ForbiddenMove, Status.Draw))
+        _.situation.status.exists(Set(Status.LineOfFive, Status.ForbiddenAction, Status.Draw))
       ) must beTrue
     }
 

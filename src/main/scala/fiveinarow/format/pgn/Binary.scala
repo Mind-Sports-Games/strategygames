@@ -71,6 +71,14 @@ object Binary {
 
     private def pos(b1: Int, b2: Int): Pos = Pos((right(b1 >> 2, 1) << 8) + b2).get
 
+    // 2 action type
+    // 1 continues the turn (set on every action after the first in a turn)
+    // 2 unused
+    // 1 highest bit of the pos index
+    // 2 role (1 black, 2 white)
+    // ----
+    // 8 lowest bits of the pos index. Total 2**9 = 512, enough for the 361 points of a 19x19 grid
+    // swap, swap2 and offer10 are the first byte alone, offer10 as other type 1 in the role bits
     def dropUci(b1: Int, b2: Int): String =
       s"${Role.binaryInt(right(b1, 2)).get.pgn}@${pos(b1, b2).key}"
 

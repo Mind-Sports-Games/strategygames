@@ -28,7 +28,7 @@ case class Situation(board: Board, player: Player) {
   lazy val forbiddenDrops: List[Pos] = board.variant.forbiddenDrops(this)
 
   lazy val gameMessage: Option[GameMessage] =
-    Option.when(forbiddenDrops.nonEmpty)(GameMessage.ForbiddenMoveWarning)
+    Option.when(forbiddenDrops.nonEmpty)(GameMessage.ForbiddenActionWarning)
 
   def drop(role: Role, pos: Pos): Validated[String, Drop] = board.variant.drop(this, role, pos)
 

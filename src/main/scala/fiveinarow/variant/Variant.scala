@@ -58,7 +58,7 @@ abstract class Variant private[variant] (
 
   def hasGameScore: Boolean = captureTarget.isDefined
 
-  def forbiddenMoves: Boolean = false
+  def forbiddenActions: Boolean = false
 
   private val lineDirections: List[(Int, Int)] = List((1, 0), (0, 1), (1, 1), (1, -1))
 
@@ -118,12 +118,18 @@ abstract class Variant private[variant] (
   def seatWithCaptures(board: Board): Option[Player] =
     captureTarget.flatMap(target => List(P1, P2).find(board.score(_) >= target))
 
+  private def endedByForbiddenAction(board: Board): Boolean = board.openingStep == OpeningStep.ForbiddenAction
+
+  // the steps a fen of this variant can carry, beyond those shared with every variant
+  def ownsStep(step: OpeningStep): Boolean =
+    opening.steps.contains(step) || (forbiddenActions && step == OpeningStep.ForbiddenAction)
+
   def isForbidden(board: Board, role: Role, at: Pos): Boolean =
-    forbiddenMoves && role == BlackStone && Forbidden.isForbidden(board, at)
+    forbiddenActions && role == BlackStone && Forbidden.isForbidden(board, at)
 
   def forbiddenDrops(situation: Situation): List[Pos] =
     if (
-      !forbiddenMoves || situation.end || situation.nextColour != BlackStone || opening.offeringStep(
+      !forbiddenActions || situation.end || situation.nextColour != BlackStone || opening.offeringStep(
         situation.board
       )
     )
@@ -132,11 +138,14 @@ abstract class Variant private[variant] (
 
   private def afterDrop(before: Board, placed: Board, role: Role, at: Pos): Board = {
     val captured = placed.capture(role, capturedBy(placed, role, at))
-    val marked   =
-      if (isForbidden(before, role, at)) captured.updateHistory(_.copy(forbiddenDrop = Some(at)))
-      else captured
-    val stepped  = marked.withOpeningStep(opening.stepAfterDrop(marked))
-    if (opening.swapsOnDrop(stepped.openingStep)) stepped.swapColours else stepped
+    if (isForbidden(before, role, at))
+      captured
+        .updateHistory(_.copy(forbiddenDrop = Some(at)))
+        .withOpeningStep(OpeningStep.ForbiddenAction)
+    else {
+      val stepped = captured.withOpeningStep(opening.stepAfterDrop(captured))
+      if (opening.swapsOnDrop(stepped.openingStep)) stepped.swapColours else stepped
+    }
   }
 
   def validDrops(situation: Situation): List[Drop] =
@@ -220,14 +229,14 @@ abstract class Variant private[variant] (
   def winner(situation: Situation): Option[Player] = {
     val board = situation.board
     colourWithLine(board).map(board.seatOf) orElse
-      board.history.forbiddenDrop.map(_ => board.seatOf(WhiteStone)) orElse
+      Option.when(endedByForbiddenAction(board))(board.seatOf(WhiteStone)) orElse
       seatWithCaptures(board)
   }
 
   def endStatus(situation: Situation): Option[Status] = {
     val board = situation.board
     if (colourWithLine(board).isDefined) Some(Status.LineOfFive)
-    else if (board.history.forbiddenDrop.isDefined) Some(Status.ForbiddenMove)
+    else if (endedByForbiddenAction(board)) Some(Status.ForbiddenAction)
     else if (seatWithCaptures(board).isDefined) Some(Status.TenCaptures)
     else if (board.drawn) Some(Status.Draw)
     else None
@@ -270,7 +279,7 @@ object Variant {
   // a fen without its variant: the board size narrows it, and an opening step only one variant uses settles it
   def forFen(fen: FEN): Option[Variant] =
     fen.boardSize.map { size =>
-      all.find(v => v.boardSize == size && v.opening.steps.contains(fen.openingStep)) | bySize(size)
+      all.find(v => v.boardSize == size && v.ownsStep(fen.openingStep)) | bySize(size)
     }
   def orDefault(id: Int): Variant       = apply(id) | default
   def orDefault(key: String): Variant   = apply(key) | default
