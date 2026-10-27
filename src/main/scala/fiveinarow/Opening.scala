@@ -63,11 +63,11 @@ object Opening {
       Set(OpeningStep.Placing, OpeningStep.SwapOffered, OpeningStep.Offering, OpeningStep.Offered)
 
     def stepAfterDrop(board: Board): OpeningStep = board.openingStep match {
-      case OpeningStep.Offering if board.offered.size == offeredStones                          => OpeningStep.Offered
-      case OpeningStep.Offering                                                                 => OpeningStep.Offering
-      case OpeningStep.Placing | OpeningStep.SwapOffered if board.droppedCount <= swappedStones =>
-        OpeningStep.SwapOffered
-      case _                                                                                    => OpeningStep.Play
+      case OpeningStep.Offering                          =>
+        if (board.offered.size == offeredStones) OpeningStep.Offered else OpeningStep.Offering
+      case OpeningStep.Placing | OpeningStep.SwapOffered =>
+        if (board.droppedCount <= swappedStones) OpeningStep.SwapOffered else OpeningStep.Play
+      case _                                             => OpeningStep.Play
     }
 
     private def inOpening(step: OpeningStep) =

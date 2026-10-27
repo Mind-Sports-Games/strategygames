@@ -27,6 +27,11 @@ class PiotrTest extends Specification {
     "give each square name one char" in {
       Piotr.lookup.values.toSet.size === Piotr.lookup.size
     }
+    // fixed characters lila already decodes, so an edit to the lookup itself is caught
+    "keep the characters lila decodes" in {
+      List("a1", "h8", "a9", "a10", "j10", "s1", "s10", "a19", "s19").map(Piotr.lookup.get) ===
+        List('a', '?', '"', '§', '@', '±', 'ă', 413.toChar, 431.toChar).map(Some(_))
+    }
     Fragment.foreach(games) { case (name, all) =>
       s"encode every $name square as $name always has" in {
         shared(all) === keyed(all)

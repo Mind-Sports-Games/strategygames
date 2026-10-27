@@ -147,6 +147,14 @@ class FiveInARowWrapperTest extends Specification {
         OpeningStep.Placing
     }
 
+    "credit the offered drop to the white seat that made it, not the black stone's owner" in {
+      val ten     = List("a1", "b1", "c1", "d1", "e1", "f1", "g1", "a2", "b2", "c2").map(k => s"B@$k")
+      val opening = List("B@h8", "W@h9", "B@h10", "W@h11", "offer10") ++ ten
+      val offered = applyAll(StratGame.apply(lib, renju), opening*)
+      val uci     = StratUci.apply(lib, gf, "B@c2").get
+      offered.applyUci(uci, MoveMetrics()).toOption.map(_._2.player) === Some(Player.P2)
+    }
+
     "carry the seat, step, offered and forbidden drop through a wrapper history" in {
       val at = Pos.fromKey("h8").get
       val h  = StratHistory(

@@ -122,7 +122,7 @@ abstract class Variant private[variant] (
 
   // read off the legal drops, which have already tested every point
   def forbiddenDrops(situation: Situation): List[Pos] =
-    if (!forbiddenActions) List.empty
+    if (!forbiddenActions || situation.nextColour != BlackStone) List.empty
     else
       situation.dropsAsDrops.collect {
         case drop if drop.after.openingStep == OpeningStep.ForbiddenAction => drop.pos

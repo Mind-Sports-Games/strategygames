@@ -200,6 +200,9 @@ object Drop {
     def situationAfter: Situation = Situation.FiveInARow(d.situationAfter)
     def finalizeAfter: Board      = d.finalizeAfter
 
+    // white drops black's fifth stone on an offered point, so the stone's owner is not who acted
+    override def player = d.player
+
     def toUci: Uci.Drop = Uci.FiveInARowDrop((d.toUci: fiveinarow.format.Uci.Drop))
 
     val unwrap = d
