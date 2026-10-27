@@ -19,4 +19,6 @@ case object Gomoku
 
   override def baseVariant: Boolean = true
 
+  override def canOfferDraw: Boolean = true
+
 }

@@ -250,6 +250,8 @@ abstract class Game(
 
   def hasJustSwitchedTurns: Boolean
 
+  def drawOfferAllowed: Boolean = situation.board.variant.canOfferDraw
+
   def player = situation.player
 
   def board = situation.board
@@ -1973,6 +1975,8 @@ object Game {
     }
 
     def hasJustSwitchedTurns: Boolean = g.hasJustSwitchedTurns
+
+    override def drawOfferAllowed: Boolean = g.drawOfferAllowed
 
     def withTurnsAndPlies(p: Int, t: Int): Game = FiveInARow(g.withTurnsAndPlies(p, t))
 

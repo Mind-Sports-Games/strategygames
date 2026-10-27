@@ -37,6 +37,8 @@ abstract class Variant private[variant] (
 
   def canOfferDraw: Boolean = false
 
+  def drawOfferMinStones: Int = 75
+
   def repetitionEnabled: Boolean = false
 
   def perfId: Int
@@ -89,6 +91,29 @@ abstract class Variant private[variant] (
           List(1, 2).flatMap(n => at.step(dx * n, dy * n))
         else List.empty
       }
+
+  private case class FiveWindow(cells: List[Pos], ends: List[Pos])
+
+  private lazy val fiveWindows: List[FiveWindow] =
+    for {
+      start    <- boardSize.positions
+      (dx, dy) <- lineDirections
+      cells     = (0 until 5).toList.flatMap(n => start.step(dx * n, dy * n)).filter(boardSize.onBoard)
+      if cells.size == 5
+    } yield FiveWindow(cells, List(start.step(-dx, -dy), start.step(dx * 5, dy * 5)).flatten)
+
+  // a window that would join a stone of its own colour beyond either end can only ever make an overline
+  private def windowOpenTo(board: Board, role: Role, window: FiveWindow): Boolean =
+    window.cells.forall(board(_).forall(_.role == role)) &&
+      (winningLine(role, 6) || !window.ends.exists(board(_).exists(_.role == role)))
+
+  // each row splits into width / 5 separate stretches, and every one needs a stone of both colours
+  private lazy val fewestStonesBlockingEveryFive: Int = 2 * boardSize.height * (boardSize.width / 5)
+
+  // captures can reopen a blocked line, so only a variant without them can run out of fives
+  def noFivePossible(board: Board): Boolean =
+    captureTarget.isEmpty && board.pieces.size >= fewestStonesBlockingEveryFive &&
+      !fiveWindows.exists(window => roles.exists(windowOpenTo(board, _, window)))
 
   def seatWithCaptures(board: Board): Option[Player] =
     captureTarget.flatMap(target => List(P1, P2).find(board.score(_) >= target))
@@ -185,10 +210,10 @@ abstract class Variant private[variant] (
   def hasMoveEffects = false
 
   def specialEnd(situation: Situation): Boolean =
-    winner(situation).isDefined || situation.board.isFull
+    winner(situation).isDefined || situation.board.drawn
 
   def specialDraw(situation: Situation): Boolean =
-    winner(situation).isEmpty && situation.board.isFull
+    winner(situation).isEmpty && situation.board.drawn
 
   def winner(situation: Situation): Option[Player] = {
     val board = situation.board
@@ -202,7 +227,7 @@ abstract class Variant private[variant] (
     if (colourWithLine(board).isDefined) Some(Status.LineOfFive)
     else if (board.history.forbiddenDrop.isDefined) Some(Status.ForbiddenMove)
     else if (seatWithCaptures(board).isDefined) Some(Status.TenCaptures)
-    else if (board.isFull) Some(Status.Draw)
+    else if (board.drawn) Some(Status.Draw)
     else None
   }
 

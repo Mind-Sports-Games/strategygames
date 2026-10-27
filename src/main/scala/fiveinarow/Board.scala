@@ -23,6 +23,8 @@ case class Board(
 
   lazy val isFull: Boolean = emptyPositions.isEmpty
 
+  lazy val drawn: Boolean = isFull || variant.noFivePossible(this)
+
   def count(role: Role): Int = pieces.values.count(_.role == role)
 
   def blackSeat: Player = history.blackSeat

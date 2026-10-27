@@ -25,4 +25,6 @@ case object Renju
 
   override def forbiddenMoves: Boolean = true
 
+  override def canOfferDraw: Boolean = true
+
 }

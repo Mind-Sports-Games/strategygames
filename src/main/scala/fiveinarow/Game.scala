@@ -82,6 +82,9 @@ case class Game(
 
   def board = situation.board
 
+  def drawOfferAllowed: Boolean =
+    board.variant.canOfferDraw && board.pieces.size >= board.variant.drawOfferMinStones
+
   def halfMoveClock: Int = board.history.halfMoveClock
 
   def fullTurnCount: Int = 1 + turnCount / 2
