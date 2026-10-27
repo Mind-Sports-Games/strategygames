@@ -151,7 +151,7 @@ object Pos {
   val all: List[Pos] = (0 to 63).map(new Pos(_)).toList
   val allSize: Int   = all.size
 
-  private lazy val piotrs: Array[Char] = all.map(pos => Piotr.lookup.getOrElse(pos.key, '?')).toArray
+  private lazy val piotrs: Array[Char] = Piotr.table(all.map(_.key))
 
   val p1Backrank = (A1 <-> H1).toList
   val p2Backrank = (A8 <-> H8).toList

@@ -188,7 +188,12 @@ object History {
       score: Score = Score(0, 0),
       captures: Score = Score(0, 0),
       multiPointState: Option[MultiPointState] = None,
-      halfMoveClock: Int = 0
+      halfMoveClock: Int = 0,
+      blackSeat: Player = Player.P1,
+      openingStep: Option[fiveinarow.OpeningStep] = None,
+      offered: List[fiveinarow.Pos] = List.empty,
+      forbiddenDrop: Option[fiveinarow.Pos] = None,
+      round: Int = 1
   ): History = lib match {
     case GameLogic.Draughts()     =>
       Draughts(
@@ -292,6 +297,7 @@ object History {
           currentTurn = currentTurn.map(lm => lm.toEntropy),
           positionHashes = positionHashes,
           score = score,
+          round = round,
           halfMoveClock = halfMoveClock
         )
       )
@@ -301,7 +307,14 @@ object History {
           lastTurn = lastTurn.map(lm => lm.toFiveInARow),
           currentTurn = currentTurn.map(lm => lm.toFiveInARow),
           positionHashes = positionHashes,
+          blackSeat = blackSeat,
+          openingStep = openingStep.getOrElse(variant match {
+            case Some(Variant.FiveInARow(v)) => v.opening.initialStep
+            case _                           => fiveinarow.OpeningStep.Opening
+          }),
           score = score,
+          offered = offered,
+          forbiddenDrop = forbiddenDrop,
           halfMoveClock = halfMoveClock
         )
       )

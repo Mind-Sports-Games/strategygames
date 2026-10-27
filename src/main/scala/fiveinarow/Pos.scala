@@ -40,7 +40,7 @@ object Pos {
 
   val allKeys: Map[String, Pos] = all.map(pos => pos.key -> pos).to(Map)
 
-  private lazy val piotrs: Array[Char] = all.map(pos => Piotr.lookup.getOrElse(pos.key, '?')).toArray
+  private lazy val piotrs: Array[Char] = Piotr.table(all.map(_.key))
 
   lazy val allPiotrs: Map[Char, Pos] = all.map(pos => pos.piotr -> pos).to(Map)
 

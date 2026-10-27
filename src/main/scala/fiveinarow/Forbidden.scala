@@ -3,11 +3,9 @@ package strategygames.fiveinarow
 // The renju international federation's definitions, applied to black only.
 object Forbidden {
 
-  private val directions: List[(Int, Int)] = List((1, 0), (0, 1), (1, 1), (1, -1))
+  import Line.directions
 
   private val reach = 4
-
-  private def isBlack(board: Board, pos: Pos): Boolean = board(pos).exists(_.role == BlackStone)
 
   private def isOpen(board: Board, pos: Pos): Boolean =
     board.boardSize.onBoard(pos) && board.empty(pos)
@@ -15,11 +13,8 @@ object Forbidden {
   private def line(at: Pos, dx: Int, dy: Int): List[Pos] =
     (-reach to reach).toList.flatMap(n => at.step(dx * n, dy * n))
 
-  private def run(board: Board, at: Pos, dx: Int, dy: Int): List[Pos] = {
-    def side(sx: Int, sy: Int) =
-      Iterator.iterate(at.step(sx, sy))(_.flatMap(_.step(sx, sy))).takeWhile(_.exists(isBlack(board, _)))
-    (side(-dx, -dy).flatten.toList.reverse :+ at) ::: side(dx, dy).flatten.toList
-  }
+  private def run(board: Board, at: Pos, dx: Int, dy: Int): List[Pos] =
+    Line.run(board, at, BlackStone, dx, dy)
 
   private def runLength(board: Board, at: Pos, dx: Int, dy: Int): Int = run(board, at, dx, dy).size
 

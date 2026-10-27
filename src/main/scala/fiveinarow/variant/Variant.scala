@@ -60,26 +60,18 @@ abstract class Variant private[variant] (
 
   def forbiddenActions: Boolean = false
 
-  private val lineDirections: List[(Int, Int)] = List((1, 0), (0, 1), (1, 1), (1, -1))
-
-  private def runLength(board: Board, from: Pos, role: Role, dx: Int, dy: Int): Int =
-    Iterator
-      .iterate(Option(from))(_.flatMap(_.step(dx, dy)))
-      .takeWhile(_.flatMap(board.apply).exists(_.role == role))
-      .size
-
   // counted only from the first stone of each run, so a long line is measured once
   def colourWithLine(board: Board): Option[Role] =
     board.pieces.collectFirst {
-      case (pos, piece) if lineDirections.exists { case (dx, dy) =>
+      case (pos, piece) if Line.directions.exists { case (dx, dy) =>
             !pos.step(-dx, -dy).flatMap(board.apply).exists(_.role == piece.role) &&
-            winningLine(piece.role, runLength(board, pos, piece.role, dx, dy))
+            winningLine(piece.role, Line.run(board, pos, piece.role, dx, dy).size)
           } =>
         piece.role
     }
 
   private val captureDirections: List[(Int, Int)] =
-    lineDirections ::: lineDirections.map { case (dx, dy) => (-dx, -dy) }
+    Line.directions ::: Line.directions.map { case (dx, dy) => (-dx, -dy) }
 
   // exactly two of the other colour, closed off at the far end by the stone just dropped's colour
   def capturedBy(board: Board, role: Role, at: Pos): List[Pos] =
@@ -97,7 +89,7 @@ abstract class Variant private[variant] (
   private lazy val fiveWindows: List[FiveWindow] =
     for {
       start    <- boardSize.positions
-      (dx, dy) <- lineDirections
+      (dx, dy) <- Line.directions
       cells     = (0 until 5).toList.flatMap(n => start.step(dx * n, dy * n)).filter(boardSize.onBoard)
       if cells.size == 5
     } yield FiveWindow(cells, List(start.step(-dx, -dy), start.step(dx * 5, dy * 5)).flatten)
@@ -107,7 +99,8 @@ abstract class Variant private[variant] (
     window.cells.forall(board(_).forall(_.role == role)) &&
       (winningLine(role, 6) || !window.ends.exists(board(_).exists(_.role == role)))
 
-  // each row splits into width / 5 separate stretches, and every one needs a stone of both colours
+  // not a proven minimum, only a count below which a blocked board is too rare to scan for: each row
+  // splits into width / 5 stretches, and a stretch usually holds a stone of both colours once blocked
   private lazy val fewestStonesBlockingEveryFive: Int = 2 * boardSize.height * (boardSize.width / 5)
 
   // captures can reopen a blocked line, so only a variant without them can run out of fives
@@ -127,14 +120,13 @@ abstract class Variant private[variant] (
   def isForbidden(board: Board, role: Role, at: Pos): Boolean =
     forbiddenActions && role == BlackStone && Forbidden.isForbidden(board, at)
 
+  // read off the legal drops, which have already tested every point
   def forbiddenDrops(situation: Situation): List[Pos] =
-    if (
-      !forbiddenActions || situation.end || situation.nextColour != BlackStone || opening.offeringStep(
-        situation.board
-      )
-    )
-      List.empty
-    else situation.board.emptyPositions.filter(Forbidden.isForbidden(situation.board, _))
+    if (!forbiddenActions) List.empty
+    else
+      situation.dropsAsDrops.collect {
+        case drop if drop.after.openingStep == OpeningStep.ForbiddenAction => drop.pos
+      }
 
   private def afterDrop(before: Board, placed: Board, role: Role, at: Pos): Board = {
     val captured = placed.capture(role, capturedBy(placed, role, at))
@@ -276,7 +268,9 @@ object Variant {
 
   def bySize(boardSize: Board.BoardSize): Variant = all.find(_.boardSize == boardSize) | default
 
-  // a fen without its variant: the board size narrows it, and an opening step only one variant uses settles it
+  // a fen without its variant: the board size narrows it, and an opening step only one variant uses
+  // settles it. Otherwise it is a guess, the size's first variant, so a renju fen past its opening
+  // reads as gomoku; a caller that knows the variant reads with Forsyth.<<@
   def forFen(fen: FEN): Option[Variant] =
     fen.boardSize.map { size =>
       all.find(v => v.boardSize == size && v.ownsStep(fen.openingStep)) | bySize(size)

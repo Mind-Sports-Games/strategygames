@@ -374,8 +374,8 @@ object FEN {
 
     def chessFen: Option[strategygames.chess.format.FEN] = None
 
-    def player1Score = 0
-    def player2Score = 0
+    def player1Score = f.score.p1
+    def player2Score = f.score.p2
 
   }
 

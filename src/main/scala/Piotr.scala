@@ -370,4 +370,7 @@ object Piotr {
     "r19" -> 430.toChar,
     "s19" -> 431.toChar
   )
+
+  // a square name missing from the lookup encodes as '?' = h8 (default from lichess)
+  def table(keys: Iterable[String]): Array[Char] = keys.map(lookup.getOrElse(_, '?')).toArray
 }

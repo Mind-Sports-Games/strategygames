@@ -19,8 +19,8 @@ class EntropyRandomGameTest extends EntropyTest {
     val s = g.situation
     if (s.mustDraw) {
       // a blind draw: uniform over what is left in the bag, so common colours come up more
-      val bag: List[Role]  = s.board.variant.bag(s.board.readyForRound)
-      val role: Role       = pick[Role](rng, bag)
+      val bag: List[Role] = s.board.variant.bag(s.board.readyForRound)
+      val role: Role      = pick[Role](rng, bag)
       g.apply(s.drawCounter(role).getOrElse(sys.error(s"refused a legal draw of ${role}")))
     } else if (s.isChaos) {
       val drops: List[Drop] = s.dropsAsDrops
@@ -100,6 +100,26 @@ class EntropyRandomGameTest extends EntropyTest {
       replayed.toOption must beSome[Reader.Result].like { case Reader.Result.Complete(replay) =>
         Forsyth.>>(replay.state) === Forsyth.>>(finished)
       }
+    }
+  }
+
+  "plyAtFen on a played game" should {
+
+    val actionStrs               = played(20260911).actionStrs
+    val sits                     = Replay.situations(actionStrs, None, variant.Entropy).toOption.get
+    // the full move number is left out of the match
+    def position(sit: Situation) = Forsyth.>>(sit).value.split(' ').init.mkString(" ")
+
+    "find the first ply that reached a position" in {
+      val target = sits.drop(10).head
+      Replay.plyAtFen(actionStrs, None, variant.Entropy, Forsyth.>>(target)).toOption must beSome[Int].like {
+        case ply => position(sits.drop(ply).head) === position(target) and (ply must be_<=(10))
+      }
+    }
+
+    "refuse a position the game never reached" in {
+      val never = format.FEN(Forsyth.>>(sits.head).value.replace(" 1 1", " 2 1"))
+      Replay.plyAtFen(actionStrs, None, variant.Entropy, never).isInvalid must beTrue
     }
   }
 

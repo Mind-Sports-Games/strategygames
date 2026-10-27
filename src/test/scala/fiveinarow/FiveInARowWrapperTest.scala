@@ -4,10 +4,12 @@ import org.specs2.mutable.Specification
 
 import strategygames.{
   Action => StratAction,
+  Board => StratBoard,
   Game => StratGame,
   GameFamily,
   GameGroup,
   GameLogic,
+  History => StratHistory,
   MoveMetrics,
   Player,
   Replay => StratReplay,
@@ -129,6 +131,58 @@ class FiveInARowWrapperTest extends Specification {
       val replayed = StratReplay.gameFromUciStrings(lib, actions, Player.P2, None, stratVariant)
       replayed.toOption.map(g => StratForsyth.>>(lib, g).value) ===
         Some(StratForsyth.>>(lib, played).value)
+    }
+  }
+
+  "a renju board built through the wrapper" should {
+
+    val renju = StratVariant.FiveInARow(variant.Renju)
+
+    "start at the Taraguchi-10 opening, not swap2's" in {
+      StratBoard(lib, Map.empty, renju).toFiveInARow.openingStep === OpeningStep.Placing
+    }
+
+    "keep the variant's opening step through a wrapper history" in {
+      StratHistory(lib, variant = Some(renju)).asInstanceOf[StratHistory.FiveInARow].h.openingStep ===
+        OpeningStep.Placing
+    }
+
+    "carry the seat, step, offered and forbidden drop through a wrapper history" in {
+      val at = Pos.fromKey("h8").get
+      val h  = StratHistory(
+        lib,
+        blackSeat = Player.P2,
+        openingStep = Some(OpeningStep.Offered),
+        offered = List(at),
+        forbiddenDrop = Some(at)
+      ).asInstanceOf[StratHistory.FiveInARow].h
+      (h.blackSeat, h.openingStep, h.offered, h.forbiddenDrop) ===
+        (Player.P2, OpeningStep.Offered, List(at), Some(at))
+    }
+  }
+
+  "a pente fen through the wrapper" should {
+
+    "report each seat's captures" in {
+      val board = List.fill(19)("19").mkString("/")
+      val fen   = StratFEN(lib, s"$board b 1 - 6 4 20")
+      (fen.player1Score, fen.player2Score) === (6, 4)
+    }
+  }
+
+  "plyAtFen" should {
+
+    val actions = Vector(Vector("B@h8", "W@h9", "B@i8"), Vector("swap2", "W@j8", "B@j9"))
+    val sits    = Replay.situations(actions, None, variant.Gomoku).toOption.get
+
+    "find the ply that reached a position" in {
+      val atFen = format.Forsyth.>>(sits.drop(3).head)
+      Replay.plyAtFen(actions, None, variant.Gomoku, atFen).toOption === Some(3)
+    }
+
+    "refuse a position the game never reached" in {
+      val never = format.FEN(format.Forsyth.initial.value.replaceFirst("^15", "7B7"))
+      Replay.plyAtFen(actions, None, variant.Gomoku, never).isInvalid must beTrue
     }
   }
 }

@@ -200,8 +200,19 @@ object Replay {
       variant: strategygames.fiveinarow.variant.Variant,
       atFen: FEN
   ): Validated[String, Int] =
-    situations(actionStrs, initialFen, variant) map { sits =>
-      sits.indexWhere(s => Forsyth.exportBoard(s.board) == atFen.value) max 0
+    normalised(variant, atFen).toValid(s"Invalid FEN $atFen") andThen { target =>
+      situations(actionStrs, initialFen, variant) andThen { sits =>
+        sits.iterator.zipWithIndex
+          .collectFirst { case (sit, ply) if normalisedOf(sit) == target => ply }
+          .toValid(s"Can't find $target, reached ply ${sits.size - 1}")
+      }
     }
+
+  private def normalised(variant: strategygames.fiveinarow.variant.Variant, fen: FEN): Option[String] =
+    Forsyth.<<@(variant, fen).map(normalisedOf)
+
+  // the full move number is left out, so a transposition matches
+  private def normalisedOf(situation: Situation): String =
+    (Forsyth >> situation).value.split(' ').init.mkString(" ")
 
 }

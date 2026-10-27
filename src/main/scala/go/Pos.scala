@@ -448,7 +448,7 @@ object Pos {
   // if adding new Pos check for use of Pos.all
   val all: List[Pos] = (0 to (File.allSize * Rank.allSize) - 1).map(new Pos(_)).toList
 
-  private lazy val piotrs: Array[Char] = all.map(pos => Piotr.lookup.getOrElse(pos.key, '?')).toArray
+  private lazy val piotrs: Array[Char] = Piotr.table(all.map(_.key))
 
   // Use this rather than all.size in hot paths. List has no cached length, so all.size is O(n).
   // all.size was used in Hash.actorIndex, which runs once per stone per position hash.

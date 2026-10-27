@@ -100,7 +100,7 @@ object Pos {
   val all: List[Pos] = (0 to (File.allSize * Rank.allSize) - 1).map(new Pos(_)).toList
   val allSize: Int   = all.size
 
-  private lazy val piotrs: Array[Char] = all.map(pos => Piotr.lookup.getOrElse(pos.key, '?')).toArray
+  private lazy val piotrs: Array[Char] = Piotr.table(all.map(_.key))
 
   val allKeys: Map[String, Pos] = all
     .map { pos =>
