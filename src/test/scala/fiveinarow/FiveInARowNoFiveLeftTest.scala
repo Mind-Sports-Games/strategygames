@@ -32,6 +32,17 @@ class FiveInARowNoFiveLeftTest extends Specification with FiveInARowTestSupport 
       "h8" -> WhiteStone
     )
 
+  // b8 to f8 reads B B _ B B between white stones: only black's exact five fits through d8
+  private def fiveOnly(variant: Variant): Map[String, Role] =
+    pattern(variant) - "d8" ++ List(
+      "a8" -> WhiteStone,
+      "b8" -> BlackStone,
+      "c8" -> BlackStone,
+      "e8" -> BlackStone,
+      "f8" -> BlackStone,
+      "g8" -> WhiteStone
+    )
+
   "a board with no five left to make" should {
 
     "end gomoku and renju as a draw before it fills" in {
@@ -47,17 +58,19 @@ class FiveInARowNoFiveLeftTest extends Specification with FiveInARowTestSupport 
     }
 
     "end the game on the drop that blocks the last five" in {
-      val before = Game(situationIn(Gomoku, overlineOnly(Gomoku)))
+      val before = Game(situationIn(Gomoku, fiveOnly(Gomoku)))
       before.situation.end must beFalse
       val after  = play(before, "W@d8")
       after.situation.end must beTrue
       after.situation.status === Some(Status.Draw)
     }
 
-    "be a draw in renju when only black's overline is left" in {
-      val s = situationIn(Renju, overlineOnly(Renju))
-      s.end must beTrue
-      s.status === Some(Status.Draw)
+    "be a draw in gomoku and renju when only an overline is left" in {
+      List(Gomoku, Renju).map { variant =>
+        val s = situationIn(variant, overlineOnly(variant))
+        s.end must beTrue
+        s.status === Some(Status.Draw)
+      }
     }
 
     "play on in pente, where a capture can reopen a line" in {
@@ -75,8 +88,8 @@ class FiveInARowNoFiveLeftTest extends Specification with FiveInARowTestSupport 
       s.status must beNone
     }
 
-    "play on in gomoku when only an overline is left" in {
-      situationIn(Gomoku, overlineOnly(Gomoku)).end must beFalse
+    "play on in pente when only an overline is left" in {
+      situationIn(Pente, overlineOnly(Pente)).end must beFalse
     }
   }
 

@@ -29,8 +29,22 @@ class FiveInARowEndingTest extends Specification with FiveInARowTestSupport {
       situationOf(boardOf(line("a15", "b14", "c13", "d12", "e11")(WhiteStone)*)).winner === Some(Player.P2)
     }
 
-    "count an overline as a win in gomoku" in {
-      situationOf(boardOf(line("d8", "e8", "f8", "g8", "h8", "i8")(BlackStone)*)).winner === Some(Player.P1)
+    "not count an overline as a win in gomoku, for either colour" in {
+      situationOf(boardOf(line("d8", "e8", "f8", "g8", "h8", "i8")(BlackStone)*)).end must beFalse
+      situationOf(boardOf(line("d8", "e8", "f8", "g8", "h8", "i8")(WhiteStone)*)).end must beFalse
+    }
+
+    "allow a drop that makes an overline in gomoku, and play on" in {
+      val g = play(opened, "W@a1", "B@g8", "W@a2", "B@j8", "W@a3", "B@l8", "W@a4", "B@k8")
+      g.situation.end must beFalse
+      g.situation.winner must beNone
+      g.situation.dropsAsDrops must not(beEmpty)
+    }
+
+    "count exactly five in gomoku alongside an overline elsewhere" in {
+      val stones = line("d8", "e8", "f8", "g8", "h8", "i8")(BlackStone) ++
+        line("a1", "b1", "c1", "d1", "e1")(BlackStone)
+      situationOf(boardOf(stones*)).winner === Some(Player.P1)
     }
 
     "not count four, or five broken by a gap" in {

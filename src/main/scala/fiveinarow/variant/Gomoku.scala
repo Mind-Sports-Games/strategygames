@@ -19,6 +19,9 @@ case object Gomoku
 
   override def baseVariant: Boolean = true
 
+  // an overline is a legal drop for either colour but never wins
+  override def winningLine(role: Role, length: Int): Boolean = length == 5
+
   override def canOfferDraw: Boolean = true
 
 }
