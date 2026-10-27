@@ -56,10 +56,9 @@ object Dumper {
   }
 
   def apply(lib: GameLogic, data: StratSelectSquares): String = (lib, data) match {
-    case (GameLogic.Go(), StratSelectSquares.Go(data))                 => go.format.pgn.Dumper(data)
-    case (GameLogic.FiveInARow(), StratSelectSquares.FiveInARow(data)) => fiveinarow.format.pgn.Dumper(data)
-    case _                                                             =>
-      sys.error("SelectSquares can only be applied to go and fiveinarow")
+    case (GameLogic.Go(), StratSelectSquares.Go(data)) => go.format.pgn.Dumper(data)
+    case _                                             =>
+      sys.error("SelectSquares can only be applied to go")
   }
 
   def apply(lib: GameLogic, data: StratDrawCounter): String = (lib, data) match {

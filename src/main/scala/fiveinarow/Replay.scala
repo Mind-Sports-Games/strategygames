@@ -22,12 +22,11 @@ case class Replay(setup: Game, actions: List[Action], state: Game) {
       .reverse
 
   def addAction(action: Action) = action match {
-    case d: Drop           => copy(actions = d :: actions, state = state.apply(d))
-    case s: Swap           => copy(actions = s :: actions, state = state.apply(s))
-    case s2: Swap2         => copy(actions = s2 :: actions, state = state.apply(s2))
-    case o: Offer10        => copy(actions = o :: actions, state = state.apply(o))
-    case ss: SelectSquares => copy(actions = ss :: actions, state = state.apply(ss))
-    case a                 => sys.error(s"Unexpected fiveinarow action in replay: ${a}")
+    case d: Drop    => copy(actions = d :: actions, state = state.apply(d))
+    case s: Swap    => copy(actions = s :: actions, state = state.apply(s))
+    case s2: Swap2  => copy(actions = s2 :: actions, state = state.apply(s2))
+    case o: Offer10 => copy(actions = o :: actions, state = state.apply(o))
+    case a          => sys.error(s"Unexpected fiveinarow action in replay: ${a}")
   }
 
 }

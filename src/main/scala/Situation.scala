@@ -1905,7 +1905,7 @@ object Situation {
 
     def passes: List[Pass] = List.empty
 
-    def selectSquaresAction: List[SelectSquares] = s.selectSquaresActions.map(SelectSquares.FiveInARow.apply)
+    def selectSquaresAction: List[SelectSquares] = List.empty
 
     def diceRolls: List[DiceRoll] = List.empty
 
@@ -1993,12 +1993,7 @@ object Situation {
     def pass: Validated[String, Pass] = sys.error("Can't do a Pass for fiveinarow")
 
     def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
-      s.selectSquares(squares.map {
-        case Pos.FiveInARow(pos) => pos
-        case _                   => sys.error("Not passed FiveInARow objects")
-      }).toEither
-        .map(ss => SelectSquares.FiveInARow(ss))
-        .toValidated
+      sys.error("Can't do a SelectSquares for fiveinarow")
 
     def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
       sys.error("Can't do a DiceRoll for fiveinarow")

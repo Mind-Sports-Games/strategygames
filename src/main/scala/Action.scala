@@ -81,11 +81,10 @@ object Action {
   }
 
   def wrap(action: fiveinarow.Action): Action = action match {
-    case d: fiveinarow.Drop           => Drop.FiveInARow(d)
-    case s: fiveinarow.Swap           => Swap.FiveInARow(s)
-    case s2: fiveinarow.Swap2         => Swap2.FiveInARow(s2)
-    case o: fiveinarow.Offer10        => Offer10.FiveInARow(o)
-    case ss: fiveinarow.SelectSquares => SelectSquares.FiveInARow(ss)
+    case d: fiveinarow.Drop    => Drop.FiveInARow(d)
+    case s: fiveinarow.Swap    => Swap.FiveInARow(s)
+    case s2: fiveinarow.Swap2  => Swap2.FiveInARow(s2)
+    case o: fiveinarow.Offer10 => Offer10.FiveInARow(o)
   }
 
   def toChess(action: Action): chess.Action = action match {
@@ -151,12 +150,11 @@ object Action {
   }
 
   def toFiveInARow(action: Action): fiveinarow.Action = action match {
-    case Drop.FiveInARow(d)           => d
-    case Swap.FiveInARow(s)           => s
-    case Swap2.FiveInARow(s2)         => s2
-    case Offer10.FiveInARow(o)        => o
-    case SelectSquares.FiveInARow(ss) => ss
-    case _                            => sys.error("Expecting a fiveinarow action e.g. drop, swap or swap2")
+    case Drop.FiveInARow(d)    => d
+    case Swap.FiveInARow(s)    => s
+    case Swap2.FiveInARow(s2)  => s2
+    case Offer10.FiveInARow(o) => o
+    case _                     => sys.error("Expecting a fiveinarow action e.g. drop, swap or swap2")
   }
 
 }

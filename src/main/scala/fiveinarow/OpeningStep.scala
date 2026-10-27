@@ -11,11 +11,11 @@ object OpeningStep {
   case object Placing     extends OpeningStep('p')
   case object SwapOffered extends OpeningStep('q')
   case object Offering    extends OpeningStep('x')
-  case object Picking     extends OpeningStep('k')
+  case object Offered     extends OpeningStep('k')
   case object Play        extends OpeningStep('-')
 
   val all: List[OpeningStep] =
-    List(Opening, Choice, Swap2Drops, FinalChoice, Placing, SwapOffered, Offering, Picking, Play)
+    List(Opening, Choice, Swap2Drops, FinalChoice, Placing, SwapOffered, Offering, Offered, Play)
 
   def fromFen(c: Char): Option[OpeningStep] = all.find(_.fen == c)
 

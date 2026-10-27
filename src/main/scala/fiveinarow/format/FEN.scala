@@ -82,7 +82,7 @@ final case class FEN(value: String) extends AnyVal {
 
 object FEN {
 
-  // a fifth stone offered in renju's opening, waiting for white to pick from 10 of them
+  // a fifth stone offered in renju's opening, waiting for white's drop on one of the ten
   val offeredChar = 'b'
 
 }

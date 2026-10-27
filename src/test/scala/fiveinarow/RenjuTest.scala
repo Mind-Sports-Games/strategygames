@@ -184,32 +184,33 @@ class RenjuTest extends Specification with FiveInARowTestSupport {
     val ten     = List("a1", "b1", "c1", "d1", "e1", "f1", "g1", "a2", "b2", "c2").map(k => s"B@$k")
     val offered = play(offering, ten*)
 
-    "pass to white to pick once ten are offered" in {
-      offered.situation.openingStep === OpeningStep.Picking
+    "pass to white once ten are offered, to drop black's fifth on one of them" in {
+      offered.situation.openingStep === OpeningStep.Offered
       offered.player === Player.P2
-      offered.situation.drops must beSome(List.empty[Pos])
-      offered.situation.selectSquaresActions.size === 10
+      offered.situation.nextColour === BlackStone
+      drops(offered) === ten.map(_.drop(2)).toSet
       offered.actionStrs.last === ("offer10" +: ten).toVector
     }
 
-    "keep the picked stone as black's fifth, clear the rest, and leave white to play the sixth" in {
-      val picked = play(offered, "ss:c2")
-      picked.situation.board.offered must beEmpty
-      picked.situation.board.pieces.size === 5
-      picked.situation.board(Pos.fromKey("c2").get).map(_.role) === Some(BlackStone)
-      picked.player === Player.P2
-      picked.situation.nextColour === WhiteStone
-      picked.situation.canSwap must beFalse
-      drops(picked).size === 225 - 5
-      val six    = play(picked, "W@o15")
+    "keep the stone dropped on an offered point as black's fifth, clear the rest, and leave white to play the sixth" in {
+      val fifthDropped = play(offered, "B@c2")
+      fifthDropped.situation.board.offered must beEmpty
+      fifthDropped.situation.board.pieces.size === 5
+      fifthDropped.situation.board(Pos.fromKey("c2").get).map(_.role) === Some(BlackStone)
+      fifthDropped.player === Player.P2
+      fifthDropped.situation.nextColour === WhiteStone
+      fifthDropped.situation.canSwap must beFalse
+      drops(fifthDropped).size === 225 - 5
+      val six          = play(fifthDropped, "W@o15")
       six.situation.openingStep === OpeningStep.Play
       six.player === Player.P1
-      six.actionStrs.last === Vector("ss:c2", "W@o15")
+      six.actionStrs.last === Vector("B@c2", "W@o15")
     }
 
-    "refuse a pick that was not offered, or more than one" in {
-      refused(offered, "ss:h1") must beTrue
-      refused(offered, "ss:a1,b1") must beTrue
+    "refuse a drop on a point not offered, a white stone, or a stone on the board" in {
+      refused(offered, "B@h1") must beTrue
+      refused(offered, "W@c2") must beTrue
+      refused(offered, "B@h8") must beTrue
     }
 
     "round trip the offered stones through the fen" in {
@@ -354,19 +355,19 @@ class RenjuTest extends Specification with FiveInARowTestSupport {
       Vector("B@h10"),
       Vector("W@h11"),
       Vector("offer10", "B@a1", "B@b1", "B@c1", "B@d1", "B@e1", "B@f1", "B@g1", "B@a2", "B@b2", "B@c2"),
-      Vector("ss:c2", "W@o15"),
+      Vector("B@c2", "W@o15"),
       Vector("B@a15")
     )
 
-    "offer offer10 and the picks among the actions" in {
+    "offer offer10, then the drops on the offered stones among the actions" in {
       val four    = applyAll(StratGame(lib, StratVariant.FiveInARow(Renju)), record.take(4).flatMap(t => t)*)
       four.situation.canOffer10 must beTrue
       four.situation.actions.map(_.toUci.uci) must contain("offer10")
       val offered = applyAll(four, record(4)*)
       offered.situation.actions
         .map(_.toUci.uci)
-        .toSet === record(4).drop(1).map(k => s"ss:${k.drop(2)}").toSet
-      offered.situation.canDrop must beFalse
+        .toSet === record(4).drop(1).toSet
+      offered.situation.canDrop must beTrue
     }
 
     "play a recorded game into the same turns" in {
@@ -388,29 +389,24 @@ class RenjuTest extends Specification with FiveInARowTestSupport {
         Some(StratForsyth.>>(lib, g).value)
     }
 
-    "read offer10 and picks as uci" in {
+    "read offer10 as uci, and no longer read select squares" in {
       Uci("offer10") === Some(Uci.Offer10())
-      Uci("ss:k10") === Some(Uci.SelectSquares(List(Pos.fromKey("k10").get)))
-      Uci.piotr(Uci.SelectSquares(List(Pos.fromKey("k10").get)).piotr) ===
-        Some(Uci.SelectSquares(List(Pos.fromKey("k10").get)))
+      Uci("ss:k10") must beNone
     }
   }
 
   "random games of renju" should {
 
-    def pick[A](rng: Random, as: Seq[A]): A = as.drop(rng.nextInt(as.size)).head
+    def anyOf[A](rng: Random, as: Seq[A]): A = as.drop(rng.nextInt(as.size)).head
 
     def act(rng: Random, g: Game): Game = {
-      val s = g.situation
-      if (s.canSelectSquares) g.apply(pick(rng, s.selectSquaresActions))
-      else {
-        val drops  = s.dropsAsDrops
-        val nearby = drops.filter(d => (d.pos.file.index - 7).abs <= 3 && (d.pos.rank.index - 7).abs <= 3)
-        rng.nextInt(6) match {
-          case 0 if s.canSwap    => g.apply(s.swap().getOrElse(sys.error("refused a legal swap")))
-          case 1 if s.canOffer10 => g.apply(s.offer10().getOrElse(sys.error("refused a legal offer10")))
-          case _                 => g.apply(pick(rng, if (nearby.nonEmpty) nearby else drops))
-        }
+      val s      = g.situation
+      val drops  = s.dropsAsDrops
+      val nearby = drops.filter(d => (d.pos.file.index - 7).abs <= 3 && (d.pos.rank.index - 7).abs <= 3)
+      rng.nextInt(6) match {
+        case 0 if s.canSwap    => g.apply(s.swap().getOrElse(sys.error("refused a legal swap")))
+        case 1 if s.canOffer10 => g.apply(s.offer10().getOrElse(sys.error("refused a legal offer10")))
+        case _                 => g.apply(anyOf(rng, if (nearby.nonEmpty) nearby else drops))
       }
     }
 

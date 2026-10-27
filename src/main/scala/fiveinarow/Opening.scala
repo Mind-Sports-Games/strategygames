@@ -60,10 +60,10 @@ object Opening {
     def initialStep = OpeningStep.Placing
 
     val steps: Set[OpeningStep] =
-      Set(OpeningStep.Placing, OpeningStep.SwapOffered, OpeningStep.Offering, OpeningStep.Picking)
+      Set(OpeningStep.Placing, OpeningStep.SwapOffered, OpeningStep.Offering, OpeningStep.Offered)
 
     def stepAfterDrop(board: Board): OpeningStep = board.openingStep match {
-      case OpeningStep.Offering if board.offered.size == offeredStones                          => OpeningStep.Picking
+      case OpeningStep.Offering if board.offered.size == offeredStones                          => OpeningStep.Offered
       case OpeningStep.Offering                                                                 => OpeningStep.Offering
       case OpeningStep.Placing | OpeningStep.SwapOffered if board.droppedCount <= swappedStones =>
         OpeningStep.SwapOffered

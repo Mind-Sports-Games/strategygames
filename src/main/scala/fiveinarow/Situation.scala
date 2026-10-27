@@ -24,10 +24,6 @@ case class Situation(board: Board, player: Player) {
 
   lazy val canOffer10: Boolean = board.variant.canOffer10(this)
 
-  lazy val canSelectSquares: Boolean = board.variant.canSelectSquares(this)
-
-  lazy val selectSquaresActions: List[SelectSquares] = board.variant.selectSquaresActions(this)
-
   // the empty points where black's drop would lose on the spot
   lazy val forbiddenDrops: List[Pos] = board.variant.forbiddenDrops(this)
 
@@ -41,9 +37,6 @@ case class Situation(board: Board, player: Player) {
   def swap2(): Validated[String, Swap2] = board.variant.swap2(this)
 
   def offer10(): Validated[String, Offer10] = board.variant.offer10(this)
-
-  def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
-    board.variant.selectSquares(this, squares)
 
   lazy val variantEnd: Boolean = board.variant.specialEnd(this)
 

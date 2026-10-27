@@ -47,7 +47,7 @@ case class Board(
   lazy val playerToMove: Player = openingStep match {
     case OpeningStep.Opening    => Player.P1
     case OpeningStep.Swap2Drops => Player.P2
-    case OpeningStep.Picking    => seatOf(nextColour.opposite)
+    case OpeningStep.Offered    => seatOf(nextColour.opposite)
     case _                      => seatOf(nextColour)
   }
 

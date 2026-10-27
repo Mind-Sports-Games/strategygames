@@ -103,51 +103,27 @@ object Uci {
 
   }
 
-  case class SelectSquares(squares: List[Pos]) extends Uci {
-
-    def lilaUci    = s"ss:${squares.mkString(",")}"
-    def fairySfUci = lilaUci
-    def fishnetUci = fairySfUci
-    def uci        = lilaUci
-
-    def piotr = s"ss:${squares.map(_.piotrStr).mkString(",")}"
-
-    def origDest = None
-
-    def apply(situation: Situation) = situation.selectSquares(squares)
-  }
-
-  object SelectSquares {
-
-    val selectSquaresR = s"^ss:(${Pos.posR}(?:,${Pos.posR})*)$$".r
-
-  }
-
   case class WithSan(uci: Uci, san: String)
 
   def apply(drop: strategygames.fiveinarow.Drop) = Uci.Drop(drop.piece.role, drop.pos)
 
   def apply(move: String): Option[Uci] =
     move match {
-      case Drop.dropR(role, dest)      =>
+      case Drop.dropR(role, dest) =>
         (Role.allByPgn.get(role.charAt(0)), Pos.fromKey(dest)) match {
           case (Some(role), Some(dest)) => Uci.Drop(role, dest).some
           case _                        => None
         }
-      case Swap.swapR()                => Uci.Swap().some
-      case Swap2.swap2R()              => Uci.Swap2().some
-      case Offer10.offer10R()          => Uci.Offer10().some
-      case _ if move.startsWith("ss:") =>
-        move.drop(3).split(",").toList.traverse(Pos.fromKey).filter(_.nonEmpty).map(Uci.SelectSquares(_))
-      case _                           => None
+      case Swap.swapR()           => Uci.Swap().some
+      case Swap2.swap2R()         => Uci.Swap2().some
+      case Offer10.offer10R()     => Uci.Offer10().some
+      case _                      => None
     }
 
   def piotr(move: String): Option[Uci] =
     if (move == "swap") Uci.Swap().some
     else if (move == "swap2") Uci.Swap2().some
     else if (move == "offer10") Uci.Offer10().some
-    else if (move.startsWith("ss:"))
-      move.drop(3).split(",").toList.traverse(_.headOption.flatMap(Pos.piotr)).map(Uci.SelectSquares(_))
     else if (move.lift(1).contains('@'))
       for {
         role <- move.headOption flatMap Role.allByPgn.get

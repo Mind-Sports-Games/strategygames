@@ -24,8 +24,7 @@ object Binary {
   }
 
   private object OtherType {
-    val Offer10       = 1
-    val SelectSquares = 2
+    val Offer10 = 1
   }
 
   private val continuesBit = 1 << 5
@@ -57,17 +56,15 @@ object Binary {
         case b1 :: rest          =>
           val continues = (b1 & continuesBit) != 0
           (headerBit(b1), rest) match {
-            case (ActionType.Drop, b2 :: more)                                             =>
+            case (ActionType.Drop, b2 :: more)                                 =>
               (dropUci(b1, b2), continues) :: intPlies(more, pliesToGo - 1)
-            case (ActionType.Swap, more)                                                   =>
+            case (ActionType.Swap, more)                                       =>
               ("swap", continues) :: intPlies(more, pliesToGo - 1)
-            case (ActionType.Swap2, more)                                                  =>
+            case (ActionType.Swap2, more)                                      =>
               ("swap2", continues) :: intPlies(more, pliesToGo - 1)
-            case (ActionType.Other, more) if right(b1, 2) == OtherType.Offer10             =>
+            case (ActionType.Other, more) if right(b1, 2) == OtherType.Offer10 =>
               ("offer10", continues) :: intPlies(more, pliesToGo - 1)
-            case (ActionType.Other, b2 :: more) if right(b1, 2) == OtherType.SelectSquares =>
-              (s"ss:${pos(b1, b2).key}", continues) :: intPlies(more, pliesToGo - 1)
-            case _                                                                         =>
+            case _                                                             =>
               !!(bs map showByte mkString ",")
           }
       }
@@ -87,14 +84,12 @@ object Binary {
     def ply(str: String, continuesTurn: Boolean): List[Byte] = {
       val continues = if (continuesTurn) continuesBit else 0
       (str match {
-        case Uci.Drop.dropR(role, dst)                 =>
+        case Uci.Drop.dropR(role, dst) =>
           pointed(headerBit(ActionType.Drop) + Role.allByPgn(role.head).binaryInt, dst)
-        case Uci.Swap.swapR()                          => List(headerBit(ActionType.Swap))
-        case Uci.Swap2.swap2R()                        => List(headerBit(ActionType.Swap2))
-        case Uci.Offer10.offer10R()                    => List(headerBit(ActionType.Other) + OtherType.Offer10)
-        case Uci.SelectSquares.selectSquaresR(dst, _*) =>
-          pointed(headerBit(ActionType.Other) + OtherType.SelectSquares, dst)
-        case _                                         => sys.error(s"Invalid action to write: ${str}")
+        case Uci.Swap.swapR()          => List(headerBit(ActionType.Swap))
+        case Uci.Swap2.swap2R()        => List(headerBit(ActionType.Swap2))
+        case Uci.Offer10.offer10R()    => List(headerBit(ActionType.Other) + OtherType.Offer10)
+        case _                         => sys.error(s"Invalid action to write: ${str}")
       }) match {
         case first :: rest => ((first + continues) :: rest).map(_.toByte)
         case Nil           => Nil

@@ -173,8 +173,6 @@ abstract class Game(
       case Uci.FiveInARowSwap(_)                        => swap(metrics)
       case Uci.FiveInARowSwap2(_)                       => swap2(metrics)
       case Uci.FiveInARowOffer10(_)                     => offer10(metrics)
-      case Uci.FiveInARowSelectSquares(uci)             =>
-        selectSquares(uci.squares.map(Pos.FiveInARow(_)), metrics)
       case Uci.GoPass(_) | Uci.EntropyPass(_)           => pass(metrics)
       case Uci.ChessDoRoll(_) | Uci.BackgammonDoRoll(_) => randomizeAndApplyDiceRoll(metrics)
       case Uci.BackgammonUndo(_)                        => undo(metrics)
@@ -1838,12 +1836,11 @@ object Game {
 
     def apply(action: Action): Game =
       action match {
-        case (Drop.FiveInARow(drop))        => FiveInARow(g.apply(drop))
-        case (Swap.FiveInARow(swap))        => FiveInARow(g.apply(swap))
-        case (Swap2.FiveInARow(swap2))      => FiveInARow(g.apply(swap2))
-        case (Offer10.FiveInARow(o))        => FiveInARow(g.apply(o))
-        case (SelectSquares.FiveInARow(ss)) => FiveInARow(g.apply(ss))
-        case _                              => sys.error("Not passed FiveInARow objects")
+        case (Drop.FiveInARow(drop))   => FiveInARow(g.apply(drop))
+        case (Swap.FiveInARow(swap))   => FiveInARow(g.apply(swap))
+        case (Swap2.FiveInARow(swap2)) => FiveInARow(g.apply(swap2))
+        case (Offer10.FiveInARow(o))   => FiveInARow(g.apply(o))
+        case _                         => sys.error("Not passed FiveInARow objects")
       }
 
     def drop(
@@ -1898,15 +1895,7 @@ object Game {
         squares: List[Pos],
         metrics: MoveMetrics = MoveMetrics()
     ): Validated[String, (Game, SelectSquares)] =
-      g.situation
-        .selectSquares(squares.map {
-          case Pos.FiveInARow(pos) => pos
-          case _                   => sys.error("Not passed FiveInARow objects")
-        })
-        .map(_ withMetrics metrics)
-        .toEither
-        .map(ss => (FiveInARow(g.apply(ss)), SelectSquares.FiveInARow(ss)))
-        .toValidated
+      sys.error("Can't selectSquares in fiveinarow")
 
     def diceRoll(
         dice: List[Int],

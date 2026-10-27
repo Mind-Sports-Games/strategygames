@@ -140,14 +140,36 @@ abstract class Variant private[variant] (
   }
 
   def validDrops(situation: Situation): List[Drop] =
-    if (situation.end || situation.openingStep == OpeningStep.Picking) List.empty
+    if (situation.end) List.empty
+    else if (situation.openingStep == OpeningStep.Offered)
+      situation.board.offered.flatMap(drop(situation, situation.nextColour, _).toOption)
     else situation.board.emptyPositions.flatMap(drop(situation, situation.nextColour, _).toOption)
 
-  def drop(situation: Situation, role: Role, pos: Pos): Validated[String, Drop] = {
-    val board = situation.board
+  def drop(situation: Situation, role: Role, pos: Pos): Validated[String, Drop] =
     if (situation.end) Validated.invalid("The game is over")
-    else if (situation.openingStep == OpeningStep.Picking) Validated.invalid("White picks an offered stone")
-    else if (role != situation.nextColour) Validated.invalid(s"The next stone is ${situation.nextColour}")
+    else if (situation.openingStep == OpeningStep.Offered) dropOnOffered(situation, role, pos)
+    else place(situation, role, pos)
+
+  // white drops black's fifth stone on one of the offered points, and plays the sixth anywhere
+  private def dropOnOffered(situation: Situation, role: Role, pos: Pos): Validated[String, Drop] =
+    if (role != situation.nextColour)
+      Validated.invalid(s"The stone dropped on an offered point is ${situation.nextColour}")
+    else
+      situation.board
+        .keepOffered(pos)
+        .map(kept =>
+          Drop(
+            Piece(situation.board.seatOf(role), role),
+            pos,
+            situation,
+            kept.withOpeningStep(OpeningStep.Placing)
+          )
+        )
+        .toValid(s"${pos} is not an offered stone")
+
+  private def place(situation: Situation, role: Role, pos: Pos): Validated[String, Drop] = {
+    val board = situation.board
+    if (role != situation.nextColour) Validated.invalid(s"The next stone is ${situation.nextColour}")
     else if (!board.empty(pos) || !board.boardSize.onBoard(pos))
       Validated.invalid(s"${pos} is occupied or off the board")
     else if (!opening.allowsDrop(board, pos))
@@ -172,9 +194,6 @@ abstract class Variant private[variant] (
   def canOffer10(situation: Situation): Boolean =
     !situation.end && opening.canOffer10(situation.board)
 
-  def canSelectSquares(situation: Situation): Boolean =
-    !situation.end && situation.openingStep == OpeningStep.Picking
-
   def swap(situation: Situation): Validated[String, Swap] =
     if (!canSwap(situation)) Validated.invalid("A swap is only offered at a choice in the opening")
     else
@@ -189,23 +208,6 @@ abstract class Variant private[variant] (
   def offer10(situation: Situation): Validated[String, Offer10] =
     if (!canOffer10(situation)) Validated.invalid("Ten fifth stones are only offered after the fourth stone")
     else Validated.valid(Offer10(situation, situation.board.withOpeningStep(OpeningStep.Offering)))
-
-  // white keeps one offered stone as black's fifth, and plays the sixth anywhere
-  def selectSquares(situation: Situation, squares: List[Pos]): Validated[String, SelectSquares] =
-    if (!canSelectSquares(situation)) Validated.invalid("There are no offered stones to pick from")
-    else
-      squares match {
-        case List(pos) =>
-          situation.board
-            .keepOffered(pos)
-            .map(kept => SelectSquares(squares, situation, kept.withOpeningStep(OpeningStep.Placing)))
-            .toValid(s"${pos} is not an offered stone")
-        case _         => Validated.invalid("Pick exactly one offered stone")
-      }
-
-  def selectSquaresActions(situation: Situation): List[SelectSquares] =
-    if (!canSelectSquares(situation)) List.empty
-    else situation.board.offered.flatMap(pos => selectSquares(situation, List(pos)).toOption)
 
   def hasMoveEffects = false
 

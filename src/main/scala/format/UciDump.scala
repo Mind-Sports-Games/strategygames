@@ -52,51 +52,49 @@ object UciDump {
   }
 
   def action(lib: GameLogic, variant: Variant)(a: Action): String = (lib, variant, a) match {
-    case (GameLogic.Draughts(), Variant.Draughts(variant), Move.Draughts(a))                =>
+    case (GameLogic.Draughts(), Variant.Draughts(variant), Move.Draughts(a))             =>
       strategygames.draughts.format.UciDump.action(variant)(a)
-    case (GameLogic.Chess(), Variant.Chess(variant), Move.Chess(a))                         =>
+    case (GameLogic.Chess(), Variant.Chess(variant), Move.Chess(a))                      =>
       strategygames.chess.format.UciDump.action(variant)(a)
-    case (GameLogic.Chess(), Variant.Chess(variant), Drop.Chess(a))                         =>
+    case (GameLogic.Chess(), Variant.Chess(variant), Drop.Chess(a))                      =>
       strategygames.chess.format.UciDump.action(variant)(a)
-    case (GameLogic.FairySF(), Variant.FairySF(variant), Move.FairySF(a))                   =>
+    case (GameLogic.FairySF(), Variant.FairySF(variant), Move.FairySF(a))                =>
       strategygames.fairysf.format.UciDump.action(variant)(a)
-    case (GameLogic.FairySF(), Variant.FairySF(variant), Drop.FairySF(a))                   =>
+    case (GameLogic.FairySF(), Variant.FairySF(variant), Drop.FairySF(a))                =>
       strategygames.fairysf.format.UciDump.action(variant)(a)
-    case (GameLogic.Samurai(), Variant.Samurai(variant), Move.Samurai(a))                   =>
+    case (GameLogic.Samurai(), Variant.Samurai(variant), Move.Samurai(a))                =>
       strategygames.samurai.format.UciDump.action(variant)(a)
-    case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant), Move.Togyzkumalak(a))    =>
+    case (GameLogic.Togyzkumalak(), Variant.Togyzkumalak(variant), Move.Togyzkumalak(a)) =>
       strategygames.togyzkumalak.format.UciDump.action(variant)(a)
-    case (GameLogic.Go(), Variant.Go(variant), Drop.Go(a))                                  =>
+    case (GameLogic.Go(), Variant.Go(variant), Drop.Go(a))                               =>
       strategygames.go.format.UciDump.action(variant)(a)
-    case (GameLogic.Go(), Variant.Go(variant), Pass.Go(a))                                  =>
+    case (GameLogic.Go(), Variant.Go(variant), Pass.Go(a))                               =>
       strategygames.go.format.UciDump.action(variant)(a)
-    case (GameLogic.Go(), Variant.Go(variant), SelectSquares.Go(a))                         =>
+    case (GameLogic.Go(), Variant.Go(variant), SelectSquares.Go(a))                      =>
       strategygames.go.format.UciDump.action(variant)(a)
-    case (GameLogic.Backgammon(), Variant.Backgammon(variant), Move.Backgammon(a))          =>
+    case (GameLogic.Backgammon(), Variant.Backgammon(variant), Move.Backgammon(a))       =>
       strategygames.backgammon.format.UciDump.action(variant)(a)
-    case (GameLogic.Abalone(), Variant.Abalone(variant), Move.Abalone(a))                   =>
+    case (GameLogic.Abalone(), Variant.Abalone(variant), Move.Abalone(a))                =>
       strategygames.abalone.format.UciDump.action(variant)(a)
-    case (GameLogic.Dameo(), Variant.Dameo(variant), Move.Dameo(a))                         =>
+    case (GameLogic.Dameo(), Variant.Dameo(variant), Move.Dameo(a))                      =>
       strategygames.dameo.format.UciDump.action(variant)(a)
-    case (GameLogic.Entropy(), Variant.Entropy(variant), Move.Entropy(a))                   =>
+    case (GameLogic.Entropy(), Variant.Entropy(variant), Move.Entropy(a))                =>
       strategygames.entropy.format.UciDump.action(variant)(a)
-    case (GameLogic.Entropy(), Variant.Entropy(variant), Drop.Entropy(a))                   =>
+    case (GameLogic.Entropy(), Variant.Entropy(variant), Drop.Entropy(a))                =>
       strategygames.entropy.format.UciDump.action(variant)(a)
-    case (GameLogic.FiveInARow(), Variant.FiveInARow(variant), Drop.FiveInARow(a))          =>
+    case (GameLogic.FiveInARow(), Variant.FiveInARow(variant), Drop.FiveInARow(a))       =>
       strategygames.fiveinarow.format.UciDump.action(variant)(a)
-    case (GameLogic.Entropy(), Variant.Entropy(variant), Pass.Entropy(a))                   =>
+    case (GameLogic.Entropy(), Variant.Entropy(variant), Pass.Entropy(a))                =>
       strategygames.entropy.format.UciDump.action(variant)(a)
-    case (GameLogic.FiveInARow(), Variant.FiveInARow(variant), Swap.FiveInARow(a))          =>
+    case (GameLogic.FiveInARow(), Variant.FiveInARow(variant), Swap.FiveInARow(a))       =>
       strategygames.fiveinarow.format.UciDump.action(variant)(a)
-    case (GameLogic.Entropy(), Variant.Entropy(variant), DrawCounter.Entropy(a))            =>
+    case (GameLogic.Entropy(), Variant.Entropy(variant), DrawCounter.Entropy(a))         =>
       strategygames.entropy.format.UciDump.action(variant)(a)
-    case (GameLogic.FiveInARow(), Variant.FiveInARow(variant), Swap2.FiveInARow(a))         =>
+    case (GameLogic.FiveInARow(), Variant.FiveInARow(variant), Swap2.FiveInARow(a))      =>
       strategygames.fiveinarow.format.UciDump.action(variant)(a)
-    case (GameLogic.FiveInARow(), Variant.FiveInARow(variant), Offer10.FiveInARow(a))       =>
+    case (GameLogic.FiveInARow(), Variant.FiveInARow(variant), Offer10.FiveInARow(a))    =>
       strategygames.fiveinarow.format.UciDump.action(variant)(a)
-    case (GameLogic.FiveInARow(), Variant.FiveInARow(variant), SelectSquares.FiveInARow(a)) =>
-      strategygames.fiveinarow.format.UciDump.action(variant)(a)
-    case _                                                                                  => sys.error("Mismatched gamelogic types 13")
+    case _                                                                               => sys.error("Mismatched gamelogic types 13")
   }
 
   private def moveStringToUci(variant: Variant, moves: String): List[Uci] =
