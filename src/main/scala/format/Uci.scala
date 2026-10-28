@@ -1636,6 +1636,51 @@ object Uci {
     case _                                                                         => sys.error(s"CubeAction not implemented for ${lib}")
   }
 
+  def apply(lib: GameLogic, swap: strategygames.Swap) = (lib, swap) match {
+    case (GameLogic.Draughts(), _)                                     => sys.error("Swap not implemented for Draughts")
+    case (GameLogic.Chess(), _)                                        => sys.error("Swap not implemented for Chess")
+    case (GameLogic.FairySF(), _)                                      => sys.error("Swap not implemented for fairysf")
+    case (GameLogic.Samurai(), _)                                      => sys.error("Swap not implemented for samurai")
+    case (GameLogic.Togyzkumalak(), _)                                 => sys.error("Swap not implemented for togyzkumalak")
+    case (GameLogic.Go(), _)                                           => sys.error("Swap not implemented for go")
+    case (GameLogic.Backgammon(), _)                                   => sys.error("Swap not implemented for backgammon")
+    case (GameLogic.Abalone(), _)                                      => sys.error("Swap not implemented for abalone")
+    case (GameLogic.Dameo(), _)                                        => sys.error("Swap not implemented for dameo")
+    case (GameLogic.Entropy(), _)                                      => sys.error("Swap not implemented for entropy")
+    case (GameLogic.FiveInARow(), strategygames.Swap.FiveInARow(swap)) =>
+      FiveInARowSwap(fiveinarow.format.Uci(swap))
+  }
+
+  def apply(lib: GameLogic, swap2: strategygames.Swap2) = (lib, swap2) match {
+    case (GameLogic.Draughts(), _)                                       => sys.error("Swap2 not implemented for Draughts")
+    case (GameLogic.Chess(), _)                                          => sys.error("Swap2 not implemented for Chess")
+    case (GameLogic.FairySF(), _)                                        => sys.error("Swap2 not implemented for fairysf")
+    case (GameLogic.Samurai(), _)                                        => sys.error("Swap2 not implemented for samurai")
+    case (GameLogic.Togyzkumalak(), _)                                   => sys.error("Swap2 not implemented for togyzkumalak")
+    case (GameLogic.Go(), _)                                             => sys.error("Swap2 not implemented for go")
+    case (GameLogic.Backgammon(), _)                                     => sys.error("Swap2 not implemented for backgammon")
+    case (GameLogic.Abalone(), _)                                        => sys.error("Swap2 not implemented for abalone")
+    case (GameLogic.Dameo(), _)                                          => sys.error("Swap2 not implemented for dameo")
+    case (GameLogic.Entropy(), _)                                        => sys.error("Swap2 not implemented for entropy")
+    case (GameLogic.FiveInARow(), strategygames.Swap2.FiveInARow(swap2)) =>
+      FiveInARowSwap2(fiveinarow.format.Uci(swap2))
+  }
+
+  def apply(lib: GameLogic, offer10: strategygames.Offer10) = (lib, offer10) match {
+    case (GameLogic.Draughts(), _)                                           => sys.error("Offer10 not implemented for Draughts")
+    case (GameLogic.Chess(), _)                                              => sys.error("Offer10 not implemented for Chess")
+    case (GameLogic.FairySF(), _)                                            => sys.error("Offer10 not implemented for fairysf")
+    case (GameLogic.Samurai(), _)                                            => sys.error("Offer10 not implemented for samurai")
+    case (GameLogic.Togyzkumalak(), _)                                       => sys.error("Offer10 not implemented for togyzkumalak")
+    case (GameLogic.Go(), _)                                                 => sys.error("Offer10 not implemented for go")
+    case (GameLogic.Backgammon(), _)                                         => sys.error("Offer10 not implemented for backgammon")
+    case (GameLogic.Abalone(), _)                                            => sys.error("Offer10 not implemented for abalone")
+    case (GameLogic.Dameo(), _)                                              => sys.error("Offer10 not implemented for dameo")
+    case (GameLogic.Entropy(), _)                                            => sys.error("Offer10 not implemented for entropy")
+    case (GameLogic.FiveInARow(), strategygames.Offer10.FiveInARow(offer10)) =>
+      FiveInARowOffer10(fiveinarow.format.Uci(offer10))
+  }
+
   def apply(lib: GameLogic, gf: GameFamily, action: String): Option[Uci] = lib match {
     case GameLogic.Draughts()     => draughts.format.Uci(action).map(wrap)
     case GameLogic.Chess()        => chess.format.Uci(action).map(wrap)

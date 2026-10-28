@@ -1,6 +1,7 @@
 package strategygames.fiveinarow.format
 
 import strategygames.fiveinarow._
+import scala.annotation.nowarn
 
 import cats.data.Validated
 import cats.implicits._
@@ -106,6 +107,12 @@ object Uci {
   case class WithSan(uci: Uci, san: String)
 
   def apply(drop: strategygames.fiveinarow.Drop) = Uci.Drop(drop.piece.role, drop.pos)
+
+  def apply(@nowarn swap: strategygames.fiveinarow.Swap) = Uci.Swap()
+
+  def apply(@nowarn swap2: strategygames.fiveinarow.Swap2) = Uci.Swap2()
+
+  def apply(@nowarn offer10: strategygames.fiveinarow.Offer10) = Uci.Offer10()
 
   def apply(move: String): Option[Uci] =
     move match {
