@@ -1,6 +1,6 @@
 package strategygames.abalone
 
-import strategygames.abalone.norm.{N6, Norm}
+import strategygames.abalone.norm.{ N6, Norm }
 
 sealed abstract class BoardType(
     val width: Int,
@@ -42,7 +42,9 @@ sealed abstract class BoardType(
 }
 
 object BoardType {
-  val all: List[BoardType] = List(Hex5, Hex6)
+  // lazy: the constructor's default norm lives on this object, so building Hex5 initialises it, and
+  // an eager list of the boards deadlocks two threads building Hex5 and Hex6 at once
+  lazy val all: List[BoardType] = List(Hex5, Hex6)
 }
 
 /** A Hexagon of side n fits in a square of side 2n - 1 */

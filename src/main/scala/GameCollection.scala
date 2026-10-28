@@ -63,6 +63,11 @@ object GameLogic {
     def name = "Entropy"
   }
 
+  final case class FiveInARow() extends GameLogic {
+    def id   = 10
+    def name = "Five in a Row"
+  }
+
   def all: List[GameLogic] =
     List(
       Chess(),
@@ -74,21 +79,23 @@ object GameLogic {
       Backgammon(),
       Abalone(),
       Dameo(),
-      Entropy()
+      Entropy(),
+      FiveInARow()
     )
 
   // TODO: I'm sure there is a better scala way of doing this
   def apply(id: Int): GameLogic = id match {
-    case 1 => Draughts()
-    case 2 => FairySF()
-    case 3 => Samurai()
-    case 4 => Togyzkumalak()
-    case 5 => Go()
-    case 6 => Backgammon()
-    case 7 => Abalone()
-    case 8 => Dameo()
-    case 9 => Entropy()
-    case _ => Chess()
+    case 1  => Draughts()
+    case 2  => FairySF()
+    case 3  => Samurai()
+    case 4  => Togyzkumalak()
+    case 5  => Go()
+    case 6  => Backgammon()
+    case 7  => Abalone()
+    case 8  => Dameo()
+    case 9  => Entropy()
+    case 10 => FiveInARow()
+    case _  => Chess()
   }
 }
 
@@ -563,6 +570,25 @@ object GameFamily {
     def playerFENChars    = Map(P1 -> 'w', P2 -> 'b')
   }
 
+  final case class FiveInARow() extends GameFamily {
+    def id                = 15
+    def name              = GameLogic.FiveInARow().name
+    def key               = "fiveinarow"
+    def gameLogic         = GameLogic.FiveInARow()
+    def hasFishnet        = false
+    def hasAnalysisBoard  = true
+    def defaultVariant    = Variant.FiveInARow(strategygames.fiveinarow.variant.Gomoku)
+    def variants          = Variant.all(GameLogic.FiveInARow())
+    def displayPiece      = "B"
+    def pieceSetThemes    = List("classic_stone")
+    def pieceSetDefault   = "classic_stone"
+    def boardThemes       = List("wood")
+    def boardThemeDefault = "wood"
+    def playerNames       = Map(P1 -> "Player 1", P2 -> "Player 2")
+    def playerColors      = Map(P1 -> "black", P2 -> "white")
+    def playerFENChars    = Map(P1 -> 'b', P2 -> 'w')
+  }
+
   def all: List[GameFamily] = List(
     Chess(),
     Draughts(),
@@ -578,7 +604,8 @@ object GameFamily {
     BreakthroughTroyka(),
     Abalone(),
     Dameo(),
-    Entropy()
+    Entropy(),
+    FiveInARow()
   )
 
   // TODO: I'm sure there is a better scala way of doing this
@@ -597,6 +624,7 @@ object GameFamily {
     case 12 => Abalone()
     case 13 => Dameo()
     case 14 => Entropy()
+    case 15 => FiveInARow()
     case _  => Chess()
   }
 
@@ -730,6 +758,14 @@ object GameGroup {
     def medley   = true
   }
 
+  final case class FiveInARow() extends GameGroup {
+    def id       = 14
+    def name     = GameLogic.FiveInARow().name
+    def key      = "fiveinarow"
+    def variants = Variant.all(GameLogic.FiveInARow()).filter(_.gameFamily.name == this.name)
+    def medley   = true
+  }
+
   def all: List[GameGroup] =
     List(
       Chess(),
@@ -745,7 +781,8 @@ object GameGroup {
       Backgammon(),
       BreakthroughTroyka(),
       Abalone(),
-      Entropy()
+      Entropy(),
+      FiveInARow()
     )
 
   def medley: List[GameGroup] = all.filter(_.medley)
@@ -765,6 +802,7 @@ object GameGroup {
     case 11 => BreakthroughTroyka()
     case 12 => Abalone()
     case 13 => Entropy()
+    case 14 => FiveInARow()
     case _  => Chess()
   }
 }

@@ -51,6 +51,7 @@ object Lift {
     def toAbalone      = sys.error("Can't make an abalone lift from a backgammon lift")
     def toDameo        = sys.error("Can't make a dameo lift from a backgammon lift")
     def toEntropy      = sys.error("Can't make an entropy lift from a backgammon lift")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow lift from a backgammon lift")
 
   }
 

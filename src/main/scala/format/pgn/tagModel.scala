@@ -105,6 +105,11 @@ case class Tags(value: List[Tag]) extends AnyVal {
       strategygames.entropy.variant.Variant byName _
     }
 
+  def fiveInARowVariant: Option[strategygames.fiveinarow.variant.Variant] =
+    apply(_.Variant).map(_.toLowerCase).flatMap {
+      strategygames.fiveinarow.variant.Variant byName _
+    }
+
   // TODO: this will need to be tested. We'll want to look at the _actual_ values that
   //       come in via these tags and ensure that the order we look at them is appropriate
   //       what a mess this function is.
@@ -137,6 +142,10 @@ case class Tags(value: List[Tag]) extends AnyVal {
                                     .orElse(
                                       entropyVariant
                                         .map(strategygames.variant.Variant.Entropy.apply)
+                                        .orElse(
+                                          fiveInARowVariant
+                                            .map(strategygames.variant.Variant.FiveInARow.apply)
+                                        )
                                     )
                                 )
                             )
@@ -165,9 +174,11 @@ case class Tags(value: List[Tag]) extends AnyVal {
     apply(_.FEN).map(strategygames.backgammon.format.FEN.apply)
   def abaloneFen: Option[abalone.format.FEN]           = apply(_.FEN).map(strategygames.abalone.format.FEN.apply)
 
-  def dameoFen: Option[dameo.format.FEN]     = apply(_.FEN).map(strategygames.dameo.format.FEN.apply)
-  def entropyFen: Option[entropy.format.FEN] =
+  def dameoFen: Option[dameo.format.FEN]           = apply(_.FEN).map(strategygames.dameo.format.FEN.apply)
+  def entropyFen: Option[entropy.format.FEN]       =
     apply(_.FEN).map(strategygames.entropy.format.FEN.apply)
+  def fiveInARowFen: Option[fiveinarow.format.FEN] =
+    apply(_.FEN).map(strategygames.fiveinarow.format.FEN.apply)
 
   def fen: Option[format.FEN] =
     variant match {
@@ -181,6 +192,7 @@ case class Tags(value: List[Tag]) extends AnyVal {
       case Some(strategygames.variant.Variant.Abalone(_))      => abaloneFen.map(format.FEN.Abalone.apply)
       case Some(strategygames.variant.Variant.Dameo(_))        => dameoFen.map(format.FEN.Dameo.apply)
       case Some(strategygames.variant.Variant.Entropy(_))      => entropyFen.map(format.FEN.Entropy.apply)
+      case Some(strategygames.variant.Variant.FiveInARow(_))   => fiveInARowFen.map(format.FEN.FiveInARow.apply)
       case Some(strategygames.variant.Variant.Chess(_)) | None => chessFen.map(format.FEN.Chess.apply)
       case Some(_)                                             => sys.error("invalid variant type for fen")
     }

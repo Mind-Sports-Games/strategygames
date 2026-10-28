@@ -15,6 +15,7 @@ object Binary {
     case GameLogic.Abalone()      => strategygames.abalone.format.pgn.Binary.writeMoves(ms)
     case GameLogic.Dameo()        => strategygames.dameo.format.pdn.Binary.writeMoves(ms)
     case GameLogic.Entropy()      => strategygames.entropy.format.pgn.Binary.writeMoves(ms)
+    case GameLogic.FiveInARow()   => strategygames.fiveinarow.format.pgn.Binary.writeMoves(ms)
   }
 
   def writeActionStrs(gf: GameFamily, ms: ActionStrs) = gf.gameLogic match {
@@ -28,6 +29,7 @@ object Binary {
     case GameLogic.Abalone()      => strategygames.abalone.format.pgn.Binary.writeActionStrs(ms)
     case GameLogic.Dameo()        => strategygames.dameo.format.pdn.Binary.writeActionStrs(ms)
     case GameLogic.Entropy()      => strategygames.entropy.format.pgn.Binary.writeActionStrs(ms)
+    case GameLogic.FiveInARow()   => strategygames.fiveinarow.format.pgn.Binary.writeActionStrs(ms)
   }
 
   def readActionStrs(gl: GameLogic, bs: List[Byte]) = gl match {
@@ -41,6 +43,7 @@ object Binary {
     case GameLogic.Abalone()      => strategygames.abalone.format.pgn.Binary.readActionStrs(bs)
     case GameLogic.Dameo()        => strategygames.dameo.format.pdn.Binary.readActionStrs(bs)
     case GameLogic.Entropy()      => strategygames.entropy.format.pgn.Binary.readActionStrs(bs)
+    case GameLogic.FiveInARow()   => strategygames.fiveinarow.format.pgn.Binary.readActionStrs(bs)
   }
 
   def readActionStrs(gl: GameLogic, bs: List[Byte], nb: Int) = gl match {
@@ -54,6 +57,7 @@ object Binary {
     case GameLogic.Abalone()      => strategygames.abalone.format.pgn.Binary.readActionStrs(bs, nb)
     case GameLogic.Dameo()        => strategygames.dameo.format.pdn.Binary.readActionStrs(bs, nb)
     case GameLogic.Entropy()      => strategygames.entropy.format.pgn.Binary.readActionStrs(bs, nb)
+    case GameLogic.FiveInARow()   => strategygames.fiveinarow.format.pgn.Binary.readActionStrs(bs, nb)
   }
 
 }

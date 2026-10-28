@@ -104,6 +104,15 @@ object Piece {
     def forsyth: Char = p.forsyth
   }
 
+  final case class FiveInARow(p: fiveinarow.Piece)
+      extends Piece(
+        p.player,
+        Role.FiveInARowRole(p.role)
+      ) {
+
+    def forsyth: Char = p.forsyth
+  }
+
   def apply(lib: GameLogic, player: Player, role: Role): Piece = (lib, role) match {
     case (GameLogic.Draughts(), Role.DraughtsRole(role))         => Draughts(draughts.Piece(player, role))
     case (GameLogic.Chess(), Role.ChessRole(role))               => Chess(chess.Piece(player, role))
@@ -116,6 +125,7 @@ object Piece {
     case (GameLogic.Abalone(), Role.AbaloneRole(role))           => Abalone(abalone.Piece(player, role))
     case (GameLogic.Dameo(), Role.DameoRole(role))               => Dameo(dameo.Piece(player, role))
     case (GameLogic.Entropy(), Role.EntropyRole(role))           => Entropy(entropy.Piece(player, role))
+    case (GameLogic.FiveInARow(), Role.FiveInARowRole(role))     => FiveInARow(fiveinarow.Piece(player, role))
     case _                                                       => sys.error("Mismatched gamelogic types 2")
   }
 
@@ -130,6 +140,7 @@ object Piece {
     case (GameLogic.Abalone())      => sys.error("cannot get piece from Char for abalone anymore")
     case (GameLogic.Dameo())        => dameo.Piece.fromChar(c).map(Dameo.apply)
     case (GameLogic.Entropy())      => entropy.Piece.fromChar(c).map(Entropy.apply)
+    case (GameLogic.FiveInARow())   => sys.error("a stone's owner depends on the position, not its char")
   }
 
   def chessPieceMap(pieceMap: PieceMap): chess.PieceMap = pieceMap.flatMap {

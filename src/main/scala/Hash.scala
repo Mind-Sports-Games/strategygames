@@ -19,70 +19,64 @@ object Hash {
   val size = 3
 
   sealed abstract class ZobristConstants {
-    def hexToLong(s: String): Long
     val p1TurnMask: Long
     val actorMasks: Array[Long]
   }
 
   final case class ChessZobristConstants(zc: chess.Hash.ZobristConstants) extends ZobristConstants {
-    def hexToLong(s: String): Long = zc.hexToLong(s)
-    val p1TurnMask: Long           = zc.p1TurnMask
-    val actorMasks: Array[Long]    = zc.actorMasks
+    val p1TurnMask: Long        = zc.p1TurnMask
+    val actorMasks: Array[Long] = zc.actorMasks
   }
 
   final case class DraughtsZobristConstants(zc: draughts.Hash.ZobristConstants) extends ZobristConstants {
-    def hexToLong(s: String): Long = zc.hexToLong(s)
-    val p1TurnMask: Long           = zc.p1TurnMask
-    val actorMasks: Array[Long]    = zc.actorMasks
+    val p1TurnMask: Long        = zc.p1TurnMask
+    val actorMasks: Array[Long] = zc.actorMasks
   }
 
   final case class FairySFZobristConstants(zc: fairysf.Hash.ZobristConstants) extends ZobristConstants {
-    def hexToLong(s: String): Long = zc.hexToLong(s)
-    val p1TurnMask: Long           = zc.p1TurnMask
-    val actorMasks: Array[Long]    = zc.actorMasks
+    val p1TurnMask: Long        = zc.p1TurnMask
+    val actorMasks: Array[Long] = zc.actorMasks
   }
 
   final case class SamuraiZobristConstants(zc: samurai.Hash.ZobristConstants) extends ZobristConstants {
-    def hexToLong(s: String): Long = zc.hexToLong(s)
-    val p1TurnMask: Long           = zc.p1TurnMask
-    val actorMasks: Array[Long]    = zc.actorMasks
+    val p1TurnMask: Long        = zc.p1TurnMask
+    val actorMasks: Array[Long] = zc.actorMasks
   }
 
   final case class TogyzkumalakZobristConstants(zc: togyzkumalak.Hash.ZobristConstants)
       extends ZobristConstants {
-    def hexToLong(s: String): Long = zc.hexToLong(s)
-    val p1TurnMask: Long           = zc.p1TurnMask
-    val actorMasks: Array[Long]    = zc.actorMasks
+    val p1TurnMask: Long        = zc.p1TurnMask
+    val actorMasks: Array[Long] = zc.actorMasks
   }
 
   final case class GoZobristConstants(zc: go.Hash.ZobristConstants) extends ZobristConstants {
-    def hexToLong(s: String): Long = zc.hexToLong(s)
-    val p1TurnMask: Long           = zc.p1TurnMask
-    val actorMasks: Array[Long]    = zc.actorMasks
+    val p1TurnMask: Long        = zc.p1TurnMask
+    val actorMasks: Array[Long] = zc.actorMasks
   }
 
   final case class BackgammonZobristConstants(zc: backgammon.Hash.ZobristConstants) extends ZobristConstants {
-    def hexToLong(s: String): Long = zc.hexToLong(s)
-    val p1TurnMask: Long           = zc.p1TurnMask
-    val actorMasks: Array[Long]    = zc.actorMasks
+    val p1TurnMask: Long        = zc.p1TurnMask
+    val actorMasks: Array[Long] = zc.actorMasks
   }
 
   final case class AbaloneZobristConstants(zc: abalone.Hash.ZobristConstants) extends ZobristConstants {
-    def hexToLong(s: String): Long = zc.hexToLong(s)
-    val p1TurnMask: Long           = zc.p1TurnMask
-    val actorMasks: Array[Long]    = zc.actorMasks
+    val p1TurnMask: Long        = zc.p1TurnMask
+    val actorMasks: Array[Long] = zc.actorMasks
   }
 
   final case class DameoZobristConstants(zc: dameo.Hash.ZobristConstants) extends ZobristConstants {
-    def hexToLong(s: String): Long = zc.hexToLong(s)
-    val p1TurnMask: Long           = zc.p1TurnMask
-    val actorMasks: Array[Long]    = zc.actorMasks
+    val p1TurnMask: Long        = zc.p1TurnMask
+    val actorMasks: Array[Long] = zc.actorMasks
   }
 
   final case class EntropyZobristConstants(zc: entropy.Hash.ZobristConstants) extends ZobristConstants {
-    def hexToLong(s: String): Long = zc.hexToLong(s)
-    val p1TurnMask: Long           = zc.p1TurnMask
-    val actorMasks: Array[Long]    = zc.actorMasks
+    val p1TurnMask: Long        = zc.p1TurnMask
+    val actorMasks: Array[Long] = zc.actorMasks
+  }
+
+  final case class FiveInARowZobristConstants(zc: fiveinarow.Hash.ZobristConstants) extends ZobristConstants {
+    val p1TurnMask: Long        = zc.p1TurnMask
+    val actorMasks: Array[Long] = zc.actorMasks
   }
 
   // The following masks are compatible with the Polyglot
@@ -98,6 +92,7 @@ object Hash {
     case GameLogic.Abalone()      => AbaloneZobristConstants(new abalone.Hash.ZobristConstants(0))
     case GameLogic.Dameo()        => DameoZobristConstants(new dameo.Hash.ZobristConstants(0))
     case GameLogic.Entropy()      => EntropyZobristConstants(new entropy.Hash.ZobristConstants(0))
+    case GameLogic.FiveInARow()   => FiveInARowZobristConstants(new fiveinarow.Hash.ZobristConstants(0))
   }
 
   private def randomTable(lib: GameLogic): ZobristConstants = lib match {
@@ -111,6 +106,7 @@ object Hash {
     case GameLogic.Abalone()      => AbaloneZobristConstants(new abalone.Hash.ZobristConstants(16))
     case GameLogic.Dameo()        => DameoZobristConstants(new dameo.Hash.ZobristConstants(16))
     case GameLogic.Entropy()      => EntropyZobristConstants(new entropy.Hash.ZobristConstants(16))
+    case GameLogic.FiveInARow()   => FiveInARowZobristConstants(new fiveinarow.Hash.ZobristConstants(16))
   }
 
   private def get(lib: GameLogic, situation: Situation, table: ZobristConstants): Long =
@@ -139,6 +135,8 @@ object Hash {
         dameo.Hash.get(situation, table)
       case (GameLogic.Entropy(), Situation.Entropy(situation), EntropyZobristConstants(table))          =>
         entropy.Hash.get(situation, table)
+      case (GameLogic.FiveInARow(), Situation.FiveInARow(situation), FiveInARowZobristConstants(table)) =>
+        fiveinarow.Hash.get(situation, table)
       case _                                                                                            => sys.error("Invalid lib, situation and table combination")
     }
 

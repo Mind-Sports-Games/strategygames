@@ -19,6 +19,7 @@ object Forsyth {
     case GameLogic.Abalone()      => FEN.Abalone(abalone.format.Forsyth.initial)
     case GameLogic.Dameo()        => FEN.Dameo(dameo.format.Forsyth.initial)
     case GameLogic.Entropy()      => FEN.Entropy(entropy.format.Forsyth.initial)
+    case GameLogic.FiveInARow()   => FEN.FiveInARow(fiveinarow.format.Forsyth.initial)
   }
 
   def <<@(lib: GameLogic, variant: Variant, fen: FEN): Option[Situation] =
@@ -43,6 +44,8 @@ object Forsyth {
         dameo.format.Forsyth.<<@(variant, fen).map(Situation.Dameo.apply)
       case (GameLogic.Entropy(), Variant.Entropy(variant), FEN.Entropy(fen))                =>
         entropy.format.Forsyth.<<@(variant, fen).map(Situation.Entropy.apply)
+      case (GameLogic.FiveInARow(), Variant.FiveInARow(variant), FEN.FiveInARow(fen))       =>
+        fiveinarow.format.Forsyth.<<@(variant, fen).map(Situation.FiveInARow.apply)
       case _                                                                                => sys.error("Mismatched gamelogic types 14")
     }
 
@@ -65,6 +68,8 @@ object Forsyth {
       dameo.format.Forsyth.<<(fen).map(Situation.Dameo.apply)
     case (GameLogic.Entropy(), FEN.Entropy(fen))           =>
       entropy.format.Forsyth.<<(fen).map(Situation.Entropy.apply)
+    case (GameLogic.FiveInARow(), FEN.FiveInARow(fen))     =>
+      fiveinarow.format.Forsyth.<<(fen).map(Situation.FiveInARow.apply)
     case _                                                 => sys.error("Mismatched gamelogic types 15")
   }
 
@@ -117,6 +122,10 @@ object Forsyth {
         entropy.format.Forsyth
           .<<<@(variant, fen)
           .map(sp => SituationPlus(Situation.Entropy(sp.situation), sp.fullTurnCount))
+      case (GameLogic.FiveInARow(), Variant.FiveInARow(variant), FEN.FiveInARow(fen))       =>
+        fiveinarow.format.Forsyth
+          .<<<@(variant, fen)
+          .map(sp => SituationPlus(Situation.FiveInARow(sp.situation), sp.fullTurnCount))
       case _                                                                                => sys.error("Mismatched gamelogic types 16")
     }
 
@@ -157,10 +166,14 @@ object Forsyth {
       dameo.format.Forsyth
         .<<<(fen)
         .map(sp => SituationPlus(Situation.Dameo(sp.situation), sp.fullTurnCount))
-    case (GameLogic.Entropy(), FEN.Entropy(fen))                     =>
+    case (GameLogic.Entropy(), FEN.Entropy(fen))           =>
       entropy.format.Forsyth
         .<<<(fen)
         .map(sp => SituationPlus(Situation.Entropy(sp.situation), sp.fullTurnCount))
+    case (GameLogic.FiveInARow(), FEN.FiveInARow(fen))     =>
+      fiveinarow.format.Forsyth
+        .<<<(fen)
+        .map(sp => SituationPlus(Situation.FiveInARow(sp.situation), sp.fullTurnCount))
     case _                                                 => sys.error("Mismatched gamelogic types 17")
   }
 
@@ -221,10 +234,16 @@ object Forsyth {
           dameo.format.Forsyth.SituationPlus(situation, parsed.fullTurnCount)
         )
       )
-    case (GameLogic.Entropy(), Situation.Entropy(situation))               =>
+    case (GameLogic.Entropy(), Situation.Entropy(situation))           =>
       FEN.Entropy(
         entropy.format.Forsyth.>>(
           entropy.format.Forsyth.SituationPlus(situation, parsed.fullTurnCount)
+        )
+      )
+    case (GameLogic.FiveInARow(), Situation.FiveInARow(situation))     =>
+      FEN.FiveInARow(
+        fiveinarow.format.Forsyth.>>(
+          fiveinarow.format.Forsyth.SituationPlus(situation, parsed.fullTurnCount)
         )
       )
     case _                                                             => sys.error("Mismatched gamelogic types 19")
@@ -243,6 +262,7 @@ object Forsyth {
     case (GameLogic.Abalone(), Game.Abalone(game))           => FEN.Abalone(abalone.format.Forsyth.>>(game))
     case (GameLogic.Dameo(), Game.Dameo(game))               => FEN.Dameo(dameo.format.Forsyth.>>(game))
     case (GameLogic.Entropy(), Game.Entropy(game))           => FEN.Entropy(entropy.format.Forsyth.>>(game))
+    case (GameLogic.FiveInARow(), Game.FiveInARow(game))     => FEN.FiveInARow(fiveinarow.format.Forsyth.>>(game))
     case _                                                   => sys.error("Mismatched gamelogic types 20")
   }
 
@@ -268,6 +288,8 @@ object Forsyth {
         dameo.format.Forsyth.exportBoard(board)
       case (GameLogic.Entropy(), Board.Entropy(board))           =>
         entropy.format.Forsyth.exportBoard(board)
+      case (GameLogic.FiveInARow(), Board.FiveInARow(board))     =>
+        fiveinarow.format.Forsyth.exportBoard(board)
       case _                                                     => sys.error("Mismatched gamelogic types 21")
     }
 
@@ -296,6 +318,8 @@ object Forsyth {
         dameo.format.Forsyth.boardAndPlayer(board, turnPlayer)
       case (GameLogic.Entropy(), Board.Entropy(board))           =>
         entropy.format.Forsyth.boardAndPlayer(board, turnPlayer)
+      case (GameLogic.FiveInARow(), Board.FiveInARow(board))     =>
+        fiveinarow.format.Forsyth.boardAndPlayer(board, turnPlayer)
       case _                                                     => sys.error("Mismatched gamelogic types 22")
     }
 

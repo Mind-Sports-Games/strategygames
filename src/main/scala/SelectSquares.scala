@@ -52,6 +52,7 @@ object SelectSquares {
     def toAbalone      = sys.error("Can't make an abalone SelectSquares from a go SelectSquares")
     def toDameo        = sys.error("Can't make a dameo SelectSquares from a go SelectSquares")
     def toEntropy      = sys.error("Can't make an entropy SelectSquares from a go SelectSquares")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow SelectSquares from a go SelectSquares")
 
   }
 
