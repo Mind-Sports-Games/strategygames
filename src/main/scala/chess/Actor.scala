@@ -109,18 +109,19 @@ final case class Actor(
    *
    *  critical function. optimize for performance.
    */
-  def kingSafetyMoveFilter(ms: List[Move]): List[Move] = {
-    val filter: Piece => Boolean =
-      if ((piece is King) || check) _ => true else _.role.projection
-    val stableKingPos            = if (piece is King) None else board kingPosOf player
-    ms filter { m =>
-      board.variant.kingSafety(
-        m,
-        filter,
-        stableKingPos orElse (m.after kingPosOf player)
-      )
-    }
-  }
+  def kingSafetyMoveFilter(ms: List[Move]): List[Move] = ms filter keepsKingSafe
+
+  def keepsKingSafe(m: Move): Boolean =
+    board.variant.kingSafety(
+      m,
+      kingSafetyThreatFilter,
+      stableKingPos orElse (m.after kingPosOf player)
+    )
+
+  private lazy val kingSafetyThreatFilter: Piece => Boolean =
+    if ((piece is King) || check) _ => true else _.role.projection
+
+  private lazy val stableKingPos: Option[Pos] = if (piece is King) None else board kingPosOf player
 
   lazy val check: Boolean = board check player
 

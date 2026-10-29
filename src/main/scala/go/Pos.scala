@@ -420,21 +420,20 @@ case class Pos private (index: Int) extends AnyVal {
 
   def sgf(numRanks: Int) = file.sgfChar.toString + rank.sgfChar(numRanks).toString
 
-  def key               = file.toString + rank.toString
+  def key               = Pos.keys(index)
   override def toString = key
 }
 
 object Pos {
   def apply(index: Int): Option[Pos] =
-    if (0 <= index && index < File.allSize * Rank.allSize) Some(new Pos(index))
+    if (0 <= index && index < File.allSize * Rank.allSize) allSome(index)
     else None
 
   def apply(file: File, rank: Rank): Pos = new Pos(File.allSize * rank.index + file.index)
 
   def at(x: Int, y: Int): Option[Pos] =
-    File(x) zip Rank(y) map { case (file, rank) =>
-      Pos(file, rank)
-    }
+    if (0 <= x && x < File.allSize && 0 <= y && y < Rank.allSize) allSome(File.allSize * y + x)
+    else None
 
   def fromKey(key: String): Option[Pos] = allKeys get key
 
@@ -822,6 +821,10 @@ object Pos {
   // all.size costs 257us to hash a full board, versus ~3us with this cached val.
   // See also bench/GoHashBenchmark.scala
   val allSize: Int = all.size
+
+  private val allSome: Array[Option[Pos]] = all.map(Some(_)).toArray
+
+  private val keys: Array[String] = all.map(pos => pos.file.toString + pos.rank.toString).toArray
 
   val allKeys: Map[String, Pos] = all
     .map { pos =>

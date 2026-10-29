@@ -158,7 +158,7 @@ case class Pos private (index: Int) extends AnyVal {
 
   def sgf(numRanks: Int) = file.sgfChar.toString + rank.sgfChar(numRanks).toString
 
-  def key               = file.toString + rank.toString
+  def key               = Pos.keys(index)
   override def toString = key
 
   def step(dx: Int, dy: Int): Option[Pos] =
@@ -166,6 +166,12 @@ case class Pos private (index: Int) extends AnyVal {
 }
 
 object Pos {
+  private val keys: Array[String] =
+    Array.tabulate(File.allSize * Rank.allSize) { index =>
+      val pos = new Pos(index)
+      pos.file.toString + pos.rank.toString
+    }
+
   def apply(index: Int): Option[Pos] =
     if (0 <= index && index < File.allSize * Rank.allSize) Some(new Pos(index))
     else None
