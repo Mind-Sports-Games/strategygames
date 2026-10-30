@@ -23,6 +23,7 @@ abstract class Action(
   def toAbalone: abalone.Action
   def toDameo: dameo.Action
   def toEntropy: entropy.Action
+  def toYonkoma: yonkoma.Action
 }
 
 object Action {
@@ -77,6 +78,11 @@ object Action {
     case d: entropy.Drop         => Drop.Entropy(d)
     case p: entropy.Pass         => Pass.Entropy(p)
     case dc: entropy.DrawCounter => DrawCounter.Entropy(dc)
+  }
+
+  def wrap(action: yonkoma.Action): Action = action match {
+    case m: yonkoma.Move => Move.Yonkoma(m)
+    case p: yonkoma.Pass => Pass.Yonkoma(p)
   }
 
   def toChess(action: Action): chess.Action = action match {
@@ -139,6 +145,12 @@ object Action {
     case DrawCounter.Entropy(dc) => dc
     case _                       =>
       sys.error("Expecting an entropy action e.g. move, drop, pass or drawCounter")
+  }
+
+  def toYonkoma(action: Action): yonkoma.Action = action match {
+    case Move.Yonkoma(m) => m
+    case Pass.Yonkoma(p) => p
+    case _               => sys.error("Expecting a yonkoma action e.g. move or pass")
   }
 
 }

@@ -56,6 +56,7 @@ object Drop {
     def toAbalone      = sys.error("Can't make an abalone drop from a chess drop")
     def toDameo        = sys.error("Can't make a dameo drop from a chess drop")
     def toEntropy      = sys.error("Can't make an entropy drop from a chess drop")
+    def toYonkoma      = sys.error("Can't make a yonkoma drop from a chess drop")
 
   }
 
@@ -85,6 +86,7 @@ object Drop {
     def toAbalone      = sys.error("Can't make an abalone drop from a fairysf drop")
     def toDameo        = sys.error("Can't make a dameo drop from a fairysf drop")
     def toEntropy      = sys.error("Can't make an entropy drop from a fairysf drop")
+    def toYonkoma      = sys.error("Can't make a yonkoma drop from a fairysf drop")
 
   }
 
@@ -114,6 +116,7 @@ object Drop {
     def toAbalone      = sys.error("Can't make an abalone drop from a go drop")
     def toDameo        = sys.error("Can't make a dameo drop from a go drop")
     def toEntropy      = sys.error("Can't make an entropy drop from a go drop")
+    def toYonkoma      = sys.error("Can't make a yonkoma drop from a go drop")
 
   }
 
@@ -143,6 +146,7 @@ object Drop {
     def toAbalone      = sys.error("Can't make an abalone drop from a backgammon drop")
     def toDameo        = sys.error("Can't make a dameo drop from a backgammon drop")
     def toEntropy      = sys.error("Can't make an entropy drop from a backgammon drop")
+    def toYonkoma      = sys.error("Can't make a yonkoma drop from a backgammon drop")
 
   }
 
@@ -178,6 +182,7 @@ object Drop {
     def toAbalone      = sys.error("Can't make a abalone drop from an entropy drop")
     def toDameo        = sys.error("Can't make a dameo drop from an entropy drop")
     def toEntropy      = d
+    def toYonkoma      = sys.error("Can't make a yonkoma drop from an entropy drop")
 
     override def toString = toUci.uci
   }
