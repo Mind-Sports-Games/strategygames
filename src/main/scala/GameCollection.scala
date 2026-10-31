@@ -63,6 +63,11 @@ object GameLogic {
     def name = "Entropy"
   }
 
+  final case class Yonkoma() extends GameLogic {
+    def id   = 10
+    def name = "Yonkoma"
+  }
+
   def all: List[GameLogic] =
     List(
       Chess(),
@@ -74,21 +79,23 @@ object GameLogic {
       Backgammon(),
       Abalone(),
       Dameo(),
-      Entropy()
+      Entropy(),
+      Yonkoma()
     )
 
   // TODO: I'm sure there is a better scala way of doing this
   def apply(id: Int): GameLogic = id match {
-    case 1 => Draughts()
-    case 2 => FairySF()
-    case 3 => Samurai()
-    case 4 => Togyzkumalak()
-    case 5 => Go()
-    case 6 => Backgammon()
-    case 7 => Abalone()
-    case 8 => Dameo()
-    case 9 => Entropy()
-    case _ => Chess()
+    case 1  => Draughts()
+    case 2  => FairySF()
+    case 3  => Samurai()
+    case 4  => Togyzkumalak()
+    case 5  => Go()
+    case 6  => Backgammon()
+    case 7  => Abalone()
+    case 8  => Dameo()
+    case 9  => Entropy()
+    case 10 => Yonkoma()
+    case _  => Chess()
   }
 }
 
@@ -563,6 +570,25 @@ object GameFamily {
     def playerFENChars    = Map(P1 -> 'w', P2 -> 'b')
   }
 
+  final case class Yonkoma() extends GameFamily {
+    def id                = 15
+    def name              = GameLogic.Yonkoma().name
+    def key               = GameLogic.Yonkoma().name.toLowerCase()
+    def gameLogic         = GameLogic.Yonkoma()
+    def hasFishnet        = false
+    def hasAnalysisBoard  = false
+    def defaultVariant    = Variant.Yonkoma(strategygames.yonkoma.variant.Yonkoma10x10)
+    def variants          = Variant.all(GameLogic.Yonkoma())
+    def displayPiece      = "wC"
+    def pieceSetThemes    = List("classic_yonkoma")
+    def pieceSetDefault   = "classic_yonkoma"
+    def boardThemes       = List("wood", "grey")
+    def boardThemeDefault = "wood"
+    def playerNames       = Map(P1 -> "Red", P2 -> "Blue")
+    def playerColors      = Map(P1 -> "white", P2 -> "black")
+    def playerFENChars    = Map(P1 -> 'w', P2 -> 'b')
+  }
+
   def all: List[GameFamily] = List(
     Chess(),
     Draughts(),
@@ -578,7 +604,8 @@ object GameFamily {
     BreakthroughTroyka(),
     Abalone(),
     Dameo(),
-    Entropy()
+    Entropy(),
+    Yonkoma()
   )
 
   // TODO: I'm sure there is a better scala way of doing this
@@ -597,6 +624,7 @@ object GameFamily {
     case 12 => Abalone()
     case 13 => Dameo()
     case 14 => Entropy()
+    case 15 => Yonkoma()
     case _  => Chess()
   }
 
@@ -730,6 +758,15 @@ object GameGroup {
     def medley   = true
   }
 
+  final case class Yonkoma() extends GameGroup {
+    def id       = 14
+    def name     = "Yonkoma"
+    def key      = "yonkoma"
+    def variants = Variant.all(GameLogic.Yonkoma()).filter(_.gameFamily.name == this.name)
+    // not in the medley rotation until lila has the medley form field for it
+    def medley   = false
+  }
+
   def all: List[GameGroup] =
     List(
       Chess(),
@@ -745,7 +782,8 @@ object GameGroup {
       Backgammon(),
       BreakthroughTroyka(),
       Abalone(),
-      Entropy()
+      Entropy(),
+      Yonkoma()
     )
 
   def medley: List[GameGroup] = all.filter(_.medley)
@@ -765,6 +803,7 @@ object GameGroup {
     case 11 => BreakthroughTroyka()
     case 12 => Abalone()
     case 13 => Entropy()
+    case 14 => Yonkoma()
     case _  => Chess()
   }
 }

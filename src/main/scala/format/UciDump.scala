@@ -34,6 +34,8 @@ object UciDump {
       strategygames.dameo.format.UciDump(actionStrs, initialFen.map(_.toDameo), variant)
     case (GameLogic.Entropy(), Variant.Entropy(variant))           =>
       strategygames.entropy.format.UciDump(actionStrs, initialFen.map(_.toEntropy), variant)
+    case (GameLogic.Yonkoma(), Variant.Yonkoma(variant))           =>
+      strategygames.yonkoma.format.UciDump(actionStrs, initialFen.map(_.toYonkoma), variant)
     case _                                                         => sys.error("Mismatched gamelogic types 12")
   }
 
@@ -72,6 +74,10 @@ object UciDump {
       strategygames.entropy.format.UciDump.action(variant)(a)
     case (GameLogic.Entropy(), Variant.Entropy(variant), DrawCounter.Entropy(a))         =>
       strategygames.entropy.format.UciDump.action(variant)(a)
+    case (GameLogic.Yonkoma(), Variant.Yonkoma(variant), Move.Yonkoma(a))                =>
+      strategygames.yonkoma.format.UciDump.action(variant)(a)
+    case (GameLogic.Yonkoma(), Variant.Yonkoma(variant), Pass.Yonkoma(a))                =>
+      strategygames.yonkoma.format.UciDump.action(variant)(a)
     case _                                                                               => sys.error("Mismatched gamelogic types 13")
   }
 

@@ -33,6 +33,8 @@ object Dumper {
       dameo.format.pdn.Dumper(data)
     case (GameLogic.Entropy(), StratMove.Entropy(data))           =>
       entropy.format.pgn.Dumper(data)
+    case (GameLogic.Yonkoma(), StratMove.Yonkoma(data))           =>
+      yonkoma.format.pgn.Dumper(data)
     case _                                                        =>
       sys.error("Mismatched gamelogic types 31")
   }
@@ -48,7 +50,8 @@ object Dumper {
   def apply(lib: GameLogic, data: StratPass): String = (lib, data) match {
     case (GameLogic.Go(), StratPass.Go(data))           => go.format.pgn.Dumper(data)
     case (GameLogic.Entropy(), StratPass.Entropy(data)) => entropy.format.pgn.Dumper(data)
-    case _                                              => sys.error("Pass can only be applied to go/entropy")
+    case (GameLogic.Yonkoma(), StratPass.Yonkoma(data)) => yonkoma.format.pgn.Dumper(data)
+    case _                                              => sys.error("Pass can only be applied to go/entropy/yonkoma")
   }
 
   def apply(lib: GameLogic, data: StratSelectSquares): String = (lib, data) match {

@@ -18,6 +18,7 @@ class HashTest extends Specification {
     case Situation.Abalone(s)      => abalone.Hash.get(s, new abalone.Hash.ZobristConstants(start))
     case Situation.Dameo(s)        => dameo.Hash.get(s, new dameo.Hash.ZobristConstants(start))
     case Situation.Entropy(s)      => entropy.Hash.get(s, new entropy.Hash.ZobristConstants(start))
+    case Situation.Yonkoma(s)      => yonkoma.Hash.get(s, new yonkoma.Hash.ZobristConstants(start))
   }
 
   private def ownBytes(situation: Situation, size: Int): Seq[Byte] = situation match {
@@ -31,6 +32,7 @@ class HashTest extends Specification {
     case Situation.Abalone(s)      => new abalone.Hash(size)(s).toSeq
     case Situation.Dameo(s)        => new dameo.Hash(size)(s).toSeq
     case Situation.Entropy(s)      => new entropy.Hash(size)(s).toSeq
+    case Situation.Yonkoma(s)      => new yonkoma.Hash(size)(s).toSeq
   }
 
   private def longBytes(l: Long): Seq[Byte] = (0 until 8).map(i => (l >>> ((7 - i) * 8)).toByte)

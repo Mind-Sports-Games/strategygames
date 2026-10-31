@@ -37,14 +37,14 @@ abstract class Game(
       partialCaptures: Boolean = false
   ): Validated[String, (Game, Action)] =
     (uci match {
-      case Uci.ChessMove(uci)                           =>
+      case Uci.ChessMove(uci)                                      =>
         apply(
           Pos.Chess(uci.orig),
           Pos.Chess(uci.dest),
           uci.promotion.map(Role.ChessPromotableRole.apply),
           metrics
         )
-      case Uci.DraughtsMove(uci)                        =>
+      case Uci.DraughtsMove(uci)                                   =>
         apply(
           Pos.Draughts(uci.orig),
           Pos.Draughts(uci.dest),
@@ -54,120 +54,127 @@ abstract class Game(
           captures,
           partialCaptures
         )
-      case Uci.FairySFMove(uci)                         =>
+      case Uci.FairySFMove(uci)                                    =>
         apply(
           Pos.FairySF(uci.orig),
           Pos.FairySF(uci.dest),
           uci.promotion.map(Role.FairySFPromotableRole.apply),
           metrics
         )
-      case Uci.SamuraiMove(uci)                         =>
+      case Uci.SamuraiMove(uci)                                    =>
         apply(
           Pos.Samurai(uci.orig),
           Pos.Samurai(uci.dest),
           promotion = None,
           metrics
         )
-      case Uci.TogyzkumalakMove(uci)                    =>
+      case Uci.TogyzkumalakMove(uci)                               =>
         apply(
           Pos.Togyzkumalak(uci.orig),
           Pos.Togyzkumalak(uci.dest),
           promotion = None,
           metrics
         )
-      case Uci.BackgammonMove(uci)                      =>
+      case Uci.BackgammonMove(uci)                                 =>
         apply(
           Pos.Backgammon(uci.orig),
           Pos.Backgammon(uci.dest),
           promotion = None,
           metrics
         )
-      case Uci.AbaloneMove(uci)                         =>
+      case Uci.AbaloneMove(uci)                                    =>
         apply(
           Pos.Abalone(uci.orig),
           Pos.Abalone(uci.dest),
           promotion = None,
           metrics
         )
-      case Uci.DameoMove(uci)                           =>
+      case Uci.DameoMove(uci)                                      =>
         apply(
           Pos.Dameo(uci.orig),
           Pos.Dameo(uci.dest),
           promotion = None,
           metrics
         )
-      case Uci.ChessDrop(uci)                           =>
+      case Uci.ChessDrop(uci)                                      =>
         drop(
           Role.ChessRole(uci.role),
           Pos.Chess(uci.pos),
           metrics
         )
-      case Uci.FairySFDrop(uci)                         =>
+      case Uci.FairySFDrop(uci)                                    =>
         drop(
           Role.FairySFRole(uci.role),
           Pos.FairySF(uci.pos),
           metrics
         )
-      case Uci.GoDrop(uci)                              =>
+      case Uci.GoDrop(uci)                                         =>
         drop(
           Role.GoRole(uci.role),
           Pos.Go(uci.pos),
           metrics
         )
-      case Uci.BackgammonDrop(uci)                      =>
+      case Uci.BackgammonDrop(uci)                                 =>
         drop(
           Role.BackgammonRole(uci.role),
           Pos.Backgammon(uci.pos),
           metrics
         )
-      case Uci.BackgammonLift(uci)                      =>
+      case Uci.BackgammonLift(uci)                                 =>
         lift(
           Pos.Backgammon(uci.pos),
           metrics
         )
-      case Uci.GoSelectSquares(uci)                     =>
+      case Uci.GoSelectSquares(uci)                                =>
         selectSquares(
           uci.squares.map(Pos.Go(_)),
           metrics
         )
-      case Uci.ChessDiceRoll(uci)                       =>
+      case Uci.ChessDiceRoll(uci)                                  =>
         diceRoll(
           uci.dice,
           metrics
         )
-      case Uci.BackgammonDiceRoll(uci)                  =>
+      case Uci.BackgammonDiceRoll(uci)                             =>
         diceRoll(
           uci.dice,
           metrics
         )
-      case Uci.BackgammonCubeAction(uci)                =>
+      case Uci.BackgammonCubeAction(uci)                           =>
         cubeAction(
           CubeInteraction.Backgammon(uci.interaction),
           metrics
         )
-      case Uci.EntropyMove(uci)                         =>
+      case Uci.EntropyMove(uci)                                    =>
         apply(
           Pos.Entropy(uci.orig),
           Pos.Entropy(uci.dest),
           promotion = None,
           metrics
         )
-      case Uci.EntropyDrop(uci)                         =>
+      case Uci.EntropyDrop(uci)                                    =>
         drop(
           Role.EntropyRole(uci.role),
           Pos.Entropy(uci.pos),
           metrics
         )
-      case Uci.EntropyDrawCounter(uci)                  =>
+      case Uci.EntropyDrawCounter(uci)                             =>
         drawCounter(
           Role.EntropyRole(uci.role),
           metrics
         )
-      case Uci.EntropyDoDrawCounter(_)                  => randomizeAndApplyDrawCounter(metrics)
-      case Uci.GoPass(_) | Uci.EntropyPass(_)           => pass(metrics)
-      case Uci.ChessDoRoll(_) | Uci.BackgammonDoRoll(_) => randomizeAndApplyDiceRoll(metrics)
-      case Uci.BackgammonUndo(_)                        => undo(metrics)
-      case Uci.BackgammonEndTurn(_)                     => endTurn(metrics)
+      case Uci.EntropyDoDrawCounter(_)                             => randomizeAndApplyDrawCounter(metrics)
+      case Uci.YonkomaMove(uci)                                    =>
+        apply(
+          Pos.Yonkoma(uci.orig),
+          Pos.Yonkoma(uci.dest),
+          promotion = None,
+          metrics
+        )
+      case Uci.GoPass(_) | Uci.EntropyPass(_) | Uci.YonkomaPass(_) => pass(metrics)
+      case Uci.ChessDoRoll(_) | Uci.BackgammonDoRoll(_)            => randomizeAndApplyDiceRoll(metrics)
+      case Uci.BackgammonUndo(_)                                   => undo(metrics)
+      case Uci.BackgammonEndTurn(_)                                => endTurn(metrics)
     }).map { case (game, action) =>
       game -> action
     }
@@ -259,6 +266,7 @@ abstract class Game(
   def toAbalone: abalone.Game
   def toDameo: dameo.Game
   def toEntropy: entropy.Game
+  def toYonkoma: yonkoma.Game
 
 }
 
@@ -414,6 +422,7 @@ object Game {
     def toAbalone: abalone.Game           = sys.error("Can't turn a chess game into an abalone game")
     def toDameo: dameo.Game               = sys.error("Can't turn a chess game into a dameo game")
     def toEntropy: entropy.Game           = sys.error("Can't turn a chess game into an entropy game")
+    def toYonkoma: yonkoma.Game           = sys.error("Can't turn a chess game into a yonkoma game")
 
   }
 
@@ -582,6 +591,7 @@ object Game {
     def toAbalone: abalone.Game           = sys.error("Can't turn a draughts game into an abalone game")
     def toDameo: dameo.Game               = sys.error("Can't turn a draughts game into a dameo game")
     def toEntropy: entropy.Game           = sys.error("Can't turn a draughts game into an entropy game")
+    def toYonkoma: yonkoma.Game           = sys.error("Can't turn a draughts game into a yonkoma game")
 
   }
 
@@ -734,6 +744,7 @@ object Game {
     def toAbalone: abalone.Game           = sys.error("Can't turn a fairysf game into an abalone game")
     def toDameo: dameo.Game               = sys.error("Can't turn a fairysf game into a dameo game")
     def toEntropy: entropy.Game           = sys.error("Can't turn a fairysf game into an entropy game")
+    def toYonkoma: yonkoma.Game           = sys.error("Can't turn a fairysf game into a yonkoma game")
 
   }
 
@@ -871,6 +882,7 @@ object Game {
     def toAbalone: abalone.Game           = sys.error("Can't turn a samurai game into an abalone game")
     def toDameo: dameo.Game               = sys.error("Can't turn a samurai game into a dameo game")
     def toEntropy: entropy.Game           = sys.error("Can't turn a samurai game into an entropy game")
+    def toYonkoma: yonkoma.Game           = sys.error("Can't turn a samurai game into a yonkoma game")
 
   }
 
@@ -1009,6 +1021,7 @@ object Game {
     def toAbalone: abalone.Game           = sys.error("Can't turn a togyzkumalak game into an abalone game")
     def toDameo: dameo.Game               = sys.error("Can't turn a togyzkumalak game into a dameo game")
     def toEntropy: entropy.Game           = sys.error("Can't turn a togyzkumalak game into an entropy game")
+    def toYonkoma: yonkoma.Game           = sys.error("Can't turn a togyzkumalak game into a yonkoma game")
 
   }
 
@@ -1156,6 +1169,7 @@ object Game {
     def toAbalone: abalone.Game           = sys.error("Can't turn a go game into an abalone game")
     def toDameo: dameo.Game               = sys.error("Can't turn a go game into a dameo game")
     def toEntropy: entropy.Game           = sys.error("Can't turn a go game into an entropy game")
+    def toYonkoma: yonkoma.Game           = sys.error("Can't turn a go game into a yonkoma game")
 
   }
 
@@ -1322,6 +1336,7 @@ object Game {
     def toAbalone: abalone.Game           = sys.error("Can't turn a backgammon game into an abalone game")
     def toDameo: dameo.Game               = sys.error("Can't turn a backgammon game into a dameo game")
     def toEntropy: entropy.Game           = sys.error("Can't turn a backgammon game into an entropy game")
+    def toYonkoma: yonkoma.Game           = sys.error("Can't turn a backgammon game into a yonkoma game")
 
   }
 
@@ -1462,6 +1477,7 @@ object Game {
     override def toAbalone: abalone.Game           = g
     override def toDameo: dameo.Game               = sys.error("Can't turn an abalone game into a dameo game")
     override def toEntropy: entropy.Game           = sys.error("Can't turn an abalone game into an entropy game")
+    override def toYonkoma: yonkoma.Game           = sys.error("Can't turn an abalone game into a yonkoma game")
   }
 
   final case class Dameo(g: dameo.Game)
@@ -1599,6 +1615,7 @@ object Game {
     def toAbalone: abalone.Game           = sys.error("Can't turn a dameo game into an abalone game")
     def toDameo: dameo.Game               = g
     def toEntropy: entropy.Game           = sys.error("Can't turn a dameo game into an entropy game")
+    def toYonkoma: yonkoma.Game           = sys.error("Can't turn a dameo game into a yonkoma game")
 
   }
 
@@ -1778,6 +1795,153 @@ object Game {
     def toAbalone: abalone.Game           = sys.error("Can't turn an entropy game into an abalone game")
     def toDameo: dameo.Game               = sys.error("Can't turn an entropy game into a dameo game")
     def toEntropy: entropy.Game           = g
+    def toYonkoma: yonkoma.Game           = sys.error("Can't make a yonkoma game from an entropy game")
+
+  }
+
+  final case class Yonkoma(g: yonkoma.Game)
+      extends Game(
+        Situation.Yonkoma(g.situation),
+        g.actionStrs,
+        g.clock,
+        g.plies,
+        g.turnCount,
+        g.startedAtPly,
+        g.startedAtTurn
+      ) {
+
+    def apply(
+        orig: Pos,
+        dest: Pos,
+        promotion: Option[PromotableRole] = None,
+        metrics: MoveMetrics = MoveMetrics(),
+        finalSquare: Boolean = false,
+        captures: Option[List[Pos]] = None,
+        partialCaptures: Boolean = false
+    ): Validated[String, (Game, Move)] = (orig, dest) match {
+      case (Pos.Yonkoma(orig), Pos.Yonkoma(dest)) =>
+        g.apply(orig, dest, metrics)
+          .toEither
+          .map(t => (Yonkoma(t._1), Move.Yonkoma(t._2)))
+          .toValidated
+      case _                                      => sys.error("Not passed Yonkoma objects")
+    }
+
+    def apply(action: Action): Game =
+      action match {
+        case (Move.Yonkoma(move)) => Yonkoma(g.apply(move))
+        case (Pass.Yonkoma(pass)) => Yonkoma(g.apply(pass))
+        case _                    => sys.error("Not passed Yonkoma objects")
+      }
+
+    def drop(
+        role: Role,
+        pos: Pos,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, Drop)] =
+      sys.error("Can't drop in yonkoma")
+
+    def lift(
+        pos: Pos,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, Lift)] =
+      sys.error("Can't lift in yonkoma")
+
+    def pass(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Pass)] =
+      g.situation
+        .pass()
+        .map(_ withMetrics metrics)
+        .toEither
+        .map(p => (Yonkoma(g.apply(p)), Pass.Yonkoma(p)))
+        .toValidated
+
+    def selectSquares(
+        squares: List[Pos],
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, SelectSquares)] =
+      sys.error("Can't selectSquares in yonkoma")
+
+    def diceRoll(
+        dice: List[Int],
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, DiceRoll)] =
+      sys.error("Can't diceroll in yonkoma")
+
+    def undo(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, Undo)] =
+      sys.error("Can't undo in yonkoma")
+
+    def endTurn(metrics: MoveMetrics = MoveMetrics()): Validated[String, (Game, EndTurn)] =
+      sys.error("Can't endTurn in yonkoma")
+
+    def cubeAction(
+        interaction: CubeInteraction,
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, CubeAction)] =
+      sys.error("Can't cubeaction in yonkoma")
+
+    def randomizeDiceRoll: Option[DiceRoll] = None
+
+    def randomizeAndApplyDiceRoll(
+        metrics: MoveMetrics = MoveMetrics()
+    ): Validated[String, (Game, DiceRoll)] =
+      sys.error("Can't apply diceroll in yonkoma")
+
+    def copy(clock: Option[ClockBase]): Game =
+      Yonkoma(g.copy(clock = clock))
+
+    def copy(plies: Int, turnCount: Int, startedAtPly: Int, startedAtTurn: Int): Game =
+      Yonkoma(
+        g.copy(
+          plies = plies,
+          turnCount = turnCount,
+          startedAtPly = startedAtPly,
+          startedAtTurn = startedAtTurn
+        )
+      )
+
+    def copy(
+        clock: Option[ClockBase],
+        plies: Int,
+        turnCount: Int,
+        startedAtPly: Int,
+        startedAtTurn: Int
+    ): Game =
+      Yonkoma(
+        g.copy(
+          clock = clock,
+          plies = plies,
+          turnCount = turnCount,
+          startedAtPly = startedAtPly,
+          startedAtTurn = startedAtTurn
+        )
+      )
+
+    def copy(situation: Situation, plies: Int, turnCount: Int): Game = situation match {
+      case Situation.Yonkoma(situation) =>
+        Yonkoma(g.copy(situation = situation, plies = plies, turnCount = turnCount))
+      case _                            =>
+        sys.error("Unable to copy yonkoma game with non-yonkoma arguments")
+    }
+    def copy(situation: Situation): Game                             = situation match {
+      case Situation.Yonkoma(situation) => Yonkoma(g.copy(situation = situation))
+      case _                            => sys.error("Unable to copy yonkoma game with non-yonkoma arguments")
+    }
+
+    def hasJustSwitchedTurns: Boolean = g.hasJustSwitchedTurns
+
+    def withTurnsAndPlies(p: Int, t: Int): Game = Yonkoma(g.withTurnsAndPlies(p, t))
+
+    def toFairySF: fairysf.Game           = sys.error("Can't turn a yonkoma game into a fairysf game")
+    def toChess: chess.Game               = sys.error("Can't turn a yonkoma game into a chess game")
+    def toDraughts: draughts.DraughtsGame = sys.error("Can't turn a yonkoma game into a draughts game")
+    def toSamurai: samurai.Game           = sys.error("Can't turn a yonkoma game into a samurai game")
+    def toTogyzkumalak: togyzkumalak.Game = sys.error("Can't turn a yonkoma game into a togyzkumalak game")
+    def toGo: go.Game                     = sys.error("Can't turn a yonkoma game into a go game")
+    def toBackgammon: backgammon.Game     = sys.error("Can't turn a yonkoma game into a backgammon game")
+    def toAbalone: abalone.Game           = sys.error("Can't turn a yonkoma game into an abalone game")
+    def toDameo: dameo.Game               = sys.error("Can't turn a yonkoma game into a dameo game")
+    def toEntropy: entropy.Game           = sys.error("Can't turn a yonkoma game into an entropy game")
+    def toYonkoma: yonkoma.Game           = g
 
   }
 
@@ -1817,6 +1981,10 @@ object Game {
       Entropy(
         entropy.Game(situation, actionStrs, clock, plies, turnCount, startedAtPly, startedAtTurn)
       )
+    case (GameLogic.Yonkoma(), Situation.Yonkoma(situation))           =>
+      Yonkoma(
+        yonkoma.Game(situation, actionStrs, clock, plies, turnCount, startedAtPly, startedAtTurn)
+      )
     case _                                                             => sys.error("Mismatched gamelogic types 32")
   }
 
@@ -1841,6 +2009,8 @@ object Game {
       Dameo(dameo.Game.apply(variant))
     case (GameLogic.Entropy(), Variant.Entropy(variant))           =>
       Entropy(entropy.Game.apply(variant))
+    case (GameLogic.Yonkoma(), Variant.Yonkoma(variant))           =>
+      Yonkoma(yonkoma.Game.apply(variant))
     case _                                                         =>
       sys.error("Mismatched gamelogic types 33")
   }
@@ -1866,6 +2036,8 @@ object Game {
       Dameo(dameo.Game.apply(variant.map(_.toDameo), fen.map(_.toDameo)))
     case GameLogic.Entropy()      =>
       Entropy(entropy.Game.apply(variant.map(_.toEntropy), fen.map(_.toEntropy)))
+    case GameLogic.Yonkoma()      =>
+      Yonkoma(yonkoma.Game.apply(variant.map(_.toYonkoma), fen.map(_.toYonkoma)))
   }
 
   def wrap(g: chess.Game)            = Chess(g)
@@ -1877,5 +2049,7 @@ object Game {
   def wrap(g: backgammon.Game)       = Backgammon(g)
   def wrap(g: abalone.Game)          = Abalone(g)
   def wrap(g: dameo.Game)            = Dameo(g)
+  def wrap(g: entropy.Game)          = Entropy(g)
+  def wrap(g: yonkoma.Game)          = Yonkoma(g)
 
 }

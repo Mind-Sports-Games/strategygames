@@ -172,6 +172,7 @@ sealed abstract class Situation(val board: Board, val player: Player) {
   def toAbalone: abalone.Situation
   def toDameo: dameo.Situation
   def toEntropy: entropy.Situation
+  def toYonkoma: yonkoma.Situation
 
 }
 
@@ -347,6 +348,7 @@ object Situation {
     def toAbalone      = sys.error("Can't make abalone situation from chess situation")
     def toDameo        = sys.error("Can't make dameo situation from chess situation")
     def toEntropy      = sys.error("Can't make entropy situation from chess situation")
+    def toYonkoma      = sys.error("Can't make yonkoma situation from chess situation")
   }
 
   final case class Draughts(s: draughts.Situation)
@@ -528,6 +530,7 @@ object Situation {
     def toAbalone      = sys.error("Can't make abalone situation from draughts situation")
     def toDameo        = sys.error("Can't make dameo situation from draughts situation")
     def toEntropy      = sys.error("Can't make entropy situation from draughts situation")
+    def toYonkoma      = sys.error("Can't make yonkoma situation from draughts situation")
 
   }
 
@@ -691,6 +694,7 @@ object Situation {
     def toAbalone      = sys.error("Can't make abalone situation from fairysf situation")
     def toDameo        = sys.error("Can't make dameo situation from fairysf situation")
     def toEntropy      = sys.error("Can't make entropy situation from fairysf situation")
+    def toYonkoma      = sys.error("Can't make yonkoma situation from fairysf situation")
   }
 
   final case class Samurai(s: samurai.Situation)
@@ -846,6 +850,7 @@ object Situation {
     def toAbalone      = sys.error("Can't make abalone situation from samurai situation")
     def toDameo        = sys.error("Can't make dameo situation from samurai situation")
     def toEntropy      = sys.error("Can't make entropy situation from samurai situation")
+    def toYonkoma      = sys.error("Can't make yonkoma situation from samurai situation")
   }
 
   final case class Togyzkumalak(s: togyzkumalak.Situation)
@@ -1002,6 +1007,7 @@ object Situation {
     def toAbalone      = sys.error("Can't make abalone situation from togyzkumalak situation")
     def toDameo        = sys.error("Can't make dameo situation from togyzkumalak situation")
     def toEntropy      = sys.error("Can't make entropy situation from togyzkumalak situation")
+    def toYonkoma      = sys.error("Can't make yonkoma situation from togyzkumalak situation")
   }
 
   final case class Go(s: go.Situation)
@@ -1164,6 +1170,7 @@ object Situation {
     def toAbalone      = sys.error("Can't make abalone situation from go situation")
     def toDameo        = sys.error("Can't make dameo situation from go situation")
     def toEntropy      = sys.error("Can't make entropy situation from go situation")
+    def toYonkoma      = sys.error("Can't make yonkoma situation from go situation")
   }
 
   final case class Backgammon(s: backgammon.Situation)
@@ -1333,6 +1340,7 @@ object Situation {
     def toAbalone      = sys.error("Can't make abalone situation from backgammon situation")
     def toDameo        = sys.error("Can't make dameo situation from backgammon situation")
     def toEntropy      = sys.error("Can't make entropy situation from backgammon situation")
+    def toYonkoma      = sys.error("Can't make yonkoma situation from backgammon situation")
   }
 
   // why are all of these overrides?
@@ -1487,6 +1495,7 @@ object Situation {
     override def toAbalone      = s
     override def toDameo        = sys.error("Can't make dameo situation from abalone situation")
     override def toEntropy      = sys.error("Can't make entropy situation from abalone situation")
+    override def toYonkoma      = sys.error("Can't make yonkoma situation from abalone situation")
   }
 
   final case class Dameo(s: dameo.Situation)
@@ -1641,6 +1650,7 @@ object Situation {
     def toAbalone      = sys.error("Can't make abalone situation from dameo situation")
     def toDameo        = s
     def toEntropy      = sys.error("Can't make an entropy object from a dameo object")
+    def toYonkoma      = sys.error("Can't make a yonkoma object from a dameo object")
   }
 
   final case class Entropy(s: entropy.Situation)
@@ -1823,6 +1833,163 @@ object Situation {
     def toAbalone      = sys.error("Can't make abalone situation from entropy situation")
     def toDameo        = sys.error("Can't make dameo situation from entropy situation")
     def toEntropy      = s
+    def toYonkoma      = sys.error("Can't make a yonkoma situation from an entropy situation")
+  }
+
+  final case class Yonkoma(s: yonkoma.Situation)
+      extends Situation(
+        Board.Yonkoma(s.board),
+        s.player
+      ) {
+
+    lazy val moves: Map[Pos, List[Move]] = s.moves.map { case (pos, moves) =>
+      (Pos.Yonkoma(pos), moves.map(Move.Yonkoma.apply))
+    }
+
+    def takebackable = true
+
+    // a player with no legal move has nothing to decide: the turn is skipped
+    def forcedAction: Option[Action] = if (s.canPass) pass.toOption else None
+
+    def forcedTurnAction: Option[Action] = forcedAction
+
+    lazy val check: Boolean = false
+
+    def checkSquare = None
+
+    def opponentHasInsufficientMaterial: Boolean = false
+
+    def insufficientMaterialStatus: Status.type => Status = _.Outoftime
+
+    def outOfTimeStatus: Status.type => Status = _.Outoftime
+
+    def threefoldRepetition: Boolean = false
+
+    def isRepetition: Boolean = false
+
+    def end: Boolean = s.end
+
+    def winner: Option[Player] = s.winner
+
+    lazy val destinations: Map[Pos, List[Pos]] = s.destinations.map { case (pos, dests) =>
+      (Pos.Yonkoma(pos), dests.map(Pos.Yonkoma.apply))
+    }
+
+    def drops: Option[List[Pos]] = None
+
+    def dropsByRole: Option[Map[Role, List[Pos]]] = None
+
+    def dropsAsDrops: List[Drop] = List.empty
+
+    def lifts: List[Lift] = List.empty
+
+    def passes: List[Pass] = pass.fold[List[Pass]](_ => List.empty, p => List(p))
+
+    def selectSquaresAction: List[SelectSquares] = List.empty
+
+    def diceRolls: List[DiceRoll] = List.empty
+
+    def undos: List[Undo] = List.empty
+
+    def endTurns: List[EndTurn] = List.empty
+
+    def cubeActions: List[CubeAction] = List.empty
+
+    lazy val validTurns: List[List[Action]] = List(actions)
+
+    def canDrop: Boolean = false
+
+    def canOnlyDrop: Boolean = false
+
+    def canLift: Boolean = false
+
+    def canOnlyLift: Boolean = false
+
+    def canRollDice: Boolean = false
+
+    def canOnlyRollDice: Boolean = false
+
+    def canUndo: Boolean = false
+
+    def canEndTurn: Boolean = false
+
+    def canOnlyEndTurn: Boolean = false
+
+    def canCubeAction: Boolean = false
+
+    def canOnlyCubeAction: Boolean = false
+
+    def playable(strict: Boolean): Boolean = s.playable(strict)
+
+    val status: Option[Status] = s.status
+
+    def resignStatus(player: Player): Status.type => Status = _.Resign
+
+    def pointValue(player: Option[Player]): Option[Int] = None
+
+    def move(
+        from: Pos,
+        to: Pos,
+        promotion: Option[PromotableRole] = None,
+        finalSquare: Boolean = false,
+        forbiddenUci: Option[List[String]] = None,
+        captures: Option[List[Pos]] = None,
+        partialCaptures: Boolean = false
+    ): Validated[String, Move] = (from, to) match {
+      case (Pos.Yonkoma(from), Pos.Yonkoma(to)) =>
+        s.move(from, to).toEither.map(m => Move.Yonkoma(m)).toValidated
+      case _                                    => sys.error("Not passed Yonkoma objects")
+    }
+
+    def move(uci: Uci.Move): Validated[String, Move] = uci match {
+      case Uci.YonkomaMove(uci) => s.move(uci).toEither.map(m => Move.Yonkoma(m)).toValidated
+      case _                    => sys.error("Not passed Yonkoma objects")
+    }
+
+    def drop(role: Role, pos: Pos): Validated[String, Drop] = sys.error("Can't do a Drop for yonkoma")
+
+    def lift(pos: Pos): Validated[String, Lift] = sys.error("Can't do a Lift for yonkoma")
+
+    def pass: Validated[String, Pass] = s.pass().toEither.map(p => Pass.Yonkoma(p)).toValidated
+
+    def selectSquares(squares: List[Pos]): Validated[String, SelectSquares] =
+      sys.error("Can't do a SelectSquares for yonkoma")
+
+    def diceRoll(dice: List[Int]): Validated[String, DiceRoll] =
+      sys.error("Can't do a DiceRoll for yonkoma")
+
+    def undo: Validated[String, Undo] = sys.error("Can't do Undo for yonkoma")
+
+    def endTurn: Validated[String, EndTurn] = sys.error("Can't do EndTurn for yonkoma")
+
+    def cubeAction(interaction: CubeInteraction): Validated[String, CubeAction] =
+      sys.error("Can't do a CubeAction for yonkoma")
+
+    def withVariant(variant: Variant): Situation = variant match {
+      case Variant.Yonkoma(variant) => Yonkoma(s.withVariant(variant))
+      case _                        => sys.error("Not passed Yonkoma objects")
+    }
+
+    def unary_! : Situation = Yonkoma(s.unary_!)
+
+    def copy(board: Board): Situation = Yonkoma(board match {
+      case Board.Yonkoma(board) => s.copy(board)
+      case _                    => sys.error("Can't copy a yonkoma situation with a non-yonkoma board")
+    })
+
+    def gameLogic: GameLogic = GameLogic.Yonkoma()
+
+    def toChess        = sys.error("Can't make chess situation from yonkoma situation")
+    def toDraughts     = sys.error("Can't make draughts situation from yonkoma situation")
+    def toFairySF      = sys.error("Can't make fairysf situation from yonkoma situation")
+    def toSamurai      = sys.error("Can't make samurai situation from yonkoma situation")
+    def toTogyzkumalak = sys.error("Can't make togyzkumalak situation from yonkoma situation")
+    def toGo           = sys.error("Can't make go situation from yonkoma situation")
+    def toBackgammon   = sys.error("Can't make backgammon situation from yonkoma situation")
+    def toAbalone      = sys.error("Can't make abalone situation from yonkoma situation")
+    def toDameo        = sys.error("Can't make dameo situation from yonkoma situation")
+    def toEntropy      = sys.error("Can't make entropy situation from yonkoma situation")
+    def toYonkoma      = s
   }
 
   def apply(lib: GameLogic, board: Board, player: Player): Situation = (lib, board) match {
@@ -1837,6 +2004,7 @@ object Situation {
     case (GameLogic.Abalone(), Board.Abalone(board))           => Abalone(abalone.Situation(board, player))
     case (GameLogic.Dameo(), Board.Dameo(board))               => Dameo(dameo.Situation(board, player))
     case (GameLogic.Entropy(), Board.Entropy(board))           => Entropy(entropy.Situation(board, player))
+    case (GameLogic.Yonkoma(), Board.Yonkoma(board))           => Yonkoma(yonkoma.Situation(board, player))
     case _                                                     => sys.error("Mismatched gamelogic types 3")
   }
 
@@ -1856,6 +2024,8 @@ object Situation {
       Dameo(dameo.Situation.apply(variant))
     case (GameLogic.Entropy(), Variant.Entropy(variant))           =>
       Entropy(entropy.Situation.apply(variant))
+    case (GameLogic.Yonkoma(), Variant.Yonkoma(variant))           =>
+      Yonkoma(yonkoma.Situation.apply(variant))
     case _                                                         => sys.error("Mismatched gamelogic types 4")
   }
 
@@ -1868,6 +2038,8 @@ object Situation {
   def wrap(s: backgammon.Situation)   = Backgammon(s)
   def wrap(s: abalone.Situation)      = Abalone(s)
   def wrap(s: dameo.Situation)        = Dameo(s)
+  def wrap(s: entropy.Situation)      = Entropy(s)
+  def wrap(s: yonkoma.Situation)      = Yonkoma(s)
 }
 
 sealed abstract class GameMessage(val translationString: String)
