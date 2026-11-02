@@ -39,7 +39,7 @@ case object OctagonFlipello
 
   override def specialEnd(situation: Situation) = {
     (situation.board.piecesOnBoardCount == (boardSize.width * boardSize.height) - invalidSquares.size) ||
-    (situation.board.apiPosition.legalMoves.size == 0) ||
+    (situation.board.apiPosition.legalMoveCount == 0) ||
     pendingDoublePass(situation)
   }
 

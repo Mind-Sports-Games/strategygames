@@ -89,7 +89,8 @@ abstract class Variant private[variant] (
 
   def addVariantEffect(move: Move): Move = move
 
-  def variantEnd(situation: Situation) = situation.moves.isEmpty
+  def variantEnd(situation: Situation) =
+    !situation.actors.exists(_.noncaptures.nonEmpty) && !situation.actors.exists(_.captures.nonEmpty)
 
   def specialEnd(@nowarn situation: Situation)  = false
   def specialDraw(@nowarn situation: Situation) = false

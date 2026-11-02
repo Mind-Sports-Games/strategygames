@@ -41,6 +41,8 @@ abstract class Norm(val radius: Int, is3: Boolean = false) {
 
   final def getNeigh(a: Pos): Set[(Pos, Pos)] = neighVectors.map(vect => (vect, a + vect))
 
+  val neighVectorList: List[Pos] = neighVectors.toList
+
   //
   // Products
   final def scal(a: Pos, b: Pos): Double = {

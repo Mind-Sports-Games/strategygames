@@ -42,8 +42,6 @@ sealed abstract class BoardType(
 }
 
 object BoardType {
-  // lazy: the constructor's default norm lives on this object, so building Hex5 initialises it, and
-  // an eager list of the boards deadlocks two threads building Hex5 and Hex6 at once
   lazy val all: List[BoardType] = List(Hex5, Hex6)
 }
 

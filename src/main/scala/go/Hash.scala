@@ -43,9 +43,6 @@ object Hash {
   private def stoneIndex(piece: Piece, pos: Pos) =
     Pos.allSize * pieceIndex(piece) + pos.hashCode
 
-  private def actorIndex(actor: Actor) =
-    stoneIndex(actor.piece, actor.pos)
-
   def mask(piece: Piece, pos: Pos): Long =
     polyglotTable.actorMasks(stoneIndex(piece, pos))
 
@@ -57,21 +54,25 @@ object Hash {
   def bytesOf(hash: Long): PositionHash =
     Array.tabulate(size)(i => (hash >>> ((size - 1 - i) * 8)).toByte)
 
-  def hashAt(hashes: PositionHash, position: Int): Long =
-    (0 until size).foldLeft(0L)((hash, i) => (hash << 8) | (hashes(position * size + i) & 0xffL))
+  def hashAt(hashes: PositionHash, position: Int): Long = {
+    val end  = (position + 1) * size
+    var i    = position * size
+    var hash = 0L
+    while (i < end) {
+      hash = (hash << 8) | (hashes(i) & 0xffL)
+      i += 1
+    }
+    hash
+  }
 
   def get(situation: Situation, table: ZobristConstants): Long = {
 
     val board = situation.board
     val hturn = situation.player.fold(table.p1TurnMask, 0L)
 
-    val hactors = board.actors.values.view
-      .map {
-        table.actorMasks compose actorIndex _
-      }
-      .fold(hturn)(_ ^ _)
-
-    hactors
+    board.pieces.foldLeft(hturn) { case (hash, (pos, piece)) =>
+      hash ^ table.actorMasks(stoneIndex(piece, pos))
+    }
   }
 
   private val h = new Hash(size)
@@ -84,7 +85,7 @@ object Hash {
 
 //only actually require 2*361 hashes.
 private object ZobristTables {
-  // to work out the size of this calculate what the max value actorIndex can produce
+  // to work out the size of this calculate what the max value stoneIndex can produce
   val actorMasks = Array(
     "9d39247e33776d4152b375aa7c0d7bac",
     "2af7398005aaa5c7208d169a534f2cf5",

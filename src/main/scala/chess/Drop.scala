@@ -15,7 +15,7 @@ case class Drop(
 ) extends Action(situationBefore) {
 
   def situationAfter =
-    Situation(finalizeAfter, if (autoEndTurn) !piece.player else piece.player)
+    finalizeAfter situationOf (if (autoEndTurn) !piece.player else piece.player)
 
   def withHistory(h: History) = copy(after = after withHistory h)
 

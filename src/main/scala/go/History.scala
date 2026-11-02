@@ -46,7 +46,12 @@ final class History(
 
   def currentPosition: Option[Long] = if (positionCount > 0) Some(positionAt(0)) else None
 
-  def hasOccurred(hash: Long): Boolean = (0 until positionCount).exists(positionAt(_) == hash)
+  def hasOccurred(hash: Long): Boolean = {
+    val count    = positionCount
+    var position = 0
+    while (position < count && positionAt(position) != hash) position += 1
+    position < count
+  }
 
   def afterPosition(hash: Long): History =
     copy(positionHashes = Hash.bytesOf(hash) ++ positionHashes)
