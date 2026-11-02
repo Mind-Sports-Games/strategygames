@@ -22,6 +22,9 @@ sealed trait Opening {
 
   def offeringStep(board: Board): Boolean = false
 
+  // the offer is recorded in the history after this, so the board does not hold it yet
+  def stepAfterOffer(board: Board): OpeningStep = board.openingStep
+
 }
 
 object Opening {
@@ -63,12 +66,13 @@ object Opening {
       Set(OpeningStep.Placing, OpeningStep.SwapOffered, OpeningStep.Offering, OpeningStep.Offered)
 
     def stepAfterDrop(board: Board): OpeningStep = board.openingStep match {
-      case OpeningStep.Offering                          =>
-        if (board.offered.size == offeredStones) OpeningStep.Offered else OpeningStep.Offering
       case OpeningStep.Placing | OpeningStep.SwapOffered =>
         if (board.droppedCount <= swappedStones) OpeningStep.SwapOffered else OpeningStep.Play
       case _                                             => OpeningStep.Play
     }
+
+    override def stepAfterOffer(board: Board): OpeningStep =
+      if (board.offered.size + 1 == offeredStones) OpeningStep.Offered else OpeningStep.Offering
 
     private def inOpening(step: OpeningStep) =
       step == OpeningStep.Placing || step == OpeningStep.SwapOffered

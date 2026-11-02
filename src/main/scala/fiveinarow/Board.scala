@@ -57,11 +57,9 @@ case class Board(
     if (pieces.contains(at) || !boardSize.onBoard(at)) None
     else Some(copy(pieces = pieces + (at -> Piece(seatOf(role), role))))
 
-  def offer(at: Pos): Board = updateHistory(h => h.copy(offered = (h.offered :+ at).sortBy(_.index)))
-
   def keepOffered(at: Pos): Option[Board] =
     if (!offered.contains(at)) None
-    else place(BlackStone, at).map(_.updateHistory(_.copy(offered = List.empty)))
+    else place(BlackStone, at)
 
   def capture(by: Role, stones: List[Pos]): Board =
     if (stones.isEmpty) this

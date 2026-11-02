@@ -371,6 +371,7 @@ object Piotr {
     "s19" -> 431.toChar
   )
 
-  // a square name missing from the lookup encodes as '?' = h8 (default from lichess)
-  def table(keys: Iterable[String]): Array[Char] = keys.map(lookup.getOrElse(_, '?')).toArray
+  // a square missing from the lookup would otherwise share another square's char, so it fails instead
+  def table(keys: Iterable[String]): Array[Char] =
+    keys.map(key => lookup.getOrElse(key, sys.error(s"No piotr for square $key"))).toArray
 }

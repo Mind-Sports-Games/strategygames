@@ -219,6 +219,7 @@ class RenjuTest extends Specification with FiveInARowTestSupport {
       fen.value.split(' ').drop(1).take(3).mkString(" ") === "b 1 x"
       val read = Forsyth.<<@(Renju, fen).get
       read.board.offered.map(_.key).toSet === Set("a1", "c2")
+      Forsyth.boardPart(read.board) === fen.value.split(' ').head
       read.player === Player.P1
       Forsyth.<<@(Renju, Forsyth.>>(offered)).get.player === Player.P2
       Forsyth.<<(Forsyth.>>(offered)).map(_.board.variant) === Some(Renju)
@@ -286,7 +287,7 @@ class RenjuTest extends Specification with FiveInARowTestSupport {
       after.end must beTrue
       after.winner === Some(Player.P2)
       after.status === Some(Status.ForbiddenAction)
-      after.board.history.forbiddenDrop.map(_.key) === Some("h8")
+      after.board.history.lastAction.map(_.uci) === Some("B@h8")
     }
 
     "be kept in the fen, which reads back as lost" in {

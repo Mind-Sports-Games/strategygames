@@ -191,8 +191,6 @@ object History {
       halfMoveClock: Int = 0,
       blackSeat: Player = Player.P1,
       openingStep: Option[fiveinarow.OpeningStep] = None,
-      offered: List[fiveinarow.Pos] = List.empty,
-      forbiddenDrop: Option[fiveinarow.Pos] = None,
       round: Int = 1
   ): History = lib match {
     case GameLogic.Draughts()     =>
@@ -313,8 +311,6 @@ object History {
             case _                           => fiveinarow.OpeningStep.Opening
           }),
           score = score,
-          offered = offered,
-          forbiddenDrop = forbiddenDrop,
           halfMoveClock = halfMoveClock
         )
       )

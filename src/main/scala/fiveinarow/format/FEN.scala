@@ -3,7 +3,18 @@ package strategygames.fiveinarow.format
 import scalalib.extensions.*
 
 import strategygames.{ Player, Score }
-import strategygames.fiveinarow.{ Board, File, History, OpeningStep, Piece, PieceMap, Pos, Rank, Role }
+import strategygames.fiveinarow.{
+  BlackStone,
+  Board,
+  File,
+  History,
+  OpeningStep,
+  Piece,
+  PieceMap,
+  Pos,
+  Rank,
+  Role
+}
 import strategygames.fiveinarow.variant.Variant
 /*
 
@@ -81,11 +92,19 @@ final case class FEN(value: String) extends AnyVal {
 
   def offered: List[Pos] = points.collect { case (pos, c) if c == FEN.offeredChar => pos }.sortBy(_.index)
 
+  // the history holds the offered stones as the turn that offered them
+  private def offeringTurn: List[Uci] = Uci.Offer10() :: offered.map(Uci.Drop(BlackStone, _))
+
   def board(variant: Variant): Board = {
-    val history          =
-      History(blackSeat = blackSeat, openingStep = openingStep, score = score, offered = offered)
+    val history          = History(
+      lastTurn = if (openingStep == OpeningStep.Offered) offeringTurn else List.empty,
+      currentTurn = if (openingStep == OpeningStep.Offering) offeringTurn else List.empty,
+      blackSeat = blackSeat,
+      openingStep = openingStep,
+      score = score
+    )
     val pieces: PieceMap = stones.map { case (pos, role) =>
-      pos -> Piece(if (role == strategygames.fiveinarow.BlackStone) blackSeat else !blackSeat, role)
+      pos -> Piece(if (role == BlackStone) blackSeat else !blackSeat, role)
     }.toMap
     Board(pieces, history, variant)
   }

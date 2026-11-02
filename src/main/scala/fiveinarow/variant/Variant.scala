@@ -130,10 +130,7 @@ abstract class Variant private[variant] (
 
   private def afterDrop(before: Board, placed: Board, role: Role, at: Pos): Board = {
     val captured = placed.capture(role, capturedBy(placed, role, at))
-    if (isForbidden(before, role, at))
-      captured
-        .updateHistory(_.copy(forbiddenDrop = Some(at)))
-        .withOpeningStep(OpeningStep.ForbiddenAction)
+    if (isForbidden(before, role, at)) captured.withOpeningStep(OpeningStep.ForbiddenAction)
     else {
       val stepped = captured.withOpeningStep(opening.stepAfterDrop(captured))
       if (opening.swapsOnDrop(stepped.openingStep)) stepped.swapColours else stepped
@@ -178,10 +175,8 @@ abstract class Variant private[variant] (
     else {
       val piece = Piece(board.seatOf(role), role)
       val after =
-        if (opening.offeringStep(board)) {
-          val offered = board.offer(pos)
-          offered.withOpeningStep(opening.stepAfterDrop(offered))
-        } else afterDrop(board, board.place(role, pos).get, role, pos)
+        if (opening.offeringStep(board)) board.withOpeningStep(opening.stepAfterOffer(board))
+        else afterDrop(board, board.place(role, pos).get, role, pos)
       Validated.valid(Drop(piece, pos, situation, after))
     }
   }

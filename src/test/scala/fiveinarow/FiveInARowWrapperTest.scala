@@ -155,17 +155,15 @@ class FiveInARowWrapperTest extends Specification {
       offered.applyUci(uci, MoveMetrics()).toOption.map(_._2.player) === Some(Player.P2)
     }
 
-    "carry the seat, step, offered and forbidden drop through a wrapper history" in {
+    "carry the seat, step and offered stones through a wrapper history" in {
       val at = Pos.fromKey("h8").get
       val h  = StratHistory(
         lib,
+        lastTurn = List(StratUci.apply(lib, gf, "offer10").get, StratUci.apply(lib, gf, "B@h8").get),
         blackSeat = Player.P2,
-        openingStep = Some(OpeningStep.Offered),
-        offered = List(at),
-        forbiddenDrop = Some(at)
+        openingStep = Some(OpeningStep.Offered)
       ).asInstanceOf[StratHistory.FiveInARow].h
-      (h.blackSeat, h.openingStep, h.offered, h.forbiddenDrop) ===
-        (Player.P2, OpeningStep.Offered, List(at), Some(at))
+      (h.blackSeat, h.openingStep, h.offered) === (Player.P2, OpeningStep.Offered, List(at))
     }
   }
 

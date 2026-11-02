@@ -11,8 +11,6 @@ case class History(
     blackSeat: Player = Player.P1,
     openingStep: OpeningStep = OpeningStep.Opening,
     score: Score = Score(0, 0),
-    offered: List[Pos] = List.empty,
-    forbiddenDrop: Option[Pos] = None,
     halfMoveClock: Int = 0
 ) {
 
@@ -29,5 +27,11 @@ case class History(
 
   lazy val recentTurnUciString: Option[String] =
     if (recentTurn.nonEmpty) Some(recentTurn.map(_.uci).mkString(",")) else None
+
+  // renju's offered stones are the drops of the turn that offers them, until white keeps one
+  lazy val offered: List[Pos] = openingStep match {
+    case OpeningStep.Offering | OpeningStep.Offered => recentTurn.collect { case Uci.Drop(_, pos) => pos }
+    case _                                          => List.empty
+  }
 
 }
