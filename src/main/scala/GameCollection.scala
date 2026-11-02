@@ -763,8 +763,7 @@ object GameGroup {
     def name     = "Yonkoma"
     def key      = "yonkoma"
     def variants = Variant.all(GameLogic.Yonkoma()).filter(_.gameFamily.name == this.name)
-    // not in the medley rotation until lila has the medley form field for it
-    def medley   = false
+    def medley   = true
   }
 
   def all: List[GameGroup] =
