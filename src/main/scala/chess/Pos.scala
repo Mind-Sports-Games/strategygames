@@ -54,11 +54,15 @@ case class Pos private (index: Int) extends AnyVal {
 
   def sgf = file.sgfChar.toString + rank.sgfChar.toString
 
-  def key               = file.toString + rank.toString
+  def key: String       = Pos.keys(index)
   override def toString = key
 }
 
 object Pos {
+  private val keys: Array[String] = Array.tabulate(64) { index =>
+    s"${(97 + (index & 7)).toChar}${(49 + (index >> 3)).toChar}"
+  }
+
   def apply(index: Int): Option[Pos] =
     if (0 <= index && index < 64) Some(new Pos(index))
     else None
