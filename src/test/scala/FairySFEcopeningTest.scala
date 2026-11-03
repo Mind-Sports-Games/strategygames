@@ -116,6 +116,8 @@ class FairySFEcopeningTest extends Specification {
   "black's amazons replies" should {
     "be keyed by the position their moves reach" in
       forall(amazonsReplies)(opening => opening.fen === boardKey(gameAfter(amazons, opening)))
+    "be keyed by the position mindtrap's replay of their moves reaches" in
+      forall(amazonsReplies)(opening => replayed(amazons, opening).map(boardKey) === Some(opening.fen))
     "be a single move then a single arrow, after each common white first turn" in
       forall(commonWhiteTurns) { turn =>
         val afterWhite = turn.foldLeft(start(amazons))(play)
