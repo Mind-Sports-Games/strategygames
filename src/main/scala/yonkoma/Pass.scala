@@ -18,6 +18,7 @@ case class Pass(
     h.copy(
       lastTurn = h.currentTurn :+ toUci,
       currentTurn = List(),
+      positionHashes = after.variant.updatePositionHashes(after, this, h.positionHashes),
       halfMoveClock = h.halfMoveClock + 1
     )
   }

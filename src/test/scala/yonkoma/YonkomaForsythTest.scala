@@ -7,7 +7,7 @@ class YonkomaForsythTest extends YonkomaTest {
 
   "the initial fen" should {
 
-    "describe the 10x10 starting position with red to play" in {
+    "describe the 10x10 starting position with white to play" in {
       val fen = Yonkoma10x10.initialFen
       fen.value === "c8C/10/10/10/10/10/10/10/10/C8c w 1"
       fen.player === Some(P1)
@@ -31,6 +31,33 @@ class YonkomaForsythTest extends YonkomaTest {
       Forsyth
         .>>(Forsyth.<<@(Yonkoma12x12, Yonkoma12x12.initialFen).get)
         .value === Yonkoma12x12.initialFen.value
+    }
+
+    "be built per variant from the same recipe" in {
+      Forsyth.initial(Yonkoma10x10) === Yonkoma10x10.initialFen
+      Forsyth.initial(Yonkoma12x12) === Yonkoma12x12.initialFen
+      Forsyth.initial === Yonkoma10x10.initialFen
+    }
+  }
+
+  "the board size" should {
+    "come from the number of ranks in the fen" in {
+      Yonkoma10x10.initialFen.boardSize === Some(Board.Dim10x10)
+      Yonkoma12x12.initialFen.boardSize === Some(Board.Dim12x12)
+      FEN("8/8/8/8/8/8/8/8 w 1").boardSize === None
+    }
+
+    "pick the variant when none is given" in {
+      Forsyth.<<(Yonkoma12x12.initialFen).map(_.board.variant) === Some(Yonkoma12x12)
+      Forsyth.<<(Yonkoma10x10.initialFen).map(_.board.variant) === Some(Yonkoma10x10)
+      Forsyth.<<<(Yonkoma12x12.initialFen).map(_.situation.board.variant) === Some(Yonkoma12x12)
+      Forsyth.<<(FEN("8/8/8/8/8/8/8/8 w 1")) === None
+    }
+
+    "refuse a fen for another board" in {
+      Forsyth.<<@(Yonkoma10x10, Yonkoma12x12.initialFen) === None
+      Forsyth.<<@(Yonkoma12x12, Yonkoma10x10.initialFen) === None
+      Forsyth.<<<@(Yonkoma10x10, Yonkoma12x12.initialFen) === None
     }
   }
 
@@ -96,6 +123,16 @@ class YonkomaForsythTest extends YonkomaTest {
     "read and write a pass" in {
       Uci("pass").map(_.uci) === Some("pass")
       Uci.readList("a1e5 pass e5d4").map(_.map(_.uci)) === Some(List("a1e5", "pass", "e5d4"))
+    }
+
+    "give none for anything else" in {
+      Uci("a1z9") === None
+      Uci("a1") === None
+      Uci("a1e5e6") === None
+      Uci("m13a1") === None
+      Uci("Pass") === None
+      Uci("") === None
+      Uci.readList("a1e5 oops") === None
     }
 
     "give every square a distinct piotr character" in {

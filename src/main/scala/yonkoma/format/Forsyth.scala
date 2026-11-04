@@ -9,21 +9,27 @@ import strategygames.yonkoma.variant.Variant
   */
 object Forsyth {
 
-  val initial = FEN("c8C/10/10/10/10/10/10/10/10/C8c w 1")
+  // P2's checkers in the top corners, P1's in the bottom corners, P1 to move
+  def initial(variant: Variant): FEN = {
+    val n     = variant.width
+    val inner = (n - 2).toString
+    val empty = List.fill(n - 2)(n.toString)
+    FEN((s"c${inner}C" :: empty ::: List(s"C${inner}c")).mkString("/") + " w 1")
+  }
 
+  val initial: FEN = initial(Variant.default)
+
+  // the FEN's rank count must be the variant's board size, and every checker must be on it
   def <<@(variant: Variant, fen: FEN): Option[Situation] =
-    Some(
-      Situation(
-        Board(
-          pieces = fen.pieces,
-          history = History(),
-          variant = variant
-        ),
-        fen.player.getOrElse(P1)
-      )
-    )
+    if (!fen.boardSize.contains(variant.boardSize)) None
+    else {
+      val board = Board(pieces = fen.pieces, history = History(), variant = variant)
+      if (board.pieces.keys.forall(board.onBoard)) Some(Situation(board, fen.player.getOrElse(P1)))
+      else None
+    }
 
-  def <<(fen: FEN): Option[Situation] = <<@(Variant.default, fen)
+  // the board size picks the variant
+  def <<(fen: FEN): Option[Situation] = Variant.forFen(fen).flatMap(<<@(_, fen))
 
   case class SituationPlus(situation: Situation, fullTurnCount: Int) {
 
@@ -40,7 +46,7 @@ object Forsyth {
       )
     }
 
-  def <<<(fen: FEN): Option[SituationPlus] = <<<@(Variant.default, fen)
+  def <<<(fen: FEN): Option[SituationPlus] = Variant.forFen(fen).flatMap(<<<@(_, fen))
 
   def >>(situation: Situation): FEN = >>(SituationPlus(situation, 1))
 

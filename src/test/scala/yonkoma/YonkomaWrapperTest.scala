@@ -33,7 +33,7 @@ class YonkomaWrapperTest extends Specification {
       strategygames.GameGroup(15).variants.map(_.key) === List("yonkoma10x10", "yonkoma12x12")
       gf.defaultVariant === stratVariant
       gf.variants.size === 2
-      gf.hasAnalysisBoard must beFalse
+      gf.hasAnalysisBoard must beTrue
       gf.hasFishnet must beFalse
     }
 
@@ -54,9 +54,13 @@ class YonkomaWrapperTest extends Specification {
       strat12.baseVariant must beFalse
       stratVariant.dropsVariant must beFalse
       stratVariant.canOfferDraw must beFalse
-      stratVariant.hasAnalysisBoard must beFalse
+      stratVariant.hasAnalysisBoard must beTrue
       stratVariant.gameFamily === gf
-      stratVariant.playerNames === Map(Player.P1 -> "Red", Player.P2 -> "Blue")
+      stratVariant.playerNames === Map(Player.P1 -> "White", Player.P2 -> "Black")
+      stratVariant.playerColors === Map(Player.P1 -> "white", Player.P2 -> "black")
+      gf.playerFENChars === Map(Player.P1 -> 'w', Player.P2 -> 'b')
+      gf.pieceSetThemes === List("classic_yonkoma", "red_blue_yonkoma")
+      strategygames.GameGroup(15).medley must beTrue
       stratVariant.startPlayer === Player.P1
       stratVariant.pieces.size === 4
     }
@@ -98,6 +102,13 @@ class YonkomaWrapperTest extends Specification {
       StratForsyth.<<@(lib, strat12, strat12.initialFen).map(_.board.pieces.size) === Some(4)
     }
 
+    "read a fen on the board its rank count says" in {
+      StratForsyth.<<(lib, strat12.initialFen).map(_.board.variant) === Some(strat12)
+      StratForsyth.<<(lib, stratVariant.initialFen).map(_.board.variant) === Some(stratVariant)
+      StratForsyth.<<@(lib, stratVariant, strat12.initialFen) === None
+      StratForsyth.<<@(lib, strat12, stratVariant.initialFen) === None
+    }
+
     "build a move uci from two wrapped positions" in {
       StratUci.Move
         .apply(lib, strategygames.Pos.Yonkoma(Pos.A1), strategygames.Pos.Yonkoma(Pos.E5), None)
@@ -108,6 +119,8 @@ class YonkomaWrapperTest extends Specification {
       StratUci.apply(lib, gf, "a1e5") must beSome[StratUci]
       StratUci.apply(lib, gf, "j10a1") must beSome[StratUci]
       StratUci.apply(lib, gf, "pass") must beSome[StratUci]
+      StratUci.apply(lib, gf, "a1z9") === None
+      StratUci.apply(lib, gf, "nonsense") === None
       StratUci.Pass.apply(lib, gf).map(_.uci) === Some("pass")
       StratUci.Drop.fromStrings(lib, gf, "c", "a1") === None
     }
@@ -217,6 +230,26 @@ class YonkomaWrapperTest extends Specification {
       val actionStrs = Vector(Vector("a1e5"), Vector("a10e6"))
       val boards     = strategygames.Replay.boards(lib, actionStrs, None, stratVariant)
       boards.toOption.map(_.size) === Some(3)
+    }
+
+    "find the ply of a position whatever its move number" in {
+      val actionStrs = Vector(Vector("a1e5"), Vector("a10e6"), Vector("j10f6"))
+      val atFen      = StratFEN.apply(lib, "10/10/10/10/4cC4/4C5/10/10/10/9c b 99")
+      strategygames.Replay.plyAtFen(lib, actionStrs, None, stratVariant, atFen).toOption === Some(3)
+      val missing    = StratFEN.apply(lib, "10/10/10/10/10/10/10/10/10/10 w 1")
+      strategygames.Replay.plyAtFen(lib, actionStrs, None, stratVariant, missing).isInvalid must beTrue
+    }
+
+    "load the legal part of a game with a corrupted action" in {
+      val actionStrs = Vector(Vector("a1e5"), Vector("a10e6"), Vector("e5e5"), Vector("j10f6"))
+      val tags       = Tags(List(Tag(_.Variant, "Yonkoma 10x10")))
+      val result     = StratReader.replayResultFromActionStrs(lib, actionStrs, identity, tags)
+      result.toOption must beSome[StratReader.Result].like {
+        case StratReader.Result.YonkomaIncomplete(replay, failure) =>
+          replay.state.plies === 2
+          failure must contain("e5e5")
+      }
+      result.toOption.map(_.evenIncomplete.state.plies) === Some(2)
     }
   }
 

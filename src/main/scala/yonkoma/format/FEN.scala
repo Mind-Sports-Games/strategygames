@@ -1,11 +1,11 @@
 package strategygames.yonkoma.format
 
 import strategygames.Player
-import strategygames.yonkoma.{ File, Piece, PieceMap, Pos, Rank }
+import strategygames.yonkoma.{ Board, File, Piece, PieceMap, Pos, Rank }
 
 // "<board> <player> <full move number>", the board written rank by rank from the top,
 // as in chess, with a run of unoccupied squares written as its length (which may have
-// two digits on these boards), 'C' for a red checker and 'c' for a blue one
+// two digits on these boards), 'C' for a P1 (white) checker and 'c' for a P2 (black) one
 final case class FEN(value: String) extends AnyVal {
 
   override def toString = value
@@ -17,6 +17,11 @@ final case class FEN(value: String) extends AnyVal {
   private def intField(index: Int): Option[Int] = field(index).flatMap(_.toIntOption)
 
   def boardPart: String = field(0).getOrElse("")
+
+  // the ranks from the top; the board is square, so their number is the board size
+  def ranks: Array[String] = boardPart.split('/')
+
+  def boardSize: Option[Board.BoardSize] = Board.BoardSize.all.find(_.height == ranks.size)
 
   def player: Option[Player] =
     field(1) flatMap (_.headOption) flatMap Player.apply
@@ -34,7 +39,7 @@ final case class FEN(value: String) extends AnyVal {
   // the ranks are listed from the top, so the number of ranks on the board is the
   // number of rank strings, and the first string is the highest rank
   def pieces: PieceMap = {
-    val rankStrs = boardPart.split('/')
+    val rankStrs = ranks
     rankStrs.zipWithIndex.flatMap { case (rankStr, rankIndexFromTop) =>
       val rankIndex = rankStrs.size - 1 - rankIndexFromTop
       var fileIndex = 0

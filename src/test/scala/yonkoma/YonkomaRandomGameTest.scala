@@ -47,13 +47,18 @@ class YonkomaRandomGameTest extends YonkomaTest {
     strs.lastOption must beSome((a: String) => a != "pass")
     strs.zip(strs.drop(1)).exists { case (a, b) => a == "pass" && b == "pass" } must beFalse
 
-    // four checkers on the board all along, reds on dark squares and blues on light ones
+    // four checkers on the board all along, P1's on dark squares and P2's on light ones
     s.board.valid(true) must beTrue
 
-    // and the record replays to the same position
+    // every position played is in the history, the latest first
+    s.board.history.positionHashes.size === strs.size * Hash.size
+    s.board.history.positionHashes.take(Hash.size).toList === Hash(s).toList
+
+    // and the record replays to the same position, with the same history
     Replay(finished.actionStrs, None, variant).toOption must beSome[Reader.Result].like {
       case Reader.Result.Complete(replay) =>
         Forsyth.>>(replay.state) === Forsyth.>>(finished)
+        replay.state.situation.board.history.positionHashes.toList === s.board.history.positionHashes.toList
     }
   }
 

@@ -27,9 +27,10 @@ case class Situation(board: Board, player: Player) {
 
   def pass(): Validated[String, Pass] = board.variant.pass(this)
 
-  def variantEnd = board.variant.specialEnd(this)
+  // the move generation for both players runs once per situation
+  lazy val variantEnd: Boolean = board.variant.specialEnd(this)
 
-  def end: Boolean = variantEnd
+  lazy val end: Boolean = variantEnd
 
   def winner: Option[Player] = board.variant.winner(this)
 

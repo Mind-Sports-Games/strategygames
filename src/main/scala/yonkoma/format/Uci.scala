@@ -90,15 +90,16 @@ object Uci {
 
   def apply(@nowarn pass: strategygames.yonkoma.Pass) = Uci.Pass()
 
+  // None for anything that is not a move between two squares or a pass
   def apply(move: String): Option[Uci] =
     move match {
       case Move.moveR(orig, dest) =>
         (Pos.fromKey(orig), Pos.fromKey(dest)) match {
           case (Some(orig), Some(dest)) => Uci.Move(orig, dest).some
-          case _                        => sys.error(s"Cannot apply uci move: ${move}")
+          case _                        => None
         }
       case Pass.passR()           => Uci.Pass().some
-      case _                      => sys.error(s"Cannot apply uci: ${move}")
+      case _                      => None
     }
 
   def piotr(move: String): Option[Uci] =

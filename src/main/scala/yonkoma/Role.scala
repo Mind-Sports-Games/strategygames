@@ -24,7 +24,7 @@ sealed trait PromotableRole extends Role
 case object Checker extends Role {
   val forsyth      = 'c'
   val forsythUpper = 'C'
-  val binaryInt    = 0
+  val binaryInt    = 1
   val hashInt      = 0
   val storable     = false
 }

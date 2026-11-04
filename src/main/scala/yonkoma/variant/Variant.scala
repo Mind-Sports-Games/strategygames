@@ -25,7 +25,7 @@ abstract class Variant private[variant] (
   def fenVariant: Boolean         = false
   def variableInitialFen: Boolean = false
 
-  def hasAnalysisBoard: Boolean = false
+  def hasAnalysisBoard: Boolean = true
   def hasFishnet: Boolean       = false
 
   def p1IsBetterVariant: Boolean = false
@@ -47,8 +47,8 @@ abstract class Variant private[variant] (
   def width: Int  = boardSize.width
   def height: Int = boardSize.height
 
-  // Red (P1) starts on the dark squares a1 and the far corner, Blue (P2) on the light
-  // squares in the other two corners
+  // P1 starts on the dark squares a1 and the far corner, P2 on the light squares in the
+  // other two corners
   def pieces: PieceMap =
     List(
       Pos.at(0, 0)                  -> Piece(P1, Checker),
@@ -57,7 +57,7 @@ abstract class Variant private[variant] (
       Pos.at(width - 1, 0)          -> Piece(P2, Checker)
     ).collect { case (Some(pos), piece) => pos -> piece }.toMap
 
-  def initialFen: FEN = format.Forsyth.>>(Situation(Board.init(this), startPlayer))
+  def initialFen: FEN = format.Forsyth.initial(this)
 
   private val diagonals: Directions = List(_.upLeft, _.upRight, _.downLeft, _.downRight)
 
@@ -122,17 +122,17 @@ abstract class Variant private[variant] (
 
   def addVariantEffect(move: Move): Move = move
 
-  // a crosscut: all four checkers in a 2x2 block, the two red checkers on one diagonal of
-  // the block and the two blue checkers on the other
+  // a crosscut: all four checkers in a 2x2 block, P1's two checkers on one diagonal of
+  // the block and P2's two on the other
   def isCrosscut(board: Board): Boolean = {
-    val red  = board.checkersOf(P1)
-    val blue = board.checkersOf(P2)
-    red.size == 2 && blue.size == 2 && {
-      val all   = red ++ blue
+    val p1 = board.checkersOf(P1)
+    val p2 = board.checkersOf(P2)
+    p1.size == 2 && p2.size == 2 && {
+      val all   = p1 ++ p2
       val files = all.map(_.file.index)
       val ranks = all.map(_.rank.index)
       files.max - files.min == 1 && ranks.max - ranks.min == 1 &&
-      red(0).onSameDiagonal(red(1)) && blue(0).onSameDiagonal(blue(1))
+      p1(0).onSameDiagonal(p1(1)) && p2(0).onSameDiagonal(p2(1))
     }
   }
 
@@ -156,12 +156,12 @@ abstract class Variant private[variant] (
 
   def materialImbalance(@nowarn board: Board): Int = 0
 
-  // two checkers each, red ones on dark squares and blue ones on light squares
+  // two checkers each, P1's on dark squares and P2's on light squares
   def valid(board: Board, strict: Boolean): Boolean = {
-    val red  = board.checkersOf(P1)
-    val blue = board.checkersOf(P2)
+    val p1 = board.checkersOf(P1)
+    val p2 = board.checkersOf(P2)
     board.pieces.keys.forall(board.onBoard) && (!strict || {
-      red.size == 2 && blue.size == 2 && red.forall(!_.isLight) && blue.forall(_.isLight)
+      p1.size == 2 && p2.size == 2 && p1.forall(!_.isLight) && p2.forall(_.isLight)
     })
   }
 
@@ -177,6 +177,7 @@ abstract class Variant private[variant] (
 
   def gameFamily: GameFamily
 
+  // the position after the action, with the next player to move, in front of the earlier ones
   def updatePositionHashes(board: Board, action: Action, hash: PositionHash): PositionHash =
     Hash(Situation(board, !action.player)) ++ hash
 
@@ -198,6 +199,11 @@ object Variant {
   val byKey = all map { v =>
     (v.key, v)
   } toMap
+
+  def bySize(boardSize: Board.BoardSize): Option[Variant] = all.find(_.boardSize == boardSize)
+
+  // the board size in a FEN picks the variant
+  def forFen(fen: FEN): Option[Variant] = fen.boardSize.flatMap(bySize)
 
   val default = Yonkoma10x10
 

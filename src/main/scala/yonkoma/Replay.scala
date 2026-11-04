@@ -34,6 +34,8 @@ object Replay {
 
   def apply(game: Game) = new Replay(game, Nil, game)
 
+  // the actions that could be played, and Incomplete from the first that could not be read
+  // or was illegal, so a game with a corrupted action still loads up to it
   def apply(
       actionStrs: ActionStrs,
       initialFen: Option[FEN],
@@ -42,14 +44,12 @@ object Replay {
     val fen                            = initialFen.getOrElse(variant.initialFen)
     val (init, gameWithActions, error) = gameWithActionWhileValid(actionStrs, fen, variant)
     val game                           = gameWithActions.lastOption.map(_._1).getOrElse(init)
+    val replay                         = new Replay(init, gameWithActions.map(_._2).reverse, game)
 
-    error match {
-      case None      =>
-        Validated.valid(
-          Reader.Result.Complete(new Replay(init, gameWithActions.map(_._2).reverse, game))
-        )
-      case Some(msg) => Validated.invalid(msg)
-    }
+    Validated.valid(error match {
+      case None      => Reader.Result.Complete(replay)
+      case Some(msg) => Reader.Result.Incomplete(replay, msg)
+    })
   }
 
   // the wrapper layer passes the players through; yonkoma derives whose turn it is from the
@@ -193,14 +193,26 @@ object Replay {
   ): Validated[String, List[Board]] =
     situations(actionStrs, initialFen, variant) map (_ map (_.board))
 
+  // the ply at which the position was reached, compared without the full move number
   def plyAtFen(
       actionStrs: ActionStrs,
       initialFen: Option[FEN],
       variant: strategygames.yonkoma.variant.Variant,
       atFen: FEN
   ): Validated[String, Int] =
-    situations(actionStrs, initialFen, variant) map { sits =>
-      sits.indexWhere(s => Forsyth.exportBoard(s.board) == atFen.value) max 0
+    if (Forsyth.<<@(variant, atFen).isEmpty) Validated.invalid(s"Invalid FEN ${atFen}")
+    else {
+      // the board and the player to move, as Forsyth writes them
+      def truncateFen(fen: FEN) = fen.value.split(' ').take(2).mkString(" ")
+      val atFenTruncated        = truncateFen(atFen)
+      def compareFen(fen: FEN)  = truncateFen(fen) == atFenTruncated
+
+      situations(actionStrs, initialFen, variant) andThen { sits =>
+        sits.indexWhere(s => compareFen(Forsyth.>>(s))) match {
+          case -1  => Validated.invalid(s"Can't find $atFen, reached ply ${sits.size - 1}")
+          case ply => Validated.valid(ply)
+        }
+      }
     }
 
 }

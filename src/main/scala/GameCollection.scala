@@ -602,15 +602,15 @@ object GameFamily {
     def key               = GameLogic.Yonkoma().name.toLowerCase()
     def gameLogic         = GameLogic.Yonkoma()
     def hasFishnet        = false
-    def hasAnalysisBoard  = false
+    def hasAnalysisBoard  = true
     def defaultVariant    = Variant.Yonkoma(strategygames.yonkoma.variant.Yonkoma10x10)
     def variants          = Variant.all(GameLogic.Yonkoma())
     def displayPiece      = "wC"
-    def pieceSetThemes    = List("classic_yonkoma")
+    def pieceSetThemes    = List("classic_yonkoma", "red_blue_yonkoma")
     def pieceSetDefault   = "classic_yonkoma"
     def boardThemes       = List("wood", "grey")
     def boardThemeDefault = "wood"
-    def playerNames       = Map(P1 -> "Red", P2 -> "Blue")
+    def playerNames       = Map(P1 -> "White", P2 -> "Black")
     def playerColors      = Map(P1 -> "white", P2 -> "black")
     def playerFENChars    = Map(P1 -> 'w', P2 -> 'b')
   }
