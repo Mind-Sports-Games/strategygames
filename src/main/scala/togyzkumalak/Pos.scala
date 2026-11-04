@@ -1,32 +1,8 @@
 package strategygames.togyzkumalak
 
-import strategygames.Player
+import strategygames.{ Piotr, Player }
 
 import scala.math.{ abs, max, min }
-
-//match src/main/scala/fairysf/Pos.scala for use in analysis and stratops
-object Piotr {
-  val lookup: Map[Int, Char] = Map(
-    Pos.A1.index -> 'a',
-    Pos.B1.index -> 'b',
-    Pos.C1.index -> 'c',
-    Pos.D1.index -> 'd',
-    Pos.E1.index -> 'e',
-    Pos.F1.index -> 'f',
-    Pos.G1.index -> 'g',
-    Pos.H1.index -> 'h',
-    Pos.A2.index -> 'i',
-    Pos.B2.index -> 'j',
-    Pos.C2.index -> 'k',
-    Pos.D2.index -> 'l',
-    Pos.E2.index -> 'm',
-    Pos.F2.index -> 'n',
-    Pos.G2.index -> 'o',
-    Pos.H2.index -> 'p',
-    Pos.I1.index -> '[',
-    Pos.I2.index -> ']'
-  )
-}
 
 case class Pos private (index: Int) extends AnyVal {
 
@@ -70,9 +46,7 @@ case class Pos private (index: Int) extends AnyVal {
   @inline def file = File of this
   @inline def rank = Rank of this
 
-  // We're going to use the chess piotr's which are not based on the
-  // indices that we use.
-  def piotr: Char = Piotr.lookup.get(index).getOrElse('?')
+  def piotr: Char = Pos.piotrs(index)
   def piotrStr    = piotr.toString
 
   def player: Player = if (index < File.allSize) Player.P1 else Player.P2
@@ -145,7 +119,9 @@ object Pos {
 
   // if adding new Pos check for use of Pos.all
   val all: List[Pos] = (0 to (File.allSize * Rank.allSize) - 1).map(new Pos(_)).toList
-  val allSize: Int   = all.size
+
+  private lazy val piotrs: Array[Char] = Piotr.table(all.map(_.key))
+  val allSize: Int                     = all.size
 
   def allByWidth(width: Int): List[Pos] = all.filter(_.file.index < width)
 
