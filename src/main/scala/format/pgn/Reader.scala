@@ -12,6 +12,7 @@ import strategygames.backgammon.format.pgn.{ Reader => BackgammonReader }
 import strategygames.abalone.format.pgn.{ Reader => AbaloneReader }
 import strategygames.dameo.format.pdn.{ Reader => DameoReader }
 import strategygames.entropy.format.pgn.{ Reader => EntropyReader }
+import strategygames.fiveinarow.format.pgn.{ Reader => FiveInARowReader }
 import strategygames.yonkoma.format.pgn.{ Reader => YonkomaReader }
 
 import cats.data.Validated
@@ -110,16 +111,27 @@ object Reader {
       def valid          = Validated.valid(r)
       def evenIncomplete = r
     }
-    case class EntropyIncomplete(replay: entropy.Replay, failure: String)           extends Result {
+
+    case class FiveInARowComplete(replay: fiveinarow.Replay)              extends Result {
+      private def r      = Replay.FiveInARow(replay)
+      def valid          = Validated.valid(r)
+      def evenIncomplete = r
+    }
+    case class EntropyIncomplete(replay: entropy.Replay, failure: String) extends Result {
       def valid          = Validated.invalid(failure)
       def evenIncomplete = Replay.Entropy(replay)
     }
-    case class YonkomaComplete(replay: yonkoma.Replay)                              extends Result {
+
+    case class FiveInARowIncomplete(replay: fiveinarow.Replay, failure: String) extends Result {
+      def valid          = Validated.invalid(failure)
+      def evenIncomplete = Replay.FiveInARow(replay)
+    }
+    case class YonkomaComplete(replay: yonkoma.Replay)                          extends Result {
       private def r      = Replay.Yonkoma(replay)
       def valid          = Validated.valid(r)
       def evenIncomplete = r
     }
-    case class YonkomaIncomplete(replay: yonkoma.Replay, failure: String)           extends Result {
+    case class YonkomaIncomplete(replay: yonkoma.Replay, failure: String)       extends Result {
       def valid          = Validated.invalid(failure)
       def evenIncomplete = Replay.Yonkoma(replay)
     }
@@ -171,6 +183,11 @@ object Reader {
       case DameoReader.Result.Incomplete(replay, failure) => Result.DameoIncomplete(replay, failure)
     }
 
+    def wrap(result: FiveInARowReader.Result) = result match {
+      case FiveInARowReader.Result.Complete(replay)            => Result.FiveInARowComplete(replay)
+      case FiveInARowReader.Result.Incomplete(replay, failure) => Result.FiveInARowIncomplete(replay, failure)
+    }
+
     def wrap(result: EntropyReader.Result) = result match {
       case EntropyReader.Result.Complete(replay)            => Result.EntropyComplete(replay)
       case EntropyReader.Result.Incomplete(replay, failure) => Result.EntropyIncomplete(replay, failure)
@@ -202,6 +219,8 @@ object Reader {
       case GameLogic.Dameo()        => DameoReader.fullWithSans(pgn, op, tags, iteratedCapts).map(Result.wrap)
       case GameLogic.Entropy()      =>
         sys.error("PGN parsing not implemented for entropy. Use replayResultFromActionStrs")
+      case GameLogic.FiveInARow()   =>
+        sys.error("PGN parsing not implemented for fiveinarow. Use replayResultFromActionStrs")
       case GameLogic.Yonkoma()      =>
         sys.error("PGN parsing not implemented for yonkoma. Use replayResultFromActionStrs")
     }
@@ -237,6 +256,8 @@ object Reader {
         sys.error("Sans not implemented for dameo")
       case GameLogic.Entropy()      =>
         sys.error("Sans not implemented for entropy")
+      case GameLogic.FiveInARow()   =>
+        sys.error("Sans not implemented for fiveinarow")
       case GameLogic.Yonkoma()      =>
         sys.error("Sans not implemented for yonkoma")
     }
@@ -272,6 +293,8 @@ object Reader {
         DameoReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
       case GameLogic.Entropy()      =>
         EntropyReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
+      case GameLogic.FiveInARow()   =>
+        FiveInARowReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
       case GameLogic.Yonkoma()      =>
         YonkomaReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
     }

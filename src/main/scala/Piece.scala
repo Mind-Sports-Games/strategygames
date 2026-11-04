@@ -104,6 +104,15 @@ object Piece {
     def forsyth: Char = p.forsyth
   }
 
+  final case class FiveInARow(p: fiveinarow.Piece)
+      extends Piece(
+        p.player,
+        Role.FiveInARowRole(p.role)
+      ) {
+
+    def forsyth: Char = p.forsyth
+  }
+
   final case class Yonkoma(p: yonkoma.Piece)
       extends Piece(
         p.player,
@@ -125,6 +134,7 @@ object Piece {
     case (GameLogic.Abalone(), Role.AbaloneRole(role))           => Abalone(abalone.Piece(player, role))
     case (GameLogic.Dameo(), Role.DameoRole(role))               => Dameo(dameo.Piece(player, role))
     case (GameLogic.Entropy(), Role.EntropyRole(role))           => Entropy(entropy.Piece(player, role))
+    case (GameLogic.FiveInARow(), Role.FiveInARowRole(role))     => FiveInARow(fiveinarow.Piece(player, role))
     case (GameLogic.Yonkoma(), Role.YonkomaRole(role))           => Yonkoma(yonkoma.Piece(player, role))
     case _                                                       => sys.error("Mismatched gamelogic types 2")
   }
@@ -140,6 +150,7 @@ object Piece {
     case (GameLogic.Abalone())      => sys.error("cannot get piece from Char for abalone anymore")
     case (GameLogic.Dameo())        => dameo.Piece.fromChar(c).map(Dameo.apply)
     case (GameLogic.Entropy())      => entropy.Piece.fromChar(c).map(Entropy.apply)
+    case (GameLogic.FiveInARow())   => sys.error("a stone's owner depends on the position, not its char")
     case (GameLogic.Yonkoma())      => yonkoma.Piece.fromChar(c).map(Yonkoma.apply)
   }
 

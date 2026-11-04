@@ -1,6 +1,6 @@
 package strategygames.abalone
 
-import strategygames.abalone.norm.{N6, Norm}
+import strategygames.abalone.norm.{ N6, Norm }
 
 sealed abstract class BoardType(
     val width: Int,

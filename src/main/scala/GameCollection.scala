@@ -63,8 +63,13 @@ object GameLogic {
     def name = "Entropy"
   }
 
-  final case class Yonkoma() extends GameLogic {
+  final case class FiveInARow() extends GameLogic {
     def id   = 10
+    def name = "Five in a Row"
+  }
+
+  final case class Yonkoma() extends GameLogic {
+    def id   = 11
     def name = "Yonkoma"
   }
 
@@ -80,6 +85,7 @@ object GameLogic {
       Abalone(),
       Dameo(),
       Entropy(),
+      FiveInARow(),
       Yonkoma()
     )
 
@@ -94,7 +100,8 @@ object GameLogic {
     case 7  => Abalone()
     case 8  => Dameo()
     case 9  => Entropy()
-    case 10 => Yonkoma()
+    case 10 => FiveInARow()
+    case 11 => Yonkoma()
     case _  => Chess()
   }
 }
@@ -570,8 +577,27 @@ object GameFamily {
     def playerFENChars    = Map(P1 -> 'w', P2 -> 'b')
   }
 
-  final case class Yonkoma() extends GameFamily {
+  final case class FiveInARow() extends GameFamily {
     def id                = 15
+    def name              = GameLogic.FiveInARow().name
+    def key               = "fiveinarow"
+    def gameLogic         = GameLogic.FiveInARow()
+    def hasFishnet        = false
+    def hasAnalysisBoard  = true
+    def defaultVariant    = Variant.FiveInARow(strategygames.fiveinarow.variant.Gomoku)
+    def variants          = Variant.all(GameLogic.FiveInARow())
+    def displayPiece      = "B"
+    def pieceSetThemes    = List("classic_stone")
+    def pieceSetDefault   = "classic_stone"
+    def boardThemes       = List("wood")
+    def boardThemeDefault = "wood"
+    def playerNames       = Map(P1 -> "Player 1", P2 -> "Player 2")
+    def playerColors      = Map(P1 -> "black", P2 -> "white")
+    def playerFENChars    = Map(P1 -> 'b', P2 -> 'w')
+  }
+
+  final case class Yonkoma() extends GameFamily {
+    def id                = 16
     def name              = GameLogic.Yonkoma().name
     def key               = GameLogic.Yonkoma().name.toLowerCase()
     def gameLogic         = GameLogic.Yonkoma()
@@ -605,6 +631,7 @@ object GameFamily {
     Abalone(),
     Dameo(),
     Entropy(),
+    FiveInARow(),
     Yonkoma()
   )
 
@@ -624,7 +651,8 @@ object GameFamily {
     case 12 => Abalone()
     case 13 => Dameo()
     case 14 => Entropy()
-    case 15 => Yonkoma()
+    case 15 => FiveInARow()
+    case 16 => Yonkoma()
     case _  => Chess()
   }
 
@@ -758,8 +786,16 @@ object GameGroup {
     def medley   = true
   }
 
-  final case class Yonkoma() extends GameGroup {
+  final case class FiveInARow() extends GameGroup {
     def id       = 14
+    def name     = GameLogic.FiveInARow().name
+    def key      = "fiveinarow"
+    def variants = Variant.all(GameLogic.FiveInARow()).filter(_.gameFamily.name == this.name)
+    def medley   = true
+  }
+
+  final case class Yonkoma() extends GameGroup {
+    def id       = 15
     def name     = "Yonkoma"
     def key      = "yonkoma"
     def variants = Variant.all(GameLogic.Yonkoma()).filter(_.gameFamily.name == this.name)
@@ -782,6 +818,7 @@ object GameGroup {
       BreakthroughTroyka(),
       Abalone(),
       Entropy(),
+      FiveInARow(),
       Yonkoma()
     )
 
@@ -802,7 +839,8 @@ object GameGroup {
     case 11 => BreakthroughTroyka()
     case 12 => Abalone()
     case 13 => Entropy()
-    case 14 => Yonkoma()
+    case 14 => FiveInARow()
+    case 15 => Yonkoma()
     case _  => Chess()
   }
 }

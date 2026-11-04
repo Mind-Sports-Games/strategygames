@@ -28,9 +28,9 @@ class YonkomaWrapperTest extends Specification {
   "the game collection" should {
 
     "know the yonkoma logic, family and group by id" in {
-      GameLogic(10) === lib
-      GameFamily(15) === gf
-      strategygames.GameGroup(14).variants.map(_.key) === List("yonkoma10x10", "yonkoma12x12")
+      GameLogic(11) === lib
+      GameFamily(16) === gf
+      strategygames.GameGroup(15).variants.map(_.key) === List("yonkoma10x10", "yonkoma12x12")
       gf.defaultVariant === stratVariant
       gf.variants.size === 2
       gf.hasAnalysisBoard must beFalse
@@ -41,8 +41,8 @@ class YonkomaWrapperTest extends Specification {
       val vs = StratVariant.all(lib)
       vs.map(_.id) === List(1, 2)
       vs.map(_.key) === List("yonkoma10x10", "yonkoma12x12")
-      vs.map(_.perfId) === List(1000, 1001)
-      StratVariant.all.filterNot(_.gameLogic == lib).map(_.perfId).intersect(List(1000, 1001)) must beEmpty
+      vs.map(_.perfId) === List(1100, 1101)
+      StratVariant.all.filterNot(_.gameLogic == lib).map(_.perfId).intersect(List(1100, 1101)) must beEmpty
       StratVariant.all.filterNot(_.gameLogic == lib).map(_.key).intersect(vs.map(_.key)) must beEmpty
       StratVariant.byKey(lib).get("yonkoma12x12") === Some(strat12)
       StratVariant.default(lib) === stratVariant

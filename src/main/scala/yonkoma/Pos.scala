@@ -2,159 +2,7 @@ package strategygames.yonkoma
 
 import scala.math.{ abs, max, min }
 
-// Each square gets the character that lila's shared table (ui/stratutils/src/piotr.ts) gives
-// its key: a1 to j10 plus k1, l1, k2 and l2 are in that table, and the remaining squares take
-// the go package's characters for the same keys (k3 to l10, and ranks 11 and 12 numbered on
-// from 260 as go numbers them), which lila does not decode yet. Only the analysis board reads
-// these characters, and yonkoma has no analysis board, but a square must never move.
-object Piotr {
-  val lookup: Map[Int, Char] = Map(
-    Pos.A1.index  -> 'a',
-    Pos.B1.index  -> 'b',
-    Pos.C1.index  -> 'c',
-    Pos.D1.index  -> 'd',
-    Pos.E1.index  -> 'e',
-    Pos.F1.index  -> 'f',
-    Pos.G1.index  -> 'g',
-    Pos.H1.index  -> 'h',
-    Pos.I1.index  -> '[',
-    Pos.J1.index  -> '\\',
-    Pos.K1.index  -> '\u00A9',
-    Pos.L1.index  -> '\u00AA',
-    Pos.A2.index  -> 'i',
-    Pos.B2.index  -> 'j',
-    Pos.C2.index  -> 'k',
-    Pos.D2.index  -> 'l',
-    Pos.E2.index  -> 'm',
-    Pos.F2.index  -> 'n',
-    Pos.G2.index  -> 'o',
-    Pos.H2.index  -> 'p',
-    Pos.I2.index  -> ']',
-    Pos.J2.index  -> '^',
-    Pos.K2.index  -> '\u00B2',
-    Pos.L2.index  -> '\u00B3',
-    Pos.A3.index  -> 'q',
-    Pos.B3.index  -> 'r',
-    Pos.C3.index  -> 's',
-    Pos.D3.index  -> 't',
-    Pos.E3.index  -> 'u',
-    Pos.F3.index  -> 'v',
-    Pos.G3.index  -> 'w',
-    Pos.H3.index  -> 'x',
-    Pos.I3.index  -> '_',
-    Pos.J3.index  -> '`',
-    Pos.K3.index  -> '\u00BC',
-    Pos.L3.index  -> '\u00BD',
-    Pos.A4.index  -> 'y',
-    Pos.B4.index  -> 'z',
-    Pos.C4.index  -> 'A',
-    Pos.D4.index  -> 'B',
-    Pos.E4.index  -> 'C',
-    Pos.F4.index  -> 'D',
-    Pos.G4.index  -> 'E',
-    Pos.H4.index  -> 'F',
-    Pos.I4.index  -> '{',
-    Pos.J4.index  -> '|',
-    Pos.K4.index  -> '\u00C5',
-    Pos.L4.index  -> '\u00C6',
-    Pos.A5.index  -> 'G',
-    Pos.B5.index  -> 'H',
-    Pos.C5.index  -> 'I',
-    Pos.D5.index  -> 'J',
-    Pos.E5.index  -> 'K',
-    Pos.F5.index  -> 'L',
-    Pos.G5.index  -> 'M',
-    Pos.H5.index  -> 'N',
-    Pos.I5.index  -> '}',
-    Pos.J5.index  -> '~',
-    Pos.K5.index  -> '\u00CE',
-    Pos.L5.index  -> '\u00CF',
-    Pos.A6.index  -> 'O',
-    Pos.B6.index  -> 'P',
-    Pos.C6.index  -> 'Q',
-    Pos.D6.index  -> 'R',
-    Pos.E6.index  -> 'S',
-    Pos.F6.index  -> 'T',
-    Pos.G6.index  -> 'U',
-    Pos.H6.index  -> 'V',
-    Pos.I6.index  -> '\u00A1',
-    Pos.J6.index  -> '\u00A2',
-    Pos.K6.index  -> '\u00D7',
-    Pos.L6.index  -> '\u00D8',
-    Pos.A7.index  -> 'W',
-    Pos.B7.index  -> 'X',
-    Pos.C7.index  -> 'Y',
-    Pos.D7.index  -> 'Z',
-    Pos.E7.index  -> '0',
-    Pos.F7.index  -> '1',
-    Pos.G7.index  -> '2',
-    Pos.H7.index  -> '3',
-    Pos.I7.index  -> '\u00A3',
-    Pos.J7.index  -> '\u00A4',
-    Pos.K7.index  -> '\u00E0',
-    Pos.L7.index  -> '\u00E1',
-    Pos.A8.index  -> '4',
-    Pos.B8.index  -> '5',
-    Pos.C8.index  -> '6',
-    Pos.D8.index  -> '7',
-    Pos.E8.index  -> '8',
-    Pos.F8.index  -> '9',
-    Pos.G8.index  -> '!',
-    Pos.H8.index  -> '?',
-    Pos.I8.index  -> '\u00A5',
-    Pos.J8.index  -> '\u00A6',
-    Pos.K8.index  -> '\u00E9',
-    Pos.L8.index  -> '\u00EA',
-    Pos.A9.index  -> '"',
-    Pos.B9.index  -> '#',
-    Pos.C9.index  -> '$',
-    Pos.D9.index  -> '%',
-    Pos.E9.index  -> '&',
-    Pos.F9.index  -> '\'',
-    Pos.G9.index  -> '(',
-    Pos.H9.index  -> ')',
-    Pos.I9.index  -> '*',
-    Pos.J9.index  -> '+',
-    Pos.K9.index  -> '\u00F2',
-    Pos.L9.index  -> '\u00F3',
-    Pos.A10.index -> '\u00A7',
-    Pos.B10.index -> '-',
-    Pos.C10.index -> '.',
-    Pos.D10.index -> '/',
-    Pos.E10.index -> ':',
-    Pos.F10.index -> '\u00A8',
-    Pos.G10.index -> '<',
-    Pos.H10.index -> '=',
-    Pos.I10.index -> '>',
-    Pos.J10.index -> '@',
-    Pos.K10.index -> '\u00FB',
-    Pos.L10.index -> '\u00FC',
-    Pos.A11.index -> 260.toChar,
-    Pos.B11.index -> 261.toChar,
-    Pos.C11.index -> 262.toChar,
-    Pos.D11.index -> 263.toChar,
-    Pos.E11.index -> 264.toChar,
-    Pos.F11.index -> 265.toChar,
-    Pos.G11.index -> 266.toChar,
-    Pos.H11.index -> 267.toChar,
-    Pos.I11.index -> 268.toChar,
-    Pos.J11.index -> 269.toChar,
-    Pos.K11.index -> 270.toChar,
-    Pos.L11.index -> 271.toChar,
-    Pos.A12.index -> 279.toChar,
-    Pos.B12.index -> 280.toChar,
-    Pos.C12.index -> 281.toChar,
-    Pos.D12.index -> 282.toChar,
-    Pos.E12.index -> 283.toChar,
-    Pos.F12.index -> 284.toChar,
-    Pos.G12.index -> 285.toChar,
-    Pos.H12.index -> 286.toChar,
-    Pos.I12.index -> 287.toChar,
-    Pos.J12.index -> 288.toChar,
-    Pos.K12.index -> 289.toChar,
-    Pos.L12.index -> 290.toChar
-  )
-}
+import strategygames.Piotr
 
 case class Pos private (index: Int) extends AnyVal {
 
@@ -202,7 +50,7 @@ case class Pos private (index: Int) extends AnyVal {
   @inline def file = File of this
   @inline def rank = Rank of this
 
-  def piotr: Char = Piotr.lookup.get(index).getOrElse('?')
+  def piotr: Char = Pos.piotrs(index)
   def piotrStr    = piotr.toString
 
   def sgf(numRanks: Int) = file.sgfChar.toString + rank.sgfChar(numRanks).toString
@@ -230,17 +78,7 @@ object Pos {
 
   def piotr(c: Char): Option[Pos] = allPiotrs get c
 
-  def keyToPiotr(key: String)          = fromKey(key) map (_.piotr)
-  def doubleKeyToPiotr(key: String)    =
-    for {
-      a <- keyToPiotr(key take 2)
-      b <- keyToPiotr(key drop 2)
-    } yield s"$a$b"
-  def doublePiotrToKey(piotrs: String) =
-    for {
-      a <- piotr(piotrs.head)
-      b <- piotr(piotrs(1))
-    } yield s"${a.key}${b.key}"
+  def keyToPiotr(key: String) = fromKey(key) map (_.piotr)
 
   val A1  = new Pos(0)
   val B1  = new Pos(1)
@@ -397,11 +235,10 @@ object Pos {
     }
     .to(Map)
 
-  val allPiotrs: Map[Char, Pos] = all
-    .map { pos =>
-      pos.piotr -> pos
-    }
-    .to(Map)
+  // the shared table, keyed by square name, so lila decodes every square the same way
+  private lazy val piotrs: Array[Char] = Piotr.table(all.map(_.key))
+
+  lazy val allPiotrs: Map[Char, Pos] = all.map(pos => pos.piotr -> pos).to(Map)
 
   // a file letter followed by a rank number, ranks 1 to 12
   val posR = "([a-l](?:1[0-2]|[1-9]))"

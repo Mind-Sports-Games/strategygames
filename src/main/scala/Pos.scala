@@ -147,6 +147,18 @@ object Pos {
     lazy val all: List[Pos] = entropy.Pos.all.map(Entropy.apply)
   }
 
+  final case class FiveInARow(p: fiveinarow.Pos) extends Pos {
+    val key: String = p.key
+
+    def piotr: Char = p.piotr
+
+    lazy val toInt: Int = (p.file.index << 5) + p.rank.index
+
+    def gameLogic: GameLogic = GameLogic.FiveInARow()
+
+    lazy val all: List[Pos] = fiveinarow.Pos.all.map(FiveInARow.apply)
+  }
+
   final case class Yonkoma(p: yonkoma.Pos) extends Pos {
     val key: String = p.key
 
@@ -172,6 +184,7 @@ object Pos {
     case GameLogic.Abalone()      => abalone.Pos.fromKey(key).map(Abalone.apply)
     case GameLogic.Dameo()        => dameo.Pos.fromKey(key).map(Dameo.apply)
     case GameLogic.Entropy()      => entropy.Pos.fromKey(key).map(Entropy.apply)
+    case GameLogic.FiveInARow()   => fiveinarow.Pos.fromKey(key).map(FiveInARow.apply)
     case GameLogic.Yonkoma()      => yonkoma.Pos.fromKey(key).map(Yonkoma.apply)
   }
 

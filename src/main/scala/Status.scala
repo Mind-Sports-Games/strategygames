@@ -39,6 +39,9 @@ object Status {
   case object OutoftimeBackgammon extends Status(49) // clock flag and loss for Backgammon
   case object CubeDropped         extends Status(50) // For Backgammon
   case object ResignMatch         extends Status(51) // For multipoint matches (e.g. backgammon)
+  case object LineOfFive          extends Status(52) // For Five in a Row
+  case object TenCaptures         extends Status(53) // For Pente
+  case object ForbiddenAction     extends Status(54) // For Renju
   case object VariantEnd          extends Status(60) // the variant has a special ending
 
   val all = List(
@@ -67,6 +70,9 @@ object Status {
     OutoftimeBackgammon,
     CubeDropped,
     ResignMatch,
+    LineOfFive,
+    TenCaptures,
+    ForbiddenAction,
     VariantEnd
   )
 
@@ -88,6 +94,9 @@ object Status {
     GinGammon,
     GinBackgammon,
     CubeDropped,
+    LineOfFive,
+    TenCaptures,
+    ForbiddenAction,
     Cheat,
     NoStart,
     VariantEnd

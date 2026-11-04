@@ -60,7 +60,8 @@ case object Amazons
     fen.toString.replace("P", "p").replace(",/", "/").dropRight(1)
   }
 
-  private def fullPockets: String = s"[${"P" * 46}${"p" * 46}]"
+  // the fen always shows full pockets of arrows, whatever is on the board
+  val fullPockets: String = s"[${"P" * 46}${"p" * 46}]"
 
   override def exportBoardFen(board: Board): FEN =
     FEN(

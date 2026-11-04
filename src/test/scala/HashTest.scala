@@ -18,6 +18,7 @@ class HashTest extends Specification {
     case Situation.Abalone(s)      => abalone.Hash.get(s, new abalone.Hash.ZobristConstants(start))
     case Situation.Dameo(s)        => dameo.Hash.get(s, new dameo.Hash.ZobristConstants(start))
     case Situation.Entropy(s)      => entropy.Hash.get(s, new entropy.Hash.ZobristConstants(start))
+    case Situation.FiveInARow(s)   => fiveinarow.Hash.get(s, new fiveinarow.Hash.ZobristConstants(start))
     case Situation.Yonkoma(s)      => yonkoma.Hash.get(s, new yonkoma.Hash.ZobristConstants(start))
   }
 
@@ -32,6 +33,7 @@ class HashTest extends Specification {
     case Situation.Abalone(s)      => new abalone.Hash(size)(s).toSeq
     case Situation.Dameo(s)        => new dameo.Hash(size)(s).toSeq
     case Situation.Entropy(s)      => new entropy.Hash(size)(s).toSeq
+    case Situation.FiveInARow(s)   => new fiveinarow.Hash(size)(s).toSeq
     case Situation.Yonkoma(s)      => new yonkoma.Hash(size)(s).toSeq
   }
 

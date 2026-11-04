@@ -15,6 +15,7 @@ object Binary {
     case GameLogic.Abalone()      => strategygames.abalone.format.pgn.Binary.writeMoves(ms)
     case GameLogic.Dameo()        => strategygames.dameo.format.pdn.Binary.writeMoves(ms)
     case GameLogic.Entropy()      => strategygames.entropy.format.pgn.Binary.writeMoves(ms)
+    case GameLogic.FiveInARow()   => strategygames.fiveinarow.format.pgn.Binary.writeMoves(ms)
     case GameLogic.Yonkoma()      => strategygames.yonkoma.format.pgn.Binary.writeMoves(ms)
   }
 
@@ -29,6 +30,7 @@ object Binary {
     case GameLogic.Abalone()      => strategygames.abalone.format.pgn.Binary.writeActionStrs(ms)
     case GameLogic.Dameo()        => strategygames.dameo.format.pdn.Binary.writeActionStrs(ms)
     case GameLogic.Entropy()      => strategygames.entropy.format.pgn.Binary.writeActionStrs(ms)
+    case GameLogic.FiveInARow()   => strategygames.fiveinarow.format.pgn.Binary.writeActionStrs(ms)
     case GameLogic.Yonkoma()      => strategygames.yonkoma.format.pgn.Binary.writeActionStrs(ms)
   }
 
@@ -43,6 +45,7 @@ object Binary {
     case GameLogic.Abalone()      => strategygames.abalone.format.pgn.Binary.readActionStrs(bs)
     case GameLogic.Dameo()        => strategygames.dameo.format.pdn.Binary.readActionStrs(bs)
     case GameLogic.Entropy()      => strategygames.entropy.format.pgn.Binary.readActionStrs(bs)
+    case GameLogic.FiveInARow()   => strategygames.fiveinarow.format.pgn.Binary.readActionStrs(bs)
     case GameLogic.Yonkoma()      => strategygames.yonkoma.format.pgn.Binary.readActionStrs(bs)
   }
 
@@ -57,6 +60,7 @@ object Binary {
     case GameLogic.Abalone()      => strategygames.abalone.format.pgn.Binary.readActionStrs(bs, nb)
     case GameLogic.Dameo()        => strategygames.dameo.format.pdn.Binary.readActionStrs(bs, nb)
     case GameLogic.Entropy()      => strategygames.entropy.format.pgn.Binary.readActionStrs(bs, nb)
+    case GameLogic.FiveInARow()   => strategygames.fiveinarow.format.pgn.Binary.readActionStrs(bs, nb)
     case GameLogic.Yonkoma()      => strategygames.yonkoma.format.pgn.Binary.readActionStrs(bs, nb)
   }
 

@@ -29,6 +29,7 @@ abstract class Variant(
   def toAbalone: abalone.variant.Variant
   def toDameo: dameo.variant.Variant
   def toEntropy: entropy.variant.Variant
+  def toFiveInARow: fiveinarow.variant.Variant
   def toYonkoma: yonkoma.variant.Variant
 
   def pieces: PieceMap
@@ -136,7 +137,8 @@ object Variant {
     def toBackgammon                   = sys.error("Can't convert chess to backgammon")
     def toAbalone                      = sys.error("Can't convert chess to abalone")
     def toDameo                        = sys.error("Can't convert chess to dameo")
-    def toEntropy                      = sys.error("Can't convert chess to dameo")
+    def toEntropy                      = sys.error("Can't convert chess to entropy")
+    def toFiveInARow                   = sys.error("Can't convert chess to fiveinarow")
     def toYonkoma                      = sys.error("Can't convert chess to yonkoma")
 
     def pieces: PieceMap =
@@ -254,7 +256,8 @@ object Variant {
     def toBackgammon   = sys.error("Can't convert draughts to backgammon")
     def toAbalone      = sys.error("Can't convert draughts to abalone")
     def toDameo        = sys.error("Can't convert draughts to dameo")
-    def toEntropy      = sys.error("Can't convert draughts to dameo")
+    def toEntropy      = sys.error("Can't convert draughts to entropy")
+    def toFiveInARow   = sys.error("Can't convert draughts to fiveinarow")
     def toYonkoma      = sys.error("Can't convert draughts to yonkoma")
 
     def pieces: PieceMap =
@@ -371,7 +374,8 @@ object Variant {
     def toBackgammon   = sys.error("Can't convert fairysf to backgammon")
     def toAbalone      = sys.error("Can't convert fairysf to abalone")
     def toDameo        = sys.error("Can't convert fairysf to dameo")
-    def toEntropy      = sys.error("Can't convert fairysf to dameo")
+    def toEntropy      = sys.error("Can't convert fairysf to entropy")
+    def toFiveInARow   = sys.error("Can't convert fairysf to fiveinarow")
     def toYonkoma      = sys.error("Can't convert fairysf to yonkoma")
 
     def pieces: PieceMap =
@@ -487,7 +491,8 @@ object Variant {
     def toBackgammon   = sys.error("Can't convert samurai to backgammon")
     def toAbalone      = sys.error("Can't convert samurai to abalone")
     def toDameo        = sys.error("Can't convert samurai to dameo")
-    def toEntropy      = sys.error("Can't convert samurai to dameo")
+    def toEntropy      = sys.error("Can't convert samurai to entropy")
+    def toFiveInARow   = sys.error("Can't convert samurai to fiveinarow")
     def toYonkoma      = sys.error("Can't convert samurai to yonkoma")
 
     def pieces: PieceMap = v.pieces.map { case (pos, (piece, count)) =>
@@ -600,7 +605,8 @@ object Variant {
     def toBackgammon   = sys.error("Can't convert togyzkumalak to backgammon")
     def toAbalone      = sys.error("Can't convert togyzkumalak to abalone")
     def toDameo        = sys.error("Can't convert togyzkumalak to dameo")
-    def toEntropy      = sys.error("Can't convert togyzkumalak to dameo")
+    def toEntropy      = sys.error("Can't convert togyzkumalak to entropy")
+    def toFiveInARow   = sys.error("Can't convert togyzkumalak to fiveinarow")
     def toYonkoma      = sys.error("Can't convert togyzkumalak to yonkoma")
 
     def pieces: PieceMap = v.pieces.map { case (pos, (piece, count)) =>
@@ -713,7 +719,8 @@ object Variant {
     def toBackgammon   = sys.error("Can't convert go to backgammon")
     def toAbalone      = sys.error("Can't convert go to abalone")
     def toDameo        = sys.error("Can't convert go to dameo")
-    def toEntropy      = sys.error("Can't convert go to dameo")
+    def toEntropy      = sys.error("Can't convert go to entropy")
+    def toFiveInARow   = sys.error("Can't convert go to fiveinarow")
     def toYonkoma      = sys.error("Can't convert go to yonkoma")
 
     def pieces: PieceMap =
@@ -827,7 +834,8 @@ object Variant {
     def toBackgammon   = v
     def toAbalone      = sys.error("Can't convert backgammon to abalone")
     def toDameo        = sys.error("Can't convert backgammon to dameo")
-    def toEntropy      = sys.error("Can't convert backgammon to dameo")
+    def toEntropy      = sys.error("Can't convert backgammon to entropy")
+    def toFiveInARow   = sys.error("Can't convert backgammon to fiveinarow")
     def toYonkoma      = sys.error("Can't convert backgammon to yonkoma")
 
     def pieces: PieceMap = v.pieces.map { case (pos, (piece, count)) =>
@@ -938,7 +946,8 @@ object Variant {
     override def toBackgammon   = sys.error("Can't convert abalone to backgammon")
     override def toAbalone      = v
     override def toDameo        = sys.error("Can't convert abalone to dameo")
-    override def toEntropy      = sys.error("Can't convert abalone to dameo")
+    override def toEntropy      = sys.error("Can't convert abalone to entropy")
+    override def toFiveInARow   = sys.error("Can't convert abalone to fiveinarow")
     override def toYonkoma      = sys.error("Can't convert abalone to yonkoma")
 
     override def pieces: PieceMap =
@@ -1050,7 +1059,8 @@ object Variant {
     def toBackgammon   = sys.error("Can't convert dameo to backgammon")
     def toAbalone      = sys.error("Can't convert dameo to abalone")
     def toDameo        = v
-    def toEntropy      = sys.error("Can't make an entropy object from a dameo object")
+    def toEntropy      = sys.error("Can't convert dameo to entropy")
+    def toFiveInARow   = sys.error("Can't convert dameo to fiveinarow")
     def toYonkoma      = sys.error("Can't make a yonkoma object from a dameo object")
 
     def pieces: PieceMap =
@@ -1164,6 +1174,7 @@ object Variant {
     def toAbalone      = sys.error("Can't convert entropy to abalone")
     def toDameo        = sys.error("Can't convert entropy to dameo")
     def toEntropy      = v
+    def toFiveInARow   = sys.error("Can't convert entropy to fiveinarow")
     def toYonkoma      = sys.error("Can't make a yonkoma variant from an entropy variant")
 
     def pieces: PieceMap =
@@ -1259,6 +1270,116 @@ object Variant {
     def playerColors: Map[Player, String] = gameFamily.playerColors
   }
 
+  case class FiveInARow(v: fiveinarow.variant.Variant)
+      extends Variant(
+        id = v.id,
+        key = v.key,
+        fishnetKey = v.key,
+        name = v.name,
+        standardInitialPosition = v.standardInitialPosition
+      ) {
+    def toChess        = sys.error("Can't convert fiveinarow to chess")
+    def toDraughts     = sys.error("Can't convert fiveinarow to draughts")
+    def toFairySF      = sys.error("Can't convert fiveinarow to fairysf")
+    def toSamurai      = sys.error("Can't convert fiveinarow to samurai")
+    def toTogyzkumalak = sys.error("Can't convert fiveinarow to togyzkumalak")
+    def toGo           = sys.error("Can't convert fiveinarow to go")
+    def toBackgammon   = sys.error("Can't convert fiveinarow to backgammon")
+    def toAbalone      = sys.error("Can't convert fiveinarow to abalone")
+    def toDameo        = sys.error("Can't convert fiveinarow to dameo")
+    def toFiveInARow   = v
+    def toEntropy      = sys.error("Can't convert fiveinarow to entropy")
+    def toYonkoma      = sys.error("Can't make a yonkoma object from a fiveinarow object")
+
+    def pieces: PieceMap =
+      v.pieces.map { case (pos, piece) => (Pos.FiveInARow(pos), (Piece.FiveInARow(piece), 1)) }
+
+    def standardVariant: Boolean     = false
+    def fromPositionVariant: Boolean = false
+    def exoticChessVariant: Boolean  = false
+    def frisianVariant: Boolean      = false
+    def draughts64Variant: Boolean   = false
+
+    def exotic: Boolean = v.exotic
+
+    def baseVariant: Boolean        = v.baseVariant
+    def fenVariant: Boolean         = v.fenVariant
+    def variableInitialFen: Boolean = v.variableInitialFen
+
+    def hasAnalysisBoard: Boolean = v.hasAnalysisBoard
+    def hasFishnet: Boolean       = v.hasFishnet
+
+    def p1IsBetterVariant: Boolean = v.p1IsBetterVariant
+    def blindModeVariant: Boolean  = v.blindModeVariant
+
+    def materialImbalanceVariant: Boolean = v.materialImbalanceVariant
+
+    def dropsVariant: Boolean      = true
+    def onlyDropsVariant: Boolean  = true
+    def hasDetachedPocket: Boolean = false
+    def hasGameScore: Boolean      = v.hasGameScore
+
+    def canOfferDraw: Boolean       = v.canOfferDraw
+    def ignoreSubmitAction: Boolean = false
+
+    def perfId: Int    = v.perfId
+    def perfIcon: Char = v.perfIcon
+
+    def initialFen: FEN        = FEN.FiveInARow(v.initialFen)
+    def initialFens: List[FEN] = List(initialFen)
+    def startPlayer: Player    = v.startPlayer
+
+    def recalcStartPlayerForStats: Boolean = false
+
+    def isValidPromotion(promotion: Option[PromotableRole]): Boolean = false
+
+    def checkmate(situation: Situation): Boolean = situation match {
+      case Situation.FiveInARow(_) => false
+      case _                       => sys.error("Not passed FiveInARow objects")
+    }
+
+    def stalemateIsDraw: Boolean = true
+
+    def useRuleOfGinOnInsufficientMaterial: Boolean = false
+
+    def winner(situation: Situation): Option[Player] = situation match {
+      case Situation.FiveInARow(situation) => v.winner(situation)
+      case _                               => sys.error("Not passed FiveInARow objects")
+    }
+
+    @nowarn def specialEnd(situation: Situation): Boolean = situation match {
+      case Situation.FiveInARow(situation) => v.specialEnd(situation)
+      case _                               => sys.error("Not passed FiveInARow objects")
+    }
+
+    @nowarn def specialDraw(situation: Situation): Boolean = situation match {
+      case Situation.FiveInARow(situation) => v.specialDraw(situation)
+      case _                               => sys.error("Not passed FiveInARow objects")
+    }
+
+    def hasMoveEffects: Boolean = v.hasMoveEffects
+
+    def addVariantEffect(move: Move): Move            = sys.error("Stones are never moved in fiveinarow")
+    def valid(board: Board, strict: Boolean): Boolean = board match {
+      case Board.FiveInARow(board) => v.valid(board, strict)
+      case _                       => sys.error("Not passed FiveInARow objects")
+    }
+
+    val roles: List[Role] = v.roles.map(Role.FiveInARowRole.apply)
+
+    override def equals(that: Any): Boolean = that match {
+      case FiveInARow(v2) => v2.equals(v)
+      case _              => false
+    }
+
+    def chessVariant: chess.variant.Variant = sys.error("Unimplemented for FiveInARow")
+    def gameLogic: GameLogic                = GameLogic.FiveInARow()
+    def gameFamily: GameFamily              = v.gameFamily
+
+    def playerNames: Map[Player, String]  = gameFamily.playerNames
+    def playerColors: Map[Player, String] = gameFamily.playerColors
+  }
+
   case class Yonkoma(v: yonkoma.variant.Variant)
       extends Variant(
         id = v.id,
@@ -1278,6 +1399,7 @@ object Variant {
     def toDameo        = sys.error("Can't convert yonkoma to dameo")
     def toEntropy      = sys.error("Can't convert yonkoma to entropy")
     def toYonkoma      = v
+    def toFiveInARow   = sys.error("Can't make a fiveinarow object from a yonkoma object")
 
     def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.Yonkoma(pos), (Piece.Yonkoma(piece), 1)) }
@@ -1383,6 +1505,8 @@ object Variant {
       backgammon.variant.Variant.all.map(Backgammon.apply) :::
       abalone.variant.Variant.all.map(Abalone.apply) :::
       entropy.variant.Variant.all.map(Entropy.apply) :::
+      fiveinarow.variant.Variant.all.map(FiveInARow.apply)
+    entropy.variant.Variant.all.map(Entropy.apply) :::
       yonkoma.variant.Variant.all.map(Yonkoma.apply)
 
   def byId = all map { v => (v.id, v) } toMap
@@ -1400,6 +1524,7 @@ object Variant {
     case GameLogic.Abalone()      => abalone.variant.Variant.all.map(Abalone.apply)
     case GameLogic.Dameo()        => dameo.variant.Variant.all.map(Dameo.apply)
     case GameLogic.Entropy()      => entropy.variant.Variant.all.map(Entropy.apply)
+    case GameLogic.FiveInARow()   => fiveinarow.variant.Variant.all.map(FiveInARow.apply)
     case GameLogic.Yonkoma()      => yonkoma.variant.Variant.all.map(Yonkoma.apply)
   }
 
@@ -1422,6 +1547,7 @@ object Variant {
     case GameLogic.Abalone()      => Abalone(abalone.variant.Variant.default)
     case GameLogic.Dameo()        => Dameo(dameo.variant.Variant.default)
     case GameLogic.Entropy()      => Entropy(entropy.variant.Variant.default)
+    case GameLogic.FiveInARow()   => FiveInARow(fiveinarow.variant.Variant.default)
     case GameLogic.Yonkoma()      => Yonkoma(yonkoma.variant.Variant.default)
   }
 
@@ -1450,6 +1576,8 @@ object Variant {
     case GameLogic.Dameo()        => dameo.variant.Variant.openingSensibleVariants.map(Dameo.apply)
     case GameLogic.Entropy()      =>
       entropy.variant.Variant.openingSensibleVariants.map(Entropy.apply)
+    case GameLogic.FiveInARow()   =>
+      fiveinarow.variant.Variant.openingSensibleVariants.map(FiveInARow.apply)
     case GameLogic.Yonkoma()      =>
       yonkoma.variant.Variant.openingSensibleVariants.map(Yonkoma.apply)
   }
@@ -1467,6 +1595,8 @@ object Variant {
     case GameLogic.Dameo()        => dameo.variant.Variant.divisionSensibleVariants.map(Dameo.apply)
     case GameLogic.Entropy()      =>
       entropy.variant.Variant.divisionSensibleVariants.map(Entropy.apply)
+    case GameLogic.FiveInARow()   =>
+      fiveinarow.variant.Variant.divisionSensibleVariants.map(FiveInARow.apply)
     case GameLogic.Yonkoma()      =>
       yonkoma.variant.Variant.divisionSensibleVariants.map(Yonkoma.apply)
   }
@@ -1482,6 +1612,7 @@ object Variant {
     case GameLogic.Abalone()      => Variant.Abalone(abalone.variant.Abalone)
     case GameLogic.Dameo()        => Variant.Dameo(dameo.variant.Dameo)
     case GameLogic.Entropy()      => Variant.Entropy(entropy.variant.Entropy)
+    case GameLogic.FiveInARow()   => Variant.FiveInARow(fiveinarow.variant.Gomoku)
     case GameLogic.Yonkoma()      => Variant.Yonkoma(yonkoma.variant.Yonkoma10x10)
   }
 
@@ -1499,6 +1630,7 @@ object Variant {
     case GameLogic.Abalone()      => Variant.Abalone(abalone.variant.Abalone)
     case GameLogic.Dameo()        => Variant.Dameo(dameo.variant.Dameo)
     case GameLogic.Entropy()      => Variant.Entropy(entropy.variant.Entropy)
+    case GameLogic.FiveInARow()   => Variant.FiveInARow(fiveinarow.variant.Gomoku)
     case GameLogic.Yonkoma()      => Variant.Yonkoma(yonkoma.variant.Yonkoma10x10)
   }
 

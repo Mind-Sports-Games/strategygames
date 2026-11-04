@@ -102,6 +102,7 @@ object Move {
     def toAbalone      = sys.error("Can't make an abalone move from a chess move")
     def toDameo        = sys.error("Can't make a dameo move from a chess move")
     def toEntropy      = sys.error("Can't make an entropy move from a chess move")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow move from a chess move")
     def toYonkoma      = sys.error("Can't make a yonkoma move from a chess move")
   }
 
@@ -156,6 +157,7 @@ object Move {
     def toAbalone      = sys.error("Can't make an abalone move from a draughts move")
     def toDameo        = sys.error("Can't make a dameo move from a draughts move")
     def toEntropy      = sys.error("Can't make an entropy move from a draughts move")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow move from a draughts move")
     def toYonkoma      = sys.error("Can't make a yonkoma move from a draughts move")
   }
 
@@ -211,6 +213,7 @@ object Move {
     def toAbalone      = sys.error("Can't make an abalone move from a fairysf move")
     def toDameo        = sys.error("Can't make a dameo move from a fairysf move")
     def toEntropy      = sys.error("Can't make an entropy move from a fairysf move")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow move from a fairysf move")
     def toYonkoma      = sys.error("Can't make a yonkoma move from a fairysf move")
   }
 
@@ -259,6 +262,7 @@ object Move {
     def toAbalone      = sys.error("Can't make an abalone move from a samurai move")
     def toDameo        = sys.error("Can't make a dameo move from a samurai move")
     def toEntropy      = sys.error("Can't make an entropy move from a samurai move")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow move from a samurai move")
     def toYonkoma      = sys.error("Can't make a yonkoma move from a samurai move")
   }
 
@@ -307,6 +311,7 @@ object Move {
     def toAbalone      = sys.error("Can't make an abalone move from a togyzkumalak move")
     def toDameo        = sys.error("Can't make a dameo move from a togyzkumalak move")
     def toEntropy      = sys.error("Can't make an entropy move from a togyzkumalak move")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow move from a togyzkumalak move")
     def toYonkoma      = sys.error("Can't make a yonkoma move from a togyzkumalak move")
   }
 
@@ -352,6 +357,7 @@ object Move {
     def toAbalone      = sys.error("Can't make an abalone move from a backgammon move")
     def toDameo        = sys.error("Can't make a dameo move from a backgammon move")
     def toEntropy      = sys.error("Can't make an entropy move from a backgammon move")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow move from a backgammon move")
     def toYonkoma      = sys.error("Can't make a yonkoma move from a backgammon move")
   }
 
@@ -397,6 +403,7 @@ object Move {
     override def toAbalone      = m
     override def toDameo        = sys.error("Can't make a dameo move from an abalone move")
     override def toEntropy      = sys.error("Can't make an entropy move from an abalone move")
+    override def toFiveInARow   = sys.error("Can't make a fiveinarow move from an abalone move")
     override def toYonkoma      = sys.error("Can't make a yonkoma move from an abalone move")
   }
 
@@ -448,6 +455,7 @@ object Move {
     def toAbalone      = sys.error("Can't make an abalone move from a dameo move")
     def toDameo        = m
     def toEntropy      = sys.error("Can't make an entropy object from a dameo object")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow object from a dameo object")
     def toYonkoma      = sys.error("Can't make a yonkoma object from a dameo object")
   }
 
@@ -506,6 +514,7 @@ object Move {
     def toAbalone      = sys.error("Can't make a abalone move from an entropy move")
     def toDameo        = sys.error("Can't make a dameo move from an entropy move")
     def toEntropy      = m
+    def toFiveInARow   = sys.error("Can't make a fiveinarow object from an entropy object")
     def toYonkoma      = sys.error("Can't make a yonkoma move from an entropy move")
 
     override def toString = toUci.uci
@@ -559,6 +568,7 @@ object Move {
     def toYonkoma      = m
 
     override def toString = toUci.uci
+    def toFiveInARow      = sys.error("Can't make a fiveinarow move from a yonkoma move")
   }
 
 }

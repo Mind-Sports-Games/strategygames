@@ -20,17 +20,13 @@ object Hash {
 
   val size = 3
 
-  // Generating them from a fixed seed without a thousand lines of hex literals.
+  // generated from a fixed seed, as the other pure-Scala games do
   class ZobristConstants(start: Int) {
     private val random = new scala.util.Random(0x9e3779b9L + start.toLong)
 
     val p1TurnMask: Long = random.nextLong()
 
     val actorMasks: Array[Long] = Array.fill(Pos.allSize * Role.all.size * 2)(random.nextLong())
-
-    def hexToLong(s: String): Long =
-      (java.lang.Long.parseLong(s.substring(start, start + 8), 16) << 32) |
-        java.lang.Long.parseLong(s.substring(start + 8, start + 16), 16)
   }
 
   private val polyglotTable    = new ZobristConstants(0)

@@ -62,6 +62,7 @@ object FullOpeningDB {
         )
     // entropy has no opening book
     case (GameLogic.Entropy(), _)                          => None
+    case (GameLogic.FiveInARow(), _)                       => None
     case (GameLogic.Yonkoma(), _)                          => None
     case _                                                 => sys.error("Mismatched gamelogic types full opening db")
   }
@@ -107,6 +108,7 @@ object FullOpeningDB {
           .map(fo => FullOpening.AtPly(FullOpening.Dameo(fo.opening), fo.ply))
       // entropy has no opening book
       case GameLogic.Entropy()      => None
+      case GameLogic.FiveInARow()   => None
       case GameLogic.Yonkoma()      => None
     }
 
@@ -238,6 +240,7 @@ object FullOpeningDB {
         )
         .map(FullOpening.Dameo.apply)
     case GameLogic.Entropy()      => None
+    case GameLogic.FiveInARow()   => None
     case GameLogic.Yonkoma()      => None
   }
 

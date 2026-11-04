@@ -16,6 +16,6 @@ case object Yonkoma12x12
   def gameFamily: GameFamily = GameFamily.Yonkoma()
 
   def perfIcon: Char = ''
-  def perfId: Int    = 1001
+  def perfId: Int    = 1101
 
 }

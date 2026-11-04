@@ -50,6 +50,7 @@ object Pass {
     def toAbalone      = sys.error("Can't make an abalone pass from a go pass")
     def toDameo        = sys.error("Can't make a dameo pass from a go pass")
     def toEntropy      = sys.error("Can't make an entropy pass from a go pass")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow pass from a go pass")
     def toYonkoma      = sys.error("Can't make a yonkoma pass from a go pass")
   }
 
@@ -80,6 +81,7 @@ object Pass {
     def toAbalone      = sys.error("Can't make a abalone pass from an entropy pass")
     def toDameo        = sys.error("Can't make a dameo pass from an entropy pass")
     def toEntropy      = p
+    def toFiveInARow   = sys.error("Can't make a fiveinarow object from an entropy object")
     def toYonkoma      = sys.error("Can't make a yonkoma pass from an entropy pass")
 
     override def toString = toUci.uci
@@ -113,6 +115,7 @@ object Pass {
     def toYonkoma      = p
 
     override def toString = toUci.uci
+    def toFiveInARow      = sys.error("Can't make a fiveinarow pass from a yonkoma pass")
   }
 
 }

@@ -31,6 +31,7 @@ object EcopeningDB {
       strategygames.dameo.opening.EcopeningDB.allByEco.map { case (a, b) => a -> Ecopening.Dameo(b) }
     // entropy has no opening book: every game starts from an empty board and a full bag
     case GameLogic.Entropy()      => Map.empty
+    case GameLogic.FiveInARow()      => Map.empty
     case GameLogic.Yonkoma()      => Map.empty
   }
 
@@ -58,6 +59,7 @@ object EcopeningDB {
     case GameLogic.Dameo()        =>
       strategygames.dameo.opening.EcopeningDB.allByFen.map { case (a, b) => a -> Ecopening.Dameo(b) }
     case GameLogic.Entropy()      => Map.empty
+    case GameLogic.FiveInARow()      => Map.empty
     case GameLogic.Yonkoma()      => Map.empty
   }
 
@@ -74,6 +76,7 @@ object EcopeningDB {
     case GameLogic.Abalone()      => strategygames.abalone.opening.EcopeningDB.all.map(Ecopening.Abalone.apply)
     case GameLogic.Dameo()        => strategygames.dameo.opening.EcopeningDB.all.map(Ecopening.Dameo.apply)
     case GameLogic.Entropy()      => List.empty
+    case GameLogic.FiveInARow()      => List.empty
     case GameLogic.Yonkoma()      => List.empty
   }
 

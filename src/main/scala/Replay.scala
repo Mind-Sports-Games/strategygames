@@ -172,6 +172,18 @@ object Replay {
     }
   }
 
+  final case class FiveInARow(r: fiveinarow.Replay)
+      extends Replay(
+        Game.FiveInARow(r.setup),
+        r.actions.map((a: fiveinarow.Action) => Action.wrap(a)),
+        Game.FiveInARow(r.state)
+      ) {
+    def copy(state: Game): Replay = state match {
+      case Game.FiveInARow(state) => Replay.wrap(r.copy(state = state))
+      case _                      => sys.error("Unable to copy a fiveinarow replay with a non-fiveinarow state")
+    }
+  }
+
   final case class Yonkoma(r: yonkoma.Replay)
       extends Replay(
         Game.Yonkoma(r.setup),
@@ -206,6 +218,8 @@ object Replay {
         Dameo(dameo.Replay(setup, actions.map(Action.toDameo), state))
       case (GameLogic.Entropy(), Game.Entropy(setup), Game.Entropy(state))                =>
         Entropy(entropy.Replay(setup, actions.map(Action.toEntropy), state))
+      case (GameLogic.FiveInARow(), Game.FiveInARow(setup), Game.FiveInARow(state))       =>
+        FiveInARow(fiveinarow.Replay(setup, actions.map(Action.toFiveInARow), state))
       case (GameLogic.Yonkoma(), Game.Yonkoma(setup), Game.Yonkoma(state))                =>
         Yonkoma(yonkoma.Replay(setup, actions.map(Action.toYonkoma), state))
       case _                                                                              => sys.error("Mismatched gamelogic types 5")
@@ -357,6 +371,19 @@ object Replay {
             message
           )
       }
+    case (GameLogic.FiveInARow(), FEN.FiveInARow(initialFen), Variant.FiveInARow(variant))       =>
+      fiveinarow.Replay.gameWithUciWhileValid(
+        actionStrs,
+        initialFen,
+        variant
+      ) match {
+        case (game, gameswithsan, message) =>
+          (
+            Game.FiveInARow(game),
+            gameswithsan.map { case (g, u) => (Game.FiveInARow(g), Uci.FiveInARowWithSan(u)) },
+            message
+          )
+      }
     case (GameLogic.Yonkoma(), FEN.Yonkoma(initialFen), Variant.Yonkoma(variant))                =>
       yonkoma.Replay.gameWithUciWhileValid(
         actionStrs,
@@ -449,6 +476,12 @@ object Replay {
         .toEither
         .map(s => s.map(Situation.Entropy.apply))
         .toValidated
+    case (GameLogic.FiveInARow(), Variant.FiveInARow(variant))     =>
+      fiveinarow.Replay
+        .situations(actionStrs, initialFen.map(_.toFiveInARow), variant)
+        .toEither
+        .map(s => s.map(Situation.FiveInARow.apply))
+        .toValidated
     case (GameLogic.Yonkoma(), Variant.Yonkoma(variant))           =>
       yonkoma.Replay
         .situations(actionStrs, initialFen.map(_.toYonkoma), variant)
@@ -538,6 +571,14 @@ object Replay {
       }
     )
 
+  private def fiveinarowUcis(ucis: List[Uci]): List[fiveinarow.format.Uci] =
+    ucis.flatMap(u =>
+      u match {
+        case u: Uci.FiveInARow => Some(u.unwrap)
+        case _                 => None
+      }
+    )
+
   private def yonkomaUcis(ucis: List[Uci]): List[yonkoma.format.Uci] =
     ucis.flatMap(u =>
       u match {
@@ -618,6 +659,12 @@ object Replay {
         .toEither
         .map(b => b.map(Board.Entropy.apply))
         .toValidated
+    case (GameLogic.FiveInARow(), Variant.FiveInARow(variant))     =>
+      fiveinarow.Replay
+        .boardsFromUci(fiveinarowUcis(ucis), initialFen.map(_.toFiveInARow), variant)
+        .toEither
+        .map(b => b.map(Board.FiveInARow.apply))
+        .toValidated
     case (GameLogic.Yonkoma(), Variant.Yonkoma(variant))           =>
       yonkoma.Replay
         .boardsFromUci(yonkomaUcis(ucis), initialFen.map(_.toYonkoma), variant)
@@ -694,6 +741,12 @@ object Replay {
         .toEither
         .map(s => s.map(Situation.Entropy.apply))
         .toValidated
+    case (GameLogic.FiveInARow(), Variant.FiveInARow(variant))     =>
+      fiveinarow.Replay
+        .situationsFromUci(fiveinarowUcis(ucis), initialFen.map(_.toFiveInARow), variant)
+        .toEither
+        .map(s => s.map(Situation.FiveInARow.apply))
+        .toValidated
     case (GameLogic.Yonkoma(), Variant.Yonkoma(variant))           =>
       yonkoma.Replay
         .situationsFromUci(yonkomaUcis(ucis), initialFen.map(_.toYonkoma), variant)
@@ -755,6 +808,10 @@ object Replay {
       entropy.Replay
         .gameFromUciStrings(ucis.flatten.toList, initialFen.map(_.toEntropy), variant)
         .map(Game.Entropy.apply)
+    case (GameLogic.FiveInARow(), Variant.FiveInARow(variant))     =>
+      fiveinarow.Replay
+        .gameFromUciStrings(ucis.flatten.toList, initialFen.map(_.toFiveInARow), variant)
+        .map(Game.FiveInARow.apply)
     case (GameLogic.Yonkoma(), Variant.Yonkoma(variant))           =>
       yonkoma.Replay
         .gameFromUciStrings(ucis.flatten.toList, initialFen.map(_.toYonkoma), variant)
@@ -829,6 +886,12 @@ object Replay {
         .toEither
         .map(r => Replay.Entropy(r))
         .toValidated
+    case (GameLogic.FiveInARow(), Variant.FiveInARow(variant))     =>
+      fiveinarow.Replay
+        .apply(fiveinarowUcis(ucis), initialFen.map(_.toFiveInARow), variant)
+        .toEither
+        .map(r => Replay.FiveInARow(r))
+        .toValidated
     case (GameLogic.Yonkoma(), Variant.Yonkoma(variant))           =>
       yonkoma.Replay
         .apply(yonkomaUcis(ucis), initialFen.map(_.toYonkoma), variant)
@@ -865,6 +928,8 @@ object Replay {
       dameo.Replay.plyAtFen(actionStrs, initialFen.map(_.toDameo), variant, atFen)
     case (GameLogic.Entropy(), Variant.Entropy(variant), FEN.Entropy(atFen))                =>
       entropy.Replay.plyAtFen(actionStrs, initialFen.map(_.toEntropy), variant, atFen)
+    case (GameLogic.FiveInARow(), Variant.FiveInARow(variant), FEN.FiveInARow(atFen))       =>
+      fiveinarow.Replay.plyAtFen(actionStrs, initialFen.map(_.toFiveInARow), variant, atFen)
     case (GameLogic.Yonkoma(), Variant.Yonkoma(variant), FEN.Yonkoma(atFen))                =>
       yonkoma.Replay.plyAtFen(actionStrs, initialFen.map(_.toYonkoma), variant, atFen)
     case _                                                                                  => sys.error("Mismatched gamelogic types 10")
@@ -880,6 +945,7 @@ object Replay {
   def wrap(r: abalone.Replay)      = Abalone(r)
   def wrap(r: dameo.Replay)        = Dameo(r)
   def wrap(r: entropy.Replay)      = Entropy(r)
+  def wrap(r: fiveinarow.Replay)   = FiveInARow(r)
   def wrap(r: yonkoma.Replay)      = Yonkoma(r)
 
 }
