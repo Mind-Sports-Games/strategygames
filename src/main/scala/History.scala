@@ -152,6 +152,15 @@ object History {
         score = h.score
       )
 
+  final case class FiveInARow(h: fiveinarow.History)
+      extends History(
+        lastTurn = h.lastTurn.map(Uci.wrap),
+        currentTurn = h.currentTurn.map(Uci.wrap),
+        positionHashes = h.positionHashes,
+        score = h.score,
+        halfMoveClock = h.halfMoveClock
+      )
+
   implicit def chessHistory(h: chess.History): History               = Chess(h)
   implicit def draughtsHistory(h: draughts.DraughtsHistory): History = Draughts(h)
   implicit def fairysfHistory(h: fairysf.History): History           = FairySF(h)
@@ -162,6 +171,7 @@ object History {
   implicit def abaloneHistory(h: abalone.History): History           = Abalone(h)
   implicit def dameoHistory(h: dameo.History): History               = Dameo(h)
   implicit def entropyHistory(h: entropy.History): History           = Entropy(h)
+  implicit def fiveinarowHistory(h: fiveinarow.History): History     = FiveInARow(h)
 
   // lila
   def apply(
@@ -178,7 +188,10 @@ object History {
       score: Score = Score(0, 0),
       captures: Score = Score(0, 0),
       multiPointState: Option[MultiPointState] = None,
-      halfMoveClock: Int = 0
+      halfMoveClock: Int = 0,
+      blackSeat: Player = Player.P1,
+      openingStep: Option[fiveinarow.OpeningStep] = None,
+      round: Int = 1
   ): History = lib match {
     case GameLogic.Draughts()     =>
       Draughts(
@@ -281,6 +294,22 @@ object History {
           lastTurn = lastTurn.map(lm => lm.toEntropy),
           currentTurn = currentTurn.map(lm => lm.toEntropy),
           positionHashes = positionHashes,
+          score = score,
+          round = round,
+          halfMoveClock = halfMoveClock
+        )
+      )
+    case GameLogic.FiveInARow()   =>
+      FiveInARow(
+        fiveinarow.History(
+          lastTurn = lastTurn.map(lm => lm.toFiveInARow),
+          currentTurn = currentTurn.map(lm => lm.toFiveInARow),
+          positionHashes = positionHashes,
+          blackSeat = blackSeat,
+          openingStep = openingStep.getOrElse(variant match {
+            case Some(Variant.FiveInARow(v)) => v.opening.initialStep
+            case _                           => fiveinarow.OpeningStep.Opening
+          }),
           score = score,
           halfMoveClock = halfMoveClock
         )
