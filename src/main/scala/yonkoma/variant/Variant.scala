@@ -169,6 +169,10 @@ object Variant {
 
   lazy val all: List[Variant] = List(Yonkoma10x10, Yonkoma12x12)
 
+  // lila stores a game's variant by id and reads it back with apply(id)
+  val byId  = all map { v =>
+    (v.id, v)
+  } toMap
   val byKey = all map { v =>
     (v.key, v)
   } toMap
@@ -180,6 +184,7 @@ object Variant {
 
   val default = Yonkoma10x10
 
+  def apply(id: Int): Option[Variant]     = byId get id
   def apply(key: String): Option[Variant] = byKey get key
 
   def byName(name: String): Option[Variant] =

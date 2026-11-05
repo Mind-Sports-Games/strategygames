@@ -38,6 +38,11 @@ class YonkomaWrapperTest extends Specification {
     }
 
     "list both variants with distinct ids, keys and perf ids" in {
+      // lila reads a stored game's variant by id and a stored piece by binaryInt
+      strategygames.yonkoma.variant.Variant(1) === Some(strategygames.yonkoma.variant.Yonkoma10x10)
+      strategygames.yonkoma.variant.Variant(2) === Some(strategygames.yonkoma.variant.Yonkoma12x12)
+      strategygames.yonkoma.variant.Variant(3) === None
+      strategygames.yonkoma.Role.allByBinaryInt === Map(1 -> strategygames.yonkoma.Checker)
       val vs = StratVariant.all(lib)
       vs.map(_.id) === List(1, 2)
       vs.map(_.key) === List("yonkoma10x10", "yonkoma12x12")

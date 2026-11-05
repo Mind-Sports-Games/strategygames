@@ -54,6 +54,10 @@ object Role {
   def allByGroundName(gf: GameFamily): Map[String, Role] = allByGameFamily(gf) map { r =>
     (r.groundName, r)
   } toMap
+  // lila's board storage reads a piece back by its binaryInt
+  val allByBinaryInt: Map[Int, Role]                     = all map { r =>
+    (r.binaryInt, r)
+  } toMap
 
   def forsyth(c: Char): Option[Role] = allByForsyth get c
 
