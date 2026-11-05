@@ -12,15 +12,8 @@ case class Replay(setup: Game, actions: List[Action], state: Game) {
 
   lazy val chronoPlies = actions.reverse
 
-  // every action is a turn of its own, so grouping by player gives one action per turn
-  lazy val chronoActions: List[List[Action]] =
-    chronoPlies
-      .drop(1)
-      .foldLeft(List(chronoPlies.take(1))) { case (turn, action) =>
-        if (turn.head.head.player != action.player) List(action) +: turn
-        else (turn.head :+ action) +: turn.tail
-      }
-      .reverse
+  // every action is a turn of its own
+  lazy val chronoActions: List[List[Action]] = chronoPlies.map(List(_))
 
   def addAction(action: Action) = action match {
     case m: Move => copy(actions = m :: actions, state = state.apply(m))
@@ -186,33 +179,24 @@ object Replay {
       replay.setup.situation :: replay.chronoPlies.map(_.situationAfter)
     }
 
-  def boards(
-      actionStrs: ActionStrs,
-      initialFen: Option[FEN],
-      variant: strategygames.yonkoma.variant.Variant
-  ): Validated[String, List[Board]] =
-    situations(actionStrs, initialFen, variant) map (_ map (_.board))
-
-  // the ply at which the position was reached, compared without the full move number
+  // the ply at which the position was reached: the board and the player to move, as
+  // Forsyth writes them, without the full move number
   def plyAtFen(
       actionStrs: ActionStrs,
       initialFen: Option[FEN],
       variant: strategygames.yonkoma.variant.Variant,
       atFen: FEN
   ): Validated[String, Int] =
-    if (Forsyth.<<@(variant, atFen).isEmpty) Validated.invalid(s"Invalid FEN ${atFen}")
-    else {
-      // the board and the player to move, as Forsyth writes them
-      def truncateFen(fen: FEN) = fen.value.split(' ').take(2).mkString(" ")
-      val atFenTruncated        = truncateFen(atFen)
-      def compareFen(fen: FEN)  = truncateFen(fen) == atFenTruncated
-
-      situations(actionStrs, initialFen, variant) andThen { sits =>
-        sits.indexWhere(s => compareFen(Forsyth.>>(s))) match {
-          case -1  => Validated.invalid(s"Can't find $atFen, reached ply ${sits.size - 1}")
-          case ply => Validated.valid(ply)
+    Forsyth.<<@(variant, atFen) match {
+      case None        => Validated.invalid(s"Invalid FEN ${atFen}")
+      case Some(atSit) =>
+        val atPosition = Forsyth.boardAndPlayer(atSit)
+        situations(actionStrs, initialFen, variant) andThen { sits =>
+          sits.indexWhere(s => Forsyth.boardAndPlayer(s) == atPosition) match {
+            case -1  => Validated.invalid(s"Can't find $atFen, reached ply ${sits.size - 1}")
+            case ply => Validated.valid(ply)
+          }
         }
-      }
     }
 
 }

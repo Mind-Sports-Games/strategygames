@@ -49,9 +49,9 @@ object Offer10 {
     def toDameo        = sys.error("Can't make a dameo offer10 from a fiveinarow offer10")
     def toEntropy      = sys.error("Can't make an entropy offer10 from a fiveinarow offer10")
     def toFiveInARow   = s
+    def toYonkoma      = sys.error("Can't make a yonkoma offer10 from a fiveinarow offer10")
 
     override def toString = toUci.uci
-    def toYonkoma         = sys.error("Can't make a yonkoma offer10 from a fiveinarow offer10")
   }
 
 }

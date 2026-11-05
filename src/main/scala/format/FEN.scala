@@ -308,7 +308,7 @@ object FEN {
     def toDameo        = f
     def toEntropy      = sys.error("Can't convert dameo to entropy")
     def toFiveInARow   = sys.error("Can't convert dameo to fiveinarow")
-    def toYonkoma      = sys.error("Can't make a yonkoma object from a dameo object")
+    def toYonkoma      = sys.error("Can't make a yonkoma FEN from a dameo FEN")
 
     def gameLogic = GameLogic.Dameo()
 
@@ -372,7 +372,7 @@ object FEN {
     def toDameo        = sys.error("Can't convert fiveinarow to dameo")
     def toFiveInARow   = f
     def toEntropy      = sys.error("Can't convert fiveinarow to entropy")
-    def toYonkoma      = sys.error("Can't make a yonkoma object from a fiveinarow object")
+    def toYonkoma      = sys.error("Can't make a yonkoma FEN from a fiveinarow FEN")
 
     def gameLogic = GameLogic.FiveInARow()
 
@@ -404,7 +404,7 @@ object FEN {
     def toDameo        = sys.error("Can't convert yonkoma to dameo")
     def toEntropy      = sys.error("Can't convert yonkoma to entropy")
     def toYonkoma      = f
-    def toFiveInARow   = sys.error("Can't make a fiveinarow object from a yonkoma object")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow FEN from a yonkoma FEN")
 
     def gameLogic = GameLogic.Yonkoma()
 

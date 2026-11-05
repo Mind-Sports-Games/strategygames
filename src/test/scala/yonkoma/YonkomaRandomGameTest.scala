@@ -50,15 +50,10 @@ class YonkomaRandomGameTest extends YonkomaTest {
     // four checkers on the board all along, P1's on dark squares and P2's on light ones
     s.board.valid(true) must beTrue
 
-    // every position played is in the history, the latest first
-    s.board.history.positionHashes.size === strs.size * Hash.size
-    s.board.history.positionHashes.take(Hash.size).toList === Hash(s).toList
-
-    // and the record replays to the same position, with the same history
+    // and the record replays to the same position
     Replay(finished.actionStrs, None, variant).toOption must beSome[Reader.Result].like {
       case Reader.Result.Complete(replay) =>
         Forsyth.>>(replay.state) === Forsyth.>>(finished)
-        replay.state.situation.board.history.positionHashes.toList === s.board.history.positionHashes.toList
     }
   }
 
@@ -143,7 +138,7 @@ class YonkomaRandomGameTest extends YonkomaTest {
 
   // the first ply of a recorded game can be read back
   "the first move" should {
-    "be a move of a red checker" in {
+    "be a move of a P1 checker" in {
       val g = played(Yonkoma10x10, 5)
       Uci(g.actionStrs.head.head).map(_.uci) === Some(g.actionStrs.head.head)
       g.actionStrs.head.head must not(beEqualTo("pass"))

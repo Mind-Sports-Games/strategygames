@@ -11,8 +11,8 @@ class YonkomaBinaryTest extends YonkomaTest {
 
       val bytes = Binary.writeActionStrs(actions)
       bytes.isSuccess must beTrue
-      // two bytes a move, one byte a pass
-      bytes.get.size === 9
+      // three bytes a move, one byte a pass
+      bytes.get.size === 13
 
       val back = Binary.readActionStrs(bytes.get.toList)
       back.isSuccess must beTrue
@@ -23,6 +23,12 @@ class YonkomaBinaryTest extends YonkomaTest {
       val actions = Vector(Vector("a11l12"), Vector("l12a11"))
       val back    = Binary.readActionStrs(Binary.writeActionStrs(actions).get.toList)
       back.get === actions
+    }
+
+    "put the action type in the two high bits of the first byte, as go and entropy do" in {
+      Binary.writeMove("pass").get === List(0x00.toByte)
+      Binary.writeMove("a1e5").get === List(0x40.toByte, Pos.A1.index.toByte, Pos.E5.index.toByte)
+      Binary.writeMove("l12a11").get === List(0x40.toByte, 143.toByte, 120.toByte)
     }
 
     "stop after the requested number of plies" in {
@@ -37,9 +43,11 @@ class YonkomaBinaryTest extends YonkomaTest {
       Binary.writeMove("m1a1").isFailure must beTrue
     }
 
-    "refuse a byte that is neither a square nor a pass" in {
-      Binary.readActionStrs(List(200.toByte, 1.toByte)).isFailure must beTrue
-      Binary.readActionStrs(List(1.toByte)).isFailure must beTrue
+    "refuse an action type it does not know, a square off the board, or a cut-off move" in {
+      Binary.readActionStrs(List(0x80.toByte)).isFailure must beTrue
+      Binary.readActionStrs(List(0xc0.toByte, 1.toByte, 2.toByte)).isFailure must beTrue
+      Binary.readActionStrs(List(0x40.toByte, 200.toByte, 1.toByte)).isFailure must beTrue
+      Binary.readActionStrs(List(0x40.toByte, 1.toByte)).isFailure must beTrue
     }
   }
 }

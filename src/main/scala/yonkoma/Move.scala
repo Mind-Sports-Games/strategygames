@@ -12,20 +12,15 @@ case class Move(
     metrics: MoveMetrics = MoveMetrics()
 ) extends Action(situationBefore, after, metrics) {
 
-  def player = piece.player
-
   def situationAfter = Situation(finalizeAfter, !player)
 
   def finalizeAfter: Board = after updateHistory { h =>
     h.copy(
       lastTurn = h.currentTurn :+ toUci,
       currentTurn = List(),
-      positionHashes = after.variant.updatePositionHashes(after, this, h.positionHashes),
       halfMoveClock = h.halfMoveClock + 1
     )
   }
-
-  lazy val lazySituationAfter = situationAfter
 
   def withMetrics(m: MoveMetrics): Move = copy(metrics = m)
 

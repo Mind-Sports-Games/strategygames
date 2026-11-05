@@ -11,13 +11,10 @@ abstract class Action(
     @nowarn metrics: MoveMetrics = MoveMetrics()
 ) {
 
-  def before = situationBefore.board
-
   def situationAfter: Situation
-  def lazySituationAfter: Situation
   def finalizeAfter: Board
 
-  def player: Player
+  def player: Player = situationBefore.player
 
   def withMetrics(m: MoveMetrics): Action
   def toUci: Uci

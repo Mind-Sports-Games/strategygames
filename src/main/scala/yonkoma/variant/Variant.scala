@@ -37,8 +37,6 @@ abstract class Variant private[variant] (
 
   def canOfferDraw: Boolean = false
 
-  def repetitionEnabled: Boolean = false
-
   def perfId: Int
   def perfIcon: Char
 
@@ -93,8 +91,9 @@ abstract class Variant private[variant] (
       .sortBy(_.index)
   }
 
+  // the mover's moves, generated once per situation through Situation.moves
   def validMoves(situation: Situation): Map[Pos, List[Move]] =
-    if (situation.end) Map.empty
+    if (isCrosscut(situation.board)) Map.empty
     else
       situation.board
         .piecesOf(situation.player)
@@ -118,10 +117,6 @@ abstract class Variant private[variant] (
     else if (situation.moves.nonEmpty) Validated.invalid("You may not pass while you have a legal move")
     else Validated.valid(Pass(situation, situation.board))
 
-  def hasMoveEffects = false
-
-  def addVariantEffect(move: Move): Move = move
-
   // a crosscut: all four checkers in a 2x2 block, P1's two checkers on one diagonal of
   // the block and P2's two on the other
   def isCrosscut(board: Board): Boolean = {
@@ -136,23 +131,16 @@ abstract class Variant private[variant] (
     }
   }
 
-  private def hasMoves(board: Board, player: Player): Boolean =
-    board.checkersOf(player).exists(pos => destinations(board, player, pos).nonEmpty)
-
-  // whoever completes a crosscut loses, so the player to move has won; a position in which
-  // neither player can move cannot arise in play, and is counted as a loss for the player to
-  // move so that no game can ever stall
-  def specialEnd(situation: Situation): Boolean =
-    isCrosscut(situation.board) || (
-      !hasMoves(situation.board, situation.player) && !hasMoves(situation.board, !situation.player)
-    )
+  // the game ends on a crosscut and nothing else: a position in which neither player can
+  // move does not exist on either board (every legal position was checked), and a player
+  // with no move has the turn skipped
+  def specialEnd(situation: Situation): Boolean = isCrosscut(situation.board)
 
   def specialDraw(@nowarn situation: Situation): Boolean = false
 
+  // whoever completes a crosscut loses, so the player to move has won
   def winner(situation: Situation): Option[Player] =
-    if (isCrosscut(situation.board)) Some(situation.player)
-    else if (specialEnd(situation)) Some(!situation.player)
-    else None
+    if (isCrosscut(situation.board)) Some(situation.player) else None
 
   def materialImbalance(@nowarn board: Board): Int = 0
 
@@ -167,19 +155,7 @@ abstract class Variant private[variant] (
 
   val roles: List[Role] = Role.all
 
-  lazy val rolesByPgn: Map[Char, Role] = roles
-    .map { r =>
-      (r.pgn, r)
-    }
-    .to(Map)
-
-  def defaultRole: Role = Role.defaultRole
-
   def gameFamily: GameFamily
-
-  // the position after the action, with the next player to move, in front of the earlier ones
-  def updatePositionHashes(board: Board, action: Action, hash: PositionHash): PositionHash =
-    Hash(Situation(board, !action.player)) ++ hash
 
   override def toString = s"Variant($name)"
 
@@ -193,9 +169,6 @@ object Variant {
 
   lazy val all: List[Variant] = List(Yonkoma10x10, Yonkoma12x12)
 
-  val byId  = all map { v =>
-    (v.id, v)
-  } toMap
   val byKey = all map { v =>
     (v.key, v)
   } toMap
@@ -207,15 +180,10 @@ object Variant {
 
   val default = Yonkoma10x10
 
-  def apply(id: Int): Option[Variant]     = byId get id
   def apply(key: String): Option[Variant] = byKey get key
-  def orDefault(id: Int): Variant         = apply(id) | default
-  def orDefault(key: String): Variant     = apply(key) | default
 
   def byName(name: String): Option[Variant] =
     all find (_.name.toLowerCase == name.toLowerCase)
-
-  def exists(id: Int): Boolean = byId contains id
 
   val openingSensibleVariants: Set[Variant] = Set()
 

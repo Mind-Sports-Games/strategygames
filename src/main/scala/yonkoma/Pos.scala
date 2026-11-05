@@ -1,40 +1,16 @@
 package strategygames.yonkoma
 
-import scala.math.{ abs, max, min }
+import scala.math.{ abs, max }
 
 import strategygames.Piotr
 
 case class Pos private (index: Int) extends AnyVal {
 
-  def down: Option[Pos]      = Pos.at(file.index, rank.index - 1)
-  def left: Option[Pos]      = Pos.at(file.index - 1, rank.index)
-  def up: Option[Pos]        = Pos.at(file.index, rank.index + 1)
-  def right: Option[Pos]     = Pos.at(file.index + 1, rank.index)
+  // checkers move like bishops, so these are the only steps the rules take
   def upLeft: Option[Pos]    = Pos.at(file.index - 1, rank.index + 1)
   def upRight: Option[Pos]   = Pos.at(file.index + 1, rank.index + 1)
   def downLeft: Option[Pos]  = Pos.at(file.index - 1, rank.index - 1)
   def downRight: Option[Pos] = Pos.at(file.index + 1, rank.index - 1)
-
-  def >|(stop: Pos => Boolean): List[Pos]                   = |<>|(stop, _.right)
-  def |<(stop: Pos => Boolean): List[Pos]                   = |<>|(stop, _.left)
-  def |<>|(stop: Pos => Boolean, dir: Direction): List[Pos] =
-    dir(this) map { p =>
-      p :: (if (stop(p)) Nil else p.|<>|(stop, dir))
-    } getOrElse Nil
-
-  def ?<(other: Pos): Boolean = file < other.file
-  def ?>(other: Pos): Boolean = file > other.file
-  def ?+(other: Pos): Boolean = rank < other.rank
-  def ?^(other: Pos): Boolean = rank > other.rank
-  def ?|(other: Pos): Boolean = file == other.file
-  def ?-(other: Pos): Boolean = rank == other.rank
-
-  def <->(other: Pos): Iterable[Pos] =
-    min(file.index, other.file.index) to max(file.index, other.file.index) flatMap { Pos.at(_, rank.index) }
-
-  def touches(other: Pos): Boolean = xDist(other) <= 1 && yDist(other) <= 1
-
-  def onSameLine(other: Pos): Boolean = ?-(other) || ?|(other)
 
   def onSameDiagonal(other: Pos): Boolean = other != this && xDist(other) == yDist(other)
 
@@ -51,15 +27,9 @@ case class Pos private (index: Int) extends AnyVal {
   @inline def rank = Rank of this
 
   def piotr: Char = Pos.piotrs(index)
-  def piotrStr    = piotr.toString
-
-  def sgf(numRanks: Int) = file.sgfChar.toString + rank.sgfChar(numRanks).toString
 
   def key               = file.toString + rank.toString
   override def toString = key
-
-  def step(dx: Int, dy: Int): Option[Pos] =
-    Pos.at(file.index + dx, rank.index + dy)
 }
 
 object Pos {
@@ -77,8 +47,6 @@ object Pos {
   def fromKey(key: String): Option[Pos] = allKeys get key
 
   def piotr(c: Char): Option[Pos] = allPiotrs get c
-
-  def keyToPiotr(key: String) = fromKey(key) map (_.piotr)
 
   val A1  = new Pos(0)
   val B1  = new Pos(1)

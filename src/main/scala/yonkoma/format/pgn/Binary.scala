@@ -17,13 +17,22 @@ object Binary {
   def readActionStrs(bs: List[Byte])          = Try(Reader actionStrs bs)
   def readActionStrs(bs: List[Byte], nb: Int) = Try(Reader.actionStrs(bs, nb))
 
-  // A square index on the 12x12 board runs from 0 to 143 and needs the whole byte, so a
-  // move is written as two bytes, the origin and the destination, and a pass as the single
-  // byte 0xff, which no square index reaches.
-  private val passByte = 0xff
+  // As in go and entropy, the two high bits of an action's first byte give its type, so
+  // further action types have room. A pass is that byte alone. A move is three bytes: the
+  // type byte, the origin square index and the destination square index, each of which
+  // runs from 0 to 143 on the 12x12 board and fits a byte.
+  private object MoveType {
+    val Pass = 0
+    val Move = 1
+  }
+
+  private def right(i: Int, x: Int): Int = i & lengthMasks(x)
+  private val lengthMasks                =
+    Map(1 -> 0x01, 2 -> 0x03, 3 -> 0x07, 4 -> 0x0f, 5 -> 0x1f, 6 -> 0x3f, 7 -> 0x7f, 8 -> 0xff)
 
   private object Reader {
 
+    // If changing this, consider changing other gamelogics and also lila game maxPlies
     private val maxPlies = 1000
 
     def actionStrs(bs: List[Byte]): ActionStrs          = actionStrs(bs, maxPlies)
@@ -34,20 +43,27 @@ object Binary {
 
     def intPlies(bs: List[Int], pliesToGo: Int): List[String] =
       bs match {
-        case _ if pliesToGo <= 0                              => Nil
-        case Nil                                              => Nil
-        case b1 :: rest if b1 == passByte                     => passUci :: intPlies(rest, pliesToGo - 1)
-        case b1 :: b2 :: rest if isSquare(b1) && isSquare(b2) =>
-          moveUci(b1, b2) :: intPlies(rest, pliesToGo - 1)
-        case x                                                => !!(x map showByte mkString ",")
+        case _ if pliesToGo <= 0                                      => Nil
+        case Nil                                                      => Nil
+        case b1 :: rest if headerBit(b1) == MoveType.Pass             =>
+          passUci :: intPlies(rest, pliesToGo - 1)
+        case b1 :: b2 :: b3 :: rest if headerBit(b1) == MoveType.Move =>
+          moveUci(b2, b3) :: intPlies(rest, pliesToGo - 1)
+        case x                                                        => !!(x map showByte mkString ",")
       }
 
-    def moveUci(b1: Int, b2: Int): String = s"${posFromInt(b1)}${posFromInt(b2)}"
+    // 2 movetype, 6 unused
+    // ----
+    // 8 pos (orig)
+    // ----
+    // 8 pos (dest)
+    def moveUci(b2: Int, b3: Int): String = s"${posFromInt(b2)}${posFromInt(b3)}"
 
     val passUci = "pass"
 
-    def isSquare(b: Int): Boolean  = b < Pos.allSize
-    def posFromInt(b: Int): String = Pos(b).get.key
+    def posFromInt(b: Int): String = Pos(b).getOrElse(!!(s"no square ${b}")).key
+
+    private def headerBit(i: Int) = i >> 6
 
     private def !!(msg: String) = throw new Exception("Binary reader failed: " + msg)
   }
@@ -68,11 +84,14 @@ object Binary {
     def actionStrs(strs: ActionStrs): Array[Byte] = plies(strs.flatten)
 
     def moveUci(orig: String, dest: String) = List(
-      Pos.fromKey(orig).get.index,
-      Pos.fromKey(dest).get.index
+      headerBit(MoveType.Move),
+      right(Pos.fromKey(orig).get.index, 8),
+      right(Pos.fromKey(dest).get.index, 8)
     )
 
-    val passUci = List(passByte)
+    def passUci = List(headerBit(MoveType.Pass))
+
+    private def headerBit(i: Int) = i << 6
 
   }
 

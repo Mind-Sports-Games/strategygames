@@ -18,13 +18,41 @@ final case class FEN(value: String) extends AnyVal {
 
   def boardPart: String = field(0).getOrElse("")
 
-  // the ranks from the top; the board is square, so their number is the board size
-  def ranks: Array[String] = boardPart.split('/')
+  // the ranks from the top, an empty string for an empty rank; the board is square, so
+  // their number is the board size
+  def ranks: Array[String] = boardPart.split("/", -1)
 
-  def boardSize: Option[Board.BoardSize] = Board.BoardSize.all.find(_.height == ranks.size)
+  // the squares a rank string describes, or None when it holds anything but runs of
+  // unoccupied squares (written without a leading zero) and checkers
+  private def rankWidth(rankStr: String): Option[Int] = {
+    var width = 0
+    var run   = 0
+    var ok    = rankStr.nonEmpty
+    rankStr.foreach { c =>
+      if (c.isDigit) {
+        if (run == 0 && c == '0') ok = false
+        run = run * 10 + c.asDigit
+      } else if (Piece.fromChar(c).isDefined) {
+        width += run + 1
+        run = 0
+      } else ok = false
+    }
+    if (ok) Some(width + run) else None
+  }
 
+  // the board size, when the rank count is one and every rank describes that many squares
+  def boardSize: Option[Board.BoardSize] =
+    Board.BoardSize.all
+      .find(_.height == ranks.size)
+      .filter(size => ranks.forall(rankWidth(_).contains(size.width)))
+
+  // the player to move, 'w' or 'b'; None for anything else
   def player: Option[Player] =
-    field(1) flatMap (_.headOption) flatMap Player.apply
+    field(1)
+      .filter(_.length == 1)
+      .flatMap(_.headOption)
+      .filter(c => c == 'w' || c == 'b')
+      .flatMap(Player.apply)
 
   def fullMove: Option[Int] = intField(2)
 

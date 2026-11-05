@@ -28,7 +28,7 @@ object Uci {
     def fishnetUci = fairySfUci
     def uci        = keys
 
-    def piotrStr = s"${orig.piotrStr}${dest.piotrStr}"
+    def piotrStr = s"${orig.piotr}${dest.piotr}"
     def piotr    = piotrStr
 
     def origDest = Some(orig -> dest)
@@ -112,13 +112,4 @@ object Uci {
 
   def readList(moves: String): Option[List[Uci]] =
     moves.split(' ').toList.map(apply(_)).sequence
-
-  def writeList(moves: List[Uci]): String =
-    moves.map(_.uci) mkString " "
-
-  def readListPiotr(moves: String): Option[List[Uci]] =
-    moves.split(' ').toList.map(piotr).sequence
-
-  def writeListPiotr(moves: List[Uci]): String =
-    moves.map(_.piotr) mkString " "
 }

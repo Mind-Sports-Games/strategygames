@@ -1,6 +1,6 @@
 package strategygames.yonkoma
 
-import strategygames.{ GameFamily, P1, P2, Player }
+import strategygames.GameFamily
 
 sealed trait Role {
   val forsyth: Char
@@ -11,14 +11,8 @@ sealed trait Role {
   val binaryInt: Int
   val hashInt: Int
   val storable: Boolean
-  lazy val valueOf: Option[Int]   = Option(1)
   lazy val gameFamily: GameFamily = GameFamily.Yonkoma()
-  final def -(player: Player)     = Piece(player, this)
-  final def p1                    = this - P1
-  final def p2                    = this - P2
 }
-
-sealed trait PromotableRole extends Role
 
 // the only piece in the game: each player has two of them
 case object Checker extends Role {
@@ -32,8 +26,6 @@ case object Checker extends Role {
 object Role {
 
   val all: List[Role] = List(Checker)
-
-  def defaultRole: Role = Checker
 
   def allByGameFamily(gf: GameFamily): List[Role] =
     all.filter(r => r.gameFamily == gf)
@@ -62,21 +54,8 @@ object Role {
   def allByGroundName(gf: GameFamily): Map[String, Role] = allByGameFamily(gf) map { r =>
     (r.groundName, r)
   } toMap
-  val allByBinaryInt: Map[Int, Role]                     = all map { r =>
-    (r.binaryInt, r)
-  } toMap
-  def allByBinaryInt(gf: GameFamily): Map[Int, Role]     = allByGameFamily(gf) map { r =>
-    (r.binaryInt, r)
-  } toMap
-  val allByHashInt: Map[Int, Role]                       = all map { r =>
-    (r.hashInt, r)
-  } toMap
 
   def forsyth(c: Char): Option[Role] = allByForsyth get c
-
-  def binaryInt(i: Int): Option[Role] = allByBinaryInt get i
-
-  def hashInt(i: Int): Option[Role] = allByHashInt get i
 
   def storable: List[Role] = all.filter(_.storable)
 
@@ -97,18 +76,5 @@ object Role {
         }
       )
       .get
-
-  // unused by lila
-  def javaSymbolToInt(s: String): Int =
-    s.headOption match {
-      case Some(c) if c.toInt >= 65 && c.toInt <= 90  => c.toInt - 64
-      case Some(c) if c.toInt >= 97 && c.toInt <= 122 => c.toInt - 70
-      case _                                          => sys.error(s"Could not get Int from java symbol: $s")
-    }
-
-  def valueOf(r: Role): Option[Int] = r.valueOf
-
-  val roleR  = s"([${allByForsyth.keys.mkString("")}])"
-  val roleRr = s"([${allByForsyth.keys.map(k => s"${k.toLower}${k.toUpper}").mkString("")}]?)"
 
 }

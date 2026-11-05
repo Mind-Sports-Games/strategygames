@@ -59,17 +59,58 @@ class YonkomaForsythTest extends YonkomaTest {
       Forsyth.<<@(Yonkoma12x12, Yonkoma10x10.initialFen) === None
       Forsyth.<<<@(Yonkoma10x10, Yonkoma12x12.initialFen) === None
     }
+
+    "refuse a rank that is wider or narrower than the board, or holds a letter it does not know" in {
+      FEN("c9C/10/10/10/10/10/10/10/10/C8c w 1").boardSize === None
+      FEN("c8C/11/10/10/10/10/10/10/10/C8c w 1").boardSize === None
+      FEN("c7C/10/10/10/10/10/10/10/10/C8c w 1").boardSize === None
+      FEN("c8X/10/10/10/10/10/10/10/10/C8c w 1").boardSize === None
+      FEN("c8C/10/10/10/10/10/10/10//C8c w 1").boardSize === None
+      FEN("c8C/10/10/10/10/10/10/10/10/C8c/ w 1").boardSize === None
+      FEN("c8C/10/10/10/10/10/10/10/10/C08c w 1").boardSize === None
+      Forsyth.<<@(Yonkoma10x10, FEN("c9C/10/10/10/10/10/10/10/10/C8c w 1")) === None
+      Forsyth.<<@(Yonkoma10x10, FEN("c8C/11/10/10/10/10/10/10/10/C8c w 1")) === None
+      Forsyth.<<(FEN("c8C/11/10/10/10/10/10/10/10/C8c w 1")) === None
+    }
+  }
+
+  "a fen" should {
+    val board = "c8C/10/10/10/10/10/10/10/10/C8c"
+
+    "name the player to move with w or b and nothing else" in {
+      FEN(s"$board w 1").player === Some(P1)
+      FEN(s"$board b 1").player === Some(P2)
+      FEN(s"$board x 1").player === None
+      FEN(s"$board wb 1").player === None
+      FEN(board).player === None
+      Forsyth.<<@(Yonkoma10x10, FEN(s"$board x 1")) === None
+      Forsyth.<<@(Yonkoma10x10, FEN(board)) === None
+      Forsyth.<<<@(Yonkoma10x10, FEN(s"$board x 1")) === None
+    }
+
+    "hold two checkers a side, white on dark squares and black on light ones" in {
+      // a third white checker on i2
+      Forsyth.<<@(Yonkoma10x10, FEN("c8C/10/10/10/10/10/10/10/8C1/C8c w 1")) === None
+      // one black checker only
+      Forsyth.<<@(Yonkoma10x10, FEN("9C/10/10/10/10/10/10/10/10/C8c w 1")) === None
+      // a white checker on the light square b1
+      Forsyth.<<@(Yonkoma10x10, FEN("c8C/10/10/10/10/10/10/10/10/1C7c w 1")) === None
+      // a black checker on the dark square a1
+      Forsyth.<<@(Yonkoma10x10, FEN("c8C/10/10/10/10/10/10/10/10/c8C w 1")) === None
+      // the four checkers anywhere legal are fine
+      Forsyth.<<@(Yonkoma10x10, FEN("10/10/10/10/4cC4/4C5/10/10/10/9c b 2")).isDefined must beTrue
+    }
   }
 
   "a fen with two-digit runs of empty squares" should {
-    val fen = FEN("10/10/10/10/10/3Cc5/3cC5/10/10/10 b 7")
+    val fen = FEN("10/10/10/10/10/3cC5/3Cc5/10/10/10 b 7")
 
     "read the board back" in {
       val pieces = fen.pieces
-      pieces.get(Pos.D5) === Some(Piece(P1, Checker))
-      pieces.get(Pos.E5) === Some(Piece(P2, Checker))
-      pieces.get(Pos.D4) === Some(Piece(P2, Checker))
-      pieces.get(Pos.E4) === Some(Piece(P1, Checker))
+      pieces.get(Pos.D5) === Some(Piece(P2, Checker))
+      pieces.get(Pos.E5) === Some(Piece(P1, Checker))
+      pieces.get(Pos.D4) === Some(Piece(P1, Checker))
+      pieces.get(Pos.E4) === Some(Piece(P2, Checker))
       pieces.size === 4
     }
 
@@ -85,10 +126,17 @@ class YonkomaForsythTest extends YonkomaTest {
     }
 
     "write a run of eleven empty squares on the 12x12 board as 11" in {
-      val fen12 = FEN("12/12/12/12/12/12/12/12/12/12/C11/11c w 3")
-      fen12.pieces.get(Pos.A2) === Some(Piece(P1, Checker))
+      val fen12 = FEN("12/12/12/12/12/12/12/12/12/C11/c10C/11c w 3")
+      fen12.pieces.get(Pos.A3) === Some(Piece(P1, Checker))
+      fen12.pieces.get(Pos.L2) === Some(Piece(P1, Checker))
+      fen12.pieces.get(Pos.A2) === Some(Piece(P2, Checker))
       fen12.pieces.get(Pos.L1) === Some(Piece(P2, Checker))
       Forsyth.>>(Forsyth.<<<@(Yonkoma12x12, fen12).get).value === fen12.value
+    }
+
+    "give an empty replay no turns" in {
+      Replay(Game(Yonkoma10x10)).chronoActions === Nil
+      Replay(Game(Yonkoma10x10)).chronoPlies === Nil
     }
   }
 
@@ -142,7 +190,7 @@ class YonkomaForsythTest extends YonkomaTest {
 
     "round-trip moves and passes through piotr" in {
       val ucis = Uci.readList("a1e5 pass j10f6 l12a1").get
-      Uci.readListPiotr(Uci.writeListPiotr(ucis)).map(_.map(_.uci)) === Some(ucis.map(_.uci))
+      ucis.map(u => Uci.piotr(u.piotr).map(_.uci)) === ucis.map(u => Some(u.uci))
     }
   }
 }

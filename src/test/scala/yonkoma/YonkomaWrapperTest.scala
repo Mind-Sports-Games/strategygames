@@ -204,8 +204,10 @@ class YonkomaWrapperTest extends Specification {
       val replay     = strategygames.Replay.apply(lib, ucis, None, stratVariant)
       replay.toOption must beSome[strategygames.Replay].like { case r =>
         r.state.situation.end must beTrue
+        r.state.situation.winner === Some(Player.P2)
         r.state.plies === 7
         r.chronoActions.size === 7
+        r.chronoActions.forall(_.size == 1) must beTrue
       }
       val situations = strategygames.Replay.situations(lib, actionStrs, None, stratVariant)
       situations.toOption.map(_.size) === Some(8)
@@ -214,6 +216,16 @@ class YonkomaWrapperTest extends Specification {
     "take the board size from the Variant tag" in {
       val actionStrs = Vector(Vector("l12g7"), Vector("l1g6"), Vector("a1f6"), Vector("a12f7"))
       val tags       = Tags(List(Tag(_.Variant, "Yonkoma 12x12")))
+      val result     = StratReader.replayResultFromActionStrs(lib, actionStrs, identity, tags)
+      result.toOption.flatMap(_.valid.toOption) must beSome[strategygames.Replay].like { case r =>
+        r.state.situation.board.variant === strat12
+        r.state.situation.end must beTrue
+      }
+    }
+
+    "take the board size from the FEN tag when there is no Variant tag" in {
+      val actionStrs = Vector(Vector("l12g7"), Vector("l1g6"), Vector("a1f6"), Vector("a12f7"))
+      val tags       = Tags(List(Tag(_.FEN, strat12.initialFen.value)))
       val result     = StratReader.replayResultFromActionStrs(lib, actionStrs, identity, tags)
       result.toOption.flatMap(_.valid.toOption) must beSome[strategygames.Replay].like { case r =>
         r.state.situation.board.variant === strat12

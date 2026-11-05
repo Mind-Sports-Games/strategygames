@@ -173,7 +173,7 @@ abstract class Game(
       case Uci.FiveInARowSwap(_)                                   => swap(metrics)
       case Uci.FiveInARowSwap2(_)                                  => swap2(metrics)
       case Uci.FiveInARowOffer10(_)                                => offer10(metrics)
-      case Uci.GoPass(_) | Uci.EntropyPass(_)                      => pass(metrics)
+      case Uci.GoPass(_) | Uci.EntropyPass(_) | Uci.YonkomaPass(_) => pass(metrics)
       case Uci.ChessDoRoll(_) | Uci.BackgammonDoRoll(_)            => randomizeAndApplyDiceRoll(metrics)
       case Uci.BackgammonUndo(_)                                   => undo(metrics)
       case Uci.BackgammonEndTurn(_)                                => endTurn(metrics)
@@ -184,7 +184,6 @@ abstract class Game(
           promotion = None,
           metrics
         )
-      case Uci.GoPass(_) | Uci.EntropyPass(_) | Uci.YonkomaPass(_) => pass(metrics)
     }).map { case (game, action) =>
       game -> action
     }
@@ -1828,7 +1827,7 @@ object Game {
     def toDameo: dameo.Game               = sys.error("Can't turn an entropy game into a dameo game")
     def toEntropy: entropy.Game           = g
     def toFiveInARow                      = sys.error("Can't make a fiveinarow object from an entropy object")
-    def toYonkoma                         = sys.error("Can't make a yonkoma object from an entropy object")
+    def toYonkoma                         = sys.error("Can't make a yonkoma game from an entropy game")
 
   }
 
@@ -1999,7 +1998,7 @@ object Game {
     def toDameo: dameo.Game               = sys.error("Can't turn a fiveinarow game into a dameo game")
     def toFiveInARow: fiveinarow.Game     = g
     def toEntropy                         = sys.error("Can't make an entropy object from a fiveinarow object")
-    def toYonkoma: yonkoma.Game           = sys.error("Can't make a yonkoma game from an entropy game")
+    def toYonkoma: yonkoma.Game           = sys.error("Can't make a yonkoma game from a fiveinarow game")
 
   }
 
@@ -2146,7 +2145,7 @@ object Game {
     def toDameo: dameo.Game               = sys.error("Can't turn a yonkoma game into a dameo game")
     def toEntropy: entropy.Game           = sys.error("Can't turn a yonkoma game into an entropy game")
     def toYonkoma: yonkoma.Game           = g
-    def toFiveInARow                      = sys.error("Can't make a fiveinarow object from a yonkoma object")
+    def toFiveInARow                      = sys.error("Can't make a fiveinarow game from a yonkoma game")
 
   }
 
@@ -2262,7 +2261,6 @@ object Game {
   def wrap(g: backgammon.Game)       = Backgammon(g)
   def wrap(g: abalone.Game)          = Abalone(g)
   def wrap(g: dameo.Game)            = Dameo(g)
-  def wrap(g: entropy.Game)          = Entropy(g)
   def wrap(g: yonkoma.Game)          = Yonkoma(g)
 
 }

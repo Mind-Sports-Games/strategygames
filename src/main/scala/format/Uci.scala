@@ -301,7 +301,7 @@ object Uci {
     def toDameo        = m
     def toEntropy      = sys.error("Can't make an entropy object from a dameo object")
     def toFiveInARow   = sys.error("Can't make a fiveinarow object from a dameo object")
-    def toYonkoma      = sys.error("Can't make a yonkoma object from a dameo object")
+    def toYonkoma      = sys.error("Can't make a yonkoma UCI from a dameo UCI")
   }
 
   sealed abstract class Drop(
@@ -783,7 +783,7 @@ object Uci {
     def toDameo        = sys.error("Can't make a dameo UCI from an entropy UCI")
     def toEntropy      = d
     def toFiveInARow   = sys.error("Can't make a fiveinarow object from an entropy object")
-    def toYonkoma      = sys.error("Can't make a yonkoma object from an entropy object")
+    def toYonkoma      = sys.error("Can't make a yonkoma UCI from an entropy UCI")
   }
 
   final case class FiveInARowDrop(d: fiveinarow.format.Uci.Drop)
@@ -809,7 +809,7 @@ object Uci {
     def toDameo        = sys.error("Can't make a dameo UCI from a fiveinarow UCI")
     def toFiveInARow   = d
     def toEntropy      = sys.error("Can't make an entropy object from a fiveinarow object")
-    def toYonkoma      = sys.error("Can't make a yonkoma drop from an entropy drop")
+    def toYonkoma      = sys.error("Can't make a yonkoma drop from a fiveinarow drop")
   }
 
   final case class EntropyPass(p: entropy.format.Uci.Pass) extends Pass() with Entropy {
@@ -1772,6 +1772,7 @@ object Uci {
     case (GameLogic.Abalone(), _)                                      => sys.error("Swap not implemented for abalone")
     case (GameLogic.Dameo(), _)                                        => sys.error("Swap not implemented for dameo")
     case (GameLogic.Entropy(), _)                                      => sys.error("Swap not implemented for entropy")
+    case (GameLogic.Yonkoma(), _)                                      => sys.error("Swap not implemented for yonkoma")
     case (GameLogic.FiveInARow(), strategygames.Swap.FiveInARow(swap)) =>
       FiveInARowSwap(fiveinarow.format.Uci(swap))
   }
@@ -1787,6 +1788,7 @@ object Uci {
     case (GameLogic.Abalone(), _)                                        => sys.error("Swap2 not implemented for abalone")
     case (GameLogic.Dameo(), _)                                          => sys.error("Swap2 not implemented for dameo")
     case (GameLogic.Entropy(), _)                                        => sys.error("Swap2 not implemented for entropy")
+    case (GameLogic.Yonkoma(), _)                                        => sys.error("Swap2 not implemented for yonkoma")
     case (GameLogic.FiveInARow(), strategygames.Swap2.FiveInARow(swap2)) =>
       FiveInARowSwap2(fiveinarow.format.Uci(swap2))
   }
@@ -1802,6 +1804,7 @@ object Uci {
     case (GameLogic.Abalone(), _)                                            => sys.error("Offer10 not implemented for abalone")
     case (GameLogic.Dameo(), _)                                              => sys.error("Offer10 not implemented for dameo")
     case (GameLogic.Entropy(), _)                                            => sys.error("Offer10 not implemented for entropy")
+    case (GameLogic.Yonkoma(), _)                                            => sys.error("Offer10 not implemented for yonkoma")
     case (GameLogic.FiveInARow(), strategygames.Offer10.FiveInARow(offer10)) =>
       FiveInARowOffer10(fiveinarow.format.Uci(offer10))
   }

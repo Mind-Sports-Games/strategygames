@@ -75,8 +75,6 @@ case class Game(
 
   def board = situation.board
 
-  def halfMoveClock: Int = board.history.halfMoveClock
-
   def fullTurnCount: Int = 1 + turnCount / 2
 
   def withTurnsAndPlies(p: Int, t: Int) = copy(plies = p, turnCount = t)

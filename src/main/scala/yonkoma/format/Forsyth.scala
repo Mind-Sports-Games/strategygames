@@ -11,22 +11,23 @@ object Forsyth {
 
   // P2's checkers in the top corners, P1's in the bottom corners, P1 to move
   def initial(variant: Variant): FEN = {
-    val n     = variant.width
-    val inner = (n - 2).toString
-    val empty = List.fill(n - 2)(n.toString)
-    FEN((s"c${inner}C" :: empty ::: List(s"C${inner}c")).mkString("/") + " w 1")
+    val width  = variant.width
+    val inner  = (width - 2).toString
+    val middle = List.fill(variant.height - 2)(width.toString)
+    FEN((s"c${inner}C" :: middle ::: List(s"C${inner}c")).mkString("/") + " w 1")
   }
 
   val initial: FEN = initial(Variant.default)
 
-  // the FEN's rank count must be the variant's board size, and every checker must be on it
+  // None unless the FEN describes the variant's board, names the player to move, and holds a
+  // position the rules allow: two checkers a side, P1's on dark squares and P2's on light ones
   def <<@(variant: Variant, fen: FEN): Option[Situation] =
-    if (!fen.boardSize.contains(variant.boardSize)) None
-    else {
-      val board = Board(pieces = fen.pieces, history = History(), variant = variant)
-      if (board.pieces.keys.forall(board.onBoard)) Some(Situation(board, fen.player.getOrElse(P1)))
-      else None
-    }
+    for {
+      size   <- fen.boardSize if size == variant.boardSize
+      player <- fen.player
+      board   = Board(pieces = fen.pieces, history = History(), variant = variant)
+      if variant.valid(board, strict = true)
+    } yield Situation(board, player)
 
   // the board size picks the variant
   def <<(fen: FEN): Option[Situation] = Variant.forFen(fen).flatMap(<<@(_, fen))

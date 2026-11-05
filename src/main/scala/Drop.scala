@@ -187,9 +187,9 @@ object Drop {
     def toDameo        = sys.error("Can't make a dameo drop from an entropy drop")
     def toEntropy      = d
     def toFiveInARow   = sys.error("Can't make a fiveinarow object from an entropy object")
+    def toYonkoma      = sys.error("Can't make a yonkoma drop from an entropy drop")
 
     override def toString = toUci.uci
-    def toYonkoma         = sys.error("Can't make a yonkoma object from an entropy object")
   }
 
   final case class FiveInARow(d: fiveinarow.Drop)
@@ -223,7 +223,7 @@ object Drop {
     def toDameo        = sys.error("Can't make a dameo drop from a fiveinarow drop")
     def toFiveInARow   = d
     def toEntropy      = sys.error("Can't make an entropy object from a fiveinarow object")
-    def toYonkoma      = sys.error("Can't make a yonkoma drop from an entropy drop")
+    def toYonkoma      = sys.error("Can't make a yonkoma drop from a fiveinarow drop")
 
     override def toString = toUci.uci
   }

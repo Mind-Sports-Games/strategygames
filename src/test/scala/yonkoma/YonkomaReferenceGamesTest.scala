@@ -27,7 +27,7 @@ class YonkomaReferenceGamesTest extends YonkomaTest {
         val parts = line.split('|')
         ReferenceGame(
           variant = if (parts(0) == "12") Yonkoma12x12 else Yonkoma10x10,
-          loser = if (parts(1) == "red") P1 else P2,
+          loser = if (parts(1) == "p1") P1 else P2,
           turns = parts(2).split(' ').toList,
           legal =
             parts(3).split(';').toList.map(l => if (l.isEmpty) Set.empty[String] else l.split(',').toSet)

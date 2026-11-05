@@ -4,16 +4,8 @@ case class File private (val index: Int) extends AnyVal with Ordered[File] {
   @inline def -(that: File): Int           = index - that.index
   @inline override def compare(that: File) = this - that
 
-  def offset(delta: Int): Option[File] =
-    if (-File.allSize < delta && delta < File.allSize) File(index + delta)
-    else None
-
   @inline def char: Char = (97 + index).toChar
-  def sgfChar: Char      = char
   override def toString  = char.toString
-
-  @inline def upperCaseChar: Char = (65 + index).toChar
-  def toUpperCaseString           = upperCaseChar.toString
 }
 
 object File {
@@ -22,8 +14,6 @@ object File {
     else None
 
   @inline def of(pos: Pos): File = new File(pos.index % allSize)
-
-  def fromChar(ch: Char): Option[File] = apply(ch.toInt - 97)
 
   val A = new File(0)
   val B = new File(1)
@@ -40,6 +30,5 @@ object File {
 
   // the largest board is 12x12; a smaller board uses the first files
   val all          = List(A, B, C, D, E, F, G, H, I, J, K, L)
-  val allReversed  = all.reverse
   val allSize: Int = all.size
 }

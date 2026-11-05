@@ -24,17 +24,21 @@ object Reader {
   }
 
   // yonkoma records games as action strings; there is no PGN text parser for it. The
-  // board size comes from the Variant tag, so a 12x12 game replays on a 12x12 board.
+  // board size comes from the Variant tag, or failing that from the FEN tag, so a 12x12
+  // game replays on a 12x12 board.
   def replayResultFromActionStrs(
       actionStrs: ActionStrs,
       op: ActionStrs => ActionStrs,
       tags: Tags
-  ): Validated[String, Result] =
-    Replay(op(actionStrs), tags(_.FEN).map(FEN.apply), variantFromTags(tags))
+  ): Validated[String, Result] = {
+    val fen = tags(_.FEN).map(FEN.apply)
+    Replay(op(actionStrs), fen, variantFromTags(tags, fen))
+  }
 
-  private def variantFromTags(tags: Tags): Variant =
+  private def variantFromTags(tags: Tags, fen: Option[FEN]): Variant =
     tags(_.Variant)
       .flatMap(name => Variant.byName(name) orElse Variant(name.toLowerCase))
+      .orElse(fen.flatMap(Variant.forFen))
       .getOrElse(Variant.default)
 
 }

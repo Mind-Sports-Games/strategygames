@@ -9,11 +9,6 @@ case class History(
     halfMoveClock: Int = 0
 ) {
 
-  def setHalfMoveClock(v: Int) = copy(halfMoveClock = v)
-
-  lazy val lastAction: Option[Uci] =
-    if (currentTurn.nonEmpty) currentTurn.reverse.headOption else lastTurn.reverse.headOption
-
   lazy val recentTurn: List[Uci] = if (currentTurn.nonEmpty) currentTurn else lastTurn
 
   lazy val recentTurnUciString: Option[String] =

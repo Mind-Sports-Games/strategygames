@@ -1061,7 +1061,7 @@ object Variant {
     def toDameo        = v
     def toEntropy      = sys.error("Can't convert dameo to entropy")
     def toFiveInARow   = sys.error("Can't convert dameo to fiveinarow")
-    def toYonkoma      = sys.error("Can't make a yonkoma object from a dameo object")
+    def toYonkoma      = sys.error("Can't make a yonkoma variant from a dameo variant")
 
     def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.Dameo(pos), (Piece.Dameo(piece), 1)) }
@@ -1289,7 +1289,7 @@ object Variant {
     def toDameo        = sys.error("Can't convert fiveinarow to dameo")
     def toFiveInARow   = v
     def toEntropy      = sys.error("Can't convert fiveinarow to entropy")
-    def toYonkoma      = sys.error("Can't make a yonkoma object from a fiveinarow object")
+    def toYonkoma      = sys.error("Can't make a yonkoma variant from a fiveinarow variant")
 
     def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.FiveInARow(pos), (Piece.FiveInARow(piece), 1)) }
@@ -1399,7 +1399,7 @@ object Variant {
     def toDameo        = sys.error("Can't convert yonkoma to dameo")
     def toEntropy      = sys.error("Can't convert yonkoma to entropy")
     def toYonkoma      = v
-    def toFiveInARow   = sys.error("Can't make a fiveinarow object from a yonkoma object")
+    def toFiveInARow   = sys.error("Can't make a fiveinarow variant from a yonkoma variant")
 
     def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.Yonkoma(pos), (Piece.Yonkoma(piece), 1)) }
@@ -1468,11 +1468,12 @@ object Variant {
       case _                            => sys.error("Not passed Yonkoma objects")
     }
 
-    def hasMoveEffects: Boolean = v.hasMoveEffects
+    // a move is a slide and nothing more
+    def hasMoveEffects: Boolean = false
 
     def addVariantEffect(move: Move): Move            = move match {
-      case Move.Yonkoma(move) => Move.Yonkoma(v.addVariantEffect(move))
-      case _                  => sys.error("Not passed Yonkoma objects")
+      case Move.Yonkoma(_) => move
+      case _               => sys.error("Not passed Yonkoma objects")
     }
     def valid(board: Board, strict: Boolean): Boolean = board match {
       case Board.Yonkoma(board) => v.valid(board, strict)
@@ -1505,8 +1506,7 @@ object Variant {
       backgammon.variant.Variant.all.map(Backgammon.apply) :::
       abalone.variant.Variant.all.map(Abalone.apply) :::
       entropy.variant.Variant.all.map(Entropy.apply) :::
-      fiveinarow.variant.Variant.all.map(FiveInARow.apply)
-    entropy.variant.Variant.all.map(Entropy.apply) :::
+      fiveinarow.variant.Variant.all.map(FiveInARow.apply) :::
       yonkoma.variant.Variant.all.map(Yonkoma.apply)
 
   def byId = all map { v => (v.id, v) } toMap
@@ -1643,6 +1643,5 @@ object Variant {
   def wrap(v: backgammon.variant.Variant)   = Backgammon(v)
   def wrap(v: abalone.variant.Variant)      = Abalone(v)
   def wrap(v: dameo.variant.Variant)        = Dameo(v)
-  def wrap(v: entropy.variant.Variant)      = Entropy(v)
   def wrap(v: yonkoma.variant.Variant)      = Yonkoma(v)
 }

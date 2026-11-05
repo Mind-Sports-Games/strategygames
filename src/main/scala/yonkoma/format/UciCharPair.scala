@@ -9,7 +9,8 @@ object UciCharPair {
   def apply(uci: Uci): stratUciCharPair =
     uci match {
       case Uci.Move(orig, dest) => stratUciCharPair(toChar(orig), toChar(dest))
-      case Uci.Pass()           => stratUciCharPair(voidChar, voidChar)
+      // a pass is (a1, a1), as in go and entropy; no move starts and ends on one square
+      case Uci.Pass()           => stratUciCharPair(toChar(Pos.A1), toChar(Pos.A1))
     }
 
   private[format] object implementation {
@@ -19,7 +20,7 @@ object UciCharPair {
 
     val pos2charMap: Map[Pos, Char] = Pos.all
       .map { pos =>
-        pos -> (pos.hashCode + charShift).toChar
+        pos -> (pos.index + charShift).toChar
       }
       .to(Map)
 

@@ -456,7 +456,7 @@ object Move {
     def toDameo        = m
     def toEntropy      = sys.error("Can't make an entropy object from a dameo object")
     def toFiveInARow   = sys.error("Can't make a fiveinarow object from a dameo object")
-    def toYonkoma      = sys.error("Can't make a yonkoma object from a dameo object")
+    def toYonkoma      = sys.error("Can't make a yonkoma move from a dameo move")
   }
 
   def wrap(m: chess.Move): Move        = Move.Chess(m)
@@ -566,9 +566,9 @@ object Move {
     def toDameo        = sys.error("Can't make a dameo move from a yonkoma move")
     def toEntropy      = sys.error("Can't make an entropy move from a yonkoma move")
     def toYonkoma      = m
+    def toFiveInARow   = sys.error("Can't make a fiveinarow move from a yonkoma move")
 
     override def toString = toUci.uci
-    def toFiveInARow      = sys.error("Can't make a fiveinarow move from a yonkoma move")
   }
 
 }

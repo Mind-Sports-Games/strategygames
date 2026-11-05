@@ -4,12 +4,7 @@ case class Rank private (val index: Int) extends AnyVal with Ordered[Rank] {
   @inline def -(that: Rank): Int           = index - that.index
   @inline override def compare(that: Rank) = this - that
 
-  def offset(delta: Int): Option[Rank] =
-    if (-Rank.allSize < delta && delta < Rank.allSize) Rank(index + delta)
-    else None
-
-  def sgfChar(numRanks: Int): Char = (97 + (numRanks - 1 - index)).toChar
-  override def toString            = (index + 1).toString
+  override def toString = (index + 1).toString
 }
 
 object Rank {
@@ -18,8 +13,6 @@ object Rank {
     else None
 
   @inline def of(pos: Pos): Rank = new Rank(pos.index / File.allSize)
-
-  def fromString(s: String): Option[Rank] = s.toIntOption.flatMap(n => apply(n - 1))
 
   val First    = new Rank(0)
   val Second   = new Rank(1)
@@ -35,7 +28,7 @@ object Rank {
   val Twelfth  = new Rank(11)
 
   // the largest board is 12x12; a smaller board uses the first ranks
-  val all                     = List(
+  val all          = List(
     First,
     Second,
     Third,
@@ -49,6 +42,5 @@ object Rank {
     Eleventh,
     Twelfth
   )
-  val allReversed: List[Rank] = all.reverse
-  val allSize: Int            = all.size
+  val allSize: Int = all.size
 }

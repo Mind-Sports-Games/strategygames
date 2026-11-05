@@ -113,9 +113,9 @@ object Pass {
     def toDameo        = sys.error("Can't make a dameo pass from a yonkoma pass")
     def toEntropy      = sys.error("Can't make an entropy pass from a yonkoma pass")
     def toYonkoma      = p
+    def toFiveInARow   = sys.error("Can't make a fiveinarow pass from a yonkoma pass")
 
     override def toString = toUci.uci
-    def toFiveInARow      = sys.error("Can't make a fiveinarow pass from a yonkoma pass")
   }
 
 }

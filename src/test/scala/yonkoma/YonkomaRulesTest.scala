@@ -6,7 +6,7 @@ class YonkomaRulesTest extends YonkomaTest {
 
   "the starting position" should {
 
-    "put red on the dark corners and blue on the light corners of the 10x10 board" in {
+    "put P1 on the dark corners and P2 on the light corners of the 10x10 board" in {
       val board = Board.init(Yonkoma10x10)
       board.pieces.size === 4
       board(Pos.A1) === Some(Piece(P1, Checker))
@@ -35,7 +35,7 @@ class YonkomaRulesTest extends YonkomaTest {
       Yonkoma12x12.boardSize.onBoard(Pos.L12) must beTrue
     }
 
-    "give red the first move" in {
+    "give P1 the first move" in {
       val game = Game.apply(Yonkoma10x10)
       game.situation.player === P1
       game.situation.moves must not(beEmpty)
@@ -43,9 +43,9 @@ class YonkomaRulesTest extends YonkomaTest {
       game.situation.end must beFalse
     }
 
-    "let red move either corner checker towards the blue ones" in {
+    "let P1 move either corner checker towards P2's" in {
       val s = Game.apply(Yonkoma10x10).situation
-      // from a1 the only diagonal runs to j10, which red's own checker blocks
+      // from a1 the only diagonal runs to j10, which P1's own checker blocks
       destinationKeys(s, "a1") === List("b2", "c3", "d4", "e5", "f6", "g7", "h8", "i9")
       destinationKeys(s, "j10") === List("b2", "c3", "d4", "e5", "f6", "g7", "h8", "i9")
     }
@@ -53,9 +53,9 @@ class YonkomaRulesTest extends YonkomaTest {
 
   "the legal move rule" should {
 
-    // Figure 2 of the rule sheet: red on a1 and b2, blue on c4 and f1, red to move.
+    // Figure 2 of the rule sheet: P1 on a1 and b2, P2 on c4 and f1, P1 to move.
     // (The figure is drawn on a 6x6 board; the answer is the same on the 10x10 board,
-    // since the squares beyond f6 on the long diagonal are all farther from the blues.)
+    // since the squares beyond f6 on the long diagonal are all farther from P2's checkers.)
     val figure2 = situation("10/10/10/10/10/10/2c7/10/1C8/C4c4", P1)
 
     "allow the moves the rule sheet lists from b2" in {
@@ -75,12 +75,12 @@ class YonkomaRulesTest extends YonkomaTest {
     }
 
     "accept a move that keeps the sum but moves away from the partner" in {
-      // c1: distances 3 and 3 to the blues, still 6, but 2 from a1 instead of 1
+      // c1: distances 3 and 3 to P2's checkers, still 6, but 2 from a1 instead of 1
       figure2.move(pos("b2"), pos("c1")).isValid must beTrue
     }
 
     "refuse a move that keeps the sum but comes closer to the partner" in {
-      // red on h6 and a9, blue on h7 and a2: h6 to f8 keeps the sum at 8 (1+7 becomes
+      // P1 on h6 and a9, P2 on h7 and a2: h6 to f8 keeps the sum at 8 (1+7 becomes
       // 2+6) but brings the checker from 7 squares to 5 from its partner
       val s = situation("10/C9/10/7c2/7C2/10/10/10/c9/10", P1)
       s.move(pos("h6"), pos("f8")).isInvalid must beTrue
@@ -88,7 +88,7 @@ class YonkomaRulesTest extends YonkomaTest {
     }
 
     "stop a slide at the first occupied square" in {
-      // red b2 may not jump the blue checker on d4 to reach e5
+      // P1's b2 may not jump P2's checker on d4 to reach e5
       val s = situation("10/10/10/10/10/10/3c6/10/1C8/C8c", P1)
       destinationKeys(s, "b2") must not(contain("e5"))
       destinationKeys(s, "b2") must not(contain("d4"))
@@ -103,13 +103,13 @@ class YonkomaRulesTest extends YonkomaTest {
   "the crosscut" should {
 
     "be recognised when the four checkers fill a 2x2 block on opposite diagonals" in {
-      // red d4 and e5, blue d5 and e4
+      // P1 on d4 and e5, P2 on d5 and e4
       val board = situation("10/10/10/10/10/3cC5/3Cc5/10/10/10", P1).board
       Yonkoma10x10.isCrosscut(board) must beTrue
     }
 
     "not be a crosscut when the colours share a diagonal" in {
-      // red d4 and d5, blue e4 and e5: each colour on a file, not a diagonal
+      // P1 on d4 and d5, P2 on e4 and e5: each side on a file, not a diagonal
       val board = situation("10/10/10/10/10/3Cc5/3Cc5/10/10/10", P1).board
       Yonkoma10x10.isCrosscut(board) must beFalse
     }
@@ -120,9 +120,9 @@ class YonkomaRulesTest extends YonkomaTest {
     }
 
     "lose the game for the player who completes it" in {
-      // as in Figure 3 of the rule sheet: red on d4 and f2, blue on d3 and e4; red moves
-      // f2 to e3 and completes the block d3 e3 d4 e4, with the reds on one diagonal and
-      // the blues on the other
+      // as in Figure 3 of the rule sheet: P1 on d4 and f2, P2 on d3 and e4; P1 moves
+      // f2 to e3 and completes the block d3 e3 d4 e4, with P1's checkers on one diagonal and
+      // P2's on the other
       val before = situation("10/10/10/10/10/10/3Cc5/3c6/5C4/10", P1)
       before.end must beFalse
       val move   = before.move(pos("f2"), pos("e3"))
@@ -136,7 +136,7 @@ class YonkomaRulesTest extends YonkomaTest {
       after.moves must beEmpty
     }
 
-    "end the shortest possible game, which blue loses" in {
+    "end the shortest possible game, which P2 loses" in {
       val game = playActionStrs("a1e5 a10e6 j10f6 j1f5", Yonkoma10x10)
       game.isValid must beTrue
       val g    = game.toOption.get
@@ -205,7 +205,7 @@ class YonkomaRulesTest extends YonkomaTest {
     }
 
     "refuse the 10x10 opening move, which runs off its diagonal" in {
-      // j10 is empty on the 12x12 board: the red checker is on l12
+      // j10 is empty on the 12x12 board: the P1 checker is on l12
       Game.apply(Yonkoma12x12).situation.move(pos("j10"), pos("f6")).isInvalid must beTrue
     }
   }
@@ -214,7 +214,7 @@ class YonkomaRulesTest extends YonkomaTest {
     "accept the starting position strictly" in {
       Board.init(Yonkoma10x10).valid(true) must beTrue
     }
-    "reject a red checker on a light square" in {
+    "reject a P1 checker on a light square" in {
       situation("c8C/10/10/10/10/10/10/10/10/1C7c", P1).board.valid(true) must beFalse
     }
     "reject a position with three checkers of one colour" in {

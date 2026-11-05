@@ -18,8 +18,6 @@ final class Hash(size: Int) {
 
 object Hash {
 
-  val size = 3
-
   // generated from a fixed seed, as the other pure-Scala games do
   class ZobristConstants(start: Int) {
     private val random = new scala.util.Random(0x9e3779b9L + start.toLong)
@@ -44,8 +42,4 @@ object Hash {
       .map { case (pos, piece) => table.actorMasks(actorIndex(pos, piece)) }
       .fold(hturn)(_ ^ _)
   }
-
-  private val h = new Hash(size)
-
-  def apply(situation: Situation): PositionHash = h.apply(situation)
 }

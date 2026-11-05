@@ -7,8 +7,6 @@ import cats.data.Validated
 
 case class Situation(board: Board, player: Player) {
 
-  def history = board.history
-
   lazy val moves: Map[Pos, List[Move]] = board.variant.validMoves(this)
 
   lazy val destinations: Map[Pos, List[Pos]] = moves.view.mapValues(_.map(_.dest)).to(Map)
@@ -16,8 +14,6 @@ case class Situation(board: Board, player: Player) {
   // passing is not allowed, so the pass is only there for a player with no legal move,
   // whose turn is skipped
   lazy val canPass: Boolean = !end && moves.isEmpty
-
-  lazy val canMove: Boolean = moves.nonEmpty
 
   def move(from: Pos, to: Pos): Validated[String, Move] =
     board.variant.move(this, from, to)
@@ -27,25 +23,18 @@ case class Situation(board: Board, player: Player) {
 
   def pass(): Validated[String, Pass] = board.variant.pass(this)
 
-  // the move generation for both players runs once per situation
+  // a crosscut on the board; the moves above are the only move generation, done once
   lazy val variantEnd: Boolean = board.variant.specialEnd(this)
 
   lazy val end: Boolean = variantEnd
 
-  def winner: Option[Player] = board.variant.winner(this)
+  lazy val winner: Option[Player] = board.variant.winner(this)
 
   def playable(strict: Boolean): Boolean = (board valid strict) && !end
-
-  def opponentHasInsufficientMaterial: Boolean = false
-
-  def autoDraw: Boolean = false
 
   lazy val status: Option[Status] =
     if (variantEnd) Some(Status.VariantEnd)
     else None
-
-  def withHistory(history: History) =
-    copy(board = board withHistory history)
 
   def withVariant(variant: strategygames.yonkoma.variant.Variant) =
     copy(board = board withVariant variant)

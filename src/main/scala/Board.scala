@@ -486,7 +486,7 @@ object Board {
     def toDameo        = sys.error("Can't make a dameo board from an entropy board")
     def toEntropy      = b
     def toFiveInARow   = sys.error("Can't make a fiveinarow object from an entropy object")
-    def toYonkoma      = sys.error("Can't make a yonkoma object from an entropy object")
+    def toYonkoma      = sys.error("Can't make a yonkoma board from an entropy board")
   }
 
   case class FiveInARow(b: fiveinarow.Board)
@@ -530,7 +530,7 @@ object Board {
     def toDameo        = sys.error("Can't make a dameo board from a fiveinarow board")
     def toFiveInARow   = b
     def toEntropy      = sys.error("Can't make an entropy object from a fiveinarow object")
-    def toYonkoma      = sys.error("Can't make a yonkoma board from an entropy board")
+    def toYonkoma      = sys.error("Can't make a yonkoma board from a fiveinarow board")
   }
 
   case class Yonkoma(b: yonkoma.Board)

@@ -20,8 +20,6 @@ case class Board(
   // the squares of a player's checkers, in a1-to-l12 order
   def checkersOf(player: Player): List[Pos] = piecesOf(player).keys.toList.sortBy(_.index)
 
-  lazy val posMap: Map[Piece, Iterable[Pos]] = pieces.groupMap(_._2)(_._1)
-
   def empty(pos: Pos): Boolean = !pieces.contains(pos)
 
   def onBoard(pos: Pos): Boolean = boardSize.onBoard(pos)
@@ -32,10 +30,6 @@ case class Board(
       pieces.get(orig).map { piece =>
         copy(pieces = pieces - orig + (dest -> piece))
       }
-
-  def place(piece: Piece, at: Pos): Option[Board] =
-    if (pieces.contains(at) || !onBoard(at)) None
-    else Some(copy(pieces = pieces + (at -> piece)))
 
   def withHistory(h: History): Board       = copy(history = h)
   def updateHistory(f: History => History) = copy(history = f(history))
@@ -63,12 +57,9 @@ object Board {
       val height: Int
   ) {
 
-    val key   = s"${width}x${height}"
-    val sizes = List(width, height)
+    val key = s"${width}x${height}"
 
     def onBoard(pos: Pos): Boolean = pos.file.index < width && pos.rank.index < height
-
-    val validPos: List[Pos] = Pos.all.filter(onBoard)
 
     val files: List[File] = File.all.take(width)
     val ranks: List[Rank] = Rank.all.take(height)
