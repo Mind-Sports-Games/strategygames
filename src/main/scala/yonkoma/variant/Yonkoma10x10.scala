@@ -15,7 +15,7 @@ case object Yonkoma10x10
 
   def gameFamily: GameFamily = GameFamily.Yonkoma()
 
-  def perfIcon: Char = ''
+  def perfIcon: Char = ''
   def perfId: Int    = 1100
 
   override def baseVariant: Boolean = true
