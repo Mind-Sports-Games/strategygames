@@ -113,6 +113,15 @@ object Piece {
     def forsyth: Char = p.forsyth
   }
 
+  final case class Yonkoma(p: yonkoma.Piece)
+      extends Piece(
+        p.player,
+        Role.YonkomaRole(p.role)
+      ) {
+
+    def forsyth: Char = p.forsyth
+  }
+
   def apply(lib: GameLogic, player: Player, role: Role): Piece = (lib, role) match {
     case (GameLogic.Draughts(), Role.DraughtsRole(role))         => Draughts(draughts.Piece(player, role))
     case (GameLogic.Chess(), Role.ChessRole(role))               => Chess(chess.Piece(player, role))
@@ -126,6 +135,7 @@ object Piece {
     case (GameLogic.Dameo(), Role.DameoRole(role))               => Dameo(dameo.Piece(player, role))
     case (GameLogic.Entropy(), Role.EntropyRole(role))           => Entropy(entropy.Piece(player, role))
     case (GameLogic.FiveInARow(), Role.FiveInARowRole(role))     => FiveInARow(fiveinarow.Piece(player, role))
+    case (GameLogic.Yonkoma(), Role.YonkomaRole(role))           => Yonkoma(yonkoma.Piece(player, role))
     case _                                                       => sys.error("Mismatched gamelogic types 2")
   }
 
@@ -141,6 +151,7 @@ object Piece {
     case (GameLogic.Dameo())        => dameo.Piece.fromChar(c).map(Dameo.apply)
     case (GameLogic.Entropy())      => entropy.Piece.fromChar(c).map(Entropy.apply)
     case (GameLogic.FiveInARow())   => sys.error("a stone's owner depends on the position, not its char")
+    case (GameLogic.Yonkoma())      => yonkoma.Piece.fromChar(c).map(Yonkoma.apply)
   }
 
   def chessPieceMap(pieceMap: PieceMap): chess.PieceMap = pieceMap.flatMap {

@@ -79,6 +79,11 @@ object Hash {
     val actorMasks: Array[Long] = zc.actorMasks
   }
 
+  final case class YonkomaZobristConstants(zc: yonkoma.Hash.ZobristConstants) extends ZobristConstants {
+    val p1TurnMask: Long        = zc.p1TurnMask
+    val actorMasks: Array[Long] = zc.actorMasks
+  }
+
   final private class Tables(start: Int) {
     lazy val draughtsTable: ZobristConstants     = DraughtsZobristConstants(
       new draughts.Hash.ZobristConstants(start)
@@ -104,8 +109,11 @@ object Hash {
     lazy val entropyTable: ZobristConstants      = EntropyZobristConstants(
       new entropy.Hash.ZobristConstants(start)
     )
-    lazy val fiveinarowTable: ZobristConstants      = FiveInARowZobristConstants(
+    lazy val fiveinarowTable: ZobristConstants   = FiveInARowZobristConstants(
       new fiveinarow.Hash.ZobristConstants(start)
+    )
+    lazy val yonkomaTable: ZobristConstants      = YonkomaZobristConstants(
+      new yonkoma.Hash.ZobristConstants(start)
     )
 
     def apply(lib: GameLogic): ZobristConstants = lib match {
@@ -120,6 +128,7 @@ object Hash {
       case GameLogic.Dameo()        => dameoTable
       case GameLogic.Entropy()      => entropyTable
       case GameLogic.FiveInARow()   => fiveinarowTable
+      case GameLogic.Yonkoma()      => yonkomaTable
     }
   }
 
@@ -160,6 +169,8 @@ object Hash {
         entropy.Hash.get(situation, table)
       case (GameLogic.FiveInARow(), Situation.FiveInARow(situation), FiveInARowZobristConstants(table)) =>
         fiveinarow.Hash.get(situation, table)
+      case (GameLogic.Yonkoma(), Situation.Yonkoma(situation), YonkomaZobristConstants(table))          =>
+        yonkoma.Hash.get(situation, table)
       case _                                                                                            => sys.error("Invalid lib, situation and table combination")
     }
 

@@ -51,6 +51,7 @@ object DrawCounter {
     def toDameo        = sys.error("Can't make a dameo drawCounter from an entropy drawCounter")
     def toEntropy      = dc
     def toFiveInARow   = sys.error("Can't make a fiveinarow object from an entropy object")
+    def toYonkoma      = sys.error("Can't make a yonkoma drawcounter from an entropy drawcounter")
 
     override def toString = toUci.uci
   }

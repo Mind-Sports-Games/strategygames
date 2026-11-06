@@ -48,7 +48,8 @@ class PiotrTest extends Specification {
     "backgammon"   -> backgammon.Pos.all.map(p => p.key -> p.piotr),
     "dameo"        -> dameo.Pos.all.map(p => p.key -> p.piotr),
     "entropy"      -> entropy.Pos.all.map(p => p.key -> p.piotr),
-    "fiveinarow"   -> fiveinarow.Pos.all.map(p => p.key -> p.piotr)
+    "fiveinarow"   -> fiveinarow.Pos.all.map(p => p.key -> p.piotr),
+    "yonkoma"      -> yonkoma.Pos.all.map(p => p.key -> p.piotr)
   )
 
   "the shared piotr lookup" should {

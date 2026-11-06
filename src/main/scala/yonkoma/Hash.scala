@@ -1,0 +1,45 @@
+package strategygames.yonkoma
+
+final class Hash(size: Int) {
+
+  def apply(situation: Situation): PositionHash = {
+    val l = Hash.get(situation, Hash.polyglotTable)
+    if (size <= 8) {
+      Array.tabulate(size)(i => (l >>> ((7 - i) * 8)).toByte)
+    } else {
+      val m = Hash.get(situation, Hash.randomTable)
+      Array.tabulate(size)(i =>
+        if (i < 8) (l >>> ((7 - i) * 8)).toByte
+        else (m >>> ((15 - i) * 8)).toByte
+      )
+    }
+  }
+}
+
+object Hash {
+
+  // generated from a fixed seed, as the other pure-Scala games do
+  class ZobristConstants(start: Int) {
+    private val random = new scala.util.Random(0x9e3779b9L + start.toLong)
+
+    val p1TurnMask: Long = random.nextLong()
+
+    val actorMasks: Array[Long] = Array.fill(Pos.allSize * Role.all.size * 2)(random.nextLong())
+  }
+
+  private val polyglotTable    = new ZobristConstants(0)
+  private lazy val randomTable = new ZobristConstants(16)
+
+  private def pieceIndex(piece: Piece): Int =
+    piece.role.hashInt * 2 + piece.player.fold(1, 0)
+
+  private def actorIndex(pos: Pos, piece: Piece): Int =
+    Pos.allSize * pieceIndex(piece) + pos.index
+
+  def get(situation: Situation, table: ZobristConstants): Long = {
+    val hturn = situation.player.fold(table.p1TurnMask, 0L)
+    situation.board.pieces.view
+      .map { case (pos, piece) => table.actorMasks(actorIndex(pos, piece)) }
+      .fold(hturn)(_ ^ _)
+  }
+}

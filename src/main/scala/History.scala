@@ -161,6 +161,14 @@ object History {
         halfMoveClock = h.halfMoveClock
       )
 
+  final case class Yonkoma(h: yonkoma.History)
+      extends History(
+        lastTurn = h.lastTurn.map(Uci.wrap),
+        currentTurn = h.currentTurn.map(Uci.wrap),
+        positionHashes = h.positionHashes,
+        halfMoveClock = h.halfMoveClock
+      )
+
   implicit def chessHistory(h: chess.History): History               = Chess(h)
   implicit def draughtsHistory(h: draughts.DraughtsHistory): History = Draughts(h)
   implicit def fairysfHistory(h: fairysf.History): History           = FairySF(h)
@@ -172,6 +180,7 @@ object History {
   implicit def dameoHistory(h: dameo.History): History               = Dameo(h)
   implicit def entropyHistory(h: entropy.History): History           = Entropy(h)
   implicit def fiveinarowHistory(h: fiveinarow.History): History     = FiveInARow(h)
+  implicit def yonkomaHistory(h: yonkoma.History): History           = Yonkoma(h)
 
   // lila
   def apply(
@@ -311,6 +320,15 @@ object History {
             case _                           => fiveinarow.OpeningStep.Opening
           }),
           score = score,
+          halfMoveClock = halfMoveClock
+        )
+      )
+    case GameLogic.Yonkoma()      =>
+      Yonkoma(
+        yonkoma.History(
+          lastTurn = lastTurn.map(lm => lm.toYonkoma),
+          currentTurn = currentTurn.map(lm => lm.toYonkoma),
+          positionHashes = positionHashes,
           halfMoveClock = halfMoveClock
         )
       )
