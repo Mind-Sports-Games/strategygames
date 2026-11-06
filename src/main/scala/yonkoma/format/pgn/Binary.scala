@@ -32,7 +32,9 @@ object Binary {
 
   private object Reader {
 
-    // If changing this, consider changing other gamelogics and also lila game maxPlies
+    // If changing this, consider changing other gamelogics and also lila game maxPlies.
+    // Yonkoma never gets near it: the longest legal game is 83 plies on the 10x10 board and
+    // 121 on the 12x12 board, passes counted (a longest-path search over every position)
     private val maxPlies = 1000
 
     def actionStrs(bs: List[Byte]): ActionStrs          = actionStrs(bs, maxPlies)
