@@ -1827,7 +1827,7 @@ object Game {
     def toDameo: dameo.Game               = sys.error("Can't turn an entropy game into a dameo game")
     def toEntropy: entropy.Game           = g
     def toFiveInARow                      = sys.error("Can't make a fiveinarow object from an entropy object")
-    def toYonkoma                         = sys.error("Can't make a yonkoma game from an entropy game")
+    def toYonkoma                         = sys.error("Can't turn an entropy game into a yonkoma game")
 
   }
 
@@ -1998,7 +1998,7 @@ object Game {
     def toDameo: dameo.Game               = sys.error("Can't turn a fiveinarow game into a dameo game")
     def toFiveInARow: fiveinarow.Game     = g
     def toEntropy                         = sys.error("Can't make an entropy object from a fiveinarow object")
-    def toYonkoma: yonkoma.Game           = sys.error("Can't make a yonkoma game from a fiveinarow game")
+    def toYonkoma: yonkoma.Game           = sys.error("Can't turn a fiveinarow game into a yonkoma game")
 
   }
 
@@ -2145,7 +2145,7 @@ object Game {
     def toDameo: dameo.Game               = sys.error("Can't turn a yonkoma game into a dameo game")
     def toEntropy: entropy.Game           = sys.error("Can't turn a yonkoma game into an entropy game")
     def toYonkoma: yonkoma.Game           = g
-    def toFiveInARow                      = sys.error("Can't make a fiveinarow game from a yonkoma game")
+    def toFiveInARow                      = sys.error("Can't turn a yonkoma game into a fiveinarow game")
 
   }
 

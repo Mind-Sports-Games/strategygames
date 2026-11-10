@@ -1681,7 +1681,7 @@ object Situation {
     def toDameo        = s
     def toEntropy      = sys.error("Can't make an entropy object from a dameo object")
     def toFiveInARow   = sys.error("Can't make a fiveinarow object from a dameo object")
-    def toYonkoma      = sys.error("Can't make a yonkoma situation from a dameo situation")
+    def toYonkoma      = sys.error("Can't make yonkoma situation from dameo situation")
   }
 
   final case class Entropy(s: entropy.Situation)
@@ -1865,7 +1865,7 @@ object Situation {
     def toDameo        = sys.error("Can't make dameo situation from entropy situation")
     def toEntropy      = s
     def toFiveInARow   = sys.error("Can't make a fiveinarow object from an entropy object")
-    def toYonkoma      = sys.error("Can't make a yonkoma situation from an entropy situation")
+    def toYonkoma      = sys.error("Can't make yonkoma situation from entropy situation")
   }
 
   final case class FiveInARow(s: fiveinarow.Situation)
@@ -2041,7 +2041,7 @@ object Situation {
     def toDameo        = sys.error("Can't make dameo situation from fiveinarow situation")
     def toEntropy      = sys.error("Can't make entropy situation from fiveinarow situation")
     def toFiveInARow   = s
-    def toYonkoma      = sys.error("Can't make a yonkoma situation from a fiveinarow situation")
+    def toYonkoma      = sys.error("Can't make yonkoma situation from fiveinarow situation")
   }
 
   final case class Yonkoma(s: yonkoma.Situation)
@@ -2198,7 +2198,7 @@ object Situation {
     def toDameo        = sys.error("Can't make dameo situation from yonkoma situation")
     def toEntropy      = sys.error("Can't make entropy situation from yonkoma situation")
     def toYonkoma      = s
-    def toFiveInARow   = sys.error("Can't make a fiveinarow situation from a yonkoma situation")
+    def toFiveInARow   = sys.error("Can't make fiveinarow situation from yonkoma situation")
   }
 
   def apply(lib: GameLogic, board: Board, player: Player): Situation = (lib, board) match {

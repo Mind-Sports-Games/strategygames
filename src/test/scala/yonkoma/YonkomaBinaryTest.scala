@@ -11,8 +11,8 @@ class YonkomaBinaryTest extends YonkomaTest {
 
       val bytes = Binary.writeActionStrs(actions)
       bytes.isSuccess must beTrue
-      // three bytes a move, one byte a pass
-      bytes.get.size === 13
+      // two bytes an action
+      bytes.get.size === 10
 
       val back = Binary.readActionStrs(bytes.get.toList)
       back.isSuccess must beTrue
@@ -25,10 +25,10 @@ class YonkomaBinaryTest extends YonkomaTest {
       back.get === actions
     }
 
-    "put the action type in the two high bits of the first byte, as go and entropy do" in {
-      Binary.writeMove("pass").get === List(0x00.toByte)
-      Binary.writeMove("a1e5").get === List(0x40.toByte, Pos.A1.index.toByte, Pos.E5.index.toByte)
-      Binary.writeMove("l12a11").get === List(0x40.toByte, 143.toByte, 120.toByte)
+    "write a move as its two square indexes and a pass as two bytes that are no square" in {
+      Binary.writeMove("pass").get === List(0xff.toByte, 0xff.toByte)
+      Binary.writeMove("a1e5").get === List(Pos.A1.index.toByte, Pos.E5.index.toByte)
+      Binary.writeMove("l12a11").get === List(143.toByte, 120.toByte)
     }
 
     "stop after the requested number of plies" in {
@@ -43,11 +43,12 @@ class YonkomaBinaryTest extends YonkomaTest {
       Binary.writeMove("m1a1").isFailure must beTrue
     }
 
-    "refuse an action type it does not know, a square off the board, or a cut-off move" in {
-      Binary.readActionStrs(List(0x80.toByte)).isFailure must beTrue
-      Binary.readActionStrs(List(0xc0.toByte, 1.toByte, 2.toByte)).isFailure must beTrue
-      Binary.readActionStrs(List(0x40.toByte, 200.toByte, 1.toByte)).isFailure must beTrue
-      Binary.readActionStrs(List(0x40.toByte, 1.toByte)).isFailure must beTrue
+    "refuse a square off the board, half a pass, or a cut-off action" in {
+      Binary.readActionStrs(List(144.toByte, 1.toByte)).isFailure must beTrue
+      Binary.readActionStrs(List(1.toByte, 200.toByte)).isFailure must beTrue
+      Binary.readActionStrs(List(0xff.toByte, 1.toByte)).isFailure must beTrue
+      Binary.readActionStrs(List(1.toByte, 0xff.toByte)).isFailure must beTrue
+      Binary.readActionStrs(List(1.toByte)).isFailure must beTrue
     }
   }
 }

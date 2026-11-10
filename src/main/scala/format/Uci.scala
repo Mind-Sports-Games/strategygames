@@ -731,7 +731,7 @@ object Uci {
     def toDameo        = sys.error("Can't make a dameo UCI from an entropy UCI")
     def toEntropy      = m
     def toFiveInARow   = sys.error("Can't make a fiveinarow object from an entropy object")
-    def toYonkoma      = sys.error("Can't make a yonkoma move from an entropy move")
+    def toYonkoma      = sys.error("Can't make a yonkoma UCI from an entropy UCI")
   }
 
   final case class YonkomaMove(m: yonkoma.format.Uci.Move)
@@ -809,7 +809,7 @@ object Uci {
     def toDameo        = sys.error("Can't make a dameo UCI from a fiveinarow UCI")
     def toFiveInARow   = d
     def toEntropy      = sys.error("Can't make an entropy object from a fiveinarow object")
-    def toYonkoma      = sys.error("Can't make a yonkoma drop from a fiveinarow drop")
+    def toYonkoma      = sys.error("Can't make a yonkoma UCI from a fiveinarow UCI")
   }
 
   final case class EntropyPass(p: entropy.format.Uci.Pass) extends Pass() with Entropy {
@@ -832,7 +832,7 @@ object Uci {
     def toDameo        = sys.error("Can't make a dameo UCI from an entropy UCI")
     def toEntropy      = p
     def toFiveInARow   = sys.error("Can't make a fiveinarow object from an entropy object")
-    def toYonkoma      = sys.error("Can't make a yonkoma pass from an entropy pass")
+    def toYonkoma      = sys.error("Can't make a yonkoma UCI from an entropy UCI")
   }
 
   final case class YonkomaPass(p: yonkoma.format.Uci.Pass) extends Pass() with Yonkoma {
@@ -883,7 +883,7 @@ object Uci {
     def toDameo        = sys.error("Can't make a dameo UCI from an entropy UCI")
     def toEntropy      = dc
     def toFiveInARow   = sys.error("Can't make a fiveinarow object from an entropy object")
-    def toYonkoma      = sys.error("Can't make a yonkoma drawcounter from an entropy drawcounter")
+    def toYonkoma      = sys.error("Can't make a yonkoma UCI from an entropy UCI")
   }
 
   // "I must draw, but the bag has not been opened yet". The request, not the result -
@@ -914,7 +914,7 @@ object Uci {
     def toDameo        = sys.error("Can't make a dameo UCI from an entropy UCI")
     def toEntropy      = dc
     def toFiveInARow   = sys.error("Can't make a fiveinarow object from an entropy object")
-    def toYonkoma      = sys.error("Can't make a yonkoma drawcounter from an entropy drawcounter")
+    def toYonkoma      = sys.error("Can't make a yonkoma UCI from an entropy UCI")
   }
 
   def wrap(uci: entropy.format.Uci): Uci = uci match {

@@ -1061,7 +1061,7 @@ object Variant {
     def toDameo        = v
     def toEntropy      = sys.error("Can't convert dameo to entropy")
     def toFiveInARow   = sys.error("Can't convert dameo to fiveinarow")
-    def toYonkoma      = sys.error("Can't make a yonkoma variant from a dameo variant")
+    def toYonkoma      = sys.error("Can't convert dameo to yonkoma")
 
     def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.Dameo(pos), (Piece.Dameo(piece), 1)) }
@@ -1175,7 +1175,7 @@ object Variant {
     def toDameo        = sys.error("Can't convert entropy to dameo")
     def toEntropy      = v
     def toFiveInARow   = sys.error("Can't convert entropy to fiveinarow")
-    def toYonkoma      = sys.error("Can't make a yonkoma variant from an entropy variant")
+    def toYonkoma      = sys.error("Can't convert entropy to yonkoma")
 
     def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.Entropy(pos), (Piece.Entropy(piece), 1)) }
@@ -1289,7 +1289,7 @@ object Variant {
     def toDameo        = sys.error("Can't convert fiveinarow to dameo")
     def toFiveInARow   = v
     def toEntropy      = sys.error("Can't convert fiveinarow to entropy")
-    def toYonkoma      = sys.error("Can't make a yonkoma variant from a fiveinarow variant")
+    def toYonkoma      = sys.error("Can't convert fiveinarow to yonkoma")
 
     def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.FiveInARow(pos), (Piece.FiveInARow(piece), 1)) }
@@ -1399,7 +1399,7 @@ object Variant {
     def toDameo        = sys.error("Can't convert yonkoma to dameo")
     def toEntropy      = sys.error("Can't convert yonkoma to entropy")
     def toYonkoma      = v
-    def toFiveInARow   = sys.error("Can't make a fiveinarow variant from a yonkoma variant")
+    def toFiveInARow   = sys.error("Can't convert yonkoma to fiveinarow")
 
     def pieces: PieceMap =
       v.pieces.map { case (pos, piece) => (Pos.Yonkoma(pos), (Piece.Yonkoma(piece), 1)) }
