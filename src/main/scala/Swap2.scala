@@ -49,6 +49,7 @@ object Swap2 {
     def toDameo        = sys.error("Can't make a dameo swap2 from a fiveinarow swap2")
     def toEntropy      = sys.error("Can't make an entropy swap2 from a fiveinarow swap2")
     def toFiveInARow   = s
+    def toYonkoma      = sys.error("Can't make a yonkoma swap2 from a fiveinarow swap2")
 
     override def toString = toUci.uci
   }

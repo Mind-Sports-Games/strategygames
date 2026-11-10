@@ -24,6 +24,7 @@ abstract class Action(
   def toDameo: dameo.Action
   def toEntropy: entropy.Action
   def toFiveInARow: fiveinarow.Action
+  def toYonkoma: yonkoma.Action
 }
 
 object Action {
@@ -85,6 +86,11 @@ object Action {
     case s: fiveinarow.Swap    => Swap.FiveInARow(s)
     case s2: fiveinarow.Swap2  => Swap2.FiveInARow(s2)
     case o: fiveinarow.Offer10 => Offer10.FiveInARow(o)
+  }
+
+  def wrap(action: yonkoma.Action): Action = action match {
+    case m: yonkoma.Move => Move.Yonkoma(m)
+    case p: yonkoma.Pass => Pass.Yonkoma(p)
   }
 
   def toChess(action: Action): chess.Action = action match {
@@ -155,6 +161,12 @@ object Action {
     case Swap2.FiveInARow(s2)  => s2
     case Offer10.FiveInARow(o) => o
     case _                     => sys.error("Expecting a fiveinarow action e.g. drop, swap or swap2")
+  }
+
+  def toYonkoma(action: Action): yonkoma.Action = action match {
+    case Move.Yonkoma(m) => m
+    case Pass.Yonkoma(p) => p
+    case _               => sys.error("Expecting a yonkoma action e.g. move or pass")
   }
 
 }

@@ -48,6 +48,8 @@ object UciDump {
       strategygames.entropy.format.UciDump(actionStrs, initialFen.map(_.toEntropy), variant)
     case (GameLogic.FiveInARow(), Variant.FiveInARow(variant))     =>
       strategygames.fiveinarow.format.UciDump(actionStrs, initialFen.map(_.toFiveInARow), variant)
+    case (GameLogic.Yonkoma(), Variant.Yonkoma(variant))           =>
+      strategygames.yonkoma.format.UciDump(actionStrs, initialFen.map(_.toYonkoma), variant)
     case _                                                         => sys.error("Mismatched gamelogic types 12")
   }
 
@@ -94,6 +96,10 @@ object UciDump {
       strategygames.fiveinarow.format.UciDump.action(variant)(a)
     case (GameLogic.FiveInARow(), Variant.FiveInARow(variant), Offer10.FiveInARow(a))    =>
       strategygames.fiveinarow.format.UciDump.action(variant)(a)
+    case (GameLogic.Yonkoma(), Variant.Yonkoma(variant), Move.Yonkoma(a))                =>
+      strategygames.yonkoma.format.UciDump.action(variant)(a)
+    case (GameLogic.Yonkoma(), Variant.Yonkoma(variant), Pass.Yonkoma(a))                =>
+      strategygames.yonkoma.format.UciDump.action(variant)(a)
     case _                                                                               => sys.error("Mismatched gamelogic types 13")
   }
 
