@@ -144,6 +144,7 @@ class YonkomaRulesTest extends YonkomaTest {
       g.situation.winner === Some(P1)
       g.situation.moves must beEmpty
       g.situation.canPass must beFalse
+      g.situation.forcedAction must beNone
       g.plies === 4
       g.turnCount === 4
     }
@@ -165,6 +166,8 @@ class YonkomaRulesTest extends YonkomaTest {
       stuck.situation.canPass must beTrue
       stuck.situation.end must beFalse
       stuck.situation.pass().isValid must beTrue
+      stuck.situation.forcedAction.map(_.toUci.uci) === Some("pass")
+      stuck.situation.forcedTurnAction.map(_.toUci.uci) === Some("pass")
     }
 
     "hand the move back to the opponent after the pass" in {

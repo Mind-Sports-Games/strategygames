@@ -2056,10 +2056,9 @@ object Situation {
 
     def takebackable = true
 
-    // a player with no legal move has nothing to decide: the turn is skipped
-    def forcedAction: Option[Action] = if (s.canPass) pass.toOption else None
+    def forcedAction: Option[Action] = s.forcedAction.map(Action.wrap)
 
-    def forcedTurnAction: Option[Action] = forcedAction
+    def forcedTurnAction: Option[Action] = s.forcedTurnAction.map(Action.wrap)
 
     lazy val check: Boolean = false
 

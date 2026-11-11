@@ -15,6 +15,10 @@ case class Situation(board: Board, player: Player) {
   // whose turn is skipped
   lazy val canPass: Boolean = !end && moves.isEmpty
 
+  lazy val forcedAction: Option[Action] = if (canPass) pass().toOption else None
+
+  lazy val forcedTurnAction: Option[Action] = forcedAction
+
   def move(from: Pos, to: Pos): Validated[String, Move] =
     board.variant.move(this, from, to)
 

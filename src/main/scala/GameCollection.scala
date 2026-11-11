@@ -608,8 +608,6 @@ object GameFamily {
     def displayPiece      = "wC"
     def pieceSetThemes    = List("classic_yonkoma", "red_blue_yonkoma")
     def pieceSetDefault   = "classic_yonkoma"
-    // placeholder names until lila has the images: oak as in the Yonkoma apps, then felt
-    // green, grey and marble, none of them the wood or maple the other square boards use
     def boardThemes       = List("marble", "oak", "green", "grey")
     def boardThemeDefault = "marble"
     def playerNames       = Map(P1 -> "White", P2 -> "Black")
