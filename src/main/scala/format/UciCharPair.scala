@@ -25,6 +25,8 @@ object UciCharPair {
       strategygames.entropy.format.UciCharPair(uci.unwrap)
     case (GameLogic.FiveInARow(), uci: Uci.FiveInARow)     =>
       strategygames.fiveinarow.format.UciCharPair(uci.unwrap)
+    case (GameLogic.Yonkoma(), uci: Uci.Yonkoma)           =>
+      strategygames.yonkoma.format.UciCharPair(uci.unwrap)
     case _                                                 => sys.error("Mismatched gamelogic and UciCharPair")
   }
 
