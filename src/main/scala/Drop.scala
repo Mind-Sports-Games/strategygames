@@ -57,6 +57,7 @@ object Drop {
     def toDameo        = sys.error("Can't make a dameo drop from a chess drop")
     def toEntropy      = sys.error("Can't make an entropy drop from a chess drop")
     def toFiveInARow   = sys.error("Can't make a fiveinarow drop from a chess drop")
+    def toYonkoma      = sys.error("Can't make a yonkoma drop from a chess drop")
 
   }
 
@@ -87,6 +88,7 @@ object Drop {
     def toDameo        = sys.error("Can't make a dameo drop from a fairysf drop")
     def toEntropy      = sys.error("Can't make an entropy drop from a fairysf drop")
     def toFiveInARow   = sys.error("Can't make a fiveinarow drop from a fairysf drop")
+    def toYonkoma      = sys.error("Can't make a yonkoma drop from a fairysf drop")
 
   }
 
@@ -117,6 +119,7 @@ object Drop {
     def toDameo        = sys.error("Can't make a dameo drop from a go drop")
     def toEntropy      = sys.error("Can't make an entropy drop from a go drop")
     def toFiveInARow   = sys.error("Can't make a fiveinarow drop from a go drop")
+    def toYonkoma      = sys.error("Can't make a yonkoma drop from a go drop")
 
   }
 
@@ -147,6 +150,7 @@ object Drop {
     def toDameo        = sys.error("Can't make a dameo drop from a backgammon drop")
     def toEntropy      = sys.error("Can't make an entropy drop from a backgammon drop")
     def toFiveInARow   = sys.error("Can't make a fiveinarow drop from a backgammon drop")
+    def toYonkoma      = sys.error("Can't make a yonkoma drop from a backgammon drop")
 
   }
 
@@ -183,6 +187,7 @@ object Drop {
     def toDameo        = sys.error("Can't make a dameo drop from an entropy drop")
     def toEntropy      = d
     def toFiveInARow   = sys.error("Can't make a fiveinarow object from an entropy object")
+    def toYonkoma      = sys.error("Can't make a yonkoma drop from an entropy drop")
 
     override def toString = toUci.uci
   }
@@ -218,6 +223,7 @@ object Drop {
     def toDameo        = sys.error("Can't make a dameo drop from a fiveinarow drop")
     def toFiveInARow   = d
     def toEntropy      = sys.error("Can't make an entropy object from a fiveinarow object")
+    def toYonkoma      = sys.error("Can't make a yonkoma drop from a fiveinarow drop")
 
     override def toString = toUci.uci
   }

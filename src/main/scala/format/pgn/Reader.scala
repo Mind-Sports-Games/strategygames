@@ -13,6 +13,7 @@ import strategygames.abalone.format.pgn.{ Reader => AbaloneReader }
 import strategygames.dameo.format.pdn.{ Reader => DameoReader }
 import strategygames.entropy.format.pgn.{ Reader => EntropyReader }
 import strategygames.fiveinarow.format.pgn.{ Reader => FiveInARowReader }
+import strategygames.yonkoma.format.pgn.{ Reader => YonkomaReader }
 
 import cats.data.Validated
 
@@ -125,6 +126,15 @@ object Reader {
       def valid          = Validated.invalid(failure)
       def evenIncomplete = Replay.FiveInARow(replay)
     }
+    case class YonkomaComplete(replay: yonkoma.Replay)                          extends Result {
+      private def r      = Replay.Yonkoma(replay)
+      def valid          = Validated.valid(r)
+      def evenIncomplete = r
+    }
+    case class YonkomaIncomplete(replay: yonkoma.Replay, failure: String)       extends Result {
+      def valid          = Validated.invalid(failure)
+      def evenIncomplete = Replay.Yonkoma(replay)
+    }
 
     def wrap(result: ChessReader.Result) = result match {
       case ChessReader.Result.Complete(replay)            => Result.ChessComplete(replay)
@@ -183,6 +193,11 @@ object Reader {
       case EntropyReader.Result.Incomplete(replay, failure) => Result.EntropyIncomplete(replay, failure)
     }
 
+    def wrap(result: YonkomaReader.Result) = result match {
+      case YonkomaReader.Result.Complete(replay)            => Result.YonkomaComplete(replay)
+      case YonkomaReader.Result.Incomplete(replay, failure) => Result.YonkomaIncomplete(replay, failure)
+    }
+
   }
 
   def fullWithSans(
@@ -206,6 +221,8 @@ object Reader {
         sys.error("PGN parsing not implemented for entropy. Use replayResultFromActionStrs")
       case GameLogic.FiveInARow()   =>
         sys.error("PGN parsing not implemented for fiveinarow. Use replayResultFromActionStrs")
+      case GameLogic.Yonkoma()      =>
+        sys.error("PGN parsing not implemented for yonkoma. Use replayResultFromActionStrs")
     }
 
   // TODO Merge the following two functions by refactoring Sans and integrating to other libs
@@ -241,6 +258,8 @@ object Reader {
         sys.error("Sans not implemented for entropy")
       case GameLogic.FiveInARow()   =>
         sys.error("Sans not implemented for fiveinarow")
+      case GameLogic.Yonkoma()      =>
+        sys.error("Sans not implemented for yonkoma")
     }
 
   def replayResultFromActionStrs(
@@ -276,6 +295,8 @@ object Reader {
         EntropyReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
       case GameLogic.FiveInARow()   =>
         FiveInARowReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
+      case GameLogic.Yonkoma()      =>
+        YonkomaReader.replayResultFromActionStrs(actionStrs, op, tags).map(Result.wrap)
     }
 
 }

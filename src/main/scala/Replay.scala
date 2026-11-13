@@ -184,6 +184,18 @@ object Replay {
     }
   }
 
+  final case class Yonkoma(r: yonkoma.Replay)
+      extends Replay(
+        Game.Yonkoma(r.setup),
+        r.actions.map((a: yonkoma.Action) => Action.wrap(a)),
+        Game.Yonkoma(r.state)
+      ) {
+    def copy(state: Game): Replay = state match {
+      case Game.Yonkoma(state) => Replay.wrap(r.copy(state = state))
+      case _                   => sys.error("Unable to copy a yonkoma replay with a non-yonkoma state")
+    }
+  }
+
   def apply(lib: GameLogic, setup: Game, actions: List[Action], state: Game): Replay =
     (lib, setup, state) match {
       case (GameLogic.Draughts(), Game.Draughts(setup), Game.Draughts(state))             =>
@@ -208,6 +220,8 @@ object Replay {
         Entropy(entropy.Replay(setup, actions.map(Action.toEntropy), state))
       case (GameLogic.FiveInARow(), Game.FiveInARow(setup), Game.FiveInARow(state))       =>
         FiveInARow(fiveinarow.Replay(setup, actions.map(Action.toFiveInARow), state))
+      case (GameLogic.Yonkoma(), Game.Yonkoma(setup), Game.Yonkoma(state))                =>
+        Yonkoma(yonkoma.Replay(setup, actions.map(Action.toYonkoma), state))
       case _                                                                              => sys.error("Mismatched gamelogic types 5")
     }
 
@@ -370,6 +384,19 @@ object Replay {
             message
           )
       }
+    case (GameLogic.Yonkoma(), FEN.Yonkoma(initialFen), Variant.Yonkoma(variant))                =>
+      yonkoma.Replay.gameWithUciWhileValid(
+        actionStrs,
+        initialFen,
+        variant
+      ) match {
+        case (game, gameswithsan, message) =>
+          (
+            Game.Yonkoma(game),
+            gameswithsan.map { case (g, u) => (Game.Yonkoma(g), Uci.YonkomaWithSan(u)) },
+            message
+          )
+      }
     case _                                                                                       => sys.error("Mismatched gamelogic types 7")
   }
 
@@ -454,6 +481,12 @@ object Replay {
         .situations(actionStrs, initialFen.map(_.toFiveInARow), variant)
         .toEither
         .map(s => s.map(Situation.FiveInARow.apply))
+        .toValidated
+    case (GameLogic.Yonkoma(), Variant.Yonkoma(variant))           =>
+      yonkoma.Replay
+        .situations(actionStrs, initialFen.map(_.toYonkoma), variant)
+        .toEither
+        .map(s => s.map(Situation.Yonkoma.apply))
         .toValidated
     case _                                                         => sys.error("Mismatched gamelogic types 8")
   }
@@ -546,6 +579,14 @@ object Replay {
       }
     )
 
+  private def yonkomaUcis(ucis: List[Uci]): List[yonkoma.format.Uci] =
+    ucis.flatMap(u =>
+      u match {
+        case u: Uci.Yonkoma => Some(u.unwrap)
+        case _              => None
+      }
+    )
+
   def boardsFromUci(
       lib: GameLogic,
       ucis: List[Uci],
@@ -624,6 +665,12 @@ object Replay {
         .toEither
         .map(b => b.map(Board.FiveInARow.apply))
         .toValidated
+    case (GameLogic.Yonkoma(), Variant.Yonkoma(variant))           =>
+      yonkoma.Replay
+        .boardsFromUci(yonkomaUcis(ucis), initialFen.map(_.toYonkoma), variant)
+        .toEither
+        .map(b => b.map(Board.Yonkoma.apply))
+        .toValidated
     case _                                                         => sys.error("Mismatched gamelogic types 8a")
   }
 
@@ -700,6 +747,12 @@ object Replay {
         .toEither
         .map(s => s.map(Situation.FiveInARow.apply))
         .toValidated
+    case (GameLogic.Yonkoma(), Variant.Yonkoma(variant))           =>
+      yonkoma.Replay
+        .situationsFromUci(yonkomaUcis(ucis), initialFen.map(_.toYonkoma), variant)
+        .toEither
+        .map(s => s.map(Situation.Yonkoma.apply))
+        .toValidated
     case _                                                         => sys.error("Mismatched gamelogic types 9")
   }
 
@@ -759,6 +812,10 @@ object Replay {
       fiveinarow.Replay
         .gameFromUciStrings(ucis.flatten.toList, initialFen.map(_.toFiveInARow), variant)
         .map(Game.FiveInARow.apply)
+    case (GameLogic.Yonkoma(), Variant.Yonkoma(variant))           =>
+      yonkoma.Replay
+        .gameFromUciStrings(ucis.flatten.toList, initialFen.map(_.toYonkoma), variant)
+        .map(Game.Yonkoma.apply)
     case _                                                         => sys.error("Mismatched gamelogic types for Replay 10")
   }
 
@@ -835,6 +892,12 @@ object Replay {
         .toEither
         .map(r => Replay.FiveInARow(r))
         .toValidated
+    case (GameLogic.Yonkoma(), Variant.Yonkoma(variant))           =>
+      yonkoma.Replay
+        .apply(yonkomaUcis(ucis), initialFen.map(_.toYonkoma), variant)
+        .toEither
+        .map(r => Replay.Yonkoma(r))
+        .toValidated
     case _                                                         => sys.error("Mismatched gamelogic types Replay 11")
   }
 
@@ -867,6 +930,8 @@ object Replay {
       entropy.Replay.plyAtFen(actionStrs, initialFen.map(_.toEntropy), variant, atFen)
     case (GameLogic.FiveInARow(), Variant.FiveInARow(variant), FEN.FiveInARow(atFen))       =>
       fiveinarow.Replay.plyAtFen(actionStrs, initialFen.map(_.toFiveInARow), variant, atFen)
+    case (GameLogic.Yonkoma(), Variant.Yonkoma(variant), FEN.Yonkoma(atFen))                =>
+      yonkoma.Replay.plyAtFen(actionStrs, initialFen.map(_.toYonkoma), variant, atFen)
     case _                                                                                  => sys.error("Mismatched gamelogic types 10")
   }
 
@@ -881,5 +946,6 @@ object Replay {
   def wrap(r: dameo.Replay)        = Dameo(r)
   def wrap(r: entropy.Replay)      = Entropy(r)
   def wrap(r: fiveinarow.Replay)   = FiveInARow(r)
+  def wrap(r: yonkoma.Replay)      = Yonkoma(r)
 
 }

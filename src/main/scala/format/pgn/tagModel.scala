@@ -110,6 +110,11 @@ case class Tags(value: List[Tag]) extends AnyVal {
       strategygames.fiveinarow.variant.Variant byName _
     }
 
+  def yonkomaVariant: Option[strategygames.yonkoma.variant.Variant] =
+    apply(_.Variant).map(_.toLowerCase).flatMap {
+      strategygames.yonkoma.variant.Variant byName _
+    }
+
   // TODO: this will need to be tested. We'll want to look at the _actual_ values that
   //       come in via these tags and ensure that the order we look at them is appropriate
   //       what a mess this function is.
@@ -146,6 +151,10 @@ case class Tags(value: List[Tag]) extends AnyVal {
                                           fiveInARowVariant
                                             .map(strategygames.variant.Variant.FiveInARow.apply)
                                         )
+                                        .orElse(
+                                          yonkomaVariant
+                                            .map(strategygames.variant.Variant.Yonkoma.apply)
+                                        )
                                     )
                                 )
                             )
@@ -179,6 +188,8 @@ case class Tags(value: List[Tag]) extends AnyVal {
     apply(_.FEN).map(strategygames.entropy.format.FEN.apply)
   def fiveInARowFen: Option[fiveinarow.format.FEN] =
     apply(_.FEN).map(strategygames.fiveinarow.format.FEN.apply)
+  def yonkomaFen: Option[yonkoma.format.FEN]       =
+    apply(_.FEN).map(strategygames.yonkoma.format.FEN.apply)
 
   def fen: Option[format.FEN] =
     variant match {
@@ -193,6 +204,7 @@ case class Tags(value: List[Tag]) extends AnyVal {
       case Some(strategygames.variant.Variant.Dameo(_))        => dameoFen.map(format.FEN.Dameo.apply)
       case Some(strategygames.variant.Variant.Entropy(_))      => entropyFen.map(format.FEN.Entropy.apply)
       case Some(strategygames.variant.Variant.FiveInARow(_))   => fiveInARowFen.map(format.FEN.FiveInARow.apply)
+      case Some(strategygames.variant.Variant.Yonkoma(_))      => yonkomaFen.map(format.FEN.Yonkoma.apply)
       case Some(strategygames.variant.Variant.Chess(_)) | None => chessFen.map(format.FEN.Chess.apply)
       case Some(_)                                             => sys.error("invalid variant type for fen")
     }

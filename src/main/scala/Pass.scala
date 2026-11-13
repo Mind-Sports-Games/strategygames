@@ -21,6 +21,7 @@ sealed abstract class Pass(
   // TODO: Yup, still not type safe. :D
   def toGo: go.Pass
   def toEntropy: entropy.Pass
+  def toYonkoma: yonkoma.Pass
 }
 
 object Pass {
@@ -50,6 +51,7 @@ object Pass {
     def toDameo        = sys.error("Can't make a dameo pass from a go pass")
     def toEntropy      = sys.error("Can't make an entropy pass from a go pass")
     def toFiveInARow   = sys.error("Can't make a fiveinarow pass from a go pass")
+    def toYonkoma      = sys.error("Can't make a yonkoma pass from a go pass")
   }
 
   def wrap(p: go.Pass): Pass = Pass.Go(p)
@@ -80,6 +82,38 @@ object Pass {
     def toDameo        = sys.error("Can't make a dameo pass from an entropy pass")
     def toEntropy      = p
     def toFiveInARow   = sys.error("Can't make a fiveinarow object from an entropy object")
+    def toYonkoma      = sys.error("Can't make a yonkoma pass from an entropy pass")
+
+    override def toString = toUci.uci
+  }
+
+  final case class Yonkoma(p: yonkoma.Pass)
+      extends Pass(
+        Situation.Yonkoma(p.situationBefore),
+        Board.Yonkoma(p.after),
+        true,
+        p.metrics
+      ) {
+
+    def situationAfter: Situation = Situation.Yonkoma(p.situationAfter)
+    def finalizeAfter: Board      = p.finalizeAfter
+
+    def toUci: Uci.Pass = Uci.YonkomaPass((p.toUci: yonkoma.format.Uci.Pass))
+
+    val unwrap = p
+
+    def toChess        = sys.error("Can't make a chess pass from a yonkoma pass")
+    def toDraughts     = sys.error("Can't make a draughts pass from a yonkoma pass")
+    def toFairySF      = sys.error("Can't make a fairysf pass from a yonkoma pass")
+    def toSamurai      = sys.error("Can't make a samurai pass from a yonkoma pass")
+    def toTogyzkumalak = sys.error("Can't make a togyzkumalak pass from a yonkoma pass")
+    def toGo           = sys.error("Can't make a go pass from a yonkoma pass")
+    def toBackgammon   = sys.error("Can't make a backgammon pass from a yonkoma pass")
+    def toAbalone      = sys.error("Can't make an abalone pass from a yonkoma pass")
+    def toDameo        = sys.error("Can't make a dameo pass from a yonkoma pass")
+    def toEntropy      = sys.error("Can't make an entropy pass from a yonkoma pass")
+    def toYonkoma      = p
+    def toFiveInARow   = sys.error("Can't make a fiveinarow pass from a yonkoma pass")
 
     override def toString = toUci.uci
   }
