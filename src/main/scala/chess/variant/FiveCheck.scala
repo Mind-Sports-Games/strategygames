@@ -17,6 +17,8 @@ case object FiveCheck
   def perfId: Int    = 19
   def perfIcon: Char = ''
 
+  override def hasGameScore = true
+
   override val initialFen = FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 5+5 0 1")
 
   override def finalizeBoard(board: Board, uci: format.Uci, capture: Option[Piece]): Board =

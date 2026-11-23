@@ -69,6 +69,7 @@ object History {
         castles = h.castles,
         checkCount = h.checkCount,
         unmovedRooks = h.unmovedRooks,
+        score = Score(p1 = h.checkCount.p2, p2 = h.checkCount.p1),
         halfMoveClock = h.halfMoveClock
       )
 

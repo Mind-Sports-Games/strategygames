@@ -213,6 +213,25 @@ K  r
           player == P2
         }
       }
+      "score is the checks each player has given" in {
+        val game = Game(Board init ThreeCheck)
+          .playMoves(
+            E2 -> E4,
+            E7 -> E6,
+            D2 -> D4,
+            F8 -> B4,
+            C2 -> C3,
+            B4 -> C3
+          )
+          .toOption
+          .get
+        strategygames.History.Chess(game.board.history).score must beEqualTo(strategygames.Score(p1 = 0, p2 = 2))
+      }
+      "is a score game, as is five-check, and standard is not" in {
+        strategygames.variant.Variant.wrap(ThreeCheck).hasGameScore must beTrue
+        strategygames.variant.Variant.wrap(FiveCheck).hasGameScore must beTrue
+        strategygames.variant.Variant.wrap(Standard).hasGameScore must beFalse
+      }
     }
 
     "Not force a draw when there is insufficient mating material" in {

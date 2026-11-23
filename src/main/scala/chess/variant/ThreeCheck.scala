@@ -17,6 +17,7 @@ case object ThreeCheck
 
   override def exoticChessVariant = true
   override def p1IsBetterVariant  = true
+  override def hasGameScore       = true
 
   def pieces = Standard.pieces
 
