@@ -225,7 +225,9 @@ K  r
           )
           .toOption
           .get
-        strategygames.History.Chess(game.board.history).score must beEqualTo(strategygames.Score(p1 = 0, p2 = 2))
+        strategygames.History.Chess(game.board.history).score must beEqualTo(
+          strategygames.Score(p1 = 0, p2 = 2)
+        )
       }
       "is a score game, as is five-check, and standard is not" in {
         strategygames.variant.Variant.wrap(ThreeCheck).hasGameScore must beTrue

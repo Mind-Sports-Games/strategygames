@@ -7,7 +7,7 @@ import scalalib.extensions.*
 
 import strategygames.chess._
 import strategygames.chess.format.{ FEN, Uci }
-import strategygames.{ GameFamily, Player, validated }
+import strategygames.{ validated, GameFamily, Player }
 
 // Correctness depends on singletons for each variant ID
 abstract class Variant private[variant] (
@@ -153,7 +153,11 @@ abstract class Variant private[variant] (
         _     <- Either.cond(actor is situation.player, actor, "Not my piece on " + from)
         m1    <- findMove(from, to).toRight("Piece on " + from + " cannot move to " + to)
         m2    <- (m1 withPromotion promotion).toRight("Piece on " + from + " cannot promote to " + promotion)
-        m3    <- Either.cond(isValidPromotion(promotion), m2, "Cannot promote to " + promotion + " in this game mode")
+        m3    <- Either.cond(
+                   isValidPromotion(promotion),
+                   m2,
+                   "Cannot promote to " + promotion + " in this game mode"
+                 )
       } yield m3
     }
   }
