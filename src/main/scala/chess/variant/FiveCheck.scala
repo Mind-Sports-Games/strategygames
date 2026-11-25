@@ -19,7 +19,7 @@ case object FiveCheck
 
   override def hasGameScore = true
 
-  override val initialFen = FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 5+5 0 1")
+  override val initialFen = FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 +0+0")
 
   override def finalizeBoard(board: Board, uci: format.Uci, capture: Option[Piece]): Board =
     board updateHistory {

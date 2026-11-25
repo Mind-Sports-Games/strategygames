@@ -1,6 +1,6 @@
 package strategygames.chess.format
 
-import strategygames.Player
+import strategygames.{ Player, Score }
 
 final case class FEN(value: String) extends AnyVal {
 
@@ -18,9 +18,21 @@ final case class FEN(value: String) extends AnyVal {
     }
 
   def initial = value == Forsyth.initial.value
+
+  def checkCountField: Option[String] =
+    List(4, 6).flatMap(value.split(' ').lift).find(_.contains('+'))
+
+  def checksGiven: Option[Score] =
+    checkCountField match {
+      case None                               => Some(Score())
+      case Some(FEN.ChecksGivenField(p1, p2)) => Some(Score(p1.toInt, p2.toInt))
+      case Some(_)                            => None
+    }
 }
 
 object FEN {
+
+  private val ChecksGivenField = """\+(\d)\+(\d)""".r
 
   def clean(source: String): FEN = FEN(source.replace("_", " ").trim)
 }

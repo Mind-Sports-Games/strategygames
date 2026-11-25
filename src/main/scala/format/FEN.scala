@@ -1,7 +1,7 @@
 package strategygames.format
 
 import strategygames.variant.Variant
-import strategygames.{ GameLogic, Player }
+import strategygames.{ GameLogic, Player, Score }
 
 sealed abstract class FEN(val value: String) {
 
@@ -66,8 +66,13 @@ object FEN {
 
     def chessFen: Option[strategygames.chess.format.FEN] = Some(f)
 
-    def player1Score = sys.error("There is no player1 score in chess")
-    def player2Score = sys.error("There is no player2 score in chess")
+    private def checksGiven: Score =
+      f.checksGiven.getOrElse(
+        sys.error(s"Check count in '$f' counts the checks remaining, which only the variant can read")
+      )
+
+    def player1Score = checksGiven.p1
+    def player2Score = checksGiven.p2
 
   }
 
