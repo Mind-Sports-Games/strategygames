@@ -433,6 +433,17 @@ K  r
         scoreFromFen(FiveCheck, FiveCheck.initialFen.value) must beSome(strategygames.Score())
         Forsyth >> Game(Board init FiveCheck) must beEqualTo(FiveCheck.initialFen)
       }
+      "be sent to fishnet as the checks remaining, out of five" in {
+        def fishnet(fen: String) = FEN.fishnetFen(FiveCheck)(FEN(fen)).value
+        fishnet(FiveCheck.initialFen.value) must beEqualTo(
+          "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 5+5 0 1"
+        )
+        fishnet("4k3/8/8/8/8/8/8/4K3 w - - 0 20 +4+3") must beEqualTo("4k3/8/8/8/8/8/8/4K3 w - - 1+2 0 20")
+        fishnet("4k3/8/8/8/8/8/8/4K3 w - - 1+2 0 20") must beEqualTo("4k3/8/8/8/8/8/8/4K3 w - - 1+2 0 20")
+      }
+      "be sent to fishnet unchanged for three-check" in {
+        FEN.fishnetFen(ThreeCheck)(ThreeCheck.initialFen) must beEqualTo(ThreeCheck.initialFen)
+      }
     }
 
     "Not force a draw when there is insufficient mating material" in {

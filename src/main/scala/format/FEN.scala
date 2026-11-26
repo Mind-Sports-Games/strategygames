@@ -483,6 +483,8 @@ object FEN {
   def fishnetFen(variant: Variant)(fen: FEN): FEN = variant match {
     case Variant.FairySF(variant) =>
       wrap(strategygames.fairysf.format.FEN.fishnetFen(variant)(fen.toFairySF))
+    case Variant.Chess(variant)   =>
+      wrap(strategygames.chess.format.FEN.fishnetFen(variant)(fen.toChess))
     case _                        =>
       fen
   }

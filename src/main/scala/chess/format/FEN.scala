@@ -19,6 +19,9 @@ final case class FEN(value: String) extends AnyVal {
 
   def initial = value == Forsyth.initial.value
 
+  // NOTE: the check count has two positions. Field 6, after the move counters, is the current
+  // format: checks given, e.g. "+1+0". Field 4, after en passant, is the older format still found
+  // in stored five-check FENs: checks remaining, e.g. "4+5".
   def checkCountField: Option[String] =
     List(4, 6).flatMap(value.split(' ').lift).find(_.contains('+'))
 
@@ -28,6 +31,13 @@ final case class FEN(value: String) extends AnyVal {
       case Some(FEN.ChecksGivenField(p1, p2)) => Some(Score(p1.toInt, p2.toInt))
       case Some(_)                            => None
     }
+
+  def withChecksRemaining(checksToWin: Int): FEN =
+    checksGiven.fold(this) { checks =>
+      val fields    = value.split(' ').toList.filterNot(_.contains('+'))
+      val remaining = s"${checksToWin - checks.p1}+${checksToWin - checks.p2}"
+      FEN((fields.take(4) ::: remaining :: fields.drop(4)).mkString(" "))
+    }
 }
 
 object FEN {
@@ -35,4 +45,11 @@ object FEN {
   private val ChecksGivenField = """\+(\d)\+(\d)""".r
 
   def clean(source: String): FEN = FEN(source.replace("_", " ").trim)
+
+  // NOTE: Fairy-Stockfish reads a checks-given count ("+1+0") as out of three whatever the variant,
+  // so five-check must reach it as checks remaining ("4+5"). Three-check needs no change.
+  def fishnetFen(variant: strategygames.chess.variant.Variant)(fen: FEN): FEN = variant match {
+    case strategygames.chess.variant.FiveCheck => fen.withChecksRemaining(5)
+    case _                                     => fen
+  }
 }
