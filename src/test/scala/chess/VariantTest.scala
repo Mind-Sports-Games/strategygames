@@ -4,13 +4,16 @@ import cats.syntax.option._
 import scala.language.reflectiveCalls
 
 import strategygames.Status
-import strategygames.chess.format.FEN
+import strategygames.chess.format.{ FEN, Forsyth }
 import strategygames.chess.Pos._
 import strategygames.chess.variant._
 
 class VariantTest extends ChessTest {
 
   val board = makeBoard
+
+  private def scoreFromFen(variant: Variant, fen: String): Option[strategygames.Score] =
+    Forsyth.<<@(variant, FEN(fen)).map(s => strategygames.History.Chess(s.board.history).score)
 
   "standard" should {
 
@@ -213,6 +216,50 @@ K  r
           player == P2
         }
       }
+      "score is the checks each player has given" in {
+        val game = Game(Board init ThreeCheck)
+          .playMoves(
+            E2 -> E4,
+            E7 -> E6,
+            D2 -> D4,
+            F8 -> B4,
+            C2 -> C3,
+            B4 -> C3
+          )
+          .toOption
+          .get
+        strategygames.History.Chess(game.board.history).score must beEqualTo(
+          strategygames.Score(p1 = 0, p2 = 2)
+        )
+      }
+      "score loads from the checks given in the FEN" in {
+        scoreFromFen(ThreeCheck, "4k3/8/8/8/8/8/8/4K3 w - - 0 20 +1+2") must beSome(
+          strategygames.Score(p1 = 1, p2 = 2)
+        )
+      }
+      "score loads from the older count of checks remaining" in {
+        scoreFromFen(ThreeCheck, "4k3/8/8/8/8/8/8/4K3 w - - 2+1 0 20") must beSome(
+          strategygames.Score(p1 = 1, p2 = 2)
+        )
+      }
+      "the wrapper FEN reads the score of each player" in {
+        val fen = strategygames.format.FEN.Chess(FEN("4k3/8/8/8/8/8/8/4K3 w - - 0 20 +1+2"))
+        (fen.player1Score, fen.player2Score) must beEqualTo((1, 2))
+      }
+      "the wrapper FEN scores the initial position 0 to 0" in {
+        val fen = strategygames.format.FEN.Chess(ThreeCheck.initialFen)
+        (fen.player1Score, fen.player2Score) must beEqualTo((0, 0))
+      }
+      "the wrapper FEN refuses a count of checks remaining, which needs the variant" in {
+        strategygames.format.FEN.Chess(FEN("4k3/8/8/8/8/8/8/4K3 w - - 2+1 0 20")).player1Score must throwA[
+          RuntimeException
+        ]
+      }
+      "is a score game, as is five-check, and standard is not" in {
+        strategygames.variant.Variant.wrap(ThreeCheck).hasGameScore must beTrue
+        strategygames.variant.Variant.wrap(FiveCheck).hasGameScore must beTrue
+        strategygames.variant.Variant.wrap(Standard).hasGameScore must beFalse
+      }
     }
 
     "Not force a draw when there is insufficient mating material" in {
@@ -348,6 +395,54 @@ K  r
         game.situation.winner must beSome.like { case player =>
           player == P2
         }
+      }
+    }
+
+    "score" in {
+      "be the checks each player has given" in {
+        val game = Game(Board init FiveCheck)
+          .playMoves(
+            E2 -> E4,
+            E7 -> E6,
+            D2 -> D4,
+            F8 -> B4,
+            C2 -> C3,
+            B4 -> C3,
+            D1 -> D2,
+            C3 -> D2,
+            E1 -> D2,
+            D8 -> G5
+          )
+          .toOption
+          .get
+        strategygames.History.Chess(game.board.history).score must beEqualTo(
+          strategygames.Score(p1 = 0, p2 = 4)
+        )
+      }
+      "load from the checks given in the FEN" in {
+        scoreFromFen(FiveCheck, "4k3/8/8/8/8/8/8/4K3 w - - 0 20 +4+3") must beSome(
+          strategygames.Score(p1 = 4, p2 = 3)
+        )
+      }
+      "load from the older count of checks remaining, out of five" in {
+        scoreFromFen(FiveCheck, "4k3/8/8/8/8/8/8/4K3 w - - 1+2 0 20") must beSome(
+          strategygames.Score(p1 = 4, p2 = 3)
+        )
+      }
+      "be 0 to 0 from the initial FEN, which round-trips" in {
+        scoreFromFen(FiveCheck, FiveCheck.initialFen.value) must beSome(strategygames.Score())
+        Forsyth >> Game(Board init FiveCheck) must beEqualTo(FiveCheck.initialFen)
+      }
+      "be sent to fishnet as the checks remaining, out of five" in {
+        def fishnet(fen: String) = FEN.fishnetFen(FiveCheck)(FEN(fen)).value
+        fishnet(FiveCheck.initialFen.value) must beEqualTo(
+          "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 5+5 0 1"
+        )
+        fishnet("4k3/8/8/8/8/8/8/4K3 w - - 0 20 +4+3") must beEqualTo("4k3/8/8/8/8/8/8/4K3 w - - 1+2 0 20")
+        fishnet("4k3/8/8/8/8/8/8/4K3 w - - 1+2 0 20") must beEqualTo("4k3/8/8/8/8/8/8/4K3 w - - 1+2 0 20")
+      }
+      "be sent to fishnet unchanged for three-check" in {
+        FEN.fishnetFen(ThreeCheck)(ThreeCheck.initialFen) must beEqualTo(ThreeCheck.initialFen)
       }
     }
 

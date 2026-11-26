@@ -17,7 +17,12 @@ case object FiveCheck
   def perfId: Int    = 19
   def perfIcon: Char = ''
 
-  override val initialFen = FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 5+5 0 1")
+  override def hasGameScore = true
+
+  // NOTE: "+0+0" counts checks given, as three-check does. Five-check FENs used to count checks
+  // remaining after en passant ("- 5+5 0 1"); games stored that way still load, see
+  // FEN.checkCountField.
+  override val initialFen = FEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 +0+0")
 
   override def finalizeBoard(board: Board, uci: format.Uci, capture: Option[Piece]): Board =
     board updateHistory {

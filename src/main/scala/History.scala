@@ -67,8 +67,12 @@ object History {
         currentTurn = h.currentTurn.map(Uci.wrap),
         positionHashes = h.positionHashes,
         castles = h.castles,
+        // NOTE: checkCount is how many times each player has been checked; the chess rules and FEN
+        // read it. score is how many checks each player has given, which is what three- and
+        // five-check display as the game score. So the sides swap: P1's score is P2's checkCount.
         checkCount = h.checkCount,
         unmovedRooks = h.unmovedRooks,
+        score = Score(p1 = h.checkCount.p2, p2 = h.checkCount.p1),
         halfMoveClock = h.halfMoveClock
       )
 
